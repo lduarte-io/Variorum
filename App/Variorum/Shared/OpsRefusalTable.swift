@@ -266,6 +266,9 @@ nonisolated enum OpsRefusalCopy {
                 + "at sentence ends, and at line breaks."
         case .invalidCommentText:
             return "A comment needs some text."
+        // 13i-c (R-13ic-4): a gathering is minted with a rule and keeps one.
+        case .gatheringRequiresRule:
+            return "A gathering needs a rule — add one to make it, or delete the gathering."
         default:
             return nil
         }

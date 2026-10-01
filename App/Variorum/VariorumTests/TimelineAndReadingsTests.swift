@@ -118,9 +118,17 @@ struct TimelineAndReadingsTests {
     @Test func aUIBuiltRuleRoundTripsUnchanged() async throws {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
-            let id = try #require(await model.create(name: "smart", kind: .gathering))
             let tag = try session.operations.createTag(name: "life")
             let goals = try session.operations.createTag(parent: tag.id, name: "goals")
+            // 13i-c (R-13ic-4): a gathering is minted WITH a rule; the empty
+            // draft this pin builds from is the Trash restoree's no-rule
+            // state, reproduced raw (the mint refuses it).
+            let id = try #require(await model.create(
+                name: "smart", kind: .gathering, querySpec: try RuleGrammar.encode(.star)))
+            try await db.write { db in
+                try db.execute(sql: "UPDATE reading SET query_spec = NULL WHERE id = ?",
+                               arguments: [id])
+            }
 
             // life ∧ (life/goals ∨ ★), built through the editor's own edits.
             let editor = RuleEditorModel(session: session, readingID: id)
@@ -151,15 +159,20 @@ struct TimelineAndReadingsTests {
             }
             #expect(entries.map(\.postID) == [match.id])
 
-            // Clearing (the root's remove) restores match-all.
+            // 13i-c (R-13ic-4, an HONEST FLIP): clearing a GATHERING's rule
+            // (the root's remove) REFUSES at the save — a gathering keeps a
+            // rule; the stored rule and the assembly stand as they were.
             let root = try #require(reopened.rows.first)
             reopened.remove(root)
             #expect(reopened.draft == nil)
-            #expect(await reopened.save())
-            let all = try await db.read { [id] in
+            #expect(await reopened.save() == false)
+            #expect(session.status.current?.kind == .refusal)
+            let stillStored = try await db.read { try Queries.readings($0) }[0].querySpec
+            #expect(RuleGrammar.decode(stillStored) == built, "the refusal leaves the rule as it was")
+            let still = try await db.read { [id] in
                 try Queries.assembleReading($0, readingID: id)
             }
-            #expect(all.count == 2)
+            #expect(still.map(\.postID) == [match.id])
         }
     }
 

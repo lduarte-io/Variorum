@@ -310,9 +310,15 @@ struct BindDoorTests {
     @Test func spawnFromARuleLessGatheringNeverClaimsItCollects() async throws {
         try await withBindWorld { session, db in
             let ops = session.operations
-            // "Create Smart Book" mints exactly this shape (F-U4-7): no rule.
-            _ = try ops.createPost(title: "a loose note")  // the gathering shows it
-            let bare = try ops.createReading(name: "everything", kind: .gathering)
+            // 13i-c (R-13ic-4): the mint REFUSES a rule-less gathering now;
+            // the shape survives only as a Trash restoree — reproduced raw.
+            _ = try ops.createPost(title: "a loose note")
+            let bare = try ops.createReading(
+                name: "everything", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            try await db.write { db in
+                try db.execute(sql: "UPDATE reading SET query_spec = NULL WHERE id = ?",
+                               arguments: [bare.id])
+            }
             let shelf = ShelfViewModel(session: session)
             let book = try #require(
                 await shelf.spawnBook(from: bare.id, named: "everything (book)"))
@@ -334,7 +340,9 @@ struct BindDoorTests {
             // The sheet's body for this gathering speaks the same truth —
             // and the MALFORMED cell (the implementer's refinement: an
             // unreadable rule runs no intake either) never promises joins.
-            let bareBody = BindCopy.spawnMessage(for: RuleGrammar.read(bare.querySpec))
+            // (Re-read: `bare` is the pre-NULL value the mint returned.)
+            let bareSpec = try await db.read { try Queries.reading($0, id: bare.id)?.querySpec }
+            let bareBody = BindCopy.spawnMessage(for: RuleGrammar.read(bareSpec))
             #expect(bareBody.contains("no rule") && bareBody.contains("starts empty"))
             #expect(!bareBody.contains("join it"))
             let malformedBody = BindCopy.spawnMessage(for: .malformed)

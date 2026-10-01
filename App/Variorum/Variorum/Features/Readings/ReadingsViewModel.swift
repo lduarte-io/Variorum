@@ -44,7 +44,8 @@ final class ReadingsViewModel {
     @discardableResult
     func create(
         name: String, kind: ReadingKind, profile: String? = nil,
-        sortField: SortField = .manual, sortDir: SortDirection = .asc
+        sortField: SortField = .manual, sortDir: SortDirection = .asc,
+        querySpec: String? = nil
     ) async -> String? {
         do {
             let reading = try await session.runner.run { ops in
@@ -54,9 +55,13 @@ final class ReadingsViewModel {
                 // the read and the insert; the only surviving race is the
                 // cross-device one her ruling deliberately tolerates.
                 try ops.assertBookNameIsFree(name)
+                // 13i-c (R-13ic-4): a gathering is minted WITH its rule — the
+                // op refuses a rule-less one; the mint door's inline editor is
+                // U3's (until then the Create Smart Book door speaks the
+                // refusal through the shared words).
                 return try ops.createReading(
                     name: name, kind: kind, profile: profile,
-                    sortField: sortField, sortDir: sortDir)
+                    sortField: sortField, sortDir: sortDir, querySpec: querySpec)
             }
             lastError = nil
             return reading.id
@@ -160,6 +165,8 @@ final class ReadingsViewModel {
         // rename both speak; `OpsRefusalCopy` reads the same sentence).
         case .duplicateBookName(let existing):
             return BookNameCopy.refusal(existing: existing)
+        case .gatheringRequiresRule:
+            return OpsRefusalCopy.message(for: op)
         default:
             return "The operation was refused: \(op)"
         }

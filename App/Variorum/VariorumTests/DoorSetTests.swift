@@ -153,7 +153,9 @@ struct DuplicateBookNameDoorTests {
     @Test func theSpawnDoorsNameIsGuarded() async throws {
         try await withStore { db, session in
             let (gathering, _) = try await session.runner.run { ops -> (String, String) in
-                let gathering = try ops.createReading(name: "Starred", kind: .gathering)
+                let gathering = try ops.createReading(
+                    name: "Starred", kind: .gathering,
+                    querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
                 let taken = try ops.createReading(name: "Ideas", kind: .book)
                 return (gathering.id, taken.id)
             }

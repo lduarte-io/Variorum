@@ -115,10 +115,9 @@ struct NoteCardSmartBooksTests {
                 ops -> (String, String, String) in
                 let stars = try Self.seedTag(ops, path: "stars")
                 let hand = try ops.createReading(name: "hand-made", kind: .book)
-                let smart = try ops.createReading(name: "starred", kind: .gathering)
-                try ops.setReadingQuerySpec(
-                    smart.id,
-                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+                let smart = try ops.createReading(
+                    name: "starred", kind: .gathering,
+                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())  // 13i-c: minted with its rule
 
                 let curatedOnly = try ops.createPost(title: "Curated")
                 try ops.addPostToReading(curatedOnly.id, to: hand.id)
@@ -153,10 +152,9 @@ struct NoteCardSmartBooksTests {
             let postID = try await session.runner.run { ops -> String in
                 let stars = try Self.seedTag(ops, path: "stars")
                 let curated = try ops.createReading(name: "Ideas", kind: .book)
-                let smart = try ops.createReading(name: "Ideas", kind: .gathering)
-                try ops.setReadingQuerySpec(
-                    smart.id,
-                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+                let smart = try ops.createReading(
+                    name: "Ideas", kind: .gathering,
+                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())  // 13i-c: minted with its rule
                 let post = try ops.createPost(title: "In both")
                 try ops.addPostToReading(post.id, to: curated.id)
                 _ = try ops.applyTag(stars.id, toPost: post.id)

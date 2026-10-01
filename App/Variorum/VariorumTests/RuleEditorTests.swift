@@ -189,7 +189,14 @@ struct RuleEditorTests {
     @Test func editsRedrawAndSaveWritesExactlyTheTreeBuilt() async throws {
         try await withEditorWorld { session, db in
             let (work, ideas, life, _) = try vocabulary(session, db)
-            let gathering = try session.operations.createReading(name: "g", kind: .gathering)
+            // 13i-c (R-13ic-4): a gathering is minted WITH a rule; the no-rule
+            // state this pin opens on is the Trash restoree's, reproduced raw.
+            let gathering = try session.operations.createReading(
+                name: "g", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            try await db.write { db in
+                try db.execute(sql: "UPDATE reading SET query_spec = NULL WHERE id = ?",
+                               arguments: [gathering.id])
+            }
             RuleEditorProbe.reset()
             let model = await editor(session, gathering.id)
 
