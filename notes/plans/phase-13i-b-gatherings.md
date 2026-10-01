@@ -1382,6 +1382,30 @@ STOP condition met.
   → **2 red** · M7 the auto-tag association dropped → **2 red**. Mac: M8 the empty-but-gathered sentence
   collapsed to "the pool is empty" → **2 red** · M9 the tucked run drawn without the click → **2 red**.
   Every new pin family bites.
+- **THE WALK — IN PROGRESS** (dev-store Debug build from ee108afe, `io.lduarte.Variorum.debug`; machine
+  author-free — HID idle 97 min at the start, her app absent, AX + Screen Recording held; my own
+  `caffeinate`; every click through a guarded wrapper adding F-U3-5's hardening — AXRaise, then the
+  TOPMOST window at the point must be the dev app — plus a hard exclusion of a system "Updates
+  Available" banner's rect, the author's to answer, never touched). Captures (gitignored)
+  `notes/plans/13ib-screens/u4/`. **Terminal · light — DONE (8):** 01 the EMPTY-BUT-GATHERED Pool ("~/pool
+  · 0 notes · 110 in gatherings · show" / "no loose notes — all 110 bookless notes show in gatherings.")
+  — staged by a rule-less gathering, which shows every note · 02 the one click: the tucked run under "in
+  gatherings", the toggle "hide" · 03 the rule editor giving "starred notes" its ★ term (the seeded
+  rule, by hand) · 04 the gathering: "smart book · 2 notes" — the starred notes; the shelf row read
+  "smart · 10w" (the word-count site hearing ★) · 05 a Pool row's "Star" on "walk two": "89 notes · 21 in
+  gatherings" — it tucked at once and joined the sidebar's Starred section (lesson 10 live) · 06 the
+  gathering "3 notes", walk two in it · 07 un-starred from the sidebar row WHILE the gathering showed:
+  "2 notes", walk two gone, no other write (the held observation heard the setting) · 05a the BEFORE of
+  F-U4-3 (below). **Walk findings:** F-U4-2 — the launch occasion declined on the dev store
+  (`starred gathering: awaitingFirstSync`, unmarked): the dev store carries an account but its sync is
+  fenced off, so the sample seeder's gate (reused) can never open there; production stores open it at
+  their first clean round (pinned both ways in `StarredGatheringSeederTests`). The walk therefore made
+  the gathering BY HAND ("re-makeable in one gesture" — the ensure's own "present" signature: the
+  reserved name, rule ★). F-U4-3 — the Pool's "show" state survived leaving and returning to the Pool
+  (the model is RootView's, so it outlives the page) — contradicting P-13ib-U4-4's "off on every visit";
+  pin + fix NEXT. F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
+  tags…" (pre-existing copy, false for a ★ rule; 13i-d's vocabulary sweep). Remaining: the F-U4-3 fix,
+  then Study light/dark and Terminal dark on the fixed build; settings restore + read-back.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
