@@ -259,3 +259,190 @@ read counts from a row-independent aggregate if a count-only consumer ever lands
 
 *(pending — findings go to the implementer verbatim; its agree/dispute returns here; the
 reviewer makes the final call and implements confirmed fixes with their pins.)*
+
+## THE IMPLEMENTER'S AGREE/DISPUTE (round 1)
+
+*The implementer voice (opus-implementer, fresh session, 2026-10-01). Nothing was implemented.
+Read in this session, not delegated: CLAUDE.md + its canon, this file, `phase-13i-b-gatherings.md`
+whole (the U1–U4 records, the adjudication batch, THE LADDER's F-R1-1 ruling), and every site
+below at HEAD 91148af3. No code changed after the reviewed 7cf0dc88, so the findings' line
+pointers are approximate rather than stale; current pointers are given where they differ. No
+test files written; mechanisms verified by reading and by running the described pin logic
+against the source. **Verdicts: 7 AGREE · 1 DISPUTE (F-R1-6 — unreachable).***
+
+### F-R1-1 — AGREE (the deafness is real, exactly as traced)
+
+Every step holds against the source:
+- `revertSmartConversion` (`Operations+ReadingConversion.swift:243–254`) writes `deletedAt`
+  only; a member row keeps `status='member'`.
+- A re-bind materializes the CURRENT assembly only (`:123–136`, skipping a pair with a LIVE row
+  via `livePairRow`, `Operations+Reading.swift:582`), so a residue pair absent from the
+  assembly at re-bind gets no row.
+- A later applying act: `intakeAfterTagging` → `intakeEvent` → `intakePairState`
+  (`Operations+Intake.swift:248–267`; `left = SUM(deleted_at IS NOT NULL AND status='member')`
+  → `.leftAsMember`) → `IntakeDecision.verdict`'s `.live, .leftAsMember → .nothing`
+  (`IntakeDecision.swift:145–147`). The sweeps' any-row `NOT EXISTS` is
+  `Operations+Intake.swift:126`.
+- The reviewer's pin is buildable as written and is RED on HEAD (the pair keeps its one
+  tombstoned row); the control (still matching at re-bind → a fresh live row) is green.
+- **The reach is a little wider than the untag route.** ANY route that keeps a residue pair out
+  of the assembly at the re-bind deafens it. ARCHIVING is one (the gathering assembly excludes
+  archived notes — `ReadingAssembly.swift:339/364/375` — and un-archiving is not an act, F-6).
+  A gathering CAP is another (`setReadingMaxPosts` has no kind guard, `Operations+Reading.swift:118`,
+  and `assembleReading` honours the cap). The untag route is the plainest and the right pin.
+
+**Fix-shape notes.** The architect's ruling picks the reviewer's shape (a); these are for
+whoever builds it:
+1. **Shape (b) as worded is not buildable.** An undo residue and a hand-removal are
+   byte-identical rows (`status='member'`, `deleted_at` set, nothing else), so `intakePairState`
+   cannot tell them apart without a marker, which would be a schema change. That leaves (a).
+2. **The existing redo pins cannot catch a status-forgetting redo.**
+   `undoingABindLeavesNoLiveRowAndRedoBringsEveryRowBackByID` (`SmartConversionTests.swift:476`)
+   and `undoRestoresTheSmartBookExactlyAndRedoPutsTheSameRowsBack` (`:349`) compare IDS only,
+   over `liveMemberships`, which reads EVERY status (`:46–56`). Under (a), a redo that revives
+   the rows but leaves them `'arrival'` brings her members back as ARRIVALS, and both pins stay
+   green. The fix must add a status assertion on the redo (members return as members; the
+   waiting arrival returns waiting — `:505` already holds that half).
+3. **The new pin should assert the RULED outcome exactly**: a live `status='arrival'` row. The
+   reviewer's "arrival or seat" would also pass a wrong fix that resets the pair to fresh and
+   SEATS it, overriding the ruling's dismissal class.
+4. **A corner the ruling's rationale covers but (a) does not.** She removes A from the bound
+   book by hand (a member-class tombstone), adds A back by hand, then undoes the bind. Under
+   (a), the undo's arrival-class tombstone sits beside the OLDER member-class one, and
+   `intakePairState`'s "any member tombstone ever" still reads `.leftAsMember`. So A stays deaf
+   after a re-bind and re-tag, though her latest act on the pair was "add". Closing it means
+   ranking the pair by its LATEST tombstone (`ORDER BY deleted_at DESC LIMIT 1`). Outside the
+   (a) residue, that reading agrees with "any member tombstone" in every sequence the ops can
+   produce: a dismissal can never follow a member tombstone, because no bell rings on a
+   `.leftAsMember` pair. Low priority and pinnable; the reviewer decides whether to fold it in.
+5. **Sync (read for safety; nothing proposed).** Both repairs that rewrite `reading_post.status`
+   read LIVE rows only: R1's rival lookup (`Sync/Repairs.swift:642–650`, `deleted_at IS NULL`)
+   and R2's ownership pass (`:938–950`). Tombstoned incoming rows land verbatim
+   (`writeResolvedRow`'s `!row.isTombstoned` gate). So a flipped-status tombstone enters no
+   repair predicate. The one new cross-device corner: device 1's undo flips a row while device 2
+   hand-removes the same row. Server-wins CAS keeps whichever lands first, so her removal can
+   come out ranked as a dismissal: the note rings again as an ARRIVAL on a fresh act and is
+   never auto-seated. That is self-limiting and her judgment holds; one line in the bundle
+   beside P-13ib-U3-3.
+6. F-R1-4(b)'s canon clause grows with (a): the redo would carry undo-time STATUSES as well as
+   ids.
+
+### F-R1-2 — AGREE
+
+`RuleGrammar.tagIDs` descends `.not` (`RuleGrammar.swift:160`), so `{"not":{"tag":a}}` yields
+`{a}`, and `ShelfViewModel.spawnBook` (`:206–214`) adopts it after only a liveness check. The
+state is reachable from the shipped editor (the `not` chip on a lone root — U3 capture 02).
+`★ ∧ NOT #a` is the same cell. Two notes on the fix:
+1. **The reviewer's two fix shapes are not equivalent.** A `positiveTagIDs` walk makes
+   `#a ∧ NOT #b` → `{a}` and SETS the auto-tag on a cell her ruling did not name. Her letter is
+   "references exactly ONE distinct tag", and that rule references two. A polarity check before
+   adopting the sole tag fixes only the broken cell and keeps `#a ∧ NOT #b` unset, which the
+   reviewer already called "fine". I recommend the polarity check. Either way, polarity is the
+   PARITY of negations: `NOT NOT #a` is positive.
+2. **Home.** The derivation is a business rule living in a view model (CLAUDE.md: view models
+   hold no business rules). Make it a pure `RuleGrammar` function — e.g.
+   `soleOutflowTagID(of:) -> String?` (the sole referenced tag, positive polarity) — and leave
+   the view model only the `tagIsLive` check. Then the red-on-old pin is a core unit test, with
+   the existing Mac spawn pin as the integration.
+
+### F-R1-3 — AGREE (plus one more cell)
+
+Verified:
+- "Create Smart Book" mints a rule-less gathering (`ShelfView.swift:114`).
+- The spawn door is offered on EVERY gathering (`:344–347`, no rule check).
+- Backfill is guarded by `intakeSweep`'s `case .rule` (`Operations+Intake.swift:118`), and
+  `livingBooks` requires a readable non-NULL spec, so the book seats nothing and never collects.
+- The false words are `BindCopy.spawnMessage` / `spawned` (`BookOrderAndConversion.swift:213–222`).
+
+**The same class, one more cell: a MALFORMED gathering.** `normalizedRuleSpec` stores
+undecodable bytes verbatim (`Operations+Reading.swift:71–74`), so the sibling copies a rule that
+runs no intake (P-13ib-5), and "new matches keep joining" is false there too. The honest branch
+keys on `RuleGrammar.read(querySpec)` being `.rule`, not on `querySpec != nil`. The sheet
+already holds the row (`spawnSource`), so it can branch with no new read. The question half is
+the morning bundle's, as THE LADDER section filed it.
+
+### F-R1-4 — AGREE (both letters)
+
+(a) AppSpec §7's `reading_post.status` note (AppSpec line 271) says "dismissing writes a
+born-tombstoned row". In fact `dismissArrival` tombstones the STANDING row
+(`Operations+Intake.swift:438–447`), and so does `dismissPendingArrivals` (`:455–462`). Under
+F-R1-1(a) a third producer of the class appears (an un-bind's flipped rows). So the closeout
+wording should name the CLASS rather than one door — e.g. "a tombstoned `arrival`-status row is
+a dismissal record: a judged dismissal, finishing's sweep, or an un-bind's residue".
+
+(b) AppSpec §9 (line 460) says "an exact-row `redo` built from do-time pre-images". The bind's
+redo reads undo-time captures instead (`Operations+ReadingConversion.swift:190–204`). The intent
+holds; the letter needs the clause, and with F-R1-1(a) it should name statuses as well as ids.
+
+### F-R1-5 — AGREE (one count corrected)
+
+No caller in `App/` (the Mac target, `Shared/`, `VariorumMobile/`) passes either parameter
+(grep).
+
+**The pins number five, not two:**
+- Two die whole: `keepCollectingMintsASecondSmartBookOnTheSameFilter`
+  (`SmartConversionTests.swift:212`) and
+  `aBlankCollectingNameFallsBackToTheDefaultAndAGivenOneIsUsed` (`:255`).
+- Three use the parameter only in passing and keep their real subjects once the argument and
+  the collector assertions are dropped: `aFinishedBookRefusesAndWritesNothing` (`:281`),
+  `undoRestoresTheSmartBookExactlyAndRedoPutsTheSameRowsBack` (`:318`) and
+  `conversionWritesThroughTheOutboxLikeAnyOtherOperation` (`:554`).
+- A sixth, `withoutTheOfferNoSecondBookExists` (`:269`), loses its subject; its count half
+  already stands in the §19.6 identity pin's "no second row".
+
+**The dead surface is wider than the two parameters:** `SmartConversionResult.collectingReading`,
+the `collectingReadingID` arms of `revertSmartConversion` / `reapplySmartConversion`, and the
+registration's `collectingID` all go with them.
+
+**Safety:** undo entries are session-scoped and in-memory, so no persisted entry names a
+collector. The "(collecting)" siblings already in stores (F-2) are ordinary gatherings this
+never touches. The keeps-collecting assertion inside `:212` is pinned elsewhere
+(`GatheringRitualTests`, `BindDoorTests`), so nothing is lost.
+
+### F-R1-6 — DISPUTE (unreachable on today's tree)
+
+The mapping is as described: `.alreadyTagged` ignores the designation
+(`Operations+Quicknote.swift:75–81`), and the face speaks `filedNote` for it
+(`QuickNoteView.swift:487–488`). But no door can reach that state:
+- `fileAsQuicknote` has ONE caller across `App/`, `Shared/` and `VariorumMobile/` (grep):
+  `QuickNoteMint.file` (`QuickNoteView.swift:474–478`). It files the post that `importPost`
+  minted in the SAME serialized runner closure.
+- `importPost` writes no tag (`Operations+Import.swift:56–82`).
+- The pad's `{#…}` microsyntax applies its tags AFTER the filing returns
+  (`QuickNoteView.swift:187–198` — `CaptureMicrosyntax.applyTags` runs on `.filed`), so even a
+  typed `{#quicknote}` lands after `fileAsQuicknote` has already answered.
+- No re-file door exists, and no remote device can tag a UUID minted inside that closure.
+
+The finding's "re-file of an already-tagged note" sequence therefore cannot happen. No
+red-on-old pin can be built through any door, and the hallucination guard binds: record, don't
+fix. If the reviewer still wants it as hygiene, the structural shape is
+`.alreadyTagged(tagID:, readingID: String?)`, so the face can choose its words honestly. That is
+not a behaviour change, so there is nothing to pin. Otherwise, record it for whichever future
+door first re-files a note.
+
+### F-R1-7 — AGREE (record for 13i-c, as proposed)
+
+`membershipElsewhere` (`Operations+Intake.swift:271–287`) joins `reading` with no kind filter.
+Three refinements:
+1. **Reachable through sync, not only in theory.** A stray live MEMBER row on a gathering can
+   arise today: device 2 hand-adds to the bound book while device 1's undo turns the row back
+   into a gathering, and that undo can't tombstone a row it hasn't seen.
+2. **The verdict effect is confined to OWNED books, as the reviewer says.** A plain book reads
+   only `ownedElsewhere` (`IntakeDecision.swift:153–155`), which sums `r.owned`, and a gathering
+   never carries that flag.
+3. **The same stray row also counts as membership in two other readers:** the Pool's exclusion
+   (`ShelfQueries.swift:317–319`, no join to `reading` at all) and `readingsContaining`'s member
+   leg (`:338–341`, no kind filter). These are F-4's original pair. 13i-c's door enumeration
+   should settle `kind='book'` for all three member-row readers together, not this probe alone.
+
+### F-R1-8 — AGREE (nit)
+
+`rn <= ?` with 0 (`ShelfQueries.swift:322`) returns no rows, and both counts are read off rows
+(`:267–279`), so the answer is 0/0. Both callers pass 200 (`PoolPostsView.window`; mobile
+`listingLimit`, default 200). Because the sibling `bookArrivals(limit: 0)` reads as "the count
+alone", the cheapest honest shape is a `precondition(window > 0)` plus a doc line.
+
+*Aside, not a finding:* two `Queries.poolListing` overloads now name two different concepts —
+`(db, window:)` for the bookless-notes Pool (`ShelfQueries.swift:258`) and `(db, poolID:)` for
+the Snippets scraps area (`PoolAndTray.swift:54`). That naming hazard belongs to 13i-d's
+vocabulary sweep.
