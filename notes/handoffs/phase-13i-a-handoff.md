@@ -2,7 +2,7 @@
 
 ## YOUR CHECKLIST (everything that is yours; nothing else is owed)
 
-- [ ] **The phone's marker-10 install** (Xcode → your device, from `main`'s tip). Until then the
+- [x] **The phone's marker-10 install** — DONE in-session (devicectl; "sync worked") (Xcode → your device, from `main`'s tip). Until then the
       phone visibly refuses to sync — outbox intact, cursor unmoved, by design. Its first round
       after the install converges on its own (both devices ran the same migration; server-wins
       CAS meets the recast rows).

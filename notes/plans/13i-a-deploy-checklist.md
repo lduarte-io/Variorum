@@ -92,3 +92,11 @@ reading columns; the allowlist + ciphertext probes true):**
   **"Synced 2:59 AM"** — the Mac half of the window is COMPLETE (the recast rows pushed; the
   marker handshake held). The PHONE's refresh is hers, any time; it refuses visibly until then.
 - The §12 running-record entry written (SyncSpec §12, marker 9→10, with the live finding).
+- **THE PHONE (2026-10-01, ~03:15):** installed via devicectl at her ask (build for device id,
+  install after unlock — the first attempt met the locked-phone 4000 disconnect); her
+  confirmation: **"sync worked"** — the TWO-DEVICE window is COMPLETE. Her one observation —
+  the Journal listing oldest-first — TRACED: no code path reordered anything; the stored sort
+  is the mint's ratified entry-date-ASCENDING and display follows it on both platforms (her
+  usual doors land inside today's entry, not at the list). The flip is a free product choice
+  now (the marker re-key removed the keeper's interest in the book's shape) — offered to her;
+  QUESTIONS carries it if she wants the DEFAULT changed (13i-e's area).
