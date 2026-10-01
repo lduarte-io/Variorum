@@ -895,6 +895,21 @@ schema/`Sync/`/migrations (zero).
   round trip) → `aUIBuiltRuleRoundTripsUnchanged` (the editor's exact round trip, the assembly
   applying it, clearing → match-all). `Queries.SmartQuerySpec` STAYS: two other doors (the tag
   manager's Promote to Book, the phone's create-book) still hand the choke point a v1 draft.
+- Piece 5a (this commit — **WIP: `BindDoorTests` deliberately RED until piece 5b; no revert in
+  flight**) — **F-U2-3 TRACED and PINNED before the fix.** The count itself was never wrong
+  (`SmartConversionCount.collected` is pinned 3-of-3); the door's PLUMBING was: the shelf set a
+  separate `@State convertCount`, then the sheet's item, and the sheet read the count inside its
+  content closure — nothing in the shelf's body read `convertCount`, so no re-render captured the
+  new value and the closure ran on a view value whose `@State` snapshot still held 0. Pin
+  `BindDoorTests.theShelfsBindSheetPromisesTheCountTheGatheringShows` mounts the REAL `ShelfView`,
+  drives its door function (the menu item's own body, factored into `openConvertOffer` — reached
+  through a DEBUG hook, `BindDoorProbe.openShelfDoor`, since the shelf's `@State` is unreachable
+  from outside) and reads what the presented sheet recorded on appear (`BindDoorProbe.shown`).
+  **RED on the old plumbing: "shown.count → 0 == 2"** — F-U2-3 reproduced in process. **Mechanism
+  confirmed by experiment:** a scratch `let _ = convertCount` in the shelf's body (a dependency →
+  a fresh snapshot) turned the same pin GREEN; the scratch line was then removed (verified, `grep
+  SCRATCH` = 0). The instrumentation added to the old tree changes no behaviour (the menu closure's
+  body moved verbatim into one function; the probe is DEBUG-only).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

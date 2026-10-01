@@ -148,6 +148,9 @@ struct SmartConversionOfferSheet: View {
         .padding(16)
         .frame(minWidth: 420)
         .onAppear { collectingName = "" }
+        #if DEBUG
+        .onAppear { BindDoorProbe.shown = .init(readingID: reading.id, count: memberCount) }
+        #endif
     }
 
     private var defaultCollectingName: String { "\(reading.name) (collecting)" }
@@ -184,3 +187,12 @@ struct SmartConversionOfferSheet: View {
             + "New tag matches will stop arriving here."
     }
 }
+
+#if DEBUG
+@MainActor
+enum BindDoorProbe {
+    struct Shown: Equatable { var readingID: String; var count: Int }
+    static var openShelfDoor: ((Reading) -> Void)?
+    static var shown: Shown?
+}
+#endif

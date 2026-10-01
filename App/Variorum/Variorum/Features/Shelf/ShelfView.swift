@@ -96,6 +96,9 @@ struct ShelfView: View {
         .background(tokens.surface)
         .task { await model.start() }
         .task { await model.refreshAggregates() }
+        #if DEBUG
+        .onAppear { BindDoorProbe.openShelfDoor = { openConvertOffer($0) } }
+        #endif
         .alert("New Book", isPresented: $createPresented) {
             TextField("Name", text: $nameField)
             Button("Create Book") {
@@ -308,13 +311,7 @@ struct ShelfView: View {
             // converting is a structural act on a book declared done, and
             // the op refuses it (P-2: a door that can't act isn't rendered).
             if !reading.locked {
-                Button("Convert to a Hand-Shaped Book…") {
-                    Task {
-                        convertCount = await SmartConversionCount.collected(
-                            session, readingID: reading.id)
-                        convertTarget = reading
-                    }
-                }
+                Button("Convert to a Hand-Shaped Book…") { openConvertOffer(reading) }
             }
         }
         Button("Length & Extent…") { extentTarget = reading }
@@ -336,6 +333,14 @@ struct ShelfView: View {
         Divider()
         Button("Delete Book", role: .destructive) {
             Task { await readings.delete(reading.id) }
+        }
+    }
+
+    private func openConvertOffer(_ reading: Reading) {
+        Task {
+            convertCount = await SmartConversionCount.collected(
+                session, readingID: reading.id)
+            convertTarget = reading
         }
     }
 
