@@ -556,6 +556,26 @@ condition met.
   instances. The record above carries the design map, P-13ib-U1-1…9 and F-1…F-6. Ledger row 2
   flipped. No revert in flight; nothing uncommitted. U1 CLOSED.
 
+## U2 RECORD — the Arrivals face (opus-implementer, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is rewritten at
+the close with everything not done.
+
+**UNIT STATUS: OPEN.**
+
+### U2 LIVE STATUS (per commit; every unverified claim PENDING)
+
+- Preflight read in this session, not delegated: CLAUDE.md + canon, this plan whole (§1–§7, the U1
+  RECORD, the ledger, the morning bundle), the sitting record §1–§6 and §18–§25 (§4, §23, §24 and
+  §25 lesson 4 closely), the resiliency protocol whole. No editor-seam, `Sync/`, custody or schema
+  work in this unit (SyncSpec / TEXTKIT2_NOTES not required). Code orientation: the U1 judgment ops
+  (`Operations+Intake.swift` — `seatArrival` / `dismissArrival`), the book view (`BookView` /
+  `BookIndexView` / `SpreadBookView` / `BookStructureModel`), the registry (`Capability` /
+  `CapabilityRegistry` / the `.surface` walk), the status seam (`StatusCenter` — refuse / receipt),
+  `TimeStampFace`, `VoiceControls`. No revert in flight. No subagents.
+- Piece 1 (this commit): the record opened. NEXT: the Queries read support (count + bounded
+  listing, observed), then the face, the registry, the pins, the walk.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
