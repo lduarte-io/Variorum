@@ -1373,8 +1373,15 @@ STOP condition met.
   association shapes incl. the flat conjunction, the dead auto-tag, the malformed book rule falling through,
   a gathering's saved filter = its filtered view (same predicate) · the refusals mint nothing · `conjoin`
   pure. **11/11 green** (new surface; mutation checks below).
-- **MUTATION CHECKS — STARTING (against the committed b48ca12e; each restored by `git checkout --`; if
-  this line is the last, read `git diff` to see what is mutated).**
+- **MUTATION CHECKS — DONE, tree restored (no mutation in flight; `git status` clean after each restore
+  by `git checkout --` from b48ca12e).** Core: M1 `StarContext.ids` always `[]` (F-U3-3 re-created
+  globally) → **30 issues** across `StarContextTests`, `StarredNotesGatheringTests`, `PoolTuckTests` ·
+  M2 the starred ensure ignores tombstones → **2 red** (deleted-stays-deleted, by rule and by name) · M3
+  the Quicknotes ensure ignores the decided designation → **1 red, 5 issues** · M4 the capped-filter path
+  removed → **1 red** (a member past the cap leaks into the filtered view) · M5 `conjoin` stops spreading
+  → **2 red** · M7 the auto-tag association dropped → **2 red**. Mac: M8 the empty-but-gathered sentence
+  collapsed to "the pool is empty" → **2 red** · M9 the tucked run drawn without the click → **2 red**.
+  Every new pin family bites.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
