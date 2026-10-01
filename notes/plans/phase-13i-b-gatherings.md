@@ -321,6 +321,19 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only and need the ma
 author-free with its own `caffeinate -d`; if the screen is locked overnight, record and fold
 the walk into the morning.
 
+## U1 RECORD — intake + auto-tag + the judgment ops (opus-implementer, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — filled at close.
+
+### U1 LIVE STATUS (per commit; every unverified claim PENDING)
+
+- Preflight read in this session, not delegated: CLAUDE.md + canon, this plan whole, the sitting
+  record §3/§4/§14/§19/§20/§24 (+ §1–§25 read through), the 13i-a record §3/§4/§9, the resiliency
+  protocol, SyncSpec whole (convergence-adjacent: R1's status-aware pair dedupe is the posture §2.7
+  leans on). No revert in flight. No subagents.
+- Piece 1 (this commit): the record opened. NEXT — piece 2: `Domain/IntakeDecision.swift` + the
+  intake engine (`Operations+Intake.swift`) + the hooks.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
