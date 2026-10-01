@@ -163,6 +163,12 @@ extension Operations {
                try postIsLive(db, originalRow.postId) {
                 originalRow.deletedAt = nil
                 try originalRow.update(db)
+                // 13i-c U2 (the 13i-c plan §4 row 9's family): the undo
+                // REVIVES the original's membership — a note claimed by an
+                // owned book since the diverge keeps its earliest
+                // membership; R2's shape, applied locally.
+                try enforceOwnershipAfterRevival(
+                    db, postIDs: [originalRow.postId], now: now)
             }
             if var container = try Container.fetchOne(db, key: copyID),
                container.deletedAt == nil {
@@ -228,6 +234,8 @@ extension Operations {
                copyRow.deletedAt != nil, try postIsLive(db, copyRow.postId) {
                 copyRow.deletedAt = nil
                 try copyRow.update(db)
+                // 13i-c U2 (row 9): the redo REVIVES the copy's membership.
+                try enforceOwnershipAfterRevival(db, postIDs: [copyRow.postId], now: now)
             }
         }
     }

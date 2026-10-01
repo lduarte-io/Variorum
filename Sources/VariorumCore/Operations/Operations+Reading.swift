@@ -263,9 +263,167 @@ extension Operations {
     /// Tombstone; the reading triggers cascade to its memberships
     /// (v1_core) and its chapters (v1_10), all stamped with the reading's
     /// exact `deleted_at`. Recoverable via `restoreReading` below.
+    /// "Delete book only" (13i-c — the sitting record §6): an OWNED book's
+    /// notes are released by the cascade and land in the Pool ("nothing of
+    /// hers destroyed"); a plain book's delete never touches a note.
     public func deleteReading(_ id: String) throws {
         let now = date.now
         try updateLiveReading(id, now: now) { $0.deletedAt = now }
+    }
+
+    /// **"Delete book and its N notes"** (13i-c U2 — the sitting record §6's
+    /// two-choice confirm; the 13i-c plan §6): ONE STAMP for the whole act —
+    /// each live MEMBER note goes to the Trash through `deleteContainer`'s own
+    /// body (its saved versions ride, that door's letter), then the book's
+    /// tombstone on the same `now` (the cascade stamps the remaining rows —
+    /// its arrivals, its chapters — with it). So `restoreReading` returns the
+    /// book WHOLE, and each note also rows in the Trash with its own Put back
+    /// (a note put back alone comes back bookless until the book returns).
+    ///
+    /// The DOOR offers this only on an OWNED book (ruled — "the asymmetry is
+    /// the ownership concept, visible at the door"); the op refuses a
+    /// gathering (`wrongReadingKind` — it holds no notes) and nothing else.
+    /// Returns the notes it deleted, in the book's order. Clears the redo
+    /// future (`deleteContainer`'s own rule — a note's content left).
+    @discardableResult
+    public func deleteReadingWithNotes(_ id: String) throws -> [String] {
+        let deleted: [String] = try database.write { db in
+            var reading = try liveReading(db, id)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: id, expected: .book)
+            }
+            let now = date.now
+            let postIDs = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT rp.post_id FROM reading_post rp
+                    JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                     AND c.kind = 'post'
+                    WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                    ORDER BY rp.position, rp.id
+                    """,
+                arguments: [id])
+            var deleted: [String] = []
+            for postID in postIDs {
+                // A member that died earlier in this loop (a version of a
+                // fellow member, riding its note) is already on the stamp.
+                guard try Container.fetchOne(db, key: postID)?.deletedAt == nil else { continue }
+                try tombstoneNoteFamily(db, id: postID, now: now)
+                deleted.append(postID)
+            }
+            reading.deletedAt = now
+            reading.updatedAt = now
+            try reading.update(db)
+            return deleted
+        }
+        undoStack?.clearRedoFuture()
+        return deleted
+    }
+
+    /// What a duplicate made.
+    public struct BookDuplicateResult: Equatable, Sendable {
+        /// The new book.
+        public let reading: Reading
+        /// DEEP only: each member's ceremony copy (original → copy), in the
+        /// book's order. Empty for a shallow duplicate.
+        public let copied: [OwnershipFork]
+    }
+
+    /// **DUPLICATE BOOK** (13i-c U2 — the sitting record §6; the 13i-c plan §6):
+    /// a NEW book row carrying the source's CONFIGURATION, never its STATE
+    /// (PROVISIONAL P-13ic-7): name as given (the door asserts it free, E13);
+    /// profile, sort, grouping tag, rule, extents, the join dial and the
+    /// OUTFLOW copied; the same wing; born UNSHELVED, unstarred, open,
+    /// unsealed and NOT owned ("the duplicate born non-owned" — ruled). Its
+    /// live chapters are copied (fresh ids, positions and names kept) and each
+    /// live MEMBER row is copied at its position, re-pointed at the copied
+    /// chapter (arrivals never — they are the source's judgment, not its
+    /// contents).
+    ///
+    /// - **Shallow** (`deep: false`): the same notes — a sibling pointing at
+    ///   them. Refuses on an OWNED source (`ownedBookDuplicatesDeep` — a
+    ///   second pointer is exactly what owning forbids).
+    /// - **Deep** (`deep: true`, "with copies"): each member's ceremony copy
+    ///   (tags riding) becomes the member — the divergent fork; the only shape
+    ///   for an owned source.
+    ///
+    /// A gathering refuses (`wrongReadingKind` — §3: "why would we be able to
+    /// duplicate a gathering?"). THE DAILY JOURNAL's duplicate wears the
+    /// journal TRAIT, never the `'daily'` marker — the marker names THE one
+    /// daily book (the identity memo §3) and only `setDailyJournalBook` moves
+    /// it (PROVISIONAL P-13ic-U2-5). No creation-time backfill (the copied
+    /// membership IS the state) and no structural-undo entry (the Trash is the
+    /// road — the `createReading` class).
+    @discardableResult
+    public func duplicateReading(
+        _ id: String, name: String, deep: Bool
+    ) throws -> BookDuplicateResult {
+        try database.write { db in
+            let source = try liveReading(db, id)
+            guard source.kind == .book else {
+                throw OperationError.wrongReadingKind(id: id, expected: .book)
+            }
+            if source.owned && !deep {
+                throw OperationError.ownedBookDuplicatesDeep(id: id)
+            }
+            let now = date.now
+            let profile = source.profile == Queries.dailyJournalBookProfile
+                ? Queries.journalTraitProfile : source.profile
+            let duplicate = Reading(
+                id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,
+                profile: profile, sortField: source.sortField, sortDir: source.sortDir,
+                groupingTagId: source.groupingTagId, querySpec: source.querySpec,
+                maxPosts: source.maxPosts, wordTarget: source.wordTarget,
+                wingId: source.wingId, intakeSeating: source.intakeSeating,
+                autoTagIds: source.autoTagIds,
+                createdAt: now, updatedAt: now)
+            try duplicate.insert(db)
+
+            var chapterMap: [String: String] = [:]
+            let chapters = try ReadingSection.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM reading_section
+                    WHERE reading_id = ? AND deleted_at IS NULL
+                    ORDER BY position, id
+                    """,
+                arguments: [id])
+            for chapter in chapters {
+                let copy = ReadingSection(
+                    id: newID(), readingId: duplicate.id, name: chapter.name,
+                    position: chapter.position, createdAt: now, updatedAt: now)
+                try copy.insert(db)
+                chapterMap[chapter.id] = copy.id
+            }
+
+            let memberships = try ReadingPost.fetchAll(
+                db,
+                sql: """
+                    SELECT rp.* FROM reading_post rp
+                    JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                     AND c.kind = 'post'
+                    WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                    ORDER BY rp.position, rp.id
+                    """,
+                arguments: [id])
+            var copied: [OwnershipFork] = []
+            for membership in memberships {
+                var postID = membership.postId
+                if deep {
+                    postID = try ceremonyCopy(db, sourceID: membership.postId, now: now).id
+                    copied.append(OwnershipFork(
+                        originalID: membership.postId, copyID: postID,
+                        elsewhereNames: [source.name]))
+                }
+                try ReadingPost(
+                    id: newID(), readingId: duplicate.id, postId: postID,
+                    position: membership.position,
+                    sectionId: membership.sectionId.flatMap { chapterMap[$0] },
+                    createdAt: now
+                ).insert(db)
+            }
+            return BookDuplicateResult(reading: duplicate, copied: copied)
+        }
     }
 
     /// Undo a `deleteReading` (13b Stage 4, 4F — N37, the author's
@@ -319,6 +477,28 @@ extension Operations {
                     """,
                 arguments: [nowStamp, id, stamp])
 
+            // 13i-c U2 — the book RETURNS WHOLE (the sitting record §18.3:
+            // "the delete-book-and-notes road (one stamp) returns WHOLE"):
+            // the notes deleted WITH the book (`deleteReadingWithNotes` — the
+            // book's own member rows and each note on this exact stamp) come
+            // back first, versions and all, through `restoreContainer`'s own
+            // body — so the live-post guard below passes for them. A note
+            // deleted independently carries a different stamp and stays dead
+            // (the standing documented corner); a note put back alone earlier
+            // is live already, and its membership revives below.
+            let notesDeletedWithBook = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT DISTINCT rp.post_id FROM reading_post rp
+                    JOIN container c ON c.id = rp.post_id AND c.deleted_at = ?
+                    WHERE rp.reading_id = ? AND rp.deleted_at = ? AND rp.status = 'member'
+                    ORDER BY rp.post_id
+                    """,
+                arguments: [stamp, id, stamp])
+            for postID in notesDeletedWithBook {
+                try restoreNoteFamily(db, id: postID)
+            }
+
             // Memberships: exact-stamp victims whose post is still LIVE.
             // (A post deleted independently stamps its own memberships via
             // the container cascade — different stamp, doubly safe; a post
@@ -331,6 +511,20 @@ extension Operations {
                       AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
                     """,
                 arguments: [id, stamp])
+
+            // 13i-c U2 — OWNERSHIP holds after the revival (the 13i-c plan §4
+            // row 7): a note added elsewhere while this book (or the note)
+            // lay in the Trash keeps its EARLIEST membership; the later one
+            // bells or goes — R2's shape, applied locally.
+            let revivedMembers = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT post_id FROM reading_post
+                    WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'
+                    """,
+                arguments: [id])
+            try enforceOwnershipAfterRevival(
+                db, postIDs: revivedMembers + notesDeletedWithBook, now: now)
 
             // 13i-b U1 — RESUME CATCH-UP (the plan §2.3): a living book back
             // from the Trash routes the gap's matches through Arrivals. The

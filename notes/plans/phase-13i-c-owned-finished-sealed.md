@@ -645,8 +645,23 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   and THEN hand-added — a road row 1's consult now refuses by design; the race it pins is B adding
   WITHOUT having seen the claim, so B now pulls the note before A claims it (repair untouched).
   App compile arms for `.waitingAtDoor` + the refusal words: PENDING (piece F).
-- **Piece C — the revival pass + its six call sites, the bind's owned-notes limb, restore-whole,
-  delete-with-notes, duplicate, the Trash count** — NOT-STARTED.
+- **Piece C — the revival pass + its call sites, the bind's owned-notes limb, restore-whole,
+  delete-with-notes, duplicate, the Trash count:** DONE (commit "13i-c U2 piece C").
+  `enforceOwnershipAfterRevival` called from `restoreContainer`, `restoreReading`,
+  `reapplySmartConversion` (AFTER the kind flip — the pass reads books only; caught by its own pin),
+  `revertDiverge` (an addition to the plan's list: the diverge UNDO revives the original's row) and
+  `reapplyDiverge`; `reapplyMintedContainer` rides `restoreContainer`. `deleteContainer`'s and
+  `restoreContainer`'s bodies shared (`tombstoneNoteFamily`, `restoreNoteFamily`);
+  `deleteReadingWithNotes` (one stamp); `restoreReading` returns WHOLE (stamp-matched member notes
+  first, versions riding); `duplicateReading` shallow/deep; the bind's
+  `ownedNotes: .leaveOut | .copyIn`; `Queries.bindOwnedNotesPreview`, `trashBookNoteCount`.
+  `OwnershipBookDoorsTests` 14/14; the regression sweep over every suite naming a touched op
+  (848 tests / 85 suites) green after ONE honest flip:
+  `SampleLibrarySignedOutRetirementTests.putBackReturnsTheRetiredCopy` pinned #85(e)(ii)'s
+  recorded "fourteen put-backs" shape — the question it recorded (should `restoreReading` revive
+  stamp-matched member containers?) is answered by §18.3 / this plan §6, so the book's Put back
+  now brings the notes home and a member's own Put back refuses `containerNotDeleted`.
+  Red-on-old for the revival pass: PENDING (the behavioural revert runs next).
 - **Piece D — Seal / Unseal, the lock/unlock guards** — NOT-STARTED.
 - **Piece E — hide-owned (fragment + setter + the setting), the badge facts, `ownership_badges`**
   — NOT-STARTED.

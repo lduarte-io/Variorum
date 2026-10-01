@@ -436,6 +436,61 @@ extension Operations {
         }
     }
 
+    // MARK: - THE REVIVAL PASS (the plan §3/§4 rows 7–9 — R2's shape, applied locally)
+
+    /// **After any door that REVIVES membership rows** — `restoreContainer`
+    /// (the note's own memberships), `restoreReading` (the book's),
+    /// `reapplySmartConversion` (the bind's redo), `revertDiverge` (the diverge
+    /// undo revives the original's row) and `reapplyDiverge`,
+    /// `reapplyMintedContainer` (through `restoreContainer`) — the revived
+    /// rows may break an ownership promise the doors upheld when each row was
+    /// made (a note added elsewhere while its owned book sat in the Trash).
+    /// This pass restores the promise the way SyncSpec §7's R2 repair does
+    /// for a sync race, applied locally to `postIDs`:
+    ///
+    /// for every note with MORE THAN ONE live member row in live books where
+    /// ANY is owned, the EARLIEST-CREATED membership stands (`created_at,
+    /// id` — the local "earlier act"; R2 ranks by `server_seq` for the same
+    /// reason — PROVISIONAL P-13ic-9). If the standing row is OWNED, every
+    /// later owned-side row DEMOTES to an ARRIVAL (the bell: claim / copy in /
+    /// leave) and every later PLAIN-side row is TOMBSTONED (member-class,
+    /// recoverable). If the standing row is PLAIN, every owned-side row bells
+    /// instead. Nothing destroyed, nothing silent — the book shows the bell,
+    /// the row is recoverable. Deterministic and idempotent (the repaired
+    /// state has no violation). In the caller's transaction, on its stamp.
+    func enforceOwnershipAfterRevival(
+        _ db: Database, postIDs: [String], now: Date
+    ) throws {
+        for postID in Set(postIDs).sorted() {
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT rp.id AS id, r.owned AS owned
+                    FROM reading_post rp
+                    JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                     AND r.kind = 'book'
+                    WHERE rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                    ORDER BY rp.created_at, rp.id
+                    """,
+                arguments: [postID])
+            let owned = rows.map { ($0["owned"] as Bool?) ?? false }
+            guard rows.count > 1, owned.contains(true) else { continue }
+            let standingIsOwned = owned[0]
+            for index in rows.indices.dropFirst() {
+                guard var membership = try ReadingPost.fetchOne(db, key: rows[index]["id"] as String)
+                else { continue }
+                if owned[index] {
+                    membership.status = .arrival
+                } else if standingIsOwned {
+                    membership.deletedAt = now
+                } else {
+                    continue   // a plain row beside a plain standing row: legal
+                }
+                try membership.update(db)
+            }
+        }
+    }
+
     // MARK: - The daily Journal's bell (§6: "an owned-elsewhere note bells, never throws")
 
     /// Rings the daily Journal's door for a pair the ownership table would

@@ -202,8 +202,17 @@ struct SampleLibrarySignedOutRetirementTests {
 
     /// PUT BACK IS REAL (the ruling's own promise): the retired copy rows
     /// in this device's Trash; `restoreReading` revives the book with its
-    /// exact-stamp chapters and memberships, a member note's own Put back
-    /// revives it (the #85(e) recorded shape), and the revival pushes.
+    /// exact-stamp chapters and memberships, and the revival pushes.
+    ///
+    /// 13i-c U2 — HONEST FLIP of #85(e)(ii)'s recorded shape ("Put back on
+    /// the retired BOOK yields a book whose members are still in the Trash —
+    /// the honest road is fourteen put-backs"). That question — should
+    /// `restoreReading` revive stamp-matched member CONTAINERS — is answered
+    /// by her 13i sitting ruling (§18.3: "the delete-book-and-notes road (one
+    /// stamp) returns WHOLE"), built in the 13i-c plan §6. The retirement's
+    /// one-stamp family IS that shape, so the book's Put back now brings its
+    /// member notes home with it, and a member's own Put back has nothing
+    /// left to do.
     @Test func putBackReturnsTheRetiredCopy() async throws {
         let (a, b, server) = try furniturePair()
         a.sampleLibraryFacts = Self.facts()
@@ -221,9 +230,13 @@ struct SampleLibrarySignedOutRetirementTests {
         try b.with { ops, _ in try ops.restoreReading(copyB.bookID) }
         #expect(try liveCopyIDs(b) == [copyB.bookID], "Put back returns the book")
         let member = copyB.postIDs["About this book"]!
-        try b.with { ops, _ in try ops.restoreContainer(member) }
         #expect(try b.db.deletedAt("container", member) == nil,
-                "a member note's own Put back revives it (#85(e)'s shape)")
+                "the book returns WHOLE — its member notes with it (13i-c, §18.3)")
+        try b.with { ops, _ in
+            #expect(throws: OperationError.containerNotDeleted(id: member)) {
+                try ops.restoreContainer(member)
+            }
+        }
 
         // Her deliberate restore propagates — and nothing re-retires it
         // (no new tombstone ever arrives).

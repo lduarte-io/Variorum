@@ -37,6 +37,26 @@ extension Operations {
         /// The membership rows minted, in materialized order. Posts that
         /// already carried a live membership row are NOT here (see below).
         public let membershipIDs: [String]
+        /// 13i-c U2 — the assembly's notes OWNED ELSEWHERE (the owned-notes
+        /// limb): under `.copyIn` each one's ceremony copy, standing in its
+        /// slot; empty under `.leaveOut`.
+        public var copied: [OwnershipFork] = []
+        /// …and under `.leaveOut`, the notes left out (nothing materialized
+        /// for them — "leave-out means gone from this book", §3).
+        public var leftOut: [String] = []
+    }
+
+    /// **The bind's OWNED-NOTES LIMB** (13i-c U2 — the sitting record §3: "owned
+    /// notes in the assembly can't materialize, so the confirm lists them:
+    /// copy in / leave out"). A bound book is a plain book, so a note another
+    /// book OWNS cannot become its member (the ownership table's `copyOnly`).
+    public enum BindOwnedNotes: Equatable, Sendable {
+        /// The DEFAULT (PROVISIONAL P-13ic-4 — copies are ceremonies, never
+        /// silent): nothing materializes for them; they are gone from this
+        /// book (a book shows members only — no ghost display, deliberately).
+        case leaveOut
+        /// A ceremony copy per such note (tags riding) takes its slot.
+        case copyIn
     }
 
     /// Pre-images captured at do-time, so the inverse restores exact rows
@@ -98,10 +118,19 @@ extension Operations {
     ///   live row (P-13ib-6), but a sync-arrived stray can stand there —
     ///   and `uq_reading_post_live` would otherwise make the bind throw.
     ///   Defensive, cheap.
+    ///
+    /// - `ownedNotes` *(13i-c U2 — the 13i-c plan §3/§4 row 6)*: the
+    ///   assembly's notes OWNED ELSEWHERE consult the ownership table and
+    ///   cannot materialize as plain members — `.leaveOut` (the default)
+    ///   materializes nothing for them; `.copyIn` mints a ceremony copy per
+    ///   note in its slot. `Queries.bindOwnedNotesPreview` lists them for the
+    ///   confirm. The un-bind takes the copies' rows like any other row
+    ///   standing on the book; the copies persist as the notes they are.
     @discardableResult
     public func convertSmartReadingToCurated(
         _ readingID: String,
-        order: Queries.ReadingOrder? = nil
+        order: Queries.ReadingOrder? = nil,
+        ownedNotes: BindOwnedNotes = .leaveOut
     ) throws -> SmartConversionResult {
         let now = date.now
         let (result, preImage): (SmartConversionResult, SmartConversionPreImage) =
@@ -121,12 +150,30 @@ extension Operations {
                 let entries = try Queries.assembleReading(
                     db, readingID: readingID, order: order)
                 var membershipIDs: [String] = []
+                var copied: [OwnershipFork] = []
+                var leftOut: [String] = []
                 for entry in entries {
                     guard try livePairRow(
                         db, postID: entry.postID, readingID: readingID) == nil
                     else { continue }
+                    // 13i-c U2 — the owned-notes limb: the bound book is
+                    // plain, so a note another book owns is `copyOnly`.
+                    var memberID = entry.postID
+                    let owner = try Queries.noteMemberships(
+                        db, postID: entry.postID, excluding: readingID
+                    ).first { $0.owned }
+                    if let owner {
+                        guard ownedNotes == .copyIn else {
+                            leftOut.append(entry.postID)
+                            continue
+                        }
+                        memberID = try ceremonyCopy(db, sourceID: entry.postID, now: now).id
+                        copied.append(OwnershipFork(
+                            originalID: entry.postID, copyID: memberID,
+                            elsewhereNames: [owner.book.name]))
+                    }
                     let membership = ReadingPost(
-                        id: newID(), readingId: readingID, postId: entry.postID,
+                        id: newID(), readingId: readingID, postId: memberID,
                         position: try readingPosition(db, readingID: readingID, at: .end),
                         createdAt: now)
                     try membership.insert(db)
@@ -142,7 +189,8 @@ extension Operations {
 
                 return (
                     SmartConversionResult(
-                        reading: reading, membershipIDs: membershipIDs),
+                        reading: reading, membershipIDs: membershipIDs,
+                        copied: copied, leftOut: leftOut),
                     preImage)
             }
 
@@ -291,6 +339,7 @@ extension Operations {
                 throw OperationError.lockedReading(id: readingID)
             }
             let now = date.now
+            var revived: [String] = []
             for row in taken {
                 guard var membership = try ReadingPost.fetchOne(db, key: row.id),
                       membership.deletedAt != nil
@@ -307,12 +356,20 @@ extension Operations {
                 membership.status = row.status
                 membership.deletedAt = nil
                 try membership.update(db)
+                revived.append(membership.postId)
             }
-            guard reading.kind != .book || reading.sortField != .manual else { return }
-            reading.kind = .book
-            reading.sortField = .manual
-            reading.updatedAt = now
-            try reading.update(db)
+            if reading.kind != .book || reading.sortField != .manual {
+                reading.kind = .book
+                reading.sortField = .manual
+                reading.updatedAt = now
+                try reading.update(db)
+            }
+            // 13i-c U2 (the 13i-c plan §4 row 9): the redo REVIVES rows, so
+            // ownership is re-asserted over them — a note claimed by an owned
+            // book since the undo keeps its earliest membership; R2's shape.
+            // AFTER the kind flip: the pass reads BOOKS' rows only, and until
+            // the flip this row is a gathering's.
+            try enforceOwnershipAfterRevival(db, postIDs: revived, now: now)
         }
     }
 }

@@ -419,21 +419,28 @@ extension Operations {
     /// no caller composes it today (ladder round 1, hazard note).
     public func deleteContainer(_ id: String) throws {
         try database.write { db in
-            var container = try liveContainer(db, id)
-            let now = date.now
-            for versionID in try Queries.noteVersionIDs(db, of: id) {
-                guard var version = try Container.fetchOne(db, key: versionID),
-                      version.deletedAt == nil
-                else { continue }
-                version.deletedAt = now
-                version.updatedAt = now
-                try version.update(db)
-            }
-            container.deletedAt = now
-            container.updatedAt = now
-            try container.update(db)
+            try tombstoneNoteFamily(db, id: id, now: date.now)
         }
         undoStack?.clearRedoFuture()
+    }
+
+    /// The `deleteContainer` body — the note and its saved versions on ONE
+    /// stamp — shared with `deleteReadingWithNotes` (13i-c U2), whose notes
+    /// go to the Trash exactly as this door sends one ("versions ride, as
+    /// that door's letter says" — the 13i-c plan §6).
+    func tombstoneNoteFamily(_ db: Database, id: String, now: Date) throws {
+        var container = try liveContainer(db, id)
+        for versionID in try Queries.noteVersionIDs(db, of: id) {
+            guard var version = try Container.fetchOne(db, key: versionID),
+                  version.deletedAt == nil
+            else { continue }
+            version.deletedAt = now
+            version.updatedAt = now
+            try version.update(db)
+        }
+        container.deletedAt = now
+        container.updatedAt = now
+        try container.update(db)
     }
 
     /// Undo a `deleteContainer` (author decision 2026-07-05: deleted posts
@@ -457,17 +464,30 @@ extension Operations {
     /// What stays dead is what diverged: a version she deleted on its own
     /// earlier carries a different stamp, and so does one deleted after the
     /// note. Both are ordinary Trash rows with their own Put back.
+    ///
+    /// **13i-c U2 — and OWNERSHIP holds after it** (the 13i-c plan §4 row 8):
+    /// the note's revived memberships pass through
+    /// `enforceOwnershipAfterRevival` in this transaction — a note that came
+    /// back into an owned book AND another (added elsewhere while it lay in
+    /// the Trash) keeps its earliest membership, the later one bells or goes,
+    /// R2's shape applied locally.
     public func restoreContainer(_ id: String) throws {
         try database.write { db in
-            let stamp = try Container.fetchOne(db, key: id)?.deletedAt
-                .map { DateFormatter.variorumISO8601.string(from: $0) }
-            try restoreContainerRows(db, id: id)
-            guard let stamp else { return }
-            for versionID in try Queries.versionHistoryDeletedWith(
-                db, note: id, stamp: stamp)
-            {
-                try restoreContainerRows(db, id: versionID)
-            }
+            try restoreNoteFamily(db, id: id)
+            try enforceOwnershipAfterRevival(db, postIDs: [id], now: date.now)
+        }
+    }
+
+    /// The `restoreContainer` body — the note and the versions that died with
+    /// it, exact-stamp — shared with `restoreReading`'s return-WHOLE half
+    /// (13i-c U2: a book deleted with its notes brings them back first).
+    func restoreNoteFamily(_ db: Database, id: String) throws {
+        let stamp = try Container.fetchOne(db, key: id)?.deletedAt
+            .map { DateFormatter.variorumISO8601.string(from: $0) }
+        try restoreContainerRows(db, id: id)
+        guard let stamp else { return }
+        for versionID in try Queries.versionHistoryDeletedWith(db, note: id, stamp: stamp) {
+            try restoreContainerRows(db, id: versionID)
         }
     }
 

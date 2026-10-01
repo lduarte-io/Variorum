@@ -167,4 +167,58 @@ extension Queries {
                     finished: $0.finished)
             }
     }
+
+    /// A note in a gathering's assembly that another book OWNS — what the
+    /// bind cannot materialize as a plain member.
+    public struct OwnedElsewhereNote: Equatable, Sendable, Identifiable {
+        public var id: String { postID }
+        public let postID: String
+        public let title: String
+        /// The owning book (the EARLIEST owning claim — §18.4).
+        public let owner: BookRef
+    }
+
+    /// **The bind's confirm — the owned-notes limb** (the 13i-c plan §3): the
+    /// notes of the gathering's CURRENT assembly (the order she is looking at,
+    /// `order` — the bind's own parameter) that another book owns, each named
+    /// with its owner. Exactly the set `convertSmartReadingToCurated`'s
+    /// `ownedNotes:` limb acts on. Empty for anything but a live gathering.
+    public static func bindOwnedNotesPreview(
+        _ db: Database, readingID: String, order: ReadingOrder? = nil
+    ) throws -> [OwnedElsewhereNote] {
+        guard let reading = try Queries.reading(db, id: readingID),
+              reading.kind == .gathering
+        else { return [] }
+        var result: [OwnedElsewhereNote] = []
+        for entry in try assembleReading(db, readingID: readingID, order: order) {
+            guard let owner = try noteMemberships(
+                db, postID: entry.postID, excluding: readingID
+            ).first(where: { $0.owned }) else { continue }
+            result.append(OwnedElsewhereNote(
+                postID: entry.postID,
+                title: DisplayTitle.note(
+                    title: entry.title, entryDate: entry.entryDate,
+                    createdAt: entry.createdAt),
+                owner: owner.book))
+        }
+        return result
+    }
+
+    /// **The Trash's "and N notes"** (the sitting record §18.3; the 13i-c plan
+    /// §6): how many notes went to the Trash WITH this deleted book — its
+    /// member rows and their notes on the book's EXACT stamp, which only
+    /// `deleteReadingWithNotes` writes (a book-only delete leaves its notes
+    /// live). 0 for a live or missing book. ∝ the book's own rows.
+    public static func trashBookNoteCount(_ db: Database, readingID: String) throws -> Int {
+        try Int.fetchOne(
+            db,
+            sql: """
+                SELECT COUNT(DISTINCT rp.post_id) FROM reading r
+                JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at = r.deleted_at
+                 AND rp.status = 'member'
+                JOIN container c ON c.id = rp.post_id AND c.deleted_at = r.deleted_at
+                WHERE r.id = ? AND r.deleted_at IS NOT NULL
+                """,
+            arguments: [readingID]) ?? 0
+    }
 }
