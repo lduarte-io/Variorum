@@ -689,7 +689,17 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   refusal words + the app compile arms; Mac + phone builds + touched suites; the FULL core suite;
   the record closed; ledger row 3:** IN-PROGRESS. `OwnershipDoorTests` 12/12 DONE (one per row,
   each asserting the consult + the outcome + the exclusivity invariant). The app compile arms
-  DONE (2509647d — Mac + phone builds green then). REMAINING: the soak, the ritual + lessons, the
+  DONE (2509647d — Mac + phone builds green then). `OwnershipSoakTests` DONE (6 seeds × 250
+  steps over own/un-own/add/copy/move/answering arms/remove/seat/dismiss/tag/finish/reopen/seal/
+  unseal/delete both ways/restore book/delete+restore note/duplicate both ways/diverge;
+  invariants exclusivity · seal · no duplicate pair · I10 · I2 after every step) — it FOUND a bug
+  on its first run (seeds 3 and 777): a note deleted while a member, its book SEALED while it lay
+  in the Trash, then put back, revived INTO the sealed book unsealed. Pinned red-first
+  (`BookSealTests.aNoteInTheTrashWhenItsBookWasSealedComesBackOutsideTheSealedBook` + the
+  restoreReading twin `aSealedBookPutBackTakesBackOnlyItsSealedMembers`), fixed by guarding both
+  revival roads (a membership revives into a SEALED book only when its note is sealed —
+  PROVISIONAL P-13ic-U2-6); soak + seal suite green; the restore-family sweep 848/85 green again.
+  REMAINING: the ritual + lessons, the
   shared refusal words (+ a `bookSeal` road — the integrity walk bans the bare "sealed"/"unseal"
   stems in the shared file), the Mac/phone builds + touched suites, the FULL core suite, the close.
 - No revert in flight.

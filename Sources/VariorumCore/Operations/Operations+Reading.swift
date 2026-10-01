@@ -515,11 +515,16 @@ extension Operations {
             // the container cascade — different stamp, doubly safe; a post
             // that died AFTER this reading did matches the stamp and is
             // exactly what the live-post guard keeps dead.)
+            // 13i-c U2 (P-13ic-U2-6): a SEALED book takes back only SEALED
+            // members — a note whose seal was lifted by hand while the book
+            // lay in the Trash does not rejoin the edition (P-13ic-6's other
+            // half: "Put back restores a sealed book whose stamps still match").
+            let sealedOnly = reading.sealedAt != nil ? " AND locked = 1" : ""
             try db.execute(
                 sql: """
                     UPDATE reading_post SET deleted_at = NULL
                     WHERE reading_id = ? AND deleted_at = ?
-                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
+                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL\(sealedOnly))
                     """,
                 arguments: [id, stamp])
 

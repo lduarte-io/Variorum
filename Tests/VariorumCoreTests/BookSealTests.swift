@@ -191,6 +191,54 @@ struct BookSealTests {
         }
     }
 
+    /// Found by `OwnershipSoakTests` (seed 3, step 95): a note deleted while
+    /// a member, its book SEALED while it lay in the Trash, then put back —
+    /// the exact-stamp revival brought it into the sealed book UNSEALED (an
+    /// editable member of a book whose text is immutable). The revival now
+    /// does what the door would (a sealed book refuses every add): the note
+    /// comes back, but not into the sealed book (PROVISIONAL P-13ic-U2-6).
+    @Test func aNoteInTheTrashWhenItsBookWasSealedComesBackOutsideTheSealedBook() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "book", kind: .book)
+            let kept = try note(ops, "kept")
+            let away = try note(ops, "in the trash")
+            try ops.addPostToReading(kept.post.id, to: book.id)
+            try ops.addPostToReading(away.post.id, to: book.id)
+            try ops.deleteContainer(away.post.id)
+            try ops.sealReading(book.id)
+
+            try ops.restoreContainer(away.post.id)
+
+            #expect(try db.deletedAt("container", away.post.id) == nil)   // it came back
+            #expect(try members(db, book.id) == [kept.post.id])           // not into the edition
+            #expect(!(try post(db, away.post.id).locked))
+            // A note SEALED with the book still comes home with it.
+            try ops.deleteContainer(kept.post.id)
+            try ops.restoreContainer(kept.post.id)
+            #expect(try members(db, book.id) == [kept.post.id])
+        }
+    }
+
+    @Test func aSealedBookPutBackTakesBackOnlyItsSealedMembers() throws {
+        // P-13ic-6's other half: a member unsealed by hand while the book lay
+        // in the Trash does not rejoin the sealed edition.
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "book", kind: .book)
+            let a = try note(ops, "a")
+            let b = try note(ops, "b")
+            try ops.addPostToReading(a.post.id, to: book.id)
+            try ops.addPostToReading(b.post.id, to: book.id)
+            try ops.sealReading(book.id)
+            try ops.deleteReading(book.id)
+            try ops.unlockPost(b.post.id)        // a real post seal, lifted per note
+
+            try ops.restoreReading(book.id)
+
+            #expect(try members(db, book.id) == [a.post.id])
+            #expect(try db.read { try Queries.noteMemberships($0, postID: b.post.id) }.isEmpty)
+        }
+    }
+
     @Test func finishedMeansTheContentsAreDoneButTheWritingCanStillChange() throws {
         // Lesson 6, first sentence (the sitting record §25): "Finished means
         // the table of contents is done — the writing inside can still change."

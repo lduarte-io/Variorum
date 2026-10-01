@@ -561,13 +561,21 @@ extension Operations {
                     arguments: [nowStamp, blockID])
                 try flipBlockCascadeTombstones(db, blockID: blockID, stamp: stamp, now: now)
             }
+            // 13i-c U2 (PROVISIONAL P-13ic-U2-6 — found by the ownership
+            // soak): a membership revives into a SEALED book only when the
+            // note is itself sealed. A note that lay in the Trash while its
+            // book was sealed was never part of that edition; reviving it
+            // there would put an editable note inside a book whose text is
+            // immutable — the door's own answer (a sealed book refuses every
+            // add) is that it comes back OUTSIDE the edition.
             try db.execute(
                 sql: """
                     UPDATE reading_post SET deleted_at = NULL
                     WHERE post_id = ? AND deleted_at = ?
-                      AND reading_id IN (SELECT id FROM reading WHERE deleted_at IS NULL)
+                      AND reading_id IN (SELECT id FROM reading WHERE deleted_at IS NULL
+                                           AND (sealed_at IS NULL OR ? = 1))
                     """,
-                arguments: [id, stamp])
+                arguments: [id, stamp, container.locked ? 1 : 0])
             try db.execute(
                 sql: """
                     UPDATE post_tag SET deleted_at = NULL
