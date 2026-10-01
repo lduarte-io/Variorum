@@ -621,5 +621,68 @@ many-books case (a bounded books section with its own scroll — her lean — or
   I'm ready for it to be built."* Mockup v5 is the visual record; the shape binds, the
   incidentals don't (§22).
 
+## 25. THE TUTORIAL CURRICULUM — the books chapters (written at her instruction as SECONDARY ACCEPTANCE CRITERIA)
+
+*(Her ask at the close: the tutorial's teaching list, written now, "so it can function as a
+secondary sort of acceptance criteria / sanity check." The rule of this section: every lesson is
+a sentence the field guide must be able to say TRUTHFULLY of the shipped build — if the build
+makes any sentence false, the build is wrong, not the sentence. The WORDS are hers (the 13s copy
+landing re-voices everything); this section fixes WHAT is taught. The chapter itself is built at
+13i-d, sized at that kickoff per the brief's 2026-08-19 addition; the walk asserts the rituals.)*
+
+**The lessons — each sentence a pin:**
+
+1. **The three kinds.** "A gathering shows you every note matching its rule — it holds nothing.
+   A book holds its notes as members. An owned book is the only place its notes live." *(§1)*
+2. **The edit law, her sentence nearly verbatim.** "Editing a note that is in a book is always
+   editing every book it appears in — owned or not. Adding a note to a book never copies it.
+   A copy only ever happens because you asked for one, and it always remembers where it came
+   from." *(§2)*
+3. **Gatherings.** "A gathering is made from a tag. Remove the tag and the note leaves on its
+   own. You can't rearrange a gathering — bind it into a book to take it in hand, and it keeps
+   collecting after you do." *(§3, the bind door)*
+4. **Arrivals.** "A collecting book auto-adds freely; anything it can't seat on its own waits at
+   Arrivals for you to judge — add it, copy it in, or dismiss it. Finishing a book dismisses
+   whatever is still waiting." *(§4, §24)*
+5. **Owned.** "Put a note in an owned book and that book is its home. Want it elsewhere too?
+   You'll get a copy, and you'll know. Remove it and it goes back to the Pool, whole." *(§6, §20)*
+6. **Finished and Sealed.** "Finished means the table of contents is done — the writing inside
+   can still change. Sealed means the book is done." *(§5)*
+7. **The Bookcase.** "Your books live on shelves, alphabetical until you choose otherwise —
+   switch to your own order to place them by hand. The shelves run left to right exactly as All
+   stacks them top to bottom. Unshelved books wait at the top until you file them." *(§7, §24)*
+8. **Deleting.** "Deleting a plain book never touches a note. Deleting an owned book asks: keep
+   the notes (they go to the Pool) or take them too. The Trash gives back whatever went in
+   together, together." *(§20, §18.3)*
+9. **The daily Journal.** "The daily Journal is an ordinary book that is special in one way:
+   it's where ⌘J and Today's Entry file. You can archive it; you can't delete it; it comes back
+   when a day arrives." *(§10)*
+10. **The Pool.** "The Pool is every note with no book. Notes that show in gatherings tuck
+    behind the count in its masthead — one click shows them." *(§8)*
+11. **Wings.** "A wing is a separate library in the same app — a different room in the same
+    house. Nothing crosses between wings except what you move or copy yourself." *(§9)*
+
+**The rituals (taught by DOING — the walk asserts each; the 2026-08-19 ruled ritual extended):**
+
+- **R1 — the classics walk (the seeded lesson, §7/§17):** open the *classics* gathering on the
+  Welcome shelf; see Jekyll's and Sherlock's notes side by side; notice Sherlock's wear the
+  owned mark; open one through it and land in its book.
+- **R2 — membership, by hand (the 2026-08-19 ritual, kept):** make a book, a chapter, a note
+  inside it; add the same note to a second book; edit it and see both books change; delete one
+  book and watch the note survive.
+- **R3 — the gathering's life:** tag two notes; make a gathering from the tag; untag one and
+  watch it leave; bind the gathering into a book; reorder it; untag the other and watch it STAY.
+- **R4 — ownership's boundary:** flip a book to Owned; try adding one of its notes to another
+  book and meet the copy choice; remove a note and find it in the Pool.
+- **R5 — the shelf gesture:** drag a book onto a shelf name; switch order to "my order" and
+  place one by hand; star one and see it float.
+
+**The sanity check, verdict:** every ruling compressed to a plain sentence on the first attempt —
+no lesson needed a second clause of exceptions, which is the design telling us the shape is
+right. The two subtlest facts stay OUT of the tutorial deliberately and live in the record
+instead: a dismissed arrival returns only on a fresh tagging act (§24 — behavior, discoverable,
+not curriculum), and the census/№ needs no lesson at all (it explains itself on click — if a
+tester ever asks what № does, THAT is the finding).
+
 **NEXT: awaiting her kickoff of `/architect-phase 13i-a`.** Nothing in this record remains
-proposed — every section through §24 is ruled or ratified.
+proposed — every section through §25 is ruled or ratified.
