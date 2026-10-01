@@ -63,24 +63,32 @@ re-sized at this phase's own kickoff.**
 - **The membership chip's staleness under an intake seat** (U3 F-U3-2) sits with 13i-d unless
   this phase's chip work (the owned badges touch the same chip) takes it for free — note it.
 
-## HER 13i-b CLOSING-SITTING ITEM (2026-10-01, routed here at her word)
+## HER OUTFLOW RULING (2026-10-01, the 13i-b closing sitting — THIS PHASE BUILDS IT)
 
-Her words, verbatim-faithful: *"if I want it changed it'll be added to the next phase. I think
-it's fine for a book to add multiple tags automatically - journal, for example, might add
-journal AND the particular journal it's a part of."* Two items, distinct:
-1. **The spawn's positive-sole-tag flip** (one line, no schema): `#a AND NOT #b` spawns with
-   `#a` as the outflow (the 13i-b ladder recorded both readings; the conservative one shipped).
-2. **THE MULTI-TAG OUTFLOW (design sitting item):** the deployed schema holds ONE
-   `auto_tag_id`. Present her the fork honestly: (a) the tag HIERARCHY may already serve the
-   journal case — auto-tag the CHILD (`journal/dream`); subtree matching gives the parent's
-   visibility with one application; (b) true multi-tag outflow (unrelated tags) needs a storage
-   shape — a schema-touching call that contradicts the no-second-event rule, so if she wants
-   (b) it must be designed as data-in-existing-columns or deferred to a future lockstep event,
-   never improvised.
+Her words, verbatim-faithful: *"can we make the outflow tag distinct from the tag rule? I want
+to be able to choose what the outflow tag is and if there is one at all, not just have it
+automatically made just because the book was once a gathering. you should be able to choose if
+you want a, b, a but not b, tag c, whatever. I realize that it's a sync change and a schema
+jump, but now is the time to do something like that. I feel like it's natural to want that -
+you might want to add my writing, poetry, and horror. While poetry could nest in my writing and
+so could horror, that's still two tags."*
+
+**The ruled shape:** the outflow is a CHOSEN, OPTIONAL set of tags on a book — independent of
+the intake rule, several tags legal (her writing + poetry + horror), none legal. The spawn and
+every door OFFER the choice rather than silently deriving (refining her 13i-b morning ruling).
+**She authorized the schema event** ("now is the time"): the storage shape (a join table or a
+designed column form) is 13i-c's kickoff sitting's, ONE lockstep event marker 10→11,
+mirror-first at her window, `Sync/` under the Fable rider, SyncSpec §12's lockstep discipline
+whole (serializer classifications, repairs if any live-unique index arrives, the fake server's
+mirror, the deploy checklist). The 13i-b-shipped single `auto_tag_id` + sole-tag spawn
+derivation stand until this build replaces them; the migration carries existing `auto_tag_id`
+values into the new shape.
 
 ## Standing constraints
 
-Schema: ZERO (13i-a landed the whole bundle — anything new is a §12 event and a design error).
+Schema: ONE RULED EXCEPTION — her outflow ruling above authorizes ONE further §12 lockstep
+event (marker 10→11) for the chosen multi-tag outflow; everything else stays on 13i-a's bundle
+(any OTHER schema want remains a design error).
 The ops enforce ownership; SyncSpec §7's R2 exclusivity repair converges races (its shape is
 PROVISIONAL #167 — check her ratify before building faces atop it). The sitting's §25 lessons
 5–6, 8 + rituals R4 are this phase's acceptance spine. The 13b constitution binds (copy it in

@@ -1633,6 +1633,25 @@ idle for ~3 minutes with no user state and was quit by the graceful Quit event; 
 re-verified. The probe is struck from the procedure (the runbook's refresh steps never included
 it — my addition, my mistake).
 
+## HER THIRD SITTING MESSAGE — THE OUTFLOW RULING (2026-10-01, at the closeout's open; verbatim-faithful)
+
+*"can we make the outflow tag distinct from the tag rule? I want to be able to choose what the
+outflow tag is and if there is one at all, not just have it automatically made just because the
+book was once a gathering. you should be able to choose if you want a, b, a but not b, tag c,
+whatever. I realize that it's a sync change and a schema jump, but now is the time to do
+something like that. I feel like it's natural to want that - you might want to add my writing,
+poetry, and horror. While poetry could nest in my writing and so could horror, that's still two
+tags. make note of this and then do all of the close out paperwork."*
+
+**RULED, routed to 13i-c (its plan § HER 13i-b CLOSING-SITTING ITEM, rewritten to this):**
+the OUTFLOW becomes its own CHOSEN fact — several tags, any tags, or none, independent of the
+intake rule — and she AUTHORIZES the schema event it needs ("now is the time"). This refines
+her morning spawn ruling (the spawn offers/lets her choose rather than silently deriving) and
+supersedes the §4-sitting single-outflow reading for 13i-c's build. 13i-b's shipped shape
+(one `auto_tag_id`, the spawn's sole-tag derivation) stands until 13i-c rebuilds it. The
+lockstep event (marker 10→11) is designed at 13i-c's kickoff sitting, mirror-first at her
+window, Fable work under the Sync rider.
+
 ## THE SANITY PASS + THE ORCHESTRATOR'S ROUTING (2026-10-01)
 
 The implementer's sanity pass over the cumulative fix diff: CLEAN BILL (its section in
