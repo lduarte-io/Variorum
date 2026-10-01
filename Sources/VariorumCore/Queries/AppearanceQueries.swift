@@ -195,6 +195,14 @@ extension Queries {
         }
     }
 
+    /// The LIVE starred NOTES' ids, in star order — the rule grammar's STAR
+    /// term context (`ruleMatchSQL`'s `starredNoteIDs`; the 13i-a plan §9
+    /// hand-off c). Bounded by the cap, never the corpus. 13i-b U1's intake
+    /// is its first consumer; the gathering assembly's call sites are U4's.
+    public static func starredNoteIDs(_ db: Database) throws -> [String] {
+        try starred(db).compactMap { $0.target.kind == .post ? $0.target.id : nil }
+    }
+
     /// The stored star list, decoded but NOT liveness-filtered. Internal:
     /// the write side needs it to tell a no-op write from a self-healing
     /// one, and nothing else should ever see a star whose target is gone.

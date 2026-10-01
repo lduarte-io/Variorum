@@ -343,8 +343,17 @@ the walk into the morning.
   tagsAll, wings migration, membership chip, quicknote — 54 tests / 7 suites) green.
   Deliberately untouched: `assembleReading`'s GROUPING-tag `sectionSelect` (a display walk, not
   the rule predicate; no door can mint the state) — recorded, not hardened.
-- NEXT — piece 3: `Domain/IntakeDecision.swift` + the intake engine (`Operations+Intake.swift`)
-  + the hooks.
+- Piece 3 (this commit — **WIP, compiling; `ArrivalMemberHygieneTests` deliberately RED until
+  piece 4**): `Domain/IntakeDecision.swift` (the pure table, owned arms included),
+  `RuleGrammar.referencesStar`, `Queries.starredNoteIDs` (the star term's context, cap-bounded);
+  and the member-reader hygiene PINS written first — 6 pins by a direct arrival row
+  (remove / reorder / assign-to-chapter / diverge refuse `postNotInReading` and leave the arrival
+  standing; a hand-add of a waiting note SEATS that same row; the capacity gate still governs it).
+  **Red-on-old watched: 6/6 red on the pre-fix tree, each for its mechanism** (the diverge pin
+  sharpened once: its first red was an accidental `postHasNoBlocks`; with a block seeded, the old
+  tree visibly diverged the ARRIVAL — tombstoned it and seated a copy).
+- NEXT — piece 4: the intake engine (`Operations+Intake.swift`), the hooks, the judgment ops,
+  auto-tag, `tagAllMembers`, the dial/auto-tag setters, `liveMembership` → member-only.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

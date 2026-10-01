@@ -161,4 +161,17 @@ public enum RuleGrammar {
         case .star, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: return []
         }
     }
+
+    /// Whether the tree carries a STAR term anywhere (13i-b U1 — a starring
+    /// act fires intake only on the books whose rule can hear it; the 13i-b
+    /// plan §2.2's "or any star term").
+    public static func referencesStar(_ term: RuleTerm?) -> Bool {
+        guard let term else { return false }
+        switch term {
+        case .and(let ts), .or(let ts): return ts.contains { referencesStar($0) }
+        case .not(let t): return referencesStar(t)
+        case .star: return true
+        case .tag, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: return false
+        }
+    }
 }
