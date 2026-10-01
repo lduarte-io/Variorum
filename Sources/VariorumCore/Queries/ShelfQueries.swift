@@ -233,6 +233,10 @@ extension Queries {
     /// the live gatherings' rules (`shown`), then window functions number and
     /// count each class, and at most `window` rows per class come back.
     ///
+    /// A HOME is a live MEMBER row of a BOOK (13i-c U2 — 13i-b ladder F-R1-7,
+    /// the three readers ruled together): a sync-stray member row on a
+    /// gathering never takes a note out of the Pool.
+    ///
     /// Per-gathering letters, each the assembly's own: NO rule shows every
     /// note in its wing; a MALFORMED rule shows nothing (fails closed — it
     /// tucks nothing); a rule's truth is COALESCEd to 0, so a legacy term over
@@ -321,7 +325,10 @@ extension Queries {
                 WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM reading_post rp
                                    WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
-                                     AND rp.status = 'member')
+                                     AND rp.status = 'member'
+                                     AND EXISTS (SELECT 1 FROM reading r
+                                                  WHERE r.id = rp.reading_id
+                                                    AND r.kind = 'book'))
               )
             )
             WHERE rn <= ?
@@ -344,6 +351,9 @@ extension Queries {
                 JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at IS NULL
                  AND rp.status = 'member'
                 WHERE rp.post_id = ? AND r.deleted_at IS NULL
+                  -- 13i-c U2 (F-R1-7): membership is a BOOK's row; a stray
+                  -- member row on a gathering never lists it as a book.
+                  AND r.kind = 'book'
                 ORDER BY r.name, r.id
                 """,
             arguments: [postID])

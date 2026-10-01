@@ -616,6 +616,35 @@ commit, foreground waits only, no subagents (one Sonnet read-only lookup at most
 bind verbatim: zero instances before any suite that mounts windows; never touch `/Applications`;
 the dev store never syncs; `pipestatus`; never a custom build configuration.
 
+## U2 RECORD — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — the full NOT-DONE line is
+written at the close. Standing scope fence: no face of any kind (U3/U4), zero `Sync/`, zero schema.
+
+**UNIT STATUS: IN PROGRESS.**
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- **Piece A — `Domain/OwnershipDecision` + the three readers' `kind='book'` (F-R1-7):**
+  DONE (the commit that opened this record). `OwnershipDecisionTests` (5, pure, incl. the
+  cell-for-cell agreement with intake's owned arms); `MembershipReadersBookScopeTests` (3) RED on
+  the pre-fix tree, each reader (owned book belled a free note → `arrival`; the Pool dropped the
+  note; the chip listed `[g, g, quiet]`), GREEN after `AND r.kind='book'` in `membershipElsewhere`,
+  the Pool's exclusion (a correlated reading probe — the P1 plan pin `PoolTuckTests` still green)
+  and `readingsContaining`'s membership leg. Filtered run: 58 tests / 5 suites green.
+- **Piece B — the membership roads:** `OperationError` cases, `addPostToReading`/`seatArrival`
+  consults, copy-in / move-in (+ the answering arms), `shelveInDailyJournalBook`'s bell, Own /
+  Stop owning, the previews — NOT-STARTED.
+- **Piece C — the revival pass + its six call sites, the bind's owned-notes limb, restore-whole,
+  delete-with-notes, duplicate, the Trash count** — NOT-STARTED.
+- **Piece D — Seal / Unseal, the lock/unlock guards** — NOT-STARTED.
+- **Piece E — hide-owned (fragment + setter + the setting), the badge facts, `ownership_badges`**
+  — NOT-STARTED.
+- **Piece F — `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual + lessons 5/6/8; the shared
+  refusal words + the app compile arms; Mac + phone builds + touched suites; the FULL core suite;
+  the record closed; ledger row 3** — NOT-STARTED.
+- No revert in flight.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store

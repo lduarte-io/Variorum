@@ -266,9 +266,14 @@ extension Operations {
         return total > 0 ? .dismissed : .fresh
     }
 
-    /// Is the note a MEMBER of some other live book — and of an OWNED one?
+    /// Is the note a MEMBER of some other live BOOK — and of an OWNED one?
     /// (§6's two ownership facts; `idx_reading_post_post` keeps it per-note.)
-    private func membershipElsewhere(
+    /// 13i-c U2 (13i-b ladder F-R1-7, one of the three readers ruled
+    /// together): only a BOOK's row is membership — a sync-stray member row
+    /// on a gathering is never "a second place it lives" (a gathering holds
+    /// nothing, the sitting record §1), so it can never make an owned book
+    /// bell a free note.
+    func membershipElsewhere(
         _ db: Database, postID: String, readingID: String
     ) throws -> (membered: Bool, owned: Bool) {
         let row = try Row.fetchOne(
@@ -277,6 +282,7 @@ extension Operations {
                 SELECT COUNT(*) AS membered, COALESCE(SUM(r.owned), 0) AS owned
                 FROM reading_post rp
                 JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                 AND r.kind = 'book'
                 WHERE rp.post_id = ? AND rp.reading_id <> ?
                   AND rp.deleted_at IS NULL AND rp.status = 'member'
                 """,
