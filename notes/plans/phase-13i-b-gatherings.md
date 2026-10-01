@@ -1598,6 +1598,22 @@ delta drafts. **Flow:** findings to a fresh implementer voice VERBATIM for agree
 reviewer makes the final calls and implements its confirmed fixes itself (authorized); round 2
 re-reviews the fixes under a FRESH reviewer; then one implementer sanity pass.
 
+## THE SANITY PASS + THE ORCHESTRATOR'S ROUTING (2026-10-01)
+
+The implementer's sanity pass over the cumulative fix diff: CLEAN BILL (its section in
+`13ib-ladder-round2.md`, commit 748c083d; suites re-run by its own hand, 102/8 core + 20/2
+Mac). Its two record-level items, routed by the orchestrator (neither disputes a fix —
+routing is the ledger's, not the ladder's):
+1. **The hand-removed-stays-removed CONTROL pin** (green-on-both by nature — a guard, not a
+   red-on-old) → taken at the CLOSEOUT commit by the orchestrator.
+2. **Legacy-only rules wear false "keeps collecting" words** (old profile/date rules with no
+   tag/star term — intake can never hear an act for them; they collect only at catch-ups,
+   through Arrivals; pre-existing, words-on-old-data) → the MORNING BUNDLE + a line owned by
+   **13i-d's vocabulary sweep**.
+**THE LADDER STANDS CLOSED AT TWO ROUNDS** — zero disputes phase-wide (the one formal DISPUTE,
+F-R1-6, was SUSTAINED by the reviewer itself). Next: the orchestrator's acceptance walk →
+the sanctioned install refresh → closeout.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
