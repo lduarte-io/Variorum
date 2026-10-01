@@ -68,6 +68,11 @@ enum MobileTodayDoor {
             return "Entry saved. Your daily journal book is full, so it wasn't added — choose another book as your daily journal (a book's details has the door)."
         case .wrongKind:
             return "Entry saved. Your daily journal is a smart book, which can't hold entries — choose a hand-picked book as your daily journal (a book's details has the door)."
+        // 13i-c U2 (the sitting record §6): book ownership kept the entry
+        // from joining on its own — it waits at the journal's door.
+        case .waitingAtDoor:
+            return "Entry saved. It's waiting at your daily journal's door — it already "
+                + "lives in another book, and one of them owns its notes."
         case .refused(let reason):
             return "Entry saved, but it wasn't added to your daily journal book: \(reason)"
         }

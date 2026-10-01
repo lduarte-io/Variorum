@@ -729,6 +729,17 @@ enum JournalBooks {
                     note: "Today's entry opened, but “\(bookName)” is a smart book — "
                         + "it collects by query and can't hold entries. Pick a curated "
                         + "book with Use as Daily Journal.")
+            case .waitingAtDoor:
+                // 13i-c U2 (the sitting record §6 — "an owned-elsewhere note
+                // bells, never throws"): book ownership kept the entry from
+                // joining on its own, so it waits at the Journal's door for
+                // her judgment. The owner-naming wording is U4's face.
+                bookName = namedBook()
+                return Outcome(
+                    postID: entry.container.id,
+                    note: "Today's entry opened — it's waiting at “\(bookName)”'s door, "
+                        + "because it already lives in another book and one of them "
+                        + "owns its notes.")
             case .refused:
                 // The shared door creates a book where none is designated,
                 // so only a race or a store failure reaches here — and it
