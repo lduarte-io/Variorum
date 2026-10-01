@@ -133,7 +133,11 @@ as the act that fires it.**
    - no rule / dead book / gathering / locked book → `nothing` (a dead or paused book's intake
      runs nothing; a gathering assembles, never materializes).
    - pair already decided (tombstone-means-decided — the `shelveInDailyJournalBook` precedent
-     generalized: ANY `reading_post` row for the pair) → `nothing`.
+     generalized: ANY `reading_post` row for the pair) → `nothing`. *(AMENDED at the U1
+     adjudication — P-13ib-U1-1: on an EVENT, a pair whose only history is DISMISSAL records
+     rings again as a fresh ARRIVAL — §24's consequence sentence is the author's later ruling
+     and refines this line for exactly that cell; a tombstoned MEMBER row stays decided against
+     every occasion, and sweeps honor ANY row. The U1 RECORD carries the full shape.)*
    - at capacity (`max_posts` ≤ live member count) → `arrival` (intake waits at the door).
    - `intake_seating = 'arrivals'` (the join dial: "wait at Arrivals") → `arrival`.
    - plain book + ordinary note → `seat` (multi-membership is legal). Plain book +
@@ -263,7 +267,14 @@ everything we've decided through the 5 phases it'll likely be fine."
   dismiss → it never returns on rule-match, returns on a fresh tagging act).
 - **U3 — THE RULE EDITOR + THE TWO DOORS (UI; §4 items 1–2).** The grammar face (tags + star,
   and/or/not; legacy terms read-only; `SmartSpecSheet`/`legacyDraft` retired), the join dial +
-  auto-tag rows, bind-in-place, spawn, the hand-drag teaching offer. **Evidence:** mounted pins
+  auto-tag rows, bind-in-place, spawn, the hand-drag teaching offer. **CARRIES F-1 (mandatory,
+  before the run's install):** the conversion sheet's "New tag matches will stop arriving
+  here." is FALSE since U1 and its "(collecting)" sibling offer now DOUBLE-collects — the
+  rebuilt bind door retires both. **And F-4's ruling (architect, 2026-10-01 — PROVISIONAL
+  P-13ib-6):** the bind's structural UNDO leaves NO live member row on the reverted row — a
+  gathering holds nothing (§1's table is the law); the inverse tombstones every live member
+  row standing on it at the revert, intake-seated and hand-added alike (their notes keep
+  showing wherever the rule matches them). **Evidence:** mounted pins
   (incl. "saving never silently drops a term" — the undraftable hazard retired WITH the draft
   vehicle) + the orchestrator's walk (edit a rule to tag ∧ star; bind a gathering and watch
   identity survive — same row id, name, star; spawn and watch backfill seat; the teaching
@@ -569,7 +580,23 @@ condition met.
    (after the walks and the ladder, per the sizing rule), behind the A1 rail, with a pgrep
    re-check at the moment. Her same message pinned the end review: "make sure you do a Fable
    review at the end" — ledger row 6 is that ladder, `fable-reviewer`, confirmed.
-5. Anything the units add (held taste calls, walk findings). **U1:** P-13ib-U1-1…9 (the U1 RECORD —
+5. **U1's PROVISIONALs P-13ib-U1-1…9** (the U1 RECORD, each with a QUESTIONS-ready paragraph).
+   The headline is **U1-1**: a note you DISMISSED from Arrivals comes back to the door on a
+   fresh tagging/starring act (never auto-seated); a note you REMOVED as a member stays out
+   for good — the adjudicated synthesis of §4's tombstone-means-decided and §24's "returns
+   only on a fresh tagging act" (the architect sustained the build; the ruling note is at
+   plan §2.1).
+6. **F-2 — your existing converted books are LIVING books now** (they kept their rules as
+   provenance; §14.6 rules they keep collecting). Nothing moves until your next matching tag
+   or star; any "(collecting)" sibling from the old offer will double-collect with its book
+   until U3's door rework (and the pair is yours to prune at will).
+7. **F-3 — the phone runs intake from its NEXT build** (intake is local acts through shared
+   core; no sync hazard — R1 converges both devices' rows). Tags made on the current phone
+   build aren't heard by books until a catch-up occasion; a phone rebuild whenever convenient.
+8. **P-13ib-6 (architect, with U3):** undoing a BIND leaves no live member row on the
+   reverted gathering — a gathering holds nothing; every row tombstones at the revert,
+   intake-seated and hand-added alike.
+9. Anything the remaining units add (held taste calls, walk findings). **U1:** P-13ib-U1-1…9 (the U1 RECORD —
    U1-1 is the reconciliation of §4's tombstone-means-decided with §24's "returns on a fresh act");
    F-2 (pre-13i-b converted books are now living) and F-3 (the phone runs intake from its next build).
 
