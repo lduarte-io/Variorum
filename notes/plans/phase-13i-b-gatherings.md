@@ -1382,7 +1382,7 @@ STOP condition met.
   → **2 red** · M7 the auto-tag association dropped → **2 red**. Mac: M8 the empty-but-gathered sentence
   collapsed to "the pool is empty" → **2 red** · M9 the tucked run drawn without the click → **2 red**.
   Every new pin family bites.
-- **THE WALK — IN PROGRESS** (dev-store Debug build from ee108afe, `io.lduarte.Variorum.debug`; machine
+- **THE WALK** (dev-store Debug build from ee108afe, `io.lduarte.Variorum.debug`; machine
   author-free — HID idle 97 min at the start, her app absent, AX + Screen Recording held; my own
   `caffeinate`; every click through a guarded wrapper adding F-U3-5's hardening — AXRaise, then the
   TOPMOST window at the point must be the dev app — plus a hard exclusion of a system "Updates
@@ -1415,8 +1415,18 @@ STOP condition met.
   the run shows; an empty-but-gathered Pool keeps its sentence first. Pins extended (both labels while
   shown, none while tucked, no loose label with nothing loose) — face suite **6/6 green**; the walk's
   captures are its geometry evidence (P-13ib-U4-4 now names the placement). F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
-  tags…" (pre-existing copy, false for a ★ rule; 13i-d's vocabulary sweep). Remaining: the F-U4-3 fix,
-  then Study light/dark and Terminal dark on the fixed build; settings restore + read-back.
+  tags…" (pre-existing copy, false for a ★ rule; 13i-d's vocabulary sweep).
+  **THE WALK — DONE, 20 captures, both voices × both appearances** (the remaining rooms on the FIXED
+  build, 4242c302): **Terminal · light** 08 the revealed run at the TOP ("in gatherings" — the quicknote
+  and dream notes and the starred note) · **Study · light** 09 shown, 10 tucked ("Pool · 90 notes · 20 in
+  gatherings · show"), 11 the starred gathering ("smart book · 2 notes") · **Study · dark** 12 tucked, 13
+  shown, 14 the gathering · **Terminal · dark** 15 the gathering, 16 tucked, 17 shown. Every room legible,
+  tokens only, nothing clipped; the toggle reads in the accent. **Her dev settings restored and READ BACK:**
+  voice Terminal (AX `1,0`), appearance `appearanceChoice = system` (AX read `0,0,1` while staged dark,
+  restored by `defaults write`); my instance quit by identity each time; zero instances; my `caffeinate`
+  stopped. The dev store keeps the walk's "starred notes" gathering (rule ★ — exactly what the seed would
+  mint, so a future seed there answers `alreadyPresent`); "walk two" was starred and un-starred (net
+  unchanged).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
