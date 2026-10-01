@@ -865,6 +865,18 @@ schema/`Sync/`/migrations (zero).
   `bindingPreservesTheRowsIdentityNameStarShelfSpotAndWing` (shelf row staged by direct insert —
   no shelf door before 13i-d). Neighbour suites (conversion, ritual, intake ops + soak, arrival
   hygiene, reading ops): 84 tests / 6 suites green; conversion 24/24.
+- Piece 3 (this commit) — **the editor's pure brain + the offer's count (core).**
+  `Domain/RuleEditing.swift`: path-addressed edits over `RuleTerm` (add · addGroup-seeded · remove
+  with upward pruning of groups THIS removal empties · toggleNegation one layer · setCombinator),
+  the face's row projection (depth, negation count, add doors — a lone root gets the wrapping
+  door), `carriesLegacy`, `needsWrite` (structural equality; malformed never overwritten). One
+  refinement found while pinning: a group whose subtree holds a legacy term carries NO remove
+  door (`isRemovable`) — read-only must not leak through a parent. `Queries/CollectingQueries.swift`:
+  `membersMissingTag` — the SAME predicate `tagAllMembers` tags by. `RuleEditingTests` (13): the
+  corpus round-trip + unedited-save-writes-nothing (incl. a non-canonical spelling), the
+  every-edit-touches-only-its-node property over 15 shapes, legacy never removable through any
+  parent, each edit exactly, the rows, the offer's count == `tagAllMembers`' return — **13/13 green
+  on first run** (new surface: structural red-on-old).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
