@@ -505,7 +505,40 @@ reordering §7, the 13o handoff §12 all verified.)*
   default option when importing, but not something for 13i to solve either way."* 13h's rows
   updated to carry the lean; this sitting hands over the machinery and nothing more.
 
-**NEXT:** her UI iteration pass on the mockup; then `/architect-phase 13i-a` per the split addendum
-(the sitting that R-cor-13 required has now RUN — this record is it). §16 is FULLY RULED; what
-stands PROPOSED-unless-she-objects is §19's defaults and harvest plus §20's Quicknotes shape,
-nothing else.
+## 21. THE UI ROUND OPENS (2026-09-30) — the design-language ruling and mockup v2
+
+- **Her critique of mockup v1, recorded as the round's brief:** the app's standing look is
+  *"stately, chill, performant and uncluttered… the takes area is also calm even when lots is
+  going on"*; the flat underline under a selected tab is *"a bit of an AI hallmark"*; v1
+  *"doesn't really match the feel of the whole app."*
+- **THE DESIGN-LANGUAGE ANCHOR (the round's rule):** the Bookcase borrows ONLY from the app's own
+  shipped idioms — the book view's MODE ROW (selection = ink + weight, no underline, no pill: the
+  `Outline Index Book Read` idiom she called clean) and the Library's gray SECTION LABELS over
+  hairlines (`Books` / `Notes`). External touchstones for taste, not copying: iA Writer ·
+  Things 3 · Ulysses · a well-set book's front matter. **Mockup v2 rebuilt on this**
+  (`notes/plans/mockups/13i-bookcase-shelves.html`): Direction A (the recommendation — the
+  contents-page shape), Direction B (shelves as sidebar children, Apple-Notes-folders style; most
+  native, but moves the verb off the page), Direction C (masthead dropdown — DECLINED for shelves
+  by her own verb-visibility ruling; noted as the right shape for the WING switcher, her sketch).
+  v2 removes: the underline, inline counts (hover + the overflow panel carry them), the
+  "3 · default" annotations, glyphs-by-default, pills of any kind.
+- **THE DETAILS TOGGLE — RULED** (her ask: the right-hand numbers were *"already trending towards
+  crowded"*): a per-surface setting hiding the row meta (counts, words, status words), remembered;
+  a quiet "details" word at the shelf line's end. **Arrivals stay visible with details off**
+  (proposed: arrivals ask for judgment, numbers don't).
+- **Two shipped-app face fixes routed to 13i-d's vocabulary/polish sweep** (pull earlier as a 17
+  entry at her word): the Library's segmented control says **"Posts" → must say "Notes"**; the
+  "edited · newest first" dropdown is slightly misaligned, and "on day…" wants clearer wording
+  (its RANGE capability is 13o's, below).
+- **Reference surfaces she named as RIGHT, recorded as anchors:** the current book view
+  (navigator + cards) — *"clean, and I like it"* — and the Library's "Books" header with its icon.
+
+**13o items filed this round (written onto its row):** the Library's 40-result cap with
+"narrow the search" and no road to more is *"definitely not acceptable"* (her words — full
+browsing: infinite scroll or an old-timey pager; "Library should show anything"; her stranded-notes
+report after the tutorial re-seed is the proof case); the day filter gains a RANGE; the
+many-books case (a bounded books section with its own scroll — her lean — or count + click-through).
+
+**NEXT:** the UI iteration continues on mockup v2 (pick a direction, mark it up); then
+`/architect-phase 13i-a`. Standing PROPOSED-unless-she-objects: §19's defaults and harvest, §20's
+Quicknotes shape, §21's arrivals-exempt-from-details.
