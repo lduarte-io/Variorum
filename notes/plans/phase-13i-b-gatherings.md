@@ -1193,9 +1193,118 @@ STOP condition met.
 
 ## U4 RECORD — the star context · the starred gathering · Quicknotes verify · the Pool tuck · the filter mechanics (opus-implementer, 2026-10-01)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** the launch SEED was not walked on the dev store
+— its gate never opens there (F-U4-2; the dev store has an account and fenced-off sync), so the walk made
+the gathering by hand and the seed's evidence is its pins (core 9 + Mac 6); the PHONE's seed occasion is
+DEFERRED to the mobile catch-up (its first-write pins count the readings that occasion mints — a second
+surface; the brain is core + `Shared/` so it is one call there), and the phone's Pool face has no tuck
+(it reads `poolPosts` — the loose class — exactly as before); the filter BAR and "Save this filter as a
+gathering"'s door/name prompt/receipt are 13i-d's (mechanics only here — no face, no registry entry); no
+tutorial prose (lesson 10's sentence is not in the seeded guide yet — the chapter is 13i-d's; the build
+makes it true and pins it); no QUESTIONS.md entries written (the plan logs PROVISIONALs at close — each
+below carries its QUESTIONS-ready paragraph); F-U3-4 (the conversion op's dead params) untouched (held
+for the ladder window); zero `Sync/`, schema, migrations — no STOP condition met.
 
-**UNIT STATUS: IN PROGRESS.**
+**UNIT STATUS: CLOSED 2026-10-01 — every evidence item of the plan §5 U4 row green and walked (below).**
+
+### What U4 built (the design as shipped — a fresh session's map)
+
+- **The ★ context (F-U3-3 closed):** `Queries.StarContext` (ReadingAssembly.swift) — the ONE way a site
+  gets `ruleMatchSQL`'s `starredNoteIDs`; `ruleMatchSQL` / `matchesRule` / `smartMembershipSQL` take it
+  with NO default. Sites: `assembleReading` (gathering arm + the filter), `bookWordCounts`,
+  `poolListingSQL`, `readingsContaining`, `smartBookMembership`, the collect door's two probes; intake
+  (U1) already passed it.
+- **The starred-notes gathering:** `Operations+StarredGathering.swift` (`starredNotesGatheringName`,
+  `ensureStarredNotesGathering`, `starredGatheringRow`) + `Shared/StarredGatheringSeeder.swift` (mark +
+  gate) + the Mac launch call in `VariorumApp.swift`.
+- **Quicknotes:** `ensureQuicknotesBook` → `String?` (a decided designation never re-mints),
+  `Queries.quicknotesBookWasDesignated`, `QuicknoteFiling.taggedOnly`, `QuickNoteCopy.filedTaggedOnly`.
+- **The Pool tuck:** `Queries.poolListing` / `PoolListing` / `poolListingSQL` (ShelfQueries.swift);
+  `poolPosts` = the loose class; the face in `PoolPostsView.swift` (`PoolPostsModel.adopt` /
+  `toggleTucked` / `tuckAway`, `PoolTuckCopy`, DEBUG `PoolTuckProbe`).
+- **The filter mechanics:** `assembleReading(…, filter:)` + `filteredIDs`; `RuleGrammar.conjoin`;
+  `Operations+ReadingFilter.swift` (`saveFilterAsGathering`, `FilterAssociation`,
+  `SavedFilterGathering`).
+- **Lesson 10 is TRUE of the build:** "The Pool is every note with no book" — loose ∪ tucked is exactly
+  the bookless set (`PoolTuckTests.thePoolIsEveryBooklessNoteAndTheGatheredOnesTuck`); "Notes that show in
+  gatherings tuck behind the count in its masthead" — the masthead's "M in gatherings" (mounted + walked);
+  "one click shows them" — the toggle (mounted + walked, the run at the top). The seeded guide's
+  standing Pool sentences stay true ("POOL holds notes that belong to no book yet"; a quick note
+  "taking the tag off sends it back to the Pool" — it untucks).
+
+### PROVISIONALs made in U4 (each QUESTIONS-ready; the morning bundle carries them)
+
+- **P-13ib-U4-1 — the starred gathering's seed, in detail.** One per store, in Home, UNSHELVED, NOT
+  starred, sorted newest first with the plain-collection profile (Quicknotes' own shape); "already here"
+  = a Home reading whose rule is exactly ★ (hers made by hand, or BOUND into a book, counts) or that
+  wears the name; "she deleted it" = a tombstone of either (a deleted one never comes back); the Mac
+  seeds at launch behind the sample library's sync gate (an account store waits for its first clean
+  round). *Options:* (a) BUILT; (b) also star it so it sits in the Starred section from day one; (c)
+  seed only fresh stores. *QUESTIONS paragraph:* "Every library now gets a 'starred notes' gathering —
+  unshelved, not starred itself, newest first. If you delete it, it stays deleted. Should it also sit in
+  the Starred section from the start, or only appear in brand-new libraries?"
+- **P-13ib-U4-2 — Deleting Quicknotes now sticks.** The 13g filing door re-made the Quicknotes gathering
+  at the next quick note after she deleted it (the daily Journal's "comes back" trait); §20 rules
+  Quicknotes ordinary, so a quick note filed after the deletion is tagged `#quicknote`, lands in the Pool,
+  and says "Filed in the Pool — tagged #quicknote." Restoring it from the Trash brings it back.
+  *Options:* (a) deletion sticks — BUILT; (b) re-make it at the next quick note (the 13g behaviour).
+  *QUESTIONS paragraph:* "If you delete the Quicknotes gathering, quick notes still get the #quicknote
+  tag and land in the Pool, and Quicknotes stays gone until you restore it or make it again. Is that
+  right, or should the next quick note re-create it?" *(Residual, recorded: the pad's placeholder still
+  reads "it lands in Quicknotes" after a deletion — 13s copy.)*
+- **P-13ib-U4-3 — The in-book filter reads the BOOK AS SHOWN:** it narrows the assembly after the book's
+  note cap and before the caller's window, in the book's own order, chapters kept. *Options:* (a)
+  BUILT; (b) filter all members, past a lowered cap too. *QUESTIONS paragraph:* "Filtering a capped book
+  shows only matching notes among the ones the book shows (never members past a lowered cap). Right?"
+- **P-13ib-U4-4 — The tuck's click is VIEW state, and the revealed run stands at the TOP.** Off on every
+  visit to the Pool (never remembered); "show" lists the tucked notes right under the masthead, labelled
+  "in gatherings", with the loose notes below labelled "loose notes"; not a registry act (a view-local
+  disclosure — the Arrivals expansion precedent). *Options:* (a) BUILT; (b) remember it per session;
+  (c) list the tucked notes after the loose ones. *QUESTIONS paragraph:* "Clicking 'show' in the Pool's
+  header lists the notes that are in gatherings at the top, under 'in gatherings'; leaving the Pool
+  tucks them away again. Keep it, remember the choice, or put them at the bottom?"
+- **P-13ib-U4-5 — The words** (13s re-voices): "Pool · N notes · M in gatherings · show/hide" (her shape;
+  "1 note", "1 in a gathering") · "in gatherings" / "loose notes" · the empty-but-gathered sentence "No
+  loose notes — all M bookless notes show in gatherings." (one: "the one bookless note shows in a
+  gathering.") · the toggle's help · the pad's "Filed in the Pool — tagged #quicknote.".
+- **P-13ib-U4-6 — "The book's tag association" for Save this filter as a gathering.** A reading's own
+  readable rule (a gathering's, or a living book's — what it "gathers from"); a rule-less gathering → the
+  filter alone (exact — it shows everything); a book without a readable rule → its live auto-tag (what
+  notes written there wear); else nothing — the filter alone, reported so the face can say the new
+  gathering looks across the whole library. A malformed gathering refuses. *Options:* (a) BUILT; (b) a
+  hand-made book with no rule or auto-tag refuses the save; (c) a hand-made book's association is its
+  members' most common tag. *QUESTIONS paragraph:* "Saving a book's filter as a gathering combines the
+  filter with what the book collects (its rule, else its auto-tag). For a hand-made book with neither,
+  it saves the filter alone, so the gathering shows matching notes from your whole library, not just
+  that book — fine, or should that case refuse?"
+
+### FINDINGS (for the orchestrator; none is a STOP condition)
+
+- **F-U4-1 (FIXED, red-on-old):** the Pool's old exclusion `NOT (<rule>)` went NULL for a legacy
+  profile/date term over a note lacking the column, hiding every such note from the Pool though no
+  gathering showed it (pinned; reverted read red).
+- **F-U4-2 (recorded — the orchestrator's call):** the launch gate (the sample library's, reused) reads
+  "belongs to an account" on the DEV store (an account is present; its sync is fenced off) and never sees
+  a clean round there, so neither this seed nor a fresh sample library can ever seed a dev store with an
+  account (`starred gathering: awaitingFirstSync`, logged, unmarked). Production stores seed after their
+  first clean round. Owner suggestion: the gate's dev-store reading (the sample seeder's) — a standing-fixes
+  entry or 13i-d.
+- **F-U4-3 (FIXED, walk-found, red-on-old):** the Pool's show state outlived the visit.
+- **F-U4-4 (recorded — 13i-d's vocabulary sweep):** a gathering's navigator footer reads "smart book — it
+  collects notes by its tags. Tag a note anywhere and it appears here." — false for a ★ rule (and
+  "smart" is the retired word).
+- **F-U4-5 (FIXED, walk-found placement):** the revealed run rendered under 90 loose cards; now at the top.
+- **F-U4-6 (test hygiene, fixed in-unit):** the held-observation pin's 5 s poll starved under the full
+  suite's parallel load; it now awaits the observation's own `next()` under a one-minute time limit (its
+  red re-proved against the un-wired context).
+- **F-U4-7 (morning bundle — a consequence made visible, not a defect):** "Create Smart Book" mints a
+  RULE-LESS gathering, and the standing rule says a gathering with no rule shows every note — so the
+  moment she makes one, EVERY bookless note tucks behind the Pool's count ("0 notes · 110 in
+  gatherings") until she gives it a rule (walked: capture 01). The tuck says so honestly; whether a new
+  gathering should be born without a rule is hers (13i-d's Collecting/creation faces).
+- **Mobile parity (for the closeout's ledger row):** the phone's Pool lists the loose class (unchanged
+  behaviour, now sharing the one split — F-U4-1's fix rides along); the tuck face and the starred seed's
+  phone occasion are the mobile catch-up's.
 
 ### The settled design (written before code)
 
@@ -1427,6 +1536,26 @@ STOP condition met.
   stopped. The dev store keeps the walk's "starred notes" gathering (rule ★ — exactly what the seed would
   mint, so a future seed there answers `alreadyPresent`); "walk two" was starred and un-starred (net
   unchanged).
+- Piece 9 (7a4b33b0) — F-U4-6: the held-observation pin made load-robust (it starved in the first full
+  core run — 1 red, the emissions late, not missing); its red re-proved against the un-wired context (the
+  time limit fires at 60 s — a failure, never a hang); tree restored.
+- **CLOSE (this commit) — the final verification, after the last code edit:** the FULL core suite `swift
+  build --build-tests && swift test` — **"Test run with 1907 tests in 199 suites passed"** (1 skipped: the
+  standing env-gated Supabase integration test; baseline 1868/195 at U3's close → +39 tests / +4 suites:
+  `StarContextTests` 11, `StarredNotesGatheringTests` 9, `PoolTuckTests` 7, `ReadingFilterTests` 11, and
+  the new Quicknotes pin). The Mac app `xcodebuild -scheme Variorum -destination 'platform=macOS' build` —
+  **BUILD SUCCEEDED**; the mobile target (`VariorumMobile`, generic iOS Simulator) — **BUILD SUCCEEDED**.
+  Mac suites, suite-level `-only-testing` by struct name, counts read exactly: **A — the Pool, Library,
+  shelf, readings, stars, quick note, the seeder, the registry: "Test run with 216 tests in 32 suites
+  passed", 0 skipped, 0 known issues** (PoolTuckFace, PoolPage, PoolCardPreview, StarredGatheringSeeder,
+  QuickNoteMint/Door/Window/Word, NodSet, LibraryTagFace, NoteTagDeclaration, StarTargeting/Declaration/
+  Acting, StarredScrollLayout/Mount, SampleLibrary, CapabilityRegistry, BindDoor, RuleEditor,
+  BookOrderConversion, TimelineAndReadings, BookArrivals, ShelfModel, PromoteAndPalette, LibraryCardName/
+  Stamps, LibraryDayFilter, LibraryPreviewBrain, LibraryPanelHost, LibraryRowAlignment, LibrarySortMenu);
+  **B — THE TUTORIAL SPINE (all eleven `TutorialWalkTests` suites) + EncryptionExplainedSeed, StatusCenter,
+  DuplicateBookNameDoor: "Test run with 98 tests in 14 suites passed", 0 skipped, 0 known issues.** Zero
+  instances throughout; `git status` clean. Ledger row 5 flipped. No revert in flight; nothing
+  uncommitted. U4 CLOSED.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
@@ -1436,7 +1565,7 @@ STOP condition met.
 | 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | **DONE 2026-10-01** — the U1 RECORD above (design map · P-13ib-U1-1…9 · F-1…F-6); evidence: `IntakeDecisionTests` 13 · `IntakeOperationsTests` 42 · `ArrivalMemberHygieneTests` 6 (red-on-old 6/6) · `RuleWingScopingTests` 3 (red-on-old 2/3, the third the control) · `IntakeSoakTests` 6 seeds × 300 steps · `GatheringRitualTests` 3 (R3 + lessons 3–4); 5+2 mutation checks bite; core 1840/193 green; Mac + mobile build; changed-op Mac suites 380/74 + mobile 101/22 pass. **F-1 is U3's to carry (a shipped sentence now false)** |
 | 3 | U2 — the Arrivals face | **DONE 2026-10-01** — the U2 RECORD above (design map · P-13ib-U2-1…5 · F-U2-1…5 · THE WALK, 15 captures, both voices × both appearances); evidence: `ArrivalQueriesTests` 12 (incl. the EXPLAIN-plan pin) · `BookArrivalsTests` 10 mounted (absent/present on Index AND Book, gone on Outline/Read, expansion + both doors, Add at the END unsectioned, Dismiss, the capacity refusal on the seam, already-judged, vanish) · the registry walk (`BookArrivalsLine` the two acts' one renderer); 2 mutation checks bite; core 1852/194 green; Mac + mobile build; book-surface + registry + tutorial Mac suites 335/57 pass (4 standing known issues). **F-U2-3 joins F-1 in U3's charter** (the conversion sheet's wrong count) |
 | 4 | U3 — the rule editor + bind/spawn + the teaching moment | **DONE 2026-10-01** — the U3 RECORD above (design map · P-13ib-U3-1…7 · F-U3-1…6 · THE WALK, 27 captures, both voices × both appearances); evidence: `RuleEditingTests` 13 (the every-edit-touches-only-its-node property; unedited/malformed write nothing; legacy never removable) · P-13ib-6 pins 2 (red-on-old watched) + the §19.6 identity pin · `BindDoorTests` 8 (F-U2-3 red-on-old through the real shelf, mechanism confirmed by experiment; F-1's truth; identity + keeps collecting; spawn; the teaching offer) · `RuleEditorTests` 8 mounted · the registry walk (`.editRule`, `.bindIntoBook`, `.makeBookFromGathering`); 4 mutation checks bite; core 1868/195 green; Mac + mobile build; Mac suites 144/19 + 94/13 incl. the tutorial spine. **F-U3-3 is U4's to carry** (the gathering assembly's star context also feeds the bind) |
-| 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | NOT STARTED |
+| 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | **DONE 2026-10-01** — the U4 RECORD above (design map · P-13ib-U4-1…6 · F-U4-1…7 · THE WALK, 20 captures, both voices × both appearances); evidence: **F-U3-3 closed** — `StarContextTests` 11 (9 red-on-old, one per site class) · `StarredNotesGatheringTests` 9 + Mac `StarredGatheringSeederTests` 6 · Quicknotes' re-mint special-casing fixed (red-on-old 5 issues) + the pad's receipt pin · `PoolTuckTests` 7 (lesson 10's truth, the EXPLAIN plan, F-U4-1 red-on-old) + Mac `PoolTuckFaceTests` 6 (F-U4-3 red-on-old) · `ReadingFilterTests` 11; 8 mutation checks bite; core 1907/199 green; Mac + mobile build; Mac suites 216/32 + 98/14 incl. the tutorial spine |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
 | 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
 
@@ -1507,6 +1636,11 @@ STOP condition met.
    confirm, when the tag-members offer asks, an empty rule clearing the rule, the words); F-U3-2
    (the note chip doesn't hear an intake seat while the note is open — a face, owner 13i-d) and
    F-U3-4 (the op's dead "(collecting)" parameters).
+   **U4:** P-13ib-U4-1…6 (the U4 RECORD — the starred gathering's seed details, deleting Quicknotes now
+   sticks, the filter reads the book as shown, the tuck's click as view state with the run at the top,
+   the words, "the book's tag association"); F-U4-2 (the launch gate never opens on a dev store with an
+   account — the sample seeder's reading) and F-U4-7 (a brand-new gathering has no rule, so it tucks
+   EVERY bookless note until it gets one).
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
 
