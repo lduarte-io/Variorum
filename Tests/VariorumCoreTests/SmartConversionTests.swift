@@ -231,14 +231,20 @@ struct SmartConversionTests {
             #expect(fresh.wordTarget == nil)
             #expect(fresh.locked == false)
 
-            // It really collects: the converted book froze, the fresh one
-            // takes the new match.
+            // It really collects — and since 13i-b U1 so does the converted
+            // book: the sitting record §14.6 RECAST the conversion as Bind
+            // into a book, which KEEPS COLLECTING ("her 2026-07-30 words
+            // honored over N38 shape A's stops-collecting; the '(collecting)'
+            // offer dies" — its face retires at U3). The rule rides the row
+            // (asserted above), the row is a book, so intake seats the
+            // tagging act's match at the END. The pre-13i-b assertion here
+            // ("the converted book froze") is the superseded shape A.
             let newcomer = try ops.createPost(title: "later")
             _ = try ops.applyTag(tag.id, toPost: newcomer.id)
-            let frozen = try db.read {
+            let bound = try db.read {
                 try Queries.assembleReading($0, readingID: reading.id)
             }
-            #expect(Set(frozen.map(\.postID)) == Set(posts.map(\.id)))
+            #expect(bound.map(\.postID) == [posts[1].id, posts[0].id, newcomer.id])
             let collecting = try db.read {
                 try Queries.assembleReading($0, readingID: fresh.id)
             }

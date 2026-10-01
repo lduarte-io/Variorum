@@ -77,6 +77,15 @@ public enum OperationError: Error, Equatable, Sendable {
     case postNotInReading(postID: String, readingID: String)
     case alreadyInReading(postID: String, readingID: String)
     case readingAtCapacity(id: String)
+    /// 13i-b U1 — a judgment op (`seatArrival` / `dismissArrival`) named a
+    /// row that is not a live ARRIVAL: missing, already judged (seated or
+    /// dismissed), or a member all along. A door that silently succeeded on
+    /// a decided pair would teach that it did something.
+    case arrivalNotFound(id: String)
+    /// 13i-b U1 — `tagAllMembers` was asked for the book's own auto-tag and
+    /// the book has none set (the "also tag the N current members" offer
+    /// exists only beside an auto-tag; the bulk door names its tag).
+    case readingHasNoAutoTag(id: String)
 
     // Structural operations (Phase 3).
     /// Extract's span is not a boundary-adjacent prefix/suffix of the

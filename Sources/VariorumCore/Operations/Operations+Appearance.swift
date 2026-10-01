@@ -268,8 +268,14 @@ extension Operations {
             // The live list — and the ONE rule the read side states, so the
             // cap and the section can never disagree about what is starred.
             var next = try Queries.starred(db).map(\.target)
+            // 13i-b U1: starring a NOTE is an applying act — it fires intake
+            // on every living book whose rule carries a star term, once the
+            // list below is written. Un-starring is a NON-EVENT (§19, ratified
+            // §24): it never evicts a member.
+            var starsANote = false
             if starred {
                 if !next.contains(target) {
+                    starsANote = target.kind == .post
                     guard try starTargetIsLive(db, target) else {
                         throw target.kind == .post
                             ? OperationError.containerNotFound(id: target.id)
@@ -290,6 +296,9 @@ extension Operations {
             guard next != stored else { return }
             let json = String(decoding: try JSONEncoder().encode(next.map(\.key)), as: UTF8.self)
             try upsertSetting(db, key: "starred", value: json)
+            if starsANote {
+                try intakeAfterStarring(db, postID: target.id, now: date.now)
+            }
         }
     }
 

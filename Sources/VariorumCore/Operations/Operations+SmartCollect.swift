@@ -155,8 +155,10 @@ extension Operations {
                         """,
                     arguments: [tagID, postID]) ?? false
                 if !alreadyApplied {
-                    try PostTag(id: newID(), tagId: tagID, postId: postID, createdAt: now)
-                        .insert(db)
+                    // The one application road (13i-b U1): adding a note to
+                    // a gathering APPLIES the tag (§14.6's R98 recast), and
+                    // an applying act is heard by every living book.
+                    try insertPostTag(db, tagID: tagID, postID: postID, now: now)
                 }
                 applied.append(path)
             }
@@ -173,11 +175,14 @@ extension Operations {
     }
 
     /// The assembly's own predicate (`ruleMatchSQL` — ONE implementation,
-    /// the Stage B rule), probed for a single post.
+    /// the Stage B rule), probed for a single post. `starredNoteIDs` is the
+    /// star term's context (13i-b U1's intake passes the live list; the
+    /// collect door's callers are U4's to wire).
     func matchesRule(
-        _ db: Database, postID: String, term: RuleTerm?, wingID: String
+        _ db: Database, postID: String, term: RuleTerm?, wingID: String,
+        starredNoteIDs: [String] = []
     ) throws -> Bool {
-        let match = Queries.ruleMatchSQL(term, wingID: wingID)
+        let match = Queries.ruleMatchSQL(term, wingID: wingID, starredNoteIDs: starredNoteIDs)
         let conditions = [
             "c.id = ?", "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
         ] + match.conditions

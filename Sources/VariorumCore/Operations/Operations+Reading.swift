@@ -16,10 +16,23 @@ extension Operations {
         querySpec: String? = nil,
         maxPosts: Int? = nil,
         wordTarget: Int? = nil,
-        wingId: String = ""
+        wingId: String = "",
+        intakeSeating: IntakeSeating? = nil,
+        autoTagId: String? = nil
     ) throws -> Reading {
         let now = date.now
         return try database.write { db -> Reading in
+            // 13i-b U1: the two Collecting settings are a BOOK's (a gathering
+            // has no membership to seat and no notes written "here").
+            if intakeSeating != nil || autoTagId != nil, kind != .book {
+                throw OperationError.wrongReadingKind(id: "", expected: .book)
+            }
+            if let autoTagId {
+                let tag = try liveTag(db, autoTagId)
+                guard tag.wingId == wingId else {
+                    throw OperationError.tagNotFound(id: autoTagId)
+                }
+            }
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
                 profile: profile, sortField: sortField, sortDir: sortDir,
@@ -27,8 +40,14 @@ extension Operations {
                 querySpec: try normalizedRuleSpec(db, querySpec, wingID: wingId),
                 maxPosts: maxPosts,
                 wordTarget: wordTarget, wingId: wingId,
+                intakeSeating: intakeSeating, autoTagId: autoTagId,
                 createdAt: now, updatedAt: now)
             try reading.insert(db)
+            // CREATION-TIME BACKFILL (the 13i-b plan §2.3, the sitting §4): a
+            // BOOK born with a rule — the spawn door, the from-tag mint —
+            // seats its current matches directly (birth = intent). Silent
+            // for a gathering or a rule-less book (the sweep's own guard).
+            try intakeSweep(db, book: reading, occasion: .backfill, now: now)
             return reading
         }
     }
@@ -131,13 +150,28 @@ extension Operations {
         }
     }
 
+    /// The ONE rule write (the choke point every face routes through). On a
+    /// BOOK it is also an intake occasion (13i-b U1, the plan §2.3): a rule
+    /// set on a RULE-LESS book is creation-time BACKFILL (seats directly —
+    /// birth = intent); a rule EDIT on a book that had one (readable or
+    /// malformed — a malformed rule ran no intake, so its gap is judgment
+    /// too) is a CATCH-UP (the gap's matches wait at Arrivals). Removing or
+    /// breaking the rule never untags and never evicts (ruled). A write
+    /// that leaves the stored rule byte-identical is no occasion at all. A
+    /// finished book's intake is paused — the un-finish catches it up.
     public func setReadingQuerySpec(_ id: String, querySpec: String?) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            let previous = reading.querySpec
             reading.querySpec = try normalizedRuleSpec(
                 db, querySpec, wingID: reading.wingId)
-            reading.updatedAt = date.now
+            let now = date.now
+            reading.updatedAt = now
             try reading.update(db)
+            guard reading.kind == .book, reading.querySpec != previous else { return }
+            let occasion: IntakeDecision.Occasion =
+                RuleGrammar.read(previous) == .none ? .backfill : .catchUp
+            try intakeSweep(db, book: reading, occasion: occasion, now: now)
         }
     }
 
@@ -169,12 +203,39 @@ extension Operations {
     }
 
     /// "Declared done" — freezes membership and order below; reversible.
+    /// FINISHING DISMISSES PENDING ARRIVALS (13i-b U1 — the sitting record
+    /// §24, her overrule of §19.5): the book's live arrival rows tombstone in
+    /// this transaction, on the finish's stamp — the decision record. The
+    /// finish CONFIRM's "N waiting at the door will be dismissed" line is
+    /// 13i-c's face.
     public func lockReading(_ id: String) throws {
-        try updateLiveReading(id) { $0.locked = true }
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            let now = date.now
+            reading.locked = true
+            reading.updatedAt = now
+            try reading.update(db)
+            try dismissPendingArrivals(db, readingID: id, now: now)
+        }
     }
 
+    /// Un-finishing a living book RESUMES its intake with a CATCH-UP (13i-b
+    /// U1, the plan §2.3): the matches that arrived while it was finished —
+    /// and only those, since every pair it had decided stays decided —
+    /// wait at Arrivals (gap = judgment). Un-finishing a book that was not
+    /// finished is no occasion.
     public func unlockReading(_ id: String) throws {
-        try updateLiveReading(id) { $0.locked = false }
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            let wasFinished = reading.locked
+            let now = date.now
+            reading.locked = false
+            reading.updatedAt = now
+            try reading.update(db)
+            if wasFinished {
+                try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+            }
+        }
     }
 
     /// Tombstone; the reading triggers cascade to its memberships
@@ -248,11 +309,27 @@ extension Operations {
                       AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
                     """,
                 arguments: [id, stamp])
+
+            // 13i-b U1 — RESUME CATCH-UP (the plan §2.3): a living book back
+            // from the Trash routes the gap's matches through Arrivals. The
+            // exact-stamp revival above came FIRST, so every pair the book
+            // had decided (members, waiting arrivals — both revived — and
+            // its older tombstones) stays decided. A finished book restores
+            // finished, its intake still paused.
+            try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
         }
     }
 
     // MARK: - Curated membership
 
+    /// A HAND-ADD. Two 13i-b U1 additions, both in this transaction:
+    /// - a note WAITING at this book's door (a live arrival) is SEATED — the
+    ///   same row flips to member at the place she asked (her judgment "add
+    ///   it"; refusing "already in this book" would be false — an arrival is
+    ///   never a member). PROVISIONAL P-13ib-U1-2.
+    /// - the book's AUTO-TAG rides the add (P-13ib-1 — "adding to a book is
+    ///   real membership, with auto-tag covering the tagging", sitting
+    ///   §14.6), through the one application road.
     @discardableResult
     public func addPostToReading(
         _ postID: String, to readingID: String, at insert: InsertPosition = .end
@@ -267,14 +344,7 @@ extension Operations {
             }
             _ = try livePost(db, postID)
 
-            let liveCount = try Int.fetchOne(
-                db,
-                sql: """
-                    SELECT COUNT(*) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL
-                      AND status = 'member'
-                    """,
-                arguments: [readingID]) ?? 0
+            let liveCount = try liveMemberCount(db, readingID: readingID)
             if try liveMembership(db, postID: postID, readingID: readingID) != nil {
                 throw OperationError.alreadyInReading(postID: postID, readingID: readingID)
             }
@@ -283,11 +353,23 @@ extension Operations {
                 throw OperationError.readingAtCapacity(id: readingID)
             }
 
-            let membership = ReadingPost(
-                id: newID(), readingId: readingID, postId: postID,
-                position: try readingPosition(db, readingID: readingID, at: insert),
-                createdAt: date.now)
-            try membership.insert(db)
+            let now = date.now
+            let membership: ReadingPost
+            if var waiting = try livePairRow(db, postID: postID, readingID: readingID) {
+                // Only an arrival can be live here (a member threw above).
+                waiting.status = .member
+                waiting.sectionId = nil
+                waiting.position = try readingPosition(db, readingID: readingID, at: insert)
+                try waiting.update(db)
+                membership = waiting
+            } else {
+                membership = ReadingPost(
+                    id: newID(), readingId: readingID, postId: postID,
+                    position: try readingPosition(db, readingID: readingID, at: insert),
+                    createdAt: now)
+                try membership.insert(db)
+            }
+            try applyAutoTag(db, book: reading, postID: postID, now: now)
             return membership
         }
     }
@@ -337,12 +419,18 @@ extension Operations {
                 }
             }
             let post = try insertPost(db, title: title, profile: profile, entryDate: entryDate)
+            let now = date.now
             try ReadingPost(
                 id: newID(), readingId: readingID, postId: post.id,
                 position: try readingPosition(db, readingID: readingID, at: .end),
                 sectionId: sectionID,
-                createdAt: date.now)
+                createdAt: now)
                 .insert(db)
+            // AUTO-TAG (13i-b U1, the sitting §4 — "notes minted inside the
+            // book get the tag"): in the mint's transaction, AFTER the
+            // membership, so this book's own pair is already decided and the
+            // tagging act is heard by the OTHER living books.
+            try applyAutoTag(db, book: reading, postID: post.id, now: now)
             return post
         }
     }
@@ -473,10 +561,24 @@ extension Operations {
         }
     }
 
-    /// Internal (not private) since 13c 2D: the smart→curated conversion
-    /// and its re-apply consult the same "is this pair already live?"
-    /// question `addPostToReading` does — one rule, one implementation.
+    /// The pair's live MEMBERSHIP — a live `status='member'` row. Every
+    /// membership door (add's duplicate check, remove, reorder, diverge,
+    /// chapter assignment) asks THIS question: an arrival is never a member
+    /// (13i-a's schema note; 13i-b U1 made arrival rows real, and pinned the
+    /// doors — `ArrivalMemberHygieneTests`).
     func liveMembership(
+        _ db: Database, postID: String, readingID: String
+    ) throws -> ReadingPost? {
+        try ReadingPost
+            .filter(Column("reading_id") == readingID && Column("post_id") == postID
+                && Column("deleted_at") == nil && Column("status") == MembershipStatus.member)
+            .fetchOne(db)
+    }
+
+    /// The pair's live row of EITHER status — the `uq_reading_post_live`
+    /// question (the smart→curated conversion and its re-apply skip a pair
+    /// that already has one; a hand-add seats a waiting arrival).
+    func livePairRow(
         _ db: Database, postID: String, readingID: String
     ) throws -> ReadingPost? {
         try ReadingPost

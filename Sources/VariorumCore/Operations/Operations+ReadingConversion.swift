@@ -124,7 +124,7 @@ extension Operations {
                     db, readingID: readingID, order: order)
                 var membershipIDs: [String] = []
                 for entry in entries {
-                    guard try liveMembership(
+                    guard try livePairRow(
                         db, postID: entry.postID, readingID: readingID) == nil
                     else { continue }
                     let membership = ReadingPost(
@@ -278,7 +278,7 @@ extension Operations {
                         + "WHERE id = ? AND deleted_at IS NULL)",
                     arguments: [membership.postId]) ?? false
                 guard postIsLive else { continue }
-                guard try liveMembership(
+                guard try livePairRow(
                     db, postID: membership.postId, readingID: readingID) == nil
                 else { continue }
                 membership.deletedAt = nil

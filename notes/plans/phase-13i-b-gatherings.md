@@ -352,8 +352,29 @@ the walk into the morning.
   **Red-on-old watched: 6/6 red on the pre-fix tree, each for its mechanism** (the diverge pin
   sharpened once: its first red was an accidental `postHasNoBlocks`; with a block seeded, the old
   tree visibly diverged the ARRIVAL — tombstoned it and seated a copy).
-- NEXT — piece 4: the intake engine (`Operations+Intake.swift`), the hooks, the judgment ops,
-  auto-tag, `tagAllMembers`, the dial/auto-tag setters, `liveMembership` → member-only.
+- Piece 4 (this commit): **the engine and every hook.** `Operations+Intake.swift` — the ONE
+  application road `insertPostTag` (applyTag(toPost:), the gathering collect door, auto-tag,
+  tagAllMembers all route through it), the tagging event (candidates = live unfinished BOOKS with a
+  readable rule in the note's wing whose rule references a tag at-or-above the applied tag,
+  wing-scoped), the starring event (`setStarred` on a NOTE, newly added only; rules carrying a
+  star term), `intakeSweep` (backfill/catch-up over current undecided matches, creation order),
+  materialization (END, unsectioned), the facts readers, `applyAutoTag`, `tagAllMembers`,
+  `setReadingIntakeSeating`, `setReadingAutoTag`, `seatArrival`, `dismissArrival`,
+  `dismissPendingArrivals`. Hooks wired: `createReading` (+ `intakeSeating`/`autoTagId` params;
+  BOOK + rule ⇒ backfill), `setReadingQuerySpec` (rule-less→rule ⇒ backfill; any other changed
+  rule ⇒ catch-up), `lockReading` (dismisses arrivals), `unlockReading` (catch-up iff it was
+  finished), `restoreReading` (catch-up after the exact-stamp revival), `addPostToReading` (seats
+  a waiting arrival; auto-tag), `newPostInReading` (auto-tag after the membership). New refusals:
+  `arrivalNotFound`, `readingHasNoAutoTag`. `liveMembership` is MEMBER-ONLY; `livePairRow` (any
+  status) serves the conversion's uniqueness skip and the hand-add's seat; `assignPostToSection`
+  filters members. `ArrivalMemberHygieneTests` 6/6 GREEN now. Neighbor suites (hygiene, wing
+  scoping, conversion, reading ops, restore, stars, tags, collect, sections, quicknote, journal —
+  106 tests / 14 suites) green after ONE honest test edit: `SmartConversionTests
+  .keepCollectingMintsASecondSmartBookOnTheSameFilter` asserted "the converted book froze" — the
+  superseded N38 shape A; the sitting record §14.6 rules the bound book KEEPS COLLECTING, and the
+  pin now asserts the newcomer seated at the end of it.
+- NEXT — piece 5: the exact state-transition suites (`IntakeDecisionTests`,
+  `IntakeOperationsTests`), then the soak, then `GatheringRitualTests`.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

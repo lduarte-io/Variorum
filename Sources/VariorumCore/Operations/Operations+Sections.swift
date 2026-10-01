@@ -142,7 +142,10 @@ extension Operations {
             }
             guard var membership = try ReadingPost
                 .filter(Column("reading_id") == readingID && Column("post_id") == postID
-                    && Column("deleted_at") == nil)
+                    && Column("deleted_at") == nil
+                    // 13i-b U1: a waiting ARRIVAL is not in the book — it has
+                    // no chapter to be filed under until she seats it.
+                    && Column("status") == MembershipStatus.member)
                 .fetchOne(db)
             else {
                 throw OperationError.postNotInReading(postID: postID, readingID: readingID)

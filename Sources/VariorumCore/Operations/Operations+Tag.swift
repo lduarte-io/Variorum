@@ -89,6 +89,10 @@ extension Operations {
 
     // MARK: - Application
 
+    /// Applying a tag to a note is an APPLYING ACT (13i-b U1): it fires
+    /// intake on every living book whose rule hears the tag, in this same
+    /// transaction (`insertPostTag` — the one application road). Removing a
+    /// tag is a non-event: it never evicts a member (§19, ratified §24).
     @discardableResult
     public func applyTag(_ tagID: String, toPost postID: String) throws -> PostTag {
         try database.write { db in
@@ -97,9 +101,7 @@ extension Operations {
             guard try liveApplication(db, table: "post_tag", tagID: tagID,
                                       targetColumn: "post_id", targetID: postID) == nil
             else { throw OperationError.alreadyTagged(tagID: tagID, targetID: postID) }
-            let application = PostTag(id: newID(), tagId: tagID, postId: postID, createdAt: date.now)
-            try application.insert(db)
-            return application
+            return try insertPostTag(db, tagID: tagID, postID: postID, now: date.now)
         }
     }
 
@@ -153,7 +155,7 @@ extension Operations {
         }
     }
 
-    private func liveApplication(
+    func liveApplication(
         _ db: Database, table: String, tagID: String, targetColumn: String, targetID: String
     ) throws -> String? {
         try String.fetchOne(
