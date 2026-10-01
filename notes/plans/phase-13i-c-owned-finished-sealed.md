@@ -452,6 +452,110 @@ deploy; the MOBILE PARITY row; KnownIssues rows 67/69 dispositioned; QUESTIONS #
 plan; 13i-d's plan + kickoff (carrying R-13ic-2's doors and the running for-the-combined-walk
 list); the handoff).
 
+## U1 RECORD — THE OUTFLOW EVENT + NO-RULE-IS-NOTHING + THE OUTFLOW OPS (Fable, the orchestrator's own build, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** the dev-store GUI walk — HELD at the
+author guard (`guard.sh --author`: HID idle 0 s, she is at the machine; the standing rule is
+STOP, never re-activate) and FOLDED into the next author-free window (U3's walk at the latest —
+the same Debug build `App/Variorum/DerivedData/13ic-u1-walk`, already built); the rule editor's
+outflow CHOOSER face (U3 — the 13i-b row rides on the forwarder meanwhile, showing the set's
+first tag); the mint door's inline rule editor and the editor's empty-save refusal face (U3 —
+the OP refuses today and the Create Smart Book door speaks the shared words); the mirror
+DEPLOY (her window, §11); the §12 running-record entry (written AT the deploy); the AppSpec
+§7/§9 contract lines (the closeout). Zero `Sync/` lines beyond the registry's one column and
+the marker — no repair was needed (the column is plain CAS metadata), as §2 designed.
+
+**UNIT STATUS: BUILT AND PINNED 2026-10-01 — core 1927/202 GREEN (1 standing env-gated skip) ·
+Mac `build-for-testing` + the touched suites 83/9 GREEN · the phone target BUILD SUCCEEDED ·
+the walk HELD (above).** Commits `b4cb639b` (core) + `19eb55c0` (Mac).
+
+### What U1 built (the design as shipped — a fresh session's map)
+
+- **`v1_20_outflow_and_ruleless`** (`Persistence/Migrations.swift`): `ALTER TABLE reading ADD
+  COLUMN auto_tag_ids TEXT`; the LIVE carry-over (`json_array(auto_tag_id)` where set; dead rows
+  untouched; `auto_tag_id` left as it is — retired-as-read); the RULE-LESS SWEEP (every live
+  gathering with `query_spec IS NULL` tombstoned on a real clock → the Trash, Put back available;
+  malformed rules untouched; rule-less BOOKS untouched). The outbox captures every touched row;
+  they push after the window. `SyncSchema.lockstepVersion = 11`; `reading`'s PLAIN list gains
+  `auto_tag_ids` (completeness walk green). The mirror artifact
+  `Server/supabase/14_phase13i_c_outflow.sql` (the re-run guard; ONE `add column`; marker 11
+  last; the verify tail) registered in `AuthRLSDDLTests.lockstepFiles`.
+- **`Reading.autoTagIds`** (the raw column) + **`autoTagIDs: [String]`** (decoded, malformed →
+  `[]`) + `Reading.encodeOutflow` / `decodeOutflow` (dedupe, order kept, empty → NULL — ONE
+  spelling of "no outflow").
+- **`Operations.setReadingOutflow(id, tagIDs:)`** — books only; every tag live in the book's
+  wing; ordered + deduped; `[]` → NULL; no-op-guarded on the decoded set. `setReadingAutoTag` is
+  a FORWARDER (one-element set; retired with U3). `createReading(autoTagIDs:)` beside the
+  forwarding `autoTagId:` (merged in front). `applyAutoTag` applies EVERY outflow tag the note
+  lacks (dead/other-wing/already-worn skipped per tag). `tagAllMembers(nil)` = every outflow
+  tag, returns NOTES newly wearing ≥1 (P-13ic-11); `Queries.membersMissingAnyOutflowTag` is the
+  offer's N. `saveFilterAsGathering`'s book association = the conjunction of the live outflow
+  tags (`.autoTag`), and it refuses to mint a rule-less gathering.
+- **`RuleGrammar.positiveTagIDs(of:)`** replaces `soleOutflowTagID` (tree order, deduped, parity
+  kept: `#a ∧ ¬#b` → `[a]`; an OR fan → all; star-only → `[]`). `ShelfViewModel.spawnBook`
+  passes the live-filtered prefill as the spawned book's outflow (U3 lets her edit it).
+- **A gathering REQUIRES a rule (R-13ic-4):** `createReading(kind: .gathering)` with a spec that
+  normalizes to NULL refuses `gatheringRequiresRule`; `setReadingQuerySpec(gathering, NULL)`
+  refuses the same (the editor's refusal stands on it; a BOOK's clear stays the kill switch).
+  `OpsRefusalTable` carries the words. The two seeders already mint with rules.
+- **NO rule = NOTHING on a gathering:** `assembleReading`'s gathering arm, `bookshelf`'s word
+  counts, `poolListing`'s tuck, `readingsContaining`, `smartBookMembership` names, and the
+  collect door (refuses "it has no rule yet") all read NULL as the closed state malformed
+  already had. `ruleMatchSQL(nil, …)` keeps its wing-only shape but no gathering reader passes
+  nil any more.
+- **F-5 closed:** `insertPost(wingId:)`; `newPostInReading` mints in the BOOK's wing.
+- **`ReadingsViewModel.create(querySpec:)`** so the Mac mint can pass a rule; the Create Smart
+  Book door speaks the refusal until U3 rebuilds it with the inline editor.
+
+### Evidence (each named before the build — the plan §7 U1 row)
+
+- `Phase13icOutflowTests` (12): the column + carry-over (+ the untouched dead row + the enqueue),
+  the rule-less sweep (real stamp; ruled/malformed/book/dead rows untouched; outbox; the Trash
+  lists it), the setter's guards/order/dedupe/NULL/no-op, the forwarding merge, every tag riding
+  a mint and a hand-add with a dead one skipped, `tagAllMembers(nil)` + the offer's N, the
+  gathering guards vs the book's kill switch, a rule-less gathering assembling EMPTY / listing
+  nowhere / refusing the collect door and ROUND-TRIPPING through the Trash, the wing fix, two
+  devices' outflow edits converging by server-wins, a pre-window NULL row landing as no outflow.
+- `OutflowRetirementTests`: a source walk — no production read of the retired column outside
+  the model, the migration and the serializer.
+- `RuleOutflowTests` rewritten to the positive-set table (an honest rewrite — the sole-tag letter
+  was superseded, not broken).
+- HONEST FLIPS of the match-all letter, each commented at the pin: `PoolTuckTests`
+  (`eachGatheringsLetterHolds`), `ReadingFilterTests` (the rule-less association → `.none`),
+  `ReadingAssemblyQueryTests` (`smartWithNoSpecMatchesNoPosts…`), `SmartQueryTagsAllTests`
+  (`emptyTagsAllIsNoRule…`), `TimelineAndReadingsTests` (a gathering's clear REFUSES at save),
+  `BindDoorTests` (the OR fan flows out every tag; a dead one drops; a negated one never; the
+  rule-less spawn words read through a raw-NULLed restoree); `WingsMigrationTests`' recast
+  fixture carries a rule (its subject is the kind/CAS/stamp preservation).
+- Fixture hygiene (no assertion weakened): every test that minted a gathering with no rule now
+  mints it WITH one (`… querySpec: try RuleGrammar.encode(.star)) // 13i-c: minted with a rule`),
+  or reproduces the restoree state raw where the no-rule state IS the pin's subject.
+- Suites: core `swift test` **1927 tests / 202 suites passed** (baseline 1913/200 at 13i-b's
+  close → +14 tests / +2 suites); Mac `xcodebuild … build-for-testing` + `test-without-building`
+  over BindDoor · RuleEditor · DoorSet · TimelineAndReadings · WalkBuildRound ·
+  StarredGatheringSeeder · PoolTuckFace · BookArrivals · TutorialWalk · ShelfAndPalette —
+  **83 / 9 passed** (the tutorial spine included); mobile `VariorumMobile` generic iOS
+  Simulator **BUILD SUCCEEDED**. Zero instances throughout (`pgrep` clean).
+
+### FINDINGS (for the record; none a STOP condition)
+
+- **F-U1-1 (U3 carries it):** the 13i-b rule editor's auto-tag row now reads the set's FIRST
+  tag and writes a one-element set — a book given two outflow tags headless would show one and
+  a save there would overwrite the set with one. No door mints two until U3's chooser, which
+  retires the row and the forwarder together.
+- **F-U1-2 (U3 carries it):** the Mac's "Create Smart Book" door REFUSES now (the op's guard)
+  with the shared words — honest, but a refusal where a mint flow belongs; U3's inline editor is
+  the door. The phone's gathering mint already requires ≥1 tag (`MobileCreateBook.canCreate`),
+  so it never meets the refusal.
+- **F-U1-3 (recorded):** `RuleEditorCopy`'s gathering empty-state sentence still says "shows
+  every note" — false since R-13ic-4; U3 re-words it ("shows nothing until it has a rule").
+- **F-U1-4 (recorded, the walk's to confirm):** the dev store may carry rule-less gatherings
+  from 13i-b's walks (F-U4-7's shape); the first Debug launch sweeps them to the Trash. Her REAL
+  store: unknown (encrypted; never touched) — the window's first launch does the same, and the
+  Trash is the record (her words: "we can maybe just drop the book, it won't drop the note").
+- **Tutorial (P-6):** no lesson sentence went false; no lesson prose rewritten — no re-seed
+  consequence.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -509,7 +613,7 @@ Debug only, author-free, own `caffeinate -d`.
 | # | Item | Status |
 |---|---|---|
 | 1 | Plan authored; her four kickoff rulings recorded (§1); PROVISIONALs (§9) | DONE (this commit) |
-| 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | NOT STARTED |
+| 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | **BUILT + PINNED 2026-10-01** (the U1 RECORD above; core 1927/202 · Mac 83/9 · phone build green; commits b4cb639b + 19eb55c0; the deploy checklist `notes/plans/13i-c-deploy-checklist.md`). **The dev-store WALK is HELD** (author at the machine) and folded into U3's walk window |
 | 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | NOT STARTED |
 | 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | NOT STARTED |
 | 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | NOT STARTED |
@@ -544,3 +648,7 @@ Debug only, author-free, own `caffeinate -d`.
   Book Settings sheet, the shelf menu, the chip, the drag roads, the Trash). Her four kickoff
   rulings recorded (§1). This plan authored as the first act. No revert in flight. U1 (Fable)
   opens next.
+- **U1 BUILT + PINNED (2026-10-01):** commits b4cb639b (core) + 19eb55c0 (Mac); the U1 RECORD
+  written; the deploy checklist authored; the walk HELD at the author guard (folded to U3's
+  window). No revert in flight; zero instances. U2 (`opus-implementer`) spawns next from the
+  plan's §3/§5/§6/§4 rows 1–12/§7 U2/§8/§9.
