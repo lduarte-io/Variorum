@@ -1268,6 +1268,24 @@ STOP condition met.
   The one test caller (`SmartBookMembershipTests`' EXPLAIN pin) passes `[]` explicitly. **`StarContextTests`
   11/11 GREEN** (9 red before); neighbours (membership, collect, quicknote, wing scoping, assembly,
   conversion, intake ops, ritual, shelf queries, tagsAll, stars) — **165 tests / 16 suites green**.
+- Piece 4 (this commit) — **B, the starred-notes gathering.** Core `Operations+StarredGathering.swift`:
+  `starredNotesGatheringName = "starred notes"` (P-13ib-4's one constant) and
+  `ensureStarredNotesGathering()` → `minted` / `alreadyPresent` / `deletedByTheReader` / `refused`,
+  never throwing, ONE write transaction; the signature (live or tombstoned) is a HOME reading whose rule
+  is exactly ★ OR that wears the reserved name (BookNaming's fold); the mint is an ordinary gathering —
+  rule `{"star":true}`, profile `collection`, created/newest-first (Quicknotes' shape), unshelved,
+  unstarred, no Collecting settings. App: `Shared/StarredGatheringSeeder` (per-store-variant device mark
+  `StarredGatheringSeeded.<variant>`, the sample seeder's sync gate, one log line; a REFUSAL is not
+  marked), called from the Mac window's `.task` after the sample books (`VariorumApp.swift`). Pins: core
+  `StarredNotesGatheringTests` **9/9 green** (fresh store's row exactly; star shows / un-star leaves, no
+  rows; an existing store gets it and nothing else moves; idempotent; deleted-stays-deleted even renamed
+  first, and by name alone; restore is the ordinary door; her own ★ gathering and its BOUND book count
+  as present; the reserved name in use is never twinned; only Home counts) — new surface, no prior
+  behaviour to be red against. Mac `StarredGatheringSeederTests` **"Test run with 6 tests in 1 suite
+  passed", 0 skipped** (unmarked → minted + marked; marked → never asked, even with no row/tombstone — a
+  purge's state; her deletion recorded in the mark; an account store waits for its first clean round and
+  is NOT marked; a synced account store seeds; the mark is per variant). The phone's occasion: DEFERRED
+  (see the record's not-done line).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

@@ -211,6 +211,21 @@ struct VariorumApp: App {
                                         fresh.sync.status.lastSuccessAt != nil
                                     }))
                         }
+                        // 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering —
+                        // an ordinary gathering on ★, seeded once per store
+                        // (fresh AND existing), her deletion honoured; same
+                        // occasion, same gate, its own mark.
+                        await StarredGatheringSeeder.seedIfNeeded(
+                            session: session,
+                            storeVariant: bootstrap.storeVariant,
+                            gate: SampleLibrarySeeder.SyncGate(
+                                belongsToAnAccount: {
+                                    fresh.sync.isConfigured
+                                        || fresh.account.variorum != nil
+                                },
+                                hasSyncedCleanly: {
+                                    fresh.sync.status.lastSuccessAt != nil
+                                }))
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
