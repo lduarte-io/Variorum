@@ -24,5 +24,10 @@ nonisolated extension SealedNoteCopy.Words {
 }
 
 nonisolated extension OpsRefusalRoads {
-    static let phone = OpsRefusalRoads(seal: .phone, divideChord: nil, arrangeTakesRoad: nil)
+    /// 13i-c U2: a book's seal is "sealed" here too (the ruled noun), but the
+    /// phone has no Unseal door for books yet (the mobile catch-up's), so the
+    /// sentence names none.
+    static let phone = OpsRefusalRoads(
+        seal: .phone, divideChord: nil, arrangeTakesRoad: nil,
+        bookSeal: .init(state: "sealed", verb: nil))
 }

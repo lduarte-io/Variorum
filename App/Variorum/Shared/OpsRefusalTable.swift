@@ -77,6 +77,18 @@ nonisolated struct OpsRefusalRoads: Sendable {
     /// it passes `nil` and the sentence ends at the keep-on-top fact, which is
     /// true on both platforms (U-2).
     let arrangeTakesRoad: String?
+    /// 13i-c U2 — the BOOK seal's words: its state noun (the sitting record
+    /// §5's ruled "Sealed Book") and the verb of the door that lifts it, or
+    /// nil where the platform has no such door yet (the phone's book-seal face
+    /// is the mobile catch-up's — the sentence then must not promise one). A
+    /// road, because the seal's stem is a platform's door word to this file's
+    /// integrity walk (the NOTE seal reads "locked" on the phone).
+    let bookSeal: BookSealWords
+
+    struct BookSealWords: Sendable, Equatable {
+        let state: String
+        let verb: String?
+    }
 }
 
 nonisolated enum OpsRefusalCopy {
@@ -269,6 +281,27 @@ nonisolated enum OpsRefusalCopy {
         // 13i-c (R-13ic-4): a gathering is minted with a rule and keeps one.
         case .gatheringRequiresRule:
             return "A gathering needs a rule — add one to make it, or delete the gathering."
+        // 13i-c U2 — the OWNERSHIP consult's two refusals (the sitting record
+        // §6; the 13i-c plan §3). Each names the CEREMONY the door offers in
+        // its place — copy in / move in — never a door (a face that can host
+        // the choice offers it; the phone's sheets are the mobile catch-up's).
+        case .noteMemberedElsewhere:
+            return "That note already lives in another book, and this book owns its notes — "
+                + "it can come in as a copy, or move in and leave its other books."
+        case .noteOwnedElsewhere:
+            return "That note belongs to a book that owns its notes — "
+                + "it can come in here only as a copy."
+        // The book seal (R-13ic-3): the one door down from it reopens the book.
+        case .readingSealed:
+            if let verb = roads.bookSeal.verb {
+                return "This book is \(roads.bookSeal.state) — \(verb) it to reopen it."
+            }
+            return "This book is \(roads.bookSeal.state), so it can't be reopened here."
+        case .readingNotSealed:
+            return "That book isn't \(roads.bookSeal.state) any more — nothing changed."
+        case .ownedBookDuplicatesDeep:
+            return "This book owns its notes, so a duplicate has to carry copies of them — "
+                + "duplicate it with copies."
         default:
             return nil
         }

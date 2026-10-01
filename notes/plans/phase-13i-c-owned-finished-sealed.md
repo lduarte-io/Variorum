@@ -607,21 +607,226 @@ the FULL core suite green at the END; the Mac app + the phone BUILD (`xcodebuild
 'generic/platform=iOS Simulator' build`) and every Mac/mobile suite that exercises a changed op.
 A pin green on both sides of a claimed fix is hollow — record, don't fix.
 
-**Your record:** a `## U2 RECORD` section in THIS file directly above `## §8 ENVIRONMENT TRAPS`,
-in the U1 RECORD's shape — the NOT-DONE line FIRST, the design map as shipped, PROVISIONALs (each
-with a QUESTIONS-ready paragraph; numbered P-13ic-U2-n), FINDINGS (for the orchestrator; name the
-owner you suggest), then your LIVE STATUS (per commit; unverified claims PENDING). Flip ledger
-row 3 in the same commit as the close. Commit per piece, `git pull --rebase` then push after every
-commit, foreground waits only, no subagents (one Sonnet read-only lookup at most). The §8 traps
-bind verbatim: zero instances before any suite that mounts windows; never touch `/Applications`;
-the dev store never syncs; `pipestatus`; never a custom build configuration.
+**Your record:** a `## U2 RECORD — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`, 2026-10-01)
 
-## U2 RECORD — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`, 2026-10-01)
+**NOT DONE BY THIS UNIT (first line, per the contract):** no face of any kind (U3/U4 — the confirms,
+the choice sheet, the badges, the Settings rows, the Trash's "and N notes" row; the ⌘J/phone
+`.waitingAtDoor` notes are generic compile arms, U4 names the owner); no dev-store GUI walk (U2 is a
+headless op family — its evidence-of-kind is the plan §7 U2 row's headless set; the first visible walk
+of these ops is U3's/U4's); NO `notes/QUESTIONS.md` entries written (the brief's rule — each
+PROVISIONAL below carries its QUESTIONS-ready paragraph for #169 at close); NOT the `unlockPost`-
+inside-a-sealed-book question (FINDING F-U2-1 — a fork reserved for the architect, unbuilt); zero
+`Sync/`, zero schema, zero `Server/` — none was needed, no STOP condition met.
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — the full NOT-DONE line is
-written at the close. Standing scope fence: no face of any kind (U3/U4), zero `Sync/`, zero schema.
+**UNIT STATUS: CLOSED 2026-10-01 — every evidence item of the plan §7 U2 row green (below): core
+2001 tests / 211 suites (1 standing env-gated skip) · Mac 772/135 · phone 102/16 · both apps build.**
 
-**UNIT STATUS: IN PROGRESS.**
+### What U2 built (the design as shipped — a fresh session's map)
+
+- **`Domain/OwnershipDecision.swift`** — the pure table: `verdict(targetOwned:note:)` → `.add` ·
+  `.needsChoice(.copyOrMove)` (owned target, note membered elsewhere — a competing owned book
+  included, §18.4) · `.needsChoice(.copyOnly)` (plain target, note owned elsewhere). Pinned cell-
+  for-cell against intake's owned arms (every choice is a bell there, every add a seat).
+- **The three readers' `kind='book'` (13i-b F-R1-7, ruled as one):** `membershipElsewhere`, the
+  Pool's exclusion (a correlated reading probe — the P1 plan pin holds), `readingsContaining`'s
+  member leg. Red-on-old pins `MembershipReadersBookScopeTests`.
+- **`Operations+Ownership.swift`:** `consultOwnership` (the one consult — wired into
+  `addPostToReading` and `seatArrival` AFTER the capacity gate); `ceremonyCopy` (the `copyPost`
+  family + the note's live tags copied as ROWS — P-13ic-U2-1; a blockless note copies BARE —
+  P-13ic-U2-2); `forkInPlace` (the diverge body inlined: the copy takes the exact slot — position
+  AND chapter; the original's row here a member-class tombstone); `setReadingOwned` both ways
+  (`OwnConversionResult.copied: [OwnershipFork]`); `copyPostIntoReading(_:into:at:)` +
+  `(answering:)` (`CopyInResult`; the copy's membership FIRST, then the target's outflow; ONE undo
+  entry, `duplicateAsVersion`-shaped); `movePostIntoReading(_:into:at:)` + `(answering:)`
+  (`MoveInResult.severed` — every other live row in live books, members AND arrivals; refuses while
+  a severed MEMBER sits in a FINISHED book — P-13ic-U2-4; no undo, P-13ic-12);
+  `enforceOwnershipAfterRevival` (THE REVIVAL PASS — R2's shape locally, ranked `created_at, id`,
+  P-13ic-9); `setReadingHideOwned` (gatherings only, nil = follow the default); `bellAtDailyDoor`;
+  `isBookless`.
+- **`Operations+Seal.swift`:** `sealReading` (forks the shared members · finishes + dismisses
+  pending arrivals · `sealed_at = now` · every member sealed with `locked_at = now` through the
+  shared `sealPost` body — dirty buffers insured; independent seals untouched; `SealResult`);
+  `unsealReading` (exact-stamp members unseal, `sealed_at` clears, `locked = 0`, the catch-up
+  fires — R-13ic-3); `liveMemberPostIDs`.
+- **Guards on the finish ladder:** `unlockReading` on a sealed book refuses `readingSealed`;
+  `lockReading` on a sealed book is a no-op; `setReadingOwned(true)` on finished/sealed refuses
+  `lockedReading` (P-13ic-2); `lockPost`/`unlockPost` now call the shared `sealPost`/`unsealPost`.
+- **Book doors (`Operations+Reading.swift`):** `deleteReadingWithNotes` (each member through the
+  shared `tombstoneNoteFamily` body — versions ride — then the book, ONE stamp; refuses only a
+  gathering; clears the redo future); `duplicateReading(_:name:deep:)` (configuration not state —
+  P-13ic-7; chapters copied and re-pointed; members at their positions, arrivals never; shallow
+  refuses an owned source `ownedBookDuplicatesDeep`; the daily marker → the trait, P-13ic-U2-5);
+  `restoreReading` returns WHOLE (stamp-matched member notes first through the shared
+  `restoreNoteFamily`, then memberships — a SEALED book takes back only sealed members, P-13ic-U2-6
+  — then the revival pass, then the catch-up); `removePostFromReading` returns BOOKLESS.
+- **Revival-pass call sites:** `restoreContainer` (+ a sealed book takes back only a sealed note,
+  P-13ic-U2-6), `restoreReading`, `reapplySmartConversion` (AFTER the kind flip), `revertDiverge`
+  (an ADDITION to the plan's list — the diverge UNDO revives the original's row), `reapplyDiverge`;
+  `reapplyMintedContainer` rides `restoreContainer`.
+- **The bind's owned-notes limb:** `convertSmartReadingToCurated(_:order:ownedNotes:)` —
+  `.leaveOut` (default, P-13ic-4; `result.leftOut`) · `.copyIn` (`result.copied`, the copy in the
+  note's slot).
+- **`shelveInDailyJournalBook`** → `.waitingAtDoor(readingID:)` (an arrival rung, never a throw);
+  the Mac's ⌘J and the phone's Today door gained honest compile arms.
+- **`Operations+Appearance`:** `setHideOwnedDefault` / `setOwnershipBadges` (synced, not seeded —
+  the `arrival_flash` pattern); `ThemeSettings.hideOwnedByDefault` (only "1" hides) /
+  `.ownershipBadges` (only "0" silences).
+- **`Queries/OwnershipQueries.swift`:** `noteMemberships`, `sharedMembers` (THE fork set — the op
+  and every confirm read it), `ownConversionPreview`, `moveInPreview` (flags finished books),
+  `bindOwnedNotesPreview`, `trashBookNoteCount`, `sealPreview` + `pendingArrivalCount` (the
+  Arrivals face's own predicate), `ownedElsewhereExclusion` (THE fragment), `hideOwnedDefault`,
+  `hidesOwned`, `ownershipFacts(postIDs:inBook:)` (one page-driven statement). The fragment is
+  composed by the gathering assembly, the chip's and the listing page's gathering legs
+  (`smartMembershipSQL(hidesOwned:)`) and `taggedPostItems` (global default only); the Library is
+  untouched (R32).
+- **`copyPost`** — every copy now born in its SOURCE's wing (§9 isolation; unreachable until 13i-d).
+- **The shared refusal words** (`App/Variorum/Shared/OpsRefusalTable.swift`) for all five new
+  refusals, platform-neutral; a new `bookSeal` ROAD (`OpsRefusalRoads.BookSealWords`) because the
+  integrity walk bans the seal's stem in the shared file — the Mac passes `sealed`/`unseal`, the
+  phone `sealed` with no verb (no book-seal door there yet; the sentence promises none). The phone's
+  membership face inherits the ownership words through its existing table fall-through (§4 row 22).
+
+### Evidence (each named before the build — the plan §7 U2 row)
+
+- **Exact state-transition suites per op:** `OwnershipOperationsTests` (20 — the consult, own/
+  stop owning, the empty fork, the wing, copy in + tags-as-rows-not-acts + answering + undo/redo,
+  move in + answering + the finished guard + the daily Journal claim, the daily bell both ways,
+  release), `OwnershipBookDoorsTests` (14 — the revival pass per door, the bind limb both ways,
+  delete-with-notes + restore whole + a note put back alone, duplicate shallow/deep/daily/gathering),
+  `BookSealTests` (9 — seal, owned seal fork-free, finished/gathering/no-op, unseal reopens with the
+  catch-up, the contradiction guards, a deleted sealed book, lesson 6's first sentence, and the
+  soak's two found pins), `OwnershipHideAndBadgesTests` (6 — the default SHOW, the global switch
+  across the assembly/chip/page/tag listing with the Library exempt, the per-gathering override,
+  the toggle's guards, the two settings, the badge facts + their P1 plan pin),
+  `OwnershipDecisionTests` (5), `MembershipReadersBookScopeTests` (3, red-on-old).
+- **`OwnershipDoorTests`** — the §4 table rows 1–12, ONE test per row, named for the row, each
+  asserting the consult, the outcome and the exclusivity invariant.
+- **`OwnershipSoakTests`** — 6 seeds × 250 steps over own / stop owning / add / copy in / move in /
+  both answering arms / remove / seat / dismiss / tag / finish / reopen / seal / unseal / delete
+  both ways / restore a book / delete + restore a note / duplicate both ways / diverge; invariants
+  after EVERY step: exclusivity, every member of a sealed book sealed, no duplicate live pair, I10,
+  I2; and the machinery must actually have been exercised (own, copy in, move in, seal, unseal, a
+  choice refusal, a book restore, delete-with-notes). **It found a real breach on its first run**
+  (seeds 3 and 777 — see P-13ic-U2-6), fixed red-first.
+- **`OwnershipRitualTests`** — R4 headless (own → the copy choice → copy in → release → the Pool) and
+  lessons 5, 6, 8 as sentence pins.
+- **Red-on-old, by behavioural revert** (committed tree; an early `return` in the revival pass AND
+  the consult; restored by `git checkout`, the marker grep 0, green again): every revival pin and
+  every consult pin red (18 issues / 34 tests). The three readers' pins and the soak's two sealed-
+  revival pins were red on the pre-fix tree before their fixes.
+- **Honest test edits (subject untouched, each commented at the pin):**
+  `Phase13iRepairTests.aLaterPlainAddBesideAStandingOwnedClaimTombstones` (its fixture pulled A's
+  claim onto B and then hand-added — row 1 now refuses that road by design; B now adds without
+  having seen the claim, which IS the race R2 pins); `SampleLibrarySignedOutRetirementTests.
+  putBackReturnsTheRetiredCopy` (pinned #85(e)(ii)'s recorded "fourteen put-backs" — the question it
+  recorded is answered by §18.3 / this plan §6: the book returns WHOLE).
+- **Suites:** core `swift test` FULL — **"Test run with 2001 tests in 211 suites passed"** (1
+  skipped: the standing env-gated Supabase integration test; baseline 1927/202 at U1's close →
+  +74 tests / +9 suites, this unit's nine new suites exactly); the per-piece
+  regression sweeps green (639/67 · 848/85 twice · 654/61 · 370/39). Mac `build` + `build-for-
+  testing` GREEN; the 135 Mac suites naming an op whose behaviour changed (63 files —
+  `addPostToReading`, the arrival judgment, the daily door, `restoreReading`/`restoreContainer`,
+  the bind, finish/reopen, the refusal tables, the theme settings, the Pool/chip/listing/tag
+  readers, recovery/deletion words) — **"Test run with 772 tests in 135 suites passed"** (4 known
+  issues = the pre-existing `withKnownIssue` TK2 marks in `IndexTierMetricsTests`; zero skips). The
+  phone generic-sim BUILD SUCCEEDED; the 16 phone suites naming a changed op on the iPhone 17 Pro
+  simulator — **"Test run with 102 tests in 16 suites passed"** (2 known issues = the deliberate
+  marks in `MobileTrashTests`). Zero app instances before and after (`pgrep` clean). DerivedData:
+  `App/Variorum/DerivedData/13ic-u2`, `13ic-u2-ios`, `13ic-u2-iossim` (+ their `.log`s) — the
+  phase is open; the closeout's tidy sweeps them.
+
+### PROVISIONALs made in U2 (each QUESTIONS-ready for #169; the plan's §9 P-13ic-1…12 were built as written)
+
+- **P-13ic-U2-1 — A ceremony copy's riding tags are a ROW COPY, not a tagging act.** The tags land
+  on the copy, but no living book "hears" them (intake fires only on applying acts); the target
+  book's OWN outflow (copy in) IS an act and is heard. Why: the plan inserts the copy's membership
+  FIRST so the pair is decided "before any tag fires intake elsewhere", which only makes sense if
+  the riding tags fire nothing; and it keeps a seal's forks from being re-shared by another book's
+  intake the moment they are minted. *QUESTIONS paragraph:* "When a copy is made for an owned-book
+  reason (owning a book, copying a note in, sealing, a deep duplicate), its tags come with it. Should
+  those tags also pull the COPY into your living books the way tagging a note by hand does? (a) No —
+  the copy just wears them; only tagging by hand (or a book's own auto-tag) pulls notes in — BUILT;
+  (b) yes, the copy's tags count as fresh tagging (then a sealed book's copies could land in other
+  books immediately)."
+- **P-13ic-U2-2 — An EMPTY note forks as a bare note** (its row and its tags; no blocks, so no
+  lineage edge — an edge joins blocks). `copyPost` refuses a blockless note, and a ceremony obliged
+  to fork must not fail on one. *QUESTIONS paragraph:* "If a book you own or seal shares an EMPTY
+  note with another book, it still gets its own copy — (a) an empty copy with no 'came from' link
+  (there's no text to come from) — BUILT; (b) refuse the whole act until the empty note has text;
+  (c) give the empty original a blank first line so the copy can link to it."
+- **P-13ic-U2-3 — Answering an arrival with Copy in / Move in lands at the END, unsectioned** (the
+  `seatArrival` rule, §4 "arrivals land at the end"), and Copy in's copy gets the book's OUTFLOW (a
+  hand-add's class — her hand made the copy) while a plain seat never does (P-13ib-U1-3). *QUESTIONS
+  paragraph:* "When you answer something waiting at a book's door by copying it in, the copy goes to
+  the end of the book and gets the book's auto-tags — (a) as built; (b) no auto-tags, to match
+  'Add' on an arrival (which never tags); (c) auto-tags on Add too."
+- **P-13ic-U2-4 — Move in REFUSES while one of the memberships it would sever is in a FINISHED (or
+  sealed) book** (`lockedReading` naming THAT book): finishing froze that book's contents and a
+  move is a removal there; Copy in stays open; the preview flags the row. Waiting arrivals elsewhere
+  are severed freely (they are not contents); Move in onto a PLAIN book is legal (release + add —
+  the faces offer it only on owned books). *QUESTIONS paragraph:* "If a note you want to MOVE into an
+  owned book is also in a book you've marked Finished, should the move (a) refuse and offer Copy in
+  instead — BUILT; (b) take it out of the finished book anyway (the claim outranks the finish); or
+  (c) move it but leave the finished book's membership standing?"
+- **P-13ic-U2-5 — Duplicating the daily Journal makes an ordinary journal-trait book**, never a
+  second daily Journal (the `'daily'` marker names THE one book; only `setDailyJournalBook` moves
+  it). *QUESTIONS paragraph:* "Duplicate the daily Journal and you get a journal-style book that is
+  NOT where ⌘J files — (a) as built; (b) make the duplicate the new daily Journal."
+- **P-13ic-U2-6 — A membership revives into a SEALED book only when its note is itself sealed**
+  (`restoreContainer` and `restoreReading` both) — found by the soak: a note in the Trash when its
+  book was sealed came back INTO the sealed book, editable. The door's own answer (a sealed book
+  refuses every add) is that it comes back outside the edition; a note sealed with the book comes
+  home with it as before. *QUESTIONS paragraph:* "A note that was in the Trash when you sealed its
+  book is put back. Should it (a) come back on its own, NOT inside the sealed book (unseal the book
+  and add it by hand if you want it) — BUILT; (b) rejoin the sealed book and be sealed with it (its
+  text then freezes everywhere it lives); (c) rejoin unsealed (the book would then hold an editable
+  note)?"
+- **P-13ic-U2-7 — Hide-owned's reach includes the membership chip's and the listing page's
+  gathering legs** (so no surface claims a gathering shows a note it hides), and tag listings follow
+  the GLOBAL default only (they have no per-listing toggle); `everythingTagged` (an ops-facing
+  lookup) is not composed. *QUESTIONS paragraph:* "When a gathering hides owned notes, the 'appears
+  in' chip on such a note stops listing that gathering too — (a) as built; (b) keep listing it."
+- **P-13ic-U2-8 — Stop owning is allowed on a finished or sealed book** (it moves no row; P-13ic-2
+  governs owning only). *QUESTIONS paragraph:* "(a) Allowed — BUILT; (b) refuse until reopened."
+- **P-13ic-U2-9 — Ceremony copies are born UNARCHIVED** (the copy family's letter — `copyPost`
+  copies title/profile/date/notes/segmentation, never the archive state; the older diverge door
+  behaves the same). Consequence: forking an ARCHIVED shared member makes the copy visible in the
+  book where the original was hidden. *QUESTIONS paragraph:* "If a book you own or seal shares a note
+  you had ARCHIVED, its copy (a) arrives unarchived, so the book now shows it — BUILT; (b) arrives
+  archived too, so the book reads exactly as before."
+
+### FINDINGS (for the orchestrator; none is a STOP condition)
+
+- **F-U2-1 (a reserved fork — the architect's; suggested owner U3):** `unlockPost` on a member of a
+  LIVE SEALED book is still allowed — a single note can be unsealed while its book says Sealed,
+  which softens "Sealed = the book is done" (required text immutability). Options: refuse while the
+  note's `locked_at` equals a live sealed book's `sealed_at` (a new refusal, the op-level belt), or
+  leave the op and have the faces hide per-note Unseal inside a sealed book. NOT built (a product
+  edge the plan is silent on); the soak's seal invariant excludes per-note unseal for this reason.
+- **F-U2-2 (closeout):** QUESTIONS #85(e)(ii) ("should `restoreReading` revive stamp-matched member
+  containers?") is ANSWERED by §18.3 / this plan §6 and built here — the closeout marks it.
+- **F-U2-3 (recorded):** the `copyPost` wing fix reaches every copy door (duplicate-as-version,
+  promote, outline mint, diverge) — all now born in the source's wing; unreachable until 13i-d mints
+  a second wing; pinned on the ownership ceremonies.
+- **F-U2-4 (recorded):** the plan's revival-pass list missed `revertDiverge` (the diverge UNDO
+  revives the original's membership) — built and pinned (row 9 + `OwnershipBookDoorsTests`).
+- **F-U2-5 (recorded, pre-existing):** a FINISHED (not sealed) book still takes back a revived
+  membership from `restoreContainer` (the freeze is her doors'; the exact-stamp revival predates
+  it). The sealed guard (P-13ic-U2-6) is deliberately narrower. Suggested owner: 13i-d's look at the
+  finish faces, if she wants the freeze to bind recovery too.
+- **F-U2-6 (U4 carries it):** the ownership refusals carry ids only (the brief's signatures); the
+  faces name the books through `noteMemberships` / `moveInPreview` / `ownershipFacts`. The ⌘J and
+  phone `.waitingAtDoor` notes are generic until U4 names the owner.
+- **F-U2-7 (U4's face discipline):** `deleteReadingWithNotes` refuses only a gathering (the plan's
+  letter) — on a PLAIN book it would delete notes that live in other books; the door must offer it
+  only on an owned book (ruled).
+- **F-U2-8 (MobileSoul row at closeout):** the phone's membership face now speaks the shared
+  ownership words through `MobileMembershipModel.refusal`'s table fall-through (§4 row 22) — "it can
+  come in as a copy…" names the ceremony, not a door; the phone's sheets are the mobile catch-up's.
+- **F-U2-9 (recorded):** after a book returns whole, a stale Trash row for one of its notes answers
+  "That note is already back." (the shipped `DeletionRefusal` words) — honest.
+- **Tutorial (P-6):** no lesson sentence went false; lessons 5, 6, 8 and R4 are now pinned true
+  headless. No lesson prose rewritten.
 
 ### LIVE STATUS (per commit; every unverified claim PENDING)
 
@@ -687,21 +892,15 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   green.
 - **Piece F — `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual + lessons 5/6/8; the shared
   refusal words + the app compile arms; Mac + phone builds + touched suites; the FULL core suite;
-  the record closed; ledger row 3:** IN-PROGRESS. `OwnershipDoorTests` 12/12 DONE (one per row,
-  each asserting the consult + the outcome + the exclusivity invariant). The app compile arms
-  DONE (2509647d — Mac + phone builds green then). `OwnershipSoakTests` DONE (6 seeds × 250
-  steps over own/un-own/add/copy/move/answering arms/remove/seat/dismiss/tag/finish/reopen/seal/
-  unseal/delete both ways/restore book/delete+restore note/duplicate both ways/diverge;
-  invariants exclusivity · seal · no duplicate pair · I10 · I2 after every step) — it FOUND a bug
-  on its first run (seeds 3 and 777): a note deleted while a member, its book SEALED while it lay
-  in the Trash, then put back, revived INTO the sealed book unsealed. Pinned red-first
-  (`BookSealTests.aNoteInTheTrashWhenItsBookWasSealedComesBackOutsideTheSealedBook` + the
-  restoreReading twin `aSealedBookPutBackTakesBackOnlyItsSealedMembers`), fixed by guarding both
-  revival roads (a membership revives into a SEALED book only when its note is sealed —
-  PROVISIONAL P-13ic-U2-6); soak + seal suite green; the restore-family sweep 848/85 green again.
-  REMAINING: the ritual + lessons, the
-  shared refusal words (+ a `bookSeal` road — the integrity walk bans the bare "sealed"/"unseal"
-  stems in the shared file), the Mac/phone builds + touched suites, the FULL core suite, the close.
+  the record closed; ledger row 3:** DONE (the closing commit). `OwnershipDoorTests` 12/12;
+  `OwnershipSoakTests` (6 seeds × 250 steps — it found the sealed-revival breach, fixed red-first,
+  P-13ic-U2-6); `OwnershipRitualTests` 4/4 (R4 + lessons 5, 6, 8); the shared refusal words for all
+  five new refusals + the `bookSeal` road (Mac `sealed`/`unseal`, phone `sealed`/no verb); the
+  app compile arms (2509647d). Mac `build-for-testing` GREEN + 135 suites — 772 tests passed (4
+  pre-existing known-issue marks, zero skips); phone generic-sim BUILD SUCCEEDED + 16 suites on the
+  iPhone 17 Pro simulator — 102 tests passed (2 deliberate known-issue marks); FULL core — 2001 tests
+  / 211 suites passed (1 standing skip). Zero app instances throughout. Ledger row 3 flipped in
+  this commit.
 - No revert in flight.
 
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
@@ -762,7 +961,7 @@ Debug only, author-free, own `caffeinate -d`.
 |---|---|---|
 | 1 | Plan authored; her four kickoff rulings recorded (§1); PROVISIONALs (§9) | DONE (this commit) |
 | 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | **BUILT + PINNED 2026-10-01** (the U1 RECORD above; core 1927/202 · Mac 83/9 · phone build green; commits b4cb639b + 19eb55c0; the deploy checklist `notes/plans/13i-c-deploy-checklist.md`). **The dev-store WALK is HELD** (author at the machine) and folded into U3's walk window |
-| 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | NOT STARTED |
+| 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | **BUILT + PINNED 2026-10-01** (the U2 RECORD above; core 2001/211 · Mac 772/135 · phone 102/16 · both builds green; commits 936f8cf9 → the closing commit; nine PROVISIONALs P-13ic-U2-1…9 for #169; FINDINGS F-U2-1…9 — F-U2-1, `unlockPost` inside a sealed book, is a reserved fork for the architect). Headless — no walk owed by this unit |
 | 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | NOT STARTED |
 | 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | NOT STARTED |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | NOT STARTED |

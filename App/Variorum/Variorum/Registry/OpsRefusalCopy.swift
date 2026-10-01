@@ -397,7 +397,9 @@ nonisolated extension OpsRefusalRoads {
     static let mac = OpsRefusalRoads(
         seal: .mac,
         divideChord: "⌘⇧D",
-        arrangeTakesRoad: "⌥⌘⇧D arranges them differently")
+        arrangeTakesRoad: "⌥⌘⇧D arranges them differently",
+        // 13i-c U2: a Sealed Book, and the Unseal door (U3 builds its face).
+        bookSeal: .init(state: "sealed", verb: "unseal"))
 }
 
 nonisolated extension OpsRefusalCopy {
