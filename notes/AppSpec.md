@@ -150,6 +150,7 @@ CREATE TABLE container (
   word_target            INTEGER,     -- per-POST words TARGET (v1_12): display/progress only, NEVER a refusal
   churn_accumulator      REAL NOT NULL DEFAULT 0,
   baseline_length        INTEGER NOT NULL DEFAULT 0,
+  wing_id                TEXT NOT NULL DEFAULT '',  -- 13i-a: '' = the virtual Home wing (R-13ia-2)
   created_at             TEXT NOT NULL,
   updated_at             TEXT NOT NULL,
   archived_at            TEXT,
@@ -184,29 +185,75 @@ CREATE INDEX idx_cblock_order ON container_block(container_id, position);
 ```
 > Rendering a post = walk by `position`, resolve the chosen variant (falling back to the block's default), concatenate `working_text`.
 
-### reading — books (curated and smart)
+### wing — in-store libraries (13i-a, v1_18; the sitting record §9: TOTAL isolation)
+```sql
+CREATE TABLE wing (
+  id           TEXT PRIMARY KEY,
+  owner_id     TEXT,
+  name         TEXT NOT NULL,            -- duplicate names legal (no natural key — no repair class)
+  position     TEXT NOT NULL,            -- switcher order
+  created_at   TEXT NOT NULL,
+  updated_at   TEXT NOT NULL,
+  deleted_at   TEXT
+);
+```
+> **THE HOME WING IS VIRTUAL (R-13ia-2, the 13i-a kickoff):** rows here are ADDITIONAL wings only; every `wing_id` pointer (`container`/`tag`/`reading`/`shelf`, each `TEXT NOT NULL DEFAULT ''`) means Home when `''` — undeletable and convergence-proof by construction, no seeded row to race. Gatherings assemble, and search/tag listings/Arrivals scope, within ONE wing; the only crossings are the explicit move/copy doors (13i-b/c). The ruling's record: the sitting record §9 + the 13i-a plan §1.
+
+### shelf — the Bookcase's groupings (13i-a, v1_18; `reading_section` one level up — the sitting record §7)
+```sql
+CREATE TABLE shelf (
+  id           TEXT PRIMARY KEY,
+  owner_id     TEXT,
+  wing_id      TEXT NOT NULL DEFAULT '',  -- '' = Home; shelves are per-wing
+  name         TEXT NOT NULL,             -- duplicate names legal
+  glyph        TEXT,                      -- ONE grapheme, monochrome (the callout frame's precedent)
+  role         TEXT,                      -- NULL | 'welcome' — the seed marker (the §7-SyncSpec Welcome keeper's key)
+  position     TEXT NOT NULL,             -- strip order = All's stacking order (§24's ruling)
+  created_at   TEXT NOT NULL,
+  updated_at   TEXT NOT NULL,
+  deleted_at   TEXT
+);
+CREATE INDEX idx_shelf_wing ON shelf(wing_id, position);
+```
+> An ordered named metadata row a pointer names (`reading.shelf_id`) — never a container, never nested. A nil or DANGLING pointer means UNSHELVED (§19's ruling: unshelved shows at the top of All, in no shelf's solo). Deleting a shelf returns its books to unshelved and never touches a book.
+
+### reading — books and gatherings (recast at 13i-a)
 ```sql
 CREATE TABLE reading (
   id              TEXT PRIMARY KEY,
   owner_id        TEXT,
   name            TEXT NOT NULL,
-  kind            TEXT NOT NULL CHECK (kind IN ('curated','smart')),
-  profile         TEXT,                        -- 'journal'|'book'|'collection' ('daily' is the ruled successor
-                                               -- identity for the daily Journal — pre-13u memo, owner 13y)
+  kind            TEXT NOT NULL CHECK (kind IN ('book','gathering')),  -- 13i-a (v1_18): the RECAST —
+                                               -- a BOOK holds membership rows as truth; a GATHERING is a
+                                               -- saved rule assembled at read (the sitting record §1; stored
+                                               -- values migrated curated→book, smart→gathering)
+  profile         TEXT,                        -- 'journal' (the TRAIT) | 'book' | 'collection' | 'daily' (THE
+                                               -- daily Journal's marker — BUILT at 13i-a; the memo's design)
   sort_field      TEXT NOT NULL DEFAULT 'manual'
                     CHECK (sort_field IN ('manual','entry_date','created_at','last_touched','last_major_revision')),
   sort_dir        TEXT NOT NULL DEFAULT 'asc' CHECK (sort_dir IN ('asc','desc')),
   grouping_tag_id TEXT,                        -- section a SMART book by a tag root; a dangling id reads as ungrouped
-  query_spec      TEXT,                        -- JSON predicate for smart readings
+  query_spec      TEXT,                        -- the v2 RULE (13i-a): gatherings' assembly + living books' intake
   max_posts       INTEGER,                     -- extent constraint (fixed-length journal)
   word_target     INTEGER,                     -- words TARGET (v1_11): display/progress only, NEVER a refusal
-  locked          INTEGER NOT NULL DEFAULT 0,  -- declared "done"
+  locked          INTEGER NOT NULL DEFAULT 0,  -- FINISHED (13i §5: assembly frozen, intake paused, text editable)
+  -- ——— the 13i-a bundle (v1_18; the sitting record §11 — the b–e column set landed whole) ———
+  wing_id         TEXT NOT NULL DEFAULT '',    -- '' = Home; books never span wings
+  shelf_id        TEXT REFERENCES shelf(id),   -- nil/dangling = UNSHELVED (§19's ruling)
+  shelf_position  TEXT,                        -- "my order" (§24); nil = never placed, appends last
+  starred         INTEGER NOT NULL DEFAULT 0,  -- the one star (absorbs the retired pin list, §7)
+  owned           INTEGER NOT NULL DEFAULT 0,  -- 13i-c's flag; ops enforce; SyncSpec §7's exclusivity repair converges
+  sealed_at       TEXT,                        -- SEALED = Finished + text immutability (§5); the exact-stamp unseal key
+  hide_owned      INTEGER,                     -- a gathering's toggle; NULL = the global default (SHOW, badged)
+  intake_seating  TEXT CHECK (intake_seating IN ('auto','arrivals') OR intake_seating IS NULL),  -- the join dial (§4)
+  auto_tag_id     TEXT REFERENCES tag(id) ON DELETE SET NULL,  -- the outflow (§4)
   created_at      TEXT NOT NULL,
   updated_at      TEXT NOT NULL,
   deleted_at      TEXT,
   FOREIGN KEY (grouping_tag_id) REFERENCES tag(id) ON DELETE SET NULL
 );
 ```
+> `query_spec` holds the **v2 rule grammar** since v1_18 (`Domain/RuleGrammar.swift` — a boolean tree of tag-by-ID and star terms, §19's rulings: subtree matching, renameTag-proof, dead terms match nothing; v1 specs migrated with legacy profile/date terms grandfathered; a NULL is no rule, malformed fails closed per consumer). `profile` gains `'daily'` — THE daily Journal's marker (the identity memo §3; the mint stamps it, `setDailyJournalBook` moves it, the §7-SyncSpec keeper keys on it) — beside `'journal'`, the TRAIT every deliberate notebook door mints.
 
 ### reading_post — curated membership (a post may live in MANY readings)
 ```sql
@@ -217,6 +264,11 @@ CREATE TABLE reading_post (
   position    TEXT NOT NULL,
   section_id  TEXT REFERENCES reading_section(id),  -- which CHAPTER (v1_10); a DANGLING pointer reads as UNSECTIONED
                                                -- (deleting a chapter never rewrites memberships; no sync repair)
+  status      TEXT NOT NULL DEFAULT 'member'
+                CHECK (status IN ('member','arrival')),  -- 13i-a: an ARRIVAL is intake's bell (sitting §4) —
+                                               -- synced, visible, NEVER counted/listed/worded as membership
+                                               -- (every member-reader filters status='member'); dismissing
+                                               -- writes a born-tombstoned row (tombstone-means-decided)
   created_at  TEXT NOT NULL,
   deleted_at  TEXT,
   FOREIGN KEY (reading_id) REFERENCES reading(id),
@@ -253,12 +305,15 @@ CREATE TABLE tag (
   name       TEXT NOT NULL,
   path       TEXT NOT NULL,                    -- materialized 'life/goals/2024' — the ONE deliberate denormalization;
                                                -- renameTag rewrites the subtree's paths
+  wing_id    TEXT NOT NULL DEFAULT '',         -- 13i-a (R-13ia-1): '' = Home; cross-wing move/copy ADOPTS the
+                                               -- destination's same-path tag's id (her rider, the 13i-a plan §1)
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   deleted_at TEXT,
   FOREIGN KEY (parent_id) REFERENCES tag(id)
 );
-CREATE UNIQUE INDEX uq_tag_path_live ON tag(path) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_tag_path_live ON tag(wing_id, path) WHERE deleted_at IS NULL;  -- 13i-a (R-13ia-1):
+                                               -- the vocabulary is PER-WING; same path in two wings = legal twins
 CREATE INDEX idx_tag_parent ON tag(parent_id);
 ```
 
@@ -422,6 +477,7 @@ Every mutation is one of these, one transaction each, through the operations lay
 - **setBlockPresentation / updateBlockPresentation** — identity-level (no-op guard, no touch/churn); the update is a read-modify-write in ONE transaction; refuses under a seal (PROVISIONAL #24). Successors INHERIT the frame; merge keeps it only when both sources agree; duplicateAsVersion/promoteLens copy it with `name`; poolDragCopy copies it (and comments) but never `name` (#24(e), pending). Export maps a callout to a blockquote (a presentation transform only).
 - **setBlockName / setTakeLabel** — identity-level metadata; a seal refuses `setTakeLabel`.
 - **addReference / removeReference / updateReferenceViewState** — INSERT/tombstone/UPDATE `reference` rows.
+- **setJournalTrait(reading, on)** (13i-a — the sitting record §10's per-book settings row; the Collecting-pane face is 13i-e's) — on ⇒ `profile='journal'`, off ⇒ `'book'`; the `'daily'` book refuses (its marker is constitutive — PROVISIONAL, the 13i-a plan §9); a finished book refuses; no-op-guarded. **setDailyJournalBook** MOVES the `'daily'` marker with the designation in one transaction (13i-a ladder M-3 — every other live `'daily'` row demotes to the trait; the stale-bearer merge class closed). **setShelfPinned / Queries.shelfPins** read and write `reading.starred` since 13i-a (starred absorbs pins, the sitting record §7; the `shelf_pins` setting is retired-as-read).
 - **resolveSyncConflict(variant, losingText, label='conflict')** — INSERT variant(losingText, label) on the same block, same parent, fan's end (S5). Lands under a seal; refuses a dead block (the engine's in-apply rescue skips one silently). ~~applyBridgeLanding~~ retired 2026-09-04 (tag `archive/fragments-bridge-2026-09-04`).
 
 ## 10. The "80%-edited" sort (anti-typo-reshuffle)
@@ -458,7 +514,7 @@ The views the model must support beyond today's surface (side-by-side, swap-and-
 
 Resolved (source SPEC §14 open questions): 1. single-variant divide in place ✔ · 2. unified `container` ✔ · 3. tagging as two tables with real FKs (deliberate schema delta) ✔ · 4. cascades as triggers; no variant→commit_point cascade ✔ · 5. the sync engine decided up front — hand-rolled row sync; PowerSync-class engines rejected (SyncSpec §1) ✔ · 6. pool-copy scope: active variant by default, `includeFan` from day one ✔ · 7. churn metric: characters, inserts + deletes equal weight ✔ · 8. headings are Markdown text, no column ✔ · 9. `default_variant_id` lifecycle (§9) ✔ · 10. edge directionality: source = descendant ✔ · 11. fractional-index positions, no rebalance ✔. Additional deltas: live-row partial unique indexes everywhere; I10 added; `chosen_variant_id` fallback semantics; the concretized stack.
 
-**The dated delta record (Phase 0 → 13u4) lives in `notes/AppSpecDeltaArchive.md` and, for the pre-split narrative, `notes/AppSpecRulingsArchive.md` §14.** The closeout rule since 2026-09-26: a phase's canon delta lands in this document as a CONTRACT line (what is now true) plus a pointer to the plan file that carries the ruling — never a paragraph of history. **Most recent phase with canon deltas — 18l-c (2026-09-28, `notes/plans/phase-18l-c-navigation-feel.md`): §7's NOT-seeded settings list gains `arrival_flash` (the round's one synced setting); TWO §12 contract lines DRAFTED AND PROPOSED to the author at the closeout, landing only at her word — the Takes find bar (her sitting rulings R-18l-6/9/10) and the mode-switch caret rule (R-18l-13); schema, migrations and `Sync/` untouched, marker 9. Before it — 18l, first half (2026-09-26, `notes/plans/phase-18l-navigation-feel.md`): the note-open rule (R-18l-1, §12); the 13g F-5 carve-out (R-18l-5, PROVISIONAL, #149); marker 9. Before it — 13u4 (2026-09-20/21, `notes/plans/phase-13u4-restyle.md`):** the Return key chains in an empty block (R-13u4-2, §7); the merge join is the rendering join on every door (R-13u4-3, §9 and OverallModel §7); `moveSpanToNewTake` (R-13u4-4, §9); the capture microsyntax (R-13u4-1, §12). Schema, migrations and `Sync/` untouched; the lockstep marker stays 9 (13y's per-tenant `server_seq`, SyncSpec §12).
+**The dated delta record (Phase 0 → 13u4) lives in `notes/AppSpecDeltaArchive.md` and, for the pre-split narrative, `notes/AppSpecRulingsArchive.md` §14.** The closeout rule since 2026-09-26: a phase's canon delta lands in this document as a CONTRACT line (what is now true) plus a pointer to the plan file that carries the ruling — never a paragraph of history. **Most recent phase with canon deltas — 13i-a (2026-10-01, `notes/plans/phase-13i-a-schema-event.md` + the sitting record `notes/plans/phase-13i-sitting-record-2026-09-30.md`): §7 gains the `wing` and `shelf` tables and the reading/reading_post/tag/container 13i columns (the ONE lockstep bundle, marker 9→10, deployed at her 2026-10-01 window — SyncSpec §12's entry); `reading.kind`'s vocabulary is book/gathering (the sitting record §1); `query_spec` is the v2 rule grammar; `profile='daily'` is the daily Journal's marker (the identity memo §3 BUILT — the §7-SyncSpec keeper re-keyed, #85(a)'s corner closed); §9 gains `setJournalTrait`, the designation's marker move, and starred-absorbs-pins.** Before it — 18l-c (2026-09-28, `notes/plans/phase-18l-c-navigation-feel.md`): §7's NOT-seeded settings list gains `arrival_flash` (the round's one synced setting); TWO §12 contract lines DRAFTED AND PROPOSED to the author at the closeout, landing only at her word — the Takes find bar (her sitting rulings R-18l-6/9/10) and the mode-switch caret rule (R-18l-13); schema, migrations and `Sync/` untouched, marker 9. Before it — 18l, first half (2026-09-26, `notes/plans/phase-18l-navigation-feel.md`): the note-open rule (R-18l-1, §12); the 13g F-5 carve-out (R-18l-5, PROVISIONAL, #149); marker 9. Before it — 13u4 (2026-09-20/21, `notes/plans/phase-13u4-restyle.md`):** the Return key chains in an empty block (R-13u4-2, §7); the merge join is the rendering join on every door (R-13u4-3, §9 and OverallModel §7); `moveSpanToNewTake` (R-13u4-4, §9); the capture microsyntax (R-13u4-1, §12). Schema, migrations and `Sync/` untouched; the lockstep marker stays 9 (13y's per-tenant `server_seq`, SyncSpec §12).
 
 ## 15. Risk register (standing risks and why; deferred WORK is `KnownIssuesAndTechDebt.md`)
 

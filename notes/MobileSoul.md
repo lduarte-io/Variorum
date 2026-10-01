@@ -232,3 +232,5 @@ always wrong for mobile. The branch & merge discipline in that plan
 binds (pull `main` at stage kickoffs and batch boundaries; prompt her
 before merging outward). After the parity round, future mobile phases
 are planned against this document + the ledger above.
+
+- **PL-42 (13i-a, 2026-10-01 — the schema event):** the whole 13i-a substrate is SHARED core (v1_18, the book/gathering recast, per-wing tags, the v2 rule grammar, the 'daily' marker, starred-absorbs-pins), so the phone inherits it at its next build with behavior preserved (the recast sweep covered the mobile target; its pins rode or were honestly updated — the 13i-a plan's ledger). **The phone OWES:** (a) the marker-10 install (hers — it refuses to sync until then, the §12 grammar); (b) the wings/shelves/gatherings FACES and vocabulary (the Bookcase-as-list, Arrivals, the Collecting sentences — the sitting record §18.5's phone-expressible mandate), with 13i-b–d's Mac builds; (c) the catch-up's standing rows unchanged.

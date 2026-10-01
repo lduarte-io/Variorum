@@ -1,6 +1,13 @@
 # Phase 13i-a — THE SCHEMA EVENT (wings · shelves · the gathering/book recast · the 13i lockstep bundle)
 
-**STATUS: OPEN — kicked off 2026-09-30 by the author's `/architect-phase 13i-a` invocation, the same
+**STATUS: CLOSED 2026-10-01 — built, two-round ladder (zero disputes), DEPLOYED at her window
+(marker 9→10; "Synced 2:59 AM"), installed, canon deltas applied. Her tail: the phone's
+marker-10 install + the handoff's ratify bundle. The window record:
+`notes/plans/13i-a-deploy-checklist.md`; the ladder: `13ia-ladder-round{1,2}.md`.**
+
+*(The kickoff banner below is kept as written — the run's history.)*
+
+**WAS: OPEN — kicked off 2026-09-30 by the author's `/architect-phase 13i-a` invocation, the same
 day the design sitting closed.** The BINDING DESIGN is `notes/plans/phase-13i-sitting-record-2026-09-30.md`
 (§1–§25, fully ruled; §11 is this run's charter, §15 its scope line) — this file carries the
 EXECUTION: the concrete schema, the sync design, the units, the ledger, and the records. The brief
@@ -380,8 +387,8 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
 | 10 | `13_phase13i_wings.sql` + deploy checklist | DONE (the artifact in U1 commit 1 — the DDL pins demanded it beside the registry; the checklist `notes/plans/13i-a-deploy-checklist.md` in the U2 commit) |
 | 11 | SyncSpec §7/§12 text amendments | §7 DONE (the U2 commit: per-wing tag identity, status-aware pairs, the built daily-marker keeper + #85(a) closed, the two new repair paragraphs); the §12 running-record entry is written AT the deploy |
 | 12 | The ladder (fresh `fable-reviewer`, combined diff) | **CLOSED AT TWO ROUNDS** (R1: 2 BLOCKER · 3 MAJOR · 4 MINOR · 1 NIT, all dispositioned — `13ia-ladder-round1.md`; the fix set revert-verified, M-2's hollow pin sharpened and catching a second real defect; R2: every finding verdicted FIXED, ONE new MINOR + 2 NITs, no round 3 owed — `13ia-ladder-round2.md`; the R2 tail swept + pinned same-session). Zero disputes. Core finals 1771/187 |
-| 13 | Her deploy window (§8) | **GO GRANTED (2026-10-01, her message: "i have closed my real store, you can refresh, and you can do the remote sync push and all of that")** — executes AFTER the ladder closes (the checklist's own first gate); the Mac half is the session's, the PHONE's refresh is hers (it will visibly refuse to sync until she installs the marker-10 build — the §12 grammar) |
-| 14 | Closeout + handoff | NOT-STARTED |
+| 13 | Her deploy window (§8) | **DONE 2026-10-01** — deploy `[]` first-run; verify + sweep clean (63 OK · 4 INFO; the allowlist probe's quoting bug corrected with chr(39)); ONE live finding repaired by her hand (the wing/shelf `variorum_definer` DML grant — the artifact amended, the sweep gap owned at KnownIssues/18a); the marker-10 Release installed, codesign-verified; her round **"Synced 2:59 AM"**. The PHONE's install is her tail |
+| 14 | Closeout + handoff | DONE 2026-10-01 — the §12 entry; AppSpec §7/§9/§14 + OverallModel §2 contract lines; the master plan (pointer, closeout paragraph, 18o rolled to the archive); KnownIssues (+1 owned row, none owed); MobileSoul PL-42; the handoff `notes/handoffs/phase-13i-a-handoff.md`; 13i-b's plan + kickoff authored |
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
 
@@ -413,3 +420,8 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
   real instance untouched throughout.
 - **HER GO (2026-10-01, mid-run):** real store closed; refresh + the mirror deploy authorized.
   Order held: the LADDER first (the checklist's gate), then the window.
+
+- **THE WINDOW + CLOSEOUT (2026-10-01):** her four pastes (probe 9 → deploy `[]` → verify →
+  sweep 63 OK/4 INFO); the live 42501 finding repaired by her hand; `/Applications` refreshed;
+  her round clean at 2:59 AM. All records applied; the phase CLOSED. Nothing uncommitted; no
+  revert in flight.

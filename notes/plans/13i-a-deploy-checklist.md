@@ -88,3 +88,7 @@ reading columns; the allowlist + ciphertext probes true):**
   **Repair: `grant select, insert, update, delete on wing, shelf to variorum_definer;` by her
   hand; the artifact amended to carry it; the sweep's shape did not check definer table grants —
   noted for its next owner.**
+- The grant applied by her hand (`wing_ok`/`shelf_ok` both true) → her RETRY round ran clean:
+  **"Synced 2:59 AM"** — the Mac half of the window is COMPLETE (the recast rows pushed; the
+  marker handshake held). The PHONE's refresh is hers, any time; it refuses visibly until then.
+- The §12 running-record entry written (SyncSpec §12, marker 9→10, with the live finding).
