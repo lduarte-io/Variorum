@@ -195,9 +195,27 @@ final class ShelfViewModel {
                     throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
                 }
                 try ops.assertBookNameIsFree(name)
+                // HER MORNING RULING (13i-b, 2026-10-01 — P-13ib-3
+                // overruled): "the spawn isn't adding the auto tag? it
+                // should." Where the copied rule references exactly ONE
+                // tag, that tag is the spawned book's outflow; an OR fan
+                // or a star-only rule has no single honest outflow, so it
+                // stays unset (the editor's row is one click). The tag
+                // must be LIVE in the gathering's wing — a dead reference
+                // would make the outflow a silent no-op from birth.
+                var autoTagID: String?
+                let ruleTagIDs = RuleGrammar.tagIDs(
+                    of: RuleGrammar.decode(gathering.querySpec))
+                if ruleTagIDs.count == 1, let sole = ruleTagIDs.first,
+                   try database.read({
+                       try Queries.tagIsLive($0, id: sole, wingID: gathering.wingId)
+                   }) {
+                    autoTagID = sole
+                }
                 let book = try ops.createReading(
                     name: name, kind: .book,
-                    querySpec: gathering.querySpec, wingId: gathering.wingId)
+                    querySpec: gathering.querySpec, wingId: gathering.wingId,
+                    autoTagId: autoTagID)
                 let seated = try database.read {
                     try Queries.assembleReading($0, readingID: book.id).count
                 }

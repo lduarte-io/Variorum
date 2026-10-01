@@ -270,14 +270,20 @@ struct BookArrivalsTests {
             let onBook = try #require(ArrivalsLineProbe.drawn[readingID])
             #expect(onBook.line == "3 at the door")
 
-            // Outline and Read are not the ruled surfaces (§4: "atop the
-            // book's Index/Book surface") — the line leaves with them.
-            for mode: BookStructureModel.ViewMode in [.outline, .read] {
-                hosted.structure.mode = mode
-                await settle(hosted.window, hosted.hosting, maxTurns: 12)
-                #expect(ArrivalsLineProbe.drawn[readingID] == nil,
-                        "\(mode) carries no arrivals line")
-            }
+            // OUTLINE carries the line since her morning ruling (13i-b,
+            // 2026-10-01 — F-U2-1: "the arrivals visibility could be added
+            // to outline"); an HONEST TEST EDIT, flipped to the ruled truth
+            // (the original §4 letter named Index/Book only).
+            hosted.structure.mode = .outline
+            await settle(hosted.window, hosted.hosting, maxTurns: 12)
+            let onOutline = try #require(ArrivalsLineProbe.drawn[readingID])
+            #expect(onOutline.line == "3 at the door", "Outline is the third host")
+
+            // Read stays line-less — a place to read, never a judgment seat.
+            hosted.structure.mode = .read
+            await settle(hosted.window, hosted.hosting, maxTurns: 12)
+            #expect(ArrivalsLineProbe.drawn[readingID] == nil,
+                    "read carries no arrivals line")
         }
     }
 

@@ -1557,6 +1557,28 @@ for the ladder window); zero `Sync/`, schema, migrations — no STOP condition m
   instances throughout; `git status` clean. Ledger row 5 flipped. No revert in flight; nothing
   uncommitted. U4 CLOSED.
 
+## THE ADJUDICATION BATCH (the architect's own build, her three morning items — 2026-10-01)
+
+Built by the orchestrator-architect under the mandate's small-code allowance, AFTER U4's close
+and BEFORE the ladder (so the ladder reviews this diff cold like every other):
+1. **Outline carries the Arrivals line (F-U2-1, her ruling):** the one renderer's third host in
+   `BookView.outlineBody`'s mode branch — above the scroll content, zero height when empty.
+   The U2 absence pin FLIPPED to the ruled truth (an honest test edit, red-on-old by nature:
+   the pre-batch tree draws nothing on Outline and the `#require` fails there); Read stays
+   line-less.
+2. **The spawn sets the auto-tag (P-13ib-3 overruled, her ruling):** `ShelfViewModel.spawnBook`
+   derives the outflow from the copied rule's SOLE tag, live-in-wing checked through the new
+   `Queries.tagIsLive` (SQL at the Queries layer, not the view model); an OR fan, a star-only
+   rule, or a dead sole tag leaves it unset (the AMBIGUOUS ARM — PROVISIONAL, bundled). The U3
+   spawn pin flipped to the ruled truth + a new unset-arm pin.
+3. **The kill switch (her "can living books be killed?"):** VERIFIED built — the editor's
+   empty state already speaks both meanings ("this book collects nothing by itself" / "this
+   gathering shows every note") and a cleared draft saves NULL. The missing piece was the
+   END-TO-END pin, added: `clearingTheRuleKillsALivingBooksIntake` (remove the last term →
+   save → NULL stored → a fresh matching act neither seats nor bells).
+**Evidence:** the three touched Mac suites 28/3 GREEN; the FULL core suite **1907/199 GREEN**
+(1 standing skip) — the pre-ladder baseline. Ledger row 5.5 below.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
@@ -1566,6 +1588,7 @@ for the ladder window); zero `Sync/`, schema, migrations — no STOP condition m
 | 3 | U2 — the Arrivals face | **DONE 2026-10-01** — the U2 RECORD above (design map · P-13ib-U2-1…5 · F-U2-1…5 · THE WALK, 15 captures, both voices × both appearances); evidence: `ArrivalQueriesTests` 12 (incl. the EXPLAIN-plan pin) · `BookArrivalsTests` 10 mounted (absent/present on Index AND Book, gone on Outline/Read, expansion + both doors, Add at the END unsectioned, Dismiss, the capacity refusal on the seam, already-judged, vanish) · the registry walk (`BookArrivalsLine` the two acts' one renderer); 2 mutation checks bite; core 1852/194 green; Mac + mobile build; book-surface + registry + tutorial Mac suites 335/57 pass (4 standing known issues). **F-U2-3 joins F-1 in U3's charter** (the conversion sheet's wrong count) |
 | 4 | U3 — the rule editor + bind/spawn + the teaching moment | **DONE 2026-10-01** — the U3 RECORD above (design map · P-13ib-U3-1…7 · F-U3-1…6 · THE WALK, 27 captures, both voices × both appearances); evidence: `RuleEditingTests` 13 (the every-edit-touches-only-its-node property; unedited/malformed write nothing; legacy never removable) · P-13ib-6 pins 2 (red-on-old watched) + the §19.6 identity pin · `BindDoorTests` 8 (F-U2-3 red-on-old through the real shelf, mechanism confirmed by experiment; F-1's truth; identity + keeps collecting; spawn; the teaching offer) · `RuleEditorTests` 8 mounted · the registry walk (`.editRule`, `.bindIntoBook`, `.makeBookFromGathering`); 4 mutation checks bite; core 1868/195 green; Mac + mobile build; Mac suites 144/19 + 94/13 incl. the tutorial spine. **F-U3-3 is U4's to carry** (the gathering assembly's star context also feeds the bind) |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | **DONE 2026-10-01** — the U4 RECORD above (design map · P-13ib-U4-1…6 · F-U4-1…7 · THE WALK, 20 captures, both voices × both appearances); evidence: **F-U3-3 closed** — `StarContextTests` 11 (9 red-on-old, one per site class) · `StarredNotesGatheringTests` 9 + Mac `StarredGatheringSeederTests` 6 · Quicknotes' re-mint special-casing fixed (red-on-old 5 issues) + the pad's receipt pin · `PoolTuckTests` 7 (lesson 10's truth, the EXPLAIN plan, F-U4-1 red-on-old) + Mac `PoolTuckFaceTests` 6 (F-U4-3 red-on-old) · `ReadingFilterTests` 11; 8 mutation checks bite; core 1907/199 green; Mac + mobile build; Mac suites 216/32 + 98/14 incl. the tutorial spine |
+| 5.5 | The adjudication batch (Outline line · spawn auto-tag · the kill-switch pin) | DONE 2026-10-01 (the section above; 28/3 + core 1907/199) |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
 | 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
 

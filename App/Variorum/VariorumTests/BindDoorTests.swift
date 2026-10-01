@@ -205,7 +205,10 @@ struct BindDoorTests {
             #expect(book.kind == .book)
             #expect(book.querySpec == source.querySpec, "the rule copied")
             #expect(book.wingId == source.wingId)
-            #expect(book.autoTagId == nil, "auto-tag OFF (P-13ib-3)")
+            // HER MORNING RULING (2026-10-01, P-13ib-3 OVERRULED: "the
+            // spawn isn't adding the auto tag? it should") — an HONEST
+            // TEST EDIT: a one-tag rule's sole tag becomes the outflow.
+            #expect(book.autoTagId == tag.id, "the sole rule tag is the auto-tag")
             #expect(book.intakeSeating == nil, "intake on, joining quietly (nil reads AUTO)")
             // Creation-time BACKFILL seated the current matches as MEMBERS.
             let rows = try await db.read { db in
@@ -230,6 +233,34 @@ struct BindDoorTests {
             _ = try session.operations.applyTag(tag.id, toPost: later.id)
             #expect(try await db.read { try Queries.assembleReading($0, readingID: bookID) }
                 .map(\.postID).last == later.id)
+        }
+    }
+
+    /// The ruling's AMBIGUOUS ARM (PROVISIONAL, her bundle): a rule naming
+    /// SEVERAL tags (an OR fan) or none has no single honest outflow — the
+    /// spawn leaves the auto-tag unset; and a rule whose sole tag is DEAD
+    /// never becomes a silent no-op outflow.
+    @Test func theSpawnLeavesTheAutoTagUnsetWhereNoSoleLiveTagExists() async throws {
+        try await withBindWorld { session, db in
+            let ops = session.operations
+            let a = try ops.createTag(name: "a")
+            let b = try ops.createTag(name: "b")
+            let fan = try ops.createReading(
+                name: "fan", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.or([.tag(a.id), .tag(b.id)])))
+            let shelf = ShelfViewModel(session: session)
+            let fanBook = try #require(await shelf.spawnBook(from: fan.id, named: "fan (book)"))
+            #expect(try await db.read { try Queries.reading($0, id: fanBook)?.autoTagId } == nil,
+                    "an OR fan has no single honest outflow")
+
+            let dead = try ops.createTag(name: "dead")
+            let deadRule = try ops.createReading(
+                name: "gone", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.tag(dead.id)))
+            try ops.deleteTag(dead.id)
+            let deadBook = try #require(await shelf.spawnBook(from: deadRule.id, named: "gone (book)"))
+            #expect(try await db.read { try Queries.reading($0, id: deadBook)?.autoTagId } == nil,
+                    "a dead sole tag never becomes a silent outflow")
         }
     }
 

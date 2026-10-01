@@ -199,7 +199,15 @@ struct BookView: View {
                         structure.mode = .outline
                     })
             case .outline:
-                outlineBody
+                // HER MORNING RULING (13i-b, 2026-10-01 — F-U2-1): "the
+                // arrivals visibility could be added to outline." The same
+                // one renderer, its third host, placed exactly as Index
+                // places it — above the scroll content, zero height when
+                // empty, so an arrival-less book lays out byte-identically.
+                VStack(spacing: 0) {
+                    BookArrivalsLine(model: arrivals, structure: structure)
+                    outlineBody
+                }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the

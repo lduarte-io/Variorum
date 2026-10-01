@@ -181,4 +181,18 @@ extension Queries {
             arguments: StatementArguments(arguments))
         return TaggedItems(postIDs: postIDs, blockIDs: blockIDs)
     }
+
+    /// Whether a tag is LIVE in a wing (13i-b, the morning sitting's spawn
+    /// ruling): the spawn door derives an auto-tag only from a rule's sole
+    /// tag, and a dead or foreign-wing reference must never become an
+    /// outflow (U1's `applyAutoTag` would no-op it silently forever).
+    public static func tagIsLive(_ db: Database, id: String, wingID: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS(SELECT 1 FROM tag
+                  WHERE id = ? AND wing_id = ? AND deleted_at IS NULL)
+                """,
+            arguments: [id, wingID]) ?? false
+    }
 }

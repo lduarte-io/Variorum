@@ -367,4 +367,38 @@ struct RuleEditorTests {
             _ = db
         }
     }
+
+    /// THE KILL SWITCH (her morning sitting, 2026-10-01: "can living books
+    /// be killed?") — removing the rule's last term and saving stores NULL,
+    /// and the book's intake is OFF from that moment: a fresh matching
+    /// tagging act neither seats nor bells (P-13ib-5's "intake runs iff a
+    /// readable rule is present", proven on the editor's own clear road).
+    @Test func clearingTheRuleKillsALivingBooksIntake() async throws {
+        try await withEditorWorld { session, db in
+            let (work, _, _, _) = try vocabulary(session, db)
+            let ops = session.operations
+            let book = try ops.createReading(
+                name: "living", kind: .book,
+                querySpec: try RuleGrammar.encode(.tag(work.id)))
+            let model = await editor(session, book.id)
+
+            let row = try #require(model.rows.first, "the one tag term draws")
+            model.remove(row)
+            #expect(model.rows.isEmpty, "the cleared draft shows the no-rule state")
+            #expect(await model.save())
+
+            let stored = try await db.read { try Queries.reading($0, id: book.id)?.querySpec }
+            #expect(stored == nil, "the clear saves NULL, not an empty tree")
+
+            let note = try ops.createPost(title: "late")
+            _ = try ops.applyTag(work.id, toPost: note.id)
+            let pairRows = try await db.read {
+                try Int.fetchOne(
+                    $0,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                    arguments: [book.id, note.id]) ?? -1
+            }
+            #expect(pairRows == 0, "a rule-less book hears nothing — the kill is real")
+        }
+    }
 }
