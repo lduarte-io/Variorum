@@ -255,10 +255,111 @@ read counts from a row-independent aggregate if a count-only consumer ever lands
   F-U3-1 fix's no-mounted-pin deviation is recorded and adjudicated honestly (the
   before/after captures are its evidence — accepted).
 
-## DISPOSITIONS (filled after the cross-model exchange)
+## DISPOSITIONS — THE REVIEWER'S FINAL CALLS (2026-10-01, after the implementer's agree/dispute; fixes implemented by the reviewer in the same session, per the cross-model flow)
 
-*(pending — findings go to the implementer verbatim; its agree/dispute returns here; the
-reviewer makes the final call and implements confirmed fixes with their pins.)*
+**F-R1-1 — CONFIRMED · FIXED (df25b855).** Built to the architect's ruled shape (a), the
+implementer's refinements taken whole: `revertSmartConversion` flips each row it takes to
+`status='arrival'` AS it tombstones (one write — the dismissal class; a row she removed by
+hand was already tombstoned and keeps its member-class record), the redo box carries
+`(id, undo-time status)` and `reapplySmartConversion` restores each row AS WHAT IT WAS. Pin
+`anUndoneBindsResidueRingsAgainAsAnArrivalAfterARebind` — **RED WATCHED on the pre-fix tree**
+at the traced silence (`#require` nil at the fresh act), green after; it asserts a LIVE
+ARRIVAL exactly (refinement 3 — a seat would override the ruling as surely as silence).
+Both existing redo pins gained status assertions (refinement 2 — a status-forgetting redo
+now bites; the arrival pin already held its half). **Recorded, not built (per the
+orchestrator's constraints, both in the op's doc + the bundle):** the
+remove→re-add-by-hand→undo corner (the OLDER member tombstone still outranks the flip in
+`intakePairState`; closing it means ranking by the LATEST tombstone — low-priority,
+pinnable, hers to want) and the cross-device undo-vs-removal race (server-wins CAS; worst
+case her removal reads as a dismissal — the note rings again as an ARRIVAL, never
+auto-seated; self-limiting, no repair, zero `Sync/` stands).
+
+**F-R1-2 — CONFIRMED · FIXED (c5f84d88), the implementer's shape.** The derivation is the
+pure `RuleGrammar.soleOutflowTagID` (business rule out of the view model, P-9);
+`ShelfViewModel` keeps only the liveness fact. **The reviewer's final call on
+`#a ∧ NOT #b`: it stays UNSET** — her letter is "references exactly ONE distinct tag" and
+that rule references two; the ambiguous arm is the bundled PROVISIONAL, so the conservative
+reading risks nothing she ruled and the editor's row is one click (the architect's
+#a-satisfies-it reading is recorded here as the alternative, one line to flip). Polarity is
+PARITY (`NOT NOT #a` is positive); mixed polarity of one tag counts its positive reference.
+Core `RuleOutflowTests` 7/7 (the table, every arm) + Mac pin
+`spawnFromANegatedRuleLeavesTheOutflowUnset` — **RED WATCHED by behavioural revert** of the
+`ShelfViewModel` hunk (autoTagId = the negated tag), green on the fix; BindDoorTests 10/10
+at that commit.
+
+**F-R1-3 — CONFIRMED · FIXED (223ffaa8), words only, the implementer's malformed cell
+included.** The honest gate is `RuleGrammar.read == .rule`: `BindCopy.spawnMessage(for:)`
+speaks three truths (readable → the standing promise; no rule → "starts empty and collects
+nothing by itself until you give it a rule"; malformed → "starts empty and won't collect
+until the rule is fixed") and `spawned(_:count:collects:)` reserves "keeps collecting" for
+a readable rule. Pin `spawnFromARuleLessGatheringNeverClaimsItCollects` — **RED WATCHED on
+the pre-fix words** (the receipt's exact lie: "0 notes joined, and it keeps collecting."),
+green after, with the malformed cell end-to-end and the per-state words table.
+**The question half stays BUNDLED** beside F-U4-7 (whether a rule-less gathering should
+offer the spawn at all — hers). BindDoorTests 11/11.
+
+**F-R1-4 — CONFIRMED · RECORD-ONLY (closeout's canon delta drafts; no code).** The two
+clauses, drafted for ledger row 7 to lift:
+(a) AppSpec §7 `reading_post.status` note — replace "dismissing writes a born-tombstoned
+row" with the CLASS, per the implementer's refinement: *"a tombstoned `arrival`-status row
+is a dismissal record — a judged dismissal, finishing's sweep, or an un-bind's residue
+(F-R1-1); dismissing tombstones the standing arrival row (created at the ring, deleted at
+the judgment — the born-tombstoned-EQUIVALENT decision record)."*
+(b) AppSpec §9 structural-undo bullet — after "an exact-row `redo` built from do-time
+pre-images (never a re-run — IDs must survive undo↔redo)" add: *"…or, where the inverse
+deliberately takes more than the do-time rows (the bind's undo, P-13ib-6), from UNDO-time
+captures carrying (id, status) — exact-row either way: ids AND statuses survive the round
+trip."*
+
+**F-R1-5 — CONFIRMED · FIXED (665431ad), the full removal at the implementer's corrected
+census.** `keepCollecting`/`collectingName`, `SmartConversionResult.collectingReading`, the
+collector mint, both undo halves' collector arms and the registration's `collectingID` all
+removed; three pins died whole with their subject, three kept their trimmed real subjects
+(the finished refusal still asserts no-second-book; the undo/redo pin keeps its exact-row
+contract; the outbox pin its rows), and the retirement's own pin landed
+(`theBindMintsNoSiblingAndTheBoundBookKeepsCollecting`). Structural cleanup — no behavior
+change at any shipped door, so no red-on-old exists or is claimed (the justification is the
+reachable dead double-collector). SmartConversionTests 23/23.
+
+**F-R1-6 — DISPUTE SUSTAINED · RECORD-ONLY.** The implementer's unreachability trace is
+concrete and verified against the source: `fileAsQuicknote` has ONE caller, which files the
+post `importPost` minted in the SAME serialized runner closure, untagged; the pad's
+microsyntax applies tags only AFTER the filing returns; no re-file door exists. So
+`.alreadyTagged` under a deleted Quicknotes cannot be produced by any door, no red-on-old
+pin can exist, and the hallucination guard's stop sign binds: record, don't fix. Recorded
+for whichever future door first re-files a note — the structural shape then is
+`.alreadyTagged(tagID:, readingID: String?)` so the face can choose its words honestly.
+
+**F-R1-7 — CONFIRMED AS RECORDED · 13i-c's door enumeration.** The stray-member-row-on-a-
+gathering reading reaches THREE readers (the implementer's addition folded in):
+`membershipElsewhere` (the owned arms would bell instead of claim — self-limiting), the
+Pool exclusion (a stray member row reads as a home — the note leaves the Pool), and
+`readingsContaining`'s membership leg (the gathering listed as a book). All unreachable by
+local doors since P-13ib-6; sync strays only. One row for 13i-c's enumeration checklist
+(`AND r.kind = 'book'` where membership means a BOOK's) — carried to the closeout's
+hand-off notes.
+
+**F-R1-8 — CONFIRMED · GUARD + DOC (this commit).** `poolListing` now documents the
+`window ≥ 1` contract (the counts ride the rows; the `bookArrivals(limit: 0)` idiom does
+not transfer) and asserts it (a DEBUG oracle — no caller passes 0; release behaves as
+today). A count-only consumer, if one ever lands, needs a row-independent aggregate.
+
+### The fix pass, verified
+
+Commits: df25b855 (F-R1-1) · c5f84d88 (F-R1-2) · 223ffaa8 (F-R1-3) · 665431ad (F-R1-5) ·
+this commit (F-R1-8 + dispositions + ledger). Every bug-class fix carries its red-watched
+pin (F-R1-1 red at the traced silence; F-R1-2 red by behavioural revert; F-R1-3 red on the
+pre-fix words); the structure single (F-R1-5) claims none. **End-of-pass verification, after
+the last code edit:** the FULL core suite — **"Test run with 1913 tests in 200 suites
+passed"** (1 skipped: the standing env-gated Supabase integration test; baseline 1907/199
+at the pre-ladder close → +7 `RuleOutflowTests` + the F-R1-1 pin + F-R1-5's net −2). The
+touched Mac suites, struct-named, counts read exactly: BindDoor · BookOrderConversion ·
+PoolTuckFace · SnippetGroupTrash · BlockTOC — **"Test run with 38 tests in 5 suites
+passed"**; BookAscentDeclaration · CalloutEmojiPicker · CalloutSwatch ·
+DuplicateBookNameDoor · PromoteAndPalette · ShelfModel (the DoorSet and ShelfAndPalette
+files' suites) — **"Test run with 26 tests in 6 suites passed"**; 0 issues, 0 skipped.
+The mobile target (`VariorumMobile`, generic iOS Simulator) — **BUILD SUCCEEDED** (no
+caller of the removed API). Zero instances throughout (`pgrep` clean).
 
 ## THE IMPLEMENTER'S AGREE/DISPUTE (round 1)
 

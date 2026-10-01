@@ -255,7 +255,14 @@ extension Queries {
     /// are author-scale; nothing reads text. This is the shipped Pool's own class
     /// (it already ran every gathering's rule over every bookless note per
     /// tick); the split adds the tucked class's count, not a new dimension.
+    /// `window` must be ≥ 1 (ladder F-R1-8): the per-class counts are read
+    /// off the returned rows (`COUNT(*) OVER` rides each row), so a
+    /// zero-row window would answer 0/0 for non-empty classes. No count-only
+    /// caller exists; if one ever lands, it needs a row-independent
+    /// aggregate, not `window: 0` (the `bookArrivals(limit: 0)` idiom does
+    /// NOT transfer here).
     public static func poolListing(_ db: Database, window: Int) throws -> PoolListing {
+        assert(window >= 1, "poolListing's counts ride its rows — window: 0 would lie (F-R1-8)")
         let statement = try poolListingSQL(db)
         let rows = try Row.fetchAll(
             db, sql: statement.sql,

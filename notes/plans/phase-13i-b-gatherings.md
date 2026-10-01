@@ -1608,7 +1608,7 @@ re-reviews the fixes under a FRESH reviewer; then one implementer sanity pass.
 | 4 | U3 — the rule editor + bind/spawn + the teaching moment | **DONE 2026-10-01** — the U3 RECORD above (design map · P-13ib-U3-1…7 · F-U3-1…6 · THE WALK, 27 captures, both voices × both appearances); evidence: `RuleEditingTests` 13 (the every-edit-touches-only-its-node property; unedited/malformed write nothing; legacy never removable) · P-13ib-6 pins 2 (red-on-old watched) + the §19.6 identity pin · `BindDoorTests` 8 (F-U2-3 red-on-old through the real shelf, mechanism confirmed by experiment; F-1's truth; identity + keeps collecting; spawn; the teaching offer) · `RuleEditorTests` 8 mounted · the registry walk (`.editRule`, `.bindIntoBook`, `.makeBookFromGathering`); 4 mutation checks bite; core 1868/195 green; Mac + mobile build; Mac suites 144/19 + 94/13 incl. the tutorial spine. **F-U3-3 is U4's to carry** (the gathering assembly's star context also feeds the bind) |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | **DONE 2026-10-01** — the U4 RECORD above (design map · P-13ib-U4-1…6 · F-U4-1…7 · THE WALK, 20 captures, both voices × both appearances); evidence: **F-U3-3 closed** — `StarContextTests` 11 (9 red-on-old, one per site class) · `StarredNotesGatheringTests` 9 + Mac `StarredGatheringSeederTests` 6 · Quicknotes' re-mint special-casing fixed (red-on-old 5 issues) + the pad's receipt pin · `PoolTuckTests` 7 (lesson 10's truth, the EXPLAIN plan, F-U4-1 red-on-old) + Mac `PoolTuckFaceTests` 6 (F-U4-3 red-on-old) · `ReadingFilterTests` 11; 8 mutation checks bite; core 1907/199 green; Mac + mobile build; Mac suites 216/32 + 98/14 incl. the tutorial spine |
 | 5.5 | The adjudication batch (Outline line · spawn auto-tag · the kill-switch pin) | DONE 2026-10-01 (the section above; 28/3 + core 1907/199) |
-| 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
+| 6 | The ladder (fresh `fable-reviewer`, combined diff) | **ROUND 1 FIXES LANDED 2026-10-01; round 2 owed** — `notes/plans/13ib-ladder-round1.md` whole (1 MAJOR · 4 MINOR · 3 NIT → 5 fixed, 1 dispute sustained record-only, 2 recorded; every disposition written). Fixes: F-R1-1 the un-bind residue ranks as the DISMISSAL class (red-watched pin + status-asserting redo pins) · F-R1-2 `RuleGrammar.soleOutflowTagID` (core 7/7 + Mac red-by-revert pin) · F-R1-3 the spawn's per-rule-state truth words (red-watched, malformed cell included) · F-R1-5 the dead "(collecting)" surface removed whole (F-U3-4 closed; SmartConversionTests 23/23) · F-R1-8 the poolListing window contract. End-of-pass: FULL core suite + 7 touched Mac suites green (counts in the ladder file §fix-pass) |
 | 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
 
 ## THE MORNING BUNDLE (everything held for her; grows as the run proceeds)
@@ -1638,7 +1638,17 @@ re-reviews the fixes under a FRESH reviewer; then one implementer sanity pass.
    build aren't heard by books until a catch-up occasion; a phone rebuild whenever convenient.
 8. **P-13ib-6 (architect, with U3):** undoing a BIND leaves no live member row on the
    reverted gathering — a gathering holds nothing; every row tombstones at the revert,
-   intake-seated and hand-added alike.
+   intake-seated and hand-added alike. **Ladder riders (F-R1-1, built to the architect's
+   ruling):** the rows an un-bind takes now rank as the DISMISSAL class (they ring again on
+   a fresh act after a re-bind — never auto-seated; a member you removed by hand stays
+   out). Two corners recorded for you, not built: (a) remove→re-add-by-hand→undo still
+   reads as "removed for good" for that pair (the older member tombstone outranks — one
+   LATEST-tombstone read to change if you want it); (b) across two devices, your removal
+   racing the other device's un-bind can come out ranked as a dismissal — the note then
+   rings again as an ARRIVAL on a fresh act, never auto-seated (documented, no repair).
+   **And F-R1-3's question half, beside F-U4-7:** should a gathering with NO rule offer
+   "Make a Book from This Gathering…" at all? (Its words now tell the born-empty truth
+   either way.)
 9. Anything the remaining units add (held taste calls, walk findings).
 
 ## HER MORNING SITTING — RULINGS (2026-10-01, mid-U4; recorded verbatim-faithful the same turn)
