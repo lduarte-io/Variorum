@@ -184,7 +184,7 @@ struct SmartBookMembershipTests {
             // wing scope; the plan pin's subject — the join order — is
             // unchanged.
             let statement = Queries.smartMembershipSQL(
-                .tag(stars.id), wingID: "")
+                .tag(stars.id), wingID: "", starredNoteIDs: [])
             let json = String(
                 decoding: try JSONEncoder().encode([post.id]), as: UTF8.self)
             let plan = try db.read { database in

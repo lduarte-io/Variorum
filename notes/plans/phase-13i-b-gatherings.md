@@ -1257,6 +1257,17 @@ STOP condition met.
   by design (they guard the fix against over-matching). First run note: the observation pin's bare
   `next()` HUNG on the old tree (no re-emission) — rewritten deadline-bounded so red is a failure, not
   a hang.
+- Piece 3 (this commit) — **A, the star context, FIXED (F-U3-3 closed).** `ruleMatchSQL`,
+  `matchesRule` and `smartMembershipSQL` lose the `starredNoteIDs = []` default (the compiler now
+  enumerates the sites — the complete list: the gathering arm of `assembleReading`; `bookWordCounts`;
+  `poolPosts`; `readingsContaining`; `smartBookMembership` → `smartMembershipSQL`; the collect door's
+  two probes; intake's `intakeEvent` + `intakeSweep`, which already passed it). `Queries.StarContext`
+  is the ONE way a site gets the list: `ids(_:for:)` answers `[]` with NO read when the rule has no ★,
+  else reads `starredNoteIDs` once per context (a loop over every gathering pays one setting read at
+  most). A star gathering's held observation now tracks the `setting` row — un-starring re-emits.
+  The one test caller (`SmartBookMembershipTests`' EXPLAIN pin) passes `[]` explicitly. **`StarContextTests`
+  11/11 GREEN** (9 red before); neighbours (membership, collect, quicknote, wing scoping, assembly,
+  conversion, intake ops, ritual, shelf queries, tagsAll, stars) — **165 tests / 16 suites green**.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

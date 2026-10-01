@@ -51,7 +51,13 @@ extension Operations {
             case .none: term = nil
             case .rule(let t): term = t
             }
-            if try matchesRule(db, postID: postID, term: term, wingID: reading.wingId) {
+            // 13i-b U4 (F-U3-3): the ★ term's context, so a starred note is
+            // honestly "already matched" and a tag the door applies can
+            // complete a `tag ∧ ★` rule.
+            var stars = Queries.StarContext()
+            let starred = try stars.ids(db, for: term)
+            if try matchesRule(
+                db, postID: postID, term: term, wingID: reading.wingId, starredNoteIDs: starred) {
                 return SmartCollectResult(appliedTagPaths: [], alreadyMatched: true)
             }
             // The filters tagging cannot satisfy refuse BEFORE any write,
@@ -165,7 +171,9 @@ extension Operations {
             // The probe must pass now — a rule this op can't satisfy by
             // tagging refuses loudly, and the transaction unwinds the
             // applications (never a half-tagged post).
-            guard try matchesRule(db, postID: postID, term: term, wingID: reading.wingId) else {
+            guard try matchesRule(
+                db, postID: postID, term: term, wingID: reading.wingId, starredNoteIDs: starred)
+            else {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
                     reason: "tagging alone can't satisfy its filter")
@@ -176,11 +184,12 @@ extension Operations {
 
     /// The assembly's own predicate (`ruleMatchSQL` — ONE implementation,
     /// the Stage B rule), probed for a single post. `starredNoteIDs` is the
-    /// star term's context (13i-b U1's intake passes the live list; the
-    /// collect door's callers are U4's to wire).
+    /// star term's context — REQUIRED since 13i-b U4 (F-U3-3), like
+    /// `ruleMatchSQL`'s own: intake passes the live list (U1), the collect
+    /// door its `StarContext` (U4).
     func matchesRule(
         _ db: Database, postID: String, term: RuleTerm?, wingID: String,
-        starredNoteIDs: [String] = []
+        starredNoteIDs: [String]
     ) throws -> Bool {
         let match = Queries.ruleMatchSQL(term, wingID: wingID, starredNoteIDs: starredNoteIDs)
         let conditions = [

@@ -91,6 +91,7 @@ extension Queries {
         // Smart books: derived membership through the ONE shared predicate
         // (a word target on a smart book must show real progress — the
         // extent sheet offers it).
+        var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
             // Malformed rules fail closed (skipped); NO rule counts every
             // post — the v1 letter per site.
@@ -100,7 +101,8 @@ extension Queries {
             case .none: term = nil
             case .rule(let t): term = t
             }
-            let match = ruleMatchSQL(term, wingID: reading.wingId)
+            let match = ruleMatchSQL(
+                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
             let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
                                "c.kind = 'post'"] + match.conditions)
                 .joined(separator: " AND ")
@@ -200,6 +202,7 @@ extension Queries {
                            AND rp.status = 'member')
             """]
         var arguments: [(any DatabaseValueConvertible)?] = []
+        var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
             switch RuleGrammar.read(reading.querySpec) {
             case .none:
@@ -211,7 +214,8 @@ extension Queries {
                 // excludes nothing here (the v1 letter).
                 continue
             case .rule(let term):
-                let match = ruleMatchSQL(term, wingID: reading.wingId)
+                let match = ruleMatchSQL(
+                    term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
                 exclusions.append("NOT (" + match.conditions.joined(separator: " AND ") + ")")
                 arguments += match.arguments
             }
@@ -254,6 +258,7 @@ extension Queries {
                 ORDER BY r.name, r.id
                 """,
             arguments: [postID])
+        var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
             // Malformed fails closed (skipped); NO rule matches every
             // post, so the chip lists the gathering (the v1 letter).
@@ -263,7 +268,8 @@ extension Queries {
             case .none: term = nil
             case .rule(let t): term = t
             }
-            let match = ruleMatchSQL(term, wingID: reading.wingId)
+            let match = ruleMatchSQL(
+                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
             let conditions = (["c.id = ?", "c.deleted_at IS NULL",
                                "c.archived_at IS NULL", "c.kind = 'post'"]
                               + match.conditions).joined(separator: " AND ")
@@ -317,6 +323,7 @@ extension Queries {
             decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
             as: UTF8.self)
         var result: [String: [String]] = [:]
+        var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
             let term: RuleTerm?
             switch RuleGrammar.read(reading.querySpec) {
@@ -324,7 +331,8 @@ extension Queries {
             case .none: term = nil
             case .rule(let t): term = t
             }
-            let statement = smartMembershipSQL(term, wingID: reading.wingId)
+            let statement = smartMembershipSQL(
+                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
             let ids = try String.fetchAll(
                 db, sql: statement.sql,
                 arguments: StatementArguments([json] + statement.arguments))
@@ -338,9 +346,9 @@ extension Queries {
     /// than a copy of it that could drift away from what ships. The first
     /// argument is always the page's ids as a JSON array.
     static func smartMembershipSQL(
-        _ term: RuleTerm?, wingID: String
+        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String]
     ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
-        let match = ruleMatchSQL(term, wingID: wingID)
+        let match = ruleMatchSQL(term, wingID: wingID, starredNoteIDs: starredNoteIDs)
         let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
                            "c.kind = 'post'"] + match.conditions)
             .joined(separator: " AND ")

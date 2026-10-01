@@ -341,10 +341,19 @@ extension Queries {
             // The v1 letter kept exactly: NULL = no rule (match-all);
             // MALFORMED fails closed (the gathering shows nothing).
             let match: (conditions: [String], arguments: [(any DatabaseValueConvertible)?])
+            var stars = StarContext()
             switch RuleGrammar.read(reading.querySpec) {
             case .malformed: return []
-            case .none: match = ruleMatchSQL(nil, wingID: reading.wingId)
-            case .rule(let term): match = ruleMatchSQL(term, wingID: reading.wingId)
+            case .none: match = ruleMatchSQL(nil, wingID: reading.wingId, starredNoteIDs: [])
+            case .rule(let term):
+                // 13i-b U4 (F-U3-3): the ★ term's context — read only when
+                // the rule carries one, so a held observation of a star
+                // gathering TRACKS the 'starred' setting (an un-star evicts
+                // on the next emission) and every other gathering's never
+                // touches it.
+                match = ruleMatchSQL(
+                    term, wingID: reading.wingId,
+                    starredNoteIDs: try stars.ids(db, for: term))
             }
             conditions += match.conditions
             arguments += match.arguments
@@ -471,11 +480,14 @@ extension Queries {
     /// A nil term is NO RULE: wing scope only (the standing match-all).
     ///
     /// `starredNoteIDs` is the star term's context (the 'starred' setting's
-    /// note targets, capped at `starLimit`) — no stored rule carries a star
-    /// term until 13i-b builds the starred gathering, and the sites that
-    /// will serve it pass the real list then; the default matches nothing.
+    /// live NOTE targets — `starredNoteIDs(_:)`; the `IN` list is bounded by
+    /// `Operations.starLimit`, which caps the write side). **REQUIRED, no
+    /// default** (13i-b U4, F-U3-3): the old `= []` let every caller but
+    /// intake match a ★ term against NOTHING, silently — so the compiler now
+    /// enumerates the sites, and each passes `StarContext.ids` (a read only
+    /// when its rule carries a ★) or an explicit `[]` where no rule exists.
     static func ruleMatchSQL(
-        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String] = []
+        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String]
     ) -> (conditions: [String], arguments: [(any DatabaseValueConvertible)?]) {
         var conditions: [String] = ["c.wing_id = ?"]
         var arguments: [(any DatabaseValueConvertible)?] = [wingID]
@@ -485,6 +497,34 @@ extension Queries {
             arguments += built.arguments
         }
         return (conditions, arguments)
+    }
+
+    /// **The star term's context, read lazily** (13i-b U4 — F-U3-3, the ONE
+    /// way a site gets `ruleMatchSQL`'s `starredNoteIDs`). `ids(_:for:)`
+    /// answers `[]` without touching the store when the rule carries no ★
+    /// term, and otherwise reads `starredNoteIDs` ONCE per context — so a loop
+    /// over every gathering (the Pool, the chip, the word counts, the Library
+    /// card) pays one setting read at most, and only when some rule needs it.
+    ///
+    /// Why lazily and not always: a HELD observation tracks what its fetch
+    /// read. A star gathering's assembly must read the setting (that is what
+    /// makes an un-star evict on the next emission); a tag-only gathering's
+    /// must not start re-fetching on every unrelated setting write.
+    ///
+    /// Cost: one `setting` row + at most `Operations.starLimit` (15) id
+    /// resolutions in two indexed reads (`Queries.starred`'s own bound).
+    struct StarContext {
+        private var cached: [String]?
+
+        init() {}
+
+        mutating func ids(_ db: Database, for term: RuleTerm?) throws -> [String] {
+            guard RuleGrammar.referencesStar(term) else { return [] }
+            if let cached { return cached }
+            let fresh = try Queries.starredNoteIDs(db)
+            cached = fresh
+            return fresh
+        }
     }
 
     private static func ruleSQL(
