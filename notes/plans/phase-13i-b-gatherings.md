@@ -1598,6 +1598,41 @@ delta drafts. **Flow:** findings to a fresh implementer voice VERBATIM for agree
 reviewer makes the final calls and implements its confirmed fixes itself (authorized); round 2
 re-reviews the fixes under a FRESH reviewer; then one implementer sanity pass.
 
+## HER SECOND SITTING MESSAGE (2026-10-01, mid-walk; verbatim-faithful) + THE WALK + THE INSTALL
+
+**Her words on the spawn outflow finding:** *"can you explain this a bit more? if I want it
+changed it'll be added to the next phase. I think it's fine for a book to add multiple tags
+automatically - journal, for example, might add journal AND the particular journal it's a part
+of."* Explained in the sitting reply; ROUTED at her word to 13i-c's plan as TWO distinct items:
+(i) the one-line positive-sole-tag flip for the spawn (`#a AND NOT #b` → `#a` flows out — no
+schema); (ii) **the MULTI-TAG OUTFLOW design question** — today's deployed schema carries ONE
+`auto_tag_id`; several outflow tags is a design ruling with a storage shape behind it, AND the
+tag HIERARCHY may already serve her journal example without any change (auto-tag the CHILD
+`journal/dream` and subtree matching makes the note visible to every `journal`-subtree rule —
+one application, both meanings). 13i-c's sitting explains the fork and takes her ruling.
+(Her earlier message acknowledged the walk's guard stop — "you can retry if needed" — the idle
+monitor had already resumed it.)
+
+**THE ACCEPTANCE WALK — DONE (2026-10-01, the orchestrator's own hand; captures
+`notes/plans/13ib-screens/final-walk/s/`):** the composed flows driven on the post-ladder Debug
+build: the rule editor's dial set to wait-at-arrivals on "the door" → a `{#door13ib}` quick-note
+capture ARRIVED at the door → **the OUTLINE surface carried "2 at the door"** (her morning
+ruling, walked) → Add seated it at the END, unfiled, the line folding to "1 at the door" →
+the spawn door minted "refresh walk (book)" with 2 backfilled members, the truthful receipt
+("2 notes joined, and it keeps collecting"), **and the AUTO-TAG riding** ("notes written here
+are tagged: #spawn13ib" — the adjudication batch, walked) → the clear's empty state spoke the
+kill switch ("No rule yet — this book collects nothing by itself."), cancelled to keep the book
+→ the Pool masthead read "90 notes · 20 in gatherings · show" (lesson 10's sentence, walked).
+One guard stop mid-walk (HID input — hers; the idle monitor resumed it); zero stray writes.
+
+**THE INSTALL REFRESH — DONE at her sanctioned window:** zero instances verified; the A1
+WAL-safe triple into `Backups/safety-copies/` (`variorum-backup-a1-13ib-refresh-…T195740Z`);
+Release built; `/Applications/Variorum.app` replaced; **codesign verified**. ONE SLIP, recorded
+honestly: a stray `--version` probe in the install chain LAUNCHED the real-store binary; it ran
+idle for ~3 minutes with no user state and was quit by the graceful Quit event; zero instances
+re-verified. The probe is struck from the procedure (the runbook's refresh steps never included
+it — my addition, my mistake).
+
 ## THE SANITY PASS + THE ORCHESTRATOR'S ROUTING (2026-10-01)
 
 The implementer's sanity pass over the cumulative fix diff: CLEAN BILL (its section in
