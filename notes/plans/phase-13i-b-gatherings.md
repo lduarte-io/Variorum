@@ -1369,7 +1369,33 @@ STOP condition met.
 8. **P-13ib-6 (architect, with U3):** undoing a BIND leaves no live member row on the
    reverted gathering — a gathering holds nothing; every row tombstones at the revert,
    intake-seated and hand-added alike.
-9. Anything the remaining units add (held taste calls, walk findings). **U1:** P-13ib-U1-1…9 (the U1 RECORD —
+9. Anything the remaining units add (held taste calls, walk findings).
+
+## HER MORNING SITTING — RULINGS (2026-10-01, mid-U4; recorded verbatim-faithful the same turn)
+
+1. **F-U2-1 RULED — Outline carries the Arrivals line too.** Her words: *"i think the arrivals
+   visibility could be added to outline."* Build: the same `BookArrivalsLine` wired into the
+   book's Outline surface (the one renderer, a third host). **Owner: the architect's
+   post-U4 adjudication batch** (small; lands before the ladder so the ladder reviews it cold).
+2. **P-13ib-1 RATIFIED — auto-tag applies on hand-add.** Her words: *"I think that hand adding
+   a note to a collecting book should apply the auto tag."* As built at U1.
+3. **P-13ib-3 OVERRULED — the SPAWN door sets the auto-tag.** Her words: *"the spawn isn't
+   adding the auto tag? it should."* Implementation reading (stated to her in the sitting
+   reply; PROVISIONAL on the ambiguous arm only): where the copied rule references exactly ONE
+   distinct tag, the spawned book's `auto_tag_id` is that tag; where the rule names several
+   tags (an OR fan) or none (star-only), there is no single honest outflow — the spawn leaves
+   it unset and the rule editor's row is one click (the ambiguous arm is bundled back to her).
+   **Owner: the architect's post-U4 adjudication batch.**
+4. **Her "can living books be killed?" — answered in the sitting reply, with one gap found:**
+   intake stops by CLEARING the rule (Edit Rule…) or pauses by FINISHING; deleting the book
+   is the ordinary Trash road. **VERIFY ITEM for the adjudication batch:** the U3 editor must
+   be able to save an EMPTY rule as NULL on a book (the kill switch — P-13ib-5's "intake runs
+   iff a readable rule is present"); on a GATHERING a cleared rule means match-all (the
+   standing NULL-spec letter), so the editor's clear door should say which it will mean.
+5. **P-13ib-U1-1 RATIFIED as built.** Her words: *"I think the new act on the note bringing it
+   back to arrivals is fine - i would expect that. if there's a new tag on there, i might want
+   it to come in. so yes, not dismissed forever. as build is good."* The §2.1 amendment and
+   the U1 shape stand; the QUESTIONS entry closes as answered at the phase's close. **U1:** P-13ib-U1-1…9 (the U1 RECORD —
    U1-1 is the reconciliation of §4's tombstone-means-decided with §24's "returns on a fresh act");
    F-2 (pre-13i-b converted books are now living) and F-3 (the phone runs intake from its next build).
    **U2:** P-13ib-U2-1…5 (the U2 RECORD — where the line stands, archived waiting notes, the
