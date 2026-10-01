@@ -1,4 +1,3 @@
-import ConcurrencyExtras
 import Foundation
 import GRDB
 import Testing
@@ -94,37 +93,27 @@ struct StarContextTests {
         }
     }
 
-    /// Deadline-bounded on purpose: on the pre-U4 tree the assembly never
-    /// read the 'starred' setting, so an un-star re-emitted NOTHING and a
-    /// bare `next()` would hang rather than fail.
-    @Test func aHeldObservationOfAStarGatheringHearsTheUnstar() async throws {
+    /// Bounded by a ONE-MINUTE time limit on purpose: on the pre-U4 tree the
+    /// assembly never read the 'starred' setting, so an un-star re-emitted
+    /// NOTHING and the second `next()` would wait forever — the limit turns
+    /// that into a failure. Awaiting the observation's own `next()` (the
+    /// `ObservationQueryTests` shape) rather than polling a deadline keeps the
+    /// pin honest under a full suite's parallel load (a 5 s poll starved there
+    /// once — the first emission arrived late, not never).
+    @Test(.timeLimit(.minutes(1)))
+    func aHeldObservationOfAStarGatheringHearsTheUnstar() async throws {
         try await withOperationsAsync { ops, db in
             let w = try world(ops) { _ in .star }
-            let seen = LockIsolated<[[String]]>([])
-            let feed = Task {
-                for try await value in db.observeReading(w.gathering.id) {
-                    seen.withValue { $0.append(value.map(\.postID)) }
-                }
-            }
-            defer { feed.cancel() }
-            #expect(await within(seconds: 5) { seen.value.count >= 1 })
-            #expect(seen.value.first == [w.starredTagged.id, w.starredOnly.id])
+            var values = db.observeReading(w.gathering.id).makeAsyncIterator()
+            let initial = try await values.next()
+            #expect(initial?.map(\.postID) == [w.starredTagged.id, w.starredOnly.id])
             // The assembly READ the 'starred' setting, so the observation
             // tracks it: un-starring re-emits without any other write.
             try ops.setStarred(.post(w.starredOnly.id), starred: false)
-            #expect(await within(seconds: 5) { seen.value.count >= 2 },
+            let afterUnstar = try await values.next()
+            #expect(afterUnstar?.map(\.postID) == [w.starredTagged.id],
                     "un-starring alone re-emitted the gathering")
-            #expect(seen.value.last == [w.starredTagged.id])
         }
-    }
-
-    private func within(seconds: Double, _ condition: () -> Bool) async -> Bool {
-        let deadline = Date().addingTimeInterval(seconds)
-        while Date() < deadline {
-            if condition() { return true }
-            try? await Task.sleep(for: .milliseconds(10))
-        }
-        return condition()
     }
 
     // MARK: - The bind (materializes the assembly — F-U3-3's sharpest edge)
