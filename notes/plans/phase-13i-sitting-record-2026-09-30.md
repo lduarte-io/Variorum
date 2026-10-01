@@ -588,6 +588,38 @@ many-books case (a bounded books section with its own scroll — her lean — or
   a SOLO filter — books · gatherings · finished · owned · living · with arrivals. ONE line
   between masthead and content, ever.
 
-**NEXT:** the UI iteration continues on mockup v4; then `/architect-phase 13i-a`. Standing
-PROPOSED-unless-she-objects: §19's defaults and harvest (plainly enumerated to her this round),
-§22's sort overlay, §23's № shape itself.
+## 24. THE CLOSING ROUND (2026-09-30) — the defaults ratified, two overruled, the sort ruled; READY TO BUILD
+
+- **§19 RATIFIED by her, item by item:** subtree matching (1) · rules remember tags by ID (2) ·
+  un-tag/un-star are non-events (3) · context mint (4) · Journal and Quicknotes start unshelved
+  (6) · starred gatherings in the Starred section (7). Bind-preserves-identity was already hers.
+- **§19.5 OVERRULED — unshelved renders at the TOP of All**, under its own collapsible
+  "unshelved" header: *"they're the least convenient to find elsewhere… the Unshelved can just
+  be collapsed if needed."* Its books remain manually orderable like any shelf's.
+- **§19.8 OVERRULED — FINISHING A BOOK DISMISSES ITS PENDING ARRIVALS** (born-tombstoned decided
+  rows): *"you're finishing the book… it would be cluttered for arrivals to hang out on a
+  finished book."* The finish confirm carries one line ("N waiting at the door will be
+  dismissed"). Consequence recorded: a dismissed arrival returns only on a FRESH tagging act
+  (tombstone-means-decided); the un-finish catch-up covers the gap only.
+- **THE BOOKCASE SORT — RULED (supersedes §22's two-option sketch):** `order ▾` = **A–Z (the
+  DEFAULT** — her words: *"the cleanest rule for all and makes it seem more neat and serious"*)
+  **· last edited · my order**. "My order" is the PLACING MODE — drag and Send to Top / Bottom
+  live there; it **remembers every placement and appends never-placed books at the end**
+  (mechanically free: fractional positions persist across mode switches; new books mint
+  end-positions). The chosen order applies WITHIN EVERY SHELF and the unshelved run; starred
+  books float first under any order. View-local, remembered. ("my order" as the label is a copy
+  candidate — 13s may re-word.)
+- **SHELVES STACK IN STRIP ORDER — RULED:** All's top-to-bottom is the strip's left-to-right,
+  *"that will make it clearer for people how the reordering works."*
+- **MANY SHELVES — CONFIRMED (her check; the earlier design stands, now precise):** the strip is
+  ONE line that never wraps, scrolling horizontally with an edge fade; when overflowed, a pinned
+  **⋯** opens the type-to-filter shelf panel (the v1 overflow design, kept); the shelf
+  right-click gains **Move to Start / Move to End** (her send-to-start); drag-to-reorder stands.
+- **Build note from her:** clear air between the shelf names and the utility run (№ · order ▾ ·
+  details) — in the mockup; the build spaces by the app's own tokens (§22's caution binds).
+- **HER CLOSING WORD — THE UI ROUND CLOSES:** *"I do think that this UI shape looks correct and
+  I'm ready for it to be built."* Mockup v5 is the visual record; the shape binds, the
+  incidentals don't (§22).
+
+**NEXT: awaiting her kickoff of `/architect-phase 13i-a`.** Nothing in this record remains
+proposed — every section through §24 is ruled or ratified.

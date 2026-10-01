@@ -49,7 +49,7 @@
   /* the utility run at the shelf row's right end + the № census panel */
   .mw.util { color:var(--capture); }
   .mw.util:hover { color:var(--muted); }
-  #censusbtn { margin-left:auto; }
+  #censusbtn { margin-left:auto; padding-left:48px; }  /* her note: clear air between shelves and the utility run */
   .cpanel { width:230px; margin-left:auto; margin-top:6px; border:1px solid var(--hair);
     border-radius:8px; padding:5px 0; font-family:-apple-system,system-ui,sans-serif;
     font-size:12.5px; background:var(--room); }
@@ -129,7 +129,7 @@ unless you give a shelf one (From Variorum demonstrates). Selection = ink + weig
     <span class="mw" data-s="ideas" title="3">Ideas</span>
     <span class="mw new">+ shelf</span>
     <span class="mw util" id="censusbtn" title="the census — counts, and solo filters; default collapsed to this one mark">№</span>
-    <span class="mw util" title="view-local: shelf order (default) · last edited — never touches your arrangement">order · shelf order ▾</span>
+    <span class="mw util" title="A–Z (default) · last edited · my order — the placing mode">order · A–Z ▾</span>
     <span class="mw util" id="detbtn" title="show / hide the right-hand numbers — remembered per surface">details</span>
   </div>
 
@@ -179,10 +179,18 @@ unless you give a shelf one (From Variorum demonstrates). Selection = ink + weig
   collapsed to just itself — numbers effectively hidden, her lean) opens the census panel: every
   count, each row a SOLO filter — books · gatherings · finished · owned · living · <b>with
   arrivals</b> (her floated future filter, folded in for free). Click a row to solo, again to
-  clear; a shelf with no matches folds away in the build. <b>order · shelf order ▾</b> is the
-  view-local sort (shelf order default · last edited) — an overlay, never a rewrite (A31 one
-  level up). <b>details</b> now hides EVERYTHING on the right, arrivals included — her ruling:
-  the chrome can be fully clean; the № panel is where arrivals are found when details are off.
+  clear; a shelf with no matches folds away in the build. <b>order ▾</b> offers <b>A–Z (the
+  default — her ruling: "the cleanest rule… more neat and serious") · last edited · my order</b>
+  — switching to <i>my order</i> is the PLACING mode: drag, Send to Top / Bottom; it remembers
+  every placement and appends never-placed books at the end. The chosen order applies WITHIN
+  EVERY SHELF (and the unshelved run); the SHELVES themselves always stack in the strip's
+  left-to-right order, so reordering the strip visibly reorders All. Starred books still float
+  first within their shelf under any order. <b>details</b> hides EVERYTHING on the right,
+  arrivals included — the № panel is where arrivals are found when details are off. <b>Many
+  shelves:</b> the strip is ONE line that scrolls horizontally with an edge fade (never wraps);
+  when overflowed, a pinned ⋯ opens the type-to-filter shelf panel; a shelf's right-click gains
+  Move to Start / Move to End. <b>Unshelved</b> renders as its own collapsible header at the TOP
+  of All (her ruling — least findable elsewhere, so most visible here).
   <br><br>
   <b>Direction A's claims:</b> the shelf line is read-quiet — muted words, the active one in ink
   and weight, generous space doing the separating. Counts live on HOVER (and in the overflow
@@ -211,15 +219,15 @@ verb visible, nothing else.</p>
     <span class="mw detailsbtn">details</span>
   </div>
   <div class="shelf">
-    <div class="shelfhead"><span class="chev">▾</span><span class="nm">Welcome</span></div>
-    <div class="row"><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch</span></div>
-    <div class="row"><span class="nm">classics</span><span class="tag">#classics</span><span class="meta"><span class="mode">gathering</span> · 18 notes</span></div>
-    <div class="row"><span class="nm">the adventures of sherlock holmes</span><span class="tag">#classics</span><span class="meta">14 notes · 13 ch · <span class="mode">owned</span></span></div>
-  </div>
-  <div class="shelf">
     <div class="shelfhead"><span class="chev">▾</span><span class="nm">unshelved</span></div>
     <div class="row"><span class="nm">Journal</span><span class="tag"></span><span class="meta">2 notes · 310w</span></div>
     <div class="row"><span class="nm">Quicknotes</span><span class="tag">#quicknote</span><span class="meta"><span class="mode">gathering</span></span></div>
+  </div>
+  <div class="shelf">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">Welcome</span></div>
+    <div class="row"><span class="nm">classics</span><span class="tag">#classics</span><span class="meta"><span class="mode">gathering</span> · 18 notes</span></div>
+    <div class="row"><span class="nm">the adventures of sherlock holmes</span><span class="tag">#classics</span><span class="meta">14 notes · 13 ch · <span class="mode">owned</span></span></div>
+    <div class="row"><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch</span></div>
   </div>
   <div class="capture">new note — just start typing</div>
 </div>
