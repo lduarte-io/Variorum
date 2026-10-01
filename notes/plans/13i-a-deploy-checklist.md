@@ -70,3 +70,21 @@ reading columns; the allowlist + ciphertext probes true):**
 ```
 ! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && jq -Rs '{query: .}' < Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql | curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d @- | jq -r '.[] | select(.verdict != null) | "\(.verdict) \(.item // .relname // "")"' | sort | uniq -c
 ```
+
+
+## THE WINDOW RECORD (2026-10-01 — running; completed lines land as they happen)
+
+- Probe: marker 9 ✓ (her paste, 02:0x). THE DEPLOY: `[]` first run — the whole file committed
+  (13y took two). Verify: marker **10**; wing/shelf present, zero rows, RLS forced; the nine
+  reading columns; `cipher_grew` true; `allowlist_grew` read FALSE from a PROBE BUG (inside
+  `$$`-quotes a doubled `''` is literal — the corrected `chr(39)` probe read BOTH pull and push
+  allowlists grown ✓). The grant sweep: **63 OK · 4 INFO · zero mismatches**.
+- The install: `/Applications/Variorum.app` = the marker-10 Release build, codesign-verified
+  source and installed.
+- **THE WINDOW'S ONE LIVE FINDING (the 13j-precedent class — only a live round can reach grant
+  reality):** her first round refused `42501 permission denied for table wing` — the data RPCs
+  run as the non-bypass `variorum_definer`, and 13's per-table template (copied from 09, which
+  predates the role) missed the per-table DML grant the 14c gate file gives every sibling.
+  **Repair: `grant select, insert, update, delete on wing, shelf to variorum_definer;` by her
+  hand; the artifact amended to carry it; the sweep's shape did not check definer table grants —
+  noted for its next owner.**

@@ -98,6 +98,15 @@ alter table wing force row level security;
 create policy wing_owner_all on wing
   for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 revoke all on wing from anon, authenticated;
+-- THE WINDOW'S LIVE REPAIR (2026-10-01, her first round's 42501 —
+-- "permission denied for table wing"): the data RPCs run as the
+-- NON-BYPASS `variorum_definer` (the 14c gate posture), which needs the
+-- per-table DML grant every sibling carries (14c-gate-definer-owner.sql's
+-- block; 12's own new tables each granted it). The per-table template
+-- this file copied from 09 PREDATES the definer role, so the grant was
+-- missed; applied live by her hand at the window, folded in here so a
+-- fresh-mirror deploy of this file is complete.
+grant select, insert, update, delete on wing to variorum_definer;
 
 drop table if exists shelf;
 create table shelf (
@@ -124,6 +133,7 @@ alter table shelf force row level security;
 create policy shelf_owner_all on shelf
   for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 revoke all on shelf from anon, authenticated;
+grant select, insert, update, delete on shelf to variorum_definer;  -- the same live repair
 
 -- ---------------------------------------------------------------------------
 -- 2. The additive columns on the existing mirrors — nullable, no defaults,
