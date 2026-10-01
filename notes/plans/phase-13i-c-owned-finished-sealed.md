@@ -84,6 +84,23 @@ mirror, the deploy checklist). The 13i-b-shipped single `auto_tag_id` + sole-tag
 derivation stand until this build replaces them; the migration carries existing `auto_tag_id`
 values into the new shape.
 
+## HER WALK POSTURE FOR THE 13i FAMILY (2026-10-01, at her 13i-c start; verbatim-faithful — BINDS 13i-c/d/e)
+
+*"I will be doing a combined walk over all of 13i - I might do some small walks between the
+rounds like this one, but i'm not exhaustively testing each sub round, I'll spend more time
+going through everything new when it's all done. Each phase will still make its own handoff,
+and the final phase will give me a cohesive final list of all the new actions to try out and
+things to look at."*
+
+So, for every remaining 13i letter: the ORCHESTRATOR'S acceptance walks stay mandatory per the
+sizing rule (an implementer's "done" is a claim; the walk is the verification — unchanged);
+HER per-phase walk is light-or-skipped by her own word, with her findings arriving whenever
+she dips in (as the Edit Rule gap did); each phase still writes its own handoff; and **13i-e's
+closeout OWES THE COHESIVE COMBINED LIST — every new action and every thing to look at across
+a–e, one document for her one deep pass.** Each letter's closeout should therefore keep a
+running "for the combined walk" list in its handoff so 13i-e can assemble rather than
+re-derive. This section is carried forward into 13i-d's and 13i-e's plans at their authoring.
+
 ## HER POST-CLOSE RULINGS (2026-10-01, after the 13i-b hard stop; verbatim-faithful)
 
 1. **A GATHERING REQUIRES A RULE AT CREATION.** Her words: *"how does a freshly minted gathering
