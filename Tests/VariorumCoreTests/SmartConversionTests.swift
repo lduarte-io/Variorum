@@ -345,8 +345,14 @@ struct SmartConversionTests {
             let redone = try #require(try db.read { try Queries.reading($0, id: reading.id) })
             #expect(redone.kind == .book)
             #expect(redone.sortField == .manual)
-            // EXACT rows — the same membership ids, not fresh ones.
-            #expect(try liveMemberships(db, reading.id).map(\.id) == result.membershipIDs)
+            // EXACT rows — the same membership ids, not fresh ones, and
+            // (ladder F-R1-1) each restored AS a member: the revert flips
+            // its taken rows to the dismissal class, so a redo that forgot
+            // statuses would return her members as arrivals.
+            let revived = try liveMemberships(db, reading.id)
+            #expect(revived.map(\.id) == result.membershipIDs)
+            #expect(revived.allSatisfy { $0.status == .member },
+                    "members return as members — the redo restores statuses, not only ids")
             #expect(try db.read { try Queries.reading($0, id: freshID) } != nil)
         }
     }
@@ -475,6 +481,8 @@ struct SmartConversionTests {
             let redone = try liveMemberships(db, reading.id)
             #expect(Set(redone.map(\.id)) == Set(beforeUndo.map(\.id)),
                     "the redo revives exactly the rows the undo took — the same ids")
+            #expect(redone.allSatisfy { $0.status == .member },
+                    "…and as what they were: members return as members (ladder F-R1-1)")
             #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .book)
         }
     }
@@ -503,6 +511,50 @@ struct SmartConversionTests {
             let back = try #require(try liveMemberships(db, reading.id)
                 .first { $0.id == waiting.id })
             #expect(back.status == .arrival)
+        }
+    }
+
+    /// **F-R1-1 (ladder round 1, the architect's ruling):** an un-bind's
+    /// residue ranks as the DISMISSAL class, never as left-as-member. The
+    /// pre-fix inverse tombstoned rows with `status='member'`, and under U1's
+    /// tombstone-means-decided a member tombstone is "removed for good" — so
+    /// after a RE-BIND, any pair that was a member at the undo but out of the
+    /// assembly at the re-bind was permanently deaf to intake: a fresh
+    /// applying act answered silence, against the bind sheet's own
+    /// keeps-collecting promise. The ruling's ground is her ratified U1-1
+    /// ("if there's a new tag on there, i might want it to come in"): an
+    /// un-bind says "I take back the binding," not "these notes never
+    /// belong." A member she REMOVED BY HAND keeps its member-class
+    /// tombstone — removed stays out, exactly as ratified.
+    ///
+    /// RED-ON-OLD (watched): on the pre-fix inverse the `#require` below
+    /// fails — the pair keeps its one member-class tombstone and no row
+    /// rings. The control (a note still matching at the re-bind) is green on
+    /// both sides.
+    @Test func anUndoneBindsResidueRingsAgainAsAnArrivalAfterARebind() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let (reading, posts, tag) = try smartBookWithTaggedPosts(ops, count: 2)
+            try ops.convertSmartReadingToCurated(reading.id)
+            try stack.undo(with: ops)
+
+            // A leaves the assembly before the re-bind; B stays (the control).
+            try ops.removeTag(tag.id, fromPost: posts[0].id)
+            _ = try ops.convertSmartReadingToCurated(reading.id)
+            #expect(try liveMemberships(db, reading.id).map(\.postId) == [posts[1].id],
+                    "control: the still-matching note re-binds as a member")
+
+            // The fresh applying act on A: the residue is the dismissal
+            // class, so A RINGS AGAIN — a LIVE ARRIVAL exactly (P-13ib-U1-1:
+            // never auto-seated over a dismissal; a seat here would override
+            // the ruling's class as surely as silence betrays it).
+            _ = try ops.applyTag(tag.id, toPost: posts[0].id)
+            let rung = try #require(
+                try liveMemberships(db, reading.id).first { $0.postId == posts[0].id },
+                "the re-bound book must HEAR the fresh act on an un-bind residue pair")
+            #expect(rung.status == .arrival,
+                    "exactly an arrival — judged by her, never seated by the machine")
         }
     }
 

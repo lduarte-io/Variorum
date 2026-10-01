@@ -183,11 +183,14 @@ extension Operations {
         // EVERY live row standing on the book at the revert, not only the
         // do-time mints (a bound book keeps collecting, so intake's seats and
         // her hand-adds stand there too, and a gathering holds nothing). Those
-        // ids exist only at UNDO time, so the inverse hands them to the redo
+        // rows exist only at UNDO time, so the inverse hands them to the redo
         // through this box — still exact-row (the same ids come back), never
-        // a re-run.
+        // a re-run. Each entry carries the row's UNDO-time STATUS beside its
+        // id (ladder F-R1-1: the revert flips its rows to the dismissal
+        // class, so the redo must restore what each row WAS — a member
+        // returns a member, a waiting arrival returns waiting).
         let collectingID = result.collectingReading?.id
-        let takenAtRevert = LockIsolated<[String]>([])
+        let takenAtRevert = LockIsolated<[(id: String, status: MembershipStatus)]>([])
         undoStack?.register(
             label: "Convert to Book",
             inverse: {
@@ -199,7 +202,7 @@ extension Operations {
             },
             redo: {
                 try $0.reapplySmartConversion(
-                    readingID: readingID, membershipIDs: takenAtRevert.value,
+                    readingID: readingID, taken: takenAtRevert.value,
                     collectingReadingID: collectingID)
             })
         return result
@@ -218,9 +221,32 @@ extension Operations {
     /// what the conversion minted — a row she added by hand is hers", which
     /// left those rows live on a gathering: invisible in its assembly but
     /// counted as membership by the Pool exclusion and `readingsContaining`.)*
-    /// Their notes keep showing wherever the rule matches them. Returns the
-    /// ids it tombstoned, in book order, so the REDO revives exactly those
-    /// (exact-row — AppSpec §9).
+    /// Their notes keep showing wherever the rule matches them.
+    ///
+    /// **The taken rows rank as the DISMISSAL class** (ladder round 1
+    /// F-R1-1 — the architect's ruling, PROVISIONAL, bundled beside
+    /// P-13ib-U3-3): each row this revert takes flips to `status='arrival'`
+    /// AS it tombstones, one write per row. A member-class tombstone means
+    /// "removed for good" under U1's table, and an un-bind says "I take back
+    /// the binding," never "these notes never belong" — her ratified U1-1
+    /// ground ("if there's a new tag on there, i might want it to come in").
+    /// So after a RE-BIND, a fresh applying act on a residue pair rings the
+    /// bell again (an arrival, never an auto-seat) instead of permanent
+    /// silence, and the bind sheet's keeps-collecting promise survives the
+    /// round trip. A member she REMOVED BY HAND before the undo was already
+    /// tombstoned and is untouched here — its member-class tombstone stands,
+    /// removed stays out, exactly as ratified. *(Recorded, not built — the
+    /// bundle carries both: the remove→re-add-by-hand→undo corner, where the
+    /// OLDER member tombstone still outranks this flip in `intakePairState`;
+    /// and the cross-device race where one device's un-bind flips a row
+    /// another device hand-removed — server-wins CAS keeps one, and the
+    /// worst case is her removal ranked as a dismissal: the note rings again
+    /// as an ARRIVAL on a fresh act, never auto-seated. Self-limiting; no
+    /// repair — zero `Sync/` stands.)*
+    ///
+    /// Returns `(id, undo-time status)` per taken row, in book order, so the
+    /// REDO revives exactly those rows AS WHAT THEY WERE (exact-row —
+    /// AppSpec §9; ids and statuses both survive the round trip).
     ///
     /// Refusal buckets, the standing ones: a book deleted meanwhile ⇒
     /// obsolete, quiet, nothing taken (its cascade already took the rows); a
@@ -231,7 +257,7 @@ extension Operations {
         readingID: String,
         sortField: SortField, sortDir: SortDirection,
         collectingReadingID: String?
-    ) throws -> [String] {
+    ) throws -> [(id: String, status: MembershipStatus)] {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt == nil
@@ -249,10 +275,14 @@ extension Operations {
                     """,
                 arguments: [readingID])
             for var row in standing {
+                row.status = .arrival  // the dismissal class (F-R1-1)
                 row.deletedAt = now
                 try row.update(db)
             }
-            let taken = standing.map(\.id)
+            // Pre-images by construction: the loop mutates COPIES (`var
+            // row`), so `standing`'s elements still carry each row's
+            // undo-time status.
+            let taken = standing.map { (id: $0.id, status: $0.status) }
             if let collectingReadingID,
                var fresh = try Reading.fetchOne(db, key: collectingReadingID),
                fresh.deletedAt == nil {
@@ -276,16 +306,20 @@ extension Operations {
     /// a re-run of the forward operation — re-running would mint fresh
     /// UUIDs and strand the inverse's captured ids). The rows the INVERSE
     /// took (P-13ib-6 — every live row at the revert, handed over by the
-    /// registration's box) come back out of their tombstones with their
-    /// status untouched (a waiting arrival returns waiting), and the
-    /// kind/sort flip is re-applied.
+    /// registration's box) come back out of their tombstones **as what they
+    /// were** — each restored to its captured undo-time STATUS (ladder
+    /// F-R1-1: the revert flipped them to the dismissal class, so without
+    /// this a redo would return her members as arrivals): a member returns
+    /// a member, a waiting arrival returns waiting. The kind/sort flip is
+    /// re-applied.
     ///
     /// A membership whose POST has since died stays dead (`restoreReading`'s
     /// live-parent guard — a live pointer at a dead post helps nobody), and
     /// a pair that somehow already has a live row is skipped rather than
     /// duplicated (`uq_reading_post_live`).
     func reapplySmartConversion(
-        readingID: String, membershipIDs: [String], collectingReadingID: String?
+        readingID: String, taken: [(id: String, status: MembershipStatus)],
+        collectingReadingID: String?
     ) throws {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
@@ -295,8 +329,8 @@ extension Operations {
                 throw OperationError.lockedReading(id: readingID)
             }
             let now = date.now
-            for id in membershipIDs {
-                guard var membership = try ReadingPost.fetchOne(db, key: id),
+            for row in taken {
+                guard var membership = try ReadingPost.fetchOne(db, key: row.id),
                       membership.deletedAt != nil
                 else { continue }
                 let postIsLive = try Bool.fetchOne(
@@ -308,6 +342,7 @@ extension Operations {
                 guard try livePairRow(
                     db, postID: membership.postId, readingID: readingID) == nil
                 else { continue }
+                membership.status = row.status
                 membership.deletedAt = nil
                 try membership.update(db)
             }
