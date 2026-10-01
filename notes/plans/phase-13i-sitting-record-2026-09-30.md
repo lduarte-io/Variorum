@@ -570,6 +570,24 @@ many-books case (a bounded books section with its own scroll — her lean — or
   regular app doesn't have. the shape of it is right."* The mockup fixes the SHAPE and idiom;
   the build uses the app's own tokens, spacing, type and corner conventions throughout.
 
-**NEXT:** the UI iteration continues on mockup v3; then `/architect-phase 13i-a`. Standing
-PROPOSED-unless-she-objects: §19's defaults and harvest, §20's Quicknotes shape, §21's
-arrivals-exempt-from-details, §22's boundary rule + census line + sort overlay.
+## 23. THE № ROUND (2026-09-30) — the census line killed; her rulings
+
+- **Quicknotes shape (§20) — RATIFIED** (*"quicknotes shape is fine"*).
+- **The place/finder BOUNDARY RULE — RULED** in her restatement: *"not letting the bookshelf get
+  too much more machinery and keeping that to the library."*
+- **DETAILS OFF HIDES ARRIVALS TOO — her overrule of §21's exception, RULED:** *"the point is
+  that the chrome can be clean if desired."* Her floated future — a filter showing only books
+  with arrivals — is folded into the census panel below, built for free.
+- **THE CENSUS LINE IS KILLED — her diagnosis, verbatim-faithful:** *"the shelf options
+  themselves can't have anything above them — they're a STRONG subheading, not this weird third
+  tier."* Her two alternatives (no numbers at all · a collapsed-by-default glyph beside the
+  order control) MERGE into the built shape, **the № census** (mockup v4): the shelf row sits
+  directly under the masthead; its right end carries the one quiet utility run —
+  **№ · order ▾ · details**. The № mark, default collapsed to just itself (numbers effectively
+  hidden — her "don't show at all" lean honored), opens the census panel: every count, each row
+  a SOLO filter — books · gatherings · finished · owned · living · with arrivals. ONE line
+  between masthead and content, ever.
+
+**NEXT:** the UI iteration continues on mockup v4; then `/architect-phase 13i-a`. Standing
+PROPOSED-unless-she-objects: §19's defaults and harvest (plainly enumerated to her this round),
+§22's sort overlay, §23's № shape itself.
