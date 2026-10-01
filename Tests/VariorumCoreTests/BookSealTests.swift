@@ -254,3 +254,61 @@ struct BookSealTests {
         }
     }
 }
+
+/// 13i-c — the architect's ruling on U2's F-U2-1 (2026-10-01): "Sealed = the
+/// book is done" is text immutability for EVERY member, so a single note's
+/// Unseal door REFUSES while a live sealed book holds it as a live member —
+/// its own seal stamp or an independent one alike (the book's promise is
+/// about its members, not about who sealed them). The road out is the
+/// book's Unseal (which reopens it, R-13ic-3). RED-ON-OLD: the pre-fix
+/// `unlockPost` unsealed the note inside the sealed book.
+@Suite("13i-c — a note inside a sealed book cannot be unsealed on its own (F-U2-1)")
+struct SealedBookMemberUnlockTests {
+    private func note(_ ops: Operations, _ title: String) throws -> Container {
+        let post = try ops.createPost(title: title)
+        _ = try ops.seedBlock(in: post.id, text: "the text of \(title)")
+        return post
+    }
+
+    @Test func unlockPostRefusesInsideALiveSealedBookAndWorksAfterTheBookUnseals() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "edition", kind: .book)
+            let sealedWithTheBook = try note(ops, "a")
+            let sealedOnItsOwn = try note(ops, "b")
+            try ops.addPostToReading(sealedWithTheBook.id, to: book.id)
+            try ops.addPostToReading(sealedOnItsOwn.id, to: book.id)
+            try ops.lockPost(sealedOnItsOwn.id)  // an INDEPENDENT seal (its own stamp)
+            _ = try ops.sealReading(book.id)
+
+            #expect(throws: OperationError.noteInSealedBook(postID: sealedWithTheBook.id, readingID: book.id)) {
+                try ops.unlockPost(sealedWithTheBook.id)
+            }
+            #expect(throws: OperationError.noteInSealedBook(postID: sealedOnItsOwn.id, readingID: book.id)) {
+                try ops.unlockPost(sealedOnItsOwn.id)
+            }
+            #expect(try db.fetchInt("SELECT locked FROM container WHERE id = ?", [sealedWithTheBook.id]) == 1)
+
+            // The book's Unseal is the road: its stamp-matched member unseals
+            // with it; the independently sealed one stays sealed but may now
+            // be unsealed by hand.
+            try ops.unsealReading(book.id)
+            #expect(try db.fetchInt("SELECT locked FROM container WHERE id = ?", [sealedWithTheBook.id]) == 0)
+            #expect(try db.fetchInt("SELECT locked FROM container WHERE id = ?", [sealedOnItsOwn.id]) == 1)
+            try ops.unlockPost(sealedOnItsOwn.id)
+            #expect(try db.fetchInt("SELECT locked FROM container WHERE id = ?", [sealedOnItsOwn.id]) == 0)
+        }
+    }
+
+    @Test func aDeletedSealedBookNoLongerGuardsAndNeitherDoesAnArrivalRow() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "edition", kind: .book)
+            let member = try note(ops, "a")
+            try ops.addPostToReading(member.id, to: book.id)
+            _ = try ops.sealReading(book.id)
+            try ops.deleteReading(book.id)
+            // The book is in the Trash: its promise is suspended with it.
+            try ops.unlockPost(member.id)
+            #expect(try db.fetchInt("SELECT locked FROM container WHERE id = ?", [member.id]) == 0)
+        }
+    }
+}

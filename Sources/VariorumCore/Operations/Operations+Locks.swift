@@ -31,8 +31,27 @@ extension Operations {
 
     /// Reversible, zero commits: unlocking restores exactly the pre-lock
     /// editing surface.
+    ///
+    /// **13i-c (the architect's ruling on U2's F-U2-1):** a note's OWN
+    /// Unseal refuses (`noteInSealedBook`) while a LIVE SEALED book holds it
+    /// as a live member — whether the book sealed it or it was sealed on its
+    /// own first. "Sealed = the book is done" is text immutability for EVERY
+    /// member; the road out is the book's Unseal (which reopens the book,
+    /// R-13ic-3). A sealed book in the Trash suspends its promise with it.
     public func unlockPost(_ id: String) throws {
         try database.write { db in
+            if let sealedBook = try String.fetchOne(
+                db,
+                sql: """
+                    SELECT r.id FROM reading_post rp
+                    JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                     AND r.sealed_at IS NOT NULL
+                    WHERE rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                    ORDER BY r.id LIMIT 1
+                    """,
+                arguments: [id]) {
+                throw OperationError.noteInSealedBook(postID: id, readingID: sealedBook)
+            }
             try unsealPost(db, id: id, now: date.now)
         }
     }

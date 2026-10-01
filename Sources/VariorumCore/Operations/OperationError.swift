@@ -111,6 +111,11 @@ public enum OperationError: Error, Equatable, Sendable {
     /// (Reopen) refuses there, because the ONE door down from Sealed is
     /// Unseal, which reopens the book too (R-13ic-3).
     case readingSealed(id: String)
+    /// 13i-c (the architect's ruling on U2's F-U2-1): a note's own Unseal
+    /// refuses while a LIVE SEALED book holds it as a live member — "Sealed =
+    /// the book is done" binds every member's text; the book's Unseal is the
+    /// road (and it reopens the book, R-13ic-3).
+    case noteInSealedBook(postID: String, readingID: String)
     /// `unsealReading` addressed a book that is not sealed (the
     /// `readingNotDeleted` class — a door that silently succeeded would teach
     /// that it did something).

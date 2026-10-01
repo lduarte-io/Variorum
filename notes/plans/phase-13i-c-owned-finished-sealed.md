@@ -607,7 +607,17 @@ the FULL core suite green at the END; the Mac app + the phone BUILD (`xcodebuild
 'generic/platform=iOS Simulator' build`) and every Mac/mobile suite that exercises a changed op.
 A pin green on both sides of a claimed fix is hollow — record, don't fix.
 
-**Your record:** a `## U2 RECORD — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`, 2026-10-01)
+**Your record:** a `## U2 RECORD` section in THIS file directly above `## §8 ENVIRONMENT TRAPS`,
+in the U1 RECORD's shape — the NOT-DONE line FIRST, the design map as shipped, PROVISIONALs (each
+with a QUESTIONS-ready paragraph; numbered P-13ic-U2-n), FINDINGS (for the orchestrator; name the
+owner you suggest), then your LIVE STATUS (per commit; unverified claims PENDING). Flip ledger
+row 3 in the same commit as the close. Commit per piece, `git pull --rebase` then push after every
+commit, foreground waits only, no subagents (one Sonnet read-only lookup at most). The §8 traps
+bind verbatim: zero instances before any suite that mounts windows; never touch `/Applications`;
+the dev store never syncs; `pipestatus`; never a custom build configuration.
+
+## U2 RECORD — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`, 2026-10-01)
+
 
 **NOT DONE BY THIS UNIT (first line, per the contract):** no face of any kind (U3/U4 — the confirms,
 the choice sheet, the badges, the Settings rows, the Trash's "and N notes" row; the ⌘J/phone
@@ -904,6 +914,119 @@ inside-a-sealed-book question (FINDING F-U2-1 — a fork reserved for the archit
   this commit.
 - No revert in flight.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U2 (2026-10-01 — the mandate's small-code allowance; the ladder reviews it cold)
+
+- **F-U2-1 RULED AND BUILT: a note's own Unseal refuses inside a live sealed book.** "Sealed = the
+  book is done" is text immutability for EVERY member, so `unlockPost` throws the new
+  `noteInSealedBook(postID:readingID:)` while a LIVE sealed book holds the note as a live member —
+  its own seal stamp or an independent one alike (the book's promise is about its members, not
+  about who sealed them); a sealed book in the Trash suspends its promise with it. The road out is
+  the book's Unseal (which reopens it, R-13ic-3). The shared words ride the `bookSeal` road ("This
+  note is in a book that is sealed — unseal the book to change it."). Pin
+  `SealedBookMemberUnlockTests` (2; RED-ON-OLD watched: four issues on the pre-fix tree). Core
+  2003/212 green after it; the Mac refusal-table integrity + convergence + spine suites 32/4 green.
+  U3's faces: the note's Unseal door inside a sealed book shows the refusal (P-2 — or hides, the
+  implementer's call with the registry's availability rule).
+- **The U2 RECORD's PROVISIONALs P-13ic-U2-1…9 stand as built** (each spec-defensible on its
+  stated ground; filed at QUESTIONS #169 at close). **F-U2-5** (a FINISHED book takes back a
+  revived membership) stays recorded with its suggested owner. **F-U2-2** (#85(e)(ii) answered)
+  lands at the closeout.
+
+## U3 BRIEF — THE SETTINGS SHEET · THE OUTFLOW CHOOSER · THE STATE DOORS · THE MINT (`opus-implementer`; read this whole file first)
+
+**Read, in your own context, before any code:** CLAUDE.md + its canon; this plan WHOLE — §1 her
+rulings · §2 (the outflow as shipped) · §3/§5/§6 (the ops you put faces on) · §7 the U3 row ·
+§8 traps · §9 · the U1 RECORD (its F-U1-1/2/3 are YOURS) · the U2 RECORD (the op names and
+signatures as built; its F-U2-6 names the preview queries your confirms read) · the adjudication
+above; the sitting record `notes/plans/phase-13i-sitting-record-2026-09-30.md` §4 (the Collecting
+pane's sentences — "Gathers from: …" · "New matches: …" · "Notes written here are tagged: …"), §5,
+§6, §21–§24 (the design-language anchor: the app's own shipped idioms, its tokens and spacing —
+never the mockup's rounded edges; `Theme/VoiceControls.swift` is the chrome vocabulary; chrome
+`fixedSize` texts carry a `lineLimit`); her post-close ruling 2 in this file (the settings sheet
+carries the Collecting section — her discoverability report); `notes/SessionResiliencyProtocol.md`.
+Code to orient on: `Features/BookView/BookView.swift` (`BookSettingsSheet`, ~line 2491),
+`Features/Shelf/ShelfView.swift` (the book menu, the Create Smart Book door, the spawn prompt),
+`Features/Readings/RuleEditor.swift` (the model, the auto-tag row, `RuleEditorCopy`),
+`Features/Readings/BookOrderAndConversion.swift` (`BindCopy`, the spawn sheet),
+`Features/Shelf/ShelfViewModel.swift` (`spawnBook`, `setFinished`), `Registry/CapabilityRegistry.swift`
+(every act declared ONCE — P-1; the registry walk test), `Registry/OpsRefusalCopy.swift` (the
+Mac's roads incl. `bookSeal`), `Shared/OpsRefusalTable.swift`, `Queries/OwnershipQueries.swift`
+(`sealPreview`, `pendingArrivalCount`, `ownConversionPreview`, `sharedMembers`),
+`Queries/CollectingQueries.swift` (`membersMissingAnyOutflowTag`), the 18i status seam (`StatusCenter`:
+refusal · offer · receipt; receipts honor `receipt_style`).
+
+**Scope (ONE unit — the book's SETTINGS surface and its doors; no membership-door face, no
+badge, no delete/duplicate face — those are U4's):**
+1. **The Book Settings sheet** (and the gathering's — the SAME pane, §4): Name · Word target ·
+   Note cap (as today) · a **COLLECTING** section written as sentences — "Gathers from: <the rule's
+   live paths, or 'nothing by itself'>" · "New matches: join quietly / wait at Arrivals" ·
+   "Notes written here are tagged: #a #b / nothing" — with ONE "Edit…" door opening the rule
+   editor sheet (her report: the sheet carried no rule/dial/outflow; this is the fix); on a
+   gathering the section shows the rule + the HIDE-OWNED toggle (`setReadingHideOwned`; nil =
+   follow the default, "0"/"1" explicit — three states, worded) and no dial/outflow. · A **STATE**
+   section: **Finished** (the toggle; when `pendingArrivalCount` > 0 the flip asks with §24's one
+   line "N waiting at the door will be dismissed", else acts; Reopen is the same toggle off) ·
+   **Sealed**: "Seal…" (the confirm LISTS the notes that will FORK — `sealPreview` names them with
+   where else they live — and carries the N-waiting line; on an owned book it says no copies are
+   needed; sealing an open book says it finishes it too) / "Unseal" (the confirm says it REOPENS
+   the book — R-13ic-3; `unlockReading` on a sealed book refuses, so the Reopen control is hidden
+   or disabled with the sealed words while sealed, P-2) · **Owned**: "Own its notes…" (the
+   confirm LISTS the shared members that will be COPIED — `ownConversionPreview` — with where else
+   they live; "nothing to copy" when none; refused on a finished/sealed book with the op's words)
+   / "Stop owning" (plain, no confirm — members stay). Every confirm's sentences are static copy
+   on a pure type (the `BindCopy` precedent) so pins read them without a window.
+2. **The rule editor's auto-tag row → the OUTFLOW CHOOSER:** a multi-tag picker over the wing's
+   live tags, ordered as chosen (append order), each removable, "none" legal, INDEPENDENT of the
+   rule (R-13ic-1); writes through `setReadingOutflow` (retire the `setReadingAutoTag` forwarder
+   and every `autoTagID` single read — F-U1-1); the "also tag the N current members" offer now
+   asks when the outflow set or the rule changed and `membersMissingAnyOutflowTag` > 0 (its N),
+   and `tagAllMembers(nil)` tags every outflow tag (the receipt counts notes). Dead ids show
+   "(deleted tag)" and drop on the next save.
+3. **R-13ic-4's faces:** on a GATHERING, removing the last term disables the save with the words
+   "A gathering needs a rule" and offers **"Delete this gathering…"** (the ordinary Trash road,
+   confirmed); the gathering's empty state re-worded — "No rule — this gathering shows nothing
+   until it has one." (F-U1-3; a Trash restoree is the only way to see it). **The MINT door
+   requires a rule:** the shelf's Create Smart Book flow becomes a mint sheet carrying the rule
+   editor INLINE (name + the rule; Create disabled until a term exists; mints through
+   `ReadingsViewModel.create(querySpec:)` — the op guard stands behind it); its wording may stay
+   "Create Smart Book"/"smart" until 13i-d's vocabulary sweep (say so in the record if you leave
+   it). F-U1-2 closes with it.
+4. **The spawn sheet's outflow chooser:** the "Make a Book from This Gathering…" prompt gains the
+   chooser PREFILLED with `RuleGrammar.positiveTagIDs` (live-filtered) and editable before the
+   mint (her ruling: the spawn OFFERS the choice).
+5. **The shelf row's menu** gains the state doors beside Finish/Reopen: Seal… / Unseal and Own
+   its notes… / Stop owning (the same confirms; one declaration each in the registry — P-1:
+   `.finishBook`/`.reopenBook` if not yet declared, `.sealBook`, `.unsealBook`, `.ownBook`,
+   `.unownBook`, each with scope `.book`, doors `.contextMenu` (+ the sheet as `.surface`), its
+   availability rule as DATA, its refusal copy; the registry walk stays green).
+6. **The note's own Unseal door inside a sealed book** (the adjudication above): shows
+   `noteInSealedBook`'s words through the status seam, or hides per the registry's availability
+   rule — your call, recorded.
+
+**Evidence (the §7 U3 row):** mounted pins per piece (each confirm's sentences; the N>0 gate; the
+chooser's save round-trip incl. order and removal; the empty-save refusal + the delete offer; the
+mint's gate; the spawn's prefill), the registry walk, the tutorial spine (`TutorialWalkTests`)
+green, the FULL core suite green at the END (you may touch core only for copy types/queries the
+faces need — no op semantics), Mac `build-for-testing` + every touched suite, the phone BUILD;
+and **YOUR OWN dev-store walk** on the Debug build (`io.lduarte.Variorum.debug`; `Tools/WalkKit/`
++ `cliclick`; the author guard `Tools/WalkKit/guard.sh --author` FIRST — if it says someone is at
+the machine, STOP, record "walk HELD", and close on pins; never re-activate and retry): open a
+book's settings → the Collecting sentences → Edit… → choose two outflow tags → save → the offer
+→ Finish with an arrival waiting (the line) → Seal (the listed forks on a shared book; fork-free
+on an owned one) → Unseal (reopens) → Own its notes (the listed copies) → Stop owning → a
+gathering's settings (hide-owned) → Edit Rule → remove the last term → the refusal + the delete
+offer → Create Smart Book → the inline editor gate → spawn with the prefilled chooser. Both
+voices (Terminal · Study) × both appearances, captures into `notes/plans/13ic-screens/u3/`
+(gitignored). **Also fold in U1's HELD walk:** confirm the first Debug launch's v1_20 ran (any
+rule-less gathering now in the Trash; a book's carried outflow shows in the Collecting sentence).
+
+**Your record:** a `## U3 RECORD` section directly above `## §8 ENVIRONMENT TRAPS`, in the U2
+RECORD's shape (NOT-DONE first · the design map · PROVISIONALs P-13ic-U3-n with QUESTIONS-ready
+paragraphs · FINDINGS with suggested owners · THE WALK with its capture list · LIVE STATUS per
+commit, unverified claims PENDING). Flip ledger row 4 at the close. Commit per piece; `git pull
+--rebase` then push after every commit; no trailers; foreground waits only; no subagents (one
+read-only Sonnet lookup at most); the §8 traps verbatim.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1000,3 +1123,7 @@ Debug only, author-free, own `caffeinate -d`.
   written; the deploy checklist authored; the walk HELD at the author guard (folded to U3's
   window). No revert in flight; zero instances. U2 (`opus-implementer`) spawns next from the
   plan's §3/§5/§6/§4 rows 1–12/§7 U2/§8/§9.
+- **U2 VERIFIED + ADJUDICATED (2026-10-01):** U2's twelve commits spot-checked (record on disk,
+  no trailers, its suites re-run green); the swallowed record heading restored; F-U2-1 ruled and
+  built with its red-on-old pin (core 2003/212; Mac refusal/spine suites 32/4); the U3 BRIEF
+  written. No revert in flight; zero instances. U3 (`opus-implementer`) spawns next.

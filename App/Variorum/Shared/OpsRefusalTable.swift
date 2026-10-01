@@ -299,6 +299,14 @@ nonisolated enum OpsRefusalCopy {
             return "This book is \(roads.bookSeal.state), so it can't be reopened here."
         case .readingNotSealed:
             return "That book isn't \(roads.bookSeal.state) any more — nothing changed."
+        // 13i-c (F-U2-1's ruling): a member's own door defers to the book's.
+        case .noteInSealedBook:
+            if let verb = roads.bookSeal.verb {
+                return "This note is in a book that is \(roads.bookSeal.state) — "
+                    + "\(verb) the book to change it."
+            }
+            return "This note is in a book that is \(roads.bookSeal.state), "
+                + "so it can't be changed here."
         case .ownedBookDuplicatesDeep:
             return "This book owns its notes, so a duplicate has to carry copies of them — "
                 + "duplicate it with copies."
