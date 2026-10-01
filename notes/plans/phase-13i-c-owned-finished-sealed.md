@@ -607,7 +607,48 @@ the FULL core suite green at the END; the Mac app + the phone BUILD (`xcodebuild
 'generic/platform=iOS Simulator' build`) and every Mac/mobile suite that exercises a changed op.
 A pin green on both sides of a claimed fix is hollow — record, don't fix.
 
-**Your record:** a `## U2 RECORD` section in THIS file directly above `## §8 ENVIRONMENT TRAPS`,
+**Your record:** a `## U2 RECORD` section in THIS file directly above `## U3 RECORD — THE SETTINGS SHEET · THE OUTFLOW CHOOSER · THE STATE DOORS · THE MINT (`opus-implementer`, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is rewritten at the close.
+
+**UNIT STATUS: IN PROGRESS (opened 2026-10-01 at tip 26414772).** Preflight read in this session's own
+context: CLAUDE.md + its canon, this plan WHOLE (§1–§11, the U1/U2 RECORDs, the adjudication, the U3
+BRIEF), the sitting record §1–§6, §10, §18, §20–§25, her post-close ruling 2 (commit 2241d670 — the
+kickoff rewrite carried it into §7's U3 row), `notes/SessionResiliencyProtocol.md`, `Tools/WalkKit/
+README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES / SyncSpec not required).
+
+### The design map as planned (each piece flips to "as shipped" at its commit)
+
+- **Piece A — THE STATE DOORS:** the six acts declared ONCE (`.finishBook` `.reopenBook` `.sealBook`
+  `.unsealBook` `.ownBook` `.unownBook` — scope `.book`, doors `.contextMenu` + `.surface`); which of each
+  pair renders is DATA (`BookStateDoorSet`, a pure table over kind/finished/sealed/owned); every confirm's
+  sentences on a pure type (`BookStateCopy`); one model (`BookStateDoors`: preview → confirm-or-act →
+  receipt/refusal on the status seam) and one confirm renderer, shared by the shelf menu and the sheet.
+- **Piece B — THE SETTINGS SHEET:** `BookSettingsSheet` to its own file; Name · Word target · Note cap
+  (as today) · COLLECTING as sentences (`CollectingCopy`) with ONE "Edit…" door into the rule editor ·
+  the gathering's three-state hide-owned · the STATE section from Piece A.
+- **Piece C — THE OUTFLOW CHOOSER:** the rule editor's auto-tag row rebuilt as a multi-tag chooser
+  (`OutflowDraft` + `OutflowChooser`), writing through `setReadingOutflow`; the offer's N =
+  `membersMissingAnyOutflowTag`; `tagAllMembers(nil)`; the `setReadingAutoTag` forwarder RETIRED (F-U1-1).
+- **Piece D — R-13ic-4's faces:** the gathering's empty-save gate + "Delete this gathering…"; the
+  empty-state re-word (F-U1-3); the MINT sheet with the rule editor inline (F-U1-2).
+- **Piece E — THE SPAWN SHEET** with the prefilled outflow chooser; **the bind sheet's owned-notes
+  limb** (the plan §3 assigns it to U3 — "the sheet gains the limb in U3"; the brief's six pieces omit
+  it; built because this unit's Own door is what makes owned notes reachable in a gathering).
+- **Piece F — the note's own Unseal inside a sealed book** (the adjudication): the refusal spoken on
+  every road, pinned; the full suites; the walk; the close.
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- **Piece A:** NOT STARTED.
+- **Piece B:** NOT STARTED.
+- **Piece C:** NOT STARTED.
+- **Piece D:** NOT STARTED.
+- **Piece E:** NOT STARTED.
+- **Piece F:** NOT STARTED.
+- No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
+
+## §8 ENVIRONMENT TRAPS`,
 in the U1 RECORD's shape — the NOT-DONE line FIRST, the design map as shipped, PROVISIONALs (each
 with a QUESTIONS-ready paragraph; numbered P-13ic-U2-n), FINDINGS (for the orchestrator; name the
 owner you suggest), then your LIVE STATUS (per commit; unverified claims PENDING). Flip ledger
