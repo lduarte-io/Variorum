@@ -44,6 +44,10 @@ struct BookView: View {
     var onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
+    /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
+    /// rather than more of `BookViewModel` (P-9): the line atop Index and Book
+    /// observes and judges arrivals and nothing else.
+    @State private var arrivals: BookArrivalsModel
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -55,6 +59,7 @@ struct BookView: View {
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
         structure: BookStructureModel? = nil,
+        arrivals: BookArrivalsModel? = nil,
         initiallyExpanded: Set<String> = [],
         paneFocused: Bool = true,
         onPaneFocusRequest: (() -> Void)? = nil,
@@ -79,6 +84,10 @@ struct BookView: View {
         _structure = State(
             initialValue: structure
                 ?? BookStructureModel(session: session, readingID: readingID))
+        // Injectable for `model`'s reason: a pin drives the door's `adopt`.
+        _arrivals = State(
+            initialValue: arrivals
+                ?? BookArrivalsModel(session: session, readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -181,6 +190,7 @@ struct BookView: View {
             case .index:
                 BookIndexView(
                     session: session, model: model, structure: structure,
+                    arrivals: arrivals,
                     masthead: { bookMasthead },
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
@@ -196,7 +206,9 @@ struct BookView: View {
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
                 // active one editable in Write or the takes stack (A43/A44).
-                SpreadBookView(session: session, model: model, structure: structure)
+                SpreadBookView(
+                    session: session, model: model, structure: structure,
+                    arrivals: arrivals)
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
                 // infinite scroll, and true book pagination. Neither is

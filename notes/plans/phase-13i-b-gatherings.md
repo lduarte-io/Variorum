@@ -589,7 +589,23 @@ the close with everything not done.
   a door even with a stray row · nameless → its day · a rung-again note stands on its NEW row
   (P-13ib-U1-1) · BOTH statements' `EXPLAIN QUERY PLAN` (`SEARCH rp` first, the container a PK
   seek, no SCAN) · the observation delivers live — **12/12 green on first run** (new feature
-  pins, not bug-class: no red-on-old applies). NEXT: the face (model + line + registry).
+  pins, not bug-class: no red-on-old applies).
+- Piece 3 (this commit — **WIP, compiling: the face built and wired; Mac BUILD SUCCEEDED; pins
+  NOT yet written, the walk-suite union edited but NOT yet run — PENDING**):
+  `Features/BookView/BookArrivals.swift` — `ArrivalsCopy` (every word: the line "N at the door",
+  helps, the "arrived …" stamp through `TimeStampFace.relative`, the "and N more waiting" tail, the
+  two receipts, the refusals naming their roads), `ArrivalsLineFace.isShown` (the ONE visibility
+  value — §23's composition point for 13i-d's details toggle), `BookArrivalsModel` (its own model,
+  P-9: the observed door, `toggle`, `seat` / `dismiss` through the runner, receipts and refusals on
+  `session.status`), `BookArrivalsLine` (draws NOTHING when empty; one quiet line + hairline when
+  occupied; rows inline on her click; declares `.seatArrival` / `.dismissArrival` as its
+  `surfaceCapabilities`), and the DEBUG `ArrivalsLineProbe` (the `TrayRowDoorProbe` pattern).
+  Registry: `CapabilityID.seatArrival` / `.dismissArrival`, `.surface`, book scope, `always`,
+  `takesAccess: .native` (the `.archiveNote` precedent). Wiring: `BookView` owns the model and
+  passes it to `BookIndexView` (the line ABOVE the pane's scroll view — never inside the
+  manifest-measured content) and `SpreadBookView` (atop both pages); both params default nil.
+  `CapabilityRegistryTests`' surface union gains `BookArrivalsLine` (a justified edit, commented).
+  NEXT: the mounted pins, then the suites, then the walk.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

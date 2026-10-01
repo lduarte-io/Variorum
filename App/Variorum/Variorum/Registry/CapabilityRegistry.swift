@@ -1527,6 +1527,30 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: WorkspaceNaming.ascentUnavailableNote,
             availability: { ctx in ctx.canAscendToBook ? .act : .unavailable }),
 
+        // 13i-b U2 — THE ARRIVALS FACE (the 13i-b plan §3; the sitting record
+        // §4). Two `.surface` acts on the Arrivals line's own rows
+        // (`BookArrivalsLine` — their ONE renderer), book scope. `always` for
+        // `.archiveNote`'s exact reason: the target is the arrival row the
+        // door carries, never derived from whatever mode a pane is in — so
+        // `takesAccess: .native` is honest rather than an exemption (Takes is
+        // not behind Write where neither owns the row). No key and no palette
+        // row: her ruling placed the judgment ON the line, and an invented
+        // chord would owe a collision sweep no ruling asked for. The per-row
+        // conditions — capacity, a finished book, a row already judged — are
+        // the operation's own refusals, spoken on the status seam (P-2).
+        Capability(
+            id: .seatArrival, verb: ArrivalsCopy.addVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .dismissArrival, verb: ArrivalsCopy.dismissVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+
         Capability(
             id: .newPost, verb: "New Note", scope: .app,
             doors: [.menuBar, .palette],

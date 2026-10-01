@@ -53,6 +53,10 @@ struct SpreadBookView: View {
     let session: AppSession
     let model: BookViewModel
     let structure: BookStructureModel
+    /// 13i-b U2 — the book's door: the Arrivals line stands atop the
+    /// spread, invisible when empty. nil composes nothing (a pin over the
+    /// spread alone).
+    var arrivals: BookArrivalsModel? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -77,6 +81,11 @@ struct SpreadBookView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // 13i-b U2: atop the spread, above both pages (an empty door
+            // draws nothing — zero height).
+            if let arrivals {
+                BookArrivalsLine(model: arrivals, structure: structure)
+            }
             if model.spreadEntries.isEmpty {
                 Spacer()
                 Text("This book has no notes yet.")

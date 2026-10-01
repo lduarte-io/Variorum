@@ -670,6 +670,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // kept up to date, and keeping the registry up to date should be part of
     // the plan."* ONE act, two door families — nothing user-visible changes.
     case openBookAtNote
+    // 13i-b U2 — THE ARRIVALS FACE's two judgment doors (the 13i-b plan §3;
+    // the sitting record §4: Add · Dismiss — the copy-in arm is 13i-c's).
+    // TWO declarations, on the `.moveTakeEarlier`/`.moveTakeLater` grounds:
+    // each is its own door on the row with its own refusal, and one
+    // declaration could not say that. Both are `.surface` acts whose target
+    // is the ARRIVAL ROW you point at on the line — the `.archiveNote` class.
+    case seatArrival, dismissArrival
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

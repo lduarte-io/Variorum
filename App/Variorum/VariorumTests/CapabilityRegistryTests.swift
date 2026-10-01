@@ -416,6 +416,14 @@ struct CapabilityRegistryTests {
             // the workbench + Index — both declare, both walked.)
             .union(BlocksWorkbenchView.surfaceCapabilities)
             .union(IndexModeView.surfaceCapabilities)
+            // 13i-b U2 (A JUSTIFIED EDIT, the E2/E8/batch-3/6b class): the
+            // ARRIVALS LINE atop a book's Index and Book surfaces renders the
+            // two judgment doors — Add (`seatArrival`) and Dismiss
+            // (`dismissArrival`) — on each waiting row. Its ONLY renderer, so
+            // the declaration lives with the builder and the union names it
+            // here; a judgment door leaking onto any other surface is a new
+            // line, which is the review this walk exists to force.
+            .union(BookArrivalsLine.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

@@ -374,6 +374,11 @@ struct BookIndexView<Masthead: View>: View {
     let session: AppSession
     let model: BookViewModel
     let structure: BookStructureModel
+    /// 13i-b U2 — the book's door: the Arrivals line stands atop the PANE
+    /// (the index's content, right of its column), invisible when empty.
+    /// Optional so a host that has no door to show (a pin over the pane
+    /// alone) composes nothing.
+    let arrivals: BookArrivalsModel?
     /// The book's masthead chrome (title · mode tabs · settings · order),
     /// composed by `BookView` so the index column and the navigator can
     /// never disagree about what the book's header says.
@@ -440,12 +445,14 @@ struct BookIndexView<Masthead: View>: View {
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
+        arrivals: BookArrivalsModel? = nil,
         @ViewBuilder masthead: @escaping () -> Masthead,
         onEditInOutline: @escaping (String) -> Void
     ) {
         self.session = session
         self.model = model
         self.structure = structure
+        self.arrivals = arrivals
         self.masthead = masthead
         self.onEditInOutline = onEditInOutline
         _edit = State(initialValue: BookIndexEditModel(session: session))
@@ -489,7 +496,17 @@ struct BookIndexView<Masthead: View>: View {
             minimum: BookIndexColumn.minimumWidth,
             maximum: BookIndexColumn.maximumWidth
         ) {
-            pane
+            // 13i-b U2: the door's line stands ABOVE the pane's scroll view,
+            // never inside it — the pane's height manifest and landing
+            // authority measure the scroll content alone, and an empty door
+            // draws nothing (zero height), so a book with no arrivals lays
+            // out byte-identically to before.
+            VStack(spacing: 0) {
+                if let arrivals {
+                    BookArrivalsLine(model: arrivals, structure: structure)
+                }
+                pane
+            }
         } panel: {
             column
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
