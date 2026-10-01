@@ -800,6 +800,57 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
 - Noticed in capture 13, cosmetic + pre-existing: the book footer says "1 chapters" —
   13i-d's vocabulary/polish sweep's, recorded here so it is owned.
 
+## U3 RECORD — the rule editor + the two strengthening doors + the teaching moment (opus-implementer, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is finalized at
+the close. Fenced from the start: the Collecting pane's sentence face (13i-d), every ownership arm
+(13i-c), the gathering assembly's STAR context (U4 — see F-U3 findings when written), the Bookcase,
+schema/`Sync/`/migrations (zero).
+
+**UNIT STATUS: IN PROGRESS.**
+
+### U3 LIVE STATUS (per commit; every unverified claim PENDING)
+
+- Preflight read in this session, not delegated: CLAUDE.md + canon, this plan whole (§1–§7, the U1
+  RECORD, the U2 RECORD + the orchestrator's U2 verification, the ledger, the morning bundle), the
+  sitting record whole (§1, §3, §4, §14.6, §17(d), §19, §20, §25 lesson 3 closely), the resiliency
+  protocol whole. No `Sync/`, custody, schema or editor-seam work in this unit (SyncSpec /
+  TEXTKIT2_NOTES not required). Code orientation: `SmartSpecSheet` + `Queries.legacyDraft` (its
+  consumers: the sheet and ONE Mac test, `TimelineAndReadingsTests.aUIBuiltSmartSpecRoundTripsUnchanged`),
+  `SmartConversionOfferSheet` + its two hosts (the shelf's menu door, BookView's "+ new chapter"),
+  `convertSmartReadingToCurated` / `revertSmartConversion` / `reapplySmartConversion`, the U1
+  Collecting setters + `tagAllMembers`, `RuleGrammar`, the registry + its walk, `StatusCenter`'s
+  offer kind, `BookStructureModel.acceptDrop` (the ONE brain behind every post drag — navigator rows
+  and Outline body rows). No revert in flight. No subagents.
+- **The settled design (written before code):**
+  - **A — the rule editor.** A pure Domain brain `RuleEditing` (path-addressed edits over
+    `RuleTerm`: add a tag/star term, add a seeded group, remove, toggle negation, flip a group's
+    and/or) whose state IS a `RuleTerm?` — a bijection with the stored grammar, so there is no
+    "shape it cannot express": the undraftable hazard is gone by construction, not relocated.
+    `.not` is a wrapper node (never a flag), so even `not(not x)` round-trips. Legacy terms render
+    read-only and are never offered; a MALFORMED stored rule refuses editing entirely. An unedited
+    Save writes NOTHING (structural equality — so non-canonical stored bytes can never fake a
+    catch-up occasion on a book). The editor never mints an empty group (a group is born seeded;
+    removing a group's last term removes the group; removing the root's last term clears the
+    rule). Face: `RuleEditorSheet` + `RuleEditorModel` (`Features/Readings/RuleEditor.swift`), one
+    shelf-menu door "Edit Rule…" for gatherings AND books; books add the join dial and the auto-tag
+    row; Save that sets/changes the rule or the auto-tag with an auto-tag in place OFFERS "also tag
+    the N current members" on the status seam (`tagAllMembers`). `SmartSpecSheet`,
+    `ReadingsViewModel.setSmartSpec` and `Queries.legacyDraft` retire.
+  - **B — Bind into a book.** `BindIntoBookSheet` replaces `SmartConversionOfferSheet`; the sheet
+    item `BindOffer` CARRIES the derived count (F-U2-3's fix shape — the count is never a separate
+    `@State` read inside a sheet closure); the "(collecting)" offer dies; the copy tells §14.6's
+    truth (it keeps collecting). P-13ib-6: `revertSmartConversion` tombstones EVERY live pair row
+    on the reverted row (a gathering holds nothing) on one stamp and records the ids; the redo
+    revives exactly those ids (exact-row, AppSpec §9).
+  - **C — Make a book from this gathering** (spawn): a shelf-menu door; a name prompt; composition
+    in `ShelfViewModel` over `createReading(kind: .book, querySpec: <the gathering's rule>, wingId:)`
+    — creation-time backfill seats; auto-tag OFF (P-13ib-3); the gathering survives.
+  - **D — the teaching moment:** `BookStructureModel.acceptDrop` on a GATHERING answers a post drag
+    with an OFFER ("Turn into a book to arrange by hand?") whose act opens the bind confirm.
+  - **E — registry:** `.editRule`, `.bindIntoBook`, `.makeBookFromGathering` (shelf context menu).
+- Piece 1 (this commit): the record opened.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
@@ -807,7 +858,7 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
 | 1 | Plan authored; kickoff PROVISIONALs recorded (§6) | DONE (this commit) |
 | 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | **DONE 2026-10-01** — the U1 RECORD above (design map · P-13ib-U1-1…9 · F-1…F-6); evidence: `IntakeDecisionTests` 13 · `IntakeOperationsTests` 42 · `ArrivalMemberHygieneTests` 6 (red-on-old 6/6) · `RuleWingScopingTests` 3 (red-on-old 2/3, the third the control) · `IntakeSoakTests` 6 seeds × 300 steps · `GatheringRitualTests` 3 (R3 + lessons 3–4); 5+2 mutation checks bite; core 1840/193 green; Mac + mobile build; changed-op Mac suites 380/74 + mobile 101/22 pass. **F-1 is U3's to carry (a shipped sentence now false)** |
 | 3 | U2 — the Arrivals face | **DONE 2026-10-01** — the U2 RECORD above (design map · P-13ib-U2-1…5 · F-U2-1…5 · THE WALK, 15 captures, both voices × both appearances); evidence: `ArrivalQueriesTests` 12 (incl. the EXPLAIN-plan pin) · `BookArrivalsTests` 10 mounted (absent/present on Index AND Book, gone on Outline/Read, expansion + both doors, Add at the END unsectioned, Dismiss, the capacity refusal on the seam, already-judged, vanish) · the registry walk (`BookArrivalsLine` the two acts' one renderer); 2 mutation checks bite; core 1852/194 green; Mac + mobile build; book-surface + registry + tutorial Mac suites 335/57 pass (4 standing known issues). **F-U2-3 joins F-1 in U3's charter** (the conversion sheet's wrong count) |
-| 4 | U3 — the rule editor + bind/spawn + the teaching moment | NOT STARTED |
+| 4 | U3 — the rule editor + bind/spawn + the teaching moment | IN PROGRESS — the U3 RECORD above |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | NOT STARTED |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
 | 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
