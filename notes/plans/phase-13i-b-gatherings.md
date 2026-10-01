@@ -558,10 +558,132 @@ condition met.
 
 ## U2 RECORD — the Arrivals face (opus-implementer, 2026-10-01)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is rewritten at
-the close with everything not done.
+**NOT DONE BY THIS UNIT (first line, per the contract):** the orchestrator's own hands-on walk
+(the plan §5 names it; this unit walked its rows itself — below — and the orchestrator walks after
+the close); no QUESTIONS.md entries written (the plan logs PROVISIONALs at close — each below
+carries its QUESTIONS-ready paragraph); no new home for a QUIET receipt on the book's Index/Book
+surfaces (F-U2-2 — the 18i seam's placement, not invented here); the conversion sheet's wrong "0
+notes" count and F-1's false sentence (both U3's door — F-U2-3); no Bookcase-row count, no
+membership-chip state, no Collecting pane, no rule editor, no finish-confirm line (fenced: 13i-d /
+P-13ib-2 / 13i-d / U3 / 13i-c); no phone face (the mobile catch-up's); zero Operations, `Sync/`,
+schema, migrations — the one core change is the Queries read support; no STOP condition met.
 
-**UNIT STATUS: OPEN.**
+**UNIT STATUS: OPEN — closing (the final verification below is PENDING until its line flips).**
+
+### What U2 built (the design as shipped — a fresh session's map)
+
+- **`Queries/ArrivalQueries.swift` (the unit's ONLY core change):** `Queries.bookArrivals(db,
+  readingID:, limit:)` → `BookArrivals { count, rows }`, ONE shared predicate
+  (`bookArrivalSource`): a live `status='arrival'` row of a live BOOK whose note is a live,
+  un-archived post, oldest arrival first; `limit: 0` = the count alone.
+  `AppDatabase.observeBookArrivals(_:limit:)`, `limit` REQUIRED. `CROSS JOIN` keeps the book's rows
+  the driver (plan-pinned).
+- **`Features/BookView/BookArrivals.swift`:** `ArrivalsCopy` (every word, pure) ·
+  `ArrivalsLineFace.isShown` (the ONE visibility value — §23's composition point: 13i-d's details
+  toggle hides arrivals by composing HERE, nothing to fight) · `BookArrivalsModel` (its own model,
+  P-9 — observes the door with `limit` = 0 collapsed / 30 open, `toggle`, `seat` / `dismiss` through
+  the runner, a receipt on success and the operation's own refusal in words on failure, both on
+  `session.status`; a per-row in-flight guard greys the row's doors) · `BookArrivalsLine` (draws
+  NOTHING when empty — not a line, not a hairline; one muted `VoicedButtonStyle(.quiet)` line +
+  hairline when occupied; rows inline on her click: the note's name (her prose, never
+  `chromeLabel`'d) · "arrived …" (`TimeStampFace.relative`, the one stamp vocabulary) · **add**
+  (`.primary`) · **dismiss** (`.quiet`); the "and N more waiting" tail past the window; every
+  fixed text `lineLimit(1)`; tokens only) · the DEBUG `ArrivalsLineProbe` (owned per line instance).
+- **Wiring:** `BookView` owns the model (`@State`, injectable) and hands it to `BookIndexView` (the
+  line stands ABOVE the pane's scroll view — outside the manifest-measured content, so the landing
+  authority is untouched) and `SpreadBookView` (atop both pages). Both params default nil.
+  Outline and Read carry no line (the ruling names Index/Book).
+- **Registry (P-1):** `CapabilityID.seatArrival` / `.dismissArrival` — `.surface`, book scope, no
+  key, no palette row, `always`, `takesAccess: .native` (the `.archiveNote` precedent: the target is
+  the row the door carries). `BookArrivalsLine.surfaceCapabilities` is their one renderer; the walk
+  union names it.
+- **§25 lesson 4 stays true:** "add it … or dismiss it" are the two doors; "copy it in" is 13i-c's
+  owned arm (no op exists — nothing here makes it false); "Finishing a book dismisses whatever is
+  still waiting" is U1's `lockReading`, untouched.
+
+### PROVISIONALs made in U2 (each QUESTIONS-ready; the morning bundle carries them)
+
+- **P-13ib-U2-1 — WHERE on the surface the line stands:** atop the CONTENT — Index's rendered pane
+  (right of the index column), Book's spread (above both pages) — never in the masthead or the
+  index column. *Options:* (a) atop the content — BUILT; (b) in the index column under the masthead
+  (and the navigator on Book); (c) the shared masthead, i.e. every mode. *Ground:* "atop the book's
+  Index/Book surface" names the surface's top; the column is the MEMBERSHIP listing, and arrivals
+  are "never listed/worded as membership"; (c) would put it on Outline/Read too. *QUESTIONS
+  paragraph:* "The 'N at the door' line sits at the top of the book's text in Index and above the
+  two pages in Book. Should it instead sit in the index column under the book's title, or in the
+  book's header so every mode shows it?"
+- **P-13ib-U2-2 — An ARCHIVED waiting note leaves the door while archived** and returns on
+  unarchive (its row stands untouched) — the book view's ambient-view rule (an archived member does
+  not render in a book either; intake never seats an archived note). *Options:* (a) BUILT; (b) list
+  it with an "archived" mark; (c) list it plain. *QUESTIONS paragraph:* "If a note waiting at a
+  book's door gets archived, should the door (a) hide it until it's unarchived — built; (b) show
+  it marked 'archived'; or (c) show it as usual?"
+- **P-13ib-U2-3 — The expansion is VIEW state:** collapsed by default, collapsed on every open of
+  the book, folds shut when the last arrival is judged; never remembered, never opens itself.
+  *Options:* (a) BUILT; (b) remember open/closed per book (local); (c) open by itself when new
+  arrivals ring. *Ground:* her clutter mandate — "never a persistent panel".
+- **P-13ib-U2-4 — The open line lists the first 30 (oldest first) and says "and N more
+  waiting"; there is NO bulk dismiss door** (dismissal at scale rides finishing — plan §2.5; a
+  "dismiss all" would be a new act no ruling makes). *Options:* (a) BUILT; (b) add "dismiss all";
+  (c) list every row (unbounded).
+- **P-13ib-U2-5 — The words:** "N at the door" (the plan §3's) · "arrived today 7:31 AM" · add /
+  dismiss · receipts "“T” added at the end of the book[, outside the chapters]." / "Dismissed
+  “T”." · refusals naming the road ("“B” is full — its cap is N notes. Raise the note cap in the
+  book's settings (the gear), then add it." · "“B” is finished — its table of contents is done…
+  Reopen it in the book's settings…" · "That note isn't waiting at the door any more — it was
+  already judged."). Dismiss's words deliberately say nothing about whether the note can ring again
+  (that rides P-13ib-U1-1, still hers). 13s re-voices all of it.
+
+### FINDINGS (for the orchestrator; none is a STOP condition)
+
+- **F-U2-1 (morning bundle — discovery):** a book OPENS into Outline (R2 / 13c 2A), where the ruled
+  line does not stand; until 13i-d's Bookcase-row accent count lands, she sees arrivals only on
+  visiting Index or Book. Built to the ruling (Index/Book); whether Outline should carry the line
+  too is hers.
+- **F-U2-2 (the 18i seam's placement — orchestrator's call):** a QUIET receipt draws only in the
+  note bars and the live note box's footer (`QuietReceiptLine`'s three hosts). On Index/Book with
+  no note live, Add's and Dismiss's receipts reach the seam (pinned) but draw nowhere under her
+  default `.quiet` (they show under `.toast`). Walked: the act's evidence is the board itself — the
+  note appears at the end, the row leaves, the count drops. Not invented around: a fourth host is a
+  seam decision.
+- **F-U2-3 (U3 — the conversion door it rebuilds):** walked live, the shelf's "Convert to a
+  Hand-Shaped Book…" sheet said "Its current **0** notes stay" for a gathering whose row read
+  "smart · 8w" (two notes) — and the conversion then KEPT 2 (its receipt said so). Observed, not
+  traced (`SmartConversionCount.collected` is a `try?`-swallowed `assembleReading` count, or the
+  sheet captured stale state); the same sheet carries F-1's false sentence. U3 retires it.
+- **F-U2-4 (pre-existing, not this surface):** on the shelf, the conversion's quiet receipt drew
+  OVER the shelf's "⌘k — find anything" hint text (overlapping glyphs). Recorded, not touched.
+- **F-U2-5 (P1, said exactly):** the door's statements are ∝ the BOOK's live pair rows (members +
+  arrivals), never the corpus (plan-pinned); strictly ∝ the pending set would need a
+  `(reading_id, status)` index — a schema change, forbidden here. The held observation re-fetches
+  at autosave rate while a book view shows the line (the note join reads `container`, which an
+  autosave rewrites whole) — bounded by the book's rows; `removeDuplicates` keeps the face still.
+
+### THE WALK (this unit's own; dev-store Debug build `io.lduarte.Variorum.debug`, 2026-10-01 07:21–07:36 MDT)
+
+Machine author-free (HID idle 6,500 s+, unlocked, caffeinate holding the display, AX + Screen
+Recording granted, her app absent; `guard.sh` before every act). Captures (gitignored)
+`notes/plans/13ib-screens/u2/`: **01** terminal-light Index, line collapsed ("▸ 2 at the door") ·
+**02** expanded (door four / door five · arrived today 7:28 am · add · dismiss) · **03** the
+capacity REFUSAL toast ("“the door” is full — its cap is 3 notes. Raise the note cap…") · **04**
+after raising the cap to 5, Add: door four SEATED at the END, in "unfiled" after door three; "1 at
+the door"; "4 notes" · **05** Book (spread): the same line atop both pages · **06** Dismiss door
+five: the line VANISHES (no panel, no hairline), membership untouched · **07** door five un-tagged
+and re-tagged by hand (the masthead tag door — a fresh act): "▸ 1 at the door" again · **08** its
+NEW row ("arrived today 7:31 am", not the dismissed 7:28 one) — P-13ib-U1-1's built truth, and NOT
+auto-seated though the cap had room · **09** study-light Index expanded (Add / Dismiss / AM) · **10**
+study-light collapsed · **11** study-light Book spread · **12** study-light OUTLINE: no line · **13**
+study-dark Index expanded · **14** terminal-dark Index expanded · **15** terminal-dark Book spread.
+The script, by shipped faces only: two notes minted through the shelf's quick-entry bar with
+`{#door13ib}` (the capture microsyntax — fresh tag; the store's `u2walk`/`u3walk` tags were earlier
+sessions' and not fresh) · Settings ▸ Tags ▸ Promote to Book → the gathering "the door" (smart ·
+8w) · the shelf row's "Convert to a Hand-Shaped Book…" (the "(collecting)" sibling unticked — F-1's
+double-collect) → "the door · 2 notes" · gear ▸ Note cap 3 · "+ new chapter" "part one", both members
+filed in it · three more `{#door13ib}` captures: the third SEATED (end, unfiled), the fourth and
+fifth WAITED (at capacity) — note five's chip read "in no book" (P-13ib-2 silent). Her dev settings
+restored and read back (voice Terminal, Appearance Follow system — AX values `1,0` / `1,0,0`;
+`appearanceChoice = system`); the instance quit by identity; zero instances after. The dev store
+keeps the walk's book "the door", its tag and seven notes (dev store — harmless).
 
 ### U2 LIVE STATUS (per commit; every unverified claim PENDING)
 
@@ -644,7 +766,12 @@ the close with everything not done.
   PaneSurface, PanePublishDoor, PagedReadView, NavigatorReadRows, PaneBookBlur, PaneMount); B —
   the registry, the seam and **the tutorial spine** — **148 / 20 passed, 0 skipped**
   (CapabilityRegistry, StatusCenter, CommandRouter, ChordLegibility, the four declaration suites,
-  and ALL eleven `TutorialWalkTests` suites). Zero instances throughout. NEXT: the dev-store walk.
+  and ALL eleven `TutorialWalkTests` suites). Zero instances throughout. 
+- Piece 6 (this commit): **the walk — DONE** (THE WALK above: 15 captures, both voices × both
+  appearances, every U2 evidence row walked live on the dev store); the record's body written
+  (the design map, P-13ib-U2-1…5, F-U2-1…5). NEXT — the FINAL VERIFICATION, **PENDING**: the full
+  core suite, the Mac app build, the mobile target build (no code has changed since the Mac suites
+  above ran green).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
