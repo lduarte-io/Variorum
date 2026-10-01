@@ -1243,7 +1243,20 @@ STOP condition met.
   §7–§9, §14, §17–§25 (§3, §8, §18.1, §19.3, §20, §25 lesson 10 closely), the resiliency protocol whole.
   No `Sync/`, custody, schema or editor-seam work planned (SyncSpec / TEXTKIT2_NOTES not required). No
   revert in flight. No subagents.
-- Piece 1 (this commit): the record opened.
+- Piece 1 (d9cff909): the record opened.
+- Piece 2 (this commit — **WIP: `StarContextTests` deliberately RED until piece 3; no revert in
+  flight**): the star-context pins written FIRST, one per site class (assembly incl. `NOT ★` and the
+  tag ∧ ★ conjunction · a HELD observation hearing the un-star alone, deadline-bounded · the bind's
+  materialization + the sheet's count · the shelf word counts · the Pool exclusion · the membership chip ·
+  the Library card's gathering list · the collect door's two probes) + two boundary controls (wing +
+  archive; a starred BOOK is never a note target). **Red-on-old watched: 9 of 11 red on the pre-fix
+  tree, each at its own mechanism** (empty assembly; `NOT (0)` matching every tagged note; no
+  re-emission on un-star — the old assembly never read the setting; bind count 0 and zero members
+  bound; 0 words; the starred notes still in the Pool; no chip; no card line; the collect door refusing
+  "tagging alone can't satisfy" for a note that already matched). The two controls pass on both sides
+  by design (they guard the fix against over-matching). First run note: the observation pin's bare
+  `next()` HUNG on the old tree (no re-emission) — rewritten deadline-bounded so red is a failure, not
+  a hang.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
