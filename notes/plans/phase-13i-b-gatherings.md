@@ -573,8 +573,23 @@ the close with everything not done.
   `BookIndexView` / `SpreadBookView` / `BookStructureModel`), the registry (`Capability` /
   `CapabilityRegistry` / the `.surface` walk), the status seam (`StatusCenter` — refuse / receipt),
   `TimeStampFace`, `VoiceControls`. No revert in flight. No subagents.
-- Piece 1 (this commit): the record opened. NEXT: the Queries read support (count + bounded
-  listing, observed), then the face, the registry, the pins, the walk.
+- Piece 1 (abe73479): the record opened.
+- Piece 2 (this commit) — **the Queries read support, the unit's ONLY core change**
+  (`Sources/VariorumCore/Queries/ArrivalQueries.swift`): `Queries.bookArrivals(db, readingID:,
+  limit:)` → `BookArrivals { count, rows }` by ONE shared predicate (`bookArrivalSource` — a live
+  `status='arrival'` row of a live BOOK whose note is a live, un-archived post; oldest arrival
+  first), `limit: 0` = the count alone (the collapsed line); `AppDatabase.observeBookArrivals(_:
+  limit:)` with `limit` REQUIRED (the `observeLibrary` discipline). P1: `CROSS JOIN` makes the
+  book's own rows drive (a book-scoped index SEARCH) and each note a PK seek — ∝ the book's live
+  pair rows, never the corpus (strictly-∝-pending would need a `(reading_id, status)` index = a
+  schema change, forbidden here; recorded). `ArrivalQueriesTests` (12): empty/members-only door ·
+  count + arrival order + row ids are the arrival rows · limit bounds rows never the count ·
+  judged arrivals leave (seat → member, dismiss → gone) · other books never count · archived
+  leaves and returns (P-13ib-U2-2) · deleted note / deleted book empty it · a gathering never has
+  a door even with a stray row · nameless → its day · a rung-again note stands on its NEW row
+  (P-13ib-U1-1) · BOTH statements' `EXPLAIN QUERY PLAN` (`SEARCH rp` first, the container a PK
+  seek, no SCAN) · the observation delivers live — **12/12 green on first run** (new feature
+  pins, not bug-class: no red-on-old applies). NEXT: the face (model + line + registry).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
