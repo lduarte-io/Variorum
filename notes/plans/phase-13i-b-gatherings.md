@@ -1167,6 +1167,30 @@ STOP condition met.
   throughout; `git status` clean. Ledger row 4 flipped. No revert in flight; nothing uncommitted.
   U3 CLOSED.
 
+## ORCHESTRATOR VERIFICATION — U3 (2026-10-01, before U4's spawn)
+
+- Trail verified (12 commits, discipline held — F-U2-3 pinned RED before its fix, P-13ib-6's
+  pins watched red on the old inverse, mutations announced + restored; pushed, tree clean).
+  Suites re-run by the orchestrator's hand: core `RuleEditingTests` + `SmartConversionTests`
+  37/2 GREEN · Mac `BindDoorTests` + `RuleEditorTests` 16/2 GREEN. Captures reviewed: 04 (the
+  bind sheet — count RIGHT, keeps-collecting spoken, identity promised), the 17a/17b F-U3-1
+  before/after pair listed; full drive rides the end-of-phase walk.
+- **Adjudications:** P-13ib-U3-3 SUSTAINED (the undo clears waiting arrivals too — an arrival
+  row on a gathering is wrong-shaped; "no live row" is P-13ib-6's letter; redo revives exactly
+  what undo took). F-U3-3 → U4's charter, LOUD (the gathering assembly's star context — the
+  bind count and Pool flow through the same read). F-U3-4 (the conversion op's dead
+  keepCollecting/collectingName params) → held for the LADDER-fix window or a closeout
+  structure single; not U4's. F-U3-2 (the membership chip's one-shot staleness under an
+  intake seat) → a KnownIssues row at closeout, owner 13i-d. F-U3-5 (walk tooling: raise the
+  window + require-topmost-at-point) → folds into 17w's standing VisualWalk-hardening row
+  (KnownIssues 97); no stray writes verified by the implementer (keystrokes re-guarded, Pool
+  clean). F-U3-1's fix stands WITHOUT a mounted pin — an acknowledged deviation, recorded for
+  the ladder: the dismissal-triggers-refresh shape is the whole-surface mount class the rig
+  cannot drive (the standing KnownIssues row); the before/after captures are its evidence.
+- Copy nit for the bundle/13s: the bind sheet's "It stays the same book on your shelf" speaks
+  of the pre-bind GATHERING as a book; exact words would be "it stays on your shelf — same
+  name, same star." Recorded, not patched (copy is hers).
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
