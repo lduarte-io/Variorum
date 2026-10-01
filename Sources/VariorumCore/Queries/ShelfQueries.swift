@@ -83,7 +83,7 @@ extension Queries {
                            AND chosen.deleted_at IS NULL AND chosen.status = 'active'),
                        b.default_variant_id)
                  AND v.deleted_at IS NULL
-                WHERE rp.deleted_at IS NULL
+                WHERE rp.deleted_at IS NULL AND rp.status = 'member'
                 """)
         for row in rows {
             counts[row["reading_id"], default: 0] += wordCount(row["text"])
@@ -167,7 +167,7 @@ extension Queries {
                 FROM reading_post rp
                 JOIN post_tag pt ON pt.post_id = rp.post_id AND pt.deleted_at IS NULL
                 JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                WHERE rp.deleted_at IS NULL
+                WHERE rp.deleted_at IS NULL AND rp.status = 'member'
                 GROUP BY rp.reading_id, t.path
                 ORDER BY rp.reading_id, n DESC, t.path
                 """)
@@ -249,6 +249,7 @@ extension Queries {
             sql: """
                 SELECT r.* FROM reading r
                 JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at IS NULL
+                 AND rp.status = 'member'
                 WHERE rp.post_id = ? AND r.deleted_at IS NULL
                 ORDER BY r.name, r.id
                 """,

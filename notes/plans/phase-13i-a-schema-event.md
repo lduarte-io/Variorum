@@ -354,6 +354,15 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
 - `setJournalTrait` refusing on `'daily'` — constitutive-trait reading, PROVISIONAL.
 - The `shelf.role` marker + R5 keeper — architect mechanism under the bundling rule (a column
   impossible to add later without a second event), recorded for her awareness.
+- **Handed to 13i-b/c's door enumeration (ladder R1 MIN-4, record-only + R2's chip note):**
+  (a) `ruleSQL`'s subtree walk matches applied tags by PATH without wing scoping — constrain
+  `applied.wing_id = root.wing_id` when cross-wing applications become mintable (unpinnable
+  today; no door can create the state); (b) whether the membership CHIP should say "arriving"
+  for an arrival row (13i-a filters it out as not-a-member; the richer face is intake's own
+  design). Also recorded (R2 NITs, record-only): `setDailyJournalBook`'s profile moves skip the
+  `updated_at` stamp (no consumer today); the kind-recast pull window is CHOREOGRAPHY-fenced
+  (her Mac is the first marker-10 client and pushes in the same sitting — the §8 order is
+  load-bearing and now on the record).
 
 ## §10 LEDGER (every row owned; statuses flip in the same commit as the work)
 
