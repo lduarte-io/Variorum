@@ -849,7 +849,8 @@ inside-a-sealed-book question (FINDING F-U2-1 — a fork reserved for the archit
   `Phase13iRepairTests.aLaterPlainAddBesideAStandingOwnedClaimTombstones` pulled A's claim onto B
   and THEN hand-added — a road row 1's consult now refuses by design; the race it pins is B adding
   WITHOUT having seen the claim, so B now pulls the note before A claims it (repair untouched).
-  App compile arms for `.waitingAtDoor` + the refusal words: PENDING (piece F).
+  App compile arms for `.waitingAtDoor` DONE (2509647d); the refusal words DONE (the closing
+  commit, piece F).
 - **Piece C — the revival pass + its call sites, the bind's owned-notes limb, restore-whole,
   delete-with-notes, duplicate, the Trash count:** DONE (commit "13i-c U2 piece C").
   `enforceOwnershipAfterRevival` called from `restoreContainer`, `restoreReading`,
