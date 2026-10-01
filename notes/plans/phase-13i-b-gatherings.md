@@ -939,6 +939,30 @@ schema/`Sync/`/migrations (zero).
   (the collector-name guard died with the collector → `theSpawnDoorsNameIsGuarded`, E13 on the
   new naming door). `RuleEditorModel.load()` made idempotent (a late `.task` load can never reset
   her draft). Mac TEST BUILD SUCCEEDED.
+- Piece 6 (this commit) — **the mounted pins.** `BindDoorTests` (8): F-U2-3 through the real shelf
+  + the presented sheet's ruled truth (keeps collecting; no "stop arriving"; no "(collecting)";
+  "Bind into a Book") · the bind words at 0/1/N and the chapter variant (lesson 3's clause in
+  each; the teaching offer verbatim) · binding through the shelf keeps the row (id, name, the row
+  star AND the sidebar star, the rule; one row) and KEEPS COLLECTING (a fresh tag seats at the
+  end) · the spawn (sibling book: rule copied, same wing, auto-tag nil, dial nil; backfill seated
+  the matches as MEMBERS; the gathering untouched and holding no rows; the sibling hears a fresh
+  match) · the teaching moment (a post drag on a gathering → an OFFER with the verbatim words and
+  the bind label, nothing written, no "isn't in this book"; its act opens the bind confirm with
+  the count) · a book's drag still files (reorders) with no offer · a finished gathering hears a
+  refusal, never an offer · the chapter door opens the bind with its count, follow-up and view
+  order. `RuleEditorTests` (8, mounted where the face matters): every shape drawn with its doors
+  (root group: not but no remove — it holds the old term; the negated any-of; the dead tag as
+  "(deleted tag)"; the legacy term drawn with NO door; the legacy notice; no Collecting rows on a
+  gathering; Save disabled) · the add doors offer exactly the wing's live tags + the star (no
+  dead tag, no other wing's, never a legacy term) · edits redraw and save writes exactly the tree ·
+  an unedited save writes nothing, not even an outbox row, over a non-canonical spelling · a
+  malformed rule is refused (notice, no rows, no add doors, edits refused) while a book's dial
+  still saves and the rule's bytes stay · a rule edit on a living book sends the gap to the door
+  (`bookArrivals` counts it; never seated) · setting an auto-tag OFFERS "Also tag the 2 current
+  members with #work now?" and its act tags them with a receipt · no offer when there is nothing
+  to tag. **Mac: BindDoorTests + RuleEditorTests + CapabilityRegistryTests — "Test run with 44
+  tests in 3 suites passed", 0 skipped** (the registry walk green with `.editRule`,
+  `.bindIntoBook`, `.makeBookFromGathering` declared and rendered).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
