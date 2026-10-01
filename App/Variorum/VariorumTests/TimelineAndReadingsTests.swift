@@ -112,6 +112,11 @@ struct TimelineAndReadingsTests {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
             let id = try #require(await model.create(name: "smart", kind: .gathering))
+            // 13i-a: rules reference tag IDs (§19), so the face's paths
+            // resolve at the WRITE — the tags exist first, like the doors'
+            // own flow (pick from existing tags).
+            let tag = try session.operations.createTag(name: "life")
+            _ = try session.operations.createTag(parent: tag.id, name: "goals")
             let spec = Queries.SmartQuerySpec(
                 tags: ["life", "life/goals"],
                 profile: "journal",
@@ -119,13 +124,23 @@ struct TimelineAndReadingsTests {
                 entryDateTo: "2026-12-31")
             await model.setSmartSpec(id, spec: spec)
 
+            // The stored value is the NORMALIZED v2 rule; the face's own
+            // vocabulary round-trips through the draft reader (13i-a — the
+            // interim contract until 13i-b's grammar faces).
             let stored = try await db.read { try Queries.readings($0) }[0].querySpec
-            let decoded = try JSONDecoder().decode(
-                Queries.SmartQuerySpec.self, from: Data(try #require(stored).utf8))
-            #expect(decoded == spec, "the UI-built spec round-trips through SmartQuerySpec unchanged")
+            let maybeSeed: (draft: Queries.SmartQuerySpec, undraftable: Bool)? =
+                try await db.read { [stored] in
+                    try Queries.legacyDraft($0, querySpec: stored)
+                }
+            let seed = try #require(maybeSeed)
+            #expect(seed.undraftable == false)
+            #expect(Set(seed.draft.tags ?? []) == ["life", "life/goals"],
+                    "the face's any-of paths round-trip")
+            #expect(seed.draft.profile == spec.profile)
+            #expect(seed.draft.entryDateFrom == spec.entryDateFrom)
+            #expect(seed.draft.entryDateTo == spec.entryDateTo)
 
             // And the assembly APPLIES it (semantics stay Phase 4's).
-            let tag = try session.operations.createTag(name: "life")
             let match = try session.operations.createPost(
                 title: "m", profile: .journal, entryDate: "2026-06-15")
             _ = try session.operations.createPost(

@@ -231,7 +231,8 @@ struct JournalBooksTests {
             }
             #expect(books.map(\.id) == [designated],
                     "the entry knows its book the way any post does — ordinary membership (R50)")
-            #expect(books.first?.profile == "journal")
+            // 13i-a: the daily mint stamps the MARKER (the memo §3).
+            #expect(books.first?.profile == "daily")
 
             // The SAME day re-opens the SAME entry (the untouchable
             // one-entry-per-day rule) and mints nothing new.
