@@ -146,7 +146,14 @@ struct ShelfView: View {
         .sheet(item: $manageTarget) { reading in
             ManageReadingPostsSheet(session: session, model: readings, reading: reading)
         }
-        .sheet(item: $ruleEditor) { editor in
+        // 13i-b U3 walk finding F-U3-1: the shelf's tags column and word
+        // counts are ONE-SHOT aggregates (refreshed on appearance and after
+        // its own membership acts); a saved rule changes what a gathering
+        // shows, so the row refreshes when the editor closes — it read
+        // "smart" with no tag until the shelf was re-entered.
+        .sheet(item: $ruleEditor, onDismiss: {
+            Task { await model.refreshAggregates() }
+        }) { editor in
             RuleEditorSheet(model: editor)
         }
         .sheet(item: $extentTarget) { reading in

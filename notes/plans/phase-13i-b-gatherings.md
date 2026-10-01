@@ -971,6 +971,38 @@ schema/`Sync/`/migrations (zero).
   queued an outbox row); M3 the editor's wing filter dropped → **1 red** (the add doors offered
   another wing's tag); M4 the keeps-collecting sentence dropped from the bind's body → **2 red**
   (the presented sheet's truth; the words at every count). Every new pin family bites.
+- **THE WALK — IN PROGRESS** (dev-store Debug build `io.lduarte.Variorum.debug`, built from the clean
+  tree at ada13430; machine author-free — HID idle 4,700 s+, AX + Screen Recording granted, her app
+  absent, `guard.sh` before every act; captures gitignored under `notes/plans/13ib-screens/u3/`).
+  **Terminal · light — DONE (16 captures):** 01 a gathering's shelf menu carries Edit Rule… · Bind
+  into a Book… · Make a Book from This Gathering… · 02 the editor on a fresh gathering (`#bind13ib`
+  added through "+ tag ▾"; `not` chip + remove; Save live) · 03 the gathering starred (sidebar) +
+  pinned · 04 **the bind sheet promises "the 2 notes it shows become members"** (F-U2-3 fixed in
+  hand) and says it keeps collecting; no "(collecting)" toggle · 05 after the bind: the SAME row,
+  still pinned and starred, "2 notes"; the receipt "…is a book now — 2 notes bound in … it keeps
+  collecting." · 06 a fresh `{#bind13ib}` capture → "3 notes" (keeps collecting) · 07 the BOOK's
+  editor: `all of these ▾ #bind13ib ★ starred` + the join dial + the auto-tag row · 08 a plain
+  note starred (⌘K Toggle Star) then tagged by hand through the masthead tag door → **seated:
+  "4 notes"** (the tagging act on a `tag ∧ star` rule) · 09 the rule edited (★ removed; the group
+  keeps `#bind13ib`, no silent collapse) + auto-tag `#walked` · 10 **the offer on the seam: "Also
+  tag the 4 current members with #walked now? Tag Them"** (pressed) · 11 **the gap at the door:
+  Index "▾ 1 at the door · arrived today 9:06 am · add · dismiss"** — `bind five` (tagged, unstarred)
+  rung by the rule edit's catch-up, never seated · 12 the spawn's name prompt ("Make a book from
+  “spawn walk”", prefilled "spawn walk (book)") · 13 the sibling "spawn walk (book) · 2 notes"
+  (backfill seated both) beside the surviving gathering "spawn walk · smart"; receipt "made … — 2
+  notes joined, and it keeps collecting." · 14 **the hand-drag teaching offer: "Turn into a book to
+  arrange by hand? Bind into a Book…"** (a navigator row dragged onto another in the gathering;
+  nothing moved, no "isn't in this book") · 15 the offer's act opened the bind confirm (title
+  without the chapter clause; count 2) · 16 the navigator's "+ new chapter" → the chapter variant
+  ("…to add chapters?", count 2, "bind & add chapter"). **Walk findings so far:** F-U3-1 (FIXED in
+  this commit — the shelf's one-shot aggregates did not refresh when the editor closed, so a saved
+  rule's tag/words appeared only on re-entering the shelf; `onDismiss` refresh added) · F-U3-2
+  (recorded — the note masthead's membership chip is one-shot by design, so a note seated by intake
+  WHILE OPEN still read "in no book" until re-opened, then "~/bind walk"; pre-existing face
+  behaviour newly reachable through U1's intake; not this unit's surface) · a walk-tooling fact: the
+  toast's 6 s clock can outlive a guarded click's latency (the first offer press landed after the
+  toast had gone; re-walked with an immediate click — the offer's act works). PENDING: Study light,
+  Study dark, Terminal dark; settings restored; zero instances.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
