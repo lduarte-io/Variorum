@@ -48,7 +48,7 @@ nonisolated enum ShelfOrder {
         let rest = books.filter { !pins.contains($0.reading.id) }
         let journals = rest.filter { Queries.hasJournalTrait($0.reading.profile) }
             .sorted { $0.reading.name < $1.reading.name }
-        let others = rest.filter { $0.reading.profile != "journal" }
+        let others = rest.filter { !Queries.hasJournalTrait($0.reading.profile) }
             .sorted { $0.reading.name < $1.reading.name }
         return pinned + journals + others
     }

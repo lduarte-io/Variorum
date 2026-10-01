@@ -54,8 +54,12 @@ struct ShelfModelTests {
             book("a", "alpha"),
             book("d", "Dream Journal", profile: "journal"),
             // 13i-a (ladder R1 M-2): THE daily Journal wears 'daily' now —
-            // the trait predicate must keep it in the journal group.
-            book("t", "Journal", profile: "daily"),
+            // the trait predicate must keep it in the journal group. (The
+            // lowercase name is deliberate: it sorts AFTER "alpha" in the
+            // rest-group under either collation, so a reverted predicate
+            // reads [...j, a, t] and the pin goes RED — the first fixture
+            // was order-coincident and revert-verified hollow.)
+            book("t", "journal", profile: "daily"),
             book("p", "pinned late"),
         ]
         let ordered = ShelfViewModel.ordered(books: books, pins: ["p", "z"])
