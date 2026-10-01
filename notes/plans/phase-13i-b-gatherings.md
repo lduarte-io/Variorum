@@ -963,6 +963,10 @@ schema/`Sync/`/migrations (zero).
   to tag. **Mac: BindDoorTests + RuleEditorTests + CapabilityRegistryTests — "Test run with 44
   tests in 3 suites passed", 0 skipped** (the registry walk green with `.editRule`,
   `.bindIntoBook`, `.makeBookFromGathering` declared and rendered).
+- **MUTATION CHECKS — IN FLIGHT** (tree committed at 3e1201ea; each mutation is applied to a
+  committed file and restored by `git checkout --`; a successor reads `git diff` to see what is
+  mutated right now). M1 teaching branch removed + M2 byte-compare `ruleChanged` (one run);
+  M3 wing filter dropped + M4 keeps-collecting dropped (one run). Results: PENDING.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
