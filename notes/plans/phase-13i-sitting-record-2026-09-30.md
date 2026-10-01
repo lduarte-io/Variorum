@@ -362,5 +362,68 @@ with the crowding caveat — one row, zero new notes) · (c) the masthead-collap
 (d) intake grammar v1 = tag/star terms only · (e) cross-wing lineage edges (data-level exception,
 surfaces scoped) · (f) the grouped-by control's home on the Index masthead (proposed, standing).
 
+## 17. HER RULINGS ON §16 — same day, the record's second pass
+
+- **(a) RULED — the starter shelf IS "Welcome."** Her words: *"I thought we decided that the
+  starter shelf would be named 'Welcome' earlier in this chat. It will be."* So: ONE shelf at
+  birth, named Welcome, holding the seeded content; ordinary and renamable; new books land on it
+  until she makes shelves (dangling shelf pointers read as the first shelf, which is Welcome).
+  *Design note, recorded honestly: the round-6 rationale (seeing shipped books SEPARATED from
+  yours) is fully satisfied the moment any second shelf exists; if birth-time separation is ever
+  wanted, a second "Your books" shelf at first mint is a one-line tweak — not ruled, just kept.*
+- **(b) RULED IN — the classics lesson ships:** Sherlock owned · Jekyll plain · both `#classics` ·
+  the seeded classics gathering on Welcome · the seeded quicknote. Hide-owned global default
+  stays show-badged (the dependency).
+- **(c) explained, stands as a UI-pass detail:** this is her own "the numbers of each thing should
+  be dismissable or at least collapsible into a small icon" about the Bookcase masthead's
+  "8 books · 3 gatherings · 4 shelves" line; only the exact collapse gesture is open.
+- **(d) explained, stands unless she objects:** intake rules may reference TAGS and the STAR,
+  combined with and/or/not ("tagged video-ideas AND starred"). Excluded for v1: date-, length- and
+  churn-shaped predicates ("edited this month") — they have no event for event-driven intake to
+  fire on, and a gathering of them would be a search wearing a book's clothes.
+- **(e) RULED — minimal naming, nothing deeper.** Her words: *"it can say it was in a different
+  wing but I don't think we should have much more detailed linking than that, maybe move back to
+  that wing for more or something? I don't want to encourage too much cross wing behavior."* The
+  lineage door names the wing ("copied from a note in [Imports]") and at most offers a plain
+  go-to-that-wing road; no preview, no content pulled across, no deep links.
+- **(f) RULED — the Index masthead.** The grouped-by control lives as proposed.
+
+## 18. THE SWEEP ADDENDUM — details recovered on her ordered re-read of the whole sitting
+
+*(Her instruction: "do a thorough sweep where you actually re-read our conversation and make sure
+that no details were missed." The re-read found these five absences plus small notes; everything
+else checked present — the manuscript/editions idea §5+§13, the kanban drag-retag §13, shelf
+reordering §7, the 13o handoff §12 all verified.)*
+
+1. **THE IN-BOOK FILTER BAR — her ORIGINAL sitting ask, and the record's one significant miss.**
+   Her opening message: *"being able to either filter a book within itself for a subset of the
+   tags, or make a new book to look at just the tags, is important."* RULED capability: a
+   view-local filter bar on a book's (and a gathering's) Index — filter the view by tags/star,
+   NEVER mutating membership — plus the **"Save this filter as a gathering"** door (rule = the
+   book's tag association ∧ the filter; this is where the boolean grammar earns its keep).
+   Slot: mechanics 13i-b, face 13i-d. The future groom door (§13) composes on it (filter + bulk).
+2. **THE SHARING/PUBLISHING BOUNDARY** (ratified at the round-3 ratify list: *"excellent point on
+   the sharing / publishing boundary — owned should stay a crisp per book fact"*): an owned,
+   sealed book is the natural future unit to share read-only or export (commercial someday);
+   one standing reason Owned is a crisp per-book fact on the row. Future-ledger line.
+3. **THE TRASH LIFECYCLE** (decided at the lifecycle-sweep round, missing from §6): books list in
+   the Trash beside notes, kind-labeled. Restore follows the exact-stamp rule — the
+   delete-book-and-notes road (one stamp) returns WHOLE; book-only deletes tombstoned the
+   memberships on the book's stamp, so restore re-points the released notes home; a member
+   independently deleted after the book stays dead (the standing documented corner). SHELVES are
+   not Trash objects — deleting one returns its books to the first shelf, cheap metadata, no
+   tombstone ceremony.
+4. **COMPETING OWNED BOOKS on one tag** (the doorbell sketch's clause, carried into the ruled
+   design): both see the arrival; first claim wins; the other book's arrival row reads
+   "claimed by [Book]." Nothing destroyed, nothing silent.
+5. **MOBILE PARITY** (the standing mandate, unstated in the record): every ruling here is
+   phone-expressible by design — the Bookcase/shelf strip as a list, Arrivals, the Collecting
+   sentences, the confirms; each 13i run's closeout owes its `notes/MobileSoul.md` ledger row.
+6. **Small notes:** ⌘K learns shelves and gatherings (go-to rows; "go to shelf" is nearly free) ·
+   books serve READING too — imported/seeded material; nothing in 13i may assume a book's notes
+   are self-authored · the tutorial's Work story teaches "the Work is a SHELF; a wing when you
+   want true separation" (her wings-stay-big imagining, taught).
+
 **NEXT:** her UI iteration pass on the mockup; then `/architect-phase 13i-a` per the split addendum
-(the sitting that R-cor-13 required has now RUN — this record is it).
+(the sitting that R-cor-13 required has now RUN — this record is it). Of §16, only (c) — a UI-pass
+detail — and (d) — explained, standing unless she objects — remain anything but RULED.
