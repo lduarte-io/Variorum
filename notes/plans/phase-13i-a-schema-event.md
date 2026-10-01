@@ -366,12 +366,12 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
 | 5 | Daily marker: mint stamp + migration stamp + predicate re-key | DONE (commit 1 — `dailyJournalBookProfile`='daily' + `journalTraitProfile`='journal' split; the name leg dropped; #85(a)'s corner CLOSED and the keeper pin flipped to say so) |
 | 6 | `setJournalTrait` op + pins | OP DONE (commit 1); dedicated pins ride the U1 close |
 | 7 | Serializer classifications + completeness walk green | DONE (commit 1 — wing name ENCRYPTED; shelf name+glyph ENCRYPTED; everything else PLAIN; `query_spec` stays ENCRYPTED, its pre-13i class) |
-| 8 | Repairs R1–R5 + convergence suites | NOT-STARTED — design settled (§5; R2 PROVISIONAL #167). NOTE: the keeper R4 re-key itself LANDED with row 5; R1–R3/R5 + suites are U2's |
-| 9 | Fake server marker 10 + mirrors | PARTIAL (commit 1): `lockstepVersion`=10 + registry-derived fake tables; the repairs' convergence scenarios are U2's |
-| 10 | `13_phase13i_wings.sql` + deploy checklist | ARTIFACT DONE (commit 1 — pulled forward: the DDL pins demand it beside the registry; 12's six registry-carrying bodies redefined verbatim + wing/shelf, `sync_purge_execute` included; the grant sweep + the era-frozen pins updated). The checklist doc is row 13's |
-| 11 | SyncSpec §7/§12 text amendments | NOT-STARTED (the §12 running-record entry is written only AT the deploy) |
-| 12 | The ladder (fresh `fable-reviewer`, combined diff) | NOT-STARTED |
-| 13 | Her deploy window (§8) | NOT-STARTED — held for her go by rule |
+| 8 | Repairs R1–R5 + convergence suites | DONE (U2 commit — `Phase13iRepairTests` 8 convergence tests incl. outbox asserts + the documented coexistence; R2 PROVISIONAL #167) |
+| 9 | Fake server marker 10 + mirrors | DONE (registry-derived; marker 10; all suites green against it) |
+| 10 | `13_phase13i_wings.sql` + deploy checklist | DONE (the artifact in U1 commit 1 — the DDL pins demanded it beside the registry; the checklist `notes/plans/13i-a-deploy-checklist.md` in the U2 commit) |
+| 11 | SyncSpec §7/§12 text amendments | §7 DONE (the U2 commit: per-wing tag identity, status-aware pairs, the built daily-marker keeper + #85(a) closed, the two new repair paragraphs); the §12 running-record entry is written AT the deploy |
+| 12 | The ladder (fresh `fable-reviewer`, combined diff) | RUNNING |
+| 13 | Her deploy window (§8) | **GO GRANTED (2026-10-01, her message: "i have closed my real store, you can refresh, and you can do the remote sync push and all of that")** — executes AFTER the ladder closes (the checklist's own first gate); the Mac half is the session's, the PHONE's refresh is hers (it will visibly refuse to sync until she installs the marker-10 build — the §12 grammar) |
 | 14 | Closeout + handoff | NOT-STARTED |
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
@@ -390,3 +390,17 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
   read the NORMALIZED stored value; era-frozen DDL pins (the 13y floor, the superseded overlay)
   subtract the 13i-born tables with the reason at the pin. Next: the Mac + mobile builds/sweeps,
   the trait-setter pins, the dev-store walk — then U1 closes.
+- **U1 + U2 CLOSED (2026-10-01).** U2: the repairs + `Phase13iRepairTests` (8) + `JournalTraitTests`
+  (3) + SyncSpec §7 text + the deploy checklist. U1's face tail: the rule-editor DRAFT READER
+  (`Queries.legacyDraft` — the blank-builder regression caught at the Mac build and closed),
+  `Queries.ruleTagPaths` + both shelf faces on the resolved map, the quicknotes mint ensures its
+  tag before the rule. **FINALS: core 1762/186 GREEN · Mac 3427/565 green (the 5 standing
+  known-issue rows; the two recast pins fixed in-run) · mobile 656/114 = 4 known + the standing
+  attributed Jekyll offender (pre-existing, untouched).** THE WALK (dev store, Debug build,
+  captures in the session scratchpad `13ia-walk*/`): the store migrated LIVE through v1_18 —
+  the shelf renders with starred floating (pins absorbed), both gatherings assemble through v2
+  rules with word counts and resolved rule tags, ⌘J minted today's entry into ~/journal (the
+  'daily' mint + shelving), the Library lists everything; the debug instance quit cleanly, her
+  real instance untouched throughout.
+- **HER GO (2026-10-01, mid-run):** real store closed; refresh + the mirror deploy authorized.
+  Order held: the LADDER first (the checklist's gate), then the window.
