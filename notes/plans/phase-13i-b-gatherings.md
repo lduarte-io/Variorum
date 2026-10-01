@@ -1,6 +1,18 @@
 # Phase 13i-b — GATHERINGS: intake · auto-tag · Arrivals · the rule grammar's faces · the Pool tuck
 
-**STATUS: OPEN — kicked off 2026-10-01 by the author's `/architect-phase 13i-b` invocation,
+**STATUS: CLOSED 2026-10-01 — four units + the architect's adjudication batch, a TWO-ROUND
+Fable ladder (zero disputes phase-wide), the acceptance walk by the orchestrator's own hand,
+the install refreshed at her sanctioned window (codesign verified). FINALS: core 1913/200
+green (1 standing env-gated skip; the post-close control pin makes SmartConversionTests 24) ·
+Mac builds + every touched suite green · mobile BUILD green. Zero schema, zero `Sync/`, the
+marker stays 10. Her sitting rulings (five in the morning, the fresh-act ratify, the OUTFLOW
+ruling at the close) recorded verbatim-faithful in their sections. The handoff:
+`notes/handoffs/phase-13i-b-handoff.md`; NEXT: 13i-c at her word
+(`notes/plans/phase-13i-c-owned-finished-sealed.md`, kickoff at its top).**
+
+*(The kickoff banner below is kept as written — the run's history.)*
+
+**WAS: OPEN — kicked off 2026-10-01 by the author's `/architect-phase 13i-b` invocation,
 immediately converted to an OVERNIGHT RUN at her word the same sitting ("run overnight, I'm
 stepping away from the computer. bundle anything provisional for the morning."). The away-run
 rules bind: PROVISIONAL-and-continue; every author call HELD and BUNDLED into § THE MORNING
@@ -1679,7 +1691,7 @@ the sanctioned install refresh → closeout.
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | **DONE 2026-10-01** — the U4 RECORD above (design map · P-13ib-U4-1…6 · F-U4-1…7 · THE WALK, 20 captures, both voices × both appearances); evidence: **F-U3-3 closed** — `StarContextTests` 11 (9 red-on-old, one per site class) · `StarredNotesGatheringTests` 9 + Mac `StarredGatheringSeederTests` 6 · Quicknotes' re-mint special-casing fixed (red-on-old 5 issues) + the pad's receipt pin · `PoolTuckTests` 7 (lesson 10's truth, the EXPLAIN plan, F-U4-1 red-on-old) + Mac `PoolTuckFaceTests` 6 (F-U4-3 red-on-old) · `ReadingFilterTests` 11; 8 mutation checks bite; core 1907/199 green; Mac + mobile build; Mac suites 216/32 + 98/14 incl. the tutorial spine |
 | 5.5 | The adjudication batch (Outline line · spawn auto-tag · the kill-switch pin) | DONE 2026-10-01 (the section above; 28/3 + core 1907/199) |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | **CLOSED AT TWO ROUNDS 2026-10-01** — round 1: `notes/plans/13ib-ladder-round1.md` whole (1 MAJOR · 4 MINOR · 3 NIT → 5 fixed with red-watched pins, 1 dispute sustained record-only, 2 recorded; every disposition written). Round 2 (fresh fable-reviewer over the fix diff): `notes/plans/13ib-ladder-round2.md` — all eight dispositions UPHELD (F-R1-1's pin independently re-run RED on a pre-fix worktree at the traced silence); ONE new finding, MINOR (NEW-R2-1: the malformed-cell spawn receipt named Edit Rule, which refuses malformed by design), implementer AGREED, confirmed and FIXED in-window (70b8606a — `spawned` takes the sheet's own `RuleGrammar.ReadResult`; independent-string pin red-watched on the exact lie). No new BLOCKER/MAJOR ⇒ no round 3. End-of-pass both rounds: FULL core 1913/200 + touched Mac suites green (counts in each ladder file's §fix-pass). **Owed: the implementer's ONE sanity pass over the reviewer's cumulative fix diff** (the cross-model flow's tail) |
-| 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
+| 7 | Closeout + morning bundle + handoff | DONE 2026-10-01 — canon deltas applied as her rulings ran (the sitting record + her in-phase ratifications; the two ladder-drafted letter clauses landed with them), the archives rolled, KnownIssues +4 owned rows, QUESTIONS #168, MobileSoul PL-43, the master plan flipped, the handoff written |
 
 ## THE MORNING BUNDLE (everything held for her; grows as the run proceeds)
 
