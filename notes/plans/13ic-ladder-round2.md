@@ -180,3 +180,113 @@ findings, restated so no message drop loses them)
 verified as the right dispositions, one doc-line NIT found, no new BLOCKER/MAJOR. From the
 reviewer's side the ladder closes at the cap's discretion once the implementer's sanity pass over
 `5a7c9c1c..63c8f130` returns.**
+
+---
+
+## IMPLEMENTER'S SANITY PASS (over 5a7c9c1c..63c8f130)
+
+*(A fresh Opus implementer session, 2026-10-02. Read in my own context first: CLAUDE.md and its
+canon, the round-1 and round-2 records whole, and the plan's §1–§7 with the U2/U3/U4 RECORDs and
+the adjudications. Then I read `git diff 5a7c9c1c..63c8f130` whole, cold, and traced every call
+site it touches. I edited no source or test file. Round 2's one NIT, `addOrOffer`'s stale doc line,
+is skipped as briefed.)*
+
+**Run in this session (`pgrep` showed zero instances before and after every Mac run):**
+- Core: `swift test --filter` over PendingArrivalDismissal, MembershipReadersBookScope, BookSeal,
+  PoolTuck and OwnershipOperations. Result: **45 tests / 6 suites passed**.
+- Mac: `build-for-testing` (DerivedData `13ic-ladder`, the round's folder) **GREEN**. Then
+  `test-without-building` over BookStateDoors, MembershipChoice, JournalBooks, TimelineAndReadings,
+  BookArrivals and ArrivalArms. Result: **61 tests / 6 suites passed**. Each of the seven named
+  pins was confirmed by name in the log.
+
+**What I checked, with a verdict for each:**
+
+1. **The MAJOR (one shared WHERE): CLEAN.**
+   - The act did not change. `pendingArrivalRowsWhere` is the old UPDATE's own predicate. Only the
+     count moved onto it.
+   - The count now equals the act at both dismissal roads. The only Mac call sites of
+     `lockReading`/`sealReading` are `BookStateDoors.perform` (:552/:558). `sealPreview` returns 0
+     when the book is locked, and `sealReading` skips the dismissal when locked.
+   - The count lost two guards it had through `bookArrivals`: the reading must be live, and its
+     kind must be book. That drop is the reviewer's recorded choice: count what the act takes, and
+     a stray row makes the door ask.
+   - The three core pins and the Mac door pin each pin what their names say. The mixed pin is the
+     one that proves count = act (cosmetic only: `archivedWaiter` returns an unused `pairID: ""`).
+2. **The Pool probe's liveness clause: CLEAN.** It is one clause on the existing primary-key probe,
+   and the pin is honest.
+   - *Observation, not a concern (it predates the fix pass):* the doc line right below the edited
+     HOME paragraph, `ShelfQueries.swift:242–243` ("NO rule shows every note in its wing"), has been
+     stale since U1. The code reads `case .malformed, .none: continue // shows nothing` (:306). It
+     belongs to the closeout tidy, beside round 2's NIT.
+3. **The wing fix (`newEntry`'s non-daily arm → `newPostInReading`): CLEAN.** I traced the old and
+   new roads against each other:
+   - `createPost` is `insertPost` with wing `''` and the same date validation, and neither road
+     registers an undo entry.
+   - The gate set, the capacity predicate and the outflow are the same, and the segmentation is
+     still set explicitly afterwards. The wing and the single transaction are the only changes.
+   - One difference: an invalid day is now refused before the gate. That is unreachable, because
+     `entryDay` is always a valid key.
+4. **The sealed-named-reopen arms that were FIXED: CLEAN as far as they go.**
+   - `sealed` is a real fact: one column on the existing statement, and no other constructor of
+     the two structs exists.
+   - The chip's three arms pass `book.sealedAt != nil` (`MembershipChip.swift:329/354/393`). The
+     collect arm only ever sees a gathering, so its flag is always false, which is harmless.
+   - Both daily roads read fresh inside the runner (the U4 `waitingAtDoor` precedent; the runner
+     wraps no write).
+   - `MembershipDoors.moveIn`'s found-row branch uses the sheet's PREVIEW `sealed`, while
+     `BookArrivals` reads fresh. A book sealed after the sheet opened therefore still reads
+     "finished — reopen". That is race-only, the stale-preview class round 2 named.
+5. **CONCERN 1: the two new fallbacks speak a raw dump, and the record's "shared words" claim is
+   false for this error.**
+   - The sites: `MembershipChoice.swift:392` (the blocking book is not in the sheet's preview) and
+     `BookArrivals.swift:377` (the blocking book cannot be read). Both speak
+     `OpsRefusalCopy.message(for: lockedReading)`.
+   - Trace: `message(for:)` (`Registry/OpsRefusalCopy.swift:409`) is `macWords(for:) ??
+     message(for:roads:.mac)`. `macWords` has no `lockedReading` arm (it falls to `default: nil`,
+     :461). The shared `words(for:roads:)` has none either: a grep of both tables for
+     `lockedReading` finds nothing. `OperationError` carries no custom description. So
+     `OpsRefusalTable.swift:322` returns `"Refused: \(error)"`, which reads **"Refused:
+     lockedReading(id: "<uuid>")"**.
+   - That is the "Refused: error(…)" class retired at R93 (`MembershipChip.swift:471–472`; "no
+     face may speak one", `SeededBookRestore.swift:104/109`). The pre-fix fallback said "“” is
+     finished…": worse words, but no dump.
+   - Both sites are race-only: the note joined a finished book after the sheet opened, or the
+     blocking book died between the refusal and the read. No pin exercises either fallback.
+   - The round-1 fix pass ("fall back to the SHARED words") and round 2 ("the operation's shared
+     words") both assumed the table has words for this error. It does not. The root is my own
+     round-1 note, which proposed "fall back to the shared words in both" without checking the
+     table.
+   - Suggested shape (the reviewer's call): a book-less sentence, e.g. "One of the books this note
+     would leave is finished, so it can't move — copy it in instead." Severity: NIT (race-only),
+     but it is the banned class.
+6. **CONCERN 2: the widened sealed-names-Reopen class has more call sites than the four arms
+   RECORDED for 13i-d. These are record-only; no fix in this phase.**
+   - (a) **`Shared/SampleLibrary/SeededBookRestore.swift:128–129`** ("The book is finished —
+     reopen it, then restore again.", both platforms). It is directly reachable: seal a seeded
+     book (Sherlock, *Encryption Explained* or Jekyll), trash one of its notes, then press Help ▸
+     Restore or the phone's restore row. The mint refuses with `lockedReading`, but a sealed book
+     renders no Reopen and `unlockReading` refuses `readingSealed`. It is a generic table with no
+     book facts, the recorded row's exact class: **add it to that 13i-d KnownIssues row.**
+   - (b) **The phone's arms, owned by no one.** F-U2-8, F-U4-6 and PL-43 do not name them.
+     - `VariorumMobile/Features/Shell/MobileTodayDoor.swift:65–66`: `.bookFinished` says "reopen it
+       from its book details". On a Journal sealed on the Mac and synced, the phone's book-details
+       row reads "Reopen" (`MobileBookDetails.swift:343`, driven by `locked`), and
+       `unlockReading` refuses with "This book is sealed, so it can't be reopened here." This is
+       directly reachable once her deploy window has run.
+     - `VariorumMobile/Features/Write/MobileMembership.swift:183–184`: reached through the sheet's
+       "diverge" button, which renders on EVERY book row (`:291–293`). On a sealed book it says
+       "“X” is finished — reopen it to change what's in it." This is the phone twin of the Mac
+       chip's diverge arm that the fix pass fixed. The phone's add filters out locked books
+       (`:99–100`), so its add arm is race-only.
+     - The phone has no Unseal door, so the honest phone sentence is the mobile catch-up's to
+       word: **add these to the closeout's MOBILE PARITY / MobileSoul row.**
+7. **The retirement and the silent-offer fix: CLEAN.**
+   - The retirement is compile-proven, and the moved CRUD test gained an assertion (the plain
+     book asks) without losing its subject.
+   - `offer`: `load` returns nil exactly when `Queries.reading` does, and `readingNotFound` has
+     real shared words (`OpsRefusalTable.swift:175`).
+8. **Test edits and scope: CLEAN.** The one existing test edited (TimelineAndReadings) gained an
+   assertion. Every other test change is an addition, and no assertion was weakened. Nothing
+   touches `Sync/`, the schema, custody or the editor seam.
+
+SANITY PASS: 2 CONCERNS (for the reviewer's final word)
