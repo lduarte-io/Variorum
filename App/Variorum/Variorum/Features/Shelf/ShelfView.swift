@@ -443,7 +443,8 @@ struct ShelfView: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    if reading.starred {
+                    // 13i-d U2 ACT 0: the UNION (`ShelfBook.starred`).
+                    if book.starred {
                         Text(StarCopy.glyph)
                             .font(tokens.small)
                             .foregroundStyle(tokens.star)
@@ -522,16 +523,15 @@ struct ShelfView: View {
     private func bookMenu(_ book: Queries.ShelfBook) -> some View {
         let reading = book.reading
         // 13f batch 6 (W4): starring a BOOK — it joins the sidebar's
-        // Starred list. (13i-d U1, F-U1-2: the star and the shelf PIN below
-        // are still two stores; their unification is STOPPED for the
-        // architect's ruling, so both doors ride as shipped until then.)
+        // Starred list. 13i-d U2 ACT 0 (F-U1-2 (A), ruled): this is the
+        // row's ONE star door — the star floats the book atop its shelf AND
+        // lists it in Starred (one truth, both stores written together), so
+        // "Pin to Shelf Top" RETIRES on the Mac (the phone keeps its words
+        // until its catch-up and writes the same truth).
         if let starDoor {
             Button(starDoor.title(for: .reading(reading.id))) {
                 starDoor.toggle(.reading(reading.id))
             }
-        }
-        Button(reading.starred ? "Unpin from Shelf Top" : "Pin to Shelf Top") {
-            Task { await model.setPinned(reading.id, pinned: !reading.starred) }
         }
         // 13i-d U1 — MOVE TO SHELF ▸ (the menu road beside the drag — every
         // shelf of this wing, and Unshelved; the one it is on is omitted).

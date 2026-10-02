@@ -190,7 +190,9 @@ nonisolated enum BookcaseBoard {
                     .compactMap { byID[$0.id] }
             }
         }
-        return sorted(books.filter(\.reading.starred)) + sorted(books.filter { !$0.reading.starred })
+        // 13i-d U2 ACT 0: `starred` is the UNION of the two stores (the
+        // column and the 13f list — `ShelfBook.starred`), never the column.
+        return sorted(books.filter(\.starred)) + sorted(books.filter { !$0.starred })
     }
 
     /// The № census over a set of books — every solo's count.

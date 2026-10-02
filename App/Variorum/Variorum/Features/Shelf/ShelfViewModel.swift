@@ -279,9 +279,8 @@ final class ShelfViewModel {
 
     // MARK: - The book doors carried over (13i-b/13i-c)
 
-    func setPinned(_ readingID: String, pinned: Bool) async {
-        await run { try $0.setShelfPinned(readingID, pinned: pinned) }
-    }
+    // (13i-d U2 ACT 0: `setPinned` RETIRED with the Mac's "Pin to Shelf Top"
+    // door — the row's ★ door is the one star, `StarsModel.toggle`.)
 
     func setWordTarget(_ readingID: String, target: Int?) async {
         await run { try $0.setReadingWordTarget(readingID, wordTarget: target) }

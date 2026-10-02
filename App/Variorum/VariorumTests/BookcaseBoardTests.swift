@@ -86,6 +86,20 @@ struct BookcaseBoardBrainTests {
             "placed by position, never-placed A–Z after — inside each half")
     }
 
+    /// 13i-d U2 ACT 0 (F-U1-2 (A), ruled): the float reads the UNION
+    /// (`ShelfBook.starred`), never the column alone — a book starred only in
+    /// the 13f list (a pre-ACT-0 ★) floats exactly like a pinned one. RED by
+    /// behavioural revert: filtering on `reading.starred` sinks it.
+    @Test func theFloatReadsTheUnionNotTheColumn() {
+        let plain = book("a", "Apple")
+        let listOnly = Queries.ShelfBook(
+            reading: book("z", "zither").reading, postCount: 0, sectionCount: 0,
+            starred: true)
+        #expect(listOnly.reading.starred == false, "the column is unset")
+        #expect(BookcaseBoard.ordered([plain, listOnly], mode: .alphabetical, lastEdited: [:])
+            .map(\.reading.id) == ["z", "a"], "the list-only star floats first")
+    }
+
     @Test func lastEditedFallsBackToTheBooksBirthWhileAggregatesLoad() {
         let older = book("o", "older", created: Date(timeIntervalSince1970: 1_000))
         let newer = book("n", "newer", created: Date(timeIntervalSince1970: 9_000))
