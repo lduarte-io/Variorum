@@ -1995,10 +1995,9 @@ changes compile on it). (3) **No drag was added** (every door is a menu item; no
 to R-13id-6 items 1–9, their counting confirms, the two doors, the delete refusal's new road, the
 registry rows — is built, pinned and walked below.
 
-**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2108/230 at the first END run (re-run after the walk's
-two face fixes: PENDING) · Mac named 1004/168, 0 skipped (the registry walk + the eleven tutorial
-suites inside; post-walk re-run of the wing/registry/tutorial batch: PENDING) · phone TEST BUILD
-green · the walk DONE ×4 (53 captures; two walk defects W-1/W-2 found, pinned red, fixed, re-walked)
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2108/230 (re-run after the walk's two face fixes:
+2108/230 again) · Mac named 1004/168, 0 skipped (the registry walk + the eleven tutorial suites
+inside; post-walk re-run of that batch 124/14, 0 skipped) · phone TEST BUILD green (twice) · the walk DONE ×4 (53 captures; two walk defects W-1/W-2 found, pinned red, fixed, re-walked)
 · the combined behavioural revert DONE (8 predicted reds). Lesson 11 stays TRUE.**
 
 Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (the kickoff
@@ -2026,7 +2025,7 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 | 6 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | DONE — core FULL **2108/230** (1 standing skip; `core-full.log`); Mac named **1004/168, 0 skipped** in three batches (`mac-c.log` 122/14 — the registry walk, the eleven `Tutorial*` suites, `WingSwitcherTests`, `WingBookMoveDoorTests` · `mac-a.log` 236/38 — every `Book*` suite, the landing families UNMODIFIED · `mac-b.log` 646/116 — U5's neighbourhood batch: Library/Pool/Bookcase/Shelf/Star/Tag/Recovery/Trash/Archived/Membership/Ownership/Journal…); phone **TEST BUILD SUCCEEDED** (`phone-bft.log`, `DerivedData/13id-u5b-mobile`) |
 | 7 | The screenshot walk ×4 into `notes/plans/13id-screens/u5b/` | DONE — **53 captures, all four combinations** (Terminal·light tl-01…18 · Terminal·dark td-01…10 · Study·dark sd-01…13 · Study·light sl-01…11; listed in EVIDENCE). **W-1** (tl: the severed list grouped by display NAME — three different notes named "2026-10-01" collapsed into one clause listing "u3 spawn walk" thrice): pinned RED 1c7f5bde (1 test / 2 issues, `mac-w1-red.log`), fixed 69ece841, re-walked (`tl-11`, `sd-05`). **W-2** (td: a gathering-only wing's bulk confirm "1 gathering move. Books keep… keeps none of its tags"; the gathering confirm promising its rule's tags for a star-only rule): pinned RED 4d2a5dd2 (1 test / 2 issues, `mac-w2-red.log`), fixed 6d38fdfb, re-walked (`sd-09`, `sl-08`). Her dev voice (Terminal — read back `1, 0`), appearance (system) and the remembered wing (Home) restored; zero instances after; the walk's own `caffeinate` ended |
 | 8 | Record close · QUESTIONS #175 · ledger row 6b | DONE (this commit) |
-| 9 | Final re-runs after the walk's face fixes (core FULL; Mac batch C — the registry walk, the eleven tutorial suites, the wing suites; phone test build) | PENDING |
+| 9 | Final re-runs after the walk's face fixes (core FULL; Mac batch C — the registry walk, the eleven tutorial suites, the wing suites; phone test build) | DONE — core FULL **2108/230** (`core-full2.log`); Mac batch C **124/14, 0 skipped** (`mac-c2.log` — the registry walk, the eleven `Tutorial*` suites, `WingSwitcherTests`, `WingBookMoveDoorTests` with W-1/W-2's pins); phone **TEST BUILD SUCCEEDED** (`phone-bft2.log`); zero instances throughout |
 
 ### THE DESIGN (the rulings R-13id-6 applied; PROVISIONAL where marked — each numbered below)
 
@@ -2178,8 +2177,9 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 - **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (the shared
   `WingWords` / refusal-table changes compile; the phone is untouched in behaviour).
 - **Post-walk re-runs** (the walk's two face fixes landed after the first END run): core FULL
-  PENDING · Mac batch C (the registry walk, the eleven tutorial suites, `WingSwitcherTests`,
-  `WingBookMoveDoorTests`) PENDING · phone TEST BUILD PENDING. (Between the fixes: the door suites
+  **2108/230** again (1 standing skip; `core-full2.log`) · Mac batch C **124/14, 0 skipped** (the
+  registry walk, the eleven tutorial suites, `WingSwitcherTests`, `WingBookMoveDoorTests` 9 incl.
+  W-1/W-2's pins; `mac-c2.log`) · phone **TEST BUILD SUCCEEDED** (`phone-bft2.log`). (Between the fixes: the door suites
   45/3 and the core move pins 14/3, green — `mac-w2-green.log`.)
 - **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u5b`; GUI grants
   probed by real effect first — a full-screen frame captured, System Events answered; the author
