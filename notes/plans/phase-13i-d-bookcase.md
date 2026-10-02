@@ -524,6 +524,62 @@ row is built, pinned and walked below.
   Bookcase tour: solo/All/unshelved-first · the № census solos · order ▾ three ways · details ·
   Set Glyph · context mint on a solo'd shelf · the arrival count badge.
 
+## U2 RECORD — THE UNION STAR (ACT 0) + THE BOOK PANEL (`opus-implementer`, 2026-10-02)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — filled at the close.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | Record skeleton + design map + evidence named | IN-PROGRESS (this commit) |
+| 2 | ACT 0 core — the union star: `Queries.starred` (list in star order, then column-only books A–Z) · `Queries.shelfPins` (the union) · `setStarred(.reading)` writes BOTH stores in one transaction, un-star clears both · the cap counts the union · `setShelfPinned` (public + in-transaction) routes through the same write · `ShelfBook.starred` = the union; red-on-old pins | NOT-STARTED |
+| 3 | ACT 0 Mac faces — the book row's ONE door Star/Unstar (Pin retires on the Mac); the board's float and the row ★ read the union | NOT-STARTED |
+| 4 | Row 104 — the membership OBSERVATION (`NoteMembershipModel`, the shared home), the chip consumes it; the seat-while-open pin red-on-old | NOT-STARTED |
+| 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | NOT-STARTED |
+| 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | NOT-STARTED |
+| 7 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; mobile star/pin suites) | NOT-STARTED |
+| 8 | The screenshot walk ×4 into `notes/plans/13id-screens/u2/` | NOT-STARTED |
+| 9 | Record close · QUESTIONS #171 · KnownIssues rows 104 (resolved) / 13 (the class grows) | NOT-STARTED |
+
+### THE DESIGN (settled before building; PROVISIONAL where marked)
+
+- **ACT 0 (F-U1-2 (A) + R-13id-5, as ruled):** ONE truth read as the UNION — a reading is starred iff
+  `reading.starred = 1` OR `reading:<id>` is in the `starred` setting list. Every star write on a
+  reading writes BOTH stores in ONE transaction; un-star clears both (the column only on a live row —
+  restore still brings a deleted book's star back with the row). `Queries.starred` = the list's live
+  entries in star order, then column-only live readings A–Z. The cap counts the union. The public
+  `setShelfPinned` IS `setStarred(.reading)` (cap included — the phone's pin door now refuses at the
+  cap like every star door). The in-transaction mints (the daily Journal, Quicknotes) write both stores
+  and are EXEMPT from the cap refusal (a mint never fails on a star — PROVISIONAL P-13id-U2-1); they
+  count toward it thereafter. Zero schema, zero `Sync/` (two CAS'd stores, each converging on its own;
+  the union of two converged stores converges).
+- **Row 104:** the note-side membership read becomes ONE held observation (`NoteMembershipModel`,
+  `Core/Views/` — two features consume it: the chip and the Book Panel's door) owned by
+  `PostDetailView` and handed to both. Cost, named: `readingsContaining` re-runs on every `container`
+  write while a note is open (one indexed membership read + one EXISTS per gathering — author-scale);
+  KnownIssues row 13's bounded re-query class at the cheap end.
+- **The Book Panel:** a fifth occupant of the note's side column (`InspectorPanel.book`), its door a
+  fourth inspector icon rendered only while the note is a member of ≥1 BOOK (P-2; a gathering holds
+  no membership). Contents: the book switcher atop (a shared note; the chooser order — recent first),
+  the book's chapters + notes (the open note marked), "appears in N gatherings" (names on click — each
+  an ascent, with the gathering's honest untag door). Click-through = the ascent road
+  (`MembershipChip.ascend` → `RootView.openBook` → `BookAscent`) — no second landing mechanism. Drags
+  INSIDE the panel only (a private token type no other drop site accepts — so no panel drag can create
+  a membership, and the ownership consult has nothing to consult; recorded), resolved by the book
+  view's own pure planners (`BookStructureModel.postDropPlan` / `chapterDropTarget`) onto the existing
+  ops (`assignPostToSection`, `reorderReadingPost`, `reorderSection`). Every drag has a menu twin
+  (note row: Chapter ▸ · Move Up · Move Down; chapter header: Move Chapter Up · Down); the remove door
+  is `.removeFromBook` (Remove / Release by the book's word), receipts spoken on the status seam.
+
+### EVIDENCE (named now; counts PENDING until run)
+
+- ACT 0: the union pins (core) red-on-old — PENDING.
+- Row 104: the seat-while-open observation pin red-on-old — PENDING.
+- The panel: VM pins, drag-plan pins over the ops, the click-through landing pin, registry rows + the
+  walk green — PENDING.
+- The tutorial spine green at the end — PENDING. The walk ×4 — PENDING.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
