@@ -532,9 +532,9 @@ row is built, pinned and walked below.
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + design map + evidence named | IN-PROGRESS (this commit) |
-| 2 | ACT 0 core — the union star: `Queries.starred` (list in star order, then column-only books A–Z) · `Queries.shelfPins` (the union) · `setStarred(.reading)` writes BOTH stores in one transaction, un-star clears both · the cap counts the union · `setShelfPinned` (public + in-transaction) routes through the same write · `ShelfBook.starred` = the union; red-on-old pins | NOT-STARTED |
-| 3 | ACT 0 Mac faces — the book row's ONE door Star/Unstar (Pin retires on the Mac); the board's float and the row ★ read the union | NOT-STARTED |
+| 1 | Record skeleton + design map + evidence named | DONE (e4fe779d) |
+| 2 | ACT 0 core — the union star: `Queries.starred` (list in star order, then column-only books A–Z) · `Queries.shelfPins` (the union) · `setStarred(.reading)` writes BOTH stores in one transaction, un-star clears both · the cap counts the union · `setShelfPinned` (public + in-transaction) routes through the same write · `ShelfBook.starred` = the union; red-on-old pins | DONE (12c60fc5) — `UnionStarTests` 9 pins: 8 RED on the pre-fix tree (13 issues), the 9th (new API) red by behavioural revert; 114/15 star-adjacent core suites green |
+| 3 | ACT 0 Mac faces — the book row's ONE door Star/Unstar (Pin retires on the Mac); the board's float and the row ★ read the union | DONE (001ea241) — `theFloatReadsTheUnionNotTheColumn` red by behavioural revert (the column filter), restored; 30/5 Mac board+star suites green |
 | 4 | Row 104 — the membership OBSERVATION (`NoteMembershipModel`, the shared home), the chip consumes it; the seat-while-open pin red-on-old | NOT-STARTED |
 | 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | NOT-STARTED |
 | 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | NOT-STARTED |
