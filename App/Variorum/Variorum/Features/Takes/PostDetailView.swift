@@ -86,11 +86,28 @@ struct PostDetailView: View {
             help: "Show the note's references (sources beside the draft)"),
     ]
 
+    /// **13i-d U2 — THE BOOK PANEL's door** (her round-5 design: the panel
+    /// joins *"scraps / reference / tray as a panel icon"*). Drawn ONLY while
+    /// the note is a member of a BOOK (P-2 — a door that could only show "in
+    /// no book" is not drawn; a gathering holds no membership), and drawn
+    /// FIRST: the cluster trails right, so a door that comes and goes on the
+    /// leading side never moves the three that are always there.
+    static let bookPanelDoor = InspectorDoor(
+        panel: .book, title: BookPanelCopy.doorTitle,
+        symbol: BookPanelCopy.doorSymbol, help: BookPanelCopy.doorHelp)
+
+    /// The cluster as drawn: the book door while the note has a book, then
+    /// the standing three (pure, pinned).
+    static func shownInspectorDoors(membered: Bool) -> [InspectorDoor] {
+        (membered ? [bookPanelDoor] : []) + inspectorDoors
+    }
+
     /// The `.surface` act this view renders (P-1's declared ⇔ rendered walk).
     /// `.showNoteTray`'s NAMED door is the masthead icon since her C1 ruling —
     /// the `note ▾` menu item moved with the panel, and the context bar's ⌫
     /// badge is the second renderer of the same act, as it always was.
-    static let surfaceCapabilities: [CapabilityID] = [.showNoteTray]
+    /// 13i-d U2: `.showBookPanel` — the book icon above.
+    static let surfaceCapabilities: [CapabilityID] = [.showNoteTray, .showBookPanel]
 
     /// 13b 4D (S4-20, her reversal on the record): a post opens in WRITE
     /// the first time — supersedes the takes-first half of R72/R79
@@ -139,12 +156,15 @@ struct PostDetailView: View {
     /// **…and — the post-13l polish round, ledger rows 16/23 — NOTE ▸
     /// VERSIONS**, the round's headline. It carries no payload: the listing is
     /// the note's, and this view already knows which note it is showing.
+    /// **…and — 13i-d U2 — THE BOOK PANEL** (her round-5 design): the
+    /// note's book as a table of contents, the open note marked.
     enum InspectorPanel: Hashable {
         case references
         case scraps
         case tray(revealBlockID: String?)
         case blockHistory(BlockHistoryRequest)
         case versions
+        case book
 
         var isTray: Bool {
             if case .tray = self { return true }
@@ -304,7 +324,9 @@ struct PostDetailView: View {
                             // precedent — the table is the render source, not a
                             // comment beside one), so "the tray icon sits with
                             // scraps and references" is a claim a pin can hold.
-                            ForEach(Self.inspectorDoors, id: \.panel) { door in
+                            ForEach(Self.shownInspectorDoors(
+                                membered: !membership.books(for: postID).isEmpty),
+                                    id: \.panel) { door in
                                 Button(door.title, systemImage: door.symbol) {
                                     toggle(door.panel)
                                 }
@@ -469,6 +491,15 @@ struct PostDetailView: View {
                         inspectorPanel = .blockHistory(request)
                     })
                     .id("history-\(request.id)")
+            case .book:
+                // 13i-d U2 — the Book Panel, in the same room (one width rule,
+                // remembered): the note's book, its chapters and notes. It
+                // reads the membership THIS detail observes (row 104's model).
+                BookPanelView(
+                    session: session, postID: postID, membership: membership,
+                    recentBookIDs: recentBookIDs,
+                    onClose: { withAnimation(Self.panelAnimation) { inspectorPanel = nil } })
+                    .id("book-\(postID)")
             case .versions:
                 // Rows 16/23: the same room the tray and the history pane got,
                 // for the same reason — a list of things with dates and verbs

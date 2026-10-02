@@ -738,6 +738,23 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case newShelf, renameShelf, setShelfGlyph, makeDefaultShelf
     case moveShelfToStart, moveShelfToEnd, deleteShelf
     case moveBookToShelf, sendBookToTop, sendBookToBottom
+    // 13i-d U2 — THE BOOK PANEL (the sitting record §15's 13i-d line; her
+    // design, the identity brief's round 5: *"a book table of contents kind
+    // of view with chapters + notes … in the right side pane"*). ONE
+    // `.surface` door opens it — the note masthead's book icon, drawn only
+    // while the note is a member of a book (P-2). Five `.contextMenu` acts
+    // are its structure doors, each the MENU TWIN of a drag inside the panel
+    // (the U1 lesson: synthetic drags never commit, so every drag has a
+    // walked twin), all composed over the EXISTING ops (`assignPostToSection`,
+    // `reorderReadingPost`, `reorderSection` — no new semantics). Separate
+    // declarations on the `.moveTakeEarlier`/`.moveTakeLater` grounds: each
+    // its own door with its own words and its own enablement (Move Up hides
+    // on a chapter's first note). The panel's other doors are declared
+    // already: the click-through is `.openBookAtNote`, the remove door
+    // `.removeFromBook`, a gathering's untag offer `.removeRuleTag`.
+    case showBookPanel
+    case fileNoteInChapter, moveNoteUpInBook, moveNoteDownInBook
+    case moveChapterUpInBook, moveChapterDownInBook
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

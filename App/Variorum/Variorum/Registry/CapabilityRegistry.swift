@@ -1768,6 +1768,53 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookcaseCopy.placingUnavailableNote,
             availability: always),
+        // 13i-d U2 — THE BOOK PANEL. Its door is the note masthead's book
+        // icon (`.surface`, the inspector cluster beside the tray, scraps and
+        // references — the panel's own declaration in `PostDetailView`);
+        // `noteScoped` for the tray's reason (a note must be open). The five
+        // structure doors are the panel's row menus (`BookPanelView`) — the
+        // menu twins of its drags — `always` for `.editRule`'s reason (each
+        // row carries its note, its chapter and its book); the per-target
+        // conditions (a chapter's first note has no Move Up; a book read in a
+        // stamp order shows no hand position) are DATA the menu reads
+        // (`BookPanelBrain`), and a finished book's refusal is the op's own,
+        // spoken with its road (#25(b)'s precedent).
+        Capability(
+            id: .showBookPanel, verb: BookPanelCopy.showVerb, scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.unavailableNote,
+            availability: noteScoped),
+        Capability(
+            id: .fileNoteInChapter, verb: BookPanelCopy.fileInChapterVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.structureUnavailableNote,
+            availability: always),
+        Capability(
+            id: .moveNoteUpInBook, verb: BookPanelCopy.moveNoteUpVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.structureUnavailableNote,
+            availability: always),
+        Capability(
+            id: .moveNoteDownInBook, verb: BookPanelCopy.moveNoteDownVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.structureUnavailableNote,
+            availability: always),
+        Capability(
+            id: .moveChapterUpInBook, verb: BookPanelCopy.moveChapterUpVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.structureUnavailableNote,
+            availability: always),
+        Capability(
+            id: .moveChapterDownInBook, verb: BookPanelCopy.moveChapterDownVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookPanelCopy.structureUnavailableNote,
+            availability: always),
         // The gathering's honest door (§20): "Remove the #tag" — the chip's
         // gathering rows, one per rule tag the note wears.
         Capability(

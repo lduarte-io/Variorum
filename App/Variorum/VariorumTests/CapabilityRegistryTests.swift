@@ -311,6 +311,10 @@ struct CapabilityRegistryTests {
             // Make Default · Move to Start/End · Delete), one builder the
             // strip's names, the ⋯ panel's rows and All's headers render.
             .union(BookcaseStrip.contextMenuCapabilities)
+            // 13i-d U2 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the BOOK PANEL's row menus — the five structure
+            // doors (each a drag's menu twin) and the remove/release door.
+            .union(BookPanelView.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
@@ -456,6 +460,10 @@ struct CapabilityRegistryTests {
             .union(OwnershipBadgeView.surfaceCapabilities)
             // 13i-d U1 (the same class): the strip's "+ shelf" word.
             .union(BookcaseStrip.surfaceCapabilities)
+            // 13i-d U2 (the same class): the BOOK PANEL's inline doors — a
+            // row's click (the ascent) and a gathering's "remove #tag". Its
+            // own door, the masthead book icon, is `PostDetailView`'s line.
+            .union(BookPanelView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
