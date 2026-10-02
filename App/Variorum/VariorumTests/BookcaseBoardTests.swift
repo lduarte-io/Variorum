@@ -207,12 +207,12 @@ struct BookcaseBoardBrainTests {
 
 // MARK: - The view model over a real session (E4)
 
-@MainActor
 /// Ladder A round 1, NIT 3 (P-2 — red by BEHAVIOURAL REVERT: the gate
 /// flipped to `true` turns the first case red; a new pure value has no
 /// pre-fix shape to run against): the book row's "Move to Shelf ▸" submenu
 /// is drawn only where it can act — a shelf-less wing's unshelved book has
-/// no destination (the empty submenu the walk's class bans).
+/// no destination (the empty submenu the walk's class bans). A pure value
+/// over the nonisolated `BookcaseBoard` — no actor isolation needed.
 @Suite("The Move to Shelf gate (ladder A round 1, NIT 3)")
 struct MoveToShelfGateTests {
     @Test func theSubmenuDrawsOnlyWhereItCanAct() {
@@ -227,6 +227,7 @@ struct MoveToShelfGateTests {
     }
 }
 
+@MainActor
 @Suite("Bookcase view model (13i-d U1)", .serialized)
 struct BookcaseViewModelTests {
     private func settle(_ model: ShelfViewModel, until: () -> Bool) async {
