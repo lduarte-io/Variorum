@@ -2376,7 +2376,7 @@ or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's
 | 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | NOT-STARTED |
 | 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | NOT-STARTED |
 
-**REVERT STATE: NO REVERT IN FLIGHT.** The combined behavioural revert ran from the committed HEAD
+**REVERT STATE: W-1's single-arm revert (`ChipRefusals.message`'s default back to the dump) runs from the committed HEAD 68358f94 — restore by `git checkout HEAD -- App/Variorum/Variorum/Features/BookView/MembershipChip.swift`.** The combined behavioural revert ran from the committed HEAD
 c306e84f and was restored by `git checkout HEAD --` (`git diff --quiet` verified) — its record is
 EVIDENCE's "combined behavioural revert" line.
 
