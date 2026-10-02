@@ -279,6 +279,7 @@ final class RecoveryViewModel {
                 (trash, trashTruncated) = TrashListing.windowed(
                     value, window: Self.window)
                 await refreshPoolHomes()
+                await refreshBookNoteCounts()
             }
         } catch is CancellationError {
         } catch {
@@ -336,6 +337,29 @@ final class RecoveryViewModel {
     /// note is gone" — still say "note" for a scrap, because the landing
     /// would have to report its container's kind for them to know better.)*
     private(set) var poolHomes: [String: Container] = [:]
+
+    /// 13i-c U4 (§18.3): per BOOK row in the window, how many notes went to
+    /// the Trash with it (the exact-stamp count) — the row's "and N notes".
+    /// Read beside the listing, ∝ the book rows listed (a summoned surface).
+    private(set) var bookNoteCounts: [String: Int] = [:]
+
+    private func refreshBookNoteCounts() async {
+        let books = trash.filter { $0.kind == .book }.map(\.id)
+        guard !books.isEmpty else {
+            bookNoteCounts = [:]
+            return
+        }
+        bookNoteCounts = (try? await session.database.read { db in
+            var counts: [String: Int] = [:]
+            for id in books { counts[id] = try Queries.trashBookNoteCount(db, readingID: id) }
+            return counts
+        }) ?? [:]
+    }
+
+    /// Tests drive the count read directly, the `adopt` way.
+    func loadBookNoteCountsForTests() async {
+        await refreshBookNoteCounts()
+    }
 
     private func refreshPoolHomes() async {
         guard trash.contains(where: { $0.noteID != nil }) else {
@@ -875,6 +899,14 @@ struct RecoveryView: View {
             Text(tokens.chromeLabel(RecoveryCopy.rowKind(item)))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
+            // 13i-c U4 (§18.3): a book that went in WITH its notes says so.
+            if item.kind == .book,
+               let notes = RecoveryCopy.bookRowNotes(model.bookNoteCounts[item.id] ?? 0) {
+                Text(tokens.chromeLabel(notes))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
             if item.kind == .preservedOriginal {
                 Text(tokens.chromeLabel(RecoveryPath.goesWithItsFamily))
                     .font(tokens.small)
@@ -955,7 +987,10 @@ struct RecoveryView: View {
     private func putBackHelp(_ item: Queries.TrashItem) -> String {
         switch item.kind {
         case .note: return "The note comes back with its blocks, its tags and its books"
-        case .book: return "The book comes back whole — chapters and membership included"
+        case .book:
+            return (model.bookNoteCounts[item.id] ?? 0) > 0
+                ? "The book comes back whole — with the notes that went in with it"
+                : "The book comes back whole — chapters and membership included"
         // 13l (§8b): note-agnostic on purpose — a block or take can have come
         // out of the SCRAPS area, and the help was calling that pool a note.
         case .block: return "The block goes back where it was"

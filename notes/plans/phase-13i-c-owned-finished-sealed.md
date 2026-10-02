@@ -1606,7 +1606,16 @@ SyncSpec not required).
   shared mark and a gathering view's owned-by mark) + 43 regression suites (book view, Outline,
   landing, Library, settings, folder, note box, the registry walk): 281/44 green (4 pre-existing
   `IndexTierMetricsTests` known issues); zero instances.
-- **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.
+- **Piece F — the Trash's "and N notes" + Put back's receipt:** DONE (commit "13i-c U4 piece F").
+  SHARED words (`RecoveryCopy.bookRowNotes` — "and N notes", nil for a book that went alone;
+  `bookPutBackWhole` — "“X” is back with its N notes.") and the SHARED act (`TrashPutBack` reads
+  `trashBookNoteCount` on the book's exact stamp BEFORE `restoreReading` clears it — a new
+  `Outcome.bookWhole(notes:)`; a book-only delete keeps the plain "Book put back."). The Mac Trash
+  (`RecoveryViewModel.bookNoteCounts`, read beside the listing, ∝ the book rows listed) draws "and N
+  notes" beside a book row's kind label; the row's Put back help says it returns with its notes; kind
+  labels unchanged. The phone's Trash rides the shared Put back road, so its receipt for such a book
+  is the whole one too (MOBILE PARITY); its ROW does not draw the count (the mobile catch-up's).
+  `TrashBookNotesTests` (3) + 24 Trash/recovery/tutorial/snippet suites: 245/25 green; zero instances.
 - **Piece G — suites, the walk, the record closed, ledger row 5:** NOT-STARTED.
 - No revert in flight.
 

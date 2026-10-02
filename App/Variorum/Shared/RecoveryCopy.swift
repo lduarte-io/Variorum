@@ -764,6 +764,30 @@ nonisolated enum RecoveryCopy {
         "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) put back."
     }
 
+    // MARK: A book that went to the Trash WITH its notes (13i-c U4 — the
+    // sitting record §18.3: "the delete-book-and-notes road (one stamp)
+    // returns WHOLE"; lesson 8: "The Trash gives back whatever went in
+    // together, together.")
+
+    /// The Trash row's "and N notes" — a book deleted with its notes says so
+    /// beside its kind (the count on the book's exact stamp,
+    /// `Queries.trashBookNoteCount`). nil for a book that went alone.
+    static func bookRowNotes(_ count: Int) -> String? {
+        switch count {
+        case 0: return nil
+        case 1: return "and 1 note"
+        default: return "and \(count) notes"
+        }
+    }
+
+    /// Put back's receipt for such a book: it came back WHOLE.
+    static func bookPutBackWhole(_ name: String?, notes count: Int) -> String {
+        let book = name.map { "\u{201C}\($0)\u{201D}" } ?? "The book"
+        return count == 1
+            ? "\(book) is back with its note."
+            : "\(book) is back with its \(count) notes."
+    }
+
     /// **`restoreBlock` ANSWERS where it landed, and the receipt repeats the
     /// answer rather than guessing** (13j's F2 shape). The three landings,
     /// in the one home — this used to be a `MobileTrashModel` static while

@@ -97,6 +97,10 @@ enum TrashPutBack {
         /// `restoreVariant` names WHAT came back — active into the fan,
         /// archived into the archived listing (the exact flip, #68(b)).
         case take(VariantStatus)
+        /// 13i-c U4 (§18.3): a book that went to the Trash WITH its notes
+        /// comes back whole — the receipt counts them (read on the book's
+        /// exact stamp BEFORE the put back clears it).
+        case bookWhole(notes: Int)
         /// The op reports no landing of its own.
         case plain
     }
@@ -111,6 +115,7 @@ enum TrashPutBack {
             return try await PreservedOriginPutBack.run(
                 session: session, postID: noteID, blockID: item.id)
         }
+        let database = session.database
         let outcome = try await session.runner.run { ops -> Outcome in
             switch item.kind {
             case .note:
@@ -123,8 +128,13 @@ enum TrashPutBack {
                 try ops.restoreContainer(item.id)
                 return .plain
             case .book:
+                // 13i-c U4: how many notes went in WITH it — the count reads
+                // the exact stamp, so it must be read before the stamp clears.
+                let notes = try database.read { db in
+                    try Queries.trashBookNoteCount(db, readingID: item.id)
+                }
                 try ops.restoreReading(item.id)
-                return .plain
+                return notes > 0 ? .bookWhole(notes: notes) : .plain
             case .block:
                 return .block(try ops.restoreBlock(item.id))
             case .take:
@@ -136,6 +146,7 @@ enum TrashPutBack {
         switch outcome {
         case .block(let landing): return RecoveryCopy.landingReceipt(landing)
         case .take(let status): return RecoveryCopy.takeRestoredReceipt(status)
+        case .bookWhole(let notes): return RecoveryCopy.bookPutBackWhole(item.title, notes: notes)
         case .plain: return RecoveryCopy.putBackReceipt(item.kind)
         }
     }
