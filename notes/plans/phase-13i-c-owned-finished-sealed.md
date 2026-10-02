@@ -1549,7 +1549,19 @@ SyncSpec not required).
   `ManageReadingPostsSheet`. `RemoveReleaseDoorTests` (5) + the registry walk + MembershipChoice +
   TimelineAndReadings + BookStructure/BookDrop: 65/6 green; the note-box/Index/pane sweep 44/7 green
   (4 pre-existing `IndexTierMetricsTests` known issues); zero instances.
-- **Piece C — the Arrivals arms (§4 row 19):** NOT-STARTED. (⌘J's owner-naming note, F-U2-6, landed with piece A.)
+- **Piece C — the Arrivals arms (§4 row 19):** DONE (commit "13i-c U4 piece C"). (⌘J's
+  owner-naming note, F-U2-6, landed with piece A.) `ArrivalArms` — the row's doors as DATA, decided by
+  the one `OwnershipDecision` verdict (so a row never offers an Add the seat refuses): Add · Dismiss
+  for an ordinary note; **Copy In · Move In · Dismiss** for a membered note at an OWNED book's door;
+  **Copy In · Dismiss** for a note owned elsewhere at a PLAIN book's door; the row's one quiet line
+  "owned by “X”" (§18.4's competing-owned-books face) / "also in “X”". `BookArrivalsModel` reads the
+  LISTED rows' facts in ONE page-driven statement (`Queries.ownershipFacts`, ∝ the ≤30 rows) and
+  answers through `copyPostIntoReading(answering:)` / `movePostIntoReading(answering:)` with receipts
+  (`ArrivalsCopy.copiedIn` / `.movedIn` naming the books it LEFT; a finished book among them refuses
+  with THAT book's road). The line's `surfaceCapabilities` gain `.copyIn`/`.moveIn` (one honest edit:
+  `BookArrivalsTests.theLineIsTheTwoActsOneRendererAndTheyAreDeclaredAsDrawn` — commented).
+  `ArrivalArmsTests` (5, incl. the MOUNTED line drawing Copy In · Move In · Dismiss) + BookArrivals +
+  the registry walk: 43/3 green; zero instances.
 - **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** NOT-STARTED.
 - **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.
 - **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.

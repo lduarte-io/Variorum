@@ -17,6 +17,18 @@
 //    (`dismissArrival`). Never a persistent panel. The copy-in arm is
 //    13i-c's and is neither built nor hinted here.
 //
+//  13i-c U4 — THE OWNERSHIP ARMS (the 13i-c plan §4 row 19; the sitting record
+//  §4 "copy in / dismiss" and "claim-move / copy in / leave", §18.4). Which
+//  doors a waiting row draws is DATA, decided per row by the one ownership
+//  table (`ArrivalArms` over `OwnershipDecision`): a note membered elsewhere
+//  at an OWNED book's door draws **Copy In · Move In · Dismiss** (no Add — a
+//  plain seat would break the book's promise); a note another book OWNS at a
+//  PLAIN book's door draws **Copy In · Dismiss**; everything else keeps
+//  **Add · Dismiss**. The row says why in one quiet line — "owned by “X”"
+//  (§18.4's competing-owned-books face, "claimed by" in the record's words) or
+//  "also in “X”". The facts are ONE page-driven read over the listed rows
+//  (`Queries.ownershipFacts`), never the corpus.
+//
 //  Three pieces, split by concern (P-9): the WORDS (`ArrivalsCopy` — pure,
 //  pinned), the MODEL (`BookArrivalsModel` — the observed door and the two
 //  acts, speaking on the one status seam), and the FACE
@@ -87,6 +99,35 @@ nonisolated enum ArrivalsCopy {
         "Dismissed \u{201C}\(title)\u{201D}."
     }
 
+    // MARK: The ownership arms (13i-c U4 — §4 row 19)
+
+    static let copyInHelp =
+        "Copy this note in \u{2014} a linked copy joins the book at the end; the original stays "
+        + "where it lives"
+    static let moveInHelp =
+        "Move this note in \u{2014} it leaves its other books and lives only here, at the end"
+
+    /// The row's one quiet line: who OWNS it (§18.4 — "claimed by [Book]" in
+    /// the record's words; "owned by" at the face), or where else it lives.
+    static func ownedBy(_ book: String) -> String { "owned by \u{201C}\(book)\u{201D}" }
+    static func alsoIn(_ books: [String]) -> String {
+        "also in " + MembershipChoiceCopy.list(books)
+    }
+
+    /// Copy In landed (at the END — the arrival's own placement, §4).
+    static func copiedIn(_ title: String) -> String {
+        "Copied \u{201C}\(title)\u{201D} in at the end of the book \u{2014} a linked copy; the "
+            + "original stays where it was."
+    }
+
+    /// Move In landed — it names the books the note LEFT.
+    static func movedIn(_ title: String, left: [String]) -> String {
+        left.isEmpty
+            ? "Moved \u{201C}\(title)\u{201D} in at the end of the book."
+            : "Moved \u{201C}\(title)\u{201D} in at the end of the book \u{2014} it left "
+                + MembershipChoiceCopy.list(left) + "."
+    }
+
     // MARK: Refusals (nothing happened — always shown, P-2)
 
     /// The operations layer's REAL refusal, in words that name the road.
@@ -139,6 +180,51 @@ nonisolated enum ArrivalsLineFace {
     }
 }
 
+// MARK: - Which doors a waiting row draws (data — 13i-c U4, §4 row 19)
+
+/// **The judgment arms of ONE waiting row**, decided by the one ownership
+/// table (`OwnershipDecision` — the same verdict `seatArrival` consults, so a
+/// row never offers Add where the seat would refuse). Pure, so pins read it.
+nonisolated struct ArrivalArms: Equatable, Sendable {
+    /// The acts the row draws, in order (each a declared `.surface` act).
+    let acts: [CapabilityID]
+    /// The row's one quiet line, or nil for an ordinary note.
+    let line: String?
+
+    static func of(bookOwned: Bool, facts: Queries.OwnershipFacts?) -> ArrivalArms {
+        of(bookOwned: bookOwned, ownedBy: facts?.ownedBy, otherBooks: facts?.otherBooks ?? [])
+    }
+
+    /// The table over the facts themselves (the note's owner, if any, and
+    /// the OTHER books it is a member of).
+    static func of(
+        bookOwned: Bool, ownedBy: Queries.BookRef?, otherBooks: [Queries.BookRef]
+    ) -> ArrivalArms {
+        let note = OwnershipDecision.NoteFacts(
+            memberedElsewhere: !otherBooks.isEmpty, ownedElsewhere: ownedBy != nil)
+        let line: String? = if let ownedBy {
+            ArrivalsCopy.ownedBy(ownedBy.name)
+        } else if !otherBooks.isEmpty, bookOwned {
+            ArrivalsCopy.alsoIn(otherBooks.map(\.name))
+        } else {
+            nil
+        }
+        switch OwnershipDecision.verdict(targetOwned: bookOwned, note: note) {
+        case .add:
+            return ArrivalArms(acts: [.seatArrival, .dismissArrival], line: nil)
+        case .needsChoice(.copyOrMove):
+            return ArrivalArms(acts: [.copyIn, .moveIn, .dismissArrival], line: line)
+        case .needsChoice(.copyOnly):
+            return ArrivalArms(acts: [.copyIn, .dismissArrival], line: line)
+        }
+    }
+
+    /// Each act's word on the row (the registry's verbs).
+    static func verb(_ act: CapabilityID) -> String {
+        CapabilityRegistry.capability(act).verb
+    }
+}
+
 // MARK: - The model
 
 /// The door of ONE book, observed, and its two acts. Holds projections and
@@ -160,6 +246,10 @@ final class BookArrivalsModel {
     /// Rows whose judgment is in flight — their doors grey until the store
     /// answers, so a double click cannot fire one act twice.
     private(set) var judging: Set<String> = []
+    /// 13i-c U4: the ownership facts of the LISTED rows' notes (note id →
+    /// facts; an ordinary free note is absent — "silence the common case"),
+    /// read once per delivered listing, ∝ the listed rows (P1).
+    private(set) var facts: [String: Queries.OwnershipFacts] = [:]
 
     /// How many rows the open line lists (the count is never windowed).
     static let window = 30
@@ -181,6 +271,7 @@ final class BookArrivalsModel {
             for try await value in session.database.observeBookArrivals(
                 readingID, limit: listingLimit) {
                 adopt(value)
+                await loadFacts()
             }
         } catch is CancellationError {
         } catch {
@@ -195,6 +286,24 @@ final class BookArrivalsModel {
         door = value
         judging.formIntersection(value.rows.map(\.id))
         if value.count == 0 { expanded = false }
+    }
+
+    /// 13i-c U4: read the listed rows' ownership facts — ONE page-driven
+    /// statement (`Queries.ownershipFacts`), so each row draws its arms.
+    func loadFacts() async {
+        let ids = door.rows.map(\.postID)
+        guard !ids.isEmpty else {
+            facts = [:]
+            return
+        }
+        facts = (try? await session.database.read { [readingID] db in
+            try Queries.ownershipFacts(db, postIDs: ids, inBook: readingID)
+        }) ?? [:]
+    }
+
+    /// The row's arms, given whether this book owns its notes.
+    func arms(for arrival: Queries.BookArrival, bookOwned: Bool) -> ArrivalArms {
+        ArrivalArms.of(bookOwned: bookOwned, facts: facts[arrival.postID])
     }
 
     /// The line's own click: open to the rows, or fold back to the line.
@@ -216,6 +325,53 @@ final class BookArrivalsModel {
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
                 for: error, book: book?.name, cap: book?.maxPosts))
+        }
+    }
+
+    /// **Copy In** (13i-c U4) — answer the arrival with a linked copy at the
+    /// END (`copyPostIntoReading(answering:)` — the pair decided for good,
+    /// P-13ic-3). The original stays where it lives.
+    func copyIn(_ arrival: Queries.BookArrival, book: Reading?) async {
+        guard judging.insert(arrival.id).inserted else { return }
+        defer { judging.remove(arrival.id) }
+        do {
+            _ = try await session.runner.run { ops in
+                try ops.copyPostIntoReading(answering: arrival.id)
+            }
+            session.status.receipt(ArrivalsCopy.copiedIn(arrival.title))
+        } catch {
+            session.status.refuse(ArrivalsCopy.refusal(
+                for: error, book: book?.name, cap: book?.maxPosts))
+        }
+    }
+
+    /// **Move In** (13i-c U4) — the owned book's claim-move on its own bell
+    /// (`movePostIntoReading(answering:)`): the note leaves every other book
+    /// and joins here at the END. The receipt names the books it left; a
+    /// finished book among them refuses with THAT book's road.
+    func moveIn(_ arrival: Queries.BookArrival, book: Reading?) async {
+        guard judging.insert(arrival.id).inserted else { return }
+        defer { judging.remove(arrival.id) }
+        let database = session.database
+        do {
+            let left: [String] = try await session.runner.run { ops in
+                let result = try ops.movePostIntoReading(answering: arrival.id)
+                let leftIDs = result.severed.filter { $0.status == .member }.map(\.readingId)
+                return try database.read { db in
+                    try leftIDs.compactMap { try Queries.reading(db, id: $0)?.name }
+                }
+            }
+            session.status.receipt(ArrivalsCopy.movedIn(arrival.title, left: left))
+        } catch {
+            if case OperationError.lockedReading(let id) = error, id != readingID {
+                let name = (try? await session.database.read { db in
+                    try Queries.reading(db, id: id)?.name
+                }) ?? nil
+                session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(name ?? ""))
+            } else {
+                session.status.refuse(ArrivalsCopy.refusal(
+                    for: error, book: book?.name, cap: book?.maxPosts))
+            }
         }
     }
 
@@ -245,7 +401,11 @@ struct BookArrivalsLine: View {
     /// The judgment doors this face renders — the two acts' ONLY renderer,
     /// so the declaration lives with the builder (the `MarkdownActs` /
     /// `BlockHistoryPane` precedent), and the registry walk asserts it.
-    static let surfaceCapabilities: [CapabilityID] = [.seatArrival, .dismissArrival]
+    static let surfaceCapabilities: [CapabilityID] = [
+        .seatArrival, .dismissArrival,
+        // 13i-c U4 (§4 row 19): the ownership arms — Copy In / Move In.
+        .copyIn, .moveIn,
+    ]
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -320,6 +480,7 @@ struct BookArrivalsLine: View {
 
     private func row(_ arrival: Queries.BookArrival) -> some View {
         let busy = model.judging.contains(arrival.id)
+        let arms = model.arms(for: arrival, bookOwned: structure.reading?.owned ?? false)
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             // The note's NAME is her prose, never chrome — no `chromeLabel`
             // (the 13u3 UNIT B lesson: the Terminal voice would lowercase it).
@@ -329,6 +490,15 @@ struct BookArrivalsLine: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .help(arrival.title)
+            // 13i-c U4 (§18.4): why this row is not an ordinary Add — who owns
+            // it, or where else it lives. Book names are hers, never chrome.
+            if let line = arms.line {
+                Text(line)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
             Spacer(minLength: 8)
             if let stamp = ArrivalsCopy.arrived(arrival.arrivedAt, now: Date()) {
                 Text(tokens.chromeLabel(stamp))
@@ -337,6 +507,36 @@ struct BookArrivalsLine: View {
                     .lineLimit(1)
                     .fixedSize()
             }
+            // 13i-c U4: the row's arms are DATA (`ArrivalArms`) — one
+            // renderer per act, in the table's order.
+            ForEach(arms.acts, id: \.self) { act in
+                armButton(act, arrival: arrival)
+                    .disabled(busy)
+            }
+        }
+        .padding(.leading, 18)
+        #if DEBUG
+        .onAppear {
+            ArrivalsLineProbe.recordRow(
+                model.readingID, owner: probeOwner, arrival.id,
+                arms.acts.map(ArrivalArms.verb))
+        }
+        .onChange(of: arms) { _, now in
+            ArrivalsLineProbe.recordRow(
+                model.readingID, owner: probeOwner, arrival.id,
+                now.acts.map(ArrivalArms.verb))
+        }
+        .onDisappear {
+            ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
+        }
+        #endif
+    }
+
+    /// One judgment door — its act, its word, its weight.
+    @ViewBuilder
+    private func armButton(_ act: CapabilityID, arrival: Queries.BookArrival) -> some View {
+        switch act {
+        case .seatArrival:
             Button(tokens.chromeLabel(ArrivalsCopy.addVerb)) {
                 Task {
                     await model.seat(
@@ -346,25 +546,25 @@ struct BookArrivalsLine: View {
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .help(ArrivalsCopy.addHelp)
-            .disabled(busy)
+        case .copyIn:
+            Button(tokens.chromeLabel(MembershipChoiceCopy.copyInVerb)) {
+                Task { await model.copyIn(arrival, book: structure.reading) }
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .help(ArrivalsCopy.copyInHelp)
+        case .moveIn:
+            Button(tokens.chromeLabel(MembershipChoiceCopy.moveInVerb)) {
+                Task { await model.moveIn(arrival, book: structure.reading) }
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+            .help(ArrivalsCopy.moveInHelp)
+        default:
             Button(tokens.chromeLabel(ArrivalsCopy.dismissVerb)) {
                 Task { await model.dismiss(arrival, book: structure.reading) }
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             .help(ArrivalsCopy.dismissHelp)
-            .disabled(busy)
         }
-        .padding(.leading, 18)
-        #if DEBUG
-        .onAppear {
-            ArrivalsLineProbe.recordRow(
-                model.readingID, owner: probeOwner, arrival.id,
-                [ArrivalsCopy.addVerb, ArrivalsCopy.dismissVerb])
-        }
-        .onDisappear {
-            ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
-        }
-        #endif
     }
 
     #if DEBUG

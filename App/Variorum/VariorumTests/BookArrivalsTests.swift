@@ -494,7 +494,11 @@ struct BookArrivalsTests {
     // MARK: - The registry
 
     @Test func theLineIsTheTwoActsOneRendererAndTheyAreDeclaredAsDrawn() {
-        #expect(BookArrivalsLine.surfaceCapabilities == [.seatArrival, .dismissArrival])
+        // 13i-c U4 (an honest edit — the subject is unchanged: every door the
+        // line draws is declared as drawn): the plan's §4 row 19 gave the line
+        // the two OWNERSHIP arms, Copy In and Move In, beside Add and Dismiss.
+        #expect(BookArrivalsLine.surfaceCapabilities
+                == [.seatArrival, .dismissArrival, .copyIn, .moveIn])
         for id in BookArrivalsLine.surfaceCapabilities {
             let capability = CapabilityRegistry.capability(id)
             #expect(capability.doors == [.surface], "\(id): an inline door, no key, no palette row")
