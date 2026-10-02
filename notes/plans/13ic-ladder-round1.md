@@ -513,3 +513,39 @@ call per finding, each bug-class fix red-on-old first; dispositions written as t
 - **Changed:** `App/Variorum/Variorum/Core/Views/MembershipChoice.swift` (`offer` →
   `@discardableResult Bool` + the spoken nil arm). Suites: MembershipChoice + TimelineAndReadings
   23/2 green.
+
+### THE FIX PASS'S CLOSE (2026-10-02, the reviewer — zero instances at every run and at the close)
+
+- **Dispositions, summarized:** [MAJOR] CONFIRMED-FIXED (the shared WHERE; four pins red-first) ·
+  [MINOR wing] CONFIRMED-FIXED for the non-daily arm (pin red-first), the DAILY arm
+  CONFIRMED-RECORDED → 13i-d (KnownIssues row + the QUESTIONS paragraph above) · [MINOR pool probe]
+  CONFIRMED-FIXED (pin red-first) · [MINOR sealed-named-reopen] CONFIRMED-FIXED across the
+  reachable class (two DB-driven pins red-first + the chip fork's pure pin), the GENERIC word-table
+  arms CONFIRMED-RECORDED → 13i-d · [MINOR dead delete] CONFIRMED-FIXED (the adjudicated
+  retirement; the test moved onto the real road) · [NIT stale/over-saying delete receipt]
+  CONFIRMED-RECORDED → 13s · [NIT silent offer] CONFIRMED-FIXED (pin red-first). Zero findings
+  DISMISSED — the implementer's seven AGREEs all held under re-trace, and its three widening notes
+  were adopted (the shared-WHERE shape; the daily-arm split; the wider sealed class).
+- **For the orchestrator to file at the closeout:** the two QUESTIONS-ready paragraphs above
+  (the archived-arrival spare-it arm, with P-13ib-U2-2's "unless finished meanwhile" exception; the
+  daily Journal's wing) join #169's set; TWO KnownIssues rows → 13i-d (the daily arm's wing +
+  `canonicalJournalEntry`'s scope; the generic `lockedReading` word-table arms —
+  `ReadingsViewModel.message`'s "locked — unlock", `ArrivalsCopy.refusal`,
+  `MembershipChoiceCopy.refusal`'s target arm, `RecoveryActs`' recovery arm — beside F-U3-1's
+  gathering faces); ONE 13s copy row (the delete receipt's count/"in the Pool" + the optional
+  "(M of them archived)" suffix on §24's line).
+- **Suites at the close (every claim run in this session):** core `swift test` FULL —
+  **"Test run with 2008 tests in 213 suites passed"** (1 standing env-gated skip; 2004/212 at the
+  round's open → +4 tests / +1 suite: `PendingArrivalDismissalTests` (3) + the pool-probe pin);
+  Mac `build-for-testing` GREEN + every suite touched by the fixes incl. the REGISTRY WALK —
+  **160 tests / 18 suites passed** — plus the chip-referencing door/ascent files **46/14** and the
+  full tutorial spine **79 tests / 11 suites** (P-6); the phone `VariorumMobile` generic iOS
+  Simulator **BUILD SUCCEEDED**. `pgrep` clean before every Mac run and at the close. Commits:
+  f29ffd84 (MAJOR) · e1dcfa36 (pool probe) · 12e92bdb (wing, non-daily) · 909c8fdb (sealed words)
+  · 2a57b001 (retirement + silent offer), each pushed; no trailers. New Mac pins live in
+  BookStateDoorsTests (+1), MembershipChoiceTests (+3), JournalBooksTests (+2 — the wing pin and
+  the sealed daily pin); DerivedData `13ic-ladder` / `13ic-ladder-ios` are this round's (the
+  closeout tidy sweeps them).
+- **Round 1 CLOSES from the reviewer's side.** Per the cross-model flow, the one remaining step
+  before round 2 (or the close at the cap's discretion) is the implementer's SANITY PASS over this
+  fix diff (5a7c9c1c..HEAD).
