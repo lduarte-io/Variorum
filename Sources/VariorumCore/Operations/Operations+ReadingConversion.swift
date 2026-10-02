@@ -328,6 +328,16 @@ extension Operations {
     /// live-parent guard — a live pointer at a dead post helps nobody), and
     /// a pair that somehow already has a live row is skipped rather than
     /// duplicated (`uq_reading_post_live`).
+    ///
+    /// **13i-d U6 ACT 0 (F-U5b-2, RULED (a)):** if ANY row it would revive
+    /// now pairs a note and this book across WINGS (a member moved away
+    /// while the book was unbound, or the gathering itself moved), the whole
+    /// redo is OBSOLETE — quiet, nothing written, the gathering stays a
+    /// gathering: the deleted bucket's shape, checked before any write and
+    /// ahead of the finished throw (the ruled letter: an inverse whose
+    /// revival would cross treats its ENTRY as obsolete — PROVISIONAL
+    /// P-13id-U6-1 records the row-level alternative). A fresh bind by hand
+    /// gives the current assembly, which is wing-scoped by construction.
     func reapplySmartConversion(
         readingID: String, taken: [(id: String, status: MembershipStatus)]
     ) throws {
@@ -335,13 +345,12 @@ extension Operations {
             guard var reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt == nil
             else { return }
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            let now = date.now
-            var revived: [String] = []
+            // The rows this redo WOULD revive, read before any write (each
+            // taken row is a distinct note — one live row per pair at the
+            // revert — so reading them up front is the loop's own answer).
+            var revivable: [(membership: ReadingPost, status: MembershipStatus)] = []
             for row in taken {
-                guard var membership = try ReadingPost.fetchOne(db, key: row.id),
+                guard let membership = try ReadingPost.fetchOne(db, key: row.id),
                       membership.deletedAt != nil
                 else { continue }
                 let postIsLive = try Bool.fetchOne(
@@ -353,7 +362,21 @@ extension Operations {
                 guard try livePairRow(
                     db, postID: membership.postId, readingID: readingID) == nil
                 else { continue }
-                membership.status = row.status
+                revivable.append((membership, row.status))
+            }
+            for entry in revivable {
+                guard try Queries.membershipRevivalStaysInOneWing(
+                    db, postID: entry.membership.postId, readingID: readingID)
+                else { return }
+            }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: readingID)
+            }
+            let now = date.now
+            var revived: [String] = []
+            for entry in revivable {
+                var membership = entry.membership
+                membership.status = entry.status
                 membership.deletedAt = nil
                 try membership.update(db)
                 revived.append(membership.postId)

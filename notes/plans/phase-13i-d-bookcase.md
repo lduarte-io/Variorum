@@ -2359,7 +2359,7 @@ or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's
 |---|---|---|
 | 1 | Record skeleton + the design + evidence named | DONE (this commit) |
 | 2 | ACT 0 — red-on-old pins on the traced recipes (diverge → move the book → ⌥⌘Z; bind → ⌥⌘Z → move the note → ⇧⌥⌘Z) + the sibling (`reapplyDiverge`: diverge → ⌥⌘Z → move the book → ⇧⌥⌘Z) + the already-guarded sibling's control (`reapplyMintedContainer` through `restoreContainer`) — committed RED on purpose | DONE (this commit — RED ON PURPOSE) — `WingUndoRevivalTests` 5: **4 RED on the pre-guard tree, 16 issues** (`act0-red.log`: every recipe's crossing count 1, the original/copy revived across, the half-undo/half-redo writes, the bind re-made a book over another wing's notes ×2), the control green |
-| 3 | ACT 0 — the guard (`Queries.membershipRevivalStaysInOneWing` over `revivalWingScope`; the three roads return before any write) → green | NOT-STARTED |
+| 3 | ACT 0 — the guard (`Queries.membershipRevivalStaysInOneWing` over `revivalWingScope`; the three roads return before any write) → green | DONE (this commit) — the pins green with the diverge/bind/ownership/wing-move/revival/undo neighbours **119/15** (`act0-green.log`); the bind's redo now reads its revivable set before any write (behaviour otherwise byte-identical — `SmartConversionTests` green unmodified) |
 | 4 | (g) F-U3-4 — TRACE the chip's "in 2 books" first; bug-class ⇒ red-on-old pin + fix, else words | NOT-STARTED |
 | 5 | (d) row 106 — the generic `lockedReading` arms + `SeededBookRestore` speak Unseal where the book is sealed | NOT-STARTED |
 | 6 | (f) item 10's dismiss receipt | NOT-STARTED |

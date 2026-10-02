@@ -52,6 +52,31 @@ extension Queries {
         wingScope(column: "wing_id", wingID: wingID)
     }
 
+    /// **THE UNDO/REDO REVIVAL'S WING RULE** (13i-d U6 ACT 0 — F-U5b-2,
+    /// RULED (a) at the adjudication after U5b): whether reviving `postID`'s
+    /// membership row in `readingID` keeps the pair in ONE wing as surfaces
+    /// read them — the note's EFFECTIVE wing (a dangling pointer is Home's,
+    /// which is also where a Put back would re-home it), the book side
+    /// through `revivalWingScope`, the one fragment the two Put-back sites
+    /// read. A structural replay recorded BEFORE a wing move (the moves
+    /// register no entry and clear nothing) can otherwise revive a row across
+    /// wings; the guarded roads — `revertDiverge`, `reapplyDiverge`,
+    /// `reapplySmartConversion` — ask this before any write and, on false,
+    /// treat their entry as OBSOLETE (each road's own "book deleted
+    /// meanwhile" bucket: quiet, nothing written). Callers have already
+    /// guarded the book's liveness; an unknown note answers true (the roads'
+    /// own live-post guards decide it).
+    static func membershipRevivalStaysInOneWing(
+        _ db: Database, postID: String, readingID: String
+    ) throws -> Bool {
+        guard let noteWing = try effectiveWing(db, ofPost: postID) else { return true }
+        let scope = revivalWingScope(wingID: noteWing)
+        return try Bool.fetchOne(
+            db,
+            sql: "SELECT EXISTS (SELECT 1 FROM reading WHERE id = ? AND \(scope.sql))",
+            arguments: StatementArguments([readingID] + scope.arguments)) ?? false
+    }
+
     /// The live ADDITIONAL wings in switcher order — `(position, id)`, the
     /// fractional-index sort key (AppSpec §6). Home is virtual and never a
     /// row; the switcher lists it first by itself.

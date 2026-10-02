@@ -137,6 +137,15 @@ extension Operations {
     /// obsolete, quiet (its cascade already took the memberships); a book
     /// FINISHED meanwhile ⇒ throws, so the entry stays on the stack for a
     /// retry after un-finishing.
+    ///
+    /// **13i-d U6 ACT 0 (F-U5b-2, RULED (a)):** the original's row would
+    /// revive into a book in ANOTHER WING (the book moved after the diverge —
+    /// the copy rode as its member, the original stayed behind) ⇒ obsolete,
+    /// quiet, NOTHING written: the deleted bucket's shape, checked before any
+    /// write and before the finished throw (re-opening cannot heal a
+    /// crossing, so a retry-throw would wedge the stack). A half-undo — the
+    /// copy out, the original not back — would leave the book short a note;
+    /// a book never spans wings (§9).
     func revertDiverge(
         copyID: String, copyMembershipID: String, originalMembershipID: String
     ) throws {
@@ -147,6 +156,13 @@ extension Operations {
                   let reading = try Reading.fetchOne(db, key: copyRow.readingId),
                   reading.deletedAt == nil
             else { return }
+            if let originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
+               originalRow.deletedAt != nil,
+               try postIsLive(db, originalRow.postId),
+               try !Queries.membershipRevivalStaysInOneWing(
+                   db, postID: originalRow.postId, readingID: copyRow.readingId) {
+                return
+            }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: copyRow.readingId)
             }
@@ -209,11 +225,25 @@ extension Operations {
         // Guards first, read-only: a book deleted meanwhile ⇒ obsolete,
         // quiet (its cascade already took the memberships); FINISHED
         // meanwhile ⇒ throws, so the entry stays on the stack for a retry.
+        //
+        // 13i-d U6 ACT 0 (F-U5b-2, RULED (a) — the sibling the grep found):
+        // the copy's row would revive into a book in ANOTHER WING (the book
+        // moved after the undo — the original rode as its member, the dead
+        // copy stayed behind) ⇒ obsolete, quiet, nothing written — before
+        // `restoreContainer` (which would bring the copy back bookless) and
+        // before the original's row is taken (a half-redo would leave the
+        // book short a note). Checked ahead of the finished throw, as in the
+        // inverse.
         let copyStillDead: Bool? = try database.read { db in
             guard let membership = try ReadingPost.fetchOne(db, key: copyMembershipID),
                   let reading = try Reading.fetchOne(db, key: membership.readingId),
                   reading.deletedAt == nil
             else { return nil }
+            if membership.deletedAt != nil,
+               try !Queries.membershipRevivalStaysInOneWing(
+                   db, postID: copyID, readingID: membership.readingId) {
+                return nil
+            }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: membership.readingId)
             }
