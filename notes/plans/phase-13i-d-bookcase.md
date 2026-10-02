@@ -535,9 +535,9 @@ row is built, pinned and walked below.
 | 1 | Record skeleton + design map + evidence named | DONE (e4fe779d) |
 | 2 | ACT 0 core — the union star: `Queries.starred` (list in star order, then column-only books A–Z) · `Queries.shelfPins` (the union) · `setStarred(.reading)` writes BOTH stores in one transaction, un-star clears both · the cap counts the union · `setShelfPinned` (public + in-transaction) routes through the same write · `ShelfBook.starred` = the union; red-on-old pins | DONE (12c60fc5) — `UnionStarTests` 9 pins: 8 RED on the pre-fix tree (13 issues), the 9th (new API) red by behavioural revert; 114/15 star-adjacent core suites green |
 | 3 | ACT 0 Mac faces — the book row's ONE door Star/Unstar (Pin retires on the Mac); the board's float and the row ★ read the union | DONE (001ea241) — `theFloatReadsTheUnionNotTheColumn` red by behavioural revert (the column filter), restored; 30/5 Mac board+star suites green |
-| 4 | Row 104 — the membership OBSERVATION (`NoteMembershipModel`, the shared home), the chip consumes it; the seat-while-open pin red-on-old | NOT-STARTED |
-| 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | NOT-STARTED |
-| 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | NOT-STARTED |
+| 4 | Row 104 — the membership OBSERVATION (`NoteMembershipModel`, the shared home), the chip consumes it; the seat-while-open pin red-on-old | DONE (2a90bae8) — `anIntakeSeatWhileTheNoteIsOpenShowsWithoutAReopen` RED on the extracted one-shot shape (5461fb76, the WIP checkpoint), green after; the chip mount + ascent + remove suites 30/4 green |
+| 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | DONE (10e5b89c) |
+| 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | DONE (fd13e9bb) — `BookPanelTests` 15/3 + the registry walk 28 green; a combined behavioural revert (drops ignoring the order · the click-through on the wrong road · the refusal without its words · the door drawn unmembered) turned 5 pins red as predicted, restored |
 | 7 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; mobile star/pin suites) | NOT-STARTED |
 | 8 | The screenshot walk ×4 into `notes/plans/13id-screens/u2/` | NOT-STARTED |
 | 9 | Record close · QUESTIONS #171 · KnownIssues rows 104 (resolved) / 13 (the class grows) | NOT-STARTED |
