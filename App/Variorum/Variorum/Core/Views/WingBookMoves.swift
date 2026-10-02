@@ -167,8 +167,9 @@ nonisolated extension WingCopy {
         let p = ask.preview
         var sentences: [String] = []
         if ask.isGathering {
+            // Walk W-2: never promise tags a star-only rule does not name.
             sentences.append("A gathering holds no notes \u{2014} in \(quoted(ask.wingName)) it shows "
-                + "the notes there that match its rule. Its rule's tags travel by name.")
+                + "the notes there that match its rule. Any tags its rule names travel by name.")
         } else {
             if p.notes == 0 {
                 sentences.append("It holds no notes.")
@@ -246,10 +247,26 @@ nonisolated extension WingCopy {
     static func everythingMessage(_ ask: WingsModel.ContentsMoveAsk) -> String {
         let p = ask.preview
         var sentences: [String] = []
-        let counts = WingWords.contents(p.contents)
-        sentences.append("\(counts.prefix(1).uppercased() + counts.dropFirst()) move. Books keep their "
-            + "notes, chapters and waiting notes; finished and sealed ones move as they are. "
-            + "Books arrive unshelved.")
+        // Walk W-2: each sentence says only what is true of what moves —
+        // agreement on a single thing, the books sentence only with books,
+        // the tags clause only with tags.
+        let c = p.contents
+        let counts = WingWords.contents(c)
+        let single = c.notes + c.books + c.gatherings + c.tags == 1
+        sentences.append("\(counts.prefix(1).uppercased() + counts.dropFirst()) "
+            + "\(single ? "moves" : "move").")
+        if c.books > 0 {
+            sentences.append("Books keep their notes, chapters and waiting notes; finished and "
+                + "sealed ones move as they are.")
+        }
+        switch (c.books, c.gatherings) {
+        case (0, 0): break
+        case (1, 0): sentences.append("The book arrives unshelved.")
+        case (_, 0): sentences.append("Books arrive unshelved.")
+        case (0, 1): sentences.append("The gathering arrives unshelved.")
+        case (0, _): sentences.append("Gatherings arrive unshelved.")
+        default: sentences.append("Books and gatherings arrive unshelved.")
+        }
         if p.contents.tags > 0 {
             var parts: [String] = []
             if !p.tags.joins.isEmpty {
@@ -272,8 +289,10 @@ nonisolated extension WingCopy {
                 + "\(p.nameCollisions.count == 1 ? "a book" : "books") named \(names) "
                 + "\u{2014} both keep their names.")
         }
-        sentences.append("\(quoted(ask.sourceName)) keeps none of its tags, so it ends empty "
-            + "\u{2014} then Delete Wing\u{2026} can take it.")
+        sentences.append(c.tags > 0
+            ? "\(quoted(ask.sourceName)) keeps none of its tags, so it ends empty "
+                + "\u{2014} then Delete Wing\u{2026} can take it."
+            : "\(quoted(ask.sourceName)) ends empty \u{2014} then Delete Wing\u{2026} can take it.")
         return sentences.joined(separator: " ")
     }
 
