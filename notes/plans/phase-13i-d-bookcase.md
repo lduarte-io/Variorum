@@ -1502,12 +1502,28 @@ session opens BANK 2.
 
 ## U5 RECORD — THE WING SWITCHER · THE CROSS-WING DOORS · THE BULK MOVE (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract) — IN PROGRESS, rewritten at the close.**
-**STOPPED FOR THE ARCHITECT'S RULING (the brief's stop rule): THE BOOK-MOVE HALF** — the bulk move
-("Move everything to another wing…") AND the per-item BOOK move share one set of residual edges
-(finished/sealed books, archived members, pending arrivals, rule tags that adopt vs die, the Trash's
-rows, shelves, the daily Journal); the proposal is written below (§ THE BOOK-MOVE PROPOSAL) and
-nothing of it is built. Everything else in the brief is in this unit's build.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **THE BOOK-MOVE HALF IS STOPPED FOR
+THE ARCHITECT'S RULING** (the brief's stop rule) — the bulk "Move everything to another wing…" AND
+the per-item BOOK move share one set of residual edges (finished/sealed books, archived members,
+pending arrivals, rule tags that adopt vs die, the Trash's rows, shelves, the daily Journal); the
+proposal is § THE BOOK-MOVE PROPOSAL below; nothing of it is built, so **the walk could not "move a
+book in" or "bulk-move back"** — it emptied the wing by hand instead (move the note back, delete the
+copy, delete the wing's tag), and the delete refusal's words do not yet name the bulk road (P-2).
+(2) **The phone is untouched in behaviour** (record only — MOBILE PARITY below): it compiles the
+shared `WingState`/`WingWords`, stands in Home, and reads every wing unscoped. (3) **The sidebar's
+Open strip is not wing-scoped** and **the Library/Pool/Archived/Trash mastheads do not name the
+wing** (the walk's W-1/W-2 — recorded as P-13id-U5-6 / F-U5-6, her taste calls). (4) **The note's
+own ▾ menu does not carry Move/Copy to Wing** — the doors render on the Library's and the Pool's
+note rows (the note-row grammar); the ▾ menu is a third renderer for a later touch. Everything
+else in the brief — riders R1/R2, the switcher, the delete refusal, the per-item note doors with
+adoption, the per-wing scoping (Bookcase, Library, Pool, tags, search, Starred, Archived, Trash,
+pickers), the lineage naming, the Home-only daily Journal and KnownIssues row 105 — is built,
+pinned (red-on-old where bug-class) and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2091/226 (1 standing skip) · Mac named 989/166, 0
+skipped, incl. the registry walk and the eleven tutorial suites (+ F-U5-3's pin after it, 8/1) · the
+phone TEST BUILD green · the walk DONE (27 captures ×4). Lesson 11 stays TRUE (P-13id-U5-4/-5/-9
+are the calls that touch it, each recorded).**
 
 Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (R-13id-1…5,
 the constitution, ledger row 6, all four adjudications + BANK 1 CLOSES, the U1–U4 RECORDs, the
@@ -1524,18 +1540,18 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + the design + the book-move proposal + evidence named | DONE (this commit) |
-| 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | DONE (this commit) — R1 RED on the pre-fix op (4 issues, `r1-red.log`), green after; three legacy fixtures re-staged as raw rows (55/6 green); R2's arm rejects BOTH spellings and a new control proves it fires on the store-wide forms (27/4 green) |
-| 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | DONE (this commit) — `Operations+Wing.swift`, `Queries/WingQueries.swift`, six `OperationError` cases; `createPost`/`createReading` refuse a dead wing; `WingOperationsTests` 8 green |
-| 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (this commit) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
+| 1 | Record skeleton + the design + the book-move proposal + evidence named | DONE (86057679) |
+| 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | DONE (e6bc91fd) — R1 RED on the pre-fix op (4 issues, `r1-red.log`), green after; three legacy fixtures re-staged as raw rows (55/6 green); R2's arm rejects BOTH spellings and a new control proves it fires on the store-wide forms (27/4 green) |
+| 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | DONE (5e2e1934) — `Operations+Wing.swift`, `Queries/WingQueries.swift`, six `OperationError` cases; `createPost`/`createReading` refuse a dead wing; `WingOperationsTests` 8 green |
+| 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (5e2e1934) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
 | 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | DONE (0c950d3e + this commit) — `WingMembershipAndJournalTests` 5: **all 5 RED, 16 issues** with the six production files restored to `5e2e1934` (`p5-red.log`); restored by `git checkout HEAD --`, src diff empty — **no revert in flight**; green with the journal/ownership/intake/arrival neighbours 197/37 |
-| 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | DONE (this commit) — `Operations+WingMove.swift` (+ `Queries.wingMovePreview`, the confirm's read; `copyPost(intoWing:)`); `WingMoveTests` 6 green |
-| 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the re-home on Put back + per-wing pins | DONE (this commit) — `WingScopedReadsTests` 5 green; the lineage line reads `versionPeerPosts` + `effectiveWing`/`wingName` at the face (no new core read) |
-| 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | DONE (this commit, Mac BUILD SUCCEEDED) — `Shared/WingState.swift` on `AppSession` (memory attached by the bootstrap only; `readScope` = nil on the phone); re-scoped: Bookcase (a fresh model per wing, `.id`), Library listing + catalog, Pool, Tags (Settings list + mints), ⌘K, Starred, Archived, Trash (+ Empty Trash takes only this wing's), Timeline, the note picker / Compare / a book's add list (the SUBJECT's wing), the chip's book chooser, the masthead tag cards + typed paths (the NOTE's wing, read once outside the held region); ⌘N/toolbar/Library mints in the current wing. Pins PENDING (piece 9's Mac suite) |
-| 9 | Mac — the SWITCHER (the Bookcase masthead's `· Home ▾`: the wings, New Wing…, Rename…, Delete… with the refusal's words) + the note doors (Move to Wing… · Copy to Wing… with confirms) + the lineage line + registry rows + the walk green | DONE (this commit) — `Core/Views/WingsModel.swift` (the shared brain + `WingNoteDoors` + `wingMoveConfirm` + `WingCopy`), `Shared/WingWords.swift`, `Features/Shelf/WingSwitcherMenu.swift`; the refusal table's six wing arms; five acts declared; Compare + the Unmark picker show only same-wing versions and NAME other wings ("go to X ›"); `WingSwitcherTests` 7 + the registry walk: **35/2 green** |
+| 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | DONE (6abadd74) — `Operations+WingMove.swift` (+ `Queries.wingMovePreview`, the confirm's read; `copyPost(intoWing:)`); `WingMoveTests` 6 green |
+| 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the re-home on Put back + per-wing pins | DONE (ad78a28f) — `WingScopedReadsTests` 5 green; the lineage line reads `versionPeerPosts` + `effectiveWing`/`wingName` at the face (no new core read) |
+| 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | DONE (Mac BUILD SUCCEEDED) — `Shared/WingState.swift` on `AppSession` (memory attached by the bootstrap only; `readScope` = nil on the phone); re-scoped: Bookcase (a fresh model per wing, `.id`), Library listing + catalog, Pool, Tags (Settings list + mints), ⌘K, Starred, Archived, Trash (+ Empty Trash takes only this wing's), Timeline, the note picker / Compare / a book's add list (the SUBJECT's wing), the chip's book chooser, the masthead tag cards + typed paths (the NOTE's wing, read once outside the held region); ⌘N/toolbar/Library mints in the current wing (f3690974). Pinned in piece 9's Mac suite (`WingSwitcherTests`) and the END batches — DONE |
+| 9 | Mac — the SWITCHER (the Bookcase masthead's `· Home ▾`: the wings, New Wing…, Rename…, Delete… with the refusal's words) + the note doors (Move to Wing… · Copy to Wing… with confirms) + the lineage line + registry rows + the walk green | DONE (2a6034d2) — `Core/Views/WingsModel.swift` (the shared brain + `WingNoteDoors` + `wingMoveConfirm` + `WingCopy`), `Shared/WingWords.swift`, `Features/Shelf/WingSwitcherMenu.swift`; the refusal table's six wing arms; five acts declared; Compare + the Unmark picker show only same-wing versions and NAME other wings ("go to X ›"); `WingSwitcherTests` 7 + the registry walk: **35/2 green** |
 | 10 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; phone test build) | DONE — core FULL **2091/226** (1 standing skip); Mac named **989/166, 0 skipped** (three batches); phone **TEST BUILD SUCCEEDED** (counts in EVIDENCE) |
-| 11 | The screenshot walk ×4 into `notes/plans/13id-screens/u5/` | DONE — 27 captures, all four combinations (listed in EVIDENCE); zero instances after; her dev voice (Terminal) and appearance (system) restored. **F-U5-3's pin added after the walk (`emptyTrashTakesOnlyTheCurrentWingsRows`, green 8/1); A BEHAVIOURAL REVERT IS IN FLIGHT NEXT on `App/Variorum/Shared/RecoveryActs.swift` (restored to `f3690974~1`); if this line still says so, `git diff --stat` shows it and `git checkout HEAD -- App/Variorum/Shared/RecoveryActs.swift` restores** |
-| 12 | Record close · QUESTIONS #174 · KnownIssues row 105 · ledger row 6 | NOT-STARTED |
+| 11 | The screenshot walk ×4 into `notes/plans/13id-screens/u5/` | DONE — 27 captures, all four combinations (EVIDENCE); zero instances after; her dev voice (Terminal) and appearance (system) restored. F-U5-3's pin added after the walk: RED by behavioural revert (`RecoveryActs.swift` at `f3690974~1`: 2 issues — the confirm counted both wings' notes and the act wrote purge intents for both), restored by `git checkout HEAD --` (diff empty) — **no revert in flight**; green 8/1 |
+| 12 | Record close · QUESTIONS #174 · KnownIssues row 105 · ledger row 6 | DONE (this commit) |
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
 
@@ -1772,17 +1788,129 @@ shared primitive; its own edges are numbered P-13id-U5-7.
 - **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (`DerivedData/13id-u5-mobile`
   — the shared `WingState`/`WingWords`/refusal arms/`TypedTagPath`/`RecoveryActs` compile; the
   phone reads every wing unscoped — `readScope` nil — and mints in Home, exactly as before).
-- The walk ×4 (mint a wing, move/copy a note in, the delete refusal naming contents, empty and
-  delete the wing, the daily Journal refusing a non-Home designation, ⌘J from another wing filing
-  into Home): PENDING.
+- **F-U5-3's pin** (`WingSwitcherTests.emptyTrashTakesOnlyTheCurrentWingsRows`, added after the END
+  run): green 8/1; RED by behavioural revert of `Shared/RecoveryActs.swift`'s two scoped reads — **2
+  issues**: the confirm counted 2 notes, and the act wrote purge intents for BOTH wings' rows
+  (`mac-w-red.log`); restored, green (`mac-w2.log`).
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u5`, GUI grants
+  probed first — `AX: true SCREEN: true` this session; the author guard before every act, her app
+  absent throughout, HID idle 9,400 s at the start; 27 captures in `notes/plans/13id-screens/u5/`,
+  gitignored). **Terminal·light** — tl-01 the masthead "~/bookcase · home ▾" · 02 the switcher (✓ Home ·
+  New Wing…) · 03 the New Wing prompt carrying lesson 11's sentence · 04 inside "Imports": an empty
+  board, the Starred section scoped away, the receipt "Made the wing “Imports” — you're in it now." ·
+  05 Imports' Library "nothing matches." · 06 a Home note row's menu: Move to Wing ›, Copy to Wing › ·
+  07 Move to Wing ▸ Imports · 08 the confirm "Move “u4 delta” to “Imports”? It leaves “u4 owned copy” —
+  a book only holds notes of its own wing. Its tags come with it." · 09 the note gone from Home's
+  Library · 10 Copy to Wing ▸ Imports · 11 Imports' Library: the moved note (its `u4ring` minted
+  there) and the copy · 12 **the lineage line** on the copy in Compare: "a version of this note lives
+  in the wing “home” · go to home ›" (nothing auto-filled across; the copy "in no book") · 13 Delete
+  Wing on the non-empty wing → the refusal "“Imports” still holds 2 notes and 1 tag — move or delete
+  them first, then the empty wing can go." · 14 the switcher inside Imports (Home · ✓ Imports · New ·
+  Rename · Delete Wing…) · 15 **⌘J pressed inside Imports** opened today's entry under `~/journal`
+  (Home's Journal), the wing unchanged · 16 Settings ▸ Tags inside Imports lists only `u4ring` · (the
+  wing emptied by hand: the note moved back with NO confirm — bookless; the copy deleted; the tag
+  deleted) · 17 the empty wing's confirm "It's empty. Its shelves go with it; nothing else is
+  touched." · 18 deleted — back in Home, receipt "Deleted the wing “Imports”.", the Journal now 9
+  notes · 19 **Home's Trash lists the copy deleted inside the dead wing** (the dangling rule) · 20 Put
+  back RE-HOMED it into Home's Library beside ⌘J's Home entry; **Terminal·dark** — td-01 the New Wing
+  prompt · 02 inside the new wing "Studio": the switcher + the receipt; **Study·dark** — sd-01
+  "Bookcase · Studio ▾" · 02 a Home note row's Move to Wing ▸ Studio; **Study·light** — sl-01 the
+  switcher on Home (no Rename/Delete for Home) · 02 Studio's delete confirm · 03 deleted, back in
+  Home. The daily Journal's designation refusal is not reachable from a face by design (the door is
+  drawn on Home books only — P-2); its refusal is the pinned op (row 105).
 
 ### FINDINGS (for the orchestrator)
 
-- **F-U5-1, F-U5-2** — above (THE DESIGN).
+- **F-U5-1 — no wing operation existed** (the F-U1-1 class; THE DESIGN's first bullet). Built in core.
+- **F-U5-2 — the latent cross-wing bugs the switcher made live**, all pinned RED-ON-OLD and fixed: the
+  tag ops' path uniqueness and rename/delete SUBTREES (and three subtree reads) matched across
+  wings; `applyTag` took another wing's tag; every membership road took a note of another wing;
+  the daily designation took another wing's book (row 105's mechanism).
+- **F-U5-3 — Empty Trash's act-time re-read was STORE-WIDE**, so with per-wing Trash views it would
+  have purged other wings' rows from a wing whose Trash never listed them (the Trash's own G6 letter
+  broken). Scoped through `WingState.readScope` (the current wing on the Mac; nil — every wing — on
+  the phone, whose Trash is unscoped), pinned red-on-old by behavioural revert.
+- **F-U5-4 — the book-move half is STOPPED** with its proposal (§ above) — ruling owed before the
+  bulk door and the per-item book door build (one ruling builds both; the note move is the shared
+  primitive).
+- **F-U5-5 — the walk's harness facts** (for WalkKit): a sidebar click and an alert's button click
+  were each swallowed once while a surface was animating (⌘K's "Go to …" rows and a second, guarded
+  click were the reliable roads); cliclick events RESET the HID idle counter, so mid-walk the guard's
+  idle reads the walker's own last click (verified climbing steadily, 7 → 12 → 17 s, with her app
+  absent) — the guard still catches her app and a reset the walker did not cause.
+- **F-U5-6 (walk W-2, her call) — the sidebar's Open strip keeps another wing's open notes** after a
+  switch (it is the window's navigation, like back/forward; a click opens the note in place). Scope
+  it per wing, or keep (built: keep).
+- **F-U5-7 (walk) — Compare's lineage line lives in Compare's EMPTY state** (beside "versions of this
+  note"); when a same-wing version auto-fills the peer column, the line is not on screen until the
+  column is cleared. Minimal by ruling (#166(e)); a second home (the note's tray/History) is a later
+  touch if wanted.
+- **F-U5-8 (U6's, already routed) — the Library has no quiet-receipt host**, so the move/copy receipts
+  are not visible on the Library surface (refusals toast); row 103's Library half is U6's. And the
+  Library still says "smart book" (U6's sweep).
+- **F-U5-9 — snippets' tag menus list EVERY wing's vocabulary** (snippets are one shared room,
+  P-13id-U5-4) and `applyTag(toBlock:)` carries no wing guard — consistent with shared snippets, but
+  a block inside a note of another wing can take a tag of the wing she stands in through the
+  snippets/workbench tag doors. Owner: #174's P-4 question (per-wing snippets would close it).
+- **F-U5-10 — book-name uniqueness (E13's door guard) stays STORE-WIDE**: a name a book wears in
+  another wing refuses a mint here. Unchanged; her call whether names are per-wing (one line).
+- **F-U5-11 — walk residue in the dev store** (the precedent — fixtures stay): "u4 delta" moved to
+  Imports and back (it left "u4 owned copy", now 4 notes; its `u4ring` application re-pointed home by
+  adoption); a copy "u4 eta" (bookless, put back into Home); ⌘J's 2026-10-02 entry in the Journal;
+  two wings made and deleted (Imports, Studio — tombstoned rows); Imports' minted `u4ring` deleted.
+  Voice (Terminal) and appearance (system) restored; the remembered wing is Home.
+- **Tutorial (P-6):** no lesson sentence went false; lesson 11 is TRUE of the build ("Nothing crosses
+  between wings except what you move or copy yourself" — the shared scraps area, Home-filed quick
+  notes and ⌘J are the recorded calls); the spine is green (11 suites).
+- **MOBILE PARITY (record only — nothing built):** the phone owes the wing face (a switcher on its
+  shelf screen; New/Rename/Delete with the refusal's words — `WingWords` is shared and ready), the
+  per-wing scoping of its listings (its reads take the same additive `wingID`), the note doors'
+  Move/Copy to Wing (the core ops are ready), and the lineage line; until then it stands in Home,
+  lists every wing, mints in Home, and its Empty Trash takes every wing's rows (it SHOWS them all —
+  `readScope` nil keeps the G6 letter on each platform).
 
 ### PROVISIONALS (QUESTIONS #174 carries them for her bundle)
 
-*PENDING — numbered P-13id-U5-n as they are built.*
+- **P-13id-U5-1** — wing names: the op allows duplicates (the schema's letter); the DOORS refuse a name
+  a live wing or Home already wears, case-folded. (a) BUILT · (b) duplicates at the door too.
+- **P-13id-U5-2** — a DANGLING wing pointer reads as HOME: a deleted wing's Trash rows list in Home's
+  Trash, and a Put back re-homes them (a book unshelved). (a) BUILT · (b) the delete moves the wing's
+  Trash rows to Home at once · (c) the delete refuses until the wing's Trash rows are gone.
+- **P-13id-U5-3** — the current wing is APP-WIDE (every window) and remembered on this Mac; a wing
+  that died returns the app to Home. (a) BUILT · (b) per window · (c) always open in Home.
+- **P-13id-U5-4** — SNIPPETS stay one shared scraps area across wings (search lists snippet hits in
+  every wing; the Trash's snippet groups too). (a) BUILT · (b) per-wing snippets.
+- **P-13id-U5-5** — the quick-note PAD files into Home (Home holds quick notes and their gathering);
+  ⌘N, the toolbar, the Bookcase's entry bar and the sidebar import mint in the CURRENT wing. (a) BUILT
+  · (b) the pad files into the current wing too.
+- **P-13id-U5-6** — the switcher is the Bookcase masthead's "Bookcase · Home ▾", drawn always; the
+  other list surfaces do not name the wing. (a) BUILT · (b) hidden until a second wing exists (New
+  Wing… then in the menu bar) · (c) a wing word on every list surface's masthead.
+- **P-13id-U5-7** — the NOTE MOVE: severs its source-wing memberships (members and waiting arrivals),
+  the confirm LISTING the books; refuses while a member row sits in a finished/sealed book; saved
+  versions ride; tags adopt by path, else the chain is minted — row copies, no intake fires in the
+  destination; the source wing's tags stay; no undo.
+- **P-13id-U5-8** — the NOTE COPY: the ceremony copy born in the destination, tags adopted, bookless,
+  lineage-edged; no confirm, no undo.
+- **P-13id-U5-9** — ⌘J / Today's Entry from another wing open Home's entry WITHOUT switching wings; a
+  daily-shaped entry moved out of Home is no longer the day's (the next press makes a Home one);
+  "Use as Daily Journal" is drawn on Home books only.
+- **P-13id-U5-10** — the sidebar's Starred section shows the CURRENT wing's stars; the cap stays one
+  store-wide fifteen.
+- **P-13id-U5-11** — wording, all 13s-revoicable: "· Home ▾", "New Wing…", "Rename Wing…", "Delete
+  Wing…", lesson 11 as the New Wing prompt, "“X” still holds … — move or delete them first, then the
+  empty wing can go.", "Move to Wing ▸" / "Copy to Wing ▸", the move confirm, the receipts, "a version
+  of this note lives in the wing “X” · go to X ›", the six refusal-table sentences.
+- **P-13id-U5-12** — the move ASKS only when the note leaves a book; a bookless note moves at once; a
+  frozen book refuses at the door naming it.
+- **P-13id-U5-13** — switching wings is a VIEW choice: undeclared in the registry and silent (the
+  surfaces changing is the answer).
+- **P-13id-U5-14** — Delete Wing reads the contents FIRST: a non-empty wing's door speaks the refusal
+  (no confirm whose only answer is no); an empty one confirms; its shelves die with it; deleting the
+  wing you stand in returns you Home.
+- **P-13id-U5-15** — the note pickers, Compare and a book's add list offer the SUBJECT note's wing; the
+  chip's book chooser lists the note's own wing's books; a typed tag resolves (and mints) in the
+  NOTE's wing.
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -1813,7 +1941,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **DONE** (adjudicated 2026-10-02; core 2041/219 · Mac 490/74 · walk ×4; F-U3-1 ruled → U4 ACT 0; F-U3-4/-6 + row 103's Library half → U6; F-U3-5 → U4; F-U3-3 kept provisionally; #172) |
 | 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **DONE** (adjudicated 2026-10-02; core 2058/221 · Mac 732/117 · walk ×4; F-U4-5 ruled → U5 rider R1; F-U4-4/-7 → U6; F-U4-6 → the catch-up; #173) |
 | 5 | LADDER A (U1–U4) | **CLOSED** (2026-10-02, two rounds, zero disputes, no round 3; five fixes + the sanity NIT all landed; round 2's one NIT → U5 rider R2; the orchestrator's walk HELD on absent GUI grants — folded to her combined walk) |
-| 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | IN FLIGHT (spawned 2026-10-02) — record opened; the BOOK-MOVE half (bulk + per-item book) STOPPED with its proposal in the U5 RECORD |
+| 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
