@@ -1,0 +1,566 @@
+//
+//  BookStateDoors.swift
+//  Variorum
+//
+//  13i-c U3 — THE BOOK'S STATE DOORS (the sitting record §5, §6, §24; the
+//  13i-c plan §5 and R-13ic-3). Finished · Sealed · Owned, each a PAIR of
+//  acts (Finish/Reopen · Seal…/Unseal · Own Its Notes…/Stop Owning), plus
+//  the Trash door R-13ic-4's gathering gate needs. Her one line is the
+//  vocabulary: "Finished = the table of contents is done; Sealed = the book
+//  is done." The ladder reads open → finished → sealed going up, and
+//  sealed → open in ONE step down (R-13ic-3: "Unseal reopens the book too").
+//
+//  Two surfaces render these doors — the shelf row's menu and the Book
+//  Settings sheet's STATE section — so everything a door IS lives here, in
+//  four movable pieces (P-9), never in either surface:
+//
+//  1. **WHICH doors render** — `BookStateDoorSet`, a pure table over the
+//     book's facts (P-1: gating is data, never a per-view if).
+//  2. **THE WORDS** — `BookStateCopy`: every confirm's sentences and every
+//     receipt are static copy on a pure type, so pins read them without a
+//     window (the `BindCopy` precedent).
+//  3. **THE MODEL** — `BookStateDoors`: read the preview the operation acts
+//     on, then confirm or act; perform through the one operation; speak the
+//     receipt or the operation's own refusal on the 18i status seam.
+//  4. **THE FACE** — `BookStateConfirmSheet`: ONE renderer for every
+//     confirm; it decides nothing.
+//
+//  The confirms LIST what a ceremony will do before it does it — the forks
+//  a seal makes, the copies owning makes (her ruling: "the one
+//  copy-as-consequence in the design is never silent") — read from the SAME
+//  predicate the operation acts on (`Queries.sealPreview`,
+//  `Queries.ownConversionPreview` — both `sharedMembers`), so a confirm can
+//  never name a different set than the act forks.
+//
+
+import SwiftUI
+import VariorumCore
+
+// MARK: - Which doors render (data)
+
+/// The facts the door table reads — a book's state, nothing else.
+nonisolated struct BookStateFacts: Equatable, Sendable {
+    var isBook: Bool
+    var finished: Bool
+    var sealed: Bool
+    var owned: Bool
+
+    init(isBook: Bool, finished: Bool, sealed: Bool, owned: Bool) {
+        self.isBook = isBook
+        self.finished = finished
+        self.sealed = sealed
+        self.owned = owned
+    }
+
+    init(_ reading: Reading) {
+        self.init(
+            isBook: reading.kind == .book, finished: reading.locked,
+            sealed: reading.sealedAt != nil, owned: reading.owned)
+    }
+}
+
+/// **WHICH STATE DOORS A BOOK RENDERS** — one pure table both surfaces read.
+///
+/// - The finish pair: Finish on an open book, Reopen on a finished one, and
+///   NEITHER on a sealed book — `unlockReading` refuses a sealed book
+///   (`readingSealed`; the one door down from Sealed is Unseal), so a Reopen
+///   there could never act (P-2). The sheet shows its Finished control
+///   disabled with the sealed words instead.
+/// - The seal pair and the own pair: BOOKS only — both operations refuse a
+///   gathering (`wrongReadingKind`: owning or sealing a gathering is a
+///   category error, the sitting record §6), so a gathering never renders
+///   them (P-2).
+/// - Own Its Notes… still renders on a finished or sealed book: the operation
+///   refuses there (`lockedReading`, PROVISIONAL P-13ic-2) WITH a road — reopen
+///   (or unseal) first — and the door speaks exactly that (the brief: "refused
+///   on a finished/sealed book with the op's words").
+/// - A gathering keeps the shipped finish pair (13i-b shipped Finish on a
+///   gathering's row and `lockReading` acts on one) — recorded, not changed
+///   here (the U3 RECORD's FINDING F-U3-1).
+nonisolated enum BookStateDoorSet {
+    static let all: [CapabilityID] = [
+        .finishBook, .reopenBook, .sealBook, .unsealBook, .ownBook, .unownBook,
+    ]
+
+    static func rendered(for facts: BookStateFacts) -> [CapabilityID] {
+        var acts: [CapabilityID] = []
+        if !facts.sealed {
+            acts.append(facts.finished ? .reopenBook : .finishBook)
+        }
+        guard facts.isBook else { return acts }
+        acts.append(facts.sealed ? .unsealBook : .sealBook)
+        acts.append(facts.owned ? .unownBook : .ownBook)
+        return acts
+    }
+}
+
+// MARK: - The words
+
+/// A confirm, whole — the sheet's item, carrying everything it says (the
+/// `BindOffer` lesson: the item is the sheet's only input, so nothing it
+/// renders can be read from a stale second piece of state).
+nonisolated struct BookStateConfirm: Identifiable, Equatable, Sendable {
+    let act: CapabilityID
+    let readingID: String
+    let title: String
+    /// The sentences above the list.
+    let lines: [String]
+    /// The listed notes (a fork's / a copy's name and where else it lives).
+    let list: [String]
+    /// The sentences below the list (§24's waiting line rides here).
+    let after: [String]
+    let confirmLabel: String
+
+    var id: String { "\(act.rawValue)|\(readingID)" }
+}
+
+/// Every word the state doors say. Wording PROVISIONAL — 13s re-voices the
+/// app; the TRUTH each sentence states is ruled (the sitting record §5, §6,
+/// §24; the §25 lessons 1, 5, 6 — no sentence here may make one false).
+nonisolated enum BookStateCopy {
+    // The registry's verbs (title case — the shelf menu's own grammar).
+    static let finishVerb = "Finish"
+    static let reopenVerb = "Reopen"
+    static let sealVerb = "Seal\u{2026}"
+    static let unsealVerb = "Unseal"
+    static let ownVerb = "Own Its Notes\u{2026}"
+    static let unownVerb = "Stop Owning"
+    static let deleteVerb = "Delete Book"
+    /// R-13ic-4's door on the rule editor's gathering gate.
+    static let deleteGatheringDoor = "Delete this gathering\u{2026}"
+
+    static let unavailableNote =
+        "A book's state lives on the book \u{2014} right-click it on the shelf, or open its "
+        + "settings (the gear)."
+
+    static func quoted(_ name: String) -> String { "\u{201C}\(name)\u{201D}" }
+
+    // MARK: Finish (§24 — the confirm carries ONE line, and only when N > 0)
+
+    /// §24's line, verbatim: "N waiting at the door will be dismissed".
+    static func waitingLine(_ count: Int) -> String {
+        "\(count) waiting at the door will be dismissed."
+    }
+
+    /// The finish asks ONLY when something is waiting — else it acts.
+    static func finishNeedsConfirm(pendingArrivals: Int) -> Bool { pendingArrivals > 0 }
+
+    static func finish(readingID: String, name: String, pendingArrivals: Int) -> BookStateConfirm {
+        BookStateConfirm(
+            act: .finishBook, readingID: readingID,
+            title: "Finish \(quoted(name))?",
+            lines: [waitingLine(pendingArrivals)], list: [], after: [],
+            confirmLabel: "Finish")
+    }
+
+    // MARK: Seal (§5 — the forks LISTED; finishing too; the waiting line)
+
+    /// Lesson 6's second sentence, the seal's own promise.
+    static let sealLead =
+        "Sealed means the book is done: no note in it can change until you unseal it."
+    static let sealFinishesToo = "Sealing finishes the book too."
+    static let sealOwnedNoForks = "It owns its notes, so nothing needs copying."
+    static let noForks = "None of its notes lives in another book, so nothing needs copying."
+    static let sealForksLead =
+        "These notes also live in other books, so each gets its own copy here, sealed with "
+        + "the book \u{2014} the originals stay where they are, still editable:"
+
+    /// One note a ceremony will copy: its name and where else it lives (the
+    /// app's own value, mapped from `Queries.SharedMember` — so the words are
+    /// pinned without a database).
+    struct Fork: Equatable, Sendable {
+        let title: String
+        let elsewhere: [String]
+
+        init(title: String, elsewhere: [String]) {
+            self.title = title
+            self.elsewhere = elsewhere
+        }
+
+        init(_ member: Queries.SharedMember) {
+            self.init(title: member.title, elsewhere: member.elsewhere.map(\.name))
+        }
+    }
+
+    static func seal(
+        readingID: String, name: String, finished: Bool, owned: Bool,
+        forks: [Fork], pendingArrivals: Int
+    ) -> BookStateConfirm {
+        var lines = [sealLead]
+        if !finished { lines.append(sealFinishesToo) }
+        if forks.isEmpty {
+            lines.append(owned ? sealOwnedNoForks : noForks)
+        } else {
+            lines.append(sealForksLead)
+        }
+        return BookStateConfirm(
+            act: .sealBook, readingID: readingID,
+            title: "Seal \(quoted(name))?",
+            lines: lines, list: forks.map(forkLine),
+            after: pendingArrivals > 0 ? [waitingLine(pendingArrivals)] : [],
+            confirmLabel: "Seal")
+    }
+
+    /// One listed note: its name and where else it lives.
+    static func forkLine(_ fork: Fork) -> String {
+        "\(fork.title) \u{2014} also in "
+            + fork.elsewhere.map(quoted).joined(separator: ", ")
+    }
+
+    // MARK: Unseal (R-13ic-3 — it REOPENS the book)
+
+    static let unsealLead =
+        "Unsealing reopens the book too: its notes can change again, and it is no longer "
+        + "finished."
+    static let unsealCatchUp =
+        "Anything that matched its rule while it was sealed waits at Arrivals."
+    static let unsealIndependent = "A note you sealed on its own stays sealed."
+
+    static func unseal(readingID: String, name: String, collects: Bool) -> BookStateConfirm {
+        var lines = [unsealLead]
+        if collects { lines.append(unsealCatchUp) }
+        lines.append(unsealIndependent)
+        return BookStateConfirm(
+            act: .unsealBook, readingID: readingID,
+            title: "Unseal \(quoted(name))?",
+            lines: lines, list: [], after: [], confirmLabel: "Unseal")
+    }
+
+    // MARK: Own (§6 — the copies LISTED)
+
+    /// Lessons 1 and 5, the owned book's promise.
+    static let ownLead =
+        "An owned book is the only place its notes live \u{2014} put one of them in another "
+        + "book and you'll get a copy."
+    static let ownForksLead =
+        "These notes also live in other books. Each gets its own copy here; the originals "
+        + "stay in their other books:"
+
+    static func own(
+        readingID: String, name: String, forks: [Fork]
+    ) -> BookStateConfirm {
+        BookStateConfirm(
+            act: .ownBook, readingID: readingID,
+            title: "Make \(quoted(name)) own its notes?",
+            lines: [ownLead, forks.isEmpty ? noForks : ownForksLead],
+            list: forks.map(forkLine), after: [],
+            confirmLabel: "Own Its Notes")
+    }
+
+    // MARK: Delete (R-13ic-4's gathering gate — the ordinary Trash road)
+
+    static func deleteGathering(readingID: String, name: String) -> BookStateConfirm {
+        BookStateConfirm(
+            act: .deleteBook, readingID: readingID,
+            title: "Delete \(quoted(name))?",
+            lines: [
+                "It goes to the Trash \u{2014} Put back returns it for \(TrashWindow.days) days.",
+                "No note is touched: a gathering holds none.",
+            ],
+            list: [], after: [], confirmLabel: "Delete Gathering")
+    }
+
+    // MARK: Receipts (the 18i seam's RECEIPT class)
+
+    static func finished(_ name: String) -> String {
+        "Finished \(quoted(name)) \u{2014} its table of contents is done; the writing inside "
+            + "can still change."
+    }
+
+    static func reopened(_ name: String) -> String { "Reopened \(quoted(name))." }
+
+    static func sealed(_ name: String, forks: Int) -> String {
+        let base = "Sealed \(quoted(name)) \u{2014} the book is done."
+        switch forks {
+        case 0: return base
+        case 1: return base + " 1 shared note got its own copy here."
+        default: return base + " \(forks) shared notes got their own copies here."
+        }
+    }
+
+    static func unsealed(_ name: String) -> String {
+        "Unsealed \(quoted(name)) \u{2014} it's open again."
+    }
+
+    static func owned(_ name: String, copies: Int) -> String {
+        let base = "\(quoted(name)) owns its notes now."
+        switch copies {
+        case 0: return base
+        case 1: return base + " 1 note that lived elsewhere got its own copy here."
+        default: return base + " \(copies) notes that lived elsewhere got their own copies here."
+        }
+    }
+
+    static func unowned(_ name: String) -> String {
+        "\(quoted(name)) no longer owns its notes \u{2014} they stay, and can live in other "
+            + "books too."
+    }
+
+    static func deleted(_ name: String) -> String {
+        "Deleted \(quoted(name)) \u{2014} it's in the Trash."
+    }
+
+    // MARK: Refusals (the operation's own, named for its book)
+
+    /// The finish ladder's refusal names the door that lifts it: a FINISHED
+    /// book's way out is Reopen; a SEALED book's is Unseal (Reopen refuses
+    /// there). Everything else speaks the shared table, then the books table.
+    @MainActor
+    static func refusal(for error: Error, name: String, sealed: Bool) -> String {
+        if case OperationError.lockedReading = error {
+            return sealed
+                ? "\(quoted(name)) is sealed \u{2014} unseal it first (that reopens it too)."
+                : "\(quoted(name)) is finished \u{2014} reopen it first."
+        }
+        return OpsRefusalCopy.macWords(for: error)
+            ?? OpsRefusalCopy.words(for: error, roads: .mac)
+            ?? ReadingsViewModel.message(error)
+    }
+}
+
+// MARK: - The model
+
+/// The state doors' one brain, shared by every surface that renders them.
+/// Holds the confirm item (the sheet's item) and nothing persisted; every
+/// write is an operation's; every outcome speaks on the status seam.
+@MainActor
+@Observable
+final class BookStateDoors {
+    @ObservationIgnored let session: AppSession
+    /// The confirm on screen — the host presents `.sheet(item:)` over it.
+    var pending: BookStateConfirm?
+
+    init(session: AppSession) {
+        self.session = session
+    }
+
+    /// What a door read before deciding: the book, fresh, and its preview.
+    private struct Opening: Sendable {
+        let reading: Reading
+        let pendingArrivals: Int
+        let sealPreview: Queries.SealPreview
+        let ownForks: [Queries.SharedMember]
+    }
+
+    /// **A door was pressed.** Reads the book FRESH (a shelf row's snapshot
+    /// may be a moment old) and the preview its act's confirm lists, then
+    /// asks or acts:
+    /// - Finish asks only when something waits at the door (§24), else acts;
+    /// - Seal, Unseal, Own and Delete always ask (each changes what the book
+    ///   is, and Seal/Own may copy — never silently);
+    /// - Reopen and Stop Owning act at once (each moves nothing she wrote).
+    func open(_ act: CapabilityID, readingID: String) async {
+        let opening: Opening
+        do {
+            guard let fetched = try await session.database.read({ db -> Opening? in
+                guard let reading = try Queries.reading(db, id: readingID) else { return nil }
+                return Opening(
+                    reading: reading,
+                    pendingArrivals: act == .finishBook
+                        ? try Queries.pendingArrivalCount(db, readingID: readingID) : 0,
+                    sealPreview: act == .sealBook
+                        ? try Queries.sealPreview(db, readingID: readingID) : .none,
+                    ownForks: act == .ownBook
+                        ? try Queries.ownConversionPreview(db, readingID: readingID) : [])
+            }) else {
+                session.status.refuse(ReadingsViewModel.message(
+                    OperationError.readingNotFound(id: readingID)))
+                return
+            }
+            opening = fetched
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+            return
+        }
+        let reading = opening.reading
+        switch act {
+        case .finishBook:
+            if BookStateCopy.finishNeedsConfirm(pendingArrivals: opening.pendingArrivals) {
+                pending = BookStateCopy.finish(
+                    readingID: readingID, name: reading.name,
+                    pendingArrivals: opening.pendingArrivals)
+            } else {
+                await perform(.finishBook, readingID: readingID)
+            }
+        case .sealBook:
+            pending = BookStateCopy.seal(
+                readingID: readingID, name: reading.name, finished: reading.locked,
+                owned: reading.owned, forks: opening.sealPreview.forks.map(BookStateCopy.Fork.init),
+                pendingArrivals: opening.sealPreview.pendingArrivals)
+        case .unsealBook:
+            let collects: Bool = if case .rule = RuleGrammar.read(reading.querySpec) {
+                true
+            } else {
+                false
+            }
+            pending = BookStateCopy.unseal(
+                readingID: readingID, name: reading.name, collects: collects)
+        case .ownBook:
+            // A finished (or sealed) book: the operation refuses owning
+            // (`lockedReading` — converting forks members, a structural act;
+            // P-13ic-2). The door speaks that refusal instead of a confirm
+            // that could only fail — the `offerToBind` precedent (a finished
+            // gathering hears the bind's refusal, never an offer). The
+            // confirm's own act still goes through the operation, which
+            // refuses on its own if the book is finished meanwhile.
+            guard !reading.locked else {
+                session.status.refuse(BookStateCopy.refusal(
+                    for: OperationError.lockedReading(id: readingID),
+                    name: reading.name, sealed: reading.sealedAt != nil))
+                return
+            }
+            pending = BookStateCopy.own(
+                readingID: readingID, name: reading.name,
+                forks: opening.ownForks.map(BookStateCopy.Fork.init))
+        case .deleteBook:
+            pending = BookStateCopy.deleteGathering(readingID: readingID, name: reading.name)
+        default:
+            await perform(act, readingID: readingID)
+        }
+    }
+
+    /// The confirm's button: perform the act it named.
+    func confirm() async {
+        guard let item = pending else { return }
+        pending = nil
+        await perform(item.act, readingID: item.readingID)
+    }
+
+    func cancel() { pending = nil }
+
+    /// **THE ACT** — exactly one operation per door, its receipt on success,
+    /// its own refusal (named for the book) on failure. Returns whether it
+    /// landed (the rule editor closes after a delete).
+    @discardableResult
+    func perform(_ act: CapabilityID, readingID: String) async -> Bool {
+        let named = (try? await session.database.read { db in
+            try Queries.reading(db, id: readingID)
+        }) ?? nil
+        let name = named?.name ?? ""
+        do {
+            let receipt: String = try await session.runner.run { ops in
+                switch act {
+                case .finishBook:
+                    try ops.lockReading(readingID)
+                    return BookStateCopy.finished(name)
+                case .reopenBook:
+                    try ops.unlockReading(readingID)
+                    return BookStateCopy.reopened(name)
+                case .sealBook:
+                    let result = try ops.sealReading(readingID)
+                    return BookStateCopy.sealed(name, forks: result.forked.count)
+                case .unsealBook:
+                    try ops.unsealReading(readingID)
+                    return BookStateCopy.unsealed(name)
+                case .ownBook:
+                    let result = try ops.setReadingOwned(readingID, owned: true)
+                    return BookStateCopy.owned(name, copies: result.copied.count)
+                case .unownBook:
+                    try ops.setReadingOwned(readingID, owned: false)
+                    return BookStateCopy.unowned(name)
+                case .deleteBook:
+                    try ops.deleteReading(readingID)
+                    return BookStateCopy.deleted(name)
+                default:
+                    throw OperationError.readingNotFound(id: readingID)
+                }
+            }
+            session.status.receipt(receipt)
+            return true
+        } catch {
+            session.status.refuse(BookStateCopy.refusal(
+                for: error, name: name, sealed: named?.sealedAt != nil))
+            return false
+        }
+    }
+}
+
+// MARK: - The face
+
+/// **ONE confirm renderer** for every state door (and the gathering's Trash
+/// door). It decides nothing: it shows its item and reports the press.
+struct BookStateConfirmSheet: View {
+    let confirm: BookStateConfirm
+    let onConfirm: () -> Void
+
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(confirm.title)
+                .font(tokens.heading)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            ForEach(Array(confirm.lines.enumerated()), id: \.offset) { _, line in
+                ChromeNotice(tokens: tokens, text: line, ink: tokens.ink, lines: 4)
+            }
+            if !confirm.list.isEmpty {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 3) {
+                        ForEach(Array(confirm.list.enumerated()), id: \.offset) { _, item in
+                            // A note's title is her prose — never `chromeLabel`'d.
+                            Text("\u{00B7} " + item)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.ink)
+                                .lineLimit(2)
+                                .truncationMode(.middle)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .frame(maxHeight: 180)
+            }
+            ForEach(Array(confirm.after.enumerated()), id: \.offset) { _, line in
+                ChromeNotice(tokens: tokens, text: line, lines: 2)
+            }
+            HStack {
+                Spacer()
+                Button(tokens.chromeLabel("Cancel")) { dismiss() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .keyboardShortcut(.cancelAction)
+                Button(tokens.chromeLabel(confirm.confirmLabel)) {
+                    onConfirm()
+                    dismiss()
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(16)
+        .frame(width: 460, alignment: .leading)
+        .background(tokens.surface)
+        #if DEBUG
+        .onAppear { BookStateProbe.shown = confirm }
+        .onDisappear { if BookStateProbe.shown == confirm { BookStateProbe.shown = nil } }
+        #endif
+    }
+}
+
+extension View {
+    /// Hosts the state doors' confirm over any surface that renders them —
+    /// ONE presentation road, so the shelf and the sheet cannot drift.
+    func bookStateConfirms(_ doors: BookStateDoors) -> some View {
+        sheet(item: Bindable(doors).pending) { item in
+            BookStateConfirmSheet(confirm: item) {
+                Task { await doors.perform(item.act, readingID: item.readingID) }
+            }
+        }
+    }
+}
+
+#if DEBUG
+/// **WHAT THE MOUNTED CONFIRM SAID, AS A TEST ORACLE** (the `BindDoorProbe`
+/// pattern): recorded on appear, cleared on disappear. DEBUG only.
+@MainActor
+enum BookStateProbe {
+    static var shown: BookStateConfirm?
+}
+#endif

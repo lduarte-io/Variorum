@@ -640,8 +640,26 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
 
 ### LIVE STATUS (per commit; every unverified claim PENDING)
 
-- **Piece A:** NOT STARTED.
-- **Piece B:** NOT STARTED.
+- **Piece A — THE STATE DOORS:** DONE (commit "13i-c U3 pieces A+B"). Registry: `.finishBook`
+  `.reopenBook` `.sealBook` `.unsealBook` `.ownBook` `.unownBook` (scope `.book`, doors `.contextMenu` +
+  `.surface`, `always`, `.native`) and `.deleteBook` (`.contextMenu` for now — the rule editor's
+  `.surface` door lands with Piece D). `Features/Readings/BookStateDoors.swift`: `BookStateDoorSet`
+  (the pure pair table), `BookStateCopy` (every confirm + receipt + the refusal named for its book),
+  `BookStateConfirm` (the sheet's item), `BookStateDoors` (preview → confirm-or-act → receipt /
+  refusal), `BookStateConfirmSheet` + `.bookStateConfirms(_:)` (ONE presentation road). The shelf menu
+  renders the pairs from the table; `ShelfViewModel.setFinished` and `BookStructureModel.setFinished`
+  RETIRED onto the shared road (one honest pin edit: `ShelfModelTests.finishAndExtentFacesCallTheOps`
+  drives `stateDoors.open(.finishBook…)`). The shelf hides Bind/Make-a-Book on a RULE-LESS gathering
+  (the plan §2's P-2 line). `BookStateDoorsTests` (13) green.
+- **Piece B — THE SETTINGS SHEET:** DONE (same commit). `Features/BookView/BookSettingsSheet.swift`
+  (moved out of `BookView.swift`): `CollectingCopy` (the rule read aloud as a sentence; the three
+  Collecting lines; the hide-owned three words), `BookSettingsModel` (paths + the global default,
+  one-shot, keyed on rule/outflow/toggle; the Edit… door; `setHideOwned`), the sheet (Name · Word
+  target · Note cap as shipped · Collecting · State — the Finished control disabled with the sealed
+  words while sealed). `.editRule` gains `.surface`; the registry walk's surface union names
+  `BookSettingsSheet`. `BookSettingsSheetTests` (6) green. Touched suites: BookStateDoors ·
+  BookSettingsSheet · CapabilityRegistry (the walk) · ShelfModelTests — **49 tests / 4 suites passed**;
+  zero instances before and after.
 - **Piece C:** NOT STARTED.
 - **Piece D:** NOT STARTED.
 - **Piece E:** NOT STARTED.

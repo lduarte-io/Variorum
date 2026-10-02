@@ -96,7 +96,10 @@ struct ShelfModelTests {
                 try ops.createReading(name: "dream", kind: .book).id
             }
             await model.setWordTarget(bookID, target: 10_000)
-            await model.setFinished(bookID, finished: true)
+            // 13i-c U3 (an honest edit — the face's road moved): the shelf's
+            // own `setFinished` retired onto the shared state doors; with
+            // nothing waiting at the door, Finish acts without asking (§24).
+            await model.stateDoors.open(.finishBook, readingID: bookID)
             let reading = try await db.read { db in try Queries.reading(db, id: bookID) }
             #expect(reading?.wordTarget == 10_000)
             #expect(reading?.locked == true)

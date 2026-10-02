@@ -688,6 +688,22 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // `.moveTakeEarlier`/`.moveTakeLater` grounds: each its own door with its
     // own words, and one declaration could not say that.
     case bindIntoBook, makeBookFromGathering
+    // 13i-c U3 — THE BOOK'S STATE DOORS (the sitting record §5, §6; the
+    // 13i-c plan §5, R-13ic-3). Six declarations, three PAIRS, on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds: each is its own door with
+    // its own words and its own confirm (or none), and one declaration could
+    // not say that. Which of each pair a book renders is DATA
+    // (`BookStateDoorSet`), never a per-view if. Finish/Reopen were the
+    // shelf's own vocabulary until now ("never registry acts"); they join
+    // here because the settings sheet renders them too — one act, two
+    // surfaces, one declaration.
+    case finishBook, reopenBook, sealBook, unsealBook, ownBook, unownBook
+    // 13i-c U3 — DELETE A BOOK (or a gathering) to the Trash: declared here
+    // because R-13ic-4's face renders it on the rule editor ("Delete this
+    // gathering…"); the shelf's "Delete Book" is its other renderer (the
+    // owned-book two-choice confirm and the settings sheet's door are U4's,
+    // which extend THIS declaration — one act, never a second id).
+    case deleteBook
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

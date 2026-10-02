@@ -29,8 +29,14 @@ final class ShelfViewModel {
     /// R98: apply-and-report's REPORT half — not an error, rendered muted.
     private(set) var lastReport: String?
 
+    /// 13i-c U3: the book's STATE doors (Finish/Reopen · Seal…/Unseal ·
+    /// Own Its Notes…/Stop Owning) — the shared brain the settings sheet
+    /// also holds one of; the shelf presents its confirms.
+    @ObservationIgnored let stateDoors: BookStateDoors
+
     init(session: AppSession) {
         self.session = session
+        self.stateDoors = BookStateDoors(session: session)
     }
 
     /// The observed snapshot (a struct — the observe seam wants Equatable;
@@ -124,11 +130,11 @@ final class ShelfViewModel {
         await run { try $0.setShelfPinned(readingID, pinned: pinned) }
     }
 
-    /// Finish / reopen (the `reading.locked` face — §14 item 10's missing
-    /// UI, finally).
-    func setFinished(_ readingID: String, finished: Bool) async {
-        await run { finished ? try $0.lockReading(readingID) : try $0.unlockReading(readingID) }
-    }
+    // (13i-c U3: `setFinished` — the shelf's own finish/reopen road — RETIRED
+    // onto `stateDoors`, the ONE road the shelf menu and the settings sheet
+    // share: Finish now asks when arrivals wait (§24), and a sealed book's
+    // Reopen is not rendered at all (it refuses — Unseal is the door). Two
+    // roads for one act is the forked-brains class.)
 
     func setWordTarget(_ readingID: String, target: Int?) async {
         await run { try $0.setReadingWordTarget(readingID, wordTarget: target) }

@@ -404,7 +404,7 @@ struct BookView: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.borderless)
-            .help("Book settings — finish, length, rename")
+            .help("Book settings — collecting, finish, seal, own, length, rename")
         }
         HStack(spacing: 8) {
             // Outline · Index · Book · Read — Index sits beside the
@@ -2486,76 +2486,9 @@ private func outlineEntryTitle(_ entry: Queries.ReadingEntry) -> String {
 // batch 1 retired the gutter (U-17) the one fetch serves the card's excerpt
 // alone, at the same per-realized-row cadence.)
 
-/// The navigator's settings leg (R43): finish, rename, extents — the book's
-/// own faces, beside the shelf's.
-struct BookSettingsSheet: View {
-    let structure: BookStructureModel
-    @State private var nameField = ""
-    @State private var wordTargetField = ""
-    @State private var maxPostsField = ""
-    @State private var parseError: String?
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Book Settings").font(.headline)
-            Form {
-                TextField("Name", text: $nameField)
-                TextField("Word target (blank = none)", text: $wordTargetField)
-                TextField("Note cap (blank = none)", text: $maxPostsField)
-                if let reading = structure.reading {
-                    Toggle("Finished", isOn: Binding(
-                        get: { reading.locked },
-                        set: { finished in Task { await structure.setFinished(finished) } }))
-                }
-            }
-            Text("Finishing freezes the book's membership and order (reversible). A finished book opens as pure text.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if let parseError {
-                Text(parseError).font(.caption).alarmVoice()
-            }
-            HStack {
-                Spacer()
-                Button("Close") {
-                    if save() { dismiss() }
-                }
-                .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(16)
-        .frame(minWidth: 380)
-        .onAppear {
-            nameField = structure.reading?.name ?? ""
-            wordTargetField = structure.reading?.wordTarget.map(String.init) ?? ""
-            maxPostsField = structure.reading?.maxPosts.map(String.init) ?? ""
-        }
-    }
-
-    /// Round 2, MINOR: unparseable input REFUSES and keeps (ExtentInput —
-    /// the one parse rule shared with the shelf's sheet).
-    private func save() -> Bool {
-        guard let target = ExtentInput.parse(wordTargetField),
-              let cap = ExtentInput.parse(maxPostsField)
-        else {
-            parseError = "Extents are plain positive numbers (e.g. 10000) — nothing was changed."
-            return false
-        }
-        let name = nameField.trimmingCharacters(in: .whitespaces)
-        Task {
-            if !name.isEmpty, name != structure.reading?.name {
-                await structure.rename(to: name)
-            }
-            if target.intValue != structure.reading?.wordTarget {
-                await structure.setWordTarget(target.intValue)
-            }
-            if cap.intValue != structure.reading?.maxPosts {
-                await structure.setMaxPosts(cap.intValue)
-            }
-        }
-        return true
-    }
-}
+// (13i-c U3: `BookSettingsSheet` — the navigator's settings leg, R43 — moved
+// to its own file, `BookSettingsSheet.swift`, when it grew the Collecting and
+// State sections; P-9.)
 
 // MARK: - The navigator's note-row door (R-cor-17; ladder fix 2, R2-10)
 

@@ -473,9 +473,10 @@ final class BookStructureModel {
 
     // MARK: - Book settings (the navigator's third leg — R43)
 
-    func setFinished(_ finished: Bool) async {
-        await run { finished ? try $0.lockReading(self.readingID) : try $0.unlockReading(self.readingID) }
-    }
+    // (13i-c U3: `setFinished` RETIRED onto `BookStateDoors` — the settings
+    // sheet's STATE section and the shelf menu share ONE road for the finish
+    // pair, so Finish asks when arrivals wait (§24) and a sealed book shows
+    // no Reopen, everywhere at once.)
 
     func rename(to name: String) async {
         // 13e E13 — the same guard the shelf's rename carries, at the book's

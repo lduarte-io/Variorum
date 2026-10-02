@@ -1558,9 +1558,13 @@ nonisolated enum CapabilityRegistry {
         // reason: the row carries its target, never a mode. No key and no
         // palette row — no ruling asked for one (13i-d re-homes the face
         // into the Collecting pane and its own doors).
+        // 13i-c U3: + `.surface` — the Book Settings sheet's Collecting
+        // section renders this act as its "Edit…" door (her post-close
+        // ruling 2, the discoverability report: the rule editor had NO door
+        // from inside the book). Same act, a second door family.
         Capability(
             id: .editRule, verb: RuleEditorCopy.editVerb, scope: .book,
-            doors: [.contextMenu],
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: RuleEditorCopy.unavailableNote,
             availability: always),
@@ -1585,6 +1589,67 @@ nonisolated enum CapabilityRegistry {
             doors: [.contextMenu],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BindCopy.spawnUnavailable,
+            availability: always),
+
+        // 13i-c U3 — THE BOOK'S STATE DOORS (the sitting record §5, §6, §24;
+        // the 13i-c plan §5, R-13ic-3). Two door families per act: the shelf
+        // row's menu (`.contextMenu`) and the Book Settings sheet's STATE
+        // section (`.surface` — the sheet points at its own book). `always`
+        // for `.editRule`'s exact reason: the row and the sheet each carry
+        // their target, never a mode — so `takesAccess: .native` is honest
+        // rather than an exemption. WHICH of each pair renders for a given
+        // book is DATA, `BookStateDoorSet.rendered(for:)` (finished ⇒ Reopen,
+        // sealed ⇒ Unseal and no Reopen, owned ⇒ Stop Owning, a gathering ⇒
+        // the finish pair only — Seal and Own refuse a gathering, P-2). The
+        // per-target refusals that remain (owning a finished or sealed book)
+        // are the operation's own, spoken in `BookStateCopy.refusal`.
+        Capability(
+            id: .finishBook, verb: BookStateCopy.finishVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .reopenBook, verb: BookStateCopy.reopenVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .sealBook, verb: BookStateCopy.sealVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .unsealBook, verb: BookStateCopy.unsealVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .ownBook, verb: BookStateCopy.ownVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .unownBook, verb: BookStateCopy.unownVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        // 13i-c U3 — DELETE A BOOK to the Trash (R-13ic-4's face). Its
+        // renderers: the shelf row's menu (the shipped "Delete Book", now
+        // drawn from here) and the rule editor's gathering gate ("Delete this
+        // gathering…" — the `.surface` door, its target the sheet's own
+        // gathering). U4's two-choice confirm and the settings sheet's door
+        // extend THIS declaration. `always`, the row/sheet carries its target.
+        Capability(
+            id: .deleteBook, verb: BookStateCopy.deleteVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
             availability: always),
 
         Capability(

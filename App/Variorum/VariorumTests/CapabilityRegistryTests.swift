@@ -424,6 +424,12 @@ struct CapabilityRegistryTests {
             // here; a judgment door leaking onto any other surface is a new
             // line, which is the review this walk exists to force.
             .union(BookArrivalsLine.surfaceCapabilities)
+            // 13i-c U3 (A JUSTIFIED EDIT, the E2/E8/batch-3/6b class): the
+            // BOOK SETTINGS sheet renders the six STATE doors (Finish/Reopen ·
+            // Seal…/Unseal · Own Its Notes…/Stop Owning — which of each pair,
+            // `BookStateDoorSet`) and the rule editor's "Edit…" door in its
+            // Collecting section. A new renderer is a new line here.
+            .union(BookSettingsSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

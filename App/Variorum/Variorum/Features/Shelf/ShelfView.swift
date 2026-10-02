@@ -16,13 +16,16 @@ import VariorumCore
 
 struct ShelfView: View {
     /// The REGISTRY capabilities this view's book menu renders (P-1's walk).
-    /// The menu's other items (Rename…, Finish, Delete Book…) are the
-    /// shelf's own book-management vocabulary and were never registry acts.
-    /// 13i-b U3 adds the rule editor's door (gatherings AND books) and the
-    /// two strengthening doors (gatherings).
+    /// The menu's other items (Rename…, Manage Notes…, Length & Extent…)
+    /// are the shelf's own book-management vocabulary and were never
+    /// registry acts. 13i-b U3 adds the rule editor's door (gatherings AND
+    /// books) and the two strengthening doors (gatherings). 13i-c U3 adds
+    /// the six STATE doors (Finish/Reopen joined the registry with them —
+    /// the settings sheet renders them too) and the Trash door, drawn from
+    /// the declaration it now shares with the rule editor's gathering gate.
     static let contextMenuCapabilities: [CapabilityID] = [
         .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
-    ]
+    ] + BookStateDoorSet.all + [.deleteBook]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -164,6 +167,10 @@ struct ShelfView: View {
                 Task { await model.bind(offer.reading.id) }
             }
         }
+        // 13i-c U3: the STATE doors' confirms (Finish with arrivals waiting ·
+        // Seal… · Unseal · Own Its Notes…) — the one presentation road the
+        // settings sheet shares.
+        .bookStateConfirms(model.stateDoors)
         .alert(
             spawnSource.map { BindCopy.spawnTitle($0.name) } ?? "",
             isPresented: Binding(
@@ -339,14 +346,23 @@ struct ShelfView: View {
             // it is. Bind is hidden on a finished gathering — binding is a
             // structural act on a thing declared done, and the op refuses it
             // (P-2: a door that can't act isn't rendered).
-            if !reading.locked {
+            //
+            // 13i-c (the plan §2, R-13ic-4): a RULE-LESS gathering — a Trash
+            // restoree, the only way one can exist live — shows nothing, so
+            // its bind and spawn doors HIDE (P-2): binding nothing or copying
+            // no rule is not the act either door names. Its road back is
+            // Edit Rule… (or the Trash, from the editor's gate).
+            let hasRule = RuleGrammar.read(reading.querySpec) != .none
+            if !reading.locked, hasRule {
                 Button(CapabilityRegistry.capability(.bindIntoBook).verb) {
                     openBindOffer(reading)
                 }
             }
-            Button(CapabilityRegistry.capability(.makeBookFromGathering).verb) {
-                nameField = BindCopy.spawnDefaultName(reading.name)
-                spawnSource = reading
+            if hasRule {
+                Button(CapabilityRegistry.capability(.makeBookFromGathering).verb) {
+                    nameField = BindCopy.spawnDefaultName(reading.name)
+                    spawnSource = reading
+                }
             }
         }
         Button("Length & Extent…") { extentTarget = reading }
@@ -359,14 +375,23 @@ struct ShelfView: View {
             }
         }
         Divider()
-        Button(reading.locked ? "Reopen" : "Finish") {
-            Task { await model.setFinished(reading.id, finished: !reading.locked) }
+        // 13i-c U3 — THE STATE DOORS, rendered from the one table
+        // (`BookStateDoorSet` — which of each pair, as data) and named by
+        // the registry. The same acts and confirms as the settings sheet's
+        // STATE section (`BookStateDoors`).
+        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading)), id: \.self) { act in
+            Button(CapabilityRegistry.capability(act).verb) {
+                Task { await model.stateDoors.open(act, readingID: reading.id) }
+            }
         }
         Divider()
         Button("Export Markdown…") { ReadingExport.export(session: session, reading: reading, asPDF: false) }
         Button("Export PDF…") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
         Divider()
-        Button("Delete Book", role: .destructive) {
+        // 13i-c U3: named by the registry's `.deleteBook` (the rule editor's
+        // gathering gate is its other renderer). Its act is unchanged here —
+        // the owned book's two-choice confirm is U4's, built on this door.
+        Button(CapabilityRegistry.capability(.deleteBook).verb, role: .destructive) {
             Task { await readings.delete(reading.id) }
         }
     }
