@@ -338,8 +338,7 @@ nonisolated enum OpsRefusalCopy {
             }
             return "There's already a wing called \u{201C}\(existing)\u{201D} — pick another name."
         case .wingNotEmpty(_, let contents):
-            return "That wing still holds \(WingWords.contents(contents)) — "
-                + "move or delete them first, then the empty wing can go."
+            return WingWords.notEmpty(nil, contents)
         case .postAlreadyInWing:
             return "That note is already in that wing — nothing changed."
         case .crossWingMembership:
@@ -348,6 +347,11 @@ nonisolated enum OpsRefusalCopy {
         case .dailyJournalIsHomeOnly:
             return "Your daily Journal lives in \(WingWords.home) — only a \(WingWords.home) "
                 + "book can be it."
+        // 13i-d U5b — the book and bulk moves (R-13id-6). Platform-neutral.
+        case .readingAlreadyInWing:
+            return "That book is already in that wing — nothing changed."
+        case .wingMoveIntoItself:
+            return "Everything is already in that wing — pick another one to move it to."
         case .placementAnchorNotOnShelf:
             return "That book has moved to another shelf — nothing changed."
         default:

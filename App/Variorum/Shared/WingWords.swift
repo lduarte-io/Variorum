@@ -38,11 +38,14 @@ nonisolated enum WingWords {
         }
     }
 
-    /// R-13id-2's refusal, naming what remains. (The bulk-move road joins
-    /// these words when that half lands — P-2: never name a door that does
-    /// not exist.)
-    static func notEmpty(_ name: String, _ c: Queries.WingContents) -> String {
-        "\u{201C}\(name)\u{201D} still holds \(contents(c)) — move or delete them first, "
-            + "then the empty wing can go."
+    /// R-13id-2's refusal, naming what remains — and, since 13i-d U5b, the
+    /// R-13id-4 ROAD (R-13id-6 item 9: "the delete refusal's words gain '— or
+    /// move everything to another wing'"; P-2 — the bulk door exists now).
+    /// ONE sentence for the Delete door (`name` given) and the shared refusal
+    /// table (`nil` — "That wing"), so the two can never drift.
+    static func notEmpty(_ name: String?, _ c: Queries.WingContents) -> String {
+        let subject = name.map { "\u{201C}\($0)\u{201D}" } ?? "That wing"
+        return "\(subject) still holds \(contents(c)) — move or delete them first, "
+            + "then the empty wing can go — or move everything to another wing."
     }
 }

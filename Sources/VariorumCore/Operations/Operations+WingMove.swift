@@ -10,10 +10,11 @@ import GRDB
 // that already has a 'writing' tag, it should probably convert to being that
 // ID").
 //
-// THE BOOK-MOVE HALF (the per-item book move and the bulk "Move everything to
-// another wing…") is STOPPED for the architect's ruling — its residual edges
-// are proposed in the 13i-d plan's U5 RECORD. Both would compose the note move
-// below over a book's members / a whole wing.
+// THE BOOK-MOVE HALF (13i-d U5b — the per-item book move and the bulk "Move
+// everything to another wing…", R-13id-6: the U5 RECORD's proposal RULED
+// whole) lives in `Operations+WingBookMove.swift`; both compose the ONE
+// relocation primitive below (`relocateNote`) over a book's members / a whole
+// wing.
 //
 // Tag ADOPTION, the one rule (R-13ia-1): a carried tag resolves BY PATH in the
 // destination — its live same-path tag adopts the application; a missing path
@@ -61,63 +62,95 @@ extension Operations {
     @discardableResult
     public func moveNoteToWing(_ postID: String, to wingID: String) throws -> NoteWingMove {
         try database.write { db in
-            var post = try livePost(db, postID)
+            let post = try livePost(db, postID)
             try requireLiveWing(db, wingID)
             guard try !sameEffectiveWing(db, post.wingId, wingID) else {
                 throw OperationError.postAlreadyInWing(postID: postID, wingID: wingID)
             }
-            let now = date.now
-
-            // 1. Memberships — refuse a frozen book's member row FIRST, so a
-            // refusal writes nothing.
-            let rows = try wingMoveMemberships(db, postID: postID)
-            for (row, reading) in rows where row.status == .member {
-                if reading.sealedAt != nil {
-                    throw OperationError.readingSealed(id: reading.id)
-                }
-                if reading.locked {
-                    throw OperationError.lockedReading(id: reading.id)
-                }
-            }
-            var left: [String] = []
-            for (row, reading) in rows {
-                var severed = row
-                severed.deletedAt = now
-                try severed.update(db)
-                if row.status == .member, !left.contains(reading.name) {
-                    left.append(reading.name)
-                }
-            }
-
-            // 2. Tags, re-pointed by path.
             var adoption = TagAdoption(wing: wingID)
-            try repointPostTags(db, postID: postID, adoption: &adoption, now: now)
-            let blockIDs = try String.fetchAll(
-                db,
-                sql: """
-                    SELECT cb.block_id FROM container_block cb
-                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
-                    """,
-                arguments: [postID])
-            for blockID in blockIDs {
-                try repointBlockTags(db, blockID: blockID, adoption: &adoption, now: now)
-            }
-
-            // 3. The note and its versions.
-            post.wingId = wingID
-            post.updatedAt = now
-            try post.update(db)
-            for versionID in try Queries.noteVersionIDs(db, of: postID) {
-                guard var version = try Container.fetchOne(db, key: versionID),
-                      version.deletedAt == nil
-                else { continue }
-                version.wingId = wingID
-                version.updatedAt = now
-                try version.update(db)
+            let severed = try relocateNote(
+                db, postID: postID, to: wingID, keeping: [], adoption: &adoption, now: date.now)
+            var left: [String] = []
+            for reading in severed where !left.contains(reading.name) {
+                left.append(reading.name)
             }
             return NoteWingMove(
                 leftBooks: left, adoptedTags: adoption.adopted, mintedTags: adoption.minted)
         }
+    }
+
+    /// **THE ONE RELOCATION** (13i-d U5b — U5's note move, extracted so the
+    /// book and bulk moves compose it; `moveNoteToWing` is `keeping: []`,
+    /// byte-identical in behaviour). Inside the caller's transaction:
+    ///
+    /// 1. **Memberships** — every live row of the note in a live reading NOT
+    ///    in `keeping` (members AND waiting arrivals) is SEVERED: a book never
+    ///    spans wings (§9). A MEMBER row there in a FINISHED or SEALED book
+    ///    REFUSES (`lockedReading` / `readingSealed` — reopen or unseal first;
+    ///    move-in's P-13ic-U2-4 precedent), checked before any write; a
+    ///    waiting arrival there is dismissed like any other. `keeping` is the
+    ///    book move's own book (it moves WITH the note, R-13id-6 item 3(a)) or
+    ///    the bulk move's every reading (they all move).
+    /// 2. **Tags** — the note's post tags and its placed blocks' tags re-point
+    ///    BY PATH into the adoption's wing (adopt, else mint) — row copies, no
+    ///    intake.
+    /// 3. **The note** — `wing_id` := the destination, for it AND its saved
+    ///    versions (they ride it). Stars, archive state, the seal, comments,
+    ///    lenses, references and canvas ride untouched.
+    ///
+    /// Returns the readings whose MEMBER row it severed, earliest first (one
+    /// entry per row — the callers name or dedupe them).
+    func relocateNote(
+        _ db: Database, postID: String, to wingID: String, keeping: Set<String>,
+        adoption: inout TagAdoption, now: Date
+    ) throws -> [Reading] {
+        var post = try livePost(db, postID)
+
+        // 1. Memberships — refuse a frozen book's member row FIRST.
+        let rows = try wingMoveMemberships(db, postID: postID)
+            .filter { !keeping.contains($0.reading.id) }
+        for (row, reading) in rows where row.status == .member {
+            if reading.sealedAt != nil {
+                throw OperationError.readingSealed(id: reading.id)
+            }
+            if reading.locked {
+                throw OperationError.lockedReading(id: reading.id)
+            }
+        }
+        var severedMembers: [Reading] = []
+        for (row, reading) in rows {
+            var severed = row
+            severed.deletedAt = now
+            try severed.update(db)
+            if row.status == .member { severedMembers.append(reading) }
+        }
+
+        // 2. Tags, re-pointed by path.
+        try repointPostTags(db, postID: postID, adoption: &adoption, now: now)
+        let blockIDs = try String.fetchAll(
+            db,
+            sql: """
+                SELECT cb.block_id FROM container_block cb
+                WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                """,
+            arguments: [postID])
+        for blockID in blockIDs {
+            try repointBlockTags(db, blockID: blockID, adoption: &adoption, now: now)
+        }
+
+        // 3. The note and its versions.
+        post.wingId = wingID
+        post.updatedAt = now
+        try post.update(db)
+        for versionID in try Queries.noteVersionIDs(db, of: postID) {
+            guard var version = try Container.fetchOne(db, key: versionID),
+                  version.deletedAt == nil
+            else { continue }
+            version.wingId = wingID
+            version.updatedAt = now
+            try version.update(db)
+        }
+        return severedMembers
     }
 
     /// **COPY TO WING** (PROVISIONAL P-13id-U5-8). The ceremony copy (§2.3 —
@@ -295,6 +328,50 @@ extension Operations {
             else { continue }
             try BlockTag(id: newID(), tagId: target.id, blockId: blockID, createdAt: now)
                 .insert(db)
+        }
+    }
+
+    /// **The bulk move's STRAYS** (13i-d U5b — R-13id-6 item 8, "every tag
+    /// application re-points by path", read literally so the wing ends
+    /// EMPTY; PROVISIONAL P-13id-U5b-7): every REMAINING live application of
+    /// a live tag of `wing` — after the notes' own applications have moved
+    /// with them, what is left is a snippet block (snippets are one shared
+    /// room, P-13id-U5-4) or a saved version's block wearing one — re-points
+    /// BY PATH into the adoption's wing, the same row copy. Without it those
+    /// tags keep a live application, so the act could not retire them and
+    /// Delete Wing would still refuse.
+    func repointStrayApplications(
+        _ db: Database, ofWing wing: String, adoption: inout TagAdoption, now: Date
+    ) throws {
+        let stamp = DateFormatter.variorumISO8601.string(from: now)
+        for (table, column, model) in [("post_tag", "post_id", "post"), ("block_tag", "block_id", "block")] {
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT a.id AS application, a.\(column) AS target, t.* FROM \(table) a
+                    JOIN tag t ON t.id = a.tag_id AND t.deleted_at IS NULL
+                    WHERE t.wing_id = ? AND a.deleted_at IS NULL
+                    ORDER BY a.created_at, a.id
+                    """,
+                arguments: [wing])
+            for row in rows {
+                let tag = try Tag(row: row)
+                let target = try adopt(db, tag, &adoption)
+                let targetID: String = row["target"]
+                try db.execute(
+                    sql: "UPDATE \(table) SET deleted_at = ? WHERE id = ?",
+                    arguments: [stamp, row["application"] as String])
+                guard try liveApplication(db, table: table, tagID: target.id,
+                                          targetColumn: column, targetID: targetID) == nil
+                else { continue }
+                if model == "post" {
+                    try PostTag(id: newID(), tagId: target.id, postId: targetID, createdAt: now)
+                        .insert(db)
+                } else {
+                    try BlockTag(id: newID(), tagId: target.id, blockId: targetID, createdAt: now)
+                        .insert(db)
+                }
+            }
         }
     }
 

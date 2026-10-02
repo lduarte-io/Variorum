@@ -207,6 +207,25 @@ public enum RuleGrammar {
         return ordered
     }
 
+    /// **The tree with every TAG term's id rewritten by `transform`** (13i-d
+    /// U5b — a book or gathering moving to another wing re-points its rule's
+    /// tags BY PATH, R-13id-6 item 2(a)). The shape is untouched: the same
+    /// boolean structure, the same star and legacy terms, the same order —
+    /// only the ids `transform` answers change. Pure; which ids to rewrite
+    /// (live, of the source wing) is the caller's. The dead term `""` is
+    /// handed to `transform` like any id (the move's resolver keeps it).
+    public static func mapTagIDs(
+        _ term: RuleTerm, _ transform: (String) throws -> String
+    ) rethrows -> RuleTerm {
+        switch term {
+        case .and(let ts): return .and(try ts.map { try mapTagIDs($0, transform) })
+        case .or(let ts): return .or(try ts.map { try mapTagIDs($0, transform) })
+        case .not(let t): return .not(try mapTagIDs(t, transform))
+        case .tag(let id): return .tag(try transform(id))
+        case .star, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: return term
+        }
+    }
+
     /// `a ∧ b` as ONE flat conjunction (13i-b U4 — "Save this filter as a
     /// gathering": the rule = the reading's tag association ∧ the filter, the
     /// sitting record §18.1). A nil `a` (no association) is the filter alone;

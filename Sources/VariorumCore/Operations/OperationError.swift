@@ -300,6 +300,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// #169(b), RULED — THE DAILY JOURNAL IS HOME-ONLY: a book of another wing
     /// cannot be designated, and the daily Journal never leaves Home.
     case dailyJournalIsHomeOnly(id: String)
+    /// 13i-d U5b — a book or gathering moved to the wing it already lives in
+    /// (`moveReadingToWing`; the door lists only the OTHER wings).
+    case readingAlreadyInWing(readingID: String, wingID: String)
+    /// 13i-d U5b — "Move everything to another wing" aimed at the wing itself
+    /// (`moveWingContents`; the door lists only the OTHER wings).
+    case wingMoveIntoItself(wingID: String)
     /// A hand placement ("my order") named an anchor that is not on the
     /// moving book's shelf — the drag's target moved under it.
     case placementAnchorNotOnShelf(readingID: String, anchorID: String)
