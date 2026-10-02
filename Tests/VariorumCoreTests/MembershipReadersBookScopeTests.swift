@@ -79,6 +79,36 @@ struct MembershipReadersBookScopeTests {
         }
     }
 
+    /// 13i-c ladder round 1: the Pool probe also checks the reading's
+    /// LIVENESS, like its two sibling readers — a live member row under a
+    /// TOMBSTONED book (a sync-stray/mid-batch tolerance state, SyncSpec §5;
+    /// no local door writes one — `restoreContainer` and `revertDiverge`
+    /// both guard the reading live) is not a home. Red on the pre-fix tree:
+    /// the note vanished from the Pool while no book listed it.
+    @Test func aNoteWhoseOnlyRowIsAStrayUnderADeadBookStaysInThePool() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "gone", kind: .book)
+            let note = try ops.createPost(title: "orphaned")
+            try ops.deleteReading(book.id)
+            // The stray: a live member row arriving under the dead book —
+            // only a sync race leaves it, so the fixture writes it raw.
+            try db.write {
+                try $0.execute(
+                    sql: """
+                        INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
+                        VALUES ('stray-dead-book', ?, ?, 'a0', 'member', '2026-07-01T00:00:00.000Z')
+                        """,
+                    arguments: [book.id, note.id])
+            }
+
+            let pool = try db.read { try Queries.poolListing($0, window: 10) }
+            #expect((pool.loose + pool.tucked).map(\.postID).contains(note.id),
+                    "a dead book's stray is not a home — the siblings' liveness rule, here too")
+            let homes = try db.read { try Queries.readingsContaining($0, postID: note.id) }
+            #expect(homes.isEmpty, "…and no listing claims the dead book holds it")
+        }
+    }
+
     @Test func theChipNeverListsAGatheringThroughAStrayMemberRow() throws {
         try withOperations { ops, db in
             let tagged = try ops.createTag(name: "tagged")

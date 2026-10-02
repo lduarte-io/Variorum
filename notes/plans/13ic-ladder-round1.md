@@ -405,3 +405,17 @@ call per finding, each bug-class fix red-on-old first; dispositions written as t
   WHERE; the P-13ib-U2-2 exception recorded at the act). Suites after: core
   PendingArrivalDismissal + BookSeal + IntakeOperations + OwnershipDoor + OwnershipSoak 69/6 green;
   Mac BookStateDoors + BookSettingsSheet + BookArrivals 29/3 green.
+
+### [MINOR] `poolListing`'s probe missing `r.deleted_at IS NULL` — **CONFIRMED-FIXED**
+- **Final call:** CONFIRMED — the gap predates U2 (the pre-phase probe read no reading at all), but
+  F-R1-7's edit is the moment the three readers were ruled TOGETHER, and two of three carry the
+  liveness clause; the Pool's now does too (defense in depth + consistency; a live stray under a
+  dead book is a SyncSpec §5 tolerance state only — no local door writes one, `restoreContainer`
+  and `revertDiverge` both guard the reading live, per both traces).
+- **Pin (RED on the pre-fix tree, green after):**
+  `MembershipReadersBookScopeTests.aNoteWhoseOnlyRowIsAStrayUnderADeadBookStaysInThePool` — the raw
+  stray under a tombstoned book excluded the note from the Pool while `readingsContaining` listed no
+  home (red); with `AND r.deleted_at IS NULL` in the probe the note stays in the Pool (green).
+- **Changed:** `Sources/VariorumCore/Queries/ShelfQueries.swift` (the one clause + the HOME doc).
+  `PoolTuckTests`' P1 plan pin re-run green (the added check is the same primary-key probe); the
+  soak green. Suites: MembershipReadersBookScope + PoolTuck + OwnershipSoak 12/3.

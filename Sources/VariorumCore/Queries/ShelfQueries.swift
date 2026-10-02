@@ -233,9 +233,11 @@ extension Queries {
     /// the live gatherings' rules (`shown`), then window functions number and
     /// count each class, and at most `window` rows per class come back.
     ///
-    /// A HOME is a live MEMBER row of a BOOK (13i-c U2 — 13i-b ladder F-R1-7,
-    /// the three readers ruled together): a sync-stray member row on a
-    /// gathering never takes a note out of the Pool.
+    /// A HOME is a live MEMBER row of a LIVE BOOK (13i-c U2 — 13i-b ladder
+    /// F-R1-7, the three readers ruled together; the liveness clause joined
+    /// at the 13i-c ladder, matching the two sibling readers): a sync-stray
+    /// member row on a gathering — or under a TOMBSTONED book — never takes
+    /// a note out of the Pool.
     ///
     /// Per-gathering letters, each the assembly's own: NO rule shows every
     /// note in its wing; a MALFORMED rule shows nothing (fails closed — it
@@ -328,6 +330,7 @@ extension Queries {
                                      AND rp.status = 'member'
                                      AND EXISTS (SELECT 1 FROM reading r
                                                   WHERE r.id = rp.reading_id
+                                                    AND r.deleted_at IS NULL
                                                     AND r.kind = 'book'))
               )
             )
