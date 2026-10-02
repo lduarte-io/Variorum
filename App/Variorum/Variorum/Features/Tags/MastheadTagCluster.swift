@@ -219,9 +219,10 @@ struct MastheadTagCluster: View {
 /// suggests from. Extracted from the cluster so its cadence is pinned
 /// without a window — the row-104 shape (`NoteMembershipModel`).
 ///
-/// `track` is the cluster's read for the note's visit; `refresh` re-reads
-/// after the cluster's OWN door acts. A `subject` guard keeps a previous
-/// note's cards from answering for the next one.
+/// `track` is the cluster's HELD read for the note's visit; `refresh` is a
+/// one-shot re-read after the cluster's OWN door acts (belt and braces — the
+/// observation delivers the same change a beat later). A `subject` guard
+/// keeps a previous note's cards from answering for the next one.
 @MainActor
 @Observable
 final class MastheadTagsModel {
@@ -246,9 +247,25 @@ final class MastheadTagsModel {
         Snapshot(applied: try Queries.postTags(db, postID: postID), all: try Queries.allTags(db))
     }
 
-    /// The visit's read. ONE-SHOT (the shipped shape, extracted unchanged).
+    /// The visit's read — HELD for as long as the note is shown (the
+    /// cluster's `.task(id: postID)` cancels it on leaving). A tag taken off
+    /// or put on by ANY door — the chip's "remove #tag", the Book Panel's
+    /// gathering line, another window — reaches the cards without a reopen.
+    /// Cost (KnownIssues row 13's class, the cheap end): the region is
+    /// `post_tag` + `tag` alone, so a keystroke's autosave never wakes it;
+    /// a tagging act anywhere re-runs two indexed reads (the note's
+    /// applications and the author-scale taxonomy).
     func track(session: AppSession, postID: String) async {
-        await refresh(session: session, postID: postID)
+        do {
+            for try await snapshot in session.database.observe({ db in
+                try Self.fetch(db, postID: postID)
+            }) {
+                adopt(snapshot, postID: postID)
+            }
+        } catch {
+            // Cancellation (the note left) or a store refusal: the cards in
+            // hand stay; the next visit's read starts fresh.
+        }
     }
 
     func refresh(session: AppSession, postID: String) async {

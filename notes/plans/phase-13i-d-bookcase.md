@@ -806,8 +806,8 @@ touched (TEXTKIT2_NOTES not required). No revert in flight. No subagents.
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + design map + evidence named + the (c)-arm proposal | IN-PROGRESS (this commit) |
-| 2 | Row 112 — the masthead tag cards as a HELD read (extract the one-shot shape → red pin → held → green) | NOT-STARTED |
+| 1 | Record skeleton + design map + evidence named + the (c)-arm proposal | DONE (f544367b) |
+| 2 | Row 112 — the masthead tag cards as a HELD read (extract the one-shot shape → red pin → held → green) | DONE (09c33836 red on purpose → this commit green) — `MastheadTagsObservationTests` 4 pins: 2 RED on the extracted one-shot shape (5 issues), the subject guard + the autosave-blind REGION control green both sides; green after (7/2 with `MastheadTagDoorTests`) |
 | 3 | Item 1 — the doors into the sheet: `.openBookSettings` (the Bookcase row's "Book Settings…" + the book masthead's gear, declared) | NOT-STARTED |
 | 4 | Item 1 — the journal-trait sentence in the Collecting pane (`setJournalTrait`; the daily book's refusal spoken) | NOT-STARTED |
 | 5 | Item 2 — row 107's SETTINGS-SHEET half (a gathering's Finish / Word target / Note cap faces leave; legacy ways out kept) + F-U1-8 (the filter folds into `BookStateDoorSet`) | NOT-STARTED |
