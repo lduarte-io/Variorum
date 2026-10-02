@@ -80,9 +80,9 @@ struct WingMembershipAndJournalTests {
                 try $0.execute(
                     sql: """
                         INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
-                        VALUES (?, ?, ?, 'a0', 'arrival', '2026-07-01T00:00:00.000Z')
+                        VALUES (?, ?, ?, ?, 'arrival', '2026-07-01T00:00:00.000Z')
                         """,
-                    arguments: [rowID, book.id, away.id])
+                    arguments: [rowID, book.id, away.id, FractionalIndex.initial()])
             }
             #expect(throws: OperationError.crossWingMembership(postID: away.id, readingID: book.id)) {
                 try ops.seatArrival(rowID)

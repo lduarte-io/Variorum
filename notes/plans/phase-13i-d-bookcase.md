@@ -1528,7 +1528,7 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 | 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | DONE (this commit) — R1 RED on the pre-fix op (4 issues, `r1-red.log`), green after; three legacy fixtures re-staged as raw rows (55/6 green); R2's arm rejects BOTH spellings and a new control proves it fires on the store-wide forms (27/4 green) |
 | 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | DONE (this commit) — `Operations+Wing.swift`, `Queries/WingQueries.swift`, six `OperationError` cases; `createPost`/`createReading` refuse a dead wing; `WingOperationsTests` 8 green |
 | 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (this commit) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
-| 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | IN-PROGRESS — fix + `WingMembershipAndJournalTests` (5) committed GREEN; **a BEHAVIOURAL REVERT IS IN FLIGHT next**: the six production files restored to `5e2e1934` (pre-piece-5) to watch the pins red, then `git checkout HEAD --` back — if this line still says IN-PROGRESS, run `git diff --stat` first: any diff in those six files IS the revert |
+| 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | DONE (0c950d3e + this commit) — `WingMembershipAndJournalTests` 5: **all 5 RED, 16 issues** with the six production files restored to `5e2e1934` (`p5-red.log`); restored by `git checkout HEAD --`, src diff empty — **no revert in flight**; green with the journal/ownership/intake/arrival neighbours 197/37 |
 | 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | NOT-STARTED |
 | 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the lineage read naming another wing + per-wing pins | NOT-STARTED |
 | 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | NOT-STARTED |
@@ -1707,8 +1707,16 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   (`insertWingTag`), so each pin compiles and runs against the old ops. Green after
   (`p4-green.log`, 14/2 with `WingOperationsTests`); the tag-adjacent suites
   (`Tag|Folder|Rule|Intake|Collect`) 214/51 green.
-- F-U5-2's MEMBERSHIP + DAILY halves (addPostToReading across wings; setDailyJournalBook non-Home —
-  row 105): PENDING.
+- **F-U5-2's MEMBERSHIP + DAILY halves RED-ON-OLD (behavioural revert — committed first, the
+  protocol):** `WingMembershipAndJournalTests` against the six production files at `5e2e1934` —
+  **5 tests, 16 issues** (`p5-red.log`): a note of another wing joined a Home book and vice versa;
+  copy in and move in crossed wings; a hand-written cross-wing arrival SEATED; **ROW 105's
+  mechanism exactly — the designation accepted the other wing's book and ⌘J's composite shelved
+  Home's entry into it** (`journalID`'s wing ≠ Home; the membership existed); and ⌘J opened the
+  other wing's daily-shaped entry as the day's. Restored by `git checkout HEAD --` (src diff
+  empty); green, with the Journal/Ownership/Intake/Arrival neighbours 197/37 (`p5-green2.log`).
+  (The first red run TRAPPED on my own fixture — an invalid fractional key `a0` the pre-fix seat
+  road reached; the fixture now mints `FractionalIndex.initial()`.)
 - **The wing ops:** `WingOperationsTests` — 8 pins green (mint trimmed/ordered/blank refused ·
   rename + Home refused + no-op silent · the name guard (Home, case-folded, self-exempt, a dead
   wing's name free) · **the delete refusal's exact counts** `WingContents(notes: 2 (one archived,
