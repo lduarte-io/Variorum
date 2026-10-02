@@ -195,6 +195,40 @@ struct BookCollectingDoorsTests {
         }
     }
 
+    // MARK: - F-U2-3: the book view's own chapter/move doors, declared
+
+    /// The adjudication after U2: the book view's OWN chapter/move doors join
+    /// the registry as the Book Panel's acts, and the spelling aligns on the
+    /// panel's — "Move to Chapter ▸" / "No Chapter" / "Move Chapter Up·Down".
+    /// RED ON OLD: the navigator, Outline and Index rows said "Chapter ▸ …
+    /// None" and "Move Up / Move Down", and `BookView` declared only the
+    /// remove door.
+    @Test func theBookViewsOwnChapterDoorsAreTheBookPanelsActs() throws {
+        for id: CapabilityID in [.fileNoteInChapter, .moveChapterUpInBook, .moveChapterDownInBook] {
+            #expect(BookView.contextMenuCapabilities.contains(id), "\(id)")
+        }
+        #expect(BookIndexColumn.surfaceCapabilities.contains(.fileNoteInChapter),
+                "the Index row's ⋯ renders Move to Chapter ▸")
+        #expect(CapabilityRegistry.capability(.fileNoteInChapter).verb == "Move to Chapter")
+        #expect(BookPanelCopy.noChapter == "No Chapter")
+        // The dead spellings, gone from the book view's sources (the
+        // literal-colour pin's grep form — code lines only).
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Features/BookView")
+        for file in ["BookView.swift", "BookIndexView.swift"] {
+            let source = try String(
+                contentsOf: appRoot.appendingPathComponent(file), encoding: .utf8)
+            let code = source.split(separator: "\n").filter {
+                !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//")
+            }
+            for dead in ["Menu(\"Chapter\")", "Button(\"None\")",
+                         "Button(\"Move Up\")", "Button(\"Move Down\")"] {
+                #expect(!code.contains { $0.contains(dead) }, "\(file) still spells \(dead)")
+            }
+        }
+    }
+
     // MARK: - The journal-trait sentence (§10)
 
     /// §10's sentence is a BOOK's row (a gathering mints no entries — P-2),

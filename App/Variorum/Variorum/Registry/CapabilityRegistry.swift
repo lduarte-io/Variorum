@@ -1785,9 +1785,12 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookPanelCopy.unavailableNote,
             availability: noteScoped),
+        // 13i-d U3 (F-U2-3): + `.surface` — the book Index row's ⋯ menu
+        // renders it too (that menu's doors are `.surface`, the remove door's
+        // precedent); the navigator's and Outline's rows are `.contextMenu`.
         Capability(
             id: .fileNoteInChapter, verb: BookPanelCopy.fileInChapterVerb, scope: .book,
-            doors: [.contextMenu],
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookPanelCopy.structureUnavailableNote,
             availability: always),

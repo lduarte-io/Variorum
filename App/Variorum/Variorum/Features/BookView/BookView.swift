@@ -19,6 +19,11 @@ struct BookView: View {
     /// 13i-c U4: the navigator's and Outline's note-row CONTEXT MENUS render
     /// the remove/release door (§20) — one act, its word the book's.
     static let contextMenuCapabilities: [CapabilityID] = [.removeFromBook]
+        // 13i-d U3 (F-U2-3, the adjudication after U2): the book view's OWN
+        // structure doors, declared — the note rows' "Move to Chapter ▸" and
+        // the chapter rows' "Move Chapter Up / Down" are the Book Panel's acts
+        // with a second renderer here (the drags are their twins' class).
+        + [.fileNoteInChapter, .moveChapterUpInBook, .moveChapterDownInBook]
     /// 13i-d U3: the masthead's GEAR is the book's own door into its
     /// settings sheet (the sitting record §4's "the book's ⋯ menu" — the
     /// book's one masthead door, P-13id-U3-1), declared at last.
@@ -1301,8 +1306,20 @@ struct BookView: View {
             chapterNameField = section.name
             renameChapterTarget = section
         }
-        Button("Move Up") { Task { await structure.moveChapter(section.id, up: true) } }
-        Button("Move Down") { Task { await structure.moveChapter(section.id, up: false) } }
+        // 13i-d U3 (F-U2-3): the book view's own chapter moves join the
+        // registry as the Book Panel's acts (one act, a second renderer),
+        // spelled from it ("Move Chapter Up / Down"), and an edge move that
+        // could never act is not drawn (P-2 — the panel's own rule).
+        if BookPanelBrain.chapterMove(section.id, up: true, sections: structure.sections) != nil {
+            Button(CapabilityRegistry.capability(.moveChapterUpInBook).verb) {
+                Task { await structure.moveChapter(section.id, up: true) }
+            }
+        }
+        if BookPanelBrain.chapterMove(section.id, up: false, sections: structure.sections) != nil {
+            Button(CapabilityRegistry.capability(.moveChapterDownInBook).verb) {
+                Task { await structure.moveChapter(section.id, up: false) }
+            }
+        }
         Divider()
         Button("Delete Chapter", role: .destructive) {
             Task { await structure.deleteChapter(section.id) }
@@ -2557,14 +2574,16 @@ private func outlineChapterMenu(
     structure: BookStructureModel, postID: String
 ) -> some View {
     if let book = structure.reading, book.kind == .book {
-        Menu("Chapter") {
+        // 13i-d U3 (F-U2-3): the Book Panel's act, spelled from the registry
+        // — "Move to Chapter ▸" with "No Chapter" (was "Chapter ▸ … None").
+        Menu(CapabilityRegistry.capability(.fileNoteInChapter).verb) {
             ForEach(structure.sections, id: \.id) { section in
                 Button(section.name) {
                     Task { await structure.assign(postID, to: section.id) }
                 }
             }
             Divider()
-            Button("None") {
+            Button(BookPanelCopy.noChapter) {
                 Task { await structure.assign(postID, to: nil) }
             }
         }

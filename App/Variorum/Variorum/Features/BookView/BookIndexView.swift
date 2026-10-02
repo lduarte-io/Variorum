@@ -226,6 +226,8 @@ nonisolated enum BookIndexColumn {
     /// 13i-c U4: the Index note row's ⋯ menu renders the remove/release door
     /// (§20) — its `.surface` declaration lives with the column it rides.
     static let surfaceCapabilities: [CapabilityID] = [.removeFromBook]
+        // 13i-d U3 (F-U2-3): the row ⋯'s "Move to Chapter ▸".
+        + [.fileNoteInChapter]
 
     /// **The ONE trailing column both row kinds end in** (17o batch d,
     /// ledger row 21; her punchlist 5, image 7). The chapter row's count was
@@ -804,14 +806,16 @@ struct BookIndexView<Masthead: View>: View {
         }
         if structure.reading?.kind == .book {
             Divider()
-            Menu("Chapter") {
+            // 13i-d U3 (F-U2-3): "Move to Chapter ▸" / "No Chapter" — the
+            // Book Panel's act and words, from the registry.
+            Menu(CapabilityRegistry.capability(.fileNoteInChapter).verb) {
                 ForEach(structure.sections, id: \.id) { section in
                     Button(section.name) {
                         Task { await structure.assign(postID, to: section.id) }
                     }
                 }
                 Divider()
-                Button("None") {
+                Button(BookPanelCopy.noChapter) {
                     Task { await structure.assign(postID, to: nil) }
                 }
             }

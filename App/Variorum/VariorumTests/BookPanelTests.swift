@@ -189,7 +189,14 @@ struct BookPanelDeclarationTests {
             .fileNoteInChapter, .moveNoteUpInBook, .moveNoteDownInBook,
             .moveChapterUpInBook, .moveChapterDownInBook,
         ] {
-            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu], "\(id)")
+            // 13i-d U3 (A JUSTIFIED EDIT — F-U2-3, the adjudication after U2:
+            // the book view's own chapter/move doors join the registry as these
+            // acts): "Move to Chapter ▸" gained the book Index row's ⋯ menu as a
+            // second renderer, whose doors are `.surface` (the remove door's
+            // precedent there) — so that one act carries both families.
+            let expected: Set<Capability.Door> = id == .fileNoteInChapter
+                ? [.contextMenu, .surface] : [.contextMenu]
+            #expect(CapabilityRegistry.capability(id).doors == expected, "\(id)")
             #expect(CapabilityRegistry.capability(id).scope == .book, "\(id)")
             #expect(BookPanelView.contextMenuCapabilities.contains(id), "\(id)")
         }
