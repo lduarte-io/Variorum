@@ -178,15 +178,38 @@ nonisolated extension WingCopy {
                 sentences.append("Its \(p.notes) note\(p.notes == 1 ? "" : "s") come\(p.notes == 1 ? "s" : "") "
                     + "with it\(archived), tags and all.")
             }
-            // Item 1(a): every severed stay-behind membership, grouped by note.
-            var order: [String] = []
-            var books: [String: [String]] = [:]
+            // Item 1(a): every severed stay-behind membership, grouped by the
+            // note's IDENTITY (walk W-1 — untitled notes are named by their
+            // day, so different notes can share a name); notes whose clause
+            // reads the same (same name, same books) merge with a count.
+            var noteOrder: [String] = []
+            var byNote: [String: (title: String, books: [String])] = [:]
             for leaves in p.alsoLeaves {
-                if books[leaves.note] == nil { order.append(leaves.note) }
-                books[leaves.note, default: []].append(quoted(leaves.book))
+                if byNote[leaves.noteID] == nil {
+                    noteOrder.append(leaves.noteID)
+                    byNote[leaves.noteID] = (leaves.note, [])
+                }
+                byNote[leaves.noteID]?.books.append(quoted(leaves.book))
             }
-            if !order.isEmpty {
-                let clauses = order.map { "\(quoted($0)) also leaves \(list(books[$0] ?? []))" }
+            var clauseOrder: [String] = []
+            var clauseCounts: [String: (title: String, books: [String], count: Int)] = [:]
+            for id in noteOrder {
+                guard let entry = byNote[id] else { continue }
+                let key = entry.title + "\u{0}" + entry.books.joined(separator: "\u{0}")
+                if let seen = clauseCounts[key] {
+                    clauseCounts[key] = (seen.title, seen.books, seen.count + 1)
+                } else {
+                    clauseOrder.append(key)
+                    clauseCounts[key] = (entry.title, entry.books, 1)
+                }
+            }
+            if !clauseOrder.isEmpty {
+                let clauses = clauseOrder.compactMap { key -> String? in
+                    guard let c = clauseCounts[key] else { return nil }
+                    return c.count == 1
+                        ? "\(quoted(c.title)) also leaves \(list(c.books))"
+                        : "\(c.count) notes called \(quoted(c.title)) also leave \(list(c.books))"
+                }
                 sentences.append(clauses.joined(separator: "; ")
                     + " \u{2014} a book only holds notes of its own wing.")
             }
