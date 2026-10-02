@@ -1470,6 +1470,36 @@ flight. No subagents. Logs and pre-revert copies: the repo's gitignored `scratch
   with archived waiters (all dismissed, counted) · a gathering's sheet and ops refusing
   Finish/extents.
 
+## BANK 1 CLOSES — LADDER A's RECORD + THE HELD WALK (the orchestrator, 2026-10-02)
+
+**LADDER A CLOSED IN TWO ROUNDS, ZERO DISPUTES, NO ROUND 3.** Round 1 (`notes/plans/13id-ladder-round1.md`):
+0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT over the 47-commit bank diff; all three implementers AGREED
+on every finding (several widened/extended); the reviewer's final calls confirmed all four with the
+extensions riding, and it implemented the fixes itself — the wing-driven held read (8f21224f), the
+starred tail's A–Z (f649d45f), the superseded-observation guards + the refresh drop (99a9d30d), the
+Move to Shelf gate (fce9295d) — each with its pin and its red evidence labeled genuine-vs-revert
+honestly. The implementer sanity pass: PASS + one NIT (a displaced `@MainActor`), confirmed and
+fixed by the reviewer (6d592161). Round 2 (`13id-ladder-round2.md`, fresh reviewer): all five fixes
+correct and complete, no regression traced, ONE NIT — the alias-blind anti-scan assertion arm in
+`BookcaseShelfTests` (~409) — **ROUTED TO U5 as rider R2** per its own recommendation. Finals at the
+ladder's close: core FULL 2060/221 (three independent runs agree), Mac fix suites + the registry
+walk + the eleven tutorial suites green, the phone test-build green. The chain:
+4f5acb68 → 3634321f → 8f21224f · f649d45f · 99a9d30d · fce9295d → 4a22aa49 → 6d592161 → e29092da → 2d93f7db.
+
+**THE ORCHESTRATOR'S COMPOSED WALK IS HELD — the GUI grants are absent** (probed at the seam:
+`AX: BLOCKED` · `SCREEN: BLOCKED` for this session's terminal host; the WalkKit rule — a consent
+grant is the AUTHOR'S, never a session's; the author guard itself passed, idle 5200 s, zero
+instances). Per the batch loop's letter the walk RECORDS AND FOLDS: the composed flows join HER
+COMBINED WALK (the running list in the adjudications above carries every flow), and a morning-bundle
+line asks whether she wants to grant the host (Accessibility + Screen Recording) so later banks'
+orchestrator walks can drive. The bank's use-shaped evidence meanwhile: the four implementer walks
+(23 + 19 + 39 + 23 captures, each ×4 voice/appearance combinations) and the two-round ladder's
+hands-on runs. The post-ladder Debug build stands at `DerivedData/13id-orchwalk` for the moment the
+grants exist.
+
+**THE SEAM CHECK:** the orchestrator is far below her ~750k line — NO mid-phase handoff; the same
+session opens BANK 2.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1498,8 +1528,8 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 2 | U2 — the Book Panel (+ ACT 0: the union star) | **DONE** (adjudicated 2026-10-02; F-U2-1 fixed by the architect `eeba2e7c` revert-red-verified; F-U2-2/3 routed to U3; drags to her combined walk; walk at the bank seam) |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **DONE** (adjudicated 2026-10-02; core 2041/219 · Mac 490/74 · walk ×4; F-U3-1 ruled → U4 ACT 0; F-U3-4/-6 + row 103's Library half → U6; F-U3-5 → U4; F-U3-3 kept provisionally; #172) |
 | 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **DONE** (adjudicated 2026-10-02; core 2058/221 · Mac 732/117 · walk ×4; F-U4-5 ruled → U5 rider R1; F-U4-4/-7 → U6; F-U4-6 → the catch-up; #173) |
-| 5 | LADDER A (U1–U4) | ROUND 1 IN FLIGHT (opened 2026-10-02; the diff d8f7c452..8b41f667; findings → notes/plans/13id-ladder-round1.md) |
-| 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
+| 5 | LADDER A (U1–U4) | **CLOSED** (2026-10-02, two rounds, zero disputes, no round 3; five fixes + the sanity NIT all landed; round 2's one NIT → U5 rider R2; the orchestrator's walk HELD on absent GUI grants — folded to her combined walk) |
+| 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | IN FLIGHT (spawned 2026-10-02) |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
@@ -1745,3 +1775,77 @@ the standing form (map · evidence with counts, PENDING until verified · FINDIN
 numbered P-13id-U4-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
 every commit. One agent at a time; no subagents; foreground waits only. An unsettled design
 fork: proposal into your record, STOP that thread for the architect, continue the others.
+
+## U5 BRIEF — THE WING SWITCHER · THE CROSS-WING DOORS · THE BULK MOVE (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — R-13id-1…5 (R-13id-2 and R-13id-4 are YOUR rulings, with her any-wing
+clarification), the constitution, your LEDGER row (scope item 6 above), ALL FOUR adjudications +
+the BANK 1 CLOSES section (your riders R1/R2 live there), the U1–U4 RECORDs, the AWAY-RUN
+POSTURE, the ENVIRONMENT TRAPS · `notes/plans/phase-13i-sitting-record-2026-09-30.md` §9 (total
+isolation — the binding wing doctrine), §17(e)/#166(e) (the lineage door's minimal naming), §21
+(Direction C — the masthead dropdown is the WING switcher's ruled shape), §22's spec caution ·
+the plan's item 6 text above (incl. the Home-only daily Journal, #169(b)) · KnownIssues row 105
+(yours to close) · `notes/plans/13id-ladder-round2.md` (rider R2's finding) ·
+`notes/SessionResiliencyProtocol.md` · the 13i-a wing substrate (`wing` table, the `wing_id`
+columns, R-13ia-1's per-wing tags + the adoption rider, R-13ia-2's virtual Home — the migration
+`v1_18`; VERIFY which wing OPS exist before building: the F-U1-1 lesson says the brief's
+assumptions about shipped ops are checked, not trusted).
+
+**Riders first (small, independent):**
+- **R1 (F-U4-5, ruled):** `createReading(kind: .gathering)` with a non-nil `maxPosts`/`wordTarget`
+  refuses `wrongReadingKind(expected: .book)` — one guard + pins red-on-old.
+- **R2 (ladder A round 2's NIT):** `BookcaseShelfTests` (~409) — the anti-scan arm is
+  alias-blind; assert `!plan.contains("SCAN rp")`/`("SCAN rs")` (or drop the arm with the reason
+  at the line).
+
+**THEN THE UNIT — item 6 whole:**
+1. **The WING SWITCHER** (§21 Direction C — a masthead dropdown): the live wings (Home first,
+   then by position), the current one marked; mint ("New Wing…", named at birth); rename;
+   delete per **R-13id-2** — refuses while the wing holds any live note, book or tag, NAMING
+   what remains AND the bulk-move road (P-2); Home is virtual and never listed as deletable.
+   Switching wings re-scopes the whole surface (the Bookcase, Library, Pool, tags, search,
+   Arrivals — §9's total isolation; the 13i-a substrate already scopes the reads: VERIFY and
+   pin, build only what the switcher exposes as missing). The Bookcase's held read already
+   takes the wing (ladder A fix 1) — consume it, never a second road.
+2. **THE BULK MOVE (R-13id-4, her backdoor + her clarification "another wing of your choice"):**
+   "Move everything to another wing…" on ADDITIONAL wings only; destination = any live wing
+   (Home listed first); the confirm COUNTS what moves; notes and books move WHOLE (memberships
+   ride; a gathering moves with its rule, its tag-ID terms adopting); moved books land
+   UNSHELVED in the destination (shelves never cross — the shelf-delete precedent); every
+   carried tag adopts BY PATH per R-13ia-1 (adopt the live same-path tag's id, else mint);
+   source-wing tags left without live applications are tombstoned by the act, said in the
+   confirm — the wing ends genuinely EMPTY. **Residual edges — PROPOSE BEFORE BUILDING that
+   half (the 4E pattern; STOP the half, continue the rest):** finished/sealed books under the
+   move; archived members; pending arrivals; a gathering whose rule names tags that adopt vs
+   die; anything else you meet.
+3. **The per-item MOVE and COPY doors** across wings with the same tag adoption; the lineage
+   door under a cross-wing copy NAMES the wing and at most offers go-to-that-wing (#166(e) —
+   no preview, no content across, no deep links).
+4. **Per-wing Archived and Trash views** (the recovery surfaces scope to the current wing;
+   verify what 13i-a left and build the switcher's exposure).
+5. **THE DAILY JOURNAL IS HOME-ONLY (#169(b), ruled):** a cross-wing move of it refuses (its
+   own door AND the bulk move route around it is IMPOSSIBLE — the bulk door never exists on
+   Home); ⌘J / Today's Entry file into Home's Journal from ANY wing, the entry born in Home
+   beside its Journal, one entry per day store-wide; the mint's Home is deliberate at the code.
+   KnownIssues row 105 closes with a red-on-old pin on its mechanism.
+
+Zero schema, zero `Sync/` — any discovered need is a STOP (a cross-wing move is ordinary row
+updates; a repair-class need is exactly the stop). Every drag gets a menu twin. OUT of scope:
+words beyond your own faces (U6), the tutorial (U7), the phone (record, don't build). Lesson
+11's sentence must END the unit TRUE: "A wing is a separate library in the same app… Nothing
+crosses between wings except what you move or copy yourself."
+
+**Evidence (named now):** R1/R2 pins; state-transition tests — move/copy with adoption (adopt vs
+mint vs die), the bulk move's FULL arithmetic (counts, unshelved landing, tag tombstones, the
+empty wing), the delete refusal naming contents and the road, the Home-only guard (row 105
+red-on-old), per-wing scoping pins (Bookcase/tags/search/Arrivals/Archived/Trash); registry rows
++ the registry walk green; the tutorial spine green; a screenshot walk in all four
+voice/appearance combinations into `notes/plans/13id-screens/u5/` (gitignored) — mint a wing,
+move a book in, bulk-move back, delete the empty wing, the daily Journal refusing. Suites at the
+END; baseline core 2060/221 (the ladder's close). Build into `App/Variorum/DerivedData/13id-u5/`.
+
+**Your record:** a `## U5 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
+numbered P-13id-U5-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
+every commit. One agent at a time; no subagents; foreground waits only.
