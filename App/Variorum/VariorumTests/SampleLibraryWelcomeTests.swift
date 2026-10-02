@@ -435,6 +435,25 @@ struct SampleLibraryWelcomeTests {
         }
     }
 
+    /// **THE WALK'S W-1 — the confirm must disclose what the door does.**
+    /// Help ▸ Restore Tutorial's confirm promised "Nothing else is touched",
+    /// but the door now composes the Welcome arrangement too (it can own
+    /// Sherlock and make the classics gathering and a quick note). The
+    /// Stage 2 ladder's MINOR-D3/D4 rule — the disclosure is EXACT about
+    /// scope — applies to what this unit added. RED ON OLD: the shipped
+    /// detail named none of it.
+    @Test func theRestoreConfirmDisclosesTheWelcomeArrangement() {
+        let detail = TutorialSeeder.replaceDetail
+        #expect(detail.contains(Operations.welcomeShelfName), "it names the Welcome shelf")
+        #expect(detail.contains(SampleLibrarySeeder.Book.sherlock.name),
+                "…the one book whose state the arrangement can change")
+        #expect(detail.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"),
+                "…the gathering it can make")
+        #expect(detail.contains("quick note"), "…and the quick note")
+        #expect(detail.hasSuffix("Nothing else is touched."),
+                "and only THEN does it promise the rest is untouched")
+    }
+
     /// **Restore Tutorial puts the fresh guide on Welcome — beside *Encryption
     /// Explained*, which is what makes the privacy lesson's "on this shelf"
     /// literally true (P-13id-U7-6).** The open door on an EXISTING guide
