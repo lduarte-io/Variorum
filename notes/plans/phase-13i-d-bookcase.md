@@ -2676,8 +2676,8 @@ walked (F-U1-4's class — hers).
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + the design + the STOP proposal + evidence named | IN-PROGRESS (this commit) |
-| 2 | Core — `ensureWelcomeShelf` (adopt the R5 keeper's keeper, else mint `role='welcome'`) + state-transition pins | NOT-STARTED — design below |
+| 1 | Record skeleton + the design + the STOP proposal + evidence named | DONE (1e79dc69) |
+| 2 | Core — `ensureWelcomeShelf` (adopt the R5 keeper's keeper, else mint `role='welcome'`) + state-transition pins | DONE (this commit) — `Operations+Shelf.swift` (`welcomeShelfName` / `welcomeShelfRole` / `ensureWelcomeShelf`); core `WelcomeShelfTests` **7/1 green** (new op — red on old by construction), incl. the two-device furniture harness: each device ensures offline → the R5 keeper converges ONE Welcome holding both books → a later ensure ADOPTS it |
 | 3 | Shared — THE WELCOME ARRANGEMENT (`SampleLibraryWelcome`: Welcome · Sherlock owned fork-free · the classics gathering · shelving · the seeded quicknote) + the launch occasion + its words; Mac wiring (launch · the four restore doors · the tutorial doors) | NOT-STARTED |
 | 4 | Mac seeder state tests (fresh birth · restore onto an existing store, Welcome ADOPTED · the keeper's letter · §19.3 unshelved Journal/Quicknotes · no silent retrofit at launch) | NOT-STARTED |
 | 5 | The BOOKS CHAPTER (the eleven lessons + five rituals as field-guide content) + the guide's prose sweep (F-U1-5, F-U6-3) + the grep pin's allow-list line removed | NOT-STARTED |

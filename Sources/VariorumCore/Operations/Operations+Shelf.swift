@@ -110,6 +110,64 @@ extension Operations {
         }
     }
 
+    // MARK: - The Welcome shelf (13i-d U7 — F-U1-3; the sitting record §7/§17(a)/§19)
+
+    /// The seeded shelf's name — "it's literally a welcome to the app,
+    /// designed to make you feel comfortable" (her §7 ruling). Ordinary and
+    /// renamable: identity is the ROLE below, never this name.
+    public static let welcomeShelfName = "Welcome"
+
+    /// The seed marker the R5 Welcome keeper (`Sync/Repairs.swift`,
+    /// `convergeWelcomeShelves`) converges on — the ONE key a seeder writes.
+    public static let welcomeShelfRole = "welcome"
+
+    /// What `ensureWelcomeShelf` found or made.
+    public struct WelcomeShelfEnsure: Equatable, Sendable {
+        public let shelf: Shelf
+        /// True when this call minted it; false when it ADOPTED a live one.
+        public let minted: Bool
+    }
+
+    /// **THE WELCOME SHELF, adopted or minted** (13i-d U7). ONE transaction:
+    /// the wing's live `role='welcome'` shelf with the SMALLEST id is adopted
+    /// — exactly the shelf the R5 keeper keeps when two devices' seeders
+    /// raced (it keys on the role, never the name, and keeps the smallest
+    /// id), so a restore door and a convergence always agree on which shelf
+    /// is Welcome. Else one is minted: named "Welcome", `role='welcome'`, at
+    /// the END of the wing's strip (on a fresh store the end IS the start).
+    ///
+    /// A shelf she named "Welcome" by hand carries no role and is never
+    /// adopted — a name is hers, the role is the seed's. A tombstoned Welcome
+    /// is not revived: shelves are not Trash objects (§18.3), so an explicit
+    /// restore mints a fresh one. Identity-level metadata, like every shelf
+    /// op: no undo entry, no touch. Zero `Sync/` — the keeper already exists
+    /// and this only CONSUMES its key.
+    @discardableResult
+    public func ensureWelcomeShelf(wingID: String = "") throws -> WelcomeShelfEnsure {
+        try database.write { db in
+            try requireLiveWing(db, wingID)
+            if let present = try Shelf.fetchOne(
+                db,
+                sql: """
+                    SELECT * FROM shelf
+                    WHERE wing_id = ? AND role = ? AND deleted_at IS NULL
+                    ORDER BY id LIMIT 1
+                    """,
+                arguments: [wingID, Self.welcomeShelfRole])
+            {
+                return WelcomeShelfEnsure(shelf: present, minted: false)
+            }
+            let now = date.now
+            let shelf = Shelf(
+                id: newID(), ownerId: currentOwnerID(), wingId: wingID,
+                name: Self.welcomeShelfName, role: Self.welcomeShelfRole,
+                position: try shelfPosition(db, wingID: wingID, at: .end),
+                createdAt: now, updatedAt: now)
+            try shelf.insert(db)
+            return WelcomeShelfEnsure(shelf: shelf, minted: true)
+        }
+    }
+
     // MARK: - Books on shelves
 
     /// Put a book (or a gathering — every shelf citizen) on a shelf, or take
