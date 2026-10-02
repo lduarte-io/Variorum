@@ -1219,8 +1219,10 @@ private struct BookIndexNoteRow: View {
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
         .onHover { hovering = $0 }
-        .help("Click to show this note in the pane — then click into any of "
-            + "its blocks to write")
+        // 13i-c U4 walk (W-2): the row's hover carries its badge's sentence.
+        .help(OwnershipBadgeCopy.rowHelp(
+            "Click to show this note in the pane — then click into any of "
+                + "its blocks to write", badge: badge))
     }
 }
 

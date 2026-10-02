@@ -1616,7 +1616,19 @@ SyncSpec not required).
   labels unchanged. The phone's Trash rides the shared Put back road, so its receipt for such a book
   is the whole one too (MOBILE PARITY); its ROW does not draw the count (the mobile catch-up's).
   `TrashBookNotesTests` (3) + 24 Trash/recovery/tutorial/snippet suites: 245/25 green; zero instances.
-- **Piece G — suites, the walk, the record closed, ledger row 5:** NOT-STARTED.
+- **Piece G — THE WALK (Terminal · light leg DONE) + walk fixes W-1/W-2/W-3:** the guard OK at every
+  act (her app absent; HID idle 4303 s at the open), AX + Screen grants true, the dev-store Debug build
+  `DerivedData/13ic-u4` (`io.lduarte.Variorum.debug`); captures u4-01…39 (the capture list lands with
+  the close). R4 walked by hand end to end. **W-1 FOUND AND FIXED** (commit "13i-c U4 walk fixes"):
+  the copy-only button was chrome-labelled WHOLE, so the Terminal voice lowercased her book's name in
+  it → `MembershipChoice.copyButtonTitle(chrome:)` voices only "Copy Into" (pinned).
+  **W-2 FOUND AND FIXED:** the shared mark's hover never surfaced — the Outline card's and the Index
+  row's own `.help` win on a face that is one click target (u4-07: hovering the glyph said "click to
+  open this note") → `OwnershipBadgeCopy.rowHelp` appends the badge's sentence to the row's hover
+  (Index row, Outline card, Library card; pinned). **W-3 FOUND AND FIXED:** Duplicate's "With copies
+  of its notes" checkbox was not voiced → `chromeLabel`. MembershipChoice + OwnershipBadge +
+  BookDeleteAndDuplicate 31/3 green after them. The other three legs (Terminal·dark, Study·dark,
+  Study·light) — PENDING (next); the close's suites — PENDING.
 - No revert in flight.
 
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)

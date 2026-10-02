@@ -2513,7 +2513,9 @@ private struct OutlinePostRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Click to open this note in the full editor; ▸ unfolds it here")
+        // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
+        .help(OwnershipBadgeCopy.rowHelp(
+            "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
 }

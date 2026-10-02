@@ -188,6 +188,19 @@ struct OwnershipBadgeTests {
         }
     }
 
+    /// The walk's W-2: a row whose whole face is one click target shows ITS
+    /// help, never the badge's inside it — so the row's hover carries the
+    /// badge's sentence.
+    @Test func aRowsHoverCarriesItsBadgesSentence() {
+        let base = "Click to open"
+        #expect(OwnershipBadgeCopy.rowHelp(base, badge: nil) == base)
+        #expect(OwnershipBadgeCopy.rowHelp(base, badge: .shared(["B"]))
+                == base + "\n" + OwnershipBadgeCopy.sharedHelp(["B"]))
+        #expect(OwnershipBadgeCopy.rowHelp(
+            base, badge: .ownedBy(Queries.BookRef(id: "a", name: "A")))
+                == base + "\n" + OwnershipBadgeCopy.ownedByHelp("A"))
+    }
+
     @Test func theNavigatorChipSaysSealedOnASealedBook() {
         #expect(BookStateCopy.navigatorChip(finished: false, sealed: false) == nil)
         #expect(BookStateCopy.navigatorChip(finished: true, sealed: false) == "\u{2713} finished")

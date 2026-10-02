@@ -45,6 +45,19 @@ nonisolated enum OwnershipBadgeCopy {
     static func ownedByHelp(_ book: String) -> String {
         "\(quoted(book)) owns this note \u{2014} click to open the book at it"
     }
+
+    /// **A ROW's hover, carrying its badge's sentence** (13i-c U4 walk, W-2):
+    /// macOS shows the OUTERMOST help on a row whose whole face is one click
+    /// target (a card's Button, a row's tap shell), so a badge's own `.help`
+    /// inside it never surfaced — hovering the shared mark said "click to
+    /// open this note". The row's help now says both.
+    static func rowHelp(_ base: String, badge: OwnershipBadgeFace.Badge?) -> String {
+        switch badge {
+        case .shared(let books): return base + "\n" + sharedHelp(books)
+        case .ownedBy(let book): return base + "\n" + ownedByHelp(book.name)
+        case nil: return base
+        }
+    }
 }
 
 // MARK: - The rule (which badge a row wears)

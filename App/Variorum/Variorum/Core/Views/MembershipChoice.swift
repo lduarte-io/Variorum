@@ -65,7 +65,11 @@ nonisolated enum MembershipChoiceCopy {
     // The two acts' button words (the registry's verbs).
     static let copyInVerb = "Copy In"
     static let moveInVerb = "Move In"
-    static func copyIntoVerb(_ book: String) -> String { "Copy Into \(quoted(book))" }
+    static func copyIntoVerb(_ book: String) -> String { "\(copyIntoLead) \(quoted(book))" }
+    /// The copy-only button's CHROME half — the book's name beside it is
+    /// hers and is never voiced (the walk's W-1: the Terminal voice
+    /// lowercased the whole label, her book's name with it).
+    static let copyIntoLead = "Copy Into"
 
     /// The sheet's title — what she was doing when the choice met her.
     static func title(note: String, book: String) -> String {
@@ -222,6 +226,16 @@ nonisolated struct MembershipChoice: Identifiable, Equatable, Sendable {
     /// alone.
     var copyLabel: String {
         offersMove ? MembershipChoiceCopy.copyInVerb : MembershipChoiceCopy.copyIntoVerb(book.name)
+    }
+
+    /// **The copy button's title, voiced** (13i-c U4 walk, W-1): the chrome
+    /// half through the voice (`chrome` — the Terminal voice lowercases it),
+    /// her book's name untouched.
+    func copyButtonTitle(chrome: (String) -> String) -> String {
+        offersMove
+            ? chrome(MembershipChoiceCopy.copyInVerb)
+            : chrome(MembershipChoiceCopy.copyIntoLead) + " "
+                + MembershipChoiceCopy.quoted(book.name)
     }
 }
 
@@ -403,7 +417,7 @@ struct MembershipChoiceSheet: View {
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
                     .disabled(choice.moveBlockedBy != nil)
                 }
-                Button(tokens.chromeLabel(choice.copyLabel)) {
+                Button(choice.copyButtonTitle(chrome: tokens.chromeLabel)) {
                     onCopy()
                     dismiss()
                 }

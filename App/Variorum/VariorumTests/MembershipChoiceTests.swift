@@ -155,6 +155,23 @@ struct MembershipChoiceTests {
         #expect(CapabilityRegistry.capability(.moveIn).verb == MembershipChoiceCopy.moveInVerb)
     }
 
+    /// The walk's W-1: the Terminal voice lowercased the whole copy-only
+    /// button, her book's name with it ("copy into “poems”"). The chrome half
+    /// is voiced; her name is not.
+    @Test func theCopyButtonVoicesTheChromeNotHerBookName() {
+        let item = MembershipChoice(
+            kind: .copyOnly, postID: "n", noteTitle: "Ode",
+            book: Queries.BookRef(id: "b", name: "Poems"), elsewhere: ["Owner"],
+            owner: Queries.BookRef(id: "o", name: "Owner"), severed: [])
+        #expect(item.copyButtonTitle(chrome: { $0.lowercased() })
+                == "copy into \u{201C}Poems\u{201D}")
+        let both = MembershipChoice(
+            kind: .copyOrMove, postID: "n", noteTitle: "Ode",
+            book: Queries.BookRef(id: "b", name: "Mine"), elsewhere: ["X"],
+            owner: nil, severed: [])
+        #expect(both.copyButtonTitle(chrome: { $0.lowercased() }) == "copy in")
+    }
+
     // MARK: - The model
 
     @Test func aBooklessNoteMovesIntoAnOwnedBookCleanWithNoChoice() async throws {

@@ -719,7 +719,8 @@ struct LibraryCatalogView: View {
         .contentShape(Rectangle())
         .onTapGesture { onOpen(.post(hit.id)) }
         .contextMenu { postRowMenu(hit) }
-        .help("Open this note")
+        // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
+        .help(OwnershipBadgeCopy.rowHelp("Open this note", badge: ownedByBadge(hit.id)))
     }
 
     /// 13e E8: ONE tags face, both note renderers — the `postRowMenu`

@@ -154,7 +154,8 @@ struct DuplicateBookSheet: View {
             TextField("Name", text: $name)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { duplicate() }
-            Toggle(DuplicateBookCopy.withCopiesToggle, isOn: Binding(
+            // 13i-c U4 walk (W-3): the checkbox's words are chrome — voiced.
+            Toggle(tokens.chromeLabel(DuplicateBookCopy.withCopiesToggle), isOn: Binding(
                 get: { deep }, set: { withCopies = $0 }))
                 .disabled(offer.owned)
             ForEach(Array(DuplicateBookCopy.lines(
