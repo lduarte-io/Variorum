@@ -132,14 +132,20 @@ struct SmartCollectTests {
     }
 
     @Test func wrongKindAndLockedReadingRefuse() throws {
-        try withOperations { ops, _ in
+        try withOperations { ops, db in
             let curated = try ops.createReading(name: "hand-picked", kind: .book)
             let post = try ops.createPost(title: "p")
             #expect(throws: OperationError.wrongReadingKind(id: curated.id, expected: .gathering)) {
                 try ops.collectPostIntoSmartReading(post.id, into: curated.id)
             }
             let smart = try smartReading(ops, spec: .init(tags: ["x"]))
-            try ops.lockReading(smart.id)
+            // 13i-d U4 ACT 0 (F-U3-1): `lockReading` refuses a gathering now,
+            // so the LEGACY finished gathering this refusal guards against is
+            // staged as the raw row it is (a pre-13i-d store, or another
+            // device's synced row) — the fixture, not the assertion, moved.
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET locked = 1 WHERE id = ?", arguments: [smart.id])
+            }
             #expect(throws: OperationError.lockedReading(id: smart.id)) {
                 try ops.collectPostIntoSmartReading(post.id, into: smart.id)
             }

@@ -180,10 +180,15 @@ struct BookCollectingDoorsTests {
             let work = try ops.createTag(name: "work")
             let gathering = try ops.createReading(
                 name: "Old", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
-            // The shipped ops still accept these on a gathering (the (c) arm
-            // is STOPPED for the architect) — exactly how a legacy one exists.
-            try ops.setReadingMaxPosts(gathering.id, maxPosts: 5)
-            try ops.lockReading(gathering.id)
+            // 13i-d U4 ACT 0 (F-U3-1, the (c) arm RULED): the ops refuse a
+            // gathering's finish and cap now, so the LEGACY one (a pre-13i-d
+            // store, or another device's synced row) is staged as the raw
+            // row it is — the fixture moved, never the assertion.
+            try await db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET locked = 1, max_posts = 5 WHERE id = ?",
+                    arguments: [gathering.id])
+            }
             BookSettingsProbe.drawn = [:]
             let target = try #require(await BookSettingsTarget.load(session: session, readingID: gathering.id))
             try await mounted(BookSettingsHost(target: target)) {}

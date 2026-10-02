@@ -121,9 +121,16 @@ extension Operations {
     /// Non-positive targets refuse; a LOCKED (finished) reading refuses —
     /// extending a bounded notebook is un-finishing it first (the
     /// setReadingSort parallel; PROVISIONAL, QUESTIONS bundle).
+    ///
+    /// 13i-d U4 ACT 0 (F-U3-1, RULED — the sitting record §3's letter: a
+    /// gathering has NO word target): a NON-NIL value on a gathering refuses
+    /// `wrongReadingKind`, answered FIRST (Reopen would not help — a gathering
+    /// has no extent at all). CLEARING stays legal: a gathering targeted
+    /// before 13i-d (or so synced from another device) keeps its way out.
     public func setReadingWordTarget(_ id: String, wordTarget: Int?) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            try refuseExtentOnGathering(reading, value: wordTarget)
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: id)
             }
@@ -142,9 +149,13 @@ extension Operations {
     /// here). Same guards as the word target. Lowering the cap below the
     /// current live membership is legal: existing memberships stand;
     /// further adds refuse at the standing `readingAtCapacity` gate.
+    ///
+    /// 13i-d U4 ACT 0: a gathering has no capacity (§3) — the word target's
+    /// rule exactly (a non-nil value refuses first; clearing stays legal).
     public func setReadingMaxPosts(_ id: String, maxPosts: Int?) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            try refuseExtentOnGathering(reading, value: maxPosts)
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: id)
             }
@@ -156,6 +167,14 @@ extension Operations {
             reading.updatedAt = date.now
             try reading.update(db)
         }
+    }
+
+    /// THE (c) ARM's extent half (13i-d U4 ACT 0): a gathering takes no
+    /// extent VALUE; nil (clearing) passes through to the setter's own
+    /// guards unchanged — the legacy way out.
+    private func refuseExtentOnGathering(_ reading: Reading, value: Int?) throws {
+        guard value != nil, reading.kind == .gathering else { return }
+        throw OperationError.wrongReadingKind(id: reading.id, expected: .book)
     }
 
     public func renameReading(_ id: String, name: String) throws {
@@ -246,9 +265,18 @@ extension Operations {
     ///
     /// 13i-c U2 (the plan §5): on a SEALED book this is a no-op — a sealed
     /// book is finished already (Sealed = Finished + text immutability).
+    ///
+    /// 13i-d U4 ACT 0 (F-U3-1, RULED — the sitting record §3's letter: a
+    /// gathering has NO finish): a GATHERING refuses `wrongReadingKind`,
+    /// answered first — a legacy finished one included (the kind, not the
+    /// state, is the answer). `unlockReading` stays legal on a gathering: a
+    /// gathering finished before 13i-d (or so synced) keeps its Reopen.
     public func lockReading(_ id: String) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: id, expected: .book)
+            }
             guard reading.sealedAt == nil else { return }
             let now = date.now
             reading.locked = true

@@ -460,7 +460,14 @@ struct BindDoorTests {
     @Test func aFinishedGatheringHearsTheRefusalNotAnOfferThatCanOnlyFail() async throws {
         try await withBindWorld { session, db in
             let (reading, posts, _) = try gathering(session, count: 2)
-            try session.operations.lockReading(reading.id)
+            // 13i-d U4 ACT 0 (F-U3-1): `lockReading` refuses a gathering now,
+            // so the LEGACY finished gathering (a pre-13i-d store, or another
+            // device's synced row) is staged as the raw row it is — the
+            // fixture moved, never the assertion.
+            try await db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET locked = 1 WHERE id = ?", arguments: [reading.id])
+            }
             let structure = try await structure(session, for: reading, db: db)
 
             structure.acceptDrop(
