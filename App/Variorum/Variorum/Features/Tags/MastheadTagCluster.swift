@@ -40,7 +40,15 @@
 //  The field is `TagInlineField` — the popover's brain (`TagChipAdder`'s
 //  pure `suggestions`) in an inline body.
 //
+//  ── 13i-d U3 — THE CARDS ARE A HELD READ (KnownIssues row 112) ──────────
+//  The cluster used to read the note's tags ONCE per note, so a tag taken
+//  off by ANOTHER door on the same screen (13i-c's membership-chip
+//  "remove #tag", 13i-d U2's Book Panel gathering line) kept its card until
+//  the note was reopened (U2's walk capture `u2/14`). The read lives in
+//  `MastheadTagsModel` now (below).
+//
 
+import GRDB
 import SwiftUI
 import VariorumCore
 
@@ -66,8 +74,11 @@ struct MastheadTagCluster: View {
     /// its own; nil — a standalone host — probes nothing).
     var geometryProbeSpace: String? = nil
 
-    @State private var tags: [Tag] = []
-    @State private var allTags: [Tag] = []
+    /// 13i-d U3 (KnownIssues row 112): the cluster's two reads live in ONE
+    /// small model, the row-104 shape (`NoteMembershipModel`).
+    @State private var store = MastheadTagsModel()
+    private var tags: [Tag] { store.tags(for: postID) }
+    private var allTags: [Tag] { store.allTags }
 
     /// The gap between the open field's right edge and what it slid out
     /// beside (the ＃'s line).
@@ -145,7 +156,7 @@ struct MastheadTagCluster: View {
                 }
         }
         .animation(.easeInOut(duration: 0.18), value: fieldOpen)
-        .task(id: postID) { await load() }
+        .task(id: postID) { await store.track(session: session, postID: postID) }
     }
 
     /// Row 59 (the Act 10 correction round, batch G — the orchestrator's walk
@@ -174,17 +185,7 @@ struct MastheadTagCluster: View {
         .mastheadGeometryProbe(.door, in: geometryProbeSpace)
     }
 
-    // MARK: - The one-shot loads and the standing doors (PaneHost's
-    // discipline, moved with the cards)
-
-    private func load() async {
-        let read = try? await session.database.read { [postID] db in
-            (applied: try Queries.postTags(db, postID: postID),
-             all: try Queries.allTags(db))
-        }
-        tags = read?.applied ?? []
-        allTags = read?.all ?? []
-    }
+    // MARK: - The standing doors (PaneHost's discipline, moved with the cards)
 
     /// Applying a typed path goes through the SHIPPED type-to-create door
     /// (`TagAssignmentViewModel.applyTypedPath`, 13b 3D's N24) — this face
@@ -195,7 +196,7 @@ struct MastheadTagCluster: View {
             if await model.applyTypedPath(path) == nil, let error = model.lastError {
                 session.status.refuse(error)
             }
-            await load()
+            await store.refresh(session: session, postID: postID)
         }
     }
 
@@ -208,8 +209,59 @@ struct MastheadTagCluster: View {
             } catch {
                 session.status.refuse(TagsViewModel.message(error))
             }
-            await load()
+            await store.refresh(session: session, postID: postID)
         }
+    }
+}
+
+/// **The note's tag cards' read** (13i-d U3 — KnownIssues row 112, U2's
+/// F-U2-2): the cards a note wears and the live taxonomy the inline field
+/// suggests from. Extracted from the cluster so its cadence is pinned
+/// without a window — the row-104 shape (`NoteMembershipModel`).
+///
+/// `track` is the cluster's read for the note's visit; `refresh` re-reads
+/// after the cluster's OWN door acts. A `subject` guard keeps a previous
+/// note's cards from answering for the next one.
+@MainActor
+@Observable
+final class MastheadTagsModel {
+    private(set) var subject: String?
+    private var applied: [Tag] = []
+    private(set) var allTags: [Tag] = []
+
+    /// The cards for `postID` — empty when the read in hand is another note's.
+    func tags(for postID: String) -> [Tag] {
+        subject == postID ? applied : []
+    }
+
+    /// What one read returns: the note's cards and the live taxonomy.
+    nonisolated struct Snapshot: Equatable, Sendable {
+        var applied: [Tag]
+        var all: [Tag]
+    }
+
+    /// The ONE fetch — `post_tag` and `tag` only, never `container` or
+    /// `variant` (pinned by region: autosave must never wake it).
+    nonisolated static func fetch(_ db: Database, postID: String) throws -> Snapshot {
+        Snapshot(applied: try Queries.postTags(db, postID: postID), all: try Queries.allTags(db))
+    }
+
+    /// The visit's read. ONE-SHOT (the shipped shape, extracted unchanged).
+    func track(session: AppSession, postID: String) async {
+        await refresh(session: session, postID: postID)
+    }
+
+    func refresh(session: AppSession, postID: String) async {
+        guard let read = try? await session.database.read({ db in
+            try Self.fetch(db, postID: postID)
+        }) else { return }
+        adopt(read, postID: postID)
+    }
+
+    private func adopt(_ snapshot: Snapshot, postID: String) {
+        applied = snapshot.applied
+        allTags = snapshot.all
+        subject = postID
     }
 }
 
