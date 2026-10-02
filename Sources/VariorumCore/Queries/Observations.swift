@@ -26,11 +26,18 @@ extension AppDatabase {
     /// the parameter belongs here and not in a post-fetch re-sort: the
     /// window is applied by the query, so sorting the delivered rows would
     /// sort only the first N of the OLD order.
+    ///
+    /// `filter` (13i-d U3, additive — the in-book FILTER BAR's face over the
+    /// 13i-b mechanics): hold the assembly narrowed by a VIEW-LOCAL tag/star
+    /// rule (`assembleReading`'s `filter:` — a read, never membership). nil is
+    /// byte-identical to before.
     public func observeReading(
-        _ readingID: String, limit: Int? = nil, order: Queries.ReadingOrder? = nil
+        _ readingID: String, limit: Int? = nil, order: Queries.ReadingOrder? = nil,
+        filter: RuleTerm? = nil
     ) -> AsyncValueObservation<[Queries.ReadingEntry]> {
         observe {
-            try Queries.assembleReading($0, readingID: readingID, limit: limit, order: order)
+            try Queries.assembleReading(
+                $0, readingID: readingID, limit: limit, order: order, filter: filter)
         }
     }
 

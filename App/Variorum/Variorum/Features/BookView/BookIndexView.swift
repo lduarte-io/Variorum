@@ -413,6 +413,13 @@ struct BookIndexView<Masthead: View>: View {
     @State private var selectedPostID: String?
     @State private var collapsed: Set<String> = []
     @State private var filter = ""
+    /// 13i-d U3 — the in-book FILTER BAR's draft (session-only: the bar is the
+    /// filter's only face, so it never outlives the Index — P-13id-U3-5).
+    @State private var filterDraft = BookFilterDraft()
+    /// The UNFILTERED notes the moment a filter turned on — the held tag read
+    /// keeps tracking them, so the bar's tag menu never shrinks to the notes
+    /// already shown. nil while unfiltered (the read tracks what is shown).
+    @State private var unfilteredIDs: [String]?
     /// Two one-shot scroll channels, one consumer each (the wave's own
     /// lesson from the note Index: two consumers of one nil-after-scroll
     /// request race each other).
@@ -529,7 +536,25 @@ struct BookIndexView<Masthead: View>: View {
     }
 
     private var groupingTrackKey: GroupingTrackKey {
-        GroupingTrackKey(postIDs: model.entries.map(\.postID), rootID: grouping?.familyRootID)
+        let shown = model.entries.map(\.postID)
+        // While a filter narrows the book, keep tracking the notes it had
+        // (plus any that arrived): the families and the bar's tags stay the
+        // book's, not the filtered few's.
+        let ids = unfilteredIDs.map { frozen in
+            frozen + shown.filter { !Set(frozen).contains($0) }
+        } ?? shown
+        return GroupingTrackKey(postIDs: ids, rootID: grouping?.familyRootID)
+    }
+
+    /// The bar's draft became a rule (or none): the book's assembly reads it.
+    private func applyFilter(_ draft: BookFilterDraft) {
+        let rule = draft.rule
+        if rule != nil, model.viewFilter == nil {
+            unfilteredIDs = model.entries.map(\.postID)
+        } else if rule == nil {
+            unfilteredIDs = nil
+        }
+        model.viewFilter = rule
     }
 
     var body: some View {
@@ -601,6 +626,7 @@ struct BookIndexView<Masthead: View>: View {
             guard let grouping else { return }
             await grouping.track(session: session, postIDs: groupingTrackKey.postIDs)
         }
+        .onChange(of: filterDraft) { _, draft in applyFilter(draft) }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
         .onChange(of: model.entries) { _, _ in
             // A changed membership is a changed entry set, which is the one
@@ -627,6 +653,10 @@ struct BookIndexView<Masthead: View>: View {
             edit.teardown()
             model.noteIndexLive(nil)
             model.noteIndexSelection(nil)
+            // 13i-d U3 (P-13id-U3-5): the filter's only face is this Index's
+            // bar, so it never outlives it — every other mode reads the book
+            // whole again.
+            if model.viewFilter != nil { model.viewFilter = nil }
             // 13u4 UNIT F1: a landing in flight ends with the surface rather
             // than re-arming its check against a dead proxy (the 13u2b
             // ladder's R2-12 class). Silent by the authority's own rule —
@@ -722,6 +752,15 @@ struct BookIndexView<Masthead: View>: View {
                 .padding(.top, 12)
                 .padding(.bottom, 8)
             columnHeader
+            // 13i-d U3 — THE IN-BOOK FILTER BAR (§18.1): tags/★ narrow what
+            // the book SHOWS, never its membership.
+            if let grouping {
+                BookFilterBar(
+                    tokens: tokens, session: session, structure: structure,
+                    grouping: grouping, draft: $filterDraft)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+            }
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 1) {

@@ -52,39 +52,7 @@ extension Operations {
         let now = date.now
         return try database.write { db in
             let source = try liveReading(db, readingID)
-            let association: RuleTerm?
-            let kind: FilterAssociation
-            switch (source.kind, RuleGrammar.read(source.querySpec)) {
-            case (_, .rule(let rule)):
-                association = rule
-                kind = .rule
-            case (.gathering, .malformed):
-                throw OperationError.smartFilterUnsatisfiable(
-                    readingID: readingID,
-                    reason: "its rule is unreadable (malformed) — edit the rule first")
-            case (.gathering, .none):
-                // 13i-c (R-13ic-4): a rule-less gathering SHOWS NOTHING (it
-                // can exist live only as a Trash restoree); its association
-                // is nothing, so the saved rule is the filter alone — the
-                // face must say so (the `.none` reading).
-                association = nil
-                kind = .none
-            case (.book, _):
-                // 13i-c (R-13ic-1): the OUTFLOW is a set — every live tag of
-                // it is what notes written there wear, so the association
-                // is their conjunction (ALL of them ride each note).
-                let live = try source.autoTagIDs.filter { tagID in
-                    guard let tag = try Tag.fetchOne(db, key: tagID) else { return false }
-                    return tag.deletedAt == nil && tag.wingId == source.wingId
-                }
-                if !live.isEmpty {
-                    association = live.count == 1 ? .tag(live[0]) : .and(live.map { .tag($0) })
-                    kind = .autoTag
-                } else {
-                    association = nil
-                    kind = .none
-                }
-            }
+            let (association, kind) = try Queries.filterAssociation(db, source: source)
             let spec = try RuleGrammar.encode(RuleGrammar.conjoin(association, filter))
             // 13i-c (R-13ic-4): the minted GATHERING needs a rule — an empty
             // filter over no association would mint a rule-less one.
@@ -98,6 +66,50 @@ extension Operations {
                 createdAt: now, updatedAt: now)
             try gathering.insert(db)
             return SavedFilterGathering(reading: gathering, association: kind)
+        }
+    }
+}
+
+extension Queries {
+    /// **"The book's tag association"** — what a saved filter is conjoined
+    /// with (PROVISIONAL P-13ib-U4-6). EXTRACTED at 13i-d U3, unchanged, from
+    /// `Operations.saveFilterAsGathering` (which calls it inside its own
+    /// transaction) so the filter bar's save door can SAY what the gathering
+    /// will gather from BEFORE it mints — the op's instruction to the face
+    /// ("the door's face must say so") made possible without a second copy of
+    /// the rule.
+    ///
+    /// Refuses a GATHERING whose own rule is malformed
+    /// (`smartFilterUnsatisfiable`); a BOOK with a malformed rule falls
+    /// through to its outflow.
+    public static func filterAssociation(
+        _ db: Database, source: Reading
+    ) throws -> (term: RuleTerm?, kind: Operations.FilterAssociation) {
+        switch (source.kind, RuleGrammar.read(source.querySpec)) {
+        case (_, .rule(let rule)):
+            return (rule, .rule)
+        case (.gathering, .malformed):
+            throw OperationError.smartFilterUnsatisfiable(
+                readingID: source.id,
+                reason: "its rule is unreadable (malformed) — edit the rule first")
+        case (.gathering, .none):
+            // 13i-c (R-13ic-4): a rule-less gathering SHOWS NOTHING (it can
+            // exist live only as a Trash restoree); its association is
+            // nothing, so the saved rule is the filter alone — the face must
+            // say so (the `.none` reading).
+            return (nil, .none)
+        case (.book, _):
+            // 13i-c (R-13ic-1): the OUTFLOW is a set — every live tag of it
+            // is what notes written there wear, so the association is their
+            // conjunction (ALL of them ride each note).
+            let live = try source.autoTagIDs.filter { tagID in
+                guard let tag = try Tag.fetchOne(db, key: tagID) else { return false }
+                return tag.deletedAt == nil && tag.wingId == source.wingId
+            }
+            if !live.isEmpty {
+                return (live.count == 1 ? .tag(live[0]) : .and(live.map { .tag($0) }), .autoTag)
+            }
+            return (nil, .none)
         }
     }
 }

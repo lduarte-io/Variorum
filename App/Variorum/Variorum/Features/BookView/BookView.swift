@@ -292,7 +292,9 @@ struct BookView: View {
         // the way she is looking restarts the observation rather than
         // re-sorting delivered rows (the window is applied by the query —
         // a post-fetch sort would sort the first N of the OLD order).
-        .task(id: model.viewOrder) { await model.start() }
+        // 13i-d U3: the in-book FILTER is the same kind of task input (the
+        // Index's filter bar narrows the assembly by it, never a re-filter).
+        .task(id: model.observationKey) { await model.start() }
         .task { await structure.start() }
         // 13i-c U4 — the badge facts, keyed on WHICH notes the book shows (a
         // title edit re-delivers entries but changes no id, so no re-read).

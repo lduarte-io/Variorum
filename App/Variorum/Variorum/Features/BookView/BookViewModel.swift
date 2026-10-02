@@ -46,6 +46,23 @@ final class BookViewModel {
     /// rather than re-sorting delivered rows: the window is applied by the
     /// query, so a post-fetch sort would sort the first N of the old order.
     var viewOrder: Queries.ReadingOrder?
+    /// **13i-d U3 — the in-book FILTER** (the sitting record §18.1): a
+    /// view-local tag/star rule narrowing what this book SHOWS — never its
+    /// membership (`assembleReading`'s `filter:`, 13i-b's mechanics). The
+    /// Index's filter bar sets it and CLEARS it when the Index leaves (the
+    /// bar is its only face — P-13id-U3-5). Like `viewOrder`, it is a task
+    /// input: changing it restarts the observation (`BookView`'s
+    /// `.task(id: observationKey)`), so the window is applied over the
+    /// narrowed assembly, never by a post-fetch filter.
+    var viewFilter: RuleTerm?
+
+    /// The observation's restart key — the order AND the filter it reads by.
+    nonisolated struct ObservationKey: Equatable {
+        var order: Queries.ReadingOrder?
+        var filter: RuleTerm?
+    }
+
+    var observationKey: ObservationKey { ObservationKey(order: viewOrder, filter: viewFilter) }
     /// True when the window really is hiding later entries (round 2 NIT:
     /// observing window+1 and capping in `adopt` means a reading of
     /// EXACTLY the window size never false-positives the marker).
@@ -67,7 +84,7 @@ final class BookViewModel {
             }
             for try await value in session.database.observeReading(
                 readingID, limit: Self.entryWindow + 1,  // +1: the truncation probe
-                order: viewOrder
+                order: viewOrder, filter: viewFilter
             ) {
                 await adopt(value)
             }
