@@ -607,164 +607,7 @@ the FULL core suite green at the END; the Mac app + the phone BUILD (`xcodebuild
 'generic/platform=iOS Simulator' build`) and every Mac/mobile suite that exercises a changed op.
 A pin green on both sides of a claimed fix is hollow — record, don't fix.
 
-**Your record:** a `## U2 RECORD` section in THIS file directly above `## U3 RECORD — THE SETTINGS SHEET · THE OUTFLOW CHOOSER · THE STATE DOORS · THE MINT (`opus-implementer`, 2026-10-01)
-
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is rewritten at the close.
-
-**UNIT STATUS: IN PROGRESS (opened 2026-10-01 at tip 26414772).** Preflight read in this session's own
-context: CLAUDE.md + its canon, this plan WHOLE (§1–§11, the U1/U2 RECORDs, the adjudication, the U3
-BRIEF), the sitting record §1–§6, §10, §18, §20–§25, her post-close ruling 2 (commit 2241d670 — the
-kickoff rewrite carried it into §7's U3 row), `notes/SessionResiliencyProtocol.md`, `Tools/WalkKit/
-README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES / SyncSpec not required).
-
-### The design map as planned (each piece flips to "as shipped" at its commit)
-
-- **Piece A — THE STATE DOORS:** the six acts declared ONCE (`.finishBook` `.reopenBook` `.sealBook`
-  `.unsealBook` `.ownBook` `.unownBook` — scope `.book`, doors `.contextMenu` + `.surface`); which of each
-  pair renders is DATA (`BookStateDoorSet`, a pure table over kind/finished/sealed/owned); every confirm's
-  sentences on a pure type (`BookStateCopy`); one model (`BookStateDoors`: preview → confirm-or-act →
-  receipt/refusal on the status seam) and one confirm renderer, shared by the shelf menu and the sheet.
-- **Piece B — THE SETTINGS SHEET:** `BookSettingsSheet` to its own file; Name · Word target · Note cap
-  (as today) · COLLECTING as sentences (`CollectingCopy`) with ONE "Edit…" door into the rule editor ·
-  the gathering's three-state hide-owned · the STATE section from Piece A.
-- **Piece C — THE OUTFLOW CHOOSER:** the rule editor's auto-tag row rebuilt as a multi-tag chooser
-  (`OutflowDraft` + `OutflowChooser`), writing through `setReadingOutflow`; the offer's N =
-  `membersMissingAnyOutflowTag`; `tagAllMembers(nil)`; the `setReadingAutoTag` forwarder RETIRED (F-U1-1).
-- **Piece D — R-13ic-4's faces:** the gathering's empty-save gate + "Delete this gathering…"; the
-  empty-state re-word (F-U1-3); the MINT sheet with the rule editor inline (F-U1-2).
-- **Piece E — THE SPAWN SHEET** with the prefilled outflow chooser; **the bind sheet's owned-notes
-  limb** (the plan §3 assigns it to U3 — "the sheet gains the limb in U3"; the brief's six pieces omit
-  it; built because this unit's Own door is what makes owned notes reachable in a gathering).
-- **Piece F — the note's own Unseal inside a sealed book** (the adjudication): the refusal spoken on
-  every road, pinned; the full suites; the walk; the close.
-
-### LIVE STATUS (per commit; every unverified claim PENDING)
-
-- **Piece A — THE STATE DOORS:** DONE (commit "13i-c U3 pieces A+B"). Registry: `.finishBook`
-  `.reopenBook` `.sealBook` `.unsealBook` `.ownBook` `.unownBook` (scope `.book`, doors `.contextMenu` +
-  `.surface`, `always`, `.native`) and `.deleteBook` (`.contextMenu` for now — the rule editor's
-  `.surface` door lands with Piece D). `Features/Readings/BookStateDoors.swift`: `BookStateDoorSet`
-  (the pure pair table), `BookStateCopy` (every confirm + receipt + the refusal named for its book),
-  `BookStateConfirm` (the sheet's item), `BookStateDoors` (preview → confirm-or-act → receipt /
-  refusal), `BookStateConfirmSheet` + `.bookStateConfirms(_:)` (ONE presentation road). The shelf menu
-  renders the pairs from the table; `ShelfViewModel.setFinished` and `BookStructureModel.setFinished`
-  RETIRED onto the shared road (one honest pin edit: `ShelfModelTests.finishAndExtentFacesCallTheOps`
-  drives `stateDoors.open(.finishBook…)`). The shelf hides Bind/Make-a-Book on a RULE-LESS gathering
-  (the plan §2's P-2 line). `BookStateDoorsTests` (13) green.
-- **Piece B — THE SETTINGS SHEET:** DONE (same commit). `Features/BookView/BookSettingsSheet.swift`
-  (moved out of `BookView.swift`): `CollectingCopy` (the rule read aloud as a sentence; the three
-  Collecting lines; the hide-owned three words), `BookSettingsModel` (paths + the global default,
-  one-shot, keyed on rule/outflow/toggle; the Edit… door; `setHideOwned`), the sheet (Name · Word
-  target · Note cap as shipped · Collecting · State — the Finished control disabled with the sealed
-  words while sealed). `.editRule` gains `.surface`; the registry walk's surface union names
-  `BookSettingsSheet`. `BookSettingsSheetTests` (6) green. Touched suites: BookStateDoors ·
-  BookSettingsSheet · CapabilityRegistry (the walk) · ShelfModelTests — **49 tests / 4 suites passed**;
-  zero instances before and after.
-- **Piece C — THE OUTFLOW CHOOSER:** DONE (commit "13i-c U3 piece C"). `Features/Readings/
-  OutflowChooser.swift`: `OutflowDraft` (pure — her append order, de-duplicated, each removable, "none"
-  legal, `written(live:)` drops a dead id) + `OutflowChooser` (a row per chosen tag in the term-row
-  grammar — "#path" or "(deleted tag)", a quiet "remove" — and one "+ tag" menu of the wing's live
-  tags not yet chosen). `RuleEditorModel.autoTagID` → `outflow: OutflowDraft`; writes
-  `setReadingOutflow(id, tagIDs:)` (a dead stored id drops on ANY save of the sheet); the offer asks
-  when the rule or the set changed, N = `membersMissingAnyOutflowTag` (read after the write), its act
-  `tagAllMembers(nil)`, the receipt counting notes; words `tagMembersOffer(count:paths:)` /
-  `taggedMembers(count:paths:)` (one tag reads exactly as before). **Core:** the
-  `setReadingAutoTag` FORWARDER RETIRED (F-U1-1) — its 10 core-test call sites moved one-for-one onto
-  `setReadingOutflow` (subjects untouched, each commented); `OutflowRetirementTests.
-  theSingleTagForwarderIsRetired` pins no production caller or definition survives. The two
-  `RuleEditorTests` auto-tag pins drive the draft (their words unchanged). Core filtered run
-  (IntakeOperations · Phase13icOutflow · ReadingFilter · OutflowRetirement) **66 / 4 green**; Mac
-  `OutflowChooserTests` (6) + RuleEditor + BindDoor + BookSettingsSheet green (one fixture-order fix
-  in my own new pin: a hand-add rides the outflow, so the member joins before it exists).
-- **Piece D — R-13ic-4's FACES:** DONE (commit "13i-c U3 piece D"). The rule editor's tree
-  extracted as `RuleTreeEditor` (one face for one grammar — the editor sheet and the mint sheet).
-  THE GATE: `RuleEditorModel.gatheringNeedsRule` (a gathering, editable rule, no term) → Save gated
-  (`canSave`) with "A gathering needs a rule." and the "Delete this gathering…" door (`.deleteBook`'s
-  `.surface` door — the registry gains it, the walk names `RuleEditorSheet`) → `BookStateDoors`'
-  confirm ("It goes to the Trash — Put back returns it for 30 days." · "No note is touched: a
-  gathering holds none.") → `deleteReading` → the editor closes (`.bookStateConfirms(_:onLanded:)`).
-  A BOOK's clear stays legal (the kill switch). The empty-state re-word (F-U1-3): "No rule — this
-  gathering shows nothing until it has one." THE MINT (F-U1-2): `RuleEditorModel(session:mintingIn:)`
-  (the mint mode — the wing's live tags, the name held on the model, `mint(through:)` via
-  `ReadingsViewModel.create(querySpec:wingId:)`), `MintGatheringSheet` (name · the tree · Create
-  disabled until a term exists · a refusal refuses-and-keeps); the shelf's "Create Smart Book…"
-  opens it (its "smart" wording LEFT for 13i-d's vocabulary sweep — the brief's allowance).
-  `GatheringRuleGateTests` (7) green; with RuleEditor · the registry walk · OutflowChooser ·
-  BookStateDoors · BookSettingsSheet — **68 tests / 6 suites passed** (one clock fix in my own new
-  pin: the Trash window reads the world's `now`, not the wall's).
-- **Piece E — THE SPAWN SHEET + THE BIND'S OWNED-NOTES LIMB:** DONE (commit "13i-c U3 piece E").
-  The spawn's 13i-b name-only `.alert` → `SpawnBookSheet` over a `SpawnOffer` item (the gathering, the
-  suggested name, the wing's live tags, the PREFILL — `ShelfViewModel.spawnPrefill`: the rule's positive
-  tags, tree order, live-filtered; ONE function for the sheet and the no-answer default) with the
-  `OutflowChooser`, editable before the mint; `spawnBook(from:named:outflow:)` writes her chosen set (a
-  chosen tag that died meanwhile drops at the act; nil = the prefill). `BindCopy.spawnMessage(.none)`
-  re-worded ("…it shows nothing" — the R-13ic-4 truth; the door itself hides there). THE LIMB:
-  `BindOffer.ownedElsewhere` (from `Queries.bindOwnedNotesPreview`, mapped to `BindCopy.OwnedNote`),
-  the sheet lists "Title — owned by “Book”" with the two-way choice (leave them out — DEFAULT,
-  P-13ic-4 · copy them in), each said whole, the count promise following the choice
-  (`BindCopy.memberCount`); `onConfirm` carries the choice to `ShelfViewModel.bind(_:ownedNotes:)` /
-  `BookStructureModel.bind(order:ownedNotes:)`; the receipt names the limb's outcome
-  (`BindCopy.bound(_:count:copied:leftOut:)` — the plain bind's words unchanged). `SpawnAndBindLimbTests`
-  (7) green; with BindDoor · BookOrderConversion · DuplicateBookNameDoor · BookAscentDeclaration —
-  **38 tests / 5 suites passed**.
-- **Piece F — the note's own Unseal inside a sealed book + the close:** the DOOR half DONE (commit
-  "13i-c U3 piece F (1/2)"). THE CALL (the adjudication left it to this unit): the door stays RENDERED
-  and SPEAKS the operation's refusal — "This note is in a book that is sealed — unseal the book to
-  change it." (the shared table, the Mac's `bookSeal` road) — because the refusal names the road out
-  and a hidden Unseal on a visibly sealed note would leave her no word on why; hiding would also need a
-  per-target fact ("a live sealed book holds this note") pushed into `CapabilityContext` for every
-  surface, a gate no other note door carries. No code change was needed: all three roads already route
-  the op's refusal through the one table. `SealedBookMemberDoorTests` (5) pins Write's bar door, the
-  Takes board's door and the shell's fallback (each speaks the words; the note stays sealed) + the
-  control (an independently sealed note outside a sealed book unseals by its own door) — green.
-  **Suites (the close's evidence, run on the committed tree 7d82a1e7):** core `swift test` FULL —
-  **"Test run with 2004 tests in 212 suites passed"** (1 skipped: the standing env-gated Supabase
-  integration test; baseline 2003/212 after the adjudication → +1, `theSingleTagForwarderIsRetired`);
-  Mac `build-for-testing` GREEN + 73 suites (every new and touched suite, every suite naming the book
-  view / shelf / readings / rule editor / seal doors, the registry walk, the refusal-table integrity +
-  convergence suites, and all ten tutorial-walk suites of `TutorialWalkTests.swift`) — **"Test run
-  with 445 tests in 73 suites passed … with 4 known issues"** (the 4 = the pre-existing
-  `withKnownIssue` TK2 marks in `IndexTierMetricsTests`; zero skips); the phone `VariorumMobile`
-  generic iOS Simulator **BUILD SUCCEEDED**. Zero app instances before and after every run.
-  PENDING: the walk, the record's close.
-- **THE WALK — IN PROGRESS (guard OK, AX + Screen grants true, dev-store Debug build
-  `DerivedData/13ic-u3`).** **W-1 FOUND AND FIXED (commit "13i-c U3 walk fix W-1"):** the Book
-  Settings sheet NESTED the rule editor; after a save the editor's "Also tag the 2 current members with
-  #u3walk #walked now? · Tag Them" OFFER rendered as the shell's toast UNDER the still-open,
-  window-modal settings sheet — her press could not land (walked: the note still wore only
-  `#spawn13ib`; captures u3-05). Fix: Edit… HANDS the editor to the book view and closes the settings
-  sheet (`BookSettingsModel.makeRuleEditor` + `onEditRule`; the book view presents it on the settings
-  sheet's dismissal), so the offer lands on an unblocked window. Not pinnable headlessly (a modal
-  sheet's event-blocking is AppKit's, not the test host's) — the walk's before/after captures are its
-  evidence; the model pin reads `makeRuleEditor()`. Settings · state doors · the registry walk 46/3
-  green after it.
-  **W-2 + W-3 FOUND AND FIXED (commit "13i-c U3 walk fixes W-2 W-3"):** W-2 — the gathering's
-  hide-owned chips TRUNCATED on one line at the sheet's width ("as the a…" · "show th…"; capture
-  u3-25) → the label on its own line, the chips under it, each `fixedSize`. W-3 — app-word values
-  ("wait at Arrivals", "nothing", "nothing by itself") stood unvoiced beside Terminal's lowercased
-  labels → `CollectingLine.appWords` voices them; her paths stay un-voiced (pinned both ways).
-  BookSettingsSheet + BookStateDoors 18/2 green (that run had MY dev instance alive — a quit refused
-  while its sheet was up; recorded; the suites re-run at the close on a zero-instance window).
-  **Walked so far (Terminal · light), each a capture:** the book sheet's Collecting sentences
-  (u3-01) → Edit… opens the editor (u3-02, before W-1; after W-1 over the book) → the chooser's menu
-  (u3-03) → two tags chosen in her order (u3-04) → the sentence updates + the offer (u3-05, blocked —
-  W-1) → removal (u3-06) → the offer on an unblocked window (u3-07) → Tag Them LANDED (u3-08: the
-  note wears #again #u3walk) → an arrival waiting (u3-09) → Finish asks with §24's one line (u3-10)
-  → finished, the arrival dismissed (u3-11) → Reopen acted at once → Seal… lists the forks (u3-12,
-  cancelled) → Own Its Notes… lists the copies (u3-13) → owned (u3-14) → Seal on the owned book:
-  "It owns its notes, so nothing needs copying." (u3-15) → sealed: Finished disabled with the sealed
-  words, Unseal, no Reopen (u3-16) → Unseal says it reopens (u3-17) → open again (u3-18) → Stop Owning
-  acted (u3-19) → the shelf menu's state doors on a book (u3-20) and Finish only on a gathering
-  (u3-21) → the spawn sheet prefilled (u3-22) → edited (u3-23) → the book made with her set (u3-24) →
-  the gathering's settings + hide-owned (u3-25 truncated, u3-26 set) → the gate's refusal + the
-  delete offer (u3-27) → the delete confirm (u3-28, cancelled) → Create Smart Book… → the mint sheet
-  gated (u3-29) → enabled (u3-30) → minted (u3-31). **U1's held walk folded in:** the Trash holds NO
-  swept gathering (u3-32/33 — the dev store had none rule-less, F-U1-4 answered for it); the carried
-  outflow reads "notes written here are tagged: #spawn13ib" on `refresh walk (book)`, a 13i-b single
-  auto-tag carried by v1_20. PENDING: the fixed gathering sheet re-captured; Study and dark captures.
-- No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
-
-## §8 ENVIRONMENT TRAPS`,
+**Your record:** a `## U2 RECORD` section in THIS file directly above `## §8 ENVIRONMENT TRAPS`,
 in the U1 RECORD's shape — the NOT-DONE line FIRST, the design map as shipped, PROVISIONALs (each
 with a QUESTIONS-ready paragraph; numbered P-13ic-U2-n), FINDINGS (for the orchestrator; name the
 owner you suggest), then your LIVE STATUS (per commit; unverified claims PENDING). Flip ledger
@@ -1184,6 +1027,361 @@ commit, unverified claims PENDING). Flip ledger row 4 at the close. Commit per p
 --rebase` then push after every commit; no trailers; foreground waits only; no subagents (one
 read-only Sonnet lookup at most); the §8 traps verbatim.
 
+## U3 RECORD — THE SETTINGS SHEET · THE OUTFLOW CHOOSER · THE STATE DOORS · THE MINT (`opus-implementer`, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** no membership-door face, no badge, no
+delete-with-notes / two-choice delete / duplicate face, no Trash "and N notes" row (all U4's — the
+shelf's "Delete Book" still acts without a confirm, now drawn from the `.deleteBook` declaration U4
+extends); no phone face (the phone has no Collecting sentences or state doors — the mobile
+catch-up's); NO `notes/QUESTIONS.md` entries written (each PROVISIONAL below carries its
+QUESTIONS-ready paragraph for #169); the book navigator's "+ new chapter" road on a RULE-LESS
+gathering not hidden (F-U3-4); the "Create Smart Book" / "smart" wording LEFT for 13i-d's vocabulary
+sweep (the brief's allowance); zero `Sync/`, zero schema, zero `Server/`; core touched ONLY to retire
+the `setReadingAutoTag` forwarder the brief named (no op semantics) and to move its test call sites.
+
+**UNIT STATUS: CLOSED 2026-10-01 — core FULL 2004 tests / 212 suites (1 standing env-gated skip) ·
+Mac 445 tests / 73 suites (4 pre-existing known issues, zero skips) incl. the registry walk and all
+ten tutorial-walk suites · the phone BUILD green · THE WALK DONE (three defects it found, fixed:
+W-1, W-2, W-3) — fifty captures, both voices × both appearances.**
+
+Preflight read in this session's own context: CLAUDE.md + its canon, this plan WHOLE (§1–§11, the
+U1/U2 RECORDs, the adjudication, the U3 BRIEF), the sitting record §1–§6, §10, §18, §20–§25, her
+post-close ruling 2 (commit 2241d670 — the kickoff rewrite carried it into §7's U3 row),
+`notes/SessionResiliencyProtocol.md`, `Tools/WalkKit/README.md`. No editor seam, no `Sync/`, no
+schema (TEXTKIT2_NOTES / SyncSpec not required).
+
+### What U3 built (the design as shipped — a fresh session's map)
+
+- **The registry (P-1):** six STATE acts declared once — `.finishBook` `.reopenBook` `.sealBook`
+  `.unsealBook` `.ownBook` `.unownBook` (scope `.book`, doors `.contextMenu` + `.surface`, `always`,
+  `.native`); `.deleteBook` (`.contextMenu` — the shelf's shipped "Delete Book", now drawn from here
+  — + `.surface` — the rule editor's gathering gate); `.editRule` gains `.surface` (the settings
+  sheet's "Edit…"). WHICH of each pair renders is DATA — `BookStateDoorSet.rendered(for:)`: Finish
+  open / Reopen finished / NEITHER sealed (Reopen refuses there); Seal/Unseal and Own/Stop Owning on
+  BOOKS only (both refuse a gathering); Own still renders on a finished/sealed book and speaks the
+  op's refusal with its road. The walk's surface union names `BookSettingsSheet` and
+  `RuleEditorSheet`; the context union names the shelf's new acts.
+- **`Features/Readings/BookStateDoors.swift`** — `BookStateCopy` (every confirm's sentences, every
+  receipt, the refusal named for its book — static copy on a pure type, `BookStateConfirm` the
+  sheet's whole item), `BookStateDoors` (the one brain: read the book FRESH + the preview its act
+  lists — `pendingArrivalCount`, `sealPreview`, `ownConversionPreview` — then confirm or act;
+  perform through exactly one op; receipt or refusal on the 18i seam), `BookStateConfirmSheet` + the
+  `.bookStateConfirms(_:onLanded:)` modifier (ONE presentation road for the shelf, the settings sheet
+  and the rule editor's gate). Finish asks ONLY when N > 0 (§24's one line verbatim); Seal, Unseal,
+  Own and the gathering's Delete always ask; Reopen and Stop Owning act at once. The shelf's and the
+  book view's `setFinished` RETIRED onto it.
+- **`Features/BookView/BookSettingsSheet.swift`** (moved out of `BookView.swift`, P-9) — the SAME
+  pane for a book and a gathering: Name · Word target · Note cap (as shipped) · **COLLECTING** as
+  sentences (`CollectingCopy`: "Gathers from: <the rule read aloud — `#a and not #b`, `(…)` for a
+  nested group, ★ starred, '(deleted tag)'>", or "nothing by itself" on a rule-less book, or the
+  whole sentence "No rule — this gathering shows nothing until it has one." on a restoree · "New
+  matches: …" · "Notes written here are tagged: #a #b / nothing" — app words voiced, her paths not,
+  W-3) with ONE "Edit…" door; on a gathering the rule + the three-state HIDE-OWNED row ("Notes an
+  owned book holds:" · "as the app does (shown|hidden)" · "show them" · "hide them" →
+  `setReadingHideOwned(nil|false|true)`) and no dial/outflow · **STATE**: the Finished toggle (the
+  confirm when arrivals wait; disabled with "A sealed book stays finished — Unseal reopens it." while
+  sealed), the seal row (Seal… / Unseal), the own row (Own Its Notes… / Stop Owning).
+  `BookSettingsModel` holds the paths + the global default (one-shot, keyed on rule/outflow/toggle)
+  and makes the rule editor; **Edit… HANDS it to the book view and closes the settings sheet (W-1)**.
+- **The outflow chooser** (`Features/Readings/OutflowChooser.swift`) — `OutflowDraft` (her append
+  order, de-duplicated, removable, "none" legal, `written(live:)` drops a dead id) + `OutflowChooser`
+  (a row per chosen tag — "#path" / "(deleted tag)" + "remove" — and a "+ tag" menu of the wing's
+  live tags not yet chosen). The rule editor writes `setReadingOutflow` (a dead stored id drops on
+  ANY save of the sheet); the offer asks when the rule or the set changed and
+  `membersMissingAnyOutflowTag` > 0, its act `tagAllMembers(nil)`, its receipt counting notes.
+  **`setReadingAutoTag` RETIRED** (core) with a retirement pin.
+- **R-13ic-4's faces** — `RuleTreeEditor` (the tree, extracted: one face for the editor and the mint);
+  the GATE (`gatheringNeedsRule` → Save gated, "A gathering needs a rule.", "Delete this gathering…"
+  → the confirm "It goes to the Trash — Put back returns it for 30 days." · "No note is touched: a
+  gathering holds none." → `deleteReading` → the editor closes); the empty-state re-word (F-U1-3);
+  **THE MINT** (F-U1-2): `RuleEditorModel(session:mintingIn:)` + `MintGatheringSheet` (name · the
+  tree · Create disabled until a term exists · a taken name refuses and keeps), opened by the shelf's
+  "Create Smart Book…"; `ReadingsViewModel.create(…, wingId:)`.
+- **The spawn sheet** — `SpawnOffer` (the gathering, the suggested name, the wing's live tags, the
+  PREFILL = `ShelfViewModel.spawnPrefill`: the rule's positive tags, tree order, live-filtered) +
+  `SpawnBookSheet` (the truth per rule state · the chooser, editable before the mint);
+  `spawnBook(from:named:outflow:)` writes her set (a chosen tag that died meanwhile drops at the act;
+  nil = the prefill). `BindCopy.spawnMessage(.none)` re-worded to the R-13ic-4 truth. The shelf hides
+  Bind / Make-a-Book on a RULE-LESS gathering (the plan §2's line).
+- **The bind sheet's owned-notes limb** (the plan §3: "the sheet gains the limb in U3" — omitted from
+  the brief's six pieces, built because this unit's Own door is what makes owned notes reachable in a
+  gathering's assembly; without it the sheet's count promise would be false the moment one exists) —
+  `BindOffer.ownedElsewhere` (from `bindOwnedNotesPreview`), "Title — owned by “Book”" listed, the
+  choice leave them out (DEFAULT, P-13ic-4) · copy them in, each said whole, the count promise and
+  the receipt (`BindCopy.bound(_:count:copied:leftOut:)`) following it; both hosts pass the choice.
+- **The note's own Unseal inside a sealed book** (the adjudication): stays RENDERED and speaks
+  `noteInSealedBook`'s words on every road — no code needed; pinned per road (P-13ic-U3-1).
+
+### Evidence (the plan §7 U3 row, each named before the build)
+
+- **Mounted pins / static copy:** `BookStateDoorsTests` (13 — the pair table cell for cell; the
+  finish line + the N>0 gate; the seal confirm's lead, finishes-too, forks lead + list, waiting line,
+  the owned fork-free line; unseal's "reopens"; own's copies / nothing-to-copy; every act through the
+  one model incl. Finish asking with an arrival and dismissing it, Seal forking a shared member,
+  Unseal reopening, Own + Stop Owning, the refusal naming its road on finished/sealed; the confirm
+  sheet draws exactly its item) · `BookSettingsSheetTests` (6 — the rule read aloud; the sentences per
+  kind and state incl. W-3's voicing; the mounted book sheet's sentences + state doors; a sealed
+  book's Unseal and disabled Finished; the gathering pane; the hide-owned round trip hiding an owned
+  note) · `OutflowChooserTests` (6 — the draft; the chooser's save round-trip incl. order and removal;
+  the dead tag drawn and dropped; none legal and never untagging; the offer's N over the set and its
+  act; a rule change re-asking) · `GatheringRuleGateTests` (7 — the re-word; the gate + the delete
+  offer; a book's clear not gated; a restoree opening gated; the delete confirm landing in the Trash
+  with no note touched; the mint's Create gate; the mint's rule + a taken name refusing and keeping) ·
+  `SpawnAndBindLimbTests` (7 — the spawn's prefill; the mounted spawn sheet's chooser; her edited set
+  minted; the limb's words and counts; the offer + mounted limb; leave-out and copy-in with their
+  receipts) · `SealedBookMemberDoorTests` (5 — the shared words; Write's, the Takes board's and the
+  shell's roads each speak them and the note stays sealed; the control).
+- **The registry walk** (`CapabilityRegistryTests`) green with the two new surface renderers and the
+  shelf's new context doors. **The tutorial spine**: all ten suites of `TutorialWalkTests.swift` green.
+- **Honest test edits (subject untouched, each commented):** `ShelfModelTests.
+  finishAndExtentFacesCallTheOps` (the face's road moved onto `stateDoors`); the two `RuleEditorTests`
+  auto-tag pins drive `OutflowDraft` (their words unchanged); core — `setReadingAutoTag`'s 10 call
+  sites → `setReadingOutflow` one-for-one (IntakeOperations ×8, ReadingFilter ×2, Phase13icOutflow ×1).
+  Fixture fixes in MY new pins only (a member joining before the outflow; the Trash window read on the
+  world's clock).
+- **Suites:** core `swift test` FULL — "Test run with 2004 tests in 212 suites passed" (1 skipped:
+  the standing env-gated Supabase integration test; baseline 2003/212 → +1, the retirement pin); Mac
+  73 suites — "Test run with 445 tests in 73 suites passed … with 4 known issues" (twice: at 7d82a1e7
+  and again after the walk fixes, zero instances); the phone `VariorumMobile` generic iOS Simulator
+  BUILD SUCCEEDED. DerivedData `App/Variorum/DerivedData/13ic-u3`, `13ic-u3-ios` (+ logs) — the
+  closeout's tidy sweeps them.
+- **No bug-class row in this unit's brief** (a face unit) — red-on-old applied to nothing; the three
+  walk defects (W-1/2/3) are presentation-layer (a modal sheet's event blocking, a truncating row,
+  voicing) and are evidenced by the walk's before/after captures, W-3 additionally pinned both ways.
+
+### PROVISIONALs made in U3 (each QUESTIONS-ready for #169)
+
+- **P-13ic-U3-1 — A note's own Unseal inside a sealed book stays visible and explains itself.** The
+  adjudication left "refuse or hide" to this unit. *QUESTIONS paragraph:* "A note that belongs to a
+  sealed book still shows its Unseal button; pressing it says 'This note is in a book that is sealed
+  — unseal the book to change it.' (a) As built — the button explains the road; (b) hide the note's
+  Unseal entirely while its book is sealed."
+- **P-13ic-U3-2 — A gathering keeps the shipped Finish/Reopen doors and the Word target / Note cap
+  fields** in its settings and shelf menu (13i-b shipped them; the ops act on a gathering), though the
+  sitting record §3 lists finish, word targets and capacity among what a gathering does NOT have.
+  *QUESTIONS paragraph:* "Gatherings can still be marked Finished and given a word target or note cap,
+  as before this phase. (a) Keep them — BUILT; (b) remove them from a gathering's settings and menu
+  (the design record's letter); (c) also make the operations refuse them on a gathering."
+- **P-13ic-U3-3 — "Own Its Notes…" stays on a finished or sealed book's menu and says how to get
+  there** ("“X” is finished — reopen it first." / "…sealed — unseal it first (that reopens it
+  too).") rather than hiding (the brief's "refused … with the op's words"). *QUESTIONS paragraph:*
+  "(a) As built — the door explains; (b) hide Own Its Notes… until the book is open."
+- **P-13ic-U3-4 — The settings sheet's "Edit…" closes the settings sheet and opens the rule editor
+  over the book** (W-1: a nested editor's "Also tag the N members" offer appeared under the still-open
+  settings sheet and could not be pressed). Back to settings is one more gear press. *QUESTIONS
+  paragraph:* "(a) As built; (b) return to the settings sheet after the editor closes and show the
+  'also tag' question inside it; (c) keep the editor inside the settings sheet and move the question
+  into the editor itself."
+- **P-13ic-U3-5 — A dead outflow tag drops on ANY save of the rule editor**, not only one that touched
+  the chooser (its row read "(deleted tag)"; the setter refuses a dead id). *QUESTIONS paragraph:*
+  "(a) As built; (b) drop it only when you edit the tag list itself."
+- **P-13ic-U3-6 — Reopen and Stop Owning act without asking** (Reopen moves nothing she wrote — the
+  gap's matches wait at Arrivals; Stop Owning moves no row — the brief's "plain, no confirm").
+  *QUESTIONS paragraph:* "(a) As built; (b) Reopen asks too, naming what may arrive."
+- **P-13ic-U3-7 — The confirm/receipt/Collecting wording** (e.g. "Sealing finishes the book too.",
+  "These notes also live in other books, so each gets its own copy here, sealed with the book — the
+  originals stay where they are, still editable:", "Notes an owned book holds: as the app does
+  (shown) · show them · hide them", the mint's "Add a tag or ★ starred — a gathering is made from its
+  rule…") — all 13s-revoicable; the TRUTHS are ruled. *QUESTIONS paragraph:* "The new sentences in
+  book settings and the seal/own/finish confirms are first drafts — re-voice at 13s?"
+
+### FINDINGS (for the orchestrator; none a STOP condition)
+
+- **F-U3-1 (suggested owner: 13i-d, the Collecting-pane re-home):** P-13ic-U3-2's gap between the
+  sitting record §3 (gatherings have no finish/targets/capacity) and the shipped ops + faces.
+- **F-U3-2 (U4):** the shelf's "Delete Book" is now drawn from `.deleteBook` and still acts on ANY
+  book without a confirm; U4's two-choice confirm extends this declaration and should route through
+  `BookStateDoors.open(.deleteBook)` (today its confirm words are the gathering's — U4 adds the
+  book's plain + owned arms).
+- **F-U3-3 (pre-existing; suggested owner: a standing-fixes entry or 13i-d's Bookcase rebuild):** the
+  shelf's `lastReport`/`lastError` overlay draws ON TOP of the ⌘K hint bar at the window bottom
+  (walked: "made “u3 spawn walk” — 5 notes joined…" over "⌘k — find anything…", u3-24).
+- **F-U3-4 (13i-d):** the plan §2's "a rule-less gathering's bind/spawn doors hide" is built on the
+  shelf menu (the declared doors); the book navigator's "+ new chapter" on a rule-less gathering still
+  opens the bind (it acts — binds nothing into an empty book).
+- **F-U3-5 (13s / 13i-d copy):** the fork/copy lists name notes by `DisplayTitle`, so two untitled
+  notes of one day read "2026-10-01 — also in …" twice (u3-12/13) — true, ambiguous; an excerpt would
+  disambiguate.
+- **F-U3-6 (13i-d / the 18i seam's owner):** a REFUSAL spoken from inside the settings sheet (e.g.
+  Own on a finished book) lands as the shell's toast under the window-modal sheet — readable but
+  dimmed. OFFERS were the blocking class (W-1, fixed); no other offer is raised from inside the sheet.
+- **F-U3-7 (U4 / 13i-d — the badges):** the book navigator's chip reads "✓ finished" on a SEALED book
+  (the shipped chip knows only `locked`); a sealed face there is the badge family's.
+- **F-U3-8 (her call, recorded):** the offer toast's 6 s clock (18i) is tight for reading "Also tag
+  the 2 current members with #a #b now?" and pressing — the walk met it twice under its own pacing.
+- **F-U3-9 (recorded):** one Mac run (W-2/W-3's 18/2) had MY dev instance alive (a quit refused while
+  its sheet was up); the close's 73-suite run re-ran everything on a zero-instance window.
+- **F-U3-10 (walk residue — dev store only):** books "u3 spawn walk", "u3 mint walk"; the note
+  "arrival walk"; fork copies of "spawn one"/"spawn two" (Own on `spawn walk (book)`); that book's
+  outflow now [#again, #u3walk] and its dial "wait at Arrivals"; `dream journal`'s hide-owned toggled
+  and restored to follow-the-default. Her voice + appearance preference restored.
+- **F-U1-4 answered for the dev store:** v1_20 found NO rule-less gathering there (the Trash holds
+  none); her REAL store stays unknown until the window.
+- **Tutorial (P-6):** no lesson sentence went false; lessons 1, 5 and 6 now appear as the confirms'
+  leads (`BookStateCopy.ownLead`, `.sealLead`, the settings captions). No tutorial prose rewritten.
+- **MOBILE PARITY (for the closeout's row):** nothing mobile-visible changed (Mac faces only; the
+  shared refusal table untouched); the phone has no Collecting sentences or state doors — the mobile
+  catch-up's.
+
+### THE WALK — captures under `notes/plans/13ic-screens/u3/` (gitignored)
+
+u3-01 book settings (Collecting) · u3-02 the rule editor from settings (pre-W-1, nested) · u3-03 the
+outflow menu · u3-04 two tags chosen · u3-05 the sentence updated + the offer BLOCKED under the sheet
+(W-1's before) · u3-06 a removal · u3-07 the offer on an unblocked window (W-1's after) · u3-08 Tag
+Them landed (#again #u3walk on the note) · u3-09 an arrival waiting · u3-10 Finish's one line ·
+u3-11 finished, arrival dismissed · u3-12 Seal… lists the forks · u3-13 Own Its Notes… lists the
+copies · u3-14 owned (Stop Owning) · u3-15 sealing an owned book: no copies needed · u3-16 sealed:
+Unseal, Finished disabled, no Reopen · u3-17 Unseal says it reopens · u3-18 open again · u3-19 Stop
+Owning acted · u3-20 the shelf menu's book state doors · u3-21 a gathering's menu (Finish only) ·
+u3-22 the spawn sheet prefilled · u3-23 edited · u3-24 the book made with her set (+ F-U3-3) · u3-25
+the gathering's hide-owned TRUNCATED (W-2's before) · u3-26 hide-owned set · u3-27 the gate's refusal
++ delete offer · u3-28 the delete confirm · u3-29 the mint gated · u3-30 enabled · u3-31 minted ·
+u3-32/33 the Trash: no swept gathering · u3-34 a rule-less book's voiced sentences (W-3's after) ·
+u3-35 the gathering sheet whole (W-2's after) · Terminal·dark u3-36…40 · Study·dark u3-41…45 ·
+Study·light u3-46…50 (each: a book's settings, the seal confirm, a gathering's settings, the gate,
+the mint).
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- **Piece A — THE STATE DOORS:** DONE (commit "13i-c U3 pieces A+B"). Registry: `.finishBook`
+  `.reopenBook` `.sealBook` `.unsealBook` `.ownBook` `.unownBook` (scope `.book`, doors `.contextMenu` +
+  `.surface`, `always`, `.native`) and `.deleteBook` (`.contextMenu` for now — the rule editor's
+  `.surface` door lands with Piece D). `Features/Readings/BookStateDoors.swift`: `BookStateDoorSet`
+  (the pure pair table), `BookStateCopy` (every confirm + receipt + the refusal named for its book),
+  `BookStateConfirm` (the sheet's item), `BookStateDoors` (preview → confirm-or-act → receipt /
+  refusal), `BookStateConfirmSheet` + `.bookStateConfirms(_:)` (ONE presentation road). The shelf menu
+  renders the pairs from the table; `ShelfViewModel.setFinished` and `BookStructureModel.setFinished`
+  RETIRED onto the shared road (one honest pin edit: `ShelfModelTests.finishAndExtentFacesCallTheOps`
+  drives `stateDoors.open(.finishBook…)`). The shelf hides Bind/Make-a-Book on a RULE-LESS gathering
+  (the plan §2's P-2 line). `BookStateDoorsTests` (13) green.
+- **Piece B — THE SETTINGS SHEET:** DONE (same commit). `Features/BookView/BookSettingsSheet.swift`
+  (moved out of `BookView.swift`): `CollectingCopy` (the rule read aloud as a sentence; the three
+  Collecting lines; the hide-owned three words), `BookSettingsModel` (paths + the global default,
+  one-shot, keyed on rule/outflow/toggle; the Edit… door; `setHideOwned`), the sheet (Name · Word
+  target · Note cap as shipped · Collecting · State — the Finished control disabled with the sealed
+  words while sealed). `.editRule` gains `.surface`; the registry walk's surface union names
+  `BookSettingsSheet`. `BookSettingsSheetTests` (6) green. Touched suites: BookStateDoors ·
+  BookSettingsSheet · CapabilityRegistry (the walk) · ShelfModelTests — **49 tests / 4 suites passed**;
+  zero instances before and after.
+- **Piece C — THE OUTFLOW CHOOSER:** DONE (commit "13i-c U3 piece C"). `Features/Readings/
+  OutflowChooser.swift`: `OutflowDraft` (pure — her append order, de-duplicated, each removable, "none"
+  legal, `written(live:)` drops a dead id) + `OutflowChooser` (a row per chosen tag in the term-row
+  grammar — "#path" or "(deleted tag)", a quiet "remove" — and one "+ tag" menu of the wing's live
+  tags not yet chosen). `RuleEditorModel.autoTagID` → `outflow: OutflowDraft`; writes
+  `setReadingOutflow(id, tagIDs:)` (a dead stored id drops on ANY save of the sheet); the offer asks
+  when the rule or the set changed, N = `membersMissingAnyOutflowTag` (read after the write), its act
+  `tagAllMembers(nil)`, the receipt counting notes; words `tagMembersOffer(count:paths:)` /
+  `taggedMembers(count:paths:)` (one tag reads exactly as before). **Core:** the
+  `setReadingAutoTag` FORWARDER RETIRED (F-U1-1) — its 10 core-test call sites moved one-for-one onto
+  `setReadingOutflow` (subjects untouched, each commented); `OutflowRetirementTests.
+  theSingleTagForwarderIsRetired` pins no production caller or definition survives. The two
+  `RuleEditorTests` auto-tag pins drive the draft (their words unchanged). Core filtered run
+  (IntakeOperations · Phase13icOutflow · ReadingFilter · OutflowRetirement) **66 / 4 green**; Mac
+  `OutflowChooserTests` (6) + RuleEditor + BindDoor + BookSettingsSheet green (one fixture-order fix
+  in my own new pin: a hand-add rides the outflow, so the member joins before it exists).
+- **Piece D — R-13ic-4's FACES:** DONE (commit "13i-c U3 piece D"). The rule editor's tree
+  extracted as `RuleTreeEditor` (one face for one grammar — the editor sheet and the mint sheet).
+  THE GATE: `RuleEditorModel.gatheringNeedsRule` (a gathering, editable rule, no term) → Save gated
+  (`canSave`) with "A gathering needs a rule." and the "Delete this gathering…" door (`.deleteBook`'s
+  `.surface` door — the registry gains it, the walk names `RuleEditorSheet`) → `BookStateDoors`'
+  confirm ("It goes to the Trash — Put back returns it for 30 days." · "No note is touched: a
+  gathering holds none.") → `deleteReading` → the editor closes (`.bookStateConfirms(_:onLanded:)`).
+  A BOOK's clear stays legal (the kill switch). The empty-state re-word (F-U1-3): "No rule — this
+  gathering shows nothing until it has one." THE MINT (F-U1-2): `RuleEditorModel(session:mintingIn:)`
+  (the mint mode — the wing's live tags, the name held on the model, `mint(through:)` via
+  `ReadingsViewModel.create(querySpec:wingId:)`), `MintGatheringSheet` (name · the tree · Create
+  disabled until a term exists · a refusal refuses-and-keeps); the shelf's "Create Smart Book…"
+  opens it (its "smart" wording LEFT for 13i-d's vocabulary sweep — the brief's allowance).
+  `GatheringRuleGateTests` (7) green; with RuleEditor · the registry walk · OutflowChooser ·
+  BookStateDoors · BookSettingsSheet — **68 tests / 6 suites passed** (one clock fix in my own new
+  pin: the Trash window reads the world's `now`, not the wall's).
+- **Piece E — THE SPAWN SHEET + THE BIND'S OWNED-NOTES LIMB:** DONE (commit "13i-c U3 piece E").
+  The spawn's 13i-b name-only `.alert` → `SpawnBookSheet` over a `SpawnOffer` item (the gathering, the
+  suggested name, the wing's live tags, the PREFILL — `ShelfViewModel.spawnPrefill`: the rule's positive
+  tags, tree order, live-filtered; ONE function for the sheet and the no-answer default) with the
+  `OutflowChooser`, editable before the mint; `spawnBook(from:named:outflow:)` writes her chosen set (a
+  chosen tag that died meanwhile drops at the act; nil = the prefill). `BindCopy.spawnMessage(.none)`
+  re-worded ("…it shows nothing" — the R-13ic-4 truth; the door itself hides there). THE LIMB:
+  `BindOffer.ownedElsewhere` (from `Queries.bindOwnedNotesPreview`, mapped to `BindCopy.OwnedNote`),
+  the sheet lists "Title — owned by “Book”" with the two-way choice (leave them out — DEFAULT,
+  P-13ic-4 · copy them in), each said whole, the count promise following the choice
+  (`BindCopy.memberCount`); `onConfirm` carries the choice to `ShelfViewModel.bind(_:ownedNotes:)` /
+  `BookStructureModel.bind(order:ownedNotes:)`; the receipt names the limb's outcome
+  (`BindCopy.bound(_:count:copied:leftOut:)` — the plain bind's words unchanged). `SpawnAndBindLimbTests`
+  (7) green; with BindDoor · BookOrderConversion · DuplicateBookNameDoor · BookAscentDeclaration —
+  **38 tests / 5 suites passed**.
+- **Piece F — the note's own Unseal inside a sealed book + the close:** the DOOR half DONE (commit
+  "13i-c U3 piece F (1/2)"). THE CALL (the adjudication left it to this unit): the door stays RENDERED
+  and SPEAKS the operation's refusal — "This note is in a book that is sealed — unseal the book to
+  change it." (the shared table, the Mac's `bookSeal` road) — because the refusal names the road out
+  and a hidden Unseal on a visibly sealed note would leave her no word on why; hiding would also need a
+  per-target fact ("a live sealed book holds this note") pushed into `CapabilityContext` for every
+  surface, a gate no other note door carries. No code change was needed: all three roads already route
+  the op's refusal through the one table. `SealedBookMemberDoorTests` (5) pins Write's bar door, the
+  Takes board's door and the shell's fallback (each speaks the words; the note stays sealed) + the
+  control (an independently sealed note outside a sealed book unseals by its own door) — green.
+  **Suites (the close's evidence, run on the committed tree 7d82a1e7):** core `swift test` FULL —
+  **"Test run with 2004 tests in 212 suites passed"** (1 skipped: the standing env-gated Supabase
+  integration test; baseline 2003/212 after the adjudication → +1, `theSingleTagForwarderIsRetired`);
+  Mac `build-for-testing` GREEN + 73 suites (every new and touched suite, every suite naming the book
+  view / shelf / readings / rule editor / seal doors, the registry walk, the refusal-table integrity +
+  convergence suites, and all ten tutorial-walk suites of `TutorialWalkTests.swift`) — **"Test run
+  with 445 tests in 73 suites passed … with 4 known issues"** (the 4 = the pre-existing
+  `withKnownIssue` TK2 marks in `IndexTierMetricsTests`; zero skips); the phone `VariorumMobile`
+  generic iOS Simulator **BUILD SUCCEEDED**. Zero app instances before and after every run.
+  The walk and the close: DONE (below).
+- **THE WALK — DONE (guard OK at every act, AX + Screen grants true, dev-store Debug build
+  `DerivedData/13ic-u3`, `io.lduarte.Variorum.debug`; her app absent throughout).** **W-1 FOUND AND FIXED (commit "13i-c U3 walk fix W-1"):** the Book
+  Settings sheet NESTED the rule editor; after a save the editor's "Also tag the 2 current members with
+  #u3walk #walked now? · Tag Them" OFFER rendered as the shell's toast UNDER the still-open,
+  window-modal settings sheet — her press could not land (walked: the note still wore only
+  `#spawn13ib`; captures u3-05). Fix: Edit… HANDS the editor to the book view and closes the settings
+  sheet (`BookSettingsModel.makeRuleEditor` + `onEditRule`; the book view presents it on the settings
+  sheet's dismissal), so the offer lands on an unblocked window. Not pinnable headlessly (a modal
+  sheet's event-blocking is AppKit's, not the test host's) — the walk's before/after captures are its
+  evidence; the model pin reads `makeRuleEditor()`. Settings · state doors · the registry walk 46/3
+  green after it.
+  **W-2 + W-3 FOUND AND FIXED (commit "13i-c U3 walk fixes W-2 W-3"):** W-2 — the gathering's
+  hide-owned chips TRUNCATED on one line at the sheet's width ("as the a…" · "show th…"; capture
+  u3-25) → the label on its own line, the chips under it, each `fixedSize`. W-3 — app-word values
+  ("wait at Arrivals", "nothing", "nothing by itself") stood unvoiced beside Terminal's lowercased
+  labels → `CollectingLine.appWords` voices them; her paths stay un-voiced (pinned both ways).
+  BookSettingsSheet + BookStateDoors 18/2 green (that run had MY dev instance alive — a quit refused
+  while its sheet was up; recorded; the suites re-run at the close on a zero-instance window).
+  **Walked so far (Terminal · light), each a capture:** the book sheet's Collecting sentences
+  (u3-01) → Edit… opens the editor (u3-02, before W-1; after W-1 over the book) → the chooser's menu
+  (u3-03) → two tags chosen in her order (u3-04) → the sentence updates + the offer (u3-05, blocked —
+  W-1) → removal (u3-06) → the offer on an unblocked window (u3-07) → Tag Them LANDED (u3-08: the
+  note wears #again #u3walk) → an arrival waiting (u3-09) → Finish asks with §24's one line (u3-10)
+  → finished, the arrival dismissed (u3-11) → Reopen acted at once → Seal… lists the forks (u3-12,
+  cancelled) → Own Its Notes… lists the copies (u3-13) → owned (u3-14) → Seal on the owned book:
+  "It owns its notes, so nothing needs copying." (u3-15) → sealed: Finished disabled with the sealed
+  words, Unseal, no Reopen (u3-16) → Unseal says it reopens (u3-17) → open again (u3-18) → Stop Owning
+  acted (u3-19) → the shelf menu's state doors on a book (u3-20) and Finish only on a gathering
+  (u3-21) → the spawn sheet prefilled (u3-22) → edited (u3-23) → the book made with her set (u3-24) →
+  the gathering's settings + hide-owned (u3-25 truncated, u3-26 set) → the gate's refusal + the
+  delete offer (u3-27) → the delete confirm (u3-28, cancelled) → Create Smart Book… → the mint sheet
+  gated (u3-29) → enabled (u3-30) → minted (u3-31). **U1's held walk folded in:** the Trash holds NO
+  swept gathering (u3-32/33 — the dev store had none rule-less, F-U1-4 answered for it); the carried
+  outflow reads "notes written here are tagged: #spawn13ib" on `refresh walk (book)`, a 13i-b single
+  auto-tag carried by v1_20. **The fixed faces and the voice × appearance matrix (after W-2/W-3):**
+  the rule-less book's voiced sentences (u3-34) and the gathering sheet whole (u3-35) in Terminal ·
+  light; Terminal · dark (u3-36 a gathering's sheet, u3-37 a book's, u3-38 the seal confirm, u3-39 the
+  gate, u3-40 the mint); Study · dark (u3-41…45, the same five); Study · light (u3-46…50, the same
+  five). Her dev store's voice (Terminal) and appearance preference (`system`) RESTORED and read back.
+- **THE CLOSE (the closing commit):** after W-1/W-2/W-3 the Mac `build-for-testing` re-ran GREEN and
+  the same 73 suites re-ran on a ZERO-instance window — **"Test run with 445 tests in 73 suites passed
+  … with 4 known issues"** (the 4 pre-existing `IndexTierMetricsTests` marks; zero skips). Core and the
+  phone stand on their 7d82a1e7 runs: no line under `Sources/`, `Tests/`, `App/Variorum/Shared/` or
+  `App/Variorum/VariorumMobile/` changed after them (`git diff --stat 7d82a1e7..HEAD` over those
+  paths — empty). The record written whole; ledger row 4 flipped.
+- **Machinery honesty:** this record's first commit (163b9545) landed INSIDE the U2 BRIEF's sentence
+  — the insertion matched the brief's backticked "`## §8 ENVIRONMENT TRAPS`" mention, the same class
+  that swallowed U2's heading. Moved here at the close; the plan was verified byte-identical to its
+  pre-U3 tip (26414772) before this record went in. No revert was ever in flight; zero app instances
+  at open and at close.
+
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1243,7 +1441,7 @@ Debug only, author-free, own `caffeinate -d`.
 | 1 | Plan authored; her four kickoff rulings recorded (§1); PROVISIONALs (§9) | DONE (this commit) |
 | 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | **BUILT + PINNED 2026-10-01** (the U1 RECORD above; core 1927/202 · Mac 83/9 · phone build green; commits b4cb639b + 19eb55c0; the deploy checklist `notes/plans/13i-c-deploy-checklist.md`). **The dev-store WALK is HELD** (author at the machine) and folded into U3's walk window |
 | 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | **BUILT + PINNED 2026-10-01** (the U2 RECORD above; core 2001/211 · Mac 772/135 · phone 102/16 · both builds green; commits 936f8cf9 → the closing commit; nine PROVISIONALs P-13ic-U2-1…9 for #169; FINDINGS F-U2-1…9 — F-U2-1, `unlockPost` inside a sealed book, is a reserved fork for the architect). Headless — no walk owed by this unit |
-| 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | NOT STARTED |
+| 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | **BUILT + PINNED + WALKED 2026-10-01** (the U3 RECORD above; core 2004/212 · Mac 445/73 · phone build green; commits 163b9545 → the closing commit; the walk found and fixed W-1/W-2/W-3; fifty captures, both voices × both appearances; seven PROVISIONALs P-13ic-U3-1…7 for #169; FINDINGS F-U3-1…10 — F-U3-2 is U4's delete door; the bind sheet's owned-notes limb built here per §3) |
 | 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | NOT STARTED |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | NOT STARTED |
 | 7 | Her deploy window (§11) + the install refresh + the phone's tail | HELD for her go |
