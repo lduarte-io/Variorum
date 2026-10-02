@@ -1150,114 +1150,297 @@ touched (TEXTKIT2_NOTES not required). No revert in flight. No subagents.
 
 ## U4 RECORD — THE (c) ARM (ACT 0) + ARCHIVED MEMBERS IN BOOKS (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — filled at the close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **the phone is untouched** (record
+only — MOBILE PARITY below): its book-details "Finish" row still draws on a gathering and now meets
+ACT 0's honest refusal (dumped raw by its `lastError` — the catch-up removes the row); it shows no
+archived line, no archived waiters, no honest counts. (2) **`createReading(kind: .gathering,
+maxPosts:/wordTarget:)` still accepts extents at the mint** — not in the ruling, unreachable from any
+face today (F-U4-5). (3) **The Library's Archived view's own Unarchive button stays undeclared**
+(P-1; `.unarchiveNote` now exists for it to name — F-U4-4, the Library surface's touch). (4) **No
+drag** was needed (every new door is a button). Everything in the U4 brief — ACT 0 as ruled and item
+9's seven pieces — is built, pinned (red-on-old where bug-class) and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2058/221 (1 standing env-gated skip) · Mac 732/117,
+0 skipped, incl. the registry walk, the eleven tutorial suites and the landing families UNMODIFIED ·
+the phone TEST BUILD green · the walk DONE (23 captures ×4).**
 
 Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (R-13id-1…5, the
 constitution, item 9, all three adjudications, the U1–U3 RECORDs, the away-run posture, the traps);
 the sitting record §4 and §24 (+ §25's lessons); `phase-13i-b-gatherings.md` §3 + its U2 RECORD
 (P-13ib-U2-1…5, the pins); `notes/SessionResiliencyProtocol.md` whole; KnownIssues rows 13, 103,
 107, 109, 110, 112; QUESTIONS #169 (her (a) reasoning, verbatim) — next free number **#173**. No
-`Sync/`, schema, custody or editor-seam work planned (the book's line hosts stand OUTSIDE the
-measured scroll content, the Arrivals line's own placement — TEXTKIT2_NOTES not required). No
-revert in flight. No subagents. Logs and pre-revert copies: the repo's gitignored
-`scratchpad/13id-u4/`.
+`Sync/`, schema, custody or editor-seam work (the book's line hosts stand OUTSIDE the measured
+scroll content, the Arrivals line's own placement — TEXTKIT2_NOTES not required). No revert in
+flight. No subagents. Logs and pre-revert copies: the repo's gitignored `scratchpad/13id-u4/`.
 
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + the design + evidence named | DONE (this commit) |
-| 2 | ACT 0 — the (c) arm: `lockReading` + a non-nil `setReadingWordTarget` / `setReadingMaxPosts` refuse a gathering (`wrongReadingKind(expected: .book)`); clearing + `unlockReading` stay legal; red-on-old pins; the three legacy-gathering FIXTURES (core `SmartCollectAndOutlineTests`, Mac `BindDoorTests`, `BookCollectingDoorsTests`) re-written as the raw legacy row | DONE (this commit) — `GatheringExtentRefusalTests` 6: the 4 refusal pins RED on the pre-fix ops (**13 issues**, `scratchpad/13id-u4/act0-red.log`), the 2 controls (the ways out; books untouched) green both sides; green after with the core reading/intake/seal neighbours **119/12** (`act0-green.log`); the core fixture re-staged (its one predicted red); the two Mac fixtures re-staged — **PENDING the Mac run** |
-| 3 | Core — THE ONE QUERY (`Queries.bookArchivedMembers` + its wing counts in `bookcaseAggregates`, one predicate) · the Arrivals predicate FLIP (archived waiters counted + listed, marked) · the P-13ib-U2-2 pin flips red-on-old · the seatArrival-archived + intake-never-seats-archived state-transition pins | DONE (this commit) — the two core flips (`ArrivalQueriesTests.anArchivedWaiterStaysAtTheDoorMarkedArchived`, `PendingArrivalDismissalTests`' line arm) RED on the pre-flip predicate (**2 tests, 3 issues**, `flip-red.log`), green after; `ArchivedMembersTests` 10 (the query ×8 incl. both plans and the live observation; the two VERIFIED facts — no op code changed, `Operations+Intake.swift`'s diff is comments only); with the neighbours (Bookcase incl. U1's held-region P1 pin, intake, hygiene, ACT 0) **99/9 green** (`p3-green.log`) |
-| 4 | Mac — the ARCHIVED LINE (copy · model · face · probe) on the Arrivals line's three hosts; the archived waiter's mark + Add's honest receipt; `.unarchiveNote` declared; the shared remove door's receipt honest for an archived note (red-on-old) | IN-PROGRESS — WIP checkpoint (this commit): built (`DerivedData/13id-u4`, TEST BUILD SUCCEEDED); the remove-receipt pin written (`RemoveReleaseDoorTests.anArchivedNoteRemovedOrReleasedStaysArchivedNeverThePool`); the mounted pins and the behavioural reverts NOT yet run — **PENDING** |
-| 5 | Mac — HONEST COUNTS: the Bookcase row meta "N notes · M archived" (hidden with details off) · the book's count lines (Outline's title meta, the Index footer — "N shown" under the filter) | IN-PROGRESS — WIP (this commit): built; `BookcaseRowMeta.drawn` is the row's ONE draw value (nil with details off); pins **PENDING** |
-| 6 | Riders — F-U3-5 (`.setReadingHideOwned` declared) · R-13id-3's documenting line (row 109, zero behavior) | IN-PROGRESS — WIP (this commit): both written and built (the comment in `restoreContainerRows`, zero behavior); the declaration's pin **PENDING** |
-| 7 | Mac pins + the Mac P-13ib-U2-2 flip (`BookStateDoorsTests`) + the registry walk | DONE (1f00dc75 pins; the revert this commit) — pins GREEN **94/8** (`p4-mac1.log`, 0 skipped); the COMBINED BEHAVIOURAL REVERT (R1 the Arrivals predicate's archived filter back · R2 the remove door's archived read forced false · R3 the sheet's `.setReadingHideOwned` declaration dropped · R5 the row meta ignoring `archived`) turned **exactly the 7 predicted tests RED, 14 issues, nothing else** (107/10 run incl. the Bookcase pair — `revert.log`): `finishAsksWhenOnlyAnArchivedNoteWaits` + `anArchivedWaiterIsMarked…` (R1) · `anArchivedNoteRemovedOrReleased…` + `removeTakesItOut…` (R2) · `theHideOwnedChipsAreADeclaredAct…` + the walk's `theSurfacesRenderExactlyTheDeclaredSurfaceActs` (R3) · `theBookcaseRowSaysTheArchived…` (R5); restored by `git checkout --` from the committed HEAD, each file `cmp`-identical to its pre-revert copy, tree clean — **no revert in flight** |
-| 8 | Suites at the END (core full; Mac named incl. the registry walk, the tutorial spine, the landing families UNMODIFIED; the phone TEST BUILD) | NOT-STARTED |
-| 9 | The screenshot walk ×4 into `notes/plans/13id-screens/u4/` | DONE (this commit) — 23 captures, all four voice/appearance combinations (`tl-01…14` Terminal·light minus a dropped non-evidence frame · `td-01…04` · `sd-01…03` · `sl-01…03`), dev-store Debug from `DerivedData/13id-u4`, the author guard first at every act, her app absent throughout; her dev voice (Terminal — read back `1, 0`), appearance (system) and the board prefs (details on) restored; zero instances after. Listed in EVIDENCE |
-| 10 | Record close · QUESTIONS #173 · KnownIssues rows 13 / 107 / 109 · ledger row 4 | NOT-STARTED |
+| 1 | Record skeleton + the design + evidence named | DONE (9fa1f711) |
+| 2 | ACT 0 — the (c) arm: `lockReading` + a non-nil `setReadingWordTarget` / `setReadingMaxPosts` refuse a gathering (`wrongReadingKind(expected: .book)`); clearing + `unlockReading` stay legal; red-on-old pins; the legacy-gathering FIXTURES re-staged as the raw legacy row | DONE (25d83b51 + 200e859c) — `GatheringExtentRefusalTests` 6: the 4 refusal pins RED on the pre-fix ops (**13 issues**, `act0-red.log`), the 2 controls (the ways out; books untouched) green both sides; green after with the core neighbours **119/12** (`act0-green.log`). Fixtures re-staged: core `SmartCollectAndOutlineTests` (its one predicted red) and — found by the END's full run — `SmartConversionTests`' three (a capped, a targeted, a finished gathering before the bind; 24/1 green); Mac `BindDoorTests` + `BookCollectingDoorsTests` (green in the END run) |
+| 3 | Core — THE ONE QUERY · the Arrivals predicate FLIP · the P-13ib-U2-2 pin flips red-on-old · the seatArrival-archived + intake-never-seats-archived pins | DONE (a3a7ad2c) — the two core flips RED on the pre-flip predicate (**2 tests, 3 issues**, `flip-red.log`), green after; `ArchivedMembersTests` **11** (the query ×9 incl. both plans and the live observation; the two VERIFIED facts — no op code changed, `Operations+Intake.swift`'s diff is comments only); with the neighbours (U1's held-region P1 pin incl.) **99/9** (`p3-green.log`) |
+| 4 | Mac — the ARCHIVED LINE on the Arrivals line's three hosts; the archived waiter's mark + Add's honest receipt; `.unarchiveNote` declared; the shared remove door's receipt honest for an archived note | DONE (fc5d8ad8; pins 1f00dc75) |
+| 5 | Mac — HONEST COUNTS: the Bookcase row meta "N notes · M archived" (hidden with details off) · Outline's title meta · the Index footer ("N shown" alone under the filter) | DONE (fc5d8ad8; pins 1f00dc75) |
+| 6 | Riders — F-U3-5 (`.setReadingHideOwned` declared, the sheet its renderer) · R-13id-3's documenting line (row 109, zero behavior) | DONE (fc5d8ad8; pin 1f00dc75) |
+| 7 | Mac pins + the Mac P-13ib-U2-2 flip + the registry walk + the combined behavioural revert | DONE (1f00dc75; revert 2fa07650) — pins GREEN **94/8** (`p4-mac1.log`, 0 skipped); the COMBINED BEHAVIOURAL REVERT (R1 the Arrivals predicate's archived filter back · R2 the remove door's archived read forced false · R3 the sheet's `.setReadingHideOwned` declaration dropped · R5 the row meta ignoring `archived`) turned **exactly the 7 predicted tests RED, 14 issues, nothing else** (107/10 — `revert.log`); restored by `git checkout --` from the committed HEAD, each file `cmp`-identical to its pre-revert copy, tree clean — **no revert in flight** |
+| 8 | Suites at the END | DONE — core FULL **2058/221**; Mac **732/117, 0 skipped**; phone **TEST BUILD SUCCEEDED** (counts in EVIDENCE) |
+| 9 | The screenshot walk ×4 into `notes/plans/13id-screens/u4/` | DONE (cbe1b119) — 23 captures, all four voice/appearance combinations; her dev voice (Terminal — read back `1, 0`), appearance (system) and the board prefs (details on) restored; zero instances after |
+| 10 | Record close · QUESTIONS #173 · KnownIssues rows 13 / 107 / 109 / 110 · ledger row 4 | DONE (this commit) |
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
 
 - **ACT 0 (F-U3-1 RULED):** `lockReading` refuses a gathering FIRST (before the sealed no-op — a
-  gathering is never sealed); `setReadingWordTarget` / `setReadingMaxPosts` refuse a NON-NIL value
-  on a gathering BEFORE the finished guard and the positivity check (the more honest answer: Reopen
-  would not help — a gathering has no extent at all); a nil value and `unlockReading` keep today's
-  path exactly (a legacy finished gathering: Reopen, then clear — the faces' legacy ways out,
-  P-13id-U3-3, stand on exactly these). `createReading(kind: .gathering, maxPosts:/wordTarget:)` is
-  NOT in the ruling and is left as shipped (a finding, not a build). Fixtures that lock a gathering
-  to stage the LEGACY state write the raw row instead (that is how a legacy one exists now — a
+  gathering is never sealed; a legacy finished one refuses too — the kind, not the state, answers);
+  `setReadingWordTarget` / `setReadingMaxPosts` refuse a NON-NIL value on a gathering BEFORE the
+  finished guard and the positivity check (Reopen would not help — a gathering has no extent at
+  all); a nil value and `unlockReading` keep today's path exactly (a legacy finished gathering:
+  Reopen, then clear — the faces' legacy ways out, P-13id-U3-3, stand on exactly these). The read
+  side is untouched (a synced legacy `max_posts` still bounds a gathering's assembly). Fixtures that
+  staged the LEGACY state through the ops now write the raw row (how a legacy one exists today — a
   pre-13i-d store or another device's synced row), each commented.
 - **THE ONE QUERY (item 9 — "faces + one query"):** `Queries.bookArchivedMembers(db, readingID:,
-  limit:)` → `{ count, rows }` by ONE predicate (`archivedMemberSource`: a live `status='member'`
-  row of a live BOOK whose note is a live, ARCHIVED post — `CROSS JOIN` so the book's own rows
-  drive, the `bookArrivalSource` discipline), `limit: 0` = the count alone; rows in the BOOK'S
-  order (P-13id-U4-3). The Bookcase's per-book counts are the SAME predicate grouped over the
-  wing, in the ONE-SHOT `bookcaseAggregates` (it reads `container`, so it can never ride the held
-  snapshot — U1's revert-verified P1 pin stands untouched).
+  limit:)` → `{ count, rows }` by ONE predicate (`archivedMemberJoin` + `archivedMemberRowFilter`: a
+  live `status='member'` row of a live BOOK whose note is a live, ARCHIVED post — `CROSS JOIN` so
+  the book's own rows drive, the `bookArrivalSource` discipline), `limit: 0` = the count alone; rows
+  NEWEST-ARCHIVED FIRST, the Archived view's own order (P-13id-U4-3 — the design first said "the
+  book's order"; changed before building, the Archived view's `archived_at DESC` precedent). The
+  Bookcase's per-book counts are the SAME predicate grouped over the wing
+  (`archivedMemberCounts`), in the ONE-SHOT `bookcaseAggregates` — it reads `container`, so it can
+  never ride the held snapshot (U1's revert-verified P1 pin green, untouched).
 - **THE ARRIVALS FLIP (item 9.3 + 9.4 — REVERSES P-13ib-U2-2):** `bookArrivalSource` drops
   `c.archived_at IS NULL`; each row carries `archived`. The line's count now equals the finish
   confirm's N (13i-c's shared predicate stands, untouched) and the Bookcase's held arrival count
-  (F-U1-7 closes). An archived waiter's row draws a quiet "archived" mark and the SAME arms
-  (`ArrivalArms` — the ownership table decides, archive changes nothing about it); Add's receipt
-  says where it went ("…it's archived, so it waits in the book's archived line"). `seatArrival`
-  does NOT refuse an archived note (it reads `livePost` alone — verified by a state-transition pin;
-  no change); intake's automatic seats never seat or bell one (`matchesRule` and the sweep both
-  require `archived_at IS NULL` — pinned, no change).
+  (F-U1-7 closes). An archived waiter's row draws a faint "archived" mark and the SAME arms
+  (`ArrivalArms` — archive changes nothing the ownership table reads); Add's receipt says where it
+  went. `seatArrival` does NOT refuse an archived note (it reads `livePost` alone — verified, no
+  change); intake never seats or bells one (`matchesRule` and the sweep require `archived_at IS
+  NULL` — verified, no change). Lesson 4 ("Finishing a book dismisses whatever is still waiting")
+  stays true — now of every waiter she can SEE.
 - **THE ARCHIVED LINE (item 9.1):** the Arrivals line's idiom exactly — invisible when empty (not a
-  hairline); one quiet line "▸ N archived"; expands INLINE to the archived members (the note's
-  name as she wrote it · "archived <stamp>" in the one stamp vocabulary · **Unarchive** ·
+  hairline); one quiet line "▸ N archived"; expands INLINE to the archived members (the note's name
+  by the one naming rule · "archived <stamp>" in the one stamp vocabulary · **Unarchive** ·
   **Remove** / **Release** on an owned book); a 30-row window with "and N more archived"; collapsed
-  on every open (P-13ib-U2-3's rule). It stands DIRECTLY UNDER the Arrivals line on the same three
-  hosts — Index (atop the pane), Outline (atop the column), Book (atop the spread) — outside the
-  measured scroll content, so the landing families see nothing (PROVISIONAL P-13id-U4-1). Read
-  carries neither (A43 — Read is a place to read). Unarchive = `unarchiveContainer` (the note
-  returns to the book's working view AND the Library); Remove = `.removeFromBook` through the ONE
-  shared door (`RemoveFromBookDoor`), whose receipt becomes honest for an archived note ("It stays
-  archived." — never "It's in the Pool now", which is false of an archived note: the row-110
-  class, here a bug in a shared door, pinned red-on-old). Finished/sealed books: Remove renders and
-  speaks the op's refusal with the road (P-13id-U2-8's precedent); Unarchive acts (archive is the
-  note's state, not the assembly's).
-- **HONEST COUNTS (item 9.2):** "N notes" counts what the book SHOWS (live, un-archived members) and
-  "M archived" the set-aside, drawn only when M > 0 (PROVISIONAL P-13id-U4-4). Sites: the Bookcase
-  row meta (`BookcaseRowMeta.facts`; the held `postCount` counts every member row, so notes =
-  `postCount − archived`, clamped — the meta is hidden whole with details off, §23); the book's own
-  count lines — Outline's title meta and the Index column's footer. Under U3's in-book filter the
-  footer says "N shown" alone (a view fact; the book's archived count is not a fact about the
-  filtered view — P-13id-U4-5).
+  on every open of the book (P-13ib-U2-3's rule). It stands DIRECTLY UNDER the Arrivals line on the
+  same three hosts — Index (atop the pane), Outline (atop the column), Book (atop the spread) —
+  outside the measured scroll content (PROVISIONAL P-13id-U4-1). Read carries neither (A43).
+  Unarchive = `unarchiveContainer`; Remove = `.removeFromBook` through the ONE shared door
+  (`RemoveFromBookDoor`), whose receipt is now honest for an archived note. Finished/sealed books:
+  Remove renders and speaks the op's refusal with the road (P-13id-U2-8's precedent); Unarchive acts.
+- **HONEST COUNTS (item 9.2):** "N notes" counts what the book SHOWS and "M archived" the set-aside,
+  drawn only when M > 0 (PROVISIONAL P-13id-U4-4). Sites: the Bookcase row meta (the held
+  `postCount` counts every member row — it was counting archived members SILENTLY, F-U4-1 — so
+  notes = `postCount − archived`, clamped; the row's draw decision is now ONE pure value,
+  `BookcaseRowMeta.drawn`, nil with details off, §23); the book's own count lines — Outline's title
+  meta and the Index column's footer. Under U3's in-book filter the footer says "N shown" alone
+  (P-13id-U4-5).
 - **THE INDEX NEVER SHOWS ARCHIVED MEMBERS** (item 9.5): unchanged — the assembly excludes them; the
-  line is the book's one door to its set-aside notes. Pinned on a mounted Index.
-- **Registry (P-1):** `.unarchiveNote` (NEW — "Unarchive", post scope, `.surface`, native target)
-  and `.removeFromBook` (declared) are the archived line's two acts — `BookArchivedLine.
-  surfaceCapabilities`, a new renderer line in the walk's union (a justified edit). F-U3-5:
-  `.setReadingHideOwned` (NEW, `.surface`) joins `BookSettingsSheet.surfaceCapabilities`.
-- **Cost (KnownIssues row 13 — named):** the archived line's held read joins `container`, so — like
-  the Arrivals line beside it (13i-b F-U2-5) — it re-fetches per autosave while a book view shows
-  it, ∝ the book's live pair rows (count alone while collapsed); the Bookcase's archived counts are
-  one-shot.
+  line is the book's one door to its set-aside notes. Pinned (core and on a mounted Index) and walked.
+- **Registry (P-1):** `.unarchiveNote` (NEW — "Unarchive", post scope, `.surface`, native target) and
+  `.removeFromBook` (declared) are the archived line's acts — `BookArchivedLine.surfaceCapabilities`,
+  a new line in the walk's union (a justified edit). F-U3-5: `.setReadingHideOwned` (NEW, `.surface`,
+  verb "Show or Hide Owned Notes") joins `BookSettingsSheet.surfaceCapabilities`.
+- **Cost (KnownIssues row 13 — named there):** the archived line's held read joins `container`, so —
+  like the Arrivals line beside it (13i-b F-U2-5) — it re-fetches per autosave while a book view
+  shows it, ∝ the book's live pair rows (the count alone while collapsed, P1 pinned on the plan);
+  the Bookcase's archived counts are one-shot.
 
 ### WHAT WAS BUILT (a fresh session's map)
 
-PENDING — filled per piece.
+- **Core ops (ACT 0)** — `Operations+Reading.swift`: `lockReading`'s kind guard first;
+  `refuseExtentOnGathering(_:value:)` (private) called first by `setReadingWordTarget` /
+  `setReadingMaxPosts`. `Operations+Container.swift`: R-13id-3's documenting comment in
+  `restoreContainerRows` (zero behavior). `Operations+Intake.swift` / `OwnershipQueries.swift`:
+  comments only (the reversed rule's wording).
+- **Core reads** — NEW `Queries/ArchivedMemberQueries.swift`: `ArchivedMember`,
+  `BookArchivedMembers`, `bookArchivedMembers(_:readingID:limit:)`, `archivedMemberCounts(_:wingID:)`,
+  the shared fragments (`archivedMemberJoin`, `archivedMemberRowFilter`, `bookArchivedSource`,
+  `bookArchivedCountSQL`, `bookArchivedRowsSQL`, `wingArchivedCountsSQL`),
+  `AppDatabase.observeBookArchivedMembers(_:limit:)`. `ArrivalQueries.swift`: `BookArrival.archived`
+  (defaulted), the predicate without the archived filter, the rows' `archived` column.
+  `ShelfQueries.swift`: `BookcaseAggregates.archivedCounts` (defaulted) filled from
+  `archivedMemberCounts`.
+- **Mac — the line** — NEW `Features/BookView/BookArchived.swift`: `ArchivedLineCopy` (every word),
+  `ArchivedLineFace`, `BookArchivedModel` (observed line · `toggle` · `unarchive` · `remove` through
+  the shared door), `BookArchivedLine` (the face; `surfaceCapabilities`), DEBUG `ArchivedLineProbe`.
+  Wiring: `BookView` owns `archived` (injectable) — Outline mounts the line under the door;
+  `BookIndexView(archived:)` mounts it atop the pane and feeds the footer; `SpreadBookView(archived:)`
+  atop the spread.
+- **Mac — the door** — `BookArrivals.swift`: the archived mark on a waiter's row
+  (`ArrivalsCopy.archivedMark` + help), `ArrivalsCopy.added(_:chaptered:archived:)`, the probe's
+  `archivedRows`.
+- **Mac — counts** — `BookView.bookMetaLine` (+ "M archived"); `BookIndexColumn.footerWords(chapters:
+  notes:filtered:archived:)`; `ShelfViewModel.archivedCounts`; `BookcaseRowMeta.drawn` (+ `Drawn`) and
+  `facts(…, archived:)` in `ShelfView.swift` (the row reads `drawn`).
+- **Mac — the shared remove door** — `Core/Views/RemoveFromBook.swift`:
+  `RemoveFromBookCopy.receipt(…, archived:)` + `leftArchived(book:owned:)`; `RemoveFromBookDoor.remove`
+  reads the note's archive state in the act's own turn.
+- **Registry** — `Capability.swift` (`.unarchiveNote`, `.setReadingHideOwned`),
+  `CapabilityRegistry.swift` (both declared), `BookSettingsSheet` (`CollectingCopy.hideOwnedVerb`, the
+  declaration, the chips' help).
+- **Tests** — core NEW `GatheringExtentRefusalTests` (6), `ArchivedMembersTests` (11); flipped
+  `ArrivalQueriesTests.anArchivedWaiterStaysAtTheDoorMarkedArchived`, `PendingArrivalDismissalTests`'
+  line arm; fixtures re-staged in `SmartCollectAndOutlineTests`, `SmartConversionTests`. Mac NEW
+  `BookArchivedLineTests` (10); `RemoveReleaseDoorTests` (+1); `BookCollectingDoorsTests` (+1 rider
+  pin; the legacy fixture re-staged); `BindDoorTests` (fixture re-staged); `BookStateDoorsTests` (the
+  flip); `CapabilityRegistryTests` (one union line).
 
-### EVIDENCE (all run at the END unless named; counts exact — PENDING until the run lands)
+### EVIDENCE (all run at the END unless named; counts exact)
 
-Named before building: ACT 0's three refusal pins red-on-old + the ways-out controls; the one
-query's tests (count/rows/order/limit, other books, gatherings, deleted notes, EXPLAIN QUERY PLAN);
-the P-13ib-U2-2 flips red-on-old (`ArrivalQueriesTests`, `PendingArrivalDismissalTests`, Mac
-`BookStateDoorsTests`); the seatArrival-archived state-transition pin; the intake-never-seats pin;
-the remove receipt's red-on-old pin; count pins (Bookcase meta details on/off; the Index footer
-with and without the filter; the Outline meta); the mounted line (absent/present/expanded/acts);
-the Index-never-shows pin; registry rows + the registry walk; the tutorial spine; the landing
-families UNMODIFIED; the walk ×4. PENDING.
+- **ACT 0 red-on-old:** `GatheringExtentRefusalTests` on the PRE-FIX ops — **4 tests RED, 13 issues**
+  (the refusals never thrown; rows and outbox written), the 2 controls green both sides
+  (`act0-red.log`); green after.
+- **P-13ib-U2-2 flips red-on-old:** core `ArrivalQueriesTests.anArchivedWaiterStaysAtTheDoorMarkedArchived`
+  (was `anArchivedNoteLeavesTheDoorWhileArchivedAndReturnsAfter`) + `PendingArrivalDismissalTests`'
+  line arm (`shown == 0` → `shown == promised`) on the PRE-FLIP predicate — **2 tests RED, 3 issues**
+  (`flip-red.log`); the Mac flip (`BookStateDoorsTests.finishAsksWhenOnlyAnArchivedNoteWaits`'s line
+  arm) RED by behavioural revert (R1 below).
+- **The combined behavioural revert (bug-class + hygiene pins):** R1 the arrivals predicate's
+  archived filter restored · R2 the shared remove door's archived read forced false · R3 the sheet's
+  `.setReadingHideOwned` declaration dropped · R5 the row meta ignoring `archived` — **exactly the 7
+  predicted tests RED, 14 issues, nothing else** of 107/10 (`revert.log`); restored, `cmp`-verified.
+- **The verified facts (shipped behaviour, no code changed):** `ArchivedMembersTests.
+  seatArrivalSeatsAnArchivedWaiterAsAnArchivedMember` (the same row → member, END, unsectioned; the
+  note stays archived; the door empties; the archived line lists it; the assembly does not) and
+  `intakeNeverSeatsOrBellsAnArchivedNote` (event · backfill · catch-up, with an un-archived control).
+- **The one query:** `ArchivedMembersTests` 9 query pins incl. **both statements' plans** (`SEARCH
+  rp` + the container PK seek, no SCAN — the per-book count, rows, and the wing statement) and the
+  live observation.
+- **Count pins:** `BookArchivedLineTests.theBookcaseRowSaysTheArchivedAndDetailsOffHidesIt` (details
+  on "5 notes · 2 archived · 2 ch", details off → nothing incl. the arrival count; a gathering says
+  no archived), `theWordsAndTheHonestCounts` (the footer with/without the filter, chapters, zero),
+  `theIndexNeverShowsAnArchivedMember` (mounted: the entries and the footer "2 notes · 2 archived").
+- **The mounted line:** absent on Index/Outline/Book with nothing set aside; "2 archived" on all
+  three, absent on Read; expands to [Unarchive, Remove] (owned: [Unarchive, Release]) newest-first
+  and folds back; Unarchive / Remove / Release / a finished book's refusal against the real store;
+  the archived waiter marked with [Add, Dismiss] and Add's receipt + landing.
+- **Core FULL `swift test`: "Test run with 2058 tests in 221 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test). Baseline 2041/219 → **+17 / +2, all this unit's**
+  (`GatheringExtentRefusalTests` 6, `ArchivedMembersTests` 11). The first END run caught
+  `SmartConversionTests`' three legacy-gathering fixtures (3 red, `core-full.log`) — re-staged as the
+  raw row, assertions untouched (200e859c), then the full run green (`core-full2.log`).
+- **Mac named suites** (build `DerivedData/13id-u4`, `test-without-building`, zero instances): **"732
+  tests in 117 suites passed", 0 skipped** (`mac-end.log`; the list `suites-end.txt`) — every Book*
+  suite (the landing families `BookIndexEditingTests`, `BookIndexLandingTests`,
+  `BookOutlineLandingTests`, `BookIndexColumnTests`, `BookIndexColumnHeightsTests` UNMODIFIED),
+  `BookArchivedLineTests`, the five NoteBox*, **all eleven `Tutorial*` suites (the tutorial spine)**,
+  **`CapabilityRegistryTests` (the registry walk)**, the Library*/Pool*/`ArchivedListingTests`
+  family, the Star*/Ascent*/MastheadTag*/ContextBar* families, and the U3 neighbours (BindDoor,
+  BookcaseBoardBrain, BookcaseViewModel, ChromeMinHeight, ConfirmationsSetting, DebugOracleTwoWindow,
+  DebugOracleOwnership, GatheringRuleGate, MembershipChoice, OutflowChooser, PromoteAndPalette,
+  RemoveReleaseDoor, RuleEditor, ShelfModel, SpawnAndBindLimb, NavigationDoors, NavigationHistory,
+  PostDetailModeMemory, PostDetailRouting, StatusCenter, WorkspaceNaming, …).
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (`DerivedData/13id-u4-mobile`
+  — the shared `BookArrival` / `BookcaseAggregates` changes compile; the phone is untouched).
+- **Honest test edits (subject changed by ruling, each commented):** the two core flips and the Mac
+  flip (P-13ib-U2-2 reversed by her #169(a)); six legacy-gathering FIXTURES re-staged as the raw row
+  (`SmartCollectAndOutlineTests` 1, `SmartConversionTests` 3, `BindDoorTests` 1,
+  `BookCollectingDoorsTests` 1 — the fixture moved, never an assertion); the walk's union line.
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u4`, the author
+  guard first at every act, her app absent throughout, HID idle climbing; 23 captures in
+  `notes/plans/13id-screens/u4/`, gitignored). Fixtures staged by her doors (the Library row menu's
+  Archive): in "bind walk", two members and the waiter archived. **Terminal·light** — 01 the Bookcase
+  row "1 arrival · 3 notes · 2 archived · 6w · living" · 02 details off: the meta gone, arrival count
+  included · 03 Outline: "▸ 1 at the door" over "▸ 2 archived", meta "book · 3 notes · 2 archived",
+  only the 3 working notes · 04 both expanded: the waiter "2026-10-01 · archived · arrived yesterday
+  · add · dismiss", the archived rows "archived today 9:22 am · unarchive · remove" · 05 Index: the
+  same lines atop the pane, the column's 3 notes, footer "3 notes · 2 archived", the box "1 of 3" ·
+  06 filtered by #bind13ib: footer "3 shown" alone · 07 **Add** on the archived waiter: the door line
+  gone, "3 archived", footer "3 notes · 3 archived", the receipt in the footer slot · 08
+  **Unarchive**: the note back in its place, "4 notes · 2 archived" · 09 **Remove**: "1 archived",
+  "4 notes · 1 archived" · 11 Book spread: the line atop both pages, "pages 1–2 of 4" · 12 Read: no
+  line · 13 the Archived view: the removed note still archived (never in the Pool) · 14 an OWNED
+  book's row: "unarchive · release"; **Terminal·dark** — 01 the Bookcase ("the door · 1 arrival · 4
+  notes · 1 archived · 1 ch · 16w · cap 5") · 02 Outline: "door five · archived" at the door + the
+  archived line, meta "1 chapters · 4 notes · 1 archived" · 03 **Add at the cap** → the op's honest
+  refusal toast ("“the door” is full — its cap is 5 notes…": 4 notes + 1 archived fill the cap —
+  F-U4-3) · 04 Index footer; **Study·dark** — 01 Index (Add · Dismiss / Unarchive · Remove voiced) · 02
+  Outline · 03 the Bookcase; **Study·light** — 01 the Bookcase · 02 Outline expanded · 03 **Unarchive**:
+  the line gone, "1 chapters · 5 notes", the receipt at the navigator's foot.
 
 ### FINDINGS (for the orchestrator)
 
-PENDING.
+- **F-U4-1 — the Bookcase row's "N notes" was silently counting ARCHIVED members** (the held
+  `postCount` reads `reading_post` alone — U1's P1 shape — while every book surface excludes archived
+  members: a book showing 3 notes read "5 notes" on the board). Fixed as part of item 9.2's honest
+  counts (notes = held − archived, the archived count one-shot) and pinned red-on-old (R5). Recorded
+  so the ladder sees it was a pre-existing dishonesty, not only a new count.
+- **F-U4-2 — the board's archived count is ONE-SHOT** (it reads `container`, so it can never be
+  held): archiving or unarchiving a member while the Bookcase is visible elsewhere (a split) leaves
+  "N notes · M archived" stale until the board's next appearance or own act — exactly the contract
+  of the board's words and last-edited (U1's one-shot tier). Not a new class; no row.
+- **F-U4-3 (product — QUESTIONS #173) — an archived member KEEPS its capacity slot:** `max_posts`
+  counts live member rows, so a capped book whose member is archived stays full (walked `td-03`: "4
+  notes · 1 archived" at cap 5 refused Add, "full — its cap is 5 notes"). Shipped semantics kept
+  (P-13id-U4-6 — "archived notes don't lose their books"); the honest count now makes the arithmetic
+  legible. Her call whether the cap should count working members only (an op change).
+- **F-U4-4 (P-1, the Library surface's touch) — the Archived view's own "Unarchive" button is
+  undeclared** (an inline button, `ArchivedView.swift`). `.unarchiveNote` exists now; the view can
+  declare it as a second renderer at U6's Library pass (row 103's Library half is there too).
+- **F-U4-5 — `createReading(kind: .gathering, maxPosts:/wordTarget:)` still mints a gathering WITH an
+  extent** (not in the ACT 0 ruling; no face passes one today — grepped). A one-line refusal at the
+  mint would complete the (c) arm's letter; the architect's call (it was not proposed at U3).
+- **F-U4-6 (MOBILE) — the phone's book-details "Finish" row draws on a gathering** and now meets
+  `wrongReadingKind`, shown through its raw `String(describing:)` `lastError` — the catch-up removes the
+  row on gatherings (P-2) and words the refusal.
+- **F-U4-7 (naming, U6/13s) — the lines name an untitled note by its DAY** ("2026-10-01" —
+  `DisplayTitle.note`, the Arrivals line's and the navigator's rule since 13i-b), while the Library
+  list names the same note by its first words ("bind three"). Walked `tl-04`. Consistent with the
+  book's own surfaces; a vocabulary item, not changed here.
+- **F-U4-8 (recorded, R-13id-3 covers) — the restore revival also revives a waiting ARRIVAL row** into
+  a finished book (the same exact-stamp letter); `dismissArrival` stays legal there. Written into
+  R-13id-3's documenting comment as a fact of the code, no behavior change.
+- **F-U4-9 (known class) — the quiet receipt truncates in the Index footer** ("Removed from…",
+  "“2026-10-01”…") and fades before its hover can be captured (U3's F-U3-7); the receipts' words are
+  pinned verbatim, and the store's truth was walked (`tl-13`: the removed note sits in Archived).
+- **F-U4-10 — walk residue in the dev store** (the 13i-c/U3 precedent — fixtures stay): "bind walk" —
+  "bind five" seated as an ARCHIVED member, "row 104 walk note" archived and removed (bookless, in
+  Archived), "bind three" archived then unarchived back; "u4 owned" — "u4 eta" archived (an archived
+  owned member); "the door" — "door five" archived (an archived waiter at a full book), "a knock at
+  the door" archived then unarchived back. Her voice (Terminal), appearance (system) and board prefs
+  restored and read back.
+- **F-U1-7 CLOSES:** the Bookcase's arrival count and the Arrivals line now count the same rows
+  (walked: "the door · 1 arrival" with the waiter archived, the line "1 at the door").
+- **Tutorial (P-6):** no lesson sentence went false; lesson 4 is truer (every waiter the finish
+  dismisses is visible). The tutorial spine is green (11 suites).
+- **MOBILE PARITY (record only — nothing built):** the phone owes the archived line (a book screen's
+  "N archived" row expanding to Unarchive / Remove-Release), the archived waiter's mark at its door (if
+  its book screen grows one), the honest counts on its shelf rows and book header, the gathering
+  Finish row's removal (F-U4-6), and the remove receipts' archived wording (its own remove door, if
+  any). The core reads and ops reach it already.
 
 ### PROVISIONALS (QUESTIONS #173 carries them for her bundle)
 
-PENDING — numbered P-13id-U4-n as built.
+- **P-13id-U4-1** — WHERE the archived line stands: directly under the Arrivals line on its three
+  hosts (Index atop the pane, Outline atop the column, Book atop the spread), never on Read. (a)
+  BUILT · (b) in the shared book masthead (the navigator / the Index column — every mode, Read too) ·
+  (c) Outline's title block only. *Ground:* "on the Arrivals line's idiom"; the column is the
+  membership listing the Index keeps archive-free; the masthead is non-scrolling chrome (an expanding
+  list there is the window-min class).
+- **P-13id-U4-2** — a row's doors are Unarchive (primary) and Remove/Release (quiet); the title is not
+  a link (the door's rows aren't either). (a) BUILT · (b) the title opens the note.
+- **P-13id-U4-3** — the rows list newest-archived first (the Archived view's order). (a) BUILT · (b)
+  the book's own order.
+- **P-13id-U4-4** — "N notes" counts what the book SHOWS; "M archived" follows only when M > 0. (a)
+  BUILT · (b) "N notes" counts every member, archived included, "of which M archived".
+- **P-13id-U4-5** — under the in-book filter the Index footer says "N shown" alone. (a) BUILT · (b)
+  "N shown · M archived".
+- **P-13id-U4-6** — an archived member keeps its capacity slot (the shipped rule — capacity counts
+  membership rows). (a) KEPT · (b) the cap counts working members only (an op change).
+- **P-13id-U4-7** — Add on an archived waiter seats it ARCHIVED (it never unarchives — her "Add seats
+  one as an archived member"); the receipt says it waits in the archived line. (a) BUILT · (b) Add
+  also unarchives.
+- **P-13id-U4-8** — the archived waiter's mark is a faint "archived" word after its name; its doors
+  are exactly an ordinary waiter's (the ownership table decides).
+- **P-13id-U4-9** — on a finished or sealed book, Unarchive acts (archive is the note's state, not the
+  assembly's) and Remove renders and refuses naming the road.
+- **P-13id-U4-10** — ACT 0's refusal order: the kind answers before the finished guard and the
+  positivity check; a legacy finished gathering's Finish refuses too (no silent no-op).
+- **P-13id-U4-11** — wording, all 13s-revoicable: "N archived", "archived <stamp>", "and N more
+  archived", "Unarchive", "Remove"/"Release", "Unarchived “T” — it's back in the book.", "Removed
+  from “B” — the note itself is untouched. It stays archived.", "Released from “B” — it stays
+  archived.", "“T” added to the book — it's archived, so it waits in the book's archived line.", the
+  registry verb "Show or Hide Owned Notes".
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -1286,13 +1469,13 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
 | 2 | U2 — the Book Panel (+ ACT 0: the union star) | **DONE** (adjudicated 2026-10-02; F-U2-1 fixed by the architect `eeba2e7c` revert-red-verified; F-U2-2/3 routed to U3; drags to her combined walk; walk at the bank seam) |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **DONE** (adjudicated 2026-10-02; core 2041/219 · Mac 490/74 · walk ×4; F-U3-1 ruled → U4 ACT 0; F-U3-4/-6 + row 103's Library half → U6; F-U3-5 → U4; F-U3-3 kept provisionally; #172) |
-| 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | IN FLIGHT (spawned 2026-10-02) |
+| 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **BUILT — awaiting adjudication** (U4 RECORD: core 2058/221 · Mac 732/117 · phone build · walk ×4; F-U4-3/-5 for the architect/her bundle; #173) |
 | 5 | LADDER A (U1–U4) | PENDING BANK 1 |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
-| 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — U4 documents; the row closes at the closeout |
+| 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
 | 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
 
 HELD FOR HER BUNDLE (nothing gates on these): the #169 remainder (P-13ic-1's open sub-question —
