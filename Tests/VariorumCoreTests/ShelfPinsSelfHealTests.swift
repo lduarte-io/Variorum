@@ -40,6 +40,10 @@ struct ShelfPinsSelfHealTests {
     /// deleted book leaves the list THE MOMENT it dies (the listing reads
     /// live rows only) — no write needed — and a RESTORED book comes back
     /// starred, which the old stored-list could not promise.
+    /// (13i-d U2 ACT 0, RE-READ: a pin now writes BOTH stores — the 13f list
+    /// too — and `shelfPins` reads their union. Every assertion here keeps
+    /// its meaning: the list's dead entry is pruned by the next write, and
+    /// the restored row's COLUMN brings the star back.)
     @Test func theNextPinWriteHealsTheStoredList() throws {
         try withOperations { ops, db in
             let first = try ops.createReading(name: "first", kind: .book)

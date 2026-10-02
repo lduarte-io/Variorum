@@ -220,36 +220,30 @@ extension Operations {
     /// the liveness check guards the pin alone, so the pin of a book that has
     /// since been deleted can always be taken off — it used to refuse
     /// `readingNotFound` forever.
+    ///
+    /// **13i-d U2 ACT 0 — A PIN IS A STAR** (F-U1-2 (A), ruled: "`setShelfPinned`
+    /// routes through the same write"): this door IS `setStarred(.reading)` —
+    /// both stores, the cap, the self-heal. The phone's "Pin to Shelf Top"
+    /// keeps its words until its catch-up and writes the same truth (so it
+    /// now refuses at the cap like every star door, naming un-starring).
     public func setShelfPinned(_ readingID: String, pinned: Bool) throws {
-        try database.write { db in
-            if pinned { _ = try liveReading(db, readingID) }
-            try setShelfPinned(db, readingID, pinned: pinned)
-        }
+        try setStarred(.reading(readingID), starred: pinned)
     }
 
-    /// The pin write itself, at db level, so a caller already inside a write
+    /// The pin write at db level, so a caller already inside a write
     /// transaction shares the ONE implementation instead of copying it
-    /// (13d batch 5 — the daily book's create-and-pin ensure). The liveness
-    /// check stays with the public door: an in-transaction caller has just
-    /// inserted the reading it is pinning (live by then).
+    /// (13d batch 5 — the daily book's create-and-pin ensure; the
+    /// Quicknotes mint). An in-transaction caller has just inserted the
+    /// reading it is pinning (live by then).
     ///
-    /// **13i-a — STARRED ABSORBS PINS (sitting record §7):** the storage is
-    /// `reading.starred` since v1_18 (the migration converted the old
-    /// `shelf_pins` setting; no reader of the setting remains). The name
-    /// survives until 13i-d's vocabulary sweep. Idempotent both ways; a
-    /// write that changes nothing writes nothing (no outbox row, no
-    /// `updated_at` — identity-level metadata, the standing convention).
-    /// UNPINNING a dead book is a no-op by the same WHERE (its row update
-    /// matches nothing live — and a tombstoned book's `starred` is
-    /// display-dead anyway; restore brings the flag back with the row,
-    /// which upgrades the old setting-list behavior honestly).
+    /// **13i-d U2 ACT 0:** it routes through the ONE star write — both
+    /// stores — and is EXEMPT from the cap's refusal (PROVISIONAL
+    /// P-13id-U2-1): her R-13id-5 keeps the daily Journal and Quicknotes
+    /// BORN STARRED, and a mint must never fail on a star. The book counts
+    /// toward the cap thereafter like any star. The name survives until
+    /// 13i-d's vocabulary sweep.
     func setShelfPinned(_ db: Database, _ readingID: String, pinned: Bool) throws {
-        try db.execute(
-            sql: """
-                UPDATE reading SET starred = ?
-                WHERE id = ? AND deleted_at IS NULL AND starred <> ?
-                """,
-            arguments: [pinned, readingID, pinned])
+        try writeStar(db, .reading(readingID), starred: pinned, enforcingCap: false)
     }
 
     // MARK: - Stars (13f W4)
@@ -284,43 +278,78 @@ extension Operations {
     /// Idempotent both ways, and a write that changes nothing writes
     /// nothing — no `updated_at`, no outbox row (the identity-metadata
     /// convention `setBlockName` established).
+    ///
+    /// **13i-d U2 ACT 0 — THE UNION STAR** (F-U1-2 (A), ruled; the sitting
+    /// record §7's "one mechanism"): a BOOK's star is also its
+    /// `reading.starred` column (the Bookcase's float). Every star write on a
+    /// reading writes BOTH stores in this one transaction, and un-starring
+    /// clears both; the cap counts the union (`Queries.starred` — the list
+    /// plus the column-only tail). See `writeStar`.
     public func setStarred(_ target: StarTarget, starred: Bool) throws {
         try database.write { db in
-            let stored = try Queries.starredTargets(db)
-            // The live list — and the ONE rule the read side states, so the
-            // cap and the section can never disagree about what is starred.
-            var next = try Queries.starred(db).map(\.target)
-            // 13i-b U1: starring a NOTE is an applying act — it fires intake
-            // on every living book whose rule carries a star term, once the
-            // list below is written. Un-starring is a NON-EVENT (§19, ratified
-            // §24): it never evicts a member.
-            var starsANote = false
-            if starred {
-                if !next.contains(target) {
-                    starsANote = target.kind == .post
-                    guard try starTargetIsLive(db, target) else {
-                        throw target.kind == .post
-                            ? OperationError.containerNotFound(id: target.id)
-                            : OperationError.readingNotFound(id: target.id)
-                    }
-                    guard next.count < Self.starLimit else {
-                        throw OperationError.starLimitReached(limit: Self.starLimit)
-                    }
-                    next.append(target)
+            try writeStar(db, target, starred: starred, enforcingCap: true)
+        }
+    }
+
+    /// **THE ONE STAR WRITE** (13i-d U2 ACT 0), at db level so the
+    /// in-transaction mints share it (`setShelfPinned(_:_:pinned:)`).
+    /// `enforcingCap` is false only for those born-starred mints
+    /// (PROVISIONAL P-13id-U2-1 — a mint never fails on a star).
+    func writeStar(
+        _ db: Database, _ target: StarTarget, starred: Bool, enforcingCap: Bool
+    ) throws {
+        let stored = try Queries.starredTargets(db)
+        // The LIST's live entries — what the self-heal persists (a dead
+        // entry leaves the stored value at the next write).
+        var next = try Queries.starredListItems(db).map(\.target)
+        // 13i-b U1: starring a NOTE is an applying act — it fires intake
+        // on every living book whose rule carries a star term, once the
+        // list below is written. Un-starring is a NON-EVENT (§19, ratified
+        // §24): it never evicts a member.
+        var starsANote = false
+        if starred {
+            // The UNION — the ONE rule the read side states, so the cap and
+            // the section can never disagree about what is starred. A target
+            // already in it (by either store) is already counted.
+            let union = try Queries.starred(db).map(\.target)
+            if !union.contains(target) {
+                guard try starTargetIsLive(db, target) else {
+                    throw target.kind == .post
+                        ? OperationError.containerNotFound(id: target.id)
+                        : OperationError.readingNotFound(id: target.id)
                 }
-            } else {
-                next.removeAll { $0 == target }
+                if enforcingCap, union.count >= Self.starLimit {
+                    throw OperationError.starLimitReached(limit: Self.starLimit)
+                }
+                starsANote = target.kind == .post
             }
-            // Un-starring a target that has since died is not a no-op: the
-            // list still loses it here, because `next` is already the
-            // pruned one. The guard is on the VALUE, so nothing is written
-            // when nothing changed.
-            guard next != stored else { return }
-            let json = String(decoding: try JSONEncoder().encode(next.map(\.key)), as: UTF8.self)
-            try upsertSetting(db, key: "starred", value: json)
-            if starsANote {
-                try intakeAfterStarring(db, postID: target.id, now: date.now)
-            }
+            // Both stores: a column-only book gains its list entry (its star
+            // TIME is now — the section's order from here on).
+            if !next.contains(target) { next.append(target) }
+        } else {
+            next.removeAll { $0 == target }
+        }
+        // The COLUMN half (a reading's only). Live rows only: un-starring a
+        // dead book leaves its tombstoned row's flag alone, so a restore
+        // still brings the star back with the row (13i-a's upgrade, kept).
+        // The `<>` guard keeps a no-op from writing a row or an outbox entry.
+        if target.kind == .reading {
+            try db.execute(
+                sql: """
+                    UPDATE reading SET starred = ?
+                    WHERE id = ? AND deleted_at IS NULL AND starred <> ?
+                    """,
+                arguments: [starred, target.id, starred])
+        }
+        // Un-starring a target that has since died is not a no-op: the
+        // list still loses it here, because `next` is already the
+        // pruned one. The guard is on the VALUE, so nothing is written
+        // when nothing changed.
+        guard next != stored else { return }
+        let json = String(decoding: try JSONEncoder().encode(next.map(\.key)), as: UTF8.self)
+        try upsertSetting(db, key: "starred", value: json)
+        if starsANote {
+            try intakeAfterStarring(db, postID: target.id, now: date.now)
         }
     }
 

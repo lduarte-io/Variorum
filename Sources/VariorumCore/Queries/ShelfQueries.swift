@@ -19,12 +19,23 @@ extension Queries {
         /// `status='arrival'` rows; always 0 on a gathering (it holds
         /// nothing, §1). Defaulted so every existing call site compiles.
         public let arrivalCount: Int
+        /// 13i-d U2 ACT 0 — whether the book is STARRED, read as the UNION
+        /// (F-U1-2 (A), ruled): its `reading.starred` column OR its entry in
+        /// the 13f `starred` list (`Queries.starredReadingIDs`). The Bookcase's
+        /// float and its ★ read THIS, never `reading.starred` alone — the
+        /// column is one of the two stores, not the truth. Defaulted to the
+        /// column so a hand-built row (a pin) reads as it always did.
+        public let starred: Bool
 
-        public init(reading: Reading, postCount: Int, sectionCount: Int, arrivalCount: Int = 0) {
+        public init(
+            reading: Reading, postCount: Int, sectionCount: Int, arrivalCount: Int = 0,
+            starred: Bool? = nil
+        ) {
             self.reading = reading
             self.postCount = postCount
             self.sectionCount = sectionCount
             self.arrivalCount = arrivalCount
+            self.starred = starred ?? reading.starred
         }
     }
 
@@ -63,12 +74,17 @@ extension Queries {
                 WHERE deleted_at IS NULL GROUP BY reading_id
                 """)
         let arrivalCounts = try countsByReading(db, sql: bookcaseArrivalCountsSQL)
+        // 13i-d U2 ACT 0: the star is the UNION of the two stores. Reading
+        // the `setting` list adds that table to the held region — a setting
+        // write is rare and never a keystroke's (P1 untouched).
+        let starredIDs = try starredReadingIDs(db)
         return readings.map { reading in
             ShelfBook(
                 reading: reading,
                 postCount: postCounts[reading.id] ?? 0,
                 sectionCount: sectionCounts[reading.id] ?? 0,
-                arrivalCount: reading.kind == .book ? arrivalCounts[reading.id] ?? 0 : 0)
+                arrivalCount: reading.kind == .book ? arrivalCounts[reading.id] ?? 0 : 0,
+                starred: starredIDs.contains(reading.id))
         }
     }
 

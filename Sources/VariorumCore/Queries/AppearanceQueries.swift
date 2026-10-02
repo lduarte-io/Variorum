@@ -123,20 +123,48 @@ extension Queries {
             .flatMap(Segmentation.init(rawValue:)) ?? .paragraph
     }
 
-    /// The STARRED books (13i-a — starred absorbs pins, sitting record §7;
-    /// the storage is `reading.starred` since v1_18, the migration converted
-    /// the old `shelf_pins` setting and no reader of it remains). The name
-    /// survives until 13i-d's vocabulary sweep. Order: (name, id) — starred
-    /// books float first under the shelf's own chosen order (§24), so this
-    /// list is a SET in a stable order, not a pin-time sequence.
+    /// The STARRED books (13i-a — starred absorbs pins, sitting record §7).
+    /// The name survives until 13i-d's vocabulary sweep. Order: (name, id) —
+    /// starred books float first under the shelf's own chosen order (§24), so
+    /// this list is a SET in a stable order, not a pin-time sequence.
+    ///
+    /// **13i-d U2 ACT 0 — THE UNION** (F-U1-2 (A), ruled): a book is starred
+    /// iff its `reading.starred` column is set OR its key is in the 13f
+    /// `starred` list — the ONE truth `starredReadingIDs` states. Before this
+    /// the float read the column alone, so a book starred from its row's ★
+    /// door (which wrote only the list) never floated.
     public static func shelfPins(_ db: Database) throws -> [String] {
-        try String.fetchAll(
+        try starredReadingRows(db).map(\.id)
+    }
+
+    /// **THE ONE STAR TRUTH FOR A READING** (13i-d U2 ACT 0): the live
+    /// readings whose column is set OR whose key the list holds — by (name,
+    /// id), case-insensitive. Every reader of "is this book starred" — the
+    /// Bookcase's float, the phone's pins, the Starred section's column-only
+    /// tail, the cap — asks THIS, so the two stores can never disagree about
+    /// a book again. Cost: one pass over the live readings (author-scale)
+    /// with an `IN` list bounded by the cap.
+    static func starredReadingRows(_ db: Database) throws -> [(id: String, name: String)] {
+        let listed = try starredTargets(db).compactMap { $0.kind == .reading ? $0.id : nil }
+        var clause = "starred = 1"
+        if !listed.isEmpty {
+            let placeholders = Array(repeating: "?", count: listed.count).joined(separator: ",")
+            clause = "(starred = 1 OR id IN (\(placeholders)))"
+        }
+        return try Row.fetchAll(
             db,
             sql: """
-                SELECT id FROM reading
-                WHERE starred = 1 AND deleted_at IS NULL
+                SELECT id, name FROM reading
+                WHERE deleted_at IS NULL AND \(clause)
                 ORDER BY name COLLATE NOCASE, id
-                """)
+                """,
+            arguments: StatementArguments(listed)
+        ).map { (id: $0["id"], name: $0["name"]) }
+    }
+
+    /// The union, as a set — the Bookcase snapshot's per-row answer.
+    public static func starredReadingIDs(_ db: Database) throws -> Set<String> {
+        Set(try starredReadingRows(db).map(\.id))
     }
 
     // MARK: - Stars (13f W4)
@@ -172,8 +200,31 @@ extension Queries {
     /// is also what keeps the cap counting only what she can see.
     ///
     /// Cost is bounded by the cap (`Operations.starLimit`), not by the
-    /// corpus: at most five ids, resolved in two indexed reads.
+    /// corpus: at most fifteen ids, resolved in two indexed reads — plus,
+    /// since 13i-d U2, one pass over the live readings for the column-only
+    /// tail (author-scale).
+    ///
+    /// **13i-d U2 ACT 0 — THE UNION** (F-U1-2 (A), ruled; R-13id-5): the
+    /// list's live entries in STAR ORDER, then every live reading starred by
+    /// its COLUMN alone, A–Z — the 13i-a-migrated shelf pins, and the daily
+    /// Journal and Quicknotes (born starred, and kept so by her ruling), made
+    /// visible in the section at last (§7: "pinned books become starred").
     public static func starred(_ db: Database) throws -> [StarredItem] {
+        let listed = try starredListItems(db)
+        let listedReadings = Set(listed.compactMap {
+            $0.target.kind == .reading ? $0.target.id : nil
+        })
+        let columnOnly = try starredReadingRows(db)
+            .filter { !listedReadings.contains($0.id) }
+            .map { StarredItem(target: .reading($0.id), name: $0.name) }
+        return listed + columnOnly
+    }
+
+    /// The LIST half of the union: its live entries, in star order (the 13f
+    /// read rule exactly — a dead target renders nothing). Internal: the
+    /// write side's self-heal persists exactly this, and nothing outside the
+    /// star machinery should see one store without the other.
+    static func starredListItems(_ db: Database) throws -> [StarredItem] {
         let targets = try starredTargets(db)
         guard !targets.isEmpty else { return [] }
 
@@ -217,7 +268,9 @@ extension Queries {
     /// hand-off c). Bounded by the cap, never the corpus. 13i-b U1's intake
     /// is its first consumer; the gathering assembly's call sites are U4's.
     public static func starredNoteIDs(_ db: Database) throws -> [String] {
-        try starred(db).compactMap { $0.target.kind == .post ? $0.target.id : nil }
+        // Notes live in the LIST alone (the column is a reading's), so the
+        // union's reading tail is never consulted here.
+        try starredListItems(db).compactMap { $0.target.kind == .post ? $0.target.id : nil }
     }
 
     /// The stored star list, decoded but NOT liveness-filtered. Internal:
