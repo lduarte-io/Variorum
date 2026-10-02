@@ -200,6 +200,36 @@ nonisolated enum CollectingCopy {
     static let finishedToggle = "Finished"
 }
 
+// MARK: - What the sheet draws (13i-d U3 — row 107)
+
+/// **WHICH of the sheet's fields and controls draw, as data** — the face and
+/// its DEBUG probe read the same answer, so they can never disagree.
+nonisolated enum BookSettingsFace {
+    enum Field: String, CaseIterable, Sendable {
+        case name = "Name"
+        case wordTarget = "Word target"
+        case noteCap = "Note cap"
+    }
+
+    /// A BOOK draws all three. A GATHERING has no word target or capacity
+    /// (the sitting record §3; P-13ic-U3-2 ruled to its letter — KnownIssues
+    /// row 107) — except a value ALREADY stored (a 13i-b-era gathering), whose
+    /// field stays so it can be cleared: the legacy way out (P-13id-U3-3).
+    static func fields(for reading: Reading) -> [Field] {
+        guard reading.kind == .gathering else { return Field.allCases }
+        var fields: [Field] = [.name]
+        if reading.wordTarget != nil { fields.append(.wordTarget) }
+        if reading.maxPosts != nil { fields.append(.noteCap) }
+        return fields
+    }
+
+    /// A gathering has no finish (§3) — the control draws only on one ALREADY
+    /// finished, where it is the Reopen door (`BookStateDoorSet`'s own cell).
+    static func showsFinished(for reading: Reading) -> Bool {
+        reading.kind == .book || reading.locked
+    }
+}
+
 // MARK: - The model
 
 /// The sheet's own brain: the Collecting projection (tag paths, the global
@@ -331,10 +361,18 @@ struct BookSettingsSheet: View {
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
+            let fields = structure.reading.map(BookSettingsFace.fields(for:))
+                ?? BookSettingsFace.Field.allCases
             Form {
-                TextField("Name", text: $nameField)
-                TextField("Word target (blank = none)", text: $wordTargetField)
-                TextField("Note cap (blank = none)", text: $maxPostsField)
+                if fields.contains(.name) {
+                    TextField("Name", text: $nameField)
+                }
+                if fields.contains(.wordTarget) {
+                    TextField("Word target (blank = none)", text: $wordTargetField)
+                }
+                if fields.contains(.noteCap) {
+                    TextField("Note cap (blank = none)", text: $maxPostsField)
+                }
             }
             if let reading = structure.reading {
                 collecting(reading)
@@ -498,24 +536,31 @@ struct BookSettingsSheet: View {
     @ViewBuilder
     private func state(_ reading: Reading) -> some View {
         let acts = BookStateDoorSet.rendered(for: BookStateFacts(reading))
-        sectionLabel(CollectingCopy.stateSection)
+        let showsFinished = BookSettingsFace.showsFinished(for: reading)
+        // 13i-d U3 (row 107): a section with nothing in it draws no label (a
+        // gathering — §3: no finish, no seal, no own).
+        if showsFinished || !acts.isEmpty {
+            sectionLabel(CollectingCopy.stateSection)
+        }
         // FINISHED — one control for the finish pair. While SEALED it stays
         // on and DISABLED with the sealed words: Reopen refuses a sealed
         // book (`readingSealed`), so no Reopen door renders (P-2).
-        Toggle(tokens.chromeLabel(CollectingCopy.finishedToggle), isOn: Binding(
-            get: { reading.locked },
-            set: { finished in
-                let act: CapabilityID = finished ? .finishBook : .reopenBook
-                guard acts.contains(act) else { return }
-                Task { await model.stateDoors.open(act, readingID: reading.id) }
-            }))
-            .font(tokens.small)
-            .disabled(!acts.contains(.finishBook) && !acts.contains(.reopenBook))
-        ChromeNotice(
-            tokens: tokens,
-            text: reading.sealedAt != nil
-                ? CollectingCopy.finishedWhileSealed : CollectingCopy.finishedCaption,
-            lines: 3)
+        if showsFinished {
+            Toggle(tokens.chromeLabel(CollectingCopy.finishedToggle), isOn: Binding(
+                get: { reading.locked },
+                set: { finished in
+                    let act: CapabilityID = finished ? .finishBook : .reopenBook
+                    guard acts.contains(act) else { return }
+                    Task { await model.stateDoors.open(act, readingID: reading.id) }
+                }))
+                .font(tokens.small)
+                .disabled(!acts.contains(.finishBook) && !acts.contains(.reopenBook))
+            ChromeNotice(
+                tokens: tokens,
+                text: reading.sealedAt != nil
+                    ? CollectingCopy.finishedWhileSealed : CollectingCopy.finishedCaption,
+                lines: 3)
+        }
         if let seal = acts.first(where: { $0 == .sealBook || $0 == .unsealBook }) {
             stateRow(
                 caption: seal == .unsealBook
@@ -601,7 +646,9 @@ struct BookSettingsSheet: View {
                 } : [],
             stateDoors: BookStateDoorSet.rendered(for: BookStateFacts(reading)),
             finishedDisabled: reading.sealedAt != nil,
-            journalTrait: reading.kind == .book ? Queries.hasJournalTrait(reading.profile) : nil)
+            journalTrait: reading.kind == .book ? Queries.hasJournalTrait(reading.profile) : nil,
+            fields: BookSettingsFace.fields(for: reading).map(\.rawValue),
+            finishedShown: BookSettingsFace.showsFinished(for: reading))
     }
     #endif
 }
@@ -664,6 +711,10 @@ enum BookSettingsProbe {
         /// 13i-d U3: the journal-trait row's state — nil when no row is drawn
         /// (a gathering).
         var journalTrait: Bool? = nil
+        /// 13i-d U3 (row 107): which of the three fields are drawn, and
+        /// whether the Finished control is.
+        var fields: [String] = []
+        var finishedShown = true
     }
 
     static var drawn: [String: Drawn] = [:]

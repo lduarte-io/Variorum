@@ -142,6 +142,59 @@ struct BookCollectingDoorsTests {
         }
     }
 
+    // MARK: - Row 107's settings-sheet half (§3: a gathering has no finish,
+    // word target or capacity)
+
+    /// RED ON OLD (the 13i-b carry-over): a gathering's sheet drew Name ·
+    /// Word target · Note cap and the Finished control. Now: Name alone, no
+    /// Finished — while a BOOK's sheet keeps all of it.
+    @Test func aGatheringsSheetDrawsNoFinishAndNoExtents() async throws {
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let work = try ops.createTag(name: "work")
+            let book = try ops.createReading(name: "Plain", kind: .book)
+            let gathering = try ops.createReading(
+                name: "Work", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+            BookSettingsProbe.drawn = [:]
+            for id in [book.id, gathering.id] {
+                let target = try #require(await BookSettingsTarget.load(session: session, readingID: id))
+                try await mounted(BookSettingsHost(target: target)) {}
+            }
+            let bookDrawn = try #require(BookSettingsProbe.drawn[book.id])
+            #expect(bookDrawn.fields == ["Name", "Word target", "Note cap"])
+            #expect(bookDrawn.finishedShown)
+            let gDrawn = try #require(BookSettingsProbe.drawn[gathering.id])
+            #expect(gDrawn.fields == ["Name"], "a gathering has no word target or capacity (§3)")
+            #expect(!gDrawn.finishedShown, "…and no finish (§3)")
+            #expect(gDrawn.stateDoors.isEmpty)
+            _ = try await reading(db, book.id)
+        }
+    }
+
+    /// The LEGACY ways out (P-13id-U3-3, P-13id-U1-9's rule on the sheet): a
+    /// gathering finished, targeted or capped BEFORE 13i-d keeps exactly the
+    /// control that clears it — Reopen, and the field holding a value.
+    @Test func aLegacyGatheringKeepsItsWaysOut() async throws {
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let work = try ops.createTag(name: "work")
+            let gathering = try ops.createReading(
+                name: "Old", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+            // The shipped ops still accept these on a gathering (the (c) arm
+            // is STOPPED for the architect) — exactly how a legacy one exists.
+            try ops.setReadingMaxPosts(gathering.id, maxPosts: 5)
+            try ops.lockReading(gathering.id)
+            BookSettingsProbe.drawn = [:]
+            let target = try #require(await BookSettingsTarget.load(session: session, readingID: gathering.id))
+            try await mounted(BookSettingsHost(target: target)) {}
+            let drawn = try #require(BookSettingsProbe.drawn[gathering.id])
+            #expect(drawn.fields == ["Name", "Note cap"], "the stored cap can be cleared")
+            #expect(drawn.finishedShown, "the finished control stays, so Reopen can act")
+            #expect(drawn.stateDoors == [.reopenBook])
+            _ = try await reading(db, gathering.id)
+        }
+    }
+
     // MARK: - The journal-trait sentence (§10)
 
     /// §10's sentence is a BOOK's row (a gathering mints no entries — P-2),

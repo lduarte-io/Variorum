@@ -104,9 +104,16 @@ struct BookStateDoorsTests {
                 "a sealed book renders NO Reopen (it refuses — Unseal is the one door down)")
         #expect(BookStateDoorSet.rendered(for: facts(owned: true))
                 == [.finishBook, .sealBook, .unownBook])
-        #expect(BookStateDoorSet.rendered(for: facts(book: false)) == [.finishBook],
-                "a gathering never renders Seal or Own (both refuse a gathering — P-2)")
-        #expect(BookStateDoorSet.rendered(for: facts(book: false, finished: true)) == [.reopenBook])
+        // 13i-d U3 (A JUSTIFIED FLIP — KnownIssues row 107, P-13ic-U3-2 ruled
+        // to the sitting record §3's letter at the 13i-c adjudication; F-U1-8
+        // folds the shelf menu's filter into THIS table): a gathering has NO
+        // finish — an open one renders no state door at all (the old cell
+        // read `[.finishBook]`); only a gathering ALREADY finished keeps
+        // Reopen, as its way out (P-13id-U1-9 / P-13id-U3-3).
+        #expect(BookStateDoorSet.rendered(for: facts(book: false)) == [],
+                "a gathering renders no Finish, Seal or Own (§3: it has no finish; both others refuse — P-2)")
+        #expect(BookStateDoorSet.rendered(for: facts(book: false, finished: true)) == [.reopenBook],
+                "a legacy-finished gathering keeps Reopen as its way out")
         // Every rendered act is declared, on the doors that render it.
         for act in BookStateDoorSet.all {
             let doors = CapabilityRegistry.capability(act).doors
@@ -472,7 +479,8 @@ struct BookSettingsSheetTests {
     }
 
     /// The SAME pane for a gathering (§4): its rule, the HIDE-OWNED toggle's
-    /// three words, no dial or outflow, and only the finish pair.
+    /// three words, no dial or outflow — and since 13i-d U3 (row 107, the
+    /// sitting record §3's letter) no state door at all.
     @Test func aGatheringsSheetDrawsItsRuleAndTheHideOwnedToggle() async throws {
         try await withStateWorld { session, db in
             let ops = session.operations
@@ -493,7 +501,9 @@ struct BookSettingsSheetTests {
                 #expect(drawn.hideOwned == [
                     "as the app does (shown)", "show them", "hide them",
                 ])
-                #expect(drawn.stateDoors == [.finishBook])
+                // 13i-d U3 (A JUSTIFIED FLIP, row 107 — the old cell read
+                // `[.finishBook]`): a gathering has no finish (§3).
+                #expect(drawn.stateDoors == [])
             }
         }
     }

@@ -636,9 +636,9 @@ struct ShelfView: View {
         // registry. 13i-d U1 (row 107's shelf half): a gathering has no
         // FINISH (§3) — the door leaves its menu; Reopen stays ONLY on a
         // gathering that is already (legacy) finished, as its way out
-        // (PROVISIONAL P-13id-U1-9; U3 rules the ops' refusal arm).
-        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading))
-            .filter { reading.kind == .book || $0 != .finishBook }, id: \.self) { act in
+        // (PROVISIONAL P-13id-U1-9). 13i-d U3 (F-U1-8): that rule now lives
+        // IN the table, which the settings sheet reads too.
+        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading)), id: \.self) { act in
             Button(CapabilityRegistry.capability(act).verb) {
                 Task { await model.stateDoors.open(act, readingID: reading.id) }
             }

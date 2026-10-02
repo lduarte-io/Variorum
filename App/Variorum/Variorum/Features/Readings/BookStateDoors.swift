@@ -74,20 +74,27 @@ nonisolated struct BookStateFacts: Equatable, Sendable {
 ///   refuses there (`lockedReading`, PROVISIONAL P-13ic-2) WITH a road — reopen
 ///   (or unseal) first — and the door speaks exactly that (the brief: "refused
 ///   on a finished/sealed book with the op's words").
-/// - A gathering keeps the shipped finish pair (13i-b shipped Finish on a
-///   gathering's row and `lockReading` acts on one) — recorded, not changed
-///   here (the U3 RECORD's FINDING F-U3-1).
+/// - **A GATHERING HAS NO FINISH** (13i-d U3 — KnownIssues row 107: P-13ic-U3-2
+///   ruled to the sitting record §3's letter at the 13i-c adjudication; the
+///   Bookcase's shelf-menu filter, U1's P-13id-U1-9, folds in HERE — F-U1-8 —
+///   so the shelf menu and the settings sheet read one table): an open
+///   gathering renders no state door at all; one ALREADY finished (13i-b
+///   shipped Finish on a gathering) renders Reopen alone, as its way out.
+///   Whether the OPERATIONS also refuse a gathering's finish is row 107's (c)
+///   arm — proposed in the 13i-d U3 RECORD and stopped for the architect.
 nonisolated enum BookStateDoorSet {
     static let all: [CapabilityID] = [
         .finishBook, .reopenBook, .sealBook, .unsealBook, .ownBook, .unownBook,
     ]
 
     static func rendered(for facts: BookStateFacts) -> [CapabilityID] {
+        guard facts.isBook else {
+            return facts.finished ? [.reopenBook] : []
+        }
         var acts: [CapabilityID] = []
         if !facts.sealed {
             acts.append(facts.finished ? .reopenBook : .finishBook)
         }
-        guard facts.isBook else { return acts }
         acts.append(facts.sealed ? .unsealBook : .sealBook)
         acts.append(facts.owned ? .unownBook : .ownBook)
         return acts
