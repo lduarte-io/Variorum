@@ -2011,7 +2011,7 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 | 4 | Core — `moveWingContents` + the pure `WingTagCarry` plan + `Queries.wingContentsMovePreview` + pins | DONE (this commit; the op landed at cfd80673) — `WingContentsMoveTests` 3 (the full arithmetic to Home incl. the confirm = the act and Delete Wing succeeding; the refusals + the daily-Journal belt; the Trash rows re-homing without crossing, to another wing AND to Home) + `WingTagCarryTests` 3 (pure) — **6 green** (`p4-a.log`) |
 | 5 | Mac — the two doors (the Bookcase row's Move to Wing ▸; the switcher's Move Everything to Another Wing ▸) with their counting confirms + receipts; the delete refusal's new road words; the registry rows; door pins + the registry walk | DONE (this commit) — `Core/Views/WingBookMoves.swift` (`WingBookMoveDoor.drawn`, the asks + acts on `WingsModel`, every word, the two confirm modifiers), `ShelfView` (the row door after Move to Shelf ▸ + the confirm), `WingSwitcherMenu` (`currentWingActs` — the current wing's acts as DATA; the bulk submenu + its confirm), `.moveBookToWing` / `.moveWingContents` declared; `WingBookMoveDoorTests` 7 + `WingSwitcherTests` 8 (TWO JUSTIFIED EDITS, commented: the refusal's road words, the switcher's fourth act) + **the registry walk** 28 — **43/3 green, 0 skipped** (`mac-p5.log`, build `DerivedData/13id-u5b`) |
 | 5b | The combined BEHAVIOURAL REVERT over the new ops (R1 no arrival dismissal · R2 no daily-Journal guard · R3 no unshelving · R4 no stray re-point · R5 `keeping: []` · R6 no rule adoption) — proving the state pins bite | DONE — **exactly the 8 predicted tests RED, 15 issues** (`revert.log`: R5 → the members' sever-list/rows, the finished/sealed whole move, the move-back; R1 → the arrivals; R6 → the rule; R3 → unshelved; R2 → the daily Journal; R4 → the bulk's snippet + mint tally), the other 6 green; restored by `git checkout HEAD --`, `git diff --quiet` verified, green again 14/3 (`revert-restored.log`) — **no revert in flight** |
-| 6 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | NOT-STARTED |
+| 6 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | DONE — core FULL **2108/230** (1 standing skip; `core-full.log`); Mac named **1004/168, 0 skipped** in three batches (`mac-c.log` 122/14 — the registry walk, the eleven `Tutorial*` suites, `WingSwitcherTests`, `WingBookMoveDoorTests` · `mac-a.log` 236/38 — every `Book*` suite, the landing families UNMODIFIED · `mac-b.log` 646/116 — U5's neighbourhood batch: Library/Pool/Bookcase/Shelf/Star/Tag/Recovery/Trash/Archived/Membership/Ownership/Journal…); phone **TEST BUILD SUCCEEDED** (`phone-bft.log`, `DerivedData/13id-u5b-mobile`) |
 | 7 | The screenshot walk ×4 into `notes/plans/13id-screens/u5b/` | NOT-STARTED |
 | 8 | Record close · QUESTIONS #175 · ledger row 6b | NOT-STARTED |
 
@@ -2099,7 +2099,21 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
   refusal at the door, the receipt; the switcher's bulk door (additional wings only — ABSENT on
   Home), its confirm and receipt; the delete refusal's new words (red on the old words);
   declarations + the registry walk: PENDING.
-- Suites at the END (baseline core 2091/226 at U5's close): PENDING. The walk ×4: PENDING.
+- **Core FULL `swift test`: "Test run with 2108 tests in 230 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test). Baseline 2091/226 → **+17 / +4, all this unit's**
+  (`WingRevivalTests` 3, `BookWingMoveTests` 8, `WingContentsMoveTests` 3, `WingTagCarryTests` 3).
+- **Mac named suites** (build `DerivedData/13id-u5b`, `test-without-building`, zero instances):
+  **1004 tests in 168 suites, 0 skipped** — 122/14 (**`CapabilityRegistryTests` — the registry
+  walk**, **all eleven `Tutorial*` suites — the tutorial spine; lesson 11 TRUE**,
+  `WingSwitcherTests`, `WingBookMoveDoorTests`) + 236/38 (every `Book*` suite) + 646/116 (U5's
+  neighbourhood batch). A first attempt ran the WHOLE bundle by accident (a relative batch path
+  the script's `cd` broke — no `-only-testing` reached xcodebuild); stopped by path after ~10
+  minutes; its partial log showed red only in `CanvasAndPoolTests.aMountedLongPostRealizes…` and
+  `CanvasArrivalTests` (the mounted-canvas/pointer-injection flake class, KnownIssues — no canvas
+  code touched here; not re-run).
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (the shared
+  `WingWords` / refusal-table changes compile; the phone is untouched in behaviour).
+- The walk ×4: PENDING.
 
 ### FINDINGS (for the orchestrator)
 
