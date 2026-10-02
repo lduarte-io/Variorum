@@ -190,3 +190,50 @@ new/changed suites and reading the pins; the Mac counts (732/117) and the walk c
 verified by reading the test sources, the flip diffs and the records — not by re-running xcodebuild
 in this session (the suites were green at the unit closes per the records, whose specific
 load-bearing assertions I located and read).
+
+---
+
+## THE CROSS-MODEL AGREE/DISPUTE RESPONSES (relayed by the orchestrator, 2026-10-02 — ZERO DISPUTES; condensed faithfully from the three implementers' replies, which the reviewer now rules on)
+
+**U3's implementer — MINOR 1, both of its arms: AGREE.**
+- MastheadTagsModel: mechanism confirmed (`track`'s loop adopts unguarded; the `@State` store
+  outlives a postID change; `removeDuplicates` makes the stale state LAST until the next
+  post_tag/tag write anywhere). **Extension offered:** `refresh(session:postID:)` — the one-shot
+  re-read after the cluster's own add/remove doors — has the same stomp if the note changes
+  mid-flight; the fix should cover it (drop a refresh whose postID is no longer the tracked
+  subject, or route refresh through the same guard).
+- BookIndexGroupingModel: AGREE, consequence LARGER than filed — a late adopt from the
+  superseded key overwrites `sectionsRoot`, so `BookIndexView.groups`' `sectionsRoot ==
+  family.id` check fails and the Index falls back to the SHIPPED look: the chosen grouping
+  silently disappears and STAYS gone until the next tagging write (removeDuplicates), not
+  transiently. Deterministic pin shape: a task cancelled before its first delivery is adopted;
+  assert subject/sectionsRoot keep the later task's values.
+
+**U1's implementer — MINOR 2, NIT 3, NIT 4: AGREE on all three.**
+- MINOR 2 WIDENED, against its own code: beside the two named statements, the same held
+  `bookshelf(db, wingID:)` read runs TWO OLDER store-wide GROUP BYs (`postCounts`,
+  `sectionCounts` — unchanged since 13 B2) and loads every wing's rows through
+  `Queries.readings(db)` before the Swift wing filter — so fixing only the named two would not
+  make "one wing's held read" true. Its preference: DRIVE ALL FOUR from `reading r WHERE
+  r.wing_id = ?` (the `wingArchivedCountsSQL` shape) so U5 inherits nothing silent; the
+  NON-held one-shots (`bookWordCounts`, `shelfBookTags`, `ruleTagPaths`) are store-wide too and
+  can be re-worded rather than driven.
+- NIT 3: gate confirmed exact (`!model.shelves.isEmpty || here != BookcaseBoard.unshelvedKey`).
+- NIT 4: the BOARD half is the intended A–Z (`BookcaseOrdering.nameAscending`, digit-aware —
+  P-13id-U1-3/10); the fix belongs on the TAIL (sort `starredReadingRows`' column-only tail
+  with `nameAscending` after the fetch; author-scale).
+
+**U4's implementer — MINOR 1's BookArchivedModel arm and MINOR 2's aggregates arm: AGREE.**
+- BookArchivedModel: mechanism traced (`start` adopts unconditionally; hosted by
+  `.task(id: model.expanded)`; a collapsed-loop value can land after the expanded loop's first
+  delivery → "▾ N archived" with ZERO rows). Consequence REFINED: self-healing waits for a
+  write touching reading/reading_post/container — with nobody typing the blank expansion stays
+  until a write lands or she folds and reopens.
+- Aggregates: the store-wide member-stamp GROUP BY is U1's statement; U4 extended the stale
+  cost comment without correcting it, so the drift rode its edit. Driving from the wing's
+  readings (its own `wingArchivedCountsSQL` shape) is preferred.
+
+Per the cross-model flow the FINAL CALL on each finding — including whether the offered
+extensions/widenings ride the fixes — is the reviewer's, which implements its confirmed fixes
+itself (pins per the hallucination guard, commit per piece, suites green at the end), then an
+implementer sanity pass, then round 2 re-reviews the fixes.
