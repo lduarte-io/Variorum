@@ -93,6 +93,18 @@ re-sized at this phase's own kickoff.**
    never shows archived members — archive keeps its one meaning (kept, out of the working view);
    the book gains a door to its own set-aside notes. Faces + one query; zero schema, zero `Sync/`.
 
+10. **THE ROAD BACK FROM A DISMISSAL — teach it (her question, 2026-10-02: *"do we teach the user
+    what to do to 'try again' with a book that was denied previously? … needing to delete and
+    re-add the tag seems weird - can you simply add the note to that book directly if you regret
+    saying no?"*).** The FACT (verified in `addPostToReading`): a dismissal decides INTAKE only —
+    the hand doors (the chip's Add to Book, a drag, Manage Notes) check live rows alone and insert a
+    fresh membership; a dismissal tombstone never blocks them (the uniqueness index is live-rows-
+    only); ownership is consulted as usual. What is missing is the TELLING: (a) the dismiss
+    receipt (`ArrivalsCopy.dismissed`) reads only "Dismissed “X”." → "Dismissed “X” — it won't come
+    back on its own; add it by hand any time."; (b) lesson 4 (§25) gains "Changed your mind? Add
+    it by hand; dismissing only stops the book from adding it on its own." Both land with this
+    phase's tutorial chapter and vocabulary sweep (or as a one-line post-close change at her word).
+
 ## HER WALK POSTURE FOR THE 13i FAMILY (2026-10-01; verbatim-faithful — BINDS 13i-d/e)
 
 *"I will be doing a combined walk over all of 13i - I might do some small walks between the
