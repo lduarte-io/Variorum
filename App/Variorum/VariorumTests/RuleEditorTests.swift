@@ -342,7 +342,7 @@ struct RuleEditorTests {
             _ = try session.operations.applyTag(work.id, toPost: members[0].id)
             let model = await editor(session, book.id)
 
-            model.autoTagID = work.id
+            model.outflow = OutflowDraft([work.id])  // 13i-c U3: the chooser (the single row retired)
             #expect(model.isDirty)
             #expect(await model.save())
 
@@ -368,7 +368,7 @@ struct RuleEditorTests {
             let (work, _, _, _) = try vocabulary(session, db)
             let book = try session.operations.createReading(name: "b", kind: .book)
             let model = await editor(session, book.id)
-            model.autoTagID = work.id
+            model.outflow = OutflowDraft([work.id])  // 13i-c U3: the chooser (the single row retired)
             #expect(await model.save())
             #expect(session.status.current?.kind != .offer)
             _ = db

@@ -168,7 +168,7 @@ struct ReadingFilterTests {
 
             // An auto-tag: what notes written here wear.
             let outflow = try ops.createTag(name: "outflow")
-            try ops.setReadingAutoTag(w.book.id, tagID: outflow.id)
+            try ops.setReadingOutflow(w.book.id, tagIDs: [outflow.id])
             let tagged = try ops.saveFilterAsGathering(w.book.id, filter: .star, name: "tagged")
             #expect(tagged.association == .autoTag)
             #expect(try rule(db, tagged.reading.id) == .and([.tag(outflow.id), .star]))
@@ -185,7 +185,7 @@ struct ReadingFilterTests {
         try withOperations { ops, db in
             let w = try book(ops)
             let outflow = try ops.createTag(name: "outflow")
-            try ops.setReadingAutoTag(w.book.id, tagID: outflow.id)
+            try ops.setReadingOutflow(w.book.id, tagIDs: [outflow.id])
             try db.write { db in
                 try db.execute(
                     sql: "UPDATE reading SET query_spec = '{broken' WHERE id = ?",

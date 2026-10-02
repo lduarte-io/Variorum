@@ -660,7 +660,22 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   `BookSettingsSheet`. `BookSettingsSheetTests` (6) green. Touched suites: BookStateDoors ·
   BookSettingsSheet · CapabilityRegistry (the walk) · ShelfModelTests — **49 tests / 4 suites passed**;
   zero instances before and after.
-- **Piece C:** NOT STARTED.
+- **Piece C — THE OUTFLOW CHOOSER:** DONE (commit "13i-c U3 piece C"). `Features/Readings/
+  OutflowChooser.swift`: `OutflowDraft` (pure — her append order, de-duplicated, each removable, "none"
+  legal, `written(live:)` drops a dead id) + `OutflowChooser` (a row per chosen tag in the term-row
+  grammar — "#path" or "(deleted tag)", a quiet "remove" — and one "+ tag" menu of the wing's live
+  tags not yet chosen). `RuleEditorModel.autoTagID` → `outflow: OutflowDraft`; writes
+  `setReadingOutflow(id, tagIDs:)` (a dead stored id drops on ANY save of the sheet); the offer asks
+  when the rule or the set changed, N = `membersMissingAnyOutflowTag` (read after the write), its act
+  `tagAllMembers(nil)`, the receipt counting notes; words `tagMembersOffer(count:paths:)` /
+  `taggedMembers(count:paths:)` (one tag reads exactly as before). **Core:** the
+  `setReadingAutoTag` FORWARDER RETIRED (F-U1-1) — its 10 core-test call sites moved one-for-one onto
+  `setReadingOutflow` (subjects untouched, each commented); `OutflowRetirementTests.
+  theSingleTagForwarderIsRetired` pins no production caller or definition survives. The two
+  `RuleEditorTests` auto-tag pins drive the draft (their words unchanged). Core filtered run
+  (IntakeOperations · Phase13icOutflow · ReadingFilter · OutflowRetirement) **66 / 4 green**; Mac
+  `OutflowChooserTests` (6) + RuleEditor + BindDoor + BookSettingsSheet green (one fixture-order fix
+  in my own new pin: a hand-add rides the outflow, so the member joins before it exists).
 - **Piece D:** NOT STARTED.
 - **Piece E:** NOT STARTED.
 - **Piece F:** NOT STARTED.

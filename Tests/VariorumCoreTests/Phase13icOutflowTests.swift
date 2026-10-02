@@ -141,8 +141,10 @@ struct Phase13icOutflowTests {
             // Empty clears to NULL — one spelling of "no outflow".
             try ops.setReadingOutflow(book.id, tagIDs: [])
             #expect(try db.fetchString("SELECT auto_tag_ids FROM reading WHERE id = ?", [book.id]) == nil)
-            // The 13i-b forwarder writes a one-element set.
-            try ops.setReadingAutoTag(book.id, tagID: a.id)
+            // A one-element set. (13i-c U3: this line drove the 13i-b
+            // forwarder `setReadingAutoTag`, RETIRED with the rule editor's
+            // single row — F-U1-1; the set's own setter writes it now.)
+            try ops.setReadingOutflow(book.id, tagIDs: [a.id])
             #expect(try db.read { try Queries.reading($0, id: book.id) }?.autoTagIDs == [a.id])
         }
     }
@@ -373,5 +375,24 @@ struct OutflowRetirementTests {
             }
         }
         #expect(offenders.isEmpty, "readers of the retired column: \(offenders)")
+    }
+
+    /// 13i-c U3 (F-U1-1): the single-tag FORWARDER retired with the rule
+    /// editor's single row — the outflow chooser writes the whole set, and no
+    /// production code may call a door that names one tag.
+    @Test func theSingleTagForwarderIsRetired() throws {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        var offenders: [String] = []
+        for dir in ["Sources", "App/Variorum/Shared", "App/Variorum/Variorum", "App/Variorum/VariorumMobile"] {
+            let base = root.appendingPathComponent(dir)
+            guard let walker = FileManager.default.enumerator(atPath: base.path) else { continue }
+            while let rel = walker.nextObject() as? String {
+                guard rel.hasSuffix(".swift") else { continue }
+                let text = try String(contentsOf: base.appendingPathComponent(rel), encoding: .utf8)
+                if text.contains("setReadingAutoTag(") { offenders.append("\(dir)/\(rel)") }
+            }
+        }
+        #expect(offenders.isEmpty, "callers or definitions of the retired forwarder: \(offenders)")
     }
 }

@@ -16,14 +16,18 @@
 //  (#166(d)); a MALFORMED stored rule refuses editing entirely.
 //
 //  It serves GATHERINGS and BOOKS — a book's rule IS its intake. For a book
-//  it also carries the two Collecting settings, minimally faced: the join
-//  dial (`intake_seating` — "new matches: join quietly at the end · wait at
-//  Arrivals") and the auto-tag row. Writes go through the one rule choke
-//  point (`setReadingQuerySpec`) and the two setters; a rule edit on a living
-//  book routes its gap through Arrivals (U1's catch-up — nothing to do here);
-//  a save that sets the rule or the auto-tag with an auto-tag in place OFFERS
-//  "also tag the N current members now" (`tagAllMembers`) on the one status
-//  seam (the sitting record §4, ruled).
+//  it also carries the two Collecting settings: the join dial
+//  (`intake_seating` — "new matches: join quietly at the end · wait at
+//  Arrivals") and — since 13i-c U3 — the OUTFLOW CHOOSER (`OutflowChooser`:
+//  a chosen, ordered, optional SET of tags, independent of the rule —
+//  R-13ic-1), which retired the single auto-tag row and its forwarder op.
+//  Writes go through the one rule choke point (`setReadingQuerySpec`) and
+//  the two setters (`setReadingIntakeSeating`, `setReadingOutflow`); a rule
+//  edit on a living book routes its gap through Arrivals (U1's catch-up —
+//  nothing to do here); a save that changed the rule or the outflow, with an
+//  outflow in place and members missing any of it, OFFERS "also tag the N
+//  current members now" (`tagAllMembers(nil)` — every outflow tag) on the
+//  one status seam (the sitting record §4, ruled).
 //
 //  13i-d re-homes this face into the Collecting pane's sentences; it is built
 //  as three movable pieces (P-9): the WORDS (`RuleEditorCopy`), the MODEL
@@ -47,8 +51,11 @@ nonisolated enum RuleEditorCopy {
     static let gatheringLead = "Shows every note that matches:"
     static let bookLead = "Collects every note that matches:"
 
+    /// 13i-c U3 (R-13ic-4, F-U1-3): NO RULE = NOTHING on a gathering — the
+    /// old "shows every note" letter died at U1 (a Trash restoree is the only
+    /// live rule-less gathering there can be).
     static let noRuleGathering =
-        "No rule yet \u{2014} with none, this gathering shows every note."
+        "No rule \u{2014} this gathering shows nothing until it has one."
     static let noRuleBook =
         "No rule yet \u{2014} this book collects nothing by itself."
 
@@ -89,17 +96,25 @@ nonisolated enum RuleEditorCopy {
     static let joinAuto = "join quietly at the end"
     static let joinArrivals = "wait at Arrivals"
     static let autoTagLabel = "Notes written here are tagged:"
-    static let autoTagNone = "no tag"
+    /// The outflow chooser's empty state (13i-c U3 — "none" is legal).
+    static let outflowNone = "nothing"
 
     // The seam.
     static func saved(_ name: String) -> String { "Saved the rule for \u{201C}\(name)\u{201D}." }
-    static func tagMembersOffer(count: Int, path: String) -> String {
+    /// The offer, over the outflow SET (13i-c — P-13ic-11): N = the members
+    /// missing at least one of the tags; the tags are named in her order.
+    static func tagMembersOffer(count: Int, paths: [String]) -> String {
         let members = count == 1 ? "the 1 current member" : "the \(count) current members"
-        return "Also tag \(members) with #\(path) now?"
+        return "Also tag \(members) with \(hashtags(paths)) now?"
     }
     static let tagMembersAction = "Tag Them"
-    static func taggedMembers(count: Int, path: String) -> String {
-        "Tagged \(count) member\(count == 1 ? "" : "s") with #\(path)."
+    /// The receipt counts NOTES that newly wear at least one (P-13ic-11).
+    static func taggedMembers(count: Int, paths: [String]) -> String {
+        "Tagged \(count) member\(count == 1 ? "" : "s") with \(hashtags(paths))."
+    }
+
+    static func hashtags(_ paths: [String]) -> String {
+        paths.map { "#\($0)" }.joined(separator: " ")
     }
 }
 
@@ -129,8 +144,9 @@ final class RuleEditorModel: Identifiable {
     private(set) var draft: RuleTerm?
     /// The book's join dial, as edited (nil stored reads AUTO — P-13ib-5).
     var seating: IntakeSeating = .auto
-    /// The book's auto-tag, as edited.
-    var autoTagID: String?
+    /// The book's OUTFLOW, as edited (13i-c U3 — the chooser's draft; the
+    /// 13i-b single `autoTagID` and its forwarder retired with it, F-U1-1).
+    var outflow = OutflowDraft([])
     /// The wing's live tags — the add menus' choices and the auto-tag row's.
     private(set) var tags: [Tag] = []
     /// Live paths of the tags the STORED rule references (a tag of another
@@ -153,12 +169,16 @@ final class RuleEditorModel: Identifiable {
     var carriesLegacy: Bool { RuleEditing.carriesLegacy(draft) }
 
     private var storedSeating: IntakeSeating { reading?.intakeSeating ?? .auto }
+    private var storedOutflow: [String] { reading?.autoTagIDs ?? [] }
     var ruleChanged: Bool { RuleEditing.needsWrite(draft: draft, stored: storedSpec) }
     var seatingChanged: Bool { isBook && seating != storedSeating }
-    // 13i-c interim (until U3's outflow chooser): the row shows the set's
-    // FIRST tag and writes a one-element set through the forwarder.
-    var autoTagChanged: Bool { isBook && autoTagID != reading?.autoTagIDs.first }
-    var isDirty: Bool { ruleChanged || seatingChanged || autoTagChanged }
+    var outflowChanged: Bool { isBook && outflow.ids != storedOutflow }
+    var isDirty: Bool { ruleChanged || seatingChanged || outflowChanged }
+    /// The wing's live tag ids — what an outflow write may name.
+    private var liveTagIDs: Set<String> { Set(tags.map(\.id)) }
+    /// A stored outflow tag that died since: it reads "(deleted tag)" and
+    /// DROPS on the next save (`setReadingOutflow` refuses a dead id).
+    var storedOutflowHasDead: Bool { storedOutflow.contains { !liveTagIDs.contains($0) } }
 
     /// What the add menus offer — the wing's live tags, then the star. Never
     /// a legacy term (#166(d)): nothing here can mint one.
@@ -173,9 +193,10 @@ final class RuleEditorModel: Identifiable {
         return RuleEditorCopy.tag(path: id.isEmpty ? nil : path)
     }
 
-    func autoTagPath(_ id: String?) -> String? {
-        guard let id else { return nil }
-        return tags.first { $0.id == id }?.path ?? referencedPaths[id]
+    /// An outflow tag's words: "#path" for a live tag of the wing, else
+    /// "(deleted tag)" (the chooser drops it at the next save).
+    func outflowLabel(_ id: String) -> String {
+        RuleEditorCopy.tag(path: tags.first { $0.id == id }?.path)
     }
 
     // MARK: Loading
@@ -206,7 +227,7 @@ final class RuleEditorModel: Identifiable {
         stored = RuleGrammar.read(reading.querySpec)
         if case .rule(let term) = stored { draft = term } else { draft = nil }
         seating = reading.intakeSeating ?? .auto
-        autoTagID = reading.autoTagIDs.first
+        outflow = OutflowDraft(reading.autoTagIDs)
     }
 
     // MARK: The edits (each one `RuleEditing`'s)
@@ -242,10 +263,10 @@ final class RuleEditorModel: Identifiable {
     // MARK: Saving
 
     /// Writes exactly what changed — the dial first (so a rule edit's
-    /// catch-up or backfill already hears the dial she chose), the auto-tag,
+    /// catch-up or backfill already hears the dial she chose), the outflow,
     /// then the rule through its one choke point. An unedited save writes
-    /// NOTHING. A save that set or changed the rule or the auto-tag, with an
-    /// auto-tag in place and members not yet wearing it, OFFERS to tag them.
+    /// NOTHING. A save that set or changed the rule or the outflow, with an
+    /// outflow in place and members missing any of it, OFFERS to tag them.
     /// Returns true when the sheet may close.
     @discardableResult
     func save() async -> Bool {
@@ -255,8 +276,10 @@ final class RuleEditorModel: Identifiable {
         defer { saving = false }
         let id = readingID
         let writeSeating = seatingChanged ? seating : nil
-        let writeAutoTag = autoTagChanged
-        let autoTag = autoTagID
+        // A dead stored id drops on ANY save of the sheet (its row read
+        // "(deleted tag)"), not only one that touched the chooser.
+        let writeOutflow = outflowChanged || (isBook && storedOutflowHasDead)
+        let written = outflow.written(live: liveTagIDs)
         let writeRule = ruleChanged
         let spec: String?
         do {
@@ -268,7 +291,7 @@ final class RuleEditorModel: Identifiable {
         do {
             try await session.runner.run { ops in
                 if let writeSeating { try ops.setReadingIntakeSeating(id, writeSeating) }
-                if writeAutoTag { try ops.setReadingAutoTag(id, tagID: autoTag) }
+                if writeOutflow { try ops.setReadingOutflow(id, tagIDs: written) }
                 if writeRule { try ops.setReadingQuerySpec(id, querySpec: spec) }
             }
         } catch {
@@ -276,32 +299,35 @@ final class RuleEditorModel: Identifiable {
             return false
         }
         session.status.receipt(RuleEditorCopy.saved(reading.name))
-        if reading.kind == .book, let autoTag, writeRule || writeAutoTag,
-           let path = autoTagPath(autoTag) {
-            await offerToTagMembers(tagID: autoTag, path: path)
+        if reading.kind == .book, writeRule || writeOutflow, !written.isEmpty {
+            await offerToTagMembers(paths: written.compactMap { id in
+                tags.first { $0.id == id }?.path
+            })
         }
         return true
     }
 
     /// "Also tag the N current members now" — asked only when there are
-    /// members the tag would reach (N is `tagAllMembers`' own predicate).
-    private func offerToTagMembers(tagID: String, path: String) async {
+    /// members the outflow would reach (N is `tagAllMembers(nil)`'s own
+    /// predicate, `membersMissingAnyOutflowTag` — read AFTER the write, so it
+    /// is the stored set's number).
+    private func offerToTagMembers(paths: [String]) async {
         let id = readingID
         let count = (try? await session.database.read { db in
-            try Queries.membersMissingTag(db, readingID: id, tagID: tagID)
+            try Queries.membersMissingAnyOutflowTag(db, readingID: id)
         }) ?? 0
         guard count > 0 else { return }
         let session = session
         session.status.offer(
-            RuleEditorCopy.tagMembersOffer(count: count, path: path),
+            RuleEditorCopy.tagMembersOffer(count: count, paths: paths),
             action: .init(label: RuleEditorCopy.tagMembersAction) {
                 Task { @MainActor in
                     do {
                         let tagged = try await session.runner.run { ops in
-                            try ops.tagAllMembers(id, tagID: tagID)
+                            try ops.tagAllMembers(id)
                         }
                         session.status.receipt(
-                            RuleEditorCopy.taggedMembers(count: tagged, path: path))
+                            RuleEditorCopy.taggedMembers(count: tagged, paths: paths))
                     } catch {
                         session.status.refuse(OpsRefusalCopy.message(for: error))
                     }
@@ -383,6 +409,7 @@ struct RuleEditorSheet: View {
         .onAppear { recordSettings() }
         .onDisappear { RuleEditorProbe.forget(model.readingID) }
         .onChange(of: model.isDirty) { _, _ in recordSettings() }
+        .onChange(of: model.outflow) { _, _ in recordSettings() }
         #endif
     }
 
@@ -510,22 +537,11 @@ struct RuleEditorSheet: View {
                     on: model.seating == .arrivals,
                     action: { model.seating = .arrivals }, lines: 1)
             }
-            HStack(spacing: 6) {
-                Text(tokens.chromeLabel(RuleEditorCopy.autoTagLabel))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                VoicedMenu(
-                    tokens: tokens,
-                    label: model.autoTagPath(model.autoTagID).map { "#\($0)" }
-                        ?? (model.autoTagID == nil ? RuleEditorCopy.autoTagNone : RuleEditorCopy.deadTag)
-                ) {
-                    Button(RuleEditorCopy.autoTagNone) { model.autoTagID = nil }
-                    ForEach(model.tags, id: \.id) { tag in
-                        Button(RuleEditorCopy.tag(path: tag.path)) { model.autoTagID = tag.id }
-                    }
-                }
-            }
+            // 13i-c U3 — THE OUTFLOW CHOOSER (R-13ic-1): a chosen, ordered,
+            // optional set, independent of the rule above.
+            OutflowChooser(
+                tokens: tokens, draft: Bindable(model).outflow, tags: model.tags,
+                label: model.outflowLabel)
         }
     }
 
@@ -553,7 +569,8 @@ struct RuleEditorSheet: View {
             saveEnabled: model.isDirty && !model.saving,
             notice: model.ruleIsEditable
                 ? (model.carriesLegacy ? RuleEditorCopy.legacyNotice : nil)
-                : RuleEditorCopy.malformedNotice)
+                : RuleEditorCopy.malformedNotice,
+            outflow: model.isBook ? model.outflow.ids.map(model.outflowLabel) : [])
     }
     #endif
 }
@@ -587,6 +604,8 @@ enum RuleEditorProbe {
         var collecting = false
         var saveEnabled = false
         var notice: String?
+        /// 13i-c U3: the outflow chooser's rows, in order, as drawn.
+        var outflow: [String] = []
     }
 
     private(set) static var drawn: [String: Drawn] = [:]
@@ -610,12 +629,14 @@ enum RuleEditorProbe {
     }
 
     static func recordSettings(
-        _ readingID: String, collecting: Bool, saveEnabled: Bool, notice: String?
+        _ readingID: String, collecting: Bool, saveEnabled: Bool, notice: String?,
+        outflow: [String] = []
     ) {
         var entry = drawn[readingID, default: Drawn()]
         entry.collecting = collecting
         entry.saveEnabled = saveEnabled
         entry.notice = notice
+        entry.outflow = outflow
         drawn[readingID] = entry
     }
 

@@ -414,12 +414,11 @@ extension Operations {
         }
     }
 
-    /// The 13i-b single-tag setter, kept as a FORWARDER onto the set (so the
-    /// 13i-b rule-editor face and its pins ride until U3 rebuilds the row as
-    /// the outflow chooser — the parity pattern). nil clears.
-    public func setReadingAutoTag(_ id: String, tagID: String?) throws {
-        try setReadingOutflow(id, tagIDs: tagID.map { [$0] } ?? [])
-    }
+    // (13i-c U3: `setReadingAutoTag` — the 13i-b single-tag setter, kept by
+    // U1 as a FORWARDER onto the set so the 13i-b rule-editor row rode until
+    // its rebuild — RETIRED with that row (F-U1-1): the rule editor writes
+    // the outflow chooser's whole set through `setReadingOutflow`, and no
+    // door names a single tag any more.)
 
     // MARK: - The judgment ops (the plan §2.5)
 

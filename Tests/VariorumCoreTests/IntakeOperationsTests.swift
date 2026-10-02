@@ -770,13 +770,13 @@ struct IntakeOperationsTests {
             let essay = try ops.createTag(name: "essay")
             let book = try ops.createReading(name: "b", kind: .book, autoTagId: essay.id)
             let first = try ops.newPostInReading(book.id, title: "first")
-            try ops.setReadingAutoTag(book.id, tagID: nil)
+            try ops.setReadingOutflow(book.id, tagIDs: [])
             #expect(try liveTagIDs(db, first.id) == [essay.id])   // never untags (ruled)
             let second = try ops.newPostInReading(book.id, title: "second")
             #expect(try liveTagIDs(db, second.id).isEmpty)
 
             let gone = try ops.createTag(name: "gone")
-            try ops.setReadingAutoTag(book.id, tagID: gone.id)
+            try ops.setReadingOutflow(book.id, tagIDs: [gone.id])
             try ops.deleteTag(gone.id)
             let third = try ops.newPostInReading(book.id, title: "third")   // a dangling outflow: silent
             #expect(try liveTagIDs(db, third.id).isEmpty)
@@ -837,7 +837,7 @@ struct IntakeOperationsTests {
                 notes.append(n)
             }
             _ = try ops.applyTag(essay.id, toPost: notes[0].id)   // already wears it
-            try ops.setReadingAutoTag(book.id, tagID: essay.id)
+            try ops.setReadingOutflow(book.id, tagIDs: [essay.id])
 
             let tagged = try ops.tagAllMembers(book.id)
             #expect(tagged == 2)
@@ -888,7 +888,7 @@ struct IntakeOperationsTests {
             let gathering = try ops.createReading(
                 name: "g", kind: .gathering, querySpec: try rule(.tag(t.id)))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {
-                try ops.setReadingAutoTag(gathering.id, tagID: t.id)
+                try ops.setReadingOutflow(gathering.id, tagIDs: [t.id])
             }
             #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {
                 try ops.setReadingIntakeSeating(gathering.id, .arrivals)
@@ -906,19 +906,21 @@ struct IntakeOperationsTests {
                     """)
             }
             #expect(throws: OperationError.tagNotFound(id: "far")) {
-                try ops.setReadingAutoTag(book.id, tagID: "far")
+                try ops.setReadingOutflow(book.id, tagIDs: ["far"])
             }
 
-            try ops.setReadingAutoTag(book.id, tagID: t.id)
+            try ops.setReadingOutflow(book.id, tagIDs: [t.id])
             try ops.setReadingIntakeSeating(book.id, .arrivals)
             let set = try #require(try db.read { try Queries.reading($0, id: book.id) })
-            // 13i-c (R-13ic-1): the forwarder writes the SET; the old column
-            // is retired-as-read and stays NULL.
+            // 13i-c (R-13ic-1): the setter writes the SET; the old column is
+            // retired-as-read and stays NULL. (13i-c U3: this test drove the
+            // 13i-b forwarder `setReadingAutoTag` until it RETIRED — F-U1-1;
+            // its calls here moved onto `setReadingOutflow` one-for-one.)
             #expect(set.autoTagIDs == [t.id])
             #expect(set.autoTagId == nil)
             #expect(set.intakeSeating == .arrivals)
             try db.clearOutbox()
-            try ops.setReadingAutoTag(book.id, tagID: t.id)
+            try ops.setReadingOutflow(book.id, tagIDs: [t.id])
             try ops.setReadingIntakeSeating(book.id, .arrivals)
             #expect(!(try db.outboxContains("reading", book.id)))   // nothing changed, nothing written
             #expect(try db.read { try Queries.reading($0, id: book.id) }?.updatedAt == set.updatedAt)
