@@ -237,3 +237,74 @@ Per the cross-model flow the FINAL CALL on each finding — including whether th
 extensions/widenings ride the fixes — is the reviewer's, which implements its confirmed fixes
 itself (pins per the hallucination guard, commit per piece, suites green at the end), then an
 implementer sanity pass, then round 2 re-reviews the fixes.
+
+---
+
+## ROUND 1 — THE FINAL CALLS AND FIXES (the reviewer, 2026-10-02; the cross-model flow's closing arm — zero disputes stood, so every call is a confirmation with its ruled extensions)
+
+**MINOR 1 — CONFIRMED, WITH U3's REFRESH EXTENSION AND U3/U4's SHARPENED CONSEQUENCES RIDING THE
+FIX.** Fixed at `99a9d30d`: `MastheadTagsModel.adopt`, `BookIndexGroupingModel.adopt` and
+`BookArchivedModel.adopt` each gain the `NoteMembershipModel` guard (`guard !Task.isCancelled` —
+the `NoteBoxFactsModel` lesson, now on every observation loop of this bank), and
+`MastheadTagsModel.refresh` drops a one-shot whose postID is no longer the subject in hand (U3's
+extension; a nil subject still adopts — the fresh visit's first read). `MastheadTagsModel.adopt`
+made internal for the pin (the `BookArchivedModel.adopt` precedent; visibility only — scaffolded
+BEFORE the red run so the red is the guard's absence, nothing else). **Pins, GENUINELY RED ON OLD
+(run on the pre-guard production code, exactly the 4 red / 6 issues of 25 tests in 3 suites,
+nothing else):** `MastheadTagsObservationTests.aCancelledTracksLateDeliveryNeverStompsTheNextNotesCards`,
+`.aLateRefreshForTheOldNoteNeverStompsTheNewOne`,
+`BookIndexGroupingTests.aCancelledTracksLateDeliveryNeverStompsTheChosenFamily` (the sharpened
+consequence in its doc: the stomped `sectionsRoot` made the chosen partition fall back to the
+shipped look and STAY there), `BookArchivedLineTests.aCancelledLoopsLateDeliveryNeverBlanksTheExpandedRows`
+(U4's refinement in its doc: the blank expansion persisted until a write). The deterministic shape
+is U3's offered one: the late delivery lands on a task cancelled before its body can run (a
+MainActor test cannot be preempted by the task it just made). Green after: 25/3.
+
+**MINOR 2 — CONFIRMED, WIDENED PER U1's AGREE (all four store-wide statements in the held read;
+the non-held one-shots re-worded).** Fixed at `8f21224f`: the member/section/arrival count
+statements gain a wing-scoped form driving from `reading r WHERE r.wing_id = ?` (the
+`wingArchivedCountsSQL` shape; a nil wing keeps the phone's shipped store-wide read), the
+readings fetch filters in SQL (`bookcaseReadings`), and `bookcaseAggregates`' member-stamp GROUP
+BY drives from the wing (`wingMemberStampsSQL`); the aggregates' cost comment is now true, and
+the non-held one-shots (`bookWordCounts`, `shelfBookTags`, `ruleTagPaths` — the 13 B2 shapes) are
+re-worded honestly at `ShelfViewModel.refreshAggregates`. **Pin:**
+`BookcaseShelfTests.theWingScopedStatementsDriveFromTheWingNeverTheStore` — EXPLAIN QUERY PLAN on
+all four shipped statements: the pair table entered by its reading_id index (`SEARCH rp/rs
+USING`), never a store scan; the three counts also keep naming no `container` (the held read's P1
+letter). **Said plainly:** a pure cost claim has no functional red-on-old — the per-wing-reading
+OUTPUT was always identical — and the pre-fix statements took no wing argument, so the pin could
+not compile against them; its red is by BEHAVIOURAL REVERT (the four statements reverted to the
+store-wide GROUP BY shape with a placeholder sink: exactly the one pin red, 4 issues — every
+statement's plan read `SCAN rp USING INDEX uq_reading_post_live` / `SCAN rs …` — restored,
+cmp-identical against the pre-revert copy, re-run green).
+
+**NIT 3 — CONFIRMED (U1's exact gate).** Fixed at `fce9295d`: the row's "Move to Shelf ▸" submenu
+draws only where it can act (P-2) through ONE pure value, `BookcaseBoard.moveToShelfCanAct`.
+**Pin:** `MoveToShelfGateTests.theSubmenuDrawsOnlyWhereItCanAct` — a new pure value has no
+pre-fix shape, so its red is by BEHAVIOURAL REVERT (the gate flipped to `true`: exactly the
+no-destination case red, 1 issue; restored cmp-identical). Green 14/3 with the board suites.
+
+**NIT 4 — CONFIRMED (the fix on the TAIL, per U1: the board's digit-aware A–Z is the intended
+one).** Fixed at `f649d45f`: the Starred section's column-only tail sorts with
+`BookcaseOrdering.nameAscending`, never the SQL collation — one A–Z on both surfaces. **Pin:**
+`UnionStarTests.theColumnOnlyTailUsesTheBoardsOwnAToZ`, **GENUINELY RED ON OLD** (run on the
+shipped tail first: 1 test, 1 issue — "Book 10" before "Book 2"); green after.
+
+**SUITES AT THE END (all run in this session, after the last fix):** core FULL `swift test` —
+**"Test run with 2060 tests in 221 suites passed"** (baseline 2058/221 + the two new core pins,
+both this round's). Mac (`DerivedData/13id-ladderA`, build-for-testing + test-without-building,
+zero instances): **"222 tests in 33 suites passed"** — the fix suites (MastheadTagsObservation,
+MastheadTagDoor, BookIndexGrouping, BookArchivedLine, BookcaseBoardBrain, BookcaseViewModel,
+MoveToShelfGate, ShelfModel), the star family (StarDoor, StarTargeting/Declaration/Acting,
+StarredScroll*, StarredGatheringSeeder, PromoteAndPalette), the book-door neighbours
+(BookCollectingDoors, BookStateDoors, BookSettingsSheet, BookFilterBar, BookPanel,
+NoteMembershipObservation, RemoveReleaseDoor), **the registry walk (CapabilityRegistryTests)**
+and **all eleven `Tutorial*` suites (the tutorial spine)**. The phone (`VariorumMobile`, generic
+iOS Simulator): **TEST BUILD SUCCEEDED** (the shared `BookcaseBoard` gains a pure func; core
+`ShelfQueries`/`AppearanceQueries` reach it — compile verified, behaviour untouched).
+
+**The fix commits, in order:** `8f21224f` (MINOR 2) · `f649d45f` (NIT 4) · `99a9d30d` (MINOR 1)
+· `fce9295d` (NIT 3). No attribution trailers; pushed after each. Zero `Sync/`, zero
+`Persistence/`, zero schema; no real-store instance ran beside this session (checked before the
+first build). The implementer sanity pass and round 2's fresh re-review follow on the
+orchestrator's side.
