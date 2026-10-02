@@ -157,6 +157,11 @@ struct PostDetailView: View {
         }
     }
     @State private var inspectorPanel: InspectorPanel?
+    /// 13i-d U2 (KnownIssues row 104): the note's membership — ONE held
+    /// observation for the visit, handed to the membership chip and the Book
+    /// Panel's door (the shared `NoteMembershipModel`), so an intake seat
+    /// while the note is open shows at once and the note is read once.
+    @State private var membership = NoteMembershipModel()
     #if DEBUG
     /// **This detail's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the detail's panel and
@@ -332,7 +337,7 @@ struct PostDetailView: View {
                     // view while a tag goes on.
                     MembershipChip(
                         session: session, postID: postID,
-                        recentBookIDs: recentBookIDs)
+                        recentBookIDs: recentBookIDs, membership: membership)
                         .mastheadGeometryProbe(.pathChip, in: Self.mastheadSpace)
                     // Act 10 item 5 — the note's tag cards on the
                     // masthead's right edge, under the icons, across from
@@ -570,6 +575,11 @@ struct PostDetailView: View {
                     arguments: [postID])
             }) ?? 0
             if blocks == 0 { mode = .write }
+        }
+        // 13i-d U2 (row 104): the membership observation, for this note's
+        // visit — a new note cancels it and starts its own.
+        .task(id: postID) {
+            await membership.track(session: session, postID: postID)
         }
         .onChange(of: inspectorPanel, initial: true) { _, panel in
             #if DEBUG

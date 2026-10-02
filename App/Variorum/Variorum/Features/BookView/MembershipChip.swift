@@ -232,9 +232,19 @@ struct MembershipChip: View {
             }
             .padding(12)
         }
+        // 13i-d U2 (row 104): a standalone chip holds its own observation;
+        // under the note detail the host's model is already tracking.
+        .task(id: postID) {
+            if membership == nil {
+                await ownMembership.track(session: session, postID: postID)
+            }
+        }
         .task(id: postID) { await refresh() }
         .onChange(of: popoverShown) { _, shown in
             if shown { Task { await refresh() } }
+        }
+        .onChange(of: model.readings(for: postID).map(\.id)) { _, _ in
+            Task { await refresh() }
         }
         // 13i-c U4 (§4 row 14): an ownership refusal OPENS the choice (P-2).
         .membershipChoices(membershipDoors) { _ in
@@ -300,10 +310,10 @@ struct MembershipChip: View {
             userInfo: ["bookID": bookID, "postID": postID])
     }
 
+    /// The popover's EXTRAS — the honest doors' worn tags and the add lists —
+    /// re-read on open and whenever the observed membership moves. The
+    /// membership itself is the model's held observation (row 104).
     private func refresh() async {
-        if membership == nil {
-            await ownMembership.track(session: session, postID: postID)
-        }
         let membership = model.readings(for: postID)
         // 13i-c U4 (§20): the honest doors' tags, per gathering row.
         let gatherings = membership.filter { $0.kind == .gathering }

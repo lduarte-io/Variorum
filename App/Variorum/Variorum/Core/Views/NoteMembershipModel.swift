@@ -45,15 +45,37 @@ final class NoteMembershipModel {
         readings(for: postID).filter { $0.kind == .gathering }
     }
 
-    /// Reads the note's membership for the visit. Run from `.task(id:)`.
+    /// HOLDS the note's membership for the visit — run from `.task(id:)`, so
+    /// a new note cancels the old observation and starts its own.
+    ///
+    /// **KnownIssues row 104, fixed here:** this was a ONE-SHOT read (the
+    /// chip's `.task(id:)` + popover-open refresh), so a tagging act that
+    /// SEATED the open note in a living book (13i-b's intake) left the chip
+    /// reading "in no book" until the note was reopened. It is a held
+    /// observation now.
+    ///
+    /// **The cost, named** (the brief's ask): `readingsContaining` reads
+    /// `container` (a gathering's match), which autosave rewrites whole — so
+    /// while a note is open this re-runs on every autosave: one indexed
+    /// membership read (`idx_reading_post_post`) plus one EXISTS per live
+    /// gathering, author-scale and off-main. KnownIssues row 13's bounded
+    /// re-query class, at its cheap end (the cadence changed, never the
+    /// scaling — P1's letter holds).
     func track(session: AppSession, postID: String) async {
-        let value = (try? await session.database.read { db in
-            try Queries.readingsContaining(db, postID: postID)
-        }) ?? []
-        // A superseded read (the task was cancelled for a newer note) leaves
-        // both fields to the newer one — the `NoteBoxFactsModel` lesson.
-        guard !Task.isCancelled else { return }
-        subject = postID
-        readings = value
+        do {
+            for try await value in session.database.observe({ db in
+                try Queries.readingsContaining(db, postID: postID)
+            }) {
+                // A superseded observation (cancelled for a newer note)
+                // leaves both fields to the newer one — the
+                // `NoteBoxFactsModel` lesson.
+                guard !Task.isCancelled else { return }
+                subject = postID
+                readings = value
+            }
+        } catch {
+            // Cancellation (the note changed or the view left) ends the
+            // visit quietly; a read failure leaves the last answer in hand.
+        }
     }
 }
