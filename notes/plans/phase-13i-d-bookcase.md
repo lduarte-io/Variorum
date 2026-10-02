@@ -2687,7 +2687,7 @@ walked (F-U1-4's class — hers).
 | 9 | The screenshot walk ×4 into `notes/plans/13id-screens/u7/` | NOT-STARTED |
 | 10 | Record close · QUESTIONS #177 · ledger row 8 | NOT-STARTED |
 
-**REVERT STATE: NO REVERT IN FLIGHT.**
+**REVERT STATE: COMBINED BEHAVIOURAL REVERT STARTING from the committed HEAD `e227e38f`** (pre-revert copies in the gitignored `scratchpad/13id-u7/prerevert/`; restore = `git checkout HEAD --` on the four files, then `git diff --quiet`). The reverts: RV1 lesson 4 loses its road-back sentence · RV2 the arrangement stops OWNING Sherlock (the write removed, the classification kept) · RV3 the arrangement's SHELVING step skipped · RV4 `BookStateCopy.ownVerb` re-spelled · RV5 `.deleteNote` loses `.surface` · RV6 the seeded QUICKNOTE step skipped · RV7 the launch treats an existing store's `.alreadySeeded/.alreadyPresent` as a birth. **Predicted RED, nothing else:** `lessonOneTheThreeKinds`, `lessonFourArrivals`, `lessonFiveOwned`, `lessonTenThePool`, `ritualOneTheClassicsWalk`; `SampleLibraryWelcomeTests`' fresh birth, classics gathering, restore door, second arrangement, restore-tutorial and existing-store tests; `NoteDeletionDeclarationTests.deleteNoteIsDeclared…`; the registry walk.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
 
