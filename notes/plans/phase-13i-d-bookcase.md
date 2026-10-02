@@ -294,7 +294,7 @@ row is built, pinned and walked below.
 | 3 | Core: the bookcase READ side (snapshot · per-book arrival counts · the one-shot aggregates) + pins | DONE (4b7da430) — the P1 pin revert-verified (below) |
 | 4 | Shared brains (`BookcaseOrdering` core + `BookcaseBoard` Shared) + pins | DONE (4b7da430 + a90ceeb8) |
 | 5 | The view model rebuilt + `BookcasePrefs` + VM pins | DONE (a90ceeb8) |
-| 6 | The board's faces | DONE (a90ceeb8; the walk's fixes 52262af7 + this commit) |
+| 6 | The board's faces | DONE (a90ceeb8; the walk's fixes 52262af7 + f1837038) |
 | 7 | Registry declarations + the walk | DONE (a90ceeb8 + 52262af7) — green |
 | 8 | The sidebar section renamed Bookcase (+ ⌘K "Go to Bookcase", the navigation label) | DONE (a90ceeb8) |
 | 9 | Suites at the END | DONE — counts in EVIDENCE |
@@ -355,6 +355,11 @@ row is built, pinned and walked below.
 - **Core FULL `swift test`: "Test run with 2027 tests in 216 suites passed"** (1 skipped — the
   standing env-gated Supabase integration test). Baseline 2008/213 → **+19 tests / +3 suites, all
   this unit's** (`BookcaseShelfTests.swift`: 11 op pins, 4 pure-rule pins, 4 read pins).
+- **P1, said exactly:** no render reads the store. The store-side counts (members, chapters,
+  arrivals) are GROUP BYs inside the HELD snapshot, whose region never includes `container`, so
+  typing never re-runs it (pinned below); the census, hover and section counts are arithmetic over
+  that in-memory snapshot (the wing's readings — author-scale); last-edited and gathering counts are
+  the ONE-SHOT tier (appearance + the board's own acts), never held.
 - **The P1 pin is REVERT-VERIFIED:** `theHeldSnapshotsRegionIsBlindToAutosave` reads the tracked
   region through GRDB's `willTrackRegion`; swapping in the natural `CROSS JOIN container` form of the
   arrival count turned it RED (the region gained `container(archived_at,deleted_at,id)`, which a
