@@ -707,7 +707,18 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   (`BindCopy.bound(_:count:copied:leftOut:)` — the plain bind's words unchanged). `SpawnAndBindLimbTests`
   (7) green; with BindDoor · BookOrderConversion · DuplicateBookNameDoor · BookAscentDeclaration —
   **38 tests / 5 suites passed**.
-- **Piece F:** NOT STARTED.
+- **Piece F — the note's own Unseal inside a sealed book + the close:** the DOOR half DONE (commit
+  "13i-c U3 piece F (1/2)"). THE CALL (the adjudication left it to this unit): the door stays RENDERED
+  and SPEAKS the operation's refusal — "This note is in a book that is sealed — unseal the book to
+  change it." (the shared table, the Mac's `bookSeal` road) — because the refusal names the road out
+  and a hidden Unseal on a visibly sealed note would leave her no word on why; hiding would also need a
+  per-target fact ("a live sealed book holds this note") pushed into `CapabilityContext` for every
+  surface, a gate no other note door carries. No code change was needed: all three roads already route
+  the op's refusal through the one table. `SealedBookMemberDoorTests` (5) pins Write's bar door, the
+  Takes board's door and the shell's fallback (each speaks the words; the note stays sealed) + the
+  control (an independently sealed note outside a sealed book unseals by its own door) — green.
+  PENDING: the FULL core suite, the Mac touched suites + TutorialWalk + the registry walk, the phone
+  build, the walk, the record's close.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
 
 ## §8 ENVIRONMENT TRAPS`,
