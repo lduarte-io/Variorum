@@ -785,6 +785,137 @@ ledger row, KnownIssues row 104 — is built, pinned and walked below.
   gatherings" names on click · Remove/Release from the panel · Star/Unstar on the Bookcase row
   (Pin is gone) · the Starred section now showing the Journal, Quicknotes and any pinned book.
 
+## U3 RECORD — THE COLLECTING PANE'S DOORS · THE GROUPED-BY CONTROL · THE FILTER-BAR FACE (`opus-implementer`, 2026-10-02)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **Row 107's (c) ARM — the OPERATIONS
+refusing Finish / Word target / Note cap on a gathering — is PROPOSED below and STOPPED for the
+architect** (the brief's stop rule; the op layer is shared with books). Only the FACES half of row 107
+is built. (2) The phone is untouched (record only — MOBILE PARITY below). *(This line is final only
+when the record closes; LIVE STATUS is the truth until then.)*
+
+Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (the kickoff
+rulings R-13id-1…5, the constitution, the ledger, both adjudications, the U1/U2 RECORDs, the away-run
+posture, the traps); the sitting record §1–§10, §13–§25 (§3, §4, §10, §16(f)/§17(f), §18.1, §22
+closely); `notes/SessionResiliencyProtocol.md` whole; KnownIssues rows 13, 103, 107, 112; the 13i-c
+plan's U3 BRIEF + U3 RECORD + its adjudication + the orchestrator's walk (the three unvoiced fields);
+the 13i-b plan's filter-mechanics record (U4 piece 8). No `Sync/`, schema, custody or editor-seam
+work planned — the Index pane's row LIST is regrouped, its liveness/landing/height machinery is not
+touched (TEXTKIT2_NOTES not required). No revert in flight. No subagents.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | Record skeleton + design map + evidence named + the (c)-arm proposal | IN-PROGRESS (this commit) |
+| 2 | Row 112 — the masthead tag cards as a HELD read (extract the one-shot shape → red pin → held → green) | NOT-STARTED |
+| 3 | Item 1 — the doors into the sheet: `.openBookSettings` (the Bookcase row's "Book Settings…" + the book masthead's gear, declared) | NOT-STARTED |
+| 4 | Item 1 — the journal-trait sentence in the Collecting pane (`setJournalTrait`; the daily book's refusal spoken) | NOT-STARTED |
+| 5 | Item 2 — row 107's SETTINGS-SHEET half (a gathering's Finish / Word target / Note cap faces leave; legacy ways out kept) + F-U1-8 (the filter folds into `BookStateDoorSet`) | NOT-STARTED |
+| 6 | Rider — the sheet's three text fields take the voice | NOT-STARTED |
+| 7 | Rider F-U2-3 — the book view's own chapter/move doors declared, spelled "Move to Chapter ▸" | NOT-STARTED |
+| 8 | Item 3 — the GROUPED-BY control on the Index masthead (chapters · a tag family · none; remembered; gatherings minus chapters; display only) | NOT-STARTED |
+| 9 | Item 4 — the in-book FILTER BAR's face + "Save this filter as a gathering…" | NOT-STARTED |
+| 10 | Rider row 103 — a quiet-receipt host on Index / Book / Outline | NOT-STARTED |
+| 11 | Suites at the END (core full; Mac named incl. the registry walk, the tutorial spine, the landing families UNMODIFIED; phone build) | NOT-STARTED |
+| 12 | The screenshot walk ×4 into `notes/plans/13id-screens/u3/` | NOT-STARTED |
+| 13 | Record close · QUESTIONS #172 · KnownIssues rows 103 / 107 / 112 annotated | NOT-STARTED |
+
+### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
+
+- **Doors into the sheet (item 1):** ONE act, `.openBookSettings` ("Book Settings…", scope `.book`,
+  `always`), two door families — the Bookcase row's context menu (`.contextMenu`, NEW: the missing
+  road) and the book masthead's gear (`.surface`, today's road, now declared — `BookView.
+  surfaceCapabilities`). The Bookcase opens the SAME `BookSettingsSheet` over a fresh
+  `BookStructureModel` it starts for the sheet's life; the sheet's Edit… hands the rule editor to the
+  Bookcase exactly as it hands it to the book view (W-1). "The book's ⋯ menu" is read as the book's own
+  masthead door — the gear (P-13id-U3-1).
+- **The journal-trait sentence (item 1):** "Entries: date-stamped, named by their day, sorted by date —
+  on/off" (§10 verbatim) as one row of the Collecting pane, BOOKS only (a gathering mints no entries —
+  P-2). Acts through `setJournalTrait`; the 'daily' book's `dailyJournalTraitIsConstitutive` and a
+  finished book's `lockedReading` are SPOKEN (the shared refusal table gains the first's words). Turning
+  it ON also sorts the book by entry date, newest first, unless it already sorts by date — so the
+  sentence it toggles is true (P-13id-U3-2); OFF leaves the order hers.
+- **Row 107's sheet half (item 2):** a gathering's Word target / Note cap fields and Finished control
+  leave the sheet; the faces' gate becomes DATA in `BookStateDoorSet` (F-U1-8 — the shelf menu's filter
+  folds in, one table for both). Legacy ways out stay: a gathering already finished shows Reopen; one
+  already carrying a word target or cap shows that field so it can be cleared (P-13id-U3-3).
+- **THE (c) ARM — PROPOSAL, STOPPED FOR THE ARCHITECT (the 4E pattern; nothing built):**
+  *(a) RECOMMENDED —* `lockReading`, and `setReadingWordTarget` / `setReadingMaxPosts` with a NON-nil
+  value, refuse a gathering with the shipped `wrongReadingKind(id:, expected: .book)` (the shape
+  `sealReading`, `setReadingOwned` and `duplicateReading` already use); CLEARING (nil) and
+  `unlockReading` stay legal on a gathering, so a gathering finished or capped before 13i-d always
+  keeps its way out (the faces' legacy doors above stand on exactly these). The refusal's words: the
+  shared table's `wrongReadingKind` arm already says "Only hand-shaped (curated) books …" — a
+  gathering-specific sentence would be added ("A gathering has no finish or length of its own — bind it
+  into a book to give it one."). Pins: one op test per refusal + the two legal ways out; zero schema,
+  zero `Sync/`. **Consequences to weigh:** the PHONE's gathering faces (if any still offer Finish or an
+  extent on a gathering) would start refusing through the same ops — the mobile catch-up's to remove;
+  a pre-13i-d synced value from another device keeps working at read time (the assembly still honours
+  a gathering's `max_posts` — the read side is untouched). *(b)* refuse ALL four incl. clearing and
+  Reopen — the strict letter, but a legacy-finished or capped gathering is then stuck with no road out
+  (rejected). *(c)* leave the ops permissive — the faces alone (as built here).
+- **The voiced fields (rider):** Name · Word target · Note cap become the Index filter field's idiom (a
+  muted chrome label over a plain field in a card box with a hairline) — one `VoicedFieldStyle` in
+  `Theme/VoiceControls.swift`, THE chrome vocabulary (P-8).
+- **F-U2-3 (rider):** the navigator chapter row's "Move Up / Move Down" and the note rows' "Chapter ▸"
+  (navigator, Outline, the Index row's ⋯) render `.moveChapterUpInBook` / `.moveChapterDownInBook` /
+  `.fileNoteInChapter` — the panel's own declarations, spelled from the registry ("Move Chapter Up",
+  "Move to Chapter ▸", "No Chapter"); an edge move that cannot act is not drawn (P-2, the panel's rule).
+- **The grouped-by control (item 3):** `group · <mode> ▾` on the Index masthead (the order control's
+  idiom, rendered only in Index): **chapters** (a book with live chapters) · **a tag family** (any tag
+  with a live child that one of the book's shown notes wears under) · **none**. View-local and
+  REMEMBERED per book in a LOCAL store (`UserDefaults`, injected — the `BookcasePrefs` precedent);
+  never-chosen = the shipped default exactly (chapters where they exist, else the stored grouping tag's
+  runs, else flat — so the landing families' fixtures see byte-identical rows). A tag family PARTITIONS
+  the shown notes: one group per child tag, A–Z by path, each note under the lexically smallest child
+  it wears (the assembly's own rule, now one shared SQL fragment), the book's order inside each group,
+  the rest trailing under "no #family" (P-13id-U3-4). It is DISPLAY only — no `reading_section` row,
+  no write, no outbox row, for a book or a gathering (§3, pinned). The family read is a HELD
+  observation over `post_tag`/`tag` for the shown ids (retags regroup live; autosave never wakes it).
+  The regroup changes only the pane's ROW LIST — headings and order — and every row keeps its anchor
+  and its manifest height, so the landing machinery is untouched.
+- **The filter bar (item 4):** under the Index column's title filter, a quiet `by tag ▾` word (the
+  book's worn tags + ★ starred); chosen terms show as removable chips, each "with" or "without"
+  (`not`); two or more combine by `all ▾ / any`; `clear`. View-local and SESSION-only (cleared when the
+  Index leaves — it narrows every surface the book's shared assembly feeds, so it never outlives the
+  bar that shows it: P-13id-U3-5). It rides the shipped mechanics — `assembleReading(…, filter:)`
+  through `observeReading(…, filter:)` (additive) — and NEVER writes. "Save this filter as a
+  gathering…" is a declared act (`.saveFilterAsGathering`, `.surface`): a name prompt (E13's name
+  guard), its message saying what the gathering will gather from — the book's rule or its outflow ∧
+  the filter, or, for a hand-made book, "every note in this library that matches" (the op's own
+  instruction to the face; the association read is extracted from the op into one core read the op
+  itself calls — no semantic change); a receipt names the new gathering.
+- **Row 103's book-surface half (rider):** the quiet slot in the Index column's footer and at the foot
+  of the navigator (Outline · Book · Read), rendered EMPTY while the sidebar note box is live (its bar
+  already hosts the slot — one receipt never draws twice: P-13id-U3-6).
+- **Row 112 (rider):** `MastheadTagCluster`'s two reads become ONE held observation in a small model
+  (`MastheadTagsModel`, the row-104 shape) — `post_tag` + `tag` only, so autosave never wakes it; its
+  cost joins row 13's class at the cheap end (one indexed read per tag write while a note is open).
+
+### EVIDENCE (named before the build; counts PENDING until each run lands)
+
+- **Door pins:** `.openBookSettings` declared with both door families; the Bookcase road's target
+  mounts the sheet for its own book (probe); every road reaches the sheet. PENDING.
+- **Journal trait:** on/off writes `profile` (+ the date sort on ON, no-op when already by date); the
+  daily book's refusal spoken in words (no enum dump); a finished book's refusal named for it; the
+  sentence drawn (probe). PENDING.
+- **Row 107 sheet half:** the door table's gathering cells FLIP (red-on-old against the old cells); the
+  mounted gathering sheet draws no Finished / extent fields; the legacy ways out drawn. PENDING.
+- **Grouped display:** a gathering's and a book's tag-family grouping mint NO `reading_section` row and
+  write nothing (outbox unchanged); the three modes remembered per book (scratch defaults); the
+  partition rule (children A–Z, the smallest child, "no #family" last, order kept); never-chosen =
+  shipped groups. PENDING.
+- **The landing families** (`BookIndexEditingTests`, `BookOutlineLandingTests`) green UNMODIFIED.
+  PENDING.
+- **Filter bar:** the draft → `RuleTerm` mapping; filtering writes nothing (membership + outbox
+  unchanged) and narrows the held assembly; the save door mints association ∧ filter and says the
+  association; the name guard. PENDING.
+- **Row 112:** the held read shows a tag removed (and one added) by ANOTHER door while the note is
+  open — RED on the extracted one-shot shape, green after. PENDING.
+- **Registry walk** green (justified union lines named); **the tutorial spine** green at the end;
+  **core FULL** suite at the END (baseline 2036/217); the phone BUILD. PENDING.
+- **The walk** ×4 into `notes/plans/13id-screens/u3/`. PENDING.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
