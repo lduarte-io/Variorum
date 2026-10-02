@@ -307,6 +307,13 @@ nonisolated enum OpsRefusalCopy {
             }
             return "This note is in a book that is \(roads.bookSeal.state), "
                 + "so it can't be changed here."
+        // 13i-d U3 — the journal trait's one refusal (the sitting record §10:
+        // the daily Journal's marker is constitutive — the 13i-a op's guard,
+        // first reachable from a face at the Collecting pane's row).
+        // Platform-neutral: names no door.
+        case .dailyJournalTraitIsConstitutive:
+            return "This is your daily Journal, so its entries are always dated by the day — "
+                + "make another book your daily Journal first to change that."
         case .ownedBookDuplicatesDeep:
             return "This book owns its notes, so a duplicate has to carry copies of them — "
                 + "duplicate it with copies."

@@ -141,4 +141,92 @@ struct BookCollectingDoorsTests {
             _ = try await reading(db, gathering.id)
         }
     }
+
+    // MARK: - The journal-trait sentence (§10)
+
+    /// §10's sentence is a BOOK's row (a gathering mints no entries — P-2),
+    /// and it is drawn with the trait's state.
+    @Test func theJournalTraitSentenceIsDrawnOnABookOnly() async throws {
+        #expect(CollectingCopy.journalTraitLabel + " " + CollectingCopy.journalTraitValue
+                == "Entries: date-stamped, named by their day, sorted by date",
+                "§10's sentence, verbatim")
+        #expect(BookSettingsSheet.surfaceCapabilities.contains(.setJournalTrait))
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let work = try ops.createTag(name: "work")
+            let book = try ops.createReading(name: "Plain", kind: .book)
+            let journal = try ops.createReading(
+                name: "Dreams", kind: .book, profile: Queries.journalTraitProfile)
+            let gathering = try ops.createReading(
+                name: "Work", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+            BookSettingsProbe.drawn = [:]
+            for (id, expected) in [(book.id, false as Bool?), (journal.id, true), (gathering.id, nil)] {
+                let target = try #require(await BookSettingsTarget.load(session: session, readingID: id))
+                try await mounted(BookSettingsHost(target: target)) {
+                    let drawn = try #require(BookSettingsProbe.drawn[id])
+                    #expect(drawn.journalTrait == expected)
+                }
+            }
+            _ = try await reading(db, book.id)
+        }
+    }
+
+    /// ON writes the trait AND sorts the book by date, newest first
+    /// (P-13id-U3-2 — the sentence it turns on says "sorted by date"); a book
+    /// already sorted by date keeps its direction; OFF writes the trait off
+    /// and leaves the order as it is.
+    @Test func theTraitTogglesThroughTheOpAndOnSortsByDate() async throws {
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let book = try ops.createReading(name: "Plain", kind: .book)
+            let settings = BookSettingsModel(session: session, readingID: book.id)
+
+            await settings.setJournalTrait(true, reading: try await reading(db, book.id))
+            var now = try await reading(db, book.id)
+            #expect(now.profile == Queries.journalTraitProfile)
+            #expect(now.sortField == .entryDate && now.sortDir == .desc,
+                    "ON sorts by entry date, newest first — the sentence is true")
+
+            await settings.setJournalTrait(false, reading: now)
+            now = try await reading(db, book.id)
+            #expect(now.profile == "book")
+            #expect(now.sortField == .entryDate, "OFF never rewrites her order")
+
+            // Already by date (oldest first): ON keeps her direction.
+            try ops.setReadingSort(book.id, field: .entryDate, direction: .asc)
+            await settings.setJournalTrait(true, reading: try await reading(db, book.id))
+            now = try await reading(db, book.id)
+            #expect(now.profile == Queries.journalTraitProfile)
+            #expect(now.sortDir == .asc, "a book already sorted by date keeps its direction")
+            #expect(session.status.spoken == nil, "nothing refused along the way")
+        }
+    }
+
+    /// The daily Journal's trait is constitutive — its "off" ACTS and the
+    /// op's refusal is SPOKEN in words (never the raw enum); a finished
+    /// book's refusal is named for the book with its road.
+    @Test func theDailyJournalAndAFinishedBookRefuseInWords() async throws {
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-02")
+            _ = ops.shelveInDailyJournalBook(entry.container.id)
+            let dailyID = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            let daily = try await reading(db, dailyID)
+            #expect(Queries.hasJournalTrait(daily.profile))
+
+            let settings = BookSettingsModel(session: session, readingID: dailyID)
+            await settings.setJournalTrait(false, reading: daily)
+            #expect(try await reading(db, dailyID).profile == daily.profile, "nothing written")
+            let spoken = try #require(session.status.spoken?.text)
+            #expect(spoken.hasPrefix("This is your daily Journal"), "\(spoken)")
+            #expect(!spoken.contains("Refused"), "never the enum dump")
+
+            let finished = try ops.createReading(name: "Done", kind: .book)
+            try ops.lockReading(finished.id)
+            let finishedSettings = BookSettingsModel(session: session, readingID: finished.id)
+            await finishedSettings.setJournalTrait(true, reading: try await reading(db, finished.id))
+            #expect(try await reading(db, finished.id).profile != Queries.journalTraitProfile)
+            #expect(session.status.spoken?.text == "\u{201C}Done\u{201D} is finished \u{2014} reopen it first.")
+        }
+    }
 }

@@ -243,6 +243,35 @@ final class BookSettingsModel {
         RuleEditorModel(session: session, readingID: readingID)
     }
 
+    /// **The journal trait's toggle** (13i-d U3 — the sitting record §10:
+    /// *"Entries: date-stamped, named by their day, sorted by date — on/off"*).
+    /// Through `setJournalTrait`; its refusals SPEAK, named for the book —
+    /// the daily Journal's trait is constitutive (`dailyJournalTraitIs
+    /// Constitutive`), a finished book's is frozen (`lockedReading`).
+    ///
+    /// **ON also sorts the book by entry date, newest first** — unless it
+    /// already sorts by date (PROVISIONAL P-13id-U3-2): the sentence she
+    /// switches on says "sorted by date", and the trait's op writes only the
+    /// profile, so without this the row would turn on a sentence that is
+    /// false of her book. Newest first is the Create Journal Book door's own
+    /// order. OFF leaves the order hers ("flipping it off never rewrites
+    /// existing entries" — and never her order either).
+    func setJournalTrait(_ on: Bool, reading: Reading) async {
+        let id = readingID
+        let sortsByDate = reading.sortField == .entryDate
+        do {
+            try await session.runner.run { ops in
+                try ops.setJournalTrait(id, on: on)
+                if on, !sortsByDate {
+                    try ops.setReadingSort(id, field: .entryDate, direction: .desc)
+                }
+            }
+        } catch {
+            session.status.refuse(BookStateCopy.refusal(
+                for: error, name: reading.name, sealed: reading.sealedAt != nil))
+        }
+    }
+
     /// A gathering's hide-owned toggle (`setReadingHideOwned`; gatherings
     /// only — a book never renders the row).
     func setHideOwned(_ choice: HideOwnedChoice) async {
@@ -262,6 +291,8 @@ struct BookSettingsSheet: View {
     /// the six state doors (which of each pair — `BookStateDoorSet`) and the
     /// rule editor's door ("Edit…" in the Collecting section).
     static let surfaceCapabilities: [CapabilityID] = BookStateDoorSet.all + [.editRule]
+        // 13i-d U3: the journal trait's on/off (§10).
+        + [.setJournalTrait]
 
     let structure: BookStructureModel
     /// The Edit… handoff (W-1): the host presents the editor AFTER this
@@ -417,6 +448,51 @@ struct BookSettingsSheet: View {
         }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .help(CapabilityRegistry.capability(.editRule).verb)
+        // 13i-d U3 — THE JOURNAL TRAIT joins the pane (§10): BOOKS only — a
+        // gathering mints no entries, so the row could never act there (P-2).
+        if reading.kind == .book {
+            journalTraitRow(reading)
+        }
+    }
+
+    /// §10's sentence, verbatim in shape — "Entries: date-stamped, named by
+    /// their day, sorted by date — on/off" — the label muted, the app's words
+    /// voiced, and the on/off pair as the sheet's own chips (the hide-owned
+    /// row's idiom). A chip acts only when it CHANGES the trait; the daily
+    /// Journal's "off" acts and speaks the op's refusal (P-2: fire-and-do).
+    private func journalTraitRow(_ reading: Reading) -> some View {
+        let on = Queries.hasJournalTrait(reading.profile)
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(tokens.chromeLabel(CollectingCopy.journalTraitLabel))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+                Text(tokens.chromeLabel(CollectingCopy.journalTraitValue))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 6) {
+                ForEach([true, false], id: \.self) { value in
+                    VoicedChip(
+                        tokens: tokens,
+                        text: CollectingCopy.journalTraitState(value),
+                        on: on == value,
+                        action: {
+                            guard value != on else { return }
+                            Task { await model.setJournalTrait(value, reading: reading) }
+                        },
+                        lines: 1)
+                        .fixedSize()
+                }
+            }
+            .padding(.leading, 12)
+        }
+        .padding(.top, 4)
+        .help(CollectingCopy.journalTraitHelp)
     }
 
     @ViewBuilder
@@ -510,6 +586,8 @@ struct BookSettingsSheet: View {
         guard let reading = structure.reading else { return "" }
         return factsKey + "|\(reading.locked)|\(String(describing: reading.sealedAt))"
             + "|\(reading.owned)|\(model.paths.count)|\(model.hideOwnedDefault)"
+            + "|\(reading.profile ?? "")|\(String(describing: reading.wordTarget))"
+            + "|\(String(describing: reading.maxPosts))"
     }
 
     private func record() {
@@ -522,7 +600,8 @@ struct BookSettingsSheet: View {
                     CollectingCopy.hideOwnedWord($0, defaultHides: model.hideOwnedDefault)
                 } : [],
             stateDoors: BookStateDoorSet.rendered(for: BookStateFacts(reading)),
-            finishedDisabled: reading.sealedAt != nil)
+            finishedDisabled: reading.sealedAt != nil,
+            journalTrait: reading.kind == .book ? Queries.hasJournalTrait(reading.profile) : nil)
     }
     #endif
 }
@@ -582,6 +661,9 @@ enum BookSettingsProbe {
         var hideOwned: [String]
         var stateDoors: [CapabilityID]
         var finishedDisabled: Bool
+        /// 13i-d U3: the journal-trait row's state — nil when no row is drawn
+        /// (a gathering).
+        var journalTrait: Bool? = nil
     }
 
     static var drawn: [String: Drawn] = [:]
