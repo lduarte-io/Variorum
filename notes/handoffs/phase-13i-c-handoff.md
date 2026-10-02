@@ -2,7 +2,7 @@
 
 ## YOUR CHECKLIST (everything that is yours; nothing else is owed)
 
-- [ ] **Relaunch Variorum from /Applications and sync once.** The refreshed build (marker 11,
+- [x] **Relaunch Variorum from /Applications and sync once.** DONE — "sync worked! excellent news." The refreshed build (marker 11,
       codesign verified) runs `v1_20` at its first open: every book's single auto-tag becomes a
       one-element outflow set; any gathering of yours that had NO rule moves to the Trash (Put back
       is there for 30 days; no note is touched). Your first round pushes those rows. Tell me what
