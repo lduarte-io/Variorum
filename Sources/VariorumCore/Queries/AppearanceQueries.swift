@@ -214,8 +214,13 @@ extension Queries {
         let listedReadings = Set(listed.compactMap {
             $0.target.kind == .reading ? $0.target.id : nil
         })
+        // Ladder A round 1, NIT 4: the tail's A–Z is the BOARD'S OWN rule
+        // (`BookcaseOrdering.nameAscending` — Finder's digit-aware compare),
+        // never the SQL collation, so "Book 2" precedes "Book 10" in the
+        // Starred section exactly as on the Bookcase (one A–Z, two surfaces).
         let columnOnly = try starredReadingRows(db)
             .filter { !listedReadings.contains($0.id) }
+            .sorted { BookcaseOrdering.nameAscending(($0.name, $0.id), ($1.name, $1.id)) }
             .map { StarredItem(target: .reading($0.id), name: $0.name) }
         return listed + columnOnly
     }

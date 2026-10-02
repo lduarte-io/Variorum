@@ -163,6 +163,23 @@ struct UnionStarTests {
         }
     }
 
+    /// Ladder A round 1, NIT 4: ONE "A–Z" everywhere she reads one — the
+    /// Starred section's column-only tail sorts with the Bookcase's own rule
+    /// (`BookcaseOrdering.nameAscending`, Finder's digit-aware compare), so
+    /// "Book 2" precedes "Book 10" in the section exactly as on the board.
+    /// RED on the shipped tail (the SQL's `COLLATE NOCASE` put "Book 10"
+    /// first).
+    @Test func theColumnOnlyTailUsesTheBoardsOwnAToZ() throws {
+        try withOperations { ops, db in
+            let ten = try ops.createReading(name: "Book 10", kind: .book)
+            let two = try ops.createReading(name: "Book 2", kind: .book)
+            try setColumnStar(db, ten.id)
+            try setColumnStar(db, two.id)
+            #expect(try db.read { try Queries.starred($0) }.map(\.name) == ["Book 2", "Book 10"],
+                    "the tail reads in the board's digit-aware A\u{2013}Z")
+        }
+    }
+
     // MARK: - The cap counts the union
 
     @Test func theCapCountsColumnOnlyStars() throws {
