@@ -52,6 +52,10 @@ struct BookView: View {
     /// rather than more of `BookViewModel` (P-9): the line atop Index and Book
     /// observes and judges arrivals and nothing else.
     @State private var arrivals: BookArrivalsModel
+    /// 13i-c U4 — THE BADGE FAMILY's facts for this book's rows (§6): ONE
+    /// page-driven observation over the entries the book holds. Injectable
+    /// for `model`'s reason (a pin loads it by hand).
+    @State private var ownership: OwnershipFactsModel
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -64,6 +68,7 @@ struct BookView: View {
         model: BookViewModel? = nil,
         structure: BookStructureModel? = nil,
         arrivals: BookArrivalsModel? = nil,
+        ownership: OwnershipFactsModel? = nil,
         initiallyExpanded: Set<String> = [],
         paneFocused: Bool = true,
         onPaneFocusRequest: (() -> Void)? = nil,
@@ -92,6 +97,7 @@ struct BookView: View {
         _arrivals = State(
             initialValue: arrivals
                 ?? BookArrivalsModel(session: session, readingID: readingID))
+        _ownership = State(initialValue: ownership ?? OwnershipFactsModel())
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -202,7 +208,8 @@ struct BookView: View {
                 BookIndexView(
                     session: session, model: model, structure: structure,
                     arrivals: arrivals,
-                    masthead: { bookMasthead },
+                        masthead: { bookMasthead },
+                    ownershipBadge: { ownershipBadge($0) },
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
                         // focused in Outline through the ascent's own door
@@ -271,6 +278,12 @@ struct BookView: View {
         // a post-fetch sort would sort the first N of the OLD order).
         .task(id: model.viewOrder) { await model.start() }
         .task { await structure.start() }
+        // 13i-c U4 — the badge facts, keyed on WHICH notes the book shows (a
+        // title edit re-delivers entries but changes no id, so no re-read).
+        .task(id: ownershipKey) {
+            await ownership.observe(
+                session: session, postIDs: model.entries.map(\.postID), inBook: readingID)
+        }
         // 13f batch 4: the pane's focus reaches the book's own focus
         // authority. `onChange` alone would miss the initial value, and a
         // book that mounts into an unfocused pane must not bring a live
@@ -459,10 +472,16 @@ struct BookView: View {
                 + "with the text flowing across them")
         }
         orderControl
-        if let reading = structure.reading, reading.locked {
-            Text(tokens.chromeLabel("✓ finished"))
+        // 13i-c U4 (F-U3-7): the chip reads the book's state from the one
+        // pure rule — a SEALED book says sealed (it is finished too, but
+        // "the book is done" is the truer word).
+        if let reading = structure.reading,
+           let chip = BookStateCopy.navigatorChip(
+               finished: reading.locked, sealed: reading.sealedAt != nil) {
+            Text(tokens.chromeLabel(chip))
                 .font(tokens.small)
                 .foregroundStyle(tokens.accent)
+                .lineLimit(1)
         }
     }
 
@@ -1817,6 +1836,19 @@ struct BookView: View {
     }
 
     /// Batch 12: kind + extent at a glance under the title.
+    /// 13i-c U4: the badge facts' task key — the ids the book shows.
+    private var ownershipKey: [String] { model.entries.map(\.postID) }
+
+    /// **The badge a row wears** (§6's direction): inside a BOOK, the shared
+    /// mark; a GATHERING's view is outside every book, so its rows wear the
+    /// owned-by mark. The setting silences the set (P-13ic-10).
+    func ownershipBadge(_ postID: String) -> OwnershipBadgeFace.Badge? {
+        ownership.badge(
+            for: postID,
+            placement: structure.reading?.kind == .gathering ? .outside : .inBook,
+            badgesOn: themeStore?.settings.ownershipBadges ?? true)
+    }
+
     private var bookMetaLine: String {
         var parts: [String] = [structure.reading?.kind == .gathering ? "smart book" : "book"]
         if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
@@ -1830,7 +1862,8 @@ struct BookView: View {
     private func postRow(_ entry: Queries.ReadingEntry) -> some View {
         OutlinePostRow(
             session: session, model: model, structure: structure,
-            entry: entry, tokens: tokens, gutter: outlineGutter)
+            entry: entry, tokens: tokens, gutter: outlineGutter,
+            badge: ownershipBadge(entry.postID))
     }
 }
 
@@ -2154,10 +2187,14 @@ private struct OutlinePostRow: View {
     /// 13u3 UNIT A1: the Outline's prose placement, handed down from the
     /// pane that knows its own width (`BookView.outlineGutter`).
     let gutter: ProseGutter
+    /// 13i-c U4 (§6): the badge this row wears, or nil — decided by the book
+    /// (`BookView.ownershipBadge`), drawn beside the title.
+    let badge: OwnershipBadgeFace.Badge?
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
-        entry: Queries.ReadingEntry, tokens: VoiceTokens, gutter: ProseGutter
+        entry: Queries.ReadingEntry, tokens: VoiceTokens, gutter: ProseGutter,
+        badge: OwnershipBadgeFace.Badge? = nil
     ) {
         self.session = session
         self.model = model
@@ -2165,6 +2202,7 @@ private struct OutlinePostRow: View {
         self.entry = entry
         self.tokens = tokens
         self.gutter = gutter
+        self.badge = badge
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -2385,6 +2423,9 @@ private struct OutlinePostRow: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             }
+            if let badge {
+                OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+            }
             // Sitting 9 batch 7: the door OUT of the book into the post's
             // full editor (modes, takes, lenses — everything).
             Button(tokens.chromeLabel("open ↗")) {
@@ -2436,6 +2477,10 @@ private struct OutlinePostRow: View {
                         Text(date)
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
+                    }
+                    // 13i-c U4 (§6): the badge family, beside the title.
+                    if let badge {
+                        OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
                     }
                     Spacer()
                     Button(tokens.chromeLabel("open ↗")) {

@@ -1584,7 +1584,28 @@ SyncSpec not required).
   `BookDeleteAndDuplicateTests` (9) + BookStateDoors + GatheringRuleGate + BookSettingsSheet + the
   registry walk + ShelfModel + DuplicateBookNameDoor + BindDoor: 80/8 green; core
   `OwnershipBookDoorsTests` 14/1 green; zero instances.
-- **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.
+- **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** DONE
+  (commit "13i-c U4 piece E"). `Core/Views/OwnershipBadge.swift` — `OwnershipBadgeCopy`,
+  `OwnershipBadgeFace` (the RULE, pure: INSIDE a book the shared mark naming the other books; OUTSIDE —
+  a gathering's view, tag listings, the Library — the owned-by mark; a free note or a note only here
+  wears nothing; the setting off silences the SET), `OwnershipFactsModel` (ONE page-driven observation
+  over `Queries.ownershipFacts` per listing — it reads only the membership tables, so it re-runs on
+  membership changes, never a keystroke; `load` is the pins' seam), `OwnershipBadgeView` (the shared
+  glyph with its hover; "owned by “X”" whose click is the ascent — `.openBookAtNote`'s third
+  renderer). Hosts: the book's Index note rows + Outline headers/cards (`BookView.ownershipBadge` —
+  `.outside` on a gathering's view), the Library's List rows and Notes cards, the tag listing
+  (`FolderView`). The POOL is not a host: it lists bookless notes, so no Pool row can be owned — the
+  mark is structurally silent there and the Pool pays for no facts read (FINDING F-U4-4). The
+  navigator chip reads `BookStateCopy.navigatorChip` — "✓ sealed" on a sealed book (F-U3-7). SETTINGS:
+  the Editor pane (where `arrival_flash` lives — the brief's placement) gains a "Books" section —
+  "Show ownership badges" (`ownership_badges`) and "Hide notes an owned book holds, in gatherings and
+  tag listings" (`hide_owned_default`), each with one help sentence that does not overclaim
+  (`OwnershipSettingsCopy`); two `SettingsCatalog` rows; `ThemeStore.setOwnershipBadges` /
+  `setHideOwnedDefault`. CORE (a value type, no semantics): `Queries.OwnershipFacts` gains a public
+  init so the rule is pinned cell for cell. `OwnershipBadgeTests` (6, incl. the mounted Index row's
+  shared mark and a gathering view's owned-by mark) + 43 regression suites (book view, Outline,
+  landing, Library, settings, folder, note box, the registry walk): 281/44 green (4 pre-existing
+  `IndexTierMetricsTests` known issues); zero instances.
 - **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.
 - **Piece G — suites, the walk, the record closed, ledger row 5:** NOT-STARTED.
 - No revert in flight.

@@ -316,6 +316,13 @@ extension Queries {
         /// earliest membership first.
         public let otherBooks: [BookRef]
         public var otherBookCount: Int { otherBooks.count }
+
+        /// 13i-c U4: public so the badge faces' rule is pinnable cell for
+        /// cell without a database (a value type, no semantics).
+        public init(ownedBy: BookRef?, otherBooks: [BookRef]) {
+            self.ownedBy = ownedBy
+            self.otherBooks = otherBooks
+        }
     }
 
     /// **The badge facts for a PAGE of notes** — ONE statement, driven by the

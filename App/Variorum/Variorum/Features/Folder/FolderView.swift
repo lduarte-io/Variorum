@@ -69,6 +69,11 @@ struct FolderView: View {
     /// Open-in-editor only (interpretation 2, PROVISIONAL).
     var openPost: (String) -> Void
     @State private var model: FolderViewModel
+    /// 13i-c U4 — THE BADGE FAMILY outside a book (§6): a tag listing's
+    /// owned-by facts, ONE page-driven observation (∝ the listed notes).
+    @State private var ownership = OwnershipFactsModel()
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
 
     init(session: AppSession, tagID: String, openPost: @escaping (String) -> Void) {
         self.session = session
@@ -98,6 +103,16 @@ struct FolderView: View {
                                 if let date = item.entryDate {
                                     Text(date).font(.caption).foregroundStyle(.secondary)
                                 }
+                                // 13i-c U4 (§6): the owned-by badge (a tag
+                                // listing is outside every book).
+                                if let badge = ownership.badge(
+                                    for: item.postID, placement: .outside,
+                                    badgesOn: themeStore?.settings.ownershipBadges ?? true) {
+                                    OwnershipBadgeView(
+                                        tokens: themeStore?.tokens(for: scheme)
+                                            ?? .fallback(for: scheme),
+                                        badge: badge, postID: item.postID)
+                                }
                                 Spacer()
                             }
                             .contentShape(Rectangle())
@@ -120,5 +135,9 @@ struct FolderView: View {
             }
         }
         .task { await model.start() }
+        .task(id: model.posts.map(\.postID)) {
+            await ownership.observe(
+                session: session, postIDs: model.posts.map(\.postID), inBook: nil)
+        }
     }
 }

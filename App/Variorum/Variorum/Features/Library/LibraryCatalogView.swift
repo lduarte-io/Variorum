@@ -114,6 +114,9 @@ struct LibraryCatalogView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
+    /// 13i-c U4 — THE BADGE FAMILY outside a book (§6): the listed notes'
+    /// owned-by facts, ONE page-driven observation (P1 — ∝ the hits).
+    @State private var ownership = OwnershipFactsModel()
     @State private var renameTarget: String?
     @State private var renameTitle = ""
     /// Item 14: the version doors' picker target — which note, which act.
@@ -219,6 +222,10 @@ struct LibraryCatalogView: View {
         .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
         #endif
         .task { await model.search() }
+        // 13i-c U4: the owned-by badge's facts, keyed on the listed notes.
+        .task(id: listedNoteIDs) {
+            await ownership.observe(session: session, postIDs: listedNoteIDs, inBook: nil)
+        }
         // 13g R5-6: switching INTO notes fills the cards; switching out
         // clears them, so a mode she is not in holds no derived text.
         .task(id: model.mode) { await model.refreshNoteCards() }
@@ -641,6 +648,19 @@ struct LibraryCatalogView: View {
         .background(tokens.surface)
     }
 
+    /// 13i-c U4: the notes the listing shows — the badge facts' key.
+    private var listedNoteIDs: [String] {
+        model.hits.filter { $0.kind == .post }.map(\.id)
+    }
+
+    /// 13i-c U4 (§6): the owned-by badge a listed note wears (the Library is
+    /// OUTSIDE every book), or nil — the setting silences the set.
+    private func ownedByBadge(_ postID: String) -> OwnershipBadgeFace.Badge? {
+        ownership.badge(
+            for: postID, placement: .outside,
+            badgesOn: themeStore?.settings.ownershipBadges ?? true)
+    }
+
     private func noteCard(_ hit: Queries.CatalogHit) -> some View {
         let card = model.noteCards[hit.id] ?? NoteCards.Card()
         // 13u3 UNIT B (her item 4): what the card LEADS with — her title
@@ -665,6 +685,11 @@ struct LibraryCatalogView: View {
                     tokens: tokens, postID: hit.id,
                     stamps: LibrarySortFace.rowStamps(model.sort, for: hit))
                 Spacer(minLength: 0)
+                // 13i-c U4 (§6): the owned-by badge — the note's owner,
+                // clickable (the ascent), before the books line.
+                if let badge = ownedByBadge(hit.id) {
+                    OwnershipBadgeView(tokens: tokens, badge: badge, postID: hit.id)
+                }
                 if !card.books.isEmpty {
                     Text(tokens.chromeLabel(card.books.joined(separator: " · ")))
                         .font(tokens.small)
@@ -759,7 +784,9 @@ struct LibraryCatalogView: View {
                 onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
                 onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } },
                 stamp: stamps.sorted,
-                oracleKey: hit.id)
+                oracleKey: hit.id,
+                badge: ownedByBadge(hit.id),
+                badgePostID: hit.id)
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -956,6 +983,10 @@ struct CatalogNoteLine: View {
     /// The note this row is about — the DEBUG words oracle's key (17q; nil
     /// off the pinned surfaces, and the oracle itself is DEBUG-only).
     var oracleKey: String?
+    /// 13i-c U4 (§6): the owned-by badge, or nil (the common case draws
+    /// nothing, so the shipped alignment pins measure exactly what they did).
+    var badge: OwnershipBadgeFace.Badge? = nil
+    var badgePostID: String = ""
 
     static let probeSpace = "catalog-note-line"
 
@@ -984,6 +1015,9 @@ struct CatalogNoteLine: View {
                 tokens: tokens, tags: tags, allTags: allTags,
                 onApply: onApply, onRemove: onRemove,
                 baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace)
+            if let badge {
+                OwnershipBadgeView(tokens: tokens, badge: badge, postID: badgePostID)
+            }
             Spacer()
             // Her row 9: *"see the created time and last edited time easily
             // on the library."* At the row's trailing edge, muted, on the

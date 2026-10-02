@@ -387,6 +387,9 @@ struct BookIndexView<Masthead: View>: View {
     /// composed by `BookView` so the index column and the navigator can
     /// never disagree about what the book's header says.
     @ViewBuilder var masthead: () -> Masthead
+    /// 13i-c U4 (§6): the badge a note row wears — the book decides
+    /// (`BookView.ownershipBadge`); nil draws nothing.
+    let ownershipBadge: (String) -> OwnershipBadgeFace.Badge?
     /// Show this note focused in OUTLINE (a navigation door in the row
     /// menu since the correction round — editing happens HERE now).
     let onEditInOutline: (String) -> Void
@@ -451,6 +454,7 @@ struct BookIndexView<Masthead: View>: View {
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
         arrivals: BookArrivalsModel? = nil,
         @ViewBuilder masthead: @escaping () -> Masthead,
+        ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
         onEditInOutline: @escaping (String) -> Void
     ) {
         self.session = session
@@ -458,6 +462,7 @@ struct BookIndexView<Masthead: View>: View {
         self.structure = structure
         self.arrivals = arrivals
         self.masthead = masthead
+        self.ownershipBadge = ownershipBadge
         self.onEditInOutline = onEditInOutline
         _edit = State(initialValue: BookIndexEditModel(session: session))
     }
@@ -772,6 +777,7 @@ struct BookIndexView<Masthead: View>: View {
             tokens: tokens,
             entry: entry,
             nested: nested,
+            badge: ownershipBadge(entry.postID),
             selected: selectedPostID == entry.postID,
             onSelect: {
                 // **A COLUMN CLICK IS NAVIGATION** (13u2 UNIT B, her item 19 —
@@ -1144,6 +1150,8 @@ private struct BookIndexNoteRow: View {
     let tokens: VoiceTokens
     let entry: Queries.ReadingEntry
     let nested: Bool
+    /// 13i-c U4 (§6): the badge family's mark for this note, or nil.
+    let badge: OwnershipBadgeFace.Badge?
     let selected: Bool
     let onSelect: () -> Void
     let menu: () -> AnyView
@@ -1170,6 +1178,9 @@ private struct BookIndexNoteRow: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
+            }
+            if let badge {
+                OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
             }
             Spacer(minLength: 4)
             Menu("⋯") { menu() }

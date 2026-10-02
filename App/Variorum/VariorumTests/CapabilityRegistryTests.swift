@@ -447,6 +447,8 @@ struct CapabilityRegistryTests {
             // rows beyond the chip — the Index row's ⋯ menu and Manage Notes….
             .union(BookIndexColumn.surfaceCapabilities)
             .union(ManageReadingPostsSheet.surfaceCapabilities)
+            // 13i-c U4: the owned-by badge is the book ascent's third renderer.
+            .union(OwnershipBadgeView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

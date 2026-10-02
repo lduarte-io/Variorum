@@ -336,6 +336,16 @@ nonisolated enum BookStateCopy {
             + "together; Put back on the book returns them together."
     }
 
+    // MARK: The navigator's state chip (13i-c U4 — F-U3-7)
+
+    /// The book navigator's one state word: "✓ sealed" on a SEALED book (it
+    /// is finished too — "Sealed = the book is done" is the truer word),
+    /// "✓ finished" on a finished one, nothing on an open one.
+    static func navigatorChip(finished: Bool, sealed: Bool) -> String? {
+        if sealed { return "\u{2713} sealed" }
+        return finished ? "\u{2713} finished" : nil
+    }
+
     // MARK: Receipts (the 18i seam's RECEIPT class)
 
     static func finished(_ name: String) -> String {

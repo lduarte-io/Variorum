@@ -94,7 +94,8 @@ struct AppSettingsView: View {
     static let rowIDsRendered: [SettingsPane: [String]] = [
         .general: ["voice", "palette", "appearance", "receipts"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
-                  "arrivalFlash", "hoverHandles", "spellcheck", "longBlocks"],
+                  "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
+                  "hoverHandles", "spellcheck", "longBlocks"],
         .takes: ["fanStyle", "followScroll"],
         .writing: ["segmentation", "cadence", "pruning"],
         .shortcuts: [],
@@ -524,6 +525,26 @@ private struct EditorSettingsPane: View {
                     get: { theme.settings.arrivalFlash },
                     set: { theme.setArrivalFlash($0) }))
                 Text(ArrivalFlashCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // 13i-c U4 (the sitting record §6): the badge family's one switch
+            // and the hide-owned global default — synced, like the flash.
+            Section(OwnershipSettingsCopy.section) {
+                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
+                    get: { theme.settings.ownershipBadges },
+                    set: { theme.setOwnershipBadges($0) }))
+                Text(OwnershipSettingsCopy.badgesHelp)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                Toggle(SettingsCatalog.title("hideOwnedDefault"), isOn: Binding(
+                    get: { theme.settings.hideOwnedByDefault },
+                    set: { theme.setHideOwnedDefault($0) }))
+                Text(OwnershipSettingsCopy.hideOwnedHelp)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(6)

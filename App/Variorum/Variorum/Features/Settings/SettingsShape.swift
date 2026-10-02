@@ -192,6 +192,17 @@ nonisolated enum SettingsCatalog {
                 + "and Read, fading in about a second. On by default; synced.",
             keywords: ["flash", "highlight", "cursor", "caret", "mode", "switch", "find my place",
                        "blink", "pulse", "where am i"]),
+        // 13i-c U4 (the sitting record §6): the two ownership settings.
+        SettingsRow(
+            id: "ownershipBadges", pane: .editor, title: OwnershipSettingsCopy.badgesTitle,
+            blurb: "Marks on notes that live in several books, and \u{201C}owned by\u{201D} on notes "
+                + "an owned book holds. On by default; synced.",
+            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership"]),
+        SettingsRow(
+            id: "hideOwnedDefault", pane: .editor, title: OwnershipSettingsCopy.hideOwnedTitle,
+            blurb: "Leave notes an owned book holds out of gatherings and tag listings. Off by "
+                + "default; each gathering can choose; the Library shows everything. Synced.",
+            keywords: ["hide", "owned", "gathering", "tag", "listing", "book", "filter"]),
         SettingsRow(
             id: "spellcheck", pane: .editor, title: "Spellchecking",
             blurb: "Off, check while typing, or check and correct. Applies to every writing "

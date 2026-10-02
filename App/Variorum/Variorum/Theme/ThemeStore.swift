@@ -119,6 +119,18 @@ final class ThemeStore {
         run { try $0.setArrivalFlash(on) }
     }
 
+    /// 13i-c U4 (the sitting record §6; P-13ic-10): the badge family's one
+    /// switch. A setter and nothing more — every badge reads the landed
+    /// value from `settings`.
+    func setOwnershipBadges(_ on: Bool) {
+        run { try $0.setOwnershipBadges(on) }
+    }
+
+    /// 13i-c U4: the hide-owned GLOBAL default (each gathering may override).
+    func setHideOwnedDefault(_ hide: Bool) {
+        run { try $0.setHideOwnedDefault(hide) }
+    }
+
     /// 18g (her R-Q6): the colour palette. A setter and nothing more, like
     /// `setVoice` beside it — it cannot refuse, so it needs no words. The
     /// CUSTOM SEEDS deliberately do NOT have one here: `setThemeTints` can
