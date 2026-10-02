@@ -229,6 +229,19 @@ struct BookCollectingDoorsTests {
         }
     }
 
+    // MARK: - KnownIssues row 103's book-surface half
+
+    /// The book's own quiet-receipt hosts (the Index column's footer, the
+    /// navigator's foot) speak whenever the sidebar's note box is NOT live —
+    /// and stand empty while it is, because its bar already hosts the one
+    /// slot (P-13id-U3-6: a receipt never draws twice).
+    @Test func theBookHostsQuietReceiptsExceptWhileTheNoteBoxIsLive() {
+        #expect(BookNoteBox.bookHostsQuietReceipt(nil), "Read / an unfocused pane: no box")
+        #expect(BookNoteBox.bookHostsQuietReceipt(.empty))
+        #expect(BookNoteBox.bookHostsQuietReceipt(.selected("n")))
+        #expect(!BookNoteBox.bookHostsQuietReceipt(.live("n")), "the live box's bar hosts it")
+    }
+
     // MARK: - The journal-trait sentence (§10)
 
     /// §10's sentence is a BOOK's row (a gathering mints no entries — P-2),

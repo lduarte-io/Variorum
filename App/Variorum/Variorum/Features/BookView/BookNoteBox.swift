@@ -23,6 +23,20 @@
 import Foundation
 
 nonisolated enum BookNoteBox {
+    /// **Who speaks a quiet RECEIPT on the book's surfaces** (13i-d U3 —
+    /// KnownIssues row 103's book-surface half: under her default `quiet`
+    /// style, the Arrivals line's Add/Dismiss, a Remove/Release, a state
+    /// door's receipt had NO visible home on Index / Book / Outline while no
+    /// note was live). The LIVE box's bar already hosts the one quiet slot, so
+    /// the book's own hosts (the Index column's footer, the navigator's foot)
+    /// stand EMPTY exactly while the box is live — one receipt never draws
+    /// twice (PROVISIONAL P-13id-U3-6). nil (no box — Read, an unfocused
+    /// pane) hosts.
+    static func bookHostsQuietReceipt(_ box: NoteBoxState?) -> Bool {
+        if case .live? = box { return false }
+        return true
+    }
+
     /// The box stands in the sidebar while a book is open in an EDITING mode
     /// — Outline, Index, Book — and never in Read (§5.4: Read is a place to
     /// read, and its surfaces are not editable by her A43 ruling).

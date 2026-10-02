@@ -399,6 +399,10 @@ struct BookIndexView<Masthead: View>: View {
     /// control; this view regroups by it). nil — a host with no control, every
     /// pre-U3 pin — is the shipped look, exactly.
     let grouping: BookIndexGroupingModel?
+    /// 13i-d U3 — KnownIssues row 103: whether the column's footer hosts the
+    /// quiet slot (false while the sidebar's LIVE note box hosts it —
+    /// `BookNoteBox.bookHostsQuietReceipt`).
+    let hostsQuietReceipt: Bool
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -469,8 +473,10 @@ struct BookIndexView<Masthead: View>: View {
         @ViewBuilder masthead: @escaping () -> Masthead,
         ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
         grouping: BookIndexGroupingModel? = nil,
+        hostsQuietReceipt: Bool = true,
         onEditInOutline: @escaping (String) -> Void
     ) {
+        self.hostsQuietReceipt = hostsQuietReceipt
         self.session = session
         self.model = model
         self.structure = structure
@@ -929,6 +935,13 @@ struct BookIndexView<Masthead: View>: View {
 
     private var columnFooter: some View {
         HStack(spacing: 10) {
+            // 13i-d U3 — KnownIssues row 103's book-surface half: the quiet
+            // slot at the column's foot (the Bookcase hint bar's shape — it
+            // yields first and takes no width idle); empty while the live
+            // note box hosts it (P-13id-U3-6).
+            QuietReceiptLine(status: session.status, tokens: tokens)
+                .opacity(hostsQuietReceipt ? 1 : 0)
+                .accessibilityHidden(!hostsQuietReceipt)
             Spacer(minLength: 4)
             let chapters = structure.chaptersActive ? structure.sections.count : 0
             Text(tokens.chromeLabel(

@@ -226,6 +226,7 @@ struct BookView: View {
                         masthead: { bookMasthead },
                     ownershipBadge: { ownershipBadge($0) },
                     grouping: grouping,
+                    hostsQuietReceipt: BookNoteBox.bookHostsQuietReceipt(noteBoxReport?.state),
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
                         // focused in Outline through the ascent's own door
@@ -840,6 +841,11 @@ struct BookView: View {
                             + "anywhere and it appears here.",
                         lines: 6)
                 }
+                // 13i-d U3 — KnownIssues row 103's book-surface half: the
+                // quiet slot at the navigator's FOOT (Outline · Book · Read),
+                // the Bookcase hint bar's shape; empty while the sidebar's live
+                // note box hosts it (P-13id-U3-6).
+                quietReceiptHost
             }
             .padding(12)
             // 18d batch 3: NO fixed width any more — `SideColumn` gives the
@@ -854,6 +860,15 @@ struct BookView: View {
             }
             .coordinateSpace(name: BookNavigatorLayout.space)
         }
+    }
+
+    /// The navigator's quiet slot (row 103). Always mounted (18i: a slot that
+    /// comes and goes moves doors); faded out while the box is live.
+    private var quietReceiptHost: some View {
+        let hosting = BookNoteBox.bookHostsQuietReceipt(noteBoxReport?.state)
+        return QuietReceiptLine(status: session.status, tokens: tokens)
+            .opacity(hosting ? 1 : 0)
+            .accessibilityHidden(!hosting)
     }
 
     // MARK: - The sidebar's note box (18d batch 1 — her U-10)
