@@ -330,6 +330,36 @@ struct JournalBooksTests {
         }
     }
 
+    /// 13i-c ladder round 1 (the sealed-named-reopen class): the daily door
+    /// on a SEALED daily Journal says UNSEAL, never Reopen — `unlockReading`
+    /// refuses a sealed book (`readingSealed`, R-13ic-3), so "reopen it"
+    /// named a door that cannot act. Both daily roads pinned: ⌘J's
+    /// `openToday` note and the book's own "+ new entry". Red-on-old: both
+    /// said "is finished — … reopen".
+    @Test func theDailyDoorOnASealedJournalNamesUnsealNeverReopen() async throws {
+        try await withShellSession2 { session, db in
+            _ = try await JournalBooks.openToday(session: session, day: "2026-07-22")
+            let dailyID = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            try await session.runner.run { ops in try ops.sealReading(dailyID) }
+
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-07-23")
+            let note = try #require(outcome.note)
+            #expect(note.localizedCaseInsensitiveContains("sealed")
+                    && note.localizedCaseInsensitiveContains("unseal"),
+                    "⌘J's note names the sealed book's real road out")
+            #expect(!note.contains("is finished"),
+                    "never 'finished — reopen' on a sealed book (Reopen refuses there)")
+
+            let daily = BookStructureModel(session: session, readingID: dailyID)
+            _ = await daily.newEntry(day: "2026-07-24")
+            let entryNote = try #require(daily.lastError)
+            #expect(entryNote.localizedCaseInsensitiveContains("sealed")
+                    && entryNote.localizedCaseInsensitiveContains("unseal"),
+                    "'+ new entry' speaks the same road")
+            #expect(!entryNote.contains("is finished"))
+        }
+    }
+
     /// 13i-c ladder round 1 (the F-5 wing class, the NON-DAILY arm): a
     /// journal-trait book's "+ new entry" mints the note in the BOOK's wing
     /// (§9 — a book never spans wings), through `newPostInReading` — the op

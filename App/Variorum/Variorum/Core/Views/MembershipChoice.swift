@@ -109,10 +109,16 @@ nonisolated enum MembershipChoiceCopy {
 
     /// A FINISHED book among the ones it would leave: its table of contents
     /// is done, so the note cannot leave it (the op's refusal, P-13ic-U2-4) —
-    /// the sheet says so where Move would be, and Copy in stays.
-    static func moveBlocked(by finished: String) -> String {
-        "It can\u{2019}t move: \(quoted(finished)) is finished, so the note can\u{2019}t leave "
-            + "it \u{2014} copy it in instead, or reopen \(quoted(finished)) first."
+    /// the sheet says so where Move would be, and Copy in stays. A SEALED
+    /// book's road out is UNSEAL (13i-c ladder round 1 — Reopen refuses
+    /// there, `readingSealed`; naming it was the P-2 class in copy).
+    static func moveBlocked(by finished: String, sealed: Bool = false) -> String {
+        sealed
+            ? "It can\u{2019}t move: \(quoted(finished)) is sealed, so the note can\u{2019}t "
+                + "leave it \u{2014} copy it in instead, or unseal \(quoted(finished)) first "
+                + "(that reopens it too)."
+            : "It can\u{2019}t move: \(quoted(finished)) is finished, so the note can\u{2019}t "
+                + "leave it \u{2014} copy it in instead, or reopen \(quoted(finished)) first."
     }
 
     // MARK: A PLAIN book meets a note another book owns (copy only)
@@ -159,10 +165,14 @@ nonisolated enum MembershipChoiceCopy {
     }
 
     /// Move in refused because one of the books it would leave is finished
-    /// (`lockedReading` naming THAT book, not the target).
-    static func moveRefusedFinished(_ finished: String) -> String {
-        "\(quoted(finished)) is finished, so this note can\u{2019}t leave it \u{2014} copy it in "
-            + "instead, or reopen \(quoted(finished)) first."
+    /// (`lockedReading` naming THAT book, not the target). A SEALED book
+    /// names Unseal (13i-c ladder round 1 — Reopen refuses there).
+    static func moveRefusedFinished(_ finished: String, sealed: Bool = false) -> String {
+        sealed
+            ? "\(quoted(finished)) is sealed, so this note can\u{2019}t leave it \u{2014} copy "
+                + "it in instead, or unseal \(quoted(finished)) first (that reopens it too)."
+            : "\(quoted(finished)) is finished, so this note can\u{2019}t leave it \u{2014} copy "
+                + "it in instead, or reopen \(quoted(finished)) first."
     }
 }
 
@@ -190,10 +200,12 @@ nonisolated struct MembershipChoice: Identifiable, Equatable, Sendable {
     var leaves: [String] { severed.filter { !$0.isArrival }.map(\.book.name) }
     /// The books whose door it stops waiting at.
     var waitingAt: [String] { severed.filter(\.isArrival).map(\.book.name) }
-    /// A finished book among the ones it would leave — MOVE IN refuses there.
-    var moveBlockedBy: String? {
-        severed.first { !$0.isArrival && $0.finished }?.book.name
+    /// A finished (or sealed) book among the ones it would leave — MOVE IN
+    /// refuses there; the sentence names ITS road out (reopen · unseal).
+    var moveBlockedRow: Queries.SeveredMembership? {
+        severed.first { !$0.isArrival && $0.finished }
     }
+    var moveBlockedBy: String? { moveBlockedRow?.book.name }
 
     /// Whether the sheet offers MOVE IN at all (an owned target only — §4).
     var offersMove: Bool { kind == .copyOrMove }
@@ -206,8 +218,9 @@ nonisolated struct MembershipChoice: Identifiable, Equatable, Sendable {
                 MembershipChoiceCopy.ownedTargetLead(book: book.name, elsewhere: elsewhere),
                 MembershipChoiceCopy.copyExplains(book: book.name, elsewhere: elsewhere),
             ]
-            if let blocked = moveBlockedBy {
-                lines.append(MembershipChoiceCopy.moveBlocked(by: blocked))
+            if let blocked = moveBlockedRow {
+                lines.append(MembershipChoiceCopy.moveBlocked(
+                    by: blocked.book.name, sealed: blocked.sealed))
             } else {
                 lines.append(MembershipChoiceCopy.moveExplains(
                     book: book.name, leaves: leaves, waitingAt: waitingAt))
@@ -358,8 +371,15 @@ final class MembershipDoors {
             return receipt
         } catch {
             if case OperationError.lockedReading(let id) = error, id != choice.book.id {
-                let name = choice.severed.first { $0.book.id == id }?.book.name ?? ""
-                session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(name))
+                // 13i-c ladder round 1: the blocking book's OWN road (reopen ·
+                // unseal); a book the stale preview does not know falls back
+                // to the shared words, never to "“” is finished".
+                if let row = choice.severed.first(where: { $0.book.id == id }) {
+                    session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(
+                        row.book.name, sealed: row.sealed))
+                } else {
+                    session.status.refuse(OpsRefusalCopy.message(for: error))
+                }
             } else {
                 session.status.refuse(
                     MembershipChoiceCopy.refusal(for: error, book: choice.book.name))

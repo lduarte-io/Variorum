@@ -441,3 +441,43 @@ call per finding, each bug-class fix red-on-old first; dispositions written as t
 - **Changed:** `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift` (the one arm).
   Suites after: JournalBooks + BookStructureModel 16/2 · BookDrop 6/1 · MembershipChoice +
   ArrivalArms 20/2 — green.
+
+### [MINOR] a sealed blocking book named "reopen" — **CONFIRMED-FIXED (the reachable class) · CONFIRMED-RECORDED (the generic-table arms)**
+- **Final call:** CONFIRMED, the implementer's widening accepted — the class is every
+  `lockedReading`-shaped sentence that names Reopen (or "unlock") where the book is SEALED and
+  Reopen refuses (`readingSealed`, R-13ic-3): the P-2 class in copy. FIXED, every arm with the
+  book's facts at hand:
+  - `Queries.NoteMembership` + `Queries.SeveredMembership` gain `sealed` (`r.sealed_at IS NOT
+    NULL`, one column in the existing statement);
+  - the choice sheet's blocked line and the Move refusal fork
+    (`MembershipChoiceCopy.moveBlocked(by:sealed:)` / `moveRefusedFinished(_:sealed:)`); the
+    `?? ""` fallbacks in BOTH catch arms (`MembershipDoors.moveIn`,
+    `BookArrivalsModel.moveIn`) now fall back to the SHARED words, never "“” is finished";
+  - the chip's arms (`ChipRefusals.message(for:bookName:sealed:)`, threaded at the add
+    fall-through, the collect arm and `DivergeCopy.refusal` — the diverge row on a sealed book was
+    the implementer's directly-reachable find);
+  - the daily door's both roads on a SEALED daily Journal (`JournalBooks.shelvingNote`'s
+    `.bookFinished` arm reads the designated book's seal; `newEntry`'s daily catch forks the same
+    way): "Unseal … (that reopens it too)" instead of "reopen".
+- **CONFIRMED-RECORDED, not fixed here (one owned row):** the GENERIC table arms with no book
+  facts at hand — `ReadingsViewModel.message`'s `.lockedReading` ("This book is locked — unlock it
+  first", reachable via a drop onto a sealed book's shelf row), `ArrivalsCopy.refusal`'s finished
+  arm, `MembershipChoiceCopy.refusal`'s target arm (race-only), and `RecoveryActs`' recovery arm
+  ("This book is finished — reopen it first") — fixing them means plumbing a sealed fact through
+  static word tables, exactly the growth a fix pass records instead of improvising. Suggested
+  owner: **13i-d** (the Bookcase/doors rebuild — it re-homes these tables anyway), noted for the
+  closeout's KnownIssues row alongside F-U3-1's gathering faces.
+- **Pins (watched RED on the pre-fix tree, green after):**
+  `MembershipChoiceTests.aSealedBookAmongTheSeveredNamesUnsealNeverReopen` (DB-driven through the
+  real road — red: the blocked line and the refusal both read "is finished … reopen");
+  `JournalBooksTests.theDailyDoorOnASealedJournalNamesUnsealNeverReopen` (both daily roads — red:
+  "is finished — … reopen" twice). The chip arms' fork is pinned by the pure
+  `theChipAndDivergeRefusalsNameTheSealedBooksRealDoor` (the fix's own signature — the class's
+  red-on-old is carried by the two DB-driven pins; recorded honestly).
+- **Changed:** `Sources/VariorumCore/Queries/OwnershipQueries.swift` (the two structs + the one
+  column), `App/Variorum/Variorum/Core/Views/MembershipChoice.swift`,
+  `App/Variorum/Variorum/Features/BookView/BookArrivals.swift`,
+  `App/Variorum/Variorum/Features/BookView/MembershipChip.swift`,
+  `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift`. Suites after: Mac
+  MembershipChoice + JournalBooks + BookArrivals + ArrivalArms + BookStateDoors 55/5 green; core
+  OwnershipOperations + OwnershipDoor + MembershipReadersBookScope + OwnershipBookDoors 50/4 green.

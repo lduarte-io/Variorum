@@ -600,10 +600,20 @@ final class BookStructureModel {
                         _ = try ops.addPostToReading(entry.container.id, to: readingID)
                     } catch OperationError.alreadyInReading {
                     } catch OperationError.lockedReading {
+                        // A SEALED book's road out is Unseal (13i-c ladder
+                        // round 1 — Reopen refuses there, `readingSealed`).
+                        let sealed = ((try? database.read { db in
+                            try Queries.reading(db, id: readingID)?.sealedAt != nil
+                        }) ?? false)
                         return (entry.container.id,
-                                "Today's entry opened, but this book is finished — it "
-                                + "wasn't added. Reopen the book in its settings, or pick "
-                                + "a new daily journal (Use as Daily Journal).")
+                                sealed
+                                ? "Today's entry opened, but this book is sealed — it "
+                                    + "wasn't added. Unseal the book in its settings (that "
+                                    + "reopens it too), or pick a new daily journal "
+                                    + "(Use as Daily Journal)."
+                                : "Today's entry opened, but this book is finished — it "
+                                    + "wasn't added. Reopen the book in its settings, or pick "
+                                    + "a new daily journal (Use as Daily Journal).")
                     } catch OperationError.readingAtCapacity {
                         return (entry.container.id,
                                 "Today's entry opened, but this book is at its note cap — "
@@ -719,7 +729,21 @@ enum JournalBooks {
         case .bookFinished:
             // The daily book is FINISHED (the bounded-notebook flow's
             // expected end): the entry still opens; the note speaks and
-            // points at the re-designation door.
+            // points at the re-designation door. A SEALED Journal's road out
+            // is UNSEAL (13i-c ladder round 1 — Reopen refuses on a sealed
+            // book, `readingSealed`, R-13ic-3).
+            let sealed = ((try? database.read { db -> Bool in
+                guard let id = try Queries.dailyJournalBookID(db),
+                      let book = try Queries.reading(db, id: id)
+                else { return false }
+                return book.sealedAt != nil
+            }) ?? false)
+            if sealed {
+                return "Today's entry opened, but “\(bookName)” is sealed — "
+                    + "it wasn't added. Pick a new daily journal from a book's "
+                    + "shelf menu (Use as Daily Journal), or unseal “\(bookName)” "
+                    + "(that reopens it too)."
+            }
             return "Today's entry opened, but “\(bookName)” is finished — "
                 + "it wasn't added. Pick a new daily journal from a book's "
                 + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”."

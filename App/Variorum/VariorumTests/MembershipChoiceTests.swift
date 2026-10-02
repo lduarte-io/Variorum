@@ -272,6 +272,53 @@ struct MembershipChoiceTests {
         }
     }
 
+    /// 13i-c ladder round 1 (the sealed-named-reopen class): a SEALED book
+    /// among the severed names UNSEAL as the road out — Reopen refuses on a
+    /// sealed book (`readingSealed`, R-13ic-3), so "is finished — reopen it
+    /// first" named a door that cannot act (the P-2 class, in copy).
+    /// Red-on-old: the sheet's blocked line and the Move refusal both said
+    /// "is finished … reopen".
+    @Test func aSealedBookAmongTheSeveredNamesUnsealNeverReopen() async throws {
+        try await withChoiceWorld { session, db in
+            let world = try shelf(session)
+            try session.operations.sealReading(world.other.id)
+            let doors = MembershipDoors(session: session)
+            _ = try await doors.addOrOffer(world.shared.id, to: world.mine.id)
+            let item = try #require(doors.pending)
+            #expect(item.moveBlockedBy == "Other")
+            let blocked = try #require(item.lines.last)
+            #expect(blocked.localizedCaseInsensitiveContains("sealed")
+                    && blocked.localizedCaseInsensitiveContains("unseal"),
+                    "the road out of a sealed book is Unseal (which reopens it too)")
+            #expect(!blocked.contains("is finished"),
+                    "never 'finished — reopen' on a sealed book (Reopen refuses there)")
+            // The op's refusal, spoken if Move is reached anyway.
+            #expect(await doors.moveIn(item) == nil)
+            let refusal = try #require(session.status.current?.text)
+            #expect(refusal.localizedCaseInsensitiveContains("sealed")
+                    && refusal.localizedCaseInsensitiveContains("unseal"))
+            #expect(!refusal.contains("is finished"))
+            #expect(try await members(db, world.mine.id).isEmpty, "nothing moved")
+        }
+    }
+
+    /// The same class at the chip's arms (the add's fall-through and the
+    /// diverge row): the sealed fork of `ChipRefusals` — the new truth, pure.
+    /// (The class's red-on-old is carried by the two DB-driven pins above
+    /// and in `JournalBooksTests` — this signature is the fix's own.)
+    @Test func theChipAndDivergeRefusalsNameTheSealedBooksRealDoor() {
+        let sealed = ChipRefusals.message(
+            for: OperationError.lockedReading(id: "b"), bookName: "Edition", sealed: true)
+        #expect(sealed.contains("sealed") && sealed.localizedCaseInsensitiveContains("unseal"))
+        #expect(!sealed.contains("finished"))
+        let finished = ChipRefusals.message(
+            for: OperationError.lockedReading(id: "b"), bookName: "Edition")
+        #expect(finished.contains("finished") && finished.contains("reopen"))
+        let diverge = DivergeCopy.refusal(
+            for: OperationError.lockedReading(id: "b"), book: "Edition", sealed: true)
+        #expect(diverge.contains("sealed") && diverge.localizedCaseInsensitiveContains("unseal"))
+    }
+
     @Test func theSheetDrawsExactlyItsItem() async throws {
         try await withChoiceWorld { session, _ in
             let world = try shelf(session)

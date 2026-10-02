@@ -35,6 +35,11 @@ extension Queries {
         public let owned: Bool
         /// The book is FINISHED (`locked` — a sealed book is finished too).
         public let finished: Bool
+        /// The book is SEALED (13i-c ladder round 1): a refusal naming the
+        /// road out must say Unseal there — Reopen refuses on a sealed book
+        /// (`readingSealed`, R-13ic-3), so "reopen it first" would name a
+        /// door that cannot act (the P-2 class, in copy).
+        public let sealed: Bool
         public let status: MembershipStatus
     }
 
@@ -51,7 +56,8 @@ extension Queries {
             db,
             sql: """
                 SELECT rp.id AS row_id, rp.status AS status,
-                       r.id AS reading_id, r.name AS name, r.owned AS owned, r.locked AS locked
+                       r.id AS reading_id, r.name AS name, r.owned AS owned, r.locked AS locked,
+                       r.sealed_at IS NOT NULL AS sealed
                 FROM reading_post rp
                 JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
                  AND r.kind = 'book'
@@ -64,7 +70,7 @@ extension Queries {
             NoteMembership(
                 rowID: row["row_id"],
                 book: BookRef(id: row["reading_id"], name: row["name"]),
-                owned: row["owned"], finished: row["locked"],
+                owned: row["owned"], finished: row["locked"], sealed: row["sealed"],
                 status: MembershipStatus(rawValue: row["status"]) ?? .member)
         }
     }
@@ -151,6 +157,9 @@ extension Queries {
         /// while this row stands (PROVISIONAL P-13ic-U2-4) — the door offers
         /// COPY IN alone.
         public let finished: Bool
+        /// The book is SEALED — the sentence's road out is Unseal, never
+        /// Reopen (13i-c ladder round 1; `readingSealed` is Reopen's refusal).
+        public let sealed: Bool
     }
 
     /// **"Move in…" — the confirm's severed list** (the plan §3): every OTHER
@@ -164,7 +173,7 @@ extension Queries {
             .map {
                 SeveredMembership(
                     rowID: $0.rowID, book: $0.book, isArrival: $0.status == .arrival,
-                    finished: $0.finished)
+                    finished: $0.finished, sealed: $0.sealed)
             }
     }
 

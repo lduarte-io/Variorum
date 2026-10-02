@@ -364,10 +364,18 @@ final class BookArrivalsModel {
             session.status.receipt(ArrivalsCopy.movedIn(arrival.title, left: left))
         } catch {
             if case OperationError.lockedReading(let id) = error, id != readingID {
-                let name = (try? await session.database.read { db in
-                    try Queries.reading(db, id: id)?.name
+                // 13i-c ladder round 1: the blocking book's OWN road (reopen ·
+                // unseal); a book that cannot be read falls back to the shared
+                // words, never to "“” is finished".
+                let blocking = (try? await session.database.read { db in
+                    try Queries.reading(db, id: id)
                 }) ?? nil
-                session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(name ?? ""))
+                if let blocking {
+                    session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(
+                        blocking.name, sealed: blocking.sealedAt != nil))
+                } else {
+                    session.status.refuse(OpsRefusalCopy.message(for: error))
+                }
             } else {
                 session.status.refuse(ArrivalsCopy.refusal(
                     for: error, book: book?.name, cap: book?.maxPosts))

@@ -326,7 +326,8 @@ struct MembershipChip: View {
                 if case .smartFilterUnsatisfiable(_, let reason) = error {
                     status = "“\(book.name)” can't take this note: \(reason)"
                 } else {
-                    status = ChipRefusals.message(for: error, bookName: book.name)
+                    status = ChipRefusals.message(
+                        for: error, bookName: book.name, sealed: book.sealedAt != nil)
                 }
             } catch {
                 status = String(describing: error)
@@ -350,7 +351,8 @@ struct MembershipChip: View {
                     status = "Added to “\(book.name)”."
                 }
             } catch {
-                status = ChipRefusals.message(for: error, bookName: book.name)
+                status = ChipRefusals.message(
+                    for: error, bookName: book.name, sealed: book.sealedAt != nil)
             }
             await refresh()
         }
@@ -388,7 +390,8 @@ struct MembershipChip: View {
                 copyBookName = book.name  // 13g R1-1: the receipt names it
                 status = DivergeCopy.done(book: book.name)
             } catch {
-                status = DivergeCopy.refusal(for: error, book: book.name)
+                status = DivergeCopy.refusal(
+                    for: error, book: book.name, sealed: book.sealedAt != nil)
             }
             await refresh()
         }
@@ -455,25 +458,32 @@ nonisolated enum DivergeCopy {
     /// A SMART book has no membership row to swap: its posts arrive by tag,
     /// so the road there is the tag. 13i owns that design; this says so
     /// rather than pretending or staying silent.
-    static func refusal(for error: Error, book: String) -> String {
+    static func refusal(for error: Error, book: String, sealed: Bool = false) -> String {
         if let error = error as? OperationError, case .wrongReadingKind = error {
             return "\u{201c}\(book)\u{201d} collects by its tags, so there is no membership to "
                 + "move — a copy would only appear there if it carried the same tags. "
                 + "Duplicate as Version, then tag the copy."
         }
-        return ChipRefusals.message(for: error, bookName: book)
+        return ChipRefusals.message(for: error, bookName: book, sealed: sealed)
     }
 }
 
 /// Readable refusal copy for the chip's doors (the "Refused: error(…)"
 /// class retired — Sitting 9, R93).
 nonisolated enum ChipRefusals {
-    static func message(for error: Error, bookName: String?) -> String {
+    /// `sealed` (13i-c ladder round 1 — the sealed-named-reopen class): a
+    /// SEALED book's road out is Unseal, never Reopen (`unlockReading`
+    /// refuses a sealed book, `readingSealed`, R-13ic-3) — every chip call
+    /// site has the book row, so it says which door is real.
+    static func message(for error: Error, bookName: String?, sealed: Bool = false) -> String {
         guard let error = error as? OperationError else { return String(describing: error) }
         let book = bookName.map { "“\($0)”" } ?? "that book"
         switch error {
         case .lockedReading:
-            return "\(book) is finished — reopen it (its settings) to change what's in it."
+            return sealed
+                ? "\(book) is sealed — unseal it (its settings) to change what's in it; "
+                    + "unsealing reopens it too."
+                : "\(book) is finished — reopen it (its settings) to change what's in it."
         case .readingAtCapacity:
             return "\(book) is at its note cap — extend the cap in its settings."
         case .alreadyInReading:
