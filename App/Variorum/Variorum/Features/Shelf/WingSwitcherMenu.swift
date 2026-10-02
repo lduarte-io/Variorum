@@ -26,12 +26,27 @@ struct WingSwitcherMenu: View {
 
     /// P-1: the switcher's three acts (the switch itself is a view choice —
     /// undeclared, the Library `sort ▾` precedent).
-    static let surfaceCapabilities: [CapabilityID] = [.newWing, .renameWing, .deleteWing]
+    static let surfaceCapabilities: [CapabilityID] = [
+        .newWing, .renameWing, .deleteWing,
+        // 13i-d U5b — her R-13id-4 backdoor (R-13id-6 item 9): additional
+        // wings only, so the daily Journal's Home is never its source.
+        .moveWingContents,
+    ]
+
+    /// 13i-d U5b — which of the CURRENT wing's acts the menu draws (DATA,
+    /// P-1/P-2, pinned): none on Home — virtual, never renamed or deleted,
+    /// and never the bulk move's source (it holds the daily Journal, R-13id-6
+    /// item 7) — and all three on an additional wing.
+    static func currentWingActs(_ currentID: String) -> [CapabilityID] {
+        currentID.isEmpty ? [] : [.renameWing, .moveWingContents, .deleteWing]
+    }
 
     @State private var newPresented = false
     @State private var renamePresented = false
     @State private var deletePresented = false
     @State private var field = ""
+    /// 13i-d U5b — the bulk move's confirm (its item IS the act's preview).
+    @State private var contentsAsk: WingsModel.ContentsMoveAsk?
 
     var body: some View {
         let current = wings.currentID
@@ -53,11 +68,26 @@ struct WingSwitcherMenu: View {
                 field = ""
                 newPresented = true
             }
-            if !current.isEmpty {
+            let acts = Self.currentWingActs(current)
+            if acts.contains(.renameWing) {
                 Button(CapabilityRegistry.capability(.renameWing).verb) {
                     field = name
                     renamePresented = true
                 }
+            }
+            if acts.contains(.moveWingContents) {
+                // 13i-d U5b — MOVE EVERYTHING TO ANOTHER WING ▸ (her R-13id-4
+                // backdoor: empty the wing in one act, then Delete succeeds).
+                // Any other live wing, Home first; the confirm counts.
+                Menu(CapabilityRegistry.capability(.moveWingContents).verb) {
+                    ForEach(wings.destinations(from: current)) { row in
+                        Button(row.name) {
+                            Task { contentsAsk = await wings.contentsMoveAsk(to: row.id) }
+                        }
+                    }
+                }
+            }
+            if acts.contains(.deleteWing) {
                 Button(CapabilityRegistry.capability(.deleteWing).verb) {
                     Task { if await wings.deleteAsk(current) { deletePresented = true } }
                 }
@@ -100,6 +130,7 @@ struct WingSwitcherMenu: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        .wingContentsMoveConfirm($contentsAsk, wings: wings)
         .alert(WingCopy.deleteTitle(name), isPresented: $deletePresented) {
             Button("Delete Wing", role: .destructive) {
                 Task { await wings.delete(current) }

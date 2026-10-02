@@ -1908,6 +1908,23 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: always),
+        // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
+        // carries its row (the note doors' `.native` precedent) and renders
+        // only while another wing exists and never on the daily Journal
+        // (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
+        // current wing and renders only on an ADDITIONAL one.
+        Capability(
+            id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.bookUnavailableNote,
+            availability: always),
+        Capability(
+            id: .moveWingContents, verb: WingCopy.moveEverythingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.unavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

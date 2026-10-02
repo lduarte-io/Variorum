@@ -91,9 +91,12 @@ struct WingSwitcherTests {
             let tag = try session.operations.createTag(name: "imported", wingID: wing.id)
             _ = try session.operations.createReading(name: "b", kind: .book, wingId: wing.id)
             #expect(await wings.deleteAsk(wing.id) == false)
+            // 13i-d U5b (A JUSTIFIED EDIT — R-13id-6 item 9, P-2: the refusal's
+            // words gain the bulk road now that the door exists; RED on the
+            // old words by construction).
             #expect(spoken(session)
                     == "“Imports” still holds 1 book, 1 note and 1 tag — move or delete them first, "
-                        + "then the empty wing can go.")
+                        + "then the empty wing can go — or move everything to another wing.")
             // Empty it by hand: move the note home, delete the tag and the book.
             _ = try session.operations.moveNoteToWing(note.id, to: "")
             try session.operations.deleteTag(tag.id)
@@ -219,7 +222,10 @@ struct WingSwitcherTests {
     /// rendered by their surfaces (the registry walk's union carries the
     /// switcher's line; the note doors ride the note-row grammar).
     @Test func theWingActsAreDeclaredAndRendered() {
-        #expect(Set(WingSwitcherMenu.surfaceCapabilities) == [.newWing, .renameWing, .deleteWing])
+        // 13i-d U5b (A JUSTIFIED EDIT — a new act on the same renderer):
+        // the switcher carries the bulk move too.
+        #expect(Set(WingSwitcherMenu.surfaceCapabilities)
+                == [.newWing, .renameWing, .deleteWing, .moveWingContents])
         let noteRow = Set(SidebarView.contextMenuCapabilities)
         #expect(noteRow.isSuperset(of: [.moveNoteToWing, .copyNoteToWing]))
         for id in [CapabilityID.newWing, .renameWing, .deleteWing] {

@@ -48,6 +48,8 @@ struct ShelfView: View {
         // 13i-d U3 — the Collecting pane's second road (the sitting record
         // §4): the book row reaches its settings sheet.
         + [.openBookSettings]
+        // 13i-d U5b — Move to Wing ▸ (R-13id-6 item 9): books AND gatherings.
+        + [.moveBookToWing]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -102,6 +104,8 @@ struct ShelfView: View {
     @State private var renameShelfTarget: Shelf?
     @State private var glyphTarget: Shelf?
     @State private var deleteShelfTarget: Shelf?
+    /// 13i-d U5b — the book move's confirm (its item IS the act's preview).
+    @State private var bookMoveAsk: WingsModel.BookMoveAsk?
     /// The book row a dragged BOOK hovers over in "my order" (the insertion
     /// hairline), and the section header a book hovers over (re-shelve).
     @State private var rowDropTarget: String?
@@ -315,6 +319,10 @@ struct ShelfView: View {
         // 13i-c U3: the STATE doors' confirms — the one presentation road the
         // settings sheet shares.
         .bookStateConfirms(model.stateDoors)
+        // 13i-d U5b — the book move's counting confirm (R-13id-6).
+        .wingBookMoveConfirm($bookMoveAsk, wings: wings) {
+            Task { await model.refreshAggregates() }
+        }
         // 13i-c U4 (§4 row 17): the row drop's ownership choice.
         .membershipChoices(model.membershipDoors) { _ in
             Task { await model.refreshAggregates() }
@@ -584,6 +592,22 @@ struct ShelfView: View {
                     if !model.shelves.isEmpty { Divider() }
                     Button(BookcaseCopy.unshelvedName) {
                         Task { await model.reshelve(reading.id, to: nil) }
+                    }
+                }
+            }
+        }
+        // 13i-d U5b — MOVE TO WING ▸ (R-13id-6 item 9; her R-13id-4 family):
+        // a book or a gathering to another library, with its notes. The other
+        // wings, Home first; never on the daily Journal (item 7) and never
+        // while one library stands alone (`WingBookMoveDoor.drawn` — P-2).
+        if let wings {
+            let others = wings.destinations(from: model.wingID)
+            if WingBookMoveDoor.drawn(reading: reading, destinations: others.count) {
+                Menu(CapabilityRegistry.capability(.moveBookToWing).verb) {
+                    ForEach(others) { row in
+                        Button(row.name) {
+                            Task { bookMoveAsk = await wings.bookMoveAsk(reading: reading, to: row.id) }
+                        }
                     }
                 }
             }

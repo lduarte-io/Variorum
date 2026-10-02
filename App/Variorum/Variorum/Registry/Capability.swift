@@ -781,11 +781,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // memory, never the store) and stays undeclared, the Library `sort ▾`
     // precedent. The two note doors join the NOTE-ROW grammar
     // (`SidebarView.contextMenuCapabilities` — the Library's and the Pool's
-    // rows render them; the Open strip does not, `.deleteNote`'s reason). The
-    // BOOK move and the bulk "Move everything to another wing…" are the
-    // STOPPED half (the U5 RECORD's proposal) — no declaration until built.
+    // rows render them; the Open strip does not, `.deleteNote`'s reason).
     case newWing, renameWing, deleteWing
     case moveNoteToWing, copyNoteToWing
+    // 13i-d U5b — THE BOOK-MOVE HALF (R-13id-6 item 9, the U5 RECORD's
+    // proposal ruled whole): the Bookcase book row's "Move to Wing ▸"
+    // (`.contextMenu`, books AND gatherings, never the daily Journal) and the
+    // switcher's "Move Everything to Another Wing ▸" (`.surface`, additional
+    // wings only — her R-13id-4 backdoor).
+    case moveBookToWing, moveWingContents
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial
