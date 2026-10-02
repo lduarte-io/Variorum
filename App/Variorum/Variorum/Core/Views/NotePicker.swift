@@ -102,8 +102,15 @@ extension NotePickerSource {
             if let peerAnchor {
                 peerIDs = await cache.peers(session: session, of: peerAnchor)
             }
-            let hits = (try? await session.database.read { db in
-                try Queries.notePickerNotes(db, query: query, excluding: subjectID)
+            // 13i-d U5: the picker offers the SUBJECT's own wing (§9 — a
+            // version link, a comparison or a book add never reaches into
+            // another library); no subject = the current wing.
+            let fallback = session.wing.currentID
+            let hits: [Queries.NotePickerHit] = (try? await session.database.read { db in
+                let wing = try subjectID.flatMap { try Queries.effectiveWing(db, ofPost: $0) }
+                    ?? fallback
+                return try Queries.notePickerNotes(
+                    db, query: query, excluding: subjectID, wingID: wing)
             }) ?? []
             let rows = hits.map { hit in
                 NotePickerRow(

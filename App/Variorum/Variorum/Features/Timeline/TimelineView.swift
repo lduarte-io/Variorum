@@ -88,8 +88,10 @@ final class TimelineViewModel {
             switch lens {
             case .library:
                 let limit = items.count + pageSize
+                let wing = session.wing.currentID  // 13i-d U5: this library's
                 let page = try await session.database.read { [limit] db in
-                    try Queries.library(db, sort: .lastTouched, direction: .desc, limit: limit)
+                    try Queries.library(
+                        db, sort: .lastTouched, direction: .desc, limit: limit, wingID: wing)
                 }
                 exhausted = page.count < limit
                 items = page

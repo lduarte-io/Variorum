@@ -96,7 +96,7 @@ struct ArchivedView: View {
             list
         }
         .background(tokens.surface)
-        .task { await model.startArchived() }
+        .task(id: session.wing.currentID) { await model.startArchived() }
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }

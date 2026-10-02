@@ -155,6 +155,10 @@ final class AppSession {
     let runner: OperationsRunner
     /// The Edit menu's window onto the undo stack (top label, live).
     let undoMenuState = UndoMenuState()
+    /// 13i-d U5 — THE CURRENT WING (`WingState`): the library every surface
+    /// reads. Held in memory here; the bootstrap attaches the device's
+    /// memory, so no pin ever touches the test host's defaults.
+    let wing = WingState()
 
     /// Phase 13b Stage 1a (N3), HOISTED cross-platform at the mobile S3
     /// ladder (round-1 BLOCKER): ONE `AutosaveCoordinator` per open post.

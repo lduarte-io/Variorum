@@ -136,7 +136,9 @@ struct RootView: View {
         _tags = State(initialValue: TagsViewModel(session: session))
         _readings = State(initialValue: ReadingsViewModel(session: session))
         _pool = State(initialValue: PoolViewModel(session: session))
-        _shelf = State(initialValue: ShelfViewModel(session: session))
+        // 13i-d U5: the Bookcase is ONE wing's surface — the current one.
+        _shelf = State(initialValue: ShelfViewModel(
+            session: session, wingID: session.wing.currentID))
         _catalog = State(initialValue: LibraryCatalogModel(session: session))
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
@@ -325,12 +327,17 @@ struct RootView: View {
         }
         .shellConfirmAlert(router)
         .task { await theme.start() }
-        .task { await library.start() }
+        // 13i-d U5: the wing is part of every scoped read's question, so a
+        // switch restarts them (snippets — `pool` — are one shared room).
+        .task(id: session.wing.currentID) { await library.start() }
         .task { await library.startJournal() }
-        .task { await tags.start() }
-        .task { await readings.start() }
+        .task(id: session.wing.currentID) { await tags.start() }
+        .task(id: session.wing.currentID) { await readings.start() }
         .task { await pool.start() }
-        .task { await stars.start() }
+        .task(id: session.wing.currentID) { await stars.start() }
+        .onChange(of: session.wing.currentID) { _, wing in
+            shelf = ShelfViewModel(session: session, wingID: wing)
+        }
         .onAppear {
             windows.register(windowID, router: router, kind: .full)
             wirePaletteCommands()
@@ -769,6 +776,8 @@ struct RootView: View {
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
                 starDoor: starDoor)
+                // 13i-d U5: a new wing is a new board (its tasks restart).
+                .id("bookcase-\(shelf.wingID)")
         case .library:
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,

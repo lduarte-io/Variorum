@@ -45,8 +45,11 @@ final class LibraryViewModel {
     /// reader queues (P2), only the assignment lands back here.
     func start() async {
         do {
+            // 13i-d U5: the CURRENT WING's notes (§9 — a separate library);
+            // the shell restarts this task when the wing switches.
             for try await items in session.database.observeLibrary(
-                sort: .lastTouched, direction: .desc, limit: listingLimit
+                sort: .lastTouched, direction: .desc, limit: listingLimit,
+                wingID: session.wing.currentID
             ) {
                 posts = items
             }
@@ -76,12 +79,14 @@ final class LibraryViewModel {
 
     /// Creates a post and returns its id so the view can select it.
     func createPost() async -> String? {
+        // 13i-d U5: a new note is born in the wing she is standing in.
+        let wing = session.wing.currentID
         do {
             let post = try await session.runner.run { ops in
                 // 13g batch 7 (R6-3): NO stored placeholder. A note with no name has
                 // a NULL title, and `DisplayTitle` shows its date — a title she
                 // never typed was never hers.
-                try ops.createPost(title: nil)
+                try ops.createPost(title: nil, wingId: wing)
             }
             return post.id
         } catch {

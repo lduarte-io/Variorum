@@ -58,9 +58,12 @@ final class PoolPostsModel {
     }
 
     func start() async {
+        // 13i-d U5: the CURRENT WING's bookless notes (the Pool of THIS
+        // library); the view restarts this task when the wing switches.
+        let wing = session.wing.currentID
         do {
             for try await value in session.database.observe({ db in
-                try Queries.poolListing(db, window: Self.window)
+                try Queries.poolListing(db, window: Self.window, wingID: wing)
             }) {
                 await adopt(value)
             }
@@ -299,7 +302,7 @@ struct PoolPostsView: View {
             }
         }
         .background(tokens.surface)
-        .task { await model.start() }
+        .task(id: model.session.wing.currentID) { await model.start() }
         .onDisappear { model.tuckAway() }
         #if DEBUG
         .onAppear { recordMasthead() }

@@ -251,8 +251,9 @@ final class RecoveryViewModel {
 
     func startArchived() async {
         do {
+            // 13i-d U5: the CURRENT WING's Archived (her per-library ruling).
             for try await value in session.database.observeArchivedPosts(
-                limit: Self.window + 1
+                limit: Self.window + 1, wingID: session.wing.currentID
             ) {
                 (archived, archivedTruncated) = TrashListing.windowed(
                     value, window: Self.window)
@@ -272,9 +273,10 @@ final class RecoveryViewModel {
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
         do {
+            // 13i-d U5: the CURRENT WING's Trash (her per-library ruling).
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,
-                limit: Self.window + 1
+                limit: Self.window + 1, wingID: session.wing.currentID
             ) {
                 (trash, trashTruncated) = TrashListing.windowed(
                     value, window: Self.window)
@@ -295,7 +297,7 @@ final class RecoveryViewModel {
         do {
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: TrashScope.listedKinds,
-                oldestFirst: false, limit: 1
+                oldestFirst: false, limit: 1, wingID: session.wing.currentID
             ) {
                 trashIsEmptyUnfiltered = value.isEmpty
             }
@@ -742,10 +744,10 @@ struct RecoveryView: View {
         }
         // Restarts when the filter or the sort changes — both are applied in
         // SQL, so the observation itself is what moves.
-        .task(id: model.restartToken) { await model.startTrash() }
+        .task(id: "\(model.restartToken)|\(session.wing.currentID)") { await model.startTrash() }
         // Ledger row 2: the unfiltered truth, on its own observation, which
         // deliberately does NOT restart with the filter.
-        .task { await model.startTrashTotal() }
+        .task(id: session.wing.currentID) { await model.startTrashTotal() }
     }
 
     /// A row with nobody to gather under — it keeps its own "from ‹note›".

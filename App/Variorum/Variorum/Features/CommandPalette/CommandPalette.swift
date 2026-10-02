@@ -87,8 +87,10 @@ final class PaletteModel {
             }
         }
         let query = query
+        // 13i-d U5: ⌘K searches the CURRENT WING (§9).
+        let wing = session.wing.currentID
         let hits = (try? await session.database.read { db in
-            try Queries.searchCatalog(db, query: query, limitPerKind: 12)
+            try Queries.searchCatalog(db, query: query, limitPerKind: 12, wingID: wing)
         }) ?? []
         guard mine == generation else { return }  // a newer keystroke won
         result += hits.map { hit in

@@ -30,8 +30,10 @@ final class ReadingsViewModel {
     }
 
     func start() async {
+        // 13i-d U5: the CURRENT WING's books (a book never spans wings).
         do {
-            for try await value in session.database.observeReadings() {
+            for try await value in session.database.observeReadings(
+                wingID: session.wing.currentID) {
                 readings = value
             }
         } catch is CancellationError {
@@ -49,11 +51,13 @@ final class ReadingsViewModel {
     func create(
         name: String, kind: ReadingKind, profile: String? = nil,
         sortField: SortField = .manual, sortDir: SortDirection = .asc,
-        querySpec: String? = nil, wingId: String = "",
+        // 13i-d U5: nil = the CURRENT wing (every door mints where she is).
+        querySpec: String? = nil, wingId: String? = nil,
         // 13i-d U1 — the Bookcase's CONTEXT MINT (§19.1/§24): the solo'd
         // shelf the new book lands on; nil = unshelved (every other door).
         shelfId: String? = nil
     ) async -> String? {
+        let wingId = wingId ?? session.wing.currentID
         do {
             let reading = try await session.runner.run { ops in
                 // 13e E13 — the duplicate-name guard, INSIDE the runner

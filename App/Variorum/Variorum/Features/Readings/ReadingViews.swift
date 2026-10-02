@@ -144,8 +144,11 @@ struct ManageReadingPostsSheet: View {
         members = (try? await session.database.read { [id = reading.id] db in
             try Queries.assembleReading(db, readingID: id)
         }) ?? []
-        candidates = (try? await session.database.read { db in
-            try Queries.library(db, sort: .lastTouched, direction: .desc, limit: 200)
+        // 13i-d U5: a book takes notes of its own wing only (a book never
+        // spans wings).
+        candidates = (try? await session.database.read { [wing = reading.wingId] db in
+            try Queries.library(
+                db, sort: .lastTouched, direction: .desc, limit: 200, wingID: wing)
         }) ?? []
     }
 }

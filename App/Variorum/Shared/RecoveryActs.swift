@@ -370,8 +370,10 @@ enum TrashPurge {
     /// read — is what decides which of them the door actually takes.
     static func emptyTrashConfirm(session: AppSession) async throws -> Confirm? {
         let now = session.now
+        // 13i-d U5: the Trash a wing SHOWS is the Trash its door empties.
+        let wing = session.wing.readScope
         let everything = try await session.database.read { db in
-            try Queries.trash(db, now: now)
+            try Queries.trash(db, now: now, wingID: wing)
         }
         var counts: [Queries.TrashItem.Kind: Int] = [:]
         for item in everything { counts[item.kind, default: 0] += 1 }
@@ -414,8 +416,9 @@ enum TrashPurge {
             // projection — the R3-1 lesson): everything currently in the
             // Trash, unwindowed, minted in one transaction.
             let now = session.now
+            let wing = session.wing.readScope  // 13i-d U5: this wing's Trash
             let everything = try await session.database.read { db in
-                try Queries.trash(db, now: now)
+                try Queries.trash(db, now: now, wingID: wing)
             }
             // Ledger row 21 (G6): exactly what the surface ROWS — notes,
             // books, blocks and their families. An original rides its family

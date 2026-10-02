@@ -471,7 +471,17 @@ final class AppBootstrap {
                 })
                 installed = true
             }
-            state = .ready(AppSession(database: view, storeVariant: storeVariant))
+            let readySession = AppSession(database: view, storeVariant: storeVariant)
+            #if os(macOS)
+            // 13i-d U5: the Mac stands in the wing it was last in (a LOCAL
+            // memory); a wing that died meanwhile returns it to Home.
+            readySession.wing.attachMemory(.standard)
+            Task { @MainActor [view] in
+                let live = Set((try? await view.read { try Queries.wings($0).map(\.id) }) ?? [])
+                readySession.wing.revalidate { $0.isEmpty || live.contains($0) }
+            }
+            #endif
+            state = .ready(readySession)
             // pre-13x 2b: the reconcile's Apple arm reads the persisted
             // switch marker (a crashed switch pending its resume).
             protection.readSwitchPending = { [database] in

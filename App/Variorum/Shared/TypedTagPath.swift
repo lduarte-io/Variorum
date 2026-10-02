@@ -91,10 +91,17 @@ nonisolated enum TypedTagPath {
     /// The create half, run INSIDE one serialized runner turn: creates the
     /// plan's missing segments through the standing ops and returns the
     /// LEAF's id.
-    static func createMissing(_ plan: Plan, ops: Operations) throws -> String? {
+    ///
+    /// 13i-d U5: `wingID` — the wing a ROOT segment is born in (the note's —
+    /// R-13ia-1); a child is born in its parent's (the op's own rule). ''
+    /// (Home) for every caller that names none — the phone's, today.
+    static func createMissing(
+        _ plan: Plan, ops: Operations, wingID: String = ""
+    ) throws -> String? {
         var parent = plan.parentID
         for segment in plan.missing {
-            parent = try ops.createTag(parent: parent, name: segment).id
+            parent = try ops.createTag(
+                parent: parent, name: segment, wingID: parent == nil ? wingID : nil).id
         }
         return plan.existingLeafID ?? parent
     }
@@ -131,10 +138,16 @@ extension TypedTagPath {
         let typed = segments(raw)
         guard !typed.isEmpty else { return .nothingTyped }
         do {
-            let live = try await session.database.read { try Queries.allTags($0) }
+            // 13i-d U5: the NOTE's wing's vocabulary — a typed path resolves
+            // (and mints) there, never in another library (R-13ia-1).
+            let (live, wing) = try await session.database.read { db in
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.allTags(db, wingID: wing), wing)
+            }
             guard let plan = plan(segments: typed, live: live) else { return .nothingTyped }
             try await session.runner.run { [plan, postID] ops in
-                guard let leafID = try createMissing(plan, ops: ops) else { return }
+                guard let leafID = try createMissing(plan, ops: ops, wingID: wing)
+                else { return }
                 do {
                     _ = try ops.applyTag(leafID, toPost: postID)
                 } catch OperationError.alreadyTagged {

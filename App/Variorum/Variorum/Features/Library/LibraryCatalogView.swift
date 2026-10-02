@@ -221,7 +221,9 @@ struct LibraryCatalogView: View {
         .environment(\.debugOracleOwner, oracleOwner)
         .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
         #endif
-        .task { await model.search() }
+        // 13i-d U5: a wing switch re-asks the catalog (the wing is part of
+        // the question).
+        .task(id: session.wing.currentID) { await model.search() }
         // 13i-c U4: the owned-by badge's facts, keyed on the listed notes.
         .task(id: listedNoteIDs) {
             await ownership.observe(session: session, postIDs: listedNoteIDs, inBook: nil)

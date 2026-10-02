@@ -350,10 +350,13 @@ final class LibraryCatalogModel {
             // ONE MORE than we show, so the listing can SAY it is truncated
             // without a second counting statement per keystroke.
             let cap: Int? = day == nil ? Self.pageSize + 1 : nil
+            // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
+            // wing; the Library is "everything" in THIS library).
+            let wing = session.wing.currentID
             let all = try await session.database.read { db in
                 try Queries.searchCatalog(
                     db, query: query, limitPerKind: cap, sort: sort, direction: direction,
-                    editedOn: day)
+                    editedOn: day, wingID: wing)
             }
             guard generation == searchGeneration else { return }  // stale
             let capped = Self.capped(filtered(all), to: cap == nil ? nil : Self.pageSize)

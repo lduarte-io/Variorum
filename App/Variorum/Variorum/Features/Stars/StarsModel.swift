@@ -39,9 +39,13 @@ final class StarsModel {
     /// Held: at most `Operations.starLimit` rows by construction, which is
     /// the bounded-observation discipline satisfied by the data itself.
     func start() async {
+        // 13i-d U5 (P-13id-U5-10): the CURRENT WING's stars — a star belongs
+        // to its thing, and the thing lives in one library (§9). The shell
+        // restarts this task when the wing switches.
+        let wing = session.wing.currentID
         do {
             for try await value in session.database.observe({ db in
-                try Queries.starred(db)
+                try Queries.starred(db, wingID: wing)
             }) {
                 items = value
             }

@@ -272,8 +272,14 @@ final class CompareViewModel {
         restartObservation()
         do {
             let anchorID = anchorPostID
+            // 13i-d U5: Compare offers the ANCHOR's own wing (§9 — never a
+            // note of another library).
+            let wing = (try? await session.database.read { db in
+                try Queries.effectiveWing(db, ofPost: anchorID)
+            }) ?? nil
             for try await items in session.database.observeLibrary(
-                sort: .lastTouched, direction: .desc, limit: 100
+                sort: .lastTouched, direction: .desc, limit: 100,
+                wingID: wing ?? session.wing.currentID
             ) {
                 peerCandidates = items.filter { $0.postID != anchorID }
             }

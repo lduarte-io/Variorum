@@ -243,8 +243,23 @@ final class MastheadTagsModel {
 
     /// The ONE fetch — `post_tag` and `tag` only, never `container` or
     /// `variant` (pinned by region: autosave must never wake it).
-    nonisolated static func fetch(_ db: Database, postID: String) throws -> Snapshot {
-        Snapshot(applied: try Queries.postTags(db, postID: postID), all: try Queries.allTags(db))
+    ///
+    /// 13i-d U5: `wingID` — the NOTE's wing (its vocabulary — a tag of
+    /// another wing does not exist in this library). Read ONCE per visit,
+    /// OUTSIDE the held observation (`noteWing`), so the region stays
+    /// `post_tag` + `tag` alone; nil = every wing (the pins' shape).
+    nonisolated static func fetch(
+        _ db: Database, postID: String, wingID: String? = nil
+    ) throws -> Snapshot {
+        Snapshot(
+            applied: try Queries.postTags(db, postID: postID),
+            all: try Queries.allTags(db, wingID: wingID))
+    }
+
+    /// The note's wing as surfaces read it — one point read per visit (13i-d
+    /// U5), never inside the held region.
+    nonisolated static func noteWing(_ db: Database, postID: String) throws -> String {
+        try Queries.effectiveWing(db, ofPost: postID) ?? ""
     }
 
     /// The visit's read — HELD for as long as the note is shown (the
@@ -257,9 +272,12 @@ final class MastheadTagsModel {
     /// a tagging act anywhere re-runs two indexed reads (the note's
     /// applications and the author-scale taxonomy).
     func track(session: AppSession, postID: String) async {
+        let wing = try? await session.database.read { db in
+            try Self.noteWing(db, postID: postID)
+        }
         do {
             for try await snapshot in session.database.observe({ db in
-                try Self.fetch(db, postID: postID)
+                try Self.fetch(db, postID: postID, wingID: wing)
             }) {
                 adopt(snapshot, postID: postID)
             }
@@ -271,7 +289,7 @@ final class MastheadTagsModel {
 
     func refresh(session: AppSession, postID: String) async {
         guard let read = try? await session.database.read({ db in
-            try Self.fetch(db, postID: postID)
+            try Self.fetch(db, postID: postID, wingID: try Self.noteWing(db, postID: postID))
         }) else { return }
         // Ladder A round 1, MINOR 1 (U3's extension): a refresh in flight
         // for the OLD note may land after the NEW note's read adopted — a

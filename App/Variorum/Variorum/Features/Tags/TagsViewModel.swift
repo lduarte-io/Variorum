@@ -29,8 +29,11 @@ final class TagsViewModel {
     /// Runs for the view's lifetime. The taxonomy is author-scale metadata
     /// (cost ∝ tag count — the unbounded pool/tray precedent).
     func start() async {
+        // 13i-d U5: the CURRENT WING's vocabulary (R-13ia-1 — tags are
+        // per-wing); the shell restarts this task when the wing switches.
         do {
-            for try await value in session.database.observeTags() {
+            for try await value in session.database.observeTags(
+                wingID: session.wing.currentID) {
                 tags = value
             }
         } catch is CancellationError {
@@ -50,7 +53,10 @@ final class TagsViewModel {
     }
 
     func createTag(parentID: String?, name: String) async {
-        await run { ops in _ = try ops.createTag(parent: parentID, name: name) }
+        // 13i-d U5: a root tag is born in the current wing; a child in its
+        // parent's (the op's own rule).
+        let wing = parentID == nil ? session.wing.currentID : nil
+        await run { ops in _ = try ops.createTag(parent: parentID, name: name, wingID: wing) }
     }
 
     func renameTag(_ id: String, to newName: String) async {
@@ -112,8 +118,12 @@ final class TagAssignmentViewModel {
     /// ceremony for a modal).
     func load() async {
         do {
+            // 13i-d U5: the NOTE's own wing's vocabulary (a tag of another
+            // wing does not exist in this note's library).
             let (tags, applied) = try await session.database.read { [postID] db in
-                (try Queries.allTags(db), try Queries.postTags(db, postID: postID))
+                (try Queries.allTags(
+                    db, wingID: try Queries.effectiveWing(db, ofPost: postID) ?? ""),
+                 try Queries.postTags(db, postID: postID))
             }
             allTags = tags
             appliedTagIDs = Set(applied.map(\.id))

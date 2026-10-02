@@ -326,8 +326,11 @@ struct MembershipChip: View {
             return worn
         }) ?? [:]
         let memberIDs = Set(membership.map(\.id))
-        let all = ((try? await session.database.read { db in
-            try Queries.readings(db)
+        // 13i-d U5: the NOTE's wing's books only — a book never spans wings
+        // (the op refuses `crossWingMembership`; the chooser never offers it).
+        let all = ((try? await session.database.read { [postID] db in
+            try Queries.readings(
+                db, wingID: try Queries.effectiveWing(db, ofPost: postID) ?? "")
         }) ?? [])
         // Addable = open curated books the post isn't already in.
         addableBooks = all

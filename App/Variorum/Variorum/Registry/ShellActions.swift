@@ -225,12 +225,14 @@ struct ShellActions {
     // MARK: - App-scope acts (⌘N / ⌘J / import / export / seams)
 
     func newPost() {
+        // 13i-d U5: ⌘N mints in the wing she is standing in.
+        let wing = session.wing.currentID
         Task { @MainActor in
             do {
                 let post = try await session.runner.run { ops in
                     // 13g batch 7 (R6-3): NULL, not the placeholder — see
                     // `LibraryViewModel.createPost`.
-                    try ops.createPost(title: nil)
+                    try ops.createPost(title: nil, wingId: wing)
                 }
                 shell.pendingSelection = .post(post.id)
             } catch {
