@@ -90,7 +90,9 @@ extension Operations {
                 let severed = try relocateNote(
                     db, postID: member.postID, to: wingID, keeping: [readingID],
                     adoption: &adoption, now: now)
-                alsoLeft += severed.map { Queries.AlsoLeaves(note: member.title, book: $0.name) }
+                alsoLeft += severed.map {
+                    Queries.AlsoLeaves(noteID: member.postID, note: member.title, book: $0.name)
+                }
             }
 
             // Item 2(a): the rule, the outflow, the grouping — by path.
@@ -259,10 +261,16 @@ extension Queries {
     /// One severed stay-behind membership, as the confirm and the receipt
     /// name it: "“note” also leaves “book”".
     public struct AlsoLeaves: Equatable, Sendable {
+        /// The note's id — the confirm groups a note's books by IDENTITY,
+        /// never by its display name (13i-d U5b walk W-1: untitled notes are
+        /// named by their day, so three different notes can all read
+        /// "2026-10-01").
+        public let noteID: String
         public let note: String
         public let book: String
 
-        public init(note: String, book: String) {
+        public init(noteID: String, note: String, book: String) {
+            self.noteID = noteID
             self.note = note
             self.book = book
         }
@@ -366,7 +374,7 @@ extension Queries {
                     """,
                 arguments: [member.postID, readingID])
             for row in rows {
-                let leaves = AlsoLeaves(note: member.title, book: row["name"])
+                let leaves = AlsoLeaves(noteID: member.postID, note: member.title, book: row["name"])
                 alsoLeaves.append(leaves)
                 let locked = (row["locked"] as Int?) == 1
                 let sealed = (row["sealed"] as String?) != nil

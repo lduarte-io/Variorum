@@ -59,7 +59,7 @@ struct BookWingMoveTests {
                 try Queries.bookWingMovePreview($0, readingID: alpha.id, to: wing.id)
             })
             #expect(preview.notes == 3 && preview.archived == 1)
-            #expect(preview.alsoLeaves == [Queries.AlsoLeaves(note: "three", book: "Beta")])
+            #expect(preview.alsoLeaves == [Queries.AlsoLeaves(noteID: three.id, note: "three", book: "Beta")])
             #expect(preview.frozen == nil && preview.waiting == 0 && !preview.isDailyJournal)
             #expect(preview.nameTakenBy == "ALPHA", "the destination's twin name is named")
 
@@ -91,7 +91,7 @@ struct BookWingMoveTests {
             try ops.lockReading(beta.id)
             #expect(try db.read {
                 try Queries.bookWingMovePreview($0, readingID: alpha.id, to: wing.id)
-            }?.frozen == Queries.AlsoLeaves(note: "three", book: "Beta"))
+            }?.frozen == Queries.AlsoLeaves(noteID: three.id, note: "three", book: "Beta"))
             let before = try db.snapshotRow("reading", alpha.id, excluding: [])
             #expect(throws: OperationError.lockedReading(id: beta.id)) {
                 try ops.moveReadingToWing(alpha.id, to: wing.id)

@@ -102,6 +102,39 @@ struct WingBookMoveDoorTests {
         }
     }
 
+    /// WALK W-1 (2026-10-02, Terminal·light `tl-11-W1-before…`): untitled
+    /// notes are named by their DAY, so three different members can all read
+    /// "2026-10-01"; the confirm grouped the severed list by that NAME and
+    /// said "“2026-10-01” also leaves “Other”, “Other” and “Other”". It
+    /// groups by the note's IDENTITY now, and identical clauses merge with a
+    /// count — RED on the title-grouping face.
+    @Test func sameNamedNotesAreCountedNotCollapsed() async throws {
+        try await withBookMoveSession { session, _ in
+            let ops = session.operations
+            let wings = WingsModel(session: session)
+            let wing = try ops.createWing(name: "Imports")
+            await wings.load()
+            let mover = try ops.createReading(name: "Mover", kind: .book)
+            let other = try ops.createReading(name: "Other", kind: .book)
+            let lone = try ops.createReading(name: "Lone", kind: .book)
+            for _ in 0..<3 {
+                let twin = try ops.createPost(title: "same")
+                _ = try ops.addPostToReading(twin.id, to: mover.id)
+                _ = try ops.addPostToReading(twin.id, to: other.id)
+            }
+            let solo = try ops.createPost(title: "solo")
+            _ = try ops.addPostToReading(solo.id, to: mover.id)
+            _ = try ops.addPostToReading(solo.id, to: other.id)
+            _ = try ops.addPostToReading(solo.id, to: lone.id)
+            let ask = try #require(await wings.bookMoveAsk(reading: mover, to: wing.id))
+            let message = WingCopy.bookMoveMessage(ask)
+            #expect(message.contains("3 notes called “same” also leave “Other”; "
+                                     + "“solo” also leaves “Other” and “Lone” — a book only holds "
+                                     + "notes of its own wing."))
+            #expect(!message.contains("“Other”, “Other”"), "a book is never listed twice for one clause")
+        }
+    }
+
     /// Item 5(a)'s line: a living book's waiting notes are counted — the
     /// finish's sentence, the dismissal's own set.
     @Test func theConfirmCountsTheWaitingNotesItDismisses() async throws {
@@ -141,7 +174,8 @@ struct WingBookMoveDoorTests {
             try ops.lockReading(beta.id)
             #expect(await wings.bookMoveAsk(reading: alpha, to: wing.id) == nil)
             #expect(spoken(session)
-                    == WingCopy.bookFrozen("Alpha", because: .init(note: "three", book: "Beta")))
+                    == WingCopy.bookFrozen(
+                        "Alpha", because: .init(noteID: three.id, note: "three", book: "Beta")))
             #expect(try await reading(db, alpha.id).wingId == "")
 
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-02").container
