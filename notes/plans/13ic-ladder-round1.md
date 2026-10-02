@@ -219,3 +219,152 @@ scales with the corpus (every new query traced ∝ one note's rows, one book's r
 BLOCKER, no invariant violation, no spec drift found. The cross-model flow proceeds: findings to
 the implementer verbatim for agree/dispute; the reviewer makes the final calls and implements its
 confirmed fixes with red-on-old pins; suite green; one implementer sanity pass.**
+
+---
+
+## IMPLEMENTER'S RESPONSE (round 1)
+
+*(The implementer's voice: a fresh Opus session, 2026-10-01. I read these in my own context:
+CLAUDE.md + its canon, the 13i-c plan whole (§1–§11, the U1–U4 RECORDs, the three
+adjudications), the sitting record §4/§5/§6/§9/§18/§20/§24, P-13ib-U2-2 in the 13i-b record,
+QUESTIONS #168 (next free number: #169), and every file:line each finding names, each traced
+independently. I touched no source or test file and ran no suite; the fix pass and its suites are
+the reviewer's. **Verdict: seven AGREE (three with a note), zero DISPUTE.**)*
+
+### [MAJOR] `pendingArrivalCount` vs `dismissPendingArrivals` — AGREE WITH A NOTE
+- **Trace:** I followed the mechanism from end to end and it holds. `archiveContainer` writes only
+  `archived_at` (`Operations+Container.swift:376`), so the arrival row stays live. `bookArrivalSource`
+  (`ArrivalQueries.swift:116`) filters `c.archived_at IS NULL`, and `pendingArrivalCount` (`:267`) is
+  `bookArrivals(limit: 0).count`. `dismissPendingArrivals` (`Operations+Intake.swift:491`) tombstones
+  on reading/liveness/status alone. `open(.finishBook)` (`BookStateDoors.swift:466–474`) acts at once
+  on 0. `sealPreview` under-counts the same way; the seal always asks, so there the line understates
+  the count but nothing happens silently. The proposed pin is red on this tree (it reads 0) and green
+  after the fix. One correction to "PERMANENT": under the 13i-b ratification (AppSpec §7
+  `reading_post`), a FRESH tagging act re-poses a dismissed pair. What the silent finish breaks is
+  P-13ib-U2-2's "returns on unarchive" (and the un-finish catch-up never resurrects a decided pair).
+  A ruled confirm is still skipped, so MAJOR stands. **The root is mine:** U2 counted with the
+  Arrivals FACE's predicate to keep the confirm and the line equal. The act is the contract.
+- **Sharper fix:** write the WHERE text once, as a `static let` in `Queries` that both the UPDATE
+  and the COUNT use (the `bookArrivalSource` discipline). Then the confirm equals the act by
+  construction. Leave `bookArrivals` (the line) untouched, and rewrite `pendingArrivalCount`'s doc:
+  by design it may now exceed the line. Counting a sync-stray row (a dead note's live arrival) as
+  well is the safe direction, because the door then asks. Corner: `lockReading` still finishes a
+  GATHERING until 13i-d (P-13ic-U3-2), and a stray arrival row there would then show the line on a
+  gathering's confirm. Guard the count with `kind = 'book'` or accept it; both are race-only.
+- **Pins beside the query pin:** (1) the DOOR: `open(.finishBook)` with only an archived waiter
+  gives `pending != nil` (red-on-old: it acts without asking); (2) `sealPreview.pendingArrivals`
+  counts the archived waiter; (3) a mixed fixture (one archived waiter, one shown) where the count
+  equals the rows `lockReading` tombstones.
+- **Copy (PROVISIONAL, 13s-revoicable):** P-13ib-U2-2 says an archived waiter "leaves the door while
+  archived". So "N waiting at the door" can now count notes the door does not show. Suggest "N
+  waiting at the door will be dismissed (M of them archived)." when M > 0, where M is the act's
+  count minus the line's.
+- **The UNDEFINED arm (spare the archived arrival instead) — QUESTIONS-ready for #169:** "A note
+  waiting at a book's door that you have ARCHIVED stays hidden from the door until you unarchive it.
+  If you finish or seal the book meanwhile, should finishing (a) dismiss it with the others? The
+  finish asks and counts it, and it comes back only if it is tagged again (the review's fix:
+  finishing 'dismisses its pending arrivals', §24). (b) Leave it waiting, so it reappears at the
+  finished book's door when you unarchive it? You would then dismiss it by hand, since a finished
+  book cannot take it in. (c) Dismiss the visible ones and ask separately about the archived ones?"
+  Whichever arm lands, #169 must record that P-13ib-U2-2's "returns on unarchive" now carries an
+  exception: "unless the book was finished meanwhile".
+
+### [MINOR] the F-5 wing class at `newEntry` / `createOrOpenJournalEntry` — AGREE WITH A NOTE (non-daily arm: fix; daily arm: a product edge → 13i-d)
+- **Trace (non-daily arm):** `BookStructureModel.swift:629–635` runs `assertReadingAcceptsPosts`,
+  then `createPost` (which calls `insertPost` with the default `wingId: ""`), then
+  `addPostToReading`. `addPostToReading` has no wing guard, so the note is minted in Home under a W
+  book. There is a second consequence the pin can assert: `applyAutoTag` skips a tag whenever
+  `post.wingId != tag.wingId` (`Operations+Intake.swift:312`), so the note also silently misses W's
+  outflow tags. The pin is red on this tree and green after the fix.
+- **Sharper fix for that arm:** replace the three-call composite with
+  `ops.newPostInReading(readingID, profile: .generic, entryDate: entryDay)`, keeping the existing
+  `setSegmentationDefault`. That op already does the gate, the mint and the membership in ONE
+  transaction, mints in the book's wing (R-13ic-2) and applies the outflow. It refuses the same
+  errors, and the round-3 "REFUSE BEFORE MINT" composite becomes structural.
+- **The DAILY arm is NOT the same one-line fix.** `createOrOpenJournalEntry` opens the day's entry
+  through `Queries.canonicalJournalEntry` (`Timeline.swift:255`), and that lookup is wing-blind.
+  Threading `wingId:` into the mint branch alone would still OPEN an existing Home day-entry and
+  shelve it into a W Journal, which is a cross-wing membership again. Scoping the lookup changes the
+  notebook rule's scope (one entry per day, or per day per wing?) for ⌘J, "+ new entry" and the
+  phone's capture. CoreDescription's ratified wings line says Home "holds … the daily Journal book",
+  and `setDailyJournalBook` has no wing guard. That decision is 13i-d's (its switcher decides what
+  ⌘J does while another wing is open). Recommend a KnownIssues row with owner 13i-d and a line on
+  13i-d's carry list, not a fix here. The proposed daily-arm pin goes green only once the lookup is
+  scoped.
+- **QUESTIONS-ready (13i-d's kickoff):** "Your daily Journal lives in Home, and ⌘J looks for the
+  day's entry across the whole library. Once other wings exist, should (a) the daily Journal stay
+  Home-only, with 'Use as Daily Journal' refusing a book in another wing (the closest reading of
+  'Home holds the daily Journal'); (b) the designated Journal be allowed to live in any wing, with
+  ⌘J opening or minting the day's entry in THAT wing (one entry per day per wing); or (c) each wing
+  get its own daily Journal, with ⌘J filing into the open wing's?"
+
+### [MINOR] `poolListing`'s probe is missing `r.deleted_at IS NULL` — AGREE
+- **Trace:** `ShelfQueries.swift:325–331` gained `r.kind = 'book'` but no liveness clause. Its
+  siblings carry one: `membershipElsewhere` (`Operations+Intake.swift:282–284`), `noteMemberships`
+  (`OwnershipQueries.swift:57–58`) and `readingsContaining` (`ShelfQueries.swift:353–356`). The
+  pre-phase probe (at `ca3b8a85`, `:324–326`) did not read the reading at all, so the gap predates
+  U2. But F-R1-7's edit was the moment the three readers were ruled together, and I missed the
+  clause there.
+- **Reachability:** agreed that only a stray or a seeded row produces this state. SyncSpec §5's
+  orphan repair (2) gives a live child arriving under a dead parent that parent's exact stamp inside
+  the apply transaction, and no local door makes the state. The fix is defense in depth plus
+  consistency with the sibling readers. MINOR (arguably NIT) is fair.
+- **Pin:** the proposed pin is red on this tree (the note is excluded) and green after. Its natural
+  home is `MembershipReadersBookScopeTests` (the three readers' suite). The added check is a
+  primary-key probe, so `PoolTuckTests`' P1 plan pin should stay green; re-run it.
+
+### [MINOR] a sealed blocking book named "reopen" — AGREE WITH A NOTE (the class is wider than the two named arms)
+- **Trace:** `NoteMembership.finished` is `r.locked` (`OwnershipQueries.swift:67`), and a sealed
+  book is always locked. `SeveredMembership` carries no sealed fact. `moveBlocked` and
+  `moveRefusedFinished` name Reopen, which `unlockReading` refuses on a sealed book
+  (`readingSealed`). The reachability chain holds: a sealed note may still be added to readings
+  (AppSpec §9, `lockPost`). The red-on-old sentence pin is honest.
+- **The same `lockedReading` → "reopen" class reaches further.** Two more arms are reachable
+  directly, with no race. (1) The chip renders "diverge" on every book row (`MembershipChip.swift:114`).
+  On a sealed book, `divergePostForReading` throws `lockedReading`, and `ChipRefusals` (`:476`) says
+  "is finished — reopen it". (2) The daily door on a SEALED daily Journal (`sealReading` has no
+  daily guard): "+ new entry" (`BookStructureModel.swift:603–606`) and ⌘J's `.bookFinished` mapping
+  (`:719–721`) both say reopen. Two more arms are race-only: `MembershipChoiceCopy.refusal`'s
+  target arm (`MembershipChoice.swift:149`; the chip filters locked targets at
+  `MembershipChip.swift:308`) and `ArrivalsCopy.refusal` (`BookArrivals.swift:148`). I did not
+  verify `RecoveryActs.swift:193`.
+- **Sharper fix:** don't fork a second sentence family. `BookStateCopy.refusal(for:name:sealed:)`
+  (`BookStateDoors.swift:396–404`) already forks correctly. Carry `sealed` (`r.sealed_at IS NOT
+  NULL`, one column) on `NoteMembership`/`SeveredMembership`, and route every Reopen-naming arm
+  through that one helper. If the fix pass keeps to the two named arms, the rest need a recorded
+  owner (13i-d or 13s), never silence: naming a road that refuses is the P-2 class, not copy taste.
+- **The `?? ""` fallback** sits in TWO places: `BookArrivals.swift:366–370` (named) and
+  `MembershipChoice.swift:361` (`choice.severed.first { … }?.book.name ?? ""`, reached when a book
+  finished after the sheet opened is missing from the preview). Fall back to the shared words in
+  both.
+
+### [MINOR] dead `ReadingsViewModel.delete` — AGREE
+- **Trace:** no app caller. I swept the four holders of a `ReadingsViewModel` (`RootView`,
+  `ShelfView`, `Readings/`, `PoolPostsView`). The only call left is
+  `TimelineAndReadingsTests.readingCRUDThroughTheUIPathEmitsExactStateTransitions` (`:105`). The
+  adjudication after U4 already routed the retirement here.
+- **Test shape:** that pin's subject is CRUD "through the UI path", so move its delete step onto the
+  real UI road: `BookStateDoors(session:).open(.deleteBook, readingID:)`, then `confirm()` (a plain
+  book asks, P-13ic-U4-6). Calling the raw op would quietly weaken the subject. Comment the honest
+  edit. No pin is owed.
+
+### [NIT] `perform(.deleteBook)`'s stale receipt count — AGREE WITH A NOTE
+- **Trace:** precisely, `named` (name, owned, kind, sealed) is read BEFORE the runner
+  (`BookStateDoors.swift:542`). `released` is read INSIDE the runner, but in its own read before
+  `deleteReading` (`:575`). The only writer that can land in between is sync apply, which runs
+  outside the runner. The effect is receipt-level only, so NIT is right.
+- **A second receipt nit in the same sentence:** `liveMemberNoteCount` counts ARCHIVED members
+  (correct for the with-notes arm), but the book-only receipt says they "are in the Pool now", and
+  the Pool lists only unarchived notes (`poolListing`, `c.archived_at IS NULL`). So the receipt
+  over-states when an archived member is released. Optional fix: return the released count from the
+  op's own transaction (the `deleteReadingWithNotes` shape), and word the receipt to match what the
+  Pool shows (13s-revoicable).
+
+### [NIT] `MembershipDoors.offer` is silent on a nil item — AGREE
+- **Trace:** `load` returns nil exactly when `Queries.reading` does. That query filters tombstones
+  (`ReadingAssembly.swift:189–192`), so nil means the book was deleted between the refusal and the
+  offer. `offer` (`MembershipChoice.swift:301`) assigns nil and says nothing. The chip host has
+  already closed its popover, so the press just vanishes (P-2).
+- **Sharper:** `addOrOffer` (`:281`) also returns false ("the sheet is up instead") in that case, so
+  the Pool, shelf-drop and Manage Notes hosts believe a sheet is up. Have `offer` return whether it
+  opened and propagate that. On nil, speak `readingNotFound`'s words through the shared table.
