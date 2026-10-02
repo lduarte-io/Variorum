@@ -756,6 +756,35 @@ ledger row, KnownIssues row 104 — is built, pinned and walked below.
 - **P-13id-U2-15** — the panel's words follow the navigator's case rules: chapter names in the
   voice's chrome case, note titles and book names as she wrote them.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U2 (2026-10-02 — verified by spot-check: eleven commits present and pushed, the `Sync/`/`Persistence/`/`Server/` diff empty, the record, #171 and KnownIssues row 112 in place)
+
+- **F-U2-1 FIXED BY THE ARCHITECT** (the mandate's small-code allowance; the ladder reviews it
+  cold — the 13i-c precedent): the union star had made the public `setShelfPinned` capped, so the
+  phone's Restore Tutorial could THROW MID-SEED with 15 stars standing — a regression ACT 0's own
+  diff introduced, so it could not wait for the catch-up. The seeder now tolerates
+  `starLimitReached` ALONE (the guide's star is a nicety; every other refusal still aborts), and
+  the guide seeds unstarred at a full cap. Commit `eeba2e7c`; pin
+  `MobileTutorialStarCapTests.restoreCompletesUnstarredWhenTheCapIsFull` — green 1/1 on the
+  simulator, RED by behavioural revert (`starLimitReached(limit: 15)` caught at the `#require`,
+  exactly the predicted shape), the fix restored by checkout, tree clean against origin.
+- **F-U2-2 / KnownIssues row 112 ROUTED TO U3** (the masthead's tag cards load once per note —
+  the implementer calls it cheap; U3 is the book-surface unit).
+- **F-U2-3 ROUTED TO U3:** the book view's OWN chapter/move doors join the registry at U3's
+  touch (P-1's grown-incrementally rule — U2 declared the panel's twins, which makes the
+  sibling surface's silence visible), and the spelling ALIGNS ON THE PANEL'S — "Move to
+  Chapter ▸" (the act verb) — at the same touch.
+- **F-U2-4:** the Book Panel's drags JOIN the combined-walk list (with U1's; menu twins walked).
+- **F-U2-5:** parity facts accumulate to the closeout's MobileSoul row, as recorded.
+- **F-U2-6 RECORD-ONLY:** §25's curriculum is ruled and stays the eleven; whether the field
+  guide should gain a Book Panel sentence is a content question for her bundle (13s/U7's edge,
+  noted at #171), not a defect.
+- **P-13id-U2-1…15 STAND** as provisionals in her #171 bundle (the away-run rule).
+- **Ledger row 2 → DONE.** The orchestrator's composed walk still runs at the BANK SEAM.
+- **For the combined 13i walk (grown by U2):** the Book Panel's drags by hand (reorder in the
+  panel; move to a chapter) · the panel tour: the switcher on a shared note · "appears in N
+  gatherings" names on click · Remove/Release from the panel · Star/Unstar on the Bookcase row
+  (Pin is gone) · the Starred section now showing the Journal, Quicknotes and any pinned book.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -781,8 +810,8 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | # | item | status |
 |---|---|---|
 | 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
-| 2 | U2 — the Book Panel (+ ACT 0: the union star) | BUILT — record closed 2026-10-02 (core 2036/217 · Mac 360/54 · phone 115/19; 19-capture walk ×4); awaiting the architect's adjudication (F-U2-1…6, #171) |
-| 3 | U3 — the Collecting doors + grouped-by + filter-bar face | NOT-STARTED |
+| 2 | U2 — the Book Panel (+ ACT 0: the union star) | **DONE** (adjudicated 2026-10-02; F-U2-1 fixed by the architect `eeba2e7c` revert-red-verified; F-U2-2/3 routed to U3; drags to her combined walk; walk at the bank seam) |
+| 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | IN FLIGHT (spawned 2026-10-02) |
 | 4 | U4 — archived members in books | NOT-STARTED |
 | 5 | LADDER A (U1–U4) | PENDING BANK 1 |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
@@ -915,3 +944,63 @@ PROVISIONALs numbered P-13id-U2-n · LIVE STATUS per commit). Commits carry NO a
 trailer. Push after every commit. One agent at a time; no subagents; foreground waits only. An
 in-build design fork the plan does not settle: write the proposal into your record, STOP that
 thread for the architect, continue the others.
+
+## U3 BRIEF — THE COLLECTING PANE'S DOORS · THE GROUPED-BY CONTROL · THE FILTER-BAR FACE (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — the kickoff rulings R-13id-1…5, the constitution, your LEDGER row, BOTH
+architect adjudications (your two routed riders live in the second), the U1/U2 RECORDs (the
+surfaces you compose with), the AWAY-RUN POSTURE, the ENVIRONMENT TRAPS ·
+`notes/plans/phase-13i-sitting-record-2026-09-30.md` (§3 the grouped display, §4 the Collecting
+pane, §10 the journal-trait row, §16(f)/§17(f) the grouped-by ruling, §18.1 the filter bar,
+§22's spec caution) · `notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from
+your FIRST commit) · KnownIssues rows 103 (the book-surface half), 107 (the settings-sheet
+half), 112 (yours — F-U2-2) · the 13i-c Book Settings sheet (`BookSettingsSheet`/the Collecting
+section — U3 of 13i-c built it; its record is in `notes/plans/phase-13i-c-owned-finished-sealed.md`).
+
+**Scope — your LEDGER row exactly, plus the two routed riders:**
+1. **The doors into the Book Settings sheet** the record names: the book's ⋯ menu and the
+   Bookcase row's context menu reach it (today's roads verified, missing ones added); the
+   JOURNAL-TRAIT row joins the pane as one sentence — "Entries: date-stamped, named by their
+   day, sorted by date — on/off" (§10; `setJournalTrait`; the 'daily' book's refusal spoken).
+2. **Row 107's settings-sheet half:** a gathering's Finish / Word target / Note cap faces leave
+   the sheet (the shelf-menu half is done, U1); for the (c) arm — the OPS refusing them on a
+   gathering — write your proposal in your record BEFORE building it (the 4E pattern; the
+   sitting §3 says a gathering has no finish/extents, so the ops refusing is the
+   spec-defensible lean, but the op layer is shared with books — propose the exact refusal
+   shape and STOP that half for the architect).
+3. **The grouped-by control on the INDEX masthead** (§17(f), ruled): chapters ▾ · a tag
+   family · none; view-local, remembered; a gathering's Index the same minus chapters; the
+   tag-family grouped DISPLAY for gatherings NEVER mints `reading_section` rows (§3). CAUTION —
+   the landing family: the Index's rows carry derived heights (`ProseHeightModel` over
+   `blockExtents`, 13u4 F3) and the landing roads aim by them; a regroup REORDERS the same rows
+   under headers and must keep the manifest honest. The `BookIndexEditingTests` /
+   `BookOutlineLandingTests` families ride green UNMODIFIED.
+4. **The in-book FILTER BAR's face** (§18.1 — mechanics + `saveFilterAsGathering` shipped at
+   13i-b): the view-local bar on a book's and a gathering's Index, filtering by tags/star,
+   NEVER mutating membership; the "Save this filter as a gathering" door.
+5. **Riders:** KnownIssues row 112 — the masthead's tag cards become a held read (the row-104
+   shape; name the cost beside row 13's class) · F-U2-3 — the book view's own chapter/move
+   doors join the registry and their spelling aligns on "Move to Chapter ▸" · the 13i-c walk's
+   polish note (the sheet's three text fields — Name · Word target · Note cap — take the voice)
+   · row 103's BOOK-SURFACE half (a quiet-receipt host on Index/Book/Outline, the hint-bar
+   shape U1 used on the Bookcase).
+
+OUT of scope: the vocabulary sweep beyond your named words (U6), anything cross-wing (U5), the
+tutorial (U7), the phone (record what it owes, build nothing). Zero schema, zero `Sync/` — any
+discovered need is a STOP. Every drag (if any) gets a menu twin.
+
+**Evidence (named now):** door pins (every road reaches the sheet; the journal-trait sentence's
+on/off + the daily book's refusal); grouped-display tests (a gathering's grouping mints NO
+sections; the three modes remembered view-locally); the landing families green UNMODIFIED;
+filter-bar face pins over the shipped mechanics (filter never writes; the save door mints with
+the association ∧ filter rule); row 112's pin red-on-old (seat/tag while open); registry rows +
+the registry walk green; the tutorial spine green at the unit's end; a screenshot walk in all
+four voice/appearance combinations into `notes/plans/13id-screens/u3/` (gitignored). Suites at
+the END; baseline core 2036/217 (U2's close). Build into `App/Variorum/DerivedData/13id-u3/`.
+
+**Your record:** a `## U3 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+U2's form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs numbered
+P-13id-U3-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after every
+commit. One agent at a time; no subagents; foreground waits only. An unsettled design fork:
+proposal into your record, STOP that thread for the architect, continue the others.
