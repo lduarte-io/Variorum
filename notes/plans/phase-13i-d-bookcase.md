@@ -1533,7 +1533,7 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 | 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the re-home on Put back + per-wing pins | DONE (this commit) — `WingScopedReadsTests` 5 green; the lineage line reads `versionPeerPosts` + `effectiveWing`/`wingName` at the face (no new core read) |
 | 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | DONE (this commit, Mac BUILD SUCCEEDED) — `Shared/WingState.swift` on `AppSession` (memory attached by the bootstrap only; `readScope` = nil on the phone); re-scoped: Bookcase (a fresh model per wing, `.id`), Library listing + catalog, Pool, Tags (Settings list + mints), ⌘K, Starred, Archived, Trash (+ Empty Trash takes only this wing's), Timeline, the note picker / Compare / a book's add list (the SUBJECT's wing), the chip's book chooser, the masthead tag cards + typed paths (the NOTE's wing, read once outside the held region); ⌘N/toolbar/Library mints in the current wing. Pins PENDING (piece 9's Mac suite) |
 | 9 | Mac — the SWITCHER (the Bookcase masthead's `· Home ▾`: the wings, New Wing…, Rename…, Delete… with the refusal's words) + the note doors (Move to Wing… · Copy to Wing… with confirms) + the lineage line + registry rows + the walk green | DONE (this commit) — `Core/Views/WingsModel.swift` (the shared brain + `WingNoteDoors` + `wingMoveConfirm` + `WingCopy`), `Shared/WingWords.swift`, `Features/Shelf/WingSwitcherMenu.swift`; the refusal table's six wing arms; five acts declared; Compare + the Unmark picker show only same-wing versions and NAME other wings ("go to X ›"); `WingSwitcherTests` 7 + the registry walk: **35/2 green** |
-| 10 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; phone test build) | NOT-STARTED |
+| 10 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; phone test build) | DONE — core FULL **2091/226** (1 standing skip); Mac named **989/166, 0 skipped** (three batches); phone **TEST BUILD SUCCEEDED** (counts in EVIDENCE) |
 | 11 | The screenshot walk ×4 into `notes/plans/13id-screens/u5/` | NOT-STARTED |
 | 12 | Record close · QUESTIONS #174 · KnownIssues row 105 · ledger row 6 | NOT-STARTED |
 
@@ -1740,8 +1740,38 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   The Bookcase's held read was already wing-driven (ladder A fix 1, consumed); Arrivals are a
   book's (books are per-wing; intake is wing-scoped since 13i-a — `RuleWingScopingTests`).
   Mac-surface scoping pins: PENDING (piece 8).
-- Registry rows + the registry walk; the tutorial spine (lesson 11 TRUE): PENDING.
-- Core FULL (baseline 2060/221) · Mac named suites · phone TEST BUILD: PENDING.
+- **Mac — the wings:** `WingSwitcherTests` 7 (rows Home-first + destinations; mint switches, a
+  taken name / Home's refuses with nothing minted; Delete NAMES what remains — "“Imports” still
+  holds 1 book, 1 note and 1 tag — move or delete them first, then the empty wing can go." — then
+  the emptied wing deletes and the app returns Home; the note doors ask / act / refuse
+  (`frozen`) / copy; new notes, books and root tags are born in the current wing while a TYPED tag
+  lands in the NOTE's wing; the memory is local, write-through and revalidates a dead wing to
+  Home; the declarations).
+- **Registry:** five acts (`.newWing .renameWing .deleteWing` — the switcher's `.surface`;
+  `.moveNoteToWing .copyNoteToWing` — the note-row grammar's `.contextMenu`, rendered by the
+  Library's and the Pool's rows); the walk gains ONE justified union line
+  (`WingSwitcherMenu.surfaceCapabilities`) and is green.
+- **Core FULL `swift test`: "Test run with 2091 tests in 226 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test; `core-full2.log`). Baseline 2060/221 → **+31 / +5,
+  all this unit's** (`WingOperationsTests` 8, `TagWingScopeTests` 6, `WingMembershipAndJournalTests`
+  5, `WingMoveTests` 6, `WingScopedReadsTests` 5, R1's pin 1). The first END run caught three
+  fixtures that minted books into a ROW-LESS wing id (`"w-2"`, `"other-wing"`, `"W1"` — written
+  before any wing op existed); `createReading` now requires a live wing, so each mints one first,
+  assertions reading its id (`core-full.log` → `core-full2.log`).
+- **Mac named suites** (build `DerivedData/13id-u5`, `test-without-building`, zero instances —
+  `scratchpad/13id-u5/run-batch.sh`, three batches): **236/38** (every `Book*` suite, the landing
+  families UNMODIFIED) + **639/115** (Library*, Pool*, Bookcase*, Shelf*, Star*, Tag*, NotePicker*,
+  Compare*, Recovery/Trash/Archived*, QuickEntryBar, Import*, Membership*, BindDoor, Journal*,
+  NoteBox*, Ascent*, ContextBar*, PostDetail*, Navigation*, WorkspaceNaming, StatusCenter,
+  Deletion*, RemoveRelease, SpawnAndBind, GatheringRuleGate, Outflow, Ownership*, Versions*…) +
+  **114/13** (**`CapabilityRegistryTests` — the registry walk**, **all eleven `Tutorial*` suites —
+  the tutorial spine**, `WingSwitcherTests`) = **989 tests in 166 suites, 0 skipped**
+  (`mac-b1/b2/b3.log`). The first batch-2 run caught ONE more row-less-wing fixture
+  (`JournalBooksTests.aNonDailyEntryIsBornInItsBooksWing`, `"W1"`), re-staged the same way; the
+  whole batch re-run green.
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (`DerivedData/13id-u5-mobile`
+  — the shared `WingState`/`WingWords`/refusal arms/`TypedTagPath`/`RecoveryActs` compile; the
+  phone reads every wing unscoped — `readScope` nil — and mints in Home, exactly as before).
 - The walk ×4 (mint a wing, move/copy a note in, the delete refusal naming contents, empty and
   delete the wing, the daily Journal refusing a non-Home designation, ⌘J from another wing filing
   into Home): PENDING.

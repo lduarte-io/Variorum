@@ -371,11 +371,14 @@ struct JournalBooksTests {
     /// record's QUESTIONS paragraph).
     @Test func aNonDailyEntryIsBornInItsBooksWing() async throws {
         try await withShellSession2 { session, db in
-            let bookID = try await session.runner.run { ops in
-                try ops.createReading(
+            // 13i-d U5: a book is born only in a LIVE wing — the fixture
+            // mints one (the assertion reads its id where it read "W1").
+            let (bookID, far) = try await session.runner.run { ops in
+                let far = try ops.createWing(name: "W1").id
+                return (try ops.createReading(
                     name: "Far Dream Journal", kind: .book, profile: "journal",
-                    wingId: "W1"
-                ).id
+                    wingId: far
+                ).id, far)
             }
             let structure = BookStructureModel(session: session, readingID: bookID)
             let entryID = try #require(await structure.newEntry(day: "2026-07-21"))
@@ -384,7 +387,7 @@ struct JournalBooksTests {
                     SELECT wing_id, profile, segmentation_default FROM container WHERE id = ?
                     """, arguments: [entryID])
             }
-            #expect((shape?["wing_id"] as String?) == "W1",
+            #expect((shape?["wing_id"] as String?) == far,
                     "the entry is born in its book's wing (the F-5 class)")
             #expect((shape?["profile"] as String?) == "generic",
                     "the non-daily shape holds — never profile='journal'")
