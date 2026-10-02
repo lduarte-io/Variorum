@@ -717,8 +717,16 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   the op's refusal through the one table. `SealedBookMemberDoorTests` (5) pins Write's bar door, the
   Takes board's door and the shell's fallback (each speaks the words; the note stays sealed) + the
   control (an independently sealed note outside a sealed book unseals by its own door) — green.
-  PENDING: the FULL core suite, the Mac touched suites + TutorialWalk + the registry walk, the phone
-  build, the walk, the record's close.
+  **Suites (the close's evidence, run on the committed tree 7d82a1e7):** core `swift test` FULL —
+  **"Test run with 2004 tests in 212 suites passed"** (1 skipped: the standing env-gated Supabase
+  integration test; baseline 2003/212 after the adjudication → +1, `theSingleTagForwarderIsRetired`);
+  Mac `build-for-testing` GREEN + 73 suites (every new and touched suite, every suite naming the book
+  view / shelf / readings / rule editor / seal doors, the registry walk, the refusal-table integrity +
+  convergence suites, and all ten tutorial-walk suites of `TutorialWalkTests.swift`) — **"Test run
+  with 445 tests in 73 suites passed … with 4 known issues"** (the 4 = the pre-existing
+  `withKnownIssue` TK2 marks in `IndexTierMetricsTests`; zero skips); the phone `VariorumMobile`
+  generic iOS Simulator **BUILD SUCCEEDED**. Zero app instances before and after every run.
+  PENDING: the walk, the record's close.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
 
 ## §8 ENVIRONMENT TRAPS`,
