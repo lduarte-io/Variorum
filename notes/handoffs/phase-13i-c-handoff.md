@@ -15,8 +15,9 @@
       the arrivals of archived notes (today it dismisses every waiting arrival, and the confirm's N
       says so); (b) should the daily Journal be Home-only by rule or wing-scoped (latent until 13i-d
       mints a wing). Plus one taste call: the offer toast's 6 s clock.
-- [x] **#167** — RATIFIED (a) as built, 2026-10-02. **#169(b)** — RULED Home-only. **#169(a)** —
-      in discussion (archiving a waiting note).
+- [x] **#167** — RATIFIED (a) as built, 2026-10-02. **#169(b)** — RULED Home-only. **#169(a)** — RULED
+      2026-10-02: archived members get a per-book archived line + honest counts, archived waiters
+      stay visible at the door, finishing dismisses all — 13i-d's item 9.
 
 ## What shipped (one paragraph)
 

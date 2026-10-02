@@ -80,6 +80,19 @@ re-sized at this phase's own kickoff.**
    finish/extent faces (P-13ic-U3-2's ruling: remove; the ops' refusal is this phase's call) · the
    shelf's report overlay · a finished book taking back revived memberships (F-U2-5; her call).
 
+9. **ARCHIVED MEMBERS IN BOOKS (her ruling 2026-10-02 at the 13i-c close — QUESTIONS #169(a),
+   "the three together, at 13i-d"):** (1) a PER-BOOK ARCHIVED LINE on the Arrivals line's idiom —
+   invisible when empty; "N archived" under the book's masthead, expanding inline to the archived
+   members with Unarchive and Remove (Release on an owned book) — and HONEST COUNTS: "5 notes · 2
+   archived" on the Bookcase row's meta and the book masthead (hidden with details off); (2) the
+   Arrivals line SHOWS archived waiters, marked "archived", with the same doors — Add seats one as
+   an ARCHIVED member (it lands in the archived line; `seatArrival` must not refuse an archived
+   note — verify; intake's automatic seats still never seat one); this REVERSES 13i-b's
+   P-13ib-U2-2 (the line's archived filter goes; the hide/return pins flip honestly); (3) finishing
+   dismisses every waiter, all visible and counted (13i-c's shared predicate stands). The Index
+   never shows archived members — archive keeps its one meaning (kept, out of the working view);
+   the book gains a door to its own set-aside notes. Faces + one query; zero schema, zero `Sync/`.
+
 ## HER WALK POSTURE FOR THE 13i FAMILY (2026-10-01; verbatim-faithful — BINDS 13i-d/e)
 
 *"I will be doing a combined walk over all of 13i - I might do some small walks between the
