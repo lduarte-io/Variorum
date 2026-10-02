@@ -286,7 +286,8 @@ struct WorkspaceNamingTests {
             "p1": "The Long Way Home", "b1": "Field Notes",
             "t1": "life/goals", "pool1": "Scraps", "blank": "",
         ]
-        #expect(WorkspaceNaming.label(for: .shelf, titles: titles) == "Shelf")
+        // 13i-d U1 (an honest edit — her §7 ruling renamed the section).
+        #expect(WorkspaceNaming.label(for: .shelf, titles: titles) == "Bookcase")
         #expect(WorkspaceNaming.label(for: .library, titles: titles) == "Library")
         #expect(WorkspaceNaming.label(for: .poolPosts, titles: titles) == "Pool")
         #expect(WorkspaceNaming.label(for: .blocks, titles: titles) == "Snippets")

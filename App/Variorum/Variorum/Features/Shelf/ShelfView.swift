@@ -140,6 +140,9 @@ struct ShelfView: View {
                     boardContent
                 }
                 .padding(.horizontal, 28)
+                // A solo'd shelf draws no header, so its first row gets a
+                // little air under the strip (All's headers carry their own).
+                .padding(.top, model.effectiveScope == .all ? 0 : 6)
                 .padding(.bottom, 10)
                 .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) {
                     listContentHeight = $0
@@ -414,17 +417,12 @@ struct ShelfView: View {
                 Rectangle().fill(tokens.line).frame(height: 1)
             }
         }
-        .onDrop(
-            of: [BookcaseDrag.type],
-            isTargeted: Binding(
-                get: { headerDropTarget == section.id },
-                set: { headerDropTarget = $0 ? section.id
-                    : (headerDropTarget == section.id ? nil : headerDropTarget) })
-        ) { providers in
-            BookcaseDrag.load(providers) { payload in
-                if case .book(let readingID) = payload {
-                    Task { await model.reshelve(readingID, to: section.shelfID) }
-                }
+        .bookcaseDropSite(
+            onHover: { headerDropTarget = $0 ? section.id
+                : (headerDropTarget == section.id ? nil : headerDropTarget) }
+        ) { payload in
+            if case .book(let readingID) = payload {
+                Task { await model.reshelve(readingID, to: section.shelfID) }
             }
         }
         .help(collapsed ? "Show this shelf's books" : "Fold this shelf away")
@@ -469,6 +467,18 @@ struct ShelfView: View {
             }
             .padding(.vertical, 8)
             .contentShape(Rectangle())
+            // A BOOK dropped here (the Bookcase's own token — my order only,
+            // the placing mode, §24) lands right ABOVE this row. On the inner
+            // content so the row's NOTE drop below keeps its own road.
+            .bookcaseDropSite(
+                enabled: placing,
+                onHover: { rowDropTarget = $0 ? reading.id
+                    : (rowDropTarget == reading.id ? nil : rowDropTarget) }
+            ) { payload in
+                if case .book(let dragged) = payload {
+                    Task { await model.dropBook(dragged, before: reading.id) }
+                }
+            }
         }
         .buttonStyle(.plain)
         .overlay(alignment: .top) {
@@ -477,24 +487,10 @@ struct ShelfView: View {
                 Rectangle().fill(tokens.accent.opacity(0.6)).frame(height: 1)
             }
         }
-        .onDrag { BookcaseDrag.book(reading.id).provider() }
-        // Two payloads, one drop: a NOTE (plain text — "drag posts onto a
-        // book", sitting 1) joins the book; a BOOK (the Bookcase's own
-        // payload, my order only — the placing mode, §24) lands right above.
-        .onDrop(
-            of: placing ? [.plainText, BookcaseDrag.type] : [.plainText],
-            isTargeted: Binding(
-                get: { rowDropTarget == reading.id },
-                set: { rowDropTarget = $0 ? reading.id
-                    : (rowDropTarget == reading.id ? nil : rowDropTarget) })
-        ) { providers in
-            if placing, BookcaseDrag.load(providers, { payload in
-                if case .book(let dragged) = payload {
-                    Task { await model.dropBook(dragged, before: reading.id) }
-                }
-            }) {
-                return true
-            }
+        .draggable(BookcaseDragToken(.book(reading.id)))
+        // A NOTE (plain text — "drag posts onto a book", sitting 1) joins
+        // the book: the shipped road, unchanged.
+        .onDrop(of: [.plainText], isTargeted: nil) { providers in
             for provider in providers where provider.canLoadObject(ofClass: NSString.self) {
                 _ = provider.loadObject(ofClass: NSString.self) { value, _ in
                     guard let postID = value as? String else { return }

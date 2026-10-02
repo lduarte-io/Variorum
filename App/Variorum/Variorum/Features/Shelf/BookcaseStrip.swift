@@ -35,58 +35,76 @@ import VariorumCore
 
 // MARK: - Dragging books and shelves (one in-app payload)
 
-/// The Bookcase's drag payload: a BOOK (re-shelve / place by hand) or a
-/// SHELF (reorder the strip). Its own type identifier, `.ownProcess`
-/// visibility — so a dragged book can never be mistaken for a note's id
-/// (`.plainText`, the book rows' NOTE drop) or imported by the sidebar's
-/// file/text drop (the `OpenNoteDragToken` precedent).
+/// What a Bookcase drag carries: a BOOK (re-shelve / place by hand) or a
+/// SHELF (reorder the strip).
 nonisolated enum BookcaseDrag: Equatable, Sendable {
     case book(String)
     case shelf(String)
+}
 
-    static let typeIdentifier = "io.lduarte.variorum.bookcase-item"
-    static let type = UTType(exportedAs: typeIdentifier)
+/// **The transport** — its own transfer type, the `OpenNoteDragToken`
+/// precedent exactly (SwiftUI's `Transferable` road, the one every drag in
+/// the app rides): deliberately not a plain String, so a dragged book can
+/// never be mistaken for a NOTE's id by the book rows' `.plainText` drop, and
+/// never imported as a note's text by the sidebar's file/text drop.
+///
+/// *(The walk's finding, recorded so it is not re-met: a first build carried
+/// the payload on a hand-registered `NSItemProvider` + `onDrop(of:)`; the drag
+/// session STARTED — the row's image followed the pointer — but no target
+/// ever lit, so nothing landed. The `Transferable` road is the proven one.)*
+nonisolated struct BookcaseDragToken: Codable, Transferable, Sendable {
+    let kind: String
+    let id: String
 
-    var encoded: String {
-        switch self {
-        case .book(let id): "book:" + id
-        case .shelf(let id): "shelf:" + id
+    init(_ drag: BookcaseDrag) {
+        switch drag {
+        case .book(let id): (kind, self.id) = ("book", id)
+        case .shelf(let id): (kind, self.id) = ("shelf", id)
         }
     }
 
-    init?(encoded: String) {
-        if encoded.hasPrefix("book:") { self = .book(String(encoded.dropFirst(5))) }
-        else if encoded.hasPrefix("shelf:") { self = .shelf(String(encoded.dropFirst(6))) }
-        else { return nil }
+    var drag: BookcaseDrag? {
+        switch kind {
+        case "book": .book(id)
+        case "shelf": .shelf(id)
+        default: nil
+        }
     }
 
-    func provider() -> NSItemProvider {
-        let provider = NSItemProvider()
-        let data = Data(encoded.utf8)
-        provider.registerDataRepresentation(
-            forTypeIdentifier: Self.typeIdentifier, visibility: .ownProcess
-        ) { completion in
-            completion(data, nil)
-            return nil
-        }
-        return provider
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: UTType(exportedAs: "io.lduarte.variorum.bookcase-item"))
     }
+}
 
-    /// The first Bookcase payload among the providers, delivered on the main
-    /// actor; false when none carries one (the caller tries its other roads).
-    @discardableResult
-    static func load(
-        _ providers: [NSItemProvider], _ deliver: @escaping @MainActor (BookcaseDrag) -> Void
-    ) -> Bool {
-        guard let provider = providers.first(where: {
-            $0.hasItemConformingToTypeIdentifier(typeIdentifier)
-        }) else { return false }
-        _ = provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
-            guard let data, let payload = BookcaseDrag(encoded: String(decoding: data, as: UTF8.self))
-            else { return }
-            Task { @MainActor in deliver(payload) }
+/// The one drop-site modifier every Bookcase target wears (strip names, the
+/// ⋯ panel's rows, All's section headers, the book rows in my order): it
+/// decodes the token and reports hover for the hairline.
+private struct BookcaseDropSite: ViewModifier {
+    let enabled: Bool
+    let onHover: (Bool) -> Void
+    let onDrop: @MainActor (BookcaseDrag) -> Void
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.dropDestination(for: BookcaseDragToken.self) { tokens, _ in
+                guard let drag = tokens.first?.drag else { return false }
+                onDrop(drag)
+                return true
+            } isTargeted: { onHover($0) }
+        } else {
+            content
         }
-        return true
+    }
+}
+
+extension View {
+    /// A Bookcase drop target (a no-op when `enabled` is false — the book
+    /// rows outside my order, P-2).
+    func bookcaseDropSite(
+        enabled: Bool = true, onHover: @escaping (Bool) -> Void,
+        onDrop: @escaping @MainActor (BookcaseDrag) -> Void
+    ) -> some View {
+        modifier(BookcaseDropSite(enabled: enabled, onHover: onHover, onDrop: onDrop))
     }
 }
 
@@ -158,7 +176,9 @@ struct BookcaseStrip: View {
     private var overflowed: Bool { contentWidth > visibleWidth + 0.5 }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 14) {
+        // CENTER, not baseline: a ScrollView publishes no text baseline, so a
+        // baseline row set the names above the rest of the line (the walk).
+        HStack(alignment: .center, spacing: 14) {
             names
             if overflowed {
                 Button("\u{22EF}") { panelShown.toggle() }
@@ -240,21 +260,16 @@ struct BookcaseStrip: View {
                     .padding(-4)
             }
         }
-        .onDrag { BookcaseDrag.shelf(shelf.id).provider() }
-        .onDrop(
-            of: [BookcaseDrag.type],
-            isTargeted: Binding(
-                get: { dropTarget == shelf.id },
-                set: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) })
-        ) { providers in
-            BookcaseDrag.load(providers) { payload in
-                switch payload {
-                case .book(let readingID):
-                    Task { await model.reshelve(readingID, to: shelf.id) }
-                case .shelf(let draggedID):
-                    guard draggedID != shelf.id else { return }
-                    Task { await model.moveShelf(draggedID, to: .before(shelf.id)) }
-                }
+        .draggable(BookcaseDragToken(.shelf(shelf.id)))
+        .bookcaseDropSite(
+            onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
+        ) { payload in
+            switch payload {
+            case .book(let readingID):
+                Task { await model.reshelve(readingID, to: shelf.id) }
+            case .shelf(let draggedID):
+                guard draggedID != shelf.id else { return }
+                Task { await model.moveShelf(draggedID, to: .before(shelf.id)) }
             }
         }
         .contextMenu { ShelfMenu(shelf: shelf, model: model, actions: menuActions) }
@@ -265,7 +280,7 @@ struct BookcaseStrip: View {
         _ text: String, active: Bool, help: String, action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Text(text)
+            Text(tokens.chromeLabel(text))
                 .font(tokens.navigation)
                 .fontWeight(active ? .semibold : .regular)
                 .foregroundStyle(active ? tokens.ink : tokens.muted)
@@ -280,7 +295,7 @@ struct BookcaseStrip: View {
     // MARK: The utility run — № · order ▾ · details
 
     private var utilityRun: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             Button("\u{2116}") { model.censusOpen.toggle() }
                 .buttonStyle(.plain)
                 .font(tokens.small)
@@ -295,18 +310,21 @@ struct BookcaseStrip: View {
             VoicedMenu(
                 tokens: tokens, label: "order \u{00B7} \(model.orderMode.label)", role: .quiet
             ) {
-                ForEach(BookcaseOrderMode.allCases, id: \.self) { mode in
-                    Button {
+                // An inline picker: the menu's native checkmark marks the
+                // order in force (a `Label` image drew nothing — the walk).
+                Picker("", selection: Binding(
+                    get: { model.orderMode },
+                    set: { mode in
                         model.orderMode = mode
                         if mode == .lastEdited { Task { await model.refreshAggregates() } }
-                    } label: {
-                        if mode == model.orderMode {
-                            Label(mode.label, systemImage: "checkmark")
-                        } else {
-                            Text(mode.label)
-                        }
+                    })
+                ) {
+                    ForEach(BookcaseOrderMode.allCases, id: \.self) { mode in
+                        Text(mode.label).tag(mode)
                     }
                 }
+                .pickerStyle(.inline)
+                .labelsHidden()
             }
             .help("A\u{2013}Z · last edited · my order — "
                 + "\u{201C}my order\u{201D} is where you place books by hand")
@@ -377,7 +395,9 @@ struct BookcaseCensusPanel: View {
         }
         .padding(.vertical, 5)
         .frame(width: 220)
-        .background(tokens.room)
+        // The BOARD's own ground (`surface`), so the panel reads as part of
+        // the page under a hairline — never a tinted card (the walk).
+        .background(tokens.surface)
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
     }
 }
@@ -429,6 +449,9 @@ struct ShelfOverflowPanel: View {
                 }
             }
             .frame(maxHeight: 280)
+            // Hug a short list; scroll a long one (the Starred section's
+            // shape, `SidebarView`).
+            .fixedSize(horizontal: false, vertical: matches.count <= 9)
         }
         .padding(.vertical, 6)
         .frame(width: 240)
@@ -444,7 +467,7 @@ struct ShelfOverflowPanel: View {
             close()
         } label: {
             HStack(alignment: .firstTextBaseline) {
-                Text(ShelfFace.label(shelf))
+                Text(tokens.chromeLabel(ShelfFace.label(shelf)))
                     .fontWeight(active ? .semibold : .regular)
                     .foregroundStyle(active ? tokens.ink : tokens.muted)
                     .lineLimit(1)
@@ -465,21 +488,16 @@ struct ShelfOverflowPanel: View {
         }
         // Reorder by dragging the panel's rows (§7, ruled) — and a book
         // dropped here re-shelves, exactly as on a strip name.
-        .onDrag { BookcaseDrag.shelf(shelf.id).provider() }
-        .onDrop(
-            of: [BookcaseDrag.type],
-            isTargeted: Binding(
-                get: { dropTarget == shelf.id },
-                set: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) })
-        ) { providers in
-            BookcaseDrag.load(providers) { payload in
-                switch payload {
-                case .book(let readingID):
-                    Task { await model.reshelve(readingID, to: shelf.id) }
-                case .shelf(let draggedID):
-                    guard draggedID != shelf.id else { return }
-                    Task { await model.moveShelf(draggedID, to: .before(shelf.id)) }
-                }
+        .draggable(BookcaseDragToken(.shelf(shelf.id)))
+        .bookcaseDropSite(
+            onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
+        ) { payload in
+            switch payload {
+            case .book(let readingID):
+                Task { await model.reshelve(readingID, to: shelf.id) }
+            case .shelf(let draggedID):
+                guard draggedID != shelf.id else { return }
+                Task { await model.moveShelf(draggedID, to: .before(shelf.id)) }
             }
         }
         .contextMenu { ShelfMenu(shelf: shelf, model: model, actions: menuActions) }

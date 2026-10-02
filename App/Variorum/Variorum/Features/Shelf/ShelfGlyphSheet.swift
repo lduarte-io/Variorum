@@ -68,12 +68,12 @@ struct ShelfGlyphSheet: View {
                 TextField("or type one", text: $field)
                     .frame(width: 110)
                 // The preview, exactly as the strip will draw the name.
-                Text(normalized.valid
+                Text(tokens.chromeLabel(normalized.valid
                     ? ShelfFace.label(Shelf(
                         id: shelf.id, name: shelf.name, glyph: normalized.glyph,
                         position: shelf.position, createdAt: shelf.createdAt,
                         updatedAt: shelf.updatedAt))
-                    : shelf.name)
+                    : shelf.name))
                     .font(tokens.navigation)
                     .fontWeight(.semibold)
                     .foregroundStyle(tokens.ink)

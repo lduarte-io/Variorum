@@ -306,6 +306,11 @@ struct CapabilityRegistryTests {
             // menus and the sidebar note box's book context.
             .union(BookView.contextMenuCapabilities)
             .union(SidebarNoteBox.contextMenuCapabilities)
+            // 13i-d U1 (A JUSTIFIED EDIT, the E2/E8 class — a new renderer is
+            // a new line): the Bookcase's SHELF menu (Rename · Set Glyph ·
+            // Make Default · Move to Start/End · Delete), one builder the
+            // strip's names, the ⋯ panel's rows and All's headers render.
+            .union(BookcaseStrip.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
@@ -449,6 +454,8 @@ struct CapabilityRegistryTests {
             .union(ManageReadingPostsSheet.surfaceCapabilities)
             // 13i-c U4: the owned-by badge is the book ascent's third renderer.
             .union(OwnershipBadgeView.surfaceCapabilities)
+            // 13i-d U1 (the same class): the strip's "+ shelf" word.
+            .union(BookcaseStrip.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
