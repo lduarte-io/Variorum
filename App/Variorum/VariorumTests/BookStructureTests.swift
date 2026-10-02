@@ -507,7 +507,11 @@ struct JournalBooksTests {
             let dream = BookStructureModel(session: session, readingID: dreamID)
             let refused = await dream.newEntry(day: "2026-07-25")
             #expect(refused == nil, "a locked non-daily book's door refuses")
-            #expect(dream.lastError?.contains("locked") == true,
+            // 13i-d U6 (KnownIssues row 106 — a JUSTIFIED EDIT): the message
+            // table's generic arm now names the true roads, not "locked —
+            // unlock"; the subject (the refusal speaks through the table) holds.
+            #expect(dream.lastError?.contains("finished") == true
+                        && dream.lastError?.contains("reopen") == true,
                     "the refusal speaks through the message table")
             let after = try await db.read { db in
                 try Int.fetchOne(db, sql: """
@@ -749,14 +753,20 @@ struct BookDropTests {
                 book.posts[0], onto: .chapter(book.sections[1]),
                 entries: entries, reposition: true)
             let postRefusal = try #require(book.structure.lastError)
-            #expect(postRefusal.contains("locked"), "\(postRefusal)")
+            // 13i-d U6 (KnownIssues row 106 — a JUSTIFIED EDIT): the generic
+            // arm's dead "locked — unlock" became the true roads ("finished —
+            // reopen it first; if it's sealed, unseal it"); the subject — the
+            // operation's real refusal, spoken — is unchanged.
+            #expect(postRefusal.contains("finished") && postRefusal.contains("reopen"),
+                    "\(postRefusal)")
             #expect(book.structure.assignments[book.posts[0]] == book.sections[0],
                     "nothing moved")
 
             await book.structure.moveChapter(
                 book.sections[0], onto: .end, entries: entries)
             let chapterRefusal = try #require(book.structure.lastError)
-            #expect(chapterRefusal.contains("locked"), "\(chapterRefusal)")
+            #expect(chapterRefusal.contains("finished") && chapterRefusal.contains("reopen"),
+                    "\(chapterRefusal)")
             _ = try await book.refresh()
             #expect(book.structure.sections.map(\.name) == ["I", "II"])
         }

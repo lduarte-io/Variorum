@@ -68,8 +68,13 @@ struct MobileSeededBookRestoreTests {
         #expect(SeededBookRestore.failureLine(for: OperationError.duplicateBookName(name: "Encryption Explained"))
                 == BookNameCopy.refusal(existing: "Encryption Explained"))
         // R2-N1: the approved platform-neutral words, exactly.
+        // 13i-d U6 (KnownIssues row 106 — "both platforms"; a JUSTIFIED
+        // EDIT): the shared line holds no book, so it names BOTH roads — a
+        // sealed sample book's is Unseal (Reopen refuses there). Still
+        // platform-neutral words.
         #expect(SeededBookRestore.failureLine(for: OperationError.lockedReading(id: "b"))
-                == "The book is finished — reopen it, then restore again.")
+                == "The book is finished \u{2014} reopen it (or unseal it, if it\u{2019}s sealed), "
+                    + "then restore again.")
         #expect(SeededBookRestore.failureLine(for: OperationError.readingAtCapacity(id: "b"))
                 == "The book is at its note cap — raise the cap, then restore again.")
     }
