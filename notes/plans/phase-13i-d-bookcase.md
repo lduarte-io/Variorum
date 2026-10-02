@@ -1984,10 +1984,22 @@ DISCHARGED — the HELD state in BANK 1 CLOSES is superseded by this record.**
 
 ## U5b RECORD — THE BOOK MOVE · THE BULK WING MOVE (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close. Known
-now: (1) **the phone is untouched** (record only); (2) **F-U5b-2 is STOPPED for the architect**
-(structural undo/redo entries recorded BEFORE a wing move can revive a cross-wing membership when
-replayed after it — the proposal is in FINDINGS; nothing built).
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **F-U5b-2 is STOPPED for the
+architect** — structural undo/redo entries recorded BEFORE a wing move can revive a cross-wing
+membership when replayed after it (`revertDiverge` after a book move; the bind's redo after a
+member's note move); traced from the code, the proposal is in FINDINGS, nothing built. (2) **The
+phone is untouched** (record only — MOBILE PARITY below; the shared refusal table and `WingWords`
+changes compile on it). (3) **No drag was added** (every door is a menu item; nothing to twin).
+(4) The Trash rows of a bulk-moved wing come back without the wing's retired tags — the ruled
+8(a) consequence, recorded as P-13id-U5b-13, not changed. Everything else in the brief — both ops
+to R-13id-6 items 1–9, their counting confirms, the two doors, the delete refusal's new road, the
+registry rows — is built, pinned and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2108/230 at the first END run (re-run after the walk's
+two face fixes: PENDING) · Mac named 1004/168, 0 skipped (the registry walk + the eleven tutorial
+suites inside; post-walk re-run of the wing/registry/tutorial batch: PENDING) · phone TEST BUILD
+green · the walk DONE ×4 (53 captures; two walk defects W-1/W-2 found, pinned red, fixed, re-walked)
+· the combined behavioural revert DONE (8 predicted reds). Lesson 11 stays TRUE.**
 
 Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (the kickoff
 rulings R-13id-1…5, the constitution, the four adjudications + BANK 1 CLOSES, the U1–U5 RECORDs —
@@ -2012,8 +2024,9 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 | 5 | Mac — the two doors (the Bookcase row's Move to Wing ▸; the switcher's Move Everything to Another Wing ▸) with their counting confirms + receipts; the delete refusal's new road words; the registry rows; door pins + the registry walk | DONE (this commit) — `Core/Views/WingBookMoves.swift` (`WingBookMoveDoor.drawn`, the asks + acts on `WingsModel`, every word, the two confirm modifiers), `ShelfView` (the row door after Move to Shelf ▸ + the confirm), `WingSwitcherMenu` (`currentWingActs` — the current wing's acts as DATA; the bulk submenu + its confirm), `.moveBookToWing` / `.moveWingContents` declared; `WingBookMoveDoorTests` 7 + `WingSwitcherTests` 8 (TWO JUSTIFIED EDITS, commented: the refusal's road words, the switcher's fourth act) + **the registry walk** 28 — **43/3 green, 0 skipped** (`mac-p5.log`, build `DerivedData/13id-u5b`) |
 | 5b | The combined BEHAVIOURAL REVERT over the new ops (R1 no arrival dismissal · R2 no daily-Journal guard · R3 no unshelving · R4 no stray re-point · R5 `keeping: []` · R6 no rule adoption) — proving the state pins bite | DONE — **exactly the 8 predicted tests RED, 15 issues** (`revert.log`: R5 → the members' sever-list/rows, the finished/sealed whole move, the move-back; R1 → the arrivals; R6 → the rule; R3 → unshelved; R2 → the daily Journal; R4 → the bulk's snippet + mint tally), the other 6 green; restored by `git checkout HEAD --`, `git diff --quiet` verified, green again 14/3 (`revert-restored.log`) — **no revert in flight** |
 | 6 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | DONE — core FULL **2108/230** (1 standing skip; `core-full.log`); Mac named **1004/168, 0 skipped** in three batches (`mac-c.log` 122/14 — the registry walk, the eleven `Tutorial*` suites, `WingSwitcherTests`, `WingBookMoveDoorTests` · `mac-a.log` 236/38 — every `Book*` suite, the landing families UNMODIFIED · `mac-b.log` 646/116 — U5's neighbourhood batch: Library/Pool/Bookcase/Shelf/Star/Tag/Recovery/Trash/Archived/Membership/Ownership/Journal…); phone **TEST BUILD SUCCEEDED** (`phone-bft.log`, `DerivedData/13id-u5b-mobile`) |
-| 7 | The screenshot walk ×4 into `notes/plans/13id-screens/u5b/` | IN-PROGRESS — Terminal·light DONE (tl-01…18) and Terminal·dark DONE (td-01…10). **W-1** (tl, the severed list grouped by display NAME — three different notes named "2026-10-01" collapsed): pinned RED 1c7f5bde (2 issues), fixed 69ece841, re-walked (`tl-11`). **W-2** (td, a gathering-only wing's bulk confirm: "1 gathering move. Books keep… keeps none of its tags"; the gathering confirm promising its rule's tags for a star-only rule): pinned RED 4d2a5dd2 (2 issues, `mac-w2-red.log`), fixed this commit — the sentences say only what is true of what moves; door suites 45/3 (`mac-w2-green.log`). Study·dark and Study·light NEXT |
-| 8 | Record close · QUESTIONS #175 · ledger row 6b | NOT-STARTED |
+| 7 | The screenshot walk ×4 into `notes/plans/13id-screens/u5b/` | DONE — **53 captures, all four combinations** (Terminal·light tl-01…18 · Terminal·dark td-01…10 · Study·dark sd-01…13 · Study·light sl-01…11; listed in EVIDENCE). **W-1** (tl: the severed list grouped by display NAME — three different notes named "2026-10-01" collapsed into one clause listing "u3 spawn walk" thrice): pinned RED 1c7f5bde (1 test / 2 issues, `mac-w1-red.log`), fixed 69ece841, re-walked (`tl-11`, `sd-05`). **W-2** (td: a gathering-only wing's bulk confirm "1 gathering move. Books keep… keeps none of its tags"; the gathering confirm promising its rule's tags for a star-only rule): pinned RED 4d2a5dd2 (1 test / 2 issues, `mac-w2-red.log`), fixed 6d38fdfb, re-walked (`sd-09`, `sl-08`). Her dev voice (Terminal — read back `1, 0`), appearance (system) and the remembered wing (Home) restored; zero instances after; the walk's own `caffeinate` ended |
+| 8 | Record close · QUESTIONS #175 · ledger row 6b | DONE (this commit) |
+| 9 | Final re-runs after the walk's face fixes (core FULL; Mac batch C — the registry walk, the eleven tutorial suites, the wing suites; phone test build) | PENDING |
 
 ### THE DESIGN (the rulings R-13id-6 applied; PROVISIONAL where marked — each numbered below)
 
@@ -2079,26 +2092,77 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
   only same-wing pairs, read through `Queries.wingScope` AFTER the re-home (PROVISIONAL
   P-13id-U5b-5 — "rows whose story diverged stay as they are", AppSpec §9's restore letter).
 
-### EVIDENCE (named now; counts PENDING until each run lands)
+### WHAT WAS BUILT (a fresh session's map)
+
+- **Core ops** — `Sources/VariorumCore/Operations/Operations+WingMove.swift`: U5's note move now
+  composes the extracted `relocateNote(db, postID:, to:, keeping:, adoption:, now:)` (returns the
+  readings whose MEMBER row it severed); `repointStrayApplications(db, ofWing:, adoption:, now:)`
+  (the bulk's remaining live applications of the wing's tags — snippet and version blocks).
+  NEW `Operations+WingBookMove.swift`: `moveReadingToWing` (→ `BookWingMove`: notes, alsoLeft,
+  dismissedArrivals, adopted/minted), `moveWingContents` (→ `WingContentsMove`: moved contents,
+  tagsRetired, adopted/minted), `adoptReadingTags` (rule terms · outflow · grouping, live
+  source-wing tags only), and the reads `Queries.AlsoLeaves` (noteID · note · book),
+  `bookMoveMembers`, `wingMoveNoteIDs`, `isTheDailyJournal`, `bookWingMovePreview`,
+  `wingContentsMovePreview`. `OperationError.readingAlreadyInWing` / `.wingMoveIntoItself`.
+- **Core pure** — `Domain/WingTagCarry.swift` (`closure`, `plan` → joins · made · lettingGo ·
+  minted); `RuleGrammar.mapTagIDs` (the tree with tag ids rewritten, shape untouched).
+- **F-U5b-1** — `Queries.revivalWingScope` (`WingQueries.swift`), read by `restoreContainerRows`
+  (`Operations+Container.swift`) and `restoreReading` (`Operations+Reading.swift`) after their
+  re-home.
+- **Shared** — `Shared/WingWords.swift`: `notEmpty(_ name: String?, …)` gains "— or move everything
+  to another wing" and is the ONE sentence the Delete door and the refusal table both speak;
+  `Shared/OpsRefusalTable.swift`: the two new arms; `wingNotEmpty` reads `WingWords.notEmpty(nil, …)`.
+- **Mac** — NEW `Core/Views/WingBookMoves.swift`: `WingBookMoveDoor.drawn` (pure: another wing ·
+  never the 'daily' marker), the `WingsModel` asks/acts (`bookMoveAsk` · `moveBook` ·
+  `contentsMoveAsk` · `moveContents`), every word (`WingCopy` extension — the confirm composers
+  group the severed list by note IDENTITY and merge same-reading clauses with a count; the bulk
+  sentences say only what is true of what moves), the two confirm modifiers.
+  `Features/Shelf/ShelfView.swift`: "Move to Wing ▸" after Move to Shelf ▸ + the confirm;
+  `Features/Shelf/WingSwitcherMenu.swift`: `currentWingActs` (DATA — none on Home; rename · move
+  everything · delete on an additional wing) + the bulk submenu + its confirm.
+- **Registry** — `.moveBookToWing` ("Move to Wing", book scope, `.contextMenu`, rendered by
+  `ShelfView.contextMenuCapabilities`) and `.moveWingContents` ("Move Everything to Another Wing",
+  app scope, `.surface`, rendered by `WingSwitcherMenu.surfaceCapabilities`) — both on renderers the
+  walk's union already names, so no new union line.
+- **Tests** — core NEW `WingRevivalTests` (3), `BookWingMoveTests` (8), `WingContentsMoveTests` (3),
+  `WingTagCarryTests` (3); Mac NEW `WingBookMoveDoorTests` (9); `WingSwitcherTests` two JUSTIFIED
+  EDITS (commented).
+
+### EVIDENCE (all run at the END unless named; counts exact)
 
 - **F-U5b-1 red-on-old:** `WingRevivalTests` on the pre-fix restore — **2 tests RED, 2 issues** (`p2-red.log`), the control green; green after (`p2-green.log`, 131/42 with the restore/trash/ownership/diverge neighbours).
-- `BookWingMoveTests` (core, state transitions): the sever-and-list arithmetic (preview = act) ·
-  a stay-behind finished AND sealed book refusing with nothing written · finished/sealed books
-  riding whole, every seal stamp untouched · archived members riding archived · pending arrivals
-  dismissed as decision rows (count = the preview's) · rule/outflow/grouping adopt vs mint · a dead
-  term untouched · unshelved + starred landing · the daily Journal's refusal (designation and
-  marker) · own wing / dead wing refusals · no undo registration: PENDING.
-- `WingContentsMoveTests` (core): the full arithmetic (every note, book, gathering, membership,
-  arrival and dismissal record riding; tags adopt/mint; a snippet's application re-pointed; every
-  source tag tombstoned → `wingContents` EMPTY → `deleteWing` succeeds) · Home/dead/self
-  refusals · the daily-Journal belt · the Trash rows left (listing in Home after the delete; a Put
-  back re-homing WITHOUT a cross-wing membership) · the confirm's tag buckets = the act · no undo
-  registration · the pure `WingTagCarry` plan: PENDING.
-- Mac door pins (`WingBookMoveDoorTests`): the row door's presence rules (another wing; never on
-  the daily Journal), the confirm's words (severed list, waiting count, collision), the frozen
-  refusal at the door, the receipt; the switcher's bulk door (additional wings only — ABSENT on
-  Home), its confirm and receipt; the delete refusal's new words (red on the old words);
-  declarations + the registry walk: PENDING.
+- **`BookWingMoveTests` (core, 8 state-transition pins, green):** the sever-and-list arithmetic
+  (the preview's list IS the act's; the destination's twin name named) · a stay-behind FINISHED
+  book refusing `lockedReading` and a SEALED one `readingSealed`, nothing written · finished and
+  sealed books riding WHOLE (the seal's stamp and the member's `locked_at` untouched) · archived
+  members riding archived · pending arrivals dismissed as decision rows (count = the preview's;
+  the waiter stays behind) · rule/outflow/grouping adopt vs mint, a dead term untouched, a gathering
+  showing the destination's matches only · unshelved + starred (both stores) · the daily Journal
+  refusing by designation AND by marker · own-wing / dead-wing refusals · no undo registration and
+  the symmetric move back.
+- **`WingContentsMoveTests` (core, 3, green) + `WingTagCarryTests` (pure, 3, green):** the full
+  arithmetic to Home (4 notes, 4 books, 1 gathering, 5 tags; members, a chapter assignment, a
+  waiting arrival and a dismissal record riding; finished/sealed whole; `writing` adopted,
+  `writing/draft`·`poems`·`classics` minted, `orphan` let go; a snippet block's application
+  re-pointed; every source tag tombstoned → `wingContents` EMPTY → `deleteWing` succeeds and takes
+  the shelf; the confirm's buckets and mint list = the act's tally; no undo) · Home/dead/self
+  refusals and the daily-Journal belt (refuses toward another wing, allowed Home) · the Trash rows
+  left: after the wing dies a Put back re-homes and NEVER crosses (to another wing: the note comes
+  back bookless, the book without its moved note; to Home: the pair rejoins), the retired tag not
+  reviving (P-13id-U5b-13).
+- **The combined behavioural revert** (R1–R6 over the new ops): exactly the 8 predicted tests RED,
+  15 issues (`revert.log`); restored by checkout, tree clean, green again (`revert-restored.log`).
+- **Mac door pins (`WingBookMoveDoorTests`, 9, green):** the row door's drawing rule (another wing;
+  books and gatherings; never the daily Journal's marker) · the confirm COUNTING (3 notes, 1
+  archived) and LISTING the severed membership and naming the twin, then the act + receipt · the
+  waiting count · a frozen stay-behind book refusing AT THE DOOR and the daily Journal refusing
+  from a stale face · the bulk door ABSENT on Home (`currentWingActs`), an empty wing speaking
+  instead of asking, the confirm's counts and tag sentence ("#orphan" let go), the act emptying
+  the wing so Delete then asks · the delete refusal's road words in the shared table (RED on the
+  old words by construction) · W-1's and W-2's pins (each RED on the pre-fix face — 2 issues apiece)
+  · the declarations. `WingSwitcherTests`' two justified edits: the refusal's road words (red on
+  the old words) and the switcher's fourth act. The registry walk (`CapabilityRegistryTests`) green
+  — no new union line (both renderers were already named).
 - **Core FULL `swift test`: "Test run with 2108 tests in 230 suites passed"** (1 skipped — the
   standing env-gated Supabase integration test). Baseline 2091/226 → **+17 / +4, all this unit's**
   (`WingRevivalTests` 3, `BookWingMoveTests` 8, `WingContentsMoveTests` 3, `WingTagCarryTests` 3).
@@ -2113,25 +2177,144 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
   code touched here; not re-run).
 - **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (the shared
   `WingWords` / refusal-table changes compile; the phone is untouched in behaviour).
-- The walk ×4: PENDING.
+- **Post-walk re-runs** (the walk's two face fixes landed after the first END run): core FULL
+  PENDING · Mac batch C (the registry walk, the eleven tutorial suites, `WingSwitcherTests`,
+  `WingBookMoveDoorTests`) PENDING · phone TEST BUILD PENDING. (Between the fixes: the door suites
+  45/3 and the core move pins 14/3, green — `mac-w2-green.log`.)
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u5b`; GUI grants
+  probed by real effect first — a full-screen frame captured, System Events answered; the author
+  guard before every act, her app absent throughout, HID idle 3,200 s at the start — three
+  self-trips at < 2 s spacing, each verified as my own by a climbing idle counter before going on;
+  53 captures in `notes/plans/13id-screens/u5b/`, gitignored). **Terminal·light** — tl-01 Home's
+  switcher: Home ✓ · New Wing… — NO bulk door on Home · 02 the New Wing prompt (lesson 11) · 03
+  inside Annex, its receipt · 04 Annex's switcher: Rename · **Move Everything to Another Wing ›** ·
+  Delete · 05 its submenu (Home) · 06 an EMPTY wing's door speaks "“Annex” is already empty — there's
+  nothing to move. Delete Wing… can take it." · 07 the daily Journal's row menu: NO Move to Wing ·
+  08 a plain book's menu: **Move to Wing ›** after Move to Shelf › · 09 its submenu · 10 **the
+  frozen stay-behind refusal at the door** ("“u4 delta” is also in “u4 other copy”, which is
+  finished — reopen it (or unseal it) before moving “u4 other” to another wing.") · 11-W1-before
+  (the defect) · 11 the fixed confirm: "Its 3 notes come with it, tags and all. 3 notes called
+  “2026-10-01” also leave “u3 spawn walk” — a book only holds notes of its own wing. It arrives
+  unshelved." · 12 moved — the receipt, the Home gatherings dropping the three notes (wing-scoped),
+  "u3 spawn walk" 5 → 2 · 13 Annex holding the book UNSHELVED with its tags made there · 14 Delete
+  Wing on the non-empty wing: "…still holds 1 book, 3 notes and 3 tags — move or delete them first,
+  then the empty wing can go — or move everything to another wing." · 15 the bulk confirm (counts;
+  "Tags travel by name: 3 join tags “Home” already has"; captured before W-2's fix — every line
+  true of that case) · 16 emptied, its receipt · 17 the empty wing's delete confirm · 18 deleted,
+  back home, the book back with its tags adopted. **Terminal·dark** — td-01 New Wing · 02 Move to
+  Wing › · 03 **"the door"'s confirm counting its waiter** ("1 waiting at the door will be
+  dismissed.") — Cancelled to keep her U4 fixture · 04 a GATHERING's confirm · 05 Annex holding the
+  gathering (0 notes — the destination's matches) · 06 the bulk submenu · 07-W2-before (the defect)
+  · 08 emptied · 09 delete confirm · 10 back home. **Study·dark** — sd-01 Home's switcher · 02 inside
+  Annex · 03 Annex's switcher with the bulk door · 04 Move to Wing › · 05 the same-named clause in
+  Study ("2 notes called “2026-10-01” also leave “u3 spawn walk”" — Cancelled to spare her fixture)
+  · 06 a journal-trait book's confirm · 07 moved, receipt · 08 the bulk submenu inside Annex · 09
+  the fixed W-2 words ("1 book and 1 note move. … The book arrives unshelved. “Annex” ends empty —
+  then Delete Wing… can take it.") · 10 emptied · 11 delete confirm · 12 back home · 13 with only
+  Home left, a gathering's menu carries NO Move to Wing (one library — P-2). **Study·light** — sl-01
+  inside Annex · 02 the daily Journal's menu: NO Move to Wing · 03 Move to Wing › · 04 a starred
+  book's confirm: "Its 5 notes come with it (1 archived — it stays archived), tags and all." · 05
+  moved · 06 Annex: the book starred and floating, "4 notes · 1 archived", its starred note in
+  Annex's Starred section · 07 bulk submenu · 08 the bulk confirm ("1 book, 5 notes and 2 tags
+  move… Tags travel by name: 2 join tags “Home” already has…") · 09 emptied · 10 delete confirm ·
+  11 back home, everything back.
 
 ### FINDINGS (for the orchestrator)
 
-- **F-U5b-1 — FIXED** (THE DESIGN above; `Queries.revivalWingScope`, read by both revival sites after their re-home) — red-on-old pinned, green.
+- **F-U5b-1 — FIXED (bug-class, U5's note move already exposed it):** a Put back revived a membership
+  on the exact stamp with only a liveness guard, so a note or book that lay in the Trash while its
+  partner moved wings came back INTO a cross-wing membership (§9). Both revival sites now read
+  `Queries.revivalWingScope` after their re-home — red-on-old pinned (`WingRevivalTests`, 2 issues),
+  green (P-13id-U5b-5).
 - **F-U5b-2 — STOPPED (the brief's stop rule): structural undo/redo replayed AFTER a wing move can
-  revive a cross-wing membership.** Trace: `divergePostForReading(O, B)` in wing X (O's row
-  tombstoned, copy C membered at its slot) → `moveReadingToWing(B, Y)` (C rides) → ⌥⌘Z →
-  `revertDiverge` tombstones C's row and C, and REVIVES O's row in B with only a live-post guard:
-  O lives in X, B in Y. The bind's redo (`convertSmartReadingToCurated`'s exact-row restore) has
-  the same shape after a member's NOTE move (a U5-era class). Proposal: **(a, recommended)** every
-  revival site consults the one same-wing predicate F-U5b-1 introduces, and an inverse whose
-  revival would cross treats its entry as OBSOLETE, quiet — the "book deleted meanwhile" bucket
-  (checked before any write); (b) a wing move clears the session's structural undo/redo stacks;
-  (c) accept (session-scoped and rare). Nothing built; the architect rules.
+  revive a cross-wing membership.** Traced from the code: (i) `divergePostForReading(O, B)` in wing X
+  (O's row tombstoned, copy C membered at its slot) → `moveReadingToWing(B, Y)` (C rides) → ⌥⌘Z →
+  `revertDiverge` tombstones C's row and C and REVIVES O's row in B with only a live-post guard: O
+  lives in X, B in Y. (ii) `convertSmartReadingToCurated(G)` in X → ⌥⌘Z (the taken rows tombstone)
+  → `moveNoteToWing(N, Y)` (N had no live row in G to sever) → ⇧⌥⌘Z → `reapplySmartConversion`
+  revives N's row in G with only the live-post and no-live-pair guards — a U5-era class. Proposal:
+  **(a, recommended)** every revival site consults the one same-wing predicate F-U5b-1 introduced,
+  and an inverse whose revival would cross treats its entry as OBSOLETE, quiet — the "book deleted
+  meanwhile" bucket, checked before any write; (b) a wing move clears the session's structural
+  undo/redo stacks; (c) accept (session-scoped, rare). Nothing built; the architect rules.
+- **F-U5b-3 — the ruled 8(a) consequence, recorded:** a note of the bulk-moved wing that lay in its
+  Trash comes back (re-homed) WITHOUT the wing's tags — the move retired them, and a Put back revives
+  only applications of live tags (pinned as current behaviour). P-13id-U5b-13 carries the options.
+- **F-U5b-4 — Quicknotes can move:** only the daily Journal is ruled Home-only (item 7); the
+  Quicknotes gathering may go to another wing, after which quick notes (filed into Home, P-13id-U5-5)
+  stop showing in it. P-13id-U5b-8.
+- **F-U5b-5 / F-U5b-6 — the walk's two defects (W-1, W-2), both FIXED** with red-on-old pins and
+  re-walked (LIVE STATUS row 7).
+- **F-U5b-7 — walk residue in the dev store (the precedent — fixtures stay):** "refresh walk
+  (book)"'s three "2026-10-01" notes LEFT "u3 spawn walk" (5 → 2 notes) when the book moved — as
+  ruled; the severed memberships stay severed after the book came home (tombstones; re-add by hand
+  if wanted). The wing "Annex" was minted and deleted four times (tombstoned rows); its minted tags
+  retired with each bulk move; "refresh walk (book)", "starred notes", "field notes" and "bind walk"
+  each went to Annex and came home whole (tags re-adopted to Home's own). The "the door" and
+  "spawn walk (book)" confirms were Cancelled. Her voice (Terminal), appearance (system) and wing
+  (Home) restored.
+- **F-U5b-8 — harness facts for WalkKit:** `sips -c` silently returned the WHOLE image when asked
+  to crop a full 3456-px screen frame to the window (it cropped a smaller box fine) — `screencapture
+  -x -R x,y,w,h` (points) is the reliable road for window-only frames, menus and alerts included;
+  a batch file passed by a RELATIVE path to a script that `cd`s first reaches xcodebuild as NO
+  `-only-testing` arguments and runs the WHOLE bundle (stop it by path); the Study voice's switcher
+  menu opens at a different position than Terminal's (label-width dependent) — re-measure per
+  voice; Return does not press a SwiftUI alert's destructive button (click it).
+- **Tutorial (P-6):** no lesson sentence went false; lesson 11 — "Nothing crosses between wings
+  except what you move or copy yourself" — is truer (the Put back and the moves never cross by
+  themselves); the spine green (11 suites).
+- **MOBILE PARITY (record only — nothing built):** the phone owes both doors once it has a wing face
+  (U5's record: the switcher on its shelf screen) — Move to Wing on a book's row/details (never the
+  daily Journal), Move Everything on an additional wing — with the confirms' sentences (today
+  `WingCopy`, Mac-only: they move to `WingWords` when the phone speaks them) and the receipts; the
+  core ops and both previews are ready, and the shared refusal table already carries the two new
+  arms and the delete refusal's road words (the phone has no delete door yet, so it never says them).
 
 ### PROVISIONALS (QUESTIONS #175 carries them for her bundle)
 
-PENDING — numbered P-13id-U5b-n as they are built (the design above names 1, 3–7, 10, 11).
+- **P-13id-U5b-1** — a wing move fires NO intake in the destination: a moved living book meets the
+  destination's already-matching notes only on their next applying act (the note move's row-copy
+  letter, P-13id-U5-7). (a) BUILT · (b) the resume catch-up (bell them at the door — the rule-edit
+  precedent) · (c) the creation backfill (seat them).
+- **P-13id-U5b-2** — the per-item book move's confirm names MEMBER severances only; a member's
+  waiting arrival at a book that stays is dismissed silently (the note move's letter). (a) BUILT ·
+  (b) also say "N of its notes stop waiting at other books".
+- **P-13id-U5b-3** — the bulk door is a submenu of the other wings (Home first), each opening the
+  counting confirm; after the act she STAYS in the emptied wing (Delete Wing is the next door); an
+  already-empty wing's door speaks "already empty … Delete Wing… can take it" instead of asking.
+  (a) BUILT · (b) switch to the destination after the act.
+- **P-13id-U5b-4** — both doors ALWAYS confirm (no undo — the confirm is the net), unlike the
+  bookless note move's no-ask (P-13id-U5-12).
+- **P-13id-U5b-5** — a Put back never revives a membership across wings: the row stays decided-dead
+  (a note comes back bookless; a book comes back without a note that went elsewhere). (a) BUILT ·
+  (b) refuse the Put back · (c) re-home the note into the book's wing (rejected — a crossing she did
+  not make).
+- **P-13id-U5b-6** — the bulk confirm's tag sentence sorts every tag of the wing into JOINS a
+  same-named tag · MADE there · LET GO (nothing wears or names it and the destination lacks it),
+  NAMING the let-go ones — the ruling retires every source tag, so those names are the only loss.
+- **P-13id-U5b-7** — "every tag application re-points by path" read literally: a snippet's (or a
+  saved version's) block wearing one of the wing's tags re-points too, so the wing ends genuinely
+  empty. (a) BUILT · (b) only the moving notes' applications (a snippet-held tag keeps the wing
+  non-empty; Delete refuses naming it).
+- **P-13id-U5b-8** — the Quicknotes gathering may move (only the daily Journal is ruled Home-only);
+  quick notes keep filing into Home, so a moved Quicknotes stops showing new ones. (a) BUILT · (b)
+  Quicknotes is Home-only too (the door not drawn, the op refusing).
+- **P-13id-U5b-9** — wording, all 13s-revoicable: "Move to Wing ▸", "Move Everything to Another Wing
+  ▸", the confirms' sentences (incl. "N notes called “X” also leave “Y”", "Any tags its rule names
+  travel by name"), the receipts, the empty-wing and frozen lines, and the Delete Wing refusal's
+  "— or move everything to another wing".
+- **P-13id-U5b-10** — dead rule terms, dead outflow ids and a dead grouping id stay exactly as they
+  were (only LIVE tags of the source wing adopt; a dead term matches nothing in any wing).
+- **P-13id-U5b-11** — the bulk op's daily-Journal belt: a 'daily'-marked book among the movers
+  refuses `dailyJournalIsHomeOnly` unless the destination is Home (unreachable by construction —
+  the door lives on additional wings only).
+- **P-13id-U5b-12** — the moved reading's `updated_at` is stamped (the note move stamps its note);
+  the retired `auto_tag_id` column is left as it was (retired-as-read).
+- **P-13id-U5b-13** — a Trash row of the bulk-moved wing comes back without the wing's tags (the
+  move retired them). (a) KEPT (8(a)'s letter) · (b) the bulk move also re-points the Trash rows'
+  tombstoned applications (exact only when the destination is Home) · (c) Put back re-adopts by path.
+- **P-13id-U5b-14** — the severed list groups by the note's identity and merges notes whose clause
+  reads the same with a count ("3 notes called “2026-10-01” also leave “u3 spawn walk”") — walk W-1.
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -2163,7 +2346,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **DONE** (adjudicated 2026-10-02; core 2058/221 · Mac 732/117 · walk ×4; F-U4-5 ruled → U5 rider R1; F-U4-4/-7 → U6; F-U4-6 → the catch-up; #173) |
 | 5 | LADDER A (U1–U4) | **CLOSED** (2026-10-02, two rounds, zero disputes, no round 3; five fixes + the sanity NIT all landed; round 2's one NIT → U5 rider R2; the orchestrator's walk HELD on absent GUI grants — folded to her combined walk) |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
-| 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **IN-PROGRESS** (the U5b RECORD's LIVE STATUS) |
+| 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
