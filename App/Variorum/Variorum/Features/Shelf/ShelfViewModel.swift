@@ -160,13 +160,18 @@ final class ShelfViewModel {
     /// No "(collecting)" sibling any more — the ruling's own clause ("the
     /// '(collecting)' offer dies"); its reason (the book stopped collecting)
     /// is gone, and the deliberate sibling road is `spawnBook` below.
-    func bind(_ readingID: String) async {
+    func bind(
+        _ readingID: String, ownedNotes: Operations.BindOwnedNotes = .leaveOut
+    ) async {
         do {
             let result = try await session.runner.run { ops in
-                try ops.convertSmartReadingToCurated(readingID)
+                try ops.convertSmartReadingToCurated(readingID, ownedNotes: ownedNotes)
             }
             lastError = nil
-            lastReport = BindCopy.bound(result.reading.name, count: result.membershipIDs.count)
+            // 13i-c U3: the receipt names the owned-notes limb's outcome.
+            lastReport = BindCopy.bound(
+                result.reading.name, count: result.membershipIDs.count,
+                copied: result.copied.count, leftOut: result.leftOut.count)
         } catch let error as OperationError {
             lastReport = nil
             lastError = ReadingsViewModel.message(error)
@@ -189,8 +194,25 @@ final class ShelfViewModel {
     /// the mint ride ONE serialized runner closure, and the gathering's rule
     /// is read INSIDE it, so the copy is the rule as it stands at the act.
     /// Returns the new book's id.
+    /// **The spawn's PREFILL** (13i-c — R-13ic-1 and her item (i)): the
+    /// rule's POSITIVE tags (`RuleGrammar.positiveTagIDs` — never a tag the
+    /// rule excludes, F-R1-2's letter), in tree order, each a LIVE tag of the
+    /// gathering's wing (a dead reference would make an outflow a silent
+    /// no-op from birth). ONE function: the spawn sheet prefills from it and
+    /// a spawn with no chooser answer (`outflow: nil`) uses it.
+    nonisolated static func spawnPrefill(_ db: Database, gathering: Reading) throws -> [String] {
+        try RuleGrammar.positiveTagIDs(of: RuleGrammar.decode(gathering.querySpec))
+            .filter { try Queries.tagIsLive(db, id: $0, wingID: gathering.wingId) }
+    }
+
+    /// 13i-c U3: `outflow` is the spawn sheet's CHOSEN set (her edit of the
+    /// prefill — the spawn OFFERS the choice); nil = the prefill itself. A
+    /// chosen id that died meanwhile is dropped at the act (the chooser's
+    /// own rule), never written as a silent no-op.
     @discardableResult
-    func spawnBook(from gatheringID: String, named name: String) async -> String? {
+    func spawnBook(
+        from gatheringID: String, named name: String, outflow chosen: [String]? = nil
+    ) async -> String? {
         let database = session.database
         do {
             let (book, seated, ruleState) = try await session.runner.run {
@@ -218,8 +240,9 @@ final class ShelfViewModel {
                 // silent no-op from birth, so it is dropped. (U3 lets her
                 // EDIT this prefill in the spawn sheet before the mint.)
                 let outflow = try database.read { db in
-                    try RuleGrammar.positiveTagIDs(of: RuleGrammar.decode(gathering.querySpec))
-                        .filter { try Queries.tagIsLive(db, id: $0, wingID: gathering.wingId) }
+                    try chosen.map { ids in
+                        try ids.filter { try Queries.tagIsLive(db, id: $0, wingID: gathering.wingId) }
+                    } ?? Self.spawnPrefill(db, gathering: gathering)
                 }
                 let book = try ops.createReading(
                     name: name, kind: .book,

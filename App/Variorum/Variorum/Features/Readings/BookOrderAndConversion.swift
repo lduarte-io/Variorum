@@ -133,17 +133,29 @@ struct BindOffer: Identifiable, Equatable {
     /// The A31 view order the host is LOOKING through (the book view's), so
     /// the bind freezes the order she sees; nil = the stored order.
     let order: Queries.ReadingOrder?
+    /// 13i-c U3 — THE OWNED-NOTES LIMB (the 13i-c plan §3: "the sheet gains
+    /// the limb in U3"; the sitting record §3: "owned notes in the assembly
+    /// can't materialize, so the confirm lists them: copy in / leave out").
+    /// The assembly's notes another book OWNS, named with their owner —
+    /// exactly `Queries.bindOwnedNotesPreview`, the set the op's
+    /// `ownedNotes:` limb acts on. Empty in the common case.
+    var ownedElsewhere: [BindCopy.OwnedNote] = []
 
     var id: String { reading.id }
 
-    /// The door's one road to an offer: load the count, then hand back ONE
-    /// value — the host assigns it in a single write.
+    /// The door's one road to an offer: load the count AND the owned-notes
+    /// limb, then hand back ONE value — the host assigns it in a single write.
     static func load(
         _ session: AppSession, reading: Reading,
         followUp: BindFollowUp = .none, order: Queries.ReadingOrder? = nil
     ) async -> BindOffer {
         let count = await SmartConversionCount.collected(session, readingID: reading.id)
-        return BindOffer(reading: reading, count: count, followUp: followUp, order: order)
+        let owned = (try? await session.database.read { db in
+            try Queries.bindOwnedNotesPreview(db, readingID: reading.id, order: order)
+        }) ?? []
+        return BindOffer(
+            reading: reading, count: count, followUp: followUp, order: order,
+            ownedElsewhere: owned.map { BindCopy.OwnedNote(title: $0.title, owner: $0.owner.name) })
     }
 }
 
@@ -196,10 +208,48 @@ nonisolated enum BindCopy {
         "It stays the same book on your shelf \u{2014} same name, same star \u{2014} and it "
         + "keeps collecting after you bind it: new notes that match its rule join at the end."
 
-    static func bound(_ name: String, count: Int) -> String {
+    static func bound(_ name: String, count: Int, copied: Int = 0, leftOut: Int = 0) -> String {
         let notes = count == 1 ? "1 note" : "\(count) notes"
+        var limb: [String] = []
+        if copied > 0 { limb.append(copied == 1 ? "1 came in as a copy" : "\(copied) came in as copies") }
+        if leftOut > 0 {
+            limb.append(leftOut == 1
+                ? "1 was left out \u{2014} another book owns it"
+                : "\(leftOut) were left out \u{2014} other books own them")
+        }
+        let aside = limb.isEmpty ? "" : " (" + limb.joined(separator: "; ") + ")"
         return "\u{201C}\(name)\u{201D} is a book now \u{2014} \(notes) bound in, in the order "
-            + "you had them. It keeps collecting."
+            + "you had them\(aside). It keeps collecting."
+    }
+
+    // MARK: The bind's OWNED-NOTES LIMB (13i-c U3 — the plan §3, sitting §3)
+
+    /// A note of the assembly another book owns, named with its owner (the
+    /// app's own value, mapped from `Queries.OwnedElsewhereNote`).
+    struct OwnedNote: Equatable, Sendable {
+        let title: String
+        let owner: String
+    }
+
+    static let ownedLead =
+        "These notes belong to books that own them, so they can\u{2019}t simply join this one:"
+    static func ownedLine(_ note: OwnedNote) -> String {
+        "\(note.title) \u{2014} owned by \u{201C}\(note.owner)\u{201D}"
+    }
+    static let leaveOutChoice = "leave them out"
+    static let copyInChoice = "copy them in"
+    /// What each choice does, said whole (P-13ic-4: LEAVE OUT is the default
+    /// — copies are ceremonies, never silent).
+    static let leaveOutMeans =
+        "Left out, they won\u{2019}t be in the book \u{2014} they stay where they are."
+    static let copyInMeans =
+        "Copied in, each gets its own copy here (tags and all); the originals stay with "
+        + "the books that own them."
+
+    /// The members the bind will make under a choice: the shown notes,
+    /// minus the owned ones when they are left out (copies are members).
+    static func memberCount(shown: Int, owned: Int, choice: Operations.BindOwnedNotes) -> Int {
+        choice == .copyIn ? shown : max(0, shown - owned)
     }
 
     /// The teaching moment (the sitting record §3, verbatim): a hand-drag
@@ -224,7 +274,11 @@ nonisolated enum BindCopy {
             return "A new book with the same rule: the notes it matches now join it, and "
                 + "new matches keep joining. The gathering stays as it is."
         case .none:
-            return "This gathering has no rule \u{2014} it shows every note. The new book "
+            // 13i-c U3 (R-13ic-4, F-U1-3's class): no rule = NOTHING on a
+            // gathering — "it shows every note" went false at U1. (The shelf
+            // hides this door on a rule-less gathering now; the words stay
+            // true for any road that reaches it.)
+            return "This gathering has no rule, so it shows nothing. The new book "
                 + "starts empty and collects nothing by itself until you give it a rule "
                 + "(Edit Rule\u{2026}). The gathering stays as it is."
         case .malformed:
@@ -237,6 +291,11 @@ nonisolated enum BindCopy {
     /// PROVISIONAL (P-13ib-U3-2): the sibling's suggested name.
     static func spawnDefaultName(_ name: String) -> String { "\(name) (book)" }
     static let spawnConfirm = "Make Book"
+    /// 13i-c U3 — the spawn's OUTFLOW CHOOSER (her item (i): the spawn
+    /// OFFERS the choice): its note under the chooser.
+    static let spawnOutflowNote =
+        "Prefilled with the tags its rule asks for \u{2014} change them as you like, or "
+        + "remove them all."
 
     /// The spawn's receipt — the SAME rule-state vocabulary as the sheet
     /// (ladder round 2, NEW-R2-1: sheet and receipt read ONE
@@ -274,7 +333,10 @@ nonisolated enum BindCopy {
 /// decides nothing itself: it reports (`onConfirm`) and composition acts.
 struct BindIntoBookSheet: View {
     let offer: BindOffer
-    let onConfirm: () -> Void
+    /// Reports the press WITH the owned-notes choice (13i-c U3 — the limb).
+    let onConfirm: (Operations.BindOwnedNotes) -> Void
+    /// The limb's choice — LEAVE OUT by default (P-13ic-4).
+    @State private var ownedNotes: Operations.BindOwnedNotes = .leaveOut
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -293,14 +355,17 @@ struct BindIntoBookSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             ChromeNotice(
                 tokens: tokens,
-                text: BindCopy.explanation(count: offer.count, followUp: offer.followUp),
+                text: BindCopy.explanation(count: memberCount, followUp: offer.followUp),
                 ink: tokens.ink, lines: 10)
+            if !offer.ownedElsewhere.isEmpty {
+                ownedLimb
+            }
             HStack {
                 Spacer()
                 Button(tokens.chromeLabel("Cancel")) { dismiss() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 Button(tokens.chromeLabel(BindCopy.confirm(offer.followUp))) {
-                    onConfirm()
+                    onConfirm(ownedNotes)
                     dismiss()
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
@@ -311,15 +376,162 @@ struct BindIntoBookSheet: View {
         .frame(width: 460, alignment: .leading)
         .background(tokens.surface)
         #if DEBUG
-        .onAppear {
-            BindDoorProbe.shown = .init(
-                readingID: offer.reading.id, count: offer.count,
-                title: BindCopy.title(offer.reading.name, followUp: offer.followUp),
-                body: BindCopy.explanation(count: offer.count, followUp: offer.followUp),
-                confirm: BindCopy.confirm(offer.followUp))
-        }
+        .onAppear { record() }
+        .onChange(of: ownedNotes) { _, _ in record() }
         #endif
     }
+
+    /// The members the bind will make under the current choice.
+    private var memberCount: Int {
+        BindCopy.memberCount(
+            shown: offer.count, owned: offer.ownedElsewhere.count, choice: ownedNotes)
+    }
+
+    /// THE OWNED-NOTES LIMB: the notes listed with their owners, and the
+    /// two-way choice (leave out · copy in), each said whole.
+    private var ownedLimb: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ChromeNotice(tokens: tokens, text: BindCopy.ownedLead, ink: tokens.ink, lines: 2)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 3) {
+                    ForEach(Array(offer.ownedElsewhere.enumerated()), id: \.offset) { _, note in
+                        // A note's title is her prose — never `chromeLabel`'d.
+                        Text("\u{00B7} " + BindCopy.ownedLine(note))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .frame(maxHeight: 140)
+            HStack(spacing: 6) {
+                VoicedChip(
+                    tokens: tokens, text: BindCopy.leaveOutChoice, on: ownedNotes == .leaveOut,
+                    action: { ownedNotes = .leaveOut }, lines: 1)
+                VoicedChip(
+                    tokens: tokens, text: BindCopy.copyInChoice, on: ownedNotes == .copyIn,
+                    action: { ownedNotes = .copyIn }, lines: 1)
+            }
+            ChromeNotice(
+                tokens: tokens,
+                text: ownedNotes == .copyIn ? BindCopy.copyInMeans : BindCopy.leaveOutMeans,
+                lines: 3)
+        }
+    }
+
+    #if DEBUG
+    private func record() {
+        BindDoorProbe.shown = .init(
+            readingID: offer.reading.id, count: offer.count,
+            title: BindCopy.title(offer.reading.name, followUp: offer.followUp),
+            body: BindCopy.explanation(count: memberCount, followUp: offer.followUp),
+            confirm: BindCopy.confirm(offer.followUp),
+            owned: offer.ownedElsewhere.map(BindCopy.ownedLine),
+            ownedChoice: ownedNotes)
+    }
+    #endif
+}
+
+// MARK: - MAKE A BOOK FROM THIS GATHERING — the spawn sheet (13i-c U3)
+
+/// **THE SPAWN SHEET'S ITEM** (13i-c U3 — her item (i): the spawn OFFERS the
+/// outflow choice, prefilled). Carries everything the sheet shows — the
+/// gathering, the suggested name, the wing's live tags and the PREFILL — so
+/// the sheet reads only its item (the `BindOffer` lesson).
+struct SpawnOffer: Identifiable, Equatable {
+    let source: Reading
+    let defaultName: String
+    /// The gathering's wing's live tags — the chooser's choices.
+    let tags: [Tag]
+    /// `ShelfViewModel.spawnPrefill`: the rule's POSITIVE tags, live-filtered.
+    let prefill: [String]
+
+    var id: String { source.id }
+
+    static func load(_ session: AppSession, gathering: Reading) async -> SpawnOffer {
+        let (tags, prefill) = (try? await session.database.read { db in
+            (try Queries.allTags(db).filter { $0.wingId == gathering.wingId },
+             try ShelfViewModel.spawnPrefill(db, gathering: gathering))
+        }) ?? ([], [])
+        return SpawnOffer(
+            source: gathering, defaultName: BindCopy.spawnDefaultName(gathering.name),
+            tags: tags, prefill: prefill)
+    }
+}
+
+/// The spawn's sheet: the name, the truth per the rule's state, and the
+/// OUTFLOW CHOOSER prefilled with the rule's positive tags, editable before
+/// the mint. It decides nothing — it reports the name and the chosen set.
+struct SpawnBookSheet: View {
+    let offer: SpawnOffer
+    let onConfirm: (_ name: String, _ outflow: [String]) -> Void
+
+    @State private var name: String
+    @State private var outflow: OutflowDraft
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
+
+    init(offer: SpawnOffer, onConfirm: @escaping (_ name: String, _ outflow: [String]) -> Void) {
+        self.offer = offer
+        self.onConfirm = onConfirm
+        _name = State(initialValue: offer.defaultName)
+        _outflow = State(initialValue: OutflowDraft(offer.prefill))
+    }
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    private func label(_ id: String) -> String {
+        RuleEditorCopy.tag(path: offer.tags.first { $0.id == id }?.path)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(BindCopy.spawnTitle(offer.source.name))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            TextField("Name", text: $name)
+            ChromeNotice(
+                tokens: tokens,
+                text: BindCopy.spawnMessage(for: RuleGrammar.read(offer.source.querySpec)),
+                ink: tokens.ink, lines: 6)
+            Rectangle().fill(tokens.line).frame(height: 1)
+            OutflowChooser(tokens: tokens, draft: $outflow, tags: offer.tags, label: label)
+            ChromeNotice(tokens: tokens, text: BindCopy.spawnOutflowNote, lines: 2)
+            HStack {
+                Spacer()
+                Button(tokens.chromeLabel("Cancel")) { dismiss() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .keyboardShortcut(.cancelAction)
+                Button(tokens.chromeLabel(BindCopy.spawnConfirm)) {
+                    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                    onConfirm(trimmed.isEmpty ? offer.defaultName : trimmed, outflow.ids)
+                    dismiss()
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(16)
+        .frame(width: 480, alignment: .leading)
+        .background(tokens.surface)
+        #if DEBUG
+        .onAppear { record() }
+        .onChange(of: outflow) { _, _ in record() }
+        #endif
+    }
+
+    #if DEBUG
+    private func record() {
+        SpawnSheetProbe.shown = .init(
+            sourceID: offer.source.id, name: name, outflow: outflow.ids.map(label))
+    }
+    #endif
 }
 
 #if DEBUG
@@ -336,9 +548,25 @@ enum BindDoorProbe {
         var title = ""
         var body = ""
         var confirm = ""
+        /// 13i-c U3 — the owned-notes limb as drawn (empty when absent).
+        var owned: [String] = []
+        var ownedChoice: Operations.BindOwnedNotes = .leaveOut
     }
 
     static var openShelfDoor: ((Reading) -> Void)?
+    static var shown: Shown?
+}
+
+/// **WHAT THE MOUNTED SPAWN SHEET OFFERED** (13i-c U3): the prefilled
+/// outflow, as drawn. DEBUG only.
+@MainActor
+enum SpawnSheetProbe {
+    struct Shown: Equatable {
+        var sourceID: String
+        var name: String
+        var outflow: [String]
+    }
+
     static var shown: Shown?
 }
 #endif

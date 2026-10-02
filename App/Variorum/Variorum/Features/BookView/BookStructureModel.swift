@@ -536,15 +536,21 @@ final class BookStructureModel {
     /// `order` (13c K6 review, K2): the A31 view-order override the book
     /// view is browsing through, so the bind freezes the order she is
     /// actually LOOKING at — the sheet's own promise. nil = the stored order.
-    func bind(order: Queries.ReadingOrder? = nil) async -> Bool {
+    func bind(
+        order: Queries.ReadingOrder? = nil,
+        ownedNotes: Operations.BindOwnedNotes = .leaveOut
+    ) async -> Bool {
         do {
             let readingID = readingID
             let result = try await session.runner.run { ops in
-                try ops.convertSmartReadingToCurated(readingID, order: order)
+                try ops.convertSmartReadingToCurated(
+                    readingID, order: order, ownedNotes: ownedNotes)
             }
             lastError = nil
-            session.status.receipt(
-                BindCopy.bound(result.reading.name, count: result.membershipIDs.count))
+            // 13i-c U3: the receipt names the owned-notes limb's outcome.
+            session.status.receipt(BindCopy.bound(
+                result.reading.name, count: result.membershipIDs.count,
+                copied: result.copied.count, leftOut: result.leftOut.count))
             return true
         } catch let error as OperationError {
             lastError = ReadingsViewModel.message(error)

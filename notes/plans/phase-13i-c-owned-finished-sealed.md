@@ -692,7 +692,21 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   `GatheringRuleGateTests` (7) green; with RuleEditor · the registry walk · OutflowChooser ·
   BookStateDoors · BookSettingsSheet — **68 tests / 6 suites passed** (one clock fix in my own new
   pin: the Trash window reads the world's `now`, not the wall's).
-- **Piece E:** NOT STARTED.
+- **Piece E — THE SPAWN SHEET + THE BIND'S OWNED-NOTES LIMB:** DONE (commit "13i-c U3 piece E").
+  The spawn's 13i-b name-only `.alert` → `SpawnBookSheet` over a `SpawnOffer` item (the gathering, the
+  suggested name, the wing's live tags, the PREFILL — `ShelfViewModel.spawnPrefill`: the rule's positive
+  tags, tree order, live-filtered; ONE function for the sheet and the no-answer default) with the
+  `OutflowChooser`, editable before the mint; `spawnBook(from:named:outflow:)` writes her chosen set (a
+  chosen tag that died meanwhile drops at the act; nil = the prefill). `BindCopy.spawnMessage(.none)`
+  re-worded ("…it shows nothing" — the R-13ic-4 truth; the door itself hides there). THE LIMB:
+  `BindOffer.ownedElsewhere` (from `Queries.bindOwnedNotesPreview`, mapped to `BindCopy.OwnedNote`),
+  the sheet lists "Title — owned by “Book”" with the two-way choice (leave them out — DEFAULT,
+  P-13ic-4 · copy them in), each said whole, the count promise following the choice
+  (`BindCopy.memberCount`); `onConfirm` carries the choice to `ShelfViewModel.bind(_:ownedNotes:)` /
+  `BookStructureModel.bind(order:ownedNotes:)`; the receipt names the limb's outcome
+  (`BindCopy.bound(_:count:copied:leftOut:)` — the plain bind's words unchanged). `SpawnAndBindLimbTests`
+  (7) green; with BindDoor · BookOrderConversion · DuplicateBookNameDoor · BookAscentDeclaration —
+  **38 tests / 5 suites passed**.
 - **Piece F:** NOT STARTED.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
 

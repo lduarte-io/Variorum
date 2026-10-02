@@ -350,9 +350,9 @@ struct BookView: View {
         // hand-drag earns. The item carries its count (F-U2-3) and the view
         // order she was looking through (K2).
         .sheet(item: Bindable(structure).bindOffer) { offer in
-            BindIntoBookSheet(offer: offer) {
+            BindIntoBookSheet(offer: offer) { ownedNotes in
                 Task {
-                    let bound = await structure.bind(order: offer.order)
+                    let bound = await structure.bind(order: offer.order, ownedNotes: ownedNotes)
                     // FROZEN is the book's order now — drop the override
                     // so the menu stops claiming a separate way of
                     // looking (the "Save as This Book's Order" door's own

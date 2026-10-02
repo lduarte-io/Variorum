@@ -56,8 +56,10 @@ struct ShelfView: View {
     /// (F-U2-3: the old door kept the count in a separate `@State` that the
     /// sheet's closure read from a stale snapshot, promising "0 notes").
     @State private var bindOffer: BindOffer?
-    /// 13i-b U3: the SPAWN door's name prompt — the gathering it copies.
-    @State private var spawnSource: Reading?
+    /// 13i-c U3: the SPAWN door's sheet — its item carries the gathering,
+    /// the name and the outflow PREFILL (the 13i-b name-only alert retired:
+    /// the spawn OFFERS the outflow choice now — her item (i)).
+    @State private var spawnOffer: SpawnOffer?
     /// 13i-c U3 (R-13ic-4): the MINT sheet — a gathering is made WITH its
     /// rule. The sheet's item is the mint-mode editor (it carries the name).
     @State private var mintEditor: RuleEditorModel?
@@ -177,36 +179,21 @@ struct ShelfView: View {
             BookExtentSheet(model: model, reading: reading)
         }
         .sheet(item: $bindOffer) { offer in
-            BindIntoBookSheet(offer: offer) {
-                Task { await model.bind(offer.reading.id) }
+            BindIntoBookSheet(offer: offer) { ownedNotes in
+                Task { await model.bind(offer.reading.id, ownedNotes: ownedNotes) }
             }
         }
         // 13i-c U3: the STATE doors' confirms (Finish with arrivals waiting ·
         // Seal… · Unseal · Own Its Notes…) — the one presentation road the
         // settings sheet shares.
         .bookStateConfirms(model.stateDoors)
-        .alert(
-            spawnSource.map { BindCopy.spawnTitle($0.name) } ?? "",
-            isPresented: Binding(
-                get: { spawnSource != nil },
-                set: { if !$0 { spawnSource = nil } }),
-            presenting: spawnSource
-        ) { source in
-            TextField("Name", text: $nameField)
-            Button(BindCopy.spawnConfirm) {
-                let name = nameField.trimmingCharacters(in: .whitespacesAndNewlines)
-                Task {
-                    await model.spawnBook(
-                        from: source.id,
-                        named: name.isEmpty ? BindCopy.spawnDefaultName(source.name) : name)
-                }
+        // 13i-c U3 — THE SPAWN SHEET: the name, the truth per the rule's
+        // state (ladder F-R1-3's words), and the OUTFLOW CHOOSER prefilled
+        // with the rule's positive tags, editable before the mint.
+        .sheet(item: $spawnOffer) { offer in
+            SpawnBookSheet(offer: offer) { name, outflow in
+                Task { await model.spawnBook(from: offer.source.id, named: name, outflow: outflow) }
             }
-            Button("Cancel", role: .cancel) {}
-        } message: { source in
-            // Ladder F-R1-3: the body tells the truth per the gathering's
-            // rule state (a rule-less or unreadable rule spawns a book that
-            // starts empty and does not collect).
-            Text(BindCopy.spawnMessage(for: RuleGrammar.read(source.querySpec)))
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? readings.lastError {
@@ -374,8 +361,7 @@ struct ShelfView: View {
             }
             if hasRule {
                 Button(CapabilityRegistry.capability(.makeBookFromGathering).verb) {
-                    nameField = BindCopy.spawnDefaultName(reading.name)
-                    spawnSource = reading
+                    Task { spawnOffer = await SpawnOffer.load(session, gathering: reading) }
                 }
             }
         }
