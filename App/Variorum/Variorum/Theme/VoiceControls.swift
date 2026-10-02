@@ -163,6 +163,40 @@ struct VoicedMenu<Content: View>: View {
     }
 }
 
+/// **A voiced text field** (13i-d U3 — the 13i-c orchestrator walk's polish
+/// note: the Book Settings sheet's Name · Word target · Note cap were
+/// system-font Aqua fields beside its voiced sections). The book Index's
+/// filter field's idiom, given a label: a muted chrome word over a plain field
+/// in the voice's card box with a hairline — the app's own corner, never a
+/// bezel. The label is the field's accessibility title too.
+struct VoicedField: View {
+    let tokens: VoiceTokens
+    let label: String
+    @Binding var text: String
+    /// A faint hint inside the empty field ("blank = none").
+    var prompt: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(tokens.chromeLabel(label))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+            TextField(
+                label, text: $text,
+                prompt: prompt.map { Text(tokens.chromeLabel($0)).foregroundStyle(tokens.faint) })
+                .labelsHidden()
+                .textFieldStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(tokens.card, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+        }
+    }
+}
+
 /// The faint dot that separates status-line clusters (replaces bezel-era
 /// vertical dividers in voiced chrome).
 struct StatusDot: View {

@@ -80,6 +80,9 @@ nonisolated enum CollectingCopy {
     static let taggedNothing = "nothing"
     static let editDoor = "Edit\u{2026}"
     static let hideOwnedLabel = "Notes an owned book holds:"
+    /// The extent fields' faint hint (13i-d U3 — was the fields' titles'
+    /// "(blank = none)" suffix).
+    static let blankIsNone = "blank = none"
 
     static func title(isBook: Bool) -> String { isBook ? "Book Settings" : "Gathering Settings" }
 
@@ -363,15 +366,22 @@ struct BookSettingsSheet: View {
                 .lineLimit(1)
             let fields = structure.reading.map(BookSettingsFace.fields(for:))
                 ?? BookSettingsFace.Field.allCases
-            Form {
-                if fields.contains(.name) {
-                    TextField("Name", text: $nameField)
-                }
-                if fields.contains(.wordTarget) {
-                    TextField("Word target (blank = none)", text: $wordTargetField)
-                }
-                if fields.contains(.noteCap) {
-                    TextField("Note cap (blank = none)", text: $maxPostsField)
+            // 13i-d U3 (the 13i-c walk's polish note): the three fields take
+            // the voice — `VoicedField`, the chrome vocabulary's own.
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(fields, id: \.self) { field in
+                    switch field {
+                    case .name:
+                        VoicedField(tokens: tokens, label: field.rawValue, text: $nameField)
+                    case .wordTarget:
+                        VoicedField(
+                            tokens: tokens, label: field.rawValue, text: $wordTargetField,
+                            prompt: CollectingCopy.blankIsNone)
+                    case .noteCap:
+                        VoicedField(
+                            tokens: tokens, label: field.rawValue, text: $maxPostsField,
+                            prompt: CollectingCopy.blankIsNone)
+                    }
                 }
             }
             if let reading = structure.reading {
