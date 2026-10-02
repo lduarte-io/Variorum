@@ -40,31 +40,33 @@ private func withShellSession<T>(
 @MainActor
 @Suite("Shelf ordering & quick entry (Phase 13, B2)")
 struct ShelfModelTests {
-    @Test func orderingIsPinsThenJournalsThenRestByName() throws {
-        func book(_ id: String, _ name: String, profile: String? = nil) -> Queries.ShelfBook {
+    /// 13i-d U1 — AN HONEST TEST EDIT (the SUBJECT changed by her ruling;
+    /// no assertion weakened): R38's pins-then-journals-then-name order is
+    /// still the PHONE's (`ShelfOrder.ordered`, pinned by the mobile suites
+    /// and untouched this phase), but the Mac's Bookcase orders by §24 —
+    /// A–Z by default, STARRED floating first, and the journal books no
+    /// longer a group of their own (a journal is a book on a shelf like any
+    /// other). The same fixture, read under the ruled rule.
+    @Test func orderingIsStarredFirstThenAToZ() throws {
+        func book(_ id: String, _ name: String, profile: String? = nil, starred: Bool = false)
+            -> Queries.ShelfBook {
             Queries.ShelfBook(
                 reading: Reading(
-                    id: id, name: name, kind: .book, profile: profile,
+                    id: id, name: name, kind: .book, profile: profile, starred: starred,
                     createdAt: Date(), updatedAt: Date()),
                 postCount: 0, sectionCount: 0)
         }
         let books = [
-            book("z", "zebra"),
+            book("z", "zebra", starred: true),
             book("j", "Journal 2026", profile: "journal"),
             book("a", "alpha"),
             book("d", "Dream Journal", profile: "journal"),
-            // 13i-a (ladder R1 M-2): THE daily Journal wears 'daily' now —
-            // the trait predicate must keep it in the journal group. (The
-            // lowercase name is deliberate: it sorts AFTER "alpha" in the
-            // rest-group under either collation, so a reverted predicate
-            // reads [...j, a, t] and the pin goes RED — the first fixture
-            // was order-coincident and revert-verified hollow.)
             book("t", "journal", profile: "daily"),
-            book("p", "pinned late"),
+            book("p", "pinned late", starred: true),
         ]
-        let ordered = ShelfViewModel.ordered(books: books, pins: ["p", "z"])
-        #expect(ordered.map(\.reading.id) == ["p", "z", "d", "j", "t", "a"],
-                "pins first in PIN order (R38), then journal-TRAIT books ('daily' included), then the rest by name")
+        let ordered = BookcaseBoard.ordered(books, mode: .alphabetical, lastEdited: [:])
+        #expect(ordered.map(\.reading.id) == ["p", "z", "a", "d", "t", "j"],
+                "starred first (A–Z among them), then everything A–Z — Finder's rule (journal before Journal 2026)")
     }
 
     // `quickEntryMintsASegmentedPostAndReturnsItsID` retired with

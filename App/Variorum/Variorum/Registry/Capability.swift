@@ -725,6 +725,19 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // shelf row's menu. ONE act whose verb follows the book ("Duplicate with
     // Copies…" on an owned book — `DuplicateBookCopy.verb(owned:)`).
     case duplicateBook
+    // 13i-d U1 — THE BOOKCASE'S doors (the sitting record §7, §19–§24). The
+    // shelf name's right-click carries six acts (§7: "Rename · Set Glyph ·
+    // Make Default · Delete", §24: "+ Move to Start / Move to End"); the
+    // "+ shelf" word is the one `.surface` door; a book row gains three (Move
+    // to Shelf ▸, and my order's Send to Top / Send to Bottom — §20). Ten
+    // declarations on the `.moveTakeEarlier`/`.moveTakeLater` grounds: each
+    // its own door with its own words and its own enablement. The view-local
+    // controls (the strip's solo, the № census, order ▾, details, a header's
+    // collapse) are NOT acts — they change what she sees, never the store —
+    // exactly as the Library's `sort ▾` and day filter are undeclared.
+    case newShelf, renameShelf, setShelfGlyph, makeDefaultShelf
+    case moveShelfToStart, moveShelfToEnd, deleteShelf
+    case moveBookToShelf, sendBookToTop, sendBookToBottom
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

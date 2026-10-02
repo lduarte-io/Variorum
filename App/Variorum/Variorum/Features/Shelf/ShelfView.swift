@@ -2,11 +2,24 @@
 //  ShelfView.swift
 //  Variorum
 //
-//  Phase 13, B2 — THE SHELF (home): the terminal LIST style with a TAGS
-//  column (R4), the ls-line, pinning (R38), finish + extent faces, and the
-//  bottom QUICK-ENTRY bar (R3 — "start typing" pinned at the bottom, the
-//  list scrolling above it under a max height; Enter opens the typed text
-//  as a whole post; the blinking block cursor is the terminal idiom).
+//  Phase 13, B2 — THE SHELF (home); REBUILT at 13i-d U1 as **THE BOOKCASE**
+//  (the sitting record §7, §19–§24; mockup v5 — the SHAPE and idiom, the
+//  app's own tokens/spacing/type/corners, never the mockup's rounded edges,
+//  §22's caution).
+//
+//  Top to bottom, ONE line between the masthead and the books (§23):
+//  · the masthead — "Bookcase", Today's Entry · + New Book (the old counts
+//    line is gone: the № census holds every number now);
+//  · THE STRIP (`BookcaseStrip`) — All · the shelves · ⋯ · + shelf, then the
+//    utility run № · order ▾ · details;
+//  · the № panel when she opened it (in flow, right-aligned — mockup v5);
+//  · the books: a solo'd shelf's rows, or ALL — UNSHELVED at the top under
+//    its own collapsible header (§24's overrule), then every shelf in strip
+//    order under the Library's gray section labels, collapsible;
+//  · the quick-entry box (R3), and at the window's foot the ⌘K hint bar,
+//    whose trailing end is now the board's QUIET RECEIPT home (18i) — the
+//    old report overlay drew ON TOP of the hint (KnownIssues rows 103 and
+//    108, closed by the rebuild).
 //  Voiced through the token layer — no literal colors here.
 //
 
@@ -23,12 +36,15 @@ struct ShelfView: View {
     /// the six STATE doors (Finish/Reopen joined the registry with them —
     /// the settings sheet renders them too) and the Trash door, drawn from
     /// the declaration it now shares with the rule editor's gathering gate.
+    /// 13i-d U1 adds the Bookcase's three book doors: Move to Shelf ▸ and
+    /// my order's Send to Top / Send to Bottom (§20, §24).
     static let contextMenuCapabilities: [CapabilityID] = [
         .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
     ] + BookStateDoorSet.all + [.deleteBook]
         // 13i-c U4: Duplicate Book… (§6 — shallow or with copies; an owned
         // book with copies only).
         + [.duplicateBook]
+        + [.moveBookToShelf, .sendBookToTop, .sendBookToBottom]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -38,7 +54,7 @@ struct ShelfView: View {
     /// The dated home's door (R38: the journal lives on the shelf).
     let onTodaysEntry: () -> Void
     /// 13f batch 6 (W4): the star door on the BOOK rows — her ruling's
-    /// "notes or books", so the shelf renders the same act the note-row
+    /// "notes or books", so the board renders the same act the note-row
     /// family does, from the same declaration.
     var starDoor: StarDoor? = nil
 
@@ -60,45 +76,71 @@ struct ShelfView: View {
     /// sheet's closure read from a stale snapshot, promising "0 notes").
     @State private var bindOffer: BindOffer?
     /// 13i-c U3: the SPAWN door's sheet — its item carries the gathering,
-    /// the name and the outflow PREFILL (the 13i-b name-only alert retired:
-    /// the spawn OFFERS the outflow choice now — her item (i)).
+    /// the name and the outflow PREFILL.
     @State private var spawnOffer: SpawnOffer?
     /// 13i-c U3 (R-13ic-4): the MINT sheet — a gathering is made WITH its
     /// rule. The sheet's item is the mint-mode editor (it carries the name).
     @State private var mintEditor: RuleEditorModel?
     /// 13i-c U4: Duplicate Book…'s prompt — its item is the book it is FOR.
     @State private var duplicateOffer: DuplicateBookOffer?
+    // 13i-d U1 — the shelf doors' prompts (the strip asks; this view owns
+    // the presentation, the `BookStateDoors` shape).
+    @State private var newShelfPresented = false
+    @State private var shelfNameField = ""
+    @State private var renameShelfTarget: Shelf?
+    @State private var glyphTarget: Shelf?
+    @State private var deleteShelfTarget: Shelf?
+    /// The book row a dragged BOOK hovers over in "my order" (the insertion
+    /// hairline), and the section header a book hovers over (re-shelve).
+    @State private var rowDropTarget: String?
+    @State private var headerDropTarget: String?
     /// Batch 9 (R102): the list region hugs its content, so the
     /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
-    /// geometry at every window size ("the start new post typing isn't
-    /// high up"). On a shelf taller than the window the region fills the
-    /// window and the bar stays pinned above the fold, exactly as R3
-    /// ruled.
+    /// geometry at every window size. On a board taller than the window the
+    /// region fills the window and the bar stays pinned above the fold,
+    /// exactly as R3 ruled.
     @State private var listContentHeight: CGFloat = 0
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    private var shelfMenuActions: ShelfMenuActions {
+        ShelfMenuActions(
+            rename: { shelf in
+                shelfNameField = shelf.name
+                renameShelfTarget = shelf
+            },
+            setGlyph: { glyphTarget = $0 },
+            delete: { deleteShelfTarget = $0 })
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
             Divider().overlay(tokens.line)
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(model.orderedBooks, id: \.reading.id) { book in
-                        shelfRow(book)
-                        Divider().overlay(tokens.line.opacity(0.6))
-                    }
-                    if model.books.isEmpty {
-                        Text(tokens.chromeLabel("No books yet — create one, or just start typing below."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .padding(24)
-                    }
+            BookcaseStrip(
+                model: model, tokens: tokens, menuActions: shelfMenuActions,
+                onNewShelf: {
+                    shelfNameField = ""
+                    newShelfPresented = true
+                })
+            if model.censusOpen {
+                // The № panel, in flow and right-aligned under the utility
+                // run (mockup v5) — opened by her click, remembered.
+                HStack {
+                    Spacer(minLength: 0)
+                    BookcaseCensusPanel(model: model, tokens: tokens)
                 }
                 .padding(.horizontal, 28)
-                .padding(.vertical, 10)
+                .padding(.bottom, 6)
+            }
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    boardContent
+                }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 10)
                 .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) {
                     listContentHeight = $0
                 }
@@ -120,16 +162,19 @@ struct ShelfView: View {
             TextField("Name", text: $nameField)
             Button("Create Book") {
                 let name = nameField
-                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .book) }
+                mint { await readings.create(
+                    name: name.isEmpty ? "Untitled" : name, kind: .book, shelfId: $0) }
             }
             // 13i-c U3 (R-13ic-4, F-U1-2): the mint door REQUIRES a rule, so
             // it opens the mint sheet (the rule drafted inline; Create
             // disabled until a term exists) instead of minting a rule-less
             // gathering the op refuses. Its "smart" wording stays until
-            // 13i-d's vocabulary sweep.
+            // 13i-d's vocabulary sweep (U6).
             Button("Create Smart Book\u{2026}") {
-                let editor = RuleEditorModel(session: session, mintingIn: "")
+                let editor = RuleEditorModel(session: session, mintingIn: model.wingID)
                 editor.mintName = nameField
+                // 13i-d U1: the context mint reaches the gathering mint too.
+                editor.mintShelfID = model.mintShelfID
                 mintEditor = editor
             }
             // §14 item 10's "starting a 'new' journal as a separate
@@ -137,16 +182,16 @@ struct ShelfView: View {
             // another; round 2's re-designation door pairs with it).
             Button("Create Journal Book") {
                 let name = nameField
-                Task {
-                    await readings.create(
-                        name: name.isEmpty ? "Untitled Journal" : name,
-                        kind: .book, profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .desc)
-                }
+                mint { await readings.create(
+                    name: name.isEmpty ? "Untitled Journal" : name,
+                    kind: .book, profile: Queries.journalTraitProfile,
+                    sortField: .entryDate, sortDir: .desc, shelfId: $0) }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("A book holds a hand-picked, ordered note list; a smart book collects by filter; a journal book holds dated entries.")
+            Text(model.mintShelfID.flatMap { id in model.shelves.first { $0.id == id } }
+                .map { "It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. " } ?? "")
+                + Text("A book holds a hand-picked, ordered note list; a smart book collects by filter; a journal book holds dated entries.")
         }
         .alert(
             "Rename Book",
@@ -158,18 +203,64 @@ struct ShelfView: View {
             TextField("Name", text: $nameField)
             Button("Rename") {
                 let name = nameField
-                Task { await readings.rename(reading.id, to: name) }
+                Task {
+                    await readings.rename(reading.id, to: name)
+                    if let error = readings.lastError { model.refuse(error) }
+                }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        // 13i-d U1 — the shelf prompts.
+        .alert("New Shelf", isPresented: $newShelfPresented) {
+            TextField("Name", text: $shelfNameField)
+            Button("Make Shelf") {
+                let name = shelfNameField
+                Task { await model.createShelf(named: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("It joins the end of the strip. Drag a book onto its name to put it there.")
+        }
+        .alert(
+            "Rename Shelf",
+            isPresented: Binding(
+                get: { renameShelfTarget != nil },
+                set: { if !$0 { renameShelfTarget = nil } }),
+            presenting: renameShelfTarget
+        ) { shelf in
+            TextField("Name", text: $shelfNameField)
+            Button("Rename") {
+                let name = shelfNameField
+                Task { await model.renameShelf(shelf.id, to: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert(
+            deleteShelfTarget.map { BookcaseCopy.deleteShelfTitle($0.name) } ?? "",
+            isPresented: Binding(
+                get: { deleteShelfTarget != nil },
+                set: { if !$0 { deleteShelfTarget = nil } }),
+            presenting: deleteShelfTarget
+        ) { shelf in
+            Button(BookcaseCopy.deleteShelfVerb.replacingOccurrences(of: "\u{2026}", with: ""),
+                   role: .destructive) {
+                Task { await model.deleteShelf(shelf.id) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { shelf in
+            Text(BookcaseCopy.deleteShelfMessage(books: model.shelfCounts[shelf.id] ?? 0))
+        }
+        .sheet(item: $glyphTarget) { shelf in
+            ShelfGlyphSheet(shelf: shelf) { glyph in
+                Task { await model.setGlyph(shelf.id, glyph: glyph) }
+            }
         }
         .sheet(item: $manageTarget) { reading in
             ManageReadingPostsSheet(session: session, model: readings, reading: reading)
         }
-        // 13i-b U3 walk finding F-U3-1: the shelf's tags column and word
-        // counts are ONE-SHOT aggregates (refreshed on appearance and after
-        // its own membership acts); a saved rule changes what a gathering
-        // shows, so the row refreshes when the editor closes — it read
-        // "smart" with no tag until the shelf was re-entered.
+        // 13i-b U3 walk finding F-U3-1: the board's tags column and word
+        // counts are ONE-SHOT aggregates; a saved rule changes what a
+        // gathering shows, so the row refreshes when the editor closes.
         .sheet(item: $ruleEditor, onDismiss: {
             Task { await model.refreshAggregates() }
         }) { editor in
@@ -183,8 +274,7 @@ struct ShelfView: View {
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)
         }
-        // 13i-c U4 — DUPLICATE BOOK… (§6): the name (E13's guard, refuse and
-        // keep) and the with-copies choice (fixed on for an owned book).
+        // 13i-c U4 — DUPLICATE BOOK… (§6).
         .sheet(item: $duplicateOffer, onDismiss: {
             Task { await model.refreshAggregates() }
         }) { offer in
@@ -195,53 +285,43 @@ struct ShelfView: View {
                 Task { await model.bind(offer.reading.id, ownedNotes: ownedNotes) }
             }
         }
-        // 13i-c U3: the STATE doors' confirms (Finish with arrivals waiting ·
-        // Seal… · Unseal · Own Its Notes…) — the one presentation road the
+        // 13i-c U3: the STATE doors' confirms — the one presentation road the
         // settings sheet shares.
         .bookStateConfirms(model.stateDoors)
         // 13i-c U4 (§4 row 17): the row drop's ownership choice.
         .membershipChoices(model.membershipDoors) { _ in
             Task { await model.refreshAggregates() }
         }
-        // 13i-c U3 — THE SPAWN SHEET: the name, the truth per the rule's
-        // state (ladder F-R1-3's words), and the OUTFLOW CHOOSER prefilled
-        // with the rule's positive tags, editable before the mint.
+        // 13i-c U3 — THE SPAWN SHEET.
         .sheet(item: $spawnOffer) { offer in
             SpawnBookSheet(offer: offer) { name, outflow in
                 Task { await model.spawnBook(from: offer.source.id, named: name, outflow: outflow) }
             }
         }
-        .overlay(alignment: .bottomLeading) {
-            if let error = model.lastError ?? readings.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .lineLimit(4)
-                    .padding(6)
-            } else if let report = model.lastReport {
-                // R98's report half — informative, never red.
-                Text(tokens.chromeLabel(report))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .lineLimit(3)
-                    .padding(6)
+    }
+
+    /// A book mint from the New Book prompt — the CONTEXT MINT (§19.1/§24:
+    /// a solo'd shelf receives it, All leaves it unshelved) — speaking the
+    /// door's refusal on the status seam (18i) rather than an overlay.
+    private func mint(_ body: @escaping (String?) async -> String?) {
+        let shelfID = model.mintShelfID
+        Task {
+            if await body(shelfID) == nil, let error = readings.lastError {
+                model.refuse(error)
+            } else {
+                await model.refreshAggregates()
             }
         }
     }
 
-    // MARK: - Header (the ls-line)
+    // MARK: - The masthead
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(tokens.path(["Shelf"]))
+            Text(tokens.path(["Bookcase"]))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
-            Text(tokens.chromeLabel(
-                "· \(model.books.count) books · \(model.finishedCount) finished"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
             Spacer()
             Button(tokens.chromeLabel("Today's Entry")) { onTodaysEntry() }
                 .buttonStyle(.borderless)
@@ -259,24 +339,119 @@ struct ShelfView: View {
         .padding(.vertical, 12)
     }
 
-    // MARK: - Rows
+    // MARK: - The books
+
+    @ViewBuilder
+    private var boardContent: some View {
+        let sections = model.sections
+        let isAll = model.effectiveScope == .all
+        if model.books.isEmpty, isAll {
+            Text(tokens.chromeLabel("No books yet — create one, or just start typing below."))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 24)
+        }
+        ForEach(sections) { section in
+            if isAll {
+                sectionHeader(section)
+            }
+            if !isAll || !model.isCollapsed(section.id) {
+                ForEach(section.books, id: \.reading.id) { book in
+                    shelfRow(book)
+                    Divider().overlay(tokens.line.opacity(0.6))
+                }
+                if section.books.isEmpty, model.solo == nil, !(isAll && model.books.isEmpty) {
+                    Text(tokens.chromeLabel(
+                        "Nothing on this shelf yet — drag a book onto its name."))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .padding(.vertical, 10)
+                }
+            }
+        }
+        if let solo = model.solo, sections.allSatisfy(\.books.isEmpty) {
+            Text(tokens.chromeLabel("Nothing in view matches \u{201C}"
+                + "\(solo.label(count: 0).dropFirst(2))\u{201D} — click \u{2116} to clear it."))
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .padding(.vertical, 10)
+        }
+    }
+
+    /// A section label in All — the Library's gray label idiom (§21),
+    /// collapsible (remembered), a DROP target (a book re-shelves here), and
+    /// for a shelf the same right-click the strip's name carries.
+    @ViewBuilder
+    private func sectionHeader(_ section: BookcaseBoard.Section) -> some View {
+        let collapsed = model.isCollapsed(section.id)
+        let title: String = {
+            switch section.kind {
+            case .unshelved: return BookcaseCopy.unshelvedName
+            case .shelf(let shelf): return ShelfFace.label(shelf)
+            }
+        }()
+        let label = HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(collapsed ? "\u{25B8}" : "\u{25BE}")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+            Text(tokens.chromeLabel(title))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+            if collapsed {
+                Text("\(section.books.count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.top, 16)
+        .padding(.bottom, 4)
+        .contentShape(Rectangle())
+        .onTapGesture { model.toggleCollapsed(section.id) }
+        .overlay(alignment: .bottom) {
+            if headerDropTarget == section.id {
+                Rectangle().fill(tokens.line).frame(height: 1)
+            }
+        }
+        .onDrop(
+            of: [BookcaseDrag.type],
+            isTargeted: Binding(
+                get: { headerDropTarget == section.id },
+                set: { headerDropTarget = $0 ? section.id
+                    : (headerDropTarget == section.id ? nil : headerDropTarget) })
+        ) { providers in
+            BookcaseDrag.load(providers) { payload in
+                if case .book(let readingID) = payload {
+                    Task { await model.reshelve(readingID, to: section.shelfID) }
+                }
+            }
+        }
+        .help(collapsed ? "Show this shelf's books" : "Fold this shelf away")
+        if case .shelf(let shelf) = section.kind {
+            label.contextMenu { ShelfMenu(shelf: shelf, model: model, actions: shelfMenuActions) }
+        } else {
+            label
+        }
+    }
 
     private func shelfRow(_ book: Queries.ShelfBook) -> some View {
         let reading = book.reading
-        let pinned = model.pins.contains(reading.id)
+        let placing = model.orderMode == .mine
         return Button {
             onOpen(.reading(reading.id))
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
-                HStack(spacing: 4) {
-                    if pinned {
-                        Image(systemName: "pin.fill")
-                            .font(.system(size: 8))
-                            .foregroundStyle(tokens.faint)
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    if reading.starred {
+                        Text(StarCopy.glyph)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.star)
                     }
-                    Text(tokens.chromeLabel(reading.name) + (reading.locked ? " ✓" : ""))
+                    Text(tokens.chromeLabel(reading.name))
                         .font(tokens.body.weight(.semibold))
-                        .foregroundStyle(reading.locked ? tokens.accent : tokens.ink)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
                 }
                 .frame(minWidth: 160, alignment: .leading)
                 Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))
@@ -284,18 +459,43 @@ struct ShelfView: View {
                     .foregroundStyle(tokens.accent.opacity(0.85))
                     .lineLimit(1)
                 Spacer(minLength: 12)
-                Text(metaColumn(book))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
+                // §23: details OFF hides the row meta AND the arrivals count
+                // ("the point is that the chrome can be clean if desired").
+                if model.detailsShown {
+                    metaText(book)
+                        .font(tokens.small)
+                        .lineLimit(1)
+                }
             }
             .padding(.vertical, 8)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        // Drag a post onto the book (sitting 1) — the drop is the gesture.
-        .onDrop(of: [.plainText], isTargeted: nil) { providers in
-            for provider in providers {
+        .overlay(alignment: .top) {
+            // My order's insertion hairline: the dragged book lands HERE.
+            if placing, rowDropTarget == reading.id {
+                Rectangle().fill(tokens.accent.opacity(0.6)).frame(height: 1)
+            }
+        }
+        .onDrag { BookcaseDrag.book(reading.id).provider() }
+        // Two payloads, one drop: a NOTE (plain text — "drag posts onto a
+        // book", sitting 1) joins the book; a BOOK (the Bookcase's own
+        // payload, my order only — the placing mode, §24) lands right above.
+        .onDrop(
+            of: placing ? [.plainText, BookcaseDrag.type] : [.plainText],
+            isTargeted: Binding(
+                get: { rowDropTarget == reading.id },
+                set: { rowDropTarget = $0 ? reading.id
+                    : (rowDropTarget == reading.id ? nil : rowDropTarget) })
+        ) { providers in
+            if placing, BookcaseDrag.load(providers, { payload in
+                if case .book(let dragged) = payload {
+                    Task { await model.dropBook(dragged, before: reading.id) }
+                }
+            }) {
+                return true
+            }
+            for provider in providers where provider.canLoadObject(ofClass: NSString.self) {
                 _ = provider.loadObject(ofClass: NSString.self) { value, _ in
                     guard let postID = value as? String else { return }
                     Task { @MainActor in await model.addPost(postID, to: reading.id) }
@@ -306,79 +506,85 @@ struct ShelfView: View {
         .contextMenu { bookMenu(book) }
     }
 
-    private func metaColumn(_ book: Queries.ShelfBook) -> String {
-        let reading = book.reading
-        var parts: [String] = []
-        if reading.locked {
-            parts.append("finished")
-        }
-        if reading.kind == .gathering {
-            parts.append("smart")
-        } else {
-            parts.append("\(book.postCount) notes")
-            if book.sectionCount > 0 { parts.append("\(book.sectionCount) ch") }
-        }
-        if let progress = model.progress(for: book) {
-            parts.append("\(progress.percent)% of \(progress.target)w")
-        } else if let words = model.wordCounts[reading.id], words > 0 {
-            parts.append("\(words)w")
-        }
-        if let cap = reading.maxPosts { parts.append("cap \(cap)") }
-        return tokens.chromeLabel(parts.joined(separator: " · "))
+    /// The row meta: the accent arrival count first (§4 — a book asking
+    /// for judgment), then the quiet facts (`BookcaseRowMeta`, pinned).
+    private func metaText(_ book: Queries.ShelfBook) -> Text {
+        let rest = Text(tokens.chromeLabel(BookcaseRowMeta.facts(
+            book, words: model.wordCounts[book.reading.id],
+            progress: model.progress(for: book),
+            gatheringCount: model.gatheringCounts[book.reading.id])))
+            .foregroundStyle(tokens.muted)
+        guard let arrivals = BookcaseRowMeta.arrivals(book) else { return rest }
+        return Text(tokens.chromeLabel(arrivals)).foregroundStyle(tokens.accent).fontWeight(.semibold)
+            + Text(" \u{00B7} ").foregroundStyle(tokens.muted)
+            + rest
     }
 
     @ViewBuilder
     private func bookMenu(_ book: Queries.ShelfBook) -> some View {
         let reading = book.reading
-        let pinned = model.pins.contains(reading.id)
-        Button(pinned ? "Unpin from Shelf Top" : "Pin to Shelf Top") {
-            Task { await model.setPinned(reading.id, pinned: !pinned) }
-        }
-        // 13f batch 6 (W4): starring a BOOK. Deliberately beside pinning,
-        // which is its nearest neighbour and its clearest contrast — a pin
-        // orders THIS list, a star lifts the book out of it to the
-        // sidebar's top.
+        // 13f batch 6 (W4): starring a BOOK — it joins the sidebar's
+        // Starred list. (13i-d U1, F-U1-2: the star and the shelf PIN below
+        // are still two stores; their unification is STOPPED for the
+        // architect's ruling, so both doors ride as shipped until then.)
         if let starDoor {
             Button(starDoor.title(for: .reading(reading.id))) {
                 starDoor.toggle(.reading(reading.id))
             }
         }
-        Button("Rename…") {
+        Button(reading.starred ? "Unpin from Shelf Top" : "Pin to Shelf Top") {
+            Task { await model.setPinned(reading.id, pinned: !reading.starred) }
+        }
+        // 13i-d U1 — MOVE TO SHELF ▸ (the menu road beside the drag — every
+        // shelf of this wing, and Unshelved; the one it is on is omitted).
+        let here = model.shelfKey(of: reading.id)
+        Menu(CapabilityRegistry.capability(.moveBookToShelf).verb) {
+            ForEach(model.shelves, id: \.id) { shelf in
+                if here != shelf.id {
+                    Button(ShelfFace.label(shelf)) {
+                        Task { await model.reshelve(reading.id, to: shelf.id) }
+                    }
+                }
+            }
+            if here != BookcaseBoard.unshelvedKey {
+                if !model.shelves.isEmpty { Divider() }
+                Button(BookcaseCopy.unshelvedName) {
+                    Task { await model.reshelve(reading.id, to: nil) }
+                }
+            }
+        }
+        // My order's own doors (§20, §24): rendered only in the PLACING mode
+        // — under A–Z or last edited a hand position would not show (P-2).
+        if model.orderMode == .mine {
+            Button(CapabilityRegistry.capability(.sendBookToTop).verb) {
+                Task { await model.place(reading.id, at: .top) }
+            }
+            Button(CapabilityRegistry.capability(.sendBookToBottom).verb) {
+                Task { await model.place(reading.id, at: .bottom) }
+            }
+        }
+        Divider()
+        Button("Rename\u{2026}") {
             nameField = reading.name
             renameTarget = reading
         }
-        // 13i-c U4 — DUPLICATE (§6): books only — a gathering has no
-        // duplicate op (§3: making a new gathering is already one gesture).
-        // The word follows the book: an owned book duplicates WITH COPIES
-        // only (the op refuses a shallow one — P-2: never offered).
+        // 13i-c U4 — DUPLICATE (§6): books only.
         if reading.kind == .book {
             Button(DuplicateBookCopy.verb(owned: reading.owned)) {
                 duplicateOffer = DuplicateBookOffer(
                     readingID: reading.id, name: reading.name, owned: reading.owned)
             }
         }
-        // 13i-b U3: the RULE EDITOR's door, for gatherings AND books — a
-        // book's rule is its intake (the plan §4 item 1). It replaced the v1
-        // "Edit Filter…" sheet, which could silently drop a term on save.
+        // 13i-b U3: the RULE EDITOR's door, for gatherings AND books.
         Button(CapabilityRegistry.capability(.editRule).verb) {
             ruleEditor = RuleEditorModel(session: session, readingID: reading.id)
         }
         if reading.kind == .book {
-            Button("Manage Notes…") { manageTarget = reading }
+            Button("Manage Notes\u{2026}") { manageTarget = reading }
         } else {
-            // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3),
-            // visibly different: BIND makes THIS row a book in place (§19.6
-            // — same id, name, star; it keeps collecting, §14.6); SPAWN
-            // seeds a sibling book from the rule and leaves the gathering as
-            // it is. Bind is hidden on a finished gathering — binding is a
-            // structural act on a thing declared done, and the op refuses it
-            // (P-2: a door that can't act isn't rendered).
-            //
-            // 13i-c (the plan §2, R-13ic-4): a RULE-LESS gathering — a Trash
-            // restoree, the only way one can exist live — shows nothing, so
-            // its bind and spawn doors HIDE (P-2): binding nothing or copying
-            // no rule is not the act either door names. Its road back is
-            // Edit Rule… (or the Trash, from the editor's gate).
+            // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3).
+            // Bind hides on a finished gathering and both hide on a rule-less
+            // one (P-2 — the op refuses; a door that can't act isn't drawn).
             let hasRule = RuleGrammar.read(reading.querySpec) != .none
             if !reading.locked, hasRule {
                 Button(CapabilityRegistry.capability(.bindIntoBook).verb) {
@@ -391,34 +597,36 @@ struct ShelfView: View {
                 }
             }
         }
-        Button("Length & Extent…") { extentTarget = reading }
+        // 13i-d U1 — KnownIssues row 107's SHELF-MENU half (P-13ic-U3-2,
+        // ruled to the sitting record §3's letter: a gathering has NO word
+        // target or capacity): Length & Extent… is a BOOK's door only.
+        if reading.kind == .book {
+            Button("Length & Extent\u{2026}") { extentTarget = reading }
+        }
         if reading.kind == .book, Queries.hasJournalTrait(reading.profile) {
-            // Round 2, MAJOR 2's re-designation door: finishing a bounded
-            // daily journal is the EXPECTED flow — this is where the next
-            // one takes over.
+            // Round 2, MAJOR 2's re-designation door.
             Button("Use as Daily Journal") {
                 Task { await model.designateDailyJournal(reading.id) }
             }
         }
         Divider()
-        // 13i-c U3 — THE STATE DOORS, rendered from the one table
-        // (`BookStateDoorSet` — which of each pair, as data) and named by
-        // the registry. The same acts and confirms as the settings sheet's
-        // STATE section (`BookStateDoors`).
-        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading)), id: \.self) { act in
+        // 13i-c U3 — THE STATE DOORS, from the one table and named by the
+        // registry. 13i-d U1 (row 107's shelf half): a gathering has no
+        // FINISH (§3) — the door leaves its menu; Reopen stays ONLY on a
+        // gathering that is already (legacy) finished, as its way out
+        // (PROVISIONAL P-13id-U1-9; U3 rules the ops' refusal arm).
+        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading))
+            .filter { reading.kind == .book || $0 != .finishBook }, id: \.self) { act in
             Button(CapabilityRegistry.capability(act).verb) {
                 Task { await model.stateDoors.open(act, readingID: reading.id) }
             }
         }
         Divider()
-        Button("Export Markdown…") { ReadingExport.export(session: session, reading: reading, asPDF: false) }
-        Button("Export PDF…") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
+        Button("Export Markdown\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: false) }
+        Button("Export PDF\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
         Divider()
-        // 13i-c U3: named by the registry's `.deleteBook` (the rule editor's
-        // gathering gate is its other renderer). 13i-c U4 (F-U3-2): it routes
-        // through the ONE confirm road — a plain book's confirm (it never
-        // touches a note), an owned book's TWO-CHOICE confirm (book only ·
-        // book and its N notes — §6), a gathering's (U3's words).
+        // 13i-c U3/U4: the ONE delete road (plain / owned two-choice /
+        // gathering confirms).
         Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
             Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
         }
@@ -433,22 +641,74 @@ struct ShelfView: View {
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
-        // Batch 14: the dashed box floats under the list — no divider,
-        // like the round-1 mockup she attached.
         QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
     }
 
+    /// The ⌘K hint at the window's foot — and, at its trailing end, the
+    /// board's QUIET RECEIPT home (18i's one slot; rows 103/108: the old
+    /// report overlay drew over these words).
     private var hintBar: some View {
-        HStack {
+        HStack(spacing: 12) {
             Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
-            Spacer()
+                .lineLimit(1)
+            Spacer(minLength: 12)
+            QuietReceiptLine(status: session.status, tokens: tokens)
             Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
+                .lineLimit(1)
+                .fixedSize()
         }
         .font(tokens.small)
         .foregroundStyle(tokens.faint)
         .padding(.horizontal, 28)
         .padding(.vertical, 6)
         .background(tokens.room)
+    }
+}
+
+/// **THE ROW META's words** (13i-d U1 — mockup v5's right column): the
+/// counts, the words and the STATUS words, in the ruled vocabulary (§1: a
+/// gathering · living; §5: finished · sealed; §6: owned). Pure, so a pin
+/// reads exactly what a row says. The ARRIVAL count is separate — it draws in
+/// the accent, first (§4: "a small accent count on the Bookcase row").
+nonisolated enum BookcaseRowMeta {
+    static func arrivals(_ book: Queries.ShelfBook) -> String? {
+        let n = book.arrivalCount
+        guard n > 0 else { return nil }
+        return "\(n) \(n == 1 ? "arrival" : "arrivals")"
+    }
+
+    static func facts(
+        _ book: Queries.ShelfBook, words: Int?, progress: (percent: Int, target: Int)?,
+        gatheringCount: Int?
+    ) -> String {
+        let reading = book.reading
+        var parts: [String] = []
+        if reading.kind == .gathering {
+            if let gatheringCount {
+                parts.append("\(gatheringCount) \(gatheringCount == 1 ? "note" : "notes")")
+            }
+        } else {
+            parts.append("\(book.postCount) \(book.postCount == 1 ? "note" : "notes")")
+            if book.sectionCount > 0 { parts.append("\(book.sectionCount) ch") }
+        }
+        if let progress {
+            parts.append("\(progress.percent)% of \(progress.target.formatted())w")
+        } else if let words, words > 0 {
+            parts.append("\(words.formatted())w")
+        }
+        if let cap = reading.maxPosts, reading.kind == .book { parts.append("cap \(cap)") }
+        if reading.kind == .gathering {
+            parts.append("gathering")
+        } else if BookcaseBoard.isLiving(reading) {
+            parts.append("living")
+        }
+        if reading.sealedAt != nil {
+            parts.append("sealed")
+        } else if reading.locked {
+            parts.append("finished")
+        }
+        if reading.owned { parts.append("owned") }
+        return parts.joined(separator: " \u{00B7} ")
     }
 }
 

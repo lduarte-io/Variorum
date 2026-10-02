@@ -171,6 +171,10 @@ final class RuleEditorModel: Identifiable {
     /// rule drafted inline before Create (the wing it will be minted in).
     /// nil for an editor over an existing reading.
     let mintWingID: String?
+    /// 13i-d U1 — the Bookcase's CONTEXT MINT (§19.1/§24): the shelf a new
+    /// gathering lands on when she mints it while a shelf is solo'd; nil =
+    /// unshelved. Set by the door that opens the mint sheet.
+    var mintShelfID: String?
     /// 13i-c U3 — the gathering gate's Trash door ("Delete this
     /// gathering…"): the state doors' brain, so its confirm and act are the
     /// ones every other book door uses.
@@ -306,7 +310,7 @@ final class RuleEditorModel: Identifiable {
         let trimmed = mintName.trimmingCharacters(in: .whitespacesAndNewlines)
         return await readings.create(
             name: trimmed.isEmpty ? "Untitled" : trimmed, kind: .gathering,
-            querySpec: spec, wingId: wing)
+            querySpec: spec, wingId: wing, shelfId: mintShelfID)
     }
 
     // MARK: The edits (each one `RuleEditing`'s)

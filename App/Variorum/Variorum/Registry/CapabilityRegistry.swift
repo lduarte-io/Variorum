@@ -1699,6 +1699,75 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: DuplicateBookCopy.unavailableNote,
             availability: always),
+        // 13i-d U1 — THE BOOKCASE (the sitting record §7, §19–§24). Every act
+        // below carries its target on the thing she points at (a shelf name,
+        // a section header, a book row), so `always` is honest for
+        // `.editRule`'s reason; the per-target conditions are DATA the menus
+        // read (Move to Start hides on the first shelf, Send to Top/Bottom
+        // render only in "my order" — the placing mode, §24), never a mode of
+        // this table. The strip's renderers declare them in
+        // `BookcaseStrip.contextMenuCapabilities` / `.surfaceCapabilities`;
+        // the book row's in `ShelfView.contextMenuCapabilities`.
+        Capability(
+            id: .newShelf, verb: BookcaseCopy.newShelfVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .renameShelf, verb: BookcaseCopy.renameShelfVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .setShelfGlyph, verb: BookcaseCopy.setGlyphVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .makeDefaultShelf, verb: BookcaseCopy.makeDefaultVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .moveShelfToStart, verb: BookcaseCopy.moveToStartVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .moveShelfToEnd, verb: BookcaseCopy.moveToEndVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .deleteShelf, verb: BookcaseCopy.deleteShelfVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .moveBookToShelf, verb: BookcaseCopy.moveToShelfVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .sendBookToTop, verb: BookcaseCopy.sendToTopVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.placingUnavailableNote,
+            availability: always),
+        Capability(
+            id: .sendBookToBottom, verb: BookcaseCopy.sendToBottomVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookcaseCopy.placingUnavailableNote,
+            availability: always),
         // The gathering's honest door (§20): "Remove the #tag" — the chip's
         // gathering rows, one per rule tag the note wears.
         Capability(

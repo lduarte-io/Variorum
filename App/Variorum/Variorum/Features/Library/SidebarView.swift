@@ -133,7 +133,9 @@ struct SidebarView: View {
     }
 
     static let areas: [Area] = [
-        Area(title: "Shelf", symbol: "books.vertical", destination: .shelf),
+        // 13i-d U1 — the section renamed BOOKCASE (the sitting record §7:
+        // *"lets call that section bookcase and a shelf can stay shelves"*).
+        Area(title: "Bookcase", symbol: "books.vertical", destination: .shelf),
         Area(title: "Library", symbol: "text.book.closed", destination: .library),
         Area(title: "Pool", symbol: "tray", destination: .poolPosts),
         // Batch 12: Blocks joins as the FOURTH AREA — R44's sidebar,

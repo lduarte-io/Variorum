@@ -49,7 +49,10 @@ final class ReadingsViewModel {
     func create(
         name: String, kind: ReadingKind, profile: String? = nil,
         sortField: SortField = .manual, sortDir: SortDirection = .asc,
-        querySpec: String? = nil, wingId: String = ""
+        querySpec: String? = nil, wingId: String = "",
+        // 13i-d U1 — the Bookcase's CONTEXT MINT (§19.1/§24): the solo'd
+        // shelf the new book lands on; nil = unshelved (every other door).
+        shelfId: String? = nil
     ) async -> String? {
         do {
             let reading = try await session.runner.run { ops in
@@ -66,7 +69,7 @@ final class ReadingsViewModel {
                 return try ops.createReading(
                     name: name, kind: kind, profile: profile,
                     sortField: sortField, sortDir: sortDir, querySpec: querySpec,
-                    wingId: wingId)
+                    wingId: wingId, shelfId: shelfId)
             }
             lastError = nil
             return reading.id

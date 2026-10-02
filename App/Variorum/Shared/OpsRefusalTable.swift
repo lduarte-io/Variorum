@@ -310,6 +310,19 @@ nonisolated enum OpsRefusalCopy {
         case .ownedBookDuplicatesDeep:
             return "This book owns its notes, so a duplicate has to carry copies of them — "
                 + "duplicate it with copies."
+        // 13i-d U1 — the Bookcase's shelves (the sitting record §7/§19/§24).
+        // Platform-neutral words: none names a Mac door.
+        case .shelfNotFound:
+            return "That shelf isn't there any more — nothing changed."
+        case .invalidShelfName:
+            return "A shelf needs a name."
+        case .invalidShelfGlyph(let value):
+            return "\u{201C}\(value)\u{201D} can't be a shelf's mark — "
+                + "use one character, and no emoji."
+        case .wingNotFound:
+            return "That library isn't there any more — nothing changed."
+        case .placementAnchorNotOnShelf:
+            return "That book has moved to another shelf — nothing changed."
         default:
             return nil
         }

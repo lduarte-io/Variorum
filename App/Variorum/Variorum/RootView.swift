@@ -989,7 +989,8 @@ struct RootView: View {
     private func wirePaletteCommands() {
         let actions = ShellActions(session: session, shell: router)
         var rows: [(title: String, action: @MainActor () -> Void)] = [
-            ("Go to Shelf", { [self] in adopt(.shelf, in: router.workspace.focusedPane) }),
+            // 13i-d U1: the section is the BOOKCASE (§7).
+            ("Go to Bookcase", { [self] in adopt(.shelf, in: router.workspace.focusedPane) }),
             ("Go to Library", { [self] in adopt(.library, in: router.workspace.focusedPane) }),
             ("Go to Pool", { [self] in adopt(.poolPosts, in: router.workspace.focusedPane) }),
             // The post-13l polish round, ledger rows 7–8: the two halves of

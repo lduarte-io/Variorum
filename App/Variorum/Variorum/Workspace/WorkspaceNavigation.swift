@@ -395,7 +395,7 @@ nonisolated enum WorkspaceNaming {
     /// IS — never as a bare identifier.
     static func label(for selection: SidebarSelection, titles: [String: String]) -> String {
         switch selection {
-        case .shelf: return "Shelf"
+        case .shelf: return "Bookcase"  // 13i-d U1 (§7: the section renamed)
         case .library: return "Library"
         case .poolPosts: return "Pool"
         case .blocks: return "Snippets"
