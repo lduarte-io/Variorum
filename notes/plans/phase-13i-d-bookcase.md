@@ -1442,6 +1442,34 @@ flight. No subagents. Logs and pre-revert copies: the repo's gitignored `scratch
   archived.", "“T” added to the book — it's archived, so it waits in the book's archived line.", the
   registry verb "Show or Hide Owned Notes".
 
+## THE ARCHITECT'S ADJUDICATION AFTER U4 — BANK 1 CLOSES (2026-10-02; spot-check: nine commits pushed, fences empty, the record and #173 in place; the away-run rule governs)
+
+- **F-U4-5 RULED — the MINT refuses too** (the same letter as the (c) arm: a gathering has no
+  extents, so `createReading(kind: .gathering)` with a non-nil `maxPosts`/`wordTarget` refuses
+  `wrongReadingKind(expected: .book)`): no caller passes one today, so the guard closes the
+  door's shape before one exists. **Built as U5's rider R1** (one guard + pins, red-on-old).
+- **F-U4-3 STANDS as shipped** (an archived member holds its cap slot — P-13id-U4-6; hers at
+  #173: an archived member IS a member, and the cap counts membership; one predicate to
+  overturn).
+- **F-U4-4 ROUTED TO U6** (the Library Archived view's undeclared inline Unarchive — one
+  declaration) and **F-U4-7 ROUTED TO U6** (the untitled-note naming split: align on the
+  Library's first-words rule or record for 13s — the sweep's call, stated in its record).
+- **F-U4-6 RECORDED for the mobile catch-up** (the phone's gathering Finish row now meets the
+  honest refusal as a raw string — the refusal is right, the words are the catch-up's; joins
+  the parity record with KnownIssues row 28's next-touch list).
+- **P-13id-U4-1…11 STAND** (#173); P-13id-U4-1's placement reading (the Arrivals hosts) matches
+  the plan's own text. **F-U1-7 CLOSED** (the count and the line agree). **Ledger row 4 → DONE;
+  BANK 1 IS BUILT** — ladder A opens on the combined diff `d8f7c452..8b41f667` (47 commits:
+  U1–U4 + the architect's F-U2-1 fix), fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md`
+  VERBATIM, zero framing; findings land in `notes/plans/13id-ladder-round1.md` repo-first.
+  The orchestrator's composed walk follows the ladder's fixes (the 13i-c order), machine
+  author-free.
+- **For the combined 13i walk (grown by U4):** a book's archived line — expand, Unarchive,
+  Remove (the stays-archived receipt) · "N notes · M archived" on the row and masthead,
+  details off hides it · an archived waiter at the door, marked, Add seats it archived · finish
+  with archived waiters (all dismissed, counted) · a gathering's sheet and ops refusing
+  Finish/extents.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1469,8 +1497,8 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
 | 2 | U2 — the Book Panel (+ ACT 0: the union star) | **DONE** (adjudicated 2026-10-02; F-U2-1 fixed by the architect `eeba2e7c` revert-red-verified; F-U2-2/3 routed to U3; drags to her combined walk; walk at the bank seam) |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **DONE** (adjudicated 2026-10-02; core 2041/219 · Mac 490/74 · walk ×4; F-U3-1 ruled → U4 ACT 0; F-U3-4/-6 + row 103's Library half → U6; F-U3-5 → U4; F-U3-3 kept provisionally; #172) |
-| 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **BUILT — awaiting adjudication** (U4 RECORD: core 2058/221 · Mac 732/117 · phone build · walk ×4; F-U4-3/-5 for the architect/her bundle; #173) |
-| 5 | LADDER A (U1–U4) | PENDING BANK 1 |
+| 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | **DONE** (adjudicated 2026-10-02; core 2058/221 · Mac 732/117 · walk ×4; F-U4-5 ruled → U5 rider R1; F-U4-4/-7 → U6; F-U4-6 → the catch-up; #173) |
+| 5 | LADDER A (U1–U4) | ROUND 1 IN FLIGHT (opened 2026-10-02; the diff d8f7c452..8b41f667; findings → notes/plans/13id-ladder-round1.md) |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
