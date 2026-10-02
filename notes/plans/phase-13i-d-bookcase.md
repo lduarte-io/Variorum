@@ -87,6 +87,15 @@ things to look at."* So: the orchestrator's acceptance walks stay mandatory; her
 light-or-skipped; each letter's handoff keeps a running "for the combined walk" list (13i-c's is in
 its handoff and its PHASE CLOSEOUT); **13i-e's closeout OWES THE COHESIVE COMBINED LIST.**
 
+## HER SIZING RULING (2026-10-02, at the 13i-c close — verbatim-faithful)
+
+*"13i-d being next is fine - I think the size is fine, we'll plan to run it as one and do a mid
+phase handoff if needed."* So: 13i-d RUNS AS ONE PHASE (no split ruled); the orchestrator plans
+its cutover seam early (the resiliency protocol's two-document handoff with a paste-ready kickoff
+at a clean unit boundary, drafted with PENDING slots during a build's wait) and hands off mid-phase
+only if the ~500k guideline is reached before the last unit — the sizing section below stays as
+the honest statement it was, overruled by her word.
+
 ## Standing constraints + SIZING (raised honestly)
 
 Schema: ZERO (13i-a's bundle + 13i-c's column carry everything; marker 11). `Sync/`: ZERO expected
