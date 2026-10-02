@@ -233,6 +233,34 @@ struct WingBookMoveDoorTests {
         }
     }
 
+    /// WALK W-2 (2026-10-02, Terminal·dark `td-07-W2-before…`): a wing holding
+    /// only a GATHERING read "1 gathering move. Books keep their notes …
+    /// “Annex” keeps none of its tags…" — wrong agreement, a books sentence
+    /// with no books, a tags clause with no tags; and the gathering's own
+    /// confirm promised "its rule's tags travel" for a star-only rule. The
+    /// sentences now say only what is true of what moves — RED on the old words.
+    @Test func theConfirmsSayOnlyWhatIsTrueOfWhatMoves() async throws {
+        try await withBookMoveSession { session, _ in
+            let ops = session.operations
+            let wings = WingsModel(session: session)
+            let wing = try ops.createWing(name: "Imports")
+            await wings.load()
+            let starred = try ops.createReading(
+                name: "Starred", kind: .gathering,
+                querySpec: try #require(try RuleGrammar.encode(.star)))
+            let single = try #require(await wings.bookMoveAsk(reading: starred, to: wing.id))
+            #expect(WingCopy.bookMoveMessage(single)
+                    == "A gathering holds no notes — in “Imports” it shows the notes there that "
+                        + "match its rule. Any tags its rule names travel by name. It arrives unshelved.")
+            await wings.moveBook(single)
+            wings.switchTo(wing.id)
+            let ask = try #require(await wings.contentsMoveAsk(to: ""))
+            #expect(WingCopy.everythingMessage(ask)
+                    == "1 gathering moves. The gathering arrives unshelved. "
+                        + "“Imports” ends empty — then Delete Wing… can take it.")
+        }
+    }
+
     /// The delete refusal's words gain the road everywhere they are said —
     /// the shared table's arm too (RED on the old words by construction).
     @Test func theDeleteRefusalNamesTheBulkRoad() {
