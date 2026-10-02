@@ -1116,6 +1116,38 @@ touched (TEXTKIT2_NOTES not required). No revert in flight. No subagents.
 - **P-13id-U3-10** — the grouped-by control and the filter's terms are NOT registry acts (view-local
   looks, the Library `sort ▾` precedent); opening the sheet, the trait and the save are.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U3 (2026-10-02 — verified by spot-check: sixteen commits pushed, the `Sync/`/`Persistence/`/`Server/` diff empty, the record and #172 in place; the away-run rule governs every call below)
+
+- **F-U3-1 RULED — the (c) arm BUILDS, exactly as proposed** (the sitting §3's letter: a
+  gathering has NO finish, word target or capacity): `lockReading` and a NON-NIL
+  `setReadingWordTarget` / `setReadingMaxPosts` refuse a gathering with the existing
+  `wrongReadingKind(expected: .book)`; CLEARING an extent and `unlockReading` stay legal (the
+  pre-13i-d escape). The trade-off is accepted: a phone face still offering these on a
+  gathering meets the ops' honest refusal (P-2); re-homing those faces is the catch-up's.
+  **The build is U4's ACT 0** with exact state-transition pins, red-on-old.
+- **F-U3-3 RULED PROVISIONALLY — KEEP:** a view-local filter never mutates and never steals her
+  selection; a hidden-but-selected note keeps the note box honest, and clearing the filter
+  finds her place intact. One line to overturn; her bundle carries it (#172).
+- **F-U3-4 ROUTED TO U6 with a TRACE order:** "in 2 books" counting a gathering must be traced
+  before it is re-worded — if a membership READER counts a gathering, that violates 13i-c's
+  books-only contract and is a bug-class fix with a pin; if it is an assembly-road label, it is
+  the sweep's words. ⌘K's "smart book" label is the sweep's either way.
+- **F-U3-5 ROUTED TO U4 (rider):** the gathering sheet's hide-owned chips get their registry
+  declaration (one row + the walk line; 13i-c's omission, caught by U3's registry contact).
+- **F-U3-6 and row 103's LIBRARY half ROUTED TO U6** (the polish/sweep unit; the double divider
+  and the Library's quiet-receipt host).
+- **F-U3-7 (the truncating footer receipt) and F-U3-8 (the filter menu's 300-note window) —
+  RECORDED, her bundle + the hardening family:** F-U3-7 is a taste call (hers); F-U3-8 is the
+  bounded-view-windows class (KnownIssues row 22's family) — honest at today's corpus, and the
+  closeout adds it beside row 22 (owner 12) so it is never unowned. Neither gates this phase.
+- **F-U3-10 noted:** walk fixtures stay in the dev store (the 13i-c precedent).
+- **P-13id-U3-1…10 STAND** (#172, the away-run rule). **Ledger row 3 → DONE.**
+- **For the combined 13i walk (grown by U3):** Book Settings from the Bookcase row's menu and
+  the masthead gear · the journal-trait sentence on/off (and the daily Journal's spoken
+  refusal) · a gathering's sheet without Finish/extents · grouped-by three ways on a book and
+  on a gathering (chapters absent there) · the filter bar: filter, watch counts say "N shown",
+  save the filter as a gathering · the quiet receipt at the Index foot.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1142,8 +1174,8 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 |---|---|---|
 | 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
 | 2 | U2 — the Book Panel (+ ACT 0: the union star) | **DONE** (adjudicated 2026-10-02; F-U2-1 fixed by the architect `eeba2e7c` revert-red-verified; F-U2-2/3 routed to U3; drags to her combined walk; walk at the bank seam) |
-| 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **BUILT — awaiting adjudication** (the U3 RECORD: core 2041/219 · Mac 490/74 · phone build green · walk ×4; row 107's (c) arm PROPOSED and STOPPED for the architect — F-U3-1; #172) |
-| 4 | U4 — archived members in books | NOT-STARTED |
+| 3 | U3 — the Collecting doors + grouped-by + filter-bar face (+ riders: row 112, F-U2-3) | **DONE** (adjudicated 2026-10-02; core 2041/219 · Mac 490/74 · walk ×4; F-U3-1 ruled → U4 ACT 0; F-U3-4/-6 + row 103's Library half → U6; F-U3-5 → U4; F-U3-3 kept provisionally; #172) |
+| 4 | U4 — archived members in books (+ ACT 0: the (c) arm; rider F-U3-5) | IN FLIGHT (spawned 2026-10-02) |
 | 5 | LADDER A (U1–U4) | PENDING BANK 1 |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
 | 7 | U6 — the vocabulary sweep | NOT-STARTED |
@@ -1335,3 +1367,59 @@ U2's form (map · evidence with counts, PENDING until verified · FINDINGS · PR
 P-13id-U3-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after every
 commit. One agent at a time; no subagents; foreground waits only. An unsettled design fork:
 proposal into your record, STOP that thread for the architect, continue the others.
+
+## U4 BRIEF — THE (c) ARM (ACT 0) + ARCHIVED MEMBERS IN BOOKS (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — the kickoff rulings R-13id-1…5, the constitution, your LEDGER row
+(scope item 9 of this plan, quoted whole there), ALL THREE architect adjudications (your ACT 0's
+ruling and your F-U3-5 rider live in the third), the U1–U3 RECORDs, the AWAY-RUN POSTURE, the
+ENVIRONMENT TRAPS · the plan's item 9 text above (her #169(a) ruling, verbatim-faithful — THE
+DESIGN) · `notes/plans/phase-13i-sitting-record-2026-09-30.md` §4 (the Arrivals idiom your line
+copies) and §24 (finishing dismisses) · `notes/plans/phase-13i-b-gatherings.md`'s U2 RECORD
+(P-13ib-U2-2 — the promise you are REVERSING; find its pins) · `notes/SessionResiliencyProtocol.md` ·
+KnownIssues rows 109 (R-13id-3's documenting line is yours) and 13 (name any new held read's cost).
+
+**ACT 0 — THE (c) ARM, RULED (F-U3-1):** `lockReading` and a NON-NIL `setReadingWordTarget` /
+`setReadingMaxPosts` refuse a gathering with the existing `wrongReadingKind(expected: .book)`;
+clearing an extent and `unlockReading` stay LEGAL. Exact state-transition pins, red-on-old (the
+refusals fail on the shipped ops). The phone's faces are untouched (their honest refusal is the
+design; record what the catch-up owes).
+
+**THEN ITEM 9 WHOLE — archived members in books (her #169(a) ruling):**
+1. the PER-BOOK ARCHIVED LINE on the Arrivals line's idiom — invisible when empty; "N archived"
+   under the book's masthead, expanding inline to the archived members with Unarchive and
+   Remove (Release on an owned book); receipts spoken;
+2. HONEST COUNTS — "5 notes · 2 archived" on the Bookcase row's meta AND the book masthead
+   (hidden with details off; compose with U1's board and U3's "N shown" filter counts);
+3. ARCHIVED WAITERS visible at the door, marked "archived", with the same doors — Add seats one
+   as an ARCHIVED member (it lands in the archived line); VERIFY `seatArrival` does not refuse
+   an archived note (a state-transition pin either way); intake's automatic seats still never
+   seat one; finishing dismisses EVERY waiter (13i-c's shared predicate stands — U1's board
+   count already counts archived waiters, F-U1-7: the line and the count AGREE once you flip
+   the filter);
+4. this REVERSES 13i-b's P-13ib-U2-2 — find its hide/return pins and FLIP THEM HONESTLY (each
+   flip red-on-old against the old assertion, named in your record);
+5. the INDEX never shows archived members (archive keeps its one meaning); the book gains its
+   door to its set-aside notes through the line alone;
+6. R-13id-3's documenting line at the code (row 109 — zero behavior: the exact-stamp revival
+   into a FINISHED book stands, her ruling);
+7. rider F-U3-5: the gathering sheet's hide-owned chips get their registry declaration.
+
+Faces + ONE query; zero schema, zero `Sync/` — any discovered need is a STOP. Every drag (if
+any) gets a menu twin. OUT of scope: words beyond your own faces (U6), wings (U5), the phone
+(record, don't build).
+
+**Evidence (named now):** ACT 0's refusal pins red-on-old; the one query's tests; the
+P-13ib-U2-2 pin flips red-on-old; the seatArrival-archived pin; count pins (details on/off ×
+filter); registry rows + the registry walk green; the tutorial spine green (lesson 4's sentence
+must stay TRUE — "Finishing a book dismisses whatever is still waiting"); the landing families
+green UNMODIFIED; a screenshot walk in all four voice/appearance combinations into
+`notes/plans/13id-screens/u4/` (gitignored). Suites at the END; baseline core 2041/219 (U3's
+close). Build into `App/Variorum/DerivedData/13id-u4/`.
+
+**Your record:** a `## U4 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
+numbered P-13id-U4-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
+every commit. One agent at a time; no subagents; foreground waits only. An unsettled design
+fork: proposal into your record, STOP that thread for the architect, continue the others.
