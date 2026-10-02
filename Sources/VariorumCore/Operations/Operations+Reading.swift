@@ -578,13 +578,21 @@ extension Operations {
             // lay in the Trash does not rejoin the edition (P-13ic-6's other
             // half: "Put back restores a sealed book whose stamps still match").
             let sealedOnly = reading.sealedAt != nil ? " AND locked = 1" : ""
+            // 13i-d U5b (F-U5b-1, PROVISIONAL P-13id-U5b-5): only notes of the
+            // book's OWN wing, read AFTER the re-home above — a note that
+            // moved to another wing while the book lay in the Trash stays
+            // where it went, and its row stays decided-dead (a book never
+            // spans wings, §9). The one predicate both revival sites read.
+            let sameWing = Queries.revivalWingScope(wingID: reading.wingId)
+            let revivalArguments: [(any DatabaseValueConvertible)?] = [id, stamp] + sameWing.arguments
             try db.execute(
                 sql: """
                     UPDATE reading_post SET deleted_at = NULL
                     WHERE reading_id = ? AND deleted_at = ?
-                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL\(sealedOnly))
+                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL\(sealedOnly)
+                                        AND \(sameWing.sql))
                     """,
-                arguments: [id, stamp])
+                arguments: StatementArguments(revivalArguments))
 
             // 13i-c U2 — OWNERSHIP holds after the revival (the 13i-c plan §4
             // row 7): a note added elsewhere while this book (or the note)

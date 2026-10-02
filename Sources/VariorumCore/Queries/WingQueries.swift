@@ -36,6 +36,22 @@ extension Queries {
         return ("\(column) = ?", [wingID])
     }
 
+    /// **THE REVIVAL'S WING RULE** (13i-d U5b — F-U5b-1, PROVISIONAL
+    /// P-13id-U5b-5): a Put back revives a membership only when the note and
+    /// the book live in the SAME wing as surfaces read them — a book never
+    /// spans wings (§9). `restoreContainerRows` scopes the reading side by the
+    /// note's wing, `restoreReading` the note side by the book's, each read
+    /// AFTER its own re-home (a row whose wing died comes back to Home, so a
+    /// pair that lay in a dead wing's Trash together comes home together).
+    /// The fragment is `wingScope` over an UNALIASED `wing_id` (the
+    /// subqueries name one table each), named once so both sites and the
+    /// architect's F-U5b-2 proposal read the same rule.
+    static func revivalWingScope(
+        wingID: String
+    ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        wingScope(column: "wing_id", wingID: wingID)
+    }
+
     /// The live ADDITIONAL wings in switcher order — `(position, id)`, the
     /// fractional-index sort key (AppSpec §6). Home is virtual and never a
     /// row; the switcher lists it first by itself.

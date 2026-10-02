@@ -600,14 +600,26 @@ extension Operations {
             // keeps binding NEW adds (her doors), never recovery. (The same
             // exact-stamp letter revives a waiting ARRIVAL row with its note;
             // `dismissArrival` stays legal on a finished book — its door.)
+            //
+            // 13i-d U5b (F-U5b-1, PROVISIONAL P-13id-U5b-5): and only into a
+            // book of the note's OWN wing, read AFTER the re-home above — a
+            // book never spans wings (§9), so a book that moved to another
+            // wing while the note lay in the Trash does not take it back (the
+            // row stays decided-dead: "rows whose story diverged stay as they
+            // are"). `Queries.revivalWingScope` is the one predicate both
+            // revival sites read.
+            let sameWing = Queries.revivalWingScope(wingID: container.wingId)
+            let revivalArguments: [(any DatabaseValueConvertible)?] =
+                [id, stamp, container.locked ? 1 : 0] + sameWing.arguments
             try db.execute(
                 sql: """
                     UPDATE reading_post SET deleted_at = NULL
                     WHERE post_id = ? AND deleted_at = ?
                       AND reading_id IN (SELECT id FROM reading WHERE deleted_at IS NULL
-                                           AND (sealed_at IS NULL OR ? = 1))
+                                           AND (sealed_at IS NULL OR ? = 1)
+                                           AND \(sameWing.sql))
                     """,
-                arguments: [id, stamp, container.locked ? 1 : 0])
+                arguments: StatementArguments(revivalArguments))
             try db.execute(
                 sql: """
                     UPDATE post_tag SET deleted_at = NULL

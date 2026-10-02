@@ -2005,8 +2005,8 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + the design + evidence named | IN-PROGRESS (this commit) |
-| 2 | F-U5b-1 — the Put back revival never crosses wings: red-on-old pin (the U5 note move + a trashed book) → the shared predicate in `restoreContainerRows` + `restoreReading` → green | NOT-STARTED |
+| 1 | Record skeleton + the design + evidence named | DONE (1ccfc362) |
+| 2 | F-U5b-1 — the Put back revival never crosses wings: red-on-old pin (the U5 note move + a trashed book) → the shared predicate in `restoreContainerRows` + `restoreReading` → green | DONE (f34af282 red on purpose → this commit) — `WingRevivalTests` 3: **2 RED on the pre-fix restore, 2 issues** (`p2-red.log`: a Put back of a book pulled in a note that had moved away; a Put back of a note rejoined a book that had moved away), the together-re-homed control green both sides; green after with the restore/trash/ownership/diverge neighbours **131/42** (`p2-green.log`) |
 | 3 | Core — the note-move primitive extracted (`relocateNote`, `moveNoteToWing` byte-identical in behaviour — U5's `WingMoveTests` green UNMODIFIED) + `moveReadingToWing` + `Queries.bookWingMovePreview` + new error cases + state-transition pins | NOT-STARTED |
 | 4 | Core — `moveWingContents` + the pure `WingTagCarry` plan + `Queries.wingContentsMovePreview` + pins | NOT-STARTED |
 | 5 | Mac — the two doors (the Bookcase row's Move to Wing ▸; the switcher's Move Everything to Another Wing ▸) with their counting confirms + receipts; the delete refusal's new road words; the registry rows; door pins + the registry walk | NOT-STARTED |
@@ -2080,7 +2080,7 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 
 ### EVIDENCE (named now; counts PENDING until each run lands)
 
-- F-U5b-1 red-on-old (the U5 note move + a trashed book, on the pre-fix restore): PENDING.
+- **F-U5b-1 red-on-old:** `WingRevivalTests` on the pre-fix restore — **2 tests RED, 2 issues** (`p2-red.log`), the control green; green after (`p2-green.log`, 131/42 with the restore/trash/ownership/diverge neighbours).
 - `BookWingMoveTests` (core, state transitions): the sever-and-list arithmetic (preview = act) ·
   a stay-behind finished AND sealed book refusing with nothing written · finished/sealed books
   riding whole, every seal stamp untouched · archived members riding archived · pending arrivals
@@ -2102,7 +2102,7 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 
 ### FINDINGS (for the orchestrator)
 
-- **F-U5b-1** — above (THE DESIGN); pin + fix PENDING.
+- **F-U5b-1 — FIXED** (THE DESIGN above; `Queries.revivalWingScope`, read by both revival sites after their re-home) — red-on-old pinned, green.
 - **F-U5b-2 — STOPPED (the brief's stop rule): structural undo/redo replayed AFTER a wing move can
   revive a cross-wing membership.** Trace: `divergePostForReading(O, B)` in wing X (O's row
   tombstoned, copy C membered at its slot) → `moveReadingToWing(B, Y)` (C rides) → ⌥⌘Z →
