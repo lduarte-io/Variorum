@@ -308,3 +308,14 @@ iOS Simulator): **TEST BUILD SUCCEEDED** (the shared `BookcaseBoard` gains a pur
 `Persistence/`, zero schema; no real-store instance ran beside this session (checked before the
 first build). The implementer sanity pass and round 2's fresh re-review follow on the
 orchestrator's side.
+
+**THE SANITY PASS'S ONE NIT — CONFIRMED AND FIXED (`6d592161`).** Its trace is exact:
+`fce9295d`'s suite insertion anchored on the `@Suite("Bookcase view model …")` line alone and so
+landed BETWEEN that suite's `@MainActor` and its `@Suite`, re-binding the attribute to the new
+gate suite — `BookcaseViewModelTests` silently lost its isolation (zero effect today: every body
+runs inside `withBookcaseSession`'s `@MainActor` closure, 5/5 green — but the fix changed the
+isolation of a suite it didn't own, and the record didn't say so). Fixed as proposed:
+`@MainActor` restored directly above the view-model suite; the gate suite stays nonisolated (a
+pure value over the nonisolated `BookcaseBoard`), its doc now says so. No pin — a compile-level
+isolation restoration with zero behaviour; the evidence is the build and the suites:
+MoveToShelfGate + BookcaseViewModel + BookcaseBoardBrain **14/3 green** on the rebuilt bundle.
