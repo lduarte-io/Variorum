@@ -116,7 +116,11 @@ final class ShelfViewModel {
     }
 
     /// The one-shot half (on appearance and after the board's own acts — a
-    /// deliberate fetch, never a held observation).
+    /// deliberate fetch, never a held observation). Said honestly (ladder A
+    /// round 1, MINOR 2's re-word): `bookWordCounts`, `shelfBookTags` and
+    /// `ruleTagPaths` are STORE-WIDE one-shots (the 13 B2 shapes, keyed per
+    /// reading and consulted per wing row); `bookcaseAggregates` is the
+    /// wing's own. All one-shot — none rides the held snapshot.
     func refreshAggregates() async {
         let wing = wingID
         do {

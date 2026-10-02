@@ -381,6 +381,52 @@ struct BookcaseReadTests {
         }
     }
 
+    /// **Ladder A round 1, MINOR 2 — the held read's work is the WING'S
+    /// OWN.** The wing-scoped count statements (members · chapters ·
+    /// arrivals) and the aggregates' member-stamp statement all DRIVE from
+    /// the wing's readings (`reading r WHERE r.wing_id = ?` — the
+    /// `wingArchivedCountsSQL` shape): the pair table is entered through its
+    /// reading_id index per candidate book, never scanned whole across every
+    /// wing. RED on the pre-fix shape (the store-wide GROUP BYs' plans said
+    /// `SCAN reading_post` / `SCAN reading_section`; verified by behavioural
+    /// revert — the pre-fix statements took no wing, so this pin could not
+    /// compile against them, and a pure cost claim has no functional
+    /// red-on-old: the OUTPUT per wing reading was always the same). The
+    /// three count statements also keep naming no `container` (the region
+    /// pin below holds beside this one).
+    @Test func theWingScopedStatementsDriveFromTheWingNeverTheStore() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "b", kind: .book)
+            let note = try ops.createPost(title: "n")
+            try ops.addPostToReading(note.id, to: book.id)
+            _ = try ops.createSection(in: book.id, name: "I")
+            for (name, sql, pair) in [
+                ("members", Queries.bookcaseMemberCountsSQL(wingScoped: true), "rp"),
+                ("sections", Queries.bookcaseSectionCountsSQL(wingScoped: true), "rs"),
+                ("arrivals", Queries.bookcaseArrivalCountsSQL(wingScoped: true), "rp"),
+                ("stamps", Queries.wingMemberStampsSQL, "rp"),
+            ] {
+                let plan = try db.read { database in
+                    try Row.fetchAll(
+                        database, sql: "EXPLAIN QUERY PLAN \(sql)",
+                        arguments: [""])
+                        .map { ($0["detail"] as String?) ?? "" }
+                }.joined(separator: "\n")
+                #expect(plan.contains("SEARCH \(pair) USING"),
+                        "\(name): the wing's readings drive and the pair table is entered by index; plan was:\n\(plan)")
+                #expect(!plan.contains("SCAN reading_post") && !plan.contains("SCAN reading_section"),
+                        "\(name): never a store-wide scan; plan was:\n\(plan)")
+            }
+            for (name, sql) in [
+                ("members", Queries.bookcaseMemberCountsSQL(wingScoped: true)),
+                ("sections", Queries.bookcaseSectionCountsSQL(wingScoped: true)),
+                ("arrivals", Queries.bookcaseArrivalCountsSQL(wingScoped: true)),
+            ] {
+                #expect(!sql.contains("container"), "\(name): the held read's P1 letter")
+            }
+        }
+    }
+
     /// **P1 — the held snapshot never reads `container`.** Autosave rewrites
     /// the container row WHOLE (`Container.update`), so any `container`
     /// column in the tracked region would wake the Bookcase at keystroke

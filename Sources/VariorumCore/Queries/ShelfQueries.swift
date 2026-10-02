@@ -55,25 +55,20 @@ extension Queries {
     /// (#169(a)(2): archived waiters show at the door, marked); a deleted
     /// note's arrival rows died with it (the container tombstone cascade).
     public static func bookshelf(_ db: Database, wingID: String? = nil) throws -> [ShelfBook] {
-        var readings = try Queries.readings(db)
-        if let wingID { readings = readings.filter { $0.wingId == wingID } }
+        let readings = try bookcaseReadings(db, wingID: wingID)
         guard !readings.isEmpty else { return [] }
+        let wingScoped = wingID != nil
+        let arguments: StatementArguments = wingID.map { [$0] } ?? []
         // 13i-a (ladder R1 MIN-3): an ARRIVAL is not a member — the
         // shelf's count, the capacity gate and the Pool's bookless
         // exclusion all read status='member' (sitting record §4's letter:
         // "membership rows counted").
         let postCounts = try countsByReading(
-            db, sql: """
-                SELECT reading_id, COUNT(*) AS n FROM reading_post
-                WHERE deleted_at IS NULL AND status = 'member'
-                GROUP BY reading_id
-                """)
+            db, sql: bookcaseMemberCountsSQL(wingScoped: wingScoped), arguments: arguments)
         let sectionCounts = try countsByReading(
-            db, sql: """
-                SELECT reading_id, COUNT(*) AS n FROM reading_section
-                WHERE deleted_at IS NULL GROUP BY reading_id
-                """)
-        let arrivalCounts = try countsByReading(db, sql: bookcaseArrivalCountsSQL)
+            db, sql: bookcaseSectionCountsSQL(wingScoped: wingScoped), arguments: arguments)
+        let arrivalCounts = try countsByReading(
+            db, sql: bookcaseArrivalCountsSQL(wingScoped: wingScoped), arguments: arguments)
         // 13i-d U2 ACT 0: the star is the UNION of the two stores. Reading
         // the `setting` list adds that table to the held region — a setting
         // write is rare and never a keystroke's (P1 untouched).
@@ -88,14 +83,81 @@ extension Queries {
         }
     }
 
-    /// The per-book arrival counts behind `bookshelf` — split out so a pin
-    /// can read the SHIPPED statement (the `catalogPostsSQL` discipline) and
-    /// assert it never names `container` (the P1 reason above).
-    static let bookcaseArrivalCountsSQL = """
-        SELECT reading_id, COUNT(*) AS n FROM reading_post
-        WHERE deleted_at IS NULL AND status = 'arrival'
-        GROUP BY reading_id
-        """
+    /// One wing's live readings (or, nil, every wing's — the phone's shipped
+    /// all-wings read), by (name, id). The WING form filters in SQL, never in
+    /// Swift over a store-wide fetch (ladder A round 1, MINOR 2).
+    static func bookcaseReadings(_ db: Database, wingID: String?) throws -> [Reading] {
+        guard let wingID else { return try Queries.readings(db) }
+        return try Reading.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM reading WHERE wing_id = ? AND deleted_at IS NULL
+                ORDER BY name, id
+                """,
+            arguments: [wingID])
+    }
+
+    // The three per-book count statements behind `bookshelf` — split out so a
+    // pin can read the SHIPPED text (the `catalogPostsSQL` discipline) and
+    // assert two things: none names `container` (the P1 reason above), and
+    // the WING-scoped form DRIVES FROM THE WING'S READINGS — `reading r WHERE
+    // r.wing_id = ?`, the `wingArchivedCountsSQL` shape — so the held read's
+    // work is the wing's own, never every wing's (ladder A round 1, MINOR 2:
+    // these GROUP BYs scanned the whole store under a "one wing's" contract,
+    // and U5's wings would have inherited the silent cross-wing cost into a
+    // HELD read). `wingScoped: false` (a nil wing — the phone's all-wings
+    // read) keeps the shipped store-wide shape. One placeholder when scoped:
+    // the wing's id.
+
+    static func bookcaseMemberCountsSQL(wingScoped: Bool) -> String {
+        wingScoped
+            ? """
+                SELECT rp.reading_id AS reading_id, COUNT(*) AS n
+                FROM reading r
+                CROSS JOIN reading_post rp ON rp.reading_id = r.id
+                WHERE r.wing_id = ? AND r.deleted_at IS NULL
+                  AND rp.deleted_at IS NULL AND rp.status = 'member'
+                GROUP BY rp.reading_id
+                """
+            : """
+                SELECT reading_id, COUNT(*) AS n FROM reading_post
+                WHERE deleted_at IS NULL AND status = 'member'
+                GROUP BY reading_id
+                """
+    }
+
+    static func bookcaseSectionCountsSQL(wingScoped: Bool) -> String {
+        wingScoped
+            ? """
+                SELECT rs.reading_id AS reading_id, COUNT(*) AS n
+                FROM reading r
+                CROSS JOIN reading_section rs ON rs.reading_id = r.id
+                WHERE r.wing_id = ? AND r.deleted_at IS NULL
+                  AND rs.deleted_at IS NULL
+                GROUP BY rs.reading_id
+                """
+            : """
+                SELECT reading_id, COUNT(*) AS n FROM reading_section
+                WHERE deleted_at IS NULL GROUP BY reading_id
+                """
+    }
+
+    static func bookcaseArrivalCountsSQL(wingScoped: Bool) -> String {
+        wingScoped
+            ? """
+                SELECT rp.reading_id AS reading_id, COUNT(*) AS n
+                FROM reading r
+                CROSS JOIN reading_post rp ON rp.reading_id = r.id
+                WHERE r.wing_id = ? AND r.deleted_at IS NULL
+                  AND rp.deleted_at IS NULL AND rp.status = 'arrival'
+                GROUP BY rp.reading_id
+                """
+            : """
+                SELECT reading_id, COUNT(*) AS n FROM reading_post
+                WHERE deleted_at IS NULL AND status = 'arrival'
+                GROUP BY reading_id
+                """
+    }
 
     // MARK: - The Bookcase (13i-d U1 — the sitting record §7, §19–§24)
 
@@ -165,27 +227,21 @@ extension Queries {
     /// to its own `created_at` (PROVISIONAL P-13id-U1-5), so a brand-new
     /// empty book sorts by its birth rather than last.
     ///
-    /// Cost, said exactly: one GROUP BY over the wing's book memberships
-    /// (each a primary-key seek into `container`), plus one assembly per
-    /// GATHERING (∝ that gathering's extent — the `bookWordCounts` smart arm's
-    /// class, minus the text), plus (13i-d U4) the archived-member GROUP BY
-    /// (the wing's books drive; the same seeks). Never per render; never held.
+    /// Cost, said exactly (true since ladder A round 1's MINOR 2 — before it
+    /// the member-stamp GROUP BY aggregated the whole store): one GROUP BY
+    /// over the wing's book memberships, the wing's readings driving
+    /// (`wingMemberStampsSQL` — each note a primary-key seek into
+    /// `container`), plus one assembly per GATHERING (∝ that gathering's
+    /// extent — the `bookWordCounts` smart arm's class, minus the text), plus
+    /// (13i-d U4) the archived-member GROUP BY (the wing's books drive; the
+    /// same seeks). Never per render; never held.
     public static func bookcaseAggregates(
         _ db: Database, wingID: String
     ) throws -> BookcaseAggregates {
-        let readings = try Queries.readings(db).filter { $0.wingId == wingID }
+        let readings = try bookcaseReadings(db, wingID: wingID)
         var lastEdited: [String: String] = [:]
         let memberRows = try Row.fetchAll(
-            db,
-            sql: """
-                SELECT rp.reading_id AS reading_id,
-                       MAX(COALESCE(c.last_touched_at, c.created_at)) AS stamp
-                FROM reading_post rp
-                JOIN container c
-                  ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
-                WHERE rp.deleted_at IS NULL AND rp.status = 'member'
-                GROUP BY rp.reading_id
-                """)
+            db, sql: wingMemberStampsSQL, arguments: [wingID])
         var memberStamps: [String: String] = [:]
         for row in memberRows {
             if let stamp: String = row["stamp"] { memberStamps[row["reading_id"]] = stamp }
@@ -218,6 +274,24 @@ extension Queries {
             lastEdited: lastEdited, gatheringCounts: gatheringCounts,
             archivedCounts: try archivedMemberCounts(db, wingID: wingID))
     }
+
+    /// The member-stamp half of `bookcaseAggregates` — one wing's book
+    /// memberships, each note a primary-key seek, the wing's readings
+    /// driving (`wingArchivedCountsSQL`'s shape; ladder A round 1, MINOR 2 —
+    /// it aggregated the whole store's memberships under a "wing's" doc).
+    /// One placeholder: the wing's id. Split out so a pin reads the shipped
+    /// text.
+    static let wingMemberStampsSQL = """
+        SELECT rp.reading_id AS reading_id,
+               MAX(COALESCE(c.last_touched_at, c.created_at)) AS stamp
+        FROM reading r
+        CROSS JOIN reading_post rp ON rp.reading_id = r.id
+        JOIN container c
+          ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
+        WHERE r.wing_id = ? AND r.deleted_at IS NULL
+          AND rp.deleted_at IS NULL AND rp.status = 'member'
+        GROUP BY rp.reading_id
+        """
 
     /// Word counts of every book's rendered content — curated AND smart
     /// (Stage B review round 2, MAJOR 4 + MINOR skews). ONE-SHOT by
@@ -1081,8 +1155,10 @@ extension Queries {
     }
 }
 
-private func countsByReading(_ db: Database, sql: String) throws -> [String: Int] {
-    let rows = try Row.fetchAll(db, sql: sql)
+private func countsByReading(
+    _ db: Database, sql: String, arguments: StatementArguments = StatementArguments()
+) throws -> [String: Int] {
+    let rows = try Row.fetchAll(db, sql: sql, arguments: arguments)
     return Dictionary(uniqueKeysWithValues: rows.map {
         ($0["reading_id"] as String, $0["n"] as Int)
     })
