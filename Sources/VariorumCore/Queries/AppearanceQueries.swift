@@ -225,6 +225,24 @@ extension Queries {
         return listed + columnOnly
     }
 
+    /// **The Starred section of ONE wing** (13i-d U5 — PROVISIONAL
+    /// P-13id-U5-10: §9's total isolation reaches the sidebar's Starred too —
+    /// a star belongs to its thing, and the thing lives in one library). The
+    /// union above, filtered to the targets that live in `wingID` as surfaces
+    /// read wings (a dangling pointer is Home's). The cap stays STORE-WIDE —
+    /// one star list, fifteen stars across every wing (the cap is about the
+    /// list she keeps, not a room). Cost ∝ the cap (≤ 15 point reads).
+    public static func starred(_ db: Database, wingID: String) throws -> [StarredItem] {
+        try starred(db).filter { item in
+            let table = item.target.kind == .post ? "container" : "reading"
+            guard let stored = try String.fetchOne(
+                db, sql: "SELECT wing_id FROM \(table) WHERE id = ?",
+                arguments: [item.target.id])
+            else { return false }
+            return (try wingIsLive(db, id: stored) ? stored : "") == wingID
+        }
+    }
+
     /// The LIST half of the union: its live entries, in star order (the 13f
     /// read rule exactly — a dead target renders nothing). Internal: the
     /// write side's self-heal persists exactly this, and nothing outside the

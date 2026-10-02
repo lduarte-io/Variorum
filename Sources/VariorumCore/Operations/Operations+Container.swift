@@ -533,6 +533,13 @@ extension Operations {
 
             container.deletedAt = nil
             container.updatedAt = now
+            // 13i-d U5 — RE-HOME on Put back (PROVISIONAL P-13id-U5-2): a note
+            // whose wing was deleted while it lay in the Trash (it listed in
+            // HOME's Trash by the dangling-wing rule) comes back as an
+            // ordinary HOME note, never a permanently dangling one.
+            if try !Queries.wingIsLive(db, id: container.wingId) {
+                container.wingId = ""
+            }
             try container.update(db)
             // 13j ladder B (B1): a restored row voids any live intent
             // naming it — a leftover intent must never claim it later.

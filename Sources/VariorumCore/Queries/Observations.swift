@@ -51,11 +51,13 @@ extension AppDatabase {
         sort: Queries.LibrarySort = .lastTouched,
         direction: SortDirection = .desc,
         limit: Int,
-        profile: Profile? = nil
+        profile: Profile? = nil,
+        wingID: String? = nil
     ) -> AsyncValueObservation<[Queries.TimelineItem]> {
         observe {
             try Queries.library(
-                $0, sort: sort, direction: direction, limit: limit, profile: profile)
+                $0, sort: sort, direction: direction, limit: limit, profile: profile,
+                wingID: wingID)
         }
     }
 
@@ -85,8 +87,10 @@ extension AppDatabase {
     /// `Queries.archivedPosts`): a saved version's one home is its note's
     /// Versions listing, so the surface that means *"notes I set aside"*
     /// shows exactly those.
-    public func observeArchivedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.archivedPosts($0, limit: limit) }
+    public func observeArchivedPosts(
+        limit: Int, wingID: String? = nil
+    ) -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.archivedPosts($0, limit: limit, wingID: wingID) }
     }
     // (No `now` here, and that is the point: ARCHIVE has no clock — 13j
     // round 3's ruling keeps Archived a calm forever-section beside the
@@ -103,15 +107,15 @@ extension AppDatabase {
 
     /// The live readings, live (Phase 10 — the readings-management face).
     /// Unbounded on purpose: author-scale metadata (the taxonomy precedent).
-    public func observeReadings() -> AsyncValueObservation<[Reading]> {
-        observe { try Queries.readings($0) }
+    public func observeReadings(wingID: String? = nil) -> AsyncValueObservation<[Reading]> {
+        observe { try Queries.readings($0, wingID: wingID) }
     }
 
     /// The whole live taxonomy, live (Phase 10 — the tag-management face).
     /// Unbounded on purpose: the tag tree is author-scale metadata, cost
     /// ∝ tag count, never corpus text (the pool/tray precedent).
-    public func observeTags() -> AsyncValueObservation<[Tag]> {
-        observe { try Queries.allTags($0) }
+    public func observeTags(wingID: String? = nil) -> AsyncValueObservation<[Tag]> {
+        observe { try Queries.allTags($0, wingID: wingID) }
     }
 
     /// The folder view's listing, live: posts tagged at or under a tag

@@ -439,8 +439,10 @@ extension Queries {
     ///
     /// 13i-b U4: the Pool's LOOSE class — `poolListing(window:).loose`, so the
     /// Mac's tuck face, the phone's listing and every pin read ONE split.
-    public static func poolPosts(_ db: Database, limit: Int) throws -> [TimelineItem] {
-        try poolListing(db, window: limit).loose
+    public static func poolPosts(
+        _ db: Database, limit: Int, wingID: String? = nil
+    ) throws -> [TimelineItem] {
+        try poolListing(db, window: limit, wingID: wingID).loose
     }
 
     /// **THE POOL, SPLIT** (13i-b U4 — the sitting record §8; lesson 10: "The
@@ -510,9 +512,15 @@ extension Queries {
     /// caller exists; if one ever lands, it needs a row-independent
     /// aggregate, not `window: 0` (the `bookArrivals(limit: 0)` idiom does
     /// NOT transfer here).
-    public static func poolListing(_ db: Database, window: Int) throws -> PoolListing {
+    ///
+    /// `wingID` (13i-d U5, additive — §9: the Pool is "every note with no
+    /// book" IN THIS LIBRARY): one wing's bookless notes, tucked behind that
+    /// wing's gatherings only; nil = every wing (byte-identical).
+    public static func poolListing(
+        _ db: Database, window: Int, wingID: String? = nil
+    ) throws -> PoolListing {
         assert(window >= 1, "poolListing's counts ride its rows — window: 0 would lie (F-R1-8)")
-        let statement = try poolListingSQL(db)
+        let statement = try poolListingSQL(db, wingID: wingID)
         let rows = try Row.fetchAll(
             db, sql: statement.sql,
             arguments: StatementArguments(statement.arguments + [window]))
@@ -539,12 +547,12 @@ extension Queries {
 
     /// The statement behind `poolListing`. The LAST placeholder is the window.
     static func poolListingSQL(
-        _ db: Database
+        _ db: Database, wingID: String? = nil
     ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
         var shownTerms: [String] = []
         var arguments: [(any DatabaseValueConvertible)?] = []
         var stars = StarContext()
-        for reading in try readings(db) where reading.kind == .gathering {
+        for reading in try readings(db, wingID: wingID) where reading.kind == .gathering {
             let term: RuleTerm?
             switch RuleGrammar.read(reading.querySpec) {
             case .malformed, .none: continue  // shows nothing — tucks nothing (13i-c, R-13ic-4)
@@ -557,6 +565,9 @@ extension Queries {
             arguments += match.arguments
         }
         let shown = shownTerms.isEmpty ? "0" : "(" + shownTerms.joined(separator: " OR ") + ")"
+        let scope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
+        let wingFence = scope.map { "\n                  AND \($0.sql)" } ?? ""
+        arguments += scope?.arguments ?? []
         return ("""
             SELECT id, title, entry_date, created_at, profile, stamp, shown, n FROM (
               SELECT id, title, entry_date, created_at, profile, stamp, shown,
@@ -568,7 +579,7 @@ extension Queries {
                        COALESCE(c.last_touched_at, c.created_at) AS stamp,
                        CASE WHEN \(shown) THEN 1 ELSE 0 END AS shown
                 FROM container c
-                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL\(wingFence)
                   AND NOT EXISTS (SELECT 1 FROM reading_post rp
                                    WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
                                      AND rp.status = 'member'
@@ -823,10 +834,16 @@ extension Queries {
     /// newest and said nothing about the rest. A day's own predicate bounds
     /// the read (cost ∝ the day's notes), so the caller lifts the cap there
     /// and keeps it everywhere else.
+    ///
+    /// **`wingID` scopes every arm to ONE wing** (13i-d U5, additive — §9:
+    /// "search … scope by wing"): its books and gatherings, its notes, and the
+    /// named blocks of its notes — while SNIPPET hits (blocks in a scraps
+    /// container) list in every wing, because the scraps area is one shared
+    /// room (PROVISIONAL P-13id-U5-4). nil = every wing, byte-identical.
     public static func searchCatalog(
         _ db: Database, query: String, limitPerKind: Int? = 20,
         sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
-        editedOn: DayBounds? = nil
+        editedOn: DayBounds? = nil, wingID: String? = nil
     ) throws -> [CatalogHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         // SQLite's own rule: a negative LIMIT is no limit.
@@ -840,15 +857,20 @@ extension Queries {
             .replacingOccurrences(of: "_", with: "\\_")
         let like = "%\(escaped)%"
 
+        let readingScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        let noteScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        let blockScope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
         if editedOn == nil {
             let books = try Row.fetchAll(
                 db,
                 sql: """
                     SELECT id, name, kind, locked FROM reading
-                    WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')
+                    WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')\(
+                        readingScope.map { " AND \($0.sql)" } ?? "")
                     ORDER BY name LIMIT ?
                     """,
-                arguments: [trimmed, like, limit])
+                arguments: StatementArguments(
+                    [trimmed, like] + (readingScope?.arguments ?? []) + [limit]))
             hits += books.map {
                 CatalogHit(
                     kind: .book, id: $0["id"], title: $0["name"],
@@ -859,10 +881,13 @@ extension Queries {
 
         let posts = try Row.fetchAll(
             db,
-            sql: catalogPostsSQL(sort: sort, direction: direction, editedOn: editedOn),
+            sql: catalogPostsSQL(
+                sort: sort, direction: direction, editedOn: editedOn,
+                wingScope: noteScope?.sql),
             arguments: StatementArguments(
                 [trimmed, like, like]
                     + (editedOn.map { [$0.start, $0.end, $0.start, $0.end] } ?? [])
+                    + (noteScope?.arguments ?? [])
                     + [limit]))
         hits += posts.map {
             // 13g batch 7 (R6-3): the hit's name is the ONE display brain's
@@ -899,10 +924,12 @@ extension Queries {
                     LEFT JOIN variant v ON v.id = b.default_variant_id AND v.deleted_at IS NULL
                     WHERE b.deleted_at IS NULL
                       AND (b.name LIKE ? ESCAPE '\\'
-                           OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))
+                           OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))\(
+                        blockScope.map { " AND (c.kind = 'pool' OR \($0.sql))" } ?? "")
                     ORDER BY b.updated_at DESC LIMIT ?
                     """,
-                arguments: [like, like, limit])
+                arguments: StatementArguments(
+                    [like, like] + (blockScope?.arguments ?? []) + [limit]))
             hits += blocks.map {
                 CatalogHit(
                     kind: .block, id: $0["id"], title: $0["handle"] ?? "block",
@@ -922,17 +949,22 @@ extension Queries {
     ///
     /// Placeholders, in order: the trimmed query (3×), then — only when a day
     /// is set — `start, end, start, end`, then the limit.
+    /// 13i-d U5: `wingScope` (a `Queries.wingScope` fragment over the bare
+    /// `wing_id` column, its arguments bound after the day's) narrows the arm
+    /// to one wing; nil is byte-identical to the shipped statement.
     static func catalogPostsSQL(
-        sort: LibrarySort, direction: SortDirection, editedOn: DayBounds?
+        sort: LibrarySort, direction: SortDirection, editedOn: DayBounds?,
+        wingScope: String? = nil
     ) -> String {
         let dir = direction == .desc ? "DESC" : "ASC"
         let day = editedOn == nil ? "" : "\n  AND \(editedOnClause)"
+        let wing = wingScope.map { "\n  AND \($0)" } ?? ""
         return """
             SELECT id, title, entry_date, created_at, profile,
                    COALESCE(last_touched_at, created_at) AS touched_at
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
-              AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')\(day)
+              AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')\(day)\(wing)
             ORDER BY \(sort.expression) \(dir), id \(dir)
             LIMIT ?
             """
@@ -1049,9 +1081,12 @@ extension Queries {
     /// An empty query returns the most recently touched notes (the resting
     /// state). Saved versions never list (they are archived by the V1
     /// classifier, and the archived fence below excludes them).
+    ///
+    /// `wingID` (13i-d U5, additive): the picker offers one wing's notes —
+    /// the subject note's own library (§9); nil = every wing (byte-identical).
     public static func notePickerNotes(
         _ db: Database, query: String, excluding subjectID: String? = nil,
-        limit: Int = 30
+        limit: Int = 30, wingID: String? = nil
     ) throws -> [NotePickerHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let escaped = trimmed
@@ -1081,6 +1116,9 @@ extension Queries {
                            OR COALESCE(c.title, '') LIKE :like ESCAPE '\\'
                            OR COALESCE(c.entry_date, '') LIKE :like ESCAPE '\\')
                       AND (:subject IS NULL OR c.id <> :subject)
+                      AND (:wing IS NULL OR c.wing_id = :wing
+                           OR (:wing = '' AND c.wing_id NOT IN
+                               (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL)))
                     ORDER BY stamp DESC, c.id DESC
                     LIMIT :limit
                 )
@@ -1098,6 +1136,7 @@ extension Queries {
                 """,
             arguments: [
                 "query": trimmed, "like": like, "subject": subjectID, "limit": limit,
+                "wing": wingID,
             ]
         ).map { row in
             let snippet = (row["snippet"] as String?)?

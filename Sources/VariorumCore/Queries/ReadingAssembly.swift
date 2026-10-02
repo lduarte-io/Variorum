@@ -137,10 +137,21 @@ extension Queries {
     /// The live readings, by name then id (a presentation order — readings
     /// are author-scale metadata, cost ∝ reading count). Phase 10
     /// (additive): the readings-management face lists through this.
-    public static func readings(_ db: Database) throws -> [Reading] {
-        try Reading.fetchAll(
+    ///
+    /// `wingID` (13i-d U5, additive): one wing's readings (a book never spans
+    /// wings — the choosers list the note's own wing's books); nil = every
+    /// wing, byte-identical for every existing caller.
+    public static func readings(_ db: Database, wingID: String? = nil) throws -> [Reading] {
+        guard let wingID else {
+            return try Reading.fetchAll(
+                db,
+                sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
+        }
+        let scope = wingScope(column: "wing_id", wingID: wingID)
+        return try Reading.fetchAll(
             db,
-            sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
+            sql: "SELECT * FROM reading WHERE deleted_at IS NULL AND \(scope.sql) ORDER BY name, id",
+            arguments: StatementArguments(scope.arguments))
     }
 
     /// pre-13x ladder round 2, F3 (MINOR-N3): whether a book of this EXACT

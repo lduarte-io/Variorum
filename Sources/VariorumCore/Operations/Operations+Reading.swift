@@ -522,6 +522,14 @@ extension Operations {
 
             reading.deletedAt = nil
             reading.updatedAt = now
+            // 13i-d U5 — RE-HOME on Put back (PROVISIONAL P-13id-U5-2): a book
+            // whose wing was deleted while it lay in the Trash comes back to
+            // HOME, unshelved (its shelf died with the wing).
+            if try !Queries.wingIsLive(db, id: reading.wingId) {
+                reading.wingId = ""
+                reading.shelfId = nil
+                reading.shelfPosition = nil
+            }
             try reading.update(db)
             // 13j ladder B (B1): a restored row voids any live intent
             // naming it — a leftover intent must never claim it later.

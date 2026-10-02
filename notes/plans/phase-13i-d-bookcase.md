@@ -1530,7 +1530,7 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 | 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (this commit) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
 | 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | DONE (0c950d3e + this commit) — `WingMembershipAndJournalTests` 5: **all 5 RED, 16 issues** with the six production files restored to `5e2e1934` (`p5-red.log`); restored by `git checkout HEAD --`, src diff empty — **no revert in flight**; green with the journal/ownership/intake/arrival neighbours 197/37 |
 | 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | DONE (this commit) — `Operations+WingMove.swift` (+ `Queries.wingMovePreview`, the confirm's read; `copyPost(intoWing:)`); `WingMoveTests` 6 green |
-| 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the lineage read naming another wing + per-wing pins | NOT-STARTED |
+| 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the re-home on Put back + per-wing pins | DONE (this commit) — `WingScopedReadsTests` 5 green; the lineage line reads `versionPeerPosts` + `effectiveWing`/`wingName` at the face (no new core read) |
 | 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | NOT-STARTED |
 | 9 | Mac — the SWITCHER (the Bookcase masthead's `· Home ▾`: the wings, New Wing…, Rename…, Delete… with the refusal's words) + the note doors (Move to Wing… · Copy to Wing… with confirms) + the lineage line + registry rows + the walk green | NOT-STARTED |
 | 10 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; phone test build) | NOT-STARTED |
@@ -1732,8 +1732,14 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   archive state stays, Home is a legal destination, the own wing and a dead wing refuse; the copy
   is born in the destination, bookless, its tag adopted, each block `derived_from` its source with
   the `version_of` anchor (the source untouched); an empty note copies bare.
-- Per-wing scoping pins (Bookcase/tags/search/Arrivals/Archived/Trash; the dangling-wing Home
-  reading; the re-home on Put back): PENDING.
+- **Per-wing scoping (core):** `WingScopedReadsTests` — 5 green (`p7.log`): the Library listing
+  one wing's (nil = every wing); search's book/note/named-block arms one wing's while a SNIPPET hit
+  lists in every wing; the Pool one wing's bookless notes, a gathering tucking only its own wing's;
+  Archived, readings, the Starred section and the note picker per wing; the Trash per wing — a
+  deleted wing's note and book list in HOME's Trash and a Put back RE-HOMES both (`wing_id = ''`).
+  The Bookcase's held read was already wing-driven (ladder A fix 1, consumed); Arrivals are a
+  book's (books are per-wing; intake is wing-scoped since 13i-a — `RuleWingScopingTests`).
+  Mac-surface scoping pins: PENDING (piece 8).
 - Registry rows + the registry walk; the tutorial spine (lesson 11 TRUE): PENDING.
 - Core FULL (baseline 2060/221) · Mac named suites · phone TEST BUILD: PENDING.
 - The walk ×4 (mint a wing, move/copy a note in, the delete refusal naming contents, empty and

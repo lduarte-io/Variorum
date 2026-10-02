@@ -207,12 +207,17 @@ extension Queries {
     /// A precondition and not a graceful fallback on purpose: silently
     /// re-ordering a listing the caller asked for in release would be a
     /// quieter lie than the one being closed.
+    ///
+    /// `wingID` (13i-d U5, additive — §9's total isolation): one wing's notes
+    /// (`wingScope` — Home also lists a dangling wing's). nil = every wing,
+    /// byte-identical for every existing caller (the phone's among them).
     public static func library(
         _ db: Database,
         sort: LibrarySort = .lastTouched,
         direction: SortDirection = .desc,
         limit: Int? = nil,
-        profile: Profile? = nil
+        profile: Profile? = nil,
+        wingID: String? = nil
     ) throws -> [TimelineItem] {
         precondition(
             sort != .title,
@@ -234,6 +239,11 @@ extension Queries {
         if let profile {
             sql += " AND profile = ?"
             arguments.append(profile.rawValue)
+        }
+        if let wingID {
+            let scope = wingScope(column: "wing_id", wingID: wingID)
+            sql += " AND \(scope.sql)"
+            arguments += scope.arguments
         }
         sql += " ORDER BY \(sort.expression) \(dir), id \(dir)"
         if let limit {
@@ -326,8 +336,13 @@ extension Queries {
     /// The parameter defaults to TRUE because that is the product truth
     /// wherever archived notes are listed; a caller that wants the raw
     /// column (the core's own tombstone/archive pins) says so explicitly.
+    ///
+    /// `wingID` (13i-d U5, additive — her per-library Archived ruling,
+    /// 2026-08-25: "will each library have an archived? that makes sense to
+    /// me"): one wing's archived notes; nil = every wing (byte-identical).
     public static func archivedPosts(
-        _ db: Database, limit: Int? = nil, excludingVersionHistory: Bool = true
+        _ db: Database, limit: Int? = nil, excludingVersionHistory: Bool = true,
+        wingID: String? = nil
     ) throws -> [TimelineItem] {
         // **ONE CLASSIFIER, READ — NEVER A SECOND COPY OF IT** (the ladder's
         // LR1-5). This fence used to be an inline near-copy of
@@ -338,14 +353,16 @@ extension Queries {
         let versionFence = excludingVersionHistory
             ? "\n  AND NOT (\(versionHistoryPredicate(alias: "container", of: .anyLiveNote)))"
             : ""
+        let scope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        let wingFence = scope.map { "\n  AND \($0.sql)" } ?? ""
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
                    created_at AS created_at, archived_at AS stamp
             FROM container
-            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL\(versionFence)
+            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL\(versionFence)\(wingFence)
             ORDER BY archived_at DESC, id DESC
             """
-        var arguments: [(any DatabaseValueConvertible)?] = []
+        var arguments: [(any DatabaseValueConvertible)?] = scope?.arguments ?? []
         if let limit {
             sql += " LIMIT ?"
             arguments.append(limit)

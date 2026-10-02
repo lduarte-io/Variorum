@@ -137,11 +137,35 @@ extension Queries {
     /// stranded-originals half walks the derived_from families of unplaced
     /// blocks (`originFamilies`), which is why it is a DELIBERATELY-opened
     /// surface's query and not a held per-keystroke one.
+    ///
+    /// **`wingID` — the per-wing Trash** (13i-d U5, additive; her 2026-08-25
+    /// ruling: "will trash be per library? I also think that makes sense" —
+    /// the STATE machinery stays global, the SURFACE scopes): notes and books
+    /// by their own wing; blocks, takes and stranded originals by their
+    /// note's (`last_container_id`) — a block with no note left reads as
+    /// Home's; snippet groups list in every wing (the scraps area is one
+    /// shared room, P-13id-U5-4). `wingScope`'s dangling rule is what makes a
+    /// deleted wing's Trash rows list in HOME's Trash. nil = every wing,
+    /// byte-identical.
     public static func trash(
         _ db: Database, now: Date, kinds: Set<TrashItem.Kind> = Set(TrashItem.Kind.allCases),
-        oldestFirst: Bool = false, limit: Int? = nil
+        oldestFirst: Bool = false, limit: Int? = nil, wingID: String? = nil
     ) throws -> [TrashItem] {
         let cutoff = TrashWindow.cutoffStamp(now: now)
+        // The wing fences, each a `wingScope` fragment (its arguments ride
+        // the named ones below — `:wing` — so the per-arm SQL stays one
+        // statement each).
+        func fence(_ column: String, nullIsHome: Bool = false) -> String {
+            guard let wingID else { return "" }
+            let home = """
+                (\(column) = '' OR \(column) NOT IN \
+                (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL))
+                """
+            let clause = wingID.isEmpty ? home : "\(column) = :wing"
+            return nullIsHome && wingID.isEmpty
+                ? " AND (\(column) IS NULL OR \(clause))"
+                : " AND \(clause)"
+        }
         // Each arm's second sort key IS the row's own id — the same pair
         // the in-memory merge below compares — so per-arm LIMITs and the
         // merged prefix agree exactly (B4's tiebreak-coherence condition).
@@ -153,6 +177,7 @@ extension Queries {
         let limitClause = limit == nil ? "" : " LIMIT :limit"
         var arguments: StatementArguments = ["cutoff": cutoff]
         if let limit { arguments += ["limit": limit] }
+        if let wingID, !wingID.isEmpty { arguments += ["wing": wingID] }
         var items: [TrashItem] = []
 
         if kinds.contains(.note) {
@@ -167,7 +192,8 @@ extension Queries {
                            (archived_at IS NOT NULL AND archived_at = created_at)
                              AS born_archived
                     FROM container
-                    WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                    WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff\(
+                        fence("wing_id"))
                       -- The fence is STAMP-AWARE (13j ladder B, B1): a LIVE
                       -- intent fences, and a completed one fences only rows
                       -- it actually covered (completed at-or-after the
@@ -234,7 +260,7 @@ extension Queries {
                 db,
                 sql: """
                     SELECT id, name, deleted_at FROM reading
-                    WHERE deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                    WHERE deleted_at IS NOT NULL AND deleted_at >= :cutoff\(fence("wing_id"))
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                         WHERE pi.table_name = 'reading' AND pi.row_id = reading.id
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= reading.deleted_at))
@@ -263,7 +289,8 @@ extension Queries {
                       ON dv.id = b.default_variant_id
                      AND (dv.deleted_at IS NULL OR dv.deleted_at = b.deleted_at)
                     LEFT JOIN container c ON c.id = b.last_container_id
-                    WHERE b.deleted_at IS NOT NULL AND b.deleted_at >= :cutoff
+                    WHERE b.deleted_at IS NOT NULL AND b.deleted_at >= :cutoff\(
+                        fence("c.wing_id", nullIsHome: true))
                       AND NOT EXISTS (
                         SELECT 1 FROM container_block cb
                         JOIN container cc ON cc.id = cb.container_id
@@ -306,7 +333,7 @@ extension Queries {
                     JOIN block b ON b.id = v.block_id
                     LEFT JOIN container c ON c.id = b.last_container_id
                     WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
-                      AND b.deleted_at IS NULL
+                      AND b.deleted_at IS NULL\(fence("c.wing_id", nullIsHome: true))
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                         WHERE pi.table_name = 'variant' AND pi.row_id = v.id
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
@@ -329,7 +356,7 @@ extension Queries {
 
         if kinds.contains(.preservedOriginal) {
             items += try strandedOriginals(
-                db, now: now, oldestFirst: oldestFirst, limit: limit)
+                db, now: now, oldestFirst: oldestFirst, limit: limit, wingID: wingID)
         }
 
         items.sort { a, b in
@@ -356,20 +383,34 @@ extension Queries {
     /// every existing caller byte-identical): the arm sorts and bounds in
     /// SQL like its four siblings above, in the caller's direction.
     public static func strandedOriginals(
-        _ db: Database, now: Date, oldestFirst: Bool = false, limit: Int? = nil
+        _ db: Database, now: Date, oldestFirst: Bool = false, limit: Int? = nil,
+        wingID: String? = nil
     ) throws -> [TrashItem] {
         let cutoff = TrashWindow.cutoffStamp(now: now)
         let dir = oldestFirst ? "ASC" : "DESC"
         let limitClause = limit == nil ? "" : " LIMIT :limit"  // binds (item 3)
         var arguments: StatementArguments = ["cutoff": cutoff]
         if let limit { arguments += ["limit": limit] }
+        // 13i-d U5: the original's NOTE's wing (the per-wing Trash).
+        var wingFence = ""
+        if let wingID {
+            if wingID.isEmpty {
+                wingFence = """
+                     AND (c.wing_id = '' OR c.wing_id NOT IN \
+                    (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL))
+                    """
+            } else {
+                wingFence = " AND c.wing_id = :wing"
+                arguments += ["wing": wingID]
+            }
+        }
         return try Row.fetchAll(
             db,
             sql: """
                 WITH RECURSIVE origins(id) AS (
                   SELECT b.id FROM block b
                   JOIN container c ON c.id = b.last_container_id AND c.deleted_at IS NULL
-                  WHERE b.deleted_at IS NULL AND b.archived_at IS NULL
+                  WHERE b.deleted_at IS NULL AND b.archived_at IS NULL\(wingFence)
                     AND NOT EXISTS (
                       SELECT 1 FROM container_block placed
                       WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
@@ -608,11 +649,13 @@ extension Queries {
 extension AppDatabase {
     /// The Trash, live (13j J1). Windowed like every other recovery listing.
     public func observeTrash(
-        now: Date, kinds: Set<Queries.TrashItem.Kind>, oldestFirst: Bool, limit: Int
+        now: Date, kinds: Set<Queries.TrashItem.Kind>, oldestFirst: Bool, limit: Int,
+        wingID: String? = nil
     ) -> AsyncValueObservation<[Queries.TrashItem]> {
         observe {
             try Queries.trash(
-                $0, now: now, kinds: kinds, oldestFirst: oldestFirst, limit: limit)
+                $0, now: now, kinds: kinds, oldestFirst: oldestFirst, limit: limit,
+                wingID: wingID)
         }
     }
 }
