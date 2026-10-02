@@ -302,7 +302,7 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: bookID)
             }
-            _ = try livePost(db, sourceID)
+            try requireSameWing(db, post: try livePost(db, sourceID), book: reading)
             if let cap = reading.maxPosts, try liveMemberCount(db, readingID: bookID) >= cap {
                 throw OperationError.readingAtCapacity(id: bookID)
             }
@@ -396,7 +396,7 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: bookID)
             }
-            _ = try livePost(db, noteID)
+            try requireSameWing(db, post: try livePost(db, noteID), book: reading)
             if try liveMembership(db, postID: noteID, readingID: bookID) != nil {
                 throw OperationError.alreadyInReading(postID: noteID, readingID: bookID)
             }

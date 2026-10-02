@@ -636,7 +636,9 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
-            _ = try livePost(db, postID)
+            // 13i-d U5 (F-U5-2): a book never spans wings (§9) — the one
+            // choke point refuses a note of another wing.
+            try requireSameWing(db, post: try livePost(db, postID), book: reading)
 
             let liveCount = try liveMemberCount(db, readingID: readingID)
             if try liveMembership(db, postID: postID, readingID: readingID) != nil {
@@ -860,6 +862,19 @@ extension Operations {
             }
             membership.position = try readingPosition(db, readingID: readingID, at: insert)
             try membership.update(db)
+        }
+    }
+
+    /// **A BOOK NEVER SPANS WINGS** (13i-d U5 — the sitting record §9; the
+    /// identity brief's "books never span libraries"): every
+    /// membership-creating road — the hand-add choke point, copy in, move in,
+    /// an arrival's seat — refuses a note whose wing is not the book's
+    /// (`crossWingMembership`). The book choosers list only the note's own
+    /// wing's books, so no face reaches this; it is the invariant's belt.
+    /// Compared as surfaces READ the wings (a dangling pointer is Home's).
+    func requireSameWing(_ db: Database, post: Container, book: Reading) throws {
+        guard try sameEffectiveWing(db, post.wingId, book.wingId) else {
+            throw OperationError.crossWingMembership(postID: post.id, readingID: book.id)
         }
     }
 

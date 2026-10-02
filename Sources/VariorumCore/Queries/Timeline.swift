@@ -252,19 +252,30 @@ extension Queries {
     /// bridge's duplicate-day landings targeted it too); anything else that
     /// must agree on
     /// "the day's entry" uses this, never a re-typed ORDER BY.
+    ///
+    /// **13i-d U5 — HOME's day (#169(b), RULED: the daily Journal is
+    /// Home-only; "the entry born in Home beside its Journal; one entry per
+    /// day for the whole store").** The lookup reads HOME (`wingScope` — a
+    /// dangling wing reads as Home), so ⌘J / Today's Entry pressed in ANY wing
+    /// open the same Home entry, and a daily entry the author MOVED to
+    /// another wing is no longer the day's (that wing is another library;
+    /// the next press makes Home's). Non-daily journal-trait books never wear
+    /// this shape (they mint `.generic` posts — the Stage B BLOCKER's rule),
+    /// so no other wing can hold a "day's entry" for this door to find.
     public static func canonicalJournalEntry(
         _ db: Database, day: String
     ) throws -> Container? {
-        try Container.fetchOne(
+        let home = wingScope(column: "wing_id", wingID: "")
+        return try Container.fetchOne(
             db,
             sql: """
                 SELECT * FROM container
                 WHERE kind = 'post' AND profile = 'journal'
-                  AND entry_date = ? AND deleted_at IS NULL
+                  AND entry_date = ? AND deleted_at IS NULL AND \(home.sql)
                 ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
                 LIMIT 1
                 """,
-            arguments: [day])
+            arguments: StatementArguments([day] + home.arguments))
     }
 
     /// Where "kept, out of view" things are found again (review finding —

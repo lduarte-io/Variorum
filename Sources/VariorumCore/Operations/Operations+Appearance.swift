@@ -377,9 +377,20 @@ extension Operations {
     /// Designates THE daily journal book (Phase 13 B3, PROVISIONAL — the
     /// R50 binding's Mac shape: "Today's Entry" ensures membership here;
     /// the one-entry-per-day rule stays the DAILY door's and is untouched).
+    ///
+    /// **13i-d U5 — HOME-ONLY (#169(b), RULED; KnownIssues row 105's
+    /// mechanism):** a book of ANOTHER wing refuses
+    /// (`dailyJournalIsHomeOnly`). ⌘J / Today's Entry mint the day's entry in
+    /// Home, so a designation in another wing would put Home's entries into
+    /// that wing's book — a membership across libraries (§9), which the
+    /// membership guard now refuses anyway; this keeps the designation itself
+    /// honest at the door.
     public func setDailyJournalBook(_ readingID: String) throws {
         try database.write { db in
-            _ = try liveReading(db, readingID)
+            let reading = try liveReading(db, readingID)
+            guard try sameEffectiveWing(db, reading.wingId, "") else {
+                throw OperationError.dailyJournalIsHomeOnly(id: readingID)
+            }
             try setDailyJournalBook(db, readingID)
         }
     }

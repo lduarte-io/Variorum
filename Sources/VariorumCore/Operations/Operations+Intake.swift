@@ -451,7 +451,7 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: reading.id)
             }
-            _ = try livePost(db, row.postId)
+            try requireSameWing(db, post: try livePost(db, row.postId), book: reading)
             if let cap = reading.maxPosts,
                try liveMemberCount(db, readingID: reading.id) >= cap {
                 throw OperationError.readingAtCapacity(id: reading.id)

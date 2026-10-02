@@ -74,8 +74,10 @@ extension Operations {
             if let existing = try Queries.canonicalJournalEntry(db, day: entryDate) {
                 return JournalEntryResult(container: existing, created: false)
             }
+            // 13i-d U5 (#169(b), RULED): the day's entry is born in HOME,
+            // beside its Journal, whichever wing the door was pressed in.
             let created = try insertPost(
-                db, title: nil, profile: .journal, entryDate: entryDate)
+                db, title: nil, profile: .journal, entryDate: entryDate, wingId: "")
             return JournalEntryResult(container: created, created: true)
         }
     }
@@ -252,6 +254,11 @@ extension Operations {
             // The shared mint-mark: the Journal-keeper repair's predicate
             // filters on exactly this constant (pre-13u Act 0).
             profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .desc,
+            // 13i-d U5 (#169(b), RULED — KnownIssues row 105): the daily
+            // Journal is HOME-ONLY, so its mint's Home is DELIBERATE, never a
+            // default that happened to hold — the designation refuses any
+            // other wing's book (`setDailyJournalBook`), and no door moves it.
+            wingId: "",
             createdAt: now, updatedAt: now)
         try book.insert(db)
         try setDailyJournalBook(db, book.id)
