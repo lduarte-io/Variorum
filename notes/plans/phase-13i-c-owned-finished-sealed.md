@@ -1777,6 +1777,28 @@ naming the finished book that holds it · u4-53 Library marks.
   agree/dispute, the reviewer's final calls + its own fixes, the suite green, one implementer
   sanity pass; hard cap three rounds.
 
+## THE ORCHESTRATOR'S ACCEPTANCE WALK (2026-10-02, the post-ladder Debug build `DerivedData/13ic-walk`, dev store, both guards OK — her app absent, HID idle 7890 s at the open; captures `notes/plans/13ic-screens/orch/`, gitignored)
+
+The composed flows by the orchestrator's own hand (the implementers' walks are claims; this is
+the verification — the sizing rule): **w0** the shelf after the v1_20 launch (24 books; the U3/U4
+fixtures present; no swept gathering — the dev store had none) → **w1** the OWNED book's shelf
+menu: Duplicate with Copies… (deep only), Finish, Seal…, Stop Owning, Delete Book… → **w2** Delete
+Book… on the owned book: the TWO-CHOICE confirm, lesson 8's sentence verbatim ("delete book and
+its 5 notes" · "delete book only"; "Put back returns whatever went in together, together") →
+**w3** the book open (Outline; the owned book's notes carry no shared mark — none can be shared)
+→ **w4** the Book Settings sheet: the COLLECTING sentences ("gathers from: #u4ring" · "new
+matches: join quietly at the end" · "notes written here are tagged: nothing" · edit…) and the
+STATE section (finished · "sealed means the book is done." seal… · "this book owns its notes —
+each one lives only here." stop owning) → **w5** Seal…: the owned-book arm ("It owns its notes,
+so nothing needs copying." · "Sealing finishes the book too.") → **w6/w7** an owned note's
+masthead chip: "u4 owned · diverge · release" (§20's vocabulary) + Add to Book → **w8** the menu
+(books, then gatherings "(by tagging)") → **w9** "u4 other" (a plain book): the CHOICE SHEET's
+copy-only arm — "This note belongs to “u4 owned”, which owns its notes. Only a copy can come in…"
++ the edit law (lesson 2) + "copy into “u4 other”" — cancelled. Every confirm cancelled; zero
+writes; the dev instance quit by bundle identity; zero instances after. **Observation (13i-d
+polish, not a defect):** the settings sheet's three text fields (Name · Word target · Note cap)
+are system-font, unvoiced — the 13i-b shape the sheet inherited; the new sections are voiced.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1891,3 +1913,6 @@ Debug only, author-free, own `caffeinate -d`.
   recorded), round 2 clean, the sanity pass's two concerns answered (1 fixed, 1 recorded).
   Tip a0dd85d0. Next: the ORCHESTRATOR'S acceptance walk on the post-ladder Debug build (held
   for an author-free window) → HER deploy window (§11) → the closeout.
+- **THE ORCHESTRATOR'S WALK DONE (2026-10-02):** the composed flows by hand (the section above;
+  nine captures); zero writes; zero instances. NEXT: HER deploy window (§11) at her explicit go,
+  then the closeout.
