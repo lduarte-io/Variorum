@@ -1752,6 +1752,31 @@ naming the finished book that holds it · u4-53 Library marks.
   note; the book's cards unchanged), the step redone at the right point. No revert was ever in flight;
   zero app instances at open and at close.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U4 (2026-10-01)
+
+- **U4 VERIFIED:** nine commits (e45d19d6…217fa4da), no trailers, the record whole on its own
+  heading line, 53 captures on disk, its six new Mac suites + BookArrivals + the tutorial spine
+  re-run by the orchestrator — 54/7 green on a zero-instance window.
+- **F-U4-1 ACCEPTED — the §4 row 15 text is corrected at the closeout:** `BookStructureModel`'s
+  two drag roads REORDER notes already in the book (they create no membership — pinned); the
+  model's one membership-creating road is the daily book's "+ new entry", which BELLS on an
+  ownership conflict exactly as ⌘J does (P-13ic-U4-1 stands as built — the sitting §6's
+  "`shelveInDailyJournalBook` … bells, never throws" is the same door).
+- **P-13ic-U4-1…11 stand as built** (filed at #169). **P-13ic-U4-9** (no owned-by mark in the
+  Pool — structurally silent, Pool notes are bookless) is correct by construction; the plan's §7
+  U4 line listing "Pool" is corrected with row 15.
+- **F-U4-2 → the standing KnownIssues row "Quiet RECEIPTS have no visible home on a book's
+  Index/Book/Outline…" (owner 13i-d) — the row's scope widens to the shelf and the Library at the
+  closeout. F-U4-3 (no Delete/Duplicate on the settings sheet), F-U4-5 (the Book Panel's remove
+  door), F-U4-9 (copy) → 13i-d / 13s. F-U4-6 → the MobileSoul row. F-U4-8** (`ReadingsViewModel.
+  delete` is dead) **→ the ladder's fix pass retires it.**
+- **THE LADDER OPENS** over the combined diff `ca3b8a85..HEAD` (every commit since the kickoff:
+  U1 Fable · U2–U4 Opus · the two adjudications), a fresh `fable-reviewer` running
+  `notes/REVIEW_PROMPT.md` verbatim, findings repo-first in `notes/plans/13ic-ladder-round1.md`;
+  the cross-model flow (CLAUDE.md): findings to a fresh implementer voice verbatim for
+  agree/dispute, the reviewer's final calls + its own fixes, the suite green, one implementer
+  sanity pass; hard cap three rounds.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1856,3 +1881,7 @@ Debug only, author-free, own `caffeinate -d`.
   trailers, fifty captures, its suites re-run 62/8 green); P-13ic-U3-2 ruled to the record's letter
   with 13i-d as the faces' owner; the U4 BRIEF written. No revert in flight; zero instances. U4
   (`opus-implementer`) spawns next — then the ladder.
+- **U4 VERIFIED + ADJUDICATED (2026-10-01):** nine commits spot-checked (record whole, no
+  trailers, 53 captures, its suites re-run 54/7 green); F-U4-1's row-15 correction accepted; the
+  findings owned. ALL FOUR UNITS BUILT. No revert in flight; zero instances. THE LADDER (a fresh
+  `fable-reviewer`, round 1) spawns next over `ca3b8a85..HEAD`.
