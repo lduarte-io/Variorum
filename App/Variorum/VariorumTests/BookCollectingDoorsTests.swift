@@ -147,6 +147,38 @@ struct BookCollectingDoorsTests {
 
     /// RED ON OLD (the 13i-b carry-over): a gathering's sheet drew Name ·
     /// Word target · Note cap and the Finished control. Now: Name alone, no
+    /// 13i-d U4 — the F-U3-5 rider (the adjudication after U3): a GATHERING's
+    /// hide-owned chips (13i-c U3's three-state row, `setReadingHideOwned`)
+    /// were an UNDECLARED act. Declared now (`.setReadingHideOwned`, a
+    /// `.surface` door) and the sheet — the row's one renderer — names it;
+    /// the row is drawn on a gathering and never on a book. Red by behavioural
+    /// revert (the sheet's declaration dropped).
+    @Test func theHideOwnedChipsAreADeclaredActTheSheetRenders() async throws {
+        let act = CapabilityRegistry.capability(.setReadingHideOwned)
+        #expect(act.doors == [.surface])
+        #expect(act.scope == .book)
+        #expect(act.verb == CollectingCopy.hideOwnedVerb)
+        #expect(BookSettingsSheet.surfaceCapabilities.contains(.setReadingHideOwned),
+                "the sheet is the chips' renderer — it declares the act")
+        try await withDoorWorld { session, db in
+            let ops = session.operations
+            let work = try ops.createTag(name: "work")
+            let book = try ops.createReading(name: "Plain", kind: .book)
+            let gathering = try ops.createReading(
+                name: "Work", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+            BookSettingsProbe.drawn = [:]
+            for id in [book.id, gathering.id] {
+                let target = try #require(await BookSettingsTarget.load(session: session, readingID: id))
+                try await mounted(BookSettingsHost(target: target)) {}
+            }
+            #expect(try #require(BookSettingsProbe.drawn[gathering.id]).hideOwned.count == 3,
+                    "the declared act's three chips draw on a gathering")
+            #expect(try #require(BookSettingsProbe.drawn[book.id]).hideOwned.isEmpty,
+                    "and never on a book")
+            _ = try await reading(db, book.id)
+        }
+    }
+
     /// Finished — while a BOOK's sheet keeps all of it.
     @Test func aGatheringsSheetDrawsNoFinishAndNoExtents() async throws {
         try await withDoorWorld { session, db in
