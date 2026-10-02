@@ -199,7 +199,7 @@ struct EncryptionBookDoorTests {
             await poll { session.status.current != nil }
             #expect(session.status.current?.text
                     == "\u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
-                    + "is already whole — it's on your shelf.")
+                    + "is already whole — it's on your Bookcase.")  // 13i-d U6 (a): the area's ruled name
             #expect(session.status.current?.kind == .refusal,
                     "nothing was minted — P-2 says she sees it whatever the setting")
         }

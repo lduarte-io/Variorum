@@ -44,7 +44,7 @@ nonisolated enum RuleEditorCopy {
     static let editVerb = "Edit Rule…"
     /// The registry's honest note for a dispatch nothing renders.
     static let unavailableNote =
-        "A rule belongs to a book or a gathering \u{2014} right-click one on the shelf to edit it."
+        "A rule belongs to a book or a gathering \u{2014} right-click one on the Bookcase to edit it."
 
     static func title(_ name: String) -> String { "Rule \u{2014} \u{201C}\(name)\u{201D}" }
 
@@ -102,9 +102,9 @@ nonisolated enum RuleEditorCopy {
     // 13i-c U3 — R-13ic-4's faces.
     /// The gathering gate: a gathering with no term cannot be saved.
     static let gatheringNeedsRule = "A gathering needs a rule."
-    /// The MINT sheet (the shelf's Create Smart Book door — its "smart"
-    /// wording stays until 13i-d's vocabulary sweep, said in the U3 RECORD).
-    static let mintTitle = "Create Smart Book"
+    /// The MINT sheet (the Bookcase's Create Gathering door — 13i-d U6 (a):
+    /// the gathering mint's words, "smart" retired app-wide, §14).
+    static let mintTitle = "Create Gathering"
     static let mintEmpty =
         "Add a tag or \u{2605} starred \u{2014} a gathering is made from its rule, and shows "
         + "every note that matches it."

@@ -120,9 +120,11 @@ nonisolated enum LibraryPreview {
         return pieces.joined(separator: " \u{B7} ")
     }
 
-    /// `book · N chapters · N notes` (`smart book`; `finished` when so).
+    /// `book · N chapters · N notes` (`gathering`; `finished` when so).
+    /// 13i-d U6 (a): "gathering", never "smart book" (the sitting record §1 —
+    /// "smart" retired app-wide, §14).
     static func bookFactsLine(kind: ReadingKind, finished: Bool, chapters: Int, notes: Int) -> String {
-        var pieces = [kind == .gathering ? "smart book" : "book"]
+        var pieces = [kind == .gathering ? "gathering" : "book"]
         if chapters > 0 { pieces.append("\(chapters) chapter\(chapters == 1 ? "" : "s")") }
         pieces.append("\(notes) note\(notes == 1 ? "" : "s")")
         if finished { pieces.append("finished") }

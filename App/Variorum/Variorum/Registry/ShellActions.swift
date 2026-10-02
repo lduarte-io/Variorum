@@ -361,7 +361,7 @@ struct ShellActions {
                 let bookID = try await TutorialSeeder.restore(session: session, existing: existing)
                 shell.pendingSelection = .reading(bookID)
                 status.receipt(
-                    "The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
+                    "The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your Bookcase.")
             } catch {
                 status.refuse("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
@@ -416,7 +416,7 @@ struct ShellActions {
                     // it, because "or the shell moved" would reclassify the
                     // daily-entry note and blur every navigating door.
                     status.refuse(
-                        "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
+                        "\u{201C}\(book.name)\u{201D} is already whole — it's on your Bookcase.")
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
                     status.receipt(

@@ -864,7 +864,7 @@ extension Queries {
             let books = try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT id, name, kind, locked FROM reading
+                    SELECT id, name, kind, locked, sealed_at FROM reading
                     WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')\(
                         readingScope.map { " AND \($0.sql)" } ?? "")
                     ORDER BY name LIMIT ?
@@ -874,8 +874,13 @@ extension Queries {
             hits += books.map {
                 CatalogHit(
                     kind: .book, id: $0["id"], title: $0["name"],
-                    detail: ($0["kind"] as String) == "gathering" ? "smart book"
-                        : (($0["locked"] as Int) == 1 ? "finished book" : "book"))
+                    // 13i-d U6 (a): the ruled nouns (the sitting record §1 —
+                    // "smart" retired app-wide, §14): a GATHERING is never a
+                    // book, and a SEALED book says so (Finished = the table of
+                    // contents is done; Sealed = the book is done, §5).
+                    detail: ($0["kind"] as String) == "gathering" ? "gathering"
+                        : (($0["sealed_at"] as String?) != nil ? "sealed book"
+                           : (($0["locked"] as Int) == 1 ? "finished book" : "book")))
             }
         }
 

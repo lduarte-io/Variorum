@@ -78,6 +78,45 @@ struct VocabularySweepTests {
                 "a gathering-only note is still a Pool note (§8) — it just shows elsewhere")
     }
 
+    // MARK: - (a) + (e) — the book's own count lines and the gathering footer
+
+    /// "gathering", never "smart book" (§1/§14); singular where one
+    /// (KnownIssues row 111's "1 chapters", captured on the 13i-b walk).
+    @Test func theBooksCountLinesSayGatheringAndCountRight() {
+        #expect(BookViewCopy.metaLine(gathering: true, chapters: 0, notes: 3, archived: 0)
+                == "gathering \u{00B7} 3 notes")
+        #expect(BookViewCopy.metaLine(gathering: false, chapters: 1, notes: 1, archived: 0)
+                == "book \u{00B7} 1 chapter \u{00B7} 1 note")
+        #expect(BookViewCopy.metaLine(gathering: false, chapters: 2, notes: 5, archived: 2)
+                == "book \u{00B7} 2 chapters \u{00B7} 5 notes \u{00B7} "
+                    + ArchivedLineCopy.line(count: 2))
+        #expect(BookIndexColumn.footerWords(chapters: 1, notes: 1, filtered: false)
+                == "1 chapter · 1 note")
+        #expect(BookIndexColumn.footerWords(chapters: 1, notes: 1, filtered: true)
+                == "1 chapter · 1 shown")
+    }
+
+    /// Row 111: the old footer ("it collects notes by its tags. Tag a note
+    /// anywhere and it appears here.") was false for a ★ rule; the new one is
+    /// true of any rule and never says "collects" of a thing that holds
+    /// nothing (lesson 1 / lesson 3).
+    @Test func theGatheringFooterIsTrueOfAnyRule() {
+        let footer = BookViewCopy.gatheringFooter
+        #expect(footer.hasPrefix("gathering"))
+        #expect(footer.contains("holds none of them"))
+        #expect(footer.contains("tags") && footer.contains("star"),
+                "true of a tag rule AND a ★ rule")
+        #expect(!footer.contains("collects"))
+    }
+
+    /// (a) — the Bookcase's own words for what a gathering is and does.
+    @Test func theBookcaseSaysWhatAGatheringDoes() {
+        #expect(BookcaseCopy.newBookMessage.contains("a gathering shows every note its rule matches"))
+        #expect(BookcaseCopy.shownByTagging(["poems", "odes"])
+                == "Tagged #poems #odes \u{2014} the gathering shows it now, as its rule matches.")
+        #expect(RuleEditorCopy.mintTitle == "Create Gathering")
+    }
+
     // MARK: - (f) item 10 — the dismiss receipt teaches the road back
 
     @Test func theDismissReceiptSaysHowToChangeYourMind() {

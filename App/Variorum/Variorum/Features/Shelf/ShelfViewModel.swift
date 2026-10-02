@@ -392,8 +392,8 @@ final class ShelfViewModel {
                     try ops.collectPostIntoSmartReading(postID, into: readingID)
                 }
                 receipt(result.alreadyMatched
-                    ? "Already collected — it matches this book's filter."
-                    : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — smart books collect by filter.")
+                    ? BookcaseCopy.alreadyShowing
+                    : BookcaseCopy.shownByTagging(result.appliedTagPaths))
             } else {
                 // 13i-c U4 (§4 row 17): the one membership road — an
                 // ownership refusal OPENS the choice sheet (P-2).
@@ -469,6 +469,24 @@ final class ShelfViewModel {
 
 /// The board's own words (the receipts it speaks; 13s may re-voice).
 nonisolated enum BookcaseCopy {
+    // 13i-d U6 (a) — the vocabulary sweep's words on the board ("smart"
+    // retired app-wide — the sitting record §1, §14).
+
+    /// The New Book prompt's message — the three kinds it mints, in lesson
+    /// 1's terms (§25): a book HOLDS, a gathering SHOWS and holds nothing.
+    static let newBookMessage =
+        "A book holds the notes you put in it, in your order; a gathering shows every "
+        + "note its rule matches and holds none of them; a journal book holds dated entries."
+
+    /// A note dropped on a GATHERING's row (R98 — adding IS tagging): the
+    /// receipts say what the act did — it tagged — and why the gathering now
+    /// shows the note. Never "collected"/"added" (a gathering holds nothing).
+    static let alreadyShowing = "Already showing \u{2014} it matches this gathering's rule."
+    static func shownByTagging(_ paths: [String]) -> String {
+        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ")
+            + " \u{2014} the gathering shows it now, as its rule matches."
+    }
+
     // The registry's verbs (13i-d U1).
     static let newShelfVerb = "New Shelf"
     static let renameShelfVerb = "Rename\u{2026}"

@@ -684,7 +684,9 @@ struct TutorialDoorTests {
             }
             #expect(openedID != bookID)
             // 18i: the restore door's report is a receipt.
-            #expect(session.status.spoken?.text.contains("on your shelf") == true,
+            // 13i-d U6 (a), a JUSTIFIED EDIT: the restore door's receipt names
+            // the area by its ruled name — the Bookcase (the sitting record §7).
+            #expect(session.status.spoken?.text.contains("on your Bookcase") == true,
                     "the outcome lands in the one status presentation")
         }
     }

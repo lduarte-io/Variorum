@@ -325,9 +325,13 @@ nonisolated enum BookIndexColumn {
     static func footerWords(
         chapters: Int, notes: Int, filtered: Bool, archived: Int = 0
     ) -> String {
-        var count = filtered ? "\(notes) shown" : "\(notes) notes"
+        // 13i-d U6 (KnownIssues row 111): singular where one — the final
+        // 13i-b walk captured "1 chapters".
+        var count = filtered
+            ? "\(notes) shown" : "\(notes) note\(notes == 1 ? "" : "s")"
         if !filtered, archived > 0 { count += " · " + ArchivedLineCopy.line(count: archived) }
-        return chapters > 0 ? "\(chapters) chapters · \(count)" : count
+        return chapters > 0
+            ? "\(chapters) chapter\(chapters == 1 ? "" : "s") · \(count)" : count
     }
 
     /// Does this entry answer the filter? Titles and dates — the column

@@ -141,7 +141,7 @@ nonisolated enum BookStateCopy {
     static let deleteGatheringDoor = "Delete this gathering\u{2026}"
 
     static let unavailableNote =
-        "A book's state lives on the book \u{2014} right-click it on the shelf, or open its "
+        "A book's state lives on the book \u{2014} right-click it on the Bookcase, or open its "
         + "settings (the gear)."
 
     static func quoted(_ name: String) -> String { "\u{201C}\(name)\u{201D}" }

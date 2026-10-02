@@ -842,14 +842,13 @@ struct BookView: View {
                             + "offers to bind the gathering into one, keeping every "
                             + "note it shows; it keeps collecting after.")
                     }
-                    // Batch 6 legibility: a smart book's derived membership
+                    // Batch 6 legibility: a gathering's derived membership
                     // is DESIGNED (#25a) — but absent-and-silent read as
                     // broken. Say so. (ChromeNotice: navigator =
                     // non-scrolling chrome — the window-min class.)
                     ChromeNotice(
                         tokens: tokens,
-                        text: "smart book — it collects notes by its tags. Tag a note "
-                            + "anywhere and it appears here.",
+                        text: BookViewCopy.gatheringFooter,
                         lines: 6)
                 }
                 // 13i-d U3 — KnownIssues row 103's book-surface half: the
@@ -1916,16 +1915,10 @@ struct BookView: View {
     }
 
     private var bookMetaLine: String {
-        var parts: [String] = [structure.reading?.kind == .gathering ? "smart book" : "book"]
-        if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
-        parts.append("\(model.entries.count) notes")
-        // 13i-d U4 — HONEST COUNTS (her #169(a)(1)): the set-aside notes the
-        // book's count line never said ("5 notes · 2 archived"); nothing
-        // when there are none. The number is the archived line's own.
-        if archived.door.count > 0 {
-            parts.append(ArchivedLineCopy.line(count: archived.door.count))
-        }
-        return parts.joined(separator: " · ")
+        BookViewCopy.metaLine(
+            gathering: structure.reading?.kind == .gathering,
+            chapters: structure.sections.count, notes: model.entries.count,
+            archived: archived.door.count)
     }
 
     /// One post in the outline (13c 2A — extracted from four inline
@@ -2709,3 +2702,31 @@ enum BookNavigatorDoor {
         model.requestReveal(entry.postID)
     }
 }
+
+/// **The book view's own words** (13i-d U6 — the vocabulary sweep), pure and
+/// static so the pins read the sentences the faces draw.
+nonisolated enum BookViewCopy {
+    /// The masthead's count line: the kind, chapters, notes and the
+    /// set-aside count. "gathering", never "smart book" (the sitting record
+    /// §1 — "smart" retired app-wide, §14); singular where one (KnownIssues
+    /// row 111 — "1 chapters"). 13i-d U4's honest counts kept as built: the
+    /// archived count rides only when there is one.
+    static func metaLine(gathering: Bool, chapters: Int, notes: Int, archived: Int) -> String {
+        var parts: [String] = [gathering ? "gathering" : "book"]
+        if chapters > 0 { parts.append("\(chapters) chapter\(chapters == 1 ? "" : "s")") }
+        parts.append("\(notes) note\(notes == 1 ? "" : "s")")
+        if archived > 0 { parts.append(ArchivedLineCopy.line(count: archived)) }
+        return parts.joined(separator: " \u{00B7} ")
+    }
+
+    /// A gathering's navigator footer. KnownIssues row 111: "it collects
+    /// notes by its tags. Tag a note anywhere and it appears here." was false
+    /// for a ★ rule (13i-b U4 F-U4-4) and said "collects" of a thing that
+    /// holds nothing. The ruled noun and lesson 1/3's truth, for ANY rule:
+    /// it shows, it holds nothing, and a note comes and goes with what the
+    /// rule reads — its tags and its star.
+    static let gatheringFooter =
+        "gathering \u{2014} it shows every note its rule matches and holds none of them. "
+        + "A note comes and goes with its tags and its star."
+}
+

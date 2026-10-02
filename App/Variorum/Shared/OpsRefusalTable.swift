@@ -171,7 +171,9 @@ nonisolated enum OpsRefusalCopy {
         // `liveReading` guard's refusal (missing OR tombstoned) from
         // every reading op, so the copy serves both meanings.
         case .readingNotDeleted:
-            return "That book is already restored — it's back on the shelf."
+            // 13i-d U6 (a): platform-NEUTRAL (the phone's area is still
+            // "Shelf" until its catch-up; the Mac's is the Bookcase).
+            return "That book is already restored — it's back where it was."
         case .readingNotFound:
             return "That book can't be found — it may have been deleted, "
                 + "or removed on another device."

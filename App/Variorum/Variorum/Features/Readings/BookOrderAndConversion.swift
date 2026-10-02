@@ -205,7 +205,7 @@ nonisolated enum BindCopy {
     /// The sentence F-1 replaced ("New tag matches will stop arriving here."
     /// — false since U1). Lesson 3's truth, in the door's words.
     static let keepsCollecting =
-        "It stays the same book on your shelf \u{2014} same name, same star \u{2014} and it "
+        "It stays the same book on your Bookcase \u{2014} same name, same star \u{2014} and it "
         + "keeps collecting after you bind it: new notes that match its rule join at the end."
 
     static func bound(_ name: String, count: Int, copied: Int = 0, leftOut: Int = 0) -> String {
@@ -323,9 +323,9 @@ nonisolated enum BindCopy {
     }
 
     static let bindUnavailable =
-        "Only a gathering binds into a book \u{2014} right-click one on the shelf."
+        "Only a gathering binds into a book \u{2014} right-click one on the Bookcase."
     static let spawnUnavailable =
-        "A book is made from a gathering \u{2014} right-click one on the shelf."
+        "A book is made from a gathering \u{2014} right-click one on the Bookcase."
 }
 
 /// **THE BIND SHEET** — both doors present it (the shelf's menu item and the

@@ -196,7 +196,9 @@ struct GatheringRuleGateTests {
             MintGatheringProbe.drawn = nil
             try await mounted(MintGatheringSheet(model: model, readings: readings)) {
                 let empty = try #require(MintGatheringProbe.drawn)
-                #expect(empty.title == "Create Smart Book")
+                // 13i-d U6 (a), a JUSTIFIED EDIT: the gathering mint's words —
+                // "smart" is retired app-wide (the sitting record §14).
+                #expect(empty.title == "Create Gathering")
                 #expect(empty.createEnabled == false, "no term — no Create")
                 #expect(empty.emptyNotice == RuleEditorCopy.mintEmpty)
                 model.add(.tag(work.id), into: nil)

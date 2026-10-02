@@ -101,7 +101,9 @@ struct LibraryPreviewBrainTests {
         #expect(LibraryPreview.bookFactsLine(kind: .book, finished: false, chapters: 0, notes: 1)
                 == "book · 1 note")
         #expect(LibraryPreview.bookFactsLine(kind: .gathering, finished: true, chapters: 2, notes: 13)
-                == "smart book · 2 chapters · 13 notes · finished")
+                // 13i-d U6 (a), a JUSTIFIED EDIT: "smart" is retired app-wide
+                // (the sitting record §14) — a gathering is a gathering.
+                == "gathering · 2 chapters · 13 notes · finished")
     }
 
     /// Row 33: a BOOK's preview is its OUTLINE — chapters and notes in the

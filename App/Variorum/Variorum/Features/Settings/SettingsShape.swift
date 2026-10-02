@@ -246,8 +246,10 @@ nonisolated enum SettingsCatalog {
         SettingsRow(
             id: "tagManager", pane: .tags, title: "Tag manager",
             blurb: "The whole hierarchy: new tags, child tags, rename, delete with the "
-                + "subtree — and Promote to Book, which turns tags into a smart book.",
-            keywords: ["tag", "tags", "hierarchy", "rename", "promote", "smart book",
+                + "subtree — and Make a Gathering, which shows every note with those tags.",
+            // 13i-d U6 (a): "promote" stays a search word (the door's old
+            // name finds it); "smart" is retired (§14).
+            keywords: ["tag", "tags", "hierarchy", "rename", "promote", "gathering",
                        "label", "folder"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",

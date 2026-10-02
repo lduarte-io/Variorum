@@ -73,7 +73,7 @@ nonisolated enum DuplicateBookCopy {
     }
 
     static let unavailableNote =
-        "A book duplicates from its shelf row's menu \u{2014} a gathering is made again from its "
+        "A book duplicates from its row's menu on the Bookcase \u{2014} a gathering is made again from its "
         + "rule instead."
 }
 

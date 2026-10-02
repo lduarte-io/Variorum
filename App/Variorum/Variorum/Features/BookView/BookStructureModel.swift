@@ -741,19 +741,20 @@ enum JournalBooks {
             if sealed {
                 return "Today's entry opened, but “\(bookName)” is sealed — "
                     + "it wasn't added. Pick a new daily journal from a book's "
-                    + "shelf menu (Use as Daily Journal), or unseal “\(bookName)” "
-                    + "(that reopens it too)."
+                    + "menu on the Bookcase (Use as Daily Journal), or unseal "
+                    + "“\(bookName)” (that reopens it too)."
             }
             return "Today's entry opened, but “\(bookName)” is finished — "
                 + "it wasn't added. Pick a new daily journal from a book's "
-                + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”."
+                + "menu on the Bookcase (Use as Daily Journal), or reopen “\(bookName)”."
         case .bookAtCapacity:
             return "Today's entry opened, but “\(bookName)” is at its note cap — "
                 + "it wasn't added. Extend the cap or start a new daily journal "
-                + "(Use as Daily Journal in a book's shelf menu)."
+                + "(Use as Daily Journal in a book's menu on the Bookcase)."
         case .wrongKind:
-            return "Today's entry opened, but “\(bookName)” is a smart book — "
-                + "it collects by query and can't hold entries. Pick a curated "
+            // 13i-d U6 (a): the ruled noun (§1) — a gathering holds nothing.
+            return "Today's entry opened, but “\(bookName)” is a gathering — "
+                + "it shows what its rule matches and can't hold entries. Pick a "
                 + "book with Use as Daily Journal."
         case .waitingAtDoor(let readingID):
             // 13i-c U2 (the sitting record §6 — "an owned-elsewhere note

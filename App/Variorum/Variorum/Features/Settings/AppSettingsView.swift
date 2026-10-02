@@ -925,9 +925,11 @@ private struct TagManagerPane: View {
                     newTagSheet = true
                 }
                 Spacer()
-                // R30/R37: promote one or SEVERAL tags to a saved book —
-                // AND-joined or OR-joined; the tags stay on the posts.
-                Button("Promote to Book…") { promoteSheet = true }
+                // R30/R37: promote one or SEVERAL tags to a saved GATHERING —
+                // AND-joined or OR-joined; the tags stay on the posts. 13i-d
+                // U6 (a): the door names what it mints (it was "Promote to
+                // Book…", minting a gathering — "smart" retired, §1/§14).
+                Button("Make a Gathering…") { promoteSheet = true }
                     .disabled(promoteTags.isEmpty)
             }
             if let error = tags.lastError {
@@ -964,7 +966,7 @@ private struct TagManagerPane: View {
     }
 }
 
-/// R30's face: tags → a saved SMART book on the shelf. AND-joined
+/// R30's face: tags → a saved GATHERING on the Bookcase. AND-joined
 /// (`tagsAll`) or OR-joined (`tags`); the promotion LEAVES the tags on the
 /// posts (R37 — trivially: nothing here touches applications).
 struct PromoteTagsSheet: View {
@@ -977,13 +979,13 @@ struct PromoteTagsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Promote to Book").font(.headline)
-            Text("Creates a smart book on the shelf collecting notes by these tags. The tags stay on the notes.")
+            Text("Make a Gathering").font(.headline)
+            Text("Makes a gathering on the Bookcase that shows every note with these tags \u{2014} it holds none of them. The tags stay on the notes.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(tagPaths.map { "#\($0)" }.joined(separator: "  "))
                 .font(.callout)
-            TextField("Book name", text: $name)
+            TextField("Gathering name", text: $name)
             if tagPaths.count > 1 {
                 Picker("Notes must carry", selection: $joinAll) {
                     Text("any of these tags (OR)").tag(false)
@@ -997,7 +999,7 @@ struct PromoteTagsSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }
-                Button("Create Book") { promote() }
+                Button("Make Gathering") { promote() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
             }

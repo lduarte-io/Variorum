@@ -210,7 +210,7 @@ struct HelperView: View {
             // the same pair, which is the whole point of the ruling.
             ("\u{23CE} / \u{21E7}\u{23CE} in a capture box",
              "\u{23CE} files what you have written \u{2014} the quick note keeps it and "
-                + "closes; the new-note box on the shelf files it and opens it. "
+                + "closes; the new-note box on the Bookcase files it and opens it. "
                 + "\u{21E7}\u{23CE} adds another paragraph instead, so a capture can be "
                 + "as long as the thought is"),
             ("View ▸ Open Beside", "put a second note beside this one (right-click a "
@@ -368,21 +368,25 @@ struct HelperView: View {
         ("pool / scraps",
          "The Pool holds notes that belong to no book yet. Snippets (scraps) holds loose "
          + "pieces — drag one into a draft and it lands as a copy with lineage."),
-        ("book / reading",
-         "An ordered collection of notes (curated by hand, or smart — collected by "
-         + "tags). A note can live in many books at once; membership is not ownership."),
+        // 13i-d U6 (a): the ruled nouns (the sitting record §1 — "smart"
+        // retired app-wide, §14); lesson 1's three kinds, said as a glossary.
+        ("book / gathering",
+         "A BOOK holds its notes as members \u{2014} your order, your chapters; a note can "
+         + "live in many books at once, and membership is not ownership (an OWNED book is "
+         + "the one place its notes live). A GATHERING is a saved rule of tags or \u{2605} "
+         + "that shows every matching note and holds none of them."),
         // 13g batch 7 (R6-1): the word for the cards she asked for.
         ("tag",
          "A hierarchical label (life/goals/2024) applied to a note or a block — never a "
          + "place, so tagging moves nothing. On a note they show as coloured cards on "
          + "the context bar; \u{FF0B} adds, \u{2715} removes, and a tag keeps its colour "
-         + "everywhere. Settings (\u{2318},) manages the whole taxonomy and can promote "
-         + "a tag into a smart book."),
+         + "everywhere. Settings (\u{2318},) manages the whole taxonomy and can make a "
+         + "gathering from tags."),
         // 13g batch 7 (R6-4): quick notes now file themselves.
         ("quicknote (the tag)",
-         "Every quick note is tagged \u{201C}quicknote\u{201D}, and the smart book "
-         + "\u{201C}Quicknotes\u{201D} collects the tag — so take the tag off and the note "
-         + "leaves that book, because smart membership is just the tag."),
+         "Every quick note is tagged \u{201C}quicknote\u{201D}, and the gathering "
+         + "\u{201C}Quicknotes\u{201D} shows the tag \u{2014} so take the tag off and the "
+         + "note leaves it, because a gathering is just its rule."),
         ("canvas",
          "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
          + "switcher just changes what a card shows; choosing is a separate, deliberate "
@@ -453,9 +457,9 @@ struct HelperView: View {
          + "from any app without a click. \u{23CE} files what you wrote and closes the "
          + "pad; \u{21E7}\u{23CE} adds another paragraph, so a capture can hold as many "
          + "as the thought needs; closing it (or \u{2318}\u{23CE}) files it too. What you "
-         + "wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} — the smart "
-         + "Quicknotes book on the shelf collects it, and taking the tag off sends it "
-         + "back to the Pool."),
+         + "wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} \u{2014} the "
+         + "Quicknotes gathering shows it, and taking the tag off sends it back to the "
+         + "Pool."),
     ]
 
     private var dictionaryTab: some View {

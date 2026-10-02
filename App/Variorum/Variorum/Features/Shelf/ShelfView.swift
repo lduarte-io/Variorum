@@ -187,9 +187,9 @@ struct ShelfView: View {
             // 13i-c U3 (R-13ic-4, F-U1-2): the mint door REQUIRES a rule, so
             // it opens the mint sheet (the rule drafted inline; Create
             // disabled until a term exists) instead of minting a rule-less
-            // gathering the op refuses. Its "smart" wording stays until
-            // 13i-d's vocabulary sweep (U6).
-            Button("Create Smart Book\u{2026}") {
+            // gathering the op refuses. 13i-d U6 (a): the gathering mint's
+            // words (RuleEditorCopy.mintTitle's door).
+            Button(RuleEditorCopy.mintTitle + "\u{2026}") {
                 let editor = RuleEditorModel(session: session, mintingIn: model.wingID)
                 editor.mintName = nameField
                 // 13i-d U1: the context mint reaches the gathering mint too.
@@ -210,7 +210,7 @@ struct ShelfView: View {
         } message: {
             Text(model.mintShelfID.flatMap { id in model.shelves.first { $0.id == id } }
                 .map { "It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. " } ?? "")
-                + Text("A book holds a hand-picked, ordered note list; a smart book collects by filter; a journal book holds dated entries.")
+                + Text(BookcaseCopy.newBookMessage)
         }
         .alert(
             "Rename Book",
@@ -860,7 +860,7 @@ struct BookExtentSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Length & Extent — “\(reading.name)”").font(.headline)
-            Text("A word target shows progress on the shelf; at its end, extend it or start a new book. The note cap refuses further adds when full. Blank clears.")
+            Text("A word target shows progress on the Bookcase; at its end, extend it or start a new book. The note cap refuses further adds when full. Blank clears.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Form {
