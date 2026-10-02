@@ -63,7 +63,7 @@ final class PoolPostsModel {
         let wing = session.wing.currentID
         do {
             for try await value in session.database.observe({ db in
-                try Queries.poolListing(db, window: Self.window, wingID: wing)
+                try Queries.notePoolListing(db, window: Self.window, wingID: wing)
             }) {
                 await adopt(value)
             }

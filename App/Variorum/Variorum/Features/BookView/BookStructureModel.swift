@@ -550,7 +550,8 @@ final class BookStructureModel {
             // 13i-c U3: the receipt names the owned-notes limb's outcome.
             session.status.receipt(BindCopy.bound(
                 result.reading.name, count: result.membershipIDs.count,
-                copied: result.copied.count, leftOut: result.leftOut.count))
+                copied: result.copied.count, leftOut: result.leftOut.count,
+                hearsActs: BindCopy.hearsActs(result.reading)))
             return true
         } catch let error as OperationError {
             lastError = ReadingsViewModel.message(error)

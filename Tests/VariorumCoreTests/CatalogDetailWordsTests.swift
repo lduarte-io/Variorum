@@ -32,3 +32,41 @@ struct CatalogDetailWordsTests {
         }
     }
 }
+
+/// 13i-d U6 (e) — KnownIssues row 111's third item: the doors' "keeps
+/// collecting" promise is true exactly when an APPLYING ACT can reach the
+/// rule — intake hears a tagging act on a rule naming the tag's subtree and a
+/// starring act on a rule with a star term (`intakeAfterTagging` /
+/// `intakeAfterStarring`); a rule of LEGACY terms only (or dead tag terms
+/// only) hears neither and collects only at catch-ups.
+@Suite("13i-d U6 — which rules hear an applying act")
+struct RuleHearsActsTests {
+    @Test func onlyTagAndStarTermsHearAnAct() {
+        #expect(RuleGrammar.hearsApplyingActs(.tag("t1")))
+        #expect(RuleGrammar.hearsApplyingActs(.star))
+        #expect(RuleGrammar.hearsApplyingActs(.and([.legacyProfile("journal"), .tag("t1")])))
+        #expect(RuleGrammar.hearsApplyingActs(.not(.star)), "a NOT still hears the act it negates")
+        #expect(!RuleGrammar.hearsApplyingActs(.legacyProfile("journal")))
+        #expect(!RuleGrammar.hearsApplyingActs(
+            .and([.legacyProfile("journal"), .legacyEntryDateFrom("2026-01-01")])))
+        #expect(RuleGrammar.hearsApplyingActs(RuleTerm.tag("")) == false, "a dead term hears nothing")
+        #expect(!RuleGrammar.hearsApplyingActs(nil))
+    }
+
+    /// The predicate is the listener's own: a legacy-only living book is NOT
+    /// reached by a tagging act, so the words that say so are true.
+    @Test func aLegacyOnlyLivingBookIsNotReachedByATaggingAct() throws {
+        try withOperations { ops, db in
+            let tag = try ops.createTag(name: "work")
+            let book = try ops.createReading(
+                name: "legacy", kind: .book,
+                querySpec: try RuleGrammar.encode(.legacyProfile("journal")))
+            let note = try ops.createPost(title: "n", profile: .journal)
+            _ = try ops.applyTag(tag.id, toPost: note.id)
+            let rows = try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                [book.id, note.id]) ?? 0
+            #expect(rows == 0, "no act reaches a legacy-only rule — it collects only at catch-ups")
+        }
+    }
+}

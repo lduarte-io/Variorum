@@ -114,7 +114,7 @@ struct PoolTuckFaceTests {
     /// What the observation would deliver now, adopted by hand.
     private func refresh(_ model: PoolPostsModel, _ db: AppDatabase) async throws {
         await model.adopt(try await db.read {
-            try Queries.poolListing($0, window: PoolPostsModel.window)
+            try Queries.notePoolListing($0, window: PoolPostsModel.window)
         })
     }
 

@@ -319,7 +319,8 @@ final class ShelfViewModel {
             // 13i-c U3: the receipt names the owned-notes limb's outcome.
             receipt(BindCopy.bound(
                 result.reading.name, count: result.membershipIDs.count,
-                copied: result.copied.count, leftOut: result.leftOut.count))
+                copied: result.copied.count, leftOut: result.leftOut.count,
+                hearsActs: BindCopy.hearsActs(result.reading)))
         } catch let error as OperationError {
             refuse(bookRefusal(error, readingID: readingID))
         } catch {

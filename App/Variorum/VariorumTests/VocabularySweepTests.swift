@@ -117,6 +117,26 @@ struct VocabularySweepTests {
         #expect(RuleEditorCopy.mintTitle == "Create Gathering")
     }
 
+    // MARK: - (e) row 111 item 3 — "keeps collecting" only where an act can reach the rule
+
+    /// A legacy-only rule (profile / date terms) hears no tagging or starring
+    /// act, so the bind and spawn doors stop promising that it keeps
+    /// collecting; every rule an act can reach keeps the shipped words.
+    @Test func theCollectingPromiseIsTrueOfTheRule() {
+        let legacy = RuleTerm.legacyProfile("journal")
+        let explained = BindCopy.explanation(count: 2, followUp: .none, hearsActs: false)
+        #expect(explained.contains("catches up") && !explained.contains("keeps collecting"))
+        #expect(BindCopy.explanation(count: 2, followUp: .none).contains(BindCopy.keepsCollecting))
+        #expect(BindCopy.bound("g", count: 2, hearsActs: false).hasSuffix(
+            "It collects only when it catches up."))
+        #expect(BindCopy.bound("g", count: 2).hasSuffix("It keeps collecting."))
+        #expect(BindCopy.spawned("b", count: 1, rule: .rule(legacy)).contains("catches up"))
+        #expect(BindCopy.spawned("b", count: 1, rule: .rule(RuleTerm.star))
+                .contains("keeps collecting"))
+        #expect(BindCopy.spawnMessage(for: .rule(legacy)).contains("only when it catches up"))
+        #expect(BindCopy.spawnMessage(for: .rule(RuleTerm.star)).contains("keep joining"))
+    }
+
     // MARK: - (f) item 10 — the dismiss receipt teaches the road back
 
     @Test func theDismissReceiptSaysHowToChangeYourMind() {

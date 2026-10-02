@@ -257,7 +257,7 @@ struct OwnershipBookDoorsTests {
             try ops.deleteReadingWithNotes(owned.id)
 
             try ops.restoreContainer(a.id)
-            #expect(try db.read { try Queries.poolListing($0, window: 10) }.loose
+            #expect(try db.read { try Queries.notePoolListing($0, window: 10) }.loose
                 .map(\.postID) == [a.id])
 
             try ops.restoreReading(owned.id)
@@ -272,7 +272,7 @@ struct OwnershipBookDoorsTests {
             try ops.addPostToReading(a.id, to: owned.id)
             try ops.deleteReading(owned.id)
             #expect(try db.deletedAt("container", a.id) == nil)
-            #expect(try db.read { try Queries.poolListing($0, window: 10) }.loose
+            #expect(try db.read { try Queries.notePoolListing($0, window: 10) }.loose
                 .map(\.postID) == [a.id])
             #expect(try db.read { try Queries.trashBookNoteCount($0, readingID: owned.id) } == 0)
 

@@ -116,7 +116,7 @@ struct RemoveReleaseDoorTests {
             let outcome = await RemoveFromBookDoor.remove(
                 session: session, postID: note.id, book: try await book(db, mine.id))
             #expect(outcome == .receipt(RemoveFromBookCopy.released(book: "Mine")))
-            let pool = try await db.read { try Queries.poolListing($0, window: 50) }
+            let pool = try await db.read { try Queries.notePoolListing($0, window: 50) }
             #expect(pool.loose.map(\.postID).contains(note.id), "it's in the Pool now")
         }
     }
@@ -153,7 +153,7 @@ struct RemoveReleaseDoorTests {
             #expect(released == .receipt(RemoveFromBookCopy.receipt(
                 book: "Mine", owned: true, bookless: true, archived: true)))
 
-            let pool = try await db.read { try Queries.poolListing($0, window: 50) }
+            let pool = try await db.read { try Queries.notePoolListing($0, window: 50) }
             #expect(!pool.loose.map(\.postID).contains(a.id), "and the store agrees")
             #expect(!pool.loose.map(\.postID).contains(b.id))
         }

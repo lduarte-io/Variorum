@@ -437,12 +437,12 @@ extension Queries {
     /// touched first; bounded like every held listing.
 
     ///
-    /// 13i-b U4: the Pool's LOOSE class — `poolListing(window:).loose`, so the
+    /// 13i-b U4: the Pool's LOOSE class — `notePoolListing(window:).loose`, so the
     /// Mac's tuck face, the phone's listing and every pin read ONE split.
     public static func poolPosts(
         _ db: Database, limit: Int, wingID: String? = nil
     ) throws -> [TimelineItem] {
-        try poolListing(db, window: limit, wingID: wingID).loose
+        try notePoolListing(db, window: limit, wingID: wingID).loose
     }
 
     /// **THE POOL, SPLIT** (13i-b U4 — the sitting record §8; lesson 10: "The
@@ -472,7 +472,7 @@ extension Queries {
         }
     }
 
-    /// ONE statement (`poolListingSQL` — split out so the P1 pin reads the
+    /// ONE statement (`notePoolListingSQL` — split out so the P1 pin reads the
     /// shipped statement): every bookless note is classified ONCE by the OR of
     /// the live gatherings' rules (`shown`), then window functions number and
     /// count each class, and at most `window` rows per class come back.
@@ -516,11 +516,11 @@ extension Queries {
     /// `wingID` (13i-d U5, additive — §9: the Pool is "every note with no
     /// book" IN THIS LIBRARY): one wing's bookless notes, tucked behind that
     /// wing's gatherings only; nil = every wing (byte-identical).
-    public static func poolListing(
+    public static func notePoolListing(
         _ db: Database, window: Int, wingID: String? = nil
     ) throws -> PoolListing {
-        assert(window >= 1, "poolListing's counts ride its rows — window: 0 would lie (F-R1-8)")
-        let statement = try poolListingSQL(db, wingID: wingID)
+        assert(window >= 1, "notePoolListing's counts ride its rows — window: 0 would lie (F-R1-8)")
+        let statement = try notePoolListingSQL(db, wingID: wingID)
         let rows = try Row.fetchAll(
             db, sql: statement.sql,
             arguments: StatementArguments(statement.arguments + [window]))
@@ -545,8 +545,8 @@ extension Queries {
             loose: loose, tucked: tucked, looseCount: looseCount, tuckedCount: tuckedCount)
     }
 
-    /// The statement behind `poolListing`. The LAST placeholder is the window.
-    static func poolListingSQL(
+    /// The statement behind `notePoolListing`. The LAST placeholder is the window.
+    static func notePoolListingSQL(
         _ db: Database, wingID: String? = nil
     ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
         var shownTerms: [String] = []

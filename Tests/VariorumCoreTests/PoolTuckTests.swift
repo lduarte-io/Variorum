@@ -13,7 +13,7 @@ import Testing
 @Suite("13i-b U4 — the Pool tuck: the bookless split (lesson 10)")
 struct PoolTuckTests {
     private func listing(_ db: AppDatabase, window: Int = 50) throws -> Queries.PoolListing {
-        try db.read { try Queries.poolListing($0, window: window) }
+        try db.read { try Queries.notePoolListing($0, window: window) }
     }
 
     /// Lesson 10, both sentences, against the store's own truth.
@@ -182,7 +182,7 @@ struct PoolTuckTests {
         }
     }
 
-    /// P1 on the PLAN (the shipped statement, `poolListingSQL`): the notes by
+    /// P1 on the PLAN (the shipped statement, `notePoolListingSQL`): the notes by
     /// their kind index, the membership probe and the tag terms as index
     /// SEARCHes (no SCAN of `reading_post` or `post_tag`); nothing reads block
     /// or variant text.
@@ -196,7 +196,7 @@ struct PoolTuckTests {
             let a = try ops.createPost(title: "a")
             try ops.setStarred(.post(a.id), starred: true)
             let plan = try db.read { db -> [String] in
-                let statement = try Queries.poolListingSQL(db)
+                let statement = try Queries.notePoolListingSQL(db)
                 return try Row.fetchAll(
                     db, sql: "EXPLAIN QUERY PLAN \(statement.sql)",
                     arguments: StatementArguments(statement.arguments + [50]))

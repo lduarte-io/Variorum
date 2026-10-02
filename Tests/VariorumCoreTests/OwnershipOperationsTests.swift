@@ -135,7 +135,7 @@ struct OwnershipOperationsTests {
 
             #expect(try ops.removePostFromReading(solo.id, from: owned.id) == true)
             #expect(try ops.removePostFromReading(twice.id, from: plainA.id) == false)
-            let pool = try db.read { try Queries.poolListing($0, window: 50) }
+            let pool = try db.read { try Queries.notePoolListing($0, window: 50) }
             #expect(pool.loose.map(\.postID).contains(solo.id))
             #expect(!pool.loose.map(\.postID).contains(twice.id))
             // The release is a member-class decision (tombstone-means-decided).

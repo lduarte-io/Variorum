@@ -73,7 +73,7 @@ struct MembershipReadersBookScopeTests {
             let note = try ops.createPost(title: "bookless")
             try strayMemberRow(db, gatheringID: gathering.id, postID: note.id)
 
-            let pool = try db.read { try Queries.poolListing($0, window: 10) }
+            let pool = try db.read { try Queries.notePoolListing($0, window: 10) }
             // Pre-fix: the stray read as a home and the note left the Pool.
             #expect((pool.loose + pool.tucked).map(\.postID).contains(note.id))
         }
@@ -101,7 +101,7 @@ struct MembershipReadersBookScopeTests {
                     arguments: [book.id, note.id])
             }
 
-            let pool = try db.read { try Queries.poolListing($0, window: 10) }
+            let pool = try db.read { try Queries.notePoolListing($0, window: 10) }
             #expect((pool.loose + pool.tucked).map(\.postID).contains(note.id),
                     "a dead book's stray is not a home — the siblings' liveness rule, here too")
             let homes = try db.read { try Queries.readingsContaining($0, postID: note.id) }

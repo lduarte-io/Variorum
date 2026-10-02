@@ -23,7 +23,7 @@ struct OwnershipRitualTests {
     }
 
     private func pool(_ db: AppDatabase) throws -> [String] {
-        try db.read { try Queries.poolListing($0, window: 50).loose.map(\.postID) }
+        try db.read { try Queries.notePoolListing($0, window: 50).loose.map(\.postID) }
     }
 
     private func text(_ db: AppDatabase, _ postID: String) throws -> String {

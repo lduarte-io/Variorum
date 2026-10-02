@@ -183,7 +183,9 @@ nonisolated enum BindCopy {
 
     /// The sheet's body — the trade made concrete, and the truth §14.6 rules:
     /// the bound book KEEPS COLLECTING.
-    static func explanation(count: Int, followUp: BindFollowUp) -> String {
+    static func explanation(
+        count: Int, followUp: BindFollowUp, hearsActs: Bool = true
+    ) -> String {
         let opener: String = switch followUp {
         case .none:
             "A gathering shows every note its rule matches and holds none of them, so it "
@@ -199,8 +201,30 @@ nonisolated enum BindCopy {
             "the \(count) notes it shows become members, in the order you\u{2019}re looking "
                 + "at them, ready to reorder and give chapters"
         }
-        return opener + members + ".\n\n" + keepsCollecting
+        return opener + members + ".\n\n"
+            + (hearsActs ? keepsCollecting : collectsOnlyAtCatchUp)
     }
+
+    /// **Whether the bound book's "keeps collecting" promise is true**
+    /// (13i-d U6 — KnownIssues row 111): only a READABLE rule that an
+    /// applying act can reach (`RuleGrammar.hearsApplyingActs` — a tag or a
+    /// star term). A rule of legacy terms only collects at catch-ups. (No
+    /// rule / a malformed one keep the shipped words — their own corners,
+    /// outside the row.)
+    static func hearsActs(_ reading: Reading) -> Bool {
+        if case .rule(let term) = RuleGrammar.read(reading.querySpec) {
+            return RuleGrammar.hearsApplyingActs(term)
+        }
+        return true
+    }
+
+    /// The legacy-only rule's truth (row 111): no tagging act reaches it, so
+    /// new matches come in only when the book CATCHES UP.
+    static let collectsOnlyAtCatchUp =
+        "It stays the same book on your Bookcase \u{2014} same name, same star. Its rule "
+        + "names no tag or star, so no tagging brings new notes in: it collects only when "
+        + "it catches up (reopened, restored, or its rule edited)."
+
 
     /// The sentence F-1 replaced ("New tag matches will stop arriving here."
     /// — false since U1). Lesson 3's truth, in the door's words.
@@ -208,7 +232,9 @@ nonisolated enum BindCopy {
         "It stays the same book on your Bookcase \u{2014} same name, same star \u{2014} and it "
         + "keeps collecting after you bind it: new notes that match its rule join at the end."
 
-    static func bound(_ name: String, count: Int, copied: Int = 0, leftOut: Int = 0) -> String {
+    static func bound(
+        _ name: String, count: Int, copied: Int = 0, leftOut: Int = 0, hearsActs: Bool = true
+    ) -> String {
         let notes = count == 1 ? "1 note" : "\(count) notes"
         var limb: [String] = []
         if copied > 0 { limb.append(copied == 1 ? "1 came in as a copy" : "\(copied) came in as copies") }
@@ -219,7 +245,8 @@ nonisolated enum BindCopy {
         }
         let aside = limb.isEmpty ? "" : " (" + limb.joined(separator: "; ") + ")"
         return "\u{201C}\(name)\u{201D} is a book now \u{2014} \(notes) bound in, in the order "
-            + "you had them\(aside). It keeps collecting."
+            + "you had them\(aside). "
+            + (hearsActs ? "It keeps collecting." : "It collects only when it catches up.")
     }
 
     // MARK: The bind's OWNED-NOTES LIMB (13i-c U3 — the plan §3, sitting §3)
@@ -270,7 +297,14 @@ nonisolated enum BindCopy {
     /// (bundled beside F-U4-7); these words tell the truth either way.
     static func spawnMessage(for rule: RuleGrammar.ReadResult) -> String {
         switch rule {
-        case .rule:
+        case .rule(let term):
+            // 13i-d U6 (row 111): "keep joining" only where an act can reach
+            // the rule — a legacy-only rule joins at catch-ups.
+            guard RuleGrammar.hearsApplyingActs(term) else {
+                return "A new book with the same rule: the notes it matches now join it. Its "
+                    + "rule names no tag or star, so later matches join only when it catches "
+                    + "up. The gathering stays as it is."
+            }
             return "A new book with the same rule: the notes it matches now join it, and "
                 + "new matches keep joining. The gathering stays as it is."
         case .none:
@@ -310,8 +344,12 @@ nonisolated enum BindCopy {
     /// impossible act.
     static func spawned(_ name: String, count: Int, rule: RuleGrammar.ReadResult) -> String {
         switch rule {
-        case .rule:
+        case .rule(let term):
             let notes = count == 1 ? "1 note" : "\(count) notes"
+            guard RuleGrammar.hearsApplyingActs(term) else {
+                return "Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined; it collects "
+                    + "only when it catches up (its rule names no tag or star)."
+            }
             return "Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined, and it keeps collecting."
         case .none:
             return "Made \u{201C}\(name)\u{201D} \u{2014} it starts empty; give it a rule "
@@ -355,7 +393,9 @@ struct BindIntoBookSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             ChromeNotice(
                 tokens: tokens,
-                text: BindCopy.explanation(count: memberCount, followUp: offer.followUp),
+                text: BindCopy.explanation(
+                    count: memberCount, followUp: offer.followUp,
+                    hearsActs: BindCopy.hearsActs(offer.reading)),
                 ink: tokens.ink, lines: 10)
             if !offer.ownedElsewhere.isEmpty {
                 ownedLimb
@@ -425,7 +465,9 @@ struct BindIntoBookSheet: View {
         BindDoorProbe.shown = .init(
             readingID: offer.reading.id, count: offer.count,
             title: BindCopy.title(offer.reading.name, followUp: offer.followUp),
-            body: BindCopy.explanation(count: memberCount, followUp: offer.followUp),
+            body: BindCopy.explanation(
+                count: memberCount, followUp: offer.followUp,
+                hearsActs: BindCopy.hearsActs(offer.reading)),
             confirm: BindCopy.confirm(offer.followUp),
             owned: offer.ownedElsewhere.map(BindCopy.ownedLine),
             ownedChoice: ownedNotes)

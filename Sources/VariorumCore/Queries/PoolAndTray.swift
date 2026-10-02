@@ -48,6 +48,11 @@ extension Queries {
                 """)
     }
 
+    /// **The SNIPPETS area's listing** — `kind='pool'` is the model term the
+    /// UI calls Snippets (AppSpec §7); the UI's "Pool" (bookless notes) is
+    /// `notePoolListing` (13i-d U6 — KnownIssues row 111's fourth item: the
+    /// two surfaces no longer share one name).
+    ///
     /// The pool's contents in pointer order — exactly `renderPost` (a pool
     /// is a container; one traversal, never a bespoke subsystem) joined
     /// with each block's live tags and each rendered take's edit stamp.

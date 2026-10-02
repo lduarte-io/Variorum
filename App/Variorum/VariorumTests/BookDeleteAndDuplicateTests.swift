@@ -137,7 +137,7 @@ struct BookDeleteAndDuplicateTests {
             #expect(asked == BookStateCopy.deleteOwnedBook(readingID: mine.id, name: "Mine", notes: 1))
             await doors.confirm()   // the first choice: the book only
             #expect(try await isLive(db, a.id))
-            #expect(try await db.read { try Queries.poolListing($0, window: 10) }.loose
+            #expect(try await db.read { try Queries.notePoolListing($0, window: 10) }.loose
                 .map(\.postID) == [a.id], "its note went back to the Pool")
             #expect(session.status.spoken?.text == BookStateCopy.deletedBookOnly("Mine", released: 1))
         }

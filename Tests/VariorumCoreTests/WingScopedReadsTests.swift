@@ -68,7 +68,7 @@ struct WingScopedReadsTests {
     @Test func thePoolIsOneWingsBooklessNotes() throws {
         try withOperations { ops, db in
             let w = try twoLibraries(ops)
-            let homePool = try db.read { try Queries.poolListing($0, window: 10, wingID: "") }
+            let homePool = try db.read { try Queries.notePoolListing($0, window: 10, wingID: "") }
             #expect(homePool.loose.map(\.postID) == [w.home.id])
             let awayTag = try ops.createTag(name: "topic", wingID: w.wing.id)
             try ops.applyTag(awayTag.id, toPost: w.away.id)
@@ -76,11 +76,11 @@ struct WingScopedReadsTests {
                 name: "g", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(awayTag.id)),
                 wingId: w.wing.id)
             let awayPool = try db.read {
-                try Queries.poolListing($0, window: 10, wingID: w.wing.id)
+                try Queries.notePoolListing($0, window: 10, wingID: w.wing.id)
             }
             #expect(awayPool.loose.isEmpty)
             #expect(awayPool.tucked.map(\.postID) == [w.away.id])
-            #expect(try db.read { try Queries.poolListing($0, window: 10, wingID: "") }.tuckedCount
+            #expect(try db.read { try Queries.notePoolListing($0, window: 10, wingID: "") }.tuckedCount
                     == 0, "the other wing's gathering tucks nothing in Home")
         }
     }

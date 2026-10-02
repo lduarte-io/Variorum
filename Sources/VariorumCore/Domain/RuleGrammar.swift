@@ -176,6 +176,20 @@ public enum RuleGrammar {
         }
     }
 
+    /// **Whether an APPLYING ACT can ever reach a living book with this rule**
+    /// (13i-d U6 — KnownIssues row 111's third word item). Intake is
+    /// EVENT-DRIVEN (§4): a tagging act reaches a rule that names the tag's
+    /// subtree (`tagIDs`), a starring act a rule with a star term
+    /// (`referencesStar`) — `Operations.intakeAfterTagging` /
+    /// `intakeAfterStarring` read exactly these two. A rule of LEGACY terms
+    /// only (profile / entry-date, grandfathered from v1) — or of dead tag
+    /// terms only — hears neither, so its book collects only when it CATCHES
+    /// UP (restore, un-finish, a rule edit). The doors' "keeps collecting"
+    /// promise is true exactly when this is.
+    public static func hearsApplyingActs(_ term: RuleTerm?) -> Bool {
+        !tagIDs(of: term).isEmpty || referencesStar(term)
+    }
+
     /// **The SPAWN door's outflow PREFILL** (13i-c — her 13i-b closing-sitting
     /// ruling: the outflow is a chosen set the spawn OFFERS, prefilled with
     /// the rule's POSITIVE tags — her item (i): `#a AND NOT #b` → `#a`; and

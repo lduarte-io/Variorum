@@ -840,7 +840,12 @@ struct BookView: View {
                         .foregroundStyle(tokens.accent)
                         .help("Chapters need a book that holds its notes — this "
                             + "offers to bind the gathering into one, keeping every "
-                            + "note it shows; it keeps collecting after.")
+                            + "note it shows; "
+                            // 13i-d U6 (row 111): the promise only where an
+                            // act can reach the rule.
+                            + ((structure.reading.map(BindCopy.hearsActs) ?? true)
+                                ? "it keeps collecting after."
+                                : "after that it collects only when it catches up."))
                     }
                     // Batch 6 legibility: a gathering's derived membership
                     // is DESIGNED (#25a) — but absent-and-silent read as
