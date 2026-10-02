@@ -2316,6 +2316,28 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 - **P-13id-U5b-14** — the severed list groups by the note's identity and merges notes whose clause
   reads the same with a count ("3 notes called “2026-10-01” also leave “u3 spawn walk”") — walk W-1.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U5b (2026-10-02 — spot-check: fifteen commits pushed, fences empty, the record and #175 in place; the away-run rule governs)
+
+- **F-U5b-2 RULED — proposal (a):** every undo/redo REVIVAL of a membership row checks the
+  same-wing rule F-U5b-1 established (`Queries.revivalWingScope`), and a replay that would cross
+  wings counts as OBSOLETE and does nothing — exactly the standing obsolete-undo pattern (a
+  tombstoned target's revert returns silently; "the book was deleted meanwhile"). (b) clearing
+  the stacks is rejected (it burns unrelated undos); (c) accepting is rejected (a cross-wing
+  leak against §9's isolation and lesson 11). **The build is U6's ACT 0** — the guard in the two
+  named revival roads (`revertDiverge`, `reapplySmartConversion`) plus any sibling found by the
+  same grep, each with a red-on-old pin on the traced recipe.
+- **F-U5b-1 ACCEPTED as fixed** (a real pre-existing bug U5's note move shared; red-on-old
+  verified in the record). **P-13id-U5b-1…14 STAND** (#175; U5b-13's Trash-tags consequence and
+  U5b-1's no-backfill-on-move are flagged in her bundle as the two likeliest to earn her eye —
+  the latter composes with the sitting §4's resume-catch-up question and is hers).
+- The walk's two defects fixed in-unit with red-on-old pins; the severed memberships staying
+  removed after a round trip is the ruled tombstone-means-decided, verified in use.
+- **Ledger row 6b → DONE.** U6 opens with ACT 0 + the accumulated word riders.
+- **For the combined 13i walk (grown by U5b):** Move to Wing ▸ on a book (the severed list
+  naming each membership) · Move Everything to Another Wing (the counting confirm; the wing
+  ends empty; Delete succeeds, its refusal naming the road beforehand) · a finished book riding
+  whole · the daily Journal's refusal · Put back across a moved wing (stays out, same-wing only).
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -2347,7 +2369,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 5 | LADDER A (U1–U4) | **CLOSED** (2026-10-02, two rounds, zero disputes, no round 3; five fixes + the sanity NIT all landed; round 2's one NIT → U5 rider R2; the orchestrator's walk HELD on absent GUI grants — folded to her combined walk) |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
-| 7 | U6 — the vocabulary sweep | NOT-STARTED |
+| 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | IN FLIGHT (spawned 2026-10-02) |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
@@ -2666,3 +2688,52 @@ END; baseline core 2060/221 (the ladder's close). Build into `App/Variorum/Deriv
 the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
 numbered P-13id-U5-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
 every commit. One agent at a time; no subagents; foreground waits only.
+
+## U6 BRIEF — THE VOCABULARY SWEEP (+ ACT 0: the cross-wing undo guard) (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — the rulings R-13id-1…6, the constitution, your LEDGER row, EVERY
+adjudication (your ACT 0 and six riders are routed across them), the U1–U5b RECORDs, the
+AWAY-RUN POSTURE, the ENVIRONMENT TRAPS · the plan's item 5 text above (the sweep's charter) ·
+KnownIssues rows 106 and 111 (yours to close) · `notes/plans/phase-13i-sitting-record-2026-09-30.md`
+§14's close + §21 (the "Posts"→"Notes" and alignment items) · `notes/SessionResiliencyProtocol.md`.
+
+**ACT 0 — THE CROSS-WING UNDO GUARD (F-U5b-2, RULED (a)):** every undo/redo revival of a
+membership row consults `Queries.revivalWingScope`; a replay that would cross wings is OBSOLETE
+and does nothing (the standing silent-obsolete pattern). Guard the two traced roads
+(`revertDiverge`, `reapplySmartConversion`) AND grep for siblings (any structural
+inverse/redo reviving `reading_post` rows); each guarded road gets a red-on-old pin on the
+traced recipe (diverge → move the book → ⌥⌘Z; bind → ⌥⌘Z → move the note → ⇧⌥⌘Z).
+
+**THEN THE SWEEP — items 5 + the routed riders, each a lettered piece in your record:**
+(a) Shelf → Bookcase and "smart" → gathering/living EVERYWHERE words remain (the navigator
+footer, "Create Smart Book…" → the gathering mint's words, the pad's placeholder, any remnant —
+grep is the tool; F-U1-6 says the row meta is already done); (b) a wing presents as a SEPARATE
+LIBRARY (the switcher's and doors' language); (c) the Library's "Posts" → "Notes" (§21); (d)
+row 106 — the generic lockedReading word-table arms + `SeededBookRestore` speak sealed→Unseal
+where the book is sealed (carry `sealed` in or route through `BookStateCopy.refusal`); (e) row
+111's four word items; (f) item 10's dismiss receipt — "Dismissed “X” — it won't come back on
+its own; add it by hand any time."; (g) F-U3-4 — TRACE FIRST: if the chip's "in 2 books"
+counting a gathering is a membership READER counting gathering rows, that is a bug-class fix
+with a red-on-old pin (13i-c's books-only contract); if it is an assembly label, re-word; ⌘K's
+"smart book" label goes either way; (h) F-U3-6 (the double divider) and F-U4-4 (the Library
+Archived view's inline Unarchive gets its registry declaration); (i) F-U4-7 — align the
+archived/arrivals lines' untitled-note naming on the Library's first-words rule, or record
+the split for 13s with the reason; (j) row 103's LIBRARY half (the quiet-receipt host, the
+hint-bar shape U1/U3 used); (k) the note ▾ menu gains the Move/Copy to Wing renderer (the doors
+exist on the Library/Pool rows — one more renderer of the same acts, wing-gated like U5's).
+Grep pins ban the dead spellings (the 18j literal-colour pin's form) so the sweep closes BY
+CONSTRUCTION. OUT of scope: the tutorial's lesson prose and the seeder (U7's — the field-guide
+SHELF prose included); the phone (record, don't build). Zero schema, zero `Sync/` — STOP rule.
+
+**Evidence (named now):** ACT 0's pins red-on-old; the grep pins; the word-table pins; F-U3-4's
+trace verdict with its pin if bug-class; registry rows + the walk green; the tutorial spine
+green; a screenshot walk in all four voice/appearance combinations into
+`notes/plans/13id-screens/u6/` (gitignored). Suites at the END; baseline core 2108/230 (U5b's
+close). Build into `App/Variorum/DerivedData/13id-u6/`.
+
+**Your record:** a `## U6 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
+numbered P-13id-U6-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
+every commit. One agent at a time; no subagents; foreground waits only. An unsettled fork:
+proposal into your record, STOP that thread, continue the others.
