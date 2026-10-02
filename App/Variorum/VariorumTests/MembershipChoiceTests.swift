@@ -302,6 +302,44 @@ struct MembershipChoiceTests {
         }
     }
 
+    /// 13i-c ladder, the sanity pass's CONCERN 1: a blocking book the sheet's
+    /// stale preview never saw is read FRESH and named — never the R93-banned
+    /// "Refused: lockedReading(id: …)" dump (`OpsRefusalCopy.message` has no
+    /// words for `lockedReading`, so the round-1 fallback spoke the raw
+    /// error). Red-on-old: the dump.
+    @Test func aBlockingBookTheSheetNeverSawIsNamedFreshNeverDumped() async throws {
+        try await withChoiceWorld { session, _ in
+            let world = try shelf(session)
+            let doors = MembershipDoors(session: session)
+            _ = try await doors.addOrOffer(world.shared.id, to: world.mine.id)
+            let item = try #require(doors.pending)
+            #expect(item.moveBlockedBy == nil, "nothing blocked when the sheet opened")
+            // The race, staged: while the sheet is up, the note joins a THIRD
+            // book, which is then finished — the op refuses naming a book the
+            // sheet's severed preview does not carry.
+            let late = try session.operations.createReading(name: "Late", kind: .book)
+            _ = try session.operations.addPostToReading(world.shared.id, to: late.id)
+            try session.operations.lockReading(late.id)
+            #expect(await doors.moveIn(item) == nil)
+            let refusal = try #require(session.status.current?.text)
+            #expect(!refusal.contains("Refused:"), "the R93-banned dump never speaks")
+            #expect(refusal == MembershipChoiceCopy.moveRefusedFinished("Late"),
+                    "the blocking book is read fresh and named with its own road")
+        }
+    }
+
+    /// The last rung — a blocking book that cannot be read at all (it died
+    /// between the op's refusal and the read; no deterministic stage exists,
+    /// recorded) — speaks a BOOK-LESS true sentence, never the dump.
+    @Test func theUnnamedMoveRefusalIsASentenceNotADump() {
+        let words = MembershipChoiceCopy.moveRefusedUnnamed
+        #expect(!words.contains("Refused:") && !words.contains("("),
+                "a sentence, never an error dump")
+        #expect(words.localizedCaseInsensitiveContains("finished")
+                && words.localizedCaseInsensitiveContains("copy"),
+                "true for finished AND sealed blockers (sealed ⇒ finished), and it names the ceremony that works")
+    }
+
     /// The same class at the chip's arms (the add's fall-through and the
     /// diverge row): the sealed fork of `ChipRefusals` — the new truth, pure.
     /// (The class's red-on-old is carried by the two DB-driven pins above

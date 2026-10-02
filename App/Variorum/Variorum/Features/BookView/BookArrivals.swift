@@ -374,7 +374,11 @@ final class BookArrivalsModel {
                     session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(
                         blocking.name, sealed: blocking.sealedAt != nil))
                 } else {
-                    session.status.refuse(OpsRefusalCopy.message(for: error))
+                    // The sanity pass's concern 1: the shared table has no
+                    // lockedReading words, so the generic road would speak
+                    // the R93-banned "Refused: error(…)" dump — the
+                    // book-less sentence instead.
+                    session.status.refuse(MembershipChoiceCopy.moveRefusedUnnamed)
                 }
             } else {
                 session.status.refuse(ArrivalsCopy.refusal(

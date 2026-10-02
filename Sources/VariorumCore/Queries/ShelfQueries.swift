@@ -239,9 +239,11 @@ extension Queries {
     /// member row on a gathering — or under a TOMBSTONED book — never takes
     /// a note out of the Pool.
     ///
-    /// Per-gathering letters, each the assembly's own: NO rule shows every
-    /// note in its wing; a MALFORMED rule shows nothing (fails closed — it
-    /// tucks nothing); a rule's truth is COALESCEd to 0, so a legacy term over
+    /// Per-gathering letters, each the assembly's own: NO rule shows NOTHING
+    /// (13i-c, R-13ic-4 — the match-all letter retired at U1; this line was
+    /// stale until the ladder's sanity pass caught it), exactly as a
+    /// MALFORMED rule does (fails closed — it tucks nothing); a rule's truth
+    /// is COALESCEd to 0, so a legacy term over
     /// a NULL column (a profile/date term on a note without one) reads FALSE
     /// exactly as the assembly's WHERE reads it. *(Fixed with the split, red
     /// on the old read: the pre-U4 exclusion `NOT (<rule>)` went NULL there,

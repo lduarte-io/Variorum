@@ -164,6 +164,17 @@ nonisolated enum MembershipChoiceCopy {
         return OpsRefusalCopy.message(for: error)
     }
 
+    /// Move in refused by a blocking book that cannot be NAMED (it died
+    /// between the operation's refusal and the read — no fact to fork on).
+    /// A sentence, never the R93-banned "Refused: error(…)" dump (the sanity
+    /// pass's concern 1: the shared table has no `lockedReading` words, so
+    /// the generic road speaks the raw error). "Finished" is TRUE for a
+    /// sealed blocker too (Sealed = Finished + text immutability), and with
+    /// no book there is no door to name — the ceremony that works is.
+    static let moveRefusedUnnamed =
+        "A book this note would leave is finished, so it can\u{2019}t move \u{2014} copy it "
+        + "in instead."
+
     /// Move in refused because one of the books it would leave is finished
     /// (`lockedReading` naming THAT book, not the target). A SEALED book
     /// names Unseal (13i-c ladder round 1 — Reopen refuses there).
@@ -289,7 +300,8 @@ final class MembershipDoors {
 
     /// `add`, then OPEN the choice at once when one was named (P-2 — the
     /// refusal opens the ceremony instead of ending in words). True when the
-    /// note joined; false when the sheet is up instead.
+    /// note joined; false when the sheet is up instead — or when the book
+    /// vanished and the refusal was spoken (no sheet; the round-2 doc NIT).
     @discardableResult
     func addOrOffer(_ postID: String, to readingID: String) async throws -> Bool {
         guard let choice = try await add(postID, to: readingID) else { return true }
@@ -382,14 +394,20 @@ final class MembershipDoors {
             return receipt
         } catch {
             if case OperationError.lockedReading(let id) = error, id != choice.book.id {
-                // 13i-c ladder round 1: the blocking book's OWN road (reopen ·
-                // unseal); a book the stale preview does not know falls back
-                // to the shared words, never to "“” is finished".
-                if let row = choice.severed.first(where: { $0.book.id == id }) {
+                // 13i-c ladder (round 1 + the sanity pass's concern 1): the
+                // blocking book is read FRESH — so its name AND its real road
+                // (reopen · unseal) are current, not the sheet's stale
+                // preview — and a book that cannot be read speaks the
+                // book-less sentence, never the "Refused: error(…)" dump
+                // (the shared table has no lockedReading words).
+                let blocking = (try? await database.read { db in
+                    try Queries.reading(db, id: id)
+                }) ?? nil
+                if let blocking {
                     session.status.refuse(MembershipChoiceCopy.moveRefusedFinished(
-                        row.book.name, sealed: row.sealed))
+                        blocking.name, sealed: blocking.sealedAt != nil))
                 } else {
-                    session.status.refuse(OpsRefusalCopy.message(for: error))
+                    session.status.refuse(MembershipChoiceCopy.moveRefusedUnnamed)
                 }
             } else {
                 session.status.refuse(

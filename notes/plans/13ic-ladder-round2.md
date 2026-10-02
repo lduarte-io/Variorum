@@ -290,3 +290,64 @@ is skipped as briefed.)*
    touches `Sync/`, the schema, custody or the editor seam.
 
 SANITY PASS: 2 CONCERNS (for the reviewer's final word)
+
+## REVIEWER'S FINAL WORD ON THE SANITY PASS
+
+*(The reviewer, 2026-10-02 — the cross-model flow's last step, authorized. Each concern re-traced
+before the call; the fix red-first by behavioral revert.)*
+
+### CONCERN 1 — the two move-in fallbacks speak the R93-banned dump — **CONFIRMED-FIXED**
+- **Final call:** CONFIRMED. The trace re-verified myself before fixing: neither `OpsRefusalCopy.
+  macWords` nor the shared `OpsRefusalTable.words` carries a `lockedReading` arm, and
+  `OperationError` has no custom description, so `OpsRefusalCopy.message(for:)` falls to
+  `OpsRefusalTable.swift:322`'s `"Refused: \(error)"` — watched LIVE on the red run:
+  `Refused: lockedReading(id: "00000000-…-0009")`. Round 1's "falls back to the shared words"
+  claim was false for this error; the implementer's honesty about its own round-1 note is noted.
+- **The fix (sharper than a sentence swap):** `MembershipDoors.moveIn`'s catch now reads the
+  blocking book FRESH (the `BookArrivalsModel.moveIn` shape) — so the stale-preview race the
+  round-2 verdict had recorded for this arm ALSO closes (a book sealed after the sheet opened now
+  reads "sealed — unseal") — and only a book that cannot be read at all falls to the new BOOK-LESS
+  sentence `MembershipChoiceCopy.moveRefusedUnnamed` ("A book this note would leave is finished,
+  so it can't move — copy it in instead." — TRUE for a sealed blocker too, since Sealed = Finished
+  + text immutability, and with no book there is no door to name, so it names the ceremony that
+  works). `BookArrivalsModel.moveIn`'s nil-book arm speaks the same sentence. No generic-table
+  road remains on either site.
+- **Pins:** `MembershipChoiceTests.aBlockingBookTheSheetNeverSawIsNamedFreshNeverDumped` —
+  **watched RED by behavioral revert** (the round-1 catch shape restored temporarily; the dump
+  spoken live, both assertions failing; the revert marker grepped 0 after restore), green on the
+  fix: the staged race (the note joins a third book while the sheet is up; the book is finished)
+  now names "Late" with its own road. The LAST RUNG (a blocking book that died between the op's
+  refusal and the read) has no deterministic stage — recorded honestly; its words are pinned pure
+  (`theUnnamedMoveRefusalIsASentenceNotADump`: a sentence, no dump, true for both blocker states,
+  names the ceremony).
+- **Changed:** `App/Variorum/Variorum/Core/Views/MembershipChoice.swift` (the sentence + the
+  fresh-read catch), `App/Variorum/Variorum/Features/BookView/BookArrivals.swift` (the nil-book
+  arm). Suites: MembershipChoice + BookArrivals + ArrivalArms 35/3 green.
+
+### CONCERN 2 — more sealed-named-reopen sites than the four recorded — **CONFIRMED-RECORDED**
+- **Final call:** CONFIRMED on all three sites, each re-read in code before the call; record-only,
+  exactly as briefed — no phone fix (the mobile catch-up owns the phone's faces, F-U2-8/F-U4-6's
+  standing letter).
+  - **(a) `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:128–129`** — "The book is
+    finished — reopen it, then restore again." — a platform-neutral table with no book facts, and
+    the restore mint's `lockedReading` is directly reachable on a SEALED sample book (seal → trash
+    a note → Help ▸ Restore / the phone's restore row); a sealed book renders no Reopen and
+    `unlockReading` refuses. **JOINS the 13i-d KnownIssues row** (the generic `lockedReading`
+    word-table arms) at the closeout — the row's list is now: `ReadingsViewModel.message` ·
+    `ArrivalsCopy.refusal` · `MembershipChoiceCopy.refusal`'s target arm · `RecoveryActs` ·
+    `SeededBookRestore` (both platforms).
+  - **(b) the PHONE's two arms** — `VariorumMobile/Features/Shell/MobileTodayDoor.swift:65–66`
+    (".bookFinished … reopen it from its book details"; directly reachable once the deploy window
+    runs and a synced Journal arrives sealed — the phone's details row says Reopen and the op
+    refuses `readingSealed` with the phone's no-verb sentence) and
+    `VariorumMobile/Features/Write/MobileMembership.swift:183–184` (the sheet's diverge button on
+    every book row — the Mac chip arm's phone twin; the phone's add filters locked books, so its
+    add arm is race-only). The phone has no book-Unseal door, so the honest sentence is the mobile
+    catch-up's to word. **GO ON THE CLOSEOUT'S MOBILE PARITY / MobileSoul row**, beside F-U4-6's
+    list.
+
+### The two doc-only NITs — **FIXED in passing (as briefed)**
+- `addOrOffer`'s doc line now says false also covers "the book vanished and the refusal was
+  spoken" (round 2's NIT); `ShelfQueries.swift`'s Pool-doc "NO rule shows every note in its wing"
+  re-worded to the R-13ic-4 truth (shows NOTHING — stale since U1; the sanity pass's observation).
+  Doc-only; no pin possible on either (nothing executable changed).
