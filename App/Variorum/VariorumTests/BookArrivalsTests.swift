@@ -185,12 +185,16 @@ struct BookArrivalsTests {
         #expect(ArrivalsCopy.arrived("not a stamp", now: now) == nil)
 
         // The receipts say where Add landed — the END (§4), outside the
-        // chapters when there are chapters — and what Dismiss did, nothing more.
+        // chapters when there are chapters — and what Dismiss did. (13i-d U6
+        // (f), a JUSTIFIED EDIT: the plan's item 10 RULED the dismiss receipt
+        // to teach the road back, so "nothing more" became the ruled sentence.)
         #expect(ArrivalsCopy.added("Ode", chaptered: false)
                 == "\u{201C}Ode\u{201D} added at the end of the book.")
         #expect(ArrivalsCopy.added("Ode", chaptered: true)
                 == "\u{201C}Ode\u{201D} added at the end of the book, outside the chapters.")
-        #expect(ArrivalsCopy.dismissed("Ode") == "Dismissed \u{201C}Ode\u{201D}.")
+        #expect(ArrivalsCopy.dismissed("Ode")
+                == "Dismissed \u{201C}Ode\u{201D} \u{2014} it won\u{2019}t come back on its own; "
+                    + "add it by hand any time.")
 
         // The refusals name their ROAD (P-2), never a raw enum.
         let full = ArrivalsCopy.refusal(

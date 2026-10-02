@@ -190,7 +190,10 @@ nonisolated enum DeletionRefusal {
                 ? RecoveryCopy.sealedPutBackRefusal
                 : "This note is marked complete — unseal it first."
         case .lockedReading:
-            return "This book is finished — reopen it first."
+            // 13i-d U6 (KnownIssues row 106): no book in hand, so both true
+            // roads — a SEALED book's is Unseal (Reopen refuses there).
+            // Platform-neutral words: the phone speaks this arm too.
+            return "This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."
         case .containerNotFound:
             return "That note is already gone."
         case .readingNotFound:

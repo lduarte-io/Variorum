@@ -147,12 +147,18 @@ nonisolated enum MembershipChoiceCopy {
 
     // MARK: Refusals (the operation's own, named for its book)
 
+    /// `sealed` (13i-d U6 — KnownIssues row 106): the TARGET book is sealed,
+    /// whose road out is Unseal — Reopen refuses there (`readingSealed`,
+    /// R-13ic-3). The doors read it fresh at the refusal.
     @MainActor
-    static func refusal(for error: Error, book: String) -> String {
+    static func refusal(for error: Error, book: String, sealed: Bool = false) -> String {
         if let op = error as? OperationError {
             switch op {
             case .lockedReading:
-                return "\(quoted(book)) is finished \u{2014} reopen it (its settings) to add to it."
+                return sealed
+                    ? "\(quoted(book)) is sealed \u{2014} unseal it (its settings) to add to it; "
+                        + "unsealing reopens it too."
+                    : "\(quoted(book)) is finished \u{2014} reopen it (its settings) to add to it."
             case .readingAtCapacity:
                 return "\(quoted(book)) is at its note cap \u{2014} extend the cap in its settings."
             case .alreadyInReading:
@@ -369,9 +375,23 @@ final class MembershipDoors {
             session.status.receipt(receipt)
             return receipt
         } catch {
-            session.status.refuse(MembershipChoiceCopy.refusal(for: error, book: choice.book.name))
+            session.status.refuse(await targetRefusal(error, choice: choice))
             return nil
         }
+    }
+
+    /// The TARGET's refusal in words (13i-d U6 — KnownIssues row 106): a
+    /// finished target names Reopen, a SEALED one Unseal — read FRESH, like
+    /// the blocking book's arm below (the sheet's book is a name, not a
+    /// state, and a moment old).
+    private func targetRefusal(_ error: Error, choice: MembershipChoice) async -> String {
+        var sealed = false
+        if case OperationError.lockedReading(let id) = error, id == choice.book.id {
+            sealed = ((try? await session.database.read { db in
+                try Queries.reading(db, id: id)
+            }) ?? nil)?.sealedAt != nil
+        }
+        return MembershipChoiceCopy.refusal(for: error, book: choice.book.name, sealed: sealed)
     }
 
     /// **MOVE IN** — the claim-move she chose. Returns the receipt on success.
@@ -410,8 +430,7 @@ final class MembershipDoors {
                     session.status.refuse(MembershipChoiceCopy.moveRefusedUnnamed)
                 }
             } else {
-                session.status.refuse(
-                    MembershipChoiceCopy.refusal(for: error, book: choice.book.name))
+                session.status.refuse(await targetRefusal(error, choice: choice))
             }
             return nil
         }

@@ -105,11 +105,15 @@ nonisolated enum ArrivalsCopy {
         "This note is archived \u{2014} add it and it joins the book still archived, kept "
         + "in the book\u{2019}s archived line rather than its Index"
 
-    /// Dismiss landed. Deliberately says no more than what happened: whether
-    /// and how a dismissed note can ring again is PROVISIONAL (P-13ib-U1-1),
-    /// and a receipt must stay true under every option on the table.
+    /// Dismiss landed — and it TEACHES the road back (13i-d U6 (f), the plan's
+    /// item 10, her question "can you simply add the note to that book
+    /// directly if you regret saying no?"): a dismissal decides INTAKE only,
+    /// so the book never adds it again by itself, while every hand door (the
+    /// chip's Add, a drag, Manage Notes) still can — they check live rows
+    /// alone. The ruled sentence, verbatim (the app's typographic apostrophe).
     static func dismissed(_ title: String) -> String {
-        "Dismissed \u{201C}\(title)\u{201D}."
+        "Dismissed \u{201C}\(title)\u{201D} \u{2014} it won\u{2019}t come back on its own; "
+            + "add it by hand any time."
     }
 
     // MARK: The ownership arms (13i-c U4 — §4 row 19)
@@ -144,8 +148,12 @@ nonisolated enum ArrivalsCopy {
     // MARK: Refusals (nothing happened — always shown, P-2)
 
     /// The operations layer's REAL refusal, in words that name the road.
-    /// `book` is the book's name; `cap` its note cap when it has one.
-    static func refusal(for error: Error, book: String?, cap: Int?) -> String {
+    /// `book` is the book's name; `cap` its note cap when it has one;
+    /// `sealed` (13i-d U6 — KnownIssues row 106) whether it is SEALED, whose
+    /// road out is Unseal — Reopen refuses there (`readingSealed`, R-13ic-3).
+    static func refusal(
+        for error: Error, book: String?, cap: Int?, sealed: Bool = false
+    ) -> String {
         let name = book.map { "\u{201C}\($0)\u{201D}" } ?? "This book"
         guard let op = error as? OperationError else {
             return OpsRefusalCopy.message(for: error)
@@ -157,8 +165,11 @@ nonisolated enum ArrivalsCopy {
             return full + " Raise the note cap in the book\u{2019}s settings (the gear), "
                 + "then add it."
         case .lockedReading:
-            return "\(name) is finished \u{2014} its table of contents is done, so nothing "
-                + "new joins. Reopen it in the book\u{2019}s settings to add notes."
+            return sealed
+                ? "\(name) is sealed \u{2014} the book is done, so nothing new joins. Unseal it "
+                    + "in the book\u{2019}s settings (that reopens it too) to add notes."
+                : "\(name) is finished \u{2014} its table of contents is done, so nothing "
+                    + "new joins. Reopen it in the book\u{2019}s settings to add notes."
         case .arrivalNotFound:
             return "That note isn\u{2019}t waiting at the door any more \u{2014} "
                 + "it was already judged."
@@ -338,7 +349,8 @@ final class BookArrivalsModel {
                 arrival.title, chaptered: chaptered, archived: arrival.archived))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
-                for: error, book: book?.name, cap: book?.maxPosts))
+                for: error, book: book?.name, cap: book?.maxPosts,
+                sealed: book?.sealedAt != nil))
         }
     }
 
@@ -355,7 +367,8 @@ final class BookArrivalsModel {
             session.status.receipt(ArrivalsCopy.copiedIn(arrival.title))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
-                for: error, book: book?.name, cap: book?.maxPosts))
+                for: error, book: book?.name, cap: book?.maxPosts,
+                sealed: book?.sealedAt != nil))
         }
     }
 
@@ -396,7 +409,8 @@ final class BookArrivalsModel {
                 }
             } else {
                 session.status.refuse(ArrivalsCopy.refusal(
-                    for: error, book: book?.name, cap: book?.maxPosts))
+                    for: error, book: book?.name, cap: book?.maxPosts,
+                    sealed: book?.sealedAt != nil))
             }
         }
     }
@@ -410,7 +424,8 @@ final class BookArrivalsModel {
             session.status.receipt(ArrivalsCopy.dismissed(arrival.title))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
-                for: error, book: book?.name, cap: book?.maxPosts))
+                for: error, book: book?.name, cap: book?.maxPosts,
+                sealed: book?.sealedAt != nil))
         }
     }
 }

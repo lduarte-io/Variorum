@@ -321,7 +321,7 @@ final class ShelfViewModel {
                 result.reading.name, count: result.membershipIDs.count,
                 copied: result.copied.count, leftOut: result.leftOut.count))
         } catch let error as OperationError {
-            refuse(ReadingsViewModel.message(error))
+            refuse(bookRefusal(error, readingID: readingID))
         } catch {
             refuse(String(describing: error))
         }
@@ -405,7 +405,7 @@ final class ShelfViewModel {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
                 refuse("That book can't take this note: \(reason)")
             } else {
-                refuse(ReadingsViewModel.message(error))
+                refuse(bookRefusal(error, readingID: readingID))
             }
         } catch {
             refuse(String(describing: error))
@@ -424,6 +424,20 @@ final class ShelfViewModel {
 
     private func refuse(_ error: Error) {
         refuse(OpsRefusalCopy.message(for: error))
+    }
+
+    /// **A refusal about ONE book on the board** (13i-d U6 — KnownIssues row
+    /// 106): the board holds the row, so a finished book names Reopen and a
+    /// SEALED one Unseal (Reopen refuses there, R-13ic-3) — the book's own
+    /// words through `BookStateCopy.refusal`. Every other refusal keeps the
+    /// shelf's shipped words.
+    func bookRefusal(_ error: OperationError, readingID: String) -> String {
+        if case .lockedReading = error,
+           let row = books.first(where: { $0.reading.id == readingID }) {
+            return BookStateCopy.refusal(
+                for: error, name: row.reading.name, sealed: row.reading.sealedAt != nil)
+        }
+        return ReadingsViewModel.message(error)
     }
 
     /// A receipt: the quiet slot under her default (18i), the toast under

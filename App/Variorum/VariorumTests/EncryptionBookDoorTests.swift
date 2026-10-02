@@ -401,7 +401,11 @@ struct EncryptionBookDoorTests {
                     == BookNameCopy.refusal(existing: "Encryption Explained"), "the one home for her duplicate-name ruling")
             // R2-N1: the approved platform-neutral words, exactly.
             #expect(SeededBookRestore.failureLine(for: OperationError.lockedReading(id: "b"))
-                    == "The book is finished — reopen it, then restore again.")
+                    // 13i-d U6 (KnownIssues row 106, a JUSTIFIED EDIT): the
+                    // line holds no book, so it names BOTH roads — a sealed
+                    // sample book's is Unseal (Reopen refuses there).
+                    == "The book is finished \u{2014} reopen it (or unseal it, if it\u{2019}s sealed), "
+                        + "then restore again.")
             #expect(SeededBookRestore.failureLine(for: OperationError.readingAtCapacity(id: "b"))
                     == "The book is at its note cap — raise the cap, then restore again.")
             // Delete one chapter: the restore brings that one back.

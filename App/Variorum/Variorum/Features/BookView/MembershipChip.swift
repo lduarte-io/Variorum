@@ -103,10 +103,13 @@ struct MembershipChip: View {
         .popover(isPresented: $popoverShown, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 8) {
                 if books.isEmpty {
-                    Text("This note is in no book — it lives in the Pool.")
+                    Text(MembershipChip.headline(bookCount: 0, gatheringCount: 0))
                         .font(.callout)
                 } else {
-                    Text("This note appears in \(books.count) book\(books.count == 1 ? "" : "s"):")
+                    // 13i-d U6 (g): books and gatherings counted apart — a
+                    // gathering SHOWS the note, it never holds it (§1).
+                    Text(MembershipChip.headline(
+                        bookCount: memberBookCount, gatheringCount: gatheringCount))
                         .font(.callout.weight(.semibold))
                     ForEach(books, id: \.id) { book in
                         HStack(spacing: 6) {
@@ -261,15 +264,59 @@ struct MembershipChip: View {
     /// real path exists — "~/orbit" in terminal, "in Orbit" in study; no
     /// book and many books stay plain words.
     private var label: String {
-        switch books.count {
-        case 0: "in no book"
-        case 1:
-            tokens.pathPrefix.isEmpty
-                ? "in \(books[0].name)"
-                : tokens.path([books[0].name])
-        default: "in \(books.count) books"
+        let memberBooks = books.filter { $0.kind == .book }
+        return MembershipChip.label(
+            bookNames: memberBooks.map(\.name), gatheringCount: gatheringCount
+        ) { name in
+            tokens.pathPrefix.isEmpty ? "in \(name)" : tokens.path([name])
         }
     }
+
+    private var memberBookCount: Int { books.filter { $0.kind == .book }.count }
+    private var gatheringCount: Int { books.filter { $0.kind == .gathering }.count }
+
+    /// **13i-d U6 (g) — F-U3-4, TRACED FIRST.** The chip said "in 2 books"
+    /// for a note in ONE book and one GATHERING. The trace: the reader is
+    /// HONEST — `Queries.readingsContaining`'s membership arm reads BOOK rows
+    /// only (`r.kind = 'book'`, `status = 'member'`, 13i-c F-R1-7's
+    /// books-only contract), and it appends each gathering whose RULE shows
+    /// the note (the assembly road, deliberately — the chip lists where the
+    /// note appears). The word "books" was the lie: a gathering holds no
+    /// membership (§1 — "it shows"), so the label counts the two apart.
+    /// Pure and static (`explainerLine`'s reason): a promise made inside a
+    /// view's closure is a promise no test can keep.
+    ///
+    /// - no book: "in no book"; one book: its path (`singleBook`); more:
+    ///   "in N books";
+    /// - any gatherings ride after a dot: "· N gathering(s)" — "appears in N
+    ///   gatherings" is the Book Panel's own line (P-13id-U2-12).
+    static func label(
+        bookNames: [String], gatheringCount: Int, singleBook: (String) -> String
+    ) -> String {
+        let bookPart: String
+        switch bookNames.count {
+        case 0: bookPart = "in no book"
+        case 1: bookPart = singleBook(bookNames[0])
+        default: bookPart = "in \(bookNames.count) books"
+        }
+        guard gatheringCount > 0 else { return bookPart }
+        return bookPart + " \u{00B7} " + gatheringsWord(gatheringCount)
+    }
+
+    /// The popover's headline over the rows — books by membership, gatherings
+    /// by appearance.
+    static func headline(bookCount: Int, gatheringCount: Int) -> String {
+        let pool = "This note is in no book \u{2014} it lives in the Pool"
+        switch (bookCount, gatheringCount) {
+        case (0, 0): return pool + "."
+        case (0, let g): return pool + " \u{2014} and appears in \(gatheringsWord(g)):"
+        case (let b, 0): return "This note is in \(booksWord(b)):"
+        case (let b, let g): return "This note is in \(booksWord(b)) and appears in \(gatheringsWord(g)):"
+        }
+    }
+
+    private static func booksWord(_ n: Int) -> String { "\(n) book\(n == 1 ? "" : "s")" }
+    static func gatheringsWord(_ n: Int) -> String { "\(n) gathering\(n == 1 ? "" : "s")" }
 
     /// The `.surface` acts this chip renders (P-1's declared ⇔ rendered
     /// walk): W23's per-book diverge door lives on the book rows here — and,

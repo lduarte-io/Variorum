@@ -165,7 +165,11 @@ final class ReadingsViewModel {
         }
         switch op {
         case .lockedReading:
-            return "This book is locked — unlock it first."
+            // 13i-d U6 (KnownIssues row 106): this generic arm knows no book,
+            // so it names BOTH true roads — a finished book reopens, a SEALED
+            // one unseals (Reopen refuses there, R-13ic-3). Sites that hold
+            // the book speak one road through `BookStateCopy.refusal`.
+            return "This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."
         case .alreadyInReading:
             return "That note is already in this book."
         case .readingAtCapacity:

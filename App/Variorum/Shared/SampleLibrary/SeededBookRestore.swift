@@ -125,8 +125,12 @@ nonisolated enum SeededBookRestore {
         // imported road asks `assertReadingAcceptsPosts` first — R2-M2).
         // PLATFORM-NEUTRAL words (R2-N1): this is the shared home, and the
         // phone's restore row speaks these lines too — no Mac-only control.
+        // 13i-d U6 (KnownIssues row 106 — reachable: seal a sample book,
+        // trash one of its notes, restore): a SEALED book's road is Unseal
+        // (Reopen refuses there); the line holds no book, so it names both.
         case OperationError.lockedReading:
-            return "The book is finished — reopen it, then restore again."
+            return "The book is finished \u{2014} reopen it (or unseal it, if it\u{2019}s sealed), "
+                + "then restore again."
         case OperationError.readingAtCapacity:
             return "The book is at its note cap — raise the cap, then restore again."
         // 18l-c U6 ladder F12: a scripted history stopped partway (a script
