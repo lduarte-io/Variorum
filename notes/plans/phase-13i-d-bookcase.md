@@ -1956,6 +1956,32 @@ Move/Copy to Wing — U6's polish rider (one renderer; the doors exist on the ro
   delete a non-empty wing (the refusal names contents) · [once U5b lands] move a book across ·
   bulk-move a wing empty and delete it.
 
+## THE ORCHESTRATOR'S COMPOSED WALK — BANKS' FLOWS THROUGH U5 (2026-10-02, by the orchestrator's own hand; the dev-store Debug build `DerivedData/13id-orchwalk` at the post-U5 tip; guards green per act — author-free, zero real-store instances; captures `notes/plans/13id-screens/orch/` o1–o9, gitignored)
+
+The composed flows, each verified on the capture: **the board** (Terminal voice) — the strip ·
+unshelved at the TOP under its own header · starred floats with ★ · the honest counts ("4 notes ·
+1 archived") · the meta vocabulary (gathering/living/finished/owned) · the "1 arrival" accent ·
+the one-line utility run (№ · order · a–z ▾ · details) → **the № census** (18 books ·
+8 gatherings · 1 finished · 1 owned · 7 living · 1 with arrivals, every row a solo) → **the
+with-arrivals SOLO** (exactly "the door" remains; the row flips to "clear"; empty shelves fold
+away) → **a book's Outline** (mode row `outline index book read` · `order · manual order ▾` ·
+the sidebar note box's none-state — reached by a MIS-AIM, kept as a bonus verification; the
+lesson: a post-clear reflow moves rows, re-read before every click) → **"u4 owned"** (masthead
+"book · 4 notes · 1 archived"; the collapsed "▸ 1 archived" line on the Arrivals idiom) → **the
+archived line EXPANDED** ("u4 eta · archived today 9:26 am · unarchive · release" — RELEASE on
+the owned book, §20's vocabulary; the Index column shows live members only) → **Book Settings
+via the gear** (voiced fields; the Collecting sentences; the journal-trait row VERBATIM —
+"entries: date-stamped, named by their day, sorted by date — on/off"; the state section:
+finished's sentence, "sealed means the book is done. seal…", "this book owns its notes — each
+one lives only here. stop owning") → **a member note opens at its START in Write** (R-18l-1
+holding; the "~/u4 owned" path chip) → **the BOOK PANEL** ("u4 owned · owned" header · the TOC
+with the open note marked · the archived member rightly absent). The wing-switcher MENU frame
+raced the capture; U5's own `sl-01` capture carries that door open (Home ✓ · Studio · New
+Wing…). One voice by design (the 13i-c walk's shape); the four-combo evidence is the units'
+walks. Zero store writes beyond view-local state (the № panel left expanded on the dev store,
+noted); the instance quit BY IDENTITY; zero instances after. **The bank's acceptance leg is
+DISCHARGED — the HELD state in BANK 1 CLOSES is superseded by this record.**
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
