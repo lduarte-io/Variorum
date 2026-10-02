@@ -419,3 +419,25 @@ call per finding, each bug-class fix red-on-old first; dispositions written as t
 - **Changed:** `Sources/VariorumCore/Queries/ShelfQueries.swift` (the one clause + the HOME doc).
   `PoolTuckTests`' P1 plan pin re-run green (the added check is the same primary-key probe); the
   soak green. Suites: MembershipReadersBookScope + PoolTuck + OwnershipSoak 12/3.
+
+### [MINOR] the F-5 wing class at `newEntry` / `createOrOpenJournalEntry` — **CONFIRMED-FIXED (non-daily arm) · CONFIRMED-RECORDED (daily arm → 13i-d)**
+- **Final call:** the implementer's split adopted. The NON-DAILY arm is the one-line class and is
+  FIXED: `BookStructureModel.newEntry`'s assert → `createPost` → `addPostToReading` composite is
+  replaced by `newPostInReading(readingID, profile: .generic, entryDate: entryDay)` (+ the explicit
+  `setSegmentationDefault(.oneBlock)` as before) — the op that already gates, mints and members in
+  ONE transaction, mints in the BOOK's wing (R-13ic-2's fix) and applies the outflow; the round-3
+  "REFUSE BEFORE MINT" doctrine becomes structural, the refusal set unchanged. The DAILY arm is NOT
+  the same fix — `canonicalJournalEntry` is wing-blind, so threading a wing into the mint alone
+  would still OPEN a Home day-entry into a W Journal, and scoping the lookup changes the one-entry-
+  per-day rule's SCOPE for ⌘J, "+ new entry" and the phone's capture: a product edge, 13i-d's (its
+  switcher decides what ⌘J means with another wing open). CONFIRMED-RECORDED: a KnownIssues row with
+  owner 13i-d at the closeout + a line on 13i-d's carry list; the implementer's QUESTIONS-ready
+  paragraph above (Home-only Journal / any-wing Journal / per-wing Journals) files with #169's set.
+  Unreachable today either way (no wing-mint door until 13i-d — the phase's own copyPost precedent).
+- **Pin (RED on the pre-fix tree, green after):**
+  `JournalBooksTests.aNonDailyEntryIsBornInItsBooksWing` (Mac — a `wingId: "W1"` journal-trait
+  book's "+ new entry": red read wing `""`; green reads `"W1"`, with the .generic profile, the
+  one_block segmentation and the membership asserted unchanged).
+- **Changed:** `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift` (the one arm).
+  Suites after: JournalBooks + BookStructureModel 16/2 · BookDrop 6/1 · MembershipChoice +
+  ArrivalArms 20/2 — green.

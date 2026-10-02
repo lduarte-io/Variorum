@@ -330,6 +330,47 @@ struct JournalBooksTests {
         }
     }
 
+    /// 13i-c ladder round 1 (the F-5 wing class, the NON-DAILY arm): a
+    /// journal-trait book's "+ new entry" mints the note in the BOOK's wing
+    /// (§9 — a book never spans wings), through `newPostInReading` — the op
+    /// that already gates, mints and members in ONE transaction and applies
+    /// the outflow. Red-on-old: the composite minted via `createPost` (wing
+    /// ''), so a non-Home book's entry was born in the wrong wing. The DAILY
+    /// arm is deliberately NOT covered here: `canonicalJournalEntry` is
+    /// wing-blind, and the daily Journal's wing story is 13i-d's (the ladder
+    /// record's QUESTIONS paragraph).
+    @Test func aNonDailyEntryIsBornInItsBooksWing() async throws {
+        try await withShellSession2 { session, db in
+            let bookID = try await session.runner.run { ops in
+                try ops.createReading(
+                    name: "Far Dream Journal", kind: .book, profile: "journal",
+                    wingId: "W1"
+                ).id
+            }
+            let structure = BookStructureModel(session: session, readingID: bookID)
+            let entryID = try #require(await structure.newEntry(day: "2026-07-21"))
+            let shape = try await db.read { db in
+                try Row.fetchOne(db, sql: """
+                    SELECT wing_id, profile, segmentation_default FROM container WHERE id = ?
+                    """, arguments: [entryID])
+            }
+            #expect((shape?["wing_id"] as String?) == "W1",
+                    "the entry is born in its book's wing (the F-5 class)")
+            #expect((shape?["profile"] as String?) == "generic",
+                    "the non-daily shape holds — never profile='journal'")
+            #expect((shape?["segmentation_default"] as String?) == "one_block",
+                    "the notebook feel still rides explicit segmentation")
+            let membered = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading_post
+                    WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL
+                      AND status = 'member'
+                    """, arguments: [bookID, entryID])
+            }
+            #expect(membered == 1, "…and it is the book's member, as before")
+        }
+    }
+
     @Test func aDreamEntryNeverCollidesWithTheDailyJournal() async throws {
         // Round 2, BLOCKER (red-on-old, verified by behavioral revert):
         // with a dream entry created FIRST on day D, the daily door must

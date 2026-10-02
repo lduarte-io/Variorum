@@ -626,13 +626,17 @@ final class BookStructureModel {
                     }
                     return (entry.container.id, nil)
                 }
-                // REFUSE BEFORE MINT: the gate runs first, in the same
-                // serialized closure as the mint it protects.
-                try ops.assertReadingAcceptsPosts(readingID)
-                let post = try ops.createPost(
-                    title: nil, profile: .generic, entryDate: entryDay)
+                // REFUSE BEFORE MINT, now structural (13i-c ladder round 1,
+                // the F-5 wing class): `newPostInReading` gates, mints and
+                // members in ONE transaction — a refusal leaves no stray
+                // post, the note is born in the BOOK's wing (§9 — a book
+                // never spans wings), and the book's outflow rides exactly
+                // as a hand-add's would. The old composite (assert →
+                // createPost → addPostToReading) minted in wing '' under a
+                // non-Home book.
+                let post = try ops.newPostInReading(
+                    readingID, profile: .generic, entryDate: entryDay)
                 try ops.setSegmentationDefault(post.id, segmentation: .oneBlock)
-                _ = try ops.addPostToReading(post.id, to: readingID)
                 return (post.id, nil)
             }
             lastError = outcome.note
