@@ -202,8 +202,16 @@ enum MobileTutorialSeeder {
             name: bookName, kind: .book, profile: "collection")
         // The shelf's pin face, taught by wearing it (pinned books sit
         // first — the guide leads the shelf so it is findable on a fresh
-        // dev store; "getting around" says so).
-        try ops.setShelfPinned(book.id, pinned: true)
+        // dev store; "getting around" says so). The star is a NICETY and
+        // never worth failing the seed: since 13i-d U2's union star this
+        // public door carries the 15-star cap, so with the cap full the
+        // guide simply seeds unstarred (F-U2-1, the architect's
+        // adjudication — every other refusal still aborts the seed).
+        do {
+            try ops.setShelfPinned(book.id, pinned: true)
+        } catch OperationError.starLimitReached {
+            // Proceed unstarred.
+        }
 
         // Chapters, in reading order.
         let welcome = try ops.createSection(in: book.id, name: "welcome")

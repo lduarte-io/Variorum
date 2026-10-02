@@ -1367,3 +1367,43 @@ struct MobilePocketGuidePrivacyTests {
         }
     }
 }
+
+// MARK: - 13i-d F-U2-1: the seed survives a full star cap
+
+/// 13i-d U2's union star routed the public `setShelfPinned` through the
+/// capped star write, which made the seeder's guide-leads-the-shelf star
+/// able to ABORT a restore mid-seed with the cap full — a regression on
+/// the phone's Restore Tutorial road (F-U2-1). The architect's ruled fix:
+/// the star is a nicety; with the cap full the guide seeds UNSTARRED and
+/// the restore completes whole. RED ON OLD: on the pre-fix seeder this
+/// restore throws `starLimitReached` and the test fails at the `#require`.
+@Suite("Mobile tutorial seed under a full star cap (13i-d F-U2-1)")
+struct MobileTutorialStarCapTests {
+    @Test func restoreCompletesUnstarredWhenTheCapIsFull() async throws {
+        try await withPocketGuideWorld { session, db, bookID in
+            // Free the guide's own star, then fill the cap exactly with
+            // her notes — the next book star must refuse.
+            try await session.runner.run { ops in
+                try ops.setShelfPinned(bookID, pinned: false)
+                for i in 0..<Operations.starLimit {
+                    let post = try ops.createPost(title: "starred note \(i)")
+                    try ops.setStarred(.post(post.id), starred: true)
+                }
+            }
+
+            let freshBookID = try await MobileTutorialSeeder.restore(session: session)
+
+            let (fresh, lessonCount, noteStars) = try await db.read { db -> (Reading?, Int, Int) in
+                let fresh = try Queries.reading(db, id: freshBookID)
+                let lessons = try Queries.assembleReading(db, readingID: freshBookID).count
+                let stars = try Queries.starred(db).count
+                return (fresh, lessons, stars)
+            }
+            let guide = try #require(fresh, "the restore completed and the guide stands")
+            #expect(guide.starred == false, "the guide seeded unstarred, not failed")
+            #expect(lessonCount == MobileTutorialSeeder.plan.flatMap(\.lessons).count,
+                    "the seed ran WHOLE past the refused star")
+            #expect(noteStars == Operations.starLimit, "her 15 note stars are untouched")
+        }
+    }
+}
