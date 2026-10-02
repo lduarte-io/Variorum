@@ -99,6 +99,11 @@ struct ManageReadingPostsSheet: View {
         .padding(16)
         .frame(minWidth: 420)
         .task { await refresh() }
+        // 13i-c U4 (§4 row 18): the add's ownership choice — the copy (or the
+        // moved note) joins the list the moment it lands.
+        .membershipChoices(model.membershipDoors) { _ in
+            Task { await refresh() }
+        }
     }
 
     private func move(_ postID: String, up: Bool) {

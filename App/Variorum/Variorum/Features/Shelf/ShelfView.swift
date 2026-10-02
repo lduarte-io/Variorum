@@ -187,6 +187,10 @@ struct ShelfView: View {
         // Seal… · Unseal · Own Its Notes…) — the one presentation road the
         // settings sheet shares.
         .bookStateConfirms(model.stateDoors)
+        // 13i-c U4 (§4 row 17): the row drop's ownership choice.
+        .membershipChoices(model.membershipDoors) { _ in
+            Task { await model.refreshAggregates() }
+        }
         // 13i-c U3 — THE SPAWN SHEET: the name, the truth per the rule's
         // state (ladder F-R1-3's words), and the OUTFLOW CHOOSER prefilled
         // with the rule's positive tags, editable before the mint.

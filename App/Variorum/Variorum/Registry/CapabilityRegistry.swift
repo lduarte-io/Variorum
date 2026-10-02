@@ -1651,6 +1651,28 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookStateCopy.unavailableNote,
             availability: always),
+        // 13i-c U4 — THE MEMBERSHIP CHOICE (the sitting record §6; the plan
+        // §3/§4 rows 14–19). Two `.surface` acts, two renderers each: the
+        // ONE choice sheet (`MembershipChoiceSheet` — hosted by the chip's
+        // Add, the Pool's add, the shelf row's drop, Manage Notes…) and the
+        // Arrivals line's rows (`BookArrivalsLine` — the judgment arms on an
+        // owned book's or an owned-elsewhere note's bell). `always` for
+        // `.seatArrival`'s reason: the sheet and the row carry their pair,
+        // never a mode — so `takesAccess: .native` is honest. The per-pair
+        // refusals (a finished target, a finished book Move would leave, a
+        // full book) are the operations' own, spoken on the status seam.
+        Capability(
+            id: .copyIn, verb: MembershipChoiceCopy.copyInVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: MembershipChoiceCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .moveIn, verb: MembershipChoiceCopy.moveInVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: MembershipChoiceCopy.unavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

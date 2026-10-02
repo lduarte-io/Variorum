@@ -704,6 +704,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // owned-book two-choice confirm and the settings sheet's door are U4's,
     // which extend THIS declaration — one act, never a second id).
     case deleteBook
+    // 13i-c U4 — THE MEMBERSHIP CHOICE's two ceremonies (the sitting record
+    // §6: "copy in (original keeps its lives) or move in (other memberships
+    // severed, listed)"; the 13i-c plan §3/§4 rows 14–19). Two declarations
+    // on the `.moveTakeEarlier`/`.moveTakeLater` grounds — each its own door
+    // with its own words and its own refusal. Both are `.surface` acts whose
+    // target is the choice sheet's pair or the ARRIVAL ROW you point at.
+    case copyIn, moveIn
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

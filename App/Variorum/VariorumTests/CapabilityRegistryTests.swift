@@ -434,6 +434,11 @@ struct CapabilityRegistryTests {
             // door R-13ic-4's gathering gate offers ("Delete this
             // gathering…" — `.deleteBook`'s `.surface` door).
             .union(RuleEditorSheet.surfaceCapabilities)
+            // 13i-c U4 (the same class): THE MEMBERSHIP CHOICE sheet renders
+            // the two ownership ceremonies (Copy In · Move In) for every hand-
+            // add road (§4 rows 14–18); the Arrivals line is their other
+            // renderer (its own line above, grown at U4).
+            .union(MembershipChoiceSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

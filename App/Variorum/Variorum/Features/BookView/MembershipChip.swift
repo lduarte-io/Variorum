@@ -44,6 +44,17 @@ struct MembershipChip: View {
     /// diverge (its receipt names the book), nil for a plain duplicate
     /// (whose copy has no book to name).
     @State private var copyBookName: String?
+    /// 13i-c U4 (§4 row 14): the add door's ownership CHOICE — the one shared
+    /// road (`MembershipDoors`); its sheet hangs off the chip itself, so it
+    /// outlives the popover the Add was pressed in.
+    @State private var membershipDoors: MembershipDoors
+
+    init(session: AppSession, postID: String, recentBookIDs: [String] = []) {
+        self.session = session
+        self.postID = postID
+        self.recentBookIDs = recentBookIDs
+        _membershipDoors = State(initialValue: MembershipDoors(session: session))
+    }
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -180,6 +191,15 @@ struct MembershipChip: View {
         .onChange(of: popoverShown) { _, shown in
             if shown { Task { await refresh() } }
         }
+        // 13i-c U4 (§4 row 14): an ownership refusal OPENS the choice (P-2).
+        .membershipChoices(membershipDoors) { _ in
+            Task { await refresh() }
+        }
+        #if DEBUG
+        // The add door's own function, reachable by a mounted pin (the chip's
+        // `@State` is unreachable from outside — the `BindDoorProbe` shape).
+        .onAppear { MembershipChipProbe.addDoor = { book in add(to: book) } }
+        #endif
     }
 
     /// Batch 9 (R101): the es line wears the voice's PATH grammar where a
@@ -276,13 +296,20 @@ struct MembershipChip: View {
         }
     }
 
+    /// The ADD door (R61) — through the one membership road (13i-c U4, §4
+    /// row 14). A plain add lands and says so here; an OWNERSHIP refusal
+    /// closes the popover and opens the choice sheet (copy in / move in, or
+    /// copy in only — P-2: the refusal opens the ceremony, never ends in
+    /// words); any other refusal speaks the chip's own words.
     private func add(to book: Reading) {
         Task {
             do {
-                _ = try await session.runner.run { [postID] ops in
-                    try ops.addPostToReading(postID, to: book.id)
+                if let choice = try await membershipDoors.add(postID, to: book.id) {
+                    popoverShown = false
+                    await membershipDoors.offer(choice, postID: postID, readingID: book.id)
+                } else {
+                    status = "Added to “\(book.name)”."
                 }
-                status = "Added to “\(book.name)”."
             } catch {
                 status = ChipRefusals.message(for: error, bookName: book.name)
             }
@@ -413,6 +440,16 @@ nonisolated enum ChipRefusals {
         }
     }
 }
+
+#if DEBUG
+/// **THE CHIP'S ADD DOOR, AS A TEST HOOK** (13i-c U4 — the `BindDoorProbe`
+/// shape): the mounted chip registers the very function its "Add to Book"
+/// menu calls, so a pin drives the real road and reads the presented sheet.
+@MainActor
+enum MembershipChipProbe {
+    static var addDoor: ((Reading) -> Void)?
+}
+#endif
 
 extension Notification.Name {
     /// A surface asks the shell to open a post (RootView routes it).

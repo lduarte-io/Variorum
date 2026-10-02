@@ -1517,9 +1517,24 @@ SyncSpec not required).
 
 ### LIVE STATUS (per commit; every unverified claim PENDING)
 
-- **Piece A — THE CHOICE SHEET + the add doors (§4 rows 14–18):** NOT-STARTED.
+- **Piece A — THE CHOICE SHEET + the add doors (§4 rows 14–18):** DONE (commit "13i-c U4 piece A").
+  `Core/Views/MembershipChoice.swift` — `MembershipChoiceCopy` (static words: the brief's two leads
+  verbatim, the edit law AT the door, the move's severed list, the finished-book block, the receipts),
+  `MembershipChoice` (the sheet's whole item, read from `noteMemberships` + `moveInPreview` — the
+  ops' own predicates), `MembershipDoors` (`add` → nil or the named choice; `addOrOffer`; `offer`;
+  `copyIn`/`moveIn` through `copyPostIntoReading`/`movePostIntoReading`, receipts on the 18i seam),
+  `MembershipChoiceSheet` + `.membershipChoices(_:onLanded:)` (ONE presentation road). Registry:
+  `.copyIn` `.moveIn` (`.surface`, `always`, `.native`); the walk names the sheet. HOSTS: the chip's
+  Add (row 14 — closes its popover, the sheet hangs off the chip), the Pool's add-to-book (row 16),
+  the shelf row's drop (row 17), Manage Notes… (row 18, through `ReadingsViewModel.addPost`). ROW 15
+  (honest shape — FINDING F-U4-1): `BookStructureModel`'s two DRAG roads create no membership (a
+  foreign payload decodes to nothing — pinned); its one ADD road is the daily book's "+ new entry",
+  whose ownership refusal now BELLS exactly as ⌘J does (§6) with the owner named
+  (`JournalBooks.shelvingNote` — ONE mapping for ⌘J and that door; `JournalWaitingCopy`, F-U2-6).
+  `MembershipChoiceTests` (15) + the registry walk: 42/2 green; the regression sweep over every
+  suite naming a changed road (24 suites) 104/24 green; zero instances.
 - **Piece B — remove/release vocabulary + the gathering's "Remove the #tag":** NOT-STARTED.
-- **Piece C — the Arrivals arms (§4 row 19) + ⌘J's owner-naming note (F-U2-6):** NOT-STARTED.
+- **Piece C — the Arrivals arms (§4 row 19):** NOT-STARTED. (⌘J's owner-naming note, F-U2-6, landed with piece A.)
 - **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** NOT-STARTED.
 - **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.
 - **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.

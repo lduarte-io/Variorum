@@ -590,6 +590,7 @@ final class BookStructureModel {
     /// `String(describing:)` retired with it).
     func newEntry(day: String? = nil) async -> String? {
         let entryDay = day ?? JournalDay.dayString(from: Date())
+        let database = session.database
         do {
             let readingID = readingID
             let outcome: (id: String, note: String?) = try await session.runner.run { ops in
@@ -607,6 +608,21 @@ final class BookStructureModel {
                         return (entry.container.id,
                                 "Today's entry opened, but this book is at its note cap — "
                                 + "it wasn't added. Extend the cap in the book's settings.")
+                    } catch OperationError.noteOwnedElsewhere, OperationError.noteMemberedElsewhere {
+                        // 13i-c U4 (§4 row 15 — this model's own add road): an
+                        // OWNERSHIP refusal at the daily book's door BELLS,
+                        // exactly as ⌘J does (the sitting record §6: "an
+                        // owned-elsewhere note bells, never throws") — the
+                        // entry still opens, the note names who holds it, and
+                        // the Arrivals line atop this book offers Copy in /
+                        // Move in / Dismiss (row 19). The shared daily door is
+                        // the act, so the pair is decided by the one rule.
+                        let shelving = ops.shelveInDailyJournalBook(entry.container.id)
+                        return (entry.container.id, JournalBooks.shelvingNote(
+                            shelving, entryID: entry.container.id,
+                            bookName: (try? ops.dailyJournalBookName() ?? nil)
+                                ?? JournalBooks.defaultDailyBookName,
+                            database: database))
                     }
                     return (entry.container.id, nil)
                 }
@@ -685,9 +701,58 @@ enum JournalBooks {
         let note: String?
     }
 
+    /// **What the daily door SAYS about its shelving** — ONE mapping for ⌘J
+    /// (`openToday`) and the daily book's own "+ new entry" (13i-c U4: the
+    /// two doors share the shelving rule, so they share its words). nil when
+    /// there is nothing to say (shelved, or the pair already decided).
+    nonisolated static func shelvingNote(
+        _ shelving: Operations.DailyBookShelving, entryID: String, bookName: String,
+        database: AppDatabase
+    ) -> String? {
+        switch shelving {
+        case .shelved, .alreadyDecided:
+            return nil
+        case .bookFinished:
+            // The daily book is FINISHED (the bounded-notebook flow's
+            // expected end): the entry still opens; the note speaks and
+            // points at the re-designation door.
+            return "Today's entry opened, but “\(bookName)” is finished — "
+                + "it wasn't added. Pick a new daily journal from a book's "
+                + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”."
+        case .bookAtCapacity:
+            return "Today's entry opened, but “\(bookName)” is at its note cap — "
+                + "it wasn't added. Extend the cap or start a new daily journal "
+                + "(Use as Daily Journal in a book's shelf menu)."
+        case .wrongKind:
+            return "Today's entry opened, but “\(bookName)” is a smart book — "
+                + "it collects by query and can't hold entries. Pick a curated "
+                + "book with Use as Daily Journal."
+        case .waitingAtDoor(let readingID):
+            // 13i-c U2 (the sitting record §6 — "an owned-elsewhere note
+            // bells, never throws"): book ownership kept the entry from
+            // joining on its own, so it waits at the Journal's door for her
+            // judgment. 13i-c U4 (F-U2-6): the note NAMES who holds it.
+            let facts = (try? database.read { db -> (owned: Bool, others: [Queries.NoteMembership]) in
+                (try Queries.reading(db, id: readingID)?.owned ?? false,
+                 try Queries.noteMemberships(db, postID: entryID, excluding: readingID))
+            })
+            return JournalWaitingCopy.note(
+                journal: bookName, journalOwned: facts?.owned ?? false,
+                elsewhere: facts?.others.map(\.book.name) ?? [],
+                owner: facts?.others.first(where: \.owned)?.book.name)
+        case .refused:
+            // The shared door creates a book where none is designated,
+            // so only a race or a store failure reaches here — and it
+            // gets a speaking note rather than a silent miss.
+            return "Today's entry opened, but it wasn't added to a daily "
+                + "journal book. Pick one with Use as Daily Journal."
+        }
+    }
+
     @MainActor
     static func openToday(session: AppSession, day: String? = nil) async throws -> Outcome {
         let entryDay = day ?? JournalDay.dayString(from: Date())
+        let database = session.database
         // The designation read runs INSIDE the runner (round 2, MINOR:
         // two rapid invocations both saw nil pre-runner and minted two
         // "Journal" books).
@@ -705,57 +770,38 @@ enum JournalBooks {
             // book is a button-press-only act — which she overturned: the
             // bridge's days belong in Journal too. So all four doors share
             // one rule with nothing left at this one.
-            var bookName = defaultDailyBookName
-            func namedBook() -> String {
-                (try? ops.dailyJournalBookName() ?? nil) ?? bookName
-            }
-            switch ops.shelveInDailyJournalBook(entry.container.id) {
-            case .shelved, .alreadyDecided:
-                return Outcome(postID: entry.container.id, note: nil)
-            case .bookFinished:
-                // The daily book is FINISHED (the bounded-notebook flow's
-                // expected end): the entry still opens; the note speaks
-                // and points at the re-designation door.
-                bookName = namedBook()
-                return Outcome(
-                    postID: entry.container.id,
-                    note: "Today's entry opened, but “\(bookName)” is finished — "
-                        + "it wasn't added. Pick a new daily journal from a book's "
-                        + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”.")
-            case .bookAtCapacity:
-                bookName = namedBook()
-                return Outcome(
-                    postID: entry.container.id,
-                    note: "Today's entry opened, but “\(bookName)” is at its note cap — "
-                        + "it wasn't added. Extend the cap or start a new daily journal "
-                        + "(Use as Daily Journal in a book's shelf menu).")
-            case .wrongKind:
-                bookName = namedBook()
-                return Outcome(
-                    postID: entry.container.id,
-                    note: "Today's entry opened, but “\(bookName)” is a smart book — "
-                        + "it collects by query and can't hold entries. Pick a curated "
-                        + "book with Use as Daily Journal.")
-            case .waitingAtDoor:
-                // 13i-c U2 (the sitting record §6 — "an owned-elsewhere note
-                // bells, never throws"): book ownership kept the entry from
-                // joining on its own, so it waits at the Journal's door for
-                // her judgment. The owner-naming wording is U4's face.
-                bookName = namedBook()
-                return Outcome(
-                    postID: entry.container.id,
-                    note: "Today's entry opened — it's waiting at “\(bookName)”'s door, "
-                        + "because it already lives in another book and one of them "
-                        + "owns its notes.")
-            case .refused:
-                // The shared door creates a book where none is designated,
-                // so only a race or a store failure reaches here — and it
-                // gets a speaking note rather than a silent miss.
-                return Outcome(
-                    postID: entry.container.id,
-                    note: "Today's entry opened, but it wasn't added to a daily "
-                        + "journal book. Pick one with Use as Daily Journal.")
-            }
+            let shelving = ops.shelveInDailyJournalBook(entry.container.id)
+            let bookName = (try? ops.dailyJournalBookName() ?? nil) ?? defaultDailyBookName
+            return Outcome(
+                postID: entry.container.id,
+                note: shelvingNote(
+                    shelving, entryID: entry.container.id, bookName: bookName,
+                    database: database))
         }
+    }
+}
+
+/// **THE DAILY DOOR'S WAITING NOTE** (13i-c U4 — F-U2-6: the refusals carry
+/// ids, so the face names the books). The §3 plan's sentence: "Today's entry
+/// opened — it's waiting at the Journal's door, because “X” owns it." Pure,
+/// so pins read it. Wording PROVISIONAL (13s).
+nonisolated enum JournalWaitingCopy {
+    static func quoted(_ name: String) -> String { "\u{201C}\(name)\u{201D}" }
+
+    static func note(
+        journal: String, journalOwned: Bool, elsewhere: [String], owner: String?
+    ) -> String {
+        let lead = "Today's entry opened \u{2014} it's waiting at \(quoted(journal))'s door, "
+        if let owner, !journalOwned {
+            return lead + "because \(quoted(owner)) owns it. Open \(quoted(journal)) to copy "
+                + "it in or dismiss it."
+        }
+        if journalOwned, !elsewhere.isEmpty {
+            return lead + "because \(quoted(journal)) owns its notes and the entry also lives "
+                + "in \(MembershipChoiceCopy.list(elsewhere)). Open \(quoted(journal)) to copy "
+                + "it in, move it in, or dismiss it."
+        }
+        return lead + "because it already lives in another book and one of them owns its "
+            + "notes. Open \(quoted(journal)) to judge it."
     }
 }

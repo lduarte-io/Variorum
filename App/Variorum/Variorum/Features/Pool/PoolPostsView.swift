@@ -47,8 +47,14 @@ final class PoolPostsModel {
     /// Bounded like every held listing (the observeLibrary discipline).
     nonisolated static let window = 200
 
+    /// 13i-c U4 (§4 row 16): the drainage door's ownership CHOICE — the one
+    /// shared road. A Pool note is bookless, so the plain add is the common
+    /// case; the choice meets only a note claimed since the listing was read.
+    @ObservationIgnored let membershipDoors: MembershipDoors
+
     init(session: AppSession) {
         self.session = session
+        self.membershipDoors = MembershipDoors(session: session)
     }
 
     func start() async {
@@ -113,12 +119,12 @@ final class PoolPostsModel {
             })
     }
 
-    /// The drainage gesture: into a book (the pool row's whole point).
+    /// The drainage gesture: into a book (the pool row's whole point). Through
+    /// the one membership road (13i-c U4): an ownership refusal OPENS the
+    /// choice sheet (P-2) rather than ending in words.
     func addToBook(_ postID: String, readingID: String) async {
         do {
-            try await session.runner.run { ops in
-                _ = try ops.addPostToReading(postID, to: readingID)
-            }
+            try await membershipDoors.addOrOffer(postID, to: readingID)
             lastError = nil
         } catch let error as OperationError {
             if case .alreadyInReading = error { return }
@@ -303,6 +309,8 @@ struct PoolPostsView: View {
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
+        // 13i-c U4 (§4 row 16): the add's ownership choice, the one road.
+        .membershipChoices(model.membershipDoors)
         // Item 2's ruled door: the every-row "Add to Book ▾" dropdown
         // retires for the ONE searchable picker (item 14's component); the
         // CAPABILITY is byte-identical — the pick fires the same

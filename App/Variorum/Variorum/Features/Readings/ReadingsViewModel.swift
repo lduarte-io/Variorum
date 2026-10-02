@@ -20,9 +20,13 @@ final class ReadingsViewModel {
 
     private(set) var readings: [Reading] = []
     private(set) var lastError: String?
+    /// 13i-c U4 (§4 row 18): Manage Notes…'s add door's ownership CHOICE —
+    /// the one shared road; the sheet presents it.
+    @ObservationIgnored let membershipDoors: MembershipDoors
 
     init(session: AppSession) {
         self.session = session
+        self.membershipDoors = MembershipDoors(session: session)
     }
 
     func start() async {
@@ -97,8 +101,15 @@ final class ReadingsViewModel {
 
     // MARK: - Curated membership
 
+    /// Through the one membership road (13i-c U4, §4 row 18): an ownership
+    /// refusal OPENS the choice sheet (P-2); any other speaks here.
     func addPost(_ postID: String, to readingID: String) async {
-        await run { ops in try ops.addPostToReading(postID, to: readingID) }
+        do {
+            try await membershipDoors.addOrOffer(postID, to: readingID)
+            lastError = nil
+        } catch {
+            lastError = Self.message(error)
+        }
     }
 
     func removePost(_ postID: String, from readingID: String) async {

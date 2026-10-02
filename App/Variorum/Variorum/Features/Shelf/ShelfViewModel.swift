@@ -33,10 +33,14 @@ final class ShelfViewModel {
     /// Own Its Notes…/Stop Owning) — the shared brain the settings sheet
     /// also holds one of; the shelf presents its confirms.
     @ObservationIgnored let stateDoors: BookStateDoors
+    /// 13i-c U4 (§4 row 17): the row drop's ownership CHOICE — the one shared
+    /// road; the shelf presents its sheet.
+    @ObservationIgnored let membershipDoors: MembershipDoors
 
     init(session: AppSession) {
         self.session = session
         self.stateDoors = BookStateDoors(session: session)
+        self.membershipDoors = MembershipDoors(session: session)
     }
 
     /// The observed snapshot (a struct — the observe seam wants Equatable;
@@ -284,9 +288,9 @@ final class ShelfViewModel {
                     ? "Already collected — it matches this book's filter."
                     : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — smart books collect by filter."
             } else {
-                try await session.runner.run { ops in
-                    _ = try ops.addPostToReading(postID, to: readingID)
-                }
+                // 13i-c U4 (§4 row 17): the one membership road — an
+                // ownership refusal OPENS the choice sheet (P-2).
+                try await membershipDoors.addOrOffer(postID, to: readingID)
                 lastError = nil
             }
         } catch let error as OperationError {
