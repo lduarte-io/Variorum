@@ -30,9 +30,15 @@ struct MembershipChip: View {
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
+    /// 13i-d U2 (KnownIssues row 104): the note's membership, read in ONE
+    /// shared place (`NoteMembershipModel`). The note detail hands down the
+    /// one it owns (the Book Panel's door reads the same); a standalone mount
+    /// (a pin) leaves this nil and the chip tracks its own.
+    var membership: NoteMembershipModel? = nil
+
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
-    @State private var books: [Reading] = []
+    @State private var ownMembership = NoteMembershipModel()
     @State private var addableBooks: [Reading] = []
     /// R98 (batch 10): unlocked SMART books join the add list — adding
     /// applies the tags their filter needs (apply-and-report).
@@ -52,15 +58,30 @@ struct MembershipChip: View {
     /// the honest "remove #tag" doors (a gathering has no membership).
     @State private var wornRuleTags: [String: [VariorumCore.Tag]] = [:]
 
-    init(session: AppSession, postID: String, recentBookIDs: [String] = []) {
+    init(
+        session: AppSession, postID: String, recentBookIDs: [String] = [],
+        membership: NoteMembershipModel? = nil
+    ) {
         self.session = session
         self.postID = postID
         self.recentBookIDs = recentBookIDs
+        self.membership = membership
         _membershipDoors = State(initialValue: MembershipDoors(session: session))
     }
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    /// The membership in hand — the host's, else the chip's own.
+    private var model: NoteMembershipModel { membership ?? ownMembership }
+
+    /// 13f W20(c): the chooser's order is hers (round 10) — curated before
+    /// smart, most-recently-visited floating inside each group. Smart
+    /// matches ARE listed: derived membership IS membership (round 10 item
+    /// 2, #26(h)), and `readingsContaining` has always returned them.
+    private var books: [Reading] {
+        BookChooserOrder.ordered(model.readings(for: postID), recentlyVisited: recentBookIDs)
     }
 
     var body: some View {
@@ -280,15 +301,10 @@ struct MembershipChip: View {
     }
 
     private func refresh() async {
-        let membership = (try? await session.database.read { [postID] db in
-            try Queries.readingsContaining(db, postID: postID)
-        }) ?? []
-        // 13f W20(c): the chooser's order is hers (round 10) — curated
-        // before smart, most-recently-visited floating inside each group.
-        // Smart matches ARE listed: derived membership IS membership
-        // (round 10 item 2, #26(h)), and `readingsContaining` has always
-        // returned them.
-        books = BookChooserOrder.ordered(membership, recentlyVisited: recentBookIDs)
+        if membership == nil {
+            await ownMembership.track(session: session, postID: postID)
+        }
+        let membership = model.readings(for: postID)
         // 13i-c U4 (§20): the honest doors' tags, per gathering row.
         let gatherings = membership.filter { $0.kind == .gathering }
         wornRuleTags = (try? await session.database.read { [postID] db in
