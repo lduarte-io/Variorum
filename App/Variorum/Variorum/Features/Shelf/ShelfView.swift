@@ -26,6 +26,9 @@ struct ShelfView: View {
     static let contextMenuCapabilities: [CapabilityID] = [
         .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
     ] + BookStateDoorSet.all + [.deleteBook]
+        // 13i-c U4: Duplicate Book… (§6 — shallow or with copies; an owned
+        // book with copies only).
+        + [.duplicateBook]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -63,6 +66,8 @@ struct ShelfView: View {
     /// 13i-c U3 (R-13ic-4): the MINT sheet — a gathering is made WITH its
     /// rule. The sheet's item is the mint-mode editor (it carries the name).
     @State private var mintEditor: RuleEditorModel?
+    /// 13i-c U4: Duplicate Book…'s prompt — its item is the book it is FOR.
+    @State private var duplicateOffer: DuplicateBookOffer?
     /// Batch 9 (R102): the list region hugs its content, so the
     /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
     /// geometry at every window size ("the start new post typing isn't
@@ -177,6 +182,13 @@ struct ShelfView: View {
         }
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)
+        }
+        // 13i-c U4 — DUPLICATE BOOK… (§6): the name (E13's guard, refuse and
+        // keep) and the with-copies choice (fixed on for an owned book).
+        .sheet(item: $duplicateOffer, onDismiss: {
+            Task { await model.refreshAggregates() }
+        }) { offer in
+            DuplicateBookSheet(session: session, offer: offer)
         }
         .sheet(item: $bindOffer) { offer in
             BindIntoBookSheet(offer: offer) { ownedNotes in
@@ -335,6 +347,16 @@ struct ShelfView: View {
             nameField = reading.name
             renameTarget = reading
         }
+        // 13i-c U4 — DUPLICATE (§6): books only — a gathering has no
+        // duplicate op (§3: making a new gathering is already one gesture).
+        // The word follows the book: an owned book duplicates WITH COPIES
+        // only (the op refuses a shallow one — P-2: never offered).
+        if reading.kind == .book {
+            Button(DuplicateBookCopy.verb(owned: reading.owned)) {
+                duplicateOffer = DuplicateBookOffer(
+                    readingID: reading.id, name: reading.name, owned: reading.owned)
+            }
+        }
         // 13i-b U3: the RULE EDITOR's door, for gatherings AND books — a
         // book's rule is its intake (the plan §4 item 1). It replaced the v1
         // "Edit Filter…" sheet, which could silently drop a term on save.
@@ -393,10 +415,12 @@ struct ShelfView: View {
         Button("Export PDF…") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
         Divider()
         // 13i-c U3: named by the registry's `.deleteBook` (the rule editor's
-        // gathering gate is its other renderer). Its act is unchanged here —
-        // the owned book's two-choice confirm is U4's, built on this door.
-        Button(CapabilityRegistry.capability(.deleteBook).verb, role: .destructive) {
-            Task { await readings.delete(reading.id) }
+        // gathering gate is its other renderer). 13i-c U4 (F-U3-2): it routes
+        // through the ONE confirm road — a plain book's confirm (it never
+        // touches a note), an owned book's TWO-CHOICE confirm (book only ·
+        // book and its N notes — §6), a gathering's (U3's words).
+        Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
+            Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
         }
     }
 

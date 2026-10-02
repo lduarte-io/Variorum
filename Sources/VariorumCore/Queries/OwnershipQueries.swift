@@ -222,6 +222,23 @@ extension Queries {
             arguments: [readingID]) ?? 0
     }
 
+    /// **The delete confirm's N** (13i-c U4 — the sitting record §6's
+    /// two-choice confirm: "Delete book and its N notes"): the book's live
+    /// MEMBER notes, archived included — exactly the set
+    /// `deleteReadingWithNotes` sends to the Trash, so the door can never
+    /// promise a different number than the act takes. ∝ the book's own rows.
+    public static func liveMemberNoteCount(_ db: Database, readingID: String) throws -> Int {
+        try Int.fetchOne(
+            db,
+            sql: """
+                SELECT COUNT(DISTINCT rp.post_id) FROM reading_post rp
+                JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                 AND c.kind = 'post'
+                WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                """,
+            arguments: [readingID]) ?? 0
+    }
+
     /// **"Seal…" — the confirm's facts** (the 13i-c plan §5): the members
     /// that WILL fork (named, with where else they live — the confirm LISTS
     /// them, ruled) and how many arrivals the seal's finish will dismiss

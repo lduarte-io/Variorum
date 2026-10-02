@@ -721,6 +721,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // `.moveTakeEarlier`/`.moveTakeLater` grounds: a different op, different
     // words, a different refusal.
     case removeFromBook, removeRuleTag
+    // 13i-c U4 — DUPLICATE BOOK… (the sitting record §6; the plan §6): the
+    // shelf row's menu. ONE act whose verb follows the book ("Duplicate with
+    // Copies…" on an owned book — `DuplicateBookCopy.verb(owned:)`).
+    case duplicateBook
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

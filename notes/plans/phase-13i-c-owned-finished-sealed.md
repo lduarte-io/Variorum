@@ -1562,7 +1562,28 @@ SyncSpec not required).
   `BookArrivalsTests.theLineIsTheTwoActsOneRendererAndTheyAreDeclaredAsDrawn` — commented).
   `ArrivalArmsTests` (5, incl. the MOUNTED line drawing Copy In · Move In · Dismiss) + BookArrivals +
   the registry walk: 43/3 green; zero instances.
-- **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** NOT-STARTED.
+- **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** DONE (commit "13i-c U4 piece D").
+  DELETE: the shelf's "Delete Book…" routes through `BookStateDoors.open(.deleteBook)` (F-U3-2) and
+  the arm is chosen by the book's facts — a gathering's (U3's words), a PLAIN book's
+  (`BookStateCopy.deletePlainBook` — lesson 8's first sentence, the Trash's 30 days; book-only, never
+  offers note deletion), an OWNED book's TWO-CHOICE confirm (`deleteOwnedBook` — "Delete Book Only"
+  → `deleteReading`, its notes to the Pool · "Delete Book and Its N Notes" → `deleteReadingWithNotes`,
+  ONE stamp — offered ONLY on an owned book, F-U2-7; an owned book with no notes has one button).
+  `BookStateConfirm.alternateLabel` + `BookStateDoors.confirm(alternate:)`/`perform(…alternate:)` + the
+  sheet's second button carry the second choice; receipts `deletedPlainBook` / `deletedBookOnly` /
+  `deletedWithNotes`. CORE (a query the face needs — no op semantics): `Queries.liveMemberNoteCount`
+  (the confirm's N = the set `deleteReadingWithNotes` takes), pinned in `OwnershipBookDoorsTests`.
+  DUPLICATE: `Features/Readings/DuplicateBook.swift` — `DuplicateBookCopy` ("Duplicate Book…" /
+  "Duplicate with Copies…" on an owned book; the brief's two receipts), `DuplicateBookOffer`,
+  `DuplicateBookDoor.perform` (E13's `assertBookNameIsFree` + `duplicateReading` in ONE runner
+  closure; an owned source always deep), `DuplicateBookSheet` (name prefilled "X copy", the "With
+  copies of its notes" checkbox — off on a plain book, on and fixed on an owned one; a refusal is said
+  IN the sheet, refuse-and-keep). The shelf menu: books only (a gathering has no duplicate op). The
+  book view's gear/settings has no delete or duplicate door today — none added (no settings-sheet work,
+  the brief's fence; FINDING F-U4-3). Registry: `.duplicateBook` (`.contextMenu`).
+  `BookDeleteAndDuplicateTests` (9) + BookStateDoors + GatheringRuleGate + BookSettingsSheet + the
+  registry walk + ShelfModel + DuplicateBookNameDoor + BindDoor: 80/8 green; core
+  `OwnershipBookDoorsTests` 14/1 green; zero instances.
 - **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.
 - **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.
 - **Piece G — suites, the walk, the record closed, ledger row 5:** NOT-STARTED.

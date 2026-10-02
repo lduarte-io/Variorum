@@ -224,6 +224,9 @@ struct OwnershipBookDoorsTests {
             try ops.addPostToReading(b.id, to: owned.id)
             try ops.assignPostToSection(b.id, in: owned.id, section: chapter.id)
             let version = try ops.saveNoteVersion(a.id).post
+            // 13i-c U4: the door's "Delete book and its N notes" counts exactly
+            // the notes the act takes (versions ride their note, uncounted).
+            #expect(try db.read { try Queries.liveMemberNoteCount($0, readingID: owned.id) } == 2)
 
             let deleted = try ops.deleteReadingWithNotes(owned.id)
 

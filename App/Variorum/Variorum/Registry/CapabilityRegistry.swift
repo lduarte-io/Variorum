@@ -1688,6 +1688,17 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: RemoveFromBookCopy.unavailableNote,
             availability: always),
+        // 13i-c U4 — DUPLICATE BOOK… (§6): the shelf row's menu, books only
+        // (a gathering has no duplicate op — the menu hides it, P-2). `always`
+        // for `.editRule`'s reason (the row carries its target); the per-book
+        // shape (owned ⇒ with copies only) is the door's word and its sheet's
+        // fixed checkbox; a taken name is E13's refusal, said in the sheet.
+        Capability(
+            id: .duplicateBook, verb: DuplicateBookCopy.verb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: DuplicateBookCopy.unavailableNote,
+            availability: always),
         // The gathering's honest door (§20): "Remove the #tag" — the chip's
         // gathering rows, one per rule tag the note wears.
         Capability(

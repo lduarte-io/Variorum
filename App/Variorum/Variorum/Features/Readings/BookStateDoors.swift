@@ -110,6 +110,10 @@ nonisolated struct BookStateConfirm: Identifiable, Equatable, Sendable {
     /// The sentences below the list (§24's waiting line rides here).
     let after: [String]
     let confirmLabel: String
+    /// A SECOND way through the same door — the owned book's delete ("Delete
+    /// Book and Its N Notes", 13i-c U4 — the sitting record §6's two-choice
+    /// confirm). nil for every one-choice confirm.
+    var alternateLabel: String? = nil
 
     var id: String { "\(act.rawValue)|\(readingID)" }
 }
@@ -260,6 +264,78 @@ nonisolated enum BookStateCopy {
             list: [], after: [], confirmLabel: "Delete Gathering")
     }
 
+    // MARK: Delete a BOOK (13i-c U4 — the sitting record §6; lesson 8: "Deleting
+    // a plain book never touches a note. Deleting an owned book asks: keep the
+    // notes (they go to the Pool) or take them too. The Trash gives back
+    // whatever went in together, together.")
+
+    static func notes(_ count: Int) -> String { count == 1 ? "1 note" : "\(count) notes" }
+
+    static let trashLine =
+        "It goes to the Trash \u{2014} Put back returns it for \(TrashWindow.days) days."
+
+    /// A PLAIN book's confirm — book-only, and it says why: a plain book's
+    /// notes were never "its" notes (§6's asymmetry, visible at the door).
+    static func deletePlainBook(readingID: String, name: String, notes count: Int) -> BookStateConfirm {
+        BookStateConfirm(
+            act: .deleteBook, readingID: readingID,
+            title: "Delete \(quoted(name))?",
+            lines: [
+                count == 0
+                    ? "Deleting a plain book never touches a note."
+                    : "Deleting a plain book never touches a note \u{2014} its \(notes(count)) "
+                        + "stay where they are, in the Library and any other book.",
+                trashLine,
+            ],
+            list: [], after: [], confirmLabel: "Delete Book")
+    }
+
+    /// An OWNED book's TWO-CHOICE confirm (§6): the book only (its notes go
+    /// to the Pool — nothing of hers destroyed) or the book AND its N notes
+    /// (both to the Trash on one stamp — Put back returns them together).
+    /// An owned book with no notes has nothing to choose: one button.
+    static func deleteOwnedBook(readingID: String, name: String, notes count: Int) -> BookStateConfirm {
+        guard count > 0 else {
+            return BookStateConfirm(
+                act: .deleteBook, readingID: readingID,
+                title: "Delete \(quoted(name))?",
+                lines: ["\(quoted(name)) owns its notes, and holds none right now.", trashLine],
+                list: [], after: [], confirmLabel: "Delete Book")
+        }
+        return BookStateConfirm(
+            act: .deleteBook, readingID: readingID,
+            title: "Delete \(quoted(name))?",
+            lines: [
+                "\(quoted(name)) owns its notes. Delete the book only, and its \(notes(count)) "
+                    + "go back to the Pool \u{2014} or delete the book and its \(notes(count)) "
+                    + "together.",
+                "Either way the book goes to the Trash for \(TrashWindow.days) days \u{2014} and "
+                    + "Put back returns whatever went in together, together.",
+            ],
+            list: [], after: [], confirmLabel: "Delete Book Only",
+            alternateLabel: count == 1
+                ? "Delete Book and Its Note" : "Delete Book and Its \(count) Notes")
+    }
+
+    /// A plain book's delete landed — its notes untouched (lesson 8).
+    static func deletedPlainBook(_ name: String) -> String {
+        deleted(name) + " Its notes are untouched."
+    }
+
+    /// Book-only, owned: the notes are in the Pool now.
+    static func deletedBookOnly(_ name: String, released count: Int) -> String {
+        count == 0
+            ? deleted(name)
+            : "Deleted \(quoted(name)) \u{2014} it\u{2019}s in the Trash; its \(notes(count)) "
+                + "\(count == 1 ? "is" : "are") in the Pool now."
+    }
+
+    /// With its notes: one stamp, one Put back.
+    static func deletedWithNotes(_ name: String, notes count: Int) -> String {
+        "Deleted \(quoted(name)) and its \(notes(count)) \u{2014} they\u{2019}re in the Trash "
+            + "together; Put back on the book returns them together."
+    }
+
     // MARK: Receipts (the 18i seam's RECEIPT class)
 
     static func finished(_ name: String) -> String {
@@ -340,6 +416,8 @@ final class BookStateDoors {
         let pendingArrivals: Int
         let sealPreview: Queries.SealPreview
         let ownForks: [Queries.SharedMember]
+        /// The delete confirm's N (13i-c U4).
+        let memberNotes: Int
     }
 
     /// **A door was pressed.** Reads the book FRESH (a shelf row's snapshot
@@ -361,7 +439,9 @@ final class BookStateDoors {
                     sealPreview: act == .sealBook
                         ? try Queries.sealPreview(db, readingID: readingID) : .none,
                     ownForks: act == .ownBook
-                        ? try Queries.ownConversionPreview(db, readingID: readingID) : [])
+                        ? try Queries.ownConversionPreview(db, readingID: readingID) : [],
+                    memberNotes: act == .deleteBook
+                        ? try Queries.liveMemberNoteCount(db, readingID: readingID) : 0)
             }) else {
                 session.status.refuse(ReadingsViewModel.message(
                     OperationError.readingNotFound(id: readingID)))
@@ -413,17 +493,33 @@ final class BookStateDoors {
                 readingID: readingID, name: reading.name,
                 forks: opening.ownForks.map(BookStateCopy.Fork.init))
         case .deleteBook:
-            pending = BookStateCopy.deleteGathering(readingID: readingID, name: reading.name)
+            // 13i-c U4 — THREE ARMS (the sitting record §6; F-U3-2): a
+            // gathering's (U3's — it holds no note), a PLAIN book's (book-only;
+            // it never touches a note), an OWNED book's TWO-CHOICE confirm
+            // (book only · book and its N notes — the asymmetry is the
+            // ownership concept, visible at the door). The N is the set
+            // `deleteReadingWithNotes` takes.
+            switch (reading.kind, reading.owned) {
+            case (.gathering, _):
+                pending = BookStateCopy.deleteGathering(readingID: readingID, name: reading.name)
+            case (.book, true):
+                pending = BookStateCopy.deleteOwnedBook(
+                    readingID: readingID, name: reading.name, notes: opening.memberNotes)
+            case (.book, false):
+                pending = BookStateCopy.deletePlainBook(
+                    readingID: readingID, name: reading.name, notes: opening.memberNotes)
+            }
         default:
             await perform(act, readingID: readingID)
         }
     }
 
-    /// The confirm's button: perform the act it named.
-    func confirm() async {
+    /// The confirm's button: perform the act it named. `alternate` is the
+    /// confirm's SECOND choice (the owned book's delete-with-notes).
+    func confirm(alternate: Bool = false) async {
         guard let item = pending else { return }
         pending = nil
-        await perform(item.act, readingID: item.readingID)
+        await perform(item.act, readingID: item.readingID, alternate: alternate)
     }
 
     func cancel() { pending = nil }
@@ -432,11 +528,13 @@ final class BookStateDoors {
     /// its own refusal (named for the book) on failure. Returns whether it
     /// landed (the rule editor closes after a delete).
     @discardableResult
-    func perform(_ act: CapabilityID, readingID: String) async -> Bool {
+    func perform(_ act: CapabilityID, readingID: String, alternate: Bool = false) async -> Bool {
         let named = (try? await session.database.read { db in
             try Queries.reading(db, id: readingID)
         }) ?? nil
         let name = named?.name ?? ""
+        let owned = named?.owned ?? false
+        let database = session.database
         do {
             let receipt: String = try await session.runner.run { ops in
                 switch act {
@@ -458,9 +556,20 @@ final class BookStateDoors {
                 case .unownBook:
                     try ops.setReadingOwned(readingID, owned: false)
                     return BookStateCopy.unowned(name)
+                case .deleteBook where alternate:
+                    // The owned book's second choice: the book AND its notes,
+                    // ONE stamp (F-U2-7: offered only on an owned book).
+                    let notes = try ops.deleteReadingWithNotes(readingID)
+                    return BookStateCopy.deletedWithNotes(name, notes: notes.count)
                 case .deleteBook:
+                    let released = owned
+                        ? try database.read { db in
+                            try Queries.liveMemberNoteCount(db, readingID: readingID)
+                        } : 0
                     try ops.deleteReading(readingID)
-                    return BookStateCopy.deleted(name)
+                    if named?.kind == .gathering { return BookStateCopy.deleted(name) }
+                    return owned ? BookStateCopy.deletedBookOnly(name, released: released)
+                        : BookStateCopy.deletedPlainBook(name)
                 default:
                     throw OperationError.readingNotFound(id: readingID)
                 }
@@ -482,6 +591,9 @@ final class BookStateDoors {
 struct BookStateConfirmSheet: View {
     let confirm: BookStateConfirm
     let onConfirm: () -> Void
+    /// The confirm's second choice, when it has one (13i-c U4 — the owned
+    /// book's "Delete Book and Its N Notes").
+    var onAlternate: (() -> Void)? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -526,6 +638,13 @@ struct BookStateConfirmSheet: View {
                 Button(tokens.chromeLabel("Cancel")) { dismiss() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(.cancelAction)
+                if let alternate = confirm.alternateLabel, let onAlternate {
+                    Button(tokens.chromeLabel(alternate)) {
+                        onAlternate()
+                        dismiss()
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+                }
                 Button(tokens.chromeLabel(confirm.confirmLabel)) {
                     onConfirm()
                     dismiss()
@@ -553,13 +672,23 @@ extension View {
         _ doors: BookStateDoors, onLanded: ((CapabilityID) -> Void)? = nil
     ) -> some View {
         sheet(item: Bindable(doors).pending) { item in
-            BookStateConfirmSheet(confirm: item) {
-                Task {
-                    if await doors.perform(item.act, readingID: item.readingID) {
-                        onLanded?(item.act)
+            BookStateConfirmSheet(
+                confirm: item,
+                onConfirm: {
+                    Task {
+                        if await doors.perform(item.act, readingID: item.readingID) {
+                            onLanded?(item.act)
+                        }
                     }
-                }
-            }
+                },
+                onAlternate: {
+                    Task {
+                        if await doors.perform(
+                            item.act, readingID: item.readingID, alternate: true) {
+                            onLanded?(item.act)
+                        }
+                    }
+                })
         }
     }
 }
