@@ -12,6 +12,7 @@
 
 import Dependencies
 import Foundation
+import GRDB
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -161,6 +162,36 @@ struct WingSwitcherTests {
             _ = await TypedTagPath.apply("writing/draft", toPost: home.id, session: session)
             #expect(try await db.read { try Queries.allTags($0, wingID: "") }.map(\.path)
                     == ["writing", "writing/draft"])
+        }
+    }
+
+    /// F-U5-3 — EMPTY TRASH takes only what THIS wing's Trash shows (the
+    /// Trash's own G6 letter: "a door may not take what it does not show").
+    /// With per-wing Trash views, the act-time re-read was store-wide — it
+    /// would have purged another wing's deleted notes from a wing whose
+    /// Trash never listed them. The confirm counts, and the act takes, the
+    /// current wing's rows alone; the other wing's row survives the act.
+    @Test func emptyTrashTakesOnlyTheCurrentWingsRows() async throws {
+        try await withWingSession { session, db in
+            let ops = session.operations
+            let wing = try ops.createWing(name: "Imports")
+            let home = try ops.createPost(title: "home gone")
+            let away = try ops.createPost(title: "away gone", wingId: wing.id)
+            try ops.deleteContainer(home.id)
+            try ops.deleteContainer(away.id)
+            session.wing.switchTo(wing.id)
+            let confirm = try #require(try await TrashPurge.emptyTrashConfirm(session: session))
+            guard case .emptyTrash(let counts, _) = confirm else {
+                Issue.record("expected the empty-trash confirm, got \(confirm)")
+                return
+            }
+            #expect(counts[.note] == 1, "the confirm counts this wing's Trash only")
+            try await TrashPurge.confirm(session: session, confirm)
+            let intents = try await db.read { db in
+                try String.fetchAll(
+                    db, sql: "SELECT row_id FROM purge_intent WHERE table_name = 'container'")
+            }
+            #expect(intents == [away.id], "the act took this wing's row and no other")
         }
     }
 
