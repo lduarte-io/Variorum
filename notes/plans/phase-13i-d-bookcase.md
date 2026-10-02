@@ -2636,6 +2636,29 @@ EVIDENCE's "combined behavioural revert" line.
 - **P-13id-U6-14** — the chip's refusal table defers to the app's one table for anything outside its
   four book arms (never a dump).
 
+## THE ARCHITECT'S ADJUDICATION AFTER U6 (2026-10-02 — spot-check: seventeen commits pushed, fences empty, the record, #176 and the KnownIssues flips in place; the away-run rule governs)
+
+- **F-U6-2 RULED — RECORD AND OWN, not an in-phase fix:** an obsolete undo speaking "Undid: …"
+  is a FALSE RECEIPT (the §12 message-kind rule: a door that did nothing speaks a refusal), and
+  it is a PRE-EXISTING class over every obsolete replay — the Mac sibling of KnownIssues row
+  23's phone finding ("undo announces itself and changes nothing"). The fix is an undo-core API
+  design (`UndoStack` must learn whether the inverse ACTED — many registrations), which the
+  friction doctrine says to design, never to patch at a sweep's tail. **The closeout adds the
+  KnownIssues row (owner 12, beside row 23's doctrine question, which stays the author's) and
+  her bundle flags it** — her daily driving can meet it.
+- **(g)'s verdict ACCEPTED:** traced, not a bug — the reader counts book rows only (13i-c's
+  contract holds); the chip's label was the defect and is re-worded.
+- **F-U6-4 ROUTED TO U7 (rider):** the Archived view's Delete Note… declaration (one door row +
+  one door-set pin edit). **F-U6-5 — HERS, bundled** (#176: the Library masthead's two adjacent
+  "Notes" segments — the scope segment she ruled beside the cards-view segment; a re-word is
+  one string at her pick). **F-U6-3 → U7** (its own scope). **P-13id-U6-1…14 STAND** (#176).
+- **Ledger row 7 → DONE.** U7 is the last unit before LADDER B.
+- **For the combined 13i walk (grown by U6):** the swept words in use — the gathering mint's
+  door ("Create Smart Book" gone), the navigator footer, the pad's placeholder, "Notes" in the
+  Library · a sealed book's generic refusals speaking Unseal · the dismiss receipt's road-back
+  sentence · an obsolete ⌥⌘Z after a wing move doing NOTHING (and, until its row lands, still
+  mis-speaking "Undid" — the known cost).
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -2668,7 +2691,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
 | 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | **BUILT — awaiting the architect's adjudication** (core 2116/233 · Mac 1406/224 · walk ×4, 46 captures; ACT 0 + a sibling guarded; F-U3-4 traced NOT bug-class; F-U4-7 recorded; W-1 fixed; F-U6-2/-4/-5 for rulings; #176) |
-| 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
+| 8 | U7 — the tutorial's books chapter + the classics seed (+ riders: F-U1-3 the Welcome mint, F-U1-5/F-U6-3 the guide's prose, F-U6-4 the declaration) | IN FLIGHT (spawned 2026-10-02) |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
 | 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
@@ -3033,5 +3056,63 @@ close). Build into `App/Variorum/DerivedData/13id-u6/`.
 **Your record:** a `## U6 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
 the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
 numbered P-13id-U6-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
+every commit. One agent at a time; no subagents; foreground waits only. An unsettled fork:
+proposal into your record, STOP that thread, continue the others.
+
+## U7 BRIEF — THE TUTORIAL'S BOOKS CHAPTER · THE CLASSICS SEED · THE WELCOME MINT (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — the rulings, the constitution, your LEDGER row (items 7 + 1's seed +
+10's lesson line above), EVERY adjudication (your riders are in the U1 and U6 ones), the U1–U6
+RECORDs, the AWAY-RUN POSTURE, the ENVIRONMENT TRAPS ·
+`notes/plans/phase-13i-sitting-record-2026-09-30.md` **§25 IN FULL — the eleven lesson
+sentences and five rituals ARE your acceptance criteria** (P-6: a build that makes a sentence
+false is wrong, not the sentence), plus §7/§17 (the Welcome shelf + the classics triad, #166(b))
+and §19.3 (Journal and Quicknotes start UNSHELVED; Welcome = the field guide + the classics
+trio, nothing else) · the Mac tutorial seeder (`TutorialSeeder` + the field-guide content) and
+the SHARED sample-library seeder (`Shared/SampleLibrary/` — Sherlock and Jekyll ship through
+it on BOTH platforms) · `notes/SessionResiliencyProtocol.md`.
+
+**Scope:**
+1. **THE WELCOME MINT (F-U1-3):** the seeder mints the Welcome shelf (`role='welcome'` — the
+   key the existing R5 keeper in `Sync/Repairs.swift` converges on; CONSUME it, never a new
+   repair class — any need for one is a STOP) and shelves the SEEDED books on it (the field
+   guide, Sherlock, Jekyll, Encryption Explained; the classics gathering below). Fresh stores
+   get it at birth; an existing store gets it through the RESTORE doors (Restore Tutorial /
+   Restore Sample Library) — never a silent retrofit of a live store.
+2. **THE CLASSICS SEED (#166(b), ruled in):** Sherlock OWNED · Jekyll plain · both `#classics` ·
+   the seeded classics GATHERING on Welcome · the ONE seeded quicknote (so Quicknotes is a live
+   example). All through the shared seeder; the phone test-builds green (its own tutorial
+   seeder is untouched — record what it owes).
+3. **THE BOOKS CHAPTER:** the ELEVEN lesson sentences + the FIVE rituals (§25) as field-guide
+   content, in the guide's established card form and voice; lesson 4 carries the dismissal
+   road-back sentence (item 10); the chapter's walk ASSERTS the rituals headless where
+   expressible (R1 the classics walk rides your seed; R5's drags are pinned at the plan layer,
+   the gesture being hers). Every lesson sentence lands as a pin (the H pattern: plain prose,
+   the pin ties doors to constants — `TutorialWalkTests`' own convention).
+4. **THE GUIDE'S PROSE SWEEP (F-U1-5, F-U6-3):** the field guide's remaining SHELF/"smart"
+   prose and `PostureCopy`'s "on this shelf" speak the Bookcase vocabulary; remove
+   `TutorialSeeder.swift`'s allow-list line from `DeadVocabularyTests` so the grep pin closes
+   over it too.
+5. **Rider F-U6-4:** the Archived view's inline Delete Note… joins the registry (one door row
+   on `.deleteNote` + the door-set pin edit).
+6. **THE RE-SEED CONSEQUENCE, recorded in your record for the closeout:** her REAL store's
+   seeded guide stales with this unit's prose; the closeout re-seeds via the product door
+   behind the A1 rail (never your act).
+
+Zero schema, zero `Sync/` — STOP rule. OUT of scope: everything else; the phone's own seeder.
+
+**Evidence (named now):** seeder state tests (the Welcome mint with its role key; the triad's
+owned/tags/gathering/quicknote; §19.3's unshelved Journal/Quicknotes); the eleven lesson pins +
+the ritual walk assertions; the restore doors re-seeding onto an EXISTING store (Welcome
+adopted, not duplicated — the R5 keeper's letter, pinned headless); the grep pin closing over
+the seeder; the registry walk green; a screenshot walk in all four voice/appearance
+combinations into `notes/plans/13id-screens/u7/` (gitignored) — the Welcome shelf with the
+triad, the classics gathering open (R1's walk), the books chapter read in use. Suites at the
+END; baseline core 2116/233 (U6's close). Build into `App/Variorum/DerivedData/13id-u7/`.
+
+**Your record:** a `## U7 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+the standing form (map · evidence with counts, PENDING until verified · FINDINGS · PROVISIONALs
+numbered P-13id-U7-n · LIVE STATUS per commit). Commits carry NO attribution trailer. Push after
 every commit. One agent at a time; no subagents; foreground waits only. An unsettled fork:
 proposal into your record, STOP that thread, continue the others.
