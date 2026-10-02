@@ -86,11 +86,24 @@ nonisolated enum ArrivalsCopy {
     /// Add landed. Says WHERE, because "at the end" is the ruled placement
     /// (§4) — and in a chaptered book the end is outside every chapter (the
     /// unsectioned bin renders last).
-    static func added(_ title: String, chaptered: Bool) -> String {
-        chaptered
+    static func added(_ title: String, chaptered: Bool, archived: Bool = false) -> String {
+        // 13i-d U4 (#169(a)(2)): an ARCHIVED waiter seats as an archived
+        // member — the Index never shows it, so the receipt says where it is.
+        if archived {
+            return "\u{201C}\(title)\u{201D} added to the book \u{2014} it\u{2019}s archived, "
+                + "so it waits in the book\u{2019}s archived line."
+        }
+        return chaptered
             ? "\u{201C}\(title)\u{201D} added at the end of the book, outside the chapters."
             : "\u{201C}\(title)\u{201D} added at the end of the book."
     }
+
+    /// 13i-d U4 (#169(a)(2) — P-13ib-U2-2 reversed): the quiet mark an
+    /// ARCHIVED waiter's row wears. Its doors are the same.
+    static let archivedMark = "archived"
+    static let archivedMarkHelp =
+        "This note is archived \u{2014} add it and it joins the book still archived, kept "
+        + "in the book\u{2019}s archived line rather than its Index"
 
     /// Dismiss landed. Deliberately says no more than what happened: whether
     /// and how a dismissed note can ring again is PROVISIONAL (P-13ib-U1-1),
@@ -321,7 +334,8 @@ final class BookArrivalsModel {
         defer { judging.remove(arrival.id) }
         do {
             try await session.runner.run { ops in try ops.seatArrival(arrival.id) }
-            session.status.receipt(ArrivalsCopy.added(arrival.title, chaptered: chaptered))
+            session.status.receipt(ArrivalsCopy.added(
+                arrival.title, chaptered: chaptered, archived: arrival.archived))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
                 for: error, book: book?.name, cap: book?.maxPosts))
@@ -502,6 +516,16 @@ struct BookArrivalsLine: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .help(arrival.title)
+            // 13i-d U4 (#169(a)(2) — P-13ib-U2-2 reversed): an ARCHIVED
+            // waiter stays at the door, marked; the same doors follow.
+            if arrival.archived {
+                Text(tokens.chromeLabel(ArrivalsCopy.archivedMark))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .help(ArrivalsCopy.archivedMarkHelp)
+            }
             // 13i-c U4 (§18.4): why this row is not an ordinary Add — who owns
             // it, or where else it lives. Book names are hers, never chrome.
             if let line = arms.line {
@@ -534,12 +558,12 @@ struct BookArrivalsLine: View {
         .onAppear {
             ArrivalsLineProbe.recordRow(
                 model.readingID, owner: probeOwner, arrival.id,
-                arms.acts.map(ArrivalArms.verb))
+                arms.acts.map(ArrivalArms.verb), archived: arrival.archived)
         }
         .onChange(of: arms) { _, now in
             ArrivalsLineProbe.recordRow(
                 model.readingID, owner: probeOwner, arrival.id,
-                now.acts.map(ArrivalArms.verb))
+                now.acts.map(ArrivalArms.verb), archived: arrival.archived)
         }
         .onDisappear {
             ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
@@ -615,6 +639,8 @@ enum ArrivalsLineProbe {
         var expanded = false
         /// Arrival row id → the door verbs that row drew.
         var rows: [String: [String]] = [:]
+        /// 13i-d U4: the rows that drew the "archived" mark.
+        var archivedRows: Set<String> = []
     }
 
     private(set) static var drawn: [String: Drawn] = [:]
@@ -636,16 +662,19 @@ enum ArrivalsLineProbe {
     }
 
     static func recordRow(
-        _ readingID: String, owner: UUID, _ rowID: String, _ verbs: [String]
+        _ readingID: String, owner: UUID, _ rowID: String, _ verbs: [String],
+        archived: Bool = false
     ) {
         var entry = claim(readingID, owner)
         entry.rows[rowID] = verbs
+        if archived { entry.archivedRows.insert(rowID) } else { entry.archivedRows.remove(rowID) }
         drawn[readingID] = entry
     }
 
     static func forgetRow(_ readingID: String, owner: UUID, _ rowID: String) {
         guard drawn[readingID]?.owner == owner else { return }
         drawn[readingID]?.rows[rowID] = nil
+        drawn[readingID]?.archivedRows.remove(rowID)
     }
 
     static func forget(_ readingID: String, owner: UUID) {

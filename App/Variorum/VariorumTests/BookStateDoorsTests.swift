@@ -225,9 +225,14 @@ struct BookStateDoorsTests {
     }
 
     /// 13i-c ladder round 1, the MAJOR: an ARCHIVED note's waiting row is
-    /// DISMISSED by the finish, so the door must ASK and count it — even
-    /// though the Arrivals line does not show it while archived
-    /// (P-13ib-U2-2's display rule). Red-on-old: the door acted at once.
+    /// DISMISSED by the finish, so the door must ASK and count it. Red-on-old:
+    /// the door acted at once.
+    ///
+    /// 13i-d U4 — P-13ib-U2-2 REVERSED (her #169(a)(2)/(3)): the line arm below
+    /// asserted the Arrivals LINE showed nothing (`== 0`) while the confirm
+    /// counted the archived waiter. The flip is deliberate, RED on the
+    /// pre-flip predicate: the line SHOWS it now (marked archived), so what
+    /// she sees at the door is exactly what the finish dismisses.
     @Test func finishAsksWhenOnlyAnArchivedNoteWaits() async throws {
         try await withStateWorld { session, db in
             let ops = session.operations
@@ -238,9 +243,11 @@ struct BookStateDoorsTests {
             let note = try ops.createPost(title: "late")
             try ops.applyTag(tag.id, toPost: note.id)
             try ops.archiveContainer(note.id)
-            #expect(try await db.read {
-                try Queries.bookArrivals($0, readingID: book.id, limit: 10).count
-            } == 0, "the LINE shows nothing — the waiter is archived")
+            let door = try await db.read {
+                try Queries.bookArrivals($0, readingID: book.id, limit: 10)
+            }
+            #expect(door.count == 1, "the LINE shows the archived waiter — all visible")
+            #expect(door.rows.map(\.archived) == [true], "marked archived")
 
             let doors = BookStateDoors(session: session)
             await doors.open(.finishBook, readingID: book.id)

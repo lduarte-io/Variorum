@@ -470,6 +470,11 @@ struct CapabilityRegistryTests {
             // the Index FILTER BAR's save word (`.saveFilterAsGathering`).
             .union(BookView.surfaceCapabilities)
             .union(BookFilterBar.surfaceCapabilities)
+            // 13i-d U4 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): a book's ARCHIVED LINE (her #169(a)(1)) renders
+            // Unarchive (`.unarchiveNote`, NEW — its one declared renderer)
+            // and the shared remove door on each archived member's row.
+            .union(BookArchivedLine.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

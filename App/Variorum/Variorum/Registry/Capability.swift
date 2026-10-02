@@ -766,6 +766,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // the grouped-by control and the filter's terms are NOT acts — they
     // change what she sees, never the store (the Library `sort ▾` precedent).
     case openBookSettings, setJournalTrait, saveFilterAsGathering
+    // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
+    // plan item 9): its two row doors are **Unarchive** (NEW — the archived
+    // line is its one declared renderer; the Library's Archived view carries
+    // an older inline twin, undeclared — a finding for that surface's touch)
+    // and the shared `.removeFromBook` (declared already). And the F-U3-5
+    // rider (the adjudication after U3): a GATHERING's hide-owned chips in the
+    // settings sheet (13i-c U3's three-state row, `setReadingHideOwned`)
+    // were an undeclared act — declared here, rendered by the sheet.
+    case unarchiveNote, setReadingHideOwned
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

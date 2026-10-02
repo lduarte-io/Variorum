@@ -57,6 +57,9 @@ struct SpreadBookView: View {
     /// spread, invisible when empty. nil composes nothing (a pin over the
     /// spread alone).
     var arrivals: BookArrivalsModel? = nil
+    /// 13i-d U4 — the archived line, directly under the door (nil composes
+    /// nothing — a pin over the spread alone).
+    var archived: BookArchivedModel? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -85,6 +88,9 @@ struct SpreadBookView: View {
             // draws nothing — zero height).
             if let arrivals {
                 BookArrivalsLine(model: arrivals, structure: structure)
+            }
+            if let archived {
+                BookArchivedLine(model: archived, structure: structure)
             }
             if model.spreadEntries.isEmpty {
                 Spacer()

@@ -568,6 +568,15 @@ extension Operations {
             // there would put an editable note inside a book whose text is
             // immutable — the door's own answer (a sealed book refuses every
             // add) is that it comes back OUTSIDE the edition.
+            //
+            // A FINISHED (not sealed) book takes its membership back — KEPT AS
+            // SHIPPED by her ruling R-13id-3 (13i-d kickoff, 2026-10-02;
+            // KnownIssues row 109, ratified-documented): a restore returns
+            // what was there — the membership existed before the delete, so
+            // the table of contents gains nothing new — and the finish freeze
+            // keeps binding NEW adds (her doors), never recovery. (The same
+            // exact-stamp letter revives a waiting ARRIVAL row with its note;
+            // `dismissArrival` stays legal on a finished book — its door.)
             try db.execute(
                 sql: """
                     UPDATE reading_post SET deleted_at = NULL

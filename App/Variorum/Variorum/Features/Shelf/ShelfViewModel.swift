@@ -48,6 +48,10 @@ final class ShelfViewModel {
     private(set) var lastEdited: [String: String] = [:]
     /// How many notes each gathering shows.
     private(set) var gatheringCounts: [String: Int] = [:]
+    /// 13i-d U4 — HONEST COUNTS (her #169(a)(1)): each book's ARCHIVED
+    /// members (one-shot — the read touches `container`, so it never rides
+    /// the held snapshot; U1's P1 pin).
+    private(set) var archivedCounts: [String: Int] = [:]
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -125,6 +129,7 @@ final class ShelfViewModel {
             ruleTags = rules
             lastEdited = aggregates.lastEdited
             gatheringCounts = aggregates.gatheringCounts
+            archivedCounts = aggregates.archivedCounts
         } catch {
             lastError = String(describing: error)
         }

@@ -66,8 +66,23 @@ nonisolated enum RemoveFromBookCopy {
         "Released from \(quoted(book)) \u{2014} it\u{2019}s in the Pool now."
     }
 
-    static func receipt(book: String, owned: Bool, bookless: Bool) -> String {
-        owned ? released(book: book) : removed(book: book, bookless: bookless)
+    /// 13i-d U4: an ARCHIVED note leaving a book is NOT in the Pool (the Pool
+    /// is every live, UN-archived bookless note) — it stays archived, and the
+    /// receipt says so instead of the Pool sentence (the archived line's
+    /// Remove door, and any remove door that reaches an archived note).
+    static func receipt(
+        book: String, owned: Bool, bookless: Bool, archived: Bool = false
+    ) -> String {
+        if archived { return leftArchived(book: book, owned: owned) }
+        return owned ? released(book: book) : removed(book: book, bookless: bookless)
+    }
+
+    /// "Removed from “X” — the note itself is untouched. It stays archived." /
+    /// "Released from “X” — it stays archived."
+    static func leftArchived(book: String, owned: Bool) -> String {
+        owned
+            ? "Released from \(quoted(book)) \u{2014} it stays archived."
+            : "Removed from \(quoted(book)) \u{2014} the note itself is untouched. It stays archived."
     }
 
     // MARK: The gathering's honest door
@@ -126,13 +141,21 @@ enum RemoveFromBookDoor {
     static func remove(
         session: AppSession, postID: String, book: Reading, speak: Bool = true
     ) async -> RemoveOutcome {
+        let database = session.database
         let outcome: RemoveOutcome
         do {
-            let bookless = try await session.runner.run { ops in
-                try ops.removePostFromReading(postID, from: book.id)
+            let (bookless, archived) = try await session.runner.run { ops -> (Bool, Bool) in
+                let bookless = try ops.removePostFromReading(postID, from: book.id)
+                // 13i-d U4: an ARCHIVED note is not in the Pool afterwards —
+                // the receipt reads its state in the act's own turn (one
+                // primary-key read).
+                let archived = try database.read { db in
+                    try Container.fetchOne(db, key: postID)?.archivedAt != nil
+                }
+                return (bookless, archived)
             }
             outcome = .receipt(RemoveFromBookCopy.receipt(
-                book: book.name, owned: book.owned, bookless: bookless))
+                book: book.name, owned: book.owned, bookless: bookless, archived: archived))
         } catch {
             outcome = .refusal(BookStateCopy.refusal(
                 for: error, name: book.name, sealed: book.sealedAt != nil))

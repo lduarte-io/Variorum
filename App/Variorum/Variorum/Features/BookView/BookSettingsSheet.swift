@@ -80,6 +80,9 @@ nonisolated enum CollectingCopy {
     static let taggedNothing = "nothing"
     static let editDoor = "Edit\u{2026}"
     static let hideOwnedLabel = "Notes an owned book holds:"
+    /// 13i-d U4 (F-U3-5): the hide-owned row's registry verb — the act its
+    /// three chips set (`setReadingHideOwned`). Wording PROVISIONAL (13s).
+    static let hideOwnedVerb = "Show or Hide Owned Notes"
     /// The extent fields' faint hint (13i-d U3 — was the fields' titles'
     /// "(blank = none)" suffix).
     static let blankIsNone = "blank = none"
@@ -326,6 +329,9 @@ struct BookSettingsSheet: View {
     static let surfaceCapabilities: [CapabilityID] = BookStateDoorSet.all + [.editRule]
         // 13i-d U3: the journal trait's on/off (§10).
         + [.setJournalTrait]
+        // 13i-d U4 (F-U3-5, the adjudication after U3): a GATHERING's
+        // hide-owned chips — 13i-c U3's row, undeclared until now.
+        + [.setReadingHideOwned]
 
     let structure: BookStructureModel
     /// The Edit… handoff (W-1): the host presents the editor AFTER this
@@ -486,6 +492,8 @@ struct BookSettingsSheet: View {
                     }
                 }
                 .padding(.leading, 12)
+                // 13i-d U4 (F-U3-5): the chips are a declared act now.
+                .help(CapabilityRegistry.capability(.setReadingHideOwned).verb)
             }
         }
         Button(tokens.chromeLabel(CollectingCopy.editDoor)) {

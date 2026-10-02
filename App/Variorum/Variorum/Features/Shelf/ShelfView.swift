@@ -481,9 +481,15 @@ struct ShelfView: View {
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 // §23: details OFF hides the row meta AND the arrivals count
-                // ("the point is that the chrome can be clean if desired").
-                if model.detailsShown {
-                    metaText(book)
+                // ("the point is that the chrome can be clean if desired") —
+                // ONE value (`BookcaseRowMeta.drawn`, pinned), 13i-d U4.
+                if let meta = BookcaseRowMeta.drawn(
+                    book, detailsShown: model.detailsShown,
+                    words: model.wordCounts[book.reading.id],
+                    progress: model.progress(for: book),
+                    gatheringCount: model.gatheringCounts[book.reading.id],
+                    archived: model.archivedCounts[book.reading.id] ?? 0) {
+                    metaText(meta)
                         .font(tokens.small)
                         .lineLimit(1)
                 }
@@ -527,13 +533,10 @@ struct ShelfView: View {
 
     /// The row meta: the accent arrival count first (§4 — a book asking
     /// for judgment), then the quiet facts (`BookcaseRowMeta`, pinned).
-    private func metaText(_ book: Queries.ShelfBook) -> Text {
-        let rest = Text(tokens.chromeLabel(BookcaseRowMeta.facts(
-            book, words: model.wordCounts[book.reading.id],
-            progress: model.progress(for: book),
-            gatheringCount: model.gatheringCounts[book.reading.id])))
+    private func metaText(_ meta: BookcaseRowMeta.Drawn) -> Text {
+        let rest = Text(tokens.chromeLabel(meta.facts))
             .foregroundStyle(tokens.muted)
-        guard let arrivals = BookcaseRowMeta.arrivals(book) else { return rest }
+        guard let arrivals = meta.arrivals else { return rest }
         return Text(tokens.chromeLabel(arrivals)).foregroundStyle(tokens.accent).fontWeight(.semibold)
             + Text(" \u{00B7} ").foregroundStyle(tokens.muted)
             + rest
@@ -705,15 +708,43 @@ struct ShelfView: View {
 /// reads exactly what a row says. The ARRIVAL count is separate — it draws in
 /// the accent, first (§4: "a small accent count on the Bookcase row").
 nonisolated enum BookcaseRowMeta {
+    /// What the row's right column DRAWS: the accent arrival count (if any)
+    /// and the quiet facts — or NOTHING with details off (§23, her overrule:
+    /// details off hides the meta AND the arrivals count). The ONE value the
+    /// row reads (13i-d U4 — so a pin reads exactly what the row draws,
+    /// "5 notes · 2 archived" included).
+    struct Drawn: Equatable {
+        let arrivals: String?
+        let facts: String
+    }
+
+    static func drawn(
+        _ book: Queries.ShelfBook, detailsShown: Bool, words: Int?,
+        progress: (percent: Int, target: Int)?, gatheringCount: Int?, archived: Int = 0
+    ) -> Drawn? {
+        guard detailsShown else { return nil }
+        return Drawn(
+            arrivals: arrivals(book),
+            facts: facts(
+                book, words: words, progress: progress,
+                gatheringCount: gatheringCount, archived: archived))
+    }
+
     static func arrivals(_ book: Queries.ShelfBook) -> String? {
         let n = book.arrivalCount
         guard n > 0 else { return nil }
         return "\(n) \(n == 1 ? "arrival" : "arrivals")"
     }
 
+    /// 13i-d U4 — HONEST COUNTS (her #169(a)(1), "5 notes · 2 archived"):
+    /// `archived` is the book's archived-member count (the one-shot
+    /// aggregate). "N notes" counts what the book SHOWS — the held member
+    /// count (`postCount`, every live member row) less the archived ones,
+    /// clamped — and "M archived" follows it only when M > 0 (PROVISIONAL
+    /// P-13id-U4-4). The whole meta hides with details off (§23).
     static func facts(
         _ book: Queries.ShelfBook, words: Int?, progress: (percent: Int, target: Int)?,
-        gatheringCount: Int?
+        gatheringCount: Int?, archived: Int = 0
     ) -> String {
         let reading = book.reading
         var parts: [String] = []
@@ -722,7 +753,9 @@ nonisolated enum BookcaseRowMeta {
                 parts.append("\(gatheringCount) \(gatheringCount == 1 ? "note" : "notes")")
             }
         } else {
-            parts.append("\(book.postCount) \(book.postCount == 1 ? "note" : "notes")")
+            let shown = max(0, book.postCount - max(0, archived))
+            parts.append("\(shown) \(shown == 1 ? "note" : "notes")")
+            if archived > 0 { parts.append("\(archived) archived") }
             if book.sectionCount > 0 { parts.append("\(book.sectionCount) ch") }
         }
         if let progress {

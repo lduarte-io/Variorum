@@ -61,6 +61,9 @@ struct BookView: View {
     /// rather than more of `BookViewModel` (P-9): the line atop Index and Book
     /// observes and judges arrivals and nothing else.
     @State private var arrivals: BookArrivalsModel
+    /// 13i-d U4 — the book's ARCHIVED LINE (her #169(a)(1)): its own model
+    /// (P-9), the Arrivals line's sibling on the same three hosts.
+    @State private var archived: BookArchivedModel
     /// 13i-c U4 — THE BADGE FAMILY's facts for this book's rows (§6): ONE
     /// page-driven observation over the entries the book holds. Injectable
     /// for `model`'s reason (a pin loads it by hand).
@@ -81,6 +84,7 @@ struct BookView: View {
         model: BookViewModel? = nil,
         structure: BookStructureModel? = nil,
         arrivals: BookArrivalsModel? = nil,
+        archived: BookArchivedModel? = nil,
         ownership: OwnershipFactsModel? = nil,
         grouping: BookIndexGroupingModel? = nil,
         initiallyExpanded: Set<String> = [],
@@ -111,6 +115,9 @@ struct BookView: View {
         _arrivals = State(
             initialValue: arrivals
                 ?? BookArrivalsModel(session: session, readingID: readingID))
+        _archived = State(
+            initialValue: archived
+                ?? BookArchivedModel(session: session, readingID: readingID))
         _ownership = State(initialValue: ownership ?? OwnershipFactsModel())
         _grouping = State(initialValue: grouping ?? BookIndexGroupingModel(readingID: readingID))
     }
@@ -223,6 +230,7 @@ struct BookView: View {
                 BookIndexView(
                     session: session, model: model, structure: structure,
                     arrivals: arrivals,
+                    archived: archived,
                         masthead: { bookMasthead },
                     ownershipBadge: { ownershipBadge($0) },
                     grouping: grouping,
@@ -243,6 +251,9 @@ struct BookView: View {
                 // empty, so an arrival-less book lays out byte-identically.
                 VStack(spacing: 0) {
                     BookArrivalsLine(model: arrivals, structure: structure)
+                    // 13i-d U4: the archived line, directly under the door
+                    // (zero height when nothing is set aside).
+                    BookArchivedLine(model: archived, structure: structure)
                     outlineBody
                 }
             case .spread:
@@ -251,7 +262,7 @@ struct BookView: View {
                 // active one editable in Write or the takes stack (A43/A44).
                 SpreadBookView(
                     session: session, model: model, structure: structure,
-                    arrivals: arrivals)
+                    arrivals: arrivals, archived: archived)
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
                 // infinite scroll, and true book pagination. Neither is
@@ -1908,6 +1919,12 @@ struct BookView: View {
         var parts: [String] = [structure.reading?.kind == .gathering ? "smart book" : "book"]
         if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
         parts.append("\(model.entries.count) notes")
+        // 13i-d U4 — HONEST COUNTS (her #169(a)(1)): the set-aside notes the
+        // book's count line never said ("5 notes · 2 archived"); nothing
+        // when there are none. The number is the archived line's own.
+        if archived.door.count > 0 {
+            parts.append(ArchivedLineCopy.line(count: archived.door.count))
+        }
         return parts.joined(separator: " · ")
     }
 

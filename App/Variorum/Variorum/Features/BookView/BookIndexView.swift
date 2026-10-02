@@ -316,8 +316,17 @@ nonisolated enum BookIndexColumn {
     /// the book (13i-d U3, the walk's W-3), the notes it shows are "shown",
     /// never the book's count: "2 notes" under a filter read as a two-note
     /// book.
-    static func footerWords(chapters: Int, notes: Int, filtered: Bool) -> String {
-        let count = filtered ? "\(notes) shown" : "\(notes) notes"
+    ///
+    /// 13i-d U4 — HONEST COUNTS (her #169(a)(1)): an unfiltered footer adds
+    /// the book's set-aside notes ("5 notes · 2 archived"), nothing when there
+    /// are none. Under the filter the footer speaks the VIEW alone ("N
+    /// shown") — the archived count is a fact about the book, not about what
+    /// the filter shows (PROVISIONAL P-13id-U4-5).
+    static func footerWords(
+        chapters: Int, notes: Int, filtered: Bool, archived: Int = 0
+    ) -> String {
+        var count = filtered ? "\(notes) shown" : "\(notes) notes"
+        if !filtered, archived > 0 { count += " · " + ArchivedLineCopy.line(count: archived) }
         return chapters > 0 ? "\(chapters) chapters · \(count)" : count
     }
 
@@ -394,6 +403,10 @@ struct BookIndexView<Masthead: View>: View {
     /// Optional so a host that has no door to show (a pin over the pane
     /// alone) composes nothing.
     let arrivals: BookArrivalsModel?
+    /// 13i-d U4 — the archived line, directly under the door on the PANE
+    /// (zero height when nothing is set aside); its count also feeds the
+    /// column footer's honest "· N archived". nil composes nothing.
+    let archived: BookArchivedModel?
     /// The book's masthead chrome (title · mode tabs · settings · order),
     /// composed by `BookView` so the index column and the navigator can
     /// never disagree about what the book's header says.
@@ -479,6 +492,7 @@ struct BookIndexView<Masthead: View>: View {
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
         arrivals: BookArrivalsModel? = nil,
+        archived: BookArchivedModel? = nil,
         @ViewBuilder masthead: @escaping () -> Masthead,
         ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
         grouping: BookIndexGroupingModel? = nil,
@@ -490,6 +504,7 @@ struct BookIndexView<Masthead: View>: View {
         self.model = model
         self.structure = structure
         self.arrivals = arrivals
+        self.archived = archived
         self.masthead = masthead
         self.ownershipBadge = ownershipBadge
         self.grouping = grouping
@@ -603,6 +618,9 @@ struct BookIndexView<Masthead: View>: View {
             VStack(spacing: 0) {
                 if let arrivals {
                     BookArrivalsLine(model: arrivals, structure: structure)
+                }
+                if let archived {
+                    BookArchivedLine(model: archived, structure: structure)
                 }
                 pane
             }
@@ -955,7 +973,8 @@ struct BookIndexView<Masthead: View>: View {
             let chapters = structure.chaptersActive ? structure.sections.count : 0
             Text(tokens.chromeLabel(BookIndexColumn.footerWords(
                 chapters: chapters, notes: model.entries.count,
-                filtered: model.viewFilter != nil)))
+                filtered: model.viewFilter != nil,
+                archived: archived?.door.count ?? 0)))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)

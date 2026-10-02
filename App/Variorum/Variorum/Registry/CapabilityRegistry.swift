@@ -1855,6 +1855,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookFilterCopy.unavailableNote,
             availability: always),
+        // 13i-d U4 — the archived line's Unarchive (the target is the row the
+        // door carries — `.archiveNote`'s `.native` precedent), and the
+        // F-U3-5 rider: a gathering's hide-owned row (book scope — the sheet
+        // carries its target).
+        Capability(
+            id: .unarchiveNote, verb: ArchivedLineCopy.unarchiveVerb, scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArchivedLineCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .setReadingHideOwned, verb: CollectingCopy.hideOwnedVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: CollectingCopy.openUnavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

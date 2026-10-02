@@ -121,6 +121,44 @@ struct RemoveReleaseDoorTests {
         }
     }
 
+    /// 13i-d U4 — an ARCHIVED note leaving a book is NOT in the Pool (the
+    /// Pool is every live, UN-archived bookless note), so the receipt must
+    /// not say it is: the archived line's Remove door (and any remove door
+    /// reaching an archived note — the Book Panel on an opened archived note)
+    /// says it stays archived. Red-on-old: the shared door said "It's in the
+    /// Pool now." / "it's in the Pool now." — false of the store.
+    @Test func anArchivedNoteRemovedOrReleasedStaysArchivedNeverThePool() async throws {
+        try await withRemoveWorld { session, db in
+            let ops = session.operations
+            let plain = try ops.createReading(name: "Plain", kind: .book)
+            let mine = try ops.createReading(name: "Mine", kind: .book)
+            try ops.setReadingOwned(mine.id, owned: true)
+            let a = try ops.createPost(title: "a")
+            let b = try ops.createPost(title: "b")
+            _ = try ops.addPostToReading(a.id, to: plain.id)
+            _ = try ops.addPostToReading(b.id, to: mine.id)
+            try ops.archiveContainer(a.id)
+            try ops.archiveContainer(b.id)
+
+            let removed = await RemoveFromBookDoor.remove(
+                session: session, postID: a.id, book: try await book(db, plain.id))
+            #expect(!removed.text.contains("Pool"), "an archived note is not in the Pool")
+            #expect(removed == .receipt(RemoveFromBookCopy.receipt(
+                book: "Plain", owned: false, bookless: true, archived: true)))
+            #expect(removed.text.hasSuffix("It stays archived."))
+
+            let released = await RemoveFromBookDoor.remove(
+                session: session, postID: b.id, book: try await book(db, mine.id))
+            #expect(!released.text.contains("Pool"))
+            #expect(released == .receipt(RemoveFromBookCopy.receipt(
+                book: "Mine", owned: true, bookless: true, archived: true)))
+
+            let pool = try await db.read { try Queries.poolListing($0, window: 50) }
+            #expect(!pool.loose.map(\.postID).contains(a.id), "and the store agrees")
+            #expect(!pool.loose.map(\.postID).contains(b.id))
+        }
+    }
+
     @Test func aFinishedOrSealedBookRefusesNamingItsRoad() async throws {
         try await withRemoveWorld { session, db in
             let ops = session.operations
