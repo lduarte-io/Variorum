@@ -1838,7 +1838,7 @@ Debug only, author-free, own `caffeinate -d`.
 | 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | **BUILT + PINNED 2026-10-01** (the U2 RECORD above; core 2001/211 · Mac 772/135 · phone 102/16 · both builds green; commits 936f8cf9 → the closing commit; nine PROVISIONALs P-13ic-U2-1…9 for #169; FINDINGS F-U2-1…9 — F-U2-1, `unlockPost` inside a sealed book, is a reserved fork for the architect). Headless — no walk owed by this unit |
 | 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | **BUILT + PINNED + WALKED 2026-10-01** (the U3 RECORD above; core 2004/212 · Mac 445/73 · phone build green; commits 163b9545 → the closing commit; the walk found and fixed W-1/W-2/W-3; fifty captures, both voices × both appearances; seven PROVISIONALs P-13ic-U3-1…7 for #169; FINDINGS F-U3-1…10 — F-U3-2 is U4's delete door; the bind sheet's owned-notes limb built here per §3) |
 | 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | **BUILT + PINNED + WALKED 2026-10-01** (the U4 RECORD above; core 2004/212 · Mac 575/82 · phone build + 72/5 green; commits e45d19d6 → the closing commit; the walk found and fixed W-1/W-2/W-3; 53 captures, both voices × both appearances; eleven PROVISIONALs P-13ic-U4-1…11 for #169; FINDINGS F-U4-1…10 — F-U4-1 corrects §4 row 15's text, F-U4-2 is the 18i seam's quiet-receipt gap) |
-| 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | NOT STARTED |
+| 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | **CLOSED AT TWO ROUNDS 2026-10-02** — round 1 `notes/plans/13ic-ladder-round1.md` (1 MAJOR · 4 MINOR · 2 NIT, no blocker; the implementer agreed with all seven; the reviewer's fix pass: 6 fixed with red-on-old pins incl. the MAJOR's shared count/dismissal predicate, 1 recorded); round 2 `13ic-ladder-round2.md` (5 FIXED · 2 RECORDED · 0 regressed · ONE doc NIT; no round 3 earned); the implementer's sanity pass raised 2 concerns → the reviewer's final word: concern 1 FIXED (the move-in fallbacks read the blocking book fresh; no R93 dump survives; red-on-old by behavioural revert), concern 2 RECORDED (13i-d + the MobileSoul row). Finals: core **2008/213** · Mac touched + registry walk + the tutorial spine **189/21** · phone BUILD green. Zero disputes phase-wide |
 | 7 | Her deploy window (§11) + the install refresh + the phone's tail | HELD for her go |
 | 8 | Closeout + handoff + 13i-d's plan (carrying R-13ic-2's doors + the combined-walk list) | NOT STARTED |
 
@@ -1885,3 +1885,9 @@ Debug only, author-free, own `caffeinate -d`.
   trailers, 53 captures, its suites re-run 54/7 green); F-U4-1's row-15 correction accepted; the
   findings owned. ALL FOUR UNITS BUILT. No revert in flight; zero instances. THE LADDER (a fresh
   `fable-reviewer`, round 1) spawns next over `ca3b8a85..HEAD`.
+- **THE LADDER CLOSED AT TWO ROUNDS (2026-10-02):** round 1 (a Fable budget death on the first
+  reviewer at its read's start — nothing written; a fresh reviewer re-ran the verbatim prompt),
+  the implementer's agree/dispute (all seven agreed), the reviewer's fix pass (6 fixed, 1
+  recorded), round 2 clean, the sanity pass's two concerns answered (1 fixed, 1 recorded).
+  Tip a0dd85d0. Next: the ORCHESTRATOR'S acceptance walk on the post-ladder Debug build (held
+  for an author-free window) → HER deploy window (§11) → the closeout.
