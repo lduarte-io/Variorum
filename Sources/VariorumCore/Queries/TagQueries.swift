@@ -12,25 +12,37 @@ extension Queries {
     /// denormalization, kept coherent by `renameTag`/`deleteTag`.
     public static func tagSubtree(_ db: Database, rootID: String) throws -> [Tag] {
         guard let root = try Tag.fetchOne(db, key: rootID), root.deletedAt == nil else { return [] }
+        // 13i-d U5 (F-U5-2): the subtree is the ROOT's wing's (R-13ia-1).
         return try Tag.fetchAll(
             db,
             sql: """
                 SELECT * FROM tag
                 WHERE deleted_at IS NULL
-                  AND (id = ? OR substr(path, 1, length(?) + 1) = ? || '/')
+                  AND (id = ? OR (wing_id = ? AND substr(path, 1, length(?) + 1) = ? || '/'))
                 ORDER BY path
                 """,
-            arguments: [rootID, root.path, root.path])
+            arguments: [rootID, root.wingId, root.path, root.path])
     }
 
     /// The whole live taxonomy, ordered by `path` (parents sort before
     /// children by construction of the materialized path). The tag tree is
     /// author-scale metadata — cost ∝ tag count, never the corpus.
     /// Phase 10 (additive): the tag-management face lists through this.
-    public static func allTags(_ db: Database) throws -> [Tag] {
-        try Tag.fetchAll(
+    ///
+    /// `wingID` (13i-d U5, additive): one WING's vocabulary (R-13ia-1 — tags
+    /// are per-wing; `Queries.wingScope`, so Home also lists a dangling
+    /// wing's). nil = every wing — byte-identical for every existing caller.
+    public static func allTags(_ db: Database, wingID: String? = nil) throws -> [Tag] {
+        guard let wingID else {
+            return try Tag.fetchAll(
+                db,
+                sql: "SELECT * FROM tag WHERE deleted_at IS NULL ORDER BY path")
+        }
+        let scope = wingScope(column: "wing_id", wingID: wingID)
+        return try Tag.fetchAll(
             db,
-            sql: "SELECT * FROM tag WHERE deleted_at IS NULL ORDER BY path")
+            sql: "SELECT * FROM tag WHERE deleted_at IS NULL AND \(scope.sql) ORDER BY path, id",
+            arguments: StatementArguments(scope.arguments))
     }
 
     /// **The paths of NAMED tags only** (17o batch d, ledger row 18): the
@@ -82,12 +94,14 @@ extension Queries {
             guard let root = try Tag.fetchOne(db, key: tagID), root.deletedAt == nil else {
                 return []
             }
+            // 13i-d U5 (F-U5-2): the root's wing's subtree only.
             tagCondition = """
                 app.tag_id IN (SELECT id FROM tag
                                 WHERE deleted_at IS NULL
-                                  AND (id = ? OR substr(path, 1, length(?) + 1) = ? || '/'))
+                                  AND (id = ? OR (wing_id = ?
+                                       AND substr(path, 1, length(?) + 1) = ? || '/')))
                 """
-            arguments = [tagID, root.path, root.path]
+            arguments = [tagID, root.wingId, root.path, root.path]
         } else {
             tagCondition = "app.tag_id = ?"
             arguments = [tagID]
@@ -157,12 +171,14 @@ extension Queries {
             guard let root = try Tag.fetchOne(db, key: tagID), root.deletedAt == nil else {
                 return TaggedItems(postIDs: [], blockIDs: [])
             }
+            // 13i-d U5 (F-U5-2): the root's wing's subtree only.
             tagCondition = """
                 app.tag_id IN (SELECT id FROM tag
                                 WHERE deleted_at IS NULL
-                                  AND (id = ? OR substr(path, 1, length(?) + 1) = ? || '/'))
+                                  AND (id = ? OR (wing_id = ?
+                                       AND substr(path, 1, length(?) + 1) = ? || '/')))
                 """
-            arguments = [tagID, root.path, root.path]
+            arguments = [tagID, root.wingId, root.path, root.path]
         } else {
             tagCondition = "app.tag_id = ?"
             arguments = [tagID]

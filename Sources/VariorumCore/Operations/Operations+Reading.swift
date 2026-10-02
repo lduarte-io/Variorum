@@ -41,6 +41,8 @@ extension Operations {
             if kind == .gathering, maxPosts != nil || wordTarget != nil {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
+            // 13i-d U5: a book is born in a LIVE wing (Home always is).
+            try requireLiveWing(db, wingId)
             for tagID in outflow {
                 let tag = try liveTag(db, tagID)
                 guard tag.wingId == wingId else {

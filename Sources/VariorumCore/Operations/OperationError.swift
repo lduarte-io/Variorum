@@ -274,7 +274,32 @@ public enum OperationError: Error, Equatable, Sendable {
     /// she typed, so the refusal can show it back.
     case invalidShelfGlyph(value: String)
     /// A shelf minted into a wing that is not live ('' — Home — always is).
+    /// 13i-d U5: also every wing op addressed at Home (virtual — never
+    /// renamed or deleted) or at a dead/unknown wing, and a move/copy whose
+    /// destination is not live.
     case wingNotFound(id: String)
+
+    // WINGS (13i-d U5 — the sitting record §9; R-13id-2; `Operations+Wing.swift`).
+    /// A wing needs a name.
+    case invalidWingName(name: String)
+    /// A DOOR that names a wing found a live wing (or Home) already wearing
+    /// that name (`assertWingNameIsFree` — E13's door-guard shape; the op
+    /// itself allows duplicates, the schema's no-natural-key letter). The
+    /// payload is the EXISTING name in its own casing.
+    case duplicateWingName(name: String)
+    /// R-13id-2 — Delete Wing refuses while the wing holds any live note, book,
+    /// gathering or tag; the payload carries the counts so every face NAMES
+    /// what remains.
+    case wingNotEmpty(id: String, contents: Queries.WingContents)
+    /// A move/copy to the wing the note already lives in.
+    case postAlreadyInWing(postID: String, wingID: String)
+    /// A book never spans wings (§9): a membership refuses a note of another
+    /// wing — the book choosers list only the note's own wing's books, so no
+    /// face reaches it; this is the invariant's op-level belt.
+    case crossWingMembership(postID: String, readingID: String)
+    /// #169(b), RULED — THE DAILY JOURNAL IS HOME-ONLY: a book of another wing
+    /// cannot be designated, and the daily Journal never leaves Home.
+    case dailyJournalIsHomeOnly(id: String)
     /// A hand placement ("my order") named an anchor that is not on the
     /// moving book's shelf — the drag's target moved under it.
     case placementAnchorNotOnShelf(readingID: String, anchorID: String)

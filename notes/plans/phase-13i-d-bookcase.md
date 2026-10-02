@@ -1526,8 +1526,8 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 |---|---|---|
 | 1 | Record skeleton + the design + the book-move proposal + evidence named | DONE (this commit) |
 | 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | DONE (this commit) — R1 RED on the pre-fix op (4 issues, `r1-red.log`), green after; three legacy fixtures re-staged as raw rows (55/6 green); R2's arm rejects BOTH spellings and a new control proves it fires on the store-wide forms (27/4 green) |
-| 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | NOT-STARTED |
-| 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | NOT-STARTED |
+| 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | DONE (this commit) — `Operations+Wing.swift`, `Queries/WingQueries.swift`, six `OperationError` cases; `createPost`/`createReading` refuse a dead wing; `WingOperationsTests` 8 green |
+| 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (this commit) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
 | 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | NOT-STARTED |
 | 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | NOT-STARTED |
 | 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the lineage read naming another wing + per-wing pins | NOT-STARTED |
@@ -1699,9 +1699,23 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   control asserts it FIRES on all three store-wide forms; 27 tests / 4 suites green.
 - The wing ops' state-transition pins (mint · rename · the delete refusal's exact counts · the
   empty delete tombstoning shelves on one stamp · Home refused): PENDING.
-- F-U5-2's bug-class pins red-on-old (tag subtree rename/delete cross-wing; path uniqueness per
-  wing; applyTag across wings; addPostToReading across wings; setDailyJournalBook non-Home — row
-  105): PENDING.
+- **F-U5-2's TAG half RED-ON-OLD:** `TagWingScopeTests` on the pre-fix tag ops — **5 tests, 8
+  issues** (`p4-red.log`): Home's rename rewrote the other wing's `writing/draft` → `prose/draft`;
+  Home's delete tombstoned it; a Home `writing` beside another wing's refused `duplicateTagPath`;
+  `tagSubtree`/`taggedPostItems`/`everythingTagged` pulled the other wing's subtree and note in;
+  `applyTag` attached another wing's tag. The fixture writes the other wing's tags RAW
+  (`insertWingTag`), so each pin compiles and runs against the old ops. Green after
+  (`p4-green.log`, 14/2 with `WingOperationsTests`); the tag-adjacent suites
+  (`Tag|Folder|Rule|Intake|Collect`) 214/51 green.
+- F-U5-2's MEMBERSHIP + DAILY halves (addPostToReading across wings; setDailyJournalBook non-Home —
+  row 105): PENDING.
+- **The wing ops:** `WingOperationsTests` — 8 pins green (mint trimmed/ordered/blank refused ·
+  rename + Home refused + no-op silent · the name guard (Home, case-folded, self-exempt, a dead
+  wing's name free) · **the delete refusal's exact counts** `WingContents(notes: 2 (one archived,
+  a saved version excluded), books: 1, gatherings: 1, tags: 1)` with nothing written · an empty
+  wing's delete tombstoning its two shelves on the wing's ONE stamp, another wing's and Home's
+  shelves untouched, Home refused · Trash rows not blocking · the scope fragment reading a
+  dangling wing as Home · mints refusing a dead wing).
 - Move/copy pins (adopt vs mint; severed memberships listed; finished/sealed refusal; versions ride;
   copy bookless with lineage edges): PENDING.
 - Per-wing scoping pins (Bookcase/tags/search/Arrivals/Archived/Trash; the dangling-wing Home

@@ -1,0 +1,144 @@
+import Foundation
+import GRDB
+
+// WINGS — the reads (13i-d U5; the sitting record §9: "nothing should cross
+// wings — the entire point is that it's basically a whole separate library").
+//
+// THE HOME WING IS VIRTUAL (R-13ia-2): `wing` rows are the ADDITIONAL wings;
+// every `wing_id` of '' means Home. One read-time rule joins it here:
+//
+// **A DANGLING WING POINTER READS AS HOME** (PROVISIONAL P-13id-U5-2 — the
+// dangling-shelf rule one level up, §19). A wing can only be deleted EMPTY
+// (R-13id-2), so locally nothing live is ever left pointing at a dead wing —
+// but its TRASH rows are (a note deleted inside the wing, then the wing
+// emptied and deleted), and so is a row another device added to the wing
+// while this one deleted it (a sync race). Reading those as Home keeps every
+// one of them on a surface — the Trash's Put back, the Library — instead of
+// silently nowhere, with no repair class: it is a read-time rule, exactly as
+// a dangling shelf pointer reads as unshelved. (A Put back RE-HOMES such a row
+// — `Operations.restoreContainer`/`restoreReading` — so it comes back as an
+// ordinary Home row rather than a permanently dangling one.)
+extension Queries {
+    /// The one wing-scope fragment every scoped read composes. `column` is a
+    /// compile-time column reference (`c.wing_id`), never user data.
+    ///
+    /// - a non-Home wing: `column = ?`
+    /// - HOME (`''`): `(column = '' OR column NOT IN (live wing ids))` — the
+    ///   dangling reading above. The subquery is over the `wing` table alone
+    ///   (author-scale — a handful of rows; P1-trivial).
+    public static func wingScope(
+        column: String, wingID: String
+    ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        if wingID.isEmpty {
+            return ("(\(column) = '' OR \(column) NOT IN "
+                    + "(SELECT w.id FROM wing w WHERE w.deleted_at IS NULL))", [])
+        }
+        return ("\(column) = ?", [wingID])
+    }
+
+    /// The live ADDITIONAL wings in switcher order — `(position, id)`, the
+    /// fractional-index sort key (AppSpec §6). Home is virtual and never a
+    /// row; the switcher lists it first by itself.
+    public static func wings(_ db: Database) throws -> [Wing] {
+        try Wing.fetchAll(
+            db,
+            sql: "SELECT * FROM wing WHERE deleted_at IS NULL ORDER BY position, id")
+    }
+
+    /// One live wing, or nil (dead, unknown, or Home's '').
+    public static func liveWing(_ db: Database, id: String) throws -> Wing? {
+        guard !id.isEmpty else { return nil }
+        return try Wing.fetchOne(
+            db, sql: "SELECT * FROM wing WHERE id = ? AND deleted_at IS NULL", arguments: [id])
+    }
+
+    /// Whether `wingID` names a wing a surface can stand in: Home always, any
+    /// other id only while its row is live. The current-wing memory reads
+    /// through this, so a wing deleted elsewhere returns the app to Home.
+    public static func wingIsLive(_ db: Database, id: String) throws -> Bool {
+        guard !id.isEmpty else { return true }
+        return try liveWing(db, id: id) != nil
+    }
+
+    /// **What a wing still holds** (R-13id-2 — "Delete Wing refuses while the
+    /// wing holds any live note, book or tag, NAMING what remains"). Counted
+    /// exactly as the delete's own guard counts (ONE read, so the refusal's
+    /// words and the act can never disagree).
+    public struct WingContents: Equatable, Sendable {
+        /// Live notes — ARCHIVED ones included (they are kept, not gone);
+        /// saved VERSIONS excluded (a version's one home is its note's
+        /// Versions listing — `versionHistoryPredicate` — and it moves and
+        /// dies with its note).
+        public let notes: Int
+        /// Live books (`kind='book'`).
+        public let books: Int
+        /// Live gatherings (`kind='gathering'`).
+        public let gatherings: Int
+        /// Live tags.
+        public let tags: Int
+
+        public init(notes: Int, books: Int, gatherings: Int, tags: Int) {
+            self.notes = notes
+            self.books = books
+            self.gatherings = gatherings
+            self.tags = tags
+        }
+
+        public var isEmpty: Bool { notes == 0 && books == 0 && gatherings == 0 && tags == 0 }
+    }
+
+    /// The contents count of one wing (`''` = Home, which is never deleted,
+    /// but answers honestly). Cost: four COUNTs over the wing's own rows —
+    /// the container count is ∝ the wing's notes (no `wing_id` index exists;
+    /// this is a deliberately-opened confirm's read, never a held one).
+    public static func wingContents(_ db: Database, wingID: String) throws -> WingContents {
+        let notes = wingScope(column: "c.wing_id", wingID: wingID)
+        let readings = wingScope(column: "r.wing_id", wingID: wingID)
+        let tags = wingScope(column: "t.wing_id", wingID: wingID)
+        let noteCount = try Int.fetchOne(
+            db,
+            sql: """
+                SELECT COUNT(*) FROM container c
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND \(notes.sql)
+                  AND NOT (\(versionHistoryPredicate(alias: "c", of: .anyLiveNote)))
+                """,
+            arguments: StatementArguments(notes.arguments)) ?? 0
+        let readingRows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.kind AS kind, COUNT(*) AS n FROM reading r
+                WHERE r.deleted_at IS NULL AND \(readings.sql)
+                GROUP BY r.kind
+                """,
+            arguments: StatementArguments(readings.arguments))
+        var books = 0
+        var gatherings = 0
+        for row in readingRows {
+            switch row["kind"] as String {
+            case ReadingKind.gathering.rawValue: gatherings = row["n"]
+            default: books += row["n"] as Int
+            }
+        }
+        let tagCount = try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM tag t WHERE t.deleted_at IS NULL AND \(tags.sql)",
+            arguments: StatementArguments(tags.arguments)) ?? 0
+        return WingContents(notes: noteCount, books: books, gatherings: gatherings, tags: tagCount)
+    }
+
+    /// The wing a note lives in, as surfaces READ it — the stored id, or Home
+    /// when that id dangles (the rule above). nil when the note is unknown.
+    public static func effectiveWing(_ db: Database, ofPost postID: String) throws -> String? {
+        guard let stored = try String.fetchOne(
+            db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [postID])
+        else { return nil }
+        return try wingIsLive(db, id: stored) ? stored : ""
+    }
+
+    /// A wing's display name: Home for `''`, the row's name while it is live,
+    /// nil otherwise (the lineage line and the move confirms speak this).
+    public static func wingName(_ db: Database, id: String, home: String = "Home") throws -> String? {
+        guard !id.isEmpty else { return home }
+        return try liveWing(db, id: id)?.name
+    }
+}

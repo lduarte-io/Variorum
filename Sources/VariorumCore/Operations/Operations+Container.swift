@@ -12,17 +12,26 @@ extension Operations {
     /// invisible to its own day (`createOrOpenJournalEntry` never finds
     /// it). The ops boundary is the
     /// enforcement line (Phase 8 round 2's rationale).
+    ///
+    /// `wingId` (13i-d U5, additive — '' = Home, every existing caller): the
+    /// note is born in the wing the author is standing in (the Mac's ⌘N and
+    /// toolbar door pass the current wing — §9: a wing is a separate
+    /// library, so what she makes there lives there). A wing that is not live
+    /// refuses (`wingNotFound`).
     @discardableResult
     public func createPost(
         title: String? = nil,
         profile: Profile? = nil,
-        entryDate: String? = nil
+        entryDate: String? = nil,
+        wingId: String = ""
     ) throws -> Container {
         if let entryDate, !JournalDay.isValid(entryDate) {
             throw OperationError.invalidEntryDate(entryDate)
         }
         return try database.write { db in
-            try insertPost(db, title: title, profile: profile, entryDate: entryDate)
+            try requireLiveWing(db, wingId)
+            return try insertPost(
+                db, title: title, profile: profile, entryDate: entryDate, wingId: wingId)
         }
     }
 
