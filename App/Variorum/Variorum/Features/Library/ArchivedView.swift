@@ -145,8 +145,9 @@ struct ArchivedView: View {
 
     /// The `.surface` acts this view renders (P-1's declared ⇔ rendered walk):
     /// each row's inline Unarchive is `.unarchiveNote` — its second renderer
-    /// beside a book's archived line (13i-d U6 (h) — F-U4-4, routed here).
-    static let surfaceCapabilities: [CapabilityID] = [.unarchiveNote]
+    /// beside a book's archived line (13i-d U6 (h) — F-U4-4, routed here) —
+    /// and its inline Delete Note… is `.deleteNote` (13i-d U7 rider, F-U6-4).
+    static let surfaceCapabilities: [CapabilityID] = [.unarchiveNote, .deleteNote]
     static let emptyLine = "Nothing archived."
     static let noMatchesLine = "No archived note matches that."
 
@@ -208,7 +209,9 @@ struct ArchivedView: View {
                 .help("Puts it back in the Library")
                 // N3's last road: Delete → the Trash, 30 days, one shared
                 // wording with every other note-delete door.
-                Button(RecoveryCopy.deleteNoteTitle) {
+                // 13i-d U7 rider (F-U6-4): spelled from the registry — the act
+                // this button renders is declared (`.deleteNote`, `.surface`).
+                Button(CapabilityRegistry.capability(.deleteNote).verb) {
                     Task { pendingDelete = await NoteDeletion.ask(
                         session: session, postIDs: [item.postID]) }
                 }

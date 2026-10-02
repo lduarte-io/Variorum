@@ -47,7 +47,10 @@ struct NoteDeletionDeclarationTests {
     /// never the privileged surface) and R6-2's one `note ▾` grammar.
     @Test func deleteNoteIsDeclaredOnceAndRenderedByEveryBarAndRowList() {
         let capability = CapabilityRegistry.capability(.deleteNote)
-        #expect(capability.doors == [.bottomBar, .contextMenu])
+        // 13i-d U7 rider (F-U6-4), a JUSTIFIED EDIT: the Archived view's inline
+        // Delete Note… is a third renderer, declared on the `.surface` door.
+        #expect(capability.doors == [.bottomBar, .contextMenu, .surface])
+        #expect(ArchivedView.surfaceCapabilities.contains(.deleteNote))
         #expect(capability.scope == .post)
         #expect(capability.takesAccess == .native)
         #expect(capability.verb == RecoveryCopy.deleteNoteTitle)

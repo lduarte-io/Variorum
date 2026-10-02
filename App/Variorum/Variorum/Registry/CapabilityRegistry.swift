@@ -951,7 +951,9 @@ nonisolated enum CapabilityRegistry {
         // split, stated so the reach is not read as an oversight.
         Capability(
             id: .deleteNote, verb: RecoveryCopy.deleteNoteTitle, scope: .post,
-            doors: [.bottomBar, .contextMenu],
+            // 13i-d U7 rider (F-U6-4): `.surface` — the Archived view's inline
+            // "Delete Note…" on each row is a third renderer of this act.
+            doors: [.bottomBar, .contextMenu, .surface],
             // NO CHORD, deliberately. The obvious candidate is ⌘⌫, and a key
             // that tombstones a whole note one finger-slip from ⌫ is exactly
             // the class P-2 retired at #59(d) — her ruling named menus, and
