@@ -260,12 +260,31 @@ extension Queries {
             pendingArrivals: reading.locked ? 0 : try pendingArrivalCount(db, readingID: readingID))
     }
 
+    /// **THE DISMISSAL'S OWN PREDICATE** (13i-c ladder round 1, the MAJOR):
+    /// the rows finishing a book takes — every LIVE arrival row of the
+    /// reading, whatever its note's archive state. Written ONCE (the
+    /// `bookArrivalSource` discipline) and shared by the act
+    /// (`dismissPendingArrivals`'s UPDATE) and the confirm's count below, so
+    /// the confirm can never promise a different number than the act takes.
+    /// One placeholder: the reading's id.
+    static let pendingArrivalRowsWhere =
+        "reading_id = ? AND deleted_at IS NULL AND status = 'arrival'"
+
     /// **The finish confirm's N** (the sitting record §24 — "N waiting at the
-    /// door will be dismissed"): the book's pending arrivals, counted by the
-    /// Arrivals face's own predicate (`bookArrivals`), so the confirm and the
-    /// door's line can never disagree.
+    /// door will be dismissed"): counted by the DISMISSAL's own predicate
+    /// (`pendingArrivalRowsWhere` — the act is the contract), so the confirm
+    /// and `dismissPendingArrivals` can never disagree. By design it may
+    /// EXCEED the Arrivals LINE's count (`bookArrivals`): an ARCHIVED note's
+    /// waiting row leaves the door's display while archived (P-13ib-U2-2)
+    /// but is still dismissed by the finish — the ladder's MAJOR was the
+    /// silent, uncounted dismissal of exactly that row. A sync-stray row (a
+    /// dead note's live arrival) counts too — the safe direction: the door
+    /// then asks.
     public static func pendingArrivalCount(_ db: Database, readingID: String) throws -> Int {
-        try bookArrivals(db, readingID: readingID, limit: 0).count
+        try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM reading_post WHERE \(pendingArrivalRowsWhere)",
+            arguments: [readingID]) ?? 0
     }
 
     // MARK: - HIDE-OWNED (§6) — the ONE fragment every scoped reader composes

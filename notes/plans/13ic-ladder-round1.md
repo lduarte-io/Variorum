@@ -368,3 +368,40 @@ the reviewer's. **Verdict: seven AGREE (three with a note), zero DISPUTE.**)*
 - **Sharper:** `addOrOffer` (`:281`) also returns false ("the sheet is up instead") in that case, so
   the Pool, shelf-drop and Manage Notes hosts believe a sheet is up. Have `offer` return whether it
   opened and propagate that. On nil, speak `readingNotFound`'s words through the shared table.
+
+## REVIEWER'S FINAL CALLS AND FIX PASS (round 1)
+
+*(The reviewer's voice, authorized by the orchestrator after the implementer's seven AGREEs. Final
+call per finding, each bug-class fix red-on-old first; dispositions written as the pieces land.)*
+
+### [MAJOR] the finish/seal confirm's N vs the dismissal — **CONFIRMED-FIXED**
+- **Final call:** CONFIRMED, the implementer's sharper shape adopted whole — ONE shared WHERE
+  (`Queries.pendingArrivalRowsWhere`) used by both `dismissPendingArrivals`'s UPDATE and
+  `pendingArrivalCount`'s COUNT, so the confirm equals the act by construction. The Arrivals LINE
+  (`bookArrivals`) keeps its display filter untouched and the new pins assert BOTH sides (the line
+  shows 0 while the count says 1). The "permanent" framing corrected per the implementer's trace:
+  what the silent finish broke is P-13ib-U2-2's "returns on unarchive" (a FRESH act still re-poses);
+  the dismissal doc now records the exception ("unless the book was finished meanwhile"). No
+  `kind='book'` guard added to the shared WHERE: the act never had one (a gathering's `lockReading`
+  still dismisses stray rows until 13i-d's P-13ic-U3-2 build), and count-the-act is the contract —
+  a stray row making the door ASK is the safe direction, as the implementer noted.
+- **Deliberately NOT built (recorded):** the "(M of them archived)" copy suffix — §24's line is
+  RULED VERBATIM ("N waiting at the door will be dismissed"); the fixed N keeps it true, and adding
+  words to a ruled line is 13s/author territory. Recorded as a 13s copy candidate: when the count
+  exceeds the line's visible rows, the confirm may read oddly beside an empty-looking door.
+- **The UNDEFINED arm** (should finishing SPARE an archived note's arrival instead) is NOT ruled
+  here — the implementer's QUESTIONS-ready paragraph above goes to #169 at the closeout; the build
+  is the (a) arm (finish dismisses, the confirm asks and counts), the spec-defensible reading of
+  §24's "finishing a book dismisses its pending arrivals", marked PROVISIONAL.
+- **Pins (watched RED on the pre-fix tree, green after):** core
+  `PendingArrivalDismissalTests` (3 — the archived waiter counted [red: 0==1 failed];
+  `sealPreview.pendingArrivals` [red]; the mixed fixture where the promised N equals the rows the
+  finish tombstones [red: 1 vs 2] — plus the LINE's display rule asserted unchanged both times);
+  Mac `BookStateDoorsTests.finishAsksWhenOnlyAnArchivedNoteWaits` (red: `pending == nil`, the door
+  acted at once; green: it asks with N=1 and the confirm dismisses exactly that row).
+- **Changed:** `Sources/VariorumCore/Queries/OwnershipQueries.swift` (the shared WHERE +
+  `pendingArrivalCount` rewritten on it, doc honest about exceeding the line),
+  `Sources/VariorumCore/Operations/Operations+Intake.swift` (`dismissPendingArrivals` on the shared
+  WHERE; the P-13ib-U2-2 exception recorded at the act). Suites after: core
+  PendingArrivalDismissal + BookSeal + IntakeOperations + OwnershipDoor + OwnershipSoak 69/6 green;
+  Mac BookStateDoors + BookSettingsSheet + BookArrivals 29/3 green.

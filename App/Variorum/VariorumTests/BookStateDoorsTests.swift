@@ -217,6 +217,42 @@ struct BookStateDoorsTests {
         }
     }
 
+    /// 13i-c ladder round 1, the MAJOR: an ARCHIVED note's waiting row is
+    /// DISMISSED by the finish, so the door must ASK and count it — even
+    /// though the Arrivals line does not show it while archived
+    /// (P-13ib-U2-2's display rule). Red-on-old: the door acted at once.
+    @Test func finishAsksWhenOnlyAnArchivedNoteWaits() async throws {
+        try await withStateWorld { session, db in
+            let ops = session.operations
+            let tag = try ops.createTag(name: "poem")
+            let book = try ops.createReading(
+                name: "Poems", kind: .book, querySpec: try RuleGrammar.encode(.tag(tag.id)),
+                intakeSeating: .arrivals)
+            let note = try ops.createPost(title: "late")
+            try ops.applyTag(tag.id, toPost: note.id)
+            try ops.archiveContainer(note.id)
+            #expect(try await db.read {
+                try Queries.bookArrivals($0, readingID: book.id, limit: 10).count
+            } == 0, "the LINE shows nothing — the waiter is archived")
+
+            let doors = BookStateDoors(session: session)
+            await doors.open(.finishBook, readingID: book.id)
+            let asked = try #require(
+                doors.pending,
+                "the finish will dismiss the archived waiter, so it must ask (§24)")
+            #expect(asked == BookStateCopy.finish(
+                readingID: book.id, name: "Poems", pendingArrivals: 1))
+            #expect(try await reading(db, book.id).locked == false,
+                    "nothing happens until she says")
+
+            await doors.confirm()
+            #expect(try await reading(db, book.id).locked)
+            #expect(try await db.read {
+                try Queries.pendingArrivalCount($0, readingID: book.id)
+            } == 0, "the archived waiter was dismissed — exactly what the confirm promised")
+        }
+    }
+
     @Test func sealListsTheForksThenForksAndSealsOnConfirm() async throws {
         try await withStateWorld { session, db in
             let ops = session.operations
