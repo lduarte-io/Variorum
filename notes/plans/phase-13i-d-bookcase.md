@@ -137,3 +137,220 @@ door-family/sweep units; item 7 is content. That is OUTSIDE the two-phase-sized-
 Panel + the wings + the tutorial chapter), never a silent proceed. Her word stands: "if you
 distribute everything we've decided through the 5 phases it'll likely be fine" — a sixth letter is
 the honest distribution if the sitting agrees.
+
+---
+
+## KICKOFF RECORD (2026-10-02 — the phase OPENED under `/architect-phase`; supersedes the STATUS banner above)
+
+**Her invocation:** `/architect-phase 13i-d` — *"I'm skipping the 13i-c walk - let's continue
+through."* Recorded: the 13i-c per-phase walk is SKIPPED at her word — her 13i walk posture
+(above) already binds; 13i-c's "for the combined walk" list rides its handoff and closeout, and
+13i-e owes the cohesive combined list. Sizing per her 2026-10-02 ruling (above): **ONE phase**,
+a mid-phase orchestrator handoff if needed — the planned seam sits between the two banks below
+(the resiliency protocol's two-document form, drafted with PENDING slots during build waits).
+
+**Preflight complete** (CLAUDE.md + its canon · the master plan · KnownIssues · QUESTIONS
+#166–#169 · this plan · the resiliency protocol · the sitting record IN FULL · the 13i-c
+closeout, handoff and environment traps). **Zero schema, zero `Sync/` expected — the marker
+stays 11; any discovered `Sync/` need is a STOP** (the R5 Welcome keeper exists and already
+converges the seeders; a seed change that wants a NEW repair class is exactly such a stop). No
+editor-seam work expected; any unit that reaches `EditorTextView`, `PaneSurface` internals or
+the read tier names `notes/TEXTKIT2_NOTES.md` as required reading in its brief.
+
+### HER KICKOFF RULINGS (the question tool + her live message, this sitting — verbatim-faithful)
+
+- **R-13id-1 — the STANDING CAST, confirmed:** Fable orchestrates and cold-reviews BOTH ladders
+  (her pick over the Opus-reviews-ladder-A option); `opus-implementer` per unit; both xhigh.
+- **R-13id-2 — WING DELETE REFUSES UNLESS EMPTY** (her pick of the three offered shapes):
+  Delete Wing refuses while the wing holds any live note, book or tag, NAMING what remains
+  ("still holds 3 books and 12 notes"). Nothing destroyed, no new recovery machinery; emptying
+  the wing is the deliberate act. (The two-choice Trash-whole shape is recorded as a future
+  strengthening if use ever asks; contents-silently-move-to-Home was declined with the options.)
+- **R-13id-3 — KnownIssues ROW 109 KEPT AS SHIPPED** (a finished — not sealed — book takes back
+  a membership revived by a Trash restore): her pick — a restore returns what was there; the
+  revival restores a membership that existed before, so the table of contents gains nothing new,
+  and the freeze keeps binding NEW adds. The row closes RATIFIED-DOCUMENTED at this closeout;
+  U4 adds the documenting line at the code, ZERO behavior change.
+- **R-13id-4 — THE BULK-MOVE BACKDOOR, her proposal adopted** (her words, verbatim: *"maybe
+  build a 'move all wing contents to another wing' is a reasonable backdoor? if you regret
+  separating them, you can delete them and move them back to home or whatever"* — and her
+  clarification, same sitting: *"by whatever i mean another wing of your choice"*, so the
+  destination is ANY live wing the user picks, not Home specially): U5 builds
+  **"Move everything to another wing…"** — the explicit bulk ceremony that composes with
+  R-13id-2: empty the wing in one act, then Delete succeeds; the Delete refusal NAMES this road
+  (P-2, fire-and-do). **The architect's design sketch, binding on U5's brief, PROVISIONAL at
+  the edges:** the door lives on ADDITIONAL wings only (its purpose is the delete backdoor;
+  Home is undeletable and holds the Home-only daily Journal); destination picked from the live
+  wings (Home listed first); the confirm COUNTS what moves; notes and books move whole
+  (memberships ride; a gathering moves with its rule, whose tag-ID terms adopt); moved books
+  land UNSHELVED in the destination (shelves are per-wing and never cross — the shelf-delete
+  precedent); every carried tag adopts BY PATH in the destination per R-13ia-1 (adopt the live
+  same-path tag's id, else mint); source-wing tags the move leaves without live applications
+  are tombstoned by the act, said in the confirm — so the wing ends genuinely empty. Residual
+  edges (finished/sealed books under the move; archived members; in-flight arrivals) the
+  implementer PROPOSES before building that half — the 4E pattern; the ruling lands here first.
+
+## THE BINDING PRINCIPLES (the 13b constitution, copied per the architect-phase skill; its application notes bind alongside)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+Also binding whole: the sitting record §1–§25 (every ruling; **§22's SPEC CAUTION rides every
+brief** — the mockup fixes the SHAPE and idiom, the build uses the app's own tokens, spacing,
+type and corner conventions), the §25 tutorial curriculum as SECONDARY ACCEPTANCE CRITERIA (all
+eleven lessons land this phase as U7's content; no act in any unit may make a lesson sentence
+false), and the hallucination guard (red-on-old by behavioural revert for every bug-class fix).
+
+## ACCEPTANCE UNITS (seven, in two banks; ONE unit per implementer session; evidence named here, before the first spawn)
+
+**BANK 1:** U1 → U2 → U3 → U4 → **LADDER A** (fresh `fable-reviewer`, the bank's combined diff).
+**BANK 2:** U5 → U6 → U7 → **LADDER B** (fresh `fable-reviewer`) → closeout. The mid-phase
+handoff seam, if needed, sits after LADDER A's dispositions land.
+
+| unit | scope (plan items + KnownIssues rows) | evidence (named now) |
+|---|---|---|
+| **U1 — THE BOOKCASE BOARD** | Item 1 minus the seeded-classics content (U7's): the section renamed Bookcase; the strip (mode-row idiom, edge fade, ⋯ overflow panel with type-to-filter); solo/All/unshelved-at-top with collapsible headers; Welcome = seeded content only; drop targets; strip + panel reorder; Move to Start/End; Rename · Set Glyph (curated set + free entry, legibility pass) · Make Default · Delete→unshelved; the № census (solo filters, remembered collapse); order ▾ (A–Z default · last edited DERIVED-LOCAL · my order with Send to Top/Bottom); starred floats first; within-shelf reorder (one position sequence); details toggle (hides meta AND arrivals count, §23); the sidebar row's arrival count; starred-absorbs-pins faces (books AND gatherings in the Starred section). Plus rows 108 (the report overlay — the rebuild replaces the shelf's bottom line), 103's BOOKCASE half (a quiet-receipt home on the new board), 107's SHELF-MENU half (a gathering's Finish/extent doors leave the shelf menu). The place/finder boundary: NO search box, NO time filter. P1: counts indexed/cached, never per-render corpus scans (§3). | State/VM tests: order modes, starred float, census solos, unshelved placement, context mint (solo'd shelf vs All), within-shelf reorder arithmetic; registry declarations for every routed door + the registry walk green; the tutorial spine green; screenshot walk in all four voice/appearance combinations; the orchestrator's hands-on walk |
+| **U2 — THE BOOK PANEL** | Item 2: the collapsible right-side Book TOC on every membered note (chapters + notes, the open note marked); reorder/drag inside it over the EXISTING ops; click-through opens the book scrolled to the note; the book switcher atop for shared notes; "appears in N gatherings" with names on click; the remove door (§20's vocabulary — Remove / Release / the gathering's untag offer). Plus row 104 (the chip's one-shot staleness under an intake seat — the panel touches the same chip; fix it here). | VM tests incl. the observation (row 104's pin red-on-old); drag pins over the ops; registry rows; click-through landing pin; walk both voices |
+| **U3 — THE COLLECTING PANE'S DOORS + THE GROUPED-BY CONTROL + THE FILTER-BAR FACE** | Items 3 + 4: the ⋯-menu and Bookcase-row context doors into the Book Settings sheet; the journal-trait row joins the pane (§10, `setJournalTrait`); row 107's SETTINGS-SHEET half (a gathering's Finish/Word-target/Note-cap faces removed; the ops' refusal arm is this unit's call — propose before building); the grouped-by control on the Index masthead (chapters ▾ · a tag family · none; view-local; a gathering's Index minus chapters); the tag-family grouped DISPLAY for gatherings (§3 — never real chapters); the in-book FILTER BAR's face (§18.1; mechanics shipped 13i-b) + the "Save this filter as a gathering" door; the 13i-c walk's polish note (the sheet's three unvoiced text fields); row 103's BOOK-SURFACE half (a quiet-receipt host on Index/Book/Outline). | Grouped-display tests (gathering grouping never mints sections); filter-bar face pins over the shipped mechanics; door pins (every road reaches the sheet); the refusal-arm decision recorded; walk |
+| **U4 — ARCHIVED MEMBERS IN BOOKS** | Item 9 whole (her #169(a) ruling): the per-book ARCHIVED LINE on the Arrivals idiom (invisible when empty; expands inline; Unarchive + Remove/Release); HONEST COUNTS ("5 notes · 2 archived" on the Bookcase row meta + the book masthead, hidden with details off); archived WAITERS visible at the door, marked, with the same doors — Add seats one as an ARCHIVED member (verify `seatArrival` does not refuse an archived note); intake's automatic seats still never seat one; finishing dismisses every waiter (13i-c's shared predicate stands). REVERSES P-13ib-U2-2 — the 13i-b hide/return pins flip HONESTLY (each flip red-on-old against the old assertion). The Index never shows archived members. Plus R-13id-3's documenting line at the code (row 109, zero behavior). Faces + ONE query; zero schema, zero `Sync/`. | The one query's tests; pin flips red-on-old; the seatArrival-archived state-transition test; count pins (details on/off); walk |
+| **LADDER A** | `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over U1–U4's combined diff; fresh `fable-reviewer` per round; findings repo-first; cap three rounds | Findings + dispositions in this file; fixes with revert-verified pins |
+| **U5 — THE WING SWITCHER + THE CROSS-WING DOORS** | Item 6: the switcher (§21 Direction C — a masthead dropdown; mint · rename · delete); **delete per R-13id-2** (refuse-unless-empty, the refusal naming contents AND the R-13id-4 road); **the bulk move per R-13id-4** (sketch above; residual edges proposed first); the explicit per-item MOVE and COPY doors across wings with the R-13ia-1 tag-adoption rider; per-wing Archived/Trash scoping; the lineage door under a cross-wing copy names the wing, at most offers go-to-that-wing (#166(e)); **the daily Journal HOME-ONLY guard** (#169(b): a cross-wing move of it refuses; ⌘J / Today's Entry file into Home's Journal from ANY wing, the entry born in Home; one entry per day store-wide) + the mint's Home deliberate — row 105 closes with it. Any `Sync/` need is a STOP. | State-transition tests: move/copy with tag adoption (adopt vs mint), the bulk move's full arithmetic, the empty-check refusal, the Home-only guard (row 105's pin red-on-old), per-wing scoping pins (search/tags/Arrivals/Trash); registry rows; walk incl. a second wing minted and deleted |
+| **U6 — THE VOCABULARY SWEEP** | Items 5 + 8's word rows: Shelf→Bookcase · "smart"→gathering/living everywhere (the navigator footer, "Create Smart Book"→the gathering mint's words, the pad's placeholder, the row meta) · a wing presents as a SEPARATE LIBRARY · the Library's "Posts"→"Notes" (§21) · row 106 (the generic lockedReading arms + `SeededBookRestore` speak sealed→Unseal where true) · row 111 (the 13i-b WORDS row's four items) · item 10's dismiss receipt ("Dismissed “X” — it won't come back on its own; add it by hand any time."). | Grep pins banning the dead spellings (the 18j literal-colour pin's form); word-table pins; the dismiss-receipt pin; walk |
+| **U7 — THE TUTORIAL'S BOOKS CHAPTER + THE SEEDED CLASSICS LESSON** | Item 7 + item 1's seed + item 10's lesson line: the ELEVEN lesson sentences + FIVE rituals (§25) as field-guide content; lesson 4 gains the dismissal road-back sentence; the seeder: Sherlock OWNED · Jekyll plain · both `#classics` · the classics gathering on Welcome · the seeded quicknote (#166(b)); R1 the classics walk rides the seed; the walk asserts the rituals headless where expressible; the RE-SEED consequence recorded for the closeout (the product door behind the A1 rail). The phone's seeder is the mobile catch-up's — record, never build. | TutorialWalkTests extensions (each lesson sentence a pin; the rituals asserted); seeder state tests (the triad, the gathering, the quicknote); zero new repair classes (the R5 keeper suffices or STOP); walk |
+| **LADDER B** | As ladder A, over U5–U7's combined diff | Same form |
+
+**MOBILE PARITY:** every ruling is phone-expressible by design (the sitting §18.5); each unit
+RECORDS what the phone owes; ONE MobileSoul ledger row lands at the closeout. Nothing is built
+on the phone this phase.
+
+## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
+
+Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
+instances are treated by STORE, never quit/killed; no Release builds or `/Applications` refreshes
+while one lives (this phase has NO deploy — the marker stays 11; the closeout's install refresh
+waits for a zero-instance window and carries the U7 re-seed note). `xcodebuild build-for-testing`
+compiles without the runner; Mac tests from `App/Variorum/` with suite-level `-only-testing` only,
+confirming the "Test run with N tests" line (skips counted — read the `skipped:` lines); zsh
+`pipestatus`; NEVER a custom build configuration (non-"Debug" names strip the DEBUG oracles);
+suites beside a live session flash test windows — prefer zero-instance windows; backups WAL-safe,
+UTC names, into `Backups/safety-copies/` (the A1 rail) before ANY real-store touch; never
+`git checkout` over uncommitted work; push after every commit; never force-push. The dev store
+(`io.lduarte.Variorum.debug`) NEVER syncs (fenced) — sync evidence is the fake-server suites,
+never the production mirror. Foreground waits only; poll logs with `grep -q … && break` loops
+(the `tail -f` trap). Background-wait = death for subagents. Known full-run flake rows
+(KnownIssues: the latency pin, `CanvasDragTrackingTests`, the pointer-injection class, the
+per-note-defaults family): adjudicate by isolation + attribution before treating any red as this
+phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, own
+`caffeinate -d`. Build folders under `App/Variorum/DerivedData/13id-*`; the closeout tidies them.
+
+## LEDGER (every row owned; statuses flip in the same commit as the work)
+
+| # | item | status |
+|---|---|---|
+| 1 | U1 — the Bookcase board | NOT-STARTED |
+| 2 | U2 — the Book Panel | NOT-STARTED |
+| 3 | U3 — the Collecting doors + grouped-by + filter-bar face | NOT-STARTED |
+| 4 | U4 — archived members in books | NOT-STARTED |
+| 5 | LADDER A (U1–U4) | PENDING BANK 1 |
+| 6 | U5 — the wing switcher + cross-wing doors + the bulk move | NOT-STARTED |
+| 7 | U6 — the vocabulary sweep | NOT-STARTED |
+| 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
+| 9 | LADDER B (U5–U7) | PENDING BANK 2 |
+| 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — U4 documents; the row closes at the closeout |
+| 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
+
+HELD FOR HER BUNDLE (nothing gates on these): the #169 remainder (P-13ic-1's open sub-question —
+tags on Duplicate-as-Version / Diverge-for-book; the offer toast's 6 s clock, F-U3-8).
+
+## U1 BRIEF — THE BOOKCASE BOARD (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL (the kickoff rulings, the constitution, your unit's row, the environment
+traps above) · `notes/plans/phase-13i-sitting-record-2026-09-30.md` IN FULL (§7, §19–§24 are your
+sections; §22's SPEC CAUTION binds every pixel) · the mockup
+`notes/plans/mockups/13i-bookcase-shelves.html` (v5 — the SHAPE and idiom, never the rounded
+edges) · `notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from your first
+commit) · KnownIssues rows 103/107/108 · the existing Shelf feature (the board you are
+rebuilding: `ShelfViewModel`, the shared `ShelfOrder`, the 13i-a columns `shelf`,
+`reading.shelf_id`/`shelf_position`/`starred`, the shelf ops shipped at 13i-a).
+
+**Scope: your unit's LEDGER row, exactly** — the Bookcase board rebuild. OUT of scope: the
+seeded classics content (U7's), the settings-sheet work (U3's), the Book Panel (U2's), anything
+cross-wing (U5's), the phone (record what it owes, build nothing). Zero schema, zero `Sync/` —
+any need you discover is a STOP: report, don't work around.
+
+**Mechanism notes:** a book's "last edited" order is DERIVED (max over members' touch stamps),
+computed or cached LOCALLY — NEVER a synced column (§22's mechanism note). "My order" is the
+placing mode: fractional positions persist across order switches; never-placed books append
+last; display = starred first, then the chosen order, within every shelf and the unshelved run.
+Counts (the № census, hover counts, the arrival count) must be indexed/cached reads — never a
+per-render corpus scan (P1; the sitting §3). The details toggle hides the row meta AND the
+arrivals count (§23's overrule). The strip draws NO rectangle except the hairline drag-over
+outline. New books land UNSHELVED; context mint while a shelf is solo'd lands ON that shelf
+(§19.1/§24). Unshelved renders at the TOP of All under its own collapsible header (§24's
+overrule). All stacks shelves in strip order. Welcome is ordinary and renamable; it holds the
+seeded content only. Registry: every routed door declared (P-1 — the `.surface` case for
+inline-only doors, the 3D precedent); the registry walk green.
+
+**Evidence (your row's, each named before you build):** state/VM tests for the order modes,
+starred float, census solos, unshelved placement, context mint, within-shelf reorder; the
+registry walk; the tutorial spine green at your unit's end (never at its start); a screenshot
+walk in all four voice/appearance combinations into `notes/plans/13id-screens/u1/` (gitignored).
+Suites at the END of the unit; the 13i-c close is the baseline (core 2008/213).
+
+**Your record:** a `## U1 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+what you built (a fresh session's map), evidence with counts, FINDINGS for the orchestrator,
+PROVISIONALs (QUESTIONS-ready, numbered P-13id-U1-n), and the LIVE STATUS table per the
+resiliency protocol (per-commit flips, PENDING for unverified claims, push after every commit).
+Commits carry NO attribution trailer. One agent at a time; no subagents; foreground waits only.
