@@ -1,6 +1,12 @@
 # Phase 13i-c — OWNED · FINISHED/SEALED · THE OUTFLOW EVENT · the convert/delete/duplicate doors · the DOOR ENUMERATION · the edit-law refusals
 
-**STATUS: OPEN — kicked off 2026-10-01 by the author's `/architect-phase 13i-c` invocation (her
+**STATUS: CLOSED 2026-10-02 — four units built and walked, a two-round Fable ladder (zero
+disputes), her deploy window (marker 10→11 LIVE), the canon deltas applied; her tail: the relaunch
++ first round, the phone's build, the #169 ratify. The handoff: `notes/handoffs/phase-13i-c-handoff.md`.
+The PHASE CLOSEOUT section (above §8) has the counts.** *(The kickoff banner below is kept as
+written — the run's history.)*
+
+**WAS: OPEN — kicked off 2026-10-01 by the author's `/architect-phase 13i-c` invocation (her
 app quit and ready). The BINDING DESIGN is `notes/plans/phase-13i-sitting-record-2026-09-30.md`
 (§1 the three-noun ladder, §2 the edit law, §5 Finished/Sealed, §6 Owned + the door enumeration,
 §14.10, §18.3 the Trash lifecycle, §18.4 competing owned books, §20 the remove/release doors, §24
@@ -324,7 +330,7 @@ exists). U2 pins the op rows; U4 pins each face's offer.
 | 12 | `duplicateReading` shallow/deep | the source's ownership | shallow refuses on an owned source | U2 |
 | 13 | sync apply | the R2 repair (13i-a) | converges | `Phase13iRepairTests` (standing) |
 | 14 | the membership chip's Add (Mac) | row 1's refusals | the choice sheet | U4 |
-| 15 | the book Index/Outline DRAG roads (`BookStructureModel` ×2) | row 1 | the choice sheet | U4 |
+| 15 | the book Index/Outline DRAG roads (`BookStructureModel` ×2) — **CORRECTED at the closeout (U4's F-U4-1, accepted):** the two drag roads REORDER notes already in the book and create no membership (pinned); the model's one membership-creating road is the daily book's "+ new entry", which BELLS on an ownership conflict exactly as ⌘J does (P-13ic-U4-1) | the table (through `shelveInDailyJournalBook`) | the bell | U4 |
 | 16 | the Pool's drop onto a book (`PoolPostsView`) | row 1 | the choice sheet | U4 |
 | 17 | the shelf row's drop (`ShelfView`) | row 1 | the choice sheet | U4 |
 | 18 | Manage Notes… (`ManageReadingPostsSheet`) | row 1 | the choice sheet | U4 |
@@ -1799,6 +1805,59 @@ writes; the dev instance quit by bundle identity; zero instances after. **Observ
 polish, not a defect):** the settings sheet's three text fields (Name · Word target · Note cap)
 are system-font, unvoiced — the 13i-b shape the sheet inherited; the new sections are voiced.
 
+## PHASE CLOSEOUT (2026-10-02)
+
+**Results.** Four units built and walked (U1 Fable; U2–U4 Opus), the architect's two adjudications
+(F-U2-1 built; P-13ic-U3-2 ruled to the record's letter), a two-round Fable ladder with zero
+disputes (round 1: 1 MAJOR · 4 MINOR · 2 NIT → 6 fixed with red-on-old pins + 1 recorded; round 2:
+clean, one doc NIT; the sanity pass's two concerns: 1 fixed, 1 recorded), the orchestrator's walk
+by hand, and HER WINDOW: marker 10→11 live, `/Applications` refreshed. **53 commits** from the
+kickoff to the ladder's close (`ca3b8a85..a0dd85d0`), 120 files, ~15k lines. **Finals:** core
+**2008 tests / 213 suites** (1 standing env-gated skip; baseline 1913/200 at 13i-b's close) · Mac
+touched suites + the registry walk + the tutorial spine **189/21** at the ladder's close (U4's own
+run 575/82; U3's 445/73; U2's 772/135) · the phone BUILD green (U2's phone suites 102/16; U4's
+72/5). Her four kickoff rulings R-13ic-1…4 built whole; the sitting record §2/§5/§6/§18.3/§18.4/
+§20/§24 honored; lessons 2, 5, 6, 8 and ritual R4 pinned true (P-6).
+
+**Corrections made here (recorded above where they land):** §4 row 15 (the drag roads reorder;
+the daily "+ new entry" bells) and §7 U4's "Pool" badge line (no owned-by mark in the Pool — its
+notes are bookless, P-13ic-U4-9).
+
+**The canon deltas (as ruled):** AppSpec §7 (`auto_tag_ids` + the retired column; a gathering
+requires a rule; the two settings), §9 (the op family), §12 (the sheet, the choice sheet, delete/
+duplicate/release, the badges), §14 (13i-b's paragraph rolled); SyncSpec §12 (the marker 10→11
+entry, written at the deploy); OverallModel untouched (its §2 reading line already says ownable/
+sealable). KnownIssues: the rule-less-gathering row RESOLVED (R-13ic-4); the quiet-receipts row
+widened (F-U4-2); six new rows — the daily arm's wing · the generic lockedReading word-table arms
+(+ `SeededBookRestore`) · gatherings' shipped finish/extent faces (P-13ic-U3-2's ruling) · the
+shelf's report overlay · a finished book taking back revived memberships (F-U2-5) — all 13i-d —
+and the delete receipt's copy (13s). QUESTIONS #169 (the bundle; two genuinely open: the
+archived-arrival spare-it arm and the daily Journal's wing). MobileSoul PL-44.
+
+**MOBILE PARITY:** PL-44 — the substrate shared (the phone refuses to sync until its marker-11
+build); the faces owed to the mobile catch-up, enumerated there, plus two phone sentences that
+still name Reopen on a sealed book.
+
+**Deferred with owners:** R-13ic-2's cross-wing doors + tag adoption + the wing switcher →
+13i-d; the KnownIssues rows above; the phone faces → the mobile catch-up; the "(M archived)"
+copy + the delete receipt → 13s; F-U3-8 (the offer clock) → her bundle.
+
+**The DerivedData tidy (her 2026-10-01 rule):** the thirteen `13ic-*` folders deleted
+(13ic-u1-walk · u2 · u2-ios · u2-iossim · u3 · u3-ios · u4 · u4-ios · u4-iossim · ladder ·
+ladder-ios · walk · release); the `.log` evidence files kept; no other phase's folder touched.
+
+**For the combined 13i walk (her posture — the running list this letter hands to 13i-d):**
+own a book (the listed copies) · add an owned note elsewhere (the choice sheet) · add a shared
+note to an owned book (copy in / move in with the severed list) · an arrival at an owned book's
+door (Copy in · Move in · Dismiss; "owned by") · Finish with arrivals waiting (the one line) ·
+Seal a shared book (the listed forks) and an owned one (fork-free) · Unseal (it reopens) · a
+note's own Unseal inside a sealed book (the refusal) · Release from an owned book (the Pool) ·
+delete an owned book both ways → the Trash's "and N notes" → Put back whole · Duplicate both
+shapes · the badges (inside a book; "owned by" outside; the Settings switch; hide-owned on a
+gathering) · the Book Settings' Collecting sentences → Edit… → two outflow tags → "also tag the
+N members" · a gathering's empty rule → the refusal + Delete · Create Smart Book with the inline
+rule · Make a Book from a gathering with the prefilled outflow.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1862,7 +1921,7 @@ Debug only, author-free, own `caffeinate -d`.
 | 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | **BUILT + PINNED + WALKED 2026-10-01** (the U4 RECORD above; core 2004/212 · Mac 575/82 · phone build + 72/5 green; commits e45d19d6 → the closing commit; the walk found and fixed W-1/W-2/W-3; 53 captures, both voices × both appearances; eleven PROVISIONALs P-13ic-U4-1…11 for #169; FINDINGS F-U4-1…10 — F-U4-1 corrects §4 row 15's text, F-U4-2 is the 18i seam's quiet-receipt gap) |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | **CLOSED AT TWO ROUNDS 2026-10-02** — round 1 `notes/plans/13ic-ladder-round1.md` (1 MAJOR · 4 MINOR · 2 NIT, no blocker; the implementer agreed with all seven; the reviewer's fix pass: 6 fixed with red-on-old pins incl. the MAJOR's shared count/dismissal predicate, 1 recorded); round 2 `13ic-ladder-round2.md` (5 FIXED · 2 RECORDED · 0 regressed · ONE doc NIT; no round 3 earned); the implementer's sanity pass raised 2 concerns → the reviewer's final word: concern 1 FIXED (the move-in fallbacks read the blocking book fresh; no R93 dump survives; red-on-old by behavioural revert), concern 2 RECORDED (13i-d + the MobileSoul row). Finals: core **2008/213** · Mac touched + registry walk + the tutorial spine **189/21** · phone BUILD green. Zero disputes phase-wide |
 | 7 | Her deploy window (§11) + the install refresh + the phone's tail | **THE MIRROR + MAC HALVES DONE 2026-10-02 at her go ("run the mirror through the PAT yourself")** — zero instances; the A1 triple `variorum-backup-a1-13ic-window-2026-10-02T072918Z` byte-equal; the marker probe read 10; `14_phase13i_c_outflow.sql` landed `[]` on the FIRST run; verify: marker **11**, `auto_tag_ids text` present, 0 carried rows at the window; the grant sweep **63 OK · 4 INFO** (13i-a's exact reading); the staged Release copied to `/Applications`, codesign verified. **Her relaunch + first round: PENDING her word. The phone: her tail.** |
-| 8 | Closeout + handoff + 13i-d's plan (carrying R-13ic-2's doors + the combined-walk list) | NOT STARTED |
+| 8 | Closeout + handoff + 13i-d's plan (carrying R-13ic-2's doors + the combined-walk list) | **DONE 2026-10-02** — the PHASE CLOSEOUT section; canon deltas; KnownIssues; QUESTIONS #169; MobileSoul PL-44; the master plan (pointer, row, paragraph; 13i-b's rolled); the DerivedData tidy; `notes/plans/phase-13i-d-bookcase.md` + its kickoff; the handoff `notes/handoffs/phase-13i-c-handoff.md` |
 
 ## §11 THE DEPLOY CHECKLIST (HER WINDOW — mirror → Mac → phone, one sitting; the 13i-a shape)
 
@@ -1916,3 +1975,6 @@ Debug only, author-free, own `caffeinate -d`.
 - **THE ORCHESTRATOR'S WALK DONE (2026-10-02):** the composed flows by hand (the section above;
   nine captures); zero writes; zero instances. NEXT: HER deploy window (§11) at her explicit go,
   then the closeout.
+- **CLOSEOUT (2026-10-02):** everything applied (the PHASE CLOSEOUT section; row 8). Her relaunch
+  + first round PENDING her word (the handoff's first line); the phone her tail. Nothing
+  uncommitted; no revert in flight; zero instances; the phase CLOSED. The hard stop follows.
