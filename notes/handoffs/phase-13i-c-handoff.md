@@ -7,16 +7,16 @@
       one-element outflow set; any gathering of yours that had NO rule moves to the Trash (Put back
       is there for 30 days; no note is touched). Your first round pushes those rows. Tell me what
       the sync status says — the window's record is PENDING that one line.
-- [ ] **The phone's marker-11 build** (Xcode → your device, from `main`'s tip). Until then it
-      visibly refuses to sync — outbox intact, cursor unmoved, by design. Its first round converges
-      on its own.
+- [x] **The phone's marker-11 build** — INSTALLED by the orchestrator at your ask (2026-10-02,
+      `xcrun devicectl device install app` to your iPhone 17 Pro, bundle `io.lduarte.VariorumMobile`,
+      *[removed for publication]*
 - [ ] **Ratify #169** (QUESTIONS) — the 13i-c bundle. Thirty-nine PROVISIONALs built as stated,
       each one line to overturn; the two genuinely open calls: (a) should FINISHING a book SPARE
       the arrivals of archived notes (today it dismisses every waiting arrival, and the confirm's N
       says so); (b) should the daily Journal be Home-only by rule or wing-scoped (latent until 13i-d
       mints a wing). Plus one taste call: the offer toast's 6 s clock.
-- [ ] **#167 still stands from 13i-a** (the owned-exclusivity sync repair's shape) — now with real
-      doors on top of it.
+- [x] **#167** — RATIFIED (a) as built, 2026-10-02. **#169(b)** — RULED Home-only. **#169(a)** —
+      in discussion (archiving a waiting note).
 
 ## What shipped (one paragraph)
 

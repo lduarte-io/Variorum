@@ -64,8 +64,11 @@ re-sized at this phase's own kickoff.**
    wings with her tag-adoption rider (R-13ia-1: a carried tag resolves BY PATH in the destination
    wing — adopt the live same-path tag's id, else mint); per-wing Archived/Trash views; the lineage
    door under a cross-wing copy names the wing and at most offers go-to-that-wing (#166(e)); the
-   13i-a §9(a) wing-scoped subtree constraint is already in. **Owned here:** the daily Journal's
-   wing question (KnownIssues; QUESTIONS #169(b) — Home-only vs per-wing).
+   13i-a §9(a) wing-scoped subtree constraint is already in. **Owned here, RULED 2026-10-02 (her
+   lean, #169(b)): the daily Journal is HOME-ONLY** — it stays in Home (a cross-wing move refuses;
+   the designation is Home's), ⌘J / Today's Entry file into it from ANY wing with the entry born in
+   Home beside its Journal, one entry per day store-wide; this phase builds the guard and makes the
+   mint's Home deliberate (the KnownIssues row closes with it).
 7. **THE TUTORIAL'S BOOKS CHAPTER (§25):** the eleven lesson sentences + the five rituals, built
    as field-guide content at this kickoff's sizing (the brief's 2026-08-19 addition); R1 the
    classics walk needs the seeded lesson above; the walk asserts the rituals; a lesson prose change
