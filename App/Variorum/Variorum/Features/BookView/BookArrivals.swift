@@ -498,6 +498,9 @@ struct BookArrivalsLine: View {
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                    // The walk: a long "also in …" list truncates in the
+                    // middle — the hover says it whole.
+                    .help(line)
             }
             Spacer(minLength: 8)
             if let stamp = ArrivalsCopy.arrived(arrival.arrivedAt, now: Date()) {

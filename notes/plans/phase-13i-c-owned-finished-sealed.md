@@ -1506,130 +1506,251 @@ read-only Sonnet lookup at most); the §8 traps verbatim.
 
 ## U4 RECORD — THE MEMBERSHIP DOORS' FACES · THE BADGES · DELETE/DUPLICATE · REMOVE/RELEASE · THE TRASH (`opus-implementer`, 2026-10-01)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** no Delete or Duplicate door added to the book
+view's gear/settings sheet (none exists there today; the spawn message's fence — "no settings-sheet work"
+— outranks the brief's "if it fits"; F-U4-3 → 13i-d); no owned-by badge in the POOL (it lists bookless
+notes, so no Pool row can be owned — structurally silent, P-13ic-U4-9); §4 row 15 NOT hosted by the choice
+sheet as the brief's text says — its named "drag roads" create no membership and its one add road (the
+daily book's "+ new entry") BELLS like ⌘J (P-13ic-U4-1, F-U4-1); no "Book Panel" remove door (the Book Panel
+is 13i-d's — F-U4-5); no phone face (MOBILE PARITY below); the shelf-row DROP pinned mounted but not
+dragged by hand in the walk (F-U4-7); NO `notes/QUESTIONS.md` entries written (each PROVISIONAL carries
+its #169 paragraph); zero `Sync/`, zero schema, zero `Server/`. Core touched ONLY for face needs:
+`Queries.liveMemberNoteCount` (the delete confirm's N) and a public memberwise init on the value type
+`Queries.OwnershipFacts` (so the badge rule is pinned cell for cell) — no op semantics.
 
-**UNIT STATUS: IN PROGRESS** (opened 2026-10-01 at tip 88e9c69c; zero app instances at open).
+**UNIT STATUS: CLOSED 2026-10-01 — core FULL 2004 tests / 212 suites (1 standing env-gated skip) · Mac
+575 tests / 82 suites (4 pre-existing known issues) incl. the registry walk and all eleven tutorial-walk
+suites · the phone BUILD green + the four phone suites on the shared Trash road 72/5 (2 deliberate known
+issues) · THE WALK DONE (three defects found and fixed — W-1, W-2, W-3) — 53 captures, both voices × both
+appearances.**
 
 Preflight read in this session's own context: CLAUDE.md + its canon, this plan WHOLE (§1–§11, the
 U1/U2/U3 RECORDs, both adjudications, the U4 BRIEF), the sitting record §1–§6, §18–§25,
-`notes/SessionResiliencyProtocol.md`. No editor seam, no `Sync/`, no schema (TEXTKIT2_NOTES /
-SyncSpec not required).
+`notes/SessionResiliencyProtocol.md`, `Tools/WalkKit/README.md`. No editor seam, no `Sync/`, no schema
+(TEXTKIT2_NOTES / SyncSpec not required).
+
+### What U4 built (the design as shipped — a fresh session's map)
+
+- **THE MEMBERSHIP CHOICE** (`Core/Views/MembershipChoice.swift` — the shared home: four features host
+  it): `MembershipChoiceCopy` (static words — the brief's two leads verbatim, "“Book” owns its notes. This
+  note also lives in “X” and “Y”." / "This note belongs to “X”, which owns its notes."; the edit law said
+  AT the door — "Adding a note to a book never copies it — a copy only happens because you choose one, and
+  it always remembers where it came from."; Move's severed list, members it LEAVES and doors it stops
+  WAITING at; the finished-book block; the receipts), `MembershipChoice` (the sheet's whole item, read
+  from `noteMemberships` + `moveInPreview` — the ops' own predicates), `MembershipDoors` (`add` → nil or
+  the named choice; `addOrOffer`; `offer`; `copyIn` / `moveIn` through `copyPostIntoReading` /
+  `movePostIntoReading`, receipts on the 18i seam; a finished book among the severed refuses with THAT
+  book's road), `MembershipChoiceSheet` (Copy In · Move In — disabled with the reason when a finished book
+  holds it — or the single "Copy Into “B”") + `.membershipChoices(_:onLanded:)` (ONE presentation road).
+  HOSTS (P-2 — the refusal OPENS the ceremony): the chip's Add (row 14 — closes its popover; the sheet
+  hangs off the chip), the Pool's add-to-book (row 16), the shelf row's drop (row 17), Manage Notes…'s
+  Add (row 18, through `ReadingsViewModel.addPost`; the copy joins the sheet's list on landing).
+- **ROW 15, as the code is** (F-U4-1): `BookStructureModel`'s two DRAG roads (navigator + Outline rows)
+  only file and reorder MEMBERS — a foreign payload decodes to nothing (pinned); its one ADD road is the
+  daily book's "+ new entry", whose ownership refusal now BELLS exactly as ⌘J does (sitting §6 — "an
+  owned-elsewhere note bells, never throws"): the entry opens, the note names who holds it, and the
+  Arrivals line offers the choice (row 19). `JournalBooks.shelvingNote` is ONE mapping for ⌘J and that
+  door; `JournalWaitingCopy` names the owner (F-U2-6 — "…waiting at “Journal”'s door, because “X” owns
+  it."). The non-daily mint is sole by construction.
+- **THE ARRIVALS ARMS** (row 19, §18.4): `ArrivalArms` — each waiting row's doors as DATA from the one
+  `OwnershipDecision` verdict (a row never offers an Add the seat refuses): Add · Dismiss (ordinary);
+  **Copy In · Move In · Dismiss** (membered note at an OWNED door); **Copy In · Dismiss** (owned-elsewhere
+  note at a PLAIN door); the row's line "owned by “X”" (competing owned books) / "also in “X”…" (its
+  hover gives the whole list). `BookArrivalsModel` reads the LISTED rows' facts in one page-driven
+  statement and answers through `copyPostIntoReading(answering:)` / `movePostIntoReading(answering:)`.
+- **REMOVE / RELEASE** (§20 — `Core/Views/RemoveFromBook.swift`): ONE act, its word the book's —
+  "Remove from This Book" / "Release from This Book" (owned); receipts from `removePostFromReading`'s
+  bookless answer ("Removed from “X” — the note itself is untouched." [+ " It's in the Pool now." when
+  bookless] / "Released from “X” — it's in the Pool now."); refusals named for the book's road
+  (`BookStateCopy.refusal` — finished → reopen, sealed → unseal). Renderers: the chip's rows
+  ("remove"/"release"), the navigator + Outline note-row context menus, the Index row's ⋯ menu, the
+  sidebar note box's book context (a context menu; `NoteBoxDoor.removeFromBook`, nil on a gathering),
+  Manage Notes…'s row (outcome said IN the sheet). A GATHERING row on the chip offers the honest
+  "remove #tag" per worn POSITIVE rule tag (subtree) — never a remove; its receipt says whether the
+  gathering still shows the note.
+- **DELETE — three arms** (F-U3-2; F-U2-7): the shelf's "Delete Book…" routes through
+  `BookStateDoors.open(.deleteBook)`; the arm follows the book: a gathering's (U3's words); a PLAIN book's
+  confirm (lesson 8's first sentence + the Trash's 30 days; book-only, never offers note deletion); an
+  OWNED book's TWO-CHOICE confirm — "Delete Book Only" (its N notes to the Pool — `deleteReading`) ·
+  "Delete Book and Its N Notes" (`deleteReadingWithNotes`, one stamp) — via `BookStateConfirm
+  .alternateLabel` + `confirm(alternate:)` + the sheet's second button. N = `Queries.liveMemberNoteCount`
+  (exactly the set the act takes).
+- **DUPLICATE BOOK…** (`Features/Readings/DuplicateBook.swift`): the shelf menu, books only;
+  "Duplicate Book…" / "Duplicate with Copies…" (owned); the sheet — name prefilled "X copy" (E13's guard
+  in the SAME runner closure as `duplicateReading`; a taken name refuses IN the sheet), "With copies of
+  its notes" (off on a plain book; on and fixed on an owned one — never a shallow offer the op refuses);
+  receipts "“X copy” — N notes, the same notes." / "“X copy” — N copies.".
+- **THE BADGE FAMILY** (§6 — `Core/Views/OwnershipBadge.swift`): `OwnershipBadgeFace` (the rule —
+  INSIDE a book the shared mark naming the other books; OUTSIDE — a gathering's view, the Library's rows
+  and cards, the tag listing — "owned by “X”", a click opening that book at the note; a free note, or a
+  note only here, wears nothing; `ownership_badges` off silences the set), `OwnershipFactsModel` (ONE
+  page-driven observation per listing, membership tables only), `OwnershipBadgeView` (`.openBookAtNote`'s
+  third renderer), `OwnershipBadgeCopy.rowHelp` (W-2). The navigator chip says "✓ sealed" on a sealed
+  book (`BookStateCopy.navigatorChip`, F-U3-7).
+- **SETTINGS**: the Editor pane (where `arrival_flash` lives) gains a "Books" section — "Show ownership
+  badges" (`ownership_badges`) and "Hide notes an owned book holds, in gatherings and tag listings"
+  (`hide_owned_default`), each with one sentence that does not overclaim; two `SettingsCatalog` rows;
+  `ThemeStore.setOwnershipBadges` / `setHideOwnedDefault`.
+- **THE TRASH** (§18.3): shared words (`RecoveryCopy.bookRowNotes` — "and N notes"; `bookPutBackWhole` —
+  "“X” is back with its N notes.") and the shared act (`TrashPutBack` reads `trashBookNoteCount` BEFORE
+  `restoreReading` clears the stamp — `Outcome.bookWhole(notes:)`); the Mac Trash row draws the count
+  beside its kind label (`RecoveryViewModel.bookNoteCounts`, ∝ the book rows listed).
+- **THE REGISTRY (P-1)**: `.copyIn`, `.moveIn` (`.surface` — the sheet + the Arrivals line),
+  `.removeFromBook` (`.contextMenu` + `.surface`), `.removeRuleTag` (`.surface` — the chip),
+  `.duplicateBook` (`.contextMenu` — the shelf); renderers declared on `MembershipChoiceSheet`,
+  `BookArrivalsLine`, `BookView` + `SidebarNoteBox` (context menus), `MembershipChip`, `BookIndexColumn`,
+  `ManageReadingPostsSheet`, `OwnershipBadgeView`, `ShelfView`; the walk names every one.
+
+### §4 rows 14–21 — dispositions
+
+| # | road | as built | pin / walk |
+|---|---|---|---|
+| 14 | the chip's Add | the sheet (copy·move or copy-only) | `row14_theChipsAddOffersTheChoice` · u4-03, u4-12, u4-42, u4-46, u4-52 |
+| 15 | `BookStructureModel` | drag roads add nothing; the daily "+ new entry" BELLS (P-13ic-U4-1) | `row15_…AddNothingByDragAndBellAtTheDailyDoor` |
+| 16 | the Pool's add | the sheet (a race-only meeting — Pool notes are bookless) | `row16_thePoolsAddOffersTheChoice` · u4-17 (the clean move-in) |
+| 17 | the shelf row's drop | the sheet | `row17_theShelfRowsDropOffersTheChoice` (mounted; not hand-dragged — F-U4-7) |
+| 18 | Manage Notes… | the sheet; the copy joins the list | `row18_manageNotesAddOffersTheChoice` · u4-38, u4-39 |
+| 19 | the Arrivals line | Copy In · Move In · Dismiss / Copy In · Dismiss + the "owned by"/"also in" line | `ArrivalArmsTests` (5, one mounted) · u4-20, u4-21, u4-43, u4-47, u4-50, u4-51 |
+| 20 | ⌘K | no add-to-book road exists (it opens notes and books) — nothing to consult; recorded | — |
+| 21 | the Book Panel's drag powers | the Book Panel is 13i-d's; the note box carries no drag; the book view's drags are within-book only (row 15's pin) — recorded | — |
+
+### Evidence
+
+- **Mounted pins / static copy:** `MembershipChoiceTests` (15 — the words; the copy button's voicing,
+  W-1; the model's plain add, both choices, Copy In, Move In, the finished block; the sheet draws its item;
+  rows 14–18 one test each through the REAL hosts; ⌘J names the owner) · `RemoveReleaseDoorTests` (5) ·
+  `ArrivalArmsTests` (5) · `BookDeleteAndDuplicateTests` (9) · `OwnershipBadgeTests` (7 — the rule cell for
+  cell, the facts page-driven, the MOUNTED Index row's shared mark and a gathering view's owned-by mark,
+  W-2's row help, the chip's sealed face, the Settings rows) · `TrashBookNotesTests` (3); core:
+  `OwnershipBookDoorsTests` gains the delete count's pin.
+- **Honest test edits (subject untouched, each commented):** `BookArrivalsTests.theLineIsTheTwoActsOne
+  RendererAndTheyAreDeclaredAsDrawn` (the line's declared set grows by the two arms, row 19);
+  `CapabilityRegistryTests` (the walk's unions name the new renderers — the JUSTIFIED-EDIT class).
+- **Suites (the close, on the committed tree + the one-line arrivals hover):** core `swift test` FULL —
+  "Test run with 2004 tests in 212 suites passed" (1 skipped: the standing env-gated Supabase test);
+  Mac `build-for-testing` GREEN + "Test run with 575 tests in 82 suites passed … with 4 known issues" (the
+  pre-existing `IndexTierMetricsTests` marks) — every new suite, every suite naming a touched surface
+  (book view, Outline/Index/landing, Library, Pool, shelf, readings, settings, Trash/recovery, note box,
+  arrivals, state doors), the registry walk and all eleven `TutorialWalkTests.swift` suites; the phone
+  `VariorumMobile` generic iOS Simulator BUILD SUCCEEDED + the four phone suites on the shared Trash road
+  (iPhone 17 Pro sim) "72 tests in 5 suites passed … with 2 known issues" (the deliberate
+  `MobileTrashTests` marks). Zero app instances before every mounted run (`pgrep` clean).
+- **No bug-class row in this brief** (a face unit) — red-on-old applied to nothing; W-1/W-2/W-3 are
+  presentation defects the walk found, evidenced by before/after captures and pinned.
+
+### PROVISIONALs made in U4 (each QUESTIONS-ready for #169)
+
+- **P-13ic-U4-1 — The daily Journal's own "+ new entry" BELLS on an ownership conflict** (⌘J's ruled
+  shape) instead of opening the choice sheet. *QUESTIONS paragraph:* "If today's entry already belongs to
+  an owned book and you press '+ new entry' inside your daily Journal, the entry opens and waits at the
+  Journal's door (where you can copy it in, move it in or dismiss it) — (a) as built, the same as ⌘J;
+  (b) ask right there with the copy/move sheet."
+- **P-13ic-U4-2 — Move In from the Arrivals line acts at once** — the row's own line already names the
+  books it will leave (the sheet hosts show the full severed list before Move). *QUESTIONS paragraph:*
+  "(a) As built; (b) Move In on a waiting row asks first, listing what it leaves."
+- **P-13ic-U4-3 — Manage Notes… carries the remove/release door too** (beyond §20's three named places),
+  its outcome said inside the sheet. *QUESTIONS paragraph:* "(a) As built — the same word everywhere a
+  note leaves a book; (b) Manage Notes keeps a plain 'Remove'."
+- **P-13ic-U4-4 — The two ownership settings live in Settings ▸ Editor ▸ Books** (the brief: "where
+  arrival_flash lives"). *QUESTIONS paragraph:* "(a) Editor ▸ Books — as built; (b) General; (c) a new
+  Books pane."
+- **P-13ic-U4-5 — The marks' look:** the shared mark is a small muted two-squares glyph with the books on
+  hover; the owned-by mark is the words "owned by “X”", clickable. *QUESTIONS paragraph:* "(a) As built;
+  (b) a different glyph or words (13s)."
+- **P-13ic-U4-6 — A plain book's Delete now asks** (it acted at once before; the brief's plain confirm),
+  and the owned confirm's keyboard default is the SAFE choice, "Delete Book Only". *QUESTIONS paragraph:*
+  "(a) As built; (b) a plain book deletes without asking (the Trash is the undo)."
+- **P-13ic-U4-7 — Duplicate's defaults:** the name "X copy"; "With copies" off on a plain book. Alt:
+  copies on by default.
+- **P-13ic-U4-8 — The gathering's honest door offers only the rule's POSITIVE tags the note wears** (by
+  subtree), none for a note matched through ★ alone, and its receipt says whether the gathering still
+  shows it. *QUESTIONS paragraph:* "(a) As built; (b) also offer 'Unstar' when the match is the star."
+- **P-13ic-U4-9 — No owned-by mark in the Pool** (the brief listed it): Pool notes are bookless by
+  definition, so the mark could only ever show for a race. *QUESTIONS paragraph:* "(a) As built —
+  silent, no read paid; (b) wire it anyway."
+- **P-13ic-U4-10 — A plain remove that leaves the note in no book says so** ("…untouched. It's in the
+  Pool now."). Alt: the brief's sentence alone.
+- **P-13ic-U4-11 — The new door/receipt/badge/confirm wording** (all 13s-revoicable; the truths ruled).
+
+### FINDINGS (for the orchestrator; none a STOP condition)
+
+- **F-U4-1 (the plan's text; recorded):** §4 row 15 names `BookStructureModel`'s "drag roads ×2" as
+  membership-creating; they are within-book reorder/assign roads (BookDrag payloads only). The model's
+  add roads are `newEntry`'s two — dispositioned above. Suggest the closeout corrects the row's text.
+- **F-U4-2 (the 18i seam's owner / 13i-d):** with `receipt_style` = quiet (her default), a receipt
+  spoken from a book view, the shelf or the Library has NO line to land on (the quiet line lives in the
+  editors' bottom bars) — the note box's Remove landed silently on screen (u4-09). Pre-existing seam
+  shape; the walk switched receipts to toasts to capture them, then restored "quiet".
+- **F-U4-3 (13i-d):** no Delete/Duplicate door on the book view's gear/settings sheet (fenced here).
+- **F-U4-4 (recorded):** the Pool's owned-by mark is structurally silent (P-13ic-U4-9).
+- **F-U4-5 (13i-d):** §20's "Book Panel's row menu" remove door awaits the Book Panel itself.
+- **F-U4-6 (the mobile catch-up — MobileSoul row):** the phone's Trash row lacks "and N notes" (its Put
+  back receipt IS whole — the shared road); its Today/⌘J-equivalent waiting note stays generic; its
+  membership face speaks the shared ownership refusal words, no sheet (F-U2-8).
+- **F-U4-7 (recorded):** the shelf-row drop was proven through the mounted `ShelfView` pin, not by a
+  hand drag (a cliclick list-row → shelf-row drag is unproven in WalkKit); the same `MembershipDoors`
+  road was walked through the chip and Manage Notes.
+- **F-U4-8 (recorded):** `ReadingsViewModel.delete` has no caller now (the shelf's delete routes through
+  the state doors); kept, harmless — the ladder may retire it.
+- **F-U4-9 (13s copy):** a long "also in …" arrival line truncates mid-list (the hover, added at the
+  close, gives it whole).
+- **F-U4-10 (walk residue — dev store only):** books "u4 owned" (owned, rule #u4ring), "u4 other", "u4
+  other copy" (FINISHED), "u4 owned copy", "u4 third", the gathering "u4 ring gathering"; "u4 owned two"
+  in the Trash (book-only delete); notes "u4 alpha"…"u4 eta" and their copies; the tag #u4ring. Her dev
+  store's voice (Terminal), appearance preference (`system`), receipts ("quiet") and badges (on)
+  RESTORED and read back.
+- **Tutorial (P-6):** no lesson sentence went false; lessons 2, 5 and 8 are now said at the doors (the
+  sheet's edit law; the release receipt; the plain delete's first sentence; the owned delete's two
+  choices and "whatever went in together, together"). No tutorial prose rewritten.
+- **MOBILE PARITY (for the closeout's row):** the phone gains no face; the shared `TrashPutBack` now
+  tells it a with-notes book "is back with its N notes" (shared road, free); everything else the phone
+  owes is F-U4-6's list — the mobile catch-up's.
+
+### THE WALK — captures under `notes/plans/13ic-screens/u4/` (gitignored)
+
+Guard OK at every act (`guard.sh --author` FIRST; her app absent; HID idle 4303 s at the open), AX +
+Screen grants true, the dev-store Debug build `DerivedData/13ic-u4` (`io.lduarte.Variorum.debug`), my own
+`caffeinate -d`; quit by bundle identity, never a keystroke; zero instances at the end.
+**Terminal · light (R4 by hand, end to end):** u4-01 the owned book's shelf menu (Stop Owning, Duplicate
+with Copies…, Delete Book…) · u4-02 the chip's "release" word on an owned book · u4-03 ROW 14 — Add an
+owned note to a plain book → the copy-only sheet · u4-04 Copy Into landed · u4-05 the Outline's shared mark
+· u4-06 the Index row's shared mark + the note box · u4-07 **W-2's before** (the row's hover shadowed the
+mark's) · u4-08 the note box's book context "Remove from This Book" · u4-09 the remove landed silently
+(F-U4-2) · u4-10/11 Settings ▸ Editor ▸ Books · u4-12 ROW 14 — copy·move with the severed list · u4-13 Move
+In's receipt names what it left · u4-14 the Index row menu's "Release from This Book" · u4-15 "Released
+… it's in the Pool now." · u4-16 the Pool holds it · u4-17 ROW 16 — a bookless note moves into an owned
+book clean · u4-18 the Library's owned-by marks · u4-19 the mark's click opened the book · u4-20 ROW 19 —
+an arrival at the owned door: Copy In · Move In · Dismiss + "also in “u4 other”" · u4-21 Copy In landed ·
+u4-22 a PLAIN book's delete confirm · u4-23 the OWNED book's two-choice confirm · u4-24 book-only → "its 2
+notes are in the Pool now" · u4-25 with its notes → one stamp · u4-26 the Trash's "book and 4 notes" row ·
+u4-27 Put back: "“u4 owned” is back with its 4 notes." · u4-28/29 Duplicate (shallow) + receipt · u4-30/31
+Duplicate with Copies only (checkbox fixed) + "4 copies." · u4-32 a gathering's view wears owned-by marks
+· u4-33 its click opened the owner · u4-34 the chip's gathering row "remove #u4ring" · u4-35 its receipt
+· u4-36 badges OFF → the Library silent · u4-37 badges back on · u4-38 ROW 18 — Manage Notes' Add → the
+sheet (W-1's before: the button lowercased her book's name) · u4-39 the copy joined the list.
+**Terminal · dark (after W-1/W-2/W-3):** u4-40 Library marks · u4-41 the chip over three books · u4-42 the
+copy·move sheet · u4-43 the arrival arms · u4-44 the owned delete. **Study · dark:** u4-45 Library · u4-46
+the sheet (Copy In / Move In voiced) · u4-47 the arrival arms · u4-48 the owned delete. **Study · light:**
+u4-49 the owned delete · u4-50 the arrival arms · u4-51 Dismissed · u4-52 Move In DISABLED, the sheet
+naming the finished book that holds it · u4-53 Library marks.
 
 ### LIVE STATUS (per commit; every unverified claim PENDING)
 
-- **Piece A — THE CHOICE SHEET + the add doors (§4 rows 14–18):** DONE (commit "13i-c U4 piece A").
-  `Core/Views/MembershipChoice.swift` — `MembershipChoiceCopy` (static words: the brief's two leads
-  verbatim, the edit law AT the door, the move's severed list, the finished-book block, the receipts),
-  `MembershipChoice` (the sheet's whole item, read from `noteMemberships` + `moveInPreview` — the
-  ops' own predicates), `MembershipDoors` (`add` → nil or the named choice; `addOrOffer`; `offer`;
-  `copyIn`/`moveIn` through `copyPostIntoReading`/`movePostIntoReading`, receipts on the 18i seam),
-  `MembershipChoiceSheet` + `.membershipChoices(_:onLanded:)` (ONE presentation road). Registry:
-  `.copyIn` `.moveIn` (`.surface`, `always`, `.native`); the walk names the sheet. HOSTS: the chip's
-  Add (row 14 — closes its popover, the sheet hangs off the chip), the Pool's add-to-book (row 16),
-  the shelf row's drop (row 17), Manage Notes… (row 18, through `ReadingsViewModel.addPost`). ROW 15
-  (honest shape — FINDING F-U4-1): `BookStructureModel`'s two DRAG roads create no membership (a
-  foreign payload decodes to nothing — pinned); its one ADD road is the daily book's "+ new entry",
-  whose ownership refusal now BELLS exactly as ⌘J does (§6) with the owner named
-  (`JournalBooks.shelvingNote` — ONE mapping for ⌘J and that door; `JournalWaitingCopy`, F-U2-6).
-  `MembershipChoiceTests` (15) + the registry walk: 42/2 green; the regression sweep over every
-  suite naming a changed road (24 suites) 104/24 green; zero instances.
-- **Piece B — remove/release vocabulary + the gathering's "Remove the #tag":** DONE (commit
-  "13i-c U4 piece B"). `Core/Views/RemoveFromBook.swift` — `RemoveFromBookCopy` (one act, its word
-  the book's: "Remove from This Book" / "Release from This Book"; the brief's two receipts verbatim +
-  the plain remove's bookless clause; "Remove the #tag"), `RemoveOutcome`, `RemoveFromBookDoor`
-  (`remove` — through `removePostFromReading`'s bookless answer, refusals named for the book's road
-  via `BookStateCopy.refusal`; `removeTag` — the gathering's honest door, its receipt saying whether
-  the gathering still shows the note; `wornRuleTags` — the rule's POSITIVE tags the note wears, by
-  subtree). Renderers: the chip's rows ("remove"/"release" on books; one "remove #tag" per worn
-  rule tag on a gathering — never a remove), the navigator's + Outline's note-row context menus
-  (`outlineChapterMenu`), the Index row's ⋯ menu, the sidebar note box's book context (a context
-  menu; `NoteBoxDoor.removeFromBook` — nil on a gathering), Manage Notes…'s row (its outcome said IN
-  the sheet — the W-1 class). Registry: `.removeFromBook` (`.contextMenu` + `.surface`) and
-  `.removeRuleTag` (`.surface`); the walk names `BookView`, `SidebarNoteBox`, `BookIndexColumn`,
-  `ManageReadingPostsSheet`. `RemoveReleaseDoorTests` (5) + the registry walk + MembershipChoice +
-  TimelineAndReadings + BookStructure/BookDrop: 65/6 green; the note-box/Index/pane sweep 44/7 green
-  (4 pre-existing `IndexTierMetricsTests` known issues); zero instances.
-- **Piece C — the Arrivals arms (§4 row 19):** DONE (commit "13i-c U4 piece C"). (⌘J's
-  owner-naming note, F-U2-6, landed with piece A.) `ArrivalArms` — the row's doors as DATA, decided by
-  the one `OwnershipDecision` verdict (so a row never offers an Add the seat refuses): Add · Dismiss
-  for an ordinary note; **Copy In · Move In · Dismiss** for a membered note at an OWNED book's door;
-  **Copy In · Dismiss** for a note owned elsewhere at a PLAIN book's door; the row's one quiet line
-  "owned by “X”" (§18.4's competing-owned-books face) / "also in “X”". `BookArrivalsModel` reads the
-  LISTED rows' facts in ONE page-driven statement (`Queries.ownershipFacts`, ∝ the ≤30 rows) and
-  answers through `copyPostIntoReading(answering:)` / `movePostIntoReading(answering:)` with receipts
-  (`ArrivalsCopy.copiedIn` / `.movedIn` naming the books it LEFT; a finished book among them refuses
-  with THAT book's road). The line's `surfaceCapabilities` gain `.copyIn`/`.moveIn` (one honest edit:
-  `BookArrivalsTests.theLineIsTheTwoActsOneRendererAndTheyAreDeclaredAsDrawn` — commented).
-  `ArrivalArmsTests` (5, incl. the MOUNTED line drawing Copy In · Move In · Dismiss) + BookArrivals +
-  the registry walk: 43/3 green; zero instances.
-- **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** DONE (commit "13i-c U4 piece D").
-  DELETE: the shelf's "Delete Book…" routes through `BookStateDoors.open(.deleteBook)` (F-U3-2) and
-  the arm is chosen by the book's facts — a gathering's (U3's words), a PLAIN book's
-  (`BookStateCopy.deletePlainBook` — lesson 8's first sentence, the Trash's 30 days; book-only, never
-  offers note deletion), an OWNED book's TWO-CHOICE confirm (`deleteOwnedBook` — "Delete Book Only"
-  → `deleteReading`, its notes to the Pool · "Delete Book and Its N Notes" → `deleteReadingWithNotes`,
-  ONE stamp — offered ONLY on an owned book, F-U2-7; an owned book with no notes has one button).
-  `BookStateConfirm.alternateLabel` + `BookStateDoors.confirm(alternate:)`/`perform(…alternate:)` + the
-  sheet's second button carry the second choice; receipts `deletedPlainBook` / `deletedBookOnly` /
-  `deletedWithNotes`. CORE (a query the face needs — no op semantics): `Queries.liveMemberNoteCount`
-  (the confirm's N = the set `deleteReadingWithNotes` takes), pinned in `OwnershipBookDoorsTests`.
-  DUPLICATE: `Features/Readings/DuplicateBook.swift` — `DuplicateBookCopy` ("Duplicate Book…" /
-  "Duplicate with Copies…" on an owned book; the brief's two receipts), `DuplicateBookOffer`,
-  `DuplicateBookDoor.perform` (E13's `assertBookNameIsFree` + `duplicateReading` in ONE runner
-  closure; an owned source always deep), `DuplicateBookSheet` (name prefilled "X copy", the "With
-  copies of its notes" checkbox — off on a plain book, on and fixed on an owned one; a refusal is said
-  IN the sheet, refuse-and-keep). The shelf menu: books only (a gathering has no duplicate op). The
-  book view's gear/settings has no delete or duplicate door today — none added (no settings-sheet work,
-  the brief's fence; FINDING F-U4-3). Registry: `.duplicateBook` (`.contextMenu`).
-  `BookDeleteAndDuplicateTests` (9) + BookStateDoors + GatheringRuleGate + BookSettingsSheet + the
-  registry walk + ShelfModel + DuplicateBookNameDoor + BindDoor: 80/8 green; core
-  `OwnershipBookDoorsTests` 14/1 green; zero instances.
-- **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** DONE
-  (commit "13i-c U4 piece E"). `Core/Views/OwnershipBadge.swift` — `OwnershipBadgeCopy`,
-  `OwnershipBadgeFace` (the RULE, pure: INSIDE a book the shared mark naming the other books; OUTSIDE —
-  a gathering's view, tag listings, the Library — the owned-by mark; a free note or a note only here
-  wears nothing; the setting off silences the SET), `OwnershipFactsModel` (ONE page-driven observation
-  over `Queries.ownershipFacts` per listing — it reads only the membership tables, so it re-runs on
-  membership changes, never a keystroke; `load` is the pins' seam), `OwnershipBadgeView` (the shared
-  glyph with its hover; "owned by “X”" whose click is the ascent — `.openBookAtNote`'s third
-  renderer). Hosts: the book's Index note rows + Outline headers/cards (`BookView.ownershipBadge` —
-  `.outside` on a gathering's view), the Library's List rows and Notes cards, the tag listing
-  (`FolderView`). The POOL is not a host: it lists bookless notes, so no Pool row can be owned — the
-  mark is structurally silent there and the Pool pays for no facts read (FINDING F-U4-4). The
-  navigator chip reads `BookStateCopy.navigatorChip` — "✓ sealed" on a sealed book (F-U3-7). SETTINGS:
-  the Editor pane (where `arrival_flash` lives — the brief's placement) gains a "Books" section —
-  "Show ownership badges" (`ownership_badges`) and "Hide notes an owned book holds, in gatherings and
-  tag listings" (`hide_owned_default`), each with one help sentence that does not overclaim
-  (`OwnershipSettingsCopy`); two `SettingsCatalog` rows; `ThemeStore.setOwnershipBadges` /
-  `setHideOwnedDefault`. CORE (a value type, no semantics): `Queries.OwnershipFacts` gains a public
-  init so the rule is pinned cell for cell. `OwnershipBadgeTests` (6, incl. the mounted Index row's
-  shared mark and a gathering view's owned-by mark) + 43 regression suites (book view, Outline,
-  landing, Library, settings, folder, note box, the registry walk): 281/44 green (4 pre-existing
-  `IndexTierMetricsTests` known issues); zero instances.
-- **Piece F — the Trash's "and N notes" + Put back's receipt:** DONE (commit "13i-c U4 piece F").
-  SHARED words (`RecoveryCopy.bookRowNotes` — "and N notes", nil for a book that went alone;
-  `bookPutBackWhole` — "“X” is back with its N notes.") and the SHARED act (`TrashPutBack` reads
-  `trashBookNoteCount` on the book's exact stamp BEFORE `restoreReading` clears it — a new
-  `Outcome.bookWhole(notes:)`; a book-only delete keeps the plain "Book put back."). The Mac Trash
-  (`RecoveryViewModel.bookNoteCounts`, read beside the listing, ∝ the book rows listed) draws "and N
-  notes" beside a book row's kind label; the row's Put back help says it returns with its notes; kind
-  labels unchanged. The phone's Trash rides the shared Put back road, so its receipt for such a book
-  is the whole one too (MOBILE PARITY); its ROW does not draw the count (the mobile catch-up's).
-  `TrashBookNotesTests` (3) + 24 Trash/recovery/tutorial/snippet suites: 245/25 green; zero instances.
-- **Piece G — THE WALK (Terminal · light leg DONE) + walk fixes W-1/W-2/W-3:** the guard OK at every
-  act (her app absent; HID idle 4303 s at the open), AX + Screen grants true, the dev-store Debug build
-  `DerivedData/13ic-u4` (`io.lduarte.Variorum.debug`); captures u4-01…39 (the capture list lands with
-  the close). R4 walked by hand end to end. **W-1 FOUND AND FIXED** (commit "13i-c U4 walk fixes"):
-  the copy-only button was chrome-labelled WHOLE, so the Terminal voice lowercased her book's name in
-  it → `MembershipChoice.copyButtonTitle(chrome:)` voices only "Copy Into" (pinned).
-  **W-2 FOUND AND FIXED:** the shared mark's hover never surfaced — the Outline card's and the Index
-  row's own `.help` win on a face that is one click target (u4-07: hovering the glyph said "click to
-  open this note") → `OwnershipBadgeCopy.rowHelp` appends the badge's sentence to the row's hover
-  (Index row, Outline card, Library card; pinned). **W-3 FOUND AND FIXED:** Duplicate's "With copies
-  of its notes" checkbox was not voiced → `chromeLabel`. MembershipChoice + OwnershipBadge +
-  BookDeleteAndDuplicate 31/3 green after them. The other three legs (Terminal·dark, Study·dark,
-  Study·light) — PENDING (next); the close's suites — PENDING.
-- No revert in flight.
+- **Piece A — THE CHOICE SHEET + the add doors (§4 rows 14–18):** DONE (45557e8d). MembershipChoice +
+  the registry walk 42/2; the regression sweep 104/24.
+- **Piece B — remove/release + the gathering's "remove #tag":** DONE (8a6af026). 65/6 + 44/7.
+- **Piece C — the Arrivals arms (§4 row 19):** DONE (6245ba0e). 43/3.
+- **Piece D — Delete (three arms) + Duplicate Book…:** DONE (33cbe567). 80/8 + core 14/1.
+- **Piece E — the badge family + the sealed chip + the Settings rows:** DONE (24d74a36). 281/44.
+- **Piece F — the Trash's "and N notes" + Put back's receipt:** DONE (d870d2b1). 245/25.
+- **Piece G — THE WALK + W-1/W-2/W-3 (8f35a60c) + the close:** DONE (the closing commit). The walk's four
+  legs captured (53); the arrivals line's hover (the close's one-line nit); core FULL 2004/212 · Mac
+  575/82 · phone build + 72/5 — all green on the committed tree; ledger row 5 flipped in this commit.
+- **Machinery honesty:** the record's heading was inserted on its OWN line by a whole-line match (the
+  U2/U3 swallow avoided); one walk step clicked a stale coordinate (forgot the window's Y offset) and
+  sent stray keystrokes — checked afterwards: no note, book or text changed (the Library showed no new
+  note; the book's cards unchanged), the step redone at the right point. No revert was ever in flight;
+  zero app instances at open and at close.
 
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
@@ -1691,7 +1812,7 @@ Debug only, author-free, own `caffeinate -d`.
 | 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | **BUILT + PINNED 2026-10-01** (the U1 RECORD above; core 1927/202 · Mac 83/9 · phone build green; commits b4cb639b + 19eb55c0; the deploy checklist `notes/plans/13i-c-deploy-checklist.md`). **The dev-store WALK is HELD** (author at the machine) and folded into U3's walk window |
 | 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | **BUILT + PINNED 2026-10-01** (the U2 RECORD above; core 2001/211 · Mac 772/135 · phone 102/16 · both builds green; commits 936f8cf9 → the closing commit; nine PROVISIONALs P-13ic-U2-1…9 for #169; FINDINGS F-U2-1…9 — F-U2-1, `unlockPost` inside a sealed book, is a reserved fork for the architect). Headless — no walk owed by this unit |
 | 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | **BUILT + PINNED + WALKED 2026-10-01** (the U3 RECORD above; core 2004/212 · Mac 445/73 · phone build green; commits 163b9545 → the closing commit; the walk found and fixed W-1/W-2/W-3; fifty captures, both voices × both appearances; seven PROVISIONALs P-13ic-U3-1…7 for #169; FINDINGS F-U3-1…10 — F-U3-2 is U4's delete door; the bind sheet's owned-notes limb built here per §3) |
-| 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | NOT STARTED |
+| 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | **BUILT + PINNED + WALKED 2026-10-01** (the U4 RECORD above; core 2004/212 · Mac 575/82 · phone build + 72/5 green; commits e45d19d6 → the closing commit; the walk found and fixed W-1/W-2/W-3; 53 captures, both voices × both appearances; eleven PROVISIONALs P-13ic-U4-1…11 for #169; FINDINGS F-U4-1…10 — F-U4-1 corrects §4 row 15's text, F-U4-2 is the 18i seam's quiet-receipt gap) |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | NOT STARTED |
 | 7 | Her deploy window (§11) + the install refresh + the phone's tail | HELD for her go |
 | 8 | Closeout + handoff + 13i-d's plan (carrying R-13ic-2's doors + the combined-walk list) | NOT STARTED |
