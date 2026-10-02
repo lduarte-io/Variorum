@@ -302,6 +302,10 @@ struct CapabilityRegistryTests {
             // by both text-surface kinds — so the declaration lives with the
             // builder rather than in each surface.
             .union(MarkdownActs.contextMenuCapabilities)
+            // 13i-c U4 (the remove/release door, §20): the book's note-row
+            // menus and the sidebar note box's book context.
+            .union(BookView.contextMenuCapabilities)
+            .union(SidebarNoteBox.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
@@ -439,6 +443,10 @@ struct CapabilityRegistryTests {
             // add road (§4 rows 14–18); the Arrivals line is their other
             // renderer (its own line above, grown at U4).
             .union(MembershipChoiceSheet.surfaceCapabilities)
+            // 13i-c U4 (the same class): the remove/release door's `.surface`
+            // rows beyond the chip — the Index row's ⋯ menu and Manage Notes….
+            .union(BookIndexColumn.surfaceCapabilities)
+            .union(ManageReadingPostsSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

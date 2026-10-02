@@ -117,4 +117,16 @@ struct NoteBoxDoor {
     /// Make the selected note live, at the block she was last in — mode
     /// shaped, because "live" means a different thing in each editing mode.
     let editHere: () -> Void
+    /// 13i-c U4 — the box's BOOK CONTEXT door (the sitting record §20): take
+    /// the box's note out of the book — "Remove from This Book", or "Release
+    /// from This Book" on an owned book. nil where the book holds no
+    /// membership (a gathering — its honest door is the note's chip).
+    var removeFromBook: NoteBoxRemoveDoor?
+}
+
+/// The note box's remove/release door: the book's word and the act.
+@MainActor
+struct NoteBoxRemoveDoor {
+    let verb: String
+    let act: () -> Void
 }

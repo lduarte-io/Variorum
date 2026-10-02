@@ -48,6 +48,9 @@ struct MembershipChip: View {
     /// road (`MembershipDoors`); its sheet hangs off the chip itself, so it
     /// outlives the popover the Add was pressed in.
     @State private var membershipDoors: MembershipDoors
+    /// 13i-c U4 (§20): per GATHERING row, the rule tags this note wears —
+    /// the honest "remove #tag" doors (a gathering has no membership).
+    @State private var wornRuleTags: [String: [VariorumCore.Tag]] = [:]
 
     init(session: AppSession, postID: String, recentBookIDs: [String] = []) {
         self.session = session
@@ -113,11 +116,32 @@ struct MembershipChip: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .help(DivergeCopy.help(book: book.name))
-                            Button("remove") { remove(from: book) }
+                            // 13i-c U4 — THE REMOVE/RELEASE VOCABULARY (the
+                            // sitting record §20): ONE act whose word follows
+                            // the book — "release" on an owned book (the note
+                            // goes back to the Pool, whole — lesson 5). A
+                            // GATHERING has no membership to remove, so it
+                            // offers the honest door instead: one "remove
+                            // #tag" per rule tag the note wears (`removeTag`).
+                            if book.kind == .book {
+                                Button(RemoveFromBookCopy.rowWord(owned: book.owned)) {
+                                    remove(from: book)
+                                }
                                 .buttonStyle(.borderless)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                                .help("Take this note out of “\(book.name)” (the note itself is untouched)")
+                                .help(RemoveFromBookCopy.help(owned: book.owned, book: book.name))
+                            } else {
+                                ForEach(wornRuleTags[book.id] ?? [], id: \.id) { tag in
+                                    Button(RemoveFromBookCopy.removeTagRowWord(path: tag.path)) {
+                                        removeTag(tag, from: book)
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .help(RemoveFromBookCopy.removeTagHelp(gathering: book.name))
+                                }
+                            }
                         }
                     }
                 }
@@ -223,7 +247,12 @@ struct MembershipChip: View {
     /// which is what makes them surface acts; the per-row condition stays the
     /// surface's (a row exists only where its book does — the
     /// `.diffAgainstChosen` split, P-2).
-    static let surfaceCapabilities: [CapabilityID] = [.divergeForBook, .openBookAtNote]
+    static let surfaceCapabilities: [CapabilityID] = [
+        .divergeForBook, .openBookAtNote,
+        // 13i-c U4 (§20): the book rows' remove/release door, and a
+        // gathering row's honest "remove #tag".
+        .removeFromBook, .removeRuleTag,
+    ]
 
     /// 13g cold review R1-1 (L17's explainer half — her WT-7 round-4
     /// ruling): the lead-in above "Duplicate as Version", CONDITIONED on
@@ -260,6 +289,16 @@ struct MembershipChip: View {
         // (round 10 item 2, #26(h)), and `readingsContaining` has always
         // returned them.
         books = BookChooserOrder.ordered(membership, recentlyVisited: recentBookIDs)
+        // 13i-c U4 (§20): the honest doors' tags, per gathering row.
+        let gatherings = membership.filter { $0.kind == .gathering }
+        wornRuleTags = (try? await session.database.read { [postID] db in
+            var worn: [String: [VariorumCore.Tag]] = [:]
+            for gathering in gatherings {
+                worn[gathering.id] = try RemoveFromBookDoor.wornRuleTags(
+                    db, postID: postID, gathering: gathering)
+            }
+            return worn
+        }) ?? [:]
         let memberIDs = Set(membership.map(\.id))
         let all = ((try? await session.database.read { db in
             try Queries.readings(db)
@@ -317,16 +356,22 @@ struct MembershipChip: View {
         }
     }
 
+    /// 13i-c U4 (§20): the one remove/release road — its receipt (or the
+    /// op's refusal, named for its book) on the chip's own line.
     private func remove(from book: Reading) {
         Task {
-            do {
-                try await session.runner.run { [postID] ops in
-                    try ops.removePostFromReading(postID, from: book.id)
-                }
-                status = "Removed from “\(book.name)” — the note itself is untouched."
-            } catch {
-                status = ChipRefusals.message(for: error, bookName: book.name)
-            }
+            status = await RemoveFromBookDoor.remove(
+                session: session, postID: postID, book: book, speak: false).text
+            await refresh()
+        }
+    }
+
+    /// 13i-c U4 (§20): a gathering's honest door — take the tag off.
+    private func removeTag(_ tag: VariorumCore.Tag, from gathering: Reading) {
+        Task {
+            status = await RemoveFromBookDoor.removeTag(
+                session: session, postID: postID, tag: tag, gathering: gathering,
+                speak: false).text
             await refresh()
         }
     }

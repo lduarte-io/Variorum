@@ -29,6 +29,10 @@
 import SwiftUI
 
 struct SidebarNoteBox: View {
+    /// 13i-c U4: the box's context menu renders the remove/release door
+    /// (§20 — "the sidebar note box's book context").
+    static let contextMenuCapabilities: [CapabilityID] = [.removeFromBook]
+
     let tokens: VoiceTokens
     /// **Whose box this is** — the book it belongs to. Its one job is the
     /// DEBUG oracles' key (the 18d ladder's MINOR-3: suites run in parallel,
@@ -65,6 +69,11 @@ struct SidebarNoteBox: View {
     var now: Date = Date()
     /// The one door out of the read-cheap state.
     var onEditHere: (() -> Void)?
+    /// 13i-c U4 (the sitting record §20) — the box's BOOK CONTEXT: the
+    /// remove/release door for the box's note (the book's word, and its act),
+    /// rendered as the box's context menu while a note is in it. nil where
+    /// the book holds no membership (a gathering).
+    var removeDoor: (verb: String, act: () -> Void)?
     /// The live editor's bar, built by the shell. nil ⇒ no full editor is
     /// live here (the Index's own liveness is a single block's pane, not an
     /// editor — see `BookNoteBox.livePost`).
@@ -142,6 +151,13 @@ struct SidebarNoteBox: View {
             RoundedRectangle(cornerRadius: Self.corner)
                 .stroke(tokens.line, lineWidth: 1))
         .overlay(alignment: .topTrailing) { editingMark }
+        // 13i-c U4 (§20): the box's BOOK CONTEXT — right-click the box to take
+        // its note out of the book. Only while a note is in it.
+        .contextMenu {
+            if let removeDoor, state.postID != nil {
+                Button(removeDoor.verb) { removeDoor.act() }
+            }
+        }
 #if DEBUG
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
             SidebarGeometry.recordBoxFrame(subjectKey, $0, owner: oracleOwner)

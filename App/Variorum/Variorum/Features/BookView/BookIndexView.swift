@@ -223,6 +223,10 @@ nonisolated struct BookIndexWashReport: Equatable, Sendable {
 #endif
 
 nonisolated enum BookIndexColumn {
+    /// 13i-c U4: the Index note row's ⋯ menu renders the remove/release door
+    /// (§20) — its `.surface` declaration lives with the column it rides.
+    static let surfaceCapabilities: [CapabilityID] = [.removeFromBook]
+
     /// **The ONE trailing column both row kinds end in** (17o batch d,
     /// ledger row 21; her punchlist 5, image 7). The chapter row's count was
     /// a bare `Text` flush against the row's padding while the note row's
@@ -803,6 +807,18 @@ struct BookIndexView<Masthead: View>: View {
                 Divider()
                 Button("None") {
                     Task { await structure.assign(postID, to: nil) }
+                }
+            }
+            // 13i-c U4 (the sitting record §20): the remove/release door —
+            // one act, its word the book's (owned ⇒ Release). Books only: a
+            // gathering holds no membership (its honest door is the chip's).
+            if let book = structure.reading {
+                Divider()
+                Button(RemoveFromBookCopy.verb(owned: book.owned)) {
+                    Task {
+                        await RemoveFromBookDoor.remove(
+                            session: session, postID: postID, book: book)
+                    }
                 }
             }
         }

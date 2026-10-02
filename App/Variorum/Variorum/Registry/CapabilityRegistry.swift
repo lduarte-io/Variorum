@@ -1673,6 +1673,30 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: MembershipChoiceCopy.unavailableNote,
             availability: always),
+        // 13i-c U4 — THE REMOVE/RELEASE DOOR (the sitting record §20). Two
+        // door families: the book's note-row CONTEXT menus (the navigator's
+        // and Outline's rows — `BookView`) and the sidebar note box's book
+        // context (`SidebarNoteBox`), and the `.surface` rows that carry their
+        // book (the chip's rows, the Index row's ⋯ menu, Manage Notes…).
+        // `always`: every renderer carries its note AND its book; the per-pair
+        // refusals (a finished or sealed book) are the op's, named for the
+        // book with its road (`BookStateCopy.refusal`). The verb is the plain
+        // book's; an owned book's renderers say `RemoveFromBookCopy.verb`.
+        Capability(
+            id: .removeFromBook, verb: RemoveFromBookCopy.removeVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: RemoveFromBookCopy.unavailableNote,
+            availability: always),
+        // The gathering's honest door (§20): "Remove the #tag" — the chip's
+        // gathering rows, one per rule tag the note wears.
+        Capability(
+            id: .removeRuleTag, verb: RemoveFromBookCopy.removeTagVerb(path: "tag"),
+            scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: RemoveFromBookCopy.removeTagUnavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

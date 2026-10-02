@@ -16,6 +16,10 @@ import SwiftUI
 import VariorumCore
 
 struct BookView: View {
+    /// 13i-c U4: the navigator's and Outline's note-row CONTEXT MENUS render
+    /// the remove/release door (§20) — one act, its word the book's.
+    static let contextMenuCapabilities: [CapabilityID] = [.removeFromBook]
+
     let session: AppSession
     let readingID: String
     var readingName: String?
@@ -857,7 +861,26 @@ struct BookView: View {
         let report = noteBoxReport
         onNoteBox?(
             readingID, report,
-            report.map { report in NoteBoxDoor { editHere(report) } })
+            report.map { report in
+                NoteBoxDoor(
+                    editHere: { editHere(report) },
+                    removeFromBook: removeDoor(report))
+            })
+    }
+
+    /// 13i-c U4 (§20) — the note box's book context: the remove/release door
+    /// for the box's note, in the book's word. A gathering has no membership
+    /// to remove, so no door (P-2: a door that can never act isn't rendered).
+    private func removeDoor(_ report: NoteBoxReport) -> NoteBoxRemoveDoor? {
+        guard let book = structure.reading, book.kind == .book,
+              let postID = report.selected ?? report.live
+        else { return nil }
+        let session = session
+        return NoteBoxRemoveDoor(verb: RemoveFromBookCopy.verb(owned: book.owned)) {
+            Task {
+                await RemoveFromBookDoor.remove(session: session, postID: postID, book: book)
+            }
+        }
     }
 
     /// **18o U4 (R-18k-6) — the same fact, to the book's leaving road.** The
@@ -2481,7 +2504,7 @@ private extension View {
 private func outlineChapterMenu(
     structure: BookStructureModel, postID: String
 ) -> some View {
-    if structure.reading?.kind == .book {
+    if let book = structure.reading, book.kind == .book {
         Menu("Chapter") {
             ForEach(structure.sections, id: \.id) { section in
                 Button(section.name) {
@@ -2491,6 +2514,17 @@ private func outlineChapterMenu(
             Divider()
             Button("None") {
                 Task { await structure.assign(postID, to: nil) }
+            }
+        }
+        // 13i-c U4 (the sitting record §20): the remove/release door — one
+        // act, its word the book's ("Release from This Book" on an owned
+        // book: the note goes back to the Pool, whole). A gathering holds no
+        // membership, so it renders none here (its honest door is the chip's).
+        Divider()
+        Button(RemoveFromBookCopy.verb(owned: book.owned)) {
+            Task {
+                await RemoveFromBookDoor.remove(
+                    session: structure.session, postID: postID, book: book)
             }
         }
     }

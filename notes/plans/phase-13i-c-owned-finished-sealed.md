@@ -1533,7 +1533,22 @@ SyncSpec not required).
   (`JournalBooks.shelvingNote` — ONE mapping for ⌘J and that door; `JournalWaitingCopy`, F-U2-6).
   `MembershipChoiceTests` (15) + the registry walk: 42/2 green; the regression sweep over every
   suite naming a changed road (24 suites) 104/24 green; zero instances.
-- **Piece B — remove/release vocabulary + the gathering's "Remove the #tag":** NOT-STARTED.
+- **Piece B — remove/release vocabulary + the gathering's "Remove the #tag":** DONE (commit
+  "13i-c U4 piece B"). `Core/Views/RemoveFromBook.swift` — `RemoveFromBookCopy` (one act, its word
+  the book's: "Remove from This Book" / "Release from This Book"; the brief's two receipts verbatim +
+  the plain remove's bookless clause; "Remove the #tag"), `RemoveOutcome`, `RemoveFromBookDoor`
+  (`remove` — through `removePostFromReading`'s bookless answer, refusals named for the book's road
+  via `BookStateCopy.refusal`; `removeTag` — the gathering's honest door, its receipt saying whether
+  the gathering still shows the note; `wornRuleTags` — the rule's POSITIVE tags the note wears, by
+  subtree). Renderers: the chip's rows ("remove"/"release" on books; one "remove #tag" per worn
+  rule tag on a gathering — never a remove), the navigator's + Outline's note-row context menus
+  (`outlineChapterMenu`), the Index row's ⋯ menu, the sidebar note box's book context (a context
+  menu; `NoteBoxDoor.removeFromBook` — nil on a gathering), Manage Notes…'s row (its outcome said IN
+  the sheet — the W-1 class). Registry: `.removeFromBook` (`.contextMenu` + `.surface`) and
+  `.removeRuleTag` (`.surface`); the walk names `BookView`, `SidebarNoteBox`, `BookIndexColumn`,
+  `ManageReadingPostsSheet`. `RemoveReleaseDoorTests` (5) + the registry walk + MembershipChoice +
+  TimelineAndReadings + BookStructure/BookDrop: 65/6 green; the note-box/Index/pane sweep 44/7 green
+  (4 pre-existing `IndexTierMetricsTests` known issues); zero instances.
 - **Piece C — the Arrivals arms (§4 row 19):** NOT-STARTED. (⌘J's owner-naming note, F-U2-6, landed with piece A.)
 - **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** NOT-STARTED.
 - **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.

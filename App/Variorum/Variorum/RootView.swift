@@ -610,6 +610,8 @@ struct RootView: View {
                 }
             },
             onEditHere: noteBoxDoor?.editHere,
+            // 13i-c U4 (§20): the box's book-context remove/release door.
+            removeDoor: noteBoxDoor?.removeFromBook.map { (verb: $0.verb, act: $0.act) },
             bar: barModel.map { AnyView(CommitBar(model: $0, axis: .box)) }))
     }
 

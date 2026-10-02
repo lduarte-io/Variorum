@@ -30,11 +30,18 @@ extension Reading: @retroactive Identifiable {}
 /// Curated membership: add/remove/reorder — the fractional positions ride
 /// the existing op; up/down emits one `reorderReadingPost` each.
 struct ManageReadingPostsSheet: View {
+    /// 13i-c U4: each member row's remove/release door (§20 — one act, its
+    /// word the book's) and the add's ownership choice road.
+    static let surfaceCapabilities: [CapabilityID] = [.removeFromBook]
+
     let session: AppSession
     let model: ReadingsViewModel
     let reading: Reading
     @State private var members: [Queries.ReadingEntry] = []
     @State private var candidates: [Queries.TimelineItem] = []
+    /// 13i-c U4: the last remove/release outcome, said in the sheet (a toast
+    /// would land under it — the W-1 class).
+    @State private var removeOutcome: RemoveOutcome?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -59,12 +66,18 @@ struct ManageReadingPostsSheet: View {
                             Button("↓") { move(entry.postID, up: false) }
                                 .disabled(i == members.count - 1)
                         }
-                        Button("Remove") {
+                        // 13i-c U4 (§20): the one remove/release road —
+                        // "Release" on an owned book (the note goes back to
+                        // the Pool, whole), its outcome said in this sheet.
+                        Button(RemoveFromBookCopy.rowWord(owned: reading.owned).capitalized) {
                             Task {
-                                await model.removePost(entry.postID, from: reading.id)
+                                removeOutcome = await RemoveFromBookDoor.remove(
+                                    session: session, postID: entry.postID, book: reading,
+                                    speak: false)
                                 await refresh()
                             }
                         }
+                        .help(RemoveFromBookCopy.help(owned: reading.owned, book: reading.name))
                     }
                 }
                 if members.isEmpty {
@@ -89,6 +102,20 @@ struct ManageReadingPostsSheet: View {
                     .font(.caption)
                     .alarmVoice()
                     .textSelection(.enabled)
+            }
+            switch removeOutcome {
+            case .receipt(let words):
+                Text(words)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            case .refusal(let words):
+                Text(words)
+                    .font(.caption)
+                    .alarmVoice()
+                    .textSelection(.enabled)
+            case nil:
+                EmptyView()
             }
             HStack {
                 Spacer()

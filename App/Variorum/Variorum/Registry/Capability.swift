@@ -711,6 +711,16 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // with its own words and its own refusal. Both are `.surface` acts whose
     // target is the choice sheet's pair or the ARRIVAL ROW you point at.
     case copyIn, moveIn
+    // 13i-c U4 — THE REMOVE/RELEASE DOOR (the sitting record §20): ONE act
+    // whose verb is a per-target function ("Remove from This Book", "Release
+    // from This Book" on an owned book — `RemoveFromBookCopy.verb(owned:)`),
+    // rendered by the book's note-row menus, the note box's book context, the
+    // membership chip's rows and Manage Notes…. A gathering holds no
+    // membership, so its honest door is a SECOND act — `.removeRuleTag`
+    // ("Remove the #tag", `removeTag`), the chip's — on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds: a different op, different
+    // words, a different refusal.
+    case removeFromBook, removeRuleTag
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial
