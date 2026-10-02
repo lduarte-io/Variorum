@@ -1504,6 +1504,28 @@ quotes `## §8` (the U2/U3 swallow). Flip ledger row 5 at the close. Commit per 
 --rebase` then push after every commit; no trailers; foreground waits only; no subagents (one
 read-only Sonnet lookup at most); the §8 traps verbatim.
 
+## U4 RECORD — THE MEMBERSHIP DOORS' FACES · THE BADGES · DELETE/DUPLICATE · REMOVE/RELEASE · THE TRASH (`opus-implementer`, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+
+**UNIT STATUS: IN PROGRESS** (opened 2026-10-01 at tip 88e9c69c; zero app instances at open).
+
+Preflight read in this session's own context: CLAUDE.md + its canon, this plan WHOLE (§1–§11, the
+U1/U2/U3 RECORDs, both adjudications, the U4 BRIEF), the sitting record §1–§6, §18–§25,
+`notes/SessionResiliencyProtocol.md`. No editor seam, no `Sync/`, no schema (TEXTKIT2_NOTES /
+SyncSpec not required).
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- **Piece A — THE CHOICE SHEET + the add doors (§4 rows 14–18):** NOT-STARTED.
+- **Piece B — remove/release vocabulary + the gathering's "Remove the #tag":** NOT-STARTED.
+- **Piece C — the Arrivals arms (§4 row 19) + ⌘J's owner-naming note (F-U2-6):** NOT-STARTED.
+- **Piece D — Delete (three arms, F-U3-2) + Duplicate Book…:** NOT-STARTED.
+- **Piece E — the badge family + the navigator's sealed face (F-U3-7) + the two Settings rows:** NOT-STARTED.
+- **Piece F — the Trash's "and N notes" + Put back's receipt:** NOT-STARTED.
+- **Piece G — suites, the walk, the record closed, ledger row 5:** NOT-STARTED.
+- No revert in flight.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
