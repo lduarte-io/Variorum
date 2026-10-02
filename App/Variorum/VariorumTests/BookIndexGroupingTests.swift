@@ -287,4 +287,28 @@ struct BookIndexGroupingTests {
             #expect(b.current == .chapters, "never chosen on a chaptered book ⇒ chapters")
         }
     }
+
+    /// **Ladder A round 1, MINOR 1 — U3's sharpened consequence (GENUINELY
+    /// RED ON OLD — run on the pre-guard model first):** a SUPERSEDED
+    /// track's late delivery (its task cancelled when the Index's key moved)
+    /// never stomps the family in hand. Before the guard the late adopt
+    /// overwrote `sectionsRoot`, so `BookIndexView.groups`' own
+    /// `sectionsRoot == family.id` check failed and the Index fell back to
+    /// the SHIPPED look — the chosen partition silently disappeared and
+    /// STAYED gone until the next tagging write.
+    @Test func aCancelledTracksLateDeliveryNeverStompsTheChosenFamily() async throws {
+        let model = BookIndexGroupingModel(readingID: "r", defaults: scratchDefaults())
+        model.adopt(
+            .init(worn: [], live: [], sections: ["p": "fam/draft"]), rootID: "fam")
+        // The superseded key's delivery lands on a CANCELLED task —
+        // deterministic: the body cannot run before this MainActor test
+        // suspends, and cancel() lands first.
+        let late = Task { @MainActor in
+            model.adopt(.init(worn: [], live: [], sections: [:]), rootID: nil)
+        }
+        late.cancel()
+        _ = await late.value
+        #expect(model.sectionsRoot == "fam", "the family in hand stands")
+        #expect(model.sections == ["p": "fam/draft"])
+    }
 }

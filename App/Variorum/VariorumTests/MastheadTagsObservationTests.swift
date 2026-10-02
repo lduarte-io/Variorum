@@ -34,6 +34,64 @@ struct MastheadTagsObservationTests {
         }
     }
 
+    /// **Ladder A round 1, MINOR 1 (GENUINELY RED ON OLD — run on the
+    /// pre-guard model first):** a SUPERSEDED track's late delivery — its
+    /// task cancelled by `.task(id:)` for the next note — never stomps the
+    /// next note's cards. Before the guard, the late adopt set `subject`
+    /// back and the new note's masthead drew NO cards (and a stale taxonomy)
+    /// until the next `post_tag`/`tag` write anywhere. The guard is the
+    /// `NoteMembershipModel` one (the `NoteBoxFactsModel` lesson).
+    @Test func aCancelledTracksLateDeliveryNeverStompsTheNextNotesCards() async throws {
+        try await world { session in
+            let ops = session.operations
+            let noteA = try ops.createPost(title: "A")
+            let noteB = try ops.createPost(title: "B")
+            let aTag = try ops.createTag(name: "a-tag")
+            let bTag = try ops.createTag(name: "b-tag")
+            _ = try ops.applyTag(aTag.id, toPost: noteA.id)
+            _ = try ops.applyTag(bTag.id, toPost: noteB.id)
+            let model = MastheadTagsModel()
+            await model.refresh(session: session, postID: noteB.id)
+            #expect(model.tags(for: noteB.id).map(\.id) == [bTag.id])
+            let aSnapshot = try await session.database.read { db in
+                try MastheadTagsModel.fetch(db, postID: noteA.id)
+            }
+            // A's late delivery arrives on a CANCELLED task — deterministic:
+            // the body cannot run before this MainActor test suspends, and
+            // cancel() lands first.
+            let late = Task { @MainActor in model.adopt(aSnapshot, postID: noteA.id) }
+            late.cancel()
+            _ = await late.value
+            #expect(model.tags(for: noteB.id).map(\.id) == [bTag.id],
+                    "B's cards stand — the superseded delivery is dropped")
+            #expect(model.tags(for: noteA.id).isEmpty)
+        }
+    }
+
+    /// **Ladder A round 1, MINOR 1 — U3's extension (GENUINELY RED ON OLD):**
+    /// the one-shot `refresh` road has the same stomp — a refresh in flight
+    /// for the OLD note (its Task outlived the switch) lands after the NEW
+    /// note's read adopted. A refresh whose postID is no longer the subject
+    /// in hand is dropped; a nil subject adopts (the first read of a fresh
+    /// visit).
+    @Test func aLateRefreshForTheOldNoteNeverStompsTheNewOne() async throws {
+        try await world { session in
+            let ops = session.operations
+            let old = try ops.createPost(title: "old")
+            let new = try ops.createPost(title: "new")
+            let worn = try ops.createTag(name: "worn")
+            _ = try ops.applyTag(worn.id, toPost: new.id)
+            let model = MastheadTagsModel()
+            await model.refresh(session: session, postID: new.id)
+            #expect(model.tags(for: new.id).map(\.id) == [worn.id])
+
+            await model.refresh(session: session, postID: old.id)
+
+            #expect(model.tags(for: new.id).map(\.id) == [worn.id],
+                    "the new note's cards stand — the late refresh is dropped")
+        }
+    }
+
     /// **RED ON OLD** (the one-shot read): the note is open with two cards;
     /// ANOTHER door takes one tag off (the chip's / the Book Panel's "remove
     /// #tag" both land as this op), and the cards in hand follow — no reopen.

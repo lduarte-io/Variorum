@@ -158,6 +158,12 @@ final class BookArchivedModel {
     /// Internal so pins drive the line deterministically (hosted `.task`
     /// callbacks don't fire under the test host).
     func adopt(_ value: Queries.BookArchivedMembers) {
+        // Ladder A round 1, MINOR 1 (U4's refinement): a cancelled loop's
+        // late delivery — the collapsed observation's count-only value
+        // landing after the `.task(id: expanded)` restart's first rows —
+        // would blank the expansion until the next write with nobody typing.
+        // The `NoteMembershipModel` guard (the `NoteBoxFactsModel` lesson).
+        guard !Task.isCancelled else { return }
         door = value
         acting.formIntersection(value.rows.map(\.id))
         if value.count == 0 { expanded = false }

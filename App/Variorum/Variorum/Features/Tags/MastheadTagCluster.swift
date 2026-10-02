@@ -273,10 +273,23 @@ final class MastheadTagsModel {
         guard let read = try? await session.database.read({ db in
             try Self.fetch(db, postID: postID)
         }) else { return }
+        // Ladder A round 1, MINOR 1 (U3's extension): a refresh in flight
+        // for the OLD note may land after the NEW note's read adopted — a
+        // one-shot whose postID is no longer the subject in hand is dropped.
+        // A nil subject adopts (the first read of a fresh visit; the held
+        // track's own delivery corrects it either way).
+        guard subject == nil || subject == postID else { return }
         adopt(read, postID: postID)
     }
 
-    private func adopt(_ snapshot: Snapshot, postID: String) {
+    /// Internal so the ladder's pin drives it deterministically (the
+    /// `BookArchivedModel.adopt` precedent).
+    func adopt(_ snapshot: Snapshot, postID: String) {
+        // Ladder A round 1, MINOR 1: a SUPERSEDED observation's late
+        // delivery — its task cancelled by `.task(id:)` for the next note —
+        // never stomps the subject in hand. The `NoteMembershipModel` guard
+        // (the `NoteBoxFactsModel` lesson), on every loop of this class.
+        guard !Task.isCancelled else { return }
         applied = snapshot.applied
         allTags = snapshot.all
         subject = postID

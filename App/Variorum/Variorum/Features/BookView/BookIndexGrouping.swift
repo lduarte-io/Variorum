@@ -305,6 +305,14 @@ final class BookIndexGroupingModel {
     }
 
     func adopt(_ snapshot: Snapshot, rootID: String?) {
+        // Ladder A round 1, MINOR 1 (U3's sharpened consequence): a
+        // SUPERSEDED track's late delivery — its task cancelled when the
+        // Index's key moved — would overwrite `sectionsRoot`, failing
+        // `BookIndexView.groups`' own-family check, so the chosen partition
+        // silently fell back to the shipped look and STAYED there until the
+        // next tagging write. The `NoteMembershipModel` guard (the
+        // `NoteBoxFactsModel` lesson).
+        guard !Task.isCancelled else { return }
         worn = snapshot.worn
         live = snapshot.live
         sections = snapshot.sections

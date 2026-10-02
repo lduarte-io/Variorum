@@ -332,6 +332,34 @@ struct BookArchivedLineTests {
 
     // MARK: - The acts
 
+    /// **Ladder A round 1, MINOR 1 — U4's refinement (GENUINELY RED ON OLD
+    /// — run on the pre-guard model first):** a cancelled loop's late
+    /// delivery — the COLLAPSED observation's count-only value landing after
+    /// the expanded loop's first rows (the `.task(id: expanded)` restart) —
+    /// never blanks the expansion. Before the guard it left "▾ N archived"
+    /// with ZERO rows, standing until a write touched
+    /// reading/reading_post/container or she folded and reopened.
+    @Test func aCancelledLoopsLateDeliveryNeverBlanksTheExpandedRows() async throws {
+        try await withArchiveBook(members: 1, archive: 1) { session, db, readingID, _ in
+            let line = BookArchivedModel(session: session, readingID: readingID)
+            try await refresh(line, db)
+            line.toggle()
+            try await refresh(line, db)
+            let rows = line.door.rows
+            #expect(rows.count == 1)
+            // The collapsed loop's value lands on a CANCELLED task —
+            // deterministic: the body cannot run before this MainActor test
+            // suspends, and cancel() lands first.
+            let late = Task { @MainActor in
+                line.adopt(.init(count: 1, rows: []))
+            }
+            late.cancel()
+            _ = await late.value
+            #expect(line.door.rows == rows, "the expanded rows stand")
+            #expect(line.expanded, "still open")
+        }
+    }
+
     @Test func unarchiveBringsTheNoteBackIntoTheBook() async throws {
         try await withArchiveBook(members: 3, archive: 1) { session, db, readingID, memberIDs in
             let line = BookArchivedModel(session: session, readingID: readingID)
