@@ -481,3 +481,35 @@ call per finding, each bug-class fix red-on-old first; dispositions written as t
   `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift`. Suites after: Mac
   MembershipChoice + JournalBooks + BookArrivals + ArrivalArms + BookStateDoors 55/5 green; core
   OwnershipOperations + OwnershipDoor + MembershipReadersBookScope + OwnershipBookDoors 50/4 green.
+
+### [MINOR] dead `ReadingsViewModel.delete` — **CONFIRMED-FIXED (the adjudicated retirement)**
+- **Final call:** CONFIRMED (F-U4-8, already adjudicated here). The method is RETIRED with a
+  pointing comment (one act, one road — `BookStateDoors.open(.deleteBook)`); its one test caller
+  (`TimelineAndReadingsTests.readingCRUDThroughTheUIPathEmitsExactStateTransitions`) moved onto the
+  REAL UI road per the implementer's shape — `BookStateDoors.open(.deleteBook)` then `confirm()`,
+  which also exercises P-13ic-U4-6's plain-book ask (the honest edit, commented; subject
+  untouched). No pin owed (a retirement, not a bug). Suites: TimelineAndReadings 5/1 green.
+
+### [NIT] `perform(.deleteBook)`'s stale receipt reads — **CONFIRMED-RECORDED**
+- **Final call:** CONFIRMED as receipt-level only (the implementer's sharper trace agreed: `named`
+  pre-runner, `released` in its own read inside the runner; only sync apply can land between), plus
+  its second half — the book-only receipt says the released notes "are in the Pool now" while an
+  ARCHIVED member never shows in the Pool listing (an over-statement). NOT fixed here: the clean
+  shape is `deleteReading` returning the released count from its own transaction (the
+  `deleteReadingWithNotes` precedent) plus a re-word — an op-signature change for a receipt nit
+  belongs to an owned row, not a ladder fix pass. RECORDED: suggested owner **13s** (the receipt
+  wording) with the op-return shape noted for whoever takes it (or 13i-d if it re-homes the doors).
+
+### [NIT] `MembershipDoors.offer` silent on a vanished book — **CONFIRMED-FIXED**
+- **Final call:** CONFIRMED (P-2 — a door never ends in silence). `offer` now returns whether it
+  opened and, when the book vanished between the refusal and the offer (`load`'s nil — the reading
+  tombstoned meanwhile), speaks `readingNotFound`'s shared words; `addOrOffer`'s false now always
+  comes WITH either the sheet or a spoken refusal, so no host believes a sheet is up that never
+  opened (the implementer's sharper note).
+- **Pin (RED on the pre-fix tree, green after):**
+  `MembershipChoiceTests.anOfferWhoseBookVanishedSpeaksInsteadOfGoingSilent` (red:
+  `session.status.current` stayed nil — the press vanished; green: a `.refusal`-kind item lands,
+  no sheet).
+- **Changed:** `App/Variorum/Variorum/Core/Views/MembershipChoice.swift` (`offer` →
+  `@discardableResult Bool` + the spoken nil arm). Suites: MembershipChoice + TimelineAndReadings
+  23/2 green.

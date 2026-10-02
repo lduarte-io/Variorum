@@ -319,6 +319,22 @@ struct MembershipChoiceTests {
         #expect(diverge.contains("sealed") && diverge.localizedCaseInsensitiveContains("unseal"))
     }
 
+    /// 13i-c ladder round 1 (the silent-offer NIT): when the choice's book
+    /// vanished between the refusal and the offer, the door SPEAKS (P-2 —
+    /// the shared words) instead of vanishing the press. Red-on-old: `offer`
+    /// assigned nothing and said nothing.
+    @Test func anOfferWhoseBookVanishedSpeaksInsteadOfGoingSilent() async throws {
+        try await withChoiceWorld { session, _ in
+            let note = try session.operations.createPost(title: "n")
+            let doors = MembershipDoors(session: session)
+            await doors.offer(.copyOnly, postID: note.id, readingID: "gone-book-id")
+            #expect(doors.pending == nil, "no sheet — there is no book to offer")
+            let spoken = try #require(session.status.current,
+                                      "the press lands as the operation's words, never silence")
+            #expect(spoken.kind == .refusal)
+        }
+    }
+
     @Test func theSheetDrawsExactlyItsItem() async throws {
         try await withChoiceWorld { session, _ in
             let world = try shelf(session)

@@ -86,9 +86,11 @@ final class ReadingsViewModel {
         }
     }
 
-    func delete(_ id: String) async {
-        await run { ops in try ops.deleteReading(id) }
-    }
+    // (13i-c ladder round 1, F-U4-8: `delete` RETIRED — the shelf's Delete
+    // Book routes through `BookStateDoors.open(.deleteBook)` since U4 (the
+    // three-arm confirm: gathering · plain · owned two-choice), and a second
+    // road beside the one confirm door is the forked-brains class. The op
+    // stays `deleteReading`, the doors' own.)
 
     func setSort(_ id: String, field: SortField, direction: SortDirection) async {
         await run { ops in try ops.setReadingSort(id, field: field, direction: direction) }

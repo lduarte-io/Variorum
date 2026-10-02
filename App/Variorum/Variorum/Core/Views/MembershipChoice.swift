@@ -306,16 +306,27 @@ final class MembershipDoors {
         }
     }
 
-    /// Load the names the sheet says and open it.
+    /// Load the names the sheet says and open it. Returns whether it opened
+    /// (13i-c ladder round 1): a book that VANISHED between the refusal and
+    /// the offer speaks the operation's words instead of vanishing the press
+    /// (P-2 — a door never ends in silence).
+    @discardableResult
     func offer(
         _ kind: OwnershipDecision.Choice, postID: String, readingID: String
-    ) async {
+    ) async -> Bool {
         do {
-            pending = try await session.database.read { db in
+            guard let item = try await session.database.read({ db in
                 try Self.load(db, kind: kind, postID: postID, readingID: readingID)
+            }) else {
+                session.status.refuse(OpsRefusalCopy.message(
+                    for: OperationError.readingNotFound(id: readingID)))
+                return false
             }
+            pending = item
+            return true
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
+            return false
         }
     }
 

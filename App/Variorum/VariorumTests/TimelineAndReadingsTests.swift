@@ -102,7 +102,14 @@ struct TimelineAndReadingsTests {
             #expect(readings[0].sortField == .entryDate)
             #expect(readings[0].sortDir == .desc)
 
-            await model.delete(id)
+            // 13i-c ladder round 1 (F-U4-8 — honest edit, subject untouched):
+            // the UI path's delete is `BookStateDoors.open(.deleteBook)` now
+            // (the shelf routes through it; `ReadingsViewModel.delete`
+            // retired) — a PLAIN book ASKS first (P-13ic-U4-6), then acts.
+            let doors = BookStateDoors(session: session)
+            await doors.open(.deleteBook, readingID: id)
+            #expect(doors.pending != nil, "a plain book's delete asks (the Trash named)")
+            await doors.confirm()
             readings = try await db.read { try Queries.readings($0) }
             #expect(readings.isEmpty)
         }
