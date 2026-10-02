@@ -1382,6 +1382,128 @@ the mint).
   at open and at close.
 
 
+## THE ARCHITECT'S ADJUDICATION AFTER U3 (2026-10-01)
+
+- **U3 VERIFIED:** ten commits (163b9545…831e4a2a), no trailers, the record whole, fifty captures
+  on disk, its six new Mac suites + BindDoor + RuleEditor + the tutorial spine re-run by the
+  orchestrator — 62/8 green on a zero-instance window.
+- **P-13ic-U3-2 RULED — the record's letter stands; the faces go at 13i-d.** The sitting record §3
+  is binding: a gathering has NO finish, word target or note cap. The shipped Finish/Reopen and
+  Length & Extent faces on a GATHERING are a 13i-b carry-over the Bookcase rebuild (13i-d) removes
+  with the shelf menu it rebuilds; the ops may refuse them on a gathering there too (the (c) arm —
+  13i-d's call, a KnownIssues row with that owner at this closeout). Not a U4 rider (a different
+  surface; U4 is the membership doors).
+- **P-13ic-U3-1, -3, -4, -5, -6, -7 stand as built** (each spec-defensible; -4 is the walk's own
+  finding fixed the honest way; filed at #169).
+- **F-U3-2 and F-U3-7 → U4** (the delete confirm through `BookStateDoors.open(.deleteBook)` with
+  the plain + owned arms; the navigator chip's sealed face joins the badge family). **F-U3-1 → 13i-d
+  (KnownIssues). F-U3-3 → a standing-fixes entry or 13i-d (KnownIssues). F-U3-4 → 13i-d. F-U3-5 →
+  13s/13i-d copy. F-U3-6 → the 18i seam's owner (recorded). F-U3-8 → her bundle (the offer clock).**
+- **The bind sheet's owned-notes limb** (built by U3 though the brief's six pieces omitted it — the
+  plan §3 assigned it): ACCEPTED; its pins stand; the ladder reviews it cold with the rest.
+
+## U4 BRIEF — THE MEMBERSHIP DOORS' FACES · THE BADGES · DELETE/DUPLICATE · REMOVE/RELEASE · THE TRASH (`opus-implementer`; read this whole file first)
+
+**Read, in your own context, before any code:** CLAUDE.md + its canon; this plan WHOLE — §1 her
+rulings · §3 (Owned — the ops you put faces on) · §4 THE DOOR ENUMERATION (rows 14–21 are YOURS;
+rows 1–12 are U2's pins you render) · §6 (delete · duplicate · the Trash) · §7 the U4 row · §8
+traps · §9 · the U1/U2/U3 RECORDs (the op names and signatures as built; U2's F-U2-6/7/8 and
+U3's F-U3-2/7 are YOURS) · both adjudications; the sitting record
+`notes/plans/phase-13i-sitting-record-2026-09-30.md` §2 (the edit law — the words at the doors),
+§6 (the add doors · the two-choice delete · duplicate · the badge family), §18.3 (the Trash
+lifecycle), §18.4 (competing owned books — "claimed by [Book]"), §20 (the remove/release doors'
+vocabulary), §21–§24 (the design-language anchor: the app's own idioms and tokens; chrome
+`fixedSize` texts carry a `lineLimit`; no literal colour outside the token layer);
+`notes/SessionResiliencyProtocol.md`. Code to orient on: `Features/BookView/MembershipChip.swift`
+(the chip: add/remove/collect/diverge + `ChipRefusals`), `Features/BookView/BookStructureModel.swift`
+(the two drag roads + the daily shelving), `Features/Pool/PoolPostsView.swift` (the drop),
+`Features/Shelf/ShelfView.swift` (the drop; `bookMenu`; Delete Book), `Features/Readings/ReadingViews.swift`
+(`ManageReadingPostsSheet`), `Features/BookView/BookArrivals.swift` (the Arrivals line + its
+model), `Features/Readings/BookStateDoors.swift` (U3's one confirm road — `BookStateDoors.open`,
+`BookStateCopy`, `.deleteBook`), `Features/BookView/BookNoteBox.swift` + `BookOutlineRows.swift` /
+`BookIndexView.swift` (the note rows' context menus), `Features/Tray/` + `Shared/RecoveryActs.swift`
++ `Shared/RecoveryCopy.swift` (the Trash's rows and receipts), `Features/Settings/` (the panes —
+the `arrival_flash` row's pattern), `Registry/CapabilityRegistry.swift` (P-1; the walk),
+`Registry/OpsRefusalCopy.swift` + `Shared/OpsRefusalTable.swift` (the words),
+`Queries/OwnershipQueries.swift` (`noteMemberships`, `moveInPreview`, `ownershipFacts(postIDs:inBook:)`,
+`trashBookNoteCount`, `sharedMembers`), the 18i status seam.
+
+**Scope (ONE unit — every face that CREATES or REMOVES membership, the badges, delete/duplicate,
+the Trash; no settings-sheet work — U3 shipped it):**
+1. **ONE choice sheet** (`MembershipChoiceSheet`, static copy on a pure type — the `BookStateCopy`
+   precedent): on `noteMemberedElsewhere` from an OWNED target — "“Book” owns its notes. This note
+   also lives in “X”, “Y”." · **Copy it in** (a linked copy; the originals stay — `copyPostIntoReading`)
+   · **Move it in** (it leaves X and Y — `movePostIntoReading`; the severed list from `moveInPreview`;
+   a finished book among them → the op's refusal, Copy in offered); on `noteOwnedElsewhere` from a
+   PLAIN target — "This note belongs to “X”, which owns its notes." · **Copy it into “B”** only. The
+   edit-law words at the door (§2): adding never copies; a copy is a ceremony she chose. HOSTED by
+   every road in §4 rows 14–18: the chip's Add, the Index/Outline drag roads (`BookStructureModel`
+   ×2), the Pool's drop, the shelf row's drop, Manage Notes…. Each host: the refusal → the sheet →
+   the act → the receipt (the status seam). The names come from `noteMemberships`/`ownershipFacts`
+   (F-U2-6 — the refusals carry ids).
+2. **The Arrivals line's arms (§4 row 19, §18.4):** per arrival row, the facts decide the doors —
+   a membered-elsewhere note at an OWNED book's door: **Copy in · Move in · Dismiss** (no Add); an
+   owned-elsewhere note at a PLAIN book's door: **Copy in · Dismiss** — and the row carries the line
+   **"owned by “Book”"** / "also in “X”" (the competing-owned-books face: "claimed by [Book]" in the
+   record's words — use "owned by"); the arrival-answering ops (`copyPostIntoReading(answering:)`,
+   `movePostIntoReading(answering:)`) are the acts; Add stays where the plain seat is legal.
+3. **Delete (§6; F-U3-2):** the shelf's Delete Book routes through `BookStateDoors.open(.deleteBook)`
+   with THREE arms in `BookStateCopy`: a PLAIN book's confirm ("Deleting a plain book never touches a
+   note" — names the Trash and its 30 days); an OWNED book's TWO-CHOICE confirm — **Delete book only**
+   (its N notes go to the Pool — `deleteReading`) · **Delete book and its N notes** (both to the Trash
+   on one stamp — `deleteReadingWithNotes`; offered ONLY on an owned book, F-U2-7); the gathering's
+   arm as U3 built it. The same door on the book view's gear/settings if one exists there.
+4. **Duplicate Book… (§6):** on the shelf row's menu (+ the settings sheet's State section if it
+   fits): a name prompt (E13's guard) with a "with copies of its notes" checkbox — shallow by
+   default on a plain book; an OWNED book offers "Duplicate with Copies…" only (`duplicateReading
+   (_:name:deep:)`); receipts name the result ("“X copy” — N notes, the same notes" / "… N copies").
+5. **The remove/release vocabulary (§20):** the chip's remove row, the Index/Outline note-row context
+   menu and the note box's book context carry **"Remove from this book"** — on an OWNED book
+   **"Release from this book"** — with receipts ("Removed from “X” — the note itself is untouched." /
+   "Released from “X” — it's in the Pool now." — `removePostFromReading` returns bookless); on a
+   GATHERING the chip offers the honest **"Remove the #tag"** (the rule's positive tags the note
+   wears; one row per tag, `removeTag`) and never a remove.
+6. **The badge family (§6; toggleable as a set — the `ownership_badges` setting):** in BOOK views
+   (Index/Outline/Book rows, the navigator chip) the shared-membership badge (a small glyph when the
+   note has OTHER book memberships; hover names them) + the navigator chip's **sealed** face
+   (F-U3-7: "✓ finished" must read sealed on a sealed book); in gatherings, the Pool, tag listings
+   and the Library cards the **owned-by** badge ("owned by “X”"; click-through opens the book at the
+   note — the panel bridge, `MembershipChip.ascend`). Silence the common case: an ordinary free note
+   shows nothing. `ownershipFacts(postIDs:inBook:)` is ONE page-driven read per listing (P1).
+   Direction ruled: the badge marks shared membership IN the book view; owned-by marks it OUTSIDE.
+7. **Settings rows:** `ownership_badges` (on/off, default on) and `hide_owned_default` (show, badged
+   / hide — default show) in the pane where `arrival_flash` lives, each worded in one sentence.
+8. **The Trash (§18.3):** a book deleted WITH its notes shows "and N notes" on its row
+   (`trashBookNoteCount`); Put back's receipt says it came back whole ("“X” is back with its N
+   notes"); kind labels stay.
+9. **The registry (P-1):** every new act declared once (`.copyIn`, `.moveIn`, `.duplicateBook`,
+   `.removeFromBook`/`.releaseFromBook` as ONE act whose verb is a per-target function, `.removeTag…`
+   as the chip's honest door, the badge as a surface renderer), doors as data, refusal copy, the
+   walk green. The phone: nothing (its membership face already speaks the shared words — F-U2-8);
+   say so in the record's MOBILE PARITY line.
+
+**Evidence (the §7 U4 row):** mounted pins per host (each face OFFERS the choice on its refusal —
+§4 rows 14–18 one test each, named for the row; the Arrivals arms per fact; the three delete arms;
+duplicate's two shapes; the remove/release words per surface; the badge facts drawn + the setting
+silencing them; the Trash row + receipt), the registry walk, `TutorialWalkTests` green, the FULL
+core suite green at the END (core touched only for copy types/queries the faces need), Mac
+`build-for-testing` + every touched suite, the phone BUILD; and **YOUR OWN dev-store walk** (the
+author guard FIRST — `Tools/WalkKit/guard.sh --author`; STOP and record "walk HELD" if someone is
+at the machine): **R4 by hand** — own a book → from another book, add one of its notes → the choice
+→ Copy in → the badge on the copy's row and the owned-by badge in the Pool → Move in a different
+note → the severed list → Release a note → the Pool; an arrival at an owned book's door with Copy
+in / Move in / Dismiss; delete an owned book both ways → the Trash's "and N notes" → Put back whole;
+Duplicate both shapes; the badges off in Settings. Both voices × both appearances, captures into
+`notes/plans/13ic-screens/u4/` (gitignored).
+
+**Your record:** a `## U4 RECORD` section directly above `## §8 ENVIRONMENT TRAPS`, in the U3
+RECORD's shape (NOT-DONE first · the design map · PROVISIONALs P-13ic-U4-n with QUESTIONS-ready
+paragraphs · FINDINGS with suggested owners · THE WALK with its capture list · LIVE STATUS per
+commit, unverified claims PENDING) — put the heading on its OWN line, never inside a sentence that
+quotes `## §8` (the U2/U3 swallow). Flip ledger row 5 at the close. Commit per piece; `git pull
+--rebase` then push after every commit; no trailers; foreground waits only; no subagents (one
+read-only Sonnet lookup at most); the §8 traps verbatim.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -1482,3 +1604,7 @@ Debug only, author-free, own `caffeinate -d`.
   no trailers, its suites re-run green); the swallowed record heading restored; F-U2-1 ruled and
   built with its red-on-old pin (core 2003/212; Mac refusal/spine suites 32/4); the U3 BRIEF
   written. No revert in flight; zero instances. U3 (`opus-implementer`) spawns next.
+- **U3 VERIFIED + ADJUDICATED (2026-10-01):** ten commits spot-checked (record whole, no
+  trailers, fifty captures, its suites re-run 62/8 green); P-13ic-U3-2 ruled to the record's letter
+  with 13i-d as the faces' owner; the U4 BRIEF written. No revert in flight; zero instances. U4
+  (`opus-implementer`) spawns next — then the ladder.
