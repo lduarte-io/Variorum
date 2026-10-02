@@ -197,6 +197,18 @@ struct VocabularySweepTests {
         }
     }
 
+    // MARK: - (h) F-U4-4 — the Archived view's inline Unarchive is declared
+
+    /// The registry walk is a UNION equality and `.unarchiveNote` already has
+    /// a renderer (a book's archived line), so the walk alone could not see
+    /// this declaration go — pinned directly (P-1: every rendered door is
+    /// declared), with the face reading its verb from the declaration.
+    @Test func theArchivedViewDeclaresItsUnarchive() {
+        #expect(ArchivedView.surfaceCapabilities == [.unarchiveNote])
+        #expect(CapabilityRegistry.capability(.unarchiveNote).doors.contains(.surface))
+        #expect(CapabilityRegistry.capability(.unarchiveNote).verb == "Unarchive")
+    }
+
     // MARK: - (f) item 10 — the dismiss receipt teaches the road back
 
     @Test func theDismissReceiptSaysHowToChangeYourMind() {

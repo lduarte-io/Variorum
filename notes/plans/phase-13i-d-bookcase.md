@@ -2376,6 +2376,12 @@ or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's
 | 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | NOT-STARTED |
 | 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | NOT-STARTED |
 
+**REVERT STATE:** the combined behavioural revert over the sweep's bug-class and hygiene pins starts at
+the commit after this line's — every production file it touches is COMMITTED at HEAD first, so `git
+checkout HEAD -- <file>` is the restore and `git diff` is the honest "what is reverted right now". A
+successor finding a dirty production tree here: the revert is in flight — restore by checkout, verify
+`git diff --quiet`, then continue.
+
 ### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
 
 - **ACT 0 (F-U5b-2 RULED (a)) — THE SIBLING MAP, traced from the code (every structural inverse or
