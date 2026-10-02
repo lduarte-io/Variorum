@@ -14,19 +14,38 @@ extension Queries {
         public let reading: Reading
         public let postCount: Int
         public let sectionCount: Int
+        /// 13i-d U1 — the Bookcase row's ARRIVAL count (the sitting record
+        /// §4: "a small accent count on the Bookcase row"). A BOOK's pending
+        /// `status='arrival'` rows; always 0 on a gathering (it holds
+        /// nothing, §1). Defaulted so every existing call site compiles.
+        public let arrivalCount: Int
 
-        public init(reading: Reading, postCount: Int, sectionCount: Int) {
+        public init(reading: Reading, postCount: Int, sectionCount: Int, arrivalCount: Int = 0) {
             self.reading = reading
             self.postCount = postCount
             self.sectionCount = sectionCount
+            self.arrivalCount = arrivalCount
         }
     }
 
     /// The live books with membership + chapter counts, by name — the
     /// shelf's observed listing (pin/journal ordering is the view model's
     /// presentation call over `shelfPins`).
-    public static func bookshelf(_ db: Database) throws -> [ShelfBook] {
-        let readings = try Queries.readings(db)
+    ///
+    /// **13i-d U1:** `wingID` scopes the listing to ONE wing — the Bookcase
+    /// is a wing's surface (the sitting record §9); nil keeps the shipped
+    /// all-wings read (the phone's shelf, untouched this phase). Each row
+    /// also carries its pending-ARRIVAL count, read from `reading_post`
+    /// ALONE — and that is a P1 decision, not an economy: this listing rides
+    /// a HELD observation, and `autosave` rewrites the `container` row whole
+    /// (`Container.update`), so a statement that read any `container` column
+    /// would wake the Bookcase at keystroke rate. Counting the rows alone
+    /// also counts an ARCHIVED waiter — which is exactly the 13i-d U4 ruling
+    /// (#169(a)(2): archived waiters show at the door, marked); a deleted
+    /// note's arrival rows died with it (the container tombstone cascade).
+    public static func bookshelf(_ db: Database, wingID: String? = nil) throws -> [ShelfBook] {
+        var readings = try Queries.readings(db)
+        if let wingID { readings = readings.filter { $0.wingId == wingID } }
         guard !readings.isEmpty else { return [] }
         // 13i-a (ladder R1 MIN-3): an ARRIVAL is not a member — the
         // shelf's count, the capacity gate and the Pool's bookless
@@ -43,12 +62,133 @@ extension Queries {
                 SELECT reading_id, COUNT(*) AS n FROM reading_section
                 WHERE deleted_at IS NULL GROUP BY reading_id
                 """)
+        let arrivalCounts = try countsByReading(db, sql: bookcaseArrivalCountsSQL)
         return readings.map { reading in
             ShelfBook(
                 reading: reading,
                 postCount: postCounts[reading.id] ?? 0,
-                sectionCount: sectionCounts[reading.id] ?? 0)
+                sectionCount: sectionCounts[reading.id] ?? 0,
+                arrivalCount: reading.kind == .book ? arrivalCounts[reading.id] ?? 0 : 0)
         }
+    }
+
+    /// The per-book arrival counts behind `bookshelf` — split out so a pin
+    /// can read the SHIPPED statement (the `catalogPostsSQL` discipline) and
+    /// assert it never names `container` (the P1 reason above).
+    static let bookcaseArrivalCountsSQL = """
+        SELECT reading_id, COUNT(*) AS n FROM reading_post
+        WHERE deleted_at IS NULL AND status = 'arrival'
+        GROUP BY reading_id
+        """
+
+    // MARK: - The Bookcase (13i-d U1 — the sitting record §7, §19–§24)
+
+    /// A wing's live SHELVES in strip order — left to right, which is also
+    /// All's top-to-bottom (§24). Author-scale; observation-safe.
+    public static func shelves(_ db: Database, wingID: String) throws -> [Shelf] {
+        try Shelf.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM shelf WHERE wing_id = ? AND deleted_at IS NULL
+                ORDER BY position, id
+                """,
+            arguments: [wingID])
+    }
+
+    /// The Bookcase's held snapshot: one wing's shelves and books.
+    public struct BookcaseSnapshot: Equatable, Sendable {
+        public let shelves: [Shelf]
+        public let books: [ShelfBook]
+
+        public init(shelves: [Shelf], books: [ShelfBook]) {
+            self.shelves = shelves
+            self.books = books
+        }
+    }
+
+    /// The held half of the Bookcase (tables: `shelf`, `reading`,
+    /// `reading_post`, `reading_section` — none of which a keystroke writes).
+    public static func bookcase(_ db: Database, wingID: String) throws -> BookcaseSnapshot {
+        BookcaseSnapshot(
+            shelves: try shelves(db, wingID: wingID),
+            books: try bookshelf(db, wingID: wingID))
+    }
+
+    /// The Bookcase's ONE-SHOT aggregates (the `bookWordCounts` contract:
+    /// fetched on appearance and after the board's own acts, never held —
+    /// they read `container`, which autosave rewrites).
+    public struct BookcaseAggregates: Equatable, Sendable {
+        /// "LAST EDITED" per reading, DERIVED (the sitting record §22's
+        /// mechanism note — *never a synced column on `reading`*: a
+        /// per-keystroke book-row write would storm the outbox). Canonical
+        /// ISO-8601 text, so the order is a string compare.
+        public let lastEdited: [String: String]
+        /// How many notes each GATHERING shows right now (its assembly's own
+        /// size — hide-owned, cap and rule exactly as it renders).
+        public let gatheringCounts: [String: Int]
+
+        public init(lastEdited: [String: String], gatheringCounts: [String: Int]) {
+            self.lastEdited = lastEdited
+            self.gatheringCounts = gatheringCounts
+        }
+    }
+
+    /// One wing's aggregates. A BOOK's last edit is the latest of its live,
+    /// un-archived MEMBERS' touch stamps (`COALESCE(last_touched_at,
+    /// created_at)` — the Library's own stamp); a GATHERING's is the latest
+    /// over the notes its assembly shows; a reading with no notes falls back
+    /// to its own `created_at` (PROVISIONAL P-13id-U1-5), so a brand-new
+    /// empty book sorts by its birth rather than last.
+    ///
+    /// Cost, said exactly: one GROUP BY over the wing's book memberships
+    /// (each a primary-key seek into `container`), plus one assembly per
+    /// GATHERING (∝ that gathering's extent — the `bookWordCounts` smart arm's
+    /// class, minus the text). Never per render; never held.
+    public static func bookcaseAggregates(
+        _ db: Database, wingID: String
+    ) throws -> BookcaseAggregates {
+        let readings = try Queries.readings(db).filter { $0.wingId == wingID }
+        var lastEdited: [String: String] = [:]
+        let memberRows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT rp.reading_id AS reading_id,
+                       MAX(COALESCE(c.last_touched_at, c.created_at)) AS stamp
+                FROM reading_post rp
+                JOIN container c
+                  ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                WHERE rp.deleted_at IS NULL AND rp.status = 'member'
+                GROUP BY rp.reading_id
+                """)
+        var memberStamps: [String: String] = [:]
+        for row in memberRows {
+            if let stamp: String = row["stamp"] { memberStamps[row["reading_id"]] = stamp }
+        }
+        var gatheringCounts: [String: Int] = [:]
+        for reading in readings {
+            var stamp: String?
+            if reading.kind == .gathering {
+                let ids = try assembleReading(db, readingID: reading.id).map(\.postID)
+                gatheringCounts[reading.id] = ids.count
+                if !ids.isEmpty {
+                    let json = String(
+                        decoding: (try? JSONEncoder().encode(ids)) ?? Data("[]".utf8),
+                        as: UTF8.self)
+                    stamp = try String.fetchOne(
+                        db,
+                        sql: """
+                            SELECT MAX(COALESCE(c.last_touched_at, c.created_at))
+                            FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
+                            """,
+                        arguments: [json])
+                }
+            } else {
+                stamp = memberStamps[reading.id]
+            }
+            lastEdited[reading.id] = stamp
+                ?? DateFormatter.variorumISO8601.string(from: reading.createdAt)
+        }
+        return BookcaseAggregates(lastEdited: lastEdited, gatheringCounts: gatheringCounts)
     }
 
     /// Word counts of every book's rendered content — curated AND smart

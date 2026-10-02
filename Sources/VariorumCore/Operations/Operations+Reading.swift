@@ -19,7 +19,8 @@ extension Operations {
         wingId: String = "",
         intakeSeating: IntakeSeating? = nil,
         autoTagId: String? = nil,
-        autoTagIDs: [String] = []
+        autoTagIDs: [String] = [],
+        shelfId: String? = nil
     ) throws -> Reading {
         let now = date.now
         // 13i-c (R-13ic-1): the OUTFLOW is a set; the single-tag parameter
@@ -47,13 +48,25 @@ extension Operations {
             if kind == .gathering, spec == nil {
                 throw OperationError.gatheringRequiresRule(id: id)
             }
+            // 13i-d U1 — THE CONTEXT MINT (the sitting record §19.1, ratified
+            // §24): a book minted while a shelf is solo'd lands ON that shelf
+            // ("you're looking at where you're filing"); every other door
+            // passes nil and the book lands UNSHELVED (§19's ruling). The
+            // shelf must be live and in this book's wing. Never placed — it
+            // appends at the end of the shelf's "my order" (§24).
+            if let shelfId {
+                let shelf = try liveShelf(db, shelfId)
+                guard shelf.wingId == wingId else {
+                    throw OperationError.shelfNotFound(id: shelfId)
+                }
+            }
             let reading = Reading(
                 id: id, ownerId: currentOwnerID(), name: name, kind: kind,
                 profile: profile, sortField: sortField, sortDir: sortDir,
                 groupingTagId: groupingTagId,
                 querySpec: spec,
                 maxPosts: maxPosts,
-                wordTarget: wordTarget, wingId: wingId,
+                wordTarget: wordTarget, wingId: wingId, shelfId: shelfId,
                 intakeSeating: intakeSeating,
                 autoTagIds: Reading.encodeOutflow(outflow),
                 createdAt: now, updatedAt: now)

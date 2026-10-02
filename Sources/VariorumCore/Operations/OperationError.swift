@@ -263,6 +263,22 @@ public enum OperationError: Error, Equatable, Sendable {
     /// `restoreSection` addressed a chapter that is not deleted.
     case sectionNotDeleted(id: String)
 
+    // The Bookcase's SHELVES (13i-d U1 — the sitting record §7/§19/§20/§24;
+    // `Operations+Shelf.swift`).
+    /// No live shelf with this id — or none in the book's own wing (a shelf
+    /// never holds a book of another wing; wings are separate libraries, §9).
+    case shelfNotFound(id: String)
+    /// A shelf needs a name (duplicates are legal — no natural key).
+    case invalidShelfName(name: String)
+    /// A glyph is ONE grapheme and never an emoji (§7). The payload is what
+    /// she typed, so the refusal can show it back.
+    case invalidShelfGlyph(value: String)
+    /// A shelf minted into a wing that is not live ('' — Home — always is).
+    case wingNotFound(id: String)
+    /// A hand placement ("my order") named an anchor that is not on the
+    /// moving book's shelf — the drag's target moved under it.
+    case placementAnchorNotOnShelf(readingID: String, anchorID: String)
+
     // Stars (13f W4 — her round-3 ruling: "up to 5 notes or books").
     /// The star list is full. Refused rather than silently evicting the
     /// oldest star: a cap she cannot see acting on its own would be the
