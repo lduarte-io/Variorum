@@ -12,7 +12,7 @@
 //    never her `.standard` domain), three ways;
 //  - the menu's options per book: chapters only where a book has them, the
 //    families its notes wear, none (a gathering — minus chapters);
-//  - the partition rule (children A–Z, the book's order kept, "no #family"
+//  - the partition rule (children A–Z, the book's order kept, "other"
 //    trailing) and the fallbacks (a choice that cannot apply draws the
 //    shipped look);
 //  - DISPLAY ONLY: grouping a book or a gathering by a family writes nothing
@@ -171,7 +171,7 @@ struct BookIndexGroupingTests {
         ]
         let groups = BookIndexGroupingBrain.groups(
             entries: entries, sections: sections, family: status)
-        #expect(groups.map(\.title) == ["#status/done", "#status/draft", "no #status"])
+        #expect(groups.map(\.title) == ["#status/done", "#status/draft", "other"])
         #expect(groups.map { $0.entries.map(\.postID) } == [["n2"], ["n1", "n4"], ["n3", "n5"]])
         #expect(groups.map(\.id) == ["fam:status/done", "fam:status/draft", "fam-none"])
         // Everything filed ⇒ no trailing group; nothing shown ⇒ nothing.
@@ -233,7 +233,7 @@ struct BookIndexGroupingTests {
                 if reading.kind == .gathering {
                     #expect(titles == ["#status/done", "#status/draft"], "\(titles)")
                 } else {
-                    #expect(titles == ["#status/done", "#status/draft", "no #status"], "\(titles)")
+                    #expect(titles == ["#status/done", "#status/draft", "other"], "\(titles)")
                 }
             }
             let after = try await counts()

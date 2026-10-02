@@ -910,9 +910,13 @@ struct BookView: View {
               let i = model.entries.firstIndex(where: { $0.postID == postID })
         else { return nil }
         let entry = model.entries[i]
+        // 13i-d U3 (the walk's W-3): under the in-book FILTER the entries are
+        // the filtered few, so "1 of 2 in this book" would be false — the
+        // position is UNKNOWN there (index 0, which the box omits).
         return NoteBoxIdentity(
             postID: postID, title: entry.displayTitle, chapter: entry.sectionPath,
-            index: i + 1, total: model.entries.count, totalIsAtLeast: model.truncated)
+            index: BookNoteBox.position(i + 1, filtered: model.viewFilter != nil),
+            total: model.entries.count, totalIsAtLeast: model.truncated)
     }
 
     private func publishNoteBox() {

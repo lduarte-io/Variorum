@@ -32,6 +32,13 @@ nonisolated enum BookNoteBox {
     /// stand EMPTY exactly while the box is live — one receipt never draws
     /// twice (PROVISIONAL P-13id-U3-6). nil (no box — Read, an unfocused
     /// pane) hosts.
+    /// The note's 1-based place in the book for the box's identity line — or
+    /// 0 (unknown, omitted) while the in-book FILTER narrows the entries
+    /// (13i-d U3, the walk's W-3: "1 of 2 in this book" was false there).
+    static func position(_ index: Int, filtered: Bool) -> Int {
+        filtered ? 0 : index
+    }
+
     static func bookHostsQuietReceipt(_ box: NoteBoxState?) -> Bool {
         if case .live? = box { return false }
         return true

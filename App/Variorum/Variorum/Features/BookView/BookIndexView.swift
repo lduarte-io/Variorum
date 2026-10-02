@@ -312,6 +312,15 @@ nonisolated enum BookIndexColumn {
         return result
     }
 
+    /// **The column footer's count** — and while the in-book FILTER narrows
+    /// the book (13i-d U3, the walk's W-3), the notes it shows are "shown",
+    /// never the book's count: "2 notes" under a filter read as a two-note
+    /// book.
+    static func footerWords(chapters: Int, notes: Int, filtered: Bool) -> String {
+        let count = filtered ? "\(notes) shown" : "\(notes) notes"
+        return chapters > 0 ? "\(chapters) chapters · \(count)" : count
+    }
+
     /// Does this entry answer the filter? Titles and dates — the column
     /// indexes what it shows; body-text search is 13o's, deliberately.
     static func matches(_ entry: Queries.ReadingEntry, filter: String) -> Bool {
@@ -944,10 +953,9 @@ struct BookIndexView<Masthead: View>: View {
                 .accessibilityHidden(!hostsQuietReceipt)
             Spacer(minLength: 4)
             let chapters = structure.chaptersActive ? structure.sections.count : 0
-            Text(tokens.chromeLabel(
-                chapters > 0
-                    ? "\(chapters) chapters · \(model.entries.count) notes"
-                    : "\(model.entries.count) notes"))
+            Text(tokens.chromeLabel(BookIndexColumn.footerWords(
+                chapters: chapters, notes: model.entries.count,
+                filtered: model.viewFilter != nil)))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)

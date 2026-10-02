@@ -140,8 +140,11 @@ nonisolated enum BookFilterCopy {
                 + "\u{2014} what notes written here wear \u{2014} that also match \(filterWords). "
                 + "No note moves."
         case .none:
-            return "This book has no tag of its own, so the gathering shows every note in this "
-                + "library that matches \(filterWords) \u{2014} not only this book's. No note moves."
+            // The walk's W-4: "no tag of its own" read oddly beside the
+            // Bookcase row's tag column; this says exactly what is absent.
+            return "This book neither gathers by a tag nor tags what's written in it, so the "
+                + "gathering shows every note in this library that matches \(filterWords) "
+                + "\u{2014} not only this book's. No note moves."
         }
     }
 

@@ -170,6 +170,21 @@ struct BookFilterBarTests {
         }
     }
 
+    /// The walk's W-3 (capture `u3/tl-09`): under a filter the Index's
+    /// footer said "2 notes" and the sidebar box "1 of 2 in this book" — the
+    /// filtered few read as the book. Now: "shown", and no position at all.
+    @Test func aFilteredIndexNeverClaimsTheBooksCount() {
+        #expect(BookIndexColumn.footerWords(chapters: 9, notes: 34, filtered: false)
+                == "9 chapters \u{00B7} 34 notes", "unfiltered: unchanged")
+        #expect(BookIndexColumn.footerWords(chapters: 9, notes: 2, filtered: true)
+                == "9 chapters \u{00B7} 2 shown")
+        #expect(BookIndexColumn.footerWords(chapters: 0, notes: 2, filtered: true) == "2 shown")
+        #expect(BookIndexColumn.footerWords(chapters: 0, notes: 5, filtered: false) == "5 notes")
+        #expect(BookNoteBox.position(3, filtered: false) == 3)
+        #expect(BookNoteBox.position(3, filtered: true) == 0,
+                "unknown ⇒ the box omits the position line")
+    }
+
     @Test func theAssociationSentencesSayTheTruthPerKind() {
         let rule = BookFilterCopy.association(.rule, associationWords: "#essay", filterWords: "#draft")
         #expect(rule.contains("this book gathers (#essay)") && rule.contains("#draft"))

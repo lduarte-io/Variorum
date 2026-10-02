@@ -21,7 +21,7 @@
 //    the family root (A–Z by path), each note under the lexically smallest
 //    child it wears — `assembleReading`'s own rule, now ONE SQL fragment
 //    both read (`Queries.tagFamilySectionSelect`) — the book's order inside
-//    each group, and the rest trailing under "no #family" (PROVISIONAL
+//    each group, and the rest trailing under "other" (PROVISIONAL
 //    P-13id-U3-4; chapters' "unfiled" convention).
 //  - The regroup changes only the Index's ROW LIST — headings and order. Every
 //    pane row keeps its anchor (`bip-<postID>`) and its manifest height; a new
@@ -96,8 +96,10 @@ nonisolated enum BookIndexGroupingCopy {
     static let none = "none"
     static let familiesHeader = "a tag family"
     static func family(_ path: String) -> String { "#" + path }
-    /// The trailing group's heading — the notes under no child of the family.
-    static func ungrouped(_ familyPath: String) -> String { "no #" + familyPath }
+    /// The trailing group's heading — the notes under no CHILD of the family.
+    /// "other", not "no #family" (the walk's W-2: a note wearing the family's
+    /// ROOT tag itself files here too, and "no #u3fam" was false of it).
+    static let ungrouped = "other"
     static let noFamilies = "no tag families in this book's notes"
     static let help =
         "Group this Index by the book's chapters, by a tag family, or not at all \u{2014} a way "
@@ -119,7 +121,7 @@ nonisolated enum BookIndexGroupingBrain {
     /// **The families on offer:** every live tag of the book's wing that is a
     /// PROPER ANCESTOR of a tag the shown notes wear — exactly the roots under
     /// which some shown note files (a family nobody here wears would file
-    /// every note under "no #…"). By path.
+    /// every note under "other"). By path.
     static func families(
         worn: [VariorumCore.Tag], live: [VariorumCore.Tag], wingID: String
     ) -> [VariorumCore.Tag] {
@@ -163,7 +165,7 @@ nonisolated enum BookIndexGroupingBrain {
     }
 
     /// **The family partition** — one group per child path present (A–Z),
-    /// the book's order kept inside each, the rest trailing under "no #…".
+    /// the book's order kept inside each, the rest trailing under "other".
     static func groups(
         entries: [Queries.ReadingEntry], sections: [String: String],
         family: VariorumCore.Tag
@@ -184,7 +186,7 @@ nonisolated enum BookIndexGroupingBrain {
         }
         if !rest.isEmpty {
             result.append(BookIndexColumn.Group(
-                id: "fam-none", title: BookIndexGroupingCopy.ungrouped(family.path),
+                id: "fam-none", title: BookIndexGroupingCopy.ungrouped,
                 entries: rest))
         }
         return result
@@ -341,21 +343,40 @@ struct BookIndexGroupingControl: View {
         // Deliberately NOT `VoicedMenu` (the order control's reason: its
         // `.fixedSize()` would push the 190–300 pt column wider than its frame
         // on a long family path). The label truncates; the menu says it all.
+        // The options are INLINE PICKERS over one selection (the walk's W-1:
+        // a `Label`'s checkmark icon is not drawn in this menu, so the option
+        // in force carried no mark; an inline picker draws the native
+        // checkmark — the Book Panel switcher's idiom, U2). Three pickers, one
+        // binding: the section header can sit between them.
+        let selection = Binding<BookIndexGrouping>(
+            get: { current }, set: { grouping.choose($0) })
         Menu {
             if chaptersActive {
-                option(.chapters, BookIndexGroupingCopy.chapters, current: current)
+                Picker(BookIndexGroupingCopy.chapters, selection: selection) {
+                    Text(BookIndexGroupingCopy.chapters).tag(BookIndexGrouping.chapters)
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
             }
             Section(BookIndexGroupingCopy.familiesHeader) {
                 if families.isEmpty {
                     Text(BookIndexGroupingCopy.noFamilies)
                 } else {
-                    ForEach(families, id: \.id) { family in
-                        option(.tagFamily(family.id),
-                               BookIndexGroupingCopy.family(family.path), current: current)
+                    Picker(BookIndexGroupingCopy.familiesHeader, selection: selection) {
+                        ForEach(families, id: \.id) { family in
+                            Text(BookIndexGroupingCopy.family(family.path))
+                                .tag(BookIndexGrouping.tagFamily(family.id))
+                        }
                     }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
                 }
             }
-            option(.none, BookIndexGroupingCopy.none, current: current)
+            Picker(BookIndexGroupingCopy.none, selection: selection) {
+                Text(BookIndexGroupingCopy.none).tag(BookIndexGrouping.none)
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
         } label: {
             Text(tokens.chromeLabel("\(BookIndexGroupingCopy.label) \u{00B7} ") + label + " \u{25BE}")
                 .font(tokens.small)
@@ -373,21 +394,6 @@ struct BookIndexGroupingControl: View {
         .onChange(of: current) { _, now in record(current: now, families: families) }
         .onChange(of: families.map(\.id)) { _, _ in record(current: current, families: families) }
         #endif
-    }
-
-    @ViewBuilder
-    private func option(
-        _ choice: BookIndexGrouping, _ words: String, current: BookIndexGrouping
-    ) -> some View {
-        Button {
-            grouping.choose(choice)
-        } label: {
-            if current == choice {
-                Label(words, systemImage: "checkmark")
-            } else {
-                Text(words)
-            }
-        }
     }
 
     #if DEBUG
