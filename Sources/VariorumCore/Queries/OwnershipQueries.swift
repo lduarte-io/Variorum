@@ -282,13 +282,14 @@ extension Queries {
     /// **The finish confirm's N** (the sitting record §24 — "N waiting at the
     /// door will be dismissed"): counted by the DISMISSAL's own predicate
     /// (`pendingArrivalRowsWhere` — the act is the contract), so the confirm
-    /// and `dismissPendingArrivals` can never disagree. By design it may
-    /// EXCEED the Arrivals LINE's count (`bookArrivals`): an ARCHIVED note's
-    /// waiting row leaves the door's display while archived (P-13ib-U2-2)
-    /// but is still dismissed by the finish — the ladder's MAJOR was the
-    /// silent, uncounted dismissal of exactly that row. A sync-stray row (a
-    /// dead note's live arrival) counts too — the safe direction: the door
-    /// then asks.
+    /// and `dismissPendingArrivals` can never disagree. Since 13i-d U4 (her
+    /// #169(a): P-13ib-U2-2 REVERSED) the Arrivals LINE (`bookArrivals`)
+    /// shows an ARCHIVED note's waiting row too, so the line and this count
+    /// agree — "finishing dismisses every waiter, all visible and counted";
+    /// the ladder's MAJOR was the silent, uncounted dismissal of exactly that
+    /// row while the line hid it. The one way this may still EXCEED the line:
+    /// a sync-stray row (a dead note's live arrival) counts here — the safe
+    /// direction: the door then asks.
     public static func pendingArrivalCount(_ db: Database, readingID: String) throws -> Int {
         try Int.fetchOne(
             db,

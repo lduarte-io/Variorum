@@ -9,9 +9,10 @@ import Testing
 /// be dismissed"; `dismissPendingArrivals` is the act). The count and the
 /// UPDATE share ONE WHERE (`Queries.pendingArrivalRowsWhere`), so the confirm
 /// can never promise a different number than the act takes — an ARCHIVED
-/// note's waiting row is dismissed by the finish, so it is counted, even
-/// though the Arrivals LINE deliberately does not show it while archived
-/// (P-13ib-U2-2's display rule, untouched here and asserted below).
+/// note's waiting row is dismissed by the finish, so it is counted. (The
+/// Arrivals LINE hid it while archived under P-13ib-U2-2's display rule — the
+/// MAJOR's occasion; 13i-d U4 REVERSED that rule, so the line shows it now and
+/// the two numbers agree, asserted below.)
 @Suite("13i-c ladder R1 — the finish confirm counts the dismissal's own set")
 struct PendingArrivalDismissalTests {
     /// A living book (dial = arrivals) with one waiting note, then the note
@@ -38,8 +39,14 @@ struct PendingArrivalDismissalTests {
             let shown = try db.read {
                 try Queries.bookArrivals($0, readingID: world.bookID, limit: 10).count
             }
-            #expect(shown == 0,
-                    "the Arrivals LINE keeps its display rule — an archived waiter leaves the door (P-13ib-U2-2)")
+            // 13i-d U4 — P-13ib-U2-2 REVERSED (her #169(a)(2)/(3)): this arm
+            // asserted `shown == 0` (the line hid the archived waiter while
+            // the confirm counted it). The flip is deliberate, RED on the
+            // pre-flip predicate: the archived waiter is VISIBLE at the door,
+            // so the line and the confirm now say the same number — "finishing
+            // dismisses every waiter, all visible and counted".
+            #expect(shown == promised,
+                    "the Arrivals LINE shows what the finish will dismiss — one number")
         }
     }
 

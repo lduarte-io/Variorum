@@ -142,10 +142,19 @@ extension Queries {
         /// How many notes each GATHERING shows right now (its assembly's own
         /// size — hide-owned, cap and rule exactly as it renders).
         public let gatheringCounts: [String: Int]
+        /// 13i-d U4 — HONEST COUNTS (her #169(a)(1)): each BOOK's ARCHIVED
+        /// members (`archivedMemberCounts` — the one archived-member
+        /// predicate, grouped); a book with none is absent. One-shot because
+        /// it reads `container` (the header's P1 rule).
+        public let archivedCounts: [String: Int]
 
-        public init(lastEdited: [String: String], gatheringCounts: [String: Int]) {
+        public init(
+            lastEdited: [String: String], gatheringCounts: [String: Int],
+            archivedCounts: [String: Int] = [:]
+        ) {
             self.lastEdited = lastEdited
             self.gatheringCounts = gatheringCounts
+            self.archivedCounts = archivedCounts
         }
     }
 
@@ -159,7 +168,8 @@ extension Queries {
     /// Cost, said exactly: one GROUP BY over the wing's book memberships
     /// (each a primary-key seek into `container`), plus one assembly per
     /// GATHERING (∝ that gathering's extent — the `bookWordCounts` smart arm's
-    /// class, minus the text). Never per render; never held.
+    /// class, minus the text), plus (13i-d U4) the archived-member GROUP BY
+    /// (the wing's books drive; the same seeks). Never per render; never held.
     public static func bookcaseAggregates(
         _ db: Database, wingID: String
     ) throws -> BookcaseAggregates {
@@ -204,7 +214,9 @@ extension Queries {
             lastEdited[reading.id] = stamp
                 ?? DateFormatter.variorumISO8601.string(from: reading.createdAt)
         }
-        return BookcaseAggregates(lastEdited: lastEdited, gatheringCounts: gatheringCounts)
+        return BookcaseAggregates(
+            lastEdited: lastEdited, gatheringCounts: gatheringCounts,
+            archivedCounts: try archivedMemberCounts(db, wingID: wingID))
     }
 
     /// Word counts of every book's rendered content — curated AND smart

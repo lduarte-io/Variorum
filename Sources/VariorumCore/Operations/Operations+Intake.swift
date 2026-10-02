@@ -492,11 +492,10 @@ extension Operations {
     /// 13i-c ladder round 1 (the MAJOR): the WHERE is
     /// `Queries.pendingArrivalRowsWhere`, SHARED with the confirm's
     /// `pendingArrivalCount` — the confirm's N and this act's rows are one
-    /// set by construction. An ARCHIVED note's waiting row is in it
-    /// (P-13ib-U2-2 hides it from the door's DISPLAY only), so §24's line
-    /// now counts it instead of the finish deciding it silently — and
-    /// P-13ib-U2-2's "returns on unarchive" carries the recorded exception:
-    /// unless the book was finished meanwhile.
+    /// set by construction. An ARCHIVED note's waiting row is in it, so
+    /// §24's line counts it instead of the finish deciding it silently — and
+    /// since 13i-d U4 (her #169(a)(3), P-13ib-U2-2 reversed) the door SHOWS
+    /// it too, marked archived: every waiter the finish takes is visible.
     func dismissPendingArrivals(_ db: Database, readingID: String, now: Date) throws {
         try db.execute(
             sql: "UPDATE reading_post SET deleted_at = ? WHERE \(Queries.pendingArrivalRowsWhere)",

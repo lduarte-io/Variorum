@@ -45,12 +45,21 @@ extension Queries {
         /// ISO-8601 text, carried RAW — the words are the face's
         /// (`TimeStampFace`), asked per rendered row.
         public let arrivedAt: String
+        /// 13i-d U4 (her #169(a)(2) — P-13ib-U2-2 REVERSED): the waiting note
+        /// is ARCHIVED. It stays at the door, counted and listed, and the face
+        /// MARKS it; the judgment doors are the same (archive changes nothing
+        /// the ownership table reads). Defaulted so a hand-built row reads as
+        /// an ordinary waiter.
+        public let archived: Bool
 
-        public init(id: String, postID: String, title: String, arrivedAt: String) {
+        public init(
+            id: String, postID: String, title: String, arrivedAt: String, archived: Bool = false
+        ) {
             self.id = id
             self.postID = postID
             self.title = title
             self.arrivedAt = arrivedAt
+            self.archived = archived
         }
     }
 
@@ -78,12 +87,17 @@ extension Queries {
     /// expansion's rows can never disagree):
     /// - a LIVE `status='arrival'` row of THIS book — dismissed arrivals are
     ///   tombstones and seated ones are members, so neither counts;
-    /// - whose note is a live, UN-ARCHIVED post — the book view's own
-    ///   ambient-view rule (an archived member does not render in the book
-    ///   either, and intake never seats an archived note). PROVISIONAL
-    ///   P-13ib-U2-2 (the U2 record): a waiting note that is archived drops
-    ///   off the door while archived and returns on unarchive (its row
-    ///   stands untouched);
+    /// - whose note is a live post — ARCHIVED OR NOT. 13i-d U4 REVERSED
+    ///   13i-b's P-13ib-U2-2 (which hid an archived waiter while archived)
+    ///   at her #169(a) ruling: *"archived notes don't lose their books … the
+    ///   admission door should still show them … someone might want to add
+    ///   an archived note to their book"*. So an archived waiter is counted
+    ///   and listed (each row says `archived`, the face marks it), and the
+    ///   line's count is the finish confirm's N (`pendingArrivalCount` — the
+    ///   dismissal's own set) and the Bookcase row's arrival count — one
+    ///   number everywhere, "all visible and counted" (#169(a)(3)). Intake
+    ///   still never seats or bells an archived note (`matchesRule`); an
+    ///   archived waiter is a note archived AFTER it rang;
     /// - of a live BOOK. A gathering holds nothing (the sitting record §1),
     ///   so its door is always empty here, even if a stray row stood on it
     ///   (the reverted-bind class, U1's F-4) — the face is a book's face.
@@ -105,7 +119,8 @@ extension Queries {
                 title: DisplayTitle.note(
                     title: row["title"], entryDate: row["entry_date"],
                     createdAt: row["note_created_at"]),
-                arrivedAt: row["arrived_at"])
+                arrivedAt: row["arrived_at"],
+                archived: row["archived"])
         }
         return BookArrivals(count: count, rows: rows)
     }
@@ -116,8 +131,7 @@ extension Queries {
     static let bookArrivalSource = """
         FROM reading_post rp
         CROSS JOIN container c
-          ON c.id = rp.post_id AND c.deleted_at IS NULL
-         AND c.archived_at IS NULL AND c.kind = 'post'
+          ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.kind = 'post'
         WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'arrival'
         """
 
@@ -129,7 +143,8 @@ extension Queries {
     static let bookArrivalRowsSQL = """
         SELECT rp.id AS id, rp.post_id AS post_id, rp.created_at AS arrived_at,
                c.title AS title, c.entry_date AS entry_date,
-               c.created_at AS note_created_at
+               c.created_at AS note_created_at,
+               (c.archived_at IS NOT NULL) AS archived
         \(bookArrivalSource)
         ORDER BY rp.created_at, rp.id
         LIMIT ?

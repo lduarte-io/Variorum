@@ -136,8 +136,16 @@ struct ArrivalQueriesTests {
         }
     }
 
-    @Test func anArchivedNoteLeavesTheDoorWhileArchivedAndReturnsAfter() throws {
-        // PROVISIONAL P-13ib-U2-2 — the book view's ambient-view rule.
+    /// **13i-d U4 — P-13ib-U2-2 REVERSED** (her #169(a)(2) ruling, 2026-10-02:
+    /// *"archived notes don't lose their books, it makes me think that the
+    /// admission door should still show them … someone might want to add an
+    /// archived note to their book"*). This pin was
+    /// `anArchivedNoteLeavesTheDoorWhileArchivedAndReturnsAfter` — it asserted
+    /// the door went EMPTY while the waiter was archived. The flip is
+    /// deliberate and was RED on the pre-flip predicate: an archived waiter
+    /// STAYS at the door — counted and listed on its own row, MARKED
+    /// archived — and unarchiving only clears the mark.
+    @Test func anArchivedWaiterStaysAtTheDoorMarkedArchived() throws {
         try withOperations { ops, db in
             let work = try ops.createTag(name: "work")
             let book = try guardedBook(ops, tag: work)
@@ -145,12 +153,15 @@ struct ArrivalQueriesTests {
             let rowID = try #require(try door(db, book.id).rows.first?.id)
 
             try ops.archiveContainer(note.id)
-            #expect(try door(db, book.id) == .none)
-            // The row itself stands untouched — only the face looks away.
+            let archived = try door(db, book.id)
+            #expect(archived.count == 1, "the archived waiter is still waiting")
+            #expect(archived.rows.map(\.id) == [rowID], "on its own row, untouched")
+            #expect(archived.rows.map(\.archived) == [true], "MARKED archived")
             #expect(try arrivalRowIDs(db, book.id) == [rowID])
 
             try ops.unarchiveContainer(note.id)
             #expect(try door(db, book.id).rows.map(\.id) == [rowID])
+            #expect(try door(db, book.id).rows.map(\.archived) == [false], "the mark clears")
         }
     }
 
