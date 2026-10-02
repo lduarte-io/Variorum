@@ -19,6 +19,10 @@ struct BookView: View {
     /// 13i-c U4: the navigator's and Outline's note-row CONTEXT MENUS render
     /// the remove/release door (§20) — one act, its word the book's.
     static let contextMenuCapabilities: [CapabilityID] = [.removeFromBook]
+    /// 13i-d U3: the masthead's GEAR is the book's own door into its
+    /// settings sheet (the sitting record §4's "the book's ⋯ menu" — the
+    /// book's one masthead door, P-13id-U3-1), declared at last.
+    static let surfaceCapabilities: [CapabilityID] = [.openBookSettings]
 
     let session: AppSession
     let readingID: String
@@ -442,7 +446,8 @@ struct BookView: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.borderless)
-            .help("Book settings — collecting, finish, seal, own, length, rename")
+            .help(CapabilityRegistry.capability(.openBookSettings).verb
+                + " — collecting, finish, seal, own, length, rename")
         }
         HStack(spacing: 8) {
             // Outline · Index · Book · Read — Index sits beside the

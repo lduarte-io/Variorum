@@ -464,6 +464,12 @@ struct CapabilityRegistryTests {
             // row's click (the ascent) and a gathering's "remove #tag". Its
             // own door, the masthead book icon, is `PostDetailView`'s line.
             .union(BookPanelView.surfaceCapabilities)
+            // 13i-d U3 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the BOOK MASTHEAD's gear, the book's own door into
+            // its settings sheet (`.openBookSettings`), declared at last; and
+            // the Index FILTER BAR's save word (`.saveFilterAsGathering`).
+            .union(BookView.surfaceCapabilities)
+            .union(BookFilterBar.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

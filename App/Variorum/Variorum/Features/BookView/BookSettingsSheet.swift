@@ -83,6 +83,27 @@ nonisolated enum CollectingCopy {
 
     static func title(isBook: Bool) -> String { isBook ? "Book Settings" : "Gathering Settings" }
 
+    // 13i-d U3 — the doors INTO the sheet (the sitting record §4: "reachable
+    // from the book's ⋯ menu and the Bookcase row's context menu").
+    /// The registry's verb (the plain book's); a gathering's row says its own.
+    static let openVerb = "Book Settings\u{2026}"
+    static func openVerb(isBook: Bool) -> String { title(isBook: isBook) + "\u{2026}" }
+    static let openUnavailableNote =
+        "A book's settings live on the book \u{2014} right-click it on the Bookcase, or use "
+        + "the gear on its masthead."
+
+    // 13i-d U3 — THE JOURNAL TRAIT's sentence (the sitting record §10,
+    // verbatim: "Entries: date-stamped, named by their day, sorted by date —
+    // on/off").
+    static let journalTraitVerb = "Date-Stamped Entries"
+    static let journalTraitLabel = "Entries:"
+    static let journalTraitValue = "date-stamped, named by their day, sorted by date"
+    /// The toggle's two words (the sentence's "on/off").
+    static func journalTraitState(_ on: Bool) -> String { on ? "on" : "off" }
+    static let journalTraitHelp =
+        "Notes written here get the day's date, are named by it until you title them, and "
+        + "the book sorts by date. Turning it off never changes an entry you already have."
+
     /// The rule in words — the boolean tree read aloud: tags by their live
     /// path ("(deleted tag)" for a dead one), the star, `not`, and `and` /
     /// `or` with a nested group in parentheses.
@@ -251,6 +272,7 @@ struct BookSettingsSheet: View {
     @State private var wordTargetField = ""
     @State private var maxPostsField = ""
     @State private var parseError: String?
+    @State private var seeded = false
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -302,11 +324,11 @@ struct BookSettingsSheet: View {
         .padding(16)
         .frame(minWidth: 420, alignment: .leading)
         .background(tokens.surface)
-        .onAppear {
-            nameField = structure.reading?.name ?? ""
-            wordTargetField = structure.reading?.wordTarget.map(String.init) ?? ""
-            maxPostsField = structure.reading?.maxPosts.map(String.init) ?? ""
-        }
+        // 13i-d U3: seeded ONCE, from the book itself — on appear when the
+        // book is already in hand (the book view's road, the Bookcase's
+        // pre-loaded target), else the moment it arrives.
+        .onAppear { seedFields() }
+        .onChange(of: structure.reading?.id) { _, _ in seedFields() }
         // The sentences' one-shot read, re-keyed on everything they say.
         .task(id: factsKey) {
             if let reading = structure.reading { await model.load(for: reading) }
@@ -448,9 +470,20 @@ struct BookSettingsSheet: View {
 
     // MARK: Saving the three fields (as shipped)
 
+    private func seedFields() {
+        guard !seeded, let reading = structure.reading else { return }
+        seeded = true
+        nameField = reading.name
+        wordTargetField = reading.wordTarget.map(String.init) ?? ""
+        maxPostsField = reading.maxPosts.map(String.init) ?? ""
+    }
+
     /// Round 2, MINOR: unparseable input REFUSES and keeps (ExtentInput —
     /// the one parse rule shared with the shelf's sheet).
     private func save() -> Bool {
+        // 13i-d U3: a sheet whose book never arrived (or left) writes nothing
+        // — its fields were never seeded, so they say nothing about the book.
+        guard structure.reading != nil else { return true }
         guard let target = ExtentInput.parse(wordTargetField),
               let cap = ExtentInput.parse(maxPostsField)
         else {
@@ -492,6 +525,49 @@ struct BookSettingsSheet: View {
             finishedDisabled: reading.sealedAt != nil)
     }
     #endif
+}
+
+// MARK: - The Bookcase's road into the sheet (13i-d U3)
+
+/// **The sheet, opened from OUTSIDE the book** — the Bookcase row's "Book
+/// Settings…" (the sitting record §4's second road). The book view hands the
+/// sheet its own live `BookStructureModel`; a host that has none makes one
+/// here, LOADED before the sheet presents (the `BindOffer.load` rule: the
+/// item arrives with its facts, so the sheet's fields never seed from an
+/// empty book — an empty Word target saved back would CLEAR the stored one)
+/// and observed for the sheet's life by `BookSettingsHost`.
+@MainActor
+struct BookSettingsTarget: Identifiable {
+    let readingID: String
+    let structure: BookStructureModel
+    var id: String { readingID }
+
+    /// nil when the book is gone (deleted elsewhere between the click and
+    /// the read) — the caller speaks the refusal.
+    static func load(session: AppSession, readingID: String) async -> BookSettingsTarget? {
+        let structure = BookStructureModel(session: session, readingID: readingID)
+        guard let snapshot = try? await session.database.read({ db in
+            BookStructureModel.Snapshot(
+                reading: try Queries.reading(db, id: readingID),
+                sections: try Queries.readingSections(db, readingID: readingID),
+                deletedSections: try Queries.deletedReadingSections(db, readingID: readingID),
+                assignments: try Queries.sectionAssignments(db, readingID: readingID))
+        }), snapshot.reading != nil else { return nil }
+        structure.adopt(snapshot)
+        return BookSettingsTarget(readingID: readingID, structure: structure)
+    }
+}
+
+/// The sheet over a target's structure, observed while it is up (the book
+/// view's own structure is observed by the book view; this one by its host).
+struct BookSettingsHost: View {
+    let target: BookSettingsTarget
+    var onEditRule: (RuleEditorModel) -> Void = { _ in }
+
+    var body: some View {
+        BookSettingsSheet(structure: target.structure, onEditRule: onEditRule)
+            .task { await target.structure.start() }
+    }
 }
 
 #if DEBUG

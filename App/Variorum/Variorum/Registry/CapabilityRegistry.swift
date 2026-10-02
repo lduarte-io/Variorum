@@ -1824,6 +1824,34 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: RemoveFromBookCopy.removeTagUnavailableNote,
             availability: always),
+        // 13i-d U3 — THE COLLECTING PANE'S DOORS (the sitting record §4, §10)
+        // and THE FILTER BAR's save (§18.1). `.openBookSettings`: two door
+        // families — the Bookcase row's menu (`.contextMenu`, the road §4
+        // names) and the book masthead's gear (`.surface`, the book's own
+        // door; its target is the book on screen). `.setJournalTrait`: the
+        // sheet's Collecting row (`.surface`). `.saveFilterAsGathering`: the
+        // Index filter bar's word (`.surface`). All `always` for `.editRule`'s
+        // reason — each renderer carries its book, never a mode; the per-book
+        // refusals (the daily Journal's constitutive trait, a finished book,
+        // a malformed gathering rule) are the operations' own, spoken.
+        Capability(
+            id: .openBookSettings, verb: CollectingCopy.openVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: CollectingCopy.openUnavailableNote,
+            availability: always),
+        Capability(
+            id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: CollectingCopy.openUnavailableNote,
+            availability: always),
+        Capability(
+            id: .saveFilterAsGathering, verb: BookFilterCopy.saveVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookFilterCopy.unavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

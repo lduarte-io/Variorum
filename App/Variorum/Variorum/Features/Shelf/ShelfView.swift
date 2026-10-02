@@ -45,6 +45,9 @@ struct ShelfView: View {
         // book with copies only).
         + [.duplicateBook]
         + [.moveBookToShelf, .sendBookToTop, .sendBookToBottom]
+        // 13i-d U3 — the Collecting pane's second road (the sitting record
+        // §4): the book row reaches its settings sheet.
+        + [.openBookSettings]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -83,6 +86,11 @@ struct ShelfView: View {
     @State private var mintEditor: RuleEditorModel?
     /// 13i-c U4: Duplicate Book…'s prompt — its item is the book it is FOR.
     @State private var duplicateOffer: DuplicateBookOffer?
+    /// 13i-d U3 — the BOOK SETTINGS sheet, opened from the row (§4). Its item
+    /// arrives LOADED (`BookSettingsTarget.load`); the sheet's Edit… hands
+    /// the rule editor back here and opens it once the sheet is gone (W-1).
+    @State private var settingsTarget: BookSettingsTarget?
+    @State private var pendingRuleEditor: RuleEditorModel?
     // 13i-d U1 — the shelf doors' prompts (the strip asks; this view owns
     // the presentation, the `BookStateDoors` shape).
     @State private var newShelfPresented = false
@@ -268,6 +276,18 @@ struct ShelfView: View {
             Task { await model.refreshAggregates() }
         }) { editor in
             RuleEditorSheet(model: editor)
+        }
+        // 13i-d U3 — the Book Settings sheet from the row (the same sheet the
+        // book's gear opens). Its Edit… is handed back and opens the rule
+        // editor AFTER this sheet dismisses (W-1's rule, the book view's).
+        .sheet(item: $settingsTarget, onDismiss: {
+            Task { await model.refreshAggregates() }
+            if let next = pendingRuleEditor {
+                pendingRuleEditor = nil
+                ruleEditor = next
+            }
+        }) { target in
+            BookSettingsHost(target: target) { editor in pendingRuleEditor = editor }
         }
         .sheet(item: $mintEditor, onDismiss: {
             Task { await model.refreshAggregates() }
@@ -566,6 +586,10 @@ struct ShelfView: View {
             nameField = reading.name
             renameTarget = reading
         }
+        // 13i-d U3 — the Collecting pane's door from the Bookcase (§4).
+        Button(CollectingCopy.openVerb(isBook: reading.kind == .book)) {
+            openSettings(reading.id)
+        }
         // 13i-c U4 — DUPLICATE (§6): books only.
         if reading.kind == .book {
             Button(DuplicateBookCopy.verb(owned: reading.owned)) {
@@ -627,6 +651,18 @@ struct ShelfView: View {
         // gathering confirms).
         Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
             Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
+        }
+    }
+
+    /// 13i-d U3 — the settings door's one road: load the book, then present
+    /// with ONE write (a book deleted in between refuses in words).
+    private func openSettings(_ readingID: String) {
+        Task {
+            if let target = await BookSettingsTarget.load(session: session, readingID: readingID) {
+                settingsTarget = target
+            } else {
+                model.refuse(OpsRefusalCopy.message(for: OperationError.readingNotFound(id: readingID)))
+            }
         }
     }
 

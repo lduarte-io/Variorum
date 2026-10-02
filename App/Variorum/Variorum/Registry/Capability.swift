@@ -755,6 +755,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case showBookPanel
     case fileNoteInChapter, moveNoteUpInBook, moveNoteDownInBook
     case moveChapterUpInBook, moveChapterDownInBook
+    // 13i-d U3 — THE COLLECTING PANE'S DOORS and THE FILTER BAR's one write
+    // (the sitting record §4: the settings sheet "reachable from the book's ⋯
+    // menu and the Bookcase row's context menu"; §10: the journal-trait row
+    // "one sentence in the Collecting pane's sheet"; §18.1: "the 'Save this
+    // filter as a gathering' door"). Three declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds — three different acts with
+    // their own words and refusals. Opening the sheet is declared for the
+    // `.showBookPanel` reason (a door onto a surface IS a user-facing act);
+    // the grouped-by control and the filter's terms are NOT acts — they
+    // change what she sees, never the store (the Library `sort ▾` precedent).
+    case openBookSettings, setJournalTrait, saveFilterAsGathering
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

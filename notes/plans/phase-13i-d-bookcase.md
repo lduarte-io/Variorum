@@ -808,7 +808,7 @@ touched (TEXTKIT2_NOTES not required). No revert in flight. No subagents.
 |---|---|---|
 | 1 | Record skeleton + design map + evidence named + the (c)-arm proposal | DONE (f544367b) |
 | 2 | Row 112 — the masthead tag cards as a HELD read (extract the one-shot shape → red pin → held → green) | DONE (09c33836 red on purpose → this commit green) — `MastheadTagsObservationTests` 4 pins: 2 RED on the extracted one-shot shape (5 issues), the subject guard + the autosave-blind REGION control green both sides; green after (7/2 with `MastheadTagDoorTests`) |
-| 3 | Item 1 — the doors into the sheet: `.openBookSettings` (the Bookcase row's "Book Settings…" + the book masthead's gear, declared) | NOT-STARTED |
+| 3 | Item 1 — the doors into the sheet: `.openBookSettings` (the Bookcase row's "Book Settings…" + the book masthead's gear, declared) | DONE (this commit) — `BookCollectingDoorsTests` 2 + `BookSettingsSheetTests` 6 green (8/2). The three U3 acts are declared here; **the registry walk is knowingly RED until piece 4 renders `.setJournalTrait`**, and `BookFilterBar` is a declared SHELL (renders nothing) until piece 9 |
 | 4 | Item 1 — the journal-trait sentence in the Collecting pane (`setJournalTrait`; the daily book's refusal spoken) | NOT-STARTED |
 | 5 | Item 2 — row 107's SETTINGS-SHEET half (a gathering's Finish / Word target / Note cap faces leave; legacy ways out kept) + F-U1-8 (the filter folds into `BookStateDoorSet`) | NOT-STARTED |
 | 6 | Rider — the sheet's three text fields take the voice | NOT-STARTED |
