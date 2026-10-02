@@ -2340,7 +2340,22 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
 
 ## U6 RECORD — THE VOCABULARY SWEEP (+ ACT 0: the cross-wing undo guard) (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **The tutorial's lesson prose and the
+seeders are untouched** (U7's, by the brief): `TutorialSeeder`'s "SHELF is home" / "smart Quicknotes
+book" / "books & the shelf" and `PostureCopy`'s privacy-lesson "on this shelf" stand, allow-listed by
+name in the grep pin with the decision (F-U6-3 — U7 removes the line). (2) **The phone is untouched in
+product code** (record only — MOBILE PARITY below); its shared words changed under it (the refusal
+table's `readingNotDeleted`, `DeletionRefusal`, `SeededBookRestore`), its TEST BUILD is green and its
+one pin on a changed shared line was flipped as a JUSTIFIED EDIT. (3) **F-U4-7 is RECORDED, not
+aligned** (the brief's second road — P-13id-U6-3). (4) **The Archived view's inline Delete Note… stays
+undeclared** (F-U6-4 — outside F-U4-4's letter). (5) **No drag** was added. Everything else — ACT 0 and
+the sweep's pieces (a)–(k) — is built, pinned (red-on-old where bug-class) and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2116/233 (1 standing skip) · Mac named 1406/224 in four
+batches (7 standing opt-in skips, all `DebugOracleSingletonWindowTests`) incl. the registry walk, the
+eleven tutorial suites and the landing families UNMODIFIED · the phone TEST BUILD green + its restore
+suite 2/1 · the walk DONE ×4 (46 captures; one walk defect W-1 found, pinned, fixed, red-by-revert,
+re-walked; the §21 alignment measured and fixed in all four).**
 
 Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (R-13id-1…6, the
 constitution, ledger row 7, every adjudication — ACT 0's ruling in the U5b one, the riders routed
@@ -2357,24 +2372,24 @@ or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + the design + evidence named | DONE (this commit) |
-| 2 | ACT 0 — red-on-old pins on the traced recipes (diverge → move the book → ⌥⌘Z; bind → ⌥⌘Z → move the note → ⇧⌥⌘Z) + the sibling (`reapplyDiverge`: diverge → ⌥⌘Z → move the book → ⇧⌥⌘Z) + the already-guarded sibling's control (`reapplyMintedContainer` through `restoreContainer`) — committed RED on purpose | DONE (this commit — RED ON PURPOSE) — `WingUndoRevivalTests` 5: **4 RED on the pre-guard tree, 16 issues** (`act0-red.log`: every recipe's crossing count 1, the original/copy revived across, the half-undo/half-redo writes, the bind re-made a book over another wing's notes ×2), the control green |
-| 3 | ACT 0 — the guard (`Queries.membershipRevivalStaysInOneWing` over `revivalWingScope`; the three roads return before any write) → green | DONE (this commit) — the pins green with the diverge/bind/ownership/wing-move/revival/undo neighbours **119/15** (`act0-green.log`); the bind's redo now reads its revivable set before any write (behaviour otherwise byte-identical — `SmartConversionTests` green unmodified) |
-| 4 | (g) F-U3-4 — TRACE the chip's "in 2 books" first; bug-class ⇒ red-on-old pin + fix, else words | DONE (this commit) — **TRACE VERDICT: NOT bug-class.** `Queries.readingsContaining`'s membership arm reads BOOK rows only (`r.kind = 'book'`, `status='member'` — 13i-c F-R1-7's contract holds; no reader counts a gathering's row); it appends each gathering whose RULE shows the note (the assembly road, deliberately). The chip's WORD lumped them: `MembershipChip.label`/`headline` (pure, static) now count books and gatherings apart ("in Orbit · 1 gathering"; "This note is in 1 book and appears in 1 gathering:") — `VocabularySweepTests.theChipCountsBooksAndGatheringsApart` (new API — red on the old label by construction). ⌘K's "smart book" detail is (a)'s |
-| 5 | (d) row 106 — the generic `lockedReading` arms + `SeededBookRestore` speak Unseal where the book is sealed | DONE (this commit) — BOOK-KNOWN sites carry `sealed`: `ArrivalsCopy.refusal(…, sealed:)` (four call sites pass `book.sealedAt`), `MembershipChoiceCopy.refusal(…, sealed:)` (the target read FRESH at the refusal — `MembershipDoors.targetRefusal`), the Bookcase's drop + bind through `ShelfViewModel.bookRefusal` → `BookStateCopy.refusal`; BOOKLESS arms name BOTH roads (`ReadingsViewModel.message` — was "locked — unlock" — `DeletionRefusal` (shared, the phone speaks it), `SeededBookRestore.failureLine` (shared)). Pins: `VocabularySweepTests` ×4 (incl. a target sealed under the open sheet, store-backed; the Bookcase model's own words); `EncryptionBookDoorTests`' seeded line a JUSTIFIED EDIT (commented). Mac **50/5 green** (`mac-p1.log`) |
-| 6 | (f) item 10's dismiss receipt | DONE (this commit) — `ArrivalsCopy.dismissed` = "Dismissed “X” — it won’t come back on its own; add it by hand any time." (the ruled sentence; the app's typographic apostrophe); pinned in `VocabularySweepTests` + `BookArrivalsTests`' receipt line a JUSTIFIED EDIT (commented — the ruling changed its subject) |
-| 7 | (a) Shelf → Bookcase · "smart" → gathering/living (the navigator footer, Create Smart Book → the gathering mint's words, the pad's placeholder, ⌘K's label, every remnant) | DONE (this commit) — read site by site ("shelf" kept where it names a SHELF): ⌘K/search detail (core `searchCatalog` — "gathering" · "sealed book" · "finished book" · "book"; `CatalogDetailWordsTests`); the Library info panel's kind word; the book masthead's meta (`BookViewCopy.metaLine`); the gathering's navigator footer (`BookViewCopy.gatheringFooter`); "Create Smart Book…" → **"Create Gathering…"** (`RuleEditorCopy.mintTitle`, the mint sheet's title too); the New Book prompt's message; the drop-on-a-gathering receipts (`BookcaseCopy.alreadyShowing`/`shownByTagging`); Settings ▸ Tags' "Promote to Book…" (it MINTS A GATHERING) → **"Make a Gathering…"** + its sheet + its search row; the daily door's "is a smart book" and "shelf menu"; the Shortcuts & Dictionary helper's five entries (book / gathering, tag, quicknote, the capture box, the pad); "on the shelf"/"on your shelf" → the Bookcase on every door (rule editor, bind/spawn notes, duplicate, state doors, the extent sheet, the Help ▸ Restore receipts); the shared refusal table's `readingNotDeleted` made platform-NEUTRAL ("back where it was" — the phone still calls its area Shelf). **The pad's placeholder carries no "smart"** (verified: "jot it down — it lands in Quicknotes"). OUT (U7's, recorded): `TutorialSeeder` lesson prose and `PostureCopy`'s privacy-lesson "on this shelf" (F-U6-3). Pins: `VocabularySweepTests` +3; JUSTIFIED EDITS (commented): `LibraryPanelTests` ("gathering · 2 chapters…"), `GatheringRuleGateTests` (the mint title), `TutorialWalkTests`' restore receipt ("on your Bookcase"), `EncryptionBookDoorTests`' whole-book refusal. Mac **108/14 green** (`mac-a.log`); core 6/2 |
-| 8 | (e) row 111's four items | DONE — items 1 (the gathering footer, true of a ★ rule — `BookViewCopy.gatheringFooter`) and 2 ("1 chapters": the book meta AND the Index footer, singular where one) at bdf23a66; item 3 (this commit): VERIFIED against the listeners first (`intakeAfterTagging` reaches only rules naming the tag's subtree, `intakeAfterStarring` only rules with a star term — a legacy-only rule hears neither), then the pure `RuleGrammar.hearsApplyingActs` (core Domain) gates every "keeps collecting" promise — the bind sheet (`BindCopy.explanation(hearsActs:)` + `hearsActs(_ reading:)`), the bind receipt (both hosts), the spawn sheet and receipt, the navigator's bind help — a legacy-only rule says it "collects only when it catches up"; item 4 (this commit): the bookless-notes overload renamed `Queries.notePoolListing` (+ `notePoolListingSQL`), the scraps overload keeps the model term `poolListing(poolID:)` (the phone's caller untouched — zero phone edits), documented. Pins: core `RuleHearsActsTests` 2 (the predicate's table + a legacy-only living book NOT reached by a tagging act — the listener's own truth); Mac `VocabularySweepTests.theCollectingPromiseIsTrueOfTheRule`. Core **85/10 → green** (`core-e*.log`; one assertion re-spelled `RuleTerm.tag("")` — an implicit-member resolution through the Optional parameter, not a product fault); Mac **61/7 green** (`mac-e.log`) |
-| 9 | (b) a wing presents as a SEPARATE LIBRARY (the switcher's and doors' language) | DONE (this commit) — the noun stays WING (lesson 11 says "A wing is a separate library in the same app"; "Library" already names the finder — a "Move to Library" door would collide); the doors that MAKE or CROSS a wing say what it is: the switcher list's header "Wings — each a separate library" (`WingCopy.switcherHeader`, the inline picker's label), the mint receipt ("…— a separate library; you're in it now."), the note move's confirm ("…a wing is a separate library, and a book only holds notes of its own wing"), the copy receipt, the lineage line ("a version of this note lives in another library — the wing “X”"); the switcher's help and the New Wing prompt already said it (U5). Pinned `VocabularySweepTests.theWingDoorsSayItIsASeparateLibrary` (U5/U5b's pins compare against the same functions — no flip) |
-| 10 | (c) the Library's "Posts" → "Notes" (§21) | DONE — "Posts" → "Notes" (98b8b408: `LibraryCatalogModel.Scope.label`, the case keeps the model term; pinned); "'on day…' wants clearer wording" → **"edited on…"** / "edited on Sep 9" (98b8b408; `LibraryDayFilterTests`' label pin a JUSTIFIED EDIT); **the misalignment, MEASURED on the walk (this commit):** the native segmented controls draw their labels 1 pt BELOW the line the text controls share, in BOTH voices (label bottoms @2×: Terminal 238 vs 236 · Study 244 vs 242 — `tl-01`, `sl-01` before), and the sort menu sits right beside a segmented control. First-text-baseline alignment was TRIED and changed nothing (the control reports a baseline its label does not draw on — `tl-26`); the sort menu and the day door now meet the segmented line by `LibraryCatalogView.segmentedLabelDrop` (1 pt) — after: Terminal·light 238/238/238 (`tl-27`), Terminal·dark 238/238 (`td-01`), Study·light and Study·dark 244/244 (`sl-01`, `sd-01`). A TASTE row: the evidence is the measured captures. PROVISIONAL P-13id-U6-5 |
-| 11 | (h) F-U3-6 (the double divider) + F-U4-4 (the Archived view's Unarchive declared) | DONE (this commit; F-U3-6's look PENDING the walk) — F-U3-6: the family picker carries its header as ITS OWN label (a `Section` header around an inline `Picker` drew two hairlines — one section, one separator now; the empty case keeps the plain section); F-U4-4: `ArchivedView.surfaceCapabilities = [.unarchiveNote]`, the button's verb from the registry, the walk's union one JUSTIFIED line. The Archived row's inline **Delete Note…** is the same P-1 class but its act (`.deleteNote`) has no `.surface` door — declaring it changes a pinned door set, outside F-U4-4's letter: F-U6-4 |
+| 1 | Record skeleton + the design + evidence named | DONE (095948f8) |
+| 2 | ACT 0 — red-on-old pins on the traced recipes (diverge → move the book → ⌥⌘Z; bind → ⌥⌘Z → move the note → ⇧⌥⌘Z) + the sibling (`reapplyDiverge`: diverge → ⌥⌘Z → move the book → ⇧⌥⌘Z) + the already-guarded sibling's control (`reapplyMintedContainer` through `restoreContainer`) — committed RED on purpose | DONE (b8e6dc62 — RED ON PURPOSE) — `WingUndoRevivalTests` 5: **4 RED on the pre-guard tree, 16 issues** (`act0-red.log`: every recipe's crossing count 1, the original/copy revived across, the half-undo/half-redo writes, the bind re-made a book over another wing's notes ×2), the control green |
+| 3 | ACT 0 — the guard (`Queries.membershipRevivalStaysInOneWing` over `revivalWingScope`; the three roads return before any write) → green | DONE (a12cb6b4; walked `tl-17…20`) — the pins green with the diverge/bind/ownership/wing-move/revival/undo neighbours **119/15** (`act0-green.log`); the bind's redo now reads its revivable set before any write (behaviour otherwise byte-identical — `SmartConversionTests` green unmodified) |
+| 4 | (g) F-U3-4 — TRACE the chip's "in 2 books" first; bug-class ⇒ red-on-old pin + fix, else words | DONE (299c7674; walked `tl-11/12`, `sl-06/07`, `sd-04`, `td-04`) — **TRACE VERDICT: NOT bug-class.** `Queries.readingsContaining`'s membership arm reads BOOK rows only (`r.kind = 'book'`, `status='member'` — 13i-c F-R1-7's contract holds; no reader counts a gathering's row); it appends each gathering whose RULE shows the note (the assembly road, deliberately). The chip's WORD lumped them: `MembershipChip.label`/`headline` (pure, static) now count books and gatherings apart ("in Orbit · 1 gathering"; "This note is in 1 book and appears in 1 gathering:") — `VocabularySweepTests.theChipCountsBooksAndGatheringsApart` (new API — red on the old label by construction). ⌘K's "smart book" detail is (a)'s |
+| 5 | (d) row 106 — the generic `lockedReading` arms + `SeededBookRestore` speak Unseal where the book is sealed | DONE (299c7674; END-run flips e2d5c497) — BOOK-KNOWN sites carry `sealed`: `ArrivalsCopy.refusal(…, sealed:)` (four call sites pass `book.sealedAt`), `MembershipChoiceCopy.refusal(…, sealed:)` (the target read FRESH at the refusal — `MembershipDoors.targetRefusal`), the Bookcase's drop + bind through `ShelfViewModel.bookRefusal` → `BookStateCopy.refusal`; BOOKLESS arms name BOTH roads (`ReadingsViewModel.message` — was "locked — unlock" — `DeletionRefusal` (shared, the phone speaks it), `SeededBookRestore.failureLine` (shared)). Pins: `VocabularySweepTests` ×4 (incl. a target sealed under the open sheet, store-backed; the Bookcase model's own words); `EncryptionBookDoorTests`' seeded line a JUSTIFIED EDIT (commented). Mac **50/5 green** (`mac-p1.log`) |
+| 6 | (f) item 10's dismiss receipt | DONE (299c7674; walked `tl-22` — the quiet slot truncates by design, F-U3-7's class) — `ArrivalsCopy.dismissed` = "Dismissed “X” — it won’t come back on its own; add it by hand any time." (the ruled sentence; the app's typographic apostrophe); pinned in `VocabularySweepTests` + `BookArrivalsTests`' receipt line a JUSTIFIED EDIT (commented — the ruling changed its subject) |
+| 7 | (a) Shelf → Bookcase · "smart" → gathering/living (the navigator footer, Create Smart Book → the gathering mint's words, the pad's placeholder, ⌘K's label, every remnant) | DONE (bdf23a66; walked `tl-01…05`, `sl-02…05`, `sd-02/03`, `td-02/03`, `tl-23/24`) — read site by site ("shelf" kept where it names a SHELF): ⌘K/search detail (core `searchCatalog` — "gathering" · "sealed book" · "finished book" · "book"; `CatalogDetailWordsTests`); the Library info panel's kind word; the book masthead's meta (`BookViewCopy.metaLine`); the gathering's navigator footer (`BookViewCopy.gatheringFooter`); "Create Smart Book…" → **"Create Gathering…"** (`RuleEditorCopy.mintTitle`, the mint sheet's title too); the New Book prompt's message; the drop-on-a-gathering receipts (`BookcaseCopy.alreadyShowing`/`shownByTagging`); Settings ▸ Tags' "Promote to Book…" (it MINTS A GATHERING) → **"Make a Gathering…"** + its sheet + its search row; the daily door's "is a smart book" and "shelf menu"; the Shortcuts & Dictionary helper's five entries (book / gathering, tag, quicknote, the capture box, the pad); "on the shelf"/"on your shelf" → the Bookcase on every door (rule editor, bind/spawn notes, duplicate, state doors, the extent sheet, the Help ▸ Restore receipts); the shared refusal table's `readingNotDeleted` made platform-NEUTRAL ("back where it was" — the phone still calls its area Shelf). **The pad's placeholder carries no "smart"** (verified: "jot it down — it lands in Quicknotes"). OUT (U7's, recorded): `TutorialSeeder` lesson prose and `PostureCopy`'s privacy-lesson "on this shelf" (F-U6-3). Pins: `VocabularySweepTests` +3; JUSTIFIED EDITS (commented): `LibraryPanelTests` ("gathering · 2 chapters…"), `GatheringRuleGateTests` (the mint title), `TutorialWalkTests`' restore receipt ("on your Bookcase"), `EncryptionBookDoorTests`' whole-book refusal. Mac **108/14 green** (`mac-a.log`); core 6/2 |
+| 8 | (e) row 111's four items | DONE — items 1 (the gathering footer, true of a ★ rule — `BookViewCopy.gatheringFooter`) and 2 ("1 chapters": the book meta AND the Index footer, singular where one) at bdf23a66; item 3 (dceba975): VERIFIED against the listeners first (`intakeAfterTagging` reaches only rules naming the tag's subtree, `intakeAfterStarring` only rules with a star term — a legacy-only rule hears neither), then the pure `RuleGrammar.hearsApplyingActs` (core Domain) gates every "keeps collecting" promise — the bind sheet (`BindCopy.explanation(hearsActs:)` + `hearsActs(_ reading:)`), the bind receipt (both hosts), the spawn sheet and receipt, the navigator's bind help — a legacy-only rule says it "collects only when it catches up"; item 4 (dceba975): the bookless-notes overload renamed `Queries.notePoolListing` (+ `notePoolListingSQL`), the scraps overload keeps the model term `poolListing(poolID:)` (the phone's caller untouched — zero phone edits), documented. Pins: core `RuleHearsActsTests` 2 (the predicate's table + a legacy-only living book NOT reached by a tagging act — the listener's own truth); Mac `VocabularySweepTests.theCollectingPromiseIsTrueOfTheRule`. Core **85/10 → green** (`core-e*.log`; one assertion re-spelled `RuleTerm.tag("")` — an implicit-member resolution through the Optional parameter, not a product fault); Mac **61/7 green** (`mac-e.log`) |
+| 9 | (b) a wing presents as a SEPARATE LIBRARY (the switcher's and doors' language) | DONE (98b8b408; walked `tl-13/14/15/21`, `sl-08`, `td-06`) — the noun stays WING (lesson 11 says "A wing is a separate library in the same app"; "Library" already names the finder — a "Move to Library" door would collide); the doors that MAKE or CROSS a wing say what it is: the switcher list's header "Wings — each a separate library" (`WingCopy.switcherHeader`, the inline picker's label), the mint receipt ("…— a separate library; you're in it now."), the note move's confirm ("…a wing is a separate library, and a book only holds notes of its own wing"), the copy receipt, the lineage line ("a version of this note lives in another library — the wing “X”"); the switcher's help and the New Wing prompt already said it (U5). Pinned `VocabularySweepTests.theWingDoorsSayItIsASeparateLibrary` (U5/U5b's pins compare against the same functions — no flip) |
+| 10 | (c) the Library's "Posts" → "Notes" (§21) | DONE — "Posts" → "Notes" (98b8b408: `LibraryCatalogModel.Scope.label`, the case keeps the model term; pinned); "'on day…' wants clearer wording" → **"edited on…"** / "edited on Sep 9" (98b8b408; `LibraryDayFilterTests`' label pin a JUSTIFIED EDIT); **the misalignment, MEASURED on the walk (68358f94):** the native segmented controls draw their labels 1 pt BELOW the line the text controls share, in BOTH voices (label bottoms @2×: Terminal 238 vs 236 · Study 244 vs 242 — `tl-01`, `sl-01` before), and the sort menu sits right beside a segmented control. First-text-baseline alignment was TRIED and changed nothing (the control reports a baseline its label does not draw on — `tl-26`); the sort menu and the day door now meet the segmented line by `LibraryCatalogView.segmentedLabelDrop` (1 pt) — after: Terminal·light 238/238/238 (`tl-27`), Terminal·dark 238/238 (`td-01`), Study·light and Study·dark 244/244 (`sl-01`, `sd-01`). A TASTE row: the evidence is the measured captures. PROVISIONAL P-13id-U6-5 |
+| 11 | (h) F-U3-6 (the double divider) + F-U4-4 (the Archived view's Unarchive declared) | DONE (98b8b408; F-U3-6 walked `tl-08/10`, `td-07` — one hairline each side of the family section) — F-U3-6: the family picker carries its header as ITS OWN label (a `Section` header around an inline `Picker` drew two hairlines — one section, one separator now; the empty case keeps the plain section); F-U4-4: `ArchivedView.surfaceCapabilities = [.unarchiveNote]`, the button's verb from the registry, the walk's union one JUSTIFIED line. The Archived row's inline **Delete Note…** is the same P-1 class but its act (`.deleteNote`) has no `.surface` door — declaring it changes a pinned door set, outside F-U4-4's letter: F-U6-4 |
 | 12 | (i) F-U4-7 — the untitled-note naming split (align, or record for 13s with the reason) | DONE — **RECORDED for 13s, no code** (the brief's second road): the two names are two RULED brains — `DisplayTitle.note` (her R6-3: what a note is CALLED — title, else its date — the masthead, exports, pickers, and every BOOK surface: the navigator, Index, Outline, the Book Panel, the Arrivals and archived lines) and `NoteCardFace` (her 13u3 item 4: what a Library LIST card LEADS with — title, else first words). Aligning the two lines alone would open a new split INSIDE the book (the lines would disagree with the Index right above them); aligning every book list is a design pass. P-13id-U6-3 carries the options |
-| 13 | (j) row 103's LIBRARY half — the quiet-receipt host | DONE (this commit; the look PENDING the walk) — the Library's own laid-out message row (above the bottom divider — F's (a)) hosts the status seam's QUIET line when nothing of its own speaks (`LibraryCatalogView.messageSlot`: its error first, its own receipt second, the quiet receipt third, else nothing — no reserved blank line); pinned. F-U5-8's move/copy receipts now land on the Library |
-| 14 | (k) the note ▾ menu's Move/Copy to Wing renderer | DONE (this commit; the menu PENDING the walk) — both bars (Write's `CommitBar`, Takes' `TakesBottomBar` — R6-2's one grammar) render the existing `WingNoteDoors` from the open NOTE's wing (`fromWing:` — an open note can be another wing's, F-U5-6), read per note (`NoteMenuWingContext` — the effective wing + the display name) and re-read after an act; the move's confirm hangs off the bar (`noteMenuWingDoors`), never a menu item; NOTE contexts only in Write's bar (it also composes the scraps editor); drawn only while another wing exists (P-2). The shared `WingsModel` reaches the bars through the ENVIRONMENT (RootView's; the note-only window owns one — R118). Registry: both acts gain `.bottomBar`, both bars render them; `WingSwitcherTests`' door pin a JUSTIFIED EDIT; the unavailable note names the new door. Pinned (`theNoteMenuReadsTheNotesOwnWing`); Mac **111/10 green incl. the registry walk** (`mac-bk.log`) |
-| 15 | The GREP PINS banning the dead spellings (the 18j literal-colour pin's form) | DONE (this commit) — `DeadVocabularyTests` walks every CODE line (comments keep history) of the Mac app, `Shared/` and core (>400 files, guarded): whole-word "smart" and the retired phrasings ("on the shelf" · "on your shelf" · "shelf menu" · "shelf row" · "shelf right-click" · "Pin to Shelf Top" · "Promote to Book" · `"Posts"` · "on day…" · "This book is locked") — "shelf" alone stays (U1's noun); a NAMED allow-list with its decisions (`TutorialSeeder.swift` — U7's prose + re-seed, U7 removes the line; core `Persistence/` — the migrations' SQL history); a matcher CONTROL (fires on the banned forms, quiet on code names). Its first dry run found one site the sweep missed — the Data Safety guide's "…“Encryption Explained” on your shelf." (a multi-line string) — swept here. Mac **2/1 green** (`mac-grep.log`); red-by-revert PENDING the combined revert |
-| 16 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | NOT-STARTED |
-| 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | NOT-STARTED |
-| 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | NOT-STARTED |
+| 13 | (j) row 103's LIBRARY half — the quiet-receipt host | DONE (98b8b408; walked `tl-21`: "Copied “2026-10-02” to “Home” — a separate library; the copy waits in its Pool.") — the Library's own laid-out message row (above the bottom divider — F's (a)) hosts the status seam's QUIET line when nothing of its own speaks (`LibraryCatalogView.messageSlot`: its error first, its own receipt second, the quiet receipt third, else nothing — no reserved blank line); pinned. F-U5-8's move/copy receipts now land on the Library |
+| 14 | (k) the note ▾ menu's Move/Copy to Wing renderer | DONE (98b8b408; walked `tl-16` — the live note box's Write bar) — both bars (Write's `CommitBar`, Takes' `TakesBottomBar` — R6-2's one grammar) render the existing `WingNoteDoors` from the open NOTE's wing (`fromWing:` — an open note can be another wing's, F-U5-6), read per note (`NoteMenuWingContext` — the effective wing + the display name) and re-read after an act; the move's confirm hangs off the bar (`noteMenuWingDoors`), never a menu item; NOTE contexts only in Write's bar (it also composes the scraps editor); drawn only while another wing exists (P-2). The shared `WingsModel` reaches the bars through the ENVIRONMENT (RootView's; the note-only window owns one — R118). Registry: both acts gain `.bottomBar`, both bars render them; `WingSwitcherTests`' door pin a JUSTIFIED EDIT; the unavailable note names the new door. Pinned (`theNoteMenuReadsTheNotesOwnWing`); Mac **111/10 green incl. the registry walk** (`mac-bk.log`) |
+| 15 | The GREP PINS banning the dead spellings (the 18j literal-colour pin's form) | DONE (827da96c; the walk's Tags-pane phrase 68358f94) — `DeadVocabularyTests` walks every CODE line (comments keep history) of the Mac app, `Shared/` and core (>400 files, guarded): whole-word "smart" and the retired phrasings ("on the shelf" · "on your shelf" · "shelf menu" · "shelf row" · "shelf right-click" · "Pin to Shelf Top" · "Promote to Book" · `"Posts"` · "on day…" · "This book is locked") — "shelf" alone stays (U1's noun); a NAMED allow-list with its decisions (`TutorialSeeder.swift` — U7's prose + re-seed, U7 removes the line; core `Persistence/` — the migrations' SQL history); a matcher CONTROL (fires on the banned forms, quiet on code names). Its first dry run found one site the sweep missed — the Data Safety guide's "…“Encryption Explained” on your shelf." (a multi-line string) — swept here; the WALK found one more — Settings ▸ Tags' subtitle "…and promote tags to a book." — swept and its phrase banned. Mac **2/1 green** (`mac-grep.log`); RED by the combined revert (R3/R6: 8 spellings listed) |
+| 16 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | DONE (e2d5c497) — core FULL **2116/233** (1 standing skip; `core-full.log`); Mac **142/16** (batch C: the registry walk, the eleven `Tutorial*` suites, the wing suites, `VocabularySweepTests`, `DeadVocabularyTests`) + **236/38** (batch A: every `Book*` suite, the landing families UNMODIFIED) + **646/116** (batch B: U5b's neighbourhood) + **382/54** (batch D: the 54 touched-but-unlisted suites — the two bars, the note window, Settings, quick note, savepoint doors; 7 standing opt-in skips) = **1406/224**; the END caught three pins asserting the retired generic word — `BookStructureTests` ×2 ("locked") and the phone's `MobileSeededBookRestoreTests` — flipped as JUSTIFIED EDITS and re-run green; phone **TEST BUILD SUCCEEDED** + `MobileSeededBookRestoreTests` 2/1 on the iPhone 17 simulator |
+| 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | DONE — **46 captures**, all four combinations (EVIDENCE lists them); W-1 found, fixed (68358f94), red by revert (78daf81b), re-walked `td-05`; her dev voice (Terminal — read back `1, 0`), appearance (`system`), wing (Home) restored; zero instances after |
+| 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | DONE (this commit) |
 
 **REVERT STATE: NO REVERT IN FLIGHT.** W-1's single-arm revert (the chip's default back to the dump, from 68358f94) turned `theChipDefersToTheSharedRefusalWordsNeverADump` RED — 1 test, 2 issues, the walk's own "Refused: postHasNoBlocks(id: …)" (`w1-revert.log`) — and was restored by checkout, `git diff --quiet` verified. The combined behavioural revert ran from the committed HEAD
 c306e84f and was restored by `git checkout HEAD --` (`git diff --quiet` verified) — its record is
@@ -2411,11 +2426,12 @@ EVIDENCE's "combined behavioural revert" line.
   ENTRY as obsolete … checked before any write") makes ONE crossing row void the whole re-bind (the
   gathering stays a gathering; a fresh bind by hand gives the current assembly). PROVISIONAL
   P-13id-U6-1 records the row-level alternative for her bundle.
-- **The sweep's pieces (a)–(k)** are designed at each piece's commit (PENDING here) — a word sweep is
-  read site by site, never a blind replace: "shelf" stays where it names a SHELF (U1's ruled noun);
-  only the AREA's old name ("on the shelf" = the Bookcase) and "smart" go.
+- **The sweep's pieces (a)–(k)** were designed at each piece's commit — their designs are the LIVE
+  STATUS rows 4–15. A word sweep is read site by site, never a blind replace: "shelf" stays where it
+  names a SHELF (U1's ruled noun); only the AREA's old name ("on the shelf" = the Bookcase) and
+  "smart" go; a sentence that carries a fact (a count, a road, a state) is pinned.
 
-### EVIDENCE (named now; counts PENDING until each run lands)
+### EVIDENCE (all run at the END unless named; counts exact)
 
 - **ACT 0 red-on-old:** `WingUndoRevivalTests` on the pre-guard tree — **4 tests RED, 16 issues**
   (`act0-red.log`: every recipe's crossing count 1; `revertDiverge` revived the original across and
@@ -2435,17 +2451,142 @@ EVIDENCE's "combined behavioural revert" line.
   renderers) — the registry walk and the choice-sheet suite stayed GREEN, as predicted (a union
   equality cannot see R4/R5 — the reason the direct pins exist); restored by checkout, tree clean,
   green again 73/5 (`revert-restored.log`).
-- (g)'s trace verdict (+ its pin if bug-class): PENDING.
-- The word-table pins (row 106's sealed arms, the dismiss receipt, row 111's words): PENDING.
-- The grep pins banning the dead spellings: PENDING.
-- Registry rows + the registry walk green; the eleven tutorial suites green: PENDING.
-- Core FULL `swift test` (baseline 2108/230): PENDING.
-- Mac named suites (build `DerivedData/13id-u6`): PENDING. Phone TEST BUILD: PENDING.
-- THE WALK ×4 into `notes/plans/13id-screens/u6/`: PENDING.
+- **(g)'s trace verdict: NOT bug-class** — the membership reader is books-only (13i-c F-R1-7 holds);
+  the gatherings it lists show the note by rule. The fix is the chip's words (LIVE STATUS row 4).
+- **W-1 (the walk's defect) red-by-revert:** the chip's default arm back to `"Refused: \(error)"` turned
+  `theChipDefersToTheSharedRefusalWordsNeverADump` RED — 1 test, 2 issues, the walk's own dump
+  (`w1-revert.log`); restored, tree clean; re-walked `td-05` ("There's nothing in that note yet — write
+  a line in it first.").
+- **Word-table pins:** `VocabularySweepTests` — **16 tests** (the chip's two word tables · the dismiss
+  receipt · the arrivals' sealed road · the bookless arms naming both roads · a target sealed under the
+  open sheet (store-backed) · the Bookcase's own sealed road (store-backed) · the book meta + Index
+  footer counts · the gathering footer · the Bookcase's gathering words + the mint title · the wing
+  framing · "Notes" · the collecting promise per rule · the Library's quiet slot · the Archived view's
+  declaration · the note menu's wing context (store-backed) · W-1's no-dump); core
+  `CatalogDetailWordsTests` 1 + `RuleHearsActsTests` 2.
+- **The grep pins:** `DeadVocabularyTests` 2 (the walk over >400 files + the matcher control) — red by
+  the combined revert (R3/R6 — 8 spellings listed by file:line).
+- **JUSTIFIED EDITS (subject changed by ruling, each commented in place):** `BookArrivalsTests` (the
+  dismiss receipt — item 10), `EncryptionBookDoorTests` ×2 (the seeded line — row 106; the whole-book
+  refusal's "on your Bookcase"), `LibraryPanelTests` ("gathering · …"), `GatheringRuleGateTests` (the
+  mint title), `TutorialWalkTests` (the restore door's receipt — "on your Bookcase"),
+  `LibraryDayFilterTests` ("edited on…"), `CapabilityRegistryTests` (one union line —
+  `ArchivedView`), `WingSwitcherTests` (the note acts' doors + the bars' renderers),
+  `BookStructureTests` ×2 (the generic arm's words — row 106), the phone's
+  `MobileSeededBookRestoreTests` (the shared line — row 106). Every rename-driven test edit
+  (`notePoolListing`) is mechanical.
+- **Registry:** `.moveNoteToWing` / `.copyNoteToWing` gain `.bottomBar` (both bars render them);
+  `.unarchiveNote` gains its second renderer (`ArchivedView`); the registry walk green in batch C.
+- **Core FULL `swift test`: "Test run with 2116 tests in 233 suites passed"** (1 skipped — the standing
+  env-gated Supabase integration test; `core-full.log`). Baseline 2108/230 → **+8 / +3, all this
+  unit's** (`WingUndoRevivalTests` 5, `CatalogDetailWordsTests` 1, `RuleHearsActsTests` 2).
+- **Mac named suites** (build `DerivedData/13id-u6`, `test-without-building`, zero instances, four
+  batches — `scratchpad/13id-u6/batch-{a,b,c,d}.txt`): **142/16** (`mac-c.log`) + **236/38**
+  (`mac-a2.log`) + **646/116** (`mac-b2.log`) + **382/54** (`mac-d.log`, 7 skipped — the standing
+  `DebugOracleSingletonWindowTests` opt-in gate) = **1406 tests in 224 suites**. The first A and B runs
+  each caught one pin on the retired generic word (`BookStructureTests` lines 752/759 and 510), flipped
+  and re-run green.
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (`phone-bft.log`,
+  `DerivedData/13id-u6-mobile`); `MobileSeededBookRestoreTests` **2/1** on the iPhone 17 simulator
+  after its justified flip (`phone-tests.log`).
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u6`; GUI grants
+  probed by real effect first — a 6 MB full-screen frame, System Events answering; the author guard
+  before every act, her app absent throughout, HID idle 4,258 s at the start — three self-trips at < 2 s
+  spacing, each verified as mine by a climbing idle counter; 46 captures in
+  `notes/plans/13id-screens/u6/`, gitignored). **Terminal·light** — tl-01 the Library masthead
+  (all · books · NOTES · blocks; "gathering" / "finished book" kinds; "edited on…"; the 1-pt
+  misalignment measured) · 02 ⌘K: "Quicknotes · gathering" · 03 the New Book prompt (the three kinds in
+  lesson-1 words; Create Gathering…) · 04 the "Create Gathering" sheet · 05 the gathering's footer
+  ("gathering — it shows every note its rule matches and holds none of them. A note comes and goes with
+  its tags and its star.") + "gathering · 15 notes" · 06 "book · 1 chapter · 5 notes" · 07 the Index
+  footer "1 chapter · 5 notes" · 08 the group menu, no family · 10 the group menu with #u3fam — ONE
+  hairline each side (F-U3-6) · 11 the chip "~/the door · 1 gathering" (was "in 2 books") · 12 its
+  popover "This note is in 1 book and appears in 1 gathering:" · 13 the switcher's "Wings — each a
+  separate library" · 14 the mint receipt "Made the wing “Annex” — a separate library; you're in it
+  now." · 15 the switcher inside Annex · 16 **the note ▾ menu's Move to Wing › / Copy to Wing ›**
+  (the live note box's Write bar) · 17–20 **ACT 0 IN USE:** diverge → Move to Wing ▸ Annex (the
+  confirm counting the copy) → Edit ▸ "Undo Diverge for This Book" → ⌥⌘Z → Edit offers "Redo Diverge
+  for This Book" (the entry consumed) and Annex's act0 walk still holds its 1 note — nothing crossed
+  (F-U6-2: the shell's receipt still says "Undid: …") · 21 **the Library's quiet slot:** "Copied
+  “2026-10-02” to “Home” — a separate library; the copy waits in its Pool." · 22 the dismiss receipt
+  in the navigator's quiet slot ("Dismissed “2026-10-02” — it won't come back on…", truncating by
+  design) · 23 Settings ▸ Tags "Make a Gathering…" (and the subtitle the walk caught) · 24 the helper's
+  "book / gathering", "tag", "quicknote" entries · 25 the Archived view's Unarchive · 26 the
+  baseline-alignment try (no effect) · 27 **after the nudge: 238/238/238**; **Study·light** — sl-01 the
+  masthead (All · Books · Notes · Blocks; 244/244 after) · 02 the Bookcase · 03 the New Book prompt ·
+  05 "Create Gathering" · 04 the gathering's footer + meta · 06 the chip "in the door · 1 gathering" ·
+  07 its popover · 08 the switcher header; **Study·dark** — sd-01 the masthead (244/244) · 02 the
+  Bookcase · 03 the gathering · 04 the chip popover; **Terminal·dark** — td-01 the masthead (238/238) ·
+  02 the Bookcase · 03 the gathering · 04 the chip popover · 05 **W-1 re-walked** (an empty note's
+  diverge: "There's nothing in that note yet — write a line in it first.") · 06 the switcher header ·
+  07 the group menu with the family. (The W-1 BEFORE frame — "Refused: postHasNoBlocks(id:
+  "5A76BA5A-…")" in the chip popover — was overwritten when its name was re-used for the successful
+  diverge; the dump is quoted here from the frame as read.)
 
 ### FINDINGS (for the orchestrator)
 
-PENDING.
+- **F-U6-1 — ACT 0's sibling map: one more road than traced.** `reapplyDiverge` revived the copy's row
+  across wings after a book move (diverge → ⌥⌘Z → move the book → ⇧⌥⌘Z) — found by the brief's grep,
+  pinned red-on-old with the two traced recipes and guarded the same way. `reapplyMintedContainer`
+  (Copy In, Duplicate as Version, Import…) was already safe through F-U5b-1's Put-back guard — pinned
+  as a control, no change. ACT 0 walked in use (`tl-17…20`).
+- **F-U6-2 (the architect's call) — an OBSOLETE replay's receipt over-says.** The ops layer is quiet,
+  as ruled, but the shell speaks "Undid: Diverge for This Book" for a replay that did nothing (walked
+  `tl-19`) — the standing behaviour for EVERY obsolete inverse (a book deleted meanwhile does the
+  same): `UndoStack.undo` returns the label whether the inverse acted or returned quietly. A truthful
+  receipt needs the inverse to report "obsolete" (an API shape across every registration — not this
+  unit's). Suggested owner: ladder B's look, else the hardening family.
+- **F-U6-3 (U7) — the prose the sweep could not touch:** `TutorialSeeder`'s lesson prose ("SHELF is
+  home", "the smart Quicknotes book", the chapter "books & the shelf", "a book on your shelf",
+  "right-click the book on the shelf ▸ …") and `PostureCopy`'s privacy lesson "…“Encryption Explained”
+  on this shelf." (shared — the phone's seeder reads it too). The grep pin allow-lists
+  `TutorialSeeder.swift` BY NAME with the decision; U7 removes the line when it rewrites (and the
+  `PostureCopy` sentence — "on this shelf" is not banned, it may be literally true once U7 seeds
+  Welcome).
+- **F-U6-4 (P-1, ladder B or the next registry touch) — the Archived view's inline "Delete Note…" is
+  undeclared.** Its act `.deleteNote` declares `[.bottomBar, .contextMenu]` only; a `.surface` door and
+  `ArchivedView` as renderer is one line plus a pinned door-set flip (`NoteDeletionDeclarationTests`) —
+  outside F-U4-4's letter (the Unarchive), so left.
+- **F-U6-5 (her call / 13s) — two "Notes" side by side in the Library masthead:** the scope segment
+  now says Notes (her §21 ruling) beside the MODE segment "Notes" (13g R5-6's Apple-Notes-shaped cards
+  mode). Each is ruled; the pair reads as a stutter (`tl-01`, `sl-01`). Options: rename the mode
+  ("Cards"), or keep.
+- **F-U6-6 — the walk's defect W-1, FIXED:** the chip's refusal table spoke a raw enum for every error
+  outside its four book arms (walked: diverge on an empty note); it now defers to the app's one table.
+  Pinned, red by single-arm revert, re-walked. (KnownIssues row 28's next-touch list names the
+  `ChipRefusals` ≡ `MobileMembershipModel.refusal` collapse — the Mac half's fall-through is now the
+  table's; the pair's collapse stays the row's.)
+- **F-U6-7 — two sites the first grep missed, both now banned by phrase:** the Data Safety guide's
+  multi-line "…on your shelf." (the grep pin's dry run) and Settings ▸ Tags' subtitle "…promote tags to
+  a book." (the walk). The pin walks code lines, so multi-line literals are covered by construction.
+- **F-U6-8 — walk harness facts (for WalkKit):** a FOREIGN floating window (Itsycal's Software Update
+  prompt, layer 3, 620×398 at (554,205)) stood over the work area for the whole walk — left untouched
+  (answering it is hers); worked around by moving MY window (x −80, or y +313 for one click) and
+  pressing covered doors through Accessibility (Settings panes, the helper's tab, window close
+  buttons); menus draw above it and window-id captures ignore it; list every layer with a 15-line
+  `CGWindowListCopyWindowInfo` dump before each walk. A SwiftUI alert whose TextField holds focus
+  IGNORES Escape (the New Book prompt) — leave through one of its own buttons. The Library and ⌘K
+  search NAMES only (body search is 13o's) and ⌘K has no "Go to Archived" — the sidebar row is the
+  road. `cliclick` at a NEGATIVE x (a window moved left) does not land — keep clicks on-screen.
+- **F-U6-9 — walk residue in the dev store** (the precedent — fixtures stay): the book "act0 walk"
+  (Home, unshelved) holding the diverged copy "act" + one empty note; the ORIGINAL "act" bookless in
+  Home's Pool, tagged #door13ib, its arrival at "the door" DISMISSED (a decision row); a Home copy
+  "act" (copied from Annex); the wing "Annex" minted and deleted (a tombstoned row). Her voice
+  (Terminal), appearance (`system`) and wing (Home) restored and read back.
+- **F-U6-10 — the naming split, seen again in use:** receipts and the book's lines name an untitled
+  note by its DAY ("Copied “2026-10-02”…", "Dismissed “2026-10-02”…") while the Library row beside
+  reads "act" — evidence for P-13id-U6-3's options.
+- **Tutorial (P-6):** no lesson sentence went false; the spine is green (11 suites, batch C). Lesson 4
+  is now TAUGHT at the door too (the dismiss receipt's road back); lesson 11's sentence is the New
+  Wing prompt and the switcher's header.
+- **MOBILE PARITY (record only — nothing built):** the phone owes the sweep on its OWN strings — its
+  shelf tab still says "Shelf" (`MobileShellView`, `MobileShelfView`), its books UI says "smart"
+  where it still does, and its chip-twin (`MobileMembershipModel`) counts books and gatherings as one;
+  the dismiss receipt's road back where its door grows one; the sealed-book roads on its book doors.
+  What already reaches it through shared code: `searchCatalog`'s "gathering"/"sealed book" details,
+  `DeletionRefusal` and `SeededBookRestore`'s two-road lines, the platform-neutral `readingNotDeleted`,
+  `RuleGrammar.hearsApplyingActs`, ACT 0's guard (core). Its tutorial seeder's pin on the restore
+  line was flipped (test only).
 
 ### PROVISIONALS (QUESTIONS #176 carries them for her bundle)
 
@@ -2455,6 +2596,45 @@ PENDING.
   (the ruling's letter) · (b) row-level: the crossing row stays dead (as a dead note's already does in
   the same redo) and the rest re-binds — closer to "redo what I did" when one member of many moved,
   but a gathering that itself moved would re-bind EMPTY.
+- **P-13id-U6-2** — the chip counts books and gatherings apart: "in no book" / its book's path / "in N
+  books", then "· N gathering(s)"; the popover heads "This note is in N book(s) and appears in N
+  gathering(s):" (a bookless one: "…lives in the Pool — and appears in N gathering(s):"); the accent
+  still lights for more than one reading. (a) BUILT · (b) count gatherings only in the popover.
+- **P-13id-U6-3** — F-U4-7 RECORDED, not aligned: every BOOK surface names an untitled note by its day
+  (`DisplayTitle`, R6-3), the Library's cards by their first words (`NoteCardFace`, her 13u3 item 4).
+  (a) KEPT (no new split inside the book) · (b) the Arrivals/archived lines alone lead with first
+  words · (c) every book LIST (Index, navigator, Book Panel, both lines, the receipts) leads with
+  first words — a 13s design pass.
+- **P-13id-U6-4** — where no book is in hand, a `lockedReading` refusal names BOTH roads ("This book is
+  finished — reopen it first; if it's sealed, unseal it."; the shared lines likewise); where the book
+  is in hand it names ONE (sealed → Unseal). (a) BUILT · (b) look the book up at every generic site.
+- **P-13id-U6-5** — the Library masthead's sort menu and day door sit 1 pt lower to meet the segmented
+  controls' text line (measured in both voices); they are therefore 1 pt off the search field's line,
+  which is boxed and far left. (a) BUILT · (b) raise the segmented controls 1 pt instead · (c) leave
+  the shipped centring.
+- **P-13id-U6-6** — "a wing presents as a separate library": the noun stays WING; the switcher's list
+  heads "Wings — each a separate library" and the mint, move, copy and lineage words say "a separate
+  library". (a) BUILT · (b) call wings "libraries" in the UI (collides with the Library area).
+- **P-13id-U6-7** — the gathering mint's words: "Create Gathering…" (the New Book prompt; the sheet
+  "Create Gathering"); Settings ▸ Tags' door "Make a Gathering…" (it always minted a gathering; "promote"
+  stays a search word). All 13s-revoicable.
+- **P-13id-U6-8** — the day door says "edited on…" / "edited on Sep 9" (her "'on day…' wants clearer
+  wording"; the RANGE stays 13o's).
+- **P-13id-U6-9** — a gathering's navigator footer: "gathering — it shows every note its rule matches
+  and holds none of them. A note comes and goes with its tags and its star."; a legacy-only rule's
+  doors say it "collects only when it catches up (reopened, restored, or its rule edited)"; a
+  rule-less or malformed one keeps the shipped words.
+- **P-13id-U6-10** — the Library's message row speaks its own refusal first, its own receipt second,
+  the status seam's quiet receipt third; nothing reserves a blank line (the row appears and goes).
+- **P-13id-U6-11** — the note ▾ menu's wing doors: both bars, NOTE contexts only, listing the wings
+  other than the note's own, the move's confirm on the bar; the shared `WingsModel` reaches them
+  through the environment (a note-only window owns its own).
+- **P-13id-U6-12** — the bookless-notes listing is `Queries.notePoolListing`; `poolListing(poolID:)`
+  keeps the model term (snippets) — the phone's caller untouched.
+- **P-13id-U6-13** — ⌘K/search name a book's kind "gathering", "sealed book", "finished book" or
+  "book" (sealed outranks finished — §5).
+- **P-13id-U6-14** — the chip's refusal table defers to the app's one table for anything outside its
+  four book arms (never a dump).
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -2487,7 +2667,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 5 | LADDER A (U1–U4) | **CLOSED** (2026-10-02, two rounds, zero disputes, no round 3; five fixes + the sanity NIT all landed; round 2's one NIT → U5 rider R2; the orchestrator's walk HELD on absent GUI grants — folded to her combined walk) |
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
-| 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | IN FLIGHT (spawned 2026-10-02) |
+| 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | **BUILT — awaiting the architect's adjudication** (core 2116/233 · Mac 1406/224 · walk ×4, 46 captures; ACT 0 + a sibling guarded; F-U3-4 traced NOT bug-class; F-U4-7 recorded; W-1 fixed; F-U6-2/-4/-5 for rulings; #176) |
 | 8 | U7 — the tutorial's books chapter + the classics seed | NOT-STARTED |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
