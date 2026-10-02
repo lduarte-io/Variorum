@@ -193,8 +193,11 @@ struct VariorumApp: App {
                         // pre-13x 5a: BOTH seeded books, in order — Sherlock,
                         // then *Encryption Explained* (its own mark, so an
                         // existing store seeds only the new one).
+                        // 13i-d U7: Sherlock's outcome decides whether this
+                        // launch is a FRESH store's birth (below).
+                        var sherlockOutcome: SampleLibrarySeeder.Outcome?
                         for book in SampleLibrarySeeder.Book.all {
-                            await SampleLibrarySeeder.seedIfNeeded(
+                            let outcome = await SampleLibrarySeeder.seedIfNeeded(
                                 session: session,
                                 book: book,
                                 storeVariant: bootstrap.storeVariant,
@@ -210,6 +213,7 @@ struct VariorumApp: App {
                                     hasSyncedCleanly: {
                                         fresh.sync.status.lastSuccessAt != nil
                                     }))
+                            if book == .sherlock { sherlockOutcome = outcome }
                         }
                         // 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering —
                         // an ordinary gathering on ★, seeded once per store
@@ -226,6 +230,18 @@ struct VariorumApp: App {
                                 hasSyncedCleanly: {
                                     fresh.sync.status.lastSuccessAt != nil
                                 }))
+                        // 13i-d U7 — THE WELCOME ARRANGEMENT AT A FRESH STORE'S
+                        // BIRTH (the sitting record §7/§17/§19.3): only when
+                        // this launch's Sherlock seed minted every story; an
+                        // existing store is marked `declined` and NEVER
+                        // retrofitted (the restore doors are its road). Same
+                        // occasion, after every other furniture seed.
+                        if let sherlockOutcome {
+                            await SampleLibraryWelcome.arrangeAtLaunch(
+                                session: session, sherlock: sherlockOutcome,
+                                storeVariant: bootstrap.storeVariant,
+                                guideName: TutorialSeeder.bookName)
+                        }
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).

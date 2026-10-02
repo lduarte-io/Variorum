@@ -359,9 +359,14 @@ struct ShellActions {
                     guard confirmed else { return }
                 }
                 let bookID = try await TutorialSeeder.restore(session: session, existing: existing)
+                // 13i-d U7: a RESTORE door — the Welcome arrangement rides it
+                // (the guide onto Welcome, and the classics lesson put back
+                // where missing). Never a silent retrofit: only a door she
+                // pressed arranges an existing store.
+                let arranged = await Self.arrangeWelcome(session: session)
                 shell.pendingSelection = .reading(bookID)
-                status.receipt(
-                    "The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your Bookcase.")
+                status.receipt(WelcomeDoorCopy.tutorialRestored(
+                    guide: TutorialSeeder.bookName, shelf: arranged?.welcome.shelf.name))
             } catch {
                 status.refuse("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
@@ -404,7 +409,13 @@ struct ShellActions {
                 // F2 (MINOR-8): the brain hoisted to `SeededBookRestore`
                 // (Shared) — the phone's restore row and the tutorial door's
                 // ensure ride the same road; this face composes the receipt.
-                switch try await SeededBookRestore.restore(session: session, book: book) {
+                let restored = try await SeededBookRestore.restore(session: session, book: book)
+                // 13i-d U7: every seeded-book restore composes the ONE Welcome
+                // arrangement after it (Welcome adopted or minted; the seeded
+                // books onto it if unshelved; the classics lesson put back
+                // where missing) — the road an EXISTING store takes to it.
+                let arranged = await Self.arrangeWelcome(session: session)
+                switch restored {
                 case .alreadyWhole(let bookID):
                     shell.pendingSelection = .reading(bookID)
                     // 18i ladder round 1, J33: nothing was minted, so this is
@@ -415,13 +426,21 @@ struct ShellActions {
                     // the sentence reports; the rule is NOT widened to cover
                     // it, because "or the shell moved" would reclassify the
                     // daily-entry note and blur every navigating door.
-                    status.refuse(
-                        "\u{201C}\(book.name)\u{201D} is already whole — it's on your Bookcase.")
+                    // 13i-d U7: …unless the arrangement WROTE something —
+                    // then the door acted, and a receipt says what.
+                    if let arranged, arranged.didAnything {
+                        status.receipt(WelcomeDoorCopy.alreadyWholeArranged(
+                            book: book.name, shelf: arranged.welcome.shelf.name))
+                    } else {
+                        status.refuse(
+                            "\u{201C}\(book.name)\u{201D} is already whole — it's on your Bookcase.")
+                    }
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
                     status.receipt(
                         "Restored \u{201C}\(book.name)\u{201D} — "
-                        + "\(minted) \(minted == 1 ? noun : noun + "s") came back.")
+                        + "\(minted) \(minted == 1 ? noun : noun + "s") came back."
+                        + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))
                 }
             } catch {
                 // F3 (NIT-N6): the road's own words on the face; the raw
@@ -431,6 +450,22 @@ struct ShellActions {
                     "Restoring \u{201C}\(book.name)\u{201D} failed: "
                     + SeededBookRestore.failureLine(for: error))
             }
+        }
+    }
+
+    /// **13i-d U7 — the Welcome arrangement, as every restore door composes
+    /// it** (`SampleLibraryWelcome.arrange` — the shared brain; the field
+    /// guide named because it is the Mac's own seeded book). Furniture never
+    /// breaks the door that carried it: a failure is LOGGED and answered nil,
+    /// so the door's own receipt stands without the shelf clause.
+    @discardableResult
+    static func arrangeWelcome(session: AppSession) async -> SampleLibraryWelcome.Arrangement? {
+        do {
+            return try await SampleLibraryWelcome.arrange(
+                session: session, guideName: TutorialSeeder.bookName)
+        } catch {
+            log.error("welcome arrangement failed: \(String(describing: error), privacy: .public)")
+            return nil
         }
     }
 
@@ -469,7 +504,7 @@ struct ShellActions {
         Task { @MainActor in
             defer { session.endTutorialDoor() }
             do {
-                guard let bookID = try await TutorialSeeder.findOrSeed(
+                guard let found = try await TutorialSeeder.findOrSeedReporting(
                     session: session,
                     confirmReplace: {
                         if let confirm { confirm() } else { await askToReplaceTutorial() }
@@ -483,7 +518,7 @@ struct ShellActions {
                         + "tutorial residue on this store, and you cancelled. Everything stays as it is.")
                     return
                 }
-                shell.pendingSelection = .reading(bookID)
+                shell.pendingSelection = .reading(found.bookID)
                 // pre-13x ladder round 1, F2 (MINOR-8): Lesson 2's last
                 // paragraph points at *Encryption Explained* "on this shelf"
                 // — a signed-in-never-synced store seeds neither book (ledger
@@ -492,6 +527,12 @@ struct ShellActions {
                 // mint what is missing, touch nothing of hers, say nothing
                 // on success; a failure speaks beside the opened tutorial.
                 await Self.ensureEncryptionBook(session: session, status: status)
+                // 13i-d U7: when this door SEEDED the guide it took the
+                // restore road, so the Welcome arrangement rides it (the
+                // guide and *Encryption Explained* onto ONE Welcome shelf —
+                // which is what makes "on this shelf" true). An existing guide
+                // that simply opened arranges nothing.
+                if found.seeded { await Self.arrangeWelcome(session: session) }
             } catch {
                 status.refuse("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
@@ -720,5 +761,36 @@ struct ShellActions {
                 status.refuse("That command isn't wired to the palette yet.")
             }
         }
+    }
+}
+
+// MARK: - 13i-d U7 — the restore doors' Welcome words
+
+/// What the restore doors SAY about the Welcome arrangement they composed
+/// (PROVISIONAL wording, 13s-revoicable). The shelf is named by its REAL
+/// name — she may have renamed Welcome, and the receipt must stay true.
+/// Pure, so a pin reads the sentences without a window.
+enum WelcomeDoorCopy {
+    /// Help ▸ Restore Tutorial's receipt: where the fresh guide now sits.
+    static func tutorialRestored(guide: String, shelf: String?) -> String {
+        guard let shelf else {
+            return "The tutorial is fresh \u{2014} \u{201C}\(guide)\u{201D} is on your Bookcase."
+        }
+        return "The tutorial is fresh \u{2014} \u{201C}\(guide)\u{201D} is on your Bookcase, "
+            + "on the \u{201C}\(shelf)\u{201D} shelf."
+    }
+
+    /// A seeded book that was already whole, when the arrangement still WROTE
+    /// something (Welcome made, a book shelved, Sherlock owned, the classics
+    /// gathering or the seeded quick note put back) — a receipt, not a refusal.
+    static func alreadyWholeArranged(book: String, shelf: String) -> String {
+        "\u{201C}\(book)\u{201D} is already whole \u{2014} and the \u{201C}\(shelf)\u{201D} "
+            + "shelf is set up again."
+    }
+
+    /// The tail a "Restored …" receipt gains: where the book now sits.
+    static func onTheShelfSuffix(shelf: String?) -> String {
+        guard let shelf else { return "" }
+        return " It's on the \u{201C}\(shelf)\u{201D} shelf."
     }
 }

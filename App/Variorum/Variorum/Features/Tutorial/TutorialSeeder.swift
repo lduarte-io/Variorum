@@ -192,15 +192,26 @@ enum TutorialSeeder {
     static func findOrSeed(
         session: AppSession, confirmReplace: () async -> Bool
     ) async throws -> String? {
+        try await findOrSeedReporting(session: session, confirmReplace: confirmReplace)?.bookID
+    }
+
+    /// `findOrSeed` that also says whether it SEEDED (13i-d U7): the open
+    /// door composes the Welcome arrangement only when it minted the guide —
+    /// the restore road — and never when an existing guide simply opened
+    /// (opening a book is not a restore; no silent arrangement of a store).
+    @MainActor
+    static func findOrSeedReporting(
+        session: AppSession, confirmReplace: () async -> Bool
+    ) async throws -> (bookID: String, seeded: Bool)? {
         let existing = try await session.database.read { db in try discover(db) }
-        if let bookID = existing.readingIDs.first { return bookID }
+        if let bookID = existing.readingIDs.first { return (bookID, false) }
         // 13u4 UNIT S3 (row 67): the confirm is ASYNC now, because the app's
         // own answer to it is a SwiftUI `.alert` the window presents rather
         // than an app-modal `NSAlert.runModal()`. A synchronous closure still
         // satisfies this type, so every pin that answers `{ true }` here is
         // untouched.
         if !existing.isEmpty, await !confirmReplace() { return nil }
-        return try await restore(session: session, existing: existing)
+        return (try await restore(session: session, existing: existing), true)
     }
 
     /// Restore door: wholesale replace — cleanup by reserved identity,
