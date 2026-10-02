@@ -1912,6 +1912,50 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   chip's book chooser lists the note's own wing's books; a typed tag resolves (and mints) in the
   NOTE's wing.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U5 (2026-10-02 — spot-check: thirteen commits pushed, fences empty, the record, #174 and the walk captures in place; the away-run rule governs)
+
+**FIRST, A CORRECTION TO THE BANK 1 CLOSES SECTION — THE GRANT PROBES WERE HOLLOW.** The
+"AX: BLOCKED · SCREEN: BLOCKED" reading was produced by probes built on a `timeout` binary this
+Mac does not have (command-not-found read as a denial, stderr suppressed). Re-probed honestly at
+U5's close: BOTH grants are PRESENT (System Events answers; `screencapture` writes a real 6 MB
+frame), which is also how U5's 27-capture walk ran. The morning-bundle ask-her-to-grant line is
+WITHDRAWN; the composed walk is UN-HELD and runs NOW, covering bank 1's flows AND U5's shipped
+half on a fresh tip build. Lesson recorded for every future probe: validate a probe against a
+known-good case before trusting its negative (the WalkKit README's compiled-probe road, or bare
+commands with stderr read).
+
+**THE BOOK-MOVE PROPOSAL — RULED, every recommendation ADOPTED (R-13id-6; provisional under the
+away-run rule, hers to overturn at #174):**
+1. **(a)** — a member's stay-behind membership in another book is SEVERED, LISTED in the confirm
+   (the `movePostIntoReading` precedent exactly — 13i-c's ratified move-in shape; a tombstone,
+   recoverable). 2. **(a)** — rules/outflows/grouping adopt BY PATH, minting missing paths
+   (R-13ia-1's rider applied to rules; meaning kept). 3. **(a)** — finished/sealed books move
+   WHOLE with their state (a wing move is metadata, never authoring; seals untouched).
+4. archived members ride, archived (her #169(a) reasoning). 5. **(a)** — a per-item move
+   DISMISSES pending arrivals in its transaction, said in the confirm (the §24 finish precedent;
+   tombstone-means-decided with the fresh-act return intact). 6. unshelved landing; starred
+   stays; the bulk move leaves source shelves to the wing delete's stamp. 7. the daily Journal
+   never moves, by construction on both doors. 8. bulk edges: Trash rows **(a)** stay (they list
+   in Home's Trash after the wing dies — the dangling-wing rule; Put back re-homes);
+   name collisions **(a)** proceed with the confirm naming them (E13's letter); NO undo on
+   either door (P-13ic-1's precedent — the symmetric door is the net). 9. the ops and doors as
+   proposed; the delete refusal gains "— or move everything to another wing" (P-2).
+   **The build is U5b's** — a fresh continuation session (U5's own session is past the context
+   guideline), briefed by the proposal + these rulings + the U5 RECORD.
+
+**The rest of U5's findings:** F-U5-2's latent cross-wing classes (tags, memberships, the daily
+designation, applyTag) — FIXED AND PINNED in-unit, the red tables verified in the record;
+F-U5-3's Empty-Trash scoping — ACCEPTED (the act takes exactly what the confirm's view showed,
+the 13i-c shared-predicate doctrine; pinned red-by-revert); F-U5-6/-7/-9/-10 and the
+unscoped-Open-strip/unnamed-mastheads calls — HERS, bundled at #174; the note ▾ menu's missing
+Move/Copy to Wing — U6's polish rider (one renderer; the doors exist on the rows).
+**P-13id-U5-1…15 STAND** (#174). **Ledger row 6 → shipped half DONE; the book-move half → U5b.**
+- **For the combined 13i walk (grown by U5):** mint a wing · switch (everything re-scopes) ·
+  move a note across with a tag that adopts and one that mints · the lineage line in Compare ·
+  the daily Journal refusing to leave Home · ⌘J from the other wing landing in Home's Journal ·
+  delete a non-empty wing (the refusal names contents) · [once U5b lands] move a book across ·
+  bulk-move a wing empty and delete it.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
