@@ -491,6 +491,39 @@ row is built, pinned and walked below.
 - **P-13id-U1-13** — receipts: making, deleting and re-shelving speak one (quiet slot); rename, glyph,
   moving a shelf and placing a book are silent (the visible change is the answer).
 
+## THE ARCHITECT'S ADJUDICATION AFTER U1 (2026-10-02 — verified by spot-check per the recovery protocol: commits present and pushed, zero `Sync/`/`Persistence` in the diff, the record and #170 in place)
+
+- **F-U1-2 RULED — proposal (A), the union star, exactly as the record states it:** one truth read
+  as the union; `setStarred(.reading)` writes BOTH stores in one transaction; un-star clears both;
+  `setShelfPinned` routes through the same write; `Queries.starred` lists the list's entries in
+  star order then column-only books A–Z; `Queries.shelfPins` and the cap read the union; the Mac
+  row's ONE door Star/Unstar (Pin retires on the Mac; the phone keeps its words until the catch-up
+  but writes the same truth). This is the sitting §7's "one mechanism" + "pinned books become
+  starred" made real; (C) rejected (divergence persists), (B) rejected (the section loses
+  star-time order). **Her ruling on the one visible consequence (R-13id-5, the question tool,
+  2026-10-02): KEEP THEM STARRED** — the daily Journal and Quicknotes keep their born-starred
+  state, floating atop the Bookcase AND appearing in the sidebar's Starred section (her pick over
+  born-unstarred). **The build is U2's ACT 0** (its brief below; the pins the record names must be
+  re-read, not just re-run).
+- **F-U1-4 noted — the drag gestures ride HER COMBINED WALK** (ritual R5's first gesture IS
+  "drag a book onto a shelf name"; the N20 class closes only by a real hand; cliclick is the same
+  synthetic class that fails). The drop handlers are pinned and every drag's menu twin is walked;
+  the combined-walk list below carries the drags explicitly.
+- **F-U1-1/-3/-5/-6/-7/-8 acknowledged and routed:** the shelf ops were built in U1 (the brief's
+  "shipped at 13i-a" was wrong — the table shipped, the ops did not); U7's seeder MINTS the
+  Welcome shelf (`role='welcome'`, the R5 keeper's key) and shelves the seeded books — its brief
+  carries F-U1-3 and F-U1-5; U6's brief carries F-U1-5/-6 (the field guide's SHELF prose; "Create
+  Smart Book…"); U4's brief carries F-U1-7 (the count and the line agree once U4 flips the
+  filter); U3's brief carries F-U1-8 (fold the shelf-menu filter into `BookStateDoorSet` if it
+  rules so).
+- **The orchestrator's hands-on walk runs at the BANK SEAM** (before ladder A's record closes, at
+  a zero-instance, author-free window — the 13i-c shape: per-unit implementer walks, one composed
+  orchestrator walk per bank). She is at the machine today; no drive runs beside her.
+- **For the combined 13i walk (the running list, grown by U1):** the shelf DRAGS by hand — a book
+  onto a shelf name · strip drag-reorder · my-order drag placement (menu twins all walked) · the
+  Bookcase tour: solo/All/unshelved-first · the № census solos · order ▾ three ways · details ·
+  Set Glyph · context mint on a solo'd shelf · the arrival count badge.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -515,8 +548,8 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 
 | # | item | status |
 |---|---|---|
-| 1 | U1 — the Bookcase board | BUILT + WALKED (the U1 RECORD) — one thread STOPPED for the architect (F-U1-2) |
-| 2 | U2 — the Book Panel | NOT-STARTED |
+| 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
+| 2 | U2 — the Book Panel (+ ACT 0: the union star) | IN FLIGHT (spawned 2026-10-02) |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face | NOT-STARTED |
 | 4 | U4 — archived members in books | NOT-STARTED |
 | 5 | LADDER A (U1–U4) | PENDING BANK 1 |
@@ -529,6 +562,15 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 
 HELD FOR HER BUNDLE (nothing gates on these): the #169 remainder (P-13ic-1's open sub-question —
 tags on Duplicate-as-Version / Diverge-for-book; the offer toast's 6 s clock, F-U3-8).
+
+**THE AWAY-RUN POSTURE (her instruction, 2026-10-02, verbatim: *"I'm going to sleep, rule
+everythign provisionally and continue on"*):** the overnight rule binds from here — every
+non-gating call is ruled PROVISIONALLY by the architect, logged in the PROVISIONALs/#170 bundle,
+and the run CONTINUES; anything genuinely author-only (a taste gate, an install refresh beside a
+live real-store instance, a deploy) is HELD and BUNDLED for her next sitting, never improvised
+around. Her real-store app, if running, is never quit; the closeout's install refresh waits for a
+zero-instance window and is HELD to her bundle if none arrives. Walk drives run only if the
+machine is unlocked and author-free; otherwise the walk records and folds into the next window.
 
 ## U1 BRIEF — THE BOOKCASE BOARD (`opus-implementer`; read this WHOLE file first)
 
@@ -571,3 +613,59 @@ what you built (a fresh session's map), evidence with counts, FINDINGS for the o
 PROVISIONALs (QUESTIONS-ready, numbered P-13id-U1-n), and the LIVE STATUS table per the
 resiliency protocol (per-commit flips, PENDING for unverified claims, push after every commit).
 Commits carry NO attribution trailer. One agent at a time; no subagents; foreground waits only.
+
+## U2 BRIEF — THE UNION STAR (ACT 0) + THE BOOK PANEL (`opus-implementer`; read this WHOLE file first)
+
+**Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
+this plan file IN FULL — the kickoff rulings R-13id-1…5, the constitution, your unit's LEDGER
+row, **THE ARCHITECT'S ADJUDICATION AFTER U1** (your ACT 0's ruling), the U1 RECORD (the board
+you compose with), the AWAY-RUN POSTURE (she is asleep: PROVISIONAL-and-continue; a genuine
+author-only stop is RECORDED HELD, other threads continue), and the ENVIRONMENT TRAPS ·
+`notes/plans/phase-13i-sitting-record-2026-09-30.md` (§2 the edit law, §6 the door enumeration —
+the Book Panel's drag powers consult ownership, §15's 13i-d line, §18.5, §20's remove doors,
+§22's spec caution) · `notes/plans/phase-13i-smart-book-identity-brief.md` round 5 (the Book
+Panel's design origin; the sitting record outranks it where they differ) ·
+`notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from your FIRST commit) ·
+KnownIssues row 104 (yours to fix) · the 18d sidebar note box (`NoteBox`/the sidebar bridge — the
+panel's older sibling; today's membership chip is your row-104 subject).
+
+**ACT 0 — THE UNION STAR (F-U1-2's proposal (A), RULED — build it EXACTLY as the adjudication
+states, R-13id-5 included: the daily Journal and Quicknotes KEEP their born-starred state).** One
+truth read as the union; `setStarred(.reading)` writes both stores in ONE transaction; un-star
+clears both; `setShelfPinned` routes through the same write; `Queries.starred` lists the list's
+entries in star order then column-only books A–Z; `Queries.shelfPins` and the cap read the union;
+the Mac row's ONE door Star/Unstar (Pin retires on the Mac; the phone keeps its words, writes the
+same truth). Zero schema, zero `Sync/`. The pins the U1 RECORD names (`StarDoorTests`,
+`StarredScroll*`, core `StarsTests`/`ShelfPinsSelfHealTests`, the phone's `MobileStarsTests`/
+`MobileBookPinTests`) are RE-READ, not just re-run — where an assertion's meaning flips (the
+Starred section gaining column-only books is the ruled migration), the flip is deliberate and
+red-on-old against the old assertion.
+
+**THEN THE BOOK PANEL — your LEDGER row exactly:** the collapsible right-side Book TOC on every
+membered note (chapters + notes, the open note marked); reorder/drag INSIDE it over the EXISTING
+ops only; click-through opens the book scrolled to the note — CONSUME the existing landing road
+(the book's `editHere`/open-landing machinery, 13u4 F3's manifest heights; never a second
+landing mechanism); the book switcher atop for shared notes; "appears in N gatherings" with
+names on click (ruled); the remove door (§20's vocabulary — Remove from this book / Release on
+an owned book / a gathering's honest untag offer; receipts spoken). Any membership-creating
+drag the panel grows consults ownership through the ONE consult (13i-c's `OwnershipDecision`
+road) — missing one is a ladder finding. Fix row 104: the note-side membership chip holds a
+one-shot read; make it an observation so an intake seat shows while it is open (name the cost —
+it joins KnownIssues row 13's bounded re-query class at the cheap end). EVERY drag gets a menu
+twin (the U1 lesson: synthetic drags never commit — walks verify the twin). OUT of scope: the
+Collecting sheet (U3), anything cross-wing (U5), the phone (record what it owes, build nothing).
+Zero schema, zero `Sync/` — any discovered need is a STOP.
+
+**Evidence (named now):** ACT 0 — the union tests + the deliberate pin flips red-on-old; the
+panel — VM tests incl. row 104's observation pin (red-on-old: seat while open), drag pins over
+the ops, the click-through landing pin, registry rows for every routed door + the registry walk
+green; the tutorial spine green at the unit's end; a screenshot walk in all four
+voice/appearance combinations into `notes/plans/13id-screens/u2/` (gitignored). Suites at the
+END; baseline core 2027/216 (U1's close). Build into `App/Variorum/DerivedData/13id-u2/`.
+
+**Your record:** a `## U2 RECORD` section in THIS file directly above `## ENVIRONMENT TRAPS` —
+the same form as U1's (map · evidence with counts, PENDING until verified · FINDINGS ·
+PROVISIONALs numbered P-13id-U2-n · LIVE STATUS per commit). Commits carry NO attribution
+trailer. Push after every commit. One agent at a time; no subagents; foreground waits only. An
+in-build design fork the plan does not settle: write the proposal into your record, STOP that
+thread for the architect, continue the others.
