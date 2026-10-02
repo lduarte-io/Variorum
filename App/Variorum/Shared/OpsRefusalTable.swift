@@ -328,6 +328,26 @@ nonisolated enum OpsRefusalCopy {
                 + "use one character, and no emoji."
         case .wingNotFound:
             return "That library isn't there any more — nothing changed."
+        // 13i-d U5 — WINGS (the sitting record §9; R-13id-2; #169(b)).
+        // Platform-neutral: none names a door.
+        case .invalidWingName:
+            return "A wing needs a name."
+        case .duplicateWingName(let existing):
+            if BookNaming.key(existing) == BookNaming.key(WingWords.home) {
+                return "\(WingWords.home) is the built-in wing's name — pick another."
+            }
+            return "There's already a wing called \u{201C}\(existing)\u{201D} — pick another name."
+        case .wingNotEmpty(_, let contents):
+            return "That wing still holds \(WingWords.contents(contents)) — "
+                + "move or delete them first, then the empty wing can go."
+        case .postAlreadyInWing:
+            return "That note is already in that wing — nothing changed."
+        case .crossWingMembership:
+            return "That note lives in another wing, and a book only holds notes of its own "
+                + "wing — move the note here first."
+        case .dailyJournalIsHomeOnly:
+            return "Your daily Journal lives in \(WingWords.home) — only a \(WingWords.home) "
+                + "book can be it."
         case .placementAnchorNotOnShelf:
             return "That book has moved to another shelf — nothing changed."
         default:

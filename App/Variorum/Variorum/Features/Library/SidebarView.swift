@@ -121,6 +121,12 @@ struct SidebarView: View {
         // that removes the note from her Library does not belong one row
         // above "Close".
         .archiveNote,
+        // 13i-d U5: the cross-wing NOTE doors join the same grammar and the
+        // same two renderers (the Library's rows and the Pool's) — Move to
+        // Wing ▸ / Copy to Wing ▸ (the sitting record §9's "explicit move/copy
+        // doors"). The Open strip does not render them (`.deleteNote`'s
+        // reason above).
+        .moveNoteToWing, .copyNoteToWing,
     ]
 
     /// The five areas, in R44's ruled order (+ Archived at the end, the

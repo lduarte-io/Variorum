@@ -49,6 +49,9 @@ struct RootView: View {
     /// window state — it is synced, so every window shows the same five;
     /// each window observes it for itself, exactly as it does the library.
     @State private var stars: StarsModel
+    /// 13i-d U5 — the WINGS (the shared `Core/Views` brain): the Bookcase's
+    /// switcher and the note rows' Move/Copy to Wing doors read this one.
+    @State private var wings: WingsModel
     @State private var paletteOpen = false
     /// pre-13x 5b (ledger 64): the iCloud Drive offer's brain — made once the
     /// services exist; nil until then and in harness mounts without services.
@@ -143,6 +146,7 @@ struct RootView: View {
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
         _stars = State(initialValue: StarsModel(session: session))
+        _wings = State(initialValue: WingsModel(session: session))
         _theme = State(initialValue: ThemeStore(session: session))
     }
 
@@ -335,6 +339,7 @@ struct RootView: View {
         .task(id: session.wing.currentID) { await readings.start() }
         .task { await pool.start() }
         .task(id: session.wing.currentID) { await stars.start() }
+        .task { await wings.track() }
         .onChange(of: session.wing.currentID) { _, wing in
             shelf = ShelfViewModel(session: session, wingID: wing)
         }
@@ -775,7 +780,7 @@ struct RootView: View {
                 session: session, model: shelf, readings: readings,
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
-                starDoor: starDoor)
+                starDoor: starDoor, wings: wings)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:
@@ -788,7 +793,7 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
-                starDoor: starDoor)
+                starDoor: starDoor, wings: wings)
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts,
@@ -801,7 +806,7 @@ struct RootView: View {
                 onOpen: openHere,
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
-                starDoor: starDoor)
+                starDoor: starDoor, wings: wings)
         case .blocks:
             // Batch 12: the Blocks AREA — standalone blocks live and are
             // born here (the sidebar rows retired).

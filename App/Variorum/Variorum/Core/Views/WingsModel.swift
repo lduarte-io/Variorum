@@ -1,0 +1,344 @@
+//
+//  WingsModel.swift
+//  Variorum
+//
+//  13i-d U5 — THE WINGS' Mac brain (the sitting record §9; §21 Direction C's
+//  switcher; her R-13id-2; the per-item cross-wing doors). In the SHARED home
+//  (`Core/Views/`) because four features consume it — the Bookcase masthead's
+//  switcher, the Library's and the Pool's note rows (Move/Copy to Wing ▸),
+//  and Compare's lineage line ("go to that wing") — and a feature never
+//  constructs or holds a sibling's model (CLAUDE.md): each surface owns one.
+//
+//  It holds a projection (the live wings) and sends operations; every refusal
+//  speaks the operations layer's own words (`OpsRefusalCopy`), every act a
+//  receipt in the quiet slot (P-13id-U1-13's class).
+//
+
+import Foundation
+import SwiftUI
+import GRDB
+import Observation
+import VariorumCore
+
+@MainActor
+@Observable
+final class WingsModel {
+    @ObservationIgnored let session: AppSession
+
+    /// The live ADDITIONAL wings, in switcher order (Home is virtual).
+    private(set) var wings: [Wing] = []
+
+    init(session: AppSession) {
+        self.session = session
+    }
+
+    /// Held — the `wing` table alone (a handful of rows; nothing else wakes it).
+    func track() async {
+        do {
+            for try await value in session.database.observe({ db in try Queries.wings(db) }) {
+                adopt(value)
+            }
+        } catch {}
+    }
+
+    /// Internal so the pins drive it deterministically.
+    func adopt(_ new: [Wing]) {
+        wings = new
+        // A wing that died (here or on another device) returns the app home.
+        let live = Set(new.map(\.id))
+        session.wing.revalidate { $0.isEmpty || live.contains($0) }
+    }
+
+    func load() async {
+        if let value = try? await session.database.read({ try Queries.wings($0) }) {
+            adopt(value)
+        }
+    }
+
+    // MARK: - What the faces read
+
+    struct Row: Equatable, Identifiable {
+        let id: String
+        let name: String
+    }
+
+    var currentID: String { session.wing.currentID }
+    var currentName: String { name(of: currentID) }
+
+    func name(of id: String) -> String {
+        id.isEmpty ? WingWords.home : (wings.first { $0.id == id }?.name ?? WingWords.home)
+    }
+
+    /// The switcher's rows: Home FIRST, then the live wings in order.
+    var rows: [Row] {
+        [Row(id: "", name: WingWords.home)] + wings.map { Row(id: $0.id, name: $0.name) }
+    }
+
+    /// The wings a note in `wingID` can move or copy to (every other row) —
+    /// empty when only one library exists, so the doors are not drawn (P-2).
+    func destinations(from wingID: String) -> [Row] {
+        rows.filter { $0.id != wingID }
+    }
+
+    // MARK: - The switcher's acts
+
+    /// The switch itself is a VIEW choice (a local memory, never the store —
+    /// the Library `sort ▾` precedent), so it speaks nothing: the surfaces
+    /// changing IS the answer.
+    func switchTo(_ id: String) {
+        session.wing.switchTo(id)
+    }
+
+    /// New Wing… — named at birth (the door guard refuses Home's name and a
+    /// live wing's, E13's shape), then switched to.
+    @discardableResult
+    func mint(named raw: String) async -> Bool {
+        let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            let wing = try await session.runner.run { ops -> Wing in
+                try ops.assertWingNameIsFree(name, homeName: WingWords.home)
+                return try ops.createWing(name: name)
+            }
+            await load()
+            switchTo(wing.id)
+            session.status.receipt(WingCopy.minted(wing.name))
+            return true
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+            return false
+        }
+    }
+
+    func rename(_ id: String, to raw: String) async {
+        let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            try await session.runner.run { ops in
+                try ops.assertWingNameIsFree(name, excluding: id, homeName: WingWords.home)
+                try ops.renameWing(id, to: name)
+            }
+            await load()
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
+    }
+
+    /// Delete Wing… — R-13id-2 at the DOOR: the contents are read first, and
+    /// a non-empty wing's door SPEAKS the refusal naming what remains (P-2:
+    /// the door fires and the op's own answer is said) instead of asking a
+    /// question whose only answer is no. Returns true when the confirm
+    /// should show.
+    func deleteAsk(_ id: String) async -> Bool {
+        let contents = try? await session.database.read { db in
+            try Queries.wingContents(db, wingID: id)
+        }
+        guard let contents else { return false }
+        if !contents.isEmpty {
+            session.status.refuse(WingWords.notEmpty(name(of: id), contents))
+            return false
+        }
+        return true
+    }
+
+    func delete(_ id: String) async {
+        let name = name(of: id)
+        do {
+            try await session.runner.run { ops in try ops.deleteWing(id) }
+            if currentID == id { switchTo("") }
+            await load()
+            session.status.receipt(WingCopy.deleted(name))
+        } catch OperationError.wingNotEmpty(_, let contents) {
+            // Raced: something landed in it between the ask and the act.
+            session.status.refuse(WingWords.notEmpty(name, contents))
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
+    }
+
+    // MARK: - The note doors (Move to Wing ▸ · Copy to Wing ▸)
+
+    /// What the move's confirm says: the books the note will leave.
+    struct MoveAsk: Identifiable, Equatable {
+        let postID: String
+        let title: String
+        let wingID: String
+        let wingName: String
+        let leaves: [String]
+        var id: String { postID + "→" + wingID }
+    }
+
+    /// The move's ask (`Queries.wingMovePreview` — the act's own predicate):
+    /// a note in a FROZEN book refuses at once, naming it; a note that leaves
+    /// books returns the confirm; a bookless note moves straight away (there
+    /// is nothing to confirm — PROVISIONAL P-13id-U5-12). nil = acted or
+    /// refused.
+    func moveAsk(postID: String, title: String, to wingID: String) async -> MoveAsk? {
+        guard let preview = try? await session.database.read({ db in
+            try Queries.wingMovePreview(db, postID: postID)
+        }) else { return nil }
+        if let frozen = preview.frozenBook {
+            session.status.refuse(WingCopy.frozen(title, book: frozen))
+            return nil
+        }
+        guard !preview.leaves.isEmpty else {
+            await move(postID: postID, title: title, to: wingID)
+            return nil
+        }
+        return MoveAsk(
+            postID: postID, title: title, wingID: wingID, wingName: name(of: wingID),
+            leaves: preview.leaves)
+    }
+
+    func move(postID: String, title: String, to wingID: String) async {
+        let wingName = name(of: wingID)
+        do {
+            let result = try await session.runner.run { ops in
+                try ops.moveNoteToWing(postID, to: wingID)
+            }
+            session.status.receipt(WingCopy.moved(title, to: wingName, left: result.leftBooks.count))
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
+    }
+
+    func copy(postID: String, title: String, to wingID: String) async {
+        let wingName = name(of: wingID)
+        do {
+            _ = try await session.runner.run { ops in
+                try ops.copyNoteToWing(postID, to: wingID)
+            }
+            session.status.receipt(WingCopy.copied(title, to: wingName))
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
+    }
+}
+
+/// Every Mac word the wing doors say (13s-revoicable — PROVISIONAL
+/// P-13id-U5-11). The platform-neutral sentences are `WingWords`.
+nonisolated enum WingCopy {
+    static let newWingVerb = "New Wing\u{2026}"
+    static let renameWingVerb = "Rename Wing\u{2026}"
+    static let deleteWingVerb = "Delete Wing\u{2026}"
+    static let moveToWingVerb = "Move to Wing"
+    static let copyToWingVerb = "Copy to Wing"
+    static let unavailableNote = "Wings live at the top of the Bookcase \u{2014} "
+        + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D}."
+    static let noteUnavailableNote = "Moving or copying a note to another wing acts on a "
+        + "note's row \u{2014} right-click one in the Library or the Pool."
+
+    static let newWingTitle = "New Wing"
+    static let renameWingTitle = "Rename Wing"
+
+    static func deleteTitle(_ name: String) -> String { "Delete the wing \u{201C}\(name)\u{201D}?" }
+    static let deleteMessage = "It's empty. Its shelves go with it; nothing else is touched."
+
+    static func minted(_ name: String) -> String {
+        "Made the wing \u{201C}\(name)\u{201D} \u{2014} you're in it now."
+    }
+    static func deleted(_ name: String) -> String { "Deleted the wing \u{201C}\(name)\u{201D}." }
+
+    static func moveTitle(_ title: String, to wing: String) -> String {
+        "Move \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D}?"
+    }
+    static func moveMessage(leaves books: [String]) -> String {
+        let names = books.map { "\u{201C}\($0)\u{201D}" }
+        let list = names.count <= 1 ? (names.first ?? "")
+            : names.dropLast().joined(separator: ", ") + " and " + names.last!
+        return "It leaves \(list) \u{2014} a book only holds notes of its own wing. "
+            + "Its tags come with it."
+    }
+    static func moved(_ title: String, to wing: String, left: Int) -> String {
+        left == 0
+            ? "Moved \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D}."
+            : "Moved \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} it left "
+                + "\(left) book\(left == 1 ? "" : "s")."
+    }
+    static func copied(_ title: String, to wing: String) -> String {
+        "Copied \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} the copy is in "
+            + "that wing's Pool."
+    }
+    static func frozen(_ title: String, book: String) -> String {
+        "\u{201C}\(title)\u{201D} is in \u{201C}\(book)\u{201D}, which is finished \u{2014} "
+            + "reopen it (or unseal it) before moving the note to another wing."
+    }
+
+    /// The lineage line (#166(e) — minimal naming, nothing deeper).
+    static func versionElsewhere(_ wing: String) -> String {
+        "a version of this note lives in the wing \u{201C}\(wing)\u{201D}"
+    }
+    static func goTo(_ wing: String) -> String { "go to \(wing) \u{203A}" }
+}
+
+// MARK: - The note-row doors (Move to Wing ▸ · Copy to Wing ▸) and the move's confirm
+
+/// The two cross-wing doors on a note's row — ONE builder the Library's and
+/// the Pool's row menus render (`SidebarView.contextMenuCapabilities`
+/// declares them for the note-row grammar). Drawn only while another wing
+/// exists (P-2). The row's note lives in the CURRENT wing (both surfaces list
+/// the current wing's notes), so its destinations are every other wing.
+struct WingNoteDoors: View {
+    let wings: WingsModel
+    let postID: String
+    let title: String
+    /// The move's confirm, when the note leaves books (the caller presents it).
+    let onAsk: (WingsModel.MoveAsk) -> Void
+    /// After an act (the one-shot listings re-ask; held ones need nothing).
+    var onDone: () -> Void = {}
+
+    var body: some View {
+        let others = wings.destinations(from: wings.currentID)
+        if !others.isEmpty {
+            Menu(CapabilityRegistry.capability(.moveNoteToWing).verb) {
+                ForEach(others) { row in
+                    Button(row.name) {
+                        Task {
+                            if let ask = await wings.moveAsk(
+                                postID: postID, title: title, to: row.id) {
+                                onAsk(ask)
+                            } else {
+                                onDone()
+                            }
+                        }
+                    }
+                }
+            }
+            Menu(CapabilityRegistry.capability(.copyNoteToWing).verb) {
+                ForEach(others) { row in
+                    Button(row.name) {
+                        Task {
+                            await wings.copy(postID: postID, title: title, to: row.id)
+                            onDone()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension View {
+    /// The move's confirm — LISTS the books the note leaves (a book never
+    /// spans wings), the one question a cross-wing move asks.
+    func wingMoveConfirm(
+        _ pending: Binding<WingsModel.MoveAsk?>, wings: WingsModel?,
+        onDone: @escaping () -> Void = {}
+    ) -> some View {
+        alert(
+            pending.wrappedValue.map { WingCopy.moveTitle($0.title, to: $0.wingName) } ?? "",
+            isPresented: Binding(
+                get: { pending.wrappedValue != nil },
+                set: { if !$0 { pending.wrappedValue = nil } }),
+            presenting: pending.wrappedValue
+        ) { ask in
+            Button("Move") {
+                Task {
+                    await wings?.move(postID: ask.postID, title: ask.title, to: ask.wingID)
+                    onDone()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { ask in
+            Text(WingCopy.moveMessage(leaves: ask.leaves))
+        }
+    }
+}

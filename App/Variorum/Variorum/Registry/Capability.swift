@@ -775,6 +775,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // settings sheet (13i-c U3's three-state row, `setReadingHideOwned`)
     // were an undeclared act — declared here, rendered by the sheet.
     case unarchiveNote, setReadingHideOwned
+    // 13i-d U5 — WINGS (the sitting record §9; §21 Direction C; R-13id-2).
+    // The switcher's three acts are its menu's `.surface` doors (the Bookcase
+    // masthead — `WingSwitcherMenu`); SWITCHING is a view choice (a local
+    // memory, never the store) and stays undeclared, the Library `sort ▾`
+    // precedent. The two note doors join the NOTE-ROW grammar
+    // (`SidebarView.contextMenuCapabilities` — the Library's and the Pool's
+    // rows render them; the Open strip does not, `.deleteNote`'s reason). The
+    // BOOK move and the bulk "Move everything to another wing…" are the
+    // STOPPED half (the U5 RECORD's proposal) — no declaration until built.
+    case newWing, renameWing, deleteWing
+    case moveNoteToWing, copyNoteToWing
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

@@ -132,9 +132,11 @@ extension NotePickerSource {
     @MainActor
     static func versionPeers(session: AppSession, of anchor: String) -> NotePickerSource {
         NotePickerSource { query in
+            // 13i-d U5 (#166(e)): a version in ANOTHER wing is never offered
+            // here — its snippet would be content pulled across libraries.
             let hits = (try? await session.database.read { db in
                 try Queries.notePickerNotes(
-                    db, ids: try Queries.versionPeerPosts(db, of: anchor))
+                    db, ids: try Queries.versionPeerSplit(db, of: anchor).sameWing)
             }) ?? []
             let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
             return hits

@@ -60,6 +60,10 @@ struct ShelfView: View {
     /// "notes or books", so the board renders the same act the note-row
     /// family does, from the same declaration.
     var starDoor: StarDoor? = nil
+    /// 13i-d U5 — the WING switcher's brain (`Core/Views/WingsModel`, owned by
+    /// the composition root and handed in). nil in harness mounts: the
+    /// masthead then reads "Bookcase" alone, exactly as before.
+    var wings: WingsModel? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -345,6 +349,11 @@ struct ShelfView: View {
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
+            // 13i-d U5 — "Bookcase · Home ▾" (§21 Direction C): which
+            // library she is in, and the door to the others.
+            if let wings {
+                WingSwitcherMenu(tokens: tokens, wings: wings)
+            }
             Spacer()
             Button(tokens.chromeLabel("Today's Entry")) { onTodaysEntry() }
                 .buttonStyle(.borderless)

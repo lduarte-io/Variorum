@@ -1871,6 +1871,43 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: CollectingCopy.openUnavailableNote,
             availability: always),
+        // 13i-d U5 — WINGS. The switcher's acts carry their target (the
+        // current wing — Rename/Delete render only on an ADDITIONAL wing,
+        // DATA the menu reads, never a mode of this table), so `always` is
+        // honest for `.editRule`'s reason; app scope (a wing is above every
+        // book and note). The note doors carry their row (`.archiveNote`'s
+        // `.native` precedent) and render only while another wing exists
+        // (P-2 — a door that can never act is not drawn).
+        Capability(
+            id: .newWing, verb: WingCopy.newWingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .renameWing, verb: WingCopy.renameWingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .deleteWing, verb: WingCopy.deleteWingVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.noteUnavailableNote,
+            availability: always),
+        Capability(
+            id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: WingCopy.noteUnavailableNote,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

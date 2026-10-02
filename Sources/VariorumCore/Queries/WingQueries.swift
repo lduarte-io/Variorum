@@ -141,4 +141,40 @@ extension Queries {
         guard !id.isEmpty else { return home }
         return try liveWing(db, id: id)?.name
     }
+
+    /// **THE LINEAGE DOOR ACROSS WINGS** (#166(e), RULED — "it can say it was
+    /// in a different wing but I don't think we should have much more
+    /// detailed linking than that … I don't want to encourage too much cross
+    /// wing behavior"). A note's version peers (`versionPeerPosts` — the
+    /// `version_of` link a cross-wing copy carries), SPLIT by wing: the peers
+    /// in the note's OWN wing (a surface may offer them as notes), and the
+    /// OTHER wings that hold one (a surface only NAMES those — no preview, no
+    /// content across, no deep link). Wing ids as surfaces read them (a
+    /// dangling pointer is Home's), distinct, Home first then by switcher
+    /// order.
+    public struct VersionPeerSplit: Equatable, Sendable {
+        public let sameWing: [String]
+        public let otherWings: [String]
+
+        public init(sameWing: [String], otherWings: [String]) {
+            self.sameWing = sameWing
+            self.otherWings = otherWings
+        }
+    }
+
+    public static func versionPeerSplit(_ db: Database, of postID: String) throws -> VersionPeerSplit {
+        let mine = try effectiveWing(db, ofPost: postID) ?? ""
+        var same: [String] = []
+        var others: Set<String> = []
+        for peer in try versionPeerPosts(db, of: postID) {
+            let wing = try effectiveWing(db, ofPost: peer) ?? ""
+            if wing == mine { same.append(peer) } else { others.insert(wing) }
+        }
+        let order = try wings(db).map(\.id)
+        let sorted = others.sorted { a, b in
+            if a.isEmpty != b.isEmpty { return a.isEmpty }
+            return (order.firstIndex(of: a) ?? .max) < (order.firstIndex(of: b) ?? .max)
+        }
+        return VersionPeerSplit(sameWing: same, otherWings: sorted)
+    }
 }

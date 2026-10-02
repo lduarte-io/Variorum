@@ -64,8 +64,20 @@ nonisolated struct CompareProjection: Equatable, Sendable {
     /// peerID → (peer block → its anchor kin block) — `Queries.blockKinship`
     /// verbatim, never re-derived view-side.
     var kinship: [String: [String: String]] = [:]
-    /// Posts version-linked to the anchor.
+    /// Posts version-linked to the anchor — IN ITS OWN WING only (13i-d U5:
+    /// a version that lives in another library is never offered as a note,
+    /// never auto-filled, never pulled in as content — #166(e)).
     var versionPeers: [String] = []
+    /// 13i-d U5 — THE LINEAGE LINE (#166(e), RULED: "it can say it was in a
+    /// different wing … maybe move back to that wing for more"): the OTHER
+    /// wings holding a version of this note, by id and name — named, with a
+    /// plain go-to road, nothing deeper.
+    var otherWingVersions: [OtherWing] = []
+
+    struct OtherWing: Equatable {
+        let id: String
+        let name: String
+    }
 }
 
 /// A display row (the model derives these from `CompareComposition`'s
@@ -310,11 +322,17 @@ final class CompareViewModel {
             peers[peerID] = try face(peerID)
             kinship[peerID] = try Queries.blockKinship(db, anchor: anchorID, other: peerID)
         }
+        let split = try Queries.versionPeerSplit(db, of: anchorID)
         return CompareProjection(
             anchor: try face(anchorID),
             peers: peers,
             kinship: kinship,
-            versionPeers: try Queries.versionPeerPosts(db, of: anchorID))
+            versionPeers: split.sameWing,
+            otherWingVersions: try split.otherWings.map { id in
+                CompareProjection.OtherWing(
+                    id: id, name: try Queries.wingName(db, id: id, home: WingWords.home)
+                        ?? WingWords.home)
+            })
     }
 
     private func restartObservation() {
@@ -1384,6 +1402,25 @@ struct CompareBoardView: View {
                     }
                     .buttonStyle(.plain)
                 }
+            }
+            // 13i-d U5 — THE LINEAGE LINE (#166(e)): another wing's version is
+            // NAMED, with at most a plain go-to road — no preview, no content
+            // across, no deep link.
+            ForEach(model.projection.otherWingVersions, id: \.id) { wing in
+                HStack(spacing: 8) {
+                    Text(tokens.chromeLabel(WingCopy.versionElsewhere(wing.name)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(1)
+                    Button(tokens.chromeLabel(WingCopy.goTo(wing.name))) {
+                        session.wing.switchTo(wing.id)
+                    }
+                    .buttonStyle(.borderless)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                }
+                .padding(.top, 6)
             }
         }
         .frame(maxWidth: 560, alignment: .leading)

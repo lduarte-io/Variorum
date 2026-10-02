@@ -213,6 +213,9 @@ struct PoolPostsView: View {
     var onOpenInNewWindow: ((String) -> Void)? = nil
     /// 13f batch 6 (W4): the star door, from the one note-row grammar.
     var starDoor: StarDoor? = nil
+    /// 13i-d U5: the cross-wing note doors' brain (owned by the composition
+    /// root); nil in harness mounts — the doors are then not drawn.
+    var wings: WingsModel? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -220,6 +223,8 @@ struct PoolPostsView: View {
     @Environment(\.colorScheme) private var scheme
     /// 13l Act 2 (item 3): the pending delete ask, in the one shared host.
     @State private var pendingDelete: NoteDeleteConfirm?
+    /// 13i-d U5: the move's confirm (the books the note would leave).
+    @State private var wingMove: WingsModel.MoveAsk?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -303,6 +308,7 @@ struct PoolPostsView: View {
         }
         .background(tokens.surface)
         .task(id: model.session.wing.currentID) { await model.start() }
+        .wingMoveConfirm($wingMove, wings: wings)
         .onDisappear { model.tuckAway() }
         #if DEBUG
         .onAppear { recordMasthead() }
@@ -446,6 +452,12 @@ struct PoolPostsView: View {
             }
             Button("Duplicate as Version") {
                 Task { await onDuplicateAsVersion(item.postID) }
+            }
+            // 13i-d U5 — the explicit cross-wing doors (the sitting record §9).
+            if let wings {
+                WingNoteDoors(
+                    wings: wings, postID: item.postID, title: item.displayTitle,
+                    onAsk: { wingMove = $0 })
             }
             Divider()
             // Ledger row 25: the same declaration the Library's row renders

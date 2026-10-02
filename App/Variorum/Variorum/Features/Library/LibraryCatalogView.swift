@@ -102,6 +102,9 @@ struct LibraryCatalogView: View {
     var onOpenBook: ((String, String) -> Void)? = nil
     /// 13f batch 6 (W4): the star door, from the one note-row grammar.
     var starDoor: StarDoor? = nil
+    /// 13i-d U5: the cross-wing note doors' brain (owned by the composition
+    /// root); nil in harness mounts — the doors are then not drawn.
+    var wings: WingsModel? = nil
     // The tutorial door's property LEFT with the \u{22EF} menu (the post-13l
     // polish round, ledger row 7). It routed through the shell's fire-and-DO
     // act (`ShellActions.openTutorial`) — and still does, from Help \u{25B8}
@@ -114,6 +117,8 @@ struct LibraryCatalogView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
+    /// 13i-d U5: the move's confirm (the books the note would leave).
+    @State private var wingMove: WingsModel.MoveAsk?
     /// 13i-c U4 — THE BADGE FAMILY outside a book (§6): the listed notes'
     /// owned-by facts, ONE page-driven observation (P1 — ∝ the hits).
     @State private var ownership = OwnershipFactsModel()
@@ -224,6 +229,7 @@ struct LibraryCatalogView: View {
         // 13i-d U5: a wing switch re-asks the catalog (the wing is part of
         // the question).
         .task(id: session.wing.currentID) { await model.search() }
+        .wingMoveConfirm($wingMove, wings: wings) { Task { await model.search() } }
         // 13i-c U4: the owned-by badge's facts, keyed on the listed notes.
         .task(id: listedNoteIDs) {
             await ownership.observe(session: session, postIDs: listedNoteIDs, inBook: nil)
@@ -843,6 +849,13 @@ struct LibraryCatalogView: View {
         }
         Button("Duplicate as Version") {
             Task { await library.duplicateAsVersion(postID: hit.id) }
+        }
+        // 13i-d U5 — the explicit cross-wing doors (the sitting record §9).
+        if let wings {
+            WingNoteDoors(
+                wings: wings, postID: hit.id, title: hit.title,
+                onAsk: { wingMove = $0 },
+                onDone: { Task { await model.search() } })
         }
         Divider()
         // The per-post export doors (Phase 11b B1's ratified context-

@@ -475,6 +475,10 @@ struct CapabilityRegistryTests {
             // Unarchive (`.unarchiveNote`, NEW — its one declared renderer)
             // and the shared remove door on each archived member's row.
             .union(BookArchivedLine.surfaceCapabilities)
+            // 13i-d U5 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the Bookcase masthead's WING SWITCHER (§21 Direction
+            // C) renders New Wing… / Rename Wing… / Delete Wing….
+            .union(WingSwitcherMenu.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
