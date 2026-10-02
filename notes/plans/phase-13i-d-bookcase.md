@@ -2376,11 +2376,9 @@ or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's
 | 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | NOT-STARTED |
 | 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | NOT-STARTED |
 
-**REVERT STATE:** the combined behavioural revert over the sweep's bug-class and hygiene pins starts at
-the commit after this line's — every production file it touches is COMMITTED at HEAD first, so `git
-checkout HEAD -- <file>` is the restore and `git diff` is the honest "what is reverted right now". A
-successor finding a dirty production tree here: the revert is in flight — restore by checkout, verify
-`git diff --quiet`, then continue.
+**REVERT STATE: NO REVERT IN FLIGHT.** The combined behavioural revert ran from the committed HEAD
+c306e84f and was restored by `git checkout HEAD --` (`git diff --quiet` verified) — its record is
+EVIDENCE's "combined behavioural revert" line.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
 
@@ -2419,7 +2417,24 @@ successor finding a dirty production tree here: the revert is in flight — rest
 
 ### EVIDENCE (named now; counts PENDING until each run lands)
 
-- ACT 0's pins red-on-old (the three guarded roads' recipes) + the control: PENDING.
+- **ACT 0 red-on-old:** `WingUndoRevivalTests` on the pre-guard tree — **4 tests RED, 16 issues**
+  (`act0-red.log`: every recipe's crossing count 1; `revertDiverge` revived the original across and
+  tombstoned the copy and its seat (the half-undo); `reapplySmartConversion` revived the moved note's
+  row and re-made the gathering a book — and, on the twin, re-bound a gathering that had moved over
+  another wing's notes; the sibling `reapplyDiverge` revived the copy across and took the original's
+  seat), the `reapplyMintedContainer` CONTROL green (F-U5b-1 already guards it — honest, not a fix);
+  green after with the diverge/bind/ownership/wing-move/revival/undo neighbours **119/15**
+  (`act0-green.log`).
+- **The combined behavioural revert (the sweep's bug-class + hygiene pins)** from the committed HEAD
+  c306e84f: R1 the choice sheet's target refusal ignoring the fresh sealed read · R2 the Bookcase's
+  book-known route back to the generic arm · R3 the helper glossary at the U6 base · R4 the Archived
+  view's declaration dropped · R5 Write's bar dropping the note-menu wing doors · R6 the generic
+  book arm's "locked — unlock" — **exactly the 6 predicted tests RED, 10 issues, nothing else** of
+  73/5 (`revert.log`: `DeadVocabularyTests` listing the 8 reverted spellings; the Archived
+  declaration; the bookless arms; the sealed target; the Bookcase's sealed road; the wing acts'
+  renderers) — the registry walk and the choice-sheet suite stayed GREEN, as predicted (a union
+  equality cannot see R4/R5 — the reason the direct pins exist); restored by checkout, tree clean,
+  green again 73/5 (`revert-restored.log`).
 - (g)'s trace verdict (+ its pin if bug-class): PENDING.
 - The word-table pins (row 106's sealed arms, the dismiss receipt, row 111's words): PENDING.
 - The grep pins banning the dead spellings: PENDING.
