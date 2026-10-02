@@ -623,21 +623,22 @@ extension Operations {
     /// copy body cannot be reached through `duplicateAsVersion` (which
     /// opens its own write and registers its own undo entry).
     func copyPost(
-        _ db: Database, sourceID: String, chosenPicks: [String: String]?, carryFans: Bool
+        _ db: Database, sourceID: String, chosenPicks: [String: String]?, carryFans: Bool,
+        intoWing destinationWing: String? = nil
     ) throws -> PostCopyResult {
         let source = try livePost(db, sourceID)
         let now = date.now
 
         // 13i-c U2: the copy is born in the SOURCE's wing — a copy door is
-        // never a wing crossing (the sitting record §9's total isolation;
-        // the explicit cross-wing doors are 13i-d's). Unreachable until a
-        // second wing exists; pinned on the ownership ceremonies.
+        // never a wing crossing (the sitting record §9's total isolation).
+        // 13i-d U5: the ONE explicit crossing — `copyNoteToWing` — names its
+        // destination (`intoWing`); every other copy door passes nil.
         var copy = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post,
             title: source.title, profile: source.profile, entryDate: source.entryDate,
             locked: false, floatingNotes: source.floatingNotes,
             segmentationDefault: source.segmentationDefault,
-            lastTouchedAt: now, wingId: source.wingId,
+            lastTouchedAt: now, wingId: destinationWing ?? source.wingId,
             createdAt: now, updatedAt: now)
         try copy.insert(db)
 

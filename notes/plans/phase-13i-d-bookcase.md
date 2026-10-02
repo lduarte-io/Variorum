@@ -1529,7 +1529,7 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 | 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | DONE (this commit) — `Operations+Wing.swift`, `Queries/WingQueries.swift`, six `OperationError` cases; `createPost`/`createReading` refuse a dead wing; `WingOperationsTests` 8 green |
 | 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | DONE (this commit) — `TagWingScopeTests`: 5 pins RED on the pre-fix ops (**8 issues**, `p4-red.log`), green after with the new mint pin (14/2); tag-adjacent core suites 214/51 green |
 | 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | DONE (0c950d3e + this commit) — `WingMembershipAndJournalTests` 5: **all 5 RED, 16 issues** with the six production files restored to `5e2e1934` (`p5-red.log`); restored by `git checkout HEAD --`, src diff empty — **no revert in flight**; green with the journal/ownership/intake/arrival neighbours 197/37 |
-| 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | NOT-STARTED |
+| 6 | Core — the per-item NOTE doors: `moveNoteToWing` (tags adopt by path; source-wing memberships severed, a finished/sealed one refuses; versions ride) + `copyNoteToWing` (the ceremony copy into the destination, tags adopted, born bookless, lineage edges) + pins (adopt vs mint) | DONE (this commit) — `Operations+WingMove.swift` (+ `Queries.wingMovePreview`, the confirm's read; `copyPost(intoWing:)`); `WingMoveTests` 6 green |
 | 7 | Core — the scoped READS (`wingID: String? = nil`, nil byte-identical): library · searchCatalog · poolListing · archivedPosts · trash · notePickerNotes · readings · allTags · starred + the lineage read naming another wing + per-wing pins | NOT-STARTED |
 | 8 | Mac — the current wing (`WingState`, app-wide, remembered locally) + every surface re-scoped (Bookcase · Library · Pool · tags · search/⌘K · Starred · Archived · Trash · pickers) + new notes/tags born in the current wing | NOT-STARTED |
 | 9 | Mac — the SWITCHER (the Bookcase masthead's `· Home ▾`: the wings, New Wing…, Rename…, Delete… with the refusal's words) + the note doors (Move to Wing… · Copy to Wing… with confirms) + the lineage line + registry rows + the walk green | NOT-STARTED |
@@ -1724,8 +1724,14 @@ shared primitive; its own edges are numbered P-13id-U5-7.
   wing's delete tombstoning its two shelves on the wing's ONE stamp, another wing's and Home's
   shelves untouched, Home refused · Trash rows not blocking · the scope fragment reading a
   dangling wing as Home · mints refusing a dead wing).
-- Move/copy pins (adopt vs mint; severed memberships listed; finished/sealed refusal; versions ride;
-  copy bookless with lineage edges): PENDING.
+- **Move/copy:** `WingMoveTests` — 6 state-transition pins green (`p6.log`): `writing/draft` ADOPTS
+  the destination's own, `poems` is MINTED, a block's `writing` adopts — counts 2 adopted / 1 minted,
+  the old applications tombstoned, the source wing's tags left live; a move SEVERS both books
+  (listed "Alpha", "Beta" — the preview reads the same), a FINISHED member book refuses
+  `lockedReading` writing nothing, a SEALED one refuses `readingSealed`; the saved version rides,
+  archive state stays, Home is a legal destination, the own wing and a dead wing refuse; the copy
+  is born in the destination, bookless, its tag adopted, each block `derived_from` its source with
+  the `version_of` anchor (the source untouched); an empty note copies bare.
 - Per-wing scoping pins (Bookcase/tags/search/Arrivals/Archived/Trash; the dangling-wing Home
   reading; the re-home on Put back): PENDING.
 - Registry rows + the registry walk; the tutorial spine (lesson 11 TRUE): PENDING.
