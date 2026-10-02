@@ -53,15 +53,22 @@ extension Operations {
     /// (mode-independent by construction) keeps its property here.
     /// Every other caller passes nothing and is byte-unchanged.
     @discardableResult
+    ///
+    /// `wingId` (13i-d U5, additive — '' = Home, every existing caller): the
+    /// Bookcase's entry bar and the sidebar's import land the note in the
+    /// wing she is standing in (the quick-note pad keeps Home — Home holds
+    /// quick notes and their gathering).
     public func importPost(
         title: String?, text: String, undoLabel: String = "Import",
-        segmentation: Segmentation? = nil
+        segmentation: Segmentation? = nil, wingId: String = ""
     ) throws -> ImportResult {
         let result: ImportResult = try database.write { db in
+            try requireLiveWing(db, wingId)
             let mode = try segmentation ?? globalSegmentation(db)
             let segments = SegmentationRules.bulkSegments(text, mode: mode)
             guard !segments.isEmpty else { throw OperationError.emptyImport }
-            let post = try insertPost(db, title: title, profile: nil, entryDate: nil)
+            let post = try insertPost(
+                db, title: title, profile: nil, entryDate: nil, wingId: wingId)
             let blockIDs = try mintSegments(db, segments, into: post.id)
             return ImportResult(container: post, blockIDs: blockIDs, createdContainer: true)
         }

@@ -642,7 +642,11 @@ struct ShelfView: View {
         if reading.kind == .book {
             Button("Length & Extent\u{2026}") { extentTarget = reading }
         }
-        if reading.kind == .book, Queries.hasJournalTrait(reading.profile) {
+        // 13i-d U5 (#169(b), RULED — the daily Journal is HOME-ONLY): the
+        // designation door is drawn only on a HOME book (P-2 — the op refuses
+        // any other wing's, `dailyJournalIsHomeOnly`).
+        if reading.kind == .book, Queries.hasJournalTrait(reading.profile),
+           model.wingID.isEmpty {
             // Round 2, MAJOR 2's re-designation door.
             Button("Use as Daily Journal") {
                 Task { await model.designateDailyJournal(reading.id) }

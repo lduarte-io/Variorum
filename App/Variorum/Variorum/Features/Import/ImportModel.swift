@@ -76,6 +76,7 @@ final class ImportModel {
         if !readable.isEmpty {
             let stack = session.undoStack
             let files = readable
+            let wing = session.wing.currentID  // 13i-d U5: this library's
             do {
                 let outcome: (imported: Int, skipped: [String]) =
                     try await session.runner.run { ops in
@@ -86,7 +87,9 @@ final class ImportModel {
                                 do {
                                     switch destination {
                                     case .library:
-                                        _ = try ops.importPost(title: file.title, text: file.text)
+                                        // 13i-d U5: the current wing's library.
+                                        _ = try ops.importPost(
+                                            title: file.title, text: file.text, wingId: wing)
                                     case .pool(let poolID):
                                         _ = try ops.importBlocks(into: poolID, text: file.text)
                                     }
@@ -218,8 +221,9 @@ final class ImportModel {
         do {
             switch destination {
             case .library:
+                let wing = session.wing.currentID  // 13i-d U5
                 _ = try await session.runner.run { ops in
-                    try ops.importPost(title: title, text: text)
+                    try ops.importPost(title: title, text: text, wingId: wing)
                 }
             case .pool(let poolID):
                 _ = try await session.runner.run { ops in

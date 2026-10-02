@@ -164,8 +164,11 @@ struct ArchivedMembersTests {
             try ops.archiveContainer(a[0].id)
             try ops.archiveContainer(a[2].id)
             try ops.archiveContainer(b[0].id)
-            // A book in ANOTHER wing never counts in this one.
-            let away = try ops.createReading(name: "away", kind: .book, wingId: "w-2")
+            // A book in ANOTHER wing never counts in this one. (13i-d U5: a
+            // book is born only in a LIVE wing now — the fixture mints one;
+            // the assertions read its id where they read "w-2".)
+            let otherWing = try ops.createWing(name: "w-2").id
+            let away = try ops.createReading(name: "away", kind: .book, wingId: otherWing)
             try db.write { db in
                 try db.execute(
                     sql: """
@@ -177,7 +180,7 @@ struct ArchivedMembersTests {
             let counts = try db.read { try Queries.archivedMemberCounts($0, wingID: "") }
             #expect(counts == [first.id: 2, second.id: 1], "books with none are absent")
             #expect(counts[plain.id] == nil)
-            #expect(try db.read { try Queries.archivedMemberCounts($0, wingID: "w-2") }
+            #expect(try db.read { try Queries.archivedMemberCounts($0, wingID: otherWing) }
                 == [away.id: 1])
             for id in [first.id, second.id] {
                 #expect(counts[id] == (try archived(db, id).count), "one predicate, two shapes")

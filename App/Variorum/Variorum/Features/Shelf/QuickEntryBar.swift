@@ -131,8 +131,10 @@ final class QuickEntryModel {
 
     private func mintNow(_ submitted: String, title: String?) async throws -> String {
         if let mint { return try await mint(submitted, title) }
+        // 13i-d U5: the Bookcase's capture lands in the wing she stands in.
+        let wing = session.wing.currentID
         return try await session.runner.run { ops in
-            try ops.importPost(title: title, text: submitted).container.id
+            try ops.importPost(title: title, text: submitted, wingId: wing).container.id
         }
     }
 }

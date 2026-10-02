@@ -161,9 +161,11 @@ struct StarredNotesGatheringTests {
         try withOperations { ops, db in
             // A ★ gathering in ANOTHER wing is that library's — Home still
             // gets its own.
+            // 13i-d U5: born only in a LIVE wing — the fixture mints one.
+            let otherWing = try ops.createWing(name: "other-wing").id
             _ = try ops.createReading(
                 name: "starred notes", kind: .gathering,
-                querySpec: try RuleGrammar.encode(.star), wingId: "other-wing")
+                querySpec: try RuleGrammar.encode(.star), wingId: otherWing)
             let id = try #require(mintedID(ops.ensureStarredNotesGathering()))
             #expect(try db.read { try Reading.fetchOne($0, key: id)?.wingId } == "")
         }

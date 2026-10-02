@@ -285,9 +285,12 @@ struct Phase13icOutflowTests {
 
     @Test func aNoteMintedInABookIsBornInTheBooksWing() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "far", kind: .book, wingId: "W1")
+            // 13i-d U5: a book is born only in a LIVE wing — the fixture
+            // mints one (the assertion reads its id where it read "W1").
+            let far = try ops.createWing(name: "W1").id
+            let book = try ops.createReading(name: "far", kind: .book, wingId: far)
             let post = try ops.newPostInReading(book.id)
-            #expect(try db.fetchString("SELECT wing_id FROM container WHERE id = ?", [post.id]) == "W1",
+            #expect(try db.fetchString("SELECT wing_id FROM container WHERE id = ?", [post.id]) == far,
                     "13i-b U1 F-5 closed: the mint lands in the BOOK's wing")
             let home = try ops.createPost(title: "home")
             #expect(try db.fetchString("SELECT wing_id FROM container WHERE id = ?", [home.id]) == "")
