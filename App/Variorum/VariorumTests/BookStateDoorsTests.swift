@@ -411,9 +411,9 @@ struct BookSettingsSheetTests {
                 #expect(drawn.stateDoors == [.finishBook, .sealBook, .ownBook])
                 #expect(drawn.finishedDisabled == false)
             }
-            // The Edit… door opens the rule editor for THIS reading.
-            settings.openRuleEditor()
-            #expect(settings.ruleEditor?.readingID == book.id)
+            // The Edit… door's editor is for THIS reading — and the sheet
+            // HANDS it to its host rather than nesting it (W-1, the U3 walk).
+            #expect(settings.makeRuleEditor().readingID == book.id)
         }
     }
 

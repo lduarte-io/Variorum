@@ -727,6 +727,17 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   `withKnownIssue` TK2 marks in `IndexTierMetricsTests`; zero skips); the phone `VariorumMobile`
   generic iOS Simulator **BUILD SUCCEEDED**. Zero app instances before and after every run.
   PENDING: the walk, the record's close.
+- **THE WALK — IN PROGRESS (guard OK, AX + Screen grants true, dev-store Debug build
+  `DerivedData/13ic-u3`).** **W-1 FOUND AND FIXED (commit "13i-c U3 walk fix W-1"):** the Book
+  Settings sheet NESTED the rule editor; after a save the editor's "Also tag the 2 current members with
+  #u3walk #walked now? · Tag Them" OFFER rendered as the shell's toast UNDER the still-open,
+  window-modal settings sheet — her press could not land (walked: the note still wore only
+  `#spawn13ib`; captures u3-05). Fix: Edit… HANDS the editor to the book view and closes the settings
+  sheet (`BookSettingsModel.makeRuleEditor` + `onEditRule`; the book view presents it on the settings
+  sheet's dismissal), so the offer lands on an unblocked window. Not pinnable headlessly (a modal
+  sheet's event-blocking is AppKit's, not the test host's) — the walk's before/after captures are its
+  evidence; the model pin reads `makeRuleEditor()`. Settings · state doors · the registry walk 46/3
+  green after it.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
 
 ## §8 ENVIRONMENT TRAPS`,

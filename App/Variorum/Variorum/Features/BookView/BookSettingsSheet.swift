@@ -179,8 +179,6 @@ final class BookSettingsModel {
     /// Live paths of every tag the rule and the outflow name.
     private(set) var paths: [String: String] = [:]
     private(set) var hideOwnedDefault = false
-    /// The rule editor, while open (the sheet's item IS its model).
-    var ruleEditor: RuleEditorModel?
     let stateDoors: BookStateDoors
 
     init(session: AppSession, readingID: String) {
@@ -201,9 +199,14 @@ final class BookSettingsModel {
         hideOwnedDefault = hides
     }
 
-    /// The "Edit…" door — the rule editor for THIS reading.
-    func openRuleEditor() {
-        ruleEditor = RuleEditorModel(session: session, readingID: readingID)
+    /// The "Edit…" door's editor — the rule editor for THIS reading. The
+    /// sheet HANDS it to its host and closes (W-1, the U3 walk): the editor's
+    /// "also tag the N current members" offer is a toast on the window, and
+    /// a settings sheet left open over it blocked its button (window-modal)
+    /// until the toast's clock ran out — so the editor must never open while
+    /// this sheet is up.
+    func makeRuleEditor() -> RuleEditorModel {
+        RuleEditorModel(session: session, readingID: readingID)
     }
 
     /// A gathering's hide-owned toggle (`setReadingHideOwned`; gatherings
@@ -227,6 +230,9 @@ struct BookSettingsSheet: View {
     static let surfaceCapabilities: [CapabilityID] = BookStateDoorSet.all + [.editRule]
 
     let structure: BookStructureModel
+    /// The Edit… handoff (W-1): the host presents the editor AFTER this
+    /// sheet dismisses. The default does nothing (a pin's mount).
+    var onEditRule: (RuleEditorModel) -> Void = { _ in }
     @State private var model: BookSettingsModel
     @State private var nameField = ""
     @State private var wordTargetField = ""
@@ -239,8 +245,12 @@ struct BookSettingsSheet: View {
     /// `model` is injectable so a pin can hand in one it already LOADED
     /// (hosted `.task` callbacks don't fire under the test host — the
     /// `RuleEditorModel` precedent); the app passes nothing.
-    init(structure: BookStructureModel, model: BookSettingsModel? = nil) {
+    init(
+        structure: BookStructureModel, model: BookSettingsModel? = nil,
+        onEditRule: @escaping (RuleEditorModel) -> Void = { _ in }
+    ) {
         self.structure = structure
+        self.onEditRule = onEditRule
         _model = State(initialValue: model ?? BookSettingsModel(
             session: structure.session, readingID: structure.readingID))
     }
@@ -287,9 +297,6 @@ struct BookSettingsSheet: View {
         // The sentences' one-shot read, re-keyed on everything they say.
         .task(id: factsKey) {
             if let reading = structure.reading { await model.load(for: reading) }
-        }
-        .sheet(item: $model.ruleEditor) { editor in
-            RuleEditorSheet(model: editor)
         }
         .bookStateConfirms(model.stateDoors)
         #if DEBUG
@@ -359,7 +366,12 @@ struct BookSettingsSheet: View {
                 }
             }
         }
-        Button(tokens.chromeLabel(CollectingCopy.editDoor)) { model.openRuleEditor() }
+        Button(tokens.chromeLabel(CollectingCopy.editDoor)) {
+            // W-1: hand the editor to the host and close — the editor opens
+            // over the book once this sheet is gone.
+            onEditRule(model.makeRuleEditor())
+            dismiss()
+        }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .help(CapabilityRegistry.capability(.editRule).verb)
     }

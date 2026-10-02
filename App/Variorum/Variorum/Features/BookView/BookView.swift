@@ -106,6 +106,15 @@ struct BookView: View {
     @State private var chapterNameField = ""
     @State private var renameChapterTarget: ReadingSection?
     @State private var settingsShown = false
+    /// 13i-c U3 (the U3 walk's finding W-1): the settings sheet's "Edit…"
+    /// door HANDS the rule editor to the book view and closes itself — the
+    /// editor's "also tag the N current members" OFFER is a toast on the
+    /// window, and a still-open window-modal settings sheet blocked its
+    /// button until the toast's clock ran out (walked: the press never
+    /// landed). `pendingRuleEditor` waits for the settings sheet's dismissal;
+    /// `ruleEditor` is the book view's own sheet item.
+    @State private var pendingRuleEditor: RuleEditorModel?
+    @State private var ruleEditor: RuleEditorModel?
     /// **13u3 UNIT A1 — the Outline PANE's width**, which is the only thing
     /// its text surfaces need that the prose column itself cannot tell them:
     /// how much whitespace stands beside the column. Read from the scroll
@@ -341,8 +350,20 @@ struct BookView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-        .sheet(isPresented: $settingsShown) {
-            BookSettingsSheet(structure: structure)
+        .sheet(isPresented: $settingsShown, onDismiss: {
+            // The Edit… handoff: the editor opens once the settings sheet is
+            // gone, over the book itself (W-1).
+            if let next = pendingRuleEditor {
+                pendingRuleEditor = nil
+                ruleEditor = next
+            }
+        }) {
+            BookSettingsSheet(structure: structure) { editor in
+                pendingRuleEditor = editor
+            }
+        }
+        .sheet(item: $ruleEditor) { editor in
+            RuleEditorSheet(model: editor)
         }
         // 13i-b U3 — BIND INTO A BOOK (the door 13c 2D shipped as the
         // conversion offer). One sheet, whichever road opened it: the
