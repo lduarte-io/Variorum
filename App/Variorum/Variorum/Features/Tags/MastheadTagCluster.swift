@@ -251,8 +251,9 @@ final class MastheadTagsModel {
     /// cluster's `.task(id: postID)` cancels it on leaving). A tag taken off
     /// or put on by ANY door — the chip's "remove #tag", the Book Panel's
     /// gathering line, another window — reaches the cards without a reopen.
-    /// Cost (KnownIssues row 13's class, the cheap end): the region is
-    /// `post_tag` + `tag` alone, so a keystroke's autosave never wakes it;
+    /// Cost, named beside KnownIssues row 13's class and OUTSIDE it: the
+    /// region is `post_tag` + `tag` alone, so a keystroke's autosave never
+    /// wakes it;
     /// a tagging act anywhere re-runs two indexed reads (the note's
     /// applications and the author-scale taxonomy).
     func track(session: AppSession, postID: String) async {
