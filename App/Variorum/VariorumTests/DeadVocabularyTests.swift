@@ -65,7 +65,7 @@ struct DeadVocabularyTests {
         "on the shelf", "on your shelf", "shelf menu", "shelf row",
         "shelf right-click", "pin to shelf top",
         // The door that mints a gathering was "Promote to Book…" (U6 (a)).
-        "promote to book",
+        "promote to book", "promote tags to a book",
         // The Library's segment (§21) and its day door (U6 (c)).
         "\"posts\"", "on day\\u{2026}",
         // The generic book refusal's dead road (KnownIssues row 106).

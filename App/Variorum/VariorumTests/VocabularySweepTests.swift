@@ -209,6 +209,19 @@ struct VocabularySweepTests {
         #expect(CapabilityRegistry.capability(.unarchiveNote).verb == "Unarchive")
     }
 
+    // MARK: - The walk's W-1 — the chip never speaks a raw enum
+
+    /// Walked: Diverge on an EMPTY note refused (rightly) as "Refused:
+    /// postHasNoBlocks(id: …)" — the chip's table fell through to a dump
+    /// while the app's one refusal table has the sentence. Red on the old
+    /// default arm (it returned exactly that dump).
+    @Test func theChipDefersToTheSharedRefusalWordsNeverADump() {
+        let empty = ChipRefusals.message(
+            for: OperationError.postHasNoBlocks(id: "p"), bookName: "Odes")
+        #expect(!empty.hasPrefix("Refused:"), "\(empty)")
+        #expect(empty == OpsRefusalCopy.message(for: OperationError.postHasNoBlocks(id: "p")))
+    }
+
     // MARK: - (f) item 10 — the dismiss receipt teaches the road back
 
     @Test func theDismissReceiptSaysHowToChangeYourMind() {

@@ -552,7 +552,11 @@ nonisolated enum ChipRefusals {
     /// refuses a sealed book, `readingSealed`, R-13ic-3) — every chip call
     /// site has the book row, so it says which door is real.
     static func message(for error: Error, bookName: String?, sealed: Bool = false) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        // 13i-d U6 — the walk's W-1: anything this table has no BOOK words for
+        // defers to the app's one refusal table, never a raw dump. (Diverge on
+        // an empty note spoke "Refused: postHasNoBlocks(id: …)" — the R93
+        // class — while the shared table has had its sentence all along.)
+        guard let error = error as? OperationError else { return OpsRefusalCopy.message(for: error) }
         let book = bookName.map { "“\($0)”" } ?? "that book"
         switch error {
         case .lockedReading:
@@ -567,7 +571,7 @@ nonisolated enum ChipRefusals {
         case .lockedPost:
             return "This note is sealed — unseal it first."
         default:
-            return "Refused: \(error)"
+            return OpsRefusalCopy.message(for: error)
         }
     }
 }

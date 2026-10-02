@@ -381,6 +381,10 @@ struct LibraryCatalogView: View {
     /// archive door's sentence), then the status seam's QUIET receipt; else
     /// nothing (no reserved blank line).
     enum MessageSlot: Equatable { case error, receipt, quiet, none }
+
+    /// How far the native segmented controls draw their labels below the
+    /// text controls' shared line (13i-d U6 (c) — measured, both voices).
+    static let segmentedLabelDrop: CGFloat = 1
     static func messageSlot(error: String?, receipt: String?, quietReceipt: Bool) -> MessageSlot {
         if error != nil { return .error }
         if receipt != nil { return .receipt }
@@ -483,6 +487,16 @@ struct LibraryCatalogView: View {
                 // choose. The Timeline mode is its own order by definition,
                 // so the door stands down there rather than lying.
                 if model.showsCatalogControls {
+                    // 13i-d U6 (c) — her §21 note, "the 'edited · newest first'
+                    // dropdown is slightly misaligned", MEASURED on the walk in
+                    // both voices: the native segmented controls draw their
+                    // labels 1 pt BELOW the line the text controls share
+                    // (Terminal: label bottoms 238 px vs 236; Study: 244 vs
+                    // 242, @2×), and the menu sits right beside a segmented
+                    // control. First-text-baseline alignment changed nothing
+                    // (the control reports a baseline its label does not
+                    // draw on), so the menu and the day door meet the
+                    // segmented line by `segmentedLabelDrop`.
                     LibrarySortMenu(
                         tokens: tokens, sort: model.sort, direction: model.direction,
                         onPick: { pick in
@@ -493,6 +507,7 @@ struct LibraryCatalogView: View {
                             model.setDirection(pick)
                             Task { await model.search() }
                         })
+                    .offset(y: Self.segmentedLabelDrop)
                     // 18h batch 2 (her row 11): *"search for any note edited
                     // on a particular day."*
                     LibraryDayField(
@@ -505,6 +520,7 @@ struct LibraryCatalogView: View {
                             model.setEditedOn(nil)
                             Task { await model.search() }
                         })
+                    .offset(y: Self.segmentedLabelDrop)
                 }
                 if selectedPosts.count > 1 {
                     Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {

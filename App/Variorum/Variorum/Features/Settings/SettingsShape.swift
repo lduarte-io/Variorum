@@ -90,7 +90,9 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .takes: "How a block's alternative takes open and follow you."
         case .writing: "What typing does to the note — and the savepoints Variorum keeps for you."
         case .shortcuts: "Every keyboard shortcut and menu door, grouped. Search above reaches it."
-        case .tags: "The whole tag hierarchy: create, rename, re-parent, and promote tags to a book."
+        // 13i-d U6 (a) — found on the walk: the door this names mints a
+        // GATHERING (its words are "Make a Gathering…").
+        case .tags: "The whole tag hierarchy: create, rename, re-parent, and make a gathering from tags."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .acknowledgments: "The open-source notices Variorum is built on."
