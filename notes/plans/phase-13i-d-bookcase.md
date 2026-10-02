@@ -276,86 +276,215 @@ on the phone this phase.
 
 ## U1 RECORD — THE BOOKCASE BOARD (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** the STARRED-ABSORBS-PINS unification is a
-design fork STOPPED for the architect's ruling (F-U1-2 below — the two star stores are not one
-mechanism in the code, and the fix is a core-op semantic change that ripples onto the phone); until
-the ruling the board's float reads `reading.starred` (13i-a's "the one star") and the row keeps the
-shipped two doors. Everything else in the U1 row is in scope below.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **STARRED-ABSORBS-PINS is STOPPED for
+the architect's ruling** (F-U1-2 below — the book "star" is still TWO stores, and unifying them is a
+core-op semantic change that ripples onto the phone); until the ruling the board's float reads
+`reading.starred` (13i-a's "the one star") and the book row keeps the shipped two doors (Star · Pin
+to Shelf Top). (2) **The DRAG gestures are pinned at the view-model layer and NOT walked** — synthetic
+drags start a drag session in this harness but never commit a SwiftUI drop (the 13b N20 class, closed
+there only by her hand); every drag road has a walked MENU twin (F-U1-4). Everything else in the U1
+row is built, pinned and walked below.
 
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
 | # | piece | status |
 |---|---|---|
-| 1 | Record skeleton + design map + evidence named | DONE (this commit) |
-| 2 | Core: the SHELF OPERATIONS (`Operations+Shelf.swift`) + `createReading(shelfId:)` + typed errors + refusal words + state-transition pins | NOT-STARTED — design in the map below |
-| 3 | Core: the bookcase READ side (`Queries.shelves`, `bookshelf(wingID:)` + per-book arrival counts, the one-shot `bookcaseAggregates` — last-edited + gathering counts) + pins | NOT-STARTED |
-| 4 | Shared brains (`BookcaseOrdering` core Domain + `BookcaseBoard` app-shared: order modes, starred float, census + solos, sections, shelf resolution) + pins | NOT-STARTED |
-| 5 | The view model rebuilt (`ShelfViewModel` + `BookcasePrefs` local memory) + VM pins (context mint, drop, place, default) | NOT-STARTED |
-| 6 | The board's faces (masthead · strip · № · order ▾ · details · sections · rows · menus · drag/drop · glyph sheet · the receipt home) | NOT-STARTED |
-| 7 | Registry declarations + the walk | NOT-STARTED |
-| 8 | The sidebar section renamed Bookcase (+ the two navigation labels) | NOT-STARTED |
-| 9 | Suites at the END (core full · named Mac suites incl. the tutorial spine + registry walk · mobile build) | NOT-STARTED |
-| 10 | The screenshot walk ×4 (Terminal/Study × light/dark) into `notes/plans/13id-screens/u1/` | NOT-STARTED |
-| 11 | Starred-absorbs-pins (F-U1-2) | **STOPPED — awaiting the architect's ruling** |
+| 1 | Record skeleton + design map + evidence named | DONE (9b2dc003) |
+| 2 | Core: the SHELF OPERATIONS + `createReading(shelfId:)` + typed errors + state-transition pins | DONE (4b7da430) |
+| 3 | Core: the bookcase READ side (snapshot · per-book arrival counts · the one-shot aggregates) + pins | DONE (4b7da430) — the P1 pin revert-verified (below) |
+| 4 | Shared brains (`BookcaseOrdering` core + `BookcaseBoard` Shared) + pins | DONE (4b7da430 + a90ceeb8) |
+| 5 | The view model rebuilt + `BookcasePrefs` + VM pins | DONE (a90ceeb8) |
+| 6 | The board's faces | DONE (a90ceeb8; the walk's fixes 52262af7 + this commit) |
+| 7 | Registry declarations + the walk | DONE (a90ceeb8 + 52262af7) — green |
+| 8 | The sidebar section renamed Bookcase (+ ⌘K "Go to Bookcase", the navigation label) | DONE (a90ceeb8) |
+| 9 | Suites at the END | DONE — counts in EVIDENCE |
+| 10 | The screenshot walk ×4 | DONE — 23 captures, listed below |
+| 11 | Starred-absorbs-pins (F-U1-2) | **STOPPED — awaiting the architect's ruling** (proposal below) |
 
-### THE DESIGN MAP (a fresh session's map; every line traced to the record/plan)
+### WHAT WAS BUILT (a fresh session's map)
 
-- **Core ops (`Sources/VariorumCore/Operations/Operations+Shelf.swift`; no schema, no `Sync/`):**
-  `createShelf(name:wingID:)` (end of the wing's strip) · `renameShelf` · `setShelfGlyph` (ONE
-  grapheme, no emoji presentation — §7; nil clears) · `deleteShelf` (tombstone only; books keep
-  their now-DANGLING pointer = unshelved, §19 — never touches a book) · `moveShelf(_:to:
-  InsertPosition)` (the shared `listPosition`, scoped by `wing_id`) · `setReadingShelf(_:shelf:)`
-  (live shelf in the reading's wing, or nil = unshelved; clears `shelf_position` — the book
-  arrives never-placed) · `placeReading(_:at: .top | .bottom | .before(id))` — "my order" over
-  ONE position sequence per shelf (placed by `(shelf_position, id)`, then never-placed A–Z), the
-  star never encoded (§20). All identity-level metadata: no-op guarded, no touch/churn.
-  `createReading` gains `shelfId:` (the context mint, §19.1/§24).
-- **Read side:** `Queries.shelves(db, wingID:)`; `bookshelf(db, wingID:)` adds the per-book
-  ARRIVAL count (one GROUP BY over `reading_post` alone — P1: the held observation must never
-  read `container`, which autosave rewrites whole); `bookcaseAggregates(db, wingID:)` ONE-SHOT
-  (refreshed on appearance/after acts, the `bookWordCounts` contract): last-edited per book
-  (DERIVED — §22's mechanism note, never a synced column) and each gathering's shown count.
-- **Brains:** core `Domain/BookcaseOrdering` (the A–Z comparator + the my-order sequence — ONE rule
-  the op and the board both read); app-shared `Shared/BookcaseBoard.swift` (order modes with the
-  starred float, the № census + its six solos, the sections for All/solo, shelf resolution with
-  dangling ⇒ unshelved). The phone's `ShelfOrder.ordered` is UNTOUCHED (the phone owes the move).
-- **Local memory (`BookcasePrefs`, `UserDefaults` injected — the R1-7 lesson):** order mode
-  (default A–Z), details (default shown), the № panel open/closed (default collapsed), the default
-  shelf per wing (nil = All), collapsed section headers.
-- **Faces:** masthead `Bookcase` + Today's Entry · + New Book (the counts line is gone — §23); ONE
-  strip line: All · shelves (glyph + name; ink+weight active; hover = count; drop target with the
-  hairline outline; drag to reorder; right-click Rename · Set Glyph · Make Default · Move to Start ·
-  Move to End · Delete) scrolling horizontally with a trailing edge fade, the pinned ⋯ (when
-  overflowed) opening the type-to-filter panel, `+ shelf`, clear air, then `№ · order ▾ · details`;
-  sections (unshelved at the TOP of All, then shelves in strip order; collapsible gray labels;
-  drop targets); rows (★ when starred, name, tags, meta = accent arrivals · counts · words ·
-  status words, hidden whole with details off); refusals toast and receipts take the quiet slot in
-  the bottom hint bar (rows 103/108).
+- **Core ops** — `Sources/VariorumCore/Operations/Operations+Shelf.swift` (F-U1-1: none existed):
+  `createShelf(name:wingID:)` (end of the wing's strip; blank refuses `invalidShelfName`; a dead wing
+  `wingNotFound`) · `renameShelf` · `setShelfGlyph` (`ShelfGlyph.normalize` — ONE grapheme, no emoji
+  presentation; refusal `invalidShelfGlyph`) · `deleteShelf` (tombstone ONLY — books keep their
+  dangling pointer = unshelved, §19) · `moveShelf(_:to: InsertPosition)` (the shared `listPosition`,
+  scope `wing_id`; another wing's anchor refuses) · `setReadingShelf(_:shelf:)` (shelf live + same
+  wing, else `shelfNotFound`; clears `shelf_position`; no-op writes nothing) · `placeReading(_:at:
+  .top|.bottom|.before(id))` (my order; `placementAnchorNotOnShelf` when the anchor is elsewhere).
+  All identity-level metadata (no touch/churn/`updated_at` on the reading; no undo entry — shelves
+  are not Trash objects, §18.3). `createReading` gained `shelfId:` (the context mint). Five
+  `OperationError` cases + their words in `Shared/OpsRefusalTable.swift` (platform-neutral).
+- **Core pure rules** — `Domain/BookcaseOrdering.swift`: Finder's A–Z (`nameAscending`), the
+  dangling-shelf resolution, the my-order SEQUENCE (placed by `(shelf_position,id)`, then
+  never-placed A–Z — the star never part of it, §20), and `placementWrites` (the whole placement
+  arithmetic incl. materializing the never-placed books ahead of a drop, and the equal-keys guard);
+  `ShelfGlyph` (the curated set + `normalize`).
+- **Core reads** — `Queries/ShelfQueries.swift`: `ShelfBook.arrivalCount` (defaulted);
+  `bookshelf(db, wingID:)` (nil = the phone's unchanged all-wings read) adds per-book arrival counts
+  from `reading_post` ALONE (`bookcaseArrivalCountsSQL`); `shelves(db, wingID:)`;
+  `bookcase(db, wingID:)` (the held snapshot); `bookcaseAggregates(db, wingID:)` (ONE-SHOT:
+  last-edited per reading — DERIVED, never a column — and each gathering's shown count).
+- **Shared brain** — `App/Variorum/Shared/BookcaseBoard.swift`: `BookcaseOrderMode` (A–Z default ·
+  last edited · my order), `BookcaseScope` (All / a shelf), `BookcaseSolo` (the six census solos +
+  their words), `BookcaseBoard` (effective scope, the CONTEXT MINT target, shelf resolution + hover
+  counts, the display order with STARRED FIRST under every mode, the census over the scope, the
+  sections: unshelved FIRST in All then shelves in strip order). The phone's `ShelfOrder.ordered` is
+  untouched.
+- **Mac feature** (`Features/Shelf/`): `ShelfViewModel` rebuilt (the held `Queries.bookcase` +
+  one-shot aggregates; view state; shelf/placement acts; speaks through `session.status` — refusals
+  toast, receipts take the quiet slot); `BookcasePrefs` (local memory, injected `UserDefaults`:
+  order, details, № open, collapsed headers, the default shelf per wing); `BookcaseStrip.swift`
+  (the strip — mode-row words, `+ shelf`, the trailing edge fade + pinned ⋯ panel with
+  type-to-filter, `№ · order ▾ · details`; `ShelfMenu`, the one shelf right-click builder; the census
+  panel; `BookcaseDragToken` + the `bookcaseDropSite` modifier); `ShelfGlyphSheet.swift`;
+  `ShelfView.swift` rebuilt (masthead `Bookcase`; sections with collapsible gray labels that are
+  drop targets; rows with ★, tags, the accent arrival count + `BookcaseRowMeta` facts hidden whole
+  with details off; the book menu gains Move to Shelf ▸ and my order's Send to Top / Bottom; row
+  107's shelf half; the hint bar's trailing end hosts `QuietReceiptLine` — rows 103/108).
+- **Registry** — ten acts (`Registry/Capability.swift`, `CapabilityRegistry.swift`):
+  `.newShelf` (surface) · `.renameShelf .setShelfGlyph .makeDefaultShelf .moveShelfToStart
+  .moveShelfToEnd .deleteShelf` (the strip's `contextMenuCapabilities`) · `.moveBookToShelf
+  .sendBookToTop .sendBookToBottom` (`ShelfView.contextMenuCapabilities`); the walk's union gained
+  two JUSTIFIED lines. View-local controls (solo, №, order, details, collapse) are not acts — the
+  Library `sort ▾` precedent.
+- **Renames** — the sidebar area `Bookcase`, `WorkspaceNaming` `.shelf` → "Bookcase", ⌘K "Go to
+  Bookcase". `.gitignore` gains `notes/plans/13id-screens/`.
 
-### EVIDENCE (named before the build; counts PENDING until run)
+### EVIDENCE (all run at the END; counts exact)
 
-- E1 core ops: state-transition pins for every shelf op and `createReading(shelfId:)` — PENDING
-- E2 core reads: snapshot/wing scope/arrival counts/aggregates pins — PENDING
-- E3 brains: order modes · starred float · census counts + solos · unshelved/dangling placement ·
-  sections (All vs solo) · within-shelf reorder arithmetic — PENDING
-- E4 VM: context mint (solo'd shelf vs All) · drop re-shelves · my-order drag/top/bottom · default
-  shelf open · receipts/refusals on the status seam — PENDING
-- E5 registry walk green with the new declarations — PENDING
-- E6 the tutorial spine (`TutorialWalkTests`) green at the END — PENDING
-- E7 core FULL suite (baseline 2008/213) + the named Mac suites + mobile generic build — PENDING
-- E8 screenshot walk ×4 into `notes/plans/13id-screens/u1/` — PENDING
-
-### PROVISIONALS (QUESTIONS-ready; numbered as they are taken)
-
-(none yet)
+- **Core FULL `swift test`: "Test run with 2027 tests in 216 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test). Baseline 2008/213 → **+19 tests / +3 suites, all
+  this unit's** (`BookcaseShelfTests.swift`: 11 op pins, 4 pure-rule pins, 4 read pins).
+- **The P1 pin is REVERT-VERIFIED:** `theHeldSnapshotsRegionIsBlindToAutosave` reads the tracked
+  region through GRDB's `willTrackRegion`; swapping in the natural `CROSS JOIN container` form of the
+  arrival count turned it RED (the region gained `container(archived_at,deleted_at,id)`, which a
+  whole-row autosave update hits) and the restore turned it green.
+- **Mac named suites (`test-without-building`, build `DerivedData/13id-u1`): "227 tests in 30 suites
+  passed"** — the two new Bookcase suites (13), ShelfModel, PromoteAndPalette, **CapabilityRegistry
+  (the registry walk)**, WorkspaceNaming, NavigationDoors, BindDoor, MembershipChoice, SpawnAndBindLimb,
+  BookOrderConversion, BookDeleteAndDuplicate, the five Star suites, QuickEntryBar, RuleEditor, and
+  **all eleven `TutorialWalkTests` suites (the tutorial spine)**; then **"34 tests in 7 suites
+  passed"** (DuplicateBookNameDoor, CalloutSwatch, CalloutEmojiPicker, BookAscentDeclaration,
+  GatheringRuleGate, PoolTuckFace, TimelineAndReadings). Zero skipped.
+- **Mobile:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED**; the phone's shelf and
+  star suites on the iPhone 17 simulator **"58 tests in 9 suites passed"** (MobileShelfLayoutBrain,
+  MobileShelfRenderedLayout, MobileShell, MobileBookPin/Create/Details/NameGuard, MobileStars,
+  MobileShelfTodayDoor) — the phone untouched in behaviour.
+- **Honest test edits (subject changed by ruling, no assertion weakened):** `ShelfModelTests.
+  orderingIsPinsThenJournalsThenRestByName` → `orderingIsStarredFirstThenAToZ` (the Mac's order is
+  §24's now; R38's rule stays the phone's, pinned by the mobile suites) · `WorkspaceNamingTests`'
+  `.shelf` label "Shelf" → "Bookcase" (§7) · the registry walk's two new renderer lines.
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug`, pid-guarded, her app absent throughout;
+  23 captures in `notes/plans/13id-screens/u1/`, gitignored): **Terminal light** — 01 All with
+  unshelved collapsed (Welcome · The Work stacked in strip order) · 02 № open · 03 solo "owned"
+  (shelves fold away, № in ink+weight) · 04 solo Welcome · 05 my order + Send to Top · 06 the book
+  menu in my order (Move to Shelf ▸ · Send to Top/Bottom) · 07 the STARRED float (Sherlock above the
+  book sent to top — and ABSENT from the sidebar's Starred list: F-U1-2's evidence) · 08 details off
+  · 09 the shelf menu (Move to End hidden on the last shelf) · 10 Set Glyph (the curated seven at
+  strip size) · 11 overflow: the trailing fade + pinned ⋯ · 12 the ⋯ panel filtering "es" · 13 the
+  delete confirm · 14 deleted, the quiet receipt in the hint bar's trailing end (row 108: nothing
+  over the ⌘K hint) · 15–16 the CONTEXT MINT ("It lands on “Welcome”…" → landed there, at the end
+  of my order); **Terminal dark** 01 All · 02 solo Welcome + census in scope (zero rows inert);
+  **Study dark** 01 solo + census · 02 All; **Study light** 01 All · 02 census · 03 relaunched SOLO
+  on the Make-Default shelf. Menu roads walked for real: Move to Shelf ▸ ×5 (receipts "Moved … to
+  Welcome."), Send to Top, Pin, Set Glyph, Delete Shelf, + shelf ×7, Make Default, the three order
+  modes. The dev store keeps the walk's shelves (Welcome, ☾ The Work, correspondence, research, later
+  essays, translations) for the orchestrator's walk; her dev voice (Terminal), appearance (system)
+  and the local prefs (A–Z, details on, № closed, no default) were restored.
 
 ### FINDINGS (for the orchestrator)
 
 - **F-U1-1 — the shelf ops did not exist.** The brief names "the shelf ops shipped at 13i-a"; only
-  the `shelf` table, the four `reading` columns, the `Shelf` record and the R5 Welcome keeper
-  shipped. U1 builds the ops (core `Operations`, zero schema, zero `Sync/`).
-- **F-U1-2 — STOPPED: starred-absorbs-pins is still TWO stores.** (Proposal written below at the
-  thread's stop.)
+  the `shelf` table, the four `reading` columns, the `Shelf` record and the R5 Welcome keeper had
+  shipped. U1 built them in core `Operations` (zero schema, zero `Sync/`).
+- **F-U1-2 — STOPPED: starred-absorbs-pins is still TWO stores.** *Today:* a book's 13f STAR is the
+  synced `starred` setting list (notes AND books; the sidebar's Starred section; star-time order;
+  cap 15); 13i-a's `reading.starred` column ("the one star (absorbs the old pin list)" — AppSpec §7,
+  the model's own doc says it "joins the upper-left Starred section") is written only by
+  `setShelfPinned` — the Mac's and the phone's "Pin to Shelf Top", and the daily-Journal and
+  Quicknotes mints. They never meet (capture 07: pinned Sherlock floats, absent from Starred). §7
+  rules ONE mechanism. **Proposal (A, recommended):** ONE truth read as the union — a reading is
+  starred iff `reading.starred = 1` OR its key is in the list; `setStarred(.reading)` writes BOTH in
+  one transaction (the list keeps star-time order and the cap; the column floats) and un-star clears
+  both; `setShelfPinned` routes through the same write; `Queries.starred` lists the list's entries
+  in star order, then column-only starred books A–Z (so the 13i-a-migrated pins finally appear in
+  the Starred section — §7's "pinned books become starred", visible); `Queries.shelfPins` reads the
+  union; the cap counts the union. Faces: the Mac row's ONE door "Star/Unstar" (Pin retires on the
+  Mac; the phone keeps its words until its catch-up but writes the same truth). Zero schema, zero
+  `Sync/`. **Its one visible consequence to confirm with her:** the daily Journal and Quicknotes
+  (pinned at mint) would appear in her sidebar's Starred section. *(B)* column-only truth for books
+  (the list keeps notes; books lose star-time order in the section). *(C)* face-only composition
+  (two writes from the Mac door; the sidebar's un-star still clears only the list — divergence
+  persists; not recommended). A continuation can build (A) in ~an hour against the pins named above
+  (`StarDoorTests`, `StarredScroll*`, core `StarsTests`/`ShelfPinsSelfHealTests`, the phone's
+  `MobileStarsTests`/`MobileBookPinTests` must be re-read, not just re-run).
+- **F-U1-3 — no Welcome shelf exists in any store.** Nothing mints one (`role='welcome'`); the board
+  shows All + `+ shelf` until U7's seeder mints Welcome (with the marker the R5 keeper keys on) and
+  places the seeded books on it. U1 built nothing that assumes it.
+- **F-U1-4 — synthetic drags never COMMIT a SwiftUI drop here.** Walked: a CGEvent left-drag
+  (`down · dragged×N · up`) starts the session — the row's image follows the pointer (captured) —
+  but no drop target lights and nothing lands; a first build on a hand-registered `NSItemProvider`
+  failed the same way, so the board now rides the app's proven `Transferable` road
+  (`BookcaseDragToken`, the `OpenNoteDragToken` shape). This is 13b's N20 class (closed there only
+  by her hand). The drop HANDLERS are pinned (`reshelve`, `dropBook` across shelves,
+  `moveShelf(before:)`) and every drag has a walked menu twin; **the drags themselves are owed a
+  human hand** — the orchestrator's walk or her combined walk.
+- **F-U1-5 — the field guide's prose names SHELF** ("SHELF is home", "right-click the book on the
+  shelf ▸ Length & Extent…") — stale after the rename; U6's sweep/U7's chapter own the prose and the
+  re-seed. No tutorial pin asserts it (the spine is green).
+- **F-U1-6 — U6's "the row meta's smart" item is pre-empted:** the rebuilt meta speaks the ruled
+  words (gathering · living · finished · sealed · owned). "Create Smart Book…" and the New Book
+  prompt's "smart book" sentence are left for U6 untouched.
+- **F-U1-7 — for U4:** the board's arrival count counts ARCHIVED waiters (P-13id-U1-8) while the
+  Arrivals line still filters them until U4 flips it — the two agree once U4 lands.
+- **F-U1-8 — for U3:** row 107's SHELF-menu half is done (a gathering's Finish and Length & Extent
+  leave its menu); the settings-sheet half and the ops' refusal arm are U3's; the filter lives in
+  `ShelfView.bookMenu` with a pointer, so U3 can fold it into `BookStateDoorSet` when it rules.
+- **KnownIssues:** row 108 is RESOLVED by the rebuild (the overlay is gone — receipts take the
+  quiet slot at the hint bar's trailing end, refusals toast); row 103's BOOKCASE half and row 107's
+  SHELF-MENU half are delivered (annotated on the rows; the closeout removes/re-owns).
+- **MOBILE PARITY (record only — nothing built):** the phone owes the whole board — shelves as a
+  list (the strip's list form, §18.5), the three orders + starred float (adopt `BookcaseBoard`), the
+  census solos, details, the context mint (`createReading(shelfId:)`), re-shelve / Move to Shelf and
+  my-order placement (the core ops are ready), the arrival count on rows, the default shelf, Set
+  Glyph; and F-U1-2's single star once ruled.
+
+### PROVISIONALS (QUESTIONS #170 carries them for her bundle)
+
+- **P-13id-U1-1** — Make Default is LOCAL (per device, per wing) beside the other remembered board
+  preferences; with no default chosen the Bookcase opens on ALL (the fresh-store mockup; Welcome
+  holds only seeded content). Options: (a) BUILT · (b) a synced setting · (c) the first shelf.
+- **P-13id-U1-2** — my order: never-placed books read A–Z after every placed one; re-shelving clears
+  the hand position (it arrives at the end there); a drop before a never-placed book materializes the
+  ones ahead of it. (a) BUILT · (b) keep the old key · (c) every mint writes an explicit end key.
+- **P-13id-U1-3** — a glyph is one grapheme, refused when emoji-presented (any default-emoji scalar
+  or U+FE0F); letters and text symbols are fine. The legibility pass kept all seven curated glyphs
+  (each renders at strip size in both voices; the hieroglyphs through the system's fallback face).
+- **P-13id-U1-4** — Delete Shelf asks first, naming how many books return to Unshelved (no Trash, no
+  undo — the confirm is the one net). (a) BUILT · (b) no confirm · (c) an undo entry.
+- **P-13id-U1-5** — "last edited" = the newest of a book's live, un-archived members' stamps
+  (`COALESCE(last_touched_at, created_at)`), a gathering's over what it shows; a reading with no
+  notes sorts by its own birth; newest first.
+- **P-13id-U1-6** — the № census counts what is in SCOPE (a solo'd shelf's census counts that
+  shelf); zero rows are faint and inert; one solo at a time, session-only (a look, not a
+  preference); the № wears ink + weight while a solo is in force; the panel opens IN FLOW under the
+  strip (mockup v5), its open/closed remembered; hovering the collapsed № lists every count.
+- **P-13id-U1-7** — the Bookcase reads ONE wing (Home) — books and shelves; U5 wires the switcher.
+- **P-13id-U1-8** — the row's arrival count reads `reading_post` alone (P1) and so counts archived
+  waiters — U4's ruled truth.
+- **P-13id-U1-9** — a gathering's shelf menu: Finish and Length & Extent leave; Reopen stays only on
+  a (legacy) finished gathering, as its way out. U3 rules the ops' arm.
+- **P-13id-U1-10** — the row meta reads `[accent arrivals] · notes · ch · words|progress · cap ·
+  gathering|living · finished|sealed · owned`; a finished book's NAME no longer wears the accent and
+  ✓ (status lives in the meta, so details-off chrome is truly clean, §23).
+- **P-13id-U1-11** — All draws every shelf's header even when empty (a new shelf must be findable),
+  with no hint row; a solo'd empty shelf says "Nothing on this shelf yet — drag a book onto its
+  name."; Unshelved draws only when it holds something.
+- **P-13id-U1-12** — a book dropped on a ROW in my order lands right above it (re-shelving first when
+  the row is on another shelf); outside my order rows take notes only; headers and strip names take
+  a book in every order (re-shelve).
+- **P-13id-U1-13** — receipts: making, deleting and re-shelving speak one (quiet slot); rename, glyph,
+  moving a shelf and placing a book are silent (the visible change is the answer).
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -381,7 +510,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 
 | # | item | status |
 |---|---|---|
-| 1 | U1 — the Bookcase board | IN-PROGRESS (the U1 RECORD's LIVE STATUS) |
+| 1 | U1 — the Bookcase board | BUILT + WALKED (the U1 RECORD) — one thread STOPPED for the architect (F-U1-2) |
 | 2 | U2 — the Book Panel | NOT-STARTED |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face | NOT-STARTED |
 | 4 | U4 — archived members in books | NOT-STARTED |

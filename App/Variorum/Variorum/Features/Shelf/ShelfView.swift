@@ -363,7 +363,9 @@ struct ShelfView: View {
                     shelfRow(book)
                     Divider().overlay(tokens.line.opacity(0.6))
                 }
-                if section.books.isEmpty, model.solo == nil, !(isAll && model.books.isEmpty) {
+                // The hint is a SOLO'd shelf's; in All an empty shelf is its
+                // header alone (four hints in a row read as noise — the walk).
+                if section.books.isEmpty, model.solo == nil, !isAll {
                     Text(tokens.chromeLabel(
                         "Nothing on this shelf yet — drag a book onto its name."))
                         .font(tokens.small)
