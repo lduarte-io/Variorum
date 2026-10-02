@@ -526,7 +526,14 @@ row is built, pinned and walked below.
 
 ## U2 RECORD — THE UNION STAR (ACT 0) + THE BOOK PANEL (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — filled at the close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **the Book Panel's DRAGS are pinned at
+the plan and op layers and NOT walked** — synthetic drags never commit a SwiftUI drop (F-U1-4's class);
+every drag's menu twin IS walked (F-U2-4 — the drags join her combined walk). (2) **The phone is
+untouched** (record only): its tutorial seeder's pin now meets the star cap (F-U2-1) and it owes the
+Book Panel (F-U2-5). (3) **The masthead's tag cards still load once** (F-U2-2 — row 104's class on a
+different surface; KnownIssues row 112, routed, not fixed here). (4) **The book view's own structure
+doors stay undeclared** (F-U2-3). Everything in the U2 brief — ACT 0 as ruled, the Book Panel per the
+ledger row, KnownIssues row 104 — is built, pinned and walked below.
 
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
@@ -538,9 +545,9 @@ row is built, pinned and walked below.
 | 4 | Row 104 — the membership OBSERVATION (`NoteMembershipModel`, the shared home), the chip consumes it; the seat-while-open pin red-on-old | DONE (2a90bae8) — `anIntakeSeatWhileTheNoteIsOpenShowsWithoutAReopen` RED on the extracted one-shot shape (5461fb76, the WIP checkpoint), green after; the chip mount + ascent + remove suites 30/4 green |
 | 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | DONE (10e5b89c) |
 | 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | DONE (fd13e9bb) — `BookPanelTests` 15/3 + the registry walk 28 green; a combined behavioural revert (drops ignoring the order · the click-through on the wrong road · the refusal without its words · the door drawn unmembered) turned 5 pins red as predicted, restored |
-| 7 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; mobile star/pin suites) | NOT-STARTED |
+| 7 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; mobile star/pin suites) | DONE — counts in EVIDENCE (core 2036/217 · Mac 360/54 · phone 115/19) |
 | 8 | The screenshot walk ×4 into `notes/plans/13id-screens/u2/` | DONE — 19 captures, four combinations (listed in EVIDENCE) |
-| 9 | Record close · QUESTIONS #171 · KnownIssues rows 104 (resolved) / 13 (the class grows) | NOT-STARTED |
+| 9 | Record close · QUESTIONS #171 · KnownIssues rows 104 (resolved) / 13 (the class grows) | DONE (this commit; #171 and row 112 at d8243b21) |
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked)
 
@@ -634,9 +641,32 @@ row is built, pinned and walked below.
   the click-through broadcast AND the mounted RootView landing) green; a combined behavioural revert
   (drops ignoring the order · the click-through on `.variorumOpenPost` · the refusal as a raw dump ·
   the door drawn unmembered) turned **5 pins red** as predicted, restored.
-- **Core FULL `swift test`:** PENDING.
-- **Mac named suites** (build `DerivedData/13id-u2`, `test-without-building`): PENDING.
-- **Mobile:** PENDING.
+- **Core FULL `swift test`: "Test run with 2036 tests in 217 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test). Baseline 2027/216 → **+9 tests / +1 suite, all this
+  unit's** (`UnionStarTests`).
+- **Mac named suites** (build `DerivedData/13id-u2`, `test-without-building`): **"360 tests in 54
+  suites passed"** — 7 skipped, all in `DebugOracleSingletonWindowTests` (its standing opt-in env
+  gate). The 54: the three BookPanel suites + `NoteMembershipObservationTests` (this unit's: 17
+  tests), **`CapabilityRegistryTests` (the registry walk)**, the Bookcase/Shelf/Star/Starred suites
+  (`BookcaseBoardBrainTests`, `BookcaseViewModelTests`, `ShelfModelTests`, `PromoteAndPaletteTests`,
+  `StarTargetingTests`, `StarDeclarationTests`, `StarActingTests`, `StarredScrollLayoutTests`,
+  `StarredScrollMountTests`, `StarredGatheringSeederTests`), the chip/membership/ascent family
+  (`MembershipChoiceTests`, `RemoveReleaseDoorTests`, `AscentDoorTests`, `AscentRoutingTests`,
+  `BookChooserOrderTests`, `ContextBarTests`, `DivergeDoorTests`, `MultiBookEditNote*`,
+  `OwnershipBadgeTests`, `BindDoorTests`, `SpawnAndBindLimbTests`), the note detail's inspector family
+  (`TrayPanelMoveTests`, `NoteTrayTests`, `BlockHistoryHostTests`, `PostDetailModeMemoryTests`,
+  `PostDetailRoutingTests`, `DebugOracleOwnershipTests`), the U1 list's remainder
+  (`WorkspaceNamingTests`, `NavigationDoorsTests`, `NavigationHistoryTests`, `BookOrderConversionTests`,
+  `BookDeleteAndDuplicateTests`, `QuickEntryBarTests`, `RuleEditorTests`, `NoteBox*`), and **all
+  eleven `Tutorial*` suites (the tutorial spine)**.
+- **Mobile** (`VariorumMobile`, iPhone 17 simulator, `DerivedData/13id-u2-mobile`): TEST BUILD
+  SUCCEEDED; **"115 tests in 19 suites passed"** with 2 KNOWN issues (`withKnownIssue` in
+  `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` — the standing KnownIssues row
+  49, the phone tutorial's retired duplicate-divide lesson; not this unit's). The 19: `MobileStarsTests`,
+  `MobileBookPinTests` (the two the brief named — green AS WRITTEN under the union), `MobileBookCreate`/
+  `Details`/`NameGuard`, `MobileShelfLayoutBrain`/`RenderedLayout`, `MobileShelfTodayDoor`,
+  `MobileShell`, `MobileStarterJournal`, `MobileDeletion`, `MobileEmptyStore`, `MobilePocketGuidePrivacy`
+  and the six `MobileTutorial*` suites (the seeder's pin through the union, under the cap).
 - **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug`, pid-guarded per step, her app absent
   throughout; 19 captures in `notes/plans/13id-screens/u2/`, gitignored): **Terminal light** — 01 the
   Starred section listing journal · quicknotes · Sherlock (column-only stars, after the list's own —
@@ -751,7 +781,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | # | item | status |
 |---|---|---|
 | 1 | U1 — the Bookcase board | **DONE** (adjudicated 2026-10-02; F-U1-2 RULED (A) + R-13id-5, its build = U2 ACT 0; the orchestrator's composed walk at the bank seam; the drags on her combined walk) |
-| 2 | U2 — the Book Panel (+ ACT 0: the union star) | IN FLIGHT (spawned 2026-10-02) |
+| 2 | U2 — the Book Panel (+ ACT 0: the union star) | BUILT — record closed 2026-10-02 (core 2036/217 · Mac 360/54 · phone 115/19; 19-capture walk ×4); awaiting the architect's adjudication (F-U2-1…6, #171) |
 | 3 | U3 — the Collecting doors + grouped-by + filter-bar face | NOT-STARTED |
 | 4 | U4 — archived members in books | NOT-STARTED |
 | 5 | LADDER A (U1–U4) | PENDING BANK 1 |
