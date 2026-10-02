@@ -172,10 +172,26 @@ struct SmartConversionTests {
         }
     }
 
+    /// 13i-d U4 ACT 0 (F-U3-1, the (c) arm RULED): the ops refuse a
+    /// gathering's finish and non-nil extents now, so the LEGACY gathering
+    /// these conversion pins start from (a pre-13i-d store, or another
+    /// device's synced row) is staged as the raw row it is — the fixture
+    /// moved, never an assertion.
+    private func stageLegacy(
+        _ db: AppDatabase, _ id: String,
+        locked: Bool = false, maxPosts: Int? = nil, wordTarget: Int? = nil
+    ) throws {
+        try db.write { db in
+            try db.execute(
+                sql: "UPDATE reading SET locked = ?, max_posts = ?, word_target = ? WHERE id = ?",
+                arguments: [locked ? 1 : 0, maxPosts, wordTarget, id])
+        }
+    }
+
     @Test func theCapIsHonoredSoTheBookIsNeverBornOverItsOwnCapacity() throws {
         try withOperations { ops, db in
             let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 4)
-            try ops.setReadingMaxPosts(reading.id, maxPosts: 2)
+            try stageLegacy(db, reading.id, maxPosts: 2)
             let shown = try db.read {
                 try Queries.assembleReading($0, readingID: reading.id)
             }
@@ -196,8 +212,7 @@ struct SmartConversionTests {
     @Test func extentsAndFinishRideTheConvertedRowUntouched() throws {
         try withOperations { ops, db in
             let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 1)
-            try ops.setReadingMaxPosts(reading.id, maxPosts: 9)
-            try ops.setReadingWordTarget(reading.id, wordTarget: 5_000)
+            try stageLegacy(db, reading.id, maxPosts: 9, wordTarget: 5_000)
 
             try ops.convertSmartReadingToCurated(reading.id)
 
@@ -240,7 +255,7 @@ struct SmartConversionTests {
     @Test func aFinishedBookRefusesAndWritesNothing() throws {
         try withOperations { ops, db in
             let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 2)
-            try ops.lockReading(reading.id)
+            try stageLegacy(db, reading.id, locked: true)
 
             #expect(throws: OperationError.self) {
                 try ops.convertSmartReadingToCurated(reading.id)
