@@ -51,11 +51,22 @@ nonisolated enum HideOwnedChoice: Equatable, Sendable, CaseIterable {
     }
 }
 
-/// One Collecting sentence: a muted label and her words (tag paths are her
-/// vocabulary — the face never `chromeLabel`s the value).
+/// One Collecting sentence: a muted label and its value. A value that is
+/// HER vocabulary (the rule read aloud — tag paths; the outflow's paths) is
+/// never `chromeLabel`'d; a value in the APP's words ("join quietly at the
+/// end", "nothing by itself") is voiced like any chrome word (`appWords` —
+/// the U3 walk's W-3: "wait at Arrivals" stood capitalised beside lowercased
+/// Terminal labels).
 nonisolated struct CollectingLine: Equatable, Sendable {
     let label: String
     let value: String
+    var appWords: Bool
+
+    init(label: String, value: String, appWords: Bool = false) {
+        self.label = label
+        self.value = value
+        self.appWords = appWords
+    }
 }
 
 /// Every word the Collecting section says. Wording PROVISIONAL (13s
@@ -108,10 +119,10 @@ nonisolated enum CollectingCopy {
             return CollectingLine(label: gathersFromLabel, value: ruleWords(term, paths: paths))
         case .none:
             return isBook
-                ? CollectingLine(label: gathersFromLabel, value: nothingByItself)
+                ? CollectingLine(label: gathersFromLabel, value: nothingByItself, appWords: true)
                 : CollectingLine(label: "", value: RuleEditorCopy.noRuleGathering)
         case .malformed:
-            return CollectingLine(label: gathersFromLabel, value: unreadableRule)
+            return CollectingLine(label: gathersFromLabel, value: unreadableRule, appWords: true)
         }
     }
 
@@ -120,7 +131,8 @@ nonisolated enum CollectingCopy {
     static func newMatches(_ seating: IntakeSeating?) -> CollectingLine {
         CollectingLine(
             label: RuleEditorCopy.joinLabel,
-            value: seating == .arrivals ? RuleEditorCopy.joinArrivals : RuleEditorCopy.joinAuto)
+            value: seating == .arrivals ? RuleEditorCopy.joinArrivals : RuleEditorCopy.joinAuto,
+            appWords: true)
     }
 
     /// "Notes written here are tagged: #a #b / nothing".
@@ -129,7 +141,8 @@ nonisolated enum CollectingCopy {
             label: RuleEditorCopy.autoTagLabel,
             value: ids.isEmpty
                 ? taggedNothing
-                : ids.map { RuleEditorCopy.tag(path: paths[$0]) }.joined(separator: " "))
+                : ids.map { RuleEditorCopy.tag(path: paths[$0]) }.joined(separator: " "),
+            appWords: ids.isEmpty)
     }
 
     /// The Collecting sentences for one reading, in the order they draw.
@@ -333,8 +346,9 @@ struct BookSettingsSheet: View {
                     .lineLimit(1)
                     .fixedSize()
             }
-            // Her vocabulary (tag paths) — never `chromeLabel`'d.
-            Text(line.value)
+            // Her vocabulary (tag paths) — never `chromeLabel`'d; the app's
+            // own words are voiced (W-3).
+            Text(line.appWords ? tokens.chromeLabel(line.value) : line.value)
                 .font(tokens.small)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(3)
@@ -350,20 +364,27 @@ struct BookSettingsSheet: View {
             sentence(line)
         }
         if reading.kind == .gathering {
-            HStack(spacing: 6) {
+            // The label on its own line and the three chips under it (W-2,
+            // the U3 walk: on one line at the sheet's width the chips
+            // truncated to "as the a…" / "show th…").
+            VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel(CollectingCopy.hideOwnedLabel))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
                     .fixedSize()
-                ForEach(HideOwnedChoice.allCases, id: \.self) { choice in
-                    VoicedChip(
-                        tokens: tokens,
-                        text: CollectingCopy.hideOwnedWord(
-                            choice, defaultHides: model.hideOwnedDefault),
-                        on: HideOwnedChoice(stored: reading.hideOwned) == choice,
-                        action: { Task { await model.setHideOwned(choice) } }, lines: 1)
+                HStack(spacing: 6) {
+                    ForEach(HideOwnedChoice.allCases, id: \.self) { choice in
+                        VoicedChip(
+                            tokens: tokens,
+                            text: CollectingCopy.hideOwnedWord(
+                                choice, defaultHides: model.hideOwnedDefault),
+                            on: HideOwnedChoice(stored: reading.hideOwned) == choice,
+                            action: { Task { await model.setHideOwned(choice) } }, lines: 1)
+                            .fixedSize()
+                    }
                 }
+                .padding(.leading, 12)
             }
         }
         Button(tokens.chromeLabel(CollectingCopy.editDoor)) {

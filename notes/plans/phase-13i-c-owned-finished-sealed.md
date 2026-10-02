@@ -738,6 +738,30 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   sheet's event-blocking is AppKit's, not the test host's) — the walk's before/after captures are its
   evidence; the model pin reads `makeRuleEditor()`. Settings · state doors · the registry walk 46/3
   green after it.
+  **W-2 + W-3 FOUND AND FIXED (commit "13i-c U3 walk fixes W-2 W-3"):** W-2 — the gathering's
+  hide-owned chips TRUNCATED on one line at the sheet's width ("as the a…" · "show th…"; capture
+  u3-25) → the label on its own line, the chips under it, each `fixedSize`. W-3 — app-word values
+  ("wait at Arrivals", "nothing", "nothing by itself") stood unvoiced beside Terminal's lowercased
+  labels → `CollectingLine.appWords` voices them; her paths stay un-voiced (pinned both ways).
+  BookSettingsSheet + BookStateDoors 18/2 green (that run had MY dev instance alive — a quit refused
+  while its sheet was up; recorded; the suites re-run at the close on a zero-instance window).
+  **Walked so far (Terminal · light), each a capture:** the book sheet's Collecting sentences
+  (u3-01) → Edit… opens the editor (u3-02, before W-1; after W-1 over the book) → the chooser's menu
+  (u3-03) → two tags chosen in her order (u3-04) → the sentence updates + the offer (u3-05, blocked —
+  W-1) → removal (u3-06) → the offer on an unblocked window (u3-07) → Tag Them LANDED (u3-08: the
+  note wears #again #u3walk) → an arrival waiting (u3-09) → Finish asks with §24's one line (u3-10)
+  → finished, the arrival dismissed (u3-11) → Reopen acted at once → Seal… lists the forks (u3-12,
+  cancelled) → Own Its Notes… lists the copies (u3-13) → owned (u3-14) → Seal on the owned book:
+  "It owns its notes, so nothing needs copying." (u3-15) → sealed: Finished disabled with the sealed
+  words, Unseal, no Reopen (u3-16) → Unseal says it reopens (u3-17) → open again (u3-18) → Stop Owning
+  acted (u3-19) → the shelf menu's state doors on a book (u3-20) and Finish only on a gathering
+  (u3-21) → the spawn sheet prefilled (u3-22) → edited (u3-23) → the book made with her set (u3-24) →
+  the gathering's settings + hide-owned (u3-25 truncated, u3-26 set) → the gate's refusal + the
+  delete offer (u3-27) → the delete confirm (u3-28, cancelled) → Create Smart Book… → the mint sheet
+  gated (u3-29) → enabled (u3-30) → minted (u3-31). **U1's held walk folded in:** the Trash holds NO
+  swept gathering (u3-32/33 — the dev store had none rule-less, F-U1-4 answered for it); the carried
+  outflow reads "notes written here are tagged: #spawn13ib" on `refresh walk (book)`, a 13i-b single
+  auto-tag carried by v1_20. PENDING: the fixed gathering sheet re-captured; Study and dark captures.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).
 
 ## §8 ENVIRONMENT TRAPS`,

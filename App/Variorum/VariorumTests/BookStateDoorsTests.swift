@@ -355,7 +355,7 @@ struct BookSettingsSheetTests {
     @Test func theCollectingSentencesPerKindAndState() {
         let paths = ["a": "work", "b": "essay"]
         #expect(CollectingCopy.gathersFrom(.none, isBook: true, paths: paths)
-                == CollectingLine(label: "Gathers from:", value: "nothing by itself"))
+                == CollectingLine(label: "Gathers from:", value: "nothing by itself", appWords: true))
         #expect(CollectingCopy.gathersFrom(.none, isBook: false, paths: paths)
                 == CollectingLine(label: "", value: RuleEditorCopy.noRuleGathering))
         #expect(CollectingCopy.gathersFrom(.malformed, isBook: true, paths: paths).value
@@ -363,8 +363,11 @@ struct BookSettingsSheetTests {
         #expect(CollectingCopy.newMatches(nil).value == RuleEditorCopy.joinAuto)
         #expect(CollectingCopy.newMatches(.arrivals).value == RuleEditorCopy.joinArrivals)
         #expect(CollectingCopy.taggedHere(["a", "b"], paths: paths)
-                == CollectingLine(label: "Notes written here are tagged:", value: "#work #essay"))
+                == CollectingLine(label: "Notes written here are tagged:", value: "#work #essay"),
+                "her paths — never voiced")
         #expect(CollectingCopy.taggedHere([], paths: paths).value == "nothing")
+        #expect(CollectingCopy.taggedHere([], paths: paths).appWords, "the app's word — voiced")
+        #expect(CollectingCopy.newMatches(nil).appWords)
         #expect(CollectingCopy.hideOwnedWord(.followDefault, defaultHides: false)
                 == "as the app does (shown)")
         #expect(CollectingCopy.hideOwnedWord(.followDefault, defaultHides: true)
@@ -404,7 +407,7 @@ struct BookSettingsSheetTests {
                 #expect(drawn.title == "Book Settings")
                 #expect(drawn.collecting == [
                     CollectingLine(label: "Gathers from:", value: "#work"),
-                    CollectingLine(label: "New matches:", value: "wait at Arrivals"),
+                    CollectingLine(label: "New matches:", value: "wait at Arrivals", appWords: true),
                     CollectingLine(label: "Notes written here are tagged:", value: "#work #essay"),
                 ])
                 #expect(drawn.hideOwned.isEmpty, "a book never renders the hide-owned row")
