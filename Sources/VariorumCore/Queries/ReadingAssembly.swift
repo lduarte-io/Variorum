@@ -301,15 +301,7 @@ extension Queries {
         let sectionSelect: String
         var arguments: [(any DatabaseValueConvertible)?] = []
         if let rootID = groupingRootID {
-            sectionSelect = """
-                (SELECT MIN(child.path)
-                   FROM tag child
-                   JOIN post_tag pt ON pt.post_id = c.id AND pt.deleted_at IS NULL
-                   JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
-                  WHERE child.parent_id = ? AND child.deleted_at IS NULL
-                    AND (applied.path = child.path
-                         OR substr(applied.path, 1, length(child.path) + 1) = child.path || '/'))
-                """
+            sectionSelect = tagFamilySectionSelect(postID: "c.id")
             arguments.append(rootID)
         } else {
             sectionSelect = "NULL"
@@ -439,6 +431,75 @@ extension Queries {
                     sectionID: row["section_id"],
                     createdAt: row["created_at"])
             }
+    }
+
+    /// **THE TAG-FAMILY SECTION RULE — one SQL fragment, two readers** (13i-d
+    /// U3 extracted it, byte-identical, from the grouping-tag arm above): the
+    /// path of the IMMEDIATE CHILD of the family root (`?`, bound by the
+    /// caller) whose subtree holds a tag applied to the post named by
+    /// `postID` — the lexically smallest such child when several match, so a
+    /// note lands under exactly ONE heading. Read by `assembleReading`'s
+    /// stored grouping tag and by `tagFamilySections` (the Index's view-local
+    /// grouped-by control), so the two can never disagree about where a note
+    /// sits.
+    static func tagFamilySectionSelect(postID: String) -> String {
+        """
+        (SELECT MIN(child.path)
+           FROM tag child
+           JOIN post_tag pt ON pt.post_id = \(postID) AND pt.deleted_at IS NULL
+           JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
+          WHERE child.parent_id = ? AND child.deleted_at IS NULL
+            AND (applied.path = child.path
+                 OR substr(applied.path, 1, length(child.path) + 1) = child.path || '/'))
+        """
+    }
+
+    /// **Where each note sits under a tag family** (13i-d U3 — the sitting
+    /// record §3/§17(f): the book Index's grouped-by control, a VIEW-LOCAL
+    /// grouped DISPLAY — never a `reading_section` row, never a write). For
+    /// each of `postIDs`, the family child it files under
+    /// (`tagFamilySectionSelect`'s rule); a note under no child is absent.
+    ///
+    /// P1: ONE statement, the id list driving through `json_each` — ∝ the ids
+    /// handed in (the Index's window), never the corpus — and it reads
+    /// `post_tag` and `tag` ONLY (no `container`), so a HELD observation of it
+    /// never wakes on a keystroke's autosave (pinned by region).
+    public static func tagFamilySections(
+        _ db: Database, rootID: String, postIDs: [String]
+    ) throws -> [String: String] {
+        guard !postIDs.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(postIDs), as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT j.value AS post_id,
+                       \(tagFamilySectionSelect(postID: "j.value")) AS section_path
+                FROM json_each(?) j
+                """,
+            arguments: [rootID, json])
+        var result: [String: String] = [:]
+        for row in rows {
+            if let path: String = row["section_path"] { result[row["post_id"]] = path }
+        }
+        return result
+    }
+
+    /// **The live tags these notes wear** (13i-d U3 — the Index's grouped-by
+    /// families and the filter bar's tag menu read it): every live tag applied
+    /// to one of `postIDs`, by path. ∝ the ids handed in; `post_tag` + `tag`
+    /// only, like `tagFamilySections`.
+    public static func tagsWorn(_ db: Database, postIDs: [String]) throws -> [Tag] {
+        guard !postIDs.isEmpty else { return [] }
+        let json = String(decoding: try JSONEncoder().encode(postIDs), as: UTF8.self)
+        return try Tag.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT t.* FROM json_each(?) j
+                JOIN post_tag pt ON pt.post_id = j.value AND pt.deleted_at IS NULL
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                ORDER BY t.path, t.id
+                """,
+            arguments: [json])
     }
 
     /// The ids among `postIDs` the filter keeps (a capped reading's filter —

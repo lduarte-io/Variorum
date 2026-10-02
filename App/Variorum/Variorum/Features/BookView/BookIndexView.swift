@@ -395,6 +395,10 @@ struct BookIndexView<Masthead: View>: View {
     /// Show this note focused in OUTLINE (a navigation door in the row
     /// menu since the correction round — editing happens HERE now).
     let onEditInOutline: (String) -> Void
+    /// 13i-d U3 — the GROUPED-BY control's state (the masthead renders the
+    /// control; this view regroups by it). nil — a host with no control, every
+    /// pre-U3 pin — is the shipped look, exactly.
+    let grouping: BookIndexGroupingModel?
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -457,6 +461,7 @@ struct BookIndexView<Masthead: View>: View {
         arrivals: BookArrivalsModel? = nil,
         @ViewBuilder masthead: @escaping () -> Masthead,
         ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
+        grouping: BookIndexGroupingModel? = nil,
         onEditInOutline: @escaping (String) -> Void
     ) {
         self.session = session
@@ -465,6 +470,7 @@ struct BookIndexView<Masthead: View>: View {
         self.arrivals = arrivals
         self.masthead = masthead
         self.ownershipBadge = ownershipBadge
+        self.grouping = grouping
         self.onEditInOutline = onEditInOutline
         _edit = State(initialValue: BookIndexEditModel(session: session))
     }
@@ -478,10 +484,52 @@ struct BookIndexView<Masthead: View>: View {
         ThemeStore.editingIndicator(of: themeStore)
     }
 
-    private var groups: [BookIndexColumn.Group] {
+    /// The shipped look (pre-U3, unchanged): chapters where the book has
+    /// them, else the stored grouping tag's runs, else flat.
+    private var shippedGroups: [BookIndexColumn.Group] {
         structure.chaptersActive
             ? BookIndexColumn.groups(chapters: structure.grouped(entries: model.entries))
             : BookIndexColumn.groups(flat: model.entries)
+    }
+
+    /// **What the Index groups by** (13i-d U3): the grouped-by choice,
+    /// resolved — the column AND the pane read this one list, so the two can
+    /// never disagree and every row keeps its anchor.
+    private var groups: [BookIndexColumn.Group] {
+        // Never chosen ⇒ the shipped look, reading NOTHING of the held read
+        // (its deliveries then never re-render this view — the landing
+        // families' fixtures see exactly the pre-U3 passes).
+        guard let grouping, let choice = grouping.choice, let reading = structure.reading
+        else { return shippedGroups }
+        switch BookIndexGroupingBrain.resolve(
+            choice: choice, chaptersActive: structure.chaptersActive,
+            live: grouping.live, wingID: reading.wingId)
+        {
+        case .shipped:
+            return shippedGroups
+        case .chapters:
+            return BookIndexColumn.groups(chapters: structure.grouped(entries: model.entries))
+        case .none:
+            return BookIndexGroupingBrain.flat(model.entries)
+        case .tagFamily(let family):
+            // Drawn only from THIS family's map: while the held read catches
+            // up after a switch, the shipped look stands (never a partition
+            // filed by another family's map).
+            guard grouping.sectionsRoot == family.id else { return shippedGroups }
+            return BookIndexGroupingBrain.groups(
+                entries: model.entries, sections: grouping.sections, family: family)
+        }
+    }
+
+    /// The held grouping read's key: the notes it files and the chosen
+    /// family (13i-d U3).
+    private struct GroupingTrackKey: Equatable {
+        var postIDs: [String]
+        var rootID: String?
+    }
+
+    private var groupingTrackKey: GroupingTrackKey {
+        GroupingTrackKey(postIDs: model.entries.map(\.postID), rootID: grouping?.familyRootID)
     }
 
     var body: some View {
@@ -546,6 +594,12 @@ struct BookIndexView<Masthead: View>: View {
             // answer in every editing mode, and this mode's liveness is its
             // own pane's, never the book's focus (P-3).
             model.noteIndexLive(edit.livePostID)
+        }
+        // 13i-d U3: the grouped-by control's one held read (and the filter
+        // bar's tag menu), keyed by the notes shown and the chosen family.
+        .task(id: groupingTrackKey) {
+            guard let grouping else { return }
+            await grouping.track(session: session, postIDs: groupingTrackKey.postIDs)
         }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
         .onChange(of: model.entries) { _, _ in

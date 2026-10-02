@@ -65,6 +65,10 @@ struct BookView: View {
     /// page-driven observation over the entries the book holds. Injectable
     /// for `model`'s reason (a pin loads it by hand).
     @State private var ownership: OwnershipFactsModel
+    /// 13i-d U3 — the Index's GROUPED-BY state (the sitting record §17(f)):
+    /// the masthead's `group ▾` sets it, the Index regroups by it. Its own
+    /// model (P-9), remembered per book in a LOCAL store.
+    @State private var grouping: BookIndexGroupingModel
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -78,6 +82,7 @@ struct BookView: View {
         structure: BookStructureModel? = nil,
         arrivals: BookArrivalsModel? = nil,
         ownership: OwnershipFactsModel? = nil,
+        grouping: BookIndexGroupingModel? = nil,
         initiallyExpanded: Set<String> = [],
         paneFocused: Bool = true,
         onPaneFocusRequest: (() -> Void)? = nil,
@@ -107,6 +112,7 @@ struct BookView: View {
             initialValue: arrivals
                 ?? BookArrivalsModel(session: session, readingID: readingID))
         _ownership = State(initialValue: ownership ?? OwnershipFactsModel())
+        _grouping = State(initialValue: grouping ?? BookIndexGroupingModel(readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -219,6 +225,7 @@ struct BookView: View {
                     arrivals: arrivals,
                         masthead: { bookMasthead },
                     ownershipBadge: { ownershipBadge($0) },
+                    grouping: grouping,
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
                         // focused in Outline through the ascent's own door
@@ -482,6 +489,11 @@ struct BookView: View {
                 + "with the text flowing across them")
         }
         orderControl
+        // 13i-d U3 — THE GROUPED-BY CONTROL (the sitting record §17(f), ruled:
+        // "the Index masthead"): drawn only while the Index is the mode.
+        if structure.mode == .index {
+            BookIndexGroupingControl(tokens: tokens, grouping: grouping, structure: structure)
+        }
         // 13i-c U4 (F-U3-7): the chip reads the book's state from the one
         // pure rule — a SEALED book says sealed (it is finished too, but
         // "the book is done" is the truer word).
