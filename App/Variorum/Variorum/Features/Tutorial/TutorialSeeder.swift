@@ -136,10 +136,29 @@ enum TutorialSeeder {
          [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
         ("ways of looking", ["read", "lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
-        ("the library of things", ["comments & tags", "books & the shelf",
+        // 13i-d U7: "books & the shelf" LEFT this chapter — its content moved
+        // (swept) into the books chapter below as "a book from the inside".
+        ("the library of things", ["comments & tags",
                                    "pool & scraps", "export — it's all yours",
                                    "the seal", "three ways of working"]),
+        // 13i-d U7 — **THE BOOKS CHAPTER** (the sitting record §25, written at
+        // her instruction as SECONDARY ACCEPTANCE CRITERIA: "every lesson is a
+        // sentence the field guide must be able to say TRUTHFULLY of the
+        // shipped build"). The eleven lesson sentences and the five rituals,
+        // in the guide's card form; `TutorialBooksChapterTests` executes each
+        // sentence's truth and every ritual headless. It sits LAST: it leans
+        // on tags (the library of things) and on everything a note can do.
+        // Lesson 9's second sentence (archive · can't delete · comes back) is
+        // 13i-e's unbuilt guard and is withheld until it ships (F-U7-2).
+        (booksChapter, ["the classics walk", "a book from the inside",
+                        "membership, not ownership", "gatherings & arrivals",
+                        "owned, finished, sealed", "the bookcase",
+                        "the journal & the pool", "wings"]),
     ]
+
+    /// The books chapter's name, in one place (the plan, the section and the
+    /// chapter's suite mean the same words).
+    nonisolated static let booksChapter = "books & the bookcase"
 
     // MARK: - Discovery (reads — the doomed set for a wholesale replace)
 
@@ -292,6 +311,8 @@ enum TutorialSeeder {
         let privacy = try ops.createSection(in: book.id, name: "keeping it private")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
+        // 13i-d U7: the books chapter — last.
+        let books = try ops.createSection(in: book.id, name: booksChapter)
 
         /// One lesson: a `.generic` post inside the book, tagged, blocks in
         /// order. Returns the minted block results for act-ready shaping.
@@ -319,8 +340,9 @@ enum TutorialSeeder {
         // ————————————————————————————— welcome —————————————————————————————
 
         _ = try lesson(welcome, "start here", [
+            // 13i-d U7 (F-U1-5): the area is the BOOKCASE (§7).
             "Welcome. This book is Variorum teaching itself with itself: you are "
-            + "reading a note, inside a chapter, inside a book on your shelf — the "
+            + "reading a note, inside a chapter, inside a book on your Bookcase — the "
             + "same objects everything you write will live in. Each lesson asks you "
             + "to actually do the thing it describes, right here in its own text.",
 
@@ -341,7 +363,8 @@ enum TutorialSeeder {
         ])
 
         _ = try lesson(welcome, "getting around", [
-            "The sidebar has four places. SHELF is home: your books, and a dashed "
+            // 13i-d U7 (F-U1-5): the sidebar area is the BOOKCASE (§7).
+            "The sidebar has four places. BOOKCASE is home: your books, and a dashed "
             + "box that reads \u{201C}new note — just start typing\u{201D} — type a first line "
             + "there and \u{23CE} mints a note and opens it. LIBRARY is everything, "
             + "searchable, with a List and a Timeline view. POOL holds notes that "
@@ -351,7 +374,7 @@ enum TutorialSeeder {
             "\u{2318}K finds anything: notes, books, blocks, and commands — type a few "
             + "letters and \u{23CE} opens the hit. \u{2318}N makes a new note from anywhere. "
             + "\u{2318}J opens today's journal entry — the journal is its own daily "
-            + "notebook on the shelf.",
+            + "notebook on the Bookcase.",
 
             // 13b 4D (S4-20): the first-open default is WRITE now; the
             // per-post memory is worth teaching in the same breath.
@@ -440,11 +463,13 @@ enum TutorialSeeder {
             // note". Both capture boxes answer the same two keys now.
             + "while you are in another app entirely. \u{23CE} there FILES what you wrote "
             + "and closes the pad; \u{21E7}\u{23CE} adds another paragraph, so a capture "
+            // 13i-d U7 (F-U6-3): Quicknotes is a GATHERING (§1/§20) on the
+            // BOOKCASE (§7) — it shows the note; it never holds it.
             + "can be as long as the thought is \u{2014} the same two keys the new-note "
-            + "box on the shelf answers. Closing the pad (or \u{2318}\u{23CE}) files it "
+            + "box on the Bookcase answers. Closing the pad (or \u{2318}\u{23CE}) files it "
             + "too, and what you wrote is kept as a note, tagged "
-            + "\u{201C}quicknote\u{201D} \u{2014} the smart Quicknotes book on "
-            + "the shelf collects it, and taking the tag off sends it back to the Pool.",
+            + "\u{201C}quicknote\u{201D} \u{2014} the Quicknotes gathering on "
+            + "the Bookcase shows it, and taking the tag off sends it back to the Pool.",
 
             "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "
             + "panes\u{201D} group is this whole lesson in key form \u{2014} including the "
@@ -1615,69 +1640,26 @@ enum TutorialSeeder {
             + "(type it; \u{201C}/\u{201D} nests, and a name that doesn't exist yet is "
             + "made), \u{2715} takes one off. Every tag keeps its own colour "
             + "everywhere. Fold the bar with \u{2318}\u{21E7}I and the cards become one "
+            // 13i-d U7 (F-U6-3): the tag door mints a GATHERING (U6 (a) —
+            // Settings ▸ Tags' "Make a Gathering…").
             + "\u{FF03} door with the count. The tag manager lives in Settings "
-            + "(\u{2318},), where a tag can also be promoted into a smart book "
-            + "that collects everything wearing it.",
+            + "(\u{2318},), where Make a Gathering\u{2026} turns a tag into a gathering "
+            + "that shows everything wearing it.",
 
             "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
             + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
             + "replace. Your own notes never wear it unless you put it there; "
-            + "everything else on your shelf is invisible to the restore.",
+            + "everything else in your library is invisible to the restore.",
         ])
         _ = try ops.addBlockComment(
             to: commentsTags.blocks[0].block.id,
             text: "a comment lives in the margin — about the block, never inside its text")
 
-        _ = try lesson(library, "books & the shelf", [
-            "You are inside a BOOK right now: an ordered collection of notes "
-            + "with real chapters. A note can live in MANY books at once — "
-            + "membership is not ownership, and adding a note to a book never "
-            + "moves or copies it.",
-
-            "The chapter list on the left is workable: \u{FF0B} new chapter, "
-            + "right-click a chapter to rename, move, or delete it, and drag "
-            + "the \u{28FF} dots — in the list or on the page's chapter headings — "
-            + "to reorder chapters. \u{FF0B} new note mints a note right inside "
-            + "the book. Notes show as collapsed cards: clicking a card opens "
-            + "the note in the full editor; its \u{25B8} expands it in place, "
-            + "right here.",
-
-            // 13b 4F (S4-9), rewritten at 13c 2A/2B/2C: the three modes and
-            // what each is FOR. (P-6: the lesson says it, the app does it —
-            // this paragraph still described the pre-2A vocabulary.)
-            "Three views of a book share the toggle at the top. OUTLINE is "
-            + "this scroll, and it is where a book gets WRITTEN: chapter "
-            + "headings, notes you can collapse, and the same editor you "
-            + "write a note in. BOOK is a two-page spread — each page is one "
-            + "whole note, and the page you are in is editable as Write or "
-            + "as its takes; \u{25C0} \u{25B6} turn the leaf two notes at a "
-            + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
-            + "READ is for reading only, in two faces: SCROLL, the whole "
-            + "book as one calm continuous page, and PAGES, real book pages "
-            + "with the text flowing across them — turn the leaf, or scrub. "
-            + "A finished book opens into Read by itself.",
-
-            // 13b 4F (N36/N37): the per-post target + the restore door.
-            "Books can be FINISHED (right-click the book on the shelf \u{25B8} "
-            + "Length & Extent\u{2026}, or the \u{2713} finished face): finishing freezes "
-            + "membership and order, reversibly. A book can also carry a word "
-            + "target — this one wears one, so its shelf row shows progress. "
-            + "A single note can wear its own target too: click the word "
-            + "counts in the editor's bottom bar. Targets are a measure, "
-            + "never a wall. And here is what deleting a book MEANS: the book, "
-            + "its chapters, and its memberships go — **the notes stay**, in "
-            + "your Library and in any other books that point at them, because "
-            + "a book only ever points at notes and never owns them. The "
-            // The post-13l polish round, ledger row 12: this sentence named a
-            // menu her B1 ruling dissolved. The Trash has its own icon at the
-            // top of the Library now, and Archived is its own sidebar item —
-            // a lesson naming a door that no longer exists is a P-6
-            // regression, chapters away from the one that moved it.
-            + "deleted book waits \(TrashWindow.days) days in the Trash "
-            + "(the trash icon at the top of the Library) with a Put back "
-            + "door — chapters and membership come back with it. The only way "
-            + "notes die is deleting the notes.",
-        ])
+        // 13i-d U7: "books & the shelf" MOVED — swept — into the books
+        // chapter at the end of this book ("a book from the inside" carries
+        // its chapters/views/targets paragraphs; finishing and deleting are
+        // lessons 6 and 8 there). Its last paragraph claimed a book "never
+        // owns" its notes, false since 13i-c's Owned books (lesson 1).
 
         // **13u4 UNIT S3 — KnownIssues row 68: this chapter's prose swept
         // against `SnippetsCopy`'s own vocabulary.** It said *"the Snippets
@@ -1752,8 +1734,9 @@ enum TutorialSeeder {
             "Your work is always yours to take out. Any note exports as "
             + "Markdown or PDF from the library's right-click Export menu; a "
             + "block exports alone via File \u{25B8} Export Block as Markdown\u{2026}; a "
+            // 13i-d U7 (F-U1-5): the book's row on the BOOKCASE carries Export.
             + "book exports as one document — its chapters as headings, this "
-            + "very book included — from its shelf right-click; and "
+            + "very book included — from its row's right-click on the Bookcase; and "
             + "File \u{25B8} Export Library\u{2026} writes the whole library as a folder "
             + "of Markdown in one gesture.",
 
@@ -1807,6 +1790,218 @@ enum TutorialSeeder {
         ])
         try take(on: threeWays.blocks[3],
             "The logbook knew everything about the light and nothing about the keeping of it.")
+
+        // ————————————————————————— books & the bookcase —————————————————————
+        //
+        // 13i-d U7 — THE BOOKS CHAPTER (the sitting record §25). Her eleven
+        // lesson sentences, kept as close to her words as the shipped
+        // surface's own words allow (the WHAT is ruled; 13s re-voices), and
+        // her five rituals as things to DO here. Written PLAINLY — never
+        // interpolated from the constants the chapter's suite ties each door
+        // to (the H pattern), so a renamed door turns a lesson red rather
+        // than merely wrong. Every sentence below is executed headless by
+        // `TutorialBooksChapterTests`.
+
+        // Lesson 1 + ritual R1 — the classics walk (§7/§17(b): the seeded
+        // lesson the Welcome arrangement puts on the Welcome shelf).
+        _ = try lesson(books, "the classics walk", [
+            "Three kinds of thing live on your Bookcase, and this whole chapter "
+            + "rests on telling them apart. A GATHERING shows you every note "
+            + "matching its rule \u{2014} it holds nothing. A BOOK holds its notes "
+            + "as members. An OWNED book is the only place its notes live.",
+
+            "All three are waiting on the Welcome shelf, where this guide sits "
+            + "too. Open the Bookcase in the sidebar, and on Welcome open the "
+            + "gathering called \u{201C}classics\u{201D}. It is made "
+            + "from the two classic books' own tags, #sherlock holmes and #jekyll and "
+            + "hyde, so it shows the notes of both books side by side without "
+            + "holding a single one of them.",
+
+            "Look closer: every Sherlock note wears a quiet \u{201C}owned by\u{201D} "
+            + "mark naming its book. That book OWNS its notes \u{2014} they live there "
+            + "and nowhere else. The Jekyll notes wear no mark: their book holds "
+            + "them as ordinary members, and they could live in other books too.",
+
+            "Click a Sherlock note's mark and you land in its book, at that very "
+            + "note. A gathering is a window onto notes that live somewhere; the "
+            + "mark is the door to where they live.",
+        ])
+
+        // The old "books & the shelf" lesson's working paragraphs, swept
+        // (the area is the BOOKCASE; finishing and deleting moved to their
+        // own lessons below).
+        _ = try lesson(books, "a book from the inside", [
+            "You are inside a BOOK right now: an ordered collection of notes "
+            + "with real chapters. The chapter list on the left is workable: "
+            + "\u{FF0B} new chapter, right-click a chapter to rename, move, or "
+            + "delete it, and drag the \u{28FF} dots \u{2014} in the list or on the "
+            + "page's chapter headings \u{2014} to reorder chapters. \u{FF0B} new note "
+            + "mints a note right inside the book. Notes show as collapsed cards: "
+            + "clicking a card opens the note in the full editor; its \u{25B8} "
+            + "expands it in place, right here.",
+
+            "Three views of a book share the toggle at the top. OUTLINE is "
+            + "this scroll, and it is where a book gets WRITTEN: chapter "
+            + "headings, notes you can collapse, and the same editor you "
+            + "write a note in. BOOK is a two-page spread \u{2014} each page is one "
+            + "whole note, and the page you are in is editable as Write or "
+            + "as its takes; \u{25C0} \u{25B6} turn the leaf two notes at a "
+            + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
+            + "READ is for reading only, in two faces: SCROLL, the whole "
+            + "book as one calm continuous page, and PAGES, real book pages "
+            + "with the text flowing across them \u{2014} turn the leaf, or scrub. "
+            + "A finished book opens into Read by itself.",
+
+            "A book can carry a word target (right-click it on the Bookcase "
+            + "\u{25B8} Length & Extent\u{2026}) \u{2014} this one wears one, so its "
+            + "row on the Bookcase shows progress. A single note can wear its own "
+            + "target too: click the word counts in the editor's bottom bar. "
+            + "Targets are a measure, never a wall.",
+        ])
+
+        // Lesson 2 (the edit law, her sentence nearly verbatim) + ritual R2 +
+        // lesson 8's first sentence, where the ritual meets it.
+        _ = try lesson(books, "membership, not ownership", [
+            "Editing a note that is in a book is always editing every book it "
+            + "appears in \u{2014} owned or not. Adding a note to a book never copies "
+            + "it. A copy only ever happens because you asked for one, and it "
+            + "always remembers where it came from.",
+
+            "Try it, start to finish. On the Bookcase press \u{FF0B} New Book and "
+            + "make a book called \u{201C}practice\u{201D}; inside it, \u{FF0B} new "
+            + "chapter, then \u{FF0B} new note, and write a line. Make a second book "
+            + "the same way. Now put that same note in the second book too: click "
+            + "the line naming the note's book at the top of its page, and the "
+            + "panel it opens has Add to Book.",
+
+            "Edit the note from either book and look at the other: it changed "
+            + "too, because it is ONE note in two books. Then delete one of the "
+            + "books \u{2014} right-click it on the Bookcase \u{25B8} Delete "
+            + "Book\u{2026}. Deleting a plain book never touches a note: yours is "
+            + "still there, in the other book and in the Library.",
+
+            "A deleted book waits \(TrashWindow.days) days in the Trash (the "
+            + "trash icon at the top of the Library) with a Put back door \u{2014} "
+            + "its chapters and memberships come back with it. The only way a "
+            + "note dies is deleting the note.",
+        ])
+
+        // Lesson 3 + ritual R3 + lesson 4 (with item 10's road back).
+        _ = try lesson(books, "gatherings & arrivals", [
+            "A gathering is made from a tag. Remove the tag and the note leaves "
+            + "on its own. You can't rearrange a gathering \u{2014} bind it into a "
+            + "book to take it in hand, and it keeps collecting after you do.",
+
+            "Try it with two of this chapter's own lessons. Give this lesson and "
+            + "the next one a tag of your own \u{2014} say #trial, with the "
+            + "\u{FF03} on the masthead. On the Bookcase, \u{FF0B} New Book "
+            + "\u{25B8} Create Gathering\u{2026}, and gather from #trial: both "
+            + "lessons show. Take the tag off one \u{2014} it leaves the gathering "
+            + "at once.",
+
+            "Now right-click the gathering on the Bookcase \u{25B8} Bind into a "
+            + "Book\u{2026}. It becomes a book holding the lesson it showed "
+            + "\u{2014} and it keeps collecting: tag the other lesson #trial again "
+            + "and the book takes it in. Being a book, it can wear your own "
+            + "order: drag one note above the other. Then take the tag off "
+            + "either one \u{2014} it STAYS. A book's notes are members, and "
+            + "untagging never sends a member away.",
+
+            "A collecting book auto-adds freely; anything it can't seat on its "
+            + "own waits at Arrivals \u{2014} the book's \u{201C}at the door\u{201D} "
+            + "line \u{2014} for you to judge: add it, copy it in, or dismiss it. "
+            + "Finishing a book dismisses whatever is still waiting. Changed your "
+            + "mind? Add it by hand; dismissing only stops the book from adding "
+            + "it on its own.",
+        ])
+
+        // Lesson 5 + ritual R4 + lesson 6 + lesson 8 whole.
+        _ = try lesson(books, "owned, finished, sealed", [
+            "Put a note in an owned book and that book is its home. Want it "
+            + "elsewhere too? You'll get a copy, and you'll know. Remove it and "
+            + "it goes back to the Pool, whole.",
+
+            "Try it on your \u{201C}practice\u{201D} book: right-click it on the "
+            + "Bookcase \u{25B8} Own Its Notes\u{2026}. Now add its note to "
+            + "another book \u{2014} the app stops and offers the copy, and says "
+            + "so. Then, inside the book, right-click the note \u{25B8} Release "
+            + "from This Book: it goes to the Pool, whole. (On a book that "
+            + "doesn't own its notes the same door reads Remove from This Book.)",
+
+            "Finished means the table of contents is done \u{2014} the writing "
+            + "inside can still change. Sealed means the book is done. Both "
+            + "doors are on the book's right-click and in its Book "
+            + "Settings\u{2026}: Finish and Seal\u{2026}, and Reopen and Unseal "
+            + "take them back.",
+
+            "Deleting a plain book never touches a note. Deleting an owned book "
+            + "asks: keep the notes (they go to the Pool) or take them too. The "
+            + "Trash gives back whatever went in together, together.",
+        ])
+
+        // Lesson 7 + ritual R5 (its drags are hers; every drag has a menu
+        // twin, named here too) + the place/finder boundary (§22/§23).
+        _ = try lesson(books, "the bookcase", [
+            "Your books live on shelves, alphabetical until you choose otherwise "
+            + "\u{2014} switch to your own order to place them by hand. The "
+            + "shelves run left to right exactly as All stacks them top to "
+            + "bottom. Unshelved books wait at the top until you file them.",
+
+            "The shelves are the strip across the top of the Bookcase: All, "
+            + "then each shelf by name \u{2014} Welcome is the one this guide "
+            + "came on. \u{FF0B} shelf makes another; right-click a shelf to "
+            + "rename it, give it a glyph, make it the default, or delete it "
+            + "(its books just return to Unshelved). The order \u{25BE} beside "
+            + "them reads A\u{2013}Z, last edited, or my order.",
+
+            "Try it: drag a book onto a shelf's name to file it there (or "
+            + "right-click the book \u{25B8} Move to Shelf). Switch the order "
+            + "\u{25BE} to my order and place a book by hand \u{2014} drag it, or "
+            + "right-click \u{25B8} Send to Top. Then star a book (right-click "
+            + "\u{25B8} Star): starred books float first, under any order.",
+
+            "The Bookcase is a PLACE \u{2014} arranged by you, and it stays "
+            + "where you put it. Finding is the Library's work: search and the "
+            + "day filter live there, never here.",
+        ])
+
+        // Lesson 9's first sentence (the second — archive · can't delete ·
+        // comes back — waits for 13i-e's guard, F-U7-2) + lesson 10, shown
+        // on the seeded quicknote the Welcome arrangement left in the Pool.
+        _ = try lesson(books, "the journal & the pool", [
+            "The daily Journal is an ordinary book that is special in one way: "
+            + "it's where \u{2318}J and Today's Entry file. Today's Entry sits at "
+            + "the top of the Bookcase; the Journal itself waits among your "
+            + "unshelved books until you file it.",
+
+            "The Pool is every note with no book. Notes that show in gatherings "
+            + "tuck behind the count in its masthead \u{2014} one click shows them.",
+
+            "There is one waiting for you: \u{201C}a first quick note\u{201D} has "
+            + "no book, so it lives in the Pool \u{2014} and Quicknotes shows it, "
+            + "so it tucks behind the count. Open the Pool, click show, and there "
+            + "it is.",
+        ])
+
+        // Lesson 11 (+ §18.6's small note: the Work is a SHELF; a wing when
+        // you want true separation).
+        _ = try lesson(books, "wings", [
+            "A wing is a separate library in the same app \u{2014} a different room "
+            + "in the same house. Nothing crosses between wings except what you "
+            + "move or copy yourself.",
+
+            "Most separation wants a SHELF. A wing is for when you want a whole "
+            + "separate library: the Bookcase's masthead names the one you're in "
+            + "\u{2014} Home, to begin with \u{2014} and its menu has New "
+            + "Wing\u{2026}. Switch, and everything shows that wing alone: the "
+            + "Bookcase, the Library, the Pool, your tags, search.",
+
+            "Once a second wing exists, a note's right-click carries Move to "
+            + "Wing and Copy to Wing, and a book's carries Move to Wing. Those "
+            + "are the only crossings. Home "
+            + "holds the daily Journal, your quick notes and this guide, and it "
+            + "can't be deleted.",
+        ])
 
         return book.id
     }

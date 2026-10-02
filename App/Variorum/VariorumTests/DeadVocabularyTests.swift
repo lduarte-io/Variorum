@@ -43,15 +43,14 @@ struct DeadVocabularyTests {
     /// Files or folders (repo-relative prefixes) that may hold a dead spelling,
     /// each with the decision that allows it. Nothing else may.
     ///
-    /// 1. **The tutorial's lesson prose and its seeder** — the 13i-d U6 brief
-    ///    puts them OUT of this sweep: U7 rewrites the books chapter (§25's
-    ///    eleven lessons) and owns the re-seed the prose change forces
-    ///    (F-U1-5 — "SHELF is home"). U7 removes this line.
-    /// 2. **The schema's history** — the migrations name the retired
+    /// 1. **The schema's history** — the migrations name the retired
     ///    `kind = 'smart'` value in their SQL (the v1_18 recast moved it to
     ///    `'gathering'`); a migration is never rewritten and never shown.
+    ///
+    /// *(13i-d U7: the tutorial seeder's entry is GONE — U7 rewrote the books
+    /// chapter and swept the guide's remaining SHELF/"smart" prose (F-U1-5,
+    /// F-U6-3), so the pin now closes over the field guide too.)*
     private static let allowed: [String] = [
-        "App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift",
         "Sources/VariorumCore/Persistence/",
     ]
 

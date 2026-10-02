@@ -1875,8 +1875,17 @@ struct TutorialLibraryActsTests {
     @Test func pagesFlipTheGuideTargetsAreRealAndTheBookRestoresWhole() async throws {
         try await withTutorialWorld { session, db, bookID in
             // The prose promises (P-6: the lesson says it, the app does it).
-            let lesson = try await db.read { try lessonID($0, bookID: bookID, "books & the shelf") }
+            // 13i-d U7, a JUSTIFIED EDIT (the subject MOVED, by the U7 brief):
+            // "books & the shelf" left "the library of things" for the books
+            // chapter — its views/targets paragraphs are "a book from the
+            // inside", its deletion paragraph "membership, not ownership".
+            // Every assertion below is unchanged; only where it reads moved.
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "a book from the inside") }
+            let membership = try await db.read {
+                try lessonID($0, bookID: bookID, "membership, not ownership")
+            }
             let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
+                + "\n" + (try await slots(db, membership).compactMap(\.text).joined(separator: "\n"))
             // 13c 2A/2B/2C: the lesson's vocabulary is the shipped one. The
             // old single "progress bar" claim is replaced by the four the
             // three modes actually make (A6 removed the bar itself).
