@@ -137,6 +137,66 @@ struct VocabularySweepTests {
         #expect(BindCopy.spawnMessage(for: .rule(RuleTerm.star)).contains("keep joining"))
     }
 
+    // MARK: - (b) a wing presents as a SEPARATE LIBRARY (§9's language line)
+
+    /// The doors that MAKE or CROSS a wing say what it is; the noun stays
+    /// "wing" (lesson 11's own sentence; "Library" already names the finder).
+    @Test func theWingDoorsSayItIsASeparateLibrary() {
+        #expect(WingCopy.switcherHeader == "Wings \u{2014} each a separate library")
+        #expect(WingCopy.minted("Annex").contains("a separate library"))
+        let leaving = WingCopy.moveMessage(leaves: ["Alpha"])
+        #expect(leaving.hasPrefix("It leaves \u{201C}Alpha\u{201D}"))
+        #expect(leaving.contains("a wing is a separate library"))
+        #expect(WingCopy.copied("n", to: "Annex").contains("a separate library"))
+        #expect(WingCopy.versionElsewhere("Annex")
+                == "a version of this note lives in another library \u{2014} the wing \u{201C}Annex\u{201D}")
+        #expect(WingWords.lesson.hasPrefix("A wing is a separate library in the same app"),
+                "lesson 11's sentence stays the New Wing prompt's (U7 pins the lesson)")
+    }
+
+    // MARK: - (c) the Library's "Posts" → "Notes" (§21, hers)
+
+    @Test func theLibrarySaysNotesNeverPosts() {
+        #expect(LibraryCatalogModel.Scope.allCases.map(\.label) == ["All", "Books", "Notes", "Blocks"])
+    }
+
+    // MARK: - (j) KnownIssues row 103's LIBRARY half — the quiet receipt's home
+
+    /// The Library's laid-out message row hosts the status seam's quiet line
+    /// when nothing of its own speaks — its own refusal and receipt keep
+    /// their precedence; nothing reserves a blank line.
+    @Test func theLibraryHostsTheQuietReceiptWhenItsOwnSlotIsFree() {
+        typealias Slot = LibraryCatalogView.MessageSlot
+        #expect(LibraryCatalogView.messageSlot(error: nil, receipt: nil, quietReceipt: true) == Slot.quiet)
+        #expect(LibraryCatalogView.messageSlot(error: nil, receipt: nil, quietReceipt: false) == Slot.none)
+        #expect(LibraryCatalogView.messageSlot(error: "no", receipt: "yes", quietReceipt: true) == Slot.error)
+        #expect(LibraryCatalogView.messageSlot(error: nil, receipt: "Archived.", quietReceipt: true)
+                == Slot.receipt)
+    }
+
+    // MARK: - (k) the note ▾ menu's Move/Copy to Wing renderer
+
+    /// The note ▾ menu lists the wings OTHER than the open NOTE's own (an
+    /// open note can be another wing's — the Open strip keeps it), named by
+    /// the one display brain; a moved note's context follows it.
+    @Test func theNoteMenuReadsTheNotesOwnWing() async throws {
+        try await withSweepWorld { session, _ in
+            let ops = session.operations
+            let annex = try ops.createWing(name: "Annex")
+            let note = try ops.createPost(title: "loose")
+            let home = try #require(await NoteMenuWingContext.load(session, postID: note.id))
+            #expect(home == NoteMenuWingContext(wingID: "", title: "loose"))
+            _ = try ops.moveNoteToWing(note.id, to: annex.id)
+            let moved = try #require(await NoteMenuWingContext.load(session, postID: note.id))
+            #expect(moved.wingID == annex.id, "after a move the menu offers the OTHER wings")
+            let wings = WingsModel(session: session)
+            await wings.load()
+            #expect(wings.destinations(from: moved.wingID).map(\.id) == [""],
+                    "from Annex the one other library is Home")
+            #expect(wings.destinations(from: home.wingID).map(\.id) == [annex.id])
+        }
+    }
+
     // MARK: - (f) item 10 — the dismiss receipt teaches the road back
 
     @Test func theDismissReceiptSaysHowToChangeYourMind() {

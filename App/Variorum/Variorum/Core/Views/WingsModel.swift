@@ -224,16 +224,23 @@ nonisolated enum WingCopy {
     static let unavailableNote = "Wings live at the top of the Bookcase \u{2014} "
         + "\u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D}."
     static let noteUnavailableNote = "Moving or copying a note to another wing acts on a "
-        + "note's row \u{2014} right-click one in the Library or the Pool."
+        + "note \u{2014} right-click its row in the Library or the Pool, or open it and use "
+        + "its note \u{25BE} menu."
 
+    /// The switcher list's header (13i-d U6 (b)).
+    static let switcherHeader = "Wings \u{2014} each a separate library"
     static let newWingTitle = "New Wing"
     static let renameWingTitle = "Rename Wing"
 
     static func deleteTitle(_ name: String) -> String { "Delete the wing \u{201C}\(name)\u{201D}?" }
     static let deleteMessage = "It's empty. Its shelves go with it; nothing else is touched."
 
+    // 13i-d U6 (b) — "a wing presents as a SEPARATE LIBRARY" (the sitting
+    // record §9's language line): the noun stays WING (lesson 11 — "A wing
+    // is a separate library in the same app"; "Library" already names the
+    // finder), and the doors that MAKE or CROSS one say what it is.
     static func minted(_ name: String) -> String {
-        "Made the wing \u{201C}\(name)\u{201D} \u{2014} you're in it now."
+        "Made the wing \u{201C}\(name)\u{201D} \u{2014} a separate library; you're in it now."
     }
     static func deleted(_ name: String) -> String { "Deleted the wing \u{201C}\(name)\u{201D}." }
 
@@ -244,8 +251,8 @@ nonisolated enum WingCopy {
         let names = books.map { "\u{201C}\($0)\u{201D}" }
         let list = names.count <= 1 ? (names.first ?? "")
             : names.dropLast().joined(separator: ", ") + " and " + names.last!
-        return "It leaves \(list) \u{2014} a book only holds notes of its own wing. "
-            + "Its tags come with it."
+        return "It leaves \(list) \u{2014} a wing is a separate library, and a book only "
+            + "holds notes of its own wing. Its tags come with it."
     }
     static func moved(_ title: String, to wing: String, left: Int) -> String {
         left == 0
@@ -254,8 +261,8 @@ nonisolated enum WingCopy {
                 + "\(left) book\(left == 1 ? "" : "s")."
     }
     static func copied(_ title: String, to wing: String) -> String {
-        "Copied \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} the copy is in "
-            + "that wing's Pool."
+        "Copied \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} a separate "
+            + "library; the copy waits in its Pool."
     }
     static func frozen(_ title: String, book: String) -> String {
         "\u{201C}\(title)\u{201D} is in \u{201C}\(book)\u{201D}, which is finished \u{2014} "
@@ -264,7 +271,7 @@ nonisolated enum WingCopy {
 
     /// The lineage line (#166(e) — minimal naming, nothing deeper).
     static func versionElsewhere(_ wing: String) -> String {
-        "a version of this note lives in the wing \u{201C}\(wing)\u{201D}"
+        "a version of this note lives in another library \u{2014} the wing \u{201C}\(wing)\u{201D}"
     }
     static func goTo(_ wing: String) -> String { "go to \(wing) \u{203A}" }
 }
@@ -280,13 +287,18 @@ struct WingNoteDoors: View {
     let wings: WingsModel
     let postID: String
     let title: String
+    /// The wing the note LIVES in (13i-d U6 (k)): nil = the current wing —
+    /// the Library's and the Pool's rows list only the current wing's notes;
+    /// the note ▾ menu passes the open note's own wing, because an open note
+    /// can be another wing's (the Open strip keeps it — F-U5-6).
+    var fromWing: String? = nil
     /// The move's confirm, when the note leaves books (the caller presents it).
     let onAsk: (WingsModel.MoveAsk) -> Void
     /// After an act (the one-shot listings re-ask; held ones need nothing).
     var onDone: () -> Void = {}
 
     var body: some View {
-        let others = wings.destinations(from: wings.currentID)
+        let others = wings.destinations(from: fromWing ?? wings.currentID)
         if !others.isEmpty {
             Menu(CapabilityRegistry.capability(.moveNoteToWing).verb) {
                 ForEach(others) { row in
@@ -342,3 +354,39 @@ extension View {
         }
     }
 }
+
+// MARK: - The note ▾ menu's renderer (13i-d U6 (k))
+
+/// **What the note ▾ menu needs to render the cross-wing doors** — the open
+/// note's wing as surfaces read it (`Queries.effectiveWing`) and its display
+/// name (the confirm's and the receipt's words). Read once per note and again
+/// after an act (a move changes the note's wing).
+struct NoteMenuWingContext: Equatable, Sendable {
+    let wingID: String
+    let title: String
+
+    static func load(_ session: AppSession, postID: String) async -> NoteMenuWingContext? {
+        try? await session.database.read { db in
+            guard let wing = try Queries.effectiveWing(db, ofPost: postID) else { return nil }
+            return NoteMenuWingContext(
+                wingID: wing, title: try Queries.noteDisplayTitle(db, id: postID) ?? "")
+        }
+    }
+}
+
+extension View {
+    /// The bar's half of the note ▾ wing doors: loads the open note's context
+    /// (per note) and hosts the move's confirm — an alert cannot hang off a
+    /// menu item, so the bar presents it (the Library row's own shape).
+    func noteMenuWingDoors(
+        session: AppSession, postID: String, wings: WingsModel?,
+        context: Binding<NoteMenuWingContext?>, ask: Binding<WingsModel.MoveAsk?>
+    ) -> some View {
+        self
+            .task(id: postID) { context.wrappedValue = await NoteMenuWingContext.load(session, postID: postID) }
+            .wingMoveConfirm(ask, wings: wings) {
+                Task { context.wrappedValue = await NoteMenuWingContext.load(session, postID: postID) }
+            }
+    }
+}
+

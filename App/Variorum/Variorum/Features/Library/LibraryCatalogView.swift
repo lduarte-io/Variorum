@@ -356,6 +356,38 @@ struct LibraryCatalogView: View {
     /// bottom-left, which put it ON the quick-entry bar at the window's edge
     /// with its descenders clipped (`seed-33`).
     @ViewBuilder private var messageRow: some View {
+        switch Self.messageSlot(
+            error: model.lastError ?? library.lastError, receipt: library.receipt,
+            quietReceipt: session.status.quietLine != nil) {
+        case .quiet:
+            // 13i-d U6 (j) — KnownIssues row 103's LIBRARY half (F-U5-8: the
+            // move/copy-to-wing receipts, the row menus' Remove/Release, every
+            // status-seam receipt spoken here landed nowhere visible under
+            // her default QUIET style). The one slot this surface already
+            // lays out for its words — above the bottom divider — hosts the
+            // seam's quiet line when nothing of its own speaks.
+            QuietReceiptLine(status: session.status, tokens: tokens)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .libraryGeometryProbe(.message)
+        case .error, .receipt, .none:
+            ownMessageRow
+        }
+    }
+
+    /// **The Library's one message slot, decided** (13i-d U6 (j)): its own
+    /// error first (always shown — a refusal), then its own receipt (the
+    /// archive door's sentence), then the status seam's QUIET receipt; else
+    /// nothing (no reserved blank line).
+    enum MessageSlot: Equatable { case error, receipt, quiet, none }
+    static func messageSlot(error: String?, receipt: String?, quietReceipt: Bool) -> MessageSlot {
+        if error != nil { return .error }
+        if receipt != nil { return .receipt }
+        return quietReceipt ? .quiet : .none
+    }
+
+    @ViewBuilder private var ownMessageRow: some View {
         if let error = model.lastError ?? library.lastError {
             Text(error)
                 .font(tokens.small)
@@ -428,7 +460,7 @@ struct LibraryCatalogView: View {
                     .frame(maxWidth: 320)
                 Picker("", selection: Binding(get: { model.scope }, set: { model.scope = $0; Task { await model.search() } })) {
                     ForEach(LibraryCatalogModel.Scope.allCases, id: \.self) { scope in
-                        Text(tokens.chromeLabel(scope.rawValue.capitalized)).tag(scope)
+                        Text(tokens.chromeLabel(scope.label)).tag(scope)
                     }
                 }
                 .pickerStyle(.segmented)

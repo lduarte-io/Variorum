@@ -33,6 +33,12 @@ struct TakesBottomBar: View {
     /// 13l Act 2 (item 3): the note-delete confirm's pending ask — Write's
     /// bar's twin, so the two bars keep one grammar (R6-2's whole point).
     @State private var pendingDelete: NoteDeleteConfirm?
+    /// 13i-d U6 (k) — the note ▾ menu's cross-wing doors: the shared wings
+    /// model (the environment's — RootView / the note window), the open
+    /// note's wing + name, and the move's pending confirm.
+    @Environment(WingsModel.self) private var wings: WingsModel?
+    @State private var wingContext: NoteMenuWingContext?
+    @State private var wingAsk: WingsModel.MoveAsk?
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -51,6 +57,8 @@ struct TakesBottomBar: View {
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
             .archiveBlock,  // the post-13l polish round (row 14 / F1): its twin
+            // 13i-d U6 (k): the note ▾ menu's cross-wing doors (Write's twin).
+            .moveNoteToWing, .copyNoteToWing,
             // (`.showNoteTray` LEFT this bar at the post-13l polish round,
             // ledger row 9 — her C1 ruling; both bars lose it together, which
             // is R6-2's one-grammar point applied to a REMOVAL.)
@@ -463,6 +471,23 @@ struct TakesBottomBar: View {
                 datePickerShown = true
             }
             Divider()
+            // 13i-d U6 (k): the note's own Move/Copy to Wing ▸ — the Library
+            // and Pool rows' doors, one more renderer of the same acts, drawn
+            // only while another wing exists (P-2) and listing the wings
+            // OTHER than the note's own. Write's bar carries the twin (R6-2).
+            if let wings, let context = wingContext,
+               !wings.destinations(from: context.wingID).isEmpty {
+                WingNoteDoors(
+                    wings: wings, postID: model.postID, title: context.title,
+                    fromWing: context.wingID, onAsk: { wingAsk = $0 },
+                    onDone: {
+                        Task {
+                            wingContext = await NoteMenuWingContext.load(
+                                model.session, postID: model.postID)
+                        }
+                    })
+                Divider()
+            }
             // 13l Act 2 (item 3): Write's bar's door, in Takes too — R118's
             // letter (no surface is privileged) and R6-2's one grammar.
             Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
@@ -473,6 +498,9 @@ struct TakesBottomBar: View {
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
         }
+        .noteMenuWingDoors(
+            session: model.session, postID: model.postID, wings: wings,
+            context: $wingContext, ask: $wingAsk)
         .help("The note itself: its seal and its date (a block's savepoints "
             + "are the history door beside commit; its tray is the tray icon "
             + "at the top of the note)")

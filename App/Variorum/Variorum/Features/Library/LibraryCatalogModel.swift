@@ -27,7 +27,21 @@ import VariorumCore
 @MainActor
 @Observable
 final class LibraryCatalogModel {
-    enum Scope: String, CaseIterable { case all, books, posts, blocks }
+    enum Scope: String, CaseIterable {
+        case all, books, posts, blocks
+
+        /// The segment's word (13i-d U6 (c) — her §21 ruling: the Library's
+        /// segmented control said "Posts" and "must say Notes"). The case
+        /// keeps the model term; the face says the noun she uses.
+        var label: String {
+            switch self {
+            case .all: "All"
+            case .books: "Books"
+            case .posts: "Notes"
+            case .blocks: "Blocks"
+            }
+        }
+    }
     /// 13g batch 6 (R5-6): `notes` joins as a THIRD view mode — her
     /// Apple-Notes-shaped list (title · date · the first bit of text · the
     /// book it's in). A mode beside the others, never a replacement.

@@ -60,7 +60,8 @@ struct WingSwitcherMenu: View {
                     Text(row.name).tag(row.id)
                 }
             } label: {
-                EmptyView()
+                // 13i-d U6 (b): the list's own header says what a wing is.
+                Text(WingCopy.switcherHeader)
             }
             .pickerStyle(.inline)
             Divider()

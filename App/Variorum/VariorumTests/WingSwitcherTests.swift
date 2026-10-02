@@ -231,8 +231,12 @@ struct WingSwitcherTests {
         for id in [CapabilityID.newWing, .renameWing, .deleteWing] {
             #expect(CapabilityRegistry.capability(id).doors == [.surface])
         }
+        // 13i-d U6 (k) (A JUSTIFIED EDIT — a new renderer of the same acts):
+        // the note ▾ menu in BOTH bars renders them too (R6-2's one grammar).
         for id in [CapabilityID.moveNoteToWing, .copyNoteToWing] {
-            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu])
+            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar])
+            #expect(CommitBar.renderedCapabilities.contains(id))
+            #expect(TakesBottomBar.renderedCapabilities.contains(id))
         }
         // The words the faces say come from the declarations.
         #expect(CapabilityRegistry.capability(.newWing).verb == "New Wing…")

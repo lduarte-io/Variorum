@@ -45,6 +45,12 @@ struct CommitBar: View {
     /// like the date picker's flag — the ACT is `NoteDeletion`'s, and the
     /// wording and the dialog's shape are the shared modifier's.
     @State private var pendingDelete: NoteDeleteConfirm?
+    /// 13i-d U6 (k) — the note ▾ menu's cross-wing doors (Takes' bar carries
+    /// the twin, R6-2): the shared wings model from the environment, the open
+    /// note's wing + name, and the move's pending confirm.
+    @Environment(WingsModel.self) private var wings: WingsModel?
+    @State private var wingContext: NoteMenuWingContext?
+    @State private var wingAsk: WingsModel.MoveAsk?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
     #if DEBUG
@@ -131,6 +137,8 @@ struct CommitBar: View {
             // 13l Act 2 (item 3): the door she went looking for and could not
             // find, in the same menu.
             .deleteNote,
+            // 13i-d U6 (k): the note ▾ menu's cross-wing doors (Takes' twin).
+            .moveNoteToWing, .copyNoteToWing,
             // The post-13l polish round (ledger row 17): **History**, beside
             // commit. Her ruling — *"history is quite similar to commit, it's
             // the natural pair to commit"* — so the bar carries the block's
@@ -763,6 +771,9 @@ struct CommitBar: View {
             .deleteNoteConfirmDialog($pendingDelete) { confirm in
                 NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
             }
+            .noteMenuWingDoors(
+                session: model.session, postID: model.postID, wings: wings,
+                context: $wingContext, ask: $wingAsk)
     }
 
     /// The note's items — one list, rendered by `noteMenu` and, in the
@@ -805,6 +816,24 @@ struct CommitBar: View {
             // stays as the belt; this is the braces. The availability rule is
             // the header's own kind — nil (still loading) hides with it.
             if model.header?.kind == .post {
+                // 13i-d U6 (k): the note's own Move/Copy to Wing ▸ — the Library
+                // and Pool rows' doors, one more renderer of the same acts:
+                // NOTE contexts only (the gate above — a pool has no wing
+                // doors), drawn only while another wing exists (P-2), listing
+                // the wings OTHER than the note's own.
+                if let wings, let context = wingContext,
+                   !wings.destinations(from: context.wingID).isEmpty {
+                    Divider()
+                    WingNoteDoors(
+                        wings: wings, postID: model.postID, title: context.title,
+                        fromWing: context.wingID, onAsk: { wingAsk = $0 },
+                        onDone: {
+                            Task {
+                                wingContext = await NoteMenuWingContext.load(
+                                    model.session, postID: model.postID)
+                            }
+                        })
+                }
                 Divider()
                 // 13l Act 2 (item 3) — HER DOOR, in the menu she went looking
                 // in. It is ordinary move-to-Trash and NOTHING else: Delete

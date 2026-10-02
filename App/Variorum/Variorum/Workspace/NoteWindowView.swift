@@ -42,6 +42,10 @@ struct NoteWindowView: View {
     @State private var router = ShellRouter()
     @State private var windowID = UUID()
     @State private var theme: ThemeStore
+    /// 13i-d U6 (k): this window's own wings model, so the note ▾ menu's
+    /// cross-wing doors render here too (R118 — no surface is behind
+    /// another); `RootView` hands its own to the main windows.
+    @State private var wings: WingsModel
     /// 13l Act 2 (item 3): its own AppKit window, so a delete of the one note
     /// it shows can close it. Handed over by `WindowKeyReporter`, which
     /// already reports it to the registry.
@@ -53,6 +57,7 @@ struct NoteWindowView: View {
         self.windows = windows
         self.postID = postID
         _theme = State(initialValue: ThemeStore(session: session))
+        _wings = State(initialValue: WingsModel(session: session))
     }
 
     /// THE MOUNT RULE, the same one fork the shell consults — with the
@@ -104,6 +109,7 @@ struct NoteWindowView: View {
             }
         }
         .environment(theme)
+        .environment(wings)
         .overlay(alignment: .bottom) {
             if let item = session.status.current {
                 StatusToast(
@@ -136,6 +142,7 @@ struct NoteWindowView: View {
             window?.close()
         }
         .task { await theme.start() }
+        .task { await wings.track() }
         .onAppear {
             // `showOnly` and not `select`: this window shows one note and
             // records nothing, which is what makes the greys above honest.

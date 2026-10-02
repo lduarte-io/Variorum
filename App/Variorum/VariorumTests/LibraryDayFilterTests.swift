@@ -559,9 +559,11 @@ struct LibraryDayFilterTests {
         calendar.timeZone = TimeZone(identifier: "UTC")!
         let now = try #require(
             DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
-        #expect(LibraryDayFace.closedLabel == "on day\u{2026}")
+        // 13i-d U6 (c), a JUSTIFIED EDIT — her §21 note: "'on day…' wants
+        // clearer wording"; the door now names what it filters by.
+        #expect(LibraryDayFace.closedLabel == "edited on\u{2026}")
         #expect(LibraryDayFace.openLabel(day: "2026-09-09", now: now, calendar: calendar)
-                == "on Sep 9")
+                == "edited on Sep 9")
         #expect(LibraryDayFace.dayWords(day: "not a day", now: now, calendar: calendar)
                 == "not a day", "a face draws what it has")
     }

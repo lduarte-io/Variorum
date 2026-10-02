@@ -217,6 +217,10 @@ struct RootView: View {
         // itself. A TRY, per her word — one modifier to put back.
         .toolbar(removing: .title)
         .environment(theme)
+        // 13i-d U6 (k): the shared wings model reaches the note ▾ menus (both
+        // bars render the cross-wing doors) without threading it through
+        // every pane — the theme store's own road; consumers read it optional.
+        .environment(wings)
         // 13f batch 5b: AppKit's own key events, reported to the registry —
         // the ONE place key-ness is decided (and it is sticky there: a
         // resign never un-keys, so ⌘-tabbing to another app does not tear

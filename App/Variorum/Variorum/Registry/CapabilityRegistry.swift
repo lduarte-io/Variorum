@@ -1856,7 +1856,8 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: BookFilterCopy.unavailableNote,
             availability: always),
         // 13i-d U4 — the archived line's Unarchive (the target is the row the
-        // door carries — `.archiveNote`'s `.native` precedent), and the
+        // door carries — `.archiveNote`'s `.native` precedent; 13i-d U6: the
+        // Library's Archived view's row is its second renderer, F-U4-4), and the
         // F-U3-5 rider: a gathering's hide-owned row (book scope — the sheet
         // carries its target).
         Capability(
@@ -1898,13 +1899,15 @@ nonisolated enum CapabilityRegistry {
             availability: always),
         Capability(
             id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
-            doors: [.contextMenu],
+            // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
+            doors: [.contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: always),
         Capability(
             id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
-            doors: [.contextMenu],
+            // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
+            doors: [.contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: always),

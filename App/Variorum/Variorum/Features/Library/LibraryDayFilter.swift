@@ -63,17 +63,20 @@ nonisolated enum LibraryDayFace {
     /// call sites read unchanged.
     static var calendar: Calendar { JournalDay.storeCalendar }
 
-    /// The door, closed: *on day…* — an invitation, in the chrome's own
-    /// ellipsis grammar.
-    static let closedLabel = "on day\u{2026}"
+    /// The door, closed: *edited on…* — an invitation, in the chrome's own
+    /// ellipsis grammar. 13i-d U6 (c) — her §21 note ("'on day…' wants
+    /// clearer wording"): the door names WHAT it filters by — the day a note
+    /// was EDITED (the same verb as the sort's `edited ·` beside it) — where
+    /// "on day…" named only a date. (Its RANGE is 13o's.)
+    static let closedLabel = "edited on\u{2026}"
 
-    /// The door, open: *on Sep 9* — the same day words every stamp in the
-    /// Library uses (`TimeStampFace.day`, core `Domain`).
+    /// The door, open: *edited on Sep 9* — the same day words every stamp in
+    /// the Library uses (`TimeStampFace.day`, core `Domain`).
     static func openLabel(
         day: String, now: Date, calendar: Calendar = LibraryDayFace.calendar,
         locale: Locale = .current
     ) -> String {
-        "on \(dayWords(day: day, now: now, calendar: calendar, locale: locale))"
+        "edited on \(dayWords(day: day, now: now, calendar: calendar, locale: locale))"
     }
 
     /// A day key in her own reading — *Sep 9*, or *Sep 9, 2025* when it is

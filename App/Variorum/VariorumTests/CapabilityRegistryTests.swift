@@ -479,6 +479,10 @@ struct CapabilityRegistryTests {
             // new line): the Bookcase masthead's WING SWITCHER (§21 Direction
             // C) renders New Wing… / Rename Wing… / Delete Wing….
             .union(WingSwitcherMenu.surfaceCapabilities)
+            // 13i-d U6 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the Library's ARCHIVED view renders `.unarchiveNote`
+            // on each row (F-U4-4 — its inline door, declared at last).
+            .union(ArchivedView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

@@ -366,19 +366,24 @@ struct BookIndexGroupingControl: View {
                 .pickerStyle(.inline)
                 .labelsHidden()
             }
-            Section(BookIndexGroupingCopy.familiesHeader) {
-                if families.isEmpty {
+            // 13i-d U6 (h) — F-U3-6, the DOUBLE DIVIDER: a `Section` header
+            // wrapping an inline `Picker` drew two hairlines (the section's
+            // and the picker's own inline section). The family picker now
+            // carries the header as ITS label — one section, one separator.
+            if families.isEmpty {
+                Section(BookIndexGroupingCopy.familiesHeader) {
                     Text(BookIndexGroupingCopy.noFamilies)
-                } else {
-                    Picker(BookIndexGroupingCopy.familiesHeader, selection: selection) {
-                        ForEach(families, id: \.id) { family in
-                            Text(BookIndexGroupingCopy.family(family.path))
-                                .tag(BookIndexGrouping.tagFamily(family.id))
-                        }
-                    }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
                 }
+            } else {
+                Picker(selection: selection) {
+                    ForEach(families, id: \.id) { family in
+                        Text(BookIndexGroupingCopy.family(family.path))
+                            .tag(BookIndexGrouping.tagFamily(family.id))
+                    }
+                } label: {
+                    Text(BookIndexGroupingCopy.familiesHeader)
+                }
+                .pickerStyle(.inline)
             }
             Picker(BookIndexGroupingCopy.none, selection: selection) {
                 Text(BookIndexGroupingCopy.none).tag(BookIndexGrouping.none)

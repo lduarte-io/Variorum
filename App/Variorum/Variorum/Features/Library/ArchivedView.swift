@@ -142,6 +142,11 @@ struct ArchivedView: View {
     /// shape one surface over, and its exact opposite in content: no clock.
     static let subtitle = "notes you set aside — kept, with no countdown"
     static let searchPrompt = "Search archived notes…"
+
+    /// The `.surface` acts this view renders (P-1's declared ⇔ rendered walk):
+    /// each row's inline Unarchive is `.unarchiveNote` — its second renderer
+    /// beside a book's archived line (13i-d U6 (h) — F-U4-4, routed here).
+    static let surfaceCapabilities: [CapabilityID] = [.unarchiveNote]
     static let emptyLine = "Nothing archived."
     static let noMatchesLine = "No archived note matches that."
 
@@ -196,7 +201,7 @@ struct ArchivedView: View {
                 Spacer(minLength: 8)
                 Button("Open") { openPost(item.postID) }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
-                Button("Unarchive") {
+                Button(CapabilityRegistry.capability(.unarchiveNote).verb) {
                     Task { await library.unarchive(postID: item.postID) }
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
