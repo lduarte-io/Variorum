@@ -208,6 +208,25 @@ struct BookcaseBoardBrainTests {
 // MARK: - The view model over a real session (E4)
 
 @MainActor
+/// Ladder A round 1, NIT 3 (P-2 — red by BEHAVIOURAL REVERT: the gate
+/// flipped to `true` turns the first case red; a new pure value has no
+/// pre-fix shape to run against): the book row's "Move to Shelf ▸" submenu
+/// is drawn only where it can act — a shelf-less wing's unshelved book has
+/// no destination (the empty submenu the walk's class bans).
+@Suite("The Move to Shelf gate (ladder A round 1, NIT 3)")
+struct MoveToShelfGateTests {
+    @Test func theSubmenuDrawsOnlyWhereItCanAct() {
+        #expect(!BookcaseBoard.moveToShelfCanAct(
+            shelfCount: 0, here: BookcaseBoard.unshelvedKey),
+            "no shelves + unshelved = nowhere to move — not drawn")
+        #expect(BookcaseBoard.moveToShelfCanAct(shelfCount: 1, here: BookcaseBoard.unshelvedKey),
+                "a shelf exists — it can move there")
+        #expect(BookcaseBoard.moveToShelfCanAct(shelfCount: 0, here: "s1"),
+                "on a (dying) shelf — Unshelved is a destination")
+        #expect(BookcaseBoard.moveToShelfCanAct(shelfCount: 3, here: "s1"))
+    }
+}
+
 @Suite("Bookcase view model (13i-d U1)", .serialized)
 struct BookcaseViewModelTests {
     private func settle(_ model: ShelfViewModel, until: () -> Bool) async {

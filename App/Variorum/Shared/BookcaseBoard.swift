@@ -195,6 +195,15 @@ nonisolated enum BookcaseBoard {
         return sorted(books.filter(\.starred)) + sorted(books.filter { !$0.starred })
     }
 
+    /// **Whether the book row's "Move to Shelf ▸" submenu can act** (P-2 —
+    /// ladder A round 1, NIT 3: a shelf-less wing's unshelved book rendered
+    /// an EMPTY submenu): there must be a shelf to move TO, or the book must
+    /// be ON one so Unshelved is a destination. `here` is the book's resolved
+    /// shelf key (`unshelvedKey` = the unshelved run).
+    static func moveToShelfCanAct(shelfCount: Int, here: String?) -> Bool {
+        shelfCount > 0 || here != unshelvedKey
+    }
+
     /// The № census over a set of books — every solo's count.
     static func census(_ books: [Queries.ShelfBook]) -> [BookcaseSolo: Int] {
         var counts: [BookcaseSolo: Int] = [:]

@@ -558,19 +558,24 @@ struct ShelfView: View {
         }
         // 13i-d U1 — MOVE TO SHELF ▸ (the menu road beside the drag — every
         // shelf of this wing, and Unshelved; the one it is on is omitted).
+        // Ladder A round 1, NIT 3 (P-2): in a shelf-less wing an unshelved
+        // book has nowhere to move — the submenu is not drawn
+        // (`BookcaseBoard.moveToShelfCanAct`, pinned).
         let here = model.shelfKey(of: reading.id)
-        Menu(CapabilityRegistry.capability(.moveBookToShelf).verb) {
-            ForEach(model.shelves, id: \.id) { shelf in
-                if here != shelf.id {
-                    Button(ShelfFace.label(shelf)) {
-                        Task { await model.reshelve(reading.id, to: shelf.id) }
+        if BookcaseBoard.moveToShelfCanAct(shelfCount: model.shelves.count, here: here) {
+            Menu(CapabilityRegistry.capability(.moveBookToShelf).verb) {
+                ForEach(model.shelves, id: \.id) { shelf in
+                    if here != shelf.id {
+                        Button(ShelfFace.label(shelf)) {
+                            Task { await model.reshelve(reading.id, to: shelf.id) }
+                        }
                     }
                 }
-            }
-            if here != BookcaseBoard.unshelvedKey {
-                if !model.shelves.isEmpty { Divider() }
-                Button(BookcaseCopy.unshelvedName) {
-                    Task { await model.reshelve(reading.id, to: nil) }
+                if here != BookcaseBoard.unshelvedKey {
+                    if !model.shelves.isEmpty { Divider() }
+                    Button(BookcaseCopy.unshelvedName) {
+                        Task { await model.reshelve(reading.id, to: nil) }
+                    }
                 }
             }
         }
