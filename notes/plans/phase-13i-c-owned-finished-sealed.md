@@ -676,7 +676,22 @@ README.md`. No editor seam, no `Sync/`, no schema in this unit (TEXTKIT2_NOTES /
   (IntakeOperations · Phase13icOutflow · ReadingFilter · OutflowRetirement) **66 / 4 green**; Mac
   `OutflowChooserTests` (6) + RuleEditor + BindDoor + BookSettingsSheet green (one fixture-order fix
   in my own new pin: a hand-add rides the outflow, so the member joins before it exists).
-- **Piece D:** NOT STARTED.
+- **Piece D — R-13ic-4's FACES:** DONE (commit "13i-c U3 piece D"). The rule editor's tree
+  extracted as `RuleTreeEditor` (one face for one grammar — the editor sheet and the mint sheet).
+  THE GATE: `RuleEditorModel.gatheringNeedsRule` (a gathering, editable rule, no term) → Save gated
+  (`canSave`) with "A gathering needs a rule." and the "Delete this gathering…" door (`.deleteBook`'s
+  `.surface` door — the registry gains it, the walk names `RuleEditorSheet`) → `BookStateDoors`'
+  confirm ("It goes to the Trash — Put back returns it for 30 days." · "No note is touched: a
+  gathering holds none.") → `deleteReading` → the editor closes (`.bookStateConfirms(_:onLanded:)`).
+  A BOOK's clear stays legal (the kill switch). The empty-state re-word (F-U1-3): "No rule — this
+  gathering shows nothing until it has one." THE MINT (F-U1-2): `RuleEditorModel(session:mintingIn:)`
+  (the mint mode — the wing's live tags, the name held on the model, `mint(through:)` via
+  `ReadingsViewModel.create(querySpec:wingId:)`), `MintGatheringSheet` (name · the tree · Create
+  disabled until a term exists · a refusal refuses-and-keeps); the shelf's "Create Smart Book…"
+  opens it (its "smart" wording LEFT for 13i-d's vocabulary sweep — the brief's allowance).
+  `GatheringRuleGateTests` (7) green; with RuleEditor · the registry walk · OutflowChooser ·
+  BookStateDoors · BookSettingsSheet — **68 tests / 6 suites passed** (one clock fix in my own new
+  pin: the Trash window reads the world's `now`, not the wall's).
 - **Piece E:** NOT STARTED.
 - **Piece F:** NOT STARTED.
 - No revert in flight. Zero app instances at open (`pgrep` clean); the author guard read OK (idle).

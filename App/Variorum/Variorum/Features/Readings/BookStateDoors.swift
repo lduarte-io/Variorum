@@ -546,11 +546,19 @@ struct BookStateConfirmSheet: View {
 
 extension View {
     /// Hosts the state doors' confirm over any surface that renders them —
-    /// ONE presentation road, so the shelf and the sheet cannot drift.
-    func bookStateConfirms(_ doors: BookStateDoors) -> some View {
+    /// ONE presentation road, so the shelf, the settings sheet and the rule
+    /// editor's gate cannot drift. `onLanded` hears an act that LANDED (the
+    /// rule editor closes after its gathering went to the Trash).
+    func bookStateConfirms(
+        _ doors: BookStateDoors, onLanded: ((CapabilityID) -> Void)? = nil
+    ) -> some View {
         sheet(item: Bindable(doors).pending) { item in
             BookStateConfirmSheet(confirm: item) {
-                Task { await doors.perform(item.act, readingID: item.readingID) }
+                Task {
+                    if await doors.perform(item.act, readingID: item.readingID) {
+                        onLanded?(item.act)
+                    }
+                }
             }
         }
     }

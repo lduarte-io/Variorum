@@ -45,7 +45,7 @@ final class ReadingsViewModel {
     func create(
         name: String, kind: ReadingKind, profile: String? = nil,
         sortField: SortField = .manual, sortDir: SortDirection = .asc,
-        querySpec: String? = nil
+        querySpec: String? = nil, wingId: String = ""
     ) async -> String? {
         do {
             let reading = try await session.runner.run { ops in
@@ -56,12 +56,13 @@ final class ReadingsViewModel {
                 // cross-device one her ruling deliberately tolerates.
                 try ops.assertBookNameIsFree(name)
                 // 13i-c (R-13ic-4): a gathering is minted WITH its rule — the
-                // op refuses a rule-less one; the mint door's inline editor is
-                // U3's (until then the Create Smart Book door speaks the
-                // refusal through the shared words).
+                // op refuses a rule-less one; the shelf's mint sheet drafts the
+                // rule inline and keeps Create disabled until it has a term
+                // (13i-c U3 — `MintGatheringSheet`).
                 return try ops.createReading(
                     name: name, kind: kind, profile: profile,
-                    sortField: sortField, sortDir: sortDir, querySpec: querySpec)
+                    sortField: sortField, sortDir: sortDir, querySpec: querySpec,
+                    wingId: wingId)
             }
             lastError = nil
             return reading.id

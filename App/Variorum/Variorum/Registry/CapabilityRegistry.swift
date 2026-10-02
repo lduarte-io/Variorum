@@ -1647,7 +1647,7 @@ nonisolated enum CapabilityRegistry {
         // extend THIS declaration. `always`, the row/sheet carries its target.
         Capability(
             id: .deleteBook, verb: BookStateCopy.deleteVerb, scope: .book,
-            doors: [.contextMenu],
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookStateCopy.unavailableNote,
             availability: always),

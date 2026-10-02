@@ -430,6 +430,10 @@ struct CapabilityRegistryTests {
             // `BookStateDoorSet`) and the rule editor's "Edit…" door in its
             // Collecting section. A new renderer is a new line here.
             .union(BookSettingsSheet.surfaceCapabilities)
+            // 13i-c U3 (the same class): the RULE EDITOR renders the Trash
+            // door R-13ic-4's gathering gate offers ("Delete this
+            // gathering…" — `.deleteBook`'s `.surface` door).
+            .union(RuleEditorSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

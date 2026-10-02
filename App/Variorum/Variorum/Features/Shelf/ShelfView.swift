@@ -58,6 +58,9 @@ struct ShelfView: View {
     @State private var bindOffer: BindOffer?
     /// 13i-b U3: the SPAWN door's name prompt — the gathering it copies.
     @State private var spawnSource: Reading?
+    /// 13i-c U3 (R-13ic-4): the MINT sheet — a gathering is made WITH its
+    /// rule. The sheet's item is the mint-mode editor (it carries the name).
+    @State private var mintEditor: RuleEditorModel?
     /// Batch 9 (R102): the list region hugs its content, so the
     /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
     /// geometry at every window size ("the start new post typing isn't
@@ -112,9 +115,15 @@ struct ShelfView: View {
                 let name = nameField
                 Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .book) }
             }
-            Button("Create Smart Book") {
-                let name = nameField
-                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .gathering) }
+            // 13i-c U3 (R-13ic-4, F-U1-2): the mint door REQUIRES a rule, so
+            // it opens the mint sheet (the rule drafted inline; Create
+            // disabled until a term exists) instead of minting a rule-less
+            // gathering the op refuses. Its "smart" wording stays until
+            // 13i-d's vocabulary sweep.
+            Button("Create Smart Book\u{2026}") {
+                let editor = RuleEditorModel(session: session, mintingIn: "")
+                editor.mintName = nameField
+                mintEditor = editor
             }
             // §14 item 10's "starting a 'new' journal as a separate
             // notebook" — a journal-profile book (dated, one entry after
@@ -158,6 +167,11 @@ struct ShelfView: View {
             Task { await model.refreshAggregates() }
         }) { editor in
             RuleEditorSheet(model: editor)
+        }
+        .sheet(item: $mintEditor, onDismiss: {
+            Task { await model.refreshAggregates() }
+        }) { editor in
+            MintGatheringSheet(model: editor, readings: readings)
         }
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)

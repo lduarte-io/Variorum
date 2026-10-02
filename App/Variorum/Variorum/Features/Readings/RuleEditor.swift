@@ -99,6 +99,17 @@ nonisolated enum RuleEditorCopy {
     /// The outflow chooser's empty state (13i-c U3 — "none" is legal).
     static let outflowNone = "nothing"
 
+    // 13i-c U3 — R-13ic-4's faces.
+    /// The gathering gate: a gathering with no term cannot be saved.
+    static let gatheringNeedsRule = "A gathering needs a rule."
+    /// The MINT sheet (the shelf's Create Smart Book door — its "smart"
+    /// wording stays until 13i-d's vocabulary sweep, said in the U3 RECORD).
+    static let mintTitle = "Create Smart Book"
+    static let mintEmpty =
+        "Add a tag or \u{2605} starred \u{2014} a gathering is made from its rule, and shows "
+        + "every note that matches it."
+    static let mintCreate = "Create"
+
     // The seam.
     static func saved(_ name: String) -> String { "Saved the rule for \u{201C}\(name)\u{201D}." }
     /// The offer, over the outflow SET (13i-c — P-13ic-11): N = the members
@@ -156,13 +167,53 @@ final class RuleEditorModel: Identifiable {
     /// Adopted once: the sheet's `.task` loads on appear, and a load that
     /// landed after her first edit must never reset the draft under her.
     @ObservationIgnored private var adopted = false
+    /// 13i-c U3 (R-13ic-4) — the MINT mode: a gathering not yet made, its
+    /// rule drafted inline before Create (the wing it will be minted in).
+    /// nil for an editor over an existing reading.
+    let mintWingID: String?
+    /// 13i-c U3 — the gathering gate's Trash door ("Delete this
+    /// gathering…"): the state doors' brain, so its confirm and act are the
+    /// ones every other book door uses.
+    let stateDoors: BookStateDoors
+
+    /// The mint mode's sheet id (it has no reading yet).
+    nonisolated static let mintKey = "mint:new-gathering"
+    /// The mint mode's NAME field — held HERE, not in the host's `@State`,
+    /// because the sheet's item IS this model (the `BindOffer` lesson: a
+    /// sheet reads only its item, so nothing it shows can be stale).
+    var mintName = ""
 
     init(session: AppSession, readingID: String) {
         self.session = session
         self.readingID = readingID
+        self.mintWingID = nil
+        self.stateDoors = BookStateDoors(session: session)
     }
 
+    /// The MINT editor (R-13ic-4: "the mint door requires a rule") — the
+    /// draft starts empty; the add menus offer the wing's live tags.
+    init(session: AppSession, mintingIn wingID: String) {
+        self.session = session
+        self.readingID = Self.mintKey
+        self.mintWingID = wingID
+        self.stateDoors = BookStateDoors(session: session)
+    }
+
+    var isMint: Bool { mintWingID != nil }
     var isBook: Bool { reading?.kind == .book }
+    /// **R-13ic-4's gate**: a GATHERING whose draft has no term. Its Save
+    /// disables ("A gathering needs a rule") and the Trash door is offered
+    /// in its place — a rule-less gathering "doesn't make sense" (hers). A
+    /// BOOK's clear stays legal (the kill switch); a malformed rule is never
+    /// edited here at all.
+    var gatheringNeedsRule: Bool {
+        reading?.kind == .gathering && ruleIsEditable && draft == nil
+    }
+    /// Save is a door only when something changed AND the gate is open.
+    var canSave: Bool { isDirty && !saving && !gatheringNeedsRule }
+    /// The mint's rule, encoded — nil until the draft has a term (Create
+    /// disables until then; the op's `gatheringRequiresRule` stands behind).
+    var mintSpec: String? { (try? RuleGrammar.encode(draft)) ?? nil }
     /// A malformed stored rule is never edited here (`RuleEditing.needsWrite`).
     var ruleIsEditable: Bool { stored != .malformed }
     var rows: [RuleEditing.Row] { RuleEditing.rows(of: draft) }
@@ -203,6 +254,13 @@ final class RuleEditorModel: Identifiable {
 
     func load() async {
         guard !adopted else { return }
+        if let wing = mintWingID {
+            let tags = (try? await session.database.read { db in
+                try Queries.allTags(db).filter { $0.wingId == wing }
+            }) ?? []
+            adoptMint(tags: tags)
+            return
+        }
         let id = readingID
         let fetched = try? await session.database.read { db -> (Reading?, [Tag], [String: String]) in
             guard let reading = try Queries.reading(db, id: id) else { return (nil, [], [:]) }
@@ -228,6 +286,27 @@ final class RuleEditorModel: Identifiable {
         if case .rule(let term) = stored { draft = term } else { draft = nil }
         seating = reading.intakeSeating ?? .auto
         outflow = OutflowDraft(reading.autoTagIDs)
+    }
+
+    /// The mint mode's adoption (internal for pins, like `adopt`).
+    func adoptMint(tags: [Tag]) {
+        adopted = true
+        self.tags = tags
+    }
+
+    // MARK: The mint (R-13ic-4 — a gathering is minted WITH its rule)
+
+    /// Mints the gathering through `ReadingsViewModel.create(querySpec:)` —
+    /// the shelf's own creation road (the duplicate-name guard inside its
+    /// runner closure, the op's rule guard behind it). Returns the new id,
+    /// or nil with the refusal left on `readings.lastError` (the sheet shows
+    /// it and stays open — refuse and keep).
+    func mint(through readings: ReadingsViewModel) async -> String? {
+        guard let wing = mintWingID, let spec = mintSpec else { return nil }
+        let trimmed = mintName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return await readings.create(
+            name: trimmed.isEmpty ? "Untitled" : trimmed, kind: .gathering,
+            querySpec: spec, wingId: wing)
     }
 
     // MARK: The edits (each one `RuleEditing`'s)
@@ -339,6 +418,11 @@ final class RuleEditorModel: Identifiable {
 // MARK: - The face
 
 struct RuleEditorSheet: View {
+    /// The REGISTRY acts this sheet renders as `.surface` doors (P-1's walk):
+    /// the Trash door R-13ic-4's gathering gate offers ("Delete this
+    /// gathering…").
+    static let surfaceCapabilities: [CapabilityID] = [.deleteBook]
+
     let model: RuleEditorModel
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -360,34 +444,29 @@ struct RuleEditorSheet: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
-            if model.ruleIsEditable {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if model.rows.isEmpty {
-                            ChromeNotice(
-                                tokens: tokens,
-                                text: model.isBook
-                                    ? RuleEditorCopy.noRuleBook : RuleEditorCopy.noRuleGathering,
-                                lines: 2)
-                            adder(target: nil, depth: 0)
-                        }
-                        ForEach(model.rows, id: \.identity) { row in
-                            rowView(row)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 4)
-                }
-                .frame(minHeight: 140, maxHeight: 340)
-                if model.carriesLegacy {
-                    ChromeNotice(tokens: tokens, text: RuleEditorCopy.legacyNotice, lines: 3)
-                }
-            } else {
-                ChromeNotice(tokens: tokens, text: RuleEditorCopy.malformedNotice, lines: 3)
-            }
+            RuleTreeEditor(
+                model: model, tokens: tokens,
+                emptyNotice: model.isBook
+                    ? RuleEditorCopy.noRuleBook : RuleEditorCopy.noRuleGathering)
             if model.isBook {
                 Rectangle().fill(tokens.line).frame(height: 1)
                 collectingRows
+            }
+            // 13i-c U3 — R-13ic-4's GATE: a gathering with no term cannot be
+            // saved (the op refuses `gatheringRequiresRule`); the honest door
+            // in Save's place is the ordinary Trash road, confirmed.
+            if model.gatheringNeedsRule {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    ChromeNotice(
+                        tokens: tokens, text: RuleEditorCopy.gatheringNeedsRule,
+                        ink: tokens.ink, lines: 2)
+                    Spacer(minLength: 8)
+                    Button(tokens.chromeLabel(BookStateCopy.deleteGatheringDoor)) {
+                        Task { await model.stateDoors.open(.deleteBook, readingID: model.readingID) }
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+                    .help(CapabilityRegistry.capability(.deleteBook).verb)
+                }
             }
             HStack {
                 Spacer()
@@ -398,19 +477,100 @@ struct RuleEditorSheet: View {
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .keyboardShortcut(.defaultAction)
-                .disabled(!model.isDirty || model.saving)
+                .disabled(!model.canSave)
             }
         }
         .padding(16)
         .frame(minWidth: 480, alignment: .leading)
         .background(tokens.surface)
         .task { await model.load() }
+        // The gate's confirm; a landed delete closes the editor (its
+        // gathering is in the Trash — there is nothing left to edit).
+        .bookStateConfirms(model.stateDoors) { act in
+            if act == .deleteBook { dismiss() }
+        }
         #if DEBUG
         .onAppear { recordSettings() }
         .onDisappear { RuleEditorProbe.forget(model.readingID) }
         .onChange(of: model.isDirty) { _, _ in recordSettings() }
         .onChange(of: model.outflow) { _, _ in recordSettings() }
+        .onChange(of: model.gatheringNeedsRule) { _, _ in recordSettings() }
         #endif
+    }
+
+    // MARK: The book's Collecting rows
+
+    private var collectingRows: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(RuleEditorCopy.joinLabel))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                VoicedChip(
+                    tokens: tokens, text: RuleEditorCopy.joinAuto, on: model.seating == .auto,
+                    action: { model.seating = .auto }, lines: 1)
+                VoicedChip(
+                    tokens: tokens, text: RuleEditorCopy.joinArrivals,
+                    on: model.seating == .arrivals,
+                    action: { model.seating = .arrivals }, lines: 1)
+            }
+            // 13i-c U3 — THE OUTFLOW CHOOSER (R-13ic-1): a chosen, ordered,
+            // optional set, independent of the rule above.
+            OutflowChooser(
+                tokens: tokens, draft: Bindable(model).outflow, tags: model.tags,
+                label: model.outflowLabel)
+        }
+    }
+
+    #if DEBUG
+    private func recordSettings() {
+        RuleEditorProbe.recordSettings(
+            model.readingID,
+            collecting: model.isBook,
+            saveEnabled: model.canSave,
+            notice: model.ruleIsEditable
+                ? (model.carriesLegacy ? RuleEditorCopy.legacyNotice : nil)
+                : RuleEditorCopy.malformedNotice,
+            outflow: model.isBook ? model.outflow.ids.map(model.outflowLabel) : [],
+            gate: model.gatheringNeedsRule ? RuleEditorCopy.gatheringNeedsRule : nil,
+            gateDoor: model.gatheringNeedsRule ? BookStateCopy.deleteGatheringDoor : nil)
+    }
+    #endif
+}
+
+/// **THE RULE'S TREE, EDITABLE** (13i-c U3 — extracted from the editor sheet
+/// so the MINT sheet drafts a rule with the SAME rows, doors and probe; one
+/// face for one grammar). It draws the rows `RuleEditing` derives, the add
+/// doors, and the legacy/malformed notices; `emptyNotice` is the host's
+/// sentence for a draft with no term.
+struct RuleTreeEditor: View {
+    let model: RuleEditorModel
+    let tokens: VoiceTokens
+    let emptyNotice: String
+
+    var body: some View {
+        if model.ruleIsEditable {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 4) {
+                    if model.rows.isEmpty {
+                        ChromeNotice(tokens: tokens, text: emptyNotice, lines: 2)
+                        adder(target: nil, depth: 0)
+                    }
+                    ForEach(model.rows, id: \.identity) { row in
+                        rowView(row)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 4)
+            }
+            .frame(minHeight: 140, maxHeight: 340)
+            if model.carriesLegacy {
+                ChromeNotice(tokens: tokens, text: RuleEditorCopy.legacyNotice, lines: 3)
+            }
+        } else {
+            ChromeNotice(tokens: tokens, text: RuleEditorCopy.malformedNotice, lines: 3)
+        }
     }
 
     // MARK: Rows
@@ -520,31 +680,6 @@ struct RuleEditorSheet: View {
         }
     }
 
-    // MARK: The book's Collecting rows
-
-    private var collectingRows: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text(tokens.chromeLabel(RuleEditorCopy.joinLabel))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                VoicedChip(
-                    tokens: tokens, text: RuleEditorCopy.joinAuto, on: model.seating == .auto,
-                    action: { model.seating = .auto }, lines: 1)
-                VoicedChip(
-                    tokens: tokens, text: RuleEditorCopy.joinArrivals,
-                    on: model.seating == .arrivals,
-                    action: { model.seating = .arrivals }, lines: 1)
-            }
-            // 13i-c U3 — THE OUTFLOW CHOOSER (R-13ic-1): a chosen, ordered,
-            // optional set, independent of the rule above.
-            OutflowChooser(
-                tokens: tokens, draft: Bindable(model).outflow, tags: model.tags,
-                label: model.outflowLabel)
-        }
-    }
-
     #if DEBUG
     private func drawn(_ row: RuleEditing.Row) -> RuleEditorProbe.DrawnRow {
         let words: String = switch row.kind {
@@ -562,16 +697,6 @@ struct RuleEditorSheet: View {
             depth: row.depth, negations: row.negations, words: words, doors: doors)
     }
 
-    private func recordSettings() {
-        RuleEditorProbe.recordSettings(
-            model.readingID,
-            collecting: model.isBook,
-            saveEnabled: model.isDirty && !model.saving,
-            notice: model.ruleIsEditable
-                ? (model.carriesLegacy ? RuleEditorCopy.legacyNotice : nil)
-                : RuleEditorCopy.malformedNotice,
-            outflow: model.isBook ? model.outflow.ids.map(model.outflowLabel) : [])
-    }
     #endif
 }
 
@@ -606,6 +731,9 @@ enum RuleEditorProbe {
         var notice: String?
         /// 13i-c U3: the outflow chooser's rows, in order, as drawn.
         var outflow: [String] = []
+        /// 13i-c U3: R-13ic-4's gate words and its Trash door, when shown.
+        var gate: String?
+        var gateDoor: String?
     }
 
     private(set) static var drawn: [String: Drawn] = [:]
@@ -630,13 +758,15 @@ enum RuleEditorProbe {
 
     static func recordSettings(
         _ readingID: String, collecting: Bool, saveEnabled: Bool, notice: String?,
-        outflow: [String] = []
+        outflow: [String] = [], gate: String? = nil, gateDoor: String? = nil
     ) {
         var entry = drawn[readingID, default: Drawn()]
         entry.collecting = collecting
         entry.saveEnabled = saveEnabled
         entry.notice = notice
         entry.outflow = outflow
+        entry.gate = gate
+        entry.gateDoor = gateDoor
         drawn[readingID] = entry
     }
 
