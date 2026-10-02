@@ -351,3 +351,37 @@ before the call; the fix red-first by behavioral revert.)*
   spoken" (round 2's NIT); `ShelfQueries.swift`'s Pool-doc "NO rule shows every note in its wing"
   re-worded to the R-13ic-4 truth (shows NOTHING — stale since U1; the sanity pass's observation).
   Doc-only; no pin possible on either (nothing executable changed).
+
+---
+
+## THE LADDER CLOSES AT TWO ROUNDS
+
+The cross-model flow is complete: round 1 (1 MAJOR · 4 MINOR · 2 NIT, seven implementer AGREEs, 5
+fixed red-first · 2 recorded) → round 2's cold re-review (5/5 fixes verified FIXED, by-revert on
+the core pins; one doc NIT) → the implementer's sanity pass (six CLEAN, 2 concerns) → the
+reviewer's final word (concern 1 CONFIRMED-FIXED red-first; concern 2 CONFIRMED-RECORDED; both doc
+NITs fixed). No new BLOCKER or MAJOR after round 1 — round 3 was never earned (the cap stands
+unused).
+
+**The close's suites (this session, 2026-10-02 — zero instances at every Mac run and at the
+close, `pgrep`-verified):**
+- core `swift test` FULL — **2008 tests / 213 suites passed** (1 standing env-gated skip);
+- Mac `build-for-testing` GREEN + the touched suites, the REGISTRY WALK and the full TUTORIAL
+  SPINE in one run — **189 tests / 21 suites passed** (MembershipChoice incl. the two new concern-1
+  pins · BookArrivals · ArrivalArms · BookStateDoors · JournalBooks · BookStructureModel ·
+  BookDrop · TimelineAndReadings · PoolTuckFace · CapabilityRegistry · the eleven TutorialWalk
+  suites);
+- phone `VariorumMobile` generic iOS Simulator — **BUILD SUCCEEDED**.
+
+**Final commits of the ladder:** rounds 1–2 as recorded above, then 674d841f (the final word:
+concern 1's fix + pins, concern 2's recordings, the two doc NITs). Every commit pushed; no
+trailers anywhere in `ca3b8a85..HEAD` (re-grepped).
+
+**Handed to the orchestrator** (ledger row 6 flips at its hand; then HER window — §11 — and the
+closeout): the closeout obligations consolidated — QUESTIONS #169's paragraphs (round 1's two),
+the 13i-d KnownIssues rows (the daily arm's wing; the generic `lockedReading` word-table arms, NOW
+INCLUDING `SeededBookRestore`), the 13s copy row (the delete receipt + the "(M archived)" suffix
+candidate), the MOBILE PARITY row's additions (the phone's Today-door and membership-diverge
+sealed sentences, beside F-U4-6), round 1's standing list (AppSpec §7/§9 lines, the §12 entry at
+the deploy, the §4 row-15 correction, the rule-less-gathering KnownIssues flip), and the
+DerivedData tidy (`13ic-ladder`, `13ic-ladder-ios`).
