@@ -132,6 +132,50 @@ struct GatheringExtentRefusalTests {
         }
     }
 
+    /// 13i-d U5 RIDER R1 (F-U4-5, RULED at the architect's adjudication after
+    /// U4 — the same letter as the (c) arm): THE MINT refuses a gathering
+    /// born with an extent, so the door's shape is closed before any face
+    /// passes one. Nothing is inserted and no outbox row is written; a
+    /// gathering minted WITHOUT extents and a BOOK minted with them both still
+    /// mint (controls inside the pin).
+    @Test func mintingAGatheringWithAnExtentRefusesAndMintsNothing() throws {
+        try withOperations { ops, db in
+            let tag = try ops.createTag(name: "mint-tag")
+            let rule = try RuleGrammar.encode(.tag(tag.id))
+            let readingsBefore = try db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM reading") ?? 0
+            }
+            try db.clearOutbox()
+            func refusesAsWrongKind(_ error: any Error) -> Bool {
+                if case OperationError.wrongReadingKind(_, expected: .book) = error { return true }
+                return false
+            }
+            #expect(performing: {
+                try ops.createReading(
+                    name: "capped", kind: .gathering, querySpec: rule, maxPosts: 5)
+            }, throws: refusesAsWrongKind)
+            #expect(performing: {
+                try ops.createReading(
+                    name: "targeted", kind: .gathering, querySpec: rule, wordTarget: 40_000)
+            }, throws: refusesAsWrongKind)
+            let readingsAfter = try db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM reading") ?? 0
+            }
+            #expect(readingsAfter == readingsBefore, "a refused mint inserts no reading row")
+            let outboxReadings = try db.read {
+                try Int.fetchOne(
+                    $0, sql: "SELECT COUNT(*) FROM sync_outbox WHERE table_name = 'reading'") ?? 0
+            }
+            #expect(outboxReadings == 0, "a refused mint queues nothing")
+            // Controls: the extent-free gathering and the extent-bearing book.
+            let plain = try ops.createReading(name: "plain", kind: .gathering, querySpec: rule)
+            #expect(plain.maxPosts == nil && plain.wordTarget == nil)
+            let book = try ops.createReading(
+                name: "bounded", kind: .book, maxPosts: 5, wordTarget: 40_000)
+            #expect(book.maxPosts == 5 && book.wordTarget == 40_000)
+        }
+    }
+
     /// BOOKS are untouched (control): a book still finishes and takes both
     /// extents.
     @Test func aBookStillFinishesAndTakesItsExtents() throws {

@@ -328,7 +328,14 @@ struct ReadingAssemblyQueryTests {
             let spec = try Queries.SmartQuerySpec(profile: "journal").encodedJSON()
             let reading = try ops.createReading(
                 name: "latest two", kind: .gathering,
-                sortField: .entryDate, sortDir: .desc, querySpec: spec, maxPosts: 2)
+                sortField: .entryDate, sortDir: .desc, querySpec: spec)
+            // 13i-d U5 R1: a LEGACY capped gathering, written raw (the mint
+            // refuses an extent now — U4's re-staging precedent; the
+            // assembly still honours a synced legacy cap).
+            try db.write {
+                try $0.execute(
+                    sql: "UPDATE reading SET max_posts = 2 WHERE id = ?", arguments: [reading.id])
+            }
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(entries.map(\.postID) == [new.id, mid.id])
             _ = old

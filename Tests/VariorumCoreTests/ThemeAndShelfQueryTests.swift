@@ -357,8 +357,15 @@ struct ShelfQueryTests {
             try ops.applyTag(stars.id, toPost: tagged.id)
             let smart = try ops.createReading(
                 name: "star-notes", kind: .gathering,
-                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
-                wordTarget: 100)
+                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+            // 13i-d U5 R1: a LEGACY targeted gathering — the mint refuses an
+            // extent now, so the fixture writes the raw row (U4's precedent:
+            // how a pre-13i-d or synced one exists). Assertions untouched.
+            try db.write {
+                try $0.execute(
+                    sql: "UPDATE reading SET word_target = 100 WHERE id = ?",
+                    arguments: [smart.id])
+            }
 
             let counts = try db.read { try Queries.bookWordCounts($0) }
             #expect(counts[book.id] == 3, "the archived member's words never count")
@@ -381,8 +388,13 @@ struct ShelfQueryTests {
             }
             let smart = try ops.createReading(
                 name: "star-notes", kind: .gathering,
-                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
-                maxPosts: 2)
+                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+            // 13i-d U5 R1: a LEGACY capped gathering, written raw (the mint
+            // refuses an extent now — U4's re-staging precedent).
+            try db.write {
+                try $0.execute(
+                    sql: "UPDATE reading SET max_posts = 2 WHERE id = ?", arguments: [smart.id])
+            }
 
             let curated = try ops.createReading(name: "orbit", kind: .book)
             let a = try ops.createPost(title: "a", profile: .generic)

@@ -394,6 +394,15 @@ struct BookcaseReadTests {
     /// red-on-old: the OUTPUT per wing reading was always the same). The
     /// three count statements also keep naming no `container` (the region
     /// pin below holds beside this one).
+    /// Does a plan SCAN the pair table — under its alias (`rp`/`rs`) or its
+    /// own name? (13i-d U5 rider R2: SQLite prints whichever the statement
+    /// used, so an honest anti-scan arm must reject both.)
+    static func scansPair(_ plan: String, alias: String) -> Bool {
+        let table = alias == "rs" ? "reading_section" : "reading_post"
+        return plan.contains("SCAN \(alias) ") || plan.hasSuffix("SCAN \(alias)")
+            || plan.contains("SCAN \(table)")
+    }
+
     @Test func theWingScopedStatementsDriveFromTheWingNeverTheStore() throws {
         try withOperations { ops, db in
             let book = try ops.createReading(name: "b", kind: .book)
@@ -414,8 +423,28 @@ struct BookcaseReadTests {
                 }.joined(separator: "\n")
                 #expect(plan.contains("SEARCH \(pair) USING"),
                         "\(name): the wing's readings drive and the pair table is entered by index; plan was:\n\(plan)")
-                #expect(!plan.contains("SCAN reading_post") && !plan.contains("SCAN reading_section"),
+                // 13i-d U5 rider R2 (ladder A round 2's NIT): EXPLAIN QUERY
+                // PLAN prints the ALIAS when the statement aliases the table
+                // and the TABLE when it does not — the old arm named only the
+                // table, which these aliased statements can never print. The
+                // arm now rejects either spelling of a scan of the pair.
+                #expect(!Self.scansPair(plan, alias: pair),
                         "\(name): never a store-wide scan; plan was:\n\(plan)")
+            }
+            // …and the arm has TEETH: the store-wide forms (the nil-wing
+            // branches the phone still reads) DO plan as a scan of the pair
+            // alias, so the assertion above is a live check, not dead weight.
+            for (name, sql, pair) in [
+                ("members", Queries.bookcaseMemberCountsSQL(wingScoped: false), "rp"),
+                ("sections", Queries.bookcaseSectionCountsSQL(wingScoped: false), "rs"),
+                ("arrivals", Queries.bookcaseArrivalCountsSQL(wingScoped: false), "rp"),
+            ] {
+                let plan = try db.read { database in
+                    try Row.fetchAll(database, sql: "EXPLAIN QUERY PLAN \(sql)")
+                        .map { ($0["detail"] as String?) ?? "" }
+                }.joined(separator: "\n")
+                #expect(Self.scansPair(plan, alias: pair),
+                        "\(name) (store-wide control): the arm must be able to fire; plan was:\n\(plan)")
             }
             for (name, sql) in [
                 ("members", Queries.bookcaseMemberCountsSQL(wingScoped: true)),

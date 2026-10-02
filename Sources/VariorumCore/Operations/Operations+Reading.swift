@@ -34,6 +34,13 @@ extension Operations {
             if intakeSeating != nil || !outflow.isEmpty, kind != .book {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
+            // 13i-d U5 rider R1 (F-U4-5, RULED — the (c) arm's letter at the
+            // mint: the sitting record §3, "a gathering has NO finish, word
+            // target or capacity"): a gathering is never BORN with an extent.
+            // No face passes one; the guard closes the door's shape first.
+            if kind == .gathering, maxPosts != nil || wordTarget != nil {
+                throw OperationError.wrongReadingKind(id: id, expected: .book)
+            }
             for tagID in outflow {
                 let tag = try liveTag(db, tagID)
                 guard tag.wingId == wingId else {

@@ -1525,7 +1525,7 @@ subagents. Logs: the repo's gitignored `scratchpad/13id-u5/`.
 | # | piece | status |
 |---|---|---|
 | 1 | Record skeleton + the design + the book-move proposal + evidence named | DONE (this commit) |
-| 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | NOT-STARTED |
+| 2 | Riders R1 (`createReading(kind: .gathering)` refuses a non-nil extent) + R2 (the alias-honest anti-scan arm) | DONE (this commit) — R1 RED on the pre-fix op (4 issues, `r1-red.log`), green after; three legacy fixtures re-staged as raw rows (55/6 green); R2's arm rejects BOTH spellings and a new control proves it fires on the store-wide forms (27/4 green) |
 | 3 | Core — the WING OPS (`createWing` · `renameWing` · `deleteWing` refusing unless empty, naming contents · `assertWingNameIsFree`) + `Queries.wings` / `wingContents` + the `wingScope` fragment + pins | NOT-STARTED |
 | 4 | Core — the TAG ops made wing-honest (`createTag(wingID:)`, path uniqueness per wing, `renameTag`/`deleteTag` subtrees per wing, `tagSubtree`/`taggedPostItems`/`everythingTagged` per wing, `applyTag` refuses another wing's tag) + red-on-old pins | NOT-STARTED |
 | 5 | Core — the cross-wing MEMBERSHIP guard (`addPostToReading` + copy-in / move-in) + THE DAILY JOURNAL IS HOME-ONLY (`setDailyJournalBook` refuses a non-Home book; the mint's Home explicit; ⌘J's day lookup scoped to Home) + row 105's red-on-old pin | NOT-STARTED |
@@ -1684,9 +1684,19 @@ shared primitive; its own edges are numbered P-13id-U5-7.
 
 ### EVIDENCE (named now; counts PENDING until each run lands)
 
-- R1 — `createReading(kind: .gathering, maxPosts:/wordTarget:)` refuses: red-on-old PENDING.
-- R2 — the anti-scan arm made alias-honest; shown to FAIL on the store-wide plan by behavioural
-  revert: PENDING.
+- **R1 RED-ON-OLD:** `GatheringExtentRefusalTests.mintingAGatheringWithAnExtentRefusesAndMintsNothing`
+  on the pre-fix `createReading` — **4 issues** (both mints returned a capped/targeted gathering; 2
+  reading rows inserted; 2 outbox rows queued — `r1-red.log`); green after. Three fixtures that
+  staged a LEGACY capped/targeted gathering THROUGH the mint were re-staged as the raw row, U4's
+  precedent, assertions untouched (`ThemeAndShelfQueryTests` ×2, `ReadingAssemblyQueryTests` ×1) —
+  55 tests / 6 suites green with the R1 suite.
+- **R2 — the arm made honest, with a control that proves it can fire.** The round-2 NIT's trace was
+  half the story: EXPLAIN prints the ALIAS when a statement aliases the table (`SEARCH rp …`) and
+  the TABLE when it does not — and the store-wide (nil-wing) forms are UNALIASED, planning as
+  `SCAN reading_post USING INDEX uq_reading_post_live` / `SCAN reading_section …`. Seen directly:
+  the first honest cut (alias-only) put its new store-wide CONTROL red — 3 issues, the plans quoted
+  in `r1-red.log`. The arm now rejects either spelling (`BookcaseReadTests.scansPair`), and the
+  control asserts it FIRES on all three store-wide forms; 27 tests / 4 suites green.
 - The wing ops' state-transition pins (mint · rename · the delete refusal's exact counts · the
   empty delete tombstoning shelves on one stamp · Home refused): PENDING.
 - F-U5-2's bug-class pins red-on-old (tag subtree rename/delete cross-wing; path uniqueness per
