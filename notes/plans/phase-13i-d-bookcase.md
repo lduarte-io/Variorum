@@ -572,6 +572,20 @@ around. Her real-store app, if running, is never quit; the closeout's install re
 zero-instance window and is HELD to her bundle if none arrives. Walk drives run only if the
 machine is unlocked and author-free; otherwise the walk records and folds into the next window.
 
+**Her two riders (same evening, 2026-10-02, verbatim):** *"ok i'll try shelf drags when I walk
+everything"* — F-U1-4's drags are CONFIRMED to her combined walk (the list above carries them);
+and *"also, only stop if you're actually above ~750k"* — **the context cutover guideline for
+THIS run is raised to ~750k** (her amendment of the ~500k guideline; the resiliency protocol's
+clarification still applies on top: finish a nearly-done stage rather than cut mid-seam). The
+mid-phase handoff seam stays after LADDER A, taken only if the orchestrator is actually above
+~750k there.
+
+**And her third (as she left, verbatim):** *"stepping away from my computer, it's yours for the
+night"* — the AUTHOR-FREE WINDOW IS OPEN: the orchestrator's composed walk at the bank seam may
+drive (dev-store Debug only, own `caffeinate -d`, her real-store instance never touched — if one
+lives, it is left alone and only the zero-instance acts are held); the overnight
+`caffeinate -dims` runs detached per the resiliency protocol and the closeout ends it.
+
 ## U1 BRIEF — THE BOOKCASE BOARD (`opus-implementer`; read this WHOLE file first)
 
 **Required reading, in order (reading is never delegated):** CLAUDE.md + its auto-loaded canon ·
