@@ -2338,6 +2338,103 @@ revert in flight. No subagents. Logs: the repo's gitignored `scratchpad/13id-u5b
   ends empty; Delete succeeds, its refusal naming the road beforehand) · a finished book riding
   whole · the daily Journal's refusal · Put back across a moved wing (stays out, same-wing only).
 
+## U6 RECORD — THE VOCABULARY SWEEP (+ ACT 0: the cross-wing undo guard) (`opus-implementer`, 2026-10-02)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+
+Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (R-13id-1…6, the
+constitution, ledger row 7, every adjudication — ACT 0's ruling in the U5b one, the riders routed
+across U1/U2/U3/U4/U5's — the U1–U5b RECORDs, the away-run posture, the traps); the plan's item 5 +
+item 10 text; KnownIssues rows 103 / 106 / 111; the sitting record §1–§26 (§9, §14's close, §21, §25
+closely); `notes/SessionResiliencyProtocol.md` whole; QUESTIONS #170–#175 (next free **#176**). The
+undo machinery read in full: `UndoStack` (undo/redo/clearRedoFuture), `Operations+Diverge.swift`,
+`Operations+ReadingConversion.swift`, `reapplyMintedContainer`, the Copy-In registration, the
+revival pass, `Queries.revivalWingScope` and both Put-back revival sites. No `Sync/`, schema, custody
+or editor-seam work planned. No revert in flight. No subagents. Logs: the repo's gitignored
+`scratchpad/13id-u6/`.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | Record skeleton + the design + evidence named | DONE (this commit) |
+| 2 | ACT 0 — red-on-old pins on the traced recipes (diverge → move the book → ⌥⌘Z; bind → ⌥⌘Z → move the note → ⇧⌥⌘Z) + the sibling (`reapplyDiverge`: diverge → ⌥⌘Z → move the book → ⇧⌥⌘Z) + the already-guarded sibling's control (`reapplyMintedContainer` through `restoreContainer`) — committed RED on purpose | NOT-STARTED |
+| 3 | ACT 0 — the guard (`Queries.membershipRevivalStaysInOneWing` over `revivalWingScope`; the three roads return before any write) → green | NOT-STARTED |
+| 4 | (g) F-U3-4 — TRACE the chip's "in 2 books" first; bug-class ⇒ red-on-old pin + fix, else words | NOT-STARTED |
+| 5 | (d) row 106 — the generic `lockedReading` arms + `SeededBookRestore` speak Unseal where the book is sealed | NOT-STARTED |
+| 6 | (f) item 10's dismiss receipt | NOT-STARTED |
+| 7 | (a) Shelf → Bookcase · "smart" → gathering/living (the navigator footer, Create Smart Book → the gathering mint's words, the pad's placeholder, ⌘K's label, every remnant) | NOT-STARTED |
+| 8 | (e) row 111's four items | NOT-STARTED |
+| 9 | (b) a wing presents as a SEPARATE LIBRARY (the switcher's and doors' language) | NOT-STARTED |
+| 10 | (c) the Library's "Posts" → "Notes" (§21) | NOT-STARTED |
+| 11 | (h) F-U3-6 (the double divider) + F-U4-4 (the Archived view's Unarchive declared) | NOT-STARTED |
+| 12 | (i) F-U4-7 — the untitled-note naming split (align, or record for 13s with the reason) | NOT-STARTED |
+| 13 | (j) row 103's LIBRARY half — the quiet-receipt host | NOT-STARTED |
+| 14 | (k) the note ▾ menu's Move/Copy to Wing renderer | NOT-STARTED |
+| 15 | The GREP PINS banning the dead spellings (the 18j literal-colour pin's form) | NOT-STARTED |
+| 16 | Suites at the END (core full; Mac named incl. the registry walk + the eleven tutorial suites; phone test build) | NOT-STARTED |
+| 17 | The screenshot walk ×4 into `notes/plans/13id-screens/u6/` | NOT-STARTED |
+| 18 | Record close · QUESTIONS #176 · KnownIssues rows 103 / 106 / 111 · ledger row 7 | NOT-STARTED |
+
+### THE DESIGN (settled before building; PROVISIONAL where marked — each numbered below)
+
+- **ACT 0 (F-U5b-2 RULED (a)) — THE SIBLING MAP, traced from the code (every structural inverse or
+  redo that revives a `reading_post` row):**
+  1. `revertDiverge` (traced recipe (i)) — revives the ORIGINAL's row in the book with a live-post
+     guard only. GUARDED here.
+  2. `reapplySmartConversion` (traced recipe (ii)) — revives every row the un-bind took, live-post +
+     no-live-pair guards only. GUARDED here.
+  3. **`reapplyDiverge` — a SIBLING the grep found:** diverge O in B → ⌥⌘Z (O's row back, the copy C
+     dead) → move B to another wing (O rides as B's member; C, dead, stays) → ⇧⌥⌘Z: `restoreContainer`
+     brings C back WITHOUT its row (F-U5b-1's guard), then the flip below it revives C's row in B with
+     a live-post guard only — C in the old wing, B in the new: a CROSSING. GUARDED here.
+  4. `reapplyMintedContainer` (Copy In, Duplicate as Version, Import, …) — revives rows only through
+     `restoreContainer`, already guarded at the row level by F-U5b-1 (the copy comes back bookless —
+     exactly what the same road does when the book was DELETED meanwhile). No change; pinned as a
+     CONTROL (green on both sides of ACT 0 — honest, not a fix).
+  5. Not revivals: `revertSmartConversion` (tombstones only), `revertMintedContainer`, every
+     block-level entry (`container_block`, never `reading_post`). `restoreContainer`/`restoreReading`
+     are F-U5b-1's (guarded).
+- **THE GUARD — the ruled shape, letter for letter:** each guarded road asks ONE question before any
+  write — would a row it is about to revive pair a note and a book in different wings as surfaces
+  read them? (`Queries.membershipRevivalStaysInOneWing` — the note's EFFECTIVE wing, the book side
+  through `revivalWingScope`, so a dangling pointer reads as Home on both sides exactly as the Put
+  back reads it.) If yes, the replay is OBSOLETE and returns quietly — each road's own "book deleted
+  meanwhile" bucket, which in all three returns before any write; it is checked AFTER the deleted
+  bucket and BEFORE the finished throw (re-opening a book cannot heal a crossing, so a retry-throw
+  would wedge the stack). The ownership revival pass never runs (nothing revived).
+- **The bind's redo is multi-row** — the ruled letter ("an inverse whose revival would cross treats its
+  ENTRY as obsolete … checked before any write") makes ONE crossing row void the whole re-bind (the
+  gathering stays a gathering; a fresh bind by hand gives the current assembly). PROVISIONAL
+  P-13id-U6-1 records the row-level alternative for her bundle.
+- **The sweep's pieces (a)–(k)** are designed at each piece's commit (PENDING here) — a word sweep is
+  read site by site, never a blind replace: "shelf" stays where it names a SHELF (U1's ruled noun);
+  only the AREA's old name ("on the shelf" = the Bookcase) and "smart" go.
+
+### EVIDENCE (named now; counts PENDING until each run lands)
+
+- ACT 0's pins red-on-old (the three guarded roads' recipes) + the control: PENDING.
+- (g)'s trace verdict (+ its pin if bug-class): PENDING.
+- The word-table pins (row 106's sealed arms, the dismiss receipt, row 111's words): PENDING.
+- The grep pins banning the dead spellings: PENDING.
+- Registry rows + the registry walk green; the eleven tutorial suites green: PENDING.
+- Core FULL `swift test` (baseline 2108/230): PENDING.
+- Mac named suites (build `DerivedData/13id-u6`): PENDING. Phone TEST BUILD: PENDING.
+- THE WALK ×4 into `notes/plans/13id-screens/u6/`: PENDING.
+
+### FINDINGS (for the orchestrator)
+
+PENDING.
+
+### PROVISIONALS (QUESTIONS #176 carries them for her bundle)
+
+- **P-13id-U6-1** — the bind's REDO under ACT 0 is ENTRY-level, as ruled: if any row it would revive
+  now pairs a note and the book across wings (a member moved away while the book was unbound, or the
+  gathering itself moved), the whole redo does nothing — the gathering stays a gathering. (a) BUILT
+  (the ruling's letter) · (b) row-level: the crossing row stays dead (as a dead note's already does in
+  the same redo) and the rest re-binds — closer to "redo what I did" when one member of many moved,
+  but a gathering that itself moved would re-bind EMPTY.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
