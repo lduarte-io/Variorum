@@ -539,7 +539,7 @@ row is built, pinned and walked below.
 | 5 | The Book Panel — brain (pure) · model · view · the inspector door · registry rows · PostDetailView wiring | DONE (10e5b89c) |
 | 6 | The panel's pins — VM, drag plans over the ops, the click-through landing, the registry walk | DONE (fd13e9bb) — `BookPanelTests` 15/3 + the registry walk 28 green; a combined behavioural revert (drops ignoring the order · the click-through on the wrong road · the refusal without its words · the door drawn unmembered) turned 5 pins red as predicted, restored |
 | 7 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine; mobile star/pin suites) | NOT-STARTED |
-| 8 | The screenshot walk ×4 into `notes/plans/13id-screens/u2/` | NOT-STARTED |
+| 8 | The screenshot walk ×4 into `notes/plans/13id-screens/u2/` | DONE — 19 captures, four combinations (listed in EVIDENCE) |
 | 9 | Record close · QUESTIONS #171 · KnownIssues rows 104 (resolved) / 13 (the class grows) | NOT-STARTED |
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked)
@@ -572,13 +572,159 @@ row is built, pinned and walked below.
   (note row: Chapter ▸ · Move Up · Move Down; chapter header: Move Chapter Up · Down); the remove door
   is `.removeFromBook` (Remove / Release by the book's word), receipts spoken on the status seam.
 
-### EVIDENCE (named now; counts PENDING until run)
+### WHAT WAS BUILT (a fresh session's map)
 
-- ACT 0: the union pins (core) red-on-old — PENDING.
-- Row 104: the seat-while-open observation pin red-on-old — PENDING.
-- The panel: VM pins, drag-plan pins over the ops, the click-through landing pin, registry rows + the
-  walk green — PENDING.
-- The tutorial spine green at the end — PENDING. The walk ×4 — PENDING.
+- **ACT 0 core** — `Sources/VariorumCore/Queries/AppearanceQueries.swift`: `starredReadingRows` /
+  `starredReadingIDs` (THE one truth for a reading: column set OR list entry, live, by name),
+  `shelfPins` reads it, `starred` = `starredListItems` (the 13f list, star order) + the column-only
+  tail A–Z, `starredNoteIDs` reads the list alone. `Operations+Appearance.swift`: `setStarred` →
+  `writeStar(db, target, starred:, enforcingCap:)` — both stores in one transaction, the cap counted
+  over the union, the self-heal kept, intake on a note star kept; the public `setShelfPinned` IS
+  `setStarred(.reading)`; the in-transaction `setShelfPinned(db:)` (the daily Journal and Quicknotes
+  mints) routes through `writeStar(enforcingCap: false)`. `ShelfQueries.swift`: `ShelfBook.starred`
+  (defaulted to the column) carries the union in `bookshelf`.
+- **ACT 0 faces** — `Shared/BookcaseBoard.ordered` floats `\.starred`; `ShelfView`'s row ★ reads
+  `book.starred`; the book menu's "Pin to Shelf Top" door and `ShelfViewModel.setPinned` RETIRED (the
+  row's one door is the ★ `StarDoor`, Star/Unstar). The phone is untouched in code (its pin door and
+  Starred list read and write the same core truth).
+- **Row 104** — `Core/Views/NoteMembershipModel.swift` (shared home: the chip and the panel door
+  consume it): `track(session:postID:)` HOLDS `Queries.readingsContaining`; `books(for:)` /
+  `gatherings(for:)` / `readings(for:)` behind a subject guard. `PostDetailView` owns one per visit
+  (`.task(id: postID)`) and hands it to `MembershipChip(membership:)`; a standalone chip tracks its
+  own. The chip's popover extras (worn tags, add lists) re-read on open and on any membership move.
+- **The Book Panel** — `Features/BookView/BookPanelModel.swift`: `BookPanelCopy` (every word),
+  `BookPanelDrag` + `BookPanelDragToken` (a PRIVATE `Transferable` type,
+  `io.lduarte.variorum.book-panel-item` — no other drop site accepts it), `BookPanelBrain` (pure:
+  `switcherBooks`/`shownBook`, `lines` over `BookStructureModel.grouped` + the navigator's row-8
+  collapse, `noteMove`/`chapterMove`, `dropPlan` through `BookStructureModel.postDropPlan` /
+  `chapterDropTarget`), `BookPanelModel` (the held TOC — `assembleReading` over a 300 window +
+  chapters + assignments, keyed by book; the acts `open` (= `MembershipChip.ascend`), `file`, `move`,
+  `moveChapter`, `drop`, `remove`/`removeTag` (= `RemoveFromBookDoor`), one refusal road
+  `BookStateCopy.refusal`). `BookPanelView.swift`: the navigator's idiom (grip + accent chapter rows
+  at 30 pt, note rows at 24 pt nested, the voice's selection marker, "unfiled"), the switcher atop
+  (a `VoicedMenu` with an inline picker — native checkmark), state words, the gatherings line (names
+  on click — each an ascent, plus its "remove #tag"), the row menus (Move to Chapter ▸ · Move Up ·
+  Move Down · Remove/Release; chapters: Move Chapter Up · Down), the panel drop sites with the
+  insertion hairline. `PostDetailView`: `InspectorPanel.book`, `bookPanelDoor` +
+  `shownInspectorDoors(membered:)` (the door FIRST, only while membered), the column's `.book` case.
+- **Registry** — six acts (`Capability.swift`, `CapabilityRegistry.swift`): `.showBookPanel`
+  (`.surface`, noteScoped) and `.fileNoteInChapter .moveNoteUpInBook .moveNoteDownInBook
+  .moveChapterUpInBook .moveChapterDownInBook` (`.contextMenu`, always). Renderers declared:
+  `PostDetailView.surfaceCapabilities` (+ `.showBookPanel`), `BookPanelView.contextMenuCapabilities`
+  (the five + `.removeFromBook`), `BookPanelView.surfaceCapabilities` (`.openBookAtNote`,
+  `.removeRuleTag`); the walk's two union lines are JUSTIFIED EDITS (a new renderer, a new line).
+
+### EVIDENCE (all run at the END; counts exact — PENDING until the run lands)
+
+- **ACT 0 red-on-old:** `UnionStarTests` (core) — 9 pins; 8 written and run on the PRE-FIX tree:
+  **all 8 RED, 13 issues**; the 9th (`theBookcaseSnapshotCarriesTheUnion`, new API) RED by
+  behavioural revert (the snapshot reading the column alone), restored. The 13f/18o pins RE-READ:
+  `StarsTests`, `ShelfPinsSelfHealTests` (comment refreshed — every assertion keeps its meaning under
+  the union), `ThemeAndShelfQueryTests`' pin arm, the phone's `MobileStarsTests` / `MobileBookPinTests`
+  (their stored-JSON and pin-order assertions hold as written: a pin now writes the list too, an
+  unpin clears both). The deliberate meaning flip — the Starred section GAINING column-only books —
+  had no earlier assertion against it; it is pinned NEW (`columnOnlyStarredBooksJoin…`,
+  `theDailyJournalIsBornStarred…`, `quicknotesIsBornStarred…`, all red on old).
+- **Board pin:** `BookcaseBoardBrainTests.theFloatReadsTheUnionNotTheColumn` RED by behavioural
+  revert (the column filter), restored.
+- **Row 104 red-on-old:** `NoteMembershipObservationTests.anIntakeSeatWhileTheNoteIsOpenShows…`
+  RED on the extracted one-shot shape (checkpoint 5461fb76 — committed red on purpose, labelled),
+  green after (2a90bae8).
+- **The panel:** `BookPanelTests` — 15 tests in 3 suites (brain 7 · declarations 2 · acts 6 incl.
+  the click-through broadcast AND the mounted RootView landing) green; a combined behavioural revert
+  (drops ignoring the order · the click-through on `.variorumOpenPost` · the refusal as a raw dump ·
+  the door drawn unmembered) turned **5 pins red** as predicted, restored.
+- **Core FULL `swift test`:** PENDING.
+- **Mac named suites** (build `DerivedData/13id-u2`, `test-without-building`): PENDING.
+- **Mobile:** PENDING.
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug`, pid-guarded per step, her app absent
+  throughout; 19 captures in `notes/plans/13id-screens/u2/`, gitignored): **Terminal light** — 01 the
+  Starred section listing journal · quicknotes · Sherlock (column-only stars, after the list's own —
+  ACT 0's ruled migration, visible) · 02 the Bookcase book row's menu: ONE star door ("Unstar" on
+  column-starred Sherlock), no Pin · 03 the Book Panel on "getting around" (the field guide's
+  chapters + notes, the note marked with the voice's ›) · 04 a row's menu (Move to Chapter ▸ · Move
+  Up · Move Down · Remove from This Book) · 05 Move Down LANDED (restored after with Move Up) · 06 the
+  SWITCHER for a shared note (added to "u1 context mint" through the chip's own Add door; the header
+  became "the field guide ▾", native checkmark) · 07 switched to the second book · 08 Remove from
+  This Book on the panel row — the QUIET RECEIPT in the note's bar, the panel back to one book · 09
+  the CLICK-THROUGH: a row's click opened the field guide with "the workspace" at the viewport top ·
+  10/11 **ROW 104**: a fresh bookless note ("in no book", three icons) tagged `#bind13ib` while open →
+  the chip read "~/bind walk" and the book door appeared, NO reopen · 12 the panel on that living
+  book (flat, the seated note last) · 13 "appears in 1 gathering ▾" opened: Quicknotes + "remove
+  #quicknote" · 14 the untag door fired — its receipt in the bar, the line gone (and F-U2-2's stale
+  tag card, captured); **Terminal dark** 15 the panel; **Study dark** 16 the panel (no marker in
+  Study — weight + ink mark the note); **Study light** 17 the panel · 18 the Bookcase — the UNION
+  FLOAT: "bind walk" (a list-only 13f ★ that never floated before) floats beside Journal and
+  Quicknotes; **Terminal light** 19 the same board. Walk artifacts left in the dev store: the note
+  "row 104 walk note" (in bind walk, tagged `#bind13ib`). Her dev voice (Terminal), appearance
+  (System), № (closed) and Unshelved (collapsed) were restored.
+
+### FINDINGS (for the orchestrator)
+
+- **F-U2-1 — the PHONE's tutorial seeder pins its book through the public `setShelfPinned`, which
+  now carries the star CAP** (ACT 0's ruled routing): with 15 stars standing, the phone's Restore
+  Tutorial throws `starLimitReached` mid-seed. The phone was not touched (record-only). Proposal: the
+  mobile catch-up (or, at the orchestrator's word, a one-line `try?` at
+  `MobileTutorialSeeder.seed`'s pin). Likewise the phone's "Pin to Shelf Top" now refuses at the cap
+  (P-13id-U2-2).
+- **F-U2-2 — the masthead's TAG CARDS load once per note** (`MastheadTagCluster.task(id:) { load() }`)
+  — row 104's class on the tags: a tag removed by another door on the same screen (13i-c's chip
+  "remove #tag"; now the panel's gathering door) still shows its card until the note is reopened
+  (capture 14). Not this unit's surface; recorded as KnownIssues row 112 (owner 13i-d, the
+  orchestrator routes it). The fix is cheap: `Queries.postTags` reads `post_tag`/`tag` only, so an
+  observation never wakes on autosave.
+- **F-U2-3 — the book view's OWN structure doors are undeclared** (its row menus' "Chapter ▸", the
+  chapter "Move Up/Down", the drags) — they predate the registry's reach. The panel declares its twins
+  as five new acts; the book view's menus could name the same ids as second renderers (and the words
+  differ: "Chapter ▸" there, "Move to Chapter ▸" here) — a registry/vocabulary sweep item (U6?).
+- **F-U2-4 — the panel's DRAGS are pinned at the plan and op layers and NOT walked** (F-U1-4's class:
+  synthetic drags never commit); every drag's menu twin is walked (Move Down/Up, Move to Chapter's
+  menu shown). The combined-walk list gains: drag a note onto another note / a chapter heading /
+  "unfiled", and a chapter onto a chapter, inside the Book Panel.
+- **F-U2-5 — MOBILE PARITY (record only):** the phone owes the Book Panel (a sheet or pushed list off
+  the note: the switcher, chapters + notes, the open note marked, the twins as row actions, the
+  remove door, appears in N gatherings); its chip's one-shot membership read (row 104's twin on the
+  phone, if the phone's note screen reads it once — not inspected); the union star reaches it through
+  core already (its Starred list and shelf pins read the union; its pin door writes both stores).
+- **F-U2-6 — no lesson names the Book Panel** (§25's eleven do not); nothing taught is falsified.
+  U7 may want one sentence in the field guide's books chapter.
+
+### PROVISIONALS (QUESTIONS #171 carries them for her bundle)
+
+- **P-13id-U2-1** — the born-starred mints (the daily Journal, Quicknotes) are EXEMPT from the cap's
+  refusal (a mint never fails on a star) and count toward it after. (a) BUILT · (b) at the cap the
+  mint is born unstarred.
+- **P-13id-U2-2** — the phone's "Pin to Shelf Top" IS the star now, so it refuses at the cap like
+  every star door. (a) BUILT (one star, one cap) · (b) pins exempt like the mints.
+- **P-13id-U2-3** — a column-only starred book (a migrated pin, a born-starred mint) sits A–Z after
+  the list's entries in the Starred section until any door stars it again (then it gains its star
+  time).
+- **P-13id-U2-4** — un-starring a DELETED book leaves its tombstoned row's flag alone, so a restore
+  brings the star back (13i-a's shipped behaviour, kept).
+- **P-13id-U2-5** — the Book Panel's door is drawn only while the note is in ≥1 BOOK; a
+  gathering-only note has no panel (its chip names the gatherings). (a) BUILT · (b) also for
+  gathering-only notes (the panel would say "in no book" + the gatherings line).
+- **P-13id-U2-6** — the door sits FIRST in the inspector cluster (the leading side — the three
+  standing icons never move), `book.closed`, titled "Book".
+- **P-13id-U2-7** — which book shows: her switcher choice for as long as the panel stays open, else
+  the most recently visited book, else A–Z.
+- **P-13id-U2-8** — structure moves are silent (the contents moving is the answer); on a finished or
+  sealed book the structure doors render and refuse with the road (#25(b)'s precedent — the book
+  view's own) rather than hide.
+- **P-13id-U2-9** — Move Up / Move Down stay inside the note's own chapter (or unfiled run) and show
+  only while the book reads in its manual order; crossing chapters is Move to Chapter ▸ (every
+  chapter + "No Chapter").
+- **P-13id-U2-10** — a plain chapter heading's click does nothing (a heading); only a collapsed
+  one-note chapter row (the navigator's row-8 rule) opens its note.
+- **P-13id-U2-11** — the panel holds the first 300 notes (the book view's own window); past it a line
+  says "Showing the first 300 notes — open the book for the rest."
+- **P-13id-U2-12** — "appears in N gatherings" opens to each gathering's name (a link — the ascent,
+  like the chip's rows) with its honest "remove #tag" doors; invisible at zero.
+- **P-13id-U2-13** — the book's state words (owned · finished/sealed) sit quiet under its name.
+- **P-13id-U2-14** — if the note leaves its last book while the panel is open, the panel stays and
+  says "This note is in no book — it lives in the Pool." (its door is gone; Close closes it).
+- **P-13id-U2-15** — the panel's words follow the navigator's case rules: chapter names in the
+  voice's chrome case, note titles and book names as she wrote them.
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
