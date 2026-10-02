@@ -204,7 +204,10 @@ struct VocabularySweepTests {
     /// this declaration go — pinned directly (P-1: every rendered door is
     /// declared), with the face reading its verb from the declaration.
     @Test func theArchivedViewDeclaresItsUnarchive() {
-        #expect(ArchivedView.surfaceCapabilities == [.unarchiveNote])
+        // 13i-d U7 rider (F-U6-4), a JUSTIFIED EDIT: the row's inline Delete
+        // Note… joined the view's declared set — this pin's own subject
+        // (Unarchive declared) is unchanged and asserted exactly as before.
+        #expect(ArchivedView.surfaceCapabilities == [.unarchiveNote, .deleteNote])
         #expect(CapabilityRegistry.capability(.unarchiveNote).doors.contains(.surface))
         #expect(CapabilityRegistry.capability(.unarchiveNote).verb == "Unarchive")
     }
