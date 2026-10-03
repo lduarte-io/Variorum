@@ -163,6 +163,22 @@ final class MobileBookDetailsModel {
         }
     }
 
+    /// **13i-e U2 — ARCHIVE the daily Journal** (its delete row's place, P-2;
+    /// the sitting record §10). Returns whether it went, so the sheet can
+    /// dismiss — the archived Journal leaves the shelf behind it.
+    @discardableResult
+    func archiveDailyJournal() async -> Bool {
+        let id = readingID
+        do {
+            try await session.runner.run { ops in try ops.archiveReading(id) }
+            lastError = nil
+            return true
+        } catch {
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+            return false
+        }
+    }
+
     /// The daily-designation road (the Today door's refusals name it).
     func designateDaily() async {
         let id = readingID
@@ -243,7 +259,12 @@ struct MobileBookDetailsSheet: View {
                     dailyRow
                 }
                 Divider().overlay(tokens.line)
-                deleteRow
+                // 13i-e U2 (P-2): the daily Journal's row is ARCHIVE.
+                if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
+                    archiveRow
+                } else {
+                    deleteRow
+                }
             }
             if let error = model.lastError {
                 Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
@@ -284,6 +305,35 @@ struct MobileBookDetailsSheet: View {
             Text(MobileShelfFaces.deleteBookConfirmDetail(
                 name: model.book?.reading.name))
         }
+    }
+
+    /// **13i-e U2 — Archive** (the daily Journal's delete row's place): a
+    /// plain Button acting at once (archive is reversible — the day brings it
+    /// back), the §10 sentence beside it.
+    private var archiveRow: some View {
+        Button {
+            let model = model
+            Task {
+                if await model.archiveDailyJournal() {
+                    dismiss()
+                    onDeleted?()
+                }
+            }
+        } label: {
+            HStack {
+                Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDoorTitle))
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.accent)
+                Spacer()
+                Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDetail))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(3)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)
     }
 
     /// **Delete Book…** (PR4) — a plain Button, like every other act row

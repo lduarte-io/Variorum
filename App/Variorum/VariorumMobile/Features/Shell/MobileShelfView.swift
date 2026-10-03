@@ -324,11 +324,20 @@ struct MobileShelfView<TabBar: View>: View {
             // is where its other acts already live; the confirm and the
             // wording are the model's, so this door and the book-details
             // door cannot describe one act two ways.
-            Button(
-                tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle),
-                role: .destructive
-            ) {
-                model.requestDeleteBook(book)
+            // 13i-e U2 (P-2; the sitting record §10): the daily Journal can
+            // be archived, never deleted — its row offers ARCHIVE instead.
+            if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
+                Button(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)) {
+                    let model = model
+                    Task { await model.archiveDailyJournal(book) }
+                }
+            } else {
+                Button(
+                    tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle),
+                    role: .destructive
+                ) {
+                    model.requestDeleteBook(book)
+                }
             }
         }
     }

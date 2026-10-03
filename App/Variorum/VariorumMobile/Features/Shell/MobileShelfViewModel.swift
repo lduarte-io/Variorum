@@ -203,6 +203,20 @@ final class MobileShelfViewModel {
         }
     }
 
+    /// **13i-e U2 — ARCHIVE the daily Journal** (its delete door's place, P-2):
+    /// the op, then a receipt naming the road back. The book is passed in
+    /// (`confirmDeleteBook`'s rule).
+    func archiveDailyJournal(_ book: Queries.ShelfBook) async {
+        do {
+            try await session.runner.run { ops in try ops.archiveReading(book.reading.id) }
+            lastError = nil
+            lastReport = MobileShelfFaces.archivedDailyJournalReceipt(name: book.reading.name)
+        } catch {
+            lastReport = nil
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+        }
+    }
+
     /// Today's Entry (M7's button): create-or-open + the shared shelving
     /// door, in one composition. The entry ALWAYS opens; only the note
     /// changes. Returns the entry to navigate to.

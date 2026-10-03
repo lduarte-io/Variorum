@@ -127,6 +127,27 @@ nonisolated enum MobileShelfFaces {
     static let deleteBookDoorTitle = "Delete Book…"
     static let deleteBookConfirmTitle = "Delete Book"
 
+    /// **13i-e U2 — the daily Journal's doors (the sitting record §10; P-2):**
+    /// "the daily Journal can be archived, never deleted; it returns when a
+    /// day arrives" — so both doors that offer Delete on a book offer ARCHIVE
+    /// on the daily Journal instead (the op refuses its delete). On the phone
+    /// the road back is Today's Entry itself (the comes-back); the phone's
+    /// archive face for ORDINARY books is the mobile catch-up's (F-U1-4).
+    static let archiveDailyJournalDoorTitle = "Archive"
+    static let archiveDailyJournalDetail = BookArchiveCopy.dailyJournalCaption
+
+    /// The archive landed — the phone has no Archived surface yet, so the
+    /// receipt names the road that IS here.
+    static func archivedDailyJournalReceipt(name: String) -> String {
+        "Archived \u{201C}\(name)\u{201D} \u{2014} it comes back when a day arrives (Today\u{2019}s Entry)."
+    }
+
+    /// Which book door a row or sheet offers (P-2): Archive on the daily
+    /// Journal — the marker the op's guard keys on — Delete everywhere else.
+    static func offersArchiveInsteadOfDelete(_ reading: Reading) -> Bool {
+        Queries.isDailyJournalMintShape(reading)
+    }
+
     /// **The confirm names what goes AND what stays.** The second sentence
     /// is the 13j books lesson she had to teach once already: deleting a
     /// book does not delete its notes — only the ordered collection goes,
