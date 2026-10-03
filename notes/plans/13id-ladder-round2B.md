@@ -541,3 +541,34 @@ smaller-id copy keeps and no live #classics application survives). Dedupe suites
 attribution trailers on any commit; pushed after every commit; no real-store instance ran
 beside this session. **No MAJOR stands after the severity call — nothing reaches the round-3
 bar; the implementer sanity pass and round 2's re-review follow on the orchestrator's side.**
+
+### THE SANITY PASS — PASS, WITH ONE NIT; THE NIT'S FINAL CALL AND FIX (`0aac9f6f`)
+
+The implementer sanity pass over the five fixes returned **PASS** — every unit's intent
+confirmed (Empty Trash takes exactly what it took; fix B gates rendering only; fix C's
+same-wing case byte-equivalent with C2's arms untouched; record D changes no keeper rule and
+its pin is non-decorative; fix E placement only), all pins judged biting, core 2127/234 and
+Mac 226/21 green in its own runs. It deliberately did NOT add fix A's suggested dead-wing
+control (reachable only via a sync race, since `deleteWing` refuses non-empty; the take arm
+shares the fence the existing deleted-wing pin covers) — accepted; its reasoning rides its
+hand-back.
+
+**Its ONE NIT — CONFIRMED on my own trace, and FIXED.** `noteMenuWingDoors`' post-move reload
+ran in an UNSTRUCTURED Task (nested under the alert button's own), which nothing ever cancels
+— fix B's `!Task.isCancelled` guard there was DEAD. Mechanism, confirmed: confirm a move on
+note A, switch to B mid-flight; A's reload lands after B's structured load and overwrites the
+binding; `matching` then answers nil, so B's bar draws NO wing doors until the next note
+change — the render gate held (never wrong destinations or titles, exactly as the pass said);
+the cost was a doors-disappear blink. **The fix is the pass's proposed remedy, made pure and
+pinned:** `NoteMenuWingContext.reloadAdopts(over:postID:)` — a reload adopts only over ITS OWN
+note's standing context — applied AFTER the await at the modifier's confirm-reload AND at both
+bars' `onDone` closures (the same unstructured class; a consistent widening, said here). The
+dead guard is gone; the `.task(id:)` site keeps its REAL cancellation guard (structured).
+**Pin `VocabularySweepTests.aPostActReloadNeverStompsTheNextNotesContext`** — a pure gate, RED
+BY BEHAVIOURAL REVERT (`reloadAdopts` flipped to adopt-always: exactly the one pin, 2 issues;
+restored by the exact inverse edit — no checkout this time), green after with
+VocabularySweepTests + WingSwitcherTests **26/0**. One commit (`0aac9f6f`), pushed.
+
+**Round 1 is CLOSED on this side: five fixes + one record + the sanity NIT's fix, every pin
+red-verified by its honest kind, no MAJOR standing, nothing at the round-3 bar. Round 2's
+fresh re-review runs on the orchestrator's side.**
