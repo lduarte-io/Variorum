@@ -876,6 +876,18 @@ Same checkpoint protocol, record shape, fences and traps as U1.
   the Pool's picker) · `df3c18e9` the comes-back receipt (`JournalBooks.Outcome.receipt`, both Mac
   roads). NEXT: piece 7 (the phone's two daily-Journal doors), piece 8 (lesson 9 + the pin flip),
   piece 9 (the Mac pins), then the END runs and the walk.
+- 2026-10-03 · **PIECES 7–9 DONE + THE END RUNS GREEN:** `5be92918` the phone's two daily-Journal
+  doors · (the pin, piece 8a) + `3fdee77a` lesson 9 (the flipped pin committed AHEAD of its sentence and
+  NATURALLY RED on the pre-sentence tree — 2 issues, the two prose arms; green after) ·
+  `dbca8189` the Mac + core pins (one JUSTIFIED EDIT, `VocabularySweepTests`) · `2b944fe5` the
+  phone pin. END runs (zero app instances, build `DerivedData/13ie-u2`): **Mac batch A "✔ Test run
+  with 97 tests in 13 suites passed"** (every `Tutorial*` suite — the spine, the flipped
+  lesson-9 pin inside) · **Mac batch B "✔ Test run with 1396 tests in 214 suites passed"** (every
+  suite in a test file touching a changed symbol + U1's batch B list; 0 skipped) · **phone "70
+  tests in 16 suites passed … with 2 known issues"** (the pre-existing `withKnownIssue`) · **core
+  FULL "✔ Test run with 2172 tests in 244 suites passed"** (1 standing env-gated skip) = U1's
+  2168/242 + exactly this unit's 4/2. NEXT: the scripted walk (dev store, Debug), then the record's
+  finals. No revert in flight.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
