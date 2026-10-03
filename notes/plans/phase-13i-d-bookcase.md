@@ -2979,7 +2979,7 @@ deliberately through the REAL classifier with an err-toward-edited control on a 
 red-on-old on the traced recipe) · **C3** F-U7-4 (the "comments & tags" lesson stops teaching the
 retired ⌘⇧I fold; prose + pin) · **C4** F-U7-5 (a gathering's navigator drops "+ new chapter";
 one gate + pin). Zero `Sync/` (the architect's half is done; mine touches none). Suites at the END.
-**REVERT STATE: NO REVERT IN FLIGHT.**
+**REVERT STATE: C1's BEHAVIOURAL REVERT STARTING from the committed HEAD `4787dcd2`** — the tagging step's `applyTag` removed from `SampleLibraryWelcome.arrange` (restore = `git checkout HEAD --` on that one file, then `git diff --quiet`). Predicted RED: the gathering pin (its seed-shape arm + shown set), `theClassicsSeedReadsPristine…` (the story wears no `#classics`), the fresh-birth test (`taggedClassics > 0`), `lessonOneTheThreeKinds` (the gathering shows nothing), `ritualOneTheClassicsWalk`.
 
 | # | piece | status |
 |---|---|---|
