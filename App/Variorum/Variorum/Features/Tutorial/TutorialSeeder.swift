@@ -1977,12 +1977,14 @@ enum TutorialSeeder {
             + "day filter live there, never here.",
         ])
 
-        // Lesson 9's first sentence (the second — archive · can't delete ·
-        // comes back — waits for 13i-e's guard, F-U7-2) + lesson 10, shown
-        // on the seeded quicknote the Welcome arrangement left in the Pool.
+        // Lesson 9 WHOLE — its second sentence (archive · can't delete ·
+        // comes back) landed WITH 13i-e's guard (F-U7-2's pin flipped at
+        // 13i-e U2) — + lesson 10, shown on the seeded quicknote the Welcome
+        // arrangement left in the Pool.
         _ = try lesson(books, "the journal & the pool", [
             "The daily Journal is an ordinary book that is special in one way: "
-            + "it's where \u{2318}J and Today's Entry file. Today's Entry sits at "
+            + "it's where \u{2318}J and Today's Entry file. You can archive it; you "
+            + "can't delete it; it comes back when a day arrives. Today's Entry sits at "
             + "the top of the Bookcase; the Journal itself waits among your "
             + "unshelved books until you file it.",
 
