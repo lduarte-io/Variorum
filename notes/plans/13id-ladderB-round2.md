@@ -178,3 +178,13 @@ tree, exercises the review tree):**
 
 Round 1's five fixes and one record are **correct and complete against their findings**; the
 sanity NIT's fix is correct; nothing new of MINOR or above was introduced by the fix diff.
+
+---
+
+## THE ROUND-2 NIT'S DISPOSITION (the orchestrator, 2026-10-02 — the architect's small-code allowance: doc-only, no behavior, no pin possible, so the full cross-model arm is not run for it)
+
+CONFIRMED and FIXED in this commit: `noteMenuWingDoors`' modifier doc now says what holds —
+the structured `.task` write is cancellation-guarded, the unstructured reloads are
+subject-guarded (`reloadAdopts`), either way no stale stomp — ending the eight-line
+contradiction with the inline comment. **LADDER B CLOSES: two rounds, zero disputes on
+mechanism anywhere, one severity dispute upheld on the reviewer's own recheck, no round 3.**

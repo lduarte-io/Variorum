@@ -410,8 +410,10 @@ extension View {
     /// The bar's half of the note ▾ wing doors: loads the open note's context
     /// (per note) and hosts the move's confirm — an alert cannot hang off a
     /// menu item, so the bar presents it (the Library row's own shape).
-    /// Both writes are cancellation-guarded (fix B): a superseded task's late
-    /// value never stomps the next note's context.
+    /// The structured `.task` write is cancellation-guarded (fix B); the
+    /// UNSTRUCTURED reloads are subject-guarded instead (`reloadAdopts` —
+    /// the sanity pass's NIT: cancellation never reaches them), so either
+    /// way a stale load never stomps the next note's context.
     func noteMenuWingDoors(
         session: AppSession, postID: String, wings: WingsModel?,
         context: Binding<NoteMenuWingContext?>, ask: Binding<WingsModel.MoveAsk?>
