@@ -5,10 +5,11 @@ cdc21e1e..HEAD` (tip `e5188e3c` at review start — U0 schema event + U1 op fami
 U2 faces/lesson 9, 31 commits, 56 files). Plan anchor: `notes/plans/phase-13i-e-daily-journal.md`.
 No "Review foci" section exists in the plan or any brief beside it.
 
-**STATUS: REVIEW COMPLETE.** Verdict: **0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT** (one of the NITs
-is a question for the #179 bundle, not a ruling). This is a clean round — the op family, the
-daily rulings, the lockstep event and the faces are built to the letter of R-13ie-1…4, her two
-riders, and the sitting record §10, with exact pins and honest red-on-old evidence throughout.
+**STATUS: ROUND CLOSED — findings dispositioned, fixes landed (the DISPOSITIONS section at the
+end of this file).** Verdict: **0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT** (one of the NITs is a
+question for the #179 bundle, not a ruling). This is a clean round — the op family, the daily
+rulings, the lockstep event and the faces are built to the letter of R-13ie-1…4, her two riders,
+and the sitting record §10, with exact pins and honest red-on-old evidence throughout.
 
 ## READ LOG (this reviewer, this session — nothing delegated)
 
@@ -273,3 +274,39 @@ Under the cross-model flow, F-R1-1 (+ the F-R1-2 style line beside it) goes to t
 verbatim for agree/dispute; this reviewer makes the final call and implements its confirmed
 fix with the red-on-old pin named above. F-R1-3 is a question for the #179 bundle (the
 closeout routes it), not a fix. No round-3 trigger exists in this round's findings.
+
+## DISPOSITIONS (the reviewer's final calls after the implementer's agree/dispute — the fix pass, same session, 2026-10-03)
+
+The implementer's response: **AGREE on both findings**, with one refinement offered on F-R1-1
+(a two-step guard — `readingNotFound` for a dead/missing designee, `wrongReadingKind` for a
+live non-book — instead of the bare `AND deleted_at IS NULL`, under which a dead id would have
+refused with the wrong cause's name).
+
+- **F-R1-1 — CONFIRMED; the refinement ACCEPTED (the reviewer's final call).** Reasoning:
+  `readingNotFound(id:)` is the public door's own word for a dead row (`liveReading`), so the
+  db-level seam converges with the public door's semantics instead of mislabeling the cause;
+  no live caller's behaviour changes (the public door pre-filters in the same transaction; the
+  mint passes its own fresh row; a LIVE gathering still refuses `wrongReadingKind` exactly as
+  ACT 0's pin asserts). **FIXED, red-on-old both ways:**
+  - The pin FIRST, committed ahead of its fix (`0280eb36` —
+    `DailyJournalDesignationKindTests.theDbLevelGuardRefusesADeadDesignee`): drives the
+    internal seam with a raw-tombstoned book + a missing id. **Natural red on the pre-fix
+    tree: 6 issues** (no throw; the live Journal demoted; the derived read nil; the cache
+    naming the dead book; the outbox written; the missing-id arm thrown as `wrongReadingKind`
+    — the wrong cause's name).
+  - The fix (`a3fd7cfe`): the two-step guard in `setDailyJournalBook(_ db:_:)` — the LIVE
+    row's kind read (`deleted_at IS NULL`), `readingNotFound` when there is none, then
+    `wrongReadingKind(expected: .book)`; both before any write; the doc comment now states
+    the whole promise honestly. **Green with the daily/archive/keeper neighbours: 77 tests /
+    18 suites.**
+  - **Behavioural revert (RV, announced before the edit):** the guard reverted to the old
+    kind-only one-liner on the committed tree → the pin **RED, 6 issues** at the same
+    mechanism → restored by `git checkout --` and verified `git diff --quiet`. No revert in
+    flight.
+- **F-R1-2 — CONFIRMED; FIXED riding F-R1-1's commit** (the implementer agreed; the two-step
+  guard is wrapped at the file's width, the 215-char line gone).
+- **F-R1-3 — routed to the #179 bundle by the orchestrator** (a question, not a fix; nothing
+  touched by this pass).
+
+**END RUN (the full core suite on the fixed tree, foreground):** PENDING until the line below
+is replaced with the exact counts.
