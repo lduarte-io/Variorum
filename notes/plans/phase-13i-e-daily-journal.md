@@ -384,6 +384,14 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   Journal). Filtered run: the four daily suites + the keeper suite + the touched suites 66/15
   GREEN. NEXT: the red-on-old REVERT cycle (R1–R3), then the full core suite, the Mac/mobile
   compile + the affected batches. No revert in flight.
+- 2026-10-03 · **REVERTS STARTING (announced before the first edit; the tree is committed at piece
+  2, so `git checkout -- <file>` is the SAFE restore and `git diff` shows exactly what is reverted
+  at any moment):** R1 — the two `refuseDeletingTheDailyJournal` calls removed in
+  `Operations+Reading.swift`; R2 — `Queries.dailyJournalBookID` back to the setting read in
+  `AppearanceQueries.swift`; R3 — the `unarchiveReading` call removed from
+  `shelveInDailyJournalBook` in `Operations+Container.swift`. ONE at a time; each restored by
+  checkout and verified clean (`git diff --quiet`) before the next. A successor finding a dirty
+  diff in any of those three files is mid-revert: `git checkout -- <file>` restores it.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
