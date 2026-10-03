@@ -117,12 +117,23 @@ extension Queries {
         public let gatherings: Int
         /// Live tags.
         public let tags: Int
+        /// 13i-e U2 (F-U1-8's copy rider): how many of `books` / `gatherings`
+        /// are ARCHIVED — kept, counted above, but off the Bookcase, so the
+        /// refusal that names them can say where they are. Never part of
+        /// `isEmpty` (they are already inside the two counts).
+        public let archivedBooks: Int
+        public let archivedGatherings: Int
 
-        public init(notes: Int, books: Int, gatherings: Int, tags: Int) {
+        public init(
+            notes: Int, books: Int, gatherings: Int, tags: Int,
+            archivedBooks: Int = 0, archivedGatherings: Int = 0
+        ) {
             self.notes = notes
             self.books = books
             self.gatherings = gatherings
             self.tags = tags
+            self.archivedBooks = archivedBooks
+            self.archivedGatherings = archivedGatherings
         }
 
         public var isEmpty: Bool { notes == 0 && books == 0 && gatherings == 0 && tags == 0 }
@@ -147,24 +158,33 @@ extension Queries {
         let readingRows = try Row.fetchAll(
             db,
             sql: """
-                SELECT r.kind AS kind, COUNT(*) AS n FROM reading r
+                SELECT r.kind AS kind, COUNT(*) AS n,
+                       SUM(r.archived_at IS NOT NULL) AS archived FROM reading r
                 WHERE r.deleted_at IS NULL AND \(readings.sql)
                 GROUP BY r.kind
                 """,
             arguments: StatementArguments(readings.arguments))
         var books = 0
         var gatherings = 0
+        var archivedBooks = 0
+        var archivedGatherings = 0
         for row in readingRows {
             switch row["kind"] as String {
-            case ReadingKind.gathering.rawValue: gatherings = row["n"]
-            default: books += row["n"] as Int
+            case ReadingKind.gathering.rawValue:
+                gatherings = row["n"]
+                archivedGatherings = row["archived"] ?? 0
+            default:
+                books += row["n"] as Int
+                archivedBooks += (row["archived"] as Int?) ?? 0
             }
         }
         let tagCount = try Int.fetchOne(
             db,
             sql: "SELECT COUNT(*) FROM tag t WHERE t.deleted_at IS NULL AND \(tags.sql)",
             arguments: StatementArguments(tags.arguments)) ?? 0
-        return WingContents(notes: noteCount, books: books, gatherings: gatherings, tags: tagCount)
+        return WingContents(
+            notes: noteCount, books: books, gatherings: gatherings, tags: tagCount,
+            archivedBooks: archivedBooks, archivedGatherings: archivedGatherings)
     }
 
     /// The wing a note lives in, as surfaces READ it — the stored id, or Home

@@ -105,6 +105,17 @@ extension AppDatabase {
         observe { try Queries.deletedPosts($0, now: now, limit: limit) }
     }
 
+    /// **The Archived surface's BOOKS, live** (13i-e U2 — R-13ie-1: "it should
+    /// be under archived"): `Queries.archivedReadings` held. Its region is the
+    /// `reading` table alone, so a keystroke's autosave never wakes it; the
+    /// surface's per-book counts are a one-shot read beside it (the 13i-d
+    /// archived-counts precedent). `limit` bounds the window.
+    public func observeArchivedReadings(
+        limit: Int, wingID: String? = nil
+    ) -> AsyncValueObservation<[Reading]> {
+        observe { try Queries.archivedReadings($0, wingID: wingID, limit: limit) }
+    }
+
     /// The live readings, live (Phase 10 — the readings-management face).
     /// Unbounded on purpose: author-scale metadata (the taxonomy precedent).
     public func observeReadings(wingID: String? = nil) -> AsyncValueObservation<[Reading]> {

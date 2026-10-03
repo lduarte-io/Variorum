@@ -198,6 +198,11 @@ nonisolated enum DeletionRefusal {
             return "That note is already gone."
         case .readingNotFound:
             return "That book is already gone."
+        // 13i-e U2 — the daily Journal's guard (the sitting record §10): the
+        // phone's delete doors speak through this table, so its words live
+        // here too — the SAME sentence as the shared refusal table's.
+        case .dailyJournalCannotBeDeleted:
+            return BookArchiveCopy.cannotDeleteDailyJournal
         case .blockNotFound:
             return "That block is already gone."
         case .variantNotFound:

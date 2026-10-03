@@ -356,6 +356,15 @@ nonisolated enum OpsRefusalCopy {
             return "Everything is already in that wing — pick another one to move it to."
         case .placementAnchorNotOnShelf:
             return "That book has moved to another shelf — nothing changed."
+        // 13i-e U2 — BOOK ARCHIVE (R-13ie-1…4; the sitting record §10's
+        // never-hard-delete). Platform-neutral: archive is the one road both
+        // faces name, and the daily Journal comes back on its own.
+        case .dailyJournalCannotBeDeleted:
+            return BookArchiveCopy.cannotDeleteDailyJournal
+        case .readingAlreadyArchived:
+            return "That book is already archived — nothing changed."
+        case .readingNotArchived:
+            return "That book isn't archived any more — nothing changed."
         default:
             return nil
         }

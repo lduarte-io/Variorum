@@ -22,13 +22,19 @@ nonisolated enum WingWords {
 
     /// "2 books, 1 gathering, 12 notes and 4 tags" — what a wing still holds
     /// (R-13id-2's refusal NAMES it). Zero kinds are left out.
+    ///
+    /// 13i-e U2 (F-U1-8's copy rider): an ARCHIVED book or gathering is kept
+    /// and counted, but it is off the Bookcase — so the count says where it
+    /// is: "2 books (1 archived)".
     static func contents(_ c: Queries.WingContents) -> String {
         var parts: [String] = []
-        func add(_ n: Int, _ one: String, _ many: String) {
-            if n > 0 { parts.append("\(n) \(n == 1 ? one : many)") }
+        func add(_ n: Int, _ one: String, _ many: String, archived: Int = 0) {
+            guard n > 0 else { return }
+            let count = "\(n) \(n == 1 ? one : many)"
+            parts.append(archived > 0 ? "\(count) (\(archived) \(BookArchiveCopy.word))" : count)
         }
-        add(c.books, "book", "books")
-        add(c.gatherings, "gathering", "gatherings")
+        add(c.books, "book", "books", archived: c.archivedBooks)
+        add(c.gatherings, "gathering", "gatherings", archived: c.archivedGatherings)
         add(c.notes, "note", "notes")
         add(c.tags, "tag", "tags")
         switch parts.count {
