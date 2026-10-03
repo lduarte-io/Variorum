@@ -14,19 +14,11 @@
 - [ ] **ONE press: Help ▸ Restore Tutorial** on the refreshed build (carried from 13i-d; 13i-e's
       lesson-9 sentence rides the same press — the confirm says exactly what it touches). I
       rehearsed this exact press on the dev store at the walk: lesson 9 renders whole.
-- [ ] **THE ONE OPEN CALL — W-O-1, found by my walk (QUESTIONS #179's head):** ⌘J still
-      OPENS today's existing entry (the Phase 8 notebook rule is alive in
-      `createOrOpenJournalEntry`), so the identity memo §0(a)'s RULED "the doors always mint"
-      was never built — and the sitting record §10's "door discouragement already gone" is
-      wrong as a fact. Lived consequence, small and honest: the FIRST filing of a day brings an
-      archived Journal back (proven live twice); a SECOND ⌘J the same day re-opens the entry
-      and the Journal stays archived, breadcrumb "(archived)". Your words cut both ways ("We
-      should remove the door discouragement" vs. "where Today's Entry and the shortcut TAKES
-      you"). Options: **(a)** build the memo's letter — every ⌘J mints a fresh entry, the
-      comes-back on every press, two presses = two entries that day; **(b)** keep ⌘J as
-      open-today AND make the ⌘J/Today's Entry door un-archive on every press (my lean — the
-      comes-back decoupled from the filing; "a command that opens it" is the never-delete
-      ground); **(c)** as built. Any of the three is a small 17-entry or next-phase act.
+- [x] **W-O-1 — RULED BY YOU AT THE CLOSE AND BUILT:** "I think it's fine for it to unarchive
+      when you command J" — option (b): ⌘J keeps open-today and the daily door un-archives on
+      EVERY press, decided pairs included (nothing re-files; a hand-removal is never undone);
+      both platforms by construction; pins red-on-old + revert-verified; core 2174/244 green.
+      The record: the plan's POST-CLOSE ADDENDUM. #179's head is closed.
 - [ ] **Ratify #179** — the 13i-e bundle (the sustained PROVISIONALs, each one line to flip;
       F-R1-3's Quicknotes-comes-back question; the Archived row's count-split taste call).
       Standing from the family: **#167** · **#168**'s two calls · **#169**'s tails (incl. the

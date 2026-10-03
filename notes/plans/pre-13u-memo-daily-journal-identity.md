@@ -67,6 +67,8 @@ retired."*
   shouldn't be deletable"* — the never-hard-delete guard PROBABLY survives on the new ground (⌘J opens it), no
   longer on the bridge's; the sitting confirms the wording.
 
+**(a) SUPERSEDED IN ITS ALWAYS-MINT HALF (2026-10-03, her post-close 13i-e ruling — the 13i-e plan's POST-CLOSE ADDENDUM):** the door-discouragement REMOVAL she wanted is satisfied the other way — ⌘J/Today's Entry KEEP open-today (`createOrOpenJournalEntry`'s notebook rule stands), and the daily door UN-ARCHIVES on EVERY press ("I think it's fine for it to unarchive when you command J"). The 13i-e walk's W-O-1 surfaced the conflict (this (a) was never built; the sitting record §10's "door discouragement already gone" was wrong as a fact); her ruling resolves it.
+
 *(Sections 1–7 below predate this ruling. Read them for the edges they enumerate, not for their conclusions.)*
 
 **Provenance:** written 2026-08-31 at the pre-13u round's tail, at the author's instruction after

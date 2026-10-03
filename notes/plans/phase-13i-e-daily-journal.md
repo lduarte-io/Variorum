@@ -1387,3 +1387,15 @@ REWRITTEN to the new ruling (`aDecidedPairStillBringsTheJournalBackAndRefilesNot
 honest edit, committed AHEAD of the fix and red on the pre-fix tree. F-U2-2 (the daily "+ new
 entry" inside an archived Journal) is UNTOUCHED — her ruling names ⌘J; that door stays in #179.
 Zero schema, zero `Sync/`; evidence below this addendum as the work lands.
+
+**EVIDENCE (2026-10-03, the addendum's close):** the two pins committed AHEAD (`6b1eefaf`),
+naturally RED on the pre-fix tree (2 issues, each at the un-archive assertion); the fix
+(`f1d209af`) green; the BEHAVIOURAL REVERT (the decided-road write removed from the committed
+tree) RED at the same 2 issues and restored clean (`git diff --quiet`); full core suite
+**2174 tests / 244 suites GREEN** (= 2173 + exactly this act's one net test); Mac
+`ComesBackReceiptTests` + `BookArchiveDoorActTests` 7/2 and the books chapter
+(`TutorialBooksLessonTests` + `TutorialBooksRitualTests`) 17/2 green — the ⌘J receipt now also
+speaks on a decided-pair return by the door's own before/after read, zero Mac code changed.
+One machinery note (F-U1-10's class met again): `-only-testing` takes the SUITE TYPE names —
+`BookArchiveFacesTests` (the FILE name) ran 0 tests and said TEST SUCCEEDED; caught by the
+missing "Test run with" line, re-run by type name.

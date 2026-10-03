@@ -91,10 +91,8 @@ build — i.e. AFTER the 13i-e window (marker 12): the deploy checklist is
 - [ ] The daily Journal — its Delete door is GONE on both platforms (Archive stands in its
       place; the State row's caption is §10's own sentence); ARCHIVE it (the Bookcase hides it;
       the Starred section deliberately keeps it) → ⌘J → it returns with today's entry filed and
-      the quiet receipt "The Journal is back on the Bookcase." ***One edge is YOURS to rule
-      before you judge it (the walk's W-O-1, the handoff's first section): a SECOND ⌘J the same
-      day re-opens today's entry and the Journal stays archived (breadcrumb "(archived)") —
-      options in the handoff.***
+      the quiet receipt "The Journal is back on the Bookcase." ***Ruled by you at the close and built: a SECOND ⌘J the same day re-opens today's entry
+      AND still brings the Journal back ("it's fine for it to unarchive when you command J").***
 - [ ] Lesson 9 in the field guide now whole: "You can archive it; you can't delete it; it comes
       back when a day arrives."
 - [ ] At the window: cross-device — a book archived on the Mac leaves the phone's shelf at its
