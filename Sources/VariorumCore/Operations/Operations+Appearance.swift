@@ -432,7 +432,9 @@ extension Operations {
     /// ensure-membership door can check-and-act inside ONE runner-serialized
     /// sequence (Stage B review round 2, MINOR: a pre-runner read let two
     /// rapid Today's-Entry invocations both see nil and mint two "Journal"
-    /// books). Dangling designations read as nil (the fallback class).
+    /// books). Since 13i-e the answer is DERIVED from the 'daily' marker
+    /// (`Queries.dailyJournalBookID` — the live marker-bearer, archived
+    /// included); no live marker-bearer reads as nil.
     public func dailyJournalBookID() throws -> String? {
         try database.read { try Queries.dailyJournalBookID($0) }
     }

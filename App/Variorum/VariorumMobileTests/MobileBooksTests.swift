@@ -230,21 +230,29 @@ struct MobileBookDetailsTests {
     /// designating a curated journal from details makes the next Today
     /// shelve silently. The door's render rule is the Mac's own (curated
     /// + journal profile — P-2), pinned pure.
+    ///
+    /// 13i-e: the refusing daily book is a FINISHED one. The "smart daily
+    /// book" premise this pin first used is retired by the derivation — the
+    /// daily Journal IS the live BOOK wearing the 'daily' marker (the sitting
+    /// record §10: "an ACTUAL BOOK"; the keeper's own predicate), so a
+    /// gathering wearing the marker designates nothing and Today mints the
+    /// real Journal instead of refusing. The road under test is unchanged.
     @Test func designateDailyIsTheRoadOutOfTheTodayRefusals() async throws {
         try await withEditorWorld { session, db in
             let (_, journalID) = try await session.runner.run { ops -> (String, String) in
-                let smart = try ops.createReading(
-                    name: "Everything", kind: .gathering, querySpec: #"{"tags":["x"]}"#)
-                try ops.setDailyJournalBook(smart.id)
+                let finished = try ops.createReading(
+                    name: "Last Year", kind: .book, profile: "journal")
+                try ops.setDailyJournalBook(finished.id)
+                try ops.lockReading(finished.id)
                 let journal = try ops.createReading(
                     name: "Mornings", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
-                return (smart.id, journal.id)
+                return (finished.id, journal.id)
             }
             let shelf = MobileShelfViewModel(session: session)
             _ = await shelf.openToday(day: "2026-08-09")
-            #expect(shelf.lastReport?.contains("smart") == true,
-                    "the smart daily book speaks")
+            #expect(shelf.lastReport?.contains("finished") == true,
+                    "the finished daily book speaks")
             #expect(shelf.lastReport?.contains("Mac") == false,
                     "…and names a phone road, never the Mac")
 

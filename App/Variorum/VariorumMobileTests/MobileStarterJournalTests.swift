@@ -25,6 +25,7 @@
 //
 
 import Foundation
+import GRDB
 import Testing
 import VariorumCore
 @testable import VariorumMobile

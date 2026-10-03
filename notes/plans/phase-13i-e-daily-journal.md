@@ -398,6 +398,14 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   not hollow):** `IntakeDecision.intakeRuns`' `&& !book.archived` AND `livingBooks`'
   `archived_at IS NULL` both removed (`Domain/IntakeDecision.swift`,
   `Operations/Operations+Intake.swift`); restored by checkout, verified clean.
+- 2026-10-03 · **R4 DONE (red, restored clean). END RUNS DONE:** core FULL 2167/242 GREEN; Mac
+  `build-for-testing` TEST BUILD SUCCEEDED + two named batches GREEN (384/50, 97/13); the phone's
+  affected suites GREEN (69/15, 2 pre-existing known issues) after TWO phone-test fixes the core
+  change forced (the starter-journal pin's `import GRDB`; `MobileBooksTests.designateDailyIsTheRoad
+  OutOfTheTodayRefusals` re-premised from a gathering-as-daily — no longer a designation under the
+  book-only derivation — to a FINISHED daily book; F-U1-3). The ops-seam `dailyJournalBookID()`
+  doc corrected. NEXT: the record's finals (WHAT WAS BUILT · EVIDENCE · FINDINGS · PROVISIONALS),
+  the ledger row, the hand-off. No revert in flight.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
