@@ -31,6 +31,14 @@
 //  `excludingVersionHistory`), and it is built here BEFORE the versions
 //  exist so the surface is right on the day they arrive.
 //
+//  ── AND, SINCE 13i-e, ARCHIVED BOOKS (her R-13ie-1) ────────────────────
+//  *"it should be under archived — … a book is a set of rules + ordering now
+//  so it makes sense to archive it."* A BOOKS group sits ABOVE the notes:
+//  each archived book or gathering of this wing, its honest facts, and its
+//  doors — Open (the book view), Unarchive, Delete Book… (never on the daily
+//  Journal — `BookArchiveDoorSet`). With no archived book the surface reads
+//  exactly as it always did (no section labels). Kept forever, no countdown.
+//
 //  ── SEARCH ───────────────────────────────────────────────────────────────
 //  Her "search it separately" half is a NAME filter over this listing —
 //  which is what the Library's catalog search does for live notes today
@@ -48,7 +56,14 @@ struct ArchivedView: View {
     let session: AppSession
     let library: LibraryViewModel
     var openPost: (String) -> Void
+    /// 13i-e U2: a book row's Open — composition decides what opening a book
+    /// means (the shell's `.reading` route). Defaults to nothing (a pin's mount).
+    var openBook: (String) -> Void = { _ in }
     @State private var model: RecoveryViewModel
+    /// 13i-e U2 — the BOOKS group's brain and the shared state doors (the
+    /// Unarchive/Delete acts, their confirms and receipts).
+    @State private var books: ArchivedBooksModel
+    @State private var doors: BookStateDoors
     @State private var query = ""
     /// The Trash road out (N3: Archive → Unarchive → Library, or Delete →
     /// the Trash). One confirm host, the shared wording.
@@ -63,12 +78,17 @@ struct ArchivedView: View {
 
     init(
         session: AppSession, library: LibraryViewModel,
-        openPost: @escaping (String) -> Void
+        openPost: @escaping (String) -> Void,
+        openBook: @escaping (String) -> Void = { _ in },
+        books: ArchivedBooksModel? = nil
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
+        self.openBook = openBook
         _model = State(initialValue: RecoveryViewModel(session: session))
+        _books = State(initialValue: books ?? ArchivedBooksModel(session: session))
+        _doors = State(initialValue: BookStateDoors(session: session))
     }
 
     /// The listing this surface shows, narrowed by the name filter. A pure
@@ -97,6 +117,9 @@ struct ArchivedView: View {
         }
         .background(tokens.surface)
         .task(id: session.wing.currentID) { await model.startArchived() }
+        .task(id: session.wing.currentID) { await books.start() }
+        // The state doors' ONE confirm road (Delete Book's three confirms).
+        .bookStateConfirms(doors)
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
@@ -140,14 +163,21 @@ struct ArchivedView: View {
 
     /// The room's own promise, said where she can read it — the `windowNote`
     /// shape one surface over, and its exact opposite in content: no clock.
-    static let subtitle = "notes you set aside — kept, with no countdown"
-    static let searchPrompt = "Search archived notes…"
+    /// 13i-e U2: books live here too now (R-13ie-1) — and kept means forever.
+    static let subtitle = "notes and books you set aside — kept, with no countdown"
+    static let searchPrompt = "Search archived notes and books…"
+    /// 13i-e U2 — the two groups' labels (drawn only when a book is archived).
+    static let booksSection = "Books"
+    static let notesSection = "Notes"
 
     /// The `.surface` acts this view renders (P-1's declared ⇔ rendered walk):
     /// each row's inline Unarchive is `.unarchiveNote` — its second renderer
     /// beside a book's archived line (13i-d U6 (h) — F-U4-4, routed here) —
     /// and its inline Delete Note… is `.deleteNote` (13i-d U7 rider, F-U6-4).
     static let surfaceCapabilities: [CapabilityID] = [.unarchiveNote, .deleteNote]
+        // 13i-e U2 — the BOOKS group's rows (R-13ie-1): Unarchive, and the
+        // shared Delete Book… road (never on the daily Journal — the table).
+        + [.unarchiveBook, .deleteBook]
     static let emptyLine = "Nothing archived."
     static let noMatchesLine = "No archived note matches that."
 
@@ -157,8 +187,31 @@ struct ArchivedView: View {
     /// card with generous doors. Every door survives byte-identical.
     private var list: some View {
         List {
+            // 13i-e U2 — THE BOOKS GROUP, above the notes (R-13ie-1).
+            let shownBooks = ArchivedBooksModel.matches(books.books, query: query)
+            if !books.books.isEmpty {
+                sectionLabel(Self.booksSection)
+                if shownBooks.isEmpty {
+                    Text(ArchivedBookCopy.noMatchesLine).foregroundStyle(.secondary)
+                        .listRowSeparator(.hidden)
+                }
+                ForEach(shownBooks, id: \.id) { reading in
+                    bookRow(reading)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(
+                            top: 3, leading: 12, bottom: 3, trailing: 12))
+                }
+                if books.truncated {
+                    Text(ArchivedBookCopy.windowed(ArchivedBooksModel.window))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .listRowSeparator(.hidden)
+                }
+                sectionLabel(Self.notesSection)
+            }
             if model.archived.isEmpty {
-                Text(Self.emptyLine).foregroundStyle(.secondary)
+                Text(books.books.isEmpty ? Self.emptyLine : ArchivedBookCopy.noNotesLine)
+                    .foregroundStyle(.secondary)
                     .listRowSeparator(.hidden)
             } else if shown.isEmpty {
                 Text(Self.noMatchesLine).foregroundStyle(.secondary)
@@ -179,6 +232,60 @@ struct ArchivedView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+    }
+
+    /// A group's quiet label (the Library's gray section-label grammar).
+    private func sectionLabel(_ words: String) -> some View {
+        Text(tokens.chromeLabel(words))
+            .font(tokens.small)
+            .foregroundStyle(tokens.faint)
+            .lineLimit(1)
+            .listRowSeparator(.hidden)
+            .padding(.top, 6)
+    }
+
+    /// One archived book or gathering: its name, its honest facts, when it was
+    /// archived — and its doors, from the archive table (P-1): Open (the book
+    /// view; navigation, never an act), Unarchive, Delete Book… (not drawn on
+    /// the daily Journal — P-2).
+    private func bookRow(_ reading: Reading) -> some View {
+        CalmCard(tokens: tokens) {
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(reading.name)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(tokens.chromeLabel(ArchivedBookCopy.facts(
+                            reading, notes: books.noteCounts[reading.id])))
+                            .font(tokens.small).foregroundStyle(tokens.muted)
+                        if let stamp = ArchivedBookCopy.stamp(reading) {
+                            Text(stamp).font(tokens.small).foregroundStyle(tokens.faint)
+                        }
+                    }
+                    .lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                Button(ArchivedBookCopy.openVerb) { openBook(reading.id) }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                ForEach(BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
+                    .filter { $0 != .archiveBook }, id: \.self) { act in
+                    if act == .deleteBook {
+                        Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}") {
+                            Task { await doors.open(.deleteBook, readingID: reading.id) }
+                        }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                    } else {
+                        Button(CapabilityRegistry.capability(act).verb) {
+                            Task { await doors.open(act, readingID: reading.id) }
+                        }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                        .help(ArchivedBookCopy.unarchiveHelp)
+                    }
+                }
+            }
+        }
     }
 
     private func row(_ item: Queries.TimelineItem) -> some View {
@@ -218,5 +325,98 @@ struct ArchivedView: View {
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
             }
         }
+    }
+}
+
+// MARK: - 13i-e U2 — the BOOKS group's brain and words
+
+/// **THE ARCHIVED BOOKS, held** (R-13ie-1): the current wing's archived
+/// books and gatherings (`observeArchivedReadings` — the `reading` table
+/// alone, so autosave never wakes it), newest archive first, windowed; and
+/// each BOOK's member count as a one-shot read beside it (it reads
+/// `container` — the 13i-d archived-counts rule keeps that out of the held
+/// region). Holds projections and ids; every write is an operation's (the
+/// state doors).
+@MainActor
+@Observable
+final class ArchivedBooksModel {
+    @ObservationIgnored private let session: AppSession
+    nonisolated static let window = 200
+
+    private(set) var books: [Reading] = []
+    private(set) var truncated = false
+    /// Live member notes per archived BOOK (a gathering holds none).
+    private(set) var noteCounts: [String: Int] = [:]
+    private(set) var lastError: String?
+
+    init(session: AppSession) {
+        self.session = session
+    }
+
+    func start() async {
+        do {
+            for try await value in session.database.observeArchivedReadings(
+                limit: Self.window + 1, wingID: session.wing.currentID
+            ) {
+                await adopt(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = DeletionRefusal.fallback(error)
+        }
+    }
+
+    /// Tests drive the listing the `adopt` way (hosted `.task`s don't fire
+    /// under the test host).
+    func adopt(_ value: [Reading]) async {
+        (books, truncated) = TrashListing.windowed(value, window: Self.window)
+        let ids = books.filter { $0.kind == .book }.map(\.id)
+        noteCounts = (try? await session.database.read { db in
+            var counts: [String: Int] = [:]
+            for id in ids { counts[id] = try Queries.liveMemberNoteCount(db, readingID: id) }
+            return counts
+        }) ?? [:]
+    }
+
+    /// The name filter (the notes' own rule — a pure read over what is held).
+    nonisolated static func matches(_ books: [Reading], query: String) -> [Reading] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return books }
+        return books.filter { $0.name.localizedCaseInsensitiveContains(trimmed) }
+    }
+}
+
+/// Every word the BOOKS group says. Wording PROVISIONAL (13s re-voices); the
+/// facts are honest counts (her #169(a)(1) precedent).
+nonisolated enum ArchivedBookCopy {
+    static let openVerb = "Open"
+    static let noMatchesLine = "No archived book matches that."
+    static let noNotesLine = "No archived notes."
+    static let unarchiveHelp = "Puts it back on the Bookcase"
+
+    static func windowed(_ window: Int) -> String {
+        "Showing the \(window) most recently archived books \u{2014} older ones aren't listed."
+    }
+
+    /// "book · 5 notes · owned · finished", "daily Journal · 12 notes", or
+    /// "gathering · shows nothing while archived" (R-13ie-3 — its assembly
+    /// is empty until unarchived, so it has no count to state).
+    static func facts(_ reading: Reading, notes: Int?) -> String {
+        guard reading.kind == .book else { return "gathering \u{00B7} shows nothing while archived" }
+        var parts = [Queries.isDailyJournalMintShape(reading) ? "daily Journal" : "book"]
+        if let notes { parts.append(notes == 1 ? "1 note" : "\(notes) notes") }
+        if reading.owned { parts.append("owned") }
+        if reading.sealedAt != nil {
+            parts.append("sealed")
+        } else if reading.locked {
+            parts.append("finished")
+        }
+        return parts.joined(separator: " \u{00B7} ")
+    }
+
+    static func stamp(_ reading: Reading) -> String? {
+        guard let archivedAt = reading.archivedAt else { return nil }
+        return TrayRowPreview.stampText(
+            DateFormatter.variorumISO8601.string(from: archivedAt), verb: "archived")
     }
 }

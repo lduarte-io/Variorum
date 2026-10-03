@@ -902,7 +902,9 @@ struct RootView: View {
         case .archived:
             ArchivedView(
                 session: session, library: library,
-                openPost: { postID in openHere(.post(postID)) })
+                openPost: { postID in openHere(.post(postID)) },
+                // 13i-e U2 (R-13ie-1): an archived book opens in the book view.
+                openBook: { readingID in openHere(.reading(readingID)) })
         }
     }
 
