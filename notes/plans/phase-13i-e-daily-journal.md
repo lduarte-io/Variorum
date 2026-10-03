@@ -289,7 +289,7 @@ the closeout tidies them.
 | # | item | status |
 |---|---|---|
 | 0 | U0 — the schema event (architect; schema-first commits) | **DONE** (b2e8b1c2 — v1_21 + model + registry/marker 12 + DDL-pin list + the mirror artifact + the deploy checklist; full core suite green 2127/234, the 13i-d baseline exactly) |
-| 1 | U1 — the op family + the daily rulings (headless) | NOT-STARTED |
+| 1 | U1 — the op family + the daily rulings (headless) | IN-PROGRESS (the U1 RECORD below — `opus-implementer`) |
 | 2 | U2 — the faces + lesson 9 | NOT-STARTED |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | NOT-STARTED |
 | 4 | The orchestrator's walk | NOT-STARTED |
@@ -335,6 +335,151 @@ STATUS in this file flipped per commit, PENDING until verified, foreground waits
 subagents). Tests at the END of the unit; counts exact. Record your UNIT RECORD in this file
 (the 13i-d records' shape: LIVE STATUS · WHAT WAS BUILT · EVIDENCE · FINDINGS · PROVISIONALS).
 Carry the ENVIRONMENT TRAPS section above verbatim as binding.
+
+## U1 RECORD — THE OP FAMILY + THE DAILY RULINGS (`opus-implementer`, 2026-10-03)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** no FACES (Mac or phone — U2's: the
+Archived surface's books group, the archive doors, the daily Journal's Delete→Archive swap, the
+`OpsRefusalTable` words, the "(archived)" marks, the Collecting pane's pause sentence, lesson 9);
+no walk (a headless unit — the evidence is state-transition pins, red-on-old reverts and the
+fake-server convergence pin; the USE gate for this unit's semantics is U2's walk + U3's
+orchestrator walk); zero `Sync/`, `Server/`, migrations, editor seam. QUESTIONS is NOT written
+here — this phase routes its PROVISIONALs to #179 at the closeout (ledger row 7; the 13i-*
+precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- 2026-10-03 · **START** — preflight read in this session, not delegated: this file WHOLE; CLAUDE.md
+  + its auto-loaded canon; the sitting record §10, §20, §25 (lesson 9); the daily-Journal identity
+  memo WHOLE; the resiliency protocol WHOLE; the 13i-c plan's §3 (+ §5/§6, the seal/delete/restore
+  patterns mirrored); KnownIssues row 32. Code read by hand: `Operations+Reading.swift` whole,
+  `Operations+Seal.swift`, `Operations+Intake.swift`, `Domain/IntakeDecision.swift`,
+  `Operations+Container.swift` (the shelving door + `insertDailyJournalBook`),
+  `Operations+Appearance.swift` (`setDailyJournalBook`), `Queries/AppearanceQueries.swift` (the
+  designation, the marker, the candidates, the star union), `Queries/ReadingAssembly.swift` whole,
+  `Queries/ShelfQueries.swift` whole, `Operations+BlockArchive.swift` (the archive precedent), the
+  v1_18 marker migration step, the app/mobile consumers of every query touched. THE DESIGN below
+  settled before the first line of code. **No revert in flight.**
+
+### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
+
+**The op family (`Operations+ReadingArchive.swift`, new — scope item 2):**
+- **`archiveReading(id)`** — a book OR a gathering (R-13ie-3), the daily Journal included (archive
+  is its road): `archived_at = updated_at = now`, ONE row write, nothing else moves (a plain book
+  archives ALONE — R-13ie-2; pending arrivals KEEP WAITING — the edge; no note touched).
+- **`archiveReadingWithNotes(id) -> [String]`** — ONE clock read: every live MEMBER note of the
+  book (live member row, live post) that is NOT already archived gets `container.archived_at =
+  updated_at = now`, then the book's `archived_at = now`. Returns the archived notes in book order.
+  Never a tombstone; never a saved VERSION (born archived by the classifier — re-stamping one would
+  break `archived_at == created_at`; the "not already archived" fence leaves them untouched by
+  construction); arrivals' notes never (an arrival is not membership); sealed members DO archive
+  (AppSpec §9's seal letter: "the post itself may still be archived").
+- **`unarchiveReading(id) -> [String]`** — the book's live MEMBER notes whose `archived_at` EQUALS
+  the book's stamp come back (archived_at cleared) FIRST, then the book's flag clears, then the
+  RESUME CATCH-UP (`intakeSweep(.catchUp)` — bells, never quiet seats; runs only when the book's
+  intake runs: a live BOOK, readable rule, not finished; a gathering simply assembles again at
+  read). Returns the notes it brought back, in book order.
+- **P-13ie-U1-1 — double archive / unarchive REFUSE:** `readingAlreadyArchived(id:)` /
+  `readingNotArchived(id:)` (two new `OperationError` cases) — the 13j block-archive precedent
+  (`blockAlreadyArchived` / `blockNotArchived`) and the `readingNotDeleted`/`readingNotSealed`
+  class ("a recovery door that silently succeeded would teach that Put back did something"); a
+  re-stamp would also orphan the exact-stamp key of an earlier archive-with-notes. *Alternative:
+  the identity-setter no-op guard.*
+- **P-13ie-U1-2 — `archiveReadingWithNotes` mirrors `deleteReadingWithNotes` AT THE OP:** refuses
+  a gathering (`wrongReadingKind`) and nothing else; the DOOR offers it only on an OWNED book (U2) —
+  R-13ie-2's "Lesson 8's ruled delete shape, mirrored", read to the letter of the 13i-c plan §6
+  ("the op itself refuses a gathering and nothing else"). *Alternative: the op also refuses a plain
+  book (a belt against hiding notes that live in other books).*
+- **P-13ie-U1-3 — the exact-stamp corners:** a note archived individually BEFORE the book carries
+  its own stamp and stays archived after the unarchive (the edge, `restoreContainer`'s letter); a
+  note that LEFT the book while it was archived (removed, moved in elsewhere, a wing move's
+  severance) is no longer a member and stays archived ("rows whose story diverged stay as they
+  are"); a note unarchived by hand meanwhile is simply live already.
+- **P-13ie-U1-4 — no undo, and the redo future untouched:** the family registers nothing (the door
+  is the recovery — the Trash-class rule the brief names) and, unlike `deleteReadingWithNotes`,
+  does not clear the redo future (`archiveContainer`'s class: archive removes no content, so no
+  stack entry is stranded).
+- **Orthogonality (no code — pinned):** Finish/Seal/lock/own on an archived book are legal (no
+  unarchive-first gate — the edge); `restoreReading` of a book deleted while archived returns
+  ARCHIVED (row state; the flip never touches `archived_at`) with its catch-up paused;
+  `duplicateReading` of an archived book is born UNARCHIVED (the `Reading` init's nil — P-13ic-7's
+  configuration-never-state letter); a wing move rides archived (an in-place row update).
+
+**The archived semantics (scope item 2, R-13ie-4 with her amendment):**
+- **P-13ie-U1-5 — THE PAUSE lives in the ONE table:** `IntakeDecision.BookFacts.archived` and
+  `intakeRuns` gains `!archived` — so EVERY auto-ingestion road pauses by construction: the tagging
+  and starring EVENTS, creation BACKFILL, every CATCH-UP (restore, un-finish, unseal, a rule edit);
+  `livingBooks`' SQL gains `archived_at IS NULL` (the cheap pre-filter, the same truth). A rule set
+  or edited on an archived book fires nothing; the unarchive's catch-up covers the gap (bells — the
+  finished-book precedent). The bind of an ARCHIVED gathering binds its assembly, which is empty
+  while archived — no new refusal; the unarchive's catch-up bells its matches.
+- **P-13ie-U1-6 — EXPLICIT adds untouched** (her amendment — NO `readingArchived` refusal anywhere):
+  `addPostToReading`, `seatArrival`, `copyPostIntoReading`, `movePostIntoReading`,
+  `newPostInReading`, `assertReadingAcceptsPosts`, `divergePostForReading`, the gathering's collect
+  door — zero lines changed. The book's OUTFLOW (auto-tag) still rides an explicit add on an
+  archived book: it is the explicit act's own tagging (P-13ib-1), not ingestion INTO the book.
+  *Alternative: an archived book's outflow pauses too.*
+- **The gathering answers EMPTY everywhere its rule is consulted:** `assembleReading`'s gathering
+  arm returns `[]` while archived (every reader THROUGH the assembly follows by construction — the
+  book surfaces, export, `bindOwnedNotesPreview`, the Bookcase aggregates' gathering counts); the
+  four readers that run a gathering's rule OUTSIDE the assembly skip an archived gathering: the
+  Pool's tuck (`notePoolListingSQL` — its notes re-class loose), the chip's gathering leg
+  (`readingsContaining`), the Library card's feed (`smartBookMembership`), `bookWordCounts`.
+- **P-13ie-U1-7 — the Bookcase listing excludes archived** at the ONE choke point
+  `bookcaseReadings` (both arms — the Mac's wing-scoped read AND the phone's all-wings read), so
+  `bookshelf`, `bookcase` (the snapshot the № census, strip counts and solos derive from in
+  `BookcaseBoard`) and `bookcaseAggregates` follow; `bookWordCounts` drops archived readings in all
+  three arms. `Queries.readings` (the choosers/pickers, the seeders' existence reads) KEEPS
+  archived — her second rider marks them "(archived)" in the pickers (U2), and a seeder must never
+  re-mint a seeded book she archived. NEW `Queries.archivedReadings(wingID:limit:)` — the Archived
+  surface's BOOKS feed for U2 (`archived_at DESC, id DESC`, the `archivedPosts` order).
+- **P-13ie-U1-8 — membership is a FACT:** an archived book's member rows still count as membership
+  wherever membership is read — the Pool's home test (a note whose only book is archived is NOT
+  bookless), `membershipElsewhere` (an archived OWNED book still owns), `readingsContaining`'s book
+  leg (U2 mutes it "(archived)"), `ownershipFacts`, `isBookless`, the sealed-book unlock guard (the
+  edge's "the honest read: membership is a fact; visibility is the book's own state"). *Alternative:
+  an archived book's notes count as bookless and return to the Pool.*
+- **P-13ie-U1-9 — the ⌘K/search catalog's book arm excludes archived books** (the edge — "match the
+  shipped archived-note treatment": the note arm has always excluded archived notes).
+- **P-13ie-U1-10 — Starred:** an archived starred book STAYS in the sidebar's Starred section
+  (`Queries.starred` unchanged) — the shipped archived-note treatment (an archived starred note
+  stays starred and listed: `starredListItems` filters `deleted_at` only); the star is her
+  deliberate quick-access, archive is the library's visibility. *Alternative: Starred hides it.*
+- **P-13ie-U1-11 — the E13 name guard skips archived books:** `assertBookNameIsFree` reads
+  `archived_at IS NULL` too — her ruling's own words, *"archived/deleted books don't count"*
+  (13e E13; QUESTIONS' 13e batch 1 entry (a) noted "books have no archive" — now they do). The wing
+  moves' name-collision PREVIEWS are deliberately unchanged (a stricter warning is the safe side).
+
+**The daily rulings (scope item 3, the sitting record §10):**
+- **THE DERIVATION:** `Queries.dailyJournalBookID` = `dailyJournalBookCandidates(db).first` (the
+  keeper's own smallest-id pick over LIVE marker-bearers — an ARCHIVED Journal is live, so it is
+  found). The `daily_journal_book` setting stays WRITTEN as a cache (`setDailyJournalBook`,
+  `insertDailyJournalBook` byte-unchanged); `designatedBookID` keeps its quicknotes consumer; the
+  §7 keeper (`Sync/Repairs.swift`) untouched.
+- **THE GUARD:** `deleteReading` and `deleteReadingWithNotes` read the row INSIDE their write
+  transaction and refuse `dailyJournalCannotBeDeleted(id:)` (new) when
+  `Queries.isDailyJournalMintShape(row)` — ANY marker-bearer (two mid-convergence both refuse; the
+  keeper's apply-mode tombstone is not an op and is unaffected). Checked FIRST after liveness.
+- **P-13ie-U1-12 — THE COMES-BACK:** `shelveInDailyJournalBook`'s filing runs in ONE write: when the
+  derived book is archived, the `unarchiveReading` body runs first (its exact-stamp members
+  return, its catch-up runs), then the FILING runs inside a SAVEPOINT (`addPostToReading`'s body,
+  extracted to a db-level twin — the public door byte-identical). A refused filing (finished, full,
+  owned-elsewhere → the bell, another wing) rolls back the filing ONLY: the Journal still comes back
+  — "it returns when a day arrives" (the day arrived), and a bell must ring at a door she can see. A
+  DECIDED pair (already filed, or removed by hand) brings nothing back — no day arrived, an old
+  entry was re-reached. A DEAD daily book still mints fresh (today's behaviour). *Alternative: the
+  Journal returns only when the filing lands (all-or-nothing).*
+
+**The pins (scope item 4 — named before building):** a new suite file
+`Tests/VariorumCoreTests/BookArchiveTests.swift` (the op family's exact transitions + the archived
+semantics per consumer) and `Tests/VariorumCoreTests/DailyJournalRulingsTests.swift` (the guard,
+the derivation, the comes-back), plus the keeper-meets-archived convergence pins headless against
+the fake server (test-side only; zero `Sync/` source). RED-ON-OLD by behavioural revert at three
+mechanisms: (R1) the guard — revert the two guard lines, the old tree tombstones the daily book;
+(R2) the derivation — revert `dailyJournalBookID` to the setting read: a marker/setting
+disagreement answers the setting, and a dangling setting beside a live marker-bearer double-mints
+on ⌘J; (R3) the comes-back — revert the shelving's unarchive: the book stays archived after the
+filing.
 
 ## U2 BRIEF — THE FACES + LESSON 9 (`opus-implementer`; read this WHOLE file first)
 
