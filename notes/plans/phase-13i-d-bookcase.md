@@ -3053,6 +3053,68 @@ one gate + pin). Zero `Sync/` (the architect's half is done; mine touches none).
   (round-1-of-B) repo-first. The orchestrator's bank-2 composed walk follows the ladder's
   fixes (the machine permitting), then the CLOSEOUT.
 
+## THE ORCHESTRATOR'S COMPOSED WALK — BANK 2 (2026-10-02, by the orchestrator's own hand; the dev-store Debug build at the post-ladder-B tip; guards green per act; captures `notes/plans/13id-screens/orch-b/` b0–b6, gitignored)
+
+The wing LIFECYCLE end to end, verified on the captures: **the switcher** ("Wings — each a
+separate library" · Home ✓ · New Wing…) → **the mint prompt teaching lesson 11 VERBATIM** ("A
+wing is a separate library in the same app — a different room in the same house. Nothing
+crosses between wings except what you move or copy yourself.") → **"orchwing" minted and the
+WHOLE SURFACE re-scoped** (empty strip · zeroed census · "no books yet" · the sidebar's Starred
+section gone · the quiet receipt "Made the wing “orchwing” — a separate library; you're in it
+now.") → **the additional wing's full door set** (New · Rename · Move Everything to Another
+Wing ▸ · Delete Wing… — absent on Home, as ruled) → **the empty wing's honest delete confirm**
+("It's empty. Its shelves go with it; nothing else is touched.") → **deleted, back on Home
+whole**, the receipt "Deleted the wing “orchwing”." — and the U7-minted WELCOME shelf standing
+in the strip beside the U1 walk shelves. The instance quit BY IDENTITY; zero instances. One
+voice by design; the four-combo evidence is the units' walks (27 + 53 + 46 + 22 captures).
+With bank 1's composed walk (o1–o9) the phase's acceptance legs are DISCHARGED; the DRAGS and
+the full flows ride HER COMBINED WALK per her posture.
+
+## PHASE CLOSEOUT (2026-10-02)
+
+**Results.** Her six kickoff/evening rulings (R-13id-1…6) + her #169(a) archived-members shape +
+the #166(b) classics letter, built whole across SEVEN units + U5b + the U7 continuation, all in
+ONE day under her away-run instruction. TWO Fable ladders (one per bank): A — 2 MINOR · 2 NIT,
+zero disputes, five fixes; B — the one MAJOR DOWNGRADED on the reviewer's own recheck of the
+severity dispute's evidence, 3 MINOR · 1 NIT, six fixes; NO round 3 in either; every fix's red
+evidence labeled by its honest kind; one hollow finding dismissed by trace with its ruling
+vacated (the trace-first lesson). The architect's own code under the rider: the F-U2-1 seeder
+tolerance, the F-U7-1 Sync/ seed-tag skip (convergence pins revert-red), two doc fixes — all
+cold-reviewed by the ladders. The orchestrator's TWO composed walks by hand (o1–o9, b0–b6)
+after the hollow-probe correction (the "grants blocked" reading was a missing `timeout`
+binary; the morning ask withdrawn). **FINALS:** core **2127/234** (baseline 2008/213 at
+13i-c's close — +119 tests), the sanity passes' Mac runs 226/21 and 197/31 beside the units'
+own batches (the registry walk + the eleven-suite tutorial spine green in every one), the
+phone test-builds + its seeder suites real-run on the simulator. **Zero schema; the marker
+stays 11; the one `Sync/` reach is the ruled seed-tag skip + a doc paragraph.** 100+ commits
+`d8f7c452..` this file's tail, every one pushed, no attribution trailers.
+
+**Canon deltas (as ruled):** AppSpec §9 (the 13i-d op family), §12 (the Bookcase / Book Panel /
+wing switcher / archived members contract + the sidebar's Bookcase name), §14's paragraph;
+13i-c's outgoing §14 paragraph and closeout/pointer rolled to the archives. SyncSpec untouched
+(no §12 event). KnownIssues: NINE rows resolved and removed, ONE added (the obsolete-undo
+false receipt, owner 12) beside the ladder's arrangement-catch-up row. QUESTIONS #170–#178
+(her bundle). MobileSoul PL-45.
+
+**MOBILE PARITY:** PL-45 — the substrate shared; the faces owed to the catch-up, enumerated
+there (the Welcome-arrangement call is the one that closes the dedupe residual's window).
+
+**Deferred with owners:** the obsolete-undo receipt design (KnownIssues, 12) · the
+arrangement catch-up (the mobile project row) · the asymmetric-dedupe stronger remedies
+(hers, #178) · the filter menu's 300-note window (row 22's family, 12) · lesson 9's second
+sentence + the never-hard-delete guard (13i-e) · the delete-receipt copy (13s).
+
+**Her tail (the handoff + in chat):** ONE press of Help ▸ Restore Tutorial on the refreshed
+install (the new books chapter + the Welcome/classics arrangement reach her real store; the
+A1 copy taken at the refresh); the #170–#178 ratify bundle; the F-U6-2 flag; the offer-toast
+clock carryover.
+
+**For the combined 13i walk:** the per-adjudication lists above, consolidated by 13i-e into
+the cohesive final list her posture owes.
+
+**The DerivedData tidy:** every `13id-*` build folder deleted at this closeout (logs and
+scripts kept); the orchestrator's `caffeinate` ended.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -3086,9 +3148,9 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
 | 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | **BUILT — awaiting the architect's adjudication** (core 2116/233 · Mac 1406/224 · walk ×4, 46 captures; ACT 0 + a sibling guarded; F-U3-4 traced NOT bug-class; F-U4-7 recorded; W-1 fixed; F-U6-2/-4/-5 for rulings; #176) |
 | 8 | U7 — the tutorial's books chapter + the classics seed (+ riders: F-U1-3 the Welcome mint, F-U1-5/F-U6-3 the guide's prose, F-U6-4 the declaration) | **BUILT + the U7 CONTINUATION CLOSED — LADDER B next** (first pass: core 2123/234 · Mac 1486/236 + W-1's 27/4 · walk ×4, 22 captures; the combined revert 14/60 red; #177. Adjudicated (9cc7c9de) and continued: F-U7-1 `#classics` RULED — the architect's `Sync/` half 17aa1113, then the seed half 4787dcd2 (the pin flipped through the real classifier); F-U7-3 re-add-as-copy c01491fa; F-U7-4 06a255d7; F-U7-5 DISMISSED AS HOLLOW (the door acts); F-U7-2 withheld for 13i-e. END: core 2125/234 · Mac 278/33 · phone 21/4 + build-for-testing; the `#classics` walk `tl-c00…c05`, `sl-c06/c07`) |
-| 9 | LADDER B (U5–U7 + U5b + the continuation + the architect's commits) | ROUND 1 IN FLIGHT (opened 2026-10-02; the diff 3e6ed192..ade4df64; findings → notes/plans/13id-ladder-round2B.md) |
+| 9 | LADDER B (U5–U7 + U5b + the continuation + the architect's commits) | **CLOSED** (2026-10-02, two rounds: the MAJOR downgraded on the reviewer's recheck, five fixes + record D + the sanity NIT's fix all red-verified, round 2 clean with one doc NIT fixed by the orchestrator; no round 3) |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
-| 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
+| 11 | Closeout: the standing ritual (the re-seed press is HERS — the walk-tooling rule binds drives to the dev store; her checklist carries it behind the A1 rail) + the install refresh at the zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | IN PROGRESS (2026-10-02) |
 
 HELD FOR HER BUNDLE (nothing gates on these): the #169 remainder (P-13ic-1's open sub-question —
 tags on Duplicate-as-Version / Diverge-for-book; the offer toast's 6 s clock, F-U3-8).
