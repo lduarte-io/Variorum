@@ -117,6 +117,20 @@ private func facts(_ db: AppDatabase) async throws -> WelcomeFacts {
     }
 }
 
+/// A book's live MEMBER notes, in book order.
+private func memberIDs(_ db: AppDatabase, _ readingID: String) async throws -> [String] {
+    try await db.read { db in
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT post_id FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'
+                ORDER BY position, id
+                """,
+            arguments: [readingID])
+    }
+}
+
 private let sherlockName = SampleLibrarySeeder.Book.sherlock.name
 private let jekyllName = SampleLibrarySeeder.Book.jekyllAndHyde.name
 private let encryptionName = SampleLibrarySeeder.Book.encryptionExplained.name
@@ -438,6 +452,98 @@ struct SampleLibraryWelcomeTests {
             }
             #expect(notesAfter == notesBefore + 1, "only the seeded quicknote — no fork copy")
             #expect(try await facts(db).readingByName[sherlockName]?.owned == false)
+        }
+    }
+
+    /// **F-U7-3, RULED re-add-as-COPY (the U7 continuation C2).** The restore
+    /// road re-members a STRAY story (tagged, live, out of its book) — and an
+    /// OWNED Sherlock meets the ownership consult when that story now lives in
+    /// another book (`noteMemberedElsewhere`). The ruled answer is the
+    /// doctrine's own: it comes back as a COPY (lineage kept); her book keeps
+    /// the original; nothing is severed. RED ON OLD: the restore THREW partway
+    /// and spoke an impossible "try again".
+    @Test func aClaimedElsewhereStoryComesBackIntoAnOwnedBookAsACopy() async throws {
+        try await withWelcomeWorld { session, db in
+            _ = await launchSeeds(session)
+            let ops = session.operations
+            let sherlockID = try #require(try await facts(db).readingByName[sherlockName]?.id)
+            _ = try ops.setReadingOwned(sherlockID, owned: true)
+            let (story, title) = try await db.read { db -> (String, String) in
+                let id = try #require(try Queries.assembleReading(db, readingID: sherlockID).last?.postID)
+                return (id, try #require(try Queries.containerTitle(db, id: id)))
+            }
+            #expect(try ops.removePostFromReading(story, from: sherlockID), "released — bookless")
+            let favorites = try ops.createReading(name: "favorites", kind: .book)
+            _ = try ops.addPostToReading(story, to: favorites.id)
+
+            let restored = try await SeededBookRestore.restore(session: session, book: .sherlock)
+            guard case .restored(_, let minted) = restored else {
+                Issue.record("the story comes back: \(restored)")
+                return
+            }
+            #expect(minted == 1)
+            let back = try await db.read { db -> (copy: String?, sectioned: Bool, lineage: Bool) in
+                let members = try Queries.assembleReading(db, readingID: sherlockID)
+                let copy = members.first { $0.title == title }?.postID
+                let sectioned = try copy.map { id in
+                    try String.fetchOne(
+                        db, sql: """
+                            SELECT section_id FROM reading_post
+                            WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL
+                            """, arguments: [sherlockID, id]) != nil
+                } ?? false
+                let lineage = try copy.map { id in
+                    try Bool.fetchOne(
+                        db,
+                        sql: """
+                            SELECT EXISTS (SELECT 1 FROM edge e
+                              JOIN container_block a ON a.block_id = e.source_block_id AND a.container_id = ?
+                              JOIN container_block b ON b.block_id = e.target_block_id AND b.container_id = ?
+                              WHERE e.deleted_at IS NULL)
+                            """, arguments: [id, story]) ?? false
+                } ?? false
+                return (copy, sectioned, lineage)
+            }
+            let copy = try #require(back.copy, "the title is back in the book")
+            #expect(copy != story, "…as a COPY — the original stays hers")
+            #expect(back.sectioned, "…in its chapter")
+            #expect(back.lineage, "…remembering where it came from")
+            #expect(try await memberIDs(db, favorites.id) == [story], "her book keeps the original")
+            #expect(try await facts(db).readingByName[sherlockName]?.owned == true, "still owned")
+        }
+    }
+
+    /// F-U7-3's sibling, the consult's OTHER arm: a PLAIN book (Jekyll) whose
+    /// released story she put into her own OWNED book (`noteOwnedElsewhere` —
+    /// copy only). The same answer: a copy comes back. RED ON OLD: it threw.
+    @Test func aStoryOwnedElsewhereComesBackIntoAPlainBookAsACopy() async throws {
+        try await withWelcomeWorld { session, db in
+            _ = await launchSeeds(session)
+            let ops = session.operations
+            let jekyllID = try #require(try await facts(db).readingByName[jekyllName]?.id)
+            let (story, title) = try await db.read { db -> (String, String) in
+                // A STORY (the front matter is never "missing" to a restore —
+                // `expectedTitles` lists the stories and the scripted note).
+                let entry = try #require(try Queries.assembleReading(db, readingID: jekyllID).first {
+                    $0.title != SampleLibraryJekyllBook.frontMatterTitle && $0.title != Takemania.title
+                })
+                return (entry.postID, try #require(entry.title))
+            }
+            _ = try ops.removePostFromReading(story, from: jekyllID)
+            let mine = try ops.createReading(name: "mine", kind: .book)
+            _ = try ops.setReadingOwned(mine.id, owned: true)
+            _ = try ops.addPostToReading(story, to: mine.id)
+
+            let restored = try await SeededBookRestore.restore(session: session, book: .jekyllAndHyde)
+            guard case .restored = restored else {
+                Issue.record("the story comes back: \(restored)")
+                return
+            }
+            let copy = try await db.read { db in
+                try Queries.assembleReading(db, readingID: jekyllID).first { $0.title == title }?.postID
+            }
+            #expect(copy != nil && copy != story, "back in Jekyll as a copy")
+            #expect(try await memberIDs(db, mine.id) == [story], "her owned book keeps its note")
         }
     }
 
