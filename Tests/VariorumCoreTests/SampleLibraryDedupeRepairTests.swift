@@ -255,6 +255,61 @@ struct SampleLibraryDedupeRepairTests {
         #expect(try liveCopyIDs(a) == [copyB.bookID])
     }
 
+    /// **13i-d LADDER B — round 1's MINOR 1, ruled (b): the DOCUMENTED
+    /// RESIDUAL, pinned so it is never a surprise** (the SyncSpec
+    /// review-finding-#6 idiom — a test that DOCUMENTS a converged outcome,
+    /// endorsing nothing). The Welcome arrangement is the Mac's alone today
+    /// (P-13id-U7-14), so a dedupe meeting can be ASYMMETRIC: one copy
+    /// arranged (its stories wear the seed's `classics` tag — the skip reads
+    /// those applications as the seeder's hands), the other RAW (a phone
+    /// seed, or a pre-U7 build's). Both read PRISTINE, the smaller id keeps —
+    /// and when the raw copy wins the toss the arranged copy's demo state
+    /// retires with its family (here the #classics applications; in the app
+    /// also the owned flag and the Welcome placement, which this classifier
+    /// deliberately never reads). Nothing of HERS is lost (both copies are
+    /// byte-identical seeds; a restore door re-arranges), and the window is
+    /// the dedupe's own — a second device seeding before its first clean
+    /// sync. The closure is the phone's arrangement catch-up (the KnownIssues
+    /// row, 2026-10-02); the remedy alternatives — a keeper-preference arm
+    /// (changes the ruled R-pre13u-8 matrix) or arranging in the shared
+    /// seeder (decides phone seed content) — are HERS, QUESTIONS #178.
+    @Test func documentedResidual_aRawCopyCanRetireAnArrangedOnesDemoState() async throws {
+        let (a, b, server) = try furniturePair()
+        let classicsFacts = Self.facts(seedTagPaths: ["classics"])
+        a.sampleLibraryFacts = classicsFacts
+        b.sampleLibraryFacts = classicsFacts
+        let copyA = try seedCopy(a)  // raw — and minted first: the smaller ids
+        let copyB = try seedCopy(b)  // "arranged": its stories wear #classics
+        try b.with { ops, _ in
+            let classics = try ops.createTag(name: "classics")
+            for (_, postID) in copyB.postIDs {
+                _ = try ops.applyTag(classics.id, toPost: postID)
+            }
+        }
+
+        try await a.push()
+        try await b.push()
+        _ = try await b.pull()
+        _ = try await b.pull()  // the quiescent window: the deferred pass runs
+
+        #expect(try liveCopyIDs(b) == [copyA.bookID],
+                "both pristine — the RAW, smaller-id copy keeps")
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID])
+            // THE RESIDUAL, documented: no live #classics application
+            // survives anywhere — the arrangement's state rode the family.
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                WHERE pt.deleted_at IS NULL AND t.path = 'classics'
+                """) == 0,
+                "documented, not endorsed — the arranged state died with its copy")
+        }
+    }
+
     @Test func anEditedCopySurvivesAndThePristineOneRetiresWhateverTheIDs() async throws {
         let (a, b, server) = try pairWithFacts()
         let copyA = try seedCopy(a)

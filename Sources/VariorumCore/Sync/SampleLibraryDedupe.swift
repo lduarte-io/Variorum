@@ -57,6 +57,20 @@ public struct SampleLibraryDedupeFacts: Sendable {
     /// copies carry the seed's own applications, and the window needs two
     /// devices seeding before first sync — the recorded engagement-chunk
     /// residual's class (KnownIssues, the 18a row).
+    ///
+    /// A SECOND residual, same class (13i-d ladder B round 1's MINOR 1,
+    /// ruled record-as-residual): the Welcome ARRANGEMENT is the Mac's
+    /// alone (P-13id-U7-14), so a meeting can pair an ARRANGED copy with a
+    /// RAW one (a phone seed, a pre-U7 build's) — both read pristine, and
+    /// when the raw copy holds the smaller id the arranged copy's demo
+    /// state (its seed-tag applications; the owned flag and shelf pointer
+    /// this classifier deliberately never reads) retires with its family.
+    /// Nothing of hers is lost and a restore door re-arranges. Pinned as
+    /// documented behaviour (`SampleLibraryDedupeRepairTests`'s
+    /// `documentedResidual_…`); closed by the phone's arrangement catch-up
+    /// (its KnownIssues row); the remedy alternatives — a keeper-preference
+    /// arm (a change to the ruled R-pre13u-8 matrix) or arranging in the
+    /// shared seeder (phone seed content) — are the author's, QUESTIONS #178.
     public var seedTagPaths: [String]
 
     public init(
