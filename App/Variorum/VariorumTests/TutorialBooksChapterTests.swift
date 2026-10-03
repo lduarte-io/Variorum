@@ -467,12 +467,16 @@ struct TutorialBooksLessonTests {
         }
     }
 
-    /// **Lesson 9 — the daily Journal**, its FIRST sentence: "The daily
-    /// Journal is an ordinary book that is special in one way: it's where ⌘J
-    /// and Today's Entry file." The second ("you can archive it; you can't
-    /// delete it; it comes back when a day arrives") is 13i-e's unbuilt guard
-    /// (KnownIssues row 32) — withheld, and this pin keeps it withheld until
-    /// the guard ships (F-U7-2).
+    /// **Lesson 9 — the daily Journal**, WHOLE (13i-e U2 — F-U7-2's pin
+    /// FLIPPED, the guard having shipped at 13i-e U1): "The daily Journal is
+    /// an ordinary book that is special in one way: it's where ⌘J and Today's
+    /// Entry file. You can archive it; you can't delete it; it comes back when
+    /// a day arrives." The second sentence was withheld until the build could
+    /// say it truthfully; now it is asserted, and its truth executed headless:
+    /// archive the Journal → it leaves the Bookcase → its delete refuses (and
+    /// no face draws a Delete for it) → a day arrives (Today's Entry) → the
+    /// SAME book is back, live, unarchived, the day's entry filed, the receipt
+    /// spoken. (Red on old: the pre-sentence tree's prose lacks the sentence.)
     @Test func lessonNineTheDailyJournal() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "the journal & the pool")
@@ -480,11 +484,15 @@ struct TutorialBooksLessonTests {
             let todays = CapabilityRegistry.capability(.todaysEntry)
             #expect(text.contains(todays.verb))
             #expect(text.contains(try #require(todays.shortcutLabel)))
-            #expect(!text.contains("can't delete") && !text.contains("archive it"),
-                    "the unbuilt half is not taught until 13i-e builds it (F-U7-2)")
+            // THE SECOND SENTENCE — taught now that the guard ships (F-U7-2).
+            #expect(text.contains("You can archive it; you can't delete it; it comes back when a day arrives."),
+                    "lesson 9's second sentence lands WITH the guard (13i-e)")
+            #expect(text.contains(CapabilityRegistry.capability(.archiveBook).verb.lowercased()),
+                    "the door it names, by its own verb")
 
-            let entry = try session.operations.createPost(title: nil)
-            let shelved = session.operations.shelveInDailyJournalBook(entry.id)
+            let ops = session.operations
+            let entry = try ops.createPost(title: nil)
+            let shelved = ops.shelveInDailyJournalBook(entry.id)
             guard case .shelved(let journal) = shelved else {
                 Issue.record("⌘J's filing lands in the daily Journal: \(shelved)")
                 return
@@ -493,6 +501,32 @@ struct TutorialBooksLessonTests {
             #expect(try await memberIDs(db, journal) == [entry.id], "⌘J files into it")
             #expect(try await db.read { try Queries.reading($0, id: journal) }?.kind == .book,
                     "an ordinary book")
+
+            // "You can archive it" — and it leaves the Bookcase.
+            try ops.archiveReading(journal)
+            #expect(try await db.read { try Queries.bookshelf($0, wingID: "") }
+                .allSatisfy { $0.reading.id != journal }, "archived: off the Bookcase")
+            // "you can't delete it" — the op refuses, in the table's words, and
+            // no face draws the door (P-2).
+            do {
+                try ops.deleteReading(journal)
+                Issue.record("the daily Journal must refuse its delete")
+            } catch {
+                #expect(error as? OperationError == .dailyJournalCannotBeDeleted(id: journal))
+                #expect(OpsRefusalCopy.words(for: error, roads: .mac)
+                        == BookArchiveCopy.cannotDeleteDailyJournal)
+            }
+            let archived = try #require(try await db.read { try Queries.reading($0, id: journal) })
+            #expect(!BookArchiveDoorSet.rendered(for: BookArchiveFacts(archived)).contains(.deleteBook))
+            // "it comes back when a day arrives" — Today's Entry, the SAME book.
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-10-04")
+            let back = try #require(try await db.read { try Queries.reading($0, id: journal) })
+            #expect(back.archivedAt == nil && back.deletedAt == nil, "back, live")
+            #expect(try await db.read { try Queries.dailyJournalBookID($0) } == journal, "the SAME book")
+            #expect(try await memberIDs(db, journal).contains(outcome.postID), "the day's entry filed")
+            #expect(try await db.read { try Queries.bookshelf($0, wingID: "") }
+                .contains { $0.reading.id == journal }, "back on the Bookcase")
+            #expect(outcome.receipt == BookArchiveCopy.journalCameBack, "and it says so")
         }
     }
 
