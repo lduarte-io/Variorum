@@ -135,3 +135,8 @@ Paragraph order is original §14 order (roughly chronological; the 2026-07-05/06
 
 
 - **13u4 (2026-09-20/21, rolled from §14 at the 13i-b closeout; the plan `notes/plans/phase-13u4-restyle.md`):** the Return key chains in an empty block (R-13u4-2, §7); the merge join is the rendering join on every door (R-13u4-3, §9 and OverallModel §7); `moveSpanToNewTake` (R-13u4-4, §9); the capture microsyntax (R-13u4-1, §12). Schema, migrations and `Sync/` untouched; the lockstep marker stayed 9.
+
+
+## Rolled at the 13i-d closeout (2026-10-02): the outgoing §14 "most recent" paragraph (13i-c's), kept verbatim
+
+**Most recent phase with canon deltas — 13i-c (2026-10-02, `notes/plans/phase-13i-c-owned-finished-sealed.md`; her four kickoff rulings R-13ic-1…4 in its §1): §7's `reading.auto_tag_ids` (the ONE lockstep event of this phase, marker 10→11 — SyncSpec §12's entry; `auto_tag_id` retired-as-read) and the gathering-requires-a-rule contract (NULL rule = shows nothing; the match-all letter retired); §7's two NOT-seeded settings (`hide_owned_default`, `ownership_badges`); §9's Owned/Finished/Sealed op family (the one ownership consult, fork-in-place, copy in / move in, the revival pass, seal/unseal with unseal-reopens, delete-with-notes + restore-whole, duplicate, the outflow set); §12's Book Settings sheet (Collecting + State doors), the membership choice sheet, the delete choices, the badge family. PROVISIONALs at QUESTIONS #169.**
