@@ -1371,3 +1371,19 @@ scripts kept); the walk's caffeinate ended at the walk's close.
   KnownIssues row 32 out + the 13s row extended; canon deltas as ruled; the master plan
   flipped with both archives rolled; MobileSoul PL-46; the PHASE CLOSEOUT section; the handoff.
   THE WINDOW stays HELD for her. Nothing uncommitted; no revert in flight. HARD STOP.
+
+## POST-CLOSE ADDENDUM (2026-10-03, her ruling at the close — the 13i-a addendum's precedent: a ruled one-liner built as her live instruction, not a phase)
+
+**Her words, verbatim (on W-O-1's options, my lean (b) presented): "I think it's fine for it to
+unarchive when you command J."** — **W-O-1 RULED (b): ⌘J keeps open-today, and the daily door
+UN-ARCHIVES on EVERY press** — the comes-back decoupled from the filing's outcome. Built at the
+OP (`shelveInDailyJournalBook`'s decided road now runs the un-archive write before returning
+`.alreadyDecided`), so every door through the op inherits it — ⌘J, Today's Entry, the Bookcase
+door, and the PHONE's Today door by construction; the Mac's comes-back receipt rides free (the
+door reads archived-before/after, outcome-independent). The memo §0(a)'s always-mint letter is
+SUPERSEDED by this ruling (open-today stands); P-13ie-U1-12's decided-pair arm ("a decided pair
+brings nothing back") is superseded the same way — the pin `aDecidedPairBringsNothingBack`
+REWRITTEN to the new ruling (`aDecidedPairStillBringsTheJournalBackAndRefilesNothing`), an
+honest edit, committed AHEAD of the fix and red on the pre-fix tree. F-U2-2 (the daily "+ new
+entry" inside an archived Journal) is UNTOUCHED — her ruling names ⌘J; that door stays in #179.
+Zero schema, zero `Sync/`; evidence below this addendum as the work lands.
