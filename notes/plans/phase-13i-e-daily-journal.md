@@ -293,9 +293,9 @@ the closeout tidies them.
 | 2 | U2 — the faces + lesson 9 | **DONE** (ACT 0 `5d61bb64`…`143417c3` red on the pre-fix tree + by revert, 7 issues each · pieces `0b5d60e9` `2f3109fe` `138a8322` `78644cba` `df3c18e9` `5be92918` · lesson 9 `3fdee77a` (naturally red pre-sentence, 2 issues) · pins `dbca8189` `2b944fe5` · W-1 `506b4ec9`; core FULL 2172/244, Mac 97/13 + 1396/214 + 99/8, phone 70/16; the walk 33 captures both voices — the U2 RECORD above) |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | **CLOSED AT TWO ROUNDS** (R1: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT — `13ie-ladder-round1.md`; the cross-model exchange: implementer AGREE ×2, the reviewer's final call took the two-step refinement, fix a3fd7cfe pin-first + revert-verified; the implementer sanity pass AGREE-CLEAN; R2 fresh reviewer: both FIXED, zero new findings — `13ie-ladder-round2.md`; core 2173/244 green) |
 | 4 | The orchestrator's walk | **DONE** (2026-10-03 — THE ORCHESTRATOR'S WALK section: every acceptance flow live incl. lesson 9 through the real re-seed door; W-O-1 the ⌘J canon conflict HELD for her; W-O-2 the walker slip restored with class rules) |
-| 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | HELD FOR HER |
-| 6 | The family close: the combined-walk document + the loose-end sweep | NOT-STARTED |
-| 7 | Closeout: the standing ritual + canon deltas + KnownIssues row 32 + #89(b) + QUESTIONS #179 + MobileSoul + the handoff + the DerivedData tidy | NOT-STARTED |
+| 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | **HELD FOR HER** (the checklist ready end to end incl. the F-U1-1 probe; the §12 entry writes AT the window; her installs stay marker-11 and working until then) |
+| 6 | The family close: the combined-walk document + the loose-end sweep | **DONE** (`notes/handoffs/13i-family-combined-walk.md`; the sweep in the PHASE CLOSEOUT) |
+| 7 | Closeout: the standing ritual + canon deltas + KnownIssues row 32 + #89(b) + QUESTIONS #179 + MobileSoul + the handoff + the DerivedData tidy | **DONE** (the PHASE CLOSEOUT section; the handoff `notes/handoffs/phase-13i-e-handoff.md`) |
 
 ## U1 BRIEF — THE OP FAMILY + THE DAILY RULINGS (`opus-implementer`; read this WHOLE file first)
 
@@ -1297,6 +1297,54 @@ archived member preserved throughout); the tutorial re-seeded (the old guide in 
 books-chapter walks re-run by the seeder); no new notes minted (the ⌘J press re-reached the
 existing 2026-10-03 entry); voice and appearance untouched.
 
+## PHASE CLOSEOUT (2026-10-03)
+
+**Results.** Her four kickoff rulings (R-13ie-1…4, two live riders) built whole in one day:
+U0 the schema event (the architect under the rider — v1_21 `reading.archived_at`, marker 12,
+the 15 artifact + deploy checklist; schema-first commits), U1 the op family + the daily rulings
+(headless; four behavioural reverts red at their mechanisms; the decisive derivation red-on-old
+— a dangling setting no longer double-mints on ⌘J), U2 the faces + lesson 9 (the F-U7-2 pin
+flipped to assert AND execute; ACT 0's two-step guard after the ladder). ONE ladder, two
+rounds: R1 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT, the cross-model exchange's refinement
+accepted and landed pin-first + revert-verified, the sanity pass AGREE-CLEAN, R2 both FIXED
+with zero new findings. The orchestrator's LIVE WALK in her away-window proved every acceptance
+flow (the record above) and surfaced W-O-1 (the ⌘J canon conflict — HELD for her, #179's head)
+and W-O-2 (the walker's slip, restored; three class rules into WalkKit). **FINALS: core
+2173/244 GREEN** (baseline 2127/234 → +46/+10: U1's 41/8, U2's 4/2, the ladder's 1). Zero
+editor seam; the one `Sync/` reach is U0's registry/marker half, the architect's, cold-reviewed
+by the ladder.
+
+**THE WINDOW IS HELD FOR HER (ledger row 5):** the mirror deploy (marker 11→12) runs only at
+her go — `notes/plans/13i-e-deploy-checklist.md` end to end (the F-U1-1 read-only probe
+inside). Her installs stay marker-11 and fully working until then; the `/Applications` refresh
+and her Restore Tutorial press ride BEHIND the window (never strand her daily drive). The
+SyncSpec §12 running-record entry is written AT the window, per the checklist.
+
+**Canon deltas (as ruled):** AppSpec §7 (`archived_at` + the retired-as-read setting note),
+§9 (the 13i-e op family + the shelving door's line), §12 (the Archived-books/doors/marks/
+receipts lines), §14's paragraph; OverallModel §2 ("archivable"); SyncSpec §7's keeper tail
+flipped to BUILT. 13i-d's pointer/closeout/§14 paragraph rolled verbatim to the archives.
+KnownIssues: row 32 RESOLVED and removed; the 13s copy row gains F-U2-3. QUESTIONS #179 (W-O-1
+at its head). MobileSoul PL-46.
+
+**THE 13i FAMILY CLOSE:** the cohesive combined-walk list her posture owed is
+`notes/handoffs/13i-family-combined-walk.md` (one tour over a–e; 13i-e's items each proven live
+at the walk first); the loose ends swept — #167/#168/#169-tails/#170–#178 stand unratified in
+her bundle (restated in the walk doc and the handoff), #89(b) RESOLVED to the ruling (the guard
+shipped; its never-hard-delete PROVISIONAL is now built behavior), the memo letter (f) faces
+verified present (⌘J/Today's Entry on the Mac registry; `MobileStarterJournal` + the phone's
+swapped doors; the tutorial's lesson), the F-U6-2 flag restated.
+
+**MOBILE PARITY:** PL-46 — the substrate shared; the phone's daily-Journal Delete→Archive swap
+landed IN-PHASE; the hidden-archived-books fact and the owed faces enumerated there.
+
+**Deferred with owners:** W-O-1's ⌘J call (hers, #179 head) · F-U2-3's empty-state copy (13s,
+the KnownIssues row) · the phone's archive faces (the mobile catch-up, PL-46) · F-R1-3's
+Quicknotes question (hers, #179).
+
+**The DerivedData tidy:** the `13ie-*` build folders deleted at this closeout (logs and
+scripts kept); the walk's caffeinate ended at the walk's close.
+
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; unverified claims PENDING)
 
 - 2026-10-03 · kickoff: preflight complete (the KICKOFF RECORD above); her four rulings
@@ -1314,3 +1362,12 @@ existing 2026-10-03 entry); voice and appearance untouched.
   234 suites** — the 13i-d baseline exactly (the marker pin and the serializer completeness
   walk rode the change). The mirror is NOT deployed — her window; the dev store never syncs so
   the phase builds safely at marker 12. U1 spawns next.
+- 2026-10-03 · **THE LADDER CLOSED AT TWO ROUNDS** (records `13ie-ladder-round1.md` /
+  `-round2.md`; the cross-model exchange and the fix pass inside round 1's file); core
+  2173/244 green on the tip.
+- 2026-10-03 · **THE ORCHESTRATOR'S WALK DONE** in her away-window (the WALK section; W-O-1
+  held for her, W-O-2 restored + WalkKit rules); zero instances after; caffeinate ended.
+- 2026-10-03 · **THE FAMILY CLOSE + CLOSEOUT DONE:** the combined-walk doc; QUESTIONS #179;
+  KnownIssues row 32 out + the 13s row extended; canon deltas as ruled; the master plan
+  flipped with both archives rolled; MobileSoul PL-46; the PHASE CLOSEOUT section; the handoff.
+  THE WINDOW stays HELD for her. Nothing uncommitted; no revert in flight. HARD STOP.
