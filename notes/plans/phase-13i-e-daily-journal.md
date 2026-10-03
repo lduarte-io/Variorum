@@ -565,6 +565,16 @@ filing.
     `aRefusedFilingStillBringsTheJournalBack`, `anOwnershipBellRingsAtAJournalThatCameBack`;
     `aDecidedPairBringsNothingBack` and `aDeadDailyJournalStillMintsFresh` green (controls). 6 tests
     / 1 suite, 7 issues. Restored clean.
+  - **R4 — the PAUSE** (an extra beyond the brief: `intakeRuns`' `&& !book.archived` and
+    `livingBooks`' `archived_at IS NULL` both removed): RED — `theOneTablePausesAnArchivedBook`
+    (`intakeRuns(archived)` true; the verdicts `.arrival`/`.seat` where `.nothing` was asserted),
+    `aLivingArchivedBookNeitherSeatsNorBellsOnTaggingOrStarring` (both archived books took rows),
+    `unarchivingALivingBookCatchesUpThroughArrivalsNeverQuietSeats` (the gap SEATED as a member
+    while archived — `[.member]` where `[.arrival]`), `aRuleSetOnAnArchivedBookFiresNothingUntilThe
+    Unarchive`, `reopeningOrRestoringAnArchivedBookStaysPaused`; the two explicit-add/outflow pins
+    green (controls — not pause claims). 7 tests / 1 suite, 11 issues. Restored clean.
+  - **No revert in flight** — every reverted file restored by checkout and verified `git diff
+    --quiet`; the tree equals the piece-2 commit's production code.
 
 ### FINDINGS (for the orchestrator) — PENDING
 
