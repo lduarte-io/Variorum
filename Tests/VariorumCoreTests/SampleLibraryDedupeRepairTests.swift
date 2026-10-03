@@ -29,12 +29,13 @@ struct SampleLibraryDedupeRepairTests {
         ("A Scandal in Bohemia", "To Sherlock Holmes she is always THE woman.\n\nSecond paragraph."),
     ]
 
-    static func facts() -> SampleLibraryDedupeFacts {
+    static func facts(seedTagPaths: [String] = []) -> SampleLibraryDedupeFacts {
         let hashes = Dictionary(
             uniqueKeysWithValues: notes.map { ($0.title, BridgeHash.body($0.text)) })
         return SampleLibraryDedupeFacts(
             bookName: bookName, tagPath: tagPath,
-            loadNoteHashes: { hashes }, hash: BridgeHash.body(_:))
+            loadNoteHashes: { hashes }, hash: BridgeHash.body(_:),
+            seedTagPaths: seedTagPaths)
     }
 
     /// The manifest hash recipe, pinned to independently computed vectors
@@ -174,6 +175,84 @@ struct SampleLibraryDedupeRepairTests {
         let settled = try a.syncedDump()
         try await syncToQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == settled)
+    }
+
+    /// **13i-d U7, F-U7-1 (the architect's Sync/ half — the ruled #classics
+    /// letter):** an application of a DECLARED seed-tag path on a shipped
+    /// note is the seeder's own act, so two fresh devices that each seeded
+    /// the triad (reserved tag + classics on every story) still classify
+    /// both copies PRISTINE and converge to the smaller-id keeper. RED ON
+    /// OLD by behavioural revert of the classifier's seed-tag skip: both
+    /// copies then read EDITED (both-survive) and the keeper assertion
+    /// fails with two live ids.
+    @Test func aSeedAuthoredClassicsTagNeverMarksACopyEditedAndTheCopiesStillConverge() async throws {
+        let (a, b, server) = try furniturePair()
+        let classicsFacts = Self.facts(seedTagPaths: ["classics"])
+        a.sampleLibraryFacts = classicsFacts
+        b.sampleLibraryFacts = classicsFacts
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        // The seeder's OWN classics act, mirrored on both devices: one tag,
+        // applied to every shipped note (the triad's shape).
+        for client in [a, b] {
+            try client.with { ops, _ in
+                let classics = try ops.createTag(name: "classics")
+                let posts = client === a ? copyA.postIDs : copyB.postIDs
+                for (_, postID) in posts {
+                    _ = try ops.applyTag(classics.id, toPost: postID)
+                }
+            }
+        }
+
+        try await a.push()
+        try await b.push()
+        _ = try await b.pull()
+        _ = try await b.pull()  // the quiescent window: the deferred pass runs
+
+        #expect(try liveCopyIDs(b) == [copyA.bookID],
+                "both copies pristine despite classics — the smaller-id keeper stands")
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID])
+            // The keeper's notes still wear the seed's classics tag.
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id
+                JOIN reading_post rp ON rp.post_id = pt.post_id
+                WHERE rp.reading_id = '\(copyA.bookID)' AND rp.deleted_at IS NULL
+                  AND pt.deleted_at IS NULL AND t.path = 'classics' AND t.deleted_at IS NULL
+                """) ?? 0 > 0, "the keeper keeps the seed's classics applications")
+        }
+    }
+
+    /// The skip is BOUNDED to the declared set (the err-toward-EDITED
+    /// letter everywhere else): a tag at any OTHER path is her hands, the
+    /// copy carrying it reads EDITED, and it SURVIVES while the pristine
+    /// twin retires — whatever the ids.
+    @Test func aTagOutsideTheSeedSetStillProtectsTheCopy() async throws {
+        let (a, b, server) = try furniturePair()
+        let classicsFacts = Self.facts(seedTagPaths: ["classics"])
+        a.sampleLibraryFacts = classicsFacts
+        b.sampleLibraryFacts = classicsFacts
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try b.with { ops, _ in
+            let hers = try ops.createTag(name: "her-own")
+            _ = try ops.applyTag(hers.id, toPost: copyB.postIDs[Self.notes[1].title]!)
+        }
+
+        try await a.push()
+        try await b.push()
+        _ = try await b.pull()
+        _ = try await b.pull()
+
+        #expect(try liveCopyIDs(b) == [copyB.bookID],
+                "her-own marks B's copy EDITED; the pristine twin retires whatever the ids")
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        #expect(try liveCopyIDs(a) == [copyB.bookID])
     }
 
     @Test func anEditedCopySurvivesAndThePristineOneRetiresWhateverTheIDs() async throws {

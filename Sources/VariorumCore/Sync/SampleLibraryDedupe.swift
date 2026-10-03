@@ -40,17 +40,37 @@ public struct SampleLibraryDedupeFacts: Sendable {
     public var loadNoteHashes: @Sendable () throws -> [String: String]
     /// The recipe the stored hashes were built with.
     public var hash: @Sendable (String) -> String
+    /// **13i-d U7's classics seed (F-U7-1, the architect's Sync/ half):**
+    /// paths of SEED-AUTHORED tags beyond the reserved one — the seeder
+    /// applies them to the shipped notes itself (`classics` on Sherlock's
+    /// stories), so a live application of one is the SEED's hands, never
+    /// hers, and must not mark a fresh copy EDITED (two fresh devices
+    /// seeding before their first sync would otherwise keep two Sherlock
+    /// books forever — both-edited's letter misfiring on the seed's own
+    /// act). Empty = inert, the facts' standing nil-inert precedent; every
+    /// pre-13i-d call site compiles and behaves byte-identically. The
+    /// DOCUMENTED RESIDUAL this skip accepts (the err-toward-EDITED letter
+    /// bent for a declared set only): her own RE-tag of a shipped note with
+    /// exactly a listed path — or her UNTAG of one — is invisible to the
+    /// classifier, so a copy touched ONLY that way can be retired at a
+    /// dedupe meeting; it duplicates/removes what the seed ships, both
+    /// copies carry the seed's own applications, and the window needs two
+    /// devices seeding before first sync — the recorded engagement-chunk
+    /// residual's class (KnownIssues, the 18a row).
+    public var seedTagPaths: [String]
 
     public init(
         bookName: String,
         tagPath: String,
         loadNoteHashes: @escaping @Sendable () throws -> [String: String],
-        hash: @escaping @Sendable (String) -> String
+        hash: @escaping @Sendable (String) -> String,
+        seedTagPaths: [String] = []
     ) {
         self.bookName = bookName
         self.tagPath = tagPath
         self.loadNoteHashes = loadNoteHashes
         self.hash = hash
+        self.seedTagPaths = seedTagPaths
     }
 }
 
@@ -157,7 +177,35 @@ public enum SampleCopyClassifier {
             arguments: [facts.tagPath])
         return try classify(
             db, copyID: copyID, manifest: manifest,
-            reservedTagID: reservedTagID, reservedTagPath: facts.tagPath, hash: facts.hash)
+            reservedTagID: reservedTagID, reservedTagPath: facts.tagPath,
+            seedTagIDs: seedTagIDs(db, facts: facts), hash: facts.hash)
+    }
+
+    /// Every LIVE tag id at a declared seed path (all wings — strictly
+    /// wider than one wing's twin, and safe: the copy's notes live in Home
+    /// and `applyTag` is same-wing-only since 13i-d U5, so only Home's row
+    /// can carry an application on a shipped note anyway; resolving all
+    /// live twins just keeps the skip immune to the fetchOne-across-wings
+    /// looseness the reserved resolution has carried since 13i-a).
+    static func seedTagIDs(
+        _ db: Database, facts: SampleLibraryDedupeFacts
+    ) throws -> Set<String> {
+        guard !facts.seedTagPaths.isEmpty else { return [] }
+        return try Set(String.fetchAll(
+            db,
+            sql: """
+                SELECT id FROM tag
+                WHERE deleted_at IS NULL
+                  AND path IN (SELECT value FROM json_each(?))
+                """,
+            arguments: [jsonArrayLiteral(facts.seedTagPaths)]))
+    }
+
+    /// A JSON array literal for `json_each` binding (the engine's own
+    /// `jsonArray` is engine-internal; this door is also the Mac guard's).
+    private static func jsonArrayLiteral(_ values: [String]) -> String {
+        let data = try? JSONSerialization.data(withJSONObject: values)
+        return data.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
     }
 }
 
@@ -244,13 +292,15 @@ extension SyncEngine {
         let reservedTagID = try String.fetchOne(
             db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
             arguments: [facts.tagPath])
+        let seedTagIDs = try SampleCopyClassifier.seedTagIDs(db, facts: facts)
 
         var pristine: [String] = []
         var edited: [String] = []
         for copyID in copies {
             switch try SampleCopyClassifier.classify(
                 db, copyID: copyID, manifest: manifest,
-                reservedTagID: reservedTagID, reservedTagPath: facts.tagPath, hash: facts.hash) {
+                reservedTagID: reservedTagID, reservedTagPath: facts.tagPath,
+                seedTagIDs: seedTagIDs, hash: facts.hash) {
             case .pristine: pristine.append(copyID)
             case .edited: edited.append(copyID)
             case .indeterminate: return 0  // defer the whole pass
@@ -726,7 +776,8 @@ extension SampleCopyClassifier {
     /// pass and the Mac seed-shape drift guard (row 8 — R3-2).
     static func classify(
         _ db: Database, copyID: String, manifest: [String: String],
-        reservedTagID: String?, reservedTagPath: String, hash: (String) -> String
+        reservedTagID: String?, reservedTagPath: String,
+        seedTagIDs: Set<String> = [], hash: (String) -> String
     ) throws -> SampleCopyVerdict {
         // Book-level acts: a finish, an extent, a grouping — and the book's
         // SORT moved off the schema default the seed minted at (R2-5).
@@ -898,13 +949,21 @@ extension SampleCopyClassifier {
             // every device, since commit_point syncs. Counting those made
             // "both pristine" unreachable in any real store (two Sherlock
             // books forever, silently). Only her deliberate ⌘S is her hand.
+            // 13i-d U7 (F-U7-1): applications of the reserved path AND of
+            // the declared seed paths are the SEEDER's hands — everything
+            // else on a shipped note is hers (the field's doc carries the
+            // accepted residual).
+            let seedAuthoredIDs = ([reservedTagID ?? ""] + seedTagIDs.sorted())
+            let seedAuthoredJSON = (try? JSONSerialization.data(withJSONObject: seedAuthoredIDs))
+                .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
             let engagement = try Bool.fetchOne(
                 db,
                 sql: """
                     SELECT EXISTS (SELECT 1 FROM reading_post
                                    WHERE post_id = ?1 AND reading_id <> ?2 AND deleted_at IS NULL)
                         OR EXISTS (SELECT 1 FROM post_tag
-                                   WHERE post_id = ?1 AND deleted_at IS NULL AND tag_id <> ?3)
+                                   WHERE post_id = ?1 AND deleted_at IS NULL
+                                     AND tag_id NOT IN (SELECT value FROM json_each(?3)))
                         OR EXISTS (SELECT 1 FROM block_tag bt
                                    JOIN container_block cb ON cb.block_id = bt.block_id
                                    WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
@@ -921,7 +980,7 @@ extension SampleCopyClassifier {
                         OR EXISTS (SELECT 1 FROM reference
                                    WHERE container_id = ?1 AND deleted_at IS NULL)
                     """,
-                arguments: [postID, copyID, reservedTagID ?? ""]) ?? false
+                arguments: [postID, copyID, seedAuthoredJSON]) ?? false
             if engagement { return .edited }
 
             // The ruled per-note rule itself, last: byte-identity of the

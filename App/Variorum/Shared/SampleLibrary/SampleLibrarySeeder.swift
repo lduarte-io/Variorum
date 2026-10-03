@@ -559,12 +559,22 @@ enum SampleLibrarySeeder {
     /// recipe rides along as the same function the manifest's own
     /// `isPristine` uses, so the pair can never disagree
     /// (`SampleLibraryDedupeFactsTests` pins the agreement).
+    /// **The classics tag's ONE spelling** (13i-d U7, her #166(b) ruling —
+    /// the seeded triad wears `#classics`): the seeder's tagging step and
+    /// the dedupe facts' seed-tag declaration both read THIS constant, so
+    /// the classifier's skip and the seed's own act can never drift.
+    nonisolated static let classicsTagPath = "classics"
+
     nonisolated static func dedupeFacts(for book: Book = .sherlock) -> SampleLibraryDedupeFacts {
         SampleLibraryDedupeFacts(
             bookName: book.name,
             tagPath: book.tagName,
             loadNoteHashes: { try manifest(for: book).noteHashes },
-            hash: BridgeHash.body(_:))
+            hash: BridgeHash.body(_:),
+            // 13i-d U7 (F-U7-1's ruled letter): the classics tag is
+            // seed-authored on EVERY dedupe-covered book's notes — a live
+            // application of it never marks a copy edited.
+            seedTagPaths: [classicsTagPath])
     }
 
     /// Every DEDUPE-COVERED book's facts, in seeding order — what
