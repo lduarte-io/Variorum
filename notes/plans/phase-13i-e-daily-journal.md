@@ -289,7 +289,7 @@ the closeout tidies them.
 | # | item | status |
 |---|---|---|
 | 0 | U0 — the schema event (architect; schema-first commits) | **DONE** (b2e8b1c2 — v1_21 + model + registry/marker 12 + DDL-pin list + the mirror artifact + the deploy checklist; full core suite green 2127/234, the 13i-d baseline exactly) |
-| 1 | U1 — the op family + the daily rulings (headless) | IN-PROGRESS (the U1 RECORD below — `opus-implementer`) |
+| 1 | U1 — the op family + the daily rulings (headless) | **DONE** (`d12eecc6` piece 1 · `b6e4f52e` piece 2 · `a8199c9b` the confirm-N fragment; R1–R4 red by revert, restored clean; core FULL 2168/242 green, Mac 384/50 + 97/13, phone 69/15 — the U1 RECORD below) |
 | 2 | U2 — the faces + lesson 9 | NOT-STARTED |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | NOT-STARTED |
 | 4 | The orchestrator's walk | NOT-STARTED |
@@ -360,7 +360,7 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   `Queries/ShelfQueries.swift` whole, `Operations+BlockArchive.swift` (the archive precedent), the
   v1_18 marker migration step, the app/mobile consumers of every query touched. THE DESIGN below
   settled before the first line of code. **No revert in flight.**
-- 2026-10-03 · **PIECE 1 DONE (the commit after ee68fdc3 — "13i-e U1 piece 1"):** the archive op
+- 2026-10-03 · **PIECE 1 DONE (`d12eecc6`):** the archive op
   family (`Operations+ReadingArchive.swift`), the three `OperationError` cases, the pause in the
   one table (`IntakeDecision.BookFacts.archived` + `intakeRuns`; `livingBooks`' SQL), the
   gathering's empty assembly + the four outside-the-assembly readers, the Bookcase choke point,
@@ -369,7 +369,7 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   its production change and RUN ON THE PRE-FIX TREE (the natural red — EVIDENCE below). NEXT: piece
   2 (the derivation, the guard, the comes-back), then the existing pins whose premise the guard
   retires, then the revert cycle, then the full suite. No revert in flight.
-- 2026-10-03 · **PIECE 2 DONE (the commit "13i-e U1 piece 2"):** THE DERIVATION
+- 2026-10-03 · **PIECE 2 DONE (`b6e4f52e`):** THE DERIVATION
   (`Queries.dailyJournalBookID` → `dailyJournalBookCandidates(db).first`), THE GUARD (both delete
   ops read the row inside their write and refuse `dailyJournalCannotBeDeleted` on the marker —
   `deleteReading` rewritten from the `updateLiveReading` closure to an explicit write),
@@ -406,6 +406,13 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   book-only derivation — to a FINISHED daily book; F-U1-3). The ops-seam `dailyJournalBookID()`
   doc corrected. NEXT: the record's finals (WHAT WAS BUILT · EVIDENCE · FINDINGS · PROVISIONALS),
   the ledger row, the hand-off. No revert in flight.
+- 2026-10-03 · **UNIT CLOSED.** `a8199c9b` added the archive-with-notes set's ONE fragment +
+  `Queries.archiveWithNotesCount` (U2's confirm N; pinned); the record's finals written
+  (`9324dfb3`); the FINAL core FULL run on that committed tree: **2168 tests / 242 suites GREEN**
+  (1 standing skip) = the baseline + exactly this unit's 41/8. Ledger row 1 → DONE. Every claim
+  above is verified; nothing PENDING; no revert in flight; nothing uncommitted. NEXT (the
+  orchestrator's): U2's spawn (the faces + lesson 9) — the U1 calls it makes are listed under WHAT
+  WAS BUILT; the ladder reads FINDINGS F-U1-1…10.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
@@ -586,8 +593,11 @@ leg names them); the Collecting pane's pause sentence reads `reading.archivedAt`
 
 ### EVIDENCE (counts exact, run at the END)
 
-- **Core FULL `swift test` (the FINAL run, after the last production change `a8199c9b`):
-  PENDING** — expected 2127/234 + this unit's 41 tests / 8 suites. *(The first END run, on the
+- **Core FULL `swift test` (the FINAL run, after the last production change `a8199c9b`, on the
+  committed tree `9324dfb3`): "✔ Test run with 2168 tests in 242 suites passed after 101.873
+  seconds"** — 1 skipped (the standing env-gated real-server integration pass,
+  `basicOfflineEditsConvergeOverTheRealServer`). Baseline 2127/234 → **+41 / +8, exactly this
+  unit's** (`BookArchiveTests` 24 in 4 suites, `DailyJournalRulingsTests` 17 in 4 suites). *(The first END run, on the
   piece-2 production code before `archiveWithNotesCount` existed: "✔ Test run with 2167 tests in
   242 suites passed after 101.711 seconds", 1 skipped — the standing env-gated real-server
   integration pass; +40 / +8 = exactly this unit's suites at that point.)*
