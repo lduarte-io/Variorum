@@ -392,6 +392,12 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   `shelveInDailyJournalBook` in `Operations+Container.swift`. ONE at a time; each restored by
   checkout and verified clean (`git diff --quiet`) before the next. A successor finding a dirty
   diff in any of those three files is mid-revert: `git checkout -- <file>` restores it.
+- 2026-10-03 · **R1–R3 DONE, each RED at its named mechanism and RESTORED CLEAN** (`git diff
+  --quiet` after each checkout; the tree equals the piece-2 commit) — the evidence lines are in
+  EVIDENCE below. **R4 ANNOUNCED (an extra, beyond the brief's three — proving the PAUSE pins are
+  not hollow):** `IntakeDecision.intakeRuns`' `&& !book.archived` AND `livingBooks`'
+  `archived_at IS NULL` both removed (`Domain/IntakeDecision.swift`,
+  `Operations/Operations+Intake.swift`); restored by checkout, verified clean.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
@@ -537,6 +543,28 @@ filing.
   edge's own claim is that NO `Sync/` change is needed — green on both sides is its evidence).
   One fixture defect found and fixed on the way (the raw setting write used `ON CONFLICT`, which
   fires the outbox trigger twice — now the repo's UPDATE-then-INSERT shape).
+- **THE BEHAVIOURAL REVERTS (on the committed piece-2 tree; the brief's R1–R3 — each run is the
+  named suite filtered; each restored by `git checkout --` and verified `git diff --quiet`):**
+  - **R1 — the GUARD** (both `refuseDeletingTheDailyJournal` calls commented out): RED —
+    `deleteReadingRefusesTheDailyJournal` ("an error was expected but none was thrown"; the
+    Journal's `deleted_at` set; the membership dead; outbox written),
+    `deleteReadingWithNotesRefusesTheDailyJournalAndTouchesNoEntry` (none thrown, the entry's
+    `deleted_at` set — the Journal and its entry in the Trash), `theGuardKeysOnTheMarker`, and the
+    re-premised `ThemeAndShelfQueryTests.dailyJournalBookDanglesToNil` ("an error was expected").
+    31 tests / 5 suites, 11 issues. Restored clean.
+  - **R2 — the DERIVATION** (`dailyJournalBookID` back to `designatedBookID(db, key:
+    "daily_journal_book")`): RED — all five derivation pins; the decisive line,
+    `aDanglingSettingBesideALiveMarkerBearerNoLongerDoubleMints`: **`next.bookID` …0004 ≠ the live
+    marker-bearer …0001, two live books** (⌘J double-minted); `theMarkerAnswersWhenTheCachedSetting
+    Disagrees`: the read answered the trait notebook and ⌘J filed into it (…0003). 5 tests / 1
+    suite, 13 issues. Restored clean.
+  - **R3 — the COMES-BACK** (the `unarchiveReading` call in the shelving's write removed): RED —
+    `aDayArrivingBringsAnArchivedJournalBackAndFilesIntoIt` (`archived_at` still set after the
+    filing; off the Bookcase; no outbox row for the reading — **the old tree's letter: the column
+    exists, nothing clears it**), `theComesBackReturnsTheEntriesArchivedWithTheJournal`,
+    `aRefusedFilingStillBringsTheJournalBack`, `anOwnershipBellRingsAtAJournalThatCameBack`;
+    `aDecidedPairBringsNothingBack` and `aDeadDailyJournalStillMintsFresh` green (controls). 6 tests
+    / 1 suite, 7 issues. Restored clean.
 
 ### FINDINGS (for the orchestrator) — PENDING
 
