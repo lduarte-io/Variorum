@@ -861,6 +861,21 @@ Same checkpoint protocol, record shape, fences and traps as U1.
   `git checkout -- Sources/VariorumCore/Operations/Operations+Appearance.swift` is the SAFE
   restore):** RV0 — the one guard line removed; the pin re-run; restored and verified `git diff
   --quiet`.
+- 2026-10-03 · **RV0 DONE — RED BY BEHAVIOURAL REVERT** (the guard line deleted from the committed
+  tree `143417c3`): `designatingAGatheringRefusesAndMovesNothing` **7 issues** again, the control
+  green (`act0-revert.log`); restored by `git checkout --`, `git diff --quiet` verified. **No revert
+  in flight.**
+- 2026-10-03 · **PIECES 2–6 DONE** (each Mac `build-for-testing` green; pins and suites at the END,
+  PENDING): `0b5d60e9` the reads + shared words (core `observeArchivedReadings`, `WingContents`'
+  archived counts; `Shared/BookArchiveCopy.swift`; the refusal arms in `OpsRefusalTable` and
+  `DeletionRefusal`; `WingWords` "(N archived)") · `2f3109fe` the registry acts + `BookArchiveDoorSet`
+  + `BookStateDoors`' archive/unarchive arms + the Bookcase row + the sheet's Archived row and pause
+  sentence + the navigator chip · `138a8322` the Archived surface's BOOKS group
+  (`ArchivedBooksModel`, `ArchivedBookCopy`, RootView's `.reading` route) · `78644cba` the
+  "(archived)" marks (chip rows/label/Add menu, Book Panel switcher/state line, context bar,
+  the Pool's picker) · `df3c18e9` the comes-back receipt (`JournalBooks.Outcome.receipt`, both Mac
+  roads). NEXT: piece 7 (the phone's two daily-Journal doors), piece 8 (lesson 9 + the pin flip),
+  piece 9 (the Mac pins), then the END runs and the walk.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
