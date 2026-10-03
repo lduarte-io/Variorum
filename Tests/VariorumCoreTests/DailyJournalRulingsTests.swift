@@ -340,17 +340,50 @@ struct DailyJournalComesBackTests {
         }
     }
 
-    /// No day arrived: re-reaching an entry already decided brings nothing
-    /// back (P-13ie-U1-12's other half).
-    @Test func aDecidedPairBringsNothingBack() throws {
+    /// **Her post-close ruling (2026-10-03, the plan's POST-CLOSE ADDENDUM —
+    /// "I think it's fine for it to unarchive when you command J"):** the
+    /// daily door un-archives on EVERY press, the decided pair included —
+    /// the comes-back decoupled from the filing. The pair stays decided
+    /// (nothing re-files, no new membership row — the never-re-shelve rule
+    /// untouched), but the Journal returns. REWRITTEN from
+    /// `aDecidedPairBringsNothingBack` (P-13ie-U1-12's decided arm,
+    /// superseded by her ruling); committed AHEAD of its fix.
+    @Test func aDecidedPairStillBringsTheJournalBackAndRefilesNothing() throws {
         try withOperations { ops, db in
             let daily = try file(ops, day: "2026-10-01")
             try ops.archiveReading(daily.bookID)
-            let stamp = try archivedAt(db, "reading", daily.bookID)
+            let rowsBefore = try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?", [daily.bookID])
 
             #expect(ops.shelveInDailyJournalBook(daily.entryID) == .alreadyDecided)
 
-            #expect(try archivedAt(db, "reading", daily.bookID) == stamp)
+            #expect(try archivedAt(db, "reading", daily.bookID) == nil,
+                    "⌘J brings an archived Journal back even when the pair is decided")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?", [daily.bookID])
+                == rowsBefore, "the decided pair re-files nothing")
+        }
+    }
+
+    /// The other decided class — a pair she REMOVED by hand (a tombstoned
+    /// membership row) — is decided the same way: the Journal still comes
+    /// back on ⌘J (her ruling binds the press, not the row's state), and the
+    /// removal is never undone.
+    @Test func aHandRemovedPairStaysRemovedButTheJournalStillReturns() throws {
+        try withOperations { ops, db in
+            let daily = try file(ops, day: "2026-10-01")
+            try ops.removePostFromReading(daily.entryID, from: daily.bookID)
+            try ops.archiveReading(daily.bookID)
+
+            #expect(ops.shelveInDailyJournalBook(daily.entryID) == .alreadyDecided)
+
+            #expect(try archivedAt(db, "reading", daily.bookID) == nil)
+            #expect(try db.fetchString(
+                """
+                SELECT deleted_at FROM reading_post
+                WHERE reading_id = ? AND post_id = ?
+                """, [daily.bookID, daily.entryID]) != nil,
+                "the deliberate removal stays removed")
         }
     }
 
