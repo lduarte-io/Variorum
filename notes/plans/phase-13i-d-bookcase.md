@@ -3029,6 +3029,30 @@ one gate + pin). Zero `Sync/` (the architect's half is done; mine touches none).
   read end to end · Restore Tutorial's new confirm sentence · the seeded quicknote in
   Quicknotes.
 
+## THE ARCHITECT'S ADJUDICATION AFTER THE U7 CONTINUATION — BANK 2 CLOSES (2026-10-02; spot-check: ten commits pushed, fences empty, tree clean)
+
+- **F-U7-5's DISMISSAL ACCEPTED — the finding was HOLLOW and the ruling's premise falls with
+  it:** the gathering's "+ new chapter" is the RULED bind-offer sequence (13c 2D / 13i-b U3 —
+  fire-and-do's own shape), two standing pins green on both sides, the walk confirming the
+  door in use. The hallucination guard's letter applied: recorded, not fixed. The R-13id
+  ruling that adopted the untraced finding is VACATED for this item; the lesson joins the
+  record — an adjudication adopting an implementer's un-traced walk finding inherits its
+  hollowness, and the trace-first order (U6's (g) discipline) should have ridden this rider
+  too.
+- **C1–C3 ACCEPTED:** the ruled #classics letter stands WHOLE (my Sync/ half `17aa1113`
+  revert-red + the seed half `4787dcd2` with the two-sided pin flipped deliberately and the
+  drift guard green); F-U7-3's re-add-as-copy red-on-old on both traced arms; F-U7-4's lesson
+  fixed. The dev-only old-rule-gathering corner is #177's record; her real store predates the
+  first U7 build and never held one.
+- **BANK 2 IS BUILT.** Finals at the bank's close: core 2125/234 · the continuation's Mac
+  batch 278/33 (the registry walk + the tutorial spine inside) · the phone's shared-seeder
+  suites 21/4 on the simulator. **LADDER B OPENS on the combined diff `3e6ed192..ade4df64`**
+  (U5 · U5b · U6 · U7 + continuation + the architect's Sync/ commit — the rider's letter puts
+  that commit under the cold Fable read), fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md`
+  VERBATIM, zero framing; findings land in `notes/plans/13id-ladder-round2B.md`
+  (round-1-of-B) repo-first. The orchestrator's bank-2 composed walk follows the ladder's
+  fixes (the machine permitting), then the CLOSEOUT.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
@@ -3062,7 +3086,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
 | 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | **BUILT — awaiting the architect's adjudication** (core 2116/233 · Mac 1406/224 · walk ×4, 46 captures; ACT 0 + a sibling guarded; F-U3-4 traced NOT bug-class; F-U4-7 recorded; W-1 fixed; F-U6-2/-4/-5 for rulings; #176) |
 | 8 | U7 — the tutorial's books chapter + the classics seed (+ riders: F-U1-3 the Welcome mint, F-U1-5/F-U6-3 the guide's prose, F-U6-4 the declaration) | **BUILT + the U7 CONTINUATION CLOSED — LADDER B next** (first pass: core 2123/234 · Mac 1486/236 + W-1's 27/4 · walk ×4, 22 captures; the combined revert 14/60 red; #177. Adjudicated (9cc7c9de) and continued: F-U7-1 `#classics` RULED — the architect's `Sync/` half 17aa1113, then the seed half 4787dcd2 (the pin flipped through the real classifier); F-U7-3 re-add-as-copy c01491fa; F-U7-4 06a255d7; F-U7-5 DISMISSED AS HOLLOW (the door acts); F-U7-2 withheld for 13i-e. END: core 2125/234 · Mac 278/33 · phone 21/4 + build-for-testing; the `#classics` walk `tl-c00…c05`, `sl-c06/c07`) |
-| 9 | LADDER B (U5–U7) | PENDING BANK 2 |
+| 9 | LADDER B (U5–U7 + U5b + the continuation + the architect's commits) | ROUND 1 IN FLIGHT (opened 2026-10-02; the diff 3e6ed192..ade4df64; findings → notes/plans/13id-ladder-round2B.md) |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
 | 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
 
