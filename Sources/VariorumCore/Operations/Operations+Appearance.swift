@@ -417,8 +417,24 @@ extension Operations {
     /// book wearing the marker (`isDailyJournalMintShape`), so designating a
     /// gathering used to demote the live Journal, stamp a marker the identity
     /// ignores, and let the next ⌘J mint a second Journal beside the first.
+    ///
+    /// **13i-e ladder round 1 (F-R1-1): a DEAD or MISSING designee refuses
+    /// too** (`readingNotFound` — the public door's own word), ahead of every
+    /// write: the demote UPDATE strips every live marker-bearer while the
+    /// stamp UPDATE filters `deleted_at IS NULL`, so a dead designee would
+    /// leave NO live marker-bearer and a dangling cache — the F-U1-2
+    /// double-mint through the liveness door. Together the two guards keep
+    /// ACT 0's whole promise at the db level: no caller, present or future,
+    /// can demote the live daily Journal against a designee that cannot be
+    /// stamped.
     func setDailyJournalBook(_ db: Database, _ readingID: String) throws {
-        guard try String.fetchOne(db, sql: "SELECT kind FROM reading WHERE id = ?", arguments: [readingID]) == ReadingKind.book.rawValue else { throw OperationError.wrongReadingKind(id: readingID, expected: .book) }
+        guard let kind = try String.fetchOne(
+            db, sql: "SELECT kind FROM reading WHERE id = ? AND deleted_at IS NULL",
+            arguments: [readingID])
+        else { throw OperationError.readingNotFound(id: readingID) }
+        guard kind == ReadingKind.book.rawValue else {
+            throw OperationError.wrongReadingKind(id: readingID, expected: .book)
+        }
         try db.execute(
             sql: """
                 UPDATE reading SET profile = ?
