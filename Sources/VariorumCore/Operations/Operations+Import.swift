@@ -52,12 +52,12 @@ extension Operations {
     /// the seeder names its mode and `TutorialSeeder`'s `newBlock` road
     /// (mode-independent by construction) keeps its property here.
     /// Every other caller passes nothing and is byte-unchanged.
-    @discardableResult
     ///
     /// `wingId` (13i-d U5, additive — '' = Home, every existing caller): the
     /// Bookcase's entry bar and the sidebar's import land the note in the
     /// wing she is standing in (the quick-note pad keeps Home — Home holds
     /// quick notes and their gathering).
+    @discardableResult
     public func importPost(
         title: String?, text: String, undoLabel: String = "Import",
         segmentation: Segmentation? = nil, wingId: String = ""
