@@ -516,15 +516,19 @@ smaller-id copy keeps and no live #classics application survives). Dedupe suites
   record D's; fix C's pin is Mac-side, and the TrashAndArchive flip edits an existing test).
 - **Mac** (`DerivedData/13id-ladderB`, build-for-testing + test-without-building, zero
   instances): the touched suites + the registry walk + the WHOLE eleven-suite tutorial spine —
-  **184 tests / 20 suites** (CapabilityRegistryTests · VocabularySweepTests ·
+  **184 tests / 18 suites** (CapabilityRegistryTests · VocabularySweepTests ·
   DeadVocabularyTests · WingSwitcherTests · WingBookMoveDoorTests · SampleLibraryTests ·
   SampleLibraryWelcomeTests · SampleLibraryDedupeFactsTests · EncryptionExplainedSeedTests ·
   JekyllTakemaniaSeedTests · EncryptionBookDoorTests · LaunchSeedTombstoneTests ·
   TutorialDoorTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
-  TutorialBookShapeTests · TutorialLibraryActsTests · TutorialWritingActsTests ·
-  TutorialWalkTests' pages suite · MobileSeededBookRestoreTests' Mac twin) **+ 45 / 7** (the
-  spine's remaining suites: TakesActs · StructureActs · LookingActs · DeletionActs ·
-  WherePlacesActs · PrivacyChapter · FannedMatrix) = **229 tests, 0 failed, 0 skipped**.
+  TutorialBookShapeTests · TutorialLibraryActsTests · TutorialWritingActsTests — the suite list
+  read back from the xcresult; two filters I also passed matched nothing and are NOT counted:
+  `TutorialWalkTests` is a file of suites, not a suite, and `MobileSeededBookRestoreTests` is
+  phone-side, covered by the simulator run below) **+ 45 / 7** (the spine's remaining suites:
+  TakesActs · StructureActs · LookingActs · DeletionActs · WherePlacesActs · PrivacyChapter ·
+  FannedMatrix) = **229 tests, 0 failed, 0 skipped** — the eleven-suite spine complete across
+  the two batches (BookShape · Doors · WritingActs · LibraryActs · TakesActs · StructureActs ·
+  LookingActs · DeletionActs · WherePlacesActs · PrivacyChapter · FannedMatrix).
 - **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED**
   (`DerivedData/13id-ladderB-mobile` — the shared seeder changes compile), and the four
   seeder-facing suites REAL-RUN on the iPhone 17 Pro simulator (the C5 precedent, because
