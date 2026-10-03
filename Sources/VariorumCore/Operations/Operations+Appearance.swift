@@ -411,7 +411,14 @@ extension Operations {
     /// a book MAKES it the daily Journal, trait included). Ordinary CAS
     /// metadata writes; outbox via the live triggers (this runs outside
     /// apply).
+    ///
+    /// **13i-e U2 ACT 0 (the architect's F-U1-2 ruling): a NON-BOOK refuses**
+    /// (`wrongReadingKind`), ahead of every write — the daily Journal IS a
+    /// book wearing the marker (`isDailyJournalMintShape`), so designating a
+    /// gathering used to demote the live Journal, stamp a marker the identity
+    /// ignores, and let the next ⌘J mint a second Journal beside the first.
     func setDailyJournalBook(_ db: Database, _ readingID: String) throws {
+        guard try String.fetchOne(db, sql: "SELECT kind FROM reading WHERE id = ?", arguments: [readingID]) == ReadingKind.book.rawValue else { throw OperationError.wrongReadingKind(id: readingID, expected: .book) }
         try db.execute(
             sql: """
                 UPDATE reading SET profile = ?

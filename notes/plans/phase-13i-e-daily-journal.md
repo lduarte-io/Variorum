@@ -851,6 +851,16 @@ Same checkpoint protocol, record shape, fences and traps as U1.
   `DeletionRefusal`, `WingWords`/`wingContents`, the phone's two delete doors, lesson 9's prose and
   `lessonNineTheDailyJournal`. THE DESIGN below settled before the first line of code. **No revert in
   flight.** NEXT: ACT 0 (pin first, red on the old tree, then the line).
+- 2026-10-03 · **ACT 0 DONE** — the pin committed AHEAD of its fix (`DailyJournalDesignationKindTests`,
+  2 tests) and RUN ON THE PRE-FIX TREE: **RED, 7 issues** at the traced mechanism (no throw; the
+  Journal demoted; the gathering wearing `'daily'`; the derived read nil; outbox written; **⌘J filed
+  into a freshly minted …0006 beside the original …0001 — two books**); the control green
+  (`scratchpad/13ie-u2/act0-red.log`). The guard line landed in `setDailyJournalBook(_ db:)`; GREEN
+  with every daily/archive/keeper/wing neighbour: **105 tests / 22 suites**
+  (`act0-green.log`). **REVERT ANNOUNCED (starts after this commit; the tree is committed, so
+  `git checkout -- Sources/VariorumCore/Operations/Operations+Appearance.swift` is the SAFE
+  restore):** RV0 — the one guard line removed; the pin re-run; restored and verified `git diff
+  --quiet`.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
