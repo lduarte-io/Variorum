@@ -69,7 +69,14 @@ to the architect). No revert in flight.
   normally on an archived book, NO `readingArchived` refusal on the add doors. The EDIT LAW
   stands: text inside stays editable; the book stays openable from Archived. Unarchive RESUMES
   auto-ingestion with the catch-up (the unseal precedent — resume catch-up bells, never quiet
-  seats).
+  seats). **Her second rider, same sitting, verbatim:** *"I do think making a note that the
+  book is archived though would be fine - either in the selector it being clear that it is
+  archived or a 'confirm add to archived book?' but archived isn't supposed to be too onerous -
+  it's just supposed to not be in the library, but you do want to keep it forever."* So the
+  add-door FACE says the state: the book selectors/pickers mark archived books "(archived)" —
+  the lighter of her two roads, chosen for "not too onerous" (the confirm is the recorded
+  alternative — PROVISIONAL, QUESTIONS #179) — and the FRAMING is keep-forever: archived means
+  out of the library, never a step toward deletion.
 
 **Standing §10 rulings this phase builds (the sitting record, 2026-09-30 — settled, not
 re-litigated):** the designation DERIVED from the `'daily'` marker (the `daily_journal_book`
@@ -208,6 +215,13 @@ leans (⌘J stays; Today's Entry the mobile button), (f) faces follow.
 - **The ⌘K palette / search catalog:** archived books leave the default book listings exactly
   as archived notes leave the Library's (match the shipped archived-note treatment) —
   PROVISIONAL.
+- **The add selectors mark, never interrupt:** archived books appear in the add
+  pickers marked "(archived)" and the add lands on a plain click — her second rider's lighter
+  road ("not too onerous"); the "confirm add to archived book?" shape is the recorded
+  alternative — PROVISIONAL.
+- **Keep-forever framing:** archive is never a step toward deletion — no expiry, no Trash
+  interplay, the Archived surface's copy says "kept" never "pending" (her words: "you do want
+  to keep it forever").
 - **Wing moves:** an archived book rides `moveWingContents` ARCHIVED (13i-d R-13id-6's
   "archived ride archived" said of notes extends to the book's own flag); the daily Journal
   still refuses both doors (13i-d, #169(b)).
@@ -343,7 +357,10 @@ Build:
    membership faces (the Book Panel, chips, "appears in N gatherings"); the VISIBLE
    auto-ingestion pause (R-13ie-4's amendment: the Collecting pane carries a sentence while the
    book is archived — "Collecting is paused while this book is archived." — the explicit add
-   doors stay rendered and working; 13s re-voices).
+   doors stay rendered and working; 13s re-voices); the add-door face per her second rider —
+   every book SELECTOR/PICKER an add road offers (the membership chip's list, Manage Notes,
+   the drop/move/copy targets) marks archived books "(archived)", no confirm interruption
+   (the lighter road; the confirm is the recorded alternative, PROVISIONAL #179).
 4. Lesson 9's second sentence into "the journal & the pool" + flip
    `lessonNineTheDailyJournal` (presence AND the archive→⌘J→same-book-back behavior); the
    eleven-suite tutorial spine green.
