@@ -1157,7 +1157,26 @@ enum SampleLibrarySeeder {
                 segmentation: Self.segmentation).container.id
             _ = try quiet.applyTag(tagID, toPost: noteID)
         }
-        _ = try quiet.addPostToReading(noteID, to: bookID)
-        try quiet.assignPostToSection(noteID, in: bookID, section: sectionID)
+        // 13i-d U7 continuation — F-U7-3, RULED re-add-as-COPY (the ownership
+        // doctrine's own answer, 13i-c §6): a STRAY that now lives in another
+        // book can meet the consult — an OWNED target (`noteMemberedElsewhere`,
+        // the seeded Sherlock owns its notes since U7) or a story owned
+        // ELSEWHERE (`noteOwnedElsewhere`). The restore never severs her book
+        // and never fails with a "try again" that cannot succeed: the story
+        // comes back as a COPY (its family, tags riding, lineage kept); her
+        // book keeps the original.
+        let memberID: String
+        do {
+            _ = try quiet.addPostToReading(noteID, to: bookID)
+            memberID = noteID
+        } catch let refusal as OperationError {
+            switch refusal {
+            case .noteMemberedElsewhere, .noteOwnedElsewhere:
+                memberID = try quiet.copyPostIntoReading(noteID, into: bookID).copy.id
+            default:
+                throw refusal
+            }
+        }
+        try quiet.assignPostToSection(memberID, in: bookID, section: sectionID)
     }
 }
