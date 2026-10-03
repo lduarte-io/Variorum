@@ -308,5 +308,11 @@ refused with the wrong cause's name).
 - **F-R1-3 — routed to the #179 bundle by the orchestrator** (a question, not a fix; nothing
   touched by this pass).
 
-**END RUN (the full core suite on the fixed tree, foreground):** PENDING until the line below
-is replaced with the exact counts.
+**END RUN (the full core suite on the fixed tree, foreground):** **"✔ Test run with 2173 tests
+in 244 suites passed after 105.495 seconds"** = the U2 baseline 2172/244 + exactly this pass's
+ONE new pin (the standing env-gated real-server skip untouched by this pass). Commits of the
+fix pass: `0280eb36` (the pin, ahead of its fix) · `a3fd7cfe` (the two-step guard + the wrap) ·
+`59bd0fce` (these dispositions) — each pushed. **ROUND 1 CLOSED: every finding dispositioned,
+every confirmed fix landed red-on-old-verified, the suite green. Next per the flow: the
+implementer's one sanity pass over this fix diff (`2bd9a908..tip`); anything it raises returns
+to this reviewer for the final word.**
