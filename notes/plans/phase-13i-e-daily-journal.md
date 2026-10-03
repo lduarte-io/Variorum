@@ -832,6 +832,113 @@ Build:
 
 Same checkpoint protocol, record shape, fences and traps as U1.
 
+## U2 RECORD — THE FACES + LESSON 9 (`opus-implementer`, 2026-10-03)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+
+### LIVE STATUS (per commit; every unverified claim PENDING)
+
+- 2026-10-03 · **START** — preflight read in this session, not delegated: this file WHOLE (the
+  kickoff rulings R-13ie-1…4 with both riders, the EDGES, the U1 RECORD, the adjudication after U1
+  and its U2 RIDERS, the U2 brief, the ENVIRONMENT TRAPS); CLAUDE.md + its auto-loaded canon; the
+  sitting record §7, §10 and §25 (lesson 9); `notes/SessionResiliencyProtocol.md` whole; the 13i-d
+  plan's U3 RECORD (the Book Settings state doors) and U7 RECORD (the books chapter, F-U7-2's pin).
+  Code read by hand: `setDailyJournalBook` (both levels), `BookStateDoors.swift` whole,
+  `BookSettingsSheet.swift` whole, `ShelfView`'s book menu + `BookcaseRowMeta`, `ArchivedView`
+  whole + `RecoveryViewModel.startArchived`, the registry's book-scope declarations and
+  `CapabilityID`'s book acts, `MembershipChip`, `BookPanelView`'s header/gatherings line,
+  `NotePicker.curatedBooks`, `JournalBooks.openToday` + its three callers, `OpsRefusalTable`,
+  `DeletionRefusal`, `WingWords`/`wingContents`, the phone's two delete doors, lesson 9's prose and
+  `lessonNineTheDailyJournal`. THE DESIGN below settled before the first line of code. **No revert in
+  flight.** NEXT: ACT 0 (pin first, red on the old tree, then the line).
+
+### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
+
+- **ACT 0 (the adjudication's F-U1-2 ruling):** `setDailyJournalBook`'s db-level writer gains ONE
+  guard ahead of the marker move — the row's `kind` read and a non-book refused
+  `wrongReadingKind(expected: .book)` — so neither the public door nor any future db-level caller
+  can demote the live daily book and stamp a gathering. Pin first: on the old tree the designation
+  of a gathering lands (the live daily Journal demoted to the trait, the gathering wearing
+  `'daily'`, the setting naming it) and the next ⌘J (`shelveInDailyJournalBook`) MINTS a fresh
+  Journal beside it — two books where one stood.
+- **The registry (P-1):** two new acts — `.archiveBook` (verb "Archive", doors `.contextMenu` the
+  Bookcase row + `.surface` the Book Settings sheet's State section) and `.unarchiveBook` (verb
+  "Unarchive", `.surface` — the Archived surface's book rows + the sheet). Both `always` for
+  `.editRule`'s reason (each renderer carries its book). **WHICH of Archive · Unarchive · Delete a
+  book renders is DATA** — a new pure table `BookArchiveDoorSet.rendered(for:)` over
+  `BookArchiveFacts` (archived · the daily marker): archived ⇒ Unarchive, else Archive; **Delete
+  never on a marker-bearer** (`Queries.isDailyJournalMintShape` — the SAME predicate the op's guard
+  keys on, so a face can never offer a delete the op refuses: P-2). Every renderer reads the table.
+- **The archive door's behaviour (the delete door's twin, lighter — her "not too onerous"):** a
+  PLAIN book, a GATHERING and the daily Journal archive AT ONCE with a receipt naming the road back
+  (no confirm — archive is reversible and kept-forever; P-13ie-U2-1); an OWNED book ASKS — two
+  choices when it holds notes ("Archive Book Only" / "Archive Book and Its N Notes", N =
+  `Queries.archiveWithNotesCount`, the copy saying the book-only notes STAY in the Library, still
+  its own — membership is a fact, P-13ie-U1-8), one button when it holds none (the delete
+  confirm's own N = 0 shape). The owned door reads "Archive…" (it asks); the others "Archive".
+  Unarchive acts at once; its receipt says what came back (the op's returned notes) and, on a
+  living book, how many now wait at Arrivals (the pending count read before/after — the catch-up
+  bells, never seats). Receipts on the status seam's RECEIPT kind (quiet by default); refusals
+  REFUSE. The acts live in `BookStateDoors` (the state doors' one brain — open/confirm/perform),
+  the words in `BookStateCopy`.
+- **The ARCHIVED surface's BOOKS group (R-13ie-1):** `ArchivedView` gains a BOOKS section ABOVE the
+  notes (section labels drawn only when an archived book exists — an archive with no books reads
+  exactly as before), fed by a held observation of `Queries.archivedReadings(wingID:)` (the
+  current wing; a NEW core observation wrapper `observeArchivedReadings` — `reading` only, so
+  autosave never wakes it) and a one-shot per-list member count (`liveMemberNoteCount`, the
+  13i-d archived-counts precedent: reading `container` stays out of the held region). Each row: the
+  name, the honest facts ("book · N notes · owned/finished/sealed · daily Journal", or "gathering
+  · shows nothing while archived"), the archived stamp; doors **Open** (navigation, the book view)
+  · **Unarchive** · **Delete Book…** (the shared delete road with its three confirms; NOT drawn on
+  the daily Journal — the table). The name filter narrows books too. Subtitle: "notes and books you
+  set aside — kept, with no countdown" (keep-forever framing — PROVISIONAL P-13ie-U2-2).
+- **The Book Settings sheet:** the STATE section gains an **Archived** row (caption + Archive /
+  Unarchive from the table); a gathering's sheet now draws the State section for it (archive is a
+  gathering's state too — R-13ie-3). The daily Journal's caption is §10's sentence verbatim ("The
+  daily Journal can be archived, never deleted; it returns when a day arrives."). **THE VISIBLE
+  PAUSE (R-13ie-4):** while archived, the Collecting section leads with "Collecting is paused while
+  this book is archived." on a book whose rule reads (a living rule — a rule-less book has no
+  auto-ingestion to pause, so the sentence would be noise) and "Collecting is paused while this
+  gathering is archived — it shows nothing until you unarchive it." on a gathering (P-13ie-U2-3);
+  the explicit add doors are untouched. The probe records both (pins).
+- **"(archived)" — her second rider's lighter road, and the muted membership faces:** ONE shared
+  word in a hoisted copy enum (`Shared/BookArchiveCopy.swift`, so the phone's catch-up speaks the
+  same mark) — `name(_:)` → "Name (archived)". Selectors: the membership chip's "Add to Book" menu
+  (books and gatherings), the Pool's Add-to-Book picker (its annotation slot: "archived", beside
+  "finished"). Membership faces: the chip's book rows, the Book Panel's switcher rows and its state
+  line ("archived"), the context bar's ascent menu. "Appears in N gatherings" needs no mark by
+  construction — U1's `readingsContaining` drops an archived gathering (it shows nothing). Manage
+  Notes… is reachable only from a Bookcase row, which never shows an archived book (P-2 by
+  construction — recorded, nothing drawn). The book view's navigator chip says "archived" too
+  (orientation for a book opened from Archived — P-13ie-U2-4).
+- **The daily Journal's doors (P-2):** Delete is REPLACED by Archive on every surface — the Mac's
+  Bookcase row (the table) and the Archived row (the table); **the phone's two doors** (the shelf
+  row's long-press and Book Details' delete row) show Archive on the daily Journal instead of
+  Delete (scope item 3's letter — "every door that offers Delete on a book offers ARCHIVE on the
+  daily Journal instead"; its road back on the phone is Today's Entry itself). The phone's archive
+  face for ORDINARY books stays the mobile catch-up's (F-U1-4's MobileSoul line; P-13ie-U2-5).
+- **The words:** `OpsRefusalTable` (shared) gains `dailyJournalCannotBeDeleted` ("The daily Journal
+  can't be deleted — archive it instead; it comes back when a day arrives."),
+  `readingAlreadyArchived` ("That book is already archived — nothing changed."),
+  `readingNotArchived` ("That book isn't archived any more — nothing changed."); the shared
+  `DeletionRefusal` (the phone's delete road) gains the first. All 13s-revoicable.
+- **The comes-back RECEIPT (F-U1-6's ruling):** `JournalBooks.openToday` reads the derived daily
+  book's archived state BEFORE and AFTER the shelving inside its runner turn and, when the filing
+  brought it back, `Outcome.receipt` = "The Journal is back on the Bookcase." (the ruling's words);
+  both Mac roads (⌘J / the palette's `ShellActions.todaysEntry`, and the Bookcase's Today's Entry
+  through `LibraryViewModel.openJournalEntry`) speak it as a RECEIPT. `DailyBookShelving`
+  unchanged. The phone's Today door is the mobile catch-up's (recorded).
+- **F-U1-8's optional copy (taken):** `Queries.WingContents` gains `archivedBooks` /
+  `archivedGatherings` (defaulted 0 — a small core QUERY addition, recorded) and
+  `WingWords.contents` says "2 books (1 archived)" so a wing that refuses deletion for books she
+  cannot see on the Bookcase says where they are.
+- **Lesson 9 (P-6):** the second sentence lands in "the journal & the pool" verbatim — "You can
+  archive it; you can't delete it; it comes back when a day arrives." — and
+  `lessonNineTheDailyJournal` FLIPS: presence asserted, and the behaviour executed headless (archive
+  the Journal → it leaves the Bookcase → `shelveInDailyJournalBook` → the SAME book back, live,
+  unarchived, entry filed; the delete door refuses it with the table's words; the Bookcase row's
+  table offers no Delete). Red-on-old is the natural red of the pre-sentence tree.
+
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; unverified claims PENDING)
 
 - 2026-10-03 · kickoff: preflight complete (the KICKOFF RECORD above); her four rulings
