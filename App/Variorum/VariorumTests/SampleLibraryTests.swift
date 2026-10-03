@@ -457,6 +457,63 @@ struct SampleLibraryTests {
         }
     }
 
+    /// **13i-d LADDER B fix C (round 1's MINOR 3 — F-U7-3's third arm), RED
+    /// ON OLD:** a sample book MOVED to another wing (U5b's legal door) made
+    /// the restore WING-BLIND fail partway — `discover` resolved the reserved
+    /// tag across wings, `place` minted the missing story in HOME, and the
+    /// membership guard refused `crossWingMembership` with a "try again" that
+    /// could never succeed (one Pool orphan per press). The restore is now
+    /// wing-aware: the tag resolves (and mints) in the BOOK's wing and a
+    /// missing story is born THERE; a stray in another wing wears that wing's
+    /// twin and is deliberately not found — its title mints fresh (the
+    /// restore never crosses wings by itself, lesson 11's fence).
+    @Test("A sample book moved to another wing restores whole, in its wing")
+    func aMovedBooksRestoreIsWingAware() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, _) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let ops = session.operations
+            let wing = try ops.createWing(name: "Attic")
+            _ = try ops.moveReadingToWing(bookID, to: wing.id)
+            // One story deleted — the restore must mint it afresh, in the wing.
+            let scandal = try await db.read { db in
+                try Queries.assembleReading(db, readingID: bookID)
+                    .first { $0.title == "A Scandal in Bohemia" }
+            }
+            try ops.deleteContainer(try #require(scandal).postID)
+
+            let restored = try await SeededBookRestore.restore(session: session, book: .sherlock)
+            guard case .restored(let readingID, let minted) = restored else {
+                Issue.record("expected a restore, got \(restored)")
+                return
+            }
+            #expect(readingID == bookID)
+            #expect(minted == 1)
+            try await db.read { db in
+                let back = try #require(
+                    try Queries.assembleReading(db, readingID: bookID)
+                        .first { $0.title == "A Scandal in Bohemia" })
+                #expect(try Queries.effectiveWing(db, ofPost: back.postID) == wing.id,
+                        "the minted story is born in the BOOK's wing")
+                // Its reserved tag is the WING's twin, never Home's row.
+                let tagWing = try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT t.wing_id FROM post_tag pt
+                        JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                        WHERE pt.post_id = ? AND pt.deleted_at IS NULL AND t.path = ?
+                        """,
+                    arguments: [back.postID, SampleLibrarySeeder.tagName])
+                #expect(tagWing == wing.id)
+            }
+        }
+    }
+
     /// **RED ON OLD (the ladder's F10, MINOR):** deleting the BOOK tombstones
     /// its memberships and never its notes, so the thirteen stories survive
     /// alive and bookless — and the restore door, deriving presence from

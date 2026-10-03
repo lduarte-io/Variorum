@@ -624,6 +624,14 @@ enum SampleLibrarySeeder {
         /// to have deleted, so its title mints afresh); smallest id first
         /// where two live tagged notes share a title, for determinism.
         var strayNoteIDsByTitle: [String: String] = [:]
+        /// **The BOOK's wing as surfaces read it** (13i-d ladder B fix C):
+        /// `''` (Home) when no book exists or its wing pointer dangles. The
+        /// seed resolves the reserved tag here and mints missing notes here —
+        /// a book she moved to another wing restores IN that wing. A stray in
+        /// ANOTHER wing wears that wing's tag twin and is deliberately not
+        /// found (its title mints fresh): the restore never crosses wings by
+        /// itself — lesson 11's fence.
+        var wing: String = ""
         /// **The seeder's own half-built scripted note** (18l-c U6 — design
         /// call 3): members of the book still wearing the scripted note's
         /// RESERVED working title, which only a history stopped before its
@@ -639,11 +647,24 @@ enum SampleLibrarySeeder {
 
     nonisolated static func discover(_ db: Database, book: Book = .sherlock) throws -> Existing {
         var existing = Existing()
-        existing.bookID = try Queries.readings(db)
-            .first { $0.name == book.name && $0.deletedAt == nil }?.id
+        let found = try Queries.readings(db)
+            .first { $0.name == book.name && $0.deletedAt == nil }
+        existing.bookID = found?.id
+        // 13i-d LADDER B fix C: the restore is WING-AWARE — the book may
+        // have been MOVED to another wing (U5b's door), and everything the
+        // seed resolves or mints must live where the book lives, or the
+        // re-membering refuses `crossWingMembership` partway with a retry
+        // that can never succeed. Home when no book exists (the fresh seed's
+        // shape, unchanged); a dangling wing reads as Home, the surfaces' rule.
+        existing.wing = try found.map {
+            try Queries.wingIsLive(db, id: $0.wingId) ? $0.wingId : ""
+        } ?? ""
         // The EXACT tag, never the subtree (the tutorial's MINOR-D3 rule):
-        // a reader's own `sherlock holmes/…` child is hers.
-        existing.tagID = try Queries.allTags(db).first { $0.path == book.tagName }?.id
+        // a reader's own `sherlock holmes/…` child is hers — and the BOOK's
+        // WING's row (fix C: a moved book's tag twin lives beside it; Home's
+        // old row stays Home's vocabulary).
+        existing.tagID = try Queries.allTags(db, wingID: existing.wing)
+            .first { $0.path == book.tagName }?.id
         if let bookID = existing.bookID {
             let entries = try Queries.assembleReading(db, readingID: bookID)
             existing.presentTitles = Set(entries.compactMap(\.title))
@@ -1028,6 +1049,9 @@ enum SampleLibrarySeeder {
         let present = existing.presentTitles
         let chapters = existing.chapterIDsByName
         let strays = existing.strayNoteIDsByTitle
+        // 13i-d ladder B fix C: everything the seed mints lives where the
+        // book lives ('' = Home when none exists — the fresh seed's shape).
+        let wing = existing.wing
 
         // The book's own clock (Sherlock: 1892 — m6), or the ambient one.
         let clock = book.clock
@@ -1044,7 +1068,8 @@ enum SampleLibrarySeeder {
                     bookID = try quiet.createReading(
                         name: bookName, kind: .book, profile: profile).id
                 }
-                let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
+                let tagID = try existing.tagID
+                    ?? quiet.createTag(name: tagName, wingID: wing).id
                 if !present.contains(frontTitle) {
                     // m5: reuse a chapter a cancelled run already left behind,
                     // never mint a second one wearing the same name.
@@ -1052,7 +1077,7 @@ enum SampleLibrarySeeder {
                         ?? quiet.createSection(in: bookID, name: frontChapter).id
                     try Self.place(
                         quiet, title: frontTitle, text: frontText, stray: strays[frontTitle],
-                        in: bookID, section: sectionID, tag: tagID, label: label)
+                        in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
                 }
                 return (bookID, tagID)
             }
@@ -1084,7 +1109,7 @@ enum SampleLibrarySeeder {
                             ?? quiet.createSection(in: bookID, name: title).id
                         try Self.place(
                             quiet, title: title, text: text, stray: stray,
-                            in: bookID, section: sectionID, tag: tagID, label: label)
+                            in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
                     }
                 }
             case .scripted(let scripted):
@@ -1101,7 +1126,7 @@ enum SampleLibrarySeeder {
                         try Self.underClock(clock) {
                             try Self.place(
                                 quiet, title: scripted.title, text: "", stray: stray,
-                                in: bookID, section: sectionID, tag: tagID, label: label)
+                                in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
                         }
                         return
                     }
@@ -1137,7 +1162,8 @@ enum SampleLibrarySeeder {
     /// did to it); only a title with no such note mints afresh.
     nonisolated private static func place(
         _ quiet: Operations, title: String, text: String, stray: String?,
-        in bookID: String, section sectionID: String, tag tagID: String, label: String
+        in bookID: String, wing: String, section sectionID: String, tag tagID: String,
+        label: String
     ) throws {
         let noteID: String
         if let stray {
@@ -1152,9 +1178,13 @@ enum SampleLibrarySeeder {
             // Pool per missing note (the scripted note's F1 class, bounded
             // here because the next press re-members it as a stray).
             try quiet.assertReadingAcceptsPosts(bookID)
+            // 13i-d ladder B fix C: born in the BOOK's wing — a book she
+            // moved restores where it lives (a Home-born mint met the
+            // membership guard's `crossWingMembership` partway, with a
+            // "try again" that could never succeed).
             noteID = try quiet.importPost(
                 title: title, text: text, undoLabel: label,
-                segmentation: Self.segmentation).container.id
+                segmentation: Self.segmentation, wingId: wing).container.id
             _ = try quiet.applyTag(tagID, toPost: noteID)
         }
         // 13i-d U7 continuation — F-U7-3, RULED re-add-as-COPY (the ownership
