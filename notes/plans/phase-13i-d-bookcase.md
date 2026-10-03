@@ -2661,16 +2661,40 @@ EVIDENCE's "combined behavioural revert" line.
 
 ## U7 RECORD — THE TUTORIAL'S BOOKS CHAPTER · THE CLASSICS SEED · THE WELCOME MINT (`opus-implementer`, 2026-10-02)
 
-**NOT DONE BY THIS UNIT (first line, per the contract — PENDING until the close; the standing items
-are known now):** (1) **THE RULED `#classics` TAG IS STOPPED for the architect** (F-U7-1 — applying
-any tag but the reserved one to a Sherlock note makes the sync dedupe's pristine classifier read the
-copy EDITED, `Sync/SampleLibraryDedupe.swift`'s engagement leg; building the ruled letter needs a
-`Sync/` change, Fable work). The classics gathering ships PROVISIONALLY on the two books' OWN
-reserved tags (P-13id-U7-1). (2) **Lesson 9's second sentence is withheld** — "You can archive it;
-you can't delete it; it comes back when a day arrives" is 13i-e's unbuilt guard (KnownIssues row 32,
-owner 13i-e); the chapter teaches the first sentence, which is true (F-U7-2). (3) The phone is
-untouched in behaviour (record only). (4) The drags of ritual R5 are pinned at the plan layer, never
-walked (F-U1-4's class — hers).
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) **THE RULED `#classics` TAG IS STOPPED
+for the architect** (F-U7-1 — any tag but the reserved one on a Sherlock note makes the sync dedupe's
+pristine classifier read the copy EDITED, `Sync/SampleLibraryDedupe.swift`'s engagement leg, pinned
+both ways in `SampleLibraryWelcomeTests`; building the ruled letter needs a `Sync/` change, Fable
+work). The classics gathering ships PROVISIONALLY on the two books' OWN reserved tags (P-13id-U7-1).
+(2) **Lesson 9's second sentence is WITHHELD** — "You can archive it; you can't delete it; it comes
+back when a day arrives" is 13i-e's unbuilt guard (KnownIssues row 32, owner 13i-e, annotated); the
+chapter teaches the first sentence, true today, and a pin keeps the second untaught until the guard
+ships (F-U7-2). (3) **The phone is untouched in behaviour** (record only — MOBILE PARITY below; the
+shared brain is ready, its TEST BUILD green). (4) **R5's drags are pinned at the handler layer, never
+walked** (F-U1-4's class — hers; the menu twins walked). (5) **F-U7-3 is RECORDED, not fixed** (an
+owned Sherlock makes a restore that re-members a released-then-reshelved story refuse partway — the
+proposal below; not this unit's surface). (6) **Her real store is NOT re-seeded** — the closeout's
+act, behind the A1 rail (THE RE-SEED CONSEQUENCE below). Everything else in the brief — the Welcome
+mint, the classics seed (minus the ruled tag), the books chapter's eleven sentences and five rituals,
+the guide's prose sweep with the grep pin closed over the seeder, and rider F-U6-4 — is built, pinned
+and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-02 — core FULL 2123/234 (1 standing skip) · Mac 1486/236 at the END (7
+standing opt-in skips) + the walk's W-1 re-run 27/4 · the phone TEST BUILD green · the combined
+behavioural revert 14 red of 60/5 · the walk ×4 DONE (22 captures; one walk defect W-1 found, pinned
+red, fixed, re-walked).**
+
+Preflight read in this session's own context: CLAUDE.md + its canon; this plan WHOLE (the kickoff
+rulings, the constitution, every adjudication incl. the riders routed to U7, the U1–U6 RECORDs, the
+away-run posture, the traps, the U7 brief); the sitting record §25 IN FULL, §7, §8, §9, §10, §15,
+§16–§24; `notes/SessionResiliencyProtocol.md` whole; the Mac `TutorialSeeder` whole; the shared
+`SampleLibrarySeeder`, `SeededBookRestore`, `SampleLibraryJekyllBook`, `StarredGatheringSeeder`; the
+R5 keeper (`Sync/Repairs.swift` — read, not touched) and the sample dedupe classifier
+(`Sync/SampleLibraryDedupe.swift` — read, not touched); QUESTIONS #170–#176 (next free **#177**). No
+schema, no `Sync/` (both diff-empty), no editor-seam work. No subagents. Logs: the repo's gitignored
+`scratchpad/13id-u7/`. *(Machinery honesty: the record-close edit's first attempt anchored on an
+EVIDENCE header U5's record shares and cut ~1,000 lines of the plan — caught by the diff stat before
+any commit, the file restored from HEAD, the edit re-run scoped to this record.)*
 
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
@@ -2684,8 +2708,8 @@ walked (F-U1-4's class — hers).
 | 6 | The eleven lesson pins + the ritual walk assertions (`TutorialBooksChapterTests`) | DONE (this commit) — `TutorialBooksLessonTests` 12 (the chapter's shape + one pin per lesson sentence: the PROSE says it, every named door tied to its OWN constant, the TRUTH executed headless — the three kinds on the seeded classics; the edit law incl. the copy's lineage; a gathering from a tag, untag leaves, no rearranging, the bind keeps collecting; arrivals: auto-adds, waits, dismiss, the road back by hand, finishing dismisses; owned: elsewhere refuses → a copy, release → the Pool whole; finished keeps text editable, sealed refuses; the Bookcase: A–Z by default, unshelved at the top, shelves in strip order; deleting: plain never touches a note, owned book-only → Pool, with notes → returns together; the daily Journal files ⌘J (and the withheld half is NOT taught — F-U7-2); the Pool: bookless loose, the seeded quicknote TUCKED; wings: the sentence IS the New Wing prompt's, nothing crosses on its own) + `TutorialBooksRitualTests` 5 (R1 the classics walk incl. the owned-by badge's ascent aimed at Sherlock and the note · R2 · R3 on the chapter's own two lessons · R4 meeting `noteOwnedElsewhere` · R5's drop/placement handlers + the star float under all three orders) — **17/2 green** |
 | 7 | Rider F-U6-4 — the Archived view's inline Delete Note… declared (`.deleteNote` + `.surface`, `ArchivedView` renderer, the door-set pin edit) | DONE (this commit) — `.deleteNote`'s doors `[.bottomBar, .contextMenu, .surface]`; `ArchivedView.surfaceCapabilities = [.unarchiveNote, .deleteNote]`, the button spelled from the registry; `NoteDeletionDeclarationTests` a JUSTIFIED EDIT (the door set gains `.surface` + the renderer asserted); the registry walk balances with no new union line (`ArchivedView` already in it) — `CapabilityRegistryTests` + the four `NoteDeletion*` suites **49/5 green** |
 | 8 | Suites at the END (core full; Mac named incl. the registry walk + the tutorial spine + the seeder suites; phone test build) | DONE (8a394fc2 + this commit) — core FULL **2123/234** (1 standing env-gated skip; +7/+1 = `WelcomeShelfTests`; `scratchpad/13id-u7/core-full.log`); Mac **1486/236** in five batches from `DerivedData/13id-u7`, zero instances — U6's four lists unchanged (A 236/38 every `Book*` suite, the landing families UNMODIFIED · B 646/116 · C 142/16 the registry walk + the eleven `Tutorial*` suites + the sweep/grep pins · D 382/54, 7 standing opt-in skips in `DebugOracleSingletonWindowTests`) + E **80/12** (this unit's: `TutorialBooksLessonTests`, `TutorialBooksRitualTests`, `SampleLibraryWelcomeTests`, and the seeders/tutorial-door neighbours no earlier batch named); the first C run caught ONE pin asserting the Archived view's exact declared set — `VocabularySweepTests.theArchivedViewDeclaresItsUnarchive`, a JUSTIFIED EDIT (the F-U6-4 rider's ruled change; re-run green); phone `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED** (`DerivedData/13id-u7-mobile`) |
-| 9 | The screenshot walk ×4 into `notes/plans/13id-screens/u7/` | NOT-STARTED |
-| 10 | Record close · QUESTIONS #177 · ledger row 8 | NOT-STARTED |
+| 9 | The screenshot walk ×4 into `notes/plans/13id-screens/u7/` | DONE — **22 captures**, all four combinations (EVIDENCE lists them); **W-1** (the Restore Tutorial confirm promised "Nothing else is touched" while the door now arranges Welcome): pinned RED 1a1c90b0 (4 issues), fixed c8f0a383, re-walked `tl-01`; the launch on the EXISTING dev store marked `declined` and wrote nothing (read back from the defaults); her dev voice (Terminal — read back `1,0`) and appearance (`system`) restored; zero instances after; the walk's own `caffeinate` ended |
+| 10 | Record close · QUESTIONS #177 · KnownIssues row 32 annotated · ledger row 8 | DONE (this commit) |
 
 **REVERT STATE: NO REVERT IN FLIGHT.** The combined behavioural revert (RV1 lesson 4's road-back sentence removed · RV2 the arrangement's Sherlock-owning write removed · RV3 its shelving step skipped · RV4 `BookStateCopy.ownVerb` re-spelled · RV5 `.deleteNote` without `.surface` · RV6 the seeded-quicknote step skipped · RV7 the launch reading an existing store as a birth) ran from the committed HEAD `1e8a95dc` (`scratchpad/13id-u7/revert.log`; the first attempt's build used a RELATIVE log path through a script that `cd`s — F-U5b-8's trap — so it tested the old build and was discarded): **14 tests RED of 60/5, the other 46 green** — the 13 predicted (`lessonOneTheThreeKinds`, `lessonFourArrivals`, `lessonFiveOwned`, `lessonTenThePool`, `ritualOneTheClassicsWalk`; `SampleLibraryWelcomeTests`' fresh birth, classics gathering, restore door, second arrangement, restore-tutorial, existing-store; `NoteDeletionDeclarationTests.deleteNoteIsDeclared…`; the registry walk `theSurfacesRenderExactlyTheDeclaredSurfaceActs`) plus ONE I did not predict and whose red is right: `aSharedSherlockStoryLeavesSherlockPlainAndForksNothing` counts the seeded quicknote in its "+1", so RV6 moved it. Restored by `git checkout HEAD --` on the four files; `git diff --quiet` and `cmp` against the pre-revert copies verified.
 
@@ -2755,22 +2779,195 @@ classifier (it reads neither) — only the tag collides.
 - **(C)** apply `#classics` anyway and accept the both-survive degradation — rejected (an edited
   copy is never silently retired, and here an UNEDITED one would never be retired either).
 
-### EVIDENCE (named now; counts PENDING until each run lands)
+### WHAT WAS BUILT (a fresh session's map)
 
-- Core `WelcomeShelfTests`: the mint (role, name, end of strip, Home) · adoption of a live role'd
-  shelf (renamed included) · the SMALLEST id among two live role'd shelves (the R5 keeper's keep) ·
-  a hand-made "Welcome" (no role) never adopted · a dead wing refused · idempotent. PENDING.
-- Mac `SampleLibraryWelcomeTests`: the fresh-birth arrangement (Welcome role'd; Sherlock OWNED with
-  zero forks; Jekyll plain; the classics gathering ON Welcome with its rule; the four seeded books
-  on Welcome; ONE seeded quicknote filed into Quicknotes; Journal + Quicknotes + starred notes
-  UNSHELVED — §19.3) · the launch occasion's marks (fresh → pending → done; an existing store →
-  declined, NOTHING written — no silent retrofit; pending resumes) · the restore doors onto an
-  EXISTING store (Welcome ADOPTED, not duplicated; a book she filed elsewhere stays; a shared member
-  leaves Sherlock plain) · idempotence. PENDING.
-- The eleven lesson pins + R1–R5 headless (`TutorialBooksChapterTests`), the grep pin closing over
-  the seeder, the registry walk (F-U6-4's row), the tutorial spine. PENDING.
-- The walk ×4 into `notes/plans/13id-screens/u7/`: the Welcome shelf with the triad · the classics
-  gathering open (R1) · the books chapter read in use. PENDING.
+- **Core** — `Operations+Shelf.swift`: `welcomeShelfName` ("Welcome"), `welcomeShelfRole`
+  ("welcome" — the R5 keeper's key), `WelcomeShelfEnsure`, `ensureWelcomeShelf(wingID:)` (adopt the
+  wing's smallest-id live role'd shelf, else mint at the strip's end). Nothing else in core.
+- **Shared** — NEW `Shared/SampleLibrary/SampleLibraryWelcome.swift`: the reserved identities
+  (`classicsGatheringName` "classics", `quicknoteTitle` "a first quick note", `quicknoteText`,
+  `seededBookNames(guideName:)`, `classicsRule`), `SherlockOwnership`, `Arrangement` (+ `didAnything`),
+  `arrange(session:guideName:)` (ONE quiet runner turn) / `arrange(ops:guideName:)` (the body),
+  `LaunchOutcome`, `launchMarkKey(for:)` (`SampleLibraryWelcome.<variant>` — absent · pending · done ·
+  declined), `arrangeAtLaunch(session:sherlock:storeVariant:guideName:loadMark:saveMark:)`. The phone
+  compiles it and calls nothing of it.
+- **Mac** — `VariorumApp`: keeps Sherlock's launch outcome and runs `arrangeAtLaunch` after every
+  furniture seed. `ShellActions`: `arrangeWelcome(session:)` (logs a failure, answers nil — the
+  door's own receipt stands) composed by `restoreTutorial`, `openTutorial` (only when
+  `findOrSeedReporting` says it SEEDED) and `restoreSeededBook` (all three Help ▸ Restore doors);
+  `WelcomeDoorCopy` (the three receipt shapes, the shelf named by its real name). `TutorialSeeder`:
+  `findOrSeedReporting` (`findOrSeed` wraps it); `replaceDetail` discloses the arrangement (W-1);
+  `booksChapter` + the plan's last chapter + the eight lessons (the seed's end); the prose sweep in
+  "start here", "getting around", "the workspace", "comments & tags", "export"; "books & the shelf"
+  removed from "the library of things" (moved). `CapabilityRegistry` / `ArchivedView`: F-U6-4.
+- **Tests** — core NEW `WelcomeShelfTests` (7). Mac NEW `SampleLibraryWelcomeTests` (10),
+  `TutorialBooksChapterTests` (`TutorialBooksLessonTests` 12 + `TutorialBooksRitualTests` 5).
+  JUSTIFIED EDITS (each commented in place): `TutorialWalkTests.pagesFlip…` (its lesson MOVED),
+  `NoteDeletionDeclarationTests` (F-U6-4's door set), `VocabularySweepTests.theArchivedView…`
+  (F-U6-4's declared set), `DeadVocabularyTests` (the seeder's allow-list line removed — the pin's
+  subject widened, by the brief).
+
+### EVIDENCE (all run at the END unless named; counts exact)
+
+- **Core `WelcomeShelfTests` — 7/1 green:** the mint (role, name, Home, outbox) · a second ensure
+  adopts · Welcome joins at the strip's END among her shelves · identity is the ROLE (a renamed
+  Welcome adopted; her own "Welcome" never taken over, never stamped) · between two live role'd
+  shelves the SMALLEST id is adopted (the keeper's keep) · a deleted Welcome is replaced; wings
+  separate; a dead wing refused · **the R5 keeper end to end through the seeders' own door** (two
+  devices each ensure offline and shelve a book → the furniture harness converges ONE Welcome holding
+  both → a later ensure on either device ADOPTS it). New op — red on old by construction.
+- **Mac `SampleLibraryWelcomeTests` — 10 green:** a FRESH store's birth arranges the whole Welcome
+  (one role'd Welcome in Home; Sherlock, Jekyll, *Encryption Explained* and the classics gathering ON
+  it; Quicknotes and the starred-notes gathering UNSHELVED; Sherlock owned, Jekyll and the encryption
+  book plain; ONE seeded quicknote wearing #quicknote, shown by Quicknotes, bookless; Quicknotes born
+  starred; the daily Journal ⌘J later mints UNSHELVED; ⌥⌘Z untouched) · the classics gathering holds
+  nothing and shows exactly both books' notes, every Sherlock note `ownedBy` Sherlock, no Jekyll note
+  marked · **F-U7-1 pinned both ways** (the arranged Sherlock and *Encryption Explained* read
+  PRISTINE to the REAL classifier; one `#classics` application on one story reads EDITED) · **never a
+  silent retrofit** (`.alreadySeeded` and `.alreadyPresent` launches → `declined`, nothing written) ·
+  the marks (undecided writes nothing; a partial seed is no birth; done/declined settled; pending
+  resumes) · **Restore on an EXISTING store ADOPTS her renamed Welcome** ("Front Door" — never a
+  second), leaves her book filed on "Essays", puts the rest on HER shelf, speaks the receipt naming it;
+  a second press refuses · a story shared with her own book leaves Sherlock plain and forks nothing ·
+  a second arrangement writes not one outbox row · Restore Tutorial puts the guide on Welcome BESIDE
+  *Encryption Explained*; the open door on an existing guide arranges nothing · **W-1's pin** (below).
+- **`TutorialBooksChapterTests` — 17/2 green** (the chapter's shape + the eleven lesson pins + R1–R5),
+  as LIVE STATUS row 6 lists.
+- **The combined behavioural revert — 14 RED of 60/5** (the 13 predicted + one correctly moved by
+  RV6 — the REVERT STATE paragraph above), restored and `cmp`-verified.
+- **W-1 red-on-old:** `theRestoreConfirmDisclosesTheWelcomeArrangement` on the shipped detail —
+  **4 issues** (`w1-red.log`: no Welcome, no Sherlock, no classics, no quick note named), committed
+  red on purpose (1a1c90b0); green after the fix with `ShellConfirmTests`, `TutorialDoorTests`,
+  `DeadVocabularyTests` — **27/4** (`w1-green.log`).
+- **Core FULL `swift test`: "Test run with 2123 tests in 234 suites passed"** (1 skipped — the
+  standing env-gated Supabase integration test). Baseline 2116/233 → **+7 / +1, all this unit's**.
+- **Mac named suites — 1486/236 at the END** (LIVE STATUS row 8 has the five batches), + the W-1
+  re-run 27/4 after the fix (the only production change after the END runs is `replaceDetail`'s text).
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED**.
+- **Fences:** `git diff 18d0588b -- Sources/VariorumCore/Sync Sources/VariorumCore/Persistence Server`
+  is EMPTY (zero `Sync/`, zero schema).
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13id-u7`; grants proven
+  by real effect first — a 6 MB full-screen frame, System Events answering; the author guard before
+  every act, her app absent throughout, HID idle 1,261 s at the start; 22 captures in
+  `notes/plans/13id-screens/u7/`, gitignored). **At launch, the existing dev store's welcome mark read
+  `declined`** (no retrofit, in use). Fixture handling, recorded: U1's walk had made a ROLE-LESS shelf
+  named "welcome" — renamed "u1 welcome" through the strip's Rename… so the seed's Welcome reads
+  unambiguously. **Terminal·light** — `tl-W1-before-confirm` (the defect: "Nothing else is
+  touched.") · `tl-01` the fixed confirm, disclosing the arrangement · `tl-02` the fresh guide (10
+  chapters · 41 notes, swept prose "on your Bookcase", "BOOKCASE is home"), the receipt at the
+  navigator's foot · `tl-03` All: the minted Welcome at the strip's END after her shelves; the census
+  9 gatherings / 2 owned; Quicknotes 15 → 16 notes, unshelved with the Journal · `tl-04` Welcome solo:
+  classics + the guide only — Sherlock and Jekyll stayed on U1's hand-filed shelf, the designed rule
+  (a book she filed elsewhere stays) · `tl-05` R5's MENU TWIN on Jekyll: Move to Shelf ▸ Welcome (the
+  row menu offering "Own Its Notes…" on plain Jekyll, "Stop Owning" on now-owned Sherlock; no Move to
+  Wing with one library) · `tl-06` Welcome with the triad: ★ Sherlock floating first ("owned"),
+  classics, the guide, Jekyll; the receipt "Moved … to Welcome." · `tl-07` **R1: the classics
+  gathering open** — "gathering · 17 notes", Jekyll's notes then Sherlock's, every Sherlock row
+  `owned by "the adventures of sherlock holmes"`, Jekyll's none; the U6 gathering footer · `tl-08`
+  **the badge's click landed in Sherlock's book at "A Scandal in Bohemia"** · `tl-09` "the classics
+  walk" read in Write · `tl-10` the Pool "· 93 notes · 22 in gatherings · show" → shown: **"a first
+  quick note" #quicknote, the first tucked row** (lesson 10 in use) · `tl-11` the Archived rows' Delete
+  Note… (F-U6-4's declared door). **Terminal·dark** — `td-01` Welcome with the triad · `td-02` the
+  classics gathering · `td-03` "gatherings & arrivals" read. **Study·dark** — `sd-01` Welcome · `sd-02`
+  classics · `sd-03` "gatherings & arrivals". **Study·light** — `sl-00` All: Journal and Quicknotes in
+  Unshelved at the TOP · `sl-01` Welcome · `sl-02` classics · `sl-03` "owned, finished, sealed" read.
+
+### FINDINGS (for the orchestrator)
+
+- **F-U7-1 — STOPPED: the ruled `#classics` tag needs `Sync/`** (§ THE STOP above, pinned both ways).
+  Built (B) PROVISIONALLY; (A) is the ruled letter with its Fable-side facts change.
+- **F-U7-2 — lesson 9's second sentence is 13i-e's** (the archive/never-delete/returns guard does
+  not exist: `deleteReading` refuses nothing for the daily Journal, and `reading` has no archive). The
+  chapter teaches the first sentence; KnownIssues row 32 now names the dependency and the pin to flip.
+- **F-U7-3 — RECORDED (an owned Sherlock meets the ownership consult on the restore's stray road).**
+  Traced: `SampleLibrarySeeder.place` re-members a STRAY story (tagged, live, out of the book) through
+  `addPostToReading`, whose `consultOwnership` refuses an OWNED target when the note lives in another
+  book (`noteMemberedElsewhere`). Recipe: Sherlock owned (now the default) → Release a story → add it
+  to her own book → Help ▸ Restore the Sample Library → the restore THROWS partway and speaks "…refused
+  a change partway… try again in a moment" — which cannot succeed. Pre-existing for a hand-owned
+  Sherlock (13i-c built Own Its Notes…); the seed makes it reachable by default. Proposal: (a) `place`
+  answers that refusal with the edit law's own road — `copyPostIntoReading` (a lineage-kept copy joins
+  Sherlock; her book keeps the original) · (b) skip such a stray and mint the story fresh · (c) word
+  the refusal honestly ("…lives in “X” — copy it in, or stop owning the book, then restore"). Shared
+  code (the phone's restore row meets it too). Suggested owner: ladder B or a standing-fixes entry.
+- **F-U7-4 — RECORDED (pre-existing P-6 drift, outside this sweep's letter):** "comments & tags" still
+  teaches tags on the CONTEXT BAR and "Fold the bar with ⌘⇧I" — row 85 fixed the same sentence in "the
+  workspace" (the masthead ＃ field; ⌘⇧I opens it) and missed this one. Suggested owner: the 13s copy
+  landing or a standing fix, with a pin on the stale clause.
+- **F-U7-5 — RECORDED (pre-existing P-2):** a gathering's book navigator draws "+ new chapter"
+  (`tl-07`, `sd-02`), a door that always refuses there (gatherings take no chapters). Suggested owner:
+  ladder B's look or a standing fix.
+- **F-U7-6 — the walk's W-1, FIXED** (pinned red 4 issues, fixed, re-walked).
+- **F-U7-7 — walk harness facts (for WalkKit):** the F-U5b-8 relative-path trap struck again — a
+  build script given a RELATIVE log path after its own `cd` never built, and the "green" revert run
+  that followed was the OLD build (caught by reading the build log, discarded, re-run with absolute
+  paths); `sips -c H W` without `--cropOffset` crops the CENTRE, not the top.
+- **F-U7-8 — walk residue in the dev store** (the precedent — fixtures stay): the tutorial re-seeded
+  (the old guide and its tagged lessons in the Trash); U1's role-less "welcome" renamed "u1 welcome";
+  a role'd "Welcome" at the strip's end holding Sherlock (now OWNED), Jekyll (moved there by the walk's
+  menu twin), the classics gathering and the guide; "a first quick note" in the Pool (shown by
+  Quicknotes); the launch mark `SampleLibraryWelcome.Variorum-dev = declined` in the debug domain. Her
+  voice (Terminal) and appearance (system) restored.
+- **Tutorial (P-6):** the spine green (the eleven `Tutorial*` suites in batch C) and the new chapter's
+  17 pins green; every lesson sentence of §25 is in the guide except lesson 9's second (F-U7-2).
+
+### PROVISIONALS (QUESTIONS #177 carries them for her bundle)
+
+- **P-13id-U7-1** — the classics gathering's rule is the books' own reserved tags,
+  `#sherlock holmes ∨ #jekyll and hyde`. (a) BUILT · (b) the ruled `#classics` + the `Sync/` facts
+  change (F-U7-1 (A)) · (c) `#classics` on Jekyll only (unjudged) with Sherlock's reserved tag.
+- **P-13id-U7-2** — Welcome is minted at the END of the wing's strip; identity is the role, the
+  smallest live id adopted (the keeper's keep); a role-less shelf named "Welcome" is hers. (a) BUILT ·
+  (b) at the START.
+- **P-13id-U7-3** — Sherlock is owned only when that forks nothing and the book is open; else left
+  plain, the result says why. (a) BUILT · (b) own anyway (forks unlisted) · (c) only a Sherlock the
+  seed itself just minted.
+- **P-13id-U7-4** — the occasions: a fresh store's birth (this launch's Sherlock seed minted every
+  story; mark pending → done; anything else `declined`) and every restore door (Restore Tutorial, the
+  open door when it seeds, each Help ▸ Restore) — ONE arrangement for all. (a) BUILT · (b) only the
+  brief's two named doors · (c) a separate "Set Up Welcome" door.
+- **P-13id-U7-5** — only UNSHELVED seeded books move onto Welcome; a book filed elsewhere stays (walked:
+  the dev store's U1 filing). (a) BUILT · (b) a restore moves every seeded book to Welcome.
+- **P-13id-U7-6** — `PostureCopy`'s "…“Encryption Explained” on this shelf." kept, now literally true
+  on both platforms. (a) BUILT · (b) "on the Welcome shelf" (phone-false until its catch-up) · (c)
+  "beside this one".
+- **P-13id-U7-7** — the seeded quicknote: titled "a first quick note" (the restore's identity), one
+  paragraph, stamped now, filed the pad's way. (a) BUILT · (b) untitled, identified by its text.
+- **P-13id-U7-8** — the gathering: named "classics", sorted created ↑ (Jekyll 1886 before Sherlock
+  1892 — the seeds' clocks), every note wearing either reserved tag (front matters and takemania too).
+- **P-13id-U7-9** — the chapter: a new LAST chapter "books & the bookcase", eight lessons carrying the
+  eleven sentences and five rituals; "books & the shelf" moved in as "a book from the inside".
+- **P-13id-U7-10** — R3 is done on the chapter's own two lessons and re-tags the first so the bound
+  book has two notes to reorder (her ritual's "reorder it").
+- **P-13id-U7-11** — lesson 9 teaches its first sentence only until 13i-e (F-U7-2).
+- **P-13id-U7-12** — receipts: Restore Tutorial "…is on your Bookcase, on the “Welcome” shelf."; a
+  restore that minted adds " It's on the “X” shelf."; an already-whole book whose arrangement wrote
+  something speaks a RECEIPT ("…already whole — and the “X” shelf is set up again."); the shelf by its
+  real name. All 13s-revoicable.
+- **P-13id-U7-13** — the Restore Tutorial confirm discloses the arrangement (W-1's wording).
+- **P-13id-U7-14** — the arrangement is the Mac's alone for now; the phone's occasions untouched.
+
+### MOBILE PARITY (record only — nothing built)
+
+The phone owes: calling `SampleLibraryWelcome.arrange` at its own occasions (its first-write
+furniture for a fresh store; its Settings restore rows) — the brain is shared and compiled there;
+a face for shelves at all (U1's record) before Welcome means anything on it; the books chapter in its
+own "pocket guide" (§25's eleven sentences, its own plan and seeder — untouched here); the owned-by
+badge on its gathering rows if its book screens grow them. The phone's restore of Sherlock meets
+F-U7-3 too once an owned flag syncs to it.
+
+### THE RE-SEED CONSEQUENCE (for the closeout — never this unit's act)
+
+Her REAL store's field guide is stale with this unit's prose (the books chapter, the swept words) and
+her store has NO Welcome — no build with the Bookcase board has ever run on it, so all her seeded
+books are UNSHELVED. The closeout, behind the A1 rail (a WAL-safe safety copy into the container's
+`Backups/safety-copies/` first) and at a zero-instance window, runs **Help ▸ Restore Tutorial…** on the
+refreshed install: the confirm now SAYS what follows — the guide replaced; a role'd Welcome minted;
+the guide, Sherlock, Jekyll, *Encryption Explained* and a new "classics" gathering put on it (all
+unshelved there); Sherlock made to own its notes ONLY if none of its stories lives in another book
+(else left plain); one "a first quick note" filed into her Quicknotes. Her launch alone does none of
+it (the mark reads `declined`). If she has hand-shelved any seeded book by then, it stays where she put
+it.
 
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
@@ -2804,7 +3001,7 @@ phase's. Walk drives (cliclick/WalkKit) are DEV-STORE Debug only, author-free, o
 | 6 | U5 — the wing switcher + cross-wing doors + the bulk move (+ riders R1 F-U4-5, R2 the round-2 NIT) | **BUILT — awaiting the architect's adjudication** (core 2091/226 · Mac 989/166 · walk ×4; the BOOK-MOVE half — bulk + per-item book — STOPPED with its proposal in the U5 RECORD; #174) |
 | 6b | U5b — the per-item book move + the bulk wing move (R-13id-6) | **BUILT — awaiting the architect's adjudication** (core 2108/230 · Mac 1004/168 · walk ×4, 53 captures; F-U5b-1 fixed; F-U5b-2 STOPPED with its proposal; #175) |
 | 7 | U6 — the vocabulary sweep (+ ACT 0 F-U5b-2(a); riders F-U3-4 trace, F-U3-6, F-U4-4, F-U4-7, row 103's Library half, the note ▾ wing doors) | **BUILT — awaiting the architect's adjudication** (core 2116/233 · Mac 1406/224 · walk ×4, 46 captures; ACT 0 + a sibling guarded; F-U3-4 traced NOT bug-class; F-U4-7 recorded; W-1 fixed; F-U6-2/-4/-5 for rulings; #176) |
-| 8 | U7 — the tutorial's books chapter + the classics seed (+ riders: F-U1-3 the Welcome mint, F-U1-5/F-U6-3 the guide's prose, F-U6-4 the declaration) | IN FLIGHT (spawned 2026-10-02; the U7 RECORD's LIVE STATUS carries the pieces; F-U7-1 `#classics` STOPPED with its proposal) |
+| 8 | U7 — the tutorial's books chapter + the classics seed (+ riders: F-U1-3 the Welcome mint, F-U1-5/F-U6-3 the guide's prose, F-U6-4 the declaration) | **BUILT — awaiting the architect's adjudication** (core 2123/234 · Mac 1486/236 + W-1's 27/4 · walk ×4, 22 captures; the combined revert 14/60 red; F-U7-1 `#classics` STOPPED with its proposal (needs `Sync/`); F-U7-2 lesson 9's second sentence withheld for 13i-e; F-U7-3/-4/-5 recorded for routing; #177) |
 | 9 | LADDER B (U5–U7) | PENDING BANK 2 |
 | 10 | KnownIssues row 109 | RULED at kickoff (R-13id-3) — **documented at U4** (the comment in `Operations+Container.swift`'s `restoreContainerRows`, fc5d8ad8, zero behavior); the row closes at the closeout |
 | 11 | Closeout: the standing ritual + the re-seed behind the A1 rail + the install refresh at a zero-instance window + the combined-walk list handed to 13i-e + the DerivedData tidy + MobileSoul row | NOT-STARTED |
