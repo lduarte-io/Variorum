@@ -141,12 +141,14 @@ extension Queries {
     /// **`wingID` — the per-wing Trash** (13i-d U5, additive; her 2026-08-25
     /// ruling: "will trash be per library? I also think that makes sense" —
     /// the STATE machinery stays global, the SURFACE scopes): notes and books
-    /// by their own wing; blocks, takes and stranded originals by their
-    /// note's (`last_container_id`) — a block with no note left reads as
-    /// Home's; snippet groups list in every wing (the scraps area is one
-    /// shared room, P-13id-U5-4). `wingScope`'s dangling rule is what makes a
-    /// deleted wing's Trash rows list in HOME's Trash. nil = every wing,
-    /// byte-identical.
+    /// by their own wing; blocks and stranded originals by their note's
+    /// (`last_container_id` — stamped at delete/release); TAKES by their
+    /// block's LIVE placement, else that stamp (13i-d ladder B fix A — a take
+    /// deleted on its own usually leaves its block placed, where the stamp is
+    /// NULL). A row with no note left reads as Home's; snippet groups list in
+    /// every wing (the scraps area is one shared room, P-13id-U5-4).
+    /// `wingScope`'s dangling rule is what makes a deleted wing's Trash rows
+    /// list in HOME's Trash. nil = every wing, byte-identical.
     public static func trash(
         _ db: Database, now: Date, kinds: Set<TrashItem.Kind> = Set(TrashItem.Kind.allCases),
         oldestFirst: Bool = false, limit: Int? = nil, wingID: String? = nil
@@ -320,6 +322,14 @@ extension Queries {
             // A take listed here is one deleted on its OWN — a take that died
             // with its block carries the block's stamp and comes back with
             // `restoreBlock`, so listing it would offer a door that refuses.
+            //
+            // 13i-d LADDER B fix A: the take's NOTE is its block's LIVE
+            // placement first — `last_container_id` is a deletion/release
+            // STAMP, NULL for a block that was never released, so the old
+            // join read every such take as HOME's (the by-wing read listed
+            // it under the wrong wing; the row carried no note name, A3).
+            // The COALESCE keeps the stamp as the fallback for a released
+            // block, and the attribution follows the note when it moves.
             items += try Row.fetchAll(
                 db,
                 sql: """
@@ -331,7 +341,10 @@ extension Queries {
                            (c.deleted_at IS NOT NULL) AS note_deleted
                     FROM variant v
                     JOIN block b ON b.id = v.block_id
-                    LEFT JOIN container c ON c.id = b.last_container_id
+                    LEFT JOIN container c ON c.id = COALESCE(
+                      (SELECT cb.container_id FROM container_block cb
+                        WHERE cb.block_id = b.id AND cb.deleted_at IS NULL),
+                      b.last_container_id)
                     WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
                       AND b.deleted_at IS NULL\(fence("c.wing_id", nullIsHome: true))
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi

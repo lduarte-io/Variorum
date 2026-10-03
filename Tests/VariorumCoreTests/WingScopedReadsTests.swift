@@ -118,6 +118,41 @@ struct WingScopedReadsTests {
         }
     }
 
+    /// **13i-d LADDER B fix A** (round 1's finding, severity settled MINOR —
+    /// the harms never reach a surface, D1/G6): a take deleted from a LIVE,
+    /// PLACED block belongs to its NOTE's wing. The old arm joined the note
+    /// through `last_container_id` — a deletion/release STAMP, NULL for a
+    /// block that was never released — so such a take read as HOME's: listed
+    /// under Home's by-wing read, absent from its own wing's, counted in the
+    /// wrong wing by `emptyTrashConfirm`, and nameless (A3's context). The
+    /// attribution now follows the block's LIVE placement first (so it moves
+    /// with the note), falling back to the stamp.
+    @Test func aDeletedTakeBelongsToItsNotesWing() throws {
+        try withOperations { ops, db in
+            let wing = try ops.createWing(name: "Attic")
+            let note = try ops.createPost(title: "attic note", wingId: wing.id)
+            let minted = try ops.newBlock(in: note.id, text: "first words", at: .end)
+            let spare = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+            try ops.deleteVariant(spare.id)
+            func takeIDs(_ wingID: String) throws -> [String] {
+                try db.read {
+                    try Queries.trash($0, now: harnessNow, kinds: [.take], wingID: wingID)
+                }.map(\.id)
+            }
+            #expect(try takeIDs(wing.id) == [spare.id], "the take lists in its note's wing")
+            #expect(try takeIDs("").isEmpty, "never as Home's")
+            let row = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.take], wingID: wing.id)
+            }.first
+            #expect(row?.noteID == minted.placement.containerId,
+                    "the live placement names the note (A3's context)")
+            // The attribution FOLLOWS the note: moved home, the take is Home's.
+            _ = try ops.moveNoteToWing(note.id, to: "")
+            #expect(try takeIDs("") == [spare.id])
+            #expect(try takeIDs(wing.id).isEmpty)
+        }
+    }
+
     /// The per-wing Trash; a deleted wing's Trash rows list in HOME's Trash
     /// (the dangling rule), and a Put back RE-HOMES them.
     @Test func theTrashIsPerWingAndADeletedWingsRowsComeHome() throws {

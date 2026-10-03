@@ -264,18 +264,19 @@ struct TrashAndArchiveTests {
                             "a \(kind) row must name its home note by its day")
                     #expect(row.noteTitle != DisplayTitle.placeholder)
                 }
-                // The TAKE arm is deliberately not asserted here, and the
-                // reason is a SEPARATE gap this walk recorded rather than
-                // fixed: that arm reaches its note through
-                // `block.last_container_id`, which a LIVE block has never
-                // carried (it is stamped when a block is deleted or
-                // released), so a take deleted from a live block names no
-                // note at all — `noteTitle` is nil, not "Untitled". Naming
-                // it needs a join through the live placement, which is a
-                // query change of its own; it is on the walk's propose-only
-                // list for the author.
-                #expect(byKind[.take]?.first?.noteTitle == nil,
-                        "recorded, not endorsed — see the note above")
+                // JUSTIFIED EDIT (13i-d ladder B fix A): this arm used to
+                // RECORD a gap instead of asserting — a take deleted from a
+                // live block named no note, because the arm reached its note
+                // through `block.last_container_id`, a stamp a LIVE block has
+                // never carried. The ladder's fix joins through the block's
+                // LIVE placement first (the query change the old comment
+                // proposed), so the take row now names its home note like its
+                // three siblings — the old `== nil` assertion flips to the
+                // same day-name rule the block arm keeps.
+                let take = try #require(byKind[.take]?.first, "expected a take row")
+                #expect(take.noteTitle == day,
+                        "a take row must name its home note by its day")
+                #expect(take.noteTitle != DisplayTitle.placeholder)
             }
 
             // And the note's own arm, once it goes.
