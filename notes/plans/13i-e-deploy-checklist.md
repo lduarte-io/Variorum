@@ -18,6 +18,17 @@ rule). The dev store never syncs, so building/testing at marker 12 is safe throu
 - [ ] Her one-line PRE-DEPLOY SUMMARY: the one wire-touching fact — `archived_at` travels PLAIN
       (a bare timestamp; disclosed structure only: that a book is put away, never which one) —
       a last honest exit.
+- [ ] **The F-U1-1 exposure check (read-only, against the MIRROR — `reading.profile` is plain
+      there; a session never queries her real store):** expect `[{"profile":"daily"}]` — any
+      other profile (or no row) means her cached designation names a marker-less book, and the
+      remedy is one press of "Use as Daily Journal" on it after the installs (the marker moves;
+      nothing else needed):
+      ```
+      ! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d '{"query":"select r.profile from setting s join reading r on r.id = s.value where s.key = ''daily_journal_book'' and r.deleted_at is null;"}'
+      ```
+      *(`setting.value` is PLAIN under E2EE — enum semantics; if the mirror's column shape
+      differs in practice, read the row bare (`select value from setting where key =
+      'daily_journal_book'`) and compare by eye. Read-only either way.)*
 
 ## The window
 

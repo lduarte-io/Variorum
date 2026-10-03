@@ -752,14 +752,57 @@ plan's EDGES (arrivals keep waiting; archive without a confirm line for waiters;
 unarchived; Finish/Seal/lock orthogonal; restore returns archived; wing moves ride archived) are
 BUILT as written and pinned.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U1 (2026-10-03 — verified by spot-check per the recovery protocol: ten commits present and pushed through `430b6dcb`, the `Sync/`/`Server/`/migrations diff EMPTY, the tree clean, the record and ledger in place, and the unit's 41/8 re-run GREEN on the tip by the orchestrator's own hand)
+
+- **F-U1-1 (the marker-less designee exposure) — ADOPTED into the deploy checklist:** the
+  read-only exposure check runs at HER window AGAINST THE MIRROR via the `!` road
+  (`reading.profile` is PLAIN there; a session never queries her real store) — `daily` ⇒ not
+  exposed; exposed ⇒ she re-designates by hand ("Use as Daily Journal" moves the marker; one
+  press). The one-time-ensure remedy stays NOT built (the brief's letter). Her store's shape
+  makes exposure near-nil (her Journal was the ⌘J-minted `'journal'`-profile book v1_18's step
+  stamped; her 13i-a round was clean) — the check is the belt.
+- **F-U1-2 (`setDailyJournalBook` accepts a gathering) — RULED, BUILD IT at U2 as ACT 0:** the
+  op refuses `wrongReadingKind` on a non-book. The trace is worse than silent-nothing: the
+  marker-move would demote every live `'daily'` book to the trait and stamp a GATHERING the
+  candidates (kind='book') ignore — the next ⌘J then mints a fresh Journal while the gathering
+  wears a marker `setJournalTrait` refuses to clear. One line + a red-on-old pin at that
+  mechanism (the brief's "keep the op unchanged" letter is the architect's to amend, and is
+  amended here).
+- **F-U1-3 (the four re-premised pins) — to the LADDER's eye** (the record flags each; the
+  reviewer confirms intent survived; zero framing beyond the repo).
+- **F-U1-4 (the phone's shelf drops archived; no phone Archived surface/unarchive door) —
+  ADOPTED for the closeout's MobileSoul line** (the mobile catch-up's face set gains it).
+- **F-U1-5 (the starter interplay) / F-U1-7 (the interim default refusal words) / F-U1-10
+  (machinery) — record-only, no action owed.**
+- **F-U1-6 (the silent comes-back) — RULED for U2:** the ⌘J road SPEAKS a quiet RECEIPT when it
+  brought the Journal back ("The Journal is back on the Bookcase." — receipt-kind on the message
+  seam, so `receipt_style` governs; 13s re-voices). Read archived-before/after at the door
+  (P-13ie-U1-13's shape) — `DailyBookShelving` stays unchanged, exactly as the record proposes.
+- **F-U1-8 (`wingContents` counts archived) — SUSTAINED as built;** U2 MAY add "(N archived)"
+  to the Delete Wing refusal's naming where it already lists contents (copy-only, implementer's
+  judgment; 13s re-voices either way).
+- **F-U1-9 (canon deltas) — adopted for the closeout's list.**
+- **The PROVISIONALs P-13ie-U1-1…13 — ALL SUSTAINED as built** (each lands in QUESTIONS #179 at
+  the closeout). P-13ie-U1-12's refused-filing-still-returns reading is upheld as R-13ie-4's own
+  letter ("a day arrived"); P-13ie-U1-13 is superseded by the F-U1-6 ruling above (the receipt
+  is now ruled, not open).
+- **U2 RIDERS (beyond its standing brief):** ACT 0 — F-U1-2's refusal + pin; the comes-back
+  receipt (F-U1-6's ruling); the optional wing-contents copy (F-U1-8).
+
 ## U2 BRIEF — THE FACES + LESSON 9 (`opus-implementer`; read this WHOLE file first)
 
-Preflight (yours): this file WHOLE (the U1 RECORD closely); CLAUDE.md + canon; the sitting
+Preflight (yours): this file WHOLE (the U1 RECORD + THE ARCHITECT'S ADJUDICATION AFTER U1
+closely — its U2 RIDERS bind); CLAUDE.md + canon; the sitting
 record §7 (the Bookcase contract) + §25 lesson 9; the resiliency protocol; the 13i-d plan's U3
 RECORD (the Book Settings state-doors shape you extend) and U7 RECORD (the books chapter + the
 F-U7-2 pin you flip). Fences as U1's: no `Sync/`, no `Server/`, no migrations, no editor seam.
 
 Build:
+0. **ACT 0 (the adjudication's F-U1-2 ruling):** `setDailyJournalBook` refuses a non-book
+   (`wrongReadingKind`) — one line in `Operations+Appearance.swift`'s db-level writer, with a
+   red-on-old pin at the traced mechanism (on the old tree the designation demotes every live
+   `'daily'` book to the trait and stamps the gathering; ⌘J then mints a fresh Journal beside
+   it). This is the ONE core-op line in your unit; everything else is faces/queries-reads.
 1. The ARCHIVED surface's BOOKS group (books above notes; open · Unarchive; honest counts);
    the archive doors everywhere Delete lives on a book/gathering (row context menu, Book
    Settings' state doors), the OWNED book's two-choice archive confirm (the delete confirm's
@@ -780,7 +823,12 @@ Build:
 4. Lesson 9's second sentence into "the journal & the pool" + flip
    `lessonNineTheDailyJournal` (presence AND the archive→⌘J→same-book-back behavior); the
    eleven-suite tutorial spine green.
-5. A scripted walk (dev store, Debug, captures gitignored under `notes/plans/13ie-screens/`).
+5. **The comes-back RECEIPT (the adjudication's F-U1-6 ruling):** the ⌘J/Today's Entry road
+   speaks a quiet receipt-kind line when the filing brought an archived Journal back ("The
+   Journal is back on the Bookcase." — `receipt_style` governs; 13s re-voices). Read
+   archived-before/after at the door; `DailyBookShelving` unchanged. Optional (F-U1-8, your
+   judgment): "(N archived)" in the Delete Wing refusal's contents naming.
+6. A scripted walk (dev store, Debug, captures gitignored under `notes/plans/13ie-screens/`).
 
 Same checkpoint protocol, record shape, fences and traps as U1.
 
