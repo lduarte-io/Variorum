@@ -258,3 +258,19 @@ bar since the U7 ladder; runs 090640 red · 093149 green · revert 094111): the 
 was pressed WITH the key, so even the transient form drives it, and a human's quick ⇧-tap cannot
 lose the release race. The held-modifier rule remains for roads that genuinely read the LIVE
 state (`NSEvent.modifierFlags` the class property) and for driving other apps.
+
+## Walker facts from the 13i-e orchestrator walk (2026-10-03)
+
+- **NEVER type after opening a menu or sheet without a capture proving where focus is.** The
+  Book/Gathering Settings sheet opens with its NAME FIELD focused and its text selected, so a
+  blind type-select or ⌘K sequence becomes a RENAME (this walk renamed Quicknotes to "pool" and
+  had to restore it). The safe order: open → CAPTURE → confirm the menu/sheet and the focus →
+  act → CAPTURE the result.
+- **A bounded window capture is never a listing's END** — the Bookcase list scrolls, and a row
+  "missing" from a crop may simply sit below the fold (this walk misread "u4 owned" as gone;
+  the ⌘K palette found it healthy). Scroll or search before concluding a row is gone.
+- **Verify every restore by re-reading the listing, not by the act's own receipt.**
+- **A SwiftUI sheet may or may not appear in the AX windows list** across its lifecycle — an
+  empty windows list is not proof the sheet closed; capture and look.
+- The guard's SELF-TRIP (synthetic keystrokes reset HIDIdleTime) adjudicates by the idle-climb
+  rule: watch `ioreg -c IOHIDSystem` for ~10 s — monotonic climb = your own trip; resume.
