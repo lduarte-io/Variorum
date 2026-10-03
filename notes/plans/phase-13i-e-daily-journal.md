@@ -288,7 +288,7 @@ the closeout tidies them.
 
 | # | item | status |
 |---|---|---|
-| 0 | U0 — the schema event (architect; schema-first commits) | NOT-STARTED |
+| 0 | U0 — the schema event (architect; schema-first commits) | **DONE** (b2e8b1c2 — v1_21 + model + registry/marker 12 + DDL-pin list + the mirror artifact + the deploy checklist; full core suite green 2127/234, the 13i-d baseline exactly) |
 | 1 | U1 — the op family + the daily rulings (headless) | NOT-STARTED |
 | 2 | U2 — the faces + lesson 9 | NOT-STARTED |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | NOT-STARTED |
@@ -374,5 +374,14 @@ Same checkpoint protocol, record shape, fences and traps as U1.
   R-13ie-1…4 recorded verbatim-faithful the same sitting; the re-size said and accepted; this
   plan rewritten as the first act. Her LIVE AMENDMENT to R-13ie-4 (explicit adds stay open;
   auto-ingestion alone pauses, visibly; the gathering pause confirmed) recorded the same turn,
-  the scope/briefs/evidence reworked to it. No revert in flight. U0 opens next (the
-  architect's schema-first commits).
+  the scope/briefs/evidence reworked to it. Her SECOND rider (the add-door face: selectors mark
+  "(archived)", no confirm — the lighter road; keep-forever framing) recorded the same turn
+  (d523d6d8). No revert in flight.
+- 2026-10-03 · **U0 DONE (b2e8b1c2):** the schema event whole — `v1_21_reading_archive`
+  (`reading.archived_at TEXT`, additive), `Reading.archivedAt`, the registry's reading column
+  (PLAIN) + `lockstepVersion = 12` + its version doc line (the `Sync/` half by the architect
+  under the rider), `AuthRLSDDLTests.lockstepFiles` + `15_phase13ie_archive.sql` (the 14
+  template) + `notes/plans/13i-e-deploy-checklist.md`. Full core suite GREEN: **2127 tests /
+  234 suites** — the 13i-d baseline exactly (the marker pin and the serializer completeness
+  walk rode the change). The mirror is NOT deployed — her window; the dev store never syncs so
+  the phase builds safely at marker 12. U1 spawns next.
