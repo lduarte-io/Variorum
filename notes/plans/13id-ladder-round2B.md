@@ -354,3 +354,44 @@ deliberate shared-furniture change the mobile parity record carries, consistent 
 sitting §18.5's phone-expressible mandate. The unit briefs' "the phone: record, don't build"
 was a unit-scoping fence, not canon; a convergence-correctness fix in shared code is exactly
 what the fix pass exists for.
+
+---
+
+## THE CROSS-MODEL AGREE/DISPUTE RESPONSES (relayed by the orchestrator, 2026-10-02 — condensed faithfully; the reviewer now rules)
+
+**U5's implementer — the MAJOR: AGREE on mechanism and fix, DISPUTE the severity (MINOR).**
+Verified itself: `last_container_id` written only at delete/release/archive/import/undo (the nine
+sites, nothing else); the take arm's NULL-join → Home's fence; the pin red on this tree; the
+COALESCE fix right (and it fills the arm's missing note id/title). The severity case: NEITHER
+named harm reaches a shipped surface — `TrashScope.listedKinds` excludes takes from EVERY wing's
+Trash view (D1), and `emptyTrashTakes(.take) == false` drops every take before `requestPurge`,
+so no purge intent for another wing's take can mint. The reachable effect is the
+`emptyTrashConfirm` "N takes stay" MISCOUNT (wrong wing's count), plus the query being wrong for
+any by-wing take caller. Recommends: MINOR, fixed as proposed, the pin + a deleted-wing control.
+
+**U6's implementer — MINOR 2: AGREE whole**, and WIDENED: beside the `.task` write, the `onDone`
+reload in both bars and the post-`wingMoveConfirm` reload carry the same unguarded shape. The
+reachable road is the sidebar note box's bar (same `@State` across note changes; the main
+window's per-note identity masks it). Favors both fix halves: `NoteMenuWingContext` carries its
+`postID` and the doors gate on the match (pinnable as pure logic), plus the ladder-A guard at
+all three write sites.
+
+**U7's implementer — MINOR 1 (arrangement half), MINOR 3, NIT: AGREE on all three.**
+- MINOR 1: confirmed the phone seeds raw and nothing mobile calls the arrangement; confirmed the
+  loss shape. ITS VOTE DIVERGES FROM THE ARCHITECT'S: **(b)** record-as-residual, owned by the
+  phone's arrangement catch-up (P-13id-U7-14/#177) — against (c): it decides PHONE seed content
+  (a product call), and cannot reach copies already seeded raw by pre-U7 builds; (a) is the only
+  every-road closure but changes the ruled §7 keeper — AUTHOR-ONLY, and for her account the real
+  window is near zero (her devices met long ago; the account-store road defers seeding).
+- MINOR 3: confirmed all four legs (wing-blind discover/tags, Home-born mints, `requireSameWing`
+  ahead of the consult, the tag-twin first-failure); the minimal catch-and-copy fails
+  (`copyPostIntoReading` also requires same-wing); favors the wing-aware restore, with the
+  stray-in-another-wing left ALONE and minted fresh (lesson 11's fence — the restore must not
+  cross wings by itself). Red-on-old recipe confirmed; shared code covers the phone's row.
+- NIT: confirmed; move the attribute below the doc block.
+
+**The standing positions on MINOR 1 for the reviewer's final call:** the architect AGREES
+(mechanism sharpened, above) and leans (c) with the phone consequence named; U7's implementer
+leans (b) with (c)'s product-call and pre-U7-copies objections; (a) is HELD-if-chosen
+(author-only — it alters her R-pre13u-8 keeper ruling). The final call is the reviewer's; an
+(a) pick becomes a HELD bundle item, never a build.
