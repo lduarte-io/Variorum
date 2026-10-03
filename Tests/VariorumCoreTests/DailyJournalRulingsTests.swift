@@ -505,4 +505,47 @@ struct DailyJournalDesignationKindTests {
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == other.id)
         }
     }
+
+    /// **The DB-LEVEL guard refuses a DEAD (or missing) designee** (the 13i-e
+    /// ladder round 1's F-R1-1, the implementer's two-step refinement
+    /// accepted): ACT 0's guard read the row's kind WITHOUT liveness, so a
+    /// future db-level caller handing it a TOMBSTONED book would demote every
+    /// live 'daily' bearer, stamp nothing (the stamp UPDATE filters
+    /// `deleted_at IS NULL`), and cache a dead id — no live marker-bearer
+    /// left, the derived read nil, the next ⌘J minting a fresh Journal (the
+    /// F-U1-2 double-mint class through the liveness door). Unreachable
+    /// through any public road today (the public door's `liveReading`
+    /// pre-filters; the mint passes its own fresh row), so the pin drives the
+    /// INTERNAL seam exactly as a future caller would.
+    ///
+    /// RED ON OLD (natural red on the pre-fix tree, and by behavioural
+    /// revert): no throw; the live Journal demoted to the trait; the derived
+    /// read nil; the cache naming the dead book; the outbox written.
+    @Test func theDbLevelGuardRefusesADeadDesignee() throws {
+        try withOperations { ops, db in
+            let daily = try file(ops, day: "2026-10-01")
+            let dead = try ops.createReading(name: "Gone", kind: .book)
+            try tombstoneAsAnOlderBuildWould(db, readingID: dead.id)
+            try db.clearOutbox()
+
+            #expect(throws: OperationError.readingNotFound(id: dead.id)) {
+                try db.write { try ops.setDailyJournalBook($0, dead.id) }
+            }
+
+            // Nothing moved: the Journal keeps its marker, the derived read
+            // still answers it, the cache never adopted the dead id, and the
+            // refused act wrote nothing.
+            #expect(try liveDailyBooks(db) == [daily.bookID])
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == daily.bookID)
+            #expect(try db.fetchString(
+                "SELECT value FROM setting WHERE key = 'daily_journal_book'") == daily.bookID)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM sync_outbox") == 0, "nothing was written")
+
+            // A MISSING id refuses the same honest word (on the old tree it
+            // threw `wrongReadingKind` — the wrong cause's name).
+            #expect(throws: OperationError.readingNotFound(id: "nowhere")) {
+                try db.write { try ops.setDailyJournalBook($0, "nowhere") }
+            }
+        }
+    }
 }
