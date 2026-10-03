@@ -1642,17 +1642,21 @@ enum TutorialSeeder {
             + "visible in the panel and can be brought back — the feature is "
             + "deliberately never skimpy.",
 
+            // 13i-d U7 continuation (F-U7-4 — row 85's twin): this paragraph
+            // taught tag cards "on the CONTEXT BAR" and "Fold the bar with
+            // ⌘⇧I", a fold the app retired; it now teaches the masthead's ＃
+            // field exactly as "the workspace" does. (F-U6-3 earlier: the tag
+            // door mints a GATHERING — Settings ▸ Tags' "Make a Gathering…".)
             "TAGS organize notes (and blocks) without moving them: hierarchical "
             + "paths like life/goals/2024. A note wears them as little coloured "
-            + "cards on the CONTEXT BAR at the top of its pane \u{2014} \u{FF0B} adds one "
-            + "(type it; \u{201C}/\u{201D} nests, and a name that doesn't exist yet is "
-            + "made), \u{2715} takes one off. Every tag keeps its own colour "
-            + "everywhere. Fold the bar with \u{2318}\u{21E7}I and the cards become one "
-            // 13i-d U7 (F-U6-3): the tag door mints a GATHERING (U6 (a) —
-            // Settings ▸ Tags' "Make a Gathering…").
-            + "\u{FF03} door with the count. The tag manager lives in Settings "
-            + "(\u{2318},), where Make a Gathering\u{2026} turns a tag into a gathering "
-            + "that shows everything wearing it.",
+            + "cards on its masthead's right edge \u{2014} click the \u{FF03} beside "
+            + "them and a tag field opens with the cursor in it (type a name; "
+            + "\u{201C}/\u{201D} nests, and a name that doesn't exist yet is made; "
+            + "\u{23CE} applies it), \u{2715} on a card takes one off, and "
+            + "\u{2318}\u{21E7}I opens the same field from anywhere in the note. "
+            + "Every tag keeps its own colour everywhere. The tag manager lives in "
+            + "Settings (\u{2318},), where Make a Gathering\u{2026} turns a tag into a "
+            + "gathering that shows everything wearing it.",
 
             "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
             + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
