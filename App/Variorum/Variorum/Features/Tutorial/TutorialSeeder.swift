@@ -55,7 +55,8 @@ enum TutorialSeeder {
         + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
         + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. It also sets up the "
         + "\(Operations.welcomeShelfName) shelf the books chapter walks: the seeded books that sit "
-        + "unshelved go onto it, \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its notes if "
+        + "unshelved go onto it, the two classic books' shipped notes are tagged "
+        + "#\(SampleLibrarySeeder.classicsTagPath), \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its notes if "
         + "none of them lives in another book, and a \u{201C}\(SampleLibraryWelcome.classicsGatheringName)"
         + "\u{201D} gathering and one quick note are made if they are missing. Nothing else is touched."
 
@@ -1819,9 +1820,9 @@ enum TutorialSeeder {
 
             "All three are waiting on the Welcome shelf, where this guide sits "
             + "too. Open the Bookcase in the sidebar, and on Welcome open the "
-            + "gathering called \u{201C}classics\u{201D}. It is made "
-            + "from the two classic books' own tags, #sherlock holmes and #jekyll and "
-            + "hyde, so it shows the notes of both books side by side without "
+            + "gathering called \u{201C}classics\u{201D}. Both classic books' notes "
+            + "wear the tag #classics, and the gathering is made from that tag "
+            + "\u{2014} so it shows the notes of both books side by side without "
             + "holding a single one of them.",
 
             "Look closer: every Sherlock note wears a quiet \u{201C}owned by\u{201D} "

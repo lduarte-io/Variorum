@@ -141,6 +141,7 @@ struct SampleLibraryWelcomeTests {
             #expect(arranged.welcome.minted)
             #expect(arranged.sherlock == .owned)
             #expect(arranged.mintedClassics && arranged.mintedQuicknote)
+            #expect(arranged.taggedClassics > 0, "the classic books' shipped notes were tagged #classics")
 
             let f = try await facts(db)
             // THE WELCOME SHELF — one, role'd, named, in Home.
@@ -193,9 +194,13 @@ struct SampleLibraryWelcomeTests {
         }
     }
 
-    /// **THE CLASSICS GATHERING — R1's object.** It shows Jekyll's and
-    /// Sherlock's notes side by side; Sherlock's wear the owned mark; it is
-    /// made from the books' own tags (P-13id-U7-1) and holds nothing.
+    /// **THE CLASSICS GATHERING — R1's object, on the RULED letter** (the U7
+    /// continuation — F-U7-1 ruled, its `Sync/` half 17aa1113): every shipped
+    /// note of both classic books wears `#classics`, and the gathering is made
+    /// from that ONE tag. It shows Jekyll's and Sherlock's notes side by side;
+    /// Sherlock's wear the owned mark; it holds nothing. *(A JUSTIFIED EDIT of
+    /// this pin's rule arm: P-13id-U7-1's two-book-tag rule is SUPERSEDED by
+    /// the ruling; the shown set, the badges and "holds nothing" unchanged.)*
     @Test func theClassicsGatheringShowsBothBooksAndSherlocksWearTheOwnedMark() async throws {
         try await withWelcomeWorld { session, db in
             let sherlock = await launchSeeds(session)
@@ -208,12 +213,12 @@ struct SampleLibraryWelcomeTests {
                     $0.name == SampleLibraryWelcome.classicsGatheringName
                 })
                 #expect(classics.kind == .gathering)
-                let tags = try Queries.allTags(db)
-                let sherlockTag = try #require(tags.first { $0.path == SampleLibrarySeeder.Book.sherlock.tagName })
-                let jekyllTag = try #require(tags.first { $0.path == SampleLibrarySeeder.Book.jekyllAndHyde.tagName })
+                let classicsTag = try #require(try Queries.allTags(db, wingID: "").first {
+                    $0.path == SampleLibrarySeeder.classicsTagPath
+                }, "the ONE spelling the dedupe facts declare")
                 #expect(RuleGrammar.read(classics.querySpec)
-                        == .rule(SampleLibraryWelcome.classicsRule(
-                            sherlockTagID: sherlockTag.id, jekyllTagID: jekyllTag.id)))
+                        == .rule(SampleLibraryWelcome.classicsRule(classicsTagID: classicsTag.id)),
+                        "made from a tag — #classics, the ruled letter")
                 #expect(try Int.fetchOne(
                     db, sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?",
                     arguments: [classics.id]) == 0, "a gathering holds nothing")
@@ -224,6 +229,13 @@ struct SampleLibraryWelcomeTests {
                 let sherlockNotes = Set(try Queries.assembleReading(db, readingID: sherlockBook.id).map(\.postID))
                 let jekyllNotes = Set(try Queries.assembleReading(db, readingID: jekyllBook.id).map(\.postID))
                 let shownIDs = Set(shown.map(\.postID))
+                // THE SEED SHAPE: every shipped note of both books wears it.
+                let tagged = Set(try String.fetchAll(
+                    db,
+                    sql: "SELECT post_id FROM post_tag WHERE tag_id = ? AND deleted_at IS NULL",
+                    arguments: [classicsTag.id]))
+                #expect(sherlockNotes.union(jekyllNotes) == tagged,
+                        "both books' shipped notes wear #classics — and nothing else does")
                 #expect(sherlockNotes.isSubset(of: shownIDs), "every Sherlock note shows")
                 #expect(jekyllNotes.isSubset(of: shownIDs), "…beside every Jekyll note")
                 #expect(shownIDs == sherlockNotes.union(jekyllNotes), "and nothing else")
@@ -239,39 +251,55 @@ struct SampleLibraryWelcomeTests {
         }
     }
 
-    /// **F-U7-1, pinned both ways.** The arranged seed stays PRISTINE to the
-    /// sync dedupe's real classifier (the owned flag and the shelf pointer
-    /// are invisible to it) — and the ruled `#classics` application on a
-    /// Sherlock note would read EDITED, which is why it is STOPPED.
-    @Test func theArrangedSeedStaysPristineAndTheRuledTagWouldNot() async throws {
+    /// **F-U7-1's two-sided pin, FLIPPED DELIBERATELY to the ruled letter**
+    /// (the U7 continuation). It used to pin "one `#classics` application on a
+    /// Sherlock story reads EDITED" — the mechanism that STOPPED the tag. The
+    /// architect's `Sync/` half (17aa1113) declared `classicsTagPath` a SEED
+    /// path the classifier skips, and that old assertion now INVERTS (RED on
+    /// the post-17aa1113 tree: `after → .pristine`, `c1-oldpin-red.log`).
+    /// Now, through the REAL classifier: the ARRANGED seed — every shipped
+    /// Sherlock story wearing `#classics`, the book owned and on Welcome —
+    /// reads PRISTINE (both judged books); and the err-toward-EDITED letter
+    /// still stands for any path the facts do NOT declare (the control).
+    @Test func theClassicsSeedReadsPristineAndAForeignTagStillEdits() async throws {
         try await withWelcomeWorld { session, db in
             let sherlock = await launchSeeds(session)
             let mark = WelcomeMark()
             await SampleLibraryWelcome.arrangeAtLaunch(
                 session: session, sherlock: sherlock, guideName: nil,
                 loadMark: mark.load, saveMark: mark.save)
+            let (story, wearsClassics) = try await db.read { db -> (String, Bool) in
+                let id = try #require(try Queries.readings(db).first { $0.name == sherlockName }?.id)
+                let story = try #require(try Queries.assembleReading(db, readingID: id).last?.postID)
+                let wears = try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (SELECT 1 FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                                       WHERE pt.post_id = ? AND t.path = ? AND pt.deleted_at IS NULL
+                                         AND t.deleted_at IS NULL)
+                        """,
+                    arguments: [story, SampleLibrarySeeder.classicsTagPath]) ?? false
+                return (story, wears)
+            }
+            #expect(wearsClassics, "the arranged seed carries the seed-authored #classics")
             for book in SampleLibrarySeeder.Book.dedupeCovered {
                 let verdict = try await db.read { db -> SampleCopyVerdict in
                     let id = try #require(try Queries.readings(db).first { $0.name == book.name }?.id)
                     return try SampleCopyClassifier.classify(
                         db, copyID: id, facts: SampleLibrarySeeder.dedupeFacts(for: book))
                 }
-                #expect(verdict == .pristine, "\(book.name) stays pristine after the arrangement")
+                #expect(verdict == .pristine,
+                        "\(book.name) reads PRISTINE with the classics seed on it (the ruled letter)")
             }
-            // The ruled letter's mechanism: one `#classics` on one story.
-            let classics = try session.operations.createTag(name: "classics")
-            let story = try await db.read { db in
-                let id = try #require(try Queries.readings(db).first { $0.name == sherlockName }?.id)
-                return try #require(try Queries.assembleReading(db, readingID: id).last?.postID)
-            }
-            _ = try session.operations.applyTag(classics.id, toPost: story)
+            // The control: a path the facts do NOT declare is still her hand.
+            let foreign = try session.operations.createTag(name: "favourites")
+            _ = try session.operations.applyTag(foreign.id, toPost: story)
             let after = try await db.read { db -> SampleCopyVerdict in
                 let id = try #require(try Queries.readings(db).first { $0.name == sherlockName }?.id)
                 return try SampleCopyClassifier.classify(
                     db, copyID: id, facts: SampleLibrarySeeder.dedupeFacts(for: .sherlock))
             }
-            #expect(after == .edited,
-                    "an extra tag reads as her hand — two fresh devices would keep two Sherlocks (F-U7-1)")
+            #expect(after == .edited, "a tag outside the declared seed set still protects her copy")
         }
     }
 
@@ -450,6 +478,8 @@ struct SampleLibraryWelcomeTests {
         #expect(detail.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"),
                 "…the gathering it can make")
         #expect(detail.contains("quick note"), "…and the quick note")
+        #expect(detail.contains("#\(SampleLibrarySeeder.classicsTagPath)"),
+                "…and that the classic books' notes are tagged (the continuation's seed half)")
         #expect(detail.hasSuffix("Nothing else is touched."),
                 "and only THEN does it promise the rest is untouched")
     }

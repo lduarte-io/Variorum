@@ -164,8 +164,10 @@ struct TutorialBooksLessonTests {
             // The doors and names it points at, from their own homes.
             #expect(text.contains("the \(Operations.welcomeShelfName) shelf"))
             #expect(text.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"))
-            #expect(text.contains("#\(SampleLibrarySeeder.Book.sherlock.tagName)"))
-            #expect(text.contains("#\(SampleLibrarySeeder.Book.jekyllAndHyde.tagName)"))
+            // The U7 continuation (F-U7-1 RULED): the gathering is made from the
+            // ONE seed tag both books' notes wear — a JUSTIFIED EDIT (the two
+            // book tags were P-13id-U7-1's superseded stand-in).
+            #expect(text.contains("#\(SampleLibrarySeeder.classicsTagPath)"))
             #expect(OwnershipBadgeCopy.ownedBy("x").hasPrefix("owned by"))
             #expect(text.contains("\u{201C}owned by\u{201D}"), "the badge, by its own words")
 

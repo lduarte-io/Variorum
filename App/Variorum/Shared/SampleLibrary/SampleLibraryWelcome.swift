@@ -31,15 +31,15 @@
 //  writes nothing. The phone's occasions are untouched (the mobile catch-up
 //  calls this same brain — recorded in the U7 RECORD).
 //
-//  ── THE CLASSICS GATHERING'S RULE (PROVISIONAL P-13id-U7-1 — F-U7-1) ────
-//  The ruled letter is "both tagged #classics". Applying ANY tag but the
-//  reserved one to a Sherlock note makes the sync dedupe's pristine
-//  classifier (`Sync/SampleLibraryDedupe.swift`) read the copy EDITED, so two
-//  fresh devices would keep two Sherlock books forever. Until the architect
-//  rules the `Sync/` half (Fable work), the gathering is made from the two
-//  books' OWN reserved tags — `#sherlock holmes ∨ #jekyll and hyde` — and no
-//  new application touches a judged note. Flipping to `#classics` is this
-//  rule plus one tagging step.
+//  ── #classics — THE RULED LETTER (F-U7-1 RULED; the U7 continuation) ────
+//  "Both tagged #classics": every SHIPPED note of both classic books wears the
+//  tag at `SampleLibrarySeeder.classicsTagPath`, and the classics gathering is
+//  made from that ONE tag. The sync dedupe's pristine classifier skips
+//  applications of that declared SEED path (the architect's `Sync/` half,
+//  17aa1113 — `SampleLibraryDedupeFacts.seedTagPaths`), so a seeded Sherlock
+//  still reads PRISTINE and two fresh devices still converge on one copy.
+//  Both sides read the same constant, so the skip and the seed's own act can
+//  never drift. (P-13id-U7-1's two-book-tag stand-in is superseded.)
 //
 //  ── SHERLOCK OWNED, FORK-FREE ONLY (PROVISIONAL P-13id-U7-3) ────────────
 //  `setReadingOwned` FORKS a member that also lives in another book. A copy
@@ -87,11 +87,14 @@ nonisolated enum SampleLibraryWelcome {
          classicsGatheringName].compactMap { $0 }
     }
 
-    /// The classics gathering's rule over the two books' reserved tag ids
-    /// (P-13id-U7-1). Sherlock first, the Collecting sentence's order.
-    static func classicsRule(sherlockTagID: String, jekyllTagID: String) -> RuleTerm {
-        .or([.tag(sherlockTagID), .tag(jekyllTagID)])
+    /// The classics gathering's rule — the ONE seed tag (the ruled letter).
+    static func classicsRule(classicsTagID: String) -> RuleTerm {
+        .tag(classicsTagID)
     }
+
+    /// The books whose SHIPPED notes wear `#classics` (her §7 triad: Sherlock
+    /// owned, Jekyll plain, both tagged).
+    static let classicBooks: [SampleLibrarySeeder.Book] = [.sherlock, .jekyllAndHyde]
 
     // MARK: - What one arrangement did
 
@@ -112,10 +115,12 @@ nonisolated enum SampleLibraryWelcome {
         /// The Welcome shelf — adopted or minted.
         var welcome: Operations.WelcomeShelfEnsure
         var sherlock: SherlockOwnership
-        /// The classics gathering's id (nil = not minted: a book's reserved
-        /// tag is missing in Home), and whether THIS arrangement minted it.
+        /// The classics gathering's id (nil = not minted: neither classic book
+        /// is in Home), and whether THIS arrangement minted it.
         var classicsID: String?
         var mintedClassics: Bool
+        /// How many shipped classic notes THIS arrangement tagged `#classics`.
+        var taggedClassics: Int
         /// The seeded readings this arrangement put onto Welcome now (they
         /// were unshelved); a book filed elsewhere is never moved.
         var shelved: [String]
@@ -126,7 +131,7 @@ nonisolated enum SampleLibraryWelcome {
         /// Whether anything at all was written — a door that did nothing
         /// speaks a refusal (§12's message kinds), one that did a receipt.
         var didAnything: Bool {
-            welcome.minted || sherlock == .owned || mintedClassics
+            welcome.minted || sherlock == .owned || mintedClassics || taggedClassics > 0
                 || !shelved.isEmpty || mintedQuicknote
         }
     }
@@ -166,16 +171,55 @@ nonisolated enum SampleLibraryWelcome {
             sherlock = .owned
         }
 
-        // (3) The classics gathering — adopted, else minted ON Welcome when
-        // both books' reserved tags are live in Home.
+        // (3) #classics — THE RULED LETTER. Every SHIPPED note of each classic
+        // book in Home (a live member wearing the book's reserved tag — the
+        // seed tags every note it ships; a note she added does not) wears the
+        // tag at `classicsTagPath` (Home's live one adopted, else minted).
+        // Applying is an applying act like any other (intake hears it); the
+        // dedupe classifier skips this declared seed path (17aa1113).
         let tags = try database.read { db in try Queries.allTags(db, wingID: "") }
-        let sherlockTag = tags.first { $0.path == SampleLibrarySeeder.Book.sherlock.tagName }
-        let jekyllTag = tags.first { $0.path == SampleLibrarySeeder.Book.jekyllAndHyde.tagName }
+        var classicsTagID = tags.first { $0.path == SampleLibrarySeeder.classicsTagPath }?.id
+        var taggedClassics = 0
+        let classicHomeBooks = try classicBooks.flatMap { book in
+            try homeReadings(database, named: book.name).filter { $0.kind == .book }
+                .map { (reading: $0, reservedTagID: tags.first { $0.path == book.tagName }?.id) }
+        }
+        if !classicHomeBooks.isEmpty, classicsTagID == nil {
+            classicsTagID = try ops.createTag(
+                name: SampleLibrarySeeder.classicsTagPath, wingID: "").id
+        }
+        if let classicsTagID {
+            for (reading, reservedTagID) in classicHomeBooks {
+                guard let reservedTagID else { continue }
+                let untagged = try database.read { db in
+                    try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT rp.post_id FROM reading_post rp
+                            JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                            WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
+                              AND rp.status = 'member'
+                              AND EXISTS (SELECT 1 FROM post_tag pt WHERE pt.post_id = rp.post_id
+                                          AND pt.tag_id = ? AND pt.deleted_at IS NULL)
+                              AND NOT EXISTS (SELECT 1 FROM post_tag pt WHERE pt.post_id = rp.post_id
+                                              AND pt.tag_id = ? AND pt.deleted_at IS NULL)
+                            ORDER BY rp.position, rp.id
+                            """,
+                        arguments: [reading.id, reservedTagID, classicsTagID])
+                }
+                for postID in untagged {
+                    _ = try ops.applyTag(classicsTagID, toPost: postID)
+                    taggedClassics += 1
+                }
+            }
+        }
+
+        // (3b) The classics gathering — adopted (a live Home gathering made
+        // from the classics tag, or wearing the reserved name), else minted ON
+        // Welcome once the tag exists.
         var classicsID: String?
         var mintedClassics = false
-        let rule = (sherlockTag?.id).flatMap { sherlockID in
-            (jekyllTag?.id).map { classicsRule(sherlockTagID: sherlockID, jekyllTagID: $0) }
-        }
+        let rule = classicsTagID.map { classicsRule(classicsTagID: $0) }
         if let present = try homeReadings(database, named: nil).first(where: { reading in
             reading.kind == .gathering
                 && ((rule.map { RuleGrammar.read(reading.querySpec) == .rule($0) } ?? false)
@@ -236,7 +280,7 @@ nonisolated enum SampleLibraryWelcome {
 
         return Arrangement(
             welcome: welcome, sherlock: sherlock, classicsID: classicsID,
-            mintedClassics: mintedClassics, shelved: shelved,
+            mintedClassics: mintedClassics, taggedClassics: taggedClassics, shelved: shelved,
             quicknoteID: quicknoteID, mintedQuicknote: mintedQuicknote)
     }
 
