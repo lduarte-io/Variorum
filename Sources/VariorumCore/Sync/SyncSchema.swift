@@ -130,12 +130,20 @@ public enum SyncSchema {
     /// gathering/book kind values, the v2 query_spec format and the
     /// per-wing tag uniqueness are meaning changes a marker-9 client
     /// must never meet; mirror DDL 13_phase13i_wings.sql — deploy is
-    /// HER window, the 13i-a plan §8's checklist, never pre-authorized).
+    /// HER window, the 13i-a plan §8's checklist, never pre-authorized);
+    /// version 12 = the Phase 13i-e BOOK ARCHIVE event (her kickoff
+    /// ruling R-13ie-1, the 13i-e plan: ONE additive column —
+    /// `reading.archived_at`, the `container.archived_at` class, PLAIN —
+    /// no table, no RPC change; the marker moves because a marker-11
+    /// client's CAS whole-row push would silently null the column out
+    /// from under a marker-12 writer; mirror DDL 15_phase13ie_archive.sql
+    /// — deploy is HER window, the 13i-e deploy checklist, never
+    /// pre-authorized).
     /// **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 11
+    public static let lockstepVersion = 12
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -232,6 +240,11 @@ public enum SyncSchema {
                 // PROVISIONAL P-13ic-8); `auto_tag_id` stays classified
                 // because it stays a column, retired-as-read.
                 "auto_tag_ids",
+                // 13i-e (v1_21, marker 11→12 — R-13ie-1): BOOK ARCHIVE on
+                // the row. PLAIN — a bare timestamp, the container.archived_at
+                // class (disclosed structure: that a book is put away, never
+                // which one or what it holds).
+                "archived_at",
                 "created_at", "updated_at", "deleted_at",
             ],
             encrypted: ["name", "query_spec"]),

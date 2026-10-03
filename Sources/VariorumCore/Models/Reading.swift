@@ -67,6 +67,14 @@ public struct Reading: VariorumRecord {
     /// array of tag ids (the rule's own shape — `query_spec` is a JSON tree of
     /// ids). NULL = no outflow. Read through `autoTagIDs`, never raw.
     public var autoTagIds: String?
+    /// BOOK ARCHIVE (13i-e, R-13ie-1 — her ruling: "a book is a set of rules
+    /// + ordering now so it makes sense to archive it"; v1_21): domain
+    /// archive, kept-but-out-of-view — the `container.archived_at` class.
+    /// Out of the Bookcase and listed under Archived; AUTO-ingestion paused
+    /// while set (R-13ie-4 — explicit adds stay open); a gathering's
+    /// assembly answers empty. KEEP-FOREVER framing: never a step toward
+    /// deletion. Orthogonal to locked/sealed/deleted.
+    public var archivedAt: Date?
     public var createdAt: Date
     public var updatedAt: Date
     public var deletedAt: Date?
@@ -95,6 +103,7 @@ public struct Reading: VariorumRecord {
         intakeSeating: IntakeSeating? = nil,
         autoTagId: String? = nil,
         autoTagIds: String? = nil,
+        archivedAt: Date? = nil,
         createdAt: Date,
         updatedAt: Date,
         deletedAt: Date? = nil,
@@ -122,6 +131,7 @@ public struct Reading: VariorumRecord {
         self.intakeSeating = intakeSeating
         self.autoTagId = autoTagId
         self.autoTagIds = autoTagIds
+        self.archivedAt = archivedAt
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt

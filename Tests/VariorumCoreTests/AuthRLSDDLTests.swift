@@ -48,6 +48,9 @@ struct AuthRLSDDLTests {
         // 13i-c (the outflow event, marker 11 — R-13ic-1): ONE additive
         // column on reading; no table, no RPC change.
         "14_phase13i_c_outflow.sql",
+        // 13i-e (the book-archive event, marker 12 — R-13ie-1): ONE additive
+        // column on reading (`archived_at`); no table, no RPC change.
+        "15_phase13ie_archive.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside

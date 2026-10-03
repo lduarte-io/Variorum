@@ -821,6 +821,19 @@ extension AppDatabase {
                     """,
                 arguments: [now, now])
         }
+        // **13i-e — THE BOOK ARCHIVE EVENT (SyncSpec §12 lockstep, marker
+        // 11→12; the plan `notes/plans/phase-13i-e-daily-journal.md`).** Her
+        // kickoff ruling R-13ie-1: general archive machinery for books ON THE
+        // ROW ("a book is a set of rules + ordering now so it makes sense to
+        // archive it … I'm fine with another sync schema event to do this
+        // right") — the `container.archived_at` class, kept-but-out-of-view,
+        // keep-forever. Additive, nullable, no data migration (nothing is
+        // archived at birth), no index (reading listings are shelf-scale,
+        // never corpus-scale). A bare ADD COLUMN writes no row, so the
+        // outbox is untouched. The ops/doors land in this phase's U1/U2.
+        migrator.registerMigration("v1_21_reading_archive") { db in
+            try db.execute(sql: "ALTER TABLE reading ADD COLUMN archived_at TEXT;")
+        }
         return migrator
     }
 }
