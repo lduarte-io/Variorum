@@ -330,3 +330,27 @@ read its assertions; none contradicted the code.
   fails partway on `crossWingMembership` — the F-U7-3 class's third arm, promising a retry that
   cannot succeed.
 - **NIT:** 1 — `importPost`'s attribute/doc-comment ordering.
+
+---
+
+## THE ARCHITECT'S OWN AGREE/DISPUTE — MINOR 1's Sync half (the orchestrator implemented 17aa1113, so its implementer answer is recorded here directly, 2026-10-02)
+
+**AGREE, with the mechanism sharpened against my own commit:** the loss window is NOT the skip's
+alone — it is the skip COMBINED with the Mac-only arrangement. Before 17aa1113 an arranged copy's
+classics applications marked it EDITED, so it SURVIVED every meeting by the ruled
+edited-survives rule; the skip makes it read PRISTINE, and the id toss can then retire the
+arranged copy against an unarranged phone seed. My adjudication's stated convergence shape
+("two fresh devices each seeding the triad") assumed a symmetry the build does not have. The
+finding stands against my half as much as the arrangement's.
+
+**My lean among the reviewer's three options, for its final call:** OPTION 3 — fold the triad
+arrangement into the SHARED seeder's own flow so BOTH platforms produce arranged copies and the
+meeting is symmetric by construction. It changes no ruled §7 keeper rule (option 1 would — a
+keeper-preference arm alters her R-pre13u-8 ruling and is AUTHOR-ONLY, to be HELD if favored)
+and leaves no her-visible loss window (option 2 would — a silently stripped owned flag is not a
+residual to accept when the root fix is one move). Its consequence is NAMED, not hidden: fresh
+PHONE stores gain the arranged triad (Welcome, owned Sherlock, #classics, the gathering) — a
+deliberate shared-furniture change the mobile parity record carries, consistent with the
+sitting §18.5's phone-expressible mandate. The unit briefs' "the phone: record, don't build"
+was a unit-scoping fence, not canon; a convergence-correctness fix in shared code is exactly
+what the fix pass exists for.
