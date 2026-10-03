@@ -3112,6 +3112,17 @@ clock carryover.
 **For the combined 13i walk:** the per-adjudication lists above, consolidated by 13i-e into
 the cohesive final list her posture owes.
 
+**THE INSTALL REFRESH (2026-10-02, the zero-instance window):** the A1 safety copy taken FIRST
+(`Backups/safety-copies/variorum-backup-a1-13id-closeout-2026-10-03T031250Z.sqlite` + wal/shm);
+Release built, `ditto`'d to `/Applications/Variorum.app`, `codesign -v --deep --strict` OK.
+**One recorded slip, the 13i-b class made worse:** the orchestrator's verification chain ended
+with EXECUTING the installed binary (`--version` — a flag the app does not take), which LAUNCHED
+the real-store app headless for ~30 minutes until the background timeout killed it. EVIDENCE OF
+NO HARM: both store files' mtimes predate the launch (the app sat at the locked lobby and wrote
+nothing), no hourly backup was minted by it, no process survived, and the A1 copy predates
+everything. The class rule, recorded for every future closeout: verify an installed GUI app by
+its Info.plist and codesign output, NEVER by executing the binary.
+
 **The DerivedData tidy:** every `13id-*` build folder deleted at this closeout (logs and
 scripts kept); the orchestrator's `caffeinate` ended.
 
