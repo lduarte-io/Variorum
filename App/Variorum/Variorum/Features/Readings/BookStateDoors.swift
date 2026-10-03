@@ -101,6 +101,48 @@ nonisolated enum BookStateDoorSet {
     }
 }
 
+/// The facts the ARCHIVE table reads (13i-e U2): whether the book is archived,
+/// and whether it wears the daily marker — read through
+/// `Queries.isDailyJournalMintShape`, the SAME predicate the delete ops' guard
+/// keys on, so a face can never offer a delete the op refuses.
+nonisolated struct BookArchiveFacts: Equatable, Sendable {
+    var archived: Bool
+    var isDailyJournal: Bool
+
+    init(archived: Bool, isDailyJournal: Bool) {
+        self.archived = archived
+        self.isDailyJournal = isDailyJournal
+    }
+
+    init(_ reading: Reading) {
+        self.init(
+            archived: reading.archivedAt != nil,
+            isDailyJournal: Queries.isDailyJournalMintShape(reading))
+    }
+}
+
+/// **WHICH OF ARCHIVE · UNARCHIVE · DELETE A BOOK RENDERS** (13i-e U2 — her
+/// rulings R-13ie-1…4 and the sitting record §10) — one pure table every
+/// renderer reads (P-1: gating is data, never a per-view if):
+/// - archived ⇒ **Unarchive**, else **Archive** — books AND gatherings
+///   (R-13ie-3: "gatherings archive too, same door");
+/// - **Delete** on every reading EXCEPT the daily Journal: "the daily Journal
+///   can be archived, never deleted; it returns when a day arrives" — the op
+///   refuses it (`dailyJournalCannotBeDeleted`), so a Delete there could
+///   never act (P-2) and Archive stands in its place.
+/// Each surface draws the subset its door family carries (the Bookcase row:
+/// Archive + Delete — an archived book is never on it; the Archived surface's
+/// rows: Unarchive + Delete; the settings sheet: Archive/Unarchive).
+nonisolated enum BookArchiveDoorSet {
+    static let all: [CapabilityID] = [.archiveBook, .unarchiveBook, .deleteBook]
+
+    static func rendered(for facts: BookArchiveFacts) -> [CapabilityID] {
+        var acts: [CapabilityID] = [facts.archived ? .unarchiveBook : .archiveBook]
+        if !facts.isDailyJournal { acts.append(.deleteBook) }
+        return acts
+    }
+}
+
 // MARK: - The words
 
 /// A confirm, whole — the sheet's item, carrying everything it says (the
@@ -343,14 +385,92 @@ nonisolated enum BookStateCopy {
             + "together; Put back on the book returns them together."
     }
 
+    // MARK: Archive (13i-e U2 — R-13ie-1…4: kept forever, off the Bookcase;
+    // the OWNED book's two-choice confirm is the delete confirm's twin)
+
+    static let archiveVerb = "Archive"
+    static let unarchiveVerb = "Unarchive"
+
+    /// The door's label: an OWNED book's Archive ASKS (the two choices), so it
+    /// carries the ellipsis; every other Archive acts at once.
+    static func archiveDoorLabel(asks: Bool) -> String { asks ? archiveVerb + "\u{2026}" : archiveVerb }
+
+    /// Whether the Archive door asks — an owned BOOK only (R-13ie-2: "a PLAIN
+    /// book archives alone"; a gathering holds no notes).
+    static func archiveAsks(_ reading: Reading) -> Bool { reading.kind == .book && reading.owned }
+
+    /// The keep-forever promise (her rider: "you do want to keep it forever").
+    static let keptLine =
+        "Either way it's kept under Archived, with no countdown \u{2014} and Unarchive brings "
+        + "back whatever went in together, together."
+
+    /// An OWNED book's TWO-CHOICE archive confirm (R-13ie-2 — lesson 8's
+    /// delete shape, mirrored): the book only (its notes stay in the Library,
+    /// still its own — membership is a fact) or the book AND its N notes on
+    /// one stamp. An owned book with no notes has nothing to choose.
+    static func archiveOwnedBook(readingID: String, name: String, notes count: Int) -> BookStateConfirm {
+        guard count > 0 else {
+            return BookStateConfirm(
+                act: .archiveBook, readingID: readingID,
+                title: "Archive \(quoted(name))?",
+                lines: [
+                    "\(quoted(name)) owns its notes, and holds none right now.",
+                    "It's kept under Archived, with no countdown \u{2014} Unarchive brings it back.",
+                ],
+                list: [], after: [], confirmLabel: "Archive Book")
+        }
+        return BookStateConfirm(
+            act: .archiveBook, readingID: readingID,
+            title: "Archive \(quoted(name))?",
+            lines: [
+                "\(quoted(name)) owns its notes. Archive the book only, and its \(notes(count)) "
+                    + "stay in the Library \u{2014} still its own \u{2014} or archive the book and "
+                    + "its \(notes(count)) together.",
+                keptLine,
+            ],
+            list: [], after: [], confirmLabel: "Archive Book Only",
+            alternateLabel: count == 1
+                ? "Archive Book and Its Note" : "Archive Book and Its \(count) Notes")
+    }
+
+    /// The archive landed — its receipt names the road back, in the reading's
+    /// own terms (a gathering shows nothing; the daily Journal comes back).
+    static func archived(_ name: String, kind: ReadingKind, dailyJournal: Bool) -> String {
+        let base = "Archived \(quoted(name)) \u{2014} it\u{2019}s kept under Archived"
+        if dailyJournal { return base + ", and it comes back when a day arrives." }
+        if kind == .gathering { return base + " and shows nothing until you unarchive it." }
+        return base + "; its notes stay where they are."
+    }
+
+    /// With its notes: one stamp, one Unarchive.
+    static func archivedWithNotes(_ name: String, notes count: Int) -> String {
+        "Archived \(quoted(name)) and its \(notes(count)) \u{2014} they\u{2019}re kept under "
+            + "Archived together; Unarchive on the book brings them back together."
+    }
+
+    /// Unarchive landed: what came back with it, and what now waits at its
+    /// door (a living book's catch-up bells, never quiet seats — R-13ie-4).
+    static func unarchived(_ name: String, returned: Int, waiting: Int) -> String {
+        var line = "Unarchived \(quoted(name)) \u{2014} it\u{2019}s back on the Bookcase."
+        if returned > 0 {
+            line += returned == 1
+                ? " Its note came back with it." : " Its \(returned) notes came back with it."
+        }
+        if waiting > 0 { line += " \(waiting) waiting at Arrivals." }
+        return line
+    }
+
     // MARK: The navigator's state chip (13i-c U4 — F-U3-7)
 
     /// The book navigator's one state word: "✓ sealed" on a SEALED book (it
     /// is finished too — "Sealed = the book is done" is the truer word),
-    /// "✓ finished" on a finished one, nothing on an open one.
-    static func navigatorChip(finished: Bool, sealed: Bool) -> String? {
-        if sealed { return "\u{2713} sealed" }
-        return finished ? "\u{2713} finished" : nil
+    /// "✓ finished" on a finished one, nothing on an open one. 13i-e U2: an
+    /// ARCHIVED book says so first — a book opened from Archived wears where
+    /// it lives (PROVISIONAL P-13ie-U2-4).
+    static func navigatorChip(finished: Bool, sealed: Bool, archived: Bool = false) -> String? {
+        let state: String? = sealed ? "\u{2713} sealed" : (finished ? "\u{2713} finished" : nil)
+        guard archived else { return state }
+        return [BookArchiveCopy.word, state].compactMap { $0 }.joined(separator: " \u{00B7} ")
     }
 
     // MARK: Receipts (the 18i seam's RECEIPT class)
@@ -435,6 +555,9 @@ final class BookStateDoors {
         let ownForks: [Queries.SharedMember]
         /// The delete confirm's N (13i-c U4).
         let memberNotes: Int
+        /// The owned archive confirm's N (13i-e U2) — the set
+        /// `archiveReadingWithNotes` takes (`Queries.archiveWithNotesCount`).
+        var archiveNotes: Int = 0
     }
 
     /// **A door was pressed.** Reads the book FRESH (a shelf row's snapshot
@@ -458,7 +581,9 @@ final class BookStateDoors {
                     ownForks: act == .ownBook
                         ? try Queries.ownConversionPreview(db, readingID: readingID) : [],
                     memberNotes: act == .deleteBook
-                        ? try Queries.liveMemberNoteCount(db, readingID: readingID) : 0)
+                        ? try Queries.liveMemberNoteCount(db, readingID: readingID) : 0,
+                    archiveNotes: act == .archiveBook
+                        ? try Queries.archiveWithNotesCount(db, readingID: readingID) : 0)
             }) else {
                 session.status.refuse(ReadingsViewModel.message(
                     OperationError.readingNotFound(id: readingID)))
@@ -526,6 +651,17 @@ final class BookStateDoors {
                 pending = BookStateCopy.deletePlainBook(
                     readingID: readingID, name: reading.name, notes: opening.memberNotes)
             }
+        case .archiveBook:
+            // 13i-e U2 (R-13ie-2): an OWNED book asks — the delete confirm's
+            // twin (book only · book and its N notes); a plain book, a
+            // gathering and the daily Journal archive at once (archive is
+            // reversible and kept forever — "not too onerous").
+            if BookStateCopy.archiveAsks(reading) {
+                pending = BookStateCopy.archiveOwnedBook(
+                    readingID: readingID, name: reading.name, notes: opening.archiveNotes)
+            } else {
+                await perform(.archiveBook, readingID: readingID)
+            }
         default:
             await perform(act, readingID: readingID)
         }
@@ -573,6 +709,29 @@ final class BookStateDoors {
                 case .unownBook:
                     try ops.setReadingOwned(readingID, owned: false)
                     return BookStateCopy.unowned(name)
+                // 13i-e U2 — ARCHIVE / UNARCHIVE (R-13ie-1…4).
+                case .archiveBook where alternate:
+                    // The owned book's second choice: the book AND its notes,
+                    // ONE stamp (offered only on an owned book).
+                    let notes = try ops.archiveReadingWithNotes(readingID)
+                    return BookStateCopy.archivedWithNotes(name, notes: notes.count)
+                case .archiveBook:
+                    try ops.archiveReading(readingID)
+                    return BookStateCopy.archived(
+                        name, kind: named?.kind ?? .book,
+                        dailyJournal: named.map(Queries.isDailyJournalMintShape) ?? false)
+                case .unarchiveBook:
+                    // What now waits at the door: a LIVING book's resume
+                    // catch-up bells (never seats) — read before and after.
+                    let waiting = { () -> Int in
+                        (try? database.read { db in
+                            try Queries.pendingArrivalCount(db, readingID: readingID)
+                        }) ?? 0
+                    }
+                    let before = waiting()
+                    let returned = try ops.unarchiveReading(readingID)
+                    return BookStateCopy.unarchived(
+                        name, returned: returned.count, waiting: max(0, waiting() - before))
                 case .deleteBook where alternate:
                     // The owned book's second choice: the book AND its notes,
                     // ONE stamp (F-U2-7: offered only on an owned book).

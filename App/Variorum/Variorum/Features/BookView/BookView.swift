@@ -513,7 +513,9 @@ struct BookView: View {
         // "the book is done" is the truer word).
         if let reading = structure.reading,
            let chip = BookStateCopy.navigatorChip(
-               finished: reading.locked, sealed: reading.sealedAt != nil) {
+               finished: reading.locked, sealed: reading.sealedAt != nil,
+               // 13i-e U2: a book opened from Archived says where it lives.
+               archived: reading.archivedAt != nil) {
             Text(tokens.chromeLabel(chip))
                 .font(tokens.small)
                 .foregroundStyle(tokens.accent)

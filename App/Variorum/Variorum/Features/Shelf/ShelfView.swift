@@ -50,6 +50,10 @@ struct ShelfView: View {
         + [.openBookSettings]
         // 13i-d U5b — Move to Wing ▸ (R-13id-6 item 9): books AND gatherings.
         + [.moveBookToWing]
+        // 13i-e U2 — Archive beside Delete (R-13ie-1…4; `BookArchiveDoorSet`
+        // — the daily Journal renders Archive and never Delete). Unarchive is
+        // not this menu's: an archived book is never on the Bookcase.
+        + [.archiveBook]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -692,10 +696,22 @@ struct ShelfView: View {
         Button("Export Markdown\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: false) }
         Button("Export PDF\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
         Divider()
-        // 13i-c U3/U4: the ONE delete road (plain / owned two-choice /
-        // gathering confirms).
-        Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
-            Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
+        // 13i-e U2 — ARCHIVE beside the ONE delete road (13i-c U3/U4: plain /
+        // owned two-choice / gathering confirms), both from the archive table
+        // (P-1): the daily Journal renders Archive and NO Delete (P-2 — the op
+        // refuses it; "it can be archived, never deleted"). Unarchive is the
+        // Archived surface's door (an archived book never reaches this menu).
+        ForEach(BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
+            .filter { $0 != .unarchiveBook }, id: \.self) { act in
+            if act == .deleteBook {
+                Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
+                    Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
+                }
+            } else {
+                Button(BookStateCopy.archiveDoorLabel(asks: BookStateCopy.archiveAsks(reading))) {
+                    Task { await model.stateDoors.open(act, readingID: reading.id) }
+                }
+            }
         }
     }
 

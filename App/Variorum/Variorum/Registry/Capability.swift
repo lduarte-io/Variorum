@@ -790,6 +790,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // switcher's "Move Everything to Another Wing ▸" (`.surface`, additional
     // wings only — her R-13id-4 backdoor).
     case moveBookToWing, moveWingContents
+    // 13i-e U2 — BOOK ARCHIVE (her kickoff rulings R-13ie-1…4: a book — or a
+    // gathering — put away under Archived, kept forever, out of the
+    // Bookcase). Two declarations on the `.moveTakeEarlier`/`.moveTakeLater`
+    // grounds: each its own door with its own words (Archive may ask on an
+    // OWNED book — the delete confirm's twin; Unarchive never asks). WHICH of
+    // Archive · Unarchive · Delete a book renders is DATA
+    // (`BookArchiveDoorSet`): the daily Journal never renders Delete (P-2 —
+    // the op refuses it, `dailyJournalCannotBeDeleted`).
+    case archiveBook, unarchiveBook
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

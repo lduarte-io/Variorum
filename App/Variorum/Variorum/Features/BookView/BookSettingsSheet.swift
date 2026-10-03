@@ -204,6 +204,18 @@ nonisolated enum CollectingCopy {
     static let ownCaption = "An owned book is the only place its notes live."
     static let ownedCaption = "This book owns its notes \u{2014} each one lives only here."
     static let finishedToggle = "Finished"
+    // 13i-e U2 — the State section's ARCHIVED row (R-13ie-1…4; her rider's
+    // keep-forever framing: "it's just supposed to not be in the library, but
+    // you do want to keep it forever"). The daily Journal's caption is the
+    // sitting record §10's own sentence (`BookArchiveCopy.dailyJournalCaption`).
+    static let archiveCaption =
+        "Archiving keeps it forever \u{2014} off the Bookcase, under Archived, with no countdown."
+    static let archivedCaption = "Archived \u{2014} kept under Archived, off the Bookcase."
+
+    static func archiveCaption(for reading: Reading) -> String {
+        if Queries.isDailyJournalMintShape(reading) { return BookArchiveCopy.dailyJournalCaption }
+        return reading.archivedAt != nil ? archivedCaption : archiveCaption
+    }
 }
 
 // MARK: - What the sheet draws (13i-d U3 — row 107)
@@ -233,6 +245,14 @@ nonisolated enum BookSettingsFace {
     /// finished, where it is the Reopen door (`BookStateDoorSet`'s own cell).
     static func showsFinished(for reading: Reading) -> Bool {
         reading.kind == .book || reading.locked
+    }
+
+    /// 13i-e U2 — the State section's Archived row: Archive or Unarchive, from
+    /// the ONE archive table (`BookArchiveDoorSet` — the sheet carries no
+    /// Delete door, so only its archive half draws here).
+    static func archiveDoor(for reading: Reading) -> CapabilityID? {
+        BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
+            .first { $0 == .archiveBook || $0 == .unarchiveBook }
     }
 }
 
@@ -327,6 +347,9 @@ struct BookSettingsSheet: View {
     /// the six state doors (which of each pair — `BookStateDoorSet`) and the
     /// rule editor's door ("Edit…" in the Collecting section).
     static let surfaceCapabilities: [CapabilityID] = BookStateDoorSet.all + [.editRule]
+        // 13i-e U2: the State section's Archived row (Archive / Unarchive —
+        // `BookArchiveDoorSet`; the sheet draws no Delete).
+        + [.archiveBook, .unarchiveBook]
         // 13i-d U3: the journal trait's on/off (§10).
         + [.setJournalTrait]
         // 13i-d U4 (F-U3-5, the adjudication after U3): a GATHERING's
@@ -466,6 +489,13 @@ struct BookSettingsSheet: View {
     @ViewBuilder
     private func collecting(_ reading: Reading) -> some View {
         sectionLabel(CollectingCopy.section)
+        // 13i-e U2 — THE VISIBLE PAUSE (R-13ie-4: "every method of auto
+        // ingestion should pause, which should be clear to users"). Said
+        // first, above the rule it pauses; the explicit add doors are
+        // untouched (her amendment). nil where nothing auto-ingests.
+        if let paused = BookArchiveCopy.pausedSentence(for: reading) {
+            ChromeNotice(tokens: tokens, text: paused, ink: tokens.ink, lines: 3)
+        }
         ForEach(Array(CollectingCopy.sentences(for: reading, paths: model.paths).enumerated()),
                 id: \.offset) { _, line in
             sentence(line)
@@ -555,9 +585,11 @@ struct BookSettingsSheet: View {
     private func state(_ reading: Reading) -> some View {
         let acts = BookStateDoorSet.rendered(for: BookStateFacts(reading))
         let showsFinished = BookSettingsFace.showsFinished(for: reading)
-        // 13i-d U3 (row 107): a section with nothing in it draws no label (a
-        // gathering — §3: no finish, no seal, no own).
-        if showsFinished || !acts.isEmpty {
+        let archive = BookSettingsFace.archiveDoor(for: reading)
+        // 13i-d U3 (row 107): a section with nothing in it draws no label.
+        // 13i-e U2: every reading has the Archived row now (R-13ie-3 —
+        // gatherings archive too), so the section always draws.
+        if showsFinished || !acts.isEmpty || archive != nil {
             sectionLabel(CollectingCopy.stateSection)
         }
         // FINISHED — one control for the finish pair. While SEALED it stays
@@ -590,9 +622,20 @@ struct BookSettingsSheet: View {
                 caption: own == .unownBook ? CollectingCopy.ownedCaption : CollectingCopy.ownCaption,
                 act: own, readingID: reading.id)
         }
+        // 13i-e U2 — ARCHIVED (the table's Archive / Unarchive; an owned
+        // book's Archive asks — "Archive…").
+        if let archive {
+            stateRow(
+                caption: CollectingCopy.archiveCaption(for: reading), act: archive,
+                readingID: reading.id,
+                label: archive == .archiveBook
+                    ? BookStateCopy.archiveDoorLabel(asks: BookStateCopy.archiveAsks(reading)) : nil)
+        }
     }
 
-    private func stateRow(caption: String, act: CapabilityID, readingID: String) -> some View {
+    private func stateRow(
+        caption: String, act: CapabilityID, readingID: String, label: String? = nil
+    ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(tokens.chromeLabel(caption))
                 .font(tokens.small)
@@ -600,7 +643,7 @@ struct BookSettingsSheet: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
-            Button(tokens.chromeLabel(CapabilityRegistry.capability(act).verb)) {
+            Button(tokens.chromeLabel(label ?? CapabilityRegistry.capability(act).verb)) {
                 Task { await model.stateDoors.open(act, readingID: readingID) }
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
@@ -651,6 +694,7 @@ struct BookSettingsSheet: View {
             + "|\(reading.owned)|\(model.paths.count)|\(model.hideOwnedDefault)"
             + "|\(reading.profile ?? "")|\(String(describing: reading.wordTarget))"
             + "|\(String(describing: reading.maxPosts))"
+            + "|\(String(describing: reading.archivedAt))"
     }
 
     private func record() {
@@ -666,7 +710,10 @@ struct BookSettingsSheet: View {
             finishedDisabled: reading.sealedAt != nil,
             journalTrait: reading.kind == .book ? Queries.hasJournalTrait(reading.profile) : nil,
             fields: BookSettingsFace.fields(for: reading).map(\.rawValue),
-            finishedShown: BookSettingsFace.showsFinished(for: reading))
+            finishedShown: BookSettingsFace.showsFinished(for: reading),
+            archiveDoor: BookSettingsFace.archiveDoor(for: reading),
+            archiveCaption: CollectingCopy.archiveCaption(for: reading),
+            paused: BookArchiveCopy.pausedSentence(for: reading))
     }
     #endif
 }
@@ -733,6 +780,11 @@ enum BookSettingsProbe {
         /// whether the Finished control is.
         var fields: [String] = []
         var finishedShown = true
+        /// 13i-e U2: the Archived row's door and caption, and the Collecting
+        /// pane's pause sentence (nil when not drawn).
+        var archiveDoor: CapabilityID? = nil
+        var archiveCaption: String? = nil
+        var paused: String? = nil
     }
 
     static var drawn: [String: Drawn] = [:]

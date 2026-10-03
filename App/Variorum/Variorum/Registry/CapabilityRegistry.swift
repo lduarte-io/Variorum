@@ -1653,6 +1653,27 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookStateCopy.unavailableNote,
             availability: always),
+        // 13i-e U2 — BOOK ARCHIVE (R-13ie-1…4). Archive: the Bookcase row's
+        // menu (`.contextMenu`) and the Book Settings sheet's State section
+        // (`.surface`). Unarchive: the Archived surface's book rows and the
+        // sheet (`.surface` — an archived book is never on the Bookcase).
+        // `always` for `.editRule`'s reason (every renderer carries its
+        // book); WHICH renders is DATA — `BookArchiveDoorSet` (archived ⇒
+        // Unarchive, else Archive; the daily Journal never offers Delete).
+        // The archive acts' own refusals (already archived / not archived)
+        // are the operations', spoken through the shared table.
+        Capability(
+            id: .archiveBook, verb: BookStateCopy.archiveVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .unarchiveBook, verb: BookStateCopy.unarchiveVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookStateCopy.unavailableNote,
+            availability: always),
         // 13i-c U4 — THE MEMBERSHIP CHOICE (the sitting record §6; the plan
         // §3/§4 rows 14–19). Two `.surface` acts, two renderers each: the
         // ONE choice sheet (`MembershipChoiceSheet` — hosted by the chip's
