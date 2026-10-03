@@ -820,8 +820,11 @@ struct CommitBar: View {
                 // and Pool rows' doors, one more renderer of the same acts:
                 // NOTE contexts only (the gate above — a pool has no wing
                 // doors), drawn only while another wing exists (P-2), listing
-                // the wings OTHER than the note's own.
-                if let wings, let context = wingContext,
+                // the wings OTHER than the note's own. Ladder B fix B: only a
+                // context loaded for THIS note draws (a stale load never puts
+                // another note's wing or title on these doors).
+                if let wings,
+                   let context = NoteMenuWingContext.matching(wingContext, postID: model.postID),
                    !wings.destinations(from: context.wingID).isEmpty {
                     Divider()
                     WingNoteDoors(

@@ -361,7 +361,17 @@ extension View {
 /// note's wing as surfaces read it (`Queries.effectiveWing`) and its display
 /// name (the confirm's and the receipt's words). Read once per note and again
 /// after an act (a move changes the note's wing).
+///
+/// 13i-d LADDER B fix B (round 1's MINOR 2 — the ladder-A superseded-
+/// observation class on U6's new code): the context carries the NOTE it was
+/// loaded for, and the bars render only a MATCHING one (`matching`) — a load
+/// that lands after the open note changed (or a cancellation's nil, written
+/// by a task that died mid-read) can no longer draw another note's
+/// destinations or put its title on the confirm. The write sites below also
+/// take the sibling cancellation guard (`NoteMembershipModel`'s lesson).
 struct NoteMenuWingContext: Equatable, Sendable {
+    /// The note this context was loaded FOR — the gate's key.
+    let postID: String
     let wingID: String
     let title: String
 
@@ -369,8 +379,19 @@ struct NoteMenuWingContext: Equatable, Sendable {
         try? await session.database.read { db in
             guard let wing = try Queries.effectiveWing(db, ofPost: postID) else { return nil }
             return NoteMenuWingContext(
-                wingID: wing, title: try Queries.noteDisplayTitle(db, id: postID) ?? "")
+                postID: postID, wingID: wing,
+                title: try Queries.noteDisplayTitle(db, id: postID) ?? "")
         }
+    }
+
+    /// The render gate, pure and pinned: the context, iff it is the OPEN
+    /// note's own — anything else (another note's stale load, nil) draws
+    /// nothing until the note's own load lands.
+    static func matching(
+        _ context: NoteMenuWingContext?, postID: String
+    ) -> NoteMenuWingContext? {
+        guard let context, context.postID == postID else { return nil }
+        return context
     }
 }
 
@@ -378,14 +399,24 @@ extension View {
     /// The bar's half of the note ▾ wing doors: loads the open note's context
     /// (per note) and hosts the move's confirm — an alert cannot hang off a
     /// menu item, so the bar presents it (the Library row's own shape).
+    /// Both writes are cancellation-guarded (fix B): a superseded task's late
+    /// value never stomps the next note's context.
     func noteMenuWingDoors(
         session: AppSession, postID: String, wings: WingsModel?,
         context: Binding<NoteMenuWingContext?>, ask: Binding<WingsModel.MoveAsk?>
     ) -> some View {
         self
-            .task(id: postID) { context.wrappedValue = await NoteMenuWingContext.load(session, postID: postID) }
+            .task(id: postID) {
+                let loaded = await NoteMenuWingContext.load(session, postID: postID)
+                guard !Task.isCancelled else { return }
+                context.wrappedValue = loaded
+            }
             .wingMoveConfirm(ask, wings: wings) {
-                Task { context.wrappedValue = await NoteMenuWingContext.load(session, postID: postID) }
+                Task {
+                    let loaded = await NoteMenuWingContext.load(session, postID: postID)
+                    guard !Task.isCancelled else { return }
+                    context.wrappedValue = loaded
+                }
             }
     }
 }

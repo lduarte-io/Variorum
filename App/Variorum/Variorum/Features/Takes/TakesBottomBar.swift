@@ -475,7 +475,9 @@ struct TakesBottomBar: View {
             // and Pool rows' doors, one more renderer of the same acts, drawn
             // only while another wing exists (P-2) and listing the wings
             // OTHER than the note's own. Write's bar carries the twin (R6-2).
-            if let wings, let context = wingContext,
+            // Ladder B fix B: only a context loaded for THIS note draws.
+            if let wings,
+               let context = NoteMenuWingContext.matching(wingContext, postID: model.postID),
                !wings.destinations(from: context.wingID).isEmpty {
                 WingNoteDoors(
                     wings: wings, postID: model.postID, title: context.title,

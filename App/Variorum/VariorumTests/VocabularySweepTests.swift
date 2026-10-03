@@ -185,7 +185,9 @@ struct VocabularySweepTests {
             let annex = try ops.createWing(name: "Annex")
             let note = try ops.createPost(title: "loose")
             let home = try #require(await NoteMenuWingContext.load(session, postID: note.id))
-            #expect(home == NoteMenuWingContext(wingID: "", title: "loose"))
+            // (postID joined the context at ladder B fix B — a mechanical
+            // edit here; the pin's subject is unchanged.)
+            #expect(home == NoteMenuWingContext(postID: note.id, wingID: "", title: "loose"))
             _ = try ops.moveNoteToWing(note.id, to: annex.id)
             let moved = try #require(await NoteMenuWingContext.load(session, postID: note.id))
             #expect(moved.wingID == annex.id, "after a move the menu offers the OTHER wings")
@@ -195,6 +197,22 @@ struct VocabularySweepTests {
                     "from Annex the one other library is Home")
             #expect(wings.destinations(from: home.wingID).map(\.id) == [annex.id])
         }
+    }
+
+    /// **13i-d LADDER B fix B** (round 1's MINOR 2 — ladder A's superseded-
+    /// observation class, re-found on U6's new code): the bars render the
+    /// wing doors only from a context whose `postID` MATCHES the open note,
+    /// so a stale load landing after a note switch — or a cancelled task's
+    /// nil — can never draw another note's destinations or put its title on
+    /// the move confirm. The write sites carry the sibling cancellation
+    /// guard; this pure gate is the belt a test can hold without the race.
+    @Test func aStaleWingContextNeverDrawsAnotherNotesDoors() {
+        let stale = NoteMenuWingContext(postID: "note-a", wingID: "w1", title: "A")
+        #expect(NoteMenuWingContext.matching(stale, postID: "note-a") == stale,
+                "the note's own context draws")
+        #expect(NoteMenuWingContext.matching(stale, postID: "note-b") == nil,
+                "another note's stale context draws NOTHING")
+        #expect(NoteMenuWingContext.matching(nil, postID: "note-b") == nil)
     }
 
     // MARK: - (h) F-U4-4 — the Archived view's inline Unarchive is declared
