@@ -290,7 +290,7 @@ the closeout tidies them.
 |---|---|---|
 | 0 | U0 — the schema event (architect; schema-first commits) | **DONE** (b2e8b1c2 — v1_21 + model + registry/marker 12 + DDL-pin list + the mirror artifact + the deploy checklist; full core suite green 2127/234, the 13i-d baseline exactly) |
 | 1 | U1 — the op family + the daily rulings (headless) | **DONE** (`d12eecc6` piece 1 · `b6e4f52e` piece 2 · `a8199c9b` the confirm-N fragment; R1–R4 red by revert, restored clean; core FULL 2168/242 green, Mac 384/50 + 97/13, phone 69/15 — the U1 RECORD below) |
-| 2 | U2 — the faces + lesson 9 | NOT-STARTED |
+| 2 | U2 — the faces + lesson 9 | **DONE** (ACT 0 `5d61bb64`…`143417c3` red on the pre-fix tree + by revert, 7 issues each · pieces `0b5d60e9` `2f3109fe` `138a8322` `78644cba` `df3c18e9` `5be92918` · lesson 9 `3fdee77a` (naturally red pre-sentence, 2 issues) · pins `dbca8189` `2b944fe5` · W-1 `506b4ec9`; core FULL 2172/244, Mac 97/13 + 1396/214 + 99/8, phone 70/16; the walk 33 captures both voices — the U2 RECORD above) |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | NOT-STARTED |
 | 4 | The orchestrator's walk | NOT-STARTED |
 | 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | HELD FOR HER |
@@ -834,7 +834,22 @@ Same checkpoint protocol, record shape, fences and traps as U1.
 
 ## U2 RECORD — THE FACES + LESSON 9 (`opus-implementer`, 2026-10-03)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at the close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** (1) the PHONE's book-archive faces beyond
+the daily Journal — an Archived surface, Archive/Unarchive on ordinary books, the "(archived)" marks,
+the comes-back receipt on its Today door — are the mobile catch-up's (F-U2-6; with F-U1-4 for the
+MobileSoul line); only its two daily-Journal doors were swapped (scope item 3's letter). (2) The
+Starred section names an archived book WITHOUT the mark (F-U2-4 — needs a core field; archived
+notes there carry none either). (3) The daily Journal's own "+ new entry" inside an ARCHIVED Journal
+does not bring it back (F-U2-2 — recorded, not changed: a semantics call outside the faces). (4) Her
+real store is NOT re-seeded with lesson 9's sentence — the closeout's Help ▸ Restore Tutorial note
+(F-U2-13). (5) No `Sync/`, `Server/`, migrations or editor seam (fences empty). Everything else in
+the brief — ACT 0, items 1–6 and the riders — is built, pinned and walked below.
+
+**UNIT STATUS: CLOSED 2026-10-03 — ACT 0 red-on-old twice (pre-fix tree + behavioural revert, 7
+issues each); lesson 9's pin naturally red on the pre-sentence tree (2 issues); core FULL 2172/244 ·
+Mac batch A 97/13 (the tutorial spine) + batch B 1396/214 (0 skipped) + the post-W-1 re-run 99/8 ·
+phone 70/16 (2 pre-existing known issues) · the walk DONE (33 captures, both voices; one walk defect
+W-1 found, fixed, re-walked).**
 
 ### LIVE STATUS (per commit; every unverified claim PENDING)
 
@@ -888,6 +903,200 @@ Same checkpoint protocol, record shape, fences and traps as U1.
   FULL "✔ Test run with 2172 tests in 244 suites passed"** (1 standing env-gated skip) = U1's
   2168/242 + exactly this unit's 4/2. NEXT: the scripted walk (dev store, Debug), then the record's
   finals. No revert in flight.
+- 2026-10-03 · **THE WALK DONE + W-1 FIXED; UNIT CLOSED.** `36cdae61` gitignored the phase's captures;
+  the walk (EVIDENCE below) found ONE defect on this unit's own surface — **W-1: the Archived
+  surface had no quiet-receipt host**, so an Unarchive from its books group said nothing — fixed at
+  `506b4ec9` (the shared `QuietReceiptLine` in its bottom overlay), re-walked (`u2-33`), and the
+  Archived-surface suites re-run green **99/8**. The record's finals written; ledger row 2 → DONE.
+  Every claim verified; nothing PENDING; no revert in flight; nothing uncommitted.
+
+### WHAT WAS BUILT (a fresh session's map)
+
+- **Core (the ONE op line + two small reads):** `Operations+Appearance.swift` —
+  `setDailyJournalBook(_ db:)` refuses a non-book (`wrongReadingKind`) ahead of every write (ACT 0).
+  `Queries/Observations.swift` — `observeArchivedReadings(limit:wingID:)` (`archivedReadings` held;
+  `reading`-only region). `Queries/WingQueries.swift` — `WingContents.archivedBooks` /
+  `archivedGatherings` (defaulted 0; counted inside `books`/`gatherings` too).
+- **Shared (Mac + phone):** NEW `Shared/BookArchiveCopy.swift` — the "(archived)" mark (`word`,
+  `name(_:)`), the pause sentences (`pausedBook` — the ruled words — `pausedGathering`,
+  `pausedSentence(for:)`), §10's caption, the guard's refusal (`cannotDeleteDailyJournal`), the
+  comes-back receipt (`journalCameBack`). `OpsRefusalTable` — `dailyJournalCannotBeDeleted`,
+  `readingAlreadyArchived`, `readingNotArchived`; `RecoveryActs.DeletionRefusal` — the first (the
+  phone's delete road). `WingWords.contents` — "2 books (1 archived)".
+- **Mac registry (P-1):** `CapabilityID.archiveBook` / `.unarchiveBook`; declarations (Archive:
+  `.contextMenu` + `.surface`; Unarchive: `.surface`). Renderers: `ShelfView.contextMenuCapabilities`
+  (+ `.archiveBook`), `BookSettingsSheet.surfaceCapabilities` (+ both), `ArchivedView.surfaceCapabilities`
+  (+ `.unarchiveBook`, `.deleteBook`).
+- **Mac doors (`Features/Readings/BookStateDoors.swift`):** `BookArchiveFacts` + `BookArchiveDoorSet`
+  (the table — archived ⇒ Unarchive else Archive; Delete never on a marker-bearer); `BookStateCopy`
+  — `archiveVerb`/`unarchiveVerb`, `archiveAsks`, `archiveDoorLabel(asks:)`, `archiveOwnedBook` (the
+  two-choice confirm), receipts `archived(_:kind:dailyJournal:)` / `archivedWithNotes` /
+  `unarchived(_:returned:waiting:)`, `navigatorChip(…, archived:)`; `BookStateDoors.open/perform` —
+  the archive arms (an owned book asks; `alternate` = with notes) and unarchive (pending arrivals
+  read before/after).
+- **Mac faces:** `ShelfView` — the row menu renders Archive/Delete from the table. `BookSettingsSheet`
+  — the Collecting section leads with the pause sentence; the State section's Archived row
+  (`BookSettingsFace.archiveDoor`, `CollectingCopy.archiveCaption(for:)`), drawn for gatherings too;
+  probe fields `archiveDoor`/`archiveCaption`/`paused`. `BookView` — the navigator chip.
+  `ArchivedView` — the BOOKS group (`ArchivedBooksModel`, `ArchivedBookCopy`), `openBook` routed by
+  `RootView` to `.reading`, the state doors' confirm host, the quiet receipt host (W-1).
+  The marks: `MembershipChip` (rows, label, Add to Book menu incl. by-tagging), `BookPanelView`
+  (switcher rows) + `BookPanelCopy.stateWords`, `ContextBar` (ascent list), `NotePicker.curatedBooks`
+  (annotation). The comes-back: `JournalBooks.Outcome.receipt`, `dailyJournalArchiveState`,
+  `comesBackReceipt`; spoken by `ShellActions.todaysEntry` and `LibraryViewModel.openJournalEntry`.
+  Lesson 9: `TutorialSeeder`'s "the journal & the pool" carries the second sentence.
+- **Phone:** `MobileShelfFaces` — `offersArchiveInsteadOfDelete`, the door title, §10's detail,
+  `archivedDailyJournalReceipt`; `MobileShelfViewModel.archiveDailyJournal(_:)`;
+  `MobileBookDetailsModel.archiveDailyJournal()`; `MobileShelfView`'s long-press and
+  `MobileBookDetails`' act row swap Delete → Archive on the marker-bearer.
+- **Tests:** core `DailyJournalDesignationKindTests` (2, in `DailyJournalRulingsTests.swift`) and
+  NEW `BookArchiveFacesCoreTests.swift` (2); Mac NEW `BookArchiveFacesTests.swift` (7 suites —
+  `BookArchiveDeclarationTests` 3, `BookArchiveDoorActTests` 5, `BookSettingsArchiveRowTests` 2,
+  `ArchivedBooksGroupTests` 1, `ArchivedMarkTests` 2, `ComesBackReceiptTests` 2,
+  `WingContentsArchivedWordsTests` 1); `TutorialBooksChapterTests.lessonNineTheDailyJournal` FLIPPED;
+  phone NEW `MobileDailyJournalArchiveTests.swift` (1). ONE JUSTIFIED EDIT:
+  `VocabularySweepTests.theArchivedViewDeclaresItsUnarchive` (the books group's two acts joined the
+  exact declared set; its subject unchanged, commented in place).
+
+### EVIDENCE (counts exact, run at the END unless named)
+
+- **ACT 0 — RED ON OLD, two ways (the kind of each recorded):** (a) the NATURAL red — the pin
+  committed ahead of its fix and run on the PRE-FIX tree: **7 issues** (no throw; the Journal
+  demoted; the gathering wearing `'daily'`; the derived read nil; outbox written; ⌘J filed into a
+  freshly minted …0006 beside …0001; two books); (b) the BEHAVIOURAL REVERT (RV0 — the guard line
+  deleted from the committed tree): **7 issues** again; restored by checkout, `git diff --quiet`.
+  The control `designatingABookStillMovesTheMarker` green on both sides.
+- **Lesson 9 — the NATURAL red:** the flipped `lessonNineTheDailyJournal` committed ahead of its
+  sentence and run on the pre-sentence tree: **2 issues** (the sentence arm and the archive-verb
+  arm; the executed behaviour already true — U1's ops + this unit's faces); green after.
+- **Core FULL `swift test`: "✔ Test run with 2172 tests in 244 suites passed after 107.269
+  seconds"** (1 skipped — the standing env-gated real-server integration pass) = U1's 2168/242 +
+  exactly this unit's **4 / 2** (`DailyJournalDesignationKindTests` 2 + `BookArchiveFacesCoreTests` 2).
+- **Mac** (zero app instances; build `DerivedData/13ie-u2`; suite-level `-only-testing` via
+  `test-without-building`, bash scripts with absolute paths): **batch A "✔ Test run with 97 tests in
+  13 suites passed"** — every `Tutorial*` suite (the eleven-suite spine + the books chapter's two,
+  the flipped lesson-9 pin inside); **batch B "✔ Test run with 1396 tests in 214 suites passed"**, 0
+  skipped — every suite in a test file touching a changed symbol (the registry walk
+  `CapabilityRegistryTests`, `BookStateDoorsTests`, `BookCollectingDoorsTests`,
+  `BookSettingsSheetTests`, `BookPanel*`, `OwnershipBadgeTests`, `JournalBooksTests`,
+  `MembershipChoiceTests`, `NotePicker*`, `ContextBar*`, `WingSwitcherTests`, the new
+  `BookArchiveFacesTests` suites, …) + U1's batch B list; after W-1's fix **"✔ Test run with 99
+  tests in 8 suites passed"** (the Archived-surface suites + the registry walk).
+- **Phone** (iPhone 17 Pro simulator, `DerivedData/13ie-u2-ios`): **"Test run with 70 tests in 16
+  suites passed … with 2 known issues"** (the pre-existing `withKnownIssue` in
+  `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape`) — U1's 15 suites + the new
+  `MobileDailyJournalArchiveTests`.
+- **Fences:** `git diff 6beb6a66 -- Sources/VariorumCore/Sync Server Sources/VariorumCore/Persistence`
+  EMPTY; the editor seam untouched.
+- **THE WALK** (dev-store Debug `io.lduarte.Variorum.debug` from `DerivedData/13ie-u2`; grants proven
+  first — `AXIsProcessTrusted` and `CGPreflightScreenCaptureAccess` both true; ZERO instances before,
+  HID idle ~95 min — author-free; own `caffeinate -d -w <pid>`; quit by identity, zero instances
+  after; 33 captures in `notes/plans/13ie-screens/u2/`, gitignored). **Terminal·light:** `u2-00`
+  the Bookcase · `u2-01` a PLAIN book's row menu: **Archive beside Delete Book…** · `u2-02` archived
+  at once — off the Bookcase (census 19→18 books), the quiet receipt "Archived “act0 walk” — it's
+  kept under Archived; its notes stay where they are." · `u2-03` the OWNED book's menu: **Archive…**
+  (ellipsis) · `u2-04` **the two-choice confirm** ("…its 4 notes stay in the Library — still its own
+  — or archive the book and its 4 notes together." · cancel · archive book and its 4 notes · archive
+  book only) · `u2-05` archived with its notes · `u2-06` **the ARCHIVED surface's BOOKS group** above
+  the notes (u4 owned "book · 5 notes · owned", act0 walk "book · 2 notes"; Open · Unarchive · Delete
+  Book…; the 4 notes on the book's stamp, "u4 eta" keeping its own earlier stamp) · `u2-07` the book
+  opened from Archived: navigator "archived", "0 notes · 5 archived" · `u2-08` **its settings: "Collecting
+  is paused while this book is archived."** + the State section's "archived — kept under archived,
+  off the bookcase. · unarchive" · `u2-09` Unarchive from the sheet: "4 notes · 1 archived" again,
+  **"2 at the door"** (the resume catch-up BELLED — F-U2-5), the row now "archive…", the receipt at
+  the navigator's foot · `u2-10` (the sheet still up — the close missed; no new fact) · `u2-11` the
+  Pool BEFORE: "93 notes · 22 in gatherings" · `u2-12` **the daily Journal's row menu: Archive and NO
+  Delete Book…** (P-2) · `u2-13` archived: off the Bookcase (17 books), receipt "…and it comes back
+  when a day arrives." · `u2-14` a GATHERING's menu: Archive + Delete · `u2-15` archived · `u2-16` the
+  Pool AFTER: **"108 notes · 7 in gatherings"** — the archived gathering's notes re-classed loose ·
+  `u2-17` **the Add-to-Book picker marks "Journal archived", "act0 walk archived"** · `u2-18` picking
+  the archived book LANDED, no interruption (Pool 108→107) · `u2-19` Archived: the gathering
+  ("gathering · shows nothing while archived"), the Journal ("daily journal · 9 notes" — **Open ·
+  Unarchive, no Delete**), act0 walk (3 notes) · `u2-20` the archived gathering open: **0 notes**,
+  "archived" · `u2-21` its settings: **"Collecting is paused while this gathering is archived — it
+  shows nothing until you unarchive it."** + Unarchive · `u2-22` unarchived from the sheet: 16 notes
+  assemble again · `u2-23` **⌘J: today's entry opens in ~/journal and the quiet slot says "The Journal
+  is back on the Bookcase."** · `u2-24` the Journal back on the Bookcase (10 notes) · `u2-25` a note of
+  the archived book: the chip reads **"~/act0 walk (archived) · 1 gathering"** · `u2-26` the chip's
+  popover row **"act0 walk (archived)"** · `u2-27` **the Book Panel: "act0 walk" / "archived"**.
+  **Study·light:** `u2-28` the Archived surface ("Books" / "Notes") · `u2-29` a rule-less archived
+  book's sheet — the Archived row and NO pause sentence ("nothing by itself") · `u2-30` **W-1's
+  before**: Unarchive from the row, no receipt anywhere · `u2-31` the row menu (Archive · Delete
+  Book…) · `u2-32` re-archived (after the fix's rebuild) · `u2-33` **W-1 fixed**: "Unarchived “act0
+  walk” — it's back on the Bookcase." at the surface's foot. Her dev voice restored to Terminal and
+  read back; appearance untouched (Follow system).
+
+### FINDINGS (for the orchestrator; none is a STOP — no fence was needed)
+
+- **F-U2-1 — the walk's W-1, FIXED** (`506b4ec9`): the Archived surface hosted no quiet receipt, so
+  the books group's acts spoke into nothing under the default `receipt_style`. A FACE row — the
+  evidence is the re-walk (`u2-30` before, `u2-33` after) and the suites re-run 99/8.
+- **F-U2-2 — the daily Journal's own "+ new entry" does NOT bring an archived Journal back**
+  (`BookStructureModel.newEntry`'s daily branch files through `addPostToReading`, an explicit add —
+  legal on an archived book by her amendment — not through `shelveInDailyJournalBook`). Reachable
+  only by opening the archived Journal from Archived. Not changed (a semantics call, outside the
+  faces). Options: (a) leave — an explicit add inside an archived book is the ruled behaviour; (b)
+  the daily branch also runs the comes-back (route through the shelving door). Owner: the ladder /
+  the architect.
+- **F-U2-3 — an archived gathering's book view says "This book has no notes yet."** (`u2-20`) — the
+  shipped kind-blind empty state; the sheet's pause sentence is the ruled face. Suggested: the empty
+  state says "Archived — it shows nothing until you unarchive it." — 13s copy or the ladder.
+- **F-U2-4 — the Starred section names an archived book unmarked** (`StarredItem` carries a name
+  only; an archived starred NOTE is unmarked there too — P-13ie-U1-10's shipped treatment). Marking
+  needs a core field; not done. Her call whether starred rows should say "(archived)".
+- **F-U2-5 — unarchiving a living book can ring several bells at once** (`u2-09`: "u4 owned" came
+  back with "2 at the door" — the resume catch-up BELLS, never seats, R-13ie-4); the receipt counts
+  them ("N waiting at Arrivals."). Correct by the ruling; recorded so the orchestrator's walk expects it.
+- **F-U2-6 — MOBILE PARITY (record only, for the closeout's MobileSoul line with F-U1-4):** the phone
+  owes an Archived surface (books), Archive/Unarchive on ordinary books, the "(archived)" marks in
+  its pickers/chips (`BookArchiveCopy` is shared and ready), the Collecting pause sentence if its
+  sheet grows one, and the comes-back receipt on its Today door (`JournalBooks`' decision is
+  Mac-local; the two reads are trivially portable).
+- **F-U2-7 — honest-count taste:** the Archived surface's book row counts every live member ("5
+  notes") where the Bookcase splits "4 notes · 1 archived" — both true (on the Archived surface the
+  book itself is set aside). Her call if she wants the split there too.
+- **F-U2-8 — Manage Notes… needs no mark by construction** (reachable only from a Bookcase row, which
+  never shows an archived book); an archived book's own view keeps its explicit add doors (+ new
+  note), which land (her amendment).
+- **F-U2-9 — a quiet receipt at the navigator's foot truncates** ("Unarchived “u4 owned” — it's back
+  on the Bookc…", `u2-09`) — 13i-d F-U3-7's class (whole on hover), unchanged.
+- **F-U2-10 — walk residue in the dev store (the precedent — fixtures stay):** "a first quick note"
+  is now a member of "act0 walk" (the explicit-add capture); "u4 owned" was archived with its notes
+  and unarchived (its 4 notes back) and carries 2 new arrivals from the catch-up; the Journal was
+  archived and came back via ⌘J holding today's entry 2026-10-03; Quicknotes archived and
+  unarchived. Voice Terminal (restored), appearance untouched.
+- **F-U2-11 — machinery:** `sips --cropOffset` still mis-cropped (F-U7-7's trap — viewed the
+  downscaled whole instead); the palette's ⏎ via `cliclick kp:return` did not land twice (clicked the
+  row — the UNIT C note's road); bash scripts with absolute paths throughout (F-U1-10's zsh trap).
+- **F-U2-12 — proposed canon deltas for the closeout (contract lines only; not written here):**
+  AppSpec §9 — `setDailyJournalBook` refuses a non-book; §12 — the Archived surface's BOOKS group,
+  the archive doors from one table (the daily Journal: Archive in Delete's place on both platforms),
+  the Collecting pane's visible pause, the "(archived)" marks, the comes-back receipt.
+- **F-U2-13 — the re-seed consequence (the closeout's, never this unit's act):** her real store's
+  field guide lacks lesson 9's second sentence until Help ▸ Restore Tutorial runs on the refreshed
+  install (behind the A1 rail, after HER window's mirror deploy).
+
+### PROVISIONALS (QUESTIONS-ready for #179; each one line to overturn)
+
+P-13ie-U2-1 the archive door acts at once on a plain book, a gathering and the daily Journal; an
+owned book asks (two choices; one button with no notes) · U2-2 the Archived surface's BOOKS group
+sits above the notes, labelled only when a book is archived, newest archive first, window 200; rows
+Open · Unarchive · Delete Book… (no Delete on the daily Journal); the name filter covers books;
+subtitle "notes and books you set aside — kept, with no countdown" · U2-3 the pause sentence: the
+ruled words on a book whose rule reads, "…while this gathering is archived — it shows nothing until
+you unarchive it." on a gathering, nothing on a rule-less book; it leads the Collecting section ·
+U2-4 the navigator chip and the Book Panel's state line say "archived" · U2-5 the phone's daily
+Journal swaps Delete → Archive on both doors, acting at once, its receipt naming Today's Entry;
+ordinary phone books untouched · U2-6 the mark spelled "Name (archived)" (rows, menus, the chip's
+path), the picker's annotation "archived" beside "finished" · U2-7 the State section's Archived-row
+captions ("Archiving keeps it forever — off the Bookcase, under Archived, with no countdown." /
+"Archived — kept under Archived, off the Bookcase." / §10's sentence on the daily Journal); a
+gathering's sheet draws State for it · U2-8 the receipts' words (archive · with notes · unarchive ·
+the daily Journal's) · U2-9 the comes-back receipt only when the SAME book was archived before the
+filing and live after (never on a fresh mint), on both Mac roads · U2-10 the wing refusal's "(N
+archived)" per kind · U2-11 the unarchive receipt counts the arrivals its catch-up added · U2-12 the
+Archived surface hosts the quiet receipt line · U2-13 the three refusals' words · U2-14 the Starred
+list unmarked (F-U2-4).
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
