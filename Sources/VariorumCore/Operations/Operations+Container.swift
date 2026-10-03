@@ -189,7 +189,35 @@ extension Operations {
                 }
             }
             guard !plan.decided else { return .alreadyDecided }
-            _ = try addPostToReading(postID, to: plan.bookID)
+            // 13i-e — THE COMES-BACK (the sitting record §10: "the daily
+            // Journal can be archived, never deleted; it returns when a day
+            // arrives"; the identity memo §5 edge 5). ONE write: an ARCHIVED
+            // Journal (the derived read finds it — archived is live) is
+            // un-archived through `unarchiveReading`'s own body FIRST — its
+            // exact-stamp entries return, its catch-up runs — and then the
+            // day's entry is filed inside a SAVEPOINT, so a REFUSED filing
+            // (finished, full, an ownership bell, another wing) rolls back the
+            // filing alone: the day arrived, so the Journal comes back either
+            // way, and the bell rings at a door she can see (PROVISIONAL
+            // P-13ie-U1-12). A DECIDED pair (above) brings nothing back — no
+            // day arrived. A DEAD Journal is not found and mints fresh, as
+            // before.
+            let refusal: OperationError? = try database.write { db -> OperationError? in
+                if let book = try Reading.fetchOne(db, key: plan.bookID),
+                   book.deletedAt == nil, book.archivedAt != nil {
+                    _ = try unarchiveReading(db, id: plan.bookID, now: date.now)
+                }
+                do {
+                    try db.inSavepoint {
+                        _ = try addPostToReading(db, postID, to: plan.bookID, at: .end)
+                        return .commit
+                    }
+                    return nil
+                } catch let refused as OperationError {
+                    return refused
+                }
+            }
+            if let refusal { throw refusal }
             return .shelved(readingID: plan.bookID)
         } catch OperationError.alreadyInReading {
             // Raced to shelved between the read and the write — the outcome

@@ -235,12 +235,25 @@ struct AppearanceSettingsTests {
         }
     }
 
+    /// 13i-e: the delete door refuses the daily Journal now (the guard), so
+    /// the dead Journal arrives the ways one still can — an older build's
+    /// delete or another device's tombstone — written as that row write. The
+    /// designation is DERIVED from the live marker-bearer, so a dead one
+    /// reads as none whatever the cached setting still names.
     @Test func dailyJournalBookDanglesToNil() throws {
         try withOperations { ops, db in
             let book = try ops.createReading(name: "Journal", kind: .book, profile: "journal")
             try ops.setDailyJournalBook(book.id)
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == book.id)
-            try ops.deleteReading(book.id)
+            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: book.id)) {
+                try ops.deleteReading(book.id)
+            }
+            try db.write { db in
+                let stamp = DateFormatter.variorumISO8601.string(from: harnessNow)
+                try db.execute(
+                    sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: [stamp, stamp, book.id])
+            }
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == nil,
                     "a dead designated book reads as none (the fallback class)")
         }

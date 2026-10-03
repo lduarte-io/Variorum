@@ -626,11 +626,24 @@ struct JournalKeeperRepairTests {
     /// Journal she had been writing in, a Trash row on every device. Now
     /// the dangling designation adopts the one live candidate, and her
     /// next entry shelves there.
+    ///
+    /// 13i-e: the delete door now REFUSES the daily Journal (the guard —
+    /// `dailyJournalCannotBeDeleted`), so the premise is reached the ways a
+    /// Journal can still die: an older build's delete, or another device's
+    /// tombstone. Written as that row write — the same tombstone the old op
+    /// wrote, its cascade triggers and outbox capture firing exactly as they
+    /// did; everything after it is byte-unchanged.
     @Test func aDanglingDesignationAdoptsTheArrivingJournal() async throws {
         let (a, b, server) = try furniturePair()
         let deleted = try mintJournal(a, day: "2026-08-28")
         try await a.push()
-        try a.with { ops, _ in try ops.deleteReading(deleted.bookID) }
+        let deadID = deleted.bookID
+        try await a.db.write { db in
+            let stamp = DateFormatter.variorumISO8601.string(from: harnessNow)
+            try db.execute(
+                sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                arguments: [stamp, stamp, deadID])
+        }
         #expect(try designation(a) == deleted.bookID,
                 "positive activity: the designation dangles at the dead book")
         #expect(try await a.db.read { try Queries.dailyJournalBookID($0) } == nil,

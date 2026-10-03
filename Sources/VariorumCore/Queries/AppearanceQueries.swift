@@ -308,11 +308,26 @@ extension Queries {
         return keys.compactMap(StarTarget.init(key:)).filter { seen.insert($0).inserted }
     }
 
-    /// The designated daily journal book, when one exists (Phase 13 B3,
-    /// PROVISIONAL). A dangling id (book deleted) reads as none — the
-    /// fallback class.
+    /// **THE daily Journal — DERIVED from its marker** (13i-e; the sitting
+    /// record §10, the identity memo §3 BUILT): the live reading wearing the
+    /// `'daily'` marker, by the Journal-keeper repair's OWN pick — the
+    /// smallest id among `dailyJournalBookCandidates` — so this read and the
+    /// §7 convergence can never name two different books. An ARCHIVED Journal
+    /// is live and is found (it "returns when a day arrives" —
+    /// `shelveInDailyJournalBook` un-archives it); a tombstoned one is not, and
+    /// none reads as nil (the next daily door mints one fresh).
+    ///
+    /// The `daily_journal_book` SETTING retires-as-read here: its writers
+    /// (`setDailyJournalBook`, the daily mint, the keeper repair) keep it
+    /// fresh as a cache — the memo §3's blessed letter — but no CAS race on
+    /// it can decide which book ⌘J files into any more. *(Before 13i-e this
+    /// read the setting: a dangling value beside a live marker-bearer read as
+    /// "no Journal" and the next ⌘J minted a second one; a setting another
+    /// device wrote could name a book that was not the marker-bearer. Both
+    /// pinned red-on-old in `DailyJournalRulingsTests`.)* Cost ∝ the
+    /// marker-bearing books — one or, mid-convergence, two.
     public static func dailyJournalBookID(_ db: Database) throws -> String? {
-        try designatedBookID(db, key: "daily_journal_book")
+        try dailyJournalBookCandidates(db).first
     }
 
     /// **The ONE journal-profile string** (pre-13u Act 0, R-pre13u-1; made
@@ -425,7 +440,9 @@ extension Queries {
             db, sql: "SELECT EXISTS (SELECT 1 FROM setting WHERE key = 'quicknote_book')") ?? false
     }
 
-    /// The one designation read (the `setting` key → a LIVE reading id).
+    /// The one designation read (the `setting` key → a LIVE reading id). Since
+    /// 13i-e its only consumer is Quicknotes — the daily Journal's
+    /// designation is derived from its marker (`dailyJournalBookID`).
     private static func designatedBookID(_ db: Database, key: String) throws -> String? {
         guard let id = try String.fetchOne(
             db, sql: "SELECT value FROM setting WHERE key = ?", arguments: [key])

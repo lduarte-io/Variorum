@@ -327,9 +327,31 @@ extension Operations {
     /// "Delete book only" (13i-c — the sitting record §6): an OWNED book's
     /// notes are released by the cascade and land in the Pool ("nothing of
     /// hers destroyed"); a plain book's delete never touches a note.
+    ///
+    /// **13i-e — THE DAILY JOURNAL CAN BE ARCHIVED, NEVER DELETED** (the
+    /// sitting record §10, on the ⌘J ground): a book wearing the 'daily'
+    /// marker refuses `dailyJournalCannotBeDeleted`, read from the row INSIDE
+    /// this transaction (a caller-side check would read a stale projection).
+    /// The road is `archiveReading` — it returns when a day arrives.
     public func deleteReading(_ id: String) throws {
-        let now = date.now
-        try updateLiveReading(id, now: now) { $0.deletedAt = now }
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            try refuseDeletingTheDailyJournal(reading)
+            let now = date.now
+            reading.deletedAt = now
+            reading.updatedAt = now
+            try reading.update(db)
+        }
+    }
+
+    /// THE GUARD, one line for both delete doors (13i-e): keyed on the
+    /// marker (`isDailyJournalMintShape` — kind book + profile 'daily'),
+    /// never the name or the cached setting. Two marker-bearers meeting
+    /// mid-convergence both refuse; the keeper repair's apply-mode tombstone
+    /// is not an operation and is untouched.
+    private func refuseDeletingTheDailyJournal(_ reading: Reading) throws {
+        guard Queries.isDailyJournalMintShape(reading) else { return }
+        throw OperationError.dailyJournalCannotBeDeleted(id: reading.id)
     }
 
     /// **"Delete book and its N notes"** (13i-c U2 — the sitting record §6's
@@ -343,7 +365,9 @@ extension Operations {
     ///
     /// The DOOR offers this only on an OWNED book (ruled — "the asymmetry is
     /// the ownership concept, visible at the door"); the op refuses a
-    /// gathering (`wrongReadingKind` — it holds no notes) and nothing else.
+    /// gathering (`wrongReadingKind` — it holds no notes) and — 13i-e — the
+    /// DAILY JOURNAL (`dailyJournalCannotBeDeleted`, the same guard as
+    /// `deleteReading`, inside this transaction, before any note is touched).
     /// Returns the notes it deleted, in the book's order. Clears the redo
     /// future (`deleteContainer`'s own rule — a note's content left).
     @discardableResult
@@ -353,6 +377,7 @@ extension Operations {
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
+            try refuseDeletingTheDailyJournal(reading)
             let now = date.now
             let postIDs = try String.fetchAll(
                 db,
@@ -645,49 +670,61 @@ extension Operations {
         _ postID: String, to readingID: String, at insert: InsertPosition = .end
     ) throws -> ReadingPost {
         try database.write { db in
-            let reading = try liveReading(db, readingID)
-            guard reading.kind == .book else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
-            }
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            // 13i-d U5 (F-U5-2): a book never spans wings (§9) — the one
-            // choke point refuses a note of another wing.
-            try requireSameWing(db, post: try livePost(db, postID), book: reading)
-
-            let liveCount = try liveMemberCount(db, readingID: readingID)
-            if try liveMembership(db, postID: postID, readingID: readingID) != nil {
-                throw OperationError.alreadyInReading(postID: postID, readingID: readingID)
-            }
-            // The extent constraint (fixed-length journals).
-            if let maxPosts = reading.maxPosts, liveCount >= maxPosts {
-                throw OperationError.readingAtCapacity(id: readingID)
-            }
-            // 13i-c U2 — the ownership consult (both arms below: a fresh row
-            // AND a waiting arrival's seat — "a waiting ARRIVAL's seating
-            // path inside the same op consults the same table", the plan §3).
-            try consultOwnership(db, book: reading, postID: postID)
-
-            let now = date.now
-            let membership: ReadingPost
-            if var waiting = try livePairRow(db, postID: postID, readingID: readingID) {
-                // Only an arrival can be live here (a member threw above).
-                waiting.status = .member
-                waiting.sectionId = nil
-                waiting.position = try readingPosition(db, readingID: readingID, at: insert)
-                try waiting.update(db)
-                membership = waiting
-            } else {
-                membership = ReadingPost(
-                    id: newID(), readingId: readingID, postId: postID,
-                    position: try readingPosition(db, readingID: readingID, at: insert),
-                    createdAt: now)
-                try membership.insert(db)
-            }
-            try applyAutoTag(db, book: reading, postID: postID, now: now)
-            return membership
+            try addPostToReading(db, postID, to: readingID, at: insert)
         }
+    }
+
+    /// The hand-add's body at db level (13i-e: shared with
+    /// `shelveInDailyJournalBook`, whose filing runs inside the SAME
+    /// transaction as the daily Journal's comes-back — under a savepoint, so
+    /// a refused filing rolls back alone). Every refusal below is raised
+    /// BEFORE the first write.
+    @discardableResult
+    func addPostToReading(
+        _ db: Database, _ postID: String, to readingID: String, at insert: InsertPosition
+    ) throws -> ReadingPost {
+        let reading = try liveReading(db, readingID)
+        guard reading.kind == .book else {
+            throw OperationError.wrongReadingKind(id: readingID, expected: .book)
+        }
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        // 13i-d U5 (F-U5-2): a book never spans wings (§9) — the one
+        // choke point refuses a note of another wing.
+        try requireSameWing(db, post: try livePost(db, postID), book: reading)
+
+        let liveCount = try liveMemberCount(db, readingID: readingID)
+        if try liveMembership(db, postID: postID, readingID: readingID) != nil {
+            throw OperationError.alreadyInReading(postID: postID, readingID: readingID)
+        }
+        // The extent constraint (fixed-length journals).
+        if let maxPosts = reading.maxPosts, liveCount >= maxPosts {
+            throw OperationError.readingAtCapacity(id: readingID)
+        }
+        // 13i-c U2 — the ownership consult (both arms below: a fresh row
+        // AND a waiting arrival's seat — "a waiting ARRIVAL's seating
+        // path inside the same op consults the same table", the plan §3).
+        try consultOwnership(db, book: reading, postID: postID)
+
+        let now = date.now
+        let membership: ReadingPost
+        if var waiting = try livePairRow(db, postID: postID, readingID: readingID) {
+            // Only an arrival can be live here (a member threw above).
+            waiting.status = .member
+            waiting.sectionId = nil
+            waiting.position = try readingPosition(db, readingID: readingID, at: insert)
+            try waiting.update(db)
+            membership = waiting
+        } else {
+            membership = ReadingPost(
+                id: newID(), readingId: readingID, postId: postID,
+                position: try readingPosition(db, readingID: readingID, at: insert),
+                createdAt: now)
+            try membership.insert(db)
+        }
+        try applyAutoTag(db, book: reading, postID: postID, now: now)
+        return membership
     }
 
     /// NEW POST IN A BOOK (taste checkpoint, Sitting 9 — R62/R75: "it needs

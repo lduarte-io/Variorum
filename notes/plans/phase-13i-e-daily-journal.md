@@ -369,6 +369,21 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   its production change and RUN ON THE PRE-FIX TREE (the natural red — EVIDENCE below). NEXT: piece
   2 (the derivation, the guard, the comes-back), then the existing pins whose premise the guard
   retires, then the revert cycle, then the full suite. No revert in flight.
+- 2026-10-03 · **PIECE 2 DONE (the commit "13i-e U1 piece 2"):** THE DERIVATION
+  (`Queries.dailyJournalBookID` → `dailyJournalBookCandidates(db).first`), THE GUARD (both delete
+  ops read the row inside their write and refuse `dailyJournalCannotBeDeleted` on the marker —
+  `deleteReading` rewritten from the `updateLiveReading` closure to an explicit write),
+  `addPostToReading`'s body extracted to a db-level twin (the public door unchanged in behaviour),
+  THE COMES-BACK (`shelveInDailyJournalBook`'s one write: the `unarchiveReading` body, then the
+  filing under `db.inSavepoint`). Three EXISTING pins whose premise the guard retires were
+  re-premised — never weakened (each still asserts its own clause; each now reaches a dead daily
+  Journal by the row write an older build's delete / another device's tombstone is):
+  `ThemeAndShelfQueryTests.dailyJournalBookDanglesToNil` (also now asserts the door refuses),
+  `JournalKeeperRepairTests.aDanglingDesignationAdoptsTheArrivingJournal`, and the PHONE's
+  `MobileStarterJournalTests.aDeletedStarterJournalNeverComesBack` (the starter IS the daily
+  Journal). Filtered run: the four daily suites + the keeper suite + the touched suites 66/15
+  GREEN. NEXT: the red-on-old REVERT cycle (R1–R3), then the full core suite, the Mac/mobile
+  compile + the affected batches. No revert in flight.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 

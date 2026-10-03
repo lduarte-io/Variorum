@@ -173,8 +173,18 @@ struct MobileStarterJournalTests {
                 return
             }
 
-            try await session.runner.run { ops in
-                try ops.deleteReading(readingID)
+            // 13i-e: the delete door REFUSES the daily Journal now (the
+            // guard — the starter IS the daily Journal, the one shared mint),
+            // so the deleted state arrives the ways it still can: an older
+            // build's delete, or another device's tombstone — written as that
+            // row write (the same tombstone; its cascade triggers fire as the
+            // old op's did). The seeder's clause under test is unchanged.
+            try await db.write { db in
+                let stamp = DateFormatter.variorumISO8601.string(
+                    from: Date(timeIntervalSince1970: 1_782_864_000))
+                try db.execute(
+                    sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: [stamp, stamp, readingID])
             }
 
             let second = await MobileStarterJournal.seedIfNeeded(
