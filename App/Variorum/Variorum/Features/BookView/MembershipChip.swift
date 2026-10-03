@@ -122,7 +122,10 @@ struct MembershipChip: View {
                             // one is the fire-and-DO class that produced the
                             // bug. It names a destination; the shell decides
                             // what that means (P-4).
-                            Button(book.name) {
+                            // 13i-e U2: an archived book is named "(archived)"
+                            // (the edge: membership is a fact; visibility is
+                            // the book's own state).
+                            Button(BookArchiveCopy.name(book)) {
                                 popoverShown = false
                                 MembershipChip.ascend(bookID: book.id, postID: postID)
                             }
@@ -172,15 +175,19 @@ struct MembershipChip: View {
                 // R61 — the ADD door, right where "in no book" is read.
                 if !addableBooks.isEmpty || !addableSmartBooks.isEmpty {
                     Menu("Add to Book") {
+                        // 13i-e U2 — her second rider's lighter road: an
+                        // archived book is MARKED in the selector and the add
+                        // lands on a plain click (explicit adds stay open —
+                        // R-13ie-4's amendment).
                         ForEach(addableBooks, id: \.id) { book in
-                            Button(book.name) { add(to: book) }
+                            Button(BookArchiveCopy.name(book)) { add(to: book) }
                         }
                         if !addableSmartBooks.isEmpty {
                             Divider()
                             // R98: smart books collect by filter — adding
                             // IS tagging, and the door says so.
                             ForEach(addableSmartBooks, id: \.id) { book in
-                                Button("\(book.name) (by tagging)") { collect(into: book) }
+                                Button("\(BookArchiveCopy.name(book)) (by tagging)") { collect(into: book) }
                             }
                         }
                     }
@@ -266,7 +273,7 @@ struct MembershipChip: View {
     private var label: String {
         let memberBooks = books.filter { $0.kind == .book }
         return MembershipChip.label(
-            bookNames: memberBooks.map(\.name), gatheringCount: gatheringCount
+            bookNames: memberBooks.map(BookArchiveCopy.name), gatheringCount: gatheringCount
         ) { name in
             tokens.pathPrefix.isEmpty ? "in \(name)" : tokens.path([name])
         }

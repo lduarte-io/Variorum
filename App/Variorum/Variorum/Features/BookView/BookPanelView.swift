@@ -105,7 +105,8 @@ struct BookPanelView: View {
                         set: { model.chosenBookID = $0 })
                     ) {
                         ForEach(books, id: \.id) { book in
-                            Text(book.name).tag(book.id)
+                            // 13i-e U2: an archived book named "(archived)".
+                            Text(BookArchiveCopy.name(book)).tag(book.id)
                         }
                     }
                     .pickerStyle(.inline)

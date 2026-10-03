@@ -170,9 +170,14 @@ extension NotePickerSource {
                     needle.isEmpty || $0.name.localizedCaseInsensitiveContains(needle)
                 }
                 .map { reading in
-                    NotePickerRow(
+                    // 13i-e U2 — her second rider: an archived book is MARKED,
+                    // never refused — the add lands on a plain pick.
+                    let marks = [reading.locked ? "finished" : nil,
+                                 reading.archivedAt != nil ? BookArchiveCopy.word : nil]
+                        .compactMap { $0 }
+                    return NotePickerRow(
                         id: reading.id, title: reading.name,
-                        annotation: reading.locked ? "finished" : nil)
+                        annotation: marks.isEmpty ? nil : marks.joined(separator: " \u{00B7} "))
                 }
         }
     }

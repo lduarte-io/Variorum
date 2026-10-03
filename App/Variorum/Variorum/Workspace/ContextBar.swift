@@ -260,7 +260,9 @@ struct ContextBar: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 260, alignment: .leading)
             ForEach(books, id: \.id) { book in
-                Button(book.name) {
+                // 13i-e U2: an archived book is NAMED, muted "(archived)" —
+                // membership is a fact; visibility is the book's own state.
+                Button(BookArchiveCopy.name(book)) {
                     listingBooks = false
                     onOpenBook(book.id)
                 }

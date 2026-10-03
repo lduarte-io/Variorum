@@ -93,6 +93,9 @@ nonisolated enum BookPanelCopy {
     /// name — a finished book's structure doors refuse with "reopen it").
     static func stateWords(_ reading: Reading) -> String? {
         var words: [String] = []
+        // 13i-e U2: an ARCHIVED book says so first (the edge — membership is a
+        // fact, visibility is the book's own state; PROVISIONAL).
+        if reading.archivedAt != nil { words.append(BookArchiveCopy.word) }
         if reading.owned { words.append("owned") }
         if reading.sealedAt != nil { words.append("sealed") }
         else if reading.locked { words.append("finished") }
