@@ -2969,6 +2969,41 @@ unshelved there); Sherlock made to own its notes ONLY if none of its stories liv
 it (the mark reads `declined`). If she has hand-shelved any seeded book by then, it stays where she put
 it.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U7 (2026-10-02 — spot-check: thirteen commits pushed, fences empty, the record and #177 in place; the away-run rule governs)
+
+- **F-U7-1 RULED — the ruled letter BUILDS, split per the implementer's own division:** the
+  `Sync/` half is THE ARCHITECT'S (the standing Fable rider; SyncSpec and the Fragments
+  postmortem read IN FULL at this adjudication, per the rule) — `SampleLibraryDedupeFacts`
+  gains a SEED-TAG PATH SET and the classifier's engagement check SKIPS applications of those
+  paths (the reserved-path completeness leg untouched — it keys on the reserved path alone);
+  the wiring at the shared configure site declares `classics`. Convergence shape, stated
+  before the build: two fresh devices each seeding the triad classify both copies PRISTINE
+  (the #classics applications being seed-authored), the smaller-id keeper stands, the loser's
+  family tombstones; the duplicate `classics` TAG row converges by the standing per-wing
+  `tag.path` repair (applications re-point to the keeper). The convergence pin is the
+  evidence (two clients, fake server, red by behavioural revert: without the skip both copies
+  read EDITED and BOTH SURVIVE — F-U7-1's own trace). **The SEED half (tag the stories, key
+  the gathering on `#classics`, flip the two-sided pin deliberately) returns to U7's session
+  as a narrow continuation**, after the classifier lands.
+- **F-U7-2 ACCEPTED** (P-6's letter: a sentence the build makes false is not taught; lesson
+  9's second sentence is PINNED UNTAUGHT until 13i-e ships the guard — the closeout's 13i-e
+  handoff carries the sentence-with-the-guard obligation; KnownIssues row 32 annotated).
+- **F-U7-3 RULED — re-add as a COPY, the ownership doctrine's own answer** (an owned book's
+  claimed-elsewhere note comes in as a copy; the restore door consults the same rule instead
+  of failing with an impossible "try again"). Built in the U7 continuation with a red-on-old
+  pin. **F-U7-4 (the retired ⌘⇧I fold taught) and F-U7-5 (a gathering's "+ new chapter"
+  that always refuses — P-2) → the U7 continuation** (one prose fix + pin; one gate + pin).
+- **P-13id-U7-1…14 STAND** (#177). The provisional classics-gathering rule (the two book
+  tags ORed) is SUPERSEDED by the ruled letter once the continuation lands.
+- **Ledger row 8 holds at BUILT until the continuation closes; then LADDER B** over bank 2's
+  combined diff (U5 → the continuation, the architect's Sync/ commit INCLUDED — the ladder's
+  Fable review covers it cold, the rider's letter).
+- **For the combined 13i walk (grown by U7):** Welcome holding the guide + the classics
+  triad · the classics gathering (R1's walk: Jekyll's and Sherlock's notes side by side,
+  Sherlock's wearing the owned mark, click-through landing in the book) · the books chapter
+  read end to end · Restore Tutorial's new confirm sentence · the seeded quicknote in
+  Quicknotes.
+
 ## ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill — every brief carries this section verbatim)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
