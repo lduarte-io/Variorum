@@ -188,7 +188,24 @@ extension Operations {
                     return (book.id, false)
                 }
             }
-            guard !plan.decided else { return .alreadyDecided }
+            guard !plan.decided else {
+                // HER POST-CLOSE RULING (2026-10-03, the plan's addendum —
+                // "I think it's fine for it to unarchive when you command
+                // J"): the daily door un-archives on EVERY press, a decided
+                // pair included — the comes-back decoupled from the filing.
+                // The pair itself stays decided (nothing re-files; the
+                // never-re-shelve rule untouched), so a deliberate removal
+                // is never undone while the Journal still returns. This
+                // supersedes P-13ie-U1-12's decided arm ("a decided pair
+                // brings nothing back").
+                try database.write { db in
+                    if let book = try Reading.fetchOne(db, key: plan.bookID),
+                       book.deletedAt == nil, book.archivedAt != nil {
+                        _ = try unarchiveReading(db, id: plan.bookID, now: date.now)
+                    }
+                }
+                return .alreadyDecided
+            }
             // 13i-e — THE COMES-BACK (the sitting record §10: "the daily
             // Journal can be archived, never deleted; it returns when a day
             // arrives"; the identity memo §5 edge 5). ONE write: an ARCHIVED
@@ -199,8 +216,8 @@ extension Operations {
             // (finished, full, an ownership bell, another wing) rolls back the
             // filing alone: the day arrived, so the Journal comes back either
             // way, and the bell rings at a door she can see (PROVISIONAL
-            // P-13ie-U1-12). A DECIDED pair (above) brings nothing back — no
-            // day arrived. A DEAD Journal is not found and mints fresh, as
+            // P-13ie-U1-12, its decided arm superseded by her post-close
+            // ruling above). A DEAD Journal is not found and mints fresh, as
             // before.
             let refusal: OperationError? = try database.write { db -> OperationError? in
                 if let book = try Reading.fetchOne(db, key: plan.bookID),
