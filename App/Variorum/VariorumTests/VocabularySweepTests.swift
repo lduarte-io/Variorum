@@ -215,6 +215,24 @@ struct VocabularySweepTests {
         #expect(NoteMenuWingContext.matching(nil, postID: "note-b") == nil)
     }
 
+    /// **The RELOAD gate** (the sanity pass's NIT on fix B, confirmed and
+    /// fixed): a post-act reload runs in an UNSTRUCTURED Task — cancellation
+    /// never reaches it — so the subject check is the real guard: a reload
+    /// adopts only over ITS OWN note's standing context. A reload for note A
+    /// landing after the bar moved to note B writes nothing, so B's loaded
+    /// context never blinks out behind the render gate; A's own refresh
+    /// still lands.
+    @Test func aPostActReloadNeverStompsTheNextNotesContext() {
+        let noteA = NoteMenuWingContext(postID: "note-a", wingID: "w1", title: "A")
+        let noteB = NoteMenuWingContext(postID: "note-b", wingID: "", title: "B")
+        #expect(NoteMenuWingContext.reloadAdopts(over: noteA, postID: "note-a"),
+                "the note's own refresh lands")
+        #expect(!NoteMenuWingContext.reloadAdopts(over: noteB, postID: "note-a"),
+                "a stale reload never overwrites the next note's context")
+        #expect(!NoteMenuWingContext.reloadAdopts(over: nil, postID: "note-a"),
+                "nothing standing, nothing to refresh — the note's own task(id:) load owns the first fill")
+    }
+
     // MARK: - (h) F-U4-4 — the Archived view's inline Unarchive is declared
 
     /// The registry walk is a UNION equality and `.unarchiveNote` already has

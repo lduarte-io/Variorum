@@ -393,6 +393,17 @@ struct NoteMenuWingContext: Equatable, Sendable {
         guard let context, context.postID == postID else { return nil }
         return context
     }
+
+    /// **The RELOAD gate** (the sanity pass's NIT on fix B, confirmed): a
+    /// post-act reload runs in an UNSTRUCTURED Task, which nothing ever
+    /// cancels — a `Task.isCancelled` guard there is dead — so the real
+    /// guard is the SUBJECT: a reload adopts only over its own note's
+    /// standing context. A reload for note A landing after the bar moved to
+    /// B writes nothing (B's loaded context never blinks out behind the
+    /// render gate); A's own refresh still lands. Pure, pinned.
+    static func reloadAdopts(over current: NoteMenuWingContext?, postID: String) -> Bool {
+        current?.postID == postID
+    }
 }
 
 extension View {
@@ -412,9 +423,14 @@ extension View {
                 context.wrappedValue = loaded
             }
             .wingMoveConfirm(ask, wings: wings) {
+                // An UNSTRUCTURED task: cancellation never reaches it, so
+                // the subject check is the guard (`reloadAdopts` — the
+                // sanity pass's NIT), applied AFTER the await, where the
+                // stale landing happens.
                 Task {
                     let loaded = await NoteMenuWingContext.load(session, postID: postID)
-                    guard !Task.isCancelled else { return }
+                    guard NoteMenuWingContext.reloadAdopts(
+                        over: context.wrappedValue, postID: postID) else { return }
                     context.wrappedValue = loaded
                 }
             }

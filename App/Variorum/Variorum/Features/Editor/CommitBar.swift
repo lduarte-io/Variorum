@@ -831,9 +831,16 @@ struct CommitBar: View {
                         wings: wings, postID: model.postID, title: context.title,
                         fromWing: context.wingID, onAsk: { wingAsk = $0 },
                         onDone: {
+                            // The sanity pass's NIT on fix B: an unstructured
+                            // task never sees cancellation — the SUBJECT
+                            // check is the guard (`reloadAdopts`).
                             Task {
-                                wingContext = await NoteMenuWingContext.load(
-                                    model.session, postID: model.postID)
+                                let subject = model.postID
+                                let loaded = await NoteMenuWingContext.load(
+                                    model.session, postID: subject)
+                                guard NoteMenuWingContext.reloadAdopts(
+                                    over: wingContext, postID: subject) else { return }
+                                wingContext = loaded
                             }
                         })
                 }
