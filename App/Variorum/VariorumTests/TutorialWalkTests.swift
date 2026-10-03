@@ -434,6 +434,25 @@ struct TutorialBookShapeTests {
                     "the retired fold is no longer taught")
         }
     }
+
+    /// **13i-d U7 continuation C3 — F-U7-4: row 85's twin, one lesson over.**
+    /// Row 85 corrected "the workspace" to the masthead's ＃ tag field and ⌘⇧I
+    /// OPENING it, and missed "comments & tags", which went on teaching tag
+    /// cards "on the CONTEXT BAR at the top of its pane" and "Fold the bar with
+    /// ⌘⇧I" — a fold the app retired. RED ON OLD: both retired clauses.
+    @Test func theCommentsAndTagsLessonTeachesTheMastheadTagField() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "comments & tags") }
+            let stored = try await db.read { try Queries.renderedText($0, containerID: lesson) }
+            #expect(!stored.contains("Fold the bar with"), "the retired fold is no longer taught")
+            #expect(!stored.contains("CONTEXT BAR at the top of its pane"),
+                    "tags live on the masthead, not the context bar (row 15)")
+            #expect(stored.contains("masthead"), "where the cards really are")
+            #expect(stored.contains("\u{2318}\u{21E7}I opens the same field"),
+                    "⌘⇧I opens the tag field — the workspace lesson's own words")
+            #expect(stored.contains("Make a Gathering"), "the Settings door the paragraph names")
+        }
+    }
 }
 
 // MARK: - The doors (seeding is a product door)
