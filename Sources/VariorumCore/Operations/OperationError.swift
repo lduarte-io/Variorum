@@ -125,6 +125,21 @@ public enum OperationError: Error, Equatable, Sendable {
     /// "with copies" (§6).
     case ownedBookDuplicatesDeep(id: String)
 
+    // Book archive (13i-e U1 — R-13ie-1…4; the 13i-e plan's U1 RECORD).
+    // Both are the `blockAlreadyArchived`/`readingNotSealed` class: a door
+    // that silently succeeded on a book already in the state it asks for
+    // would teach that it did something — and re-stamping an archived book
+    // would orphan the exact-stamp key its archived-with-notes members carry.
+    case readingAlreadyArchived(id: String)
+    case readingNotArchived(id: String)
+    /// THE DAILY JOURNAL CAN BE ARCHIVED, NEVER DELETED (13i-e — the sitting
+    /// record §10's ruling on the ⌘J ground: "the daily Journal can be
+    /// archived, never deleted; it returns when a day arrives"). Both delete
+    /// doors (`deleteReading`, `deleteReadingWithNotes`) refuse a book
+    /// wearing the 'daily' marker, checked inside their write transaction;
+    /// the road is `archiveReading`.
+    case dailyJournalCannotBeDeleted(id: String)
+
     // Structural operations (Phase 3).
     /// Extract's span is not a boundary-adjacent prefix/suffix of the
     /// rendered variant's text (a middle span is a divide), or it is blank,

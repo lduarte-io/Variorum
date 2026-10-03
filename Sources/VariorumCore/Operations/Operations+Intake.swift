@@ -170,10 +170,13 @@ extension Operations {
 
     // MARK: - The facts the table reads
 
-    /// The live, unfinished BOOKS with a READABLE rule in one wing — the
-    /// candidates any act can reach (a gathering never materializes; a
-    /// malformed rule runs nothing). Ordered by id so a multi-book act
-    /// writes deterministically.
+    /// The live, unfinished, UNARCHIVED BOOKS with a READABLE rule in one
+    /// wing — the candidates any act can reach (a gathering never
+    /// materializes; a malformed rule runs nothing; an archived book's
+    /// auto-ingestion is paused — 13i-e, R-13ie-4, the same truth
+    /// `IntakeDecision.intakeRuns` states, filtered here as the cheap
+    /// pre-filter). Ordered by id so a multi-book act writes
+    /// deterministically.
     private func livingBooks(
         _ db: Database, wingID: String
     ) throws -> [(book: Reading, term: RuleTerm)] {
@@ -182,6 +185,7 @@ extension Operations {
             sql: """
                 SELECT * FROM reading
                 WHERE deleted_at IS NULL AND kind = 'book' AND locked = 0
+                  AND archived_at IS NULL
                   AND query_spec IS NOT NULL AND wing_id = ?
                 ORDER BY id
                 """,
@@ -229,7 +233,8 @@ extension Operations {
             seating: book.intakeSeating,
             maxPosts: book.maxPosts,
             memberCount: try liveMemberCount(db, readingID: book.id),
-            owned: book.owned)
+            owned: book.owned,
+            archived: book.archivedAt != nil)
     }
 
     /// Live `status='member'` rows — THE count capacity reads (arrivals are

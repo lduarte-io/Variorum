@@ -360,6 +360,15 @@ precedent); each P-13ie-U1-n below is written QUESTIONS-ready.
   `Queries/ShelfQueries.swift` whole, `Operations+BlockArchive.swift` (the archive precedent), the
   v1_18 marker migration step, the app/mobile consumers of every query touched. THE DESIGN below
   settled before the first line of code. **No revert in flight.**
+- 2026-10-03 · **PIECE 1 DONE (the commit after ee68fdc3 — "13i-e U1 piece 1"):** the archive op
+  family (`Operations+ReadingArchive.swift`), the three `OperationError` cases, the pause in the
+  one table (`IntakeDecision.BookFacts.archived` + `intakeRuns`; `livingBooks`' SQL), the
+  gathering's empty assembly + the four outside-the-assembly readers, the Bookcase choke point,
+  `archivedReadings`, the catalog's book arm, the E13 name guard. Pins: `BookArchiveTests.swift`
+  (4 suites / 23 tests) GREEN in a filtered run. `DailyJournalRulingsTests.swift` committed AHEAD of
+  its production change and RUN ON THE PRE-FIX TREE (the natural red — EVIDENCE below). NEXT: piece
+  2 (the derivation, the guard, the comes-back), then the existing pins whose premise the guard
+  retires, then the revert cycle, then the full suite. No revert in flight.
 
 ### THE DESIGN (settled before building; PROVISIONAL where marked — QUESTIONS-ready for #179)
 
@@ -480,6 +489,35 @@ mechanisms: (R1) the guard — revert the two guard lines, the old tree tombston
 disagreement answers the setting, and a dangling setting beside a live marker-bearer double-mints
 on ⌘J; (R3) the comes-back — revert the shelving's unarchive: the book stays archived after the
 filing.
+
+### WHAT WAS BUILT (a fresh session's map) — PENDING (written at the unit's end)
+
+### EVIDENCE (counts exact, run at the END) — PENDING except the pre-fix run below
+
+- **PRE-FIX RUN (piece 1's tree — the archive family present, the daily rulings NOT yet built;
+  `swift test --filter` over the four daily suites, 17 tests / 4 suites):** RED at every named
+  mechanism — (R1) `deleteReadingRefusesTheDailyJournal` ("an error was expected but none was
+  thrown"; the Journal's `deleted_at` set; its membership dead) and
+  `deleteReadingWithNotesRefusesTheDailyJournalAndTouchesNoEntry` (none thrown, `["…0000"]`
+  returned — the entry sent to the Trash with it), `theGuardKeysOnTheMarker`; (R2)
+  `theMarkerAnswersWhenTheCachedSettingDisagrees` (the read answered the trait notebook; ⌘J filed
+  into it), `aDanglingSettingBesideALiveMarkerBearerNoLongerDoubleMints` (**the double-mint:
+  `next.bookID` = …0004 beside the live marker-bearer …0001**; two live daily-shaped books),
+  `aMissingSettingBesideALiveMarkerBearerFilesThere`, `theCachedSettingAloneNoLongerDesignates`,
+  `theCacheIsStillWrittenAndTheReadIsTheKeepersPick`; (R3)
+  `aDayArrivingBringsAnArchivedJournalBackAndFilesIntoIt` (`archived_at` still set after the
+  filing; not on the Bookcase), `theComesBackReturnsTheEntriesArchivedWithTheJournal`,
+  `aRefusedFilingStillBringsTheJournalBack`, `anOwnershipBellRingsAtAJournalThatCameBack`. GREEN on
+  both sides by design (behaviour-preservation and edge pins, never red-on-old claims):
+  `archiveIsTheDailyJournalsRoad`, `aDecidedPairBringsNothingBack`,
+  `aDeadDailyJournalStillMintsFresh`, and the two keeper-meets-archived convergence pins (the
+  edge's own claim is that NO `Sync/` change is needed — green on both sides is its evidence).
+  One fixture defect found and fixed on the way (the raw setting write used `ON CONFLICT`, which
+  fires the outbox trigger twice — now the repo's UPDATE-then-INSERT shape).
+
+### FINDINGS (for the orchestrator) — PENDING
+
+### PROVISIONALS — the P-13ie-U1-n of THE DESIGN above (final list PENDING)
 
 ## U2 BRIEF — THE FACES + LESSON 9 (`opus-implementer`; read this WHOLE file first)
 

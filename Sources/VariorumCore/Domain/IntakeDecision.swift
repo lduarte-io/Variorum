@@ -70,10 +70,17 @@ public enum IntakeDecision {
         /// Live `status='member'` rows — arrivals are never counted.
         public var memberCount: Int
         public var owned: Bool
+        /// ARCHIVED (13i-e — R-13ie-4, her amendment: *"every method of auto
+        /// ingestion should pause"*): intake pauses exactly as it does for a
+        /// finished book — every occasion, every road — while the EXPLICIT
+        /// add doors stay open (they never consult this table). Defaulted so
+        /// every pre-13i-e fact-builder reads as it always did.
+        public var archived: Bool
 
         public init(
             isLive: Bool, isBook: Bool, rule: RuleState, locked: Bool,
-            seating: IntakeSeating?, maxPosts: Int?, memberCount: Int, owned: Bool
+            seating: IntakeSeating?, maxPosts: Int?, memberCount: Int, owned: Bool,
+            archived: Bool = false
         ) {
             self.isLive = isLive
             self.isBook = isBook
@@ -83,6 +90,7 @@ public enum IntakeDecision {
             self.maxPosts = maxPosts
             self.memberCount = memberCount
             self.owned = owned
+            self.archived = archived
         }
     }
 
@@ -116,11 +124,14 @@ public enum IntakeDecision {
     }
 
     /// Does this book's intake run at all (P-13ib-5)? A live row, a BOOK, a
-    /// READABLE rule, not finished. A malformed rule runs nothing (fails
-    /// closed — the standing per-consumer letter); a dead or paused book's
-    /// intake runs nothing (§4, ruled).
+    /// READABLE rule, not finished — and (13i-e, R-13ie-4) NOT ARCHIVED. A
+    /// malformed rule runs nothing (fails closed — the standing per-consumer
+    /// letter); a dead or paused book's intake runs nothing (§4, ruled).
+    /// Archive pauses here, in the one table, so every occasion — the
+    /// tagging/starring event, the backfill, every resume catch-up — pauses
+    /// by construction; the unarchive's catch-up covers the gap.
     public static func intakeRuns(_ book: BookFacts) -> Bool {
-        book.isLive && book.isBook && book.rule == .readable && !book.locked
+        book.isLive && book.isBook && book.rule == .readable && !book.locked && !book.archived
     }
 
     /// The one verdict. Order is the table's (the 13i-b plan §2.1):

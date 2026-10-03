@@ -141,6 +141,13 @@ extension Queries {
     /// `wingID` (13i-d U5, additive): one wing's readings (a book never spans
     /// wings — the choosers list the note's own wing's books); nil = every
     /// wing, byte-identical for every existing caller.
+    ///
+    /// 13i-e: ARCHIVED readings are INCLUDED — this is the choosers' and
+    /// pickers' feed (her second rider: the add selectors mark an archived
+    /// book "(archived)" and the add lands on a plain click) and the seeders'
+    /// existence read (a seeded book she archived must never be re-minted).
+    /// The Bookcase's listing excludes them at its own choke point
+    /// (`bookcaseReadings`); the Archived surface reads `archivedReadings`.
     public static func readings(_ db: Database, wingID: String? = nil) throws -> [Reading] {
         guard let wingID else {
             return try Reading.fetchAll(
@@ -152,6 +159,31 @@ extension Queries {
             db,
             sql: "SELECT * FROM reading WHERE deleted_at IS NULL AND \(scope.sql) ORDER BY name, id",
             arguments: StatementArguments(scope.arguments))
+    }
+
+    /// **THE ARCHIVED SURFACE'S BOOKS** (13i-e — R-13ie-1: "it should be under
+    /// archived"): the live, ARCHIVED readings — books and gatherings alike —
+    /// newest archive first (`archivedPosts`' own order: `archived_at DESC,
+    /// id DESC`). `wingID` scopes to one wing as surfaces read wings (a
+    /// dangling pointer is Home's — her per-library Archived ruling); nil =
+    /// every wing. `limit` bounds a held observation; one-shot callers omit.
+    /// Cost ∝ the readings (author-scale metadata), never the corpus.
+    public static func archivedReadings(
+        _ db: Database, wingID: String? = nil, limit: Int? = nil
+    ) throws -> [Reading] {
+        let scope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        var sql = """
+            SELECT * FROM reading
+            WHERE deleted_at IS NULL AND archived_at IS NOT NULL\(
+                scope.map { " AND \($0.sql)" } ?? "")
+            ORDER BY archived_at DESC, id DESC
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = scope?.arguments ?? []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Reading.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
     }
 
     /// pre-13x ladder round 2, F3 (MINOR-N3): whether a book of this EXACT
@@ -374,6 +406,16 @@ extension Queries {
             arguments += filterArguments
 
         case .gathering:
+            // 13i-e (R-13ie-3, her confirmation inside R-13ie-4): an ARCHIVED
+            // gathering STOPS ASSEMBLING — "a saved rule put away" answers
+            // EMPTY here, so every reader THROUGH the assembly (the book
+            // surfaces, export, the bind and its preview, the Bookcase's
+            // gathering counts) follows by construction; the four readers that
+            // run a rule OUTSIDE it skip an archived gathering themselves (the
+            // Pool's tuck, the chip's gathering leg, the Library card's feed,
+            // the word counts). A BOOK keeps assembling while archived — it
+            // opens from Archived with its members (the edit law).
+            if reading.archivedAt != nil { return [] }
             var conditions = [
                 "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
             ]

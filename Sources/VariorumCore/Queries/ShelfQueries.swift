@@ -86,12 +86,28 @@ extension Queries {
     /// One wing's live readings (or, nil, every wing's — the phone's shipped
     /// all-wings read), by (name, id). The WING form filters in SQL, never in
     /// Swift over a store-wide fetch (ladder A round 1, MINOR 2).
+    ///
+    /// **13i-e — ARCHIVED READINGS ARE NOT ON THE BOOKCASE** (R-13ie-1: "it
+    /// should be under archived"). This is the ONE choke point: `bookshelf`,
+    /// `bookcase` (the snapshot the № census, the strip's counts and the
+    /// solos derive from — `BookcaseBoard` reads only its books) and
+    /// `bookcaseAggregates` all list through here, on the Mac's wing-scoped
+    /// arm AND the phone's all-wings arm. The pickers keep archived books
+    /// (`Queries.readings`); the Archived surface reads `archivedReadings`.
     static func bookcaseReadings(_ db: Database, wingID: String?) throws -> [Reading] {
-        guard let wingID else { return try Queries.readings(db) }
+        guard let wingID else {
+            return try Reading.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL
+                    ORDER BY name, id
+                    """)
+        }
         return try Reading.fetchAll(
             db,
             sql: """
                 SELECT * FROM reading WHERE wing_id = ? AND deleted_at IS NULL
+                  AND archived_at IS NULL
                 ORDER BY name, id
                 """,
             arguments: [wingID])
@@ -327,14 +343,20 @@ extension Queries {
                  AND v.deleted_at IS NULL
                 WHERE rp.deleted_at IS NULL AND rp.status = 'member'
                 """)
-        for row in rows {
+        // 13i-e: an ARCHIVED reading is off the Bookcase, so it is off its
+        // count too (R-13ie-1) — and an archived gathering assembles nothing
+        // (R-13ie-3). Author-scale: the archived readings' ids, read once.
+        let archived = Set(try String.fetchAll(
+            db, sql: "SELECT id FROM reading WHERE archived_at IS NOT NULL"))
+        for row in rows where !archived.contains(row["reading_id"]) {
             counts[row["reading_id"], default: 0] += wordCount(row["text"])
         }
         // Smart books: derived membership through the ONE shared predicate
         // (a word target on a smart book must show real progress — the
         // extent sheet offers it).
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
-        for reading in try readings(db) where reading.kind == .gathering {
+        for reading in try readings(db)
+        where reading.kind == .gathering && reading.archivedAt == nil {
             // Malformed rules fail closed (skipped); NO rule counts NOTHING
             // (13i-c, R-13ic-4 — the match-all letter is retired).
             let term: RuleTerm
@@ -375,7 +397,7 @@ extension Queries {
         // members beyond a cap LOWERED below its membership (#25(d)
         // legal). Capped books are rare; one assembly each, still
         // one-shot (#26(g)).
-        for reading in try readings(db) where reading.maxPosts != nil {
+        for reading in try readings(db) where reading.maxPosts != nil && reading.archivedAt == nil {
             let capped = try assembleReading(db, readingID: reading.id)
             counts[reading.id] = try capped.reduce(0) { total, entry in
                 total + (try renderPost(db, containerID: entry.postID)
@@ -552,7 +574,10 @@ extension Queries {
         var shownTerms: [String] = []
         var arguments: [(any DatabaseValueConvertible)?] = []
         var stars = StarContext()
-        for reading in try readings(db, wingID: wingID) where reading.kind == .gathering {
+        // 13i-e (R-13ie-3): an ARCHIVED gathering shows nothing, so it tucks
+        // nothing — its notes re-class LOOSE (the assembly's own letter).
+        for reading in try readings(db, wingID: wingID)
+        where reading.kind == .gathering && reading.archivedAt == nil {
             let term: RuleTerm?
             switch RuleGrammar.read(reading.querySpec) {
             case .malformed, .none: continue  // shows nothing — tucks nothing (13i-c, R-13ic-4)
@@ -615,8 +640,12 @@ extension Queries {
                 ORDER BY r.name, r.id
                 """,
             arguments: [postID])
+        // 13i-e: the BOOK leg above keeps an ARCHIVED book — membership is a
+        // fact (P-13ie-U1-8; the faces mute it "(archived)"); the GATHERING
+        // leg below skips an archived gathering — it shows nothing (R-13ie-3).
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
-        for reading in try readings(db) where reading.kind == .gathering {
+        for reading in try readings(db)
+        where reading.kind == .gathering && reading.archivedAt == nil {
             // Malformed fails closed (skipped); NO rule matches NOTHING
             // (13i-c, R-13ic-4), so neither lists on the chip.
             let term: RuleTerm
@@ -683,7 +712,10 @@ extension Queries {
             as: UTF8.self)
         var result: [String: [String]] = [:]
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
-        for reading in try readings(db) where reading.kind == .gathering {
+        // 13i-e (R-13ie-3): an ARCHIVED gathering collects nothing — the
+        // Library card never names it.
+        for reading in try readings(db)
+        where reading.kind == .gathering && reading.archivedAt == nil {
             let term: RuleTerm
             switch RuleGrammar.read(reading.querySpec) {
             case .malformed, .none: continue  // both show nothing (13i-c, R-13ic-4)
@@ -861,11 +893,15 @@ extension Queries {
         let noteScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
         let blockScope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
         if editedOn == nil {
+            // 13i-e (the plan's edge, PROVISIONAL P-13ie-U1-9): an ARCHIVED
+            // book leaves the catalog exactly as an archived note always has
+            // (the note arm's `archived_at IS NULL`) — it lives under Archived.
             let books = try Row.fetchAll(
                 db,
                 sql: """
                     SELECT id, name, kind, locked, sealed_at FROM reading
-                    WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')\(
+                    WHERE deleted_at IS NULL AND archived_at IS NULL
+                      AND (? = '' OR name LIKE ? ESCAPE '\\')\(
                         readingScope.map { " AND \($0.sql)" } ?? "")
                     ORDER BY name LIMIT ?
                     """,

@@ -817,6 +817,12 @@ extension Operations {
     /// collision; the offline-race tolerance covers it, and no repair rule
     /// exists to invent).
     ///
+    /// **13i-e — and an ARCHIVED book does not count either** — the other
+    /// half of her words, which had nothing to bite on until books could be
+    /// archived (QUESTIONS' 13e batch-1 entry (a): "books have no archive").
+    /// An unarchive can re-create a collision exactly as a Put back can; the
+    /// same tolerance covers it (PROVISIONAL P-13ie-U1-11).
+    ///
     /// ── COST ─────────────────────────────────────────────────────────────
     /// One indexless scan of the `reading` table — bounded by the number of
     /// BOOKS, which is a shelf, never a corpus (P1: nothing here scales with
@@ -828,7 +834,7 @@ extension Operations {
         let key = BookNaming.key(name)
         try database.read { db in
             let rows = try Row.fetchAll(
-                db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL")
+                db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL")
             for row in rows {
                 let id: String = row["id"]
                 guard id != readingID else { continue }
