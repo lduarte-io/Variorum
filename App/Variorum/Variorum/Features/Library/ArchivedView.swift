@@ -136,6 +136,13 @@ struct ArchivedView: View {
                     .foregroundStyle(tokens.muted)
                     .textSelection(.enabled)
                     .padding(4)
+            } else {
+                // 13i-e U2 (the walk's W-1): the BOOKS group's acts speak on
+                // the one status seam (18i), and a quiet receipt needs a host
+                // on the surface that spoke it (KnownIssues row 103's class) —
+                // without this line an Unarchive here said nothing at all.
+                QuietReceiptLine(status: session.status, tokens: tokens)
+                    .padding(4)
             }
         }
     }
