@@ -2969,6 +2969,29 @@ unshelved there); Sherlock made to own its notes ONLY if none of its stories liv
 it (the mark reads `declined`). If she has hand-shelved any seeded book by then, it stays where she put
 it.
 
+### CONTINUATION (the same session, at the architect's word — after the adjudication below and its `Sync/` half 17aa1113)
+
+Scope, exactly the four ruled items: **C1** the SEED half of the ruled `#classics` letter (tag
+Sherlock's and Jekyll's shipped notes with `SampleLibrarySeeder.classicsTagPath`; re-key the classics
+gathering on `#classics`, superseding P-13id-U7-1's two-book-tag rule; flip the two-sided pin
+deliberately through the REAL classifier with an err-toward-edited control on a non-seed path) ·
+**C2** F-U7-3 RULED re-add-as-copy (the restore road's claimed-elsewhere story comes in as a COPY;
+red-on-old on the traced recipe) · **C3** F-U7-4 (the "comments & tags" lesson stops teaching the
+retired ⌘⇧I fold; prose + pin) · **C4** F-U7-5 (a gathering's navigator drops "+ new chapter";
+one gate + pin). Zero `Sync/` (the architect's half is done; mine touches none). Suites at the END.
+**REVERT STATE: NO REVERT IN FLIGHT.**
+
+| # | piece | status |
+|---|---|---|
+| C0 | This subsection + LIVE STATUS | DONE (this commit) |
+| C1 | The seed half of `#classics` + the gathering re-keyed + the pin flipped (+ the confirm's disclosure, the lesson's words) | NOT-STARTED |
+| C2 | F-U7-3 — the restore road copies a claimed-elsewhere story in (red-on-old first) | NOT-STARTED |
+| C3 | F-U7-4 — "comments & tags" teaches the masthead tag field, not the retired fold (red-on-old first) | NOT-STARTED |
+| C4 | F-U7-5 — no "+ new chapter" on a gathering's navigator (gate + pin) | NOT-STARTED |
+| C5 | Suites at the END (core full ≥2125; the touched Mac suites + the registry walk + the tutorial spine; phone test build) | NOT-STARTED |
+| C6 | A walk capture of the classics gathering on `#classics` into `13id-screens/u7/` | NOT-STARTED |
+| C7 | Record + QUESTIONS #177 + ledger flipped | NOT-STARTED |
+
 ## THE ARCHITECT'S ADJUDICATION AFTER U7 (2026-10-02 — spot-check: thirteen commits pushed, fences empty, the record and #177 in place; the away-run rule governs)
 
 - **F-U7-1 RULED — the ruled letter BUILDS, split per the implementer's own division:** the
