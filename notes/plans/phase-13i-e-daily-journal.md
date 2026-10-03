@@ -527,9 +527,89 @@ disagreement answers the setting, and a dangling setting beside a live marker-be
 on ⌘J; (R3) the comes-back — revert the shelving's unarchive: the book stays archived after the
 filing.
 
-### WHAT WAS BUILT (a fresh session's map) — PENDING (written at the unit's end)
+### WHAT WAS BUILT (a fresh session's map)
 
-### EVIDENCE (counts exact, run at the END) — PENDING except the pre-fix run below
+**Production (core only — zero `Sync/`, `Server/`, migrations, editor seam):**
+- `Operations/Operations+ReadingArchive.swift` (NEW) — `archiveReading(id)`,
+  `archiveReadingWithNotes(id) -> [String]`, `unarchiveReading(id) -> [String]` and its db-level
+  body `unarchiveReading(_ db:id:now:)` (shared with the shelving door's comes-back);
+  `Queries.archiveWithNotesSource` (the ONE set) + `Queries.archiveWithNotesCount(readingID:)`
+  (the owned two-choice confirm's N — U2's).
+- `Operations/OperationError.swift` — `readingAlreadyArchived(id:)`, `readingNotArchived(id:)`,
+  `dailyJournalCannotBeDeleted(id:)` (the app's `OpsRefusalTable` has a `default:` — no app
+  compile change; the WORDS are U2's).
+- `Domain/IntakeDecision.swift` — `BookFacts.archived` (defaulted `false`) and `intakeRuns`'
+  `&& !book.archived`. `Operations/Operations+Intake.swift` — `livingBooks` filters
+  `archived_at IS NULL`; `intakeBookFacts` passes the flag.
+- `Queries/ReadingAssembly.swift` — the GATHERING arm of `assembleReading` returns `[]` while
+  archived (books keep assembling); `Queries.archivedReadings(wingID:limit:)` (NEW — the
+  Archived surface's books feed, `archived_at DESC, id DESC`); `Queries.readings` documented as
+  INCLUDING archived (pickers, seeders).
+- `Queries/ShelfQueries.swift` — `bookcaseReadings` (BOTH arms) excludes archived → `bookshelf`,
+  `bookcase`, `bookcaseAggregates` (and the app's `BookcaseBoard` census/solos/strip counts, which
+  read only the snapshot's books); `bookWordCounts` drops archived readings (all three arms);
+  `notePoolListingSQL`, `readingsContaining`'s gathering leg and `smartBookMembership` skip an
+  archived gathering; `searchCatalog`'s book arm excludes archived books.
+- `Operations/Operations+Reading.swift` — `deleteReading` rewritten from the `updateLiveReading`
+  closure to an explicit write carrying THE GUARD; `deleteReadingWithNotes` carries it after the
+  kind check; `refuseDeletingTheDailyJournal` (private, keyed on `isDailyJournalMintShape`);
+  `addPostToReading`'s body extracted to `addPostToReading(_ db:_:to:at:)` (internal — the public
+  door calls it in its own write; behaviour identical, the full suite is the proof);
+  `assertBookNameIsFree` skips archived books.
+- `Queries/AppearanceQueries.swift` — `dailyJournalBookID` = `dailyJournalBookCandidates(db).first`
+  (THE DERIVATION); `designatedBookID` now serves Quicknotes alone.
+- `Operations/Operations+Container.swift` — `shelveInDailyJournalBook`: after the (unchanged)
+  plan/decided read, ONE write — the `unarchiveReading` body when the derived book is archived,
+  then `addPostToReading(db…)` under `db.inSavepoint`; an `OperationError` from the savepoint is
+  returned out of the write (so the un-archive commits) and rethrown into the SHIPPED outcome
+  mapping (`.bookFinished` / `.bookAtCapacity` / `.wrongKind` / the bell / `.refused`).
+- `Operations/Operations+Appearance.swift` — doc only (the ops-seam `dailyJournalBookID()`).
+
+**Tests:** NEW `Tests/VariorumCoreTests/BookArchiveTests.swift` — `BookArchiveOperationTests`
+(8), `ArchivedIntakeTests` (7), `ArchivedGatheringReadersTests` (2), `ArchivedListingTests` (7);
+NEW `Tests/VariorumCoreTests/DailyJournalRulingsTests.swift` — `DailyJournalDeleteGuardTests`
+(4), `DailyJournalDerivationTests` (5), `DailyJournalComesBackTests` (6),
+`ArchivedJournalKeeperTests` (2, the fake server). RE-PREMISED (the guard/derivation retired their
+premise; each keeps its own clause): `ThemeAndShelfQueryTests.dailyJournalBookDanglesToNil`,
+`JournalKeeperRepairTests.aDanglingDesignationAdoptsTheArrivingJournal` (file
+`FurnitureConvergenceRepairTests.swift`), the phone's
+`MobileStarterJournalTests.aDeletedStarterJournalNeverComesBack` (+ `import GRDB`) and
+`MobileBooksTests.designateDailyIsTheRoadOutOfTheTodayRefusals` (F-U1-3).
+
+**For U2 — the calls the faces make:** Archive = `archiveReading`; the OWNED book's second choice
+= `archiveReadingWithNotes` (its confirm's N = `Queries.archiveWithNotesCount`); Unarchive =
+`unarchiveReading` (returns the notes that came back — the "came back whole" receipt's count); the
+Archived surface's books group = `Queries.archivedReadings(wingID:)`; the daily Journal's Delete →
+Archive (the op refuses `dailyJournalCannotBeDeleted` — the words are U2's); "(archived)" marks
+read `reading.archivedAt` (the pickers' `Queries.readings` keeps archived books; the chip's book
+leg names them); the Collecting pane's pause sentence reads `reading.archivedAt` on a living book.
+
+### EVIDENCE (counts exact, run at the END)
+
+- **Core FULL `swift test` (the FINAL run, after the last production change `a8199c9b`):
+  PENDING** — expected 2127/234 + this unit's 41 tests / 8 suites. *(The first END run, on the
+  piece-2 production code before `archiveWithNotesCount` existed: "✔ Test run with 2167 tests in
+  242 suites passed after 101.711 seconds", 1 skipped — the standing env-gated real-server
+  integration pass; +40 / +8 = exactly this unit's suites at that point.)*
+- **Mac** (zero app instances — `pgrep` empty; build `App/Variorum/DerivedData/13ie-u1`):
+  `build-for-testing` **TEST BUILD SUCCEEDED**; named suites via `test-without-building`, 0
+  skipped: **batch B "✔ Test run with 384 tests in 50 suites passed"** (every suite in a test file
+  that reads a changed query or door — `BookcaseBoardBrainTests`, `BookcaseViewModelTests`,
+  `JournalBooksTests`, `BookStructureModelTests`, `BookDropTests`, `MembershipChoiceTests`,
+  `BookCollectingDoorsTests`, `ShelfModelTests`, `PromoteAndPaletteTests`, `PoolTuckFaceTests`,
+  `NoteCardSmartBooksTests`, `LibrarySortMenuTests`, `LibraryDayFilterTests`,
+  `DuplicateBookNameDoorTests`, `BookDeleteAndDuplicateTests`, `TrashBookNotesTests`,
+  `TrashSurfaceTests`, `WingSwitcherTests`, `WingBookMoveDoorTests`, `SampleLibraryWelcomeTests`,
+  `QuickNote*`, …) + **batch A "✔ Test run with 97 tests in 13 suites passed"** (every
+  `Tutorial*` suite — the spine, `TutorialBooksLessonTests`' withholding lesson-9 pin still green:
+  U1 adds no sentence). These ran on the piece-2 production code; the one later production change
+  (`archiveWithNotesCount` + the act reading the shared fragment) is core-internal and no app code
+  calls it yet.
+- **Phone** (iPhone 17 Pro simulator, build `DerivedData/13ie-u1-ios`): **"Test run with 69 tests
+  in 15 suites passed … with 2 known issues"** — the known issues are the pre-existing
+  `withKnownIssue` in `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape`
+  (eeba2e7c, untouched). Suites: `MobileStarterJournalTests`, `MobileShelfTodayDoorTests`, the
+  `MobileBooksTests` file's five, `MobileShellTests`, the tutorial-walk file's seven.
 
 - **PRE-FIX RUN (piece 1's tree — the archive family present, the daily rulings NOT yet built;
   `swift test --filter` over the four daily suites, 17 tests / 4 suites):** RED at every named
@@ -584,9 +664,83 @@ filing.
   - **No revert in flight** — every reverted file restored by checkout and verified `git diff
     --quiet`; the tree equals the piece-2 commit's production code.
 
-### FINDINGS (for the orchestrator) — PENDING
+### FINDINGS (for the orchestrator; none is a STOP — no fence was needed)
 
-### PROVISIONALS — the P-13ie-U1-n of THE DESIGN above (final list PENDING)
+- **F-U1-1 — the derivation's one exposure (a store-shape question for HER window):** a store whose
+  cached `daily_journal_book` names a LIVE book wearing NO marker now reads "no daily Journal",
+  and the next ⌘J mints a fresh one (the old book keeps its entries as an ordinary book). Reachable
+  only where v1_18's step 8 skipped the stamp — it marked the designee only when its profile was
+  `'journal'`, so a pre-13i-a "Use as Daily Journal" on a non-journal book is the one road. Pinned
+  as documented behaviour (`theCachedSettingAloneNoLongerDesignates`). **Exposure check, read-only,
+  at her window (never a session's act on her store):** `SELECT r.profile FROM setting s JOIN
+  reading r ON r.id = s.value WHERE s.key = 'daily_journal_book' AND r.deleted_at IS NULL` — `daily`
+  ⇒ not exposed. Remedies if exposed: (a) she re-designates by hand ("Use as Daily Journal" moves
+  the marker); (b) a one-time ensure (the memo §5 edge 1's "the ensure's own write": no live
+  marker-bearer + a live designee ⇒ stamp it) — NOT built, the brief keeps the setting
+  retired-as-read; (c) accept.
+- **F-U1-2 — `setDailyJournalBook` still accepts a GATHERING** and stamps `'daily'` on it — a
+  marker the identity (`kind = 'book'`) ignores, so the designation silently does nothing and ⌘J
+  mints the real Journal. No face offers it (the Mac's "Use as Daily Journal" and the phone's
+  details door render on books only); the op's letter permits it, and a PRE-RECAST store whose
+  designated SMART book wore profile `'journal'` got the stamp from v1_18. Proposal: the op refuses
+  `wrongReadingKind` (one line — not done: the brief keeps `setDailyJournalBook` byte-unchanged).
+  The phone's `.wrongKind` Today wording is now unreachable (harmless dead copy).
+- **F-U1-3 — two PHONE pins re-premised (the ladder should confirm each keeps its intent):**
+  `MobileStarterJournalTests.aDeletedStarterJournalNeverComesBack` reaches the deleted starter by
+  the row write an older build's delete is (the starter IS the daily Journal — the door refuses
+  now); `MobileBooksTests.designateDailyIsTheRoadOutOfTheTodayRefusals` used a GATHERING as the
+  refusing daily book — under the derivation that is no designation at all (F-U1-2), so the
+  refusal half now uses a FINISHED daily book (`.bookFinished`, "finished", still never "Mac"); the
+  designate-heals half is untouched. Two core pins re-premised the same way (listed in WHAT WAS
+  BUILT).
+- **F-U1-4 — the PHONE's shelf drops archived books too** (`bookshelf(nil)` is the Bookcase's
+  all-wings arm, so the ruling binds it), but the phone has NO Archived surface and no unarchive
+  door: an archived book is out of view on the phone until unarchived on the Mac (the catalog
+  excludes it as well; its notes stay in the phone's Library). The closeout's MobileSoul line
+  should carry it for the mobile catch-up.
+- **F-U1-5 — the starter Journal and the comes-back:** her Mobile Round 2 starter ruling ("if they
+  delete that journal book or archive it, it just doesn't appear at all") is about the SEEDER and
+  still holds (an archived starter is a live reading, so the store is never "new" again). The
+  starter IS the daily Journal, so §10's comes-back returns an archived one on the next Today's
+  Entry — the later ruling governing exactly the daily Journal; lesson 9's sentence says so.
+  Surfaced so nobody reads it as a seeder regression.
+- **F-U1-6 — the comes-back is silent:** `DailyBookShelving` is unchanged (a new case would break
+  the phone's exhaustive `shelvingNote` switch and every pin comparing outcomes). A face wanting a
+  receipt ("Your Journal is back on the Bookcase") reads archived-before/after itself — U2's call
+  (PROVISIONAL P-13ie-U1-13).
+- **F-U1-7 — interim, same phase:** until U2 lands its words and the Delete→Archive swap (P-2),
+  the Mac's and the phone's Delete doors on the daily Journal speak their tables' DEFAULT refusal
+  words for `dailyJournalCannotBeDeleted`. Nothing is lost — the act refuses.
+- **F-U1-8 — `wingContents` deliberately COUNTS archived books** (a wing holding only archived
+  books is not empty; Delete Wing refuses and names them — kept-forever framing). U2's copy may
+  want "(N archived)" there.
+- **F-U1-9 — proposed canon deltas for the closeout (contract lines only; not written here):**
+  AppSpec §9 — the archive family (archive / archive-with-notes / unarchive with the exact-stamp
+  return and the resume catch-up; the pause in `intakeRuns`; explicit adds open), the daily
+  Journal's derivation, delete guard and comes-back; §12 — the Archived surface's books (U2's).
+- **F-U1-10 — machinery:** zsh does not word-split an unquoted `$ARGS`, so a first Mac batch ran
+  0 tests ("Executed 0 tests", 14 s) — caught by its missing "Test run with" line; the batches ran
+  from bash scripts with absolute paths (`App/Variorum/DerivedData/13ie-u1-batch{A,B}.sh`,
+  `13ie-u1-ios.sh`; build folders `DerivedData/13ie-u1`, `13ie-u1-ios` for the closeout's tidy).
+  No session death; no revert left in flight.
+
+### PROVISIONALS (QUESTIONS-ready for #179; each one line to overturn)
+
+P-13ie-U1-1 double archive/unarchive refuse (the block-archive precedent) · U1-2 archive-with-notes
+refuses a gathering only at the op; the door offers it on owned books · U1-3 the exact-stamp
+corners (individually archived stays; a note that left the book stays) · U1-4 no undo, the redo
+future untouched · U1-5 the pause lives in the one table (every intake road; a rule edit while
+archived fires nothing; the bind of an archived gathering binds its empty assembly) · U1-6
+explicit adds untouched, the OUTFLOW still rides an explicit add · U1-7 the Bookcase excludes
+archived on both arms; the pickers keep them; `archivedReadings` newest-first · U1-8 membership is
+a fact (an archived book still homes its notes — not in the Pool; an archived owned book still
+owns) · U1-9 the catalog drops archived books · U1-10 an archived starred book stays in Starred ·
+U1-11 the E13 guard skips archived names (her own words) · U1-12 the comes-back: un-archive first,
+the filing savepointed — a refused filing still brings the Journal back; a decided pair brings
+nothing back · **U1-13 (new at the end)** the comes-back speaks no receipt of its own (F-U1-6). The
+plan's EDGES (arrivals keep waiting; archive without a confirm line for waiters; duplicate born
+unarchived; Finish/Seal/lock orthogonal; restore returns archived; wing moves ride archived) are
+BUILT as written and pinned.
 
 ## U2 BRIEF — THE FACES + LESSON 9 (`opus-implementer`; read this WHOLE file first)
 
