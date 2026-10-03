@@ -448,10 +448,92 @@ leans (b) with (c)'s product-call and pre-U7-copies objections; (a) is HELD-if-c
 
 | # | piece | status |
 |---|---|---|
-| 1 | The final calls + this skeleton | DONE (this commit) |
-| 2 | Fix A (the downgraded take-arm MINOR): the live-placement COALESCE join + red-on-old pin + the follows-the-note control | PENDING |
-| 3 | Fix B (MINOR 2): the postID-gated context + the guarded writes + pins | PENDING |
-| 4 | Fix C (MINOR 3): the wing-aware restore + red-on-old pin | PENDING |
-| 5 | Record D (MINOR 1): the residual at the field doc · KnownIssues row · QUESTIONS #178 · the documenting two-client pin | PENDING |
-| 6 | Fix E (NIT): the attribute placement | PENDING |
-| 7 | Suites at the END: core FULL (baseline 2125/234) · touched Mac suites + the registry walk + the tutorial spine · phone test build | PENDING |
+| 1 | The final calls + this skeleton | DONE (01940a60) |
+| 2 | Fix A (the downgraded take-arm MINOR): the live-placement COALESCE join + red-on-old pin + the follows-the-note control | DONE (9b9d604e) |
+| 3 | Fix B (MINOR 2): the postID-gated context + the guarded writes + pins | DONE (cb7bfc3f) |
+| 4 | Fix C (MINOR 3): the wing-aware restore + red-on-old pin | DONE (06d450ee) |
+| 5 | Record D (MINOR 1): the residual at the field doc · KnownIssues row · QUESTIONS #178 · the documenting two-client pin | DONE (11dcd2f7) |
+| 6 | Fix E (NIT): the attribute placement | DONE (006ee025) |
+| 7 | Suites at the END: core FULL (baseline 2125/234) · touched Mac suites + the registry walk + the tutorial spine · phone test build | DONE (this commit — the record below) |
+
+### THE FIXES, EACH WITH ITS PIN AND ITS RED (commit per piece, pushed after each)
+
+**Fix A (`9b9d604e`) — the take arm attributes by the block's LIVE placement.**
+`Queries.trash`'s take arm joins the note through `COALESCE((SELECT cb.container_id FROM
+container_block cb WHERE cb.block_id = b.id AND cb.deleted_at IS NULL), b.last_container_id)`
+(I2's live-unique index makes the scalar subquery deterministic); the `trash` doc's wing
+paragraph re-worded honestly. **Pin `WingScopedReadsTests.aDeletedTakeBelongsToItsNotesWing`,
+GENUINELY RED ON OLD** (run on the pre-fix query: 1 test / 3 issues — absent from the wing's
+read, present as Home's, `noteID` nil), green after; plus the follows-the-note arm (moved home,
+the take reads as Home's). One JUSTIFIED FLIP:
+`TrashAndArchiveTests.theTrashNamesANamelessNoteByItsDayAndNeverByThePlaceholder`'s take arm —
+the old assertion RECORDED this exact gap as "recorded, not endorsed … needs a join through the
+live placement" (the walk's propose-only list); the fix is that join, so the arm flips to the
+day-name rule its three siblings keep, the old comment quoted in place. Green with the
+trash/purge/recovery neighbours **137/27**.
+
+**Fix B (`cb7bfc3f`) — the note ▾ wing doors' context gated by note identity.**
+`NoteMenuWingContext` carries `postID`; the pure gate `NoteMenuWingContext.matching` is the
+bars' ONE render condition (CommitBar + TakesBottomBar — a stale load landing after a note
+switch, or a cancelled task's nil, draws NOTHING until the note's own load lands); both write
+sites in `noteMenuWingDoors` take the ladder-A cancellation guard. The existing load pin's
+constructor edit is mechanical (the struct gained a field; the pin's subject unchanged).
+**Pin `VocabularySweepTests.aStaleWingContextNeverDrawsAnotherNotesDoors`** — a pure gate with
+no pre-fix shape, **RED BY BEHAVIOURAL REVERT** (`matching` flipped to pass-through: exactly the
+one pin, 1 issue — "another note's stale context draws NOTHING"; restored). Honesty note, per
+the resiliency protocol's own trap list: restoring the revert via `git checkout --` also wiped
+the UNCOMMITTED fix in that file once (never-checkout-over-uncommitted-work), recovered by
+re-applying the edit; the commit message records it. Green after with VocabularySweepTests +
+WingSwitcherTests **25/0**.
+
+**Fix C (`06d450ee`) — the sample-library restore is wing-aware.**
+`discover` reads the BOOK's effective wing (`Existing.wing` — '' when no book or a dangling
+pointer), resolves the reserved tag IN that wing, and `place` mints a missing story THERE
+(`importPost(wingId:)`); a stray in ANOTHER wing wears that wing's twin and is deliberately not
+found — its title mints fresh (the restore never crosses wings by itself, lesson 11's fence);
+takemania was already wing-safe through `newPostInReading` (traced — it mints in the book's
+wing since 13i-c's R-13ic-2 fix). **Pin `SampleLibraryTests.aMovedBooksRestoreIsWingAware`,
+GENUINELY RED ON OLD** (the fix stashed, the pin kept: "Caught error: crossWingMembership(…)" —
+the exact traced refusal, partway), green after with the seeder/door neighbours **67/0**.
+
+**Record D (`11dcd2f7`) — MINOR 1 recorded as the documented residual (the ruled (b)).**
+The `seedTagPaths` field doc gains the SECOND-residual paragraph (the Fable seat's own `Sync/`
+doc edit — no engine line changes) beside the retag/untag class; the KnownIssues row lands
+owned by the phone's arrangement catch-up (the mobile project — a named owner per the R2-7
+rule); QUESTIONS **#178** carries the two stronger remedies for her bundle — the
+keeper-preference arm (author-only: it would amend R-pre13u-8's ruled matrix) and the
+shared-seeder arrangement (phone seed content); and the DOCUMENTING two-client pin
+`SampleLibraryDedupeRepairTests.documentedResidual_aRawCopyCanRetireAnArrangedOnesDemoState`
+(the SyncSpec review-finding-#6 idiom — green on the current tree, endorsing nothing: the raw
+smaller-id copy keeps and no live #classics application survives). Dedupe suites **20/2**.
+
+**Fix E (`006ee025`) — the NIT:** `@discardableResult` moved below `importPost`'s doc block.
+
+### SUITES AT THE END (all run in this session, after the last fix)
+
+- **Core FULL `swift test`: "Test run with 2127 tests in 234 suites passed"** (1 standing
+  env-gated skip) — baseline 2125/234 + the two new core pins, both this round's (fix A's and
+  record D's; fix C's pin is Mac-side, and the TrashAndArchive flip edits an existing test).
+- **Mac** (`DerivedData/13id-ladderB`, build-for-testing + test-without-building, zero
+  instances): the touched suites + the registry walk + the WHOLE eleven-suite tutorial spine —
+  **184 tests / 20 suites** (CapabilityRegistryTests · VocabularySweepTests ·
+  DeadVocabularyTests · WingSwitcherTests · WingBookMoveDoorTests · SampleLibraryTests ·
+  SampleLibraryWelcomeTests · SampleLibraryDedupeFactsTests · EncryptionExplainedSeedTests ·
+  JekyllTakemaniaSeedTests · EncryptionBookDoorTests · LaunchSeedTombstoneTests ·
+  TutorialDoorTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+  TutorialBookShapeTests · TutorialLibraryActsTests · TutorialWritingActsTests ·
+  TutorialWalkTests' pages suite · MobileSeededBookRestoreTests' Mac twin) **+ 45 / 7** (the
+  spine's remaining suites: TakesActs · StructureActs · LookingActs · DeletionActs ·
+  WherePlacesActs · PrivacyChapter · FannedMatrix) = **229 tests, 0 failed, 0 skipped**.
+- **Phone:** `VariorumMobile` generic iOS Simulator **TEST BUILD SUCCEEDED**
+  (`DerivedData/13id-ladderB-mobile` — the shared seeder changes compile), and the four
+  seeder-facing suites REAL-RUN on the iPhone 17 Pro simulator (the C5 precedent, because
+  `SampleLibrarySeeder.discover`/`place` genuinely changed): SampleLibraryManifestTests ·
+  MobileSeededBookRestoreTests · MobileFirstWriteFurnitureTests · MobileFirstWriteTombstoneTests
+  — **21 tests, 0 failed**.
+
+**Scope fences:** zero schema, zero `Persistence/`, zero `Server/`, zero editor seam; the one
+`Sync/` touch is record D's field-doc paragraph (the Fable seat's, no engine line). No
+attribution trailers on any commit; pushed after every commit; no real-store instance ran
+beside this session. **No MAJOR stands after the severity call — nothing reaches the round-3
+bar; the implementer sanity pass and round 2's re-review follow on the orchestrator's side.**
