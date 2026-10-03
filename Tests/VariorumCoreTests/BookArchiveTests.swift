@@ -169,6 +169,35 @@ struct BookArchiveOperationTests {
         }
     }
 
+    /// The owned two-choice confirm's N is the act's set by construction (the
+    /// 13i-c ladder MAJOR's discipline): a member already archived on its own
+    /// is NOT counted — the delete confirm's `liveMemberNoteCount` does count
+    /// it, because the delete takes it; the archive leaves its stamp alone.
+    @Test func theConfirmsNIsExactlyTheSetTheActArchives() throws {
+        try withOperations { ops, db in
+            let owned = try ops.createReading(name: "owned", kind: .book)
+            try ops.setReadingOwned(owned.id, owned: true)
+            let a = try note(ops, "a")
+            let early = try note(ops, "archived on its own")
+            for n in [a, early] { try ops.addPostToReading(n.id, to: owned.id) }
+            try ops.archiveContainer(early.id)
+            let gone = try note(ops, "deleted member")
+            try ops.addPostToReading(gone.id, to: owned.id)
+            try ops.deleteContainer(gone.id)
+
+            let promised = try db.read { try Queries.archiveWithNotesCount($0, readingID: owned.id) }
+            let deleteWouldTake = try db.read {
+                try Queries.liveMemberNoteCount($0, readingID: owned.id)
+            }
+            let archived = try ops.archiveReadingWithNotes(owned.id)
+
+            #expect(promised == 1 && archived == [a.id])
+            #expect(promised == archived.count)
+            #expect(deleteWouldTake == 2, "the delete's N counts the archived member it would take")
+            #expect(try db.read { try Queries.archiveWithNotesCount($0, readingID: owned.id) } == 0)
+        }
+    }
+
     /// The edge (the plan's EDGES list): "A note archived INDIVIDUALLY before
     /// its owned book's archive-with-notes: stamp differs, so the book's
     /// unarchive leaves it archived."

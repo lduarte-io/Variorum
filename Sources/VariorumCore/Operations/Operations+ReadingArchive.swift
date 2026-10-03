@@ -87,10 +87,7 @@ extension Operations {
             let postIDs = try String.fetchAll(
                 db,
                 sql: """
-                    SELECT rp.post_id FROM reading_post rp
-                    JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
-                     AND c.kind = 'post' AND c.archived_at IS NULL
-                    WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                    SELECT rp.post_id \(Queries.archiveWithNotesSource)
                     ORDER BY rp.position, rp.id
                     """,
                 arguments: [id])
@@ -165,5 +162,30 @@ extension Operations {
         try reading.update(db)
         try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
         return returned
+    }
+}
+
+extension Queries {
+    /// **THE ARCHIVE-WITH-NOTES SET, written ONCE** (13i-e — the 13i-c
+    /// ladder's MAJOR discipline: a confirm's N and its act's rows are one set
+    /// by construction): the book's live MEMBER notes that are not already
+    /// archived. Read by `archiveReadingWithNotes` (the act) and
+    /// `archiveWithNotesCount` (the owned two-choice confirm's "the book and
+    /// its N notes"). One placeholder: the reading's id.
+    static let archiveWithNotesSource = """
+        FROM reading_post rp
+        JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+         AND c.kind = 'post' AND c.archived_at IS NULL
+        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+        """
+
+    /// **The archive confirm's N** — exactly the notes `archiveReadingWithNotes`
+    /// will archive (a member archived on its own already is not counted: it
+    /// keeps its own stamp and is not taken). Distinct from
+    /// `liveMemberNoteCount` (the DELETE confirm's N, which counts archived
+    /// members because the delete takes them). ∝ the book's own rows.
+    public static func archiveWithNotesCount(_ db: Database, readingID: String) throws -> Int {
+        try Int.fetchOne(
+            db, sql: "SELECT COUNT(*) \(archiveWithNotesSource)", arguments: [readingID]) ?? 0
     }
 }
