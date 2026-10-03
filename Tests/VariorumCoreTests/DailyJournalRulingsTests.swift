@@ -446,3 +446,63 @@ struct ArchivedJournalKeeperTests {
         }
     }
 }
+
+// MARK: - 13i-e U2 ACT 0 — the designation refuses a non-book
+
+/// **THE DESIGNATION REFUSES A NON-BOOK** (13i-e U2 ACT 0 — the architect's
+/// F-U1-2 ruling). The daily Journal's identity is a BOOK wearing the marker
+/// (`isDailyJournalMintShape` — `kind = 'book'`), so a gathering can never BE
+/// it. The traced mechanism on the old tree: designating a gathering ran the
+/// marker move whole — every live 'daily' BOOK demoted to the trait, the
+/// gathering stamped 'daily' (a marker the identity ignores and
+/// `setJournalTrait` refuses to clear), the cache naming it — so the derived
+/// read answered NO daily Journal and the next ⌘J MINTED a fresh one beside
+/// the demoted original: two Journals where one stood.
+@Suite("13i-e U2 ACT 0 — the daily designation refuses a non-book")
+struct DailyJournalDesignationKindTests {
+    /// RED ON OLD (by behavioural revert of the one guard line): no throw;
+    /// the Journal demoted; the gathering wearing 'daily'; ⌘J double-minted.
+    @Test func designatingAGatheringRefusesAndMovesNothing() throws {
+        try withOperations { ops, db in
+            let daily = try file(ops, day: "2026-10-01")
+            let tag = try ops.createTag(name: "t")
+            let gathering = try ops.createReading(
+                name: "g", kind: .gathering,
+                querySpec: try #require(try RuleGrammar.encode(.tag(tag.id))))
+            try db.clearOutbox()
+
+            #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {
+                try ops.setDailyJournalBook(gathering.id)
+            }
+
+            // Nothing moved: the Journal keeps its marker, the gathering
+            // wears none, the derived designation still answers the Journal,
+            // and the refused act wrote nothing.
+            #expect(try liveDailyBooks(db) == [daily.bookID])
+            #expect(try db.fetchString("SELECT profile FROM reading WHERE id = ?", [gathering.id]) == nil)
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == daily.bookID)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM sync_outbox") == 0, "nothing was written")
+
+            // The next day files into the SAME Journal — no second one minted.
+            let next = try file(ops, day: "2026-10-02")
+            #expect(next.bookID == daily.bookID, "⌘J files where it always did")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE kind = 'book' AND deleted_at IS NULL") == 1,
+                    "one Journal, never two")
+        }
+    }
+
+    /// The control (green on both sides): designating another BOOK still
+    /// moves the marker exactly as 13i-a's M-3 built it.
+    @Test func designatingABookStillMovesTheMarker() throws {
+        try withOperations { ops, db in
+            let daily = try file(ops, day: "2026-10-01")
+            let other = try ops.createReading(name: "Days", kind: .book)
+            try ops.setDailyJournalBook(other.id)
+            #expect(try liveDailyBooks(db) == [other.id])
+            #expect(try db.fetchString("SELECT profile FROM reading WHERE id = ?", [daily.bookID])
+                    == Queries.journalTraitProfile)
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == other.id)
+        }
+    }
+}
