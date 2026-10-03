@@ -714,6 +714,35 @@ enum JournalBooks {
     struct Outcome: Equatable {
         let postID: String
         let note: String?
+        /// 13i-e U2 (the architect's F-U1-6 ruling): a RECEIPT when the day's
+        /// filing brought an archived daily Journal back ("it returns when a
+        /// day arrives") — spoken on the status seam's receipt kind, so
+        /// `receipt_style` governs. nil otherwise.
+        var receipt: String? = nil
+    }
+
+    /// The derived daily Journal's id and whether it is archived — read
+    /// BEFORE and AFTER the shelving at the door (P-13ie-U1-13's shape: the
+    /// shared shelving result stays unchanged). nil when there is none.
+    nonisolated static func dailyJournalArchiveState(
+        _ database: AppDatabase
+    ) -> (id: String, archived: Bool)? {
+        (try? database.read { db -> (id: String, archived: Bool)? in
+            guard let id = try Queries.dailyJournalBookID(db),
+                  let book = try Queries.reading(db, id: id)
+            else { return nil }
+            return (id, book.archivedAt != nil)
+        }) ?? nil
+    }
+
+    /// The comes-back RECEIPT, decided from the two reads: the SAME book was
+    /// archived before the filing and is not after.
+    nonisolated static func comesBackReceipt(
+        before: (id: String, archived: Bool)?, after: (id: String, archived: Bool)?
+    ) -> String? {
+        guard let before, before.archived, let after, after.id == before.id, !after.archived
+        else { return nil }
+        return BookArchiveCopy.journalCameBack
     }
 
     /// **What the daily door SAYS about its shelving** — ONE mapping for ⌘J
@@ -788,6 +817,9 @@ enum JournalBooks {
         // "Journal" books).
         return try await session.runner.run { ops in
             let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
+            // 13i-e U2 — read the Journal's archive state BEFORE the filing
+            // (the comes-back receipt's first half).
+            let before = dailyJournalArchiveState(database)
             // The ENSURE half — CREATE-AND-PIN INCLUDED — delegates WHOLLY
             // to the one implementation (13c Stage 1 ladder R1-4, completed
             // by the author's 13d #37(iii) ruling). This door used to call
@@ -806,7 +838,8 @@ enum JournalBooks {
                 postID: entry.container.id,
                 note: shelvingNote(
                     shelving, entryID: entry.container.id, bookName: bookName,
-                    database: database))
+                    database: database),
+                receipt: comesBackReceipt(before: before, after: dailyJournalArchiveState(database)))
         }
     }
 }

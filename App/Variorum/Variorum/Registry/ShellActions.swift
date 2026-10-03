@@ -250,6 +250,11 @@ struct ShellActions {
                 if let note = outcome.note {
                     status.refuse(note)
                 }
+                // 13i-e U2 (F-U1-6's ruling): the Journal came back — a
+                // RECEIPT (quiet by default; `receipt_style` governs).
+                if let receipt = outcome.receipt {
+                    status.receipt(receipt)
+                }
             } catch {
                 status.refuse("Today's entry failed: \(error)")
             }

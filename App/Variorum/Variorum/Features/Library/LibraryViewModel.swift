@@ -107,6 +107,11 @@ final class LibraryViewModel {
         do {
             let outcome = try await JournalBooks.openToday(session: session, day: day)
             lastError = outcome.note
+            // 13i-e U2 (F-U1-6's ruling): the Journal came back — a RECEIPT on
+            // the one status seam (quiet by default).
+            if let receipt = outcome.receipt {
+                session.status.receipt(receipt)
+            }
             return outcome.postID
         } catch {
             lastError = String(describing: error)
