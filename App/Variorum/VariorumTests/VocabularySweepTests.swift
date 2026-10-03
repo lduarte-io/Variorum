@@ -243,7 +243,12 @@ struct VocabularySweepTests {
         // 13i-d U7 rider (F-U6-4), a JUSTIFIED EDIT: the row's inline Delete
         // Note… joined the view's declared set — this pin's own subject
         // (Unarchive declared) is unchanged and asserted exactly as before.
-        #expect(ArchivedView.surfaceCapabilities == [.unarchiveNote, .deleteNote])
+        // 13i-e U2, a JUSTIFIED EDIT: the BOOKS group joined the view
+        // (R-13ie-1) — its rows render `.unarchiveBook` and the shared
+        // `.deleteBook`; this pin's subject (the note row's Unarchive is
+        // declared) is unchanged and asserted exactly as before.
+        #expect(ArchivedView.surfaceCapabilities
+                == [.unarchiveNote, .deleteNote, .unarchiveBook, .deleteBook])
         #expect(CapabilityRegistry.capability(.unarchiveNote).doors.contains(.surface))
         #expect(CapabilityRegistry.capability(.unarchiveNote).verb == "Unarchive")
     }
