@@ -1185,6 +1185,41 @@ list unmarked (F-U2-4).
   unarchived, entry filed; the delete door refuses it with the table's words; the Bookcase row's
   table offers no Delete). Red-on-old is the natural red of the pre-sentence tree.
 
+## THE ARCHITECT'S ADJUDICATION AFTER U2 (2026-10-03 — verified by spot-check: sixteen commits present and pushed through `f0bafc32`, the `Sync/`/`Server/`/migrations diff EMPTY against `6beb6a66`, the tree clean, the record and ledger row 2 in place)
+
+- **F-U2-1 (the walk's W-1, the receipt host) — ACCEPTED as fixed in-unit** (red-shaped evidence:
+  the re-walk pair u2-30/u2-33 + the 99/8 re-run; the ladder re-reads it like everything else).
+- **F-U2-2 (the daily Journal's own "+ new entry" inside an archived Journal does not bring it
+  back) — RULED (a): LEAVE AS BUILT, PROVISIONAL to her bundle (#179).** The reasoning recorded:
+  the comes-back belongs to the TODAY doors (⌘J / Today's Entry — §10's "where ⌘J and Today's
+  Entry file"; "it returns when a day arrives"); the "+ new entry" press is only reachable from
+  INSIDE the archived Journal's own view, where the archived state is visible and Unarchive is
+  one press away, and her amendment made explicit adds on archived books land WITHOUT
+  un-archiving as the general rule. One line to flip if she wants that door in the comes-back
+  class (P-13ic-U4-1's ⌘J-twin reading is the argument the other way — recorded honestly).
+- **F-U2-3 (the archived gathering's generic empty state) — routed to 13s** (copy; the sheet's
+  pause sentence and the Archived row already carry the state honestly). Lands on the 13s list
+  at the closeout beside KnownIssues row 103's delete-receipt copy.
+- **F-U2-4 / P-13ie-U2-14 (Starred unmarked) — SUSTAINED as built** (the shipped archived-note
+  treatment; a core field is not minted for a mark she has not asked for). Hers in #179.
+- **F-U2-5 (several bells on unarchive) — expected by R-13ie-4's letter;** the orchestrator's
+  walk treats it as correct.
+- **F-U2-6 (+ F-U1-4) — ADOPTED for the closeout's MobileSoul line** (the phone's Archived
+  books surface, Archive/Unarchive on ordinary books, the marks, the pause sentence, the
+  comes-back receipt on its Today door).
+- **F-U2-7 (the Archived row's count shape) — hers, #179** (both counts true; the split is one
+  query reuse away).
+- **F-U2-8/-9/-10/-11 — record-only;** F-U2-12's canon lines and F-U2-13's re-seed note are
+  adopted for the closeout (the re-seed press is HERS, behind the A1 rail, after the window —
+  the 13i-d walk-tooling rule).
+- **The one justified test edit (`VocabularySweepTests.theArchivedViewDeclaresItsUnarchive`) —
+  to the ladder's confirmation** beside U1's four re-premised pins.
+- **PROVISIONALs P-13ie-U2-1…14 — ALL SUSTAINED as built;** they land in QUESTIONS #179 at the
+  closeout with U1's.
+- **NEXT:** the ladder (ONE `fable-reviewer`, the combined diff `d06f57b0..f0bafc32` + the
+  architect's U0 commits `b2e8b1c2`/`cdcdefc8`/`d523d6d8` — in practice the whole phase diff
+  `cdc21e1e..tip`), findings repo-first; then the orchestrator's walk; then the family close.
+
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; unverified claims PENDING)
 
 - 2026-10-03 · kickoff: preflight complete (the KICKOFF RECORD above); her four rulings
