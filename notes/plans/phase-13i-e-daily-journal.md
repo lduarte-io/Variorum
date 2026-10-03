@@ -291,8 +291,8 @@ the closeout tidies them.
 | 0 | U0 — the schema event (architect; schema-first commits) | **DONE** (b2e8b1c2 — v1_21 + model + registry/marker 12 + DDL-pin list + the mirror artifact + the deploy checklist; full core suite green 2127/234, the 13i-d baseline exactly) |
 | 1 | U1 — the op family + the daily rulings (headless) | **DONE** (`d12eecc6` piece 1 · `b6e4f52e` piece 2 · `a8199c9b` the confirm-N fragment; R1–R4 red by revert, restored clean; core FULL 2168/242 green, Mac 384/50 + 97/13, phone 69/15 — the U1 RECORD below) |
 | 2 | U2 — the faces + lesson 9 | **DONE** (ACT 0 `5d61bb64`…`143417c3` red on the pre-fix tree + by revert, 7 issues each · pieces `0b5d60e9` `2f3109fe` `138a8322` `78644cba` `df3c18e9` `5be92918` · lesson 9 `3fdee77a` (naturally red pre-sentence, 2 issues) · pins `dbca8189` `2b944fe5` · W-1 `506b4ec9`; core FULL 2172/244, Mac 97/13 + 1396/214 + 99/8, phone 70/16; the walk 33 captures both voices — the U2 RECORD above) |
-| 3 | The ladder (ONE, `fable-reviewer`, combined diff) | NOT-STARTED |
-| 4 | The orchestrator's walk | NOT-STARTED |
+| 3 | The ladder (ONE, `fable-reviewer`, combined diff) | **CLOSED AT TWO ROUNDS** (R1: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT — `13ie-ladder-round1.md`; the cross-model exchange: implementer AGREE ×2, the reviewer's final call took the two-step refinement, fix a3fd7cfe pin-first + revert-verified; the implementer sanity pass AGREE-CLEAN; R2 fresh reviewer: both FIXED, zero new findings — `13ie-ladder-round2.md`; core 2173/244 green) |
+| 4 | The orchestrator's walk | **DONE** (2026-10-03 — THE ORCHESTRATOR'S WALK section: every acceptance flow live incl. lesson 9 through the real re-seed door; W-O-1 the ⌘J canon conflict HELD for her; W-O-2 the walker slip restored with class rules) |
 | 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | HELD FOR HER |
 | 6 | The family close: the combined-walk document + the loose-end sweep | NOT-STARTED |
 | 7 | Closeout: the standing ritual + canon deltas + KnownIssues row 32 + #89(b) + QUESTIONS #179 + MobileSoul + the handoff + the DerivedData tidy | NOT-STARTED |
@@ -1219,6 +1219,83 @@ list unmarked (F-U2-4).
 - **NEXT:** the ladder (ONE `fable-reviewer`, the combined diff `d06f57b0..f0bafc32` + the
   architect's U0 commits `b2e8b1c2`/`cdcdefc8`/`d523d6d8` — in practice the whole phase diff
   `cdc21e1e..tip`), findings repo-first; then the orchestrator's walk; then the family close.
+
+## THE ORCHESTRATOR'S WALK (2026-10-03, by the orchestrator's own hand — the dev-store Debug build `DerivedData/13ie-orchwalk` at the post-ladder tip `589c521f`; guards green per act incl. one self-trip adjudicated by the idle-climb rule; her away-window ("go ahead, I'm away from my computer"); captures `notes/plans/13ie-screens/orch/` o2–o24, gitignored; zero instances before and after; the dev instance quit by identity; caffeinate ended)
+
+**The acceptance flows, each verified live:**
+- **A plain book's round trip** (o2/o3/o4/o5): the context menu offers Archive BESIDE Delete
+  Book…; the archive acted at once; the Bookcase dropped the row; the ARCHIVED surface's BOOKS
+  group showed "act0 walk · book · 3 notes · archived …" with Open · Unarchive · Delete Book…
+  under the keep-forever masthead ("notes and books you set aside — kept, with no countdown");
+  Unarchive from the surface spoke the quiet receipt ("Unarchived "act0 walk" — it's back on
+  the Bookcase.") — the W-1 host works — and the book returned to the Bookcase.
+- **The gathering's pause** (o6/o8/o9/o10): archiving Quicknotes flipped the Pool masthead
+  93 loose · 21 in gatherings → 107 · 7 (its tucked notes re-classed); the archived gathering's
+  own view read "0 notes"; the Gathering Settings sheet LED Collecting with "Collecting is
+  paused while this gathering is archived — it shows nothing until you unarchive it." and the
+  State row read "archived — kept under archived, off the bookcase." with the unarchive door;
+  the unarchive brought all 16 back (o11) and the Pool restored.
+- **The owned two-choice** (o13/o14/o15): the owned book's door says "archive…" (it asks) where
+  the plain/gathering doors act at once; the confirm verbatim-faithful ("…owns its notes.
+  Archive the book only, and its 4 notes stay in the Library — still its own — or archive the
+  book and its 4 notes together. Either way it's kept under Archived, with no countdown — and
+  Unarchive brings back whatever went in together, together.") with N=4 EXCLUDING the
+  already-archived member (the one-fragment count); the act: 0 notes · 5 archived, the pause
+  sentence leading Collecting, the 2 arrivals KEPT WAITING, the receipt; the unarchive: back to
+  4 notes · 1 archived — the individually-archived member STAYED archived (the exact-stamp
+  corner, on screen), arrivals still at the door.
+- **The daily Journal** (o16/o17/o18/o19/o21/o22): its State row carries §10's sentence as the
+  caption ("the daily journal can be archived, never deleted; it returns when a day arrives.")
+  with a plain archive door and NO delete door anywhere (the Archived row too: Open · Unarchive
+  only, where note rows carry three buttons); archived ⇒ off the Bookcase; its Archived row
+  reads "Journal · daily journal · 10 notes · archived …"; unarchive's receipt "Unarchived
+  "Journal" — it's back on the Bookcase."
+- **Lesson 9 live through the real door** (o23/o24): Help ▸ Restore Tutorial's confirm
+  discloses exactly what it touches (the 13i-d ruling's wording); the re-seeded "the journal &
+  the pool" page carries lesson 9 WHOLE — *"You can archive it; you can't delete it; it comes
+  back when a day arrives."* — the F-U7-2 sentence, rendered, via the exact press she will make
+  on her real store after the window.
+
+**W-O-1 — THE WALK'S FINDING (a canon conflict found by use; HELD FOR HER — nothing built):**
+⌘J pressed while the Journal was archived, with today's entry ALREADY existing (U2's walk had
+minted it), OPENED the existing entry — breadcrumb honestly "~/journal (archived)" (o19) — and
+the Journal STAYED archived (the decided-pair arm, P-13ie-U1-12, behaving as sustained). Traced
+to ground truth: `createOrOpenJournalEntry` still implements the Phase 8 NOTEBOOK RULE ("a day
+that already has a live journal entry OPENS it"), so **the memo §0(a) RULED retirement ("the
+door discouragement goes … Today's Entry / ⌘J / + new entry always MINT") was NEVER BUILT — and
+the sitting record §10's "door discouragement already gone" is WRONG AS A FACT.** The ruling's
+owner is 13i-e (her third 2026-09-04 message), so this phase owes her the call, and her own
+words cut both ways (her second message's "*where Today's Entry and the shortcut TAKES YOU*"
+reads as open-today; the memo's (a) reads always-mint). The lived consequence is small and
+honest (a re-press same-day leaves the Journal under Archived with the labeled breadcrumb; the
+FIRST filing of a day brings it back — U2's walk proved that arm live at 12:27). OPTIONS,
+hers: **(a)** build memo (a) literally — every ⌘J mints a fresh date-stamped entry, so the
+comes-back runs on every press (two presses = two entries for the day); **(b)** keep ⌘J as
+open-today AND make the ⌘J/Today's Entry door un-archive the Journal on EVERY press (the
+comes-back decoupled from the filing — "a command that opens it" ground; the decided-pair arm
+keeps meaning no re-filing); **(c)** as built (first-press-of-a-day returns it; a re-press
+opens the entry with the honest crumb). The architect's lean: (b). Routed to QUESTIONS (the
+#179 bundle's head) and the handoff's first section.
+
+**W-O-2 — the walker's slip, found, restored, and the class rules recorded:** two blind
+keystroke sequences (a type-select sent without CONFIRMING the context menu had opened; ⌘K
+navigation typed while the Gathering Settings sheet's NAME FIELD held focus) RENAMED Quicknotes
+to "pool" and later cost its star. Caught by reading the listings; RESTORED deliberately
+(the sheet's name field retyped with visible focus → "quicknotes" back on the Bookcase; the
+context menu re-opened WITH a confirmation capture → Star → the ★ float verified). Also met and
+adjudicated: the guard's self-trip (idle climbed 8→19 monotonically — resumed per the rule);
+a mid-transition capture misread as a missing row (the Bookcase list had merely scrolled "u4
+owned" below the fold — the palette found it healthy). THE RULES, for WalkKit's facts file at
+the closeout: (1) NEVER type after opening a menu/sheet without a capture proving where focus
+is — a settings sheet opens with its name field focused and type-select keystrokes become a
+RENAME; (2) a bounded window capture is never a listing's END — scroll or search before
+concluding a row is gone; (3) verify every restore by re-reading the listing, not the act.
+
+**Residue in the dev store (the fixtures-stay precedent):** act0 walk / Quicknotes / u4 owned
+/ the Journal each round-tripped through archive and back (u4 owned's 2 arrivals and 1
+archived member preserved throughout); the tutorial re-seeded (the old guide in the Trash, the
+books-chapter walks re-run by the seeder); no new notes minted (the ⌘J press re-reached the
+existing 2026-10-03 entry); voice and appearance untouched.
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; unverified claims PENDING)
 
