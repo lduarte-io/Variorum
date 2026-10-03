@@ -395,3 +395,63 @@ all three write sites.
 leans (b) with (c)'s product-call and pre-U7-copies objections; (a) is HELD-if-chosen
 (author-only — it alters her R-pre13u-8 keeper ruling). The final call is the reviewer's; an
 (a) pick becomes a HELD bundle item, never a build.
+
+---
+
+## ROUND 1 — THE FINAL CALLS AND FIXES (the reviewer, 2026-10-02; the cross-model flow's closing arm)
+
+### THE FINAL CALLS (each recorded before its build)
+
+- **The MAJOR — SEVERITY DISPUTE UPHELD: DOWNGRADED TO MINOR; mechanism and fix CONFIRMED.**
+  I re-checked U5's two facts myself rather than taking them: `TrashScope.listedKinds`
+  (RecoveryActs.swift:489) excludes `.take` from EVERY Trash view — her own D1 ruling, "takes
+  never row here" — and `emptyTrashTakes(.take) == false` (:511) drops takes from BOTH the
+  confirm's acted-count and the act's `requestPurge` targets (:383, :431). So neither harm my
+  MAJOR named reaches a shipped surface: no wing's Trash ever lists a take, and no Empty Trash
+  can mint a purge intent for one. My finding assumed the surface showed what the query listed;
+  I had not read `TrashScope` — the dispute caught it, which is what the recheck is for. The
+  REACHABLE effects are real and worth the fix: the `emptyTrashConfirm` counts (`Queries.trash`
+  with every kind) attribute a live placed block's deleted takes to HOME's confirm instead of
+  their note's wing ("N takes stay" said in the wrong wing), and the query lies to any future
+  by-wing `.take` caller. **Severity MINOR; fixed below exactly as proposed** (the COALESCE
+  live-placement join), with the red-on-old pin at the query level. With the downgrade NO MAJOR
+  stands — nothing reaches the round-3 bar.
+- **MINOR 1 (the dedupe's asymmetric meeting) — CONFIRMED; remedy = (b), RECORD AS THE
+  DOCUMENTED RESIDUAL, with (a) and (c) routed to HER BUNDLE.** The three-way divergence decided
+  on these grounds: (a) — a keeper-preference arm — alters her R-pre13u-8 ruled matrix and is
+  AUTHOR-ONLY (held to the bundle, never a build, as flagged). (c) — folding the arrangement
+  into the shared seeder — is the root closure but DECIDES PHONE SEED CONTENT (what a fresh
+  phone store holds at first write: a Welcome shelf its UI cannot yet show, an owned Sherlock,
+  a seeded gathering — §19's Welcome shape was HER sitting ruling for the Mac board, and the
+  phone's equivalent deserves the same sitting, per U7's objection), cannot reach copies already
+  seeded raw by pre-U7 builds, and would land un-walked phone furniture from a fix pass — the
+  friction doctrine says design it, not patch it. (b) is honest and zero-risk: the residual is
+  NAMED at the `seedTagPaths` field doc beside the retag/untag class it extends, a KnownIssues
+  row lands owned by the phone's arrangement catch-up (P-13id-U7-14 — the already-recorded
+  closer), a DOCUMENTING two-client pin makes the outcome a test instead of a surprise (the
+  SyncSpec review-finding-#6 precedent), and the (a)/(c) choice goes to her bundle (QUESTIONS
+  #178) so the product call is hers. The window stays the dedupe's own (seed-before-first-sync;
+  her account's is near zero).
+- **MINOR 2 (the wing-context stomp) — CONFIRMED, WIDENED PER U6'S AGREE** (the two reload
+  sites ride the fix; the sidebar note box's bar named as the reachable road). Both fix halves
+  land: `NoteMenuWingContext` carries its `postID` and the bars render only a MATCHING context
+  (a pure, pinnable gate — a stale or nil-stomped context can no longer draw another note's
+  doors), and the modifier's write sites take the ladder-A cancellation guard.
+- **MINOR 3 (the wing-moved sample book's restore) — CONFIRMED, FIXED AS THE WING-AWARE
+  RESTORE** per U7's agree: the reserved tag resolves (and mints) in the BOOK's wing, missing
+  notes mint IN the book's wing, and a stray in ANOTHER wing is left alone (the title mints
+  fresh — the restore never crosses wings by itself, lesson 11's fence); the minimal
+  catch-and-copy is rejected on U7's own trace (`copyPostIntoReading` is same-wing too).
+- **The NIT — CONFIRMED** (attribute below the doc block).
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | The final calls + this skeleton | DONE (this commit) |
+| 2 | Fix A (the downgraded take-arm MINOR): the live-placement COALESCE join + red-on-old pin + the follows-the-note control | PENDING |
+| 3 | Fix B (MINOR 2): the postID-gated context + the guarded writes + pins | PENDING |
+| 4 | Fix C (MINOR 3): the wing-aware restore + red-on-old pin | PENDING |
+| 5 | Record D (MINOR 1): the residual at the field doc · KnownIssues row · QUESTIONS #178 · the documenting two-client pin | PENDING |
+| 6 | Fix E (NIT): the attribute placement | PENDING |
+| 7 | Suites at the END: core FULL (baseline 2125/234) · touched Mac suites + the registry walk + the tutorial spine · phone test build | PENDING |
