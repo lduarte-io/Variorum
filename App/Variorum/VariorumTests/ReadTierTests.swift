@@ -221,12 +221,12 @@ struct ReadTierTests {
     /// install/uninstall path).
     @Test func aRemadeReadSurfaceStillRendersDecorAndBadges() async throws {
         try await withReadTier(seedBlocks: ["a callout block", "a fanned block"]) { h in
-            func hasDecor(_ view: NSView) -> Bool {
+            @MainActor func hasDecor(_ view: NSView) -> Bool {
                 view.subviews.contains {
                     String(describing: type(of: $0)).contains("DecorRectView")
                 }
             }
-            func hasBadge(_ view: NSView) -> Bool {
+            @MainActor func hasBadge(_ view: NSView) -> Bool {
                 view.subviews.contains { ($0 as? NSButton)?.title.contains("⑂") == true }
             }
 

@@ -855,7 +855,7 @@ struct TutorialWritingActsTests {
             // NOW the badge host wires — exactly the install order.
             let overlay = BadgeOverlayController(model: model, textView: textView)
             _ = overlay
-            func hasBadge() -> Bool {
+            @MainActor func hasBadge() -> Bool {
                 textView.subviews.contains { ($0 as? NSButton)?.title.contains("⑂") == true }
             }
             await poll { hasBadge() }
@@ -922,7 +922,7 @@ struct TutorialWritingActsTests {
             window.layoutIfNeeded()
             window.display()
 
-            func badgeYs() -> [CGFloat] {
+            @MainActor func badgeYs() -> [CGFloat] {
                 textView.subviews
                     .compactMap { $0 as? NSButton }
                     .filter { $0.title.hasPrefix("⑂") }

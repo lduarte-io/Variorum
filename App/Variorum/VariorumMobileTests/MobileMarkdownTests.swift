@@ -642,7 +642,7 @@ struct MobileMarkdownActsTests {
             // holds ROW stacks — one row since her R22, two before it —
             // so labels flatten row by row and keep reading in door
             // order however the strip is split.
-            func labels() -> [String] {
+            @MainActor func labels() -> [String] {
                 (toolbar.items ?? []).flatMap { item -> [String] in
                     if let strip = item.customView as? UIStackView,
                        strip.accessibilityIdentifier == "kbar.formattingStrip" {

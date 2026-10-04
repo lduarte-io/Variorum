@@ -402,7 +402,7 @@ struct ReadNoteLandingTests {
             // far the face's own scroll view is scrolled (the AppKit scroll view
             // the face IS — the one whose size is the face's; the page face's
             // first block rests at 0.08, which is below the page's top air).
-            func scrollViews(_ v: NSView) -> [NSScrollView] {
+            @MainActor func scrollViews(_ v: NSView) -> [NSScrollView] {
                 (v is NSScrollView ? [v as! NSScrollView] : []) + v.subviews.flatMap(scrollViews)
             }
             let scroll = try #require(scrollViews(world.hosting).first {

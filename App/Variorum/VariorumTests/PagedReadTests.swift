@@ -575,9 +575,9 @@ struct PagedReadViewTests {
             // the surface draws. (The view's page model is its `@State`, and
             // the root view's body reads the instance the hosted graph holds.)
             let scrub = try #require(scrubbers.first ?? nil, "the scrubber drives a binding")
-            func drawnPages() -> [Int] {
+            @MainActor func drawnPages() -> [Int] {
                 var numbers: [Int] = []
-                func walk(_ view: NSView) {
+                @MainActor func walk(_ view: NSView) {
                     if let page = view as? PageFrameNSView { numbers.append(page.pageNumber) }
                     for sub in view.subviews { walk(sub) }
                 }

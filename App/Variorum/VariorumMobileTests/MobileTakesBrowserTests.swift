@@ -737,7 +737,7 @@ struct MobileTakesBrowserSurfaceTests {
             // The chosen card wears the state, never an inert ✓ door
             // (P-2); the peeked card wears the takes register (the
             // in-page marker's grammar carried into the sheet).
-            func subview(_ card: MobileTakesCardView, _ id: String) -> UIView? {
+            @MainActor func subview(_ card: MobileTakesCardView, _ id: String) -> UIView? {
                 card.subviews.first { $0.accessibilityIdentifier == id }
             }
             #expect((subview(chosenCard, "takes.card.choose") as? UIButton)?.isHidden == true)
@@ -952,14 +952,14 @@ struct MobileTakesBrowserSurfaceTests {
                 Issue.record("browser view not installed")
                 return
             }
-            func find(_ id: String, in root: UIView) -> UIView? {
+            @MainActor func find(_ id: String, in root: UIView) -> UIView? {
                 if root.accessibilityIdentifier == id { return root }
                 for sub in root.subviews {
                     if let hit = find(id, in: sub) { return hit }
                 }
                 return nil
             }
-            func cardsScroll(in root: UIView) -> UIScrollView? {
+            @MainActor func cardsScroll(in root: UIView) -> UIScrollView? {
                 for sub in root.subviews {
                     if let scroll = sub as? UIScrollView, !(scroll is UITextView) {
                         return scroll

@@ -213,7 +213,7 @@ struct LibraryPanelHostTests {
         let window: NSWindow
         let hosting: NSHostingView<AnyView>
 
-        func tearDown() {
+        @MainActor func tearDown() {
             window.orderOut(nil)
             window.close()
         }

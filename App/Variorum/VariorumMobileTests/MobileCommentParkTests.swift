@@ -53,7 +53,7 @@ private func seedTwoBlockPost(
 }
 
 /// Any descendant carrying this accessibility identifier.
-private func find(_ identifier: String, in root: UIView) -> UIView? {
+@MainActor private func find(_ identifier: String, in root: UIView) -> UIView? {
     if root.accessibilityIdentifier == identifier { return root }
     for child in root.subviews {
         if let hit = find(identifier, in: child) { return hit }

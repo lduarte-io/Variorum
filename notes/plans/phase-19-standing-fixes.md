@@ -892,5 +892,34 @@ outputs copied into the evidence folder.
    VACUOUS; 1 RECORDED** (`AppleKeyRoundTripTests.swift:97`, the iCloud-Keychain opt-in — a
    session never runs it; its expansion calls the `-> Bool` overload, a rank, not a clearance).
 5. Re-spells — NONE OWED (zero vacuous sites; no assertion byte changes in Arm 1).
-6. Arm 2, Mac then mobile — PENDING.
+6. Arm 2 — DONE in code (this commit), suites PENDING. The warning-grade main-actor reads sat in
+   LOCAL helper functions (Swift 6.4 does not give a local `func` its enclosing test's isolation —
+   every suite here is already `@MainActor`), one nested struct method, two file-scope `private
+   func find`s and ONE synchronous test; the treatment is test-side `@MainActor` on exactly that
+   context (19a F3's shape; the local-function spelling follows `PoolDragTests:299`'s `@MainActor
+   func poll`): **Mac** — `BookViewTests` `walk` ×2 / `count` / `views`; `LibraryPanelTests`
+   `Mounted.tearDown`; `PagedReadTests` `walk` AND its caller `drawnPages` (the first build said
+   so: `error: call to main actor-isolated local function 'walk' in a synchronous nonisolated
+   context` — `walk` is nested in `drawnPages`, `mac-bft-arm2.log`; fixed the same way,
+   `mac-bft-arm2b.log` green); `ReadNoteLandingTests` `scrollViews`; `ReadTierTests` `hasDecor` /
+   `hasBadge`; `TakePaneMeasureTests` `findPane` (the one at 561 — the file's other seven
+   `findPane`s never warned and are untouched); `TutorialWalkTests` `hasBadge` / `badgeYs`.
+   **Mobile** — `MobileCommentDraftTests` / `MobileCommentParkTests` file-scope `find`;
+   `MobileMarkdownTests` `labels`; `MobileTakesBrowserTests` `subview` / `find` / `cardsScroll`;
+   `MobileProtectionTests` — `@MainActor` on the ONE synchronous test
+   `theReconciledStringsNameThePhone` (its line-620 `#expect` reads the main-actor static
+   `EncryptionView.keysReplacedExplanation`; the attribute line shifts the file's later lines by
+   one — the NOT-OWNED unnecessary `try` now sits at **1573**). **Diff:** 12 files, 20+/19−, every
+   changed line a declaration gaining `@MainActor` (plus the one attribute line); **zero
+   `#expect`/`#require` lines changed** (`git diff -U0 | grep '#(expect|require)'` empty).
+   **Census after (full test-target recompiles — the test targets' intermediates deleted first so
+   every test file re-emits its diagnostics; `mac-bft-arm2-full.log`, `mobile-bft-arm2-full.log`,
+   both `** TEST BUILD SUCCEEDED **`):** Mac test-file warnings 97 → **74**, the removed set
+   EXACTLY the 23 isolation lines in the 7 files, nothing added; mobile 60 → **40**, the removed
+   set EXACTLY the 20 (17 + 2 autoclosure + the in-expansion static), nothing added; **ZERO
+   isolation warnings left in either test target** — what remains is the recorded NOT-OWNED
+   classes (10 `UIWindow.init(frame:)` deprecations; `MobileProtectionTests:1573`'s `try`) and the
+   other cosmetic classes 19a/19b recorded. **Arm 1 still holds after Arm 2:** the route census
+   re-run on the recompiled objects is IDENTICAL per (file, macro, check, route) on both targets,
+   zero `#expect` on an Optional route (`mac-routes-arm2.tsv`, `mobile-routes-arm2.tsv`).
 7. Acceptance runs + the census table + dispositions — PENDING.

@@ -583,6 +583,7 @@ struct MobilePhoneProtectionCopyTests {
     /// strings the Mac shows, with the phone's nouns (*this iPhone asks for
     /// Face ID*), and the Always-ask / leaving doors name Face ID.
     /// pre-13x 5a — the reconciliation's re-renders in the phone's nouns.
+    @MainActor
     @Test func theReconciledStringsNameThePhone() {
         #expect(ProtectionCopy.lobbyBiometryFailed == "Face ID didn't go through — enter your encryption passphrase instead.")
         #expect(ProtectionCopy.lobbyWordsDoor == "Use your twelve words")

@@ -558,7 +558,7 @@ extension TakePaneMeasureTests {
             for _ in 0..<8 {
                 window.layoutIfNeeded(); window.displayIfNeeded(); pumpMain(); await Task.yield()
             }
-            func findPane(_ view: NSView) -> PaneTextView? {
+            @MainActor func findPane(_ view: NSView) -> PaneTextView? {
                 if let pane = view as? PaneTextView,
                    pane.identifier?.rawValue.contains(longVariantID) == true { return pane }
                 for sub in view.subviews {

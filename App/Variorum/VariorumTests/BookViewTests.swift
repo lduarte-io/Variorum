@@ -218,7 +218,7 @@ struct BookViewTests {
             // And the surfaces carry REAL content — the coordinator-started
             // observations delivered (the projection reached the surface).
             var sawContent = false
-            func walk(_ v: NSView) {
+            @MainActor func walk(_ v: NSView) {
                 if let read = v as? ReadPostTextView, read.string.contains("Sentence one") {
                     sawContent = true
                 }
@@ -613,12 +613,12 @@ struct OutlineWritingSurfaceTests {
     @Test func outlineCarriesNoBottomChrome() async throws {
         try await withHostedBook(posts: 6) { _, _, _, _, window, hosting, _ in
             await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
-            func count<V: NSView>(_ type: V.Type, in view: NSView) -> Int {
+            @MainActor func count<V: NSView>(_ type: V.Type, in view: NSView) -> Int {
                 var n = view is V ? 1 : 0
                 for sub in view.subviews { n += count(type, in: sub) }
                 return n
             }
-            func views<V: NSView>(_ type: V.Type, in view: NSView) -> [V] {
+            @MainActor func views<V: NSView>(_ type: V.Type, in view: NSView) -> [V] {
                 var found = (view as? V).map { [$0] } ?? []
                 for sub in view.subviews { found += views(type, in: sub) }
                 return found
@@ -659,7 +659,7 @@ struct OutlineWritingSurfaceTests {
         try await withHostedBook(posts: 3, width: 1400) { _, _, _, _, window, hosting, _ in
             await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
             var widths: [CGFloat] = []
-            func walk(_ v: NSView) {
+            @MainActor func walk(_ v: NSView) {
                 if let read = v as? ReadPostTextView, read.bounds.width > 0 {
                     widths.append(read.bounds.width - 2 * read.textContainerInset.width)
                 }
