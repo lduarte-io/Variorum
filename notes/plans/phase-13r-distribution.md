@@ -1984,13 +1984,36 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 
 ## U3-A RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; refreshed at the stop):**
-- U3-B (MetricKit, Diagnostics, Help ▸ Send Feedback…) — not this session's.
-- THE U3 ACCEPTANCE WALK — staged later (after U3-B) and run at HER sitting; this session never
-  runs it, never builds a walk DMG through the pipeline, never publishes anything (the public
-  appcast stays 404), never touches `/Applications` or the real store.
-- Zero `Sources/VariorumCore/Sync/`, zero schema, zero mobile-target files.
-- (Filled in at the stop with anything else left undone.)
+**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; FINAL at the stop):**
+- **THE DMG WINDOW'S LAYOUT NEVER RAN.** Scripting Finder is DENIED for this Mac's terminal host
+  (Ghostty, status −1743, measured). `make-dmg.sh` and `release.sh` therefore REFUSE at preflight
+  until **HER HANDS: System Settings ▸ Privacy & Security ▸ Automation ▸ Ghostty ▸ Finder → ON**.
+  The window is unverified on screen; its first proof is the no-notarization dry run in piece 5
+  (it reads the layout back and prints PASS/FAIL), then the walk's arm (a). Everything around it
+  (the drawn background, the RW→UDZO road's refusal, the read-back parser on real Finder data, the
+  notes embedding with the real 2.10.0 tool) was exercised.
+- **Release-only faces were not walked here (P-2 makes them absent in Debug, by design):** the
+  update ask (Sparkle's own window from day 3), Settings ▸ General's "Check for updates
+  automatically", and the calm sync face's Check for Updates… door. They are pinned; their USE is
+  the U3 walk's arms (b) and (e). The calm sync face cannot be reached on any build here (the dev
+  *[removed for publication]*
+- **The field guide's new passage was not seen on screen:** Help ▸ Restore Tutorial… is a
+  wholesale replace of the dev store's guide, which this session declined to do to the dev store;
+  the passage is pinned headless (`TutorialWalkTests`), and the closeout's real-store re-seed is
+  where it is first seen.
+- **The U3 walk sheet is not written** (staged after U3-B, per the plan); this record hands it the
+  day-counter recipe (piece 6) and the DMG dry run (piece 5). Nothing was published (the public
+  appcast stays 404); `/Applications` and the real store were never touched; zero
+  `Sources/VariorumCore/Sync/`, zero schema, zero mobile-target files (the mobile target BUILDS).
+- **A PRE-EXISTING red, not this unit's, routed not fixed:** `DataSafetyRunbookTests
+  .theShippedRunbookAndTheRepoCopyAreOneDocument` fails at the U3-A base too —
+  `notes/DataSafetyRunbook.md` line 291 still says "on your shelf" while `DataSafetyCopy.runbook`
+  has said "on your Bookcase" since 13i-d U6 (`827da96c`); confirmed at `138ac723` before any U3-A
+  line. The fix is a one-line repo-doc sync (copy the rendered text the test writes over the repo
+  file) — the orchestrator's to place (a 19 entry or the closeout).
+- U3-B (MetricKit, Diagnostics, Help ▸ Send Feedback…) — not this session's. The full Mac and core
+  suites were not run (the brief names the touched families; the ladder's "suite green" is the
+  phase's).
 
 **Session start (2026-10-04 ~19:58Z):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair).
@@ -2253,7 +2276,7 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      CalmAsks green; CalmAsks' 3 issues were the TEST's own (a "past midnight" hour that was not, and
      a missing seeded RNG dependency), fixed → **`Test run with 15 tests in 1 suite passed`** (logs
      `13r-u3a/p6-test.log`, `p6-test2.log`). No `skipped:` lines.
-7. Finals — the touched families' suites, the Debug-build captures, this record closed — IN-PROGRESS.
+7. Finals — **DONE (this commit)**.
    - **MUTATION RUN IN FLIGHT (named before it starts, per the protocol's addendum 2; the
      committed tree `6151f47a` is the pre-revert copy):** three production files are mutated
      together — `Shared/SyncStatusViews.swift` (the classifier answers false), `Features/WhatsNew/
@@ -2283,3 +2306,54 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      `defaults import ~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Preferences/io.lduarte.Variorum.debug <that export>`.**
      The voice was switched to Study for captures (a dev-store synced setting) — switched back to
      Terminal at the end.
+     **RESTORED:** the dev prefs re-imported and the walk's three extra keys deleted — the domain's
+     export now equals the pre-walk export (diffed, equal); the voice set back to Terminal.
+   - **THE DEV-STORE WALK (Debug build `13r-u3a/p1-debug`, `cliclick` + `Tools/WalkKit`, every
+     step behind `guard.sh`; HER app absent throughout, idle > 40 min at the start). Captures in the
+     gitignored `notes/plans/13r-screens/u3a/`:**
+     - `a1/w0.png` — **What's New at LAUNCH after a version change** (the ledger set to a recorded
+       0.8.9; the build is 0.9.0): the sheet over the Bookcase in the TERMINAL voice, the 0.9.0
+       notes rendered (headings, bullets, bold, the support link), "Continue" on ⏎. The record
+       read 0.9.0 immediately after (settled on appearance).
+     - `a2/` — after Continue: the main window alone. `a3/` — **the NEXT launch: no sheet** (the
+       show-once, walked).
+     - `a4/` — **Help ▸ What's New** on demand (the menu listed: Shortcuts & Dictionary · Open the
+       Tutorial · What's New · Restore…), Terminal.
+     - `a5-study/w0.png` — Help ▸ What's New in the **STUDY** voice (serif, the voice's own room).
+     - `s1/w0.png` — Settings ▸ General in a Debug build: **no Updates section** (P-2 — the channel
+       is inert in Debug; the row is Release-only).
+     - `b1/w0.png` — **THE BACKUP OFFER on day 5** (the day counter set to 4 + a past day; the dev
+       store's second-folder bookmark and offer mark removed for the walk): it fired at the first
+       15-s tick past 2 minutes (launch ~14:54:48, shown 14:56:55, nothing typed), as the bottom
+       toast "Keep a copy of your backups in iCloud Drive?" · Not Now · Set Up… · ✕ (Study voice);
+       the prefs then read day 5, `backupFolder.timesShown 1`, `lastAskDay 5`.
+     - `b2/w0.png` — **Set Up… → the three-door sheet** (re-armed once to click it inside the 6-s
+       window); Escape answered it as Not Now and the dev mark read 1 again.
+   - **SUITES (zero-instance windows):**
+     - the 22 touched/neighbouring suites (registry walk, shell chrome, Open strip menu, chord
+       legibility, update channel, entitlements, version scheme, What's New, calm asks, the two sync
+       faces + EncryptionFlow's face pins, the iCloud offer, Settings shape, confirmations, status
+       vocabulary, Data Safety's runbook, no-literal-colour, the two debug-oracle window suites,
+       shell confirm, PostureSwitch): **`Test run with 209 tests in 22 suites` — 1 issue, the
+       PRE-EXISTING runbook drift above, nothing else**; the `skipped:` lines are exactly the 7
+       `DebugOracleSingletonWindowTests` tests + their suite, opt-in-disabled by design
+       (`VARIORUM_ORACLE_SINGLETON_WINDOWS`) (log `13r-u3a/close-suites.log`).
+     - every suite in the tutorial, command-routing (incl. `StatusCenterTests`), shell-landing,
+       windows and note-box files (34 suites): **`Test run with 166 tests in 34 suites passed`**,
+       no `skipped:` — the new `theExportLessonTeachesWhereBackupsLiveAndTheSecondFolderDoor`
+       among them (log `close-suites2.log`).
+     - **The mobile target BUILDS** (`Shared/SyncStatusViews.swift` changed; fresh
+       `-derivedDataPath 13r-u3a/mobile.noindex`, `generic/platform=iOS Simulator` → BUILD
+       SUCCEEDED, `mobile-build.log`).
+     - **A CLEAN Debug build** (fresh `13r-u3a/clean-debug`) → BUILD SUCCEEDED, stamped by the new
+       phase; **its warning set is IDENTICAL to U2's p4 clean build** (22 unique file+message pairs
+       on each side under one normalisation, `diff` empty — U2's "28" counted differently).
+   - **For the ladder (flagged, not decided):** the two UNDECLARED menu doors on their precedents
+     (Help ▸ What's New beside "Open the Tutorial"; U2's Check for Updates…); `StatusCenter.Item`'s
+     new `secondary` door (the one-door offer shape widened for this ask); the deferral's
+     `@objc(updaterShouldPromptForPermissionToCheckForUpdates:)` pin (Sparkle calls it by selector);
+     `askPermission()` driving Sparkle's standard user driver directly (the public `SPUUserDriver`
+     road — Sparkle's own `_showingPermissionRequest` stays NO, so the channel greys its own menu
+     door while the window is up); `ENABLE_USER_SCRIPT_SANDBOXING = NO` on the Mac target only;
+     the `hdiutil` deprecation warning on macOS 27; the Finder-automation dependency of the ruled
+     DMG road.
