@@ -2429,14 +2429,33 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
 
 ## U3-B RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; kept current, FINAL at the stop):**
-- **AT THE PLACEMENT PAUSE (2026-10-04):** the FACES are not built — no Settings row for the opt-in,
-  no Diagnostics surface — because their placement is the in-batch fork (piece 4's PROPOSAL, awaiting
-  the architect's ruling). Everything placement-independent is built and pinned (pieces 1–3). Not yet
-  done either: the U3 walk sheet (staged after the ruling, so its optional arm can name the ruled
-  pane), the mutation run, the dev-store walk + captures, the finals' suites. Nothing published;
-  `/Applications` and the real store untouched; zero `Sources/VariorumCore/Sync/`, zero schema, zero
-  `Shared/`, zero mobile-target files.
+**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; FINAL at the stop, 2026-10-04):**
+- **A Variorum mail draft was NEVER SEEN ON SCREEN on this machine** — this M3's Apple Mail has no
+  account, so BOTH doors (Send Report… and Help ▸ Send Feedback…) landed in Mail's own Add Account
+  sheet (F-W5, measured; the compose service even reports success, so Variorum cannot tell). The
+  drafts' contents and the attachment's identity are pinned headless; the first on-screen draft is
+  her new computer's arm (f) if Mail is set up there. Whether the doors should do more for a Mac
+  without a mail account is QUESTIONS **#181 (i)** — hers, not decided here.
+- **The REAL MetricKit delivery was not observed** (no real crash; Apple controls the timing). The
+  walk exercised everything below MetricKit's payload object through the INJECTED synthetic payload;
+  the payload extraction is one line, unpinnable outside MetricKit. MetricKit inside the App Sandbox
+  is UNCONFIRMED by any source the lookup found — recorded, never claimed. A beta-era crash on an
+  opted-in Mac is the opportunistic last leg (R-13r-5's accepted trade-off).
+- **The U3 walk is STAGED, never run** (piece 6): no release, no publish, nothing against the public
+  feed; the public appcast is untouched.
+- **The full Mac and core suites were not run** (the brief names the touched families; the ladder's
+  "suite green" is the phase's). The one red in the families run is the PRE-EXISTING runbook drift
+  already queued as **19e** (`DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument`).
+*[removed for publication]*
+  zero schema, zero `Shared/`, zero mobile-target files (the scope check below) — so the mobile
+  target is untouched by construction and was not rebuilt.
+- **For the ladder (flagged, not decided):** Help ▸ Send Feedback… is UNDECLARED in the capability
+  registry (the What's New / Open the Tutorial precedent — a P-1 reading); the two pane acts ARE
+  declared `.surface`-only (the Data Safety precedent); `CrashDiagnosticSubscriber` is `@unchecked
+  Sendable` (its one stored property is an immutable `@Sendable` closure); the compose service's
+  delegate is the app-long `LiveSupportMailRoads.shared`, holding one pending failure road at a
+  time; MetricKit's `MX*` API is "to be deprecated" in the macOS 27 SDK (no warning; the new API is
+  macOS 27+).
 
 **Session start (2026-10-04 ~21:10Z):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair).
@@ -2892,7 +2911,7 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
    - **Left in place, not cleaned:** the new computer's install (it is hers — it will self-update
      *[removed for publication]*
      debris on the M3 stay for the closeout's sweep, as the U2 record says.
-7. Finals — IN-PROGRESS.
+7. Finals — **DONE (this commit).**
    - **MUTATION RUN IN FLIGHT (named before it starts, per the protocol's addendum 2; the committed
      tree `f2d710b0` is the pre-revert copy):** four production mutants applied together —
      (M1) `CrashReporting.init` subscribes REGARDLESS of the preference (`if isOn { subscribe() }` →
@@ -2984,3 +3003,29 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
        `Application Support/Diagnostics` folder and the synthetic file removed (neither existed
        before); the voice back to Terminal; Mail NOT running (as before — each leg's cancel quit
        it). Zero instances.
+   - **SUITES (zero-instance window, Debug, `-derivedDataPath 13r-u3b/dd`):** U3-A's 22-suite family
+     (registry walk, shell chrome, Open strip menu, chord legibility, update channel, entitlements,
+     version scheme, What's New, calm asks, the sync faces incl. EncryptionFlow's, the iCloud offer,
+     Settings shape, confirmations, status vocabulary, Data Safety's runbook, no-literal-colour, the
+     two debug-oracle window suites, shell confirm, PostureSwitch) + appearance choice + the
+     composition-road suite (`ProtectionSurfaceRenderTests`) + `OwnershipBadgeTests` (the catalog) +
+     this unit's four: **`Test run with 272 tests in 31 suites` — 1 issue, the PRE-EXISTING 19e
+     runbook drift, nothing else**; the `skipped:` lines are exactly the 7
+     `DebugOracleSingletonWindowTests` tests + their suite (opt-in by design — U3-A's identical
+     reading) (log `13r-u3b/close-suites.log`).
+   - **A RELEASE COMPILE** (zero instances, `CODE_SIGNING_ALLOWED=NO`, its own
+     `13r-u3b/release-compile.noindex`, never launched): BUILD SUCCEEDED; the binary carries **zero**
+     `VARIORUM_SYNTHETIC_CRASH_REPORT` strings (the DEBUG-only door compiles out of what ships) and
+     the opt-in key; it links only the SYSTEM `MetricKit.framework` (zero new dependency). The
+     unsigned Release app — a REAL-store build if anyone launched it — was then REMOVED and its two
+     LaunchServices registrations (the app + Sparkle's `Updater.app`) unregistered: 0 remain.
+   - **SCOPE (`git diff --name-only 32b97fdc..HEAD`):** 14 Mac-target files under `App/Variorum/
+     Variorum/` (`Features/Diagnostics/` ×5 new, `Features/Settings/` ×2 new + 2 edited, `Registry/`
+     ×2, `EditorCommands`, `VariorumApp`, `VariorumAppDelegate`), 5 test files, `notes/QUESTIONS.md`
+     (#181), this plan file. **No `Sources/`, `Shared/`, mobile or `Server/` path.** Commit count at
+     the stop: 4907.
+   - Build warnings: no warning in any file this unit created; the one warning in an edited file
+     (`AppSettingsView.swift`, `PromoteTagsSheet`'s actor isolation) is pre-existing (U3-A's logs).
+
+**U3-B STATE AT THE STOP (2026-10-04): ALL SEVEN PIECES DONE AND PUSHED; THE U3 WALK IS STAGED (piece
+6), AUTHOR-GATED.** The orchestrator verifies by spot-check, then the pre-walk staging (N-0) begins.
