@@ -151,6 +151,34 @@ struct PaneSurfaceTests {
         }
     }
 
+    /// **THE XCODE-27 ISOLATED-CONFORMANCE FIX'S TRIPWIRE** (19a; authorized by
+    /// the 13r orchestrator's 19a MID-RUN ADJUDICATION as the entry's one new
+    /// assertion). `resolve`'s at-rest stroke picks its arm by whether there
+    /// are tokens. Swift 6.4 refused the shipped `tokens == nil` (it resolves
+    /// through `VoiceTokens`' main-actor-isolated `Equatable`), so 13r U1
+    /// re-spelled it `tokens.map { _ in Color.clear } ?? Color.gray.opacity(0.25)`.
+    /// The pin above compares the rest look only RELATIVELY and only with
+    /// tokens, so a swapped or merged arm would stay green there; this one
+    /// holds BOTH arms to their ABSOLUTE values — voiced compositions draw a
+    /// clear hairline, the token-less call sites keep the grey one.
+    @Test func theRestLookHoldsItsAbsoluteValueOnBothArms() {
+        for voice in ThemeVoice.allCases {
+            for dark in [false, true] {
+                let voiced = VoiceTokens.resolve(voice: voice, dark: dark)
+                for style in EditingIndicatorStyle.allCases {
+                    #expect(PaneDecoration.resolve(isLive: false, indicator: style, tokens: voiced)
+                            == PaneDecoration(stroke: .clear, lineWidth: 0.5, fill: nil),
+                            "voiced (\(voice), dark \(dark), \(style)): nothing drawn at rest")
+                }
+            }
+        }
+        for style in EditingIndicatorStyle.allCases {
+            #expect(PaneDecoration.resolve(isLive: false, indicator: style, tokens: nil)
+                    == PaneDecoration(stroke: Color.gray.opacity(0.25), lineWidth: 0.5, fill: nil),
+                    "token-less (\(style)): the grey hairline at 0.5")
+        }
+    }
+
     /// The three hosts that keep a frame of their OWN around the live pane
     /// (`ReadEditPane`, `BookIndexView`, `BlocksWorkbenchView`) consume the
     /// same rule instead of reaching for `tokens.ring` — the brief's

@@ -79,9 +79,9 @@ not wait on this entry).
 
 **NOT DONE YET (stated first, per the contract):** the seven TK2 point-release tripwire suites have
 NOT run yet (measurement-shaped; held for a zero-instance window — her real-store app was live, pid
-85948, through the runs below). **And the brief's "`PaneSurfaceTests`' five `PaneDecoration.resolve`
-pins PROVE 13r U1's line behavior-preserving" does NOT hold as stated** — piece 4 says why and what
-evidence stands in for it. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
+85948, through the runs below). The brief's "`PaneSurfaceTests`' five `PaneDecoration.resolve` pins
+PROVE 13r U1's line behavior-preserving" did NOT hold as stated — piece 4 says why; the orchestrator
+ADJUDICATED it (piece 5) and authorized ONE committed absolute pin, landed here. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
 2026-10-04 — her live drill passed; U1 closed): suites run at quiet windows from here, her real-store
 instance never touched, the measurement-shaped TK2 tripwire suites preferring a zero-instance window.
 (During the window the implementer ran compile-only work — `swift build --build-tests` and
@@ -233,7 +233,31 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
      comment's contract ("voiced compositions draw nothing … tokens nil keep their grey hairline").
      **Routed to the orchestrator: whether 13r's ladder wants that probe's two absolute assertions
      committed as a real pin.**
+     **ADJUDICATED** — see piece 5.
+   - **The core count's +1 vs the 13i-e closeout baseline (2174/244 vs 2173/244):** not this entry's
+     — 19a adds no core test (`8fe0680e` touches no `@Test` line). The closeout paragraph's 2173 was
+     counted BEFORE the 13i-e post-close addendum: `6b1eefaf` (her W-O-1(b) ruling, 2026-10-03)
+     renamed `aDecidedPairBringsNothingBack` → `aDecidedPairStillBringsTheJournalBackAndRefilesNothing`
+     and ADDED `aHandRemovedPairStaysRemovedButTheJournalStillReturns` (DailyJournalRulingsTests), and
+     `d58bc3ee` already recorded "core 2174/244".
    - **The mobile target builds** — DONE (piece 3).
    - **The seven TK2 tripwire suites** (`JumpViewportLayoutTests` · `RefontGapTopTests` ·
      `InlineHeightReportTests` · `TakePaneMeasureTests` · `PaneRenderRestoreClipTests` ·
      `IndexTierMetricsTests` · `PaneFindFaceTests`) — PENDING, waiting for a zero-instance window.
+5. **THE ONE AUTHORIZED NEW ASSERTION** — the 13r orchestrator's "19a MID-RUN ADJUDICATION"
+   (`notes/plans/phase-13r-distribution.md`, the LIVE STATUS bullet, `0b2c1385`): the finding accepted,
+   the "five pins prove it" acceptance line corrected, and — **as a scoped exception to this entry's
+   no-new-assertions rule** — ONE committed pin authorized: `PaneDecoration.resolve`'s ABSOLUTE rest
+   values on both arms, named as the Xcode-27 isolated-conformance fix's tripwire. **LANDED (this
+   commit):** `PaneSurfaceTests.theRestLookHoldsItsAbsoluteValueOnBothArms` — for both voices ×
+   light/dark × every indicator style, voiced tokens → `PaneDecoration(stroke: .clear, lineWidth:
+   0.5, fill: nil)`; for every style, nil tokens → `PaneDecoration(stroke: Color.gray.opacity(0.25),
+   lineWidth: 0.5, fill: nil)`. GREEN on the current tree: `✔ Test run with 15 tests in 1 suite
+   passed` (`PaneSurfaceTests`, 14 + the pin; `mac-pin-green.log`). The pin's own red-on-old cannot
+   run (the pre-U1 spelling no longer compiles), so its discrimination is shown by a MUTATION CHECK:
+   **MUTATION CHECK STARTING after this commit** — `PaneSurface.swift:1077`'s arms are swapped
+   temporarily (`tokens.map { _ in Color.gray.opacity(0.25) } ?? Color.clear`), the pin must go RED,
+   then the file is restored with `git checkout -- App/Variorum/Variorum/Surface/PaneSurface.swift`
+   (it is committed and carries no other change) and its sha256 re-read against
+   `f5549afc0f5e3732ca9c4c23068d0d24ebf1204aa1e6ac40120c225064c1d770`. If this record still says
+   STARTING, the check died mid-flight: run that `git checkout --` first.
