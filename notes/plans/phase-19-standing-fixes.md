@@ -20,7 +20,71 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | REVIEW-PENDING — acceptance met 2026-10-04 by the implementer's runs (the 19a RECORD); the Opus cold review is next |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | ROUND 1 REVIEWED 2026-10-04 (1 MAJOR in-entry, 1 MAJOR → 19b, 2 NIT) — fixes in flight; round 2 re-reviews them |
+| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns |
+
+---
+
+## 19a ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow: the orchestrator arbitrates, the implementer fixes, a FRESH reviewer runs round 2)
+
+- **F1 [MAJOR] — `CatalogDetailWordsTests.swift:45` is VACUOUS under Xcode 27 — ACCEPTED,
+  ORCHESTRATOR-CONFIRMED by the decisive check run by my own hands** (line 45's argument →
+  the provably-false `.tag("")`: the suite stayed GREEN 2/2; file restored, tree clean).
+  Mechanism per the review (from Xcode 27's `Testing.swiftinterface`): a bare implicit-member
+  `.tag(…)` argument in function-call shape routes the `#expect` expansion through
+  `__checkFunctionCall` with R = Void — the Bool is discarded (the compiler's own
+  "unused result" warning IS the tell) and the check passes on `.some(())`, unable to fail.
+  **The orchestrator's earlier settlement (`e57fbb4c`) is WITHDRAWN:** its probe substituted
+  `.legacyProfile` for the trigger spelling `.tag`, which changed overload resolution — the
+  probe proved a DIFFERENT instance real. The lesson, binding on future settlements: **a
+  settling probe must reproduce the EXACT trigger spelling, or prove the substitution
+  resolution-equivalent.** FIX (the implementer, in-entry): re-spell line 45 with the explicit
+  type (`RuleTerm.tag("t1")`) or `== true`; land the review's mutation pin discipline (the
+  `.tag("")` mutant must go RED on the new spelling — it is GREEN on today's); correct NOTICED
+  #1; record the census rule — an unused-result warning inside an `#expect` expansion means a
+  vacuous expectation until proven otherwise (and a `@discardableResult` callee takes the same
+  path with NO warning — the review's named blind spot).
+- **F2 [MAJOR] — the mobile TEST target does not compile and nothing owned it — ACCEPTED,
+  ownership gap real; ROUTED TO 19b** (below) rather than extending this entry: the
+  orchestrator read the review's own continue-after-errors log (`mobile-bft-2.log`) and the
+  class reaches **~61 sites across ~25 mobile test files** (the review's six were the
+  first-failure floor) — a full unit of its own by the sizing rule, and this entry's session
+  already carried one. 19b carries the census, the same rules, and the CopiedRow unification
+  question.
+- **F3 [NIT] — `LandingAuthorityTests.swift:54–59`, the ISOLATION class as warnings —
+  ACCEPTED: fix in-entry now** (the same test-side `@MainActor`, assertion bytes unchanged;
+  one toolchain promotion from red is exactly what this entry exists to prevent). The
+  review's app-side root note (nonisolated types with default-isolated extensions) is
+  recorded here, no fix owed in a test-migration entry.
+- **F4 [NIT] — the CopiedRow doc comment's duplicate-column claim is half-true — ACCEPTED as
+  the COMMENT NARROWING** (both twins: case-variant duplicate names unsupported; every live
+  site reads single-table rows with unique names). The case-insensitive rebuild is NOT
+  implemented (zero live sites — over-build); the one-source-many-targets unification rides
+  19b, which adds the third consumer.
+- **Out-of-entry note recorded:** `SyncEnrollmentTests.swift:262`'s `!= nil` on a non-optional
+  `SymmetricKey` is dead weight (the `try` carries the real check) — remove at the next
+  legitimate touch of that file; no fix owed here.
+- **The clean bill acknowledged:** the convergence suites' assertions proven unweakened by the
+  review's three red mutations; CopiedRow↔Row parity independently re-verified; the authorized
+  pin independently confirmed discriminating; every acceptance claim checked against its log.
+
+## 19b — Xcode 27 / Swift 6.4: the MOBILE test-target migration
+
+**Opened 2026-10-04 by the 13r orchestrator out of 19a's round-1 review** (finding 2: the
+mobile TEST target was outside every census — the 13r-u1 probe built the mobile APP only —
+and does not compile under Xcode 27; unowned ⇒ owned here). **Scope:** the Row-Sendable
+ROW-COPY class across `App/Variorum/VariorumMobileTests/` — **~61 sites in ~25 files** per
+the reviewer's continue-after-errors log (a FLOOR until the build is green: censuses are
+lower bounds, 19a's own lesson); the same rules as 19a (MECHANICAL migration only, assertion
+bytes preserved, any intent-changing fix stops and reports); PLUS the **CopiedRow
+unification question** — one source file serving core/Mac/mobile versus a third identical
+twin: the implementer PROPOSES, the orchestrator rules, before building that part.
+**Acceptance:** mobile TEST BUILD SUCCEEDED (generic iOS Simulator) · the touched files'
+suites green on a concrete simulator (suite-level, counts confirmed) · F4's narrowed comment
+carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
+**Red-on-old:** the failing build itself (`mobile-bft-2.log` preserved in the 19a round-1
+evidence). **State: OPEN — queued at the next seam after 13r U2 spawns (13r is the launch
+path; nothing mobile gates it; the author may reorder).**
 
 ---
 

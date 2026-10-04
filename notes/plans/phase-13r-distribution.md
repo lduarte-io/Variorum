@@ -545,7 +545,14 @@ opened; the working tree was left clean.
   same target FAILED with full expansion detail — the shape is REAL, the Xcode-27 "unused
   result" warning inside the Testing macro expansion is cosmetic; NO sweep entry opens; the
   19a record's NOTICED row carries this disposition. The Opus cold review spawns next; U2
-  spawns at the entry's close.
+  spawns at the entry's close. **[WITHDRAWN SAME DAY — the settlement above was WRONG. The
+  19a round-1 review proved the warned line vacuous, and the orchestrator CONFIRMED it by
+  the decisive check (the false `.tag("")` stayed GREEN): the settling probe had substituted
+  `.legacyProfile` for the trigger spelling `.tag`, which changed overload resolution. The
+  binding record is the 19a ROUND 1 section of the 19 ledger (F1's disposition + the
+  exact-spelling lesson + the census rule); finding 2 there opened 19b (the mobile
+  test-target census, ~61 sites). Kept un-deleted so the error and its correction both
+  stand.]**
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
