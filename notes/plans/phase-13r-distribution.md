@@ -2889,5 +2889,13 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
    - **Left in place, not cleaned:** the new computer's install (it is hers — it will self-update
      *[removed for publication]*
      debris on the M3 stay for the closeout's sweep, as the U2 record says.
-7. Finals (mutation check, the dev-store walk + captures, suites at zero-instance windows) —
-   PENDING.
+7. Finals — IN-PROGRESS.
+   - **MUTATION RUN IN FLIGHT (named before it starts, per the protocol's addendum 2; the committed
+     tree `f2d710b0` is the pre-revert copy):** four production mutants applied together —
+     (M1) `CrashReporting.init` subscribes REGARDLESS of the preference (`if isOn { subscribe() }` →
+     `subscribe()`); (M2) `CrashReportingPreference.remembered` reads `defaults.bool(forKey:)` (which
+     takes "1"/"YES"/2 as yes); (M3) `CrashReporting.receive` drops its ON guard; (M4)
+     `CrashReportCard` renders Send Report… whatever the bytes. Files:
+     `Features/Diagnostics/CrashReporting.swift`, `Features/Settings/DiagnosticsPane.swift`.
+     Restored with `git checkout --` on exactly those two paths. If a session dies mid-run, `git
+     diff` against `f2d710b0` shows what is mutated; restore it.
