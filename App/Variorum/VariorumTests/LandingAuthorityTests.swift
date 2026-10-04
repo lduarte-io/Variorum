@@ -42,6 +42,7 @@ struct LandingAuthorityTests {
     /// hoist moved their address, not their value. (Stated as a pin because
     /// "byte-identical" is this unit's own promise, and a promise nothing
     /// asserts is a comment.)
+    @MainActor
     @Test func theTwoPoliciesCarryTheSurfacesShippedNumbers() {
         #expect(outline.tolerance == 2)
         #expect(flow.tolerance == 4)

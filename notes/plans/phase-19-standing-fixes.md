@@ -407,14 +407,50 @@ passed by name.
 
 **ROUND 1 FIXES (LIVE STATUS — the same implementer, resumed 2026-10-04 at the orchestrator's
 arbitration `e1bfdd08`; the binding record is the "19a ROUND 1" section above):**
-- F1 [MAJOR] `CatalogDetailWordsTests.swift:45` vacuous — IN-PROGRESS. Re-spelled (this commit)
-  `#expect(RuleGrammar.hearsApplyingActs(RuleTerm.tag("t1")))` — the explicit type, the file's own
-  line-51 idiom — with a three-line comment naming why. The core test build no longer carries ANY
-  unused-result warning inside an `#expect`/`#require` expansion (0; it was 1, this line);
-  `RuleHearsActsTests` GREEN, 2 tests (`r1-core-bft.log`). **MUTATION CHECK STARTING after this
-  commit:** line 45's argument → `RuleTerm.tag("")` (provably false — a dead term hears nothing),
-  the suite must go RED; then `git checkout -- Tests/VariorumCoreTests/CatalogDetailWordsTests.swift`
-  (committed, no other change). If this line still says STARTING, run that restore first.
-- F3 [NIT] `LandingAuthorityTests.swift:54–59` isolation warnings — PENDING.
-- F4 [NIT] both `CopiedRow` twins' duplicate-column comment — PENDING.
+- F1 [MAJOR] `CatalogDetailWordsTests.swift:45` vacuous — **DONE (`e9fbccbe` + this commit).**
+  Re-spelled `#expect(RuleGrammar.hearsApplyingActs(RuleTerm.tag("t1")))` — the explicit type, the
+  file's own line-51 idiom — under a three-line comment naming why (the expectation now sits at line
+  49). The core test build carries ZERO unused-result warnings inside any `#expect`/`#require`
+  expansion (it carried 1, this line; `r1-core-bft.log`). **Mutation check DONE:** argument →
+  `RuleTerm.tag("")` ⇒ `RuleHearsActsTests` RED, exactly 1 issue, at the re-spelled line
+  (`Expectation failed: RuleGrammar.hearsApplyingActs(RuleTerm.tag(""))`; `r1-f1-mutant.log`) — the
+  same mutant was GREEN on the old spelling (the orchestrator's decisive check). Restored with
+  `git checkout --`, tree clean, suite GREEN again 2/1.
+  **NOTICED #1 CORRECTED:** the isolated reproduction I cited did not reproduce the trigger (its
+  stand-in enum resolved differently), so "not vacuous in isolation" proved nothing about line 45;
+  the line WAS vacuous. Mechanism (the review's, from Xcode 27's `Testing.swiftinterface`): the
+  bare implicit-member `.tag(…)` argument in function-call shape routes the `#expect` expansion
+  through `__checkFunctionCall` with R = Void, the Bool is discarded, and the check passes on
+  `.some(())`. **THE CENSUS RULE (binding on any toolchain census):** an unused-result warning inside
+  an `#expect`/`#require` expansion means a VACUOUS expectation until a red mutant proves otherwise
+  — and a `@discardableResult` callee takes the same path with NO warning, so the tell cannot
+  clear those. Applied to this entry's targets: the core and Mac test builds carry exactly ONE such
+  warning between them (line 45, now gone). The silent half is NOT cleared — see NOTICED #6.
+- F3 [NIT] `LandingAuthorityTests.swift:54–59` isolation warnings — **DONE (this commit).**
+  `@MainActor` on the one synchronous test, `theTwoPoliciesCarryTheSurfacesShippedNumbers` (its six
+  `BookView.landing*` / `ReadingFlowView.landing*` reads are main-actor statics); assertion bytes
+  unchanged. The Mac test build's lines carrying those six warnings: 12 → 0 (`r1-mac-bft.log`).
+  `LandingAuthorityTests` + `LandingSignpostTests` (the file's two suites): **`✔ Test run with 10
+  tests in 2 suites passed`**, no `skipped:` line, at a zero-instance window (`pgrep` empty before
+  and after; `r1-landing.log`). The rest of the class in the Mac build (AppKit `subviews` / `title`
+  / `frame` / `identifier` from nonisolated contexts — `BookViewTests`, `LibraryPanelTests`,
+  `PagedReadTests`, `ReadNoteLandingTests`, `ReadTierTests`, `TakePaneMeasureTests`,
+  `TutorialWalkTests`) is NOT F3's and is not touched — NOTICED #7.
+- F4 [NIT] both `CopiedRow` twins' duplicate-column comment — **DONE (this commit).** Narrowed in
+  both: an EXACT duplicate keeps the leftmost; duplicates differing only in CASE are NOT supported
+  (the rebuilt row comes from an unordered dictionary, so GRDB's case-insensitive lookup picks one
+  unspecified); every live site reads single-table rows with unique names. Comment-only — the
+  bodies are byte-identical between the twins (`diff` clean) and both targets build. No
+  case-insensitive rebuild (the arbitration's ruling).
 - F2 is 19b's (the mobile TEST target) — not touched here.
+
+**NOTICED, round 1 (routed to the orchestrator; none acted on):**
+6. **The census rule's SILENT half is live in this codebase, unverified.** 65 functions in `Sources`
+   and the Mac/Shared app code are `@discardableResult … -> Bool` (scratchpad list), and Mac tests
+   assert some of them BARE with an implicit-member argument, the exact F1 shape minus the warning,
+   e.g. `MarkdownActsTests.swift:96/123/146/167/191` (`#expect(MarkdownActs.apply(.bold, to:
+   h.textView))`), `BookStructureTests.swift:782/786/793` (`#expect(book.structure.acceptDrop(…`).
+   Whether any is vacuous is unknown until a red mutant at its exact spelling says so — a census
+   of its own (a natural rider for 19b, or a fresh letter).
+7. **The ISOLATION class still stands as WARNINGS** in seven Mac test files (F3's list above): one
+   toolchain promotion from red, like F3. Not this round's.

@@ -19,10 +19,12 @@
 //  - `copies == otherCopies` — same columns, same order, same values.
 //
 //  Both subscripts READ THROUGH A REBUILT `Row`, so decoding, NULL and
-//  missing-column behaviour are GRDB's own, never re-implemented here. The
-//  rebuilt row keeps the LEFTMOST of any duplicated column name (GRDB's own
-//  lookup rule); every site reads a single-table row, whose names are unique.
-//  Equality is GRDB's `Row ==` for rows without scopes or prefetched rows —
+//  missing-column behaviour are GRDB's own, never re-implemented here.
+//  DUPLICATED COLUMN NAMES: an EXACT duplicate keeps the leftmost (GRDB's own
+//  lookup rule); duplicates differing only in CASE are NOT supported — the
+//  rebuilt row comes from an unordered dictionary, so which of them GRDB's
+//  case-insensitive lookup finds is unspecified. Every live site reads a
+//  single-table row, whose column names are unique. Equality is GRDB's `Row ==` for rows without scopes or prefetched rows —
 //  which no raw-SQL fetch has: names compared case-sensitively, in order,
 //  values by `DatabaseValue ==`.
 //
