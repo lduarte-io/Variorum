@@ -1055,7 +1055,7 @@ classes ✔ · the touched suites green at a quiet window, counts confirmed, `sk
    line shift was mapped — `census/settle.py` does it).
 
 **FOR THE COLD REVIEW — the landed diff (`git diff e8a0950e..HEAD -- App Tests Sources`):** 12
-test files, 20+/19−: each changed line is a helper/test declaration gaining `@MainActor` (11
+test files, 20+/19−: each changed line is a helper/test declaration gaining `@MainActor` (13
 same-line prefixes in 7 Mac files incl. `PagedReadTests`' two; 6 in 4 mobile files; one attribute
 line above `MobilePhoneProtectionCopyTests.theReconciledStringsNameThePhone`). Check: no
 `#expect`/`#require` line changed; each annotated function is the context the compiler named
