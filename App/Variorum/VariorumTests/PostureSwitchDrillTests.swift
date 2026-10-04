@@ -618,7 +618,7 @@ struct PostureSwitchDrillTests {
         let joinerRecord = try #require(joiner.plainSyncRecord, "custody landed under the throwaway scope")
         #expect(joinerRecord.material?.corpusKeyID == oldMaterial.corpusKeyID && joinerRecord.material?.masterKey == oldMaterial.masterKey,
                 "custody holds the account's keys")
-        #expect(joinerRecord.deviceID != nil, "the device identity minted beside them")
+        #expect(!joinerRecord.deviceID.isEmpty, "the device identity minted beside them")
         let joinerFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: joiner.storeURL))
         #expect(joinerFile.master != nil, "the key file carries the master copy")
         #expect(try joinerFile.unwrapKey(master: oldMaterial.masterSymmetricKey) == joiner.oldKey)

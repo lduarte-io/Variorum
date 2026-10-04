@@ -1265,7 +1265,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    - (C) CLEANUP — `FannedDefaultsTests:355` (`EditorViewModel.postID` is `let postID: String`) —
      **1 site**, no pin possible.
    - No touched suite is env-gated except `PostureSwitchDrillTests` (grep of every touched file).
-2. Re-spells, committed per target — Mac DONE (`36954f75`); mobile DONE (this commit); family 2 PENDING. **Mac (12
+2. Re-spells, committed per target — Mac DONE (`36954f75`); mobile DONE (`6bb4eae4`); family 2 DONE (piece 4). **Mac (12
    files, the 15 SILENT sites + the 355 cleanup):** (R) `let x = X` + `#expect(x != nil)` at
    `EditorSeamCostTests:81`, `MarkdownFaceTests:284`, `NoteBoxTests:221`,
    `NoteVersionsPaneTests:332`/`:336`, `OriginBlockDoorTests:87`/`:90`, `QuickNoteTests:358`,
@@ -1374,7 +1374,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    brief's ruled cleanup. FLAGGED for the orchestrator: re-spelling the 18 hollow sites as a
    warning-only cleanup would make the redundancy warning a clean tell again (no behaviour
    change); that is a scope call, not this implementer's.
-4. Family 2 — IN-PROGRESS. **OLD-SPELLING EVIDENCE — ANNOUNCED, STARTING after this commit** (both
+4. Family 2 — DONE (this commit; the NEW-spelling SE pin rides piece 3). **OLD-SPELLING EVIDENCE — ANNOUNCED** (both
    files committed at base; `SyncEnrollmentTests` is an ordinary suite over in-memory custody and
    a scripted vault — no real Keychain item): (a) `mutate.py SE` on the OLD line 262 (`words:
    fresh` → `words: old` — the unwrap must THROW); (b) a THROWAWAY probe suite appended to
@@ -1385,6 +1385,30 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    `SyncEnrollmentTests` + `Mut19dDeviceIDProbe` only (the gated drill stays OFF — not in the run).
    Revert: `git checkout -- App/Variorum/VariorumTests/{SyncEnrollmentTests,PostureSwitchDrillTests}.swift`,
    status clean, zero markers.
+   **OLD-SPELLING EVIDENCE — DONE, REVERTED** (`19d/old-SE-probe.diff`; `mac-old-SE.log`, 6 tests / 2
+   suites — `SyncEnrollmentTests` + the probe ONLY, the drill not run — at a zero-instance window,
+   `mac-old-SE.window`: `pgrep` empty before 16:55:24Z and after 16:56:21Z; restored, status clean,
+   zero markers): **(b) the probe** — the OLD spelling (`#expect(joinerRecord.deviceID != nil, …)`)
+   stayed GREEN over `deviceID: ""` (the silence), the NEW spelling (`#expect(!joinerRecord.deviceID
+   .isEmpty, …)`) went RED at its own line ("Expectation failed: !joinerRecord.deviceID.isEmpty") —
+   exactly 1 issue. **(a) `SyncEnrollmentTests:262` — THE METHOD'S PRESUMPTION WAS WRONG, corrected
+   here:** the OLD line does NOT record at its own line on a throw. The `try` operand is evaluated
+   before the check, the error ESCAPES the `#expect` and aborts the test, recorded as "Caught error:
+   .unwrapFailed" at the `@Test` DECLARATION (line 248), exactly 1 issue. So the old line's effective
+   check was "the unwrap does not throw", ABORT-on-throw; its `!= nil` was a dead conjunct. **The
+   re-spell therefore keeps that behaviour byte-for-byte: `_ = try vault.unwrapMaster(…)`** (the
+   brief's "removed — the `try` carries the real check", read literally), under a one-line comment.
+   NOT taken: `#expect(throws: Never.self) { … }` — it would record at its own line but CONTINUE
+   after a throw, changing abort into continue in a custody-drill file (test intent, not
+   mechanics; the orchestrator's call if it wants that locality).
+   **The re-spells — DONE (this commit):** `PostureSwitchDrillTests:621` → `#expect(!joinerRecord
+   .deviceID.isEmpty, "the device identity minted beside them")` (strictly stronger than the
+   always-true line: `SyncCustodyRecord.fresh` mints a lowercased UUID string, so a real enrol
+   passes; an empty identity now fails); `SyncEnrollmentTests:262` → the comment + `_ = try …`.
+   `mac-bft-new2.log` → `** TEST BUILD SUCCEEDED **`; the two files' warnings before → after: the
+   two always-true lines removed, nothing added (`PostureSwitchDrillTests:697`'s effect-marker
+   warning predates this entry). This build also re-emitted the other changed files: **the Mac
+   redundancy census now reads EXACTLY the 10 hollow sites**, recorded.
 5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
    NOT-STARTED.
 6. The census table, dispositions, acceptance lines, State → REVIEW-PENDING — NOT-STARTED.

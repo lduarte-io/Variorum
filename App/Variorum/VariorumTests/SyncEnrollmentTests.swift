@@ -259,7 +259,8 @@ struct SyncEnrollmentTests {
         for _ in 0..<200 where w.model.phase != .done(.standard) { try await Task.sleep(for: .milliseconds(20)) }
         let vault = try await fetched(w)
         #expect((try? vault.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: old))) == nil, "the old words open nothing")
-        #expect(try vault.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: fresh)) != nil)
+        // The fresh words open the vault: a throw here fails the test (the check is the `try`).
+        _ = try vault.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: fresh))
         #expect(w.landings.value.first?.recoveryWords == fresh, "the key file's copy replaced at the land")
     }
 
