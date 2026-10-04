@@ -77,8 +77,11 @@ not wait on this entry).
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE YET (stated first, per the contract):** NO suite has run yet (every target now COMPILES —
-core tests, Mac app + tests, the mobile app). **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
+**NOT DONE YET (stated first, per the contract):** the seven TK2 point-release tripwire suites have
+NOT run yet (measurement-shaped; held for a zero-instance window — her real-store app was live, pid
+85948, through the runs below). **And the brief's "`PaneSurfaceTests`' five `PaneDecoration.resolve`
+pins PROVE 13r U1's line behavior-preserving" does NOT hold as stated** — piece 4 says why and what
+evidence stands in for it. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
 2026-10-04 — her live drill passed; U1 closed): suites run at quiet windows from here, her real-store
 instance never touched, the measurement-shaped TK2 tripwire suites preferring a zero-instance window.
 (During the window the implementer ran compile-only work — `swift build --build-tests` and
@@ -185,5 +188,52 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
    VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`, no
    diagnostic on the file (log `App/Variorum/DerivedData/19a/mobile-build.log`). The only `Sources`
    line in this entry's diff.
-4. Acceptance runs (core `swift test` full · the 8 Mac suites · the 7 TK2 tripwire suites ·
-   `PaneSurfaceTests` · the mobile build) — PENDING (runs wait for the drill window to close).
+4. Acceptance runs — IN-PROGRESS.
+   - **Core `swift test`, full: GREEN — `✔ Test run with 2174 tests in 244 suites passed`** (13i-e's
+     baseline 2173/244), exit 0, the one `skipped:` line the standing Supabase integration gate
+     (`basicOfflineEditsConvergeOverTheRealServer`, env-gated), XCTest `Executed 0 tests` (no XCTest
+     cases). Every touched core test passed BY NAME: `theLosersTombstoneArrivingBeforeItsRepointsMoves
+     TheMembershipsToTheKeeper` (433) · `aLoserRenamedLocallyStillHandsItsMembershipsToTheKeeper` (727)
+     · `aFreshStoreMeetingTheLoserDeadHandsItsMembershipsToTheKeeper` (803) ·
+     `aMembershipArrivingUnderTheDeadLoserRepointsToTheKeeper` (864) ·
+     `duplicateCanvasRowsRepairToTheSmallerIDAndTheRepairPushes` (Phase11 221) ·
+     `bothReadsAreBlindToAutosave` (TagFamily) · `everyRowItWritesIsAnOrdinaryOutboxedRow`
+     (SplitAtNewlines). Log `App/Variorum/DerivedData/19a/core-swift-test.log`.
+   - **`CopiedRow` ↔ `Row` parity, on a real database (a THROWAWAY probe, run once by filter, deleted,
+     never committed):** NULL / missing column / present via the untyped subscript; `as String?` on
+     text, NULL and missing; `as Int?`, `as Double?` (and `Double?` from an integer column); a
+     case-insensitive `let x: String = copy["T"]`; `copy["t"] == "abc"`; `==` against an equal row, a
+     row differing in one value, and a row differing only in a column name's CASE — 18 checks, every
+     one the same answer as `Row`. 1 test, passed.
+   - **The 13 fixed Mac files' suites + `PaneSurfaceTests`/`PanePublishDoorTests`** (48 suites, every
+     test type in those files; `test-without-building`, suite-level `-only-testing`): **run 2 GREEN —
+     `✔ Test run with 286 tests in 48 suites passed`, no `skipped:` line** (286 = the files' `@Test`
+     count exactly). Run 1 (same set) had ONE issue: `CanvasHostedRealizationTests.
+     aMountedLongPostRealizesABoundedCardSet` — `paneCount > 0` (a 300-card canvas mounted in its own
+     `NSWindow` found no `PaneTextView` in the hierarchy). Not this entry's: the test touches no edited
+     line (this file's edit is line 69, another struct) and no `CopiedRow`; GREEN alone 2/2
+     (`mac-canvas-hosted-{1,2}.log`) and in run 2; and the same expectation failed the same way in a
+     crowded Act 10 full run under Xcode 26 (`notes/plans/act10-correction-screens/batch-g/
+     g-full-mac.log:1091`). Recorded as the pre-existing concurrent-mount sensitivity of a mounted
+     window test, with her real-store app live beside the run. Logs `mac-suites-{1,2}.log`.
+   - **`PaneSurfaceTests` GREEN (run 2) — `theLivePanesDecorationFollowsTheIndicatorPreference`, the
+     test holding all five `PaneDecoration.resolve` calls, passed by name. BUT those five pins do NOT
+     discriminate 13r U1's line** (`PaneSurface.swift:1077`, `tokens.map { _ in Color.clear } ??
+     Color.gray.opacity(0.25)`): every call passes NON-nil tokens, and they compare the rest look only
+     RELATIVELY (`off == rest`, `background.stroke == rest.stroke`, `resolve(isLive: false, …) ==
+     rest`) — no test anywhere pins either arm's ABSOLUTE stroke (grep: `PaneDecoration` appears in
+     tests only there and in `hostRing`'s three pins). A swapped or merged arm would stay green. **What
+     stands in, as evidence (a THROWAWAY probe in `VariorumTests`, run once by filter, deleted, never
+     committed — the line is 13r's editor-seam fix, so a committed pin is 13r's ladder's call, not this
+     entry's):** for both voices × light/dark × every indicator style, `resolve(isLive: false, …,
+     tokens: voiced) == PaneDecoration(stroke: .clear, lineWidth: 0.5, fill: nil)`; for every style,
+     `resolve(isLive: false, …, tokens: nil) == PaneDecoration(stroke: Color.gray.opacity(0.25),
+     lineWidth: 0.5, fill: nil)` and `!=` the clear one; and the live `.off` arm returns each rest. 1
+     test, passed (`mac-probe-run.log`). So U1's line reads the shipped values on BOTH arms — the
+     comment's contract ("voiced compositions draw nothing … tokens nil keep their grey hairline").
+     **Routed to the orchestrator: whether 13r's ladder wants that probe's two absolute assertions
+     committed as a real pin.**
+   - **The mobile target builds** — DONE (piece 3).
+   - **The seven TK2 tripwire suites** (`JumpViewportLayoutTests` · `RefontGapTopTests` ·
+     `InlineHeightReportTests` · `TakePaneMeasureTests` · `PaneRenderRestoreClipTests` ·
+     `IndexTierMetricsTests` · `PaneFindFaceTests`) — PENDING, waiting for a zero-instance window.
