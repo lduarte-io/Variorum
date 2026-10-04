@@ -999,6 +999,13 @@ opened; the working tree was left clean.
   gates → the DMG dry run → the 0.9.0/0.9.1 releases + publishes) → HER WALK on the new
   computer → the ONE fable-reviewer ladder over U1–U3 (finals green modulo 19e's named red) →
   closeout.** The F-W5 no-Mail-account fact and the ladder flags ride the record as written.
+- **THE DMG WINDOW, SEEN BY HER AND ADJUSTED (2026-10-04, pre-release):** the toggle flipped
+  (the probe reads ALLOWED), the dry run PASSED 5/5 twice, and she judged the mounted window
+  live. Her feedback, verbatim: *"the arrow looks a bit silly, can you fix the arrow being so
+  long please? otherwise looks good"* — the orchestrator's own small fix at adjudication (the
+  skill's allowance): the gap-spanning shaft becomes a SHORT 72-pt mark centred in the gap,
+  and the caption drops 15 → 13 pt (its tail grazed the Applications icon in her capture).
+  Re-run: PASS 5/5, remounted for her eyes. The ladder reviews the diff with U3-A's piece 5.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 

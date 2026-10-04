@@ -50,10 +50,13 @@ func draw(scale: CGFloat, to url: URL) throws {
     room.setFill()
     NSRect(origin: .zero, size: size).fill()
 
-    // The arrow: a shaft across the gap between the icons (each icon is 128 pt wide), and a chevron head.
+    // The arrow: a SHORT mark centred in the gap between the icons, not a bridge spanning it
+    // (her walk feedback 2026-10-04: the gap-spanning shaft "looks a bit silly" — too long).
     let y = appCentre.y
-    let start = appCentre.x + 64 + 26
-    let end = linkCentre.x - 64 - 26
+    let gapCentre = (appCentre.x + linkCentre.x) / 2
+    let arrowLength: CGFloat = 72
+    let start = gapCentre - arrowLength / 2
+    let end = gapCentre + arrowLength / 2
     ink.setStroke()
     let shaft = NSBezierPath()
     shaft.lineWidth = 4
@@ -65,16 +68,17 @@ func draw(scale: CGFloat, to url: URL) throws {
     head.lineWidth = 4
     head.lineCapStyle = .round
     head.lineJoinStyle = .round
-    head.move(to: CGPoint(x: end - 18, y: y - 16))
+    head.move(to: CGPoint(x: end - 14, y: y - 12))
     head.line(to: CGPoint(x: end, y: y))
-    head.line(to: CGPoint(x: end - 18, y: y + 16))
+    head.line(to: CGPoint(x: end - 14, y: y + 12))
     head.stroke()
 
     // The words, centred under the arrow (drawn upright inside the flipped space).
     let paragraph = NSMutableParagraphStyle()
     paragraph.alignment = .center
     let attributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: 15, weight: .medium),
+        // 13 pt (was 15): at 15 the line's tail grazed the Applications icon in her capture.
+        .font: NSFont.systemFont(ofSize: 13, weight: .medium),
         .foregroundColor: ink,
         .paragraphStyle: paragraph,
     ]
