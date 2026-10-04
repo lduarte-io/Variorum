@@ -498,10 +498,33 @@ opened; the working tree was left clean.
 - **U1 — CLOSED (2026-10-04, the drill sitting): the LIVE drill PASSED all five arms** (the
   VERDICT at the U1 RECORD's tail; the KnownIssues row-24 flip this PASS authorizes rides the
   phase close, per the checklist's own sentence).
+- **THE SITE-SIDE REPORT (2026-10-04, carried by her from the stargazing.tech agent — recorded
+  the same sitting; U2's brief MUST carry this bullet):** all three brief items COMPLETE and
+  verified live. **(1) URLs LOCKED exactly as adjudicated** — appcast
+  `https://stargazing.tech/variorum/appcast.xml` (no-cache, must-revalidate; U2 bakes it);
+  DMGs `https://dl.stargazing.tech/variorum/Variorum-<version>.dmg` (R2 custom domain, HTTPS
+  ≥TLS1.2/ATS, `application/x-apple-diskimage`, `public, max-age=31536000, immutable`); the
+  immutability rider ADOPTED as their publish-and-leave rule. **NEW BINDING FACTS for U2's
+  pipeline:** the DMG filename stays `Variorum-<version>.dmg` EXACTLY (their per-IP rate
+  limit — 10 req/10 s, 429-verified — keys on that prefix); each appcast `<enclosure url>`
+  must be exactly the dl.stargazing.tech URL with `length` = the DMG's byte size
+  (`generate_appcast` + download-url-prefix satisfies both); **publish order is DMG first,
+  verified reachable, THEN appcast** — the release runbook U2 writes must emit the handoff
+  shape: SHE carries `appcast.xml` + the DMG to the site repo, whose agent runs their
+  `notes/variorum-releases.md`. The public rate limit never touches the R-13r-8 walk (local
+  feed override, locally served files). **(2) The download page** `/variorum` is live:
+  unlisted + noindex, version + DMG button + "Requires macOS 26 or later, Apple silicon" +
+  the support mailto; a PENDING state shows until the first release; it reads version/URL
+  from one per-release data file (page copy is HERS, post-launch-changeable — rides her
+  items). **(3) THE MAILBOX IS LIVE — `support@stargazing.tech` lands in her own Mail inbox,
+  her test message received** (iCloud+ custom domain; MX/SPF/DKIM/DMARC in place). This
+  SUPERSEDES every "mailbox does NOT exist yet" line above and CLOSES HER HANDS step 4 and
+  the beta-checklist's mailbox item — U3's Help ▸ Send Feedback… and the crash-report flow
+  now target a real inbox. Site-side open items: the live no-cache header check at the first
+  release; her beta-page copy.
 - **U2 — NOT STARTED** (gated on 19a's CLOSE — the migration AND its per-entry Opus cold
   review — now that U1 is done; her step 3 — EdDSA minting — at its start, once the U2 session
-  has Sparkle's tools in hand; the appcast URL from the site brief must be settled before this
-  unit closes).
+  has Sparkle's tools in hand; the URL set is LOCKED per the site-side report above).
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
