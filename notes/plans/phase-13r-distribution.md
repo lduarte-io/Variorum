@@ -1092,6 +1092,19 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 
    **U2 STATE AT THE PAUSE:** pieces 1–3 DONE and pushed. The session STOPS here and reports. **Piece
    4 resumes ONLY with the public key in hand.** Nothing is uncommitted. No build or suite is running.
+
+   **HER HANDS STEP 3 — DONE (2026-10-04, the minting sitting, her hands via the `!` road, every
+   output witnessed by the orchestrator):** the mint printed "A key has been generated and saved in
+   your keychain" (fresh, as staged — no pre-existing-key message); **the PUBLIC key =
+   `tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA=`** (44 chars, the `-p` cross-check byte-identical);
+   the backup export wrote 44 bytes and went to her password manager (step 4, her GUI; her
+   confirmation of the stow asked and recorded below when given); the export file REMOVED —
+   with one wrinkle caught: the first cleanup ran with an empty `$EXPORT` (the `!` road starts a
+   fresh shell per command, so the variable did not persist and `rm` deleted nothing while the
+   `ls`-based echo misleadingly said "removed") — re-run with the path set inline: `removed` +
+   `gone for real`, witnessed. The keychain attributes check confirmed the key in her login
+   keychain. **Lesson for every staged her-hands block: `!`-road commands get NO shared shell
+   state — every block must set its own variables inline.** Piece 4 resumes with the key.
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
    `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
    with Sparkle's standard consent flow, the Check for Updates… door — NOT-STARTED.
