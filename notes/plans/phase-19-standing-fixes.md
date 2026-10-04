@@ -1674,7 +1674,7 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   `SurfaceSizeMemoryTests:782` (`FocusedBlock`'s memberwise `blockID: String`). **All 12 are
   unwrap-bound: NO third silent site** — the reviewer's 278-site token sweep confirmed by a method
   that does not depend on knowing the macro's exact suppression-token set.
-- F1 [MAJOR] re-spells (`BookAscentTests:803`, `MarkdownFaceTests:187`, the (R) shape) — PENDING.
+- F1 [MAJOR] re-spells — DONE (this commit): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
 - F2 [MINOR] the 18-hollow cleanup (core 8, Mac 10; behaviour-identical, each site's
   abort-vs-continue kept) — PENDING.
 - F1 pins under the reviewer's two mutants (re-created by `19d/mutate.py F1R` — the same upstream

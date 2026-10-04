@@ -800,7 +800,8 @@ struct DivergeDoorTests {
         let fired = LockIsolated(0)
         center.offer("offer", action: StatusCenter.Item.Action(
             label: "Do it", perform: { fired.withValue { $0 += 1 } }))
-        let action = try? #require(center.current?.action)
+        let action = center.current?.action
+        #expect(action != nil)
         #expect(action?.label == "Do it")
         action?.perform()
         #expect(fired.value == 1)

@@ -184,7 +184,8 @@ struct MarkdownFaceTests {
             #expect(font(storage, at: 0)?.pointSize == base.pointSize,
                     "the marker keeps the base size")
             let titleAt = string.range(of: "A ").location
-            let headingSize = try? #require(font(storage, at: titleAt)?.pointSize)
+            let headingSize = font(storage, at: titleAt)?.pointSize
+            #expect(headingSize != nil)
             #expect((headingSize ?? 0) > base.pointSize, "headings ARE sizes (F-3)")
 
             // Composition: the bold inside the heading is bold AND still the
