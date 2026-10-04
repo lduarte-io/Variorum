@@ -59,13 +59,15 @@ struct WingContentsMoveTests {
             let b1 = try ops.createReading(name: "B1", kind: .book, wingId: w, shelfId: shelf.id)
             let b2 = try ops.createReading(name: "B2", kind: .book, wingId: w)
             let b3 = try ops.createReading(name: "B3", kind: .book, wingId: w)
+            let writingRule = try #require(try RuleGrammar.encode(.tag(writing.id)))
             let living = try ops.createReading(
                 name: "Living", kind: .book,
-                querySpec: try #require(try RuleGrammar.encode(.tag(writing.id))),
+                querySpec: writingRule,
                 wingId: w, intakeSeating: .arrivals)
+            let classicsRule = try #require(try RuleGrammar.encode(.tag(classics.id)))
             let gathering = try ops.createReading(
                 name: "Classics", kind: .gathering,
-                querySpec: try #require(try RuleGrammar.encode(.tag(classics.id))), wingId: w)
+                querySpec: classicsRule, wingId: w)
 
             let n1 = try ops.createPost(title: "n1", wingId: w)
             let block = try ops.seedBlock(in: n1.id, text: "first words")

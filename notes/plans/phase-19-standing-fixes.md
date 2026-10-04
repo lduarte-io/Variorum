@@ -1675,8 +1675,16 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   unwrap-bound: NO third silent site** — the reviewer's 278-site token sweep confirmed by a method
   that does not depend on knowing the macro's exact suppression-token set.
 - F1 [MAJOR] re-spells — DONE (this commit): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
-- F2 [MINOR] the 18-hollow cleanup (core 8, Mac 10; behaviour-identical, each site's
-  abort-vs-continue kept) — PENDING.
+- F2 [MINOR] the 18-hollow cleanup (behaviour-identical, each site's abort-vs-continue kept) —
+  core DONE (this commit), Mac PENDING. **Core (6 files, the 8 sites, all (A) — abort kept):** the
+  hoist `let tagRule = try #require(try RuleGrammar.encode(.tag(…)))` (`classicsRule`/`writingRule`
+  where a test holds two) on the line before the `createReading` that consumed it, then
+  `querySpec: <rule>` — `BookArchiveFacesCoreTests:24`, `BookWingMoveTests:159/216`,
+  `DailyJournalRulingsTests:504`, `PendingArrivalDismissalTests:26`, `WingContentsMoveTests:64/68`
+  (evaluation order unchanged: each rule is still encoded immediately before its own
+  `createReading`); `TrashAndArchiveTests:253` → `let createdStamp = try #require(stamp)` then
+  `let day = try #require(DisplayTitle.day(fromStamp: createdStamp))`. `core-bt-r1.log`
+  (`Build complete!`): redundancy census 0; the six files carry no warning of any kind.
 - F1 pins under the reviewer's two mutants (re-created by `19d/mutate.py F1R` — the same upstream
   edits as `19d-review/probe.py` P1/P2, anchored above the site so they apply to the new spelling)
   — PENDING; the red-on-old is the reviewer's LOGGED silence (`19d-review/mac-probe.log`: in the

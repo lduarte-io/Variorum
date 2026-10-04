@@ -499,9 +499,10 @@ struct DailyJournalDesignationKindTests {
         try withOperations { ops, db in
             let daily = try file(ops, day: "2026-10-01")
             let tag = try ops.createTag(name: "t")
+            let tagRule = try #require(try RuleGrammar.encode(.tag(tag.id)))
             let gathering = try ops.createReading(
                 name: "g", kind: .gathering,
-                querySpec: try #require(try RuleGrammar.encode(.tag(tag.id))))
+                querySpec: tagRule)
             try db.clearOutbox()
 
             #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {

@@ -21,9 +21,10 @@ struct PendingArrivalDismissalTests {
         _ ops: Operations
     ) throws -> (bookID: String, noteID: String, pairID: String) {
         let tag = try ops.createTag(name: "waiting")
+        let tagRule = try #require(try RuleGrammar.encode(.tag(tag.id)))
         let book = try ops.createReading(
             name: "guarded", kind: .book,
-            querySpec: try #require(try RuleGrammar.encode(.tag(tag.id))),
+            querySpec: tagRule,
             intakeSeating: .arrivals)
         let note = try ops.createPost(title: "late")
         try ops.applyTag(tag.id, toPost: note.id)

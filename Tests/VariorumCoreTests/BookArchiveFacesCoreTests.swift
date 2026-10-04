@@ -19,9 +19,10 @@ struct BookArchiveFacesCoreTests {
             let kept = try ops.createReading(name: "Kept", kind: .book, wingId: wing.id)
             _ = try ops.createReading(name: "Shown", kind: .book, wingId: wing.id)
             let t = try ops.createTag(name: "t", wingID: wing.id)
+            let tagRule = try #require(try RuleGrammar.encode(.tag(t.id)))
             let g = try ops.createReading(
                 name: "G", kind: .gathering,
-                querySpec: try #require(try RuleGrammar.encode(.tag(t.id))), wingId: wing.id)
+                querySpec: tagRule, wingId: wing.id)
             try ops.archiveReading(kept.id)
             try ops.archiveReading(g.id)
             let contents = try db.read { try Queries.wingContents($0, wingID: wing.id) }

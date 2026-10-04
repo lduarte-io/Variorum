@@ -154,9 +154,10 @@ struct BookWingMoveTests {
         try withOperations { ops, db in
             let wing = try ops.createWing(name: "Imports")
             let tag = try ops.createTag(name: "classics")
+            let tagRule = try #require(try RuleGrammar.encode(.tag(tag.id)))
             let living = try ops.createReading(
                 name: "Living", kind: .book,
-                querySpec: try #require(try RuleGrammar.encode(.tag(tag.id))),
+                querySpec: tagRule,
                 intakeSeating: .arrivals)
             let waiter = try ops.createPost(title: "waiter")
             try ops.applyTag(tag.id, toPost: waiter.id)
@@ -211,9 +212,10 @@ struct BookWingMoveTests {
             #expect(try db.deletedAt("tag", poems.id) == nil, "the source's vocabulary stays")
 
             // A gathering: alone, and at once the destination's matches.
+            let classicsRule = try #require(try RuleGrammar.encode(.tag(classics.id)))
             let gathering = try ops.createReading(
                 name: "Classics", kind: .gathering,
-                querySpec: try #require(try RuleGrammar.encode(.tag(classics.id))))
+                querySpec: classicsRule)
             let homeNote = try ops.createPost(title: "home classic")
             try ops.applyTag(classics.id, toPost: homeNote.id)
             let awayNote = try ops.createPost(title: "away classic", wingId: wing.id)

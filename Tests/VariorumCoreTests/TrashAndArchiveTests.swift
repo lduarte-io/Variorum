@@ -250,7 +250,8 @@ struct TrashAndArchiveTests {
                     db, sql: "SELECT created_at FROM container WHERE id = ?",
                     arguments: [post.id])?["created_at"]
             }
-            let day = try #require(DisplayTitle.day(fromStamp: #require(stamp)))
+            let createdStamp = try #require(stamp)
+            let day = try #require(DisplayTitle.day(fromStamp: createdStamp))
             #expect(day != DisplayTitle.placeholder)
 
             try db.read { db in
