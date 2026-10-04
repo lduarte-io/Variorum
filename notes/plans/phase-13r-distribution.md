@@ -2720,7 +2720,7 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
        PASS → **the page's data file STAYS at 0.9.0** (see the shape above).
      - **(e) From the M3, the public state the walk expects:**
        ```sh
-       curl -s https://stargazing.tech/variorum/appcast.xml | grep -o 'sparkle:shortVersionString="[^"]*"\|<sparkle:shortVersionString>[^<]*' | sort -u
+       curl -s https://stargazing.tech/variorum/appcast.xml | grep -oE '<sparkle:shortVersionString>[^<]+' | sort -u
        ```
        Expect both 0.9.0 and 0.9.1.
        ```sh
