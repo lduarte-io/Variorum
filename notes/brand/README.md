@@ -13,6 +13,11 @@ propose-only, written for the future design sitting.
 
 ## Beyond the marks
 
+- **`LAUNCH-CONTENT-NOTES.md`** — START HERE for any marketing/launch-content
+  session: the continuity record — inventory, the standing copy rules (claim
+  discipline, E2EE phrasing, the bracket/PENDING conventions), owed items, and
+  where each public claim was verified.
+
 - **`video/`** — the shorts-scripts section (2026-09-26): three drafted scripts for
   Reels/TikTok in a shared hook/pain/turn/demo/kicker shape, its own README, and
   `filming-notes.md` (staging, vertical crop, capture choreography, AI-video rules).
