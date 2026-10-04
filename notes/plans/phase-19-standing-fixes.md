@@ -21,7 +21,7 @@
 | Letter | Subject | State |
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
-| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns (her word 2026-10-04: "that's fine for 19b to run later") |
+| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | IN PROGRESS — the implementer opened 2026-10-04 at the seam after 13r U2 (her word: "that's fine for 19b to run later"); the 19b RECORD at the tail |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the remaining test-side isolation warnings (#7) | OPEN — queued with 19b at the same seam |
 
 ---
@@ -149,8 +149,8 @@ warnings inside `#expect`/`#require` expansions in the mobile test build (F1's c
 any found settled by an IN-PLACE mutant at the exact spelling — R2-1's amended lesson)** ·
 F4's narrowed comment carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
 **Red-on-old:** the failing build itself (`mobile-bft-2.log` preserved in the 19a round-1
-evidence). **State: OPEN — queued at the next seam after 13r U2 spawns (13r is the launch
-path; nothing mobile gates it; the author may reorder).**
+evidence). **State: IN PROGRESS (2026-10-04) — the implementer's LIVE STATUS is the 19b RECORD
+at this file's tail.**
 
 ---
 
@@ -523,3 +523,50 @@ arbitration `e1bfdd08`; the binding record is the "19a ROUND 1" section above):*
    of its own (a natural rider for 19b, or a fresh letter).
 7. **The ISOLATION class still stands as WARNINGS** in seven Mac test files (F3's list above): one
    toolchain promotion from red, like F3. Not this round's.
+
+---
+
+## 19b RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS ENTRY (stated first, per the contract):** PENDING — filled at the close. Standing
+facts from the start: no walk capture (no product face changes — the diff is test-target-only); no
+`Sync/`, no custody, no schema, no app source; no `#expect`/`#require` line is re-spelled here (vacuous
+candidates are RECORDED for 19c Arm 1, never fixed in this entry — that would change assertion bytes).
+
+**Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match. Base `102453a8`.
+
+**THE CENSUS, re-read from the preserved red-on-old (`App/Variorum/DerivedData/19b/mobile-bft-2.log`,
+the 19a round-1 reviewer's continue-after-errors `build-for-testing`):** exactly **6 ERROR sites in 4
+files**, all ROW-COPY (`conformance of 'Row' to 'Sendable' is unavailable`), each printed twice (two
+arch passes): `MobileLibraryTests.swift:212` · `MobileMembershipTests.swift:239/299` ·
+`MobileShellTests.swift:270` · `MobileTutorialWalkTests.swift:395/433`. **The entry's "~61 sites in
+~25 files" is NOT the log's error census** — the log's ~60 unique WARNING lines (20 "no calls to
+throwing functions occur within 'try'", 17+2+1 main-actor reads from nonisolated contexts, 10
+`UIWindow.init(frame:)` deprecations, …) match that figure; the errors are 6. Still a FLOOR (19a's
+lesson): SIL-stage diagnostics only run once a batch type-checks, so the number is quoted only after
+my own builds iterate to green. Ten more `Row.fetch*` reads in the mobile tests (`MobileBlockHistory`
+55, `MobileShell` 249, `MobileStructural` 511, `MobileTakeLock` 42/55, `MobileTutorialWalk` 193/1061,
+`MobileWalk` 495) did NOT error — each is checked below before it is called out of scope.
+
+**THE COPIEDROW FORK — PROPOSED to the orchestrator, AWAITING THE RULING (not built):** (A,
+recommended) ONE file, three consumers — the core `Tests/VariorumCoreTests/Support/CopiedRow.swift`
+stays the single source, compiled by both Xcode test targets through one classic `PBXFileReference`
+in their (today empty) Sources phases, the Mac twin deleted; (B) a third identical twin in
+`VariorumMobileTests/`; (C, not recommended) a SwiftPM test-support library. Facts: both Xcode test
+targets are nonisolated (no `SWIFT_DEFAULT_ACTOR_ISOLATION`), Swift 6.0 mode, `MemberImportVisibility`
+on, fed by file-system-synchronized groups, and already `import GRDB` — the type compiles identically
+in all three.
+
+**Pieces:**
+1. Red-on-old under my own hands — IN-PROGRESS: a fresh `build-for-testing` of the unmodified tree
+   (`DerivedData/19b/mobile-bft-old.log`, derived data `19b/mobile.noindex`).
+2. The six ROW-COPY call sites (`.map(CopiedRow.init)` inside the read closure, 19a's shape) —
+   NOT-STARTED (identical under A or B).
+3. The CopiedRow shape the orchestrator rules — NOT-STARTED (waits on the ruling).
+4. Iterate the mobile test build to `** TEST BUILD SUCCEEDED **`, recording every extension site —
+   NOT-STARTED.
+5. The `#expect`/`#require` unused-result census over the green build log — NOT-STARTED.
+6. Suites green on a concrete simulator (the touched files' suites, counts confirmed, `skipped:` read)
+   — NOT-STARTED.
