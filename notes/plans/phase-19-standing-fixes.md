@@ -814,8 +814,8 @@ change — no refresh owed); `Tools/Release/`, 13r's DerivedData folders and the
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match. Base `e8a0950e` (no code
 change since 19b's `3c70b283`; every commit after it touches `notes/` only). Evidence logs:
-`App/Variorum/DerivedData/19c/` (gitignored); census scripts in the session scratchpad, their
-outputs copied into the evidence folder.
+`App/Variorum/DerivedData/19c/` (gitignored, 4.8 GB with its two derived-data folders, kept for the
+review); every census script and output is in its `census/` subfolder.
 
 **THE METHOD (decided before any edit; the reviewer checks it):**
 - **Arm 1 enumeration, two independent censuses.** (A) the GREP census the entry asks for — every
@@ -826,7 +826,7 @@ outputs copied into the evidence folder.
   the three test targets whose first argument, after `try`/`await`/`!`/outer parens, is a call
   whose final name is one of those callees, each RESOLVED by hand to its declaration (name
   collisions are many: `settle`, `poll`, `save`, `apply`…). (B) a COMPILER-LEVEL cross-check
-  (PENDING): which `__checkFunctionCall` overload each expansion actually CALLS, read from the
+  (DONE — piece 3): which `__checkFunctionCall` overload each expansion actually CALLS, read from the
   test objects' relocations (`llvm-objdump -d -r -l`; the line annotations name the macro buffer,
   whose mangled name carries the original line) — the `-> R?` overload under an `#expect` is the
   vacuous route by construction. (B) ranks and cross-checks; it never clears (R2-1).
@@ -846,7 +846,7 @@ outputs copied into the evidence folder.
   unchanged, rebuild to zero.
 
 **Pieces:**
-1. The grep census (A) — DONE (resolution encoded in `census/resolve.py`, output `census/resolved.tsv`):
+1. The grep census (A) — DONE (`1df8793c`; resolution encoded in `census/resolve.py`, output `census/resolved.tsv`):
    95 `@discardableResult … -> Bool/Bool?` declarations in the four code roots (19 core, 33 Mac,
    21 Shared, 22 mobile — 19a's "65" predates the mobile arm) + 17 test-target helpers; 369
    name-matched assertion sites → **261 IN-CLASS** (core 5 · Mac 169 · mobile 87; by shape: 141
@@ -857,18 +857,18 @@ outputs copied into the evidence folder.
    — which warn when discarded (scratch-verified); `LegacyLegs.apply` ×3 and the Mac
    `MarkdownActs.toggleCheckbox` ×2, not discardable; 4 Optional-returning `#require` unwraps;
    one file-local `run`).
-2. Fresh builds — DONE (`mac-bft-0.log`, `mobile-bft-0.log`: `** TEST BUILD SUCCEEDED **`; core up
+2. Fresh builds — DONE (`11eb4820`; `mac-bft-0.log`, `mobile-bft-0.log`: `** TEST BUILD SUCCEEDED **`; core up
    to date at HEAD). **The census rule's visible half:** zero unused-result warnings inside any
    `#expect`/`#require` expansion in either build (the only in-expansion warnings: Mac
    `SyncEnrollmentTests:262`'s known `!= nil`; mobile `MobileProtectionTests:1572`'s `try` and
    `:620`'s isolation read — Arm 2's).
-3. The compiler-level cross-check (B) — DONE. ZERO `#expect` expansions on an Optional-returning
+3. The compiler-level cross-check (B) — DONE (`11eb4820` + `1df8793c`). ZERO `#expect` expansions on an Optional-returning
    route in Mac (18,950 `__check` calls), mobile (3,623) or core (8,997); **positive control
    PASSED and RESTORED**: `CatalogDetailWordsTests.swift:49` re-spelled to F1's bare `.tag("t1")`
    flipped to `__checkFunctionCall … OPT` (and its unused-result warning returned —
    `core-bt-posctl.log`, `core-routes-posctl.tsv`); `git checkout --` restored it, the route read
    VOID again (`core-routes-restored.tsv`), tree clean.
-4. Mutant runs — IN-PROGRESS. **Baselines GREEN on the unmutated tree** (zero-instance window):
+4. Mutant runs — DONE (`b0f94351`). **Baselines GREEN on the unmutated tree** (zero-instance window):
    Mac 44 suites `Test run with 362 tests in 44 suites passed … with 5 known issues`
    (`mac-base-1.log`; 8 skips = the opt-in `DebugOracleSingletonWindowTests` suite), that suite
    run deliberately ALONE with `TEST_RUNNER_VARIORUM_ORACLE_SINGLETON_WINDOWS=1` (its own gate's
@@ -906,7 +906,7 @@ outputs copied into the evidence folder.
    VACUOUS; 1 RECORDED** (`AppleKeyRoundTripTests.swift:97`, the iCloud-Keychain opt-in — a
    session never runs it; its expansion calls the `-> Bool` overload, a rank, not a clearance).
 5. Re-spells — NONE OWED (zero vacuous sites; no assertion byte changes in Arm 1).
-6. Arm 2 — DONE in code (this commit), suites PENDING. The warning-grade main-actor reads sat in
+6. Arm 2 — DONE (`d2e43ea4` the code; `a7bbaac1` the suites). The warning-grade main-actor reads sat in
    LOCAL helper functions (Swift 6.4 does not give a local `func` its enclosing test's isolation —
    every suite here is already `@MainActor`), one nested struct method, two file-scope `private
    func find`s and ONE synchronous test; the treatment is test-side `@MainActor` on exactly that
@@ -943,7 +943,7 @@ outputs copied into the evidence folder.
    `mac-arm2-suites-1.{log,window}`; the TK2 tripwire `TakePaneMeasureTests` among them, green) ·
    **mobile `✔ Test run with 106 tests in 17 suites passed`** (106 = those 5 files' `@Test` count
    exactly; ZERO `skipped:` lines; iPhone 17 Pro / iOS 26.2; `mobile-arm2-suites-1.log`).
-7. Acceptance + the census table + dispositions — DONE (this commit). State → REVIEW-PENDING.
+7. Acceptance + the census table + dispositions — DONE (`a7bbaac1`). State → REVIEW-PENDING.
 
 **THE CENSUS TABLE (Arm 1 — every in-class site, by callee; the per-site rows with their issue
 counts are `census/{core,mac,singleton,mobile}-settle.tsv`, the resolution `census/resolved.tsv`):**
