@@ -36,11 +36,14 @@ Apple Notes visibly lags past ~10k words; that failure mode is designed out
 here, not patched. *On camera:* the split-screen stunt (short 02); the typing
 beat lands hardest.
 
-**5. Private and local-first.**
-Your writing lives in a file on your own Mac — readable, exportable, yours. No
+**5. Private and local-first — you own the file.**
+Your whole collection is one encrypted database file on your own Mac. No
 account required to write; no server between you and your journal; sync is a
-choice, not a dependency. *On camera:* hard to demo directly — best said over
-the calm page, or shown as the app working in airplane mode.
+choice, not a dependency — and the file itself is portable: AirDrop it to a
+new Mac and open it with your passphrase (13x-gated — verify shipped before
+claiming). *On camera:* the AirDrop-to-a-second-Mac move IS the demo if two
+machines are handy; otherwise said over the calm page, or the app working in
+airplane mode.
 
 **6. Real encryption, not a checkbox.**
 The store is encrypted at rest on disk, and sync is end-to-end encrypted — the

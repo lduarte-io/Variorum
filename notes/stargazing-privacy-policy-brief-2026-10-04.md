@@ -135,10 +135,10 @@ the account-password minimum is 12 characters and leaked-password protection is 
   only.
 - Do not carry the old cross-account aggregate-activity disclosure forward — it is closed (13y); the policy now
   states the per-account line instead.
-- The site's FAQ is briefed separately (`notes/stargazing-help-faq-brief-pre13x.md` — note it has NOT been
-  re-issued since pre-13x; where it and this brief disagree, THIS brief wins, and its 13y/13i deltas apply to the
-  FAQ's mechanisms too). The policy states boundaries; the FAQ explains mechanisms. Fragments' half of the story
-  remains the Fragments agent's to confirm.
+- The site's FAQ is briefed separately — the CURRENT edition is
+  `notes/stargazing-help-faq-brief-2026-10-04.md` (same date as this brief; they agree by construction). The
+  policy states boundaries; the FAQ explains mechanisms. Fragments' half of the story remains the Fragments
+  agent's to confirm.
 - Launch timing: 13o (search — fully client-side, changes nothing in this brief), 13r (distribution; the crash-
   reporting line lands then), 13x and 13s remain before release. None is expected to move these facts; if a future
   schema event amends the envelope, a re-issue of this brief will say so explicitly.

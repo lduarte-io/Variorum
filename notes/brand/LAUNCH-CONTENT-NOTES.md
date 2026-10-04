@@ -31,12 +31,14 @@ it changes.
   product page (V1–V25, three tiers, beats + staging + hard rules), written
   for an AI-driven recording session. Blog uses at most three (V1+V2+V5
   recommended).
-- **`../../stargazing-privacy-policy-brief-2026-10-04.md`** (notes/ root,
-  beside its 13p and pre-13x predecessors) — the CURRENT privacy brief she
-  carries to the stargazing.tech agent; self-contained; supersedes pre-13x
-  where they differ (13y closed the cross-account activity disclosure and
-  changed the key proof; 13i added structure-only columns). The help-FAQ
-  brief has NOT been re-issued since pre-13x — flagged inside.
+- **`../../stargazing-privacy-policy-brief-2026-10-04.md`** and
+  **`../../stargazing-help-faq-brief-2026-10-04.md`** (notes/ root, beside
+  their 13p/pre-13x predecessors) — the CURRENT pair she carries to the
+  stargazing.tech agent; both self-contained and same-dated so they agree.
+  Privacy: 13y closed the cross-account activity disclosure and changed the
+  key proof; 13i added structure-only columns. FAQ: ruled copy verbatim; the
+  three 13x-door entries are STAGE-NOW, PUBLISH ON HER GO (13x imminent at
+  this writing); verify the phone Re-link twin (QUESTIONS #139) at publish.
 
 Conventions across all of them: `[brackets]` = hers to fill or confirm;
 **PENDING** markers = re-check at publish time.
@@ -104,9 +106,15 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
 - Cross-link the blog post ↔ product page when both are on the site.
 - Shorts 04+ (candidates in `video/README.md`); the embed captures per
   `video/embed-shot-list.md` (AI-driven session; she may shoot some herself).
-- She carries the 2026-10-04 privacy brief to the stargazing agent; the
-  help-FAQ brief (`notes/stargazing-help-faq-brief-pre13x.md`) is owed a
-  matching re-issue when next touched.
+- She carries the 2026-10-04 privacy + FAQ briefs to the stargazing agent;
+  after 13x ships, she gives that agent the go to publish the three staged
+  FAQ entries (and the launch copy's `[13x-gated]` AirDrop/portability
+  claims unbracket at the same moment).
+- **The 13x portability claim** ("you own the file — AirDrop your collection
+  to a new Mac, open it with your passphrase") is now in the Show HN text,
+  the blog privacy bullet, the product page §11 + file-format FAQ, and
+  standout entry #5 — all marked 13x-gated; verify shipped before any of
+  them publish.
 - The product page hands off to the stargazing.tech agent (that repo has its
   own Claude agent — she tasks it; this repo only drafts content).
 
