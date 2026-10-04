@@ -23,7 +23,7 @@
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
-| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | OPEN — runs next in the away-gap; her walk outranks it |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | IN-PROGRESS (implementer; the 19d RECORD at the tail) |
 
 ---
 
@@ -1173,3 +1173,69 @@ build's objects. Commits: `fdc841ad` (record opened, method) · `11eb4820` (buil
 positive control announced) · `1df8793c` (census resolved, baselines, mutants announced) ·
 `b0f94351` (mutant results, restored) · `d2e43ea4` (Arm 2) · this commit (suites, table,
 dispositions, NOTICED, State → REVIEW-PENDING).
+
+---
+
+## 19d RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS ENTRY (stated first, per the contract) — PENDING, filled at the close.**
+
+**Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match. Base `5790a095`. Evidence:
+`App/Variorum/DerivedData/19d/` (gitignored).
+
+**THE METHOD (decided before any edit; the reviewer checks it):**
+- **Census first, from MY OWN fresh builds** (fresh derived-data / scratch paths under `19d/`, so
+  every test file re-emits its diagnostics): core `swift build --build-tests --scratch-path
+  …/19d/core.build`; Mac and mobile `xcodebuild build-for-testing` (`-derivedDataPath
+  DerivedData/19d/{mac,mobile}.noindex`, mobile on `generic/platform=iOS Simulator`). Counted as
+  UNIQUE warning lines (file:line:col, plus `macro expansion #require:` lines with their
+  "expanded code originates here" note — they carry no path of their own; 19b's counting lesson),
+  never "(N failures)". Two classes: "'#require(_:_:)' is redundant because 'X' never equals
+  'nil'" and "… always returns true". The reviewer's 38 + 2 is a floor.
+- **The re-spell rule, decided by the site's OWN spelling (mechanical, not a judgment of intent):**
+  (R) **`try? #require(X)`** — the spelling's own semantics under the overload its author meant
+  (`#require<T>(_: T?) -> T`) is RECORD AT THE LINE, THEN CONTINUE with nil (the `try?` swallows the
+  throw). The faithful re-spell keeps exactly that: `let x = X` then `#expect(x != nil)` on the next
+  line (X evaluated once; every downstream `x?.…` line byte-identical). (A) **`try #require(X)` in an
+  Optional-typed position** (an argument or an assignment whose type is `T?`) — the spelling's own
+  semantics is ABORT on nil (`try`, not `try?`): HOIST `let y = try #require(X)` onto its own line
+  (no type context, the `BookArchiveFacesTests:106` shape), then pass `y`. (C) a `#require` over a
+  NON-optional (`FannedDefaultsTests:355`) — pure cleanup, the macro dropped, no pin possible (the
+  type proves non-nil). A site that fits none of these, or whose `try?` sits beside contrary
+  signals (a force-unwrap downstream, a throwing context that makes the `try?` look accidental),
+  STOPS AND REPORTS.
+- **The pin discipline (F1's), per site:** a nil/empty MUTANT staged IN PLACE in the real test
+  target, keeping the re-spelled line byte-identical — preferring the upstream VALUE (a variable's
+  assignment, an input that makes the callee answer nil) over the callee's source; a callee-source
+  mutant only where no in-test input reaches nil, announced and reverted with the source
+  sha256-verified. **Once per SHAPE** the OLD spelling is shown SILENT at its line under the same
+  mutant; **for EVERY site** the NEW spelling is shown RED AT ITS OWN LINE. Scored by issue
+  LOCATIONS in the log, never pass/fail counts (19c's lesson). Mutants are announced HERE before
+  they run, applied only over COMMITTED files, reverted with `git checkout --`, tree verified clean,
+  `grep` for probe strings empty.
+- **Family 2:** `PostureSwitchDrillTests:621` → `#expect(!joinerRecord.deviceID.isEmpty, …)`.
+  **The drill suite is env-gated OFF (`VARIORUM_POSTURE_DRILL=1`) and STAYS OFF** (the brief's
+  binding line — it seeds the corpus and writes real Keychain items); so line 621 cannot be run in
+  place by this session. Its evidence is (i) the warning gone from the real target's build, (ii) a
+  THROWAWAY probe test in the SAME file (same import graph, the exact assertion spelling, the same
+  `SyncCustodyRecord` type) over `deviceID: ""` — the old spelling GREEN (silent), the new RED at its
+  line — run once by filter, deleted, never committed (the 19a piece-4 precedent), and (iii) the
+  route the compiler chose at line 621 in the real build (19c's `routes.py`, adopted as supporting
+  evidence at 19c round 1). FLAGGED for the orchestrator's own-hands verification.
+  `SyncEnrollmentTests:262` → the dead `!= nil` removed, the throw kept as the check, record-and-
+  continue kept (the spelling decided at build time — `#expect(throws: Never.self) { … }` if it
+  compiles warning-free under Xcode 27's Testing, which declares no dedicated `expect(throws:
+  Never.Type)` overload); pinned by an in-place throwing mutant (the OLD words' key at the line) —
+  RED at its own line on BOTH spellings (the old line was never silent on a throw — only its
+  comparison was dead).
+
+**Pieces:**
+1. Fresh builds + the census — IN-PROGRESS.
+2. Re-spells (core / Mac / mobile), committed per target — NOT-STARTED.
+3. Mutant pins (old silent once per shape; new red at its line per site) — NOT-STARTED.
+4. Family 2 — NOT-STARTED.
+5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
+   NOT-STARTED.
+6. The census table, dispositions, acceptance lines, State → REVIEW-PENDING — NOT-STARTED.
