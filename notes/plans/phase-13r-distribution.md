@@ -472,9 +472,28 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match.
 
 **Pieces:**
-1. **The Xcode-27 clean-build probe** — IN-PROGRESS: `swift package clean && swift build` (repo
-   root) + `xcodebuild -scheme Variorum -destination 'platform=macOS' build` into a FRESH
-   `-derivedDataPath App/Variorum/DerivedData/13r-u1/probe-debug` (clean by construction). PENDING.
+1. **The Xcode-27 clean-build probe** — IN-PROGRESS.
+   - `swift package clean && swift build` (repo root, Swift 6.4 / swiftlang-6.4.0.34.1): **GREEN**
+     — `Build complete!`, exit 0, 6 benign warnings (Swift 6.4's new "`nonisolated(unsafe)` is
+     unnecessary for a constant with Sendable type DateFormatter" ×4; a dependency's `v4`
+     deprecation ×2). Log: `App/Variorum/DerivedData/13r-u1/probe-swift-build.log`.
+   - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+     App/Variorum/DerivedData/13r-u1/probe-debug build` (FRESH path = clean): **RED — exit 65,
+     ONE error** — `Variorum/Surface/PaneSurface.swift:1076:28: error: main actor-isolated
+     conformance of 'VoiceTokens' to 'Equatable' cannot be used in nonisolated context
+     [#IsolatedConformances]`. Mechanism: `PaneDecoration` is a `nonisolated struct`; its static
+     `resolve(isLive:indicator:tokens:)` compares `tokens == nil` on a `VoiceTokens?`; Swift 6.4
+     resolves that through `Optional<Wrapped: Equatable>.==`, and `VoiceTokens: Equatable`
+     (`Shared/Theme/VoiceTokens.swift:32`) is INFERRED main-actor-isolated under the target's
+     `-default-isolation=MainActor` + `InferIsolatedConformances`. The EDITOR SEAM (CLAUDE.md
+     names `PaneSurface`) — per the brief, REPORTED, not landed. Log:
+     `App/Variorum/DerivedData/13r-u1/probe-xcodebuild-debug.log`.
+   - **PROBE IN FLIGHT (census only, never committed):** a temporary one-line edit at
+     `PaneSurface.swift:1076` (`tokens == nil ? A : B` → `tokens.map { _ in B } ?? A`) to learn
+     whether anything ELSE breaks under Xcode 27 (app + Mac test targets). RESTORE = `git
+     checkout -- App/Variorum/Variorum/Surface/PaneSurface.swift` (HEAD is the pre-probe text;
+     pre-probe sha256 `26525f05…500264e8`). A successor seeing a diff there: it is this probe —
+     restore it.
 2. **The archive/export road** — NOT-STARTED. Settled design: `Tools/Release/archive-and-export`
    (zero-instance refusal → clean Release archive into a fresh derived-data path under the output
    dir → `-exportArchive` with `Tools/Release/ExportOptions.plist`, method `developer-id`, manual
