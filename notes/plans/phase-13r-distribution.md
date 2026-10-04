@@ -457,3 +457,30 @@ opened; the working tree was left clean.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
+
+---
+
+## U1 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS UNIT (stated first, per the contract):** the LIVE drill leg (b) is AUTHOR-GATED
+and is STAGED here, never run — the export is never launched by this session, the real store is
+never touched, `/Applications` is never refreshed. No notarization submit (U2's). No entitlements
+edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero schema.
+
+**Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match.
+
+**Pieces:**
+1. **The Xcode-27 clean-build probe** — IN-PROGRESS: `swift package clean && swift build` (repo
+   root) + `xcodebuild -scheme Variorum -destination 'platform=macOS' build` into a FRESH
+   `-derivedDataPath App/Variorum/DerivedData/13r-u1/probe-debug` (clean by construction). PENDING.
+2. **The archive/export road** — NOT-STARTED. Settled design: `Tools/Release/archive-and-export`
+   (zero-instance refusal → clean Release archive into a fresh derived-data path under the output
+   dir → `-exportArchive` with `Tools/Release/ExportOptions.plist`, method `developer-id`, manual
+   signing, the Developer ID Application identity, the profile by UUID; the versioned profile copy
+   beside it, cross-checked against the plist and the installed copy) + `Tools/Release/verify-export`
+   (the static drill as a re-runnable PASS/FAIL script U2 reuses). The scheme's Run config stays
+   Debug; no build configuration is added.
+3. **The static drill leg (a)** — NOT-STARTED. PENDING.
+4. **The live drill leg (b) staged as her checklist** — NOT-STARTED.
