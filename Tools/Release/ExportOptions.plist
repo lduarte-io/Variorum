@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Phase 13r U1 — the Developer ID export (`archive-and-export.sh` feeds
+	     this to `xcodebuild -exportArchive`). MANUAL signing so the export
+	     names exactly one identity and exactly one profile; the project's
+	     own CODE_SIGN_STYLE stays Automatic (the archive is development-
+	     signed, and the export re-signs it).
+
+	     signingCertificate — the SHA-1 of "Developer ID Application: Lillian
+	     Duarte (384925MZJ6)", the ONE certificate the profile below embeds.
+	     provisioningProfiles — "Variorum Developer ID" by UUID; its file is
+	     versioned beside this plist (Variorum_Developer_ID.provisionprofile —
+	     not a secret: it ships inside every exported bundle as
+	     embedded.provisionprofile). Its entitlements carry
+	     keychain-access-groups = 384925MZJ6.* — the wildcard that authorizes
+	     BOTH of Variorum.entitlements' groups (the KnownIssues row 13r closes).
+
+	     A renewed certificate or a regenerated profile changes BOTH values
+	     here AND the versioned profile file; archive-and-export.sh refuses
+	     until all three agree (and agree with the Keychain). -->
+	<key>method</key>
+	<string>developer-id</string>
+	<key>destination</key>
+	<string>export</string>
+	<key>teamID</key>
+	<string>384925MZJ6</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>signingCertificate</key>
+	<string>81365B79375FDD80F36DE976CADB0819991CC4B5</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>io.lduarte.Variorum</key>
+		<string>a905d2d6-442a-4569-b4e1-30273f717f16</string>
+	</dict>
+</dict>
+</plist>

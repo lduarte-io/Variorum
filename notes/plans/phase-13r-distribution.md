@@ -567,12 +567,55 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
 - **What resumes on either road:** pieces 2–4 as designed below. Pieces 2 and 4 (the scripts, the
   plist, the profile copy, the staged checklist) do NOT need the app to compile and could be built
   first. Piece 3 (the archive and the static drill) needs the app line fixed.
-2. **The archive/export road** — NOT-STARTED. Settled design: `Tools/Release/archive-and-export`
-   (zero-instance refusal → clean Release archive into a fresh derived-data path under the output
-   dir → `-exportArchive` with `Tools/Release/ExportOptions.plist`, method `developer-id`, manual
-   signing, the Developer ID Application identity, the profile by UUID; the versioned profile copy
-   beside it, cross-checked against the plist and the installed copy) + `Tools/Release/verify-export`
-   (the static drill as a re-runnable PASS/FAIL script U2 reuses). The scheme's Run config stays
-   Debug; no build configuration is added.
+2. **The archive/export road** — BUILT (this commit); its first real run is piece 3 (PENDING).
+   `Tools/Release/`:
+   - `archive-and-export.sh [--out DIR]`. DIR (default `App/Variorum/DerivedData/release/<UTC>`)
+     must be empty, so every run is clean by construction (a fresh `-derivedDataPath` inside it).
+     It then:
+     - writes `BUILD-INFO.txt` (the commit, a dirty-tree flag, the toolchain);
+     - REFUSES (exit 3) if any Variorum process runs: `pgrep -fl 'Variorum.app/Contents/MacOS'`,
+       re-checked before the archive, before the export and at the end; it never quits or kills one;
+     - REFUSES (exit 4) unless the signing inputs agree: the method is `developer-id`; the profile
+       UUID ExportOptions names is the versioned file's UUID; ExportOptions' certificate SHA-1 is a
+       DeveloperCertificate of that profile AND a valid Keychain identity; the profile's app-id is
+       `io.lduarte.Variorum`; the profile is unexpired;
+     - INSTALLS the profile into `~/Library/Developer/Xcode/UserData/Provisioning
+       Profiles/<UUID>.provisionprofile` when it is absent (a copy; it refuses if a different file
+       sits there).
+     - archives (`-configuration Release`, `generic/platform=macOS`), then exports with
+       `ExportOptions.plist`;
+     - unregisters every `Variorum.app` it made from LaunchServices (`lsregister -u`), so no
+       Spotlight / `open -b` / Dock road resolves her app to them;
+     - runs `verify-export.sh` (with `--compare-with /Applications/Variorum.app` when present) into
+       `verify.txt`.
+   - `ExportOptions.plist`: `method developer-id`, `signingStyle manual`, `signingCertificate`
+     *[removed for publication]*
+     *[removed for publication]*
+   - `Variorum_Developer_ID.provisionprofile`: her profile, versioned (`cmp`-identical to
+     `~/Downloads`; sha256 `f661fdea…eec5c97`). It is not a secret: it ships in every bundle as
+     `embedded.provisionprofile`.
+   - `verify-export.sh <app> [--compare-with <app>]`: the static drill as PASS/FAIL lines plus a
+     VERDICT. It reads signatures only. It checks:
+     - the seal: `codesign --verify --deep --strict`;
+     - the identity: leaf = Developer ID Application, chain → Developer ID CA → Apple Root CA,
+       hardened runtime flag, secure timestamp;
+     - the entitlements: sandbox, BOTH keychain groups IN ORDER (the default group first) and
+       exactly two, app-id, team-id, get-task-allow absent, the carried keys;
+     - the embedded profile: byte-identical to the versioned copy; it authorizes each signed group
+       through its pattern and matches app-id/team-id; the leaf SHA-1 is among its certificates;
+       the UUID and certificate match ExportOptions;
+     - nested Mach-O: Developer ID + runtime + timestamp each;
+     - `spctl`: "rejected" + `source=Unnotarized Developer ID` counts as PASS before U2's notarize,
+       "accepted" after it;
+     - with `--compare-with`: the keychain groups are byte-identical to the other build's.
+   - **Smoke-tested read-only against `/Applications/Variorum.app`** (Apple Development): exactly
+     the Developer-ID-specific checks FAIL (11 of 33: leaf, chain, timestamp, get-task-allow, the
+     profile's identity and UUID, the nested framework's signer, Gatekeeper); the shared ones pass.
+     That proves the checks discriminate. **Found by it:** the bundle carries NESTED code,
+     `Contents/Frameworks/SQLCipher.framework` (a dynamic framework), so the export must re-sign it
+     under Developer ID (the nested check covers it). The Release binary is universal
+     (x86_64 + arm64).
+   - The scheme's Run config stays Debug and no build configuration was added (the scheme and
+     project are untouched by this unit).
 3. **The static drill leg (a)** — NOT-STARTED. PENDING.
 4. **The live drill leg (b) staged as her checklist** — NOT-STARTED.
