@@ -2,7 +2,7 @@
 // accept, BEFORE anything is published. It reads files only.
 //
 //   swiftc -O -o verify-appcast Tools/Release/verify-appcast.swift
-//   verify-appcast <appcast.xml> <dmg> <url-prefix> <version> <build> <base64-public-key>
+//   verify-appcast <appcast.xml> <dmg> <url-prefix> <version> <build> <base64-public-key> [<notes.md>]
 //
 // It checks the item whose sparkle:version is <build>:
 //   · sparkle:shortVersionString = <version>
@@ -15,6 +15,8 @@
 //     Ed25519, which Sparkle uses; CryptoKit verifies it independently of Sparkle's code).
 //   · its build is STRICTLY the highest in the feed (so Sparkle offers it to every older install)
 //   · no delta items (the handoff is "appcast.xml + the DMG", nothing else to upload)
+//   · U3-A: when <notes.md> is given (non-empty), the item's <description sparkle:format="markdown">
+//     carries EXACTLY that text — the ONE release-notes source the in-app What's New also reads
 // Exit 0 = every check passed · 1 = a check failed · 2 = usage or unreadable input.
 
 import CryptoKit
@@ -25,11 +27,12 @@ func ok(_ s: String) { print("PASS  \(s)") }
 func bad(_ s: String) { print("FAIL  \(s)"); failures += 1 }
 
 let args = CommandLine.arguments
-guard args.count == 7 else {
-    FileHandle.standardError.write(Data("usage: verify-appcast <appcast.xml> <dmg> <url-prefix> <version> <build> <base64-public-key>\n".utf8))
+guard args.count == 7 || args.count == 8 else {
+    FileHandle.standardError.write(Data("usage: verify-appcast <appcast.xml> <dmg> <url-prefix> <version> <build> <base64-public-key> [<notes.md>]\n".utf8))
     exit(2)
 }
 let (appcastPath, dmgPath, prefix, version, build, publicKeyB64) = (args[1], args[2], args[3], args[4], args[5], args[6])
+let notesPath: String? = args.count == 8 && !args[7].isEmpty ? args[7] : nil
 
 guard let doc = try? XMLDocument(contentsOf: URL(fileURLWithPath: appcastPath), options: []) else {
     FileHandle.standardError.write(Data("cannot parse \(appcastPath)\n".utf8)); exit(2)
@@ -96,6 +99,26 @@ if let mine = Int(build), others.allSatisfy({ $0 < mine }) {
     ok("build \(build) is strictly the highest in the feed (others: \(others.sorted().map(String.init).joined(separator: ", ")))")
 } else {
     bad("build \(build) is NOT strictly the highest (others: \(others)) — Sparkle would not offer it")
+}
+
+// U3-A — the ONE release-notes source, embedded as the item's Markdown description.
+let description = child(item, "description")
+if let notesPath {
+    guard let notes = try? String(contentsOfFile: notesPath, encoding: .utf8) else {
+        FileHandle.standardError.write(Data("cannot read \(notesPath)\n".utf8)); exit(2)
+    }
+    let embedded = description?.stringValue ?? ""
+    let trim: (String) -> String = { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+    if !trim(notes).isEmpty, trim(embedded) == trim(notes) {
+        ok("the item's description is the release notes, verbatim (\(notes.utf8.count) bytes)")
+    } else {
+        bad("the item's description is not the release notes (\(embedded.utf8.count) bytes embedded)")
+    }
+    let format = description.flatMap { attribute($0, "format") }
+    if format == "markdown" { ok("the description is sparkle:format=\"markdown\" (Sparkle renders it natively)") }
+    else { bad("the description's sparkle:format is '\(format ?? "nil")' (expected 'markdown')") }
+} else {
+    ok("no release notes expected for this item\(description == nil ? "" : " (it carries a description anyway)")")
 }
 
 let deltas = (try? doc.nodes(forXPath: "//*[local-name()='deltas']")) ?? []

@@ -2117,8 +2117,67 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      RUNNING version carries its notes in the bundle (a bump without notes is red); the grammar;
      the Help door's source line). **Run: `Test run with 7 tests in 1 suite passed`, no
      `skipped:`** (log `13r-u3a/p4-test.log`).
-5. `release.sh`: the notes rendered beside the DMG into the appcast + R-13r-10's self-explaining
-   DMG window — PENDING
+5. `release.sh`: the notes into the appcast + R-13r-10's self-explaining DMG window — **DONE (this
+   commit) — the Finder leg UNVERIFIED BY THIS SESSION: it needs a permission that is HER HANDS.**
+   - **THE NOTES ROAD:** `release.sh` preflight finds `…/WhatsNew/ReleaseNotes-<version>.md` —
+     a RELEASE refuses without it; a walk build may lack it (said, and the app shows its honest
+     no-notes line). `make-appcast.sh --notes MD` (REQUIRED in release mode) copies it into the
+     feed as `Variorum-<version>.md` beside its DMG — an existing copy with different bytes is
+     refused (immutability's spirit) — and `generate_appcast` now runs with
+     `--embed-release-notes`, so the item carries `<description sparkle:format="markdown">`
+     (Sparkle 2.10.0 renders Markdown natively — `SUUpdateAlert` → `SUTextViewReleaseNotesView
+     prefersMarkdown:YES`, read from the checkout). The notes STAY in the feed: read from
+     `generate_appcast`'s source (`FeedXML.swift`), every run re-embeds each item from the file
+     beside its DMG and REMOVES the description of an item whose file is gone. `verify-appcast
+     .swift` gains an optional 7th argument and two checks: the description is the notes
+     verbatim, and its format is markdown.
+   - **PROVEN with the real 2.10.0 tool, never her Keychain:** a scratch feed holding a DMG of the
+     piece-1 Debug app + the 0.9.0 notes, `generate_appcast --ed-key-file <a THROWAWAY CryptoKit
+     key> --embed-release-notes` → "Wrote 1 new update", the item's `<description
+     sparkle:format="markdown">` = the notes' CDATA; `verify-appcast` with the notes → both notes
+     checks PASS; with a different notes file → "not the release notes" FAIL; with none → "no
+     release notes expected" PASS. (Its edSignature check FAILED there by design: generate_appcast
+     refuses to sign an app whose baked `SUPublicEDKey` is not the signing key's twin — the
+     throwaway key never is. U2's walk W-0(c) proved the real signing road.) The extracted
+     `.debug` app copy in `generate_appcast`'s cache was unregistered and its entry removed.
+   - **THE DMG WINDOW (R-13r-10) — `Tools/Release/make-dmg.sh`, her ruled road, no new
+     dependency:** stage the app + the `/Applications` link + `.background/background.tiff` →
+     `hdiutil create` a READ-WRITE image (UDRW, HFS+, "Variorum") → attach at `/Volumes/Variorum`
+     (refused if a "Variorum" volume is already mounted — Finder must address exactly one) →
+     AppleScript tells Finder: icon view, toolbar + status bar hidden (the sidebar goes with the
+     toolbar), bounds 660×400 content, not arranged, 128-pt icons, the background picture, the app
+     at (165, 190) and Applications at (495, 190) → Finder writes the `.DS_Store` INTO the RW
+     image → the layout is READ BACK from that `.DS_Store` (`--verify-layout`) → detach → `hdiutil
+     convert` UDZO, `Variorum-<version>.dmg`. `release.sh` step 4 calls it; signing/notarizing is
+     unchanged and comes after (the layout is inside the seal and the ticket); step 7 reads the
+     layout back again from the SHIPPED, stapled DMG.
+   - **The arrow:** `Tools/Release/dmg-background.swift` (AppKit drawing, compiled with `xcrun
+     swiftc` like `verify-appcast.swift`) draws a plain mid-grey arrow across the gap between the
+     icons and "Drag Variorum to Applications" under it on a near-white room, 1× and 2×
+     (`tiffutil -cathidpicheck` → one HiDPI TIFF). Seen (the 2× PNG read back): upright, centred,
+     between the icon positions. Functional only — 13s's art replaces the file.
+   - **The layout verifier is proven on real Finder data:** its record parser read `bwsp`/`icvp`
+     plists and `Iloc` blobs out of four Finder-written `.DS_Store` files in her home (read only:
+     e.g. `WindowBounds '{{404, 486}, {920, 436}}'`, `backgroundType 0`), and it FAILS a DMG with
+     no layout ("no .DS_Store … the window was never laid out", exit 1).
+   - **THE PERMISSION — MEASURED, HER HANDS:** scripting Finder needs the user's Automation
+     consent for the terminal app running the pipeline. `finder-automation-check.swift` asks the
+     system WITHOUT prompting (`AEDeterminePermissionToAutomateTarget`, askUserIfNeeded false).
+     **On this Mac today the host (Ghostty) is DENIED for Finder (status −1743; for comparison
+     Terminal.app reads −1744, never asked).** So `make-dmg.sh --check` refuses, and `release.sh`
+     refuses at PREFLIGHT (before the archive and an hour of notarization), naming the toggle:
+     **System Settings ▸ Privacy & Security ▸ Automation ▸ Ghostty ▸ Finder → ON.** Measured
+     here: `make-dmg.sh --app <Debug app>` → REFUSED exit 3 before any hdiutil. **Consequence for
+     the orchestrator: no U3 walk DMG can be built until she flips that toggle; then the first
+     run is the window's verification** — a one-line dry run needs no notarization:
+     `Tools/Release/make-dmg.sh --app App/Variorum/DerivedData/13r-u3a/p1-debug/Build/Products/Debug/Variorum.app --version 0.0.99 --out <scratch dir>`
+     (its read-back prints PASS/FAIL per setting; then `open` the DMG and capture the window).
+   - **Facts for the ladder:** on macOS 27.0 `hdiutil create/attach/detach` print a DEPRECATION
+     warning ("use diskutil image …") but work — her ruling names hdiutil, and U2's pipeline
+     already used it; recorded, not acted on. **The dark-mode question is open for the walk's arm
+     (a):** Finder draws icon labels over the near-white background; whether it keeps them dark
+     under a dark system appearance could not be measured without Finder access — capture arm (a)
+     in both appearances if she can.
 6. THE CALM-ASKS CADENCE — the one local scheduler, the update ask (R-13r-11), the backup-folder
    OFFER toast (R-13r-12), Settings ▸ General's "Check for updates automatically", the ONE
    QUESTIONS entry — PENDING

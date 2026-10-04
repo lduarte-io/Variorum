@@ -9,24 +9,34 @@
 #
 # THE ORDER (each step refuses to continue on any failure):
 #   0. preflight   clean tree (a release is ONE commit's build) · ZERO Variorum instances (pgrep, by PATH)
-#                  · the Sparkle tools verified by digest · the notary credential answers · release mode:
+#                  · the Sparkle tools verified by digest · the notary credential answers · this host may
+#                  script Finder (the DMG window's layout — U3-A) · the version's RELEASE NOTES exist
+#                  (U3-A: release mode REFUSES without them; a walk build may lack them) · release mode:
 #                  the version is unpublished (no local feed copy, and dl.stargazing.tech answers 404)
 #   1. stamp       MARKETING_VERSION = --version · CURRENT_PROJECT_VERSION = `git rev-list --count HEAD`
-#                  (R-13r-6's number; command-line overrides, never a build configuration)
+#                  (R-13r-6's number; command-line overrides, never a build configuration). Since U3-A the
+#                  Mac target's own "Stamp Build Number" phase writes the SAME count into every build's
+#                  CFBundleVersion; the override stays because the xcarchive's metadata reads the setting.
 #   2. archive + export   archive-and-export.sh: U1's developer-id road, CLEAN by construction; its
 #                  verify-export.sh run must PASS with the stamp proven (pre-notarization reading)
 #   3. notarize + staple the APP (zipped; Keychain profile VariorumNotary), then verify-export.sh
 #                  --require-notarized → Gatekeeper ACCEPTED + the ticket stapled
-#   4. DMG         plain `hdiutil` (UDZO, HFS+): Variorum.app + an /Applications link, named EXACTLY
-#                  Variorum-<version>.dmg (the site's per-IP rate limit keys on that prefix)
+#   4. DMG         make-dmg.sh (U3-A — R-13r-10, the SELF-EXPLAINING window): plain `hdiutil` + Finder's
+#                  scripted window settings written into a read-write image (the app and an /Applications
+#                  link at fixed positions, a plain arrow + "Drag Variorum to Applications" between them,
+#                  fixed size, no toolbar/sidebar), then UDZO, named EXACTLY Variorum-<version>.dmg (the
+#                  site's per-IP rate limit keys on that prefix). The layout is set BEFORE signing.
 #   5. sign the DMG (Developer ID, secure timestamp)
 #   6. notarize + staple the DMG; `spctl -t open` must ACCEPT it
 #   7. verify the SHIPPED BYTES: mount the final DMG read-only and run verify-export.sh --require-notarized
-#                  on the app inside it, so what is checked is exactly what users get
+#                  on the app inside it, so what is checked is exactly what users get — and read the
+#                  window's layout back out of its .DS_Store (make-dmg.sh --verify-layout)
 #   8. dSYMs retained: copied out of the archive with their UUIDs proven equal to the shipped binary's.
 #                  Release mode also files them DURABLY under ~/Library/Developer/Variorum/Releases/<version>/
 #                  with the build's records (never in DerivedData, which gets swept)
-#   9. appcast     make-appcast.sh (it reads HER Keychain; the first run asks her)
+#   9. appcast     make-appcast.sh (it reads HER Keychain; the first run asks her), handed the version's
+#                  RELEASE NOTES (U3-A — the ONE source the in-app What's New reads), which it embeds in
+#                  the item as Markdown
 #  10. HANDOFF     printed + HANDOFF.txt. RELEASE: SHE carries the DMG and then appcast.xml to the site repo
 #                  in the site's PUBLISH-AND-LEAVE order (DMG uploaded and VERIFIED reachable BEFORE the
 #                  appcast lands), each leg checked by verify-published.sh. WALK: the local feed's
@@ -87,6 +97,21 @@ say "Sparkle 2.10.0 tools verified by digest"
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" --output-format json >/dev/null 2>&1 \
   || refuse "the notary credential '${NOTARY_PROFILE}' did not answer (xcrun notarytool history --keychain-profile ${NOTARY_PROFILE})"
 say "notary credential '${NOTARY_PROFILE}' answers"
+# U3-A (R-13r-10): the DMG window is laid out by scripting Finder, which needs the user's consent for the
+# terminal app running this. Asked of the system WITHOUT a prompt, so a missing consent refuses HERE,
+# before the archive and an hour of notarization, never mid-run.
+FINDER_CHECK="$("${HERE}/make-dmg.sh" --check 2>&1)" || refuse "the DMG window cannot be laid out from this host — ${FINDER_CHECK}"
+say "this host may script Finder (the DMG window's layout)"
+# U3-A — THE ONE RELEASE-NOTES SOURCE (the in-app What's New reads the same file from the bundle).
+NOTES_SRC="${REPO}/App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSION}.md"
+if [ -s "$NOTES_SRC" ]; then
+  say "release notes: ${NOTES_SRC#"${REPO}/"}"
+elif [ "$MODE" = release ]; then
+  refuse "no release notes for ${VERSION}: write App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSION}.md and commit it (What's New and the appcast both read it)"
+else
+  NOTES_SRC=""
+  say "release notes: none for walk build ${VERSION} (the app says so plainly; the appcast item carries none)"
+fi
 DMG_NAME="Variorum-${VERSION}.dmg"
 if [ "$MODE" = release ]; then
   [ ! -e "${RELEASES}/${VERSION}" ] || refuse "${RELEASES}/${VERSION} already exists: ${VERSION} was built for release before (versions are never reused)"
@@ -157,16 +182,14 @@ grep -E '^(FAIL|VERDICT)|Gatekeeper|stapler' "${OUT}/verify-stapled.txt" || true
 
 # ------------------------------------------------------------------ 4. the DMG (named EXACTLY)
 step "4. hdiutil DMG: ${DMG_NAME}"
-ROOT="${OUT}/dmg-root"
-mkdir "$ROOT"
-ditto "$APPX" "${ROOT}/Variorum.app"
-ln -s /Applications "${ROOT}/Applications"
 DMG="${OUT}/${DMG_NAME}"
-hdiutil create -volname "Variorum" -srcfolder "$ROOT" -fs HFS+ -format UDZO -ov "$DMG" > "${OUT}/hdiutil-create.txt" 2>&1 \
-  || { cat "${OUT}/hdiutil-create.txt" >&2; exit 6; }
-"$LSREGISTER" -u "${ROOT}/Variorum.app" >/dev/null 2>&1 || true
-rm -rf "$ROOT"
-say "${DMG} ($(stat -f %z "$DMG") bytes before signing)"
+set +e
+"${HERE}/make-dmg.sh" --app "$APPX" --version "$VERSION" --out "$OUT" > "${OUT}/make-dmg.txt" 2>&1
+MD=$?
+set -e
+sed 's/^/  /' "${OUT}/make-dmg.txt"
+[ "$MD" -eq 0 ] && [ -f "$DMG" ] || { echo "make-dmg.sh exited ${MD} (${OUT}/make-dmg.txt)" >&2; exit 6; }
+say "${DMG} ($(stat -f %z "$DMG") bytes before signing; the window laid out and read back)"
 
 # ------------------------------------------------------------------ 5. sign the DMG
 step "5. sign the DMG (Developer ID ${CERT})"
@@ -196,6 +219,8 @@ set +e
   --require-notarized > "${OUT}/verify-dmg.txt" 2>&1
 V=$?
 LINK="$(readlink "${MNT}/Applications" || true)"
+"${HERE}/make-dmg.sh" --verify-layout "$MNT" > "${OUT}/verify-dmg-layout.txt" 2>&1
+LAYOUT=$?
 "$LSREGISTER" -u "${MNT}/Variorum.app" >/dev/null 2>&1
 hdiutil detach "$MNT" > /dev/null 2>&1 || hdiutil detach -force "$MNT" > /dev/null 2>&1
 "$LSREGISTER" -u "$MNT" >/dev/null 2>&1   # the volume's own record (measured lingering at walk A)
@@ -204,6 +229,8 @@ rmdir "$MNT" 2>/dev/null || true
 grep -E '^(FAIL|VERDICT)' "${OUT}/verify-dmg.txt" || true
 [ "$V" -eq 0 ] || { echo "the app INSIDE the DMG failed verify-export.sh (${OUT}/verify-dmg.txt)" >&2; exit 1; }
 [ "$LINK" = "/Applications" ] || { echo "the DMG's Applications link reads '${LINK}'" >&2; exit 1; }
+grep -E '^(PASS|FAIL|VERDICT)' "${OUT}/verify-dmg-layout.txt" | sed 's/^/    /' || true
+[ "$LAYOUT" -eq 0 ] || { echo "the SHIPPED DMG's window layout did not read back (${OUT}/verify-dmg-layout.txt)" >&2; exit 1; }
 DMG_BYTES="$(stat -f %z "$DMG")"
 DMG_SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
 say "shipped bytes verified: ${DMG_NAME} · ${DMG_BYTES} bytes · sha256 ${DMG_SHA}"
@@ -263,14 +290,16 @@ fi
 if [ -n "$STOP_BEFORE_APPCAST" ]; then
   step "9. appcast — STOPPED BEFORE IT (--stop-before-appcast)"
   say "run when she is at the machine (the first run asks her Keychain):"
-  say "  Tools/Release/make-appcast.sh --${MODE} --dmg ${DMG} --version ${VERSION} --build ${BUILD}"
+  say "  Tools/Release/make-appcast.sh --${MODE} --dmg ${DMG} --version ${VERSION} --build ${BUILD}${NOTES_SRC:+ --notes ${NOTES_SRC}}"
   exit 0
 fi
 step "9. appcast"
-if ! "${HERE}/make-appcast.sh" "--${MODE}" --dmg "$DMG" --version "$VERSION" --build "$BUILD"; then
+NOTES_ARGS=()
+[ -z "$NOTES_SRC" ] || NOTES_ARGS=(--notes "$NOTES_SRC")
+if ! "${HERE}/make-appcast.sh" "--${MODE}" --dmg "$DMG" --version "$VERSION" --build "$BUILD" ${NOTES_ARGS[@]+"${NOTES_ARGS[@]}"}; then
   # Never re-run release.sh for this version: it would rebuild different bytes under the same name.
   echo "the appcast step failed. RESUME it on the SAME DMG (never rebuild ${VERSION}):" >&2
-  echo "  Tools/Release/make-appcast.sh --${MODE} --dmg ${DMG} --version ${VERSION} --build ${BUILD}" >&2
+  echo "  Tools/Release/make-appcast.sh --${MODE} --dmg ${DMG} --version ${VERSION} --build ${BUILD}${NOTES_SRC:+ --notes ${NOTES_SRC}}" >&2
   exit 7
 fi
 

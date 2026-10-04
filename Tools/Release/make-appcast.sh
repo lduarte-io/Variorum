@@ -5,8 +5,17 @@
 # wants to use your confidential information stored in 'https://sparkle-project.org'". She enters her
 # login password, then Allow (or Always Allow). A tools upgrade (a new ad-hoc cdhash) asks again.
 #
-#   Tools/Release/make-appcast.sh --release --dmg PATH --version X.Y.Z --build N [--feed-dir DIR]
-#   Tools/Release/make-appcast.sh --walk    --dmg PATH --version 0.0.N --build N [--feed-dir DIR] [--port P]
+#   Tools/Release/make-appcast.sh --release --dmg PATH --version X.Y.Z --build N --notes MD [--feed-dir DIR]
+#   Tools/Release/make-appcast.sh --walk    --dmg PATH --version 0.0.N --build N [--notes MD] [--feed-dir DIR] [--port P]
+#
+# THE RELEASE NOTES (U3-A — the ONE source; the in-app What's New reads the same file from the bundle):
+# --notes copies App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-<version>.md into the feed as
+# Variorum-<version>.md, beside its DMG, and generate_appcast --embed-release-notes embeds it in the item
+# as <description sparkle:format="markdown"> (Sparkle 2.10.0's update alert renders Markdown natively —
+# read from its source). The notes STAY in the feed directory: generate_appcast re-embeds every item from
+# the files beside the DMGs at each run, and an item whose notes file is missing loses its description.
+# Release mode REQUIRES --notes; an existing notes file with DIFFERENT bytes is refused (a published item's
+# notes change only by a deliberate hand edit of the feed copy, never silently).
 #
 # THE TWO FEEDS NEVER MIX:
 #   --release  feed dir  $VARIORUM_RELEASES_DIR/feed (default ~/Library/Developer/Variorum/Releases/feed):
@@ -42,8 +51,8 @@ ED_PUBLIC_KEY="tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA="
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 GA_CACHE="${HOME}/Library/Caches/Sparkle_generate_appcast"
 
-usage() { echo "usage: $0 (--release|--walk) --dmg PATH --version V --build N [--feed-dir DIR] [--port P]" >&2; exit 2; }
-MODE=""; DMG=""; VERSION=""; BUILD=""; FEED=""; PORT="8765"
+usage() { echo "usage: $0 (--release|--walk) --dmg PATH --version V --build N [--notes MD] [--feed-dir DIR] [--port P]" >&2; exit 2; }
+MODE=""; DMG=""; VERSION=""; BUILD=""; FEED=""; PORT="8765"; NOTES=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --release) MODE=release; shift ;;
@@ -53,6 +62,7 @@ while [ $# -gt 0 ]; do
     --build) [ $# -ge 2 ] || usage; BUILD="$2"; shift 2 ;;
     --feed-dir) [ $# -ge 2 ] || usage; FEED="$2"; shift 2 ;;
     --port) [ $# -ge 2 ] || usage; PORT="$2"; shift 2 ;;
+    --notes) [ $# -ge 2 ] || usage; NOTES="$2"; shift 2 ;;
     *) usage ;;
   esac
 done
@@ -67,6 +77,7 @@ case "$MODE" in
     [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "--version must be X.Y.Z (got '${VERSION}')"
     [[ "$VERSION" =~ ^0\.0\. ]] && refuse "0.0.x is the WALK range; a release never carries it"
     [ -n "$FEED" ] || FEED="${RELEASES}/feed"
+    [ -n "$NOTES" ] || refuse "a release REQUIRES --notes (the version's ReleaseNotes-<version>.md — What's New and the appcast read the one source)"
     PREFIX="$RELEASE_PREFIX" ;;
   walk)
     [[ "$VERSION" =~ ^0\.0\.[0-9]+$ ]] || refuse "a walk build's version is 0.0.N (got '${VERSION}'), so no walk artifact can ever wear a release number"
@@ -96,12 +107,24 @@ else
   say "${NAME} copied into the ${MODE} feed: ${FEED}"
 fi
 
+# ------------------------------------------------------------------ the release notes join it (U3-A)
+NOTES_NAME="Variorum-${VERSION}.md"
+if [ -n "$NOTES" ]; then
+  [ -s "$NOTES" ] || refuse "no such notes file (or empty): ${NOTES}"
+  if [ -e "${FEED}/${NOTES_NAME}" ]; then
+    cmp -s "$NOTES" "${FEED}/${NOTES_NAME}" || refuse "${FEED}/${NOTES_NAME} already exists with DIFFERENT text — a published item's notes change only by a deliberate hand edit of that copy"
+  else
+    cp -p "$NOTES" "${FEED}/${NOTES_NAME}"
+    say "${NOTES_NAME} copied beside its DMG (embedded as the item's Markdown description)"
+  fi
+fi
+
 # ------------------------------------------------------------------ generate_appcast (reads HER Keychain)
 BIN="$("${HERE}/fetch-sparkle-tools.sh" --path)"
 LOG="${FEED}/generate_appcast-${VERSION}.log"
-say "generate_appcast --maximum-deltas 0 --download-url-prefix ${PREFIX} ${FEED}"
+say "generate_appcast --maximum-deltas 0 --embed-release-notes --download-url-prefix ${PREFIX} ${FEED}"
 say "(it reads the EdDSA private key from HER login Keychain; the first run on this machine asks her: login password, then Allow)"
-if ! "${BIN}/generate_appcast" --maximum-deltas 0 --download-url-prefix "$PREFIX" "$FEED" > "$LOG" 2>&1; then
+if ! "${BIN}/generate_appcast" --maximum-deltas 0 --embed-release-notes --download-url-prefix "$PREFIX" "$FEED" > "$LOG" 2>&1; then
   echo "generate_appcast FAILED — ${LOG}:" >&2
   tail -20 "$LOG" >&2
   exit 4
@@ -125,6 +148,7 @@ xcrun swiftc -O -o "${WORK}/verify-appcast" "${HERE}/verify-appcast.swift" 2>"${
   || { cat "${WORK}/swiftc.err" >&2; echo "could not compile verify-appcast.swift" >&2; exit 1; }
 set +e
 "${WORK}/verify-appcast" "${FEED}/appcast.xml" "${FEED}/${NAME}" "$PREFIX" "$VERSION" "$BUILD" "$ED_PUBLIC_KEY" \
+  "${NOTES:+${FEED}/${NOTES_NAME}}" \
   | tee "${FEED}/verify-appcast-${VERSION}.txt"
 VERIFY=${PIPESTATUS[0]}
 set -e
