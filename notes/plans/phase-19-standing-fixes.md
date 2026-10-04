@@ -1712,6 +1712,37 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   (core 22, 157, 502, 24, 253, 62; Mac 470, 147, 249, 114, 562 — each then ABORTING its test as the
   old `try` did; 222, 688, 3503, 3505 — each CONTINUING as the old `try?` did). Revert: `git
   checkout --` of the touched files, status clean, zero markers, the four callee sha256s.
+  **ROUND-1 MUTANT RUN — DONE, REVERTED** (`19d/r1-M1-F1R.diff`; `core-r1-M1.log` 40 tests / 6
+  suites; `mac-r1-M1.log` 213 tests / 20 suites at a zero-instance window — `mac-r1-M1.window`:
+  `pgrep` empty before 17:52:10Z and after 17:53:31Z; restored with `git checkout --` of the 18
+  files, status clean, zero markers, the four sha256s OK). **(a) `BookAscentTests` — PINNED: RED at
+  805 "action != nil"** (the new line, +1 for F1R's inserted line), then its downstream 806/808 as
+  before. **(b) `MarkdownFaceTests:187` — NOT PINNED BY P2, AND P2 NEVER TESTED IT:** the new line
+  (189 mutated) did NOT record; only 190 `(headingSize ?? 0) > base.pointSize` and 196 did, and the
+  captured value reads `(headingSize ?? 0) → 12.0` — in THIS log and identically in the reviewer's
+  `19d-review/mac-probe.log`. `NSTextStorage` fixes attributes when the edit is processed
+  (`fixFontAttribute` reassigns a default 12-pt font to any run left without one), so removing the
+  `.font` attribute never yields nil there. **The reviewer's logged "silence" at 188 is therefore
+  UNINFORMATIVE for this site: X was 12.0, not nil** (BookAscent's P1 is genuine — its downstream
+  `action?.label` failed on nil in both logs). Route at 187 (the reviewer's
+  `mac-routes-final-all.tsv`): `__checkPropertyAccess` — the decomposed form, so silence is
+  PREDICTED; only a real nil can settle it. **(c) every round-0 re-spell re-scored RED at its own
+  line** (82, 223, 334, 339, 88, 92, 359, 210/238/351, 201, 344 ×2, 75, 369, and MarkdownFace's
+  voice-switch site at 288 = 285 + two inserted lines). **(d) the 18 cleanups are
+  behaviour-identical under their logged mutants:** core recorded EXACTLY the old run's 9 issues,
+  each now at its hoisted line with the same message (22, 157, 502, 24 ×3, 253 "stamp", 62; 203 =
+  the old run's 202 fallout, +1); Mac 470, 147, 249, 114 "picked", 562 "parentID" — each test then
+  ABORTS as the old `try` did (nothing below it records) — and 222, 688, 3503/3505 record then
+  CONTINUE (their downstream `?.` lines still record, 3506's `index != nil && places != nil` too).
+  **RUNS A/B for MarkdownFace:187 — ANNOUNCED, STARTING after this commit** (set `F1M`: the site's
+  own file-private callee `font(_:at:)` answers nil for exactly the site's call — the heading string
+  at the title's offset — a one-line replacement, no line shift; offsets 0 and "Big" untouched). **A
+  (the self-owned red-on-old, for BOTH F1 sites):** `mutate.py OLDF1` (the two OLD spellings
+  restored TEMPORARILY over the committed new ones) + `F1P1` + `F1M`; Mac bft + `MarkdownFaceTests`
+  + `DivergeDoorTests`; expected: NO issue at BookAscent 804 (the old site, +1) nor MarkdownFace 187,
+  only their downstream lines. **B (the new spellings):** `F1P1` + `F1M` on the committed tree;
+  expected RED at BookAscent 805 "action != nil" and MarkdownFace 188 "headingSize != nil". Each run
+  reverted with `git checkout --` of the two files, status clean, zero markers.
 - F3 [NIT] wording + NOTICED #1/#2/#4 corrections — PENDING.
 - Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
   at zero redundancy warnings + the touched suites green — PENDING.
