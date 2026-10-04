@@ -1295,6 +1295,42 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    then `git checkout --` of every M1 file, `git status` clean, `grep -r MUT19D` empty, the four
    sha256s re-read. **If this record still says STARTING, a death came mid-mutant: run `git
    checkout -- Sources App Tests` and re-read the shas FIRST.**
+   **OLD-TREE M1 — DONE, REVERTED** (`19d/old-M1.diff`; logs `core-old-M1.log` — 40 tests / 6
+   suites, `mac-old-M1.log` — 202 tests / 18 suites at a zero-instance window
+   (`mac-old-M1.window`: `pgrep` empty before 16:37:37Z and after 16:38:53Z), `mobile-old-M1.log`
+   — 12 tests / 1 suite, iPhone 17 Pro / iOS 26.2; issue locations by `19d/issues.py`; restored
+   with `git checkout --` of the 17 files, `git status` clean, zero `MUT19D` in the tree, all four
+   callee sha256s OK). **THE FINDING — the class is NOT uniformly silent; the redundancy warning is
+   a STATIC diagnostic and does not by itself mean a runtime silence.** Under the in-place nil
+   mutant, the OLD spelling:
+   - **RECORDS AT ITS OWN LINE (the site's own expression as the message — e.g. "Expectation
+     failed: try RuleGrammar.encode(.tag(inbox.id))", "…: picked", "…: herStamp", "…: stamp")** at
+     core `BookArchiveFacesCoreTests:24`, `BookWingMoveTests:159`, `DailyJournalRulingsTests:504`,
+     `PendingArrivalDismissalTests:26` (×3 callers), `TrashAndArchiveTests:253` (the INNER
+     `#require(stamp)` — message "stamp"), `WingContentsMoveTests:64`; Mac `BookArchivedLineTests:471`,
+     `FannedDefaultsTests:221`, `LibraryDayFilterTests:114`, `SurfaceSizeMemoryTests:687`,
+     `TutorialWalkTests:563`, `:3501`/`:3503` (the macro's first line; the warning cites 3502/3504),
+     `WingBookMoveDoorTests:149`/`:250`. **These are HOLLOW for the silent-nil class** (the pin
+     would be green on both sides) — every one's `X` is a plain variable, a subscript, a
+     `try`-prefixed call or a trailing-closure call.
+   - **SILENT AT ITS OWN LINE (only later lines record, or nothing at all)** at Mac
+     `EditorSeamCostTests:81` (82 records), `MarkdownFaceTests:284` (286/289/291),
+     `NoteBoxTests:221` (223–230), `NoteVersionsPaneTests:332`/`:336` (334/338),
+     `OriginBlockDoorTests:87`/`:90` (88–93), `QuickNoteTests:358` (359/360),
+     `ReadRenderingTests:210`/`:237`/`:349` (217/241/357), `SystemHotKeyTests:200` (202/203),
+     `TakeStructureDoorTests:343` (344 ×2), `TrayPanelMoveTests:74` (75/76),
+     `TypingErgonomicsTests:368` (NOTHING records anywhere in the test — the mutant's effect is
+     proven on the new spelling, below); mobile `MobileCrossBlockEditTests:144`/`:163`/`:210`/`:310`
+     (only the downstream `edit?.…` lines). **These are the genuine never-failing checks** — every
+     one's `X` is an UN-prefixed function call or member access.
+   - NOT REACHED under M1 (an earlier abort in the same test): core `BookWingMoveTests:216`,
+     `WingContentsMoveTests:68`; Mac `LibraryDayFilterTests:124` — OLD-M2 below.
+   **OLD-TREE M2 — ANNOUNCED, STARTING after this commit:** `mutate.py M2c` (REVISED from the
+   counter to a PER-CALL callee mutant: `encode` answers nil only when the calling thread carries
+   the `MUT19D` flag, set on the line just before the site's statement — synchronous, so the same
+   thread, and immune to parallel tests; sites 68 and 216) + `mutate.py M2m`; core build + the two
+   core suites, Mac bft + `LibraryDayFilterTests`; then `git checkout --`, status clean, zero
+   markers, RuleGrammar's sha256 re-read. Same death rule as above.
 4. Family 2 — NOT-STARTED.
 5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
    NOT-STARTED.
