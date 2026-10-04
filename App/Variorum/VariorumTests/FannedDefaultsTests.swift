@@ -218,7 +218,8 @@ struct FannedDefaultsTests {
     @Test func theBoardBarsStructuralHelpsTellTheKeepOnTopTruth() {
         let helps = Dictionary(
             uniqueKeysWithValues: TakesBottomBar.structuralBar.map { ($0.act, $0.help) })
-        let divide = try? #require(helps[.divide])
+        let divide = helps[.divide]
+        #expect(divide != nil)
         #expect(divide?.contains("stay whole on the top block") == true)
         #expect(divide?.contains("onto both") == false,
                 "the duplicate shape is gone from the words too")

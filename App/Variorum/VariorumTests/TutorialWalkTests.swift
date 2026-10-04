@@ -559,8 +559,9 @@ struct TutorialDoorTests {
             let parentID = try await db.read { db in
                 try Queries.allTags(db).first { $0.path == TutorialSeeder.tagName }?.id
             }
+            let parentTagID = try #require(parentID)
             let child = try session.operations.createTag(
-                parent: try #require(parentID), name: "keepsake")
+                parent: parentTagID, name: "keepsake")
             let userPost = try session.operations.createPost(title: "my keepsake notes")
             _ = try session.operations.newBlock(in: userPost.id, text: "sub-tagged, mine.")
             _ = try session.operations.applyTag(child.id, toPost: userPost.id)
@@ -3498,10 +3499,10 @@ struct TutorialPrivacyChapterTests {
     }
 
     @Test func theChapterIsTwoLessonsInTheRightPlace() {
-        let index = try? #require(
-            TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter })
-        let places = try? #require(
-            TutorialSeeder.plan.firstIndex { $0.chapter == placesChapter })
+        let index = TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter }
+        #expect(index != nil)
+        let places = TutorialSeeder.plan.firstIndex { $0.chapter == placesChapter }
+        #expect(places != nil)
         #expect(index != nil && places != nil)
         if let index, let places {
             #expect(index == places + 1,

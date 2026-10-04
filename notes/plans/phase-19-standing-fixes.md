@@ -1676,7 +1676,7 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   that does not depend on knowing the macro's exact suppression-token set.
 - F1 [MAJOR] re-spells — DONE (this commit): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
 - F2 [MINOR] the 18-hollow cleanup (behaviour-identical, each site's abort-vs-continue kept) —
-  core DONE (this commit), Mac PENDING. **Core (6 files, the 8 sites, all (A) — abort kept):** the
+  core DONE (`668846bb`), Mac DONE (this commit). **Core (6 files, the 8 sites, all (A) — abort kept):** the
   hoist `let tagRule = try #require(try RuleGrammar.encode(.tag(…)))` (`classicsRule`/`writingRule`
   where a test holds two) on the line before the `createReading` that consumed it, then
   `querySpec: <rule>` — `BookArchiveFacesCoreTests:24`, `BookWingMoveTests:159/216`,
@@ -1685,6 +1685,17 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   `createReading`); `TrashAndArchiveTests:253` → `let createdStamp = try #require(stamp)` then
   `let day = try #require(DisplayTitle.day(fromStamp: createdStamp))`. `core-bt-r1.log`
   (`Build complete!`): redundancy census 0; the six files carry no warning of any kind.
+  **Mac (6 files, the 10 sites):** (A, abort kept — the hoist) `BookArchivedLineTests:471`
+  (`inboxRule`), `WingBookMoveDoorTests:149`/`:250` (`tagRule`/`starRule`), `LibraryDayFilterTests:114`/
+  `:124` (`firstPick`/`secondPick` — each `#require(picked)` read at the same point, after its
+  field's pick, exactly where the argument was evaluated), `TutorialWalkTests:563`
+  (`parentTagID`); (R, continue kept — `let x = X` + `#expect(x != nil)`) `FannedDefaultsTests:221`,
+  `SurfaceSizeMemoryTests:687`, `TutorialWalkTests:3501`/`:3503` (`index`/`places`; the existing
+  3505 `#expect(index != nil && places != nil)` stays byte-identical). Local names checked
+  collision-free per file. **THE TRIPWIRE: `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'`
+  over all five test roots → 0.** `mac-bft-r1.log` (`** TEST BUILD SUCCEEDED **`, incremental over
+  the final derived data): Mac redundancy census 0; the 8 Mac files touched this round carry only
+  `BookAscentTests:554`'s two effect-marker warnings, present identically in the base build.
 - F1 pins under the reviewer's two mutants (re-created by `19d/mutate.py F1R` — the same upstream
   edits as `19d-review/probe.py` P1/P2, anchored above the site so they apply to the new spelling)
   — PENDING; the red-on-old is the reviewer's LOGGED silence (`19d-review/mac-probe.log`: in the

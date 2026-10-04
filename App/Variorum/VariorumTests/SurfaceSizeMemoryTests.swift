@@ -684,7 +684,8 @@ struct SurfaceSizeMemoryTests {
         EditorTypography.current = restore
         EditorTypography.isAdopted = wasAdopted
 
-        let study = try? #require(herStamp)
+        let study = herStamp
+        #expect(study != nil)
         #expect(study?.contains("Iowan") == true, "the adopted stamp is Study's: \(String(describing: herStamp))")
         #expect(stampAfter == herStamp,
                 "a drawing host cannot move the stamp once the voice is adopted: \(String(describing: stampAfter)) vs \(String(describing: herStamp))")

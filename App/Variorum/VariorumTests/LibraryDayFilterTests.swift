@@ -111,7 +111,8 @@ struct LibraryDayFilterTests {
                 day: model.editedOn, now: today,
                 onPick: { picked = $0 }, onClear: {})
             field.dateBinding.wrappedValue = today
-            model.setEditedOn(try #require(picked))
+            let firstPick = try #require(picked)
+            model.setEditedOn(firstPick)
             await model.search()
             #expect(noteIDs(model) == [fresh.id], "the day she picked, and only it")
 
@@ -121,7 +122,8 @@ struct LibraryDayFilterTests {
                 day: model.editedOn, now: today,
                 onPick: { picked = $0 }, onClear: {})
             armed.dateBinding.wrappedValue = earlier
-            model.setEditedOn(try #require(picked))
+            let secondPick = try #require(picked)
+            model.setEditedOn(secondPick)
             await model.search()
             #expect(noteIDs(model) == [old.id], "moved back two days, the older note answers")
         }

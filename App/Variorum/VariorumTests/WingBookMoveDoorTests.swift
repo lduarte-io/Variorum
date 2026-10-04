@@ -144,9 +144,10 @@ struct WingBookMoveDoorTests {
             let wing = try ops.createWing(name: "Imports")
             await wings.load()
             let tag = try ops.createTag(name: "classics")
+            let tagRule = try #require(try RuleGrammar.encode(.tag(tag.id)))
             let living = try ops.createReading(
                 name: "Living", kind: .book,
-                querySpec: try #require(try RuleGrammar.encode(.tag(tag.id))),
+                querySpec: tagRule,
                 intakeSeating: .arrivals)
             for title in ["a", "b"] {
                 let note = try ops.createPost(title: title)
@@ -245,9 +246,10 @@ struct WingBookMoveDoorTests {
             let wings = WingsModel(session: session)
             let wing = try ops.createWing(name: "Imports")
             await wings.load()
+            let starRule = try #require(try RuleGrammar.encode(.star))
             let starred = try ops.createReading(
                 name: "Starred", kind: .gathering,
-                querySpec: try #require(try RuleGrammar.encode(.star)))
+                querySpec: starRule)
             let single = try #require(await wings.bookMoveAsk(reading: starred, to: wing.id))
             #expect(WingCopy.bookMoveMessage(single)
                     == "A gathering holds no notes — in “Imports” it shows the notes there that "

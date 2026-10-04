@@ -467,8 +467,9 @@ struct BookArchivedLineTests {
         try await withArchiveBook(members: 1, archive: 0) { session, db, readingID, _ in
             let ops = session.operations
             let inbox = try ops.createTag(name: "inbox")
+            let inboxRule = try #require(try RuleGrammar.encode(.tag(inbox.id)))
             try ops.setReadingQuerySpec(
-                readingID, querySpec: try #require(try RuleGrammar.encode(.tag(inbox.id))))
+                readingID, querySpec: inboxRule)
             try ops.setReadingIntakeSeating(readingID, .arrivals)
             let note = try ops.createPost(title: "set aside")
             _ = try ops.newBlock(in: note.id, text: "A waiting note.")
