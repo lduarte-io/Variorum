@@ -479,6 +479,15 @@ opened; the working tree was left clean.
 
 ## U1 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
+**U1 STATE (2026-10-04, the implementer's stop): the fix, the road, the static drill DONE (35/35);
+the LIVE drill STAGED (piece 4's checklist), waiting on HER launch, which the orchestrator
+coordinates.** Pieces below. Forward notes for the orchestrator, none of them this unit's:
+- A pre-existing indexed real-store-id Release build sits in Xcode's default DerivedData (piece 3).
+- Run 1's leftover real-store bundles await removal (piece 4).
+- Her OWN eventual move to a Developer ID build would meet the bookmark question (piece 4's
+  predictions), if the community report holds. Friends start fresh, so it cannot touch them.
+  R-13r-7 keeps her on hand-copies.
+
 **U1 RESUMED (2026-10-04) after the toolchain gate. The orchestrator's adjudication (`4d1afcd8`, the
 LIVE STATUS bullet above) took OPTION (a), REFINED.** The history: the Xcode-27 probe found that the
 Mac APP did not compile (ONE error, in the editor seam). U1 stopped and reported, nothing landed. The
@@ -617,7 +626,19 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
      (x86_64 + arm64).
    - The scheme's Run config stays Debug and no build configuration was added (the scheme and
      project are untouched by this unit).
-3. **The static drill leg (a)** — IN-PROGRESS. Run 1 PASSED; run 2 (the final script) is PENDING.
+3. **The static drill leg (a)** — **DONE: PASSED 35/35 on both runs.** Run 2 is the drill build.
+   - **RUN 2 (the FINAL script `5ba04cc1`, tree clean, 2026-10-04T10:11:16Z):** `--out
+     App/Variorum/DerivedData/13r-u1/drill`, so the `.noindex` append was exercised, landing in
+     `drill.noindex/`.
+     - Every zero-instance check found no process. The signing inputs agreed. The profile was
+       "already installed" (run 1's install, `cmp`-identical).
+     - `** ARCHIVE SUCCEEDED **` → `** EXPORT SUCCEEDED **` → both copies unregistered →
+       `LaunchServices: 0 registrations under …/drill.noindex` → **`VERDICT: PASS — 35 of 35
+       checks`** (`drill.noindex/verify.txt`). Every line matches run 1's evidence below (secure
+       timestamp `Oct 4, 2026 at 4:15:07 AM`).
+     - Re-checked ~4 minutes later: 0 registrations for the drill build (the only `13r-u1`
+       registrations are the Debug probe builds `.debug` and the mobile simulator build, as in
+       every phase's build folders), and 0 Spotlight hits under `drill.noindex`.
    - **RUN 1 (script `c51b18d9`, tree clean):** `Tools/Release/archive-and-export.sh --out
      App/Variorum/DerivedData/13r-u1/release`, 2026-10-04T10:02:57Z.
      - Every zero-instance check found no process.
@@ -668,4 +689,115 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
      Release build at
      `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Release/Variorum.app`
      (an earlier refresh's build folder that was not removed). Left untouched for the orchestrator.
-4. **The live drill leg (b) staged as her checklist** — NOT-STARTED.
+4. **The live drill leg (b), STAGED as a ready checklist** — DONE (this commit). NEVER RUN BY THIS
+   SESSION: no launch, no store touch, no `/Applications` refresh. The orchestrator coordinates her
+   launch.
+
+   **THE BUILD UNDER TEST (exactly one):**
+   `<home>/dev/variorum/App/Variorum/DerivedData/13r-u1/drill.noindex/export/Variorum.app`
+   — run 2, script commit `5ba04cc1`, Developer ID, `CDHash=efdee49f8e803ef10fed1866833e77cf0ab43d6c`,
+   executable sha256 `c14b5d8b…af80e66`, static drill 35/35 (`drill.noindex/verify.txt`).
+   - It is NOT run 1's `release.noindex/export/Variorum.app`. That copy and the two `.xcarchive`
+     app copies are also real-store-id bundles. This session's `rm -rf` of run 1's copies was
+     STOPPED by the harness safety check, so their removal is left to the orchestrator or her. All
+     four sit under `.noindex` with 0 LaunchServices registrations.
+
+   **WHAT THE DRILL PREDICTS (measured at staging; the drill confirms or falsifies):**
+   - **Keychain:** every custody family (store-key, store-key-escrow, e2ee-keys, apple-key, auth)
+     lives in the DATA-PROTECTION keychain (`KeychainPartition`, `StoreKey`'s DP flag). Access there
+     is governed by the access groups, and the export's groups are byte-identical to her build's.
+     So: NO prompt beyond her posture's normal Touch ID (Apple TN3137).
+   - **Legacy keychain:** the file-based keychain holds NO Variorum item. An attributes-only
+     `security find-generic-password -s <service>` found "none" for all five services, and
+     `security dump-keychain` lists no Variorum service. So the old-signature access-list password
+     prompt CANNOT occur.
+   - **Container:** the ownership metadata reads `Owners =
+     *[removed for publication]*
+     The export carries the same team and identifier. Predicted SILENT: WWDC23 10053 says "All apps
+     signed with your Team ID can access data in your other app's containers by default, without a
+     permission prompt"; DTS thread 741479 says Team ID, not the designated requirement. This exact
+     Development → Developer ID switch is UNCONFIRMED by any source; the drill confirms it.
+   - **App-scope bookmarks** (her backup folder; the reference panel's files): community-reported,
+     unconfirmed, to fail to resolve under a changed signing identity. TRACED: no code path writes a
+     bookmark back on resolve (`BackupDestination.resolve` returns `wasStale` and no caller
+     re-mints; `ReferencesViewModel` only resolves). So the worst case is an honest "can't be
+     found", and NOTHING is rewritten. Observation only; NOT a drill failure.
+   - **Gatekeeper:** a locally built bundle carries no quarantine flag, so no Gatekeeper dialog
+     gates this launch (the quarantined-DMG road is U2's walk).
+
+   **THE CHECKLIST.** `[O]` = the orchestrator (shell, read-only unless stated); `[HER]` = her
+   hands. `APP` = the drill build above. `C=$HOME/Library/Containers/io.lduarte.Variorum`.
+   `S="$C/Data/Library/Application Support/Variorum"`. `LSR=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister`.
+   - **0. Preconditions [O].**
+     - (a) `pgrep -fl 'Variorum.app/Contents/MacOS'` → NO output. Discriminate by PATH: a Debug
+       build or a test host also counts. She quits it; it is never quit or killed by a session.
+     - (b) `codesign -dvvv "$APP" 2>&1 | grep CDHash` → `efdee49f…ab43d6c`, then
+       `Tools/Release/verify-export.sh "$APP" --compare-with /Applications/Variorum.app` →
+       `VERDICT: PASS — 35 of 35`.
+     - (c) `$LSR -dump | grep -c 'drill.noindex'` → `0` (else `$LSR -u "$APP"`).
+     - (d) For each of `store-key store-key-escrow e2ee-keys apple-key auth`:
+       `security find-generic-password -s io.lduarte.Variorum.<name> >/dev/null 2>&1 && echo FOUND
+       || echo none` → all `none`. Attributes only; NEVER `-g`. Any FOUND: STOP, report, do not
+       launch.
+   - **1. The A1 rail [O]** (the app CLOSED; WAL-safe = the three store files together):
+     `STAMP=$(date -u +%Y%m%dT%H%M%SZ); DEST="$S/Backups/safety-copies/13r-u1-drill-$STAMP"; mkdir -p
+     "$DEST"; cd "$S" && for f in variorum.sqlite variorum.sqlite-wal variorum.sqlite-shm
+     variorum-keys*.json; do cp -p "$f" "$DEST/" && cmp "$f" "$DEST/$f" && echo "ok $f"; done` →
+     expect SIX `ok` lines: the store, `-wal`, `-shm`, and three key files, as at staging and at
+     18o's refresh. A different count: list it and decide before going on.
+     - This drill's two extras: `cp -p "$C/Data/Library/Preferences/io.lduarte.Variorum.plist"
+       "$DEST/"` (UserDefaults, where the backup-folder bookmark lives) and `cp -p
+       "$C/.com.apple.containermanagerd.metadata.plist"
+       "$DEST/containermanagerd.metadata.BEFORE.plist"`. These are evidence; restoring them is the
+       orchestrator's call.
+   - **2. Mark the window [O]:** `START=$(date '+%Y-%m-%d %H:%M:%S')`; `plutil -p
+     "$C/.com.apple.containermanagerd.metadata.plist" | grep Owners` (record it).
+   - **3. Reveal [O]:** `open -R "$APP"`, which shows the bundle in Finder for her.
+   - **4. THE ONE LAUNCH [HER].** Double-click `Variorum.app` in that Finder window (or run `open
+     "$APP"`).
+     - EXPECTED: the window reads "Variorum" (not "Variorum Dev"). If her posture is Biometric,
+       ONE Touch ID prompt (the custody read lands). Then HER library, the same notes as her daily
+       drive.
+     - Look only: open one recent note; edit nothing; change no setting; do not sign in or out; do
+       not open a reference.
+     - OPTIONAL, read-only: Settings ▸ Data Safety. Note whether the backup-folder line reads
+       normally or says the folder can't be found (the bookmark observation above).
+     - Then ⌘Q.
+   - **4-STOP. Any of these: give the NON-granting answer, quit, report, do nothing else.**
+     - A "Variorum would like to access data from other apps" prompt → **Don't Allow** (predicted
+       silent).
+     - A keychain PASSWORD prompt ("…wants to use your confidential information…") → **Deny**
+       (predicted impossible, step 0d).
+     - Instead of her library: a custody refusal, an unlock or "set up" screen, an EMPTY library,
+       or any error → quit WITHOUT pressing any door on it. That visible refusal is exactly what
+       the `CustodyHandover` guard exists to show; the A1 copy restores.
+     - Touch ID asked more than once, or a passphrase request she does not expect → Cancel, quit.
+   - **5. [O]** `pgrep -fl 'Variorum.app/Contents/MacOS'` → no output (zero instances again).
+   - **6. Verification reads [O], all read-only.**
+     - (a) `log show --start "$START" --predicate 'processImagePath CONTAINS "drill.noindex"'
+       --info --style compact`: the drill process's own lines, the `protection` / `e2ee`
+       categories among them. Then `log show --start "$START" --predicate 'processImagePath
+       CONTAINS "drill.noindex" AND (eventMessage CONTAINS "-34018" OR messageType == error)'` →
+       expect nothing custody-shaped. `-34018` = errSecMissingEntitlement = the group failure the
+       drill exists to rule out.
+     - (b) `plutil -p "$C/.com.apple.containermanagerd.metadata.plist" | grep Owners` versus step
+       2: record the change. A second owner entry with `validationCategory` developer-id is a FACT
+       to record, not a failure.
+     - (c) Step 0(d)'s sweep again → still all `none`.
+     - (d) `$LSR -u "$APP"` (the launch re-registers it), then `$LSR -dump | grep -c
+       'drill.noindex'` → `0`.
+   - **7. THE RETURN LEG [HER].** Open `/Applications/Variorum.app` as she always does. It must
+     open exactly as before: Touch ID as usual, NO new prompt, her library. This proves the
+     Developer ID launch re-owned nothing her daily build needs. The same 4-STOP rules apply.
+   - **8. VERDICT [O], into this record.** PASS = all of the following:
+     - the custody read landed (at most her posture's one Touch ID);
+     - the library opened;
+     - no unexpected prompt;
+     - no `-34018` or custody refusal in 6(a);
+     - the return leg was clean.
+
+     PASS closes the KnownIssues keychain-access-groups row (24) at the phase close.
+   - **ROLLBACK (only on a FAIL, at zero instances) [O]:** copy the six store and key files from
+     `$DEST` back over `$S` with `cp -p`, then `cmp` each. That is the established A1 restore. The
+     prefs/metadata copies are evidence: restoring them (cfprefsd caches prefs) is the
+     orchestrator's call, with her.
