@@ -215,6 +215,19 @@ Reviewer evidence: `App/Variorum/DerivedData/19d-review/` (kept).
   Reworded with the fixes: the route the compiler chose; the bindings INFERRED and settled
   AT RUNTIME (the mutants are the evidence). The route-to-behaviour mapping held 40/40.
 
+**[F1 CORRECTED AT THE FIX ROUND — kept beside the original, the custom:** the implementer's
+pinning work proved `MarkdownFaceTests:187` HOLLOW, not silent — the round-1 reviewer's
+probe (removing the `.font` attribute) never produced a nil, because `NSTextStorage`
+re-adds a default 12-pt font; BOTH probe logs show `(headingSize ?? 0) → 12.0`, so the
+logged "silence" never tested the site. Under a TRUE nil mutant (the test file's own
+`font(_:at:)` helper returning nil for exactly that call) the OLD spelling records at its
+own line. The genuinely silent F1 site is `BookAscentTests:803` ALONE, now pinned by the
+implementer's own red-on-old; 187's re-spell stands as F2-class cleanup. The
+route-to-behaviour mapping is therefore 40 of 41 — **the route census RANKS candidates,
+it never settles one** (R2-1's law holding once more, now against a reviewer's probe). The
+probe lesson, binding: CHECK THE CAPTURED VALUE first — confirm the mutant really produced
+the nil before reading a silence. Round 2 verifies this reclassification independently.]**
+
 ---
 
 ## 19a ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow: the orchestrator arbitrates, the implementer fixes, a FRESH reviewer runs round 2)
