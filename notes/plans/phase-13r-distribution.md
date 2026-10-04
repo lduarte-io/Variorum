@@ -987,6 +987,18 @@ opened; the working tree was left clean.
   stands. The not-proposed exclusions (Protection; a second Send Feedback door) are ratified
   as recorded. Piece 5 builds to this; the walk sheet's optional arm names the Diagnostics
   pane.
+- **U3-B VERIFIED BY THE ORCHESTRATOR (2026-10-04, the seam spot-check by its own hands):** tree
+  clean at `73ee3984` = origin, zero instances; the whole-range scope guard shows ZERO
+  `Sources/`, `Server/`, `Shared/` and mobile lines; the five U3-B-adjacent suites RE-RUN —
+  **62 tests in 5 suites GREEN, no skips** (CrashReporting · DiagnosticsPane · SupportDraft ·
+  SyntheticCrashReport · the registry walk); the staged walk sheet READ IN FULL and matching
+  R-13r-16 (the page-at-0.9.0-during-the-walk subtlety, the inline day-counter blocks, the
+  re-arm road, the optional arm (g), the N-0 [O] staging with the hazard re-check); the
+  mutation run's four-mutants-all-caught record read; QUESTIONS #181 (a)–(i) in place.
+  **U3 IS BUILT COMPLETE (U3-A + U3-B); what remains of the phase: the N-0 staging (her two
+  gates → the DMG dry run → the 0.9.0/0.9.1 releases + publishes) → HER WALK on the new
+  computer → the ONE fable-reviewer ladder over U1–U3 (finals green modulo 19e's named red) →
+  closeout.** The F-W5 no-Mail-account fact and the ladder flags ride the record as written.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
