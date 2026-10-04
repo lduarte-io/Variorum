@@ -22,10 +22,12 @@
       EVERY press, decided pairs included (nothing re-files; a hand-removal is never undone);
       both platforms by construction; pins red-on-old + revert-verified; core 2174/244 green.
       The record: the plan's POST-CLOSE ADDENDUM. #179's head is closed.
-- [ ] **Ratify #179** — the 13i-e bundle (the sustained PROVISIONALs, each one line to flip;
-      F-R1-3's Quicknotes-comes-back question; the Archived row's count-split taste call).
-      Standing from the family: **#167** · **#168**'s two calls · **#169**'s tails (incl. the
-      offer toast's 6 s clock) · **#170–#178** (#178 the genuinely open one).
+- [x] **Ratify #179 — EVERY OPEN CALL RULED 2026-10-03 (the family-close sitting, the question
+      tool; the dispositions written into each QUESTIONS entry):** F-R1-3 and F-U2-7 keep as
+      built; #169's tails ruled (Duplicate as Version CARRIES TAGS → 17y; Diverge stays
+      tag-less; 6 s kept); #173/#174/#175 keep as built; #176 ruled (all-or-nothing kept;
+      "Cards" → 17y; naming split kept with her reason); #178 NEITHER. The as-built PROVISIONAL
+      lists STAND, each still one line to overturn. F-U6-2 → the 17x entry at her word.
 - [ ] **THE COMBINED 13i WALK, at your leisure:** `notes/handoffs/13i-family-combined-walk.md`
       — the cohesive list your posture asked 13i-e to assemble (one tour over a–e; the 🖐 items
       need your hand; every 13i-e item was proven live at my walk first).
