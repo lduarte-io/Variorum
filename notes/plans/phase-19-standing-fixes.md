@@ -22,7 +22,7 @@
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
-| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | OPEN — runs next (19b closed; the mobile test build it needed exists) |
+| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **RUNNING 2026-10-04** — the implementer's LIVE STATUS is the 19c RECORD at this file's tail |
 
 ---
 
@@ -789,3 +789,55 @@ R2-2's named mobile candidates (`MobileMarkdownActs.swift:90–91` asserted bare
 `MobileMarkdownTests.swift:389/397/453/551/563`) carry no warning in this build, as the rule predicts;
 settling them by in-place mutants is 19c Arm 1's, sequenced after this entry (the mobile test build now
 exists for it).
+
+---
+
+## 19c RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS ENTRY (stated first, per the contract — PENDING, finalized at the close).**
+
+**Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match. Base `e8a0950e` (no code
+change since 19b's `3c70b283`; every commit after it touches `notes/` only). Evidence logs:
+`App/Variorum/DerivedData/19c/` (gitignored); census scripts in the session scratchpad, their
+outputs copied into the evidence folder.
+
+**THE METHOD (decided before any edit; the reviewer checks it):**
+- **Arm 1 enumeration, two independent censuses.** (A) the GREP census the entry asks for — every
+  `@discardableResult` declaration in `Sources` + `App/Variorum/{Variorum,Shared,VariorumMobile}`
+  whose return type is `Bool`/`Bool?` (a balanced-paren signature parse, not a line grep), PLUS
+  the same attribute on test-target helpers (an extension of the stated universe — the mechanism
+  does not care where the callee lives; recorded as such); then every `#expect(`/`#require(` in
+  the three test targets whose first argument, after `try`/`await`/`!`/outer parens, is a call
+  whose final name is one of those callees, each RESOLVED by hand to its declaration (name
+  collisions are many: `settle`, `poll`, `save`, `apply`…). (B) a COMPILER-LEVEL cross-check
+  (PENDING): which `__checkFunctionCall` overload each expansion actually CALLS, read from the
+  test objects' relocations (`llvm-objdump -d -r -l`; the line annotations name the macro buffer,
+  whose mangled name carries the original line) — the `-> R?` overload under an `#expect` is the
+  vacuous route by construction. (B) ranks and cross-checks; it never clears (R2-1).
+- **Arm 1 settlement — the CALLEE-NEGATION mutant, in place.** Each in-class callee keeps its
+  exact declaration (attributes, name, parameter clause, effects, return type) and its body is
+  renamed aside behind a wrapper of the identical signature that calls it and returns the
+  NEGATED Bool. Every call site stays byte-identical (the import graph, the spelling and the
+  overload set are untouched; only the runtime value flips), every side effect still happens,
+  and every assertion over the callee's Bool — bare, `!`-negated, `try`/`await`-prefixed or
+  `== true/false` — must go RED if it is real. A site that stays green under its callee's
+  mutant (and is proven REACHED) is VACUOUS. Re-spelled sites must then go RED under the same
+  mutant on the new spelling, and green without it. Mutants are reverted with
+  `git checkout --` of COMMITTED files only (the resiliency protocol's rule 11) and verified by
+  `git status`/`git diff`.
+- **Arm 2:** the warning census from fresh `build-for-testing` logs (Mac + mobile), the
+  isolation class's sites per file, test-side `@MainActor` (19a F3's shape), assertion bytes
+  unchanged, rebuild to zero.
+
+**Pieces:**
+1. The grep census (A) — IN-PROGRESS: 95 `@discardableResult … -> Bool/Bool?` declarations in the
+   four code roots (19 core, 33 Mac, 21 Shared, 22 mobile — 19a's "65" predates the mobile arm) +
+   17 test-target helpers; 369 name-matched assertion sites before resolution.
+2. Fresh builds (Mac + mobile `build-for-testing`, core `swift build --build-tests`) — PENDING.
+3. The compiler-level cross-check (B) — PENDING.
+4. Mutant runs, per target — PENDING.
+5. Re-spells of VACUOUS sites + red-on-new-spelling — PENDING.
+6. Arm 2, Mac then mobile — PENDING.
+7. Acceptance runs + the census table + dispositions — PENDING.
