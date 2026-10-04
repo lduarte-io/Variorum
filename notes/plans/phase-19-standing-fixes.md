@@ -1232,9 +1232,69 @@ dispositions, NOTICED, State → REVIEW-PENDING).
   comparison was dead).
 
 **Pieces:**
-1. Fresh builds + the census — IN-PROGRESS.
+1. Fresh builds + the census — DONE (this commit). `core-bt-0.log` (`Build complete!`, a fresh
+   scratch path), `mac-bft-0.log` and `mobile-bft-0.log` (`** TEST BUILD SUCCEEDED **`, fresh
+   derived data); the census script `19d/census.sh` (ANSI stripped; a warning whose expression
+   spans lines is matched on "is redundant because", not on "never equals 'nil'" — a first pass
+   matched the latter and MISSED the three multi-line sites, caught by reconciling against the
+   reviewer's list); outputs `19d/{core,mac,mobile}-census-0.txt`. **THE CENSUS IS EXACTLY THE
+   FLOOR: 38 `#require` sites — core 8 · Mac 26 · mobile 4 — no more, no fewer** (the reviewer's
+   list, site for site). **Always-true: the 2 named test sites** (`PostureSwitchDrillTests:621`;
+   `SyncEnrollmentTests:262`, printed twice — at its path and at `macro expansion #expect:1:112` —
+   ONE site) **+ 1 NOT OWNED: `App/Variorum/VariorumMobile/Spike/SpikeScenarios.swift:240`**
+   ("comparing non-optional value of type 'NSLayoutManager' to 'nil'") — mobile APP source in the
+   Spike folder, compiled into the mobile test build but outside this test-files-only entry;
+   RECORDED, not touched. No "always returns false" twin anywhere (that class fails loudly anyway).
+   **The per-site classification (the rule above, read off each site's own spelling):**
+   - (A) HOIST, `try #require(X)` in an Optional position — core: `BookArchiveFacesCoreTests:24`,
+     `BookWingMoveTests:159/216`, `DailyJournalRulingsTests:504`, `PendingArrivalDismissalTests:26`,
+     `WingContentsMoveTests:64/68` (all `querySpec: String?`), `TrashAndArchiveTests:253` (the
+     INNER `#require(stamp)` nested in an outer `#require`, `fromStamp: String?`); Mac:
+     `BookArchivedLineTests:471`, `WingBookMoveDoorTests:149/250` (`querySpec:`),
+     `LibraryDayFilterTests:114/124` (`setEditedOn(_: String?)`), `ReadRenderingTests:210/237/349`
+     (`ctFrame: CTFrame?`), `TutorialWalkTests:563` (`createTag(parent: String?)`),
+     `TypingErgonomicsTests:368` (`contentView: NSView?`) — **18 sites**.
+   - (R) RECORD-AND-CONTINUE, `try? #require(X)` — Mac: `EditorSeamCostTests:81`,
+     `FannedDefaultsTests:221`, `MarkdownFaceTests:284`, `NoteBoxTests:221`,
+     `NoteVersionsPaneTests:332/336`, `OriginBlockDoorTests:87/90`, `QuickNoteTests:358`,
+     `SurfaceSizeMemoryTests:687`, `SystemHotKeyTests:200`, `TakeStructureDoorTests:343`,
+     `TrayPanelMoveTests:74`, `TutorialWalkTests:3502/3504`; mobile:
+     `MobileCrossBlockEditTests:144/163/210/310` — **19 sites**. Every one sits in a NON-throwing
+     test function (the `try?` is the only spelling that compiles there) and every downstream use
+     is optional-chained or `??`-defaulted — no contrary signal; **zero stop-and-report sites.**
+   - (C) CLEANUP — `FannedDefaultsTests:355` (`EditorViewModel.postID` is `let postID: String`) —
+     **1 site**, no pin possible.
+   - No touched suite is env-gated except `PostureSwitchDrillTests` (grep of every touched file).
 2. Re-spells (core / Mac / mobile), committed per target — NOT-STARTED.
-3. Mutant pins (old silent once per shape; new red at its line per site) — NOT-STARTED.
+3. Mutant pins (old silent once per shape; new red at its line per site) — IN-PROGRESS.
+   **THE MUTANTS (the script `19d/mutate.py`, string-anchored so one patch applies to the old AND
+   the re-spelled tree; each edit asserted to match exactly once; marker `MUT19D`):** set **M1** —
+   every site's first-run mutant: CALLEE (source, announced): `RuleGrammar.encode` answers nil
+   (core) · `DivideWCeremony.releasedOriginalNote` answers nil · `EditorCommands.keyEquivalent`
+   answers nil for `.quickNote`/`.takeToBlockBelow`/`.takesToBlocks` · `PagePaginator.frame(forPage:)`
+   answers nil (Mac); UPSTREAM VALUE (test code, the site line untouched): TrashAndArchive's stamp
+   read keyed to a missing id · EditorSeamCost `Self.index([])` · FannedDefaults' help table without
+   `.divide` · LibraryDayFilter's FIRST field's pick never lands · MarkdownFace's text layout manager
+   removed from its content manager (so `textStorage` reads nil) · NoteBox `edited`/`saved` nil ·
+   NoteVersions' local `cost` helper zeroed (the "nothing to say" cost) · SurfaceSizeMemory
+   `herStamp` nil · SystemHotKey's fake never records its id · TrayPanelMove `doors` emptied ·
+   TutorialWalk's parent-tag predicate and both chapter names unmatched · TypingErgonomics' text
+   view detached from its scroll view · mobile: the REAL `CrossBlockCompound.plan` handed surface
+   text of the wrong length (its own desync guard answers nil — `CrossBlockCompound.swift`'s
+   `guard text.length == ranges[i].length else { return nil }`). Set **M2c** (core,
+   `WingContentsMove:68` — same test as 64, whose hoisted `try` aborts first): `encode` answers nil
+   on its SECOND call (the filtered run holds that one test; `createReading` never encodes a valid
+   v2 spec, so call 1 is line 64's). Set **M2m** (Mac, `LibraryDayFilter:124`): only the ARMED
+   field's pick never lands. Set **SE** (`SyncEnrollmentTests:262`): the OLD words' key AT the line
+   (`words: fresh` → `words: old`, one same-typed identifier — the only value edit on a site line).
+   Callee sources' base sha256 in `19d/callee-sha-base.txt` (RuleGrammar `f2d83651…`,
+   DivideWCeremony `baa303ec…`, EditorCommands `66264f65…`, PagePaginator `401fb7f0…`).
+   **OLD-TREE M1 — ANNOUNCED, STARTING after this commit** (on the committed base, so `git checkout
+   --` restores): `python3 App/Variorum/DerivedData/19d/mutate.py M1`, then the core build + the six
+   core suites, the Mac bft + the 19 Mac suites, the mobile bft + `MobileCrossBlockEditBrainTests`;
+   then `git checkout --` of every M1 file, `git status` clean, `grep -r MUT19D` empty, the four
+   sha256s re-read. **If this record still says STARTING, a death came mid-mutant: run `git
+   checkout -- Sources App Tests` and re-read the shas FIRST.**
 4. Family 2 — NOT-STARTED.
 5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
    NOT-STARTED.
