@@ -365,7 +365,8 @@ struct SpellcheckLevelTests {
                     window.orderOut(nil)
                     window.close()
                 }
-                window.contentView = try #require(h.textView.enclosingScrollView)
+                let scrollView = try #require(h.textView.enclosingScrollView)
+                window.contentView = scrollView
                 window.orderFrontRegardless()
 
                 h.type(" wih speling erors", at: h.model.index.range(ofEntryAt: 0).upperBound)

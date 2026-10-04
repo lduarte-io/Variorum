@@ -71,7 +71,8 @@ struct TrayPanelMoveTests {
         #expect(doors.map(\.panel) == [
             .tray(revealBlockID: nil), .scraps, .references,
         ])
-        let tray = try? #require(doors.first)
+        let tray = doors.first
+        #expect(tray != nil)
         #expect(tray?.title == TrayPath.menuLabel)
         #expect(tray?.symbol == "tray")
         #expect(doors.allSatisfy { !$0.help.isEmpty }, "every icon says what it opens")

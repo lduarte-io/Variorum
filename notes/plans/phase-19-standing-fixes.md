@@ -1265,7 +1265,19 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    - (C) CLEANUP — `FannedDefaultsTests:355` (`EditorViewModel.postID` is `let postID: String`) —
      **1 site**, no pin possible.
    - No touched suite is env-gated except `PostureSwitchDrillTests` (grep of every touched file).
-2. Re-spells (core / Mac / mobile), committed per target — NOT-STARTED.
+2. Re-spells, committed per target — Mac DONE (this commit); mobile, family 2 PENDING. **Mac (12
+   files, the 15 SILENT sites + the 355 cleanup):** (R) `let x = X` + `#expect(x != nil)` at
+   `EditorSeamCostTests:81`, `MarkdownFaceTests:284`, `NoteBoxTests:221`,
+   `NoteVersionsPaneTests:332`/`:336`, `OriginBlockDoorTests:87`/`:90`, `QuickNoteTests:358`,
+   `SystemHotKeyTests:200`, `TakeStructureDoorTests:343`, `TrayPanelMoveTests:74`; (A) the hoist
+   `let ctFrame = try #require(paginator.frame(forPage: 0))` + `view.ctFrame = ctFrame` at
+   `ReadRenderingTests:210`/`:237`/`:349`, `let scrollView = try
+   #require(h.textView.enclosingScrollView)` + `window.contentView = scrollView` at
+   `TypingErgonomicsTests:368`; (C) `let post = h.model.postID` at `FannedDefaultsTests:355`. Every
+   downstream line byte-identical. `mac-bft-new.log` → `** TEST BUILD SUCCEEDED **`; the touched
+   files' warnings before → after: EXACTLY the 16 redundancy lines removed, the hollow
+   `FannedDefaultsTests:221` stays (recorded), nothing added (the only other lines are
+   `QuickNoteTests`' three pre-existing effect-marker warnings, shifted down one line).
 3. Mutant pins (old silent once per shape; new red at its line per site) — IN-PROGRESS.
    **THE MUTANTS (the script `19d/mutate.py`, string-anchored so one patch applies to the old AND
    the re-spelled tree; each edit asserted to match exactly once; marker `MUT19D`):** set **M1** —

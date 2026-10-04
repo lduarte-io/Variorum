@@ -197,7 +197,8 @@ struct SystemHotKeyRoadTests {
         #expect(center.registrations == made)
 
         // The press, driven at the same named call the C callback makes.
-        let pressed = try? #require(fake.registeredIDs.first)
+        let pressed = fake.registeredIDs.first
+        #expect(pressed != nil)
         center.fire(pressed ?? 0)
         #expect(summoned == [.quickNote])
         #expect(center.fires == 1)

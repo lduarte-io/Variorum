@@ -84,10 +84,12 @@ struct OriginBlockDoorTests {
     @Test func theCompletionNamesTheDestinationOnlyWhenSomethingRodeAway() {
         #expect(DivideWCeremony.releasedOriginalNote(uncheckedTakes: 0) == nil,
                 "every take checked — nothing she wasn't shown went anywhere")
-        let one = try? #require(DivideWCeremony.releasedOriginalNote(uncheckedTakes: 1))
+        let one = DivideWCeremony.releasedOriginalNote(uncheckedTakes: 1)
+        #expect(one != nil)
         #expect(one?.contains("1 uncut take") == true)
         #expect(one?.contains("uncut takes") == false, "singular stays singular")
-        let three = try? #require(DivideWCeremony.releasedOriginalNote(uncheckedTakes: 3))
+        let three = DivideWCeremony.releasedOriginalNote(uncheckedTakes: 3)
+        #expect(three != nil)
         #expect(three?.contains("3 uncut takes") == true)
         #expect(three?.contains(TrayPath.originalsPath) == true)
         #expect(three?.contains("\u{2325}\u{2318}Z") == true, "the ratified undo grammar")

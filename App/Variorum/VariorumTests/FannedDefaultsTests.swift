@@ -352,7 +352,7 @@ struct FannedDefaultsTests {
             caret(h, entry: 0, offset: 11)
             await h.model.invokeGesture(.divideAtCursor)
 
-            let post = try #require(h.model.postID)
+            let post = h.model.postID
             _ = try h.session.operations.placeBlock(slot.blockID, in: post, at: .end)
             let after = try h.storeSlots()
             #expect(after.count == 3)

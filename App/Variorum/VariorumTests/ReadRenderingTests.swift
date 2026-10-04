@@ -207,7 +207,8 @@ struct ReadRenderingTests {
         let paginator = PagePaginator(composed: post, contentRect: geometry.contentRect)
         let view = PageFrameNSView()
         view.frame = NSRect(origin: .zero, size: geometry.size)
-        view.ctFrame = try #require(paginator.frame(forPage: 0))
+        let ctFrame = try #require(paginator.frame(forPage: 0))
+        view.ctFrame = ctFrame
         view.geometry = geometry
         view.links = post.links
         view.scale = 1
@@ -234,7 +235,8 @@ struct ReadRenderingTests {
         let post = compose([slot("a", "Open [the docs](https://x.test/a) to begin.")])
         let paginator = PagePaginator(composed: post, contentRect: geometry.contentRect)
         let view = PageFrameNSView()
-        view.ctFrame = try #require(paginator.frame(forPage: 0))
+        let ctFrame = try #require(paginator.frame(forPage: 0))
+        view.ctFrame = ctFrame
         view.geometry = geometry
         view.scale = 1
         let linkRange = try #require(post.links.first).range
@@ -346,7 +348,8 @@ extension ReadRenderingTests {
         let paginator = PagePaginator(composed: post, contentRect: geometry.contentRect)
         let view = PageFrameNSView()
         view.frame = NSRect(origin: .zero, size: geometry.size)
-        view.ctFrame = try #require(paginator.frame(forPage: 0))
+        let ctFrame = try #require(paginator.frame(forPage: 0))
+        view.ctFrame = ctFrame
         view.geometry = geometry
         view.links = post.links
         view.blocks = post.blocks

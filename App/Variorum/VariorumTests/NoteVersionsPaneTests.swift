@@ -329,12 +329,14 @@ struct NoteVersionsPaneTests {
         #expect(VersionsPath.restoreCostLine(cost()) == nil, "nothing to say")
         #expect(VersionsPath.restoreCostLine(cost(moments: 1))?
             .contains("1 saved moment.") == true, "singular, and the list ends there")
-        let three = try? #require(VersionsPath.restoreCostLine(
-            cost(moments: 4, takes: 2, comments: 1)))
+        let three = VersionsPath.restoreCostLine(
+            cost(moments: 4, takes: 2, comments: 1))
+        #expect(three != nil)
         #expect(three?.contains("4 saved moments, 2 deleted takes and 1 deleted comment")
             == true, "the app's own listing grain")
-        let stranded = try? #require(VersionsPath.restoreCostLine(
-            cost(originals: ["a", "b"], originalTakes: 5)))
+        let stranded = VersionsPath.restoreCostLine(
+            cost(originals: ["a", "b"], originalTakes: 5))
+        #expect(stranded != nil)
         #expect(stranded?.contains("2 set-aside originals and their 5 takes") == true,
                 """
                 her ruling's named population — empty for a restore today, and \

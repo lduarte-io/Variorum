@@ -218,8 +218,9 @@ struct NoteBoxCopyTests {
     @Test func theStampsLineIsDateOnlyAndOmitsWhatItDoesNotKnow() {
         let edited = Date(timeIntervalSince1970: 1_788_000_000)
         let saved = Date(timeIntervalSince1970: 1_787_800_000)
-        let both = try? #require(NoteBoxCopy.stampsLine(
-            edited: edited, saved: saved, now: now, calendar: calendar, locale: locale))
+        let both = NoteBoxCopy.stampsLine(
+            edited: edited, saved: saved, now: now, calendar: calendar, locale: locale)
+        #expect(both != nil)
         #expect(both?.hasPrefix("edited ") == true)
         #expect(both?.contains(" · saved ") == true)
         // No time of day, ever.

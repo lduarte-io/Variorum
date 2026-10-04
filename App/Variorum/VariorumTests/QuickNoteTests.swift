@@ -355,7 +355,8 @@ struct QuickNoteDoorTests {
                     "\(capability.id) collides with \(seen[chord]?.rawValue ?? "") on \(chord)")
             seen[chord] = capability.id
         }
-        let chord = try? #require(EditorCommands.keyEquivalent(for: .quickNote))
+        let chord = EditorCommands.keyEquivalent(for: .quickNote)
+        #expect(chord != nil)
         #expect(chord?.0 == "n")
         #expect(chord?.1 == [.command, .shift])
         // Its neighbour is untouched: ⌘N still makes a note.

@@ -340,7 +340,8 @@ struct TakeToBlockDoorTests {
             #expect(TakesCellView.contextMenuCapabilities.contains(id))
             // The chord is wired in the ONE place keys are declared, and it
             // is a RETURN chord free of ⌘⏎ / ⌘⇧⏎.
-            let key = try? #require(EditorCommands.keyEquivalent(for: id))
+            let key = EditorCommands.keyEquivalent(for: id)
+            #expect(key != nil)
             #expect(key?.0 == .return)
         }
         #expect(EditorCommands.keyEquivalent(for: .takeToBlockBelow)?.1 == [.command, .option])

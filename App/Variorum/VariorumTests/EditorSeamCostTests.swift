@@ -78,7 +78,8 @@ struct EditorSeamCostTests {
     /// entry ends exactly where a tail-free document does.
     @Test func theWalkLandsTheLastEntryAtTheDocumentEnd() {
         let index = Self.index([0, 7, 0, 0, 13, 1, 0])
-        let last = try? #require(index.entryRanges().last)
+        let last = index.entryRanges().last
+        #expect(last != nil)
         #expect(last?.upperBound == index.documentLength)
     }
 

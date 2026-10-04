@@ -281,7 +281,8 @@ struct MarkdownFaceTests {
             EditorTypography.adopt(EditorTypography.resolve(voice: .study, inlineComments: false))
             view.applyVoiceChrome(EditorSurfaceChrome(
                 voice: .study, dark: false, inlineComments: false))
-            let storage = try? #require(view.textStorage)
+            let storage = view.textStorage
+            #expect(storage != nil)
             #expect(storage?.string == "a **bold** word", "still byte-identical")
             #expect(EditorDocument.baseFont.familyName == "Iowan Old Style")
             let boldAt = 4
