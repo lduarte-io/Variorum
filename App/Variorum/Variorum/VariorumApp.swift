@@ -50,7 +50,7 @@ struct VariorumApp: App {
                 RootView(
                     session: session, services: services,
                     protection: bootstrap.protection, windows: windows,
-                    hotKeys: hotKeys)
+                    hotKeys: hotKeys, whatsNew: appDelegate.whatsNew)
                     .onAppear { appDelegate.session = session }
                     // 13r U3-A — R-13r-13: the sync row's Check for Updates…
                     // door, from the ONE update channel; nil unless it is

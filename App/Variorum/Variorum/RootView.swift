@@ -56,6 +56,10 @@ struct RootView: View {
     /// pre-13x 5b (ledger 64): the iCloud Drive offer's brain — made once the
     /// services exist; nil until then and in harness mounts without services.
     @State private var iCloudOffer: ICloudDriveOfferModel?
+    /// 13r U3-A: What's New's ledger (the app delegate's one instance; nil
+    /// in harness mounts, which then never auto-show) and this window's sheet.
+    let whatsNew: WhatsNewLedger?
+    @State private var whatsNewShown = false
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -127,13 +131,15 @@ struct RootView: View {
         // 13e E14: defaulted like `windows`, and defaulted to the INERT
         // system — a harness that mounts this view must never ask the real
         // system for her chord (it would fight the running app for it).
-        hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert)
+        hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
+        whatsNew: WhatsNewLedger? = nil
     ) {
         self.session = session
         self.services = services
         self.protection = protection
         self.windows = windows
         self.hotKeys = hotKeys
+        self.whatsNew = whatsNew
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -254,6 +260,24 @@ struct RootView: View {
         ) {
             if let iCloudOffer { ICloudDriveOfferSheet(model: iCloudOffer) }
         }
+        // 13r U3-A — WHAT'S NEW: once after a version CHANGE (the ledger's
+        // launch decision; the first window to appear claims it), and on
+        // demand from Help ▸ What's New. The sheet settles the version the
+        // moment it is actually on screen, so a sheet that never appeared
+        // (another sheet held the window) is not marked seen.
+        .sheet(isPresented: $whatsNewShown) {
+            WhatsNewSheet(
+                version: WhatsNewLedger.thisAppsVersion,
+                notes: ReleaseNotes.source(for: WhatsNewLedger.thisAppsVersion),
+                onClose: { whatsNewShown = false })
+                .environment(theme)
+                .onAppear { whatsNew?.markShown() }
+        }
+        .onChange(of: router.whatsNewRequested) { _, requested in
+            guard requested else { return }
+            whatsNewShown = true
+            router.whatsNewRequested = false
+        }
         .onChange(of: router.pendingSelection) { _, pending in
             guard let pending else { return }
             adopt(pending, in: router.workspace.focusedPane)
@@ -362,6 +386,8 @@ struct RootView: View {
             // deliberately — she can close every window and the pad still
             // answers her chord (the menu-bar extra's own promise).
             hotKeys.install { _ in summonQuickNote() }
+            // 13r U3-A: the version-change show, claimed once per process.
+            if whatsNew?.claimAutoShow() == true { whatsNewShown = true }
         }
         .onDisappear {
             windows.unregister(windowID)

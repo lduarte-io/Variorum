@@ -2082,8 +2082,41 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      the REAL store's seeded field guide; the orchestrator re-seeds it via the product door
      (Help ▸ Restore Tutorial…) behind the A1 rail at the refresh window. This session never
      touches the real store.
-4. The ONE release-notes source → What's New (show-once on a version CHANGE, silent on a fresh
-   record; Help ▸ What's New) — PENDING
+4. The ONE release-notes source → What's New — **DONE (this commit)**.
+   - **THE SOURCE:** one Markdown file per marketing version,
+     `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-<version>.md`, bundled by the
+     synchronized group (measured: `Contents/Resources/ReleaseNotes-0.9.0.md` in the Debug
+     bundle). A deliberately small grammar both renderers agree on (`#`/`##`/`###` headings,
+     `- `/`* ` bullets, joined paragraphs, inline bold/italic/code/links) — `ReleaseNotes.swift`.
+     The appcast half (release.sh renders the same file beside the DMG) is piece 5.
+   - **0.9.0's notes are a FUNCTIONAL DRAFT for HER to rewrite before the first release** (13s
+     owns the voice): thanks, what this build is (library on this Mac, encrypted on disk; sync
+     optional; updates — the ask after a few days, Check for Updates… any time), where to start
+     (Help ▸ Open the Tutorial; Settings ▸ Data Safety's second folder), and the support address.
+     It promises no unbuilt door (Help ▸ Send Feedback… is U3-B's, so the notes name the address).
+   - **THE LEDGER (`WhatsNew.swift`), built to the architect's reading:** a LOCAL preference of
+     this app (`variorum.whatsNew.lastVersion` — never synced; a version is a fact of the
+     installation), decided ONCE per process at launch on the MARKETING version (never the build
+     number, which moves every commit): no record → record silently, show nothing (a fresh
+     install, and every existing install's first stamped build — the calm direction, her daily
+     drive included); same → nothing; a CHANGED recorded version → due. The first window claims
+     the show once per process; the version is settled only when the sheet is actually on screen
+     (`onAppear`), so a sheet that never appeared stays due next launch. The app delegate owns
+     the one ledger (the `updates`/`appearance` precedent) and hands it to `RootView`.
+   - **THE SHEET:** on the main window, in the voice (P-8: the window's `ThemeStore` tokens via
+     the environment, `VoicedButtonStyle` primary "Continue" on ⏎, the title line-limited), the
+     notes scrollable and selectable; a build with no notes for its version (a walk build) says
+     so plainly ("Variorum is now version X. This build doesn't carry notes for it.").
+   - **Help ▸ What's New** — a request the window adopts (`ShellRouter.whatsNewRequested`, the
+     `quickNoteRequested` shape), on the creation router so it lands in a full window, greyed when
+     none exists (P-2). **UNDECLARED in the capability registry on the "Open the Tutorial"
+     precedent one line above it — flagged for the ladder as a P-1 reading, not a product call.**
+   - Pins: `VariorumTests/WhatsNewTests.swift` (7 — fresh = silent + recorded; THE SHOW-ONCE across
+     a simulated run of launches 0.9.0 → 0.9.0 → 0.9.1 → 0.9.1 → 0.9.1 → 0.9.2 → 0.9.2, shown
+     exactly at the two changes; one claim per process; a never-shown claim stays due; the
+     RUNNING version carries its notes in the bundle (a bump without notes is red); the grammar;
+     the Help door's source line). **Run: `Test run with 7 tests in 1 suite passed`, no
+     `skipped:`** (log `13r-u3a/p4-test.log`).
 5. `release.sh`: the notes rendered beside the DMG into the appcast + R-13r-10's self-explaining
    DMG window — PENDING
 6. THE CALM-ASKS CADENCE — the one local scheduler, the update ask (R-13r-11), the backup-folder

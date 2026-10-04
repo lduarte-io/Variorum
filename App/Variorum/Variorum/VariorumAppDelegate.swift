@@ -29,6 +29,11 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// is applied inside `forThisBuild()`, and nowhere else.
     let updates = UpdateChannel.forThisBuild()
 
+    /// 13r U3-A: **What's New's ledger** — one per app, decided once at
+    /// launch (a fresh install records its version silently; a CHANGED
+    /// version shows the notes once). The first window claims the show.
+    let whatsNew = WhatsNewLedger.forThisApp()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's

@@ -834,6 +834,16 @@ struct EditorCommands: Commands {
             // applied with the class, flagged so it can be reversed).
             Button("Open the Tutorial") { creationActions()?.openTutorial() }
                 .disabled(!canReachCreationTarget)
+            // 13r U3-A: Help ▸ What's New — this version's release notes
+            // (the ONE source the appcast also carries), on demand. A
+            // request the window adopts, on the creation router (the sheet
+            // needs a full window), so it lands where it can show (P-2).
+            // UNDECLARED in the capability registry on the "Open the
+            // Tutorial" precedent one line up — an app-scope Help door with
+            // no block/take/post/book scope; flagged for the ladder as a P-1
+            // reading, not a product call.
+            Button(WhatsNewCopy.menuTitle) { windows.creationRouter()?.whatsNewRequested = true }
+                .disabled(!canReachCreationTarget)
             Button(verb(.restoreTutorial)) { creationActions()?.restoreTutorial() }
                 .disabled(!canReachCreationTarget)
             Button(verb(.restoreSampleLibrary)) {
