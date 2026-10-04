@@ -965,8 +965,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`): no match. HEAD `dd95e301`, tree clean, commit count 4815.
 
 **Pieces:**
-1. **Sparkle 2.10.0 via SPM, the Mac target ONLY** — IN-PROGRESS (the project edit + the resolve
-   COMMITTED; the clean Mac build PENDING).
+1. **Sparkle 2.10.0 via SPM, the Mac target ONLY** — DONE (`0d2f7d78`; the builds verified below).
    - `project.pbxproj`: ONE `XCRemoteSwiftPackageReference "Sparkle"`
      (`https://github.com/sparkle-project/Sparkle`, `requirement = { kind = exactVersion; version =
      2.10.0; }` — EXACT, never a range), ONE `XCSwiftPackageProductDependency` (`Sparkle`) in the
@@ -976,6 +975,17 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      `Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0`; `Package.resolved` gains the one
      pin `sparkle` → `version 2.10.0`, `revision eef1a539a373c1f1a320624b1130fc5de7b2e100` (the
      checkout's `git describe --tags` = `2.10.0`). No other pin moved.
+   - **The Mac app builds CLEAN:** `xcodebuild -scheme Variorum -destination 'platform=macOS'
+     -configuration Debug -derivedDataPath App/Variorum/DerivedData/13r-u2/debug build` (a fresh
+     path) → `** BUILD SUCCEEDED **`, exit 0. **The warning set is IDENTICAL to U1's post-fix
+     baseline** (`13r-u1/fix-xcodebuild-debug.log`): 28 unique warnings on each side, `diff` empty.
+     Sparkle adds no warnings. The bundle embeds `Contents/Frameworks/Sparkle.framework` (2.10.0),
+     whose `Versions/B/` carries `Autoupdate`, `Updater.app` and `XPCServices/{Installer,Downloader}.xpc`.
+     Sparkle 2.6+ ships its XPC services INSIDE the framework, so no copy phase is needed; piece 4
+     enables only the Installer road (`SUEnableInstallerLauncherService`), never the Downloader.
+   - **The mobile target is unaffected:** `xcodebuild -scheme VariorumMobile -destination
+     'generic/platform=iOS Simulator' … build` → `** BUILD SUCCEEDED **`; ZERO `*sparkle*` paths
+     inside the built `VariorumMobile.app` (log `13r-u2/build-mobile.log`).
 2. **Sparkle's official signed command-line tools (the 2.10.0 release artifact)** — NOT-STARTED.
 3. **HER minting commands, staged** — NOT-STARTED. **→ HARD PAUSE** (commit, push, report; the
    orchestrator carries the minting to her and returns the PUBLIC key string).
