@@ -20,7 +20,7 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | ROUND 1 REVIEWED 2026-10-04 (1 MAJOR in-entry, 1 MAJOR → 19b, 2 NIT) — fixes in flight; round 2 re-reviews them |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | ROUND-2-PENDING — round 1 reviewed 2026-10-04 (1 MAJOR in-entry, 1 MAJOR → 19b, 2 NIT); F1/F3/F4 fixed and pushed (`13610ffc`); a FRESH reviewer runs round 2 over the fixes |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns |
 
 ---
@@ -137,10 +137,13 @@ agents — runs after 13r U1's implementer session ends, before 13r U2 spawns (U
 the 13r ladder's "suite green" need the restored base; U1's static drill and her live drill do
 not wait on this entry).
 
-**State: REVIEW-PENDING** — acceptance met 2026-10-04 by the implementer's runs (the 19a RECORD
+**State: ROUND-2-PENDING** — acceptance met 2026-10-04 by the implementer's runs (the 19a RECORD
 below: core 2174/244 · the fixed Mac files' 48 suites 286/48 · the TK2 tripwires 41/8 at a
-zero-instance window · `PaneSurfaceTests` 15/1 with the authorized pin · the mobile app builds); the
-Opus cold review (`notes/REVIEW_PROMPT.md` verbatim) is next, spawned by the orchestrator.
+zero-instance window · `PaneSurfaceTests` 15/1 with the authorized pin · the mobile app builds);
+round 1 reviewed and arbitrated (the "19a ROUND 1" section above); its three in-entry fixes F1 · F3 ·
+F4 landed (the RECORD's "ROUND 1 FIXES"; `e9fbccbe`, `13610ffc`): `RuleHearsActsTests` 2/1 with
+the F1 mutant RED, `LandingAuthorityTests` + `LandingSignpostTests` 10/2. A FRESH reviewer runs
+round 2 over the fixes (`git diff 574ea6a8..HEAD -- Tests App`), spawned by the orchestrator.
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
