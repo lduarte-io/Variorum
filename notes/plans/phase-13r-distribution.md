@@ -233,6 +233,58 @@ a beta-era crash proves the last leg; recorded honestly, not overclaimed). **Not
 toggle's copy states the privacy story plainly (nothing leaves the machine without your hand —
 consistent with "no analytics OUT LOUD").
 
+**U3 AMENDED AT THE U2 WALK SITTING (2026-10-04) — her two rulings join the unit (the LIVE
+STATUS's walk-sitting bullet carries her words verbatim):**
+- **R-13r-10 — the self-explaining DMG window.** `release.sh`'s DMG step (U2's pipeline,
+  `Tools/Release/`) lays out the window: the app icon and the Applications link at FIXED
+  positions, a plain "drag here" arrow or label between them, a fixed window size, no
+  toolbar/sidebar. Plain `hdiutil` + scripted Finder window settings (the `.DS_Store` written
+  by AppleScript against the mounted read-write image before conversion) — no new dependency.
+  Functional layout only; the branded background art is 13s's. The notarize/staple order is
+  unchanged (the layout is set before the DMG is signed). The in-app "running from the disk
+  image" notice was offered alongside and is NOT ruled — do not build it.
+- **R-13r-11 — no popup at first open: Sparkle's consent is deferred until after real use.**
+  U2 shipped Sparkle's stock flow (the "Check for updates automatically?" prompt on the
+  second launch). U3 replaces the timing: `UpdateChannel` gains an updater delegate that
+  declines Sparkle's early permission prompt (`updaterShouldPromptForPermissionToCheck…` →
+  false, read from the 2.10.0 source before relying on it) and asks LATER, once a usage
+  threshold is met. No automatic check runs before consent (unchanged). Check for
+  Updates… works from the first launch. **IN-BATCH FORK (the implementer proposes, the
+  architect rules):** the threshold's shape and number (for example: the Nth launch, N days
+  since first launch, or both), where it is counted (a LOCAL preference, never synced), and
+  how the deferred ask is presented (Sparkle's own permission prompt at a calm moment, not
+  at launch). Mark PROVISIONAL and log in `notes/QUESTIONS.md`. Her principle governs:
+  opening Variorum is calm, and no popup greets a first open.
+*[removed for publication]*
+  and run at HER sitting; the U2 walk sheet is the template):** two fresh walk builds through
+  the pipeline (0.0.3 → 0.0.4, the stamping build phase now live). Arms: (a) the DMG window
+  opens with the drag layout visible (capture); (b) the drag-install, then the FIRST open
+  shows NO Sparkle prompt (Gatekeeper's one-time "downloaded from the Internet" question is
+  the OS's, expected); (c) What's New appears once after the update and not again on the
+  next launch; (d) Check for Updates… installs 0.0.4 over the XPC road, relaunching as
+  0.0.4 with the library intact; (e) the deferred consent is exercised by the threshold
+  (shortened by an injected test seam or a documented defaults key on the walk build ONLY —
+  the shipped threshold is never weakened); (f) Help ▸ Send Feedback… opens a pre-filled
+  draft (NOT sent). **W-5 launches by explicit path** (`open ~/Applications/Variorum.app`) —
+  *[removed for publication]*
+  still holds U2's `SUFeedURL` localhost override; the U3 walk reuses it.
+- **THE HAZARDS U2 HANDED FORWARD (binding):** no PUBLIC appcast entry may exist until U3's
+  stamping is in HER hand-copied `/Applications` build (her daily drive carries build 1 until
+  then, and it would be offered the release). The pipeline passes the stamp as command-line
+  overrides and `verify-export.sh --expect-version/--expect-build` asserts it — U3's build
+  phase writes the same `git rev-list --count HEAD`, so keep the assertion. Release notes plug
+  in as `Variorum-<version>.html|md` beside the DMG in the feed directory.
+- **SIZING — RAISED FOR HER KICKOFF (the sizing guidance: say so, never split silently):** U3
+  now carries the stamping + 0.9.0, What's New + the one release-notes source, MetricKit +
+  Diagnostics, Send Feedback, the DMG window and the consent deferral. That is a lot for ONE
+  implementer session (the ~500k context cliff). **The orchestrator's recommendation: run U3 as
+  TWO sequential implementer sessions under ONE acceptance walk** — **U3-A, the release
+  experience** (stamping + 0.9.0, the release-notes source + What's New, the DMG window, the
+  consent deferral; these four touch the pipeline and the launch path together) and **U3-B,
+  support & diagnostics** (MetricKit opt-in + Diagnostics + Send Feedback, plus the Settings
+  placement fork). The walk runs after U3-B. Her call at the kickoff; if she declines, U3 runs
+  as one session with a mid-unit checkpoint commit.
+
 ### U4 — The accessibility pass
 
 > **DEFERRED POST-LAUNCH AT HER WORD (2026-10-04, the 13i family-close sitting: "I won't be doing
@@ -678,8 +730,17 @@ opened; the working tree was left clean.
   The model-seat note: the Fable seat hit repeated safeguard stops mid-walk; at her switch
   the walk continues on Opus 5.5 (her call), the rest of the phase returns to a Fable
   orchestrator via her next kickoff.
-- **U3 — NOT STARTED.**
-- **U4 — NOT STARTED.**
+- **U2 — CLOSED (2026-10-04, the walk sitting): the walk PASSED every arm** (the VERDICT at the
+  *[removed for publication]*
+  her return leg clean). Her two walk rulings (R-13r-10, R-13r-11) are written into the U3
+  section as the unit's amendment.
+- **THE SEAT HANDS BACK TO FABLE:** the walk was finished on Opus 5.5 at her call (the Fable
+  seat hit repeated safeguard stops mid-walk); she kicks off a FRESH Fable orchestrator for
+  U3, the ladder and the closeout from the handoff's THIRD edition
+  (`notes/plans/phase-13r-orchestrator-handoff.md`).
+- **U3 — READY TO OPEN (not started):** the amended U3 section is the brief; the sizing
+  question (two sessions, U3-A then U3-B, under one walk) is HERS at the kickoff.
+- **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
 ---
@@ -1697,3 +1758,44 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    *[removed for publication]*
      *[removed for publication]*
      is removed.
+
+**THE U2 WALK VERDICT (the orchestrator, 2026-10-04, the walk sitting — W-10(e)): PASS, every
+*[removed for publication]*
+*[removed for publication]*
+`notes/plans/13r-screens/u2-walk/`.
+- **W-0 (her session, the orchestrator):** zero instances; both walk DMGs stapler-validated +
+  Gatekeeper ACCEPTED with their recorded sha256s; **W-0(c) the walk appcast — `VERDICT: PASS`,
+  7/7, the `edSignature` VERIFYING under the baked `SUPublicEDKey`: the first end-to-end proof
+  that her login Keychain's private key is the shipped public key's twin** (no Keychain prompt
+  surfaced on this run); the feed served detached on `localhost:8765`; walk A staged
+  quarantined in `/Users/Shared/VariorumWalk/`.
+*[removed for publication]*
+  feed across the user switch (`1` item) and the quarantine read back byte-identical.
+- **W-4 `spctl` accepted the installed app:** ✔ — `~/Applications/Variorum.app: accepted /
+  *[removed for publication]*
+  quarantine inherited (0183 after her approval).
+- **W2 the notarized first-open question, not a block:** ✔ — the OS's one-time "downloaded from
+  the Internet" question, on the DMG copy and again on the `~/Applications` copy (each newly
+  quarantined copy asks once).
+*[removed for publication]*
+- **W6 consent ASKED, no profile option:** ✔ — and her RULING R-13r-11 changes its timing in U3.
+- **W7–W8 0.0.2 found and the XPC install landed:** ✔ — "Variorum 0.0.2 is now available—you
+  have 0.0.1" (captured 13:31:03); the server log shows the app's own `GET /appcast.xml`
+  (13:31:02) and `GET /Variorum-0.0.2.dmg` (13:31:12); no password asked.
+- **W9–W10 relaunched as 0.0.2 with the library intact, `spctl` accepted, seal valid:** ✔ —
+  *[removed for publication]*
+  *[removed for publication]*
+  Developer ID`, `seal valid`.
+- **W-10(d) her return leg:** ✔ — her words: *"my variorum opened just fine."* The walk touched
+  *[removed for publication]*
+  public feed. The server is stopped.
+- **Findings the walk produced (all recorded in the LIVE STATUS's walk-sitting bullet):** the
+  art-less DMG's Applications link went unseen and she launched from the mounted DMG →
+  **R-13r-10** (the self-explaining DMG window, U3); the consent prompt greeting an early launch
+  *[removed for publication]*
+  `/Applications` → U3's walk launches by explicit path; the first "Update Error" was the
+  unwritten feed override (the baked public feed correctly 404s pre-release) — not a defect;
+  her 13s onboarding note (the backups popup on open).
+*[removed for publication]*
+  localhost override), `/Users/Shared/VariorumWalk/`, the walk builds and the walk feed — swept
+  at the closeout.
