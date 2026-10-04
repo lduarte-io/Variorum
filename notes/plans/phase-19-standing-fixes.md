@@ -1697,9 +1697,21 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   the final derived data): Mac redundancy census 0; the 8 Mac files touched this round carry only
   `BookAscentTests:554`'s two effect-marker warnings, present identically in the base build.
 - F1 pins under the reviewer's two mutants (re-created by `19d/mutate.py F1R` — the same upstream
-  edits as `19d-review/probe.py` P1/P2, anchored above the site so they apply to the new spelling)
-  — PENDING; the red-on-old is the reviewer's LOGGED silence (`19d-review/mac-probe.log`: in the
-  probe-mutated files the sites sit at 804/188 and record NOTHING; only 805/807 and 189/195 do).
+  edits as `19d-review/probe.py` P1/P2: `center.refuse(…)` above BookAscent's site, the heading's
+  `.font` attribute removed above MarkdownFace's — anchored on the line ABOVE the site so they
+  apply to the new spelling) — the red-on-old is the reviewer's LOGGED silence
+  (`19d-review/mac-probe.log`: in the probe-mutated files the sites sit at 804/188 and record
+  NOTHING; only 805/807 and 189/195 do). **ROUND-1 MUTANT RUN — ANNOUNCED, STARTING after this
+  commit** (the committed tree `83955f96`): `mutate.py M1` + `mutate.py F1R`; the Mac bft (final
+  derived data) + the 18 site suites + `SyncEnrollmentTests` + `DivergeDoorTests` (BookAscent's
+  site); the core six suites. M1 rides along at no extra cost: it re-scores every round-0
+  re-spell and shows the 18 cleanups behaviour-identical under their logged mutants (no pin
+  OWED for those — F2's ruling). **Score sheet (MUTATED-file lines):** the owed F1 pins —
+  `BookAscentTests` 805 "action != nil" (804 + F1R's line) and `MarkdownFaceTests` 189 "headingSize
+  != nil" (188 + F1R's line); the cleanups' expected issue lines are each hoisted / `#expect` line
+  (core 22, 157, 502, 24, 253, 62; Mac 470, 147, 249, 114, 562 — each then ABORTING its test as the
+  old `try` did; 222, 688, 3503, 3505 — each CONTINUING as the old `try?` did). Revert: `git
+  checkout --` of the touched files, status clean, zero markers, the four callee sha256s.
 - F3 [NIT] wording + NOTICED #1/#2/#4 corrections — PENDING.
 - Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
   at zero redundancy warnings + the touched suites green — PENDING.
