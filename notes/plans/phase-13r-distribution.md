@@ -959,7 +959,7 @@ five arms. U1 IS CLOSED.**
   MARKETING_VERSION and the build-number stamping build phase are U3's (R-13r-6), so this unit
   leaves them as they are.
 
-**U2 STATE (2026-10-04, session start):** piece 1 IN-PROGRESS. **Toolchain re-read at session
+**U2 STATE (2026-10-04): PAUSED AFTER PIECE 3 for HER HANDS step 3 (the minting) — pieces 1–3 DONE; piece 4 resumes with the PUBLIC key (the pause line under piece 3 is the detail).** **Toolchain re-read at session
 start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a) · `xcode-select -p` =
 `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`): no match. HEAD `dd95e301`, tree clean, commit count 4815.
@@ -1021,8 +1021,77 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      The prompt reads "generate_appcast wants to use your confidential information stored in
      'https://sparkle-project.org'": login password, then Allow or Always Allow. A future tools
      upgrade (a new cdhash) asks again.
-3. **HER minting commands, staged** — NOT-STARTED. **→ HARD PAUSE** (commit, push, report; the
-   orchestrator carries the minting to her and returns the PUBLIC key string).
+3. **HER minting commands, staged** — DONE (this commit). **→ HARD PAUSE** (commit, push, report;
+   the orchestrator carries the minting to her and returns the PUBLIC key string).
+
+   **What was established before staging (read-only; nothing run):**
+   - `generate_keys`' behaviour was READ FROM ITS SOURCE at the tag
+     (`SourcePackages/checkouts/Sparkle/generate_keys/main.swift`), never by running it:
+     - The key is a generic-password item in the LOGIN keychain: service
+       `https://sparkle-project.org`, account `ed25519` (the default; R-13r-1 takes the default), label
+       "Private key for signing Sparkle updates". The item's comment carries the PUBLIC key.
+     - Default mode (no flags) MINTS only when no item exists. Otherwise it REUSES the existing key
+       and prints "A pre-existing signing key was found".
+     - `-p` prints ONLY the base64 public key.
+     - `-x <file>` writes the base64 private SEED to `<file>` (32 bytes → 44 base64 characters, no
+       newline) and refuses if `<file>` exists.
+   - **No pre-existing Sparkle key exists**, checked by ATTRIBUTES ONLY (U1's step-0(d) precedent;
+     never `-g`): `security find-generic-password -s https://sparkle-project.org` → none, and by
+     label → none. So her run MINTS a fresh key, as R-13r-1 assumes. It cannot silently reuse
+     another project's key.
+
+   **THE STAGED COMMANDS — HER HANDS step 3.** Run them in HER Terminal (her session, login keychain
+   unlocked), one block at a time. Only the public-key line ever leaves her machine.
+   ```sh
+   # 0. Re-verify the tools by digest right before running one (must say "present and verified").
+   cd <home>/dev/variorum && Tools/Release/fetch-sparkle-tools.sh
+   T=<home>/dev/variorum/Tools/Release/vendor/Sparkle-2.10.0/bin
+
+   # 1. MINT. Expected: "Generating a new signing key…", then "A key has been generated and saved in
+   #    your keychain" with an <key>SUPublicEDKey</key> block. If it instead says "A pre-existing
+   #    signing key was found": STOP and report (none existed at staging). If macOS asks to allow
+   #    saving to the keychain: Allow.
+   "$T/generate_keys"
+
+   # 2. THE PUBLIC KEY: one line, 44 characters ending in "=". THIS line (and only this) goes back to
+   #    the orchestrator. It is public: it ships in every app bundle.
+   "$T/generate_keys" -p
+
+   # 3. THE ONE BACKUP (R-13r-1). The export goes to her private per-user temp folder (not synced,
+   #    not in the repo). Expected output: nothing, then "44" (the seed's length, which reveals nothing).
+   EXPORT="$TMPDIR/variorum-sparkle-key-export.txt"
+   "$T/generate_keys" -x "$EXPORT" && wc -c < "$EXPORT"
+   ```
+   **4. Into her password manager.** Create ONE item, e.g. "Variorum — Sparkle update-signing key
+   (generate_keys -x backup)".
+   - **The secret:** if the manager takes file attachments, attach `$EXPORT`. Otherwise run
+     `pbcopy < "$EXPORT"`, paste into the item's password/secret field, then clear the clipboard
+     at once with `pbcopy < /dev/null` (Universal Clipboard can relay to her nearby devices
+     meanwhile).
+   - **The item's notes:** the step-2 public key, the date, and "import with: generate_keys -f
+     <file>". The notes let a future restore be checked against the shipped `SUPublicEDKey`.
+   ```sh
+   # 5. Remove the export and confirm the key stays in her login keychain (attributes only, no secret).
+   rm "$EXPORT"; pbcopy < /dev/null
+   ls "$EXPORT" 2>/dev/null || echo "export removed"
+   security find-generic-password -s https://sparkle-project.org -a ed25519 >/dev/null && echo "key in login keychain"
+   ```
+   **STOP rules.**
+   - A "pre-existing key" message at step 1, an error from any step, or a `wc -c` other than 44:
+     stop, run nothing further, report.
+   - The export file NEVER goes into the repo, a chat, an email, iCloud Drive or a synced folder.
+   - The private key is NEVER typed or pasted anywhere but the password-manager item.
+
+   **What returns to this session:** the step-2 PUBLIC key string, and nothing else. Piece 4 bakes it
+   as `SUPublicEDKey`.
+
+   **Rotation, if ever needed (her R-13r-1 leak story; not run now):** per R-13r-1's record, rotation
+   rides a Developer-ID-signed DMG transition update (Sparkle's documented road). The backup is what
+   keeps ORDINARY signing available after a lost or wiped machine (`generate_keys -f` re-imports it),
+   so no transition is needed for that case.
+
+   **U2 STATE AT THE PAUSE:** pieces 1–3 DONE and pushed. The session STOPS here and reports. **Piece
+   4 resumes ONLY with the public key in hand.** Nothing is uncommitted. No build or suite is running.
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
    `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
    with Sparkle's standard consent flow, the Check for Updates… door — NOT-STARTED.
