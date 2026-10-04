@@ -2775,6 +2775,9 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
        "Variorum feedback", the body three empty lines, a rule "———", then "Variorum 0.9.0 (<build>)"
        and "macOS <her OS> (<build>)" — and nothing else. **CAPTURE U3-f1.** Close it UNSENT (Don't
        Save / Delete Draft). Nothing was sent.
+     - (Measured on the M3 at U3-B's walk: with no Mail account, BOTH doors land in Mail's Add
+       Account sheet and no draft appears — F-W5. So this arm may be the FIRST time a Variorum draft
+       is seen on screen at all.)
      - **If Mail has no account on the new computer,** Mail's own account setup opens instead: that
        is the OS's state on a new Mac, not a Variorum failure — **CAPTURE U3-f2**, cancel it, and it
        is a FINDING for QUESTIONS #181 (a) (whether plain feedback should keep the default-mail-app
@@ -2924,3 +2927,60 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      `Data/tmp/`; the voice back to Terminal (a dev-store synced setting); Mail was NOT running
      before the walk — the draft legs launch it, and it is quit again at the end (its compose
      windows closed UNSENT, Don't Save — nothing is ever sent).
+     **THE DEV-STORE WALK — DONE, RESTORED (2026-10-04 ~21:53–22:06Z; every step behind
+     `guard.sh`; captures in the gitignored `notes/plans/13r-screens/u3b/`):**
+     - `w1/` — **Settings ▸ Diagnostics, a fresh state: the tenth pane in the list (stethoscope,
+       between Data Safety and Acknowledgments), "Collect crash reports" OFF, the promise, the
+       pointer, and "None. Nothing is collected while this is off."** (Terminal). The opt-in key read
+       ABSENT in the dev domain before and at this capture.
+       **WALK FIND, FIXED IN PLACE (`54d1ee4a`):** the first capture showed the pointer ending
+       "Send Feedback…." — an ellipsis and a period stacked; the sentence now ends on the menu item
+       ("…there's Help ▸ Send Feedback…"), rebuilt and re-captured before any later step.
+     - `w2/` — **Settings search "crash"** → one result, "Collect crash reports", badged
+       "diagnostics"; clicking it opens the pane.
+     - `w3/` — **the toggle ON**: "None yet — that's the usual state."; the dev domain's
+       `variorum.crashReports.optIn` read `1`.
+     - `w4/` — **the INJECTED SYNTHETIC PAYLOAD through the seam:** app quit; a MetricKit-shaped
+       crash report (marked SYNTHETIC in its `terminationReason`) written into the Debug container's
+       `Data/tmp/`; relaunched with `open --env VARIORUM_SYNTHETIC_CRASH_REPORT=<it>` → the folder
+       gained `crash-report-20261004T215907Z-03383b11.json` AT LAUNCH, **`cmp` byte-identical to the
+       delivered file**; the pane lists ONE card — heading "Variorum 0.9.0 (4905) · macOS 27.0
+       (26A428)" read out of it, "Received Oct 4, 2026 at 3:59 PM", the JSON VERBATIM in the bounded
+       monospaced box (it scrolls on both axes; `w0-scrolled.png` shows the end of the report and the
+       two doors, **Send Report…** in the accent, **Delete Report** quiet). Recorded honestly: the
+       door's `NSLog` line did NOT surface in `log show` for the walk process (it does for the test
+       host); the delivery is proven by the file born at launch, byte-identical, in a folder nothing
+       else writes.
+     - `w5/` — **Send Report… → MEASURED FINDING F-W5: this M3's Apple Mail has NO ACCOUNT.** Mail
+       (not running before) launched and showed its own **Add Account** sheet; no compose window
+       exists. The log shows the compose share extension (`com.apple.share.Mail.compose`) activated
+       and **`sharingService:didShareItems:` — the service reported SUCCESS**, so the by-hand
+       fallback never ran and Variorum could not tell. Cancel on Mail's sheet QUITS Mail; the draft
+       is gone. **Nothing was sent** (there is no account to send from). This was the lookup's one
+       UNCONFIRMED item; it is now measured. **Consequence for the acceptance: the draft-with-
+       attachment cannot be SEEN on this machine** — its content and the attachment's identity are
+       pinned headless (`SupportDraftTests`, incl. "what is sent is what was shown"), the road is
+       proven to reach Mail's compose extension, and the on-screen draft is first seeable on her new
+       computer's arm (f) if Mail is set up there (N-5 already carries the no-account branch).
+       Routed: QUESTIONS #181 (i), options for her; `SupportMail.swift`'s header now says what was
+       measured (no behaviour change).
+     - `w6/help-menu-crop.png` — **Help ▸ … ▸ divider ▸ Send Feedback…** at the end of the Help
+       menu. Pressed: Mail launched into the same Add Account sheet (`w6/w0.png`; the `mailto:`
+       road, Mail the default handler — the URL is private to the system log); cancelled, Mail quit.
+       Nothing sent.
+     - `w7-study/` — **the card in the STUDY voice** (the serif room; the doors in the voice).
+     - `w8/` — **the toggle OFF** (the Study layout moved the switch 11 pt up; the first click missed
+       and was re-aimed from the capture, never blind): the key read `0`, **the received report
+       STAYED** (OFF keeps what arrived — #181 (f)). `w8-general/` — the voice switched back to
+       Terminal.
+     - `w9/` — **OFF + the synthetic env on a fresh launch → NOTHING delivered:** the folder still
+       held the one earlier report; the pane lists exactly it. An OFF app has no subscriber to
+       deliver into.
+     - `w10/` — **Delete Report** → the folder EMPTY, the pane back to "None. Nothing is collected
+       while this is off."
+     - **RESTORED:** app quit; the dev prefs re-imported, then the walk's one extra key
+       (`variorum.crashReports.optIn`, which `defaults import` MERGES rather than removes) deleted —
+       **the domain's export now equals the pre-walk export (diffed, equal)**; the walk's
+       `Application Support/Diagnostics` folder and the synthetic file removed (neither existed
+       before); the voice back to Terminal; Mail NOT running (as before — each leg's cancel quit
+       it). Zero instances.

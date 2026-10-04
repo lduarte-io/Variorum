@@ -20,6 +20,15 @@
 //     she can attach it herself.
 //   · If nothing opens at all, the door speaks a refusal (P-2).
 //
+//  MEASURED on the U3-B dev-store walk (macOS 27.0, Apple Mail with NO
+//  account set up): `canPerform` answers TRUE, Mail opens its own Add
+//  Account sheet instead of a draft, and the service reports SUCCESS
+//  (`didShareItems`) — so the fallback above never runs there, and Variorum
+//  cannot tell. Cancelling Mail's sheet quits Mail and the handed draft is
+//  gone; nothing is sent. The plain `mailto:` road lands in the same sheet
+//  when Mail is the default and has no account. Whether the doors should do
+//  more for a Mac without a mail account is QUESTIONS #181 (i) — hers.
+//
 //  The roads are injected (`SupportMailRoads`), so which road a draft takes
 //  — and that nothing is ever sent — is pinned without opening a mail app.
 //
