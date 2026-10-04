@@ -532,6 +532,20 @@ opened; the working tree was left clean.
   named as the Xcode-27 isolated-conformance fix's tripwire. 13r's ladder reviews the fix;
   19a's cold review sees the pin. The implementer also records, in one line, the core-count
   delta vs the 13i-e closeout baseline (2174/244 vs 2173/244 — name where the +1 came from).
+- **19a AT REVIEW-PENDING (2026-10-04, the implementer's stop — verified by spot-check: diff
+  scope 21 files exact, tree clean, all pushed through `574ea6a8`):** every target compiles
+  and runs green under Xcode 27 (core 2174/244 full; the fixed files' 48 suites 286 green;
+  the authorized pin landed WITH a mutation check — red 15-issue under swapped arms, the only
+  failure; mobile builds; the +1 explained as `6b1eefaf`'s post-close pin). **THE SDK-SHIFT
+  CENSUS ANSWER:** the TK2 tripwire suites ran green at a zero-instance window, 41 tests, and
+  the four #154(b) known-issue measurements read EXACTLY the recorded 27.0 values (−10.0 pt
+  Terminal / −20.0 pt Study) — **no TK2 geometry shift on the Xcode 27 SDK.** **The
+  vacuous-#expect question SETTLED by the orchestrator's own probe (the implementer's 2-minute
+  check, run and deleted):** a deliberately FALSE expectation of the warned call shape in the
+  same target FAILED with full expansion detail — the shape is REAL, the Xcode-27 "unused
+  result" warning inside the Testing macro expansion is cosmetic; NO sweep entry opens; the
+  19a record's NOTICED row carries this disposition. The Opus cold review spawns next; U2
+  spawns at the entry's close.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
