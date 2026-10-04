@@ -1,10 +1,9 @@
 # Phase 13r — Distribution Mechanics (the Sparkle round)
 
-**STATUS: OPEN — PAUSED AT THE SITTING'S CLOSE (2026-09-25, her word: she resumes later with
-`/architect-phase 13r`; one or more of the 18 health rounds may run overnight in between — no
-conflict, nothing of 13r is built yet). The kickoff sitting is COMPLETE: every ruling is made
-(R-13r-1…9 below), the plan is fully made, the records are pushed. Units not yet started.
-RESUME AT THE BOTTOM — the LIVE STATUS block says exactly what a fresh orchestrator does first.**
+**STATUS: OPEN — RESUMED 2026-10-04 (`/architect-phase 13r`, her invocation; the Fable
+orchestrator seat). The kickoff sitting is COMPLETE: every ruling is made (R-13r-1…9 below),
+the plan is fully made. The LIVE STATUS block at the bottom carries the resume record and the
+per-unit state.**
 
 ---
 
@@ -293,12 +292,39 @@ the rider.
 
 ---
 
-## LIVE STATUS (paused 2026-09-25 at the sitting's close — resume point for `/architect-phase 13r`)
+## LIVE STATUS (RESUMED 2026-10-04 — the orchestrator's resume record)
 
 **WHAT IS DONE (all pushed):** the kickoff sitting whole — preflight, rulings R-13r-1…9, this plan
 file (`dc0d478f`), the 13y closeout-ritual housekeeping + the 13r row moved back + the pointer
 (`7f021d22`), the site-agent brief + #145(a)'s ruling (`79a89556`). Zero code written; zero unit
 opened; the working tree was left clean.
+
+**THE RESUME RECORD (2026-10-04, the fresh orchestrator; resume steps 1–2 executed):**
+- **Step 1 — preflight COMPLETE:** this file in full; CLAUDE.md + the auto-loaded canon; the
+  master plan (pointer: 13i-e closed 2026-10-03, 13r is hers to kick off — this invocation is
+  that word; the 17y kickoff message carries her sequencing verbatim: *"a brief pause and
+  complete 13r, then run this phase"*); KnownIssues end to end (the keychain-access-groups row
+  24 is 13r's, and P15 — the key-in-error-description exfiltration path the 17 file flagged
+  against crash reporting — is FIXED at 17b with redaction pins, so U3's trust surface starts
+  from a closed road); QUESTIONS (#145(a) ruled at this phase's own sitting; #139(a) rides this
+  phase's build; #146–#179 all dispositioned — nothing open gates 13r; her carried ratify
+  bundle #117–#135 stands untouched); `PhaseSizingGuidance.md`; the resiliency protocol; the
+  13y checklist §10; the site brief; the 2026-10-04 privacy-policy brief (it already promises
+  "Crash reporting, when it ships (13r), will be opt-in" — U3's copy aligns with it).
+- **Step 2 — history check CLEAN:** tree clean, `main` = `origin/main` at `a627434a`; no round
+  RUNNING. What ran since the pause (18l-c · 18m · 18n-interim · 18o · 18k tails · the 13i
+  family a–e with THREE deployed lockstep events · 17y a–l · phase 19 opened · brand/launch
+  content) is all closed and harmless to 13r exactly as predicted (nothing of 13r existed;
+  commit-count build numbers only rose). **One live-state delta recorded, not a ruling change:
+  the schema marker is 12 today (13i-a 9→10, 13i-c 10→11, 13i-e 11→12, each deployed at her
+  window), so this plan's "marker stays 9" closes as "marker UNCHANGED (12 at resume)" — the
+  intent (zero schema, zero `Sync/`) binds as written.**
+- **Machine facts RE-VERIFIED at resume (unchanged from the sitting):** exactly ONE codesigning
+  *[removed for publication]*
+  one macOS profile is "Mac Team Provisioning Profile: *" (exp 2027-08-30) — NO Developer ID
+  cert, NO Developer ID profile. HER HANDS steps 1–2 are genuinely still owed and open U1.
+- **Steps 3–4 are at her:** the site-brief/appcast-URL/mailbox questions go to her this sitting;
+  U1 opens with her portal steps, then the U1 `opus-implementer` spawns briefed from this file.
 
 **RESUME — the fresh orchestrator's first acts, in order:**
 1. Read this file IN FULL (the kickoff section names the rest of the preflight). Do NOT re-open any
