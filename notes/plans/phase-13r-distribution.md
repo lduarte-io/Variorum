@@ -1006,6 +1006,25 @@ opened; the working tree was left clean.
   skill's allowance): the gap-spanning shaft becomes a SHORT 72-pt mark centred in the gap,
   and the caption drops 15 → 13 pt (its tail grazed the Applications icon in her capture).
   Re-run: PASS 5/5, remounted for her eyes. The ladder reviews the diff with U3-A's piece 5.
+- **N-0 IN FLIGHT — 0.9.0 RELEASED AND PUBLISHED (2026-10-04, the orchestrator under
+  R-13r-15/16; her two gates closed first: the toggle flipped and probe-verified ALLOWED, the
+  DMG window dry-run PASS 5/5 twice and APPROVED at her eyes after her arrow fix, her release
+  notes landed verbatim-faithful):** `release.sh --version 0.9.0` exit 0 — the export drill
+  56/56, app and DMG notarizations both **Accepted** (0 issues), the window laid out and read
+  back inside the shipped DMG, shipped bytes 21,202,362 · sha256 `db62b7fb…cb74e603`, build
+  **4911**, her notes riding the appcast verbatim with the edSignature VERIFYING under the
+  baked key; dSYMs filed at `~/Library/Developer/Variorum/Releases/0.9.0/`. **Published per
+  the site runbook in the locked order:** the DMG to R2 (verify-published dmg PASS,
+  byte-identical), then the appcast + `src/data/variorum.json` → 0.9.0, deployed
+  (verify-published appcast PASS; **the no-cache header VERIFIED LIVE for the first time** —
+  the runbook's own open item closed); the page renders "Variorum 0.9.0" with the Download
+  button at the exact dl URL; the site repo committed and pushed (`e304b43`). **One lesson
+  recorded:** a pre-upload preflight 404 can be NEGATIVELY CACHED at an edge node for a
+  couple of minutes and a Workers deploy propagates per-POP — two transient 404s read
+  seconds after byte-identical PASSes; the answer is wait-and-re-verify (both arms re-ran
+  PASS), never a re-upload. **0.9.1 IN FLIGHT:** its functional notes + the version bump
+  committed (`c4974c4a`); `release.sh --version 0.9.1` running; its publish follows the same
+  order, the page's data file STAYING at 0.9.0 until after her walk (the sheet's shape).
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
