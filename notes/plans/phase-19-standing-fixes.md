@@ -1649,3 +1649,38 @@ the mechanism via the route census; dispositions decided) · `36954f75` (Mac re-
 `97b3eb0c` (family 2 re-spells + the 262 correction) · `73a263fb` (NEW-tree runs announced, score
 sheet) · `c93be1ef` (NEW-tree pins) · this commit (final census, suites, table, dispositions,
 State → REVIEW-PENDING).
+
+**ROUND 1 FIXES (LIVE STATUS — the same implementer, resumed 2026-10-04 at the orchestrator's
+arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; fix diff range
+`f3f5c3a0..` this section's last commit):**
+- **The completeness sweep, re-derived by MY OWN method (token-INDEPENDENT) — DONE (this commit):**
+  `19d/reqpos.py` classifies EVERY `#require(` in the five test roots (core, Mac, mobile, both
+  UITests) by the SYNTACTIC POSITION its result flows into — 2803 sites: LET 2477 (unannotated
+  `let/var x = try #require(…)` ending the statement or followed by `.member`/`!` — no contextual
+  type, so the unwrap overload; the overload choice is type-decided, never token-decided, and no
+  token-free LET site has ever warned) · STMT 96 · TRYQ 6 · OTHER 224 (`reqpos-0.tsv`). The
+  silent class can only live in TRYQ (all 6 re-spelled by this round) or in an OTHER site whose
+  result fills an Optional-typed slot; a TOKEN-FREE such site always warns (the suppression is the
+  only silencer — the reviewer's source trace), and the final builds carry no warning beyond the 18
+  sites F2 now re-spells; so the residue is the OTHER sites whose argument carries a suppressing
+  token. Filtered with a deliberately BROAD superset (any `?` incl. `??`/ternary/`try?`, `nil`,
+  `Optional`): **12 sites (`reqpos-0-other-tokens.txt`), each settled BY TYPE:** `NoteTrayTakesTests`
+  82/84/103/126/145 + `ObservationQueryTests:44` (`branchVariant(_:from: String)`) ·
+  `StructuralSplitAtNewlinesTests:392` (`outboxContains(_: String, _: String)`) ·
+  `DivideArrangementTests:363` (a `for … in` — `Optional` is not a `Sequence`) ·
+  `PostureSwitchTests:1116` (`>` — `Optional` is not `Comparable`) · `SampleLibraryTests:700`
+  (annotated `: String`) · `SampleLibraryWelcomeTests:442` (the closure's result is `story`, passed
+  to `addPostToReading(_ postID: String, …)` — a `String?` would not compile) ·
+  `SurfaceSizeMemoryTests:782` (`FocusedBlock`'s memberwise `blockID: String`). **All 12 are
+  unwrap-bound: NO third silent site** — the reviewer's 278-site token sweep confirmed by a method
+  that does not depend on knowing the macro's exact suppression-token set.
+- F1 [MAJOR] re-spells (`BookAscentTests:803`, `MarkdownFaceTests:187`, the (R) shape) — PENDING.
+- F2 [MINOR] the 18-hollow cleanup (core 8, Mac 10; behaviour-identical, each site's
+  abort-vs-continue kept) — PENDING.
+- F1 pins under the reviewer's two mutants (re-created by `19d/mutate.py F1R` — the same upstream
+  edits as `19d-review/probe.py` P1/P2, anchored above the site so they apply to the new spelling)
+  — PENDING; the red-on-old is the reviewer's LOGGED silence (`19d-review/mac-probe.log`: in the
+  probe-mutated files the sites sit at 804/188 and record NOTHING; only 805/807 and 189/195 do).
+- F3 [NIT] wording + NOTICED #1/#2/#4 corrections — PENDING.
+- Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
+  at zero redundancy warnings + the touched suites green — PENDING.
