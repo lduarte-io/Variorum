@@ -522,9 +522,16 @@ opened; the working tree was left clean.
   the beta-checklist's mailbox item — U3's Help ▸ Send Feedback… and the crash-report flow
   now target a real inbox. Site-side open items: the live no-cache header check at the first
   release; her beta-page copy.
-- **U2 — NOT STARTED** (gated on 19a's CLOSE — the migration AND its per-entry Opus cold
-  review — now that U1 is done; her step 3 — EdDSA minting — at its start, once the U2 session
-  has Sparkle's tools in hand; the URL set is LOCKED per the site-side report above).
+- **19a MID-RUN ADJUDICATION (the orchestrator, 2026-10-04):** the 19a acceptance line claiming
+  `PaneSurfaceTests`' five resolve pins "PROVE the U1 line behavior-preserving" is CORRECTED —
+  the implementer found they do NOT discriminate it (non-nil tokens, relative compares; honest
+  report, routed up rather than claimed). Its throwaway absolute probe read the shipped values
+  on BOTH arms, so the equivalence itself holds. AUTHORIZED as a scoped exception to 19a's
+  no-new-assertions rule: ONE committed pin asserting `PaneDecoration.resolve`'s ABSOLUTE rest
+  values on both arms (nil tokens → the gray-0.25 stroke at 0.5 width; voiced tokens → clear),
+  named as the Xcode-27 isolated-conformance fix's tripwire. 13r's ladder reviews the fix;
+  19a's cold review sees the pin. The implementer also records, in one line, the core-count
+  delta vs the 13i-e closeout baseline (2174/244 vs 2173/244 — name where the +1 came from).
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
