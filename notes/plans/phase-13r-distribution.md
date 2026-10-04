@@ -841,6 +841,31 @@ opened; the working tree was left clean.
   section for both asks (proposed at her request; her kickoff message ratifies it); R-13r-12
   moves the backup-folder ask into 13r from 13s. The only fork left in U3 is U3-B's Settings
   placement of the crash-report opt-in + Diagnostics.
+- **R-13r-15 — THE SITE-PUBLISH EXEMPTION: THE FIRST RELEASE GOES ONTO stargazing.tech BY THE
+  ORCHESTRATOR'S HANDS (her ruling at the U3 kickoff, 2026-10-04, verbatim: *"after your
+  closeoff duties are done, I'm going to want you to go into ~/dev/stargazing.tech and read the
+  files / instructions there and put the first updated dmg on there + push, so that people can
+  download it from my app. This will be a known exemption to the 'not editing other repos rule'
+  - when I have a release ready, I want you to be able to go update the stargazing.tech website
+  with it. you can also use a subagent for the purpose if you prefer."*).** Consequences,
+  recorded: (1) a STANDING, SCOPED exemption — `~/dev/stargazing.tech` may be entered to
+  publish a READY RELEASE, following that repo's own files/instructions (their
+  `notes/variorum-releases.md`, per the SITE-SIDE REPORT); the exemption is release-publishing
+  only, and Fragments stays hands-off exactly as before. (2) The beta checklist's publish shape
+  is SUPERSEDED: "she carries `appcast.xml` + the DMG to the site agent" becomes — after the
+  closeout duties (including her `/Applications` refresh carrying the stamping, the standing
+  HAZARD's precondition), the orchestrator runs 0.9.0 through `release.sh` (the `make-appcast`
+  Keychain read may ask her once — the one her-adjacent moment) and then publishes site-side in
+  the LOCKED order: the DMG first to `dl.stargazing.tech` (exact name `Variorum-<version>.dmg`,
+  immutable once referenced), verified reachable, THEN the appcast + the `/variorum` page's
+  per-release data file, commit + push; `verify-published.sh dmg` and `appcast` close the loop
+  from this side. A subagent may carry the site-side legs at the orchestrator's preference.
+  (3) Anything the site repo's instructions demand that this machine lacks (credentials, an R2
+  upload tool needing her sign-in, GUI steps) PAUSES for her — the exemption opens the repo,
+  never her accounts. (4) Nothing publishes before her hand-copied build carries the stamping —
+  the hazard binds unchanged; her "after your closeoff duties" sequencing satisfies it by
+  construction. The closeout's author handoff (`notes/handoffs/phase-13r-handoff.md`) is
+  written to THIS shape.
 - **U3-A — OPEN (2026-10-04; the implementer spawns from this record).** Its brief: this file's
   U3 section WITH ITS AMENDMENTS (R-13r-10…14 + THE CALM-ASKS CADENCE + the walk arms + the
   hazards + SIZING — U3-A's scope list is the sizing bullet's) + ENVIRONMENT TRAPS + this LIVE
@@ -1936,7 +1961,30 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
 `generate_appcast/ArchiveItem.swift`) before relying on them — recorded per piece.
 
 **Pieces (the SIZING bullet's U3-A list; order chosen so each lands whole):**
-1. R-13r-6 — the stamping build phase + MARKETING_VERSION 0.9.0 — PENDING
+1. R-13r-6 — the stamping build phase + MARKETING_VERSION 0.9.0 — **DONE (this commit)**.
+   - `App/Variorum/StampBuildNumber.sh` (new): `git rev-list --count HEAD` → `PlistBuddy Set
+     :CFBundleVersion` on `${TARGET_BUILD_DIR}/${INFOPLIST_PATH}`; refuses loudly (fails the build)
+     on no git, a shallow/missing checkout, or a non-positive count — never guesses.
+   - `project.pbxproj`, the Mac target ONLY: a `PBXShellScriptBuildPhase` "Stamp Build Number"
+     (`E1B5A0102F0000000000AA10`) as the LAST phase after Resources, `alwaysOutOfDate = 1`, input =
+     the processed Info.plist (orders it after its producer); `ENABLE_USER_SCRIPT_SANDBOXING = NO`
+     on the Mac target's Debug + Release (git must read `.git`, which no input list can name — the
+     project-level YES is untouched for every other target); `MARKETING_VERSION` 1.0 → **0.9.0** on
+     the Mac target's two configurations (the mobile target's own settings untouched — not this
+     phase's). No build configuration added.
+   - **Verified (fresh `-derivedDataPath DerivedData/13r-u3a/p1-debug`, Debug):** BUILD SUCCEEDED;
+     the log orders `ProcessInfoPlistFile …/Variorum.app/Contents/Info.plist` (line 3700) →
+     `PhaseScriptExecution Stamp\ Build\ Number` (5670, "CFBundleVersion = 4879") → `CodeSign
+     …/Variorum.app` (5703); the bundle reads `CFBundleVersion 4879` = `git rev-list --count HEAD`
+     at that HEAD, `CFBundleShortVersionString 0.9.0`; `codesign --verify --deep --strict` → valid
+     (the stamp is inside the seal). No stamp-phase warning in the log.
+   - The release pipeline keeps BOTH roads (U2's interface note allowed either): it still passes
+     `CURRENT_PROJECT_VERSION` = the count as an override (the xcarchive's own metadata reads the
+     setting) and `verify-export.sh --expect-build` still asserts the shipped bundle — the phase
+     writes the same number from the same clean HEAD.
+   - Pin: `VariorumTests/VersionSchemeTests.swift` (3 tests — the stamped count ≥ 4879, the 0.9.x
+     line, the phase's shape in the project file). Red-on-old by construction (old bundle: `1` /
+     `1.0`, no phase). Suite run: PENDING (the finals).
 2. R-13r-13 — the out-of-date sync refusal's calm face (face-side; the Check for Updates… door) — PENDING
 3. R-13r-14 — the field guide's backups passage — PENDING
 4. The ONE release-notes source → What's New (show-once on a version CHANGE, silent on a fresh
