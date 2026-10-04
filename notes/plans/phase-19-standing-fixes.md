@@ -1310,7 +1310,12 @@ RuleGrammar.swift`, `Features/Editor/DivideWCeremony.swift`, `EditorCommands.swi
    matched the latter and MISSED the three multi-line sites, caught by reconciling against the
    reviewer's list); outputs `19d/{core,mac,mobile}-census-0.txt`. **THE CENSUS IS EXACTLY THE
    FLOOR: 38 `#require` sites — core 8 · Mac 26 · mobile 4 — no more, no fewer** (the reviewer's
-   list, site for site). **Always-true: the 2 named test sites** (`PostureSwitchDrillTests:621`;
+   list, site for site). **[CORRECTED AT ROUND 1 (F1) — kept beside its correction: this was the
+   WARNING census, and the warning is not a complete tell — `NonOptionalRequireMacro` suppresses it
+   when an argument token is `?`, `nil` or `Optional`. Two more `try? #require` sites existed
+   (`BookAscentTests:803`, `MarkdownFaceTests:187`); round 1's runs A/B settle them (803 silent,
+   187 hollow). The complete method is the warning lines + a position sweep (`19d/reqpos.py`) + the
+   `try? #require` grep tripwire — the ROUND 1 FIXES record.]** **Always-true: the 2 named test sites** (`PostureSwitchDrillTests:621`;
    `SyncEnrollmentTests:262`, printed twice — at its path and at `macro expansion #expect:1:112` —
    ONE site) **+ 1 NOT OWNED: `App/Variorum/VariorumMobile/Spike/SpikeScenarios.swift:240`**
    ("comparing non-optional value of type 'NSLayoutManager' to 'nil'") — mobile APP source in the
@@ -1423,7 +1428,9 @@ RuleGrammar.swift`, `Features/Editor/DivideWCeremony.swift`, `EditorCommands.swi
    `mac-old-M2.log` 19 tests / 1 suite at a zero-instance window, EXACTLY 1 issue:
    `LibraryDayFilterTests:124` "Expectation failed: picked"). All three RECORD AT THEIR OWN LINE —
    hollow. Restored: status clean, zero markers, the four sha256s OK.
-   **THE MECHANISM, CORROBORATED BY THE COMPILER'S OWN CHOICE** (19c's `routes.py`, copied to
+   **THE MECHANISM — THE ROUTE THE COMPILER CHOSE; THE BINDINGS INFERRED, AND SETTLED AT RUNTIME BY
+   THE MUTANTS** *(reworded at round 1, F3: `routes.py` reads the generic `__check*` symbol each
+   expansion calls, never the type binding inside it; the binding story below is INFERENCE)* (19c's `routes.py`, copied to
    `19d/routes.py`, over the BASE build's objects — `{mac,core,mobile}-routes-base.tsv`): every one
    of the 38 sites binds the `NonOptionalRequireMacro` (hence the identical warning), but the
    macro delegates to the ordinary `#require` expansion, which then type-checks ON ITS OWN:
@@ -1432,11 +1439,15 @@ RuleGrammar.swift`, `Features/Editor/DivideWCeremony.swift`, `EditorCommands.swi
    records); **(ii) at all 19 SILENT sites it calls `__checkFunctionCall` or `__checkPropertyAccess`**
    (the decomposed forms take the value as a CLOSURE'S result typed `R?`; with the macro's result
    type `X?` as the context, `R` binds to `X?` and the closure's `X?` promotes to `X??`, so a nil
-   arrives as `.some(nil)` and passes). 38 of 38 sites: route ⇔ runtime behaviour, no exception
+   arrives as `.some(nil)` and passes — INFERRED). 38 of 38 sites: route ⇔ runtime behaviour, no exception
+   **[CORRECTED AT ROUND 1: 40 of 41 — `MarkdownFaceTests:187` routes `__checkPropertyAccess` yet
+   RECORDS under a real nil (runs A/B). The route RANKS; only the runtime settles.]**
    (`TrashAndArchive:253` carries both — its flagged INNER `#require(stamp)` is `__checkValue`, its
    unflagged outer `#require` the function-call form). The class's real tell is therefore the
    warning **on a decomposed expression** (an un-prefixed call or member access), not the warning
-   alone. **This NARROWS 19c round 1 F1's census sentence** ("a nil X records NOTHING at that
+   alone. **[CORRECTED AT ROUND 1 (F1/F3): the warning is NOT a reliable tell at all (token
+   suppression hides it) and the route does not decide the behaviour (187); the standing method is
+   the grep tripwire at zero + the position sweep, with a real-nil mutant as the only settlement.]** **This NARROWS 19c round 1 F1's census sentence** ("a nil X records NOTHING at that
    line" — true of 19 of its 38; the four sites its probes touched were all decomposed forms).
    **DISPOSITIONS DECIDED (the contract's hollow rule — a pin green on both sides is a hollow row:
    record it, do not fix it):** the 18 HOLLOW sites are **DISMISSED AS HOLLOW**, NOT re-spelled —
@@ -1626,11 +1637,20 @@ re-count warnings.
    `try`-prefixed call or a trailing-closure call goes through `__checkValue` and records. The
    cheap exact ranking for a future census: a flagged `#require` line whose route is
    `__checkFunctionCall`/`__checkPropertyAccess` = silent; `__checkValue` = hollow (38/38 here;
-   the runtime mutant stays the settlement — R2-1).
+   the runtime mutant stays the settlement — R2-1). **[CORRECTED AT ROUND 1 (F1/F3): NOT exact —
+   the warning is suppressed on `?`/`nil`/`Optional` argument tokens (two unflagged `try?` sites
+   existed), and the route is not the binding (`MarkdownFace:187`: `__checkPropertyAccess`, yet it
+   records). The method from here: the `try? #require` grep at ZERO (a standing tripwire), the
+   position sweep `19d/reqpos.py` for the Optional-slot half (token-independent: every OTHER-position
+   site carrying any `?`/`nil`/`Optional` is settled by the receiving slot's TYPE), and a real-nil
+   mutant to settle any candidate.]**
 2. **The 18 hollow sites' warnings now carry NO signal** — every future build re-prints them. A
    warning-only re-spell (the hoist / `#expect(x != nil)`, zero behaviour change; each's mutant
    evidence already logged) would leave the redundancy warning meaning "silent" again. A scope
-   call for the orchestrator; not taken here (the contract's hollow rule).
+   call for the orchestrator; not taken here (the contract's hollow rule). **[RESOLVED AT ROUND 1
+   (F2, the orchestrator's call): the cleanup is TAKEN — all 18 re-spelled behaviour-identically; and
+   the warning would NOT have become a clean tell (token suppression) — the grep tripwire is the
+   tell.]**
 3. **`#expect(try X …)` does not record at its line on a throw:** the `try` operand is evaluated
    before the check, so the error escapes the macro and ABORTS the test, recorded at the `@Test`
    declaration (observed: `SyncEnrollmentTests:262` under the SE mutant → issue at 248). Wherever
@@ -1640,7 +1660,9 @@ re-count warnings.
 4. **A census method note:** a warning whose expression spans lines splits its message across
    lines, so a grep for the message's tail ("never equals 'nil'") misses it — anchor on the head
    ("is redundant because"). My first pass missed 3 of 38 until reconciled against the reviewer's
-   list.
+   list. **[CORRECTED AT ROUND 1 (F1): anchoring better on the warning still cannot find a site the
+   macro never warns about — the warning census is a FLOOR; the grep tripwire and the position
+   sweep are what close it.]**
 
 **Commits:** `94145dbc` (record opened, method) · `4fe9a227` (census; mutants written; OLD-M1
 announced) · `4585b7f9` (OLD-M1 results — the class not uniformly silent) · `096bc934` (OLD-M2;
@@ -1761,6 +1783,6 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
     `__checkPropertyAccess` — the decomposed form — yet records. So my round-0 "38/38 route ⇔
     runtime" and the arbitration's "held 40/40" are 40 of 41: **the route RANKS a site, it never
     settles one; only a real-nil mutant does** (R2-1's lesson, one level down).
-- F3 [NIT] wording + NOTICED #1/#2/#4 corrections — PENDING.
+- F3 [NIT] wording + NOTICED #1/#2/#4 corrections — DONE (this commit): the mechanism heading reworded (the route the compiler chose; the bindings inferred, settled at runtime), the 38/38 claim corrected to 40 of 41, the census's floor claim and NOTICED #1/#2/#4 each carry an in-place correction note kept beside the original text.
 - Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
   at zero redundancy warnings + the touched suites green — PENDING.
