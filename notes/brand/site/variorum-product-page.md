@@ -362,8 +362,10 @@ graph of everything. Reuse is copy-plus-lineage: the draft remembers where a
 piece came from, and the piece belongs to one home. It's a writing tool.
 
 **Is it collaborative?**
-No, and it isn't going to be. It syncs *your* writing between *your* devices.
-Real-time collaboration is out of scope on purpose.
+Today it syncs *your* writing between *your* devices. Collaboration is on the
+roadmap — in Variorum's shape: sharing a draft so another person's
+suggestions arrive as takes beside your text, never as edits over it.
+Real-time co-typing in one document is out of scope on purpose.
 
 **Does it track my edits?**
 It keeps what you choose to keep: takes, savepoints, lineage. It does not

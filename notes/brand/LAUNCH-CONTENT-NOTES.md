@@ -93,6 +93,32 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
    privacy may legitimately rise to #2–3 and the flagship hook can become
    "your journal shouldn't live on someone's server" — offered, not decided.
 
+## Decisions from the 2026-10-04 release-judgment round
+
+- **Release staggering:** release (quiet, download live) and Show HN
+  (the announcement) are separate days — ship when code-done, announce after
+  the copy pass. Her sizing: the copy pass ≤ ~8 focused hours, worth one day.
+- **The in-app copy pass precedes the video pass** (the surfaces are on
+  camera). Working docs: `notes/copy-pass/priority-order.md` (her burn-down
+  order) and `notes/copy-pass/all-user-facing-strings.md` (the exhaustive
+  inventory she pastes into Variorum). The ruled encryption copy
+  (`notes/plans/pre-13x-copy.md`) is flagged ⚠RULED inside — edit
+  deliberately, keep the keystone lines.
+- **No Variorum interchange format for v1** (recommendation accepted-pending
+  — hers to overrule): the open story at launch is the SQLite file you own +
+  AirDrop portability (13x) + Markdown/Alternates export. A granular
+  export/import format matters when there are other Variorum users to
+  exchange with — post-v1, alongside the recorded merge-libraries candidate.
+- **The WHAT'S NEXT roadmap (her items, 2026-10-04)** now in the blog post
+  and Show HN text: (1) MCP with Variorum-shaped AI permissions — per-note
+  read grants, write power = add-a-take only, local models; (2) images;
+  (3) collaboration; (4) Obsidian + Apple Notes importers. **⚠ Collaboration
+  wording:** canon (CoreDescription/OverallModel) says not-collaborative; the
+  copy reconciles via the takes shape ("suggestions arrive as takes, never
+  edits over your text; real-time co-typing stays out of scope") and the
+  product-page FAQ was aligned to match. If she means MORE than
+  suggestions-as-takes, the copy and eventually canon need her ruling.
+
 ## Owed / next natural steps
 
 - Her rewrite of the blog post (in Variorum), then a fact-only pass on it.
