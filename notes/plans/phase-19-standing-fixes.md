@@ -21,7 +21,7 @@
 | Letter | Subject | State |
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
-| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | IN PROGRESS — the implementer opened 2026-10-04 at the seam after 13r U2 (her word: "that's fine for 19b to run later"); the 19b RECORD at the tail |
+| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | REVIEW-PENDING — acceptance met 2026-10-04 (mobile TEST BUILD SUCCEEDED; touched suites 62/14 green; zero unused-result warnings in `#expect`/`#require` expansions; CopiedRow option A landed); Opus cold review next — the 19b RECORD at the tail |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the remaining test-side isolation warnings (#7) | OPEN — queued with 19b at the same seam |
 
 ---
@@ -149,8 +149,8 @@ warnings inside `#expect`/`#require` expansions in the mobile test build (F1's c
 any found settled by an IN-PLACE mutant at the exact spelling — R2-1's amended lesson)** ·
 F4's narrowed comment carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
 **Red-on-old:** the failing build itself (`mobile-bft-2.log` preserved in the 19a round-1
-evidence). **State: IN PROGRESS (2026-10-04) — the implementer's LIVE STATUS is the 19b RECORD
-at this file's tail.**
+evidence). **State: REVIEW-PENDING (2026-10-04) — acceptance met by the implementer's runs; the
+implementer's LIVE STATUS and the cold review's diff map are the 19b RECORD at this file's tail.**
 
 **THE CENSUS CORRECTED (the implementer's log re-read, 2026-10-04 — accepted by the
 orchestrator):** the "~61 sites in ~25 files" above was the round-1 log's WARNING census
@@ -555,10 +555,16 @@ arbitration `e1bfdd08`; the binding record is the "19a ROUND 1" section above):*
 
 ## 19b RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS ENTRY (stated first, per the contract):** PENDING — filled at the close. Standing
-facts from the start: no walk capture (no product face changes — the diff is test-target-only); no
-`Sync/`, no custody, no schema, no app source; no `#expect`/`#require` line is re-spelled here (vacuous
-candidates are RECORDED for 19c Arm 1, never fixed in this entry — that would change assertion bytes).
+**NOT DONE BY THIS ENTRY (stated first, per the contract):** (1) no walk capture — no product face
+changed: the diff is test-target-only (four mobile test files, the one shared test-support file's
+COMMENT, the Mac twin's deletion, and test-target-only pbxproj objects), so the entry's acceptance is
+builds + suites, as 19a's was; (2) NO full suite — only the touched mobile files' suites, rider 3's Mac
+CopiedRow consumers, and the core CopiedRow consumers ran (below); (3) no vacuous-`#expect` settlement
+— the R2-2 mobile candidates are 19c Arm 1's, untouched (re-spelling them would change assertion
+bytes); (4) no warning fixed — the 60-warning census is RECORDED for the orchestrator's routing; (5) no
+`Sync/`, no custody, no schema, no app source, no Release build, `/Applications` untouched (no Mac-app
+change: the app targets' pbxproj objects are byte-equal — no refresh owed); `Tools/Release/` and 13r's
+DerivedData folders untouched.
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
@@ -626,10 +632,76 @@ phases, and already `import GRDB` — the type compiles identically in all three
 3. The `#expect`/`#require` unused-result census over the green build log — DONE (this commit): see
    the WARNING CENSUS below. **ZERO unused-result warnings inside any `#expect`/`#require` expansion in
    the mobile test build** (acceptance line met).
-4. Suites green on a concrete simulator (the touched files' suites, counts confirmed, `skipped:` read)
-   — PENDING.
-5. Rider 3's Mac re-run — 19a's migrated Row-copy suites (every suite type in the nine Mac files that
-   consume `CopiedRow`) GREEN at a zero-instance window — PENDING.
+4. Suites green on a concrete simulator — DONE (this commit). Every suite type in the four touched
+   files (14 suites: `MobileLibraryTests` · `MobileLibrarySortTests` · `MobileMembershipTests` ·
+   `MobileNoteRenameTests` · `MobileNoteEntryDateTests` · `MobileShellTests` · the eight
+   `MobileTutorialWalkTests.swift` suites), `test-without-building`, suite-level `-only-testing`, on the
+   project's established destination `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`: **`Test run
+   with 62 tests in 14 suites passed … with 2 known issues`** (62 = the files' `@Test` count exactly),
+   ZERO `skipped:` lines (`mobile-suites-1.log`). The 2 known issues are the STANDING deliberate
+   `withKnownIssue` in `theFannedDivideLessonLandsTheDuplicateShape` (`MobileTutorialWalkTests` 919–,
+   13u1 ladder F-5 `0af79a38`, its KnownIssues row owned by the mobile project) — untouched here. **Every
+   test holding a migrated site passed BY NAME:** `theNewNoteDoorMintsANamelessNote` (Library) ·
+   `renameWritesTrimsAndBlankClears` + `setAndClearTheEntryDate` (Membership) ·
+   `theShelfNewNoteDoorIsTheLibrarysTwin` (Shell) · `restoreReplacesWholesaleAndTouchesNothingElse`
+   (TutorialWalk, both reads + the `[CopiedRow] ==` wholesale pin). **The read shapes (for the
+   review):** `(x?["c"] as String?) == nil` and `as Int?` and `[copies] == [copies]` are 19a's covered
+   shapes; two shapes are NEW here — `x?["c"] == nil as String?` (Membership 243/303) and `x?["c"]` passed
+   to a `String?` parameter (`DisplayTitle.day(fromStamp:)`, `TimelineItem(createdAt:)`, Library
+   217/221). Evidence in place, not in a mimic (R2-1): Membership 243/303 read a SQL NULL — had the copy's
+   generic subscript bound a NON-optional `String`, GRDB's decode traps on NULL and the test dies; it
+   passed, so the binding is `String?`, the only one that can read nil there, as `Row`'s did. Library
+   217/221 read a NOT NULL `created_at` into `String?` parameters (no untyped-subscript candidate
+   converts to `String?`), where `String` and `String?` bindings decode the same value.
+5. Rider 3's Mac re-run — DONE (this commit). Every suite type in the nine Mac files that consume
+   `CopiedRow` (40 suites; `BookStructureTests` · `CanvasAndPoolTests` · `CanvasBankTests` ·
+   `CanvasDragTests` · `LifecycleFacesTests` · `PoolDragTests` · `StructuralGestureTests` ·
+   `TagAndFolderTests` · `TutorialWalkTests`; the non-suite `CanvasDragRig` helper excluded) from the
+   re-pointed build: **`✔ Test run with 213 tests in 40 suites passed`** (213 = those files' `@Test`
+   count exactly), ZERO `skipped:` lines, at a ZERO-INSTANCE window — `pgrep -fl
+   'Variorum.app/Contents/MacOS'` empty before (13:59:49Z) and after (14:01:14Z) (`mac-suites-1.log`,
+   `mac-suites-1.window`). The re-pointed file serves the Mac target identically. **Extra, core:** the
+   two core consumers' five suites (`JournalKeeperRepairTests` · `TheDrainOrderTests` ·
+   `SchemaLockstepTests` · `SchemaVersionTransportTests` · `Phase11SyncConvergenceTests`) —
+   **`✔ Test run with 29 tests in 5 suites passed`**, no `skipped:` line (`core-copiedrow-suites.log`;
+   the core file's change is comment-only).
+
+**DISPOSITIONS (every census site):** all six **FIXED** (ROW-COPY): `MobileLibraryTests` 212 ·
+`MobileMembershipTests` 239, 299 · `MobileShellTests` 270 · `MobileTutorialWalkTests` 395, 433.
+Evidence class (19a's reading of pin-before-fix for a toolchain migration): red-on-old IS the failing
+build (`mobile-bft-2.log` preserved + `mobile-bft-old.log` by my hands, the same six); green-on-new is
+the TEST BUILD SUCCEEDED + the suites above. Nothing DISMISSED, nothing DEFERRED inside the scope. The
+ten non-erroring `Row.fetch*` reads: out of scope, already copy-inside-closure (piece 2). **Assertion
+bytes:** ZERO `#expect`/`#require` lines in the diff (`git diff 52edc1f9..HEAD -- App Tests | grep -E
+'^[-+].*#(expect|require)'` is empty). **Acceptance lines:** mobile TEST BUILD SUCCEEDED ✔ · the touched
+files' suites green on a concrete simulator, counts confirmed, `skipped:` read ✔ · zero unused-result
+warnings inside `#expect`/`#require` expansions ✔ · F4's narrowed comment carried into the ONE file ✔ ·
+the ruling's riders 1–5 ✔ (1: the object diff; 2: `3c70b283` carries the wiring AND the deletion; 3:
+core build-tests, Mac bft, rider-3 suites, mobile; 4: the comment fate; 5: the `git rm` met no stop).
+
+**FOR THE COLD REVIEW — the diff, by class (`git diff 52edc1f9..HEAD -- App Tests`):**
+- ROW-COPY: `App/Variorum/VariorumMobileTests/{MobileLibraryTests,MobileMembershipTests,MobileShellTests,
+  MobileTutorialWalkTests}.swift` — six `.map(CopiedRow.init)` insertions inside read closures.
+- THE ONE FILE: `Tests/VariorumCoreTests/Support/CopiedRow.swift` — comment-only (`git diff -w` shows no
+  code line); `App/Variorum/VariorumTests/CopiedRow.swift` deleted; `App/Variorum/Variorum.xcodeproj/
+  project.pbxproj` — the four added objects + three changed objects of rider 1's proof.
+- Check: the shared file compiles `in target 'VariorumTests'` and `in target 'VariorumMobileTests'` from
+  its core path (the build logs); no app target's objects changed; every `#expect` line byte-identical.
+
+**NOTICED (routed to the orchestrator; none acted on):**
+1. **The mobile ISOLATION warnings (20 = 17 + 2 autoclosure + 1 static, five files:
+   `MobileMarkdownTests`, `MobileTakesBrowserTests`, `MobileCommentDraftTests`, `MobileCommentParkTests`,
+   `MobileProtectionTests`)** are the 19a F3 / 19c Arm 2 class on the phone side — one toolchain
+   promotion from red. A candidate widening of 19c Arm 2 (the orchestrator's routing call).
+2. **`UIWindow.init(frame:)` deprecated in iOS 26 (10 sites in 7 files, the hosted-surface rigs)** —
+   cosmetic today; `init(windowScene:)` needs a scene in a test host, so it is not a mechanical swap.
+3. **The census-number lesson, refined:** an xcodebuild failure summary's "(N failures)" counts failed
+   BUILD COMMANDS (batch lines + per-file lines × archs), and a continue-after-errors log's warning
+   lines outnumber its errors — quote the unique `error:` lines, and include the
+   `macro expansion #expect:` lines when counting warnings (they carry no file path).
+
+**Commits:** `1355ecad` (record opened) · `3c70b283` (pieces 1–3: the six sites, the ruled CopiedRow
+shape, the census) · this commit (pieces 4–5, dispositions, State → REVIEW-PENDING).
 
 **THE WARNING CENSUS (the mobile TEST target, the green build `mobile-bft-1.log`; counts + classes only,
 no fixes — routing is the orchestrator's at the close; the full line list is
