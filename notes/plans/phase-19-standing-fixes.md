@@ -1281,7 +1281,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    **Mobile (1 file, the 4 SILENT sites):** (R) at `MobileCrossBlockEditTests:144`/`:163`/`:210`/`:310`
    (`let edit = Self.plan(…)` / `CrossBlockCompound.plan(…)` + `#expect(edit != nil)`).
    `mobile-bft-new.log` → `** TEST BUILD SUCCEEDED **`; the file's warnings 4 → 0, nothing added.
-3. Mutant pins (old silent once per shape; new red at its line per site) — IN-PROGRESS.
+3. Mutant pins (old silent once per shape; new red at its line per site) — DONE (this commit).
    **THE MUTANTS (the script `19d/mutate.py`, string-anchored so one patch applies to the old AND
    the re-spelled tree; each edit asserted to match exactly once; marker `MUT19D`):** set **M1** —
    every site's first-run mutant: CALLEE (source, announced): `RuleGrammar.encode` answers nil
@@ -1383,6 +1383,22 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    SystemHotKey 201 · TakeStructureDoor 344 (×2, the loop) · TrayPanelMove 75 · TypingErgonomics 369
    (368 + 1) · mobile 145, 165, 213, 316 · SyncEnrollment: "Caught error" at 248 (the old line's own
    behaviour, unchanged). Revert as before; same death rule.
+   **NEW-TREE M1 + SE — DONE, REVERTED** (`19d/new-M1-SE.diff`; `mac-new-M1.log` 207 tests / 19
+   suites at a zero-instance window — `mac-new-M1.window`: `pgrep` empty before 17:01:15Z and after
+   17:02:33Z; `mobile-new-M1.log` 12 tests / 1 suite; restored with `git checkout --` of the 18
+   files, status clean, zero markers, the four sha256s OK). **EVERY re-spelled site RED AT ITS OWN
+   NEW LINE, with its own expression as the message — the score sheet met 20 of 20:** EditorSeamCost
+   82 "last != nil" · MarkdownFace 286 "storage != nil" · NoteBox 223 "both != nil" · NoteVersions
+   334 "three != nil", 339 "stranded != nil" · OriginBlockDoor 88 "one != nil", 92 "three != nil" ·
+   QuickNote 359 "chord != nil" · ReadRendering 210/238/351 "paginator.frame(forPage: 0)" (and each
+   test now ABORTS there — the old run's later 217/241/357 lines are gone: the hoist's `try` intent)
+   · SystemHotKey 201 "pressed != nil" · TakeStructureDoor 344 ×2 "key != nil" · TrayPanelMove 75
+   "tray != nil" · TypingErgonomics 369 "h.textView.enclosingScrollView" (**this proves the mutant
+   real, so the OLD site was silent with NOTHING downstream to catch it — the purest instance of the
+   class**) · mobile 145/165/213/316 "edit != nil" (32 issues = the old run's 28 + exactly these 4)
+   · SyncEnrollment "Caught error: .unwrapFailed" at 248 — IDENTICAL to the old line's (behaviour
+   kept). Every downstream `x?.…` line fails as before (record-and-continue intact). The hollow
+   sites re-recorded at their own lines, unchanged.
 4. Family 2 — DONE (this commit; the NEW-spelling SE pin rides piece 3). **OLD-SPELLING EVIDENCE — ANNOUNCED** (both
    files committed at base; `SyncEnrollmentTests` is an ordinary suite over in-memory custody and
    a scripted vault — no real Keychain item): (a) `mutate.py SE` on the OLD line 262 (`words:
