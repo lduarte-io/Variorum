@@ -1053,6 +1053,26 @@ opened; the working tree was left clean.
   (`e304b43`, `dbb12a3`). SHE IS WALKING LIVE on the new computer (steps 1–4 released early at
   her ask, mid-snag; step 5's update leg released at this green light). Her reports land here
   as findings.
+- **THE U3 WALK VERDICT (2026-10-04, her report, verbatim: *"ok i've downloaded 0.9.0, it
+  worked, downloaded the update, and it worked! I think that everything is set up and solid.
+  I'm not running the commands to advance the day time for now - I tried this with my first
+  beta on a friends computer so I don't feel like doing all that but I'm sure it works fine.
+  YAY! first external user exists"*): PASS on the arms she ran, honestly scoped.** What
+  PASSED at her hands on the REAL public road, on a computer that is not the M3: the page →
+  the 0.9.0 download → the DMG → the install → the first open → **Check for Updates… finding
+  0.9.1 on the public feed and installing it** — the phase's core promise, proven end to end
+  by a genuinely external install. **THE FIRST EXTERNAL USER EXISTS** — the walk ran on a
+  FRIEND'S computer, at her own hand; the friends beta has factually begun. **Arms DECLINED
+  at her word:** the day-counter cadence arms (e) — her words above; their acceptance stands
+  on the U3-A dev-store walk's captures (the backup offer fired on day 5, Set Up… opened the
+  sheet; What's New show-once walked) + the 15 CalmAsks pins with the 30-day simulated run +
+  the mutation runs. Arms (f)/(g) unreported — their standing evidence is U3-B's pins and
+  captures; the first on-screen mail draft remains unobserved (F-W5's open question, #181
+  (i)). No captures were filed (her report is the record). **Consequences recorded:** the
+  pre-ladder fence ("no link to friends until the closeout") was overtaken by her own act —
+  her prerogative, and the designed answer already stands: any ladder-driven fix ships as
+  0.9.2 through the feed and the friend's install self-updates (the lockstep synergy, live).
+  N-10(b): the page moves to 0.9.1 NOW. **U3 CLOSES ON THIS VERDICT; the ladder is next.**
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
