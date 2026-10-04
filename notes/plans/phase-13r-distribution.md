@@ -235,6 +235,12 @@ consistent with "no analytics OUT LOUD").
 
 ### U4 — The accessibility pass
 
+> **DEFERRED POST-LAUNCH AT HER WORD (2026-10-04, the 13i family-close sitting: "I won't be doing
+> accessibility before launch"):** this unit does NOT run in the pre-launch 13r; the phase closes
+> at U3. The scope below is KEPT INTACT as the post-🚀 unit's brief (the KnownIssues whole-app
+> accessibility row carries the recorded decision; the audits' P1/P3 rider still binds whenever it
+> runs).
+
 **Scope (the row's letter):** the custom decoration language — take cards, seams, chips (membership,
 tags), the ⑂ badge, ordinals, the ceremony sheets' custom surfaces (the ✂ overlay), the sidebar's
 terminal-idiom rows — VoiceOver labels/roles/values + keyboard focus-order sanity; native controls
