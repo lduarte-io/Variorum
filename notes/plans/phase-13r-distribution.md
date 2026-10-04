@@ -2673,6 +2673,221 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      (`13r-u3b/p5-test.log`). The build's one warning in a touched file
      (`AppSettingsView.swift` — `spec(paths:joinAll:)` actor isolation, in `PromoteTagsSheet`) is
      PRE-EXISTING: U3-A's logs carry it at its old line number.
-6. THE U3 WALK — STAGED (R-13r-16's combined public road) — PENDING.
+6. THE U3 WALK — STAGED (R-13r-16's combined public road) — **DONE: STAGED, never run (this
+   commit).** The sheet is below. This session runs nothing in it: no release, no publish, nothing
+   against the public feed, no `/Applications`, no real store.
+
+   **THE U3 WALK — STAGED (R-13r-16: the COMBINED PUBLIC-ROAD WALK, on HER NEW COMPUTER).**
+   - **Who does what:** `[O]` = the orchestrator, on the M3, before the sitting (the releases are
+     published per R-13r-15/16 BEFORE she sits — they are not this session's to run). `[HER]` = her
+     hands, on the NEW COMPUTER.
+   - **The `!`-road lesson binds:** every Terminal block below sets its own values INLINE; nothing
+     carries between blocks. Paste one block at a time.
+   - **On the new computer she is a NEW USER:** she signs Variorum into NOTHING during the walk (a
+     sync sign-in would pull her real library into the walk install — out of this walk's letter;
+     that is a later decision, not an arm). Her new computer's own `/Applications` is the install
+     target, exactly as a friend's: the M3's "every account sees `/Applications`" hazard (the U2
+     walk) is a same-machine fact and does not apply on another Mac.
+   - **Captures:** ⌘⇧3 / ⌘⇧4 land on the new computer's Desktop by default; she brings them to the
+     M3 however she likes (AirDrop), and `[O]` files them in the gitignored
+     `notes/plans/13r-screens/u3-walk/`. Each arm names its capture (`U3-a1` …).
+   - **THE PUBLIC ROAD'S SHAPE DURING THE WALK (the one staging subtlety):** the `/variorum` page's
+     data file points at **0.9.0** (what she downloads) while the appcast already carries **0.9.1**
+     (what Check for Updates… finds). The page moves to 0.9.1 only AFTER the walk (R-13r-16:
+     "After the walk the page's data file points at the latest 0.9.x").
+
+   - **N-0. [O] STAGING, on the M3, before the sitting** (the R-13r-15 exemption; the site runbook
+     is `~/dev/stargazing.tech/stargazing-tech/notes/variorum-releases.md`, pre-read in the LIVE
+     STATUS):
+     - **(a) The no-public-entry hazard, re-checked rather than assumed:** her M3 daily drive must be
+       either the PRE-SPARKLE `1.0 (1)` (no updater exists in it) or a stamped build whose
+       `CFBundleVersion` exceeds every 0.9.x entry's. `/usr/libexec/PlistBuddy -c 'Print
+       :CFBundleShortVersionString' -c 'Print :CFBundleVersion' /Applications/Variorum.app/Contents/Info.plist`
+       — a stamped build BELOW a published entry is a STOP (her own app would be offered it).
+     - **(b) Her two bundle items done:** the Finder Automation toggle (`release.sh` refuses at
+       preflight without it) and the 0.9.0 notes rewritten/okayed.
+     - **(c) 0.9.0:** the version-bump commit if needed (R-13r-6's adjudicated reading; 0.9.0 is
+       already the Mac target's MARKETING_VERSION) → `Tools/Release/release.sh --version 0.9.0`
+       (its `make-appcast` step reads HER Keychain — the one her-adjacent moment) → the site
+       runbook in its LOCKED order: DMG to `dl.stargazing.tech` first, then
+       `Tools/Release/verify-published.sh dmg <that DMG>` PASS, then the appcast + `src/data/
+       variorum.json` → 0.9.0, deploy, then `verify-published.sh appcast <that appcast.xml>` PASS.
+     - **(d) 0.9.1:** its notes `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-0.9.1.md`
+       drafted functional-honest (release mode REFUSES without them; her look invited) → the bump
+       commit to 0.9.1 → `Tools/Release/release.sh --version 0.9.1` (the durable release feed
+       `~/Library/Developer/Variorum/Releases/feed` accumulates, so this appcast carries BOTH items)
+       → DMG first + `verify-published.sh dmg` PASS → the appcast + `verify-published.sh appcast`
+       PASS → **the page's data file STAYS at 0.9.0** (see the shape above).
+     - **(e) From the M3, the public state the walk expects:**
+       ```sh
+       curl -s https://stargazing.tech/variorum/appcast.xml | grep -o 'sparkle:shortVersionString="[^"]*"\|<sparkle:shortVersionString>[^<]*' | sort -u
+       ```
+       Expect both 0.9.0 and 0.9.1.
+       ```sh
+       curl -sI https://dl.stargazing.tech/variorum/Variorum-0.9.0.dmg | head -1; curl -sI https://dl.stargazing.tech/variorum/Variorum-0.9.1.dmg | head -1
+       ```
+       Expect two `200` lines (two requests — well inside the host's 10-per-10-s limit).
+       And `https://stargazing.tech/variorum` in a browser reads **0.9.0** with its download button.
+     - **(f) [O]** `date -u +'%Y-%m-%d %H:%M:%S'` — the walk's START, recorded here.
+
+   - **N-1. [HER] Download, on the new computer** — arm (a)'s first half.
+     - Safari ▸ `https://stargazing.tech/variorum` → the page reads 0.9.0 → the download button.
+       **CAPTURE U3-a1** (the page).
+     - In Terminal (Applications ▸ Utilities ▸ Terminal), one block:
+       ```sh
+       xattr -p com.apple.quarantine ~/Downloads/Variorum-0.9.0.dmg; spctl -a -t open --context context:primary-signature -vv ~/Downloads/Variorum-0.9.0.dmg 2>&1 | head -2
+       ```
+       Expect a quarantine line (Safari's), then `accepted` / `source=Notarized Developer ID`.
+
+   - **N-2. [HER] ARM (a) — THE DMG WINDOW on the downloaded image:** double-click
+     `~/Downloads/Variorum-0.9.0.dmg`.
+     - EXPECT: macOS verifies it; the window opens at a fixed size with NO toolbar or sidebar, the
+       Variorum icon on the LEFT, the Applications folder on the RIGHT, a plain grey arrow between
+       them with "Drag Variorum to Applications" under it. No warning blocks it. **CAPTURE U3-a2.**
+     - U3-A's open question for this arm: if she can, capture it again with the system in DARK
+       appearance (System Settings ▸ Appearance ▸ Dark, reopen the DMG window) — whether Finder keeps
+       the icon labels readable over the near-white background was not measurable without Finder
+       access. **CAPTURE U3-a3** (dark), then set her appearance back.
+
+   - **N-3. [HER] THE DRAG-INSTALL:** drag Variorum onto the window's Applications folder. Eject the
+     DMG. Then, one block:
+     ```sh
+     /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/Variorum.app/Contents/Info.plist; spctl -a -vv /Applications/Variorum.app 2>&1 | head -3
+     ```
+     Expect `0.9.0`, then `accepted` / `source=Notarized Developer ID`.
+
+   - **N-4. [HER] ARM (b) — THE FIRST OPEN, and DAY 1 of use:** open Variorum from Launchpad or
+     `/Applications` (NOT from the DMG).
+     - EXPECT the OS's one-time question: "“Variorum” is an app downloaded from the Internet. Are you
+       sure you want to open it?" → **Open**. **CAPTURE U3-b1.** (That question is the OS's, expected
+       once per newly downloaded copy.) A BLOCK dialog ("cannot be opened because Apple cannot check
+       it", "is damaged", "unidentified developer") is a STOP.
+     - EXPECT a fresh library (the seeded Welcome shelf, the field guide), and **NO popup of
+       Variorum's own**: no Sparkle "Check for updates automatically?", no What's New (a fresh
+       install records its version silently), no backup offer. **CAPTURE U3-b2.**
+     - **Day 1, the calm proof:** leave Variorum frontmost and untouched for **3 minutes** (the
+       cadence's moment is 2 minutes open + 20 s without typing). EXPECT still NOTHING — day 1 shows
+       neither ask. **CAPTURE U3-b3** at the 3-minute mark.
+     - Variorum ▸ About Variorum reads **0.9.0 (<its build>)**. **CAPTURE U3-b4.**
+
+   - **N-5. [HER] ARM (f) — HELP ▸ SEND FEEDBACK… (NOT SENT):** Help ▸ **Send Feedback…**.
+     - EXPECT her DEFAULT mail app opens a new message: To `support@stargazing.tech`, Subject
+       "Variorum feedback", the body three empty lines, a rule "———", then "Variorum 0.9.0 (<build>)"
+       and "macOS <her OS> (<build>)" — and nothing else. **CAPTURE U3-f1.** Close it UNSENT (Don't
+       Save / Delete Draft). Nothing was sent.
+     - **If Mail has no account on the new computer,** Mail's own account setup opens instead: that
+       is the OS's state on a new Mac, not a Variorum failure — **CAPTURE U3-f2**, cancel it, and it
+       is a FINDING for QUESTIONS #181 (a) (whether plain feedback should keep the default-mail-app
+       road). Nothing was sent either way.
+
+   - **N-6. [HER] ARMS (d) + (c) — THE UPDATE from the PUBLIC FEED, then WHAT'S NEW once:**
+     - Variorum ▸ **Check for Updates…**. EXPECT "A new version of Variorum is available! Variorum
+       0.9.1 is now available—you have 0.9.0." with 0.9.1's notes. **CAPTURE U3-d1.** If the alert
+       shows "Automatically download and install updates in the future", leave it UNticked (the
+       friend's default road; read from Sparkle 2.10.0: that box writes `SUAutomaticallyUpdate`,
+       never the answer the day-3 ask reads, so arm (e) survives either way).
+     - **Install Update** → download → **Install and Relaunch**. EXPECT Variorum quits and relaunches
+       on its own; no password should be asked (the app is hers, in her own `/Applications` copy) —
+       if one is, capture it, enter it, and note it. **CAPTURE U3-d2.**
+     - **ARM (c):** at the relaunch EXPECT the **What's New** sheet: "What's new in Variorum 0.9.1",
+       0.9.1's notes, Continue. **CAPTURE U3-c1.** Continue.
+     - Variorum ▸ About reads **0.9.1 (<its build>)**, and the library from N-4 is still there.
+       **CAPTURE U3-d3.**
+     - **⌘Q, then open Variorum again:** EXPECT NO What's New (shown once). **CAPTURE U3-c2.**
+     - One block:
+       ```sh
+       /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/Variorum.app/Contents/Info.plist; spctl -a -vv /Applications/Variorum.app 2>&1 | head -3; codesign --verify --deep --strict /Applications/Variorum.app && echo "seal valid"
+       ```
+       Expect `0.9.1`, `accepted` / `Notarized Developer ID`, `seal valid`.
+
+   - **N-7. [HER] ARM (e) — THE CALM-ASKS CADENCE, day 3 (the update ask):**
+     - **⌘Q Variorum first** (the counter is written with the app closed).
+     - One block — make the next launch day 3 (U3-A's container-path recipe; the shipped numbers are
+       never shortened — only the counter is moved):
+       ```sh
+       defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.daysOfUse -int 2
+       ```
+       ```sh
+       defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.lastUseDay -string 2000-01-01
+       ```
+       ```sh
+       defaults read ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.daysOfUse
+       ```
+       Expect `2`.
+     - Open Variorum. EXPECT NOTHING at launch. Leave it frontmost and untouched; within about **2½
+       minutes** EXPECT Sparkle's own window: "Check for updates automatically?" — **Check
+       Automatically** / **Don't Check**, and NO system-profile option. **CAPTURE U3-e1** (note the
+       minutes after launch).
+     - Choose **Check Automatically**. Then Variorum ▸ Settings… ▸ **General**: the **Updates**
+       section's "Check for updates automatically" reads ON, and the "You haven't chosen yet…"
+       sentence is gone (the window and the checkbox are Sparkle's ONE setting). **CAPTURE U3-e2.**
+
+   - **N-8. [HER] ARM (e) — day 5 (the backup-folder offer):**
+     - **Writing of her own first** (the offer waits for it): ⌘N, type one sentence of her own into
+       the new note. Then **⌘Q**.
+     - Make the next launch day 5:
+       ```sh
+       defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.daysOfUse -int 4
+       ```
+       ```sh
+       defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.lastUseDay -string 2000-01-01
+       ```
+       ```sh
+       defaults read ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.daysOfUse
+       ```
+       Expect `4`.
+     - Open Variorum, leave it frontmost and untouched. Within about **2½ minutes** EXPECT the quiet
+       OFFER toast at the bottom: "Keep a copy of your backups in iCloud Drive?" — **Not Now** ·
+       **Set Up…** · ✕. It shows for about 6 seconds. **CAPTURE U3-e3** quickly.
+     - **Set Up…** (if the toast has gone, see the re-arm below): EXPECT the three-door iCloud Drive
+       sheet. **CAPTURE U3-e4.** Close it with **Not Now** — the ask retires.
+     - **The re-arm, if she missed the 6-second toast:** ⌘Q, then the two `defaults write` blocks
+       above again PLUS this one (it clears the day the toast took):
+       ```sh
+       defaults delete ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.lastAskDay
+       ```
+       and reopen. (A toast that times out counts as ignored, and returns ONCE more after 7 further
+       days of use — the cadence's own rule; the re-arm just brings it back today for the walk.)
+
+   - **N-9. [OPTIONAL — NOT in R-13r-16's letter; the orchestrator's call] ARM (g) — CRASH
+     REPORTING IS OFF on a friend's road:** Variorum ▸ Settings… ▸ **Diagnostics** (the tenth pane,
+     between Data Safety and Acknowledgments). EXPECT "Collect crash reports" OFF, the promise under
+     it, and "None. Nothing is collected while this is off." **CAPTURE U3-g1.** One block:
+     ```sh
+     defaults read ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.crashReports.optIn
+     ```
+     EXPECT `The domain/default pair … does not exist` — the opt-in was never set. Whether she then
+     turns it ON on this computer (so a real beta-era crash, if one ever happens, is the
+     opportunistic real-delivery witness R-13r-5 accepted) is HER choice, not an arm.
+     New-user extra, optional: the field guide's "export — it's all yours" lesson now ends with
+     R-13r-14's backups passage, readable in place.
+
+   - **N-10. [O] Back on the M3:**
+     - **(a) The captures** into `notes/plans/13r-screens/u3-walk/` (gitignored); list them.
+     - **(b) The page moves to 0.9.1** (the site runbook's data-file + deploy legs), now that the
+       walk has run.
+     - **(c) THE VERDICT, into this record. PASS = all of:** U3-a2 the DMG window's drag layout on
+       the DOWNLOADED image · N-3 `spctl` accepted the installed app · U3-b1 the OS's question, not
+       a block · U3-b2/b3 no Variorum popup at first open and none on day 1 · U3-f1 (or f2) a
+       pre-filled feedback draft on screen, NOT sent · U3-d1–d3 0.9.1 found on the PUBLIC feed and
+       installed over the XPC road, library intact, seal valid · U3-c1/c2 What's New once, not on
+       the relaunch · U3-e1 the update ask on day 3 at a calm moment, never at launch · U3-e2 the
+       Settings checkbox reflects the answer · U3-e3/e4 the backup offer on day 5 (never the update
+       ask's day), Set Up… → the sheet, Not Now retires it.
+
+   - **STOP RULES, any step:**
+     - a Gatekeeper BLOCK (on the DMG or the app);
+     - a Sparkle "An error occurred…" alert (capture it, ⌘Q, report) — or Check for Updates…
+       reporting 0.9.0 is the newest (the 0.9.1 entry is not live: N-0 (d)/(e) were not done);
+     - the installer failing, or a relaunch that still reads 0.9.0 (capture About);
+     - ANY Variorum popup at the first open or on day 1 (the R-13r-11 principle broken — capture it);
+     - a mail draft that was SENT without her pressing Send (it cannot happen by construction; if it
+       ever does, stop everything);
+     - anything touching her M3's Variorum or its real store — this walk never does.
+     **The walk publishes nothing beyond N-0's two releases, never touches the M3's `/Applications`
+     or real store, and uses NO feed override anywhere (R-13r-16).**
+   - **Left in place, not cleaned:** the new computer's install (it is hers — it will self-update
+     *[removed for publication]*
+     debris on the M3 stay for the closeout's sweep, as the U2 record says.
 7. Finals (mutation check, the dev-store walk + captures, suites at zero-instance windows) —
    PENDING.
