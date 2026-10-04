@@ -486,6 +486,15 @@ opened; the working tree was left clean.
   `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/`. **19a
   SPAWNED** (the adjudicated sequencing: after U1's session, before U2); its suites run at
   quiet windows and her drill OUTRANKS it if both want the machine.
+- **HER ANSWERS AT THE DRILL SITTING (2026-10-04, verbatim-faithful):** 19a's session-opened
+  birth RATIFIED (*"that's fine on 19a being opened by you - the ledger never needed to say
+  that it would be author filled in the first place, the 17 series was also used by sessions
+  whenever they needed a place to put an issue"* — recorded in the 19a entry too); run-1
+  leftovers *"go ahead and delete them"* — DONE at her word (the export and xcarchive bundles
+  removed; run-1 logs kept until the closeout sweep); the universal binary *"that's fine i
+  think"* — the disposition stands; the stray DerivedData Release build *"you can remove
+  that excess release build"* — DONE (the app bundle removed, dSYM left). *"i'm ready for
+  the drill"* — the LIVE drill runs this sitting; verdict lands in the U1 RECORD.
 - **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
   from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**

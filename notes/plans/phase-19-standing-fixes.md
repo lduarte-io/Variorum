@@ -26,8 +26,11 @@
 
 ## 19a — Xcode 27 / Swift 6.4: the test-target + mobile migration
 
-**Opened 2026-10-04 by the 13r orchestrator** (not author-filed — flagged to her in the same
-report; the toolchain moved to Xcode 27.0/27A266a mid-13r at her hands, and the 13r U1
+**Opened 2026-10-04 by the 13r orchestrator** (not author-filed — flagged to her and RATIFIED
+at her word the same day: *"that's fine on 19a being opened by you - the ledger never needed to
+say that it would be author filled in the first place, the 17 series was also used by sessions
+whenever they needed a place to put an issue"* — sessions may open entries here, as they did in
+17; the toolchain moved to Xcode 27.0/27A266a mid-13r at her hands, and the 13r U1
 implementer's clean-build census found the breakage; the census record is the 13r plan's U1
 RECORD, commit `d2e091ee`, logs under the gitignored `App/Variorum/DerivedData/13r-u1/`).
 **Deliberately NOT in this entry:** the Mac APP's one error (`PaneSurface.swift:1076`,
