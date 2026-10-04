@@ -986,7 +986,41 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    - **The mobile target is unaffected:** `xcodebuild -scheme VariorumMobile -destination
      'generic/platform=iOS Simulator' … build` → `** BUILD SUCCEEDED **`; ZERO `*sparkle*` paths
      inside the built `VariorumMobile.app` (log `13r-u2/build-mobile.log`).
-2. **Sparkle's official signed command-line tools (the 2.10.0 release artifact)** — NOT-STARTED.
+2. **Sparkle's official command-line tools (the 2.10.0 release artifact)** — DONE (this commit).
+   - **The road:** `Tools/Release/fetch-sparkle-tools.sh` (`--path` prints the bin dir). It
+     downloads `Sparkle-2.10.0.tar.xz` from the GitHub release, REFUSES unless the tarball's sha256
+     equals the pin, extracts only `./bin` + `./LICENSE`, and REFUSES unless every tool's sha256
+     equals its own pin and `codesign --verify --strict` passes. Idempotent: a present, verified
+     copy is re-verified and left alone. It NEVER runs a tool.
+   - **Where they land:** `Tools/Release/vendor/Sparkle-2.10.0/bin/` (gitignored, new
+     `.gitignore` line `Tools/Release/vendor/`). Binaries never enter the repo.
+   - **The checksums (pinned in the script):**
+     - tarball `Sparkle-2.10.0.tar.xz` (16,319,840 bytes) sha256
+       `c2bf58aa8387266ac179357b1415d6f2635f044da8be41042af32425dae6da0c`. This equals the digest
+       GitHub's release API publishes for that asset (uploader `Sparkle-Bot`; release published
+       2026-09-13T23:54:06Z, not a draft or prerelease).
+     - `generate_keys` `c37679f98d9121981cf7b2d18592fdc8b44931bffa604acf10c9e11791b6222e`
+     - `generate_appcast` `59e48e8432433cf4358519027e67e2c66a7348e0fe415f75f67b3b2372c13844`
+     - `sign_update` `43c249771bafc3aa581228abae00731a012d324691b8292860896635050be76b`
+     - `BinaryDelta` `020adbe773efb0e53e4146d805e37a72e9ceee25c993b7ff6c86c4bb4f9f90b3`
+   - **A FACT the brief's word "signed" needs corrected:** Sparkle ships these tools **AD-HOC
+     signed** (`flags=0x10002(adhoc,runtime)`, `TeamIdentifier=not set`). The framework is also
+     ad-hoc in the release; the export re-signs it under her Developer ID. So no Developer ID
+     vouches for the tools. Their authenticity is the release artifact's, and two INDEPENDENTLY
+     checksummed roads agree on every byte:
+     - the tarball's GitHub-published digest;
+     - the SPM artifact Xcode downloaded. `Package.swift` at the tag (revision `eef1a539`) pins
+       `checksum = 17e28312b8e18ab7cdbbe09a6fb28cc55a5479ec6c371dbc07cdecd2a14fd959`, which is also
+       GitHub's published digest for `Sparkle-for-Swift-Package-Manager.zip`. SPM verifies it at
+       download. That zip's `bin/` tools are **BYTE-IDENTICAL** to the tarball's, all four measured.
+   - **Verified:** the first run installed; the second run reported "present and verified". A
+     NEGATIVE run (a copy of the script with a zeroed tarball pin, in the scratchpad) REFUSED with
+     exit 1 and installed nothing.
+   - **One keychain fact for the runbook:** the ad-hoc identity is the binary's cdhash. When the
+     pipeline's `generate_appcast` first reads the key `generate_keys` created, macOS asks HER once.
+     The prompt reads "generate_appcast wants to use your confidential information stored in
+     'https://sparkle-project.org'": login password, then Allow or Always Allow. A future tools
+     upgrade (a new cdhash) asks again.
 3. **HER minting commands, staged** — NOT-STARTED. **→ HARD PAUSE** (commit, push, report; the
    orchestrator carries the minting to her and returns the PUBLIC key string).
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,

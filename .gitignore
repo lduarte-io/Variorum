@@ -49,3 +49,5 @@ notes/plans/13ib-screens/
 notes/plans/13ic-screens/
 notes/plans/13id-screens/
 notes/plans/13ie-screens/
+# 13r U2: Sparkle's pinned command-line tools (binaries; fetch-sparkle-tools.sh re-fetches + verifies by digest)
+Tools/Release/vendor/
