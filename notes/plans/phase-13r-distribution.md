@@ -479,13 +479,21 @@ opened; the working tree was left clean.
 
 ## U1 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**U1 IS STOPPED AT THE TOOLCHAIN GATE (2026-10-04) — REPORTED TO THE ORCHESTRATOR, NOTHING LANDED IN
-SOURCE.** The Xcode-27 probe found that the Mac APP does not compile (ONE error, in the editor seam),
-so no Release archive can exist, and therefore no static drill either. Per the brief ("report
-breakage rather than redesigning around it") and the one-unit rule, the fix is the orchestrator's to
-route. The census below is complete across all four build surfaces. The probe edit is RESTORED
-(sha256 re-verified, the tree is clean). Resume = the orchestrator's word on the routing (below),
-then pieces 2–4 as designed.
+**U1 RESUMED (2026-10-04) after the toolchain gate. The orchestrator's adjudication (`4d1afcd8`, the
+LIVE STATUS bullet above) took OPTION (a), REFINED.** The history: the Xcode-27 probe found that the
+Mac APP did not compile (ONE error, in the editor seam). U1 stopped and reported, nothing landed. The
+orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 test/mobile errors are
+**19a's** (not this unit's; the test targets and `MobileChipFlow.swift` stay untouched here).
+- **THE FIX — DONE (`a8691989`), its own commit, EDITOR-SEAM-flagged for 13r's Fable ladder.**
+  `PaneSurface.swift:1076` now reads `tokens.map { _ in Color.clear } ?? Color.gray.opacity(0.25)`
+  (the probe's shape, the same value on both arms), plus a two-line comment naming why it is not
+  `== nil`. `TEXTKIT2_NOTES.md` was re-read first (the editor-seam rule); no TK2 API, storage or
+  layout is touched (a SwiftUI `Color` choice in a pure function). **Verified: the Mac app builds
+  GREEN CLEAN after it** (`** BUILD SUCCEEDED **`, fresh `-derivedDataPath
+  App/Variorum/DerivedData/13r-u1/fix-debug`, log `fix-xcodebuild-debug.log`). **Pin story:**
+  `PaneSurfaceTests`' five `PaneDecoration.resolve` pins prove the line behavior-preserving once
+  19a restores the Xcode-27 suite base. No Mac suite can compile before then, so none was run (the
+  orchestrator's order).
 
 **NOT DONE BY THIS UNIT (stated first, per the contract):** the LIVE drill leg (b) is AUTHOR-GATED
 and is STAGED here, never run — the export is never launched by this session, the real store is
