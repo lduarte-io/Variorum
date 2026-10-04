@@ -570,8 +570,14 @@ opened; the working tree was left clean.
   (EdDSA minting) happens at that pause, the orchestrator carrying the commands to her; the
   WALK (R-13r-8) is AUTHOR-GATED: staged by the session, never run by it. **WALK-PREP opened
   this sitting, her hands:** the fresh macOS user account (Standard, NO Apple ID sign-in,
-  fast user switching in the Menu Bar) — steps given; her account name lands here when she
-  reports it.
+  fast user switching in the Menu Bar) — steps given. **DONE (her report, same sitting): the
+  *[removed for publication]*
+  its password is hers alone and stays out of the repo.** One wrinkle she hit, resolved: the
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  toggle to be enabled on the next visit (per-user, no admin expected). The walk checklist
+  assumes the log-out road works everywhere.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
