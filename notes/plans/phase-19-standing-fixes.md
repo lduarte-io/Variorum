@@ -20,7 +20,7 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | ROUND-2-PENDING — round 1 reviewed 2026-10-04 (1 MAJOR in-entry, 1 MAJOR → 19b, 2 NIT); F1/F3/F4 fixed and pushed (`13610ffc`); a FRESH reviewer runs round 2 over the fixes |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns (her word 2026-10-04: "that's fine for 19b to run later") |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the remaining test-side isolation warnings (#7) | OPEN — queued with 19b at the same seam |
 
@@ -33,12 +33,17 @@ twin: a `@discardableResult … -> Bool` callee asserted bare takes the same Voi
 tell. 65 such functions exist in `Sources` + the Mac/Shared app code; the named live
 candidates are `MarkdownActsTests.swift:96/123/146/167/191`
 (`#expect(MarkdownActs.apply(.bold, to: h.textView))`) and
-`BookStructureTests.swift:782/786/793` (`#expect(book.structure.acceptDrop(…`). **Scope:**
-enumerate EVERY bare `#expect(F(…))` call site over a `@discardableResult -> Bool` callee
-(grep-complete, recorded); settle each candidate with a red mutant at the EXACT spelling
-(the 19a lesson — never a substituted input); re-spell any vacuous site (explicit type or
-`== true`) with the mutant red on the new spelling; a site whose falseness cannot be staged
-mechanically is recorded, not guessed. **Arm 2 — the isolation residue (#7):** the
+`BookStructureTests.swift:782/786/793` (`#expect(book.structure.acceptDrop(…`); R2-2 adds the
+MOBILE arm — `MobileMarkdownActs.swift:90–91` asserted bare at
+`MobileMarkdownTests.swift:389/397/453/551/563` — so Arm 1's universe is `Sources` + the
+Mac/Shared app code + `VariorumMobile/`, with the mobile call sites sequenced AFTER 19b (no
+mobile test build exists until 19b). **Scope:** enumerate EVERY bare `#expect(F(…))` call
+site over a `@discardableResult -> Bool` callee (grep-complete, recorded); settle each
+candidate with a red mutant **IN PLACE in the real test target at the EXACT spelling, then
+revert — never in a scratch or mimic module (R2-1: the import graph, not only the spelling,
+decides the overload; the recorded trigger conditions rank candidates, never clear them)**;
+re-spell any vacuous site (explicit type or `== true`) with the mutant red on the new
+spelling; a site whose falseness cannot be staged mechanically is recorded, not guessed. **Arm 2 — the isolation residue (#7):** the
 warning-grade main-actor reads in seven Mac test files (`BookViewTests`, `LibraryPanelTests`,
 `PagedReadTests`, `ReadNoteLandingTests`, `ReadTierTests`, `TakePaneMeasureTests`,
 `TutorialWalkTests`) get the same test-side `@MainActor`, assertion bytes unchanged — the F3
@@ -65,7 +70,9 @@ behavior coverage, so the seam right after U2 spawns is the preferred slot).
   `.legacyProfile` for the trigger spelling `.tag`, which changed overload resolution — the
   probe proved a DIFFERENT instance real. The lesson, binding on future settlements: **a
   settling probe must reproduce the EXACT trigger spelling, or prove the substitution
-  resolution-equivalent.** FIX (the implementer, in-entry): re-spell line 45 with the explicit
+  resolution-equivalent** *(AMENDED at round 2, R2-1: and it must run IN PLACE in the real
+  test target — the import graph also decides the overload, so a scratch/mimic module can
+  clear a vacuous site wrongly even at the exact spelling)*. FIX (the implementer, in-entry): re-spell line 45 with the explicit
   type (`RuleTerm.tag("t1")`) or `== true`; land the review's mutation pin discipline (the
   `.tag("")` mutant must go RED on the new spelling — it is GREEN on today's); correct NOTICED
   #1; record the census rule — an unused-result warning inside an `#expect` expansion means a
@@ -95,6 +102,36 @@ behavior coverage, so the seam right after U2 spawns is the preferred slot).
   review's three red mutations; CopiedRow↔Row parity independently re-verified; the authorized
   pin independently confirmed discriminating; every acceptance claim checked against its log.
 
+## 19a ROUND 2 — the fresh reviewer's verdict and the orchestrator's dispositions (2026-10-04); THE ENTRY CLOSES
+
+**No BLOCKER, no MAJOR — no round 3 earned; F1/F3/F4 confirmed sound** (the re-spell verified
+against the real module graph with a true red/green pair at the exact spelling; the F1 census
+claim re-checked across every build log; F3's six warnings traced into the one now-annotated
+test, suites 10/2 green; F4's narrowed comment verified against GRDB's own source and all 20
+live sites). Two MINOR findings, both record/ledger scope, DISPOSITIONED BY EDIT in this
+commit; one NIT held to next-touch:
+
+- **R2-1 [MINOR] ACCEPTED — the settlement lesson was incomplete: the IMPORT GRAPH, not only
+  the spelling, decides the overload.** The reviewer's probes: the same exact spelling is REAL
+  with `import Testing` alone and VACUOUS once `SwiftUI`/`AppKit`/`Dependencies` is visible
+  (an Optional-typed parameter + certain implicit-member names — observed: `tag`, `id`,
+  `opacity`, `post`, `bold`); `Foundation`/`Combine`/`GRDB` leave it real. So NOTICED #1's
+  failed reproduction was the import graph's doing, and even an exact-spelling probe in a
+  scratch module can clear a vacuous site wrongly. **The lesson as AMENDED (binding, here and
+  in 19c's rules): settle by mutating IN PLACE in the real test target, then revert — never
+  in a scratch or mimic module.** The trigger conditions are recorded as a candidate-RANKING
+  aid only, never a clearance.
+- **R2-2 [MINOR] ACCEPTED — mobile's vacuous-expectation check was unowned.** Named live
+  candidates: `MobileMarkdownActs.swift:90–91` (`@discardableResult … -> Bool`) asserted bare
+  at `MobileMarkdownTests.swift:389/397/453/551/563`. DISPOSITIONED: 19b's acceptance gains
+  the zero-unused-result-warnings line; 19c Arm 1 widens to the mobile callees and call
+  sites, sequenced after 19b (both edited below/above in this commit).
+- **R2-3 [NIT] — one 127-column comment line in each CopiedRow twin: re-wrap at next touch**
+  (recorded; no commit owed).
+
+**19a IS CLOSED** (opened and closed 2026-10-04; the red-on-old was the failing Xcode-27
+build; every target compiles and runs green; the ladder ran round 1 → fixes → round 2 clean).
+
 ## 19b — Xcode 27 / Swift 6.4: the MOBILE test-target migration
 
 **Opened 2026-10-04 by the 13r orchestrator out of 19a's round-1 review** (finding 2: the
@@ -107,8 +144,10 @@ bytes preserved, any intent-changing fix stops and reports); PLUS the **CopiedRo
 unification question** — one source file serving core/Mac/mobile versus a third identical
 twin: the implementer PROPOSES, the orchestrator rules, before building that part.
 **Acceptance:** mobile TEST BUILD SUCCEEDED (generic iOS Simulator) · the touched files'
-suites green on a concrete simulator (suite-level, counts confirmed) · F4's narrowed comment
-carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
+suites green on a concrete simulator (suite-level, counts confirmed) · **zero unused-result
+warnings inside `#expect`/`#require` expansions in the mobile test build (F1's census rule;
+any found settled by an IN-PLACE mutant at the exact spelling — R2-1's amended lesson)** ·
+F4's narrowed comment carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
 **Red-on-old:** the failing build itself (`mobile-bft-2.log` preserved in the 19a round-1
 evidence). **State: OPEN — queued at the next seam after 13r U2 spawns (13r is the launch
 path; nothing mobile gates it; the author may reorder).**

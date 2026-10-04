@@ -555,6 +555,23 @@ opened; the working tree was left clean.
   stand.]**
 - **19b's after-U2 scheduling RATIFIED by her (2026-10-04, verbatim): *"yeah, that's fine for
   19b to run later."*** The queue stands: 19a round 2 → 19a closes → U2 → 19b at a seam.
+- **19a CLOSED (2026-10-04, round 2 clean: no BLOCKER/MAJOR — the record is the 19 ledger's
+  ROUND 2 section).** R2-1 completed the settlement lesson (the IMPORT GRAPH, not only the
+  spelling, decides the `#expect` overload — settlements mutate IN PLACE in the real target);
+  R2-2 amended 19b/19c (the mobile vacuous-check owned); both queued at the post-U2 seam as
+  she ratified. *(A record slip found while flipping this state: an earlier bullet
+  replacement had silently dropped the "U2 — NOT STARTED" state line; restored here as U2 —
+  OPEN.)*
+- **U2 — OPEN (2026-10-04; the implementer spawns from this record).** Its brief: this file's
+  U2 section + ENVIRONMENT TRAPS + this LIVE STATUS (the toolchain pair, the SITE-SIDE
+  REPORT bullet's LOCKED URLs and pipeline facts, the U1 RECORD's reusable export road) +
+  the resiliency protocol. FIRST PIECE then PAUSE: Sparkle 2.10.0 via SPM (Mac target ONLY)
+  + the signed command-line tools obtained + the minting commands staged — HER HANDS step 3
+  (EdDSA minting) happens at that pause, the orchestrator carrying the commands to her; the
+  WALK (R-13r-8) is AUTHOR-GATED: staged by the session, never run by it. **WALK-PREP opened
+  this sitting, her hands:** the fresh macOS user account (Standard, NO Apple ID sign-in,
+  fast user switching in the Menu Bar) — steps given; her account name lands here when she
+  reports it.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
