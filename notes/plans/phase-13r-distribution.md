@@ -1254,4 +1254,63 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      read it. The lookup's inference from `defaults read` was WRONG for writes.
      - The container exists only after the app's FIRST launch, so the walk's override comes after
        a first run and a quit.
+
+   **THE PIPELINE (`Tools/Release/`, this commit; its first REAL run is next — PENDING):**
+   - **`release.sh [--walk] --version X.Y.Z [--out DIR] [--stop-before-appcast]`** runs the whole
+     order, refusing to continue on any failure:
+     - **0. preflight:** a CLEAN tree (a build is one commit's), ZERO instances (pgrep, never quits
+       one), the tools verified by digest, the `VariorumNotary` credential answers (`notarytool
+       history`). Release mode also requires the version unpublished: no local record or feed copy,
+       and `dl.stargazing.tech` answering **404** for that exact name.
+     - **1. stamp:** MARKETING_VERSION = `--version`, CURRENT_PROJECT_VERSION =
+       `git rev-list --count HEAD` (R-13r-6's number), passed as command-line overrides. There is no
+       configuration.
+     - **2. archive + export:** U1's `archive-and-export.sh`, REUSED and extended with `--version/--build`.
+       Its drill must PASS with the stamp proven.
+     - **3. notarize + staple the APP:** `ditto` zip → `notarytool submit --wait`. The JSON result
+       and Apple's log are kept. Then staple + validate, and `verify-export.sh --require-notarized`
+       must read Gatekeeper **ACCEPTED** with the ticket stapled.
+     - **4. DMG:** plain `hdiutil` (UDZO, HFS+, the app + an `/Applications` link), named EXACTLY
+       `Variorum-<version>.dmg`.
+     - **5.** sign the DMG (Developer ID + timestamp).
+     - **6.** notarize + staple the DMG; `spctl -t open` must ACCEPT it as Notarized Developer ID.
+     - **7. the SHIPPED bytes:** mount the final DMG read-only and run `verify-export.sh
+       --require-notarized` on the app INSIDE it.
+     - **8. dSYMs:** copied out with their UUIDs proven equal to the shipped binary's. Release mode
+       files them DURABLY in `~/Library/Developer/Variorum/Releases/<version>/` with the notary
+       JSON and the verify reports, never in DerivedData, which gets swept.
+     - **9. appcast:** `make-appcast.sh`.
+     - **10. the HANDOFF,** printed and written to `HANDOFF.txt`.
+   - **`make-appcast.sh (--release|--walk) --dmg … --version … --build …`** is the one step that
+     reads HER Keychain, so it is separable (`--stop-before-appcast` + the printed resume line).
+     - It refuses: a DMG not named exactly; an unstapled DMG; a feed name already holding DIFFERENT
+       bytes (IMMUTABILITY); a walk DMG in the release feed, or the reverse.
+     - It runs `generate_appcast --maximum-deltas 0 --download-url-prefix …`. Release mode uses the
+       durable `~/Library/Developer/Variorum/Releases/feed` with `https://dl.stargazing.tech/variorum/`;
+       walk mode uses the gitignored `App/Variorum/DerivedData/walk-feed` with `http://localhost:8765/`.
+     - It then unregisters and REMOVES the real-store-id `Variorum.app` copy that generate_appcast
+       extracts into `~/Library/Caches/Sparkle_generate_appcast` (U1's LaunchServices hazard,
+       extended; other apps' cache entries are untouched).
+     - Last it runs `verify-appcast.swift`.
+   - **`verify-appcast.swift`** checks the new item with CryptoKit, independently of Sparkle:
+     - shortVersionString;
+     - the enclosure url = prefix + the exact DMG name;
+     - the length = the DMG's bytes;
+     - `sparkle:edSignature` VERIFIES over the DMG under the BAKED `SUPublicEDKey`, the end-to-end
+       proof the Keychain's private key is the shipped key's twin;
+     - the build is STRICTLY the feed's highest;
+     - no deltas.
+     **Exercised on a synthetic feed signed with a THROWAWAY CryptoKit key (never hers):** a valid
+     item PASSES 7/7. A tampered DMG, her real key against the test signature, and a wrong
+     version/prefix/length/non-highest build each FAIL, the last case with 5 issues.
+   - **`verify-published.sh dmg|appcast`** covers the two publish-and-leave checks from this side:
+     - `dmg`: one GET of the exact `dl.stargazing.tech` name, which must be sha256-IDENTICAL to the
+       local DMG;
+     - `appcast`: the live feed must be BYTE-IDENTICAL to the local `appcast.xml`, and the newest
+       item's enclosure must already answer 200 with its declared length (the DMG-first order,
+       checked from the far end).
+     Today the live appcast answers 404, correctly: nothing is published.
+   - **`verify-export.sh` + `archive-and-export.sh`** were extended in `815f7e38` (above in the
+     commit log). Smoke on U1's pre-Sparkle export: EXACTLY the 7 Sparkle checks fail, and the other
+     40 of 47 pass.
 6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.

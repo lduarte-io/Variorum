@@ -1,0 +1,132 @@
+#!/bin/bash
+# make-appcast.sh — Phase 13r U2: THE APPCAST STEP of the release pipeline. It is separable because it is
+# the ONE step that reads HER Keychain: generate_appcast signs each new DMG with the EdDSA private key
+# `generate_keys` stored there (R-13r-1). The FIRST run on a machine makes macOS ask HER: "generate_appcast
+# wants to use your confidential information stored in 'https://sparkle-project.org'". She enters her
+# login password, then Allow (or Always Allow). A tools upgrade (a new ad-hoc cdhash) asks again.
+#
+#   Tools/Release/make-appcast.sh --release --dmg PATH --version X.Y.Z --build N [--feed-dir DIR]
+#   Tools/Release/make-appcast.sh --walk    --dmg PATH --version 0.0.N --build N [--feed-dir DIR] [--port P]
+#
+# THE TWO FEEDS NEVER MIX:
+#   --release  feed dir  $VARIORUM_RELEASES_DIR/feed (default ~/Library/Developer/Variorum/Releases/feed):
+#              every PUBLISHED DMG + appcast.xml. generate_appcast re-uses the existing appcast.xml and
+#              adds the new item. Enclosure prefix https://dl.stargazing.tech/variorum/ (the LOCKED DMG
+#              host, the site-side report).
+#   --walk     feed dir  App/Variorum/DerivedData/walk-feed (gitignored). Enclosure prefix
+#              http://localhost:<port>/ (default 8765). The R-13r-8 walk serves this directory from HER
+#              session (localhost is machine-wide, so the walk account reaches it). ATS allows plain HTTP
+#              to loopback, MEASURED at U2 piece 5 (the 13r plan's U2 RECORD). Never published.
+#
+# --maximum-deltas 0, always: the site's handoff is "appcast.xml + the DMG". Delta files would be extra
+# uploads the site's publish-and-leave rule does not carry.
+#
+# After generate_appcast it cleans up after itself. generate_appcast EXTRACTS each archive into
+# ~/Library/Caches/Sparkle_generate_appcast, which leaves a real-store-id Variorum.app there: the very
+# LaunchServices/Spotlight hazard U1 measured. So every Variorum.app under that cache is unregistered and
+# its cache entry removed. Other apps' cache entries are untouched.
+#
+# Then verify-appcast.swift proves the new item is exactly what a shipped Variorum accepts. That includes
+# the EdDSA signature verifying under the BAKED SUPublicEDKey, checked by CryptoKit, independently of
+# Sparkle.
+#
+# Exit: 0 appcast written and verified · 1 verification failed · 2 usage · 3 refused (immutability,
+#       a mixed feed, an unstapled DMG) · 4 generate_appcast failed.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+REPO="$(cd "${HERE}/../.." && pwd)"
+RELEASES="${VARIORUM_RELEASES_DIR:-${HOME}/Library/Developer/Variorum/Releases}"
+RELEASE_PREFIX="https://dl.stargazing.tech/variorum/"
+ED_PUBLIC_KEY="tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA="
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+GA_CACHE="${HOME}/Library/Caches/Sparkle_generate_appcast"
+
+usage() { echo "usage: $0 (--release|--walk) --dmg PATH --version V --build N [--feed-dir DIR] [--port P]" >&2; exit 2; }
+MODE=""; DMG=""; VERSION=""; BUILD=""; FEED=""; PORT="8765"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --release) MODE=release; shift ;;
+    --walk) MODE=walk; shift ;;
+    --dmg) [ $# -ge 2 ] || usage; DMG="$2"; shift 2 ;;
+    --version) [ $# -ge 2 ] || usage; VERSION="$2"; shift 2 ;;
+    --build) [ $# -ge 2 ] || usage; BUILD="$2"; shift 2 ;;
+    --feed-dir) [ $# -ge 2 ] || usage; FEED="$2"; shift 2 ;;
+    --port) [ $# -ge 2 ] || usage; PORT="$2"; shift 2 ;;
+    *) usage ;;
+  esac
+done
+[ -n "$MODE" ] && [ -n "$DMG" ] && [ -n "$VERSION" ] && [ -n "$BUILD" ] || usage
+say() { echo "[make-appcast] $*"; }
+refuse() { echo "REFUSED: $*" >&2; exit 3; }
+
+# ------------------------------------------------------------------ the inputs agree
+[[ "$BUILD" =~ ^[1-9][0-9]*$ ]] || refuse "--build must be a positive integer (got '${BUILD}')"
+case "$MODE" in
+  release)
+    [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "--version must be X.Y.Z (got '${VERSION}')"
+    [[ "$VERSION" =~ ^0\.0\. ]] && refuse "0.0.x is the WALK range; a release never carries it"
+    [ -n "$FEED" ] || FEED="${RELEASES}/feed"
+    PREFIX="$RELEASE_PREFIX" ;;
+  walk)
+    [[ "$VERSION" =~ ^0\.0\.[0-9]+$ ]] || refuse "a walk build's version is 0.0.N (got '${VERSION}'), so no walk artifact can ever wear a release number"
+    [[ "$PORT" =~ ^[0-9]+$ ]] || refuse "--port must be a number"
+    [ -n "$FEED" ] || FEED="${REPO}/App/Variorum/DerivedData/walk-feed"
+    PREFIX="http://localhost:${PORT}/" ;;
+esac
+NAME="Variorum-${VERSION}.dmg"
+[ -f "$DMG" ] || refuse "no such DMG: ${DMG}"
+[ "$(basename "$DMG")" = "$NAME" ] || refuse "the DMG must be named EXACTLY ${NAME} (the site's rate limit keys on that prefix), got $(basename "$DMG")"
+xcrun stapler validate "$DMG" >/dev/null 2>&1 || refuse "${DMG} carries no valid stapled notarization ticket: never put an unstapled DMG in a feed"
+mkdir -p "$FEED"
+FEED="$(cd "$FEED" && pwd)"
+if [ "$MODE" = release ]; then
+  case "$FEED" in *walk*) refuse "the release feed may not be a walk directory (${FEED})" ;; esac
+  if ls "$FEED"/Variorum-0.0.*.dmg >/dev/null 2>&1; then refuse "${FEED} holds a WALK DMG: the feeds never mix"; fi
+elif [ -d "${RELEASES}/feed" ] && [ "$FEED" = "$(cd "${RELEASES}/feed" && pwd)" ]; then
+  refuse "a walk build may not enter the RELEASE feed"
+fi
+
+# ------------------------------------------------------------------ the DMG joins the feed (immutable names)
+if [ -e "${FEED}/${NAME}" ]; then
+  cmp -s "$DMG" "${FEED}/${NAME}" || refuse "${FEED}/${NAME} already exists with DIFFERENT bytes. A published DMG name is IMMUTABLE once an appcast references it (the site-side report): cut a new version instead."
+  say "${NAME} already in the feed, byte-identical: re-generating only"
+else
+  cp -p "$DMG" "${FEED}/${NAME}"
+  say "${NAME} copied into the ${MODE} feed: ${FEED}"
+fi
+
+# ------------------------------------------------------------------ generate_appcast (reads HER Keychain)
+BIN="$("${HERE}/fetch-sparkle-tools.sh" --path)"
+LOG="${FEED}/generate_appcast-${VERSION}.log"
+say "generate_appcast --maximum-deltas 0 --download-url-prefix ${PREFIX} ${FEED}"
+say "(it reads the EdDSA private key from HER login Keychain; the first run on this machine asks her: login password, then Allow)"
+if ! "${BIN}/generate_appcast" --maximum-deltas 0 --download-url-prefix "$PREFIX" "$FEED" > "$LOG" 2>&1; then
+  echo "generate_appcast FAILED — ${LOG}:" >&2
+  tail -20 "$LOG" >&2
+  exit 4
+fi
+sed 's/^/    /' "$LOG"
+
+# ------------------------------------------------------------------ hygiene: no real-store-id copy left in its cache
+if [ -d "$GA_CACHE" ]; then
+  while IFS= read -r app; do
+    "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
+    entry="${app#"${GA_CACHE}"/}"; entry="${GA_CACHE}/${entry%%/*}"
+    rm -rf "$entry"
+    say "generate_appcast's cache: unregistered + removed the extracted copy ($(basename "$entry"))"
+  done < <(find "$GA_CACHE" -maxdepth 4 -type d -name 'Variorum.app' -prune 2>/dev/null)
+fi
+
+# ------------------------------------------------------------------ prove the item
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/make-appcast.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+xcrun swiftc -O -o "${WORK}/verify-appcast" "${HERE}/verify-appcast.swift" 2>"${WORK}/swiftc.err" \
+  || { cat "${WORK}/swiftc.err" >&2; echo "could not compile verify-appcast.swift" >&2; exit 1; }
+set +e
+"${WORK}/verify-appcast" "${FEED}/appcast.xml" "${FEED}/${NAME}" "$PREFIX" "$VERSION" "$BUILD" "$ED_PUBLIC_KEY" \
+  | tee "${FEED}/verify-appcast-${VERSION}.txt"
+VERIFY=${PIPESTATUS[0]}
+set -e
+[ "$VERIFY" -eq 0 ] || { echo "the appcast item FAILED verification. Do NOT publish." >&2; exit 1; }
+say "appcast: ${FEED}/appcast.xml · DMG: ${FEED}/${NAME} ($(stat -f %z "${FEED}/${NAME}") bytes)"
