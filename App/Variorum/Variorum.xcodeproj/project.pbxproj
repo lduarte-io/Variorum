@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1C271B32FFC2FB40084BEA6 /* VariorumCore */; };
 		E1D217912FFCE2C600886CFC /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1D217902FFCE2C600886CFC /* VariorumCore */; };
+		E1B5A0022F0000000000AA02 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E1B5A0032F0000000000AA03 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */,
+				E1B5A0022F0000000000AA02 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,6 +188,7 @@
 			name = Variorum;
 			packageProductDependencies = (
 				E1C271B32FFC2FB40084BEA6 /* VariorumCore */,
+				E1B5A0032F0000000000AA03 /* Sparkle */,
 			);
 			productName = Variorum;
 			productReference = E1C271882FFC2F420084BEA6 /* Variorum.app */;
@@ -352,6 +355,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../.." */,
+				E1B5A0012F0000000000AA01 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1C271892FFC2F420084BEA6 /* Products */;
@@ -991,6 +995,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		E1B5A0012F0000000000AA01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		E1C271B32FFC2FB40084BEA6 /* VariorumCore */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -999,6 +1014,11 @@
 		E1D217902FFCE2C600886CFC /* VariorumCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = VariorumCore;
+		};
+		E1B5A0032F0000000000AA03 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1B5A0012F0000000000AA01 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -938,3 +938,43 @@ five arms. U1 IS CLOSED.**
 - The A1 copies stay per the rail's custom; the prefs/metadata extras were evidence only,
   nothing restored. **PASS authorizes the KnownIssues keychain-access-groups row-24 flip at
   the phase close.**
+
+---
+
+## U2 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS UNIT (stated first, per the contract):**
+- **HER HANDS step 3 (the EdDSA minting) is HERS:** staged here as command text (piece 3), never
+  run. This session runs `generate_keys` in NO form, because it acts inside her user session and
+  any run would touch her login Keychain. It never handles the private key or the `-x` export.
+- **The WALK (R-13r-8) is AUTHOR-GATED:** staged (piece 6), never run by this session.
+- Out of scope, untouched: zero `Sync/`, zero schema, no editor seam, `/Applications` never touched,
+  the real store never touched, no custom build configuration, nothing against the public feed.
+  MARKETING_VERSION and the build-number stamping build phase are U3's (R-13r-6), so this unit
+  leaves them as they are.
+
+**U2 STATE (2026-10-04, session start):** piece 1 IN-PROGRESS. **Toolchain re-read at session
+start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a) · `xcode-select -p` =
+`/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`): no match. HEAD `dd95e301`, tree clean, commit count 4815.
+
+**Pieces:**
+1. **Sparkle 2.10.0 via SPM, the Mac target ONLY** — IN-PROGRESS (the project edit + the resolve
+   COMMITTED; the clean Mac build PENDING).
+   - `project.pbxproj`: ONE `XCRemoteSwiftPackageReference "Sparkle"`
+     (`https://github.com/sparkle-project/Sparkle`, `requirement = { kind = exactVersion; version =
+     2.10.0; }` — EXACT, never a range), ONE `XCSwiftPackageProductDependency` (`Sparkle`) in the
+     **Variorum** target's `packageProductDependencies` + its Frameworks phase. The VariorumMobile
+     target, the test targets and `Shared/` are untouched: no `Sparkle` line names them.
+   - `xcodebuild -resolvePackageDependencies` (exit 0, log `App/Variorum/DerivedData/13r-u2/resolve.log`):
+     `Sparkle: https://github.com/sparkle-project/Sparkle @ 2.10.0`; `Package.resolved` gains the one
+     pin `sparkle` → `version 2.10.0`, `revision eef1a539a373c1f1a320624b1130fc5de7b2e100` (the
+     checkout's `git describe --tags` = `2.10.0`). No other pin moved.
+2. **Sparkle's official signed command-line tools (the 2.10.0 release artifact)** — NOT-STARTED.
+3. **HER minting commands, staged** — NOT-STARTED. **→ HARD PAUSE** (commit, push, report; the
+   orchestrator carries the minting to her and returns the PUBLIC key string).
+4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
+   `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
+   with Sparkle's standard consent flow, the Check for Updates… door — NOT-STARTED.
+5. **The full release pipeline** in `Tools/Release/` — NOT-STARTED.
+6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.
