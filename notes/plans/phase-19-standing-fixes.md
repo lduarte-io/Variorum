@@ -21,7 +21,34 @@
 | Letter | Subject | State |
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | ROUND-2-PENDING — round 1 reviewed 2026-10-04 (1 MAJOR in-entry, 1 MAJOR → 19b, 2 NIT); F1/F3/F4 fixed and pushed (`13610ffc`); a FRESH reviewer runs round 2 over the fixes |
-| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns |
+| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | OPEN — queued; runs at the next seam after 13r U2 spawns (her word 2026-10-04: "that's fine for 19b to run later") |
+| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the remaining test-side isolation warnings (#7) | OPEN — queued with 19b at the same seam |
+
+---
+
+## 19c — the Xcode-27 residue census (opened 2026-10-04 by the 13r orchestrator; owns 19a's NOTICED #6 and #7)
+
+**Arm 1 — the silent vacuous-#expect candidates (#6).** F1's mechanism has a WARNING-FREE
+twin: a `@discardableResult … -> Bool` callee asserted bare takes the same Void route with no
+tell. 65 such functions exist in `Sources` + the Mac/Shared app code; the named live
+candidates are `MarkdownActsTests.swift:96/123/146/167/191`
+(`#expect(MarkdownActs.apply(.bold, to: h.textView))`) and
+`BookStructureTests.swift:782/786/793` (`#expect(book.structure.acceptDrop(…`). **Scope:**
+enumerate EVERY bare `#expect(F(…))` call site over a `@discardableResult -> Bool` callee
+(grep-complete, recorded); settle each candidate with a red mutant at the EXACT spelling
+(the 19a lesson — never a substituted input); re-spell any vacuous site (explicit type or
+`== true`) with the mutant red on the new spelling; a site whose falseness cannot be staged
+mechanically is recorded, not guessed. **Arm 2 — the isolation residue (#7):** the
+warning-grade main-actor reads in seven Mac test files (`BookViewTests`, `LibraryPanelTests`,
+`PagedReadTests`, `ReadNoteLandingTests`, `ReadTierTests`, `TakePaneMeasureTests`,
+`TutorialWalkTests`) get the same test-side `@MainActor`, assertion bytes unchanged — the F3
+class closed file-complete before the next toolchain promotes it to red. **Rules:** 19a's
+(mechanical only; anything intent-changing stops and reports). **Acceptance:** the census
+table in the record (site → real/vacuous-fixed, mutant evidence per fix) · zero isolation
+warnings left in the Mac test build · the touched suites green at a quiet window. **Cast:**
+`opus-implementer`; Opus cold review. **State: OPEN — queued with 19b** (sequencing hers to
+reorder; nothing in 13r is gated on it, but MarkdownActs/BookStructure pins are shipped-
+behavior coverage, so the seam right after U2 spawns is the preferred slot).
 
 ---
 
