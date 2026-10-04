@@ -553,6 +553,8 @@ opened; the working tree was left clean.
   exact-spelling lesson + the census rule); finding 2 there opened 19b (the mobile
   test-target census, ~61 sites). Kept un-deleted so the error and its correction both
   stand.]**
+- **19b's after-U2 scheduling RATIFIED by her (2026-10-04, verbatim): *"yeah, that's fine for
+  19b to run later."*** The queue stands: 19a round 2 → 19a closes → U2 → 19b at a seam.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
