@@ -2444,11 +2444,40 @@ ruled**; the new API is a post-macOS-27-floor migration, recorded here and nothi
 
 **Pieces (the SIZING bullet's U3-B list; placement-independent pieces FIRST, then THE PLACEMENT
 PROPOSAL and a STOP for the architect's ruling, then the faces):**
-1. The crash-report OPT-IN — a LOCAL machine preference (the 18j `AppearanceChoice` pattern),
-   default OFF; an INJECTED registration seam so OFF is pinnable (no `MXMetricManager` subscriber
-   registration when off); the MetricKit subscriber; the one owner on the app delegate — PENDING.
-2. The received-report store (LOCAL files, the bytes exactly as MetricKit handed them) + the
-   DEBUG-only synthetic-payload injection door (env-gated, the `VisualWalkProbe` precedent) — PENDING.
+1. The crash-report OPT-IN + the registration seam + the subscriber + the owner + the report store —
+   **DONE (this commit).** (The store joined piece 1: the receive road needs somewhere to end.)
+   - `Features/Diagnostics/CrashReporting.swift` (Mac target only): `CrashReportingPreference` — a
+     LOCAL preference (`variorum.crashReports.optIn`, this app's container, never synced) where ONLY
+     an explicit boolean YES is on (absent, `false`, `"1"`, `"YES"`, `2`, … all read OFF);
+     `CrashDiagnosticRegistration` — THE INJECTED SEAM (`MetricKitRegistration` = `MXMetricManager
+     .shared.add/remove` in production); `CrashDiagnosticSubscriber` — `nonisolated`, implements
+     `didReceive(_: [MXDiagnosticPayload])` ONLY (no metrics callback, so no metrics are ever
+     delivered) and keeps each `MXCrashDiagnostic`'s own `jsonRepresentation()` — one report per
+     crash; a hang/CPU/disk diagnostic in the same payload is never stored, shown or sent (R-13r-5
+     names `MXCrashDiagnostic`); `CrashReporting` — the ONE owner on `VariorumAppDelegate` (the
+     `appearance`/`updates` precedent): registers at init ONLY when the preference already says
+     yes, `set(_:)` registers/unregisters the same subscriber, `receive` stores only while ON (a
+     delivery racing the switch to OFF is dropped), turning OFF never deletes what already arrived.
+   - `Features/Diagnostics/CrashReportStore.swift`: one file per report,
+     `Application Support/Diagnostics/Crash Reports/crash-report-<UTC stamp>-<8 hex>.json` in the
+     app's own container — a SIBLING of the library folder (`Application Support/<variant>/`), never
+     inside it, so no backup/export/sync carries one; the BYTES exactly as MetricKit handed them;
+     `text` is the bytes as UTF-8 or nil (bytes that are not text are never shown as if they were —
+     and so can never be sent, see piece 3); `heading` is READ OUT of the report
+     (`diagnosticMetaData` app/OS versions), never added to it.
+   - Pins: `VariorumTests/CrashReportingTests.swift` (10 — a fresh install is OFF and REGISTERS
+     NOTHING; seven strange stored values register nothing; five launches while off never
+     subscribe; yes subscribes once, no unregisters the SAME subscriber; a remembered yes subscribes
+     at launch; a delivery while on lands byte-for-byte and a late delivery after off is dropped;
+     the subscriber takes diagnostics and never metrics (by ObjC selector); the app's own owner
+     rides MetricKit and starts off; the store's order/round-trip/delete; the heading read out).
+     **Run: `Test run with 10 tests in 1 suite passed`, no `skipped:` line** (log
+     `App/Variorum/DerivedData/13r-u3b/p1-test.log`; build log `p1-build.log` — no warning in any
+     new file). Red-on-old by construction (no type existed); the mutation run is the finals'.
+   - NOT pinnable, recorded: the extraction from a real `MXDiagnosticPayload` (MetricKit's types
+     cannot be constructed outside MetricKit) — it is the one line `payloads.flatMap {
+     $0.crashDiagnostics ?? [] }.map { $0.jsonRepresentation() }`.
+2. The DEBUG-only synthetic-payload door (env-gated, the `VisualWalkProbe` precedent) — PENDING.
 3. The support door's MAIL DRAFT machinery (one draft builder; an injected opener) + Help ▸ Send
    Feedback… — PENDING.
 4. THE PLACEMENT PROPOSAL (the in-batch fork) — PENDING; the session STOPS there.

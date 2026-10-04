@@ -40,6 +40,13 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// registers from the window that holds the store's services.
     let calmAsks = CalmAskScheduler.live()
 
+    /// 13r U3-B — R-13r-5: **the app's ONE crash-reporting owner** (MetricKit,
+    /// opt-in, default OFF). Here for the `appearance` reason: one per app,
+    /// alive before the first window — and a subscriber registered at launch
+    /// (only when she already said yes) is how MetricKit's pending reports
+    /// arrive. Nothing it receives is ever sent automatically.
+    let crashReports = CrashReporting.forThisApp()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
