@@ -23,7 +23,7 @@
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
-| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | REVIEW-PENDING — 19 silent sites FIXED with pins, 18 DISMISSED AS HOLLOW (record at their own line), 1 cleanup; 621 fixed, 262 cleaned; suites green; the orchestrator's custody-line check owed |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | FIXES-IN-FLIGHT — round 1: the landed work held (20 pin pairs re-scored; custody lines confirmed twice over), but 1 MAJOR: TWO more silent sites the warning CANNOT flag (token-suppressed by design) → re-spells owed; the hollow cleanup TAKEN; round 2 follows |
 
 ---
 
@@ -161,11 +161,57 @@ review **with an explicit charge on the custody-drill test files** (`PostureSwit
 `SyncEnrollment` — assertions must not weaken; the 19a FurnitureConvergence precedent), and
 the orchestrator verifies those re-spells by its own hands at the close. **DO-NOT-TOUCH
 unchanged from 19b/19c** (13r's staged artifacts, `Sync/`, schema, app source except
-nothing — this entry is TEST FILES ONLY). **State: REVIEW-PENDING (2026-10-04) — the 19d
-RECORD at the ledger's tail: 19 of the 38 sites were silent and are FIXED with pins, 18 are HOLLOW
-(their old spelling records at its own line — dismissed, recorded), 1 cleanup; 621 fixed (probe —
-the drill stayed off), 262 cleaned (behaviour-identical); the Opus cold review with the
-custody-drill charge, and the orchestrator's own-hands check of 621/262, are next.**
+nothing — this entry is TEST FILES ONLY). **State: FIXES-IN-FLIGHT (2026-10-04) — round 1
+arbitrated below (1 MAJOR accepted with fixes owed; the hollow cleanup TAKEN at the
+orchestrator's call; 1 NIT reword); the implementer lands the fixes; a FRESH reviewer runs
+round 2 over the fix diff. The implementer's run record is the 19d RECORD at the tail; the
+orchestrator's own-hands check of 621/262 PASSED (strictly stronger / abort-preserved) and
+the round-1 reviewer's independent custody read agrees.**
+
+## 19d ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow: the orchestrator arbitrates, the implementer fixes, a FRESH reviewer runs round 2)
+
+**The entry's landed work held:** all 18 hollow scorings re-verified (plus the reviewer's
+own probe), all 20 silent-site pin pairs re-scored (old silent at its line, new red at its
+own line), the re-spells faithful (types, abort-vs-continue, downstream bytes), the warning
+censuses reproduced (Mac 102→83, mobile 47→43, core 30→30, nothing added), the four
+temporarily-mutated sources sha256-matched to base, suites green at a zero-instance window
+(Mac 205/29; mobile 24/2). **The custody-drill charge is satisfied twice over:** the
+reviewer's independent read traced 621's identity paths (the only empty-identity
+constructor's one consumer takes `.material` only — the new line fails only on a real
+defect) and mutated 262's new spelling red; the orchestrator's own-hands diff check agreed.
+Reviewer evidence: `App/Variorum/DerivedData/19d-review/` (kept).
+
+- **F1 [MAJOR] ACCEPTED — TWO MORE LIVE SILENT SITES, invisible to the warning census:**
+  `BookAscentTests.swift:803` (`let action = try? #require(center.current?.action)`) and
+  `MarkdownFaceTests.swift:187` (same shape over `font(…)?.pointSize`). The mechanism,
+  reviewer-traced to swift-testing's source (the one Sonnet lookup, an external fact):
+  `NonOptionalRequireMacro` SUPPRESSES its redundancy warning whenever any argument token is
+  `?`, `nil` or `Optional` (`#if !SWT_FIXED_137943258`, the workaround for OPEN swift#79202;
+  the flag is defined nowhere, so suppression is ON in every shipped build). Both sites
+  proven silent by in-place probes (`19d-review/mac-probe.log`); the reviewer's 278-site
+  token sweep found NO third (core zero, mobile zero, UITests zero). **So the
+  compiler warning is NOT a reliable tell for this class — 19c round 1 F1's "the redundancy
+  WARNING is this class's only tell" is FALSE under token suppression (annotated in place),
+  and NOTICED #1/#2/#4's warning-anchored census wording is corrected with the fixes.**
+  FIX (the implementer): re-spell both in the (R) shape, downstream lines byte-identical;
+  pins — the red-on-old is the LOGGED SILENCE under the reviewer's two mutants, and the new
+  spellings must go RED AT THEIR OWN LINES under the same mutants.
+- **F2 [MINOR] ACCEPTED — THE 18-HOLLOW CLEANUP IS TAKEN (the orchestrator's scope call,
+  reversing its own earlier leaning on the reviewer's two new facts):** (1) with the warning
+  suppressed by design, the ONLY toolchain-independent tripwire for the record-and-continue
+  half is `grep -rn 'try? #require'` AT ZERO — which requires the hollow sites re-spelled;
+  (2) the hollow sites are correct only through how `__checkValue`'s `T` binds inside an
+  expansion that exists BECAUSE of open swift#79202 (SPECULATIVE and unpinnable, the
+  reviewer's own label — removing the dependency costs nothing). These land as CLEANUP
+  (behaviour-identical, the `FannedDefaultsTests:355` class; no bug-fix claim, no new pins
+  owed — the per-site mutant evidence is already logged), each preserving its site's
+  abort-vs-continue semantics. The acceptance line is then met LITERALLY: zero redundancy
+  warnings in all three test builds, no recorded exceptions; the grep tripwire is the
+  standing census method from here on.
+- **F3 [NIT] ACCEPTED — the record's "corroborated by the compiler's own choice" wording
+  overstates `routes.py`:** it reads the generic `__check*` symbol, not the type binding.
+  Reworded with the fixes: the route the compiler chose; the bindings INFERRED and settled
+  AT RUNTIME (the mutants are the evidence). The route-to-behaviour mapping held 40/40.
 
 ---
 
