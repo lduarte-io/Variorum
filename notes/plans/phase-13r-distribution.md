@@ -351,6 +351,48 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   pre-filled draft (NOT sent). **W-5 launches by explicit path** (`open ~/Applications/Variorum.app`) —
   *[removed for publication]*
   still holds U2's `SUFeedURL` localhost override; the U3 walk reuses it.
+- **R-13r-16 — THE COMBINED PUBLIC-ROAD WALK (her ruling, 2026-10-04, superseding the walk's
+  VENUE AND ROAD above; her words verbatim: *"note that I will test out my walk AND the
+  download from stargazing.tech at the same time - upload the appropriate build there & I'll
+  download it from stargazing.tech on a new computer to see how everything works for a new
+  user. I'll let you know if there are any issues"*).** Consequences, recorded:
+  *[removed for publication]*
+    *[removed for publication]*
+    walk-feed mechanics stay recorded for future walks; nothing is cleaned early). This is
+    R-13r-8's honestly-recorded gap ("the friends' first installs are the true second-machine
+    evidence") made REAL before the first friend.
+  - **Sequencing:** after U3-B closes on green suites, the orchestrator runs the REAL
+    **0.9.0** through `release.sh` (release mode; the `make-appcast` Keychain read is the one
+    her-adjacent moment) and publishes it per R-13r-15 — DMG to `dl.stargazing.tech` first,
+    verified reachable, then the appcast + the `/variorum` page's data file, push — BEFORE
+    her sitting. The update leg's **0.9.1** is built and published the same way, so
+    Check for Updates… exercises the PUBLIC feed end to end: NO feed override exists anywhere
+    in this walk. After the walk the page's data file points at the latest 0.9.x.
+  - **The no-public-entry HAZARD, RE-DERIVED rather than waived:** its purpose is that HER
+    app is never offered a release. Her M3 daily drive is **1.0 (1), PRE-SPARKLE** (the U2
+    walk's measured fact — no update machinery exists in it), so a public entry cannot reach
+    it; the closeout refresh then hands her a stamped build whose commit count exceeds any
+    0.9.x entry's, and Sparkle stays quiet (R-13r-7). The letter is satisfied the day any
+    build of hers can check the feed at all.
+  - **The PRE-LADDER publish is accepted at her word, with the fence stated:** the page stays
+    unlisted/pending and NO LINK goes to friends until the ladder and closeout are done; a
+    ladder-driven fix ships as the next 0.9.x through the same road, and her new computer's
+    install SELF-UPDATES to it — a further live proof, not a cost.
+  - **The arms re-map onto the public road:** (a) the DMG window's drag layout — on the
+    DOWNLOADED DMG; (b) the drag-install's first open shows NO Sparkle prompt (the OS's
+    one-time question expected) and day 1 of use shows NEITHER ask; (c) What's New appears
+    once after the 0.9.0 → 0.9.1 update, not again on relaunch; (d) Check for Updates…
+    installs 0.9.1 over the XPC road FROM THE PUBLIC FEED, library intact; (e) the cadence's
+    day-counter arms via container-path `defaults write` on the new computer (every line a
+    copyable block; shipped numbers never shorten); (f) Help ▸ Send Feedback… opens the
+    pre-filled draft. New-user extras now in reach: the fresh store's field guide carries
+    R-13r-14's backups passage for her to read in place.
+  - **U3-B stages the walk sheet to THIS shape** (its brief carries this bullet), and the
+    orchestrator PRE-READS `~/dev/stargazing.tech`'s release runbook before her sitting so
+    any credential/tooling need surfaces early (R-13r-15 (3): such a need pauses for her,
+    never improvises).
+  - Her reports from the new computer are findings — recorded verbatim, routed per the
+    standing rule.
 - **THE HAZARDS U2 HANDED FORWARD (binding):** no PUBLIC appcast entry may exist until U3's
   stamping is in HER hand-copied `/Applications` build (her daily drive carries build 1 until
   then, and it would be offered the release). The pipeline passes the stamp as command-line
