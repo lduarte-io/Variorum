@@ -2477,7 +2477,21 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
    - NOT pinnable, recorded: the extraction from a real `MXDiagnosticPayload` (MetricKit's types
      cannot be constructed outside MetricKit) — it is the one line `payloads.flatMap {
      $0.crashDiagnostics ?? [] }.map { $0.jsonRepresentation() }`.
-2. The DEBUG-only synthetic-payload door (env-gated, the `VisualWalkProbe` precedent) — PENDING.
+2. The DEBUG-only synthetic-payload door — **DONE (this commit).**
+   - `Features/Diagnostics/SyntheticCrashReport.swift`, gated THREE times: `#if DEBUG` (a Release
+     build compiles it to nothing); the launch environment `VARIORUM_SYNTHETIC_CRASH_REPORT=<path>`
+     (the `VisualWalkProbe` precedent); and the opt-in itself — the bytes go into the REGISTERED
+     subscriber's own delivery (`deliverAsMetricKitWould`), so an OFF app has nothing to deliver
+     into, exactly as with MetricKit. Everything below MetricKit's payload object is the real road
+     (subscriber → main-actor hop → the owner's ON gate → the store → the list). The app is
+     sandboxed, so the walk writes the file under the Debug container's own `Data/tmp/`. It NSLogs
+     its outcome (`[13r-u3b] synthetic crash report: delivered | offSoNothingDelivered | …`) for
+     the walk to read. Called once from `applicationDidFinishLaunching`, inside the existing DEBUG
+     block.
+   - Pins: `VariorumTests/SyntheticCrashReportTests.swift` (4 — not asked → nothing; OFF + asked →
+     nothing delivered, the folder untouched; ON + asked → the report arrives verbatim through the
+     subscriber; an unreadable path → nothing). **Run with piece 1's suite: `Test run with 14 tests
+     in 2 suites passed`, no `skipped:` line** (`13r-u3b/p2-test.log`; no warning in any new file).
 3. The support door's MAIL DRAFT machinery (one draft builder; an injected opener) + Help ▸ Send
    Feedback… — PENDING.
 4. THE PLACEMENT PROPOSAL (the in-batch fork) — PENDING; the session STOPS there.

@@ -84,6 +84,11 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         // 18l U-VIS: the visual harness's oracle endpoint — registers nothing
         // unless the harness launched this process (`VARIORUM_VISUAL_WALK=1`).
         VisualWalkProbe.installIfRequested { [weak self] in self?.session }
+        // 13r U3-B: the walk's synthetic crash report — a no-op unless the
+        // walk launched this process with `VARIORUM_SYNTHETIC_CRASH_REPORT`,
+        // and then delivered ONLY if crash reporting is ON (the real
+        // subscriber's own delivery; an OFF app has nothing to deliver into).
+        SyntheticCrashReport.injectIfRequested(into: crashReports)
         #endif
     }
 
