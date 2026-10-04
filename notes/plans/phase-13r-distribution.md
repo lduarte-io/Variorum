@@ -578,6 +578,17 @@ opened; the working tree was left clean.
   *[removed for publication]*
   toggle to be enabled on the next visit (per-user, no admin expected). The walk checklist
   assumes the log-out road works everywhere.
+- **HER WORD AT THE POST-COMPACTION RESUME (2026-10-04, verbatim-faithful; the orchestrator
+  re-oriented from the handoff's SECOND edition, found the U2 implementer live mid-piece-5,
+  and messaged it contact-only — no twin):** *"plan to proceed with 19b / 19c - don't pause
+  chat with a question, I'll send a message proactively when I see U2 coming to an end if
+  I'm ready. Feel free to use the computer as needed for testing - I've stepped away for now
+  and will be back for the U2 walk."* So: when the U2 implementer stops with the walk STAGED,
+  the orchestrator verifies its pieces by spot-check and spawns **19b without pausing for
+  her** (then 19c after 19b closes, each with its per-entry Opus cold review, one agent at a
+  time); the machine is free for suite runs while she is away; her proactive message — not an
+  orchestrator question — opens the walk sitting, and the walk outranks 19b/19c for the
+  machine whenever she is ready.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
