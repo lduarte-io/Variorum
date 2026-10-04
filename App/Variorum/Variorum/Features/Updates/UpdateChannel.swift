@@ -98,4 +98,14 @@ final class UpdateChannel {
     func checkForUpdates() {
         controller?.checkForUpdates(nil)
     }
+
+    /// 13r U3-A — R-13r-13: the SYNC ROW's Check for Updates… door (the calm
+    /// out-of-date face, `SyncRowFace.appOutOfDate`). Handed out ONLY by a
+    /// live channel, so the door renders only where it can act (P-2): a
+    /// Debug build's row says the plain sentence alone. The act is this
+    /// channel's own — the same one the menu door runs.
+    var syncRowDoor: CheckForUpdatesDoor? {
+        guard isLive else { return nil }
+        return CheckForUpdatesDoor { [weak self] in self?.checkForUpdates() }
+    }
 }

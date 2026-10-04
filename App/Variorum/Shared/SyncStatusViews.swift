@@ -25,6 +25,24 @@
 //     stale keys after a re-key are its everyday cause — presents as the
 //     replaced-keys line naming its fix, with the same one-act door.
 //
+//  Phase 13r U3-A — R-13r-13 (her refinement at the U3 kickoff, verbatim:
+//  *"if sync doesn't work because your version is out of date, a calm
+//  message should say so as well."*). The engine's §12 lockstep refusal
+//  (`SyncError.schemaLockstepMismatch` — outbox kept, cursor unmoved, by
+//  design) used to reach this row as the GENERIC error face, so a friend
+//  would read the engine's sentence, written for the author ("Finish the
+//  schema update on the lagging side…"). It is classified HERE, face-side,
+//  on the `isKeysLockedError` pattern — the engine and its text are
+//  untouched (zero `Sync/` lines). Only the direction a friend can reach
+//  is re-faced: the SERVER's marker AHEAD of the app's — this version is
+//  older than the account's sync format, so the fix is an update. The door
+//  is Check for Updates…, rendered only where an updater can act (P-2: the
+//  Mac's live Sparkle channel injects `checkForUpdatesDoor`; a Debug build
+//  and the phone inject nothing and show the plain sentence alone). The
+//  other direction (the app AHEAD of the server — the author's own
+//  pre-deploy state, R-13r-7) keeps the generic face: no friend can reach
+//  it, because the §12 choreography deploys the mirror before any release.
+//
 
 import SwiftUI
 import VariorumCore
@@ -37,6 +55,11 @@ nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
         case keysLocked, keysReplaced, rekeyIncomplete, notEntitled, error, idle
+        /// R-13r-13 (13r U3-A): the §12 refusal with the SERVER ahead —
+        /// this app is older than the account's sync format. Calm, never
+        /// the error red; its door (where an updater can act) is
+        /// Check for Updates….
+        case appOutOfDate
         /// RUN B B2 row 12 (17d P31): a CLEAN round whose pull is held at
         /// a row whose referents have not arrived — the round succeeded,
         /// but "Synced <time>" would be saying "fine" while nothing new
@@ -50,6 +73,10 @@ nonisolated struct SyncRowFace: Equatable {
             case syncNow
             /// Open the tabbed Account sheet at the named tab (CF-14).
             case openAccount(AccountTab)
+            /// R-13r-13: the update channel's own act (the Mac's Sparkle
+            /// channel, injected as `checkForUpdatesDoor`). Minted only when
+            /// the face was told a live updater exists (P-2).
+            case checkForUpdates
         }
         var label: String
         var act: Act
@@ -71,7 +98,8 @@ nonisolated struct SyncRowFace: Equatable {
         isSyncing: Bool,
         lastError: String?,
         lastErrorIsOffline: Bool,
-        stalled: Bool = false
+        stalled: Bool = false,
+        canCheckForUpdates: Bool = false
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -136,6 +164,17 @@ nonisolated struct SyncRowFace: Equatable {
                     Door(label: "Re-enroll…", act: .openAccount(.encryption)),
                 ])
             }
+            if Self.isAppBehindServerError(error) {
+                // R-13r-13 (13r U3-A): this version is older than the
+                // account's sync format. Calm and plain; the door is the
+                // update channel's, and only where it can act (P-2) — a
+                // Debug build and the phone say the sentence alone.
+                return SyncRowFace(
+                    kind: .appOutOfDate,
+                    doors: canCheckForUpdates
+                        ? [Door(label: Self.checkForUpdatesLabel, act: .checkForUpdates)]
+                        : [])
+            }
             if HostedSyncTier.isNotEntitledError(error) {
                 // Phase 14c batch 3 (L7): the tier refusal is NOT an error
                 // — the app is whole without the tier (the v1 principle:
@@ -168,6 +207,66 @@ nonisolated struct SyncRowFace: Equatable {
             Door(label: "Account…", act: .openAccount(.account)),
         ])
     }
+
+    /// **R-13r-13's classifier (13r U3-A) — face-side, the engine
+    /// untouched.** True exactly for the engine's §12 lockstep refusal AS
+    /// THE SCHEDULER SURFACES IT (`String(describing:)` — its `description`)
+    /// when the SERVER's marker is AHEAD of the app's. The text carries the
+    /// two markers, so this reads them back out and then demands the WHOLE
+    /// string equal the engine's own rendering of that pair — the
+    /// `isKeysLockedError` exactness rule (a substring match would swallow
+    /// unrelated errors into a calm face). The app-ahead direction answers
+    /// false and keeps the generic face (the header says why).
+    static func isAppBehindServerError(_ text: String) -> Bool {
+        guard let markers = lockstepMarkers(in: text) else { return false }
+        return markers.server > markers.client
+    }
+
+    /// The (client, server) pair of an EXACT lockstep refusal, or nil.
+    static func lockstepMarkers(in text: String) -> (client: Int, server: Int)? {
+        guard let open = text.range(of: "(app "),
+              let comma = text.range(of: ", server ", range: open.upperBound..<text.endIndex),
+              let close = text.range(of: ")", range: comma.upperBound..<text.endIndex),
+              let client = Int(text[open.upperBound..<comma.lowerBound]),
+              let server = Int(text[comma.upperBound..<close.lowerBound])
+        else { return nil }
+        let rendered = String(describing: SyncError.schemaLockstepMismatch(client: client, server: server))
+        return rendered == text ? (client, server) : nil
+    }
+
+    /// The door's words — the platform's own, identical to the Mac menu's
+    /// Variorum ▸ Check for Updates… (`UpdateChannel.checkForUpdatesTitle`;
+    /// a Mac pin holds the two equal — `Shared/` cannot see the channel).
+    static let checkForUpdatesLabel = "Check for Updates\u{2026}"
+
+    /// The row's line (calm: the quiet caption, never the error red).
+    static let appOutOfDateLabel = "Sync paused \u{2014} this version of Variorum needs an update"
+
+    /// The sentence under it — her R-13r-13 letter: older than the
+    /// account's sync format; update to continue; nothing lost meanwhile.
+    static let appOutOfDateDetail =
+        "This version of Variorum is older than your account\u{2019}s sync format. "
+        + "Update Variorum to continue syncing \u{2014} nothing is lost while sync is paused."
+}
+
+/// R-13r-13 (13r U3-A): the update channel's act, handed to the sync row
+/// from where it lives. The Mac's composition injects it ONLY from a LIVE
+/// channel (`UpdateChannel.isLive` — never in a Debug build, R-13r-7); the
+/// phone never injects it (its updates are the App Store's). nil ⇒ the row
+/// renders no Check for Updates… door (P-2).
+struct CheckForUpdatesDoor {
+    let perform: @MainActor () -> Void
+}
+
+private struct CheckForUpdatesDoorKey: EnvironmentKey {
+    static let defaultValue: CheckForUpdatesDoor? = nil
+}
+
+extension EnvironmentValues {
+    var checkForUpdatesDoor: CheckForUpdatesDoor? {
+        get { self[CheckForUpdatesDoorKey.self] }
+        set { self[CheckForUpdatesDoorKey.self] = newValue }
+    }
 }
 
 /// One row: signed-in + configured → last sync / pending / error;
@@ -179,6 +278,9 @@ struct SyncStatusRow: View {
     /// sheet injects it here; the Account sheet presented below inherits
     /// it through the environment.
     @Environment(\.sharedPageStyle) private var pageStyle
+    /// R-13r-13: the update channel's act where one can run (the Mac's
+    /// live channel); nil everywhere else, and then no door renders.
+    @Environment(\.checkForUpdatesDoor) private var checkForUpdatesDoor
     /// CF-14: the ONE sheet, opened at the tab the pressed door names
     /// (nil = not presented).
     @State private var accountSheetTab: AccountTab?
@@ -193,7 +295,8 @@ struct SyncStatusRow: View {
             isSyncing: sync.status.isSyncing,
             lastError: sync.status.lastError,
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
-            stalled: sync.status.pullStalled)
+            stalled: sync.status.pullStalled,
+            canCheckForUpdates: checkForUpdatesDoor != nil)
     }
 
     var body: some View {
@@ -237,6 +340,11 @@ struct SyncStatusRow: View {
                 if face.kind == .error, let error = sync.status.lastError {
                     ErrorCauseNote(error: error)
                 }
+                if face.kind == .appOutOfDate {
+                    Text(SyncRowFace.appOutOfDateDetail)
+                        .pageCaption(pageStyle)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .font(style.tokens.small)
             .foregroundStyle(style.tokens.ink)
@@ -257,6 +365,14 @@ struct SyncStatusRow: View {
                 // line).
                 if face.kind == .error, let error = sync.status.lastError {
                     ErrorCauseNote(error: error)
+                }
+                // R-13r-13: the calm sentence under the line — the cause
+                // IS the line's subject, said plainly (never the engine's
+                // author-facing text, which stays in the hover).
+                if face.kind == .appOutOfDate {
+                    Text(SyncRowFace.appOutOfDateDetail)
+                        .pageCaption(pageStyle)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .font(.caption)
@@ -319,6 +435,13 @@ struct SyncStatusRow: View {
             Text(Self.stalledLabel)
                 .pageCaptionWarning(pageStyle)
             pendingNote
+        case .appOutOfDate:
+            // R-13r-13: calm — the quiet caption (the notEntitled register),
+            // never the error red or the keys orange. The engine's own
+            // sentence rides the hover, as every paused state's does.
+            Text(SyncRowFace.appOutOfDateLabel)
+                .pageCaption(pageStyle)
+                .help(sync.status.lastError ?? "")
         case .error:
             Text("Sync error")
                 .pageCaptionError(pageStyle)
@@ -343,6 +466,8 @@ struct SyncStatusRow: View {
             sync.triggerSync()
         case .openAccount(let tab):
             accountSheetTab = tab
+        case .checkForUpdates:
+            checkForUpdatesDoor?.perform()
         }
     }
 

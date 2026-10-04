@@ -52,6 +52,10 @@ struct VariorumApp: App {
                     protection: bootstrap.protection, windows: windows,
                     hotKeys: hotKeys)
                     .onAppear { appDelegate.session = session }
+                    // 13r U3-A — R-13r-13: the sync row's Check for Updates…
+                    // door, from the ONE update channel; nil unless it is
+                    // live (never in a Debug build), and then no door shows.
+                    .environment(\.checkForUpdatesDoor, appDelegate.updates.syncRowDoor)
                     .task {
                         guard services == nil else { return }
                         let fresh = AppServices(

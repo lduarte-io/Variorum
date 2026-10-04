@@ -1985,7 +1985,33 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
    - Pin: `VariorumTests/VersionSchemeTests.swift` (3 tests — the stamped count ≥ 4879, the 0.9.x
      line, the phase's shape in the project file). Red-on-old by construction (old bundle: `1` /
      `1.0`, no phase). Suite run: PENDING (the finals).
-2. R-13r-13 — the out-of-date sync refusal's calm face (face-side; the Check for Updates… door) — PENDING
+2. R-13r-13 — the out-of-date sync refusal's calm face — **DONE (this commit)**. ZERO `Sync/` lines
+   (the engine and its sentence untouched; `git diff --stat` names no `Sources/` path).
+   - `Shared/SyncStatusViews.swift`: `SyncRowFace.Kind.appOutOfDate` + `Door.Act.checkForUpdates`;
+     `face(…, canCheckForUpdates: Bool = false)` (defaulted — every existing pin reads unchanged);
+     the classifier `SyncRowFace.isAppBehindServerError` on the `isKeysLockedError` exactness rule
+     — it reads the two markers out of the text, then demands the WHOLE string equal the engine's
+     own `String(describing: SyncError.schemaLockstepMismatch(client:server:))` (exactly what
+     `SyncScheduler` writes into `lastError`), and answers true only when server > client. The
+     app-ahead direction falls through to the generic face, as ruled. Calm words: the line "Sync
+     paused — this version of Variorum needs an update" in the QUIET caption (the notEntitled
+     register, never the error red), and under it her letter: "This version of Variorum is older
+     than your account's sync format. Update Variorum to continue syncing — nothing is lost while
+     sync is paused." The engine's own sentence rides the hover, as every paused state's does.
+   - THE DOOR (P-2): an environment value `checkForUpdatesDoor` (nil by default); the Mac's
+     `VariorumApp` injects `UpdateChannel.syncRowDoor`, which is nil unless the channel is LIVE —
+     so a Debug build's row and the phone's row say the sentence alone, and a Release row offers
+     Check for Updates… (the menu door's own act and words; a Mac pin holds the labels equal).
+   - **MOBILE-VISIBLE, flagged for the closeout's parity line:** the face is `Shared/`, so the
+     phone's Settings sync row gains the calm sentence (no door — its updates are the App Store's)
+     in place of the generic error for this one refusal. No mobile file was touched.
+   - Pins: `VariorumTests/SyncOutOfDateFaceTests.swift` (6 — server-ahead → calm face + the door;
+     no updater → calm face, no door; app-ahead → the generic face with Retry/Account; the
+     classifier's exactness — prefix, suffix, equal pair, another refusal, a bare marker pair;
+     the words + label equality with the menu's; the inert channel hands out no door).
+     **Run green with piece 1's suite and `SyncStalledRowTests`: `Test run with 11 tests in 3
+     suites passed`, no `skipped:` line** (log `App/Variorum/DerivedData/13r-u3a/p2-test.log`).
+     Red-on-old: the mutation run is in the finals (PENDING).
 3. R-13r-14 — the field guide's backups passage — PENDING
 4. The ONE release-notes source → What's New (show-once on a version CHANGE, silent on a fresh
    record; Help ▸ What's New) — PENDING
