@@ -2253,4 +2253,10 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      CalmAsks green; CalmAsks' 3 issues were the TEST's own (a "past midnight" hour that was not, and
      a missing seeded RNG dependency), fixed → **`Test run with 15 tests in 1 suite passed`** (logs
      `13r-u3a/p6-test.log`, `p6-test2.log`). No `skipped:` lines.
-7. Finals — the touched families' suites, the Debug-build captures, this record closed — PENDING
+7. Finals — the touched families' suites, the Debug-build captures, this record closed — IN-PROGRESS.
+   - **MUTATION RUN IN FLIGHT (named before it starts, per the protocol's addendum 2; the
+     committed tree `6151f47a` is the pre-revert copy):** three production files are mutated
+     together — `Shared/SyncStatusViews.swift` (the classifier answers false), `Features/WhatsNew/
+     WhatsNew.swift` (a fresh install is due), `Features/CalmAsks/CalmAsks.swift` (`next` drops
+     the one-per-day guard) — and restored with `git checkout --` on exactly those three paths.
+     If a session dies mid-run, `git diff` against `6151f47a` shows what is mutated; restore it.
