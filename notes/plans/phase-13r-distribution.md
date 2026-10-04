@@ -959,6 +959,20 @@ opened; the working tree was left clean.
   Updates section; P15 (the key-in-error-description road) is CLOSED since 17b with redaction
   pins; the privacy-policy brief already promises opt-in crash reporting — U3-B's copy aligns.
   Zero `Sync/`, zero schema, zero mobile; nothing published.
+- **THE R-13r-16 RUNBOOK PRE-READ — DONE (the orchestrator, 2026-10-04; the R-13r-15 exemption's
+  first act, READ-ONLY):** the site repo is `~/dev/stargazing.tech/stargazing-tech/` (an Astro
+  site on Cloudflare Workers; note the nested folder — the memory's flat path was stale); the
+  runbook `notes/variorum-releases.md` there is complete and settled against this phase's own
+  brief ("Settled 2026-10-04 with the Variorum side"): per release, in order — preflight 404 on
+  the exact DMG key · `npx wrangler r2 object put variorum-downloads/variorum/Variorum-<v>.dmg
+  --remote` with the content-type and immutable cache-control · curl the download · drop the
+  pipeline's `appcast.xml` into `public/variorum/` · bump `src/data/variorum.json` (version +
+  the full dl URL) · `npm run build && npm run deploy` · the no-cache header check (NEVER yet
+  verified live — the first release proves it, the runbook's own note) · the page check ·
+  commit + push. **CREDENTIALS: NO GAP** — `wrangler whoami` answers her OAuth token on this
+  machine (R2/Workers/deploys covered; DNS/security rules are dashboard-only and NOT needed for
+  a release). **The publish road is clear end to end; the ONLY gates left before the sitting
+  are HER two bundle items** (the Automation toggle; the 0.9.0 notes rewrite/okay).
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
