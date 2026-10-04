@@ -22,7 +22,7 @@
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
-| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **RUNNING 2026-10-04** — the implementer's LIVE STATUS is the 19c RECORD at this file's tail |
+| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **REVIEW-PENDING 2026-10-04** — Arm 1: 264 sites, 263 REAL by in-place mutant, 0 vacuous, 1 recorded; Arm 2: 43 isolation warnings → 0, suites green (Mac 160/23, mobile 106/17); the 19c RECORD at this file's tail |
 
 ---
 
@@ -60,8 +60,8 @@ table in the record (site → real/vacuous-fixed, mutant evidence per fix) · ze
 warnings left in the Mac test build AND zero in the mobile test build beyond the recorded
 not-owned classes (the deprecation class and `MobileProtectionTests:1572`'s unnecessary
 `try` stay recorded, not owed) · the touched suites green at a quiet window. **Cast:**
-`opus-implementer`; Opus cold review. **State: OPEN — runs at 19b's close (2026-10-04): the
-mobile test build it needed exists; her walk outranks it for the machine.**
+`opus-implementer`; Opus cold review. **State: REVIEW-PENDING (2026-10-04) — the implementer's run is closed in the 19c RECORD below;
+an Opus cold review follows (no Fable trigger: the landed diff is test files only).**
 
 ---
 
@@ -794,7 +794,21 @@ exists for it).
 
 ## 19c RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS ENTRY (stated first, per the contract — PENDING, finalized at the close).**
+**NOT DONE BY THIS ENTRY (stated first, per the contract):** (1) no walk capture — no product face
+changed: the landed diff is 12 TEST files (19 local/helper declarations and one test gaining
+`@MainActor`) and this record; every Arm-1 edit was a reverted probe; so the acceptance is builds +
+suites + the census, as 19a's and 19b's were; (2) NO re-spell — the census found ZERO vacuous sites,
+so no assertion byte changed anywhere; (3) ONE site not settled: `AppleKeyRoundTripTests.swift:97`
+lives in an opt-in suite that writes a synchronizable item into her iCloud Keychain — a session never
+runs it; RECORDED; (4) the silent class's WIDER edge (imported ObjC/C `BOOL` methods, which Swift
+treats as discardable) is outside the entry's stated callee universe — measured by the
+compiler-level census, not mutant-settled; NOTICED below; (5) NO full suite — only the Arm-1
+census suites (baseline + mutant) and the Arm-2 touched files' suites; (6) no `Sync/`, no schema,
+no app source landed (the mutants touched `Shared/` custody files and two core `Sources` files
+TEMPORARILY, restored — `mutants.diff`), no Release build, `/Applications` untouched (no Mac-app
+change — no refresh owed); `Tools/Release/`, 13r's DerivedData folders and the 13r plan untouched;
+(7) the NOT-OWNED classes untouched: the 10 `UIWindow.init(frame:)` deprecations and
+`MobileProtectionTests`' unnecessary `try` (1572 → 1573 after this entry's one inserted line).
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
@@ -922,4 +936,134 @@ outputs copied into the evidence folder.
    other cosmetic classes 19a/19b recorded. **Arm 1 still holds after Arm 2:** the route census
    re-run on the recompiled objects is IDENTICAL per (file, macro, check, route) on both targets,
    zero `#expect` on an Optional route (`mac-routes-arm2.tsv`, `mobile-routes-arm2.tsv`).
-7. Acceptance runs + the census table + dispositions — PENDING.
+   **Suites — DONE:** every suite type in the 12 touched files (`census/arm2-suites.tsv`),
+   `test-without-building`, suite-level `-only-testing`: **Mac `✔ Test run with 160 tests in 23
+   suites passed`** (160 = those 7 files' `@Test` count exactly; ZERO `skipped:` lines; a
+   ZERO-INSTANCE window — `pgrep` empty before 15:24:34Z and after 15:27:22Z,
+   `mac-arm2-suites-1.{log,window}`; the TK2 tripwire `TakePaneMeasureTests` among them, green) ·
+   **mobile `✔ Test run with 106 tests in 17 suites passed`** (106 = those 5 files' `@Test` count
+   exactly; ZERO `skipped:` lines; iPhone 17 Pro / iOS 26.2; `mobile-arm2-suites-1.log`).
+7. Acceptance + the census table + dispositions — DONE (this commit). State → REVIEW-PENDING.
+
+**THE CENSUS TABLE (Arm 1 — every in-class site, by callee; the per-site rows with their issue
+counts are `census/{core,mac,singleton,mobile}-settle.tsv`, the resolution `census/resolved.tsv`):**
+
+| Callee (`@discardableResult … -> Bool`) | Sites (file: lines; shape B bare · N `!` · E try/await · Q `== true/false`) | Result under its negation mutant |
+|---|---|---|
+| StoreEncryptionMigration.migrateIfNeeded | StoreEncryptionMigrationTests 114E,142E,206E,334E | 4 RED |
+| StoreEncryptionMigration.rekey | StoreEncryptionMigrationTests 221E | 1 RED |
+| AppleKeyKeychain.delete | AppleKeyRoundTripTests 97B | 1 RECORDED |
+| CommandRouter.requestBlockHistory | BlockHistoryHostTests 153B,165B,181B · BlockHistoryPaneTests 160B,199N,202B | 6 RED |
+| CommandRouter.requestMode | BlockHistoryHostTests 159B,168B,206B,207B,209B · CommandRoutingTests 91B,96B,97N,106N,960N,1033B · CurrentBlockContinuityTests 187B,198B,204B,217B,319B,329B,343B,368B,454B,462B,477B · MastheadLayoutTests 79B · ModeSwitchCarryTests 209B,216B,311B,427B · ModeSwitchFeelTests 217B,220B,403B · NoteOpenLandingTests 319B,509B,512B · PostDetailAndPanelTests 164B | 34 RED |
+| EditorViewModel.pickBlock | BlockManagementTests 151B,486B,494B,531B · TrashSurfaceTests 540B,767B · TutorialWalkTests 2489B,2491B,2949B | 9 RED |
+| (test helper) BlocksWorkbenchFaceTests.Rig.poll | BlocksWorkbenchFaceTests 256E,263E,314E,336E · PagesArrowKeysTests 104E,112E,134E · RowClickTests 127E | 8 RED |
+| BookOutlineHeights.stand | BookHeightManifestTests 275B,278N | 2 RED |
+| BookPanelModel.drop | BookPanelTests 296E,301E | 2 RED |
+| CommandRouter.dispatch | BookViewTests 770N,775B,1175N,1182B,1194B · CommandRoutingTests 127N,141B,143B · TakesFindBoardTests 479B | 9 RED |
+| (test helper) DebugOracleWindowRig.settle | DebugOracleSingletonWindowTests 95E,106E,112E,131E,153E,165E,209E,217E,264E,275E,313E,322E,359E,368E,391E,400E · DebugOracleTwoWindowTests 252E,269E,294E,330E,344E,379E,394E,437E,444E,475E,486E,522E,527E,538E,543E | 31 RED |
+| CommandRouter.requestNoteTray | DebugOracleSingletonWindowTests 110B · SideColumnTests 131B · TrayPanelMoveTests 114B,134N | 4 RED |
+| MarkdownStyling.style | FormattingSurfacesTests 183B,205B | 2 RED |
+| MarkdownStyling.restyle | FormattingSurfacesTests 211B | 1 RED |
+| (test helper) IndexClickCaretTests.Rig.poll | IndexClickCaretTests 415E,470E,472E · IndexTierMetricsTests 351E,370E,393E,427E,457E,486E | 9 RED |
+| MarkdownActs.apply | MarkdownActsTests 96B,123B,146B,167B,191B | 5 RED |
+| CommandRouter.requestTagField | MastheadLayoutTests 438B | 1 RED |
+| CommandRouter.requestNoteVersions | NoteVersionsPaneTests 119B,142N,144B | 3 RED |
+| RuleEditorModel.save | OutflowChooserTests 126E,149E,166E,202E,231E · RuleEditorTests 230E,254E,287E,318E,347E,372E,395E · TimelineAndReadingsTests 148E | 13 RED |
+| WorkspaceModel.closeSplit | PaneSplitTests 195B,265B · SavepointOnLeaveTests 203B | 3 RED |
+| StoreKeyGuardKeychain.saveGated | Phase13pKeychainFactTests 240B,264B,266B | 3 RED |
+| StoreKeyGuardKeychain.deleteGated | Phase13pKeychainFactTests 249B,287B | 2 RED |
+| (test helper) ReadModeTests.Rig.poll | ReadModeTests 220E,224E,226E,235E,238E,239E,256E,260E,262E,266E,437E,443E | 12 RED |
+| Operations.removePostFromReading | SampleLibraryWelcomeTests 475E | 1 RED |
+| KeychainAuthStorage.save | SessionTokenBindingTests 108B,147B | 2 RED |
+| KeychainAuthStorage.clear | SessionTokenBindingTests 115B,152B | 2 RED |
+| StoreKeyCustody.deviceKeychainRemove | StoreKeyBindingTests 198B | 1 RED |
+| TakesBoardLayout.noteArticleRowFrame | TakesArticleScrollTests 2005B,2006B | 2 RED |
+| WingsModel.mint | WingSwitcherTests 69E | 1 RED |
+| (test helper) MenuActionHandler.activate | MobileBlockMenuTests 286B | 1 RED |
+| MobileCommentsController.add | MobileCommentDraftTests 127E,152E · MobileCommentParkTests 96E,331E | 4 RED |
+| MobileCommentsController.submitDraft | MobileCommentDraftTests 156E · MobileCommentParkTests 160E,348E,364E,370E | 5 RED |
+| MobileBookDetailsModel.archiveDailyJournal | MobileDailyJournalArchiveTests 56E | 1 RED |
+| MobileEditorViewModel.deleteNote | MobileDeletionTests 60E,291E | 2 RED |
+| (test helper) HostedSurface.activate | MobileDeletionTests 88B,90B,238B,240B,277B,363B · MobileQuickNoteTests 1017B · MobileShelfTodayDoorTests 64B,112B · MobileTrashTests 88B,94B,116B,265B,295B,364B,423B · MobileUndoDoorTests 119B,198B,204B,223B,283B,379B | 22 RED |
+| (test helper) HostedSurface.tapAlertAction | MobileDeletionTests 153B,243B,331B · MobileTrashTests 323B,379B · MobileUndoDoorTests 320B,382B | 7 RED |
+| MobileLibraryViewModel.confirmDeleteNote | MobileDeletionTests 197E | 1 RED |
+| (test helper) typeEdit (free func) | MobileEditRoutingTests 532B · MobileEditTraceTests 216B · MobileEditorTests 655B,686B,709B · MobileLivenessTests 80B,85N,209B,214N · MobileNoteClipboardTests 80B · MobileTakesBrowserTests 278B · MobileTakesTests 148B,173B,207B,242B,253B,278B,382N,404N | 19 RED |
+| MobileLensesModel.saveCurrentView | MobileLensesTests 200E · MobileTutorialWalkTests 827E | 2 RED |
+| MobileMarkdownActs.apply | MobileMarkdownTests 389B,397B,453B,551B,563B,574N | 6 RED |
+| MobileMarkdownActs.toggleCheckbox | MobileMarkdownTests 825B,834B,857N,871B · MobileTutorialWalkTests 658B · MobileWalkTests 185B | 6 RED |
+| MobileReferencesModel.addURL | MobileReferencesTests 37E,38E,67E | 3 RED |
+| MobileScrapsModel.mintScrap | MobileScrapsTests 66E,72E,175E,208E | 4 RED |
+| (test helper) typeAtEnd (free func) | MobileTutorialWalkTests 591B,594B,595B,596B | 4 RED |
+| BookStructureModel.acceptDrop | BookStructureTests 782Q,786Q,793Q | 3 RED |
+
+**Totals: 264 sites — 263 REAL (RED at their own line under their callee's mutant), 0 VACUOUS,
+1 RECORDED (the iCloud-Keychain opt-in).** By target: core 5 · Mac 171 (154 in the 44-suite run +
+17 in the opt-in singleton suite run alone) · mobile 87 · + the recorded one. The 19a-named
+candidates (`MarkdownActsTests` 96/123/146/167/191, `BookStructureTests` 782/786/793) and the
+R2-2 mobile arm (`MobileMarkdownTests` 389/397/453/551/563, plus 574's negated twin) are ALL REAL.
+The out-of-class remainder (108 sites, `census/resolved.tsv` with a reason per row) needs no
+mutant: each callee warns when its result is discarded, and both fresh builds carry ZERO
+unused-result warnings inside any expansion (the census rule's visible half).
+**#require, checked the same way:** every `#require` on an Optional route is the unwrap
+overload doing its job; the 48 whose macro starts the statement (where a discarded Bool would
+hide) were read one by one — every condition is Optional-typed (`fetchVault`, `Queries.reading`,
+`RuleGrammar.encode`, `fetchOne`, a failable `DayBounds` init, …;
+`census/require-opt-statement-sites.txt`).
+
+**DISPOSITIONS:** Arm 1 — the census is the deliverable: 263 sites **REAL with mutant evidence**
+(no fix owed; nothing to re-spell) · 1 **RECORDED** (`AppleKeyRoundTripTests.swift:97`, unrunnable
+by a session; its expansion calls the `-> Bool` overload — a rank, never a clearance; it settles
+the day she next runs that opt-in drill with the negation mutant in place, if she wants it
+settled — no row is opened without her owner) · 0 vacuous. Arm 2 — **FIXED, all 43 warnings**
+(Mac 23 in 7 files, mobile 20 in 5 files): red-on-old IS the warning census of the fresh
+pre-entry builds (`mac-bft-0.log`, `mobile-bft-0.log`); green-on-new is the full test-target
+recompiles' census (zero isolation warnings left, nothing added) + the touched suites green.
+Nothing DISMISSED, nothing DEFERRED.
+
+**ACCEPTANCE LINES:** the census table in the record, with mutant evidence per site ✔ · zero
+isolation warnings in the Mac test build AND the mobile test build beyond the recorded not-owned
+classes ✔ · the touched suites green at a quiet window, counts confirmed, `skipped:` read ✔.
+
+**NOTICED (routed to the orchestrator; none acted on):**
+1. **The silent half of the census rule is WIDER than `@discardableResult`.** Swift imports
+   ObjC/C methods as discardable unless they are marked `warn_unused_result`: in a scratch
+   typecheck under this toolchain, `FileManager.fileExists(atPath:)`, `NSTextView
+   .shouldChangeText(in:replacementString:)`, `becomeFirstResponder()` and `NSString.hasPrefix`
+   discard silently, while the Swift stdlib's `contains`/`hasPrefix` and CoreGraphics'
+   `intersects` warn. The test targets assert such calls bare (by callee name among the 5,898
+   call-shaped conditions: `fileExists` 52, `shouldChangeText` 21, …). They are outside this
+   entry's stated universe and NOT mutant-settled — but the compiler-level census below already
+   reads them: none sits on the vacuous route at HEAD.
+2. **A cheap, exact tripwire exists for this whole class** — `census/routes.py`: every
+   `__check*` call in every test object, by macro expansion (the DWARF line annotation names
+   the macro buffer, whose mangled name carries the original line) and by the overload the
+   COMPILER chose (`-> R?` under an `#expect` = the vacuous route). It is callee-agnostic,
+   needs only the build products, runs in about a minute per target, and was validated by a
+   positive control (the F1 spelling flips its line to the Optional route; the fix flips it
+   back). A candidate standing step for the next toolchain census (a script under `Tools/` or a
+   test-plan note) — the orchestrator's or the author's call; not built into the repo here.
+3. **Local functions do not inherit their test's `@MainActor` under Swift 6.4** — the whole Arm-2
+   class was local helpers inside already-`@MainActor` suites (plus one nested struct method and
+   two file-scope helpers). A helper NESTED in another helper needs both annotated
+   (`PagedReadTests`' `drawnPages`/`walk`: annotating only the inner one is a compile error).
+   Worth one line wherever the project keeps its toolchain lessons.
+4. **Mutant fallout worth knowing for the next settlement:** several production paths BRANCH on
+   these Bools (a flipped `toggleCheckbox` moved `MobileWalkTests` walk3's text, and the mobile
+   DEBUG identity oracle killed that test's host — the runner restarted and finished); a census
+   that settles by negation must read issue LOCATIONS, never pass/fail counts, and must map
+   lines in files that carry a wrapper (the first read here mis-scored 33 sites GREEN until the
+   line shift was mapped — `census/settle.py` does it).
+
+**FOR THE COLD REVIEW — the landed diff (`git diff e8a0950e..HEAD -- App Tests Sources`):** 12
+test files, 20+/19−: each changed line is a helper/test declaration gaining `@MainActor` (11
+same-line prefixes in 7 Mac files incl. `PagedReadTests`' two; 6 in 4 mobile files; one attribute
+line above `MobilePhoneProtectionCopyTests.theReconciledStringsNameThePhone`). Check: no
+`#expect`/`#require` line changed; each annotated function is the context the compiler named
+(`mac-bft-0.warnings.txt` / `mobile-bft-0.warnings.txt` vs the `*-arm2-full.warnings.txt`);
+every caller of an annotated helper is main-actor (the builds say so). **The Arm-1 evidence is
+reproducible from the folder:** `census/mutate.py` over `census/*-mutants.txt` re-creates
+`mutants.diff`; `census/settle.py` re-scores the mutant logs; `census/routes.py` re-reads any
+build's objects. Commits: `fdc841ad` (record opened, method) · `11eb4820` (builds, route census,
+positive control announced) · `1df8793c` (census resolved, baselines, mutants announced) ·
+`b0f94351` (mutant results, restored) · `d2e43ea4` (Arm 2) · this commit (suites, table,
+dispositions, NOTICED, State → REVIEW-PENDING).
