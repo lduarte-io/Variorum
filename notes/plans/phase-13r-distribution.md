@@ -249,12 +249,60 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   declines Sparkle's early permission prompt (`updaterShouldPromptForPermissionToCheck…` →
   false, read from the 2.10.0 source before relying on it) and asks LATER, once a usage
   threshold is met. No automatic check runs before consent (unchanged). Check for
-  Updates… works from the first launch. **IN-BATCH FORK (the implementer proposes, the
-  architect rules):** the threshold's shape and number (for example: the Nth launch, N days
-  since first launch, or both), where it is counted (a LOCAL preference, never synced), and
-  how the deferred ask is presented (Sparkle's own permission prompt at a calm moment, not
-  at launch). Mark PROVISIONAL and log in `notes/QUESTIONS.md`. Her principle governs:
-  opening Variorum is calm, and no popup greets a first open.
+  Updates… works from the first launch. ~~IN-BATCH FORK (the implementer proposes, the
+  architect rules): the threshold's shape and number…~~ **SUPERSEDED the same day: she asked
+  for the cadence to be proposed NOW, with the backup-folder ask joining it (R-13r-12 below)
+  — the cadence is THE CALM-ASKS CADENCE below, not a fork.** Her principle governs: opening
+  Variorum is calm, and no popup greets a first open.
+- **R-13r-12 — THE BACKUP-FOLDER ASK MOVES INTO 13r, beside the update ask (her words,
+  2026-10-04: *"propose a cadance for the 'backup folder' iCloud prompt too - I know I said
+  13s would do it, but I'd rather that it be done now within this upcoming phase so the two
+  popups are handled, being kept in mind that the other exists, together"*).** Today's
+  behaviour (read from the code): `ICloudDriveOfferModel.consider(after:)` fires at the FIRST
+  automatic backup run (`RootView.swift:248–249`), which happens on the first launch, so the
+  modal three-door sheet greets the first open. This SUPERSEDES the timing half of the pre-13x
+  design's decision 24 ("the offer at the first backup run"); the offer's copy, doors and
+  once-per-store mark are unchanged. Her original note asked for "a popup toast" after some
+  use, so the ask becomes an OFFER on the existing status seam (AppSpec §12: offers always
+  toast), and the toast's door opens the existing sheet.
+- **THE CALM-ASKS CADENCE (proposed by the orchestrator at her request, 2026-10-04; her
+  kickoff message RATIFIES it as written unless she amends it there).** One schedule governs
+  both asks:
+  - **Shared rules.** (1) **Nothing on the first day of use.** A "day of use" is a calendar day
+    on which Variorum was opened or brought forward. It is counted on THIS Mac in a LOCAL
+    preference, never synced; an app left open across midnight counts the new day the next
+    time it becomes active. (2) **Never at the launch moment.** An ask waits until the app has
+    been open at least 2 minutes and nothing has been typed for 20 seconds, and never appears
+    while a sheet, ceremony or menu is open. (3) **At most one ask per day, and the two never
+    share a day.** (4) **Both are always answerable without the popup.** Settings ▸ General
+    gains "Check for updates automatically" (mapped onto Sparkle's own setting), and Data
+    Safety already has the second-folder door. Answering in Settings retires that ask for
+    good. (5) **One home.** A small local scheduler owns the day counter and these rules (Mac
+    app, under `Features/`, never `Shared/` — the phone has neither ask). Both asks register
+    with it, so a later ask (13s onboarding, for example) joins the same rules instead of
+    stacking.
+  - **The update ask — from the 3rd day of use,** at the first calm moment that day: Sparkle's
+    own permission window ("Check for updates automatically?" — Check Automatically / Don't
+    Check). Once answered, never again (Sparkle remembers). Until then no automatic check
+    runs; Check for Updates… works from day one.
+  - **The backup-folder ask — from the 5th day of use, at least one day after the update ask
+    was shown, and only once the library holds writing of the user's own** (a note they made,
+    not the seeded welcome content): a quiet OFFER toast — "Keep a copy of your backups in
+    iCloud Drive?" with **Set Up…** and **Not Now**. Set Up… opens today's three-door sheet
+    (the folder picker needs it). Not Now retires the ask (the existing mark). Ignored (closed
+    or timed out with no answer), it returns ONCE more after 7 further days of use, then never.
+    A store that already has a second folder is never asked (unchanged).
+  - **Why updates first:** during the beta, fixes ship fast, and a friend who never turns on
+    automatic checks stays on old builds. The second backup copy matters once there is writing
+    worth keeping; until then the automatic local backups beside the library cover everything
+    except losing the Mac.
+  - **Existing installs:** the day counter starts fresh at the U3 build. A store whose iCloud
+    offer is already answered is never asked again. Her daily drive will see the update ask on
+    its 3rd day of use after the refresh, and no backup ask if hers is already answered.
+  - The numbers (3rd day, 5th day, 2 minutes, 20 seconds, 7 days) are PROVISIONAL, tunable from
+    beta use; U3-A logs them as ONE `notes/QUESTIONS.md` entry. A walk test may set the local
+    day counter by the container-path `defaults write` on the walk build only — the shipped
+    numbers are never shortened.
 *[removed for publication]*
   and run at HER sitting; the U2 walk sheet is the template):** two fresh walk builds through
   the pipeline (0.0.3 → 0.0.4, the stamping build phase now live). Arms: (a) the DMG window
@@ -262,10 +310,13 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   shows NO Sparkle prompt (Gatekeeper's one-time "downloaded from the Internet" question is
   the OS's, expected); (c) What's New appears once after the update and not again on the
   next launch; (d) Check for Updates… installs 0.0.4 over the XPC road, relaunching as
-  0.0.4 with the library intact; (e) the deferred consent is exercised by the threshold
-  (shortened by an injected test seam or a documented defaults key on the walk build ONLY —
-  the shipped threshold is never weakened); (f) Help ▸ Send Feedback… opens a pre-filled
-  draft (NOT sent). **W-5 launches by explicit path** (`open ~/Applications/Variorum.app`) —
+  0.0.4 with the library intact; (e) THE CALM-ASKS CADENCE: on the first day of use NEITHER
+  ask appears; with the walk build's local day counter set (container-path `defaults write`,
+  walk build only) to day 3 the update ask appears at a calm moment, never at launch; set to
+  *[removed for publication]*
+  ask's day), Set Up… opens the three-door sheet, Not Now retires it; Settings ▸ General's
+  "Check for updates automatically" answers the update ask; (f) Help ▸ Send Feedback… opens a
+  pre-filled draft (NOT sent). **W-5 launches by explicit path** (`open ~/Applications/Variorum.app`) —
   *[removed for publication]*
   still holds U2's `SUFeedURL` localhost override; the U3 walk reuses it.
 - **THE HAZARDS U2 HANDED FORWARD (binding):** no PUBLIC appcast entry may exist until U3's
@@ -274,16 +325,18 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   overrides and `verify-export.sh --expect-version/--expect-build` asserts it — U3's build
   phase writes the same `git rev-list --count HEAD`, so keep the assertion. Release notes plug
   in as `Variorum-<version>.html|md` beside the DMG in the feed directory.
-- **SIZING — RAISED FOR HER KICKOFF (the sizing guidance: say so, never split silently):** U3
-  now carries the stamping + 0.9.0, What's New + the one release-notes source, MetricKit +
-  Diagnostics, Send Feedback, the DMG window and the consent deferral. That is a lot for ONE
-  implementer session (the ~500k context cliff). **The orchestrator's recommendation: run U3 as
-  TWO sequential implementer sessions under ONE acceptance walk** — **U3-A, the release
-  experience** (stamping + 0.9.0, the release-notes source + What's New, the DMG window, the
-  consent deferral; these four touch the pipeline and the launch path together) and **U3-B,
-  support & diagnostics** (MetricKit opt-in + Diagnostics + Send Feedback, plus the Settings
-  placement fork). The walk runs after U3-B. Her call at the kickoff; if she declines, U3 runs
-  as one session with a mid-unit checkpoint commit.
+- **SIZING — RULED BY HER (2026-10-04): U3 runs as TWO SUB-PHASES the orchestrator runs in
+  order, under ONE acceptance walk** (her words: *"I'll run U3 with an orchestrator, so there can
+  be two subphases that the orchestrator runs"*). **U3-A — the release experience and the calm
+  asks:** R-13r-6's stamping build phase + MARKETING_VERSION 0.9.0; the one release-notes source
+  feeding What's New (shown once per version change + Help ▸ What's New) and the appcast;
+  R-13r-10's self-explaining DMG window; THE CALM-ASKS CADENCE for both asks (R-13r-11 + R-13r-12)
+  with Settings ▸ General's update checkbox. **U3-B — support & diagnostics:** the MetricKit
+  opt-in (LOCAL, provably OFF), Diagnostics with payloads verbatim and a per-report Send, Help ▸
+  Send Feedback…. U3-B's one in-batch fork stays: the Settings placement of the opt-in +
+  Diagnostics (the implementer proposes, the architect rules). Each sub-phase is one fresh
+  `opus-implementer` session with its own per-piece commits; the orchestrator verifies each by
+  spot-check; the ONE walk runs after U3-B, then the Fable ladder over U1–U3.
 
 ### U4 — The accessibility pass
 
@@ -738,8 +791,12 @@ opened; the working tree was left clean.
   seat hit repeated safeguard stops mid-walk); she kicks off a FRESH Fable orchestrator for
   U3, the ladder and the closeout from the handoff's THIRD edition
   (`notes/plans/phase-13r-orchestrator-handoff.md`).
-- **U3 — READY TO OPEN (not started):** the amended U3 section is the brief; the sizing
-  question (two sessions, U3-A then U3-B, under one walk) is HERS at the kickoff.
+- **U3 — READY TO OPEN (not started); EVERY QUESTION ANSWERED BEFORE THE KICKOFF (2026-10-04,
+  her ask: "we're just answering the questions now so that U3 can run smoothly"):** two
+  sub-phases, U3-A then U3-B, under one walk (RULED); THE CALM-ASKS CADENCE written into the U3
+  section for both asks (proposed at her request; her kickoff message ratifies it); R-13r-12
+  moves the backup-folder ask into 13r from 13s. The only fork left in U3 is U3-B's Settings
+  placement of the crash-report opt-in + Diagnostics.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 

@@ -46,16 +46,20 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
 1. **Preflight** per the skill (CLAUDE.md + canon, the master plan, KnownIssues,
    `notes/QUESTIONS.md`, the 13r plan IN FULL, the resiliency protocol). Then `git log
    --oneline -15`, `git status -sb`, `ListAgents` — nothing should be running.
-2. **Open U3 with HER sizing call** (the U3 section's SIZING bullet): the recommendation is
-   TWO sequential implementer sessions under ONE walk — **U3-A, the release experience**
-   (stamping + MARKETING_VERSION 0.9.0, the one release-notes source feeding What's New and
-   the appcast, R-13r-10's self-explaining DMG window, R-13r-11's deferred update-consent
-   prompt), then **U3-B, support & diagnostics** (the MetricKit opt-in, Diagnostics, Help ▸
-   Send Feedback…). Ask her once, with the recommendation first; build to her answer.
-3. **Rule the in-batch forks when the implementer proposes:** the Settings placement of the
-   opt-in + Diagnostics (U3-B), and R-13r-11's "after use" threshold (U3-A — PROVISIONAL, logged
-   in QUESTIONS). The implementer proposes BEFORE building that half; the ruling lands in the
-   plan first.
+2. **Open U3 — every question is already answered** (her ask, 2026-10-04: "we're just
+   answering the questions now so that U3 can run smoothly"). **U3 runs as TWO SUB-PHASES you
+   run in order (RULED), under ONE walk:** **U3-A — the release experience and the calm asks**
+   (stamping + MARKETING_VERSION 0.9.0; the one release-notes source feeding What's New and
+   the appcast; R-13r-10's self-explaining DMG window; THE CALM-ASKS CADENCE for both the
+   update ask (R-13r-11) and the backup-folder ask (R-13r-12, moved in from 13s), plus
+   Settings ▸ General's "Check for updates automatically"), then **U3-B — support &
+   diagnostics** (the MetricKit opt-in, Diagnostics, Help ▸ Send Feedback…). The cadence is
+   written out in the U3 section; her kickoff message ratifies it. One fresh
+   `opus-implementer` per sub-phase, briefed from the U3 section; verify each by spot-check
+   before the next spawns.
+3. **The one fork left:** U3-B's Settings placement of the crash-report opt-in + Diagnostics
+   (the implementer proposes BEFORE building that half; the ruling lands in the plan first).
+   The cadence's numbers are PROVISIONAL (one QUESTIONS entry, logged by U3-A), not a fork.
 4. **The U3 walk at HER sitting** (the amended U3 section names the arms; the U2 walk sheet in
    the U2 RECORD piece 6 is the template). Mechanics that worked: the orchestrator runs every
    *[removed for publication]*
@@ -106,9 +110,14 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
 > automatically). U1 and U2 are CLOSED; U3, the review ladder and the closeout remain.
 > Re-orient from the REPO: read `notes/plans/phase-13r-orchestrator-handoff.md` (the THIRD
 > edition) first, then `notes/plans/phase-13r-distribution.md` IN FULL — its LIVE STATUS, the
-> U2 RECORD's walk verdict, and the U3 section as amended at the walk (my rulings R-13r-10, the
-> self-explaining DMG window, and R-13r-11, no popup at first open). Run the preflight, then
-> `git log --oneline -15`, `git status -sb` and `ListAgents`. Then ask me the one open question
-> (U3 as two sessions, U3-A then U3-B, under one walk — you recommend), and continue per the
-> handoff's "Next acts". The 19 ledger stays parked until 13r closes. Nothing ruled re-opens;
-> no attribution trailers on commits (my rule outranks the harness reminder).
+> U2 RECORD's walk verdict, and the U3 section as amended (my rulings R-13r-10, the
+> self-explaining DMG window; R-13r-11, no popup at first open; R-13r-12, the backup-folder
+> ask moved into this phase). Every U3 question is already answered: run U3 as two sub-phases
+> in order, U3-A (release experience + the calm asks) then U3-B (support & diagnostics), under
+> one walk at my sitting. I APPROVE the calm-asks cadence as written in the U3 section (nothing
+> on the first day of use; the update ask from the 3rd day; the backup-folder toast from the
+> 5th day once I've written something, never on the same day; never at launch; both always
+> answerable in Settings). Run the preflight, then `git log --oneline -15`, `git status -sb`
+> and `ListAgents`, and continue per the handoff's "Next acts" without asking me anything
+> until the walk. The 19 ledger stays parked until 13r closes. Nothing ruled re-opens; no
+> attribution trailers on commits (my rule outranks the harness reminder).
