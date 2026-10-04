@@ -65,4 +65,22 @@ struct EntitlementsTests {
         #expect(groups.last?.hasSuffix(".io.lduarte.Variorum.shared") == true,
                 "the SECOND group is the shared one, got \(groups)")
     }
+
+    /// 13r U2: Sparkle's XPC installer road for a sandboxed app. The two
+    /// mach-lookup exceptions are named after the build's OWN bundle id (the
+    /// variable form), so this Debug host reads `….debug-spks` / `-spki`
+    /// while the Release export reads `io.lduarte.Variorum-spks` / `-spki`
+    /// (the release pipeline's export check pins that side).
+    @Test func sparklesInstallerMachServicesFollowTheBuildsOwnBundleID() {
+        guard let task = SecTaskCreateFromSelf(nil) else {
+            Issue.record("SecTaskCreateFromSelf returned nil")
+            return
+        }
+        let names = SecTaskCopyValueForEntitlement(
+            task, "com.apple.security.temporary-exception.mach-lookup.global-name" as CFString, nil)
+            as? [String] ?? []
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        #expect(!bundleID.isEmpty)
+        #expect(names == [bundleID + "-spks", bundleID + "-spki"], "got \(names)")
+    }
 }

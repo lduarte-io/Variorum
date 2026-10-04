@@ -46,5 +46,19 @@
 		     batch 0); a Developer ID build must carry BOTH (KnownIssues, 13r). -->
 		<string>$(AppIdentifierPrefix)io.lduarte.Variorum.shared</string>
 	</array>
+	<!-- Phase 13r U2 — SPARKLE'S XPC INSTALLER ROAD (Sparkle's sandboxing
+	     doc; the 13r plan's External facts): a sandboxed app reaches the
+	     installer through two mach services named after its OWN bundle id —
+	     "-spks" (status) and "-spki" (installer connection). THE VALUE IS THE
+	     VARIABLE, for the keychain groups' reason above: Debug resolves to
+	     io.lduarte.Variorum.debug-spks / -spki and Release to
+	     io.lduarte.Variorum-spks / -spki, so the dev fence holds down to the
+	     update channel too (and Debug never starts an updater at all —
+	     R-13r-7, UpdateChannel.swift). -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spks</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spki</string>
+	</array>
 </dict>
 </plist>

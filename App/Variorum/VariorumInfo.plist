@@ -28,5 +28,39 @@
 	     copying its own Info.plist into Resources. -->
 	<key>NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac</key>
 	<true/>
+	<!-- Phase 13r U2 — SPARKLE, the update channel (rulings R-13r-1/2/7;
+	     the 13r plan's U2 RECORD). Shared by Debug and Release like
+	     everything in this file, and INERT in Debug: the updater is
+	     instantiated only outside DEBUG (UpdateChannel.swift — R-13r-7's
+	     fence), and Sparkle does nothing until something instantiates it.
+
+	     SUPublicEDKey — the PUBLIC half of the EdDSA key the author minted
+	     at HER HANDS step 3 (2026-10-04; the private half lives in her login
+	     Keychain + ONE password-manager backup, never in or beside this
+	     repo). Every appcast enclosure must verify against it.
+
+	     SUFeedURL — THE BAKED URL, ruled and LOCKED (R-13r-2 + the site-side
+	     report): stargazing.tech serves it no-cache. The R-13r-8 walk
+	     overrides it with a user default on a SCRATCH install only (Sparkle
+	     reads a defaults SUFeedURL first); update testing never uses this.
+
+	     SUEnableInstallerLauncherService — REQUIRED for a sandboxed app
+	     (Sparkle's sandboxing doc): the installer runs outside the sandbox,
+	     launched over XPC; Variorum.entitlements carries the -spks/-spki
+	     mach-lookup exceptions it needs. The DOWNLOADER service stays OFF:
+	     the app already holds network.client, and Sparkle says not to enable
+	     it then.
+
+	     Deliberately ABSENT (each one's absence is a decision):
+	     SUEnableAutomaticChecks — so Sparkle's standard consent flow ASKS
+	     before any automatic check (on the second launch); SUEnableSystem-
+	     Profiling — so no anonymous system profile can ever be sent (no
+	     analytics, out loud); SUEnableDownloaderService (above). -->
+	<key>SUPublicEDKey</key>
+	<string>tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA=</string>
+	<key>SUFeedURL</key>
+	<string>https://stargazing.tech/variorum/appcast.xml</string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
 </dict>
 </plist>

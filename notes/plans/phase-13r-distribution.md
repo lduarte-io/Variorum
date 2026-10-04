@@ -1108,6 +1108,87 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    state — every block must set its own variables inline.** Piece 4 resumes with the key.
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
    `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
-   with Sparkle's standard consent flow, the Check for Updates… door — NOT-STARTED.
+   with Sparkle's standard consent flow, the Check for Updates… door — IN-PROGRESS (code
+   committed; the Debug build + the pins PENDING).
+
+   **Sparkle facts READ FROM THE 2.10.0 SOURCE in the checkout (`SourcePackages/checkouts/Sparkle`,
+   tag 2.10.0), not assumed:**
+   - **The walk's feed override works.** `SPUUpdater.retrieveFeedURL` reads
+     `[_host objectForKey:SUFeedURLKey]`, and `SUHost objectForKey:` returns the USER-DEFAULTS
+     value before the Info.plist one. Sparkle's own start-up warning about a defaults feed URL ends
+     "If the feed url was set via a defaults write command for testing purposes, then please ignore
+     this warning."
+   - **The consent flow** (`SPUUpdater startUpdateCycle`):
+     - With `SUEnableAutomaticChecks` unset and no delegate override, Sparkle prompts when
+       `SUHasLaunchedBefore` is already set. So the FIRST launch only sets that flag, and the
+       SECOND launch asks ("Check for updates automatically?").
+     - With automatic checks unanswered/off, `scheduleNextUpdateCheckFiringImmediately:NO` returns
+       without checking. **So no network call is made before she consents, unless she presses
+       Check for Updates….**
+   - **No system profile:** the permission prompt's "Include anonymous system profile" control is
+     gated on the Info.plist `SUEnableSystemProfiling` (`SUUpdatePermissionPrompt.m:78`), which is
+     left unset.
+   - **An http feed is not refused:** with an EdDSA key present, Sparkle only LOGS an ATS warning
+     ("If the feed URL is using local networking for testing, this warning may be incorrect"). The
+     OS's ATS is the separate question (piece 6).
+   - **DMG updates work on the sandboxed road:** the disk image is unpacked by
+     `Autoupdate/SUDiskImageUnarchiver` inside the installer, which runs outside the sandbox.
+   - **The XPC services must live INSIDE Sparkle.framework, never in the app.** Sparkle refuses an
+     app-level `Contents/XPCServices/Installer.xpc`, and SPM's framework layout satisfies this.
+     Separately, `SUInstallerLauncher` logs "make sure InstallerLauncher is not sandboxed and do
+     not sign your app by passing --deep". Xcode's export never passes `--deep`; piece 5's check
+     reads the Installer's entitlements.
+   - **Sparkle refuses an app running from a read-only or temporary location**
+     (`SPUBasicUpdateDriver`, `SURunningFromDiskImageError`): "can't be updated because it was opened
+     from a read-only or a temporary location". So the walk installs by a FINDER DRAG into
+     `~/Applications`, which also clears Gatekeeper's App Translocation.
+   - API (`SPUStandardUpdaterController.h`): `initWithStartingUpdater:updaterDelegate:userDriverDelegate:`,
+     `startUpdater`, `checkForUpdates:`; `SPUUpdater.canCheckForUpdates` is the documented
+     KVO-observable for menu enablement.
+
+   **What landed (this commit):**
+   - **`App/Variorum/VariorumInfo.plist`:**
+     - `SUPublicEDKey` = `tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA=`;
+     - `SUFeedURL` = `https://stargazing.tech/variorum/appcast.xml` (the LOCKED URL);
+     - `SUEnableInstallerLauncherService` = YES.
+     - The comment records the three deliberate ABSENCES: automatic checks, system profiling, the
+       downloader service.
+     - The file is shared by both configurations and INERT in Debug, because nothing instantiates
+       Sparkle there.
+   - **`App/Variorum/Variorum.entitlements`:** `com.apple.security.temporary-exception.mach-lookup.global-name`
+     = [`$(PRODUCT_BUNDLE_IDENTIFIER)-spks`, `$(PRODUCT_BUNDLE_IDENTIFIER)-spki`]. It is the
+     variable form, exactly as the keychain groups.
+   - **`Variorum/Features/Updates/UpdateChannel.swift`:** a NEW Mac-only module (never `Shared/`;
+     the mobile target cannot see Sparkle).
+     - `@Observable final class UpdateChannel`. THE FENCE is ONE constant, `liveInThisBuild`
+       (`#if DEBUG` → false), consulted only in `forThisBuild()`. Only INSTANTIATION is fenced, so
+       the Sparkle-touching code compiles in Debug too, and a Debug build type-checks the Release
+       road.
+     - A live channel builds `SPUStandardUpdaterController(startingUpdater: false, …)` with no
+       delegates (Sparkle's standard user driver and consent flow). `start()` starts it and KVO-mirrors
+       `canCheckForUpdates`. `checkForUpdates()` is the door's act.
+   - **`VariorumAppDelegate`:** `let updates = UpdateChannel.forThisBuild()` (the
+     `AppearanceController` precedent: one per app, exists before the first window), and
+     `updates.start()` in `applicationDidFinishLaunching`.
+   - **The door:** `EditorCommands` gains `updates`, and `CommandGroup(after: .appInfo)` renders
+     **Variorum ▸ Check for Updates…** ONLY when `updates.isLive`, disabled while
+     `!canCheckForUpdates`.
+     - P-2: never rendered in Debug, where it could never act.
+     - UNDECLARED in the capability registry, on the "Lock Library Now" / "New Window" precedent:
+       an app-menu standard, conditionally rendered, with no block/take/post/book scope.
+       **Flagged for the ladder** as a P-1 reading, not a product call.
+   - **The only chrome face is the menu item.** Every update window (consent, found, progress,
+     relaunch) is Sparkle's own standard UI, not this unit's to re-voice.
+   - **The pins:**
+     - `VariorumTests/UpdateChannelTests.swift`: the Debug fence at both levels; the inert channel's
+       no-door/no-op contract; the door's words; the locked feed URL; the minted public key (exact,
+       and 32 bytes decoded); launcher ON / downloader absent; automatic checks, system profiling
+       and prompt-on-first-launch ABSENT.
+     - `EntitlementsTests` gains one pin: the mach-lookup names equal `[<bundleID>-spks,
+       <bundleID>-spki]` in the Debug host (`io.lduarte.Variorum.debug-…`).
+     - **The fence pin gets NO mutation run, deliberately.** The mutant (a live channel in Debug)
+       would START Sparkle in a Debug build pointed at the public feed, which is exactly what
+       R-13r-7 forbids. The pin's red side holds by construction; the Release side is piece 5's
+       export check + the walk.
 5. **The full release pipeline** in `Tools/Release/` — NOT-STARTED.
 6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.

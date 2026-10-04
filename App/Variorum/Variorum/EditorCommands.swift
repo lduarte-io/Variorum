@@ -26,6 +26,9 @@ struct EditorCommands: Commands {
     /// workspace (⌥⌘[, ⌥⌘], ⌘⇧1–9, Open Beside, Close Split, the context-bar
     /// fold) therefore acts on the window she is actually in.
     let windows: WindowRegistry
+    /// 13r U2: the app's update channel (Sparkle). Only its door's
+    /// rendering and enablement are read here; the act is the channel's.
+    let updates: UpdateChannel
 
     /// The key window's routing channel — nil only before any window has
     /// registered (the first frames), where every door is already disabled
@@ -262,6 +265,19 @@ struct EditorCommands: Commands {
     }
 
     var body: some Commands {
+        // 13r U2 — Variorum ▸ Check for Updates…, under About: the platform's
+        // own place for this act. UNDECLARED in the capability registry, on
+        // the Lock Library Now / New Window precedent. It is an app-menu
+        // standard, conditionally rendered and app-scoped, and has no
+        // block/take/post/book scope or mode rule to declare. P-2 holds: the
+        // door renders ONLY where it can act (a live channel, so never in
+        // DEBUG — R-13r-7), and it greys while Sparkle already runs a session.
+        CommandGroup(after: .appInfo) {
+            if updates.isLive {
+                Button(UpdateChannel.checkForUpdatesTitle) { updates.checkForUpdates() }
+                    .disabled(!updates.canCheckForUpdates)
+            }
+        }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
             // 13f cold review R1-3: the creation acts land on the window

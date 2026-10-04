@@ -23,6 +23,12 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// window, which is what makes the launch application deterministic.
     let appearance = AppearanceController()
 
+    /// 13r U2: **the app's ONE update channel** (Sparkle, the XPC installer
+    /// road). The same reason as `appearance`: one per app, and it exists
+    /// before the first window. Inert in every DEBUG build: R-13r-7's fence
+    /// is applied inside `forThisBuild()`, and nowhere else.
+    let updates = UpdateChannel.forThisBuild()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
@@ -40,6 +46,9 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         // controller's own init applies it too, and neither order matters.
         appearance.apply()
         sanitizeWindowFrames()
+        // 13r U2: Sparkle's cycle starts once launching is done. On the
+        // inert (Debug) channel this does nothing.
+        updates.start()
         #if DEBUG
         // 18l U-VIS: the visual harness's oracle endpoint — registers nothing
         // unless the harness launched this process (`VARIORUM_VISUAL_WALK=1`).

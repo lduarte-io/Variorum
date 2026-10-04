@@ -320,7 +320,9 @@ struct VariorumApp: App {
         //     because the wrong conclusion was one screenshot away.)
         .windowToolbarStyle(.unifiedCompact)
         .commands {
-            EditorCommands(bootstrap: bootstrap, windows: windows)
+            // 13r U2: the update channel rides in for the app menu's
+            // Check for Updates… door (rendered only where it can act).
+            EditorCommands(bootstrap: bootstrap, windows: windows, updates: appDelegate.updates)
         }
         // 13f batch 5b (W2/A26 — her round-2 ruling: BOTH window kinds).
         // The lightweight NOTE-ONLY window: one note, its detail and its
