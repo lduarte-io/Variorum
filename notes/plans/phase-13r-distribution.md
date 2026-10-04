@@ -1097,8 +1097,9 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    output witnessed by the orchestrator):** the mint printed "A key has been generated and saved in
    your keychain" (fresh, as staged — no pre-existing-key message); **the PUBLIC key =
    `tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA=`** (44 chars, the `-p` cross-check byte-identical);
-   the backup export wrote 44 bytes and went to her password manager (step 4, her GUI; her
-   confirmation of the stow asked and recorded below when given); the export file REMOVED —
+   the backup export wrote 44 bytes and went to her password manager (step 4, her GUI;
+   **stow CONFIRMED at her word — "yes" — before any further step**, so R-13r-1's one-backup
+   custody stands complete); the export file REMOVED —
    with one wrinkle caught: the first cleanup ran with an empty `$EXPORT` (the `!` road starts a
    fresh shell per command, so the variable did not persist and `rm` deleted nothing while the
    `ls`-based echo misleadingly said "removed") — re-run with the path set inline: `removed` +
