@@ -603,6 +603,29 @@ opened; the working tree was left clean.
   recorded for U3's sequencing). **U2's code and pipeline are DONE; U2 now waits ONLY on her
   walk sitting — the walk's VERDICT closes it.** Per her resume word, **19b SPAWNS NOW**
   (19c after it closes), one agent at a time, her walk outranking both for the machine.
+- **THE AWAY-GAP'S 19 WORK — the record, with ONE DEVIATION OWNED (2026-10-04, at her ask:
+  "ensure the docs note the deviation"):** the gap ran **19b** (her word) → **19c** (her
+  word) → **19d** — and 19d was NOT in her word's letter: it was born from 19c round 1's
+  MAJOR (a silent-`#require` class behind a false clearance sentence, unowned) and the
+  orchestrator SPAWNED AND RAN it on its own judgment under the SPIRIT of her away-gap
+  authorization ("don't pause chat with a question"), recorded here as the deviation the
+  skill requires, never silent. Why it was judged right to run: every 19 entry was
+  TEST-SIDE ONLY (zero lines that ship; the per-entry reviewers confirmed nothing under
+  `13r-u1/`, `13r-u2/` or `Tools/Release/` newer than base each round), the silent class
+  included two custody-drill assertions the 13r ladder's "suite green" would otherwise
+  lean on hollowly, and her walk retained right-of-way throughout. **THE REFOCUS
+  COMMITMENT, binding from here:** after 19d's round-2 verdict closes it, NO further 19
+  letter runs inside 13r — anything new a review surfaces is RECORDED AND QUEUED, not run;
+  the phase's own spine (her walk → U3 → the ladder → closeout) is the only work. **Walk
+  readiness re-confirmed at this writing:** both walk DMGs in place (stapler-validated +
+  Gatekeeper-accepted at the U2 seam check), the W-0…W-10 checklist staged in the U2
+  RECORD, zero instances; `walk-feed/` is absent BY DESIGN (it is born at W-0(c), the one
+  Keychain step, with her at the machine). **U3 readiness:** its brief inputs are all
+  in-plan (the U3 unit section + the U2 RECORD's interface notes — the stamp passed as
+  overrides with the export assertion, release notes as `Variorum-<version>.html|md`
+  beside the DMG, the two hazard notes: no public appcast entry before U3's stamping is in
+  her hand-copied build; her daily drive will see Sparkle's consent prompt once after the
+  refresh); U3's implementer spawns the moment her walk closes U2, strictly sequential.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
