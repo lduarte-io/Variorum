@@ -2416,7 +2416,13 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
 ## U3-B RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
 **NOT DONE BY THIS SUB-PHASE (stated first, per the contract; kept current, FINAL at the stop):**
-- PENDING — this line is rewritten at each stop. At the start: nothing is built yet.
+- **AT THE PLACEMENT PAUSE (2026-10-04):** the FACES are not built — no Settings row for the opt-in,
+  no Diagnostics surface — because their placement is the in-batch fork (piece 4's PROPOSAL, awaiting
+  the architect's ruling). Everything placement-independent is built and pinned (pieces 1–3). Not yet
+  done either: the U3 walk sheet (staged after the ruling, so its optional arm can name the ruled
+  pane), the mutation run, the dev-store walk + captures, the finals' suites. Nothing published;
+  `/Applications` and the real store untouched; zero `Sources/VariorumCore/Sync/`, zero schema, zero
+  `Shared/`, zero mobile-target files.
 
 **Session start (2026-10-04 ~21:10Z):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair).
@@ -2540,7 +2546,76 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      suites passed`, no `skipped:` line** (`13r-u3b/p3-test.log`; no warning in any touched file).
    - QUESTIONS **#181** opened (a)–(g): the two roads, the by-hand fallback, the words, the Help
      placement, crash-only collection, OFF keeps received reports, no cap.
-4. THE PLACEMENT PROPOSAL (the in-batch fork) — PENDING; the session STOPS there.
+4. THE PLACEMENT PROPOSAL (the in-batch fork) — **WRITTEN (this commit); THE SESSION STOPS HERE
+   for the architect's ruling.**
+
+   **THE PLACEMENT PROPOSAL — where the crash-report opt-in and the Diagnostics surface live in
+   Settings.** The surveyed facts first (read from `SettingsShape.swift`, `AppSettingsView.swift`,
+   `DataSafetyPane.swift`, `ProtectionPane.swift`; the window is a FIXED 720×520 with a leading pane
+   list + the search field):
+   - **General** — "the voice, the colours, light and dark, and how the app confirms what it did";
+     deliberately THE SHORT PANE (KnownIssues row 59's fold: 13u4 S1 split the old tab and reordered
+     it so the appearance choice is on screen when Settings opens). Today: Voice · Light & dark (this
+     Mac) · Palette (the tallest control in Settings) · Confirmations · **Updates** (U3-A's "Check for
+     updates automatically" — rendered ONLY in a live Release build, P-2).
+   - **Editor** (10 rows: the page, switching modes, ownership badges, while you write) · **Takes** (2)
+     · **Writing** (3 synced document habits) · **Shortcuts** (the keyboard map + dictionary) ·
+     **Tags** (the tag manager) — all about writing; none fits.
+   - **Protection** — the passphrase, Standard/Castle, escrow, the ways back in: custody, not this.
+   - **Data Safety** — the LONGEST pane, seven sections, all about THE LIBRARY's safety: copies of
+     your library · a second folder · plain-text copies · the decrypted export · "Your account" (is
+     anything still only on this Mac) · restoring a copy · the backup log. Blurb: "Backups, how fresh
+     they are, and what restoring one does."
+   - **Acknowledgments** — open-source notices.
+   - The surface itself, whatever the pane (shared by every option): the opt-in TOGGLE with the
+     privacy story stated plainly under it (off unless you turn it on; macOS hands Variorum a report
+     after a crash, usually at the next launch; reports stay on this Mac and appear below exactly as
+     they arrived; nothing is sent unless you press Send, which opens an email draft to
+     support@stargazing.tech with the report attached, for you to read first; this Mac only); then
+     the RECEIVED REPORTS, newest first — each a card with its heading (the versions read out of it)
+     and received date, the report's raw JSON ALWAYS VISIBLE in a bounded, scrollable, selectable
+     monospaced box (verbatim means shown before Send is reachable, never behind a disclosure), and
+     **Send…** (the support door's draft with the report attached) + **Delete** (from this Mac);
+     an empty list says so in one quiet line. A catalog row so Settings search finds it ("crash",
+     "report", "diagnostics", "privacy", "metrickit", "support"…).
+
+   **OPTION A (RECOMMENDED) — a TENTH PANE, "Diagnostics", between Data Safety and Acknowledgments**
+   (symbol `stethoscope`; blurb along the lines of "Crash reports — off unless you turn them on, and
+   never sent without you."). The toggle at the top, the received reports under it, nothing else.
+   *For:* the brief and the plan already NAME the surface "Diagnostics" — a pane of that name is where
+   anyone (a friend, Settings search) looks; the privacy promise reads best alone at the head of its
+   own pane rather than as the eighth section of another; the verbatim JSON is long (a real report is
+   hundreds of lines) and gets a pane's height without pushing any existing control under a fold;
+   every existing pane keeps its shape and its blurb (row 59's fold work untouched; Data Safety's
+   seven sections untouched); one pane = one concern (P-9's spirit); it is the shape a later
+   "diagnostics" thing (a hang report, an exported log) would join. *Against:* a tenth pane for one
+   toggle and a list that is empty for nearly everyone — the empty state must be calm, one line.
+   Ten rows fit the fixed pane list with room (measured by the row metrics: ~27 pt a row).
+
+   **OPTION B — a "Crash reports" section at the END of Data Safety** (after the backup log).
+   *For:* Data Safety is already the pane about what exists on this Mac and what leaves it (copies,
+   exports, the "is anything still only here" evidence), and crash reports are another local
+   record; no new pane. *Against:* Data Safety is about THE LIBRARY's safety and crash reports are
+   about THE APP — a friend looking for "crash" will not guess "Data Safety"; it is the longest pane
+   already, so the toggle and its promise land at the very bottom of a long scroll and the verbatim
+   JSON makes it longer still; the pane's blurb would have to change to admit a second subject.
+
+   **OPTION C — the toggle in GENERAL beside Updates, the reports behind a "Show Crash Reports…"
+   door** (a sheet). *For:* the two app-level settings that concern the outside world sit together
+   (Updates: asks stargazing.tech; Crash reports: never sends); General is "the whole app".
+   *Against:* General is the deliberately SHORT pane (row 59's fold history); its Updates section is
+   Release-only while crash reporting exists in every build, so the pairing is absent exactly where
+   the walk runs; a sheet inside Settings is a second surface to build and puts the verbatim evidence
+   one click away from the promise that says it is shown.
+
+   **NOT PROPOSED, recorded:** Protection (custody, a different trust surface); a second Send
+   Feedback… door inside the pane (the act already has its door in the Help menu — one act, one
+   door, P-1's spirit; the pane's caption may NAME Help ▸ Send Feedback… in words).
+
+   **Resuming after the ruling:** piece 5 builds the toggle + the surface into the ruled place (the
+   `CrashReporting` owner handed to `AppSettingsView` like `appearance`/`updates`; the catalog row;
+   `rowIDsRendered` updated; P-8 voice chrome; pins incl. the pane-shape and search pins), then
+   piece 6 stages the walk sheet, then the finals.
 5. The faces, to the architect's ruling: the opt-in row + the Diagnostics surface — PENDING the
    ruling.
 6. THE U3 WALK — STAGED (R-13r-16's combined public road) — PENDING.
