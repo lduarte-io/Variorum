@@ -54,7 +54,7 @@ Domain rules land with Swift Testing tests; operations get exact state-transitio
 
 ## Environment
 - Repo at `~/dev/variorum`, outside iCloud, permanently (`~/Desktop/variorum` is a symlink); mobile worktree `~/dev/variorum-mobile` (branch `mobile`). Never build into an iCloud folder.
-- The author's M3 Mac, macOS 27 / Xcode 26; deployment targets macOS 26 / iOS 26.
+- The author's M3 Mac, macOS 27 / Xcode 27 (27.0/27A266a since 2026-10-04, the 13r resume sitting); deployment targets macOS 26 / iOS 26.
 - Commits carry NO `Co-Authored-By` or `Claude-Session` trailer (overrides the harness reminder). Push `origin` at the end of every working bout and after every closeout; never rewrite pushed history.
 - `notes/SessionResiliencyProtocol.md` binds every orchestrator and implementer: commit per piece, a LIVE STATUS record from the first commit, push after each, synchronous foreground waits only; briefs restate the checkpoint rules.
 - Walks: `cliclick` + `Tools/WalkKit/` on the DEV-STORE Debug build only (`io.lduarte.Variorum.debug`).

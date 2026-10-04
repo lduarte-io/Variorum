@@ -283,11 +283,19 @@ updated app. A changed Xcode version re-opens nothing ruled — it is an environ
 her update run had installed CLT 27.0 only (Software Update carries macOS + CLT, never the Xcode
 app); the on-disk Xcode stayed 26.3 and the OS now REFUSES its GUI launch (Launch Services -10664,
 the compatibility gate; her Spotlight shows the prohibitory icon) while `xcodebuild` still runs.
-macOS 27.0.1 (26A434) sits downloaded awaiting HER restart. The road out is hers: the 27.0.1
-restart, then the full Xcode update via the App Store app (or the developer.apple.com .xip). Noted
-as an unblock option: HER HANDS steps 1–2 need NO Xcode GUI (portal + Keychain Access CSR for the
-cert, the profile downloads in the browser, notarytool is CLI) — but U1 builds on the settled
-toolchain, so resolving Xcode first is the cleaner order.
+macOS 27.0.1 (26A434) was offered by Software Update (listed AVAILABLE — the orchestrator's
+"downloaded" read overstated; her correction stands: *"i haven't downloaded 27.0.1 so I won't be
+doing that right now"* — the point update is DEFERRED at her word, an open environment item, not
+13r's). Noted as an unblock option: HER HANDS steps 1–2 need NO Xcode GUI (portal + Keychain
+Access CSR for the cert, the profile downloads in the browser, notarytool is CLI).
+**RESOLVED SAME SITTING, her hands:** she installed the new Xcode from the App Store WITHOUT the
+27.0.1 restart, opened it, components installed, and Settings ▸ Accounts shows the NEW email —
+the stale-email check passed with it. **THE FINAL PAIR, re-pinned by the orchestrator and binding
+for every unit brief: macOS 27.0 (26A428) / Xcode 27.0 (27A266a)**, `xcode-select` at
+`/Applications/Xcode.app`, `-checkFirstLaunchStatus` OK; CLAUDE.md's environment line updated in
+the same commit. Xcode 27 is a new MAJOR mid-phase: U1's first act includes a clean
+`swift build` + a Mac build so any toolchain breakage surfaces before real work, and any odd
+failure checks the toolchain first (her standing instruction above).
 
 ## THE LADDER
 
