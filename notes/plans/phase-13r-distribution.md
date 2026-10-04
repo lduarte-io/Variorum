@@ -2275,3 +2275,11 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      `1.0` — her own About screenshot of the old daily drive, "1.0 (1)"); the iCloud retirement pin
      (the pre-fix `RootView.swift` carries `services.backup?.onRun = { record in
      offer.consider(after: record) }` at line 248 — `git show 138ac723:…/RootView.swift`).
+   - **DEV-STORE WALK IN FLIGHT (Debug build, `io.lduarte.Variorum.debug`, the fenced dev store):**
+     the dev domain's prefs were EXPORTED first to the gitignored
+     `App/Variorum/DerivedData/13r-u3a/devprefs-prewalk/io.lduarte.Variorum.debug.plist`; for the
+     backup-offer capture the walk DELETES `variorum.backup.secondDestination` (a dev bookmark) and
+     the dev offer mark, and sets the day counter. **Restore at the walk's end (app quit):
+     `defaults import ~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Preferences/io.lduarte.Variorum.debug <that export>`.**
+     The voice was switched to Study for captures (a dev-store synced setting) — switched back to
+     Terminal at the end.
