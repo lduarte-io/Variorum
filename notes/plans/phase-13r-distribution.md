@@ -271,7 +271,15 @@ fresh-user-account walk uses fast user switching (her session's app QUIT first �
 one bundle id confuse the discipline even across stores); Sparkle's SPM resolve pins the exact
 version (2.10.0); the stamping build phase must run BEFORE code signing or the seal breaks; never
 commit the notarytool profile name's secrets, the API key file, or any EdDSA export — the key lives
-in the Keychain and her password manager ONLY.
+in the Keychain and her password manager ONLY. **TOOLCHAIN MOVED MID-SITTING (2026-10-04, her
+report: an Xcode update "required post upgrade to golden gate mac os" is installing):** at the
+orchestrator's pre-update read the machine was macOS 27.0 (26A428) / Xcode 26.3 (17C519),
+`xcode-select` at `/Applications/Xcode.app`; the orchestrator RE-READS both versions before the U1
+spawn and every unit brief carries the then-current pair. Any odd build/codesign failure in this
+phase checks the toolchain FIRST (her own instruction): `xcodebuild -version`, first-launch
+component installs, the license (hers to accept if asked), `xcode-select -p` still pointing at the
+updated app. A changed Xcode version re-opens nothing ruled — it is an environment fact to record
+(CLAUDE.md's environment line updates when the final pair is verified).
 
 ## THE LADDER
 
