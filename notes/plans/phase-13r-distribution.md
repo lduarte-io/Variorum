@@ -1233,7 +1233,8 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        - Restored with `git checkout --`, then **GREEN, 7/7**; the tree is clean.
      - **Release-path compile:** the Sparkle-touching code compiles in Debug too (only instantiation
        is fenced), so the Debug build above type-checks it. Piece 5's archive is the Release proof.
-5. **The full release pipeline** in `Tools/Release/` — IN-PROGRESS (design below; scripts next).
+5. **The full release pipeline** in `Tools/Release/` — IN-PROGRESS (scripts committed; the FIRST
+   REAL RUN = walk build A PASSED end to end except the Keychain step; walk build B next).
 
    **Two walk facts MEASURED first** (they shape both pieces 5 and 6). The probe was a throwaway
    SANDBOXED probe app: `network.client`, NO ATS dictionary, built against SDK 27.0 with `minos`
@@ -1313,4 +1314,48 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    - **`verify-export.sh` + `archive-and-export.sh`** were extended in `815f7e38` (above in the
      commit log). Smoke on U1's pre-Sparkle export: EXACTLY the 7 Sparkle checks fail, and the other
      40 of 47 pass.
+
+   **THE FIRST REAL RUN — WALK BUILD A, `0.0.1` (build 4829, commit `40301c3c`, a zero-instance
+   window, `--stop-before-appcast`):** `Tools/Release/release.sh --walk --version 0.0.1
+   --stop-before-appcast --out App/Variorum/DerivedData/13r-u2/walk-a` ran DETACHED, with its exit
+   line in `13r-u2/walk-a.run.log`, and this session blocked on the log in foreground polls.
+   `RELEASE-EXIT=0`, 12:54:18Z → 13:32:26Z.
+   - **Preflight:** clean tree, zero instances, tools verified, `VariorumNotary` answered.
+   - **Stamp → archive → export:** the export drill passed **56/56** with the stamp proven
+     (`CFBundleShortVersionString 0.0.1`, `CFBundleVersion 4829`). Every nested Sparkle binary
+     (`Autoupdate`, `Updater.app`, `Installer.xpc`, `Downloader.xpc`, the framework) was re-signed by
+     the export under **Developer ID + hardened runtime + timestamp**. The keychain groups are
+     byte-identical to her `/Applications` build. `Installer.xpc` is unsandboxed. The
+     `-spks/-spki` pair is EXACT.
+   *[removed for publication]*
+     **Accepted**. Apple's log reads "Ready for distribution" with `issues: None`. **It sat "In
+     Progress" ~32 minutes: the team's FIRST submission.** The DMG's submission took ~1 minute. Then
+     `verify-export.sh --require-notarized` → **`PASS  Gatekeeper ACCEPTS (source=Notarized
+     Developer ID)`** + **`stapler validate`** → **57/57**. This is U1's predicted turn from
+     "rejected / Unnotarized Developer ID" to ACCEPTED, now measured.
+   - **DMG:** `Variorum-0.0.1.dmg` (UDZO, the app + an `/Applications` link). Signed `Developer ID
+     *[removed for publication]*
+     *[removed for publication]*
+     `spctl -a -t open --context context:primary-signature` → **accepted, source=Notarized
+     Developer ID**.
+   - **The SHIPPED bytes:** the app INSIDE the final DMG passed **57/57**. The DMG is **24,173,366
+     bytes**, sha256 `beb771c211114bff58763aec6b18f371cd06c5ac0109311152e15b1ea590945f`.
+   - **dSYMs:** `Variorum.app.dSYM` UUIDs = the shipped binary's (arm64 + x86_64:
+     `9527D086-E84E-3D63-AFA4-4090B92E9F75`, `9A6AC251-79B8-3F6A-8571-128174AAE426`).
+   - **A hygiene finding, FIXED in the road (this commit):**
+     - **Finding:** after the run, LaunchServices again listed three paths under the run folder:
+       the stapled export, the DMG's mount point, and Sparkle's `Updater.app` inside the archive
+       intermediates. `archive-and-export.sh`'s own sweep had left 0, so the later steps that TOUCH
+       the bundle (staple, Gatekeeper assessment, the mount) re-registered them.
+     - **Fix:** `release.sh` now ends with a sweep. It deletes the archive's `DerivedData`
+       intermediates (another full app copy, and **1.9 GB**; the dSYMs come from the `.xcarchive`),
+       unregisters every `.app` under the run plus the mount's own record, and re-counts after a
+       pause, listing only registrations whose path still EXISTS. A record for a removed mount point
+       resolves nothing.
+     - **Applied by hand to walk A: ZERO live registrations.**
+     - **Spotlight measured CLEAN:** a global `kMDItemCFBundleIdentifier == "io.lduarte.Variorum"`
+       query finds ONLY `/Applications/Variorum.app`, so `.noindex` holds. An `mdfind -onlyin` hit
+       was a live scan of the folder named, not the index.
+   - **The notarization wait cap is 6 h now (was 45 min),** because the first submission's 32
+     minutes came too close.
 6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.

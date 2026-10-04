@@ -118,7 +118,9 @@ say "export ${APPX}: the pre-notarization drill PASSED with the stamp proven (${
 notarize() {   # notarize <file> <label> — submit, wait, keep the JSON result and Apple's log
   local file="$1" label="$2" status id
   say "notarytool submit ${file##*/} (${label}) — waiting for Apple"
-  if ! xcrun notarytool submit "$file" --keychain-profile "$NOTARY_PROFILE" --wait --timeout 45m \
+  # 6 h: measured at U2's first real run, a team's FIRST submission sat "In Progress" for ~32 min
+  # (the next one took ~1 min). A detached run waits it out rather than failing mid-pipeline.
+  if ! xcrun notarytool submit "$file" --keychain-profile "$NOTARY_PROFILE" --wait --timeout 6h \
          --output-format json > "${OUT}/notary-${label}.json" 2> "${OUT}/notary-${label}.err"; then
     echo "notarytool submit failed (${label}):" >&2; cat "${OUT}/notary-${label}.err" >&2; exit 4
   fi
@@ -196,6 +198,7 @@ V=$?
 LINK="$(readlink "${MNT}/Applications" || true)"
 "$LSREGISTER" -u "${MNT}/Variorum.app" >/dev/null 2>&1
 hdiutil detach "$MNT" > /dev/null 2>&1 || hdiutil detach -force "$MNT" > /dev/null 2>&1
+"$LSREGISTER" -u "$MNT" >/dev/null 2>&1   # the volume's own record (measured lingering at walk A)
 set -e
 rmdir "$MNT" 2>/dev/null || true
 grep -E '^(FAIL|VERDICT)' "${OUT}/verify-dmg.txt" || true
@@ -229,6 +232,31 @@ if [ "$MODE" = release ]; then
   cp -p "${OUT}/RELEASE-INFO.txt" "${OUT}"/notary-*.json "${OUT}/verify-stapled.txt" "${OUT}/verify-dmg.txt" "$RECORD/"
   cp -p "${BUILD_DIR}/verify.txt" "${RECORD}/verify-pre-notarization.txt"
   say "DURABLE record (dSYMs + the build's records): ${RECORD}"
+fi
+
+# ------------------------------------------------------------------ hygiene: no real-store-id copy stays resolvable
+# MEASURED at walk A (U2 piece 5): archive-and-export.sh's own sweep left 0 registrations, but the later
+# steps that TOUCH the bundle (staple, Gatekeeper assessment, the mount) re-registered the stapled export,
+# the DMG's mount point and Sparkle's Updater.app inside the archive intermediates. So the sweep runs
+# again here, last: the intermediates are deleted (another full app copy plus GBs of build products; the
+# dSYMs above came from the .xcarchive), then every .app left under the run is unregistered and the
+# count re-read after a pause. Spotlight was measured clean (.noindex holds; a global
+# kMDItemCFBundleIdentifier query finds only /Applications).
+ls_sweep() {
+  rm -rf "${BUILD_DIR}/DerivedData"
+  while IFS= read -r app; do "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true; done \
+    < <(find "$OUT" -type d -name '*.app' 2>/dev/null)
+  sleep 5
+  # Only a registration whose path STILL EXISTS can resolve an app. A record for a removed path (the
+  # detached mount point, measured at walk A) points at nothing and is LaunchServices' to prune.
+  "$LSREGISTER" -dump 2>/dev/null | grep -E "path: *${OUT}/" | sed -E 's/^.*path: *//; s/ \(0x[0-9a-f]+\)$//' \
+    | sort -u | while IFS= read -r p; do [ -e "$p" ] && echo "$p"; done || true
+}
+LEFT_LIST="$(ls_sweep)"
+if [ -z "$LEFT_LIST" ]; then
+  say "LaunchServices: 0 registrations under ${OUT} (the archive intermediates removed)"
+else
+  say "WARNING: LaunchServices still lists under ${OUT}:"; echo "$LEFT_LIST" | sed 's/^/    /'
 fi
 
 # ------------------------------------------------------------------ 9. the appcast (HER Keychain)
