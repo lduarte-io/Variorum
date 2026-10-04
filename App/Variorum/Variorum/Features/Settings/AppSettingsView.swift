@@ -56,6 +56,10 @@ struct AppSettingsView: View {
     /// delegate (a preview, a pin) gets the row's door hidden rather than a
     /// second owner minted beside the real one.
     let appearance: AppearanceController?
+    /// 13r U3-A: the app's ONE update channel — General's "Check for updates
+    /// automatically" maps onto Sparkle's own setting through it. Rendered
+    /// only where the channel is LIVE (P-2: never in a Debug build).
+    let updates: UpdateChannel?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
     /// The pane on screen. Her "overall one" opens.
@@ -68,12 +72,14 @@ struct AppSettingsView: View {
     init(
         session: AppSession, services: AppServices? = nil,
         protection: ProtectionController? = nil,
-        appearance: AppearanceController? = nil
+        appearance: AppearanceController? = nil,
+        updates: UpdateChannel? = nil
     ) {
         self.session = session
         self.services = services
         self.protection = protection
         self.appearance = appearance
+        self.updates = updates
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -92,7 +98,7 @@ struct AppSettingsView: View {
     /// pane itself, so it can be found by name — and that row is what these
     /// entries say.
     static let rowIDsRendered: [SettingsPane: [String]] = [
-        .general: ["voice", "palette", "appearance", "receipts"],
+        .general: ["voice", "palette", "appearance", "receipts", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
@@ -256,7 +262,7 @@ struct AppSettingsView: View {
     @ViewBuilder private var paneBody: some View {
         switch pane {
         case .general:
-            GeneralPane(theme: theme, session: session, appearance: appearance)
+            GeneralPane(theme: theme, session: session, appearance: appearance, updates: updates)
         case .editor:
             EditorSettingsPane(theme: theme)
         case .takes:
@@ -385,6 +391,7 @@ private struct GeneralPane: View {
     let theme: ThemeStore
     let session: AppSession
     let appearance: AppearanceController?
+    let updates: UpdateChannel?
 
     var body: some View {
         Form {
@@ -457,6 +464,24 @@ private struct GeneralPane: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+            // 13r U3-A — THE CALM-ASKS CADENCE's rule 4: the update ask is
+            // always answerable here, without the popup. The checkbox IS
+            // Sparkle's own setting; touching it answers the question, so the
+            // ask retires for good. Only where a live channel can act (P-2).
+            if let updates, updates.isLive {
+                Section(UpdateSettingsCopy.section) {
+                    Toggle(SettingsCatalog.title("updates"), isOn: Binding(
+                        get: { updates.automaticallyChecks },
+                        set: { updates.setAutomaticallyChecks($0) }))
+                    Text(updates.permissionAnswered
+                         ? UpdateSettingsCopy.help
+                         : UpdateSettingsCopy.help + " " + UpdateSettingsCopy.unansweredNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .formStyle(.grouped)

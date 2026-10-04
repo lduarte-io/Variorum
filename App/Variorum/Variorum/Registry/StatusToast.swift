@@ -28,6 +28,18 @@ struct StatusToast: View {
             // door can BE the door. The button dismisses as it acts — an
             // offer that stays on screen after it is taken reads as a
             // question that was never answered.
+            // 13r U3-A (R-13r-12): an offer's second door — the decline
+            // (Not Now), quieter than the act and before it, the platform's
+            // order for a cancel beside a default. It dismisses as it acts.
+            if let secondary = item.secondary {
+                Button(secondary.label) {
+                    onDismiss()
+                    secondary.perform()
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .lineLimit(1)
+                .fixedSize()
+            }
             if let action = item.action {
                 Button(action.label) {
                     onDismiss()

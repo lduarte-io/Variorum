@@ -3,13 +3,19 @@
 //  VariorumTests
 //
 //  pre-13x batch 5b, item 0(a) — THE iCLOUD DRIVE OFFER (decision 24; copy
-//  §6; ledger 64): once, at the first backup run, over the picked-folder
-//  machinery. The pins drive the MODEL through scripted leaves (no panel
-//  ever opens) over a scratch defaults suite: the offer is due only after a
-//  run and only when the mark is unset and no second folder is picked;
-//  each door's effect; the mark's variant scoping; a store that already
-//  picked a folder is never asked. A new mechanism — no behavioural revert
-//  exists (the brief's letter); the render pin hosts the sheet alone.
+//  §6; ledger 64), over the picked-folder machinery. The pins drive the
+//  MODEL through scripted leaves (no panel ever opens) over a scratch
+//  defaults suite: each door's effect; the mark's variant scoping; a store
+//  that already picked a folder is never asked. The render pin hosts the
+//  sheet alone.
+//
+//  13r U3-A — R-13r-12: the sheet's OPENER changed, its doors did not. The
+//  first-backup-run trigger (which greeted the first open) is RETIRED; the
+//  sheet now opens only from the calm-asks cadence's offer toast (Set Up…
+//  → `openSheet()`), and the cadence asks the model `stillWantsAsking()`.
+//  So these pins open the sheet the new way; the assertions on every door
+//  are unchanged, and the first pin holds the retirement itself (red on the
+//  old tree: RootView wired every backup run to the offer).
 //
 
 import AppKit
@@ -59,25 +65,32 @@ struct ICloudDriveOfferTests {
             posture: { posture }))
     }
 
-    private func aRun() -> BackupRunRecord {
-        BackupRunRecord(at: Date(), primary: .init(outcome: .written), secondary: .init(outcome: .noDestination), markdown: nil)
-    }
-
-    /// Due only AFTER a run, only while the mark is unset and no folder is
-    /// picked; *Not Now* marks it asked, and it is never due again.
-    @Test func theOfferIsDueOnceAfterTheFirstRunAndNotNowAnswersItForGood() {
+    /// R-13r-12: nothing opens the sheet by itself any more — no backup run
+    /// is wired to it (the retired trigger greeted the FIRST OPEN, because the
+    /// first run lands at the first launch). Only the offer toast's Set Up…
+    /// opens it; *Not Now* marks it asked, and it is never due again.
+    @Test func theSheetOpensOnlyFromSetUpAndNotNowAnswersItForGood() throws {
         let (defaults, name) = scratchDefaults()
         defer { defaults.removePersistentDomain(forName: name) }
         let calls = Calls()
         let offer = model(defaults: defaults, calls: calls)
-        offer.consider(after: nil)
-        #expect(!offer.isDue, "no run yet — nothing is offered")
-        offer.consider(after: aRun())
-        #expect(offer.isDue, "the first run lands ⇒ the offer")
+        #expect(!offer.isDue, "a fresh model offers nothing on its own")
+        #expect(offer.stillWantsAsking(), "the question is open: no mark, no folder")
+        // THE RETIREMENT, read from the composition: no backup run reaches
+        // the offer (the old `services.backup?.onRun = { … }` hook).
+        let root = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/RootView.swift"),
+            encoding: .utf8)
+        #expect(!root.contains("onRun"), "the first-backup-run trigger is retired (R-13r-12)")
+        offer.openSheet()
+        #expect(offer.isDue, "Set Up… opens the three-door sheet")
         offer.notNow()
         #expect(!offer.isDue)
         #expect(ICloudDriveOfferModel.isMarked(variant: .real, in: defaults))
-        offer.consider(after: aRun())
+        #expect(!offer.stillWantsAsking(), "answered — the cadence never asks again")
+        offer.openSheet()
         #expect(!offer.isDue, "asked once — never again after any door")
         #expect(calls.picksAt.isEmpty && calls.runs == 0, "Not Now opens no panel and runs nothing")
     }
@@ -92,7 +105,7 @@ struct ICloudDriveOfferTests {
         let picked = ICloudDriveOfferModel.driveRoot
         calls.pickReturns = picked
         let offer = model(defaults: defaults, calls: calls)
-        offer.consider(after: aRun())
+        offer.openSheet()
         #expect(offer.isDue)
         await offer.useICloudDrive()
         #expect(calls.picksAt == [ICloudDriveOfferModel.driveRoot], "the panel opened at iCloud Drive's root")
@@ -114,7 +127,7 @@ struct ICloudDriveOfferTests {
         let picked = URL(fileURLWithPath: "/Volumes/Backups/Variorum", isDirectory: true)
         calls.pickReturns = picked
         let offer = model(defaults: defaults, calls: calls)
-        offer.consider(after: aRun())
+        offer.openSheet()
         await offer.chooseAnotherFolder()
         #expect(calls.picksAt == [nil], "the plain picker — the panel's own default folder")
         #expect(calls.remembered == [picked] && calls.runs == 1)
@@ -130,7 +143,7 @@ struct ICloudDriveOfferTests {
         let calls = Calls()
         calls.pickReturns = nil
         let offer = model(defaults: defaults, calls: calls)
-        offer.consider(after: aRun())
+        offer.openSheet()
         await offer.useICloudDrive()
         #expect(offer.isDue, "the sheet stays")
         #expect(offer.note == ProtectionCopy.iCloudOfferNoFolderPicked)
@@ -149,24 +162,25 @@ struct ICloudDriveOfferTests {
         let (defaults, name) = scratchDefaults()
         defer { defaults.removePersistentDomain(forName: name) }
         let dev = model(variant: .dev, defaults: defaults, calls: Calls())
-        dev.consider(after: aRun())
+        dev.openSheet()
         dev.notNow()
         #expect(ICloudDriveOfferModel.isMarked(variant: .dev, in: defaults))
         #expect(!ICloudDriveOfferModel.isMarked(variant: .real, in: defaults))
         let real = model(variant: .real, defaults: defaults, calls: Calls())
-        real.consider(after: aRun())
+        real.openSheet()
         #expect(real.isDue, "the real store is still owed its offer")
         #expect(ICloudDriveOfferModel.markKey(for: .dev) != ICloudDriveOfferModel.markKey(for: .real))
     }
 
-    /// A store that ALREADY has a second folder picked is marked silently at
-    /// its first run — the question is answered by the pick that exists.
+    /// A store that ALREADY has a second folder picked is never asked and is
+    /// marked silently — the question is answered by the pick that exists.
     @Test func aStoreWithAFolderAlreadyPickedIsNeverAskedAndIsMarkedQuietly() {
         let (defaults, name) = scratchDefaults()
         defer { defaults.removePersistentDomain(forName: name) }
         defaults.set(Data("bookmark".utf8), forKey: BackupDestination.defaultsKey)
         let offer = model(defaults: defaults, calls: Calls())
-        offer.consider(after: aRun())
+        #expect(!offer.stillWantsAsking(), "the cadence is told the question is answered")
+        offer.openSheet()
         #expect(!offer.isDue)
         #expect(ICloudDriveOfferModel.isMarked(variant: .real, in: defaults), "marked — never asked later either")
     }
@@ -179,7 +193,7 @@ struct ICloudDriveOfferTests {
         defer { defaults.removePersistentDomain(forName: name) }
         for posture in [Posture.standard, Posture.castle] {
             let offer = model(defaults: defaults, posture: posture, calls: Calls())
-            offer.consider(after: aRun())
+            offer.openSheet()
             let sheet = ICloudDriveOfferSheet(model: offer)
             await SurfaceComposition.host(sheet, size: NSSize(width: 500, height: 300))
             let shown = SurfaceComposition.text(of: sheet.body)

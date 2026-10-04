@@ -275,7 +275,7 @@ struct EditorCommands: Commands {
         CommandGroup(after: .appInfo) {
             if updates.isLive {
                 Button(UpdateChannel.checkForUpdatesTitle) { updates.checkForUpdates() }
-                    .disabled(!updates.canCheckForUpdates)
+                    .disabled(!updates.canCheckNow)
             }
         }
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.

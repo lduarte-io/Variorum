@@ -50,7 +50,8 @@ struct VariorumApp: App {
                 RootView(
                     session: session, services: services,
                     protection: bootstrap.protection, windows: windows,
-                    hotKeys: hotKeys, whatsNew: appDelegate.whatsNew)
+                    hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
+                    calmAsks: appDelegate.calmAsks)
                     .onAppear { appDelegate.session = session }
                     // 13r U3-A — R-13r-13: the sync row's Check for Updates…
                     // door, from the ONE update channel; nil unless it is
@@ -404,7 +405,10 @@ struct VariorumApp: App {
                     // door. Never re-read from `UserDefaults` by the pane
                     // (F-0: a setting is read once at its owner and pushed
                     // down) — the pane binds to this object.
-                    appearance: appDelegate.appearance)
+                    appearance: appDelegate.appearance,
+                    // 13r U3-A: General's "Check for updates automatically"
+                    // — rendered only where the channel is live (P-2).
+                    updates: appDelegate.updates)
             } else {
                 Text("Open the main window first.")
                     .padding(24)

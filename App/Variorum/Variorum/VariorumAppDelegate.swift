@@ -34,6 +34,12 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// version shows the notes once). The first window claims the show.
     let whatsNew = WhatsNewLedger.forThisApp()
 
+    /// 13r U3-A: **THE CALM-ASKS CADENCE's one scheduler** — the day-of-use
+    /// counter and the shared rules (`CalmAsks.swift`). The update ask
+    /// registers here (the channel is the delegate's); the backup-folder ask
+    /// registers from the window that holds the store's services.
+    let calmAsks = CalmAskScheduler.live()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
@@ -54,6 +60,19 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         // 13r U2: Sparkle's cycle starts once launching is done. On the
         // inert (Debug) channel this does nothing.
         updates.start()
+        // 13r U3-A — R-13r-11: THE UPDATE ASK joins the cadence, ONLY where a
+        // live updater can act (P-2 — never in a Debug build): from the 3rd
+        // day of use, at a calm moment, Sparkle's own permission window. It
+        // ranks first; while it is open it takes its day.
+        if updates.isLive {
+            calmAsks.register(.init(
+                id: CalmAskScheduler.AskID.update, rank: 0,
+                fromDay: calmAsks.numbers.updateAskFromDay,
+                maxShows: .max, returnsAfterDays: 1, host: nil,
+                wantsAsking: { [updates] in updates.wantsPermissionAsked },
+                present: { [updates] in updates.askPermission() }))
+        }
+        calmAsks.start()
         #if DEBUG
         // 18l U-VIS: the visual harness's oracle endpoint — registers nothing
         // unless the harness launched this process (`VARIORUM_VISUAL_WALK=1`).
@@ -63,6 +82,9 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         sanitizeWindowFrames()
+        // 13r U3-A: a day of use is a day the app was opened OR brought
+        // forward — an app left open across midnight counts the new day here.
+        calmAsks.noteActive()
     }
 
     private func sanitizeWindowFrames() {

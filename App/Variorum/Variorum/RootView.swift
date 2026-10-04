@@ -60,6 +60,9 @@ struct RootView: View {
     /// in harness mounts, which then never auto-show) and this window's sheet.
     let whatsNew: WhatsNewLedger?
     @State private var whatsNewShown = false
+    /// 13r U3-A: the calm-asks scheduler (the app delegate's one instance);
+    /// this window registers the backup-folder ask once its services exist.
+    let calmAsks: CalmAskScheduler?
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -132,7 +135,8 @@ struct RootView: View {
         // system — a harness that mounts this view must never ask the real
         // system for her chord (it would fight the running app for it).
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
-        whatsNew: WhatsNewLedger? = nil
+        whatsNew: WhatsNewLedger? = nil,
+        calmAsks: CalmAskScheduler? = nil
     ) {
         self.session = session
         self.services = services
@@ -140,6 +144,7 @@ struct RootView: View {
         self.windows = windows
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
+        self.calmAsks = calmAsks
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -242,17 +247,36 @@ struct RootView: View {
             }
             .environment(theme)
         }
-        // pre-13x 5b (ledger 64 — decision 24): THE iCLOUD DRIVE OFFER, once,
-        // at the first backup run of this store. Wired when the services
-        // exist; the hook rides every run, and the model re-reads the last
-        // run at attach in case the first one landed before the hook did.
+        // pre-13x 5b (ledger 64 — decision 24): THE iCLOUD DRIVE OFFER's
+        // sheet. 13r U3-A — R-13r-12: it no longer opens at the first backup
+        // run (which greeted the first open); the ask is the calm-asks
+        // cadence's OFFER toast — from the 5th day of use, once the library
+        // holds her own writing, never on the update ask's day — whose
+        // Set Up… opens this sheet and whose Not Now is the existing mark.
         .task(id: services != nil) {
             guard let services, iCloudOffer == nil else { return }
             let offer = ICloudDriveOfferModel(
                 leaves: .live(services: services, protection: protection))
             iCloudOffer = offer
-            services.backup?.onRun = { record in offer.consider(after: record) }
-            offer.consider(after: services.backup?.lastRun)
+            guard let calmAsks else { return }
+            let ownWriting = OwnWritingProbe(session: session)
+            let status = session.status
+            calmAsks.register(.init(
+                id: CalmAskScheduler.AskID.backupFolder, rank: 1,
+                fromDay: calmAsks.numbers.backupAskFromDay,
+                maxShows: 2, returnsAfterDays: calmAsks.numbers.backupReturnsAfterDays,
+                host: windowID,
+                wantsAsking: { [weak offer] in
+                    guard let offer, offer.stillWantsAsking() else { return false }
+                    return await ownWriting.holdsOwnWriting()
+                },
+                present: { [weak offer] in
+                    guard let offer else { return }
+                    status.offer(
+                        CalmAskCopy.backupQuestion,
+                        action: .init(label: CalmAskCopy.backupSetUpDoor) { offer.openSheet() },
+                        secondary: .init(label: CalmAskCopy.backupNotNowDoor) { offer.notNow() })
+                }))
         }
         .sheet(isPresented: Binding(
             get: { iCloudOffer?.isDue ?? false },
@@ -400,6 +424,9 @@ struct RootView: View {
             // 13j J11: closing the window is a leaving for every note its
             // panes were showing.
             SavepointOnLeave.windowClosing(workspace: router.workspace, session: session)
+            // 13r U3-A: this window's backup-ask registration goes with it
+            // (another window's is never touched).
+            calmAsks?.unregister(id: CalmAskScheduler.AskID.backupFolder, host: windowID)
         }
     }
 

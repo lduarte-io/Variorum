@@ -82,6 +82,10 @@ final class StatusCenter {
         /// 18i: defaulted, so every shipped `Item` construction and every
         /// pin reads unchanged.
         var kind: Kind = .refusal
+        /// 13r U3-A (R-13r-12): an offer may carry a SECOND door — the
+        /// backup-folder ask's Set Up… / Not Now pair. Defaulted, so every
+        /// shipped construction and pin reads unchanged; only an offer sets it.
+        var secondary: Action? = nil
 
         struct Action: Equatable {
             let label: String
@@ -160,6 +164,13 @@ final class StatusCenter {
         deliver(text, kind: .offer, action: action)
     }
 
+    /// **OFFER with two doors** (13r U3-A — the backup-folder ask: Set Up… /
+    /// Not Now). The primary door is the act; the secondary is the decline.
+    /// Either one dismisses the toast as it acts (`StatusToast`).
+    func offer(_ text: String, action: Item.Action, secondary: Item.Action) {
+        deliver(text, kind: .offer, action: action, secondary: secondary)
+    }
+
     /// **DIRECT — a direction she must see, though nothing was refused.**
     /// Delivered as a refusal because the CLASS is "always shown", which is
     /// what the setting governs; the name exists so a reader is not told
@@ -206,10 +217,12 @@ final class StatusCenter {
     /// The general door, for a producer that already knows its class — the
     /// view models whose own status line is classed where the message is
     /// produced (`RecoveryStatus`, and the `statusMessage` forwarders).
-    func deliver(_ text: String, kind: Kind, action: Item.Action? = nil) {
+    func deliver(
+        _ text: String, kind: Kind, action: Item.Action? = nil, secondary: Item.Action? = nil
+    ) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        let item = Item(id: UUID(), text: trimmed, action: action, kind: kind)
+        let item = Item(id: UUID(), text: trimmed, action: action, kind: kind, secondary: secondary)
         guard let slot = slot(for: kind) else {
             // `.off`: she asked for nothing, so nothing shows — and a
             // dropped receipt leaves whatever is already on screen alone

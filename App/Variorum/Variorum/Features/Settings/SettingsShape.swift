@@ -151,6 +151,13 @@ nonisolated enum SettingsCatalog {
             blurb: "Follow system, light, or dark. Dark is a fully black room in both voices. "
                 + "This Mac only.",
             keywords: ["dark", "light", "dark mode", "night", "black", "bright", "system"]),
+        // 13r U3-A: the update ask's Settings answer (the calm-asks rule 4).
+        SettingsRow(
+            id: "updates", pane: .general, title: UpdateSettingsCopy.title,
+            blurb: "Whether Variorum looks for a newer version about once a day. "
+                + "Check for Updates\u{2026} in the Variorum menu works either way.",
+            keywords: ["update", "updates", "upgrade", "new version", "sparkle", "automatic",
+                       "check", "version", "release"]),
         SettingsRow(
             id: "receipts", pane: .general, title: ReceiptStyleCopy.title,
             blurb: "Whether an act that landed says so as a toast, a quiet line, or nothing. "

@@ -2178,7 +2178,79 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      (a):** Finder draws icon labels over the near-white background; whether it keeps them dark
      under a dark system appearance could not be measured without Finder access — capture arm (a)
      in both appearances if she can.
-6. THE CALM-ASKS CADENCE — the one local scheduler, the update ask (R-13r-11), the backup-folder
-   OFFER toast (R-13r-12), Settings ▸ General's "Check for updates automatically", the ONE
-   QUESTIONS entry — PENDING
+6. THE CALM-ASKS CADENCE — **DONE (this commit)**, built as written (her kickoff ratified it).
+   - **THE ONE SCHEDULER — `App/Variorum/Variorum/Features/CalmAsks/CalmAsks.swift` (Mac only,
+     under `Features/`, never `Shared/`):** the pure `CalmAskRules` (eligibility, the one ask per
+     day in rank order, the calm moment, the day-of-use count) + `CalmAskScheduler` (the app
+     delegate's one instance). Days of use are counted in LOCAL preferences
+     (`variorum.calmAsks.daysOfUse` / `.lastUseDay`, never synced) at launch AND at every
+     `applicationDidBecomeActive` — so an app left open across midnight counts the new day when it
+     next becomes active. The shared rules: nothing on day 1; never before 2 minutes open, 20 s
+     since the last keystroke (a LOCAL `keyDown` monitor — this app's keystrokes only, the event
+     returned untouched), never while a sheet (ceremonies and What's New are sheets), a modal, a
+     menu or a drag is open (`RunLoop.main.currentMode == .eventTracking`) or while the app is not
+     frontmost; ONE ask per day and the two never share one (`lastAskDay`); a quiet evaluation
+     every 15 s, O(registered asks), the store read only when an ask is otherwise due. Asks
+     REGISTER (id, rank, first day, max shows, return gap, `wantsAsking`, `present`), so a later
+     ask (13s onboarding) joins the same rules.
+   - **THE UPDATE ASK (R-13r-11) — `UpdateChannel`:** the updater delegate `PermissionDeferral`
+     implements Sparkle's `updaterShouldPromptForPermissionToCheckForUpdates:` (its Swift name is
+     `updaterShouldPromptForPermissionToCheck(forUpdates:)`; the selector is pinned explicitly with
+     `@objc(…)`) and answers NO — read from the 2.10.0 source FIRST: the delegate is consulted only
+     while `SUEnableAutomaticChecks` is absent from defaults AND Info.plist, and Sparkle prompts on
+     the second launch only when the delegate does NOT implement it; with NO the cycle schedules
+     nothing (`automaticallyChecksForUpdates` reads NO until answered), so no automatic check runs
+     before consent; Check for Updates… works from day one (unchanged). From the 3rd day of use, at
+     a calm moment, `askPermission()` shows SPARKLE'S OWN permission window through its standard
+     user driver (`SPUUserDriver show(_:reply:)` — the public protocol) and applies the answer
+     exactly as Sparkle's `updatePermissionRequestFinishedWithResponse:` does; the menu door greys
+     while that window is up (Sparkle does not know it is showing). The answer is Sparkle's own
+     record — `SUEnableAutomaticChecks` in the defaults (`permissionAnswered`); registered ONLY
+     where the channel is live (P-2: never in a Debug build). Rank 0, re-asks a later day only if
+     the window was closed unanswered (PROVISIONAL (c) in #180).
+   - **THE BACKUP-FOLDER ASK (R-13r-12):** the first-backup-run trigger is RETIRED —
+     `ICloudDriveOfferModel.consider(after:)` and RootView's `services.backup?.onRun` hook are gone;
+     the model gains `stillWantsAsking()` (the existing mark + a picked folder marks silently, as
+     before) and `openSheet()`. RootView registers the ask (rank 1, from the 5th day, at most twice,
+     7 days apart — "ignored, it returns ONCE more after 7 further days of use, then never") once
+     its services exist, and takes back only its own registration when it closes. The ask is an
+     OFFER toast on the status seam — "Keep a copy of your backups in iCloud Drive?" (the sheet's
+     own title) with **Set Up…** (opens today's three-door sheet) and **Not Now** (the existing
+     mark): `StatusCenter.Item` gains a defaulted `secondary` door and `offer(_:action:secondary:)`;
+     `StatusToast` renders it quiet, before the act; either door dismisses as it acts. The toast
+     keeps the app's ONE 6-s clock; a timeout or ✕ counts as ignored. **"Writing of the user's
+     own"** = `OwnWriting.exists` — a live note with words on its page wearing none of the seeded
+     tags (the seeders' own constants: `TutorialSeeder.tagName`, every `SampleLibrarySeeder.Book`
+     tag, `#classics`) and not the seeded quick note (its reserved title); one EXISTS read,
+     latched once true, a "no" re-read at most every 5 minutes (`OwnWritingProbe`).
+   - **Settings ▸ General — "Check for updates automatically"** (a new Updates section, rendered
+     ONLY where the channel is live — P-2): the Toggle IS Sparkle's own
+     `automaticallyChecksForUpdates` (KVO-mirrored), so touching it writes the answer and the ask
+     retires for good; while unanswered the caption adds "You haven't chosen yet — Variorum asks
+     once, after a few days of use, or you can decide here." The catalog gains the row (`updates`,
+     General) so Settings search finds it. (In a Debug build the row is not rendered — the
+     `appearance` row's precedent for a catalogued-but-conditional control.)
+   - **THE ONE QUESTIONS ENTRY: `notes/QUESTIONS.md` #180** — the five numbers + six readings
+     (a)–(f) the cadence is silent on + the 0.9.0 notes draft. **THE WALK'S DAY-COUNTER RECIPE
+     (container-path `defaults write`, walk build only, app QUIT first):** to make the next launch
+     day N, write `variorum.calmAsks.daysOfUse` = N−1 and `variorum.calmAsks.lastUseDay` = a past
+     *[removed for publication]*
+     and `… variorum.calmAsks.lastUseDay -string 2000-01-01` → the next launch is day 3 (the
+     update ask after 2 minutes); `-int 4` → day 5 (the backup offer, once a note of hers holds
+     words, and not on a day an ask already appeared — `variorum.calmAsks.lastAskDay` records it).
+   - Pins: `VariorumTests/CalmAsksTests.swift` (15 — the numbers; nothing before its day, one per
+     day, rank order; the backup ask's once-more-after-7-then-never; the calm moment; the day count;
+     A SIMULATED RUN of 30 days of use through the real scheduler (shown exactly: update on day 3,
+     backup on day 5 once she has writing, again on day 12, never after); never at launch / while
+     typing / over a sheet; the update ask still open on day 5 takes it and the backup ask waits a
+     day; midnight counted on becoming active; window-scoped unregistration; the deferral answers
+     Sparkle's own selector with NO; the inert channel never asks and reads Sparkle's own key; the
+     Settings row; the two-door offer with the sheet's own words; OwnWriting over an in-memory store
+     — the seeded field guide is not hers, a blank note is not writing, a seeded-tag note is not, her
+     note with words is). `ICloudDriveOfferTests` moved to the new opener (`openSheet()`), every door
+     assertion unchanged, its first pin now holding the retirement (RootView carries no `onRun`).
+     **Runs:** piece 6's eight suites `Test run with 78 tests in 8 suites` — every suite but
+     CalmAsks green; CalmAsks' 3 issues were the TEST's own (a "past midnight" hour that was not, and
+     a missing seeded RNG dependency), fixed → **`Test run with 15 tests in 1 suite passed`** (logs
+     `13r-u3a/p6-test.log`, `p6-test2.log`). No `skipped:` lines.
 7. Finals — the touched families' suites, the Debug-build captures, this record closed — PENDING
