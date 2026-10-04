@@ -2,7 +2,14 @@
 # archive-and-export.sh — Phase 13r U1: the Developer ID export road (U2 grows it into the full
 # pipeline: stamp -> archive -> export -> notarize + staple -> DMG -> appcast).
 #
-#   Tools/Release/archive-and-export.sh [--out DIR]
+#   Tools/Release/archive-and-export.sh [--out DIR] [--version X.Y.Z --build N]
+#
+# --version/--build (13r U2 — THE STAMP): MARKETING_VERSION and CURRENT_PROJECT_VERSION are passed to
+# `xcodebuild archive` as COMMAND-LINE BUILD-SETTING OVERRIDES — never a new build configuration
+# (CLAUDE.md's fence). With GENERATE_INFOPLIST_FILE=YES they become CFBundleShortVersionString and
+# CFBundleVersion; verify-export.sh --expect-version/--expect-build proves the export carries them.
+# release.sh supplies them (the build number = `git rev-list --count HEAD`, R-13r-6). Without them
+# the project's own values build (U1's drill road, unchanged).
 #
 # DIR defaults to App/Variorum/DerivedData/release/<UTC stamp>.noindex (gitignored) and must NOT
 # already hold anything: every run is CLEAN BY CONSTRUCTION (a fresh -derivedDataPath inside DIR —
@@ -37,14 +44,26 @@ PROFILES_DIR="${HOME}/Library/Developer/Xcode/UserData/Provisioning Profiles"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 PB=/usr/libexec/PlistBuddy
 
-usage() { echo "usage: $0 [--out DIR]" >&2; exit 2; }
+usage() { echo "usage: $0 [--out DIR] [--version X.Y.Z --build N]" >&2; exit 2; }
 OUT=""
+STAMP_VERSION=""
+STAMP_BUILD=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --out) [ $# -ge 2 ] || usage; OUT="$2"; shift 2 ;;
+    --version) [ $# -ge 2 ] || usage; STAMP_VERSION="$2"; shift 2 ;;
+    --build) [ $# -ge 2 ] || usage; STAMP_BUILD="$2"; shift 2 ;;
     *) usage ;;
   esac
 done
+# The stamp comes whole or not at all: a version without its build number (or the reverse) is a
+# half-stamped bundle that Sparkle would compare wrongly.
+if [ -n "$STAMP_VERSION" ] || [ -n "$STAMP_BUILD" ]; then
+  [[ "$STAMP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "REFUSED: --version must be X.Y.Z (got '${STAMP_VERSION}')" >&2; exit 2; }
+  [[ "$STAMP_BUILD" =~ ^[1-9][0-9]*$ ]] || { echo "REFUSED: --build must be a positive integer (got '${STAMP_BUILD}')" >&2; exit 2; }
+fi
+STAMP_SETTINGS=()
+[ -z "$STAMP_VERSION" ] || STAMP_SETTINGS=("MARKETING_VERSION=${STAMP_VERSION}" "CURRENT_PROJECT_VERSION=${STAMP_BUILD}")
 [ -n "$OUT" ] || OUT="${REPO}/App/Variorum/DerivedData/release/$(date -u +%Y%m%dT%H%M%SZ)"
 OUT="${OUT%/}"
 case "$OUT" in *.noindex) ;; *) OUT="${OUT}.noindex" ;; esac   # Spotlight never indexes the copies
@@ -79,6 +98,11 @@ DIRTY="$(git -C "$REPO" status --porcelain | wc -l | tr -d ' ')"
   echo "dirty files: ${DIRTY}"
   echo "toolchain:   $(xcodebuild -version | tr '\n' ' ')· xcode-select $(xcode-select -p)"
   echo "macOS:       $(sw_vers -productVersion) ($(sw_vers -buildVersion))"
+  if [ -n "$STAMP_VERSION" ]; then
+    echo "stamp:       MARKETING_VERSION=${STAMP_VERSION} CURRENT_PROJECT_VERSION=${STAMP_BUILD} (command-line overrides)"
+  else
+    echo "stamp:       none (the project's own MARKETING_VERSION / CURRENT_PROJECT_VERSION)"
+  fi
 } > "${OUT}/BUILD-INFO.txt"
 sed 's/^/    /' "${OUT}/BUILD-INFO.txt"
 [ "$DIRTY" = "0" ] || say "WARNING: the working tree has ${DIRTY} uncommitted change(s) — this export is not one commit's build"
@@ -134,6 +158,7 @@ say "archiving (Release, fresh derived data) -> ${OUT}/Variorum.xcarchive · log
 if ! xcodebuild archive -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
       -destination 'generic/platform=macOS' \
       -archivePath "${OUT}/Variorum.xcarchive" -derivedDataPath "${OUT}/DerivedData" \
+      ${STAMP_SETTINGS[@]+"${STAMP_SETTINGS[@]}"} \
       > "${OUT}/archive.log" 2>&1 \
    || ! grep -q '\*\* ARCHIVE SUCCEEDED \*\*' "${OUT}/archive.log"; then
   echo "ARCHIVE FAILED — ${OUT}/archive.log:" >&2
@@ -171,8 +196,10 @@ fi
 COMPARE=()
 if [ -d /Applications/Variorum.app ]; then COMPARE=(--compare-with /Applications/Variorum.app); fi
 say "verify-export.sh ${OUT}/export/Variorum.app ${COMPARE[*]:-} -> ${OUT}/verify.txt"
+EXPECT=()
+[ -z "$STAMP_VERSION" ] || EXPECT=(--expect-version "$STAMP_VERSION" --expect-build "$STAMP_BUILD")
 set +e
-"${HERE}/verify-export.sh" "${OUT}/export/Variorum.app" ${COMPARE[@]+"${COMPARE[@]}"} > "${OUT}/verify.txt" 2>&1
+"${HERE}/verify-export.sh" "${OUT}/export/Variorum.app" ${COMPARE[@]+"${COMPARE[@]}"} ${EXPECT[@]+"${EXPECT[@]}"} > "${OUT}/verify.txt" 2>&1
 VERIFY=$?
 set -e
 grep -E '^(PASS|FAIL|VERDICT)' "${OUT}/verify.txt" || true

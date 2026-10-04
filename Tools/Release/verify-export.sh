@@ -3,6 +3,14 @@
 # Developer-ID export of Variorum (U2 reuses it on every release, after notarize + staple).
 #
 #   Tools/Release/verify-export.sh <path/to/Variorum.app> [--compare-with <other/Variorum.app>]
+#                                  [--expect-version X.Y.Z --expect-build N] [--require-notarized]
+#
+# 13r U2 additions: --expect-version/--expect-build prove THE STAMP landed (CFBundleShortVersionString
+# / CFBundleVersion); --require-notarized is the POST-STAPLE reading (Gatekeeper must ACCEPT and the
+# stapled ticket must validate — the "Unnotarized Developer ID" PASS is then a FAIL); section H checks
+# the Sparkle road (the baked feed + public key, the installer launcher on and the downloader off,
+# the consent/no-profile absences, the framework's version and its XPC services in place, the
+# Installer unsandboxed) and section D pins the -spks/-spki mach-lookup pair EXACTLY.
 #
 # It READS signatures and files only: it never launches the app, never touches a store,
 # never writes outside a private temp dir. --compare-with reads another build's signature
@@ -24,13 +32,24 @@ PROFILE_VERSIONED="${HERE}/Variorum_Developer_ID.provisionprofile"
 EXPORT_OPTIONS="${HERE}/ExportOptions.plist"
 PB=/usr/libexec/PlistBuddy
 
-usage() { echo "usage: $0 <path/to/Variorum.app> [--compare-with <other.app>]" >&2; exit 2; }
+# 13r U2 — the Sparkle road's fixed values (the ruled, LOCKED feed; the key she minted 2026-10-04).
+FEED_URL="https://stargazing.tech/variorum/appcast.xml"
+ED_PUBLIC_KEY="tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA="
+SPARKLE_VERSION="2.10.0"
+
+usage() { echo "usage: $0 <path/to/Variorum.app> [--compare-with <other.app>] [--expect-version X.Y.Z --expect-build N] [--require-notarized]" >&2; exit 2; }
 [ $# -ge 1 ] || usage
 APP="${1%/}"; shift
 COMPARE=""
+EXPECT_VERSION=""
+EXPECT_BUILD=""
+REQUIRE_NOTARIZED=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --compare-with) [ $# -ge 2 ] || usage; COMPARE="${2%/}"; shift 2 ;;
+    --expect-version) [ $# -ge 2 ] || usage; EXPECT_VERSION="$2"; shift 2 ;;
+    --expect-build) [ $# -ge 2 ] || usage; EXPECT_BUILD="$2"; shift 2 ;;
+    --require-notarized) REQUIRE_NOTARIZED=yes; shift ;;
     *) usage ;;
   esac
 done
@@ -44,7 +63,7 @@ ok()   { echo "PASS  $*"; pass=$((pass + 1)); }
 bad()  { echo "FAIL  $*"; fail=$((fail + 1)); }
 info() { echo "INFO  $*"; }
 indent() { sed 's/^/        /'; }
-pbget() { "$PB" -c "Print :$2" "$1" 2>/dev/null; }   # pbget <plist> <colon:key:path>
+pbget() { [ -f "$1" ] || return 1; "$PB" -c "Print :$2" "$1" 2>/dev/null; }   # pbget <plist> <colon:key:path> (a missing plist reads as absent; PlistBuddy would offer to CREATE it)
 expect_eq() {   # expect_eq <description> <actual> <expected>
   if [ "$2" = "$3" ]; then ok "$1 = $2"; else bad "$1 = '${2}' (expected '${3}')"; fi
 }
@@ -58,6 +77,9 @@ expect_eq "CFBundleIdentifier" "$(pbget "$INFO_PLIST" CFBundleIdentifier)" "$BUN
 EXE_NAME="$(pbget "$INFO_PLIST" CFBundleExecutable)"
 EXE="${APP}/Contents/MacOS/${EXE_NAME}"
 info "version $(pbget "$INFO_PLIST" CFBundleShortVersionString) (build $(pbget "$INFO_PLIST" CFBundleVersion)) · executable ${EXE_NAME} · archs $(lipo -archs "$EXE" 2>/dev/null) · LSMinimumSystemVersion $(pbget "$INFO_PLIST" LSMinimumSystemVersion)"
+# THE STAMP (13r U2): what release.sh asked for is what the bundle says.
+[ -z "$EXPECT_VERSION" ] || expect_eq "CFBundleShortVersionString (the stamp)" "$(pbget "$INFO_PLIST" CFBundleShortVersionString)" "$EXPECT_VERSION"
+[ -z "$EXPECT_BUILD" ] || expect_eq "CFBundleVersion (the stamp)" "$(pbget "$INFO_PLIST" CFBundleVersion)" "$EXPECT_BUILD"
 
 # ---------------------------------------------------------------- B. the seal is valid
 echo "-- codesign --verify --deep --strict --verbose=2"
@@ -122,6 +144,16 @@ if plutil -lint -s "$ENT" >/dev/null 2>&1; then
              com.apple.security.files.bookmarks.app-scope; do
     expect_eq "$key (carried)" "$(pbget "$ENT" "$key")" "true"
   done
+  # 13r U2: Sparkle's XPC installer road — EXACTLY the build's own two names, in order (the
+  # variable form resolved for the Release id; nothing else may ride this temporary exception).
+  ML="com.apple.security.temporary-exception.mach-lookup.global-name"
+  expect_eq "${ML}[0]" "$(pbget "$ENT" "${ML}:0")" "${BUNDLE_ID}-spks"
+  expect_eq "${ML}[1]" "$(pbget "$ENT" "${ML}:1")" "${BUNDLE_ID}-spki"
+  if pbget "$ENT" "${ML}:2" >/dev/null; then
+    bad "${ML} carries MORE than the two Sparkle names: $(pbget "$ENT" "${ML}:2") ..."
+  else
+    ok "${ML} carries exactly the two Sparkle names"
+  fi
 else
   bad "the entitlements dump is not a readable plist"
 fi
@@ -212,12 +244,53 @@ done < <(find "$APP/Contents" -type f \( -perm -u+x -o -name '*.dylib' \) 2>/dev
 echo "-- spctl --assess --type execute -vv"
 spctl --assess --type execute -vv "$APP" > "$WORK/spctl.txt" 2>&1
 indent < "$WORK/spctl.txt"
-if grep -q ': accepted' "$WORK/spctl.txt"; then
-  ok "Gatekeeper ACCEPTS (notarized: $(sed -n 's/^source=//p' "$WORK/spctl.txt"))"
-elif grep -q ': rejected' "$WORK/spctl.txt" && grep -q '^source=Unnotarized Developer ID' "$WORK/spctl.txt"; then
-  ok "Gatekeeper reads a valid Developer ID signature, rejected ONLY for notarization (expected before U2's notarize + staple)"
+if grep -q ': accepted' "$WORK/spctl.txt" && grep -q '^source=Notarized Developer ID' "$WORK/spctl.txt"; then
+  ok "Gatekeeper ACCEPTS (source=Notarized Developer ID)"
+elif [ -z "$REQUIRE_NOTARIZED" ] && grep -q ': rejected' "$WORK/spctl.txt" && grep -q '^source=Unnotarized Developer ID' "$WORK/spctl.txt"; then
+  ok "Gatekeeper reads a valid Developer ID signature, rejected ONLY for notarization (the pre-notarization reading)"
+elif [ -n "$REQUIRE_NOTARIZED" ]; then
+  bad "Gatekeeper must ACCEPT a notarized build (--require-notarized) — got: $(tr '\n' ' ' < "$WORK/spctl.txt")"
 else
   bad "Gatekeeper's reading is neither 'accepted' nor 'Unnotarized Developer ID'"
+fi
+if [ -n "$REQUIRE_NOTARIZED" ]; then
+  # The STAPLED ticket — what lets the app validate offline once it leaves the DMG.
+  if xcrun stapler validate "$APP" > "$WORK/staple.txt" 2>&1; then
+    ok "stapler validate: the notarization ticket is stapled to the bundle"
+  else
+    bad "stapler validate failed: $(tail -1 "$WORK/staple.txt")"
+  fi
+fi
+
+# ---------------------------------------------------------------- H. the Sparkle road (13r U2)
+echo "-- Sparkle (R-13r-1/2/7; the 13r plan's U2 RECORD)"
+expect_eq "SUFeedURL (the LOCKED baked feed)" "$(pbget "$INFO_PLIST" SUFeedURL)" "$FEED_URL"
+expect_eq "SUPublicEDKey (the key she minted)" "$(pbget "$INFO_PLIST" SUPublicEDKey)" "$ED_PUBLIC_KEY"
+expect_eq "SUEnableInstallerLauncherService" "$(pbget "$INFO_PLIST" SUEnableInstallerLauncherService)" "true"
+for absent in SUEnableDownloaderService SUEnableAutomaticChecks SUEnableSystemProfiling SUPromptUserOnFirstLaunch; do
+  if pbget "$INFO_PLIST" "$absent" >/dev/null; then
+    bad "${absent} is SET (= $(pbget "$INFO_PLIST" "$absent")) — its absence is a decision"
+  else
+    ok "${absent} absent (a decision: consent asked · no profile · no downloader)"
+  fi
+done
+FW="${APP}/Contents/Frameworks/Sparkle.framework"
+expect_eq "Sparkle.framework version" "$(pbget "${FW}/Resources/Info.plist" CFBundleShortVersionString)" "$SPARKLE_VERSION"
+INSTALLER_XPC="${FW}/Versions/B/XPCServices/Installer.xpc"
+if [ -d "$INSTALLER_XPC" ]; then ok "Installer.xpc inside Sparkle.framework"; else bad "Installer.xpc missing from Sparkle.framework"; fi
+if [ -d "${APP}/Contents/XPCServices" ]; then
+  bad "the app bundles XPC services directly (Contents/XPCServices) — Sparkle refuses that layout"
+else
+  ok "no app-level Contents/XPCServices (Sparkle's services stay inside the framework)"
+fi
+# Sparkle's own log line: "Please make sure InstallerLauncher is not sandboxed" — the installer
+# must run OUTSIDE the sandbox to replace the app.
+INST_ENT="$WORK/installer-entitlements.plist"
+codesign -d --entitlements - --xml "$INSTALLER_XPC" > "$INST_ENT" 2>/dev/null
+if [ "$(pbget "$INST_ENT" com.apple.security.app-sandbox)" = "true" ]; then
+  bad "Installer.xpc is SANDBOXED (Sparkle's installer must not be)"
+else
+  ok "Installer.xpc is not sandboxed"
 fi
 
 # ---------------------------------------------------------------- I. same keychain identity as another build
