@@ -23,7 +23,7 @@
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
-| d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | FIXES-IN-FLIGHT — round 1: the landed work held (20 pin pairs re-scored; custody lines confirmed twice over), but 1 MAJOR: TWO more silent sites the warning CANNOT flag (token-suppressed by design) → re-spells owed; the hollow cleanup TAKEN; round 2 follows |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | ROUND-2-PENDING — round-1 fixes landed (`git diff f3f5c3a0..HEAD`): BookAscent:803 fixed + pinned; MarkdownFace:187 found HOLLOW under a real nil (P2 never made it nil — routed); all 19 hollow cleaned; `try? #require` tripwire 0; zero redundancy warnings; suites green |
 
 ---
 
@@ -161,12 +161,14 @@ review **with an explicit charge on the custody-drill test files** (`PostureSwit
 `SyncEnrollment` — assertions must not weaken; the 19a FurnitureConvergence precedent), and
 the orchestrator verifies those re-spells by its own hands at the close. **DO-NOT-TOUCH
 unchanged from 19b/19c** (13r's staged artifacts, `Sync/`, schema, app source except
-nothing — this entry is TEST FILES ONLY). **State: FIXES-IN-FLIGHT (2026-10-04) — round 1
+nothing — this entry is TEST FILES ONLY). ~~**State: FIXES-IN-FLIGHT (2026-10-04)**~~ — round 1
 arbitrated below (1 MAJOR accepted with fixes owed; the hollow cleanup TAKEN at the
-orchestrator's call; 1 NIT reword); the implementer lands the fixes; a FRESH reviewer runs
-round 2 over the fix diff. The implementer's run record is the 19d RECORD at the tail; the
-orchestrator's own-hands check of 621/262 PASSED (strictly stronger / abort-preserved) and
-the round-1 reviewer's independent custody read agrees.**
+orchestrator's call; 1 NIT reword); the orchestrator's own-hands check of 621/262 PASSED
+(strictly stronger / abort-preserved) and the round-1 reviewer's independent custody read
+agrees. **State: ROUND-2-PENDING (2026-10-04) — the round-1 fixes landed; a FRESH reviewer runs
+round 2 over `git diff f3f5c3a0..HEAD -- App Tests` (the implementer's ROUND 1 FIXES record at
+the tail). One finding for the arbitration: `MarkdownFaceTests:187` is HOLLOW under a real nil —
+the round-1 F1 text names it silent.**
 
 ## 19d ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow: the orchestrator arbitrates, the implementer fixes, a FRESH reviewer runs round 2)
 
@@ -1227,11 +1229,12 @@ dispositions, NOTICED, State → REVIEW-PENDING).
 
 ## 19d RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS ENTRY (stated first, per the contract):** (1) **18 of the 38 `#require` sites
-were NOT re-spelled — they are HOLLOW** (core 8 · Mac 10): under the in-place nil mutant the OLD
-spelling already records at its own line, so the contract's hollow rule binds (record, do not fix);
-their redundancy warnings STAY, each recorded below with its reason. Re-spelling them as a
-warning-only cleanup is the orchestrator's scope call, flagged, not taken. (2) **The posture drill
+**NOT DONE BY THIS ENTRY (stated first, per the contract) — AS OF ROUND 1:** (0) **round 1's F1
+pins hold for ONE of its two sites only:** `BookAscentTests:803` is genuinely silent and FIXED with
+its pin; `MarkdownFaceTests:187` is HOLLOW (its old spelling records at its own line under a real
+nil — the reviewer's P2 never produced a nil), so it carries no fix claim; its edit stands as an F2
+cleanup. (1) ~~18 of the 38 sites NOT re-spelled~~ — **superseded at round 1: the orchestrator took
+the cleanup (F2); all 19 hollow sites are now re-spelled behaviour-identically.** (2) **The posture drill
 was NOT run** — `PostureSwitchDrillTests` is env-gated OFF (`VARIORUM_POSTURE_DRILL=1`) and stayed
 off; line 621's re-spell is evidenced by a same-file throwaway probe + the route census, and the
 orchestrator's own-hands verification of both custody-drill re-spells is still owed (the entry's
@@ -1550,24 +1553,24 @@ NEW = the re-spelled line (line numbers in the COMMITTED file) under the same mu
 
 | Site (base line) | Class | Route | OLD under the mutant | NEW under the mutant | Disposition |
 |---|---|---|---|---|---|
-| core `BookArchiveFacesCoreTests:24` | A | `__checkValue` | RED at 24 | — | DISMISSED AS HOLLOW |
-| core `BookWingMoveTests:159` | A | `__checkValue` | RED at 159 | — | DISMISSED AS HOLLOW |
-| core `BookWingMoveTests:216` | A | `__checkValue` | RED at 216 (M2c; logged 217, +1 shift) | — | DISMISSED AS HOLLOW |
-| core `DailyJournalRulingsTests:504` | A | `__checkValue` | RED at 504 | — | DISMISSED AS HOLLOW |
-| core `PendingArrivalDismissalTests:26` | A | `__checkValue` | RED at 26 (×3 callers) | — | DISMISSED AS HOLLOW |
-| core `TrashAndArchiveTests:253` (inner) | A | `__checkValue` | RED at 253 "stamp" | — | DISMISSED AS HOLLOW |
-| core `WingContentsMoveTests:64` | A | `__checkValue` | RED at 64 | — | DISMISSED AS HOLLOW |
-| core `WingContentsMoveTests:68` | A | `__checkValue` | RED at 68 (M2c; logged 69) | — | DISMISSED AS HOLLOW |
-| Mac `BookArchivedLineTests:471` | A | `__checkValue` | RED at 471 | — | DISMISSED AS HOLLOW |
-| Mac `FannedDefaultsTests:221` | R | `__checkValue` | RED at 221 | — | DISMISSED AS HOLLOW |
-| Mac `LibraryDayFilterTests:114` | A | `__checkValue` | RED at 114 | — | DISMISSED AS HOLLOW |
-| Mac `LibraryDayFilterTests:124` | A | `__checkValue` | RED at 124 (M2m) | — | DISMISSED AS HOLLOW |
-| Mac `SurfaceSizeMemoryTests:687` | R | `__checkValue` | RED at 687 | — | DISMISSED AS HOLLOW |
-| Mac `TutorialWalkTests:563` | A | `__checkValue` | RED at 563 | — | DISMISSED AS HOLLOW |
-| Mac `TutorialWalkTests:3502` (macro at 3501) | R | `__checkValue` | RED at 3501 | — | DISMISSED AS HOLLOW |
-| Mac `TutorialWalkTests:3504` (macro at 3503) | R | `__checkValue` | RED at 3503 | — | DISMISSED AS HOLLOW |
-| Mac `WingBookMoveDoorTests:149` | A | `__checkValue` | RED at 149 | — | DISMISSED AS HOLLOW |
-| Mac `WingBookMoveDoorTests:250` | A | `__checkValue` | RED at 250 | — | DISMISSED AS HOLLOW |
+| core `BookArchiveFacesCoreTests:24` | A | `__checkValue` | RED at 24 | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `BookWingMoveTests:159` | A | `__checkValue` | RED at 159 | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `BookWingMoveTests:216` | A | `__checkValue` | RED at 216 (M2c; logged 217, +1 shift) | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `DailyJournalRulingsTests:504` | A | `__checkValue` | RED at 504 | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `PendingArrivalDismissalTests:26` | A | `__checkValue` | RED at 26 (×3 callers) | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `TrashAndArchiveTests:253` (inner) | A | `__checkValue` | RED at 253 "stamp" | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `WingContentsMoveTests:64` | A | `__checkValue` | RED at 64 | — | HOLLOW → CLEANUP (round 1 F2) |
+| core `WingContentsMoveTests:68` | A | `__checkValue` | RED at 68 (M2c; logged 69) | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `BookArchivedLineTests:471` | A | `__checkValue` | RED at 471 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `FannedDefaultsTests:221` | R | `__checkValue` | RED at 221 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `LibraryDayFilterTests:114` | A | `__checkValue` | RED at 114 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `LibraryDayFilterTests:124` | A | `__checkValue` | RED at 124 (M2m) | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `SurfaceSizeMemoryTests:687` | R | `__checkValue` | RED at 687 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `TutorialWalkTests:563` | A | `__checkValue` | RED at 563 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `TutorialWalkTests:3502` (macro at 3501) | R | `__checkValue` | RED at 3501 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `TutorialWalkTests:3504` (macro at 3503) | R | `__checkValue` | RED at 3503 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `WingBookMoveDoorTests:149` | A | `__checkValue` | RED at 149 | — | HOLLOW → CLEANUP (round 1 F2) |
+| Mac `WingBookMoveDoorTests:250` | A | `__checkValue` | RED at 250 | — | HOLLOW → CLEANUP (round 1 F2) |
 | Mac `EditorSeamCostTests:81` | R | `__checkPropertyAccess` | SILENT (82 only) | RED at 82 | FIXED |
 | Mac `MarkdownFaceTests:284` | R | `__checkPropertyAccess` | SILENT (286/289/291) | RED at 285 (logged 286) | FIXED |
 | Mac `NoteBoxTests:221` | R | `__checkFunctionCall` | SILENT (223–230) | RED at 223 | FIXED |
@@ -1588,6 +1591,8 @@ NEW = the re-spelled line (line numbers in the COMMITTED file) under the same mu
 | mobile `MobileCrossBlockEditTests:163` | R | `__checkFunctionCall` | SILENT (164–169) | RED at 165 | FIXED |
 | mobile `MobileCrossBlockEditTests:210` | R | `__checkFunctionCall` | SILENT (211/212) | RED at 213 | FIXED |
 | mobile `MobileCrossBlockEditTests:310` | R | `__checkFunctionCall` | SILENT (313–318) | RED at 316 | FIXED |
+| Mac `BookAscentTests:803` (round 1 F1 — warning SUPPRESSED by its `?` token) | R | `__checkPropertyAccess` | SILENT under P1 (run A: nothing at the site; 805/807 only) | RED at 804 (logged 805, run B) | FIXED (round 1) |
+| Mac `MarkdownFaceTests:187` (round 1 F1 — warning SUPPRESSED) | R | `__checkPropertyAccess` | RED AT 187 under a REAL nil (run A; P2 never made it nil) | RED at 188 (run B) | HOLLOW → CLEANUP (round 1 F2) |
 | Mac `PostureSwitchDrillTests:621` (always-true) | — | `__checkBinaryOperation` → `__checkPropertyAccess` (VOID) | probe over `deviceID: ""`: GREEN (the silence) | probe: RED at its line | FIXED (`!…isEmpty`; drill gated off) |
 | Mac `SyncEnrollmentTests:262` (always-true) | — | `__checkValue` → none (`_ = try`) | throw: "Caught error" at 248 (the `@Test` line) | identical, at 248 | CLEANUP (dead conjunct removed; behaviour identical) |
 | mobile APP `Spike/SpikeScenarios.swift:240` (always-true) | — | — | — | — | RECORDED, NOT OWNED (app source) |
@@ -1596,6 +1601,12 @@ NEW = the re-spelled line (line numbers in the COMMITTED file) under the same mu
 new RED at its own line, 19/19), 18 DISMISSED AS HOLLOW (core 8 · Mac 10; old already RED at its
 own line, so no pin can be red-on-old), 1 CLEANUP. The 2 always-true test sites: 621 FIXED (probe
 pin), 262 CLEANUP (behaviour-identical). Zero stop-and-report sites; zero DEFERRED.**
+**[TOTALS AT ROUND 1 — the class is 40 `#require` sites, not 38 (the two token-suppressed `try?`
+sites): 20 FIXED with pins (Mac 16 incl. `BookAscentTests:803` · mobile 4); 19 HOLLOW, every one
+re-spelled as a behaviour-identical CLEANUP at round 1 (core 8 · Mac 11 incl.
+`MarkdownFaceTests:187`; the orchestrator's F2 ruling); 1 CLEANUP (`FannedDefaultsTests:355`). The
+`try? #require` grep reads ZERO across all five test roots; the redundancy warning reads ZERO in all
+three test builds. The 2 always-true sites unchanged from round 0 (621 FIXED, 262 CLEANUP).]**
 
 **DISPOSITIONS (by the contract's three):** FIXED with its pin — the 19 silent sites + 621 (each pin
 in the table, logs named above) · DISMISSED AS HOLLOW — the 18 sites, each with the mutant log
@@ -1606,7 +1617,8 @@ legitimate touch of that Spike file).
 
 **ACCEPTANCE LINES:** zero "'#require(_:_:)' is redundant" warnings in all three test builds except
 sites recorded with a reason — ✔ (the final fresh builds carry exactly the 18 hollow sites, each
-recorded above with its mutant evidence) · zero "always returns true" warnings in the test files —
+recorded above with its mutant evidence) **[AT ROUND 1: met LITERALLY — the fresh round-1 builds
+carry ZERO, no recorded exceptions; see the ROUND 1 FIXES record]** · zero "always returns true" warnings in the test files —
 ✔ (the one left is mobile APP source, recorded not owned) · the census table — ✔ (above) · the
 touched suites green at a quiet window — ✔ (Mac 197/27 at a zero-instance window, mobile 24/2 on
 iPhone 17 Pro / iOS 26.2, `skipped:` read: none) · custody-drill lines not weakened — ✔ (621 is
@@ -1784,5 +1796,35 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
     runtime" and the arbitration's "held 40/40" are 40 of 41: **the route RANKS a site, it never
     settles one; only a real-nil mutant does** (R2-1's lesson, one level down).
 - F3 [NIT] wording + NOTICED #1/#2/#4 corrections — DONE (this commit): the mechanism heading reworded (the route the compiler chose; the bindings inferred, settled at runtime), the 38/38 claim corrected to 40 of 41, the census's floor claim and NOTICED #1/#2/#4 each carry an in-place correction note kept beside the original text.
-- Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
-  at zero redundancy warnings + the touched suites green — PENDING.
+- **Tripwire + final builds + suites — DONE (this commit).** **The tripwire `grep -rnE
+  'try\?[[:space:]]*(await[[:space:]]+)?#require'` over all five test roots → 0.** FULLY FRESH
+  round-1 builds (`core-bt-r1final.log` `Build complete!`; `mac-bft-r1final.log` /
+  `mobile-bft-r1final.log` `** TEST BUILD SUCCEEDED **`): **redundancy warnings core 0 · Mac 0 ·
+  mobile 0 — no exceptions** (`*-census-r1final.txt`; mobile's one line is the not-owned app-source
+  always-true, `SpikeScenarios.swift:240`); always-true in test files 0. Nothing added anywhere
+  (`warnsets.py`, base `*-0` → `*-r1final`): core 30 → 22 (−8), Mac 102 → 73 (−29 = 26 redundancy
+  + 621 + 262's two lines), mobile 47 → 43 (−4); added: NONE. **Suites** — every suite type in all
+  26 files changed by the entry (`r1-touched-files.txt`; the gated drill's file excluded, left
+  off), `test-without-building` on the round-1 products: **Mac `✔ Test run with 360 tests in 52
+  suites passed`** (360 = those files' `@Test` count exactly; ZERO `skipped:`; a ZERO-INSTANCE
+  window — `pgrep` empty before 18:07:11Z and after 18:09:03Z, `mac-r1final-suites.window`) ·
+  **mobile `✔ Test run with 24 tests in 2 suites passed`** (zero `skipped:`; iPhone 17 Pro / iOS
+  26.2) · **core `✔ Test run with 61 tests in 11 suites passed`** (zero `skipped:`). Evidence 5.2 GB
+  (the round-0 build products deleted, every log kept; the round-1 products kept for round 2).
+- **THE ROUND-1 FIX DIFF (`git diff f3f5c3a0..HEAD -- App Tests Sources`): 14 test files, 40+/22−,
+  no other path.** 20 macro lines removed (the 2 F1 sites + the 18 hollow), 21 added (2 + 8 core
+  hoists + `TrashAndArchive`'s rewritten outer line + 6 Mac hoists + 4 Mac `#expect(x != nil)`).
+  For round 2 to check: every downstream line byte-identical; every hoist placed where its argument
+  was evaluated (each rule encoded immediately before its own `createReading`; each `picked` read
+  after its field's pick); `try` sites still abort, `try?` sites still continue — the round-1
+  mutant run's logs show it per site (`core-r1-M1.log`, `mac-r1-M1.log`).
+- **Commits:** `4439b157` (opened; the sweep) · `6e0a359c` (F1 re-spells) · `668846bb` (F2 core) ·
+  `83955f96` (F2 Mac; tripwire 0) · `94c2e9c3` (round-1 run announced) · `84dd79b5` (round-1 run
+  results; the P2 finding; runs A/B announced) · `d3b9c01e` (runs A/B) · `aac611d4` (F3) · this
+  commit (final builds, suites, table/totals/acceptance, State → ROUND-2-PENDING).
+- **FOR THE ORCHESTRATOR (routed, not acted on):** (a) the "19d ROUND 1" section's F1 text names
+  `MarkdownFaceTests:187` a live silent site and its arbitration says the route mapping "held 40/40"
+  — both are corrected by runs A/B (187 is hollow under a real nil; the mapping is 40 of 41); (b)
+  the reviewer's P2 probe was non-discriminating (`NSTextStorage` re-fixes a removed `.font` to a
+  12-pt default) — a mutant-design lesson worth keeping: CONFIRM the mutant's value is the one
+  intended (here, the captured `→ 12.0` said so) before reading a silence.
