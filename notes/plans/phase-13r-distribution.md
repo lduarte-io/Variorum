@@ -920,6 +920,45 @@ opened; the working tree was left clean.
   means a FRESH store records the current version silently and shows nothing — the sheet
   appears only on a version CHANGE from a recorded one (the walk's arms (b)/(c) read exactly
   this way); pin it.
+- **U3-A VERIFIED BY THE ORCHESTRATOR (2026-10-04, the seam spot-check by its own hands):** tree
+  clean at `ec2ac9fb` = origin; the whole-diff scope check shows ZERO `Sources/VariorumCore/Sync/`
+  and ZERO mobile-target lines; the four new pin suites RE-RUN — **31 tests in 4 suites GREEN,
+  no skips** (VersionScheme · SyncOutOfDateFace · WhatsNew · CalmAsks); the Finder-automation
+  denial REPRODUCED under the orchestrator's own shell (the probe prints DENIED); QUESTIONS #180
+  in place; the U3-A RECORD read in full. **The pre-existing runbook drift is QUEUED as 19e**
+  (the parked-ledger rule — the ladder's finals read green modulo that one named red).
+  **U3-A's open tail rides the pre-walk staging:** the DMG window's first proof is the
+  no-notarization dry run, gated on HER Automation toggle (below).
+- **R-13r-6 ADJUDICATED READING (the orchestrator, from the ruling's own letter "0.9.x
+  increments per beta release"):** the repo's MARKETING_VERSION increments WITH each beta
+  release — the release run's first act is the version-bump commit (release.sh demands a clean
+  tree anyway), so her hand-copied tip build's About tracks the latest published 0.9.x. Cosmetic
+  either way (Sparkle compares build numbers); recorded so the implementer's flagged question
+  has its answer.
+- **HER ITEMS BUNDLED FOR THE SITTING (nothing improvised around):** (1) **the Automation
+  toggle** — System Settings ▸ Privacy & Security ▸ Automation ▸ Ghostty ▸ Finder → ON; the
+  ruled DMG-window road cannot run without it, and `release.sh` refuses at preflight until it is
+  on. The moment it is on, the orchestrator runs the no-notarization dry run and captures the
+  window (the record's piece-5 command). (2) **the 0.9.0 release notes** — `App/Variorum/
+  Variorum/Features/WhatsNew/ReleaseNotes-0.9.0.md` is a functional draft; it goes PUBLIC at the
+  release run, so it is hers to rewrite or okay as-is. 0.9.1's notes are the orchestrator's to
+  draft functional-honest at the release run (her look invited). (3) QUESTIONS #180's
+  PROVISIONALs ride her ordinary ratify cadence, nothing gating.
+- **MOBILE PARITY accumulator for the closeout:** the calm out-of-date sync sentence reaches the
+  PHONE (the face is `Shared/`; no door — its updates are the App Store's) — joins the two
+  candidate rows the closeout duties already name.
+- **U3-B — OPEN (2026-10-04; the implementer spawns from this record).** Its brief: the U3
+  section's U3-B scope (the SIZING bullet's list — the MetricKit opt-in LOCAL and provably OFF
+  with the injected registration seam; Diagnostics listing payloads VERBATIM with a per-report
+  Send; Help ▸ Send Feedback… pre-filled and never auto-sent) + the IN-BATCH FORK protocol (the
+  Settings placement of the opt-in + Diagnostics: the implementer builds the placement-free
+  half, writes its PROPOSAL in its record, STOPS; the orchestrator rules repo-first and resumes
+  it) + R-13r-16's walk shape (U3-B STAGES the walk sheet to the combined public road — the new
+  computer, the public feed, 0.9.0 → 0.9.1, U3-A's day-counter recipe, arm (f)) + ENVIRONMENT
+  TRAPS + the resiliency protocol. Context it inherits: Settings ▸ General now carries U3-A's
+  Updates section; P15 (the key-in-error-description road) is CLOSED since 17b with redaction
+  pins; the privacy-policy brief already promises opt-in crash reporting — U3-B's copy aligns.
+  Zero `Sync/`, zero schema, zero mobile; nothing published.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
