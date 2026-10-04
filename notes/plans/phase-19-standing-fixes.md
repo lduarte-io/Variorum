@@ -832,24 +832,41 @@ outputs copied into the evidence folder.
   unchanged, rebuild to zero.
 
 **Pieces:**
-1. The grep census (A) — IN-PROGRESS (hand resolution of the 369 name-matched sites): 95
-   `@discardableResult … -> Bool/Bool?` declarations in the four code roots (19 core, 33 Mac, 21
-   Shared, 22 mobile — 19a's "65" predates the mobile arm) + 17 test-target helpers.
-2. Fresh builds — DONE (logs `mac-bft-0.log`, `mobile-bft-0.log`: `** TEST BUILD SUCCEEDED **`
-   both; core `swift build --build-tests` up to date at HEAD, `core-build-tests-0.log`).
-3. The compiler-level cross-check (B) — FIRST PASS DONE, positive control IN FLIGHT. Every
-   `__check*` call in every test object, by macro expansion and overload route
-   (`census/routes.py` → `mac-routes.tsv` 18,950 calls · `mobile-routes.tsv` 3,623 (arm64) ·
-   `core-routes.tsv` 8,997): **ZERO `#expect` expansions on an Optional-returning route in any of
-   the three targets** (the only `#expect` OPT routes are `__checkClosureCall`, i.e.
-   `#expect(throws:)`, whose `E?` result is its contract). The five named MarkdownActs lines,
-   e.g., call the `(T, Arg0, Arg1) throws -> Bool` overload. **Prediction: no vacuous `#expect`
-   at HEAD — the mutants must confirm it (B never clears).** **POSITIVE CONTROL IN FLIGHT (a
-   probe edit of a COMMITTED file):** `Tests/VariorumCoreTests/CatalogDetailWordsTests.swift:49`
-   re-spelled back to 19a F1's bare `.tag("t1")`, core rebuilt, the census must flag line 49 OPT;
-   restore = `git checkout -- Tests/VariorumCoreTests/CatalogDetailWordsTests.swift` (if this line
-   still says IN FLIGHT, run that first).
-4. Mutant runs, per target — PENDING.
+1. The grep census (A) — DONE (resolution encoded in `census/resolve.py`, output `census/resolved.tsv`):
+   95 `@discardableResult … -> Bool/Bool?` declarations in the four code roots (19 core, 33 Mac,
+   21 Shared, 22 mobile — 19a's "65" predates the mobile arm) + 17 test-target helpers; 369
+   name-matched assertion sites → **261 IN-CLASS** (core 5 · Mac 169 · mobile 87; by shape: 141
+   BARE, 104 `try`/`await`-prefixed, 16 `!`-negated) + the 3 named `== true/false` lines
+   (`BookStructureTests` 782/786/793, settled by the same mutant) = **264 sites to settle**; **108
+   OUT** with the reason per site (76 file-local non-discardable `settle`; 22 CLOSURE-property calls
+   — `StoreKeyCustody.save`, `DeviceKeyStore.save`, `StoreKeyGuard.saveGated`/`removeLegacyEscrow`
+   — which warn when discarded (scratch-verified); `LegacyLegs.apply` ×3 and the Mac
+   `MarkdownActs.toggleCheckbox` ×2, not discardable; 4 Optional-returning `#require` unwraps;
+   one file-local `run`).
+2. Fresh builds — DONE (`mac-bft-0.log`, `mobile-bft-0.log`: `** TEST BUILD SUCCEEDED **`; core up
+   to date at HEAD). **The census rule's visible half:** zero unused-result warnings inside any
+   `#expect`/`#require` expansion in either build (the only in-expansion warnings: Mac
+   `SyncEnrollmentTests:262`'s known `!= nil`; mobile `MobileProtectionTests:1572`'s `try` and
+   `:620`'s isolation read — Arm 2's).
+3. The compiler-level cross-check (B) — DONE. ZERO `#expect` expansions on an Optional-returning
+   route in Mac (18,950 `__check` calls), mobile (3,623) or core (8,997); **positive control
+   PASSED and RESTORED**: `CatalogDetailWordsTests.swift:49` re-spelled to F1's bare `.tag("t1")`
+   flipped to `__checkFunctionCall … OPT` (and its unused-result warning returned —
+   `core-bt-posctl.log`, `core-routes-posctl.tsv`); `git checkout --` restored it, the route read
+   VOID again (`core-routes-restored.tsv`), tree clean.
+4. Mutant runs — IN-PROGRESS. **Baselines GREEN on the unmutated tree** (zero-instance window):
+   Mac 44 suites `Test run with 362 tests in 44 suites passed … with 5 known issues`
+   (`mac-base-1.log`; 8 skips = the opt-in `DebugOracleSingletonWindowTests` suite), that suite
+   run deliberately ALONE with `TEST_RUNNER_VARIORUM_ORACLE_SINGLETON_WINDOWS=1` (its own gate's
+   instruction): 7 tests passed (`mac-base-singleton.log`); mobile 24 suites `206 tests … passed
+   … with 2 known issues` (`mobile-base-1.log`, iPhone 17 Pro / iOS 26.2, 0 skipped); core
+   `StoreEncryptionMigrationTests` 9 passed (`core-base-1.log`). **NOT RUN, BY DESIGN:**
+   `AppleKeyRoundTripTests` (opt-in: writes a synchronizable item into her iCLOUD Keychain — her
+   act, never a session's) — its one site is recorded unstageable here.
+   **ALL MUTANTS IN FLIGHT (probe edits of COMMITTED files; 43 callees, `census/mutate.py` over
+   `census/{mac,mobile,core}-mutants.txt`):** `App/Variorum/Shared/AuthSession.swift` `App/Variorum/Shared/StoreKeyGuard.swift` `App/Variorum/Variorum/Core/Views/WingsModel.swift` `App/Variorum/Variorum/Features/BookView/BookOutlineHeights.swift` `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift` `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift` `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift` `App/Variorum/Variorum/Features/Readings/RuleEditor.swift` `App/Variorum/Variorum/Features/Takes/TakesBoardLayout.swift` `App/Variorum/Variorum/Registry/CommandRouter.swift` `App/Variorum/Variorum/Theme/MarkdownStyling.swift` `App/Variorum/Variorum/Workspace/WorkspaceModel.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileScraps.swift` `App/Variorum/VariorumMobile/Features/Takes/MobileLenses.swift` `App/Variorum/VariorumMobile/Features/Write/MobileComments.swift` `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift` `App/Variorum/VariorumMobile/Features/Write/MobileMarkdownActs.swift` `App/Variorum/VariorumMobile/Features/Write/MobileReferences.swift` `App/Variorum/VariorumMobileTests/MobileEditorTestSupport.swift` `App/Variorum/VariorumMobileTests/MobileSurfaceDriver.swift` `App/Variorum/VariorumTests/BlocksWorkbenchFaceTests.swift` `App/Variorum/VariorumTests/DebugOracleTwoWindowTests.swift` `App/Variorum/VariorumTests/IndexClickCaretTests.swift` `App/Variorum/VariorumTests/ReadModeTests.swift` `Sources/VariorumCore/Operations/Operations+Reading.swift` `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift` `Sources/VariorumCore/Persistence/StoreKey.swift`.
+   **Restore = `git checkout -- ` those files, then `git status` must be clean. If this line still
+   says IN FLIGHT, restore first.**
 5. Re-spells of VACUOUS sites + red-on-new-spelling — PENDING.
 6. Arm 2, Mac then mobile — PENDING.
 7. Acceptance runs + the census table + dispositions — PENDING.
