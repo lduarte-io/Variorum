@@ -495,8 +495,13 @@ opened; the working tree was left clean.
   think"* — the disposition stands; the stray DerivedData Release build *"you can remove
   that excess release build"* — DONE (the app bundle removed, dSYM left). *"i'm ready for
   the drill"* — the LIVE drill runs this sitting; verdict lands in the U1 RECORD.
-- **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
-  from the site brief must be settled before this unit closes).
+- **U1 — CLOSED (2026-10-04, the drill sitting): the LIVE drill PASSED all five arms** (the
+  VERDICT at the U1 RECORD's tail; the KnownIssues row-24 flip this PASS authorizes rides the
+  phase close, per the checklist's own sentence).
+- **U2 — NOT STARTED** (gated on 19a's CLOSE — the migration AND its per-entry Opus cold
+  review — now that U1 is done; her step 3 — EdDSA minting — at its start, once the U2 session
+  has Sparkle's tools in hand; the appcast URL from the site brief must be settled before this
+  unit closes).
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
@@ -517,7 +522,10 @@ opened; the working tree was left clean.
 
 **U1 STATE (2026-10-04, the implementer's stop): the fix, the road, the static drill DONE (35/35);
 the LIVE drill STAGED (piece 4's checklist), waiting on HER launch, which the orchestrator
-coordinates.** Pieces below. Forward notes for the orchestrator, none of them this unit's:
+coordinates.** **SUPERSEDED THE SAME SITTING — U1 IS CLOSED: the LIVE drill RAN at her hands
+and PASSED all five arms (the VERDICT at this record's tail, step 8); the forward notes below
+were each dispositioned at her word (the LIVE STATUS's drill-sitting bullet).** Pieces below.
+Forward notes for the orchestrator, none of them this unit's:
 - A pre-existing indexed real-store-id Release build sits in Xcode's default DerivedData (piece 3).
 - Run 1's leftover real-store bundles await removal (piece 4).
 - Her OWN eventual move to a Developer ID build would meet the bookmark question (piece 4's
@@ -832,3 +840,31 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      `$DEST` back over `$S` with `cp -p`, then `cmp` each. That is the established A1 restore. The
      prefs/metadata copies are evidence: restoring them (cfprefsd caches prefs) is the
      orchestrator's call, with her.
+
+**THE LIVE DRILL VERDICT (the orchestrator, 2026-10-04, the drill sitting — step 8): PASS, all
+five arms. U1 IS CLOSED.**
+- **Her launch** (04:31:05 local, PID 84420, the CDHash-named build; preconditions 0a–0d all
+  green minutes before, the A1 rail's six `ok` lines + two evidence extras at
+  `safety-copies/13r-u1-drill-20261004T102619Z`): ONE Touch ID — her words, *"it needed touch
+  id to oepn, I opened it, looks fine"* — then HER library, the window reading "Variorum". The
+  custody read landed; no 4-STOP rule fired; she looked only and ⌘Q'd.
+- **The logs (6a):** 4,096 lines from the drill process; **ZERO `-34018`**
+  (errSecMissingEntitlement — the group failure the drill exists to rule out); the only
+  error-typed lines are three stock macOS benignities (the `/private/var/db/DetachedSignatures`
+  sqlite probe, a BaseBoard task-port line, a ViewBridge teardown that labels itself benign).
+  (Harness note for successors: `log` is a zsh BUILTIN in this shell — call `/usr/bin/log`.)
+- **Owners (6b): BYTE-UNCHANGED** — still the single development entry. The predicted-silent
+  container access confirmed, and stronger: the Developer ID launch added no second owner entry
+  at all.
+- **The keychain sweep (6c):** all five services still `none` in the legacy keychain — nothing
+  migrated or created there. **LaunchServices (6d):** re-registration removed, dump count 0.
+- **The return leg (7):** her daily `/Applications` build — her words, *"opened normally,
+  looks good."* Undisturbed.
+- **BONUS — the staged bookmark observation landed GOOD:** Settings ▸ Data Safety in the drill
+  build rendered her second backup folder (`~/Desktop/mybackups/`) normally, copy counts and
+  dates showing (her screenshot) — the app-scope bookmark RESOLVED under the new signature;
+  the community-reported failure did not occur. Both of the staging's UNCONFIRMED predictions
+  (container silence, bookmark survival) are now CONFIRMED on the clean side.
+- The A1 copies stay per the rail's custom; the prefs/metadata extras were evidence only,
+  nothing restored. **PASS authorizes the KnownIssues keychain-access-groups row-24 flip at
+  the phase close.**
