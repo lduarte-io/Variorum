@@ -1025,6 +1025,25 @@ opened; the working tree was left clean.
   PASS), never a re-upload. **0.9.1 IN FLIGHT:** its functional notes + the version bump
   committed (`c4974c4a`); `release.sh --version 0.9.1` running; its publish follows the same
   order, the page's data file STAYING at 0.9.0 until after her walk (the sheet's shape).
+- **0.9.1 BUILT (second run) — PUBLISH PAUSED AT A CACHED 404, HER PURGE ASKED (2026-10-04).**
+  Run 1 FAILED SAFELY at the export drill: the stamp assertion caught `4913 ≠ expected 4912` —
+  the orchestrator had committed the N-0 record MID-BUILD and the commit-count moved under the
+  run. **LESSON (binding on this orchestrator): NO repo commits while a release run is in
+  flight — the build number is the commit count.** Run 2 from the settled HEAD: exit 0, 57/57
+  twice, both notarizations Accepted, `Variorum-0.9.1.dmg` 21,203,033 bytes · sha256
+  `6fedd07e…9751579f`, the appcast carrying BOTH items, verify-appcast PASS. **The publish:**
+  the DMG uploaded to R2 and confirmed IN THE BUCKET byte-perfect (a direct
+  `wrangler r2 object get` sha256-matches), but the PUBLIC URL serves a CACHED 404
+  (`cf-cache-status: HIT`, age 171, `max-age=14400`) — the runbook's own preflight HEAD, run
+  seconds before the upload, seeded a 404 the edge cached for up to 4 h (0.9.0 met the same
+  shape for ~2 minutes; the TTL is evidently POP-/response-dependent). **The DMG-FIRST order
+  did its job: the live appcast still advertises ONLY 0.9.0, so no client can be offered the
+  dead link.** The unblock is a one-URL dashboard purge (zone-level — outside wrangler's OAuth
+  by the runbook's own access note): HER HANDS, asked. **LESSON TO PROPOSE for the site
+  runbook (their file — proposed, not edited):** the never-overwrite preflight should check
+  the BUCKET (`wrangler r2 object head`), never the public URL, which seeds exactly this
+  cached 404. The appcast push, the page deploy and the N-0(e) public-state checks resume the
+  moment the purged URL serves the DMG.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
