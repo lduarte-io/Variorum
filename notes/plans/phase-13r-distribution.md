@@ -422,7 +422,16 @@ opened; the working tree was left clean.
    credential), then spawn U1's `opus-implementer` briefed ONLY from this file's U1 section +
    environment traps.
 
-- **U1 — NOT STARTED.** Opens with HER HANDS steps 1–2.
+- **HER HANDS PROGRESS (2026-10-04, the resume sitting):** step 1's CERTIFICATE done and
+  *[removed for publication]*
+  *[removed for publication]*
+  **step 2 DONE** — the notarytool credential `VariorumNotary` validated and saved to her
+  *[removed for publication]*
+  hers to move out of ~/Downloads — never into the repo). **REMAINING before the U1 spawn:**
+  step 1's PROFILE — the Developer ID provisioning profile for `io.lduarte.Variorum` (portal,
+  Keychain Sharing on the App ID), handed to the session and verified to authorize both
+  keychain groups.
+- **U1 — NOT STARTED** (spawns when the profile lands).
 - **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
   from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**
