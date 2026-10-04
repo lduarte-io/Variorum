@@ -960,11 +960,20 @@ five arms. U1 IS CLOSED.**
 
 ## U2 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS UNIT (stated first, per the contract):**
-- **HER HANDS step 3 (the EdDSA minting) is HERS:** staged here as command text (piece 3), never
-  run. This session runs `generate_keys` in NO form, because it acts inside her user session and
-  any run would touch her login Keychain. It never handles the private key or the `-x` export.
-- **The WALK (R-13r-8) is AUTHOR-GATED:** staged (piece 6), never run by this session.
+**NOT DONE BY THIS UNIT (stated first, per the contract; FINAL at the session's stop):**
+- **THE WALK (R-13r-8), U2's acceptance:** STAGED (piece 6's checklist W-0…W-10), never run by this
+  session. **U2 does not close until her walk's VERDICT lands here.**
+- **`make-appcast.sh`'s first LIVE run** reads HER Keychain, so it is the walk's step W-0(c),
+  staged and never run here. `verify-appcast.swift` was exercised only on a synthetic feed signed
+  with a THROWAWAY key. Every other pipeline step ran for real, twice (walk A + walk B).
+- **No public release, no publish:** nothing went to `dl.stargazing.tech` or the public feed (it
+  answers 404). `verify-published.sh` ran against nothing live.
+- **Suites:** the full Mac and core suites were NOT run, because the brief names none. The targeted
+  closing check is under piece 4's "Verified" (the U2 pins + every menu/registry suite that reads
+  `EditorCommands`). The ladder's "suite green" is the phase's.
+- **HER HANDS step 3 (the EdDSA minting) was HERS:** staged as command text (piece 3), then run by
+  her (recorded at `b66633a9`). This session never ran `generate_keys` in any form and never
+  handled the private key or the `-x` export.
 - Out of scope, untouched: zero `Sync/`, zero schema, no editor seam, `/Applications` never touched,
   the real store never touched, no custom build configuration, nothing against the public feed.
   MARKETING_VERSION and the build-number stamping build phase are U3's (R-13r-6), so this unit
@@ -1238,7 +1247,16 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
          (`theBakedFeedIsTheLockedStargazingURL`, `UpdateChannelTests.swift:57`).
        - Restored with `git checkout --`, then **GREEN, 7/7**; the tree is clean.
      - **Release-path compile:** the Sparkle-touching code compiles in Debug too (only instantiation
-       is fenced), so the Debug build above type-checks it. Piece 5's archive is the Release proof.
+       is fenced), so the Debug build above type-checks it. Piece 5's archive is the Release proof. (Walk builds A and B archived Release
+       clean, piece 5.)
+     - **The closing check (the session's end, a zero-instance window):** `xcodebuild test …
+       -only-testing:` CapabilityRegistryTests, ShellChromeTests, OpenStripMenuTests,
+       ChordLegibilityTests, UpdateChannelTests, EntitlementsTests, OneTimeCodeAutoFillTests (plus
+       a `WindowsTests` id that matched no suite) → **`Test run with 60 tests in 7 suites passed`**,
+       0 `skipped` lines (log `13r-u2/close-suites.log`). The suites: the registry walk (P-1's
+       declared ⇔ rendered), the flat shell, the merge chord, the Open strip's menu, the update
+       channel, the entitlements, and one-time-code. The undeclared Check for Updates… door
+       breaks none of the menu's source-reading pins.
 5. **The full release pipeline** in `Tools/Release/` — **DONE** (`40301c3c` + `470c3ffc`). Two real
    runs PASSED end to end, every step but the Keychain one: walk A and walk B below. **One leg is
    left PENDING by design:** `make-appcast.sh`'s first live run reads HER Keychain, so it is the
