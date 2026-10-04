@@ -863,10 +863,34 @@ outputs copied into the evidence folder.
    `StoreEncryptionMigrationTests` 9 passed (`core-base-1.log`). **NOT RUN, BY DESIGN:**
    `AppleKeyRoundTripTests` (opt-in: writes a synchronizable item into her iCLOUD Keychain — her
    act, never a session's) — its one site is recorded unstageable here.
-   **ALL MUTANTS IN FLIGHT (probe edits of COMMITTED files; 43 callees, `census/mutate.py` over
-   `census/{mac,mobile,core}-mutants.txt`):** `App/Variorum/Shared/AuthSession.swift` `App/Variorum/Shared/StoreKeyGuard.swift` `App/Variorum/Variorum/Core/Views/WingsModel.swift` `App/Variorum/Variorum/Features/BookView/BookOutlineHeights.swift` `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift` `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift` `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift` `App/Variorum/Variorum/Features/Readings/RuleEditor.swift` `App/Variorum/Variorum/Features/Takes/TakesBoardLayout.swift` `App/Variorum/Variorum/Registry/CommandRouter.swift` `App/Variorum/Variorum/Theme/MarkdownStyling.swift` `App/Variorum/Variorum/Workspace/WorkspaceModel.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` `App/Variorum/VariorumMobile/Features/Shell/MobileScraps.swift` `App/Variorum/VariorumMobile/Features/Takes/MobileLenses.swift` `App/Variorum/VariorumMobile/Features/Write/MobileComments.swift` `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift` `App/Variorum/VariorumMobile/Features/Write/MobileMarkdownActs.swift` `App/Variorum/VariorumMobile/Features/Write/MobileReferences.swift` `App/Variorum/VariorumMobileTests/MobileEditorTestSupport.swift` `App/Variorum/VariorumMobileTests/MobileSurfaceDriver.swift` `App/Variorum/VariorumTests/BlocksWorkbenchFaceTests.swift` `App/Variorum/VariorumTests/DebugOracleTwoWindowTests.swift` `App/Variorum/VariorumTests/IndexClickCaretTests.swift` `App/Variorum/VariorumTests/ReadModeTests.swift` `Sources/VariorumCore/Operations/Operations+Reading.swift` `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift` `Sources/VariorumCore/Persistence/StoreKey.swift`.
-   **Restore = `git checkout -- ` those files, then `git status` must be clean. If this line still
-   says IN FLIGHT, restore first.**
-5. Re-spells of VACUOUS sites + red-on-new-spelling — PENDING.
+   **THE MUTANT RUNS — DONE; MUTANTS RESTORED** (44 callees — 27 Mac-reachable, 15 mobile, 2
+   core — via `census/mutate.py`; the full mutant diff is `mutants.diff`; restored with
+   `git checkout --` of the 30 files, `git status` clean, zero `__mut19c` left in the tree).
+   Mutant mechanics the reviewer should check: the wrapper copies the header bytes from the first
+   attribute line (so `@MainActor` above `@discardableResult` rides both copies); unqualified calls
+   INSIDE a renamed original to another function mutated in the same file are redirected to that
+   function's original (`saveGated`→`deleteGated`, `typeAtEnd`→`typeEdit`, the recursive
+   `MenuActionHandler.activate`) so each wrapper flips only what leaves it — without that,
+   `typeAtEnd`'s sites would have read a double negation; and a mutated file's lines below the
+   wrapper SHIFT, so `census/settle.py` maps every original site line into the mutated file
+   (difflib over `git show HEAD:` vs the mutated file) before reading the log's issue locations.
+   **Results — every runnable site RED at its own line under its callee's mutant:**
+   core `StoreEncryptionMigrationTests` 5/5 (`core-mut-1.log`, 9 tests, 17 issues) · Mac 154/154
+   in 44 suites (`mac-mut-1.log`: `Test run with 362 tests in 44 suites failed … with 323 issues`
+   — the same 362 as the baseline) · the opt-in singleton suite, run alone, 17/17
+   (`mac-mut-singleton.log`, 7 tests, 17 issues) · mobile 87/87 (`mobile-mut-1.log`; 24 suites).
+   **No candidate line carried an issue in its baseline** (the baselines' only issue lines:
+   `IndexTierMetricsTests:274` ×4 and `TakesFindBoardTests:431` — the standing known issues —
+   and mobile `MobileTrashTests:497/498`, known issues; none a census site). Mutant-only
+   fallout, recorded: downstream production code branches on several of these Bools, so other
+   assertions also moved (e.g. `MobileWalkTests` walk3's text checks after a flipped
+   `toggleCheckbox`), and in `walk3_markdownVocabularyByteStable` the mobile DEBUG identity
+   oracle killed the host (`MobileEditorViewModel.swift:1682`, "surface desynced") — the runner
+   restarted and finished the suite; every census site had already recorded its red. Neither
+   occurs on the restored tree. **Settlement table:** `census/{core,mac,singleton,mobile}-settle.tsv`
+   (site → RED/GREEN → issue count). **VERDICT: 263 sites REAL with mutant evidence; ZERO
+   VACUOUS; 1 RECORDED** (`AppleKeyRoundTripTests.swift:97`, the iCloud-Keychain opt-in — a
+   session never runs it; its expansion calls the `-> Bool` overload, a rank, not a clearance).
+5. Re-spells — NONE OWED (zero vacuous sites; no assertion byte changes in Arm 1).
 6. Arm 2, Mac then mobile — PENDING.
 7. Acceptance runs + the census table + dispositions — PENDING.
