@@ -626,6 +626,23 @@ opened; the working tree was left clean.
   beside the DMG, the two hazard notes: no public appcast entry before U3's stamping is in
   her hand-copied build; her daily drive will see Sparkle's consent prompt once after the
   refresh); U3's implementer spawns the moment her walk closes U2, strictly sequential.
+- **TWO AUTHOR REPORTS AT THE WALK SITTING (2026-10-04, verbatim-faithful; recorded
+  mid-walk):** (1) **FOR 13s ONBOARDING, her words:** *"make a note for 13s onboarding that
+  I don't like the 'choose backups' popup appearing on app open - it ruins the calm feeling
+  of opening the app, that can surface after some use as a popup toast."* Routed to 13s
+  (first-run onboarding is 13s's scope; the closeout handoff carries this forward).
+  (2) **A use-shaped DMG finding, observed live:** at W-3 she did not see the DMG's
+  Applications link (it exists — the pipeline writes app + link — but with 13r's
+  deliberately clean, art-less DMG it reads as a bare folder icon) and launched the app
+  FROM THE MOUNTED DMG; Gatekeeper's notarized-app prompt appeared there and the app ran.
+  Friends will do the same. FOR 13s: the DMG background art should carry the
+  drag-to-Applications affordance (the standard arrow). WALK CONSEQUENCE, handled in the
+  sitting: Sparkle refuses updates from a read-only/temporary location (its source, the U2
+  facts), so the walk resumed with quit → the W-6 override written EARLY (the container
+  exists after the DMG launch — this also keeps any consent-triggered check off the public
+  feed) → the W-4 drag-install → W-5 from `~/Applications`; consent may arrive one launch
+  earlier than the sheet's count (the DMG launch set Sparkle's first-launch flag) — the
+  acceptance cares that consent is ASKED with no profile option, not its ordinal.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
