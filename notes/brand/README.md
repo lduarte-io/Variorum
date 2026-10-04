@@ -18,6 +18,10 @@ propose-only, written for the future design sitting.
   `filming-notes.md` (staging, vertical crop, capture choreography, AI-video rules).
 - **`why-variorum-stands-out.md`** — the ranked positioning list (most-differentiating
   first) that the scripts and future marketing draw from.
+*[removed for publication]*
+  notes apps" — the website essay, with an alternate opening and video-embedding
+  guidance) and `show-hn.md` (the Show HN text, prepared first comment, comment-section
+  crib sheet, tactics — gated on having a downloadable beta, per HN's try-it rule).
 
 ## Provenance
 
