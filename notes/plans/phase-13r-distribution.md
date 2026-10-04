@@ -427,11 +427,31 @@ opened; the working tree was left clean.
   *[removed for publication]*
   **step 2 DONE** — the notarytool credential `VariorumNotary` validated and saved to her
   *[removed for publication]*
-  hers to move out of ~/Downloads — never into the repo). **REMAINING before the U1 spawn:**
-  step 1's PROFILE — the Developer ID provisioning profile for `io.lduarte.Variorum` (portal,
-  Keychain Sharing on the App ID), handed to the session and verified to authorize both
-  keychain groups.
-- **U1 — NOT STARTED** (spawns when the profile lands).
+  hers to move out of ~/Downloads — never into the repo). **STEP 1 COMPLETE (2026-10-04): the
+  Developer ID provisioning profile is minted, installed and ORCHESTRATOR-VERIFIED.** Her road,
+  recorded: no explicit App ID existed (the Mac app had only ever signed against the
+  team-wildcard development profile; the portal listed only Fragments' three), so she
+  registered `io.lduarte.Variorum` (description "Variorum Mac", explicit) — the portal's
+  capability list did NOT offer Keychain Sharing (searched; empty), registered without it on
+  the orchestrator's call, and the call is proven right below. Profile "Variorum Developer
+  ID", downloaded to `~/Downloads/Variorum_Developer_ID.provisionprofile` and
+  double-click-installed (Device Management shows it). **Decoded facts (`security cms -D`):**
+  *[removed for publication]*
+  BOTH groups exactly as the sitting's external-facts bullet predicted;
+  *[removed for publication]*
+  *[removed for publication]*
+  byte-exact; `ProvisionsAllDevices` = true; expires 2044-09-29. The U1 drill's static leg
+  re-checks all of it ON THE EXPORT.
+- **HER HANDS steps 1–2 COMPLETE. Step 3 (EdDSA minting) waits for U2's start; the mailbox
+  rides the beta checklist. The profile FILE may be committed if the export road wants it
+  versioned (it is NOT a secret — it ships inside every app bundle as
+  `embedded.provisionprofile`); the `.p8` and any EdDSA material NEVER.**
+- **U1 — OPEN (2026-10-04; the implementer spawns from this record).** Its brief: this file's
+  U1 section + ENVIRONMENT TRAPS + this LIVE STATUS (the toolchain pair, the profile and
+  credential facts above) + the resiliency protocol. First act: a clean `swift build` + a Mac
+  build to surface any Xcode-27 breakage. The LIVE drill leg (b) is AUTHOR-GATED — the
+  implementer builds the road and the static leg, STAGES the live drill (A1 rail
+  instructions ready), then stops and reports; the orchestrator coordinates her launch.
 - **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
   from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**
