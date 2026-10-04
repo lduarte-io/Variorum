@@ -2492,8 +2492,54 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      nothing delivered, the folder untouched; ON + asked → the report arrives verbatim through the
      subscriber; an unreadable path → nothing). **Run with piece 1's suite: `Test run with 14 tests
      in 2 suites passed`, no `skipped:` line** (`13r-u3b/p2-test.log`; no warning in any new file).
-3. The support door's MAIL DRAFT machinery (one draft builder; an injected opener) + Help ▸ Send
-   Feedback… — PENDING.
+3. The support door's MAIL DRAFT machinery + Help ▸ Send Feedback… — **DONE (this commit).**
+   - **EXTERNAL FACTS (the unit's one read-only Sonnet lookup, 2026-10-04; Apple-documented vs
+     community kept apart):** a `mailto:` cannot carry an attachment (**Apple QA1018**, RFC 6068) and
+     opens in the user's DEFAULT mail app (community, medium-high); `NSSharingService(.composeEmail)`
+     takes `recipients`/`subject` + a body string + file URLs (**Apple-documented**) but is
+     effectively Apple Mail-only (`canPerform` true only when Mail is usable — community,
+     medium-high); its behaviour with NO Mail account is UNCONFIRMED. MetricKit: diagnostics reach
+     Developer-ID apps with no documented channel requirement; crash diagnostics do NOT depend on
+     the "Share with App Developers" consent (Apple DTS + a MetricKit engineer, on iOS — macOS
+     UNCONFIRMED); diagnostics are documented as delivered immediately (macOS 12+), in practice on
+     the relaunch after a crash; MetricKit inside the App Sandbox is UNCONFIRMED by any source —
+     so the REAL delivery stays "opportunistic" in this record, never claimed; Xcode 27's Debug ▸
+     MetricKit ▸ Simulate MetricKit Payloads exists, macOS support UNCONFIRMED. A crash report's
+     `exceptionReason`/`terminationReason` text is whatever the thrower composed, so it could carry
+     app data — Apple DTS says to treat MetricKit data as potentially personal — which is exactly
+     why the report is shown VERBATIM before anything can leave (the P15 road stays closed: this
+     unit reads no GRDB error, and the subscriber's bytes are MetricKit's own).
+   - `Features/Diagnostics/SupportDraft.swift` — THE ONE BUILDER (pure): `support@stargazing.tech`
+     (R-13r-9, the LIVE mailbox); the FEEDBACK draft = three empty lines to write in, a rule, then
+     "Variorum 0.9.0 (4893)" and "macOS 27.0 (26A428)" — the versions and NOTHING else; the CRASH
+     draft = the same shape with "Attached: <file> — the crash report exactly as Variorum showed it
+     to you." and the report's OWN FILE as the attachment (the bytes the surface shows — pinned
+     equal); `attachingByHand()` = the fallback twin; `mailtoURL` = RFC 6068-clean (unreserved-only
+     percent-encoding, CRLF line breaks, subject + body only). `Versions.osLine` reads the build
+     out of `operatingSystemVersionString`, never invents one. `SupportCopy` holds the words.
+   - `Features/Diagnostics/SupportMail.swift` — the side effect, behind the injected
+     `SupportMailRoads` (`LiveSupportMailRoads` in production): NO attachment → `mailto:` (her
+     default mail app); WITH the attachment → the compose-email service when it can take the draft;
+     when it cannot, or reports a failure that is not HER cancel (`isHerOwnCancel` —
+     `NSUserCancelledError` in the Cocoa domain), the FALLBACK: the file shown in Finder, then the
+     plain draft naming it (PROVISIONAL, QUESTIONS #181 (b)); nothing opening at all → the door's
+     refusal ("…nothing was sent."). **No road can send** — the protocol has no such member.
+   - **Help ▸ Send Feedback…** (`EditorCommands`, the Help group's END after a divider, always
+     enabled — it needs no window or store): `SupportMail.open(.feedback(.thisMac()))`, its refusal
+     through the session's status seam, or a plain alert when no store is open (a door that did
+     nothing must speak). **UNDECLARED in the capability registry on the What's New / Open the
+     Tutorial precedent — FLAGGED FOR THE LADDER as a P-1 reading, not decided here** (#181 (d)).
+   - Pins: `VariorumTests/SupportDraftTests.swift` (12 — the feedback draft byte-exact; the running
+     app's versions are the bundle's own; the OS line read never guessed; the crash draft attaches
+     the report's own file and the by-hand twin names it; WHAT IS SENT IS WHAT WAS SHOWN (the
+     attachment's bytes == the stored report's text); the mailto form RFC 6068-clean and
+     round-tripping; feedback → `mailto:` only; a report → compose with the attachment; no compose →
+     reveal + the by-hand draft; a late compose failure falls back while her cancel does not;
+     nothing opening speaks the refusal; the Help door's source line). **Run with pieces 1–2 + the
+     registry walk, What's New, shell chrome and chord legibility: `Test run with 74 tests in 7
+     suites passed`, no `skipped:` line** (`13r-u3b/p3-test.log`; no warning in any touched file).
+   - QUESTIONS **#181** opened (a)–(g): the two roads, the by-hand fallback, the words, the Help
+     placement, crash-only collection, OFF keeps received reports, no cap.
 4. THE PLACEMENT PROPOSAL (the in-batch fork) — PENDING; the session STOPS there.
 5. The faces, to the architect's ruling: the opt-in row + the Diagnostics surface — PENDING the
    ruling.

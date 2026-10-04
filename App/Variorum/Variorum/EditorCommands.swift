@@ -862,6 +862,34 @@ struct EditorCommands: Commands {
             .disabled(!canReachCreationTarget)
             // (The pre-13x batch 0 DEBUG keychain probe door lived here —
             // deleted at batch 2a with the real Apple-key item, row 12.)
+            // 13r U3-B — R-13r-3/9: Help ▸ Send Feedback…, THE SUPPORT DOOR.
+            // A mail draft to support@stargazing.tech, pre-filled with the app
+            // and OS versions and nothing else, opened ON SCREEN in her own
+            // mail app; it goes only when she presses that app's Send. It
+            // needs no window and no store, so it is always enabled. UNDECLARED
+            // in the capability registry on the What's New / Open the Tutorial
+            // precedent above — an app-scope Help door with no block/take/
+            // post/book scope; flagged for the ladder as a P-1 reading, as
+            // U3-A flagged its own. Its own group at the end: it talks to the
+            // author, where the doors above act on the library.
+            Divider()
+            Button(SupportCopy.feedbackMenuTitle) { sendFeedback() }
+        }
+    }
+
+    /// 13r U3-B: the support door's act. The draft opens in her default mail
+    /// app (`mailto:` — `SupportMail`); if nothing could open it, the door
+    /// says so (P-2) — through the status seam when a store is open, and
+    /// otherwise in a plain alert, since a door that did nothing must speak.
+    private func sendFeedback() {
+        SupportMail.open(.feedback(.thisMac())) { refusal in
+            if case .ready(let session) = bootstrap.state {
+                session.status.refuse(refusal)
+            } else {
+                let alert = NSAlert()
+                alert.messageText = refusal
+                alert.runModal()
+            }
         }
     }
 
