@@ -1674,7 +1674,7 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   `SurfaceSizeMemoryTests:782` (`FocusedBlock`'s memberwise `blockID: String`). **All 12 are
   unwrap-bound: NO third silent site** — the reviewer's 278-site token sweep confirmed by a method
   that does not depend on knowing the macro's exact suppression-token set.
-- F1 [MAJOR] re-spells — DONE (this commit): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
+- F1 [MAJOR] re-spells — DONE (`6e0a359c`; dispositions corrected by runs A/B below — BookAscent FIXED with its pin, MarkdownFace HOLLOW, its edit standing as an F2 cleanup): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
 - F2 [MINOR] the 18-hollow cleanup (behaviour-identical, each site's abort-vs-continue kept) —
   core DONE (`668846bb`), Mac DONE (this commit). **Core (6 files, the 8 sites, all (A) — abort kept):** the
   hoist `let tagRule = try #require(try RuleGrammar.encode(.tag(…)))` (`classicsRule`/`writingRule`
@@ -1743,6 +1743,24 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   only their downstream lines. **B (the new spellings):** `F1P1` + `F1M` on the committed tree;
   expected RED at BookAscent 805 "action != nil" and MarkdownFace 188 "headingSize != nil". Each run
   reverted with `git checkout --` of the two files, status clean, zero markers.
+  **RUNS A/B — DONE, REVERTED** (`19d/r1-runA.diff`, `r1-runB.diff`; `mac-r1-runA.log`,
+  `mac-r1-runB.log`, 22 tests / 2 suites each, zero-instance windows — `pgrep` empty 17:56:48Z–
+  17:57:51Z and 17:59:18Z–18:00:20Z; restored, status clean, zero markers, the four sha256s OK):
+  - **`BookAscentTests:803` — GENUINELY SILENT, now PINNED by my own pair:** run A (the OLD spelling
+    under P1) records NOTHING at the site (804 there) — only 805 `action?.label == "Do it"` (nil)
+    and 807; run B (the new spelling) RED at 805 "action != nil". **FIXED.**
+  - **`MarkdownFaceTests:187` — HOLLOW, the round-1 F1 finding does NOT hold for this site:** under
+    a REAL nil (`F1M`), run A's OLD spelling RECORDS AT ITS OWN LINE — "Expectation failed:
+    font(storage, at: titleAt).pointSize" at 187 — then 188/194. The reviewer's P2 left
+    `headingSize` at 12.0, so its logged silence never exercised the site. Run B's new spelling
+    records at its own line (188 "headingSize != nil"): the re-spell is BEHAVIOUR-IDENTICAL.
+    **Disposition: DISMISSED AS HOLLOW as a silent-nil finding; the edit (`6e0a359c`) STANDS as an
+    F2-class CLEANUP** (F2's tripwire requires every `try? #require` gone). Routed to the
+    orchestrator: the "19d ROUND 1" F1 text names this site silent.
+  - **The route ≠ the behaviour, by counterexample:** `MarkdownFace:187` compiles to
+    `__checkPropertyAccess` — the decomposed form — yet records. So my round-0 "38/38 route ⇔
+    runtime" and the arbitration's "held 40/40" are 40 of 41: **the route RANKS a site, it never
+    settles one; only a real-nil mutant does** (R2-1's lesson, one level down).
 - F3 [NIT] wording + NOTICED #1/#2/#4 corrections — PENDING.
 - Tripwire `grep -rnE 'try\?[[:space:]]*(await[[:space:]]+)?#require'` at ZERO + final fresh builds
   at zero redundancy warnings + the touched suites green — PENDING.
