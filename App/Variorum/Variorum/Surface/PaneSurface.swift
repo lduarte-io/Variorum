@@ -1071,9 +1071,10 @@ nonisolated struct PaneDecoration: Equatable {
         // The AT-REST look, byte-unchanged: voiced compositions draw
         // nothing (the card behind is the paper); the pre-13 call sites
         // (tokens nil — the tutorial samples and the pins) keep their grey
-        // hairline.
+        // hairline. (Not `tokens == nil`: Swift 6.4 resolves that through
+        // `VoiceTokens`'s main-actor-isolated Equatable — a compile error here.)
         let rest = PaneDecoration(
-            stroke: tokens == nil ? Color.gray.opacity(0.25) : .clear,
+            stroke: tokens.map { _ in Color.clear } ?? Color.gray.opacity(0.25),
             lineWidth: 0.5, fill: nil)
         guard isLive else { return rest }
         switch indicator {
