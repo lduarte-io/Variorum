@@ -407,7 +407,14 @@ passed by name.
 
 **ROUND 1 FIXES (LIVE STATUS — the same implementer, resumed 2026-10-04 at the orchestrator's
 arbitration `e1bfdd08`; the binding record is the "19a ROUND 1" section above):**
-- F1 [MAJOR] `CatalogDetailWordsTests.swift:45` vacuous — PENDING.
+- F1 [MAJOR] `CatalogDetailWordsTests.swift:45` vacuous — IN-PROGRESS. Re-spelled (this commit)
+  `#expect(RuleGrammar.hearsApplyingActs(RuleTerm.tag("t1")))` — the explicit type, the file's own
+  line-51 idiom — with a three-line comment naming why. The core test build no longer carries ANY
+  unused-result warning inside an `#expect`/`#require` expansion (0; it was 1, this line);
+  `RuleHearsActsTests` GREEN, 2 tests (`r1-core-bft.log`). **MUTATION CHECK STARTING after this
+  commit:** line 45's argument → `RuleTerm.tag("")` (provably false — a dead term hears nothing),
+  the suite must go RED; then `git checkout -- Tests/VariorumCoreTests/CatalogDetailWordsTests.swift`
+  (committed, no other change). If this line still says STARTING, run that restore first.
 - F3 [NIT] `LandingAuthorityTests.swift:54–59` isolation warnings — PENDING.
 - F4 [NIT] both `CopiedRow` twins' duplicate-column comment — PENDING.
 - F2 is 19b's (the mobile TEST target) — not touched here.

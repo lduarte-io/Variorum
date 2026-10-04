@@ -42,7 +42,11 @@ struct CatalogDetailWordsTests {
 @Suite("13i-d U6 — which rules hear an applying act")
 struct RuleHearsActsTests {
     @Test func onlyTagAndStarTermsHearAnAct() {
-        #expect(RuleGrammar.hearsApplyingActs(.tag("t1")))
+        // `RuleTerm.tag`, never the bare `.tag(…)`: under Xcode 27's Testing
+        // macros the bare spelling expands through `__checkFunctionCall` with
+        // R = Void — the Bool is discarded and the expectation cannot fail
+        // (19a round 1, F1). The explicit type keeps it a real check.
+        #expect(RuleGrammar.hearsApplyingActs(RuleTerm.tag("t1")))
         #expect(RuleGrammar.hearsApplyingActs(.star))
         #expect(RuleGrammar.hearsApplyingActs(.and([.legacyProfile("journal"), .tag("t1")])))
         #expect(RuleGrammar.hearsApplyingActs(.not(.star)), "a NOT still hears the act it negates")
