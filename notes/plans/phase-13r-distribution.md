@@ -2899,3 +2899,15 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      `Features/Diagnostics/CrashReporting.swift`, `Features/Settings/DiagnosticsPane.swift`.
      Restored with `git checkout --` on exactly those two paths. If a session dies mid-run, `git
      diff` against `f2d710b0` shows what is mutated; restore it.
+     **THE MUTATION RUN — DONE, RESTORED (`git diff` empty after the checkout):** with the four
+     mutants in, `Test run with 22 tests in 3 suites failed … with 19 issues` — **every mutant
+     caught**: M1 (subscribe regardless) reddened `aFreshInstallIsOffAndRegistersNothing`,
+     `launchAfterLaunchWhileOffNeverSubscribes`, `theAppsOwnerUsesMetricKitAndStartsOff` and the
+     synthetic door's `offMeansNothingIsDeliveredEvenWhenAskedFor` (an OFF app suddenly had a
+     subscriber to deliver into); M2 (`bool(forKey:)`) reddened
+     `onlyAnExplicitYesIsOnAndEveryOtherValueRegistersNothing` across the strange values; M3 (no ON
+     guard) reddened `aDeliveryWhileOnLandsVerbatimAndADeliveryAfterOffIsDropped`; M4 (Send
+     whatever the bytes) reddened `aReportThatIsNotTextHasNoSend` (log `13r-u3b/mutants.log`).
+     **Restored: `Test run with 22 tests in 3 suites passed`** (`restored.log`). No hollow pin
+     found. Red-on-old by construction for the rest (the support draft, the Help door, the pane's
+     place and search): none of it existed at `32b97fdc`.
