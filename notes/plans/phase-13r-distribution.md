@@ -2012,7 +2012,34 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      **Run green with piece 1's suite and `SyncStalledRowTests`: `Test run with 11 tests in 3
      suites passed`, no `skipped:` line** (log `App/Variorum/DerivedData/13r-u3a/p2-test.log`).
      Red-on-old: the mutation run is in the finals (PENDING).
-3. R-13r-14 — the field guide's backups passage — PENDING
+3. R-13r-14 — the field guide's backups passage — **DONE (this commit)**.
+   - **THE PLACEMENT, proposed and built (mine to propose, per the brief): two paragraphs at the
+     END of the existing lesson "export — it's all yours" (chapter "the library of things"), not
+     a lesson of its own.** Why: (a) the lesson's promise is "your work is always yours to take
+     out" — export is the copy you TAKE, a backup the copy Variorum KEEPS, the same promise from
+     the other side, so the passage reads as the lesson's natural second half; (b) the privacy
+     chapter was the other candidate, but its two lessons are copy §7 VERBATIM from constants
+     the PHONE's seeder renders too — adding the second-folder door there would teach the phone a
+     door it does not have (the picked-folder road is Mac-only) and re-open her "SHORT chapter"
+     ruling; (c) a lesson of its own would change the plan's lesson list (the walk contract's
+     shape) for two paragraphs. The Mac seeder only — the phone is untouched.
+   - The words (every name the surface's own constant, P-6): where backups live on their own
+     ("Once a day while Variorum is open, it copies your whole library into a backups folder
+     right beside the library, on this Mac"), that they survive a mistake but not losing the
+     Mac, then the door — "Settings ▸ `SettingsPane.dataSafety.title`, under
+     “`DataSafetyCopy.secondFolderSection`” — its `CapabilityRegistry .chooseBackupFolder` verb
+     button", iCloud Drive named among the choices — and R-13r-12's offer in its own words
+     ("…a quiet note at the bottom of the window: “`ProtectionCopy.iCloudOfferTitle`”").
+   - `DataSafetyCopy.secondFolderSection` ("A second folder") is new, and the Data Safety pane
+     now renders its section title FROM it, so the lesson and the pane cannot drift.
+   - Pin: `TutorialWalkTests.theExportLessonTeachesWhereBackupsLiveAndTheSecondFolderDoor`
+     (compiled in piece 2's test build; the suite runs in the finals — PENDING). The lesson PLAN
+     (chapter + lesson titles) is unchanged, so `theSeededBookMatchesTheLessonPlanExactly` and
+     the export-to-one-document pins hold as they are.
+   - **THE CLOSEOUT'S RE-SEED DUTY FIRES** (the standing rule): this lesson-content edit stales
+     the REAL store's seeded field guide; the orchestrator re-seeds it via the product door
+     (Help ▸ Restore Tutorial…) behind the A1 rail at the refresh window. This session never
+     touches the real store.
 4. The ONE release-notes source → What's New (show-once on a version CHANGE, silent on a fresh
    record; Help ▸ What's New) — PENDING
 5. `release.sh`: the notes rendered beside the DMG into the appcast + R-13r-10's self-explaining

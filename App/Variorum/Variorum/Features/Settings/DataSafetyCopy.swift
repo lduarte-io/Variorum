@@ -46,6 +46,12 @@
 import Foundation
 
 nonisolated enum DataSafetyCopy {
+    /// 13r U3-A — R-13r-14: the second-folder section's title, in ONE place,
+    /// because the field guide's backups passage names it as the road
+    /// (P-6: the tutorial's door is the pane's own words, never a re-typed
+    /// copy that could drift).
+    static let secondFolderSection = "A second folder"
+
     // MARK: - The three sentences the app itself must say
 
     /// M2/M4 — the SYNCED population's restore warning (her post-sitting

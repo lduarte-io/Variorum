@@ -1757,6 +1757,35 @@ enum TutorialSeeder {
             + "every fanned block, so nothing you kept open is lost on paper. "
             + "Try it on the choosing lesson — its four rain takes all reach "
             + "the page.",
+
+            // 13r U3-A — R-13r-14 (her refinement at the U3 kickoff,
+            // verbatim: *"if the user guide needs an updated backups session
+            // reflecting where you can choose a backup folder … add that."*).
+            // The guide covered backups only custody-side (the privacy
+            // chapter's "what opens a backup"); these two paragraphs say
+            // WHERE backups live on their own and teach the second-folder
+            // door, in the same words as the pane and as the offer the app
+            // makes a few days in (R-13r-12's toast, whose Set Up… opens the
+            // same choice). Every name below is the surface's own constant.
+            // Placement (the U3-A RECORD's piece 3 says why): this lesson,
+            // because export is the copy you TAKE and a backup is the copy
+            // Variorum KEEPS — the same promise, "it's all yours", from the
+            // other side; the Mac-only seeder, so the phone (which has no
+            // picked-folder road) is never told about a door it lacks.
+            "BACKUPS happen on their own. Once a day while Variorum is open, it "
+            + "copies your whole library into a backups folder right beside the "
+            + "library, on this Mac \u{2014} no button, nothing to remember. Those "
+            + "copies survive a mistake; they don\u{2019}t survive losing the Mac.",
+
+            "So you can add a second folder of your own choosing \u{2014} iCloud "
+            + "Drive, an external drive, any folder your cloud service syncs \u{2014} "
+            + "and every backup lands there too: Settings \u{25B8} "
+            + "\(SettingsPane.dataSafety.title), under \u{201C}"
+            + "\(DataSafetyCopy.secondFolderSection)\u{201D} \u{2014} its "
+            + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. If you "
+            + "haven\u{2019}t picked one, Variorum offers it a few days into your "
+            + "writing, with a quiet note at the bottom of the window: \u{201C}"
+            + "\(ProtectionCopy.iCloudOfferTitle)\u{201D}",
         ])
 
         let sealed = try lesson(library, "the seal", [

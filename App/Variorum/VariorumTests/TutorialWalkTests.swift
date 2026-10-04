@@ -2137,6 +2137,32 @@ struct TutorialLibraryActsTests {
         }
     }
 
+    /// 13r U3-A — R-13r-14: the field guide teaches WHERE backups live on
+    /// their own and the SECOND-FOLDER door, by the surfaces' own words —
+    /// the Settings pane's title, the pane's section title (the SAME
+    /// constant the pane renders), the door's registry verb, and the offer's
+    /// own question (R-13r-12's toast). P-6: a renamed door is a red test.
+    @Test func theExportLessonTeachesWhereBackupsLiveAndTheSecondFolderDoor() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "export \u{2014} it's all yours"))
+            }
+            #expect(prose.contains("BACKUPS happen on their own"))
+            #expect(prose.contains("beside the library, on this Mac"),
+                    "where the automatic copies live")
+            #expect(prose.contains("Settings \u{25B8} \(SettingsPane.dataSafety.title)"),
+                    "the pane's real name")
+            #expect(prose.contains("\u{201C}\(DataSafetyCopy.secondFolderSection)\u{201D}"),
+                    "the section's real title — the constant the pane renders")
+            #expect(prose.contains(CapabilityRegistry.capability(.chooseBackupFolder).verb),
+                    "the door's real verb")
+            #expect(prose.contains("iCloud Drive"))
+            #expect(prose.contains("\u{201C}\(ProtectionCopy.iCloudOfferTitle)\u{201D}"),
+                    "the offer's own question, word for word")
+        }
+    }
+
     @Test func theSealRefusesOutLoudAndTheToastShowsIt() async throws {
         // The deliberate-refusal show-and-tell: the tutorial makes a
         // refusal happen ON PURPOSE and points at the spoken answer.

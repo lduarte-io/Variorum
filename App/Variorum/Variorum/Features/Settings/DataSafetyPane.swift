@@ -115,7 +115,7 @@ struct DataSafetyPane: View {
     }
 
     private var folderSection: some View {
-        Section("A second folder") {
+        Section(DataSafetyCopy.secondFolderSection) {
             switch model.destination {
             case .unset:
                 Text("Not set. The copies above are on this disk, beside the library "
