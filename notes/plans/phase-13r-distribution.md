@@ -329,15 +329,58 @@ opened; the working tree was left clean.
   *[removed for publication]*
   one macOS profile is "Mac Team Provisioning Profile: *" (exp 2027-08-30) — NO Developer ID
   cert, NO Developer ID profile. HER HANDS steps 1–2 are genuinely still owed and open U1.
-- **Step 3 ANSWERED by her at the resume sitting (2026-10-04, the question tool):** the site
-  brief IS CARRIED (the stargazing agent has it); **the appcast URL IS SETTLED — the proposed
-  URLs stand** (`https://stargazing.tech/variorum/appcast.xml` ·
-  `https://stargazing.tech/variorum/downloads/Variorum-<version>.dmg`) — U2 bakes them as
-  final; the mailbox `support@stargazing.tech` does NOT exist yet — an OPEN AUTHOR ITEM carried
-  to the closeout's beta checklist (needed before the beta's first install, not before U1; U3
-  bakes the address as ruled, R-13r-3/9).
+- **Step 3 ANSWERED by her at the resume sitting (2026-10-04, the question tool), then
+  CORRECTED by her the same sitting** (*"I shouldn't have confirmed the URL's fully"* — she
+  brought the site agent's note for approval). **THE FINAL URL SET, approved by the
+  orchestrator under the R-13r-2 mandate ("adjust freely, report the final URLs back"):**
+  - **Appcast (THE BAKED URL, unchanged from the brief):**
+    `https://stargazing.tech/variorum/appcast.xml`, served no-cache via a `_headers` file —
+    exactly what U2 bakes as `SUFeedURL`.
+  - **DMGs (CHANGED from the brief's proposal):**
+    `https://dl.stargazing.tech/variorum/Variorum-<version>.dmg` — an R2 bucket on a
+    subdomain, no Worker. **Approved on the mechanism:** the enclosure URL lives inside each
+    appcast ENTRY (the release pipeline writes it; `generate_appcast`'s download-url-prefix),
+    never inside the app, so the host can move later without breaking any install; the
+    download's authenticity rides Sparkle's EdDSA signature + Apple's code signing, not the
+    host; HTTPS holds on the subdomain (ATS satisfied). The Worker-route alternative is
+    declined as needless. **One rider reported back:** a published DMG URL is IMMUTABLE once
+    an appcast entry references it — moving/renaming a published DMG breaks that release's
+    entry until the appcast is regenerated.
+  - **Download page:** `/variorum`, unlisted — DMG link, version, "macOS 26 or later, Apple
+    silicon" (the brief's item 2, as proposed).
+  - The site brief IS CARRIED; the mailbox `support@stargazing.tech` does NOT exist yet — an
+    OPEN AUTHOR ITEM carried to the closeout's beta checklist (needed before the beta's first
+    install, not before U1; U3 bakes the address as ruled, R-13r-3/9).
 - **Step 4 — U1 opens with HER HANDS steps 1–2** (walked this sitting), then the U1
   `opus-implementer` spawns briefed from this file's U1 section + environment traps.
+- **U4 DEFERRAL ADOPTED (her decision, recorded out-of-band at `47d23955` the same sitting:
+  "I won't be doing accessibility before launch"):** the phase runs U1 → U2 → U3; the ladder
+  runs over the combined U1–U3 diff; the phase CLOSES AT U3. The U4 brief stays intact in this
+  file as the post-🚀 unit's brief; KnownIssues row 67 carries the decision.
+- **TWO AUTHOR REPORTS AT THE RESUME SITTING (2026-10-04, verbatim-faithful; recorded before
+  *[removed for publication]*
+  *[removed for publication]*
+  reflected, but if it looks stale on this computer I'll have to fix and update that somehow…
+  let me know if I need to log out and in somehow to update this stale email before I do this
+  developer app identity issue."* The local Apple Development cert indeed still reads
+  *[removed for publication]*
+  orchestrator's guidance: check Xcode ▸ Settings ▸ Accounts refresh, sign out/in only if it
+  errors; certs/profiles/keychain survive a sign-out; the Developer ID cert carries the TEAM
+  name, not the email; the Apple ACCOUNT behind iCloud-Keychain custody is the same account
+  under a new label — no custody implication). (2) *"I also want to know what I'd have to do to
+  reserve the variorum name on the apple ios store… if submitting it would reserve the name,
+  then we can submit it too. i don't want someone else taking that name."* — **VERIFIED by a
+  read-only Sonnet lookup (2026-10-04):** creating the APP RECORD in App Store Connect (New
+  App: platform · name · primary language · bundle ID · SKU) claims the name at creation, NO
+  submission needed (Apple's create-an-app-record help documents the uniqueness rule; the
+  no-submission-needed half is community-confirmed, not Apple-stated). **No current
+  Apple-documented dormancy/reclaim rule could be confirmed** — the old 120/180-day
+  reclaim windows are HISTORICAL (community reports say the cap was dropped ~2014); whether
+  any clock exists today, and whether a TestFlight upload would affect one, is UNCONFIRMED
+  either way. The honest posture: create the record now (it reserves immediately), treat the
+  hold as solid-on-community-evidence, ask Apple Developer Support only if certainty matters;
+  submitting the unfinished app buys nothing the record doesn't. The act is HERS, adjacent to
+  (not inside) 13r's scope; it rides the beta checklist as an optional author item.
 
 **RESUME — the fresh orchestrator's first acts, in order:**
 1. Read this file IN FULL (the kickoff section names the rest of the preflight). Do NOT re-open any
