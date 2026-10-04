@@ -589,6 +589,20 @@ opened; the working tree was left clean.
   time); the machine is free for suite runs while she is away; her proactive message — not an
   orchestrator question — opens the walk sitting, and the walk outranks 19b/19c for the
   machine whenever she is ready.
+- **U2 VERIFIED TO THE SEAM (the orchestrator, 2026-10-04, post-report spot-check by its own
+  hands):** the implementer stopped at `469d419a` — tree clean, `main` = `origin/main`, zero
+  instances. Verified directly: the fence read in source (`UpdateChannel.liveInThisBuild`,
+  `#if DEBUG` → false, instantiation-only); the Info.plist's three keys byte-exact (her
+  public key, the LOCKED feed URL, launcher ON) with the three absences confirmed; the
+  entitlements' variable-form `-spks`/`-spki` pair; the public appcast answering **404**
+  (nothing published, as claimed); BOTH walk DMGs stapler-validated + Gatekeeper **ACCEPTED
+  (Notarized Developer ID)** with sha256s byte-matching the record; the piece-4 pins RE-RUN
+  by the orchestrator — **13 tests / 3 suites GREEN**; the staged W-0…W-10 checklist read in
+  full and matching the agreed mechanics (her-session [O] steps, the log-out road, the
+  scratch-only container-path override, zero-instance discipline, the two hazard notes
+  recorded for U3's sequencing). **U2's code and pipeline are DONE; U2 now waits ONLY on her
+  walk sitting — the walk's VERDICT closes it.** Per her resume word, **19b SPAWNS NOW**
+  (19c after it closes), one agent at a time, her walk outranking both for the machine.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
