@@ -1,0 +1,3957 @@
+# Variorum (Mac) — every user-facing string
+
+**Compiled 2026-10-04** for the author's pre-release copy-editing pass. Read-only inventory: no source file was changed.
+
+Scope: the Mac app — `App/Variorum/Variorum/` (Features, Core/Views, Registry, Workspace, root composition), `App/Variorum/Shared/` (the cross-platform brains and faces the Mac app links), and the handful of `Sources/VariorumCore/` literals that reach the screen (structural-undo labels, sync-pause sentences, smart-book refusal reasons, export templates, default names). Excluded: `VariorumMobile/`, every test target, `Tools/`, anything inside `#if DEBUG` (and `#if os(iOS)` branches of Shared files), log/print/assert text, SQL, setting keys, identifiers, SF Symbol names and asset names. Strings are grouped by the SURFACE where they render, not by file; within a group they are in path order. Each bullet is the literal exactly as written in source (Swift escapes kept: `\u{2014}` = —, `\u{2026}` = …, `\u{201C}`/`\u{201D}` = “ ”, `\u{2019}` = ’, `\u{00B7}`/`\u{B7}` = ·, `\u{2318}` = ⌘, `\u{21E7}` = ⇧, `\u{2325}` = ⌥, `\u{23CE}` = ⏎, `\u{238B}` = ⎋, `\u{25B8}` = ▸, `\u{25BE}` = ▾, `\u{FF0B}` = ＋, `\u{2702}` = ✂), with `\(…)` interpolations left in place; a string built from `"…" + "…"` pieces is shown joined, at the line of its first piece; ` ⏎ ` marks a line break inside a multi-line literal. The same literal used at several sites in one group is one bullet listing every site. Tags: **(tooltip)** = a hover `.help`/menu-help text; **(templated)** = contains interpolation or a plural/variant switch; **⚠RULED** = matches (exactly, or by a 5-word phrase on the protection surfaces) the word-by-word ruled copy in `notes/plans/pre-13x-copy.md` — edit those deliberately, against that file. Refusal/offer/receipt text spoken inline at the status seam is gathered in its own group; refusal text that lives in a surface's own copy enum (e.g. `BookArrivalsCopy`, `MembershipChoiceCopy`) stays with that surface. Placeholders and empty states are gathered in their own group except on the protection surfaces, which stay whole for the ruled-copy pass.
+
+
+## Onboarding, first run & the locked lobby
+
+- `"The new library's key file could not be written beside the library: \(String(describing: error))"` — `App/Variorum/Shared/AppBootstrap.swift:958` (templated)
+- `"The Keychain refused to keep the new library's key — nothing was created."` — `App/Variorum/Shared/AppBootstrap.swift:967`
+- `"\(ProtectionCopy.biometryName) didn't go through. Try again."` — `App/Variorum/Shared/StoreLaunchGate.swift:625` (templated) ⚠RULED (§11 provisional)
+- `"Starting…"` — `App/Variorum/Variorum/LibraryMissingView.swift:84`
+- `"The Variorum database could not be opened."` — `App/Variorum/Variorum/StoreFailureView.swift:43`
+- `"Store: \(error.storePath)"` — `App/Variorum/Variorum/StoreFailureView.swift:46` (templated)
+- `"Retry"` — `App/Variorum/Variorum/StoreFailureView.swift:56`
+- `"Reveal in Finder"` — `App/Variorum/Variorum/StoreFailureView.swift:57`
+- `"Quit"` — `App/Variorum/Variorum/StoreFailureView.swift:62`
+- `"The key file beside your library can still unlock it."` — `App/Variorum/Variorum/StoreFailureView.swift:78` ⚠RULED
+- `"Encryption passphrase"` — `App/Variorum/Variorum/StoreFailureView.swift:83`, `App/Variorum/Variorum/StoreLockView.swift:196` ⚠RULED
+- `"Unlock"` — `App/Variorum/Variorum/StoreFailureView.swift:87`, `App/Variorum/Variorum/StoreLockView.swift:200` ⚠RULED (§11 provisional)
+- `"The 12 recovery words, separated by spaces"` — `App/Variorum/Variorum/StoreFailureView.swift:95`, `App/Variorum/Variorum/StoreLockView.swift:211` ⚠RULED (§11 provisional)
+- `"Unlock with Recovery Phrase"` — `App/Variorum/Variorum/StoreFailureView.swift:102`, `App/Variorum/Variorum/StoreLockView.swift:218` ⚠RULED (§11 provisional)
+- `"Forgot your passphrase?"` — `App/Variorum/Variorum/StoreFailureView.swift:113`
+- `"Unlock with your recovery phrase"` — `App/Variorum/Variorum/StoreFailureView.swift:113`
+- `"Unlocking…"` — `App/Variorum/Variorum/StoreFailureView.swift:127` ⚠RULED (§11 provisional)
+- `"Checking iCloud Keychain…"` — `App/Variorum/Variorum/StoreLockView.swift:102` ⚠RULED (§11 provisional)
+- `"Variorum is locked"` — `App/Variorum/Variorum/StoreLockView.swift:109` ⚠RULED (§11 provisional)
+- `"Unlock with \(ProtectionCopy.biometryName)"` — `App/Variorum/Variorum/StoreLockView.swift:172` (templated) ⚠RULED
+- `"This library is encrypted, and its key is not available on this device."` — `Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift:132`
+- `"A key for this library could not be saved to the Keychain, so an encrypted library was not created — a store whose key cannot be kept would be unopenable at the next launch."` — `Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift:140`
+
+— 22 strings
+
+
+## Sidebar & Library chrome (Library, Timeline, Folder, Starred, the Open list, back/forward)
+
+- `"edited"` — `App/Variorum/Shared/LibrarySortWords.swift:50`, `Sources/VariorumCore/Domain/TimeStampFace.swift:67`
+- `"created"` — `App/Variorum/Shared/LibrarySortWords.swift:51`, `Sources/VariorumCore/Domain/TimeStampFace.swift:69`
+- `"date"` — `App/Variorum/Shared/LibrarySortWords.swift:52`
+- `"title"` — `App/Variorum/Shared/LibrarySortWords.swift:53`
+- `"last meaningful edit"` — `App/Variorum/Shared/LibrarySortWords.swift:71`
+- `"click to see when it was created"` — `App/Variorum/Variorum/Core/Views/FlippingStamp.swift:84`
+- `"click to see when it was last edited"` — `App/Variorum/Variorum/Core/Views/FlippingStamp.swift:85`
+- `"click to see the day this note is about"` — `App/Variorum/Variorum/Core/Views/FlippingStamp.swift:86`
+- `"click to collapse it to a clock"` — `App/Variorum/Variorum/Core/Views/FlippingStamp.swift:93`
+- `"click to show the date again"` — `App/Variorum/Variorum/Core/Views/FlippingStamp.swift:94`
+- `"Tagged “\($0)” (and below)"` — `App/Variorum/Variorum/Features/Folder/FolderView.swift:87` (templated)
+- `"Folder"` — `App/Variorum/Variorum/Features/Folder/FolderView.swift:87`
+- `"Showing the \(FolderViewModel.window) most recently touched notes with this tag — older ones aren't listed."` — `App/Variorum/Variorum/Features/Folder/FolderView.swift:123` (templated)
+- `"All"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift:38`
+- `"Books"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift:39`, `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:581`
+- `"Notes"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift:40`, `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:481`, `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:612`
+- `"Blocks"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift:41`, `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:622`
+- `"Tagged \(postIDs.count - failed) of \(postIDs.count) notes — \(failed) refused (\(lastRefusal ?? "a note may be gone")). The tagged ones keep the tag."` — `App/Variorum/Variorum/Features/Library/LibraryCatalogTagActs.swift:81` (templated)
+- `"Mark as Versions with"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:261`
+- `"Unmark Versions with"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:261`
+- `"Nothing matches."` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:263`
+- `"No notes are marked as versions of this one."` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:264`
+- `"already versions"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:269`
+- `"Rename Note"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:282`
+- `"Rename"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:289`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:296`
+- `"Library"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:437`, `App/Variorum/Variorum/Features/Library/SidebarView.swift:145`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:399`
+- `"everything — sortable, searchable"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:440`
+- `"List"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:480`
+- `"Timeline"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:482`, `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:148`
+- `"Tag \(selectedPosts.count) notes"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:526` (templated)
+- `"Untag \(selectedPosts.count) notes"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:541` (templated)
+- `"Delete \(selectedPosts.count) notes\u{2026}"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:557` (templated)
+- `"in \(home)"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:628` (templated)
+- `"Open this note"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:779` (tooltip)
+- `"Open"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:857`, `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:306`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:391`
+- `"Rename…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:869`
+- `"Tags…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:876`
+- `"Mark as Versions with…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:887`
+- `"Unmark Versions with…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:895`
+- `"Duplicate as Version"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:898`
+- `"Export"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:911`
+- `"Markdown…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:912`
+- `"Markdown with Takes…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:913`
+- `"PDF…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:914`
+- `"Scope the listing to books, notes or blocks"` — `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:37`
+- `"A day names notes \u{2014} clear it to scope books and blocks again"` — `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:39`
+- `"showing the first \(page) \u{2014} narrow the search"` — `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:44` (templated)
+- `"edited on\u{2026}"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:71`
+- `"edited on \(dayWords(day: day, now: now, calendar: calendar, locale: locale))"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:79` (templated)
+- `"Show only the notes edited on one day"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:98` (tooltip)
+- `"Clear the day \u{2014} list every note again"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:99` (tooltip)
+- `"A note keeps one edit stamp, so a note edited on two days answers for the later one \u{2014} earlier days show up where a savepoint landed."` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:104`
+- `"No note's last edit or savepoint falls on \(words)."` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:128` (templated)
+- `"No note matching \u{201C}\(typed)\u{201D} was edited on \(words)."` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:129` (templated)
+- `"\(words.formatted()) word\(words == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:114` (templated)
+- `"\(blocks) block\(blocks == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:115` (templated)
+- `"sealed"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:118`
+- `"archived"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:119`
+- `"gathering"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:127`
+- `"book"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:127`, `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:324`
+- `"\(chapters) chapter\(chapters == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:128` (templated)
+- `"\(notes) note\(notes == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:129` (templated)
+- `"finished"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:130`
+- `"unfiled"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:208`
+- `"Close"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:283`, `App/Variorum/Variorum/Features/Library/SidebarView.swift:789`
+- `"\(multiCount) notes selected — the Tag, Untag and Delete doors above act on all of them."` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:294` (templated)
+- `"Open Book"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:306`
+- `"Open this book — a double-click on the row does the same"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:311`
+- `"Open this note where you left off — a double-click on the row does the same"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:312`
+- `"note"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:323`
+- `"block"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:325`
+- `"Open the book"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:556`
+- `"Open the book at this note"` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:557`
+- `"A–Z"` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:66`
+- `"Z–A"` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:66`
+- `"newest first"` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:68`
+- `"oldest first"` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:68`
+- `"Sort the notes \u{2014} "` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:172`
+- `", newest or oldest first"` — `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:173`
+- `"Bookcase"` — `App/Variorum/Variorum/Features/Library/SidebarView.swift:144`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:398`
+- `"Pool"` — `App/Variorum/Variorum/Features/Library/SidebarView.swift:146`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:400`
+- `"Snippets"` — `App/Variorum/Variorum/Features/Library/SidebarView.swift:150`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:401`, `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:406`
+- `"this note"` — `App/Variorum/Variorum/Features/Library/SidebarView.swift:592`
+- `"Close this row — the note itself is untouched"` — `App/Variorum/Variorum/Features/Library/SidebarView.swift:740` (tooltip)
+- `"Toggle Star"` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:117`
+- `"Star"` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:118`
+- `"Unstar"` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:119`
+- `"Starred"` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:120`
+- `"Open a note or a book to star it — a star points at one of those, and the Starred list sits at the top of the sidebar."` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:129`
+- `"Un-star this — it leaves the Starred list; nothing else changes."` — `App/Variorum/Variorum/Features/Stars/StarsModel.swift:132` (tooltip)
+- `"Entry date"` — `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:33`
+- `"Last touched"` — `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:34`
+- `"Major revision"` — `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:35`
+- `"All notes"` — `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:36`
+- `"Load More"` — `App/Variorum/Variorum/Features/Timeline/TimelineView.swift:169`
+- `"New Note"` — `App/Variorum/Variorum/RootView.swift:201`
+- `"Untitled"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:405`
+- `"Book"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:407`
+- `"Tag"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:408`
+- `"Nothing to go back to \u{2014} this is where you started"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:436`
+- `"Back to \(origin)\(chordSuffix(.navigateBack))"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:437` (templated)
+- `"Nothing to go forward to \u{2014} you haven't gone back"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:451`
+- `"Forward to \(destination)\(chordSuffix(.navigateForward))"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:453` (templated)
+- `"\u{201c}\(name)\u{201d} is already open in the other pane — a split never shows one note twice. To see one note side by side, use Lenses or Compare."` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:466` (templated)
+- `"Open Beside"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:472`
+- `"This note isn't in any book yet"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:485`
+- `"Open \u{201c}\(topBook)\u{201d} at this note (\u{2318}-click to see it listed)"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:487` (templated)
+- `"This note is in \(count) books — click to pick one"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:489` (templated)
+- `"This note isn't in any book yet — add it to one from the membership chip above the note."` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:498`
+- `"This note is in 1 book — open it at this note:"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:505`
+- `"This note is in \(count) books — open one at this note:"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:506` (templated)
+- `"1 block deleted from this note"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:528`
+- `"\(deleted) blocks deleted from this note"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:529` (templated)
+- `"\(deletedPhrase) \u{2014} click to put any of them back"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:530` (templated)
+- `"Put the tag field away (\u{2318}\u{21e7}I or \u{238B})"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:538`
+- `"Tag this note \u{2014} opens a field with the cursor in it (\u{2318}\u{21e7}I)"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:539`
+- `"Toggle Sidebar"` — `App/Variorum/Variorum/Workspace/WorkspaceNavigation.swift:544`
+- `"dated"` — `Sources/VariorumCore/Domain/TimeStampFace.swift:71`
+- `"today"` — `Sources/VariorumCore/Domain/TimeStampFace.swift:179`
+- `"today \(time)"` — `Sources/VariorumCore/Domain/TimeStampFace.swift:181` (templated)
+- `"yesterday"` — `Sources/VariorumCore/Domain/TimeStampFace.swift:185`
+
+— 122 strings
+
+
+## Archived & Deleted (the Trash) and putting things back
+
+- `"This note is marked complete — unseal it first."` — `App/Variorum/Shared/RecoveryActs.swift:191`
+- `"This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."` — `App/Variorum/Shared/RecoveryActs.swift:196`
+- `"That note is already gone."` — `App/Variorum/Shared/RecoveryActs.swift:198`, `App/Variorum/Shared/RecoveryCopy.swift:729`
+- `"That book is already gone."` — `App/Variorum/Shared/RecoveryActs.swift:200`
+- `"That block is already gone."` — `App/Variorum/Shared/RecoveryActs.swift:207`
+- `"That take is already gone."` — `App/Variorum/Shared/RecoveryActs.swift:209`
+- `"That note is already back."` — `App/Variorum/Shared/RecoveryActs.swift:216`
+- `"That book is already back."` — `App/Variorum/Shared/RecoveryActs.swift:218`
+- `"That block is already back."` — `App/Variorum/Shared/RecoveryActs.swift:220`
+- `"That take is already back."` — `App/Variorum/Shared/RecoveryActs.swift:222`
+- `"That's not in the \(RecoveryCopy.trashSection) any more — only things in the \(RecoveryCopy.trashSection) can be deleted for good."` — `App/Variorum/Shared/RecoveryActs.swift:227` (templated)
+- `"That couldn't be done — \(String(describing: error))."` — `App/Variorum/Shared/RecoveryActs.swift:237` (templated)
+- `"Empty Trash"` — `App/Variorum/Shared/RecoveryActs.swift:344`
+- `"Trash"` — `App/Variorum/Shared/RecoveryCopy.swift:49`
+- `"Archived"` — `App/Variorum/Shared/RecoveryCopy.swift:51`
+- `"Archived & Deleted"` — `App/Variorum/Shared/RecoveryCopy.swift:65`
+- `"Put back"` — `App/Variorum/Shared/RecoveryCopy.swift:68`
+- `"Deleted things wait here for \(TrashWindow.days) days, then they're gone."` — `App/Variorum/Shared/RecoveryCopy.swift:73` (templated)
+- `"Notes"` — `App/Variorum/Shared/RecoveryCopy.swift:80`, `App/Variorum/Variorum/Features/Library/ArchivedView.swift:178`
+- `"Books"` — `App/Variorum/Shared/RecoveryCopy.swift:81`, `App/Variorum/Variorum/Features/Library/ArchivedView.swift:177`
+- `"Blocks"` — `App/Variorum/Shared/RecoveryCopy.swift:82`
+- `"Takes"` — `App/Variorum/Shared/RecoveryCopy.swift:83`
+- `"Snippet groups"` — `App/Variorum/Shared/RecoveryCopy.swift:86`
+- `"Originals"` — `App/Variorum/Shared/RecoveryCopy.swift:87`
+- `"filter: \(kindLabel(kind)) \u{2715}"` — `App/Variorum/Shared/RecoveryCopy.swift:103` (templated)
+- `"The listing is narrowed to one kind — click to show everything again."` — `App/Variorum/Shared/RecoveryCopy.swift:107`
+- `"The Trash is empty."` — `App/Variorum/Shared/RecoveryCopy.swift:124`
+- `"No \(kindLabel(kind).lowercased()) in the Trash — the \(kindLabel(kind)) filter is on, and other things are waiting here."` — `App/Variorum/Shared/RecoveryCopy.swift:125` (templated)
+- `"note"` — `App/Variorum/Shared/RecoveryCopy.swift:149`, `App/Variorum/Shared/RecoveryCopy.swift:402`
+- `"book"` — `App/Variorum/Shared/RecoveryCopy.swift:150`, `App/Variorum/Variorum/Features/Library/ArchivedView.swift:413`
+- `"block"` — `App/Variorum/Shared/RecoveryCopy.swift:151`
+- `"take"` — `App/Variorum/Shared/RecoveryCopy.swift:152`
+- `"snippet group"` — `App/Variorum/Shared/RecoveryCopy.swift:153`
+- `"preserved original"` — `App/Variorum/Shared/RecoveryCopy.swift:154`
+- `"leaves today"` — `App/Variorum/Shared/RecoveryCopy.swift:165`
+- `"1 day left"` — `App/Variorum/Shared/RecoveryCopy.swift:166`
+- `"\(days) days left"` — `App/Variorum/Shared/RecoveryCopy.swift:167` (templated)
+- `"kept — no clock"` — `App/Variorum/Shared/RecoveryCopy.swift:172`
+- `"set aside by a divide or merge \u{2014} kept until its family goes"` — `App/Variorum/Shared/RecoveryCopy.swift:186`
+- `"1 deleted take"` — `App/Variorum/Shared/RecoveryCopy.swift:366`
+- `"\(count) deleted takes"` — `App/Variorum/Shared/RecoveryCopy.swift:366` (templated)
+- `"Put back where it was."` — `App/Variorum/Shared/RecoveryCopy.swift:383`
+- `"Put back where it came from."` — `App/Variorum/Shared/RecoveryCopy.swift:384`
+- `"scraps"` — `App/Variorum/Shared/RecoveryCopy.swift:403`
+- `"Put back at the end of this note."` — `App/Variorum/Shared/RecoveryCopy.swift:409`
+- `"Put back at the end of the scraps."` — `App/Variorum/Shared/RecoveryCopy.swift:410`
+- `"Put back \u{2014} but it remembers no note to go back into, so it's set aside on its own for now."` — `App/Variorum/Shared/RecoveryCopy.swift:427`
+- `"Put back \u{2014} but its \(homeWord(home)) is gone, so it's set aside on its own for now."` — `App/Variorum/Shared/RecoveryCopy.swift:430` (templated)
+- `"This original's note is gone, so there's nowhere to put it back — it stays here."` — `App/Variorum/Shared/RecoveryCopy.swift:442`
+- `"This note is marked complete — unseal it to put this back."` — `App/Variorum/Shared/RecoveryCopy.swift:448`
+- `"Delete Now"` — `App/Variorum/Shared/RecoveryCopy.swift:452`
+- `"Empty Trash…"` — `App/Variorum/Shared/RecoveryCopy.swift:453`
+- `"Delete this \(noun) for good? It skips the rest of its \(TrashWindow.days) days — there's no putting it back."` — `App/Variorum/Shared/RecoveryCopy.swift:486` (templated)
+- `" Its \(savedVersions) saved version\(one ? "" : "s") \(one ? "isn't" : "aren't") taken with it — \(one ? "it stays" : "they stay") in the Trash with the \(TrashWindow.days) days \(one ? "it has" : "they have") left."` — `App/Variorum/Shared/RecoveryCopy.swift:490` (templated)
+- `"The Trash is empty — nothing to delete."` — `App/Variorum/Shared/RecoveryCopy.swift:538`
+- `"Empty the Trash? \(total) thing\(total == 1 ? "" : "s") go\(total == 1 ? "es" : "") for good: \(parts.joined(separator: ", "))."` — `App/Variorum/Shared/RecoveryCopy.swift:565` (templated)
+- `" \(originals) preserved original\(originals == 1 ? " rides" : "s ride") along with \(originals == 1 ? "its" : "their") famil\(originals == 1 ? "y" : "ies")."` — `App/Variorum/Shared/RecoveryCopy.swift:568` (templated)
+- `" \(takes) deleted take\(takes == 1 ? "" : "s") on living blocks stay\(takes == 1 ? "s" : "") — but not kept: \(takes == 1 ? "it" : "each") still runs out its own \(TrashWindow.days) days, and putting \(takes == 1 ? "it" : "one") back is what keeps it."` — `App/Variorum/Shared/RecoveryCopy.swift:572` (templated)
+- `"The \(rowKind(kind)) is gone from the app now — the bytes follow once every synced device has caught up."` — `App/Variorum/Shared/RecoveryCopy.swift:590` (templated)
+- `"The \(rowKind(kind)) is gone from the app now — it once synced, so the bytes finish clearing after you next sign in."` — `App/Variorum/Shared/RecoveryCopy.swift:594` (templated)
+- `"The \(rowKind(kind)) is gone from the app now — the app's own cleanup removes the bytes."` — `App/Variorum/Shared/RecoveryCopy.swift:597` (templated)
+- `", \(versions) of them saved version\(versions == 1 ? "" : "s")"` — `App/Variorum/Shared/RecoveryCopy.swift:610` (templated)
+- `"The Trash is emptied — \(total) thing\(total == 1 ? "" : "s")\(moments) gone from the app now; "` — `App/Variorum/Shared/RecoveryCopy.swift:612` (templated)
+- `"the bytes follow once every synced device has caught up."` — `App/Variorum/Shared/RecoveryCopy.swift:613`
+- `"anything that once synced finishes clearing after you next sign in; the rest the app cleans up now."` — `App/Variorum/Shared/RecoveryCopy.swift:615`
+- `"the app's own cleanup removes the bytes."` — `App/Variorum/Shared/RecoveryCopy.swift:618`
+- `"The \(rowKind(kind)) goes to the \(trashSection) for \(TrashWindow.days) days. You can put it back from there until then."` — `App/Variorum/Shared/RecoveryCopy.swift:643` (templated)
+- `"Note archived — it's kept in \(archivedSection), with no countdown."` — `App/Variorum/Shared/RecoveryCopy.swift:656` (templated)
+- `"Note unarchived — it's back in the Library."` — `App/Variorum/Shared/RecoveryCopy.swift:661`
+- `"\(count) notes archived — they're kept in \(archivedSection), with no countdown."` — `App/Variorum/Shared/RecoveryCopy.swift:666` (templated)
+- `"Its notes stay in the library."` — `App/Variorum/Shared/RecoveryCopy.swift:673`
+- `"\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) moved to the \(trashSection) — \(TrashWindow.days) days to put it back."` — `App/Variorum/Shared/RecoveryCopy.swift:676` (templated)
+- `"Delete Note\u{2026}"` — `App/Variorum/Shared/RecoveryCopy.swift:694`
+- `"Delete Note"` — `App/Variorum/Shared/RecoveryCopy.swift:698`
+- `"Delete \(count) notes?"` — `App/Variorum/Shared/RecoveryCopy.swift:706` (templated)
+- `"The \(count) notes go to the \(trashSection) for \(TrashWindow.days) days. You can put them back from there until then."` — `App/Variorum/Shared/RecoveryCopy.swift:712` (templated)
+- `"\(count) notes moved to the \(trashSection) — \(TrashWindow.days) days to put them back."` — `App/Variorum/Shared/RecoveryCopy.swift:721` (templated)
+- `"Those notes are already gone."` — `App/Variorum/Shared/RecoveryCopy.swift:729`
+- `"Scraps go one at a time — delete the scraps themselves."` — `App/Variorum/Shared/RecoveryCopy.swift:758`
+- `"\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) put back."` — `App/Variorum/Shared/RecoveryCopy.swift:764` (templated)
+- `"and 1 note"` — `App/Variorum/Shared/RecoveryCopy.swift:778`
+- `"and \(count) notes"` — `App/Variorum/Shared/RecoveryCopy.swift:779` (templated)
+- `"The book"` — `App/Variorum/Shared/RecoveryCopy.swift:785`
+- `"\(book) is back with its note."` — `App/Variorum/Shared/RecoveryCopy.swift:787` (templated)
+- `"\(book) is back with its \(count) notes."` — `App/Variorum/Shared/RecoveryCopy.swift:788` (templated)
+- `"Take put back — it was archived when it was deleted, so it's among its block's archived takes, not the fan. Unarchive it there to bring it back."` — `App/Variorum/Shared/RecoveryCopy.swift:837`
+- `"notes and books you set aside — kept, with no countdown"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:174`
+- `"Showing the \(RecoveryViewModel.window) most recently archived — older ones aren't listed."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:234` (templated)
+- `"archived"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:310`, `App/Variorum/Variorum/Features/Library/ArchivedView.swift:427`
+- `"Open"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:317`, `App/Variorum/Variorum/Features/Library/ArchivedView.swift:399`
+- `"Puts it back in the Library"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:323` (tooltip)
+- `"Puts it back on the Bookcase"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:402` (tooltip)
+- `"Showing the \(window) most recently archived books \u{2014} older ones aren't listed."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:405` (templated)
+- `"gathering \u{00B7} shows nothing while archived"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:412`
+- `"daily Journal"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:413`
+- `"1 note"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:414`
+- `"\(notes) notes"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:414` (templated)
+- `"owned"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:415`
+- `"sealed"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:417`
+- `"finished"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:419`
+- `"Library \u{2192} \(menuLabel)"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:88` (templated)
+- `"1 original set aside by this block's lineage"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:132`
+- `"\(count) originals set aside by this block's lineage"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:133` (templated)
+- `"Delete for Good"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:602`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:605`
+- `"Showing the \(RecoveryViewModel.window) most recent — older ones aren't listed."` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:711` (templated)
+- `"from \(title)"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:771` (templated)
+- `"Show"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:826`
+- `"Everything"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:829`
+- `"Oldest first"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:852`
+- `"Everything in the Trash goes for good — the confirm names the full count"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:872` (tooltip)
+- `"from \(noteTitle) (also in the Trash)"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:927` (templated)
+- `"from \(noteTitle)"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:928` (templated)
+- `"deleted"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:933`
+- `"Open snippets"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:953`
+- `"Open note"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:953`
+- `"Skips the rest of the \(TrashWindow.days) days — asked to confirm every time"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:976` (tooltip) (templated)
+- `"The note comes back with its blocks, its tags and its books"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:991`
+- `"The book comes back whole — with the notes that went in with it"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:994`
+- `"The book comes back whole — chapters and membership included"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:995`
+- `"The block goes back where it was"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:998`
+- `"The take comes back in its block, exactly as it was"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:999`
+- `"The group comes back with its snippets"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:1001`
+- `"Places the original back where it came from — it stops counting down"` — `App/Variorum/Variorum/Features/Library/RecoveryView.swift:1003`
+
+— 124 strings
+
+
+## Pool & Snippets (the scraps area)
+
+- `"block"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:34`
+- `"snippet"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:35`
+- `"(empty)"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:40`
+- `"tags for this \(noun) \u{2014} \u{201C}\(subject)\u{201D}"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:41` (templated)
+- `"done"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:178`
+- `"Rename Group"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:126`
+- `"Rename"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:133`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:137`, `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:149`, `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:163`
+- `"New Group"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:139`
+- `"Create"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:141`
+- `"Delete the group \u{201C}\($0.name)\u{201D}?"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:152` (templated)
+- `"Delete"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:159`
+- `"The group is empty."` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:166`
+- `"Its \(confirm.snippets == 1 ? "1 snippet goes" : "\(confirm.snippets) snippets go") to the Trash with it — \(TrashWindow.days) days to put it back."` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:167` (templated)
+- `"This group in the full editor — type, split, fan takes"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:243` (tooltip)
+- `"Groups are free-standing — no book or note owns one. A snippet lives in exactly one group; tags are labels it can wear many of."` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:255` (tooltip)
+- `"No tags yet — create one in Settings"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:430`
+- `"in \(PoolNaming.title(home))"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:521` (templated)
+- `"Drag into an open editor — a copy with lineage; ⌥ carries the whole fan"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:532` (tooltip)
+- `"(empty snippet)"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:662`
+- `"No snippets group could be created."` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:675`
+- `"New snippet refused: \(error)"` — `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:683` (templated)
+- `"Pool"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:245`, `App/Variorum/Variorum/Features/Pool/PoolSection.swift:105`
+- `"Add to Book"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:330`
+- `"add to book"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:424`
+- `"Into a book — the pool's whole point. Search opens; finished books say so."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:428` (tooltip)
+- `"Open"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:439`
+- `"Duplicate as Version"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:453`
+- `"1 note"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:518`
+- `"\(count) notes"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:518` (templated)
+- `"1 in a gathering"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:522`
+- `"\(count) in gatherings"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:522` (templated)
+- `"hide"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:533`
+- `"show"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:533`
+- `"Tuck the notes that show in gatherings back behind the count."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:537`
+- `"Notes that show in gatherings tuck behind this count \u{2014} one click lists them here too."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:538`
+- `"in gatherings"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:542`
+- `"loose notes"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:545`
+- `"Every note lives in a book. The pool is empty."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:553`
+- `"No loose notes \u{2014} the one bookless note shows in a gathering."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:554`
+- `"No loose notes \u{2014} all \(tucked) bookless notes show in gatherings."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:555` (templated)
+- `"no group"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:43`
+- `"Snippets"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:44`, `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:29`
+- `"snippets"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:74`
+- `"Which snippet group the panel shows"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:86` (tooltip)
+- `"drag a snippet into the page — it lands as a copy with lineage; the snippet stays here. ⌥-drag carries its whole fan. Drops land where you can type: Write, or a book's open note."` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:91`
+- `"No snippets in this group — the Snippets area (sidebar) mints them."` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:106`
+- `"⑂\(item.block.activeVariantCount) — ⌥-drag carries all takes"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:146` (templated)
+- `"Tags…"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:159`, `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:60`
+- `"Drag into the page — a copy with lineage; ⌥ carries the whole fan; right-click to tag, set aside or delete"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:178` (tooltip)
+- `"(empty block)"` — `App/Variorum/Variorum/Features/Pool/ScrapsPanel.swift:184`
+- `"1 snippet"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:32`
+- `"\(snippets) snippets"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:32` (templated)
+- `"1 group"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:33`
+- `"\(groups) groups"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:33` (templated)
+- `"\(s) in \(g)"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:34` (templated)
+- `"all snippets"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:38`
+- `"groups"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:39`
+- `"+ new group"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:40`
+- `"rename group…"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:41`
+- `"new group…"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:42`
+- `"delete group…"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:43`
+- `"its snippets go to the Trash with it — 30 days"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:47`
+- `"open as editor"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:48`
+- `"drop text or a file here to add it"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:49`
+- `"new snippet — start typing · ⏎ keeps it as a standalone snippet"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:50`
+- `"Open this snippet in its editor"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:59`
+- `"Move to Group"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:61`
+- `"Move out to snippets (leaves this note)"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:69`
+- `"Archive Snippet"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:70`
+- `"Delete Snippet"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:71`
+- `"move to group"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:75`
+- `"tag"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:76`
+- `"archive"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:77`
+- `"delete"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:78`
+- `"clear"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:79`
+- `"tag: any"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:82`
+- `"This snippet's tags — click to add or remove them"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:98` (tooltip)
+- `"⑂ \(count) takes"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:101` (templated)
+- `"1 word"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:103`
+- `"\(count) words"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:103` (templated)
+- `"Snippet moved"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:109`
+- `"\(count) snippets moved"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:109` (templated)
+- `" to \(group)."` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:109` (templated)
+- `"Group \(name) created."` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:111` (templated)
+- `"recent"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:134`
+- `"oldest"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:134`
+- `"longest"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:134`
+
+— 88 strings
+
+
+## Quick note & capture
+
+- `"Quick Note"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:536`
+- `"New Quick Note"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:539`
+- `"quick note"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:540`
+- `"files it · ⇧ ⏎ new paragraph · closing files it too"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:547`
+- `"File It"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:548`
+- `"Filed in Quicknotes — tagged #quicknote."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:556`
+- `"Filed in the Pool — tagged #quicknote."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:563`
+- `"Kept as a note in the Pool — the Quicknotes filing didn't take: \(reason)."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:575` (templated)
+- `"The quick note wasn't filed:"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:577`
+- `"The store couldn't take it just now."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:588`
+- `"\(refusedPrefix) \(reason) Your text is still here — try again in a moment."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:589` (templated)
+- `"The quick note wasn't filed. Your words are kept — the next quick note opens with them."` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:607`
+- `"the capture that couldn't be filed — ⏎ tries again"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:611`
+- `"Quicknotes"` — `Sources/VariorumCore/Operations/Operations+Quicknote.swift:24`
+- `"the quicknotes shelf could not be reached"` — `Sources/VariorumCore/Operations/Operations+Quicknote.swift:173`, `Sources/VariorumCore/Operations/Operations+Quicknote.swift:181`
+- `"the note is no longer there"` — `Sources/VariorumCore/Operations/Operations+Quicknote.swift:177`
+- `"the quicknote tag is no longer there"` — `Sources/VariorumCore/Operations/Operations+Quicknote.swift:179`
+
+— 17 strings
+
+
+## Note chrome — masthead, mode row, tags, context bar, panes
+
+- `"Tag this note — type a path (\u{201C}/\u{201D} nests: life/goals), \u{23CE} applies, \u{238B} closes"` — `App/Variorum/Variorum/Features/Tags/MastheadTagCluster.swift:400` (tooltip)
+- `"Take “\(tag.path)” off this note"` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:226` (tooltip) (templated)
+- `"Tagged \(tag.path)"` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:236` (tooltip) (templated)
+- `"Tag this note — type a path (“/” nests: life/goals)"` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:253` (tooltip)
+- `"No tags yet — type one and ⏎ makes it."` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:357`
+- `"makes “\(typed.trimmingCharacters(in: .whitespaces))” a new tag."` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:358` (templated)
+- `"Tags for “\(postTitle?.isEmpty == false ? postTitle! : DisplayTitle.placeholder)”"` — `App/Variorum/Variorum/Features/Tags/TagViews.swift:39` (templated)
+- `"type a tag — ⏎ applies it (new tags are created; “/” nests: life/goals)"` — `App/Variorum/Variorum/Features/Tags/TagViews.swift:46`
+- `"Done"` — `App/Variorum/Variorum/Features/Tags/TagViews.swift:81`
+- `"Operation failed: \(error)"` — `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift:85` (templated)
+- `"Tag names can't be empty or contain “/”."` — `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift:89`
+- `"A tag named “\(path)” already exists."` — `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift:91` (templated)
+- `"That tag no longer exists."` — `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift:93`
+- `"The operation was refused: \(op)"` — `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift:95` (templated)
+- `"Scraps"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:70`
+- `"What this note has set aside: blocks it archived, everything of its own that is on the \(TrashWindow.days)-day clock, and the originals a divide or a merge kept whole"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:76` (tooltip) (templated)
+- `"Show the scraps beside the draft — drag one into the page (⌥ carries its whole fan)"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:82` (tooltip)
+- `"References"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:85`
+- `"Show the note's references (sources beside the draft)"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:86` (tooltip)
+- `"This note's mode — Write · Takes · Read · Lenses · Compare · Blocks · Canvas (⌘1–⌘7)"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:319` (tooltip)
+- `"The note's name — click to rename it right here"` — `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:855` (tooltip)
+- `"Write"` — `App/Variorum/Variorum/Registry/PostMode.swift:40`
+- `"Takes"` — `App/Variorum/Variorum/Registry/PostMode.swift:41`
+- `"Read"` — `App/Variorum/Variorum/Registry/PostMode.swift:42`
+- `"Lenses"` — `App/Variorum/Variorum/Registry/PostMode.swift:43`
+- `"Compare"` — `App/Variorum/Variorum/Registry/PostMode.swift:44`
+- `"Blocks"` — `App/Variorum/Variorum/Registry/PostMode.swift:45`
+- `"Canvas"` — `App/Variorum/Variorum/Registry/PostMode.swift:46`
+- `"Open \u{201C}\(book.name)\u{201D} at this note"` — `App/Variorum/Variorum/Workspace/ContextBar.swift:270` (tooltip) (templated)
+- `"This note is in \(bookCount) books — editing here edits it everywhere. To make a copy that can diverge, use Duplicate as Version (the book chip under the title)."` — `App/Variorum/Variorum/Workspace/MultiBookEditNote.swift:39` (templated)
+- `"click to edit"` — `App/Variorum/Variorum/Workspace/PaneHost.swift:199`
+- `"This pane is holding \(WorkspaceNaming.paneLine("this note", mode: $0)) — click anywhere in it to write here, and it opens back into \($0.rawValue)"` — `App/Variorum/Variorum/Workspace/PaneHost.swift:210` (templated)
+- `"This pane is showing — click anywhere in it to write here"` — `App/Variorum/Variorum/Workspace/PaneHost.swift:213`
+
+— 33 strings
+
+
+## Note mode row — Write (the editor, bottom bar, comments, find, formatting, references, word targets)
+
+- `"the comment that couldn't be saved — here to try again"` — `App/Variorum/Shared/CommentDraftPark.swift:100`
+- `"\u{23CE} saves it \u{00B7} \u{238B} cancels. An empty name is fine — the moment is saved either way."` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:86`
+- `"\u{23CE} saves it \u{00B7} \u{238B} leaves it as it was. Clearing the field removes the name."` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:92`
+- `"Committed \u{201C}\(name)\u{201D} — an immutable savepoint of this take."` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:107` (templated)
+- `"A name is optional and always editable afterwards — Block History's rename door beside the savepoint"` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:110` (tooltip)
+- `"name it "` — `App/Variorum/Variorum/Core/Views/TitleSuggestionChip.swift:100`
+- `"\u{2713} title: "` — `App/Variorum/Variorum/Core/Views/TitleSuggestionChip.swift:102`
+- `"Use these first words as the note's title. Nothing is applied unless you click \u{2014} an untitled note still shows its first words in the Library."` — `App/Variorum/Variorum/Core/Views/TitleSuggestionChip.swift:105`
+- `"This will be the note's title \u{2014} click to leave it untitled."` — `App/Variorum/Variorum/Core/Views/TitleSuggestionChip.swift:107` (tooltip)
+- `"block"` — `App/Variorum/Variorum/Core/Views/WordTargetFace.swift:56`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:666`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:941`
+- `"Word target — this note"` — `App/Variorum/Variorum/Core/Views/WordTargetFace.swift:260`
+- `"A target shows progress beside the word counts. It is a measure, never a wall — nothing refuses at the boundary."` — `App/Variorum/Variorum/Core/Views/WordTargetFace.swift:264`
+- `"Clear"` — `App/Variorum/Variorum/Core/Views/WordTargetFace.swift:273`
+- `"Set"` — `App/Variorum/Variorum/Core/Views/WordTargetFace.swift:278`, `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:268`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:887`
+- `"block —"` — `App/Variorum/Variorum/Features/Editor/BlockLineLabel.swift:24`
+- `"block \(ordinal)/\(count)"` — `App/Variorum/Variorum/Features/Editor/BlockLineLabel.swift:25` (templated)
+- `"Toggle Callout"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:84`
+- `"Emoji\u{2026}"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:92`
+- `"Remove Callout"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:93`
+- `"Emoji & Symbols\u{2026}"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:174`
+- `"Callout Emoji"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:255`
+- `"A leading glyph for this callout — type or paste one, or pick from Emoji & Symbols (leave empty for none). Just the first one is kept."` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:264`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:269`, `App/Variorum/Variorum/Features/Editor/EditorView.swift:238`
+- `"This note is sealed — unseal it to change comments."` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:339`
+- `"A comment needs some text."` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:340`
+- `"A comment needs some text — Delete removes it."` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:343`
+- `"Comment deleted — it is under \"deleted\" below, restorable."` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:344`
+- `"Comment restored."` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:345`
+- `"Write a comment…"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:346`
+- `"unsaved · ⌘"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:347`
+- `"new line · ⌘ ⏎ saves · ⎋ undoes"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:350`
+- `"Comments"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:575`
+- `"Close"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:584`, `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:113`
+- `"Save"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:724`
+- `"Revert"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:728`
+- `"Delete"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:731`
+- `"\(deletedShown ? "▾" : "▸") deleted (\(model.deleted.count))"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:756` (templated)
+- `"Add"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:761`
+- `"Restore"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:785`
+- `"Divide"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:184` (tooltip)
+- `"Extract"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:187` (tooltip)
+- `"Make Block"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:189`, `App/Variorum/Variorum/Features/Editor/EditorView.swift:235` (tooltip)
+- `"Merge"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:190` (tooltip)
+- `"comments"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:373`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:636`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:720`
+- `"The caret block's comments — working remarks on a block, never per-take"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:375`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:722` (tooltip)
+- `"Takes"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:594`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:631`
+- `"commit ⌘S"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:599`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:628`
+- `"An immutable savepoint of the take under the caret — name it, or press ⏎ to save it unnamed"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:602` (tooltip)
+- `"Everything this block has been: each take's saved moments, its archived and deleted takes, and the block it came out of"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:616` (tooltip)
+- `"more"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:626`
+- `"\(FormattingDoor.label) — put the formatting row away"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:638` (templated)
+- `"\(FormattingDoor.label) — formatting"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:639` (templated)
+- `"note"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:642`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:757`
+- `"The rest of this bar at this width: commit, takes, history, comments, formatting, and the note's own menu"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:646`
+- `"The rest of this bar at this width: takes, comments and formatting"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:648`
+- `"＋ New block below this one (⌘⇧ ⏎ )"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:691`
+- `"− Delete this block"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:706`
+- `"Everything block-scoped: divide, extract, make block, merge, the two block mints, splitting this block at its newlines, and the two ways to set a block aside"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:710` (tooltip)
+- `"The note itself: its versions, its seal, its date, and the repair that makes every newline a block (its tray is the tray icon at the top of the note; a block's savepoints are the history door beside commit)"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:760` (tooltip)
+- `"Unseal"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:803`
+- `"Seal"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:803`
+- `"Date: \($0)…"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:807` (templated)
+- `"Set date…"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:807`
+- `"Entry date"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:876`, `App/Variorum/Variorum/Features/Editor/CommitBar.swift:878`
+- `"Clear Date"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:882`
+- `"open tail"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:926`
+- `"\($0)w block"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:936` (templated)
+- `"\($0)w selected"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:937` (templated)
+- `"\($0.formatted())w in note"` — `App/Variorum/Variorum/Features/Editor/CommitBar.swift:940` (templated)
+- `"match"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:88`, `App/Variorum/Variorum/Features/Editor/EditorFind.swift:129`
+- `"matches"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:88`, `App/Variorum/Variorum/Features/Editor/EditorFind.swift:129`
+- `"Nothing was replaced — \(blocked) of \(total) \(matches) can't be: "` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:89` (templated)
+- `"That match crosses a block boundary — replace inside one block, or merge the blocks first (⌘⇧M)."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:100`
+- `"That match is in a locked take — branch it or unlock it to edit."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:103`
+- `"That match is in a block that hasn't fully synced; it is read-only for now."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:105`
+- `"That match is in text the editor is re-syncing — try again in a moment."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:107`
+- `"That match touches the paragraph still being written — it becomes a block once typing pauses; try again then."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:109`
+- `"Replaced 1 match."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:115`
+- `"Replaced \(count) matches."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:115` (templated)
+- `"Replaced \(replacements) "` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:128` (templated)
+- `" in \(takes) \(takes == 1 ? "take" : "takes")."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:130` (templated)
+- `" Skipped \(skipped.count): "` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:132` (templated)
+- `" \(moved) moved before \(moved == 1 ? "it" : "they") could be replaced."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:135` (templated)
+- `"Nothing was replaced"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:143`
+- `" — \(moved) \(moved == 1 ? "match" : "matches") moved before \(moved == 1 ? "it" : "they") could be"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:145` (templated)
+- `"Nothing to replace — open Find and Replace (⌥⌘F) and type what to find and what to replace it with."` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:158`
+- `"\(moved) moved before \(moved == 1 ? "it" : "they") could be"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:172` (templated)
+- `"\(blocked) can no longer be replaced where \(blocked == 1 ? "it" : "they") landed"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:175` (templated)
+- `"Replaced \(applied) of \(total) — "` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:177` (templated)
+- `"\(boundary) cross\(boundary == 1 ? "es" : "") a block boundary"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:189` (templated)
+- `"\(locked) \(locked == 1 ? "is" : "are") in a locked take"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:190` (templated)
+- `"\(unsynced) \(unsynced == 1 ? "is" : "are") in an unsynced block"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:191` (templated)
+- `"\(resyncing) \(resyncing == 1 ? "is" : "are") in text still re-syncing"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:192` (templated)
+- `"\(forming) touch\(forming == 1 ? "es" : "") the paragraph still being written"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:193` (templated)
+- `"This block has 1 other take — it keeps this span."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:301`
+- `"This block has \(otherTakes) other takes — they keep this span."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:302` (templated)
+- `"Merged the visible takes — 1 other take stays with the released block (\(TrayPath.originalsPath); ⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:446` (templated)
+- `"Merged the visible takes — \(otherTakes) other takes stay with the released blocks (\(TrayPath.originalsPath); ⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:448` (templated)
+- `" Divide choosing takes (⌥⌘⇧D) can send a whole take to one side."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:563`
+- `"Split at Newlines"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:686`
+- `"No blocks yet — type on the page and each finished paragraph becomes one."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:705`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:904`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1021`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1042`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1084`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1112`
+- `"Put the caret in a block first — this splits the block you're in."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:706`
+- `"Put the caret in a block first — the new block lands right below it."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:905`
+- `"Put the caret in a take first — this moves that take into its own block."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1022`
+- `"Put the caret in a block first — this turns its takes into blocks."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1043`
+- `"Put the caret in a block first — this removes the block you're in."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1085`
+- `"Put the caret in a block first — this sets the block you're in aside."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1113`
+- `"Nothing would land on the merged block — pair takes with ＋, or check “carry” on at least one."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1420`
+- `"Merged — 1 take stays with the released blocks in lineage (\(TrayPath.originalsPath); ⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1811` (templated)
+- `"Merged — \(count) takes stay with the released blocks in lineage (\(TrayPath.originalsPath); ⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1813` (templated)
+- `"The takes changed while the sheet was open — review the pairings before merging."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1972`
+- `"The takes changed while the sheet was open — review before merging."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1973`
+- `"The blocks moved while the confirm was open — nothing was changed; reselect and try again."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2108`
+- `"One of this block's takes needs its cut placed by hand — finish Divide choosing takes, then run Make Block from Selection again."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2257`
+- `"Both blocks at this seam have takes"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2393`
+- `"The block above has takes"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2394`
+- `"The block below has takes"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2395`
+- `" — backspace won't fold a fan away. "` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2400`
+- `" (no unique match)"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2619`
+- `"Deleted in \(applied) take\(applied == 1 ? "" : "s")."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2640` (templated)
+- `" Skipped \(skipped.count): \(skipped.joined(separator: ", "))."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2642` (templated)
+- `"an empty take"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2651`
+- `" (no match)"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2865`
+- `" (appears more than once)"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2867`
+- `"sealed note — read-only"` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:113`
+- `"Save current choices as a lens"` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:181`
+- `"Make one block across boundaries?"` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:227`
+- `"The selection crosses \(state.blockCount) blocks. Variorum will cut the first and last blocks at the snapped edges and merge everything inside into ONE block — undo (⌥⌘Z) restores it all."` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:240` (templated)
+- `"clear"` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:274`
+- `"Unpick every block"` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:276` (tooltip)
+- `"The text changed while that gesture was landing — nothing was altered; try it again on the current text."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:1771`
+- `"Delete in Every Take"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2734`
+- `"Show Takes"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2737`
+- `"Copied from the pool with its takes."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3052`
+- `"Copied from the pool."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3053`
+- `"Place the caret in a block to commit."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3166`
+- `"New blank take opened as chosen — type away (the old take is still in the fan)."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3322`
+- `"New take added on this block — ⌘⇧T shows the takes."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3323`
+- `"This take is locked — branch it or unlock it to edit."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:4264`
+- `"Move the selected words out of the take you're in and into a new take on this block — the take they leave is saved first, so nothing is lost."` — `App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift:111`
+- `"Select the words you want to move into a take first."` — `App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift:117`
+- `"That selection crosses a block boundary — this moves part of ONE block into a take on it. Make Block from Selection (⌘⇧K) is the gesture for a span across blocks."` — `App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift:122`
+- `"Moved into a new take — the take it left was saved first. \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift:135`
+- `"Moved into a new take — \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift:136`
+- `"link"` — `App/Variorum/Variorum/Features/Formatting/FormatBar.swift:88`
+- `"Aa"` — `App/Variorum/Variorum/Features/Formatting/FormatBar.swift:133`
+- `"Put the formatting row away — bold, italics, sizes, lists, links and the newlines setting"` — `App/Variorum/Variorum/Features/Formatting/FormatBar.swift:137`
+- `"Bold, italics, sizes, lists, links — and whether ⏎ makes new blocks. They slide out here; the rest of the bar stays put."` — `App/Variorum/Variorum/Features/Formatting/FormatBar.swift:139`
+- `"Add a source file or URL — it renders beside the draft."` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:49`
+- `"reference"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:75`, `App/Variorum/Variorum/Features/References/ReferencesViewModel.swift:239`
+- `"Move Up"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:83`
+- `"Move Down"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:84`
+- `"Open in Browser"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:86`
+- `"Remove"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:89`
+- `"Add File…"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:102`
+- `"Add Reference"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:116`
+- `"This URL can't be loaded."` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:140`
+- `"This file has no preview."` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:159`
+- `"Not a loadable URL: \(string)"` — `App/Variorum/Variorum/Features/References/ReferencesViewModel.swift:99` (templated)
+- `"“\(url.lastPathComponent)” was added without cross-launch access (the sandbox refused a security-scoped bookmark) — its preview may stop working after the app relaunches; re-add it if so."` — `App/Variorum/Variorum/Features/References/ReferencesViewModel.swift:142` (templated)
+- `"“\(display)” has no file bookmark — remove and re-add it."` — `App/Variorum/Variorum/Features/References/ReferencesViewModel.swift:243` (templated)
+- `"The file for “\(display)” can't be found — it may have moved."` — `App/Variorum/Variorum/Features/References/ReferencesViewModel.swift:256` (templated)
+- `"Takes — block \(String(blockID.prefix(8)))"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:97` (templated)
+- `"Open Takes mode"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:100`
+- `"The full board — every block's takes at once (⌘2)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:112` (tooltip)
+- `"Sync conflicts can add takes here; nothing is lost — choose what the entry shows."` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:119`
+- `"Sealed note — takes are viewable; choosing and new takes are frozen."` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:139`
+- `"archived takes"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:152`
+- `"This block is no longer in the note."` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:161`
+- `"✓ chosen"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:201`
+- `"locked"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:204`
+- `"Choose this take — the note shows it (everywhere); ⌘"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:212` (tooltip)
+- `"(empty take)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:248`
+- `"Unarchive"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:253`
+- `"＋ new take (branch)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:267`
+- `"A new take that starts as a copy of what's shown (⌘T)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:276` (tooltip)
+- `"＋ blank take"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:278`
+- `"A genuinely different take, from scratch — NOT chosen until you ✓ it (⌥⌘T)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:285` (tooltip)
+- `"＋ blank & choose"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:287`
+- `"The power gesture: a blank take that becomes the note's text right now (⇧⌥⌘T)"` — `App/Variorum/Variorum/Features/Takes/WriteTakesPanel.swift:296` (tooltip)
+- `"newlines make blocks: on"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:30`
+- `"newlines make blocks: off"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:31`
+- `"Newlines now stay inside the block in this note — typing and pasting won't make new blocks; Divide (⌘⇧D) or New Block Below (⌘⇧ ⏎ ) split deliberately. Existing blocks are untouched."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:37`
+- `"Newlines make blocks again in this note — in Write, Return makes a block wherever the cursor is, and pasted paragraphs arrive as blocks. Existing blocks are untouched."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:44`
+- `"This note now follows your global setting — and that is currently \"newlines don't make blocks\", so newlines still stay inside the block here. Change it in Settings ▸ Appearance ▸ Writing."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:57`
+- `"ON (the standard): in Write, Return makes a block wherever the cursor is — a new block below at a paragraph's end, a divide inside its text — and pasted paragraphs arrive as blocks; ⇧ ⏎ stays a newline inside the block, and a take pane's ⏎ is always content. OFF (opt-in): newlines stay INSIDE the block — typing and pasting never make blocks in this note; Divide (⌘⇧D) or New Block Below (⌘⇧ ⏎ ) split deliberately. Governs future entry only — existing blocks never re-segment. Per note — ON means \"follow the global setting\" (Settings ▸ Appearance ▸ Writing)."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:71`
+- `"Word counts \u{2014} "` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:127`
+- `"click condenses them; right-click sets a word target for this note, which shows progress here and is a measure, never a wall."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:128`
+- `"Word counts"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:134`
+- `"Set a word target\u{2026}"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:139`
+- `"Change the word target\u{2026}"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:140`
+- `"Clear the word target"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:141`
+- `"Full counts"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:148`
+- `"Only the note"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:149`
+- `"Only this \(unitNoun)"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:150` (templated)
+- `"Just an icon"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:151`
+- `"Word target (blank = none)"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:154`
+- `"Targets are plain positive numbers (e.g. 5000) — nothing was changed."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:155`
+- `"Word target set — \(target.formatted())w. Progress shows beside the word counts; a target is a measure, never a wall."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:157` (templated)
+- `"Word target cleared."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:160`
+- `"\(percent)% of \(target.formatted())w target"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:164` (templated)
+- `"Make every newline a block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:480`
+- `"Split this block at its newlines"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:482`
+- `"split at newlines"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:484`
+- `"Every paragraph in this note becomes its own block — the takes on a multi-paragraph block stay with its TOP paragraph. Lists stay whole. \u{2325}\u{2318}Z undoes the whole thing."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:487`
+- `"This block's paragraphs become their own blocks — its takes stay with the top one. \u{2325}\u{2318}Z undoes."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:491`
+
+— 206 strings
+
+
+## Note mode row — Takes
+
+- `"sealed note — takes are viewable; choosing and new takes are frozen"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:163`
+- `"Sync conflicts can add takes here; nothing is lost — choose what the entry shows."` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:176`
+- `"Save current choices as a lens"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:249`
+- `"Stack"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:435`
+- `"Carousel"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:436`
+- `"Margin grid"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:437`
+- `"Slot split"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:438`
+- `"How a block's takes fan open"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:440` (tooltip)
+- `"× \(beneathCount) beside"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:443` (templated)
+- `"How many takes show side by side (your screen width, your call)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:448` (tooltip)
+- `"\(gridRows) high"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:453` (templated)
+- `"\(n) high"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:455` (templated)
+- `"How many take cards stack vertically in the margin"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:458` (tooltip)
+- `"\(gridCols) wide"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:459` (templated)
+- `"\(n) wide"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:461` (templated)
+- `"How many card columns the margin shows before scrolling"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:464` (tooltip)
+- `"wash: on"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:469`
+- `"wash: off"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:469`
+- `"Wash the block whose takes are open (R13 — the transient marker)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:472` (tooltip)
+- `"expand all"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:476`
+- `"Open every block's fan (they stay open once expanded)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:478` (tooltip)
+- `"close all"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:479`
+- `"Back to the plain page (⎋)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:482` (tooltip)
+- `"note actions"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:487`
+- `"Write new takes on every block"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:488`
+- `"A fresh take on every block, branched from what the note shows — a full rewrite pass. See them in each block's fan, or side by side in Lenses."` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:491` (tooltip)
+- `"Save choices as lens…"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:493`
+- `"Keep the note's current takes as a named way of looking (a lens) — you can bring it back or compare against it in Lenses"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:494` (tooltip)
+- `"Duplicate as Version"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:496`
+- `"A full copy of this note — takes and all — as a new note, linked as a version"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:497` (tooltip)
+- `"The rare whole-note acts: a rewrite pass, saving choices as a lens, duplicating as a version"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:499` (tooltip)
+- `"Join the picked blocks into one — neighbours only; ⌥⌘Z undoes it"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:560` (tooltip)
+- `"clear"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:583`
+- `"Unpick every block"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:585` (tooltip)
+- `"A new block at the end of the note — type right into it"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:661` (tooltip)
+- `"Close this fan"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:927`, `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1219` (tooltip)
+- `"Open this fan (\(styleName))"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:928` (templated)
+- `"Give this block its first alternative take"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:932` (tooltip)
+- `"shortened — double-click for full length"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1161`
+- `"Drag to shorten this block's takes (remembered on this Mac); drag back down — or double-click — for full length"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1172` (tooltip)
+- `"takes · \(takes.count)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1211` (templated)
+- `"\(firstShown)–\(lastShown) of \(takes.count)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1300` (templated)
+- `"\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1352` (templated)
+- `"\(revealed ? "▾" : "▸") archived · \(count)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1414` (templated)
+- `"This block's archived takes — out of the fan, never gone"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1418` (tooltip)
+- `"(empty take)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1436`, `App/Variorum/Variorum/Features/Takes/TakesShared.swift:672`
+- `"Unarchive"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1442`
+- `"Back into the fan — right here (the fan re-opens with it)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1444` (tooltip)
+- `"＋ new take (branch)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1460`
+- `"A new take that starts as a copy of what's shown"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1466` (tooltip)
+- `"＋ blank take"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1468`
+- `"A genuinely different take, from scratch"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1472` (tooltip)
+- `"; \($0) opens it as chosen"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1474` (templated)
+- `"stack"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1555`
+- `"carousel"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1556`
+- `"margin grid"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1557`
+- `"slot split"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1558`
+- `"✓ chosen"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1650`
+- `"choose"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1650`
+- `"The note shows this take (everywhere)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1666`
+- `"Choose this take — the note shows it (everywhere); ⌘ ⏎ from the keyboard"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1667`
+- `" — one place \(reorder.axis == .vertical ? "up" : "left") in this block's fan (⌥⌘Z undoes)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1673` (templated)
+- `" — one place \(reorder.axis == .vertical ? "down" : "right") in this block's fan (⌥⌘Z undoes)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1679` (templated)
+- `"This take's own acts — archive, label, lock, delete"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1684` (tooltip)
+- `"(empty)"` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1869`
+- `"Divide"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:106` (tooltip)
+- `"Cut the block you're in at your cursor, right here — on a block with several takes the take you're looking at is cut and the rest stay whole on the top block (Divide choosing takes… to arrange them)"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:107`
+- `"Lay every take out in one sheet and say where each one goes — right here, without leaving Takes"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:111`
+- `"Extract"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:113` (tooltip)
+- `"Pull your selected span out into its own block — in Write, carried there for you"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:114`
+- `"Make Block"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:115` (tooltip)
+- `"Your selected span becomes its own block — in Write, carried there for you"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:116`
+- `"Merge"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:117` (tooltip)
+- `"Join the block you're in with the one above it, bringing every take along — in Write, carried there for you"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:118`
+- `"Choose what the merged block keeps — every take, only the ones you were looking at, or takes paired by hand — in Write, carried there for you"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:121`
+- `"block"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:143`
+- `"＋ New take — branch of what's shown"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:145` (tooltip)
+- `"＋ Blank take"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:154`, `App/Variorum/Variorum/Features/Takes/TakesShared.swift:477` (tooltip)
+- `"＋ Blank take, opened as chosen"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:159` (tooltip)
+- `"Label take…"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:163`
+- `"＋ New block below this one (⌘⇧ ⏎ )"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:173`
+- `"− Delete this block"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:192`
+- `"＋ New block at the end of the note"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:198`
+- `"Comments… (⌘⇧')"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:212`
+- `"Open in Write"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:216`
+- `"Everything block-scoped: new takes, new blocks, comments — acts on the block you're in"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:220` (tooltip)
+- `"+ take"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:356`
+- `"A new take on the block you're in, branched from what's shown (⌘T)"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:368` (tooltip)
+- `"commit ⌘S"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:369`
+- `"An immutable savepoint of the take you're in — name it, or press ⏎ to save it unnamed"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:376` (tooltip)
+- `"Everything this block has been: each take's saved moments, its archived and deleted takes, and the block it came out of"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:385` (tooltip)
+- `"comments"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:398`
+- `"The block's comments — working remarks on a block, never per-take (⌘⇧')"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:400` (tooltip)
+- `"note"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:448`
+- `"Unseal"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:465`
+- `"Seal"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:465`
+- `"Date: \($0)…"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:469` (templated)
+- `"Set date…"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:469`
+- `"The note itself: its seal and its date (a block's savepoints are the history door beside commit; its tray is the tray icon at the top of the note)"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:513` (tooltip)
+- `"Entry date"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:518`, `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:520`
+- `"Clear Date"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:524`
+- `"Set"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:529`, `App/Variorum/Variorum/Features/Takes/TakesShared.swift:796`
+- `"click into a take"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:563`
+- `"\(TextMetrics.wordCount(resolved.text))w take"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:580` (templated)
+- `"\(model.postWordCount.formatted())w note"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:589` (templated)
+- `"take"` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:590`
+- `"find"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:27`
+- `"done"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:78`
+- `"Close the find bar (Esc) — back to the take you're in"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:80` (tooltip)
+- `"— or ⏎ in the field"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:102` (tooltip)
+- `"— or ⇧ ⏎ in the field"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:106` (tooltip)
+- `": on"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:110`
+- `": off"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:110`
+- `"On: each block's chosen take only. Off: every take on the board — a block whose other takes match says so, and stepping to one opens its fan."` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:113` (tooltip)
+- `"Matches on takes this block isn't showing — step to one (⌘G) to open its fan"` — `App/Variorum/Variorum/Features/Takes/TakesFindBar.swift:135` (tooltip)
+- `"1 match"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:234`
+- `"\(total) matches"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:234` (templated)
+- `"\(n) of \(total)"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:237` (templated)
+- `" · wrapped"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:237`
+- `"1 in another take"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:241`
+- `"\(count) in other takes"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:241` (templated)
+- `"only chosen takes"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:243`
+- `"Nothing here yet — make the first block here, or start writing."` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:51`
+- `"＋ new block"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:52`
+- `"The note's first block, right here — it takes the ring, so you can type into it"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:54`
+- `"Start writing (Write mode)"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:55`
+- `"✓ Choose this take (the note shows it)"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:289`
+- `"Diverge here (new take, this thread)"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:294`
+- `"Diff against chosen"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:373`
+- `"chosen"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:375`
+- `"this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:375`
+- `"Show take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:398`
+- `"＋ New take — branch of this one"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:473` (tooltip)
+- `"Archive this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:481` (tooltip)
+- `"Unlock this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:502`
+- `"Lock this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:502`
+- `"Delete this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:507` (tooltip)
+- `"Label take\u{2026}"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:516` (tooltip)
+- `"+\(comments.count - 1) more"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:728` (templated)
+- `"This block's comments — click to read, add, or edit them"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:745` (tooltip)
+- `"Label this take"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:777`
+- `"Change the take's label"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:777`
+- `"A label names a take on its card and in exports — identity only, never printed in the prose."` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:782`
+- `"Clear Label"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:789`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:795`, `App/Variorum/Variorum/Features/Takes/TakesShared.swift:829`
+- `"Name this lens"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:813`
+- `"Save"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:830`
+- `" Divide choosing takes (⌥⌘⇧D) can send a whole take to one side."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:566`
+- `"This take is already first in the fan."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:647`
+- `"This take is already last in the fan."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:648`
+- `"Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:662` (templated)
+- `"Lens \(n)"` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:886`, `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:887` (templated)
+- `"Adopted — the note now shows this column. The old chosen is kept as the lens “\(preservation.name)”."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1227` (templated)
+- `"Lens"` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1251`
+- `"Made a new note — “\(promoted.post.title ?? "untitled")” is now its own note, linked as a version."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1270` (templated)
+- `"New takes written on \(picks.count) block\(picks.count == 1 ? "" : "s") — open any fan to see them, or open them side by side in Lenses."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1305` (templated)
+- `"Committed — an immutable savepoint of this take."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1728`
+- `"Restored — the savepoint is back in the take's buffer. Nothing was lost: commits are append-only."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2285`
+- `"Click into a column's pane first — on this board a new take lands as that column's pick."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2432`
+- `"conflict"` — `Sources/VariorumCore/Operations/Operations+Sync.swift:26`, `Sources/VariorumCore/Operations/Operations+Sync.swift:57`
+
+— 160 strings
+
+
+## Note mode row — Read
+
+- `"Name this block"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:177`
+- `"Save"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:184`
+- `"Cancel"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:188`, `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:208`
+- `"Move to block # (of \(model.rows.count))"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:191` (templated)
+- `"Move"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:198`
+- `"collapse all"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:231`
+- `"expand all"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:231`
+- `"Fold every section down to its heading — and back"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:241` (tooltip)
+- `"Unfold this section"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:274` (tooltip)
+- `"Fold this section to its heading"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:274` (tooltip)
+- `"locked"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:321`
+- `"Name…"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:363`
+- `"Jump to block in Write"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:367`
+- `"Move to top"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:369`
+- `"Move to bottom"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:371`
+- `"Move to block #…"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:373`
+- `"Delete block"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:392`
+- `"\(TrayPath.menuLabel) — \(model.tray.count) waiting"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:408` (templated)
+- `"Opens this note's tray: what it deleted, what it archived, and any originals a divide or merge preserved"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:414` (tooltip)
+- `"\(model.rows.count) blocks · \(totalWords) words"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:419` (templated)
+- `"Turn the leaf back — two pages (←)"` — `App/Variorum/Variorum/Features/ReadMode/NotePagesView.swift:133` (tooltip)
+- `"Scrub through the note — the page count is estimated until a page has been read"` — `App/Variorum/Variorum/Features/ReadMode/NotePagesView.swift:140` (tooltip)
+- `"Turn the leaf on — two pages (→)"` — `App/Variorum/Variorum/Features/ReadMode/NotePagesView.swift:145` (tooltip)
+- `"This take is locked — unlock it in Takes to write here"` — `App/Variorum/Variorum/Features/ReadMode/ReadEditPane.swift:435`
+- `"Click to write in this block right here — one block is live at a time"` — `App/Variorum/Variorum/Features/ReadMode/ReadEditPane.swift:436`
+- `"outline"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:363`
+- `"The note's index beside the page — fold it away and back"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:374` (tooltip)
+- `"edit"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:377`
+- `"read"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:378`
+- `"edit: the index beside the text — click a block to write in it. read: the note as a page, nothing to edit"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:387` (tooltip)
+- `"continuous"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:391`
+- `"pages"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:392`
+- `"Read the note as one continuous page, or as real pages with the text flowing across them"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:398` (tooltip)
+- `"Aa −"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:402`
+- `"Smaller type"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:407` (tooltip)
+- `"Aa +"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:408`
+- `"Bigger type"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:413` (tooltip)
+- `"\(words) words · about \(max(1, Int((Double(words) / 200).rounded(.up)))) minute\(words > 200 ? "s" : "")"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:990` (templated)
+- `"Click to edit this paragraph — the page turns to edit with this block live"` — `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:1091` (tooltip)
+- `"✓ chosen"` — `App/Variorum/Variorum/Features/ReadTier/ReadTakesView.swift:104`
+
+— 40 strings
+
+
+## Note mode row — Lenses
+
+- `"Restore"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:34`
+- `"This pick was archived — showing the note's take instead"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:38`
+- `"This pick was deleted — showing the note's take instead"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:39`
+- `"This pick is gone — showing the note's take instead"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:40`
+- `"This pick belongs to another block — showing the note's take instead"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:41`
+- `"Unarchive that take — this column goes back to showing it"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:47`
+- `"Put that take back — this column goes back to showing it"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:48`
+- `"Take unarchived — this lens is showing its pick again."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:53`
+- `"Take put back — this lens is showing its pick again."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:54`
+- `"Take put back — it came back archived, so this pick still shows the note's take. Restore again to unarchive it."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:59`
+- `"That take isn't here to restore — pick another one for this block."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:64`
+- `"Sealed note — takes are viewable; choosing and new takes are frozen."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:139`
+- `"Rename lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:174`
+- `"align: on"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:355`
+- `"align: off"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:355`
+- `"Locked: registered comparison rows (honest whitespace). Unlocked: each column flows as its own read."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:358` (tooltip)
+- `"Columns are ways of looking at the same note. Nothing here changes the note except ✓ (make this the note) and ⧉ (make a new note). Typing edits the take you're in — the same take, everywhere it appears."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:371`
+- `"What a lens column is — the one rule"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:380` (tooltip)
+- `"New lens — arrange existing takes"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:393`, `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:765`
+- `"A fresh way of looking that starts as a mirror of the note. Flip any block to a take that already exists — nothing new is written."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:394` (tooltip)
+- `"New lens — write new takes"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:396`, `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:768`
+- `"A fresh take on EVERY block, branched from what the note shows — a full rewrite pass beside the original. New takes are written."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:399` (tooltip)
+- `"Open “\(lens.name)”"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:404` (templated)
+- `"+ column"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:410`
+- `"You can have more views than you have takes — a column is a way of looking, not a copy."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:414` (tooltip)
+- `"＋ column"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:434`
+- `"open another reading beside this one"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:437`
+- `"A column is a way of looking, not a copy — open the note's chosen takes, a saved lens, or a fresh one, side by side with this column"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:466` (tooltip)
+- `"Drag to reorder this block — one note, one order: every column moves together"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:606` (tooltip)
+- `"take \(pos.index) of \(pos.count)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:681` (templated)
+- `"Close this column (a named lens stays saved; an unnamed one is let go)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:726` (tooltip)
+- `"the note — its chosen takes"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:745`
+- `"unnamed lens — 💾 keeps it"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:746`
+- `"saved lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:747`
+- `"Chosen (the note)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:755`, `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:792`
+- `"Replace this column with a different lens, the note itself, or a new lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:787` (tooltip)
+- `"Lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:793`, `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:795`
+- `"⧉ Duplicate as Version"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:808`
+- `"A full copy of this note, linked as a version"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:809`
+- `"Copies the note exactly as it is — takes and all — into a new linked note"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:816` (tooltip)
+- `"⧉ Make this a note"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:819`, `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:840`
+- `"New note from this column (takes ride)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:820`
+- `"New note, only what this column shows"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:823`
+- `"New note — and keep this as a lens too"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:827`
+- `"A new linked note whose text is what this column shows — no lens required (direct promote)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:834` (tooltip)
+- `"Keep this way of looking: save it as a named lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:837` (tooltip)
+- `"New note from this lens (takes ride)"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:841`
+- `"New note, only what this lens shows"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:844`
+- `"A new linked note whose text is what this lens shows"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:851` (tooltip)
+- `"Rename lens…"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:853`
+- `"Duplicate lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:859`
+- `"Delete lens"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:860`
+- `"✓ Make this the note"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:874`
+- `"The note's chosen takes become this column's — and the old chosen is kept automatically as a lens (“chosen until …”), so you can always swap back"` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:878` (tooltip)
+- `"chosen until \(formatter.string(from: now))"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:578` (templated)
+
+— 55 strings
+
+
+## Note mode row — Compare (incl. Outline note, Diff)
+
+- `"\u{201C}Related blocks only\u{201D} hid the block you were writing in — your text is saved. Turn it off to go back to it."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:654`
+- `"Order drags stay within one note here — each column reorders its own note."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:715`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1551`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1790`
+- `"Reordered. This column is following the first note's order right now — the new order shows with \u{201C}follow this note's order\u{201D} off."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:743`
+- `"Marked as versions — a connection, nothing copied. These notes share no lineage, so they align only loosely: side by side, each in its own order."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:782`
+- `"Unmarked — the notes are no longer versions of each other (both untouched; re-mark any time)."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:800`
+- `"Made \u{201C}\(result.post.title ?? "the outline")\u{201D} — close a column to open it here (compare holds four)."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:823` (templated)
+- `"Committed — an immutable savepoint of this take."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:890`
+- `"Compare with"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1062`
+- `"version of this note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1067`
+- `"follow this note's order: on"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1082`
+- `"follow this note's order: off"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1082`
+- `"On: the other columns arrange themselves to sit beside their related blocks, in this note's order (display only — nothing is moved). Off: every column flows in its own note's order."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1085` (tooltip)
+- `"lineage colors: on"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1091`
+- `"lineage colors: off"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1091`
+- `"Color rails mark related blocks across the columns — the same color means the same origin. Rails only appear where a real relationship exists."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1094` (tooltip)
+- `"related blocks only: on"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1100`
+- `"related blocks only: off"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1100`
+- `"On: every column shows only the blocks lineage connects across these notes — the unrelated stretches are hidden. Nothing is moved or deleted; this is a way of looking. Off: every block shows."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1103` (tooltip)
+- `"make outline note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1117`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1372`
+- `"A linked copy named \u{201C}outline of \u{2026}\u{201D} — each block starts as this note's first sentence per block; it opens beside the note here, registered block-by-block (R99 — the retired Outline tab's power, re-homed)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1121` (tooltip)
+- `"+ note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1194`
+- `"Open another note beside these (compare holds up to four)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1201` (tooltip)
+- `"swap"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1224`
+- `"Choose a different note for this column"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1228` (tooltip)
+- `"Close this column (the note itself is untouched)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1232` (tooltip)
+- `"unmark"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1237`
+- `"These two stop being versions of each other — the link deletes, both notes stay exactly as they are (Sitting 9, R60)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1239` (tooltip)
+- `"mark as versions"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1242`
+- `"Says 'these two notes are versions of the same piece' — a connection, not a copy. Blocks align side-by-side where LINEAGE connects them; two unrelated notes you hand-link only pair loosely. Unmarkable any time."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1246` (tooltip)
+- `"diff"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1251`
+- `"Line diff of the two notes' rendered text — savable to a file"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1253` (tooltip)
+- `"Open this note on its own — \u{2318}[ comes straight back to this comparison"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1263` (tooltip)
+- `"sealed — read-only"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1267`
+- `"related blocks only — nothing from this note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1275`
+- `"Lineage connects none of this note's blocks to the first note's, so the filter leaves this column empty. Turn \u{201C}related blocks only\u{201D} off to see it whole."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1278` (tooltip)
+- `"＋ choose a note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1294`
+- `"versions of this note come first"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1297`
+- `"Open a note beside this one — search the library; version peers rank first"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1311` (tooltip)
+- `"there is no relationship here"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1320`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1440`
+- `"No lineage and no version link connects these notes — they render plainly side by side, each in its own order, no rails, no blanks."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1323` (tooltip)
+- `"versions · no shared lineage — loose alignment"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1326`
+- `"versions"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1330`
+- `"linked by lineage"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1334`
+- `"⌕ compare with a note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1360`
+- `"search the library — it opens beside this note, related blocks tied by lineage"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1361`
+- `"a linked condensation — first sentence per block — minted and opened right here"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1373`
+- `"versions of this note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1379`
+- `"open beside ›"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1396`
+- `"\u{201C}Related blocks only\u{201D} is on, and lineage connects nothing across these notes — so there is nothing to show. Turn it off to read them side by side."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1442`
+- `"moved (order differs in this version)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1485`
+- `"Version"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1589`
+- `"this note · sealed — read-only"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1686`
+- `"this note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1686`
+- `"Drag to reorder this block within its own note"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1753` (tooltip)
+- `"This block's takes — open them right here; ✓ chooses"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1764` (tooltip)
+- `"The note shows this take"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1833`
+- `"Choose this take — the note shows it everywhere"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1834`
+- `"diff — \(leftTitle) → \(rightTitle)\n"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:93` (templated)
+- `"(whitespace ignored when matching lines)\n"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:95`
+- `"Diff — \(leftTitle) → \(rightTitle)"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:133` (templated)
+- `"Ignore whitespace"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:135`
+- `"Save…"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:140`
+- `"Save this diff as a plain-text file — e.g. to feed to an AI agent"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:141` (tooltip)
+- `"Close"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:142`
+- `"diff — \(sanitize(leftTitle)) vs \(sanitize(rightTitle)).txt"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:185` (templated)
+- `"Saved to “\(url.lastPathComponent)”."` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:190` (templated)
+- `"Save failed: \(error.localizedDescription)"` — `App/Variorum/Variorum/Features/Takes/DiffView.swift:192` (templated)
+- `"outline of \(sourceTitle)"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:227` (templated)
+
+— 68 strings
+
+
+## Note mode row — Blocks (workbench & block index)
+
+- `"the pool"` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:408`
+- `"Snippets"` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:654`
+- `"all"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:184`
+- `"with takes"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:185`
+- `"with comments"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:186`
+- `"locked"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:187`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:599`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:993`
+- `"tagged"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:188`
+- `"note order"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:204`
+- `"recently edited"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:205`
+- `"longest"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:206`
+- `"Name this block"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:309`
+- `"Save"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:316`
+- `"Cancel"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:320`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:340`
+- `"Move to block # (of \(model.rows.count))"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:323` (templated)
+- `"Move"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:330`
+- `"A way of looking — nothing moves; ↑ ↓ and drags wake only in note order"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:381` (tooltip)
+- `"Show only the blocks that carry the thing you're working on"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:387` (tooltip)
+- `"\(model.rows.count) blocks"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:393` (templated)
+- `"\(model.rows.count) blocks · \(totalWords) words"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:394` (templated)
+- `"move to top"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:436`
+- `"move to bottom"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:440`
+- `"Join the picked blocks into one, left to right — every take rides along (the carry-all chain); the originals wait in lineage"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:449` (tooltip)
+- `"tag ▾"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:477`
+- `"move out ▾"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:485`
+- `"Move the picked blocks out to a snippet group — they LEAVE this note (a block lives in one place; takes go along)"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:494` (tooltip)
+- `"archive"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:496`
+- `"Set the picked blocks aside — kept, no clock; they wait in \(TrayPath.menuLabel)"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:500` (tooltip) (templated)
+- `"clear"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:507`
+- `"Pick this block for a bulk act — ⌘-click the row does the same; ⌘⇧-click picks a whole run"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:552` (tooltip)
+- `"⑂ \(facts.map { "\($0.activeVariantCount) " } ?? "")takes"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:580` (templated)
+- `"named block"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:584`
+- `"edited \(day)"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:612` (templated)
+- `"Name…"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:644`
+- `"Jump to block in Write"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:648`
+- `"Block History…"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:649`
+- `"Move to top"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:656`
+- `"Move to bottom"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:658`
+- `"Move to block #…"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:660`
+- `"Delete block"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:679`
+- `"\(TrayPath.menuLabel) — \(model.tray.count) waiting"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:696` (templated)
+- `"High-quality door to the tray: what this note deleted (with its clock), what it archived, and the originals a divide or merge preserved"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:702` (tooltip)
+- `"⌘-click picks several · double-click opens in write"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:706`
+- `"Drag to give the block panel more or less room"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:757` (tooltip)
+- `"block \(String(format: "%02d", ordinal))"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:839` (templated)
+- `"Close the block panel"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:848` (tooltip)
+- `"words"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:859`
+- `"edited"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:861`
+- `"saved"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:863`
+- `"1 savepoint"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:863`
+- `"\(savepoints) savepoints"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:863` (templated)
+- `"tags"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:865`
+- `"comments"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:868`
+- `"✓ chosen"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:922`
+- `"take"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:923`
+- `"open in write"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:947`
+- `"see takes"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:949`
+- `"name…"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:957`
+- `"history"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:959`
+- `"1 take"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:991`
+- `"\(row.activeVariantCount) takes"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:991` (templated)
+- `"1 comment"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:992`
+- `"\(row.commentCount) comments"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:992` (templated)
+- `"(empty block)"` — `Sources/VariorumCore/Queries/TakesQueries.swift:348`, `Sources/VariorumCore/Queries/TakesQueries.swift:360`
+
+— 63 strings
+
+
+## Note mode row — Canvas
+
+- `"Save this canvas's takes as a lens"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:236`
+- `"Open a card's ‹ › switcher first — stepping and choosing act on it."` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:257`
+- `"all tags"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:299`
+- `"Show only cards wearing a tag — a LABEL filter, not a pool: pools are containers (a block lives in exactly one); tags are labels (a block can wear many). Every card stays where it lives."` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:304` (tooltip)
+- `"back to 1:1"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:309`
+- `"Leave the overview — or click any card to land on it"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:310` (tooltip)
+- `"fit all"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:312`
+- `"See every card at once — small boards scroll into view; big boards open a read-only overview"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:313` (tooltip)
+- `"hide bank"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:324`
+- `"Cards you haven't placed wait in the bank — drag one out to put it where you drop it, or drop a placed card back in"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:330` (tooltip)
+- `"click cards in reading order — \(model.orderSequence.count) numbered"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:338` (templated)
+- `"apply order"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:342`
+- `"The numbered cards lead the note in click order; everything else keeps its relative order after them (⌥⌘Z undoes)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:345` (tooltip)
+- `"cancel"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:347`
+- `"order by clicking…"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:350`
+- `"Click cards in the order the note should read — one confirm reorders the note; the spatial arrangement never moves"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:351` (tooltip)
+- `"save picks as lens…"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:359`
+- `"This canvas's viewed takes become a named lens — open it in Lenses, adopt it, or promote it later"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:360` (tooltip)
+- `"tag filter: all"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:392`
+- `"bank · \(model.bankCards.count)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:403` (templated)
+- `"click a card to number it, here or on the board"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:408`
+- `"drag a card onto the board to place it — drop a placed card here to unplace it"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:409`
+- `"hide"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:414`
+- `"every card is placed — drop one here to park it again"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:420`
+- `"Drag onto the board to place this card where you drop it"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:480` (tooltip)
+- `"Place on the board"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:502`
+- `"Tags…"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:508`, `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:996`, `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1017`
+- `"viewing — not what the note shows"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:799`
+- `"Drag here to move the card — dragging in the text selects text"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:807` (tooltip)
+- `"Block \(ordinal) of the note's current order"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:910` (tooltip) (templated)
+- `"done"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:932`
+- `"✓ choose this take (the note shows it)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:940`
+- `"⑂ see takes (\(item.block.activeVariantCount))"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:950` (templated)
+- `"take — of \(position.count)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:960` (templated)
+- `"take \(index + 1) of \(position.count)\(name)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:964` (templated)
+- `"Drag to resize this card (remembered on this Mac)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:977` (tooltip)
+- `"Reset size"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1006`, `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1027`
+- `"✓ Choose this take (the note shows it)"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1032`
+- `"Scraps"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1053`
+- `"Canvas"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1054`
+- `"Pool mode"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1092`
+- `"What this scraps area has set aside: blocks it archived, and everything of its own on the \(TrashWindow.days)-day clock"` — `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:1105` (tooltip) (templated)
+- `"Committed — an immutable savepoint of this take."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:784`
+
+— 43 strings
+
+
+## This Note's Tray & Block History
+
+- `"Block History"` — `App/Variorum/Shared/BlockHistoryFace.swift:40`
+- `"Savepoints"` — `App/Variorum/Shared/BlockHistoryFace.swift:42`
+- `"Archived takes"` — `App/Variorum/Shared/BlockHistoryFace.swift:43`
+- `"Deleted takes"` — `App/Variorum/Shared/BlockHistoryFace.swift:44`
+- `"Came from"` — `App/Variorum/Shared/BlockHistoryFace.swift:45`
+- `"Everything this block has been: each take's saved moments, the takes it set aside or deleted, and the block it came out of."` — `App/Variorum/Shared/BlockHistoryFace.swift:49`
+- `"take \(ordinal) of \(total)"` — `App/Variorum/Shared/BlockHistoryFace.swift:63` (templated)
+- `"this take"` — `App/Variorum/Shared/BlockHistoryFace.swift:63`
+- `"the take you're in"` — `App/Variorum/Shared/BlockHistoryFace.swift:66`
+- `"This block has no past yet: one take, no saved moments, nothing set aside, and nothing it came out of."` — `App/Variorum/Shared/BlockHistoryFace.swift:68`
+- `"Bring back"` — `App/Variorum/Shared/BlockHistoryFace.swift:78`
+- `"Puts this original back into the note, beside the blocks it became — it was kept whole and set aside, never deleted"` — `App/Variorum/Shared/BlockHistoryFace.swift:80`
+- `"Open this note's tray"` — `App/Variorum/Shared/BlockHistoryFace.swift:82`, `App/Variorum/Shared/BlockHistoryFace.swift:389`
+- `"Put back"` — `App/Variorum/Shared/BlockHistoryFace.swift:93`
+- `"See original"` — `App/Variorum/Shared/BlockHistoryFace.swift:94`
+- `"Take put back — it's in this block's fan again."` — `App/Variorum/Shared/BlockHistoryFace.swift:98`
+- `"Take put back — it was archived, so it's in this block's archived takes, not the fan. Unarchive it there to bring it back."` — `App/Variorum/Shared/BlockHistoryFace.swift:106`
+- `"Puts this take back among the block's archived takes, exactly as it was — it was archived when it was deleted"` — `App/Variorum/Shared/BlockHistoryFace.swift:118`
+- `"Puts this take back in the block's fan, exactly as it was — its label, its place in the fan and its savepoints all come back with it"` — `App/Variorum/Shared/BlockHistoryFace.swift:120`
+- `"Saved moment restored into this take — the moments themselves are never overwritten, so nothing was lost."` — `App/Variorum/Shared/BlockHistoryFace.swift:147`
+- `"Take unarchived — it's back in this block's fan."` — `App/Variorum/Shared/BlockHistoryFace.swift:149`
+- `"Restore"` — `App/Variorum/Shared/BlockHistoryFace.swift:150`
+- `"Unarchive"` — `App/Variorum/Shared/BlockHistoryFace.swift:151`
+- `"predates a split"` — `App/Variorum/Shared/BlockHistoryFace.swift:152`
+- `"This saved moment predates a split of this block"` — `App/Variorum/Shared/BlockHistoryFace.swift:153`
+- `"Restoring will resurrect the full pre-split text into this take's buffer — the split-off half still exists next door."` — `App/Variorum/Shared/BlockHistoryFace.swift:155`
+- `"Restore Anyway"` — `App/Variorum/Shared/BlockHistoryFace.swift:157`
+- `"Set aside, out of the fan — kept, with no clock."` — `App/Variorum/Shared/BlockHistoryFace.swift:159`
+- `"Name"` — `App/Variorum/Shared/BlockHistoryFace.swift:172`
+- `"Rename"` — `App/Variorum/Shared/BlockHistoryFace.swift:173`
+- `"Give this saved moment a name — what it was, so you can find it again. The moment's text is never editable; only its name is"` — `App/Variorum/Shared/BlockHistoryFace.swift:181`
+- `"Change this saved moment's name, or clear it. The moment's text is never editable; only its name is"` — `App/Variorum/Shared/BlockHistoryFace.swift:183`
+- `"Saved moment named \u{201C}\(name)\u{201D}."` — `App/Variorum/Shared/BlockHistoryFace.swift:190` (templated)
+- `"Name cleared — the saved moment itself is untouched."` — `App/Variorum/Shared/BlockHistoryFace.swift:193`
+- `"On the \(TrashWindow.days)-day clock. Put one back here"` — `App/Variorum/Shared/BlockHistoryFace.swift:210` (templated)
+- `"; to end a take's remaining days early, \(purgeRoad)."` — `App/Variorum/Shared/BlockHistoryFace.swift:212` (templated)
+- `"quiet"` — `App/Variorum/Shared/BlockHistoryFace.swift:267`
+- `"saved by hand"` — `App/Variorum/Shared/BlockHistoryFace.swift:267`
+- `"See the Original This Came From"` — `App/Variorum/Shared/BlockHistoryFace.swift:362`
+- `"See the original this came from\u{2026}"` — `App/Variorum/Shared/BlockHistoryFace.swift:369`
+- `"See original from \(act)\u{2026}"` — `App/Variorum/Shared/BlockHistoryFace.swift:370` (templated)
+- `"an earlier change"` — `App/Variorum/Shared/BlockHistoryFace.swift:376`
+- `"From \(act) — the original is preserved"` — `App/Variorum/Shared/BlockHistoryFace.swift:378` (templated)
+- `"From \(act) on \(when) — the original is preserved"` — `App/Variorum/Shared/BlockHistoryFace.swift:380` (templated)
+- `"Put back in note"` — `App/Variorum/Shared/BlockHistoryFace.swift:388`
+- `"This block was kept WHOLE and set aside — not deleted. It's waiting here with its takes, and Put back returns it to the note beside the blocks it became."` — `App/Variorum/Shared/BlockHistoryFace.swift:396`
+- `"This block wasn't divided or merged out of another one — there's no original standing behind it."` — `App/Variorum/Shared/BlockHistoryFace.swift:403`
+- `"This original is no longer waiting here — it may already be back in the note."` — `App/Variorum/Shared/BlockHistoryFace.swift:410`
+- `"divide"` — `App/Variorum/Shared/BlockHistoryFace.swift:415`
+- `"merge"` — `App/Variorum/Shared/BlockHistoryFace.swift:416`
+- `"extract"` — `App/Variorum/Shared/BlockHistoryFace.swift:417`
+- `"Archived"` — `App/Variorum/Shared/RecoveryCopy.swift:202`
+- `"Leaving"` — `App/Variorum/Shared/RecoveryCopy.swift:203`
+- `"Archived \u{2014} kept, no clock"` — `App/Variorum/Shared/RecoveryCopy.swift:228`
+- `"Leaving \u{2014} on the \(TrashWindow.days)-day clock"` — `App/Variorum/Shared/RecoveryCopy.swift:233` (templated)
+- `"all"` — `App/Variorum/Shared/RecoveryCopy.swift:240`
+- `"blocks"` — `App/Variorum/Shared/RecoveryCopy.swift:241`
+- `"takes"` — `App/Variorum/Shared/RecoveryCopy.swift:242`
+- `"block"` — `App/Variorum/Shared/RecoveryCopy.swift:256`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1268`
+- `"original"` — `App/Variorum/Shared/RecoveryCopy.swift:260`
+- `"take"` — `App/Variorum/Shared/RecoveryCopy.swift:265`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1269`
+- `"Everything this \(homeWord(home)) has on the \(TrashWindow.days)-day clock. Put back keeps a row; \(deleteNowVerb) ends its days early."` — `App/Variorum/Shared/RecoveryCopy.swift:281` (templated)
+- `"Kept out of this \(homeWord(home)), with no clock. Archiving a block keeps it here with no countdown."` — `App/Variorum/Shared/RecoveryCopy.swift:299` (templated)
+- `"Nothing archived from this \(homeWord(home))."` — `App/Variorum/Shared/RecoveryCopy.swift:308` (templated)
+- `"Nothing from this \(homeWord(home)) is on the clock."` — `App/Variorum/Shared/RecoveryCopy.swift:312` (templated)
+- `"No blocks from this \(homeWord(home)) are on the clock."` — `App/Variorum/Shared/RecoveryCopy.swift:319` (templated)
+- `"No takes from this \(homeWord(home)) are on the clock."` — `App/Variorum/Shared/RecoveryCopy.swift:323` (templated)
+- `"No blocks are archived from this \(homeWord(home))."` — `App/Variorum/Shared/RecoveryCopy.swift:327` (templated)
+- `"Takes aren't archived here \u{2014} an archived take stays with its block, under \(BlockHistoryPath.archivedSection) in \(BlockHistoryPath.name)."` — `App/Variorum/Shared/RecoveryCopy.swift:334` (templated)
+- `"The block you asked to see isn't in this \(homeWord(home))'s tray."` — `App/Variorum/Shared/RecoveryCopy.swift:341` (templated)
+- `"The block you asked about isn't leaving this \(homeWord(home)) — it was kept whole by a divide or merge, and it lives under \(BlockHistoryPath.cameFromSection) in \(BlockHistoryPath.name), not in the tray."` — `App/Variorum/Shared/RecoveryCopy.swift:351` (templated)
+- `"history"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:68`
+- `"the history door in the note's bottom bar"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:71`
+- `"Show the block you're in"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:93`
+- `"Your cursor has moved to a different block — this points the panel at that block's history instead, without closing it"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:95`
+- `"Each take's saved moments \u{2014} Restore loads one back into its buffer."` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:102`
+- `"open \(TrayPath.menuLabel) and choose \(TrayPath.leavingTab) \u{25B8} \(RecoveryCopy.trayFilterTakes)"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:437` (templated)
+- `"Close"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:511`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:840`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:583`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1451`
+- `"Loads this saved moment back into the take's buffer — the moment itself stays, and saving again appends"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:740` (tooltip)
+- `"Back into the block's fan, exactly as it was"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:776` (tooltip)
+- `"The whole list: what this note has set aside, and everything of its own that is on the clock"` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:861` (tooltip)
+- `"This Note's Tray"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:74`
+- `"This Scraps Area's Tray"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:84`
+- `"the tray icon at the top of the note"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:104`
+- `"the tray icon at the top of the scraps area"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:105`
+- `"Everything this view holds"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:954`
+- `"Blocks this note deleted, and originals riding a family's countdown"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:957`
+- `"Blocks archived out of this note — kept, with no clock"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:958`
+- `"Takes deleted on their own \u{2014} each on its own \(TrashWindow.days) days. They never show in the Library's Trash: a take alone is hard to place, so this is where they are audited."` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:960` (templated)
+- `"deleted"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:991`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1062`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1072`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1414`
+- `"Puts the block back where it was in this note (a released original that was deleted later has no old place left, and lands at the end)"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:993` (tooltip)
+- `"archived"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1013`, `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1067`
+- `"Kept out of the note, with no clock — Put back returns it where it stood"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1015` (tooltip)
+- `"goes"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1039`
+- `"Put back the blocks it became — or put the original itself back into this note — and it stops counting down"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1044` (tooltip)
+- `"Puts this take back exactly as it was — its label, its place in the fan and its savepoints come back with it (a take that was archived when it was deleted comes back archived)"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1126` (tooltip)
+- `"Showing the \(TrayViewModel.window) most recently \(what) — older ones aren't listed."` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1157` (templated)
+- `"Ends this \(noun)'s remaining days now. There is no putting it back afterwards."` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1273` (tooltip) (templated)
+- `"Delete for Good"` — `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1448`
+- `"\(count) quiet savepoint\(count == 1 ? "" : "s")"` — `Sources/VariorumCore/Domain/SavepointRuns.swift:101` (templated)
+- `"Savepoints Variorum took for you \u{2014} one per changed take each time you left this note, plus the idle backstop. Settings \u{25b8} Writing sets how often. \u{2318}S savepoints are never folded in here."` — `Sources/VariorumCore/Domain/SavepointRuns.swift:110`
+
+— 102 strings
+
+
+## Note Versions
+
+- `"That isn't one of this note's saved versions any more."` — `App/Variorum/Shared/VersionActs.swift:110`
+- `"This note is marked complete — unseal it to restore a version."` — `App/Variorum/Shared/VersionActs.swift:112`
+- `"There's nothing in this note to save a version of yet."` — `App/Variorum/Shared/VersionActs.swift:114`
+- `"That version is already gone."` — `App/Variorum/Shared/VersionActs.swift:116`
+- `"Versions"` — `App/Variorum/Shared/VersionsCopy.swift:27`
+- `"Versions\u{2026}"` — `App/Variorum/Shared/VersionsCopy.swift:30`
+- `"Save a Version"` — `App/Variorum/Shared/VersionsCopy.swift:35`
+- `"Versions in the note menu"` — `App/Variorum/Shared/VersionsCopy.swift:38`
+- `"Whole moments of this note, saved by hand. Opening one reads it; restoring makes the note say that again — and saves where it is now first, so none of its words are lost."` — `App/Variorum/Shared/VersionsCopy.swift:45`
+- `"No saved moments yet. \u{2318}\u{21E7}S saves the whole note as it is right now, and the moment waits here for as long as the note does."` — `App/Variorum/Shared/VersionsCopy.swift:50`
+- `"Read"` — `App/Variorum/Shared/VersionsCopy.swift:54`
+- `"Restore"` — `App/Variorum/Shared/VersionsCopy.swift:55`
+- `"Promote"` — `App/Variorum/Shared/VersionsCopy.swift:56`
+- `"Delete\u{2026}"` — `App/Variorum/Shared/VersionsCopy.swift:57`
+- `"The note goes back to saying this. It keeps its name, its books and everything pointing at it — and where it is now is saved as a new moment first."` — `App/Variorum/Shared/VersionsCopy.swift:60`
+- `"Takes this moment out of the past and makes it a note of its own, in the Library, to work with. It leaves this list for good."` — `App/Variorum/Shared/VersionsCopy.swift:65`
+- `"Sends this moment to the Trash for \(TrashWindow.days) days."` — `App/Variorum/Shared/VersionsCopy.swift:69` (templated)
+- `"1 block"` — `App/Variorum/Shared/VersionsCopy.swift:80`
+- `"\(item.blockCount) blocks"` — `App/Variorum/Shared/VersionsCopy.swift:80` (templated)
+- `"saved for you"` — `App/Variorum/Shared/VersionsCopy.swift:81`
+- `"Saved a version \u{2014} the whole note as it is now, in \(name)."` — `App/Variorum/Shared/VersionsCopy.swift:95` (templated)
+- `"The note says this again \u{2014} and where it was a moment ago is saved in \(name), so you can go back."` — `App/Variorum/Shared/VersionsCopy.swift:100` (templated)
+- `"This moment is a note of its own now, in the Library. It has left \(name)."` — `App/Variorum/Shared/VersionsCopy.swift:104` (templated)
+- `"The moment moved to the \(RecoveryCopy.trashSection) \u{2014} \(TrashWindow.days) days to put it back."` — `App/Variorum/Shared/VersionsCopy.swift:108` (templated)
+- `"Make the note say this again?"` — `App/Variorum/Shared/VersionsCopy.swift:115`
+- `"Where the note is right now is saved as a new version first, so none of its words are lost. The note keeps its name, its books and everything that points at it."` — `App/Variorum/Shared/VersionsCopy.swift:126`
+- `"Promote instead keeps everything \u{2014} it makes this moment a note of its own and deletes nothing."` — `App/Variorum/Shared/VersionsCopy.swift:146`
+- `"1 saved moment"` — `App/Variorum/Shared/VersionsCopy.swift:155`
+- `"\(cost.savedMoments) saved moments"` — `App/Variorum/Shared/VersionsCopy.swift:155` (templated)
+- `"1 deleted take"` — `App/Variorum/Shared/VersionsCopy.swift:159`
+- `"\(cost.deletedTakes) deleted takes"` — `App/Variorum/Shared/VersionsCopy.swift:159` (templated)
+- `"1 deleted comment"` — `App/Variorum/Shared/VersionsCopy.swift:163`
+- `"\(cost.deletedComments) deleted comments"` — `App/Variorum/Shared/VersionsCopy.swift:163` (templated)
+- `"1 set-aside original and its \(takesPhrase(cost.setAsideTakes))"` — `App/Variorum/Shared/VersionsCopy.swift:174` (templated)
+- `"\(count) set-aside originals and their \(takesPhrase(cost.setAsideTakes))"` — `App/Variorum/Shared/VersionsCopy.swift:175` (templated)
+- `"A version holds the words, not the history. Going with these paragraphs, and held by no version: \(list(pieces)). Nothing puts them back."` — `App/Variorum/Shared/VersionsCopy.swift:178` (templated)
+- `"1 take"` — `App/Variorum/Shared/VersionsCopy.swift:184`
+- `"\(count) takes"` — `App/Variorum/Shared/VersionsCopy.swift:184` (templated)
+- `"saved version"` — `App/Variorum/Shared/VersionsCopy.swift:199`
+- `"a version of \u{201C}\(noteTitle)\u{201D}"` — `App/Variorum/Shared/VersionsCopy.swift:203` (templated)
+- `"Version put back \u{2014} it's in its note's \(name) again."` — `App/Variorum/Shared/VersionsCopy.swift:208` (templated)
+- `"Its 1 saved version goes with it."` — `App/Variorum/Shared/VersionsCopy.swift:218`
+- `"Its \(count) saved versions go with it."` — `App/Variorum/Shared/VersionsCopy.swift:219` (templated)
+- `"Saves the whole note as it is right now (\u{2318}\u{21E7}S)"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:224` (tooltip)
+- `"Close"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:225`
+- `"Showing the \(NoteVersionsModel.window) most recent moments."` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:247` (templated)
+- `"Cancel"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:267`, `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:282`
+- `"Delete"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:279`
+- `"Reads this moment here, without changing the note"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:312` (tooltip)
+- `"Hide"` — `App/Variorum/Variorum/Features/Versions/NoteVersionsPane.swift:341`
+
+— 50 strings
+
+
+## Book surfaces — the Bookcase, shelves & wings
+
+- `"A\u{2013}Z"` — `App/Variorum/Shared/BookcaseBoard.swift:38`
+- `"last edited"` — `App/Variorum/Shared/BookcaseBoard.swift:39`
+- `"my order"` — `App/Variorum/Shared/BookcaseBoard.swift:40`
+- `"\(count) \(count == 1 ? "book" : "books")"` — `App/Variorum/Shared/BookcaseBoard.swift:73`, `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:252` (tooltip) (templated)
+- `"\(count) \(count == 1 ? "gathering" : "gatherings")"` — `App/Variorum/Shared/BookcaseBoard.swift:74` (templated)
+- `"\(count) finished"` — `App/Variorum/Shared/BookcaseBoard.swift:75` (templated)
+- `"\(count) owned"` — `App/Variorum/Shared/BookcaseBoard.swift:76` (templated)
+- `"\(count) living"` — `App/Variorum/Shared/BookcaseBoard.swift:77` (templated)
+- `"\(count) with arrivals"` — `App/Variorum/Shared/BookcaseBoard.swift:78` (templated)
+- `"unshelved"` — `App/Variorum/Shared/BookcaseBoard.swift:98`
+- `"Home"` — `App/Variorum/Shared/WingWords.swift:16`, `Sources/VariorumCore/Operations/Operations+Wing.swift:98`, `Sources/VariorumCore/Queries/WingQueries.swift:201`
+- `"A wing is a separate library in the same app — a different room in the same house. Nothing crosses between wings except what you move or copy yourself."` — `App/Variorum/Shared/WingWords.swift:20`
+- `"book"` — `App/Variorum/Shared/WingWords.swift:36`, `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:256`
+- `"books"` — `App/Variorum/Shared/WingWords.swift:36`
+- `"gathering"` — `App/Variorum/Shared/WingWords.swift:37`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:826`
+- `"gatherings"` — `App/Variorum/Shared/WingWords.swift:37`
+- `"note"` — `App/Variorum/Shared/WingWords.swift:38`
+- `"notes"` — `App/Variorum/Shared/WingWords.swift:38`
+- `"tag"` — `App/Variorum/Shared/WingWords.swift:39`
+- `"tags"` — `App/Variorum/Shared/WingWords.swift:39`
+- `"nothing"` — `App/Variorum/Shared/WingWords.swift:41`
+- `"That wing"` — `App/Variorum/Shared/WingWords.swift:53`
+- `"\(subject) still holds \(contents(c)) — move or delete them first, then the empty wing can go — or move everything to another wing."` — `App/Variorum/Shared/WingWords.swift:54` (templated)
+- `"Move Everything to Another Wing"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:142`
+- `"Moving a book to another wing acts on its row \u{2014} right-click a book on the Bookcase."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:143`
+- `"Move"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:145`, `App/Variorum/Variorum/Core/Views/WingsModel.swift:345`
+- `"Move Everything"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:146`
+- `"Move \(quoted(name)) to \(quoted(wing))?"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:161` (templated)
+- `"A gathering holds no notes \u{2014} in \(quoted(ask.wingName)) it shows the notes there that match its rule. Any tags its rule names travel by name."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:171` (templated)
+- `"It holds no notes."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:175`
+- `" (\(p.archived) archived \u{2014} \(p.archived == 1 ? "it stays" : "they stay") archived)"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:178` (templated)
+- `"Its \(p.notes) note\(p.notes == 1 ? "" : "s") come\(p.notes == 1 ? "s" : "") with it\(archived), tags and all."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:179` (templated)
+- `"\(quoted(c.title)) also leaves \(list(c.books))"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:211` (templated)
+- `"\(c.count) notes called \(quoted(c.title)) also leave \(list(c.books))"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:212` (templated)
+- `" \u{2014} a book only holds notes of its own wing."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:215`
+- `"\(p.waiting) waiting at the door will be dismissed."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:218` (templated)
+- `"It arrives unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:221`
+- `"\(quoted(ask.wingName)) already has one called \(quoted(twin)) \u{2014} both keep their names."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:223` (templated)
+- `"\(quoted(frozen.note)) is also in \(quoted(frozen.book)), which is finished \u{2014} reopen it (or unseal it) before moving \(quoted(name)) to another wing."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:232` (templated)
+- `"Moved \(quoted(name)) to \(quoted(wing))."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:237` (templated)
+- `"Moved \(quoted(name)) to \(quoted(wing)) with its \(notes) note\(notes == 1 ? "" : "s")."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:238` (templated)
+- `"Move everything in \(quoted(source)) to \(quoted(wing))?"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:244` (templated)
+- `"\(counts.prefix(1).uppercased() + counts.dropFirst()) \(single ? "moves" : "move")."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:256` (templated)
+- `"Books keep their notes, chapters and waiting notes; finished and sealed ones move as they are."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:259`
+- `"The book arrives unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:264`
+- `"Books arrive unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:265`
+- `"The gathering arrives unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:266`
+- `"Gatherings arrive unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:267`
+- `"Books and gatherings arrive unshelved."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:268`
+- `"\(p.tags.joins.count) join\(p.tags.joins.count == 1 ? "s a tag" : " tags") \(quoted(ask.wingName)) already has"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:273` (templated)
+- `"\(p.tags.made.count) \(p.tags.made.count == 1 ? "is" : "are") made there"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:277` (templated)
+- `"\(p.tags.lettingGo.count) nothing uses \(p.tags.lettingGo.count == 1 ? "is" : "are") let go \u{2014} \(names)"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:281` (templated)
+- `"Tags travel by name: \(list(parts))."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:284` (templated)
+- `"\(quoted(ask.wingName)) already has \(p.nameCollisions.count == 1 ? "a book" : "books") named \(names) \u{2014} both keep their names."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:288` (templated)
+- `"\(quoted(ask.sourceName)) keeps none of its tags, so it ends empty \u{2014} then Delete Wing\u{2026} can take it."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:293` (templated)
+- `"\(quoted(ask.sourceName)) ends empty \u{2014} then Delete Wing\u{2026} can take it."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:295` (templated)
+- `"Moved everything in \(quoted(source)) to \(quoted(wing)) \u{2014} \(quoted(source)) is empty now."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:300` (templated)
+- `"\(quoted(source)) is already empty \u{2014} there's nothing to move. Delete Wing\u{2026} can take it."` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:304` (templated)
+- `"Cancel"` — `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:329`, `App/Variorum/Variorum/Core/Views/WingBookMoves.swift:349`, `App/Variorum/Variorum/Core/Views/WingsModel.swift:351`, `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:94`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:213`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:234`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:243`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:259`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:272`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:891`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:122`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:132`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:139`
+- `"New Wing\u{2026}"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:219`
+- `"Rename Wing\u{2026}"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:220`
+- `"Delete Wing\u{2026}"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:221`
+- `"Move to Wing"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:222`
+- `"Copy to Wing"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:223`
+- `"Wings live at the top of the Bookcase \u{2014} \u{201C}Bookcase \u{00B7} \(WingWords.home) \u{25BE}\u{201D}."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:224` (templated)
+- `"Moving or copying a note to another wing acts on a note \u{2014} right-click its row in the Library or the Pool, or open it and use its note \u{25BE} menu."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:226`
+- `"Wings \u{2014} each a separate library"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:231`
+- `"New Wing"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:232`
+- `"Rename Wing"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:233`
+- `"Delete the wing \u{201C}\(name)\u{201D}?"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:235` (templated)
+- `"It's empty. Its shelves go with it; nothing else is touched."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:236`
+- `"Made the wing \u{201C}\(name)\u{201D} \u{2014} a separate library; you're in it now."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:243` (templated)
+- `"Deleted the wing \u{201C}\(name)\u{201D}."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:245` (templated)
+- `"Move \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D}?"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:248` (templated)
+- `"It leaves \(list) \u{2014} a wing is a separate library, and a book only holds notes of its own wing. Its tags come with it."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:254` (templated)
+- `"Moved \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D}."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:259` (templated)
+- `"Moved \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} it left \(left) book\(left == 1 ? "" : "s")."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:260` (templated)
+- `"Copied \u{201C}\(title)\u{201D} to \u{201C}\(wing)\u{201D} \u{2014} a separate library; the copy waits in its Pool."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:264` (templated)
+- `"\u{201C}\(title)\u{201D} is in \u{201C}\(book)\u{201D}, which is finished \u{2014} reopen it (or unseal it) before moving the note to another wing."` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:268` (templated)
+- `"a version of this note lives in another library \u{2014} the wing \u{201C}\(wing)\u{201D}"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:274` (templated)
+- `"go to \(wing) \u{203A}"` — `App/Variorum/Variorum/Core/Views/WingsModel.swift:276` (templated)
+- `"Every shelf — type to find one"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:188` (tooltip)
+- `"+ shelf"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:195`
+- `"Make a new shelf at the end of the strip"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:201` (tooltip)
+- `"All"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:218`
+- `"Every shelf, stacked in strip order — unshelved books on top"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:219` (tooltip)
+- `" · opens here"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:252` (tooltip)
+- `"order \u{00B7} \(model.orderMode.label)"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:311` (templated)
+- `"A\u{2013}Z · last edited · my order — \u{201C}my order\u{201D} is where you place books by hand"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:329` (tooltip)
+- `"details"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:332`
+- `"Hide the counts, words and status at each row's end"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:339`
+- `"Show the counts, words and status at each row's end"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:340`
+- `"Showing only: \(solo.label(count: census[solo] ?? 0)) — \(line)"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:353` (templated)
+- `"clear"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:382`
+- `"solo"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:382`
+- `"The store couldn't take it just now."` — `App/Variorum/Variorum/Features/Shelf/QuickEntryBar.swift:164`
+- `"The note wasn't created. \(reason) Your text is still here — try again in a moment."` — `App/Variorum/Variorum/Features/Shelf/QuickEntryBar.swift:165` (templated)
+- `"Set Glyph \u{2014} \u{201C}\(shelf.name)\u{201D}"` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:45` (templated)
+- `"One character, set in the strip's own ink \u{2014} no emoji, no colour."` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:46`
+- `"A glyph is one character, and never an emoji."` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:83`
+- `"No Glyph"` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:88`
+- `"Save"` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:95`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:892`
+- `"New Book"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:184`
+- `"Create Book"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:186`
+- `"Untitled"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:189`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:923`
+- `"Create Journal Book"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:206`
+- `"Untitled Journal"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:209`
+- `"It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. "` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:216` (templated)
+- `"Rename Book"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:220`
+- `"Rename"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:227`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:255`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:128`
+- `"New Shelf"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:237`, `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:492`
+- `"Make Shelf"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:239`
+- `"It joins the end of the strip. Drag a book onto its name to put it there."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:245`
+- `"Rename Shelf"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:248`
+- `"Bookcase"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:360`
+- `"Today's Entry"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:370`
+- `"+ New Book"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:374`
+- `"Nothing on this shelf yet — drag a book onto its name."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:411`
+- `"Show this shelf's books"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:471` (tooltip)
+- `"Fold this shelf away"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:471` (tooltip)
+- `"Rename\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:630`, `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:493`
+- `"Manage Notes\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:650`
+- `"Length & Extent\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:671`
+- `"Use as Daily Journal"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:679`
+- `"Export Markdown\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:696`
+- `"Export PDF\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:697`
+- `"⌘K — find anything: notes, books, commands"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:747`
+- `"⌘J today · ⌘N new note"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:751`
+- `"\(n) \(n == 1 ? "arrival" : "arrivals")"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:794` (templated)
+- `"\(gatheringCount) \(gatheringCount == 1 ? "note" : "notes")"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:811` (templated)
+- `"\(shown) \(shown == 1 ? "note" : "notes")"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:815` (templated)
+- `"\(progress.percent)% of \(progress.target.formatted())w"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:820` (templated)
+- `"living"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:828`
+- `"sealed"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:831`
+- `"finished"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:833`
+- `"owned"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:835`
+- `"Length & Extent — “\(reading.name)”"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:878` (templated)
+- `"A word target shows progress on the Bookcase; at its end, extend it or start a new book. The note cap refuses further adds when full. Blank clears."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:879`
+- `"Extents are plain positive numbers (e.g. 10000) — nothing was changed."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:896`
+- `"shelf"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:227`
+- `"A book holds the notes you put in it, in your order; a gathering shows every note its rule matches and holds none of them; a journal book holds dated entries."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:479`
+- `"Already showing \u{2014} it matches this gathering's rule."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:485`
+- `"Tagged "` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:487`
+- `" \u{2014} the gathering shows it now, as its rule matches."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:488`
+- `"Set Glyph\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:494`
+- `"Make Default"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:495`
+- `"Open on All Instead"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:498`
+- `"Move to Start"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:499`
+- `"Move to End"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:500`
+- `"Delete Shelf\u{2026}"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:501`
+- `"Move to Shelf"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:502`
+- `"Send to Top"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:503`
+- `"Send to Bottom"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:504`
+- `"Unshelved"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:505`
+- `"Open the Bookcase to arrange shelves and books."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:506`
+- `"Switch the Bookcase's order to \u{201C}my order\u{201D} to place books by hand."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:508`
+- `"Delete the shelf \u{201C}\(name)\u{201D}?"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:513` (templated)
+- `"It holds no books. No book is ever touched by deleting a shelf."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:518`
+- `"Its \(books) \(books == 1 ? "book returns" : "books return") to Unshelved — no book is touched."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:519` (templated)
+- `"Deleted the shelf \u{201C}\(name)\u{201D}."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:525` (templated)
+- `"Deleted the shelf \u{201C}\(name)\u{201D} — its \(books) \(books == 1 ? "book is" : "books are") unshelved now."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:526` (templated)
+- `"Moved \u{201C}\(book)\u{201D} to \(shelf)."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:531` (templated)
+- `"\u{201C}\(book)\u{201D} is unshelved now."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:532` (templated)
+- `"Which library you're in \u{2014} each wing is a separate library"` — `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:115` (tooltip)
+- `"Make Wing"` — `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:118`
+- `"Delete Wing"` — `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:136`
+- `"Welcome"` — `Sources/VariorumCore/Operations/Operations+Shelf.swift:118`
+- `"starred notes"` — `Sources/VariorumCore/Operations/Operations+StarredGathering.swift:25`
+
+— 168 strings
+
+
+## Book surfaces — books & gatherings (Outline · Index · Book · Read, book settings and states, membership, rules, arrivals)
+
+- `"archived"` — `App/Variorum/Shared/BookArchiveCopy.swift:23`, `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:103`
+- `"Collecting is paused while this book is archived."` — `App/Variorum/Shared/BookArchiveCopy.swift:40`
+- `"Collecting is paused while this gathering is archived \u{2014} it shows nothing until you unarchive it."` — `App/Variorum/Shared/BookArchiveCopy.swift:42`
+- `"The daily Journal can be archived, never deleted; it returns when a day arrives."` — `App/Variorum/Shared/BookArchiveCopy.swift:56`
+- `"The daily Journal can't be deleted \u{2014} archive it instead; it comes back when a day arrives."` — `App/Variorum/Shared/BookArchiveCopy.swift:62`
+- `"The Journal is back on the Bookcase."` — `App/Variorum/Shared/BookArchiveCopy.swift:67`
+- `"A book named \u{201c}\(existing)\u{201d} already exists — pick a different name, or rename that one first."` — `App/Variorum/Shared/BookNameCopy.swift:40` (templated)
+- `"this note"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:126`
+- `"edit here"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:139`
+- `"editing"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:141`
+- `"This is where a note's controls live while a book is open. Click a note in the book and they appear here."` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:144`
+- `"Write in this note, at the block you were last in"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:147`
+- `"\(index) of \(count) in this book"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:167` (templated)
+- `"\(index) of \(count)"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:167` (templated)
+- `"\(words.formatted()) word\(words == 1 ? "" : "s") \u{B7} \(blocks) block\(blocks == 1 ? "" : "s")"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:175` (templated)
+- `"\u{2442} takes on \(fannedBlocks) block\(fannedBlocks == 1 ? "" : "s")"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:189` (templated)
+- `"edited \(day(edited, now: now, calendar: calendar, locale: locale))"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:200` (templated)
+- `"saved \(day(saved, now: now, calendar: calendar, locale: locale))"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:203` (templated)
+- `"Also in \(MembershipChoiceCopy.list(books)) \u{2014} editing it here edits it there too"` — `App/Variorum/Variorum/Core/Views/OwnershipBadge.swift:39` (templated)
+- `"owned by \(quoted(book))"` — `App/Variorum/Variorum/Core/Views/OwnershipBadge.swift:43` (templated)
+- `"\(quoted(book)) owns this note \u{2014} click to open the book at it"` — `App/Variorum/Variorum/Core/Views/OwnershipBadge.swift:46` (templated)
+- `"end of the book"` — `App/Variorum/Variorum/Core/Views/PageLeafView.swift:58`, `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:144`
+- `"Remove from This Book"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:38`
+- `"Release from This Book"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:40`
+- `"release"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:46`
+- `"remove"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:46`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:65`
+- `"Take this note out of \(quoted(book)) \u{2014} it owns its notes, so the note goes back to the Pool, whole"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:50` (templated)
+- `"Take this note out of \(quoted(book)) (the note itself is untouched)"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:52` (templated)
+- `"Removed from \(quoted(book)) \u{2014} the note itself is untouched."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:60` (templated)
+- `" It\u{2019}s in the Pool now."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:61`
+- `"Released from \(quoted(book)) \u{2014} it\u{2019}s in the Pool now."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:66` (templated)
+- `"Released from \(quoted(book)) \u{2014} it stays archived."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:84` (templated)
+- `"Removed from \(quoted(book)) \u{2014} the note itself is untouched. It stays archived."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:85` (templated)
+- `"Remove the #\(path) tag"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:91` (templated)
+- `"remove #\(path)"` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:94` (templated)
+- `"\(quoted(gathering)) holds no notes \u{2014} it shows what its rule matches. Taking this tag off the note is the honest way out of it."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:97` (templated)
+- `"Removed #\(path) \u{2014} \(quoted(gathering)) still shows this note through another of its tags."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:103` (templated)
+- `"Removed #\(path) \u{2014} \(quoted(gathering)) no longer shows this note."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:105` (templated)
+- `"A note leaves a book from the book's own rows \u{2014} right-click it in the book's Index or Outline, or use the book chip on the note."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:110`
+- `"A gathering holds no notes \u{2014} take the tag off the note (the book chip on the note offers it)."` — `App/Variorum/Variorum/Core/Views/RemoveFromBook.swift:113`
+- `"Unarchive"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:51`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:392`
+- `"Notes of this book you\u{2019}ve archived \u{2014} still in the book, kept out of its Index. Unarchive one to bring it back, or take it out of the book"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:57`
+- `"Unarchive \u{2014} it comes back into the book (and the Library)"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:61`
+- `"Release"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:66`
+- `"Remove"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:66`
+- `"archived "` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:73`
+- `"and \(hidden) more archived"` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:78` (templated)
+- `"Unarchived \u{201C}\(title)\u{201D} \u{2014} it\u{2019}s back in the book."` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:82` (templated)
+- `"That note is gone \u{2014} it was deleted, so there\u{2019}s nothing to unarchive."` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:88`
+- `"Unarchiving acts on an archived note\u{2019}s row \u{2014} a book\u{2019}s archived line (atop its Index, Outline or Book view), or the Library\u{2019}s Archived view."` — `App/Variorum/Variorum/Features/BookView/BookArchived.swift:95`
+- `"Add"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:57`
+- `"Dismiss"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:58`
+- `"\(count) at the door"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:61` (templated)
+- `"Notes this book's rule brought in that are waiting for you — add each to the end of the book, or dismiss it"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:65`
+- `"Add this note to the book — it lands at the end"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:68` (tooltip)
+- `"Dismiss — don't add this note to the book"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:69` (tooltip)
+- `"arrived "` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:77`
+- `"and \(hidden) more waiting"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:82` (templated)
+- `"\u{201C}\(title)\u{201D} added to the book \u{2014} it\u{2019}s archived, so it waits in the book\u{2019}s archived line."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:93` (templated)
+- `"\u{201C}\(title)\u{201D} added at the end of the book, outside the chapters."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:97` (templated)
+- `"\u{201C}\(title)\u{201D} added at the end of the book."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:98` (templated)
+- `"This note is archived \u{2014} add it and it joins the book still archived, kept in the book\u{2019}s archived line rather than its Index"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:105`
+- `"Dismissed \u{201C}\(title)\u{201D} \u{2014} it won\u{2019}t come back on its own; add it by hand any time."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:115` (templated)
+- `"Copy this note in \u{2014} a linked copy joins the book at the end; the original stays where it lives"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:122`
+- `"Move this note in \u{2014} it leaves its other books and lives only here, at the end"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:125`
+- `"owned by \u{201C}\(book)\u{201D}"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:129` (templated)
+- `"also in "` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:131`
+- `"Copied \u{201C}\(title)\u{201D} in at the end of the book \u{2014} a linked copy; the original stays where it was."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:136` (templated)
+- `"Moved \u{201C}\(title)\u{201D} in at the end of the book."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:143` (templated)
+- `"Moved \u{201C}\(title)\u{201D} in at the end of the book \u{2014} it left "` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:144` (templated)
+- `"This book"` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:157`
+- `"\(name) is full \u{2014} its cap is \($0) notes."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:163` (templated)
+- `"\(name) is at its note cap."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:164` (templated)
+- `" Raise the note cap in the book\u{2019}s settings (the gear), then add it."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:165`
+- `"\(name) is sealed \u{2014} the book is done, so nothing new joins. Unseal it in the book\u{2019}s settings (that reopens it too) to add notes."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:169` (templated)
+- `"\(name) is finished \u{2014} its table of contents is done, so nothing new joins. Reopen it in the book\u{2019}s settings to add notes."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:171` (templated)
+- `"That note isn\u{2019}t waiting at the door any more \u{2014} it was already judged."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:174`
+- `"That note is gone \u{2014} it was deleted, so there\u{2019}s nothing to add."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:177`
+- `"This book is gone \u{2014} it was deleted."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:179`
+- `"Only a book has a door \u{2014} a gathering shows its matches without holding them."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:181`
+- `"Arrivals wait atop a book\u{2019}s Index and Book views \u{2014} open the book to judge them."` — `App/Variorum/Variorum/Features/BookView/BookArrivals.swift:190`
+- `"Save This Filter as a Gathering\u{2026}"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:97`
+- `"The filter lives on a book's Index \u{2014} choose a tag there, then save it as a gathering."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:99`
+- `"+ tag"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:102`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:66`
+- `"with"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:103`
+- `"without"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:104`
+- `"clear"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:105`
+- `"save as gathering\u{2026}"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:106`
+- `"match all"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:109`
+- `"match any"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:109`
+- `"all of them"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:111`
+- `"any of them"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:112`
+- `"Show only this book's notes with (or without) a tag or the star \u{2014} a way of looking: no note leaves the book."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:114`
+- `"Stop filtering by this"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:116` (tooltip)
+- `"Save This Filter as a Gathering"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:126`
+- `"It shows the notes this book gathers (\(associationWords ?? "its rule")) that also match \(filterWords) \u{2014} and keeps up as tags change. No note moves."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:136` (templated)
+- `"It shows the notes tagged \(associationWords ?? "as this book tags them") \u{2014} what notes written here wear \u{2014} that also match \(filterWords). No note moves."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:139` (templated)
+- `"This book neither gathers by a tag nor tags what's written in it, so the gathering shows every note in this library that matches \(filterWords) \u{2014} not only this book's. No note moves."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:145` (templated)
+- `"Saved \u{201C}\(name)\u{201D} as a gathering \u{2014} it's on the Bookcase, unshelved."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:152` (templated)
+- `"Save"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:283`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:479`
+- `"Cancel"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:291`, `App/Variorum/Variorum/Features/BookView/BookView.swift:384`, `App/Variorum/Variorum/Features/BookView/BookView.swift:398`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:405`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:550`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:814`, `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:174`, `App/Variorum/Variorum/Features/Readings/MintGatheringSheet.swift:62`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:477`
+- `"group"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:94`
+- `"chapters"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:95`
+- `"none"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:96`
+- `"a tag family"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:97`
+- `"other"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:102`
+- `"Group this Index by the book's chapters, by a tag family, or not at all \u{2014} a way of looking: nothing is written, and the book's own chapters are untouched."` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:105`
+- `"unfiled"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:289`, `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:70`, `App/Variorum/Variorum/Features/BookView/BookView.swift:654`, `App/Variorum/Variorum/Features/BookView/BookView.swift:1477`
+- `"\(notes) shown"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:331` (templated)
+- `"\(notes) note\(notes == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:331`, `App/Variorum/Variorum/Features/BookView/BookView.swift:2724` (templated)
+- `"\(chapters) chapter\(chapters == 1 ? "" : "s") · \(count)"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:334` (templated)
+- `"showing the first \(BookViewModel.entryWindow) notes"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:817` (templated)
+- `"fold all"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:854`
+- `"unfold"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:854`
+- `"Fold every chapter down to its heading — and back"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:858` (tooltip)
+- `"Unfold this chapter"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:876` (tooltip)
+- `"Fold this chapter to its heading"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:876` (tooltip)
+- `"Show in Outline"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:932`
+- `"Open in the full editor"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:933`
+- `"Click to show this note in the pane — then click into any of its blocks to write"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:1365`
+- `"Click a block to write in it right here — one block is live at a time"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:1561` (tooltip)
+- `"Book Panel"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:49`
+- `"Book"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:50`, `App/Variorum/Variorum/Features/BookView/BookView.swift:484`
+- `"Show this note's book beside the draft \u{2014} its chapters and notes; click one to open the book there"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:52` (tooltip)
+- `"Open a note that is in a book and its book shows beside it."` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:54`
+- `"Move to Chapter"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:57`
+- `"No Chapter"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:58`
+- `"Move Up"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:59`
+- `"Move Down"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:60`
+- `"Move Chapter Up"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:61`
+- `"Move Chapter Down"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:62`
+- `"A note's place in its book is changed from the book's rows \u{2014} the Book Panel beside the note, or the book's own Outline and Index."` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:64`
+- `"Close"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:68`, `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:425`
+- `"This note is in no book \u{2014} it lives in the Pool."` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:71`
+- `"Open \(quoted(book)) at this note"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:72` (tooltip) (templated)
+- `"This note is in more than one book \u{2014} choose which one shows here"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:73` (tooltip)
+- `"The note you are writing"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:74` (tooltip)
+- `"Showing the first \(count) notes \u{2014} open the book for the rest."` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:76` (templated)
+- `"appears in 1 gathering"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:84`
+- `"appears in \(count) gatherings"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:85` (templated)
+- `"Gatherings show notes their rule matches \u{2014} they hold nothing. Click to see which."` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:88` (tooltip)
+- `"Open \(quoted(name)) at this note"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:90` (tooltip) (templated)
+- `"owned"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:99`
+- `"sealed"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:100`
+- `"finished"` — `App/Variorum/Variorum/Features/BookView/BookPanelModel.swift:101`
+- `"Collecting"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:75`
+- `"State"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:76`
+- `"Gathers from:"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:77`
+- `"a rule this version can\u{2019}t read"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:79`
+- `"Edit\u{2026}"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:81`
+- `"Notes an owned book holds:"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:82`
+- `"Show or Hide Owned Notes"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:85`
+- `"blank = none"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:88`
+- `"Book Settings"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:90`
+- `"Gathering Settings"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:90`
+- `"Book Settings\u{2026}"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:95`
+- `"A book's settings live on the book \u{2014} right-click it on the Bookcase, or use the gear on its masthead."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:98`
+- `"Date-Stamped Entries"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:104`
+- `"Entries:"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:105`
+- `"date-stamped, named by their day, sorted by date"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:106`
+- `"on"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:108`
+- `"off"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:108`
+- `"Notes written here get the day's date, are named by it until you title them, and the book sorts by date. Turning it off never changes an entry you already have."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:110`
+- `"not "` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:127`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:589`
+- `"as the app does (hidden)"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:190`
+- `"as the app does (shown)"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:190`
+- `"show them"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:191`
+- `"hide them"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:192`
+- `"Finished means the table of contents is done \u{2014} the writing inside can still change. A finished book opens as pure text."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:198`
+- `"A sealed book stays finished \u{2014} Unseal reopens it."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:201`
+- `"Sealed means the book is done."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:202`
+- `"Sealed \u{2014} the book is done; no note in it can change."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:203`
+- `"An owned book is the only place its notes live."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:204`
+- `"This book owns its notes \u{2014} each one lives only here."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:205`
+- `"Finished"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:206`
+- `"Archiving keeps it forever \u{2014} off the Bookcase, under Archived, with no countdown."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:212`
+- `"Archived \u{2014} kept under Archived, off the Bookcase."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:213`
+- `"Name"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:227`
+- `"Word target"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:228`
+- `"Note cap"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:229`
+- `"Extents are plain positive numbers (e.g. 10000) — nothing was changed."` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:672`
+- `"No deleted chapter to restore."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:185`
+- `"Today's entry opened, but this book is sealed — it wasn't added. Unseal the book in its settings (that reopens it too), or pick a new daily journal (Use as Daily Journal)."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:611`
+- `"Today's entry opened, but this book is finished — it wasn't added. Reopen the book in its settings, or pick a new daily journal (Use as Daily Journal)."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:615`
+- `"Today's entry opened, but this book is at its note cap — it wasn't added. Extend the cap in the book's settings."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:620`
+- `"Today's entry opened, but “\(bookName)” is sealed — it wasn't added. Pick a new daily journal from a book's menu on the Bookcase (Use as Daily Journal), or unseal “\(bookName)” (that reopens it too)."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:772` (templated)
+- `"Today's entry opened, but “\(bookName)” is finished — it wasn't added. Pick a new daily journal from a book's menu on the Bookcase (Use as Daily Journal), or reopen “\(bookName)”."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:777` (templated)
+- `"Today's entry opened, but “\(bookName)” is at its note cap — it wasn't added. Extend the cap or start a new daily journal (Use as Daily Journal in a book's menu on the Bookcase)."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:781` (templated)
+- `"Today's entry opened, but “\(bookName)” is a gathering — it shows what its rule matches and can't hold entries. Pick a book with Use as Daily Journal."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:786` (templated)
+- `"Today's entry opened, but it wasn't added to a daily journal book. Pick one with Use as Daily Journal."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:806`
+- `"Today's entry opened \u{2014} it's waiting at \(quoted(journal))'s door, "` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:857` (templated)
+- `"because \(quoted(owner)) owns it. Open \(quoted(journal)) to copy it in or dismiss it."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:859` (templated)
+- `"because \(quoted(journal)) owns its notes and the entry also lives in \(MembershipChoiceCopy.list(elsewhere)). Open \(quoted(journal)) to copy it in, move it in, or dismiss it."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:863` (templated)
+- `"because it already lives in another book and one of them owns its notes. Open \(quoted(journal)) to judge it."` — `App/Variorum/Variorum/Features/BookView/BookStructureModel.swift:867` (templated)
+- `"New Chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:378`
+- `"Create"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:380`, `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:111`
+- `"Rename Chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:387`
+- `"Rename"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:394`
+- `"book"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:464`, `App/Variorum/Variorum/Features/BookView/BookView.swift:1417`, `App/Variorum/Variorum/Features/BookView/BookView.swift:2722`
+- `" — collecting, finish, seal, own, length, rename"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:476`
+- `"Outline"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:482`
+- `"Index"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:483`
+- `"Read"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:485`
+- `"Scroll"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:497`
+- `"Pages"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:498`
+- `"Read the book as one continuous scroll, or as real pages with the text flowing across them"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:502` (tooltip)
+- `"The book's writing surface — every note in one column"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:547`
+- `"The book's index — chapters and notes beside the whole text"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:548`
+- `"The two-up spread — each page a whole note"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:549`
+- `"Read the book as pure text"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:550`
+- `"+ new chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:769`, `App/Variorum/Variorum/Features/BookView/BookView.swift:834`
+- `"restore deleted chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:780`
+- `"+ new entry"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:792`, `App/Variorum/Variorum/Features/BookView/BookView.swift:1535`
+- `"+ new note"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:806`
+- `"A new note born inside this book — no drag needed"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:816`, `App/Variorum/Variorum/Features/BookView/BookView.swift:1560` (tooltip)
+- `"Chapters need a book that holds its notes — this offers to bind the gathering into one, keeping every note it shows; "` — `App/Variorum/Variorum/Features/BookView/BookView.swift:843` (tooltip)
+- `"it keeps collecting after."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:849`
+- `"after that it collects only when it catches up."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:850`
+- `"This book's order (\(stored))"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1065`, `App/Variorum/Variorum/Features/BookView/BookView.swift:1067` (templated)
+- `"Save as This Book's Order"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1084`
+- `"order · \(current ?? stored)"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1095` (templated)
+- `"Look at this book in a different order — nothing is written until you save it as the book's own order."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1105` (tooltip)
+- `"Rename…"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1355`
+- `"Delete Chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1374`
+- `"Restore Last Deleted Chapter"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1377`
+- `"expand all"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1428`
+- `"collapse all"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1432`
+- `"Showing the first \(BookViewModel.entryWindow) notes — the rest of this book isn't loaded yet (windowing arrives with Phase 12)."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1523` (templated)
+- `"+ new note in this book"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1548`
+- `"Drag to reorder this chapter — here or in the navigator (right-click for Move Up / Move Down)"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1777` (tooltip)
+- `"Put this chapter at the top of the page"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1795` (tooltip)
+- `"Collapse this note back to its card"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2489` (tooltip)
+- `"open ↗"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2503`, `App/Variorum/Variorum/Features/BookView/BookView.swift:2558`, `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:332`
+- `"Open this note in the full editor (Write · Takes · Lenses · …)"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2509`, `App/Variorum/Variorum/Features/BookView/BookView.swift:2564`, `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:338` (tooltip)
+- `"Unfold this note in place — write in it right here"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2544` (tooltip)
+- `"Click to open this note in the full editor; ▸ unfolds it here"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2590`
+- `"gathering"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2722`
+- `"\(chapters) chapter\(chapters == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2723` (templated)
+- `"gathering \u{2014} it shows every note its rule matches and holds none of them. A note comes and goes with its tags and its star."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:2736`
+- `"Which books hold this note — add it to one, or diverge a copy"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:102` (tooltip)
+- `"Open “\(book.name)” at this note"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:133` (tooltip) (templated)
+- `"diverge"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:141`
+- `"Add to Book"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:177`
+- `"\(BookArchiveCopy.name(book)) (by tagging)"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:190` (templated)
+- `"Duplicate as Version"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:213`
+- `"A full copy — takes and all — as a new note, linked to this one as a version"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:216` (tooltip)
+- `"in \(name)"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:278` (templated)
+- `"in no book"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:305`
+- `"in \(bookNames.count) books"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:307` (templated)
+- `"This note is in no book \u{2014} it lives in the Pool"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:316`
+- `" \u{2014} and appears in \(gatheringsWord(g)):"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:319` (templated)
+- `"This note is in \(booksWord(b)):"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:320` (templated)
+- `"This note is in \(booksWord(b)) and appears in \(gatheringsWord(g)):"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:321` (templated)
+- `"\(n) book\(n == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:325` (templated)
+- `"\(n) gathering\(n == 1 ? "" : "s")"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:326` (templated)
+- `"Editing here edits the note everywhere it appears. To make a separate note that can diverge:"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:352`
+- `"To make a separate, linked copy of this note:"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:354`
+- `"Already collected — it matches “\(book.name)”'s filter."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:406` (templated)
+- `"Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:407` (templated)
+- `"Diverge for This Book"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:515`
+- `"Diverge for \u{201c}\(book)\u{201d}"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:519` (templated)
+- `"Make a copy that can diverge and put it in \u{201c}\(book)\u{201d} in this note's place — the original stays in its other books and in the library"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:522` (templated)
+- `"Diverged — \u{201c}\(book)\u{201d} holds the copy now, in the same place; the original is untouched elsewhere. \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:527` (templated)
+- `"Open the Copy"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:537`
+- `"Open the Copy in \u{201c}\(book)\u{201d}"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:538` (templated)
+- `"\u{201c}\(book)\u{201d} collects by its tags, so there is no membership to move — a copy would only appear there if it carried the same tags. Duplicate as Version, then tag the copy."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:546` (templated)
+- `"that book"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:567`
+- `"\(book) is sealed — unseal it (its settings) to change what's in it; unsealing reopens it too."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:571` (templated)
+- `"\(book) is finished — reopen it (its settings) to change what's in it."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:573` (templated)
+- `"\(book) is at its note cap — extend the cap in its settings."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:575` (templated)
+- `"This note is already in \(book)."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:577` (templated)
+- `"This note is sealed — unseal it first."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:579`
+- `"no pages"` — `App/Variorum/Variorum/Features/BookView/PagedReadModel.swift:344`
+- `"pages \(first.pageNumber)–\(second.pageNumber)"` — `App/Variorum/Variorum/Features/BookView/PagedReadModel.swift:348` (templated)
+- `"page \(first.pageNumber)"` — `App/Variorum/Variorum/Features/BookView/PagedReadModel.swift:350` (templated)
+- `"\(numbers) of \(approx)\(index.totalPages)"` — `App/Variorum/Variorum/Features/BookView/PagedReadModel.swift:352` (templated)
+- `"Turn the leaf back — two pages (←)"` — `App/Variorum/Variorum/Features/BookView/PagedReadView.swift:177` (tooltip)
+- `"Scrub through the book — the page domain is estimated until a page has been read"` — `App/Variorum/Variorum/Features/BookView/PagedReadView.swift:184` (tooltip)
+- `"Turn the leaf on — two pages (→)"` — `App/Variorum/Variorum/Features/BookView/PagedReadView.swift:190` (tooltip)
+- `"Turn the leaf back — two notes at once (←)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:164` (tooltip)
+- `"Nudge back by ONE note — re-pair the two pages (⌥←)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:169` (tooltip)
+- `"Jump through the book — the scrub domain is the note list, one page per note"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:184` (tooltip)
+- `"Nudge on by ONE note — re-pair the two pages (⌥→)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:190` (tooltip)
+- `"Turn the leaf on — two notes at once (→)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:195` (tooltip)
+- `"Write"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:213`
+- `"Takes"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:214`
+- `"How the page you're writing in presents itself — the ordinary Write editor, or that note's takes"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:218` (tooltip)
+- `"page \(left)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:240` (templated)
+- `"pages \(left)–\(left + 1)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:240` (templated)
+- `"\(numbers) of \(total)"` — `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:241` (templated)
+- `"Manual order"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:45`
+- `"Entry date ↑"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:46`
+- `"Entry date ↓"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:47`
+- `"Created ↑"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:48`
+- `"Created ↓"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:49`
+- `"Last touched ↓"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:50`
+- `"Major revision ↓"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:51`
+- `"book's order"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:67`
+- `"as collected"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:70`
+- `"Bind into a Book\u{2026}"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:167`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:286`
+- `"Make a Book from This Gathering\u{2026}"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:168`
+- `"Bind \u{201C}\(name)\u{201D} into a book?"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:172` (templated)
+- `"Bind \u{201C}\(name)\u{201D} into a book to add chapters?"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:173` (templated)
+- `"Bind into a Book"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:179`
+- `"Bind & Add Chapter"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:180`
+- `"A gathering shows every note its rule matches and holds none of them, so it can\u{2019}t be arranged by hand. Bind it into a book to take it in hand: "` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:191`
+- `"Chapters need a book that holds its notes \u{2014} a gathering only shows the notes its rule matches. Bind it into a book and the chapter follows: "` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:194`
+- `"it shows no notes right now, so the book starts empty"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:198`
+- `"the 1 note it shows becomes a member, ready to reorder and give chapters"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:199`
+- `"the \(count) notes it shows become members, in the order you\u{2019}re looking at them, ready to reorder and give chapters"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:201` (templated)
+- `"It stays the same book on your Bookcase \u{2014} same name, same star. Its rule names no tag or star, so no tagging brings new notes in: it collects only when it catches up (reopened, restored, or its rule edited)."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:224`
+- `"It stays the same book on your Bookcase \u{2014} same name, same star \u{2014} and it keeps collecting after you bind it: new notes that match its rule join at the end."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:232`
+- `"1 note"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:238`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:348`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:321`, `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:66`
+- `"\(count) notes"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:238`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:348`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:321`, `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:66` (templated)
+- `"1 came in as a copy"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:240`
+- `"\(copied) came in as copies"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:240` (templated)
+- `"1 was left out \u{2014} another book owns it"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:243`
+- `"\(leftOut) were left out \u{2014} other books own them"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:244` (templated)
+- `"\u{201C}\(name)\u{201D} is a book now \u{2014} \(notes) bound in, in the order you had them\(aside). "` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:247` (templated)
+- `"It keeps collecting."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:249`
+- `"It collects only when it catches up."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:249`
+- `"These notes belong to books that own them, so they can\u{2019}t simply join this one:"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:262`
+- `"\(note.title) \u{2014} owned by \u{201C}\(note.owner)\u{201D}"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:264` (templated)
+- `"leave them out"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:266`
+- `"copy them in"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:267`
+- `"Left out, they won\u{2019}t be in the book \u{2014} they stay where they are."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:271`
+- `"Copied in, each gets its own copy here (tags and all); the originals stay with the books that own them."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:273`
+- `"Turn into a book to arrange by hand?"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:285`
+- `"Make a book from \u{201C}\(name)\u{201D}"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:289` (templated)
+- `"A new book with the same rule: the notes it matches now join it. Its rule names no tag or star, so later matches join only when it catches up. The gathering stays as it is."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:304`
+- `"A new book with the same rule: the notes it matches now join it, and new matches keep joining. The gathering stays as it is."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:308`
+- `"This gathering has no rule, so it shows nothing. The new book starts empty and collects nothing by itself until you give it a rule (Edit Rule\u{2026}). The gathering stays as it is."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:315`
+- `"This gathering\u{2019}s rule is stored in a form this version can\u{2019}t read, so the new book starts empty and won\u{2019}t collect until the rule is fixed. The gathering stays as it is."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:319`
+- `"Make Book"` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:327`
+- `"Prefilled with the tags its rule asks for \u{2014} change them as you like, or remove them all."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:331`
+- `"Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined; it collects only when it catches up (its rule names no tag or star)."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:350` (templated)
+- `"Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined, and it keeps collecting."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:353` (templated)
+- `"Made \u{201C}\(name)\u{201D} \u{2014} it starts empty; give it a rule (Edit Rule\u{2026}) and it will collect."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:355` (templated)
+- `"Made \u{201C}\(name)\u{201D} \u{2014} it starts empty and won\u{2019}t collect until the rule is fixed."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:358` (templated)
+- `"Only a gathering binds into a book \u{2014} right-click one on the Bookcase."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:364`
+- `"A book is made from a gathering \u{2014} right-click one on the Bookcase."` — `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:366`
+- `"Finish"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:175`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:206`
+- `"Reopen"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:176`
+- `"Seal\u{2026}"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:177`
+- `"Unseal"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:178`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:279`
+- `"Own Its Notes\u{2026}"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:179`
+- `"Stop Owning"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:180`
+- `"Delete Book"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:181`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:339`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:352`
+- `"Delete this gathering\u{2026}"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:183`
+- `"A book's state lives on the book \u{2014} right-click it on the Bookcase, or open its settings (the gear)."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:186`
+- `"\(count) waiting at the door will be dismissed."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:195` (templated)
+- `"Finish \(quoted(name))?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:204` (templated)
+- `"Sealed means the book is done: no note in it can change until you unseal it."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:213`
+- `"Sealing finishes the book too."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:214`
+- `"It owns its notes, so nothing needs copying."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:215`
+- `"None of its notes lives in another book, so nothing needs copying."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:216`
+- `"These notes also live in other books, so each gets its own copy here, sealed with the book \u{2014} the originals stay where they are, still editable:"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:218`
+- `"Seal \(quoted(name))?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:251` (templated)
+- `"Seal"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:254`
+- `"\(fork.title) \u{2014} also in "` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:259` (templated)
+- `"Unsealing reopens the book too: its notes can change again, and it is no longer finished."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:266`
+- `"Anything that matched its rule while it was sealed waits at Arrivals."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:269`
+- `"A note you sealed on its own stays sealed."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:270`
+- `"Unseal \(quoted(name))?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:278` (templated)
+- `"An owned book is the only place its notes live \u{2014} put one of them in another book and you'll get a copy."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:286`
+- `"These notes also live in other books. Each gets its own copy here; the originals stay in their other books:"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:289`
+- `"Make \(quoted(name)) own its notes?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:297` (templated)
+- `"Own Its Notes"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:300`
+- `"Delete \(quoted(name))?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:308`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:331`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:350`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:356` (templated)
+- `"It goes to the Trash \u{2014} Put back returns it for \(TrashWindow.days) days."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:310`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:324` (templated)
+- `"No note is touched: a gathering holds none."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:311`
+- `"Delete Gathering"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:313`
+- `"Deleting a plain book never touches a note."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:334`
+- `"Deleting a plain book never touches a note \u{2014} its \(notes(count)) stay where they are, in the Library and any other book."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:335` (templated)
+- `"\(quoted(name)) owns its notes, and holds none right now."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:351`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:417` (templated)
+- `"\(quoted(name)) owns its notes. Delete the book only, and its \(notes(count)) go back to the Pool \u{2014} or delete the book and its \(notes(count)) together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:358` (templated)
+- `"Either way the book goes to the Trash for \(TrashWindow.days) days \u{2014} and Put back returns whatever went in together, together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:361` (templated)
+- `"Delete Book Only"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:364`
+- `"Delete Book and Its Note"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:366`
+- `"Delete Book and Its \(count) Notes"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:366` (templated)
+- `" Its notes are untouched."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:371`
+- `"Deleted \(quoted(name)) \u{2014} it\u{2019}s in the Trash; its \(notes(count)) \(count == 1 ? "is" : "are") in the Pool now."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:378` (templated)
+- `"Deleted \(quoted(name)) and its \(notes(count)) \u{2014} they\u{2019}re in the Trash together; Put back on the book returns them together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:384` (templated)
+- `"Archive"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:391`
+- `"Either way it's kept under Archived, with no countdown \u{2014} and Unarchive brings back whatever went in together, together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:404`
+- `"Archive \(quoted(name))?"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:415`, `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:424` (templated)
+- `"It's kept under Archived, with no countdown \u{2014} Unarchive brings it back."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:418`
+- `"Archive Book"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:420`
+- `"\(quoted(name)) owns its notes. Archive the book only, and its \(notes(count)) stay in the Library \u{2014} still its own \u{2014} or archive the book and its \(notes(count)) together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:426` (templated)
+- `"Archive Book Only"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:431`
+- `"Archive Book and Its Note"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:433`
+- `"Archive Book and Its \(count) Notes"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:433` (templated)
+- `"Archived \(quoted(name)) \u{2014} it\u{2019}s kept under Archived"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:439` (templated)
+- `", and it comes back when a day arrives."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:440`
+- `" and shows nothing until you unarchive it."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:441`
+- `"; its notes stay where they are."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:442`
+- `"Archived \(quoted(name)) and its \(notes(count)) \u{2014} they\u{2019}re kept under Archived together; Unarchive on the book brings them back together."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:447` (templated)
+- `"Unarchived \(quoted(name)) \u{2014} it\u{2019}s back on the Bookcase."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:454` (templated)
+- `" Its note came back with it."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:457`
+- `" Its \(returned) notes came back with it."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:457` (templated)
+- `" \(waiting) waiting at Arrivals."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:459` (templated)
+- `"\u{2713} sealed"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:471`
+- `"\u{2713} finished"` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:471`
+- `"Finished \(quoted(name)) \u{2014} its table of contents is done; the writing inside can still change."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:479` (templated)
+- `"Reopened \(quoted(name))."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:483` (templated)
+- `"Sealed \(quoted(name)) \u{2014} the book is done."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:486` (templated)
+- `" 1 shared note got its own copy here."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:489`
+- `" \(forks) shared notes got their own copies here."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:490` (templated)
+- `"Unsealed \(quoted(name)) \u{2014} it's open again."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:495` (templated)
+- `"\(quoted(name)) owns its notes now."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:499` (templated)
+- `" 1 note that lived elsewhere got its own copy here."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:502`
+- `" \(copies) notes that lived elsewhere got their own copies here."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:503` (templated)
+- `"\(quoted(name)) no longer owns its notes \u{2014} they stay, and can live in other books too."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:508` (templated)
+- `"Deleted \(quoted(name)) \u{2014} it's in the Trash."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:513` (templated)
+- `"\(quoted(name)) is sealed \u{2014} unseal it first (that reopens it too)."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:525` (templated)
+- `"\(quoted(name)) is finished \u{2014} reopen it first."` — `App/Variorum/Variorum/Features/Readings/BookStateDoors.swift:526` (templated)
+- `"Duplicate Book\u{2026}"` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:32`
+- `"Duplicate with Copies\u{2026}"` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:34`
+- `"Duplicate \(quoted(name))"` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:39` (templated)
+- `"With copies of its notes"` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:44`
+- `"\(quoted(name)) owns its notes, so its duplicate carries copies of them \u{2014} each linked to its original, which stays here."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:50` (templated)
+- `"Each note gets its own linked copy in the duplicate; the originals stay where they are."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:53`
+- `"The duplicate holds the same notes \u{2014} editing a note in either book edits it in both. Check the box for copies that can go their own way."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:56`
+- `"It\u{2019}s a new book with this one\u{2019}s settings and chapters \u{2014} not owned, not finished, unshelved."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:61`
+- `"\(quoted(name)) \u{2014} \(count == 1 ? "1 copy" : "\(count) copies")."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:71` (templated)
+- `"\(quoted(name)) \u{2014} \(notes(count)), the same notes."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:72` (templated)
+- `"A book duplicates from its row's menu on the Bookcase \u{2014} a gathering is made again from its rule instead."` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:76`
+- `"Duplicate"` — `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:177`
+- `"Notes in “\(reading.name)”"` — `App/Variorum/Variorum/Features/Readings/ReadingViews.swift:49` (templated)
+- `"Ordered by the book's sort — manual reorder applies in Manual order."` — `App/Variorum/Variorum/Features/Readings/ReadingViews.swift:55`
+- `"Add Note…"` — `App/Variorum/Variorum/Features/Readings/ReadingViews.swift:88`
+- `"Done"` — `App/Variorum/Variorum/Features/Readings/ReadingViews.swift:122`
+- `"Operation failed: \(error)"` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:164` (templated)
+- `"This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:172`
+- `"That note is already in this book."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:174`
+- `"This book is at its note limit."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:176`
+- `"That's already a book — only a gathering binds into one."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:184`
+- `"Only hand-shaped (curated) books hold a note list you pick by hand."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:185`
+- `"That note isn't in this book."` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:187`
+- `"The operation was refused: \(op)"` — `App/Variorum/Variorum/Features/Readings/ReadingsViewModel.swift:196` (templated)
+- `"Edit Rule…"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:44`
+- `"A rule belongs to a book or a gathering \u{2014} right-click one on the Bookcase to edit it."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:47`
+- `"Rule \u{2014} \u{201C}\(name)\u{201D}"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:49` (templated)
+- `"Shows every note that matches:"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:51`
+- `"Collects every note that matches:"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:52`
+- `"No rule \u{2014} this gathering shows nothing until it has one."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:58`
+- `"No rule yet \u{2014} this book collects nothing by itself."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:60`
+- `"all of these"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:62`
+- `"any of these"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:63`
+- `"not"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:64`
+- `"+ starred"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:67`
+- `"+ group"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:68`
+- `"all of…"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:69`
+- `"any of…"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:70`
+- `"\u{2605} starred"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:71`
+- `"(deleted tag)"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:72`
+- `"profile is \u{201C}\(profile)\u{201D}"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:80` (templated)
+- `"entry date from \(day)"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:81` (templated)
+- `"entry date to \(day)"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:82` (templated)
+- `"This rule carries an old date/profile term \u{2014} it keeps working exactly as it is, but it can\u{2019}t be edited here."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:88`
+- `"This rule is stored in a form this version can\u{2019}t read, so it can\u{2019}t be edited here \u{2014} nothing about it will be changed."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:91`
+- `"New matches:"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:95`
+- `"join quietly at the end"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:96`
+- `"wait at Arrivals"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:97`
+- `"Notes written here are tagged:"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:98`
+- `"nothing"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:100`
+- `"A gathering needs a rule."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:104`
+- `"Create Gathering"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:107`
+- `"Add a tag or \u{2605} starred \u{2014} a gathering is made from its rule, and shows every note that matches it."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:109`
+- `"Saved the rule for \u{201C}\(name)\u{201D}."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:114` (templated)
+- `"the 1 current member"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:118`
+- `"the \(count) current members"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:118` (templated)
+- `"Also tag \(members) with \(hashtags(paths)) now?"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:119` (templated)
+- `"Tag Them"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:121`
+- `"Tagged \(count) member\(count == 1 ? "" : "s") with \(hashtags(paths))."` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:124` (templated)
+- `"Untitled"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:312`
+- `"Journal"` — `Sources/VariorumCore/Operations/Operations+Container.swift:267`
+- `"sealed book"` — `Sources/VariorumCore/Queries/ShelfQueries.swift:918`
+- `"finished book"` — `Sources/VariorumCore/Queries/ShelfQueries.swift:919`
+
+— 479 strings
+
+
+## Menus, command palette & structural-undo labels
+
+- `"Edit Across Blocks"` — `App/Variorum/Shared/EditorBrain/CrossBlockCompound.swift:620`
+- `"Undo \(label)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:36` (templated)
+- `"Redo \(label)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:37` (templated)
+- `"New Window"` — `App/Variorum/Variorum/EditorCommands.swift:292`
+- `"Lock Library Now"` — `App/Variorum/Variorum/EditorCommands.swift:355` ⚠RULED
+- `"Paste Without Line Breaks"` — `App/Variorum/Variorum/EditorCommands.swift:426`
+- `"Find"` — `App/Variorum/Variorum/EditorCommands.swift:436`
+- `"Block"` — `App/Variorum/Variorum/EditorCommands.swift:472`
+- `"Format"` — `App/Variorum/Variorum/EditorCommands.swift:693`, `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift:130`
+- `"Open the Tutorial"` — `App/Variorum/Variorum/EditorCommands.swift:819`
+- `"Undo \($0)"` — `App/Variorum/Variorum/EditorCommands.swift:873` (templated)
+- `"Undo Structural Change"` — `App/Variorum/Variorum/EditorCommands.swift:873`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1036`
+- `"Redo \($0)"` — `App/Variorum/Variorum/EditorCommands.swift:879` (templated)
+- `"Redo Structural Change"` — `App/Variorum/Variorum/EditorCommands.swift:879`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1048`
+- `"Order Blocks"` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:855`
+- `"Make Block"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:314`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2173`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2178`
+- `"Divide"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:619`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:586`, `Sources/VariorumCore/Operations/Operations+Structural.swift:197`, `Sources/VariorumCore/Operations/Operations+Structural.swift:667`
+- `"Merge Blocks"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:868`, `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:530`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:871`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:234`
+- `"Delete Blocks"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1191`, `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:580`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:976`
+- `"Delete in Every Take"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2631`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:250`
+- `"Replace in Every Take"` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2884`
+- `"Heading 1"` — `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift:78`
+- `"Heading 2"` — `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift:79`
+- `"Heading 3"` — `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift:80`
+- `"Import"` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:85`, `Sources/VariorumCore/Operations/Operations+Import.swift:62`, `Sources/VariorumCore/Operations/Operations+Import.swift:101`
+- `"Quick Note"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:550`
+- `"Move Blocks"` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:440`
+- `"Split at Newlines"` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:608`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:290`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:581`, `Sources/VariorumCore/Operations/Operations+Structural.swift:839`
+- `"Divide Block at Cursor"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:191`
+- `"Divide choosing takes…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:216`
+- `"Extract Selection"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:222`
+- `"Make Block from Selection"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:228`
+- `"Merge choosing takes…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:244`
+- `"Move Selection into a New Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:286`
+- `"New Block at End of Note"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:293`
+- `"New Block Below"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:304`
+- `"Delete Block"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:334`, `Sources/VariorumCore/Operations/Operations+Deletion.swift:216`
+- `"Archive Block"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:364`, `Sources/VariorumCore/Operations/Operations+BlockArchive.swift:52`
+- `"Show Takes"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:377`
+- `"New Take (Branch)"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:386`
+- `"New Blank Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:392`
+- `"New Blank Take as Chosen"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:398`
+- `"Choose This Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:404`
+- `"Previous Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:410`
+- `"Next Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:416`
+- `"Archive Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:422`
+- `"Save Choices as Lens…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:432`
+- `"Close All Takes (Esc)"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:438`
+- `"Previous Page of Takes"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:447`
+- `"Next Page of Takes"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:453`
+- `"Lock Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:480`
+- `"Delete Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:486`
+- `"Unarchive Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:492`
+- `"Move Take Earlier"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:507`
+- `"Move Take Later"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:513`
+- `"Merge Selected Blocks"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:526`
+- `"Delete Selected Blocks"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:547`
+- `"Make Every Newline a Block"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:567`
+- `"Split This Block at Its Newlines"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:574`
+- `"Copy All Takes"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:602`
+- `"Move Take into a Block Below"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:620`
+- `"Turn All Takes into Blocks"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:626`
+- `"Label Take…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:634`
+- `"Rename Lens…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:647`
+- `"Tag Block…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:663`
+- `"Delete Scrap"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:694`
+- `"Archive Scrap"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:709`
+- `"Tag Note"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:725`
+- `"Bank"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:743`
+- `"Return to Bank"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:749`
+- `"Diverge here (new take, this thread)"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:755`
+- `"Diff against chosen"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:766`
+- `"Put Back Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:819`
+- `"Delete Selected Notes"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:974`
+- `"Archive"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:988`
+- `"Delete Now"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1013`
+- `"Empty Trash"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1021`
+- `"Commit Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1030`
+- `"Seal / Unseal Note"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1056`
+- `"Previous Block"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1070`
+- `"Next Block"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1076`
+- `"Comments…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1082`
+- `"Callout"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1102`
+- `"Export Block as Markdown…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1108`
+- `"Find in Note…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1135`
+- `"Find and Replace…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1141`
+- `"Find Next"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1147`
+- `"Find Previous"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1153`
+- `"Use Selection for Find"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1159`
+- `"Replace All in Every Take"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1172`
+- `"Bold"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1210`
+- `"Italic"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1216`
+- `"Strikethrough"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1222`
+- `"Inline Code"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1228`
+- `"Add Link"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1241`
+- `"Heading"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1251`
+- `"Bullet List"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1257`
+- `"Checklist"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1263`
+- `"Indent"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1298`
+- `"Outdent"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1304`
+- `"Switch Mode (⌘1–⌘7)"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1312`
+- `"Open Notes (\u{2318}\u{21e7}1\u{2013}9)"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1330`
+- `"Back"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1355`
+- `"Forward"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1361`
+- `"Close Split"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1408`
+- `"Open in New Window"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1422`
+- `"Open"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1480`
+- `"Open Book at This Note"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1526`
+- `"New Note"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1956`
+- `"Today's Entry"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1961`
+- `"Find Anything…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1966`
+- `"Import Files…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1971`
+- `"Export Library…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1976`
+- `"Toggle Block Seams"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1981`
+- `"Shortcuts & Dictionary"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1986`, `App/Variorum/Variorum/VariorumApp.swift:386`
+- `"Restore Tutorial…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1994`
+- `"Restore the Sample Library"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2001`
+- `"Restore \u{201C}\(SampleLibraryEncryptionBook.name)\u{201D}"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2010` (templated)
+- `"Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2019` (templated)
+- `"Back Up Now…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2031`
+- `"Choose Folder…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2037`
+- `"Stop Copying There"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2043`
+- `"Choose Where…"` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2052` ⚠RULED
+- `"Go to Bookcase"` — `App/Variorum/Variorum/RootView.swift:1013`
+- `"Go to Library"` — `App/Variorum/Variorum/RootView.swift:1014`
+- `"Go to Pool"` — `App/Variorum/Variorum/RootView.swift:1015`
+- `"Open the Tutorial — \(TutorialSeeder.bookName)"` — `App/Variorum/Variorum/RootView.swift:1027` (templated)
+- `"Settings — Appearance & Tags"` — `App/Variorum/Variorum/RootView.swift:1028`
+- `"Use Terminal Voice"` — `App/Variorum/Variorum/RootView.swift:1029`
+- `"Use Study Voice"` — `App/Variorum/Variorum/RootView.swift:1030`
+- `"New Block"` — `Sources/VariorumCore/Operations/Operations+Block.swift:81`
+- `"Unarchive Block"` — `Sources/VariorumCore/Operations/Operations+BlockArchive.swift:100`
+- `"Archive Variant"` — `Sources/VariorumCore/Operations/Operations+Deletion.swift:18`
+- `"Delete Variant"` — `Sources/VariorumCore/Operations/Operations+Deletion.swift:127`
+- `"Diverge for This Book"` — `Sources/VariorumCore/Operations/Operations+Diverge.swift:115`
+- `"Save a Version"` — `Sources/VariorumCore/Operations/Operations+NoteVersions.swift:59`
+- `"Copy In"` — `Sources/VariorumCore/Operations/Operations+Ownership.swift:327`
+- `"Move Block"` — `Sources/VariorumCore/Operations/Operations+Placement.swift:199`
+- `"Reorder"` — `Sources/VariorumCore/Operations/Operations+Placement.swift:231`
+- `"Pool Copy"` — `Sources/VariorumCore/Operations/Operations+Pool.swift:105`
+- `"Convert to Book"` — `Sources/VariorumCore/Operations/Operations+ReadingConversion.swift:217`
+- `"Move into a New Take"` — `Sources/VariorumCore/Operations/Operations+SpanToTake.swift:146`
+- `"Extract"` — `Sources/VariorumCore/Operations/Operations+Structural.swift:145`
+- `"Divide choosing takes"` — `Sources/VariorumCore/Operations/Operations+Structural.swift:360`
+- `"Merge"` — `Sources/VariorumCore/Operations/Operations+Structural.swift:982`
+- `"Merge Takes"` — `Sources/VariorumCore/Operations/Operations+Structural.swift:1242`
+- `"Move Take into a Block"` — `Sources/VariorumCore/Operations/Operations+TakeStructure.swift:109`
+- `"Turn Takes into Blocks"` — `Sources/VariorumCore/Operations/Operations+TakeStructure.swift:198`
+- `"Reorder Take"` — `Sources/VariorumCore/Operations/Operations+Variant.swift:404`
+- `"Duplicate as Version"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:201`
+- `"Make Outline Note"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:269`
+- `"Promote Lens"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:292`
+- `"Adopt Lens"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:316`, `Sources/VariorumCore/Operations/Operations+Versions.swift:363`, `Sources/VariorumCore/Operations/Operations+Versions.swift:414`
+- `"Make Into a Note"` — `Sources/VariorumCore/Operations/Operations+Versions.swift:437`
+
+— 154 strings
+
+
+## Refusals, offers & receipts (the status seam)
+
+- `"The note was filed — the tag “\(path)” didn't apply. \(reason)"` — `App/Variorum/Shared/CaptureMicrosyntax.swift:281` (templated)
+- `"One of the blocks at this seam has takes."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:276`
+- `"That block looks empty, but it carries an archived take."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:278`
+- `"That block looks empty, but it carries a comment."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:280`
+- `"A take in this selection is locked — nothing was changed."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:286`
+- `"A block in this selection hasn't arrived yet — nothing was changed."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:288`
+- `"The end of this selection isn't a block yet."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:290`
+- `"The end of this selection is the empty line at the note's end."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:294`
+- `"This keystroke can't join these two blocks."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:301`
+- `"This part of the note is still settling."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:312`
+- `"A keystroke won't fold a fan away \u{2014} "` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:331`
+- `"Open its takes to see it, or use Delete Block to remove the block whole."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:333`
+- `"Open its comments, or use Delete Block to remove the block whole."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:335`
+- `"Branch it or unlock it, then try again."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:337`
+- `"It stays read-only until it syncs."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:339`
+- `"It becomes one moments after you pause typing, and then it can go with the rest."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:341`
+- `"Nudge that end back one character, or delete the empty line on its own."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:347`
+- `"Try that again in a moment."` — `App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift:360`
+- `"This note is \(words.state) — \(words.verb) it "` — `App/Variorum/Shared/OpsRefusalTable.swift:61` (templated)
+- `"to \($0)."` — `App/Variorum/Shared/OpsRefusalTable.swift:62` (templated)
+- `"That take is archived — unarchive it first."` — `App/Variorum/Shared/OpsRefusalTable.swift:105`
+- `"That take is already back — it's in the block's fan."` — `App/Variorum/Shared/OpsRefusalTable.swift:111`
+- `"Only things in the Trash can be deleted for good — delete it first, and it waits there \(TrashWindow.days) days."` — `App/Variorum/Shared/OpsRefusalTable.swift:118` (templated)
+- `"That isn't something the Trash can delete for good."` — `App/Variorum/Shared/OpsRefusalTable.swift:121`
+- `"That take is locked — unlock it or branch a new take."` — `App/Variorum/Shared/OpsRefusalTable.swift:123`
+- `"The note shows this take \u{2014} choose another take first, and then this one can go. (If it's the block's only take, it's the block you want to delete.)"` — `App/Variorum/Shared/OpsRefusalTable.swift:136`
+- `"That take isn't there any more \u{2014} it may have just been deleted. The block's History lists deleted takes, with Put back."` — `App/Variorum/Shared/OpsRefusalTable.swift:145`
+- `"That saved moment isn't there any more."` — `App/Variorum/Shared/OpsRefusalTable.swift:148`
+- `"These two notes aren't marked as versions — nothing to unmark."` — `App/Variorum/Shared/OpsRefusalTable.swift:150`
+- `"These two notes are already marked as versions of each other."` — `App/Variorum/Shared/OpsRefusalTable.swift:157`
+- `"There's nothing in that note yet — write a line in it first."` — `App/Variorum/Shared/OpsRefusalTable.swift:166`
+- `"That book is already restored — it's back where it was."` — `App/Variorum/Shared/OpsRefusalTable.swift:176`
+- `"That book can't be found — it may have been deleted, or removed on another device."` — `App/Variorum/Shared/OpsRefusalTable.swift:178`
+- `"A word target or note cap must be a positive number — nothing was changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:184`
+- `"\u{201C}\(value)\u{201D} isn't a colour — a colour is six hex digits, like B9A7E6 or #8A7A3A. Nothing was changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:192` (templated)
+- `"This block has more than one take now — divide it again and the take you're in splits while the others stay on the first block"` — `App/Variorum/Shared/OpsRefusalTable.swift:200`
+- `"That block isn't empty after all — it carries a take or a comment that isn't shown here. Nothing was deleted."` — `App/Variorum/Shared/OpsRefusalTable.swift:212`
+- `"This block has only one take — a block keeps at least one take, so delete the block instead, or divide it"` — `App/Variorum/Shared/OpsRefusalTable.swift:227`
+- `" to split it into blocks."` — `App/Variorum/Shared/OpsRefusalTable.swift:229`
+- `"That take is empty — there's no text to become a block."` — `App/Variorum/Shared/OpsRefusalTable.swift:231`
+- `"This block has no other takes with text in them — nothing to turn into blocks."` — `App/Variorum/Shared/OpsRefusalTable.swift:233`
+- `"That block is no longer in this note — it may have moved while you worked. Nothing was changed here."` — `App/Variorum/Shared/OpsRefusalTable.swift:240`
+- `"Something sits between these blocks — a block that hasn't arrived yet, or one that landed since you selected. Nothing was changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:251`
+- `"That block has no text here yet — it may still be arriving from another device. Nothing was changed; try again in a moment."` — `App/Variorum/Shared/OpsRefusalTable.swift:263`
+- `"The text changed while that gesture was landing — nothing was altered; try it again on the current text."` — `App/Variorum/Shared/OpsRefusalTable.swift:273`
+- `"No legal cut spot for that here — cuts land between words, at sentence ends, and at line breaks."` — `App/Variorum/Shared/OpsRefusalTable.swift:279`, `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:41`
+- `"A comment needs some text."` — `App/Variorum/Shared/OpsRefusalTable.swift:282`
+- `"A gathering needs a rule — add one to make it, or delete the gathering."` — `App/Variorum/Shared/OpsRefusalTable.swift:285`
+- `"That note already lives in another book, and this book owns its notes — it can come in as a copy, or move in and leave its other books."` — `App/Variorum/Shared/OpsRefusalTable.swift:291`
+- `"That note belongs to a book that owns its notes — it can come in here only as a copy."` — `App/Variorum/Shared/OpsRefusalTable.swift:294`
+- `"This book is \(roads.bookSeal.state) — \(verb) it to reopen it."` — `App/Variorum/Shared/OpsRefusalTable.swift:299` (templated)
+- `"This book is \(roads.bookSeal.state), so it can't be reopened here."` — `App/Variorum/Shared/OpsRefusalTable.swift:301` (templated)
+- `"That book isn't \(roads.bookSeal.state) any more — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:303` (templated)
+- `"This note is in a book that is \(roads.bookSeal.state) — \(verb) the book to change it."` — `App/Variorum/Shared/OpsRefusalTable.swift:307` (templated)
+- `"This note is in a book that is \(roads.bookSeal.state), so it can't be changed here."` — `App/Variorum/Shared/OpsRefusalTable.swift:310` (templated)
+- `"This is your daily Journal, so its entries are always dated by the day — make another book your daily Journal first to change that."` — `App/Variorum/Shared/OpsRefusalTable.swift:317`
+- `"This book owns its notes, so a duplicate has to carry copies of them — duplicate it with copies."` — `App/Variorum/Shared/OpsRefusalTable.swift:320`
+- `"That shelf isn't there any more — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:325`
+- `"A shelf needs a name."` — `App/Variorum/Shared/OpsRefusalTable.swift:327`
+- `"\u{201C}\(value)\u{201D} can't be a shelf's mark — use one character, and no emoji."` — `App/Variorum/Shared/OpsRefusalTable.swift:329` (templated)
+- `"That library isn't there any more — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:332`
+- `"A wing needs a name."` — `App/Variorum/Shared/OpsRefusalTable.swift:336`
+- `"\(WingWords.home) is the built-in wing's name — pick another."` — `App/Variorum/Shared/OpsRefusalTable.swift:339` (templated)
+- `"There's already a wing called \u{201C}\(existing)\u{201D} — pick another name."` — `App/Variorum/Shared/OpsRefusalTable.swift:341` (templated)
+- `"That note is already in that wing — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:345`
+- `"That note lives in another wing, and a book only holds notes of its own wing — move the note here first."` — `App/Variorum/Shared/OpsRefusalTable.swift:347`
+- `"Your daily Journal lives in \(WingWords.home) — only a \(WingWords.home) book can be it."` — `App/Variorum/Shared/OpsRefusalTable.swift:350` (templated)
+- `"That book is already in that wing — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:354`
+- `"Everything is already in that wing — pick another one to move it to."` — `App/Variorum/Shared/OpsRefusalTable.swift:356`
+- `"That book has moved to another shelf — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:358`
+- `"That book is already archived — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:365`
+- `"That book isn't archived any more — nothing changed."` — `App/Variorum/Shared/OpsRefusalTable.swift:367`
+- `"Refused: \(error)"` — `App/Variorum/Shared/OpsRefusalTable.swift:377`, `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:326` (templated)
+- `"This block hasn't fully synced; it is read-only for now."` — `App/Variorum/Shared/OpsRefusalTable.swift:409`
+- `"The editor lost track of block boundaries — reloading from the store."` — `App/Variorum/Shared/OpsRefusalTable.swift:413`
+- `"This build is missing the book's text — nothing was restored."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:117`
+- `"It was stopped before it finished — what came back stays; try again."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:119`
+- `"The book is finished \u{2014} reopen it (or unseal it, if it\u{2019}s sealed), then restore again."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:132`
+- `"The book is at its note cap — raise the cap, then restore again."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:135`
+- `"It stopped partway through the note's history — the unfinished note goes when you restore again."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:140`
+- `"The library refused a change partway — what was already restored stays; try again in a moment."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:142`
+- `"The library couldn't be written to — nothing else was touched; try again in a moment."` — `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift:144`
+- `"Undid: \(label)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:40` (templated)
+- `"Redid: \(label)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:41` (templated)
+- `"No structural change to undo."` — `App/Variorum/Shared/StructuralUndoCopy.swift:42`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1039`
+- `"No structural change to redo."` — `App/Variorum/Shared/StructuralUndoCopy.swift:43`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1051`
+- `"Undo cancelled — nothing changed."` — `App/Variorum/Shared/StructuralUndoCopy.swift:44`
+- `"Another structural change is still landing."` — `App/Variorum/Shared/StructuralUndoCopy.swift:54`, `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:552`, `App/Variorum/Variorum/Features/Editor/EditorFind.swift:415`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:254`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1699`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2919`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:189`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:219`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:231`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:376`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:686`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:713`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:785`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:927`
+- `"Undo failed: \(message)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:58` (templated)
+- `"Redo failed: \(message)"` — `App/Variorum/Shared/StructuralUndoCopy.swift:59` (templated)
+- `"Undo \(warning.label)?"` — `App/Variorum/Shared/StructuralUndoCopy.swift:66` (templated)
+- `"Click into some text first — this pastes into a note you are writing in."` — `App/Variorum/Variorum/EditorCommands.swift:431`
+- `"A gathering needs a name."` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:207`
+- `"“\(book.name)” can't take this note: \(reason)"` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:410` (templated)
+- `"Added to “\(book.name)”."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:434` (templated)
+- `"Duplicated — the copy is its own note now (in the Pool until you shelve it)."` — `App/Variorum/Variorum/Features/BookView/MembershipChip.swift:496`
+- `"✓ chosen — the note shows this take everywhere now."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:637`
+- `"Saved — “\(lens.name)” remembers this canvas's takes (open it in Lenses)."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:658` (templated)
+- `"Click into a card first — ⌘S commits the take you're editing."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:749`, `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:774`
+- `"This note is sealed — order stays frozen until it's unsealed."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:803`
+- `"Ordered — \(count) card\(count == 1 ? "" : "s") lead the note now (⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:868` (templated)
+- `"Nothing to fit — this canvas has no cards."` — `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift:900`
+- `"Comments observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/CommentsPanel.swift:140` (templated)
+- `"This block's takes changed — try the divide again."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:325`, `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:675`, `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:268`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:477`
+- `"This block's takes changed while the sheet was open — the cuts were re-proposed; review before dividing."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:715`
+- `"edit"` — `App/Variorum/Variorum/Features/Editor/EditorFind.swift:373`, `App/Variorum/Variorum/Features/Editor/EditorFind.swift:398`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2527`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2747`, `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:1042`
+- `"Unsaved changes couldn't be written — resolve that first, then retry."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:574`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:660`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:735`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:832`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1481`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1560`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2135`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2580`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2797`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2955`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:3165`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:132`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:167`, `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2644`
+- `"New block added below — type away."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:909`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:102`
+- `"These blocks' takes changed — try the merge again."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1871`, `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1929`, `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:269`
+- `"The takes changed while the sheet was open — review before merging."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:1878`
+- `"Empty block deleted — ⌥⌘Z undoes it."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2329`
+- `"Blocks joined — ⌥⌘Z undoes it."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2378`
+- `"Select the text to delete in every take first."` — `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:2531`
+- `"Nothing to undo in the text — your last change was structural: \u{2325}\u{2318}Z undoes it, \u{21e7}\u{2325}\u{2318}Z redoes."` — `App/Variorum/Variorum/Features/Editor/EditorUndoHint.swift:46`
+- `"Nothing to redo in the text — the change you undid was structural: \u{21e7}\u{2325}\u{2318}Z redoes it, \u{2325}\u{2318}Z undoes again."` — `App/Variorum/Variorum/Features/Editor/EditorUndoHint.swift:50`
+- `"Multi-range edits aren't supported yet."` — `App/Variorum/Variorum/Features/Editor/EditorView.swift:824`
+- `"Lineage observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:539` (templated)
+- `"Presentation observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:552` (templated)
+- `"Comment observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:567` (templated)
+- `"Header observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:784` (templated)
+- `"Note observation failed: \(error)"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:811`, `App/Variorum/Variorum/Features/ReadTier/ReadPostViewModel.swift:133` (templated)
+- `"Caret at the end — typing here starts a new block."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2601`
+- `"Unsealed."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2942`, `App/Variorum/Variorum/Registry/ShellActions.swift:122`
+- `"Sealed — the note is read-only until unsealed."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2951`, `App/Variorum/Variorum/Registry/ShellActions.swift:122`
+- `"Entry date set to \($0)."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3017` (templated)
+- `"Entry date cleared."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3017`
+- `"add to it"` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3031`
+- `"Committed."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3220`
+- `"Place the caret in a block to see its takes."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3279`
+- `"Put the caret in a block first — takes grow on the block you're in."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3299`
+- `"Saved — “\(name)” remembers these choices (open it in Lenses, ⌘5)."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3346` (templated)
+- `"Put the caret in a block first — ⌘⇧A archives the take you're on."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3355`
+- `"Take archived — never gone: the takes panel (⌘⇧T) keeps it under “archived takes”."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3369`
+- `"Place the caret in a block to see its comments."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3831`
+- `"Place the caret in a block first — the frame goes on that block."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3844`
+- `"Place the caret in a block first — this copies that block's takes."` — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:3867`
+- `"Block divided — ⌥⌘Z undoes it."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:192`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:541`
+- `"1 other take stayed on the first"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:196`
+- `"\(kept) other takes stayed on the first"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:197` (templated)
+- `"1 empty take stayed with the original block"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:201`
+- `"\(stayedBehind) empty takes stayed with the original block"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:202` (templated)
+- `"Block divided — the take you were in split across both blocks; "` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:204`
+- `", and "` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:205`
+- `". ⌥⌘Z undoes."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:205`
+- `"Blocks merged — ⌥⌘Z undoes it."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:211`
+- `"1 other take"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:212`, `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:221`
+- `"\(carried) other takes"` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:212`, `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:221` (templated)
+- `"Blocks merged — the takes you were looking at joined, and \(takes) came along whole. Extra copies are quick to delete; ⌥⌘Z undoes."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:213` (templated)
+- `"Merged \(blocks) blocks — ⌥⌘Z undoes it."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:220` (templated)
+- `"Merged \(blocks) blocks — the takes you were looking at joined, and \(takes) came along whole. Extra copies are quick to delete; ⌥⌘Z undoes."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:222` (templated)
+- `"Merge Blocks (⌘⇧M) joins them and brings every take along; Merge choosing takes (⌥⌘⇧M) lets you arrange them yourself."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:239`
+- `"This block has one take — ⌘⇧D divides it in place. Divide choosing takes is for arranging a fan's takes across the two new blocks."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:249`
+- `"These blocks have one take each — ⌘⇧M joins them. Merge choosing takes is for arranging the takes when either side has a fan."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:254`
+- `"These blocks changed — try the merge again."` — `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift:274`
+- `"restructure"` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:19`
+- `"This block hasn't fully synced yet — try again once it arrives."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:21`
+- `"This take is locked — branch it or unlock it first."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:23`
+- `"This text isn't a block yet — it becomes one moments after you pause typing."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:25`
+- `"The selection crosses a block boundary. Divide the neighbors at the edges you want, then merge the middle pieces."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:27`
+- `"That selection already IS a whole block (see blk n/n below) — nothing to make. Select part of it to split one out."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:29`
+- `"Extract takes a span at the block's start or end. For a middle span, use Make Block from Selection."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:31`
+- `"This block has other takes, and they carry no cut marks — divide at the cursor (⌘⇧D), or Divide choosing takes (⌥⌘⇧D) to place a cut in each take."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:33`
+- `"To merge, put the caret at a block seam or select across the blocks to join."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:35`
+- `"The editor lost track of the selection — try again."` — `App/Variorum/Variorum/Features/Editor/RefusalCopy.swift:43`
+- `"Click into the text you want to format first — formatting acts on the writing surface you're in."` — `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift:124`
+- `"\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count)."` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:204`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:336` (templated)
+- `"Decoration observation failed: \(error)"` — `App/Variorum/Variorum/Features/ReadTier/ReadPostViewModel.swift:153` (templated)
+- `"Made the shelf \u{201C}\(shelf.name)\u{201D}."` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:208` (templated)
+- `"That book can't take this note: \(reason)"` — `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift:407` (templated)
+- `"Already block \(clamped) of \(rows.count)."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:367` (templated)
+- `"Moved — now block \(clamped) of \(rows.count) (⌥⌘Z undoes)."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:372` (templated)
+- `"Moved to \(name) — the block LEFT this note (a block lives in one place; its takes went with it). Find it in Snippets; ⌥⌘Z brings it back."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:409` (templated)
+- `"Moved \(chain.count) block\(chain.count == 1 ? "" : "s") to the \(toTop ? "top" : "bottom") (\u{2325}\u{2318}Z undoes in one go)."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:456` (templated)
+- `"\u{2318}-click a second block first — merge joins the blocks you pick."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:477`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:790`
+- `"Merge joins neighbouring blocks — these aren't next to each other. Pick blocks that sit side by side."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:496`, `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:816`
+- `"Tagged \(chain.count) block\(chain.count == 1 ? "" : "s")."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:637` (templated)
+- `"Moved \(chain.count) block\(chain.count == 1 ? "" : "s") to \(name) — they LEFT this note (takes went along). \u{2325}\u{2318}Z brings them back."` — `App/Variorum/Variorum/Features/TOC/BlockTOCView.swift:655` (templated)
+- `"Compare observation failed: \(error)"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:300`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:356` (templated)
+- `"That note is already open in this compare."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:664`
+- `"Click into a pane first — ⌘S commits the take you're in."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:849`, `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:879`
+- `"Click into a pane first — the frame goes on that block."` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:903`
+- `"Click into a pane first — ⌘T diverges that column at that block."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:295`
+- `"Click into a pane first — ⌥⌘T adds a blank take on that block."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:305`
+- `"Click into a pane first — ⇧⌥⌘T opens a blank take as chosen there."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:317`
+- `"Nothing unnamed to save — named lenses save themselves as you work."` — `App/Variorum/Variorum/Features/Takes/LensesBoardView.swift:339`
+- `"Copied this block's take to the clipboard."` — `App/Variorum/Variorum/Features/Takes/TakeClipboard.swift:72`
+- `"Copied \(takes) takes to the clipboard — the shown one first, then its alternates."` — `App/Variorum/Variorum/Features/Takes/TakeClipboard.swift:73` (templated)
+- `"This block has no text to copy."` — `App/Variorum/Variorum/Features/Takes/TakeClipboard.swift:76`
+- `"Copy failed: \(detail)"` — `App/Variorum/Variorum/Features/Takes/TakeClipboard.swift:78` (templated)
+- `"Click into a take first — ⌘T branches the take you're in."` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:387`
+- `"Click into a block first — ⌥⌘T adds a blank take there."` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:399`
+- `"Click into a block first — ⇧⌥⌘T opens a blank take as chosen there."` — `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:408`
+- `"This block has no renderable take to branch from."` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:149`, `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:363`
+- `"This block has no renderable take to label."` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:168`
+- `"Click into a block first — the block menu acts on the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesBottomBar.swift:224`
+- `"Click into a block first — then the gesture knows where to act."` — `App/Variorum/Variorum/Features/Takes/TakesChoreographer.swift:66`
+- `"New block added at the end — type away."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:77`
+- `"Click into a block first — the new block lands right below it."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:92`
+- `"Click into a block first — this removes the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:117`
+- `"Click into a block first — this sets the block you're in aside."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:158`
+- `"Click into a block first — this splits the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:215`
+- `"Click into a block first — divide cuts the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:380`
+- `"This block has no renderable take to divide."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:384`
+- `"This block's takes changed — try the move again."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:641`
+- `"Click into a take first — this moves that take into its own block."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:690`
+- `"Click into a block first — this turns its takes into blocks."` — `App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:717`
+- `"Takes observation failed: \(error)"` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:363` (templated)
+- `"The main column shows the note's chosen takes — use ✓ to change them."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1049`
+- `"This column IS the note — nothing to adopt."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1214`
+- `"Saved — “\(lens.name)” now remembers these choices."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1329` (templated)
+- `"Click into a block first — this copies that block's takes."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1434`
+- `"Take archived — never gone: \u{201C}archived \u{B7} n\u{201D} under this block's takes brings it back."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1513`
+- `"Take archived — never gone: the archived list under this block's takes on the Takes board (\u{2318}2) brings it back."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1516`
+- `"Take unarchived — back in the block's fan."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1525`
+- `"Click into a take first — ⌘S commits the take you're in."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1696`, `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1721`
+- `"Click into a block first — comments live on the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2029`
+- `"Click into a block first — the frame goes on the block you're in."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2071`
+- `"Open a block's takes first — ⌥⌘← and ⌥⌘→ page through its cards."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2275`
+- `"Chosen \u{2014} the note now shows the new blank take; add a \u{201C}Chosen (the note)\u{201D} column to see it here."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2328`
+- `"Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2508`
+- `"This block has one take — ⌘T branches a second."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2523`
+- `"Click into a take first — ⌘ ⏎ chooses the take you're in."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2538`
+- `"✓ chosen — the note shows this take everywhere."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2543`
+- `"Click into a take first — ⌘⇧A archives the take you're in."` — `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:2560`
+- `"Find works in a note's Write or Takes mode — open one there (⌘1 or ⌘2)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:184`
+- `"Dividing happens inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:194`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:219`
+- `"Extracting happens inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:225`
+- `"Making a block happens inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:231`
+- `"Merging happens inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:237`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:247`
+- `"Delete in Every Take works on a selection inside a note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:253`
+- `"Moving a selection into a take happens where you write — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:290`
+- `"Blocks are born inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:296`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:314`
+- `"Blocks live inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:341`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:372`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:578`
+- `"Takes live inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:380`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:605`
+- `"Takes grow on a block inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:389`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:395`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:401`
+- `"Choosing happens among a block's takes — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:407`
+- `"Stepping through takes happens inside a note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:413`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:419`
+- `"Archiving acts on the take you're in — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:429`
+- `"Lenses save a note's choices — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:435`
+- `"Takes bloom on the Takes board (⌘2) — close-all acts there."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:441`
+- `"Take pages live on the Takes board (⌘2)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:450`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:456`
+- `"A take's lock is on its own card — open a block's takes."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:483`
+- `"A take is deleted on its own card — open a block's takes."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:489`
+- `"Unarchiving acts on an archived take — open its block's takes first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:495`
+- `"Takes are rearranged on their cards, on the Takes board (⌘2)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:510`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:516`
+- `"⌘-click blocks on the Takes board (⌘2) to pick what merges."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:529`
+- `"Open a note first — this repairs the note you're in."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:571`
+- `"Takes become blocks inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:623`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:629`
+- `"Labels live on a take inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:639`
+- `"Lenses are renamed from their column header in Lenses (⌘5)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:650`
+- `"Tags go on a block where you see it — scrap rows and canvas cards carry the door."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:666`
+- `"Scraps are deleted where you see them — the Snippets rows carry the door."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:697`
+- `"Scraps are set aside where you see them — the Snippets rows carry the door."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:712`
+- `"Open a note to tag it — the \u{FF03} in its masthead opens the tag field."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:732`
+- `"The bank is the canvas's parking strip — open a canvas to see it."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:746`
+- `"A card returns to the bank from the canvas it sits on."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:752`
+- `"Diverging acts on a pane in Takes or Lenses."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:758`
+- `"Diffing compares a take against the chosen one, in Takes or Lenses."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:769`
+- `"Released originals wait in \(TrayPath.menuLabel) — \(TrayPath.doorPhrase)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:810` (templated)
+- `"A deleted take waits in its block's History — open a note and a block's History lists what it has deleted."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:822`
+- `"Open a note and its tray lists what it has deleted."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:854`
+- `"Put the caret in a block and its History shows that block's saved moments, its archived and deleted takes, and where it came from."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:877`
+- `"Saving a version acts on the note you have open — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:902`
+- `"A note's saved moments live with the note — open one and its \(VersionsPath.name) lists them."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:909` (templated)
+- `"Deleting a note acts on an open one — open one, or use a note's row in the Library."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:963`
+- `"\u{2318}-click notes in the Library to pick what goes."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:977`
+- `"Archiving acts on a note's row \u{2014} right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, with no countdown."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:991` (templated)
+- `"Delete Now lives where things are already deleted — \(RecoveryPath.surface), and the Leaving section of a note's own tray. Never in the writing itself."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1016` (templated)
+- `"Empty Trash lives in the Trash — \(RecoveryPath.surface) holds it, never a note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1024` (templated)
+- `"Nothing to commit here — ⌘S commits a take inside a note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1033`
+- `"Sealing acts on an open note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1059`
+- `"Block-to-block caret jumps live in Write."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1073`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1079`
+- `"Comments live on a block — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1085`
+- `"Callout frames go on a block — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1105`
+- `"Put the caret in a block to export it."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1114`
+- `"Find works in the note editor — open a note in Write (⌘1)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1144`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1162`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1175`
+- `"Formatting acts on the text you're writing — open a note first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1213`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1219`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1225`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1231`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1244`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1254`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1260`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1266`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1301`, `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1307`
+- `"Open a note first — the modes live inside a note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1315`
+- `"No notes are open yet — open one and it joins the Open list."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1335`
+- `"Nothing to go back to — this is where you started."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1358`
+- `"Nothing to go forward to — you haven't gone back."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1364`
+- `"There's no other open note to put beside this one yet — open a second note and it can sit alongside."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1376`
+- `"Only a full window has a sidebar — this one shows a single note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1400`
+- `"There's no split to close — this window shows one note."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1411`
+- `"Peer columns live on the Compare board (\u{2318}6)."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1483`
+- `"Diverging happens inside a note — open one first."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1503`
+- `"Backing up lives in Settings ▸ Data Safety."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2034`
+- `"The backup folder is picked in Settings ▸ Data Safety."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2040`
+- `"There is no second backup folder to stop copying to."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2046`
+- `"The unencrypted export lives in Settings ▸ Data Safety."` — `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:2055`
+- `"The open note changed — that request no longer applies."` — `App/Variorum/Variorum/Registry/CommandRouter.swift:465`
+- `"That take is now the block below — the original is archived on its block (\u{201c}archived \u{B7} n\u{201d} under its takes brings it back); \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:182`
+- `"1 take is now its own block below"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:191`
+- `"\(blocks) takes are now their own blocks below"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:192` (templated)
+- `" — this block still shows the take it showed, and the originals are archived on it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:193`
+- `" 1 blank take was left alone (there was nothing to make a block from)."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:197`
+- `" \(skippedBlanks) blank takes were left alone (there was nothing to make blocks from)."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:198` (templated)
+- `" \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:201`
+- `"1 block picked — \u{2318}-click another, or \u{2318}\u{21e7}-click to pick a whole run"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:217`
+- `"\(picked) blocks picked"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:219` (templated)
+- `"Delete Block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:223`
+- `"Delete \(picked) Blocks"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:223` (templated)
+- `"Delete every picked block — \u{2325}\u{2318}Z brings them all back at once, and afterwards they wait in \(TrayPath.menuLabel)"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:235` (templated)
+- `"then in \(TrayPath.menuLabel) \u{2014} \(TrayPath.doorPhrase)."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:278` (templated)
+- `"then in the \(RecoveryCopy.trashSection)."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:280` (templated)
+- `"Block deleted — \u{2325}\u{2318}Z puts it back, \(road)"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:283` (templated)
+- `"\(count) blocks deleted — \u{2325}\u{2318}Z puts them all back in one go, "` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:284` (templated)
+- `"Block archived — it's kept, with no countdown, in \(TrayPath.menuLabel(for: home)) \u{2014} \(TrayPath.doorPhrase(for: home)). \u{2325}\u{2318}Z undoes this."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:307` (templated)
+- `" The original preserved from this block's divide rides the Trash with it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:319`
+- `" \(count) preserved originals ride the Trash with these blocks."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:320` (templated)
+- `"\u{2318}-click the blocks you want to remove first — they highlight as you pick them."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:326`
+- `"deleted"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:349`
+- `"it may have been deleted since you picked it"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:349`
+- `"merged"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:361`
+- `"it may have been deleted or moved elsewhere"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:361`
+- `"One of the blocks you picked is already gone — \(hedge). Nothing was \(nothingWas); pick again and retry."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:367` (templated)
+- `"sealed"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:391`, `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:402`
+- `"unseal"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:391`, `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:402`
+- `"⌥⌘⇧D arranges them differently"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:400`
+- `"That's a deliberate ⌘S savepoint — those are never pruned, in any mode."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:420`
+- `"You can star \(limit) things at a time — un-star one in the \(StarCopy.sectionHeader) list at the top of the sidebar, and this can take its place."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:429` (templated)
+- `"Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:452`
+- `"The merged block needs at least one take — pair takes with ＋, or check “carry” on one."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:456`
+- `"A take can sit in only one pairing (and a paired take can't also carry) — remove the duplicate first."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:459`
+- `"\(made) blocks from \(from == 1 ? "1 block" : "\(from) blocks")"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:499` (templated)
+- `" — every take stayed with its top paragraph"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:501`
+- `"; 1 empty take stayed with the original block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:505`
+- `"; \(takesLeftBehind) empty takes stayed with the original block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:506` (templated)
+- `". \u{2325}\u{2318}Z undoes."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:508`
+- `"Every block is already one paragraph."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:545`
+- `"This block is already one paragraph."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:546`
+- `"Every picked block is already one paragraph."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:547`
+- `"1 block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:601`
+- `"\(outcome.deletedCount) blocks"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:601` (templated)
+- `"\(noun) to \(TrayPath.menuLabel(for: home))"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:602` (templated)
+- `"the ends joined \u{2014} originals under \(BlockHistoryPath.cameFromSection)"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:608` (templated)
+- `"the ends kept their own blocks \u{2014} one has takes"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:612`
+- `"edited across blocks"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:619`
+- `". \u{2325}\u{2318}Z undoes it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:620`
+- `"New note failed: \(error)"` — `App/Variorum/Variorum/Registry/ShellActions.swift:239` (templated)
+- `"Today's entry failed: \(error)"` — `App/Variorum/Variorum/Registry/ShellActions.swift:259` (templated)
+- `"Import failed: \(failure)"` — `App/Variorum/Variorum/Registry/ShellActions.swift:273` (templated)
+- `"Import finished."` — `App/Variorum/Variorum/Registry/ShellActions.swift:278`
+- `"Export Library"` — `App/Variorum/Variorum/Registry/ShellActions.swift:285`
+- `"Export failed: \(failure)"` — `App/Variorum/Variorum/Registry/ShellActions.swift:291`, `App/Variorum/Variorum/Registry/ShellActions.swift:332` (templated)
+- `"Export finished."` — `App/Variorum/Variorum/Registry/ShellActions.swift:295`, `App/Variorum/Variorum/Registry/ShellActions.swift:336`
+- `"Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))"` — `App/Variorum/Variorum/Registry/ShellActions.swift:376` (templated)
+- `"story"` — `App/Variorum/Variorum/Registry/ShellActions.swift:411`
+- `"chapter"` — `App/Variorum/Variorum/Registry/ShellActions.swift:411`
+- `"\u{201C}\(book.name)\u{201D} is already whole — it's on your Bookcase."` — `App/Variorum/Variorum/Registry/ShellActions.swift:441` (templated)
+- `"Restored \u{201C}\(book.name)\u{201D} — \(minted) \(minted == 1 ? noun : noun + "s") came back."` — `App/Variorum/Variorum/Registry/ShellActions.swift:446` (templated)
+- `"Restoring \u{201C}\(book.name)\u{201D} failed: "` — `App/Variorum/Variorum/Registry/ShellActions.swift:455` (templated)
+- `"The tutorial opened, but \u{201C}\(book.name)\u{201D} could not be restored beside it: "` — `App/Variorum/Variorum/Registry/ShellActions.swift:497` (templated)
+- `"Nothing opened — re-seeding the tutorial would replace the tutorial residue on this store, and you cancelled. Everything stays as it is."` — `App/Variorum/Variorum/Registry/ShellActions.swift:522`
+- `"Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))"` — `App/Variorum/Variorum/Registry/ShellActions.swift:542` (templated)
+- `"Seam toggle failed: \(error)"` — `App/Variorum/Variorum/Registry/ShellActions.swift:667` (templated)
+- `"That command isn't wired to the palette yet."` — `App/Variorum/Variorum/Registry/ShellActions.swift:766`
+- `"The tutorial is fresh \u{2014} \u{201C}\(guide)\u{201D} is on your Bookcase."` — `App/Variorum/Variorum/Registry/ShellActions.swift:782` (templated)
+- `"The tutorial is fresh \u{2014} \u{201C}\(guide)\u{201D} is on your Bookcase, on the \u{201C}\(shelf)\u{201D} shelf."` — `App/Variorum/Variorum/Registry/ShellActions.swift:784` (templated)
+- `"\u{201C}\(book)\u{201D} is already whole \u{2014} and the \u{201C}\(shelf)\u{201D} shelf is set up again."` — `App/Variorum/Variorum/Registry/ShellActions.swift:792` (templated)
+- `" It's on the \u{201C}\(shelf)\u{201D} shelf."` — `App/Variorum/Variorum/Registry/ShellActions.swift:799` (templated)
+- `"Dismiss"` — `App/Variorum/Variorum/Registry/StatusToast.swift:50` (tooltip)
+- `"the daily journal book could not be reached"` — `Sources/VariorumCore/Operations/Operations+Container.swift:328`, `Sources/VariorumCore/Operations/Operations+Container.swift:336`
+- `"the daily journal book is no longer there"` — `Sources/VariorumCore/Operations/Operations+Container.swift:332`
+- `"the entry is no longer there"` — `Sources/VariorumCore/Operations/Operations+Container.swift:334`
+- `"its rule is unreadable (malformed) — edit the rule first"` — `Sources/VariorumCore/Operations/Operations+ReadingFilter.swift:94`
+- `"its filter is unreadable (malformed) — edit the filter first"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:50`
+- `"it has no rule yet — give it one first"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:56`
+- `"this note is archived — books don't show archived notes; unarchive it first"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:73`
+- `"it collects \(profile) notes — this note isn't one, and adding can't change that"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:86` (templated)
+- `"it collects notes by their entry date — this note has no entry date; set one first (set date…)"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:92`
+- `"it collects notes dated \(from) or later — this one is dated \(day)"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:98` (templated)
+- `"it collects notes dated \(to) or earlier — this one is dated \(day)"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:104` (templated)
+- `"the tag #\($0)"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:155` (templated)
+- `"a tag"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:155`
+- `"its filter needs \(name), which doesn't exist right now — recreate it (Settings → Tags) first"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:158` (templated)
+- `"tagging alone can't satisfy its filter"` — `Sources/VariorumCore/Operations/Operations+SmartCollect.swift:184`
+
+— 377 strings
+
+
+## Dialogs, sheets & ceremonies (Divide/Merge choosing takes, confirms, pickers)
+
+- `"Copy in and Move in are offered where a note meets a book that owns its notes \u{2014} add it to the book, or judge it at the book's door."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:62`
+- `"Copy In"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:66`
+- `"Move In"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:67`
+- `"Copy Into"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:72`
+- `"Add \(quoted(note)) to \(quoted(book))?"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:76` (templated)
+- `"Adding a note to a book never copies it \u{2014} a copy only happens because you choose one, and it always remembers where it came from."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:82`
+- `"\(quoted(book)) owns its notes. This note also lives in \(list(elsewhere))."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:90` (templated)
+- `"Copy it in: a linked copy joins \(quoted(book)); the original stays in \(list(elsewhere)), unchanged."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:95` (templated)
+- `"Move it in: it leaves \(list(leaves))"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:103` (templated)
+- `" and stops waiting at \(list(waitingAt))\u{2019}s door"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:105` (templated)
+- `", and lives only in \(quoted(book))."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:107` (templated)
+- `"It can\u{2019}t move: \(quoted(finished)) is sealed, so the note can\u{2019}t leave it \u{2014} copy it in instead, or unseal \(quoted(finished)) first (that reopens it too)."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:117` (templated)
+- `"It can\u{2019}t move: \(quoted(finished)) is finished, so the note can\u{2019}t leave it \u{2014} copy it in instead, or reopen \(quoted(finished)) first."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:120` (templated)
+- `"This note belongs to \(quoted(owner)), which owns its notes."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:128` (templated)
+- `"Only a copy can come in: a linked copy joins \(quoted(book)); the original stays in \(quoted(owner)), unchanged."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:132` (templated)
+- `"Copied into \(quoted(book)) \u{2014} a linked copy; the original stays where it was."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:139` (templated)
+- `"Moved into \(quoted(book))."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:144` (templated)
+- `"Moved into \(quoted(book)) \u{2014} it left \(list(left))."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:145` (templated)
+- `"\(quoted(book)) is sealed \u{2014} unseal it (its settings) to add to it; unsealing reopens it too."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:159` (templated)
+- `"\(quoted(book)) is finished \u{2014} reopen it (its settings) to add to it."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:161` (templated)
+- `"\(quoted(book)) is at its note cap \u{2014} extend the cap in its settings."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:163` (templated)
+- `"This note is already in \(quoted(book))."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:165` (templated)
+- `"A book this note would leave is finished, so it can\u{2019}t move \u{2014} copy it in instead."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:181`
+- `"\(quoted(finished)) is sealed, so this note can\u{2019}t leave it \u{2014} copy it in instead, or unseal \(quoted(finished)) first (that reopens it too)."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:189` (templated)
+- `"\(quoted(finished)) is finished, so this note can\u{2019}t leave it \u{2014} copy it in instead, or reopen \(quoted(finished)) first."` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:191` (templated)
+- `"Cancel"` — `App/Variorum/Variorum/Core/Views/MembershipChoice.swift:477`, `App/Variorum/Variorum/Features/Editor/CeremonySheetChrome.swift:162`, `App/Variorum/Variorum/Features/Library/NoteDeletion.swift:267`, `App/Variorum/Variorum/Registry/ShellActions.swift:576`, `App/Variorum/Variorum/RootView.swift:1073`
+- `"finished"` — `App/Variorum/Variorum/Core/Views/NotePicker.swift:175`
+- `"search notes"` — `App/Variorum/Variorum/Core/Views/NotePicker.swift:195`
+- `"cancel"` — `App/Variorum/Variorum/Core/Views/NotePicker.swift:214`
+- `"What the keys do, and what a check means"` — `App/Variorum/Variorum/Features/Editor/CeremonySheetChrome.swift:68` (tooltip)
+- `"Keep takes on the top block"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:122`
+- `"Keep takes on the bottom block"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:123`
+- `"Copy takes to both"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:124`
+- `"Choose per take…"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:125`
+- `"the take you were in splits; the others stay whole on top"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:137`
+- `"the mirror — the others stay whole below"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:138`
+- `"every other take rides whole onto both halves"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:139`
+- `"check, place and park each \u{2702} yourself"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:140`
+- `"Check at least one take to carry the cut through."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:197`
+- `"Place the ✂ in every checked take — drag it, click a spot, or use ←/→ (⇥ moves between takes)."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:200`
+- `"Every checked take rides whole into the first block — the second block would be born without a take. Split at least one, or park one at its start."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:203`
+- `"Every checked take rides whole into the second block — the first block would be born without a take. Split at least one, or park one at its end."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:206`
+- `"This block's takes changed — try the divide again."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:213`
+- `"Place the \u{2702} in the take you're dividing — drag it, click a spot, or use \u{2190}/\u{2192}."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:216`
+- `"Copying the takes to both blocks needs a cut INSIDE this take — move the \u{2702} off the end."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:221`
+- `"The \u{2702} is at this take's very end and every other take stays on the top block — the bottom block would be born without a take. Move the \u{2702} into the text."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:224`
+- `"The \u{2702} is at this take's very start and every other take goes to the bottom block — the top block would be born without a take. Move the \u{2702} into the text."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:228`
+- `"1 other take"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:464`, `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:109`
+- `"\(n) other takes"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:464` (templated)
+- `" 1 empty take can't be placed and stays with the original block."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:468`
+- `" \(unparkable) empty takes can't be placed and stay with the original block."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:469` (templated)
+- `"Each new block starts with one take."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:473`
+- `"\(takes(parked)) \(parked == 1 ? "stays" : "stay") whole on the \(side) block; the \(theOther) block starts with one take."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:474` (templated)
+- `"The take you were in splits at the \u{2702}. \(parking(on: "top", theOther: "bottom"))\(stranded) Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:479` (templated)
+- `"The take you were in splits at the \u{2702}. \(parking(on: "bottom", theOther: "top"))\(stranded) Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:483` (templated)
+- `"The take you were in splits at the \u{2702}. \(takes(others)) \(others == 1 ? "rides" : "ride") whole onto BOTH blocks — the extra copies are quick to delete. Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:487` (templated)
+- `"Each \u{2702} splits its take; \u{2702} at the very END keeps the whole take on the top block, at the very START on the bottom. An unchecked take is not cut and stays on the original block, in lineage. \u{21E5} moves between takes."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:491`
+- `"**Check the takes that should be cut.** Each checked take carries its own \u{2702}, and its two halves become the two new blocks' takes. **An unchecked take is not cut and goes into neither new block** — it stays whole on the original block, which the divide keeps and releases to \(TrayPath.originalsPathWithDoor)."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:640` (templated)
+- `"1 uncut take"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:658`
+- `"\(uncheckedTakes) uncut takes"` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:658` (templated)
+- `"Divided — the original block kept \(takes) and waits in \(TrayPath.originalsPathWithDoor). \u{2325}\u{2318}Z undoes the divide."` — `App/Variorum/Variorum/Features/Editor/DivideWCeremony.swift:659` (templated)
+- `"Divide choosing takes"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:104`
+- `"Divide"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:128`
+- `"1 take"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:160`, `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:224`
+- `"\(state.takes.count) takes"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:160` (templated)
+- `"choosing per take"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:162`
+- `"place the \u{2702} first"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:165`
+- `"cut where you clicked"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:165`
+- `"**Keyboard** — \u{2190}/\u{2192} step the aimed take's \u{2702} one word · \u{2325}\u{2190}/\u{2325}\u{2192} a sentence, a newline, or the ends · \u{21E5}/\u{21E7}\u{21E5} aim the next/previous checked take · \u{23CE} Divide · \u{238B} Cancel."` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:176`
+- `"Check the takes to cut and place each \u{2702} yourself"` — `App/Variorum/Variorum/Features/Editor/DivideWSheet.swift:344`
+- `"Bring every take"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:59`
+- `"Only the shown ones"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:60`
+- `"Only the two shown"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:60`
+- `"Pair by hand…"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:61`
+- `"the shown takes join in order; every other take comes along whole"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:72`
+- `"the two shown join; every other take comes along whole"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:73`
+- `"the others stay with their original blocks, in lineage"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:75`
+- `"\u{FF0B} pairings, carries, and the join per pair"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:77`
+- `"join with a space"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:101`
+- `"join on a new line"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:102`
+- `"join directly"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:103`
+- `"The \(blocks) takes you were looking at join in order."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:106` (templated)
+- `"The two takes you were looking at \(joined)."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:107` (templated)
+- `"\(otherTakes) other takes"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:109` (templated)
+- `"\(shown) There are no other takes to bring. Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:114` (templated)
+- `"\(shown) \(takes) \(one ? "comes" : "come") along whole onto the merged block. Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:117` (templated)
+- `"\(shown) There are no other takes. Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:121` (templated)
+- `"\(shown) \(takes) \(one ? "stays" : "stay") with the released blocks in lineage (\(TrayPath.originalsPath)). Reversible — \u{2325}\u{2318}Z."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:123` (templated)
+- `"Place a \u{FF0B} between one take on each side to mint a joined take, check \u{201C}carry\u{201D} to ride a take over whole, and anything left stays with its released block in lineage."` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:126`
+- `"Join the picked blocks — choose whether every take comes along or only the shown ones"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:137`
+- `"Join the picked blocks — choose whether every take comes along or only the two shown"` — `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift:138`
+- `"Merge choosing takes"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:68`
+- `"Merge"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:96`
+- `"2 blocks"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:113`
+- `"\(blocks) blocks"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:113` (templated)
+- `"1 take beyond the shown ones"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:116`
+- `"\(state.otherTakes) takes beyond the shown ones"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:117` (templated)
+- `"\(state.firstTakes.count) + \(state.secondTakes.count) takes"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:119` (templated)
+- `"A **＋** pairs one take from each block into a joined take on the merged block (click a take on each side to place it). **Carry** rides a take over whole, unjoined. Anything unpaired and uncarried stays with the released blocks in lineage — \u{2325}\u{2318}Z undoes the whole merge."` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:128`
+- `"**Keyboard** — \u{23CE} Merge · \u{238B} Cancel."` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:133`
+- `"First block"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:173`
+- `"\u{FF0B} pairs with \u{2192}"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:174`
+- `"Second block"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:176`
+- `"carried whole"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:200`, `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:379`
+- `"stays in lineage"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:200`
+- `"block \(i + 1) of \(state.runBlocks.count)"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:222` (templated)
+- `"\(block.takeCount) takes — all coming along"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:226` (templated)
+- `"\(block.takeCount) takes — only this one comes"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:227` (templated)
+- `"Pairings"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:249`
+- `"First block's takes"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:259`
+- `"Second block's takes"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:264`
+- `"1 unpaired take will stay with its released block in lineage (\(TrayPath.originalsPath))."` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:271` (templated)
+- `"\(state.stayBehindCount) unpaired takes will stay with their released blocks in lineage (\(TrayPath.originalsPath))."` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:272` (templated)
+- `"Join"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:307`
+- `"space"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:311`
+- `"new line"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:312`
+- `"Remove this pairing — both takes return to their columns"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:329` (tooltip)
+- `"Every take here is paired."` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:364`
+- `"picked — choose one on the other side"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:378`
+- `"click to pair"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:379`
+- `"carry whole"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:390`
+- `"This take rides onto the merged block as its own take, unjoined"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:394` (tooltip)
+- `"Click to pair — select a take on the other side and the ＋ lands between them"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:399` (tooltip)
+- `"a take"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:429`
+- `"an empty take"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:432`, `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:480`
+- `"take"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:439`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:231`
+- `"take \(ordinal)"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:439`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:231` (templated)
+- `"shown here"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:473`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:237`
+- `"locked"` — `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:476`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:240`
+- `"\u{2702} splits here."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:80`
+- `"\u{2702} splits here — \(wordCount(words.above)) above, \(words.below) below"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:81` (templated)
+- `"\u{2702} at the end — this whole take stays on the top block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:84`
+- `"\u{2702} at the start — this whole take goes to the bottom block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:86`
+- `"Not cut — this whole take rides onto BOTH blocks"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:88`
+- `"Not cut — stays on the original block, in \(TrayPath.originalsPath)"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:94` (templated)
+- `"Place the \u{2702} — drag it, click between words, or \u{2190}/\u{2192}"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:96`
+- `"This take is empty — there's no cut to place. Uncheck it."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:98`
+- `"1 word"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:103`
+- `"\(n) words"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:103` (templated)
+- `"The original block stays whole in \(TrayPath.originalsPath)."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:110` (templated)
+- `"The original blocks stay whole in \(TrayPath.originalsPath)."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:116` (templated)
+- `"Both original blocks stay whole in \(TrayPath.originalsPath)."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:117` (templated)
+- `"top block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:123`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:129`
+- `"bottom block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:123`, `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:129`
+- `"top block · whole"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:124`
+- `"bottom block · whole"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:125`
+- `"original block · lineage"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:138`
+- `"no cut placed yet"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:139`
+- `"Drag, click, or use the arrow keys to move the cut."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:287`
+- `"no cut placed"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:350`
+- `"whole take goes to the first block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:351`
+- `"whole take goes to the second block"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:352`
+- `"cut at position \(index) of \(take.boundaries.count)"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:354` (templated)
+- `"Delete"` — `App/Variorum/Variorum/Features/Library/NoteDeletion.swift:263`
+- `"Restore the tutorial?"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:49`
+- `"This replaces the tutorial with a fresh copy: every note tagged exactly \u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. It also sets up the \(Operations.welcomeShelfName) shelf the books chapter walks: the seeded books that sit unshelved go onto it, the two classic books' shipped notes are tagged #\(SampleLibrarySeeder.classicsTagPath), \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its notes if none of them lives in another book, and a \u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D} gathering and one quick note are made if they are missing. Nothing else is touched."` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:54` (templated)
+- `"One take has been edited since"` — `App/Variorum/Variorum/Registry/ShellActions.swift:563`
+- `"\(warning.bufferCount) takes have been edited since"` — `App/Variorum/Variorum/Registry/ShellActions.swift:563` (templated)
+- `"\(subject) — undoing puts back the text as it was BEFORE the \(warning.label.lowercased()), so that writing is set aside. It is committed first, so you can bring it back from the take's history (⌘S's list) at any time."` — `App/Variorum/Variorum/Registry/ShellActions.swift:564` (templated)
+- `"Undo"` — `App/Variorum/Variorum/Registry/ShellActions.swift:575`
+- `"Replace"` — `App/Variorum/Variorum/Registry/ShellActions.swift:599`
+
+— 161 strings
+
+
+## Settings panes
+
+The Settings window has nine panes (General · Editor · Takes · Writing · Shortcuts · Tags · Protection · Data Safety · Acknowledgments). Each pane's strings are below; a pane's catalog title and blurb (from `SettingsShape.swift`, also what Settings search shows) sit with that pane.
+
+
+### Settings — window chrome, pane list & search
+
+- `"search settings"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:163`
+- `"Clear the search"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:178` (tooltip)
+- `"search"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:239`
+- `"Settings, keyboard shortcuts and the app's own words — all three."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:245`
+- `"shortcut"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:371`
+- `"the word"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:372`
+- `"General"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:72`
+- `"Editor"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:73`
+- `"Takes"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:74`
+- `"Writing"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:75`
+- `"Shortcuts"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:76`
+- `"Tags"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:77`
+- `"Protection"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:78`
+- `"Data Safety"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:79`
+- `"Acknowledgments"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:80`
+- `"The voice, the colours, light and dark, and how the app confirms what it did."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:88`
+- `"How the writing surface looks and behaves while you are in it."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:89`
+- `"How a block's alternative takes open and follow you."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:90`
+- `"What typing does to the note — and the savepoints Variorum keeps for you."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:91`
+- `"Every keyboard shortcut and menu door, grouped. Search above reaches it."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:92`
+- `"The whole tag hierarchy: create, rename, re-parent, and make a gathering from tags."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:95`
+- `"The passphrase, how the library locks, and the ways back in."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:96`
+- `"Backups, how fresh they are, and what restoring one does."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:97`
+- `"The open-source notices Variorum is built on."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:98`
+
+— 24 strings
+
+
+### Settings — General
+
+- `"Voice"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:391`
+- `"Terminal"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:395`
+- `"Study"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:396`
+- `"Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:399`
+- `"Confirmations"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:440`
+- `"Light & dark"` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:25`
+- `"Appearance"` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:26`, `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:150`
+- `"Follow system"` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:29`
+- `"Light"` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:30`
+- `"Dark"` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:31`
+- `"Dark is a fully black room in both voices, and under every colour palette. This Mac only — your voice and palette follow you everywhere, but how bright the screen should be is about where you are sitting."` — `App/Variorum/Variorum/Features/Settings/AppearanceChoiceRow.swift:34`
+- `"Colour palette"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:23`
+- `"Default"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:38`, `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:63`
+- `"Pastels"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:39`
+- `"Two-tone"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:40`
+- `"Bold"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:41`
+- `"Your own"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:42`
+- `"Lavender"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:64`
+- `"Mint"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:65`
+- `"Pink"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:66`
+- `"Blue"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:67`
+- `"Gold & black"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:68`
+- `"Sage & terracotta"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:69`
+- `"Slate & amber"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:70`
+- `"Plum & cream"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:71`
+- `"Ink & coral"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:72`
+- `"Grey & green"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:73`
+- `"Cobalt & tangerine"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:74`
+- `"Peach & indigo"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:75`
+- `"Butter & cobalt"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:76`
+- `"Rose & moss"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:77`
+- `"Teal & rust"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:78`
+- `"Custom"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:79`
+- `"A palette recolours the panels, the selected-row wash, the coloured chrome words (\u{201C}this note\u{201D}, \u{201C}commit \u{2318}S\u{201D}), the take cards and the hairlines. Everything else stays the voice's \u{2014} its type, its marks and its habits \u{2014} and dark mode stays fully black whichever you pick."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:84`
+- `"Two voices, many palettes: the palette is only colour, so Terminal stays Terminal and Study stays Study under every one of them."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:93`
+- `"Your colour"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:98`
+- `"Accent, optional"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:99`
+- `"Six hex digits \u{2014} with or without the #. Variorum derives the rest: the panels, the wash, the take tints, the hairlines, and an accent deep enough to read on them. Type a second colour if you want the chrome words in a different hue; leave it empty and they take your colour, deepened."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:103`
+- `"Type a colour above to see it \u{2014} until then this looks like the default."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:109`
+- `"Using #\(room) with #\($0) for the chrome words."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:117` (templated)
+- `"Using #\(room)."` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:118` (templated)
+- `"Confirmations after an act"` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:27`
+- `"A quiet line in the bottom bar (recommended)"` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:31`
+- `"A note at the bottom of the window"` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:32`
+- `"Nothing"` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:33`
+- `"What Variorum says after it does something — \u{201C}Blocks joined\u{201D}, \u{201C}Block divided\u{201D}, the newlines chip's sentence, \u{201C}Undid: Divide\u{201D}. A quiet line: muted words at the end of the bottom bar, fading after a few seconds. A note at the bottom of the window: the card these used to appear in. Nothing: they stay unsaid."` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:38`
+- `"Whichever you choose, anything Variorum REFUSES still shows as a note at the bottom of the window \u{2014} a door that can't act always says why \u{2014} and so does any note that offers you a button."` — `App/Variorum/Variorum/Features/Settings/ReceiptStyleCopy.swift:46`
+- `"Design voice"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:139`
+- `"Terminal (mono, airy, its own idioms) or Study (warm paper and serif)."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:140`
+- `"Sixteen palettes plus your own hex — the room, the wash, the accent and the take tints, under either voice."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:145`
+- `"Follow system, light, or dark. Dark is a fully black room in both voices. This Mac only."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:151`
+- `"Whether an act that landed says so as a toast, a quiet line, or nothing. Refusals always show."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:156`
+
+— 52 strings
+
+
+### Settings — Editor
+
+- `"The page"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:493`
+- `"Off — the cursor is enough"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:500`
+- `"Outline ring"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:501`
+- `"Background"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:502`
+- `"Standard"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:512`
+- `"A blank line's worth"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:513`
+- `"Air after every paragraph — inside a block and between blocks alike, so block boundaries stay invisible at rest. Purely how it looks: nothing is stored, and exports are byte-identical either way. This Mac only."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:515`
+- `"Switching modes"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:523`
+- `"While you write"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:553`
+- `"ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:555`
+- `"Off"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:564`
+- `"Check while typing"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:565`
+- `"Check and correct"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:566`
+- `"Off (the default): no underlines; Edit ▸ Spelling and Grammar still checks on demand. Check while typing: red underlines as you go. Check and correct: macOS also fixes what it is confident about. Applies to every writing surface — Write, takes, comparisons. This Mac only."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:568`
+- `"ON: when you scroll near a very long block, Variorum asks the text system to measure that one block properly — which removes the empty space it was guessing at underneath. It happens once per block, only for blocks over about a long-paragraph's length and under a measured size cap, and never while you are actually scrolling. OFF: the text system's own estimate stands, and long blocks can show phantom space that vanishes when you scroll onto them. This Mac only."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:574`
+- `"Flash your place after switching modes"` — `App/Variorum/Variorum/Features/Settings/ArrivalFlashCopy.swift:21`
+- `"When you switch between Write, Takes and Read, the line (or block) you were in wears a brief highlight that fades in about a second, so your eye finds it. Clicks, find steps and opening a note never flash. Off: no highlight — the switch still lands you in the same place. With Reduce Motion on, it shows without fading. Synced."` — `App/Variorum/Variorum/Features/Settings/ArrivalFlashCopy.swift:24`
+- `"Books"` — `App/Variorum/Variorum/Features/Settings/OwnershipSettingsCopy.swift:20`
+- `"Show ownership badges"` — `App/Variorum/Variorum/Features/Settings/OwnershipSettingsCopy.swift:22`
+- `"In a book, a small mark on a note that also lives in other books (hover names them \u{2014} editing it there edits it here). In gatherings, tag listings and the Library, \u{201C}owned by\u{201D} on a note an owned book holds \u{2014} click it to open that book at the note. Off: no marks anywhere; nothing else changes. Synced."` — `App/Variorum/Variorum/Features/Settings/OwnershipSettingsCopy.swift:25`
+- `"Hide notes an owned book holds, in gatherings and tag listings"` — `App/Variorum/Variorum/Features/Settings/OwnershipSettingsCopy.swift:30`
+- `"Off (the default): gatherings and tag listings show every matching note, and one an owned book holds wears its \u{201C}owned by\u{201D} mark. On: they leave such notes out \u{2014} each gathering can still choose for itself in its settings. The Library always shows everything. Synced."` — `App/Variorum/Variorum/Features/Settings/OwnershipSettingsCopy.swift:33`
+- `"Show block seams (dotted lines between blocks)"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:163`
+- `"The dotted line between blocks. Off by default — at rest a note reads as seamless prose. ⌘⇧B toggles it too."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:164`
+- `"Mark the block being edited"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:168`
+- `"Off, an outline ring, or a background wash on the block you are in."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:169`
+- `"Show comments inline (tinted, under the block)"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:173`
+- `"Comments as tinted strips under the block instead of cards in the margin."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:174`
+- `"Show the block drag handle on hover (Write)"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:178`
+- `"Pointing at a block reveals its ⠿ drag handle. This Mac only."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:179`
+- `"Lay out very long blocks as you reach them"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:182`
+- `"Removes the empty space the text system guesses at under a very long block. This Mac only."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:183`
+- `"Space between paragraphs"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:187`
+- `"Standard, or a blank line's worth of air after every paragraph. Nothing is stored; exports are identical either way."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:188`
+- `"A brief highlight on your place after you switch between Write, Takes and Read, fading in about a second. On by default; synced."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:193`
+- `"Marks on notes that live in several books, and \u{201C}owned by\u{201D} on notes an owned book holds. On by default; synced."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:200`
+- `"Leave notes an owned book holds out of gatherings and tag listings. Off by default; each gathering can choose; the Library shows everything. Synced."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:205`
+- `"Spellchecking"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:209`
+- `"Off, check while typing, or check and correct. Applies to every writing surface. This Mac only."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:210`
+
+— 39 strings
+
+
+### Settings — Takes
+
+- `"The fan"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:598`
+- `"Stack"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:602`
+- `"Carousel"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:603`
+- `"Margin grid"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:604`
+- `"Slot split"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:605`
+- `"Takes open with ⌘⇧T on the block you are in, and ⎋ closes them all. Both settings are synced, so a fan opens the same way on every device."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:610`
+- `"Takes open as"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:217`
+- `"Stack, carousel, margin grid, or slot split — the four ways a block's fan lays out."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:218`
+- `"Takes follow the scroll"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:223`
+- `"Open takes track the block you scroll to instead of staying where they were opened."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:224`
+
+— 10 strings
+
+
+### Settings — Writing
+
+- `"Typing"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:644`
+- `"Savepoints"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:664`
+- `"Savepoints Variorum takes for you"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:22`
+- `"Every time I leave a note (recommended)"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:26`
+- `"Only after a note sits untouched"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:27`
+- `"Only when I press ⌘S"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:28`
+- `"Every time I leave a note: closing it, switching away, or quitting leaves one savepoint for each take you changed — and a note you leave open gets one after about two hours. Only after a note sits untouched: just that two-hour backstop. Only when I press ⌘S: neither. A take you haven't changed is never saved twice, and these quiet savepoints group into one line in a take's history."` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:33`
+- `"Whichever you choose, Variorum still saves a take right before something could make your text unreachable — marking a note complete, locking a take with unsaved changes, and undoing a structural change over edits. Those aren't a schedule; they're insurance."` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:42`
+- `"Old quiet savepoints"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:57`
+- `"Tidy them after \(SavepointPruning.ageDays) days (recommended)"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:61` (templated)
+- `"Keep every one, forever"` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:62`
+- `"Tidy: once a take's quiet savepoints are older than \(SavepointPruning.ageDays) days, only the newest \(SavepointPruning.keepNewestQuiet) are kept — the rest are deleted for good, everywhere, once every synced device has seen them. Keep every one: nothing is ever thinned. Savepoints you took yourself with ⌘S are never touched, in either mode."` — `App/Variorum/Variorum/Features/Settings/SavepointCadenceCopy.swift:67` (templated)
+- `"Whether a new paragraph becomes its own block as you type past it. Synced; a note's own chip still wins where it is set."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:231`
+- `"How often Variorum writes a quiet savepoint for you. The insurance occasions stay on in every mode."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:237`
+- `"Whether old quiet savepoints are trimmed, and after how long. Never means never, on every device."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:243`
+- `"Newlines make blocks"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:88`
+- `"On — each paragraph becomes its own block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:89`
+- `"Off — newlines stay inside the block"` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:90`
+- `"The default for every note that has no setting of its own. ON (the standard): in Write, Return makes a block wherever the cursor is, and pasted paragraphs arrive as blocks. OFF: newlines stay inside the block everywhere — Divide (⌘⇧D) or New Block Below (⌘⇧ ⏎ ) split deliberately. Governs future entry only; existing blocks never re-segment, and a note with its own setting keeps it. Synced to all your devices."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:93`
+- `"Newlines make blocks by default again. Existing blocks are untouched, and notes with their own setting keep it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:102`
+- `"Newlines now stay inside the block by default — typing and pasting won't make new blocks. Existing blocks are untouched, and notes with their own setting keep it."` — `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift:105`
+
+— 21 strings
+
+
+### Settings — Shortcuts
+
+- `"Every shortcut here is also a menu item — the menus are the map. The search field finds any of these by what it does."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:820`
+- `"⌘/ opens the same list in its own window, beside the dictionary of the app's own words."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:858`
+
+— 2 strings
+
+
+### Settings — Tags
+
+- `"New Child Tag…"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:902`
+- `"Rename…"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:907`
+- `"Delete (with subtree)"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:912`
+- `"No tags yet."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:918`
+- `"New Tag…"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:922`
+- `"Make a Gathering…"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:932`
+- `"New Tag"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:940`
+- `"New Child Tag"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:940`
+- `"Name"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:941`, `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:956`
+- `"Create"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:942`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:947`, `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:961`, `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:1001`
+- `"Rename Tag"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:950`
+- `"Rename"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:957`
+- `"Make a Gathering"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:982`
+- `"Makes a gathering on the Bookcase that shows every note with these tags \u{2014} it holds none of them. The tags stay on the notes."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:983`
+- `"Gathering name"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:988`
+- `"Notes must carry"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:990`
+- `"any of these tags (OR)"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:991`
+- `"all of these tags (AND)"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:992`
+- `"Make Gathering"` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:1002`
+- `"Tag manager"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:249`
+- `"The whole hierarchy: new tags, child tags, rename, delete with the subtree — and Make a Gathering, which shows every note with those tags."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:250`
+
+— 22 strings
+
+
+### Settings — Protection
+
+The Protection pane itself renders the copy listed under **Protection, encryption, account & sync surfaces** (`ProtectionPane.swift`, `PostureCopy.swift`, `StoreProtection.swift`); only the pane's catalog entry is here.
+
+- `"Protection"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:257`
+- `"The passphrase, when the library locks, escrow and the recovery key."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:258`
+
+— 2 strings
+
+
+### Settings — Data Safety
+
+- `"This folder can't be remembered across launches (\(error.localizedDescription)). Pick a folder in your home directory or on an external volume."` — `App/Variorum/Shared/BackupDestination.swift:84` (templated)
+- `"The backup folder can't be found — it may have moved, been renamed, or be on a disconnected drive. Pick it again."` — `App/Variorum/Shared/MarkdownInsurance.swift:113`, `App/Variorum/Shared/StoreBackup.swift:362`
+- `"This run made no snapshot to copy."` — `App/Variorum/Shared/StoreBackup.swift:404`
+- `"no answer"` — `App/Variorum/Shared/StoreBackup.swift:489`
+- `"could not be checked: \(error.localizedDescription)"` — `App/Variorum/Shared/StoreBackup.swift:513` (templated)
+- `"lock-time copy \(name): gone before it could be checked"` — `App/Variorum/Shared/StoreBackup.swift:684` (templated)
+- `"lock-time copy \(name): \(integrityCheck(of: url, using: configuration))"` — `App/Variorum/Shared/StoreBackup.swift:686` (templated)
+- `"If this Mac syncs, restoring an older copy does not undo your deletions. Your account tells this Mac what you deleted since: ordinary deletions re-apply and the writing lands in the Trash, recoverable for the rest of its 30 days — and anything you deleted permanently stays permanently deleted."` — `App/Variorum/Variorum/Features/Settings/DataSafetyCopy.swift:57`
+- `"If this Mac is not syncing, restoring is time travel: anything deleted after this copy was made comes back — including things deleted permanently."` — `App/Variorum/Variorum/Features/Settings/DataSafetyCopy.swift:66`
+- `"Permanent deletion removes writing from your library and your synced devices — not from backup files. If you restore a backup made before a permanent delete, the deleted writing does not come back into your library; but it is still inside that backup file, and stays there until the backup is rotated away or you delete the file."` — `App/Variorum/Variorum/Features/Settings/DataSafetyCopy.swift:72`
+- `"Folder set."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:253`
+- `"Copies stop going there. The copies already in that folder stay where they are."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:265`
+- `"Copied here, but the check on the copy said “\(record.primary.integrity ?? "")”."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:284` (templated)
+- `"Copied, checked, ok."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:286`
+- `"Already up to date here."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:288`
+- `"The copy beside your library failed: \(record.primary.detail ?? "unknown")."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:290` (templated)
+- `"No place to copy to."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:292`
+- `"Copied to your folder, but the check there said “\(record.secondary.integrity ?? "")”."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:300` (templated)
+- `"Copied to your folder too\(record.secondary.pruned > 0 ? ", \(record.secondary.pruned) old \(record.secondary.pruned == 1 ? "copy" : "copies") retired" : "")."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:302` (templated)
+- `"Your folder already has today's copy."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:304`
+- `"Your folder: \(record.secondary.detail ?? "unknown")."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:306` (templated)
+- `"Plain-text copy written (\(count) file\(count == 1 ? "" : "s"))."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:317` (templated)
+- `"Plain-text copy: \(record.markdown?.detail ?? "unknown")."` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:319` (templated)
+- `"Backups"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:71`, `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:262`
+- `"Open the main window — backups run with the app."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:72`
+- `"Copies of your library"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:85` ⚠RULED
+- `"Beside your library"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:88` ⚠RULED
+- `"Variorum copies your library once a day while it is open. A day the app stayed closed has no copy — which is why the dates above matter more than the schedule does."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:99`
+- `"A second folder"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:118`
+- `"Not set. The copies above are on this disk, beside the library they copy — so they survive a mistake, but not the disk. Pick a folder somewhere else: an external drive, or a folder your cloud service syncs."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:121`
+- `"The folder you picked can't be reached — it may have moved, been renamed, or be on a disconnected drive. Nothing has been copied there since. Pick it again."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:128`
+- `"Kept there: the 14 most recent days that have a copy, plus one copy from each of the 4 weeks before those."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:135`
+- `"Change Folder…"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:143`
+- `"Plain-text copies"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:168`
+- `"Keep a weekly plain-text copy of every note"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:172`
+- `"Pick a second folder above first — the plain-text copies only ever go there."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:180`
+- `"Every note as Markdown"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:195`
+- `"The automatic export is off — the files above are from when it was on, and stay until you remove them."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:203`
+- `"Written weekly while the option is on — off by default now that your library is encrypted, because a scheduled plain-text copy re-opens the door encryption closed. The 4 most recent are kept. When on, this is the copy that survives a problem with the library file itself — plain text any program can open, no Variorum required."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:208`
+- `"Note that these are readable by anything that can read the folder — including whatever syncs it, if you picked a cloud folder."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:216`
+- `"Variorum can also keep a plain-text copy of every note in a folder you pick — the copy that survives a problem with the library file itself. It is off by default now that your library is encrypted; the manual Export Library command is always there."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:221`
+- `"Cancel"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:267`, `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:276` ⚠RULED (§11 provisional)
+- `"Writing the unencrypted copy…"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:282`
+- `"Written: \(path)"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:285` (templated)
+- `"Close"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:286`, `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:290` ⚠RULED (§11 provisional)
+- `"no passphrase is set on this library"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:326`
+- `"Variorum-unencrypted.sqlite"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:349`
+- `"Your account"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:362`
+- `"Restoring a copy"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:429`
+- `"Restoring is a Finder operation, not a button: quit Variorum, move the current library file aside, put the copy in its place, open Variorum. The step-by-step is in “\(StoreBackup.runbookFilename)”, which sits in every backup folder above."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:434` (templated) ⚠RULED
+- `"Backup log"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:465`
+- `"Newest: \(newest.formatted(date: .abbreviated, time: .shortened))"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:490` (templated)
+- `"\(summary.count) \(summary.count == 1 ? "copy" : "copies")"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:492` (templated)
+- `"back to \(oldest.formatted(date: .abbreviated, time: .omitted))"` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:494` (templated)
+- `"Where copies go, how fresh the last one is, and what restoring one does — including to things that were deleted."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:263`
+- `"Sync is off in this build (development store)."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:45`
+- `"Signed in, but this Mac isn't syncing right now."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:52`
+- `"Not syncing — this Mac keeps your library to itself."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:53`
+- `"Everything written on this Mac has reached your account."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:60`
+- `"1 change is still waiting to go up."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:66`
+- `"\(pending) changes are still waiting to go up."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:67` (templated)
+- `"Everything works: your writing is on this Mac, and the backups above are its net."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:80`
+- `"Nothing is lost while they wait — they are held on this Mac and sent when it can."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:86`
+- `"\(facts.pending) change\(facts.pending == 1 ? "" : "s") would go up when it does."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:93` (templated)
+- `"No sync round has finished since Variorum opened."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:102`
+- `"Last completed round: \(last.formatted(date: .omitted, time: .shortened))."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:104` (templated)
+- `"This Mac hasn't received anything from your account yet."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:109`
+- `"Received everything your account had through change #\(cursor)."` — `App/Variorum/Variorum/Features/Settings/SyncSafetyWords.swift:111` (templated)
+
+— 68 strings
+
+
+### Settings — Acknowledgments
+
+- `"Variorum is built on open-source software. The encryption that protects your library is SQLCipher, by Zetetic LLC."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:33`
+- `"SQLCipher"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:43`
+- `"Whole-library encryption — every page of your store is encrypted at rest with AES-256 through SQLCipher Community Edition (Zetetic LLC)."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:44`
+- `"SQLite"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:75`
+- `"The database engine SQLCipher extends, and the store's whole substrate."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:76`
+- `"GRDB.swift"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:86`
+- `"The Swift SQLite toolkit every read and write flows through (built here from a fork whose one delta is the README-documented SQLCipher configuration)."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:87`
+- `"Point-Free's dependency-injection library — how the app's clocks, identities, and stores stay testable."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:102`
+- `"Argon2 (PHC reference implementation)"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:131`
+- `"Passphrase key derivation for the encryption passphrase — vendored byte-verbatim from the Password Hashing Competition winner's official repository."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:132`
+- `"BIP-39 English wordlist"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:147`
+- `"The 2,048 words your recovery phrase is drawn from."` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:148`
+- `"From the Bitcoin Improvement Proposals repository (BIP-0039) — ⏎ PD/BSD-2-Clause per the BIP's preamble; the wordlist is treated as ⏎ public-domain reference data across BIP-39 implementations. ⏎ Upstream: https://github.com/bitcoin/bips/tree/master/bip-0039"` — `App/Variorum/Shared/AcknowledgmentsCopy.swift:149`
+- `"Open-source notices"` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:267`
+- `"The licences and copyright notices for what Variorum is built on."` — `App/Variorum/Variorum/Features/Settings/SettingsShape.swift:268`
+
+— 15 strings
+
+
+## Protection, encryption, account & sync surfaces
+
+- `"Check your email for a confirmation link, then sign in here. If this address already has an account, no email arrives — sign in with its existing password instead."` — `App/Variorum/Shared/AppServices.swift:70`
+- `"Project keys not configured (ProjectConfig.swift)"` — `App/Variorum/Shared/AppServices.swift:321`, `App/Variorum/Shared/AppServices.swift:351`, `App/Variorum/Shared/AppServices.swift:536`, `App/Variorum/Shared/AppServices.swift:611`, `App/Variorum/Shared/EncryptionSession.swift:360`, `App/Variorum/Shared/EncryptionSession.swift:384`, `App/Variorum/Shared/EncryptionSession.swift:633`
+- `"Owner adoption failed: \(error) — sync held; sign out and back in (or relaunch) to retry"` — `App/Variorum/Shared/AppServices.swift:447` (templated)
+- `"Couldn't reach the server — check your connection and try again."` — `App/Variorum/Shared/AppServices.swift:562`, `App/Variorum/Shared/EncryptionSession.swift:687`, `App/Variorum/Shared/ErrorPresentation.swift:139`, `App/Variorum/Shared/ErrorPresentation.swift:182`, `App/Variorum/Shared/PostureSwitchModel.swift:639` ⚠RULED (§11 provisional)
+- `"This account has an active hosted-sync plan — cancel it first."` — `App/Variorum/Shared/AppServices.swift:599`
+- `"sign in first"` — `App/Variorum/Shared/AppServices.swift:612`
+- `"Account"` — `App/Variorum/Shared/AuthViews.swift:29`
+- `"Encryption"` — `App/Variorum/Shared/AuthViews.swift:30`
+- `"If you have an active subscription, cancel it first — deleting the account does not cancel a purchase on its own."` — `App/Variorum/Shared/AuthViews.swift:72`
+- `"One account for the suite — hosted sync runs under it. Variorum works fully without an account; everything you write stays on this device either way."` — `App/Variorum/Shared/AuthViews.swift:87`
+- `"Close"` — `App/Variorum/Shared/AuthViews.swift:200`, `App/Variorum/Shared/AuthViews.swift:224`, `App/Variorum/Shared/KeyDoorView.swift:172`, `App/Variorum/Shared/KeyDoorView.swift:177`, `App/Variorum/Shared/SyncEnrollmentView.swift:142`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:130`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:950`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1311`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1330`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1442`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1449` ⚠RULED (§11 provisional)
+- `"Section"` — `App/Variorum/Shared/AuthViews.swift:212`
+- `"Project keys are not filled in yet (ProjectConfig.swift) — sign-in is dormant."` — `App/Variorum/Shared/AuthViews.swift:233`
+- `"Signed in\(signedIn.email.map { " as \($0)" } ?? "")"` — `App/Variorum/Shared/AuthViews.swift:245` (templated)
+- `"Sign out"` — `App/Variorum/Shared/AuthViews.swift:250` ⚠RULED
+- `"Cancel"` — `App/Variorum/Shared/AuthViews.swift:255`, `App/Variorum/Shared/AuthViews.swift:264`, `App/Variorum/Shared/AuthViews.swift:422`, `App/Variorum/Shared/EncryptionViews.swift:374`, `App/Variorum/Shared/KeyDoorView.swift:250`, `App/Variorum/Shared/PostureCopy.swift:242`, `App/Variorum/Shared/PostureCopy.swift:704`, `App/Variorum/Shared/SyncEnrollmentView.swift:39`, `App/Variorum/Shared/SyncEnrollmentView.swift:57`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:61`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1115`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1131`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1144`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1160`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1178`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1190`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1200`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1228`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1244`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1300`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1425` ⚠RULED (§11 provisional)
+- `"Sync runs under this account; everything you write is owned by it."` — `App/Variorum/Shared/AuthViews.swift:269`
+- `"Sign in with your Stargazing account:"` — `App/Variorum/Shared/AuthViews.swift:278`
+- `"Email"` — `App/Variorum/Shared/AuthViews.swift:280`, `App/Variorum/Shared/AuthViews.swift:342`
+- `"Password"` — `App/Variorum/Shared/AuthViews.swift:284`, `App/Variorum/Shared/AuthViews.swift:346`
+- `"Sign In"` — `App/Variorum/Shared/AuthViews.swift:289` ⚠RULED
+- `"Create an account…"` — `App/Variorum/Shared/AuthViews.swift:291`
+- `"One account for the suite — sync and everything you write run under it."` — `App/Variorum/Shared/AuthViews.swift:296`
+- `"Delete Account…"` — `App/Variorum/Shared/AuthViews.swift:307` ⚠RULED
+- `"Create your Stargazing account with an email and password:"` — `App/Variorum/Shared/AuthViews.swift:340`
+- `"Confirm password"` — `App/Variorum/Shared/AuthViews.swift:351`
+- `"The two password entries don't match yet."` — `App/Variorum/Shared/AuthViews.swift:366`
+- `"Create Account"` — `App/Variorum/Shared/AuthViews.swift:369`
+- `"Back to sign in"` — `App/Variorum/Shared/AuthViews.swift:371`
+- `"Account password"` — `App/Variorum/Shared/AuthViews.swift:404`
+- `"this \(ProtectionCopy.deviceName)"` — `App/Variorum/Shared/DeviceName.swift:31` (templated) ⚠RULED (§11 provisional)
+- `"This library already has an encryption passphrase, and your account must use the SAME one — one passphrase serves both. Type the library's passphrase here (check it under Settings ▸ Protection if you're unsure)."` — `App/Variorum/Shared/EncryptionSession.swift:148` ⚠RULED
+- `"iCloud Keychain wouldn't hold the key on this \(ProtectionCopy.deviceName) — nothing was set up. Turn on iCloud Keychain, or enter Castle first (Settings ▸ Protection) and set sync up there."` — `App/Variorum/Shared/EncryptionSession.swift:306` (templated) ⚠RULED
+- `"This device holds no keys — unlock with your passphrase first."` — `App/Variorum/Shared/EncryptionSession.swift:469`
+- `"The device Keychain refused to store the keys — sync will ask again next launch."` — `App/Variorum/Shared/EncryptionSession.swift:548`, `App/Variorum/Shared/EncryptionSession.swift:625`
+- `"Wrong encryption passphrase."` — `App/Variorum/Shared/EncryptionSession.swift:659`
+- `"That recovery phrase doesn't unlock this account's vault."` — `App/Variorum/Shared/EncryptionSession.swift:661` ⚠RULED (§11 provisional)
+- `"The passphrase can't be empty."` — `App/Variorum/Shared/EncryptionSession.swift:663`
+- `"That's not quite the phrase — one of the twelve words is off. Compare it with what you wrote down."` — `App/Variorum/Shared/EncryptionSession.swift:666`, `App/Variorum/Shared/PostureCopy.swift:375`, `App/Variorum/Shared/StoreProtection.swift:889` ⚠RULED
+- `"“\(word)” isn't a recovery-phrase word — check its spelling."` — `App/Variorum/Shared/EncryptionSession.swift:668` (templated) ⚠RULED
+- `"A recovery phrase is exactly 12 words — you entered \(count)."` — `App/Variorum/Shared/EncryptionSession.swift:670`, `App/Variorum/Shared/StoreProtection.swift:894` (templated) ⚠RULED
+- `"No encryption vault exists for this account yet — run setup first."` — `App/Variorum/Shared/EncryptionSession.swift:672` ⚠RULED (§11 provisional)
+- `"This account already has an encryption vault — enroll with its passphrase instead."` — `App/Variorum/Shared/EncryptionSession.swift:674` ⚠RULED (§11 provisional)
+- `"This account's encryption was set up by a newer version of Variorum — update the app first."` — `App/Variorum/Shared/EncryptionSession.swift:676` ⚠RULED (§11 provisional)
+- `"The vault just changed on another device — nothing was overwritten. Try again from the current state."` — `App/Variorum/Shared/EncryptionSession.swift:679` ⚠RULED (§11 provisional)
+- `"A recovery phrase already exists — replacing it is a deliberate step (use Regenerate)."` — `App/Variorum/Shared/EncryptionSession.swift:681`
+- `"This account's keys changed on another device — re-enroll with the current passphrase, then try again."` — `App/Variorum/Shared/EncryptionSession.swift:685` ⚠RULED
+- `"Encryption step failed: \(String(describing: error))"` — `App/Variorum/Shared/EncryptionSession.swift:689` (templated)
+- `"All 12 words together, in order, are the secret — no single word is a password. Anyone with the whole phrase can unlock your synced writing; anyone with less has nothing."` — `App/Variorum/Shared/EncryptionViews.swift:92`
+- `"Everything you write is sealed on your devices before it syncs: your text and takes, titles, book and chapter names, tags, comments, commit messages, and reference names and links. The server can never read any of it.\n\nWhat the server still sees is the shape, not the words: that an entry exists on a day, how items are ordered and connected, their sizes, when you sync, and settings switches. Sealed words plus visible shape is what lets sync work without trusting the server."` — `App/Variorum/Shared/EncryptionViews.swift:99`
+- `"Key replacement didn't finish on this device — sync is paused until it completes. Run Replace Encryption Keys again; nothing is lost, and your writing is untouched."` — `App/Variorum/Shared/EncryptionViews.swift:121`
+- `"Key replacement didn't finish on this device — sync is paused until it completes. Sign in first, then run Replace Encryption Keys from this tab; nothing is lost."` — `App/Variorum/Shared/EncryptionViews.swift:129`
+- `"Touch ID"` — `App/Variorum/Shared/EncryptionViews.swift:152`, `App/Variorum/Shared/StoreProtection.swift:522`
+- `"Checking this account's encryption state…"` — `App/Variorum/Shared/EncryptionViews.swift:189` ⚠RULED (§11 provisional)
+- `"This account's encryption was set up by a newer version of Variorum. Update the app to unlock sync."` — `App/Variorum/Shared/EncryptionViews.swift:197` ⚠RULED (§11 provisional)
+- `"Sign Out"` — `App/Variorum/Shared/EncryptionViews.swift:244`, `App/Variorum/Shared/KeyDoorCopy.swift:113`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:822` ⚠RULED
+- `"Sync setup isn't available in this build."` — `App/Variorum/Shared/EncryptionViews.swift:267` ⚠RULED (§11 provisional)
+- `"Step 4 of 4 — Your recovery phrase (required)"` — `App/Variorum/Shared/EncryptionViews.swift:277` ⚠RULED (§11 provisional)
+- `"If you ever forget the passphrase, these 12 words are the only other way into your synced writing. Setup isn't finished until you've written them down and confirmed them — closing now just leaves this step waiting."` — `App/Variorum/Shared/EncryptionViews.swift:278`
+- `"1. Write the 12 words down — on paper, or in a password manager."` — `App/Variorum/Shared/EncryptionViews.swift:338`
+- `"2. Type them back, in order, to confirm:"` — `App/Variorum/Shared/EncryptionViews.swift:340`
+- `"The 12 words, separated by spaces"` — `App/Variorum/Shared/EncryptionViews.swift:342`, `App/Variorum/Shared/KeyDoorView.swift:236`, `App/Variorum/Shared/SyncEnrollmentView.swift:156`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:104`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:889`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1360` ⚠RULED (§11 provisional)
+- `"That doesn't match the phrase above — check what you wrote down."` — `App/Variorum/Shared/EncryptionViews.swift:344`
+- `"The phrase you have now keeps working until this confirm lands — then it stops, everywhere."` — `App/Variorum/Shared/EncryptionViews.swift:348`
+- `"Confirm — I Wrote It Down"` — `App/Variorum/Shared/EncryptionViews.swift:353` ⚠RULED (§11 provisional)
+- `"Unlock sync on this device"` — `App/Variorum/Shared/EncryptionViews.swift:419` ⚠RULED (§11 provisional)
+- `"Enter your encryption passphrase to unwrap this account's keys."` — `App/Variorum/Shared/EncryptionViews.swift:421` ⚠RULED (§11 provisional)
+- `"The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused."` — `App/Variorum/Shared/EncryptionViews.swift:495` ⚠RULED (§11 provisional)
+- `"Encryption passphrase"` — `App/Variorum/Shared/EncryptionViews.swift:509`, `App/Variorum/Shared/SecretCheck.swift:262`, `App/Variorum/Shared/SecretCheck.swift:296`, `App/Variorum/Shared/StoreProtection.swift:665`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:56`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:470`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1005` ⚠RULED
+- `"Unlock"` — `App/Variorum/Shared/EncryptionViews.swift:512` ⚠RULED (§11 provisional)
+- `"Use my recovery phrase instead"` — `App/Variorum/Shared/EncryptionViews.swift:518` ⚠RULED (§11 provisional)
+- `"The 12 recovery words, separated by spaces"` — `App/Variorum/Shared/EncryptionViews.swift:522`, `App/Variorum/Shared/SecretCheck.swift:309` ⚠RULED (§11 provisional)
+- `"Unlock with Recovery Phrase"` — `App/Variorum/Shared/EncryptionViews.swift:523` ⚠RULED (§11 provisional)
+- `"Back to passphrase entry"` — `App/Variorum/Shared/EncryptionViews.swift:533` ⚠RULED (§11 provisional)
+- `"Passphrase key derivation took %.2f s on this device."` — `App/Variorum/Shared/EncryptionViews.swift:568`
+- `"Change Passphrase…"` — `App/Variorum/Shared/EncryptionViews.swift:582`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:485` ⚠RULED (§11 provisional)
+- `"What the server can and can't see"` — `App/Variorum/Shared/EncryptionViews.swift:634`, `App/Variorum/Shared/EncryptionViews.swift:640`
+- `"This looks like a sign-in problem — Account… → sign out and back in usually clears it (server-side auth changes can strand the old session)."` — `App/Variorum/Shared/ErrorPresentation.swift:68`
+- `"Account creation isn't open yet — this server isn't accepting new accounts."` — `App/Variorum/Shared/ErrorPresentation.swift:78`
+- `"An account with this email already exists — sign in instead."` — `App/Variorum/Shared/ErrorPresentation.swift:81`
+- `"The server couldn't send a confirmation email to that address — email delivery isn't fully set up yet. Try again later."` — `App/Variorum/Shared/ErrorPresentation.swift:107`
+- `"Too many attempts right now — wait a minute and try again."` — `App/Variorum/Shared/ErrorPresentation.swift:126`
+- `"That doesn't look like a valid email address — check it and try again."` — `App/Variorum/Shared/ErrorPresentation.swift:131`
+- `"Account creation failed — the server refused (HTTP \(status)). Try again in a moment."` — `App/Variorum/Shared/ErrorPresentation.swift:133` (templated)
+- `"Account creation failed — the server's response couldn't be read. Try again in a moment."` — `App/Variorum/Shared/ErrorPresentation.swift:135`
+- `"Account creation failed: \(error.localizedDescription)"` — `App/Variorum/Shared/ErrorPresentation.swift:141` (templated)
+- `"Wrong email or password."` — `App/Variorum/Shared/ErrorPresentation.swift:174`
+- `"Sign-in failed — the server refused (HTTP \(status)). Try again in a moment."` — `App/Variorum/Shared/ErrorPresentation.swift:176` (templated)
+- `"Sign-in failed — the server's response couldn't be read. Try again in a moment."` — `App/Variorum/Shared/ErrorPresentation.swift:178`
+- `"Sign-in failed: \(error.localizedDescription)"` — `App/Variorum/Shared/ErrorPresentation.swift:184` (templated)
+- `"At least 12 characters."` — `App/Variorum/Shared/KeyDoorCopy.swift:21` ⚠RULED
+- `"Your account password needs at least 12 characters."` — `App/Variorum/Shared/KeyDoorCopy.swift:22` ⚠RULED
+- `"That password has appeared in a known data breach — choose another."` — `App/Variorum/Shared/KeyDoorCopy.swift:26` ⚠RULED
+- `"Sync is on. This \(deviceName) keeps your sync keys in its own protected Keychain, beside your library's key."` — `App/Variorum/Shared/KeyDoorCopy.swift:31` (templated) ⚠RULED
+- `"Change your encryption passphrase."` — `App/Variorum/Shared/KeyDoorCopy.swift:36` ⚠RULED
+- `"Changing your passphrase updates your account's keys on the server, so it needs a connection."` — `App/Variorum/Shared/KeyDoorCopy.swift:38` ⚠RULED
+- `"For when you've forgotten it or want a different one. Your devices keep syncing; the new passphrase works on them right away when they're online, and each stops taking the old one once you've used the new one there. Changing your passphrase isn't a security measure — if someone else may have it, tick \"Also replace my keys\" below."` — `App/Variorum/Shared/KeyDoorCopy.swift:40` ⚠RULED
+- `"Current passphrase"` — `App/Variorum/Shared/KeyDoorCopy.swift:44` ⚠RULED
+- `"New passphrase"` — `App/Variorum/Shared/KeyDoorCopy.swift:45`
+- `"Confirm new"` — `App/Variorum/Shared/KeyDoorCopy.swift:46`
+- `"Forgot your current passphrase?"` — `App/Variorum/Shared/KeyDoorCopy.swift:47` ⚠RULED
+- `"This \(deviceName) holds your keys, so you can set a new passphrase now."` — `App/Variorum/Shared/KeyDoorCopy.swift:49` (templated) ⚠RULED
+- `"Set a New Passphrase"` — `App/Variorum/Shared/KeyDoorCopy.swift:50` ⚠RULED
+- `"Confirm with \(biometryName) to set a new passphrase."` — `App/Variorum/Shared/KeyDoorCopy.swift:52` (templated) ⚠RULED
+- `"Use your twelve words instead."` — `App/Variorum/Shared/KeyDoorCopy.swift:54` ⚠RULED
+- `"Also replace my keys — choose this if someone may have USED the old passphrase, or had one of your devices unlocked."` — `App/Variorum/Shared/KeyDoorCopy.swift:56` ⚠RULED
+- `"Your passphrase is changed. Your other devices keep syncing and take the new passphrase right away; each stops taking the old one once you've used the new one there."` — `App/Variorum/Shared/KeyDoorCopy.swift:59` ⚠RULED
+- `"Change Passphrase"` — `App/Variorum/Shared/KeyDoorCopy.swift:61` ⚠RULED (§11 provisional)
+- `"New twelve words."` — `App/Variorum/Shared/KeyDoorCopy.swift:65` ⚠RULED
+- `"Your current words stop opening your account the moment the new ones are confirmed; a device where you haven't used the new words yet still takes the old ones until you do. Write the new ones down first."` — `App/Variorum/Shared/KeyDoorCopy.swift:67` ⚠RULED
+- `"Also replace my keys — choose this if someone may have USED the old words, or had one of your devices unlocked."` — `App/Variorum/Shared/KeyDoorCopy.swift:71` ⚠RULED
+- `"Regenerate Twelve Words…"` — `App/Variorum/Shared/KeyDoorCopy.swift:73`
+- `"Your twelve words are replaced. The old ones no longer open your account."` — `App/Variorum/Shared/KeyDoorCopy.swift:74` ⚠RULED (§11 provisional)
+- `"Replace all your keys."` — `App/Variorum/Shared/KeyDoorCopy.swift:78` ⚠RULED
+- `"Use this if someone may have used your passphrase or twelve words, or had one of your devices unlocked. A copy of your library or a backup holds no keys, so it is never the reason on its own. Your sync gets a new master key and a new corpus key, everything on the server is re-encrypted from this \(deviceName), and this library gets a new key. Your other devices will each ask for your passphrase once, then give their own libraries new keys. Your passphrase and twelve words stay the same unless you change them below. Old backups keep their old keys: they still open with the passphrase you had when they were made, with your twelve words (unless you regenerate them), and — if they were made in Standard — through your Apple account; an enrolled device's master key no longer opens them, because that key is replaced."` — `App/Variorum/Shared/KeyDoorCopy.swift:80` (templated) ⚠RULED
+- `"In Standard this doesn't shut out someone inside your Apple account — your Apple account holds a key to the new keys too. For that, secure your Apple account with Apple's tools, or move to Castle."` — `App/Variorum/Shared/KeyDoorCopy.swift:91` ⚠RULED
+- `"Also choose a new passphrase"` — `App/Variorum/Shared/KeyDoorCopy.swift:94` ⚠RULED
+- `"Your passphrase typed (checked against your account's copy) and your twelve words typed or regenerated — the new keys must be wrapped under both, and \(biometryName) can't do that. (Forgot the passphrase? Change Passphrase first, with \(biometryName).)"` — `App/Variorum/Shared/KeyDoorCopy.swift:97` (templated) ⚠RULED
+- `"Replace Keys"` — `App/Variorum/Shared/KeyDoorCopy.swift:100` ⚠RULED
+- `"Replace All Keys…"` — `App/Variorum/Shared/KeyDoorCopy.swift:101`
+- `"Done. Your other devices will ask for your passphrase the next time they open."` — `App/Variorum/Shared/KeyDoorCopy.swift:102` ⚠RULED
+- `"Sync isn't set up on this account."` — `App/Variorum/Shared/KeyDoorCopy.swift:104`, `App/Variorum/Shared/PostureCopy.swift:185` ⚠RULED
+- `"Sign out of this \(deviceName)?"` — `App/Variorum/Shared/KeyDoorCopy.swift:108` (templated) ⚠RULED
+- `"This \(deviceName) stays signed out of sync until you sign in again. Your library and its keys stay on this \(deviceName). To stop another device from syncing, use Sign Out Everywhere from a device you trust. To give this \(deviceName) away, delete the library too."` — `App/Variorum/Shared/KeyDoorCopy.swift:110` (templated) ⚠RULED
+- `"Sign out everywhere?"` — `App/Variorum/Shared/KeyDoorCopy.swift:114` ⚠RULED
+- `"Every device signed into your account is signed out, including this one. Use this if you think someone has your account password. Then change it. Your libraries and keys on your devices aren't touched."` — `App/Variorum/Shared/KeyDoorCopy.swift:116` ⚠RULED
+- `"Sign Out Everywhere"` — `App/Variorum/Shared/KeyDoorCopy.swift:119` ⚠RULED
+- `"Delete your Stargazing account?"` — `App/Variorum/Shared/KeyDoorCopy.swift:123` ⚠RULED
+- `"Your account, its sync copy on our server, and its keys are deleted. Nothing on this \(deviceName) or your other devices is touched — every library stays, and still opens exactly as it does today. You can set sync up again later under a new account; your library will upload to it."` — `App/Variorum/Shared/KeyDoorCopy.swift:125` (templated) ⚠RULED
+- `"Enter your account password to continue."` — `App/Variorum/Shared/KeyDoorCopy.swift:129` ⚠RULED
+- `"DELETE MY ACCOUNT"` — `App/Variorum/Shared/KeyDoorCopy.swift:130`
+- `"Type \(deleteAccountTypedPhrase) to confirm."` — `App/Variorum/Shared/KeyDoorCopy.swift:131` (templated)
+- `"Delete Account"` — `App/Variorum/Shared/KeyDoorCopy.swift:132` ⚠RULED
+- `"That isn't your account password — nothing was deleted."` — `App/Variorum/Shared/KeyDoorCopy.swift:133` ⚠RULED (§11 provisional)
+- `"Export an unencrypted copy of your library."` — `App/Variorum/Shared/KeyDoorCopy.swift:137` ⚠RULED
+- `"This writes your whole library as a plain, unencrypted database file, readable by anyone who has it, anywhere you put it. Variorum never does this on its own. Choose where it goes and treat it like the writing itself."` — `App/Variorum/Shared/KeyDoorCopy.swift:139` ⚠RULED
+- `"Enter your passphrase."` — `App/Variorum/Shared/KeyDoorCopy.swift:142` ⚠RULED
+- `"Choose Where…"` — `App/Variorum/Shared/KeyDoorCopy.swift:143` ⚠RULED
+- `"Export"` — `App/Variorum/Shared/KeyDoorCopy.swift:144` ⚠RULED
+- `"Not into Variorum's backups folder — an unencrypted copy beside the sealed ones would be the one anything in that folder could read. Choose somewhere else."` — `App/Variorum/Shared/KeyDoorCopy.swift:147` ⚠RULED (§11 provisional)
+- `"That's a passphrase you've since changed. Enter the current one — or use \(biometryName), or your twelve words."` — `App/Variorum/Shared/KeyDoorCopy.swift:153` (templated) ⚠RULED
+- `"Confirm it's you to set a new passphrase"` — `App/Variorum/Shared/KeyDoorModel.swift:257`
+- `"Not confirmed — nothing was changed."` — `App/Variorum/Shared/KeyDoorModel.swift:258`, `App/Variorum/Shared/KeyDoorModel.swift:343`, `App/Variorum/Shared/PostureSwitchModel.swift:501`
+- `"Couldn't verify against your account (\(reason))."` — `App/Variorum/Shared/KeyDoorModel.swift:327`, `App/Variorum/Shared/KeyDoorModel.swift:370`, `App/Variorum/Shared/PassphraseSetModel.swift:154`, `App/Variorum/Shared/PostureSwitchModel.swift:236` (templated)
+- `"Confirm it's you to regenerate your twelve words"` — `App/Variorum/Shared/KeyDoorModel.swift:342`
+- `"Checking…"` — `App/Variorum/Shared/KeyDoorView.swift:29`, `App/Variorum/Shared/SecretCheck.swift:281`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1102`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1413` ⚠RULED (§11 provisional)
+- `"Confirm with \(ProtectionCopy.biometryName)"` — `App/Variorum/Shared/KeyDoorView.swift:97`, `App/Variorum/Shared/KeyDoorView.swift:105` (templated) ⚠RULED
+- `"your account's vault was written by a newer Variorum — update the app"` — `App/Variorum/Shared/PassphraseSetModel.swift:78`
+- `"That isn't your account's encryption passphrase — and one passphrase serves both your account and this library."` — `App/Variorum/Shared/PassphraseSetModel.swift:100`
+- `"Those aren't your account's twelve words."` — `App/Variorum/Shared/PassphraseSetModel.swift:113`, `App/Variorum/Shared/PostureFollowModel.swift:231`
+- `"Type a passphrase first."` — `App/Variorum/Shared/PassphraseSetModel.swift:211`, `App/Variorum/Shared/ProtectionController.swift:1086`
+- `"The two entries don't match."` — `App/Variorum/Shared/PassphraseSetModel.swift:225`, `App/Variorum/Shared/PostureCopy.swift:349` ⚠RULED
+- `"Couldn't verify against your account's vault (\(reason)) — one passphrase serves both, so setting it waits until it can check."` — `App/Variorum/Shared/PassphraseSetModel.swift:241` (templated)
+- `"Couldn't check the words against your account (\(reason))."` — `App/Variorum/Shared/PassphraseSetModel.swift:291` (templated)
+- `"Couldn't check your account for recovery words (\(reason)) — one set of words serves both, so making them waits until it can check."` — `App/Variorum/Shared/PassphraseSetModel.swift:387` (templated)
+- `"Hide what you typed"` — `App/Variorum/Shared/PeekableSecretField.swift:47` (tooltip)
+- `"Show what you typed"` — `App/Variorum/Shared/PeekableSecretField.swift:47` (tooltip)
+- `"Couldn't verify the passphrase (\(reason))."` — `App/Variorum/Shared/PlaintextExportModel.swift:78` (templated)
+- `"Your library is encrypted on disk, and sync is end-to-end encrypted. The Variorum server can never read your writing — in either mode. The only difference is who holds a key."` — `App/Variorum/Shared/PostureCopy.swift:20` ⚠RULED
+- `"An unlocked, enrolled device is as powerful as your passphrase. \(biometryName) guards this device — your passphrase is what lets a new device in."` — `App/Variorum/Shared/PostureCopy.swift:24` (templated) ⚠RULED
+- `"Your account password signs you in and can delete your account. It never touches your keys."` — `App/Variorum/Shared/PostureCopy.swift:28` ⚠RULED
+- `"While Variorum is open and unlocked, everything in it is readable — that is what open means. Locking is how you end that."` — `App/Variorum/Shared/PostureCopy.swift:31` ⚠RULED
+- `"Protection"` — `App/Variorum/Shared/PostureCopy.swift:36`
+- `"Standard"` — `App/Variorum/Shared/PostureCopy.swift:40` ⚠RULED
+- `"Castle"` — `App/Variorum/Shared/PostureCopy.swift:41`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:418` ⚠RULED
+- `"the default"` — `App/Variorum/Shared/PostureCopy.swift:47`
+- `"only you"` — `App/Variorum/Shared/PostureCopy.swift:48`
+- `"You're in Standard. Your Apple account holds a key."` — `App/Variorum/Shared/PostureCopy.swift:55` ⚠RULED
+- `"You're in Castle. Only you hold the keys."` — `App/Variorum/Shared/PostureCopy.swift:56` ⚠RULED
+- `"Your Apple account holds a key. Nothing to remember day to day."` — `App/Variorum/Shared/PostureCopy.swift:64` ⚠RULED
+- `"Only you hold the keys. Your \(deviceName)'s \(credentialName) can't open your library."` — `App/Variorum/Shared/PostureCopy.swift:66` (templated) ⚠RULED
+- `"Who holds a key"` — `App/Variorum/Shared/PostureCopy.swift:76`, `App/Variorum/Shared/PostureCopy.swift:103` ⚠RULED
+- `"your Apple account — iCloud Keychain, and Apple's ways of recovering it (your device passcode, a recovery contact, a recovery key). That key lives in iCloud Keychain: it travels with your Apple account to every device signed into it, and Apple's account recovery can reach it."` — `App/Variorum/Shared/PostureCopy.swift:77` ⚠RULED
+- `"Opening"` — `App/Variorum/Shared/PostureCopy.swift:82`, `App/Variorum/Shared/PostureCopy.swift:110` ⚠RULED
+- `"silently, on any device signed into your iCloud."` — `App/Variorum/Shared/PostureCopy.swift:82` ⚠RULED
+- `"A new device"` — `App/Variorum/Shared/PostureCopy.swift:83`, `App/Variorum/Shared/PostureCopy.swift:113` ⚠RULED
+- `"sign into iCloud, sign into Variorum, and everything is there. Nothing typed."` — `App/Variorum/Shared/PostureCopy.swift:84` ⚠RULED
+- `"Who it stops"` — `App/Variorum/Shared/PostureCopy.swift:86`, `App/Variorum/Shared/PostureCopy.swift:116` ⚠RULED
+- `"the Variorum server — yes. Someone at your unlocked \(deviceName) — no: anyone who can open Variorum as you can read your writing, and can set a new passphrase. Someone fully in your Apple account — no."` — `App/Variorum/Shared/PostureCopy.swift:87` (templated) ⚠RULED
+- `"If your \(deviceName) dies"` — `App/Variorum/Shared/PostureCopy.swift:90`, `App/Variorum/Shared/PostureCopy.swift:121` (templated) ⚠RULED
+- `"with sync on, sign in on a new \(deviceName) and it all comes back. Without sync, your Apple account holds a key but not your writing — you need a copy of your library that survived the \(deviceName) (your backup folder in iCloud Drive, or Time Machine)."` — `App/Variorum/Shared/PostureCopy.swift:91` (templated) ⚠RULED
+- `"The floor"` — `App/Variorum/Shared/PostureCopy.swift:95`, `App/Variorum/Shared/PostureCopy.swift:124` ⚠RULED
+- `"you lose your writing only if you lose every Apple device, every way Apple offers to recover your account, AND your passphrase and twelve words. Keep the words: they are your way back if your Apple account is ever gone."` — `App/Variorum/Shared/PostureCopy.swift:96` ⚠RULED
+- `"only you — your passphrase, your twelve words, and your enrolled devices behind \(biometryName). With \(biometryName) on, this \(deviceName)'s security chip holds a copy of the key. It is released only to your fingerprint — never to your \(credentialName), never to iCloud — and it never leaves this \(deviceName). Turn on Always ask, and no copy exists anywhere."` — `App/Variorum/Shared/PostureCopy.swift:104` (templated) ⚠RULED
+- `"\(biometryName), with your passphrase as the fallback — or your passphrase every time, if you choose."` — `App/Variorum/Shared/PostureCopy.swift:111` (templated) ⚠RULED
+- `"sign into Variorum and type your passphrase or your twelve words, once."` — `App/Variorum/Shared/PostureCopy.swift:114` ⚠RULED
+- `"the Variorum server — yes. Your \(deviceName)'s \(credentialName) — yes: nothing on this \(deviceName) releases the key to it. Someone in your Apple account — yes. Someone holding your passphrase, your twelve words, or a fingerprint enrolled on your \(deviceName) — no."` — `App/Variorum/Shared/PostureCopy.swift:117` (templated) ⚠RULED
+- `"with sync on, sign in and type your passphrase. Without sync, a surviving backup plus your passphrase or twelve words."` — `App/Variorum/Shared/PostureCopy.swift:122` ⚠RULED
+- `"lose every enrolled device AND both your passphrase and your twelve words, and your writing is gone. Nobody can help — not Apple, not us. That is the point of Castle, and it's why we ask you to write the words down."` — `App/Variorum/Shared/PostureCopy.swift:125` ⚠RULED
+- `"Use Standard"` — `App/Variorum/Shared/PostureCopy.swift:136`, `App/Variorum/Shared/PostureCopy.swift:478` ⚠RULED
+- `"Use Castle…"` — `App/Variorum/Shared/PostureCopy.swift:137` ⚠RULED
+- `"Always ask for the passphrase"` — `App/Variorum/Shared/PostureCopy.swift:140` ⚠RULED
+- `"Skip \(biometryName) and type your passphrase every time Variorum opens. Choose this if other people's fingerprints are enrolled on your \(deviceName)."` — `App/Variorum/Shared/PostureCopy.swift:142` (templated) ⚠RULED
+- `"Any fingerprint enrolled on your \(deviceName) account can unlock with \(biometryName) — \(biometryName) guards the \(deviceName), not the person."` — `App/Variorum/Shared/PostureCopy.swift:147` (templated) ⚠RULED
+- `"With this on, no copy of the key is kept on this \(deviceName) at all."` — `App/Variorum/Shared/PostureCopy.swift:150` (templated) ⚠RULED
+- `"Lock after time away"` — `App/Variorum/Shared/PostureCopy.swift:152`, `App/Variorum/Shared/StoreProtection.swift:812` ⚠RULED
+- `"Lock your library after you haven't used Variorum for:"` — `App/Variorum/Shared/PostureCopy.swift:153` ⚠RULED
+- `"never"` — `App/Variorum/Shared/PostureCopy.swift:155`
+- `"\(minutes) minutes"` — `App/Variorum/Shared/PostureCopy.swift:156` (templated)
+- `"Switching to another app doesn't lock it; time away does. Variorum always locks when your \(deviceName) sleeps or its screen locks."` — `App/Variorum/Shared/PostureCopy.swift:159` (templated) ⚠RULED
+- `"Getting your key from iCloud Keychain…"` — `App/Variorum/Shared/PostureCopy.swift:164` ⚠RULED
+- `"This usually takes a moment and can take longer. You can also enter your passphrase or twelve words instead."` — `App/Variorum/Shared/PostureCopy.swift:166` ⚠RULED
+- `"Enter Passphrase…"` — `App/Variorum/Shared/PostureCopy.swift:168`, `App/Variorum/Shared/PostureCopy.swift:645` ⚠RULED (§11 provisional)
+- `"Enter Twelve Words…"` — `App/Variorum/Shared/PostureCopy.swift:169` ⚠RULED
+- `"This \(deviceName)'s Apple account doesn't hold the key that set up sync — if it's the same Apple account, the key may still be arriving. Enter your passphrase or twelve words once to continue now; after that this \(deviceName) opens on its own."` — `App/Variorum/Shared/PostureCopy.swift:177` (templated) ⚠RULED
+- `"Turn On Sync…"` — `App/Variorum/Shared/PostureCopy.swift:186` ⚠RULED
+- `"Sync needs two things you keep."` — `App/Variorum/Shared/PostureCopy.swift:188` ⚠RULED
+- `"Sync is end-to-end encrypted: the Variorum server stores your writing in a form it can't read. To make that true, your account needs a passphrase and twelve words that only you have."` — `App/Variorum/Shared/PostureCopy.swift:190` ⚠RULED
+- `"Your passphrase lets a new device into your sync."` — `App/Variorum/Shared/PostureCopy.swift:193` ⚠RULED
+- `"Your twelve words do the same, and are your way back if you forget the passphrase."` — `App/Variorum/Shared/PostureCopy.swift:194` ⚠RULED
+- `"You're in Standard, so day to day your Apple account handles this for you and you won't type either one. Keep them anyway: if your Apple account is ever gone, they are the only way back to your writing."` — `App/Variorum/Shared/PostureCopy.swift:197` ⚠RULED
+- `"You're in Castle, so these two are the only ways into your writing besides your enrolled devices. Nobody can reset them — not Apple, not us."` — `App/Variorum/Shared/PostureCopy.swift:201` ⚠RULED
+- `"Continue"` — `App/Variorum/Shared/PostureCopy.swift:203`, `App/Variorum/Shared/PostureCopy.swift:330`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:923`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1276` ⚠RULED
+- `"Choose your encryption passphrase."` — `App/Variorum/Shared/PostureCopy.swift:205` ⚠RULED
+- `"Sync is on. Your Apple account holds a key, so your other Apple devices will join with nothing typed. Your passphrase and twelve words are your way back if your Apple account is ever gone."` — `App/Variorum/Shared/PostureCopy.swift:208` ⚠RULED
+- `"Sync is on. Your other devices will ask for your passphrase or twelve words, once. Nothing else opens your writing."` — `App/Variorum/Shared/PostureCopy.swift:211` ⚠RULED
+- `"Done"` — `App/Variorum/Shared/PostureCopy.swift:213`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:126`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:999`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1264`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1440` ⚠RULED
+- `"This library last synced under a different account. Turning on sync here moves it to this account and uploads everything in it. Your other account isn't changed."` — `App/Variorum/Shared/PostureCopy.swift:216` ⚠RULED
+- `"Move It to This Account"` — `App/Variorum/Shared/PostureCopy.swift:218` ⚠RULED
+- `"Enter your passphrase to join sync."` — `App/Variorum/Shared/PostureCopy.swift:222` ⚠RULED
+- `"Use my twelve words instead."` — `App/Variorum/Shared/PostureCopy.swift:223` ⚠RULED
+- `"This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays."` — `App/Variorum/Shared/PostureCopy.swift:226` ⚠RULED
+- `"This account is in Standard, so this library will open silently from now on and your Apple account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use Castle…), then join again."` — `App/Variorum/Shared/PostureCopy.swift:237` ⚠RULED
+- `"Join"` — `App/Variorum/Shared/PostureCopy.swift:241` ⚠RULED (§11 provisional)
+- `"Sync isn't joined on this \(deviceName)."` — `App/Variorum/Shared/PostureCopy.swift:245` (templated) ⚠RULED (§11 provisional)
+- `"Join This Account's Sync…"` — `App/Variorum/Shared/PostureCopy.swift:246` ⚠RULED (§11 provisional)
+- `"A backup opens through your Apple account — or with your passphrase or twelve words."` — `App/Variorum/Shared/PostureCopy.swift:251` ⚠RULED
+- `"A backup opens with your twelve words — always, unless you regenerated them — or with the passphrase you had when it was made. Backups made while you were in Standard also open through your Apple account. Backups run while your library is open."` — `App/Variorum/Shared/PostureCopy.swift:254` ⚠RULED
+- `"When you lock, Variorum also keeps a sealed copy of the library as it was — checked the next time you unlock."` — `App/Variorum/Shared/PostureCopy.swift:259` ⚠RULED
+- `"Keep a copy of your backups in iCloud Drive?"` — `App/Variorum/Shared/PostureCopy.swift:265` ⚠RULED
+- `"Variorum keeps backups beside your library, on this \(deviceName). A copy in iCloud Drive survives the \(deviceName)."` — `App/Variorum/Shared/PostureCopy.swift:267` (templated) ⚠RULED
+- `"Your Apple account then holds both the key and the writing."` — `App/Variorum/Shared/PostureCopy.swift:269` ⚠RULED
+- `"Backups are encrypted; the copy is safe anywhere."` — `App/Variorum/Shared/PostureCopy.swift:270` ⚠RULED
+- `"Use iCloud Drive"` — `App/Variorum/Shared/PostureCopy.swift:271` ⚠RULED
+- `"Choose Another Folder…"` — `App/Variorum/Shared/PostureCopy.swift:272` ⚠RULED
+- `"Not Now"` — `App/Variorum/Shared/PostureCopy.swift:273` ⚠RULED
+- `"No folder was chosen, so nothing changed."` — `App/Variorum/Shared/PostureCopy.swift:278` ⚠RULED (§11 provisional)
+- `"Your working library stays on this \(deviceName). iCloud Drive syncs files while they're being written, which can corrupt a live database — backups are complete, sealed copies, which is what a synced folder is good at. To have your writing on every device, use sync."` — `App/Variorum/Shared/PostureCopy.swift:284` (templated) ⚠RULED
+- `"Variorum now keeps your sync keys in this \(deviceName)'s own protected Keychain, beside your library's key — never in the library file — and your account is in Castle. Nothing else changed. Confirm your passphrase once to finish."` — `App/Variorum/Shared/PostureCopy.swift:296` (templated) ⚠RULED
+- `"Confirm…"` — `App/Variorum/Shared/PostureCopy.swift:300` ⚠RULED
+- `"Later"` — `App/Variorum/Shared/PostureCopy.swift:301`, `App/Variorum/Shared/PostureCopy.swift:658`, `App/Variorum/Shared/StoreProtection.swift:773`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:715`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1318` ⚠RULED
+- `"Done. This device opens with \(biometryName); your passphrase and twelve words are your other ways in."` — `App/Variorum/Shared/PostureCopy.swift:303` (templated) ⚠RULED
+- `"Castle: only you hold the keys."` — `App/Variorum/Shared/PostureCopy.swift:312` ⚠RULED
+- `"Your library gets a new key, and so does your sync. From now on your \(deviceName)'s \(credentialName) can't open it, and your Apple account holds no key to it. Opening takes \(biometryName) or your passphrase."` — `App/Variorum/Shared/PostureCopy.swift:314` (templated) ⚠RULED
+- `"Your other devices will start asking too — Touch ID or Face ID, with your passphrase as the fallback — and each gives its own library a new key the same way. Each will ask for your passphrase once, to pick up your new sync keys."` — `App/Variorum/Shared/PostureCopy.swift:318` ⚠RULED
+- `"Backups made before today — Variorum's own, Time Machine, copies you made — still open through your Apple account. Delete them, Time Machine included, if you want Castle to cover everything you have ever written. Keep them if you want a way back to what you wrote before today, should you ever lose your passphrase and twelve words."` — `App/Variorum/Shared/PostureCopy.swift:321` ⚠RULED
+- `"If you think someone may already hold your keys — your Apple account, or an unlocked device of yours together with your account password — also delete your Stargazing account and set sync up again. That gives your sync fresh keys."` — `App/Variorum/Shared/PostureCopy.swift:326` ⚠RULED
+- `"Castle needs a passphrase."` — `App/Variorum/Shared/PostureCopy.swift:333` ⚠RULED
+- `"Passphrase"` — `App/Variorum/Shared/PostureCopy.swift:334`
+- `"Confirm passphrase"` — `App/Variorum/Shared/PostureCopy.swift:335` ⚠RULED
+- `"At least 12 characters. Four or more random words work well. This is the one thing a stolen copy of the server could be guessed against, so make it long."` — `App/Variorum/Shared/PostureCopy.swift:337` ⚠RULED
+- `"Your passphrase needs at least 12 characters."` — `App/Variorum/Shared/PostureCopy.swift:348` ⚠RULED
+- `"Your library already has a passphrase — sync uses the same one. Type it here."` — `App/Variorum/Shared/PostureCopy.swift:351` ⚠RULED
+- `"That isn't your library's passphrase. Check it under Settings ▸ Protection if you're unsure."` — `App/Variorum/Shared/PostureCopy.swift:353` ⚠RULED
+- `"Your library already has twelve words."` — `App/Variorum/Shared/PostureCopy.swift:357` ⚠RULED
+- `"Type them to use the same twelve for sync, or generate new ones — the new ones replace the old everywhere."` — `App/Variorum/Shared/PostureCopy.swift:359` ⚠RULED
+- `"Type My Words…"` — `App/Variorum/Shared/PostureCopy.swift:361`
+- `"Generate New Ones"` — `App/Variorum/Shared/PostureCopy.swift:362` ⚠RULED
+- `"Write down your twelve words."` — `App/Variorum/Shared/PostureCopy.swift:363` ⚠RULED
+- `"These twelve words open your account and your library exactly as your passphrase does. Write them on paper and keep the paper somewhere real. They are shown once."` — `App/Variorum/Shared/PostureCopy.swift:365` ⚠RULED
+- `"Copy All"` — `App/Variorum/Shared/PostureCopy.swift:368` ⚠RULED
+- `"Copied. Your clipboard clears in 60 seconds."` — `App/Variorum/Shared/PostureCopy.swift:369` ⚠RULED
+- `"I've written them down"` — `App/Variorum/Shared/PostureCopy.swift:370`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:89`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1073` ⚠RULED
+- `"Type your twelve words to confirm."` — `App/Variorum/Shared/PostureCopy.swift:371` ⚠RULED
+- `"This proves the paper is right before anything depends on it."` — `App/Variorum/Shared/PostureCopy.swift:372` ⚠RULED
+- `"Confirm"` — `App/Variorum/Shared/PostureCopy.swift:373`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1020` ⚠RULED
+- `"Read this once."` — `App/Variorum/Shared/PostureCopy.swift:379` ⚠RULED
+- `"In Castle, nobody can help you if you forget your passphrase and lose your twelve words while no enrolled device is left. Not Apple. Not us. There is no reset. That is what makes Castle real — and it's why the words go on paper."` — `App/Variorum/Shared/PostureCopy.swift:381` ⚠RULED
+- `"I know my passphrase, and my twelve words are written down."` — `App/Variorum/Shared/PostureCopy.swift:384` ⚠RULED
+- `"Enter Castle"` — `App/Variorum/Shared/PostureCopy.swift:385` ⚠RULED
+- `"Re-encrypting your library on the server… (preparing)"` — `App/Variorum/Shared/PostureCopy.swift:396` ⚠RULED
+- `"Re-encrypting your library on the server… (\(done) of \(total))"` — `App/Variorum/Shared/PostureCopy.swift:397` (templated) ⚠RULED
+- `"Minting your new keys…"` — `App/Variorum/Shared/PostureCopy.swift:416`
+- `"Picking up your new keys…"` — `App/Variorum/Shared/PostureCopy.swift:416`
+- `"Catching up with the server…"` — `App/Variorum/Shared/PostureCopy.swift:418`
+- `"Working…"` — `App/Variorum/Shared/PostureCopy.swift:420`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:135`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:957`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1337`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1437`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1456` ⚠RULED (§11 provisional)
+- `"Giving your library a new key…"` — `App/Variorum/Shared/PostureCopy.swift:423` ⚠RULED
+- `"The twelve words you just wrote down are NOT in use: nothing changed, and your existing twelve words still open your account."` — `App/Variorum/Shared/PostureCopy.swift:432`
+- `"Your weekly unencrypted Markdown export is now off — it would have kept writing readable copies of your library to disk. You can turn it back on in Backups; Castle will warn you there."` — `App/Variorum/Shared/PostureCopy.swift:435` ⚠RULED
+- `"You're in Castle. Your library has a new key that your Apple account never held. A fresh backup was made under it. This \(deviceName) asks for \(biometryName) from now on; your other devices will ask the next time they open."` — `App/Variorum/Shared/PostureCopy.swift:439` (templated) ⚠RULED
+- `"You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched. This \(deviceName) asks for \(biometryName) from now on; your other devices will ask the next time they open."` — `App/Variorum/Shared/PostureCopy.swift:450` (templated) ⚠RULED
+- `"You're in Castle. Your library has a new key that your Apple account never held. This \(deviceName) asks for \(biometryName) from now on; your other devices will ask the next time they open."` — `App/Variorum/Shared/PostureCopy.swift:459` (templated) ⚠RULED
+- `"Delete the backups Variorum made before today?"` — `App/Variorum/Shared/PostureCopy.swift:462` ⚠RULED
+- `"They still open through your Apple account, and they always will. Deleting them closes that door for what they hold. Variorum can only delete its own backups — Time Machine, copies you made, and anything outside Variorum's folders aren't touched and still open the old way. If your backups are in iCloud Drive, iCloud keeps deleted files for 30 days in Recently Deleted."` — `App/Variorum/Shared/PostureCopy.swift:464` ⚠RULED
+- `"Delete Them"` — `App/Variorum/Shared/PostureCopy.swift:469`
+- `"Keep Them"` — `App/Variorum/Shared/PostureCopy.swift:470`
+- `"Back to Standard?"` — `App/Variorum/Shared/PostureCopy.swift:473` ⚠RULED
+- `"Your Apple account will hold a key to your library again. Anyone fully in your Apple account, or at your unlocked \(deviceName), can then read your writing. Your other devices will open silently again the next time they open."` — `App/Variorum/Shared/PostureCopy.swift:475` (templated) ⚠RULED
+- `"Your Apple account's key isn't reachable on this \(deviceName). If this \(deviceName) is signed into the Apple account that set up sync, wait a moment and try again; if it isn't, run Replace All Keys from \(deviceNameWithArticle) that is."` — `App/Variorum/Shared/PostureCopy.swift:490` (templated) ⚠RULED
+- `"A key replacement started on \(device) on \(day) is still finishing. Any signed-in device that has picked up the new keys can finish it. Try again after."` — `App/Variorum/Shared/PostureCopy.swift:497` (templated) ⚠RULED
+- `"Finish Entering Castle…"` — `App/Variorum/Shared/PostureCopy.swift:501`
+- `"Finish Replacing Keys…"` — `App/Variorum/Shared/PostureCopy.swift:502`
+- `"Entering Castle didn't finish on this \(deviceName) — sync is paused until it completes. Nothing is lost; finishing picks up exactly where it stopped."` — `App/Variorum/Shared/PostureCopy.swift:504` (templated) ⚠RULED (§11 provisional)
+- `"Enter your passphrase to finish."` — `App/Variorum/Shared/PostureCopy.swift:506`
+- `"The server is still settling a few rows written just before the switch. Nothing is lost — sync stays paused; finish from Settings ▸ Protection in a moment, and it picks up exactly where it stopped."` — `App/Variorum/Shared/PostureCopy.swift:513` ⚠RULED (§11 provisional)
+- `"Your Apple account"` — `App/Variorum/Shared/PostureCopy.swift:534` ⚠RULED
+- `"Re-link Your Apple Account…"` — `App/Variorum/Shared/PostureCopy.swift:535`
+- `"In Standard your Apple account holds a key, and that is what lets your other Apple devices join your sync with nothing typed. If you reset iCloud Keychain, or the Apple account that set sync up isn't the one on this \(deviceName) any more, the key on file stops matching: your writing is safe and sync keeps running, but a new device has to enter your passphrase or twelve words. Re-linking puts the key your Apple account holds NOW on file instead."` — `App/Variorum/Shared/PostureCopy.swift:537` (templated) ⚠RULED
+- `"Re-link your Apple account"` — `App/Variorum/Shared/PostureCopy.swift:543`
+- `"From now on your account's key is held by the Apple account signed into this \(deviceName) (the key it holds: \(shortAppleKeyID(appleKeyID))). Every device signed into that same Apple account then joins your sync with nothing typed — and so could anyone with full access to it. Nothing you have written changes, and your passphrase and twelve words keep working exactly as they do now."` — `App/Variorum/Shared/PostureCopy.swift:552` (templated) ⚠RULED
+- `"The key on file now (\(shortAppleKeyID(recordedKeyID))) stops opening your account: a device that was joining through it asks for your passphrase or twelve words instead. Copies and backups you already have are untouched."` — `App/Variorum/Shared/PostureCopy.swift:561` (templated) ⚠RULED
+- `"The key on file is already the one this \(deviceName)'s Apple account holds. Re-linking writes that same key again and changes nothing."` — `App/Variorum/Shared/PostureCopy.swift:569` (templated)
+- `"Type your encryption passphrase to confirm."` — `App/Variorum/Shared/PostureCopy.swift:571`
+- `"Re-link"` — `App/Variorum/Shared/PostureCopy.swift:572`
+- `"The key your Apple account holds changed while this was open, so nothing was written. Open this door again to see what it holds now."` — `App/Variorum/Shared/PostureCopy.swift:583`
+- `"Your account's key couldn't be updated just now, and nothing was changed. This needs to be online with your keys on this \(deviceName) — try again in a moment."` — `App/Variorum/Shared/PostureCopy.swift:589` (templated)
+- `"The Apple account signed into this \(deviceName) now holds your account's key. Devices signed into it join your sync with nothing typed; your passphrase and your twelve words are unchanged."` — `App/Variorum/Shared/PostureCopy.swift:592` (templated) ⚠RULED
+- `"an earlier day"` — `App/Variorum/Shared/PostureCopy.swift:608`, `App/Variorum/Shared/PostureSwitchModel.swift:562`, `App/Variorum/Shared/PostureSwitchModel.swift:595`
+- `"another device"` — `App/Variorum/Shared/PostureCopy.swift:620` ⚠RULED
+- `"Your account is now in Castle — set on \(device) on \(day). From now on this \(deviceName) asks for \(biometryName) to open your library, with your passphrase as the fallback. Enter your passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or twelve words open them."` — `App/Variorum/Shared/PostureCopy.swift:624` (templated) ⚠RULED
+- `"Your account is in Castle, but this \(deviceName) still opens without asking. Enter your passphrase once to move this \(deviceName)'s key behind \(biometryName) and give your library a fresh key."` — `App/Variorum/Shared/PostureCopy.swift:633` (templated) ⚠RULED
+- `"Until then this \(deviceName) opens and reads as before — what you write meanwhile stays under the old key until you enter your passphrase."` — `App/Variorum/Shared/PostureCopy.swift:638` (templated) ⚠RULED
+- `"Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."` — `App/Variorum/Shared/PostureCopy.swift:643` (templated) ⚠RULED
+- `"Pick Up New Keys"` — `App/Variorum/Shared/PostureCopy.swift:651`
+- `"Use Twelve Words…"` — `App/Variorum/Shared/PostureCopy.swift:657`
+- `"Until then this \(deviceName) opens and reads, but doesn't sync — and what you write meanwhile stays under the old key until you pick up the new ones."` — `App/Variorum/Shared/PostureCopy.swift:664` (templated) ⚠RULED
+- `"Sync is paused until you enter your passphrase once — your keys were replaced on \(device) on \(day)."` — `App/Variorum/Shared/PostureCopy.swift:668` (templated) ⚠RULED
+- `"Enter…"` — `App/Variorum/Shared/PostureCopy.swift:671` ⚠RULED (§11 provisional)
+- `"Pick up your new keys first — enter your passphrase."` — `App/Variorum/Shared/PostureCopy.swift:673`, `App/Variorum/Shared/PostureSwitchModel.swift:610` ⚠RULED
+- `"Your account is back in Standard — set on \(device) on \(day). This \(deviceName) opens silently again; your Apple account holds a key."` — `App/Variorum/Shared/PostureCopy.swift:676` (templated) ⚠RULED
+- `"OK"` — `App/Variorum/Shared/PostureCopy.swift:679`
+- `"Your passphrase was changed on \(device) on \(day). The old one still opens this \(deviceName), but sync waits until you enter the new one here."` — `App/Variorum/Shared/PostureCopy.swift:682` (templated) ⚠RULED
+- `"Enter It Now…"` — `App/Variorum/Shared/PostureCopy.swift:685`
+- `"This account's keys changed since this \(deviceName) joined. Enter your passphrase to pick up the new ones."` — `App/Variorum/Shared/PostureCopy.swift:694` (templated) ⚠RULED
+- `"This account's keys don't match this library. Enter your passphrase to connect it — everything in it will upload to this account."` — `App/Variorum/Shared/PostureCopy.swift:698` ⚠RULED
+- `"Connect…"` — `App/Variorum/Shared/PostureCopy.swift:701`
+- `"Your passphrase was changed on \(device) on \(day). Use the new one here when you can — this \(deviceName) still takes the old one until you do."` — `App/Variorum/Shared/PostureCopy.swift:710` (templated) ⚠RULED
+- `"Your twelve words were regenerated on \(device) on \(day). Use the new ones here when you can — this \(deviceName) still takes the old ones until you do."` — `App/Variorum/Shared/PostureCopy.swift:718` (templated) ⚠RULED
+- `"Dismiss"` — `App/Variorum/Shared/PostureCopy.swift:723` ⚠RULED (§11 provisional)
+- `"Your passphrase was changed on another device — enter the new one."` — `App/Variorum/Shared/PostureCopy.swift:730` ⚠RULED
+- `"You're offline. If your passphrase was changed on another device recently, the one you had before still works here until you're back online."` — `App/Variorum/Shared/PostureCopy.swift:734` ⚠RULED
+- `"Unlocking…"` — `App/Variorum/Shared/PostureCopy.swift:739` ⚠RULED (§11 provisional)
+- `"Checking your account…"` — `App/Variorum/Shared/PostureCopy.swift:740` ⚠RULED (§11 provisional)
+- `"Your new keys are in place on this \(deviceName), and sync is back on."` — `App/Variorum/Shared/PostureCopy.swift:745` (templated) ⚠RULED (§11 provisional)
+- `"This library is connected to this account, and everything in it is uploading now."` — `App/Variorum/Shared/PostureCopy.swift:749` ⚠RULED
+- `"What's true in every mode"` — `App/Variorum/Shared/PostureCopy.swift:762` ⚠RULED
+- `"Your library is encrypted on disk: the file Variorum writes is unreadable without its key — to Finder, to Terminal, to a backup drive, to anyone who copies it. Sync is end-to-end encrypted: everything is encrypted on your device before it leaves, and the Variorum server stores what it can never read. Both modes are like this. What differs between them is only who holds a key."` — `App/Variorum/Shared/PostureCopy.swift:764` ⚠RULED
+- `"And one thing no setting changes: while Variorum is open and unlocked, everything in it is readable — that is what open means. Locking is how you end that."` — `App/Variorum/Shared/PostureCopy.swift:770` ⚠RULED
+- `"Standard and Castle: what you must keep"` — `App/Variorum/Shared/PostureCopy.swift:775` ⚠RULED
+- `"Standard is the default. Your Apple account holds a key. Keep: your Apple account, and — if you use sync — your passphrase and twelve words, in case your Apple account is ever gone. Anyone who can open Variorum as you, at your unlocked \(deviceName) or fully inside your Apple account, can read."` — `App/Variorum/Shared/PostureCopy.swift:777` (templated) ⚠RULED
+- `"Castle means only you hold the keys. Keep: your passphrase and your twelve words. \(biometryName) opens this \(deviceName) for you; your passphrase is what lets a new device in. Lose every enrolled device and both secrets, and your writing is gone — nobody can help. That is the point."` — `App/Variorum/Shared/PostureCopy.swift:781` (templated) ⚠RULED
+- `"Wherever you SET that passphrase, it must be at least \(passphraseFloor) characters — it is the one secret a stolen copy of the server could be guessed against. A passphrase you already have keeps working whatever its length; the change-passphrase door is where a longer one is asked for."` — `App/Variorum/Shared/PostureCopy.swift:788` (templated) ⚠RULED
+- `"The whole story — every key, where it lives, what happens when you switch, why an old backup behaves the way it does — is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf."` — `App/Variorum/Shared/PostureCopy.swift:792` (templated) ⚠RULED
+- `"Keep: your Apple account, and — if you use sync — your passphrase and twelve words, in case your Apple account is ever gone."` — `App/Variorum/Shared/PostureCopy.swift:798` ⚠RULED
+- `"Lose every enrolled device and both secrets, and your writing is gone — nobody can help."` — `App/Variorum/Shared/PostureCopy.swift:801` ⚠RULED
+- `"is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf."` — `App/Variorum/Shared/PostureCopy.swift:803` (templated)
+- `"Use your passphrase instead"` — `App/Variorum/Shared/PostureCopy.swift:813` ⚠RULED
+- `"Use your twelve words"` — `App/Variorum/Shared/PostureCopy.swift:815` ⚠RULED
+- `"\(biometryName) didn't go through — enter your encryption passphrase instead."` — `App/Variorum/Shared/PostureCopy.swift:818` (templated) ⚠RULED
+- `"Sign in to sync your library across your devices. Sync is end-to-end encrypted."` — `App/Variorum/Shared/PostureCopy.swift:822` ⚠RULED
+- `"Sign In…"` — `App/Variorum/Shared/PostureCopy.swift:823` ⚠RULED
+- `"Another device entered Castle first, so this \(deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's: your account's words are the ones \(device ?? anotherDevice) showed when it entered Castle — those are the set to keep."` — `App/Variorum/Shared/PostureCopy.swift:836` (templated) ⚠RULED
+- `"The key file carries no passphrase wrap."` — `App/Variorum/Shared/PostureSwitch.swift:906`, `App/Variorum/Shared/PostureSwitch.swift:1222`
+- `"the current key file cannot be read"` — `App/Variorum/Shared/PostureSwitch.swift:1052`
+- `"The new key file carries no passphrase wrap."` — `App/Variorum/Shared/PostureSwitch.swift:1114`
+- `"the new key file is missing beside the library"` — `App/Variorum/Shared/PostureSwitch.swift:1420`
+- `"The new passphrase couldn't be set here — your keys were replaced; change the passphrase under Account & Encryption."` — `App/Variorum/Shared/PostureSwitchModel.swift:465` ⚠RULED (§11 provisional)
+- `"Confirm it's you to leave Castle"` — `App/Variorum/Shared/PostureSwitchModel.swift:500`
+- `"This account's keys changed since this \(ProtectionCopy.deviceName) joined — pick up your new keys first (enter your passphrase under Account & Encryption)."` — `App/Variorum/Shared/PostureSwitchModel.swift:603` (templated) ⚠RULED
+- `"Nothing is left to finish."` — `App/Variorum/Shared/PostureSwitchModel.swift:614`
+- `"Your twelve words are needed to replace your keys — type them, or generate new ones."` — `App/Variorum/Shared/PostureSwitchModel.swift:618` ⚠RULED (§11 provisional)
+- `"The earlier attempt never reached the server — start again."` — `App/Variorum/Shared/PostureSwitchModel.swift:624`
+- `"iCloud Keychain wouldn't hold the key on this \(ProtectionCopy.deviceName) — nothing was changed."` — `App/Variorum/Shared/PostureSwitchModel.swift:629` (templated) ⚠RULED (§11 provisional)
+- `"That switch doesn't apply right now."` — `App/Variorum/Shared/PostureSwitchModel.swift:635`
+- `"Always ask is a Castle switch — in Standard the library opens silently."` — `App/Variorum/Shared/ProtectionController.swift:1190`
+- `"The Keychain refused the sync keys' item — nothing was altered."` — `App/Variorum/Shared/ProtectionController.swift:1254`
+- `"The Keychain refused the change — nothing was altered."` — `App/Variorum/Shared/ProtectionController.swift:1301`
+- `"This \(ProtectionCopy.deviceName) has no \(ProtectionCopy.biometryName) to gate the key with — use Always ask instead."` — `App/Variorum/Shared/ProtectionController.swift:1309` (templated)
+- `"The Keychain refused the gated item — nothing was altered."` — `App/Variorum/Shared/ProtectionController.swift:1324`
+- `"Type the passphrase first."` — `App/Variorum/Shared/ProtectionController.swift:1598`, `App/Variorum/Shared/StoreProtection.swift:874`
+- `"This library has no passphrase or recovery phrase on file yet."` — `App/Variorum/Shared/ProtectionController.swift:1772`
+- `"This library's key isn't in hand right now — unlock the library first."` — `App/Variorum/Shared/ProtectionController.swift:1878`
+- `"this device's keys are locked — unlock them under Settings ▸ Encryption and try again"` — `App/Variorum/Shared/ProtectionController.swift:1890`
+- `"Check that you still have your secrets"` — `App/Variorum/Shared/SecretCheck.swift:56`
+- `"Type a secret and Variorum will try to unlock this account's vault with it, then throw the result away. Nothing is changed, reset or re-sent — this only answers yes or no."` — `App/Variorum/Shared/SecretCheck.swift:57`
+- `"encryption passphrase"` — `App/Variorum/Shared/SecretCheck.swift:73` ⚠RULED
+- `"recovery phrase"` — `App/Variorum/Shared/SecretCheck.swift:74` ⚠RULED (§11 provisional)
+- `"this account's vault"` — `App/Variorum/Shared/SecretCheck.swift:131`, `App/Variorum/Shared/SecretCheck.swift:209` ⚠RULED (§11 provisional)
+- `"Encryption isn't configured in this build."` — `App/Variorum/Shared/SecretCheck.swift:164`
+- `"This account has no recovery phrase on file yet — generate one first."` — `App/Variorum/Shared/SecretCheck.swift:196`
+- `"That is the right \(secret.noun) — it unlocked \(target). Nothing was changed."` — `App/Variorum/Shared/SecretCheck.swift:217` (templated)
+- `"That did not unlock \(target). Check the \(secret.noun) and try again — nothing was changed, and nothing is locked out by getting it wrong here."` — `App/Variorum/Shared/SecretCheck.swift:220` (templated)
+- `"Couldn't check: \(reason)"` — `App/Variorum/Shared/SecretCheck.swift:224` (templated)
+- `"This takes a few seconds on purpose: turning a passphrase into a key is deliberately slow, which is what makes guessing it expensive."` — `App/Variorum/Shared/SecretCheck.swift:235`
+- `"What to check"` — `App/Variorum/Shared/SecretCheck.swift:261`
+- `"Recovery phrase"` — `App/Variorum/Shared/SecretCheck.swift:263`, `App/Variorum/Shared/StoreProtection.swift:670` ⚠RULED (§11 provisional)
+- `"Check"` — `App/Variorum/Shared/SecretCheck.swift:272`
+- `"The key derivation took %.2f s on this device."` — `App/Variorum/Shared/SecretCheck.swift:330`
+- `"Unlock your Variorum library"` — `App/Variorum/Shared/StoreKeyGuard.swift:344` ⚠RULED
+- `"Mac"` — `App/Variorum/Shared/StoreProtection.swift:521`
+- `"login password"` — `App/Variorum/Shared/StoreProtection.swift:524`
+- `"a Mac"` — `App/Variorum/Shared/StoreProtection.swift:525`
+- `"The Keychain accepted the key but cannot find it again, so your current way in was left exactly as it was. Nothing is lost — your passphrase and recovery phrase still open your library."` — `App/Variorum/Shared/StoreProtection.swift:535`
+- `"The Keychain accepted the key but cannot find it again, so this \(deviceName)'s sync keys were left exactly as they were. Nothing is lost — entering your encryption passphrase re-enrolls sync on this \(deviceName)."` — `App/Variorum/Shared/StoreProtection.swift:546` (templated)
+- `"The Keychain could not remove the key's previous item, so your current way in was left exactly as it was. Nothing changed — you can try the switch again."` — `App/Variorum/Shared/StoreProtection.swift:558`
+- `"The device Keychain could not remove the previous sync-key item, so the setting was left exactly as it was. Nothing changed — you can try again."` — `App/Variorum/Shared/StoreProtection.swift:566`
+- `"Your library is encrypted on disk, and this \(deviceName)'s Keychain opens it silently when Variorum opens. This protects the disk — a stolen drive, a copied file — but anyone who can use this \(deviceName) as you can open Variorum and read."` — `App/Variorum/Shared/StoreProtection.swift:581` (templated) ⚠RULED
+- `"Variorum asks for your fingerprint or face every time it opens, and when it locks. Your \(deviceName)'s \(credentialName) can NOT open it. If biometrics fail, the fallback is your encryption passphrase — which is why this mode requires one."` — `App/Variorum/Shared/StoreProtection.swift:586` (templated)
+- `"Variorum asks for your encryption passphrase every time it opens, and when it locks. Nothing opens it silently — not the Keychain, not your login password."` — `App/Variorum/Shared/StoreProtection.swift:591`
+- `"verified this launch — the iCloud key opens the key file's copy"` — `App/Variorum/Shared/StoreProtection.swift:625`
+- `"not landing — no copy verifiably opens with the iCloud key"` — `App/Variorum/Shared/StoreProtection.swift:626`
+- `"not checked yet this launch"` — `App/Variorum/Shared/StoreProtection.swift:627`
+- `"This \(deviceName)"` — `App/Variorum/Shared/StoreProtection.swift:650`, `App/Variorum/Shared/StoreProtection.swift:654`, `App/Variorum/Shared/StoreProtection.swift:659` (templated) ⚠RULED (§11 provisional)
+- `"its Keychain opens the library silently"` — `App/Variorum/Shared/StoreProtection.swift:651`
+- `"\(biometryName) unlocks it — the computer password never does"` — `App/Variorum/Shared/StoreProtection.swift:655` (templated)
+- `"nothing here opens the library silently — that is this mode's point"` — `App/Variorum/Shared/StoreProtection.swift:660`
+- `"opens any copy, and lets a new device into sync"` — `App/Variorum/Shared/StoreProtection.swift:667` ⚠RULED
+- `"not set"` — `App/Variorum/Shared/StoreProtection.swift:668`
+- `"the twelve words — the passphrase's twin, on paper"` — `App/Variorum/Shared/StoreProtection.swift:672`
+- `"not saved"` — `App/Variorum/Shared/StoreProtection.swift:673`
+- `"iCloud key"` — `App/Variorum/Shared/StoreProtection.swift:676`, `App/Variorum/Shared/StoreProtection.swift:680` ⚠RULED (§11 provisional)
+- `"no copy opens with it in Castle"` — `App/Variorum/Shared/StoreProtection.swift:677`
+- `"One thing no setting here changes: while Variorum is open and unlocked, everything in your library is readable — that is what open means. Locking is how you end that. There is deliberately no per-note lock: over an already-open library it would look like protection without being any."` — `App/Variorum/Shared/StoreProtection.swift:696` ⚠RULED
+- `"Your library lives on this \(deviceName). Unless you sync it, there is no copy of it anywhere else — so the ways back in above are the whole list."` — `App/Variorum/Shared/StoreProtection.swift:709` (templated)
+- `"You're in Castle — and a scheduled plain-text export re-opens the door Castle closed: every note, readable, on a timer, in the folder you picked. Turn it on only if that trade is one you mean."` — `App/Variorum/Shared/StoreProtection.swift:719`
+- `"Right now, only this \(deviceName) can open your work."` — `App/Variorum/Shared/StoreProtection.swift:728` (templated) ⚠RULED
+- `"Your Apple account hasn't been able to take a key yet, no passphrase is set and no twelve words are written down — so if this \(deviceName) is lost or broken, your writing goes with it. Two minutes fixes that: turn on iCloud Keychain, or set a passphrase (your twelve words appear on the same screen)."` — `App/Variorum/Shared/StoreProtection.swift:730` (templated) ⚠RULED
+- `"At least one real way back into your writing exists beyond this \(deviceName)."` — `App/Variorum/Shared/StoreProtection.swift:737` (templated) ⚠RULED
+- `"Whether a spare way in exists can't be told right now — this library's key file exists but can't be read. That is a fact about this check, not about your writing: whatever opened the library still does."` — `App/Variorum/Shared/StoreProtection.swift:740` ⚠RULED
+- `"Ways back in: unknown — this library's key file exists but can't be read right now."` — `App/Variorum/Shared/StoreProtection.swift:748` ⚠RULED
+- `"this device's \(biometryName) unlock"` — `App/Variorum/Shared/StoreProtection.swift:752` (templated)
+- `"your encryption passphrase"` — `App/Variorum/Shared/StoreProtection.swift:753` ⚠RULED
+- `"your recovery phrase"` — `App/Variorum/Shared/StoreProtection.swift:754` ⚠RULED (§11 provisional)
+- `"the key in your iCloud Keychain"` — `App/Variorum/Shared/StoreProtection.swift:756` ⚠RULED
+- `"Ways back in: none beyond this device — see above."` — `App/Variorum/Shared/StoreProtection.swift:759`
+- `"Ways back in: "` — `App/Variorum/Shared/StoreProtection.swift:761`
+- `"Your library is encrypted. Two minutes makes it recoverable."` — `App/Variorum/Shared/StoreProtection.swift:765` ⚠RULED (§11 provisional)
+- `"Right now this \(deviceName)'s Keychain holds the only key. Set an encryption passphrase (your recovery phrase appears on the same screen), or just take the recovery phrase — either one means losing this \(deviceName) doesn't mean losing your writing."` — `App/Variorum/Shared/StoreProtection.swift:767` (templated) ⚠RULED (§11 provisional)
+- `"Set a Passphrase…"` — `App/Variorum/Shared/StoreProtection.swift:771`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:485` ⚠RULED (§11 provisional)
+- `"Show My Recovery Phrase…"` — `App/Variorum/Shared/StoreProtection.swift:772` ⚠RULED (§11 provisional)
+- `"Still remember your encryption passphrase?"` — `App/Variorum/Shared/StoreProtection.swift:776` ⚠RULED (§11 provisional)
+- `"You never type it day to day, which is exactly how it slips away. Check it here — nothing is changed or reset, this only answers yes or no."` — `App/Variorum/Shared/StoreProtection.swift:778` ⚠RULED (§11 provisional)
+- `"Open silently (Keychain)"` — `App/Variorum/Shared/StoreProtection.swift:790` ⚠RULED (§11 provisional)
+- `"Ask for \(biometryName)"` — `App/Variorum/Shared/StoreProtection.swift:791` (templated) ⚠RULED (§11 provisional)
+- `"Ask for the passphrase"` — `App/Variorum/Shared/StoreProtection.swift:792` ⚠RULED
+- `"Lock Library Now"` — `App/Variorum/Shared/StoreProtection.swift:799` ⚠RULED
+- `"Locking closes the library and forgets its key until you unlock it again."` — `App/Variorum/Shared/StoreProtection.swift:801` ⚠RULED
+- `"Lock when Variorum leaves the screen"` — `App/Variorum/Shared/StoreProtection.swift:806`
+- `"Whatever you were writing is saved first, then the library closes and its key is forgotten. Coming back asks again."` — `App/Variorum/Shared/StoreProtection.swift:808`
+- `"Unlock your library with \(biometryName)."` — `App/Variorum/Shared/StoreProtection.swift:818` (templated) ⚠RULED
+- `"Enter your encryption passphrase to unlock your library."` — `App/Variorum/Shared/StoreProtection.swift:819` ⚠RULED
+- `"Your library file is missing."` — `App/Variorum/Shared/StoreProtection.swift:839` ⚠RULED
+- `"Variorum's library isn't where it was. Your lock hasn't changed."` — `App/Variorum/Shared/StoreProtection.swift:841` ⚠RULED
+- `"Restore from a Backup…"` — `App/Variorum/Shared/StoreProtection.swift:842` ⚠RULED
+- `"Open an Existing Library…"` — `App/Variorum/Shared/StoreProtection.swift:843` ⚠RULED
+- `"Start a New Library"` — `App/Variorum/Shared/StoreProtection.swift:844` ⚠RULED
+- `"A new library starts empty and has its own key."` — `App/Variorum/Shared/StoreProtection.swift:845` ⚠RULED
+- `"its \(biometryName) item is gone from this \(deviceName), and no passphrase or recovery phrase is on file beside the library"` — `App/Variorum/Shared/StoreProtection.swift:851` (templated) ⚠RULED
+- `"no passphrase or recovery phrase is on file beside the library"` — `App/Variorum/Shared/StoreProtection.swift:854`
+- `"No way to unlock this library exists on this \(deviceName): \(cause). Restore the \(StoreKeyEnvelope.filename) file from a backup folder, or restore the whole library from a backup."` — `App/Variorum/Shared/StoreProtection.swift:856` (templated) ⚠RULED
+- `"That passphrase doesn't unlock this library."` — `App/Variorum/Shared/StoreProtection.swift:866` ⚠RULED
+- `"Those twelve words don't unlock this library."` — `App/Variorum/Shared/StoreProtection.swift:868` ⚠RULED
+- `"This library has no passphrase set — unlock it another way."` — `App/Variorum/Shared/StoreProtection.swift:870`
+- `"This library has no recovery phrase on file."` — `App/Variorum/Shared/StoreProtection.swift:872`
+- `"This library's key file was written by a newer Variorum — update the app to open it."` — `App/Variorum/Shared/StoreProtection.swift:876`
+- `"This library's key file exists but can't be read. Restore \(StoreKeyEnvelope.filename) from a backup folder, or unlock with \(biometryName) if it's offered."` — `App/Variorum/Shared/StoreProtection.swift:883` (templated) ⚠RULED
+- `"\u{201C}\(word)\u{201D} isn't a recovery-phrase word — check its spelling."` — `App/Variorum/Shared/StoreProtection.swift:892` (templated) ⚠RULED
+- `"Something unexpected went wrong with this library's key file. Try again — and if it keeps happening, restore \(StoreKeyEnvelope.filename) from a backup folder."` — `App/Variorum/Shared/StoreProtection.swift:901` (templated)
+- `"Turning on sync…"` — `App/Variorum/Shared/SyncEnrollmentView.swift:131` ⚠RULED (§11 provisional)
+- `"Sign in…"` — `App/Variorum/Shared/SyncStatusViews.swift:83` ⚠RULED
+- `"Sync now"` — `App/Variorum/Shared/SyncStatusViews.swift:89`, `App/Variorum/Shared/SyncStatusViews.swift:99`, `App/Variorum/Shared/SyncStatusViews.swift:148`, `App/Variorum/Shared/SyncStatusViews.swift:162`, `App/Variorum/Shared/SyncStatusViews.swift:167`
+- `"Account…"` — `App/Variorum/Shared/SyncStatusViews.swift:90`, `App/Variorum/Shared/SyncStatusViews.swift:149`, `App/Variorum/Shared/SyncStatusViews.swift:154`, `App/Variorum/Shared/SyncStatusViews.swift:163`, `App/Variorum/Shared/SyncStatusViews.swift:168`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:824`
+- `"Unlock…"` — `App/Variorum/Shared/SyncStatusViews.swift:107` ⚠RULED (§11 provisional)
+- `"Finish key replacement…"` — `App/Variorum/Shared/SyncStatusViews.swift:120`
+- `"Re-enroll…"` — `App/Variorum/Shared/SyncStatusViews.swift:136`
+- `"Retry"` — `App/Variorum/Shared/SyncStatusViews.swift:153`
+- `"Sync off (dev store)"` — `App/Variorum/Shared/SyncStatusViews.swift:277`
+- `"Signed out"` — `App/Variorum/Shared/SyncStatusViews.swift:280` ⚠RULED
+- `"Sync is off"` — `App/Variorum/Shared/SyncStatusViews.swift:283`
+- `"Syncing…"` — `App/Variorum/Shared/SyncStatusViews.swift:288`
+- `"Sync error"` — `App/Variorum/Shared/SyncStatusViews.swift:323`
+- `"· \(sync.status.pendingPushCount) pending"` — `App/Variorum/Shared/SyncStatusViews.swift:335` (templated)
+- `"Sync locked — enter your encryption passphrase"` — `App/Variorum/Shared/SyncStatusViews.swift:352` ⚠RULED
+- `"Sync paused — this account's encryption keys were replaced"` — `App/Variorum/Shared/SyncStatusViews.swift:358` ⚠RULED (§11 provisional)
+- `"Sync paused — key replacement didn't finish on this device"` — `App/Variorum/Shared/SyncStatusViews.swift:363`
+- `"Not synced yet"` — `App/Variorum/Shared/SyncStatusViews.swift:366`
+- `"Synced \(last.formatted(date: .omitted, time: .shortened))"` — `App/Variorum/Shared/SyncStatusViews.swift:367` (templated)
+- `"Waiting to sync (offline)"` — `App/Variorum/Shared/SyncStatusViews.swift:372`
+- `"Sync incomplete — some changes haven't arrived yet"` — `App/Variorum/Shared/SyncStatusViews.swift:378`
+- `"Sync off — hosted sync isn't active on this account"` — `App/Variorum/Shared/TierViews.swift:44`
+- `"Hosted sync is active on this account."` — `App/Variorum/Shared/TierViews.swift:47`
+- `"Hosted sync keeps an end-to-end encrypted copy of your writing on the server and syncs it across your devices. The server can never read what it stores."` — `App/Variorum/Shared/TierViews.swift:51`
+- `"Variorum works fully without it — everything you write lives on this device, and nothing in the app is reduced."` — `App/Variorum/Shared/TierViews.swift:56`
+- `"Plans are available at stargazing.tech."` — `App/Variorum/Shared/TierViews.swift:62`
+- `"Renews or ends \(parsed.formatted(date: .abbreviated, time: .omitted))."` — `App/Variorum/Shared/TierViews.swift:108` (templated)
+- `"Hosted Sync"` — `App/Variorum/Shared/TierViews.swift:127`, `App/Variorum/Shared/TierViews.swift:135`
+- `"Couldn't check the words (\(reason))."` — `App/Variorum/Shared/WordsCeremony.swift:99` (templated)
+- `"Set your encryption passphrase"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:44` ⚠RULED (§11 provisional)
+- `"Your account already has an encryption passphrase, and one passphrase serves both — type that same one here to make it unlock this library too."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:47` ⚠RULED (§11 provisional)
+- `"One passphrase, chosen by you, never sent anywhere. It can unlock this library when the Keychain can't — or at every open, if you ask for that."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:50`
+- `"Type it again"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:58`
+- `"Set Passphrase"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:63` ⚠RULED (§11 provisional)
+- `"Your recovery phrase"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:71`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1046` ⚠RULED (§11 provisional)
+- `"Twelve words that can unlock this library if everything else is gone. Write them down somewhere real — they are shown now, and never again."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:73` ⚠RULED (§11 provisional)
+- `"Your account already has a recovery phrase"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:96` ⚠RULED (§11 provisional)
+- `"Type those same twelve words to make them unlock this library too — one phrase serves both. You can skip this; the passphrase is set either way."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:98`
+- `"Skip"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:110` ⚠RULED (§11 provisional)
+- `"Extend It to This Library"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:115` ⚠RULED (§11 provisional)
+- `"The passphrase is set."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:127` ⚠RULED (§11 provisional)
+- `"Ways back in — right now"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:253` ⚠RULED (§11 provisional)
+- `"Your Apple account hasn't been able to take a key yet — this Mac's Keychain refused to keep the iCloud key, so no copy exists beyond this Mac; your other ways back in stand."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:277` ⚠RULED
+- `"Standard or Castle"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:298`
+- `" ⌃⌘L does the same from anywhere."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:457`
+- `"Passphrase & twelve words"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:469` ⚠RULED (§11 provisional)
+- `"Set"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:471`
+- `"Not set"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:471`
+- `"Twelve words"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:472`
+- `"On file"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:473`
+- `"Not saved"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:473`
+- `"Change your passphrase or your twelve words under Account & Encryption."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:479` ⚠RULED (§11 provisional)
+- `"The passphrase and the twelve words are the ways back into this library when this Mac's Keychain can't help. Nothing is sent anywhere; both work offline."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:491` ⚠RULED (§11 provisional)
+- `"Remembering your secrets"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:504` ⚠RULED (§11 provisional)
+- `"this library's key"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:509` ⚠RULED
+- `"Don't offer again"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:679` (tooltip)
+- `"Check it in Settings ▸ Protection — nothing changes, it only answers yes or no."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:705`
+- `"Check It…"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:711` ⚠RULED (§11 provisional)
+- `"Enter"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:880`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:899` ⚠RULED (§11 provisional)
+- `"Keep Variorum open. If it quits, the follow picks up where it stopped."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:908` ⚠RULED (§11 provisional)
+- `"Nothing was changed."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:945`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1325`, `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1444` ⚠RULED (§11 provisional)
+- `"Confirming…"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1014`
+- `"Twelve words that can unlock this library if this Mac is lost. Write them down somewhere real — they are shown now, and never again."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1048` ⚠RULED (§11 provisional)
+- `"Keep Variorum open. If it quits, the switch picks up where it stopped."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1261` ⚠RULED (§11 provisional)
+- `"Confirm with Touch ID"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1302` ⚠RULED
+- `"You're in Standard."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1309` ⚠RULED
+- `"Your Apple account holds a key again. Nothing else changed."` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1310` ⚠RULED (§11 provisional)
+- `"Finish"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:1320`
+- `"Too many attempts — wait a few minutes and try again."` — `Sources/VariorumCore/Auth/AuthRateLimit.swift:32`
+- `"the encrypted temp could not be attached (\(key.redactedDescription(of: error))); the original store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:112` (templated)
+- `"the source's WAL did not drain (\(size) bytes remain); the store is untouched — relaunching retries the migration"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:140` (templated)
+- `"the encrypted copy failed row-count verification (\(found.count) tables vs \(counts.count)); the original store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:155` (templated)
+- `"the encrypted copy failed verification (\(error)); the original store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:163` (templated)
+- `"the exported copy is not ciphertext; the original store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:168`
+- `"the atomic swap failed (errno \(code): \(String(cString: strerror(code)))); the encrypted copy remains at \(temp.lastPathComponent) and the original is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:181` (templated)
+- `"the store is not ciphertext — a plaintext store takes the one-time encryption migration, never a re-key; nothing was touched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:229`
+- `"neither the current key nor the new key opens this store; nothing was touched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:240`
+- `"the re-keyed temp could not be attached (\(scrubbed)); the store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:263` (templated)
+- `"the source's WAL did not drain (\(size) bytes remain); the store is untouched — the next attempt retries the re-key"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:285` (templated)
+- `"the re-keyed copy failed row-count verification (\(found.count) tables vs \(counts.count)); the store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:298` (templated)
+- `"the re-keyed copy failed verification (\(error)); the store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:305` (templated)
+- `"the re-keyed copy is not ciphertext; the store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:309`
+- `"the atomic swap failed (errno \(code): \(String(cString: strerror(code)))); the re-keyed copy remains at \(temp.lastPathComponent) and the store is untouched"` — `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift:318` (templated)
+- `"a file named \(destination.lastPathComponent) is already there — choose another name"` — `Sources/VariorumCore/Persistence/StorePlaintextExport.swift:41` (templated)
+- `"the destination could not be opened for writing (\(error))"` — `Sources/VariorumCore/Persistence/StorePlaintextExport.swift:50` (templated)
+- `"Sync paused: the app and the server are on different schema versions (app \(client), server \(server)). Finish the schema update on the lagging side; nothing is lost while paused (SyncSpec §12)."` — `Sources/VariorumCore/Sync/SyncSchema.swift:698` (templated)
+- `"Sync paused: this device's encryption keys are locked or not enrolled. Enter your encryption passphrase to unlock sync; nothing is lost while paused."` — `Sources/VariorumCore/Sync/SyncSchema.swift:702` ⚠RULED
+- `"Sync refused: '\(table)' row '\(rowID)' arrived with an unencrypted value in encrypted column '\(column)'. End-to-end encryption is mandatory — the round is refused so nothing unverified lands; outbox and cursor are untouched."` — `Sources/VariorumCore/Sync/SyncSchema.swift:705` (templated)
+- `"Sync refused: '\(table)' row '\(rowID)' column '\(column)' failed to encrypt/decrypt (\(detail)). Nothing unverified lands; outbox and cursor are untouched."` — `Sources/VariorumCore/Sync/SyncSchema.swift:709` (templated)
+- `"Sync paused: this account's encryption keys were replaced — this device still holds the previous keys. Re-enroll with the current encryption passphrase; nothing is lost while paused."` — `Sources/VariorumCore/Sync/SyncSchema.swift:713` ⚠RULED (§11 provisional)
+- `"Sync paused: hosted sync isn't active on this account. Your writing stays safe on this device; sync resumes once the plan is active."` — `Sources/VariorumCore/Sync/SyncSchema.swift:717`
+- `"Sync paused: replacing this account's encryption keys didn't finish on this device. It resumes from Settings ▸ Protection (or Replace All Keys); nothing is lost while paused."` — `Sources/VariorumCore/Sync/SyncSchema.swift:723` ⚠RULED (§11 provisional)
+- `"Sync couldn't read everything from the server just now — another device still owes some of it (paused at \(cursor)). Nothing is lost; try again in a moment."` — `Sources/VariorumCore/Sync/SyncSchema.swift:727` (templated)
+- `"This device still has \(pending) change\(pending == 1 ? "" : "s") to send — wait for sync to finish, then try again."` — `Sources/VariorumCore/Sync/SyncSchema.swift:731` (templated)
+- `"This device has been away a while — it needs to reload from your account. Anything written here first gets saved up; nothing typed is lost. Nothing syncs until the reload runs."` — `Sources/VariorumCore/Sync/SyncSchema.swift:737`
+- `"Sync is paused until you enter your passphrase once — your keys were replaced on another device. Nothing is lost while paused."` — `Sources/VariorumCore/Sync/SyncSchema.swift:744` ⚠RULED
+- `"Sync couldn't finish setting up this account's security check — it retries on the next sync. Nothing is lost while it waits."` — `Sources/VariorumCore/Sync/SyncSchema.swift:747`
+- `"This account's security check is already set up."` — `Sources/VariorumCore/Sync/SyncSchema.swift:752`
+- `"Sync couldn't complete a security check just now — it retries on the next sync. Nothing is lost while it waits."` — `Sources/VariorumCore/Sync/SyncSchema.swift:754`
+- `" It resumes automatically (about \(minutes) minute\(minutes == 1 ? "" : "s"))."` — `Sources/VariorumCore/Sync/SyncSchema.swift:761` (templated)
+- `" It resumes automatically."` — `Sources/VariorumCore/Sync/SyncSchema.swift:762`
+- `"Sync is paused — this account hit today's write limit; nothing is lost.\(wait)"` — `Sources/VariorumCore/Sync/SyncSchema.swift:763` (templated)
+- `"This needs a fresh sign-in — confirm your account password and try again."` — `Sources/VariorumCore/Sync/SyncSchema.swift:766`
+
+— 561 strings
+
+
+## Empty states & placeholders
+
+- `"(empty take)"` — `App/Variorum/Shared/BlockHistoryFace.swift:134`, `App/Variorum/Shared/RecoveryCopy.swift:379`
+- `"(empty block)"` — `App/Variorum/Shared/BlockHistoryFace.swift:323`
+- `"Type a tag name — “/” makes a hierarchy (life/goals)."` — `App/Variorum/Shared/TypedTagPath.swift:52`
+- `"no note selected"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:127`
+- `"click a note in the book to see its controls here"` — `App/Variorum/Variorum/Core/Views/NoteBox.swift:128`
+- `"Nothing matches."` — `App/Variorum/Variorum/Core/Views/NotePicker.swift:196`, `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:27`, `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:52`
+- `"name this moment"` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:80`
+- `"no name"` — `App/Variorum/Variorum/Core/Views/SavepointNameField.swift:84`
+- `"by tag"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:101`
+- `"no tags on this book's notes"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:107`
+- `"Name"` — `App/Variorum/Variorum/Features/BookView/BookFilterBar.swift:282`, `App/Variorum/Variorum/Features/BookView/BookView.swift:379`, `App/Variorum/Variorum/Features/BookView/BookView.swift:393`, `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:132`, `App/Variorum/Variorum/Features/Pool/BlocksAreaView.swift:140`, `App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:540`, `App/Variorum/Variorum/Features/Readings/DuplicateBook.swift:154`, `App/Variorum/Variorum/Features/Readings/MintGatheringSheet.swift:47`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:185`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:226`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:238`, `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:254`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:117`, `App/Variorum/Variorum/Features/Shelf/WingSwitcherMenu.swift:127`
+- `"no tag families in this book's notes"` — `App/Variorum/Variorum/Features/BookView/BookIndexGrouping.swift:103`
+- `"filter this book"` — `App/Variorum/Variorum/Features/BookView/BookIndexView.swift:843`
+- `"nothing by itself"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:78`
+- `"nothing"` — `App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift:80`, `App/Variorum/Variorum/Features/Editor/MergeCeremonySheet.swift:313`
+- `"This book has no notes yet."` — `App/Variorum/Variorum/Features/BookView/BookView.swift:1440`, `App/Variorum/Variorum/Features/BookView/PagedReadView.swift:90`, `App/Variorum/Variorum/Features/BookView/SpreadBookView.swift:97`
+- `"Find anything — notes, books, commands…"` — `App/Variorum/Variorum/Features/CommandPalette/CommandPalette.swift:152`
+- `"e.g. \u{1f4a1}"` — `App/Variorum/Variorum/Features/Editor/CalloutMenu.swift:199`
+- `"There is nothing in this take to cut."` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:254`
+- `"No notes carry this tag yet."` — `App/Variorum/Variorum/Features/Folder/FolderView.swift:91`
+- `"Search archived notes and books…"` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:175`
+- `"Nothing archived."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:188`
+- `"No archived note matches that."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:189`
+- `"No archived book matches that."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:400`
+- `"No archived notes."` — `App/Variorum/Variorum/Features/Library/ArchivedView.swift:401`
+- `"Title"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:288`
+- `"Search books, notes, blocks…"` — `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:457`
+- `"No notes match."` — `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:30`
+- `"No text yet"` — `App/Variorum/Variorum/Features/Library/LibraryCopy.swift:50`
+- `"No text yet."` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:390`
+- `"No notes in this book yet."` — `App/Variorum/Variorum/Features/Library/LibraryInfoPanel.swift:474`
+- `"No tags yet \u{2014} make one in Settings \u{25B8} Tags."` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:21`
+- `"search books"` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:331`
+- `"No books match."` — `App/Variorum/Variorum/Features/Pool/PoolPostsView.swift:332`
+- `"search snippets"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:37`
+- `"No snippets yet — type one below, or drop text here."` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:51`
+- `"no snippet here wears a tag yet \u{2014} right-click one \u{25B8} Tags\u{2026}"` — `App/Variorum/Variorum/Features/Pool/SnippetsSurface.swift:90`
+- `"jot it down — it lands in Quicknotes"` — `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:541`
+- `"Name (blank clears)"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:183`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:315`
+- `"Position (1–\(model.rows.count))"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:197`, `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:329` (templated)
+- `"filter this note"` — `App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift:220`
+- `"nothing to read yet"` — `App/Variorum/Variorum/Features/ReadMode/NotePagesView.swift:60`
+- `"no blocks yet"` — `App/Variorum/Variorum/Features/ReadTier/ReadTakesView.swift:64`
+- `"No notes yet."` — `App/Variorum/Variorum/Features/Readings/ReadingViews.swift:84`
+- `"no tags yet"` — `App/Variorum/Variorum/Features/Readings/RuleEditor.swift:73`
+- `"Add URL…"` — `App/Variorum/Variorum/Features/References/ReferencePanel.swift:95`
+- `"Nothing here matches “\(query)”. Try a word from the thing itself — “callout”, “dark”, “seam”, “savepoint”."` — `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:309` (templated)
+- `"Use This Folder"` — `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift:242`, `App/Variorum/Variorum/Features/Settings/ICloudDriveOffer.swift:68` ⚠RULED (§11 provisional)
+- `"No copies here yet."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:405`
+- `"Nothing recorded yet on this Mac."` — `App/Variorum/Variorum/Features/Settings/DataSafetyPane.swift:467`
+- `"B9A7E6"` — `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift:100`
+- `"Find a shelf"` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:425`
+- `"No shelf matches."` — `App/Variorum/Variorum/Features/Shelf/BookcaseStrip.swift:444`
+- `"new note — just start typing · ⏎ opens it · ⇧ ⏎ new paragraph"` — `App/Variorum/Variorum/Features/Shelf/QuickEntryBar.swift:152`
+- `"or type one"` — `App/Variorum/Variorum/Features/Shelf/ShelfGlyphSheet.swift:68`
+- `"No books yet — create one, or just start typing below."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:393`
+- `"Nothing in view matches \u{201C}\(solo.label(count: 0).dropFirst(2))\u{201D} — click \u{2116} to clear it."` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:419` (templated)
+- `"Word target (e.g. 10000)"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:883`
+- `"Note cap (max notes)"` — `App/Variorum/Variorum/Features/Shelf/ShelfView.swift:884`
+- `"filter blocks"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:366`
+- `"No tags yet — make one in Settings ▸ Tags"` — `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:482`
+- `"tag — ⏎ applies · / nests"` — `App/Variorum/Variorum/Features/Tags/MastheadTagCluster.swift:344`
+- `"tag — ⏎ applies it (“/” nests: life/goals)"` — `App/Variorum/Variorum/Features/Tags/NoteTagChips.swift:350`
+- `"No tags yet — type one above, or manage the taxonomy in Settings (⌘,)."` — `App/Variorum/Variorum/Features/Tags/TagViews.swift:60`
+- `"search notes"` — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift:1063`
+- `"No matches"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:232`
+- `"Find in this note's takes"` — `App/Variorum/Variorum/Features/Takes/TakesFindPlan.swift:244`
+- `"e.g. bolder opening"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:779`
+- `"e.g. bolder thread"` — `App/Variorum/Variorum/Features/Takes/TakesShared.swift:823`
+- `"No saved moments yet \u{2014} \u{2318}S saves one."` — `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:75`
+- `"Variorum is locked — unlock it in the main window."` — `App/Variorum/Variorum/VariorumApp.swift:344`
+- `"\(ProtectionCopy.libraryMissingTitle) See the main window."` — `App/Variorum/Variorum/VariorumApp.swift:347` (templated)
+- `"Open a note from the main window."` — `App/Variorum/Variorum/VariorumApp.swift:352`
+- `"Open the main window first."` — `App/Variorum/Variorum/VariorumApp.swift:370`, `App/Variorum/Variorum/VariorumApp.swift:403`
+- `"Untitled"` — `Sources/VariorumCore/Domain/DisplayTitle.swift:36`
+
+— 75 strings
+
+
+## Tooltips & help text — the Shortcuts & Dictionary window
+
+- `"Shortcuts"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:28`
+- `"Dictionary"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:30`
+- `"Takes"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:60`
+- `"open/close takes at the block you're in"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:61`
+- `"close all takes — back to the plain page"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:62`
+- `"new take (starts as a copy of what's shown)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:63`
+- `"new blank take (not chosen until you ✓ it)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:64`
+- `"new blank take AND choose it — the power gesture"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:65`
+- `"choose the take you're in (the note shows it)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:66`
+- `"step through a block's takes"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:67`
+- `"archive the take you're in"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:68`
+- `"save current choices as a lens"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:69`
+- `"previous / next page of takes (on the Takes board)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:70`
+- `"copy this block's takes — the shown one, then its alternates (⌘C is still ordinary copy)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:72`
+- `"move the take you're in into its own block below — the original is archived on this block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:77`
+- `"turn ALL of this block's takes into blocks below it — the block keeps showing what it showed; the originals are archived on it"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:79`
+- `"Writing"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:82`
+- `"commit — an immutable savepoint of the take you're in; name it or press ⏎ to save it unnamed"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:85`
+- `"save a version — the whole note as it is, in Versions"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:89`
+- `"text undo (typing only)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:90`
+- `"structural undo (splits, merges, moves — never text)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:91`
+- `"structural redo — puts back what ⌥⌘Z undid"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:92`
+- `"jump to the previous / next block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:93`
+- `"the block's comments"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:94`
+- `"callout frame on this block (again to remove it)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:95`
+- `"toggle block seams (dotted lines between blocks)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:96`
+- `"Structure"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:98`
+- `"divide the block at the cursor — a block with takes cuts the take you're in and leaves the others whole on the first block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:99`
+- `"divide choosing takes — pick where the other takes go, or place each cut by hand"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:101`
+- `"extract the selection into its own block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:103`
+- `"make a block from the selection"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:104`
+- `"merge blocks — every take comes along"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:105`
+- `"merge choosing takes — bring every take, only the shown ones, or pair them by hand"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:106`
+- `"new block below the one you're in (Write and Takes alike)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:108`
+- `"Formatting"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:114`
+- `"bold — wraps the selection in ** ** (again to take it off)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:115`
+- `"italic — the same, with * *"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:116`
+- `"Format ▸ Strikethrough"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:117`
+- `"~~like this~~"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:117`
+- `"Format ▸ Inline Code"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:118`
+- `` "`like this`" `` — `App/Variorum/Variorum/Features/Help/HelperView.swift:118`
+- `"Format ▸ Heading"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:119`
+- `"heading 1, 2 or 3 — the line gains #, ## or ###"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:119`
+- `"Format ▸ Bullet List"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:120`
+- `"the line becomes \"- item\""` — `App/Variorum/Variorum/Features/Help/HelperView.swift:120`
+- `"Format ▸ Checklist"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:121`
+- `"the line becomes \"- [ ] item\" — click the box to tick it"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:121`
+- `"Format ▸ Add Link"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:124`
+- `"[text](address) around the selection, cursor in the parentheses ready for the address"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:124`
+- `"⌘-click a link"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:126`
+- `"opens it — in a writing surface, where a plain click places the cursor; in Read a plain click opens it"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:126`
+- `"the bottom bar"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:131`
+- `` "B · I · S · ` · link · H · • · ☐ — the same eight acts as the Format menu, on the text you're writing in" `` — `App/Variorum/Variorum/Features/Help/HelperView.swift:131`
+- `"Tab / ⇧Tab in a list"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:138`
+- `"indent / outdent the list item you're in (Format ▸ Indent and Format ▸ Outdent do the same); outside a list, Tab is the key it always was"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:138`
+- `"indent / outdent — unindent, if that's your word for it — the list item you're in; the same act as Tab / ⇧Tab, on keys the Format menu can show you"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:154`
+- `"Find in a note"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:161`
+- `"find text in the note you're in (the chosen takes)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:162`
+- `"find and replace in this note"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:163`
+- `"⌘G / ⇧⌘G"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:164`
+- `"next / previous match"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:164`
+- `"search for whatever is selected"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:165`
+- `"Navigation"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:167`
+- `"note modes: Write · Takes · Read · Lenses · Compare · Blocks · Canvas"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:168`
+- `"find anything — notes, books, blocks, commands (not body text)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:169`
+- `"new note"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:170`
+- `"today's journal entry"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:171`
+- `"settings (voice, seams, takes options, tags)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:172`
+- `"this helper"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:173`
+- `"Windows & panes"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:181`
+- `"jump to the 1st–9th note in the sidebar's Open list"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:182`
+- `"show or hide the sidebar (the leading toolbar button is the same door)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:187`
+- `"back / forward, in the pane you're in — the \(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) on the context bar are the same two doors"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:194` (templated)
+- `"tag this note — the field slides out in the masthead with the cursor in it (the ＃ beside the tag cards is the same door)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:199`
+- `"the quick note — a floating pad, from anywhere in Variorum"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:201`
+- `"the quick note from ANY app — Variorum need not be in front (the menu-bar \u{25FB} does the same with a click)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:206`
+- `"\u{23CE} / \u{21E7}\u{23CE} in a capture box"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:211`
+- `"\u{23CE} files what you have written \u{2014} the quick note keeps it and closes; the new-note box on the Bookcase files it and opens it. \u{21E7}\u{23CE} adds another paragraph instead, so a capture can be as long as the thought is"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:212`
+- `"View ▸ Open Beside"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:216`
+- `"put a second note beside this one (right-click a note row for that note; the menu takes the most recent other one)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:216`
+- `"View ▸ Close Split"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:218`
+- `"fold the window back to one pane"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:218`
+- `"File ▸ New Window"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:219`
+- `"a second full window; right-click a note row ▸ Open in New Window for a note on its own"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:219`
+- `"right-click ▸ \(StarCopy.verb)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:221` (templated)
+- `"star a note or book — the Starred section sits at the sidebar's top (up to fifteen); \u{2318}K has the same row"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:221`
+- `"The note's bars"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:229`
+- `"tag cards (top bar)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:230`
+- `"a note's tags live on the context bar as coloured cards, showing by default: \u{FF0B} adds one (type it — \u{201C}/\u{201D} nests), \u{2715} takes it off. The \u{FF03} icon folds them away and back (\u{2318}\u{21E7}I does the same), and where you leave it is where it stays"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:230`
+- `"block \u{25BE} (bottom bar)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:235`
+- `"divide · extract · make block · merge · \u{FF0B} new block below · \u{2212} delete this block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:235`
+- `"note \u{25BE} (bottom bar)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:237`
+- `"history (savepoints) · seal / unseal · the note's date"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:237`
+- `"Every shortcut here is also a menu item — the menus are the map."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:260`
+- `"block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:291`
+- `"The atomic unit — a paragraph-sized piece of writing with permanent identity. Nothing owns blocks; notes and books just point at them."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:292`
+- `"take"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:294`
+- `"One alternative text for a block. A block can hold many takes side by side — the fan. Most blocks live with exactly one."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:295`
+- `"chosen"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:297`
+- `"The take the note actually uses. \"Chosen is what the note is.\" Everything else is a way of looking. ✓ is the one gesture that moves it."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:298`
+- `"fan / bloom"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:300`
+- `"A block's set of takes (the fan); opening it on screen is a bloom. ⌘⇧T opens and closes; ⎋ closes them all."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:301`
+- `"lens"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:303`
+- `"A saved way of LOOKING at a note: for each block, which take to show. A lens never changes the note — ✓ (adopt) and ⧉ (promote) are the only doors out. Unnamed lenses (\"Lens 1\") are the ones you haven't kept yet."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:304`
+- `"arranging vs writing"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:307`
+- `"Two ways to start a lens column: ARRANGE picks among takes that already exist (mints nothing); WRITE mints a fresh take on every block — a full rewrite pass beside the original."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:308`
+- `"adopt (✓ make this the note)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:311`
+- `"The note's chosen takes become what this lens/column shows. Adopting SWAPS, never destroys: the old chosen is auto-saved as a lens named \"chosen until <date>\", so you can always swap back."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:312`
+- `"promote (⧉ make this a note)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:315`
+- `"A new note minted from a lens or column, linked to the original as a version. \"Promote is the bridge\" from a way of looking to a thing of its own."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:316`
+- `"version"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:318`
+- `"A different NOTE related to this one. Two gestures share the word, and they do different things: MARK AS VERSIONS is a CONNECTION ONLY — it draws a link between two notes that already exist; nothing is copied, neither note changes; the link just lets Compare pair them. DUPLICATE AS VERSION is a COPY — it mints a whole new note (takes and all) and draws that same link in one gesture. Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only the connection — both notes stay exactly as they are."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:319`
+- `"divide / divide choosing takes"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:326`
+- `"Divide cuts a block in two at your cursor (⌘⇧D — works in Takes too, right where you are). When the block has SEVERAL takes, the take you're LOOKING at is the one that gets cut, and every other take stays WHOLE on the first block — nothing to hunt for afterwards. Want the takes somewhere else? ⌥⌘⇧D opens \"Divide choosing takes\", which asks first: keep the takes on the top block, keep them on the bottom, copy them to both — or choose per take, where you check the takes to cut and place each ✂ yourself (unchecked takes stay with the original). Either way ⌥⌘Z puts everything back."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:327`
+- `"merge"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:336`
+- `"Join neighboring blocks into one (⌘⇧M): cursor at the seam, or a selection across the run. From Takes it joins your block with the one above. The merged text is what you were LOOKING at on each side — and every OTHER take comes along whole onto the merged block, so nothing goes missing (extra copies are quick to delete). To choose instead — only the takes you were looking at, or this take paired with that one — use ⌥⌘⇧M, Merge choosing takes. Archived takes stay behind with the released blocks; find them under \(TrayPath.originalsPathWithDoor), or ⌥⌘Z brings everything straight back."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:337` (templated)
+- `"extract / make block"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:346`
+- `"Extract (⌘⇧E) pulls a selected span at a block's edge into its own block; Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — select in your take, and the app carries the selection to Write and acts."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:347`
+- `"commit"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:350`
+- `"An immutable savepoint of one take (⌘S). It can carry a NAME — ⌘S offers a field, ⏎ saves it named or not — and the name is editable afterwards from Block History. Commits are append-only: restoring one never erases another, and a name never touches the text."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:351`
+- `"seal"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:355`
+- `"A note marked complete: everything under it refuses edits until unsealed. Reversible; nothing is ever locked away for good."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:356`
+- `"seam"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:358`
+- `"The dotted line between blocks (⌘⇧B). Off by default — at rest a note reads as seamless prose."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:359`
+- `"callout"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:361`
+- `"A block wearing a colored frame (Block ▸ Callout). Presentation only — exports as a quote block; the text is untouched."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:362`
+- `"comment"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:364`
+- `"A working remark on a BLOCK (never on a single take): \"take 1 is better but take 2's ending…\". Margin cards by default; deleted comments stay recoverable."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:365`
+- `"pool / scraps"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:368`
+- `"The Pool holds notes that belong to no book yet. Snippets (scraps) holds loose pieces — drag one into a draft and it lands as a copy with lineage."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:369`
+- `"book / gathering"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:373`
+- `"A BOOK holds its notes as members \u{2014} your order, your chapters; a note can live in many books at once, and membership is not ownership (an OWNED book is the one place its notes live). A GATHERING is a saved rule of tags or \u{2605} that shows every matching note and holds none of them."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:374`
+- `"tag"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:379`
+- `"A hierarchical label (life/goals/2024) applied to a note or a block — never a place, so tagging moves nothing. On a note they show as coloured cards on the context bar; \u{FF0B} adds, \u{2715} removes, and a tag keeps its colour everywhere. Settings (\u{2318},) manages the whole taxonomy and can make a gathering from tags."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:380`
+- `"quicknote (the tag)"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:386`
+- `"Every quick note is tagged \u{201C}quicknote\u{201D}, and the gathering \u{201C}Quicknotes\u{201D} shows the tag \u{2014} so take the tag off and the note leaves it, because a gathering is just its rule."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:387`
+- `"canvas"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:390`
+- `"A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › switcher just changes what a card shows; choosing is a separate, deliberate gesture."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:391`
+- `"pane / the split"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:397`
+- `"A window can show TWO notes side by side. Right-click a note row ▸ Open Beside puts that note in a second pane; View ▸ Open Beside takes the most recently opened other note. Drag the seam to resize; View ▸ Close Split folds back to one. Only ONE pane is live at a time — the one you clicked into is the one you type in, and the other reads quietly beside it. A split never shows one note twice; for that, use Lenses or Compare."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:398`
+- `"window"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:404`
+- `"Two kinds. File ▸ New Window opens another FULL window — its own sidebar, its own Open list, its own back trail. Right-click a note row ▸ Open in New Window opens just that note, with no sidebar. Every window shows the same store; the one you're in is the one that writes."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:405`
+- `"the Open list"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:409`
+- `"The sidebar's list of notes this window has open, in the order you opened them — ⌘⇧1 through ⌘⇧9 jump to them. Drag rows to rearrange; ✕ closes a ROW and nothing else (the note is untouched and comes back the next time you open it)."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:410`
+- `"context bar"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:414`
+- `"The thin line above a pane, always the same doors: ← back, the book this note sits in (click to open that book right at this note; ⌘-click, or a click when it's in several, lists them), and → forward. The note's tag cards live in the masthead's right edge, with ＃ to add one. A door with nowhere to go is greyed, not hidden — the row never changes shape. ⌥⌘[ / ⌥⌘] and ⌘⇧I are the same doors on the keyboard."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:415`
+- `"star"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:422`
+- `"A shortcut to a note or a book, pinned at the sidebar's top under \u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ \(StarCopy.verb), or the same row in ⌘K. Up to fifteen: stars are meant to be the things you're in right now, not a filing system."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:423` (templated)
+- `"markdown"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:430`
+- `"How formatting is STORED: as ordinary characters in your text. **bold** is really two stars, a heading really starts with #. The editor styles them and dims the markers, but what you see is exactly what is saved — which is why an export is already markdown, and why nothing about a formatted note is locked in."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:431`
+- `"checkbox"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:436`
+- `"A line starting \"- [ ] \" — a to-do. CLICK the box to tick it (\"- [x] \"); that is an ordinary edit, so ⌘Z takes it back and a sealed note refuses it. Format ▸ Checklist makes one from the line you're on."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:437`
+- `"link"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:443`
+- `"Written in the text as [words](address) — Format \u{25B8} Add Link puts the brackets around your selection. While you're WRITING you see the whole thing and \u{2318}-click follows it (a plain click has to place the cursor). In a book's READ mode there is nothing to type, so the markers are hidden, the words read as a link, and a plain click opens it."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:444`
+- `"quick note"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:452`
+- `"A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, the ✏︎ in the system menu bar, or \u{2303}\u{2325}\u{2318}N, which reaches you "` — `App/Variorum/Variorum/Features/Help/HelperView.swift:453`
+- `"from any app without a click. \u{23CE} files what you wrote and closes the pad; \u{21E7}\u{23CE} adds another paragraph, so a capture can hold as many as the thought needs; closing it (or \u{2318}\u{23CE}) files it too. What you wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} \u{2014} the Quicknotes gathering shows it, and taking the tag off sends it back to the Pool."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:457`
+- `"Visible is what you're looking at; chosen is what the note is; a lens is a saved way of looking; a version is a different note."` — `App/Variorum/Variorum/Features/Help/HelperView.swift:469`
+- `"⌘⇧T open/close takes · ⎋ close all ⏎ ⌘T new take · ⌥⌘T blank · ⇧⌥⌘T blank & choose ⏎ ⌘ ⏎ choose · ⌃⌘←/→ step takes · ⌘⇧A archive ⏎ ⌘⇧L save as lens · ⌘S commit ( ⏎ saves it unnamed) · ⌘/ full list"` — `App/Variorum/Variorum/Features/Help/HelperView.swift:494`
+
+— 159 strings
+
+
+## Import & export (templates, file names, reports)
+
+- `"Markdown"` — `App/Variorum/Variorum/Features/Export/ExportModel.swift:81`
+- `"PDF"` — `App/Variorum/Variorum/Features/Export/ExportModel.swift:85`
+- `"Exported \(count) file\(count == 1 ? "" : "s")."` — `App/Variorum/Variorum/Features/Export/ExportModel.swift:101` (templated)
+- `"\(base.isEmpty ? "Block" : base).md"` — `App/Variorum/Variorum/Features/Export/ExportModel.swift:113` (templated)
+- `"Exported \(what) to \(url.lastPathComponent)."` — `App/Variorum/Variorum/Features/Export/ExportModel.swift:134` (templated)
+- `"Variorum"` — `App/Variorum/Variorum/Features/Export/PDFExporter.swift:94`
+- `"\(url.lastPathComponent) (not plain text)"` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:174` (templated)
+- `"nothing to import"` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:247`
+- `"the destination is sealed — unseal it first"` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:249`
+- `"Imported \(imported) note\(imported == 1 ? "" : "s")."` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:260` (templated)
+- `"Added to the pool."` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:262`
+- `"Skipped: \(skipped.joined(separator: ", "))."` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:266` (templated)
+- `"Import"` — `App/Variorum/Variorum/Features/Import/ImportModel.swift:286`
+- `"--- Alternates for this block ---"` — `Sources/VariorumCore/Queries/Export.swift:22`
+- `"take: \"\(label)\""` — `Sources/VariorumCore/Queries/Export.swift:25` (templated)
+- `"--- end alternates ---"` — `Sources/VariorumCore/Queries/Export.swift:31`
+- `"## \(group.heading ?? "Ungrouped")"` — `Sources/VariorumCore/Queries/Export.swift:221` (templated)
+- `"### \(title)"` — `Sources/VariorumCore/Queries/Export.swift:230` (templated)
+- `"## \(title)"` — `Sources/VariorumCore/Queries/Export.swift:230` (templated)
+- `"\(date) \(title)"` — `Sources/VariorumCore/Queries/Export.swift:322` (templated)
+- `"Archived/"` — `Sources/VariorumCore/Queries/Export.swift:324`
+- `"Pools/\(base.isEmpty ? DisplayTitle.placeholder : base)"` — `Sources/VariorumCore/Queries/Export.swift:342` (templated)
+- `"Readings/\(base.isEmpty ? "Untitled" : base)"` — `Sources/VariorumCore/Queries/Export.swift:353` (templated)
+
+— 23 strings
+
+
+## Seeded content
+
+Whole seeded documents are not inlined; each entry gives the source, the title strings the reader sees, and an approximate word count.
+
+- **The tutorial book** — title `"the field guide"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:39`; its tag `"tutorial"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:40`; its scraps pool `"tutorial scraps"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:41`; word target 4000 (`App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:303`). Seeded lesson prose ≈ **11,200 words** across 10 chapters / 42 lessons (the `lesson(…)` calls and their take/comment/label texts, `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:293`–`App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:2020`). Restore confirm text is listed under Dialogs (`App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:49`, `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:54`).
+  - chapter `"welcome"` — lessons: `"start here"` · `"getting around"` · `"the workspace"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:77` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"writing"` — lessons: `"blocks & typing"` · `"shaping blocks"` · `"formatting"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:81` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"takes"` — lessons: `"your first take"` · `"choosing & the board"` · `"keeping takes safe"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:82` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"structure"` — lessons: `"divide"` · `"divide choosing takes"` · `"extract & make block"` · `"merge"` · `"the two undos"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:83` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"deleting & getting it back"` — lessons: `"deleting blocks"` · `"archive \u{B7} delete \u{B7} scraps"` · `"the tray & the Trash"` · `"what a block leaves behind"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:94` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"where things go"` — lessons: `"the five places"` · `"saving a moment"` · `"what a copy carries"` · `"the two exits"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:117` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"keeping it private"` — lessons: `ProtectionCopy.privacyLessonOneTitle = "What's true in every mode"` · `ProtectionCopy.privacyLessonTwoTitle = "Standard and Castle: what you must keep"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:143` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`) ⚠RULED (copy §7 — the lessons render `PostureCopy.swift:762`–`:803` verbatim; listed under Protection)
+  - chapter `"ways of looking"` — lessons: `"read"` · `"lenses"` · `"compare & versions"` · `"blocks \u{B7} canvas"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:145` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"the library of things"` — lessons: `"comments & tags"` · `"pool & scraps"` · `"export — it's all yours"` · `"the seal"` · `"three ways of working"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:149` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - chapter `"books & the bookcase"` — lessons: `"the classics walk"` · `"a book from the inside"` · `"membership, not ownership"` · `"gatherings & arrivals"` · `"owned, finished, sealed"` · `"the bookcase"` · `"the journal & the pool"` · `"wings"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:161` (chapter names also `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:306`–`:323`; `"books & the bookcase"` is `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:169`)
+  - named objects the lessons create: block name `"the named block"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:552`; lens `"the other reading"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:1523`; note `"compare & versions \u{2014} the twin"` — `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:1573`
+- **Sample Library — Sherlock Holmes** — book `"the adventures of sherlock holmes"` — `App/Variorum/Shared/SampleLibrary/SampleLibrarySeeder.swift:212`; tag `"sherlock holmes"` — `:214`; front-matter chapter `"about this text"` — `:217`; note `"About this book"` — `:218`; its attribution text ≈ 106 words — `:431`; tag path `"classics"` — `:559`. Body: `App/Variorum/Shared/SampleLibrary/SherlockAdventures.txt` — 12 stories (A Scandal in Bohemia · The Red-Headed League · A Case of Identity · The Boscombe Valley Mystery · The Five Orange Pips · The Man with the Twisted Lip · The Adventure of the Blue Carbuncle · … of the Speckled Band · … of the Engineer’s Thumb · … of the Noble Bachelor · … of the Beryl Coronet · … of the Copper Beeches), ≈ **104,400 words**, public-domain text (not for copy-editing).
+- **Sample Library — Jekyll & Hyde** — book `"The Strange Case of Dr Jekyll and Mr Hyde"` — `App/Variorum/Shared/SampleLibrary/SampleLibraryJekyllBook.swift:34`; tag `"jekyll and hyde"` — `:38`; chapter `"about this book"` — `:39`; note `"About this book"` — `:40`; attribution text ≈ 320 words — `:75`. Body: `App/Variorum/Shared/SampleLibrary/JekyllAndHyde.txt` — 2 chapters (`Story of the Door` · `Henry Jekyll’s Full Statement of the Case`), ≈ **9,300 words**, public domain.
+- **takemania** (the demo note inside Jekyll & Hyde) — title `"takemania"` — `App/Variorum/Shared/SampleLibrary/Takemania.swift:65`; working title `"takemania (unfinished setup)"` — `:70`; chapter `"takemania"` — `:73`, placed after `"Story of the Door"` — `:75`. Prose: `App/Variorum/Shared/SampleLibrary/TakemaniaProse.swift` — section headings `"## The will"` :26 · `"## Mr. Seek"` :111 · `"## The Carew murder"` :236 · `"## The letter"` :308 · `"## The last night"` :383; ≈ **4,400 words** across all takes. Take labels and savepoint names it writes (`Takemania.swift`): `"first try"` :308 · `"Stevenson"` :310 · `"the maid, in one piece"` :328 · `"the whole scroll, before cutting"` :333 · `"scroll"` :334 · `"short"` :335 · `"Stevenson"` :337 · `"plainer"` :339 · `"with the dialogue"` :361 · `"cut to the door"` :363 · `"tighter"` :370 · `"opening, back to Stevenson\u{2019}s rhythm"` :373 · `"Stevenson\u{2019}s door, untouched"` :400 · `"ending, first version"` :401 · `"shorter"` :409 · `"before the oath gets shorter"` :414 · `"Stevenson"` :415 · `"shorter"` :416 · `"Stevenson"` :418 · `"the maid tells it"` :419 · `"first pass at the weather"` :427 · `"Stevenson"` :428 · `"tighter"` :429 · `"keep the blood running cold"` :447 · `"Stevenson"` :448 · `"sat up"` :449 · `"one hand"` :450 · `"after the divide: Hyde\u{2019}s face in two"` :477 · `"Stevenson"` :484 · `"five blows"` :486 · `"Stevenson"` :488 · `"the stick first"` :490 · `"Stevenson\u{2019}s close"` :497 · `"open ending"` :498 · `"no face"` :500 · `"Lanyon next"` :507 · `"ending as Stevenson closes it"` :508 · `"the open ending, reading it tomorrow"` :509.
+- **Encryption Explained** — book `"Encryption Explained"` — `App/Variorum/Shared/SampleLibrary/SampleLibraryEncryptionBook.swift:29`; tag `"encryption explained"` — `:32`; chapter `"about this book"` — `:33`; note `"About this book"` — `:34`; the about-note text (the register rule's definitions) ≈ 90 words — `:47` ⚠RULED (copy §7b). Body: `App/Variorum/Shared/SampleLibrary/EncryptionExplained.txt` — 8 chapters (`Chapter 1 — What is encrypted, and with what` · `Chapter 2 — The keys, and where each one lives` · `Chapter 3 — Standard, step by step` · `Chapter 4 — Castle, step by step` · `Chapter 5 — Backups, and why an old one behaves the way it does` · `Chapter 6 — Changing things` · `Chapter 7 — Who can read what` · `Chapter 8 — What we can and cannot do for you`), ≈ **2,400 words** ⚠RULED (`notes/plans/pre-13x-copy.md` §7b: every fact binding).
+- **The welcome arrangement** — gathering `"classics"` — `App/Variorum/Shared/SampleLibrary/SampleLibraryWelcome.swift:63`; quick note `"a first quick note"` — `:68`, its text ≈ 42 words — `:74`; the Welcome shelf `"Welcome"` — `Sources/VariorumCore/Operations/Operations+Shelf.swift:118`; the `"Quicknotes"` gathering — `Sources/VariorumCore/Operations/Operations+Quicknote.swift:24`; the `"starred notes"` gathering — `Sources/VariorumCore/Operations/Operations+StarredGathering.swift:25`; the daily `"Journal"` book — `Sources/VariorumCore/Operations/Operations+Container.swift:267`; the `"Home"` wing — `App/Variorum/Shared/WingWords.swift:16`. (These names also appear in their surface groups.)
+- **RESTORE.md — the data-safety runbook the app writes into every backup folder** — `App/Variorum/Variorum/Features/Settings/DataSafetyCopy.swift:83` (file name `"RESTORE.md"` — `App/Variorum/Shared/StoreBackup.swift:78`); heading `"# Variorum — data safety and restore"`, ≈ **2,770 words**. Its own first line points at the repo path `notes/DataSafetyRunbook.md`.
+
+— 7 documents (titles listed inline)
+
+
+## Accessibility-only labels
+
+- `"Close"` — `App/Variorum/Shared/AuthViews.swift:205`
+- `"What the server can and can't see"` — `App/Variorum/Shared/EncryptionViews.swift:637`
+- `"Hide the secret"` — `App/Variorum/Shared/PeekableSecretField.swift:46`
+- `"Show the secret"` — `App/Variorum/Shared/PeekableSecretField.swift:46`
+- `"Working…"` — `App/Variorum/Shared/TravellingDotsIndicator.swift:40`
+- `"take"` — `App/Variorum/Variorum/Features/Editor/ProseTakeCard.swift:284`
+- `"Clear the day filter"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:217`
+- `"Filter by the day a note was edited"` — `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift:225`
+- `"on"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:217`
+- `"off"` — `App/Variorum/Variorum/Features/Pool/BlockTagViews.swift:217`
+- `"current"` — `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift:356`
+
+— 11 strings
+
+
+## Anything else user-visible
+
+- `"Variorum"` — `App/Variorum/Shared/BackupDestination.swift:40`
+- `"Backups"` — `App/Variorum/Shared/BackupDestination.swift:41`
+- `"RESTORE.md"` — `App/Variorum/Shared/StoreBackup.swift:78`
+- `"Drag to resize"` — `App/Variorum/Variorum/Core/Views/SeamGrip.swift:60` (tooltip)
+- `"Drag to give the panel more or less room"` — `App/Variorum/Variorum/Core/Views/SideColumn.swift:264` (tooltip)
+- `"Drag to resize the panes"` — `App/Variorum/Variorum/RootView.swift:699` (tooltip)
+- `"Drag to resize the sidebar"` — `App/Variorum/Variorum/Workspace/ShellSplit.swift:131` (tooltip)
+
+— 7 strings
+
+
+## Totals
+
+| Group | Count |
+|---|---|
+| Onboarding, first run & the locked lobby | 22 |
+| Sidebar & Library chrome (Library, Timeline, Folder, Starred, the Open list, back/forward) | 122 |
+| Archived & Deleted (the Trash) and putting things back | 124 |
+| Pool & Snippets (the scraps area) | 88 |
+| Quick note & capture | 17 |
+| Note chrome — masthead, mode row, tags, context bar, panes | 33 |
+| Note mode row — Write (the editor, bottom bar, comments, find, formatting, references, word targets) | 206 |
+| Note mode row — Takes | 160 |
+| Note mode row — Read | 40 |
+| Note mode row — Lenses | 55 |
+| Note mode row — Compare (incl. Outline note, Diff) | 68 |
+| Note mode row — Blocks (workbench & block index) | 63 |
+| Note mode row — Canvas | 43 |
+| This Note's Tray & Block History | 102 |
+| Note Versions | 50 |
+| Book surfaces — the Bookcase, shelves & wings | 168 |
+| Book surfaces — books & gatherings (Outline · Index · Book · Read, book settings and states, membership, rules, arrivals) | 479 |
+| Menus, command palette & structural-undo labels | 154 |
+| Refusals, offers & receipts (the status seam) | 377 |
+| Dialogs, sheets & ceremonies (Divide/Merge choosing takes, confirms, pickers) | 161 |
+| Settings — window chrome, pane list & search | 24 |
+| Settings — General | 52 |
+| Settings — Editor | 39 |
+| Settings — Takes | 10 |
+| Settings — Writing | 21 |
+| Settings — Shortcuts | 2 |
+| Settings — Tags | 22 |
+| Settings — Protection | 2 |
+| Settings — Data Safety | 68 |
+| Settings — Acknowledgments | 15 |
+| Protection, encryption, account & sync surfaces | 561 |
+| Empty states & placeholders | 75 |
+| Tooltips & help text — the Shortcuts & Dictionary window | 159 |
+| Import & export (templates, file names, reports) | 23 |
+| Seeded content | 7 |
+| Accessibility-only labels | 11 |
+| Anything else user-visible | 7 |
+| **All groups** | **3630** |
+
+Counts are bullets (distinct literals per group, every code site on one bullet); the seeded-content row counts documents, not words.
+
+## Sweep notes
+
+**How the sweep was done.** Every `.swift` file under `App/Variorum/Variorum/`, `App/Variorum/Shared/` and `Sources/VariorumCore/` was tokenized for string literals (including multi-line `"""` literals and `"…" + "…"` chains); `#if DEBUG` and `#if os(iOS)` regions were dropped; each remaining literal was judged user-facing or internal by reading its line in context, file by file. Every bullet's `path:line` was machine-checked against the source (the literal's opening text is on that line).
+
+**Deliberately included (judgment calls).**
+- Developer-flavoured text that CAN render: `"Project keys not configured (ProjectConfig.swift)"` and `"Project keys are not filled in yet (ProjectConfig.swift) — sign-in is dormant."` (`AppServices.swift`, `AuthViews.swift`), `"Sync off (dev store)"` (`SyncStatusViews.swift:277`), `"Sync is off in this build (development store)."` (`SyncSafetyWords.swift:45`), the `"… observation failed: \(error)"` status lines (Editor/Read/Compare/Takes view models), and the encryption-migration failure reasons in `Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift` (they can reach the store-failure screen as an error's text). All under their surface groups.
+- Internal references that leak into visible copy — worth a look in the pass: `"(SyncSpec §12)"` inside the schema-skew sync pause (`Sources/VariorumCore/Sync/SyncSchema.swift:698`); `"(R13 — the transient marker)"` in a Takes tooltip (`TakesBoardView.swift:472`); `"(Sitting 9, R60)"` in a Compare tooltip (`CompareBoardView.swift:1239`); `"(windowing arrives with Phase 12)"` (`BookView.swift:1523`); the runbook's pointer to `notes/DataSafetyRunbook.md` (`DataSafetyCopy.swift:83`).
+- Words the ruled vocabulary bans from user copy (`pre-13x-copy.md`: never *box, vault, escrow, KDF, token, session, RLS*) that still render: `"escrow"` in the Settings ▸ Protection catalog blurb (`SettingsShape.swift:258`); `"vault"` in `EncryptionSession.swift:661/672/674/679` (these four are §11's documented REGISTER exemptions), `PassphraseSetModel.swift:78/241`, `SecretCheck.swift:57/131/209` (not in §11's exemption list).
+- `TextField`/`SecureField` labels and the save/open panel button titles (`"Use This Folder"`, `"Import"`, `"Add Reference"`, `"Export Library"`) — they render as placeholder or button text.
+- Structural-undo labels (`withCompound(label:)`, `undoLabel:`, and the `label:` strings in `Sources/VariorumCore/Operations/*`) — they surface as **Undo/Redo \<label\>** in the Edit menu and in `Undid: …` receipts.
+- Settings-catalog titles/blurbs (`SettingsShape.swift`) — they render as each pane's rows AND as Settings search results.
+- The two macOS device words and their iPhone twins in `StoreProtection.swift:513`–`:525` render via interpolation (`\(deviceName)`, `\(biometryName)`, `\(credentialName)`); the iPhone arm is compiled out on the Mac and was dropped.
+- `"Iowan Old Style"` and other font names, SF Symbol names, notification/defaults keys, `id:`/anchor strings, accessibility identifiers — excluded.
+
+**Deliberately excluded.**
+- `VariorumMobile/` (its own copy pass, later), all test targets, `Tools/`, everything under `#if DEBUG` (walk probes, oracles, debug menus), log/`print`/`os_log`/assert/`fatalError` text, `ruling:` annotations, SQL, setting KEYS (e.g. `savepoint_cadence`; its pane label is listed), server error-code constants, Settings **search keywords** (`SettingsShape.swift` `keywords:` arrays — matched, never displayed).
+- Third-party licence texts in `AcknowledgmentsCopy.swift` (`:47`, `:78`, `:90`, `:104`, `:135` — SQLCipher, SQLite, GRDB, swift-dependencies, Argon2): legal text, not ours to edit. The names, one-line roles and the intro ARE listed under Settings — Acknowledgments.
+- The public-domain book bodies (Sherlock, Jekyll) — listed as documents only.
+
+**Where the sweep can't see (dynamic strings).**
+- **Enum raw values shown as labels**: `PostMode` (`Write`…`Canvas`, `PostMode.swift:40`–`:46`), `TimelineView` lenses, `BlocksWorkbenchView` filters/sorts (`:184`–`:206`), `SnippetSort` (`recent`/`oldest`/`longest`, `SnippetsSurface.swift:134`, case names with no literal), `TimeStampFace.Subject` (`edited`/`created`/`dated`, `Sources/VariorumCore/Domain/TimeStampFace.swift:67`–`:71`, also capitalised for tooltips), `BookSettingsSheet` field names. A rename of the case changes the label.
+- **A database enum turned into words at runtime**: `BookOrderAndConversion.swift:60` renders a reading's `sort_field` raw value with `_` → space (e.g. *last major revision ↓*) for any order not in the fixed list at `:45`–`:51`.
+- **Composed menu titles**: `Capability.swift:406` appends the shortcut as `"\(base) (\(shortcutLabel))"`; `CapabilityRegistry` verbs are reused by toolbars, context menus and the ⌘K palette (`CommandPalette.swift` lists the registry, books and notes — its entries are the verbs above plus user content).
+- **Error text from below**: any `\(error)`, `String(describing: error)` or `localizedDescription` interpolation (`"Refused: \(error)"`, `"Operation failed: \(error)"`, `"Import failed: \(failure)"`, `"Sign-in failed: \(…)"`, the sync `"Sync refused: '\(table)' row …"` lines) can show system, GRDB, URLSession or server wording the app does not own.
+- **Pieces joined at runtime**: plural/variant switches inside interpolations, `joined(separator:)` lists (" · ", ", ", " and "), and copy enums that assemble sentences from fragments (`RecoveryCopy`, `WingBookMoves`, `MembershipChoiceCopy`, `OpsRefusalCopy`, `BookStateDoors`). Each fragment is listed; the assembled sentences are not.
+- **System-owned chrome**: the standard macOS App/Edit/View/Window/Help menu items, NSOpenPanel/NSSavePanel chrome, the Touch ID sheet (only the reason `"Unlock your Variorum library"` is ours), the Emoji & Symbols picker, the spelling panel, date/number formatting (`.formatted(…)`, `DateFormatter` templates — the locale owns the words, e.g. *at* in *Sep 9, 2026 at 4:02 PM*).
+- **User and seeded content** shown in chrome (note titles, book names, tag paths, take labels) — not inventoried except the seeded names above.
+- **The Settings ▸ Shortcuts pane** renders the capability registry's verbs and chords (listed under Menus) — its own literals are only the two sentences in its group.
+
+**Ambiguities resolved by placement, not by deletion.**
+- Refusal text that lives in a surface's copy enum stays with its surface; inline seam text is in the status-seam group. `CapabilityRegistry` "unavailable" sentences (the refusal a menu door speaks when it can't act) are in the status-seam group; the verbs are in Menus.
+- Placeholder/empty-state routing is heuristic (field labels, `prompt:`/placeholder constants, and `Text("No …"/"Nothing …")`); protection-surface placeholders stay in the Protection group so the ruled pass sees them whole.
+- **⚠RULED** = the literal (or a ≥18-character piece of it between interpolations) appears in `pre-13x-copy.md` §1–10; on the protection, lobby and data-safety surfaces a shared 5-word phrase also counts, and short labels count when the copy file names them in emphasis. **⚠RULED (§11 provisional)** = the literal appears only in §11 of that file — the table of strings the copy file does NOT carry, listed as provisional for the voice pass (facts binding, words not). Generic one-word buttons (Cancel/Close/Done) are flagged only on the protection surfaces. Seeded documents carrying ruled text: the tutorial's "keeping it private" chapter and the whole Encryption Explained book.
