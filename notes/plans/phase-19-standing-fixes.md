@@ -1374,6 +1374,15 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    brief's ruled cleanup. FLAGGED for the orchestrator: re-spelling the 18 hollow sites as a
    warning-only cleanup would make the redundancy warning a clean tell again (no behaviour
    change); that is a scope call, not this implementer's.
+   **NEW-TREE M1 + SE — ANNOUNCED, STARTING after this commit** (the re-spelled tree, committed at
+   `97b3eb0c`): `mutate.py M1` + `mutate.py SE`; Mac bft + the 18 site suites + `SyncEnrollmentTests`;
+   mobile bft + `MobileCrossBlockEditBrainTests` (no core site was re-spelled — no core NEW run is
+   owed). **The score sheet (the line each NEW spelling must record at, in the MUTATED file):**
+   EditorSeamCost 82 · MarkdownFace 286 (285 + the mutant's inserted line) · NoteBox 223 ·
+   NoteVersions 334, 339 · OriginBlockDoor 88, 92 · QuickNote 359 · ReadRendering 210, 238, 351 ·
+   SystemHotKey 201 · TakeStructureDoor 344 (×2, the loop) · TrayPanelMove 75 · TypingErgonomics 369
+   (368 + 1) · mobile 145, 165, 213, 316 · SyncEnrollment: "Caught error" at 248 (the old line's own
+   behaviour, unchanged). Revert as before; same death rule.
 4. Family 2 — DONE (this commit; the NEW-spelling SE pin rides piece 3). **OLD-SPELLING EVIDENCE — ANNOUNCED** (both
    files committed at base; `SyncEnrollmentTests` is an ordinary suite over in-memory custody and
    a scripted vault — no real Keychain item): (a) `mutate.py SE` on the OLD line 262 (`words:
