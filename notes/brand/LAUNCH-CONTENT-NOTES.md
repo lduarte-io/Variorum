@@ -112,12 +112,16 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
 - **The WHAT'S NEXT roadmap (her items, 2026-10-04)** now in the blog post
   and Show HN text: (1) MCP with Variorum-shaped AI permissions — per-note
   read grants, write power = add-a-take only, local models; (2) images;
-  (3) collaboration; (4) Obsidian + Apple Notes importers. **⚠ Collaboration
-  wording:** canon (CoreDescription/OverallModel) says not-collaborative; the
-  copy reconciles via the takes shape ("suggestions arrive as takes, never
-  edits over your text; real-time co-typing stays out of scope") and the
-  product-page FAQ was aligned to match. If she means MORE than
-  suggestions-as-takes, the copy and eventually canon need her ruling.
+  (3) collaboration; (4) Obsidian + Apple Notes importers. **Collaboration
+  RULED (her words, 2026-10-04):** sync-time, never real-time same-editor
+  work — "maybe a shared item between two libraries"; no locking needed
+  because simultaneous edits become takes; far-future ("it has complexities
+  for sure, especially given encryption"); public copy says it's
+  "eventually" on the map. Blog, Show HN and the product-page FAQ all carry
+  that wording. Canon's not-collaborative line (CoreDescription) still reads
+  "no real-time collaborative editing, ever" — consistent with her ruling;
+  a canon delta recording the shared-item future is a phase closeout's
+  business if/when it's ever designed, not marketing's.
 
 ## Owed / next natural steps
 
