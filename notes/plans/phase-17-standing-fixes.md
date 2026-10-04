@@ -1,5 +1,12 @@
 # Phase 17 — Standing Fixes (STANDING PLAN)
 
+> **THE ALPHABET IS FULL (her word, 2026-10-04):** 17z took the last letter the same night it was
+> minted, and the author ruled the succession at the 13i family close — **new entries open in
+> `notes/plans/phase-19-standing-fixes.md` (19a, 19b, … 19z) from now on.** This file stays the
+> binding record for every 17 entry: the OPEN ones (17e-residue riders, 17r, 17s, 17w, 17x, 17y,
+> 17z) still run and close HERE under their own letters; nothing moves. The same rules bind both
+> files; CLAUDE.md's live rule names 19 as the active ledger.
+
 > **This phase does not close.** It is a standing home for bug fixes and tech debt, opened by the
 > author on 2026-08-30. Its **entries** (17a, 17b, 17c, …) are what open, run, and close — the phase
 > itself stays open for the life of the project. A closed entry is never reopened; a recurrence gets
