@@ -23,7 +23,7 @@
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
-| d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | ROUND-2-PENDING — round-1 fixes landed (`git diff f3f5c3a0..HEAD`): BookAscent:803 fixed + pinned; MarkdownFace:187 found HOLLOW under a real nil (P2 never made it nil — routed); all 19 hollow cleaned; `try? #require` tripwire 0; zero redundancy warnings; suites green |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR + 1 NIT, record/method scope, dispositioned); the 187-hollow reclassification CONFIRMED by the reviewer's own true-nil mutant; tripwire 0, zero redundancy warnings, all suites green. **THE LEDGER PARKS until 13r closes** (record-and-queue only) |
 
 ---
 
@@ -97,6 +97,14 @@ touched `Sync/`; keychain-fact tests clean up in unconditional `defer`s. Reviewe
   only tell); **the class is ROUTED TO 19d** (opened below — the sizing rule, 19a's F2
   precedent: this entry's session already carried its unit). The warn-free spelling exists
   in the tree (`BookArchiveFacesTests:106` hoists into a `let` first) and is 19d's shape.
+  **[CORRECTED AT 19d (rounds 1–2; this note owed since 19d ROUND 1 claimed it existed —
+  19d R2-1): the "records NOTHING" and "only tell" sentences above are both too strong.
+  Only 19 of the 38 flagged sites were SILENT — the other 18 were HOLLOW (the macro's
+  direct-value route records at its own line). And the warning is NOT a reliable tell:
+  `NonOptionalRequireMacro` SUPPRESSES it whenever an argument token is `?`, `nil` or
+  `Optional` (the open-swift#79202 workaround), which hid the genuinely silent
+  `BookAscentTests:803`. The standing method since 19d: the `try? #require` grep tripwire
+  AT ZERO, plus token/type sweeps — the 19d ROUND 1/ROUND 2 sections carry it.]**
 - **F2 [MINOR] ACCEPTED — `PostureSwitchDrillTests.swift:621` can never fail**
   (`deviceID != nil` on a non-optional `String`; always true since `9f0eceea`, 2026-09-05 —
   pre-toolchain, so not residue). The compiler's "always returns true" warning is
@@ -165,10 +173,10 @@ nothing — this entry is TEST FILES ONLY). ~~**State: FIXES-IN-FLIGHT (2026-10-
 arbitrated below (1 MAJOR accepted with fixes owed; the hollow cleanup TAKEN at the
 orchestrator's call; 1 NIT reword); the orchestrator's own-hands check of 621/262 PASSED
 (strictly stronger / abort-preserved) and the round-1 reviewer's independent custody read
-agrees. **State: ROUND-2-PENDING (2026-10-04) — the round-1 fixes landed; a FRESH reviewer runs
-round 2 over `git diff f3f5c3a0..HEAD -- App Tests` (the implementer's ROUND 1 FIXES record at
-the tail). One finding for the arbitration: `MarkdownFaceTests:187` is HOLLOW under a real nil —
-the round-1 F1 text names it silent.**
+agrees. **State: CLOSED 2026-10-04 — round 2 clean (no BLOCKER/MAJOR; 2 MINOR + 1 NIT, all
+record/method scope, dispositioned by edit in the ROUND 2 section below); the 187-hollow
+reclassification CONFIRMED by the fresh reviewer's own true-nil mutant; the entry closed on
+two rounds, and THE LEDGER PARKS until 13r closes.**
 
 ## 19d ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow: the orchestrator arbitrates, the implementer fixes, a FRESH reviewer runs round 2)
 
@@ -227,6 +235,54 @@ route-to-behaviour mapping is therefore 40 of 41 — **the route census RANKS ca
 it never settles one** (R2-1's law holding once more, now against a reviewer's probe). The
 probe lesson, binding: CHECK THE CAPTURED VALUE first — confirm the mutant really produced
 the nil before reading a silence. Round 2 verifies this reclassification independently.]**
+
+## 19d ROUND 2 — the fresh reviewer's verdict and the orchestrator's dispositions (2026-10-04); THE ENTRY CLOSES
+
+**No BLOCKER, no MAJOR — no round 3 earned. 2 MINOR + 1 NIT, all record/method scope,
+DISPOSITIONED BY EDIT in this commit.** The disputed reclassification is SETTLED: the
+reviewer's OWN true-nil mutant (runs A/B, `19d-r2/mac-runA.log`/`runB.log`) confirms
+**`MarkdownFaceTests:187` is HOLLOW** (the old spelling records at its own line with
+`(headingSize ?? 0) → 0.0` proving the nil was real) and **`BookAscentTests:803` is the one
+genuinely SILENT site** (nothing at its line; downstream catches only), with both new
+spellings RED at their own lines. The clean bill besides: every hollow cleanup read
+line-by-line (abort-vs-continue preserved, hoists at the original evaluation points, no
+name shadowing, downstream bytes identical, the implementer's mutant logs agreeing issue
+for issue); the tripwire grep 0 across the five test roots AND `Sources`/`App`; fresh
+builds on all three targets — redundancy warnings core 0 · Mac 0 · mobile 0, nothing
+added (core 30→22, Mac 102→73, mobile 47→43); touched suites re-run at HEAD by the
+reviewer's own build (Mac 218/28 at a zero-instance window; core 61/11, zero skipped);
+the fix diff touches no `Sources`, no `Sync/`, no custody file. Reviewer evidence:
+`App/Variorum/DerivedData/19d-r2/` (kept; its build products deletable at the sweep).
+
+- **R2-1 [MINOR] ACCEPTED — the annotation 19d ROUND 1 F1 claimed was "(annotated in
+  place)" did not exist:** the bracketed correction now sits beside 19c ROUND 1 F1 (this
+  commit), saying what it owed — 19/38 silent, 18 hollow, the warning NOT a reliable tell
+  under token suppression, the grep tripwire the standing method.
+- **R2-2 [MINOR] ACCEPTED — the completeness sweep's CONCLUSION holds; its METHOD had
+  three holes the record presented as sound** (corrected by the bracket beside the record's
+  sweep bullet, this commit): the STMT class keyed on a same-line regex (missing
+  continuation-line arguments and implicit closure returns — `TypewriterRoomTests:269`,
+  `TutorialBooksChapterTests:669`); the token filter ran on a 100-char-truncated column
+  (missing `DivideKeyMonitorTests:103`); the LET-class `!` reasoning was BACKWARDS (a
+  postfix `!` NEEDS an Optional — exactly the silent binding; vacuous today at 0 sites).
+  The reviewer settled the missed sites BY TYPE (269 → `.convert` forces unwrap; 103 → a
+  non-optional `NSEvent` return; 669 → unconstrained, the more-specific unwrap wins and a
+  silent binding would have warned) and re-swept all 2797 sites by its own script: **NO
+  third silent site — the conclusion stands on the corrected method.** If `reqpos.py`
+  serves a future census it must classify by the true statement start and filter the FULL
+  argument.
+- **R2-3 [NIT] ACCEPTED — two stale "orchestrator's check owed" lines** in the record now
+  carry their DONE brackets (this commit): the own-hands 621/262 verification PASSED at the
+  round-1 arbitration and the round-1 reviewer's independent read agreed.
+- **The reviewer's ranking observation, RECORDED as a ranking aid only (never a
+  clearance):** the silent sites all END in a member whose own type is Optional; at 187 the
+  terminal `pointSize` is non-optional and the nil came from the chained base. Only a
+  real-nil mutant settles a site.
+
+**19d IS CLOSED** (opened and closed 2026-10-04; two rounds; the red-on-old was the logged
+SILENCE per silent site and each hollow site's own-line record). **THE 19 LEDGER PARKS for
+the remainder of 13r** (the refocus commitment in the 13r plan's LIVE STATUS): new findings
+are recorded and queued here, never run, until 13r closes.
 
 ---
 
@@ -1251,7 +1307,8 @@ the cleanup (F2); all 19 hollow sites are now re-spelled behaviour-identically.*
 was NOT run** — `PostureSwitchDrillTests` is env-gated OFF (`VARIORUM_POSTURE_DRILL=1`) and stayed
 off; line 621's re-spell is evidenced by a same-file throwaway probe + the route census, and the
 orchestrator's own-hands verification of both custody-drill re-spells is still owed (the entry's
-rule). (3) `SyncEnrollmentTests:262` took the behaviour-identical `_ = try …`, NOT `#expect(throws:
+rule). **[DONE — it PASSED at the round-1 arbitration (strictly stronger / abort-preserved), and
+the round-1 reviewer's independent custody read agreed; 19d ROUND 1 records it — R2-3's bracket.]** (3) `SyncEnrollmentTests:262` took the behaviour-identical `_ = try …`, NOT `#expect(throws:
 Never.self) { … }` (which would turn abort into continue — test intent). (4) `VariorumMobile/Spike/
 SpikeScenarios.swift:240`'s always-true comparison is mobile APP source — not owned, untouched. (5)
 No walk capture — no product face changed (15 test files only), so the acceptance is builds +
@@ -1637,6 +1694,8 @@ touched suites green at a quiet window — ✔ (Mac 197/27 at a zero-instance wi
 iPhone 17 Pro / iOS 26.2, `skipped:` read: none) · custody-drill lines not weakened — ✔ (621 is
 strictly stronger than an always-true line; 262's check and its abort are unchanged) — **the
 orchestrator's own-hands verification of these two is the entry's remaining owed step.**
+**[DONE — PASSED at the round-1 arbitration; confirmed independently by the round-1 reviewer's
+custody read. R2-3's bracket.]**
 
 **FOR THE COLD REVIEW — the landed diff (`git diff 5790a095..HEAD -- App Tests Sources`):** 15
 test files, 46+/26−, no other path (`Sources` and every app target untouched). 22 macro lines
@@ -1720,7 +1779,15 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   to `addPostToReading(_ postID: String, …)` — a `String?` would not compile) ·
   `SurfaceSizeMemoryTests:782` (`FocusedBlock`'s memberwise `blockID: String`). **All 12 are
   unwrap-bound: NO third silent site** — the reviewer's 278-site token sweep confirmed by a method
-  that does not depend on knowing the macro's exact suppression-token set.
+  that does not depend on knowing the macro's exact suppression-token set. **[METHOD CORRECTED AT
+  ROUND 2 (R2-2) — the CONCLUSION stands, re-confirmed by the round-2 reviewer's own 2797-site
+  sweep, but three holes in `reqpos.py` are on the record: the STMT class keyed on a same-line
+  regex (missing `TypewriterRoomTests:269` and `TutorialBooksChapterTests:669`), the token filter
+  ran on a 100-char-truncated argument column (missing `DivideKeyMonitorTests:103`), and the LET
+  `!` reasoning was backwards (a postfix `!` NEEDS an Optional — the silent binding; 0 such sites
+  today). The three missed sites were settled BY TYPE at round 2, all unwrap-bound. Any standing
+  reuse of the script must classify by the true statement start and filter the full argument. The
+  19d ROUND 2 section carries the detail.]**
 - F1 [MAJOR] re-spells — DONE (`6e0a359c`; dispositions corrected by runs A/B below — BookAscent FIXED with its pin, MarkdownFace HOLLOW, its edit standing as an F2 cleanup): `BookAscentTests:803` → `let action = center.current?.action` + `#expect(action != nil)`; `MarkdownFaceTests:187` → `let headingSize = font(storage, at: titleAt)?.pointSize` + `#expect(headingSize != nil)`; downstream lines byte-identical (build PENDING, rides F2's).
 - F2 [MINOR] the 18-hollow cleanup (behaviour-identical, each site's abort-vs-continue kept) —
   core DONE (`668846bb`), Mac DONE (this commit). **Core (6 files, the 8 sites, all (A) — abort kept):** the
