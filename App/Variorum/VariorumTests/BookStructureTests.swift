@@ -312,7 +312,7 @@ struct JournalBooksTests {
             let shape = try await db.read { [first] db in
                 try Row.fetchOne(db, sql: """
                     SELECT profile, segmentation_default FROM container WHERE id = ?
-                    """, arguments: [first])
+                    """, arguments: [first]).map(CopiedRow.init)
             }
             #expect((shape?["profile"] as String?) == "generic",
                     "a non-daily entry NEVER wears profile='journal' (the BLOCKER's shape)")
@@ -385,7 +385,7 @@ struct JournalBooksTests {
             let shape = try await db.read { db in
                 try Row.fetchOne(db, sql: """
                     SELECT wing_id, profile, segmentation_default FROM container WHERE id = ?
-                    """, arguments: [entryID])
+                    """, arguments: [entryID]).map(CopiedRow.init)
             }
             #expect((shape?["wing_id"] as String?) == far,
                     "the entry is born in its book's wing (the F-5 class)")

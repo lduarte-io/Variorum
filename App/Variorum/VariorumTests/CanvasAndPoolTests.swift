@@ -68,6 +68,7 @@ struct CanvasAndPoolTests {
 
             let rows = try await db.read { db in
                 try Row.fetchAll(db, sql: "SELECT block_id, x, y FROM canvas_layout WHERE deleted_at IS NULL")
+                    .map(CopiedRow.init)
             }
             #expect(rows.count == 1, "exactly ONE layout row — the drag's op")
             #expect(rows[0]["block_id"] == blockID)

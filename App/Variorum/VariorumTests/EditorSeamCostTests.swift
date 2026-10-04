@@ -171,6 +171,7 @@ struct EditorSeamCostTests {
     /// same Σi shape, on the road a REFUSED cross-block keystroke takes (so
     /// it runs exactly when the author is already being told no, and a
     /// document-proportional stall there is the worst possible moment).
+    @MainActor
     @Test func theCrossBlockRefusalDiagnosisStaysCheapAtTwentyThousandBlocks() {
         let index = Self.index(Array(repeating: 40, count: 20_000))
         let slots = (0..<20_000).map { slot("b\($0)", text: String(repeating: "x", count: 40)) }

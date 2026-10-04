@@ -495,7 +495,7 @@ struct MakeBlockGestureTests {
                     sql: """
                         SELECT source_block_id, target_block_id, origin_op
                         FROM edge WHERE deleted_at IS NULL ORDER BY created_at, id
-                        """)
+                        """).map(CopiedRow.init)
             }
             #expect(edges.count == 2)
             #expect(edges.allSatisfy { $0["origin_op"] == "divide" })

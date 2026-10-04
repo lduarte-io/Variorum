@@ -46,10 +46,10 @@ struct LifecycleFacesTests {
             let model = LibraryViewModel(session: session)
             let post = try session.operations.createPost(title: "p")
 
-            func container() async throws -> Row {
+            func container() async throws -> CopiedRow {
                 try await db.read { [id = post.id] in
-                    try Row.fetchOne(
-                        $0, sql: "SELECT * FROM container WHERE id = ?", arguments: [id])!
+                    CopiedRow(try Row.fetchOne(
+                        $0, sql: "SELECT * FROM container WHERE id = ?", arguments: [id])!)
                 }
             }
 
@@ -94,7 +94,7 @@ struct LifecycleFacesTests {
             let (locked, texts, commits) = try await h.database.read { [postID = h.postID] db in
                 (try Container.fetchOne(db, key: postID)?.locked ?? false,
                  try Queries.renderPost(db, containerID: postID).map { $0.text ?? "" },
-                 try Row.fetchAll(db, sql: "SELECT * FROM commit_point"))
+                 try Row.fetchAll(db, sql: "SELECT * FROM commit_point").map(CopiedRow.init))
             }
             #expect(locked, "the seal landed")
             #expect(texts == ["alpha typed"], "the buffer flushed BEFORE the freeze — nothing lost")

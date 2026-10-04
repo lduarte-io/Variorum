@@ -207,6 +207,7 @@ struct BoundaryClampTests {
     ///
     /// The sentence must no longer claim a geometry, and must still name a
     /// road that opens (the 13u1 ladder's rule).
+    @MainActor
     @Test func theSurvivingResidualsAreNamedAndNeitherIsAGeometry() {
         // SURVIVOR 1 — the SEAM keystroke no carve could take. An EMPTY
         // block beside a texted one (A7's own geometry) with NO projection

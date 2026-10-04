@@ -478,7 +478,7 @@ struct TutorialDoorTests {
             _ = try session.operations.newBlock(in: userPost.id, text: "my own words.")
             let userBook = try session.operations.createReading(name: "my book", kind: .book)
             let userRows = try await db.read { [postID = userPost.id] db in
-                try userPostRows(db, postID: postID)
+                try userPostRows(db, postID: postID).map(CopiedRow.init)
             }
 
             // Wound the tutorial: delete one lesson, edit another.
@@ -512,7 +512,7 @@ struct TutorialDoorTests {
             // The user's world is byte-untouched — the post AND its
             // placements/blocks/variants (NIT-5).
             let userRowsAfter = try await db.read { [postID = userPost.id] db in
-                try userPostRows(db, postID: postID)
+                try userPostRows(db, postID: postID).map(CopiedRow.init)
             }
             #expect(!userRowsAfter.isEmpty)
             #expect(userRowsAfter == userRows, "restore never touches her rows — down to the variants")

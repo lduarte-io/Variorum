@@ -101,7 +101,7 @@ struct TagAndFolderTests {
             await model.toggle(tag.id)
             #expect(model.isApplied(tag.id))
             var rows = try await db.read {
-                try Row.fetchAll($0, sql: "SELECT * FROM post_tag")
+                try Row.fetchAll($0, sql: "SELECT * FROM post_tag").map(CopiedRow.init)
             }
             #expect(rows.count == 1)
             #expect(rows[0]["deleted_at"] == nil)
@@ -109,7 +109,7 @@ struct TagAndFolderTests {
             await model.toggle(tag.id)
             #expect(!model.isApplied(tag.id))
             rows = try await db.read {
-                try Row.fetchAll($0, sql: "SELECT * FROM post_tag")
+                try Row.fetchAll($0, sql: "SELECT * FROM post_tag").map(CopiedRow.init)
             }
             // The removal is a tombstone, never a row removal (S2).
             #expect(rows.count == 1)

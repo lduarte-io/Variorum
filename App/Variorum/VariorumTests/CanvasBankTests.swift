@@ -119,6 +119,7 @@ struct CanvasBankMembershipTests {
             model.adopt(try await db.read { try Queries.canvasProjection($0, container: poolID) })
             let rows = try await db.read { db in
                 try Row.fetchAll(db, sql: "SELECT x, y FROM canvas_layout WHERE deleted_at IS NULL")
+                    .map(CopiedRow.init)
             }
             #expect(rows.count == 1, "one drag out of the bank, one layout row")
             let x: Double? = rows.first?["x"]
@@ -337,6 +338,7 @@ struct CanvasBankHostedTests {
 
             let rows = try await db.read { db in
                 try Row.fetchAll(db, sql: "SELECT x, y FROM canvas_layout WHERE deleted_at IS NULL")
+                    .map(CopiedRow.init)
             }
             #expect(rows.count == 1, "the drag out of the bank wrote exactly one position")
             guard case .board(let point) = expected else {

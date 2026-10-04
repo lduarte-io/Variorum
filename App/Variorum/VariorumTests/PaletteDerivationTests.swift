@@ -16,6 +16,7 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+@MainActor
 @Suite("Palette derivation (18g)")
 struct PaletteDerivationTests {
     /// Every palette that names a preset, in `ThemePalette`'s own order.

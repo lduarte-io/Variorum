@@ -332,6 +332,7 @@ struct CanvasDragTrackingTests {
                     "the card tracks the pointer 1:1 while dragging (pre-fix: 60,30)")
             let rows = try await db.read { db in
                 try Row.fetchAll(db, sql: "SELECT x, y FROM canvas_layout WHERE deleted_at IS NULL")
+                    .map(CopiedRow.init)
             }
             #expect(rows.count == 1, "one drag, one layout row (the A7 pin)")
             let storedX: Double? = rows.first?["x"]

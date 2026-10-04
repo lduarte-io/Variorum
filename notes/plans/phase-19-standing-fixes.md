@@ -77,12 +77,13 @@ not wait on this entry).
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE YET (stated first, per the contract):** the Mac test target and the mobile line are not
-yet fixed; NO suite has run. **PAUSED for the author's 13r U1 LIVE DRILL window** (the orchestrator's
-message, 2026-10-04): no Mac suite, no test host, nothing that launches an app bundle runs until the
-orchestrator says "drill window closed". The implementer ALSO holds core `swift test` until then
-(some core suites exercise keychain custody seams; her drill reads the keychain). Compile-only work
-(edits, `swift build --build-tests`, `build-for-testing`) continues.
+**NOT DONE YET (stated first, per the contract):** the mobile line is edited but not yet built; NO
+suite has run yet. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
+2026-10-04 — her live drill passed; U1 closed): suites run at quiet windows from here, her real-store
+instance never touched, the measurement-shaped TK2 tripwire suites preferring a zero-instance window.
+(During the window the implementer ran compile-only work — `swift build --build-tests` and
+`xcodebuild build-for-testing` — and held core `swift test` too, since some core suites exercise
+keychain custody seams and her drill read the keychain.)
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
@@ -105,8 +106,17 @@ errors — **a sync lockstep/convergence suite: the cold review checks it like F
 `TagFamilySectionsTests.swift:101/107` (EXPR-SPLIT: "failed to produce diagnostic" + "generic
 parameter 'Value' could not be inferred" on a typed `for fetch: @Sendable (Database) throws -> Int in
 [closure, closure]` header) · `StructuralSplitAtNewlinesTests.swift:393` (TRY-IN-REQUIRE, below).
-The fourth build is GREEN. The Mac target's census (`xcodebuild build-for-testing`) may likewise be a
-lower bound; its rebuild will say.
+The fourth build is GREEN.
+**The Mac target's census was a lower bound for the same reason** (`xcodebuild` stops scheduling
+compile batches after the first failure): after the 20 census sites, the rebuild exposed
+`LifecycleFacesTests.swift:94` (ROW-COPY — the file's SECOND read, a tuple holding `[Row]`); a
+continue-after-errors pass (`-IDEBuildingContinueBuildingAfterErrors=YES`, an IDE build-system
+default, not a build setting) then showed exactly ONE remaining failing batch, nine errors: ROW-COPY
+at `BookStructureTests` 312/385 · `CanvasAndPoolTests` 69 · `CanvasBankTests` 120/338 ·
+`CanvasDragTests` 333; ISOLATION at `BoundaryClampTests` 226/242/248 (one sync test calling the
+Mac-only `CrossBlockRefusal.message(for:)` forward). After those, `** TEST BUILD SUCCEEDED **`
+(logs `App/Variorum/DerivedData/19a/mac-bft{,-2,-3,-4}.log`). **Totals: core 7 → 12 errors in 5 files;
+Mac 20 → 30 errors in 13 files; mobile 1.**
 
 **The mechanism classes (for the cold review):**
 - **ROW-COPY** (GRDB `Row` crossing an async `read`): GRDB 7 declares `@available(*, unavailable)
@@ -126,9 +136,20 @@ lower bound; its rebuild will say.
   binds the SAME `Value` for every shape the sites use — `x?["c"] as String?` (Optional<String>,
   so NULL reads nil, never a trap) · `x["c"] == "lit"` / `== s` / `allSatisfy { $0["c"] == … }`
   (String) · `x["c"] == nil` / `!= nil` (the untyped subscript) · `let k: String = x["c"]`.
-- **ISOLATION** (main-actor statics from nonisolated test contexts): PaletteDerivation,
-  EditorSeamCost. PENDING.
-- **IMPORT** (`MemberImportVisibility`): PlainPaste. PENDING.
+- **ISOLATION** (main-actor members called from nonisolated test contexts): the Mac app target
+  builds with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`; `VariorumTests` does not (nonisolated).
+  `PalettePreset.all` / `resolved(_:tint:)` sit in an `extension PalettePreset` that is NOT marked
+  `nonisolated` (the struct is), and the 3-arg `CrossBlockRefusal.message(range:index:slots:)` and
+  `message(for:)` live in the Mac's default-isolated `CrossBlockRefusalRoads.swift` extension (the
+  enum itself is `nonisolated`) — so all are main-actor members Swift 6.4 now refuses from a
+  nonisolated sync test. Fix, test-side only (no app source touched): `@MainActor` on the
+  `PaletteDerivationTests` SUITE (all ten sites plus its shared `presets` helper are inside it; every
+  test there is a pure computation) and on the ONE function at each of
+  `EditorSeamCostTests.theCrossBlockRefusalDiagnosisStaysCheapAtTwentyThousandBlocks` (a 50 ms
+  ceiling over a synchronous pure call — main-actor execution cannot interleave inside it) and
+  `BoundaryClampTests.theSurvivingResidualsAreNamedAndNeitherIsAGeometry`.
+- **IMPORT** (`MemberImportVisibility`, on in every target): `PlainPasteTests` reads
+  `Queries.RenderedBlock.text` without importing its defining module — `import VariorumCore` added.
 - **EXPR-SPLIT** (type-check failures): MobileChipFlow:81 (PENDING) · TagFamilySections:101 (DONE —
   the typed closure array hoisted to `let fetches: [@Sendable (Database) throws -> Int]`, then
   `for fetch in fetches`; same two closures, same order, same loop body).
@@ -145,7 +166,17 @@ lower bound; its rebuild will say.
    `TagFamilySectionsTests` 101; TRY-IN-REQUIRE at `StructuralSplitAtNewlinesTests` 393;
    `Support/CopiedRow.swift` new. `swift build --build-tests` exit 0 (log `core-build-tests-4.log`).
    Core `swift test` full run — PENDING (held for the drill window).
-2. Mac `VariorumTests` 8 files — PENDING.
+2. Mac `VariorumTests` compiles under Xcode 27 — DONE (this commit): ROW-COPY at `TagAndFolderTests`
+   104/112 · `TutorialWalkTests` 480/514 (the call-site copy; the `userPostRows` helper keeps returning
+   `[Row]` — it is called only inside the reads) · `LifecycleFacesTests` 50 (`container()` now returns
+   `CopiedRow`) + 94 · `PoolDragTests` 59 · `StructuralGestureTests` 492 · `BookStructureTests`
+   312/385 · `CanvasAndPoolTests` 69 · `CanvasBankTests` 120/338 · `CanvasDragTests` 333; ISOLATION at
+   `PaletteDerivationTests` (suite) · `EditorSeamCostTests` (one test) · `BoundaryClampTests` (one
+   test); IMPORT at `PlainPasteTests`; `VariorumTests/CopiedRow.swift` new (the core copy's twin). **No
+   `#expect`/`#require` line changed in the Mac diff.** The ROW-COPY overload experiment was extended
+   to the Canvas shapes (`rows[0]["x"] == Double(…)` → `Double`; `let x: Double? = rows.first?["x"]`
+   → `Optional<Double>`) — the same bindings as `Row`. `xcodebuild build-for-testing` →
+   `** TEST BUILD SUCCEEDED **` (log `mac-bft-4.log`). Suite runs — PENDING.
 3. Mobile `MobileChipFlow.swift:81` — PENDING.
 4. Acceptance runs (core `swift test` full · the 8 Mac suites · the 7 TK2 tripwire suites ·
    `PaneSurfaceTests` · the mobile build) — PENDING (runs wait for the drill window to close).

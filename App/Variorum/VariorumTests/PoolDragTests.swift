@@ -60,7 +60,7 @@ struct PoolDragTests {
                     (try Row.fetchAll(
                         db,
                         sql: "SELECT * FROM edge WHERE source_block_id = ? AND deleted_at IS NULL",
-                        arguments: [copyID]),
+                        arguments: [copyID]).map(CopiedRow.init),
                      try Int.fetchOne(
                         db,
                         sql: """
