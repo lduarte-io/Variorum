@@ -2,7 +2,10 @@
 
 ## YOUR CHECKLIST (everything that is yours; nothing else is owed)
 
-- [ ] **THE WINDOW (marker 11→12) — the one gate on everything else:**
+- [x] **THE WINDOW (marker 11→12) — RUN 2026-10-03 at your in-session go** (deploy `[]` first
+      run · marker 12 verified · sweep 63 OK · 4 INFO · F-U1-1 `"daily"`, no press owed · Mac
+      Release installed sha-verified · the phone via devicectl in the same window; the record:
+      the plan's ledger row 5 + the SyncSpec §12 entry). The original gate text, for reference:
       `notes/plans/13i-e-deploy-checklist.md` end to end, at your go. The short of it: the
       read-only marker probe → the deploy (`15_phase13ie_archive.sql` via the `!` road, expect
       `[]`) → verify (marker 12 + the `archived_at` column) → the grant sweep → **the F-U1-1

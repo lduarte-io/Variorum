@@ -293,7 +293,7 @@ the closeout tidies them.
 | 2 | U2 — the faces + lesson 9 | **DONE** (ACT 0 `5d61bb64`…`143417c3` red on the pre-fix tree + by revert, 7 issues each · pieces `0b5d60e9` `2f3109fe` `138a8322` `78644cba` `df3c18e9` `5be92918` · lesson 9 `3fdee77a` (naturally red pre-sentence, 2 issues) · pins `dbca8189` `2b944fe5` · W-1 `506b4ec9`; core FULL 2172/244, Mac 97/13 + 1396/214 + 99/8, phone 70/16; the walk 33 captures both voices — the U2 RECORD above) |
 | 3 | The ladder (ONE, `fable-reviewer`, combined diff) | **CLOSED AT TWO ROUNDS** (R1: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT — `13ie-ladder-round1.md`; the cross-model exchange: implementer AGREE ×2, the reviewer's final call took the two-step refinement, fix a3fd7cfe pin-first + revert-verified; the implementer sanity pass AGREE-CLEAN; R2 fresh reviewer: both FIXED, zero new findings — `13ie-ladder-round2.md`; core 2173/244 green) |
 | 4 | The orchestrator's walk | **DONE** (2026-10-03 — THE ORCHESTRATOR'S WALK section: every acceptance flow live incl. lesson 9 through the real re-seed door; W-O-1 the ⌘J canon conflict HELD for her; W-O-2 the walker slip restored with class rules) |
-| 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | **HELD FOR HER** (the checklist ready end to end incl. the F-U1-1 probe; the §12 entry writes AT the window; her installs stay marker-11 and working until then) |
+| 5 | HER WINDOW: mirror deploy (her go) → Mac install refresh → the phone at her convenience | **DONE** (2026-10-03, her in-session go — the checklist end to end: A1 copy `variorum-backup-a1-13ie-window-2026-10-04T035847Z`; the deploy `[]` on the FIRST run; verify marker 12 · the column · 0 archived rows; the sweep 63 OK · 4 INFO · 0 fail, 13i-c-identical; F-U1-1 `[{"profile":"daily"}]` — no press owed; the Mac Release installed sha-verified at a held zero-instance window; the phone via `devicectl` in the SAME window; the §12 entry written. Her first live rounds land at her relaunch — the combined walk's first act) |
 | 6 | The family close: the combined-walk document + the loose-end sweep | **DONE** (`notes/handoffs/13i-family-combined-walk.md`; the sweep in the PHASE CLOSEOUT) |
 | 7 | Closeout: the standing ritual + canon deltas + KnownIssues row 32 + #89(b) + QUESTIONS #179 + MobileSoul + the handoff + the DerivedData tidy | **DONE** (the PHASE CLOSEOUT section; the handoff `notes/handoffs/phase-13i-e-handoff.md`) |
 
@@ -1318,7 +1318,11 @@ by the ladder.
 her go — `notes/plans/13i-e-deploy-checklist.md` end to end (the F-U1-1 read-only probe
 inside). Her installs stay marker-11 and fully working until then; the `/Applications` refresh
 and her Restore Tutorial press ride BEHIND the window (never strand her daily drive). The
-SyncSpec §12 running-record entry is written AT the window, per the checklist.
+SyncSpec §12 running-record entry is written AT the window, per the checklist. *(FLIPPED
+2026-10-03: the window RAN at her in-session go — deploy `[]` first run, marker 12 verified,
+sweep 63 OK · 4 INFO, F-U1-1 `"daily"` with no press owed, BOTH installs refreshed in the same
+window. The record: ledger row 5 + the SyncSpec §12 entry. Her first live rounds land at the
+combined walk.)*
 
 **Canon deltas (as ruled):** AppSpec §7 (`archived_at` + the retired-as-read setting note),
 §9 (the 13i-e op family + the shelving door's line), §12 (the Archived-books/doors/marks/
