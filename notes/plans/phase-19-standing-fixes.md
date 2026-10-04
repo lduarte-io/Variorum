@@ -23,7 +23,7 @@
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
-| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | IN-PROGRESS (implementer; the 19d RECORD at the tail) |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | REVIEW-PENDING — 19 silent sites FIXED with pins, 18 DISMISSED AS HOLLOW (record at their own line), 1 cleanup; 621 fixed, 262 cleaned; suites green; the orchestrator's custody-line check owed |
 
 ---
 
@@ -161,8 +161,11 @@ review **with an explicit charge on the custody-drill test files** (`PostureSwit
 `SyncEnrollment` — assertions must not weaken; the 19a FurnitureConvergence precedent), and
 the orchestrator verifies those re-spells by its own hands at the close. **DO-NOT-TOUCH
 unchanged from 19b/19c** (13r's staged artifacts, `Sync/`, schema, app source except
-nothing — this entry is TEST FILES ONLY). **State: OPEN — runs next in the away-gap; her
-walk outranks it for the machine.**
+nothing — this entry is TEST FILES ONLY). **State: REVIEW-PENDING (2026-10-04) — the 19d
+RECORD at the ledger's tail: 19 of the 38 sites were silent and are FIXED with pins, 18 are HOLLOW
+(their old spelling records at its own line — dismissed, recorded), 1 cleanup; 621 fixed (probe —
+the drill stayed off), 262 cleaned (behaviour-identical); the Opus cold review with the
+custody-drill charge, and the orchestrator's own-hands check of 621/262, are next.**
 
 ---
 
@@ -1178,7 +1181,25 @@ dispositions, NOTICED, State → REVIEW-PENDING).
 
 ## 19d RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS ENTRY (stated first, per the contract) — PENDING, filled at the close.**
+**NOT DONE BY THIS ENTRY (stated first, per the contract):** (1) **18 of the 38 `#require` sites
+were NOT re-spelled — they are HOLLOW** (core 8 · Mac 10): under the in-place nil mutant the OLD
+spelling already records at its own line, so the contract's hollow rule binds (record, do not fix);
+their redundancy warnings STAY, each recorded below with its reason. Re-spelling them as a
+warning-only cleanup is the orchestrator's scope call, flagged, not taken. (2) **The posture drill
+was NOT run** — `PostureSwitchDrillTests` is env-gated OFF (`VARIORUM_POSTURE_DRILL=1`) and stayed
+off; line 621's re-spell is evidenced by a same-file throwaway probe + the route census, and the
+orchestrator's own-hands verification of both custody-drill re-spells is still owed (the entry's
+rule). (3) `SyncEnrollmentTests:262` took the behaviour-identical `_ = try …`, NOT `#expect(throws:
+Never.self) { … }` (which would turn abort into continue — test intent). (4) `VariorumMobile/Spike/
+SpikeScenarios.swift:240`'s always-true comparison is mobile APP source — not owned, untouched. (5)
+No walk capture — no product face changed (15 test files only), so the acceptance is builds +
+pins + suites, as 19a–19c's were. (6) No full suite — the touched files' suites (+ the core
+hollow-site suites as a sanity run). (7) No `Sync/`, no schema, no custody source, no app or core
+source LANDED; the mutants touched four source files TEMPORARILY (`Sources/VariorumCore/Domain/
+RuleGrammar.swift`, `Features/Editor/DivideWCeremony.swift`, `EditorCommands.swift`,
+`Features/BookView/PagePaginator.swift`), each reverted and sha256-verified; no Release build;
+`/Applications` untouched (no Mac-app change — no refresh owed); `AppleKeyRoundTripTests` not run;
+`Tools/Release/`, 13r's and 19c's DerivedData folders and the 13r plan untouched.
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
@@ -1229,10 +1250,14 @@ dispositions, NOTICED, State → REVIEW-PENDING).
   compiles warning-free under Xcode 27's Testing, which declares no dedicated `expect(throws:
   Never.Type)` overload); pinned by an in-place throwing mutant (the OLD words' key at the line) —
   RED at its own line on BOTH spellings (the old line was never silent on a throw — only its
-  comparison was dead).
+  comparison was dead). **[CORRECTED IN PLACE at piece 4 — kept beside its correction, the 19a
+  custom: the old line does NOT record at its own line on a throw; the error escapes the `#expect`
+  and aborts the test, recorded at the `@Test` declaration (248). So "record-and-continue kept" was
+  a false premise; the re-spell keeps the ACTUAL behaviour (`_ = try …`, abort-on-throw), and the
+  pin shows the identical issue on both spellings.]**
 
 **Pieces:**
-1. Fresh builds + the census — DONE (this commit). `core-bt-0.log` (`Build complete!`, a fresh
+1. Fresh builds + the census — DONE (`4fe9a227`). `core-bt-0.log` (`Build complete!`, a fresh
    scratch path), `mac-bft-0.log` and `mobile-bft-0.log` (`** TEST BUILD SUCCEEDED **`, fresh
    derived data); the census script `19d/census.sh` (ANSI stripped; a warning whose expression
    spans lines is matched on "is redundant because", not on "never equals 'nil'" — a first pass
@@ -1265,7 +1290,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    - (C) CLEANUP — `FannedDefaultsTests:355` (`EditorViewModel.postID` is `let postID: String`) —
      **1 site**, no pin possible.
    - No touched suite is env-gated except `PostureSwitchDrillTests` (grep of every touched file).
-2. Re-spells, committed per target — Mac DONE (`36954f75`); mobile DONE (`6bb4eae4`); family 2 DONE (piece 4). **Mac (12
+2. Re-spells, committed per target — Mac DONE (`36954f75`); mobile DONE (`6bb4eae4`); family 2 DONE (`97b3eb0c`, piece 4). **Mac (12
    files, the 15 SILENT sites + the 355 cleanup):** (R) `let x = X` + `#expect(x != nil)` at
    `EditorSeamCostTests:81`, `MarkdownFaceTests:284`, `NoteBoxTests:221`,
    `NoteVersionsPaneTests:332`/`:336`, `OriginBlockDoorTests:87`/`:90`, `QuickNoteTests:358`,
@@ -1281,7 +1306,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    **Mobile (1 file, the 4 SILENT sites):** (R) at `MobileCrossBlockEditTests:144`/`:163`/`:210`/`:310`
    (`let edit = Self.plan(…)` / `CrossBlockCompound.plan(…)` + `#expect(edit != nil)`).
    `mobile-bft-new.log` → `** TEST BUILD SUCCEEDED **`; the file's warnings 4 → 0, nothing added.
-3. Mutant pins (old silent once per shape; new red at its line per site) — DONE (this commit).
+3. Mutant pins (old silent once per shape; new red at its line per site) — DONE (`c93be1ef`).
    **THE MUTANTS (the script `19d/mutate.py`, string-anchored so one patch applies to the old AND
    the re-spelled tree; each edit asserted to match exactly once; marker `MUT19D`):** set **M1** —
    every site's first-run mutant: CALLEE (source, announced): `RuleGrammar.encode` answers nil
@@ -1399,7 +1424,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    · SyncEnrollment "Caught error: .unwrapFailed" at 248 — IDENTICAL to the old line's (behaviour
    kept). Every downstream `x?.…` line fails as before (record-and-continue intact). The hollow
    sites re-recorded at their own lines, unchanged.
-4. Family 2 — DONE (this commit; the NEW-spelling SE pin rides piece 3). **OLD-SPELLING EVIDENCE — ANNOUNCED** (both
+4. Family 2 — DONE (`97b3eb0c`; the NEW-spelling SE pin rides piece 3). **OLD-SPELLING EVIDENCE — ANNOUNCED** (both
    files committed at base; `SyncEnrollmentTests` is an ordinary suite over in-memory custody and
    a scripted vault — no real Keychain item): (a) `mutate.py SE` on the OLD line 262 (`words:
    fresh` → `words: old` — the unwrap must THROW); (b) a THROWAWAY probe suite appended to
@@ -1426,7 +1451,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    NOT taken: `#expect(throws: Never.self) { … }` — it would record at its own line but CONTINUE
    after a throw, changing abort into continue in a custody-drill file (test intent, not
    mechanics; the orchestrator's call if it wants that locality).
-   **The re-spells — DONE (this commit):** `PostureSwitchDrillTests:621` → `#expect(!joinerRecord
+   **The re-spells — DONE (`97b3eb0c`):** `PostureSwitchDrillTests:621` → `#expect(!joinerRecord
    .deviceID.isEmpty, "the device identity minted beside them")` (strictly stronger than the
    always-true line: `SyncCustodyRecord.fresh` mints a lowercased UUID string, so a real enrol
    passes; an empty identity now fails); `SyncEnrollmentTests:262` → the comment + `_ = try …`.
@@ -1434,6 +1459,147 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    two always-true lines removed, nothing added (`PostureSwitchDrillTests:697`'s effect-marker
    warning predates this entry). This build also re-emitted the other changed files: **the Mac
    redundancy census now reads EXACTLY the 10 hollow sites**, recorded.
-5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
-   NOT-STARTED.
-6. The census table, dispositions, acceptance lines, State → REVIEW-PENDING — NOT-STARTED.
+5. Rebuilds + the touched suites green — DONE (this commit). **FULLY FRESH final builds** (new
+   derived-data / scratch paths, so every file re-emits): `core-bt-final.log` (`Build complete!`),
+   `mac-bft-final.log` / `mobile-bft-final.log` (`** TEST BUILD SUCCEEDED **`). **The closing census
+   (`{core,mac,mobile}-census-final.txt`): core 8 + Mac 10 redundancy lines = EXACTLY the 18 HOLLOW
+   sites (recorded); mobile 0; always-true in test files 0 (the one left is the not-owned mobile APP
+   line `SpikeScenarios.swift:240`).** Whole-target "nothing added" (`19d/warnsets.py`, base `*-0`
+   vs `*-final`, by file and by (file, message) ignoring line shifts): Mac 102 → 83 unique warnings
+   (−19 = the 16 redundancy lines + 621 + 262's path and in-expansion lines), mobile 47 → 43 (−4),
+   core 30 → 30; **added: NONE in all three.** The route census over the FINAL objects
+   (`mac-routes-final-custody.tsv`): `PostureSwitchDrillTests:621` now compiles to
+   `__checkPropertyAccess` on the Bool (VOID) route — the real one (base: `__checkBinaryOperation`
+   folded to always-true); `SyncEnrollmentTests` 262 carries no expectation now (its old 263 moved to
+   264). **Suites (the final build products, `test-without-building`, suite-level
+   `-only-testing`):** **Mac `✔ Test run with 197 tests in 27 suites passed`** — every suite type
+   in the 13 touched Mac files other than the gated drill (`mac-touched.args`; 197 = those files'
+   `@Test` count exactly; ZERO `skipped:` lines; a ZERO-INSTANCE window — `pgrep` empty before
+   17:11:31Z and after 17:12:20Z, `mac-final-suites.window`; `PostureSwitchDrillTests` deliberately
+   NOT in the run — its suite is the env-gated drill, left off) · **mobile `✔ Test run with 24
+   tests in 2 suites passed`** (`MobileCrossBlockEditBrainTests` + `MobileCrossBlockEditTests`, the
+   file's 24 `@Test`s; zero `skipped:`; iPhone 17 Pro / iOS 26.2) · core (NOT owed — no core file
+   changed; a sanity run of the hollow sites' six suites) `✔ Test run with 40 tests in 6 suites
+   passed`, zero `skipped:`. Evidence folder 5.2 GB (the superseded build products deleted, every
+   log kept; the final build products kept so the reviewer can re-read routes).
+6. The census table, dispositions, acceptance lines, State → REVIEW-PENDING — DONE (this commit).
+
+**THE CENSUS TABLE (40 sites + 1 not owned).** Class: A = `try #require` in an Optional position
+(abort) · R = `try? #require` (record-and-continue) · C = cleanup. Route = the `__check*` the
+expansion calls at the site in the real target (`*-routes-base.tsv`). OLD = the old spelling under
+the in-place nil mutant (logs `{core,mac,mobile}-old-M1.log`, `core-old-M2.log`, `mac-old-M2.log`);
+NEW = the re-spelled line (line numbers in the COMMITTED file) under the same mutant
+(`mac-new-M1.log`, `mobile-new-M1.log`).
+
+| Site (base line) | Class | Route | OLD under the mutant | NEW under the mutant | Disposition |
+|---|---|---|---|---|---|
+| core `BookArchiveFacesCoreTests:24` | A | `__checkValue` | RED at 24 | — | DISMISSED AS HOLLOW |
+| core `BookWingMoveTests:159` | A | `__checkValue` | RED at 159 | — | DISMISSED AS HOLLOW |
+| core `BookWingMoveTests:216` | A | `__checkValue` | RED at 216 (M2c; logged 217, +1 shift) | — | DISMISSED AS HOLLOW |
+| core `DailyJournalRulingsTests:504` | A | `__checkValue` | RED at 504 | — | DISMISSED AS HOLLOW |
+| core `PendingArrivalDismissalTests:26` | A | `__checkValue` | RED at 26 (×3 callers) | — | DISMISSED AS HOLLOW |
+| core `TrashAndArchiveTests:253` (inner) | A | `__checkValue` | RED at 253 "stamp" | — | DISMISSED AS HOLLOW |
+| core `WingContentsMoveTests:64` | A | `__checkValue` | RED at 64 | — | DISMISSED AS HOLLOW |
+| core `WingContentsMoveTests:68` | A | `__checkValue` | RED at 68 (M2c; logged 69) | — | DISMISSED AS HOLLOW |
+| Mac `BookArchivedLineTests:471` | A | `__checkValue` | RED at 471 | — | DISMISSED AS HOLLOW |
+| Mac `FannedDefaultsTests:221` | R | `__checkValue` | RED at 221 | — | DISMISSED AS HOLLOW |
+| Mac `LibraryDayFilterTests:114` | A | `__checkValue` | RED at 114 | — | DISMISSED AS HOLLOW |
+| Mac `LibraryDayFilterTests:124` | A | `__checkValue` | RED at 124 (M2m) | — | DISMISSED AS HOLLOW |
+| Mac `SurfaceSizeMemoryTests:687` | R | `__checkValue` | RED at 687 | — | DISMISSED AS HOLLOW |
+| Mac `TutorialWalkTests:563` | A | `__checkValue` | RED at 563 | — | DISMISSED AS HOLLOW |
+| Mac `TutorialWalkTests:3502` (macro at 3501) | R | `__checkValue` | RED at 3501 | — | DISMISSED AS HOLLOW |
+| Mac `TutorialWalkTests:3504` (macro at 3503) | R | `__checkValue` | RED at 3503 | — | DISMISSED AS HOLLOW |
+| Mac `WingBookMoveDoorTests:149` | A | `__checkValue` | RED at 149 | — | DISMISSED AS HOLLOW |
+| Mac `WingBookMoveDoorTests:250` | A | `__checkValue` | RED at 250 | — | DISMISSED AS HOLLOW |
+| Mac `EditorSeamCostTests:81` | R | `__checkPropertyAccess` | SILENT (82 only) | RED at 82 | FIXED |
+| Mac `MarkdownFaceTests:284` | R | `__checkPropertyAccess` | SILENT (286/289/291) | RED at 285 (logged 286) | FIXED |
+| Mac `NoteBoxTests:221` | R | `__checkFunctionCall` | SILENT (223–230) | RED at 223 | FIXED |
+| Mac `NoteVersionsPaneTests:332` | R | `__checkFunctionCall` | SILENT (334) | RED at 334 | FIXED |
+| Mac `NoteVersionsPaneTests:336` | R | `__checkFunctionCall` | SILENT (338) | RED at 339 | FIXED |
+| Mac `OriginBlockDoorTests:87` | R | `__checkFunctionCall` | SILENT (88/89) | RED at 88 | FIXED |
+| Mac `OriginBlockDoorTests:90` | R | `__checkFunctionCall` | SILENT (91–93) | RED at 92 | FIXED |
+| Mac `QuickNoteTests:358` | R | `__checkFunctionCall` | SILENT (359/360) | RED at 359 | FIXED |
+| Mac `ReadRenderingTests:210` | A | `__checkFunctionCall` | SILENT (217) | RED at 210, aborts | FIXED |
+| Mac `ReadRenderingTests:237` | A | `__checkFunctionCall` | SILENT (241) | RED at 238, aborts | FIXED |
+| Mac `ReadRenderingTests:349` | A | `__checkFunctionCall` | SILENT (357) | RED at 351, aborts | FIXED |
+| Mac `SystemHotKeyTests:200` | R | `__checkPropertyAccess` | SILENT (202/203) | RED at 201 | FIXED |
+| Mac `TakeStructureDoorTests:343` | R | `__checkFunctionCall` | SILENT (344 ×2) | RED at 344 ×2 | FIXED |
+| Mac `TrayPanelMoveTests:74` | R | `__checkPropertyAccess` | SILENT (75/76) | RED at 75 | FIXED |
+| Mac `TypingErgonomicsTests:368` | A | `__checkPropertyAccess` | SILENT — NOTHING records in the test | RED at 368 (logged 369), aborts | FIXED |
+| Mac `FannedDefaultsTests:355` | C | `__checkPropertyAccess` (`postID: String`) | — (cannot be nil) | — | CLEANUP (macro dropped) |
+| mobile `MobileCrossBlockEditTests:144` | R | `__checkFunctionCall` | SILENT (145–156) | RED at 145 | FIXED |
+| mobile `MobileCrossBlockEditTests:163` | R | `__checkFunctionCall` | SILENT (164–169) | RED at 165 | FIXED |
+| mobile `MobileCrossBlockEditTests:210` | R | `__checkFunctionCall` | SILENT (211/212) | RED at 213 | FIXED |
+| mobile `MobileCrossBlockEditTests:310` | R | `__checkFunctionCall` | SILENT (313–318) | RED at 316 | FIXED |
+| Mac `PostureSwitchDrillTests:621` (always-true) | — | `__checkBinaryOperation` → `__checkPropertyAccess` (VOID) | probe over `deviceID: ""`: GREEN (the silence) | probe: RED at its line | FIXED (`!…isEmpty`; drill gated off) |
+| Mac `SyncEnrollmentTests:262` (always-true) | — | `__checkValue` → none (`_ = try`) | throw: "Caught error" at 248 (the `@Test` line) | identical, at 248 | CLEANUP (dead conjunct removed; behaviour identical) |
+| mobile APP `Spike/SpikeScenarios.swift:240` (always-true) | — | — | — | — | RECORDED, NOT OWNED (app source) |
+
+**Totals: the 38 `#require` sites — 19 FIXED with pins (Mac 15 · mobile 4; old SILENT at its line,
+new RED at its own line, 19/19), 18 DISMISSED AS HOLLOW (core 8 · Mac 10; old already RED at its
+own line, so no pin can be red-on-old), 1 CLEANUP. The 2 always-true test sites: 621 FIXED (probe
+pin), 262 CLEANUP (behaviour-identical). Zero stop-and-report sites; zero DEFERRED.**
+
+**DISPOSITIONS (by the contract's three):** FIXED with its pin — the 19 silent sites + 621 (each pin
+in the table, logs named above) · DISMISSED AS HOLLOW — the 18 sites, each with the mutant log
+showing its old spelling RED at its own line with its own expression as the message (the reason
+their warnings stay) · DEFERRED — none. Cleanups (ruled by the brief, no behaviour change): 355,
+262. Not owned: `SpikeScenarios.swift:240` (app source; no row opened — warning-grade, next
+legitimate touch of that Spike file).
+
+**ACCEPTANCE LINES:** zero "'#require(_:_:)' is redundant" warnings in all three test builds except
+sites recorded with a reason — ✔ (the final fresh builds carry exactly the 18 hollow sites, each
+recorded above with its mutant evidence) · zero "always returns true" warnings in the test files —
+✔ (the one left is mobile APP source, recorded not owned) · the census table — ✔ (above) · the
+touched suites green at a quiet window — ✔ (Mac 197/27 at a zero-instance window, mobile 24/2 on
+iPhone 17 Pro / iOS 26.2, `skipped:` read: none) · custody-drill lines not weakened — ✔ (621 is
+strictly stronger than an always-true line; 262's check and its abort are unchanged) — **the
+orchestrator's own-hands verification of these two is the entry's remaining owed step.**
+
+**FOR THE COLD REVIEW — the landed diff (`git diff 5790a095..HEAD -- App Tests Sources`):** 15
+test files, 46+/26−, no other path (`Sources` and every app target untouched). 22 macro lines
+removed (the 19 silent sites + 355 + 621 + 262), 20 added (11 Mac + 4 mobile `#expect(x != nil)`,
+4 hoisted `try #require`, 621's `!…isEmpty`). Check: every downstream line byte-identical; the
+record-and-continue sites keep continuing (their downstream `x?.…` lines still record under the
+mutant — `mac-new-M1.log`); the hoisted sites abort where the old `try` meant to. **The
+custody-drill charge:** `PostureSwitchDrillTests.swift:621` (one line; the drill itself is
+env-gated off and was never run — its evidence is the probe's two lines in `old-SE-probe.diff` +
+`mac-old-SE.log`, and the final route) and `SyncEnrollmentTests.swift:262–263` (a comment + `_ =
+try vault.unwrapMaster(…)`; the `SE` mutant's issue is the same "Caught error: .unwrapFailed" at
+248 on both spellings — `mac-old-SE.log` vs `mac-new-M1.log`). **Reproducible from the folder:**
+`mutate.py {M1,M2c,M2m,SE}` re-creates every mutant (`old-M1.diff`, `old-M2.diff`,
+`old-SE-probe.diff`, `new-M1-SE.diff` are the applied diffs); `issues.py <log>` re-scores issue
+locations; `routes.py` re-reads routes from any build's objects; `census.sh` / `warnsets.py`
+re-count warnings.
+
+**NOTICED (routed to the orchestrator; none acted on):**
+1. **19c round 1 F1's census sentence is NARROWED by this entry's evidence:** the redundancy warning
+   is the `NonOptionalRequireMacro`'s STATIC diagnostic and fires at all 38 sites, but only the 19
+   whose expression the macro DECOMPOSES (an un-prefixed function call → `__checkFunctionCall`, a
+   member access → `__checkPropertyAccess`) are silent at runtime; a plain variable, a subscript, a
+   `try`-prefixed call or a trailing-closure call goes through `__checkValue` and records. The
+   cheap exact ranking for a future census: a flagged `#require` line whose route is
+   `__checkFunctionCall`/`__checkPropertyAccess` = silent; `__checkValue` = hollow (38/38 here;
+   the runtime mutant stays the settlement — R2-1).
+2. **The 18 hollow sites' warnings now carry NO signal** — every future build re-prints them. A
+   warning-only re-spell (the hoist / `#expect(x != nil)`, zero behaviour change; each's mutant
+   evidence already logged) would leave the redundancy warning meaning "silent" again. A scope
+   call for the orchestrator; not taken here (the contract's hollow rule).
+3. **`#expect(try X …)` does not record at its line on a throw:** the `try` operand is evaluated
+   before the check, so the error escapes the macro and ABORTS the test, recorded at the `@Test`
+   declaration (observed: `SyncEnrollmentTests:262` under the SE mutant → issue at 248). Wherever
+   the suites read `#expect(try …)` as "record and continue", it is "abort, recorded at the
+   test". If line-local recording matters at a custody line, `#expect(throws: Never.self) { … }` is
+   the spelling (continue + at its line) — test intent, so not taken here.
+4. **A census method note:** a warning whose expression spans lines splits its message across
+   lines, so a grep for the message's tail ("never equals 'nil'") misses it — anchor on the head
+   ("is redundant because"). My first pass missed 3 of 38 until reconciled against the reviewer's
+   list.
+
+**Commits:** `94145dbc` (record opened, method) · `4fe9a227` (census; mutants written; OLD-M1
+announced) · `4585b7f9` (OLD-M1 results — the class not uniformly silent) · `096bc934` (OLD-M2;
+the mechanism via the route census; dispositions decided) · `36954f75` (Mac re-spells) ·
+`6bb4eae4` (mobile re-spells) · `edf25961` (family 2's old-spelling evidence announced) ·
+`97b3eb0c` (family 2 re-spells + the 262 correction) · `73a263fb` (NEW-tree runs announced, score
+sheet) · `c93be1ef` (NEW-tree pins) · this commit (final census, suites, table, dispositions,
+State → REVIEW-PENDING).
