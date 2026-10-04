@@ -651,6 +651,30 @@ opened; the working tree was left clean.
   *[removed for publication]*
   this-Mac-only hazard (a friend's Mac has no dev build there), but the walk sheet's W-5 must
   launch by explicit path (`open ~/Applications/Variorum.app`) — the resumed walk does.
+  **(4) TWO AUTHOR RULINGS AT THE WALK SITTING (2026-10-04, verbatim-faithful) — both ride
+  U3:** **R-13r-10 — THE SELF-EXPLAINING DMG WINDOW, APPROVED:** *"yeah let's do this one -
+  that's what I'm talking about as a standard experience … approved"* — the DMG window opens
+  with the app icon and the Applications link in FIXED positions and a plain "drag here"
+  arrow or label between them; functional layout only (plain `hdiutil` + scripted Finder
+  window settings, no new dependency); the branded background art stays 13s's. (The
+  companion in-app "running from the disk image" notice was offered too; she approved the
+  DMG window only — the notice is NOT ruled and is not built.) **R-13r-11 — NO POPUP AT
+  FIRST OPEN: SPARKLE'S CONSENT IS DEFERRED:** *"again, I don't want the user experience to
+  start with a popup. please change things so that this popup shows up after they've been
+  using the app."* This supersedes U2's "Sparkle asks on the second launch" stock flow: U3
+  defers the "Check for updates automatically?" prompt until after real use (mechanism:
+  Sparkle's updater delegate declines the early permission prompt, and the channel asks
+  later; Check for Updates… works throughout). The exact "after use" threshold is
+  PROVISIONAL, the implementer proposes and the architect rules. It pairs with her 13s
+  backups-popup note above as one principle: **opening Variorum is calm — no popup greets a
+  first open.** **(5) Walk facts, step by step:** the `~/Applications` copy's first open
+  showed the notarized "downloaded from the Internet" question (expected — each newly
+  quarantined copy asks once; W2 ✔); consent was ASKED with no profile option (W6 ✔); About
+  read 0.0.1 and Check for Updates… was present (W4/W5 ✔); the first Check returned
+  "Update Error" because the W-6 feed override had not been written (her transcript has no
+  `defaults read` line; the server log shows no request from the app), so Sparkle correctly
+  asked the BAKED public feed, which 404s pre-release. This is correct behaviour, not a
+  defect. The walk resumes with the override written and verified.
   The model-seat note: the Fable seat hit repeated safeguard stops mid-walk; at her switch
   the walk continues on Opus 5.5 (her call), the rest of the phase returns to a Fable
   orchestrator via her next kickoff.
