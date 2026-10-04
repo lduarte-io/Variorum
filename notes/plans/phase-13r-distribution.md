@@ -2260,3 +2260,18 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      WhatsNew.swift` (a fresh install is due), `Features/CalmAsks/CalmAsks.swift` (`next` drops
      the one-per-day guard) — and restored with `git checkout --` on exactly those three paths.
      If a session dies mid-run, `git diff` against `6151f47a` shows what is mutated; restore it.
+     **THE MUTATION RUN — DONE, RESTORED (`git checkout --` on the three paths; tree clean but the
+     strengthened pin below):** with the three mutants in, `Test run with 28 tests in 3 suites
+     failed … with 10 issues` — the sync face: 5 issues across the server-ahead, no-updater and
+     exactness pins (the pre-fix face is the generic one); What's New: 4 issues across the fresh-
+     install and show-once pins (a greeted fresh install); the cadence: the pure one-per-day pin.
+     **The run found one HOLLOW SPOT in my own pins and it was strengthened, not fixed in code:**
+     the scheduler's own `lastAskDay` guard (mutated with the rule's) was caught by no scheduler
+     pin, because the update ask's one-day re-ask gap masks a same-day second evaluation in every
+     scripted day. `theUpdateAskStillOpenOnDayFiveTakesItAndTheBackupAskWaits` now evaluates twice
+     on the day BOTH asks are due — red under the mutant (2 issues, `13r-u3a/mutants3.log`), green
+     restored. **Restored run: `Test run with 28 tests in 3 suites passed`** (`restored.log`).
+     Red-on-old by construction, not mutated: `VersionSchemeTests` (the pre-fix bundle reads `1` /
+     `1.0` — her own About screenshot of the old daily drive, "1.0 (1)"); the iCloud retirement pin
+     (the pre-fix `RootView.swift` carries `services.backup?.onRun = { record in
+     offer.consider(after: record) }` at line 248 — `git show 138ac723:…/RootView.swift`).

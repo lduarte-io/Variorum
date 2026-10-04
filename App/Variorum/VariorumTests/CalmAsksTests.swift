@@ -203,6 +203,10 @@ struct CalmAsksTests {
         for _ in 1...4 { _ = w.nextDay() }  // four short days: no calm moment evaluated
         var s = w.nextDay()
         #expect(await s.evaluate() == CalmAskScheduler.AskID.update)
+        // Both asks are due today; the second never joins it the same day
+        // (the update ask's own one-day gap does not cover this — the
+        // shared rule does).
+        #expect(await s.evaluate() == nil, "the two never share a day")
         w.updateOpen = false
         s = w.nextDay()
         #expect(await s.evaluate() == CalmAskScheduler.AskID.backupFolder,
