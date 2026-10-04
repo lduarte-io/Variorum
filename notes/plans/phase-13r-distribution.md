@@ -1044,6 +1044,15 @@ opened; the working tree was left clean.
   the BUCKET (`wrangler r2 object head`), never the public URL, which seeds exactly this
   cached 404. The appcast push, the page deploy and the N-0(e) public-state checks resume the
   moment the purged URL serves the DMG.
+- **N-0 COMPLETE — THE WALK IS GREEN-LIT (2026-10-04 23:10:53Z, the N-0(f) START):** the cached
+  404 cleared (her purge road; the watch saw the URL go live), the published 0.9.1 DMG verified
+  BYTE-IDENTICAL from the public URL, the two-entry appcast deployed and verified (byte-identical;
+  the newest enclosure live at its declared 21,203,033 bytes), and the N-0(e) public state reads
+  exactly the sheet's expectation — the feed lists **0.9.0 AND 0.9.1**, the page still offers
+  **Download Variorum 0.9.0** (it moves to 0.9.1 only after the walk), both site commits pushed
+  (`e304b43`, `dbb12a3`). SHE IS WALKING LIVE on the new computer (steps 1–4 released early at
+  her ask, mid-snag; step 5's update leg released at this green light). Her reports land here
+  as findings.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
