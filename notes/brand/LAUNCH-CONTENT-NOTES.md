@@ -27,6 +27,16 @@ it changes.
   are FACT-ONLY (claims, not voice) unless she asks otherwise.
 - **`site/variorum-product-page.md`** — the full what-is-Variorum reference
   page for stargazing.tech (15 sections + TOC), written as final copy.
+- **`video/embed-shot-list.md`** — the silent-loop capture list for blog +
+  product page (V1–V25, three tiers, beats + staging + hard rules), written
+  for an AI-driven recording session. Blog uses at most three (V1+V2+V5
+  recommended).
+- **`../../stargazing-privacy-policy-brief-2026-10-04.md`** (notes/ root,
+  beside its 13p and pre-13x predecessors) — the CURRENT privacy brief she
+  carries to the stargazing.tech agent; self-contained; supersedes pre-13x
+  where they differ (13y closed the cross-account activity disclosure and
+  changed the key proof; 13i added structure-only columns). The help-FAQ
+  brief has NOT been re-issued since pre-13x — flagged inside.
 
 Conventions across all of them: `[brackets]` = hers to fill or confirm;
 **PENDING** markers = re-check at publish time.
@@ -92,8 +102,11 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
   show-hn.md, blog-launch-post.md, and the product page §8.
 - Mobile status wording on the product page §13, at publish.
 - Cross-link the blog post ↔ product page when both are on the site.
-- Shorts 04+ (candidates in `video/README.md`); landscape crops of the same
-  staged gestures for blog embeds.
+- Shorts 04+ (candidates in `video/README.md`); the embed captures per
+  `video/embed-shot-list.md` (AI-driven session; she may shoot some herself).
+- She carries the 2026-10-04 privacy brief to the stargazing agent; the
+  help-FAQ brief (`notes/stargazing-help-faq-brief-pre13x.md`) is owed a
+  matching re-issue when next touched.
 - The product page hands off to the stargazing.tech agent (that repo has its
   own Claude agent — she tasks it; this repo only drafts content).
 

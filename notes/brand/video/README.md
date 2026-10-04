@@ -33,5 +33,8 @@ from tags.
 
 - **`filming-notes.md`** — what to show and how to film it: staging, vertical
   crop, capture setup (WalkKit/cliclick choreography), AI-video tooling rules.
+- **`embed-shot-list.md`** — the silent-loop captures for the blog post and
+  product page (25 candidates in three tiers, with beats, staging and hard
+  rules), written to be driven by an AI recording session.
 - **`../why-variorum-stands-out.md`** — the ranked positioning list every script
   draws from.
