@@ -303,6 +303,38 @@ STATUS's walk-sitting bullet carries her words verbatim):**
     beta use; U3-A logs them as ONE `notes/QUESTIONS.md` entry. A walk test may set the local
     day counter by the container-path `defaults write` on the walk build only — the shipped
     numbers are never shortened.
+- **R-13r-13 — THE OUT-OF-DATE SYNC REFUSAL GETS A CALM FACE (her refinement at the U3 kickoff,
+  2026-10-04, verbatim: *"One other note and refinement on the popup schedule - if sync doesn't
+  work because your version is out of date, a calm message should say so as well."*).** The fact,
+  read from the code before recording: `SyncError.schemaLockstepMismatch` (the §12 refusal —
+  outbox kept, cursor unmoved, by design) reaches the sync status face as a GENERIC error today —
+  `SyncStatusViews.swift` special-cases keys-locked / rekey-incomplete / payload-crypto /
+  not-entitled but not this one, so a beta friend would read the engine's own sentence ("Finish
+  the schema update on the lagging side; nothing is lost while paused (SyncSpec §12)") — honest,
+  but written for the author. U3-A adds the face-side classification on the established pattern
+  (the `isKeysLockedError` precedent, app-side): when the SERVER's marker is AHEAD of the app's,
+  the face reads calm and plain — this version of Variorum is older than your account's sync
+  format; update to continue syncing; nothing is lost while paused — with the door being **Check
+  for Updates…** (the U2 channel; the door renders only where the updater is live, P-2). The
+  other direction (app ahead of server — her own pre-deploy state under R-13r-7) keeps today's
+  quiet generic face: no friend can reach it (the §12 choreography deploys the mirror before any
+  release ships). **Zero `Sync/` expected: the classification lands in the face, never the
+  engine; the engine's error text stands. Any `Sync/` line stops for the rider.** Pinned by a
+  *[removed for publication]*
+  walk installs never sign into sync).
+- **R-13r-14 — THE FIELD GUIDE'S BACKUPS COVERAGE GAINS THE CHOOSE-A-BACKUP-FOLDER DOOR (her
+  refinement at the U3 kickoff, 2026-10-04, verbatim: *"And if the user guide needs an updated
+  backups session reflecting where you can choose a backup folder (not sure if we already have
+  that in the field guide or not), add that."*).** The fact, checked before recording: it does
+  NOT have it — the guide's backups coverage is custody-shaped only (copy §7 / `PostureCopy`'s
+  "what opens a backup" sentences); no lesson teaches Settings ▸ Data Safety's "A second folder"
+  door. U3-A adds a short backups passage saying where backups live automatically and that a
+  second folder of your choosing (iCloud Drive among them) can be picked in Settings ▸ Data
+  Safety — speaking the same language as R-13r-12's offer toast, which opens the same sheet.
+  Placement (a passage in an existing lesson vs. a short lesson of its own) is the implementer's
+  to propose in its record; the lesson-plan contract and `TutorialWalkTests` move with it (P-6).
+  **Closeout consequence (the standing rule):** lesson content edits stale the REAL store's
+  seeded field guide — the closeout re-seeds it via the product door behind the A1 rail.
 *[removed for publication]*
   and run at HER sitting; the U2 walk sheet is the template):** two fresh walk builds through
   the pipeline (0.0.3 → 0.0.4, the stamping build phase now live). Arms: (a) the DMG window
@@ -331,7 +363,9 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   asks:** R-13r-6's stamping build phase + MARKETING_VERSION 0.9.0; the one release-notes source
   feeding What's New (shown once per version change + Help ▸ What's New) and the appcast;
   R-13r-10's self-explaining DMG window; THE CALM-ASKS CADENCE for both asks (R-13r-11 + R-13r-12)
-  with Settings ▸ General's update checkbox. **U3-B — support & diagnostics:** the MetricKit
+  with Settings ▸ General's update checkbox; R-13r-13's calm out-of-date sync face (the Check for
+  Updates… door); R-13r-14's field-guide backups passage (the second-folder door taught — the
+  closeout's re-seed duty fires). **U3-B — support & diagnostics:** the MetricKit
   opt-in (LOCAL, provably OFF), Diagnostics with payloads verbatim and a per-report Send, Help ▸
   Send Feedback…. U3-B's one in-batch fork stays: the Settings placement of the opt-in +
   Diagnostics (the implementer proposes, the architect rules). Each sub-phase is one fresh
@@ -422,7 +456,9 @@ product behavior — if one arises it lands only as she rules it); **MOBILE PARI
 handoff `notes/handoffs/phase-13r-handoff.md` with her checklist on top — **which IS the friends-beta
 checklist** (site pages live per the brief · 0.9.0 through the pipeline · the download link to
 friends · the support mailbox watched); the install refresh at the end (her tip build gains the
-stamping too); memory updated. Marker stays 9; zero `Sync/` expected — any `Sync/` line stops for
+stamping too); **the field-guide re-seed behind the A1 rail** (R-13r-14's lesson edit stales the
+REAL store's seeded guide — re-seed via the product door at the refresh window, the standing
+closeout rule); memory updated. Marker stays 9; zero `Sync/` expected — any `Sync/` line stops for
 the rider.
 
 ---
@@ -791,7 +827,15 @@ opened; the working tree was left clean.
   seat hit repeated safeguard stops mid-walk); she kicks off a FRESH Fable orchestrator for
   U3, the ladder and the closeout from the handoff's THIRD edition
   (`notes/plans/phase-13r-orchestrator-handoff.md`).
-- **U3 — READY TO OPEN (not started); EVERY QUESTION ANSWERED BEFORE THE KICKOFF (2026-10-04,
+- **THE FRESH FABLE SEAT (2026-10-04, her `/architect-phase 13r` kickoff from the handoff's
+  THIRD edition):** preflight run per the skill (the handoff, this file IN FULL, CLAUDE.md +
+  canon, the master plan, KnownIssues, the resiliency protocol; QUESTIONS + sizing guidance in
+  the same pass); tree clean at `92f1b51a` = `origin/main`; no agent running. Her kickoff
+  RATIFIES the calm-asks cadence as written. **TWO REFINEMENTS arrived with the kickoff and are
+  RECORDED AS R-13r-13 (the out-of-date sync refusal's calm face) and R-13r-14 (the field
+  guide's backups passage) in the U3 section above — both U3-A's**; the facts under each were
+  read from the code before recording (the generic error face today; no second-folder lesson
+  today).
   her ask: "we're just answering the questions now so that U3 can run smoothly"):** two
   sub-phases, U3-A then U3-B, under one walk (RULED); THE CALM-ASKS CADENCE written into the U3
   section for both asks (proposed at her request; her kickoff message ratifies it); R-13r-12
