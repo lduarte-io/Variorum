@@ -1331,6 +1331,34 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    thread, and immune to parallel tests; sites 68 and 216) + `mutate.py M2m`; core build + the two
    core suites, Mac bft + `LibraryDayFilterTests`; then `git checkout --`, status clean, zero
    markers, RuleGrammar's sha256 re-read. Same death rule as above.
+   **OLD-TREE M2 — DONE, REVERTED** (`19d/old-M2.diff`; `core-old-M2.log` 11 tests / 2 suites, EXACTLY
+   2 issues: `BookWingMoveTests:217` and `WingContentsMoveTests:69` — the original 216/68, shifted one
+   line by the inserted flag — each "Expectation failed: try RuleGrammar.encode(.tag(classics.id))";
+   `mac-old-M2.log` 19 tests / 1 suite at a zero-instance window, EXACTLY 1 issue:
+   `LibraryDayFilterTests:124` "Expectation failed: picked"). All three RECORD AT THEIR OWN LINE —
+   hollow. Restored: status clean, zero markers, the four sha256s OK.
+   **THE MECHANISM, CORROBORATED BY THE COMPILER'S OWN CHOICE** (19c's `routes.py`, copied to
+   `19d/routes.py`, over the BASE build's objects — `{mac,core,mobile}-routes-base.tsv`): every one
+   of the 38 sites binds the `NonOptionalRequireMacro` (hence the identical warning), but the
+   macro delegates to the ordinary `#require` expansion, which then type-checks ON ITS OWN:
+   **(i) at all 18 HOLLOW sites the expansion calls `__checkValue`** (`__checkValue<T>(_
+   optionalValue: T?, …) -> Result<T, Error>` takes the value DIRECTLY and binds `T := X` — a nil
+   records); **(ii) at all 19 SILENT sites it calls `__checkFunctionCall` or `__checkPropertyAccess`**
+   (the decomposed forms take the value as a CLOSURE'S result typed `R?`; with the macro's result
+   type `X?` as the context, `R` binds to `X?` and the closure's `X?` promotes to `X??`, so a nil
+   arrives as `.some(nil)` and passes). 38 of 38 sites: route ⇔ runtime behaviour, no exception
+   (`TrashAndArchive:253` carries both — its flagged INNER `#require(stamp)` is `__checkValue`, its
+   unflagged outer `#require` the function-call form). The class's real tell is therefore the
+   warning **on a decomposed expression** (an un-prefixed call or member access), not the warning
+   alone. **This NARROWS 19c round 1 F1's census sentence** ("a nil X records NOTHING at that
+   line" — true of 19 of its 38; the four sites its probes touched were all decomposed forms).
+   **DISPOSITIONS DECIDED (the contract's hollow rule — a pin green on both sides is a hollow row:
+   record it, do not fix it):** the 18 HOLLOW sites are **DISMISSED AS HOLLOW**, NOT re-spelled —
+   their warnings stay, each RECORDED with its reason (the acceptance's "except sites recorded
+   with a reason"); the 19 SILENT sites are re-spelled with pins; `FannedDefaultsTests:355` is the
+   brief's ruled cleanup. FLAGGED for the orchestrator: re-spelling the 18 hollow sites as a
+   warning-only cleanup would make the redundancy warning a clean tell again (no behaviour
+   change); that is a scope call, not this implementer's.
 4. Family 2 — NOT-STARTED.
 5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
    NOT-STARTED.
