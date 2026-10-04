@@ -152,6 +152,33 @@ F4's narrowed comment carried into whatever CopiedRow shape lands. **Cast:** `op
 evidence). **State: IN PROGRESS (2026-10-04) — the implementer's LIVE STATUS is the 19b RECORD
 at this file's tail.**
 
+**THE CENSUS CORRECTED (the implementer's log re-read, 2026-10-04 — accepted by the
+orchestrator):** the "~61 sites in ~25 files" above was the round-1 log's WARNING census
+misread as the error class; the preserved red-on-old carries **6 ROW-COPY error sites in 4
+mobile test files** (MobileLibraryTests:212 · MobileMembershipTests:239/299 ·
+MobileShellTests:270 · MobileTutorialWalkTests:395/433), a FLOOR until the implementer's own
+builds iterate to green. The ~60 warnings get a per-class census in the 19b RECORD (counts +
+classes, no fixes beyond this entry's own acceptance lines); their ROUTING is held for the
+orchestrator at the entry's close (candidates: the mobile main-actor warning class widens
+19c Arm 2; cosmetic classes recorded next-touch).
+
+**THE COPIEDROW FORK — RULED BY THE ORCHESTRATOR (2026-10-04, repo-first before the build):
+OPTION A, one file, three consumers.** `Tests/VariorumCoreTests/Support/CopiedRow.swift`
+stays the single source; the Xcode project gains ONE classic file reference to it (a small
+TestSupport group) plus one PBXBuildFile per TEST target's Sources phase; the Mac twin
+`App/Variorum/VariorumTests/CopiedRow.swift` is DELETED. Why over B: one source of truth
+ends the lockstep-editing class F4 already exposed; the pbxproj risk is contained to
+test-target sections (provable in the diff) and cannot touch 13r's BUILT walk artifacts; B
+would institutionalize a three-way copy rule the next toolchain bump punishes. RIDERS: (1)
+the record PROVES from the diff that zero app-target lines changed; (2) the twin's deletion
+lands in the SAME commit as the wiring — no interval with a duplicate or missing type; (3)
+verification owed: core `swift build --build-tests` green · Mac `build-for-testing` compiles
+· the Mac suites that consume CopiedRow (19a's migrated Row-copy suites) re-run GREEN at a
+zero-instance window (the re-pointed file proven serving the Mac target identically) ·
+mobile per this entry's own acceptance; (4) comment fate as proposed — F4's narrowed text
+verbatim, the three-consumers header, "keep them identical" retires, R2-3's re-wrap counts
+as its next touch; (5) any harness-stopped deletion is surfaced, never worked around.
+
 ---
 
 ## 19a — Xcode 27 / Swift 6.4: the test-target + mobile migration
