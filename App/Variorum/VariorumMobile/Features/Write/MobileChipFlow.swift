@@ -78,10 +78,14 @@ struct MobileChipFlow: Layout {
         let height = rows.map { row in
             row.map { sizes[$0].height }.max() ?? 0
         }.reduce(0, +) + CGFloat(max(rows.count - 1, 0)) * vSpacing
-        let contentWidth = rows.map { row in
-            row.map { sizes[$0].width }.reduce(0, +)
-                + CGFloat(max(row.count - 1, 0)) * hSpacing
-        }.max() ?? 0
+        // Split into typed steps (19a — Xcode 27's type checker timed out on
+        // the one-expression form); the same sum, gaps and max per row.
+        let rowWidths: [CGFloat] = rows.map { row in
+            let chipWidths: CGFloat = row.map { sizes[$0].width }.reduce(0, +)
+            let gaps: CGFloat = CGFloat(max(row.count - 1, 0)) * hSpacing
+            return chipWidths + gaps
+        }
+        let contentWidth = rowWidths.max() ?? 0
         // A nil OR infinite proposal answers with content width (D ladder
         // NIT R1-3 — echoing .infinity breaks any host that trusts it).
         let proposed = proposal.width

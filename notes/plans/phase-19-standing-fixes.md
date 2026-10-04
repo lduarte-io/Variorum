@@ -77,8 +77,8 @@ not wait on this entry).
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE YET (stated first, per the contract):** the mobile line is edited but not yet built; NO
-suite has run yet. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
+**NOT DONE YET (stated first, per the contract):** NO suite has run yet (every target now COMPILES —
+core tests, Mac app + tests, the mobile app). **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
 2026-10-04 — her live drill passed; U1 closed): suites run at quiet windows from here, her real-store
 instance never touched, the measurement-shaped TK2 tripwire suites preferring a zero-instance window.
 (During the window the implementer ran compile-only work — `swift build --build-tests` and
@@ -150,7 +150,11 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
   `BoundaryClampTests.theSurvivingResidualsAreNamedAndNeitherIsAGeometry`.
 - **IMPORT** (`MemberImportVisibility`, on in every target): `PlainPasteTests` reads
   `Queries.RenderedBlock.text` without importing its defining module — `import VariorumCore` added.
-- **EXPR-SPLIT** (type-check failures): MobileChipFlow:81 (PENDING) · TagFamilySections:101 (DONE —
+- **EXPR-SPLIT** (type-check failures): MobileChipFlow:81 (DONE — `contentWidth`'s one expression
+  became `let rowWidths: [CGFloat] = rows.map { row in let chipWidths: CGFloat = …reduce(0, +); let
+  gaps: CGFloat = CGFloat(max(row.count - 1, 0)) * hSpacing; return chipWidths + gaps }` then
+  `rowWidths.max() ?? 0` — the same per-row sum, the same gaps, the same `+` order, the same max and
+  the same empty answer; `height` untouched, it type-checks) · TagFamilySections:101 (DONE —
   the typed closure array hoisted to `let fetches: [@Sendable (Database) throws -> Int]`, then
   `for fetch in fetches`; same two closures, same order, same loop body).
 - **TRY-IN-REQUIRE** (Xcode 27's Swift Testing `#require` now expands a function-call argument into
@@ -177,6 +181,9 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
    to the Canvas shapes (`rows[0]["x"] == Double(…)` → `Double`; `let x: Double? = rows.first?["x"]`
    → `Optional<Double>`) — the same bindings as `Row`. `xcodebuild build-for-testing` →
    `** TEST BUILD SUCCEEDED **` (log `mac-bft-4.log`). Suite runs — PENDING.
-3. Mobile `MobileChipFlow.swift:81` — PENDING.
+3. Mobile `MobileChipFlow.swift:81` — DONE (this commit; EXPR-SPLIT above). `xcodebuild -scheme
+   VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`, no
+   diagnostic on the file (log `App/Variorum/DerivedData/19a/mobile-build.log`). The only `Sources`
+   line in this entry's diff.
 4. Acceptance runs (core `swift test` full · the 8 Mac suites · the 7 TK2 tripwire suites ·
    `PaneSurfaceTests` · the mobile build) — PENDING (runs wait for the drill window to close).
