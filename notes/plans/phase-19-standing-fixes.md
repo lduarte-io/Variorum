@@ -1374,7 +1374,17 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    brief's ruled cleanup. FLAGGED for the orchestrator: re-spelling the 18 hollow sites as a
    warning-only cleanup would make the redundancy warning a clean tell again (no behaviour
    change); that is a scope call, not this implementer's.
-4. Family 2 — NOT-STARTED.
+4. Family 2 — IN-PROGRESS. **OLD-SPELLING EVIDENCE — ANNOUNCED, STARTING after this commit** (both
+   files committed at base; `SyncEnrollmentTests` is an ordinary suite over in-memory custody and
+   a scripted vault — no real Keychain item): (a) `mutate.py SE` on the OLD line 262 (`words:
+   fresh` → `words: old` — the unwrap must THROW); (b) a THROWAWAY probe suite appended to
+   `PostureSwitchDrillTests.swift` (un-gated, marker `Mut19dDeviceIDProbe`/`MUT19D`): `let
+   joinerRecord = try #require(Optional(SyncCustodyRecord(deviceID: "", material: nil)), …)` then
+   line 621's OLD spelling and its NEW spelling, verbatim with the same comment, one after the
+   other — the old must stay GREEN (the silence), the new go RED at its line. Mac bft, then
+   `SyncEnrollmentTests` + `Mut19dDeviceIDProbe` only (the gated drill stays OFF — not in the run).
+   Revert: `git checkout -- App/Variorum/VariorumTests/{SyncEnrollmentTests,PostureSwitchDrillTests}.swift`,
+   status clean, zero markers.
 5. Rebuilds to zero warnings of both classes + the touched suites green at a quiet window —
    NOT-STARTED.
 6. The census table, dispositions, acceptance lines, State → REVIEW-PENDING — NOT-STARTED.
