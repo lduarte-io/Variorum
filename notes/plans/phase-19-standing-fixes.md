@@ -832,11 +832,23 @@ outputs copied into the evidence folder.
   unchanged, rebuild to zero.
 
 **Pieces:**
-1. The grep census (A) — IN-PROGRESS: 95 `@discardableResult … -> Bool/Bool?` declarations in the
-   four code roots (19 core, 33 Mac, 21 Shared, 22 mobile — 19a's "65" predates the mobile arm) +
-   17 test-target helpers; 369 name-matched assertion sites before resolution.
-2. Fresh builds (Mac + mobile `build-for-testing`, core `swift build --build-tests`) — PENDING.
-3. The compiler-level cross-check (B) — PENDING.
+1. The grep census (A) — IN-PROGRESS (hand resolution of the 369 name-matched sites): 95
+   `@discardableResult … -> Bool/Bool?` declarations in the four code roots (19 core, 33 Mac, 21
+   Shared, 22 mobile — 19a's "65" predates the mobile arm) + 17 test-target helpers.
+2. Fresh builds — DONE (logs `mac-bft-0.log`, `mobile-bft-0.log`: `** TEST BUILD SUCCEEDED **`
+   both; core `swift build --build-tests` up to date at HEAD, `core-build-tests-0.log`).
+3. The compiler-level cross-check (B) — FIRST PASS DONE, positive control IN FLIGHT. Every
+   `__check*` call in every test object, by macro expansion and overload route
+   (`census/routes.py` → `mac-routes.tsv` 18,950 calls · `mobile-routes.tsv` 3,623 (arm64) ·
+   `core-routes.tsv` 8,997): **ZERO `#expect` expansions on an Optional-returning route in any of
+   the three targets** (the only `#expect` OPT routes are `__checkClosureCall`, i.e.
+   `#expect(throws:)`, whose `E?` result is its contract). The five named MarkdownActs lines,
+   e.g., call the `(T, Arg0, Arg1) throws -> Bool` overload. **Prediction: no vacuous `#expect`
+   at HEAD — the mutants must confirm it (B never clears).** **POSITIVE CONTROL IN FLIGHT (a
+   probe edit of a COMMITTED file):** `Tests/VariorumCoreTests/CatalogDetailWordsTests.swift:49`
+   re-spelled back to 19a F1's bare `.tag("t1")`, core rebuilt, the census must flag line 49 OPT;
+   restore = `git checkout -- Tests/VariorumCoreTests/CatalogDetailWordsTests.swift` (if this line
+   still says IN FLIGHT, run that first).
 4. Mutant runs, per target — PENDING.
 5. Re-spells of VACUOUS sites + red-on-new-spelling — PENDING.
 6. Arm 2, Mac then mobile — PENDING.
