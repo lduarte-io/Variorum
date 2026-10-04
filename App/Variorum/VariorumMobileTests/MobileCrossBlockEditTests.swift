@@ -141,7 +141,8 @@ struct MobileCrossBlockEditBrainTests {
     /// question, the answers her ruling changed.)*
     @Test func thePlanNamesTheEndsItKeepsAndTheFatesOfTheRest() {
         // 6..16: "one." + the separator + "Beta " — mid-block 0 to mid-block 1.
-        let edit = try? #require(Self.plan(NSRange(location: 6, length: 10)))
+        let edit = Self.plan(NSRange(location: 6, length: 10))
+        #expect(edit != nil)
         #expect(edit?.deletedBlockIDs.isEmpty == true, "no block is covered whole")
         #expect(edit?.leading?.blockID == "b0")
         #expect(edit?.leading?.variantID == "v0")
@@ -160,7 +161,8 @@ struct MobileCrossBlockEditBrainTests {
     /// `deleteBlock` — the Trash/tray road, her ruling's first clause — and
     /// the two ends keep their identities. A replacement rides the first end.
     @Test func aWhollyCoveredMiddleRidesTheTrayAndTheEndsSurvive() {
-        let edit = try? #require(Self.plan(NSRange(location: 6, length: 20), "X"))
+        let edit = Self.plan(NSRange(location: 6, length: 20), "X")
+        #expect(edit != nil)
         #expect(edit?.deletedBlockIDs == ["b1"], "the middle goes whole")
         #expect(edit?.leading?.blockID == "b0")
         #expect(edit?.leading?.newText == "Alpha X", "the typed text lands where the span opened")
@@ -207,7 +209,8 @@ struct MobileCrossBlockEditBrainTests {
     /// correctness half: never authorize from stale state).
     @Test func aFannedSpanIsThisRoadNowAndTheFanDecidesTheJoinElsewhere() {
         let span = NSRange(location: 6, length: 10)
-        let edit = try? #require(Self.plan(span))
+        let edit = Self.plan(span)
+        #expect(edit != nil)
         #expect(edit?.leading?.blockID == "b0")
         #expect(edit?.joinsEnds == true,
                 "the GEOMETRY says join; whether it really does is the store's answer")
@@ -307,9 +310,10 @@ struct MobileCrossBlockEditBrainTests {
         }
         // …and the plan built on it still answers the geometry the same way:
         // a span from inside entry 1 to inside entry 4.
-        let edit = try? #require(CrossBlockCompound.plan(
+        let edit = CrossBlockCompound.plan(
             replacing: NSRange(location: 4, length: 15), with: "",
-            index: index, surfaceText: Self.filler))
+            index: index, surfaceText: Self.filler)
+        #expect(edit != nil)
         #expect(edit?.leading?.blockID == "b1")
         #expect(edit?.trailing?.blockID == "b4")
         #expect(edit?.deletedBlockIDs == ["b2", "b3"],

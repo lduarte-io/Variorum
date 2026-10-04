@@ -1265,7 +1265,7 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    - (C) CLEANUP — `FannedDefaultsTests:355` (`EditorViewModel.postID` is `let postID: String`) —
      **1 site**, no pin possible.
    - No touched suite is env-gated except `PostureSwitchDrillTests` (grep of every touched file).
-2. Re-spells, committed per target — Mac DONE (this commit); mobile, family 2 PENDING. **Mac (12
+2. Re-spells, committed per target — Mac DONE (`36954f75`); mobile DONE (this commit); family 2 PENDING. **Mac (12
    files, the 15 SILENT sites + the 355 cleanup):** (R) `let x = X` + `#expect(x != nil)` at
    `EditorSeamCostTests:81`, `MarkdownFaceTests:284`, `NoteBoxTests:221`,
    `NoteVersionsPaneTests:332`/`:336`, `OriginBlockDoorTests:87`/`:90`, `QuickNoteTests:358`,
@@ -1278,6 +1278,9 @@ dispositions, NOTICED, State → REVIEW-PENDING).
    files' warnings before → after: EXACTLY the 16 redundancy lines removed, the hollow
    `FannedDefaultsTests:221` stays (recorded), nothing added (the only other lines are
    `QuickNoteTests`' three pre-existing effect-marker warnings, shifted down one line).
+   **Mobile (1 file, the 4 SILENT sites):** (R) at `MobileCrossBlockEditTests:144`/`:163`/`:210`/`:310`
+   (`let edit = Self.plan(…)` / `CrossBlockCompound.plan(…)` + `#expect(edit != nil)`).
+   `mobile-bft-new.log` → `** TEST BUILD SUCCEEDED **`; the file's warnings 4 → 0, nothing added.
 3. Mutant pins (old silent once per shape; new red at its line per site) — IN-PROGRESS.
    **THE MUTANTS (the script `19d/mutate.py`, string-anchored so one patch applies to the old AND
    the re-spelled tree; each edit asserted to match exactly once; marker `MUT19D`):** set **M1** —
