@@ -20,7 +20,7 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | RUNNING — implementer spawned 2026-10-04 (13r U1's session ended at `91ef9e55`; U2 waits on this entry); the record is the entry's 19a RECORD |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | REVIEW-PENDING — acceptance met 2026-10-04 by the implementer's runs (the 19a RECORD); the Opus cold review is next |
 
 ---
 
@@ -73,7 +73,10 @@ agents — runs after 13r U1's implementer session ends, before 13r U2 spawns (U
 the 13r ladder's "suite green" need the restored base; U1's static drill and her live drill do
 not wait on this entry).
 
-**State: OPEN.**
+**State: REVIEW-PENDING** — acceptance met 2026-10-04 by the implementer's runs (the 19a RECORD
+below: core 2174/244 · the fixed Mac files' 48 suites 286/48 · the TK2 tripwires 41/8 at a
+zero-instance window · `PaneSurfaceTests` 15/1 with the authorized pin · the mobile app builds); the
+Opus cold review (`notes/REVIEW_PROMPT.md` verbatim) is next, spawned by the orchestrator.
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
@@ -280,3 +283,60 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
    the finding demonstrated directly. Restored with `git checkout --`; sha256 re-read =
    `f5549afc…c1d770`, the pre-mutation value; `git status` clean; the test products rebuilt from the
    restored tree (`mac-bft-restored.log`) before the tripwire run.
+
+**DISPOSITIONS (every census and extension site):** all **FIXED** — core 12 errors / 5 files, Mac 30
+errors / 13 files, mobile 1. Evidence class (the entry's own reading of pin-before-fix): red-on-old
+IS the failing build (`App/Variorum/DerivedData/13r-u1/probe-*.log` for the census;
+`App/Variorum/DerivedData/19a/core-build-tests{,-2,-3}.log` and `mac-bft{,-2,-3}.log` for the
+extensions), green-on-new is the compiling targets plus the suites above. Nothing DISMISSED, nothing
+DEFERRED. **Assertion bytes:** every `#expect`/`#require` line in the diff is byte-identical EXCEPT
+(1) `StructuralSplitAtNewlinesTests.swift:393` — `try` added inside a `#require` (an effect marker;
+the same call and value), and (2) the ONE new pin, authorized (piece 5). The two sync-convergence
+files (`FurnitureConvergenceRepairTests`, `Phase11LockstepSyncTests`) change ONLY their read lines
+(`await` + `.map(CopiedRow.init)`); every assertion there is byte-identical and every touched test
+passed by name.
+
+**FOR THE COLD REVIEW — the diff, by class (`git diff a634ff7a..HEAD -- Tests App`):**
+- ROW-COPY: `Tests/VariorumCoreTests/Support/CopiedRow.swift` + `App/Variorum/VariorumTests/CopiedRow.swift`
+  (new, identical bodies) · core `FurnitureConvergenceRepairTests`, `Phase11LockstepSyncTests` · Mac
+  `TagAndFolderTests`, `TutorialWalkTests`, `LifecycleFacesTests`, `PoolDragTests`,
+  `StructuralGestureTests`, `BookStructureTests`, `CanvasAndPoolTests`, `CanvasBankTests`,
+  `CanvasDragTests`. Check: `CopiedRow`'s reads go through a rebuilt GRDB `Row`; `==` matches
+  `Row ==` for scope-free rows; the overload experiment and the real-DB parity probe (piece 4).
+- ISOLATION: `PaletteDerivationTests` (suite `@MainActor`), `EditorSeamCostTests` and
+  `BoundaryClampTests` (one function each).
+- IMPORT: `PlainPasteTests`.
+- EXPR-SPLIT: `TagFamilySectionsTests` (core), `MobileChipFlow.swift` (the one `Sources` line).
+- TRY-IN-REQUIRE: `StructuralSplitAtNewlinesTests` (core).
+- THE AUTHORIZED PIN: `PaneSurfaceTests.theRestLookHoldsItsAbsoluteValueOnBothArms`.
+
+**NOTICED (routed to the orchestrator; none acted on here):**
+1. **A possibly VACUOUS `#expect` under Xcode 27's Testing macros, unresolved:**
+   `Tests/VariorumCoreTests/CatalogDetailWordsTests.swift:45`
+   (`#expect(RuleGrammar.hearsApplyingActs(.tag("t1")))`) now WARNS "result of call to
+   'hearsApplyingActs' is unused" inside its expansion
+   (`__checkFunctionCall(RuleGrammar.self, calling: { $0.hearsApplyingActs($1) }, .tag("t1"), …)`).
+   That is the shape the `-> R?` overload of `__checkFunctionCall` would take with `R = Void` — which
+   would make the expectation always pass. An isolated reproduction (a mimic with the same
+   `(RuleTerm?) -> Bool` signature, scratchpad `expectprobe/`) is NOT vacuous (its false
+   expectations fail) and does not warn, and the sibling lines 46–51 do not warn either, so the real
+   module's warning is unexplained. Not checked further (the orchestrator's stop order). The settling
+   check, ≈2 min: a throwaway core test whose FIRST statement is the same form on a FALSE value
+   (`#expect(RuleGrammar.hearsApplyingActs(.tag("")))`) must FAIL. If it passes, every
+   `__checkFunctionCall`-shaped `#expect` deserves a sweep — an entry of its own.
+2. **The census method:** both `swift build` and `xcodebuild` stop scheduling compile batches at the
+   first failure, so a one-pass "census" of a new toolchain is a LOWER BOUND (13r U1's 28 became 43
+   here). The next major's census should iterate to green before quoting a number.
+3. **Swift 6.4 warnings, not errors (out of scope):** core test build 60 warnings (new classes:
+   "no calls to throwing functions occur within 'try'" ×11, "#require is redundant" ×8, unused
+   results), Mac test build 207; 13r U1 recorded 4 new `nonisolated(unsafe)`-unnecessary warnings in
+   core `Sources`.
+4. **`CanvasHostedRealizationTests.aMountedLongPostRealizesABoundedCardSet`** — the pre-existing
+   concurrent-mount sensitivity (piece 4): one `paneCount > 0` miss in a 48-suite run beside her live
+   app, green alone 2/2 and in the re-run; the same miss is on record from Act 10 under Xcode 26.
+5. **Two `CopiedRow` copies** (the core and Mac test targets share no support module) — keep them
+   identical; the Mac file's header says so.
+
+**Commits:** `4a50d0f2` (record opened, drill pause) · `8fe0680e` (piece 1, core) · `7fbe7550` (piece
+2, Mac) · `dd2bd8f8` (piece 3, mobile) · `feaf5045` (acceptance runs) · `97ce8a87` (piece 5, the pin)
+· `12d28565` (tripwires + mutation check) · this commit (dispositions, State → REVIEW-PENDING).
