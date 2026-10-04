@@ -279,7 +279,15 @@ spawn and every unit brief carries the then-current pair. Any odd build/codesign
 phase checks the toolchain FIRST (her own instruction): `xcodebuild -version`, first-launch
 component installs, the license (hers to accept if asked), `xcode-select -p` still pointing at the
 updated app. A changed Xcode version re-opens nothing ruled — it is an environment fact to record
-(CLAUDE.md's environment line updates when the final pair is verified).
+(CLAUDE.md's environment line updates when the final pair is verified). **DIAGNOSED SAME SITTING:**
+her update run had installed CLT 27.0 only (Software Update carries macOS + CLT, never the Xcode
+app); the on-disk Xcode stayed 26.3 and the OS now REFUSES its GUI launch (Launch Services -10664,
+the compatibility gate; her Spotlight shows the prohibitory icon) while `xcodebuild` still runs.
+macOS 27.0.1 (26A434) sits downloaded awaiting HER restart. The road out is hers: the 27.0.1
+restart, then the full Xcode update via the App Store app (or the developer.apple.com .xip). Noted
+as an unblock option: HER HANDS steps 1–2 need NO Xcode GUI (portal + Keychain Access CSR for the
+cert, the profile downloads in the browser, notarytool is CLI) — but U1 builds on the settled
+toolchain, so resolving Xcode first is the cleaner order.
 
 ## THE LADDER
 
