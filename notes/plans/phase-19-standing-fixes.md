@@ -20,7 +20,7 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | OPEN — queued behind 13r U1's session, runs BEFORE 13r U2 spawns |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | RUNNING — implementer spawned 2026-10-04 (13r U1's session ended at `91ef9e55`; U2 waits on this entry) |
 
 ---
 

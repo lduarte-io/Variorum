@@ -469,6 +469,23 @@ opened; the working tree was left clean.
   the first suite run on the new major IS the SDK-shift census — and `PaneSurfaceTests`' five
   `PaneDecoration.resolve` pins, which PROVE the U1 line behavior-preserving. (3) Her LIVE
   drill waits on none of 19a — it can run as soon as U1 stages it.
+- **U1 VERIFIED BY THE ORCHESTRATOR (2026-10-04, the acceptance walk's static half):** the five
+  resumed commits spot-checked (the one-line fix diff at `a8691989` is exactly the authorized
+  shape, editor-seam flagged); the static drill RE-RUN by the orchestrator's own hands against
+  run 2's export with the daily-drive compare — **VERDICT: PASS 35/35**, independently
+  reproducing the implementer's result (both groups in order, the profile authorizing by the
+  team wildcard, groups byte-identical to her `/Applications` build, Gatekeeper's expected
+  unnotarized-Developer-ID read). **U1 now waits ONLY on her LIVE drill** (the staged checklist
+  at this record's tail: the orchestrator runs the [O] steps, she runs the two launches).
+  Surfaced, not acted: run 1's leftover real-store bundles (named in the record; the
+  implementer's `rm` was harness-stopped, so removal is held for her word — recommended before
+  the drill window so exactly ONE drill bundle exists). DISPOSITIONED: the export stays
+  UNIVERSAL (x86_64+arm64) — the download page's "Apple silicon" line remains true (it
+  understates); revisit only if U2's DMG size argues. NOTED for the closeout's debris sweep,
+  untouched: a stray older real-store Release build under
+  `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/`. **19a
+  SPAWNED** (the adjudicated sequencing: after U1's session, before U2); its suites run at
+  quiet windows and her drill OUTRANKS it if both want the machine.
 - **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
   from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**
