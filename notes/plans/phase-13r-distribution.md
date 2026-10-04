@@ -329,8 +329,15 @@ opened; the working tree was left clean.
   *[removed for publication]*
   one macOS profile is "Mac Team Provisioning Profile: *" (exp 2027-08-30) — NO Developer ID
   cert, NO Developer ID profile. HER HANDS steps 1–2 are genuinely still owed and open U1.
-- **Steps 3–4 are at her:** the site-brief/appcast-URL/mailbox questions go to her this sitting;
-  U1 opens with her portal steps, then the U1 `opus-implementer` spawns briefed from this file.
+- **Step 3 ANSWERED by her at the resume sitting (2026-10-04, the question tool):** the site
+  brief IS CARRIED (the stargazing agent has it); **the appcast URL IS SETTLED — the proposed
+  URLs stand** (`https://stargazing.tech/variorum/appcast.xml` ·
+  `https://stargazing.tech/variorum/downloads/Variorum-<version>.dmg`) — U2 bakes them as
+  final; the mailbox `support@stargazing.tech` does NOT exist yet — an OPEN AUTHOR ITEM carried
+  to the closeout's beta checklist (needed before the beta's first install, not before U1; U3
+  bakes the address as ruled, R-13r-3/9).
+- **Step 4 — U1 opens with HER HANDS steps 1–2** (walked this sitting), then the U1
+  `opus-implementer` spawns briefed from this file's U1 section + environment traps.
 
 **RESUME — the fresh orchestrator's first acts, in order:**
 1. Read this file IN FULL (the kickoff section names the rest of the preflight). Do NOT re-open any
