@@ -27,8 +27,8 @@ nonisolated enum DiagnosticsCopy {
 
     /// The one other road, named in words (the act's door is the Help menu).
     static let feedbackPointer =
-        "Variorum has no analytics. To write about anything else, use Help \u{25B8} "
-        + "Send Feedback\u{2026}."
+        "Variorum has no analytics. To write about anything else, there\u{2019}s Help "
+        + "\u{25B8} Send Feedback\u{2026}"
 
     static let receivedSection = "Received"
 
