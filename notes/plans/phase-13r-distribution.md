@@ -973,6 +973,20 @@ opened; the working tree was left clean.
   machine (R2/Workers/deploys covered; DNS/security rules are dashboard-only and NOT needed for
   a release). **The publish road is clear end to end; the ONLY gates left before the sitting
   are HER two bundle items** (the Automation toggle; the 0.9.0 notes rewrite/okay).
+- **THE U3-B PLACEMENT FORK RULED (the orchestrator, 2026-10-04, the in-batch rule — the
+  implementer proposed, the architect rules; the proposal is the U3-B RECORD's piece 4):
+  OPTION A — a TENTH SETTINGS PANE, "Diagnostics", between Data Safety and Acknowledgments,
+  exactly as proposed.** The deciding grounds, stated: the brief and the plan themselves name
+  the surface "Diagnostics" — a pane of that name is where a friend and Settings search look;
+  R-13r-5's verbatim-evidence promise wants the JSON ALWAYS VISIBLE at a pane's height (B
+  lands it at the bottom of the longest pane's scroll; C puts the evidence one click behind
+  the promise that says it is shown); every existing pane keeps its shape and blurb (the
+  row-52/59 fold lessons stay honored); one pane = one concern, and a later diagnostics thing
+  joins it. The against (a mostly-empty pane) is answered by the calm one-line empty state.
+  The blurb and captions are approved as FUNCTIONAL copy (13s re-voices); `stethoscope`
+  stands. The not-proposed exclusions (Protection; a second Send Feedback door) are ratified
+  as recorded. Piece 5 builds to this; the walk sheet's optional arm names the Diagnostics
+  pane.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
