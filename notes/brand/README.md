@@ -22,6 +22,10 @@ propose-only, written for the future design sitting.
   notes apps" — the website essay, with an alternate opening and video-embedding
   guidance) and `show-hn.md` (the Show HN text, prepared first comment, comment-section
   crib sheet, tactics — gated on having a downloadable beta, per HN's try-it rule).
+- **`site/`** — website reference content (2026-10-04): `variorum-product-page.md`,
+  the full what-is-Variorum features page for stargazing.tech — 15 sections with a
+  table of contents; `[brackets]` are hers to fill; the two PENDING sections (search
+  scope, mobile status) re-check at publish time.
 
 ## Provenance
 
