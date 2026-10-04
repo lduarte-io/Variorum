@@ -2630,8 +2630,49 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
    `CrashReporting` owner handed to `AppSettingsView` like `appearance`/`updates`; the catalog row;
    `rowIDsRendered` updated; P-8 voice chrome; pins incl. the pane-shape and search pins), then
    piece 6 stages the walk sheet, then the finals.
-5. The faces, to the architect's ruling: the opt-in row + the Diagnostics surface — PENDING the
-   ruling.
+5. The faces, to the architect's ruling — **DONE (this commit).** RULED (the LIVE STATUS, `868b8096`):
+   **Option A — a TENTH Settings pane "Diagnostics" between Data Safety and Acknowledgments**,
+   `stethoscope`, the blurb and captions approved as FUNCTIONAL copy (13s re-voices), the
+   exclusions (Protection; no second Send Feedback door in the pane) ratified.
+   - `SettingsShape.swift`: `SettingsPane.diagnostics` (title, blurb "Crash reports — off unless you
+     turn them on, and never sent without you.", `stethoscope`) between `.dataSafety` and
+     `.acknowledgments`; the catalog row `crashReports` (title = `DiagnosticsCopy.toggleTitle`
+     "Collect crash reports"; keywords crash/report/diagnostics/privacy/metrickit/support/
+     feedback/telemetry/analytics…) so Settings search finds it.
+   - `AppSettingsView.swift`: a `crashReports: CrashReporting?` input (optional like `protection` —
+     no owner, no pane: P-2, never a second owner), `rowIDsRendered[.diagnostics] =
+     ["crashReports"]`, the pane in `paneBody`. `VariorumApp` hands it `appDelegate.crashReports`.
+   - `Features/Settings/DiagnosticsPane.swift` (its own file, P-9 — the pane composes in one line):
+     Section "Crash reports" = the Toggle (bound to the owner's `isOn`/`set`) + the PROMISE caption +
+     "Variorum has no analytics. To write about anything else, use Help ▸ Send Feedback…." (the act's
+     door named in words, never a second door); Section "Received" = the calm one-line empty state
+     (OFF: "None. Nothing is collected while this is off." · ON: "None yet — that's the usual
+     state.") or one `CrashReportCard` per report, newest first; a draft that could not open says so
+     in a caption under the reports (Settings has no status seam — the Data Safety `note` shape).
+     The pane re-reads the folder on appear. `CrashReportCard`: the heading read out of the report,
+     "Received <date>", the report's text in `Text(verbatim:)` (no Markdown, no localisation) inside
+     a bounded 180-pt, two-axis-scrollable, SELECTABLE monospaced box on the voice's `card`/`line`/
+     `ink` tokens — ALWAYS visible, never behind a disclosure; then **Send Report…** (rendered ONLY
+     when the report's bytes were shown as text) and **Delete Report** in `VoicedButtonStyle`
+     (P-8). `DiagnosticsCopy.swift` holds every word.
+   - **P-1, on the Data Safety precedent:** the two acts are DECLARED — `.sendCrashReport` ("Send
+     Report…") and `.deleteCrashReport` ("Delete Report"), `.surface` door ONLY, app scope (never
+     ⌘K or a menu: a report is sent from where it was read — the reason is in `Capability.swift`);
+     `DiagnosticsPane.surfaceCapabilities` joins the registry walk's union as a JUSTIFIED EDIT line.
+   - Delete acts at once, no confirm (a local diagnostic file, not writing) — PROVISIONAL, added to
+     QUESTIONS #181 as (h).
+   - Pins: `VariorumTests/DiagnosticsPaneTests.swift` (8 — the tenth pane's place/name/symbol and
+     General still ≤5 rows; search reaches it in six of her words; OFF composes the toggle + promise
+     + pointer + the OFF empty line and NOT the ON one; ON-empty the reverse; the promise's words say
+     what the code does (names the address and the card's own verb); a report's card composes its
+     text VERBATIM + the heading + both verbs, and the pane hosts with it; a not-text report shows
+     the not-text line and NO Send; both acts `.surface`-only). The 17f/P47 composition road
+     (`SurfaceComposition`), so a deleted `Text` fails, not only a changed constant.
+     **Run with the Settings shape, registry walk, no-literal-colour and the three earlier U3-B
+     suites: `Test run with 79 tests in 7 suites passed`, no `skipped:` line**
+     (`13r-u3b/p5-test.log`). The build's one warning in a touched file
+     (`AppSettingsView.swift` — `spec(paths:joinAll:)` actor isolation, in `PromoteTagsSheet`) is
+     PRE-EXISTING: U3-A's logs carry it at its old line number.
 6. THE U3 WALK — STAGED (R-13r-16's combined public road) — PENDING.
 7. Finals (mutation check, the dev-store walk + captures, suites at zero-instance windows) —
    PENDING.

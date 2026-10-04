@@ -60,6 +60,11 @@ struct AppSettingsView: View {
     /// automatically" maps onto Sparkle's own setting through it. Rendered
     /// only where the channel is LIVE (P-2: never in a Debug build).
     let updates: UpdateChannel?
+    /// 13r U3-B: the app's ONE crash-reporting owner — Settings ▸
+    /// Diagnostics reads and calls it. Optional like `protection`: a host
+    /// without the app delegate (a preview, a pin) gets no Diagnostics pane
+    /// rather than a second owner minted beside the real one (P-2).
+    let crashReports: CrashReporting?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
     /// The pane on screen. Her "overall one" opens.
@@ -73,13 +78,15 @@ struct AppSettingsView: View {
         session: AppSession, services: AppServices? = nil,
         protection: ProtectionController? = nil,
         appearance: AppearanceController? = nil,
-        updates: UpdateChannel? = nil
+        updates: UpdateChannel? = nil,
+        crashReports: CrashReporting? = nil
     ) {
         self.session = session
         self.services = services
         self.protection = protection
         self.appearance = appearance
         self.updates = updates
+        self.crashReports = crashReports
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -93,10 +100,10 @@ struct AppSettingsView: View {
     /// does not hold the thing it promised: the same drift her item 7
     /// reports one menu over, arriving through the search instead.
     ///
-    /// The four panes composed from other files (`Tags`, `Protection`,
-    /// `Data Safety`, `Acknowledgments`) carry ONE catalog row each — the
-    /// pane itself, so it can be found by name — and that row is what these
-    /// entries say.
+    /// The panes composed from other files (`Tags`, `Protection`, `Data
+    /// Safety`, `Diagnostics`, `Acknowledgments`) carry ONE catalog row each
+    /// — the pane itself (Diagnostics': its one toggle), so it can be found by
+    /// name — and that row is what these entries say.
     static let rowIDsRendered: [SettingsPane: [String]] = [
         .general: ["voice", "palette", "appearance", "receipts", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
@@ -108,6 +115,7 @@ struct AppSettingsView: View {
         .tags: ["tagManager"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
+        .diagnostics: ["crashReports"],
         .acknowledgments: ["acknowledgments"],
     ]
 
@@ -115,7 +123,10 @@ struct AppSettingsView: View {
     /// controller exists (a preview, a pin) rather than rendered empty —
     /// P-2's letter, which the old `TabView` already applied to that tab.
     private var panes: [SettingsPane] {
-        SettingsPane.allCases.filter { $0 != .protection || protection != nil }
+        SettingsPane.allCases.filter {
+            ($0 != .protection || protection != nil)
+                && ($0 != .diagnostics || crashReports != nil)
+        }
     }
 
     var body: some View {
@@ -283,6 +294,12 @@ struct AppSettingsView: View {
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             DataSafetyPane(services: services, protection: protection)
+        case .diagnostics:
+            // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
+            // opt-in at the head, the received reports verbatim under it.
+            if let crashReports {
+                DiagnosticsPane(crashReports: crashReports)
+            }
         case .acknowledgments:
             // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic
             // copyright line, the SQLCipher license text, and the

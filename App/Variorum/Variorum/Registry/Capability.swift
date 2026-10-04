@@ -842,4 +842,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// reasons — and never a palette door: an act that writes the whole
     /// library readable is not one to reach by a keystroke.
     case exportPlaintextLibrary
+    /// 13r U3-B (R-13r-5) — Settings ▸ Diagnostics' two acts on a RECEIVED
+    /// crash report, `.surface` on the Data Safety precedent above: their
+    /// target is the report card she is looking at, and the per-gesture
+    /// condition (is this report text Variorum showed verbatim?) is that
+    /// card's own. Send Report… is the support door's mail draft with the
+    /// report attached — it OPENS A DRAFT, and never sends. Deliberately NOT
+    /// `.palette` or `.menuBar`: a report is sent from where it was read,
+    /// never by a keystroke from elsewhere — the verbatim-first promise
+    /// would otherwise have a door that skips the reading.
+    case sendCrashReport, deleteCrashReport
 }

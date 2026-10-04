@@ -2054,6 +2054,25 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "The unencrypted export lives in Settings ▸ Data Safety.",
             availability: always),
+
+        // MARK: Diagnostics (13r U3-B — Settings ▸ Diagnostics, R-13r-5)
+        // The Data Safety shape: `.surface`, app scope, always available as
+        // an ACT, the per-report condition living on the card. See the
+        // declaration comment in `Capability.swift` for why neither wears a
+        // palette or menu door.
+        Capability(
+            id: .sendCrashReport, verb: "Send Report\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Crash reports are sent from Settings \u{25B8} Diagnostics, "
+                + "where you can read them first.",
+            availability: always),
+        Capability(
+            id: .deleteCrashReport, verb: "Delete Report", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Crash reports are deleted from Settings \u{25B8} Diagnostics.",
+            availability: always),
     ]
 
     // MARK: - Lookup

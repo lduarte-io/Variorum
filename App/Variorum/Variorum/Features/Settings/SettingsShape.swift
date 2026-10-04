@@ -63,6 +63,11 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
     case tags
     case protection
     case dataSafety
+    /// 13r U3-B (the architect's ruling — Option A): crash reports, opt-in,
+    /// shown verbatim, never sent without her hand. Its own pane because the
+    /// surface's own name is where she looks, and the verbatim evidence
+    /// wants a pane's height.
+    case diagnostics
     case acknowledgments
 
     var id: String { rawValue }
@@ -77,6 +82,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .tags: "Tags"
         case .protection: "Protection"
         case .dataSafety: "Data Safety"
+        case .diagnostics: "Diagnostics"
         case .acknowledgments: "Acknowledgments"
         }
     }
@@ -95,6 +101,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .tags: "The whole tag hierarchy: create, rename, re-parent, and make a gathering from tags."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
+        case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
         case .acknowledgments: "The open-source notices Variorum is built on."
         }
     }
@@ -109,6 +116,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .tags: "tag"
         case .protection: "lock.shield"
         case .dataSafety: "externaldrive.badge.timemachine"
+        case .diagnostics: "stethoscope"
         case .acknowledgments: "text.book.closed"
         }
     }
@@ -270,6 +278,15 @@ nonisolated enum SettingsCatalog {
             blurb: "Where copies go, how fresh the last one is, and what restoring one does — "
                 + "including to things that were deleted.",
             keywords: ["backup", "restore", "copy", "folder", "safety", "icloud", "export"]),
+        // 13r U3-B (R-13r-5): the crash-report opt-in, on its own pane.
+        SettingsRow(
+            id: "crashReports", pane: .diagnostics, title: DiagnosticsCopy.toggleTitle,
+            blurb: "Off unless you turn it on. Reports stay on this Mac, shown exactly as they "
+                + "arrived; Send Report\u{2026} opens an email draft for you to read first. "
+                + "This Mac only.",
+            keywords: ["crash", "crashes", "crashed", "report", "diagnostics", "diagnostic",
+                       "privacy", "metrickit", "support", "bug", "problem", "send", "feedback",
+                       "telemetry", "analytics"]),
         SettingsRow(
             id: "acknowledgments", pane: .acknowledgments, title: "Open-source notices",
             blurb: "The licences and copyright notices for what Variorum is built on.",

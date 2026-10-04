@@ -408,7 +408,10 @@ struct VariorumApp: App {
                     appearance: appDelegate.appearance,
                     // 13r U3-A: General's "Check for updates automatically"
                     // — rendered only where the channel is live (P-2).
-                    updates: appDelegate.updates)
+                    updates: appDelegate.updates,
+                    // 13r U3-B: Settings ▸ Diagnostics — the ONE crash-
+                    // reporting owner (opt-in, default OFF).
+                    crashReports: appDelegate.crashReports)
             } else {
                 Text("Open the main window first.")
                     .padding(24)

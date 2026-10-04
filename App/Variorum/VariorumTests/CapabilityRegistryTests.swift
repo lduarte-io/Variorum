@@ -483,6 +483,11 @@ struct CapabilityRegistryTests {
             // new line): the Library's ARCHIVED view renders `.unarchiveNote`
             // on each row (F-U4-4 — its inline door, declared at last).
             .union(ArchivedView.surfaceCapabilities)
+            // 13r U3-B (A JUSTIFIED EDIT, the Data Safety class — a new
+            // renderer is a new line): Settings ▸ Diagnostics renders Send
+            // Report… and Delete Report on each received crash report, and is
+            // their ONLY renderer — a report is sent from where it was read.
+            .union(DiagnosticsPane.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
