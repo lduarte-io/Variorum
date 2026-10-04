@@ -479,6 +479,16 @@ opened; the working tree was left clean.
 
 ## U1 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
+**NOT DONE BY THIS UNIT (stated first, per the contract):**
+- The LIVE drill leg (b) is AUTHOR-GATED. It is STAGED here (piece 4), never run: this session
+  never launched the export, never touched the real store, never refreshed `/Applications`.
+- No Mac or core suite was run: none compiles under Xcode 27 until 19a.
+- No notarization submit (U2's). No entitlements edit, no Info.plist keys, no version stamping, no
+  Sparkle, zero `Sync/`, zero schema. The test targets and `MobileChipFlow.swift` are untouched
+  (19a's).
+- Run 1's leftover real-store bundles were NOT removed: the harness safety check stopped the
+  `rm -rf`, and the removal is left to the orchestrator or her.
+
 **U1 STATE (2026-10-04, the implementer's stop): the fix, the road, the static drill DONE (35/35);
 the LIVE drill STAGED (piece 4's checklist), waiting on HER launch, which the orchestrator
 coordinates.** Pieces below. Forward notes for the orchestrator, none of them this unit's:
@@ -503,11 +513,6 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
   `PaneSurfaceTests`' five `PaneDecoration.resolve` pins prove the line behavior-preserving once
   19a restores the Xcode-27 suite base. No Mac suite can compile before then, so none was run (the
   orchestrator's order).
-
-**NOT DONE BY THIS UNIT (stated first, per the contract):** the LIVE drill leg (b) is AUTHOR-GATED
-and is STAGED here, never run — the export is never launched by this session, the real store is
-never touched, `/Applications` is never refreshed. No notarization submit (U2's). No entitlements
-edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero schema.
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
