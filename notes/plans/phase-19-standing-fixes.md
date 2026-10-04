@@ -20,7 +20,7 @@
 
 | Letter | Subject | State |
 |---|---|---|
-| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | RUNNING — implementer spawned 2026-10-04 (13r U1's session ended at `91ef9e55`; U2 waits on this entry) |
+| a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | RUNNING — implementer spawned 2026-10-04 (13r U1's session ended at `91ef9e55`; U2 waits on this entry); the record is the entry's 19a RECORD |
 
 ---
 
@@ -74,3 +74,43 @@ the 13r ladder's "suite green" need the restored base; U1's static drill and her
 not wait on this entry).
 
 **State: OPEN.**
+
+### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE YET (stated first, per the contract):** no fix has landed; no suite has run. **PAUSED for
+the author's 13r U1 LIVE DRILL window** (the orchestrator's message, 2026-10-04): no Mac suite, no
+test host, nothing that launches an app bundle runs until the orchestrator says "drill window
+closed". Compile-only work (edits, `swift build`, `build-for-testing`) continues.
+
+**Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match.
+
+**Red-on-old (the census, re-read from the 13r-u1 probe logs, exact):** `probe-xcodebuild-bft.log`
+20 errors / 8 files (PaletteDerivation 24/76/107/124/125/128/176/187/191/236 · PlainPaste 88/103 ·
+TagAndFolder 103/111 · TutorialWalk 480/514 · LifecycleFaces 50 · PoolDrag 59 · StructuralGesture 492
+· EditorSeamCost 183); `probe-swift-build-tests.log` 7 errors (FurnitureConvergenceRepair 433 ×2,
+727 ×2, 803 ×2, 864); `probe-mobile-build.log` 1 error (MobileChipFlow 81).
+
+**The mechanism classes (for the cold review):**
+- **ROW-COPY** (GRDB `Row` crossing an async `read`): GRDB 7 declares `@available(*, unavailable)
+  extension Row: Sendable` (`.build/checkouts/GRDB.swift/GRDB/Core/Row.swift:278-280`). Under Swift
+  6.2 the solver treated the unavailable conformance as non-conforming, so every `db.read { …Row… }`
+  in an async body silently resolved to the SYNC `AppDatabase.read` overload (which is why the core
+  sites compiled with no `await` at all). Swift 6.4 now selects the async overload
+  (`read<T: Sendable>(_: @Sendable …) async`, `AppDatabase.swift:184`) and diagnoses the unavailable
+  conformance (plus, at the await-less core sites, the missing `await`). Fix: materialize the
+  fetched rows INSIDE the closure as a Sendable copy and `await` the read. PENDING — the shape is
+  being settled (a per-target `CopiedRow` mirroring `Row`'s String-keyed reads and `==`, so every
+  `#expect` line stays byte-identical).
+- **ISOLATION** (main-actor statics from nonisolated test contexts): PaletteDerivation,
+  EditorSeamCost. PENDING.
+- **IMPORT** (`MemberImportVisibility`): PlainPaste. PENDING.
+- **EXPR-SPLIT** (type-check timeout): MobileChipFlow:81. PENDING.
+
+**Pieces:**
+1. Core `FurnitureConvergenceRepairTests` (ROW-COPY + `await`) — PENDING.
+2. Mac `VariorumTests` 8 files — PENDING.
+3. Mobile `MobileChipFlow.swift:81` — PENDING.
+4. Acceptance runs (core `swift test` full · the 8 Mac suites · the 7 TK2 tripwire suites ·
+   `PaneSurfaceTests` · the mobile build) — PENDING (Mac runs wait for the drill window to close).
