@@ -404,3 +404,10 @@ passed by name.
 **Commits:** `4a50d0f2` (record opened, drill pause) · `8fe0680e` (piece 1, core) · `7fbe7550` (piece
 2, Mac) · `dd2bd8f8` (piece 3, mobile) · `feaf5045` (acceptance runs) · `97ce8a87` (piece 5, the pin)
 · `12d28565` (tripwires + mutation check) · this commit (dispositions, State → REVIEW-PENDING).
+
+**ROUND 1 FIXES (LIVE STATUS — the same implementer, resumed 2026-10-04 at the orchestrator's
+arbitration `e1bfdd08`; the binding record is the "19a ROUND 1" section above):**
+- F1 [MAJOR] `CatalogDetailWordsTests.swift:45` vacuous — PENDING.
+- F3 [NIT] `LandingAuthorityTests.swift:54–59` isolation warnings — PENDING.
+- F4 [NIT] both `CopiedRow` twins' duplicate-column comment — PENDING.
+- F2 is 19b's (the mobile TEST target) — not touched here.
