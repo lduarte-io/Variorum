@@ -970,7 +970,13 @@ five arms. U1 IS CLOSED.**
   MARKETING_VERSION and the build-number stamping build phase are U3's (R-13r-6), so this unit
   leaves them as they are.
 
-**U2 STATE (2026-10-04): PAUSED AFTER PIECE 3 for HER HANDS step 3 (the minting) — pieces 1–3 DONE; piece 4 resumes with the PUBLIC key (the pause line under piece 3 is the detail).** **Toolchain re-read at session
+**U2 STATE (2026-10-04): ALL SIX PIECES DONE, and THE WALK IS STAGED, AUTHOR-GATED.** The session
+stops here and reports, and the orchestrator coordinates her sitting.
+- **What remains for U2 to close:** HER walk (piece 6's checklist), INCLUDING W-0(c), the
+  pipeline's one Keychain step (`make-appcast.sh`'s first live run). Then the VERDICT lands in this
+  record.
+- (History: paused after piece 3 for HER HANDS step 3. The minting was recorded at `b66633a9`, and
+  pieces 4–6 resumed with the public key.) **Toolchain re-read at session
 start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a) · `xcode-select -p` =
 `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`): no match. HEAD `dd95e301`, tree clean, commit count 4815.
@@ -1233,8 +1239,10 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        - Restored with `git checkout --`, then **GREEN, 7/7**; the tree is clean.
      - **Release-path compile:** the Sparkle-touching code compiles in Debug too (only instantiation
        is fenced), so the Debug build above type-checks it. Piece 5's archive is the Release proof.
-5. **The full release pipeline** in `Tools/Release/` — IN-PROGRESS (scripts committed; the FIRST
-   REAL RUN = walk build A PASSED end to end except the Keychain step; walk build B next).
+5. **The full release pipeline** in `Tools/Release/` — **DONE** (`40301c3c` + `470c3ffc`). Two real
+   runs PASSED end to end, every step but the Keychain one: walk A and walk B below. **One leg is
+   left PENDING by design:** `make-appcast.sh`'s first live run reads HER Keychain, so it is the
+   walk's step W-0(c), with her at the machine.
 
    **Two walk facts MEASURED first** (they shape both pieces 5 and 6). The probe was a throwaway
    SANDBOXED probe app: `network.client`, NO ATS dictionary, built against SDK 27.0 with `minos`
@@ -1358,4 +1366,227 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        was a live scan of the folder named, not the index.
    - **The notarization wait cap is 6 h now (was 45 min),** because the first submission's 32
      minutes came too close.
-6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.
+
+   **WALK BUILD B, `0.0.2` (build 4830, commit `470c3ffc`, the hygiene fix aboard, a zero-instance
+   window):** `RELEASE-EXIT=0` in ~6 minutes (13:34:35Z → 13:40:28Z), because both notarizations now
+   return in about a minute.
+   - The export drill passed 56/56.
+   *[removed for publication]*
+     **57/57 with Gatekeeper ACCEPTED**.
+   *[removed for publication]*
+   - **The shipped bytes passed 57/57.** `Variorum-0.0.2.dmg` is **24,173,312 bytes**, sha256
+     `115b2c9def7d97be53daa432dc30e161053a00afe025539c6314f41dfd73d90e`.
+   - dSYM UUIDs match (`27E03119-DAFF-3A0B-A667-E64A32F914F1`, `F21F8EE3-8930-3457-9E6A-4116EA221EB4`).
+   - **The new final sweep, inside the script: `LaunchServices: 0 registrations` (the
+     intermediates removed).** `archive-and-export.sh` had warned of 1 mid-run, and the final sweep
+     cleared it.
+   - **The update is real:** walk A's 4829 < walk B's 4830, because B was built from the later commit.
+     Both DMGs re-validated (`stapler validate` → "The validate action worked!").
+   - **Interface note for U3:** the pipeline passes the stamp as command-line overrides, and
+     `verify-export.sh --expect-version/--expect-build` asserts it on the export. When U3's
+     every-build stamping phase lands, it writes the SAME `git rev-list --count HEAD`, so the
+     assertion still holds. U3 may then drop the `CURRENT_PROJECT_VERSION` override and keep the
+     assertion, or keep both. U3's release notes plug in as a `Variorum-<version>.html|md` beside the
+     DMG in the feed directory (generate_appcast picks it up, read from its source).
+   - **A hazard note for the orchestrator (R-13r-7's premise):** her daily-drive builds carry
+     CFBundleVersion **1** until U3's stamping lands (the project's `CURRENT_PROJECT_VERSION = 1`).
+     A PUBLIC appcast entry must therefore not exist before U3's stamping is in her hand-copied
+     build, or her own app would be OFFERED that release. Today the public feed answers 404, and the
+     first release follows U3, so this is a sequencing fact, not a defect.
+   - **A second hazard note:** her daily drive, refreshed after U2/U3, will show Sparkle's
+     standard consent prompt ONCE, on its second launch. That is the standard flow, consistent with
+     R-13r-7's "the check runs and offers nothing".
+6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — **DONE:
+   STAGED, never run** (this commit). The orchestrator coordinates her sitting. **U2 then closes on
+   the walk's VERDICT** (the acceptance is USE).
+
+   **THE WALK (R-13r-8) — the checklist.**
+   - **Who does what:** `[O]` = the orchestrator, in HER session (shell). `[HER]` = her hands.
+   - **The `!`-road lesson binds:** every command block run in her session sets its own values
+     inline. No variable carries between commands.
+   *[removed for publication]*
+   *[removed for publication]*
+     *[removed for publication]*
+   - **The artifacts (built and verified above):**
+     - walk A `App/Variorum/DerivedData/13r-u2/walk-a.noindex/Variorum-0.0.1.dmg` (the version she
+       installs);
+     - walk B `App/Variorum/DerivedData/13r-u2/walk-b.noindex/Variorum-0.0.2.dmg` (the update);
+     - the walk feed `App/Variorum/DerivedData/walk-feed/`, served at `http://localhost:8765/`.
+       *[removed for publication]*
+       plain-HTTP loopback (measured, piece 5).
+   - **The walk builds ARE the shipping configuration:** the same Info.plist (the LOCKED public feed
+     baked in), the same entitlements. The ONLY walk-specific thing is a user default written into
+     *[removed for publication]*
+     public feed (R-13r-7/8).
+
+   - **W-0. Preconditions** (her session, before she switches).
+     - **(a) [HER]** quits her Variorum. **[O]** `pgrep -fl 'Variorum.app/Contents/MacOS'` → NO
+       *[removed for publication]*
+       confuse the discipline even across stores (ENVIRONMENT TRAPS).
+     - **(b) [O]** Both walk DMGs still verify:
+       ```sh
+       cd <home>/dev/variorum && for d in App/Variorum/DerivedData/13r-u2/walk-a.noindex/Variorum-0.0.1.dmg App/Variorum/DerivedData/13r-u2/walk-b.noindex/Variorum-0.0.2.dmg; do xcrun stapler validate "$d" | tail -1; spctl -a -t open --context context:primary-signature -vv "$d" 2>&1 | head -2; shasum -a 256 "$d"; done
+       ```
+       Expect "The validate action worked!", "accepted / source=Notarized Developer ID", and the
+       sha256s recorded above (A `beb771c2…`, B `115b2c9d…`).
+     - **(c) THE WALK APPCAST — the ONE Keychain step: [O] runs it, [HER] approves.**
+       ```sh
+       cd <home>/dev/variorum && Tools/Release/make-appcast.sh --walk --dmg App/Variorum/DerivedData/13r-u2/walk-b.noindex/Variorum-0.0.2.dmg --version 0.0.2 --build 4830
+       ```
+       - The first run on this machine makes macOS ask HER: "generate_appcast wants to use your
+         confidential information stored in “https://sparkle-project.org” in your keychain."
+         **[HER]** enters her login password, then **Always Allow** (it asks again only after a
+         Sparkle tools upgrade) or **Allow** (it asks at every release).
+       - Expect `VERDICT: PASS`, with 7 PASS lines from `verify-appcast`. **This is the first proof
+         that her Keychain's private key is the twin of the baked `SUPublicEDKey`** (the
+         `edSignature` VERIFIES under it). The real-release signing road is proven here too.
+       - The feed directory then holds `appcast.xml` + `Variorum-0.0.2.dmg` + the logs.
+     - **(d) [O]** Serve the walk feed DETACHED, so it outlives the call and the user switch:
+       ```sh
+       cd <home>/dev/variorum/App/Variorum/DerivedData/walk-feed && nohup python3 -m http.server 8765 --bind 127.0.0.1 > <home>/dev/variorum/App/Variorum/DerivedData/13r-u2/walk-server.log 2>&1 < /dev/null & echo $! > <home>/dev/variorum/App/Variorum/DerivedData/13r-u2/walk-server.pid
+       curl -s http://localhost:8765/appcast.xml | grep -c '<item>'
+       curl -sI http://localhost:8765/Variorum-0.0.2.dmg | head -1
+       ```
+       Expect `1` and `HTTP/1.0 200 OK`.
+     *[removed for publication]*
+       exercised exactly as on a friend's machine:
+       ```sh
+       mkdir -p /Users/Shared/VariorumWalk/captures && chmod 1777 /Users/Shared/VariorumWalk/captures
+       cp <home>/dev/variorum/App/Variorum/DerivedData/13r-u2/walk-a.noindex/Variorum-0.0.1.dmg /Users/Shared/VariorumWalk/ && chmod 644 /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg
+       xattr -w com.apple.quarantine "0083;$(printf %x $(date +%s));Safari;$(uuidgen)" /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg
+       xattr -p com.apple.quarantine /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg; spctl -a -t open --context context:primary-signature -vv /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg 2>&1 | head -2
+       ```
+       Expect a `0083;…;Safari;…` line, then "accepted / source=Notarized Developer ID".
+     - **(f) [O]** `date -u +'%Y-%m-%d %H:%M:%S'`. Record it as the walk's START (for W-10's log read).
+
+   *[removed for publication]*
+     session keeps running, and the feed server with it.
+
+   *[removed for publication]*
+     ```sh
+     mkdir -p ~/Applications
+     defaults write com.apple.screencapture location /Users/Shared/VariorumWalk/captures
+     *[removed for publication]*
+     *[removed for publication]*
+     ```
+     *[removed for publication]*
+     ⌘⇧3 screenshots land in the shared captures folder. If the location does not take, use
+     ⌘⇧5 ▸ Options ▸ Other Location.
+
+   - **W-3. [HER] Gatekeeper on the quarantined DMG:** Finder ▸ Go ▸ Go to Folder… →
+     `/Users/Shared/VariorumWalk` → double-click `Variorum-0.0.1.dmg`.
+     - EXPECT: macOS verifies the image, and the DMG window opens with `Variorum.app` and the
+       `Applications` link. No warning blocks it.
+     - **CAPTURE W1.**
+
+   *[removed for publication]*
+     - Open a second Finder window at Go ▸ Home ▸ Applications (the folder W-2 made). Drag
+       `Variorum.app` from the DMG window INTO it.
+     *[removed for publication]*
+       That is expected, not a defect. A Finder DRAG also clears App Translocation. Sparkle refuses
+       an app run from a read-only or temporary location (read from its source).
+     - Eject the DMG.
+     *[removed for publication]*
+       ```sh
+       *[removed for publication]*
+       *[removed for publication]*
+       ```
+       Expect the quarantine INHERITED, then **accepted / source=Notarized Developer ID**. This is
+       the plan's literal `spctl -a -vv` acceptance.
+
+   - **W-5. [HER] FIRST LAUNCH:** double-click `~/Applications/Variorum.app`.
+     - **The Gatekeeper dialog.** EXPECT the notarized-app question: "“Variorum” is an app
+       downloaded from the Internet. Are you sure you want to open it?" (with Apple's
+       checked-for-malicious-software line). Press **Open**. **CAPTURE W2.**
+     - **A BLOCK dialog = STOP:** "cannot be opened because Apple cannot check it…", "is damaged",
+       "unidentified developer".
+     *[removed for publication]*
+       first-run defaults appear. Sign in to NOTHING. **CAPTURE W3.** (The iCloud-Keychain waiting
+       lobby cannot appear: it is only for an EXISTING encrypted store whose key is missing,
+       `AppBootstrap` read at staging.)
+     - **No consent yet.** EXPECT NO Sparkle consent prompt on this first launch. Sparkle asks on the
+       SECOND launch (read from its source).
+     - **The version.** Variorum ▸ About Variorum reads **0.0.1 (4829)**. **CAPTURE W4.**
+     - **The door.** Open the Variorum menu: **Check for Updates…** sits under About. **CAPTURE W5**
+       (the menu open). Do not press it yet.
+     - **⌘Q.**
+
+   *[removed for publication]*
+     and the CONTAINER-PATH form is the ONLY one a sandboxed app reads (measured in piece 5: the
+     plain bundle-id form writes where the app never looks):
+     ```sh
+     defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum SUFeedURL http://localhost:8765/appcast.xml
+     *[removed for publication]*
+     ```
+     Expect `http://localhost:8765/appcast.xml`. Sparkle reads a defaults `SUFeedURL` before the
+     Info.plist one, and logs a warning that names "a defaults write command for testing purposes"
+     as fine.
+
+   - **W-7. [HER] SECOND LAUNCH → CONSENT:** open Variorum again.
+     - EXPECT Sparkle's permission prompt: "Check for updates automatically?" with **Check
+       Automatically** / **Don't Check**, and NO "Include anonymous system profile" option
+       (`SUEnableSystemProfiling` is unset). **CAPTURE W6.**
+     - Choose **Check Automatically**. If Sparkle then finds 0.0.2 on its own and shows the update
+       alert, skip to W-8's second step.
+
+   - **W-8. [HER] THE UPDATE:**
+     - **Find.** Variorum ▸ **Check for Updates…**. EXPECT "A new version of Variorum is
+       available! Variorum 0.0.2 is now available—you have 0.0.1." **CAPTURE W7.**
+     - **Install.** Press **Install Update**. EXPECT a download, then "Ready to Install", then
+       **Install and Relaunch**. **CAPTURE W8.**
+     - **The XPC installer road.** Variorum quits. Sparkle's installer, launched over XPC OUTSIDE
+       the sandbox, replaces `~/Applications/Variorum.app`, and Variorum relaunches.
+     *[removed for publication]*
+       folder. If any dialog appears, capture it and note it.
+
+   - **W-9. [HER] AFTER THE RELAUNCH:**
+     - Variorum ▸ About reads **0.0.2 (4830)**. **CAPTURE W9.**
+     - The library from W-5 is still there: the store survived the update. **CAPTURE W10.**
+     *[removed for publication]*
+       ```sh
+       *[removed for publication]*
+       *[removed for publication]*
+       *[removed for publication]*
+       ```
+       Expect `0.0.2`, **accepted / Notarized Developer ID**, and `seal valid`.
+     *[removed for publication]*
+       session.
+
+   - **W-10. [O] Back in her session:**
+     - **(a) The server.**
+       ```sh
+       kill "$(cat <home>/dev/variorum/App/Variorum/DerivedData/13r-u2/walk-server.pid)"; cat <home>/dev/variorum/App/Variorum/DerivedData/13r-u2/walk-server.log
+       ```
+       Expect `GET /appcast.xml` and `GET /Variorum-0.0.2.dmg` 200 lines: the update's download,
+       seen from the server's side.
+     - **(b) The captures.** Copy `/Users/Shared/VariorumWalk/captures/*` into
+       *[removed for publication]*
+     - **(c) The logs** (optional, read-only; `log` is a zsh builtin, so call `/usr/bin/log`):
+       `/usr/bin/log show --start "<W-0(f)'s START>" --predicate 'subsystem == "org.sparkle-project.Sparkle" OR process == "Installer" OR process == "Autoupdate" OR process == "Updater"' --style compact | tail -80`.
+     - **(d) [HER]** Reopen `/Applications/Variorum.app` as always. Expect it undisturbed: the walk
+       *[removed for publication]*
+     - **(e) THE VERDICT, into this record.** **PASS** = all of the following:
+       - W1: the quarantined DMG opened clean;
+       - W-4: `spctl` accepted the installed app;
+       - W2: the notarized first-launch question appeared, not a block;
+       - W3: the first run on a fresh container store;
+       - W6: consent was ASKED, with no profile option;
+       - W7–W8: 0.0.2 was found and the XPC install landed;
+       *[removed for publication]*
+         valid.
+
+   - **STOP RULES, any step:**
+     - a Gatekeeper BLOCK;
+     - a Sparkle "An error occurred…" alert (capture it, ⌘Q, log out, report);
+     - the installer failing, or a relaunch that still reads 0.0.1 (capture About);
+     - anything touching HER account's Variorum.
+
+     **The walk never touches `/Applications`, her real store, or the public feed.**
+   - **Left for later, NOT cleaned now:**
+     *[removed for publication]*
+     - **`/Users/Shared/VariorumWalk/`, the walk builds and the walk feed** go at the closeout's
+       debris sweep. The builds sit under `.noindex` with zero live LaunchServices registrations;
+       the feed sits under DerivedData, gitignored.
+   *[removed for publication]*
+     *[removed for publication]*
+     is removed.
