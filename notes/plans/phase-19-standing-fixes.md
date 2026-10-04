@@ -77,9 +77,13 @@ not wait on this entry).
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE YET (stated first, per the contract):** the seven TK2 point-release tripwire suites have
-NOT run yet (measurement-shaped; held for a zero-instance window — her real-store app was live, pid
-85948, through the runs below). The brief's "`PaneSurfaceTests`' five `PaneDecoration.resolve` pins
+**NOT DONE BY THIS ENTRY (stated first, per the contract):** no walk capture — the entry's acceptance
+is the suites RUNNING green (no product face changed; the one `Sources` line is a value-identical
+expression split in a SwiftUI `Layout` whose arithmetic is not headless-pinned — `MobileChipFlowTests`
+pins the pure brains only — and the mobile TEST target was neither built nor run: the entry asks for
+the mobile app build only). No `Sync/`, no custody, no schema, no app source beyond that one mobile
+line; 13r U1's `PaneSurface.swift` line untouched (the mutation check below swapped it temporarily
+and restored it, sha256-verified). The brief's "`PaneSurfaceTests`' five `PaneDecoration.resolve` pins
 PROVE 13r U1's line behavior-preserving" did NOT hold as stated — piece 4 says why; the orchestrator
 ADJUDICATED it (piece 5) and authorized ONE committed absolute pin, landed here. **The drill-window pause is LIFTED** (the orchestrator's "drill window closed",
 2026-10-04 — her live drill passed; U1 closed): suites run at quiet windows from here, her real-store
@@ -241,9 +245,17 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
      and ADDED `aHandRemovedPairStaysRemovedButTheJournalStillReturns` (DailyJournalRulingsTests), and
      `d58bc3ee` already recorded "core 2174/244".
    - **The mobile target builds** — DONE (piece 3).
-   - **The seven TK2 tripwire suites** (`JumpViewportLayoutTests` · `RefontGapTopTests` ·
-     `InlineHeightReportTests` · `TakePaneMeasureTests` · `PaneRenderRestoreClipTests` ·
-     `IndexTierMetricsTests` · `PaneFindFaceTests`) — PENDING, waiting for a zero-instance window.
+   - **The seven TK2 tripwire suites — GREEN at a ZERO-INSTANCE window** (her app quit, the
+     orchestrator's word; `pgrep` empty before AND after, 11:19:23Z–11:20:53Z; products rebuilt from the
+     restored tree first): `JumpViewportLayoutTests` · `RefontGapTopTests` · `InlineHeightReportTests` ·
+     `TakePaneMeasureTests` · `PaneRenderRestoreClipTests` · `IndexTierMetricsTests` (+ its file's
+     `PaneLineMetricsScopeTests`) · `PaneFindFaceTests` — **`Test run with 41 tests in 8 suites passed …
+     with 4 known issues`**, no `skipped:` line. The 4 known issues are the STANDING non-intermittent
+     `withKnownIssue` at `IndexTierMetricsTests.swift:290` (#154 (b)'s one residual, 18l-c: TK2 lays the
+     extra line after an empty last paragraph short), 2 voices × the Book Index and Read-edit panes —
+     **measured −10.0 pt (Terminal) / −20.0 pt (Study), exactly the values recorded on 27.0**. **The
+     SDK-shift census: the first suite run on Xcode 27 / the 27.0 SDK finds NO TK2 geometry shift** (the
+     OS stayed 27.0 / 26A428 — only the toolchain and SDK moved). Log `mac-tk2-tripwires.log`.
 5. **THE ONE AUTHORIZED NEW ASSERTION** — the 13r orchestrator's "19a MID-RUN ADJUDICATION"
    (`notes/plans/phase-13r-distribution.md`, the LIVE STATUS bullet, `0b2c1385`): the finding accepted,
    the "five pins prove it" acceptance line corrected, and — **as a scoped exception to this entry's
@@ -261,3 +273,10 @@ Mac 20 → 30 errors in 13 files; mobile 1.**
    (it is committed and carries no other change) and its sha256 re-read against
    `f5549afc0f5e3732ca9c4c23068d0d24ebf1204aa1e6ac40120c225064c1d770`. If this record still says
    STARTING, the check died mid-flight: run that `git checkout --` first.
+   **MUTATION CHECK — DONE.** With the arms swapped (`mac-bft-mutant.log`, `mac-pin-mutant.log`): the
+   new pin went **RED, 15 issues** (12 voiced: 2 voices × 2 appearances × 3 styles at line 169; 3 nil
+   at line 176) and it was the ONLY failing test — **the five relative pins stayed GREEN under the
+   mutant** (`✘ Test run with 15 tests in 1 suite failed … with 15 issues`, every issue the new pin's),
+   the finding demonstrated directly. Restored with `git checkout --`; sha256 re-read =
+   `f5549afc…c1d770`, the pre-mutation value; `git status` clean; the test products rebuilt from the
+   restored tree (`mac-bft-restored.log`) before the tripwire run.
