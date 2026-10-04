@@ -21,8 +21,8 @@
 | Letter | Subject | State |
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
-| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census) | REVIEW-PENDING — acceptance met 2026-10-04 (mobile TEST BUILD SUCCEEDED; touched suites 62/14 green; zero unused-result warnings in `#expect`/`#require` expansions; CopiedRow option A landed); Opus cold review next — the 19b RECORD at the tail |
-| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the remaining test-side isolation warnings (#7) | OPEN — queued with 19b at the same seam |
+| b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
+| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | OPEN — runs next (19b closed; the mobile test build it needed exists) |
 
 ---
 
@@ -43,17 +43,25 @@ candidate with a red mutant **IN PLACE in the real test target at the EXACT spel
 revert — never in a scratch or mimic module (R2-1: the import graph, not only the spelling,
 decides the overload; the recorded trigger conditions rank candidates, never clear them)**;
 re-spell any vacuous site (explicit type or `== true`) with the mutant red on the new
-spelling; a site whose falseness cannot be staged mechanically is recorded, not guessed. **Arm 2 — the isolation residue (#7):** the
-warning-grade main-actor reads in seven Mac test files (`BookViewTests`, `LibraryPanelTests`,
-`PagedReadTests`, `ReadNoteLandingTests`, `ReadTierTests`, `TakePaneMeasureTests`,
-`TutorialWalkTests`) get the same test-side `@MainActor`, assertion bytes unchanged — the F3
-class closed file-complete before the next toolchain promotes it to red. **Rules:** 19a's
+spelling; a site whose falseness cannot be staged mechanically is recorded, not guessed. **Arm 2 — the isolation residue (#7), WIDENED
+to the mobile side at 19b's close:** the warning-grade main-actor reads in seven Mac test
+files (`BookViewTests`, `LibraryPanelTests`, `PagedReadTests`, `ReadNoteLandingTests`,
+`ReadTierTests`, `TakePaneMeasureTests`, `TutorialWalkTests`) AND in the five mobile test
+files 19b's census found (`MobileMarkdownTests`, `MobileTakesBrowserTests`,
+`MobileCommentDraftTests`, `MobileCommentParkTests`, `MobileProtectionTests` — 20 warnings;
+the per-class table is the 19b RECORD's) get the same test-side `@MainActor`, assertion
+bytes unchanged — the F3 class closed file-complete on BOTH platforms before the next
+toolchain promotes it to red. **Adjacent residue recorded here, deliberately NOT owned by
+this entry (19b round 1's routing):** the 10 deprecated `UIWindow.init(frame:)` sites in 7
+mobile test rigs — not mechanical (the replacement needs a window scene); a fresh letter
+when a toolchain turns it red. **Rules:** 19a's
 (mechanical only; anything intent-changing stops and reports). **Acceptance:** the census
 table in the record (site → real/vacuous-fixed, mutant evidence per fix) · zero isolation
-warnings left in the Mac test build · the touched suites green at a quiet window. **Cast:**
-`opus-implementer`; Opus cold review. **State: OPEN — queued with 19b** (sequencing hers to
-reorder; nothing in 13r is gated on it, but MarkdownActs/BookStructure pins are shipped-
-behavior coverage, so the seam right after U2 spawns is the preferred slot).
+warnings left in the Mac test build AND zero in the mobile test build beyond the recorded
+not-owned classes (the deprecation class and `MobileProtectionTests:1572`'s unnecessary
+`try` stay recorded, not owed) · the touched suites green at a quiet window. **Cast:**
+`opus-implementer`; Opus cold review. **State: OPEN — runs at 19b's close (2026-10-04): the
+mobile test build it needed exists; her walk outranks it for the machine.**
 
 ---
 
@@ -149,8 +157,9 @@ warnings inside `#expect`/`#require` expansions in the mobile test build (F1's c
 any found settled by an IN-PLACE mutant at the exact spelling — R2-1's amended lesson)** ·
 F4's narrowed comment carried into whatever CopiedRow shape lands. **Cast:** `opus-implementer`; Opus cold review.
 **Red-on-old:** the failing build itself (`mobile-bft-2.log` preserved in the 19a round-1
-evidence). **State: REVIEW-PENDING (2026-10-04) — acceptance met by the implementer's runs; the
-implementer's LIVE STATUS and the cold review's diff map are the 19b RECORD at this file's tail.**
+evidence). **State: CLOSED 2026-10-04 — the Opus cold review returned a CLEAN BILL (no
+BLOCKER, no MAJOR, no MINOR; two record-scope NITs, dispositioned in the ROUND 1 section
+below); no round 2 earned.**
 
 **THE CENSUS CORRECTED (the implementer's log re-read, 2026-10-04 — accepted by the
 orchestrator):** the "~61 sites in ~25 files" above was the round-1 log's WARNING census
@@ -178,6 +187,57 @@ zero-instance window (the re-pointed file proven serving the Mac target identica
 mobile per this entry's own acceptance; (4) comment fate as proposed — F4's narrowed text
 verbatim, the three-consumers header, "keep them identical" retires, R2-3's re-wrap counts
 as its next touch; (5) any harness-stopped deletion is surfaced, never worked around.
+
+## 19b ROUND 1 — the Opus cold review's verdict and the orchestrator's dispositions (2026-10-04, same-model flow); THE ENTRY CLOSES
+
+**CLEAN BILL: no BLOCKER, no MAJOR, no MINOR — no round 2 earned.** The reviewer verified by
+its own hands: six in-place red mutants in the real mobile target (exactly 6 issues, then
+reverted, tree clean) proving every migrated assertion can still fail — including the new
+`== nil as String?` shape, proven non-vacuous; the 6-site census reconfirmed from both logs;
+zero `#expect`/`#require` lines changed; the pbxproj object diff independently reproduced
+(only the main group, the two TEST Sources phases, and the four new objects — all six
+targets, every configuration, both app Sources phases unchanged); the twins' code proven
+identical pre-deletion; mobile 62/14 green on a concrete simulator; Mac 213/40 and core 29/5
+green at a zero-instance window; the warning census reconciled (58 path-anchored + 2
+macro-expansion = 60). Reviewer evidence: `App/Variorum/DerivedData/19b-review/` (kept; its
+3.3 GB of build products deleted, logs retained). Two NITs, both record-scope:
+
+- **N1 [NIT] ACCEPTED — the 19b RECORD's post-edit line citations drifted by one; THIS BLOCK
+  is the corrected citation** (the record's prose stands as written; verified by the
+  orchestrator's own grep at HEAD): `.map(CopiedRow.init)` sits at MobileLibraryTests:215 ·
+  MobileMembershipTests:242/303 · MobileShellTests:279 · MobileTutorialWalkTests:396/434;
+  the two flagged read shapes at MobileMembershipTests:244/305 (`== nil as String?`) and
+  MobileLibraryTests:218/222. The census lines (the compiler's error lines on the OLD tree)
+  were correct as recorded. The record's "evidence in place" gap for the NULL-binding shape
+  is also closed BY THE REVIEW: its green run proved the binding, and the reviewer's red
+  mutants (logs `19b-review/mobile-bft-mutant.log` + `mobile-mutant-run.log`; issues at
+  Library:217, Membership:244/305, Shell:281/282, TutorialWalk:439) supply the
+  can-fail proof R2-1's discipline asks for.
+- **N2 [NIT] ACCEPTED as next-touch, record-only:** CopiedRow's failure output prints two
+  parallel arrays where `Row` printed name:value pairs; the improvement at the next
+  legitimate touch is a `CustomStringConvertible` built from `zip(columns, values)` (never
+  `row.description` — the dictionary rebuild loses column order). Joins R2-3's next-touch
+  class. No commit owed.
+- **Out-of-diff item 1 — FIXED in this commit:** the master plan's standing-fixes pointer
+  row (17) gains the succession sentence naming THIS ledger as the active one (the ledger
+  header's "the master plan carries one pointer row" promise was dangling for 19).
+- **Out-of-diff item 2 — RECORDED, no entry opened:** a fresh mobile build shows 7 app/core
+  SOURCE warnings, outside 19b/19c's test-file scope (warning-grade, zero behavior change;
+  next legitimate touch per file). One is `Shared/EncryptionSession.swift:387` ("`joined`
+  inferred as `()?`") — custody-adjacent, so any future touch of that file is FABLE-seat
+  work by the standing review rule.
+
+**THE NOTICED ROUTING (held to the close, now ruled):** (1) the 20 mobile isolation
+warnings in 5 files → **19c Arm 2 WIDENS to the mobile side** (the 19c entry is amended in
+this commit); (2) the 10 deprecated `UIWindow.init(frame:)` sites in
+7 test rigs are RECORDED in 19c's entry as adjacent residue deliberately NOT owned there
+(not mechanical — the replacement needs a window scene; promote to a fresh letter when a
+toolchain turns it red); (3) the counting lesson, binding on future censuses: xcodebuild's
+"(N failures)" counts BUILD COMMANDS, not errors — count unique `error:` lines, and include
+`macro expansion #expect:` lines when counting warnings (they carry no file path).
+
+**19b IS CLOSED** (opened and closed 2026-10-04; the red-on-old was the failing mobile test
+build; one round, clean).
 
 ---
 
