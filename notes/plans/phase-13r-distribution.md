@@ -841,6 +841,18 @@ opened; the working tree was left clean.
   section for both asks (proposed at her request; her kickoff message ratifies it); R-13r-12
   moves the backup-folder ask into 13r from 13s. The only fork left in U3 is U3-B's Settings
   placement of the crash-report opt-in + Diagnostics.
+- **U3-A — OPEN (2026-10-04; the implementer spawns from this record).** Its brief: this file's
+  U3 section WITH ITS AMENDMENTS (R-13r-10…14 + THE CALM-ASKS CADENCE + the walk arms + the
+  hazards + SIZING — U3-A's scope list is the sizing bullet's) + ENVIRONMENT TRAPS + this LIVE
+  STATUS (the toolchain pair macOS 27.0 (26A428) / Xcode 27.0 (27A266a), re-verified at this
+  spawn; the SITE-SIDE REPORT's locked URLs; the U2 RECORD's piece-4/piece-5 interface notes) +
+  the resiliency protocol. The walk is STAGED only (one walk after U3-B, at her sitting); zero
+  `Sync/` (R-13r-13 is face-side; any `Sync/` need stops and reports), zero schema, nothing
+  published (the public appcast stays 404). One architect reading recorded for the implementer:
+  What's New "shown once when the version changes" under her no-popup-at-first-open principle
+  means a FRESH store records the current version silently and shows nothing — the sheet
+  appears only on a version CHANGE from a recorded one (the walk's arms (b)/(c) read exactly
+  this way); pin it.
 - **U4 — DEFERRED post-launch (her word).**
 - Ladder / closeout — not started.
 
