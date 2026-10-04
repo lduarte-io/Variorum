@@ -212,7 +212,7 @@ struct MobileLibraryTests {
             let stored = try await db.read { db in
                 try Row.fetchOne(
                     db, sql: "SELECT title, created_at FROM container WHERE id = ?",
-                    arguments: [postID])
+                    arguments: [postID]).map(CopiedRow.init)
             }
             #expect((stored?["title"] as String?) == nil, "no stored placeholder title")
             let day = try #require(DisplayTitle.day(fromStamp: stored?["created_at"]))

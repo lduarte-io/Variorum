@@ -393,7 +393,7 @@ struct MobileTutorialDoorTests {
                 try ops.createReading(name: "my book", kind: .book)
             }
             let userRows = try await db.read { [postID = userPost.id] db in
-                try userPostRows(db, postID: postID)
+                try userPostRows(db, postID: postID).map(CopiedRow.init)
             }
 
             // Wound the tutorial: delete one lesson, scribble on another.
@@ -431,7 +431,7 @@ struct MobileTutorialDoorTests {
             // The user's world is byte-untouched — the note AND its
             // placements/blocks/variants.
             let userRowsAfter = try await db.read { [postID = userPost.id] db in
-                try userPostRows(db, postID: postID)
+                try userPostRows(db, postID: postID).map(CopiedRow.init)
             }
             #expect(!userRowsAfter.isEmpty)
             #expect(userRowsAfter == userRows,

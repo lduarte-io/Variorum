@@ -10,6 +10,8 @@
 		E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1C271B32FFC2FB40084BEA6 /* VariorumCore */; };
 		E1D217912FFCE2C600886CFC /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1D217902FFCE2C600886CFC /* VariorumCore */; };
 		E1B5A0022F0000000000AA02 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E1B5A0032F0000000000AA03 /* Sparkle */; };
+		E19B00022F00000000000B02 /* CopiedRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19B00012F00000000000B01 /* CopiedRow.swift */; };
+		E19B00032F00000000000B03 /* CopiedRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19B00012F00000000000B01 /* CopiedRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,7 @@
 		E1D2175C2FFCE2C500886CFC /* VariorumMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VariorumMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1D217682FFCE2C600886CFC /* VariorumMobileTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VariorumMobileTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1D217722FFCE2C600886CFC /* VariorumMobileUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VariorumMobileUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E19B00012F00000000000B01 /* CopiedRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopiedRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -149,6 +152,7 @@
 				E1D2175D2FFCE2C500886CFC /* VariorumMobile */,
 				E1D2176B2FFCE2C600886CFC /* VariorumMobileTests */,
 				E1D217752FFCE2C600886CFC /* VariorumMobileUITests */,
+				E19B00042F00000000000B04 /* TestSupport */,
 				E1C271892FFC2F420084BEA6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -164,6 +168,15 @@
 				E1D217722FFCE2C600886CFC /* VariorumMobileUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E19B00042F00000000000B04 /* TestSupport */ = {
+			isa = PBXGroup;
+			children = (
+				E19B00012F00000000000B01 /* CopiedRow.swift */,
+			);
+			name = TestSupport;
+			path = ../../Tests/VariorumCoreTests/Support;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -429,6 +442,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E19B00022F00000000000B02 /* CopiedRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +464,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E19B00032F00000000000B03 /* CopiedRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

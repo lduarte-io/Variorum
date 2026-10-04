@@ -1,8 +1,14 @@
 import GRDB
 
 /// A `Sendable` copy of one fetched GRDB `Row` — 19a, the Xcode 27 / Swift
-/// 6.4 migration (the Mac test target carries the same type in
-/// `App/Variorum/VariorumTests/CopiedRow.swift`).
+/// 6.4 migration. ONE FILE, THREE CONSUMERS (19b, the orchestrator's option
+/// A): the core test target compiles it here, in place (SwiftPM); the Mac
+/// (`VariorumTests`) and mobile (`VariorumMobileTests`) test targets compile
+/// THIS SAME FILE through one explicit file reference in
+/// `App/Variorum/Variorum.xcodeproj` (the `TestSupport` group, a build file in
+/// each test target's Sources phase). Each test bundle gets its own internal
+/// copy of the type from these bytes. Moving or renaming this file breaks the
+/// two Xcode test builds loudly — re-point the reference with it.
 ///
 /// GRDB 7 declares `Row`'s `Sendable` conformance UNAVAILABLE (a row may wrap
 /// a live statement). Swift 6.2 treated that as "not Sendable" and silently
@@ -21,9 +27,10 @@ import GRDB
 /// lookup rule); duplicates differing only in CASE are NOT supported — the
 /// rebuilt row comes from an unordered dictionary, so which of them GRDB's
 /// case-insensitive lookup finds is unspecified. Every live site reads a
-/// single-table row, whose column names are unique. Equality is GRDB's `Row ==` for rows without scopes or prefetched rows —
-/// which no raw-SQL fetch has: names compared case-sensitively, in order,
-/// values by `DatabaseValue ==`.
+/// single-table row, whose column names are unique. Equality is GRDB's
+/// `Row ==` for rows without scopes or prefetched rows — which no raw-SQL
+/// fetch has: names compared case-sensitively, in order, values by
+/// `DatabaseValue ==`.
 struct CopiedRow: Sendable, Equatable {
     let columns: [String]
     let values: [DatabaseValue]

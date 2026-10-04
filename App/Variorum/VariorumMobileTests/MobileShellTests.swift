@@ -276,7 +276,7 @@ struct MobileShellTests {
                                   AND deleted_at IS NULL) AS memberships
                         FROM container WHERE id = ?
                         """,
-                    arguments: [postID])
+                    arguments: [postID]).map(CopiedRow.init)
             }
             #expect((stored?["title"] as String?) == nil, "no stored placeholder title")
             #expect((stored?["memberships"] as Int?) == 0, "a BOOKLESS mint (the Pool's filter)")

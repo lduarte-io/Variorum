@@ -577,23 +577,83 @@ my own builds iterate to green. Ten more `Row.fetch*` reads in the mobile tests 
 55, `MobileShell` 249, `MobileStructural` 511, `MobileTakeLock` 42/55, `MobileTutorialWalk` 193/1061,
 `MobileWalk` 495) did NOT error — each is checked below before it is called out of scope.
 
-**THE COPIEDROW FORK — PROPOSED to the orchestrator, AWAITING THE RULING (not built):** (A,
-recommended) ONE file, three consumers — the core `Tests/VariorumCoreTests/Support/CopiedRow.swift`
-stays the single source, compiled by both Xcode test targets through one classic `PBXFileReference`
-in their (today empty) Sources phases, the Mac twin deleted; (B) a third identical twin in
-`VariorumMobileTests/`; (C, not recommended) a SwiftPM test-support library. Facts: both Xcode test
-targets are nonisolated (no `SWIFT_DEFAULT_ACTOR_ISOLATION`), Swift 6.0 mode, `MemberImportVisibility`
-on, fed by file-system-synchronized groups, and already `import GRDB` — the type compiles identically
-in all three.
+**THE COPIEDROW FORK — RULED: OPTION A** (the orchestrator, `52edc1f9`; the ruling text and its five
+riders live in the 19b entry above). Built in piece 2: `Tests/VariorumCoreTests/Support/CopiedRow.swift`
+is the ONE source; the Xcode project compiles that same file into BOTH test targets; the Mac twin
+`App/Variorum/VariorumTests/CopiedRow.swift` is deleted in the SAME commit as the wiring (rider 2).
+Facts behind it: both Xcode test targets are nonisolated (no `SWIFT_DEFAULT_ACTOR_ISOLATION`), Swift
+6.0 mode, `MemberImportVisibility` on, fed by file-system-synchronized groups with empty Sources
+phases, and already `import GRDB` — the type compiles identically in all three.
 
 **Pieces:**
-1. Red-on-old under my own hands — IN-PROGRESS: a fresh `build-for-testing` of the unmodified tree
-   (`DerivedData/19b/mobile-bft-old.log`, derived data `19b/mobile.noindex`).
-2. The six ROW-COPY call sites (`.map(CopiedRow.init)` inside the read closure, 19a's shape) —
-   NOT-STARTED (identical under A or B).
-3. The CopiedRow shape the orchestrator rules — NOT-STARTED (waits on the ruling).
-4. Iterate the mobile test build to `** TEST BUILD SUCCEEDED **`, recording every extension site —
-   NOT-STARTED.
-5. The `#expect`/`#require` unused-result census over the green build log — NOT-STARTED.
-6. Suites green on a concrete simulator (the touched files' suites, counts confirmed, `skipped:` read)
-   — NOT-STARTED.
+1. Red-on-old under my own hands — DONE (`1355ecad` record; the log is gitignored): a fresh
+   `build-for-testing` of the unmodified tree (`App/Variorum/DerivedData/19b/mobile-bft-old.log`,
+   derived data `19b/mobile.noindex`, `-IDEBuildingContinueBuildingAfterErrors=YES`) → `** TEST BUILD
+   FAILED **`, exactly the same 6 error sites as the preserved log (no more, no fewer). Its "(27
+   failures)" counts failed BUILD COMMANDS (four 6-file compile batches × two archs plus their per-file
+   lines) — the failing batches hold 24 files, the likely source of the entry's "~25 files".
+2. The six ROW-COPY call sites + the ruled CopiedRow shape — DONE (this commit). Call sites, 19a's
+   shape exactly (the copy INSIDE the read closure; every `#expect`/`#require` line byte-identical):
+   `MobileLibraryTests` 214 · `MobileMembershipTests` 241, 301 · `MobileShellTests` 280 (`Row.fetchOne(…)
+   .map(CopiedRow.init)` — `Optional.map`) · `MobileTutorialWalkTests` 395, 433 (the call-site copy,
+   `userPostRows(…).map(CopiedRow.init)`; the helper keeps returning `[Row]` — it is called only inside
+   the reads, as on the Mac). The ruled shape: (a) `Tests/VariorumCoreTests/Support/CopiedRow.swift` —
+   COMMENT-ONLY change (the body is byte-identical): the header now names its three consumers and how
+   each sees it; F4's narrowed duplicate-column text carried verbatim (words unchanged); "keep them
+   identical" retired; R2-3's 127-column line re-wrapped (this is its next touch); (b)
+   `App/Variorum/Variorum.xcodeproj/project.pbxproj` — ONE `PBXFileReference` (`CopiedRow.swift`) in a
+   new `TestSupport` `PBXGroup` (`path = ../../Tests/VariorumCoreTests/Support`, under the main group),
+   TWO `PBXBuildFile`s, one in each TEST target's Sources phase; (c) `git rm` of the Mac twin (no harness
+   stop). **RIDER 1 — zero app-target lines, PROVEN from the diff** (both files converted to JSON with
+   `plutil`, every object compared — `App/Variorum/DerivedData/19b/pbxproj-object-diff.txt`): REMOVED
+   none; ADDED exactly the file reference, the two build files and the `TestSupport` group; CHANGED
+   exactly three objects — the project's main group (`children` gains `TestSupport`), `VariorumTests`'
+   Sources phase `E1C271912FFC2F440084BEA6` and `VariorumMobileTests`' `E1D217642FFCE2C600886CFC`
+   (`files: [] → [the build file]`); all six `PBXNativeTarget`s, every build configuration, and both app
+   targets' Sources phases (`E1C271842FFC2F420084BEA6` Variorum, `E1D217582FFCE2C500886CFC`
+   VariorumMobile) byte-equal.
+   **Builds:** mobile `build-for-testing` (generic iOS Simulator) → **`** TEST BUILD SUCCEEDED **` on the
+   FIRST iteration** (`mobile-bft-1.log`; the shared file compiled `in target 'VariorumMobileTests'` from
+   `Tests/VariorumCoreTests/Support/CopiedRow.swift`) — **the census is FINAL: 6 sites in 4 files**,
+   no SIL-stage extension site surfaced (unlike 19a's core and Mac targets). Mac `build-for-testing` →
+   `** TEST BUILD SUCCEEDED **` (`mac-bft-1.log`; the shared file compiled `in target 'VariorumTests'`,
+   zero references to the deleted twin). Core `swift build --build-tests` → `Build complete!`, exit 0
+   (`core-build-tests.log`).
+   **The ten non-erroring `Row.fetch*` reads** (named in the census paragraph) — checked, OUT OF SCOPE:
+   each already maps its rows to Sendable values INSIDE the closure (`.map { ($0["kind"], $0["text"]) }`,
+   `.map { $0["deleted_at"] as String? }`, `.reduce(into: [String: String]())`, …), so no `Row` crosses
+   the async read — they are already in the copy-inside-closure shape.
+3. The `#expect`/`#require` unused-result census over the green build log — DONE (this commit): see
+   the WARNING CENSUS below. **ZERO unused-result warnings inside any `#expect`/`#require` expansion in
+   the mobile test build** (acceptance line met).
+4. Suites green on a concrete simulator (the touched files' suites, counts confirmed, `skipped:` read)
+   — PENDING.
+5. Rider 3's Mac re-run — 19a's migrated Row-copy suites (every suite type in the nine Mac files that
+   consume `CopiedRow`) GREEN at a zero-instance window — PENDING.
+
+**THE WARNING CENSUS (the mobile TEST target, the green build `mobile-bft-1.log`; counts + classes only,
+no fixes — routing is the orchestrator's at the close; the full line list is
+`App/Variorum/DerivedData/19b/mobile-warning-census.txt`):** **60 unique warnings in 20 files** (each
+printed once per arch). The test-target set is IDENTICAL between the red-on-old fresh build and the green
+one — fixing the six sites surfaced no new warning. NOTE for any re-count: two of the 60 are reported at
+`macro expansion #expect:1:N`, not at a file path, so a `^/…: warning:` grep finds only 58.
+| Class | Count | Sites (file:line) |
+|---|---|---|
+| UnnecessaryEffectMarker — "no calls to throwing functions occur within 'try'" | 20 | `MobileNoteClipboardTests` 86/111/131/148/165/191 · `MobileTrashTests` 54/82/112/261/408/419 · `MobileUndoDoorTests` 116/194/220 · `MobileDeletionTests` 270 · `MobileEditTraceTests` 343 · `MobileEmptyStoreTests` 120 · `MobileTutorialWalkTests` 919 · `MobileProtectionTests` 1572 (INSIDE an `#expect` expansion: `#expect(try await PostureSwitchRunner.pendingMarker(…) == nil)`) |
+| ISOLATION — main-actor property read from a nonisolated context | 17 | `MobileMarkdownTests` 646/647/648/649/651×2/653/656 · `MobileTakesBrowserTests` 741×2/956/957/963 · `MobileCommentDraftTests` 54/55 · `MobileCommentParkTests` 57/58 |
+| ISOLATION — main-actor property read from a nonisolated AUTOCLOSURE | 2 | `MobileMarkdownTests` 657×2 |
+| ISOLATION — main-actor STATIC property from a nonisolated context | 1 | `MobileProtectionTests` 620 (INSIDE an `#expect` expansion: `EncryptionView.keysReplacedExplanation`) |
+| DeprecatedDeclaration — `UIWindow.init(frame:)` (iOS 26: "Use init(windowScene:)") | 10 | `MobileBlockHistoryTests` 579/688 · `MobileKeyboardBarGeometryTests` 254/584 · `MobileTakesBrowserTests` 768/944 · `MobileCommentDraftTests` 70 · `MobileCommentParkTests` 70 · `MobileLivenessTests` 400 · `MobileSurfaceDriver` 218 |
+| "`#require(_:_:)` is redundant because … never equals 'nil'" | 4 | `MobileCrossBlockEditTests` 144/163/210/310 |
+| "conditional cast … always succeeds" | 2 | `MobileQuickNoteTests` 1172/1188 |
+| NoUsage — "expression of type 'Bool' is unused" | 2 | `MobileWriteLatchTests` 100/101 — `await first.value` / `await second.value` (a `Task<Bool>`'s value as a bare STATEMENT, NOT inside any `#expect`/`#require` expansion) |
+| NoUsage — "immutable value … was never used" | 1 | `MobileUndoDoorTests` 250 |
+| VariableNeverMutated | 1 | `VaultRPCEmulation` 104 |
+**The F1 census rule applied:** zero "result of call … is unused" / unused-result warnings inside any
+`#expect`/`#require` expansion (the build's only two in-expansion warnings are the isolation and
+effect-marker lines above). **The rule's SILENT half is NOT cleared and is NOT this entry's:** a
+`@discardableResult … -> Bool` callee asserted bare takes the vacuous route with NO warning — 19a
+R2-2's named mobile candidates (`MobileMarkdownActs.swift:90–91` asserted bare at
+`MobileMarkdownTests.swift:389/397/453/551/563`) carry no warning in this build, as the rule predicts;
+settling them by in-place mutants is 19c Arm 1's, sequenced after this entry (the mobile test build now
+exists for it).

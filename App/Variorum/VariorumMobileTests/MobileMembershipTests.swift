@@ -239,6 +239,7 @@ struct MobileNoteRenameTests {
             let stored = try await db.read { db in
                 try Row.fetchOne(
                     db, sql: "SELECT title FROM container WHERE id = ?", arguments: [postID])
+                    .map(CopiedRow.init)
             }
             #expect(stored?["title"] == nil as String?,
                     "a blank clears the stored title to NIL — no placeholder")
@@ -299,7 +300,7 @@ struct MobileNoteEntryDateTests {
             let stored = try await db.read { db in
                 try Row.fetchOne(
                     db, sql: "SELECT entry_date FROM container WHERE id = ?",
-                    arguments: [postID])
+                    arguments: [postID]).map(CopiedRow.init)
             }
             #expect(stored?["entry_date"] == nil as String?,
                     "blank clears — un-dating a note is legitimate")
