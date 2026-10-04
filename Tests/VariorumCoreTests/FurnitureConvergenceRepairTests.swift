@@ -430,11 +430,11 @@ struct JournalKeeperRepairTests {
         #expect(try liveMemberships(b, in: journalA.bookID) == 3,
                 "the loser's memberships moved to the keeper BEFORE the cascade could take them")
         for entry in loserEntries {
-            let membership = try b.db.read { db in
+            let membership = try await b.db.read { db in
                 try Row.fetchOne(
                     db,
                     sql: "SELECT id, reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
-                    arguments: [entry])
+                    arguments: [entry]).map(CopiedRow.init)
             }
             #expect(membership?["reading_id"] as String? == journalA.bookID)
             if let id = membership?["id"] as String? {
@@ -724,11 +724,11 @@ struct JournalKeeperRepairTests {
         #expect(try liveMemberships(b, in: journalA.bookID) == 3,
                 "the renamed loser's memberships moved to the keeper (old: killed by the cascade)")
         for entry in loserEntries {
-            let membership = try b.db.read { db in
+            let membership = try await b.db.read { db in
                 try Row.fetchOne(
                     db,
                     sql: "SELECT id, reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
-                    arguments: [entry])
+                    arguments: [entry]).map(CopiedRow.init)
             }
             #expect(membership?["reading_id"] as String? == journalA.bookID)
             if let id = membership?["id"] as String? {
@@ -800,11 +800,11 @@ struct JournalKeeperRepairTests {
         #expect(try c.outboxContains("setting", "daily_journal_book"),
                 "the designation rewrite reaches the outbox (SyncSpec §7)")
         for entry in loserEntries {
-            let membership = try c.db.read { db in
+            let membership = try await c.db.read { db in
                 try Row.fetchOne(
                     db,
                     sql: "SELECT id, reading_id, deleted_at FROM reading_post WHERE post_id = ?",
-                    arguments: [entry])
+                    arguments: [entry]).map(CopiedRow.init)
             }
             #expect(membership?["deleted_at"] as String? == nil)
             #expect(membership?["reading_id"] as String? == journalA.bookID)
@@ -865,7 +865,7 @@ struct JournalKeeperRepairTests {
             try Row.fetchOne(
                 db,
                 sql: "SELECT id, reading_id, deleted_at FROM reading_post WHERE post_id = ?",
-                arguments: [second.entryID])
+                arguments: [second.entryID]).map(CopiedRow.init)
         }
         #expect(landed?["deleted_at"] as String? == nil, "never stamped dead (old: the orphan cascade)")
         #expect(landed?["reading_id"] as String? == journalA.bookID, "re-pointed to the keeper")

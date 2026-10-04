@@ -218,10 +218,10 @@ struct Phase11SyncConvergenceTests {
         _ = try await a.push()
         _ = try await b.pull()  // B meets A's row — the collision repairs here
 
-        let live = try b.db.read { db in
+        let live = try await b.db.read { db in
             try Row.fetchAll(db, sql: """
                 SELECT id, deleted_at FROM canvas_layout ORDER BY id
-                """)
+                """).map(CopiedRow.init)
         }
         #expect(live.count == 2)
         let keeper: String = live[0]["id"]

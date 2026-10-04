@@ -98,10 +98,11 @@ struct TagFamilySectionsTests {
     @Test func bothReadsAreBlindToAutosave() async throws {
         let queue = try DatabaseQueue()
         try AppDatabase.migrator.migrate(queue)
-        for fetch: @Sendable (Database) throws -> Int in [
+        let fetches: [@Sendable (Database) throws -> Int] = [
             { try Queries.tagFamilySections($0, rootID: "r", postIDs: ["p"]).count },
             { try Queries.tagsWorn($0, postIDs: ["p"]).count },
-        ] {
+        ]
+        for fetch in fetches {
             let region = LockIsolated<DatabaseRegion?>(nil)
             let observation = ValueObservation
                 .tracking(fetch)

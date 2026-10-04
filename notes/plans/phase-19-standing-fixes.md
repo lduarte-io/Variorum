@@ -77,10 +77,12 @@ not wait on this entry).
 
 ### 19a RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE YET (stated first, per the contract):** no fix has landed; no suite has run. **PAUSED for
-the author's 13r U1 LIVE DRILL window** (the orchestrator's message, 2026-10-04): no Mac suite, no
-test host, nothing that launches an app bundle runs until the orchestrator says "drill window
-closed". Compile-only work (edits, `swift build`, `build-for-testing`) continues.
+**NOT DONE YET (stated first, per the contract):** the Mac test target and the mobile line are not
+yet fixed; NO suite has run. **PAUSED for the author's 13r U1 LIVE DRILL window** (the orchestrator's
+message, 2026-10-04): no Mac suite, no test host, nothing that launches an app bundle runs until the
+orchestrator says "drill window closed". The implementer ALSO holds core `swift test` until then
+(some core suites exercise keychain custody seams; her drill reads the keychain). Compile-only work
+(edits, `swift build --build-tests`, `build-for-testing`) continues.
 
 **Toolchain at session start (re-read, matches the pinned pair):** macOS 27.0 (26A428) · Xcode 27.0
 (27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer`. Zero-instance check
@@ -90,7 +92,21 @@ closed". Compile-only work (edits, `swift build`, `build-for-testing`) continues
 20 errors / 8 files (PaletteDerivation 24/76/107/124/125/128/176/187/191/236 · PlainPaste 88/103 ·
 TagAndFolder 103/111 · TutorialWalk 480/514 · LifecycleFaces 50 · PoolDrag 59 · StructuralGesture 492
 · EditorSeamCost 183); `probe-swift-build-tests.log` 7 errors (FurnitureConvergenceRepair 433 ×2,
-727 ×2, 803 ×2, 864); `probe-mobile-build.log` 1 error (MobileChipFlow 81).
+727 ×2, 803 ×2, 864); `probe-mobile-build.log` 1 error (MobileChipFlow 81 — NOTE: line 81 is the
+`contentWidth` expression (81–84), not the `height` reduce (78–80) the entry names; the probe log's
+own source excerpt shows it; `height` type-checks).
+
+**THE CENSUS WAS A LOWER BOUND (found 2026-10-04, same session).** `swift build --build-tests` stops
+at the first failing COMPILE BATCH (SwiftPM has no keep-going flag), so the probe saw only the batch
+holding `FurnitureConvergenceRepairTests`. Fixing it and rebuilding exposed three more core sites,
+each in a later batch, fixed in the same mechanical classes (logs `App/Variorum/DerivedData/19a/
+core-build-tests{,-2,-3,-4}.log`, gitignored): `Phase11LockstepSyncTests.swift:221` (ROW-COPY, ×2
+errors — **a sync lockstep/convergence suite: the cold review checks it like Furniture**) ·
+`TagFamilySectionsTests.swift:101/107` (EXPR-SPLIT: "failed to produce diagnostic" + "generic
+parameter 'Value' could not be inferred" on a typed `for fetch: @Sendable (Database) throws -> Int in
+[closure, closure]` header) · `StructuralSplitAtNewlinesTests.swift:393` (TRY-IN-REQUIRE, below).
+The fourth build is GREEN. The Mac target's census (`xcodebuild build-for-testing`) may likewise be a
+lower bound; its rebuild will say.
 
 **The mechanism classes (for the cold review):**
 - **ROW-COPY** (GRDB `Row` crossing an async `read`): GRDB 7 declares `@available(*, unavailable)
@@ -99,18 +115,37 @@ TagAndFolder 103/111 · TutorialWalk 480/514 · LifecycleFaces 50 · PoolDrag 59
   in an async body silently resolved to the SYNC `AppDatabase.read` overload (which is why the core
   sites compiled with no `await` at all). Swift 6.4 now selects the async overload
   (`read<T: Sendable>(_: @Sendable …) async`, `AppDatabase.swift:184`) and diagnoses the unavailable
-  conformance (plus, at the await-less core sites, the missing `await`). Fix: materialize the
-  fetched rows INSIDE the closure as a Sendable copy and `await` the read. PENDING — the shape is
-  being settled (a per-target `CopiedRow` mirroring `Row`'s String-keyed reads and `==`, so every
-  `#expect` line stays byte-identical).
+  conformance (plus, at the await-less sites, the missing `await`). Fix: `await` the read and copy
+  the rows INSIDE the closure — `….map(CopiedRow.init)` — into `CopiedRow`
+  (`Tests/VariorumCoreTests/Support/CopiedRow.swift`; the Mac target gets the same type): a Sendable
+  `(columns, values: [DatabaseValue])` copy whose two String-keyed subscripts READ THROUGH A REBUILT
+  GRDB `Row` (so decoding, NULL and missing-column behaviour are GRDB's own) and whose synthesized
+  `==` equals `Row ==` for scope-free raw-SQL rows (ordered names case-sensitive, `DatabaseValue
+  ==`). **Every `#expect` line at a ROW-COPY site is byte-identical.** Overload proof: a standalone
+  Swift 6.4 experiment mimicking `Row`'s three subscripts vs the copy's two (scratchpad `solver/`)
+  binds the SAME `Value` for every shape the sites use — `x?["c"] as String?` (Optional<String>,
+  so NULL reads nil, never a trap) · `x["c"] == "lit"` / `== s` / `allSatisfy { $0["c"] == … }`
+  (String) · `x["c"] == nil` / `!= nil` (the untyped subscript) · `let k: String = x["c"]`.
 - **ISOLATION** (main-actor statics from nonisolated test contexts): PaletteDerivation,
   EditorSeamCost. PENDING.
 - **IMPORT** (`MemberImportVisibility`): PlainPaste. PENDING.
-- **EXPR-SPLIT** (type-check timeout): MobileChipFlow:81. PENDING.
+- **EXPR-SPLIT** (type-check failures): MobileChipFlow:81 (PENDING) · TagFamilySections:101 (DONE —
+  the typed closure array hoisted to `let fetches: [@Sendable (Database) throws -> Int]`, then
+  `for fetch in fetches`; same two closures, same order, same loop body).
+- **TRY-IN-REQUIRE** (Xcode 27's Swift Testing `#require` now expands a function-call argument into
+  `__checkFunctionCall(db.self, calling: { $0.fetchString($1,$2) }, …)`, a closure the outer `try`
+  does not cover): `StructuralSplitAtNewlinesTests.swift:393` gains `try` before `db.fetchString(` —
+  **the ONE assertion-line byte change so far: an effect marker only, the same call and the same
+  value checked** (the macro now checks it as a value rather than decomposing the call; only a
+  failure message's sub-expression detail differs).
 
 **Pieces:**
-1. Core `FurnitureConvergenceRepairTests` (ROW-COPY + `await`) — PENDING.
+1. Core test target compiles under Xcode 27 — DONE (this commit): ROW-COPY at
+   `FurnitureConvergenceRepairTests` 433/727/803/864 + `Phase11LockstepSyncTests` 221; EXPR-SPLIT at
+   `TagFamilySectionsTests` 101; TRY-IN-REQUIRE at `StructuralSplitAtNewlinesTests` 393;
+   `Support/CopiedRow.swift` new. `swift build --build-tests` exit 0 (log `core-build-tests-4.log`).
+   Core `swift test` full run — PENDING (held for the drill window).
 2. Mac `VariorumTests` 8 files — PENDING.
 3. Mobile `MobileChipFlow.swift:81` — PENDING.
 4. Acceptance runs (core `swift test` full · the 8 Mac suites · the 7 TK2 tripwire suites ·
-   `PaneSurfaceTests` · the mobile build) — PENDING (Mac runs wait for the drill window to close).
+   `PaneSurfaceTests` · the mobile build) — PENDING (runs wait for the drill window to close).

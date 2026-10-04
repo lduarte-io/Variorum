@@ -390,7 +390,7 @@ struct StructuralSplitAtNewlinesTests {
             #expect(try db.outboxContains("variant", a.variant.id))
             #expect(try db.outboxContains("block", result.blockIDs[1]))
             #expect(try db.outboxContains("container_block", try #require(
-                db.fetchString(
+                try db.fetchString(
                     "SELECT id FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
                     [result.blockIDs[1]]))))
         }
