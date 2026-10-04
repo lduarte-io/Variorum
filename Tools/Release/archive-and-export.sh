@@ -4,9 +4,12 @@
 #
 #   Tools/Release/archive-and-export.sh [--out DIR]
 #
-# DIR defaults to App/Variorum/DerivedData/release/<UTC stamp> (gitignored) and must NOT already
-# hold anything: every run is CLEAN BY CONSTRUCTION (a fresh -derivedDataPath inside DIR — stale
-# DerivedData lies about signatures). It produces
+# DIR defaults to App/Variorum/DerivedData/release/<UTC stamp>.noindex (gitignored) and must NOT
+# already hold anything: every run is CLEAN BY CONSTRUCTION (a fresh -derivedDataPath inside DIR —
+# stale DerivedData lies about signatures). DIR ALWAYS ends in `.noindex` (appended when missing):
+# measured at U1's first run, Spotlight indexed the export and LaunchServices RE-REGISTERED it after
+# `lsregister -u` — a real-store-id bundle Spotlight / `open -b` could resolve her app to. Spotlight
+# skips `.noindex` folders, and the re-registration stopped (0 registrations after 90 s). It produces
 #   DIR/Variorum.xcarchive      the Release archive (development-signed by the project's Automatic style)
 #   DIR/export/Variorum.app     the Developer ID export (ExportOptions.plist: manual, one identity, one profile)
 #   DIR/verify.txt              verify-export.sh's PASS/FAIL drill over the export (+ the --compare-with
@@ -43,6 +46,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$OUT" ] || OUT="${REPO}/App/Variorum/DerivedData/release/$(date -u +%Y%m%dT%H%M%SZ)"
+OUT="${OUT%/}"
+case "$OUT" in *.noindex) ;; *) OUT="${OUT}.noindex" ;; esac   # Spotlight never indexes the copies
 mkdir -p "$OUT"
 OUT="$(cd "$OUT" && pwd)"
 if [ -n "$(ls -A "$OUT")" ]; then
@@ -154,6 +159,13 @@ while IFS= read -r app; do
   "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
   say "LaunchServices: unregistered ${app#"${OUT}"/}"
 done < <(find "$OUT" -type d -name 'Variorum.app' -prune)
+"$LSREGISTER" -dump > "${WORK}/ls-dump.txt" 2>/dev/null || true
+LEFT="$(grep -c "path: *${OUT}/" "${WORK}/ls-dump.txt" || true)"
+if [ "${LEFT:-0}" = "0" ]; then
+  say "LaunchServices: 0 registrations under ${OUT}"
+else
+  say "WARNING: LaunchServices still holds ${LEFT} registration(s) under ${OUT} — re-run 'lsregister -u' on them before any launch"
+fi
 
 # ------------------------------------------------------------------ 6. the static drill
 COMPARE=()

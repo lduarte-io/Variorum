@@ -617,5 +617,55 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
      (x86_64 + arm64).
    - The scheme's Run config stays Debug and no build configuration was added (the scheme and
      project are untouched by this unit).
-3. **The static drill leg (a)** — NOT-STARTED. PENDING.
+3. **The static drill leg (a)** — IN-PROGRESS. Run 1 PASSED; run 2 (the final script) is PENDING.
+   - **RUN 1 (script `c51b18d9`, tree clean):** `Tools/Release/archive-and-export.sh --out
+     App/Variorum/DerivedData/13r-u1/release`, 2026-10-04T10:02:57Z.
+     - Every zero-instance check found no process.
+     - The signing inputs agreed. The profile was INSTALLED to Xcode's directory: it was absent,
+       because her double-click had put it only in the Device Management store, which xcodebuild
+       never reads.
+     - `** ARCHIVE SUCCEEDED **` → `** EXPORT SUCCEEDED **` → **`VERDICT: PASS — 35 of 35 checks`**.
+   - **The brief's literal commands, on that export (outputs abridged to the load-bearing lines):**
+     - `codesign -d --entitlements - export/Variorum.app` →
+       *[removed for publication]*
+       *[removed for publication]*
+       - `com.apple.security.app-sandbox` = **true**
+       - `files.bookmarks.app-scope` = true, `files.user-selected.read-write` = true,
+         `network.client` = true
+       *[removed for publication]*
+         *[removed for publication]*
+       - NO `get-task-allow`.
+     - `codesign -dv` → `CodeDirectory v=20500 … flags=0x10000(runtime)` (**HARDENED RUNTIME**);
+       *[removed for publication]*
+       Certification Authority` → `Apple Root CA`, `Timestamp=Oct 4, 2026 at 4:07:36 AM` (secure
+       *[removed for publication]*
+     - `security cms -D -i export/Variorum.app/Contents/embedded.provisionprofile` → `Name = Variorum
+       *[removed for publication]*
+       *[removed for publication]*
+       *[removed for publication]*
+       *[removed for publication]*
+       *[removed for publication]*
+     - `codesign --verify --deep --strict --verbose=2` → `valid on disk` + `satisfies its Designated
+       Requirement`, exit 0. The nested `SQLCipher.framework` was re-signed under Developer ID with
+       runtime and a timestamp.
+     - `spctl --assess --type execute -vv` → `rejected` / **`source=Unnotarized Developer ID`** /
+       *[removed for publication]*
+       notarization-ready state, confirmed by the external-facts lookup (Apple DTS threads 124614,
+       822378). U2's notarize + staple turns it to `accepted`.
+     - `--compare-with /Applications/Variorum.app` (her daily drive, signed Apple Development
+       *[removed for publication]*
+       order; the app-id matches**. The ONLY entitlement difference is `get-task-allow => true` on
+       hers (development signing injects it), absent on the export. That is exactly what
+       notarization requires.
+   - **A finding of run 1, FIXED in the road:** Spotlight indexed the export, and LaunchServices
+     RE-REGISTERED it after the script's `lsregister -u`. That left a real-store-id bundle that
+     Spotlight or `open -b io.lduarte.Variorum` could resolve her app to before the A1 rail. The run
+     folder was moved to `release.noindex/` and both copies unregistered: **0 registrations after
+     90 s**, and `mdfind` no longer lists it. The script now ALWAYS appends `.noindex` to its output
+     folder and counts leftover registrations after the unregister. `verify-export.sh` re-run at
+     the moved path: 35/35 (`release.noindex/verify-after-move.txt`).
+   - **A pre-existing hazard, NOT this unit's, REPORTED:** Spotlight indexes a SECOND real-store-id
+     Release build at
+     `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Release/Variorum.app`
+     (an earlier refresh's build folder that was not removed). Left untouched for the orchestrator.
 4. **The live drill leg (b) staged as her checklist** — NOT-STARTED.
