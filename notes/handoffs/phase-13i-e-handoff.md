@@ -14,9 +14,9 @@
       the phone build. Until the window runs, your marker-11 installs keep working and NOTHING
       is owed — the new build would refuse to sync against the marker-11 mirror, so the install
       refresh deliberately waits.
-- [ ] **ONE press: Help ▸ Restore Tutorial** on the refreshed build (carried from 13i-d; 13i-e's
-      lesson-9 sentence rides the same press — the confirm says exactly what it touches). I
-      rehearsed this exact press on the dev store at the walk: lesson 9 renders whole.
+- [x] **ONE press: Help ▸ Restore Tutorial — DONE 2026-10-04 at her walk** ("things are all
+      looking pretty good overall"); the field guide renders whole on the real store, lesson 9
+      included.
 - [x] **W-O-1 — RULED BY YOU AT THE CLOSE AND BUILT:** "I think it's fine for it to unarchive
       when you command J" — option (b): ⌘J keeps open-today and the daily door un-archives on
       EVERY press, decided pairs included (nothing re-files; a hand-removal is never undone);
