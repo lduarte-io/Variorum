@@ -462,6 +462,14 @@ opened; the working tree was left clean.
 
 ## U1 RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
+**U1 IS STOPPED AT THE TOOLCHAIN GATE (2026-10-04) — REPORTED TO THE ORCHESTRATOR, NOTHING LANDED IN
+SOURCE.** The Xcode-27 probe found that the Mac APP does not compile (ONE error, in the editor seam),
+so no Release archive can exist, and therefore no static drill either. Per the brief ("report
+breakage rather than redesigning around it") and the one-unit rule, the fix is the orchestrator's to
+route. The census below is complete across all four build surfaces. The probe edit is RESTORED
+(sha256 re-verified, the tree is clean). Resume = the orchestrator's word on the routing (below),
+then pieces 2–4 as designed.
+
 **NOT DONE BY THIS UNIT (stated first, per the contract):** the LIVE drill leg (b) is AUTHOR-GATED
 and is STAGED here, never run — the export is never launched by this session, the real store is
 never touched, `/Applications` is never refreshed. No notarization submit (U2's). No entitlements
@@ -472,7 +480,7 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
 (`pgrep -fl 'Variorum.app/Contents/MacOS'`) at session start: no match.
 
 **Pieces:**
-1. **The Xcode-27 clean-build probe** — IN-PROGRESS.
+1. **The Xcode-27 clean-build probe** — DONE (census complete; the result is RED, see the gate above).
    - `swift package clean && swift build` (repo root, Swift 6.4 / swiftlang-6.4.0.34.1): **GREEN**
      — `Build complete!`, exit 0, 6 benign warnings (Swift 6.4's new "`nonisolated(unsafe)` is
      unnecessary for a constant with Sendable type DateFormatter" ×4; a dependency's `v4`
@@ -488,12 +496,52 @@ edit, no Info.plist keys, no version stamping, no Sparkle, zero `Sync/`, zero sc
      `-default-isolation=MainActor` + `InferIsolatedConformances`. The EDITOR SEAM (CLAUDE.md
      names `PaneSurface`) — per the brief, REPORTED, not landed. Log:
      `App/Variorum/DerivedData/13r-u1/probe-xcodebuild-debug.log`.
-   - **PROBE IN FLIGHT (census only, never committed):** a temporary one-line edit at
-     `PaneSurface.swift:1076` (`tokens == nil ? A : B` → `tokens.map { _ in B } ?? A`) to learn
-     whether anything ELSE breaks under Xcode 27 (app + Mac test targets). RESTORE = `git
-     checkout -- App/Variorum/Variorum/Surface/PaneSurface.swift` (HEAD is the pre-probe text;
-     pre-probe sha256 `26525f05…500264e8`). A successor seeing a diff there: it is this probe —
-     restore it.
+   - **The census probe — RESTORED, nothing in flight.** A temporary one-line edit at
+     `PaneSurface.swift:1076` (`tokens == nil ? Color.gray.opacity(0.25) : .clear` →
+     `tokens.map { _ in Color.clear } ?? Color.gray.opacity(0.25)`, same value on both arms) was
+     applied ONLY to learn what else breaks; it was restored with `git checkout --` (the diff
+     verified to be that one line first). sha256 re-read = `26525f05…500264e8`, the pre-probe value;
+     `git status` clean.
+   - **WITH the probe line, the Mac APP builds** — `** BUILD SUCCEEDED **`, exit 0, 27 warnings
+     (log `probe-xcodebuild-debug2.log`). So the APP's whole Xcode-27 census is that ONE line.
+   - **The Mac TEST target `VariorumTests`** (`build-for-testing`, with the probe line): **RED, 20
+     unique errors in 8 files** — `PaletteDerivationTests` ×10 (main-actor-isolated statics
+     `all` / `resolved(_:tint:)` used from nonisolated test contexts) · `PlainPasteTests` ×2
+     (`MemberImportVisibility`: missing `import VariorumCore`) · `TagAndFolderTests` ×2,
+     `TutorialWalkTests` ×2, `LifecycleFacesTests` ×1, `PoolDragTests` ×1,
+     `StructuralGestureTests` ×1 (GRDB `Row`'s Sendable conformance is unavailable, now enforced)
+     · `EditorSeamCostTests` ×1 (a main-actor static called from a nonisolated context). Log
+     `probe-xcodebuild-bft.log`. **No Mac suite can run under Xcode 27 until these are migrated**
+     (that includes `PaneSurfaceTests`, the five pins on `PaneDecoration.resolve`).
+   - **The CORE package's tests** (`swift build --build-tests`): **RED, 7 unique errors, ALL in
+     `Tests/VariorumCoreTests/FurnitureConvergenceRepairTests.swift`** (lines 433/727/803: an
+     `async` expression missing `await` + `Row`'s unavailable Sendable; line 864: `Row` Sendable).
+     A test file under `Tests/`, not `Sources/VariorumCore/Sync/`. Log
+     `probe-swift-build-tests.log`. **`swift test` cannot run under Xcode 27 until it is migrated.**
+   - **The MOBILE target** (`-scheme VariorumMobile -destination 'generic/platform=iOS Simulator'`,
+     build only; iOS 27.0 SDK + simulator runtime are installed): **RED, ONE error** —
+     `VariorumMobile/Features/Write/MobileChipFlow.swift:81:28: the compiler is unable to type-check
+     this expression in reasonable time` (the `height` reduce in the chip-flow layout's
+     `sizeThatFits`), once per simulator architecture. Log `probe-mobile-build.log`.
+   - All logs are under `App/Variorum/DerivedData/13r-u1/` (gitignored, local).
+
+**THE ROUTING QUESTION FOR THE ORCHESTRATOR (U1 cannot proceed past it):**
+- **Only the APP line gates U1.** The archive needs the app to compile; the static drill needs the
+  archive. The test-target, core-test and mobile breakages do NOT gate U1's acceptance (it is
+  signing evidence, not a suite), but they DO gate every later suite run: the phase ladder's "suite
+  green", U2/U3's pins, and every other phase.
+- **Options, proposed (not taken):** (a) authorize U1 to land the app's one line as its OWN commit
+  ahead of the export road, flagged for the Fable ladder (editor-seam file; the change is the probe
+  line above: a pure function, the same value on both arms, no TK2 API touched), and route the 28
+  test/mobile errors to a standing-fixes entry (an Xcode-27 migration entry in the 19 ledger) that
+  runs before the ladder; (b) run that migration entry FIRST, app line included, under its own cast
+  (it touches the editor seam and a sync-convergence test file, so the cast is for the orchestrator to
+  set), then resume U1 from this record; (c) another fix for the app line (for example, declare
+  `VoiceTokens`'s `Equatable` conformance `nonisolated` in `Shared/Theme/VoiceTokens.swift`). That is
+  wider (a cross-platform Theme type) and the implementer does not recommend it.
+- **What resumes on either road:** pieces 2–4 as designed below. Pieces 2 and 4 (the scripts, the
+  plist, the profile copy, the staged checklist) do NOT need the app to compile and could be built
+  first. Piece 3 (the archive and the static drill) needs the app line fixed.
 2. **The archive/export road** — NOT-STARTED. Settled design: `Tools/Release/archive-and-export`
    (zero-instance refusal → clean Release archive into a fresh derived-data path under the output
    dir → `-exportArchive` with `Tools/Release/ExportOptions.plist`, method `developer-id`, manual
