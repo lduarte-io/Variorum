@@ -2911,3 +2911,16 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      **Restored: `Test run with 22 tests in 3 suites passed`** (`restored.log`). No hollow pin
      found. Red-on-old by construction for the rest (the support draft, the Help door, the pane's
      place and search): none of it existed at `32b97fdc`.
+   - **DEV-STORE WALK IN FLIGHT — THE RESTORE POINT, named before it runs (Debug build
+     `App/Variorum/DerivedData/13r-u3b/dd/Build/Products/Debug/Variorum.app`, `io.lduarte.Variorum
+     .debug`, the fenced dev store; `cliclick` + `Tools/WalkKit`, every step behind `guard.sh`; her
+     app absent, idle ~56 min at the start; the host holds Accessibility + Screen Recording):** the
+     dev domain's prefs EXPORTED to the gitignored
+     `App/Variorum/DerivedData/13r-u3b/devprefs-prewalk/io.lduarte.Variorum.debug.plist` (the
+     opt-in key ABSENT there); the dev container had NO `Application Support/Diagnostics` folder.
+     **Restore at the walk's end (app quit):** `defaults import ~/Library/Containers/io.lduarte
+     .Variorum.debug/Data/Library/Preferences/io.lduarte.Variorum.debug <that export>`; remove the
+     walk's `Application Support/Diagnostics` folder and the synthetic file under the container's
+     `Data/tmp/`; the voice back to Terminal (a dev-store synced setting); Mail was NOT running
+     before the walk — the draft legs launch it, and it is quit again at the end (its compose
+     windows closed UNSENT, Don't Save — nothing is ever sent).
