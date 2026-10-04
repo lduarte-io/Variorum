@@ -22,7 +22,8 @@
 |---|---|---|
 | a | Xcode 27 / Swift 6.4: the TEST-target + mobile migration (the 13r toolchain census's 28 non-app errors) | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR record-scope, dispositioned into the lesson/19b/19c; 1 NIT next-touch); every target green under Xcode 27 |
 | b | Xcode 27 / Swift 6.4: the MOBILE test-target migration (19a round-1 finding 2's census; CopiedRow unified to ONE source, three consumers) | **CLOSED 2026-10-04** — round 1 CLEAN BILL (no BLOCKER/MAJOR/MINOR; 2 record-scope NITs dispositioned); 6 sites fixed, mobile 62/14 green |
-| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **REVIEW-PENDING 2026-10-04** — Arm 1: 264 sites, 263 REAL by in-place mutant, 0 vacuous, 1 recorded; Arm 2: 43 isolation warnings → 0, suites green (Mac 160/23, mobile 106/17); the 19c RECORD at this file's tail |
+| c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
+| d | The compiler-flagged never-failing checks: the `#require` silent-nil class (38 sites, Mac 26 · mobile 4 · core 8) + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | OPEN — runs next in the away-gap; her walk outranks it |
 
 ---
 
@@ -58,10 +59,110 @@ when a toolchain turns it red. **Rules:** 19a's
 (mechanical only; anything intent-changing stops and reports). **Acceptance:** the census
 table in the record (site → real/vacuous-fixed, mutant evidence per fix) · zero isolation
 warnings left in the Mac test build AND zero in the mobile test build beyond the recorded
-not-owned classes (the deprecation class and `MobileProtectionTests:1572`'s unnecessary
-`try` stay recorded, not owed) · the touched suites green at a quiet window. **Cast:**
-`opus-implementer`; Opus cold review. **State: REVIEW-PENDING (2026-10-04) — the implementer's run is closed in the 19c RECORD below;
-an Opus cold review follows (no Fable trigger: the landed diff is test files only).**
+not-owned classes (the deprecation class and `MobileProtectionTests:1573`'s unnecessary
+`try` — the citation corrected per round 1 F4 — stay recorded, not owed) · the touched
+suites green at a quiet window. **Cast:**
+`opus-implementer`; Opus cold review. **State: CLOSED 2026-10-04 — round 1 returned a CLEAN
+BILL on the entry's own two arms (every settlement independently re-scored; 29 of the
+reviewer's own in-place mutants red at their own lines); its 1 MAJOR is against the RECORD's
+adjacent `#require` clearance claim, corrected in the ROUND 1 section below and the class
+routed to 19d; 2 MINOR + 2 NIT dispositioned by edit; no in-entry code fix landed, so no
+round 2 is owed — 19d's own ladder reviews the new class's work.**
+
+## 19c ROUND 1 — the Opus cold review's findings and the orchestrator's dispositions (2026-10-04, same-model flow); THE ENTRY CLOSES
+
+**The entry's own arms: CLEAN.** The reviewer re-ran the route census on its own fresh
+builds (TSVs identical), re-scored all 263 settlement rows against the mutant logs by its
+own script, ran 29 of its own in-place mutants (all red at their own lines, including every
+19a-named candidate), reconciled every count, confirmed the callee-universe narrowing loses
+no sites, and re-ran both arms' suites green (Mac 160/23 at a zero-instance window; mobile
+106/17). Zero `#expect`/`#require` lines changed in the landed diff. The mutants never
+touched `Sync/`; keychain-fact tests clean up in unconditional `defer`s. Reviewer evidence:
+`App/Variorum/DerivedData/19c-review/` (kept).
+
+- **F1 [MAJOR] ACCEPTED — the RECORD's `#require` clearance sentence is FALSE, and a real
+  silent class sat behind it, unowned.** The reviewer's in-place probes (exact spellings,
+  reverted): in a `try? #require(X)` position, or `try #require(X)` where an Optional is
+  expected, the compiler picks Testing's doc-private `#require<T>(_ optionalValue: T) -> T`
+  (the `NonOptionalRequireMacro`), binds T to the OPTIONAL ITSELF, and a nil X records
+  NOTHING at that line — the only tell is the "'#require(_:_:)' is redundant because 'X'
+  never equals 'nil'" warning. Proven at `QuickNoteTests.swift:358` (a nil-returning
+  `keyEquivalent` mutant: NO issue at 358; only later lines red) and
+  `ReadRenderingTests.swift:210/237/349` (same shape, logs `mac-probe-req.log`/`-req2.log`).
+  **Census: 38 compiler-flagged sites (Mac 26 · mobile 4 · core 8).** At the four probed
+  sites later expectations caught the nil; nobody has checked the other 34. DISPOSITIONS:
+  the record's sentence carries an in-place correction note; NOTICED #2's tripwire claim is
+  NARROWED (the route census sees `#expect` routes only — require-kind calls sit on the
+  Optional route BY DESIGN and are invisible to it; the redundancy WARNING is this class's
+  only tell); **the class is ROUTED TO 19d** (opened below — the sizing rule, 19a's F2
+  precedent: this entry's session already carried its unit). The warn-free spelling exists
+  in the tree (`BookArchiveFacesTests:106` hoists into a `let` first) and is 19d's shape.
+- **F2 [MINOR] ACCEPTED — `PostureSwitchDrillTests.swift:621` can never fail**
+  (`deviceID != nil` on a non-optional `String`; always true since `9f0eceea`, 2026-09-05 —
+  pre-toolchain, so not residue). The compiler's "always returns true" warning is
+  path-anchored, not in-expansion, so piece 2's filter missed it; the VOID route makes the
+  route census blind to it. ROUTED TO 19d with its named twin `SyncEnrollmentTests:262`
+  (19a's next-touch orphan — 19d is that touch): the compiler-flagged NEVER-FAILING-CHECK
+  family is one entry. Both are custody-drill test files — 19d's cold review carries an
+  explicit charge on them (the 19a FurnitureConvergence precedent), and the orchestrator
+  verifies those re-spells itself at 19d's close.
+- **F3 [MINOR] ACCEPTED — NOTICED #3's lesson was overgeneralized; REWORDED BY THIS BLOCK**
+  (the reviewer's counterexample: seven unannotated `findPane` locals directly inside
+  `@MainActor` test bodies compile warning-free in the very file the record cites). The
+  lesson as CORRECTED, binding wherever it is carried: **a local function declared inside a
+  CLOSURE does not inherit that closure's isolation — even when the closure's type is
+  explicitly `@MainActor`; a local function directly in a main-actor FUNCTION BODY does
+  inherit it.** (Plus the unchanged nested-helper corollary: annotate both.)
+- **F4 [NIT] ACCEPTED, corrected by edit:** the record's NOT-DONE (6) says the mutants
+  touched "two core Sources files" — `mutants.diff` shows THREE (`Operations+Reading.swift`,
+  `StoreEncryptionMigration.swift`, `StoreKey.swift` — the latter two custody code, all
+  reverted, none landed); the entry's `MobileProtectionTests:1572` citation is now 1573
+  (both corrected above/in this block).
+- **F5 [NIT] ACCEPTED as recorded residue:** the Mac test target's remaining 74 warnings
+  have no per-class census (19b did one for mobile; the next toolchain entry does the Mac
+  twin). Named now as adjacent concurrency-family residue, recorded NOT owed:
+  `SendableClosureCaptures` at `NoteDeletionDoorsTests:432` and
+  `StructuralGestureTests:1007/1071` — the likeliest to turn red at a future toolchain
+  bump; a fresh letter when one does.
+- **The reviewer's observation ADOPTED for the record:** the route census reads the overload
+  the compiler chose IN THE REAL TARGET (it is not R2-1's forbidden scratch-module
+  evidence), so it STANDS as supporting evidence for the one recorded site
+  (`AppleKeyRoundTripTests:97`, VOID route) — the site stays RECORDED, not settled: its
+  suite writes into her real iCloud Keychain and no session runs it.
+
+**19c IS CLOSED** (opened at 19a's close, closed 2026-10-04; one round; the red-on-old was
+each settlement's own in-place mutant).
+
+## 19d — the compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons
+
+**Opened 2026-10-04 by the 13r orchestrator out of 19c round 1 (F1 + F2).** **Scope, two
+families, test targets only:** **(1) the `#require` silent-nil class — 38 compiler-flagged
+sites (Mac 26 · mobile 4 · core 8**, the reviewer's census from fresh builds; a FLOOR:
+re-census first, counting unique warning lines): every `try? #require(X)` /
+Optional-position `try #require(X)` site re-spelled to a shape where a nil RECORDS AT ITS
+OWN LINE — the hoisted spelling (`let y = try #require(X)` first, then use `y`;
+`BookArchiveFacesTests:106` is the in-tree exemplar) or an explicit `#expect(X != nil)` +
+unwrap, whichever preserves the test's abort-vs-continue intent; **a `try?`
+record-and-continue site where abort-vs-continue is genuinely ambiguous STOPS AND REPORTS
+to the orchestrator** (choosing is test-intent, not mechanics); `FannedDefaultsTests:355`
+(a non-optional wrapped — purely redundant) is cleanup. **(2) the always-true-comparison
+family:** `PostureSwitchDrillTests:621` (`deviceID != nil` on non-optional; re-spell to a
+failable assertion, e.g. `!isEmpty`, red under an in-place `""` mutant) and
+`SyncEnrollmentTests:262` (19a's orphan: the dead `!= nil` removed — the `try` carries the
+real check). **Rules:** 19a's (mechanical; intent-changing stops), PLUS every re-spell
+carries F1's pin discipline — under an in-place nil/empty mutant at the exact call, the OLD
+spelling records nothing at its line (the red-on-old is the SILENCE, shown once per shape)
+and the NEW spelling records an issue AT ITS OWN LINE; mutants announced in-flight,
+reverted, tree clean. **Acceptance:** zero "'#require(_:_:)' is redundant" and zero
+"always returns true" warnings in all three test builds, except sites recorded with a
+reason · the census table (site → re-spelled-with-pin / recorded) · touched suites green at
+a quiet window (mobile on a concrete simulator). **Cast:** `opus-implementer`; Opus cold
+review **with an explicit charge on the custody-drill test files** (`PostureSwitchDrill`,
+`SyncEnrollment` — assertions must not weaken; the 19a FurnitureConvergence precedent), and
+the orchestrator verifies those re-spells by its own hands at the close. **DO-NOT-TOUCH
+unchanged from 19b/19c** (13r's staged artifacts, `Sync/`, schema, app source except
+nothing — this entry is TEST FILES ONLY). **State: OPEN — runs next in the away-gap; her
+walk outranks it for the machine.**
 
 ---
 
@@ -1008,7 +1109,12 @@ unused-result warnings inside any expansion (the census rule's visible half).
 overload doing its job; the 48 whose macro starts the statement (where a discarded Bool would
 hide) were read one by one — every condition is Optional-typed (`fetchVault`, `Queries.reading`,
 `RuleGrammar.encode`, `fetchOne`, a failable `DayBounds` init, …;
-`census/require-opt-statement-sites.txt`).
+`census/require-opt-statement-sites.txt`). **[THE FIRST SENTENCE IS CORRECTED AT ROUND 1
+(F1, MAJOR) — kept un-deleted beside its correction, the 19a custom: 38 compiler-flagged
+sites take the `NonOptionalRequireMacro` route (`try?` position, or `try #require` where an
+Optional is expected), where a nil records NOTHING at its own line. The statement-form
+reading above was sound; the clearance it implied for the whole macro was not. The class is
+19d's; the ROUND 1 section carries the mechanism and probes.]**
 
 **DISPOSITIONS:** Arm 1 — the census is the deliverable: 263 sites **REAL with mutant evidence**
 (no fix owed; nothing to re-spell) · 1 **RECORDED** (`AppleKeyRoundTripTests.swift:97`, unrunnable
