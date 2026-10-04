@@ -1912,3 +1912,38 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 *[removed for publication]*
   localhost override), `/Users/Shared/VariorumWalk/`, the walk builds and the walk feed — swept
   at the closeout.
+
+---
+
+## U3-A RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; refreshed at the stop):**
+- U3-B (MetricKit, Diagnostics, Help ▸ Send Feedback…) — not this session's.
+- THE U3 ACCEPTANCE WALK — staged later (after U3-B) and run at HER sitting; this session never
+  runs it, never builds a walk DMG through the pipeline, never publishes anything (the public
+  appcast stays 404), never touches `/Applications` or the real store.
+- Zero `Sources/VariorumCore/Sync/`, zero schema, zero mobile-target files.
+- (Filled in at the stop with anything else left undone.)
+
+**Session start (2026-10-04 ~19:58Z):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair).
+Zero instances (`pgrep -fl 'Variorum.app/Contents/MacOS'`: no match). HEAD `138ac723` = origin,
+tree clean, commit count 4878. Brief read in full in this session: the plan's KICKOFF, SITTING
+RECORD, the U3 section with every amendment (R-13r-10…14, THE CALM-ASKS CADENCE, the walk arms,
+the hazards, SIZING), ENVIRONMENT TRAPS, THE LADDER, the LIVE STATUS from THE RESUME RECORD down,
+the U2 RECORD (pieces 4 and 5 especially); `notes/SessionResiliencyProtocol.md`. Sparkle facts
+re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDelegate.h`,
+`generate_appcast/ArchiveItem.swift`) before relying on them — recorded per piece.
+
+**Pieces (the SIZING bullet's U3-A list; order chosen so each lands whole):**
+1. R-13r-6 — the stamping build phase + MARKETING_VERSION 0.9.0 — PENDING
+2. R-13r-13 — the out-of-date sync refusal's calm face (face-side; the Check for Updates… door) — PENDING
+3. R-13r-14 — the field guide's backups passage — PENDING
+4. The ONE release-notes source → What's New (show-once on a version CHANGE, silent on a fresh
+   record; Help ▸ What's New) — PENDING
+5. `release.sh`: the notes rendered beside the DMG into the appcast + R-13r-10's self-explaining
+   DMG window — PENDING
+6. THE CALM-ASKS CADENCE — the one local scheduler, the update ask (R-13r-11), the backup-folder
+   OFFER toast (R-13r-12), Settings ▸ General's "Check for updates automatically", the ONE
+   QUESTIONS entry — PENDING
+7. Finals — the touched families' suites, the Debug-build captures, this record closed — PENDING
