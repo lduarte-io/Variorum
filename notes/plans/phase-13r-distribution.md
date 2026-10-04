@@ -452,6 +452,23 @@ opened; the working tree was left clean.
   build to surface any Xcode-27 breakage. The LIVE drill leg (b) is AUTHOR-GATED — the
   implementer builds the road and the static leg, STAGES the live drill (A1 rail
   instructions ready), then stops and reports; the orchestrator coordinates her launch.
+- **THE TOOLCHAIN-GATE ROUTING ADJUDICATED (the orchestrator, 2026-10-04, post-compaction — the
+  U1 RECORD's routing question; TEXTKIT2_NOTES re-read first per the editor-seam rule): OPTION
+  (a), REFINED.** The `PaneSurface.swift:1076` break is a TOOLCHAIN compile error, not a TK2
+  behavior shift (no TK2 API implicated; the OS build is unchanged at 26A428) — nothing ruled
+  re-opens. (1) U1's implementer LANDS the one-line use-site fix as its OWN commit (the probe's
+  shape — same value on both arms), flagged editor-seam for 13r's Fable ladder; the
+  conformance-isolation alternative (c) is DECLINED (wider blast radius on a cross-platform
+  Theme type; both sessions agree); then pieces 2–4 as designed. (2) The 28 test/mobile errors
+  are **19a** — the 19 ledger's FIRST entry (opened by this orchestrator; scope, rules, cast
+  and acceptance live there): a MECHANICAL migration, assertions byte-preserved
+  (`FurnitureConvergenceRepairTests` is sync-convergence protection — its Opus cold review
+  explicitly checks nothing weakened), run AFTER U1's session ends and BEFORE U2 spawns
+  (U2/U3's pins and the ladder's "suite green" need the restored base; U1's static drill does
+  not). 19a's acceptance includes the TK2 point-release tripwire suites green under Xcode 27 —
+  the first suite run on the new major IS the SDK-shift census — and `PaneSurfaceTests`' five
+  `PaneDecoration.resolve` pins, which PROVE the U1 line behavior-preserving. (3) Her LIVE
+  drill waits on none of 19a — it can run as soon as U1 stages it.
 - **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
   from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**
