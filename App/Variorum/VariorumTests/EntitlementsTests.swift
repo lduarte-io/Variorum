@@ -70,7 +70,13 @@ struct EntitlementsTests {
     /// mach-lookup exceptions are named after the build's OWN bundle id (the
     /// variable form), so this Debug host reads `….debug-spks` / `-spki`
     /// while the Release export reads `io.lduarte.Variorum-spks` / `-spki`
-    /// (the release pipeline's export check pins that side).
+    /// (the release pipeline's export check pins that side EXACTLY).
+    ///
+    /// MEASURED at 13r U2: when Xcode signs a test host it APPENDS its own
+    /// names to this array (`com.apple.testmanagerd`,
+    /// `com.apple.dt.testmanagerd.runner`, `com.apple.coresymbolicationd`). So
+    /// this asserts OUR two names LEAD, in order, and that neither appears
+    /// twice; the injected extras are Xcode's, not the app's.
     @Test func sparklesInstallerMachServicesFollowTheBuildsOwnBundleID() {
         guard let task = SecTaskCreateFromSelf(nil) else {
             Issue.record("SecTaskCreateFromSelf returned nil")
@@ -80,7 +86,10 @@ struct EntitlementsTests {
             task, "com.apple.security.temporary-exception.mach-lookup.global-name" as CFString, nil)
             as? [String] ?? []
         let bundleID = Bundle.main.bundleIdentifier ?? ""
+        let ours = [bundleID + "-spks", bundleID + "-spki"]
         #expect(!bundleID.isEmpty)
-        #expect(names == [bundleID + "-spks", bundleID + "-spki"], "got \(names)")
+        #expect(Array(names.prefix(2)) == ours, "got \(names)")
+        #expect(names.filter { $0.hasSuffix("-spks") || $0.hasSuffix("-spki") } == ours,
+                "exactly our two Sparkle names, got \(names)")
     }
 }

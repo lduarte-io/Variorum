@@ -1108,8 +1108,8 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    state — every block must set its own variables inline.** Piece 4 resumes with the key.
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
    `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
-   with Sparkle's standard consent flow, the Check for Updates… door — IN-PROGRESS (code
-   committed; the Debug build + the pins PENDING).
+   with Sparkle's standard consent flow, the Check for Updates… door — IN-PROGRESS (code, build
+   and pins GREEN; a mutation check of the plist pin next — the detail under "Verified" below).
 
    **Sparkle facts READ FROM THE 2.10.0 SOURCE in the checkout (`SourcePackages/checkouts/Sparkle`,
    tag 2.10.0), not assumed:**
@@ -1190,5 +1190,29 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        would START Sparkle in a Debug build pointed at the public feed, which is exactly what
        R-13r-7 forbids. The pin's red side holds by construction; the Release side is piece 5's
        export check + the walk.
+   - **Verified:**
+     - **Build:** a CLEAN Debug build (`-derivedDataPath App/Variorum/DerivedData/13r-u2/p4-debug`,
+       removed first) → `** BUILD SUCCEEDED **`. The warning set is **IDENTICAL to the U1
+       baseline, 28/28**. Two of my own warnings were met on the way and removed by design, not
+       suppressed:
+       - `SPUUpdater` imports into Swift as MAIN-ACTOR-ISOLATED (Sparkle's main-thread contract),
+         so the KVO handler's read must sit on the main actor.
+       - The handler now asserts that contract with `MainActor.assumeIsolated`. KVO fires on the
+         mutating thread, which is main by Sparkle's contract, and `.initial` fires synchronously
+         inside `observe`.
+     - **The signed Debug bundle** (`codesign -d --entitlements -`) carries
+       `mach-lookup.global-name = [io.lduarte.Variorum.debug-spks, io.lduarte.Variorum.debug-spki]`,
+       so the variable form resolves per configuration. Its Info.plist carries the three keys, and
+       the downloader and automatic-checks keys are absent.
+     - **Pins:** `xcodebuild test … -only-testing:VariorumTests/UpdateChannelTests
+       -only-testing:VariorumTests/EntitlementsTests -only-testing:VariorumTests/OneTimeCodeAutoFillTests`
+       at a zero-instance window → **`Test run with 13 tests in 3 suites passed`**, no `skipped:`
+       lines (log `13r-u2/p4-test2.log`).
+       - The first run was RED on my own entitlement pin, and that was a TEST-HOST fact, not an app
+         defect: when Xcode signs a test host it APPENDS `com.apple.testmanagerd`,
+         `com.apple.dt.testmanagerd.runner` and `com.apple.coresymbolicationd` to this same array.
+       - The pin now asserts that OUR two names LEAD, in order, and are the only Sparkle names. The
+         piece-5 export check asserts EXACT equality on the shipped bundle, where nothing is
+         injected.
 5. **The full release pipeline** in `Tools/Release/` — NOT-STARTED.
 6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.

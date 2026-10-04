@@ -81,9 +81,15 @@ final class UpdateChannel {
         controller.startUpdater()
         observation = controller.updater.observe(
             \.canCheckForUpdates, options: [.initial, .new]
-        ) { @Sendable [weak self] updater, _ in
-            let value = updater.canCheckForUpdates
-            Task { @MainActor in self?.canCheckForUpdates = value }
+        ) { [weak self] updater, _ in
+            // `SPUUpdater` is main-actor-isolated in Swift: Sparkle's contract
+            // is main-thread-only. KVO fires on the mutating thread, which is
+            // therefore main, and `.initial` fires synchronously inside this
+            // `observe` call, also on main. So this ASSERTS the contract and
+            // invents no hop. A violation would trap loudly instead of racing.
+            MainActor.assumeIsolated {
+                self?.canCheckForUpdates = updater.canCheckForUpdates
+            }
         }
     }
 
