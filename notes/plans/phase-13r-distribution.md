@@ -2410,3 +2410,50 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      door while the window is up); `ENABLE_USER_SCRIPT_SANDBOXING = NO` on the Mac target only;
      the `hdiutil` deprecation warning on macOS 27; the Finder-automation dependency of the ruled
      DMG road.
+
+---
+
+## U3-B RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS SUB-PHASE (stated first, per the contract; kept current, FINAL at the stop):**
+- PENDING — this line is rewritten at each stop. At the start: nothing is built yet.
+
+**Session start (2026-10-04 ~21:10Z):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0
+(27A266a) · `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair).
+Zero instances (`pgrep -fl 'Variorum.app/Contents/MacOS'`: no match). HEAD `32b97fdc` = origin, tree
+clean, commit count 4892. Brief read in full in this session: the plan's KICKOFF, the SITTING RECORD
+(R-13r-1…9, R-13r-5 above all), the U3 section with every amendment (R-13r-10…16, the walk arms,
+the hazards, SIZING), ENVIRONMENT TRAPS, THE LADDER, the LIVE STATUS from THE RESUME RECORD down
+(the toolchain pair; the SITE-SIDE REPORT — `support@stargazing.tech` is LIVE; the "U3-B — OPEN"
+bullet), the U2 RECORD's walk sheet (W-0…W-10 + its STOP rules — the form this unit's sheet
+follows), the U3-A RECORD in full; `notes/SessionResiliencyProtocol.md`; the 17 ledger's P15 entry
+and its FIXED row (the key-in-error-description road closed at origin by `StoreKey
+.redactedDescription(of:)` + `RedactedKeyedStatementError` — this unit's surface starts from a
+closed road and adds no new reader of any GRDB error).
+
+**A FACT READ BEFORE RELYING ON IT — the MetricKit road, from THIS machine's macOS 27.0 SDK
+headers (not a web claim):** `MXMetricManager` / `MXMetricManagerSubscriber` /
+`MXDiagnosticPayload` / `MXCrashDiagnostic` stay `macos(12.0)`, now marked
+`API_DEPRECATED(…, macos(12.0, API_TO_BE_DEPRECATED))` — the "to be deprecated" sentinel, which
+emits no warning — in favour of a new Swift `MetricManager` / `DiagnosticReport` family that is
+`@available(macOS 27.0, …)` (the `.swiftinterface`). The deployment target is macOS 26 and AppSpec
+§1 rules "no availability gating", so **R-13r-5's `MXCrashDiagnostic` subscriber road stands as
+ruled**; the new API is a post-macOS-27-floor migration, recorded here and nothing more.
+`MXDiagnosticPayload.crashDiagnostics` and `pastDiagnosticPayloads` are `macos(12.0)`;
+`MXCrashDiagnostic.exceptionReason` is `macos(14.0)`.
+
+**Pieces (the SIZING bullet's U3-B list; placement-independent pieces FIRST, then THE PLACEMENT
+PROPOSAL and a STOP for the architect's ruling, then the faces):**
+1. The crash-report OPT-IN — a LOCAL machine preference (the 18j `AppearanceChoice` pattern),
+   default OFF; an INJECTED registration seam so OFF is pinnable (no `MXMetricManager` subscriber
+   registration when off); the MetricKit subscriber; the one owner on the app delegate — PENDING.
+2. The received-report store (LOCAL files, the bytes exactly as MetricKit handed them) + the
+   DEBUG-only synthetic-payload injection door (env-gated, the `VisualWalkProbe` precedent) — PENDING.
+3. The support door's MAIL DRAFT machinery (one draft builder; an injected opener) + Help ▸ Send
+   Feedback… — PENDING.
+4. THE PLACEMENT PROPOSAL (the in-batch fork) — PENDING; the session STOPS there.
+5. The faces, to the architect's ruling: the opt-in row + the Diagnostics surface — PENDING the
+   ruling.
+6. THE U3 WALK — STAGED (R-13r-16's combined public road) — PENDING.
+7. Finals (mutation check, the dev-store walk + captures, suites at zero-instance windows) —
+   PENDING.
