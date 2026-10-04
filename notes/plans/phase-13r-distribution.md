@@ -1108,8 +1108,8 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    state — every block must set its own variables inline.** Piece 4 resumes with the key.
 4. **After the public key:** the partial Info.plist (`SUPublicEDKey`, `SUFeedURL`,
    `SUEnableInstallerLauncherService`), the two mach-lookup exceptions, the non-DEBUG updater
-   with Sparkle's standard consent flow, the Check for Updates… door — IN-PROGRESS (code, build
-   and pins GREEN; a mutation check of the plist pin next — the detail under "Verified" below).
+   with Sparkle's standard consent flow, the Check for Updates… door — **DONE** (`e4694ac2` +
+   `0903f125`, the mutation check recorded in this commit).
 
    **Sparkle facts READ FROM THE 2.10.0 SOURCE in the checkout (`SourcePackages/checkouts/Sparkle`,
    tag 2.10.0), not assumed:**
@@ -1214,5 +1214,33 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        - The pin now asserts that OUR two names LEAD, in order, and are the only Sparkle names. The
          piece-5 export check asserts EXACT equality on the shipped bundle, where nothing is
          injected.
-5. **The full release pipeline** in `Tools/Release/` — NOT-STARTED.
+     - **The mutation check (safe by construction: the Debug updater is never instantiated).**
+       `SUFeedURL` was edited to `https://stargazing.tech/appcast.xml` (the committed state first, per
+       the resiliency rule's commit-before-revert):
+       - `UpdateChannelTests` went **RED, exactly 1 issue**
+         (`theBakedFeedIsTheLockedStargazingURL`, `UpdateChannelTests.swift:57`).
+       - Restored with `git checkout --`, then **GREEN, 7/7**; the tree is clean.
+     - **Release-path compile:** the Sparkle-touching code compiles in Debug too (only instantiation
+       is fenced), so the Debug build above type-checks it. Piece 5's archive is the Release proof.
+5. **The full release pipeline** in `Tools/Release/` — IN-PROGRESS (design below; scripts next).
+
+   **Two walk facts MEASURED first** (they shape both pieces 5 and 6). The probe was a throwaway
+   SANDBOXED probe app: `network.client`, NO ATS dictionary, built against SDK 27.0 with `minos`
+   26.0, its own bundle id `io.lduarte.u2-ats-probe`, run on this macOS 27.0. It touched no Variorum
+   container. Its prefs and container were REMOVED after, verified absent.
+   - **ATS allows loopback, and ATS was proven ACTIVE.** `http://localhost:8765/…` and
+     `http://127.0.0.1:8765/…` both loaded (HTTP 200) from a local `python3 -m http.server`. The
+     CONTROL, `http://example.com/`, FAILED with `NSURLErrorDomain -1022` ("…App Transport Security
+     policy requires the use of a secure connection").
+     - So the walk's locally-served plain-HTTP feed needs NO Info.plist exception, and **the walk
+       builds are byte-for-byte the shipping configuration**.
+     - The lookup's doc reading (macOS 14+ blocks IP literals by default) did not hold for
+       loopback here. Measured beats inferred, and both are recorded.
+   - **A sandboxed app's defaults are reached ONLY by the CONTAINER-PATH `defaults write`.** With
+     the plain bundle id (`defaults write io.lduarte.u2-ats-probe SUFeedURL …`), the write landed in
+     `~/Library/Preferences/` and the sandboxed app read **nil**. With the container path
+     (`defaults write ~/Library/Containers/<id>/Data/Library/Preferences/<id> SUFeedURL …`), the app
+     read it. The lookup's inference from `defaults read` was WRONG for writes.
+     - The container exists only after the app's FIRST launch, so the walk's override comes after
+       a first run and a quit.
 6. **The walk, staged** ([O]/[HER] checklist, the local feed plan, two walk builds) — NOT-STARTED.
