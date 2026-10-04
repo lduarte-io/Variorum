@@ -643,6 +643,17 @@ opened; the working tree was left clean.
   feed) → the W-4 drag-install → W-5 from `~/Applications`; consent may arrive one launch
   earlier than the sheet's count (the DMG launch set Sparkle's first-launch flag) — the
   acceptance cares that consent is ASKED with no profile option, not its ordinal.
+  **(3) A SAME-MACHINE WALK HAZARD, caught by her About screenshot (1.0 (1)):** the drag-install
+  landed correctly (`~/Applications/Variorum.app` reads 0.0.1/4829; `spctl` accepted, quarantine
+  inherited), but the app she then OPENED was `/Applications/Variorum.app` — HER daily-drive
+  build (1.0 (1), pre-Sparkle, no update door), visible to every account because `/Applications`
+  *[removed for publication]*
+  *[removed for publication]*
+  this-Mac-only hazard (a friend's Mac has no dev build there), but the walk sheet's W-5 must
+  launch by explicit path (`open ~/Applications/Variorum.app`) — the resumed walk does.
+  The model-seat note: the Fable seat hit repeated safeguard stops mid-walk; at her switch
+  the walk continues on Opus 5.5 (her call), the rest of the phase returns to a Fable
+  orchestrator via her next kickoff.
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
