@@ -178,6 +178,40 @@ struct LaunchFurnitureTests {
         }
     }
 
+    /// **R-17y-8's PIN (17y B-DEDUPE): Jekyll leaves the DEFAULT seed.** A
+    /// fresh store's first launch seeds the subset — Sherlock and *Encryption
+    /// Explained* — and NO Jekyll, ever (her word: "I don't want it in
+    /// people's libraries anymore"); the launch loop iterates
+    /// `Book.launchSet` while `Book.all` keeps Jekyll for the Restore doors.
+    /// RED ON OLD: the loop iterated `Book.all` and a fresh store was born
+    /// with Jekyll (and takemania inside it).
+    @Test func aFreshLaunchSeedsTheSubsetWithoutJekyll() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            #expect(
+                try await reading(db, named: SampleLibrarySeeder.Book.sherlock.name) != nil,
+                "Sherlock still seeds")
+            #expect(
+                try await reading(db, named: SampleLibrarySeeder.Book.encryptionExplained.name) != nil,
+                "Encryption Explained still seeds")
+            #expect(
+                try await reading(db, named: SampleLibrarySeeder.Book.jekyllAndHyde.name) == nil,
+                "no Jekyll in a fresh library (R-17y-8)")
+            // Not minted-then-removed either: no tombstone of the name exists.
+            let everExisted = try await db.read { db in
+                try Queries.readingTombstoneExists(
+                    db, name: SampleLibrarySeeder.Book.jekyllAndHyde.name)
+            }
+            #expect(!everExisted, "Jekyll was never minted at all")
+            // The subset is a LAUNCH fact only: Book.all keeps Jekyll so the
+            // Restore doors and the existing-store vocabulary stay whole.
+            #expect(SampleLibrarySeeder.Book.all.contains(.jekyllAndHyde))
+        }
+    }
+
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing
     /// store that already had its library is declined at launch and grows no
     /// guide; a store born on an earlier build (`done`, no guide) stays as it
