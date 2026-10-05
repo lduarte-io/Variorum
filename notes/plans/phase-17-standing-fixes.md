@@ -1827,7 +1827,7 @@ only; DerivedData `App/Variorum/DerivedData/17y/`.
 | 4 | Red-on-old by behavioural revert of piece 3 | DONE (this commit) — the pins sharpened first (`a5a8696c`: the resumed-birth deletion arm SPLIT — the WHOLE guide deleted, so the tombstone alone decides; the book alone, whose tagged lessons are residue — and a sixth pin `theBirthSeedNamesWhatItFound` driving `seedAtBirth`'s decision table branch by branch; 6/6 green, `p3b-green.log`). **ROUND A — RV1, the hook's argument removed from `LaunchFurniture` (`rv-a.log`): exactly the predicted RED — `aFreshStoresFirstLaunchPutsTheFieldGuideOnWelcome` with its 2 issues (no guide), the other 5 green — "6 tests … failed … with 2 issues".** **ROUND B — RV2 the tombstone guard · RV3 the residue guard · RV4 the doors' latch removed from `performBirthSeed`, the wire intact (`rv-b.log`): RED with 8 issues across exactly the three guarded tests** — `aResumedBirthHonoursHerDeletionAndLeavesResidueAlone` 4 (the whole-guide deletion re-made; the book-only deletion re-made; residue REPLACED — a guide minted AND her tagged note destroyed by the replace's cleanup), `aTutorialDoorInFlightIsNeverRacedByTheLaunch` 1 (the launch minted beside a held door), `theBirthSeedNamesWhatItFound` 3 (`.deletedByTheReader` / `.residue` / `.doorInFlight` each answered as a seed or `.alreadyPresent`) — while the birth pin, the no-retrofit pin and the signed-in pin stayed green, as predicted. Both rounds restored clean |
 | 5 | Suites at the END (the pins, the seeder/Welcome suites, the tutorial spine; the phone build — `Shared/` gains one defaulted parameter) | DONE — Mac on the fixed tree (HEAD `30a2e6ac`'s code, `DerivedData/17y`, zero Variorum instances): **batch 1 `end-seeders.log` — "Test run with 103 tests in 12 suites passed"** (`LaunchFurnitureTests` · `SampleLibraryWelcomeTests` · `SampleLibraryTests` · `EncryptionExplainedSeedTests` · `LaunchSeedTombstoneTests` · `StarredGatheringSeederTests` · `EncryptionBookDoorTests` · `JekyllTakemaniaSeedTests` · `CalmAsksTests` (the seed is not her writing — the guide included) · `ShellConfirmTests` · `DeadVocabularyTests` · `SampleLibraryDedupeFactsTests`); **batch 2, THE TUTORIAL SPINE, `end-spine.log` — "Test run with 98 tests in 13 suites passed"** (the eleven `TutorialWalkTests.swift` suites `TutorialBookShapeTests` … `TutorialFannedMatrixTests` + `TutorialBooksLessonTests` + `TutorialBooksRitualTests`); no skips in either. **Phone: `VariorumMobile` generic iOS Simulator BUILD SUCCEEDED** (`phone-build.log`, `DerivedData/17y-mobile` — `Shared/`'s one defaulted parameter compiles there; the phone calls nothing of it) |
 | 6 | The walk — a FRESH dev store, both voices, into `notes/plans/17y-screens/b-seed/` (gitignored) | IN-PROGRESS — **STATE NOW: the dev store is BACK in place and its five marks restored to the originals (read back); NO Variorum instance runs.** The walk's fresh store is PARKED at `…/Application Support/Variorum-dev.17y-bseed-fresh` (seeded content only — made by this walk; remove it at the walk's end; a successor who abandons the walk `rm -rf`s it). **WALK A DONE (ROAD 2 live, the fixed build at `DerivedData/17y`, pid 11732, launched 01:45:16 on the fresh store, marks cleared as a fresh install's):** the unified log (`/usr/bin/log show … category sample-library/tutorial/starred-gathering` — note: zsh's builtin `log` shadows it, use the path) read `the adventures of sherlock holmes: awaitingFirstSync` 01:45:39 · `Encryption Explained: awaitingFirstSync` 01:45:59 · `The Strange Case of Dr Jekyll and Mr Hyde: awaitingFirstSync` 01:46:19 · `starred gathering: awaitingFirstSync` 01:46:39 · `welcome arrangement: undecided` — and NO field-guide line (the hook is never reached on this road): the dev scope's signed-in session (sync OFF) gates every seed, exactly the trace's Road 2. Its capture was STOPPED by the author guard (HID idle 0 s — the author was at the machine; not retried; the idle-climb read 8→31 s after) and then the **coordinator's HOLD** arrived (her real-store mint refuses while ANY Variorum instance runs): the instance was quit BY IDENTITY at once and the dev store swapped back. NEXT, after the hold: re-stage (original aside, the parked fresh store back, marks cleared), capture walk A's bare Bookcase, then walk B — Welcome mark `pending` on the same fresh store (the guide's real road: the hook → `seedAtBirth` → the arrangement shelves it), captures in both voices; then restore exactly as above |
-| 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | NOT-STARTED |
+| 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | IN-PROGRESS — FINDINGS + PROVISIONALS written; QUESTIONS #183 (a)–(e) appended; the KnownIssues row for F-BSEED-3 added, owner 13s (this commit). PENDING: EVIDENCE's walk lines, the first line |
 
 **REVERT STATE: NO REVERT IN FLIGHT** (rounds A and B both ran from committed HEADs and were restored by `git checkout HEAD --`, `git diff --quiet` verified each time).
 
@@ -1932,8 +1932,49 @@ PENDING.
 
 ### FINDINGS
 
-PENDING.
+- **F-BSEED-1 — FIXED (the row): a fresh store was born without its field guide.** Mechanism above;
+  pinned red-on-old (piece 2's driven reproduction, piece 4's round A); fixed (piece 3).
+- **F-BSEED-2 — the U7 fresh-birth pin composed a REPLICA of the launch** (`launchSeeds` in
+  `SampleLibraryWelcomeTests`), which is how the gap stayed invisible; its comment described the
+  defect as design ("the guide is seeded when she first opens it"). FIXED structurally: the launch's
+  furniture is ONE function (`LaunchFurniture.seed`) that `VariorumApp` and `LaunchFurnitureTests`
+  both call; the stale comment rewritten (comment-only).
+- **F-BSEED-3 — RECORDED + OWNED (KnownIssues, owner 13s; QUESTIONS #183(c)): her Monday bed will
+  show the unjudged seeded objects TWICE after sign-in** — Jekyll, the starred-notes gathering,
+  Quicknotes, the classics gathering (one of the two then matches nothing), "a first quick note" on
+  TODAY's tree already, and the field guide now too (THE RESIDUAL above). Traced by reading (SyncSpec
+  §7; `Sync/` grepped — no keeper keys on any of them), not run two-client. The orchestrator may want
+  to tell her before Monday: nothing is lost, delete the extras.
+- **F-BSEED-4 — the signed-OUT fresh-store road cannot be WALKED on this machine without the
+  author.** The dev scope holds a signed-in dev session with dev sync OFF, so every fresh dev store
+  takes Road 2 (walk A proved it live). Signing that session out is a credential act — hers. Walk B
+  therefore stages the `pending` resume of a birth (the guide's real road, books gated); the live
+  signed-out bed is her Monday first launch — **which carries this fix only if the build she installs
+  carries it** (this batch refreshes nothing and publishes nothing; release runs are hers to approve).
+- **F-BSEED-5 — walk-harness fact (for WalkKit):** in the zsh tool shell, `log` is zsh's builtin
+  (`log: too many arguments`, or silently nothing) — the unified log is `/usr/bin/log show`.
+- **Cost note (no finding):** the birth seed is the restore road's one runner turn (~45 notes),
+  awaited after the three books on the furniture path — first paint long done, nothing awaits it;
+  the same cost every Restore Tutorial press already pays.
 
-### PROVISIONALS (QUESTIONS #183 carries them)
 
-PENDING.
+### PROVISIONALS (QUESTIONS #183 carries them, in her words)
+
+- **P-17y-BSEED-1 — the occasion:** the arrangement's arrange-now road only (a birth under the sync
+  gate, or its `pending` resume); never an existing store — including stores born on U7–13r builds
+  without a guide (their road stays the doors). (a) BUILT · (b) a one-time add-if-missing pass on
+  existing stores (breaks the no-retrofit contract) · (c) key the guide on "the account holds no guide"
+  after a first clean round instead of on the birth.
+- **P-17y-BSEED-2 — any tutorial trace means do nothing:** a live guide, a tombstoned one (her
+  deletion), or residue (tagged lessons / the scraps pool, no book) — the residue's replace is the
+  doors' CONFIRMED road. (a) BUILT · (b) replace residue silently (could tombstone her own
+  `tutorial`-tagged note — round B's red shows it would) · (c) seed beside residue (MINOR-D5's
+  doubled-pool class).
+- **P-17y-BSEED-3 — out of the sync dedupe** (the brief's Jekyll precedent) → THE RESIDUAL. (a) BUILT ·
+  (b) a tutorial keeper in `Sync/` (Fable work; its own entry) · (c) the 13s seed-set reshape.
+- **P-17y-BSEED-4 — the latch:** a door in flight → the birth seed yields; a door pressed during the
+  birth seed is a silent no-op (the doors' existing double-press rule). (a) BUILT · (b) the door waits
+  for the birth seed and then opens the guide.
+- **P-17y-BSEED-5 — silent:** no receipt, no navigation, one `tutorial`-category log line. (a) BUILT ·
+  (b) a quiet receipt naming the guide.
+
