@@ -1749,6 +1749,13 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   pre-compaction reading is lost) and the design memo `notes/plans/17y-bdedupe-design-memo.md`
   written BEFORE building; a FRESH fable-reviewer cold round after. Zero schema — the marker
   stays 12; SyncSpec §7 gains the keeper's paragraph as the canon delta at close.
+  **~07:00: the PRECONDITION READS are DONE (this orchestrator session, post-compaction) and
+  THE DESIGN MEMO IS COMMITTED (3d11348f)** — the build follows B3's close, to the memo: the
+  reserved-object PAIRWISE fold (fold only unengaged content-identical pairs; any doubt keeps
+  both), chosen over a guide manifest classifier because the guide's seeded richness (fans, a
+  callout, the twin, the scraps pool, per-build content after MAJOR-2's fix) breaks the
+  Sherlock classifier's contract — the deviation from R-17y-5's sketch is the memo's
+  PROVISIONAL (i), hers to overturn.
 - **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)(r)(s) + the F-B2-7
   rider): RUNNING** (spawned 2026-10-05 ~06:15, fresh `opus-implementer`; the standalone brief
   `notes/plans/17y-b3-brief.md` + the rulings file bind — Gate 1 PRE-ANSWERED (R-17y-1…4), the
