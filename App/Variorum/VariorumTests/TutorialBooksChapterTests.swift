@@ -171,6 +171,12 @@ struct TutorialBooksLessonTests {
             #expect(text.contains("#\(SampleLibrarySeeder.classicsTagPath)"))
             #expect(OwnershipBadgeCopy.ownedBy("x").hasPrefix("owned by"))
             #expect(text.contains("\u{201C}owned by\u{201D}"), "the badge, by its own words")
+            // 17y B-DEDUPE (R-17y-8), the lesson's new claims: the GUIDE is
+            // the plain-book example now, and Jekyll is the example you
+            // choose — one Restore press away, named by its own door.
+            #expect(text.contains("This guide is the plain kind"))
+            #expect(text.contains("\u{201C}\(SampleLibraryJekyllBook.name)\u{201D}"),
+                    "the Restore sentence names the book the door restores")
 
             // THE TRUTH, kind by kind.
             let readings = try await db.read { try Queries.readings($0) }
@@ -184,6 +190,15 @@ struct TutorialBooksLessonTests {
             let jekyllShown = try await shown(db, jekyll.id)
             #expect(!jekyllMembers.isEmpty && jekyllMembers == jekyllShown,
                     "a book holds its notes as members — what it shows IS its rows")
+            // 17y B-DEDUPE (R-17y-8): the lesson's plain-book example is the
+            // GUIDE itself now — a book whose notes are ordinary members —
+            // and the restored Jekyll's notes join the gathering (the
+            // Restore sentence's truth; this world holds the restored copy).
+            #expect(!(try await memberIDs(db, guideID)).isEmpty,
+                    "the guide is a plain book holding members")
+            let classicsShown = Set(try await shown(db, classics.id))
+            #expect(Set(jekyllMembers).isSubset(of: classicsShown),
+                    "a restored Jekyll's notes join the gathering beside Sherlock's")
             #expect(sherlock.owned)
             let story = try #require(try await memberIDs(db, sherlock.id).last)
             let elsewhere = try session.operations.createReading(name: "elsewhere", kind: .book)
@@ -288,20 +303,16 @@ struct TutorialBooksLessonTests {
             #expect(text.contains("for you to judge: add it, copy it in, or dismiss it."))
             #expect(text.contains("Finishing a book dismisses whatever is still waiting."))
             #expect(text.contains("Changed your mind? Add it by hand; dismissing only stops the book from adding it on its own."))
-            // 17y B3 item (h) (R-17y-1/2): the "N at the door" line LEFT the
-            // book's content — the door is the masthead's icon and the one
-            // word is "Arrivals". The lesson's "the book's “at the door”
-            // line" is SEED CONTENT, fenced from B3 (zero seed content) and
-            // RE-OWNED to B-DEDUPE (the seeder's next touch — finding F-B3-1).
-            // Until it is re-worded the prose names a line that no longer
-            // exists: a KNOWN issue, so the spine stays honest — and this
-            // block fails ("known issue not recorded") the moment the prose
-            // is fixed, so the follow-up must remove it.
+            // 17y B3 item (h) (R-17y-1/2) → FIXED at 17y B-DEDUPE (F-B3-1):
+            // the door is the masthead's Arrivals icon beside the gear, and
+            // the lesson now names THAT face — the retired "at the door"
+            // line is gone from the prose (the wrapper this block carried
+            // came off with the fix, as it demanded).
             #expect(ArrivalsCopy.word == "Arrivals")
-            withKnownIssue("F-B3-1: lesson 4 still names the retired \u{201C}at the door\u{201D} line") {
-                #expect(!text.contains("\u{201C}at the door\u{201D}"),
-                        "the lesson names the door by the face's own word")
-            }
+            #expect(!text.contains("\u{201C}at the door\u{201D}"),
+                    "the lesson names the door by the face's own word")
+            #expect(text.contains("beside the book's settings gear"),
+                    "…and points at the icon where it lives")
             #expect(text.contains(ArrivalsCopy.addVerb.lowercased() + " it"))
             #expect(text.contains(ArrivalsCopy.dismissVerb.lowercased() + " it"))
             #expect(MembershipChoiceCopy.copyInVerb.lowercased() == "copy in")
@@ -600,7 +611,10 @@ struct TutorialBooksRitualTests {
     /// **R1 — the classics walk:** open the classics gathering on the Welcome
     /// shelf; see Jekyll's and Sherlock's notes side by side; notice
     /// Sherlock's wear the owned mark; open one through it and land in its
-    /// book.
+    /// book. (17y B-DEDUPE, R-17y-8: the fixture's `library: true` world is
+    /// the POST-RESTORE shape now — Jekyll is the example the lesson's
+    /// Restore press adds, not launch furniture; the walk's mechanics are
+    /// identical either way.)
     @Test func ritualOneTheClassicsWalk() async throws {
         try await withChapterWorld(library: true) { _, db, _ in
             let readings = try await db.read { try Queries.readings($0) }

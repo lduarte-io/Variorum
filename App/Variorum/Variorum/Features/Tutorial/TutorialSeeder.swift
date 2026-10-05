@@ -41,6 +41,86 @@ enum TutorialSeeder {
     nonisolated static let tagName = "tutorial"
     nonisolated static let scrapPoolTitle = "tutorial scraps"
 
+    /// **17y B-DEDUPE (the B2 ladder's MAJOR-2): the getting-around lesson's
+    /// mode-row sentence, DERIVED from the (p) seam** (`PostMode` — the one
+    /// place the build's mode order lives), so the seeded guide can never
+    /// teach a mode the build lacks: Release reads six modes and ⌘1–⌘6,
+    /// Debug keeps all seven. The count's word stays prose (13s re-voices).
+    nonisolated static func modeRowSentence(
+        keepingCanvas: Bool = PostMode.buildKeepsCanvas
+    ) -> String {
+        let count = PostMode.order(keepingCanvas: keepingCanvas).count
+        let word = count == 7 ? "seven" : count == 6 ? "six" : "\(count)"
+        return "A note opens into one of \(word) modes \u{2014} the tabs read "
+            + PostMode.modeList(keepingCanvas: keepingCanvas) + ", and "
+            + PostMode.keySpan(keepingCanvas: keepingCanvas)
+            + " switch between them. A note opens in Write the first time \u{2014} the "
+            + "plain full page; after that it remembers the mode you left it in. "
+            + "The rest of this book visits each mode where it earns its keep."
+    }
+
+    /// **17y B-DEDUPE (MAJOR-2), the same seam for the "ways of looking"
+    /// chapter's last lesson:** Release (no Canvas) gets the workbench
+    /// lesson alone — title "blocks", two paragraphs; Debug keeps the
+    /// canvas teaching whole. One pure function, so the mint, the plan and
+    /// the pins read the same shape in both flavors.
+    nonisolated static func lookingLessonContent(
+        teachesCanvas: Bool = PostMode.buildKeepsCanvas
+    ) -> (title: String, paragraphs: [String]) {
+        var paragraphs: [String] = [
+            teachesCanvas
+                ? "Two more ways of looking, each a different traversal of the same "
+                  + "note \u{2014} nothing is ever copied into a view. (Outlining lives in "
+                  + "Compare now: an outline is just a related note beside its "
+                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)"
+                : "One more way of looking \u{2014} a different traversal of the same "
+                  + "note; nothing is ever copied into a view. (Outlining lives in "
+                  + "Compare now: an outline is just a related note beside its "
+                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)",
+
+            // 13b 4D (N39 + N32(a)) + wave 2c (item 16, W8-1 direction C):
+            // the workbench, taught where the doors live. (The old
+            // table-of-contents half of this lesson lives in Read's edit
+            // face now.)
+            "BLOCKS (\u{2318}6) is the workbench \u{2014} the note's blocks as "
+            + "objects. Every row shows what it carries: takes, comments, "
+            + "words, tags, a lock, when it last moved. Click a row and its "
+            + "panel opens on the right \u{2014} edit the text there, see its "
+            + "takes, or jump onward (Write, Takes, its history). \u{2318}-click "
+            + "picks several, and the bar above acts on all of them at once \u{2014} "
+            + "merge, tag, archive, delete, move out to snippets \u{2014} one "
+            + "\u{2325}\u{2318}Z takes the whole act back. Rows reorder with "
+            + "\u{2191} \u{2193}, or the row's \u{22EF} menu moves by position: top, "
+            + "bottom, or the number you type. Move out to snippets does what "
+            + "it says: the block LEAVES this note and becomes a snippet "
+            + "there (a block lives in one place; \u{2325}\u{2318}Z brings it "
+            + "back).",
+        ]
+        if teachesCanvas {
+            paragraphs += [
+                // 13b 4E (N30/S4-7): the canvas package, taught whole.
+                "CANVAS (\u{2318}7) scatters the blocks as sticky-note cards. They open "
+                + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
+                + "header \u{2014} arrangement is yours and is remembered, the note's order "
+                + "doesn't move \u{2014} and resize it from the corner grip. Click into a "
+                + "card and type: edits land on the take the card is showing. The "
+                + "little number in a card's corner is the block's place in the "
+                + "note's current order.",
+
+                "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
+                + "Click cards in the order the note should read \u{2014} each shows its "
+                + "number as you go \u{2014} then Apply once: the numbered cards lead the "
+                + "note and everything else keeps its relative order after them "
+                + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
+                + "card at once \u{2014} bigger boards open a read-only overview; click any "
+                + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
+                + "which take you're viewing (\u{201C}viewing \u{2014} not what the note "
+                + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
+            ]
+        }
+        return (teachesCanvas ? "blocks \u{B7} canvas" : "blocks", paragraphs)
+    }
+
     /// What the confirm sheet says before a wholesale replace — plain
     /// words, exact scope (the spoken confirm, brief decision 6; the
     /// Stage 2 ladder's MINOR-D3/D4 accuracy pass: the copy discloses the
@@ -143,8 +223,12 @@ enum TutorialSeeder {
         // is the seeded book *Encryption Explained*.
         ("keeping it private",
          [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
+        // 17y B-DEDUPE (MAJOR-2): the last lesson's title follows the BUILD
+        // — Release (no Canvas after (p)) titles it "blocks"; the mint and
+        // this plan read the ONE pure function, so the shape pins stay in
+        // lockstep in both flavors.
         ("ways of looking", ["read", "lenses", "compare & versions",
-                             "blocks \u{B7} canvas"]),
+                             lookingLessonContent().title]),
         // 13i-d U7: "books & the shelf" LEFT this chapter — its content moved
         // (swept) into the books chapter below as "a book from the inside".
         ("the library of things", ["comments & tags",
@@ -452,12 +536,11 @@ enum TutorialSeeder {
 
             // 13b 4D (S4-20): the first-open default is WRITE now; the
             // per-post memory is worth teaching in the same breath.
-            "A note opens into one of seven modes — the tabs read Write \u{B7} Takes \u{B7} "
-            + "Read \u{B7} Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and "
-            + "\u{2318}1 through \u{2318}7 "
-            + "switch between them. A note opens in Write the first time — the "
-            + "plain full page; after that it remembers the mode you left it in. "
-            + "The rest of this book visits each mode where it earns its keep.",
+            // 17y B-DEDUPE (the B2 ladder's MAJOR-2): the sentence DERIVES
+            // from the mode seam — the guide can never teach a mode the
+            // build lacks (Release has no Canvas after (p); the helper's
+            // own precedent). Words functional, 13s re-voices.
+            modeRowSentence(),
 
             "Try it now: press \u{2318}K, type \u{201C}getting\u{201D}, and \u{23CE} back to this very "
             + "lesson. Then press \u{2318}2 for Takes and \u{2318}1 for Write, and watch the "
@@ -1646,49 +1729,14 @@ enum TutorialSeeder {
             try ops.applyTag(tagID, toPost: twin.post.id)
         } catch OperationError.alreadyTagged {}
 
-        _ = try lesson(looking, "blocks \u{B7} canvas", [
-            "Two more ways of looking, each a different traversal of the same "
-            + "note — nothing is ever copied into a view. (Outlining lives in "
-            + "Compare now: an outline is just a related note beside its "
-            + "draft — the previous lesson's \u{201C}make outline note\u{201D}.)",
-
-            // 13b 4D (N39 + N32(a)) + wave 2c (item 16, W8-1 direction C):
-            // the workbench, taught where the doors live. (The old
-            // table-of-contents half of this lesson lives in Read's edit
-            // face now.)
-            "BLOCKS (\u{2318}6) is the workbench — the note's blocks as "
-            + "objects. Every row shows what it carries: takes, comments, "
-            + "words, tags, a lock, when it last moved. Click a row and its "
-            + "panel opens on the right — edit the text there, see its "
-            + "takes, or jump onward (Write, Takes, its history). \u{2318}-click "
-            + "picks several, and the bar above acts on all of them at once — "
-            + "merge, tag, archive, delete, move out to snippets — one "
-            + "\u{2325}\u{2318}Z takes the whole act back. Rows reorder with "
-            + "\u{2191} \u{2193}, or the row's \u{22EF} menu moves by position: top, "
-            + "bottom, or the number you type. Move out to snippets does what "
-            + "it says: the block LEAVES this note and becomes a snippet "
-            + "there (a block lives in one place; \u{2325}\u{2318}Z brings it "
-            + "back).",
-
-            // 13b 4E (N30/S4-7): the canvas package, taught whole.
-            "CANVAS (\u{2318}7) scatters the blocks as sticky-note cards. They open "
-            + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
-            + "header — arrangement is yours and is remembered, the note's order "
-            + "doesn't move — and resize it from the corner grip. Click into a "
-            + "card and type: edits land on the take the card is showing. The "
-            + "little number in a card's corner is the block's place in the "
-            + "note's current order.",
-
-            "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
-            + "Click cards in the order the note should read — each shows its "
-            + "number as you go — then Apply once: the numbered cards lead the "
-            + "note and everything else keeps its relative order after them "
-            + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
-            + "card at once — bigger boards open a read-only overview; click any "
-            + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
-            + "which take you're viewing (\u{201C}viewing — not what the note "
-            + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
-        ])
+        // 17y B-DEDUPE (the B2 ladder's MAJOR-2): the lesson teaches the
+        // BUILD's modes — Release (no Canvas after (p)) gets the workbench
+        // lesson alone, its title and intro following; the Debug guide keeps
+        // the canvas teaching whole. ONE pure function carries both flavors
+        // (`lookingLessonContent`), the same seam as the helper's "canvas"
+        // dictionary entry. Words functional, 13s re-voices.
+        let looking2 = Self.lookingLessonContent()
+        _ = try lesson(looking, looking2.title, looking2.paragraphs)
 
         // —————————————————————————— the library of things ——————————————————
 
@@ -1924,17 +1972,26 @@ enum TutorialSeeder {
             + "matching its rule \u{2014} it holds nothing. A BOOK holds its notes "
             + "as members. An OWNED book is the only place its notes live.",
 
+            // 17y B-DEDUPE (R-17y-8): Jekyll left the default seed, so the
+            // lesson teaches with what stands — Sherlock (owned), this guide
+            // (a plain book), the classics gathering — and carries her
+            // intake's own sentence: Jekyll is one Restore press away, an
+            // example you choose. Words functional, 13s re-voices.
             "All three are waiting on the Welcome shelf, where this guide sits "
             + "too. Open the Bookcase in the sidebar, and on Welcome open the "
-            + "gathering called \u{201C}classics\u{201D}. Both classic books' notes "
-            + "wear the tag #classics, and the gathering is made from that tag "
-            + "\u{2014} so it shows the notes of both books side by side without "
-            + "holding a single one of them.",
+            + "gathering called \u{201C}classics\u{201D}. Every Sherlock note wears "
+            + "the tag #classics, and the gathering is made from that tag \u{2014} "
+            + "so it shows every note wearing it without holding a single one "
+            + "of them.",
 
             "Look closer: every Sherlock note wears a quiet \u{201C}owned by\u{201D} "
             + "mark naming its book. That book OWNS its notes \u{2014} they live there "
-            + "and nowhere else. The Jekyll notes wear no mark: their book holds "
-            + "them as ordinary members, and they could live in other books too.",
+            + "and nowhere else. This guide is the plain kind: a book whose notes "
+            + "are ordinary members, free to live in other books too. And a second "
+            + "classic is one press away \u{2014} Help \u{25B8} Restore "
+            + "\u{201C}\(SampleLibraryJekyllBook.name)\u{201D} adds it as an example: "
+            + "its notes arrive wearing #classics and join this gathering beside "
+            + "Sherlock's.",
 
             "Click a Sherlock note's mark and you land in its book, at that very "
             + "note. A gathering is a window onto notes that live somewhere; the "
@@ -2021,9 +2078,12 @@ enum TutorialSeeder {
             + "either one \u{2014} it STAYS. A book's notes are members, and "
             + "untagging never sends a member away.",
 
+            // 17y B-DEDUPE (B3's F-B3-1): the door moved to the book
+            // masthead's Arrivals icon at 17y B3 (R-17y-1/2) — the lesson
+            // names the face that exists. Words functional, 13s re-voices.
             "A collecting book auto-adds freely; anything it can't seat on its "
-            + "own waits at Arrivals \u{2014} the book's \u{201C}at the door\u{201D} "
-            + "line \u{2014} for you to judge: add it, copy it in, or dismiss it. "
+            + "own waits at Arrivals \u{2014} the little tray beside the book's "
+            + "settings gear \u{2014} for you to judge: add it, copy it in, or dismiss it. "
             + "Finishing a book dismisses whatever is still waiting. Changed your "
             + "mind? Add it by hand; dismissing only stops the book from adding "
             + "it on its own.",
