@@ -607,6 +607,9 @@ struct ShelfView: View {
         .onAppear { recordRow(reading.id, placing: placing) }
         .onChange(of: placing) { _, now in recordRow(reading.id, placing: now) }
         .onChange(of: model.detailsShown) { _, _ in recordRow(reading.id, placing: placing) }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            BookcaseRowOracle.recordFrame(reading.id, frame, owner: oracleOwner)
+        }
         #endif
     }
 
@@ -1015,9 +1018,25 @@ enum BookcaseRowOracle {
         store.publish(drawn, for: readingID, owner: owner)
     }
 
-    static func release(owner: UUID) { store.release(owner: owner) }
+    private static var frames = OwnedRegistrations<String, CGRect>()
+
+    /// Where the row sits, in its window (`.global`) — so a pin can read the
+    /// pixels a frozen row keeps showing.
+    static func frame(_ readingID: String) -> CGRect? { frames.current[readingID] }
+
+    static func recordFrame(_ readingID: String, _ frame: CGRect, owner: UUID) {
+        frames.publish(frame, for: readingID, owner: owner)
+    }
+
+    static func release(owner: UUID) {
+        store.release(owner: owner)
+        frames.release(owner: owner)
+    }
 
     /// A pin's door: start from empty.
-    static func forgetAll() { store.forgetAll() }
+    static func forgetAll() {
+        store.forgetAll()
+        frames.forgetAll()
+    }
 }
 #endif
