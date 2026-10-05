@@ -166,6 +166,51 @@ struct BookPanelDragGateTests {
         }
     }
 
+    /// **The B2 ladder's MAJOR-1 — a FROZEN book's lock answers BEFORE the
+    /// sort gate.** A finished (or sealed) book in a stamp order: re-placing a
+    /// note inside its own chapter must speak the op's OWN refusal — "reopen
+    /// it first" / "unseal it first" — never `needsManualOrder`, whose road
+    /// (set the order ▾ to Manual and save it) a frozen book cannot take: the
+    /// Save button is hidden there and `setReadingSort` refuses. Pre-B2 the
+    /// drop reached `assignPostToSection`, whose lock guard runs before its
+    /// no-op guard; the B2 gate answered first. RED ON OLD (d3560ab9's tree):
+    /// the refusal names "Manual order", not "reopen" / "unseal".
+    @Test(arguments: [false, true])
+    func aFrozenStampOrderedBookSpeaksItsOwnRefusalNotManualOrder(sealed: Bool) async throws {
+        try await withWorld { world in
+            let ops = world.session.operations
+            if sealed {
+                _ = try ops.sealReading(world.book.id)
+            } else {
+                try ops.lockReading(world.book.id)
+            }
+            let bookID = world.book.id
+            let frozen = try #require(try await world.db.read { try Queries.reading($0, id: bookID) })
+            #expect(frozen.locked && (frozen.sealedAt != nil) == sealed)
+            let (model, task) = try await heldModel(world)
+            defer { task.cancel() }
+            try await settle { model.snapshot(for: bookID)?.reading?.locked == true }
+            let shown = try #require(model.groups(for: bookID)
+                .first { $0.section?.id == world.one.id }?.entries.map(\.postID))
+            #expect(shown.count == 2)
+            let before = try await membershipOrder(world)
+
+            // The note shown LAST dropped on the note shown FIRST: a real
+            // re-place (in manual order it would land right above).
+            await model.drop(.note(try #require(shown.last)), onto: .note(try #require(shown.first)),
+                             in: frozen)
+            let refusal = try #require(world.session.status.current,
+                                       "a frozen book's drop must SAY why (U2-8)")
+            #expect(refusal.kind == .refusal)
+            #expect(refusal.text.contains(sealed ? "unseal" : "reopen"),
+                    "the op's own road for a \(sealed ? "sealed" : "finished") book: \(refusal.text)")
+            #expect(!refusal.text.contains("Manual order"),
+                    "never the sort road — a frozen book cannot save an order: \(refusal.text)")
+            #expect(try await membershipOrder(world) == before, "nothing moved")
+            #expect(try await chapterOf(world, try #require(shown.last)) == world.one.id)
+        }
+    }
+
     /// GUARD (green on both sides): the LEGAL half of a stamp-order drop —
     /// filing a note into ANOTHER chapter — still files, silently (the book
     /// view's own ruling: "the chapter half of the drop always happens").
