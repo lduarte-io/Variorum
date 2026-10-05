@@ -184,6 +184,11 @@ struct CaptureTextView: NSViewRepresentable {
         view.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)
         view.drawsBackground = false
+        // 17y B2 (m): where the CARET is, reported from the box's own
+        // first-responder changes — the one truth (see `onCaretChange`).
+        view.onCaretChange = { [weak coordinator = context.coordinator] inBox in
+            coordinator?.parent.onFocusChange?(inBox)
+        }
         view.wantsInitialFocus = focusRequest > 0
         context.coordinator.lastFocusRequest = focusRequest
         // Spelling follows the app's ONE this-Mac setting (default `off`,
@@ -294,13 +299,13 @@ struct CaptureTextView: NSViewRepresentable {
             parent.text = view.string
         }
 
-        func textDidBeginEditing(_ notification: Notification) {
-            parent.onFocusChange?(true)
-        }
-
-        func textDidEndEditing(_ notification: Notification) {
-            parent.onFocusChange?(false)
-        }
+        // 17y B2 (m): `textDidBeginEditing` / `textDidEndEditing` no longer
+        // report focus. AppKit posts begin-editing on the first EDIT, not
+        // when the caret arrives, so the autofocused empty box blinked its
+        // caret while the host still drew the Terminal block cursor — two
+        // cursors (a 13u3 UNIT C regression: the bar's gate read
+        // `@FocusState`, the first-responder truth, before this view).
+        // `CaptureNSTextView.onCaretChange` is the one report now.
     }
 }
 
@@ -320,6 +325,26 @@ final class CaptureNSTextView: NSTextView {
     /// over: a caret that blinks in a non-key window swallows every
     /// keystroke, and a caret you cannot type into is worse than no caret.
     var wantsInitialFocus = false
+
+    /// **Where the caret is** (17y B2, item (m)): true when this box becomes
+    /// first responder, false when it resigns — reported the moment the
+    /// caret ARRIVES, keystroke or none, so the host's Terminal block cursor
+    /// stands down exactly while this caret is the one blinking (her rule:
+    /// "if the terminal cursor is blinking open at the end, your cursor
+    /// shouldn't be blinking as well" — one cursor at a time).
+    var onCaretChange: ((Bool) -> Void)?
+
+    override func becomeFirstResponder() -> Bool {
+        let became = super.becomeFirstResponder()
+        if became { onCaretChange?(true) }
+        return became
+    }
+
+    override func resignFirstResponder() -> Bool {
+        let resigned = super.resignFirstResponder()
+        if resigned { onCaretChange?(false) }
+        return resigned
+    }
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()

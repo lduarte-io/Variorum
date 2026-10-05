@@ -179,8 +179,9 @@ struct QuickEntryBar: View {
     @State private var box: QuickEntryModel
     /// Plain state rather than `@FocusState` since 13u3 UNIT C: the caret
     /// lives in an AppKit box now, and the one honest report of where it is
-    /// comes from that box's own begin/end editing (the block-cursor idiom
-    /// is the only reader).
+    /// comes from that box's own first-responder changes (17y B2 (m) — it
+    /// was its begin/end EDITING, which missed a caret that arrived without
+    /// a keystroke: two cursors). The block-cursor idiom is the only reader.
     @State private var entryFocused = false
     /// A counted focus REQUEST, the capture box's own door: raised once when
     /// the shelf wants the caret here, and again whenever she clicks the
