@@ -2527,3 +2527,31 @@ the diff: `CaptureTextView` (NIT-1) — a TK2 `NSTextView` OUTSIDE the editor se
 WHEN the caret report reaches the host (a main-queue hop), no TK1 API, no identity attributes. The rest is the Book
 Panel's drop brain (MAJOR-1, NIT-4), chrome (NIT-3), copy (NIT-6) and comments/pins.
 
+
+#### THE ORCHESTRATOR'S SPOT-WALK (post-fix-round, pre-round-2 — the faces no round had seen; dev-store Debug build at 873fed6b, author-free ~05:20–05:45, zero other instances; captures `notes/plans/17y-screens/b2fix/`, gitignored)
+
+- **MAJOR-1's refusal, LIVE (`frozen-refusal.png`):** the Journal (entry-date ↓, chapterless)
+  FINISHED through Book Settings (no arrivals existed; no dismissal line in the sheet — correct),
+  a member note opened, the Book Panel's "2026-09-26" dragged onto "2026-10-02" (a real
+  re-place): the toast speaks **"“Journal” is finished — reopen it first."** — the op's own
+  refusal with its real road, never the Manual-order advice. Nothing moved. The Journal then
+  REOPENED through the same sheet (`journal-restored.png`, the "Reopened “Journal”." receipt);
+  while finished it opened as pure text (the Finished contract's face, seen in passing).
+- **(b) on the FINAL tree (`my-order-grips.png`, `after-drop-3.png`):** my order → every row's
+  ⠿ in the gutter, names unmoved vs a–z; "u4 other" dragged onto "refresh walk" LANDS right
+  above it; a–z → no grip anywhere. A–Z then restored.
+- **NIT-3 LIVE (`book-panel-lone.png`):** "the door"'s panel (1 chapter) draws NO grip on
+  "part one" while the name keeps the slot's indent — no hug, no shift.
+- **(n) in passing (`panel-try2.png`):** a stray click opened the title's rename field on
+  "door one" — the open field's words sat exactly where the resting title rested.
+- **Walk facts:** (1) two drags STARTED ON THE GRIP COLUMN's left edge (gutter x≈248pt) never
+  engaged a session; the same gesture from the row name committed — the implementer's b2/b9
+  frames show grip-started drops landing, so this reads as a hit-area coordinate miss in this
+  walk, not a defect; recorded for the next walker (aim the grip's center, or drag the name).
+  (2) NIT-6's tooltip did not render under a 3 s synthetic hover + capture — the help string
+  is pin-guarded (both clauses required), so the words are verified headless; the live tooltip
+  render is macOS's own.
+- **Residue (accepted class, the B2 walk's own):** one my-order hand position ("u4 other"
+  above "refresh walk" in Home's unshelved sequence) — invisible outside my order. The Journal
+  finish/reopen round-trips to flag-off (no arrivals existed to dismiss; no buffers were dirty).
+  The Debug instance quit clean by identity; zero instances after.
