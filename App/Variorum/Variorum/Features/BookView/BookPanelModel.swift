@@ -60,6 +60,14 @@ nonisolated enum BookPanelCopy {
     static let moveNoteDownVerb = "Move Down"
     static let moveChapterUpVerb = "Move Chapter Up"
     static let moveChapterDownVerb = "Move Chapter Down"
+    /// 17y B2 (e) — a note re-placed inside its own chapter while the book
+    /// reads in a stamp order: what happened, why, and the road out (the
+    /// book view navigator's "order · … ▾" → Manual order → Save as This
+    /// Book's Order). Wording PROVISIONAL (13s re-voices).
+    static func needsManualOrder(book: String, order: String) -> String {
+        "\(quoted(book)) is sorted by \(order), so a note can\u{2019}t be placed by hand "
+            + "\u{2014} set the book\u{2019}s order \u{25BE} to Manual order and save it."
+    }
     static let structureUnavailableNote =
         "A note's place in its book is changed from the book's rows \u{2014} the Book Panel "
         + "beside the note, or the book's own Outline and Index."
@@ -223,9 +231,13 @@ nonisolated enum BookPanelBrain {
         return index < ids.count - 1 ? .after(ids[index + 1]) : nil
     }
 
-    /// Whether a chapter row draws its ⠿ grip (17y B2, item (e)).
+    /// Whether a chapter row draws its ⠿ grip (17y B2, item (e) — her
+    /// stance: "a handle that cannot drag must not render"). A LONE chapter
+    /// has nowhere to go — every drop of it resolves to nothing (`dropPlan`)
+    /// — so its grip is not drawn; with another chapter to move past, it is
+    /// (a finished book keeps it and refuses WITH the road — U2-8).
     static func chapterGripDrawn(chapterCount: Int) -> Bool {
-        true
+        chapterCount > 1
     }
 
     /// Move Chapter Up / Down — `BookStructureModel.moveChapter(_:up:)`'s
@@ -295,6 +307,49 @@ nonisolated enum BookPanelBrain {
             guard sections.last?.id != sectionID else { return nil }
             return .moveChapter(sectionID: sectionID, to: .end)
         }
+    }
+
+    /// What a panel drop RESOLVES to (17y B2, item (e) — the silent sort
+    /// gate made to speak, P-2).
+    nonisolated enum DropOutcome: Equatable {
+        /// Write this through the existing ops.
+        case plan(DropPlan)
+        /// Nothing to do — dropped on itself, or where it already stands.
+        case nothing
+        /// A note dropped to RE-PLACE it inside its own chapter (onto a
+        /// sibling, or its own chapter's heading) while the book reads in a
+        /// STAMP order: the book view's planner keeps an order she cannot see
+        /// untouched, so the drop would write nothing under a hairline that
+        /// promised "lands right above". Refuse WITH the road instead.
+        case needsManualOrder
+    }
+
+    /// The ONE resolution every panel drop takes: `dropPlan` (the book
+    /// view's planners, unchanged), plus the sort gate's honest answer.
+    static func dropOutcome(
+        _ drag: BookPanelDrag, onto site: DropSite, groups: [Group],
+        sections: [ReadingSection], manualOrder: Bool
+    ) -> DropOutcome {
+        guard let plan = dropPlan(
+            drag, onto: site, groups: groups, sections: sections, manualOrder: manualOrder)
+        else { return .nothing }
+        // The gate: a stamp order, a note, a plan that files it into the
+        // chapter it is ALREADY in (a write that changes nothing) — where
+        // the same drop in manual order would have re-placed it.
+        if !manualOrder, case .note(let postID) = drag,
+           case .file(_, let sectionID, nil) = plan,
+           sectionID == chapter(of: postID, in: groups),
+           case .file(_, _, let before?)? = dropPlan(
+               drag, onto: site, groups: groups, sections: sections, manualOrder: true),
+           before != postID {
+            return .needsManualOrder
+        }
+        return .plan(plan)
+    }
+
+    /// The chapter a note sits in on the panel (nil = unfiled).
+    private static func chapter(of postID: String, in groups: [Group]) -> String? {
+        groups.first { $0.entries.contains { $0.postID == postID } }?.section?.id
     }
 }
 
@@ -421,11 +476,22 @@ final class BookPanelModel {
     /// — the content type keeps it out).
     @discardableResult
     func drop(_ drag: BookPanelDrag, onto site: BookPanelBrain.DropSite, in book: Reading) async -> Bool {
-        guard let plan = BookPanelBrain.dropPlan(
+        let plan: BookPanelBrain.DropPlan
+        switch BookPanelBrain.dropOutcome(
             drag, onto: site, groups: groups(for: book.id),
             sections: snapshot(for: book.id)?.sections ?? [],
-            manualOrder: manualOrder(for: book.id))
-        else { return false }
+            manualOrder: manualOrder(for: book.id)) {
+        case .nothing:
+            return false
+        case .needsManualOrder:
+            // 17y B2 (e): the silent sort gate speaks, with the road out.
+            let shown = snapshot(for: book.id)?.reading ?? book
+            session.status.refuse(BookPanelCopy.needsManualOrder(
+                book: shown.name, order: BookOrderChoices.storedLabel(for: shown)))
+            return true
+        case .plan(let resolved):
+            plan = resolved
+        }
         switch plan {
         case .file(let postID, let sectionID, let before):
             await run(book) { ops in

@@ -139,14 +139,26 @@ struct BookPanelDragGateTests {
     }
 
     /// The same gate on the other re-place road: onto its OWN chapter's
-    /// heading ("the top of this chapter" in a manual book).
+    /// heading ("the top of this chapter" in a manual book). The dragged
+    /// note is the one the stamp order shows LAST in the chapter — the one
+    /// shown first is already at the top, a genuine nothing-to-do.
     @Test func aStampOrderedDropOnItsOwnChapterHeadingRefusesWithTheRoad() async throws {
         try await withWorld { world in
             let (model, task) = try await heldModel(world)
             defer { task.cancel() }
             let before = try await membershipOrder(world)
+            let shown = try #require(model.groups(for: world.book.id)
+                .first { $0.section?.id == world.one.id }?.entries.map(\.postID))
+            #expect(shown.count == 2)
+            let lower = try #require(shown.last)
 
-            await model.drop(.note(world.n2), onto: .chapter(world.one.id), in: world.book)
+            await model.drop(.note(try #require(shown.first)), onto: .chapter(world.one.id),
+                             in: world.book)
+            #expect(world.session.status.current == nil,
+                    "the note shown first is already at the top — nothing to do, nothing said")
+            #expect(try await membershipOrder(world) == before)
+
+            await model.drop(.note(lower), onto: .chapter(world.one.id), in: world.book)
             let refusal = try #require(world.session.status.current)
             #expect(refusal.kind == .refusal)
             #expect(refusal.text.contains("Manual order"), "\(refusal.text)")
