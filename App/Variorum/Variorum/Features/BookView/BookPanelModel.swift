@@ -317,7 +317,8 @@ nonisolated enum BookPanelBrain {
         /// Nothing to do — dropped on itself, or where it already stands.
         case nothing
         /// A note dropped to RE-PLACE it inside its own chapter (onto a
-        /// sibling, or its own chapter's heading) while the book reads in a
+        /// sibling, or its own chapter's heading) while an OPEN book (never a
+        /// finished or sealed one — its lock answers first) reads in a
         /// STAMP order: the book view's planner keeps an order she cannot see
         /// untouched, so the drop would write nothing under a hairline that
         /// promised "lands right above". Refuse WITH the road instead.
@@ -326,13 +327,22 @@ nonisolated enum BookPanelBrain {
 
     /// The ONE resolution every panel drop takes: `dropPlan` (the book
     /// view's planners, unchanged), plus the sort gate's honest answer.
+    ///
+    /// `frozen` = the book is finished or sealed (`reading.locked` — sealing
+    /// finishes too). **The lock answers BEFORE the sort gate** (the B2
+    /// ladder's MAJOR-1): a frozen book's plan runs as it is, so the op's OWN
+    /// lock guard refuses ("reopen it first" / "unseal it first" — one
+    /// refusal source, through `run`), because `needsManualOrder`'s road —
+    /// save a Manual order — is impossible there (Save is hidden on a frozen
+    /// book and `setReadingSort` refuses).
     static func dropOutcome(
         _ drag: BookPanelDrag, onto site: DropSite, groups: [Group],
-        sections: [ReadingSection], manualOrder: Bool
+        sections: [ReadingSection], manualOrder: Bool, frozen: Bool
     ) -> DropOutcome {
         guard let plan = dropPlan(
             drag, onto: site, groups: groups, sections: sections, manualOrder: manualOrder)
         else { return .nothing }
+        if frozen { return .plan(plan) }
         // The gate: a stamp order, a note, a plan that files it into the
         // chapter it is ALREADY in (a write that changes nothing) — where
         // the same drop in manual order would have re-placed it.
@@ -476,16 +486,18 @@ final class BookPanelModel {
     /// — the content type keeps it out).
     @discardableResult
     func drop(_ drag: BookPanelDrag, onto site: BookPanelBrain.DropSite, in book: Reading) async -> Bool {
+        // The held row — the one the order gate already reads — so the lock
+        // consult and the refusal's sealed/finished wording agree with it.
+        let shown = snapshot(for: book.id)?.reading ?? book
         let plan: BookPanelBrain.DropPlan
         switch BookPanelBrain.dropOutcome(
             drag, onto: site, groups: groups(for: book.id),
             sections: snapshot(for: book.id)?.sections ?? [],
-            manualOrder: manualOrder(for: book.id)) {
+            manualOrder: manualOrder(for: book.id), frozen: shown.locked) {
         case .nothing:
             return false
         case .needsManualOrder:
             // 17y B2 (e): the silent sort gate speaks, with the road out.
-            let shown = snapshot(for: book.id)?.reading ?? book
             session.status.refuse(BookPanelCopy.needsManualOrder(
                 book: shown.name, order: BookOrderChoices.storedLabel(for: shown)))
             return true
@@ -494,14 +506,14 @@ final class BookPanelModel {
         }
         switch plan {
         case .file(let postID, let sectionID, let before):
-            await run(book) { ops in
+            await run(shown) { ops in
                 try ops.assignPostToSection(postID, in: book.id, section: sectionID)
                 if let before {
                     try ops.reorderReadingPost(postID, in: book.id, to: .before(before))
                 }
             }
         case .moveChapter(let sectionID, let target):
-            await run(book) { ops in try ops.reorderSection(sectionID, to: target) }
+            await run(shown) { ops in try ops.reorderSection(sectionID, to: target) }
         }
         return true
     }
