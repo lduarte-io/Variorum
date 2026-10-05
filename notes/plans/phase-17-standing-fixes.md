@@ -2561,3 +2561,39 @@ Panel's drop brain (MAJOR-1, NIT-4), chrome (NIT-3), copy (NIT-6) and comments/p
   above "refresh walk" in Home's unshelved sequence) — invisible outside my order. The Journal
   finish/reopen round-trips to flag-off (no arrivals existed to dismiss; no buffers were dirty).
   The Debug instance quit clean by identity; zero instances after.
+
+## 17y B3 RECORD — faces, vocabulary, ruled behaviors: items (c)(d)(g)(o)(h)(i)(f)(l)(r)(s) + the F-B2-7 rider (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
+
+**NOT DONE (first line, per the contract):** PENDING — the batch is running; this line is rewritten at the close.
+
+Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
+the B3 brief `notes/plans/17y-b3-brief.md` whole; `notes/plans/17y-sitting-rulings-2026-10-05.md`
+whole (R-17y-1…9 + both R-17y-9 addenda + the overnight mandate); this file's 17y row end to end,
+the kickoff, the RUN RECORD, the B2 BRIEF + B2 RECORD + its fix round + the orchestrator's
+spot-walk; QUESTIONS #169/#170/#171/#174/#176/#183/#184 (next free number **#185**);
+`notes/SessionResiliencyProtocol.md` whole; 13i-c U3 BRIEF + RECORD; 13i-b §3 + U2 RECORD;
+13i-e U2 RECORD; 13i-d U1/U2 RECORDs + adjudications, U5 RECORD (design, book-move proposal,
+findings, provisionals) + adjudication, U5b RECORD (design). Worktree `~/dev/variorum-17y` only;
+DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 0 | This record + the b3 captures dir gitignored | IN-PROGRESS (this commit) |
+| 1 | (d) the cards view → "Cards" | NOT-STARTED |
+| 2 | (i) "unfiled" wins everywhere the chapterless state shows | NOT-STARTED |
+| 3 | (c) Duplicate as Version carries post tags (Diverge stays tag-less) | NOT-STARTED |
+| 4 | item 11 — F-B2-7: the book view's own navigator/Outline drop gate (lock first; satisfied = nothing) | NOT-STARTED |
+| 5 | (r) the № census panel as a true overlay dropdown | NOT-STARTED |
+| 6 | (s) the starred shelf (virtual, books only, drop-to-star) | NOT-STARTED |
+| 7 | (l) book-row context menus beyond the Bookcase | NOT-STARTED |
+| 8 | (h) the Arrivals door on the mode-row icon; the one word "Arrivals"; rows open the note | NOT-STARTED |
+| 9 | (g) the one searchable tag picker with create-in-place (rule terms + outflow) | NOT-STARTED |
+| 10 | (o) the add-to-book picker: the same idiom + the inline mint | NOT-STARTED |
+| 11 | (f) the cross-wing follow (open + focus switch the wing; receipt; Open-row wing indicator) | NOT-STARTED |
+| 12 | END suites + the tutorial spine + the phone build | NOT-STARTED |
+| 13 | The walk → `notes/plans/17y-screens/b3/` (gitignored) | NOT-STARTED |
+| 14 | Record close (first line, findings, PROVISIONALs → QUESTIONS #185) | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
