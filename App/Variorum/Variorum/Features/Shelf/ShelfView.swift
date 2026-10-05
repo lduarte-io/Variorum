@@ -151,31 +151,6 @@ struct ShelfView: View {
                     shelfNameField = ""
                     newShelfPresented = true
                 })
-                // 17y item (r) — THE № PANEL IS A TRUE DROPDOWN (her report:
-                // "it's a dropdown, not a push down"). 13i-d U1 drew it IN
-                // FLOW between the strip and the board, so opening it pushed
-                // every row down by its height (148 pt, measured) and, in a
-                // window whose height was spoken for, clipped the first row
-                // at the scroll region's top edge. It now hangs from the
-                // strip's bottom edge, right-aligned under the utility run's
-                // № exactly where it sat — an OVERLAY: zero layout push. The
-                // strip draws above its siblings (`zIndex`) so the panel
-                // floats over the board's rows; its contents, solo acts and
-                // remembered-open state are untouched.
-                .overlay(alignment: .bottomTrailing) {
-                    if model.censusOpen {
-                        BookcaseCensusPanel(model: model, tokens: tokens)
-                            .padding(.trailing, 28)
-                            .alignmentGuide(.bottom) { $0[.top] }
-                            #if DEBUG
-                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                                BookcaseRowOracle.recordFrame(
-                                    BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
-                            }
-                            #endif
-                    }
-                }
-                .zIndex(1)
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
@@ -195,6 +170,33 @@ struct ShelfView: View {
                 }
             }
             .frame(maxHeight: listContentHeight > 0 ? listContentHeight : nil, alignment: .top)
+            // 17y item (r) — THE № PANEL IS A TRUE DROPDOWN (her report: "it's
+            // a dropdown, not a push down"). 13i-d U1 drew it IN FLOW between
+            // the strip and the board, so opening it pushed every row down
+            // by its height (148 pt, measured) and, in a window whose height
+            // was spoken for, clipped the first row at the scroll region's top
+            // edge. It now FLOATS over the board's top-right — hung from the
+            // board's top edge (= the strip's bottom), right-aligned at the
+            // strip's own 28-pt inset under the utility run's №, exactly where
+            // it sat: zero layout push. The board draws above its later
+            // siblings (`zIndex`) so a tall panel over a short board floats
+            // over the entry bar too. Contents, solo acts and the remembered-
+            // open state are untouched. (A first build hung it from the strip
+            // with a custom bottom guide; SwiftUI ignored the guide and drew it
+            // ABOVE the strip — the walk caught it, the pin now measures it.)
+            .overlay(alignment: .topTrailing) {
+                if model.censusOpen {
+                    BookcaseCensusPanel(model: model, tokens: tokens)
+                        #if DEBUG
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                            BookcaseRowOracle.recordFrame(
+                                BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
+                        }
+                        #endif
+                        .padding(.trailing, 28)
+                }
+            }
+            .zIndex(1)
             entryBar
             // Batch 14: the ⌘k advice bar rides the WINDOW BOTTOM (her
             // ask); the entry box stays high with the list.
