@@ -120,8 +120,10 @@ nonisolated enum BookPanelDrag: Equatable, Sendable {
 
 /// The panel's drag payload — `Codable` under its OWN content type, so a
 /// panel row dropped anywhere else in the app is refused by every other site
-/// (the `BookcaseDragToken` road, which rides the app's proven `Transferable`
-/// path — the U1 finding F-U1-4).
+/// (the `BookcaseDragToken` road). That type is DECLARED in
+/// `App/Variorum/VariorumInfo.plist` (`UTExportedTypeDeclarations`), pinned by
+/// `DragTypeDeclarationTests`; until 17y B2 it was not, and no panel drop ever
+/// landed (F-B2-1 — the U1/U2 "synthetic harness" readings were this defect).
 nonisolated struct BookPanelDragToken: Codable, Transferable, Sendable {
     let kind: String
     let id: String

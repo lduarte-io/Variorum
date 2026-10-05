@@ -97,11 +97,19 @@ struct MastheadLayoutTests {
         }
     }
 
-    /// **Row 12 — the placeholder no longer shifts when she clicks.** The two
-    /// faces (`Text` and `TextField`) shared a max WIDTH and nothing else, so
-    /// the field's taller intrinsic height moved the words the moment the
-    /// title went editable. They now share ONE BOX. RED ON OLD: the field's
-    /// frame sat above the label's by the difference in their heights.
+    /// **Row 12 — the two title faces share ONE BOX.** The two faces (`Text`
+    /// and `TextField`) shared a max WIDTH and nothing else, so the field's
+    /// taller intrinsic height moved the words the moment the title went
+    /// editable. They now share ONE BOX. RED ON OLD: the field's frame sat
+    /// above the label's by the difference in their heights.
+    ///
+    /// **What it guards — the BOX only (17y B2, F-B2-3).** It compares the two
+    /// faces' SwiftUI frames, and after row 12's fix those are the box by
+    /// construction (the editing face's oracle reads the `.frame(maxWidth:
+    /// maxHeight:)` wrapper, never the field), so it cannot see the WORDS
+    /// moving inside the field — the shift her 17y capture showed survived it.
+    /// The words are `theOpenFieldsWordsStayWhereTheTitleRested`'s (below),
+    /// which measures the drawn glyphs.
     @Test func bothTitleFacesShareOneBoxSoNothingShiftsOnClick() async throws {
         for voice in [ThemeVoice.terminal, .study] {
             try await withMountedDetail(

@@ -888,8 +888,10 @@ struct PostDetailView: View {
         private func beginEditing() {
             // The DRAFT is the stored name, never the shown date: clicking a
             // date and typing must name the note, not rename it after
-            // itself (13g batch 7, R6-3). The date rides as the field's
-            // prompt so the line still reads as it did.
+            // itself (13g batch 7, R6-3). While the draft is empty the date
+            // is drawn BEHIND the open field by the resting face's own `Text`
+            // (17y B2 (n) — the field carries no prompt), so the line still
+            // reads as it did.
             draft = title
             editing = true
         }

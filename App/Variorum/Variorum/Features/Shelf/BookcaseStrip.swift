@@ -51,7 +51,11 @@ nonisolated enum BookcaseDrag: Equatable, Sendable {
 /// *(The walk's finding, recorded so it is not re-met: a first build carried
 /// the payload on a hand-registered `NSItemProvider` + `onDrop(of:)`; the drag
 /// session STARTED — the row's image followed the pointer — but no target
-/// ever lit, so nothing landed. The `Transferable` road is the proven one.)*
+/// ever lit, so nothing landed. Moving to `Transferable` did NOT cure it: the
+/// cause was this token's content type never being DECLARED (17y B2, F-B2-1).
+/// Every in-app drag type is now exported in `App/Variorum/VariorumInfo.plist`
+/// (`UTExportedTypeDeclarations`), pinned by `DragTypeDeclarationTests` — a
+/// new token's type must join that list or its drops never land.)*
 nonisolated struct BookcaseDragToken: Codable, Transferable, Sendable {
     let kind: String
     let id: String
