@@ -2132,7 +2132,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | # | piece | status |
 |---|---|---|
 | 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
-| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | IN-PROGRESS — reproduction DONE on the pre-fix Debug build (below); the pin `VariorumTests/DragTypeDeclarationTests.swift` committed RED ON PURPOSE (this commit): **"Test run with 3 tests in 1 suite failed … with 10 issues"** (`scratchpad/17y-b2/p2-red.log`). NEXT: the declarations in `VariorumInfo.plist`, green, the post-fix drag, revert round |
+| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (this commit) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
 | 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | NOT-STARTED |
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | NOT-STARTED |
 | 5 | (m) the quick-note box's double cursor | NOT-STARTED |
@@ -2173,3 +2173,18 @@ name (`a1-middrag-over-research.png`); after `du` the book is still unshelved an
 (`a2-after-drop.png`). That is F-U1-4's shape exactly — on a build whose own log names the cause.
 (3) The pin, RED on this tree with 10 issues across its 3 tests (the three tokens' types undeclared;
 none conforms to `public.data` at runtime; the source scan finds three undeclared identifiers).
+
+**THE MECHANISM, CONFIRMED (both sides driven):** an exported `UTType` the bundle does not declare is
+not a data type, so the drag's payload is never offered to a drop destination as the
+`Transferable`'s content type — the session starts and no `dropDestination(for:)` ever targets.
+**Built-and-broken, all three surfaces** — the drop handlers were built and pinned (13i-d U1/U2) and
+the types were simply never declared. Declaring them (no code change) brings back: (a) every Bookcase
+drop site (strip names, the ⋯ panel's rows, All's section labels), (b) the my-order ROW drop
+(`ShelfView.swift` — `bookcaseDropSite(enabled: placing)`, `dropBook(_:before:)`), (e) every Book
+Panel drop (`PanelDropSite`), plus the strip's shelf-name reorder and the sidebar Open strip's row
+reorder (the same class; declared in the same commit — the pin's source scan names all three).
+F-U1-4 and F-U2-4's "synthetic drags never commit a SwiftUI drop here" was this defect, not the
+harness: on the fixed build the same `cliclick` drag commits.
+
+**DEV-STORE ACTS TO RESTORE AT THE WALK'S END:** "field notes" (was Unshelved → research) and
+"u4 third" (was Unshelved → correspondence) — both back to Unshelved via Move to Shelf ▸ Unshelved.

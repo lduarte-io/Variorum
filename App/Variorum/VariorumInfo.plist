@@ -62,5 +62,54 @@
 	<string>https://stargazing.tech/variorum/appcast.xml</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
+	<!-- 17y B2, items (a)(b)(e) — THE APP'S OWN DRAG TYPES, DECLARED.
+	     Every in-app drag on the Bookcase (a book onto a shelf, a book placed
+	     in "my order", a shelf name reordered), in the Book Panel (a note or a
+	     chapter moved) and in the sidebar's Open strip (a row reordered) rides
+	     a Transferable token whose CodableRepresentation names one of these
+	     identifiers via UTType(exportedAs:). An exported type the bundle does
+	     NOT declare resolves with no supertypes - it is not public.data - and
+	     the system faults at launch ("...was expected to be declared and
+	     exported in the Info.plist of Variorum.app, but it was not found");
+	     the drag session starts, but no drop site ever accepts the payload:
+	     nothing lights, nothing lands (the 17y B2 RECORD's driven
+	     reproduction - the cause of 13i-d F-U1-4 / F-U2-4 and of her walk's
+	     dead drags). Declared here as plain data, private to this app (no
+	     filename extension, no MIME type - they never leave the process).
+	     `DragTypeDeclarationTests` pins all three AND scans the sources, so a
+	     new `UTType(exportedAs:)` must be declared here or the suite fails. -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>io.lduarte.variorum.bookcase-item</string>
+			<key>UTTypeDescription</key>
+			<string>Variorum Bookcase item</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>io.lduarte.variorum.book-panel-item</string>
+			<key>UTTypeDescription</key>
+			<string>Variorum Book Panel item</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>io.lduarte.variorum.open-note-row</string>
+			<key>UTTypeDescription</key>
+			<string>Variorum open note</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
