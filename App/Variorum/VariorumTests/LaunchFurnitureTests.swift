@@ -156,9 +156,11 @@ struct LaunchFurnitureTests {
             #expect(guide.wingId == "", "in Home")
             #expect(facts.chapters == TutorialSeeder.plan.map(\.chapter), "every chapter, in order")
             #expect(facts.lessons == TutorialSeeder.plan.flatMap(\.lessons), "every lesson, whole")
-            // …beside the rest of the seeded content, unchanged.
+            // …beside the rest of the seeded content, unchanged. (Justified
+            // edit, 17y B-DEDUPE R-17y-8: Jekyll left the DEFAULT seed, so
+            // it leaves this on-Welcome list — its own absence is pinned by
+            // aFreshLaunchSeedsTheSubsetWithoutJekyll below.)
             for name in [SampleLibrarySeeder.Book.sherlock.name,
-                         SampleLibrarySeeder.Book.jekyllAndHyde.name,
                          SampleLibrarySeeder.Book.encryptionExplained.name,
                          SampleLibraryWelcome.classicsGatheringName] {
                 #expect(try await reading(db, named: name)?.shelfId == welcome, "\(name) on Welcome")

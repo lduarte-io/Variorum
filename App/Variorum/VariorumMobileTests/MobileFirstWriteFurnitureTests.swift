@@ -56,16 +56,8 @@ private final class Marks {
               loadEncryptionBook: { [self] in encryptionBook },
               saveEncryptionBook: { [self] in encryptionBook = $0 })
     }
-    /// 18l-c U6: the takemania book's OWN mark, with Sherlock's (and so the
-    /// encryption book's) reading "already seeded".
-    var jekyllBook = false
-    var jekyllBookOnly: MobileFirstWriteFurniture.Marks {
-        .init(loadJournal: { [self] in journal },
-              saveJournal: { [self] in journal = $0 },
-              loadSample: { true }, saveSample: { _ in },
-              loadJekyllBook: { [self] in jekyllBook },
-              saveJekyllBook: { [self] in jekyllBook = $0 })
-    }
+    // (The Jekyll marks helper left with the phone's Jekyll seed —
+    // 17y B-DEDUPE, R-17y-8.)
 }
 
 @Suite("The first-write occasion (R-pre13u-1 / R-pre13u-8)")
@@ -399,41 +391,38 @@ struct MobileFirstWriteFurnitureTests {
         }
     }
 
-    // MARK: 18l-c U6 — the takemania book rides the same occasion
+    // MARK: 17y B-DEDUPE (R-17y-8) — Jekyll left the phone's default seed
 
-    /// *The Strange Case of Dr Jekyll and Mr Hyde* (takemania's book) seeds
-    /// on the phone's first-write occasion under its OWN mark — the seed
-    /// occasions byte-identical to Sherlock's precedent (the brief's fence) —
-    /// with takemania's whole scripted history, and its mark set only after.
-    @Test func theOccasionSeedsTheJekyllBookUnderItsOwnMark() async throws {
+    /// **JUSTIFIED EDIT of 18l-c U6's seeds-Jekyll pin — the SUBJECT
+    /// RETIRED at her R-17y-8 ("I don't want it in people's libraries
+    /// anymore"):** the first-write occasion seeds the DEFAULT SUBSET and
+    /// NO Jekyll — no reading of the name, no tombstone of the name (never
+    /// minted-then-removed), takemania nowhere. The Mac's launch pin
+    /// (`aFreshLaunchSeedsTheSubsetWithoutJekyll`) is the class's
+    /// red-on-old; an existing store that already holds Jekyll keeps it
+    /// (nothing retrofits — the seed simply never asks).
+    @Test func theOccasionSeedsNoJekyll() async throws {
         try await withEditorWorld { session, db in
             let marks = Marks()
             let furniture = MobileFirstWriteFurniture(
-                session: session, storeVariant: .dev,
-                marks: marks.jekyllBookOnly)
-            guard case .ran(_, let sample) = await furniture.run() else {
+                session: session, storeVariant: .dev, marks: marks.both)
+            guard case .ran = await furniture.run() else {
                 Issue.record("expected the occasion to run")
                 return
             }
-            #expect(sample == .alreadySeeded, "Sherlock's injected mark stands")
-            #expect(furniture.encryptionBookOutcome == .alreadySeeded, "…and stands for the encryption book")
-            guard case .seeded(let bookID, let notes) = furniture.jekyllBookOutcome else {
-                Issue.record("expected the Jekyll book to seed, got \(String(describing: furniture.jekyllBookOutcome))")
-                return
+            let (jekyll, tombstoned, takemania) = try await db.read { db in
+                (try Queries.readings(db).first {
+                    $0.name == SampleLibraryJekyllBook.name && $0.deletedAt == nil
+                 },
+                 try Queries.readingTombstoneExists(db, name: SampleLibraryJekyllBook.name),
+                 try String.fetchOne(
+                    db,
+                    sql: "SELECT id FROM container WHERE title = ? AND deleted_at IS NULL",
+                    arguments: [Takemania.title]))
             }
-            #expect(notes == 3 && marks.jekyllBook)
-            let (book, titles) = try await db.read { db in
-                (try Queries.reading(db, id: bookID),
-                 try Queries.assembleReading(db, readingID: bookID).compactMap(\.title))
-            }
-            #expect(book?.name == SampleLibraryJekyllBook.name)
-            #expect(titles.contains(Takemania.title) && !titles.contains(Takemania.workingTitle))
-            #expect(session.undoStack.depth == 0)
-            // A second occasion with the mark set seeds nothing more.
-            let again = MobileFirstWriteFurniture(
-                session: session, storeVariant: .dev, marks: marks.jekyllBookOnly)
-            _ = await again.run()
-            #expect(again.jekyllBookOutcome == .alreadySeeded)
+            #expect(jekyll == nil, "no Jekyll in a fresh phone library (R-17y-8)")
+            #expect(!tombstoned, "never minted at all")
+            #expect(takemania == nil, "takemania left with its book")
         }
     }
 }

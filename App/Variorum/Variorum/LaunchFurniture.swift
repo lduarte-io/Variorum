@@ -70,9 +70,12 @@ enum LaunchFurniture {
     }
 
     /// Every seed a launch runs, in the launch's order. Answers the Welcome
-    /// arrangement's launch decision (nil only if `Book.all` ever stopped
-    /// carrying Sherlock). Silent by design — every outcome is logged by
-    /// its own seeder, none is ever surfaced.
+    /// arrangement's launch decision (nil only if `Book.launchSet` ever
+    /// stopped carrying Sherlock). Silent by design — every outcome is
+    /// logged by its own seeder, none is ever surfaced.
+    /// 17y B-DEDUPE (R-17y-8): the loop iterates the LAUNCH SET — Jekyll
+    /// left the default seed; the Restore doors still mint it from
+    /// `Book.all`.
     @discardableResult
     static func seed(
         session: AppSession,
@@ -82,7 +85,7 @@ enum LaunchFurniture {
         firstRoundWait: Duration? = nil
     ) async -> SampleLibraryWelcome.LaunchOutcome? {
         var sherlockOutcome: SampleLibrarySeeder.Outcome?
-        for book in SampleLibrarySeeder.Book.all {
+        for book in SampleLibrarySeeder.Book.launchSet {
             let mark = marks.book?(book)
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
                 session: session,

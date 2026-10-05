@@ -309,9 +309,18 @@ enum SampleLibrarySeeder {
             scriptedNote: .takemania,
             joinsPristineDedupe: false)
 
-        /// Every seeded book, in seeding order — what the Mac's launch and
-        /// the pins iterate.
+        /// Every seeded book, in seeding order — the RESTORE doors' and the
+        /// pins' vocabulary. Since 17y B-DEDUPE this is NOT the launch's
+        /// list: `launchSet` is.
         static let all: [Book] = [.sherlock, .encryptionExplained, .jekyllAndHyde]
+
+        /// **The DEFAULT seed — what a fresh store is born with (R-17y-8,
+        /// 2026-10-05, her word: "I don't want it in people's libraries
+        /// anymore").** Jekyll (takemania inside it) leaves the launch on
+        /// BOTH platforms; existing stores are never retrofitted (their
+        /// marks and discovery already hold), and Help ▸ Restore keeps
+        /// minting it on demand — `all` is the doors' list.
+        static let launchSet: [Book] = [.sherlock, .encryptionExplained]
 
         /// The books the sync engine's pristine-copy dedupe judges
         /// (`allDedupeFacts`) — every book whose shipped seed is PRISTINE by
