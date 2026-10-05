@@ -1928,9 +1928,11 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
 - **The Help door's door-level pin is SOURCE-TEXT** (`theHelpDoorAsksBeforeItsDraftOpens` — a
   `Commands` struct's private act, the SupportDraftTests precedent for this very door); the
   behaviour beneath it is pinned through the shared dispatcher and the channel, and walked.
-- **The full Mac suite was not run** (it runs ~12.5 min, past a foreground call): the two touched
-  families were (below). Core and mobile were not run — zero `Sources/`, `Shared/`, mobile paths.
-  The one red in family A is 19e's named, queued, PRE-EXISTING runbook drift.
+- **Core and mobile were not run** — zero `Sources/`, `Shared/`, mobile paths. (The FULL Mac suite
+  WAS run, at the zero-instance window the author opened and the orchestrator relayed — below.)
+  Its two real reds are PRE-EXISTING and not 19f's: 19e's queued runbook drift, and a NEW-TO-THE-
+  RECORD regression of the 13u4 S3 class pin (`ChromeLineLimitTests`) — routed below, NOT fixed
+  here (another unit).
 - QUESTIONS **#182** (a)–(e) are PROVISIONAL, awaiting her; (c) confirmed on screen.
 - ~400 pre-existing test-host fixture dirs in the Debug container's `tmp/` (the U3-B pins' and
   older) — recorded, not swept (only this entry's 12 removed).
@@ -2143,6 +2145,25 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      `Sync/` path.** SupportDraftTests.swift UNTOUCHED (its 13 pins ride unmodified, green on both
      sides of the revert). The range also holds the orchestrator's own commits (`9ce643ec`,
      `34bf1485`, `6c812d6f` — FuturePhases + the 13r handoff), none of them 19f's.
+
+   - **THE FULL MAC SUITE (the author's zero-instance window, relayed by the orchestrator: "my app
+     is closed & prepared"; zero instances re-checked by this session; launched detached to its log
+     and POLLED IN THE FOREGROUND to its end, 03:23→03:49Z): `Test run with 3812 tests in 618 suites
+     failed after 1557.035 seconds with 7 issues (including 5 known issues)`** (`finals-fullmac.log`)
+     — the 5 KNOWN are declared `withKnownIssue`s (IndexTierMetrics `overTwoBlankLines` ×4, both
+     voices; TakesFindBoard's Esc boundary ×1); the 17 `skipped:` lines are exactly the env-gated
+     opt-in drill/oracle suites (Apple-key round trip, migration/posture/connect drills, the
+     singleton-window oracles) and their tests; `SupportChoiceTests` passed. **The 2 real issues,
+     BOTH PRE-EXISTING, neither 19f's:** (i) 19e's runbook drift (named, queued); (ii)
+     **`ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` — 4 offenders: `Features/Shelf/
+     BookcaseStrip.swift:227` and `:342` (last touched `52262af7`, 13i-d U1, 2026-10-02) and
+     `Features/BookView/BookSettingsSheet.swift:521` and `:575` (last touched `2f3109fe`, 13i-e U2,
+     2026-10-03) — bare `.fixedSize()` with no `lineLimit` within four lines (P-8; the 13u4 S3
+     class pin, KnownIssues row 37's closer).** The pin is a pure source scan, and both files AND
+     the pin are byte-unchanged since this entry's base `505df96e` (`git diff --stat` empty), so the
+     red stands identically at the base. **ROUTED to the orchestrator (a ledger-letter candidate:
+     the class pin catching a 13i-d/13i-e regression; every finals family since then ran without
+     this suite). NOT fixed here — another surface, another unit.**
 
 **DISPOSITION (the entry's letter, row by row):**
 - *Before ANY draft opens, both doors ask* — **FIXED**, pins `theReportDoorAsksBeforeAnyDraftOpens`,
