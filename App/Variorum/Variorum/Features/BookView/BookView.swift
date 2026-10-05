@@ -2625,7 +2625,8 @@ private func outlineChapterMenu(
 ) -> some View {
     if let book = structure.reading, book.kind == .book {
         // 13i-d U3 (F-U2-3): the Book Panel's act, spelled from the registry
-        // — "Move to Chapter ▸" with "No Chapter" (was "Chapter ▸ … None").
+        // — "Move to Chapter ▸" with "No Chapter" (was "Chapter ▸ … None");
+        // 17y (i), R-17y-4: that destination now says the headers' "unfiled".
         Menu(CapabilityRegistry.capability(.fileNoteInChapter).verb) {
             ForEach(structure.sections, id: \.id) { section in
                 Button(section.name) {

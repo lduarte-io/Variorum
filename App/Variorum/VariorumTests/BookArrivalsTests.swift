@@ -190,8 +190,11 @@ struct BookArrivalsTests {
         // to teach the road back, so "nothing more" became the ruled sentence.)
         #expect(ArrivalsCopy.added("Ode", chaptered: false)
                 == "\u{201C}Ode\u{201D} added at the end of the book.")
+        // 17y B3 item (i) — A JUSTIFIED EDIT (R-17y-4): the chapterless
+        // place speaks the headers' one word; the subject (the receipt says
+        // WHERE Add landed) holds.
         #expect(ArrivalsCopy.added("Ode", chaptered: true)
-                == "\u{201C}Ode\u{201D} added at the end of the book, outside the chapters.")
+                == "\u{201C}Ode\u{201D} added at the end of the book, unfiled.")
         #expect(ArrivalsCopy.dismissed("Ode")
                 == "Dismissed \u{201C}Ode\u{201D} \u{2014} it won\u{2019}t come back on its own; "
                     + "add it by hand any time.")

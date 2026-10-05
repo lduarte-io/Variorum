@@ -55,7 +55,12 @@ nonisolated enum BookPanelCopy {
 
     // The structure doors (the row menus — each a drag's menu twin).
     static let fileInChapterVerb = "Move to Chapter"
-    static let noChapter = "No Chapter"
+    /// The move menus' chapterless destination. 17y item (i) — R-17y-4, her
+    /// pick: ONE word for the state everywhere it shows, and it is the
+    /// headers' — "unfiled" (the menus said "No Chapter" while the Outline
+    /// said "unfiled"; she read the two words as two places). 13s may
+    /// re-voice sentences; the word is settled.
+    static let noChapter = unfiled
     static let moveNoteUpVerb = "Move Up"
     static let moveNoteDownVerb = "Move Down"
     static let moveChapterUpVerb = "Move Chapter Up"

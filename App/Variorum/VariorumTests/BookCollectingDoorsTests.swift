@@ -247,7 +247,10 @@ struct BookCollectingDoorsTests {
         #expect(BookIndexColumn.surfaceCapabilities.contains(.fileNoteInChapter),
                 "the Index row's ⋯ renders Move to Chapter ▸")
         #expect(CapabilityRegistry.capability(.fileNoteInChapter).verb == "Move to Chapter")
-        #expect(BookPanelCopy.noChapter == "No Chapter")
+        // 17y B3 item (i) — A JUSTIFIED EDIT (R-17y-4, her pick): the
+        // chapterless destination says the headers' one word; the subject
+        // (the book view's doors ARE the panel's acts, one spelling) holds.
+        #expect(BookPanelCopy.noChapter == "unfiled")
         // The dead spellings, gone from the book view's sources (the
         // literal-colour pin's grep form — code lines only).
         let appRoot = URL(fileURLWithPath: #filePath)

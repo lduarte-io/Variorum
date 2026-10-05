@@ -93,8 +93,11 @@ nonisolated enum ArrivalsCopy {
             return "\u{201C}\(title)\u{201D} added to the book \u{2014} it\u{2019}s archived, "
                 + "so it waits in the book\u{2019}s archived line."
         }
+        // 17y item (i) — R-17y-4: the chapterless state's ONE word, the
+        // headers' own ("unfiled"), in the receipt too.
         return chaptered
-            ? "\u{201C}\(title)\u{201D} added at the end of the book, outside the chapters."
+            ? "\u{201C}\(title)\u{201D} added at the end of the book, "
+                + "\(BookPanelCopy.unfiled)."
             : "\u{201C}\(title)\u{201D} added at the end of the book."
     }
 
