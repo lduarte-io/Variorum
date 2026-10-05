@@ -512,9 +512,13 @@ nonisolated enum BookcaseCopy {
     /// The grip column's width — inside the row, pulled into the board's
     /// 28-pt gutter so the name column never moves between orders.
     static let gripColumn: CGFloat = 16
+    /// Promises only what §20 delivers (the B2 ladder's NIT-6): a drop lands
+    /// right above its row EXCEPT across the starred line — starred books
+    /// always float first, so a book dropped across it settles in its own
+    /// half (QUESTIONS #184(h)). Wording PROVISIONAL (13s re-voices).
     static let gripHelp =
-        "Drag to place this book by hand \u{2014} it lands right above the row you drop it on, "
-        + "on any shelf"
+        "Drag to place this book by hand, on any shelf. Dropped on a book, it lands right above "
+        + "it \u{2014} except across the starred line: starred books always stay first."
 
     /// The shelf delete's confirm (P-13id-U1-4 — the one net for cheap
     /// metadata with no Trash and no undo).

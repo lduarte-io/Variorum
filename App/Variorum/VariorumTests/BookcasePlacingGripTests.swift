@@ -36,8 +36,12 @@ struct BookcasePlacingGripTests {
 
     @Test func theGripSaysWhatADropDoes() {
         #expect(BookcaseCopy.gripGlyph == "\u{283F}", "the app's one handle glyph")
-        #expect(BookcaseCopy.gripHelp.contains("lands right above the row"),
+        #expect(BookcaseCopy.gripHelp.contains("lands right above"),
                 "the help names P-13id-U1-12's landing rule")
+        // The B2 ladder's NIT-6: …and only what §20 delivers — across the
+        // starred line a drop settles in its own half (QUESTIONS #184(h)).
+        #expect(BookcaseCopy.gripHelp.contains("starred books always stay first"),
+                "the help says where the promise stops")
         // F-B2-5: the grip lives INSIDE the row, in a column the row is pulled
         // into the board's 28-pt gutter by — so the column must fit it.
         #expect(BookcaseCopy.gripColumn > 0 && BookcaseCopy.gripColumn < 28)
