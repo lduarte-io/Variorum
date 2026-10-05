@@ -166,6 +166,30 @@ struct BookPanelDragGateTests {
         }
     }
 
+    /// **The B2 ladder's NIT-4 — an ALREADY-SATISFIED drop asks for nothing.**
+    /// A note dropped onto its IMMEDIATE shown successor would land "right
+    /// above" where it already stands: no placement was asked, so no refusal
+    /// is owed (the refusal's words — "can't be placed by hand" — would be
+    /// false). Manual order does the same gesture silently; so does a stamp
+    /// order now. RED ON OLD (03a0513e's tree): the needsManualOrder refusal.
+    @Test func aStampOrderedDropOntoItsOwnSuccessorAsksForNothing() async throws {
+        try await withWorld { world in
+            let (model, task) = try await heldModel(world)
+            defer { task.cancel() }
+            let before = try await membershipOrder(world)
+            let shown = try #require(model.groups(for: world.book.id)
+                .first { $0.section?.id == world.one.id }?.entries.map(\.postID))
+            #expect(shown.count == 2)
+
+            let dropped = await model.drop(.note(try #require(shown.first)),
+                                           onto: .note(try #require(shown.last)), in: world.book)
+            #expect(!dropped, "nothing to do")
+            #expect(world.session.status.current == nil,
+                    "already right above its successor — nothing said")
+            #expect(try await membershipOrder(world) == before, "nothing moved")
+        }
+    }
+
     /// **The B2 ladder's MAJOR-1 — a FROZEN book's lock answers BEFORE the
     /// sort gate.** A finished (or sealed) book in a stamp order: re-placing a
     /// note inside its own chapter must speak the op's OWN refusal — "reopen
