@@ -63,8 +63,21 @@ struct VersionSchemeTests {
         #expect(project.contains("shellScript = \"\\\"${SRCROOT}/StampBuildNumber.sh\\\"\\n\";"))
         #expect(project.components(separatedBy: "ENABLE_USER_SCRIPT_SANDBOXING = NO;").count - 1 == 2,
                 "exactly the Mac target's Debug and Release configurations")
-        #expect(project.components(separatedBy: "MARKETING_VERSION = 0.9.0;").count - 1 == 2,
+        // R-13r-6's ADJUDICATED reading (the plan's LIVE STATUS): the repo's
+        // MARKETING_VERSION increments WITH each beta release, so this pin
+        // holds the SHAPE, never a literal release number (the original
+        // "0.9.0;" literal went red at c4974c4a's 0.9.1 bump — repaired at
+        // the ladder's fix pass). The letter held: the Mac target's TWO
+        // configurations carry the SAME 0.9.x line — the one the running
+        // test host was built as — and no other target wears it.
+        let builtVersion = try #require(
+            Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+        let marketingLines = project.components(separatedBy: "\n")
+            .filter { $0.contains("MARKETING_VERSION = 0.9.") }
+        #expect(marketingLines.count == 2,
                 "the Mac target's two configurations; the mobile target is not this phase's")
+        #expect(marketingLines.allSatisfy { $0.contains("MARKETING_VERSION = \(builtVersion);") },
+                "both configurations carry the version this host was built as (read \(marketingLines))")
         let script = try String(
             contentsOf: appDir.appendingPathComponent("StampBuildNumber.sh"), encoding: .utf8)
         #expect(script.contains("git -C \"${SRCROOT}\" rev-list --count HEAD"))
