@@ -1801,9 +1801,24 @@ self-contained.
 
 ## 17y B-SEED RECORD — item (q), the tutorial-seed trace (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
 
-**NOT DONE (first line, per the contract): PENDING until the close** — the record's opening facts
-are the trace (below, stated BEFORE any fix); every claim that a run has not yet confirmed reads
-PENDING.
+**NOT DONE (first line, per the contract):** (1) **the SIGNED-OUT fresh-store road was not walked
+end to end on this machine** — the dev scope carries a signed-in dev session (sync OFF), so every
+fresh dev store takes Road 2; signing it out is a credential act, hers (F-BSEED-4). The guide's own
+road WAS walked live (walk B: the `pending` resume of a birth on a fresh dev store — the hook,
+`seedAtBirth`, the arrangement shelving it), with the books still gated; the signed-out road's
+whole composition is pinned headless through the production function. Her Monday first launch is
+the live signed-out bed **only if the build she installs carries this fix** (this batch refreshes
+nothing and publishes nothing). (2) **No dark-appearance captures** (both voices walked in light;
+the appearance is a local preference and nothing here is appearance-dependent). (3) **The Monday
+duplicates (F-BSEED-3) are recorded and owned, not fixed** — the guide's half is the brief's named
+residual; the rest predates this batch. (4) Zero `Sync/`, schema, custody, mobile behaviour or seed
+content — the fences held (`git diff 7344c11f -- Sources Server App/Variorum/VariorumMobile*` is
+EMPTY).
+
+**BATCH STATUS: CLOSED 2026-10-05 (implementer side) — the row FIXED with its pin; Mac 103/12 +
+the tutorial spine 98/13 green at the END; the phone build green; red-on-old by two revert rounds;
+the walk (A: Road 2 live; B: the guide on Welcome at first open, Terminal + Study) captured. FABLE
+cold review next (the orchestrator's).**
 
 Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; this file's 17y
 row item (q), the RUN RECORD and the B-SEED brief; `notes/SessionResiliencyProtocol.md` whole;
@@ -1826,8 +1841,8 @@ only; DerivedData `App/Variorum/DerivedData/17y/`.
 | 3 | THE FIX — the guide's birth seed (`TutorialSeeder.seedAtBirth`) on the arrangement's arrange-now road (`arrangeAtLaunch`'s new `beforeArranging`, default nil) | DONE (this commit) — `Shared/SampleLibrary/SampleLibraryWelcome.swift`: `arrangeAtLaunch` gains `beforeArranging: (@MainActor () async -> Void)? = nil`, awaited after the decision and before `arrange` (the header says so; the phone never calls `arrangeAtLaunch`); `Features/Tutorial/TutorialSeeder.swift`: `BirthSeed` + `seedAtBirth(session:)` (the doors' latch → `.doorInFlight`; ONE read — `discover` + `Queries.readingTombstoneExists` — a live guide → `.alreadyPresent`, a tombstone → `.deletedByTheReader`, residue → `.residue`, else the quiet restore road → `.seeded`; errors → `.refused`; one `tutorial`-category log line); `LaunchFurniture.swift` passes it as the hook; `SampleLibraryWelcomeTests`' stale comment ("the guide is seeded when she first opens it") rewritten to point here (comment-only). **GREEN, `p3-green.log`: "Test run with 17 tests in 2 suites passed"** (`LaunchFurnitureTests` 5/5 incl. the birth pin; `SampleLibraryWelcomeTests` 12/12 unmodified in behaviour) |
 | 4 | Red-on-old by behavioural revert of piece 3 | DONE (this commit) — the pins sharpened first (`a5a8696c`: the resumed-birth deletion arm SPLIT — the WHOLE guide deleted, so the tombstone alone decides; the book alone, whose tagged lessons are residue — and a sixth pin `theBirthSeedNamesWhatItFound` driving `seedAtBirth`'s decision table branch by branch; 6/6 green, `p3b-green.log`). **ROUND A — RV1, the hook's argument removed from `LaunchFurniture` (`rv-a.log`): exactly the predicted RED — `aFreshStoresFirstLaunchPutsTheFieldGuideOnWelcome` with its 2 issues (no guide), the other 5 green — "6 tests … failed … with 2 issues".** **ROUND B — RV2 the tombstone guard · RV3 the residue guard · RV4 the doors' latch removed from `performBirthSeed`, the wire intact (`rv-b.log`): RED with 8 issues across exactly the three guarded tests** — `aResumedBirthHonoursHerDeletionAndLeavesResidueAlone` 4 (the whole-guide deletion re-made; the book-only deletion re-made; residue REPLACED — a guide minted AND her tagged note destroyed by the replace's cleanup), `aTutorialDoorInFlightIsNeverRacedByTheLaunch` 1 (the launch minted beside a held door), `theBirthSeedNamesWhatItFound` 3 (`.deletedByTheReader` / `.residue` / `.doorInFlight` each answered as a seed or `.alreadyPresent`) — while the birth pin, the no-retrofit pin and the signed-in pin stayed green, as predicted. Both rounds restored clean |
 | 5 | Suites at the END (the pins, the seeder/Welcome suites, the tutorial spine; the phone build — `Shared/` gains one defaulted parameter) | DONE — Mac on the fixed tree (HEAD `30a2e6ac`'s code, `DerivedData/17y`, zero Variorum instances): **batch 1 `end-seeders.log` — "Test run with 103 tests in 12 suites passed"** (`LaunchFurnitureTests` · `SampleLibraryWelcomeTests` · `SampleLibraryTests` · `EncryptionExplainedSeedTests` · `LaunchSeedTombstoneTests` · `StarredGatheringSeederTests` · `EncryptionBookDoorTests` · `JekyllTakemaniaSeedTests` · `CalmAsksTests` (the seed is not her writing — the guide included) · `ShellConfirmTests` · `DeadVocabularyTests` · `SampleLibraryDedupeFactsTests`); **batch 2, THE TUTORIAL SPINE, `end-spine.log` — "Test run with 98 tests in 13 suites passed"** (the eleven `TutorialWalkTests.swift` suites `TutorialBookShapeTests` … `TutorialFannedMatrixTests` + `TutorialBooksLessonTests` + `TutorialBooksRitualTests`); no skips in either. **Phone: `VariorumMobile` generic iOS Simulator BUILD SUCCEEDED** (`phone-build.log`, `DerivedData/17y-mobile` — `Shared/`'s one defaulted parameter compiles there; the phone calls nothing of it) |
-| 6 | The walk — a FRESH dev store, both voices, into `notes/plans/17y-screens/b-seed/` (gitignored) | IN-PROGRESS — **STATE NOW: the dev store is BACK in place and its five marks restored to the originals (read back); NO Variorum instance runs.** The walk's fresh store is PARKED at `…/Application Support/Variorum-dev.17y-bseed-fresh` (seeded content only — made by this walk; remove it at the walk's end; a successor who abandons the walk `rm -rf`s it). **WALK A DONE (ROAD 2 live, the fixed build at `DerivedData/17y`, pid 11732, launched 01:45:16 on the fresh store, marks cleared as a fresh install's):** the unified log (`/usr/bin/log show … category sample-library/tutorial/starred-gathering` — note: zsh's builtin `log` shadows it, use the path) read `the adventures of sherlock holmes: awaitingFirstSync` 01:45:39 · `Encryption Explained: awaitingFirstSync` 01:45:59 · `The Strange Case of Dr Jekyll and Mr Hyde: awaitingFirstSync` 01:46:19 · `starred gathering: awaitingFirstSync` 01:46:39 · `welcome arrangement: undecided` — and NO field-guide line (the hook is never reached on this road): the dev scope's signed-in session (sync OFF) gates every seed, exactly the trace's Road 2. Its capture was STOPPED by the author guard (HID idle 0 s — the author was at the machine; not retried; the idle-climb read 8→31 s after) and then the **coordinator's HOLD** arrived (her real-store mint refuses while ANY Variorum instance runs): the instance was quit BY IDENTITY at once and the dev store swapped back. The coordinator RELEASED the hold (~02:08, "the mint finished cleanly"); from 02:09 her REAL-store app (`/Applications/Variorum.app`) is OPEN and in active use (HID idle 2–34 s at every check through 02:19) — the walk guard forbids every walk act while it runs and it is never ours to quit, so walk B WAITS for an author-free window. NEXT, in that window: re-stage (original aside, the parked fresh store back, marks cleared), capture walk A's bare Bookcase, then walk B — Welcome mark `pending` on the same fresh store (the guide's real road: the hook → `seedAtBirth` → the arrangement shelves it), captures in both voices; then restore exactly as above |
-| 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | IN-PROGRESS — FINDINGS + PROVISIONALS written; QUESTIONS #183 (a)–(e) appended; the KnownIssues row for F-BSEED-3 added, owner 13s (this commit). PENDING: EVIDENCE's walk lines, the first line |
+| 6 | The walk — a FRESH dev store, both voices, into `notes/plans/17y-screens/b-seed/` (gitignored) | DONE (this commit) — **the dev store is BACK in place** (its own store id `4077e8a5…`, key file `…54909c07…json`), the five marks re-written to their originals and read back, the walk's fresh store DELETED, NO Variorum instance running; the debug domain diffed before/after: nothing added or removed, only `IdleCommitSweepMark.Variorum-dev` (a launch timestamp) and `variorum.backup.log` (launch entries, all `upToDate`, no backup file written for the fresh store) changed. **Walk residue removed:** the fresh store's key-file copy `~/Documents/Variorum/variorum-keys-60c37cb981721228.json` (written 01:45 by walk A's first launch, store id `5b69ccb4…`) — that one file only. **Residue that stays:** the fresh store's per-store custody item in the data-protection keychain (unreachable — per-store custody never deletes; not removable without the app). Sequence: walk A at 01:45 (log only; its capture stopped by the guard, then the coordinator's HOLD — the instance quit by identity at once, the dev store swapped back), the hold released ~02:08, her real-store app open and in use 02:09–~02:26 (walk WAITED; never touched), then at an author-free window (her app closed, idle ≥ 120 s, guard before every act): **A1** `A1-road2-fresh-dev-store-terminal-light.png` — the fresh store's first launch on Road 2: the log `awaitingFirstSync` ×3 + the starred gathering, `welcome arrangement: undecided`, NO guide line; the Bookcase "no books yet", every census count 0 · then the Welcome mark staged `pending` on the same fresh store and relaunched — the log: the three books `awaitingFirstSync` (still gated), then **`[tutorial] field guide at a fresh store's birth: seeded(bookID: "C1B1C564-…")` 02:31:50.882 → `welcome arrangement: arranged` 02:31:50.915** (the guide's seed ≈1.4 s on this Debug build), the mark read `done` · **B1** `B1-guide-on-welcome-at-first-open-terminal-light.png` — ALL: Unshelved holds ★ quicknotes (gathering); **Welcome holds "the field guide · 41 notes · 10 ch"**; the census 1 book · 1 gathering; nothing spoken in the status line · **B2** `B2-the-guide-opens-whole-terminal-light.png` — the guide opened: "book · 10 chapters · 41 notes", welcome/writing/takes/structure/deleting/where things go… in plan order · the voice flipped to Study through Settings ▸ General ▸ Design voice (AX; the FRESH store's own setting — nothing of hers changed) · **B3** `B3-the-guide-opens-whole-study-light.png` · **B4** `B4-guide-on-welcome-study-light.png` — Bookcase · Home: Unshelved ★ Quicknotes #quicknote; **Welcome: the field guide #tutorial · 41 notes · 10 ch** |
+| 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | DONE (this commit) — the first line, EVIDENCE, FINDINGS, PROVISIONALS; QUESTIONS #183 (a)–(e); KnownIssues row (owner 13s) |
 
 **REVERT STATE: NO REVERT IN FLIGHT** (rounds A and B both ran from committed HEADs and were restored by `git checkout HEAD --`, `git diff --quiet` verified each time).
 
@@ -1926,9 +1941,27 @@ re-makes one any time). This is the Monday bed's exact sequence, and it is the s
 the starred-notes gathering, the classics gathering and the seeded quicknote already stand in on
 today's tree.
 
-### EVIDENCE (PENDING until each run lands)
+### EVIDENCE (all run at the END unless named; logs in the gitignored `scratchpad/17y-bseed/`)
 
-PENDING.
+- **The driven reproduction (piece 2, `p2-red.log`):** on the refactored, unfixed tree the birth pin
+  `aFreshStoresFirstLaunchPutsTheFieldGuideOnWelcome` RED with exactly 2 issues (no guide minted;
+  `#require(facts.guides.first)` nil) — "5 tests in 1 suite failed … with 2 issues".
+- **Red-on-old by revert (piece 4):** round A (`rv-a.log`, the hook's argument removed) → the birth pin
+  RED, 2 issues, the other 5 green; round B (`rv-b.log`, the tombstone + residue + latch guards removed,
+  the wire intact) → 8 issues across exactly the three guarded pins (her tagged note DESTROYED by a
+  silent replace among them), the birth / no-retrofit / signed-in pins green. Both restored by
+  `git checkout HEAD --`, `git diff --quiet` verified.
+- **`LaunchFurnitureTests` — 6/6 green** (`p3b-green.log`; in the END batch too).
+- **Mac at the END** (`DerivedData/17y`, zero instances): **"Test run with 103 tests in 12 suites
+  passed"** (`end-seeders.log`) and **the tutorial spine "Test run with 98 tests in 13 suites passed"**
+  (`end-spine.log`); no skips. `SampleLibraryWelcomeTests` 12/12 unmodified in behaviour (one comment).
+- **Phone:** `VariorumMobile` generic iOS Simulator **BUILD SUCCEEDED** (`phone-build.log`).
+- **The walk:** LIVE STATUS row 6 — A1 (Road 2 live) and B1–B4 (the guide on Welcome at first open,
+  whole, silent, both voices), with the unified-log lines that name each outcome.
+- **Fences:** `git diff 7344c11f -- Sources Server App/Variorum/VariorumMobile App/Variorum/VariorumMobileTests`
+  EMPTY (zero `Sync/`, schema, custody, mobile); no seed-content edit; no new setting, mark or
+  dependency; no `/Applications` refresh; her real-store app never touched (it ran 02:09–~02:26 and
+  the walk waited).
 
 ### FINDINGS
 
