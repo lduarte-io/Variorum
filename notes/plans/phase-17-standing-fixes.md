@@ -1798,3 +1798,142 @@ foreground waits only (poll, never `tail -f | grep`); no subagents. Commits carr
 Co-Authored-By / Claude-Session trailer. The cold review after your close is FABLE's
 (Sync-adjacent subject), spawned by the orchestrator — leave the diff clean and the record
 self-contained.
+
+## 17y B-SEED RECORD — item (q), the tutorial-seed trace (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
+
+**NOT DONE (first line, per the contract): PENDING until the close** — the record's opening facts
+are the trace (below, stated BEFORE any fix); every claim that a run has not yet confirmed reads
+PENDING.
+
+Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; this file's 17y
+row item (q), the RUN RECORD and the B-SEED brief; `notes/SessionResiliencyProtocol.md` whole;
+`notes/plans/phase-13s-onboarding-intake-2026-10-04.md`; the 13i-d U7 RECORD, its CONTINUATION,
+both adjudications after it and the U7 BRIEF (`phase-13i-d-bookcase.md`); QUESTIONS #177/#178 (next
+free number **#183**); `notes/SyncSpec.md` whole (the signed-in road's story is a sync story — read,
+nothing of `Sync/` touched); `SampleLibraryWelcome.swift`, `SampleLibrarySeeder.swift`,
+`SeededBookRestore.swift`, `StarredGatheringSeeder.swift`, `TutorialSeeder.swift` (the doors, the
+discovery, the seed's skeleton), `ShellActions.swift` (the door family), the launch task in
+`VariorumApp.swift`, `AuthSession.swift` (where a session lives), `AppServices.start()` / the
+sign-in road, `SampleLibraryWelcomeTests.swift`. No subagents. Worktree `~/dev/variorum-17y`
+only; DerivedData `App/Variorum/DerivedData/17y/`.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | This record + THE MECHANISM, both roads, stated before any fix | DONE (this commit) |
+| 2 | The launch's furniture made CALLABLE — `LaunchFurniture.seed` (a verbatim move out of `VariorumApp`'s window task; marks + first-round wait injectable, production defaults) — + the pins, the birth pin RED on purpose | NOT-STARTED |
+| 3 | THE FIX — the guide's birth seed (`TutorialSeeder.seedAtBirth`) on the arrangement's arrange-now road (`arrangeAtLaunch`'s new `beforeArranging`, default nil) | NOT-STARTED |
+| 4 | Red-on-old by behavioural revert of piece 3 | NOT-STARTED |
+| 5 | Suites at the END (the pins, the seeder/Welcome suites, the tutorial spine; the phone build — `Shared/` gains one defaulted parameter) | NOT-STARTED |
+| 6 | The walk — a FRESH dev store, before (old build) / after (fixed build), both voices, into `notes/plans/17y-screens/b-seed/` (gitignored) | NOT-STARTED |
+| 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
+
+### THE MECHANISM (traced by reading before any fix; the driven reproduction is piece 2's red pin + piece 6's old-build capture)
+
+**Nothing on the launch path seeds the field guide — the guide has only ever been a DOOR.** The
+Mac's launch furniture is the window `.task` in `VariorumApp.swift:185–249`, run after
+`AppServices.start()`: (1) `SampleLibrarySeeder.seedIfNeeded` for each of `Book.all` (Sherlock,
+*Encryption Explained*, Jekyll) behind the `SyncGate`; (2) `StarredGatheringSeeder.seedIfNeeded`;
+(3) when Sherlock's outcome says a FRESH store was born (`.seeded` with every story minted —
+`SampleLibraryWelcome.decide`, `SampleLibraryWelcome.swift:356–390`), `arrangeAtLaunch(...,
+guideName: TutorialSeeder.bookName)` arranges Welcome. The arrangement's shelving step
+(`SampleLibraryWelcome.swift:241–253`) walks `seededBookNames(guideName:)` (`:82–88`) and shelves
+every LIVE Home reading of each name — the guide's name is on the list, but no reading of that name
+exists, so the step shelves nothing for it and the mark goes `done` (never again on this device).
+`TutorialSeeder` is reached ONLY from `ShellActions.openTutorial` (`ShellActions.swift:507–545` —
+Help ▸ Open the Tutorial `EditorCommands.swift:835`, the ⌘K row `RootView.swift:1082`) and
+`ShellActions.restoreTutorial` (`:352–379` — Help ▸ Restore Tutorial…). History, so the class is
+clear: 13b Stage 2 built the tutorial door-only ("SEEDING IS A PRODUCT DOOR", `7c081110`); the
+13i-d U7 BRIEF then required that "fresh stores get it at birth" with Welcome holding "the field
+guide, Sherlock, Jekyll, Encryption Explained" (`phase-13i-d-bookcase.md:3544–3549`; the sitting
+record §19.3 "Welcome = the field guide + the classics trio"), and U7 built the arrangement's
+shelving of the guide BY NAME but never a birth seed of the guide — its own fresh-birth pin says so
+in a comment ("the guide is seeded when she first opens it", `SampleLibraryWelcomeTests.swift:165–
+166`), and that pin composes a REPLICA of the launch (`launchSeeds`, `:69–79`) rather than the
+production composition, so no test ever exercised what a real first launch does.
+
+**ROAD 1 — a SIGNED-OUT fresh store** (every new user's first launch; and EVERY fresh install,
+because the session is DEVICE-BOUND — `AuthSession.swift:116–130`: the data-protection keychain,
+`WhenUnlockedThisDeviceOnly`, "a migrated Mac signs in again"): `start()` finds no persisted
+session (`AppServices.swift:271–276`), so the gate's `belongsToAnAccount` (`sync.isConfigured ||
+account.variorum != nil`) is false and nothing waits: all three books seed whole, the starred-notes
+gathering mints, Sherlock's full mint decides FRESH, Welcome is arranged — Sherlock, Jekyll,
+*Encryption Explained*, the classics gathering on it, the quicknote in the Pool — **and no field
+guide anywhere**. That is exactly her report ("everything else was just there"; the guide had to
+come from Help ▸ Restore Tutorial…).
+
+**ROAD 2 — a SIGNED-IN fresh store** (a store whose launch finds a persisted session for its
+variant — e.g. this machine's dev scope, which carries a dev-scoped session with dev sync OFF): the
+gate's `belongsToAnAccount` is true, so each book waits up to `firstRoundWait` (20 s,
+`SampleLibrarySeeder.swift:816`) for `sync.status.lastSuccessAt`; a store that has not synced
+cleanly (a new device not yet enrolled — the engine refuses a round without keys, SyncSpec §3) gets
+`.awaitingFirstSync`, NOTHING marked, and Welcome reads `.undecided` (nothing marked) — the next
+launch asks again. Once a clean round has landed, the corpus's Sherlock is found
+(`.alreadyPresent`, or `.deletedByTheReader` on her tombstone) → Welcome `declined` → no
+arrangement. **The guide's story on this road: her corpus's live field guide arrives by sync like
+any book; nothing seeds one** (today, and — by design below — after the fix, which keys the guide on
+the same fresh-birth decision). The one corner: an account whose corpus holds no Sherlock at all
+reads FRESH after its first clean round, and the guide seed's discovery then finds the guide the
+round already brought, and seeds nothing.
+
+**HER MONDAY BED RUNS BOTH ROADS, IN THAT ORDER.** A fresh install on the new MacBook is signed
+OUT at its first launch (the device-bound session above) — so Road 1 runs first: on today's tree
+Welcome has no guide; with the fix the guide is on Welcome at first open. Then she signs in and
+enrolls, and ordinary sync MERGES her corpus with the fresh seeds (sign-in is `connectSyncIfAllowed`
+— owner adoption + rounds, `AppServices.swift:382–414`; never a replace). By reading (SyncSpec §7 +
+`Sync/` grepped for any repair keyed on these objects): Sherlock and *Encryption Explained* FOLD by
+the pristine-copy dedupe (both pristine → the smaller id keeps; an edited copy is kept), the Welcome
+shelf folds (the R5 keeper), the reserved/`classics`/`tutorial` tags fold (`tag.path`); what stands
+TWICE because no keeper exists for it — on TODAY's tree already — is Jekyll (18l-c U6's recorded
+residual: seeded everywhere, judged nowhere), the starred-notes gathering, the classics gathering
+(the loser's rule then names the folded tag and matches nothing) and "a first quick note"; **and,
+with the fix, the field guide joins that class** (THE RESIDUAL below).
+
+### THE FIX'S DESIGN (settled before building — the brief's pre-authorized shape; no fork raised)
+
+- **One occasion, the books' own:** the guide seeds on the Welcome arrangement's ARRANGE-NOW road
+  only — a fresh store's birth (Sherlock's full mint under the SyncGate) or the `pending` resume of
+  one — through a new defaulted parameter `beforeArranging` on `SampleLibraryWelcome.arrangeAtLaunch`
+  (Shared; the phone never calls `arrangeAtLaunch`, so it passes nothing and nothing changes there),
+  run after the decision and before `arrange`, so the arrangement's existing shelving step puts the
+  guide on Welcome. It therefore inherits every guarantee of that decision: the SyncGate (Road 2
+  never reaches it), and **never a retrofit** — an existing store is `declined`/`done` and the hook
+  is never called (stores born on U7–13r builds without a guide keep the doors as their road).
+- **The seed itself (`TutorialSeeder.seedAtBirth`, Mac):** silent (no receipt, no navigation, no ask
+  — R-13r-11; one log line), on the quiet facade (the restore road's `Operations(undoStack: nil)`),
+  under the tutorial doors' latch (a door in flight → the birth seed yields; it seeds and arranges
+  itself), deciding from ONE read: a live guide present → nothing; a tombstoned reading of the
+  guide's name → her deletion, honoured; any tutorial RESIDUE (tagged lessons, the scraps pool, no
+  book) → nothing (replacing residue is the doors' confirmed road, never silent furniture's); else
+  the pristine seed (the restore road over an empty discovery — no cleanup, the one shape).
+- **No new mark, no setting:** the Welcome mark (`pending` → `done`) already records that this
+  device handled the birth; a later deletion of the guide is final on this device (the launch reads
+  `alreadySettled`).
+- **The pin drives the PRODUCTION composition:** the launch's furniture moves verbatim into
+  `LaunchFurniture.seed` (Mac) so `VariorumApp` and the pins call the same function.
+- Zero `Sources/VariorumCore/Sync/`, zero schema, zero custody, zero mobile behaviour, zero seed
+  content.
+
+### THE RESIDUAL (named, the brief's Jekyll precedent — PROVISIONAL P-17y-BSEED-3)
+
+The field guide stays OUT of the sync dedupe (a tutorial dedupe family would be `Sync/` — the hard
+stop). So **a fresh signed-OUT store that later signs into an account already holding a field guide
+shows TWO field guides** — both live, nothing lost, either deletable (Help ▸ Restore Tutorial…
+re-makes one any time). This is the Monday bed's exact sequence, and it is the same class Jekyll,
+the starred-notes gathering, the classics gathering and the seeded quicknote already stand in on
+today's tree.
+
+### EVIDENCE (PENDING until each run lands)
+
+PENDING.
+
+### FINDINGS
+
+PENDING.
+
+### PROVISIONALS (QUESTIONS #183 carries them)
+
+PENDING.
