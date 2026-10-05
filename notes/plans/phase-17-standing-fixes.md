@@ -2648,3 +2648,146 @@ Panel's identical gate was B2's (e) (`BookPanelBrain.dropOutcome`); its two orde
 satisfied = nothing) were settled by B2's ladder. Measured by the red pin on the pre-fix tree:
 `lastError == nil` for a real re-place under Created ↓.
 
+
+### THE TRACE — (r), before the fix
+
+`ShelfView`'s body is one VStack: masthead · strip · `if model.censusOpen { HStack { Spacer;
+BookcaseCensusPanel } }` · the board's ScrollView (`maxHeight: listContentHeight`) · the entry bar ·
+the hint bar. 13i-d U1 put the panel IN FLOW there (P-13id-U1-6 — "opens IN FLOW under the strip
+(mockup v5)"). Opening it inserts its whole height between the strip and the board: every row moves
+down (measured by the red pin: **148.0 pt**), and in a window whose height is already spoken for the
+ScrollView shrinks under it and clips its first row at the top edge — her capture's half-drawn
+"u4 owned". The fix changes only the layout mechanism (an overlay hung from the strip); the
+supersession of U1-6's "in flow" letter is her (r) report's.
+
+### F-B3-3 — THE FIRST END RUN'S TEST-HOST CRASH (found, reproduced, bisected; this batch's trigger removed; the latent class is the orchestrator's)
+
+**What happened:** the first full Mac run (`end-mac.log`) CRASHED the test host mid-run — `Fatal error:
+Could not open the Variorum database … io.lduarte.Variorum.debug/…/variorum.sqlite … SQLite error 26:
+file is not a database` — i.e. the test process tried to OPEN THE DEV STORE through
+`AppDatabase.liveValue` (the decrypt failed without the key, so nothing was read or written; the
+dev store is verified to open on the walk). xcodebuild restarted the host and finished: "3587 tests in
+590 suites passed … with 6 known issues", `** TEST FAILED **` naming
+`AscentDoorTests.theFoldIsOneDeclaredActWithOneKey()` (the issue landed in its window).
+**The backtrace** (`~/Library/Logs/DiagnosticReports/Variorum-2026-10-05-081254.ips`, faulting
+thread): `SavepointOnLeave.wire(workspace:session:)`'s closure → `AppSession.savepointOnLeaving` →
+`Operations.closeAutoCommit` → `Operations.database` → `@Dependency(\.database)` with no override in
+the CURRENT task-local context → `liveValue`. **Bisected** (54-suite population = every test file up
+to `BookAscentTests.swift`): the current tree CRASHES deterministically; without the mint suite it
+still crashes; without B3's two new suites it does NOT; the PRE-B3 tree (`0dafa1b1`, a `git archive`
+snapshot in the gitignored scratchpad, its own DerivedData) does NOT ("303 tests in 51 suites
+passed"). **The trigger was B3's own pin** `ArrivalsDoorPlacementTests.aRowsNameOpensTheNoteAndNever
+SeatsIt`, which POSTED the app-wide `.variorumOpenPost` broadcast: a shell standing in the test host
+adopted the note, and the later `AscentDoorTests` broadcast (`.variorumOpenBookAtPost`, pre-existing)
+made that shell's pane LEAVE the note — the leaving signal ran `closeAutoCommit` in the posting test's
+dependency-less context. **Fixed (58bdeb0d):** the open road's broadcast is captured at a seam
+(`BookArrivalsList.openNote(_:post:)`), the books-only condition pinned at `BookArrivalsDoor.isDrawn`
+(no whole book views mounted); the population re-ran **313 tests / 53 suites, zero crash**.
+**INFERRED, not proven — the standing shell:** only `AscentRoutingTests` mounts a RootView in that
+population and it had not yet started, so the receiving shell is most likely the test host app's
+OWN window over a session a bootstrap pin published (`AppBootstrapOffMainTests` builds
+`AppBootstrap(testOpener: { .success(database) })`, whose `AppSession` is created inside the
+bootstrap off any test's dependency scope). **The latent class (owner: the orchestrator — a 19-ledger
+item):** any pin that posts an app-wide navigation broadcast (`AscentDoorTests` does today) can drive
+that standing shell, and any note departure there reaches `@Dependency(\.database)`'s LIVE value —
+the test host attempting to open the developer's dev store. Candidate shapes: the test host never
+shows a shell over a bootstrap pin's session; or `AppDatabase`'s `testValue` fails loudly WITHOUT
+opening any file; or the broadcast pins capture at a seam as B3's now does.
+
+### FINDINGS (for the orchestrator)
+
+- **F-B3-1 — lesson 4 still names the retired "at the door" line** (`TutorialSeeder` — "waits at
+  Arrivals — the book's “at the door” line —"). Seed CONTENT, fenced from B3; the spine pin
+  `TutorialBooksChapterTests.lessonFourArrivals` carries it as a `withKnownIssue` that FAILS the
+  moment the prose is re-worded (so the fix must remove the wrapper). **Suggested owner: B-DEDUPE**
+  (the same seeder file and reviewer; its R-17y-8 lesson sentence and MAJOR-2's Canvas lesson ride the
+  same re-seed consequence).
+- **F-B3-2 — the ARCHIVED line still stands atop the book's content** (13i-d U4: "N archived" on
+  Index/Outline/Book, the Arrivals line's old idiom, directly under where the door's line was). (h)'s
+  ruling moved the ARRIVALS door only; whether the archived line follows it into the masthead is hers
+  (13s, or a later 17/19 item).
+- **F-B3-3 — the test-host crash** (the section above): B3's trigger fixed; the latent class routed.
+- **F-B3-4 — the move menus still offer "unfiled" to a note already unfiled** (a silent no-op — the
+  other half of her (i) confusion). (i) ruled the WORD; omitting the current destination (the
+  Bookcase's Move to Shelf ▸ precedent) is a behaviour no ruling makes — hers if wanted.
+- **F-B3-5 — the Arrivals door's observation now runs whenever a book is open** (every mode — the
+  door is the masthead's), where the line's ran only on Index/Outline/Book; it is bounded by the
+  book's pair rows (13i-b F-U2-5's P1 statement, unchanged) and re-fetches at autosave rate while the
+  book view shows (the same class).
+- **F-B3-6 — the Open-row wing indicator is a one-shot read** keyed on (rows, current wing): a note
+  MOVED to another wing while open shows its new wing at the next key change (a switch, a row
+  opened/closed), not at the move itself.
+- **F-B3-7 — the note-only window does not follow** (its workspace is not wired — `showOnly`, no
+  history); recorded as P-f5.
+
+### PROVISIONALS (QUESTIONS #185 carries them, in her words)
+
+- **P-17y-B3-c1** a duplicate's riding tags are a ROW copy — no living book hears the duplicate (the
+  copy family's letter). (a) BUILT · (b) an applying act: books whose rule names the tag take the
+  duplicate in (or bell it at Arrivals).
+- **P-17y-B3-i1** "unfiled" is lowercase in the move menus too (the headers' case). (a) BUILT · (b)
+  "Unfiled" in menus.
+- **P-17y-B3-11a** the book view's sort refusal speaks on the book view's own error line (where its
+  finished/sealed refusals already speak), naming the order she is LOOKING through. (a) BUILT · (b)
+  the toast, like the Book Panel's.
+- **P-17y-B3-r1** the open № panel floats OVER the first rows' right ends (their meta hidden while it
+  is open). (a) BUILT · (b) a popover arrowed at the №.
+- **P-17y-B3-s1/s2** (the ruling's own provisionals) the starred row sits right after All, always
+  shown, the bare lowercase word "starred"; its hover "Every starred book, wherever it's shelved —
+  drop a book here to star it". **s3** no hand placing on the starred shelf (no ⠿, no row drop, no
+  Send to Top/Bottom — a hand position belongs to a real shelf). **s4** + New Book while looking at
+  starred lands unshelved and UNstarred. **s5** a drop is one-way and silent (already starred:
+  nothing; the cap's refusal speaks); a shelf name dropped there does nothing; the word has no
+  right-click menu. **s6** gatherings join books there (the union star covers both).
+- **P-17y-B3-l1** the menu beyond the Bookcase (Library book rows · Starred book rows · Archived book
+  rows): Open · Star/Unstar · Book/Gathering Settings… · Export Markdown… · Export PDF… · Archive
+  (Archive… on an owned book) or Unarchive · Delete Book… (never the daily Journal). (a) BUILT · (b)
+  the full Bookcase menu minus the positional doors · (c) Star alone.
+- **P-17y-B3-h1** the door: a tray icon beside the gear — faint with no count when calm, the accent
+  and the count when something waits; BOOKS only (a gathering has none). **h2** it rides every book
+  mode, Read included. **h3** the finish confirm's and the wing move's sentence: "N waiting at
+  Arrivals will be dismissed." **h4** the popover's words ("Arrivals · 3 waiting"; "Nothing is
+  waiting. When this book's rule brings in a note and its dial says “wait at Arrivals,” the note
+  waits here for you."). **h5** a row's name opens the note in the pane she is in (the popover
+  closes).
+- **P-17y-B3-g1** the picker: a popover — search field, matches, a 'New tag "#x"' row; ⏎ takes the
+  first match, else makes the tag. **g2** a tag made in the rule editor is made AT ONCE (Cancel keeps
+  the tag, like a tag typed on a note) — (b) make it only on Save. **g3** the create row offers only
+  a path no tag of the book's wing wears (case aside); "/" makes a hierarchy. **g4** the spawn
+  sheet's chooser searches but does not make tags yet; the "+ group" seed menus stay flat (the
+  adoption list).
+- **P-17y-B3-o1** the note's Add to Book door is ALWAYS drawn (with no other book, it makes one).
+  **o2** the made book is born in the NOTE's wing. **o3** a made book STANDS if the add then asks
+  copy-in/move-in and she cancels — (b) undo the mint on cancel. **o4** the receipt "Made the book
+  “X” and added this note." **o5** the Pool's Add to Book sheet gains the same create row, atop the
+  matches.
+- **P-17y-B3-f1** the receipt: "Now in “X”." / "Now in Home." **f2** re-opening the note already
+  shown (an Open row click) is followed — an open is an open. **f3** BOOKS follow too (a book
+  reached in another wing — back/forward — switches the wing like a note) — (b) notes only. **f4**
+  the indicator: the wing's name, faint, after the Open row's title, hover "In the wing “X” —
+  opening it takes you there". **f5** the note-only window does not move the wing.
+
+### MOBILE PARITY (record only — nothing built)
+
+- (c) is core — the phone's duplicate door (none today) would carry tags for free.
+- (f) the phone stands in Home with no wing face (U5's parity facts) — the follow and the indicator
+  are the mobile catch-up's, once it has a wing switcher.
+- (o)/(g) the phone's add-to-book and tag pickers adopt the one idiom at its catch-up (`SearchPicker`
+  is Mac chrome; its BRAIN `SearchPickerBrain` is the shareable half — hoist at that touch).
+- (h) the phone has no Arrivals face yet (13i-b's mobile row stands); the ONE word "Arrivals" binds
+  it when it lands.
+- (s)/(l)/(r)/(i)/(d)/item 11 — Mac surfaces; the phone has no Bookcase strip, no book-row menus off
+  a Bookcase, no census panel, no Cards view; "unfiled" binds any phone chapter face.
+- The one Shared/ change: `BookcaseBoard` (the `.starred` scope + section kind + the scope-aware
+  `placesByHand`) — the phone compiles it and calls none of it (the phone build, row 12).
+
+### SEAM NOTE (for the review cast)
+
+No `Sources/VariorumCore/Sync/`, no schema, no custody, no editor seam (`EditorTextView`,
+`BlockRangeIndex`, `PaneSurface`, the read tier untouched — the book view's MASTHEAD and its
+structure model's drop brain are chrome/model, not the text seam). Core touched ONCE, for (c):
+`Operations+Versions.swift` (`duplicateAsVersion` rides `copyLiveTags`) and the helper's visibility in
+`Operations+Ownership.swift` — an operation's row transition, pinned in core. One DEFAULT's meaning
+moved under her rulings: (f) the app's current wing now follows the focused pane (R-17y-…/#174's
+ruled shape). Expected cast: `opus-reviewer`; the orchestrator may re-cast to Fable for (f)'s
+default-meaning change.
