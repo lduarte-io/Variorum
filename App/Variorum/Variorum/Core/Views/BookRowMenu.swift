@@ -97,8 +97,10 @@ final class BookRowDoors {
         self.stateDoors = stateDoors ?? BookStateDoors(session: session)
     }
 
-    /// Read the listed books' rows (one statement per call, the listing's
-    /// ids only). Called by each host's `.task(id:)` over its book ids.
+    /// Read the listed books' rows: ONE read transaction, one row lookup per
+    /// listed id — bounded by the listing (∝ the rows, P1). Called by each
+    /// host's `.task(id:)` over its book ids. (The ladder's round-1 NIT-3:
+    /// the old sentence claimed "one statement per call".)
     func load(_ readingIDs: [String]) async {
         guard !readingIDs.isEmpty else {
             facts = [:]
