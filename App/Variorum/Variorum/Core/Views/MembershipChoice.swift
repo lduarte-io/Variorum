@@ -341,15 +341,19 @@ final class MembershipDoors {
     /// cancelled sheet keeps the empty book — PROVISIONAL P-17y-B3-o3). Any
     /// other refusal is rethrown for the host's words.
     func mintAndAdd(_ typedName: String, postID: String) async throws -> MintOutcome {
-        let name = typedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = typedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        // The ladder's round-1 MINOR-1: the guard keys the name the mint
+        // will STORE — a blank type resolves to "Untitled" FIRST, so E13
+        // checks that same string (guarding the typed "" let an existing
+        // "Untitled" gain a twin). Every mint guards the name it stores.
+        let name = trimmed.isEmpty ? "Untitled" : trimmed
         let database = session.database
         let book = try await session.runner.run { ops -> Reading in
             try ops.assertBookNameIsFree(name)
             let wing = try database.read { db in
                 try Queries.effectiveWing(db, ofPost: postID)
             } ?? ""
-            return try ops.createReading(
-                name: name.isEmpty ? "Untitled" : name, kind: .book, wingId: wing)
+            return try ops.createReading(name: name, kind: .book, wingId: wing)
         }
         if let choice = try await add(postID, to: book.id) {
             await offer(choice, postID: postID, readingID: book.id)
