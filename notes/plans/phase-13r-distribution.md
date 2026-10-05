@@ -1140,6 +1140,12 @@ opened; the working tree was left clean.
     with `evaluate` picking the most recent surviving entry per id in rank order (the
     `present` lookup following the same choice); **F4** — guarding inside
     `UpdateChannel.checkForUpdates()` itself would cover any future door (either shape fine).
+  - **HER WINDOW OPENED MID-PASS (2026-10-04, verbatim: *"my app is quit and ready for
+    refresh, i'm away from the computer, run tests at your leisure"*):** zero instances
+    confirmed by the orchestrator; the reviewer told to run the FULL fix-pass suites; the
+    away posture is PROVISIONAL-and-continue (nothing author-gated remains before round 2);
+    the `/Applications` refresh stays the CLOSEOUT'S act behind the A1 rail — her "ready
+    for refresh" is its pre-authorization, not a reordering.
   - **ZERO DISPUTES. The fix pass is the REVIEWER'S** (authorized by follow-up message):
     final calls on all five, F3 pin-first red-on-old, F1/F2 as script changes labelled
     no-pin (F1's 200-on-published-name measurement included), F4/F5 at its call; the fix
