@@ -201,3 +201,15 @@ Nothing is installed and `/Applications/Variorum.app` is never swapped: the tool
 **Way back:** the A1 safety copy (her rail), or Book ▸ Delete Book… with its notes (the Trash keeps them).
 A mint that fails partway leaves a partial book, and the one-shot guard then refuses a re-run until that book
 is deleted. The worktree and branch are removable after the mint (issue #7: the branch never merges).
+
+## THE FABLE REVIEW (the planning-session orchestrator's own hands, 2026-10-05 — the custody-adjacent rule the implementer itself flagged)
+
+Read in full: `StoreUnlock.swift`; `WorkbookMint.swift`'s guard, write path and verification head; the CLI's secret handling, refusal order and instance check. Re-ran the plan proof on the primary checkout: 3630 / 37 / 7, every footer and the Totals table agreeing.
+
+**VERDICT: PASS — nothing blocks the mint.**
+- The unlock road adds no crypto or keying of its own, touches no Keychain item, and fences both store-creation traps (`requireExistingEncryptedStore` before every open; the probe's scratch-store schema comparison refuses before the real open could migrate her library); the real open is the lobby's own call (`openStore(at:custody:.inMemory)`).
+- The write path is ops-only and insert-only; the one-shot guard (`BookNaming.key`, archived included) refuses before the first write; verification is an independent plain-SQL read-back of everything.
+- The CLI: `readpassphrase` with `RPP_ECHO_OFF | RPP_REQUIRE_TTY`, secrets never printed or logged; the running-instance refusal by bundle identifier; the typed `MINT` confirm; refusals to stderr before any write path exists.
+- NOTED, acceptable: (i) a TOCTOU hair between the guard's read and the first write — closed in practice by the instance refusal and the single operator; (ii) `--yes` + `--passphrase-file`/`--recovery-file` permit a non-interactive mint — rehearsal affordances that still require the secret, the exact path, zero instances and the guard.
+
+**P-2 RULED BY HER (2026-10-05, the question tool): FIRST MENTION — as built.** No table edit; the tested shape mints. (P-1, P-3…P-8 stand as the record's defaults; hers to re-rule any time before the mint.)
