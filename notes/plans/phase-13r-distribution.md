@@ -1257,6 +1257,29 @@ opened; the working tree was left clean.
     dd44aff3 · 15ce51b5 · d3cd0079 · 0d2f3f05 · 7579b4fd) + this refinement; round 2
     spawns under a FRESH reviewer, with the 7579b4fd pin repair and this F4 refinement
     explicitly in its view.**
+  - **LADDER ROUND 2 — CLOSED CLEAN (2026-10-04, the FRESH reviewer over the final fix set
+    at `da325b3d`): 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT, every fix judged SOUND with its
+    mechanism re-verified cold** (F3's red-on-old traced by the reviewer's own hands; F4's
+    Sparkle claims re-verified at the cited 2.10.0 lines including the @optional header
+    fact; F5's single-slot mutant trace reproduced at exactly 3 issues; F2's plist read
+    byte-identical to the retired literal; the pin repair probed on every hollowness road —
+    diverged configs, a third 0.9.x line, host/pbxproj skew — and judged unable to go
+    hollow); the five touched suites re-run BY THE REVIEWER at a verified zero-instance
+    window: **45 tests / 5 suites PASSED**. NO round 3 earned. **THE LADDER IS CLOSED:
+    round 1 (0/0/3/2, zero disputes, all five fixed + the F4 refinement) · round 2
+    (0/0/0/3).**
+  - **The three round-2 NITs, DISPOSITIONED RECORD-ONLY by the orchestrator (the reviewer's
+    own eligibility reading, accepted):** (N1) the ~millisecond post-answer gap in the F4
+    guard (`isAskingPermission` clears one main-drain after Sparkle nils its prompt) —
+    unpinnable, not a regression, the pre-refinement silence confined to a window no hand
+    can hit deliberately; the synchronous-clear shape is on record if it ever earns
+    building. (N2) the F1 rider's 200/MISS arm doesn't alone discriminate
+    query-in-cache-key from plain expiry — the mechanism rests on Cloudflare's documented
+    default and the fix is strictly no worse either way; the discriminating back-to-back
+    HEAD comparison is ONE line at the NEXT release (carried in the handoff). (N3) the
+    reshaped version pin reds at 1.0.0 with a message that won't name R-13r-6's scheme
+    event — the red is the pin DOING ITS JOB at a deliberate scheme event; the message fold
+    is noted for whoever runs 1.0.0.
 
 ---
 
@@ -3297,3 +3320,15 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
 
 **U3-B STATE AT THE STOP (2026-10-04): ALL SEVEN PIECES DONE AND PUSHED; THE U3 WALK IS STAGED (piece
 6), AUTHOR-GATED.** The orchestrator verifies by spot-check, then the pre-walk staging (N-0) begins.
+
+---
+
+## PHASE 13r — CLOSEOUT (2026-10-04, the orchestrator; the LIVE STATUS and unit records above are the evidence)
+
+*[removed for publication]*
+
+**THE RELEASES ARE LIVE: 0.9.0 (build 4911) and 0.9.1 (build 4913)** — notarized + stapled (4 Accepted submissions, 0 issues), byte-identical on `dl.stargazing.tech`, the two-entry appcast live with her notes verbatim and the edSignature verifying under the baked key, the no-cache header verified live for the first time, the page at 0.9.1; dSYMs durable per version. **THE FIRST EXTERNAL USER EXISTS** — her walk ran the whole road on a friend's computer (download → install → calm first open → the public-feed update), her verdict verbatim in the LIVE STATUS; the cadence day-counter arms declined at her word (their evidence: the U3-A dev-store walk + 15 CalmAsks pins + the 30-day simulated run).
+
+**THE LADDER (two rounds, CLOSED):** round 1 — 0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT; the cross-model exchange closed with ZERO DISPUTES (both implementers sharpened rather than disputed); all five findings fixed at the reviewer's hands (F3 pin-first red-on-old + revert-verified; F1's immutability rider MEASURED 200/404; F2's by-construction key; the F4 refinement accepted from the sanity pass's NIT and verified against Sparkle's source) + the pre-existing VersionSchemeTests literal repaired to R-13r-6's ruled shape. Round 2 (FRESH reviewer) — 0/0/0/3, every fix SOUND, no round 3; the three NITs dispositioned record-only. **FINALS:** 274/31 (exactly the one named pre-existing red — 19e, queued) · 166/34 · 2/2 · core 2174/244 (the 19a baseline exact) · the round-2 re-run 45/5. **Zero `Sync/`, zero schema, zero custody lines in the whole phase; the marker stays 12.** KnownIssues row 24 RESOLVED on the U1 drill's PASS. New process rulings this phase: R-13r-15 (the site-publish exemption), R-13r-16 (the combined public-road walk); release lessons recorded (no commits mid-release-run; the cache-busted preflight; the negative-cache purge road).
+
+**DEFERRED/CARRIED:** U4 (post-🚀, the brief intact); 19e (the runbook doc drift, queued — the ledger UN-PARKS at this close); the §12 calm-asks contract line PROPOSED in the handoff (lands only at her word); QUESTIONS #180/#181 her ratify bundle; the site runbook's bucket-side preflight proposal; the field-guide re-seed press (hers, one click, in the handoff); N2's back-to-back HEAD comparison at the next release; N3's message fold at the 1.0.0 scheme event. **MOBILE PARITY:** the calm out-of-date sync sentence REACHES THE PHONE (the face is `Shared/`; no door — its updates are the App Store's); the phone's crash-report opt-in face and the phone's What's New (the App Store road) are named candidate rows — all three carried to `notes/MobileSoul.md`'s ledger. **The author handoff is `notes/handoffs/phase-13r-handoff.md` — her checklist IS the friends-beta checklist.** 17y runs next at her kickoff (its message at the 17y entry's tail); the 19 ledger is active again.
