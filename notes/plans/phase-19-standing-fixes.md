@@ -25,7 +25,7 @@
 | c | The Xcode-27 residue census: silent vacuous-#expect candidates (19a NOTICED #6) + the test-side isolation warnings, Mac AND MOBILE (#7, widened at 19b's close) | **CLOSED 2026-10-04** — round 1: the entry's arms CLEAN (263 REAL, 0 vacuous, 1 recorded; isolation 43→0); the 1 MAJOR was the RECORD's false `#require` clearance → corrected, class routed to 19d |
 | d | The compiler-flagged never-failing checks: the `#require` silent-nil class + the always-true comparisons (PostureSwitchDrill:621, SyncEnrollment:262) — 19c round 1's F1+F2 | **CLOSED 2026-10-04** — round 2: no BLOCKER/MAJOR (2 MINOR + 1 NIT, record/method scope, dispositioned); the 187-hollow reclassification CONFIRMED by the reviewer's own true-nil mutant; tripwire 0, zero redundancy warnings, all suites green. **THE LEDGER PARKS until 13r closes** (record-and-queue only) |
 | e | The runbook's repo copy drifted from the shipped text: `notes/DataSafetyRunbook.md` line 291 still says "on your shelf" where `DataSafetyCopy.runbook` has said "on your Bookcase" since 13i-d U6 (`827da96c`) — `DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument` red. Found by 13r U3-A's finals (2026-10-04), PRE-EXISTING (confirmed at `138ac723`, before any U3-A line). The fix: the one-line repo-doc sync (copy the rendered text the test writes over the repo file), one commit, the pin going green IS the verification; the per-entry Opus cold review per the standing rule (the author may waive a one-line doc sync at her word). | **QUEUED 2026-10-04** (recorded by the 13r orchestrator under the parked-ledger rule — runs after 13r closes; until then the 13r ladder's finals read "green modulo this one named pre-existing red") |
-| f | The support doors gain THE PRE-DRAFT CHOICE (her #181 (i) ruling, 2026-10-04, the 13r post-close sitting): before ANY draft opens, both doors ask — "Open in Mail" / "Show the file and copy the address" (the plain feedback door the same shape minus the file: "Open in Mail" / "Copy the address"). Closes the measured no-Mail-account dead-end (13r's F-W5: both doors land in Mail's Add Account sheet, no draft, Variorum cannot tell) BY CONSTRUCTION — the second road never needs a mail app (the address to the pasteboard; the report revealed in Finder). Scope: `Features/Diagnostics/SupportMail.swift` + the two door call sites; no send road exists and none is added; words functional (13s re-voices); zero Sync//schema/mobile. Pins: the choice interposes before any compose on BOTH doors (red-on-old: the old shape composes directly); the copy-the-address road lands support@stargazing.tech on the pasteboard and, for a report, reveals the file; the existing draft/attachment pins ride unmodified. Acceptance: pins + a dev-store walk capture of both doors' choice; the mandatory per-entry Opus cold review. | **OPEN 2026-10-04** — runs now at her word at the sitting ("we might as well finish it"); one implementer session |
+| f | The support doors gain THE PRE-DRAFT CHOICE (her #181 (i) ruling, 2026-10-04, the 13r post-close sitting): before ANY draft opens, both doors ask — "Open in Mail" / "Show the file and copy the address" (the plain feedback door the same shape minus the file: "Open in Mail" / "Copy the address"). Closes the measured no-Mail-account dead-end (13r's F-W5: both doors land in Mail's Add Account sheet, no draft, Variorum cannot tell) BY CONSTRUCTION — the second road never needs a mail app (the address to the pasteboard; the report revealed in Finder). Scope: `Features/Diagnostics/SupportMail.swift` + the two door call sites; no send road exists and none is added; words functional (13s re-voices); zero Sync//schema/mobile. Pins: the choice interposes before any compose on BOTH doors (red-on-old: the old shape composes directly); the copy-the-address road lands support@stargazing.tech on the pasteboard and, for a report, reveals the file; the existing draft/attachment pins ride unmodified. Acceptance: pins + a dev-store walk capture of both doors' choice; the mandatory per-entry Opus cold review. | **OPEN 2026-10-04** — runs now at her word at the sitting ("we might as well finish it"); one implementer session. **BUILT 2026-10-04** (the 19f RECORD below: both doors ask, red-on-old + revert verified, walked; PROVISIONALs #182) — the Opus cold review is next |
 
 ---
 
@@ -1915,7 +1915,27 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
 
 ## 19f RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
 
-**NOT DONE BY THIS ENTRY (stated first, per the contract; PENDING — finalised at the stop).**
+**NOT DONE BY THIS ENTRY (stated first, per the contract; FINAL at the stop, 2026-10-04):**
+- **`/Applications/Variorum.app` was NOT refreshed and nothing was released** — her rule, recorded
+  this same evening in the 13r handoff's item 8 (`6c812d6f`): a release's trigger is always her
+  explicit word, and `/Applications` refreshes are her test road. Until one carries 19f, the
+  shipped 0.9.1 still opens the draft directly (F-W5's dead-end stands there).
+- **A Variorum mail draft has still never been seen on screen on this M3** — its Mail still has no
+  account, so the walk's Open in Mail leg reached Mail's Add Account sheet (F-W5, unchanged
+  beneath the choice). Only FEEDBACK's Open in Mail was pressed in the walk; the report's Open in
+  Mail (the compose-with-attachment road) is pinned headless (`theReportDoorAsksBeforeAnyDraftOpens`
+  + SupportDraftTests' road pins), not walked.
+- **The Help door's door-level pin is SOURCE-TEXT** (`theHelpDoorAsksBeforeItsDraftOpens` — a
+  `Commands` struct's private act, the SupportDraftTests precedent for this very door); the
+  behaviour beneath it is pinned through the shared dispatcher and the channel, and walked.
+- **The full Mac suite was not run** (it runs ~12.5 min, past a foreground call): the two touched
+  families were (below). Core and mobile were not run — zero `Sources/`, `Shared/`, mobile paths.
+  The one red in family A is 19e's named, queued, PRE-EXISTING runbook drift.
+- QUESTIONS **#182** (a)–(e) are PROVISIONAL, awaiting her; (c) confirmed on screen.
+- ~400 pre-existing test-host fixture dirs in the Debug container's `tmp/` (the U3-B pins' and
+  older) — recorded, not swept (only this entry's 12 removed).
+- No `Sources/VariorumCore/Sync/`, no schema, no `Shared/`, no mobile, no `Server/`; her real store
+  and her app never touched (her app absent at every check); no subagent spawned.
 
 **Session start (2026-10-04):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0 (27A266a) ·
 `xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair). Zero instances
@@ -2052,7 +2072,7 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      road (Mail's Add Account sheet on this M3 — F-W5 — or a draft), closed unsent; (6) every window
      closed → Help ▸ Send Feedback… → the app-modal ask → Cancel; (7) Help ▸ Restore Tutorial… still
      asks (the second `.alert` host on `RootView` did not displace the first) → Cancel.
-   **THE WALK — DONE, RESTORED (2026-10-04 ~03:06–03:40Z; every act behind `guard.sh` — `--author`
+   **THE WALK — DONE, RESTORED (2026-10-04 ~03:06–03:14Z; every act behind `guard.sh` — `--author`
    first; her app absent throughout, idle ≥ 26 min at the start; captures in the gitignored
    `notes/plans/19-screens/19f/`):**
    - `w0/` — launch with the synthetic env + the opt-in ON: `crash-report-20261005T030632Z-c93d9bf3
@@ -2105,4 +2125,50 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      (`entire contents` finds no `AXButton`), so Send Report… was pressed by guarded click at a point
      read from a fresh capture; the alert's buttons likewise (or by Escape); the no-window modal's
      buttons by AX name.
-5. Finals (suites, scope, record) — **NOT-STARTED.**
+5. Finals (suites, scope, record) — **DONE (this commit).**
+   - **Build at HEAD (`finals-bft.log`): TEST BUILD SUCCEEDED, no warning in any touched file.**
+   - **FAMILY A — U3-B's 31-suite close set + `SupportChoiceTests` (zero instances): `Test run with
+     289 tests in 32 suites` — 1 issue, EXACTLY 19e's pre-existing
+     `DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument`; the `skipped:` lines
+     are exactly the 7 opt-in `DebugOracleSingletonWindowTests` + their suite (as always).** 289 =
+     the ladder's 274 baseline + this entry's 15 (`finals-familyA.log`).
+   - **FAMILY B — the ladder's 34-suite shell-landing/windows/tutorial/command-routing/note-box set
+     (RootView, ShellRouter and EditorCommands are touched): `Test run with 166 tests in 34 suites
+     passed`, no `skipped:` line — the baseline exact** (`finals-familyB.log`).
+   - **SCOPE (`git log 505df96e..HEAD`, the 19f commits only):** `EditorCommands.swift`,
+     `RootView.swift`, `ShellRouter.swift`, `Features/Diagnostics/{SupportMail,SupportDraft,
+     SupportChoice(new)}.swift`, `Features/Settings/{DiagnosticsPane,DiagnosticsCopy}.swift`,
+     `VariorumTests/SupportChoiceTests.swift` (new), `.gitignore` (one line), `notes/QUESTIONS.md`
+     (#182), this ledger. 648+/21− in `App/`. **No `Sources/`, `Shared/`, mobile, `Server/` or
+     `Sync/` path.** SupportDraftTests.swift UNTOUCHED (its 13 pins ride unmodified, green on both
+     sides of the revert). The range also holds the orchestrator's own commits (`9ce643ec`,
+     `34bf1485`, `6c812d6f` — FuturePhases + the 13r handoff), none of them 19f's.
+
+**DISPOSITION (the entry's letter, row by row):**
+- *Before ANY draft opens, both doors ask* — **FIXED**, pins `theReportDoorAsksBeforeAnyDraftOpens`,
+  `aDismissedReportQuestionOpensNothing`, `theHelpDoorAsksBeforeItsDraftOpens` (+ the dispatcher's
+  `theQuestionComesBeforeAnyRoad`, `aDismissedQuestionDoesNothingAtAll`); **red on the old shape (9
+  issues) and by revert (the same 9), green after**; walked on both doors (w2, w4, w5, w6, w10).
+- *The copy road lands the address on the pasteboard and, for a report, reveals the file; no draft*
+  — **FIXED**, pins `theReportDoorsSecondRoadShowsTheFileAndCopiesTheAddress` (red on old/by
+  revert), `copyTheAddressPutsTheAddressOnThePasteboardAndOpensNoDraft`,
+  `showTheFileAndCopyTheAddressRevealsTheReportsOwnFile`; walked (w3, w7, w10).
+- *Open in Mail takes exactly today's roads; no send road exists or is added* — **HELD**:
+  `SupportMailRoads` unchanged (still send-free); each door's U3-B act verbatim under the closure;
+  pins `openInMailTakesTheDoorsOwnRoadAndCopiesNothing` + the report door's compose leg; walked (w8).
+- *The existing draft/attachment pins ride unmodified* — **HELD**: SupportDraftTests 13/13, file
+  untouched.
+- *The choice is a small calm surface in the app's alert grammar* — the `.alert` (row 67's) on both
+  doors, the app-modal only where no window exists (#182 (a), PROVISIONAL).
+- *The pasteboard copy's expiry* — **READING: no expiry (a public address)** — #182 (d).
+- No bug-class row was found hollow. Nothing DEFERRED inside the entry's letter.
+
+**FOR THE REVIEWER (flagged, not decided):** (1) `SupportChoiceAsk` REPEATS `ShellRouter.ask`'s
+continuation shape rather than generalising it — the confirm is yes/no and its one caller (the
+tutorial doors) would have moved; one more two-answer question would justify folding them.
+(2) The one copy line outside the question's own words: the Diagnostics promise's "opens" →
+"offers" (#182 (e)). (3) The Help door raises a full window behind Settings to ask
+(`windows.creationRouter()`'s side effect — a chosen act, the creation-door precedent). (4) The
+report door's `Task` outlives a pane that disappears mid-question only as long as the question
+stands (the `.alert` goes with the pane; SwiftUI's dismissal answers nil through the binding — not
+walked: closing Settings with the question up).
