@@ -242,7 +242,7 @@ extension SyncEngine {
                 switch try gatheringIsSeedsOwn(db, row: candidate, gathering: gathering) {
                 case true: seedOwn.append(candidate)
                 case false: continue
-                case nil: return .deferred  // a shelf row still in flight
+                case nil: return .deferred  // a `shelf` record still in flight
                 }
             }
             guard seedOwn.count > 1 else { continue }
@@ -307,7 +307,7 @@ extension SyncEngine {
     /// the name is still the reserved one, and no engagement flag is set.
     /// Every leg errs toward ENGAGED, which keeps copies. Returns nil —
     /// STRAGGLING — when the shelf pointer names a row this store has
-    /// never seen (her shelf may be in flight; a DEAD shelf row is the
+    /// never seen (her shelf may be in flight; a DEAD `shelf` record is the
     /// ordinary dangling-reads-unshelved state and stays the seed's).
     private func gatheringIsSeedsOwn(
         _ db: Database, row: Row, gathering: SeededFurnitureDedupeFacts.Gathering
