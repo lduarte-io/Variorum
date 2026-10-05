@@ -2875,7 +2875,7 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 | 4 | (k) core: the keyset page read per sort + pins | DONE (2a203573) — `Queries.catalogNotesPage` (`Sources/VariorumCore/Queries/LibraryPaging.swift`): each sort's own `(key, id)`, never OFFSET, one statement + a probe row; EDITED seeks `idx_container_touched` in two arms (`INDEXED BY` — this store never runs ANALYZE; measured 22,729 → 4,409 VM steps for one page over 600 notes); created/date/title one bounded top-N pass per page (flat in depth, ∝ notes; no index holds their keys — § THE (k) NUMBERS). `searchCatalog`'s book/block arms factored out byte-for-byte (`catalogBooks`/`catalogBlocks`) + one LIKE-escape. Pins `LibraryPagingTests` (8) incl. the held facts' region blind to a keystroke; the catalog-adjacent core suites 115/16 green |
 | 5 | (k) the model: pages, refresh-in-place, bounded held observation + pins | DONE (837edc3a WIP · 5729584a) — `LibraryCatalogModel` (books · paged notes · capped blocks; `search` = a first page, `refresh` = in place at depth for every row act) + `LibraryCatalogPaging.swift` (row appear/disappear → the next page within 30 rows of the end; the NEAR WINDOW = the pages around what is on screen, quantized to page boundaries, the only part whose extras load and whose ownership facts the MODEL holds; window checks coalesce to one per turn AFTER the layout — a window the views READ fed back into the Cards' lazy layout). Pins `LibraryPagingModelTests` (6, build pins — the pre-fix tree had no paging); three cap pins in `LibraryDayFilterTests` flipped as JUSTIFIED EDITS (the cap became a page) |
 | 6 | (k) the views: List + Cards infinite scroll; the All-screen books region cap + pins | DONE (837edc3a · 5729584a · 511c1df8) — both views page by their rows' appear/disappear with a quiet sentinel row ("loading more notes…" only while a page is in flight); under All, books past half the listing's height split into their own List capped at half (`LibraryBooksRegion`, the List's measured row pitch). Mounted pins `LibraryInfiniteScrollTests` (3) RED on the pre-fix worktree (`k-red2.log`: List + Cards "listed 40 of 130"; no note row beside forty books) → GREEN. THE WALK FOUND (fixed, pinned): the Cards view's quiet tag row pegged 100% CPU under a resting pointer (PRE-EXISTING since 13e E8) — `NoteTagsRowHoverTests` |
-| 7 | Measurements (before/after, quiet machine) + the walk → `notes/plans/17y-screens/b1/` | NOT-STARTED |
+| 7 | Measurements (before/after, quiet machine) + the walk → `notes/plans/17y-screens/b1/` | IN-PROGRESS — (j) paired before/after DONE (§ THE FIX); (k) the core scale table DONE and the in-app page-landing measurements started (§ THE (k) NUMBERS); 2f26fff2 landed the one-update page + the isolated paged view; **HELD at 15:40 MDT: the machine went ACTIVE (HID idle 0 for minutes — the guard's exit 4: someone is at the machine) — no GUI act and no window-mounting test run until it is quiet**; the prefetch-margin experiment (does an earlier append avoid the stall) is next |
 | 8 | END suites + record close (findings, PROVISIONALs → QUESTIONS #187) | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
@@ -2983,3 +2983,76 @@ worktree; AFTER = f8977039 + the probes. Logs `BEFORE*.frames` / `AFTER*.frames`
 The fling is now at display cadence (the same 11 ms as the column with NO controls at all — arm H)
 and travels its whole distance: the stall the "quick scroll" leaps rode is gone. The row under the
 pointer wakes the moment the scroll stops (`j-after-wake-after-scroll.png`).
+
+### THE (k) DESIGN (4–7; the binding item text is the 17y row's (k) cell — her launch blocker + her smoothness bar)
+
+- **The page read** (`Queries.catalogNotesPage`, core): keyset on each sort's own `(key, id)` — never
+  OFFSET, never a raised cap; one statement per page with a probe row (another page follows, never a
+  count). The EDITED sort (the default) seeks the timeline's own `idx_container_touched` in two arms
+  (touched notes from the cursor; never-touched notes — no block ever written, NULL stamp — by their
+  birth), with `INDEXED BY` because this store never runs ANALYZE. CREATED · DATE · TITLE have no
+  index on their keys (the three stamp indexes are `entry_date`, `last_touched_at`,
+  `last_major_revision_at`; `date` is `COALESCE(entry_date, created_at)`): each page is ONE bounded
+  top-N pass over the wing's live notes — flat in depth, ∝ notes; **measured fast enough that no new
+  index is NEEDED** (below), so no schema event (an index for them stays the author's §12 call —
+  QUESTIONS #187(f)).
+- **The listing** (`LibraryCatalogModel` + `LibraryCatalogPaging.swift`): every book of the wing
+  (books are never a page — the Bookcase's own class), the notes paged (80 a page, the next asked
+  for 30 rows before the end), the block hits of a typed query still capped at 40 and said so. A NEW
+  question (query · scope · sort · direction · day · wing) starts over; an ACT on a row re-reads IN
+  PLACE at the depth she scrolled to (one statement ∝ what is listed, once per act). The day filter's
+  answer stays the whole set (unchanged).
+- **P1 — the near window**: only the pages around what is on screen (page-quantized) load their
+  extras (tag chips, card words) and have their ownership facts HELD (the model owns the one
+  observation, re-aimed only when the window's ids change); the window is unobserved by the views
+  and its checks coalesce to one per turn AFTER the layout (a window the views read fed back into
+  the Cards' lazy layout — the first build looped). A page lands as ONE update: the page and its
+  extras read together, merged in one assignment per dictionary; the paged rows live in their own
+  view (`LibraryPagedNotes`) with `Equatable` row hosts, so a landing page never re-evaluates the
+  whole catalog.
+- **The rider** (`LibraryBooksRegion`): the surface her words name is the Library's List mode under
+  the "All" scope (the one screen listing books ABOVE notes). Past half the listing's height (the
+  List's own measured row pitch × the count), the books move into their own List capped at half,
+  scrolling inside it; fewer books stay in the one list exactly as before; the Books scope (nothing
+  below to make room for) keeps one list.
+- **The walk found (fixed, pinned):** the Cards view's quiet tag row pegged 100 % CPU forever with
+  the pointer resting on an untagged card's chip row — PRE-EXISTING since 13e E8 (measured 99.7 /
+  100.0 % on the pre-fix Debug build): revealing the narrow `＋` moved the pointer out of the hovered
+  view and back. One frame + one hit shape for both states (`NoteTagsRowHoverTests`); after: 0.4–1.5 %.
+
+### THE (k) NUMBERS (measured; Debug unless said; her app not running; load 2.7–5.6 on 12 cores)
+
+**The page read at corpus scale** (the core read alone, `swift test` debug build, an in-memory store
+of N notes, 20 consecutive pages of 80, wing-scoped as the app asks; the "shipped" column is the
+pre-fix catalog read of its 41 rows for comparison):
+
+| N | sort | page 1 | median page | max page | shipped 41-row read | a typed query's page |
+|---|---|---|---|---|---|---|
+| 5,000 | edited | 5.8 ms | 1.7 ms | 5.8 ms | 1.7 ms | 1.3 ms |
+| 5,000 | created | 4.3 | 3.9 | 4.3 | 2.9 | 1.5 |
+| 5,000 | date | 1.5 | 1.8 | 4.0 | 1.3 | 1.4 |
+| 5,000 | title | 2.0 | 2.2 | 2.3 | 1.5 | 1.5 |
+| 20,000 | edited | 2.2 | 1.8 | 2.2 | 3.6 | 1.4 |
+| 20,000 | created | 12.8 | 12.8 | 13.2 | 8.8 | 4.1 |
+| 20,000 | date | 3.5 | 4.1 | 4.2 | 3.3 | 3.7 |
+| 20,000 | title | 4.4 | 5.4 | 5.5 | 3.8 | 3.7 |
+
+Off-main, asked for a page before it is needed: none of these is felt. VM steps (pinned): the edited
+page is FLAT in the corpus (300 → 1,200 notes: within 1.5×); every sort's deep page costs what page
+one costs (500 notes deep: within 1.5×).
+
+**In the app** (the fixture: 600 notes + the dev store's own, 822 listed; a trackpad fling of the
+notes region, the pointer resting over it, a display-link frame probe):
+- BEFORE (the pre-fix worktree): the List and the Cards stop at 40 notes; scrolling those 40 runs
+  smooth (List 11.1 ms mean frame gap; Cards 9.2 ms).
+- AFTER, first cut (5729584a): the whole corpus scrolls (822 listed), but each page LANDING stalled a
+  frame 100–250 ms (List) / 120–160 ms (Cards): the catalog's whole body re-evaluated per page and
+  the page's extras landed as a second full re-draw.
+- AFTER 2f26fff2 (one update per page; the isolated paged view): the catalog body no longer
+  re-evaluates on a landing (counted: zero catalog bodies at page landings, where every landing had
+  one); the landing still drops 70–137 ms (List) — sampled: AppKit's automatic row heights measure
+  the INSERTED rows that fall inside the table's prepared region (`_doAutomaticRowHeightsForInserted
+  AndVisibleRows` → a SwiftUI row view per inserted row), and the stall barely moves with the page
+  size (20 · 40 · 80 rows: 73 · 70 · 84 ms mean at a landing) — so the next experiment is WHEN the
+  page lands (earlier, outside the prepared region), not how big it is. PENDING (the machine went
+  active).
