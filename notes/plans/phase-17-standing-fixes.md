@@ -1829,7 +1829,7 @@ only; DerivedData `App/Variorum/DerivedData/17y/`.
 | 6 | The walk — a FRESH dev store, before (old build) / after (fixed build), both voices, into `notes/plans/17y-screens/b-seed/` (gitignored) | NOT-STARTED |
 | 7 | Record close + QUESTIONS #183 (the PROVISIONALs) | NOT-STARTED |
 
-**REVERT STATE: NO REVERT IN FLIGHT.**
+**REVERT STATE: REVERT ROUND A IN FLIGHT from committed HEAD `a5a8696c`** — RV1: the `beforeArranging:` argument removed from `App/Variorum/Variorum/LaunchFurniture.swift` (working tree only). Restore: `git checkout HEAD -- App/Variorum/Variorum/LaunchFurniture.swift`; verify `git diff --quiet`. A successor finding this line with a dirty `LaunchFurniture.swift` restores it first.
 
 ### THE MECHANISM (traced by reading before any fix; the driven reproduction is piece 2's red pin + piece 6's old-build capture)
 
