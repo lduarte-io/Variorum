@@ -294,25 +294,74 @@ struct NoteTagsRow: View {
     /// all on the List mode's column, which always shows its `＋`.
     static let reservedHeight: CGFloat = 18
 
-    @State private var hovering = false
+    @State private var hovering: Bool
+
+    init(
+        tokens: VoiceTokens, tags: [Tag], allTags: [Tag],
+        onApply: @escaping (String) -> Void, onRemove: @escaping (Tag) -> Void,
+        revealsOnHover: Bool = false,
+        baselineProbePrefix: String? = nil, baselineProbeSpace: String = "",
+        initiallyHovering: Bool = false
+    ) {
+        self.tokens = tokens
+        self.tags = tags
+        self.allTags = allTags
+        self.onApply = onApply
+        self.onRemove = onRemove
+        self.revealsOnHover = revealsOnHover
+        self.baselineProbePrefix = baselineProbePrefix
+        self.baselineProbeSpace = baselineProbeSpace
+        _hovering = State(initialValue: initiallyHovering)
+    }
 
     var body: some View {
-        Group {
-            if tags.isEmpty && revealsOnHover && !hovering {
-                // Nothing to say and nothing being pointed at: the room the
-                // chips would take, held open and empty.
-                Color.clear.frame(height: Self.reservedHeight)
-            } else {
-                NoteTagChips(
-                    tokens: tokens, tags: tags, allTags: allTags,
-                    onApply: onApply, onRemove: onRemove,
-                    baselineProbePrefix: baselineProbePrefix,
-                    baselineProbeSpace: baselineProbeSpace)
-            }
+        if revealsOnHover {
+            // **17y B1 (k) — the hover target is the ROW, never what it is
+            // drawing.** Measured on the Cards view: with the pointer resting
+            // on an untagged card's chip row the app ran at 100 % CPU forever
+            // (pre-existing, 13e E8's shape): the quiet state's room spans the
+            // row, the revealed `＋` is narrow, so revealing moved the pointer
+            // OUT of the hovered view, which hid the `＋`, which put the
+            // pointer back IN — a loop at display rate. One frame for both
+            // states (the row's width, the reserved height), one hit shape.
+            chips
+                .frame(maxWidth: .infinity, minHeight: Self.reservedHeight, alignment: .leading)
+                .contentShape(Rectangle())
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    NoteTagsRowProbe.hoverRegions[hovering] = $0
+                }
+                #endif
+                .onHover { hovering = $0 }
+        } else {
+            chips
         }
-        .onHover { hovering = $0 }
+    }
+
+    @ViewBuilder
+    private var chips: some View {
+        if tags.isEmpty && revealsOnHover && !hovering {
+            // Nothing to say and nothing being pointed at: the room the
+            // chips would take, held open and empty.
+            Color.clear.frame(height: Self.reservedHeight)
+        } else {
+            NoteTagChips(
+                tokens: tokens, tags: tags, allTags: allTags,
+                onApply: onApply, onRemove: onRemove,
+                baselineProbePrefix: baselineProbePrefix,
+                baselineProbeSpace: baselineProbeSpace)
+        }
     }
 }
+
+#if DEBUG
+/// 17y B1 (k): the hover region a reveal-on-hover row tracks, by state
+/// (quiet · revealed) — the pin holds the two to one rectangle.
+@MainActor
+enum NoteTagsRowProbe {
+    static var hoverRegions: [Bool: CGRect] = [:]
+}
+#endif
 
 /// The `＋` popover: type a path, ⏎ applies. Suggestions are the live
 /// taxonomy filtered by what has been typed, already-applied paths dropped —
