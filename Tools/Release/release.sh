@@ -116,7 +116,14 @@ DMG_NAME="Variorum-${VERSION}.dmg"
 if [ "$MODE" = release ]; then
   [ ! -e "${RELEASES}/${VERSION}" ] || refuse "${RELEASES}/${VERSION} already exists: ${VERSION} was built for release before (versions are never reused)"
   [ ! -e "${RELEASES}/feed/${DMG_NAME}" ] || refuse "${RELEASES}/feed/${DMG_NAME} already exists (a published name is immutable)"
-  CODE="$(curl -sS -o /dev/null -I -w '%{http_code}' "${DMG_HOST_PREFIX}${DMG_NAME}" || echo 000)"
+  # F1 (ladder round 1): the preflight HEAD is CACHE-BUSTED with a throwaway query, so the 404 it
+  # earns on an unpublished name is cached under the throwaway URL, never the canonical one. The
+  # canonical URL used to be HEADed here, and the edge NEGATIVELY CACHED that 404 (measured at
+  # 0.9.1's publish: cf-cache-status HIT, age 171, max-age 14400) — the publish then stalls on a
+  # zone purge that is HER HANDS. The edge's cache key includes the query string, MEASURED
+  # 2026-10-04: a busted HEAD on the PUBLISHED Variorum-0.9.0.dmg answered 200 / MISS / its exact
+  # byte size, so the immutability refusal keeps its force (the fix-pass record in the 13r plan).
+  CODE="$(curl -sS -o /dev/null -I -w '%{http_code}' "${DMG_HOST_PREFIX}${DMG_NAME}?preflight=$(uuidgen | tr '[:upper:]' '[:lower:]')" || echo 000)"
   [ "$CODE" = "404" ] || refuse "${DMG_HOST_PREFIX}${DMG_NAME} answered HTTP ${CODE} (expected 404): it is published or the host cannot confirm it is not. Published names are IMMUTABLE."
   say "${DMG_NAME} is unpublished (the DMG host answers 404) and unbuilt here"
 fi
