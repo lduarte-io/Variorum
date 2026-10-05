@@ -150,6 +150,8 @@ struct CaptureTextView: NSViewRepresentable {
     var focusRequest = 0
     /// Whether the caret is in this box, for the host's own chrome (the
     /// Terminal voice's blinking block cursor stands down when it is).
+    /// Delivered on the next main-queue turn, never inside a view update
+    /// (the B2 ladder's NIT-1 — the host may write `@State` here).
     var onFocusChange: ((Bool) -> Void)?
     /// Plain ⏎ — the host decides what filing means.
     let onFile: () -> Void
@@ -186,8 +188,17 @@ struct CaptureTextView: NSViewRepresentable {
         view.drawsBackground = false
         // 17y B2 (m): where the CARET is, reported from the box's own
         // first-responder changes — the one truth (see `onCaretChange`).
+        // Delivered ASYNC (the B2 ladder's NIT-1): the Bookcase's autofocus
+        // raises `focusRequest` from its `.task`, so `updateNSView` →
+        // `takeFocus` → `makeFirstResponder` → `becomeFirstResponder` runs
+        // INSIDE SwiftUI's view update, and a synchronous report would write
+        // the host's `@State` there (the state-during-update class). The main
+        // queue is FIFO, so the reports keep their order and the last one
+        // delivered is the caret's latest truth.
         view.onCaretChange = { [weak coordinator = context.coordinator] inBox in
-            coordinator?.parent.onFocusChange?(inBox)
+            DispatchQueue.main.async {
+                coordinator?.parent.onFocusChange?(inBox)
+            }
         }
         view.wantsInitialFocus = focusRequest > 0
         context.coordinator.lastFocusRequest = focusRequest
