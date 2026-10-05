@@ -2135,7 +2135,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (this commit) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
 | 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | DONE except the walk (034c28ad + this commit): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"19 tests in 5 suites passed"** (`p3-green.log`); **behavioural revert (the gate `true` for every order) → RED "2 tests … failed … with 2 issues"** (`p3-rv.log`), restored by checkout, `git diff --quiet`. The walk (grip visible + a row drop landing right above) rides piece 9 — HELD at 03:2x: the guard read HID idle 0 s (someone at the machine) |
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | DONE except the walk (2e07a4d4 red · 78f4c824 fix · this commit): `BookPanelBrain.dropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `dropPlan`); `BookPanelModel.drop` speaks `BookPanelCopy.needsManualOrder` — *“X” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.* (PROVISIONAL words); `chapterGripDrawn` = more than one chapter. Pins RED on the pre-fix behaviour (4 issues) → GREEN "48 tests in 5 suites" (`p4-green.log`) → **behavioural revert (the gate off, the grip always) RED "5 tests … with 4 issues"** (`p4-rv.log`) on the corrected fixture, restored, `git diff --quiet`. The walk (a panel drag landing; the refusal road) rides piece 9 |
-| 5 | (m) the quick-note box's double cursor | NOT-STARTED |
+| 5 | (m) the quick-note box's double cursor | IN-PROGRESS — the trace below; pin `VariorumTests/CaptureFocusReportTests.swift` committed RED ON PURPOSE (this commit): **"1 test in 1 suite failed … with 1 issue"** (`p5-red.log`) — the autofocused box HOLDS the caret (`window.firstResponder === box` passed) and the host heard nothing (`reports.last == true` failed); the departure half passed on the old tree (AppKit posts end-editing at resign) — the arrival alone is the defect. NEXT: the fix |
 | 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
 | 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | DONE except the walk + the Release COMPILE check (c430c0aa red · this commit): `PostMode.buildKeepsCanvas` (the compile condition, read by nothing but the seam) · `order(keepingCanvas:)` · **`allCases` RETURNS the build's order** (so the mode row, ⌘1–⌘n, the rail and the masthead menu shorten in Release with no renderer touched) · `fromStored` decodes a mode the build lacks to nil (→ the caller's default, Write — PROVISIONAL) · `keyLabel`/`keySpan`/`modeList` feed the registry's `.switchMode` verb + label, the helper's row and the masthead menu's help · the helper's "canvas" dictionary entry filtered by the seam · `PoolDetailView.Mode.allCases` = `faces(keepingCanvas:)` and its picker drawn only with more than one face. Red-on-old: the seam in its pre-fix shape (Canvas kept whatever the flag) → "5 tests … with 6 issues" (`p7-red.log`); **GREEN with the mode/registry/canvas suites — "61 tests in 8 suites passed"** (`p7-green.log`: CanvasDebugOnly, NewModes (Debug's seven, unedited), the registry walk, OpenStripMenu, SidebarLayout, PostDetail mode memory, Canvas & full pool, CanvasArrival) |
 | 8 | Suites at the END + the tutorial spine | NOT-STARTED |
@@ -2236,3 +2236,23 @@ Debug's). The ⌘K palette carries NO mode rows (no `requestMode` caller beyond 
 in-mode hops to Takes/Write), and no Settings pane names Canvas. **Not gated — the fence:** the field
 guide's prose teaches Canvas (lesson "blocks · canvas", the mode-row sentence at
 `TutorialSeeder.swift:456`) — seed CONTENT, 13s's (finding F-B2 below).
+
+### THE TRACE — (m), the two cursors
+
+**The surface is the quick-ENTRY box** (`Features/Shelf/QuickEntryBar.swift` — the Bookcase's and the
+Library's "new note — just start typing" capture; the dev-store capture `b2/old/w0.png` shows its █
+at the placeholder's end). The floating quick-note pad composes the same `CaptureTextView` but
+draws NO block cursor; the Snippets area's entry draws one gated on `@FocusState` (correct). **The
+mechanism:** the bar draws the Terminal voice's blinking block cursor while `tokens.showsBlockCursor
+&& !entryFocused` (empty box), and `entryFocused` is fed by `CaptureTextView.onFocusChange` — whose
+own doc says what it is for ("the Terminal voice's blinking block cursor stands down when [the caret
+is in this box]") — but which the Coordinator raised from `textDidBeginEditing` /
+`textDidEndEditing`. AppKit posts begin-editing on the first EDIT, never when the view becomes first
+responder. The Bookcase AUTOFOCUSES the box (R102 — `focusRequest` → `wantsInitialFocus` →
+`makeFirstResponder`), so on every Bookcase visit the caret blinks at the box's start while the host
+believes it is elsewhere, and the block cursor blinks at the placeholder's end: two cursors, until
+she types (then the placeholder — and the block cursor with it — goes). **Built-and-broken, a
+13u3 REGRESSION:** before 13u3 UNIT C (a0b1957d) the gate read `@FocusState` (`.focused($entryFocused)`
+— the first-responder truth) and stood down correctly; UNIT C swapped the SwiftUI field for the AppKit
+capture box and fed the same gate from editing notifications. The owner of the suppression is the
+box's focus REPORT, not the bar's gate (which was right).
