@@ -21,8 +21,8 @@ Branch rule (issue #7): this branch never merges; it lives for the mint and dies
 | P4 — the ops-driven mint (`WorkbookMint`) + the one-shot guard + read-back verification | DONE (`aa430cdb`); tests green (P6) |
 | P5 — the headless unlock road (`StoreUnlock`) + the CLI | DONE (`aa430cdb`); tests green (P6) |
 | P6 — tests green (`swift build`, `swift test --filter StringsWorkbookTests`) | DONE (`5d7cbb09`) — 39 tests / 5 suites green, 55.9 s (first run: 2 reds were a TEST-HELPER ambiguity — two literals share HelperView.swift:118 and :131 — fixed in the helper; the parser was right) |
-| P7 — the end-to-end rehearsal: the CLI against a scratch ENCRYPTED store laid out like hers | DONE (this commit) — every road and refusal walked; transcript summary under Verification |
-| P8 — END-of-batch finals (`swift build`, the filtered suite) | PENDING |
+| P7 — the end-to-end rehearsal: the CLI against a scratch ENCRYPTED store laid out like hers | DONE (`5ed2042b`) — every road and refusal walked; transcript summary under Verification |
+| P8 — END-of-batch finals (`swift build`, the filtered suite) | DONE (this commit) — `swift build` complete; `swift test --filter StringsWorkbookTests`: 40 tests / 6 suites passed in 48.6 s = 39 ran green + the opt-in `RehearsalFixture` skipped (Swift Testing counts skips). BATCH CLOSED; the mint itself is hers (the choreography below) |
 
 ## The road decision — ROAD A (headless executable), viable
 
@@ -70,7 +70,7 @@ on each. CANON is not edited on this branch (issue #7), so they live here, not i
 - **P-1 — NOTES are the inventory's 37 SURFACES, not its 28 `##` headings.** "Settings panes" is a container
   heading with ten `###` panes, each with its own footer; the doc's own Totals table counts the panes as
   rows, and Tier 3 lists them one by one. So one note per pane, titled "Settings — General" etc. Alternative
-  (not built): one "Settings panes" note of 257 blocks.
+  (not built): one "Settings panes" note of 255 blocks.
 - **P-2 — placement rule, PROVISIONAL.** A surface sits in the FIRST tier that names it (as a surface, or by a
   part of it), at the position of that first mention. Tier 0 names defect STRINGS by site, never surfaces,
   so it places nothing. Tier 3's explicit instruction ("Settings ▸ Protection … land with the ruled corpus
