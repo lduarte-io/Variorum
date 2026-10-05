@@ -107,3 +107,8 @@
   its overlap with the sidebar's Starred section (notes+books mixed) vs the strip's ★
   (books-only, board idiom) — a mockup call for 13s or the next Bookcase touch, not a build
   now (her own framing).
+
+* Her 2026-10-05 clarification of "0 items starred": it is WITHIN the starred gathering —
+  starred NOTES show empty at birth; born-starred BOOKS (Journal, Quicknotes) stand, and the
+  starred SHELF (built at 17y item (s), R-17y-9) can have Journal on it. The earlier
+  born-starred flag above is answered by this.

@@ -150,3 +150,23 @@ living inside the Jekyll book) leaves the default experience with it — restora
 way; 13s decides where takes-teaching lives by default. **Runs in the B-DEDUPE slice** (same
 seeder files, same reviewer); the slice's remaining fold scope: the field guide's facts entry,
 the seeded-gathering keeper (classics · starred notes · Quicknotes), the quicknote fold.
+
+## R-17y-9 — THE STARRED SHELF, RULED IN AND BUILT NOW (her words 2026-10-05 ~03:25: "let's do the starred shelf - it is the books only… i also don't think it needs a mockup - in library, have an automatic 'starred' shelf that isn't deletable. i think it's fine. i do think build now tbh")
+
+**Item (s), runs in B3.** The shape: an AUTOMATIC "starred" row in the Bookcase strip — BOOKS
+ONLY (the union star), assembled like a view, **VIRTUAL by construction** (the Home-wing
+precedent, R-13ia-2: no stored `shelf` row, so it is undeletable, unrenamable, convergence-
+proof, zero schema, zero sync, no seeding race — "isn't deletable" satisfied structurally,
+never by a guard). It solos like a shelf (the strip's grammar); a book shown there still
+lives on its real shelf (a filter, never a container — the starred-float's sibling, not its
+replacement); the sidebar's Starred section (notes + books) is untouched. Dropping a book
+onto the ★ row STARS it (the strip's drop grammar; menu twin = the existing Star/Unstar; the
+cap refusal speaks as at every star door). PROVISIONAL build details (each one line to flip):
+the row sits beside "All" at the strip's head; it shows ALWAYS (the Journal is born starred,
+so it is ~never empty; presence-when-empty teaches the star exists); its word is lowercase
+"starred" (the strip's idiom). Her mockup waiver is explicit — no mock step.
+
+**Her clarification riding the same message (for 13s's intake):** "0 items starred is within
+the starred gathering - the starred shelf can have journal on it" — the empty-at-birth want
+is about starred NOTES (the gathering shows empty); born-starred BOOKS (Journal, Quicknotes)
+stand and populate the starred shelf.
