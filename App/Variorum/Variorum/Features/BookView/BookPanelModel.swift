@@ -316,7 +316,8 @@ nonisolated enum BookPanelBrain {
     nonisolated enum DropOutcome: Equatable {
         /// Write this through the existing ops.
         case plan(DropPlan)
-        /// Nothing to do — dropped on itself, or where it already stands.
+        /// Nothing to do — dropped on itself, or where it already stands
+        /// (in a stamp order too: onto its immediate shown successor).
         case nothing
         /// A note dropped to RE-PLACE it inside its own chapter (onto a
         /// sibling, or its own chapter's heading) while an OPEN book (never a
@@ -354,6 +355,11 @@ nonisolated enum BookPanelBrain {
            case .file(_, _, let before?)? = dropPlan(
                drag, onto: site, groups: groups, sections: sections, manualOrder: true),
            before != postID {
+            // Already satisfied (the B2 ladder's NIT-4): dropped onto its
+            // IMMEDIATE shown successor, the note would land right above
+            // where it already stands — no placement was asked, so no refusal
+            // is owed (manual order does the same gesture silently).
+            if before == successor(of: postID, in: groups) { return .nothing }
             return .needsManualOrder
         }
         return .plan(plan)
@@ -362,6 +368,17 @@ nonisolated enum BookPanelBrain {
     /// The chapter a note sits in on the panel (nil = unfiled).
     private static func chapter(of postID: String, in groups: [Group]) -> String? {
         groups.first { $0.entries.contains { $0.postID == postID } }?.section?.id
+    }
+
+    /// The note shown right after `postID` in its own group (nil = it is the
+    /// group's last).
+    private static func successor(of postID: String, in groups: [Group]) -> String? {
+        guard let entries = groups.first(where: { $0.entries.contains { $0.postID == postID } })?
+                  .entries,
+              let index = entries.firstIndex(where: { $0.postID == postID }),
+              index + 1 < entries.count
+        else { return nil }
+        return entries[index + 1].postID
     }
 }
 

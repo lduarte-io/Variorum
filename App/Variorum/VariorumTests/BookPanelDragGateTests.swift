@@ -121,20 +121,29 @@ struct BookPanelDragGateTests {
     /// THE SILENT SORT GATE, made to speak: re-placing a note inside its
     /// own chapter of a stamp-ordered book refuses WITH the road, and
     /// nothing moves. (Red on the pre-fix tree: the status seam stays nil.)
+    ///
+    /// The drop is a REAL re-place — the note the stamp order shows LAST
+    /// onto the note it shows FIRST. (B2 first wrote n2 onto n1, which in
+    /// this order is n2 onto its own immediate successor: already satisfied,
+    /// asking for nothing — the B2 ladder's NIT-4, pinned below.)
     @Test func aStampOrderedReplaceRefusesWithTheRoad() async throws {
         try await withWorld { world in
             let (model, task) = try await heldModel(world)
             defer { task.cancel() }
             let before = try await membershipOrder(world)
+            let shown = try #require(model.groups(for: world.book.id)
+                .first { $0.section?.id == world.one.id }?.entries.map(\.postID))
+            #expect(shown.count == 2)
+            let lower = try #require(shown.last)
 
-            await model.drop(.note(world.n2), onto: .note(world.n1), in: world.book)
+            await model.drop(.note(lower), onto: .note(try #require(shown.first)), in: world.book)
             let refusal = try #require(world.session.status.current,
                                        "a drop that cannot land must SAY so (P-2)")
             #expect(refusal.kind == .refusal)
             #expect(refusal.text.contains("Orbit") && refusal.text.contains("Manual order"),
                     "names the book and the road: \(refusal.text)")
             #expect(try await membershipOrder(world) == before, "nothing moved")
-            #expect(try await chapterOf(world, world.n2) == world.one.id)
+            #expect(try await chapterOf(world, lower) == world.one.id)
         }
     }
 
