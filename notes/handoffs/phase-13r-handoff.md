@@ -40,11 +40,14 @@ disputes, all fixed; round 2 (fresh reviewer) — 0/0/0/3 record-only, every fix
    variorum-releases.md`, commit `5649cf6` — wrangler has no `r2 object head`, so the
    verified busted-probe shape landed) · the Restore Tutorial press — noted, hers, and the
    tutorial rewording is 13s-a's anyway.
-8. **The next release, whenever you have fixes to ship:** **HER RULE FIRST (2026-10-04,
-   verbatim: "always ask me for release notes after presenting me with a draft and getting
-   them approved pre-release") — the notes are drafted, presented to her in chat, and
-   APPROVED before any release runs; no release ships notes she hasn't okayed.** Then one
-   command + the site legs, under the standing R-13r-15 exemption — `Tools/Release/release.sh --version 0.9.2`, then the site
+8. **The next release, whenever you have fixes to ship — HER TWO RULES FIRST (2026-10-04,
+   both verbatim):** **(1) the trigger is always her explicit word** — *"I'll always
+   explicitly note when I want to release - never automatically at phase end"*; a phase
+   close or an `/Applications` refresh NEVER implies a release (refreshes are her TEST
+   road: *"I'll keep using refreshes to test before I'm ready to release"*). **(2) the
+   notes are approved pre-release** — *"always ask me for release notes after presenting
+   me with a draft and getting them approved pre-release"*; no release ships notes she
+   hasn't okayed. Then one command + the site legs, under the standing R-13r-15 exemption — `Tools/Release/release.sh --version 0.9.2`, then the site
    runbook's locked order (the orchestrator of any session may run it; the pipeline refuses
    dirty trees, running instances, and published names on its own). TWO carried notes for that
    run: (a) do the back-to-back canonical-vs-busted HEAD comparison once (round 2's N2 — it
