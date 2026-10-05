@@ -274,3 +274,11 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
   empty windows list is not proof the sheet closed; capture and look.
 - The guard's SELF-TRIP (synthetic keystrokes reset HIDIdleTime) adjudicates by the idle-climb
   rule: watch `ioreg -c IOHIDSystem` for ~10 s — monotonic climb = your own trip; resume.
+
+## Walker facts from the 17y B2 implementer's drag walks (2026-10-05 — F-B2-4, folded by the orchestrator)
+
+- **A synthetic mouse-up can be MISSED by AppKit's drag loop** (a fast `cliclick du` right
+  after the `dm` steps): the drag session stays open, the app answers no AppleEvent (a quit
+  TIMES OUT), and the next mouse-up — real or synthetic — ends it. Diagnose with
+  `sample <pid> | grep _dragUntilMouseUp`; recover by posting a SECOND `du`. Prefer a short
+  pause between the last `dm` and the `du`.

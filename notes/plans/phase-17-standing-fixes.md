@@ -1720,15 +1720,32 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   reviewer's own honest no-pin label. No fix round owed; the ladder closes at round 1.
   Residuals: the two-guides-after-sign-in class re-owned to B-DEDUPE (R-17y-5); her Monday
   install is the live bed (the public 0.9.1 build predates the fix — 0.9.2 carries it).
-- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): RUNNING** (spawned 2026-10-05
-  ~03:00; the B2 BRIEF below binds; its implementer appends the B2 RECORD after it).
-- **B-DEDUPE — the whole-set seed-duplicate fold (R-17y-5): NOT-STARTED** (between B3 and B1).
-  The guide + Jekyll into the book dedupe (#155(a) overturned at her word); the Sync/ keeper
-  for the seeded gatherings + quicknote (the Welcome keeper's adopt-by-identity pattern;
-  engagement keeps both; convergence suites mandatory). The Sync/ halves are the ORCHESTRATOR'S
-  OWN seat (the standing rider), behind a full SyncSpec + `notes/sync-postmortem-fragments.md`
-  read; a FRESH fable-reviewer cold round after. Zero schema — the marker stays 12; SyncSpec §7
-  gains the keeper's paragraph as the canon delta at close.
+- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): IMPLEMENTER CLOSED ~04:50; LADDER
+  RUNNING.** All six fixed with red-on-old pins and walked (the B2 RECORD below; the shared
+  mechanism: the three in-app drag types were never declared in the Info.plist — 13i-d's
+  "harness artifact" verdicts were this defect). Union 335/62 + spine 98/13 green; phone +
+  Release compile green; fences verified EMPTY (`8ff566e1..d3560ab9 -- Sources Server
+  VariorumMobile*`). ROUND 1 (opus cold review): **0 BLOCKER · 2 MAJOR · 2 MINOR · 6 NIT** —
+  findings + dispositions at `notes/plans/17y-b2-ladder-round1.md` (7b3ab4e2). MAJOR-1 (the
+  frozen-book stamp-order refusal with no real road) + MINOR-1 + the six NITs run as a FIX
+  ROUND in a FRESH implementer session (the B2 session passed the ~500k line); MAJOR-2 (the
+  released guide teaches Canvas) RE-OWNS IN-PASS to B-DEDUPE; MINOR-2: the §12 canon line joins
+  the close list below and F-B2-7 re-owns to B3 (its brief amended). Round 2 re-reviews the
+  fixes. Her Monday spot-check list gains the Open strip's row reorder (F-B2-2, same
+  undeclared-type class, declared in the same commit).
+- **B-DEDUPE — the whole-set seed-duplicate fold (R-17y-5, trimmed at R-17y-8): NOT-STARTED**
+  (between B3 and B1). Scope as amended: the FIELD GUIDE's dedupe-facts entry; the Sync/ keeper
+  for the seeded gatherings + quicknote (the Welcome keeper's adopt-by-identity pattern; rules
+  judged by tag PATH; engagement keeps both; convergence suites mandatory); JEKYLL LEAVES THE
+  DEFAULT SEED (R-17y-8 — the fold leg dropped, nothing retrofitted, Help ▸ Restore keeps
+  minting) with her intake's ONE lesson sentence; **plus the B2 ladder's MAJOR-2 re-own: the
+  guide's mode-row sentence derives from the (p) seam and its Canvas lesson gates on
+  `buildKeepsCanvas`** (the helper's own precedent; the re-seed consequence rides the lesson
+  sentence's, already recorded). The Sync/ halves are the ORCHESTRATOR'S OWN seat (the standing
+  rider), behind a full SyncSpec + `notes/sync-postmortem-fragments.md` RE-READ (the
+  pre-compaction reading is lost) and the design memo `notes/plans/17y-bdedupe-design-memo.md`
+  written BEFORE building; a FRESH fable-reviewer cold round after. Zero schema — the marker
+  stays 12; SyncSpec §7 gains the keeper's paragraph as the canon delta at close.
 - **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)): NOT-STARTED.** Runs
   Monday; closes at HER ONE SITTING (the bundled picks: (h)'s placement mock pair; (g)'s
   picker-adoption scope; any B2/B-SEED PROVISIONALs). Both mocks for (h) land as HTML files
@@ -1738,6 +1755,12 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   pagination on `(stamp, id)`, never a raised cap + the All-screen books region cap; the close
   is USE-SHAPED — her live scroll walk on a large fixture + her feel. FABLE review mandatory
   ((j) reaches the read tier). The entry CLOSES only on B1's evidence and her word.
+
+**CANON DELTAS OWED AT THE ENTRY'S CLOSE (accumulating; landed exactly as ruled, contract line
++ pointer):** AppSpec §12 — Canvas is Debug-only ((p), her "debug-only ratified"): the Release
+note mode row is six modes ⌘1–⌘6 and the Snippets area's Canvas face is off in Release
+(P-17y-B2-7/#184(g)); pointer to the B2 RECORD. SyncSpec §7 — the seeded-gathering/quicknote
+keeper's paragraph (B-DEDUPE's, at its close).
 
 **Standing facts for a successor:** preflight done in full 2026-10-05 (CLAUDE.md canon · master
 plan post-13r pointer · KnownIssues · QUESTIONS #166–#182 · the 17y row a–q end to end · the

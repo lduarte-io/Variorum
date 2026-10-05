@@ -77,6 +77,16 @@
    refusal speaks as at every star door). PROVISIONAL details as the rulings file states them
    (beside "All" at the head; shown always; lowercase "starred") — each one line to flip.
 
+11. **(F-B2-7 rider, re-owned here at the B2 ladder's round 1 — `notes/plans/17y-b2-ladder-
+   round1.md` MINOR-2(ii)):** the BOOK VIEW'S OWN navigator/Outline drop
+   (`BookStructureModel.acceptDrop` → `filePost(…, reposition: false)`) re-places a note inside
+   its own chapter of a stamp-ordered book as a SILENT no-op — the exact sibling of (e)'s gate,
+   fixed in B2 on the Book Panel only. Give this surface the same `needsManualOrder` refusal
+   words, with the SAME two orderings B2's ladder settled: the LOCK consult answers first (a
+   frozen book speaks reopen/unseal, never the sort advice — MAJOR-1's contract), and a drop
+   already satisfied (onto the note's immediate shown successor) is `.nothing`, not a refusal
+   (NIT-4's). Pin red-on-old on the book view road; small item, the panel's gate is the model.
+
 **RULES:** pin before fix / red-on-old by revert per item; traces before fixes; commit + push
 per item; the registry walk green wherever declarations change; the tutorial spine at the
 batch's end. PROVISIONALs numbered in your record, QUESTIONS-ready (the sitting bundles them).
