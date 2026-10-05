@@ -466,7 +466,7 @@ struct BookView: View {
             // beside the gear, calm when nothing waits, presence when
             // something does; its popover lists the rows. A BOOK's door
             // only — a gathering holds nothing, so it has none (P-2).
-            if structure.reading?.kind == .book {
+            if BookArrivalsDoor.isDrawn(for: structure.reading) {
                 BookArrivalsDoor(model: arrivals, structure: structure)
             }
             Button {

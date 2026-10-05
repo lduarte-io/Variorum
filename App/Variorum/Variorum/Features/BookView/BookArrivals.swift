@@ -509,6 +509,13 @@ struct BookArrivalsDoor: View {
     /// The one PRESENCE value (§23's composition point, kept).
     private var presence: Bool { ArrivalsLineFace.isShown(model.door) }
 
+    /// **Whether a book's masthead draws the door at all** — a BOOK's only (a
+    /// gathering holds nothing, so it has no door — P-2). The masthead's one
+    /// condition, named so it is pinnable without mounting a book view.
+    nonisolated static func isDrawn(for reading: Reading?) -> Bool {
+        reading?.kind == .book
+    }
+
     var body: some View {
         Button {
             model.setDoorOpen(!model.doorOpen)
@@ -695,9 +702,18 @@ struct BookArrivalsList: View {
     /// note-open broadcast (the book view's "open ↗" road), read-normal. It
     /// writes NOTHING: opening never seats (only Add does) — a named call so
     /// the promise is pinnable (the `MembershipChip.ascend` reason).
-    static func openNote(_ postID: String) {
-        NotificationCenter.default.post(
-            name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
+    ///
+    /// `post` is the broadcast's one seam — NotificationCenter in the app; a
+    /// pin hands in a capture so no test posts an APP-WIDE navigation
+    /// broadcast (F-B3-3: a broadcast from a test reaches whatever shell the
+    /// test host has standing, outside the test's dependency scope).
+    static func openNote(
+        _ postID: String,
+        post: (Notification.Name, [AnyHashable: Any]) -> Void = { name, info in
+            NotificationCenter.default.post(name: name, object: nil, userInfo: info)
+        }
+    ) {
+        post(.variorumOpenPost, ["postID": postID])
     }
 
     /// One judgment door — its act, its word, its weight.
