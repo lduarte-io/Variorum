@@ -518,6 +518,7 @@ struct BookSettingsSheet: View {
                                 choice, defaultHides: model.hideOwnedDefault),
                             on: HideOwnedChoice(stored: reading.hideOwned) == choice,
                             action: { Task { await model.setHideOwned(choice) } }, lines: 1)
+                            .lineLimit(1)  // 19g: a one-line chip (P-8)
                             .fixedSize()
                     }
                 }
@@ -572,6 +573,7 @@ struct BookSettingsSheet: View {
                             Task { await model.setJournalTrait(value, reading: reading) }
                         },
                         lines: 1)
+                        .lineLimit(1)  // 19g: a one-line chip (P-8)
                         .fixedSize()
                 }
             }

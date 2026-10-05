@@ -224,6 +224,7 @@ struct BookcaseStrip: View {
             }
             .padding(.vertical, 3)
             .padding(.horizontal, 4)
+            .lineLimit(1)  // 19g: the strip is one line by contract (P-8)
             .fixedSize()
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }
         }
@@ -339,6 +340,7 @@ struct BookcaseStrip: View {
                     ? "Hide the counts, words and status at each row's end"
                     : "Show the counts, words and status at each row's end")
         }
+        .lineLimit(1)  // 19g: a one-line counts row (P-8)
         .fixedSize()
     }
 

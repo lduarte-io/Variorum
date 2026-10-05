@@ -1683,3 +1683,47 @@ You are the Fable orchestrator for **17y, THE 13i FAMILY FIX PASS** — a standi
 - **B3 — faces, vocabulary, ruled behaviors:** (c) Duplicate as Version carries tags (Diverge STAYS tag-less), (d) the cards view → "Cards", (g) tag pickers: create-in-place + searchable (scope whether every picker adopts the control — propose, she picks), (o) the add-to-book picker: the SAME control idiom — type-to-filter search + the INLINE-MINT create door (her question-tool ruling, in the row: a 'New book "X"' row mints a plain book in the current wing and adds the note as an ORDINARY membership — the ownership consult and capacity gate run exactly as on every other add road), (h) the Arrivals door: MOCK BOTH placements (the mode-row icon beside the gear — her lead and the architect's — vs. the navigator's bottom) for HER pick; calm-when-empty/presence-when-waiting; rows OPEN the waiting note (opening never seats); the ONE WORD across dial/line/chip/receipts, (i) unfiled vs. No Chapter — one word, (f) the cross-wing follow — SHAPE RULED, build detail only: switch on OPEN with the quiet "Now in X" receipt; split panes follow the FOCUSED pane's note on focus; one app-wide wing stays the truth; editors never close; the wing indicator on cross-wing Open rows, (l) the book-row context menus beyond the Bookcase (enumerate the surfaces; Star at minimum; positional items omitted where meaningless).
 
 **RULES THAT BIND:** pin before fix, red-on-old verified by revert, per item; no fix without a self-traced mechanism; a pin green on both sides is a hollow finding — record it, don't fix it. The ladder per CLAUDE.md, fresh reviewer per round, findings and dispositions repo-first. Her pending picks ((h)'s placement; (g)'s scope) bundle into ONE sitting at B3's close — do not drip questions. LIVE STATUS from the first commit; commit and push per piece; synchronous foreground waits only. The entry CLOSES only on B1's use-shaped evidence and the author's word; dispositions land in this entry per item at close. Hard stop after; 13r's successor ordering is hers.
+
+## 17y RUN RECORD — LIVE STATUS (the orchestrator's running record; born 2026-10-05 00:58 with the first commit)
+
+**THE TREE:** this pass runs in the worktree `~/dev/variorum-17y` (branch `main`, commits land on
+main directly and push to `origin/main` — "runs on main" satisfied). Reason, decided at kickoff
+preflight: the primary checkout `~/dev/variorum` is HELD LIVE by the strings-workbook session
+(`variorum-65`, busy, committing minutes apart on `tools/strings-workbook` with an uncommitted
+test-iteration diff at 00:50) — two writers on one tree is the one way the checkpoint protocol
+loses work, so 17y took its own worktree instead of touching that checkout. Successor rule: work
+in `~/dev/variorum-17y`; never commit, stash or checkout in `~/dev/variorum` while that session
+lives; the worktree is removed at the pass's close (after its last push).
+DerivedData for this pass: `App/Variorum/DerivedData/17y/` (in the worktree; swept at close).
+
+**EXECUTION ORDER (hers, 2026-10-05): B0 → B-SEED → B2 → B3 → B1.** One pass, one entry; fresh
+implementer per batch; cold review per batch (B-SEED's diff is Sync-adjacent ⇒ FABLE review).
+
+- **B0 — the ledger clears: DONE** (this commit). 19e: the one-word runbook sync; the standing
+  red `DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument` green (5/5 suite).
+  19g: `.lineLimit(1)` at the four named sites; `ChromeLineLimitTests` green. Both reviews
+  waived at her word; the documented pre-existing reds at the 19f finals are the red-on-old.
+  Both 19-ledger rows flipped CLOSED. Full-Mac finals now read fully green (no named reds).
+- **B-SEED — (q) the tutorial-seed trace: NOT-STARTED (next; tonight — time-sensitive).** The
+  mechanism must be in hand before her Monday fresh-install + sign-in on the new MacBook (the
+  verification bed). A fresh `opus-implementer`, briefed by this file's 17y row item (q) + the
+  B-SEED brief section below once written; the seeder is Sync-adjacent (`ensureWelcomeShelf`,
+  `SampleLibraryDedupeFacts`) ⇒ FABLE cold review of the diff, per the standing rider.
+- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): NOT-STARTED** (after B-SEED,
+  tonight/overnight). Two trace families + three singles; pin-before-fix each; (n) finds the
+  PRIOR landing first (her "still"; the capture `notes/plans/17y-screens/title-chrome-shift.png`).
+- **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)): NOT-STARTED.** Runs
+  Monday; closes at HER ONE SITTING (the bundled picks: (h)'s placement mock pair; (g)'s
+  picker-adoption scope; any B2/B-SEED PROVISIONALs). Both mocks for (h) land as HTML files
+  (never Artifacts) with absolute paths in the sitting note.
+- **B1 — the two performance items ((j)(k)): NOT-STARTED.** Runs LAST (Monday night → Tuesday);
+  (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
+  pagination on `(stamp, id)`, never a raised cap + the All-screen books region cap; the close
+  is USE-SHAPED — her live scroll walk on a large fixture + her feel. FABLE review mandatory
+  ((j) reaches the read tier). The entry CLOSES only on B1's evidence and her word.
+
+**Standing facts for a successor:** preflight done in full 2026-10-05 (CLAUDE.md canon · master
+plan post-13r pointer · KnownIssues · QUESTIONS #166–#182 · the 17y row a–q end to end · the
+resiliency protocol · TEXTKIT2_NOTES owed before B1's brief · per-item records read per batch).
+No `Sync/`, custody or schema expected anywhere in this pass — if an item needs one, STOP (§12 /
+author event). Her pending picks bundle into ONE sitting at B3's close — no dripped questions.
