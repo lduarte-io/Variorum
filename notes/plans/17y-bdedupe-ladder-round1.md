@@ -68,3 +68,42 @@ The reviewer's bottom line stands as written: the gathering/quicknote/pool machi
 sound; the guide's acceptance was asserted without its proof. The fix round lands with the
 same discipline the batch claimed — pins red-on-old on the REAL shapes first — and ROUND 2
 re-reviews the fix diff fresh.
+
+## ROUND 1 FIXES (the orchestrator's, same seat; commit a8d498f6)
+
+- **BLOCKER-1 FIXED + PINNED BOTH WAYS:** the seed-authored state (word target ·
+  the sealed lesson's lock · the seed's comments as ordered block-ordinal+text
+  tuples, created_at excluded for cross-device clocks) moved from ENGAGEMENT
+  into the PAIRWISE IDENTITY; the classifier went PUBLIC
+  (`SeededFurnitureClassifier` — the `SampleCopyClassifier` precedent) so the
+  Mac's REAL-SEED drift guard (`TutorialFurnitureFoldTests`) judges two real
+  `TutorialSeeder` mints with the REAL classifier: foldable + EQUAL signatures
+  for the guide, the scraps pool and the twin — green now, red the day any
+  seed-content change trips a new engagement leg. The core fold test upgraded
+  to the SHIPPED shape (word target + comment + sealed lesson). REVERT ROUND
+  from the committed HEAD: the word_target + locked legs flipped back to
+  engagement → the shipped-shape fold RED (10 issues; the guide never folds)
+  + the straggler arm red — restored, `git diff --quiet`, 16/16 green.
+- **MAJOR-2 RECORDED:** QUESTIONS #186(g) carries the crossing-race window in
+  her words with the full defense as her alternative.
+- **MAJOR-3 FIXED + PINNED:** `ruleReading` tri-state — ABSENT tag row =
+  STRAGGLING (defer + marker; `signatureMatches` keeps the straggling
+  candidate so the defer can fire), wrong-path = differs;
+  `aRuleNamingANeverArrivedTagDefersThenFolds` (defer → marker → the dead-twin
+  landing folds).
+- **MAJOR-4 FIXED:** the suite is 16 tests — her comment / her MANUAL
+  savepoint / a chapter rename / a removed member each keep both; a half-dead
+  copy reads ENGAGED (the cascade kills the membership with the post — errs to
+  keep); a variant-less block reads STRAGGLING; the designation naming a third
+  thing is left alone (single-store, apart from the setting's own CAS, which
+  rules cross-device values — stated in the arm).
+- **MINOR-5:** the −1 normalization documented as deliberate at the function
+  (conservative-only; the memo deviation noted here).
+- **MINOR-6:** the gathering loser's cascade-victim sweep belt landed.
+- **NIT-7:** `Operations.quicknoteBookDesignationKey` at both sites.
+- **NIT-8 RECORDED:** #186(h).
+- **The record corrections:** #186's head corrected IN PLACE with the honest
+  note (the original claim predated its proof); the B-DEDUPE RECORD's piece-6
+  wording corrected to enumerate what is pinned.
+
+ROUND 2 (fresh fable-reviewer) re-reviews the fix diff next.
