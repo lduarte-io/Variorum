@@ -264,7 +264,9 @@ struct LaunchFurnitureTests {
 
     /// **A RESUMED BIRTH** (the `pending` mark — a first launch cut short)
     /// honours what happened in between: (a) a guide she DELETED is never
-    /// re-made (the tombstone is her word); (b) tutorial RESIDUE — a note
+    /// re-made — the whole guide (book, lessons, scraps: nothing live is
+    /// left, so the TOMBSTONE alone is her word) and the book alone (its
+    /// lessons survive tagged — residue); (b) tutorial RESIDUE — a note
     /// tagged exactly `tutorial`, no guide book — is never replaced silently
     /// (that is the doors' confirmed road), and her note is untouched; (c) a
     /// guide the interrupted launch already made is not made twice.
@@ -272,8 +274,13 @@ struct LaunchFurnitureTests {
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
             device.welcome = "pending"
-            let guide = try await TutorialSeeder.restore(session: session)
-            try session.operations.deleteReading(guide)
+            _ = try await TutorialSeeder.restore(session: session)
+            // She deletes the WHOLE guide — the book, every lesson, the
+            // scraps pool (the doors' own cleanup, i.e. tombstones only).
+            let everything = try await db.read { db in try TutorialSeeder.discover(db) }
+            TutorialSeeder.cleanup(ops: session.operations, existing: everything)
+            let left = try await db.read { db in try TutorialSeeder.discover(db) }
+            #expect(left.isEmpty, "no live trace of the guide is left — only its tombstones")
             let resumed = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: false, clean: true), marks: device.marks)
@@ -281,7 +288,19 @@ struct LaunchFurnitureTests {
                 Issue.record("a pending mark resumes: \(String(describing: resumed))")
                 return
             }
-            #expect(try await guideFacts(db).guides.isEmpty, "her deletion stands")
+            let facts = try await guideFacts(db)
+            #expect(facts.guides.isEmpty, "her deletion stands — the tombstone is her word")
+        }
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            device.welcome = "pending"
+            let guide = try await TutorialSeeder.restore(session: session)
+            try session.operations.deleteReading(guide)
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let facts = try await guideFacts(db)
+            #expect(facts.guides.isEmpty, "the book alone deleted: still not re-made")
         }
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
@@ -328,6 +347,34 @@ struct LaunchFurnitureTests {
             let facts = try await guideFacts(db)
             #expect(facts.guides.isEmpty, "the launch left the guide to the door")
             #expect(session.tutorialDoorInFlight, "and never released the door's latch")
+        }
+    }
+
+    /// **THE BIRTH SEED'S DECISION TABLE, branch by branch** (driven direct,
+    /// so each guard is pinned on its own rather than masked by its
+    /// neighbour — a deleted book leaves tagged lessons, which is also
+    /// residue): a store with no trace seeds; a live guide is found; the
+    /// whole guide deleted is her word; residue is left alone; a door in
+    /// flight is never raced.
+    @Test func theBirthSeedNamesWhatItFound() async throws {
+        try await withLaunchWorld { session, _ in
+            guard case .seeded = await TutorialSeeder.seedAtBirth(session: session) else {
+                Issue.record("an empty store is seeded")
+                return
+            }
+            #expect(await TutorialSeeder.seedAtBirth(session: session) == .alreadyPresent)
+            let everything = try await session.database.read { db in try TutorialSeeder.discover(db) }
+            TutorialSeeder.cleanup(ops: session.operations, existing: everything)
+            #expect(await TutorialSeeder.seedAtBirth(session: session) == .deletedByTheReader)
+        }
+        try await withLaunchWorld { session, _ in
+            let tag = try session.operations.createTag(name: TutorialSeeder.tagName)
+            let hers = try session.operations.createPost(title: "mine")
+            _ = try session.operations.applyTag(tag.id, toPost: hers.id)
+            #expect(await TutorialSeeder.seedAtBirth(session: session) == .residue)
+            #expect(session.beginTutorialDoor())
+            #expect(await TutorialSeeder.seedAtBirth(session: session) == .doorInFlight)
+            session.endTutorialDoor()
         }
     }
 }
