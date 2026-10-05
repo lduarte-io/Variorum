@@ -225,9 +225,21 @@ final class UpdateChannel {
     /// NOT guarded on `canCheckForUpdates`: mid-session, Sparkle's own
     /// `checkForUpdates` brings the running session into focus — behaviour
     /// worth keeping for a door that is not greyed.
+    ///
+    /// The sanity pass's refinement (P-2 — a door must never do nothing
+    /// SILENTLY): instead of a bare return, the guard mirrors Sparkle's own
+    /// move for a check during ITS prompt (`SPUUpdater checkForUpdates` →
+    /// `showUpdateInFocus`, read from 2.10.0) — the deferred permission
+    /// window comes forward (the standard driver raises `_permissionPrompt`
+    /// and activates the app). `showUpdateInFocus` is an @optional
+    /// `SPUUserDriver` requirement, hence the optional-protocol call.
     func checkForUpdates() {
-        guard !isAskingPermission else { return }
-        controller?.checkForUpdates(nil)
+        guard let controller else { return }
+        if isAskingPermission {
+            (controller.userDriver as any SPUUserDriver).showUpdateInFocus?()
+            return
+        }
+        controller.checkForUpdates(nil)
     }
 
     /// 13r U3-A — R-13r-13: the SYNC ROW's Check for Updates… door (the calm
