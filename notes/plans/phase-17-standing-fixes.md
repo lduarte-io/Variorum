@@ -2136,7 +2136,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | DONE except the walk (034c28ad + this commit): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"19 tests in 5 suites passed"** (`p3-green.log`); **behavioural revert (the gate `true` for every order) → RED "2 tests … failed … with 2 issues"** (`p3-rv.log`), restored by checkout, `git diff --quiet`. The walk (grip visible + a row drop landing right above) rides piece 9 — HELD at 03:2x: the guard read HID idle 0 s (someone at the machine) |
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | DONE except the walk (2e07a4d4 red · 78f4c824 fix · this commit): `BookPanelBrain.dropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `dropPlan`); `BookPanelModel.drop` speaks `BookPanelCopy.needsManualOrder` — *“X” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.* (PROVISIONAL words); `chapterGripDrawn` = more than one chapter. Pins RED on the pre-fix behaviour (4 issues) → GREEN "48 tests in 5 suites" (`p4-green.log`) → **behavioural revert (the gate off, the grip always) RED "5 tests … with 4 issues"** (`p4-rv.log`) on the corrected fixture, restored, `git diff --quiet`. The walk (a panel drag landing; the refusal road) rides piece 9 |
 | 5 | (m) the quick-note box's double cursor | DONE except the walk (2c60f3be red · 95f615eb fix · this commit): `CaptureNSTextView.onCaretChange` from `becomeFirstResponder`/`resignFirstResponder`, wired to the host's `onFocusChange` (the Coordinator's begin/end-EDITING reports retired); `QuickEntryBar`'s gate untouched. Pin RED on the pre-fix tree (1 issue — the arrival) → GREEN (17/4 + 21/5) → **behavioural revert (the wire removed) RED "1 test … with 2 issues"** (`p5-rv.log`), restored, `git diff --quiet`. The walk (ONE cursor, Terminal) rides piece 9. **Seam note for the review cast:** the diff touches `CaptureNSTextView` — a TK2 `NSTextView`, but OUTSIDE the editor seam by its own header (no identity attributes, no `BlockRangeIndex`, no `PaneTextAuthority`, no router claim); only first-responder overrides, no TK1 API |
-| 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
+| 6 | (n) the title's chrome shift — the PRIOR landing first | IN-PROGRESS — the prior landing found and the mechanism measured (below); pin `MastheadLayoutTests.theOpenFieldsWordsStayWhereTheTitleRested` committed RED ON PURPOSE (this commit): **"1 test in 1 suite failed … with 3 issues"** (`p6-red.log`) — the open field carries the date as its own prompt in BOTH voices, and Study's glyph tops sit at 12.0 open vs 18.5 at rest (6.5 pt). NEXT: the fix |
 | 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | DONE except the walk + the Release COMPILE check (c430c0aa red · this commit): `PostMode.buildKeepsCanvas` (the compile condition, read by nothing but the seam) · `order(keepingCanvas:)` · **`allCases` RETURNS the build's order** (so the mode row, ⌘1–⌘n, the rail and the masthead menu shorten in Release with no renderer touched) · `fromStored` decodes a mode the build lacks to nil (→ the caller's default, Write — PROVISIONAL) · `keyLabel`/`keySpan`/`modeList` feed the registry's `.switchMode` verb + label, the helper's row and the masthead menu's help · the helper's "canvas" dictionary entry filtered by the seam · `PoolDetailView.Mode.allCases` = `faces(keepingCanvas:)` and its picker drawn only with more than one face. Red-on-old: the seam in its pre-fix shape (Canvas kept whatever the flag) → "5 tests … with 6 issues" (`p7-red.log`); **GREEN with the mode/registry/canvas suites — "61 tests in 8 suites passed"** (`p7-green.log`: CanvasDebugOnly, NewModes (Debug's seven, unedited), the registry walk, OpenStripMenu, SidebarLayout, PostDetail mode memory, Canvas & full pool, CanvasArrival) |
 | 8 | Suites at the END + the tutorial spine | NOT-STARTED |
 | 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | NOT-STARTED |
@@ -2256,3 +2256,32 @@ she types (then the placeholder — and the block cursor with it — goes). **Bu
 — the first-responder truth) and stood down correctly; UNIT C swapped the SwiftUI field for the AppKit
 capture box and fed the same gate from editing notifications. The owner of the suppression is the
 box's focus REPORT, not the bar's gate (which was right).
+
+### THE TRACE — (n), the title's shift, STILL
+
+**THE PRIOR LANDING (found first, per the brief):** the 2026-09-06 use-report round's ledger row 12
+— punchlist 2, *"When you click on the title the placeholder text shifts upwards"* — FIXED at 17o
+batch d, `5ce18072` (2026-09-08), with the pin `MastheadLayoutTests.bothTitleFacesShareOneBoxSoNothing
+ShiftsOnClick`. Its mechanism then: the two faces (`Text` / `TextField(prompt)`) shared a max WIDTH and
+nothing else, so the field's intrinsic height moved the row; its fix: ONE BOX — a hidden `Text` at the
+title font defines it and the live face is an overlay that fills it.
+
+**WHY IT SURVIVED — the pin went hollow at its own fix:** the editing face's oracle
+(`recordTitleField`) is attached AFTER `.frame(maxWidth: .infinity, maxHeight: .infinity, alignment:
+.leading)` (`PostDetailView.swift:811–827`), so it reads the frame WRAPPER, which after 5ce18072 IS
+the box by construction; the pin compares two rects that cannot differ, and nothing measured where the
+WORDS land inside the field.
+
+**THE MECHANISM (measured, a scratch diagnostic on the shipped test harness — never committed; the real
+`NSTextField`, its field editor, and a pixel scan of the drawn words):** on a note named by its DAY
+(her capture: "2026-10-04"), the title is stored "" and the draft is the stored name (13g R6-3), so the
+open field is EMPTY and shows its PROMPT — the date — and that prompt is drawn by SwiftUI's own field
+editor (`_SystemTextFieldFieldEditor`, TK2) laid against the field's TOP rather than on the label's
+baseline. Box = field = field editor = 29 pt in Study, 22–23 pt in Terminal (the frames agree — the
+prior fix holds); but the words: **Study (Iowan Old Style Bold 21, ascender 21.76 > its 21-pt size) —
+the label's glyph tops at y 18.5, the open prompt's at y 12.0 = the field's own top edge: 6.5 pt up and
+CLIPPED there** (exactly her capture's cut-off tops); Terminal (SF Mono Semibold 19, ascender 18.37) —
+0.5 pt. **TYPED text is not affected** (Study: tops 16.0 typed vs 16.5 at rest; the TK2 line fragment
+29 pt tall, baseline 22) — only the PROMPT moves. Her "still": the prior fix aligned the BOXES; the
+words inside one of them were never measured. No editor-seam code is involved (the masthead title is a
+SwiftUI `TextField`; the measurement read SwiftUI's field editor, never `EditorTextView`).

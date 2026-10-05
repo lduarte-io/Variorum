@@ -131,6 +131,102 @@ struct MastheadLayoutTests {
         }
     }
 
+    /// **17y B2 — item (n): "the chrome is STILL shifted up when you click on
+    /// the title"** (her capture `17y-screens/title-chrome-shift.png`: a
+    /// date-named note, Study, the date's tops cut off under the open mark).
+    ///
+    /// The prior landing (row 12 above, 5ce18072) gave both faces ONE BOX —
+    /// and its pin compares the two faces' SwiftUI frames, which after that
+    /// fix are the box by construction (the editing face's oracle reads the
+    /// `.frame(maxWidth:maxHeight:)` wrapper, never the field), so it could
+    /// not see what still moved: the words INSIDE the field. Measured (the B2
+    /// RECORD): on a note named by its day the draft is the stored name, ""
+    /// — so the open field shows its PROMPT, the date (13g R6-3), and SwiftUI's
+    /// field editor (`_SystemTextFieldFieldEditor`) lays a prompt out against
+    /// the field's top rather than on the label's baseline: for Iowan Old
+    /// Style Bold 21 (ascender 21.76 > its 21-pt size) the date rides 6.5 pt
+    /// up and is CLIPPED at the field's top edge; SF Mono 19 moves 0.5 pt.
+    /// Typed text lands where the label sat (within half a point) — only the
+    /// prompt moved.
+    ///
+    /// RED ON OLD: the field carried the date as its prompt (`placeholderString`
+    /// "2026-06-30"), and Study's glyph tops sat 6.5 pt above the label's.
+    @Test func theOpenFieldsWordsStayWhereTheTitleRested() async throws {
+        for voice in [ThemeVoice.terminal, .study] {
+            try await withMountedDetail(
+                width: 1100, title: "", tags: [], voice: voice
+            ) { session, _, window, hosting in
+                #if DEBUG
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                await settle(window, hosting, until: { oracle.titleFrame != nil })
+                await settle(window, hosting, until: { false }, maxTurns: 6)
+                let resting = try #require(Self.snapshot(hosting))
+
+                PostDetailOracle.beginTitleEditing?()
+                await settle(window, hosting, until: { Self.titleField(in: hosting) != nil })
+                await settle(window, hosting, until: { false }, maxTurns: 8)
+                let field = try #require(Self.titleField(in: hosting),
+                                         "(\(voice)) the rename field opened")
+                // THE MECHANISM: the field editor is never the one drawing the
+                // date — a prompt it draws lands off the label's baseline.
+                #expect((field.placeholderString ?? "").isEmpty
+                        && field.placeholderAttributedString == nil,
+                        "(\(voice)) the open field carries no prompt of its own: \(String(describing: field.placeholderString))")
+                let editing = try #require(Self.snapshot(hosting))
+                let band = field.convert(field.bounds, to: hosting).insetBy(dx: 0, dy: -10)
+                let rest = try #require(Self.glyphTop(resting, in: hosting, band),
+                                        "(\(voice)) the resting title drew")
+                let open = try #require(Self.glyphTop(editing, in: hosting, band),
+                                        "(\(voice)) the open field showed the date")
+                #expect(abs(open - rest) <= 1,
+                        "(\(voice)) the words stay put when the field opens: tops at \(open) open vs \(rest) at rest")
+                #endif
+            }
+        }
+    }
+
+    /// The window's pixels, as drawn — the words where they actually land.
+    private static func snapshot(_ view: NSView) -> NSBitmapImageRep? {
+        guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return nil }
+        view.cacheDisplay(in: view.bounds, to: rep)
+        return rep
+    }
+
+    /// The title's editable field (the masthead's only editable text field
+    /// while its rename is open).
+    private static func titleField(in view: NSView) -> NSTextField? {
+        if let field = view as? NSTextField, field.isEditable { return field }
+        for sub in view.subviews {
+            if let found = titleField(in: sub) { return found }
+        }
+        return nil
+    }
+
+    /// The topmost row of ink (in points, in `view`'s flipped space) inside
+    /// `band`, scanning from 8 pt in — clear of the caret at the field's
+    /// leading edge — across the first 140 pt of the words; the band's
+    /// bottom (the open mark, row two) is never reached by a top scan.
+    private static func glyphTop(_ rep: NSBitmapImageRep, in view: NSView, _ band: NSRect) -> CGFloat? {
+        let scale = CGFloat(rep.pixelsHigh) / view.bounds.height
+        func row(_ y: CGFloat) -> Int { Int((view.isFlipped ? y : view.bounds.height - y) * scale) }
+        let r0 = max(0, min(row(band.minY), row(band.maxY)))
+        let r1 = min(rep.pixelsHigh - 1, max(row(band.minY), row(band.maxY)))
+        let x0 = Int((band.minX + 8) * scale)
+        let x1 = min(rep.pixelsWide - 1, Int((band.minX + 140) * scale))
+        guard x0 < x1, r0 < r1, let ground = rep.colorAt(x: x1, y: r0)?.usingColorSpace(.deviceRGB)
+        else { return nil }
+        func ink(_ color: NSColor?) -> Bool {
+            guard let c = color?.usingColorSpace(.deviceRGB) else { return false }
+            return abs(c.redComponent - ground.redComponent)
+                + abs(c.greenComponent - ground.greenComponent)
+                + abs(c.blueComponent - ground.blueComponent) > 0.25
+        }
+        for y in r0...r1 where (x0..<x1).contains(where: { ink(rep.colorAt(x: $0, y: y)) }) {
+            return CGFloat(y) / scale
+        }
+        return nil
+    }
+
     /// **13u2 UNIT D — item 13's SECOND half, Act 10 ledger row 93.** The
     /// correction round's walk recorded an observation rather than a defect:
     /// on a note named by its DAY, clicking the title opens the rename field
