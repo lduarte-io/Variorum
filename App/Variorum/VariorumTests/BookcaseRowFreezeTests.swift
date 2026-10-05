@@ -20,9 +20,18 @@
 //  re-renders, so its record keeps the state it moved with.
 //
 //  Red-on-old, stated: the moved row's record stayed `placing == true` after
-//  the order went A–Z and `details == true` after details went off (verified
-//  by the identity line's revert — the B2 RECORD). The unmoved row is the
+//  the order went A–Z and `details == true` after details went off — 2
+//  issues, the two "the MOVED row" expectations (verified by the identity
+//  line's revert — the B2 RECORD and its fix round). The unmoved row is the
 //  control and passes on both trees.
+//
+//  ⚠ THE HIDDEN DEPENDENCY, made explicit (the B2 ladder's MINOR-1): this
+//  red-on-old holds only while each row also records its FRAME
+//  (`ShelfView`'s `.onGeometryChange(.global)` → `BookcaseRowOracle.
+//  recordFrame`). With that recorder removed the pin goes HOLLOW — green with
+//  the identity reverted — and WHY is NOT explained (recorded, never
+//  claimed). So the pin REQUIRES a frame record for both rows: removing the
+//  recorder turns it red, never hollow. Nothing reads the rect's value.
 //
 
 import AppKit
@@ -100,9 +109,18 @@ struct BookcaseRowFreezeTests {
 
             await settle(window, hosting) {
                 BookcaseRowOracle.drawn(moving.id) != nil && BookcaseRowOracle.drawn(staying.id) != nil
+                    && BookcaseRowOracle.frame(moving.id) != nil
+                    && BookcaseRowOracle.frame(staying.id) != nil
             }
             #expect(BookcaseRowOracle.drawn(moving.id) == .init(placing: true, details: true),
                     "both rows drew under my order with details on")
+            // THE COUPLING (see the header): the frame recorder is what makes
+            // this pin's red-on-old real — required, so it cannot be
+            // "cleaned up" into a hollow pin.
+            _ = try #require(BookcaseRowOracle.frame(moving.id),
+                             "the moved row recorded its frame — the pin's red-on-old needs the recorder")
+            _ = try #require(BookcaseRowOracle.frame(staying.id),
+                             "the control row recorded its frame — the pin's red-on-old needs the recorder")
 
             // THE MOVE between sections — the act that froze U1's row.
             await model.reshelve(moving.id, to: ideas.id)

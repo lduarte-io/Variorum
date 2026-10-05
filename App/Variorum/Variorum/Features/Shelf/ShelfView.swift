@@ -607,6 +607,14 @@ struct ShelfView: View {
         .onAppear { recordRow(reading.id, placing: placing) }
         .onChange(of: placing) { _, now in recordRow(reading.id, placing: now) }
         .onChange(of: model.detailsShown) { _, _ in recordRow(reading.id, placing: placing) }
+        // ⚠ LOAD-BEARING for `BookcaseRowFreezeTests`' red-on-old (the B2
+        // ladder's MINOR-1): with this frame recorder removed, that pin goes
+        // HOLLOW — green even with the section-qualified identity reverted.
+        // WHY a geometry observer on the row makes the old freeze reproducible
+        // in-process is NOT explained (recorded, never claimed). No test reads
+        // the rect's VALUE; the pin REQUIRES a frame record for both of its
+        // rows, so removing this turns the pin red, never hollow — do not
+        // "clean it up" without replacing the pin's red-on-old.
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
             BookcaseRowOracle.recordFrame(reading.id, frame, owner: oracleOwner)
         }
@@ -1020,8 +1028,11 @@ enum BookcaseRowOracle {
 
     private static var frames = OwnedRegistrations<String, CGRect>()
 
-    /// Where the row sits, in its window (`.global`) — so a pin can read the
-    /// pixels a frozen row keeps showing.
+    /// Where the row sits, in its window (`.global`). No pin reads the VALUE:
+    /// `BookcaseRowFreezeTests` requires only that each of its rows HAS one,
+    /// because the recorder writing it is load-bearing for that pin's
+    /// red-on-old for a reason not understood (the B2 ladder's MINOR-1 — see
+    /// the recorder at the row).
     static func frame(_ readingID: String) -> CGRect? { frames.current[readingID] }
 
     static func recordFrame(_ readingID: String, _ frame: CGRect, owner: UUID) {
