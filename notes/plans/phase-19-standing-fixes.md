@@ -2024,5 +2024,32 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
    "Send Report… opens an email draft…" → "**offers**" (it asks first now; `DiagnosticsCopy.swift`,
    pin-neutral — `thePromiseSaysWhatTheCodeDoes` checks substrings this word is not in; flagged for
    the reviewer as the one copy line touched outside the question's own words).
-4. The dev-store walk (both doors' choice, the roads in use) — **NOT-STARTED.**
+4. The dev-store walk (both doors' choice, the roads in use) — **IN FLIGHT — THE RESTORE POINT,
+   named before it runs** (Debug build `App/Variorum/DerivedData/19f/dd/Build/Products/Debug/
+   Variorum.app`, `io.lduarte.Variorum.debug` 0.9.1 (4939), the fenced dev store; `cliclick` +
+   `Tools/WalkKit`, every act behind `guard.sh`; her app absent; the host holds AX + Screen
+   Recording (a compiled probe: `AX: true SCREEN: true`). Captures into the NEW gitignored
+   `notes/plans/19-screens/19f/` (this commit adds the ledger's `notes/plans/19-screens/` line —
+   the per-phase screens precedent; no 19 entry walked before).
+   - **State before:** the dev domain's prefs EXPORTED to the gitignored
+     `App/Variorum/DerivedData/19f/devprefs-prewalk/io.lduarte.Variorum.debug.plist` (the opt-in
+     key ABSENT there); the dev container has NO `Application Support/Diagnostics` folder; Mail NOT
+     running; HER CLIPBOARD holds 123 bytes of plain text (utf8/utf16/string), saved to this
+     session's scratchpad (never the repo) for the restore — the walk's copy road MUST write the
+     general pasteboard, that is the act under test.
+   - **Restore at the walk's end (app quit by identity):** `defaults import` the export, then
+     delete `variorum.crashReports.optIn` (import MERGES — the U3-B lesson) and diff the domain's
+     export against the pre-walk one; remove the walk's `Application Support/Diagnostics` folder and
+     its synthetic file under the container's `Data/tmp/`; the voice back to what it was; Mail quit
+     if the Open in Mail leg launched it (any compose window closed UNSENT); the Finder window the
+     reveal opened closed; her clipboard restored with `pbcopy` and its byte count/sha256 compared.
+   - **The legs:** (1) Settings ▸ Diagnostics with one synthetic report (the opt-in ON + the U3-B
+     env door) → Send Report… → THE CHOICE on screen (Terminal) → "Show the file and copy the
+     address" → Finder shows the file, `pbpaste` reads the address, the pane's receipt, no Mail;
+     (2) Send Report… → Cancel → nothing; (3) the choice in STUDY; (4) Help ▸ Send Feedback…
+     pressed while Settings is key → the main window comes forward and asks → "Copy the address" →
+     `pbpaste` + the bottom bar's receipt; (5) Help ▸ Send Feedback… → "Open in Mail" → the U3-B
+     road (Mail's Add Account sheet on this M3 — F-W5 — or a draft), closed unsent; (6) every window
+     closed → Help ▸ Send Feedback… → the app-modal ask → Cancel; (7) Help ▸ Restore Tutorial… still
+     asks (the second `.alert` host on `RootView` did not displace the first) → Cancel. **PENDING.**
 5. Finals (suites, scope, record) — **NOT-STARTED.**
