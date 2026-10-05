@@ -2024,8 +2024,8 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
    "Send Report… opens an email draft…" → "**offers**" (it asks first now; `DiagnosticsCopy.swift`,
    pin-neutral — `thePromiseSaysWhatTheCodeDoes` checks substrings this word is not in; flagged for
    the reviewer as the one copy line touched outside the question's own words).
-4. The dev-store walk (both doors' choice, the roads in use) — **IN FLIGHT — THE RESTORE POINT,
-   named before it runs** (Debug build `App/Variorum/DerivedData/19f/dd/Build/Products/Debug/
+4. The dev-store walk (both doors' choice, the roads in use) — **DONE (this commit). The restore
+   point, named before it ran** (Debug build `App/Variorum/DerivedData/19f/dd/Build/Products/Debug/
    Variorum.app`, `io.lduarte.Variorum.debug` 0.9.1 (4939), the fenced dev store; `cliclick` +
    `Tools/WalkKit`, every act behind `guard.sh`; her app absent; the host holds AX + Screen
    Recording (a compiled probe: `AX: true SCREEN: true`). Captures into the NEW gitignored
@@ -2051,5 +2051,58 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      `pbpaste` + the bottom bar's receipt; (5) Help ▸ Send Feedback… → "Open in Mail" → the U3-B
      road (Mail's Add Account sheet on this M3 — F-W5 — or a draft), closed unsent; (6) every window
      closed → Help ▸ Send Feedback… → the app-modal ask → Cancel; (7) Help ▸ Restore Tutorial… still
-     asks (the second `.alert` host on `RootView` did not displace the first) → Cancel. **PENDING.**
+     asks (the second `.alert` host on `RootView` did not displace the first) → Cancel.
+   **THE WALK — DONE, RESTORED (2026-10-04 ~03:06–03:40Z; every act behind `guard.sh` — `--author`
+   first; her app absent throughout, idle ≥ 26 min at the start; captures in the gitignored
+   `notes/plans/19-screens/19f/`):**
+   - `w0/` — launch with the synthetic env + the opt-in ON: `crash-report-20261005T030632Z-c93d9bf3
+     .json` born AT LAUNCH (the U3-B road). `w1/`, `w1b/` — Settings ▸ Diagnostics (Terminal): the
+     card, the doors, and the promise reading "**offers** an email draft".
+   - `w2-choice-terminal/` — **Send Report… → THE CHOICE ON SCREEN, nothing opened:** "Send this
+     crash report", the detail, **Open in Mail** (the blue DEFAULT — #182 (c) CONFIRMED: SwiftUI makes
+     the first button Return's), **Show the file and copy the address**, Cancel; Mail NOT launched, no
+     Finder window.
+   - `w3-copied-report/` + `w3-finder/` — **"Show the file and copy the address":** `pbpaste` read
+     exactly `support@stargazing.tech`; Finder came forward on a "Crash Reports" window with THE
+     report's file selected; the pane's caption: "Copied support@stargazing.tech and showed
+     crash-report-20261005T030632Z-c93d9bf3.json in Finder — attach it to an email from any mail
+     app."; Mail NOT launched — **no mail app needed, the F-W5 dead-end closed by construction.**
+   - `w4-cancel/` — a marker on the pasteboard, the reveal's window closed, Send Report… → the
+     choice → **Cancel → nothing:** the marker unchanged, no Finder window, no Mail, no caption
+     (the earlier receipt cleared at the press).
+   - `w5-study/` — the voice → STUDY (Settings ▸ General's AX radio); Send Report… → **the same
+     choice** (system alert chrome — identical in both voices, as the `.alert` grammar is), dismissed
+     with **Escape → nothing** (the binding's nil road: marker, Finder, Mail all unchanged). The voice
+     back to TERMINAL (the radio read `10`).
+   - `w6-feedback-choice/` — **Help ▸ Send Feedback… pressed with SETTINGS KEY → the main window came
+     forward and asked** ("Send feedback" · Open in Mail · Copy the address · Cancel); Mail NOT
+     launched, the marker unchanged.
+   - `w7-feedback-copied/` — **"Copy the address":** `pbpaste` = the address; the bottom bar's
+     QUIET receipt "Copied support@stargazing.tech — paste it into any mail app."; no Mail.
+   - `w8-open-in-mail/` — Help ▸ Send Feedback… → **"Open in Mail" → the U3-B road EXACTLY:** Mail
+     (not running before) launched into its own **Add Account** sheet — this M3's Mail still has no
+     account, F-W5 as measured — the pasteboard untouched; Mail's Cancel QUIT Mail (as U3-B
+     measured). Nothing sent (no account exists to send from).
+   - `w9-restore-tutorial/` — **Help ▸ Restore Tutorial… still asks through ITS `.alert`** ("Restore
+     the tutorial?" · Cancel · Replace) — the second host on `RootView` displaced nothing; Escape →
+     gone, nothing replaced.
+   - `w10-no-window-modal/` — Settings and the main window CLOSED (the app frontmost with zero
+     windows) → Help ▸ Send Feedback… → **the app-modal ask** (`AXDialog` 260×350 at (734,217),
+     captured by frame): the same title, words and three buttons (with the Debug build's generic
+     icon); "Copy the address" pressed BY NAME → `pbpaste` = the address; no Mail.
+   - **RESTORED:** the dev app quit by identity (zero instances after); `defaults import` of the
+     export + the `variorum.crashReports.optIn` delete → **the domain's export diffed against the
+     pre-walk one: 0 lines**; the walk's `Application Support/Diagnostics` folder and synthetic file
+     removed (neither existed before); the voice Terminal; Mail NOT running (as before); the reveal's
+     Finder window closed (the one Finder window left, "DerivedData", predates the walk); **her
+     clipboard restored — 123 bytes, the same sha256 prefix `c936d3f768adbb57`, the same three types
+     — and the scratch copy deleted.** Also removed: the 12 `19f-door-*` fixture stores my pin runs
+     left in the Debug container's `tmp/` (the test host shares it; the U3-B pins leave theirs too —
+     ~400 entries of that pre-existing class remain, recorded not swept).
+   - **Machinery, recorded:** mid-walk-staging the orchestrator committed `34bf1485` (its own
+     `notes/handoffs/phase-13r-handoff.md` line) in this same checkout — a disjoint file; every 19f
+     commit is pathspec-limited. The voiced card doors are NOT exposed to AX in the Settings form
+     (`entire contents` finds no `AXButton`), so Send Report… was pressed by guarded click at a point
+     read from a fresh capture; the alert's buttons likewise (or by Escape); the no-window modal's
+     buttons by AX name.
 5. Finals (suites, scope, record) — **NOT-STARTED.**
