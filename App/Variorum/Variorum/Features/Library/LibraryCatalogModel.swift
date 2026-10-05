@@ -45,7 +45,22 @@ final class LibraryCatalogModel {
     /// 13g batch 6 (R5-6): `notes` joins as a THIRD view mode — her
     /// Apple-Notes-shaped list (title · date · the first bit of text · the
     /// book it's in). A mode beside the others, never a replacement.
-    enum Mode: String, CaseIterable { case list, notes, timeline }
+    enum Mode: String, CaseIterable {
+        case list, notes, timeline
+
+        /// The segment's word, in ONE home (the `Scope.label` precedent).
+        /// 17y item (d) — F-U6-5, her pick (QUESTIONS #176): the cards view
+        /// is "Cards" (two "Notes" sat side by side at the Library's top —
+        /// the scope's kind and this mode). The case keeps its model name;
+        /// 13s may re-voice the word.
+        var label: String {
+            switch self {
+            case .list: "List"
+            case .notes: "Cards"
+            case .timeline: "Timeline"
+            }
+        }
+    }
 
     @ObservationIgnored let session: AppSession
     var scope: Scope = .all

@@ -37,9 +37,15 @@ struct LibraryCardsWordTests {
     @Test func thePickerRendersTheModeWordsFromTheirOneHome() throws {
         let view = try Self.source("Variorum/Features/Library/LibraryCatalogView.swift")
         let inline = try Regex(#"chromeLabel\("[^"]*"\)\)\.tag\(LibraryCatalogModel\.Mode\."#)
-        #expect(view.matches(of: inline).isEmpty,
+        #expect(view.matches(of: inline).count == 0,
                 "no mode word is a literal in the view body")
         #expect(!view.contains(#"chromeLabel("Notes")).tag(LibraryCatalogModel.Mode.notes)"#),
                 "the cards view no longer says Notes")
+    }
+
+    /// The words themselves (added with the fix — `Mode.label` is the home
+    /// the fix made).
+    @Test func theModeWordsAreListCardsTimeline() {
+        #expect(LibraryCatalogModel.Mode.allCases.map(\.label) == ["List", "Cards", "Timeline"])
     }
 }

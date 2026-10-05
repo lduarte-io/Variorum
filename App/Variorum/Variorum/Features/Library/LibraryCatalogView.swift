@@ -477,9 +477,10 @@ struct LibraryCatalogView: View {
                 .help(model.editedOn == nil
                       ? LibraryCopy.scopeDoor : LibraryCopy.scopeDoorUnderADay)
                 Picker("", selection: Binding(get: { model.mode }, set: { model.mode = $0 })) {
-                    Text(tokens.chromeLabel("List")).tag(LibraryCatalogModel.Mode.list)
-                    Text(tokens.chromeLabel("Notes")).tag(LibraryCatalogModel.Mode.notes)
-                    Text(tokens.chromeLabel("Timeline")).tag(LibraryCatalogModel.Mode.timeline)
+                    // 17y (d): each mode's word from its one home — "Cards".
+                    ForEach(LibraryCatalogModel.Mode.allCases, id: \.self) { mode in
+                        Text(tokens.chromeLabel(mode.label)).tag(mode)
+                    }
                 }
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 230)
