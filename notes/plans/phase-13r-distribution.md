@@ -1074,7 +1074,57 @@ opened; the working tree was left clean.
   0.9.2 through the feed and the friend's install self-updates (the lockstep synergy, live).
   N-10(b): the page moves to 0.9.1 NOW. **U3 CLOSES ON THIS VERDICT; the ladder is next.**
 - **U4 — DEFERRED post-launch (her word).**
-- Ladder / closeout — not started.
+- **LADDER ROUND 1 — DONE (2026-10-04, fable-reviewer, REVIEW_PROMPT verbatim, zero framing;
+  diff a627434a..0a3df855 excluding the 19 ledger's own-reviewed entries): 0 BLOCKER · 0
+  MAJOR · 3 MINOR · 2 NIT; nothing requiring an emergency 0.9.2.** Findings (recorded here
+  BEFORE any fix session sees them; the cross-model exchange follows):
+  - **F1 [MINOR] · Tools/Release/release.sh:119** — the release preflight HEADs the public
+    DMG URL and seeds a negatively-cached 404 over the release's own canonical URL (the
+    phase's live incident traced: `cf-cache-status: HIT`, age 171, max-age 14400 at 0.9.1's
+    publish; the publish then pauses on a zone-level purge that is HER HANDS). Proposed fix:
+    cache-bust the preflight request only (`?preflight=$(uuidgen)` — the cache key includes
+    the query string, the canonical URL untouched); keep verify-published on the canonical
+    URL post-upload. Ops-script class, no Swift pin — labelled honestly.
+  - **F2 [MINOR] · Tools/Release/make-appcast.sh:50** — `ED_PUBLIC_KEY` is a THIRD duplicated
+    key literal (plist · verify-export.sh · here); a future rotation updating this constant +
+    verify-export's without the Keychain/plist staying twins yields a PASS over an appcast
+    every shipped install refuses — an availability failure found only at users. Proposed
+    fix: read it from the one baked source (`PlistBuddy Print :SUPublicEDKey` on
+    VariorumInfo.plist), so the verification key is BY CONSTRUCTION the shipped key
+    (verify-export's copy is the opposite-direction tripwire and may stay). Script class.
+  - **F3 [MINOR] · Features/CalmAsks/CalmAsks.swift:222–232 + RootView's backup-ask
+    registration** — `register` replaces by id and discards the prior host's registration:
+    window A registers, window B's register drops A's, B closes and unregisters → ZERO
+    registrations for `backupFolder` while A stays open; A's `.task` never re-fires, so the
+    ask is dormant until a new window or the next launch. Self-healing and data-free
+    (MINOR). Red-on-old pin named: register A, register B, unregister(B) → `registeredIDs`
+    still contains `backupFolder` (fails today). Fix: per-(id, host) registrations with
+    rank-order dedupe at evaluate, or unregister falls back to the surviving same-id
+    registration.
+  - **F4 [NIT] · SyncStatusViews' `.checkForUpdates` act / UpdateChannel.syncRowDoor** — the
+    sync row's door doesn't consult `canCheckNow`, so pressed while the deferred permission
+    window is up it starts a user-initiated check beside it (both resolve gracefully;
+    two-window cosmetic corner; unpinnable without a live Sparkle controller). Fix if
+    wanted: guard the closure on `canCheckNow`.
+  - **F5 [NIT] · Features/Diagnostics/SupportMail.swift:102** — `pendingFailure` is a single
+    slot; two Send Report… composes in flight and the first's late-failure fallback is
+    silently dropped (nothing ever sent; graceful; the U3-B record flags the shape). Fix if
+    wanted: key the pending road per NSSharingService instance.
+  - **Every recorded ladder flag ADJUDICATED by the reviewer** (the editor-seam line ACCEPTED
+    with TEXTKIT2 re-read + the 19a absolute pin; the three undeclared menu doors as P-1
+    readings on their precedents; the `secondary` door; the deferral selector and
+    `askPermission()` both VERIFIED against Sparkle 2.10.0 source incl. the re-arm
+    notification road; script sandboxing; hdiutil; the Finder gate; `@unchecked Sendable`;
+    the MX* deprecation posture; the two `.surface` acts). **CLEAN BILL** on custody, the
+    Debug fence, consent/calm, R-13r-13's exact classifier (zero `Sync/` verified), crash
+    reporting's OFF proof and no-send-road, What's New's one source, the pipeline's
+    immutability/hygiene, the suites' one named pre-existing red (19e), and commit hygiene.
+    The reviewer ran no Mac suites itself (her real-store app was LIVE — the zero-instance
+    discipline held); the fix pass owes the suite run at a quiet window.
+  - **The exchange:** F1–F4 to the U3-A implementer and F5 to the U3-B implementer VERBATIM
+    for agree/dispute; the reviewer makes the final call and implements its confirmed fixes
+    itself (F3 pin-first; F1/F2 as script changes labelled no-pin); then suite green and one
+    implementer sanity pass; round 2 re-reviews the fixes under a FRESH reviewer.
 
 ---
 
