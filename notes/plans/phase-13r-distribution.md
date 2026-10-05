@@ -1125,6 +1125,27 @@ opened; the working tree was left clean.
     for agree/dispute; the reviewer makes the final call and implements its confirmed fixes
     itself (F3 pin-first; F1/F2 as script changes labelled no-pin); then suite green and one
     implementer sanity pass; round 2 re-reviews the fixes under a FRESH reviewer.
+  - **F5 — the U3-B implementer AGREES (NIT), with the mechanism SHARPENED on its own
+    re-read** (lines 102/121/136/142–143): the single slot is not only a drop — with drafts
+    A then B in flight, A's late failure runs B's fallback (the WRONG draft's file shown and
+    named), and A's SUCCESS nils the slot so B's later failure has no road at all. Nothing
+    is ever sent in any case; the measured callback window is ~1.5 s. It endorses the
+    reviewer's per-service-instance keying (`[ObjectIdentifier(sharingService): road]`).
+  - **F1–F4 — the U3-A implementer AGREES ON ALL FOUR, disputes none** (each cited line
+    re-read at `87ccf7ad`; nothing fixed, per the exchange). Riders recorded: **F1** — when
+    the cache-busted preflight lands, MEASURE ONCE that a busted HEAD on an
+    already-published name (e.g. `Variorum-0.9.0.dmg?preflight=<uuid>`) still answers 200,
+    or the immutability refusal loses its force; **F3** — its own prior pin missed exactly
+    this (it unregistered a never-registered host), and it prefers the per-(id, host) fix
+    with `evaluate` picking the most recent surviving entry per id in rank order (the
+    `present` lookup following the same choice); **F4** — guarding inside
+    `UpdateChannel.checkForUpdates()` itself would cover any future door (either shape fine).
+  - **ZERO DISPUTES. The fix pass is the REVIEWER'S** (authorized by follow-up message):
+    final calls on all five, F3 pin-first red-on-old, F1/F2 as script changes labelled
+    no-pin (F1's 200-on-published-name measurement included), F4/F5 at its call; the fix
+    suites at a ZERO-INSTANCE window only (her real-store app may be live — pause and
+    report rather than run beside it or touch it); then the implementer sanity pass and
+    round 2 under a FRESH reviewer.
 
 ---
 
