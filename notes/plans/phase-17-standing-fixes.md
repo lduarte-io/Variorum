@@ -2450,9 +2450,14 @@ measurement read SwiftUI's own field editor). The orchestrator decides whether t
 
 ### 17y B2 FIX ROUND (round 1 → 2) — `opus-implementer`, a FRESH session, 2026-10-05; the binding findings are `notes/plans/17y-b2-ladder-round1.md`
 
-**NOT DONE (first line, per the contract):** PENDING — written at the round's close. MAJOR-2 (the guide's
-Canvas teaching) is B-DEDUPE's and MINOR-2 is the orchestrator's (both landed or owned elsewhere) — not
-touched here. Fences as B2's: zero `Sync/`, schema, custody, mobile code, seed content; no
+**NOT DONE (first line, per the contract):** (1) **No walk this round** — the round's brief set the evidence (MAJOR-1: pin
+red-on-old + revert; the rest: suites green), so MAJOR-1's face (the panel's "reopen it first" / "unseal it first" toast on
+a frozen, date-ordered book), NIT-3's steady chapter names and NIT-6's new tooltip are pinned and suite-green but UNWALKED
+on the dev-store Debug build — the orchestrator's call (round 2's walk or her Monday spot-check). (2) **F-FR-1 is recorded,
+not fixed** — a capture-box focus request raised before the box is in a window is dropped (below); the NIT-1 pin drives
+the windowed re-raise road instead of the `.task`-at-birth road the ladder named. (3) MAJOR-2 (the guide's Canvas teaching)
+is B-DEDUPE's and MINOR-2 the orchestrator's — not touched here. (4) The tutorial spine was not run (no seed or spine
+surface in this diff, per the brief). Fences as B2's: zero `Sync/`, schema, custody, mobile code, seed content; no
 /Applications refresh; no Release launch.
 
 Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; the ladder record
@@ -2473,7 +2478,7 @@ Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon;
 | 6 | NIT-4 — `dropOutcome` returns `.nothing` for an already-satisfied stamp-order drop (onto the note's immediate shown successor) | DONE (ce4a9626 red · 6ee95cba fix): inside the sort gate, a manual-plan `before` equal to the note's immediate successor in its SHOWN group (`BookPanelBrain.successor(of:in:)`) → `.nothing` (nothing written, nothing said, `drop` returns false — manual order's same gesture is silent too); a frozen book still answers first (MAJOR-1). Pin `aStampOrderedDropOntoItsOwnSuccessorAsksForNothing`: RED on the pre-NIT-4 tree (2 issues, `nit4-red.log`) → GREEN with the Book Panel family + the drag-type pins **"25 tests in 5 suites passed"** (`nit4-green.log` — this run also compiles NIT-3) → **REVERT (the one line removed from 6ee95cba) RED "7 tests … with 2 issues"** (`nit4-rv.log`), restored, `git diff --quiet`. **One B2 pin moved, said plainly:** `aStampOrderedReplaceRefusesWithTheRoad` dropped n2 onto n1 — in this world's stamp order n1 is n2's immediate shown successor, so B2's own refusal pin exercised EXACTLY the already-satisfied case this NIT rules a nothing (it went red on the fix, 1 issue). It now drops the note shown LAST onto the one shown FIRST (a real re-place) and still guards the refusal with its road |
 | 7 | NIT-5 — the completeness pin: every `PostMode` case (an exhaustive-switch helper) in `order(keepingCanvas: true)` | DONE (c33a3d0d · this commit the record): `CanvasDebugOnlyTests.everyCaseSitsInTheDebugRow` walks every case WITHOUT `allCases`, through `ring(after:)` — an exhaustive switch whose arms each name the next case (a new case fails to compile until its arm joins the ring) — and requires each reached case in Debug's full row, each once; `declaredOrder`'s doc points at it. **Bite check** (not a bug-class pin — hardening): `.lenses` dropped from `declaredOrder` → the pin RED at 76/79 (`nit5-bite.log`), restored, `git diff --quiet`. Green with the mode/canvas family at the END (row 9). *The ring's one honest gap, said:* an arm written for a new case that nothing else NAMES (`case .x: .write` with no arm returning `.x`) would escape — the doc forbids it; Swift offers no case enumeration once `allCases` is overridden |
 | 8 | NIT-6 — `gripHelp` softened to §20's truth; the edge appended to QUESTIONS #184 as (h) in her words | DONE (this commit): `BookcaseCopy.gripHelp` now reads *"Drag to place this book by hand, on any shelf. Dropped on a book, it lands right above it — except across the starred line: starred books always stay first."* (PROVISIONAL, 13s re-voices) — traced first: the board draws starred-then-unstarred, each in hand order (`BookcaseBoard` — `sorted(starred) + sorted(unstarred)`), and `placeReading(.before(target))` writes a star-agnostic position, so a cross-half drop settles in its OWN half where that position falls (often the top of the unstarred run). The placement behaviour is untouched. `BookcasePlacingGripTests.theGripSaysWhatADropDoes` now requires the landing rule AND the starred-line clause. **QUESTIONS #184(h)** appended in her words with the ladder's alternatives (refuse a cross-line drop with a short reason; or keep as built and let her walk decide). Evidence: the Bookcase family at the END (row 9) |
-| 9 | END suites — the Book Panel family, the Bookcase family, the capture family, the mode/canvas family incl. the registry walk (+ the masthead family, whose test file this round edited) | IN-PROGRESS — ONE run of 42 suites (`end-fix.log`) at HEAD e00120a8's code; result PENDING |
+| 9 | END suites — the Book Panel family, the Bookcase family, the capture family, the mode/canvas family incl. the registry walk (+ the masthead family, whose test file this round edited) | DONE — **"✔ Test run with 236 tests in 42 suites passed"** (`end-fix.log`, HEAD e00120a8's code, `DerivedData/17y`, zero Variorum instances by path; no skip lines). The 42: Book Panel (DragGate, Brain, Declaration, Acting) + `DragTypeDeclarationTests` · Bookcase (PlacingGrip, RowFreeze, ViewModel, BoardBrain, MoveToShelfGate, ShelfModel, BindDoor, MembershipChoice) · capture (FocusReport, Keys, TextViewKey, HandOff, QuickEntryBar, the four QuickNote suites) · mode/canvas (CanvasDebugOnly, NewModes, OpenStripMenu, SidebarLayout, ShellChrome, PostDetail mode memory + routing, CanvasAndPool, CanvasArrival, the three CanvasBank suites, CanvasDragTracking, StarredScroll ×2, **`CapabilityRegistryTests` — the registry walk**) · masthead (MastheadLayout, OneTimeCodeAutoFill, DebugOracleOwnership, MastheadTagDoor). The run's SwiftUI "Modifying state during view update" lines (103) are PRE-EXISTING — B2's own END log carries 108 from the same Canvas-arrival/bank/drag, masthead and routing suites; none from the capture or Book Panel families (F-FR-2) |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
@@ -2494,4 +2499,31 @@ Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon;
   folded into this hardening round. **Owner: the orchestrator's call** (a 17y/19 standing-fixes item, or B3's
   touch if it reaches the Bookcase). The NIT-1 pin drives the same `updateNSView → takeFocus` road with the box
   windowed (the re-raise road), which is where the state-during-update class was measured.
+- **F-FR-2 — pre-existing SwiftUI "Modifying state during view update" warnings in OTHER suites (record only).** The END
+  run logs 103 such lines, B2's own END run 108 — attributed (roughly, by the suite each falls under) to "Canvas arrives
+  fitted…" (~85), the masthead title suite (~12), the Canvas bank/drag and PostDetail routing suites (~2 each). None is in
+  this round's diff or in the capture family (whose pin's road now logs zero). Not owned here; the orchestrator's call
+  whether the class gets a sweep.
+
+#### DISPOSITIONS (round 1 → 2, one line each)
+
+- **MAJOR-1 — FIXED with its pin** (d083a464 red · 03a0513e fix · revert RED 4 issues): the lock answers before the sort gate.
+- **MINOR-1 — FIXED (hardening + honest record)** (3181a953 · e48df72a): the coupling said at both sites and REQUIRED by the
+  pin; the reviewer's hollow configuration now RED; the B2 RECORD's row 3c citation corrected (2 issues at 119/128).
+- **NIT-1 — FIXED (hardening)** (4ac49745 · 367f1552): async delivery (the SwiftUI warning measured on sync, absent on
+  async); the header's counts re-measured; the `.task` road NOT pinnable without a product change → F-FR-1.
+- **NIT-2 — FIXED** (ed3b08e9): four comments corrected.
+- **NIT-3 — FIXED** (90fe3ecb): opacity in a fixed slot.
+- **NIT-4 — FIXED with its pin** (ce4a9626 red · 6ee95cba fix · revert RED 2 issues); B2's own refusal pin moved onto a
+  real re-place (its gesture was the satisfied case).
+- **NIT-5 — FIXED** (the ring pin; its bite checked).
+- **NIT-6 — FIXED** (e00120a8): the help softened; #184(h) in her words.
+
+#### SEAM NOTE (for the round-2 cast)
+
+No `Sources/VariorumCore/Sync/`, schema, custody, mobile code, `Shared/`, or seed content (`git diff 205009ad -- Sources
+Server App/Variorum/VariorumMobile App/Variorum/Shared` EMPTY). No editor seam in the strict sense. One text surface IS in
+the diff: `CaptureTextView` (NIT-1) — a TK2 `NSTextView` OUTSIDE the editor seam by its own header; the change is only
+WHEN the caret report reaches the host (a main-queue hop), no TK1 API, no identity attributes. The rest is the Book
+Panel's drop brain (MAJOR-1, NIT-4), chrome (NIT-3), copy (NIT-6) and comments/pins.
 
