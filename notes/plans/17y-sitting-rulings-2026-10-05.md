@@ -79,3 +79,13 @@ close (dispositions · the /Applications refresh at a zero-instance window · 0.
 approval).** Monday's hands-on for her: the scroll walk + drag spot-check, the 0.9.2 notes
 approval, the entry-close word, and her new-Mac install (its sequencing vs 0.9.2 is hers — a
 post-release install, or a carried DMG, makes the new Mac duplicate-free and guide-complete).
+
+## Process instruction (hers, same sitting ~03:05 — binds this pass and successors)
+
+**"make sure you use a fable subagent where needed for your reviews — as the orchestrator not
+much should be reviewed by hand."** Every cold review in this pass is a FRESH reviewer
+subagent (`fable-reviewer`, or `opus-reviewer` where the standing cast allows); the
+orchestrator never hand-reviews a diff — above all its own B-DEDUPE `Sync/` work, which gets a
+fresh `fable-reviewer` with zero framing. The orchestrator's seat at review time is
+adjudication and dispositions only. (The kickoff's "fable-reviewer, or you per the standing
+rule" parenthetical is superseded by this instruction.)
