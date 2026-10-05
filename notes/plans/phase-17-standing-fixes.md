@@ -1720,19 +1720,22 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   reviewer's own honest no-pin label. No fix round owed; the ladder closes at round 1.
   Residuals: the two-guides-after-sign-in class re-owned to B-DEDUPE (R-17y-5); her Monday
   install is the live bed (the public 0.9.1 build predates the fix — 0.9.2 carries it).
-- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): IMPLEMENTER CLOSED ~04:50; LADDER
-  RUNNING.** All six fixed with red-on-old pins and walked (the B2 RECORD below; the shared
-  mechanism: the three in-app drag types were never declared in the Info.plist — 13i-d's
-  "harness artifact" verdicts were this defect). Union 335/62 + spine 98/13 green; phone +
-  Release compile green; fences verified EMPTY (`8ff566e1..d3560ab9 -- Sources Server
-  VariorumMobile*`). ROUND 1 (opus cold review): **0 BLOCKER · 2 MAJOR · 2 MINOR · 6 NIT** —
-  findings + dispositions at `notes/plans/17y-b2-ladder-round1.md` (7b3ab4e2). MAJOR-1 (the
-  frozen-book stamp-order refusal with no real road) + MINOR-1 + the six NITs run as a FIX
-  ROUND in a FRESH implementer session (the B2 session passed the ~500k line); MAJOR-2 (the
-  released guide teaches Canvas) RE-OWNS IN-PASS to B-DEDUPE; MINOR-2: the §12 canon line joins
-  the close list below and F-B2-7 re-owns to B3 (its brief amended). Round 2 re-reviews the
-  fixes. Her Monday spot-check list gains the Open strip's row reorder (F-B2-2, same
-  undeclared-type class, declared in the same commit).
+- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): CLOSED 2026-10-05 ~06:10.** All
+  six fixed with red-on-old pins and walked (the B2 RECORD below; the shared mechanism: the
+  three in-app drag types were never declared in the Info.plist — 13i-d's "harness artifact"
+  verdicts were this defect). Union 335/62 + spine 98/13 green; phone + Release compile green;
+  fences EMPTY across the batch AND the fix round. THE LADDER: round 1 (opus, cold) **0/2/2/6**
+  (`17y-b2-ladder-round1.md`, 7b3ab4e2) → the FRESH fix-round session fixed MAJOR-1 + MINOR-1 +
+  all six NITs with revert-proven pins (18 commits, 873fed6b; END 236/42) → round 2 (fresh
+  opus) **0/0/0/3, every round-1 fix CONFIRMED by independent probes, no round 3**
+  (`17y-b2-ladder-round2.md`, 4313a5bc; the three new comment/record NITs fixed at the
+  adjudication seam, F-FR-1/2 dispositioned record-only). THE ORCHESTRATOR'S SPOT-WALK
+  (1b3ae986): MAJOR-1's "reopen it first" live on the finished Journal, the grips + a row drop
+  landing on the final tree, NIT-3's kept slot, (n) in passing. RE-OWNS OUT: MAJOR-2 → B-DEDUPE
+  (the guide's Canvas teaching); F-B2-7 → B3 item 11 (the book view's own silent gate). HER
+  MONDAY SPOT-CHECK list: the Bookcase drags, the Book Panel drags, AND the Open strip's row
+  reorder (F-B2-2 — the same undeclared-type class, declared in the same commit, never
+  human-walked).
 - **B-DEDUPE — the whole-set seed-duplicate fold (R-17y-5, trimmed at R-17y-8): NOT-STARTED**
   (between B3 and B1). Scope as amended: the FIELD GUIDE's dedupe-facts entry; the Sync/ keeper
   for the seeded gatherings + quicknote (the Welcome keeper's adopt-by-identity pattern; rules
@@ -1746,10 +1749,13 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   pre-compaction reading is lost) and the design memo `notes/plans/17y-bdedupe-design-memo.md`
   written BEFORE building; a FRESH fable-reviewer cold round after. Zero schema — the marker
   stays 12; SyncSpec §7 gains the keeper's paragraph as the canon delta at close.
-- **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)): NOT-STARTED.** Runs
-  Monday; closes at HER ONE SITTING (the bundled picks: (h)'s placement mock pair; (g)'s
-  picker-adoption scope; any B2/B-SEED PROVISIONALs). Both mocks for (h) land as HTML files
-  (never Artifacts) with absolute paths in the sitting note.
+- **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)(r)(s) + the F-B2-7
+  rider): RUNNING** (spawned 2026-10-05 ~06:15, fresh `opus-implementer`; the standalone brief
+  `notes/plans/17y-b3-brief.md` + the rulings file bind — Gate 1 PRE-ANSWERED (R-17y-1…4), the
+  mock steps collapsed, items (r) the census overlay and (s) the starred shelf ruled in
+  (R-17y-9), item 11 = F-B2-7's book-view gate with B2's two orderings. No sitting gates it:
+  closes on the orchestrator's verification + its ladder; PROVISIONALs bundle to QUESTIONS.
+  The implementer appends "17y B3 RECORD" at this file's tail.
 - **B1 — the two performance items ((j)(k)): NOT-STARTED.** Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
   pagination on `(stamp, id)`, never a raised cap + the All-screen books region cap; the close
