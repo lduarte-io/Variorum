@@ -45,3 +45,37 @@ closes only on B1's use-shaped evidence and her word.
   deliverable, not a sitting question).
 - Monday's sitting shrinks to: B1's live scroll walk + her drag spot-check + the entry-close
   word. PROVISIONALs accumulate in QUESTIONS as usual, none gating.
+
+## THE SECOND ROUND (same sitting, ~02:50 — after B-SEED's close; the question tool)
+
+5. **R-17y-5 — THE SEED-DUPLICATE FOLD, WHOLE SET, INSIDE 17y.** Her direction verbatim: "the
+   duplicates after sign-in should be resolved somehow"; her picks at the question tool: **the
+   whole seed set** · **inside 17y, 0.9.2 carries it**. The scope: (1) the FIELD GUIDE joins the
+   book dedupe by a facts entry (Mac-side wiring; the engine's facts list); (2) JEKYLL flips into
+   `Book.dedupeCovered` — **#155's provisional (a) ("seeded everywhere, judged nowhere") is
+   OVERTURNED at her word**; (3) a NEW `Sync/` keeper folds the seeded GATHERINGS (classics ·
+   starred notes · Quicknotes) and the seeded QUICKNOTE on the Welcome keeper's adopt-by-identity
+   pattern — fold only when BOTH copies read as the seed's own; HER ENGAGEMENT (rename, edit,
+   re-rule, re-tag) always keeps both; smaller id keeps; deterministic on every device. After the
+   slice, a fresh-install-then-sign-in road leaves ZERO duplicate seeds. **The slice runs as
+   B-DEDUPE, between B3 and B1** (B1 stays last — its close is use-shaped). The `Sync/` halves
+   are the ORCHESTRATOR'S OWN implementation seat (the standing Fable rider), behind a full
+   SyncSpec + sync-postmortem read, with convergence suites (no sync change is reviewed without
+   one) and a FRESH fable-reviewer cold round. SyncSpec §7 gains the keeper's paragraph as the
+   canon delta at close (client-side repair — zero schema, zero server, NO §12 event; the marker
+   stays 12). The B-SEED KnownIssues row (the duplicate class, owner 13s) RE-OWNS to this slice
+   and closes with it; #183(c)'s alternative (i) is the road taken, (ii) 13s's reshape still
+   lands later and simply shrinks the seed set further.
+6. **R-17y-6 — 0.9.2 SHIPS AT THE PASS'S CLOSE, carrying the whole pass.** Her words: "when this
+   phase is done, the release build should be updated on the website. might as well do so." The
+   road is R-13r-15's (the site-publish exemption; the runbook in ~/dev/stargazing.tech). HER
+   STANDING RELEASE RULE binds: the 0.9.2 notes are DRAFTED → PRESENTED → APPROVED by her before
+   any release run; no repo commits mid-release-run. If Monday tightens, B-DEDUPE + the release
+   land Tuesday morning — the Monday goal bends before the quality bar (her ratified pairing at
+   the question tool).
+
+**The execution order as amended: B0 ✓ → B-SEED ✓ (ladder running) → B2 → B3 → B-DEDUPE → B1 →
+close (dispositions · the /Applications refresh at a zero-instance window · 0.9.2 at her
+approval).** Monday's hands-on for her: the scroll walk + drag spot-check, the 0.9.2 notes
+approval, the entry-close word, and her new-Mac install (its sequencing vs 0.9.2 is hers — a
+post-release install, or a carried DMG, makes the new Mac duplicate-free and guide-complete).
