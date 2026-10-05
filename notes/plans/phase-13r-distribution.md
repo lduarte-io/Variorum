@@ -1146,6 +1146,40 @@ opened; the working tree was left clean.
     suites at a ZERO-INSTANCE window only (her real-store app may be live — pause and
     report rather than run beside it or touch it); then the implementer sanity pass and
     round 2 under a FRESH reviewer.
+- **THE ROUND-1 FIX PASS (the SAME reviewer session, authorized 2026-10-04; LIVE STATUS from
+  the first commit — DONE(hash) / IN-PROGRESS / PENDING):** final calls on all five findings
+  are CONFIRMED AS FOUND (zero disputes; the exchange's sharpenings adopted — F5's
+  per-service keying, F3's per-(id, host) shape with the most-recent-surviving-per-id
+  evaluate AND present lookup, F4 as the channel-level guard covering future doors, F1's
+  busted-HEAD-on-published-name measurement). Per-piece states:
+  - **F3 (the one pinned bug-class fix) — PENDING.** Pin first
+    (`aClosingWindowLeavesTheOtherWindowsRegistrationStanding`), verified RED on the old
+    code before the fix and by revert after; then per-(id, host) registrations, rank-order
+    dedupe to the most recent surviving entry per id, the `present` lookup on the same rule.
+  - **F4 — PENDING.** The guard inside `UpdateChannel.checkForUpdates()` on
+    `!isAskingPermission` ONLY (deliberately NOT on `canCheckForUpdates`: Sparkle's own
+    mid-session `checkForUpdates` shows the running session in focus — behaviour worth
+    keeping; the double-window corner is exactly the deferred ask's window, which Sparkle
+    cannot see). NIT hardening, NO PIN — the state is unreachable without a live Sparkle
+    controller (labelled honestly).
+  - **F5 — PENDING.** The pending failure road keyed per service instance
+    (`[ObjectIdentifier: road]`), the delegate callbacks consuming only THEIR service's
+    road; a bookkeeping pin over two never-performed `NSSharingService` instances (wrong-
+    draft fallback impossible; success clears only its own) + a single-slot MUTANT check in
+    place of red-on-old (the old shape is unpinnable without `perform` launching Mail —
+    labelled honestly).
+  - **F1 — PENDING.** `release.sh`'s preflight HEAD cache-busted with a unique query
+    (`?preflight=$(uuidgen)` — the edge cache keys on the full URL, so the canonical URL's
+    cache is never seeded); the rider measurement (a busted HEAD on the PUBLISHED
+    `Variorum-0.9.0.dmg` answers 200, so the immutability refusal keeps its force) recorded
+    below at the flip. Script change, NO PIN (ops class).
+  - **F2 — PENDING.** `make-appcast.sh` reads `ED_PUBLIC_KEY` out of
+    `App/Variorum/VariorumInfo.plist` (`PlistBuddy Print :SUPublicEDKey`, refusing on an
+    empty read) so the appcast is verified BY CONSTRUCTION under the shipped key;
+    `verify-export.sh`'s constant STAYS as the opposite-direction tripwire. Script change,
+    NO PIN.
+  - **THE SUITE RUN — PENDING** (zero-instance window only; her app was LIVE at the review;
+    pgrep evidence lands here either way).
 
 ---
 
