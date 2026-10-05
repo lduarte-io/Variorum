@@ -44,9 +44,11 @@ enum StringsWorkbookMintCLI {
         do {
             try run()
         } catch let error as Usage {
+            fflush(stdout)
             FileHandle.standardError.write(Data("\(error.description)\n".utf8))
             exit(2)
         } catch {
+            fflush(stdout)
             FileHandle.standardError.write(Data("strings-workbook-mint: REFUSED — \(error)\n".utf8))
             exit(1)
         }
@@ -129,7 +131,7 @@ enum StringsWorkbookMintCLI {
 
         // 5. The probe: schema identical to this build's, workbook absent.
         let probe = try StoreUnlock.probe(storeAt: storeURL, key: key)
-        say("  schema matches this build (\(probe.migrations.count) migrations, last \(probe.migrations.last ?? "—")) · \(probe.books) books · \(probe.notes) notes")
+        say("  schema identical to this build's (\(probe.migrations.count) migrations) · books: \(probe.books) · notes: \(probe.notes)")
         if let existing = probe.existingWorkbook {
             throw WorkbookMint.MintError.alreadyMinted(existingName: existing)
         }
