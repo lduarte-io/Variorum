@@ -1781,7 +1781,18 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   (findings to the implementer verbatim; the reviewer finalizes and implements its confirmed
   fixes). QUESTIONS #185 (a)–(j) carries the PROVISIONALs. Residue, deliberate: three Trash
   items from its walk (listed in the B3 RECORD), recoverable 30 days.
-- **B1 — the two performance items ((j)(k)): NOT-STARTED.** Runs LAST (Monday night → Tuesday);
+- **B1 — the two performance items ((j)(k)): BUILT 2026-10-05 ~19:20; hand-back VERIFIED by the
+  orchestrator** (tree clean + pushed at 6c8e4f02; fences EMPTY over the whole range
+  c9c4d75d..6c8e4f02 — zero `Sync/`, schema, custody, mobile or seed; the read-tier touch is
+  `NoteIndexColumn.swift` alone). The B1 RECORD below carries the (j) trace + fix (184–217 ms
+  frames → 11 ms, travel restored), the (k) design + numbers (keyset pages every sort, both
+  views whole-corpus, the books region), the walk, findings F-B1-1…10, and the staging recipe
+  for HER walk; QUESTIONS #187 (a)–(h) PROVISIONAL + her real question (i) (the List's
+  per-new-row cost); KnownIssues row 22's Library leg BUILT (closes at her walk) + four rows
+  owned by 12. END: core 2204/247 · Mac 388/64 · phone build green. **THE LADDER: FABLE round 1
+  SPAWNED on c9c4d75d..6c8e4f02 (record-only commit in range: 4144e7ad).** HER GATES remain:
+  the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
+  (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
   pagination on `(stamp, id)`, never a raised cap + the All-screen books region cap; the close
   is USE-SHAPED — her live scroll walk on a large fixture + her feel. FABLE review mandatory
