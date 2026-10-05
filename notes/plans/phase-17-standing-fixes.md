@@ -2516,7 +2516,7 @@ Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon;
 | 8 | NIT-6 — `gripHelp` softened to §20's truth; the edge appended to QUESTIONS #184 as (h) in her words | DONE (this commit): `BookcaseCopy.gripHelp` now reads *"Drag to place this book by hand, on any shelf. Dropped on a book, it lands right above it — except across the starred line: starred books always stay first."* (PROVISIONAL, 13s re-voices) — traced first: the board draws starred-then-unstarred, each in hand order (`BookcaseBoard` — `sorted(starred) + sorted(unstarred)`), and `placeReading(.before(target))` writes a star-agnostic position, so a cross-half drop settles in its OWN half where that position falls (often the top of the unstarred run). The placement behaviour is untouched. `BookcasePlacingGripTests.theGripSaysWhatADropDoes` now requires the landing rule AND the starred-line clause. **QUESTIONS #184(h)** appended in her words with the ladder's alternatives (refuse a cross-line drop with a short reason; or keep as built and let her walk decide). Evidence: the Bookcase family at the END (row 9) |
 | 9 | END suites — the Book Panel family, the Bookcase family, the capture family, the mode/canvas family incl. the registry walk (+ the masthead family, whose test file this round edited) | DONE — **"✔ Test run with 236 tests in 42 suites passed"** (`end-fix.log`, HEAD e00120a8's code, `DerivedData/17y`, zero Variorum instances by path; no skip lines). The 42: Book Panel (DragGate, Brain, Declaration, Acting) + `DragTypeDeclarationTests` · Bookcase (PlacingGrip, RowFreeze, ViewModel, BoardBrain, MoveToShelfGate, ShelfModel, BindDoor, MembershipChoice) · capture (FocusReport, Keys, TextViewKey, HandOff, QuickEntryBar, the four QuickNote suites) · mode/canvas (CanvasDebugOnly, NewModes, OpenStripMenu, SidebarLayout, ShellChrome, PostDetail mode memory + routing, CanvasAndPool, CanvasArrival, the three CanvasBank suites, CanvasDragTracking, StarredScroll ×2, **`CapabilityRegistryTests` — the registry walk**) · masthead (MastheadLayout, OneTimeCodeAutoFill, DebugOracleOwnership, MastheadTagDoor). The run's SwiftUI "Modifying state during view update" lines (103) are PRE-EXISTING — B2's own END log carries 108 from the same Canvas-arrival/bank/drag, masthead and routing suites; none from the capture or Book Panel families (F-FR-2) |
 
-**REVERT STATE: A SYNTHETIC REVERT ROUND IS STARTING on `NoteIndexColumn.swift` (committed at f8977039 — `git checkout -- App/Variorum/Variorum/Features/ReadMode/NoteIndexColumn.swift` is the SAFE restore; nothing uncommitted rides it). Measurement instrumentation removed from the tree first.**
+**REVERT STATE: NO REVERT IN FLIGHT** (the (j) synthetic revert round ran and was restored — `git diff --quiet` verified).
 
 #### FINDINGS (for the orchestrator)
 
@@ -2870,7 +2870,7 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 |---|---|---|
 | 0 | This record + the b1 captures dir gitignored | DONE (this commit) |
 | 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | DONE (this commit) — § THE TRACE below: M1 (the column: a whole-note lookup per realized row + three AppKit controls per row) is her lag; M2 (the pane's 4.7× lazy estimate) recorded; re-query storm and landing re-aims ruled OUT. The temporary instrumentation is REMOVED from the tree in this commit (kept as the gitignored `b1trace.patch` for the after-measurement) |
-| 2 | (j) pin red-on-old → fix → green | DONE (20433ebd red · 15b081d2 fix) — `NoteIndexColumnScrollCostTests` (4): RED on the pre-fix tree at both halves of M1 (`j-red.log`: "realizing 426 rows built 639 whole-note lookups" · "213 of 426 resting rows built live controls") → GREEN; the note-index family 79 tests / 9 suites green. **REFINED at f8977039** (the after-measurement found two more per-frame costs — see § THE FIX). **IN FLIGHT NOW: measurement-only instrumentation re-applied UNCOMMITTED (`b1trace-measure.patch` + one `column off` onScrollGeometryChange in NoteIndexColumn) for the paired before/after; a worktree of the pre-fix tree at `<scratchpad>/wt-before` (90eb3416 + the same probes) — a successor `git checkout --`s ReadEditPane/ReadModeView/BlockTOCView, deletes the one `B1Trace` modifier in NoteIndexColumn, and `git worktree remove --force`s the scratchpad worktree** |
+| 2 | (j) pin red-on-old → fix → green | DONE (20433ebd red · 15b081d2 fix · f8977039 refined) — § THE FIX below. Pins `NoteIndexColumnScrollCostTests` (5) RED on the pre-fix tree (`j-red.log`) → GREEN; SYNTHETIC REVERT ROUND (announced c1043df3): A — the wake rule forced live → the resting-rows pin RED "213 of 426" + the wake pin RED; B — a whole-note lookup back in the row builder → the lookup pin RED "realizing 426 rows built 416 whole-note lookups"; restored, `git diff --quiet`. Paired before/after measured (below). The pre-fix worktree `<scratchpad>/wt-before` (90eb3416 + probes) is KEPT for (k)'s before-measurement — removed at the close |
 | 3 | (k) the large-fixture road (dev store, staged + restored) | DONE (90eb3416) — `ScaleFixture.swift` (DEBUG + `VARIORUM_SCALE_FIXTURE`) + `Tools/ScaleFixture/stage.sh` / `restore.sh`. **THE DEV STORE IS STAGED NOW** — prestage copy `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261005T190622Z` (cmp-verified); a successor RESTORES it (`Tools/ScaleFixture/restore.sh <that dir>`, the DEV app quit first) before closing. ALSO STAGED: the dev app's local `readFace.<id>` defaults — six notes flipped `read`→`edit` for the trace; the originals are listed in this row's restore note: 4A5B8D9A…, 4EBE2134…, CDFD73E1…, D39B34A7…, D42DDB29…, D5AA052C… were `read` (67DB6BCA…, 6D00EAC7… were already `edit`) |
 | 4 | (k) core: the keyset page read per sort + pins | NOT-STARTED |
 | 5 | (k) the model: pages, refresh-in-place, bounded held observation + pins | NOT-STARTED |
@@ -2950,3 +2950,36 @@ builds ONE AppKit `Menu("⋯")` per realized row (no `↑ ↓`, no whole-book lo
 buttons; B − D ≈ the menu). Its pane is the F3-fixed shape (13u4 UNIT F3). Recorded as a finding;
 not this batch's surface.
 
+
+### THE FIX — (j) (15b081d2 + f8977039; `NoteIndexColumn.swift` only)
+
+1. **Each flattened column row CARRIES its TOC row** (`ColumnRow.toc`): the whole-note lookup is
+   built ONCE per body (in `columnRows`, beside the ONE outline walk the header and rows now share)
+   and never by a row builder — a realized row costs what it shows (P1).
+2. **Only an AWAKE row builds the live `↑ ↓ ⋯`** — the SELECTED row always; the HOVERED row only
+   while the column is still (`NoteIndexRowWake.isLive`, the column's observed scroll phase
+   `NoteIndexScrollPhase`, read by the rows, never by the column's body). Every other row draws the
+   resting hint as ONE cached image per ink (`RestingRowControls.hint` — drawn once with
+   `ImageRenderer`, keyed by the ink's sRGB components) at the live set's MEASURED footprint, 79 × 13
+   pt; the live set draws at its own size inside that footprint, so waking a row never moves it and
+   every title truncates exactly where it did (captures `j-before-*` / `j-after-*` — the titles
+   truncate at the same glyph; the resting bezels a shade lighter: PROVISIONAL P-17y-B1-j1).
+3. **Why the refinement (f8977039) — measured, not assumed:** the first fix (15b081d2) removed the
+   lookup and drew the hint as views, and the after-measurement still read ~45–50 ms a frame. Arms
+   on that tree isolated two more per-frame costs: the hint drawn as SwiftUI views (~20 ms — an image
+   is ~free) and rows WAKING as the scroll carried them under a resting pointer (~20 ms — the live
+   controls built and torn down per passing row). Both are gone in the shipped shape.
+
+**THE NUMBERS (paired, INTERLEAVED, the dev-store Debug build, the 2,000-block note, a cold trackpad
+fling of the column with the pointer resting over it; machine load 2.7–5.6 on 12 cores, her app
+not running).** BEFORE = the pre-fix tree (90eb3416) + the same measurement probes, built in a
+worktree; AFTER = f8977039 + the probes. Logs `BEFORE*.frames` / `AFTER*.frames`.
+
+| run | frames | mean frame gap | max gap | distance the same fling travelled |
+|---|---|---|---|---|
+| BEFORE 1 · 2 · 3 | 2 · 5 · 5 | 208 · 178 · 189 ms | 316 · 392 · 354 ms | 2,400 · 7,450 · 8,029 pt |
+| AFTER 1 · 2 · 3 | 79 · 68 · 82 | **11.3 · 13.7 · 11.1 ms** | 25 · 30 · 25 ms | 13,699 · 15,317 · 14,218 pt |
+
+The fling is now at display cadence (the same 11 ms as the column with NO controls at all — arm H)
+and travels its whole distance: the stall the "quick scroll" leaps rode is gone. The row under the
+pointer wakes the moment the scroll stops (`j-after-wake-after-scroll.png`).
