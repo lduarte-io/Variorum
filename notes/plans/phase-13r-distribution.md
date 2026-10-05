@@ -1158,34 +1158,75 @@ opened; the working tree was left clean.
   per-service keying, F3's per-(id, host) shape with the most-recent-surviving-per-id
   evaluate AND present lookup, F4 as the channel-level guard covering future doors, F1's
   busted-HEAD-on-published-name measurement). Per-piece states:
-  - **F3 (the one pinned bug-class fix) — PENDING.** Pin first
-    (`aClosingWindowLeavesTheOtherWindowsRegistrationStanding`), verified RED on the old
-    code before the fix and by revert after; then per-(id, host) registrations, rank-order
-    dedupe to the most recent surviving entry per id, the `present` lookup on the same rule.
-  - **F4 — PENDING.** The guard inside `UpdateChannel.checkForUpdates()` on
+  - **F3 (the one pinned bug-class fix) — DONE (`7f792dc3`).** Pin FIRST:
+    `CalmAsksTests.aClosingWindowLeavesTheOtherWindowsRegistrationStanding` ran RED on the
+    old code (3 issues: the registration dropped; the ask never presented) BEFORE the fix,
+    and RED AGAIN by stash-revert after it (the whole suite: exactly the one pin red, 15
+    green) — the first revert attempt's per-test `-only-testing` id matched 0 tests
+    (vacuous, discarded; the settling-probe lesson held) and was re-run as the full suite.
+    The fix: `register` keeps one registration per (id, host); `effective` (the newest
+    surviving registration per id, rank order) is the ONE list `evaluate`'s snapshot AND
+    its `present` lookup read — the exchange's preferred shape. Suite 16/16 green.
+  - **F4 — DONE (`dd44aff3`).** The guard inside `UpdateChannel.checkForUpdates()` on
     `!isAskingPermission` ONLY (deliberately NOT on `canCheckForUpdates`: Sparkle's own
     mid-session `checkForUpdates` shows the running session in focus — behaviour worth
     keeping; the double-window corner is exactly the deferred ask's window, which Sparkle
     cannot see). NIT hardening, NO PIN — the state is unreachable without a live Sparkle
-    controller (labelled honestly).
-  - **F5 — PENDING.** The pending failure road keyed per service instance
-    (`[ObjectIdentifier: road]`), the delegate callbacks consuming only THEIR service's
-    road; a bookkeeping pin over two never-performed `NSSharingService` instances (wrong-
-    draft fallback impossible; success clears only its own) + a single-slot MUTANT check in
-    place of red-on-old (the old shape is unpinnable without `perform` launching Mail —
-    labelled honestly).
-  - **F1 — PENDING.** `release.sh`'s preflight HEAD cache-busted with a unique query
-    (`?preflight=$(uuidgen)` — the edge cache keys on the full URL, so the canonical URL's
-    cache is never seeded); the rider measurement (a busted HEAD on the PUBLISHED
-    `Variorum-0.9.0.dmg` answers 200, so the immutability refusal keeps its force) recorded
-    below at the flip. Script change, NO PIN (ops class).
-  - **F2 — PENDING.** `make-appcast.sh` reads `ED_PUBLIC_KEY` out of
-    `App/Variorum/VariorumInfo.plist` (`PlistBuddy Print :SUPublicEDKey`, refusing on an
-    empty read) so the appcast is verified BY CONSTRUCTION under the shipped key;
-    `verify-export.sh`'s constant STAYS as the opposite-direction tripwire. Script change,
-    NO PIN.
-  - **THE SUITE RUN — PENDING** (zero-instance window only; her app was LIVE at the review;
-    pgrep evidence lands here either way).
+    controller (labelled honestly, in the commit too).
+  - **F5 — DONE (`15ce51b5`).** The pending failure road keyed per service instance
+    (`[ObjectIdentifier: (service, road)]`, the service retained for the key's life, the
+    entry leaving in either callback); `compose`'s bookkeeping half separable
+    (`expectFailureRoad`) so the delegate contract is pinnable without `perform`. Pin:
+    `SupportDraftTests.aLateFailureRunsOnlyItsOwnDraftsRoadAndASuccessClearsOnlyItsOwn`
+    (two never-performed services: A's late failure runs A's road never B's; B's success
+    clears only B's; a cancel spends the road). Red-on-old NOT demonstrable (the old
+    single-slot shape is reachable only through `perform`, which opens Mail) — **the
+    MUTANT check stood in: single-slot semantics restored under the new API → the pin RED
+    with 3 issues, exactly it; restored by `git checkout --`, tree clean.** Suite 13/13.
+  - **F1 — DONE (`d3cd0079`).** `release.sh`'s preflight HEAD cache-busted
+    (`?preflight=$(uuidgen)` — the edge cache keys on the full URL, so the 404 an
+    unpublished name earns caches under a throwaway URL, never the canonical one).
+    **THE RIDER'S MEASUREMENT (2026-10-04, both arms):** a busted HEAD on the PUBLISHED
+    `Variorum-0.9.0.dmg` answered **HTTP 200 · cf-cache-status: MISS · content-length
+    21,202,362** (the recorded byte size) — the immutability refusal keeps its force; a
+    busted HEAD on an unpublished name (`Variorum-0.9.9.dmg`) answered **404**. `bash -n`
+    clean. Script change, NO PIN (ops class); its next real run is the next release's.
+  - **F2 — DONE (`0d2f3f05`).** `make-appcast.sh` reads `ED_PUBLIC_KEY` out of
+    `App/Variorum/VariorumInfo.plist` (`PlistBuddy Print :SUPublicEDKey`, with a
+    44-char-base64 shape refusal naming the real cause) — the appcast verified BY
+    CONSTRUCTION under the shipped key; `verify-export.sh`'s literal STAYS as the
+    opposite-direction tripwire. Verified: the plist read returns byte-identically the
+    retired literal. `bash -n` clean. Script change, NO PIN.
+  - **A PRE-EXISTING RED SURFACED BY THIS PASS'S OWN SUITE RUN, repaired (`7579b4fd`) —
+    flagged for round 2:** `VersionSchemeTests.theStampPhaseIsTheMacTargetsLastPhase…`
+    pinned the literal `MARKETING_VERSION = 0.9.0;` and went red at `c4974c4a`'s ruled
+    0.9.1 bump (R-13r-6's ADJUDICATED reading: the repo version increments with each beta
+    release; the finals had last run at `73ee3984`, BEFORE the bump, so nobody had seen
+    it). The pin now holds the ruling's SHAPE — exactly two 0.9.x lines (the Mac target's
+    two configurations), both carrying the version the running test host was built as —
+    so every future release bump stays green while the letter (two configs, same value,
+    no other target) still binds. Test-side repair of a stale literal, NOT a production
+    fix; 3/3 green.
+  - **THE SUITE RUN — DONE at a REAL zero-instance window** (her word relayed by the
+    orchestrator mid-pass — "my app is quit and ready for refresh… run tests at your
+    leisure" — and verified by this session's own `pgrep -fl 'Variorum.app/Contents/MacOS'`
+    → no match; earlier in the pass her app WAS live, PID 52395, and only the touched pin
+    suites ran then, per the fallback authorization):
+    - the 31-suite finals family (U3-B's close set): **`Test run with 274 tests in 31
+      suites` — 1 issue, EXACTLY the named pre-existing 19e runbook red**, the 7
+      `DebugOracleSingletonWindowTests` opt-in skips as always (+2 tests over the 272
+      baseline = this pass's two new pins);
+    - the 34-suite tutorial/command-routing/shell-landing/windows/note-box family:
+      **166/34 PASSED** (the U3-A baseline exact; a first attempt whose extracted suite
+      list matched 0 tests was DISCARDED as vacuous and re-run for real);
+    - `OneTimeCodeAutoFillTests` (the one U2-close suite in neither family): 2/2;
+    - the CORE package: **`swift test` → 2174 tests in 244 suites PASSED** (the 19a
+      baseline exact).
+    Zero `Sync/`, zero schema, zero `Shared/`, zero mobile-target lines in this pass
+    (CalmAsks/UpdateChannel/SupportMail are Mac-only; scripts + tests otherwise), so no
+    mobile rebuild is owed. Nothing published; the touched pipeline scripts' next real run
+    is the next release's. **The fix pass is COMPLETE; the implementer sanity pass and
+    round 2 (a FRESH reviewer) are next.**
 
 ---
 
