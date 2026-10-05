@@ -24,20 +24,17 @@ disputes, all fixed; round 2 (fresh reviewer) — 0/0/0/3 record-only, every fix
    runs and offers nothing (R-13r-7 by construction). Sparkle's consent ask will come calmly on
    your 3rd day of use (the cadence — no popup at open); answer it or flip Settings ▸ General's
    "Check for updates automatically" whenever.
-5. **The ratify bundle, at your cadence:** QUESTIONS **#180** (the calm-asks numbers + six quiet
-   readings) · **#181** (support/diagnostics readings (a)–(i), incl. the no-Mail-account road —
-   no Variorum mail draft has yet been SEEN on screen anywhere; your friend's machine may show
-   it first).
-6. **ONE PROPOSED canon line — yours to accept or decline, never landed autonomously:**
-   AppSpec §12 could carry the calm-asks principle as a contract line: *"no popup greets a
-   first open; the app's own asks (updates, the backup folder) wait for days of use and calm
-   moments, and are always answerable in Settings (R-13r-11/12, the cadence in the 13r plan)."*
-   Say the word and a session lands it; otherwise it stays a plan-file ruling.
+5. ✅ **DONE at the post-close sitting (2026-10-04, the question tool):** **#180 RATIFIED AS
+   BUILT** (numbers stay one tunable struct) · **#181 (a)–(h) RATIFIED; (i) RULED — the
+   pre-draft choice** ("Open in Mail" / "Show the file and copy the address", both doors) —
+   **built at 19f** (the active ledger; one session + its Opus cold review).
+6. ✅ **DONE at the same sitting: the §12 calm-asks contract line LANDED** exactly as proposed
+   (AppSpec §12 + §14's 13r head; the two oldest §14 entries rolled to the delta archive).
 7. **Optional author items carried forward:** the iOS name reservation (an App Store Connect
    app record reserves the name immediately; no submission needed) · macOS 27.0.1 (deferred at
    your word) · the `/variorum` page's placeholder copy (marked yours in the site source) ·
-   **<test-account>'s fate** — the account stays for future walks unless you want it gone (its container
-   still holds the localhost `SUFeedURL` override; `defaults delete` it or delete the account).
+   ✅ **<test-account> KEPT for future walks** (her call at the sitting; the container override only
+   matters inside <test-account>).
 8. **The next release, whenever you have fixes to ship:** one command + the site legs, under
    the standing R-13r-15 exemption — `Tools/Release/release.sh --version 0.9.2`, then the site
    runbook's locked order (the orchestrator of any session may run it; the pipeline refuses
