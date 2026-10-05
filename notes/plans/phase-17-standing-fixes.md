@@ -2869,7 +2869,7 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 | # | piece | status |
 |---|---|---|
 | 0 | This record + the b1 captures dir gitignored | DONE (this commit) |
-| 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | NOT-STARTED |
+| 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | IN-PROGRESS — **TEMPORARY `B1TRACE` NSLog instrumentation is in the WORKING TREE, UNCOMMITTED** (ReadEditPane / ReadEditBlock / NoteIndexColumn / BlockTOCViewModel.adopt / ReadModeView body — every line carries `B1Trace`; a successor deletes every `B1Trace` line and the `enum B1Trace` at ReadEditPane.swift's tail before anything else). Driving: the dev-store Debug build + a phased trackpad-fling tool (scratchpad `fling.swift`) |
 | 2 | (j) pin red-on-old → fix → green | NOT-STARTED |
 | 3 | (k) the large-fixture road (dev store, staged + restored) | NOT-STARTED |
 | 4 | (k) core: the keyset page read per sort + pins | NOT-STARTED |
