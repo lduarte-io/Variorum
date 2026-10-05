@@ -545,6 +545,10 @@ struct RootView: View {
         // which read the key window through the registry) because leaving is
         // a fact about the panes that just changed, not about focus.
         SavepointOnLeave.wire(workspace: router.workspace, session: session)
+        // 17y B3 item (f): THIS window's focused subject — an open, or a focus
+        // move between its panes — carries the app's one wing with it (her
+        // ruled cross-wing follow; the receipt "Now in X").
+        WingFollow.wire(workspace: router.workspace, session: session)
         router.workspace.visit(selection ?? .shelf)
     }
 

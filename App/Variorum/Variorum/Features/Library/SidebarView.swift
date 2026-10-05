@@ -205,6 +205,10 @@ struct SidebarView: View {
     /// The column's height, as laid out — the fit test's input
     /// (`SidebarLayout`). Zero on the first pass, which never compresses.
     @State private var columnHeight: CGFloat = 0
+    /// 17y B3 item (f): the Open rows living in ANOTHER wing → that wing's
+    /// name (the indicator). Read once per (rows, current wing) — bounded by
+    /// the Open list.
+    @State private var openRowWings: [String: String] = [:]
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -728,7 +732,20 @@ struct SidebarView: View {
                 }
             }
             .padding(.horizontal, Self.groupPadding)
+            // 17y (f): which open notes live in another wing (the indicator).
+            .task(id: openWingsKey) {
+                let ids = workspace.openNotes.shown
+                let current = session.wing.currentID
+                openRowWings = (try? await session.database.read { db in
+                    try WingFollow.crossWingNames(db, noteIDs: ids, current: current)
+                }) ?? [:]
+            }
         }
+    }
+
+    /// The indicator's read key: the rows shown and the wing she stands in.
+    private var openWingsKey: String {
+        workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
     }
 
     private func openRow(_ noteID: String, ordinal: Int) -> some View {
@@ -742,6 +759,18 @@ struct SidebarView: View {
                     font: tokens.navigation,
                     color: current ? tokens.ink : tokens.muted,
                     weight: current ? .semibold : .regular)
+                // 17y B3 item (f) — THE WING INDICATOR (her ruled shape): a
+                // row whose note lives in ANOTHER wing names that wing,
+                // faint (her name for it — never chrome); opening it takes
+                // the app there (`WingFollow`). PROVISIONAL P-17y-B3-f4.
+                if let wing = openRowWings[noteID] {
+                    Text(wing)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .help(WingFollow.indicatorHelp(wing))
+                }
                 // The ordinal its key carries — so ⌘⇧n is legible without
                 // opening a menu. Insertion-ordered (her round-7 ruling), so
                 // the number is a STABLE address; rows past nine are

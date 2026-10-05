@@ -97,6 +97,23 @@ final class WorkspaceModel {
     /// pane shows is covered without remembering anything.
     @ObservationIgnored var onNotesLeft: ([String]) -> Void = { _ in }
 
+    /// **17y B3 item (f) — the FOCUSED subject signal.** Raised with what the
+    /// focused pane shows whenever a navigation door ASKS it to show
+    /// something (every `select` — a re-open of the same note included: she
+    /// opened it) or focus MOVES to another pane. Wired by the shell to the
+    /// cross-wing follow (`WingFollow.wire`); a no-op by default, so a
+    /// workspace built in a test or a preview follows nothing. It lives here
+    /// for `onNotesLeft`'s reason: the fact is this type's, and a test drives
+    /// it without SwiftUI.
+    @ObservationIgnored var onFocusedSubjectChanged: (SidebarSelection?) -> Void = { _ in }
+
+    /// Runs a FOCUS move and raises the signal when the focused pane changed.
+    private func reportingFocusMove(_ change: () -> Void) {
+        let before = focusedPane
+        change()
+        if focusedPane != before { onFocusedSubjectChanged(focusedSelection) }
+    }
+
     /// Runs `change`, then reports what left the shown set. Order-preserving
     /// and duplicate-safe: a note still shown by ANOTHER pane of this window
     /// has not been left (the ⌘-click-into-the-other-pane case, where only
@@ -157,7 +174,7 @@ final class WorkspaceModel {
     func select(_ destination: SidebarSelection, in pane: PaneID? = nil) -> SelectionOutcome {
         let pane = pane ?? focusedPane
         if let existing = paneShowing(destination), existing != pane {
-            focusedPane = existing
+            reportingFocusMove { focusedPane = existing }
             return .focusedExistingPane(existing)
         }
         // 13j J11: this is the door every navigation funnels through, so
@@ -169,6 +186,8 @@ final class WorkspaceModel {
             focusedPane = pane
             visit(destination, in: pane)
         }
+        // 17y (f): an OPEN — followed even when it re-opens what is shown.
+        onFocusedSubjectChanged(focusedSelection)
         return .adopted
     }
 
@@ -185,7 +204,7 @@ final class WorkspaceModel {
     @discardableResult
     func openBeside(_ destination: SidebarSelection) -> OpenBesideOutcome {
         if let existing = paneShowing(destination) {
-            focusedPane = existing
+            reportingFocusMove { focusedPane = existing }
             return .focusedExistingPane(existing)
         }
         if panes.count < Self.maximumPanes {
@@ -213,12 +232,14 @@ final class WorkspaceModel {
         // 13j J11: folding the window back is a leaving for whatever that
         // pane was showing (unless the other pane shows it, which the
         // same-note rule already forbids).
-        reportingDepartures {
-            let closing = panes.remove(at: index)
-            selections.removeValue(forKey: closing)
-            histories.removeValue(forKey: closing)
-            splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
-            focusedPane = panes[min(index, panes.count - 1)]
+        reportingFocusMove {
+            reportingDepartures {
+                let closing = panes.remove(at: index)
+                selections.removeValue(forKey: closing)
+                histories.removeValue(forKey: closing)
+                splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
+                focusedPane = panes[min(index, panes.count - 1)]
+            }
         }
         return true
     }
@@ -229,7 +250,8 @@ final class WorkspaceModel {
     /// `PaneMount.liveCount` answer exactly one.
     func focus(_ pane: PaneID) {
         guard panes.contains(pane) else { return }
-        focusedPane = pane
+        // 17y (f): a focus MOVE is followed too (her "follow on focus").
+        reportingFocusMove { focusedPane = pane }
     }
 
     func setSplitFraction(at index: Int, to value: Double) {
