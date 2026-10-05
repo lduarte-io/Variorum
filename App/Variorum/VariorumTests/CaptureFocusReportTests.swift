@@ -22,7 +22,8 @@
 //  reported, and so must its departure. Red-on-old, stated exactly: on the
 //  pre-fix tree the ARRIVAL is not reported — 1 issue (AppKit's end-editing
 //  notification still reported the departure); the behavioural revert (the
-//  first-responder wire removed) reports neither — 2 issues (the B2 RECORD).
+//  first-responder wire removed) reports neither — 2 issues. Both counts
+//  re-measured on THIS host at the B2 fix round (the record).
 //
 //  THE ROAD (the B2 ladder's NIT-1): the caret arrives by a focus request
 //  RAISED once the box is up — the bar's own re-raise road (a click on the
