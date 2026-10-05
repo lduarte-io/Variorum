@@ -483,7 +483,14 @@ public struct SyncEngine: Sendable {
             // else arriving. One local-only marker read per empty pull;
             // the apply transaction opens only when the marker is set.
             // (`isPullBatch`: this IS a pull — the dedupe's only road.)
-            if try await database.read({ try self.sampleDedupePending($0) }) {
+            // 17y B-DEDUPE: the seeded-furniture fold's own deferral marker
+            // rides the same head-reached moment.
+            if try await database.read({ db in
+                try self.sampleDedupePending(db)
+                    || Bool.fetchOne(
+                        db, sql: "SELECT EXISTS (SELECT 1 FROM sync_state WHERE key = ?)",
+                        arguments: [Self.furnitureDedupePendingKey]) ?? false
+            }) {
                 emptyReport.repairs = try await applyingRemoteWithDeferredFKs { db in
                     try runPostApplyRepairs(db, touched: TouchedRows(isPullBatch: true))
                 }

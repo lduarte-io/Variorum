@@ -164,14 +164,18 @@ extension SyncEngine {
 
         // ── the GATHERING grain ──────────────────────────────────────────
         for gathering in facts.gatherings {
-            repairs += try foldGatheringCopies(db, gathering: gathering)
+            switch try foldGatheringCopies(db, gathering: gathering) {
+            case .folded(let count): repairs += count
+            case .deferred: deferred = true
+            case .nothing: break
+            }
         }
 
         // ── the BOOK grain (the field guide) ─────────────────────────────
         if let guideName = facts.guideBookName {
             switch try foldGuideCopies(
                 db, name: guideName, tagPath: facts.guideTagPath,
-                hash: facts.hash, arrivingDead: touched.arrivingDeadIDs) {
+                hash: facts.hash, touched: touched) {
             case .folded(let count): repairs += count
             case .deferred: deferred = true
             case .nothing: break
@@ -181,8 +185,7 @@ extension SyncEngine {
         // ── the NOTE and POOL grains ─────────────────────────────────────
         for reserved in facts.containers {
             switch try foldReservedContainers(
-                db, reserved: reserved, hash: facts.hash,
-                arrivingDead: touched.arrivingDeadIDs) {
+                db, reserved: reserved, hash: facts.hash, touched: touched) {
             case .folded(let count): repairs += count
             case .deferred: deferred = true
             case .nothing: break
@@ -216,7 +219,7 @@ extension SyncEngine {
     /// names a loser.
     private func foldGatheringCopies(
         _ db: Database, gathering: SeededFurnitureDedupeFacts.Gathering
-    ) throws -> Int {
+    ) throws -> FurnitureFoldOutcome {
         let rows = try Row.fetchAll(
             db,
             sql: """
@@ -234,8 +237,13 @@ extension SyncEngine {
         var repairs = 0
         let stamp = nowStamp()
         for (_, candidates) in byWing {
-            let seedOwn = try candidates.filter {
-                try gatheringIsSeedsOwn(db, row: $0, gathering: gathering)
+            var seedOwn: [Row] = []
+            for candidate in candidates {
+                switch try gatheringIsSeedsOwn(db, row: candidate, gathering: gathering) {
+                case true: seedOwn.append(candidate)
+                case false: continue
+                case nil: return .deferred  // a shelf row still in flight
+                }
             }
             guard seedOwn.count > 1 else { continue }
             let sorted = seedOwn.sorted { ($0["id"] as String) < ($1["id"] as String) }
@@ -263,7 +271,7 @@ extension SyncEngine {
             }
             repairs += try repointKeeperRule(db, keeperID: keeperID, gathering: gathering)
         }
-        return repairs
+        return repairs > 0 ? .folded(repairs) : .nothing
     }
 
     /// The signature: the rule resolves to the declared shape BY PATH
@@ -297,10 +305,13 @@ extension SyncEngine {
 
     /// Seed's-own = the signature holds by RULE SHAPE (not merely name),
     /// the name is still the reserved one, and no engagement flag is set.
-    /// Every leg errs toward ENGAGED, which keeps copies.
+    /// Every leg errs toward ENGAGED, which keeps copies. Returns nil —
+    /// STRAGGLING — when the shelf pointer names a row this store has
+    /// never seen (her shelf may be in flight; a DEAD shelf row is the
+    /// ordinary dangling-reads-unshelved state and stays the seed's).
     private func gatheringIsSeedsOwn(
         _ db: Database, row: Row, gathering: SeededFurnitureDedupeFacts.Gathering
-    ) throws -> Bool {
+    ) throws -> Bool? {
         guard try ruleMatchesShape(db, spec: row["query_spec"], shape: gathering.rule) != nil
         else { return false }
         guard BookNaming.sameName(row["name"] as String? ?? "", gathering.name) else { return false }
@@ -317,15 +328,19 @@ extension SyncEngine {
         if (row["word_target"] as Int?) != nil { return false }
         if (row["max_posts"] as Int?) != nil { return false }
         if (row["starred"] as Int? ?? 0) != (gathering.bornStarred ? 1 : 0) { return false }
-        // The shelf: nil/dangling (unshelved — starred notes, Quicknotes)
-        // or a `role='welcome'` shelf (classics ships ON Welcome) are the
-        // seed's states; her own shelf is engagement.
+        // The shelf: nil/dangling-dead (unshelved — starred notes,
+        // Quicknotes) or a `role='welcome'` shelf (classics ships ON
+        // Welcome) are the seed's states; her own shelf is engagement; a
+        // pointer to a NEVER-SEEN row is a straggler (defer).
         if let shelfID = row["shelf_id"] as String? {
-            let role = try String.fetchOne(
-                db,
-                sql: "SELECT role FROM shelf WHERE id = ? AND deleted_at IS NULL",
+            guard let shelf = try Row.fetchOne(
+                db, sql: "SELECT role, deleted_at FROM shelf WHERE id = ?",
                 arguments: [shelfID])
-            if role != nil && role != "welcome" { return false }
+            else { return nil }
+            if (shelf["deleted_at"] as String?) == nil {
+                let role = shelf["role"] as String?
+                if role != "welcome" { return false }
+            }
         }
         return true
     }
@@ -377,7 +392,7 @@ extension SyncEngine {
     private func foldGuideCopies(
         _ db: Database, name: String, tagPath: String?,
         hash: @Sendable (String) -> String,
-        arrivingDead: [String: Set<String>]
+        touched: TouchedRows
     ) throws -> FurnitureFoldOutcome {
         let copies = try Row.fetchAll(
             db,
@@ -388,6 +403,16 @@ extension SyncEngine {
                 """,
             arguments: [name])
         guard copies.count > 1 else { return .nothing }
+        // The F2 quiescence arm (the sample pass's own letter): a copy
+        // whose reading row arrived THIS batch is indeterminate — its
+        // engagement rows (comments, tags, references) sort after the
+        // membership chunk in the push order and can still be in flight,
+        // so judging now could read an edited copy as unengaged and fold
+        // it. Defer the whole grain; the marker re-fires at the next pull,
+        // the empty window included.
+        if copies.contains(where: { touched.readingIDs.contains($0["id"] as String) }) {
+            return .deferred
+        }
 
         var byWing: [String: [String]] = [:]
         for copy in copies {
@@ -409,7 +434,7 @@ extension SyncEngine {
             for (_, twins) in classes where twins.count > 1 {
                 for loser in twins.sorted().dropFirst() {
                     repairs += try retireSampleCopy(
-                        db, copyID: loser, arrivingDead: arrivingDead)
+                        db, copyID: loser, arrivingDead: touched.arrivingDeadIDs)
                 }
             }
         }
@@ -457,11 +482,14 @@ extension SyncEngine {
             return .engaged
         }
         if let shelfID = book["shelf_id"] as String? {
-            let role = try String.fetchOne(
-                db,
-                sql: "SELECT role FROM shelf WHERE id = ? AND deleted_at IS NULL",
+            guard let shelf = try Row.fetchOne(
+                db, sql: "SELECT role, deleted_at FROM shelf WHERE id = ?",
                 arguments: [shelfID])
-            if role != nil && role != "welcome" { return .engaged }
+            else { return .straggling }  // her shelf may be in flight
+            if (shelf["deleted_at"] as String?) == nil,
+               (shelf["role"] as String?) != "welcome" {
+                return .engaged
+            }
         }
 
         let chapters = try Row.fetchAll(
@@ -518,7 +546,7 @@ extension SyncEngine {
     private func foldReservedContainers(
         _ db: Database, reserved: SeededFurnitureDedupeFacts.ReservedContainer,
         hash: @Sendable (String) -> String,
-        arrivingDead: [String: Set<String>]
+        touched: TouchedRows
     ) throws -> FurnitureFoldOutcome {
         let rows = try Row.fetchAll(
             db,
@@ -529,6 +557,11 @@ extension SyncEngine {
                 """,
             arguments: [reserved.kind, reserved.title])
         guard rows.count > 1 else { return .nothing }
+        // The F2 quiescence arm, container grain: a copy arriving THIS
+        // batch may have its comment/tag/reference chunk still in flight.
+        if rows.contains(where: { touched.containerIDs.contains($0["id"] as String) }) {
+            return .deferred
+        }
 
         var byWing: [String: [String]] = [:]
         for row in rows {
@@ -568,7 +601,8 @@ extension SyncEngine {
                     try enqueueExplicitly(db, table: "container", rowID: loser)
                     repairs += 1
                     repairs += try enqueueSuppressedCascadeVictims(
-                        db, parent: ("container", loser, stamp), arrivingDead: arrivingDead)
+                        db, parent: ("container", loser, stamp),
+                        arrivingDead: touched.arrivingDeadIDs)
                 }
             }
         }

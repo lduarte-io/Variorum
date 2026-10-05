@@ -55,6 +55,9 @@ final class SyncClient {
     /// a scenario with a SECOND book appends here — `engine()` composes the
     /// two into the list exactly as `SyncSession.configure` hands both.
     var additionalSampleLibraryFacts: [SampleLibraryDedupeFacts] = []
+    /// 17y B-DEDUPE: the seeded-furniture fold's facts — nil by default,
+    /// exactly like production's unwired engine (inert).
+    var furnitureFacts: SeededFurnitureDedupeFacts?
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -141,7 +144,8 @@ final class SyncClient {
         SyncEngine(
             transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
             keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
-            sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts)
+            sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts,
+            furnitureFacts: furnitureFacts)
     }
 
     @discardableResult
