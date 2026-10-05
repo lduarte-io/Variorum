@@ -214,6 +214,7 @@ struct BookPanelView: View {
         book: Reading, snapshot: BookPanelModel.Snapshot, groups: [BookPanelBrain.Group]
     ) -> some View {
         let marked = collapsed?.postID == postID
+        let gripDrawn = BookPanelBrain.chapterGripDrawn(chapterCount: snapshot.sections.count)
         return Button {
             // A collapsed one-note chapter row IS the note's row (row 8):
             // its click is that note's click-through. A plain heading is a
@@ -221,11 +222,15 @@ struct BookPanelView: View {
             if let collapsed { model.open(book: book, at: collapsed.postID) }
         } label: {
             HStack(spacing: 4) {
-                if BookPanelBrain.chapterGripDrawn(chapterCount: snapshot.sections.count) {
-                    Text("\u{283F}")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                }
+                // A lone chapter's grip is not drawn (#184(b)) — by OPACITY in
+                // a slot every chapter row keeps, so the names never shift as
+                // the chapter count crosses 1↔2 (the B2 ladder's NIT-3; the
+                // Bookcase grip column's own idiom).
+                Text("\u{283F}")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .opacity(gripDrawn ? 1 : 0)
+                    .accessibilityHidden(!gripDrawn)
                 if marked { marker }
                 Text(tokens.chromeLabel(section.name))
                     .font(tokens.small.weight(.semibold))
