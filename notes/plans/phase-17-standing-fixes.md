@@ -2849,7 +2849,7 @@ Book/facts grammar · the three gatherings' + quicknote's + guide's mint shapes 
 
 ## 17y B1 RECORD — the two performance items: (j) the in-note Index scroll · (k) the Library infinite scroll + the All-screen books cap (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit; the brief is `notes/plans/17y-b1-brief.md`)
 
-**NOT DONE (first line, per the contract — kept current):** EVERYTHING below is in flight; HER live scroll walk on the large fixture + her word is the batch's (and the 17y entry's) close gate and is NOT this session's to run; the Fable cold review follows this record's close (the orchestrator spawns it).
+**NOT DONE (first line, per the contract):** (1) **HER live scroll walk on the large fixture + her word** — the batch's and the 17y entry's close gate, never this session's (the fixture is RESTORED away; § HER WALK below re-stages it in one command); (2) the **Fable cold review** (mandatory — (j) is the read tier's index column; the orchestrator spawns it); (3) **no Release measurement** — every in-app number here is the Debug build (the brief forbids a Release launch; § THE (k) NUMBERS says what that does and does not change); (4) **the List view's per-new-row cost is NOT reduced** — measured, pre-existing per row, SwiftUI `List`'s own (F-B1-5, her call at QUESTIONS #187(i)); (5) **(j)'s M2 (the note pane's lazy height estimate — the scroller thumb throws the page) is NOT fixed** — F-B1-1, KnownIssues, owner 12; (6) the book Index navigator's per-row `⋯` menu (half of M1's class) is NOT touched — F-B1-2, owner 12; (7) the app-wide menu-bar status-item redraw during every scroll is NOT touched — F-B1-4, owner 12.
 
 Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
 the B1 brief whole; this file's 17y row end to end (items (j)/(k) verbatim, her smoothness bar), the
@@ -2871,12 +2871,12 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 | 0 | This record + the b1 captures dir gitignored | DONE (this commit) |
 | 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | DONE (this commit) — § THE TRACE below: M1 (the column: a whole-note lookup per realized row + three AppKit controls per row) is her lag; M2 (the pane's 4.7× lazy estimate) recorded; re-query storm and landing re-aims ruled OUT. The temporary instrumentation is REMOVED from the tree in this commit (kept as the gitignored `b1trace.patch` for the after-measurement) |
 | 2 | (j) pin red-on-old → fix → green | DONE (20433ebd red · 15b081d2 fix · f8977039 refined) — § THE FIX below. Pins `NoteIndexColumnScrollCostTests` (5) RED on the pre-fix tree (`j-red.log`) → GREEN; SYNTHETIC REVERT ROUND (announced c1043df3): A — the wake rule forced live → the resting-rows pin RED "213 of 426" + the wake pin RED; B — a whole-note lookup back in the row builder → the lookup pin RED "realizing 426 rows built 416 whole-note lookups"; restored, `git diff --quiet`. Paired before/after measured (below). The pre-fix worktree `<scratchpad>/wt-before` (90eb3416 + probes) is KEPT for (k)'s before-measurement — removed at the close |
-| 3 | (k) the large-fixture road (dev store, staged + restored) | DONE (90eb3416) — `ScaleFixture.swift` (DEBUG + `VARIORUM_SCALE_FIXTURE`) + `Tools/ScaleFixture/stage.sh` / `restore.sh`. **THE DEV STORE IS STAGED NOW** — prestage copy `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261005T190622Z` (cmp-verified); a successor RESTORES it (`Tools/ScaleFixture/restore.sh <that dir>`, the DEV app quit first) before closing. ALSO STAGED: the dev app's local `readFace.<id>` defaults — six notes flipped `read`→`edit` for the trace; the originals are listed in this row's restore note: 4A5B8D9A…, 4EBE2134…, CDFD73E1…, D39B34A7…, D42DDB29…, D5AA052C… were `read` (67DB6BCA…, 6D00EAC7… were already `edit`) |
+| 3 | (k) the large-fixture road (dev store, staged + restored) | DONE (90eb3416) — `ScaleFixture.swift` (DEBUG + `VARIORUM_SCALE_FIXTURE`) + `Tools/ScaleFixture/stage.sh` / `restore.sh`. **RESTORED at the close** (`restore.sh scale-prestage-20261005T190622Z` — every file cmp-verified, the Debug app quit by identity first) and the six staged `readFace.<id>` defaults put back to `read` (read back: all eight keys exactly as before the batch). The fixture's SHAPE (for any re-run): 600 notes tagged `scale-fixture` (every 7th untitled — its card leads with its words; every 5th carries an entry date; every 13th has no block at all — never touched, NULL stamp), births and edits spread over two years, plus `scale fixture · long note` (2,000 blocks · 13,713 words, a `# Part N` heading every 100 blocks); with the dev store's own, 822 notes listed |
 | 4 | (k) core: the keyset page read per sort + pins | DONE (2a203573) — `Queries.catalogNotesPage` (`Sources/VariorumCore/Queries/LibraryPaging.swift`): each sort's own `(key, id)`, never OFFSET, one statement + a probe row; EDITED seeks `idx_container_touched` in two arms (`INDEXED BY` — this store never runs ANALYZE; measured 22,729 → 4,409 VM steps for one page over 600 notes); created/date/title one bounded top-N pass per page (flat in depth, ∝ notes; no index holds their keys — § THE (k) NUMBERS). `searchCatalog`'s book/block arms factored out byte-for-byte (`catalogBooks`/`catalogBlocks`) + one LIKE-escape. Pins `LibraryPagingTests` (8) incl. the held facts' region blind to a keystroke; the catalog-adjacent core suites 115/16 green |
 | 5 | (k) the model: pages, refresh-in-place, bounded held observation + pins | DONE (837edc3a WIP · 5729584a) — `LibraryCatalogModel` (books · paged notes · capped blocks; `search` = a first page, `refresh` = in place at depth for every row act) + `LibraryCatalogPaging.swift` (row appear/disappear → the next page within 30 rows of the end; the NEAR WINDOW = the pages around what is on screen, quantized to page boundaries, the only part whose extras load and whose ownership facts the MODEL holds; window checks coalesce to one per turn AFTER the layout — a window the views READ fed back into the Cards' lazy layout). Pins `LibraryPagingModelTests` (6, build pins — the pre-fix tree had no paging); three cap pins in `LibraryDayFilterTests` flipped as JUSTIFIED EDITS (the cap became a page) |
-| 6 | (k) the views: List + Cards infinite scroll; the All-screen books region cap + pins | DONE (837edc3a · 5729584a · 511c1df8) — both views page by their rows' appear/disappear with a quiet sentinel row ("loading more notes…" only while a page is in flight); under All, books past half the listing's height split into their own List capped at half (`LibraryBooksRegion`, the List's measured row pitch). Mounted pins `LibraryInfiniteScrollTests` (3) RED on the pre-fix worktree (`k-red2.log`: List + Cards "listed 40 of 130"; no note row beside forty books) → GREEN. THE WALK FOUND (fixed, pinned): the Cards view's quiet tag row pegged 100% CPU under a resting pointer (PRE-EXISTING since 13e E8) — `NoteTagsRowHoverTests` |
-| 7 | Measurements (before/after, quiet machine) + the walk → `notes/plans/17y-screens/b1/` | IN-PROGRESS — (j) paired before/after DONE (§ THE FIX); (k) the core scale table DONE and the in-app page-landing measurements started (§ THE (k) NUMBERS); 2f26fff2 landed the one-update page + the isolated paged view; **HELD at 15:40 MDT: the machine went ACTIVE (HID idle 0 for minutes — the guard's exit 4: someone is at the machine) — no GUI act and no window-mounting test run until it is quiet**; the prefetch-margin experiment (does an earlier append avoid the stall) is next |
-| 8 | END suites + record close (findings, PROVISIONALs → QUESTIONS #187) | NOT-STARTED |
+| 6 | (k) the views: List + Cards infinite scroll; the All-screen books region cap + pins | DONE (837edc3a · 5729584a · 511c1df8 · 2f26fff2 · ad911257) — both views page by their rows' appear/disappear with a quiet sentinel row ("loading more notes…" only while a page is in flight); under All, books past half the listing's height split into their own List capped at half (`LibraryBooksRegion`, the List's measured row pitch). Mounted pins `LibraryInfiniteScrollTests` (3) RED on the pre-fix worktree (`k-red2.log`: List + Cards "listed 40 of 130"; no note row beside forty books) → GREEN; the landing pin (4th) RED on 2f26fff2 (Cards: "re-drew 7 rows already built") → GREEN. THE WALK FOUND (fixed, pinned): the Cards view's quiet tag row pegged 100% CPU under a resting pointer (PRE-EXISTING since 13e E8) — `NoteTagsRowHoverTests` |
+| 7 | Measurements (before/after, quiet machine) + the walk → `notes/plans/17y-screens/b1/` | DONE — (j) § THE FIX; (k) § THE (k) NUMBERS (the core scale table; the page-landing story to ad911257; the FINAL paired runs); the walk on the committed build (ad911257), both views, both voices — § THE WALK (captures + the feel note). The pre-fix worktree + its build were removed at the close |
+| 8 | END suites + record close (findings, PROVISIONALs → QUESTIONS #187) | DONE (this commit) — § END SUITES (core 2204/247 · Mac 388/64 · the phone build); § FINDINGS F-B1-1…10; QUESTIONS #187; KnownIssues row 22's Library leg marked BUILT + four new rows owned by 12 |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
@@ -2997,8 +2997,9 @@ pointer wakes the moment the scroll stops (`j-after-wake-after-scroll.png`).
   index is NEEDED** (below), so no schema event (an index for them stays the author's §12 call —
   QUESTIONS #187(f)).
 - **The listing** (`LibraryCatalogModel` + `LibraryCatalogPaging.swift`): every book of the wing
-  (books are never a page — the Bookcase's own class), the notes paged (80 a page, the next asked
-  for 30 rows before the end), the block hits of a typed query still capped at 40 and said so. A NEW
+  (books are never a page — the Bookcase's own class), the notes paged (80 first, then GROWING — the
+  smoothness bullet's (2); the next asked for once fewer rows than max(30, half the next page) lie
+  below what is on screen), the block hits of a typed query still capped at 40 and said so. A NEW
   question (query · scope · sort · direction · day · wing) starts over; an ACT on a row re-reads IN
   PLACE at the depth she scrolled to (one statement ∝ what is listed, once per act). The day filter's
   answer stays the whole set (unchanged).
@@ -3015,6 +3016,24 @@ pointer wakes the moment the scroll stops (`j-after-wake-after-scroll.png`).
   List's own measured row pitch × the count), the books move into their own List capped at half,
   scrolling inside it; fewer books stay in the one list exactly as before; the Books scope (nothing
   below to make room for) keeps one list.
+- **Smoothness, measured into shape (2f26fff2 → ad911257):** (1) **each note row reads its OWN
+  observable slice** (`LibraryNoteRowExtras` — its tags, card words and owned-by facts; the model
+  writes a slice only when that note's values change): every row used to read the WHOLE listing's
+  extras dictionaries and the whole facts map, so a landing page's chips/words — or any other note's
+  badge — re-drew every row SwiftUI held alive (counted: 105–159 cards per landing; the Cards' lazy
+  column keeps far more alive than the screen shows). The shared `OwnershipFactsModel` is back to its
+  shipped form; the Library holds its own window-bounded facts observation. (2) **pages GROW**: 80
+  first, then the next page = what is listed, capped at 1,280 — each still ONE bounded read (∝ the
+  page), because a List landing's stall barely moves with the page's size (measured 20 · 40 · 80
+  rows → 73 · 70 · 84 ms) — so fewer landings. (3) **a page read while the rows move LANDS WHEN THEY
+  REST** (200 ms with no row coming or going — the rows themselves report motion: the List reports
+  no SwiftUI scroll phase, measured), or AT ONCE within 40 rows of the end (she never reaches an end
+  that is not the Library's). (4) **no page is asked for while a newer question is being read** (a
+  hole in this batch's own new road found at self-review: the old listing's cursor under the new
+  query/sort could land after the new listing — rows out of order or skipped; `listedGeneration`).
+  (5) **a mode switch REPLACES the card words** (a mode keeps only what it draws — the 13u3 plan
+  rule; piece 5 had turned it into a merge, caught by `LibraryCardNameTests` when the END set
+  widened — F-B1-6).
 - **The walk found (fixed, pinned):** the Cards view's quiet tag row pegged 100 % CPU forever with
   the pointer resting on an untagged card's chip row — PRE-EXISTING since 13e E8 (measured 99.7 /
   100.0 % on the pre-fix Debug build): revealing the narrow `＋` moved the pointer out of the hovered
@@ -3053,6 +3072,168 @@ notes region, the pointer resting over it, a display-link frame probe):
   one); the landing still drops 70–137 ms (List) — sampled: AppKit's automatic row heights measure
   the INSERTED rows that fall inside the table's prepared region (`_doAutomaticRowHeightsForInserted
   AndVisibleRows` → a SwiftUI row view per inserted row), and the stall barely moves with the page
-  size (20 · 40 · 80 rows: 73 · 70 · 84 ms mean at a landing) — so the next experiment is WHEN the
-  page lands (earlier, outside the prepared region), not how big it is. PENDING (the machine went
-  active).
+  size (20 · 40 · 80 rows: 73 · 70 · 84 ms mean at a landing) — so the next experiment was WHEN the
+  page lands, not how big it is; and the Cards' landing frames were whole-alive-set re-draws
+  (counted per landing with a row-body counter: 105–159 rows).
+- **AFTER ad911257 (the FINAL shape — the rows' own slices, growing pages, rest-landing), the same
+  harness, two runs per view** (the harness fling is a 40-event phased drag at 300/400 pt per 8 ms
+  event — ~37,500 pt/s, far past a hand — then its momentum tail; frames binned by how many NEW rows
+  SwiftUI built in them):
+
+| run | frames | mean gap | max | >50 ms | >100 ms | landings (gap at the landing frame; rows built in it) |
+|---|---|---|---|---|---|---|
+| BEFORE List (40 rows, no paging) | 206 | 11.1 ms | 100.5 | 1 | 1 | — (stops at 40) |
+| BEFORE Cards (40 rows) | 230 | 9.2 | 71.0 | 1 | 0 | — |
+| FINAL List 1 · 2 | 549 · 480 | **10.7 · 11.1** | 124 · 172 | 6 · 7 | 3 · 1 | 44–124 ms · 3–34 rows |
+| FINAL Cards 1 · 2 | 507 · 484 | **12.8 · 13.0** | 90 · 99 | 23 · 23 | **0 · 0** | 25–78 ms · 0–29 rows |
+
+| frames by NEW rows built in them (FINAL, both runs) | List mean gap | Cards mean gap |
+|---|---|---|
+| 0 rows (scrolling what is built) | **8.8–8.9 ms** | **8.7–8.9 ms** |
+| 1–5 rows | 17.7–18.9 | 15.0–16.8 |
+| 11–20 rows | 59–62 | 53–57 |
+| 21+ rows | 103–135 | 73–75 |
+
+  **What binds the remaining long frames is the cost of a NEW row** — ~3–4 ms per row in this Debug
+  build in both views — and it is the SAME per row as before: the pre-fix build's first fling over
+  its 40 fresh rows ran 34 · 71 · 33 ms frames (Cards) and a 100.5 ms first frame (List). Paging
+  changed what is reachable, not what a row costs. Sampled (`sample`, the List under a brisk fling):
+  ~85 % of the main thread's busy time is SwiftUI/AppKit row hosting — `NSTableView`'s automatic row
+  heights sizing each new row's hosting view (`_uncachedAutomaticRowHeight` → `NSHostingView.
+  idealSizeForCurrentWidth` → the row's stack layout); the app's own row code (stamps, card words,
+  tokens) ≈ 8–10 %, the DEBUG-only geometry probes ≈ 1.4 % — so a Release build moves little of it
+  (unmeasured — no Release launch).
+- **At a HAND's speed** (the same fling at 30 pt per event, ~3,750 pt/s — a brisk flick):
+
+| run | frames | mean gap | max | >25 ms | >50 ms | >100 ms |
+|---|---|---|---|---|---|---|
+| BRISK Cards | 925 | **11.2 ms** | 33.4 | 6 | **0** | 0 |
+| BRISK List | 484 | **20.8 ms** | 94.0 | 155 | 21 | 0 |
+
+  The Cards view keeps the display's cadence through the whole corpus at a hand's speed; the List
+  view runs ~48 fps through rows it has not built yet (~3 new rows a frame × ~3–4 ms) and at display
+  cadence over rows it has (the 0-row bin above). F-B1-5; her call at QUESTIONS #187(i).
+- **The menu-bar status item redraws during every scroll** (`NSStatusItem _updateReplicants` →
+  `_cacheDisplayInRect`, fired by delayed-perform timers): 109–165 samples per 5-s scroll sample —
+  10–19 % of the main thread's busy time — on the pre-fix build too (139 samples, the same harness),
+  never at idle. App-wide, pre-existing, not this item's — F-B1-4.
+
+### THE WALK — the committed build (ad911257), the dev store with the fixture, both views, both voices
+
+Captures (gitignored, `notes/plans/17y-screens/b1/k/final/`): `k-final-list-all-top-terminal.png`
+(the rider: under All, the books in their own region capped at half, scrolling inside it; the notes
+below from the first row) · `k-final-list-end-terminal.png` (the List scrolled to the corpus's very
+end — Fixture 0000, then the classics seeded at "Jan 4, 1886", the oldest notes the store holds) ·
+`k-final-cards-deep-terminal.png` (Cards, deep — past the fixture into the dev store's own notes) ·
+`k-final-cards-end-terminal.png` (Cards at the end; Fixture 0006's "No text yet" is TRUE — the
+fixture's never-touched note) · `k-final-cards-end-study.png` · `k-final-list-all-top-study.png` ·
+`k-final-list-end-study.png` (the same three in Study; the scroll position survived the voice
+change). Earlier: `k/k-before-list-all-top.png` (the pre-fix build: forty book rows, no note row on
+screen) · `k/k-after-list-all-top.png` · `k/k-hover-reveal-after.png` · the (j) crops at the folder's
+top.
+
+**The feel note (mine, Debug, the harness's flings and the WalkKit wheel):** both views now reach
+the oldest note; nothing ever stops at 40. Over rows already built both views move at the display's
+cadence; a brisk flick through NEW rows is smooth in Cards and visibly busier in the List (the
+measured ~48 fps, a few 50–90 ms frames) — the List's own per-row hosting, the same per row as
+before (F-B1-5). Page landings fall where the rows rest or at the end of what is listed; at a hand's
+speed I could not feel one in Cards; in the List a landing at the margin reads as one short hitch.
+The books region under All behaves as her words ask — many books scroll inside their half, the
+notes are always on screen. Whether this meets "SMOOTH like the rest of the app" is HER word at her
+walk — in the build she walks.
+
+### HER WALK — how to stage it (one command each way; the dev store only)
+
+`Tools/ScaleFixture/stage.sh` (quit any Variorum instance first — it refuses otherwise; it takes the
+A1 prestage copy, cmp-verified, and launches the dev-store Debug build with the fixture minting in
+the background, ~1 min) → walk the Library: List and Cards, All/Notes scopes, each `sort ▾`, a
+typed search, scroll to the very end; the books region under All → quit the Debug app → `Tools/
+ScaleFixture/restore.sh "<the dir stage.sh printed>"`. (Her real store is never touched; the
+fixture never exists outside a DEBUG build.)
+
+### END SUITES (at the close, on ad911257 + this record)
+
+- Core `swift test` — **2204 tests / 247 suites green** (incl. `LibraryPagingTests` 8).
+- Mac (`DerivedData/17y`, suite-level `-only-testing`) — **388 tests / 64 suites green, 4 known issues**
+  (the `IndexTierMetricsTests` `withKnownIssue` legs, untouched by this batch): every Library-
+  touching suite (the 44 of the first END pass — `LibraryInfiniteScrollTests` 5 cases,
+  `LibraryPagingModelTests` 9, `LibraryDayFilterTests`, `LibraryCardNameTests`, the card/stamp/sort/
+  panel/row-click/selection/deletion/tag/quick-note/capture/ownership-badge/vocabulary/capability/
+  appearance suites) + the read tier's 20 (`NoteIndexColumnScrollCostTests` 5, `NoteIndexOutline`,
+  `ReadMode`, `ReadNoteLanding*`, `ReadNoteHeights*`, `PaneSurface`/`PanePublishDoor`, `ModeSwitch*`,
+  `NoteOpenLanding`, `ReadArrivalMeasure`, `ReadPageRoom`, `PagesArrowKeys*`/`PageTurnKeysRule`,
+  `NewModes`, `IndexClickCaret`, `CurrentBlockContinuity`, `OutlineRoom`, `IndexTierMetrics`,
+  `PaneLineMetricsScope`).
+- The phone (`VariorumMobile`, generic iOS Simulator) — **BUILD SUCCEEDED** (no `Shared/` or mobile
+  file changed; built because the core's public read surface grew).
+- Fences held: zero `Sources/VariorumCore/Sync/`, zero schema, zero custody, zero mobile code, zero
+  seed content, no dependency, no `/Applications` refresh, no Release launch.
+
+### FINDINGS (F-B1-N — each dispositioned)
+
+- **F-B1-1 — (j)'s M2: the note pane's lazy height estimate** (4.7× on the 2,000-block note; the
+  scroller THUMB rides it and a quick drag throws the page; the first big jump hitches 248–837 ms).
+  NOT her reported lag (trackpad scrolling of the pane is smooth); the remedy is the F3 shape (known
+  heights before the aim — `ReadNoteHeights` already derives them), a read-tier build of its own.
+  **DEFERRED — KnownIssues row, owner 12 (Hardening & perf validation).**
+- **F-B1-2 — the book Index navigator's per-row `Menu("⋯")`**: half of M1's class (one AppKit menu
+  per realized row, ≤300 rows), ~one third of the column's per-row weight. **DEFERRED — KnownIssues
+  row, owner 12.**
+- **F-B1-3 — the Cards view's quiet tag row looped at 100 % CPU under a resting pointer** (pre-existing
+  since 13e E8; 99.7 / 100 % measured on the pre-fix build). **FIXED (511c1df8) with its pin**
+  (`NoteTagsRowHoverTests`); after: 0.4–1.5 %.
+- **F-B1-4 — the menu-bar status item (the quick-note `MenuBarExtra`) redraws its replicants on every
+  scroll**, app-wide: 10–19 % of the main thread's busy time during any scroll sampled, identical on
+  the pre-fix build, absent at idle. Not this surface. **DEFERRED — KnownIssues row, owner 12.**
+- **F-B1-5 — the Library List's per-NEW-row cost** (SwiftUI `List` on macOS: `NSTableView` automatic
+  row heights size each new row's hosting view, ~3–4 ms a row in Debug): unchanged per row by this
+  batch, now reachable for the whole corpus; a brisk flick through unseen rows runs ~48 fps in the
+  List while Cards holds the display's cadence. The structural remedy (the List's notes on the lazy
+  column Cards use) changes the List's face — her eye's call. **DEFERRED — her call at QUESTIONS
+  #187(i); KnownIssues row, owner 12.**
+- **F-B1-6 — a regression from this batch's own piece 5** (837edc3a): the mode switch merged the card
+  words instead of replacing them (the List kept the Cards' book names it never draws; the Timeline
+  kept everything). Caught by `LibraryCardNameTests.eachModeReadsWhatItDraws` when the END set
+  widened past the paging suites. **FIXED (ad911257).** Lesson recorded: the touched surface's
+  existing suites run at every piece, not only the batch's new pins.
+- **F-B1-7 — a hole in this batch's own new road**: a page could be asked for while a newer question
+  was being read. **FIXED at self-review (ad911257)** with a build pin
+  (`noPageIsAskedForWhileANewQuestionIsRead` — the race is not deterministic to reproduce red).
+- **F-B1-8 — the Library's Timeline mode** keeps its own growing listing with a visible Load More
+  (never a silent cap) — the brief names List and Cards; untouched, observed.
+- **F-B1-9 — the DEBUG-only per-row probes** (the Library's geometry oracle) cost ≈ 1.4 % of a scroll's
+  busy time in Debug — Release strips them; recorded so Debug numbers are read honestly.
+- **F-B1-10 — `tokens` is re-derived (`VoiceTokens.resolve` → `PaletteDerivation`) on EVERY read** in
+  the Library's row builders — ≈ 1.4 % of a scroll; an app-wide pattern, not this item's;
+  recorded (no owner needed: no deferred work is claimed — a later perf pass may cache it).
+
+### PROVISIONALs (QUESTIONS #187 — in her words there)
+
+P-17y-B1-j1 (the resting row controls drawn as a still image, a shade lighter) · P-17y-B1-k1 (the
+batch sizes: 80, then growing, capped at 1,280; asked for well before the end) · k2 (a batch read
+mid-scroll waits for the rows to rest — 200 ms — or lands at once within 40 rows of the end) · k3
+(books are listed whole; the books region under All splits off past half the height) · k4 (a typed
+search still names at most 40 blocks/scraps, with its line) · k5 (the end of the Library has no
+closing line; "loading more notes…" shows only while a batch is in flight) · k6 (created / date /
+title sorts read without a dedicated index — measured, no schema event) · k7 (an act on a row keeps
+her place) · k8 (the day filter's answer stays whole). F-B1-5 is her question (i), not a
+PROVISIONAL.
+
+### MOBILE PARITY
+
+Nothing mobile-visible: the phone's notes list is its own surface (not `LibraryCatalogModel`); the
+core gained a read (`Queries.catalogNotesPage`) and a behaviour-identical factoring of
+`searchCatalog` — the phone build is green against it. Whether the phone's own lists need the same
+keyset paging at corpus scale is the mobile project's question (its lists were not measured here).
+
+### FOR THE COLD REVIEWER (seams touched)
+
+- The read tier: `NoteIndexColumn.swift` only (the `▸ 01` column's rows) — no `EditorTextView`, no
+  `BlockRangeIndex`, no `PaneSurface`, no `runStructural`, no landing/aim code; the pane is untouched.
+- The Library: `LibraryCatalogModel` / `LibraryCatalogPaging` / `LibraryCatalogView` /
+  `LibraryBooksRegion` / `NoteTagChips` (+ `LibraryCopy`, `LibraryInfoPanel`'s DEBUG probe slots,
+  `LibraryCardName`'s `nonisolated`, `LibraryCatalogTagActs`' search→refresh).
+- Core: `Queries/LibraryPaging.swift` (new) + `ShelfQueries.swift` (the book/block arms factored out
+  byte-for-byte) — no `Sync/`, no migration, no schema.
+- DEBUG-only: `ScaleFixture.swift` + its hook in `VariorumApp.swift`; `Tools/ScaleFixture/`.
+
