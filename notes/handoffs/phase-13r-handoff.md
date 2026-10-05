@@ -30,11 +30,16 @@ disputes, all fixed; round 2 (fresh reviewer) — 0/0/0/3 record-only, every fix
    **built at 19f** (the active ledger; one session + its Opus cold review).
 6. ✅ **DONE at the same sitting: the §12 calm-asks contract line LANDED** exactly as proposed
    (AppSpec §12 + §14's 13r head; the two oldest §14 entries rolled to the delta archive).
-7. **Optional author items carried forward:** the iOS name reservation (an App Store Connect
-   app record reserves the name immediately; no submission needed) · macOS 27.0.1 (deferred at
-   your word) · the `/variorum` page's placeholder copy (marked yours in the site source) ·
-   ✅ **<test-account> KEPT for future walks** (her call at the sitting; the container override only
-   matters inside <test-account>).
+7. **Optional author items — each now dispositioned at the sitting (2026-10-04):** the iOS
+   name reservation — HERS, before launch at a moment of her choosing · macOS 27.0.1
+   (deferred at your word, unchanged) · the `/variorum` page's intro copy — rides **13s**
+   (her word: she'll write it within that phase; her site's visual update runs alongside;
+   **13s is SPLIT at the same sitting into 13s-a rewording / 13s-b onboarding — the ruling
+   *[removed for publication]*
+   site runbook's cache-busted preflight APPLIED at her word** (their `notes/
+   variorum-releases.md`, commit `5649cf6` — wrangler has no `r2 object head`, so the
+   verified busted-probe shape landed) · the Restore Tutorial press — noted, hers, and the
+   tutorial rewording is 13s-a's anyway.
 8. **The next release, whenever you have fixes to ship:** one command + the site legs, under
    the standing R-13r-15 exemption — `Tools/Release/release.sh --version 0.9.2`, then the site
    runbook's locked order (the orchestrator of any session may run it; the pipeline refuses
