@@ -553,7 +553,11 @@ struct BookArrivalsDoor: View {
                 }
             }
             .padding(12)
-            .frame(width: 460, alignment: .leading)
+            // 17y B3 (h) — the walk's W-1: at 460 pt an owned book's row (the
+            // "also in …" line, the stamp, three arms) truncated "Copy In" to
+            // "copy…" — a door word must never truncate (the arms are
+            // fixed-size below; the room is here).
+            .frame(width: 600, alignment: .leading)
             .background(tokens.surface)
         }
         // The door's observation — the count always, the rows while open.
@@ -679,6 +683,10 @@ struct BookArrivalsList: View {
             ForEach(arms.acts, id: \.self) { act in
                 armButton(act, arrival: arrival)
                     .disabled(busy)
+                    // W-1: a door's word is never truncated — the ownership
+                    // line yields (it truncates in the middle, whole on hover).
+                    .lineLimit(1)
+                    .fixedSize()
             }
         }
         #if DEBUG

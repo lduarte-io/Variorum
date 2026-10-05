@@ -367,6 +367,11 @@ final class LibraryCatalogModel {
             .flatMap(Queries.LibrarySort.init(rawValue:)) ?? .lastTouched
         direction = defaults.string(forKey: Self.directionKey)
             .flatMap(SortDirection.init(rawValue:)) ?? .desc
+        // 17y B3 (l) — the walk's W-2: the listing is a ONE-SHOT read, so a
+        // book archived or deleted from its row menu must re-ask it.
+        bookRowDoors.onLanded = { [weak self] in
+            Task { await self?.search() }
+        }
     }
 
     /// One-shot per typed query / scope / sort change (the core query's

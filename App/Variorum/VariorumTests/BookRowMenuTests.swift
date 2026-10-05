@@ -117,4 +117,28 @@ struct BookRowMenuTests {
             #expect(doors.settingsTarget?.readingID == book.id, "the settings sheet's item")
         }
     }
+
+    /// The walk's W-2: a state door that ran tells the surface, so a ONE-SHOT
+    /// listing (the Library's catalog) re-asks — a book deleted or archived
+    /// from its row menu leaves the list at once.
+    @Test func aStateDoorThatRanTellsTheSurface() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 4))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let book = try session.operations.createReading(name: "essays", kind: .book)
+            let doors = BookRowDoors(session: session)
+            var landed = 0
+            doors.onLanded = { landed += 1 }
+            await doors.open(.archiveBook, readingID: book.id)
+            #expect(landed == 1, "the surface heard the act")
+            let catalog = LibraryCatalogModel(session: session)
+            await catalog.search()
+            #expect(!catalog.hits.contains { $0.id == book.id }, "an archived book leaves the catalog")
+        }
+    }
 }

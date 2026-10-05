@@ -83,6 +83,11 @@ final class BookRowDoors {
     var settingsTarget: BookSettingsTarget?
     var pendingRuleEditor: RuleEditorModel?
     var ruleEditor: RuleEditorModel?
+    /// Raised after a state door ran (acted at once, or a confirm landed) —
+    /// a surface whose listing is a ONE-SHOT read re-asks it here (the
+    /// Library's catalog; the walk's W-2: a book deleted from its row menu
+    /// stayed listed). Held listings (Starred, Archived) need nothing.
+    @ObservationIgnored var onLanded: () -> Void = {}
 
     init(session: AppSession, stateDoors: BookStateDoors? = nil) {
         self.session = session
@@ -119,6 +124,10 @@ final class BookRowDoors {
 
     func open(_ act: CapabilityID, readingID: String) async {
         await stateDoors.open(act, readingID: readingID)
+        // An act that asked first lands later, through the host's confirm
+        // (which raises it again) — re-asking a one-shot listing twice is
+        // harmless.
+        onLanded()
     }
 }
 
@@ -210,7 +219,7 @@ private struct BookRowDoorsHost: ViewModifier {
                 RuleEditorSheet(model: editor)
             }
         if hostsStateConfirms {
-            hosted.bookStateConfirms(doors.stateDoors)
+            hosted.bookStateConfirms(doors.stateDoors) { _ in doors.onLanded() }
         } else {
             hosted
         }
