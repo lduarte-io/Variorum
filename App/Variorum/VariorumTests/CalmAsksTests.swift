@@ -237,6 +237,40 @@ struct CalmAsksTests {
         #expect(s.registeredIDs.contains(CalmAskScheduler.AskID.backupFolder), "another window's id")
     }
 
+    /// F3 (ladder round 1, red-on-old): TWO windows each register the backup
+    /// ask. The later registration must not DISCARD the earlier window's —
+    /// otherwise closing the later window (which takes back only its own)
+    /// leaves the ask unregistered while the earlier window still stands,
+    /// and the ask goes dormant until the next launch.
+    @Test func aClosingWindowLeavesTheOtherWindowsRegistrationStanding() async {
+        let w = World()
+        defer { w.defaults.removePersistentDomain(forName: w.suite) }
+        w.ownWriting = true
+        w.updateOpen = false  // the update ask is answered; only the backup ask is in play
+        let s = w.scheduler()  // window A's registration rides in (its own host)
+        let hostB = UUID()
+        var windowBPresented = 0
+        s.register(.init(
+            id: CalmAskScheduler.AskID.backupFolder, rank: 1, fromDay: 5, maxShows: 2,
+            returnsAfterDays: 7, host: hostB,
+            wantsAsking: { true }, present: { windowBPresented += 1 }))
+        s.unregister(id: CalmAskScheduler.AskID.backupFolder, host: hostB)
+        #expect(s.registeredIDs.contains(CalmAskScheduler.AskID.backupFolder),
+                "window A's registration survives window B's close")
+        // And the survivor SPEAKS: on the ask's day, THIS scheduler presents
+        // through window A's registration (`w.shown`), never through the
+        // closed window B's.
+        for _ in 1...5 {
+            w.now = w.calendar.date(byAdding: .day, value: 1, to: w.now)!
+            s.noteActive()
+        }
+        w.now = w.now.addingTimeInterval(180)
+        #expect(await s.evaluate() == CalmAskScheduler.AskID.backupFolder,
+                "the surviving registration answers for the ask")
+        #expect(w.shown == ["backup"] && windowBPresented == 0,
+                "window A presents; the closed window's present never runs")
+    }
+
     // MARK: - The update ask's two halves (R-13r-11)
 
     /// Sparkle asks its delegate by the Objective-C selector, and prompts on

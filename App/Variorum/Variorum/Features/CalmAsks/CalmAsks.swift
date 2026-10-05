@@ -218,11 +218,17 @@ final class CalmAskScheduler {
 
     // MARK: Registration
 
-    /// Registers (or replaces, by id) one ask.
+    /// Registers one ask. A host re-registering its OWN ask (same id AND
+    /// host) replaces it; a different host's registration for the same id
+    /// stands BESIDE the earlier one (F3, ladder round 1: two windows may
+    /// each carry the backup ask — replacing by id alone discarded the
+    /// earlier window's, so closing the later window left the ask
+    /// unregistered while the earlier window still stood). The stored array
+    /// keeps REGISTRATION ORDER; rank ordering and the one-voice-per-id
+    /// choice live in `effective`.
     func register(_ registration: Registration) {
-        registrations.removeAll { $0.id == registration.id }
+        registrations.removeAll { $0.id == registration.id && $0.host == registration.host }
         registrations.append(registration)
-        registrations.sort { $0.rank < $1.rank }
     }
 
     /// Takes back an ask — only the registering host's (a window closing
@@ -231,7 +237,18 @@ final class CalmAskScheduler {
         registrations.removeAll { $0.id == id && $0.host == host }
     }
 
-    var registeredIDs: [String] { registrations.map(\.id) }
+    /// ONE registration speaks per ask id — the most recently registered
+    /// surviving one — in rank order. `evaluate` reads THIS list for both
+    /// the snapshot and the `present` lookup (the same choice, F3's shape).
+    private var effective: [Registration] {
+        var newestByID: [String: Registration] = [:]
+        for registration in registrations { newestByID[registration.id] = registration }
+        return newestByID.values.sorted {
+            $0.rank != $1.rank ? $0.rank < $1.rank : $0.id < $1.id
+        }
+    }
+
+    var registeredIDs: [String] { effective.map(\.id) }
 
     // MARK: One evaluation
 
@@ -251,9 +268,11 @@ final class CalmAskScheduler {
         let lastAskDay = leaves.defaults.object(forKey: Key.lastAskDay) as? Int
         guard lastAskDay != day else { return nil }
         // The cheap terms first; an ask's own `wantsAsking` (which may read
-        // the store) only when it is otherwise due today.
+        // the store) only when it is otherwise due today. `effective` (the
+        // newest surviving registration per id, rank order) is the one list
+        // this pass and the `present` lookup below both read.
         var snapshot: [CalmAskRules.Ask] = []
-        for registration in registrations {
+        for registration in effective {
             var ask = CalmAskRules.Ask(
                 id: registration.id, fromDay: registration.fromDay, wantsAsking: true,
                 timesShown: leaves.defaults.integer(forKey: Key.timesShown(registration.id)),
@@ -270,7 +289,7 @@ final class CalmAskScheduler {
             now: leaves.now(), launchedAt: launchedAt, lastTypedAt: lastTypedAt,
             nothingOpen: leaves.nothingOpen(), numbers: numbers),
             let id = CalmAskRules.next(snapshot, day: day, lastAskDay: lastAskDay),
-            let registration = registrations.first(where: { $0.id == id })
+            let registration = effective.first(where: { $0.id == id })
         else { return nil }
         let shown = leaves.defaults.integer(forKey: Key.timesShown(id))
         leaves.defaults.set(shown + 1, forKey: Key.timesShown(id))
