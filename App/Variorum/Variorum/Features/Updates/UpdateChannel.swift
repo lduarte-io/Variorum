@@ -216,7 +216,17 @@ final class UpdateChannel {
 
     /// The door's act: a user-initiated check. From here on the UI is
     /// Sparkle's own standard alerts (found / up to date / install / relaunch).
+    ///
+    /// F4 (ladder round 1): guarded on `isAskingPermission` AT THE CHANNEL, so
+    /// EVERY door — the menu's (which also greys), the sync row's, any future
+    /// one — refuses to open a check beside the deferred permission window.
+    /// Sparkle cannot refuse it for us: we drive its user driver directly, so
+    /// its own `_showingPermissionRequest` stays NO (its source). Deliberately
+    /// NOT guarded on `canCheckForUpdates`: mid-session, Sparkle's own
+    /// `checkForUpdates` brings the running session into focus — behaviour
+    /// worth keeping for a door that is not greyed.
     func checkForUpdates() {
+        guard !isAskingPermission else { return }
         controller?.checkForUpdates(nil)
     }
 
