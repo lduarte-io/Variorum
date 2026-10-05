@@ -163,7 +163,11 @@ struct SampleLibraryWelcomeTests {
             #expect(f.welcomes.count == 1)
             #expect(welcome.name == "Welcome" && welcome.wingId == "")
             // The seeded content ON it (§19): the three books + the classics
-            // gathering (the guide is seeded when she first opens it).
+            // gathering. (The field guide is the Mac launch's own birth seed —
+            // 17y B-SEED; this pin drives the shared brain without it, and
+            // `LaunchFurnitureTests` pins the guide on Welcome through the
+            // production launch. The old note here — "the guide is seeded when
+            // she first opens it" — described the defect.)
             for name in [sherlockName, jekyllName, encryptionName,
                          SampleLibraryWelcome.classicsGatheringName] {
                 #expect(f.shelfOf[name] == .some(welcome.id), "\(name) sits on Welcome")

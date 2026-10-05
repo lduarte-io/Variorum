@@ -31,6 +31,7 @@
 
 import Foundation
 import GRDB
+import OSLog
 import VariorumCore
 
 enum TutorialSeeder {
@@ -268,6 +269,71 @@ enum TutorialSeeder {
     static func restore(session: AppSession) async throws -> String {
         let existing = try await session.database.read { db in try discover(db) }
         return try await restore(session: session, existing: existing)
+    }
+
+    // MARK: - The birth seed (17y B-SEED — item (q))
+
+    /// What a fresh store's birth did about the guide. Recorded (one log
+    /// line), never surfaced — furniture is silent.
+    enum BirthSeed: Equatable {
+        /// Minted the pristine guide (the restore road over an empty store).
+        case seeded(bookID: String)
+        /// A live guide already stands (arrived by sync, or the interrupted
+        /// launch this one resumes already made it) — nothing minted.
+        case alreadyPresent
+        /// A reading of the guide's name is TOMBSTONED — her deletion,
+        /// honoured (the seeded books' rule, `readerDeletedTheBook`'s shape).
+        case deletedByTheReader
+        /// Tutorial RESIDUE with no guide (notes tagged exactly `tutorial`,
+        /// the scraps pool): replacing it is the doors' CONFIRMED road
+        /// (MAJOR-A / MINOR-D5), never silent furniture's — nothing touched.
+        case residue
+        /// A tutorial door holds the latch — it seeds and arranges the guide
+        /// itself; the launch yields rather than racing it.
+        case doorInFlight
+        /// The store said no. Recorded, never surfaced; the doors still mint.
+        case refused(String)
+    }
+
+    private static let birthLog = Logger(subsystem: "io.lduarte.Variorum", category: "tutorial")
+
+    /// **THE GUIDE AT A FRESH STORE'S BIRTH** (17y B-SEED — her report: the
+    /// field guide was the one seeded thing missing on a fresh store; §19.3
+    /// "Welcome = the field guide + the classics trio"; the 13i-d U7 brief
+    /// "fresh stores get it at birth"). The launch hands this to
+    /// `SampleLibraryWelcome.arrangeAtLaunch(beforeArranging:)`, so it runs
+    /// ONLY on the arrangement's arrange-now road (a fresh birth under the
+    /// sync gate, or the `pending` resume of one) — never on an existing
+    /// store — and the arrangement then shelves the guide on Welcome.
+    ///
+    /// SILENT: no receipt, no navigation, no ask (R-13r-11 — the seed is
+    /// furniture); the QUIET facade (the restore road — nothing on ⌥⌘Z);
+    /// under the doors' latch; and one read decides, in the seeded books'
+    /// order — a live guide wins, then her deletion, then residue; only a
+    /// store with no trace of the tutorial at all is seeded.
+    @MainActor
+    @discardableResult
+    static func seedAtBirth(session: AppSession) async -> BirthSeed {
+        let outcome = await performBirthSeed(session: session)
+        birthLog.notice("field guide at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
+        return outcome
+    }
+
+    @MainActor
+    private static func performBirthSeed(session: AppSession) async -> BirthSeed {
+        guard session.beginTutorialDoor() else { return .doorInFlight }
+        defer { session.endTutorialDoor() }
+        do {
+            let (existing, deleted) = try await session.database.read { db in
+                (try discover(db), try Queries.readingTombstoneExists(db, name: bookName))
+            }
+            if !existing.readingIDs.isEmpty { return .alreadyPresent }
+            if deleted { return .deletedByTheReader }
+            if !existing.isEmpty { return .residue }
+            return .seeded(bookID: try await restore(session: session, existing: existing))
+        } catch {
+            return .refused(String(describing: error))
+        }
     }
 
     /// Deletion is tombstones through Operations — everything recoverable

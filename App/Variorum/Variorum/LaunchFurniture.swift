@@ -37,6 +37,18 @@
 //      minted every story; an existing store is marked `declined` and NEVER
 //      retrofitted (the restore doors are its road). Same occasion, after
 //      every other furniture seed.
+//    · 17y B-SEED — THE FIELD GUIDE AT BIRTH: on that same arrange-now road,
+//      BEFORE the arrangement shelves it (`TutorialSeeder.seedAtBirth`, the
+//      arrangement's `beforeArranging`). Until this batch nothing on the
+//      launch path seeded the guide — it had only ever been a door — so a
+//      fresh store's Welcome lacked it (her report). Silent, latched, and
+//      deciding from one read: a live guide, her deletion, or tutorial
+//      residue each leave the store as it is.
+//
+//      THE RESIDUAL, NAMED (the Jekyll precedent — 18l-c U6): the guide is
+//      not judged by the sync dedupe (that would be `Sync/`), so a fresh
+//      signed-OUT store that later signs into an account already holding a
+//      field guide shows two — both live, nothing lost, either deletable.
 //
 
 import Foundation
@@ -94,6 +106,10 @@ enum LaunchFurniture {
             session: session, sherlock: sherlockOutcome,
             storeVariant: storeVariant,
             guideName: TutorialSeeder.bookName,
+            // 17y B-SEED: the field guide is born with the store, on the
+            // arrangement's arrange-now road only — so Welcome holds it at
+            // first open (§19.3) and an existing store never grows one.
+            beforeArranging: { _ = await TutorialSeeder.seedAtBirth(session: session) },
             loadMark: marks.welcome?.load,
             saveMark: marks.welcome?.save)
     }

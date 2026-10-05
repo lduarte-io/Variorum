@@ -24,7 +24,9 @@
 //  QUIET facade (furniture never lands on her structural-undo stack — the
 //  tutorial's MINOR-D1), every write an operation. WHEN it runs is the
 //  caller's: the Mac runs it at a FRESH store's birth (`arrangeAtLaunch` —
-//  only when this launch's Sherlock seed minted every story) and from every
+//  only when this launch's Sherlock seed minted every story; since 17y
+//  B-SEED the Mac seeds its field guide on that same road first, through
+//  `beforeArranging`, so Welcome holds the guide at first open) and from every
 //  RESTORE door (Help ▸ Restore Tutorial, the tutorial's open door when it
 //  seeds the guide, Help ▸ Restore for each seeded book). An existing store
 //  is never arranged silently: its launch marks the decision `declined` and
@@ -324,6 +326,17 @@ nonisolated enum SampleLibraryWelcome {
     /// now. Marked `pending` before arranging (a window closed mid-arrange
     /// resumes at the next launch), `done` after. Any other Sherlock outcome
     /// on an undecided store marks `declined` and writes nothing.
+    ///
+    /// **`beforeArranging`** (17y B-SEED — item (q)): the platform's OWN
+    /// seeded furniture that must exist before the arrangement shelves it —
+    /// the Mac's field guide (Mac-only content; the phone never calls this).
+    /// It runs on the arrange-now road only (this birth, or a `pending`
+    /// resume of one), AFTER the decision and BEFORE `arrange`, so it
+    /// inherits every guarantee of that decision — the sync gate behind
+    /// Sherlock's outcome, and never on an existing store (`declined` /
+    /// `done` never reach it) — and the arrangement's shelving step puts what
+    /// it made on Welcome. Furniture: it answers nothing and must never
+    /// throw; its own outcome is its own log line.
     @MainActor
     @discardableResult
     static func arrangeAtLaunch(
@@ -331,6 +344,7 @@ nonisolated enum SampleLibraryWelcome {
         sherlock outcome: SampleLibrarySeeder.Outcome,
         storeVariant: AppDatabase.StoreVariant = .real,
         guideName: String?,
+        beforeArranging: (@MainActor () async -> Void)? = nil,
         loadMark: (() -> String?)? = nil,
         saveMark: ((String) -> Void)? = nil
     ) async -> LaunchOutcome {
@@ -342,6 +356,7 @@ nonisolated enum SampleLibraryWelcome {
             log.notice("welcome arrangement: \(String(describing: decided!), privacy: .public)")
             return decided!
         }
+        await beforeArranging?()
         do {
             let arranged = try await arrange(session: session, guideName: guideName)
             save("done")
