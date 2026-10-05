@@ -2132,7 +2132,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | # | piece | status |
 |---|---|---|
 | 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
-| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | IN-PROGRESS — the trace's lead (below) is being confirmed by a driven reproduction before any fix |
+| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | IN-PROGRESS — reproduction DONE on the pre-fix Debug build (below); the pin `VariorumTests/DragTypeDeclarationTests.swift` committed RED ON PURPOSE (this commit): **"Test run with 3 tests in 1 suite failed … with 10 issues"** (`scratchpad/17y-b2/p2-red.log`). NEXT: the declarations in `VariorumInfo.plist`, green, the post-fix drag, revert round |
 | 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | NOT-STARTED |
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | NOT-STARTED |
 | 5 | (m) the quick-note box's double cursor | NOT-STARTED |
@@ -2160,3 +2160,16 @@ drags and committed by her hand; 13i-d U1's custom-type drag started a session b
 lit (F-U1-4), and the Open strip's custom-type reorder was never human-verified (pre-13u Act 10).
 F-U1-4/F-U2-4 recorded the failure as a synthetic-harness artifact; her real hand failing on (a)
 and (e) says it was not.
+
+**THE DRIVEN REPRODUCTION (pre-fix Debug build of HEAD dfd15204, `DerivedData/17y`, dev store,
+author-free, guards green per act; captures `17y-screens/b2/old/`):** (1) the launch's unified log
+(`/usr/bin/log show`) carries the system's own FAULT, repeated, from `UniformTypeIdentifiers`
+[`com.apple.runtime-issues:Type Declaration Issues`]: *Type "io.lduarte.variorum.bookcase-item" was
+expected to be declared and exported in the Info.plist of Variorum.app, but it was not found.*
+(2) A `cliclick` drag (`dd` · stepped `dm` · `du`) of "field notes" from UNSHELVED onto the strip's
+"research": the full-screen mid-drag capture `a3-middrag-fullscreen.png` shows the drag SESSION
+running (the row's "field notes" image rides the pointer onto "research") with NO hairline on the
+name (`a1-middrag-over-research.png`); after `du` the book is still unshelved and nothing spoke
+(`a2-after-drop.png`). That is F-U1-4's shape exactly — on a build whose own log names the cause.
+(3) The pin, RED on this tree with 10 issues across its 3 tests (the three tokens' types undeclared;
+none conforms to `public.data` at runtime; the source scan finds three undeclared identifiers).
