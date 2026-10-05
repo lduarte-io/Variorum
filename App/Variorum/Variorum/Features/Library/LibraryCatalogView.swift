@@ -121,7 +121,6 @@ struct LibraryCatalogView: View {
     @State private var wingMove: WingsModel.MoveAsk?
     /// 13i-c U4 — THE BADGE FAMILY outside a book (§6): the listed notes'
     /// owned-by facts, ONE page-driven observation (P1 — ∝ the hits).
-    @State private var ownership = OwnershipFactsModel()
     @State private var renameTarget: String?
     @State private var renameTitle = ""
     /// Item 14: the version doors' picker target — which note, which act.
@@ -238,12 +237,12 @@ struct LibraryCatalogView: View {
         .task(id: model.listedBookIDs) { await model.bookRowDoors.load(model.listedBookIDs) }
         .bookRowDoors(model.bookRowDoors)
         .wingMoveConfirm($wingMove, wings: wings) { Task { await model.refresh() } }
-        // 13i-c U4: the owned-by badge's facts — 17y B1 (k): OBSERVED for the
-        // NEAR WINDOW only (the pages around what is on screen), so the held
-        // region stays a few pages however deep she scrolls.
-        .task(id: model.nearNoteIDs) {
-            await ownership.observe(session: session, postIDs: model.nearNoteIDs, inBook: nil)
-        }
+        // 13i-c U4: the owned-by badge's facts — 17y B1 (k): the MODEL holds
+        // them for the NEAR WINDOW only (the pages around what is on screen),
+        // so the held region stays a few pages however deep she scrolls; the
+        // hold ends with the listing.
+        .onAppear { model.holdNearFacts() }
+        .onDisappear { model.stopHoldingFacts() }
         // 13g R5-6: switching INTO notes fills the cards; switching out
         // clears them, so a mode she is not in holds no derived text.
         .task(id: model.mode) { await model.refreshNoteCards() }
@@ -788,7 +787,7 @@ struct LibraryCatalogView: View {
     /// 13i-c U4 (§6): the owned-by badge a listed note wears (the Library is
     /// OUTSIDE every book), or nil — the setting silences the set.
     private func ownedByBadge(_ postID: String) -> OwnershipBadgeFace.Badge? {
-        ownership.badge(
+        model.ownership.badge(
             for: postID, placement: .outside,
             badgesOn: themeStore?.settings.ownershipBadges ?? true)
     }

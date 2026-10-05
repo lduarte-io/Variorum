@@ -70,7 +70,9 @@ extension LibraryCatalogModel {
         windowMaybeMoved(spawning: spawning)
         guard notesHaveMore, !loadingMoreNotes,
               position >= noteHits.count - Self.prefetchMargin else { return false }
-        if spawning { Task { await loadMoreNotes() } }
+        // The read starts on the NEXT turn, never inside the layout that
+        // reported the row.
+        if spawning { Task { @MainActor in await loadMoreNotes() } }
         return true
     }
 
@@ -83,13 +85,53 @@ extension LibraryCatalogModel {
         if !visibleNoteIndices.isEmpty { windowMaybeMoved(spawning: spawning) }
     }
 
+    /// The window check — coalesced into ONE per turn when the views report
+    /// (`spawning`), run at once when a pin drives it.
     private func windowMaybeMoved(spawning: Bool) {
+        guard spawning else {
+            applyWindow()
+            return
+        }
+        guard !windowCheckQueued else { return }
+        windowCheckQueued = true
+        Task { @MainActor in
+            windowCheckQueued = false
+            applyWindow()
+            await loadNearExtras(generation: searchGeneration, replacing: false)
+        }
+    }
+
+    /// Move the window to what is on screen; re-aim the held facts if it moved.
+    private func applyWindow() {
         let next = Self.window(visible: visibleNoteIndices, count: noteHits.count)
         guard next != nearPages else { return }
         nearPages = next
-        if spawning {
-            Task { await loadNearExtras(generation: searchGeneration, replacing: false) }
+        holdNearFacts()
+    }
+
+    // MARK: - The held facts (the near window's ownership badges)
+
+    /// Observe the owned-by facts of the near window's notes — and nothing
+    /// else: re-aimed only when the window's ids change (a page boundary, a
+    /// new page in the window, a re-read), so the held region stays a few
+    /// pages however deep she scrolls.
+    func holdNearFacts() {
+        let ids = nearNoteIDs
+        guard ids != heldNoteIDs || ownershipHold == nil else { return }
+        heldNoteIDs = ids
+        ownershipHold?.cancel()
+        let ownership = ownership
+        let session = session
+        ownershipHold = Task { @MainActor in
+            await ownership.observe(session: session, postIDs: ids, inBook: nil)
         }
+    }
+
+    /// The listing left the screen: the held observation ends with it.
+    func stopHoldingFacts() {
+        ownershipHold?.cancel()
+        ownershipHold = nil
+        heldNoteIDs = []
     }
 
     /// **The next page of notes** — one keyset read after the cursor, under
@@ -123,9 +165,9 @@ extension LibraryCatalogModel {
             notesHaveMore = page.next != nil
             loadingMoreNotes = false
             // The page just landed sits beside what is on screen: its extras
-            // are the window's to read.
-            let next = Self.window(visible: visibleNoteIndices, count: noteHits.count)
-            nearPages = next
+            // are the window's to read, its facts the window's to hold.
+            nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
+            holdNearFacts()
             await loadNearExtras(generation: generation, replacing: false)
         } catch {
             loadingMoreNotes = false

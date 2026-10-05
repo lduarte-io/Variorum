@@ -101,8 +101,11 @@ struct LibraryInfiniteScrollTests {
     private func mount(
         _ session: AppSession, _ model: LibraryCatalogModel, height: CGFloat = 640
     ) -> (NSWindow, NSHostingView<AnyView>) {
+        // AWAY from the machine's pointer: a card under a real pointer is
+        // HOVERED, and a hovered untagged card's chip row has its own
+        // behaviour (F-B1-… in the record) — these pins are about scrolling.
         let window = NSWindow(
-            contentRect: NSRect(x: 60, y: 60, width: 1000, height: height),
+            contentRect: Self.frameAwayFromThePointer(height: height),
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         let hosting = NSHostingView(rootView: AnyView(
@@ -113,6 +116,16 @@ struct LibraryInfiniteScrollTests {
         window.contentView = hosting
         window.makeKeyAndOrderFront(nil)
         return (window, hosting)
+    }
+
+    private static func frameAwayFromThePointer(height: CGFloat) -> NSRect {
+        let mouse = NSEvent.mouseLocation
+        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 2000, height: 1200)
+        // The window is 1000 wide: put it on the half the pointer is not in,
+        // vertically too.
+        let x = mouse.x < screen.midX ? max(screen.midX, screen.maxX - 1_000) : screen.minX
+        let y = mouse.y < screen.midY ? screen.maxY - height : screen.minY
+        return NSRect(x: x, y: y, width: 1000, height: height)
     }
 
     private static func scrollViews(in view: NSView) -> [NSScrollView] {

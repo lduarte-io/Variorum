@@ -205,7 +205,20 @@ final class LibraryCatalogModel {
     @ObservationIgnored var visibleNoteIndices: Set<Int> = []
     /// The pages near what is on screen — the window whose extras (chips,
     /// card words) are kept loaded and whose ownership facts are OBSERVED.
-    var nearPages: ClosedRange<Int> = 0...0
+    /// UNOBSERVED on purpose: the rows report what is on screen while SwiftUI
+    /// lays them out, and a window the views READ would feed back into that
+    /// very layout (measured: the Cards view's lazy column looped). The
+    /// window acts on the extras and the held facts, never on the views.
+    @ObservationIgnored var nearPages: ClosedRange<Int> = 0...0
+    /// A window check is queued (the rows' callbacks coalesce into one per
+    /// turn, run AFTER the layout that reported them).
+    @ObservationIgnored var windowCheckQueued = false
+    /// **The owned-by badge facts — HELD for the near window only** (13i-c
+    /// U4's one page-driven observation, owned here since 17y B1 (k) so the
+    /// window, not the whole listing, is what it observes).
+    @ObservationIgnored let ownership = OwnershipFactsModel()
+    @ObservationIgnored var ownershipHold: Task<Void, Never>?
+    @ObservationIgnored var heldNoteIDs: [String] = []
     /// Pages whose chips are loaded for the current listing; pages whose card
     /// words are loaded for the current mode.
     @ObservationIgnored var chipPages: Set<Int> = []
@@ -455,6 +468,7 @@ final class LibraryCatalogModel {
             chipPages = []
             cardPages = []
             nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
+            holdNearFacts()
             await loadNearExtras(generation: generation, replacing: true)
             lastError = nil
         } catch {
