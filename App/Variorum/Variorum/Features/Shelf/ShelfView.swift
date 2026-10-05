@@ -12,7 +12,8 @@
 //    line is gone: the № census holds every number now);
 //  · THE STRIP (`BookcaseStrip`) — All · the shelves · ⋯ · + shelf, then the
 //    utility run № · order ▾ · details;
-//  · the № panel when she opened it (in flow, right-aligned — mockup v5);
+//  · the № panel when she opened it — right-aligned under the №, and since
+//    17y (r) an OVERLAY dropdown floating over the board (never in flow);
 //  · the books: a solo'd shelf's rows, or ALL — UNSHELVED at the top under
 //    its own collapsible header (§24's overrule), then every shelf in strip
 //    order under the Library's gray section labels, collapsible;
@@ -150,16 +151,25 @@ struct ShelfView: View {
                     shelfNameField = ""
                     newShelfPresented = true
                 })
-            if model.censusOpen {
-                // The № panel, in flow and right-aligned under the utility
-                // run (mockup v5) — opened by her click, remembered.
-                HStack {
-                    Spacer(minLength: 0)
-                    BookcaseCensusPanel(model: model, tokens: tokens)
+                // 17y item (r) — THE № PANEL IS A TRUE DROPDOWN (her report:
+                // "it's a dropdown, not a push down"). 13i-d U1 drew it IN
+                // FLOW between the strip and the board, so opening it pushed
+                // every row down by its height (148 pt, measured) and, in a
+                // window whose height was spoken for, clipped the first row
+                // at the scroll region's top edge. It now hangs from the
+                // strip's bottom edge, right-aligned under the utility run's
+                // № exactly where it sat — an OVERLAY: zero layout push. The
+                // strip draws above its siblings (`zIndex`) so the panel
+                // floats over the board's rows; its contents, solo acts and
+                // remembered-open state are untouched.
+                .overlay(alignment: .bottomTrailing) {
+                    if model.censusOpen {
+                        BookcaseCensusPanel(model: model, tokens: tokens)
+                            .padding(.trailing, 28)
+                            .alignmentGuide(.bottom) { $0[.top] }
+                    }
                 }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 6)
-            }
+                .zIndex(1)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     boardContent
@@ -611,10 +621,11 @@ struct ShelfView: View {
         // ladder's MINOR-1): with this frame recorder removed, that pin goes
         // HOLLOW — green even with the section-qualified identity reverted.
         // WHY a geometry observer on the row makes the old freeze reproducible
-        // in-process is NOT explained (recorded, never claimed). No test reads
-        // the rect's VALUE; the pin REQUIRES a frame record for both of its
-        // rows, so removing this turns the pin red, never hollow — do not
-        // "clean it up" without replacing the pin's red-on-old.
+        // in-process is NOT explained (recorded, never claimed). That pin
+        // never reads the rect's VALUE (it REQUIRES a frame record for both
+        // of its rows, so removing this turns it red, never hollow — do not
+        // "clean it up" without replacing its red-on-old); 17y B3 (r)'s
+        // `BookcaseCensusOverlayTests` does read it (the № panel moves no row).
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
             BookcaseRowOracle.recordFrame(reading.id, frame, owner: oracleOwner)
         }
@@ -1028,11 +1039,12 @@ enum BookcaseRowOracle {
 
     private static var frames = OwnedRegistrations<String, CGRect>()
 
-    /// Where the row sits, in its window (`.global`). No pin reads the VALUE:
-    /// `BookcaseRowFreezeTests` requires only that each of its rows HAS one,
-    /// because the recorder writing it is load-bearing for that pin's
-    /// red-on-old for a reason not understood (the B2 ladder's MINOR-1 — see
-    /// the recorder at the row).
+    /// Where the row sits, in its window (`.global`). `BookcaseRowFreezeTests`
+    /// requires only that each of its rows HAS one, because the recorder
+    /// writing it is load-bearing for that pin's red-on-old for a reason not
+    /// understood (the B2 ladder's MINOR-1 — see the recorder at the row).
+    /// 17y B3 (r): `BookcaseCensusOverlayTests` DOES read the value — the
+    /// open № panel must not move a row.
     static func frame(_ readingID: String) -> CGRect? { frames.current[readingID] }
 
     static func recordFrame(_ readingID: String, _ frame: CGRect, owner: UUID) {
