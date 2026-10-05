@@ -182,52 +182,23 @@ struct VariorumApp: App {
                         // now, so the migration-if-undone + the reconcile
                         // run again; the ready road's run had neither.
                         await bootstrap.runReadyHousekeeping()
-                        // Pre-13u Act 3: THE SAMPLE LIBRARY — the Sherlock
-                        // adventures as a real book, seeded once per store.
-                        // Her ruling is default-on in every reader's store,
-                        // which puts this on every launch's path, so where
-                        // it sits matters: HERE, inside the window's own
-                        // `.task` and after `start()`, so (1) first paint is
-                        // already done — nothing in the launch awaits it —
-                        // and (2) the sign-in question is settled, so the
-                        // gate below reads facts instead of a coin flip (the
-                        // starter journal's batch-5 MAJOR, whose duplicate
-                        // book propagated to every device). Idempotent by
-                        // construction and resumable, so a re-run after an
-                        // unlock — or after a cancelled seed — is safe.
-                        // pre-13x 5a: BOTH seeded books, in order — Sherlock,
-                        // then *Encryption Explained* (its own mark, so an
-                        // existing store seeds only the new one).
-                        // 13i-d U7: Sherlock's outcome decides whether this
-                        // launch is a FRESH store's birth (below).
-                        var sherlockOutcome: SampleLibrarySeeder.Outcome?
-                        for book in SampleLibrarySeeder.Book.all {
-                            let outcome = await SampleLibrarySeeder.seedIfNeeded(
-                                session: session,
-                                book: book,
-                                storeVariant: bootstrap.storeVariant,
-                                gate: SampleLibrarySeeder.SyncGate(
-                                    // Captured strongly, deliberately: the
-                                    // closures outlive nothing, and a nil'd weak
-                                    // reference would read as "no account",
-                                    // which is the unsafe direction.
-                                    belongsToAnAccount: {
-                                        fresh.sync.isConfigured
-                                            || fresh.account.variorum != nil
-                                    },
-                                    hasSyncedCleanly: {
-                                        fresh.sync.status.lastSuccessAt != nil
-                                    }))
-                            if book == .sherlock { sherlockOutcome = outcome }
-                        }
-                        // 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering —
-                        // an ordinary gathering on ★, seeded once per store
-                        // (fresh AND existing), her deletion honoured; same
-                        // occasion, same gate, its own mark.
-                        await StarredGatheringSeeder.seedIfNeeded(
+                        // THE LAUNCH'S FURNITURE — the sample books, the
+                        // starred-notes gathering and, at a fresh store's
+                        // birth, the Welcome arrangement. HERE, inside the
+                        // window's own `.task` and after `start()`: first
+                        // paint is done and the sign-in question is settled
+                        // (the gate reads facts). 17y B-SEED moved the body
+                        // verbatim into `LaunchFurniture.seed` so the pins
+                        // drive this exact composition — its header carries
+                        // every seed's reasons.
+                        await LaunchFurniture.seed(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             gate: SampleLibrarySeeder.SyncGate(
+                                // Captured strongly, deliberately: the
+                                // closures outlive nothing, and a nil'd weak
+                                // reference would read as "no account",
+                                // which is the unsafe direction.
                                 belongsToAnAccount: {
                                     fresh.sync.isConfigured
                                         || fresh.account.variorum != nil
@@ -235,18 +206,6 @@ struct VariorumApp: App {
                                 hasSyncedCleanly: {
                                     fresh.sync.status.lastSuccessAt != nil
                                 }))
-                        // 13i-d U7 — THE WELCOME ARRANGEMENT AT A FRESH STORE'S
-                        // BIRTH (the sitting record §7/§17/§19.3): only when
-                        // this launch's Sherlock seed minted every story; an
-                        // existing store is marked `declined` and NEVER
-                        // retrofitted (the restore doors are its road). Same
-                        // occasion, after every other furniture seed.
-                        if let sherlockOutcome {
-                            await SampleLibraryWelcome.arrangeAtLaunch(
-                                session: session, sherlock: sherlockOutcome,
-                                storeVariant: bootstrap.storeVariant,
-                                guideName: TutorialSeeder.bookName)
-                        }
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
