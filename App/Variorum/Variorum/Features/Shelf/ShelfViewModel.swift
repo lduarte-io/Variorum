@@ -506,6 +506,12 @@ nonisolated enum BookcaseCopy {
     static let unavailableNote = "Open the Bookcase to arrange shelves and books."
     static let placingUnavailableNote =
         "Switch the Bookcase's order to \u{201C}my order\u{201D} to place books by hand."
+    /// 17y B2 (b) — my order's row grip (the app's one handle glyph, ⠿ —
+    /// the Lenses rows', the book view's chapter headers', the Book Panel's).
+    static let gripGlyph = "\u{283F}"
+    static let gripHelp =
+        "Drag to place this book by hand \u{2014} it lands right above the row you drop it on, "
+        + "on any shelf"
 
     /// The shelf delete's confirm (P-13id-U1-4 — the one net for cheap
     /// metadata with no Trash and no undo).

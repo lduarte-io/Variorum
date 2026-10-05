@@ -478,7 +478,9 @@ struct ShelfView: View {
 
     private func shelfRow(_ book: Queries.ShelfBook) -> some View {
         let reading = book.reading
-        let placing = model.orderMode == .mine
+        // 17y B2 (b): ONE value for the row drop, the grip and Send to
+        // Top/Bottom (`BookcaseBoard.placesByHand`, pinned).
+        let placing = BookcaseBoard.placesByHand(model.orderMode)
         return Button {
             onOpen(.reading(reading.id))
         } label: {
@@ -535,6 +537,19 @@ struct ShelfView: View {
             // My order's insertion hairline: the dragged book lands HERE.
             if placing, rowDropTarget == reading.id {
                 Rectangle().fill(tokens.accent.opacity(0.6)).frame(height: 1)
+            }
+        }
+        .overlay(alignment: .leading) {
+            // 17y B2 (b) — HER DRAG-BARS ASK: in my order every row shows the
+            // app's handle (⠿), in the board's leading GUTTER so the name
+            // column never moves when the order changes. Drawn exactly where
+            // a drag can place (P-2); the whole row stays the drag source.
+            if placing {
+                Text(BookcaseCopy.gripGlyph)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .help(BookcaseCopy.gripHelp)
+                    .offset(x: -16)
             }
         }
         .draggable(BookcaseDragToken(.book(reading.id)))
@@ -618,7 +633,7 @@ struct ShelfView: View {
         }
         // My order's own doors (§20, §24): rendered only in the PLACING mode
         // — under A–Z or last edited a hand position would not show (P-2).
-        if model.orderMode == .mine {
+        if BookcaseBoard.placesByHand(model.orderMode) {
             Button(CapabilityRegistry.capability(.sendBookToTop).verb) {
                 Task { await model.place(reading.id, at: .top) }
             }

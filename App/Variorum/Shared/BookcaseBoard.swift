@@ -204,6 +204,16 @@ nonisolated enum BookcaseBoard {
         shelfCount > 0 || here != unshelvedKey
     }
 
+    /// **Whether the board's rows are PLACED BY HAND** (17y B2, item (b)):
+    /// the ONE value the book row's drop site (a book dropped on a row lands
+    /// right above it — P-13id-U1-12), its ⠿ grip (her drag-bars ask) and my
+    /// order's Send to Top / Bottom all read — so the handle is drawn exactly
+    /// where a drag can place (P-2; her "a handle that cannot drag must not
+    /// render"). Under A–Z or last edited a hand position would not show.
+    static func placesByHand(_ mode: BookcaseOrderMode) -> Bool {
+        mode == .mine
+    }
+
     /// The № census over a set of books — every solo's count.
     static func census(_ books: [Queries.ShelfBook]) -> [BookcaseSolo: Int] {
         var counts: [BookcaseSolo: Int] = [:]

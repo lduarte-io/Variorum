@@ -2133,7 +2133,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 |---|---|---|
 | 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
 | 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (this commit) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
-| 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | NOT-STARTED |
+| 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | IN-PROGRESS — BUILT (this commit): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"Test run with 19 tests in 5 suites passed"** (`p3-green.log`). NEXT: the behavioural revert round (announced below), then the walk (grip visible + a row drop landing right above) |
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | NOT-STARTED |
 | 5 | (m) the quick-note box's double cursor | NOT-STARTED |
 | 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
@@ -2142,7 +2142,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | NOT-STARTED |
 | 10 | Record close (first line, findings, PROVISIONALs → QUESTIONS #184 if any) | NOT-STARTED |
 
-**REVERT STATE: NO REVERT IN FLIGHT.**
+**REVERT STATE: (b)'s round starting — `placesByHand` answering `true` for every order, from committed HEAD; restore = `git checkout HEAD -- App/Variorum/Shared/BookcaseBoard.swift`.**
 
 ### THE TRACE — (a)(b)(e), the shared drag mechanism (PENDING confirmation by a driven reproduction)
 
