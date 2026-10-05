@@ -801,7 +801,34 @@ struct PostDetailView: View {
         private var face: some View {
             Group {
                 if editing {
-                    TextField(displayed, text: $draft)
+                    // **17y B2 (n) — the words STAY when the field opens.** On
+                    // a note named by its day the draft is the stored name,
+                    // "", so the open field used to show the date as its OWN
+                    // prompt — and SwiftUI's field editor lays a prompt out
+                    // against the field's top, not on the label's baseline:
+                    // in Study (Iowan's ascender is taller than its size) the
+                    // date rode 6.5 pt up and was clipped at the field's top,
+                    // "the chrome is still shifted up". Row 12's one box held
+                    // (the frames agree); the words inside it did not. So the
+                    // field carries NO prompt, and while the draft is empty
+                    // the date is drawn by the resting face's own `Text` —
+                    // same font, same frame, same place — behind the field.
+                    // Typed text already lands on the label's line (measured
+                    // within half a point), so nothing moves either way.
+                    // (The same shape the 2026-09-06 round's row 10 named as
+                    // the API-free road for the digit prompt.)
+                    if draft.isEmpty {
+                        Text(displayed)
+                            .font(tokens.title)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
+                    TextField("", text: $draft)
+                        .accessibilityLabel(Text(displayed))
                         .textFieldStyle(.plain)
                         .font(tokens.title)
                         .foregroundStyle(tokens.ink)
