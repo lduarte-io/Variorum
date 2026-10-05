@@ -183,3 +183,27 @@ to flip at her word; her hands at the walk are the honest test.)*
 on it - don't have it in the menu item line." The strip's ★ row is always the bare word —
 no count, no sentence, no badge inline; the empty-state one-liner renders ONLY in the solo'd
 board area when the starred set is empty. Binding for B3's build.)*
+
+## THE OVERNIGHT MANDATE (hers, 2026-10-05 ~04:30 — verbatim; binds the rest of the pass)
+
+"I'm stepping away for the night - continue onwards with the plan and rule things provisionally
+in my absence. if you need to stop for whatever reason, please leave me a handoff note so that
+I don't have to wake you tomorrow. I don't anticipate that you'll need to stop. Standardard
+ruling and the machine is now yours."
+
+Consequences applied:
+- **PROVISIONAL-and-continue** (the skill's away-run rule): every non-gating ambiguity gets the
+  most spec-defensible build, marked PROVISIONAL, numbered into QUESTIONS; nothing drips to her.
+- **HELD AND BUNDLED for her return** (the standing author-only list, untouched by the mandate):
+  B1's live scroll walk + drag spot-check (the use-shaped close), the 0.9.2 release-notes
+  approval (her standing release rule — drafted → presented → approved before any release run),
+  and the entry-close word. The pass runs to B1-built-and-orchestrator-verified without her;
+  the entry CLOSES only at her word.
+- **THE MACHINE IS HERS-GRANTED:** walks, captures and test drives run without coordination
+  holds for the rest of the night. The absolutes survive the grant: a real-store Variorum
+  instance is NEVER quit or killed (instance checks by path before every act); the dev store is
+  restored exactly after any staging; no /Applications refresh except at a true zero-instance
+  window at the close ritual.
+- **If a stop is forced** (any reason), a handoff note lands at
+  `notes/plans/17y-overnight-handoff.md` — state, next act, her checklist — so her morning
+  starts from the repo, not from waking this session.
