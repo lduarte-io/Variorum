@@ -167,9 +167,20 @@ struct ShelfView: View {
                         BookcaseCensusPanel(model: model, tokens: tokens)
                             .padding(.trailing, 28)
                             .alignmentGuide(.bottom) { $0[.top] }
+                            #if DEBUG
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                BookcaseRowOracle.recordFrame(
+                                    BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
+                            }
+                            #endif
                     }
                 }
                 .zIndex(1)
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
+                }
+                #endif
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     boardContent
@@ -1061,6 +1072,11 @@ enum BookcaseRowOracle {
         store.release(owner: owner)
         frames.release(owner: owner)
     }
+
+    /// 17y B3 (r): the reserved keys the strip and the № panel record their
+    /// frames under (never a reading id — those are UUIDs).
+    static let stripKey = "\u{2116}strip"
+    static let censusPanelKey = "\u{2116}panel"
 
     /// A pin's door: start from empty.
     static func forgetAll() {

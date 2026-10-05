@@ -103,6 +103,18 @@ struct BookcaseCensusOverlayTests {
                     "every row stays where it was — zero layout push")
             #expect(abs(openFirst.height - closedFirst.height) < 0.5, "no row half-drawn")
 
+            // …and it hangs UNDER the strip's №, right-aligned at the strip's
+            // own inset — a dropdown, never a panel over the masthead (the
+            // first walk of the fix found it drawn ABOVE the strip: the push
+            // half of this pin was green while the face was wrong).
+            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
+            let panel = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey),
+                                     "the open panel recorded its frame")
+            #expect(abs(panel.minY - strip.maxY) < 1.5,
+                    "the panel's top hangs from the strip's bottom (strip \(strip), panel \(panel))")
+            #expect(abs(panel.maxX - (strip.maxX - 28)) < 1.5,
+                    "right-aligned under the utility run (strip \(strip), panel \(panel))")
+
             model.censusOpen = false
             await settle(window, hosting, turns: 40) { false }
             let againFirst = try #require(BookcaseRowOracle.frame(first.id))
