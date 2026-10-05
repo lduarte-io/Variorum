@@ -65,9 +65,11 @@
 
 ## Flags for the 13s plan (the orchestrator's read — not rulings, hers to confirm at the 13s sitting)
 
-- **"Make the default mode Study"** is a VOICE-DEFAULT change (Terminal leads today, AppSpec
-  §12's two-voices contract untouched — only which one a fresh store wakes in). It deserves an
-  explicit confirm at the 13s sitting so it lands as a ruled flip, not a side effect.
+- **"Make the default mode Study" — RULED (her word, 2026-10-05: "default mode study is an
+  explicit ruling").** A fresh store wakes in the STUDY voice; existing stores keep whatever
+  voice is set (a default flip, never a migration). AppSpec §12's two-voices contract is
+  untouched — only which voice leads at first open changes. Lands in 13s; the canon delta is
+  13s's closeout line.
 - **"Way too many books" + the restorable classics** reshape the SEED SET — the same seeder
   17y (q) traces. Sequence deliberately: (q)'s mechanism first, then 13s's seed-set changes
   land on a seeder that is known-correct. Seed work is Sync-adjacent (dedupe facts): the Fable
