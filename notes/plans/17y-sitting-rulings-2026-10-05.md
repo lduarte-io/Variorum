@@ -184,6 +184,28 @@ on it - don't have it in the menu item line." The strip's ★ row is always the 
 no count, no sentence, no badge inline; the empty-state one-liner renders ONLY in the solo'd
 board area when the starred set is empty. Binding for B3's build.)*
 
+## HER RETURN RULINGS (2026-10-05 ~17:50, mid-B1-ladder — verbatim + consequences)
+
+**R-17y-10 — THE 0.9.2 NOTES ARE APPROVED AS DRAFTED.** Her words: "that's fine on the release
+notes - only beta users will see these release notes, i'll write them myself in the future but
+this is fine for now." Consequences: (1) the standing approval gate is SATISFIED for 0.9.2 —
+the two B1 placeholder lines fill in the draft's own register at the ladder's close and are
+SHOWN to her at the walk as a courtesy, no second approval cycle owed; (2) **from 0.9.3 on the
+release notes are HERS to write** — the orchestrator/successor drafts none unless she asks
+(the drafted→presented→approved cadence's drafting seat moves to her; the no-release-without-
+her-word core is untouched). Memory updated same turn.
+
+**HER NEW-MAC SEQUENCING (her words):** "I'm setting up my new mac now, so I'll download the
+current version and then run the update myself on my mac when this is released." The
+orchestrator's flag back to her, same turn: a 0.9.1 FRESH STORE'S FIRST LAUNCH seeds JEKYLL
+(R-17y-8 only lands in 0.9.2) and that seed pushes to the account at first sign-in — the ONE
+duplicate class the 0.9.2 fold deliberately does not cover (the Jekyll fold leg was dropped on
+the premise no fresh copies would exist). Updating to 0.9.2 after the launch does not unwind
+it (nothing retrofits). The safe shapes offered: download now but DON'T LAUNCH Variorum on the
+new Mac until it runs 0.9.2, or install 0.9.2 directly (close). The other 0.9.1-launch
+duplicates (gatherings · quicknote · Sherlock) fold once the Mac updates; Jekyll alone would
+persist. HER CALL PENDING — recorded here so the close ritual checks it.
+
 ## THE OVERNIGHT MANDATE (hers, 2026-10-05 ~04:30 — verbatim; binds the rest of the pass)
 
 "I'm stepping away for the night - continue onwards with the plan and rule things provisionally

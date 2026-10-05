@@ -1,4 +1,4 @@
-# Variorum 0.9.2 — release notes DRAFT (17y; drafted 2026-10-05 for HER APPROVAL — her standing rule: presented → approved → only then the release run. B1's two lines are PLACEHOLDERS until its close.)
+# Variorum 0.9.2 — release notes: **APPROVED BY HER 2026-10-05 ~17:50** (R-17y-10, the rulings file: "this is fine for now"; beta audience; from 0.9.3 she writes them herself). The two B1 placeholder lines fill in this register at the ladder's close and are shown at her walk — no second approval cycle owed.
 
 ## What's new in 0.9.2
 
