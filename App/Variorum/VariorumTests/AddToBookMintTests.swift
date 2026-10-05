@@ -130,6 +130,29 @@ struct AddToBookMintTests {
         }
     }
 
+    /// The ladder's round-1 MINOR-1 (bug-class, red-on-old): the guard keys
+    /// the name the mint will STORE. A blank type resolves to "Untitled" —
+    /// on the old tree `assertBookNameIsFree` keyed the trimmed TYPED string
+    /// (""), so an existing "Untitled" never refused and a twin was minted
+    /// beside it, bypassing E13 ("every mint guards the name it stores").
+    /// Unreachable from both shipped faces today (`createOffer` never offers
+    /// a blank), so the pin drives the shared brain road directly.
+    @Test func aBlankTypeIsGuardedAsTheNameItWouldStore() async throws {
+        try await withMintWorld { session, db in
+            let ops = session.operations
+            _ = try ops.createReading(name: "Untitled", kind: .book)
+            let note = try ops.createPost(title: "an essay")
+            let doors = MembershipDoors(session: session)
+            await #expect(throws: OperationError.duplicateBookName(name: "Untitled")) {
+                _ = try await doors.mintAndAdd("   ", postID: note.id)
+            }
+            let count = try await db.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL")
+            }
+            #expect(count == 1, "nothing minted beside the standing \u{201C}Untitled\u{201D}")
+        }
+    }
+
     /// The book is born in the NOTE's wing (a book never spans wings).
     @Test func theBookIsBornInTheNotesWing() async throws {
         try await withMintWorld { session, db in
