@@ -78,9 +78,14 @@ struct InventoryParserTests {
     }
 
     @Test func aLiteralHoldingABacktickParsesFromItsDoubleBacktickSpan() throws {
-        let code = try #require(RealDocs.bullet(firstSite: "App/Variorum/Variorum/Features/Help/HelperView.swift:118"))
+        // Two literals share each of these source lines; the lookup refuses
+        // the ambiguity, so the body fragment picks the one under test.
+        #expect(RealDocs.bullet(firstSite: "App/Variorum/Variorum/Features/Help/HelperView.swift:118") == nil)
+        let code = try #require(RealDocs.bullet(
+            firstSite: "App/Variorum/Variorum/Features/Help/HelperView.swift:118", containing: "`"))
         #expect(code.current == "`like this`")
-        let format = try #require(RealDocs.bullet(firstSite: "App/Variorum/Variorum/Features/Help/HelperView.swift:131"))
+        let format = try #require(RealDocs.bullet(
+            firstSite: "App/Variorum/Variorum/Features/Help/HelperView.swift:131", containing: "`"))
         #expect(format.current.hasPrefix("B · I · S · ` · link"))
     }
 
@@ -125,10 +130,13 @@ struct InventoryParserTests {
     }
 
     @Test func everyCorrectionReproducesTheInventoryTextExactly() {
-        let bodies = Dictionary(RealDocs.bullets.map { ($0.sites[0], $0.docBody) }, uniquingKeysWith: { a, _ in a })
-        for entry in ReturnGlyphCorrections.all {
-            #expect(ReturnGlyphCorrections.inventoryForm(of: entry) == bodies[entry.site], "\(entry.site)")
+        // Keyed off the corrected bullets themselves (a first site can be
+        // shared by two literals on one source line).
+        for bullet in RealDocs.bullets where bullet.correctedFromSource {
+            let entry = ReturnGlyphCorrections.entry(forSite: bullet.sites[0])
+            #expect(entry.map(ReturnGlyphCorrections.inventoryForm(of:)) == bullet.docBody, "\(bullet.sites[0])")
         }
+        #expect(Set(ReturnGlyphCorrections.all.map(\.site)).count == ReturnGlyphCorrections.all.count)
     }
 
     // MARK: - Seeded content

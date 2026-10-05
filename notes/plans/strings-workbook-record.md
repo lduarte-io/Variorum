@@ -15,13 +15,13 @@ Branch rule (issue #7): this branch never merges; it lives for the mint and dies
 | Piece | State |
 |---|---|
 | P0 — road decision + this record | DONE (this commit) |
-| P1 — Package.swift targets (library `StringsWorkbook`, exec `strings-workbook-mint`, tests `StringsWorkbookTests`) | DONE (P1–P5 commit) |
-| P2 — the parser (`StringsInventory`) + Swift-escape renderer + the ⏎ correction table | DONE (P1–P5 commit) — compiling; tests PENDING |
-| P3 — the tier plan (`TierPlan`) + the pure workbook plan (`WorkbookPlan`) | DONE (P1–P5 commit) — compiling; tests PENDING |
-| P4 — the ops-driven mint (`WorkbookMint`) + the one-shot guard + read-back verification | DONE (P1–P5 commit) — compiling; tests PENDING |
-| P5 — the headless unlock road (`StoreUnlock`) + the CLI | DONE (P1–P5 commit) — compiling; tests PENDING |
-| P6 — tests green (`swift build`, `swift test --filter StringsWorkbookTests`) | IN-PROGRESS — tests written (4 suites), first run next |
-| P7 — the end-to-end rehearsal: the CLI against a scratch ENCRYPTED store laid out like hers | NOT-STARTED |
+| P1 — Package.swift targets (library `StringsWorkbook`, exec `strings-workbook-mint`, tests `StringsWorkbookTests`) | DONE (`aa430cdb`) |
+| P2 — the parser (`StringsInventory`) + Swift-escape renderer + the ⏎ correction table | DONE (`aa430cdb`); tests green (P6) |
+| P3 — the tier plan (`TierPlan`) + the pure workbook plan (`WorkbookPlan`) | DONE (`aa430cdb`); tests green (P6) |
+| P4 — the ops-driven mint (`WorkbookMint`) + the one-shot guard + read-back verification | DONE (`aa430cdb`); tests green (P6) |
+| P5 — the headless unlock road (`StoreUnlock`) + the CLI | DONE (`aa430cdb`); tests green (P6) |
+| P6 — tests green (`swift build`, `swift test --filter StringsWorkbookTests`) | DONE (this commit) — 39 tests / 5 suites green, 55.9 s (first run: 2 reds were a TEST-HELPER ambiguity — two literals share HelperView.swift:118 and :131 — fixed in the helper; the parser was right) |
+| P7 — the end-to-end rehearsal: the CLI against a scratch ENCRYPTED store laid out like hers | IN-PROGRESS — an opt-in fixture test writes a production-KDF scratch library; then the release CLI runs against it |
 
 ## The road decision — ROAD A (headless executable), viable
 
