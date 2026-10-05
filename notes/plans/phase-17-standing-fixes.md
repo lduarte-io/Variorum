@@ -1781,7 +1781,7 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   (findings to the implementer verbatim; the reviewer finalizes and implements its confirmed
   fixes). QUESTIONS #185 (a)–(j) carries the PROVISIONALs. Residue, deliberate: three Trash
   items from its walk (listed in the B3 RECORD), recoverable 30 days.
-- **B1 — the two performance items ((j)(k)): BUILT 2026-10-05 ~19:20; hand-back VERIFIED by the
+- **B1 — the two performance items ((j)(k)): BUILT 2026-10-05 ~17:10 MDT; hand-back VERIFIED by the
   orchestrator** (tree clean + pushed at 6c8e4f02; fences EMPTY over the whole range
   c9c4d75d..6c8e4f02 — zero `Sync/`, schema, custody, mobile or seed; the read-tier touch is
   `NoteIndexColumn.swift` alone). The B1 RECORD below carries the (j) trace + fix (184–217 ms
