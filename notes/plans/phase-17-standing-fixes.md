@@ -2448,3 +2448,31 @@ the diff: **(m)** `CaptureNSTextView` — a TK2 `NSTextView`, OUTSIDE the editor
 first-responder overrides and no TK1 API; **(n)** the masthead title — a SwiftUI `TextField` (the
 measurement read SwiftUI's own field editor). The orchestrator decides whether that re-casts to Fable.
 
+### 17y B2 FIX ROUND (round 1 → 2) — `opus-implementer`, a FRESH session, 2026-10-05; the binding findings are `notes/plans/17y-b2-ladder-round1.md`
+
+**NOT DONE (first line, per the contract):** PENDING — written at the round's close. MAJOR-2 (the guide's
+Canvas teaching) is B-DEDUPE's and MINOR-2 is the orchestrator's (both landed or owned elsewhere) — not
+touched here. Fences as B2's: zero `Sync/`, schema, custody, mobile code, seed content; no
+/Applications refresh; no Release launch.
+
+Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; the ladder record
+`17y-b2-ladder-round1.md` whole; the B2 BRIEF and the B2 RECORD whole; QUESTIONS #184;
+`notes/SessionResiliencyProtocol.md` whole. Worktree `~/dev/variorum-17y` only; DerivedData
+`App/Variorum/DerivedData/17y/`; no subagents.
+
+#### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | finding | status |
+|---|---|---|
+| 0 | This record | DONE (this commit) |
+| 1 | MAJOR-1 — the frozen book's drop speaks the op's reopen/unseal refusal, never `needsManualOrder` | NOT-STARTED — design: `dropOutcome` gains a `frozen` input (the snapshot's fresh `reading.locked`, which sealing sets too) consulted BEFORE the sort gate; a frozen book returns `.plan` so `assignPostToSection`'s own lock guard speaks through `run` (one refusal source; the sealed wording from the fresh reading). PIN FIRST, red on the current tree: finished + stamp order + same-chapter drop expects "reopen"; sealed expects "unseal" |
+| 2 | MINOR-1 — the row-freeze pin's frame-recorder coupling said at both sites; the pin REQUIRES a frame record for both rows; the B2 RECORD's row 3c citation corrected to the committed test's real lines/issues | NOT-STARTED |
+| 3 | NIT-1 — `onCaretChange` delivered async; the pin host's raise moved into `.task` (the real Bookcase road); the header's red count corrected (1 issue on the pre-fix tree) | NOT-STARTED — STOP-and-record if async delivery destabilizes any capture suite |
+| 4 | NIT-2 — four stale comments (`BookcaseStrip` 51–54, `BookPanelModel` 121–124, `PostDetailView` 891, the row-12 masthead pin's doc) | NOT-STARTED |
+| 5 | NIT-3 — the Book Panel's lone-chapter grip drawn by OPACITY in a fixed slot | NOT-STARTED |
+| 6 | NIT-4 — `dropOutcome` returns `.nothing` for an already-satisfied stamp-order drop (onto the note's immediate shown successor) | NOT-STARTED |
+| 7 | NIT-5 — the completeness pin: every `PostMode` case (an exhaustive-switch helper) in `order(keepingCanvas: true)` | NOT-STARTED |
+| 8 | NIT-6 — `gripHelp` softened to §20's truth; the edge appended to QUESTIONS #184 as (h) in her words | NOT-STARTED |
+| 9 | END suites — the Book Panel family, the Bookcase family, the capture family, the mode/canvas family incl. the registry walk | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
