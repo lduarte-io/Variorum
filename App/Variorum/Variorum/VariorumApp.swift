@@ -52,7 +52,14 @@ struct VariorumApp: App {
                     protection: bootstrap.protection, windows: windows,
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
                     calmAsks: appDelegate.calmAsks)
-                    .onAppear { appDelegate.session = session }
+                    .onAppear {
+                        appDelegate.session = session
+                        #if DEBUG
+                        // 17y B1: the large fixture — a no-op unless the walk
+                        // launched this process with `VARIORUM_SCALE_FIXTURE`.
+                        ScaleFixture.seedIfRequested(session: session)
+                        #endif
+                    }
                     // 13r U3-A — R-13r-13: the sync row's Check for Updates…
                     // door, from the ONE update channel; nil unless it is
                     // live (never in a Debug build), and then no door shows.
