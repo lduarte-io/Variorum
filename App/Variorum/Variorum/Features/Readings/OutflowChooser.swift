@@ -61,6 +61,35 @@ struct OutflowChooser: View {
     let tags: [Tag]
     /// A chosen id's words: "#path", or "(deleted tag)".
     let label: (String) -> String
+    /// 17y B3 item (g): make a tag in place from the picker (the host's road
+    /// — the rule editor's `createTag`, in the book's wing); returns the new
+    /// tag's id. nil = the picker searches only (the spawn sheet's — it
+    /// adopts create at its next touch, R-17y-3).
+    var onCreate: ((String) async -> String?)? = nil
+
+    /// The picker's options: the wing's live tags not yet chosen, by path.
+    private var offered: [SearchPickerOption] {
+        tags.filter { !draft.ids.contains($0.id) }.map { tag in
+            SearchPickerOption(
+                id: tag.id, label: RuleEditorCopy.tag(path: tag.path), searchText: tag.path)
+        }
+    }
+
+    /// The create row's words — only where the host can make a tag.
+    private var createLabel: ((String) -> String)? {
+        onCreate == nil ? nil : { SearchPickerCopy.newTag($0) }
+    }
+
+    /// The create act: make it through the host, then choose it.
+    private var createAct: ((String) -> Void)? {
+        guard let make = onCreate else { return nil }
+        let binding = $draft
+        return { typed in
+            Task { @MainActor in
+                if let id = await make(typed) { binding.wrappedValue.add(id) }
+            }
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -76,15 +105,18 @@ struct OutflowChooser: View {
                         .lineLimit(1)
                 }
                 Spacer(minLength: 4)
-                VoicedMenu(tokens: tokens, label: RuleEditorCopy.addTag, role: .quiet) {
-                    let offered = tags.filter { !draft.ids.contains($0.id) }
-                    if offered.isEmpty {
-                        Text(RuleEditorCopy.noTagsYet)
-                    }
-                    ForEach(offered, id: \.id) { tag in
-                        Button(RuleEditorCopy.tag(path: tag.path)) { draft.add(tag.id) }
-                    }
-                }
+                // 17y B3 item (g) — THE ONE PICKER (R-17y-3): type-to-filter
+                // over the wing's tags not yet chosen, and (with a host road)
+                // a 'New tag "#x"' row that makes it in place and chooses it.
+                SearchPicker(
+                    tokens: tokens, label: RuleEditorCopy.addTag,
+                    prompt: SearchPickerCopy.tagPrompt,
+                    options: offered,
+                    emptyText: RuleEditorCopy.noTagsYet,
+                    createLabel: createLabel,
+                    key: SearchPickerCopy.tagKey(_:),
+                    onPick: { id in draft.add(id) },
+                    onCreate: createAct)
             }
             ForEach(draft.ids, id: \.self) { id in
                 HStack(alignment: .firstTextBaseline, spacing: 6) {

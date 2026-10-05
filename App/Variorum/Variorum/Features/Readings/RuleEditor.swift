@@ -74,6 +74,9 @@ nonisolated enum RuleEditorCopy {
 
     static func tag(path: String?) -> String { path.map { "#\($0)" } ?? deadTag }
 
+    /// 17y B3 (g) — the tag made in place (a quiet receipt; 13s re-voices).
+    static func madeTag(_ path: String) -> String { "Made the tag #\(path)." }
+
     /// A grandfathered term, read-only, in plain words.
     static func legacy(_ term: RuleTerm) -> String {
         switch term {
@@ -252,6 +255,57 @@ final class RuleEditorModel: Identifiable {
     /// "(deleted tag)" (the chooser drops it at the next save).
     func outflowLabel(_ id: String) -> String {
         RuleEditorCopy.tag(path: tags.first { $0.id == id }?.path)
+    }
+
+    // MARK: The searchable picker's choices (17y B3 (g))
+
+    /// The "+ tag" picker's options — the wing's live tags, by path.
+    var tagOptions: [SearchPickerOption] {
+        tags.map { SearchPickerOption(id: $0.id, label: RuleEditorCopy.tag(path: $0.path),
+                                      searchText: $0.path) }
+    }
+
+    /// The wing a tag made here is born in — the book's (or the gathering
+    /// being minted's): a book never reaches into another library (§9).
+    private var tagWing: String { mintWingID ?? reading?.wingId ?? "" }
+
+    /// **MAKE A TAG IN PLACE** (17y item (g), her ask: the "+ tag" menus
+    /// "must let her CREATE A NEW TAG in place"). The ordinary road — the
+    /// typed-path grammar (`TypedTagPath`: "/" makes a hierarchy, the deepest
+    /// existing prefix anchors, the missing remainder is minted through
+    /// `createTag`, one runner turn) — in the book's wing. The tag is made AT
+    /// ONCE (vocabulary, not the rule: Cancel keeps it, like a tag typed on
+    /// a note — PROVISIONAL P-17y-B3-g2); the caller then adds the term (or
+    /// the outflow entry) to the DRAFT, which only Save writes. Returns the
+    /// leaf's id (an existing one when the whole path already lived), nil
+    /// with the refusal spoken.
+    func createTag(_ typed: String) async -> String? {
+        // A leading "#" is how a tag READS, never part of its name.
+        let segments = TypedTagPath.segments(SearchPickerBrain.normalized(typed))
+        guard !segments.isEmpty else {
+            session.status.refuse(TypedTagPath.emptyMessage)
+            return nil
+        }
+        let wing = tagWing
+        do {
+            let live = try await session.database.read { db in
+                try Queries.allTags(db, wingID: wing)
+            }
+            guard let plan = TypedTagPath.plan(segments: segments, live: live) else { return nil }
+            let leaf = try await session.runner.run { ops in
+                try TypedTagPath.createMissing(plan, ops: ops, wingID: wing)
+            }
+            tags = try await session.database.read { db in
+                try Queries.allTags(db).filter { $0.wingId == wing }
+            }
+            if leaf != nil, !plan.missing.isEmpty {
+                session.status.receipt(RuleEditorCopy.madeTag(plan.leafPath))
+            }
+            return leaf
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+            return nil
+        }
     }
 
     // MARK: Loading
@@ -523,7 +577,9 @@ struct RuleEditorSheet: View {
             // optional set, independent of the rule above.
             OutflowChooser(
                 tokens: tokens, draft: Bindable(model).outflow, tags: model.tags,
-                label: model.outflowLabel)
+                label: model.outflowLabel,
+                // 17y B3 (g): the "+ tag" picker makes a tag in place too.
+                onCreate: { typed in await model.createTag(typed) })
         }
     }
 
@@ -648,14 +704,22 @@ struct RuleTreeEditor: View {
     /// A group's add doors: a tag, the star, or a new group born seeded.
     private func adder(target: RuleEditing.Path?, depth: Int) -> some View {
         HStack(spacing: 4) {
-            VoicedMenu(tokens: tokens, label: RuleEditorCopy.addTag, role: .quiet) {
-                if model.tags.isEmpty {
-                    Text(RuleEditorCopy.noTagsYet)
-                }
-                ForEach(model.tags, id: \.id) { tag in
-                    Button(RuleEditorCopy.tag(path: tag.path)) { model.add(.tag(tag.id), into: target) }
-                }
-            }
+            // 17y B3 item (g) — THE ONE PICKER (R-17y-3): type-to-filter over
+            // the wing's tags, and a 'New tag "#x"' row that makes the tag in
+            // place (the typed-path grammar) and adds its term.
+            SearchPicker(
+                tokens: tokens, label: RuleEditorCopy.addTag,
+                prompt: SearchPickerCopy.tagPrompt, options: model.tagOptions,
+                emptyText: RuleEditorCopy.noTagsYet,
+                createLabel: SearchPickerCopy.newTag(_:), key: SearchPickerCopy.tagKey(_:),
+                onPick: { id in model.add(.tag(id), into: target) },
+                onCreate: { typed in
+                    Task {
+                        if let id = await model.createTag(typed) {
+                            model.add(.tag(id), into: target)
+                        }
+                    }
+                })
             Button(tokens.chromeLabel(RuleEditorCopy.addStarred)) { model.add(.star, into: target) }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             VoicedMenu(tokens: tokens, label: RuleEditorCopy.addGroup, role: .quiet) {
