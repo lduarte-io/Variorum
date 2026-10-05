@@ -118,8 +118,11 @@ struct SeededFurnitureDedupeTests {
                     db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
                     arguments: [Self.guidePath])
             } ?? (try ops.createTag(name: Self.guidePath)).id
+            // The SHIPPED shape (the round-1 BLOCKER's three legs): the
+            // mint's word target, a seed-authored comment, a sealed lesson.
             let book = try ops.createReading(
-                name: Self.guideName, kind: .book, profile: "collection")
+                name: Self.guideName, kind: .book, profile: "collection",
+                wordTarget: 4000)
             let welcome = try ops.createSection(in: book.id, name: "welcome")
             let takes = try ops.createSection(in: book.id, name: "takes")
             let one = try ops.importPost(
@@ -156,11 +159,21 @@ struct SeededFurnitureDedupeTests {
             }
             try ops.setBlockPresentation(
                 framed, BlockPresentation(color: "tipTint"))
+            _ = try ops.addBlockComment(
+                to: framed,
+                text: "a comment lives in the margin — the seed's own hands")
+            let sealed = try ops.importPost(
+                title: "the seal", text: "A sealed lesson, the mint's own act.",
+                undoLabel: "Tutorial")
+            _ = try ops.addPostToReading(sealed.container.id, to: book.id)
+            try ops.assignPostToSection(sealed.container.id, in: book.id, section: takes.id)
+            _ = try ops.applyTag(tag, toPost: sealed.container.id)
+            try ops.lockPost(sealed.container.id)
             let pool = try ops.createPool(title: Self.poolTitle)
             let scrap = try ops.newBlock(
                 in: pool.id, text: "a scrap with two takes.", at: .end)
             _ = try ops.branchVariant(scrap.block.id, from: scrap.variant.id)
-            return (book.id, [one.container.id, two.container.id], pool.id)
+            return (book.id, [one.container.id, two.container.id, sealed.container.id], pool.id)
         }
     }
 
@@ -455,6 +468,218 @@ struct SeededFurnitureDedupeTests {
         // IDEMPOTENCE: another empty pull decides nothing and writes nothing.
         let again = try await b.pull()
         #expect(again.applied == 0 && again.repairs == 0)
+    }
+
+    @Test func herCommentOnAGuideLessonKeepsBoth() async throws {
+        let (a, b, _) = try pairWithFacts()
+        try seedGuide(a)
+        let guideB = try seedGuide(b)
+        try b.with { ops, db in
+            let block = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE container_id = ? ORDER BY position LIMIT 1",
+                    arguments: [guideB.noteIDs[1]])!
+            }
+            _ = try ops.addBlockComment(to: block, text: "her margin note")
+        }
+        try await converge(a, b)
+        #expect(try liveGatherings(b, named: Self.guideName).count == 2,
+                "her comment is a tuple the other copy lacks — the pair differs, both stand")
+    }
+
+    @Test func herManualSavepointOnAGuideLessonKeepsBoth() async throws {
+        let (a, b, _) = try pairWithFacts()
+        try seedGuide(a)
+        let guideB = try seedGuide(b)
+        try b.with { ops, db in
+            let variant = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT v.id FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.container_id = ? LIMIT 1
+                        """,
+                    arguments: [guideB.noteIDs[0]])!
+            }
+            try ops.commit(variant)
+        }
+        try await converge(a, b)
+        #expect(try liveGatherings(b, named: Self.guideName).count == 2,
+                "a MANUAL savepoint is her hand — engagement, both stand")
+    }
+
+    @Test func herChapterRenameKeepsBoth() async throws {
+        let (a, b, _) = try pairWithFacts()
+        try seedGuide(a)
+        let guideB = try seedGuide(b)
+        try b.with { ops, db in
+            let chapter = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT id FROM reading_section WHERE reading_id = ? ORDER BY position LIMIT 1",
+                    arguments: [guideB.bookID])!
+            }
+            try ops.renameSection(chapter, name: "her chapter")
+        }
+        try await converge(a, b)
+        #expect(try liveGatherings(b, named: Self.guideName).count == 2,
+                "a chapter name rides the identity — the pair differs, both stand")
+    }
+
+    @Test func aRemovedMemberKeepsBoth() async throws {
+        let (a, b, _) = try pairWithFacts()
+        try seedGuide(a)
+        let guideB = try seedGuide(b)
+        try b.with { ops, _ in
+            try ops.removePostFromReading(guideB.noteIDs[0], from: guideB.bookID)
+        }
+        try await converge(a, b)
+        #expect(try liveGatherings(b, named: Self.guideName).count == 2,
+                "a dead membership is her act — engagement, both stand")
+    }
+
+    @Test func aMemberWhosePostIsGoneMidConvergenceDefers() async throws {
+        // The reachable straggler shape under real FKs: a LIVE membership
+        // whose post row is TOMBSTONED (cascade timing mid-convergence).
+        // The classifier must read STRAGGLING — defer, never judge.
+        let (a, _, _) = try pairWithFacts()
+        let guide = try seedGuide(a)
+        try await a.withAsync { db in
+            try await db.write { db in
+                try db.execute(
+                    sql: "UPDATE container SET deleted_at = '2026-10-05T00:00:00Z' WHERE id = ?",
+                    arguments: [guide.noteIDs[0]])
+            }
+        }
+        let halfDead = try await a.db.read { db in
+            try SeededFurnitureClassifier.guideVerdict(
+                db, copyID: guide.bookID, tagPath: Self.guidePath, hash: BridgeHash.body(_:))
+        }
+        // The cascade tombstones the membership WITH the post, so a
+        // half-killed copy reads ENGAGED — errs to keep, never folds.
+        #expect(halfDead == .engaged, "a half-dead copy keeps both, never folds")
+
+        // The TRUE straggler shape (a block whose variant rows have not
+        // arrived — the SyncSpec §5 class): STRAGGLING, defer.
+        let (c, _, _) = try pairWithFacts()
+        let fresh = try seedGuide(c)
+        try await c.withAsync { db in
+            try await db.write { db in
+                try db.execute(
+                    sql: """
+                        UPDATE variant SET deleted_at = '2026-10-05T00:00:00Z'
+                        WHERE block_id IN (SELECT block_id FROM container_block
+                                           WHERE container_id = ?)
+                        """,
+                    arguments: [fresh.noteIDs[0]])
+            }
+        }
+        let straggling = try await c.db.read { db in
+            try SeededFurnitureClassifier.guideVerdict(
+                db, copyID: fresh.bookID, tagPath: Self.guidePath, hash: BridgeHash.body(_:))
+        }
+        #expect(straggling == .straggling, "a variant-less block defers, never judges")
+    }
+
+    @Test func aDesignationNamingAThirdThingIsLeftAlone() async throws {
+        // Single-store (the repair's own promise, apart from the setting's
+        // ordinary CAS): two seed-own Quicknotes fold; the designation
+        // names HER OWN notebook — neither keeper nor loser — and the
+        // repair leaves it byte-alone (§20: re-point ONLY loser→keeper).
+        let (a, _, _) = try pairWithFacts(guide: false)
+        let staged = try a.with { ops, db -> (hers: String, reading: String) in
+            let tag = try ops.createTag(name: Self.quicknotePath)
+            let first = try ops.createReading(
+                name: Self.quicknotesName, kind: .gathering, profile: "collection",
+                sortField: .createdAt, sortDir: .desc,
+                querySpec: try RuleGrammar.encode(.tag(tag.id)))
+            try ops.setShelfPinned(first.id, pinned: true)
+            let second = try ops.createReading(
+                name: Self.quicknotesName, kind: .gathering, profile: "collection",
+                sortField: .createdAt, sortDir: .desc,
+                querySpec: try RuleGrammar.encode(.tag(tag.id)))
+            try ops.setShelfPinned(second.id, pinned: true)
+            let hers = try ops.createReading(name: "her own notebook", kind: .book)
+            try db.write { db in
+                try db.execute(
+                    sql: "INSERT OR REPLACE INTO setting (key, value) VALUES ('quicknote_book', ?)",
+                    arguments: [hers.id])
+            }
+            return (hers.id, first.id)
+        }
+        let engine = a.engine()
+        _ = try await a.withAsync { db in
+            try await db.write { db -> Int in
+                var touched = TouchedRows()
+                touched.isPullBatch = true
+                touched.readingIDs = [staged.reading]
+                return try engine.dedupeSeededFurniture(db, touched: touched)
+            }
+        }
+        #expect(try a.db.fetchString(
+            "SELECT value FROM setting WHERE key = 'quicknote_book'") == staged.hers,
+            "a third value is hers — the repair never touches it (§20)")
+        #expect(try liveGatherings(a, named: Self.quicknotesName).count == 1,
+                "…while the fold itself still ran")
+    }
+
+    @Test func aRuleNamingANeverArrivedTagDefersThenFolds() async throws {
+        // The round-1 MAJOR-3: an ABSENT tag row under a rule is in-flight
+        // evidence — the grain defers with its marker (never guesses
+        // "not seed's own"), and decides when the row lands.
+        let (a, _, _) = try pairWithFacts(guide: false)
+        let ghost = "0000ghost-0000-4000-8000-000000000000"
+        let staged = try a.with { ops, _ -> (first: String, second: String, live: String) in
+            let live = try ops.createTag(name: Self.classicsPath)
+            let first = try ops.createReading(
+                name: Self.classicsName, kind: .gathering, profile: "collection",
+                sortField: .createdAt, sortDir: .asc,
+                querySpec: try RuleGrammar.encode(.tag(ghost)))
+            let second = try ops.createReading(
+                name: Self.classicsName, kind: .gathering, profile: "collection",
+                sortField: .createdAt, sortDir: .asc,
+                querySpec: try RuleGrammar.encode(.tag(live.id)))
+            return (first.id, second.id, live.id)
+        }
+        let engine = a.engine()
+        let deferredRepairs = try await a.withAsync { db in
+            try await db.write { db -> Int in
+                var touched = TouchedRows()
+                touched.isPullBatch = true
+                touched.readingIDs = [staged.first]
+                return try engine.dedupeSeededFurniture(db, touched: touched)
+            }
+        }
+        #expect(deferredRepairs == 0, "the absent row defers — nothing judged")
+        #expect(try liveGatherings(a, named: Self.classicsName).count == 2)
+        #expect(try a.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'furniture_dedupe_pending'") == "1",
+            "…and the marker is armed (the old reading guessed and armed nothing)")
+
+        // The tag row lands — already folded by the tag.path repair in the
+        // same apply (DEAD beside the live twin, the readable residue this
+        // classifier is built for): the next pass — the marker's own
+        // occasion — reads the path off the dead row and folds.
+        try await a.withAsync { db in
+            try await db.write { db in
+                try db.execute(
+                    sql: """
+                        INSERT INTO tag (id, name, path, wing_id, created_at, updated_at, deleted_at)
+                        VALUES (?, ?, ?, '', '2026-10-05T00:00:00Z', '2026-10-05T00:00:00Z',
+                                '2026-10-05T00:00:01Z')
+                        """,
+                    arguments: [ghost, Self.classicsPath, Self.classicsPath])
+            }
+        }
+        let folded = try await a.withAsync { db in
+            try await db.write { db -> Int in
+                try engine.dedupeSeededFurniture(db, touched: TouchedRows(isPullBatch: true))
+            }
+        }
+        #expect(folded > 0)
+        #expect(try liveGatherings(a, named: Self.classicsName).count == 1)
     }
 
     @Test func anEditedLessonKeepsBothGuides() async throws {

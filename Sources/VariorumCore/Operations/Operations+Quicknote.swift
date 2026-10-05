@@ -23,6 +23,11 @@ extension Operations {
     /// creation it names).
     public static let defaultQuicknoteBookName = "Quicknotes"
 
+    /// The designation setting's ONE key (17y B-DEDUPE NIT-7 — the
+    /// `twinTitle` precedent): the writer below and the furniture fold's
+    /// facts read the same spelling.
+    public static let quicknoteBookDesignationKey = "quicknote_book"
+
     /// What `fileAsQuicknote` did, so the caller can speak in its own voice
     /// while there stays exactly ONE implementation of the rules — the
     /// `DailyBookShelving` shape, and for its reason.
@@ -152,7 +157,7 @@ extension Operations {
                 querySpec: try RuleGrammar.encode(.tag(tagID)),
                 createdAt: now, updatedAt: now)
             try book.insert(db)
-            try upsertSetting(db, key: "quicknote_book", value: book.id)
+            try upsertSetting(db, key: Self.quicknoteBookDesignationKey, value: book.id)
             try setShelfPinned(db, book.id, pinned: true)
             return book.id
         }

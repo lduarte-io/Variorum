@@ -255,6 +255,11 @@ extension SyncEngine {
                     arguments: [stamp, stamp, loserID])
                 try enqueueExplicitly(db, table: "reading", rowID: loserID)
                 repairs += 1
+                // The §7 belt (round-1 MINOR-6, SPECULATIVE reachability):
+                // no ops road mints live children under a gathering today,
+                // but if any ever exist the muted cascade must still push.
+                repairs += try enqueueSuppressedCascadeVictims(
+                    db, parent: ("reading", loserID, stamp), arrivingDead: [:])
                 // §20's letter: the designation only ever RE-POINTS —
                 // loser → keeper; anything else it names is left alone.
                 if let key = gathering.designationKey,
@@ -276,30 +281,50 @@ extension SyncEngine {
 
     /// The signature: the rule resolves to the declared shape BY PATH
     /// (dead tag rows readable — the whole point), or the name is the
-    /// reserved one under the E13 key.
+    /// reserved one under the E13 key. A STRAGGLING rule reading (its tag
+    /// row has never arrived) counts as a candidate so the grain can
+    /// DEFER on it rather than guess (the round-1 MAJOR-3).
     private func signatureMatches(
         _ db: Database, row: Row, gathering: SeededFurnitureDedupeFacts.Gathering
     ) throws -> Bool {
         if BookNaming.sameName(row["name"] as String? ?? "", gathering.name) { return true }
-        return try ruleMatchesShape(db, spec: row["query_spec"], shape: gathering.rule) != nil
+        switch try ruleReading(db, spec: row["query_spec"], shape: gathering.rule) {
+        case .matches, .straggling: return true
+        case .differs: return false
+        }
     }
 
-    /// Resolves a stored rule against the declared shape. Returns the tag
-    /// id the rule names (for `.tagPath`; "" for `.star`) when it matches,
-    /// nil when it does not. A malformed or absent rule matches nothing.
-    private func ruleMatchesShape(
+    enum RuleReading: Equatable {
+        /// The rule IS the declared shape; carries the tag id it names
+        /// ("" for `.star`).
+        case matches(String)
+        /// A readable rule of a different shape, or a PRESENT tag row of a
+        /// different path — definitively not the seed's.
+        case differs
+        /// The rule names a tag row this store has NEVER SEEN (absent —
+        /// distinct from dead, which stays readable): the evidence is in
+        /// flight; defer, never guess (the round-1 MAJOR-3 — the old
+        /// reading returned `differs` here and the pair stood un-folded
+        /// with no marker until an unrelated book happened to land).
+        case straggling
+    }
+
+    /// Resolves a stored rule against the declared shape. A malformed or
+    /// absent rule DIFFERS (fails closed, the grammar's own rule).
+    private func ruleReading(
         _ db: Database, spec: String?, shape: SeededFurnitureDedupeFacts.Gathering.RuleShape
-    ) throws -> String? {
-        guard case .rule(let term) = RuleGrammar.read(spec) else { return nil }
+    ) throws -> RuleReading {
+        guard case .rule(let term) = RuleGrammar.read(spec) else { return .differs }
         switch (shape, term) {
         case (.star, .star):
-            return ""
+            return .matches("")
         case (.tagPath(let path), .tag(let tagID)):
-            let tagPath = try String.fetchOne(
+            guard let tagPath = try String.fetchOne(
                 db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [tagID])
-            return tagPath == path ? tagID : nil
+            else { return .straggling }
+            return tagPath == path ? .matches(tagID) : .differs
         default:
-            return nil
+            return .differs
         }
     }
 
@@ -312,8 +337,11 @@ extension SyncEngine {
     private func gatheringIsSeedsOwn(
         _ db: Database, row: Row, gathering: SeededFurnitureDedupeFacts.Gathering
     ) throws -> Bool? {
-        guard try ruleMatchesShape(db, spec: row["query_spec"], shape: gathering.rule) != nil
-        else { return false }
+        switch try ruleReading(db, spec: row["query_spec"], shape: gathering.rule) {
+        case .matches: break
+        case .differs: return false
+        case .straggling: return nil  // the tag row is in flight — defer
+        }
         guard BookNaming.sameName(row["name"] as String? ?? "", gathering.name) else { return false }
         if (row["owned"] as Int? ?? 0) != 0 { return false }
         if (row["locked"] as Int? ?? 0) != 0 { return false }
@@ -422,12 +450,13 @@ extension SyncEngine {
         for (_, ids) in byWing where ids.count > 1 {
             var classes: [String: [String]] = [:]
             for id in ids {
-                switch try guideCopySignature(db, copyID: id, tagPath: tagPath, hash: hash) {
+                switch try SeededFurnitureClassifier.guideVerdict(
+                    db, copyID: id, tagPath: tagPath, hash: hash) {
                 case .engaged:
                     continue
                 case .straggling:
                     return .deferred
-                case .signature(let value):
+                case .foldable(let value):
                     classes[value, default: []].append(id)
                 }
             }
@@ -441,21 +470,34 @@ extension SyncEngine {
         return repairs > 0 ? .folded(repairs) : .nothing
     }
 
-    enum FurnitureSignature {
+
+}
+
+/// **The furniture classifier, ONE public body** (the `SampleCopyClassifier`
+/// precedent, applied at the B-DEDUPE ladder's round 1): the engine's pass
+/// and the Mac's REAL-SEED drift guard invoke the SAME functions, so the
+/// shipped seed's foldability is pinned against the real classifier — never
+/// a synthetic mirror of it.
+public enum SeededFurnitureClassifier {
+    public enum Verdict: Equatable, Sendable {
         case engaged
         case straggling
-        case signature(String)
+        case foldable(signature: String)
     }
 
     /// One guide copy's verdict: ENGAGED on any sign of her hands (every
     /// leg errs this way — engagement keeps copies), STRAGGLING when any
     /// row is still in flight, else the copy's content signature —
     /// chapters in order, members in book order with their chapter
-    /// assignment, and every member note's own signature.
-    private func guideCopySignature(
+    /// assignment, and every member note's own signature. SEED-AUTHORED
+    /// state (the ladder's BLOCKER-1) — the book's word target, a sealed
+    /// lesson's lock, the seed's block comments — rides the IDENTITY, not
+    /// engagement: identical on both copies it folds; any act of hers
+    /// makes the pair differ and both survive, the ruled letter exactly.
+    public static func guideVerdict(
         _ db: Database, copyID: String, tagPath: String?,
         hash: @Sendable (String) -> String
-    ) throws -> FurnitureSignature {
+    ) throws -> Verdict {
         guard let book = try Row.fetchOne(
             db,
             sql: """
@@ -470,7 +512,8 @@ extension SyncEngine {
         if (book["sealed_at"] as String?) != nil { return .engaged }
         if (book["owned"] as Int? ?? 0) != 0 { return .engaged }
         if (book["archived_at"] as String?) != nil { return .engaged }
-        if (book["word_target"] as Int?) != nil { return .engaged }
+        // word_target is SEED-AUTHORED (the mint ships 4000) — identity,
+        // not engagement (BLOCKER-1): a target she changes differs.
         if (book["max_posts"] as Int?) != nil { return .engaged }
         if (book["grouping_tag_id"] as String?) != nil { return .engaged }
         if (book["query_spec"] as String?) != nil { return .engaged }
@@ -517,24 +560,27 @@ extension SyncEngine {
             ($0["deleted_at"] as String?) != nil || ($0["status"] as String?) != "member"
         }) { return .engaged }
 
-        var parts: [String] = chapters.map { $0["name"] as String }
+        var parts: [String] = ["wt:\(book["word_target"] as Int? ?? -1)"]
+        parts += chapters.map { $0["name"] as String }
         for membership in memberships {
             let postID: String = membership["post_id"]
             let section = membership["section_id"] as String?
             let index = section.flatMap { chapterIndex[$0] }
             guard let index else { return .engaged }  // unfiled/foreign chapter: hers
-            switch try noteSignature(
+            switch try noteVerdict(
                 db, postID: postID, within: copyID,
                 seedTagPaths: [tagPath].compactMap { $0 }, hash: hash) {
             case .engaged: return .engaged
             case .straggling: return .straggling
-            case .signature(let value):
+            case .foldable(let value):
                 parts.append("\(index)|\(value)")
             }
         }
-        return .signature(hash(parts.joined(separator: "\u{1F}")))
+        return .foldable(signature: hash(parts.joined(separator: "\u{1F}")))
     }
+}
 
+extension SyncEngine {
     // MARK: - The note and pool grains
 
     /// Live containers of the declared kind wearing the reserved title,
@@ -584,12 +630,12 @@ extension SyncEngine {
         for (_, ids) in byWing where ids.count > 1 {
             var classes: [String: [String]] = [:]
             for id in ids {
-                switch try noteSignature(
+                switch try SeededFurnitureClassifier.noteVerdict(
                     db, postID: id, within: nil,
                     seedTagPaths: reserved.seedTagPaths, hash: hash) {
                 case .engaged: continue
                 case .straggling: return .deferred
-                case .signature(let value):
+                case .foldable(let value):
                     classes[value, default: []].append(id)
                 }
             }
@@ -609,20 +655,28 @@ extension SyncEngine {
         return repairs > 0 ? .folded(repairs) : .nothing
     }
 
+}
+
+extension SeededFurnitureClassifier {
     /// One note's (or pool's) verdict. ENGAGED: a manual savepoint, a live
-    /// comment or reference, a tag beyond the declared seed paths, a block
-    /// tag, floating notes, an entry date, a lock, an archive — or, for a
-    /// guide member, a live membership in any OTHER reading. STRAGGLING: a
-    /// placement without its block's variants, or no placements at all.
-    /// Else the note's content signature: the rendered text's hash plus a
-    /// structural skeleton — blocks in placement order; per block the
-    /// active take texts in fan order, the archived-take count, any locked
-    /// take, the block name, the presentation, and the CHOSEN take's index
-    /// (nil or dead chosen reads as the default's — the read-time rule).
-    private func noteSignature(
+    /// reference, a tag beyond the declared seed paths, a block tag,
+    /// floating notes, an entry date, an archive — or, for a guide member,
+    /// a live membership in any OTHER reading. IDENTITY (BLOCKER-1's move —
+    /// seed-authored state the real mint ships): the note's LOCK (the
+    /// sealed lesson) and its live COMMENTS as ordered (block-ordinal,
+    /// text) tuples — created_at deliberately excluded, each device's seed
+    /// stamps its own clock. STRAGGLING: a placement without its block's
+    /// variants, or no placements at all. Else the content signature:
+    /// the rendered text's hash plus a structural skeleton — blocks in
+    /// placement order; per block the active take texts in fan order, the
+    /// archived-take count, any locked take, the block name, the
+    /// presentation, and the CHOSEN take's index (nil or dead chosen
+    /// NORMALIZES TO -1 — deliberately NOT the default's index; the
+    /// direction is conservative only, recorded at the round-1 MINOR-5).
+    public static func noteVerdict(
         _ db: Database, postID: String, within readingID: String?,
         seedTagPaths: [String], hash: @Sendable (String) -> String
-    ) throws -> FurnitureSignature {
+    ) throws -> Verdict {
         guard let post = try Row.fetchOne(
             db,
             sql: """
@@ -631,7 +685,6 @@ extension SyncEngine {
                 """,
             arguments: [postID])
         else { return .straggling }
-        if (post["locked"] as Int? ?? 0) != 0 { return .engaged }
         if (post["archived_at"] as String?) != nil { return .engaged }
         if (post["entry_date"] as String?) != nil { return .engaged }
         if let notes = post["floating_notes"] as String?, !notes.isEmpty { return .engaged }
@@ -647,7 +700,7 @@ extension SyncEngine {
             if elsewhere { return .engaged }
         }
 
-        let seedPathsJSON = jsonArray(Set(seedTagPaths))
+        let seedPathsJSON = jsonArrayLiteral(seedTagPaths)
         let engagement = try Bool.fetchOne(
             db,
             sql: """
@@ -659,10 +712,6 @@ extension SyncEngine {
                                JOIN container_block cb ON cb.block_id = bt.block_id
                                WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
                                  AND bt.deleted_at IS NULL)
-                    OR EXISTS (SELECT 1 FROM block_comment bc
-                               JOIN container_block cb ON cb.block_id = bc.block_id
-                               WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
-                                 AND bc.deleted_at IS NULL)
                     OR EXISTS (SELECT 1 FROM commit_point cp
                                JOIN variant v ON v.id = cp.variant_id
                                JOIN container_block cb ON cb.block_id = v.block_id
@@ -684,7 +733,29 @@ extension SyncEngine {
             arguments: [postID])
         guard !placements.isEmpty else { return .straggling }
 
-        var parts: [String] = [post["title"] as String? ?? ""]
+        var parts: [String] = [post["title"] as String? ?? "",
+                               "lk:\(post["locked"] as Int? ?? 0)"]
+        // The note's live comments, as (block-ordinal, text) tuples in
+        // placement order — identity, not engagement (BLOCKER-1): the
+        // seed's own comment matches across copies; hers differ.
+        let comments = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT cb.position AS pos, cb.id AS pid, bc.text AS text
+                FROM block_comment bc
+                JOIN container_block cb ON cb.block_id = bc.block_id
+                WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                  AND bc.deleted_at IS NULL
+                ORDER BY cb.position, cb.id, bc.text
+                """,
+            arguments: [postID])
+        var commentOrdinal: [String: Int] = [:]
+        parts += comments.map { row -> String in
+            let key = (row["pos"] as String? ?? "") + "|" + (row["pid"] as String? ?? "")
+            let ordinal = commentOrdinal.count
+            if commentOrdinal[key] == nil { commentOrdinal[key] = ordinal }
+            return "c\(commentOrdinal[key]!):\(hash(row["text"] as String? ?? ""))"
+        }
         for placement in placements {
             let blockID: String = placement["block_id"]
             guard let block = try Row.fetchOne(
@@ -718,6 +789,13 @@ extension SyncEngine {
         }
         let rendered = try Queries.renderedText(db, containerID: postID)
         parts.append(hash(rendered))
-        return .signature(hash(parts.joined(separator: "\u{1F}")))
+        return .foldable(signature: hash(parts.joined(separator: "\u{1F}")))
+    }
+
+    /// A JSON array literal for `json_each` binding (the
+    /// `SampleCopyClassifier` door's own precedent).
+    private static func jsonArrayLiteral(_ values: [String]) -> String {
+        let data = try? JSONSerialization.data(withJSONObject: values)
+        return data.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
     }
 }

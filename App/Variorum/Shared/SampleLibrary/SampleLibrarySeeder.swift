@@ -625,7 +625,7 @@ enum SampleLibrarySeeder {
                 .init(
                     name: Operations.defaultQuicknoteBookName,
                     rule: .tagPath(Operations.quicknoteTagPath),
-                    designationKey: "quicknote_book",
+                    designationKey: Operations.quicknoteBookDesignationKey,
                     bornStarred: true),
             ],
             containers: [
