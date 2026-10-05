@@ -118,9 +118,34 @@ struct BookRowMenuTests {
         }
     }
 
-    /// The walk's W-2: a state door that ran tells the surface, so a ONE-SHOT
-    /// listing (the Library's catalog) re-asks — a book deleted or archived
-    /// from its row menu leaves the list at once.
+    /// The walk's W-2 (a bug-class row — red-on-old by a synthetic revert of
+    /// the wiring, recorded in the B3 RECORD): the Library's listing is a
+    /// ONE-SHOT read, so a book archived from ITS row menu must leave the list
+    /// without anything else asking — the catalog's own row doors re-ask.
+    @Test func aBookArchivedFromTheLibraryRowLeavesTheListing() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 5))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let book = try session.operations.createReading(name: "essays", kind: .book)
+            let catalog = LibraryCatalogModel(session: session)
+            await catalog.search()
+            #expect(catalog.listedBookIDs.contains(book.id), "listed before the act")
+
+            await catalog.bookRowDoors.open(.archiveBook, readingID: book.id)
+            for _ in 0..<200 where catalog.listedBookIDs.contains(book.id) {
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(!catalog.listedBookIDs.contains(book.id),
+                    "the listing re-asked on its own — the archived book left it")
+        }
+    }
+
+    /// The brain's half: a state door that ran tells the surface.
     @Test func aStateDoorThatRanTellsTheSurface() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
@@ -136,9 +161,6 @@ struct BookRowMenuTests {
             doors.onLanded = { landed += 1 }
             await doors.open(.archiveBook, readingID: book.id)
             #expect(landed == 1, "the surface heard the act")
-            let catalog = LibraryCatalogModel(session: session)
-            await catalog.search()
-            #expect(!catalog.hits.contains { $0.id == book.id }, "an archived book leaves the catalog")
         }
     }
 }
