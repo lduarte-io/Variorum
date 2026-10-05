@@ -2869,7 +2869,7 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 | # | piece | status |
 |---|---|---|
 | 0 | This record + the b1 captures dir gitignored | DONE (this commit) |
-| 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | IN-PROGRESS — **TEMPORARY `B1TRACE` NSLog instrumentation is in the WORKING TREE, UNCOMMITTED** (ReadEditPane / ReadEditBlock / NoteIndexColumn / BlockTOCViewModel.adopt / ReadModeView body — every line carries `B1Trace`; a successor deletes every `B1Trace` line and the `enum B1Trace` at ReadEditPane.swift's tail before anything else). Driving: the dev-store Debug build + a phased trackpad-fling tool (scratchpad `fling.swift`) |
+| 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | DONE (this commit) — § THE TRACE below: M1 (the column: a whole-note lookup per realized row + three AppKit controls per row) is her lag; M2 (the pane's 4.7× lazy estimate) recorded; re-query storm and landing re-aims ruled OUT. The temporary instrumentation is REMOVED from the tree in this commit (kept as the gitignored `b1trace.patch` for the after-measurement) |
 | 2 | (j) pin red-on-old → fix → green | NOT-STARTED |
 | 3 | (k) the large-fixture road (dev store, staged + restored) | DONE (90eb3416) — `ScaleFixture.swift` (DEBUG + `VARIORUM_SCALE_FIXTURE`) + `Tools/ScaleFixture/stage.sh` / `restore.sh`. **THE DEV STORE IS STAGED NOW** — prestage copy `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261005T190622Z` (cmp-verified); a successor RESTORES it (`Tools/ScaleFixture/restore.sh <that dir>`, the DEV app quit first) before closing. ALSO STAGED: the dev app's local `readFace.<id>` defaults — six notes flipped `read`→`edit` for the trace; the originals are listed in this row's restore note: 4A5B8D9A…, 4EBE2134…, CDFD73E1…, D39B34A7…, D42DDB29…, D5AA052C… were `read` (67DB6BCA…, 6D00EAC7… were already `edit`) |
 | 4 | (k) core: the keyset page read per sort + pins | NOT-STARTED |
@@ -2879,3 +2879,74 @@ subagents. QUESTIONS' next free number at preflight: **#187**.
 | 8 | END suites + record close (findings, PROVISIONALs → QUESTIONS #187) | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
+
+### THE TRACE — (j), MEASURED, BEFORE ANY FIX (the mechanism; the book Index checked)
+
+**The bed.** The DEV-store Debug build (`DerivedData/17y`), the fixture's long note (2,000 blocks ·
+13,713 words — a long-paragraph opening, then mostly one-line dialogue, a `# Part N` heading every
+100 blocks) and *A Scandal in Bohemia* (262 blocks); Read ▸ `edit` (the editable index surface) with
+the `▸ 01` column beside it. Driven by a phased TRACKPAD fling (`fling.swift`: began · changed×N ·
+ended · a decaying momentum tail, posted at the HID tap), the WalkKit line-wheel, and real scroller-
+thumb drags (`cliclick`). Measured by TEMPORARY in-process instrumentation (never committed; kept as
+`notes/plans/17y-screens/b1/b1trace.patch`, gitignored): every `onScrollGeometryChange` of both
+scroll views, every row/body evaluation, every `observeBlockTOC` delivery, the landing's LAND/AIM,
+each whole-note lookup's duration, and a DISPLAY-LINK FRAME PROBE on the window (the main thread's
+true frame cadence + every NSScrollView's clip offset per frame). Debug numbers; the SHAPE is what
+binds.
+
+**What she scrolls is the COLUMN.** The app's own words call it the note's index (the `outline`
+toggle's help: "The note's index beside the page"); the pane beside it is smooth. Measured on the
+2,000-block note, a cold trackpad fling:
+
+| surface | frames during the fling | mean frame gap | max | notes |
+|---|---|---|---|---|
+| the `edit` PANE (LazyVStack of blocks) | 110 | 8.0 ms | 17 ms | smooth — zero DB reads, zero body re-evaluations; only the realized rows' bodies |
+| the `▸ 01` COLUMN (LazyVStack of index rows) — shipped | **5** | **184–217 ms** (3 cold runs) | **391 ms** | ~5 fps; distance LOST under the stall (six identical slow flings travelled 8,523 pt shipped vs 19,588 pt with the cost removed); single-frame leaps of 4,000+ pt |
+
+**M1 — THE LAG (ruled IN; the column).** During a column fling there are ZERO column body
+re-evaluations, ZERO pane row bodies, ZERO `observeBlockTOC` deliveries (counted) — the whole cost
+is per REALIZED ROW, and it has two parts, isolated by A/B arms in the same build (env-switched,
+cold relaunch per run, alternated):
+1. **A whole-note lookup per realized row — P1's letter.** `NoteIndexColumn.rowsByID` is a COMPUTED
+   `Dictionary` over EVERY row of the note, and the row builders call it (`blockRow`, `sectionRow`,
+   and the row's `⋯` menu content) — measured 698 builds in one fling, **626 µs each at 2,000
+   blocks (437 ms of the fling)**: per-frame cost ∝ (rows realized) × (note size).
+2. **Three AppKit-backed controls on EVERY row** (`↑` `↓` buttons + the `⋯` `Menu`), built for every
+   realized row though each rests at 25 % opacity until hovered — P3's shape broken (only the
+   focused thing is heavy).
+
+| arm (cold fling, 2,000 blocks) | mean frame gap |
+|---|---|
+| A — shipped | 184 · 217 · 217 ms |
+| B — the lookup built once (cached) | 113 · 125 · 127 ms |
+| D — B + no `Menu` (buttons kept) | 70 · 84 ms |
+| C — B + no row controls | **10.9 · 11.3 ms (smooth, 80 frames)** |
+
+**"A quick scroll sends you straight to the top" — NOT reproduced literally; the measured mechanism
+is the same stall.** At 5 fps a flick's whole momentum lands in one or two frames (measured: an
+upward flick from 33,499 pt reached the top in three frames: 33,499 → 16,399 → 1,999 → 0), and
+under the stall scroll distance is dropped or coalesced unpredictably — the page moves in leaps the
+hand cannot steer. Removing M1's cost removes the stall the leaps ride.
+
+**M2 — the PANE's estimate (ruled IN as the F3 class; NOT her lag; recorded, not fixed here).** The
+pane's `LazyVStack` gives SwiftUI no row heights, so unrealized rows stand at the average of the
+realized ones: on the 2,000-block note the content height starts at **334,824 pt for a 71,389-pt
+note (4.7×)** and collapses as rows realize (334,824 → 83,917 inside one fling). Trackpad scrolling
+stays smooth (above), but the scroller THUMB rides the estimate: a quick thumb drag throws the page
+far past the hand (measured: a 192-pt upward drag, ~23 % of the track, moved 102,154 → 33,408 pt as
+the estimate collapsed 159,979 → 74,406), and the first big jump hitches 248–837 ms. Its remedy is
+the F3 shape (heights known before the aim — `ReadNoteHeights` already derives them), a read-tier
+build of its own; filed as a finding with an owner (below), never "also done".
+
+**Ruled OUT by measurement:** a scroll-driven re-QUERY storm (zero `observeBlockTOC` deliveries and
+zero body re-evaluations during every fling; deliveries arrive only at autosave cadence); the
+landing's jump-correction re-aiming against her scroll (every fling, wheel scroll and thumb drag
+reported `phase=interacting` first, which ends any landing — `landing=0` on every frame of every
+scroll; zero AIMs during scrolls).
+
+**The book Index — shares HALF of M1.** Its navigator (`BookIndexView.column` → `BookIndexNoteRow`)
+builds ONE AppKit `Menu("⋯")` per realized row (no `↑ ↓`, no whole-book lookup), over at most the
+300-note window — the control half's class at one third of the per-row weight (arm D − C ≈ the two
+buttons; B − D ≈ the menu). Its pane is the F3-fixed shape (13u4 UNIT F3). Recorded as a finding;
+not this batch's surface.
+
