@@ -2137,7 +2137,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | DONE except the walk (2e07a4d4 red · 78f4c824 fix · this commit): `BookPanelBrain.dropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `dropPlan`); `BookPanelModel.drop` speaks `BookPanelCopy.needsManualOrder` — *“X” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.* (PROVISIONAL words); `chapterGripDrawn` = more than one chapter. Pins RED on the pre-fix behaviour (4 issues) → GREEN "48 tests in 5 suites" (`p4-green.log`) → **behavioural revert (the gate off, the grip always) RED "5 tests … with 4 issues"** (`p4-rv.log`) on the corrected fixture, restored, `git diff --quiet`. The walk (a panel drag landing; the refusal road) rides piece 9 |
 | 5 | (m) the quick-note box's double cursor | NOT-STARTED |
 | 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
-| 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | NOT-STARTED |
+| 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | IN-PROGRESS — the trace below; pins `VariorumTests/CanvasDebugOnlyTests.swift` committed RED ON PURPOSE (this commit) against the seam added in its PRE-FIX shape (`PostMode.buildKeepsCanvas` / `order(keepingCanvas:)` / `keyLabel` / `keySpan` / `modeList` / `fromStored(_:keepingCanvas:)` and `PoolDetailView.Mode.faces(keepingCanvas:)` all keeping Canvas whatever the flag; no consumer rewired; `rememberedMode`'s `flatMap` spelled as a closure for the defaulted parameter — no behaviour change): **"5 tests in 1 suite failed … with 6 issues"** (`p7-red.log`) — the three Release-flavour tests red, the two Debug-wiring guards green by design. NEXT: the fix |
 | 8 | Suites at the END + the tutorial spine | NOT-STARTED |
 | 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | NOT-STARTED |
 | 10 | Record close (first line, findings, PROVISIONALs → QUESTIONS #184 if any) | NOT-STARTED |
@@ -2212,3 +2212,27 @@ the panel's roads, each traced to its op:
   dropped row lands right above this one", and nothing speaks. That is the brief's P-2 class (a
   silent refusal) → it must refuse WITH the road: the book's order control is the book view
   navigator's "order · … ▾" → Manual order → Save as This Book's Order (`BookView.orderControl`).
+
+### THE TRACE — (p), Canvas's doors (enumerated before the gate)
+
+**The order is derived in ONE place: `PostMode.allCases`** (`Registry/PostMode.swift` — its own doc:
+"The ⌘1–⌘7 keys derive from THIS order (EditorCommands' ForEach), as do the sidebar rail and the
+masthead menu — one order, three renderers"). Its readers: the masthead mode menu
+(`PostDetailView.swift:311`), ⌘1–⌘n (`EditorCommands.swift:766`), the sidebar rail and its counts
+(`SidebarView.swift:230/236/593/614/623/631`). Gating `allCases` itself gates all of them with no
+renderer touched. **Canvas's OTHER doors, every one:** (1) the per-note mode MEMORY's decode
+(`PostMode.fromStored` ← `PostDetailView.rememberedMode`, also the pane line's `heldMode`) — a note
+she left in Canvas on a Release build would reopen in a mode the build no longer renders; (2) the
+hand-written ⌘ span — the registry's `.switchMode` verb "Switch Mode (⌘1–⌘7)" + label "⌘1–7"
+(`CapabilityRegistry.swift:1312`), the helper's "⌘1–7 · note modes: … · Canvas" row
+(`HelperView.swift:168`, tied to the label by `everyDeclaredShortcutIsFindableInTheHelper`), the
+masthead menu's help "… · Blocks · Canvas (⌘1–⌘7)" (`PostDetailView.swift:320`); (3) the helper's
+"canvas" DICTIONARY entry (`HelperView.swift:390`); (4) **the Snippets area's second face** — the
+"Scraps | Canvas" segmented picker (`PoolDetailView.Mode`, `CanvasView.swift:1052`, mounted at
+`RootView.swift:940`; AppSpec §12: "Canvas = a VIEW on a post or the scraps area"); (5) the
+canvas-only acts `.toggleCanvasBank` / `.returnCardToBank` are `.surface` doors rendered only INSIDE
+`CanvasView` — unreachable once (1)–(4) are gated; their declarations stay (the registry walk is
+Debug's). The ⌘K palette carries NO mode rows (no `requestMode` caller beyond ⌘-keys, the rail and
+in-mode hops to Takes/Write), and no Settings pane names Canvas. **Not gated — the fence:** the field
+guide's prose teaches Canvas (lesson "blocks · canvas", the mode-row sentence at
+`TutorialSeeder.swift:456`) — seed CONTENT, 13s's (finding F-B2 below).

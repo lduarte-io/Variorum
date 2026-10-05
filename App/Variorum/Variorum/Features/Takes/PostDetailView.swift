@@ -117,7 +117,7 @@ struct PostDetailView: View {
     /// values decode through `PostMode.fromStored`, so a post left in the
     /// retired Outline tab reopens in Compare — no stored value strands.
     static func rememberedMode(postID: String, defaults: UserDefaults = .standard) -> Mode {
-        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.fromStored) ?? .write
+        defaults.string(forKey: "postMode.\(postID)").flatMap { Mode.fromStored($0) } ?? .write
     }
 
     @State private var mode: Mode = .write

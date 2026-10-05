@@ -1052,6 +1052,10 @@ struct PoolDetailView: View {
     enum Mode: String, CaseIterable {
         case scraps = "Scraps"
         case canvas = "Canvas"
+
+        static func faces(keepingCanvas: Bool) -> [Mode] {
+            [.scraps, .canvas]
+        }
     }
 
     @State private var mode: Mode = .scraps

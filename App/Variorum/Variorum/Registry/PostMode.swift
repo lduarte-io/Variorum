@@ -51,9 +51,35 @@ nonisolated enum PostMode: String, CaseIterable, Sendable {
     /// left in the retired Index tab reopens in Read (the correction round,
     /// R-cor-5/7 — Read's `edit` face IS the index surface). Unknown
     /// strings still decode nil (the caller's fallback owns those).
-    static func fromStored(_ raw: String) -> PostMode? {
+    static func fromStored(_ raw: String, keepingCanvas: Bool = buildKeepsCanvas) -> PostMode? {
         if raw == "Outline" { return .compare }
         if raw == "Index" { return .read }
         return PostMode(rawValue: raw)
+    }
+
+    // MARK: - 17y B2 (p) — the build flavour's seam (PRE-FIX SHAPE: Canvas in every build)
+
+    static let buildKeepsCanvas: Bool = {
+        #if DEBUG
+        return true
+        #else
+        return false
+        #endif
+    }()
+
+    static func order(keepingCanvas: Bool) -> [PostMode] {
+        [.write, .takes, .read, .lenses, .compare, .blocks, .canvas]
+    }
+
+    static func keyLabel(keepingCanvas: Bool) -> String {
+        "\u{2318}1\u{2013}\(order(keepingCanvas: keepingCanvas).count)"
+    }
+
+    static func keySpan(keepingCanvas: Bool) -> String {
+        "\u{2318}1\u{2013}\u{2318}\(order(keepingCanvas: keepingCanvas).count)"
+    }
+
+    static func modeList(keepingCanvas: Bool) -> String {
+        order(keepingCanvas: keepingCanvas).map(\.rawValue).joined(separator: " \u{00B7} ")
     }
 }
