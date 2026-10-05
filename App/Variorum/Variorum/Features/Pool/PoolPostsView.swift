@@ -122,6 +122,20 @@ final class PoolPostsModel {
             })
     }
 
+    /// 17y B3 item (o) — the add picker's INLINE MINT: a plain book, then the
+    /// one membership road (the consult and the gate are the add's own); an
+    /// ownership refusal opens the choice sheet. Other refusals speak here.
+    func mintBook(_ typed: String, adding postID: String) async {
+        do {
+            _ = try await membershipDoors.mintAndAdd(typed, postID: postID)
+            lastError = nil
+        } catch let error as OperationError {
+            lastError = ReadingsViewModel.message(error)
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
     /// The drainage gesture: into a book (the pool row's whole point). Through
     /// the one membership road (13i-c U4): an ownership refusal OPENS the
     /// choice sheet (P-2) rather than ending in words.
@@ -330,10 +344,18 @@ struct PoolPostsView: View {
                 title: "Add to Book",
                 prompt: "search books",
                 emptyState: "No books match.",
-                source: .curatedBooks(readings.readings)
-            ) { row in
-                Task { await model.addToBook(target.postID, readingID: row.id) }
-            }
+                source: .curatedBooks(readings.readings),
+                onPick: { row in
+                    Task { await model.addToBook(target.postID, readingID: row.id) }
+                },
+                // 17y B3 item (o): the same idiom's INLINE MINT — 'New book
+                // "X"' makes a plain book and adds the note through the one
+                // membership road (`MembershipDoors.mintAndAdd`).
+                createLabel: AddToBookCopy.newBook(_:),
+                createKey: AddToBookCopy.key(_:),
+                onCreate: { typed in
+                    Task { await model.mintBook(typed, adding: target.postID) }
+                })
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError {

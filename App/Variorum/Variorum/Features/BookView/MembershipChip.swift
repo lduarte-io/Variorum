@@ -173,30 +173,21 @@ struct MembershipChip: View {
                     }
                 }
                 // R61 — the ADD door, right where "in no book" is read.
-                if !addableBooks.isEmpty || !addableSmartBooks.isEmpty {
-                    Menu("Add to Book") {
-                        // 13i-e U2 — her second rider's lighter road: an
-                        // archived book is MARKED in the selector and the add
-                        // lands on a plain click (explicit adds stay open —
-                        // R-13ie-4's amendment).
-                        ForEach(addableBooks, id: \.id) { book in
-                            Button(BookArchiveCopy.name(book)) { add(to: book) }
-                        }
-                        if !addableSmartBooks.isEmpty {
-                            Divider()
-                            // R98: smart books collect by filter — adding
-                            // IS tagging, and the door says so.
-                            ForEach(addableSmartBooks, id: \.id) { book in
-                                Button("\(BookArchiveCopy.name(book)) (by tagging)") { collect(into: book) }
-                            }
-                        }
-                    }
-                    // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
-                    // states its own line policy, so its IDEAL width can never be a
-                    // wrapped one (the b6dae25 class's window-sizing hazard).
-                    .lineLimit(1)
-                    .fixedSize()
-                }
+                // 17y B3 item (o) — THE SAME PICKER IDIOM + THE INLINE MINT
+                // (her ruling at the question tool): type-to-filter over the
+                // books (an archived one MARKED, never refused — 13i-e's rider;
+                // a gathering joins "by tagging", R98), and the search field
+                // doubles as the mint — 'New book "X"' makes a PLAIN book and
+                // adds the note through the one membership road (the consult,
+                // the gate). Always drawn now: with no other book she can
+                // still make one.
+                SearchPicker(
+                    tokens: tokens, label: AddToBookCopy.verb, prompt: AddToBookCopy.prompt,
+                    options: addOptions, emptyText: AddToBookCopy.empty,
+                    createLabel: AddToBookCopy.newBook(_:), key: AddToBookCopy.key(_:),
+                    onPick: { id in pickBook(id) },
+                    onCreate: { typed in mint(typed) },
+                    role: .secondary)
                 Divider()
                 // 13g cold review R1-1 (L17 — her WT-7 round-4 ruling,
                 // built at the review after the batches dropped it): the
@@ -393,6 +384,47 @@ struct MembershipChip: View {
         // open smart books too — the add applies the filter's tags.
         addableSmartBooks = all
             .filter { $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id) }
+    }
+
+    /// 17y (o): the add picker's options — the open books the note is not
+    /// in (an archived one marked), then the open gatherings "by tagging".
+    private var addOptions: [SearchPickerOption] {
+        addableBooks.map { book in
+            SearchPickerOption(
+                id: book.id, label: book.name,
+                annotation: book.archivedAt != nil ? BookArchiveCopy.word : nil)
+        } + addableSmartBooks.map { book in
+            SearchPickerOption(id: book.id, label: book.name, annotation: AddToBookCopy.byTagging)
+        }
+    }
+
+    /// A pick: a book joins by membership, a gathering by tagging (R98).
+    private func pickBook(_ id: String) {
+        if let book = addableBooks.first(where: { $0.id == id }) {
+            add(to: book)
+        } else if let gathering = addableSmartBooks.first(where: { $0.id == id }) {
+            collect(into: gathering)
+        }
+    }
+
+    /// 17y (o) — THE INLINE MINT, through the one membership brain
+    /// (`MembershipDoors.mintAndAdd` — the consult and the gate are the add's
+    /// own). An ownership refusal closes the popover and opens the choice,
+    /// exactly as an existing book's add does.
+    private func mint(_ typed: String) {
+        Task {
+            do {
+                switch try await membershipDoors.mintAndAdd(typed, postID: postID) {
+                case .added(let name):
+                    status = AddToBookCopy.made(name)
+                case .offered:
+                    popoverShown = false
+                }
+            } catch {
+                status = ChipRefusals.message(for: error, bookName: typed)
+            }
+            await refresh()
+        }
     }
 
     /// R98 — apply-and-report through `collectPostIntoSmartReading`.

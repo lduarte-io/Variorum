@@ -315,6 +315,50 @@ final class MembershipDoors {
         return false
     }
 
+    /// What the inline mint did (17y (o)).
+    enum MintOutcome: Equatable {
+        /// The book was made and the note joined it.
+        case added(book: String)
+        /// The book was made; the note's add met an ownership refusal and
+        /// the choice sheet is up (exactly as on an existing book's add).
+        case offered(book: String)
+    }
+
+    /// **THE INLINE MINT** (17y item (o) — her ruling at the question tool:
+    /// the add-to-book picker's search field doubles as the mint; a 'New book
+    /// "X"' row "mints a PLAIN book in the current wing, adds the note as an
+    /// ORDINARY membership — the ownership consult and the capacity gate run
+    /// exactly as on every other add road, never bypassed — and speaks a
+    /// quiet receipt; deeper setup stays in Book Settings").
+    ///
+    /// Two runner turns, the mint then THIS type's one add road (`add` →
+    /// `addPostToReading`, whose gate and consult are the op's own): the book
+    /// is made in the NOTE's wing (a book never spans wings — and under the
+    /// cross-wing follow (17y (f)) the note's wing IS the current one; the
+    /// note's is the one an add can land in — PROVISIONAL P-17y-B3-o2), with
+    /// the store-wide name guard every book mint runs (E13). A refused add
+    /// leaves the made book standing (an ownership choice opens the sheet; a
+    /// cancelled sheet keeps the empty book — PROVISIONAL P-17y-B3-o3). Any
+    /// other refusal is rethrown for the host's words.
+    func mintAndAdd(_ typedName: String, postID: String) async throws -> MintOutcome {
+        let name = typedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let database = session.database
+        let book = try await session.runner.run { ops -> Reading in
+            try ops.assertBookNameIsFree(name)
+            let wing = try database.read { db in
+                try Queries.effectiveWing(db, ofPost: postID)
+            } ?? ""
+            return try ops.createReading(
+                name: name.isEmpty ? "Untitled" : name, kind: .book, wingId: wing)
+        }
+        if let choice = try await add(postID, to: book.id) {
+            await offer(choice, postID: postID, readingID: book.id)
+            return .offered(book: book.name)
+        }
+        session.status.receipt(AddToBookCopy.made(book.name))
+        return .added(book: book.name)
+    }
+
     /// Which choice an operation's refusal names — nil for any other refusal.
     nonisolated static func choice(for error: Error) -> OwnershipDecision.Choice? {
         switch error as? OperationError {
@@ -536,3 +580,21 @@ enum MembershipChoiceProbe {
     static var shown: MembershipChoice?
 }
 #endif
+
+/// The add-to-book doors' words (17y (o) — the chip's picker and the Pool's;
+/// 13s re-voices).
+nonisolated enum AddToBookCopy {
+    static let verb = "Add to Book"
+    static let prompt = "Find or make a book"
+    static let empty = "No other books here \u{2014} type a name to make one."
+    static let byTagging = "by tagging"
+    /// The create row — names exactly what it will make.
+    static func newBook(_ typed: String) -> String { "New book \u{201C}\(typed)\u{201D}" }
+    /// The quiet receipt.
+    static func made(_ name: String) -> String {
+        "Made the book \u{201C}\(name)\u{201D} and added this note."
+    }
+    /// A book's identity for "already exists": its name, as the E13 guard
+    /// reads it (case-folded, trimmed).
+    static func key(_ text: String) -> String { BookNaming.key(text) }
+}

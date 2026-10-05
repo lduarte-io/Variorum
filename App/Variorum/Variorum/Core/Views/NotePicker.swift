@@ -196,6 +196,13 @@ struct NotePickerSheet: View {
     var emptyState = "Nothing matches."
     let source: NotePickerSource
     let onPick: (NotePickerRow) -> Void
+    /// 17y item (o) — THE INLINE MINT (the one picker idiom, `SearchPicker`'s
+    /// brain): when a host can MAKE what was typed, the create row names it
+    /// ('New book "X"') atop the matches, and ⏎ takes it when nothing
+    /// matches. nil = search only (the note pickers).
+    var createLabel: ((String) -> String)? = nil
+    var createKey: (String) -> String = { $0 }
+    var onCreate: ((String) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
@@ -226,8 +233,11 @@ struct NotePickerSheet: View {
                     .foregroundStyle(tokens.ink)
                     .focused($searchFocused)
                     .onSubmit {
-                        guard let top = rows.first else { return }
-                        pick(top)
+                        if let top = rows.first {
+                            pick(top)
+                        } else if let offer = createOffer {
+                            create(offer)
+                        }
                     }
             }
             .padding(.horizontal, 12)
@@ -238,10 +248,24 @@ struct NotePickerSheet: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
+                    if let offer = createOffer, let createLabel {
+                        Button {
+                            create(offer)
+                        } label: {
+                            CalmCard(tokens: tokens) {
+                                Text(createLabel(offer))
+                                    .font(tokens.body)
+                                    .foregroundStyle(tokens.accent)
+                                    .lineLimit(1)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
                     ForEach(rows) { row in
                         rowCard(row)
                     }
-                    if rows.isEmpty {
+                    if rows.isEmpty, createOffer == nil {
                         Text(tokens.chromeLabel(emptyState))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
@@ -302,6 +326,21 @@ struct NotePickerSheet: View {
     private func pick(_ row: NotePickerRow) {
         dismiss()
         onPick(row)
+    }
+
+    /// The create row's value, by the one brain (`SearchPickerBrain`): the
+    /// typed text when no row already IS it.
+    private var createOffer: String? {
+        guard createLabel != nil, onCreate != nil else { return nil }
+        return SearchPickerBrain.createOffer(
+            query: query,
+            options: rows.map { SearchPickerOption(id: $0.id, label: $0.title) },
+            key: createKey)
+    }
+
+    private func create(_ typed: String) {
+        dismiss()
+        onCreate?(typed)
     }
 
     /// The palette's cadence: one bounded read per typed query, latest
