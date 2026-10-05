@@ -1240,6 +1240,23 @@ opened; the working tree was left clean.
     mobile rebuild is owed. Nothing published; the touched pipeline scripts' next real run
     is the next release's. **The fix pass is COMPLETE; the implementer sanity pass and
     round 2 (a FRESH reviewer) are next.**
+  - **THE SANITY PASS'S ONE NIT ON F4 — THE FINAL CALL: ACCEPTED AND LANDED
+    (`a53aa77e`).** The cited mechanism was VERIFIED in the 2.10.0 source first (the
+    standing practice): `SPUUpdater checkForUpdates` under `_showingPermissionRequest`
+    calls `showUpdateInFocus` (when the driver responds) and returns;
+    `SPUStandardUserDriver showUpdateInFocus` raises `_permissionPrompt` via `showWindow:`
+    and activates the app; and `showUpdateInFocus` sits in the protocol's `@optional`
+    section with NO declaration in the standard driver's public header — so the Swift call
+    is the optional-protocol form on the driver cast `as any SPUUserDriver`. The guard now
+    MIRRORS Sparkle's own move: a check pressed while the deferred ask is up brings the
+    permission window FORWARD instead of doing nothing silently (P-2 whole again in the
+    out-of-date-sync × ask-on-screen corner). Like F4 itself: NO PIN, labelled honestly
+    (unreachable without a live controller). Channel-adjacent suites re-run at a verified
+    zero-instance window: **29/3 green** (UpdateChannel · CalmAsks · SyncOutOfDateFace).
+    **THE FIX SET IS FINAL at `a53aa77e`: six production/test commits (7f792dc3 ·
+    dd44aff3 · 15ce51b5 · d3cd0079 · 0d2f3f05 · 7579b4fd) + this refinement; round 2
+    spawns under a FRESH reviewer, with the 7579b4fd pin repair and this F4 refinement
+    explicitly in its view.**
 
 ---
 
