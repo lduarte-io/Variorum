@@ -2114,3 +2114,49 @@ SAY SO in your record so the review re-casts to Fable).
 cursor in the quick-note box (Terminal voice); the title click with the chrome still; the mode
 row without Canvas (a Release-conditioned evidence road per the pin's seam — a Debug capture
 shows Canvas kept).
+
+## 17y B2 RECORD — the drag mechanics + three singles, items (a)(b)(e)(m)(n)(p) (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
+
+**NOT DONE (first line, per the contract): PENDING — written at the batch's close.**
+
+Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; this file's 17y
+row items (a)(b)(e)(m)(n)(p) end to end, the RUN RECORD and the B2 BRIEF; `notes/plans/17y-sitting-
+rulings-2026-10-05.md` (none of the six items is changed by it); `notes/SessionResiliencyProtocol.md`
+whole; the 13i-d U1 RECORD + its adjudication and the U2 RECORD + its adjudication
+(`phase-13i-d-bookcase.md`); QUESTIONS #170/#171 (next free number **#184**); her capture
+`17y-screens/title-chrome-shift.png`; `Tools/WalkKit/README.md` + the guard/click/keys scripts.
+Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
+| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | IN-PROGRESS — the trace's lead (below) is being confirmed by a driven reproduction before any fix |
+| 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | NOT-STARTED |
+| 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | NOT-STARTED |
+| 5 | (m) the quick-note box's double cursor | NOT-STARTED |
+| 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
+| 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | NOT-STARTED |
+| 8 | Suites at the END + the tutorial spine | NOT-STARTED |
+| 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | NOT-STARTED |
+| 10 | Record close (first line, findings, PROVISIONALs → QUESTIONS #184 if any) | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
+
+### THE TRACE — (a)(b)(e), the shared drag mechanism (PENDING confirmation by a driven reproduction)
+
+The lead, from reading (no fix yet): every drag in (a), (b) and (e) rides a `Transferable` token
+whose `CodableRepresentation` names a CUSTOM exported type — `BookcaseDragToken`
+(`io.lduarte.variorum.bookcase-item`, `BookcaseStrip.swift:75`) for (a)/(b), `BookPanelDragToken`
+(`io.lduarte.variorum.book-panel-item`, `BookPanelModel.swift:137`) for (e) — and **neither type
+(nor the Open strip's `io.lduarte.variorum.open-note-row`, `SidebarView.swift:669`, the "proven
+road" both were modelled on) is declared in the app's Info.plist** (`App/Variorum/VariorumInfo.plist`
+carries no `UTExportedTypeDeclarations`; the generated plist adds none). Measured from a scratch
+script: `UTType(exportedAs:)` on an undeclared identifier yields a type with NO supertypes that does
+NOT conform to `public.data` (the system-declared plain text does). The records' own evidence
+discriminates: 13b N20's String drag (a declared system type) LIT its drop indicator under synthetic
+drags and committed by her hand; 13i-d U1's custom-type drag started a session but NO target ever
+lit (F-U1-4), and the Open strip's custom-type reorder was never human-verified (pre-13u Act 10).
+F-U1-4/F-U2-4 recorded the failure as a synthetic-harness artifact; her real hand failing on (a)
+and (e) says it was not.
