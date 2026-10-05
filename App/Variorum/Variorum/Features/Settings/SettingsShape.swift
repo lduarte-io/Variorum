@@ -282,7 +282,7 @@ nonisolated enum SettingsCatalog {
         SettingsRow(
             id: "crashReports", pane: .diagnostics, title: DiagnosticsCopy.toggleTitle,
             blurb: "Off unless you turn it on. Reports stay on this Mac, shown exactly as they "
-                + "arrived; Send Report\u{2026} opens an email draft for you to read first. "
+                + "arrived; Send Report\u{2026} offers an email draft for you to read first. "
                 + "This Mac only.",
             keywords: ["crash", "crashes", "crashed", "report", "diagnostics", "diagnostic",
                        "privacy", "metrickit", "support", "bug", "problem", "send", "feedback",

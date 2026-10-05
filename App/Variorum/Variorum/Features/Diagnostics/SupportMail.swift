@@ -15,7 +15,7 @@
 //     compose-email sharing service, the one road that can attach a file
 //     (Apple's QA1018: a `mailto:` cannot). It is effectively Apple Mail's.
 //     When it cannot take the draft — or reports a failure that is not her
-//     own cancel — the FALLBACK (PROVISIONAL, QUESTIONS #181): the same
+//     own cancel — the FALLBACK (ratified, #181 (b)): the same
 //     draft as a `mailto:` naming the file, with the file shown in Finder so
 //     she can attach it herself.
 //   · If nothing opens at all, the door speaks a refusal (P-2).

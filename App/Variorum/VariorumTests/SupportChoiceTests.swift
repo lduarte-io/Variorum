@@ -295,7 +295,7 @@ struct SupportChoiceTests {
                                "the Help door asks the feedback question")
         let open = try #require(act.range(of: "SupportMail.open(.feedback(.thisMac()))"))
         #expect(ask.lowerBound < open.lowerBound,
-                "the draft opens only on the question's Open in Mail road")
+                "the draft's open sits after the ask in the act's source (19f review NIT 3: source order is what this pin proves; the walk and the channel pins carry the only-on-that-road half)")
         #expect(act.components(separatedBy: "SupportMail.open(").count == 2,
                 "exactly one mail road in the act — the one inside the question")
         #expect(act.contains("supportChoice"), "asked of the window (the shell's channel)")

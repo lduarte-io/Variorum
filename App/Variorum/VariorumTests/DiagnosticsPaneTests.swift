@@ -69,6 +69,15 @@ struct DiagnosticsPaneTests {
         }
     }
 
+    // The 19f review's MINOR 1: the catalog row's blurb is the promise's TWIN (settings
+    // search renders it as the result's detail line), so its verb must match the pane's —
+    // #182 (e) ratified "offers", and the two sentences must not disagree.
+    @Test func theCatalogBlurbSpeaksThePromisesVerb() {
+        let blurb = SettingsCatalog.rows.first { $0.id == "crashReports" }?.blurb ?? ""
+        #expect(blurb.contains("offers an email draft"),
+                "the search result's detail says what the pane's promise says (#182 (e))")
+    }
+
     // MARK: What the pane composes
 
     @Test func offThePaneLeadsWithTheToggleAndThePromiseAndSaysNothingIsCollected() async {
