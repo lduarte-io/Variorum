@@ -881,43 +881,12 @@ extension Queries {
         // SQLite's own rule: a negative LIMIT is no limit.
         let limit = limitPerKind ?? -1
         var hits: [CatalogHit] = []
-        // LIKE-escape the query (round 2 NIT: `_` is a single-char
-        // wildcard too; escape the escape first, then both wildcards).
-        let escaped = trimmed
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "%", with: "\\%")
-            .replacingOccurrences(of: "_", with: "\\_")
-        let like = "%\(escaped)%"
+        // LIKE-escape the query — the catalog's ONE rule (`catalogLikeEscaped`).
+        let like = "%\(catalogLikeEscaped(trimmed))%"
 
-        let readingScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
         let noteScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
-        let blockScope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
         if editedOn == nil {
-            // 13i-e (the plan's edge, PROVISIONAL P-13ie-U1-9): an ARCHIVED
-            // book leaves the catalog exactly as an archived note always has
-            // (the note arm's `archived_at IS NULL`) — it lives under Archived.
-            let books = try Row.fetchAll(
-                db,
-                sql: """
-                    SELECT id, name, kind, locked, sealed_at FROM reading
-                    WHERE deleted_at IS NULL AND archived_at IS NULL
-                      AND (? = '' OR name LIKE ? ESCAPE '\\')\(
-                        readingScope.map { " AND \($0.sql)" } ?? "")
-                    ORDER BY name LIMIT ?
-                    """,
-                arguments: StatementArguments(
-                    [trimmed, like] + (readingScope?.arguments ?? []) + [limit]))
-            hits += books.map {
-                CatalogHit(
-                    kind: .book, id: $0["id"], title: $0["name"],
-                    // 13i-d U6 (a): the ruled nouns (the sitting record §1 —
-                    // "smart" retired app-wide, §14): a GATHERING is never a
-                    // book, and a SEALED book says so (Finished = the table of
-                    // contents is done; Sealed = the book is done, §5).
-                    detail: ($0["kind"] as String) == "gathering" ? "gathering"
-                        : (($0["sealed_at"] as String?) != nil ? "sealed book"
-                           : (($0["locked"] as Int) == 1 ? "finished book" : "book")))
-            }
+            hits += try catalogBooks(db, query: query, limit: limitPerKind, wingID: wingID)
         }
 
         let posts = try Row.fetchAll(
@@ -952,34 +921,94 @@ extension Queries {
 
         // Blocks: named blocks anywhere + pool scraps by first-line handle.
         if !trimmed.isEmpty, editedOn == nil {
-            let blocks = try Row.fetchAll(
-                db,
-                sql: """
-                    SELECT b.id AS id,
-                           COALESCE(b.name, SUBSTR(v.working_text, 1, 80)) AS handle,
-                           c.title AS home, c.id AS home_id, c.kind AS home_kind
-                    FROM block b
-                    JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
-                    JOIN container c ON c.id = cb.container_id AND c.deleted_at IS NULL
-                     AND c.archived_at IS NULL
-                    LEFT JOIN variant v ON v.id = b.default_variant_id AND v.deleted_at IS NULL
-                    WHERE b.deleted_at IS NULL
-                      AND (b.name LIKE ? ESCAPE '\\'
-                           OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))\(
-                        blockScope.map { " AND (c.kind = 'pool' OR \($0.sql))" } ?? "")
-                    ORDER BY b.updated_at DESC LIMIT ?
-                    """,
-                arguments: StatementArguments(
-                    [like, like] + (blockScope?.arguments ?? []) + [limit]))
-            hits += blocks.map {
-                CatalogHit(
-                    kind: .block, id: $0["id"], title: $0["handle"] ?? "block",
-                    detail: $0["home"],
-                    homeContainerID: $0["home_id"],
-                    homeIsPool: ($0["home_kind"] as String) == "pool")
-            }
+            hits += try catalogBlocks(db, query: query, limit: limitPerKind, wingID: wingID)
         }
         return hits
+    }
+
+    /// **The catalog's BOOK arm** — its books and gatherings by name, in one
+    /// wing, archived ones out (they live under Archived). Factored out of
+    /// `searchCatalog` byte-for-byte (17y B1 (k)) so the Library can ask for
+    /// EVERY book of a wing (`limit: nil`) while it pages its notes; the
+    /// palette and the phone keep asking `searchCatalog` exactly as before.
+    public static func catalogBooks(
+        _ db: Database, query: String, limit: Int?, wingID: String? = nil
+    ) throws -> [CatalogHit] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let like = "%\(catalogLikeEscaped(trimmed))%"
+        let readingScope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        // 13i-e (the plan's edge, PROVISIONAL P-13ie-U1-9): an ARCHIVED
+        // book leaves the catalog exactly as an archived note always has
+        // (the note arm's `archived_at IS NULL`) — it lives under Archived.
+        let books = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT id, name, kind, locked, sealed_at FROM reading
+                WHERE deleted_at IS NULL AND archived_at IS NULL
+                  AND (? = '' OR name LIKE ? ESCAPE '\\')\(
+                    readingScope.map { " AND \($0.sql)" } ?? "")
+                ORDER BY name LIMIT ?
+                """,
+            arguments: StatementArguments(
+                [trimmed, like] + (readingScope?.arguments ?? []) + [limit ?? -1]))
+        return books.map {
+            CatalogHit(
+                kind: .book, id: $0["id"], title: $0["name"],
+                // 13i-d U6 (a): the ruled nouns (the sitting record §1 —
+                // "smart" retired app-wide, §14): a GATHERING is never a
+                // book, and a SEALED book says so (Finished = the table of
+                // contents is done; Sealed = the book is done, §5).
+                detail: ($0["kind"] as String) == "gathering" ? "gathering"
+                    : (($0["sealed_at"] as String?) != nil ? "sealed book"
+                       : (($0["locked"] as Int) == 1 ? "finished book" : "book")))
+        }
+    }
+
+    /// **The catalog's BLOCK arm** — named blocks anywhere and scraps by their
+    /// first line, for a TYPED query only. Factored out of `searchCatalog`
+    /// byte-for-byte (17y B1 (k)); an empty query names no block.
+    public static func catalogBlocks(
+        _ db: Database, query: String, limit: Int?, wingID: String? = nil
+    ) throws -> [CatalogHit] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+        let like = "%\(catalogLikeEscaped(trimmed))%"
+        let blockScope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
+        let blocks = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT b.id AS id,
+                       COALESCE(b.name, SUBSTR(v.working_text, 1, 80)) AS handle,
+                       c.title AS home, c.id AS home_id, c.kind AS home_kind
+                FROM block b
+                JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
+                JOIN container c ON c.id = cb.container_id AND c.deleted_at IS NULL
+                 AND c.archived_at IS NULL
+                LEFT JOIN variant v ON v.id = b.default_variant_id AND v.deleted_at IS NULL
+                WHERE b.deleted_at IS NULL
+                  AND (b.name LIKE ? ESCAPE '\\'
+                       OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))\(
+                    blockScope.map { " AND (c.kind = 'pool' OR \($0.sql))" } ?? "")
+                ORDER BY b.updated_at DESC LIMIT ?
+                """,
+            arguments: StatementArguments(
+                [like, like] + (blockScope?.arguments ?? []) + [limit ?? -1]))
+        return blocks.map {
+            CatalogHit(
+                kind: .block, id: $0["id"], title: $0["handle"] ?? "block",
+                detail: $0["home"],
+                homeContainerID: $0["home_id"],
+                homeIsPool: ($0["home_kind"] as String) == "pool")
+        }
+    }
+
+    /// The catalog's ONE LIKE-escape (round 2 NIT: `_` is a single-char
+    /// wildcard too; escape the escape first, then both wildcards).
+    static func catalogLikeEscaped(_ trimmed: String) -> String {
+        trimmed
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
     }
 
     /// The catalog's NOTE arm, as SQL — one string, built in one place, so
