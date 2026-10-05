@@ -170,3 +170,11 @@ so it is ~never empty; presence-when-empty teaches the star exists); its word is
 the starred gathering - the starred shelf can have journal on it" — the empty-at-birth want
 is about starred NOTES (the gathering shows empty); born-starred BOOKS (Journal, Quicknotes)
 stand and populate the starred shelf.
+
+*(R-17y-9 addendum, ~03:30: she probed the shown-always provisional — "do you think it should
+hide if there are no starred books? i'm open to either way" — and left it at the
+orchestrator's recommendation: SHOWN ALWAYS. The reasoning recorded: the empty case barely
+exists (the Journal is born starred); a shelf is a PLACE, not a notice (the Arrivals
+hide-when-empty grammar is a bell's, not navigation's); and the ★ row is the drop-to-star
+target — hiding it removes the gesture exactly when the first star wants it. Still one line
+to flip at her word; her hands at the walk are the honest test.)*
