@@ -120,6 +120,11 @@ struct ShelfView: View {
     /// region fills the window and the bar stays pinned above the fold,
     /// exactly as R3 ruled.
     @State private var listContentHeight: CGFloat = 0
+    #if DEBUG
+    /// 17y B2 (F-B2-5): the board's own name in `BookcaseRowOracle` (the C4
+    /// rule — its rows' records live exactly as long as this board).
+    @State private var oracleOwner = UUID()
+    #endif
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -180,6 +185,7 @@ struct ShelfView: View {
         .task { await model.refreshAggregates() }
         #if DEBUG
         .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
+        .onDisappear { BookcaseRowOracle.release(owner: oracleOwner) }
         #endif
         .alert("New Book", isPresented: $createPresented) {
             TextField("Name", text: $nameField)
@@ -339,6 +345,19 @@ struct ShelfView: View {
         }
     }
 
+    #if DEBUG
+    private func recordRow(_ readingID: String, placing: Bool) {
+        BookcaseRowOracle.record(
+            readingID, .init(placing: placing, details: model.detailsShown), owner: oracleOwner)
+    }
+    #endif
+
+    /// 17y B2 (b), F-B2-5 — a book row's view identity: its SECTION and the
+    /// book, so a book moving between shelves becomes a new row (pinned).
+    nonisolated static func rowIdentity(section: String, book: String) -> String {
+        section + "\u{1F}" + book
+    }
+
     /// A book mint from the New Book prompt — the CONTEXT MINT (§19.1/§24:
     /// a solo'd shelf receives it, All leaves it unshelved) — speaking the
     /// door's refusal on the status seam (18i) rather than an overlay.
@@ -402,6 +421,15 @@ struct ShelfView: View {
             if !isAll || !model.isCollapsed(section.id) {
                 ForEach(section.books, id: \.reading.id) { book in
                     shelfRow(book)
+                        // 17y B2 (b) — F-B2-5, a PRE-EXISTING freeze the
+                        // walk exposed: a book that MOVED between sections
+                        // (re-shelved by its menu or by a drop) kept a row
+                        // view that never updated again until the board was
+                        // rebuilt — its meta ignored "details", its grip,
+                        // hairline and drop site ignored the order. The row's
+                        // identity is qualified by its SECTION, so a move is
+                        // a new row, never a re-parented one.
+                        .id(Self.rowIdentity(section: section.id, book: book.reading.id))
                     Divider().overlay(tokens.line.opacity(0.6))
                 }
                 // The hint is a SOLO'd shelf's; in All an empty shelf is its
@@ -572,6 +600,14 @@ struct ShelfView: View {
             return !providers.isEmpty
         }
         .contextMenu { bookMenu(book) }
+        #if DEBUG
+        // F-B2-5's oracle: what this row last DREW. A row view that froze
+        // (U1's shape, a book moved between sections) never re-renders, so
+        // its record keeps the state it moved with — which a pin can see.
+        .onAppear { recordRow(reading.id, placing: placing) }
+        .onChange(of: placing) { _, now in recordRow(reading.id, placing: now) }
+        .onChange(of: model.detailsShown) { _, _ in recordRow(reading.id, placing: placing) }
+        #endif
     }
 
     /// The row meta: the accent arrival count first (§4 — a book asking
@@ -958,3 +994,30 @@ enum ReadingExport {
         }
     }
 }
+
+#if DEBUG
+/// **17y B2 (F-B2-5) — what each Bookcase ROW last drew**: its `placing`
+/// (the grip, the hairline, the row drop) and whether its meta showed. Keyed
+/// by the book, owned by the board that drew it (`OwnedRegistrations` — the
+/// 18k C4 rule). A row view that FROZE keeps the record it moved with.
+@MainActor
+enum BookcaseRowOracle {
+    struct Drawn: Equatable {
+        var placing: Bool
+        var details: Bool
+    }
+
+    private static var store = OwnedRegistrations<String, Drawn>()
+
+    static func drawn(_ readingID: String) -> Drawn? { store.current[readingID] }
+
+    static func record(_ readingID: String, _ drawn: Drawn, owner: UUID) {
+        store.publish(drawn, for: readingID, owner: owner)
+    }
+
+    static func release(owner: UUID) { store.release(owner: owner) }
+
+    /// A pin's door: start from empty.
+    static func forgetAll() { store.forgetAll() }
+}
+#endif
