@@ -1755,9 +1755,20 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   both), chosen over a guide manifest classifier because the guide's seeded richness (fans, a
   callout, the twin, the scraps pool, per-build content after MAJOR-2's fix) breaks the
   Sherlock classifier's contract — the deviation from R-17y-5's sketch is the memo's
-  PROVISIONAL (i), hers to overturn.
+  PROVISIONAL (i), hers to overturn. **~10:45: BUILDING (the orchestrator's own hands; the
+  B-DEDUPE RECORD below carries LIVE STATUS).** Scope additions folded at the ladders:
+  MAJOR-2 (the guide's mode-row sentence + Canvas lesson gate) and F-B3-1 (lesson 4's
+  "at the door" prose + its withKnownIssue wrapper) — three seed-content touches, ONE re-seed
+  consequence, executed once at the close ritual.
 - **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)(r)(s) + the F-B2-7
-  rider): IMPLEMENTER CLOSED ~09:40; LADDER IN ITS EXCHANGE.** All eleven items built with
+  rider): CLOSED 2026-10-05 ~10:40.** THE LADDER CLOSED CLEAN: round 1 (FABLE, re-cast on the
+  honest seam flag) 0/0/2/3 → the cross-model exchange (the implementer AGREED on all four,
+  disputing none) → the reviewer's final calls implemented in its own session (MINOR-1 the
+  resolved-name guard, red pin efd9aa95 verified → b1fe70ff; NIT-2 the table aligned; NIT-3
+  the comment; NIT-1 HELD TO NEXT-TOUCH on the implementer's accepted pin-semantics argument,
+  the safe fold scope recorded) → the implementer's sanity pass: ALL SOUND, 66/5 green at
+  894c6ccf, "from my side the ladder can close." MINOR-2 = 19h minted (VR-112). Round record
+  + fixes: `17y-b3-ladder-round1.md`. All eleven items built with
   red-on-old pins, walked in use (59 captures, both voices); whole-Mac END 3887/638 green
   (+ three post-END commits covered by their targeted suites — B-DEDUPE's END run covers the
   whole-target gap); phone build green; one transient 529 death mid-run, resumed in place, no
@@ -2814,3 +2825,24 @@ structure model's drop brain are chrome/model, not the text seam). Core touched 
 moved under her rulings: (f) the app's current wing now follows the focused pane (R-17y-…/#174's
 ruled shape). Expected cast: `opus-reviewer`; the orchestrator may re-cast to Fable for (f)'s
 default-meaning change.
+
+## 17y B-DEDUPE RECORD — the whole-set seed-duplicate fold (THE ORCHESTRATOR'S OWN IMPLEMENTATION, 2026-10-05; LIVE STATUS from the first commit; the binding design is `notes/plans/17y-bdedupe-design-memo.md`)
+
+**Preflight (this session, post-compaction, all read whole):** SyncSpec · the postmortem ·
+`SampleLibraryDedupe.swift` · the Welcome/daily keepers in `Repairs.swift` · the seeder's
+Book/facts grammar · the three gatherings' + quicknote's + guide's mint shapes ·
+`LaunchFurniture` · `TouchedRows` + `runPostApplyRepairs`'s order. The memo binds; R-17y-5/8
++ the B2 ladder's MAJOR-2 re-own + the B3 ladder's F-B3-1 re-own are the scope.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 1 | This record + the RUN RECORD flips (B3 closed; B-DEDUPE building) | DONE (this commit) |
+| 2 | R-17y-8 — Jekyll leaves the default seed: `Book.launchSet` + `LaunchFurniture` iterates it; pins red-on-old (a fresh launch seeds no Jekyll; Restore still mints; existing stores untouched) | NOT-STARTED |
+| 3 | The guide's seed-content trio (ONE re-seed consequence): the mode-row sentence derives from the (p) seam + the Canvas lesson gates on `buildKeepsCanvas` (B2 MAJOR-2) · lesson 4's "at the door" → the Arrivals word + the `withKnownIssue` wrapper removed (B3 F-B3-1) · the books-chapter Jekyll-restorable sentence (R-17y-8); pins red-on-old per leg | NOT-STARTED |
+| 4 | `Sync/` — `SeededFurnitureDedupe.swift` (the facts + the pairwise-identity classifier + the four-grain pass + the one-shot marker) + `TouchedRows.containerIDs` + the `runPostApplyRepairs` wiring (after the Welcome keeper) + explicit outbox rows | NOT-STARTED |
+| 5 | The facts wiring at the ONE shared site (+ the Mac's guide half; the phone wires the shared half only — the pocket guide is the MOBILE PARITY row) | NOT-STARTED |
+| 6 | Convergence suites (two-client fake server, the memo §4 matrix) + idempotence + inert-arm | NOT-STARTED |
+| 7 | END: the touched families + the whole-Mac run (covers B3's post-END gap) + the tutorial spine + the phone build | NOT-STARTED |
+| 8 | Record close; PROVISIONALs → QUESTIONS; the fresh fable-reviewer cold round follows | NOT-STARTED |
