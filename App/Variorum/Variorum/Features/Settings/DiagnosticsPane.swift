@@ -97,14 +97,33 @@ struct DiagnosticsPane: View {
         .onAppear { crashReports.refresh() }
     }
 
-    /// Send Report…: the support door's draft with this report attached,
-    /// opened on screen in a mail app. Nothing is sent here. (Internal, not
-    /// private, so a pin can press the door — 19f.)
+    /// Send Report…: nothing is sent here. **19f (her #181 (i) ruling): it
+    /// ASKS FIRST** — "Open in Mail" opens the support door's draft with this
+    /// report attached, on screen in a mail app (the U3-B road, unchanged),
+    /// while "Show the file and copy the address" shows this report's file in
+    /// Finder and puts the address on the clipboard, opening no draft — the
+    /// road that needs no mail account. (Internal, not private, so a pin can
+    /// press the door.)
     func send(_ report: CrashReport) {
         note = nil
-        SupportMail.open(
-            .crashReport(fileName: report.id, at: report.url, .thisMac()),
-            roads: roads) { refusal in note = refusal }
+        let roads = self.roads
+        let pasteboard = self.pasteboard
+        let choose: SupportChooser = self.choose ?? { [asking] in await asking.ask($0) }
+        Task { @MainActor in
+            let answer = await SupportMail.ask(
+                .report(file: report.url), choose: choose, roads: roads, pasteboard: pasteboard
+            ) {
+                SupportMail.open(
+                    .crashReport(fileName: report.id, at: report.url, .thisMac()),
+                    roads: roads) { refusal in note = refusal }
+            }
+            // The second road's receipt, in the pane's own caption (Settings
+            // has no status seam): the address is on the clipboard and the
+            // file is in front of her.
+            if case .copiedAddress = answer {
+                note = SupportCopy.copiedAddressShowingFile(report.id)
+            }
+        }
     }
 }
 

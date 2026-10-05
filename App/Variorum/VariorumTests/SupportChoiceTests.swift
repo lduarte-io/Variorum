@@ -191,6 +191,117 @@ struct SupportChoiceTests {
                 "no draft and no mail app on this road")
     }
 
+    // MARK: The doors — BOTH ask before any draft opens (red on the old shape)
+
+    private func ownerWithOneReport(_ name: String) throws -> (CrashReporting, CrashReport) {
+        let suite = "19f.door.\(name)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        let store = CrashReportStore(directory: FileManager.default.temporaryDirectory
+            .appendingPathComponent("19f-door-\(name)-\(UUID().uuidString)"))
+        store.save(Data(CrashReportFixture.json.utf8), receivedAt: Date())
+        let owner = CrashReporting(
+            defaults: defaults, registration: RecordingRegistration(), store: store)
+        owner.set(true)
+        let report = try #require(owner.reports.first)
+        return (owner, report)
+    }
+
+    /// Settings ▸ Diagnostics' Send Report…, pressed: the question is on
+    /// screen and NOTHING has opened — no compose, no `mailto:`, no Finder,
+    /// no copy. The old door composed at the press. Then "Open in Mail"
+    /// takes exactly the U3-B road with the report's own file attached.
+    @Test func theReportDoorAsksBeforeAnyDraftOpens() async throws {
+        let (owner, report) = try ownerWithOneReport("asks")
+        let roads = RecordingRoads()
+        roads.composeAvailable = true
+        let pasteboard = privatePasteboard()
+        let asking = SupportChoiceAsk()
+        let pane = DiagnosticsPane(
+            crashReports: owner, roads: roads, pasteboard: pasteboard, choose: asking.ask)
+
+        pane.send(report)
+        await poll { asking.pending != nil }
+        #expect(asking.pending?.question == .report(file: report.url),
+                "the report's question, carrying the report's own file")
+        #expect(roads.composed.isEmpty && roads.opened.isEmpty && roads.revealed.isEmpty,
+                "nothing opens before her answer")
+        #expect(pasteboard.string(forType: .string) == "sentinel")
+
+        asking.answer(.openInMail)
+        await poll { !roads.composed.isEmpty }
+        #expect(roads.composed.count == 1)
+        #expect(roads.composed.first?.attachment == report.url, "the U3-B road, unchanged")
+        #expect(pasteboard.string(forType: .string) == "sentinel", "Open in Mail copies nothing")
+    }
+
+    /// The report door's second road: the file shown in Finder and the
+    /// address on the pasteboard — and NO draft, so no mail app is needed.
+    @Test func theReportDoorsSecondRoadShowsTheFileAndCopiesTheAddress() async throws {
+        let (owner, report) = try ownerWithOneReport("copies")
+        let roads = RecordingRoads()
+        roads.composeAvailable = true
+        let pasteboard = privatePasteboard()
+        let asking = SupportChoiceAsk()
+        DiagnosticsPane(
+            crashReports: owner, roads: roads, pasteboard: pasteboard, choose: asking.ask
+        ).send(report)
+        await poll { asking.pending != nil }
+        #expect(roads.composed.isEmpty && roads.opened.isEmpty && roads.revealed.isEmpty)
+
+        asking.answer(.copyAddress)
+        await poll { !roads.revealed.isEmpty }
+        #expect(roads.revealed == [report.url], "the report's own file, in Finder")
+        #expect(pasteboard.string(forType: .string) == "support@stargazing.tech")
+        #expect(roads.composed.isEmpty && roads.opened.isEmpty, "no draft on this road")
+    }
+
+    /// Cancel on the report door's question: nothing at all happens.
+    @Test func aDismissedReportQuestionOpensNothing() async throws {
+        let (owner, report) = try ownerWithOneReport("dismissed")
+        let roads = RecordingRoads()
+        roads.composeAvailable = true
+        let pasteboard = privatePasteboard()
+        let asking = SupportChoiceAsk()
+        DiagnosticsPane(
+            crashReports: owner, roads: roads, pasteboard: pasteboard, choose: asking.ask
+        ).send(report)
+        await poll { asking.pending != nil }
+        #expect(asking.pending != nil, "the door asked")
+        asking.answer(nil)
+        for _ in 0..<20 { await Task.yield() }
+        #expect(roads.composed.isEmpty && roads.opened.isEmpty && roads.revealed.isEmpty)
+        #expect(pasteboard.string(forType: .string) == "sentinel")
+    }
+
+    /// Help ▸ Send Feedback… (a `Commands` door — read from its source, the
+    /// SupportDraftTests precedent for this very door): its act ASKS the
+    /// feedback question — of the window, or with no window the app-modal
+    /// ask — and its one mail road, `SupportMail.open(.feedback(.thisMac()))`
+    /// (the U3-B act, verbatim), sits INSIDE the question's Open in Mail
+    /// road. The old act opened the draft at the press.
+    @Test func theHelpDoorAsksBeforeItsDraftOpens() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Variorum/EditorCommands.swift")
+        let file = try String(contentsOf: url, encoding: .utf8)
+        let start = try #require(file.range(of: "private func sendFeedback() {"))
+        let rest = file[start.upperBound...]
+        let end = try #require(rest.range(of: "\n    }\n"), "the act's closing brace")
+        let act = String(rest[..<end.lowerBound])
+
+        let ask = try #require(act.range(of: "SupportMail.ask(.feedback"),
+                               "the Help door asks the feedback question")
+        let open = try #require(act.range(of: "SupportMail.open(.feedback(.thisMac()))"))
+        #expect(ask.lowerBound < open.lowerBound,
+                "the draft opens only on the question's Open in Mail road")
+        #expect(act.components(separatedBy: "SupportMail.open(").count == 2,
+                "exactly one mail road in the act — the one inside the question")
+        #expect(act.contains("supportChoice"), "asked of the window (the shell's channel)")
+        #expect(act.contains("SupportChoiceModal.ask"), "with no window, the app-modal ask")
+    }
+
     // MARK: The questions (her words)
 
     @Test func theTwoQuestionsCarryHerWords() {

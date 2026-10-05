@@ -1978,7 +1978,38 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      suites passed`, no `skipped:` line** — SupportChoice 11 + SupportDraft 13 (UNMODIFIED) +
      DiagnosticsPane 8 + ShellConfirm 5 (`19f/p1-test.log`; build `p1-bft.log`, no warning in any
      touched file).
-2. The door pins RED on piece 1's tree; the doors ask; GREEN; the revert check — **NOT-STARTED.**
+2. The door pins RED on piece 1's tree; the doors ask; GREEN; the revert check — **DONE except the
+   revert check (this commit); the revert check IN-PROGRESS — ANNOUNCED HERE BEFORE IT STARTS.**
+   - Four door pins added to `SupportChoiceTests` (15 now): `theReportDoorAsksBeforeAnyDraftOpens`
+     (the pane's Send Report… pressed through `send(_:)`: the report's question on screen, NOTHING
+     composed/opened/revealed/copied; then Open in Mail = the U3-B compose with the report's own
+     file), `theReportDoorsSecondRoadShowsTheFileAndCopiesTheAddress` (the file revealed, the
+     address on the private pasteboard, no draft), `aDismissedReportQuestionOpensNothing`,
+     `theHelpDoorAsksBeforeItsDraftOpens` (a `Commands` door — read from its source on the
+     SupportDraftTests precedent for this very door: the act asks the feedback question, of the
+     window's `supportChoice` or the `SupportChoiceModal` fallback, and its ONE
+     `SupportMail.open(.feedback(.thisMac()))` sits after/inside the ask).
+   - **RED ON THE OLD SHAPE (piece 1's tree, `ba5949b4`, the doors composing directly; pins
+     uncommitted): `Test run with 15 tests in 1 suite failed … with 9 issues` — exactly the 4 door
+     pins** (the report door: no question asked + composed at the press, ×3 tests; the Help door:
+     no `SupportMail.ask(.feedback` in its act); the 11 layer pins green (`19f/p2-red.log`).
+   - THE FIX: `DiagnosticsPane.send` and `EditorCommands.sendFeedback` ask through `SupportMail.ask`
+     — the report door with its pane's `.alert` (or the injected chooser); the Help door of the
+     window (`windows.creationRouter()?.supportChoice` — the full window raised if Settings or a
+     note window is key) or, with no window, `SupportChoiceModal`. Each door's old act sits VERBATIM
+     inside the Open in Mail closure. The second road's receipt: the pane's caption
+     (`copiedAddressShowingFile`), the Help door's status seam (`copiedAddress`, a RECEIPT — her
+     confirmations setting governs it); with no store, nothing more is said (the question's own
+     words said what the button does).
+   - **GREEN: `Test run with 41 tests in 4 suites passed`, no `skipped:` line** — SupportChoice 15 +
+     SupportDraft 13 (UNMODIFIED) + DiagnosticsPane 8 + ShellConfirm 5 (`19f/p2-green.log`; no
+     warning in any touched file).
+   - **THE REVERT CHECK (announced; the committed tree is THIS commit, so `git diff` against it
+     shows exactly what is reverted):** the two door call sites restored to piece 1's text
+     (`git show ba5949b4:<path>` over `App/Variorum/Variorum/Features/Settings/DiagnosticsPane.swift`
+     and `App/Variorum/Variorum/EditorCommands.swift`), the suite run, then `git checkout HEAD --`
+     on exactly those two paths and the suite re-run. If a session dies mid-check: `git diff` shows
+     the reverted lines; `git checkout HEAD --` those two paths restores the fix. **PENDING.**
 3. QUESTIONS #182 (the readings the ruling leaves open) — **NOT-STARTED.**
 4. The dev-store walk (both doors' choice, the roads in use) — **NOT-STARTED.**
 5. Finals (suites, scope, record) — **NOT-STARTED.**

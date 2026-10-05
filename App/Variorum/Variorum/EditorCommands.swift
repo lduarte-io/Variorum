@@ -865,7 +865,9 @@ struct EditorCommands: Commands {
             // 13r U3-B — R-13r-3/9: Help ▸ Send Feedback…, THE SUPPORT DOOR.
             // A mail draft to support@stargazing.tech, pre-filled with the app
             // and OS versions and nothing else, opened ON SCREEN in her own
-            // mail app; it goes only when she presses that app's Send. It
+            // mail app; it goes only when she presses that app's Send. 19f:
+            // before the draft it asks — "Open in Mail" or "Copy the address"
+            // (her #181 (i) ruling; `sendFeedback()` below). It
             // needs no window and no store, so it is always enabled. UNDECLARED
             // in the capability registry on the What's New / Open the Tutorial
             // precedent above — an app-scope Help door with no block/take/
@@ -877,18 +879,41 @@ struct EditorCommands: Commands {
         }
     }
 
-    /// 13r U3-B: the support door's act. The draft opens in her default mail
-    /// app (`mailto:` — `SupportMail`); if nothing could open it, the door
-    /// says so (P-2) — through the status seam when a store is open, and
-    /// otherwise in a plain alert, since a door that did nothing must speak.
+    /// 13r U3-B: the support door's act. **19f (her #181 (i) ruling): it
+    /// ASKS FIRST** — "Open in Mail" or "Copy the address" — and no draft
+    /// opens before her answer. The question is asked of the window (the
+    /// shell's `supportChoice`, presented as a SwiftUI `.alert` like every
+    /// confirm in the app; a full window behind Settings or a note window is
+    /// raised to ask it); with NO window to ask in — the library not open,
+    /// or every window closed — this always-enabled door asks through an
+    /// app-modal alert, its own no-window voice. "Open in Mail" is the U3-B
+    /// act, unchanged: the draft opens in her default mail app (`mailto:` —
+    /// `SupportMail`); if nothing could open it, the door says so (P-2) —
+    /// through the status seam when a store is open, and otherwise in a
+    /// plain alert, since a door that did nothing must speak. "Copy the
+    /// address" needs no mail app: the address onto the clipboard, and a
+    /// receipt where a store is open.
     private func sendFeedback() {
-        SupportMail.open(.feedback(.thisMac())) { refusal in
-            if case .ready(let session) = bootstrap.state {
-                session.status.refuse(refusal)
-            } else {
-                let alert = NSAlert()
-                alert.messageText = refusal
-                alert.runModal()
+        let choose: SupportChooser
+        if let window = windows.creationRouter()?.supportChoice {
+            choose = { await window.ask($0) }
+        } else {
+            choose = { SupportChoiceModal.ask($0) }
+        }
+        Task { @MainActor in
+            let answer = await SupportMail.ask(.feedback, choose: choose) {
+                SupportMail.open(.feedback(.thisMac())) { refusal in
+                    if case .ready(let session) = bootstrap.state {
+                        session.status.refuse(refusal)
+                    } else {
+                        let alert = NSAlert()
+                        alert.messageText = refusal
+                        alert.runModal()
+                    }
+                }
+            }
+            if case .copiedAddress = answer, case .ready(let session) = bootstrap.state {
+                session.status.receipt(SupportCopy.copiedAddress)
             }
         }
     }
