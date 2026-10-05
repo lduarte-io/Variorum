@@ -47,7 +47,13 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "${HERE}/../.." && pwd)"
 RELEASES="${VARIORUM_RELEASES_DIR:-${HOME}/Library/Developer/Variorum/Releases}"
 RELEASE_PREFIX="https://dl.stargazing.tech/variorum/"
-ED_PUBLIC_KEY="tn/IQUaJMGk8Q+T8iE3ph2t+xpdzlUDGxg7+k/5xMhA="
+# F2 (ladder round 1): the verification key is READ FROM THE ONE BAKED SOURCE — the partial
+# Info.plist whose SUPublicEDKey ships in every bundle — never a duplicated literal (this file
+# carried the THIRD copy; a rotation that missed it could verify an appcast under a key no
+# shipped install holds). verify-export.sh's literal STAYS: it is the opposite-direction
+# tripwire, checking the plist AGAINST an independent constant.
+BAKED_PLIST="${REPO}/App/Variorum/VariorumInfo.plist"
+ED_PUBLIC_KEY="$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$BAKED_PLIST" 2>/dev/null || true)"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 GA_CACHE="${HOME}/Library/Caches/Sparkle_generate_appcast"
 
@@ -71,6 +77,10 @@ say() { echo "[make-appcast] $*"; }
 refuse() { echo "REFUSED: $*" >&2; exit 3; }
 
 # ------------------------------------------------------------------ the inputs agree
+# F2: a 44-character base64 Ed25519 public key, or nothing was read — refuse before any work
+# (verify-appcast would exit 2 on a malformed key anyway; this names the real cause).
+[[ "$ED_PUBLIC_KEY" =~ ^[A-Za-z0-9+/]{43}=$ ]] \
+  || refuse "no SUPublicEDKey read from ${BAKED_PLIST} (got '${ED_PUBLIC_KEY}') — the appcast is verified under the SHIPPED key, which lives there"
 [[ "$BUILD" =~ ^[1-9][0-9]*$ ]] || refuse "--build must be a positive integer (got '${BUILD}')"
 case "$MODE" in
   release)
