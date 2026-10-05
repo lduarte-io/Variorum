@@ -86,3 +86,24 @@
 - **The comp-sci helping hand ("commit" etc.)** — a GLOSSARY-REGISTER direction for the copy
   pass as much as for the tour; her copy pass already owns the words, the tour owns the
   first-touch explanations.
+
+## Addendum — her 2026-10-05 ~03:20 notes (recorded verbatim-faithful by the 17y orchestrator at her instruction, mid-17y)
+
+* Jekyll's removal from the default seed RUNS NOW (17y, R-17y-8 — her confirm: "unless they
+  select to add it as an example or demonstration that I mention - if that's what you mean,
+  then continue"). 13s may surface the add-it-as-an-example door in the tour's own voice.
+* "I also don't want people to see a quicknote spawned already."
+* Her CURRENT PLAN for the final seed set, verbatim: "my current plan is to finish with only
+  starred notes there with 0 items starred, sherlock, and field guide (maybe one standalone
+  note too)". Orchestrator's reading flags for the 13s sitting (not rulings): "0 items
+  starred" touches the born-starred rule (R-13id-5 — the daily Journal and Quicknotes mint
+  starred); her list carries NO Quicknotes gathering, NO classics gathering, NO seeded
+  quicknote, NO Encryption Explained; the Journal already mints on demand (⌘J), not at birth.
+* **A STARRED SHELF for starred books** — her idea, her words: "i feel like there should be a
+  starred shelf for starred books ? thoughts? doesn't have to be built now but maybe worth
+  putting on the plan." Orchestrator's thoughts, recorded for the sitting: fits the strip's
+  grammar as a VIRTUAL ★ row beside "All" (a filter like the census solos, never a container
+  — pointer religion holds); consistent with the starred-float; the open design question is
+  its overlap with the sidebar's Starred section (notes+books mixed) vs the strip's ★
+  (books-only, board idiom) — a mockup call for 13s or the next Bookcase touch, not a build
+  now (her own framing).
