@@ -65,6 +65,34 @@ let package = Package(
             dependencies: ["VariorumCore"],
             path: "Tools/VaultBootstrap"
         ),
+        // BRANCH-ONLY (`tools/strings-workbook`, never merges — issue #7's
+        // branch rule; issue #5): the App Strings workbook generator. The
+        // parser, the tier plan and the ops-driven mint live in ONE library
+        // so the tests cover the real logic; the executable is the headless
+        // road onto her store (the lobby's own passphrase road). Never linked
+        // into any app. Record: notes/plans/strings-workbook-record.md.
+        .target(
+            name: "StringsWorkbook",
+            dependencies: [
+                "VariorumCore",
+                .product(name: "GRDB", package: "GRDB.swift"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
+            ],
+            path: "Tools/StringsWorkbook/Sources"
+        ),
+        .executableTarget(
+            name: "strings-workbook-mint",
+            dependencies: ["StringsWorkbook", "VariorumCore"],
+            path: "Tools/StringsWorkbook/CLI"
+        ),
+        .testTarget(
+            name: "StringsWorkbookTests",
+            dependencies: [
+                "StringsWorkbook", "VariorumCore",
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Tools/StringsWorkbook/Tests"
+        ),
         .testTarget(
             name: "VariorumCoreTests",
             // CArgon2 direct: the RFC 9106 full-context vector calls
