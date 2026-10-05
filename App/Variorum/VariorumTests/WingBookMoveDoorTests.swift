@@ -93,7 +93,7 @@ struct WingBookMoveDoorTests {
             #expect(message.contains("“three” also leaves “Beta” — a book only holds notes of its own wing."))
             #expect(message.contains("“Imports” already has one called “ALPHA” — both keep their names."))
             #expect(message.contains("It arrives unshelved."))
-            #expect(!message.contains("waiting at the door"), "no waiter, no line")
+            #expect(!message.contains("waiting at Arrivals"), "no waiter, no line")
 
             await wings.moveBook(ask)
             #expect(spoken(session) == WingCopy.bookMoved("Alpha", to: "Imports", notes: 3, isGathering: false))
@@ -154,7 +154,7 @@ struct WingBookMoveDoorTests {
                 try ops.applyTag(tag.id, toPost: note.id)
             }
             let ask = try #require(await wings.bookMoveAsk(reading: living, to: wing.id))
-            #expect(WingCopy.bookMoveMessage(ask).contains("2 waiting at the door will be dismissed."))
+            #expect(WingCopy.bookMoveMessage(ask).contains("2 waiting at Arrivals will be dismissed."))
         }
     }
 

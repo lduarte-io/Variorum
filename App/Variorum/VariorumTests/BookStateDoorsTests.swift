@@ -128,8 +128,9 @@ struct BookStateDoorsTests {
         #expect(BookStateCopy.finishNeedsConfirm(pendingArrivals: 1))
         let confirm = BookStateCopy.finish(readingID: "b", name: "Poems", pendingArrivals: 2)
         #expect(confirm.title == "Finish \u{201C}Poems\u{201D}?")
-        // §24 verbatim: "N waiting at the door will be dismissed".
-        #expect(confirm.lines == ["2 waiting at the door will be dismissed."])
+        // §24's line — 17y B3 (h), A JUSTIFIED EDIT (R-17y-2): its "door"
+        // is the ONE word now; the subject (one line, only when N > 0) holds.
+        #expect(confirm.lines == ["2 waiting at Arrivals will be dismissed."])
         #expect(confirm.list.isEmpty && confirm.after.isEmpty)
         #expect(confirm.confirmLabel == "Finish")
     }
@@ -146,7 +147,7 @@ struct BookStateDoorsTests {
                 "sealing an open book says it finishes it too (R-13ic-3)")
         #expect(open.lines.contains(BookStateCopy.sealForksLead))
         #expect(open.list == ["Jekyll's diary \u{2014} also in \u{201C}Classics\u{201D}, \u{201C}Drafts\u{201D}"])
-        #expect(open.after == ["1 waiting at the door will be dismissed."])
+        #expect(open.after == ["1 waiting at Arrivals will be dismissed."])
 
         let finishedOwned = BookStateCopy.seal(
             readingID: "b", name: "Edition", finished: true, owned: true,

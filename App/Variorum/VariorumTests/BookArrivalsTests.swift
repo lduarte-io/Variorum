@@ -23,6 +23,17 @@
 //  pattern): a hosted SwiftUI tree exposes no accessibility children here,
 //  so "what did the line draw" is recorded by the line itself.
 //
+//  17y B3 item (h) — JUSTIFIED EDITS THROUGHOUT THE MOUNTED HALF (R-17y-1 /
+//  R-17y-2, her pre-answered rulings): the "N at the door" line LEFT the
+//  book's content; the door is the masthead's ICON beside the gear (CALM when
+//  nothing waits, PRESENCE when something does), recorded by
+//  `ArrivalsDoorProbe`, and its popover hosts the rows (`BookArrivalsList`,
+//  recorded by `ArrivalsLineProbe`'s rows — mounted directly here, since a
+//  popover does not render under the test host). Each pin keeps its subject:
+//  absent-when-empty became calm-when-empty; "says how many" holds on the
+//  door, now in EVERY mode; the rows still carry both judgment doors; the
+//  last judgment still returns the face to its quiet state.
+//
 
 import AppKit
 import Dependencies
@@ -171,8 +182,12 @@ struct BookArrivalsTests {
     // MARK: - The words (pure)
 
     @Test func theWordsLiveInOneHomeAndSayTheTruth() throws {
-        #expect(ArrivalsCopy.line(count: 1) == "1 at the door")
-        #expect(ArrivalsCopy.line(count: 12) == "12 at the door")
+        // 17y B3 (h): the ONE word, and the door's count (calm = none).
+        #expect(ArrivalsCopy.word == "Arrivals")
+        #expect(ArrivalsCopy.doorCount(0) == nil, "calm: no count")
+        #expect(ArrivalsCopy.doorCount(12) == "12")
+        #expect(ArrivalsCopy.header(count: 3) == "Arrivals \u{00B7} 3 waiting")
+        #expect(ArrivalsCopy.doorHelp(count: 0).hasPrefix("Arrivals"))
         #expect(ArrivalsCopy.more(4) == "and 4 more waiting")
 
         // When it arrived — the app's ONE stamp vocabulary, with this row's
@@ -234,10 +249,27 @@ struct BookArrivalsTests {
         #expect(ArrivalsLineFace.hidden(door) == 4)
     }
 
-    // MARK: - The line, mounted
+    // MARK: - The door, mounted (17y B3 (h) — the masthead icon)
 
-    @Test func theLineIsAbsentWhenNothingWaits() async throws {
+    /// The rows, mounted ON THEIR OWN (they are the door's popover content;
+    /// a popover does not render under the test host).
+    private func mountedList(
+        session: AppSession, arrivals: BookArrivalsModel, structure: BookStructureModel
+    ) -> (window: NSWindow, hosting: NSView) {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 640, height: 400),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: BookArrivalsList(model: arrivals, structure: structure))
+        hosting.frame = NSRect(x: 0, y: 0, width: 640, height: 400)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        return (window, hosting)
+    }
+
+    @Test func theDoorIsCalmWhenNothingWaits() async throws {
         ArrivalsLineProbe.reset()
+        ArrivalsDoorProbe.reset()
         try await withArrivalsBook(members: 3, waiting: 0) { session, db, readingID, _, _ in
             for mode: BookStructureModel.ViewMode in [.index, .spread] {
                 let hosted = try await mounted(
@@ -246,16 +278,22 @@ struct BookArrivalsTests {
                     hosted.window.orderOut(nil)
                     hosted.window.close()
                 }
-                await settle(hosted.window, hosted.hosting)
+                await settle(hosted.window, hosted.hosting) {
+                    ArrivalsDoorProbe.drawn[readingID] != nil
+                }
                 #expect(hosted.arrivals.door == .none)
+                let door = try #require(ArrivalsDoorProbe.drawn[readingID],
+                                        "\(mode): the door is drawn — calm, but there")
+                #expect(door.count == 0 && door.presence == false, "\(mode): CALM — no count, no accent")
                 #expect(ArrivalsLineProbe.drawn[readingID] == nil,
-                        "\(mode): nothing waits, so nothing draws — not a line, not a hairline")
+                        "\(mode): no row draws anywhere — no line atop the content")
             }
         }
     }
 
-    @Test func theLineSaysHowManyWaitAtopIndexAndBook() async throws {
+    @Test func theDoorSaysHowManyWaitInEveryMode() async throws {
         ArrivalsLineProbe.reset()
+        ArrivalsDoorProbe.reset()
         try await withArrivalsBook(members: 2, waiting: 3) { session, db, readingID, _, _ in
             let hosted = try await mounted(
                 session: session, db: db, readingID: readingID, mode: .index)
@@ -263,72 +301,55 @@ struct BookArrivalsTests {
                 hosted.window.orderOut(nil)
                 hosted.window.close()
             }
-            await settle(hosted.window, hosted.hosting) {
-                ArrivalsLineProbe.drawn[readingID]?.line != nil
+            // The masthead rides every mode (Index's column carries it; the
+            // navigator carries it beside the others) — Read included now:
+            // the door is the book's chrome, never a seat on the page.
+            for mode: BookStructureModel.ViewMode in [.index, .spread, .outline, .read] {
+                hosted.structure.mode = mode
+                await settle(hosted.window, hosted.hosting, until: {
+                    ArrivalsDoorProbe.drawn[readingID]?.count == 3
+                }, maxTurns: 12)
+                let door = try #require(ArrivalsDoorProbe.drawn[readingID], "\(mode)")
+                #expect(door.count == 3 && door.presence, "\(mode): PRESENCE — the count, the accent")
+                #expect(door.open == false, "\(mode): closed until she opens it")
+                #expect(ArrivalsLineProbe.drawn[readingID] == nil,
+                        "\(mode): no row draws until the door opens — nothing atop the content")
             }
-            let onIndex = try #require(ArrivalsLineProbe.drawn[readingID])
-            #expect(onIndex.line == "3 at the door")
-            #expect(onIndex.expanded == false, "collapsed by default — one quiet line")
-            #expect(onIndex.rows.isEmpty, "no rows until she opens it")
-
-            // The BOOK surface (the spread) carries the same line.
-            hosted.structure.mode = .spread
-            await settle(hosted.window, hosted.hosting, maxTurns: 12)
-            let onBook = try #require(ArrivalsLineProbe.drawn[readingID])
-            #expect(onBook.line == "3 at the door")
-
-            // OUTLINE carries the line since her morning ruling (13i-b,
-            // 2026-10-01 — F-U2-1: "the arrivals visibility could be added
-            // to outline"); an HONEST TEST EDIT, flipped to the ruled truth
-            // (the original §4 letter named Index/Book only).
-            hosted.structure.mode = .outline
-            await settle(hosted.window, hosted.hosting, maxTurns: 12)
-            let onOutline = try #require(ArrivalsLineProbe.drawn[readingID])
-            #expect(onOutline.line == "3 at the door", "Outline is the third host")
-
-            // Read stays line-less — a place to read, never a judgment seat.
-            hosted.structure.mode = .read
-            await settle(hosted.window, hosted.hosting, maxTurns: 12)
-            #expect(ArrivalsLineProbe.drawn[readingID] == nil,
-                    "read carries no arrivals line")
         }
     }
 
-    @Test func theLineExpandsInlineToTheRowsWithBothDoors() async throws {
+    @Test func theDoorsRowsCarryBothJudgmentDoors() async throws {
         ArrivalsLineProbe.reset()
         try await withArrivalsBook(members: 1, waiting: 2) { session, db, readingID, _, waitingIDs in
-            let hosted = try await mounted(
-                session: session, db: db, readingID: readingID, mode: .index)
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(.init(
+                reading: try await db.read { try Queries.reading($0, id: readingID) },
+                sections: [], deletedSections: [], assignments: [:]))
+            let arrivals = BookArrivalsModel(session: session, readingID: readingID)
+            arrivals.setDoorOpen(true)
+            #expect(arrivals.listingLimit == BookArrivalsModel.window,
+                    "opening the door asks the observation for the rows")
+            try await refreshDoor(arrivals, db)
+            #expect(arrivals.door.rows.map(\.postID) == waitingIDs,
+                    "the waiting notes, oldest arrival first")
+            let hosted = mountedList(session: session, arrivals: arrivals, structure: structure)
             defer {
                 hosted.window.orderOut(nil)
                 hosted.window.close()
             }
-            await settle(hosted.window, hosted.hosting)
-            hosted.arrivals.toggle()
-            #expect(hosted.arrivals.listingLimit == BookArrivalsModel.window,
-                    "opening asks the observation for the rows")
-            try await refreshDoor(hosted.arrivals, db)
-            #expect(hosted.arrivals.door.rows.map(\.postID) == waitingIDs,
-                    "the waiting notes, oldest arrival first")
             await settle(hosted.window, hosted.hosting) {
                 ArrivalsLineProbe.drawn[readingID]?.rows.count == 2
             }
             let drawn = try #require(ArrivalsLineProbe.drawn[readingID])
-            #expect(drawn.expanded)
-            #expect(Set(drawn.rows.keys) == Set(hosted.arrivals.door.rows.map(\.id)),
+            #expect(Set(drawn.rows.keys) == Set(arrivals.door.rows.map(\.id)),
                     "one row per waiting ARRIVAL ROW")
             for verbs in drawn.rows.values {
                 #expect(verbs == [ArrivalsCopy.addVerb, ArrivalsCopy.dismissVerb],
-                        "each row carries both judgment doors — and no copy-in arm (13i-c's)")
+                        "each row carries both judgment doors")
             }
-
-            // Folding back: the line stays, the rows go.
-            hosted.arrivals.toggle()
-            await settle(hosted.window, hosted.hosting) {
-                ArrivalsLineProbe.drawn[readingID]?.rows.isEmpty == true
-            }
-            #expect(ArrivalsLineProbe.drawn[readingID]?.expanded == false)
-            #expect(ArrivalsLineProbe.drawn[readingID]?.line == "2 at the door")
+            // Closing the door stops the listing (the count alone again).
+            arrivals.setDoorOpen(false)
+            #expect(arrivals.listingLimit == 0)
         }
     }
 
@@ -460,8 +481,8 @@ struct BookArrivalsTests {
         }
     }
 
-    @Test func whenTheLastArrivalIsJudgedTheLineVanishes() async throws {
-        ArrivalsLineProbe.reset()
+    @Test func whenTheLastArrivalIsJudgedTheDoorGoesCalm() async throws {
+        ArrivalsDoorProbe.reset()
         try await withArrivalsBook(members: 1, waiting: 1) { session, db, readingID, _, _ in
             let hosted = try await mounted(
                 session: session, db: db, readingID: readingID, mode: .spread)
@@ -469,44 +490,39 @@ struct BookArrivalsTests {
                 hosted.window.orderOut(nil)
                 hosted.window.close()
             }
-            hosted.arrivals.toggle()
+            hosted.arrivals.setDoorOpen(true)
             try await refreshDoor(hosted.arrivals, db)
             await settle(hosted.window, hosted.hosting) {
-                ArrivalsLineProbe.drawn[readingID]?.rows.count == 1
+                ArrivalsDoorProbe.drawn[readingID]?.count == 1
             }
-            // The line WAS there, open on its one row — so "gone" below is
-            // the judgment's doing, never a line that never drew (the M2
-            // mutation check found this pin silent without it).
-            #expect(ArrivalsLineProbe.drawn[readingID]?.line == "1 at the door")
-            #expect(ArrivalsLineProbe.drawn[readingID]?.rows.count == 1)
+            // The door WAS present — so "calm" below is the judgment's doing.
+            #expect(ArrivalsDoorProbe.drawn[readingID]?.presence == true)
             let waiting = try #require(hosted.arrivals.door.rows.first)
             await hosted.arrivals.seat(
                 waiting, book: hosted.structure.reading, chaptered: false)
             try await refreshDoor(hosted.arrivals, db)
-            // The book's own projection carries the seated note (the board
-            // refreshes through its observation; adopted by hand here).
             await hosted.model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             await settle(hosted.window, hosted.hosting) {
-                ArrivalsLineProbe.drawn[readingID] == nil
+                ArrivalsDoorProbe.drawn[readingID]?.presence == false
             }
-            #expect(ArrivalsLineProbe.drawn[readingID] == nil,
-                    "nothing waits any more — the line is gone, not an empty panel")
-            #expect(hosted.arrivals.expanded == false)
+            let door = try #require(ArrivalsDoorProbe.drawn[readingID])
+            #expect(door.count == 0 && door.presence == false,
+                    "nothing waits any more — the door is calm again, never gone")
             #expect(hosted.model.entries.last?.postID == waiting.postID)
         }
     }
 
     // MARK: - The registry
 
-    @Test func theLineIsTheTwoActsOneRendererAndTheyAreDeclaredAsDrawn() {
+    @Test func theRowsAreTheActsOneRendererAndTheyAreDeclaredAsDrawn() {
         // 13i-c U4 (an honest edit — the subject is unchanged: every door the
         // line draws is declared as drawn): the plan's §4 row 19 gave the line
         // the two OWNERSHIP arms, Copy In and Move In, beside Add and Dismiss.
-        #expect(BookArrivalsLine.surfaceCapabilities
+        #expect(BookArrivalsList.surfaceCapabilities
                 == [.seatArrival, .dismissArrival, .copyIn, .moveIn])
-        for id in BookArrivalsLine.surfaceCapabilities {
+        for id in BookArrivalsList.surfaceCapabilities {
             let capability = CapabilityRegistry.capability(id)
             #expect(capability.doors == [.surface], "\(id): an inline door, no key, no palette row")
             #expect(capability.scope == .book)

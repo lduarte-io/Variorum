@@ -1533,7 +1533,7 @@ nonisolated enum CapabilityRegistry {
 
         // 13i-b U2 — THE ARRIVALS FACE (the 13i-b plan §3; the sitting record
         // §4). Two `.surface` acts on the Arrivals line's own rows
-        // (`BookArrivalsLine` — their ONE renderer), book scope. `always` for
+        // (`BookArrivalsList` — their ONE renderer, the masthead door's popover since 17y (h)), book scope. `always` for
         // `.archiveNote`'s exact reason: the target is the arrival row the
         // door carries, never derived from whatever mode a pane is in — so
         // `takesAccess: .native` is honest rather than an exemption (Takes is
@@ -1683,7 +1683,7 @@ nonisolated enum CapabilityRegistry {
         // §3/§4 rows 14–19). Two `.surface` acts, two renderers each: the
         // ONE choice sheet (`MembershipChoiceSheet` — hosted by the chip's
         // Add, the Pool's add, the shelf row's drop, Manage Notes…) and the
-        // Arrivals line's rows (`BookArrivalsLine` — the judgment arms on an
+        // Arrivals rows (`BookArrivalsList` — the judgment arms on an
         // owned book's or an owned-elsewhere note's bell). `always` for
         // `.seatArrival`'s reason: the sheet and the row carry their pair,
         // never a mode — so `takesAccess: .native` is honest. The per-pair

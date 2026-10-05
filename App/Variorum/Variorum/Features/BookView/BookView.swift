@@ -229,7 +229,6 @@ struct BookView: View {
             case .index:
                 BookIndexView(
                     session: session, model: model, structure: structure,
-                    arrivals: arrivals,
                     archived: archived,
                         masthead: { bookMasthead },
                     ownershipBadge: { ownershipBadge($0) },
@@ -244,15 +243,12 @@ struct BookView: View {
                         structure.mode = .outline
                     })
             case .outline:
-                // HER MORNING RULING (13i-b, 2026-10-01 — F-U2-1): "the
-                // arrivals visibility could be added to outline." The same
-                // one renderer, its third host, placed exactly as Index
-                // places it — above the scroll content, zero height when
-                // empty, so an arrival-less book lays out byte-identically.
+                // 13i-d U4: the archived line atop the content (zero height
+                // when nothing is set aside). 17y B3 (h): the Arrivals line
+                // that stood above it here (her 13i-b morning ruling) LEFT
+                // the content — the door is the masthead's icon (R-17y-1),
+                // visible in every mode, Outline included.
                 VStack(spacing: 0) {
-                    BookArrivalsLine(model: arrivals, structure: structure)
-                    // 13i-d U4: the archived line, directly under the door
-                    // (zero height when nothing is set aside).
                     BookArchivedLine(model: archived, structure: structure)
                     outlineBody
                 }
@@ -262,7 +258,7 @@ struct BookView: View {
                 // active one editable in Write or the takes stack (A43/A44).
                 SpreadBookView(
                     session: session, model: model, structure: structure,
-                    arrivals: arrivals, archived: archived)
+                    archived: archived)
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
                 // infinite scroll, and true book pagination. Neither is
@@ -466,6 +462,13 @@ struct BookView: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
             Spacer(minLength: 2)
+            // 17y B3 item (h) — THE ARRIVALS DOOR (R-17y-1): the small icon
+            // beside the gear, calm when nothing waits, presence when
+            // something does; its popover lists the rows. A BOOK's door
+            // only — a gathering holds nothing, so it has none (P-2).
+            if structure.reading?.kind == .book {
+                BookArrivalsDoor(model: arrivals, structure: structure)
+            }
             Button {
                 settingsShown = true
             } label: {

@@ -32,8 +32,22 @@
 //  Three pieces, split by concern (P-9): the WORDS (`ArrivalsCopy` — pure,
 //  pinned), the MODEL (`BookArrivalsModel` — the observed door and the two
 //  acts, speaking on the one status seam), and the FACE
-//  (`BookArrivalsLine` — renders and sends, the two acts' one renderer and
+//  (`BookArrivalsDoor` + `BookArrivalsList` since 17y (h) — the door renders
+//  the count, its popover the rows; the list the four acts' one renderer and
 //  so their `.surface` declaration's home).
+//
+//  17y B3 item (h) — THE DOOR MOVES TO THE MODE ROW, AND THE ONE WORD WINS
+//  (R-17y-1 / R-17y-2, her pre-answered rulings; her walk: "I also have no
+//  idea where arrivals are… I don't see it anywhere" and "I don't like it
+//  being there"). The "N at the door" line LEAVES the top of the book's
+//  content: the door is now a small ICON in the book's masthead beside the
+//  settings gear (`BookArrivalsDoor`) — CALM when nothing waits (a faint
+//  icon, no count), PRESENCE when something does (the accent, the count) —
+//  and its popover is the rows' home (`BookArrivalsList`, the old line's
+//  expansion). A waiting row's NAME OPENS the note, read-normal (the
+//  ordinary note-open broadcast); opening never seats — only Add does. The
+//  one word is "Arrivals" — the dial's own ("wait at Arrivals"), now the
+//  door's, the popover's, the refusals' and the finish confirm's.
 //
 //  §23 (her overrule — "details off hides arrivals too"): the details toggle
 //  is 13i-d's and does not exist yet. Nothing here fights it — whether the
@@ -57,13 +71,38 @@ nonisolated enum ArrivalsCopy {
     static let addVerb = "Add"
     static let dismissVerb = "Dismiss"
 
-    /// The line itself — the plan §3's wording.
-    static func line(count: Int) -> String { "\(count) at the door" }
+    /// **THE ONE WORD** (17y B3 item (h) — R-17y-2, her pick): the dial's
+    /// "wait at Arrivals", the door, the popover, the refusals and the
+    /// finish confirm all say it. 13s may re-voice sentences; the WORD is
+    /// settled.
+    static let word = "Arrivals"
 
-    /// The line's hover: what is waiting and what she can do about it.
-    static let lineHelp =
-        "Notes this book's rule brought in that are waiting for you — "
-        + "add each to the end of the book, or dismiss it"
+    /// What the door draws beside its icon: the count when something waits
+    /// (PRESENCE), nothing when nothing does (CALM — her "calm when nothing
+    /// is there and has presence when something is there").
+    static func doorCount(_ count: Int) -> String? { count > 0 ? "\(count)" : nil }
+
+    /// The door's hover (wording PROVISIONAL — 13s re-voices).
+    static func doorHelp(count: Int) -> String {
+        count == 0
+            ? "\(word) \u{2014} nothing waiting"
+            : "\(word) \u{2014} \(count) waiting: notes this book's rule brought in. "
+                + "Open one to read it; add it to the book, or dismiss it."
+    }
+
+    /// The popover's head line.
+    static func header(count: Int) -> String {
+        count == 0 ? word : "\(word) \u{00B7} \(count) waiting"
+    }
+
+    /// The popover's calm answer when nothing waits.
+    static let nothingWaiting =
+        "Nothing is waiting. When this book's rule brings in a note and its dial says "
+        + "\u{201C}wait at \(word),\u{201D} the note waits here for you."
+
+    /// A waiting row's NAME is a door to the note itself (17y (h), her
+    /// "you should be able to click on the note to see what it is").
+    static let openHelp = "Open this note to read it \u{2014} opening never adds it to the book"
 
     static let addHelp = "Add this note to the book — it lands at the end"
     static let dismissHelp = "Dismiss — don't add this note to the book"
@@ -174,7 +213,7 @@ nonisolated enum ArrivalsCopy {
                 : "\(name) is finished \u{2014} its table of contents is done, so nothing "
                     + "new joins. Reopen it in the book\u{2019}s settings to add notes."
         case .arrivalNotFound:
-            return "That note isn\u{2019}t waiting at the door any more \u{2014} "
+            return "That note isn\u{2019}t waiting at \(word) any more \u{2014} "
                 + "it was already judged."
         case .containerNotFound:
             return "That note is gone \u{2014} it was deleted, so there\u{2019}s nothing to add."
@@ -190,7 +229,8 @@ nonisolated enum ArrivalsCopy {
 
     /// The registry's honest note for a dispatch nothing renders.
     static let unavailableNote =
-        "Arrivals wait atop a book\u{2019}s Index and Book views \u{2014} open the book to judge them."
+        "\(word) wait behind the tray icon beside a book\u{2019}s settings gear \u{2014} "
+        + "open the book to judge them."
 }
 
 // MARK: - Whether the line shows (one value — §23's composition point)
@@ -278,6 +318,10 @@ final class BookArrivalsModel {
     /// read once per delivered listing, ∝ the listed rows (P1).
     private(set) var facts: [String: Queries.OwnershipFacts] = [:]
 
+    /// 17y B3 (h): whether the masthead door's popover is open — it lists
+    /// the rows while it is (the door hosts the observation).
+    private(set) var doorOpen = false
+
     /// How many rows the open line lists (the count is never windowed).
     static let window = 30
 
@@ -288,11 +332,16 @@ final class BookArrivalsModel {
 
     /// What the observation asks for: the count alone while collapsed (the
     /// common occupied state pays for no listing), the window while open.
-    var listingLimit: Int { expanded ? Self.window : 0 }
+    var listingLimit: Int { (expanded || doorOpen) ? Self.window : 0 }
 
-    /// Observe the door. Hosted by the line with `.task(id: expanded)`, so
-    /// opening the line restarts the observation with its listing, and the
-    /// observation lives exactly as long as a surface shows the line (P3).
+    /// The door opened or closed its popover (17y (h)). Unlike `toggle`, it
+    /// opens on an EMPTY door too — the calm door answers "nothing waiting".
+    func setDoorOpen(_ open: Bool) { doorOpen = open }
+
+    /// Observe the door. Hosted by the masthead door with `.task(id:
+    /// listingLimit)` (17y (h) — the line's host retired), so opening the
+    /// popover restarts the observation with its listing, and the
+    /// observation lives exactly as long as the book shows its door (P3).
     func start() async {
         do {
             for try await value in session.database.observeBookArrivals(
@@ -435,14 +484,101 @@ final class BookArrivalsModel {
 
 // MARK: - The face
 
-/// **The Arrivals line** — atop the book's Index pane and its Book spread.
-/// Draws NOTHING when the door is empty; one muted line when it is not;
-/// the waiting rows inline when she opens it.
-struct BookArrivalsLine: View {
+/// **THE ARRIVALS DOOR** (17y B3 item (h) — R-17y-1: "the small icon in the
+/// book's mode-row area beside the settings gear — calm when nothing waits,
+/// presence when something does"). Drawn on a BOOK's masthead only (a
+/// gathering has no door — it holds nothing; P-2). CALM: a faint tray icon,
+/// no count. PRESENCE: the accent icon and the count. Its popover lists the
+/// waiting rows (`BookArrivalsList`) — her clutter mandate kept: nothing
+/// lists until she opens it, and the book's content carries no line at all.
+/// It also HOSTS the door's observation (the retired line's job).
+struct BookArrivalsDoor: View {
     let model: BookArrivalsModel
     let structure: BookStructureModel
 
-    /// The judgment doors this face renders — the two acts' ONLY renderer,
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    #if DEBUG
+    @State private var probeOwner = UUID()
+    #endif
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    /// The one PRESENCE value (§23's composition point, kept).
+    private var presence: Bool { ArrivalsLineFace.isShown(model.door) }
+
+    var body: some View {
+        Button {
+            model.setDoorOpen(!model.doorOpen)
+        } label: {
+            HStack(spacing: 2) {
+                Image(systemName: "tray.and.arrow.down")
+                if let count = ArrivalsCopy.doorCount(model.door.count) {
+                    Text(count)
+                        .font(tokens.small.weight(.semibold))
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
+            .foregroundStyle(presence ? tokens.accent : tokens.faint)
+        }
+        .buttonStyle(.borderless)
+        .help(ArrivalsCopy.doorHelp(count: model.door.count))
+        .accessibilityLabel(ArrivalsCopy.header(count: model.door.count))
+        .popover(
+            isPresented: Binding(
+                get: { model.doorOpen }, set: { model.setDoorOpen($0) }),
+            arrowEdge: .bottom
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(tokens.chromeLabel(ArrivalsCopy.header(count: model.door.count)))
+                    .font(tokens.small.weight(.semibold))
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                if presence {
+                    BookArrivalsList(
+                        model: model, structure: structure,
+                        onOpen: { model.setDoorOpen(false) })
+                } else {
+                    ChromeNotice(tokens: tokens, text: ArrivalsCopy.nothingWaiting, lines: 3)
+                }
+            }
+            .padding(12)
+            .frame(width: 460, alignment: .leading)
+            .background(tokens.surface)
+        }
+        // The door's observation — the count always, the rows while open.
+        .task(id: model.listingLimit) { await model.start() }
+        #if DEBUG
+        .onAppear { recordDoor() }
+        .onChange(of: model.door) { _, _ in recordDoor() }
+        .onChange(of: model.doorOpen) { _, _ in recordDoor() }
+        .onDisappear { ArrivalsDoorProbe.forget(model.readingID, owner: probeOwner) }
+        #endif
+    }
+
+    #if DEBUG
+    private func recordDoor() {
+        ArrivalsDoorProbe.record(
+            model.readingID, owner: probeOwner,
+            count: model.door.count, presence: presence, open: model.doorOpen)
+    }
+    #endif
+}
+
+/// **The waiting rows** — the old line's expansion, now the door's popover
+/// content (17y (h)). Each row: the note's NAME (a door to the note itself,
+/// read-normal — opening never seats), the archived mark, the ownership line,
+/// when it arrived, and its judgment arms (data — `ArrivalArms`).
+struct BookArrivalsList: View {
+    let model: BookArrivalsModel
+    let structure: BookStructureModel
+    /// Called after a row's name opened its note (the door closes its popover).
+    var onOpen: () -> Void = {}
+
+    /// The judgment doors this face renders — the four acts' ONLY renderer,
     /// so the declaration lives with the builder (the `MarkdownActs` /
     /// `BlockHistoryPane` precedent), and the registry walk asserts it.
     static let surfaceCapabilities: [CapabilityID] = [
@@ -454,7 +590,7 @@ struct BookArrivalsLine: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
-    /// This line's own name in the DEBUG probe (DEBUG-only; see the probe).
+    /// This list's own name in the DEBUG probe (DEBUG-only; see the probe).
     @State private var probeOwner = UUID()
     #endif
 
@@ -462,62 +598,20 @@ struct BookArrivalsLine: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    /// The measure the line's words stand on — the Index pane's own prose
-    /// column (640 + 34 a side), so the line reads as the page's first line
-    /// rather than window chrome; the spread centres it the same way.
-    private static let measure: CGFloat = 640
-    private static let sideInset: CGFloat = 34
-
     var body: some View {
-        VStack(spacing: 0) {
-            // The observation's anchor: a zero-height view, so the `.task`
-            // has something that always appears — even while the door is
-            // empty and the line itself draws nothing.
-            Color.clear.frame(height: 0)
-            if ArrivalsLineFace.isShown(model.door) {
-                line
-                Rectangle()
-                    .fill(tokens.line)
-                    .frame(height: 1)
-            }
-        }
-        .task(id: model.expanded) { await model.start() }
-    }
-
-    private var line: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Button {
-                model.toggle()
-            } label: {
-                Text(tokens.chromeLabel(
-                    (model.expanded ? "\u{25BE} " : "\u{25B8} ")
-                        + ArrivalsCopy.line(count: model.door.count)))
+            ForEach(model.door.rows) { arrival in
+                row(arrival)
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(ArrivalsCopy.lineHelp)
-            if model.expanded {
-                ForEach(model.door.rows) { arrival in
-                    row(arrival)
-                }
-                let hidden = ArrivalsLineFace.hidden(model.door)
-                if hidden > 0 {
-                    Text(tokens.chromeLabel(ArrivalsCopy.more(hidden)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                        .lineLimit(1)
-                        .padding(.leading, 5)
-                }
+            let hidden = ArrivalsLineFace.hidden(model.door)
+            if hidden > 0 {
+                Text(tokens.chromeLabel(ArrivalsCopy.more(hidden)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
             }
         }
-        .frame(maxWidth: Self.measure, alignment: .leading)
-        .padding(.horizontal, Self.sideInset)
-        .padding(.vertical, 6)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .background(tokens.surface)
         #if DEBUG
-        .onAppear { recordLine() }
-        .onChange(of: model.door) { _, _ in recordLine() }
-        .onChange(of: model.expanded) { _, _ in recordLine() }
         .onDisappear { ArrivalsLineProbe.forget(model.readingID, owner: probeOwner) }
         #endif
     }
@@ -528,12 +622,21 @@ struct BookArrivalsLine: View {
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             // The note's NAME is her prose, never chrome — no `chromeLabel`
             // (the 13u3 UNIT B lesson: the Terminal voice would lowercase it).
-            Text(arrival.title)
-                .font(tokens.small)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .help(arrival.title)
+            // 17y (h): it OPENS the note — the ordinary note-open broadcast,
+            // read-normal; opening never seats (only Add does).
+            Button {
+                Self.openNote(arrival.postID)
+                onOpen()
+            } label: {
+                Text(arrival.title)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.ink)
+                    .underline()
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+            .buttonStyle(.plain)
+            .help(ArrivalsCopy.openHelp)
             // 13i-d U4 (#169(a)(2) — P-13ib-U2-2 reversed): an ARCHIVED
             // waiter stays at the door, marked; the same doors follow.
             if arrival.archived {
@@ -571,7 +674,6 @@ struct BookArrivalsLine: View {
                     .disabled(busy)
             }
         }
-        .padding(.leading, 18)
         #if DEBUG
         .onAppear {
             ArrivalsLineProbe.recordRow(
@@ -587,6 +689,15 @@ struct BookArrivalsLine: View {
             ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
         }
         #endif
+    }
+
+    /// A waiting row's NAME opens the note itself — the app's ordinary
+    /// note-open broadcast (the book view's "open ↗" road), read-normal. It
+    /// writes NOTHING: opening never seats (only Add does) — a named call so
+    /// the promise is pinnable (the `MembershipChip.ascend` reason).
+    static func openNote(_ postID: String) {
+        NotificationCenter.default.post(
+            name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
     }
 
     /// One judgment door — its act, its word, its weight.
@@ -623,38 +734,23 @@ struct BookArrivalsLine: View {
             .help(ArrivalsCopy.dismissHelp)
         }
     }
-
-    #if DEBUG
-    private func recordLine() {
-        ArrivalsLineProbe.recordLine(
-            model.readingID, owner: probeOwner,
-            text: ArrivalsCopy.line(count: model.door.count),
-            expanded: model.expanded)
-    }
-    #endif
 }
 
 #if DEBUG
-/// **WHAT THE MOUNTED LINE DREW, AS A TEST ORACLE** (the `TrayRowDoorProbe`
+/// **WHAT THE MOUNTED ROWS DREW, AS A TEST ORACLE** (the `TrayRowDoorProbe`
 /// pattern, for its measured reason: a hosted SwiftUI tree exposes no
 /// accessibility children in this test host, and a composition dump does not
-/// evaluate a `ForEach`'s content). Recorded from the line's and each row's
-/// own `onAppear`, keyed by the book; cleared on disappear — so "absent" is
-/// an honest answer: nothing drew. DEBUG only; the shipping face carries none
-/// of it.
+/// evaluate a `ForEach`'s content). Recorded from each row's own `onAppear`
+/// (`BookArrivalsList` — since 17y (h) the masthead door's popover content,
+/// mountable on its own), keyed by the book; cleared on disappear — so
+/// "absent" is an honest answer: nothing drew. DEBUG only.
 ///
-/// **Owned per line instance** (the 18k C4 `oracleOwner` shape): SwiftUI
-/// mounts an arriving surface BEFORE it unmounts the departing one (the
-/// `BookView` note-box comment records the same order), so a switch from
-/// Index to Book would otherwise have the departing line's `onDisappear`
-/// erase what the arriving line had just recorded. A record names its owner;
-/// a forget clears only its own.
+/// **Owned per list instance** (the 18k C4 `oracleOwner` shape): a record
+/// names its owner; a forget clears only its own.
 @MainActor
 enum ArrivalsLineProbe {
     struct Drawn: Equatable {
         var owner: UUID
-        var line: String?
-        var expanded = false
         /// Arrival row id → the door verbs that row drew.
         var rows: [String: [String]] = [:]
         /// 13i-d U4: the rows that drew the "archived" mark.
@@ -665,18 +761,9 @@ enum ArrivalsLineProbe {
 
     static func reset() { drawn = [:] }
 
-    /// This owner's entry for the book, or a fresh one (a different owner's
-    /// record is a departing line's, and the arriving one replaces it).
     private static func claim(_ readingID: String, _ owner: UUID) -> Drawn {
         if let entry = drawn[readingID], entry.owner == owner { return entry }
         return Drawn(owner: owner)
-    }
-
-    static func recordLine(_ readingID: String, owner: UUID, text: String, expanded: Bool) {
-        var entry = claim(readingID, owner)
-        entry.line = text
-        entry.expanded = expanded
-        drawn[readingID] = entry
     }
 
     static func recordRow(
@@ -693,6 +780,33 @@ enum ArrivalsLineProbe {
         guard drawn[readingID]?.owner == owner else { return }
         drawn[readingID]?.rows[rowID] = nil
         drawn[readingID]?.archivedRows.remove(rowID)
+    }
+
+    static func forget(_ readingID: String, owner: UUID) {
+        guard drawn[readingID]?.owner == owner else { return }
+        drawn[readingID] = nil
+    }
+}
+
+/// **WHAT THE MASTHEAD DOOR DREW** (17y (h)): the count it shows, whether it
+/// wears PRESENCE (the accent — something waits) or is CALM, and whether its
+/// popover is open. Owned per door instance (the navigator's masthead and
+/// the Index column's are each a door). DEBUG only.
+@MainActor
+enum ArrivalsDoorProbe {
+    struct Drawn: Equatable {
+        var owner: UUID
+        var count: Int
+        var presence: Bool
+        var open: Bool
+    }
+
+    private(set) static var drawn: [String: Drawn] = [:]
+
+    static func reset() { drawn = [:] }
+
+    static func record(_ readingID: String, owner: UUID, count: Int, presence: Bool, open: Bool) {
+        drawn[readingID] = Drawn(owner: owner, count: count, presence: presence, open: open)
     }
 
     static func forget(_ readingID: String, owner: UUID) {

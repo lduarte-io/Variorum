@@ -483,10 +483,27 @@ struct BookArchivedLineTests {
                 hosted.window.close()
             }
             await settle(hosted.window, hosted.hosting)
-            #expect(hosted.arrivals.door.count == 1, "the archived waiter is at the door")
+            #expect(hosted.arrivals.door.count == 1, "the archived waiter is at Arrivals")
             hosted.arrivals.toggle()
             try await refresh(hosted.arrivals, db)
-            await settle(hosted.window, hosted.hosting) {
+            // 17y B3 (h) — A JUSTIFIED EDIT: the rows are the masthead door's
+            // popover content (`BookArrivalsList`), mounted on their own here
+            // (a popover does not render under the test host); the subject —
+            // the archived waiter's mark and doors — is unchanged.
+            let rowsWindow = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 640, height: 400),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            rowsWindow.isReleasedWhenClosed = false
+            let rowsHost = NSHostingView(rootView: BookArrivalsList(
+                model: hosted.arrivals, structure: hosted.structure))
+            rowsHost.frame = NSRect(x: 0, y: 0, width: 640, height: 400)
+            rowsWindow.contentView = rowsHost
+            rowsWindow.makeKeyAndOrderFront(nil)
+            defer {
+                rowsWindow.orderOut(nil)
+                rowsWindow.close()
+            }
+            await settle(rowsWindow, rowsHost) {
                 ArrivalsLineProbe.drawn[readingID]?.rows.isEmpty == false
             }
             let row = try #require(hosted.arrivals.door.rows.first)

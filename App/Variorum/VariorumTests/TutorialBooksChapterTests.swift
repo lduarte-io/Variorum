@@ -288,8 +288,20 @@ struct TutorialBooksLessonTests {
             #expect(text.contains("for you to judge: add it, copy it in, or dismiss it."))
             #expect(text.contains("Finishing a book dismisses whatever is still waiting."))
             #expect(text.contains("Changed your mind? Add it by hand; dismissing only stops the book from adding it on its own."))
-            #expect(ArrivalsCopy.line(count: 1).hasSuffix("at the door"))
-            #expect(text.contains("\u{201C}at the door\u{201D}"), "the line, by its own words")
+            // 17y B3 item (h) (R-17y-1/2): the "N at the door" line LEFT the
+            // book's content — the door is the masthead's icon and the one
+            // word is "Arrivals". The lesson's "the book's “at the door”
+            // line" is SEED CONTENT, fenced from B3 (zero seed content) and
+            // RE-OWNED to B-DEDUPE (the seeder's next touch — finding F-B3-1).
+            // Until it is re-worded the prose names a line that no longer
+            // exists: a KNOWN issue, so the spine stays honest — and this
+            // block fails ("known issue not recorded") the moment the prose
+            // is fixed, so the follow-up must remove it.
+            #expect(ArrivalsCopy.word == "Arrivals")
+            withKnownIssue("F-B3-1: lesson 4 still names the retired \u{201C}at the door\u{201D} line") {
+                #expect(!text.contains("\u{201C}at the door\u{201D}"),
+                        "the lesson names the door by the face's own word")
+            }
             #expect(text.contains(ArrivalsCopy.addVerb.lowercased() + " it"))
             #expect(text.contains(ArrivalsCopy.dismissVerb.lowercased() + " it"))
             #expect(MembershipChoiceCopy.copyInVerb.lowercased() == "copy in")

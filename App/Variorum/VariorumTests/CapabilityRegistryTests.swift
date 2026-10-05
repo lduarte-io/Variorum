@@ -440,8 +440,10 @@ struct CapabilityRegistryTests {
             // (`dismissArrival`) — on each waiting row. Its ONLY renderer, so
             // the declaration lives with the builder and the union names it
             // here; a judgment door leaking onto any other surface is a new
-            // line, which is the review this walk exists to force.
-            .union(BookArrivalsLine.surfaceCapabilities)
+            // line, which is the review this walk exists to force. (17y B3
+            // (h), A JUSTIFIED EDIT: the renderer is the masthead door's
+            // popover rows, `BookArrivalsList` — the same acts, renamed.)
+            .union(BookArrivalsList.surfaceCapabilities)
             // 13i-c U3 (A JUSTIFIED EDIT, the E2/E8/batch-3/6b class): the
             // BOOK SETTINGS sheet renders the six STATE doors (Finish/Reopen ·
             // Seal…/Unseal · Own Its Notes…/Stop Owning — which of each pair,

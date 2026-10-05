@@ -215,7 +215,9 @@ nonisolated extension WingCopy {
                     + " \u{2014} a book only holds notes of its own wing.")
             }
             if p.waiting > 0 {
-                sentences.append("\(p.waiting) waiting at the door will be dismissed.")
+                // 17y B3 (h) — R-17y-2: the one word (the finish confirm's
+                // sentence, shared).
+                sentences.append(BookStateCopy.waitingLine(p.waiting))
             }
         }
         sentences.append("It arrives unshelved.")

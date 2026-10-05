@@ -190,9 +190,12 @@ nonisolated enum BookStateCopy {
 
     // MARK: Finish (§24 — the confirm carries ONE line, and only when N > 0)
 
-    /// §24's line, verbatim: "N waiting at the door will be dismissed".
+    /// §24's line ("N waiting at the door will be dismissed"), its door
+    /// re-worded to the ONE word at 17y B3 item (h) — R-17y-2: "the door
+    /// line's 'N at the door' idiom re-words to the Arrivals family"
+    /// (PROVISIONAL P-17y-B3-h3 on the sentence; 13s re-voices).
     static func waitingLine(_ count: Int) -> String {
-        "\(count) waiting at the door will be dismissed."
+        "\(count) waiting at \(ArrivalsCopy.word) will be dismissed."
     }
 
     /// The finish asks ONLY when something is waiting — else it acts.

@@ -60,7 +60,7 @@ nonisolated enum MembershipChoiceCopy {
     /// The registry's honest note for a dispatch nothing renders.
     static let unavailableNote =
         "Copy in and Move in are offered where a note meets a book that owns its notes "
-        + "\u{2014} add it to the book, or judge it at the book's door."
+        + "\u{2014} add it to the book, or judge it at the book's Arrivals."
 
     // The two acts' button words (the registry's verbs).
     static let copyInVerb = "Copy In"

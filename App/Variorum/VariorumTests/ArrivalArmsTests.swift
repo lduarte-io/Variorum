@@ -129,8 +129,8 @@ struct ArrivalArmsTests {
         #expect(ArrivalArms.verb(.copyIn) == "Copy In")
         #expect(ArrivalArms.verb(.moveIn) == "Move In")
         #expect(ArrivalArms.verb(.seatArrival) == ArrivalsCopy.addVerb)
-        #expect(BookArrivalsLine.surfaceCapabilities.contains(.copyIn))
-        #expect(BookArrivalsLine.surfaceCapabilities.contains(.moveIn))
+        #expect(BookArrivalsList.surfaceCapabilities.contains(.copyIn))
+        #expect(BookArrivalsList.surfaceCapabilities.contains(.moveIn))
     }
 
     @Test func theModelReadsEachRowsFactsAndCopyInAnswersTheBell() async throws {
@@ -219,9 +219,13 @@ struct ArrivalArmsTests {
                 window.orderOut(nil)
                 window.close()
             }
-            let hosting = NSHostingView(rootView: BookView(
-                session: session, readingID: readingID,
-                model: model, structure: structure, arrivals: arrivals))
+            // 17y B3 (h) — A JUSTIFIED EDIT: the rows are the masthead door's
+            // POPOVER content now (`BookArrivalsList`); a popover does not
+            // render under the test host, so the rows mount on their own. The
+            // subject — each row draws its arms — is unchanged.
+            _ = model
+            let hosting = NSHostingView(rootView: BookArrivalsList(
+                model: arrivals, structure: structure))
             hosting.frame = NSRect(x: 0, y: 0, width: 1300, height: 820)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)

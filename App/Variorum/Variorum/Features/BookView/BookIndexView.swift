@@ -402,12 +402,8 @@ struct BookIndexView<Masthead: View>: View {
     let session: AppSession
     let model: BookViewModel
     let structure: BookStructureModel
-    /// 13i-b U2 — the book's door: the Arrivals line stands atop the PANE
-    /// (the index's content, right of its column), invisible when empty.
-    /// Optional so a host that has no door to show (a pin over the pane
-    /// alone) composes nothing.
-    let arrivals: BookArrivalsModel?
-    /// 13i-d U4 — the archived line, directly under the door on the PANE
+    /// 13i-d U4 — the archived line, on the PANE (17y B3 (h): the Arrivals
+    /// line it sat under moved to the masthead's door —
     /// (zero height when nothing is set aside); its count also feeds the
     /// column footer's honest "· N archived". nil composes nothing.
     let archived: BookArchivedModel?
@@ -495,7 +491,6 @@ struct BookIndexView<Masthead: View>: View {
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
-        arrivals: BookArrivalsModel? = nil,
         archived: BookArchivedModel? = nil,
         @ViewBuilder masthead: @escaping () -> Masthead,
         ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
@@ -507,7 +502,6 @@ struct BookIndexView<Masthead: View>: View {
         self.session = session
         self.model = model
         self.structure = structure
-        self.arrivals = arrivals
         self.archived = archived
         self.masthead = masthead
         self.ownershipBadge = ownershipBadge
@@ -614,15 +608,13 @@ struct BookIndexView<Masthead: View>: View {
             minimum: BookIndexColumn.minimumWidth,
             maximum: BookIndexColumn.maximumWidth
         ) {
-            // 13i-b U2: the door's line stands ABOVE the pane's scroll view,
-            // never inside it — the pane's height manifest and landing
-            // authority measure the scroll content alone, and an empty door
-            // draws nothing (zero height), so a book with no arrivals lays
-            // out byte-identically to before.
+            // 13i-d U4: the archived line stands ABOVE the pane's scroll
+            // view, never inside it — the pane's height manifest and landing
+            // authority measure the scroll content alone, and an empty line
+            // draws nothing (zero height). (17y B3 (h): the Arrivals line that
+            // stood above it LEFT the content — the door is the masthead's
+            // icon now, R-17y-1.)
             VStack(spacing: 0) {
-                if let arrivals {
-                    BookArrivalsLine(model: arrivals, structure: structure)
-                }
                 if let archived {
                     BookArchivedLine(model: archived, structure: structure)
                 }

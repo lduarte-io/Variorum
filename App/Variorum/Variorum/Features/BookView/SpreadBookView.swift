@@ -53,12 +53,9 @@ struct SpreadBookView: View {
     let session: AppSession
     let model: BookViewModel
     let structure: BookStructureModel
-    /// 13i-b U2 — the book's door: the Arrivals line stands atop the
-    /// spread, invisible when empty. nil composes nothing (a pin over the
-    /// spread alone).
-    var arrivals: BookArrivalsModel? = nil
-    /// 13i-d U4 — the archived line, directly under the door (nil composes
-    /// nothing — a pin over the spread alone).
+    /// 13i-d U4 — the archived line atop the spread (nil composes nothing —
+    /// a pin over the spread alone). 17y B3 (h): the Arrivals line it sat
+    /// under moved to the masthead's door.
     var archived: BookArchivedModel? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -84,11 +81,8 @@ struct SpreadBookView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 13i-b U2: atop the spread, above both pages (an empty door
-            // draws nothing — zero height).
-            if let arrivals {
-                BookArrivalsLine(model: arrivals, structure: structure)
-            }
+            // 13i-d U4: the archived line atop the spread (zero height when
+            // empty). 17y B3 (h): the Arrivals line LEFT — the masthead door.
             if let archived {
                 BookArchivedLine(model: archived, structure: structure)
             }
