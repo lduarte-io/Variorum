@@ -56,6 +56,46 @@ struct CanvasDebugOnlyTests {
         #expect(PostMode.allCases == PostMode.order(keepingCanvas: PostMode.buildKeepsCanvas))
     }
 
+    /// **No case can silently vanish from the row (the B2 ladder's NIT-5).**
+    /// Overriding `allCases` (the one Release-gated derivation) gave up the
+    /// compiler's synthesized list: a future case left out of `declaredOrder`
+    /// would simply never render — no mode row, no ⌘ key, no rail entry. So
+    /// every case is reached here WITHOUT `allCases`, through the exhaustive
+    /// `ring(after:)` below, and each must sit in Debug's full row.
+    @Test func everyCaseSitsInTheDebugRow() {
+        var reached: [PostMode] = []
+        var mode = PostMode.write
+        repeat {
+            reached.append(mode)
+            mode = Self.ring(after: mode)
+        } while mode != .write && reached.count <= 64
+        #expect(mode == .write, "the ring closes back on Write")
+        #expect(Set(reached).count == reached.count, "the ring names each case once")
+        let row = PostMode.order(keepingCanvas: true)
+        for mode in reached {
+            #expect(row.contains(mode),
+                    "\(mode.rawValue) is a PostMode case missing from `declaredOrder` — it would never render")
+        }
+        #expect(row.count == reached.count && Set(row) == Set(reached),
+                "Debug's full row is every case, each once")
+    }
+
+    /// Every `PostMode` case's successor on ONE ring — EXHAUSTIVE by
+    /// construction: adding a case fails to compile here until it has an arm,
+    /// and that arm must JOIN the ring (the arm before it names it, it names
+    /// the next) so `everyCaseSitsInTheDebugRow` reaches it. Never `default:`.
+    private static func ring(after mode: PostMode) -> PostMode {
+        switch mode {
+        case .write: .takes
+        case .takes: .read
+        case .read: .lenses
+        case .lenses: .compare
+        case .compare: .blocks
+        case .blocks: .canvas
+        case .canvas: .write
+        }
+    }
+
     /// A note she left in Canvas (her real store ran Canvas in Release
     /// before this) reopens in the default mode there — never a mode the
     /// build cannot render.

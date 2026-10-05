@@ -86,7 +86,9 @@ nonisolated enum PostMode: String, CaseIterable, Sendable {
     }()
 
     /// Every mode in the row's order (Debug's row). `order(keepingCanvas:)`
-    /// filters it; a new case must join it (the row's order IS this list).
+    /// filters it; a new case must join it (the row's order IS this list —
+    /// `allCases` is overridden, so the compiler no longer lists cases for
+    /// us; `CanvasDebugOnlyTests.everyCaseSitsInTheDebugRow` catches a miss).
     private static let declaredOrder: [PostMode] = [
         .write, .takes, .read, .lenses, .compare, .blocks, .canvas,
     ]
