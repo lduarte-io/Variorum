@@ -24,6 +24,10 @@ struct TouchedRows {
     /// convergence repairs (pre-13u Act 0): the Journal keeper and the
     /// sample-library dedupe both check only when a batch touched a book.
     var readingIDs: Set<String> = []
+    /// Applied `container` rows — the seeded-furniture fold's note/pool
+    /// occasion (17y B-DEDUPE): a reserved-titled container landing is the
+    /// moment its grain can first have two copies to judge.
+    var containerIDs: Set<String> = []
     /// True when the batch touched the daily-book designation setting —
     /// the Journal keeper's second (belt) firing occasion.
     var dailyDesignationTouched = false
@@ -487,6 +491,8 @@ extension SyncEngine {
             }
         case "container_block":
             touched.placementIDs.insert(row.rowID)
+        case "container":
+            touched.containerIDs.insert(row.rowID)
         case "reading":
             touched.readingIDs.insert(row.rowID)
         case "setting" where row.rowID == "daily_journal_book":
@@ -899,6 +905,14 @@ extension SyncEngine {
         // 13i-a (R5): the Welcome-shelf keeper — fired by a shelf landing.
         if !touched.shelfIDs.isEmpty {
             repairs += try convergeWelcomeShelves(db, touched: touched)
+        }
+        // 17y B-DEDUPE (R-17y-5): the seeded-furniture pairwise fold —
+        // pull-only occasions of its own (`furnitureDedupeOccasion`), run
+        // AFTER the Welcome keeper so shelf pointers it reads are already
+        // converged, and after the tag fold (the per-row apply) so rule
+        // re-points see the folded vocabulary.
+        if try furnitureDedupeOccasion(db, touched: touched) {
+            repairs += try dedupeSeededFurniture(db, touched: touched)
         }
         return repairs
     }

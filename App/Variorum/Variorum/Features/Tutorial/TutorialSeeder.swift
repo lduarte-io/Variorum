@@ -41,6 +41,29 @@ enum TutorialSeeder {
     nonisolated static let tagName = "tutorial"
     nonisolated static let scrapPoolTitle = "tutorial scraps"
 
+    /// The versions lesson's twin note — a `duplicateAsVersion` copy the
+    /// seed renames so the ⌘K palette never shows two identical rows (the
+    /// U7 walk finding). ONE constant since 17y B-DEDUPE: the mint and the
+    /// furniture fold's reserved-title facts read the same spelling.
+    nonisolated static let twinTitle = "compare & versions \u{2014} the twin"
+
+    /// **17y B-DEDUPE (R-17y-5): the GUIDE half of the furniture-fold
+    /// facts** — appended to the shared half at the Mac's `AppServices`
+    /// construction (the engine's `furnitureFacts`; the phone passes
+    /// nothing — its pocket guide is the recorded MOBILE PARITY row). The
+    /// guide book folds by pairwise content identity; the scraps pool and
+    /// a BOOKLESS twin fold at container grain (a twin membered in its
+    /// guide rides the book's own fold).
+    nonisolated static func furnitureFactsHalf() -> (
+        guideBookName: String, guideTagPath: String,
+        containers: [SeededFurnitureDedupeFacts.ReservedContainer]
+    ) {
+        (bookName, tagName, [
+            .init(title: scrapPoolTitle, kind: "pool", seedTagPaths: [tagName]),
+            .init(title: twinTitle, kind: "post", seedTagPaths: [tagName]),
+        ])
+    }
+
     /// **17y B-DEDUPE (the B2 ladder's MAJOR-2): the getting-around lesson's
     /// mode-row sentence, DERIVED from the (p) seam** (`PostMode` — the one
     /// place the build's mode order lives), so the seeded guide can never
@@ -1719,7 +1742,7 @@ enum TutorialSeeder {
         // A distinct title (walk finding): the copy inherits the lesson's
         // title, and two identical rows in the ⌘K palette invite opening
         // the wrong one.
-        try ops.renameContainer(twin.post.id, title: "compare & versions \u{2014} the twin")
+        try ops.renameContainer(twin.post.id, title: Self.twinTitle)
         // 17y B3 item (c): Duplicate as Version now CARRIES the source's tags,
         // so the twin is born wearing the guide's tag (a row copy) and this
         // apply finds it already there. Tolerated ONLY for that refusal — the

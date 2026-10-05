@@ -135,6 +135,10 @@ final class AppServices {
     /// recording fakes; production composes the real client over the same
     /// session the sync transport rides.
     private let makeAccountLifecycle: (any UserSessionProviding) -> any AccountLifecycleProviding
+    /// 17y B-DEDUPE (R-17y-5): the seeded-furniture fold's facts for this
+    /// PLATFORM — the shared half by default; the Mac's construction site
+    /// appends the guide's half (`TutorialSeeder.furnitureFactsHalf()`).
+    private let furnitureFacts: SeededFurnitureDedupeFacts
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
@@ -145,10 +149,12 @@ final class AppServices {
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
         keyVault: KeyVaultClient? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
+        furnitureFacts: SeededFurnitureDedupeFacts? = nil,
         legacyCleanup: @escaping @Sendable () -> Void
     ) {
         self.session = session
         self.legacyCleanup = legacyCleanup
+        self.furnitureFacts = furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts()
         self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
             AccountLifecycleClient(
                 configuration: ProjectConfig.variorumTransport,
@@ -409,7 +415,8 @@ final class AppServices {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
         await sync.configure(
-            transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider())
+            transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider(),
+            furnitureFacts: furnitureFacts)
         sync.triggerSync()
     }
 

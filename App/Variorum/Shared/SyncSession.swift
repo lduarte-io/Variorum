@@ -81,7 +81,10 @@ final class SyncSession {
     /// providers. There is no plaintext mode: a refusing provider means
     /// every round refuses visibly, which is the designed pre-enrollment
     /// state, never a wiring accident.
-    func configure(transport: any SyncTransport, keyProvider: any SyncKeyProviding) async {
+    func configure(
+        transport: any SyncTransport, keyProvider: any SyncKeyProviding,
+        furnitureFacts: SeededFurnitureDedupeFacts? = nil
+    ) async {
         guard allowsSync else { return }
         let old = scheduler
         stopObservations()
@@ -107,10 +110,13 @@ final class SyncSession {
         // the engine cannot see the seeder, so the identity predicate and
         // per-note manifest are handed in here — the one composition site
         // both platforms share. pre-13x 5a: EVERY seeded book's facts
-        // (Sherlock + *Encryption Explained*), a list.
+        // (Sherlock + *Encryption Explained*), a list. 17y B-DEDUPE: the
+        // seeded-furniture fold's facts ride the same seam (nil = the
+        // SHARED half — the caller passes the platform's whole set).
         let engine = SyncEngine(
             transport: transport, keyProvider: keyProvider,
-            sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts())
+            sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts(),
+            furnitureFacts: furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts())
         let janitor = (transport as? any SyncTransport & SyncPurgeTransport)
             .map { PurgeJanitor(transport: $0, keyProvider: keyProvider) }
         let scheduler = SyncScheduler(engine: engine, janitor: janitor)

@@ -45,17 +45,23 @@ public struct SyncEngine: Sendable {
     /// per seeded book (Sherlock, *Encryption Explained*); the pass runs per
     /// entry exactly as it ran for one — no rule or ordering change.
     public let sampleLibraryFacts: [SampleLibraryDedupeFacts]
+    /// 17y B-DEDUPE (R-17y-5): the seeded-furniture pairwise fold's facts —
+    /// the guide, the three gatherings, the quicknote/twin, the scraps pool
+    /// (`SeededFurnitureDedupe.swift`). Nil = INERT, the standing pattern.
+    public let furnitureFacts: SeededFurnitureDedupeFacts?
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
-        sampleLibraryFacts: [SampleLibraryDedupeFacts] = []
+        sampleLibraryFacts: [SampleLibraryDedupeFacts] = [],
+        furnitureFacts: SeededFurnitureDedupeFacts? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
         self.maxPushIterations = maxPushIterations
         self.keyProvider = keyProvider
         self.sampleLibraryFacts = sampleLibraryFacts
+        self.furnitureFacts = furnitureFacts
     }
 
     /// Ladder R1-1, re-based on pre-13x 2b's PER-STEP marker: the posture

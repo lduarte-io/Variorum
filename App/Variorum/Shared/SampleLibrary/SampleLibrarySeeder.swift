@@ -596,6 +596,48 @@ enum SampleLibrarySeeder {
         Book.dedupeCovered.map { dedupeFacts(for: $0) }
     }
 
+    /// **17y B-DEDUPE (R-17y-5): the seeded-furniture fold's SHARED half** —
+    /// the three seeded gatherings and the seeded quicknote, the objects
+    /// both platforms mint. The GUIDE half is the platform's to append (the
+    /// Mac passes `TutorialSeeder`'s at its `AppServices` construction; the
+    /// phone passes nothing — the pocket guide's symmetric entry is its
+    /// recorded MOBILE PARITY row). Every signature reads the minting
+    /// code's OWN constants, so the fold and the seeds can never drift.
+    nonisolated static func furnitureDedupeFacts(
+        guideBookName: String? = nil,
+        guideTagPath: String? = nil,
+        guideContainers: [SeededFurnitureDedupeFacts.ReservedContainer] = []
+    ) -> SeededFurnitureDedupeFacts {
+        SeededFurnitureDedupeFacts(
+            guideBookName: guideBookName,
+            guideTagPath: guideTagPath,
+            gatherings: [
+                // classics — minted ON Welcome by the arrangement, rule =
+                // the ONE seed tag (the F-U7-1 letter), unstarred.
+                .init(
+                    name: SampleLibraryWelcome.classicsGatheringName,
+                    rule: .tagPath(classicsTagPath)),
+                // starred notes — unshelved, rule ★, unstarred (13i-b U4).
+                .init(name: Operations.starredNotesGatheringName, rule: .star),
+                // Quicknotes — unshelved, rule = the quicknote tag, BORN
+                // STARRED (R-13id-5), with the designation that must
+                // re-point to the keeper (§20: re-point, never mint).
+                .init(
+                    name: Operations.defaultQuicknoteBookName,
+                    rule: .tagPath(Operations.quicknoteTagPath),
+                    designationKey: "quicknote_book",
+                    bornStarred: true),
+            ],
+            containers: [
+                // The ONE seeded quicknote (the pad's own road; its tag is
+                // the seed's hands).
+                .init(
+                    title: SampleLibraryWelcome.quicknoteTitle, kind: "post",
+                    seedTagPaths: [Operations.quicknoteTagPath]),
+            ] + guideContainers,
+            hash: BridgeHash.body(_:))
+    }
+
     // MARK: - Discovery (the idempotence guard)
 
     /// What the store already holds of this library. Deliberately reports

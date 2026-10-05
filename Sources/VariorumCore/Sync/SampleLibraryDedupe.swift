@@ -754,7 +754,10 @@ extension SyncEngine {
     /// Trash she never asked to fill, and a fourteen-step road out — both
     /// recorded for her at QUESTIONS #85(e); widening the recovery door is
     /// an op-semantics call, not this repair's.
-    private func retireSampleCopy(
+    /// (INTERNAL since 17y B-DEDUPE: the seeded-furniture fold's book grain
+    /// retires a guide copy through this same family-complete shape — one
+    /// body, two callers, the F4 Put-back story identical.)
+    func retireSampleCopy(
         _ db: Database, copyID: String, arrivingDead: [String: Set<String>]
     ) throws -> Int {
         var repairs = 0

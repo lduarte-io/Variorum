@@ -66,6 +66,17 @@ struct VariorumApp: App {
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
                             backupRunbookText: DataSafetyCopy.runbook,
+                            // 17y B-DEDUPE: the Mac's furniture-fold facts =
+                            // the shared half + the GUIDE's (the engine's
+                            // pairwise fold; the phone wires the shared half
+                            // alone — its pocket guide is the parity row).
+                            furnitureFacts: {
+                                let guide = TutorialSeeder.furnitureFactsHalf()
+                                return SampleLibrarySeeder.furnitureDedupeFacts(
+                                    guideBookName: guide.guideBookName,
+                                    guideTagPath: guide.guideTagPath,
+                                    guideContainers: guide.containers)
+                            }(),
                             // The retired-credential sweep — REQUIRED at the
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })

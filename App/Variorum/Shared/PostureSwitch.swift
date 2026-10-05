@@ -215,6 +215,12 @@ final class PostureSwitchRunner {
         /// and the regular engine never saw that arrival again (the cursor
         /// had moved). Empty in the scripted worlds.
         var sampleLibraryFacts: [SampleLibraryDedupeFacts] = []
+        /// 17y B-DEDUPE: the furniture fold's facts for the drain engine —
+        /// the F2 (MINOR-5) parity rule, the SHARED half in production (a
+        /// guide pair met during a ceremony drain folds at the regular
+        /// engine's next book-touching pull — the recorded corner). Nil in
+        /// the scripted worlds.
+        var furnitureFacts: SeededFurnitureDedupeFacts?
         /// nil = no vault client composed (unconfigured / local-only).
         var vault: KeyVaultClient?
         var transport: (any SyncTransport & SyncRotationTransport)?
@@ -1494,6 +1500,9 @@ extension PostureSwitchRunner.Leaves {
             keyProvider: DeviceKeySyncProvider(store: keyStore),
             // F2 (MINOR-5): the same facts the regular engine carries.
             sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts(),
+            // 17y B-DEDUPE: the furniture fold's SHARED half (the corner
+            // above — the guide half is the regular engine's).
+            furnitureFacts: SampleLibrarySeeder.furnitureDedupeFacts(),
             vault: current?.keyVault,
             transport: transport,
             signedIn: { [current] in
@@ -1565,6 +1574,8 @@ extension PostureSwitchRunner.Leaves {
     /// composition, mirrored here so a second engine never silently drops
     /// a repair the design says every pull carries).
     nonisolated func drainEngine(transport: any SyncTransport) -> SyncEngine {
-        SyncEngine(transport: transport, keyProvider: keyProvider, sampleLibraryFacts: sampleLibraryFacts)
+        SyncEngine(
+            transport: transport, keyProvider: keyProvider,
+            sampleLibraryFacts: sampleLibraryFacts, furnitureFacts: furnitureFacts)
     }
 }
