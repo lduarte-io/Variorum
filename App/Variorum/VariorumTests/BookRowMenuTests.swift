@@ -57,10 +57,12 @@ struct BookRowMenuTests {
     }
 
     /// Before the row's facts are read, no state door is drawn (its truth is
-    /// unknown) — the rest are.
+    /// unknown) — and, since the ladder's round-1 NIT-2 (a justified edit,
+    /// the subject strengthened), no export either: `ReadingExport` takes
+    /// the Reading row, so the table says exactly what the renderer draws
+    /// on a facts-less row.
     @Test func unknownFactsDrawNoStateDoor() {
-        #expect(BookRowMenuTable.doors(for: nil)
-                == [.open, .star, .settings, .exportMarkdown, .exportPDF])
+        #expect(BookRowMenuTable.doors(for: nil) == [.open, .star, .settings])
     }
 
     /// Her carve-out: position means nothing off the Bookcase — none of its

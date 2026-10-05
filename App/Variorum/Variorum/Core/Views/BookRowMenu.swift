@@ -48,13 +48,16 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
 }
 
 /// **THE TABLE** — which doors a book row draws off the Bookcase (pure,
-/// pinned). nil facts (a row whose reading has not been read yet) draw the
-/// doors that need none; the state doors wait for the facts (P-2: a door
-/// whose truth is unknown is not drawn).
+/// pinned). nil facts (a row whose reading has not been read yet) draw only
+/// the doors that need none; the EXPORTS and the state doors wait for the
+/// facts (P-2: a door whose truth — or target: `ReadingExport` takes the
+/// Reading row — is unknown is not drawn). The ladder's round-1 NIT-2: the
+/// table says exactly what the renderer draws.
 nonisolated enum BookRowMenuTable {
     static func doors(for reading: Reading?) -> [BookRowDoor] {
-        var out: [BookRowDoor] = [.open, .star, .settings, .exportMarkdown, .exportPDF]
+        var out: [BookRowDoor] = [.open, .star, .settings]
         if let reading {
+            out += [.exportMarkdown, .exportPDF]
             out += BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading)).map { .state($0) }
         }
         return out
