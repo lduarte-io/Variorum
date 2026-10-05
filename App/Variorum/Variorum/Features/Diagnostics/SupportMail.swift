@@ -97,9 +97,17 @@ enum SupportMail {
 final class LiveSupportMailRoads: NSObject, SupportMailRoads, NSSharingServiceDelegate {
     static let shared = LiveSupportMailRoads()
 
-    /// The one draft in flight's failure road (the service holds its
-    /// delegate weakly; this object is the app-long `shared`).
-    private var pendingFailure: (@MainActor () -> Void)?
+    /// Each in-flight draft's failure road, keyed by ITS OWN service
+    /// instance (F5, ladder round 1 — the U3-B exchange's sharpening: a
+    /// single slot not only DROPPED a road, it could run the WRONG draft's
+    /// fallback — A fails late after B composes → B's file shown and named —
+    /// and A's success nilled B's road). The value retains the service so
+    /// the key's identity is stable for the callback's life; the entry
+    /// leaves in either callback. (A service that never calls back would
+    /// strand one entry on this app-long object — AppKit's compose service
+    /// was measured to report every outcome, F-W5.)
+    private var pendingFailureRoads:
+        [ObjectIdentifier: (service: NSSharingService, road: @MainActor () -> Void)] = [:]
 
     private func items(_ draft: SupportDraft) -> [Any] {
         [draft.body as NSString] + (draft.attachment.map { [$0 as NSURL] } ?? [])
@@ -117,9 +125,16 @@ final class LiveSupportMailRoads: NSObject, SupportMailRoads, NSSharingServiceDe
         }
         service.recipients = [draft.recipient]
         service.subject = draft.subject
-        service.delegate = self
-        pendingFailure = onFailure
+        expectFailureRoad(for: service, onFailure)
         service.perform(withItems: items(draft))
+    }
+
+    /// `compose`'s bookkeeping half, separable so the delegate contract is
+    /// PINNABLE without `perform` (which would open Mail): the road is keyed
+    /// by this service alone, and only this service's failure runs it.
+    func expectFailureRoad(for service: NSSharingService, _ road: @escaping @MainActor () -> Void) {
+        service.delegate = self
+        pendingFailureRoads[ObjectIdentifier(service)] = (service, road)
     }
 
     func open(_ url: URL) -> Bool {
@@ -133,17 +148,16 @@ final class LiveSupportMailRoads: NSObject, SupportMailRoads, NSSharingServiceDe
     // MARK: NSSharingServiceDelegate
 
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) {
-        pendingFailure = nil
+        pendingFailureRoads[ObjectIdentifier(sharingService)] = nil
     }
 
     func sharingService(
         _ sharingService: NSSharingService, didFailToShareItems items: [Any], error: any Error
     ) {
-        let failure = pendingFailure
-        pendingFailure = nil
+        let entry = pendingFailureRoads.removeValue(forKey: ObjectIdentifier(sharingService))
         // Her own cancel is an answer, not a failure: nothing more happens.
         if Self.isHerOwnCancel(error) { return }
-        failure?()
+        entry?.road()
     }
 
     /// A cancelled share (she closed the compose window unsent) is

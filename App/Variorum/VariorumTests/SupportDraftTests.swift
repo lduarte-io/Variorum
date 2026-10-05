@@ -14,6 +14,7 @@
 //  Red on old by construction: none of this existed before U3-B.
 //
 
+import AppKit
 import Foundation
 import Testing
 @testable import Variorum
@@ -151,6 +152,35 @@ struct SupportDraftTests {
             NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoPermissionError)))
         #expect(!LiveSupportMailRoads.isHerOwnCancel(
             NSError(domain: "other", code: NSUserCancelledError)))
+    }
+
+    /// F5 (ladder round 1, the exchange's sharpened mechanism): with drafts A
+    /// then B in flight, A's LATE failure must run A's own road — never B's
+    /// (the wrong draft's file shown and named) — and B's SUCCESS must clear
+    /// only B's road. The live delegate's bookkeeping is driven directly over
+    /// two services that are NEVER performed (performing would open Mail —
+    /// which is why no red-on-old pin could run against the single-slot
+    /// shape; the mutant check stands in, recorded in the plan).
+    @Test func aLateFailureRunsOnlyItsOwnDraftsRoadAndASuccessClearsOnlyItsOwn() throws {
+        let roads = LiveSupportMailRoads()
+        let serviceA = try #require(NSSharingService(named: .composeEmail))
+        let serviceB = try #require(NSSharingService(named: .composeEmail))
+        var ran: [String] = []
+        roads.expectFailureRoad(for: serviceA) { ran.append("A") }
+        roads.expectFailureRoad(for: serviceB) { ran.append("B") }
+        let failure = NSError(domain: "test", code: 1)
+        roads.sharingService(serviceA, didFailToShareItems: [], error: failure)
+        #expect(ran == ["A"], "A's late failure runs A's road, never B's")
+        roads.sharingService(serviceB, didShareItems: [])
+        roads.sharingService(serviceB, didFailToShareItems: [], error: failure)
+        #expect(ran == ["A"], "B's success cleared only B's road; nothing runs twice")
+        // Her own cancel consumes the road and runs nothing (unchanged).
+        roads.expectFailureRoad(for: serviceA) { ran.append("A2") }
+        roads.sharingService(
+            serviceA, didFailToShareItems: [],
+            error: NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError))
+        roads.sharingService(serviceA, didFailToShareItems: [], error: failure)
+        #expect(ran == ["A"], "a cancel is her answer — the road is spent, not re-run")
     }
 
     @Test func nothingOpeningSpeaksARefusal() {
