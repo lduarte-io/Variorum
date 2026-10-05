@@ -69,7 +69,7 @@ nonisolated enum LibraryCardName {
 }
 
 /// The card read's PLAN: which notes, and whether the books ride along.
-struct LibraryCardRead: Equatable {
+nonisolated struct LibraryCardRead: Equatable {
     let ids: [String]
     let books: Bool
 

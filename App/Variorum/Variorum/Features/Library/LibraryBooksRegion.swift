@@ -64,3 +64,43 @@ struct LibraryMoreNotesRow: View {
             .accessibilityHidden(!loading)
     }
 }
+
+/// **The paged notes, in a view of their own** (17y B1 (k), measured): a page
+/// landing changes `noteHits`, and whatever body READS it re-evaluates — in
+/// the catalog's own body that was the whole Library (its header, its menus,
+/// both regions), a 100–250 ms stall per page in the Debug build. Here only
+/// this list re-evaluates, and each row is an `Equatable` host on its hit, so
+/// the rows already standing are skipped (a row still re-draws when what IT
+/// reads changes — its chips, its pick — through its own observation).
+struct LibraryPagedNotes<Row: View>: View {
+    let model: LibraryCatalogModel
+    let tokens: VoiceTokens
+    @ViewBuilder let row: (Queries.CatalogHit) -> Row
+
+    var body: some View {
+        ForEach(model.noteHits, id: \.id) { hit in
+            LibraryNoteRowHost(hit: hit) { row(hit) }
+                .equatable()
+                // The rows on screen drive the paging (the next page as she
+                // nears the end) and the near window (the extras and the
+                // held facts).
+                .onAppear { model.noteRowAppeared(hit.id) }
+                .onDisappear { model.noteRowDisappeared(hit.id) }
+        }
+        if model.notesHaveMore {
+            LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
+                .onAppear { Task { await model.loadMoreNotes() } }
+        }
+    }
+}
+
+/// One paged row, equal to another on its hit alone — so a page appended
+/// below never re-draws the rows above it.
+struct LibraryNoteRowHost<Content: View>: View, Equatable {
+    let hit: Queries.CatalogHit
+    @ViewBuilder let content: () -> Content
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.hit == rhs.hit }
+
+    var body: some View { content() }
+}

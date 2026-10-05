@@ -115,7 +115,10 @@ final class OwnershipFactsModel {
             for try await value in session.database.observe({ db in
                 try Queries.ownershipFacts(db, postIDs: postIDs, inBook: readingID)
             }) {
-                facts = value
+                // 17y B1 (k): a re-aimed observation re-delivers the facts it
+                // already holds — an unchanged answer must not re-draw every
+                // row that reads it.
+                if value != facts { facts = value }
             }
         } catch {
             // A failed read draws no badge — silence, never a wrong mark.

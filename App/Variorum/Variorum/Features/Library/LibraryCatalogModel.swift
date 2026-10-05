@@ -185,7 +185,14 @@ final class LibraryCatalogModel {
     /// pages, never a cap); the block hits of a typed query, still capped and
     /// said so. Written only by this file's reads and the paging extension.
     var bookHits: [Queries.CatalogHit] = []
-    var noteHits: [Queries.CatalogHit] = []
+    var noteHits: [Queries.CatalogHit] = [] {
+        // The one flag the catalog's own body reads (17y B1 (k)): a page
+        // landing changes `noteHits` but never this, so the catalog does not
+        // re-evaluate per page — only the paged list does.
+        didSet { if hasNoteRows == noteHits.isEmpty { hasNoteRows = !noteHits.isEmpty } }
+    }
+    /// The listing has note rows at all (the section and the empty answer).
+    private(set) var hasNoteRows = false
     var blockHits: [Queries.CatalogHit] = []
     /// Everything listed, in the listing's order (books · notes · blocks).
     var hits: [Queries.CatalogHit] { bookHits + noteHits + blockHits }
@@ -666,17 +673,35 @@ final class LibraryCatalogModel {
                 postTags = chips
                 noteCards = cards
             } else {
-                // A page whose ids had no tag still OWES its entries' removal
-                // (a chip taken off since the last read): the ids read here
-                // are the truth for those pages.
-                for id in chipIDs { postTags[id] = chips[id] }
-                for id in cardIDs { noteCards[id] = cards[id] }
+                mergeExtras(chipIDs: chipIDs, chips: chips, cardIDs: cardIDs, cards: cards)
             }
         } catch {
             chipPages.subtract(chipWanted)
             cardPages.subtract(cardWanted)
             guard generation == searchGeneration else { return }
             lastError = String(describing: error)
+        }
+    }
+
+    /// **Merge one read's extras in ONE assignment per dictionary** (17y B1
+    /// (k), measured): every row reads these dictionaries, so each assignment
+    /// re-draws every row on screen — a per-id loop of assignments paid that
+    /// once per id. A page whose ids carry no tag still OWES its entries'
+    /// removal (a chip taken off since the last read): the ids read here are
+    /// the truth for those rows.
+    func mergeExtras(
+        chipIDs: [String], chips: [String: [Tag]],
+        cardIDs: [String], cards: [String: NoteCards.Card]
+    ) {
+        if !chipIDs.isEmpty {
+            var merged = postTags
+            for id in chipIDs { merged[id] = chips[id] }
+            if merged != postTags { postTags = merged }
+        }
+        if !cardIDs.isEmpty {
+            var merged = noteCards
+            for id in cardIDs { merged[id] = cards[id] }
+            if merged != noteCards { noteCards = merged }
         }
     }
 

@@ -142,13 +142,25 @@ extension LibraryCatalogModel {
               let cursor = notesCursor else { return }
         loadingMoreNotes = true
         let generation = searchGeneration
-        let (query, sort, direction) = (query, sort, direction)
+        let (query, sort, direction, mode) = (query, sort, direction, mode)
         let wing = session.wing.currentID
         do {
-            let page = try await session.database.read { db in
-                try Queries.catalogNotesPage(
+            // The page AND its extras in ONE read, landed in ONE update — so
+            // the rows on screen re-draw once per page, never once for the
+            // rows and again for their chips (measured: the second pass was
+            // half of a page's stall).
+            let (page, chips, cards, cardIDs) = try await session.database.read { db in
+                let page = try Queries.catalogNotesPage(
                     db, query: query, sort: sort, direction: direction,
                     after: cursor, limit: Self.pageSize, wingID: wing)
+                let ids = page.hits.map(\.id)
+                let plan = LibraryCardRead.plan(mode: mode, hits: page.hits)
+                return (
+                    page,
+                    ids.isEmpty ? [:] : try TagChips.load(db, postIDs: ids),
+                    plan.ids.isEmpty ? [:] : try NoteCards.load(
+                        db, postIDs: plan.ids, includingBooks: plan.books),
+                    plan.ids)
             }
             guard generation == searchGeneration else {
                 // Superseded: the new question's read owns the listing now.
@@ -161,13 +173,19 @@ extension LibraryCatalogModel {
             let start = noteHits.count
             noteHits += fresh
             for (offset, hit) in fresh.enumerated() { noteIndex[hit.id] = start + offset }
+            mergeExtras(
+                chipIDs: page.hits.map(\.id), chips: chips, cardIDs: cardIDs, cards: cards)
+            // The pages this one filled are loaded (chips; cards for this mode).
+            let landed = Set(fresh.compactMap { noteIndex[$0.id] }.map { $0 / Self.pageSize })
+            chipPages.formUnion(landed)
+            cardPages.formUnion(landed)
             notesCursor = page.next
             notesHaveMore = page.next != nil
             loadingMoreNotes = false
-            // The page just landed sits beside what is on screen: its extras
-            // are the window's to read, its facts the window's to hold.
             nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
             holdNearFacts()
+            // Anything else the window now covers (rare — a page split by a
+            // dedupe) fills here; normally there is nothing left to read.
             await loadNearExtras(generation: generation, replacing: false)
         } catch {
             loadingMoreNotes = false

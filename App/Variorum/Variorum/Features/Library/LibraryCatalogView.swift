@@ -589,7 +589,7 @@ struct LibraryCatalogView: View {
         // decides, never a guessed count).
         let capped = LibraryBooksRegion.capsBooks(
             scope: model.scope, books: model.bookHits.count,
-            showsMore: !model.noteHits.isEmpty || !model.blockHits.isEmpty,
+            showsMore: model.hasNoteRows || !model.blockHits.isEmpty,
             pitch: bookRowPitch, lead: LibraryBooksRegion.defaultLead, height: listAreaHeight)
         return VStack(spacing: 0) {
             if capped {
@@ -617,22 +617,16 @@ struct LibraryCatalogView: View {
         // note and book rows alike; the model still owns the pick.
         List {
             if includesBooks { booksSection }
-            if !model.noteHits.isEmpty {
+            if model.hasNoteRows {
                 Section(tokens.chromeLabel("Notes")) {
-                    ForEach(model.noteHits, id: \.id) { hit in
+                    // 17y B1 (k): the PAGED rows live in their own view, so a
+                    // page landing re-draws the rows' list — never this whole
+                    // catalog (measured: a page's stall was the catalog body).
+                    LibraryPagedNotes(model: model, tokens: tokens) { hit in
                         postRow(hit)
                             .listRowBackground(rowBackground(
                                 picked: model.selectedPosts.contains(hit.id),
                                 subject: model.infoHit?.id == hit.id))
-                            // 17y B1 (k): the rows on screen drive the paging
-                            // (the next page as she nears the end) and the
-                            // near window (the extras and the held facts).
-                            .onAppear { model.noteRowAppeared(hit.id) }
-                            .onDisappear { model.noteRowDisappeared(hit.id) }
-                    }
-                    if model.notesHaveMore {
-                        LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
-                            .onAppear { Task { await model.loadMoreNotes() } }
                     }
                 }
             }
@@ -667,7 +661,7 @@ struct LibraryCatalogView: View {
                     }
                 }
             }
-            if model.bookHits.isEmpty, model.noteHits.isEmpty, model.blockHits.isEmpty {
+            if model.bookHits.isEmpty, !model.hasNoteRows, model.blockHits.isEmpty {
                 // 18h batch 2: a day that finds nothing says WHY — the one
                 // wording, shared with the Notes mode below.
                 if let day = model.dayForEmptyAnswer {
@@ -753,15 +747,13 @@ struct LibraryCatalogView: View {
     private var notesBody: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(model.noteHits, id: \.id) { hit in
+                LibraryPagedNotes(model: model, tokens: tokens) { hit in
                     VStack(spacing: 0) {
                         noteCard(hit)
                         Divider().overlay(tokens.line.opacity(0.6))
                     }
-                    .onAppear { model.noteRowAppeared(hit.id) }
-                    .onDisappear { model.noteRowDisappeared(hit.id) }
                 }
-                if model.noteHits.isEmpty {
+                if !model.hasNoteRows {
                     if let day = model.dayForEmptyAnswer {
                         LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                             .padding(24)
@@ -771,11 +763,6 @@ struct LibraryCatalogView: View {
                             .foregroundStyle(tokens.muted)
                             .padding(24)
                     }
-                }
-                if model.notesHaveMore {
-                    LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
-                        .padding(.vertical, 10)
-                        .onAppear { Task { await model.loadMoreNotes() } }
                 }
             }
             .padding(.horizontal, 20)
