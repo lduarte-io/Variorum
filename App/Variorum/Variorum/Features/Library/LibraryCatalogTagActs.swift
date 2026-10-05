@@ -38,7 +38,7 @@ extension LibraryCatalogModel {
                     }
                 }
             }
-            await search()
+            await refresh()
         } catch {
             report(TagsViewModel.message(error))
         }
@@ -84,7 +84,7 @@ extension LibraryCatalogModel {
         }
         // The refresh AFTER, the report LAST — a successful `search()`
         // clears `lastError`, and the partiality report must survive it.
-        await search()
+        await refresh()
         if let report { self.report(report) }
     }
 
@@ -105,7 +105,7 @@ extension LibraryCatalogModel {
                     }
                 }
             }
-            await search()
+            await refresh()
         } catch {
             report(TagsViewModel.message(error))
         }

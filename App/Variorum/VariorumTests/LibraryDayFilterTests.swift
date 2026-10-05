@@ -421,6 +421,12 @@ struct LibraryDayFilterTests {
     /// first 40" over a complete list of notes.
     ///
     /// Red on old: one flag, true for both bodies.
+    ///
+    /// **JUSTIFIED EDIT (17y B1 (k)):** books are no longer a page — every
+    /// book of the wing is listed (her launch blocker's "ALL of their notes",
+    /// and the books region scrolls on its own) — so 81 books are all drawn
+    /// and nothing is truncated; the subject (truncation is per kind and
+    /// never spoken over a complete listing) is unchanged.
     @Test func theNotesBodysTruncationIsAboutNotes() async throws {
         try await withTravellingLibrary { session, _ in
             for index in 0..<(LibraryCatalogModel.pageSize + 1) {
@@ -434,9 +440,10 @@ struct LibraryDayFilterTests {
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("kinds"))
             await model.search()
 
-            #expect(model.listingIsTruncated, "41 books are more than a page")
-            #expect(!model.notesAreTruncated,
-                    "…but every note is drawn, so the Notes mode has nothing to confess")
+            #expect(model.hits.filter { $0.kind == .book }.count == LibraryCatalogModel.pageSize + 1,
+                    "every book is listed — books are not a page")
+            #expect(!model.listingIsTruncated, "…so nothing is truncated")
+            #expect(!model.notesHaveMore, "every note is drawn: no further page")
             #expect(model.hits.filter { $0.kind == .post }.count == 3)
         }
     }
@@ -483,12 +490,20 @@ struct LibraryDayFilterTests {
 
     // MARK: - The cap, and the day's answer (the ladder's R1-4)
 
-    /// **The day's answer is whole; every other listing says it is capped.**
+    /// **The day's answer is whole; every other listing is PAGED.**
     /// Red on old: `truncated` did not exist and the day's answer stopped at
     /// 40 with nothing said.
+    ///
+    /// **JUSTIFIED EDIT (17y B1 (k)):** the ordinary listing used to be a
+    /// capped page that SAID so ("showing the first 40"); her launch blocker
+    /// retired the cap — it is now the first PAGE of an infinite scroll, and
+    /// what it says is that another page follows (`notesHaveMore`). The
+    /// subject (the day's answer is the whole set; the ordinary listing is
+    /// bounded per read) is unchanged.
     @Test func theDaysAnswerIsWholeAndACappedListingSaysSo() async throws {
         try await withTravellingLibrary { session, clock in
-            for index in 0..<45 {
+            let total = LibraryCatalogModel.pageSize + 5
+            for index in 0..<total {
                 let note = try session.operations.createPost(title: "note \(index)")
                 _ = try session.operations.newBlock(in: note.id, text: "words")
             }
@@ -496,22 +511,24 @@ struct LibraryDayFilterTests {
 
             await model.search()
             #expect(noteIDs(model).count == LibraryCatalogModel.pageSize,
-                    "the ordinary listing is a page")
-            #expect(model.notesAreTruncated, "…and it says so")
+                    "the ordinary listing's first read is a page")
+            #expect(model.notesHaveMore, "…and another page follows")
 
             model.setEditedOn(day(of: clock.current))
             await model.search()
-            #expect(noteIDs(model).count == 45, "the day's answer is the whole set")
-            #expect(!model.notesAreTruncated, "so there is nothing to confess")
+            #expect(noteIDs(model).count == total, "the day's answer is the whole set")
+            #expect(!model.notesHaveMore, "so no page follows it")
 
             model.setEditedOn(nil)
             await model.search()
-            #expect(model.notesAreTruncated)
+            #expect(model.notesHaveMore)
         }
     }
 
-    /// The `+ 1` probe is exact at the boundary: 40 notes are a full page and
-    /// NOT truncated; 41 are.
+    /// The `+ 1` probe is exact at the boundary: a page's worth of notes is a
+    /// full page with NOTHING after it; one more is a second page.
+    /// **JUSTIFIED EDIT (17y B1 (k)):** the probe now answers "does another
+    /// page follow" (`notesHaveMore`) where it answered "is this truncated".
     @Test func theProbeIsExactAtThePagesEdge() async throws {
         try await withTravellingLibrary { session, _ in
             for index in 0..<LibraryCatalogModel.pageSize {
@@ -520,14 +537,14 @@ struct LibraryDayFilterTests {
             }
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("edge"))
             await model.search()
-            #expect(noteIDs(model).count == 40)
-            #expect(!model.notesAreTruncated, "exactly a page is not a truncation")
+            #expect(noteIDs(model).count == LibraryCatalogModel.pageSize)
+            #expect(!model.notesHaveMore, "exactly a page has nothing after it")
 
             let extra = try session.operations.createPost(title: "one more")
             _ = try session.operations.newBlock(in: extra.id, text: "words")
             await model.search()
-            #expect(noteIDs(model).count == 40)
-            #expect(model.notesAreTruncated, "one over the page IS")
+            #expect(noteIDs(model).count == LibraryCatalogModel.pageSize)
+            #expect(model.notesHaveMore, "one over the page IS a second page")
         }
     }
 

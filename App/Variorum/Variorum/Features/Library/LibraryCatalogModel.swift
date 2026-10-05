@@ -179,7 +179,37 @@ final class LibraryCatalogModel {
     /// didSet task (deterministic under test; the generation guard orders
     /// the UI's unordered spawns).
     var query = ""
-    private(set) var hits: [Queries.CatalogHit] = []
+    /// **The listing, by kind** (17y B1 (k) — her launch blocker: the Library
+    /// showed the 40 newest notes and stopped). Every book of the wing; the
+    /// NOTES paged in as she scrolls (`LibraryCatalogPaging.swift` — keyset
+    /// pages, never a cap); the block hits of a typed query, still capped and
+    /// said so. Written only by this file's reads and the paging extension.
+    var bookHits: [Queries.CatalogHit] = []
+    var noteHits: [Queries.CatalogHit] = []
+    var blockHits: [Queries.CatalogHit] = []
+    /// Everything listed, in the listing's order (books · notes · blocks).
+    var hits: [Queries.CatalogHit] { bookHits + noteHits + blockHits }
+
+    // MARK: - The notes' paging state (17y B1 (k) — the extension is the brain)
+
+    /// Where the next page of notes starts; nil when none follows.
+    var notesCursor: Queries.CatalogCursor?
+    /// Another page of notes exists beyond what is listed (the probe row's
+    /// answer — never a count). The listing asks for it as she nears the end.
+    var notesHaveMore = false
+    /// A next page is in flight (one at a time).
+    var loadingMoreNotes = false
+    /// Each listed note's position (the visible window's arithmetic).
+    @ObservationIgnored var noteIndex: [String: Int] = [:]
+    /// The listed notes' positions the views say are on screen.
+    @ObservationIgnored var visibleNoteIndices: Set<Int> = []
+    /// The pages near what is on screen — the window whose extras (chips,
+    /// card words) are kept loaded and whose ownership facts are OBSERVED.
+    var nearPages: ClosedRange<Int> = 0...0
+    /// Pages whose chips are loaded for the current listing; pages whose card
+    /// words are loaded for the current mode.
+    @ObservationIgnored var chipPages: Set<Int> = []
+    @ObservationIgnored var cardPages: Set<Int> = []
     /// 13e E8: the listed notes' live tags (whole rows — see `TagChips`).
     private(set) var postTags: [String: [Tag]] = [:]
     /// 13g R5-6: postID → the note card's read-time extras (snippet +
@@ -190,7 +220,7 @@ final class LibraryCatalogModel {
     private(set) var lastError: String?
     /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling):
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
-    private var searchGeneration = 0
+    private(set) var searchGeneration = 0
 
     // MARK: - The ⌘-click pick (P-0, 13l's end-of-phase ladder)
 
@@ -206,7 +236,7 @@ final class LibraryCatalogModel {
     /// (the ⇧-range, and the confirm's list) come from here, because a `Set`
     /// has none.
     var listedNoteIDs: [String] {
-        hits.filter { $0.kind == .post }.map(\.id)
+        noteHits.map(\.id)
     }
 
     /// The pick in list order — what the confirm and the receipt name.
@@ -233,7 +263,7 @@ final class LibraryCatalogModel {
             anchor: selectionAnchor, order: listedNoteIDs)
         selectedPosts = next.selection
         selectionAnchor = next.anchor
-        infoHit = hits.first { $0.id == postID && $0.kind == .post }
+        infoHit = noteHits.first { $0.id == postID }
     }
 
     /// A click on a BOOK row's body — same ruling, the book's facts.
@@ -344,7 +374,7 @@ final class LibraryCatalogModel {
     @ObservationIgnored let bookRowDoors: BookRowDoors
 
     /// The book hits' ids, in listing order — what the row menus' facts read.
-    var listedBookIDs: [String] { hits.filter { $0.kind == .book }.map(\.id) }
+    var listedBookIDs: [String] { bookHits.map(\.id) }
 
     init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
@@ -370,45 +400,62 @@ final class LibraryCatalogModel {
         // 17y B3 (l) — the walk's W-2: the listing is a ONE-SHOT read, so a
         // book archived or deleted from its row menu must re-ask it.
         bookRowDoors.onLanded = { [weak self] in
-            Task { await self?.search() }
+            Task { await self?.refresh() }
         }
     }
 
-    /// One-shot per typed query / scope / sort change (the core query's
-    /// contract); the resting state is books + recent posts.
+    /// **A NEW QUESTION** (a typed query, a scope, a sort, a direction, a day,
+    /// a wing): the listing starts over — every book, the FIRST page of notes,
+    /// the capped block hits. The notes beyond the page arrive as she scrolls
+    /// (`loadMoreNotes`, 17y B1 (k)).
     func search() async {
+        await read(noteDepth: Self.pageSize, startingOver: true)
+    }
+
+    /// **The SAME question, re-asked IN PLACE** after an act on the listing's
+    /// own rows (a rename, a tag, an archive, a delete, a wing move, a book's
+    /// row menu): every note she has scrolled through is re-read in ONE
+    /// statement (∝ what is listed, once per act — never per scroll), so the
+    /// list she is halfway down stays where it is instead of snapping back to
+    /// its first page.
+    func refresh() async {
+        await read(noteDepth: max(Self.pageSize, noteHits.count), startingOver: false)
+    }
+
+    /// The one read behind both doors.
+    private func read(noteDepth: Int, startingOver: Bool) async {
         searchGeneration += 1
         let generation = searchGeneration
         do {
             let query = query
-            let (sort, direction) = (sort, direction)
+            let (sort, direction, scope) = (sort, direction, scope)
             // Her day, in her calendar, converted once — the query compares
             // the store's own UTC text (18h batch 2).
             let day = editedOn.flatMap { DayBounds(day: $0, calendar: LibraryDayFace.calendar) }
-            // **The day's answer is a SET, so it is not capped** (the
-            // ladder's R1-4): "which notes did I edit on Sep 8" answered with
-            // the day's 40 newest and said nothing about the rest, which is a
-            // WRONG answer rather than a short one. The day's own predicate
-            // bounds the read. Everywhere else the cap stays and we ask for
-            // ONE MORE than we show, so the listing can SAY it is truncated
-            // without a second counting statement per keystroke.
-            let cap: Int? = day == nil ? Self.pageSize + 1 : nil
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).
             let wing = session.wing.currentID
-            let all = try await session.database.read { db in
-                try Queries.searchCatalog(
-                    db, query: query, limitPerKind: cap, sort: sort, direction: direction,
-                    editedOn: day, wingID: wing)
+            let listing = try await session.database.read { db in
+                try Self.listing(
+                    db, query: query, scope: scope, sort: sort, direction: direction,
+                    day: day, wing: wing, noteDepth: noteDepth)
             }
             guard generation == searchGeneration else { return }  // stale
-            let capped = Self.capped(filtered(all), to: cap == nil ? nil : Self.pageSize)
-            truncatedKinds = capped.truncated
-            hits = capped.hits
+            bookHits = listing.books
+            noteHits = listing.notes
+            blockHits = listing.blocks
+            notesCursor = listing.next
+            notesHaveMore = listing.next != nil
+            truncatedKinds = listing.blocksOver ? [.block] : []
+            reindexNotes()
+            if startingOver { visibleNoteIndices = [] }
             pruneSelectionToListing()   // R2-2: the pick follows the listing
-            let postIDs = hits.filter { $0.kind == .post }.map(\.id)
-            await loadTagChips(for: postIDs, generation: generation)
-            await loadNoteCards(for: postIDs, generation: generation)
+            // The extras (chips, card words) are the NEAR pages' only — and a
+            // re-asked listing's are all stale, so the window re-reads.
+            chipPages = []
+            cardPages = []
+            nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
+            await loadNearExtras(generation: generation, replacing: true)
             lastError = nil
         } catch {
             guard generation == searchGeneration else { return }
@@ -416,26 +463,74 @@ final class LibraryCatalogModel {
         }
     }
 
-    /// **The listing's page size** — the one place that knows the number, so
-    /// the line that says it and the read that asks for one more can never
-    /// disagree (18h ladder, R1-4).
-    static let pageSize = 40
+    /// What one read returns (the listing's three arms).
+    struct Listing {
+        var books: [Queries.CatalogHit] = []
+        var notes: [Queries.CatalogHit] = []
+        var blocks: [Queries.CatalogHit] = []
+        var next: Queries.CatalogCursor?
+        var blocksOver = false
+    }
 
-    /// **Which KINDS are showing fewer rows than the store holds** — set by
-    /// the `+ 1` probe: we ask for 41 per kind, draw 40, and a 41st is the
-    /// proof there are more, never a `COUNT(*)` (a second statement on every
-    /// keystroke).
-    ///
-    /// Per KIND, not one flag (the ladder's R2-2): the Notes body draws notes
-    /// only, and a whole-listing flag let it say *"showing the first 40"*
-    /// over a complete list of notes because 41 BOOKS came back — a
-    /// truncation of something that body does not draw.
+    /// **One read, every arm the scope shows** — and only those: a scope
+    /// that draws no notes reads none.
+    nonisolated static func listing(
+        _ db: Database, query: String, scope: Scope, sort: Queries.LibrarySort,
+        direction: SortDirection, day: DayBounds?, wing: String, noteDepth: Int
+    ) throws -> Listing {
+        var listing = Listing()
+        // **The day's answer is a SET, so it is not paged** (18h ladder
+        // R1-4): "which notes did I edit on Sep 8" is answered whole, and the
+        // books and blocks stand down (they carry no edit stamp).
+        if let day {
+            guard scope == .all || scope == .posts else { return listing }
+            listing.notes = try Queries.searchCatalog(
+                db, query: query, limitPerKind: nil, sort: sort, direction: direction,
+                editedOn: day, wingID: wing)
+            .filter { $0.kind == .post }
+            return listing
+        }
+        if scope == .all || scope == .books {
+            // Every book of the wing (∝ the wing's books — the Bookcase's own
+            // class): a book listing is never a page.
+            listing.books = try Queries.catalogBooks(db, query: query, limit: nil, wingID: wing)
+        }
+        if scope == .all || scope == .posts {
+            let page = try Queries.catalogNotesPage(
+                db, query: query, sort: sort, direction: direction,
+                limit: noteDepth, wingID: wing)
+            listing.notes = page.hits
+            listing.next = page.next
+        }
+        if scope == .all || scope == .blocks {
+            // The block hits of a typed query — named blocks and scraps —
+            // stay capped and SAY so (one more than drawn is the proof).
+            let blocks = try Queries.catalogBlocks(
+                db, query: query, limit: blockCap + 1, wingID: wing)
+            listing.blocksOver = blocks.count > blockCap
+            listing.blocks = Array(blocks.prefix(blockCap))
+        }
+        return listing
+    }
+
+    /// **The notes' page size** — a page, never a cap (17y B1 (k)): the
+    /// listing reads this many at a time and asks for the next as she nears
+    /// the end. Large enough that a page outruns a fast scroll (two screens
+    /// of List rows, four of cards), small enough that a page is one quick
+    /// statement (measured: ~2 ms at 20,000 notes in the edited sort).
+    nonisolated static let pageSize = 80
+    /// How many rows before the end of the listed notes ask for the next page.
+    nonisolated static let prefetchMargin = 30
+    /// The block hits' cap (a search's named blocks and scraps) — the one
+    /// listing still capped, and the one the truncation line now speaks for.
+    nonisolated static let blockCap = 40
+
+    /// **Which KINDS are showing fewer rows than the store holds** — since
+    /// 17y B1 (k) only ever the block hits (books are all listed; notes page).
     private(set) var truncatedKinds: Set<Queries.CatalogHit.Kind> = []
 
-    /// The List body draws every kind, so any truncation is its own.
-    var listingIsTruncated: Bool { !truncatedKinds.isEmpty }
-    /// The Notes body draws notes.
-    var notesAreTruncated: Bool { truncatedKinds.contains(.post) }
+    /// The List body draws the block hits, so their cap is its to say.
+    var listingIsTruncated: Bool { truncatedKinds.contains(.block) }
 
     /// Trim each kind to the page and say WHICH kinds were over.
     /// `nil` = uncapped (the day's answer), which is never truncated.
@@ -500,7 +595,7 @@ final class LibraryCatalogModel {
     /// otherwise be a bare date, and never the book memberships, which that
     /// row does not draw. A library of named notes pays nothing.
     func loadNoteCards(for postIDs: [String], generation: Int) async {
-        let plan = LibraryCardRead.plan(mode: mode, hits: hits)
+        let plan = LibraryCardRead.plan(mode: mode, hits: noteHits)
         // The passed ids remain the listing's own (the generation's subject);
         // the plan narrows them, and can never widen past them.
         let wanted = plan.ids.filter(Set(postIDs).contains)
@@ -523,11 +618,59 @@ final class LibraryCatalogModel {
 
     /// The view calls this when the MODE changes (a mode switch does not
     /// re-run the search, and switching INTO a mode that draws words must
-    /// fill them).
+    /// fill them) — the NEAR pages' words (17y B1 (k)); farther pages fill as
+    /// she scrolls to them.
     func refreshNoteCards() async {
-        await loadNoteCards(
-            for: hits.filter { $0.kind == .post }.map(\.id),
-            generation: searchGeneration)
+        cardPages = []
+        await loadNearExtras(generation: searchGeneration, replacing: false, cardsOnly: true)
+    }
+
+    /// **The extras of the pages near what is on screen** (17y B1 (k)): the
+    /// tag chips and the card words of every near page not yet loaded — ONE
+    /// read for both, bounded by the window (a few pages), never by how far
+    /// she has scrolled. `replacing` drops what other pages held (a new or
+    /// re-asked listing's extras are stale); otherwise the near pages' merge
+    /// in. Pages are marked BEFORE the read, so a window that moves again
+    /// mid-read never asks twice.
+    func loadNearExtras(generation: Int, replacing: Bool, cardsOnly: Bool = false) async {
+        let pages = Array(nearPages)
+        let chipWanted = cardsOnly ? [] : pages.filter { !chipPages.contains($0) }
+        let cardWanted = pages.filter { !cardPages.contains($0) }
+        chipPages.formUnion(chipWanted)
+        cardPages.formUnion(cardWanted)
+        let chipIDs = chipWanted.flatMap { notesOfPage($0) }.map(\.id)
+        let plan = LibraryCardRead.plan(
+            mode: mode, hits: cardWanted.flatMap { notesOfPage($0) })
+        let (cardIDs, books) = (plan.ids, plan.books)
+        do {
+            let (chips, cards) = try await session.database.read { db in
+                (chipIDs.isEmpty ? [:] : try TagChips.load(db, postIDs: chipIDs),
+                 cardIDs.isEmpty ? [:] : try NoteCards.load(db, postIDs: cardIDs, includingBooks: books))
+            }
+            guard generation == searchGeneration else { return }  // stale extras never land
+            if replacing {
+                postTags = chips
+                noteCards = cards
+            } else {
+                // A page whose ids had no tag still OWES its entries' removal
+                // (a chip taken off since the last read): the ids read here
+                // are the truth for those pages.
+                for id in chipIDs { postTags[id] = chips[id] }
+                for id in cardIDs { noteCards[id] = cards[id] }
+            }
+        } catch {
+            chipPages.subtract(chipWanted)
+            cardPages.subtract(cardWanted)
+            guard generation == searchGeneration else { return }
+            lastError = String(describing: error)
+        }
+    }
+
+    /// The notes of one page of the listing (positions `page × pageSize ..<`).
+    func notesOfPage(_ page: Int) -> ArraySlice<Queries.CatalogHit> {
+        let start = page * Self.pageSize
+        guard start < noteHits.count, start >= 0 else { return [] }
+        return noteHits[start..<min(noteHits.count, start + Self.pageSize)]
     }
 
     /// **The tag acts' one report door** (13u4 UNIT S2 — row 50's second

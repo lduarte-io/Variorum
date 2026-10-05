@@ -588,6 +588,10 @@ enum LibraryPanelOracle {
     static var quickEntryFrame: CGRect? { frameStore[.quickEntry] }
     /// A book row's LINE — its width must span the row (row 33 (a)).
     static var bookLineFrame: CGRect? { frameStore[.bookLine] }
+    /// 17y B1 (k): the capped books region (only when the books are split
+    /// off) and the list that carries the notes.
+    static var booksRegionFrame: CGRect? { frameStore[.booksRegion] }
+    static var notesRegionFrame: CGRect? { frameStore[.notesRegion] }
     /// Each NOTE row's frame by post id — so a pin can click a row for
     /// real (ladder R1-2: the row-click brain's timing pin).
     static var noteRowFrames: [String: CGRect] {
@@ -630,6 +634,8 @@ enum LibraryPanelOracle {
 enum LibraryProbeSlot: Hashable {
     case root, divider, panel, message, quickEntry, bookLine
     case noteRow(String)
+    /// 17y B1 (k): the capped books List and the list beside it.
+    case booksRegion, notesRegion
 }
 
 extension View {

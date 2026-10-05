@@ -272,4 +272,27 @@ struct LibraryPagingTests {
         #expect(large.created > small.created * 3,
                 "the created page is a bounded pass over the notes (recorded, not hidden): \(small.created) → \(large.created)")
     }
+
+    /// **The Library HOLDS one observation per window — the ownership facts
+    /// of the near pages' notes** (17y B1 (k); the U1 P1-pin pattern): its
+    /// tracked region is blind to a keystroke (autosave rewrites `variant`
+    /// and the `container` row) and wakes only for a membership or a book.
+    @Test func theHeldOwnershipFactsAreBlindToAKeystroke() async throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue)
+        let region = LockIsolated<DatabaseRegion?>(nil)
+        let observation = ValueObservation
+            .tracking { try Queries.ownershipFacts($0, postIDs: ["a", "b"], inBook: nil) }
+            .handleEvents(willTrackRegion: { region.setValue($0) })
+        var values = observation.values(in: queue).makeAsyncIterator()
+        _ = try await values.next()
+        let tracked = try #require(region.value)
+        #expect(!tracked.isModified(byEventsOfKind: .update(
+            tableName: "variant", columnNames: ["working_text", "updated_at"])))
+        #expect(!tracked.isModified(byEventsOfKind: .update(
+            tableName: "container",
+            columnNames: ["last_touched_at", "updated_at", "churn_accumulator", "title"])))
+        #expect(tracked.isModified(byEventsOfKind: .insert(tableName: "reading_post")),
+                "…while a membership wakes it")
+    }
 }

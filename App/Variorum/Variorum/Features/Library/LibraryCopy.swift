@@ -44,6 +44,9 @@ nonisolated enum LibraryCopy {
         "showing the first \(page) \u{2014} narrow the search"
     }
 
+    /// The paged listing's end while the next page is on its way (17y B1 (k)).
+    static let loadingMoreNotes = "loading more notes…"
+
     /// A note with no words in it yet — the Notes card's quiet second line
     /// (13g's own literal, moved here at 13u3 UNIT B when the card's second
     /// line stopped being "whatever the snippet was").
@@ -55,7 +58,7 @@ nonisolated enum LibraryCopy {
 /// reason the sentences above live in one place.
 struct LibraryTruncationLine: View {
     let tokens: VoiceTokens
-    var page: Int = LibraryCatalogModel.pageSize
+    var page: Int = LibraryCatalogModel.blockCap
 
     var body: some View {
         Text(tokens.chromeLabel(LibraryCopy.showingTheFirst(page)))

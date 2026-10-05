@@ -133,6 +133,11 @@ struct LibraryCatalogView: View {
     /// Row 34: the library's measured width — the panel column's width is
     /// derived from it (`LibraryPanelLayout`), never from an inspector.
     @State private var libraryWidth: CGFloat = 0
+    /// 17y B1 (k) — the List area's height and the books List's measured row
+    /// pitch / lead (the rider's split threshold, read off what the List drew).
+    @State private var listAreaHeight: CGFloat = 0
+    @State private var bookRowPitch: CGFloat = LibraryBooksRegion.defaultPitch
+    @State private var bookRowTops: [Int: CGFloat] = [:]
     #if DEBUG
     /// **This catalog's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): its probes read it by environment,
@@ -232,10 +237,12 @@ struct LibraryCatalogView: View {
         // 17y B3 item (l): the book rows' menu facts — the listed books only.
         .task(id: model.listedBookIDs) { await model.bookRowDoors.load(model.listedBookIDs) }
         .bookRowDoors(model.bookRowDoors)
-        .wingMoveConfirm($wingMove, wings: wings) { Task { await model.search() } }
-        // 13i-c U4: the owned-by badge's facts, keyed on the listed notes.
-        .task(id: listedNoteIDs) {
-            await ownership.observe(session: session, postIDs: listedNoteIDs, inBook: nil)
+        .wingMoveConfirm($wingMove, wings: wings) { Task { await model.refresh() } }
+        // 13i-c U4: the owned-by badge's facts — 17y B1 (k): OBSERVED for the
+        // NEAR WINDOW only (the pages around what is on screen), so the held
+        // region stays a few pages however deep she scrolls.
+        .task(id: model.nearNoteIDs) {
+            await ownership.observe(session: session, postIDs: model.nearNoteIDs, inBook: nil)
         }
         // 13g R5-6: switching INTO notes fills the cards; switching out
         // clears them, so a mode she is not in holds no derived text.
@@ -293,7 +300,7 @@ struct LibraryCatalogView: View {
                 let title = renameTitle
                 Task {
                     await library.rename(postID: postID, title: title)
-                    await model.search()
+                    await model.refresh()
                 }
             }
             Button("Cancel", role: .cancel) {}
@@ -310,7 +317,7 @@ struct LibraryCatalogView: View {
         // entirely (P-4: the signal says what happened, this decides what it
         // means here — re-read).
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
-            Task { await model.search() }
+            Task { await model.refresh() }
         }
     }
 
@@ -573,6 +580,36 @@ struct LibraryCatalogView: View {
     }
 
     private var listBody: some View {
+        // **17y B1 (k) — her rider, verbatim: "once books hit ~half of the
+        // vertical area, books start to scroll within their own little view,
+        // so that many books won't mean you see no notes."** Under "All", a
+        // wing whose books would take more than HALF the listing's height
+        // gets them in their OWN list, capped at half and scrolling inside
+        // it; the notes keep the rest. Fewer books stay one list, exactly as
+        // before (`LibraryBooksRegion.capsBooks` — the measured row pitch
+        // decides, never a guessed count).
+        let capped = LibraryBooksRegion.capsBooks(
+            scope: model.scope, books: model.bookHits.count,
+            showsMore: !model.noteHits.isEmpty || !model.blockHits.isEmpty,
+            pitch: bookRowPitch, lead: LibraryBooksRegion.defaultLead, height: listAreaHeight)
+        return VStack(spacing: 0) {
+            if capped {
+                List { booksSection }
+                    .scrollContentBackground(.hidden)
+                    .background(tokens.surface)
+                    .frame(height: LibraryBooksRegion.cappedHeight(listAreaHeight))
+                    .libraryGeometryProbe(.booksRegion)
+                Divider().overlay(tokens.line)
+            }
+            mainList(includesBooks: !capped)
+                .libraryGeometryProbe(.notesRegion)
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { listAreaHeight = $0 }
+    }
+
+    /// The List mode's one list — the books (when the region is not split
+    /// off), the PAGED notes, the block hits.
+    private func mainList(includesBooks: Bool) -> some View {
         // Row 56: the List draws NO selection of its own — the old
         // `List(selection:)` binding painted the pick as the SYSTEM band
         // (grey while the list was not first responder, the blue accent when
@@ -580,58 +617,29 @@ struct LibraryCatalogView: View {
         // render through `rowBackground` — the wash + a tinted border — on
         // note and book rows alike; the model still owns the pick.
         List {
-            let grouped = Dictionary(grouping: model.hits, by: \.kind)
-            if let books = grouped[.book], !books.isEmpty {
-                Section(tokens.chromeLabel("Books")) {
-                    ForEach(books, id: \.id) { hit in
-                        // The TITLE opens instantly, as today (her click
-                        // model — the body selects, the words open).
-                        CatalogBookLine(
-                            tokens: tokens, title: hit.title, detail: hit.detail,
-                            onTitleTap: { openHit(hit) })
-                        // Row 33 (a): the WHOLE row is the target — the line
-                        // used to be only as wide as its words, so a click
-                        // right of "book" was a dead click and the panel
-                        // kept whatever it was showing.
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        // A body click selects AT ONCE and shows the book's
-                        // OUTLINE in the panel (her ruled model, row 33's
-                        // shape); a double-click anywhere opens. ONE shared
-                        // tap brain (`rowClick`, ladder R1-2): the stacked
-                        // count-2 + plain gestures held every single click
-                        // for the double-click interval — batch C's row-25
-                        // lag, alive on this surface until now.
-                        .rowClick(
-                            onClick: { _ in
-                                withAnimation(Self.panelAnimation) { model.selectBook(hit) }
-                            },
-                            onDoubleClick: { openHit(hit) })
-                        .listRowBackground(
-                            rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
-                        // 17y B3 item (l): a BOOK row's menu — the Bookcase's
-                        // trimmed of position (`BookRowMenu`, one table).
-                        .contextMenu {
-                            BookRowMenu(
-                                readingID: hit.id, doors: model.bookRowDoors,
-                                starDoor: starDoor, open: { openHit(hit) })
-                        }
-                    }
-                }
-            }
-            if let posts = grouped[.post], !posts.isEmpty {
+            if includesBooks { booksSection }
+            if !model.noteHits.isEmpty {
                 Section(tokens.chromeLabel("Notes")) {
-                    ForEach(posts, id: \.id) { hit in
+                    ForEach(model.noteHits, id: \.id) { hit in
                         postRow(hit)
                             .listRowBackground(rowBackground(
                                 picked: model.selectedPosts.contains(hit.id),
                                 subject: model.infoHit?.id == hit.id))
+                            // 17y B1 (k): the rows on screen drive the paging
+                            // (the next page as she nears the end) and the
+                            // near window (the extras and the held facts).
+                            .onAppear { model.noteRowAppeared(hit.id) }
+                            .onDisappear { model.noteRowDisappeared(hit.id) }
+                    }
+                    if model.notesHaveMore {
+                        LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
+                            .onAppear { Task { await model.loadMoreNotes() } }
                     }
                 }
             }
-            if let blocks = grouped[.block], !blocks.isEmpty {
+            if !model.blockHits.isEmpty {
                 Section(tokens.chromeLabel("Blocks")) {
-                    ForEach(blocks, id: \.id) { hit in
+                    ForEach(model.blockHits, id: \.id) { hit in
                         HStack {
                             Image(systemName: "square.on.square").foregroundStyle(tokens.muted)
                             Text(hit.title).font(tokens.small).lineLimit(1)
@@ -660,7 +668,7 @@ struct LibraryCatalogView: View {
                     }
                 }
             }
-            if model.hits.isEmpty {
+            if model.bookHits.isEmpty, model.noteHits.isEmpty, model.blockHits.isEmpty {
                 // 18h batch 2: a day that finds nothing says WHY — the one
                 // wording, shared with the Notes mode below.
                 if let day = model.dayForEmptyAnswer {
@@ -672,8 +680,7 @@ struct LibraryCatalogView: View {
                 }
             }
             // R1-4: a capped listing says so rather than reading as the
-            // library. The day's answer is uncapped, so this never draws
-            // under one.
+            // library — since 17y B1 (k) only the block hits are capped.
             if model.listingIsTruncated {
                 LibraryTruncationLine(tokens: tokens)
             }
@@ -682,19 +689,80 @@ struct LibraryCatalogView: View {
         .background(tokens.surface)
     }
 
+    /// The books, as one List section — the whole List mode's when the region
+    /// is not split, the capped region's when it is (one row grammar).
+    @ViewBuilder
+    private var booksSection: some View {
+        if !model.bookHits.isEmpty {
+            Section(tokens.chromeLabel("Books")) {
+                ForEach(Array(model.bookHits.enumerated()), id: \.element.id) { index, hit in
+                    // The TITLE opens instantly, as today (her click
+                    // model — the body selects, the words open).
+                    CatalogBookLine(
+                        tokens: tokens, title: hit.title, detail: hit.detail,
+                        onTitleTap: { openHit(hit) })
+                    // Row 33 (a): the WHOLE row is the target — the line
+                    // used to be only as wide as its words, so a click
+                    // right of "book" was a dead click and the panel
+                    // kept whatever it was showing.
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    // A body click selects AT ONCE and shows the book's
+                    // OUTLINE in the panel (her ruled model, row 33's
+                    // shape); a double-click anywhere opens. ONE shared
+                    // tap brain (`rowClick`, ladder R1-2): the stacked
+                    // count-2 + plain gestures held every single click
+                    // for the double-click interval — batch C's row-25
+                    // lag, alive on this surface until now.
+                    .rowClick(
+                        onClick: { _ in
+                            withAnimation(Self.panelAnimation) { model.selectBook(hit) }
+                        },
+                        onDoubleClick: { openHit(hit) })
+                    .listRowBackground(
+                        rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
+                    // 17y B1 item (l): a BOOK row's menu — the Bookcase's
+                    // trimmed of position (`BookRowMenu`, one table).
+                    .contextMenu {
+                        BookRowMenu(
+                            readingID: hit.id, doors: model.bookRowDoors,
+                            starDoor: starDoor, open: { openHit(hit) })
+                    }
+                    // 17y B1 (k): the first two rows measure the List's own row
+                    // pitch (voice-proof — the split's threshold).
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.frame(in: .named(Self.probeSpace)).minY
+                    } action: { y in
+                        guard index < 2 else { return }
+                        bookRowTops[index] = y
+                        if let first = bookRowTops[0], let second = bookRowTops[1],
+                           second - first > 8, second - first < 120 {
+                            bookRowPitch = second - first
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// 13g batch 6 (R5-6) — the Apple-Notes-shaped list: title · date ·
     /// the first bit of text · the book it's in, per her screenshot. NOTES
     /// ONLY (books and blocks have no snippet to show and belong to the
     /// List mode's sections); a `LazyVStack` so the rows cost what is drawn.
+    /// 17y B1 (k): PAGED like the List — the rows on screen ask for the next
+    /// page and move the near window.
     private var notesBody: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                let posts = model.hits.filter { $0.kind == .post }
-                ForEach(posts, id: \.id) { hit in
-                    noteCard(hit)
-                    Divider().overlay(tokens.line.opacity(0.6))
+                ForEach(model.noteHits, id: \.id) { hit in
+                    VStack(spacing: 0) {
+                        noteCard(hit)
+                        Divider().overlay(tokens.line.opacity(0.6))
+                    }
+                    .onAppear { model.noteRowAppeared(hit.id) }
+                    .onDisappear { model.noteRowDisappeared(hit.id) }
                 }
-                if posts.isEmpty {
+                if model.noteHits.isEmpty {
                     if let day = model.dayForEmptyAnswer {
                         LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                             .padding(24)
@@ -705,9 +773,10 @@ struct LibraryCatalogView: View {
                             .padding(24)
                     }
                 }
-                if model.notesAreTruncated {
-                    LibraryTruncationLine(tokens: tokens)
+                if model.notesHaveMore {
+                    LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
                         .padding(.vertical, 10)
+                        .onAppear { Task { await model.loadMoreNotes() } }
                 }
             }
             .padding(.horizontal, 20)
@@ -715,10 +784,6 @@ struct LibraryCatalogView: View {
         .background(tokens.surface)
     }
 
-    /// 13i-c U4: the notes the listing shows — the badge facts' key.
-    private var listedNoteIDs: [String] {
-        model.hits.filter { $0.kind == .post }.map(\.id)
-    }
 
     /// 13i-c U4 (§6): the owned-by badge a listed note wears (the Library is
     /// OUTSIDE every book), or nil — the setting silences the set.
@@ -914,7 +979,7 @@ struct LibraryCatalogView: View {
             WingNoteDoors(
                 wings: wings, postID: hit.id, title: hit.title,
                 onAsk: { wingMove = $0 },
-                onDone: { Task { await model.search() } })
+                onDone: { Task { await model.refresh() } })
         }
         Divider()
         // The per-post export doors (Phase 11b B1's ratified context-
@@ -931,7 +996,7 @@ struct LibraryCatalogView: View {
         Button(CapabilityRegistry.capability(.archiveNote).verb) {
             Task {
                 await library.archive(postID: hit.id)
-                await model.search()
+                await model.refresh()
             }
         }
         // 13l Act 2 (item 3) — HER RULING: *"add a confirmation for the
