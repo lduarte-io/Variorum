@@ -2285,3 +2285,19 @@ CLIPPED there** (exactly her capture's cut-off tops); Terminal (SF Mono Semibold
 29 pt tall, baseline 22) — only the PROMPT moves. Her "still": the prior fix aligned the BOXES; the
 words inside one of them were never measured. No editor-seam code is involved (the masthead title is a
 SwiftUI `TextField`; the measurement read SwiftUI's field editor, never `EditorTextView`).
+
+### THE WALK CAUGHT ONE DEFECT IN THIS BATCH'S OWN (b) FACE (F-B2-5 — fixed in piece 3b below)
+
+The (b) grip (034c28ad) drew at `.offset(x: -16)` in an `.overlay` — OUTSIDE the row's bounds, in the
+board's 28-pt gutter. Walked live after the acceptance captures (`b2/` x1–x5 working frames, scratch):
+rows that had MOVED between sections kept the wrong grip state — "u4 third" and "field notes",
+re-shelved by their menus with my order on, still drew ⠿ after the order went A–Z and then "last
+edited" (the mark scrolled WITH its row — a live view, not stale screen paint); "u4 other",
+re-shelved under last edited, drew NO grip once my order was back; "u4 owned copy", re-shelved by DRAG
+with my order on, drew none either (so not the context menu, and not "frozen at the move"). The
+discriminating act: a book dropped onto that grip-less row LANDED right above it (*"u1 context mint"*
+→ correspondence) — the row's `placing` (which also gates its drop site) was LIVE; only the
+out-of-bounds grip failed to draw. Mechanism: content drawn outside a lazily-hosted row's bounds is
+not reliably repainted when that row is re-inserted elsewhere. The fix keeps the grip INSIDE the row:
+a fixed grip column every row carries (opacity by `placing`), the row pulled into the gutter by the
+column's width so the name column still never moves between orders.
