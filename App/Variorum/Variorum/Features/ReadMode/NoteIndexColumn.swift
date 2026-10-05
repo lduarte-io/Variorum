@@ -77,6 +77,11 @@ struct NoteIndexColumn: View {
         NoteIndexOutline.outline(of: model.rows.map { ($0.blockID, $0.text) })
     }
 
+    /// The note's rows by id — a WHOLE-NOTE build, so it is taken ONCE per
+    /// body (by `columnRows`), never per row (**17y B1 (j)** — her "laggy"
+    /// index scroll: the row builders called this computed property, so every
+    /// row a scroll realized rebuilt a dictionary over the whole note — 626 µs
+    /// at 2,000 blocks, several times per row; the record's § THE TRACE).
     private var rowsByID: [String: Queries.TOCRow] {
         #if DEBUG
         NoteIndexColumnProbe.wholeNoteLookups += 1
@@ -90,8 +95,12 @@ struct NoteIndexColumn: View {
 
     /// One flattened column row (sections and kids interleaved, collapse
     /// and filter applied) — so the LazyVStack virtualizes a long note.
+    /// **It carries its own TOC row** (17y B1 (j)): a row the scroll realizes
+    /// draws from what it holds and looks nothing up — its cost is what it
+    /// shows, never the note's size (P1).
     private struct ColumnRow: Identifiable {
         let row: NoteIndexOutline.Row
+        let toc: Queries.TOCRow
         let isSection: Bool
         let headingLevel: Int?
         let kidCount: Int
@@ -99,7 +108,7 @@ struct NoteIndexColumn: View {
         var id: String { row.blockID }
     }
 
-    private func columnRows() -> [ColumnRow] {
+    private func columnRows(_ outline: NoteIndexOutline.Outline) -> [ColumnRow] {
         let needle = filter.trimmingCharacters(in: .whitespaces)
         let byID = rowsByID
         func matches(_ blockID: String) -> Bool {
@@ -114,21 +123,27 @@ struct NoteIndexColumn: View {
             let kidMatches = group.rows.filter { matches($0.blockID) }
             if let head = group.head {
                 let headMatches = matches(head.blockID)
-                guard headMatches || !kidMatches.isEmpty else { continue }
+                guard headMatches || !kidMatches.isEmpty, let headRow = byID[head.blockID]
+                else { continue }
                 result.append(ColumnRow(
-                    row: head, isSection: true, headingLevel: group.headingLevel,
+                    row: head, toc: headRow, isSection: true,
+                    headingLevel: group.headingLevel,
                     kidCount: group.rows.count, nested: false))
                 if !collapsedSections.contains(head.blockID) {
                     let kids = needle.isEmpty ? group.rows : kidMatches
-                    result.append(contentsOf: kids.map {
-                        ColumnRow(row: $0, isSection: false, headingLevel: nil,
-                                  kidCount: 0, nested: true)
+                    result.append(contentsOf: kids.compactMap { kid in
+                        byID[kid.blockID].map {
+                            ColumnRow(row: kid, toc: $0, isSection: false, headingLevel: nil,
+                                      kidCount: 0, nested: true)
+                        }
                     })
                 }
             } else {
-                result.append(contentsOf: kidMatches.map {
-                    ColumnRow(row: $0, isSection: false, headingLevel: nil,
-                              kidCount: 0, nested: false)
+                result.append(contentsOf: kidMatches.compactMap { kid in
+                    byID[kid.blockID].map {
+                        ColumnRow(row: kid, toc: $0, isSection: false, headingLevel: nil,
+                                  kidCount: 0, nested: false)
+                    }
                 })
             }
         }
@@ -136,12 +151,15 @@ struct NoteIndexColumn: View {
     }
 
     var body: some View {
+        // ONE outline and ONE row list per body (17y B1 (j)) — the header and
+        // the rows read the same walk; the rows carry what they draw.
+        let outline = self.outline
         VStack(alignment: .leading, spacing: 0) {
-            columnHeader
+            columnHeader(outline)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 1) {
-                        ForEach(columnRows()) { entry in
+                        ForEach(columnRows(outline)) { entry in
                             if entry.isSection {
                                 sectionRow(entry)
                             } else {
@@ -214,7 +232,7 @@ struct NoteIndexColumn: View {
 
     // MARK: - The header (filter + fold-all)
 
-    private var columnHeader: some View {
+    private func columnHeader(_ outline: NoteIndexOutline.Outline) -> some View {
         HStack(spacing: 8) {
             HStack(spacing: 6) {
                 Text("⌕")
@@ -256,12 +274,10 @@ struct NoteIndexColumn: View {
         #if DEBUG
         NoteIndexColumnProbe.rowsBuilt += 1
         #endif
-        let row = rowsByID[entry.row.blockID]
+        let row = entry.toc
         let folded = collapsedSections.contains(entry.row.blockID)
-        let title = row.flatMap { r -> String? in
-            let heading = NoteIndexOutline.headingTitle(of: r.text)
-            return heading.isEmpty ? nil : heading
-        } ?? Queries.tocHandle(name: row?.name, text: row?.text)
+        let heading = NoteIndexOutline.headingTitle(of: row.text)
+        let title = heading.isEmpty ? Queries.tocHandle(name: row.name, text: row.text) : heading
         return IndexColumnRow(
             tokens: tokens,
             selected: selectedBlockID == entry.row.blockID,
@@ -294,7 +310,7 @@ struct NoteIndexColumn: View {
                 .padding(.top, 10)
                 .padding(.bottom, 3)
             },
-            trailing: { rowControls(for: entry.row.blockID, ordinal: entry.row.ordinal) },
+            trailing: { live in rowControls(for: row, ordinal: entry.row.ordinal, live: live) },
             onSelect: { onSelect(entry.row.blockID) })
     }
 
@@ -306,57 +322,90 @@ struct NoteIndexColumn: View {
         #if DEBUG
         let _ = NoteIndexColumnProbe.rowsBuilt += 1
         #endif
-        if let row = rowsByID[entry.row.blockID] {
-            let selected = selectedBlockID == row.blockID
-            IndexColumnRow(
-                tokens: tokens,
-                selected: selected,
-                content: {
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("▸")
-                            .font(tokens.small)
-                            .foregroundStyle(selected ? tokens.accent : tokens.faint)
-                        Text(String(format: "%02d", entry.row.ordinal))
-                            .font(tokens.mono)
-                            .foregroundStyle(tokens.faint)
-                        Text(Queries.tocHandle(name: row.name, text: row.text))
-                            .font(row.name != nil ? tokens.body.weight(.semibold) : tokens.body)
-                            .foregroundStyle(tokens.ink)
-                            .lineLimit(1)
-                        if row.hasFan {
-                            Text("⑂").font(tokens.small).foregroundStyle(tokens.ring)
-                        }
-                        if row.variantLocked {
-                            Text(tokens.chromeLabel("locked"))
-                                .font(tokens.small)
-                                // 18j — the same token as the Blocks
-                                // workbench's lock mark, for the same reason.
-                                .foregroundStyle(tokens.alarm)
-                        }
-                        Spacer(minLength: 4)
+        let row = entry.toc
+        let selected = selectedBlockID == row.blockID
+        IndexColumnRow(
+            tokens: tokens,
+            selected: selected,
+            content: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("▸")
+                        .font(tokens.small)
+                        .foregroundStyle(selected ? tokens.accent : tokens.faint)
+                    Text(String(format: "%02d", entry.row.ordinal))
+                        .font(tokens.mono)
+                        .foregroundStyle(tokens.faint)
+                    Text(Queries.tocHandle(name: row.name, text: row.text))
+                        .font(row.name != nil ? tokens.body.weight(.semibold) : tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                    if row.hasFan {
+                        Text("⑂").font(tokens.small).foregroundStyle(tokens.ring)
                     }
-                    .padding(.vertical, 5)
-                    .padding(.leading, entry.nested ? 14 : 0)
-                },
-                trailing: { rowControls(for: row.blockID, ordinal: entry.row.ordinal) },
-                onSelect: { onSelect(row.blockID) })
-        }
+                    if row.variantLocked {
+                        Text(tokens.chromeLabel("locked"))
+                            .font(tokens.small)
+                            // 18j — the same token as the Blocks
+                            // workbench's lock mark, for the same reason.
+                            .foregroundStyle(tokens.alarm)
+                    }
+                    Spacer(minLength: 4)
+                }
+                .padding(.vertical, 5)
+                .padding(.leading, entry.nested ? 14 : 0)
+            },
+            trailing: { live in rowControls(for: row, ordinal: entry.row.ordinal, live: live) },
+            onSelect: { onSelect(row.blockID) })
     }
 
     /// ↑ ↓ ⋯ — the TOC's whole door set, waking on hover. `ordinal` rides
     /// in from the outline walk (never a per-row `firstIndex` — the O(N²)
     /// render class the KnownIssues row names).
-    private func rowControls(for blockID: String, ordinal: Int) -> some View {
+    ///
+    /// **17y B1 (j) — only the row she is AT builds the live controls**
+    /// (P3: only the focused thing is heavy). Three AppKit-backed controls on
+    /// EVERY realized row were the other half of her "laggy" scroll (the
+    /// record's § THE TRACE: with the lookup gone the column still ran at
+    /// ~120 ms a frame; with resting rows drawing no controls, 11 ms). A
+    /// RESTING row draws the same hint (`RestingRowControls`, sized to the
+    /// live set); the hovered and the selected row draw the live controls
+    /// OVER that hint's own frame — so waking a row never moves its layout.
+    @ViewBuilder
+    private func rowControls(for row: Queries.TOCRow, ordinal: Int, live: Bool) -> some View {
+        RestingRowControls(tokens: tokens)
+            .opacity(live ? 0 : 1)
+            #if DEBUG
+            .onGeometryChange(for: CGSize.self) { $0.size } action: {
+                NoteIndexColumnProbe.restingSize = $0
+            }
+            #endif
+            .overlay(alignment: .trailing) {
+                if live {
+                    // At its OWN size, never the hint's proposal — so the pin
+                    // below measures the live set's real footprint.
+                    liveRowControls(for: row, ordinal: ordinal)
+                        .fixedSize()
+                        #if DEBUG
+                        .onGeometryChange(for: CGSize.self) { $0.size } action: {
+                            NoteIndexColumnProbe.liveSize = $0
+                        }
+                        #endif
+                }
+            }
+    }
+
+    private func liveRowControls(for row: Queries.TOCRow, ordinal: Int) -> some View {
         #if DEBUG
         NoteIndexColumnProbe.liveControlRows += 1
         #endif
+        let blockID = row.blockID
         return HStack(spacing: 2) {
             Button("↑") { Task { await model.move(blockID: blockID, up: true) } }
                 .disabled(ordinal <= 1)
             Button("↓") { Task { await model.move(blockID: blockID, up: false) } }
                 .disabled(ordinal >= model.rows.count)
             Menu("⋯") {
-                if let row = rowsByID[blockID] { rowMenu(row, ordinal: ordinal) }
+                rowMenu(row, ordinal: ordinal)
             }
             .menuStyle(.borderlessButton)
             // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
@@ -452,14 +501,68 @@ enum NoteIndexColumnProbe {
     static var wholeNoteLookups = 0
     static var rowsBuilt = 0
     static var liveControlRows = 0
+    /// What the resting hint and the live set each drew (the hint is sized to
+    /// the live set — the geometry pin holds them together).
+    static var restingSize: CGSize?
+    static var liveSize: CGSize?
 
     static func reset() {
         wholeNoteLookups = 0
         rowsBuilt = 0
         liveControlRows = 0
+        restingSize = nil
+        liveSize = nil
     }
 }
 #endif
+
+// MARK: - The resting rows' hint (17y B1 (j))
+
+/// **What a resting row shows where the `↑ ↓ ⋯` doors wake** — drawn, never
+/// built from controls: two small rounded keys and the menu's dots, in the
+/// voice's ink, at the row's own 25 % rest. The live set is drawn OVER this
+/// frame when the row is hovered or selected, so the size here is the live
+/// set's own (measured off the mini controls — `NoteIndexColumnScrollCostTests`
+/// holds the two together); nothing here can be clicked, because nothing here
+/// is awake (a click on a resting row selects it, and its hover wakes the
+/// doors first).
+struct RestingRowControls: View {
+    let tokens: VoiceTokens
+
+    /// The live mini controls' footprint, measured (79 × 13 pt on macOS 27.0:
+    /// two 25.5-pt keys, the 24-pt menu, 2-pt gaps) — the geometry pin holds
+    /// the hint to it, so a row's title truncates exactly where it always did.
+    static let keyFrame = CGSize(width: 25.5, height: 13)
+    static let menuWidth: CGFloat = 24
+    static let spacing: CGFloat = 2
+
+    var body: some View {
+        HStack(spacing: Self.spacing) {
+            key("↑")
+            key("↓")
+            HStack(spacing: 2) {
+                Text("⋯")
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 7, weight: .semibold))
+            }
+            .font(.system(size: 10))
+            .foregroundStyle(tokens.ink)
+            .frame(width: Self.menuWidth, height: Self.keyFrame.height)
+        }
+        .accessibilityHidden(true)
+    }
+
+    /// A key: the bezel drawn one point inside its frame (the mini button's
+    /// own inset), the glyph centred.
+    private func key(_ glyph: String) -> some View {
+        Text(glyph)
+            .font(.system(size: 9))
+            .foregroundStyle(tokens.ink)
+            .frame(width: Self.keyFrame.width - 2, height: Self.keyFrame.height - 1)
+            .background(tokens.ink.opacity(0.1), in: RoundedRectangle(cornerRadius: 4))
+            .frame(width: Self.keyFrame.width, height: Self.keyFrame.height)
+    }
+}
 
 // MARK: - One column row (selection wash, hover-waking controls)
 
@@ -467,7 +570,9 @@ private struct IndexColumnRow<Content: View, Trailing: View>: View {
     let tokens: VoiceTokens
     let selected: Bool
     @ViewBuilder var content: () -> Content
-    @ViewBuilder var trailing: () -> Trailing
+    /// The trailing controls, told whether the row is LIVE (hovered or
+    /// selected) — 17y B1 (j): only a live row builds the AppKit controls.
+    @ViewBuilder var trailing: (_ live: Bool) -> Trailing
     let onSelect: () -> Void
 
     @State private var hovering = false
@@ -480,7 +585,7 @@ private struct IndexColumnRow<Content: View, Trailing: View>: View {
                     .foregroundStyle(tokens.accent)
             }
             content()
-            trailing()
+            trailing(hovering || selected)
                 .opacity(hovering || selected ? 1 : 0.25)
         }
         .padding(.horizontal, 8)

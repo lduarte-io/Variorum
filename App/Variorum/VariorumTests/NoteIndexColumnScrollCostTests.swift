@@ -172,4 +172,21 @@ struct NoteIndexColumnScrollCostTests {
             #endif
         }
     }
+
+    /// **The resting hint is the live set's own footprint** (a geometry
+    /// oracle — the fix's face). Waking a row draws the live controls OVER
+    /// the hint's frame, so the row never moves; and the hint must be the
+    /// live set's size, or the eye sees the doors jump as a row wakes.
+    @Test func theRestingHintIsTheLiveControlsFootprint() async throws {
+        try await withColumn(selected: "Line 3 of the long note.") { _, _, _ in
+            #if DEBUG
+            let resting = try #require(NoteIndexColumnProbe.restingSize)
+            let live = try #require(NoteIndexColumnProbe.liveSize)
+            #expect(abs(resting.width - live.width) <= 0.5,
+                    "resting hint \(resting) vs live controls \(live): widths differ")
+            #expect(abs(resting.height - live.height) <= 0.5,
+                    "resting hint \(resting) vs live controls \(live): heights differ")
+            #endif
+        }
+    }
 }
