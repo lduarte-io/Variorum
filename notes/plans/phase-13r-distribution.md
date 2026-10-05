@@ -1152,6 +1152,19 @@ opened; the working tree was left clean.
     suites at a ZERO-INSTANCE window only (her real-store app may be live — pause and
     report rather than run beside it or touch it); then the implementer sanity pass and
     round 2 under a FRESH reviewer.
+  - **THE SANITY PASS (the U3-A implementer over fc5ce29a..b18b70d4; F5 outside its range,
+    not judged): AGREE-CLEAN on F3 (the new pin confirmed red-on-old by its own trace; the
+    lock/unlock road intact), F1 (the rider's measurement honoured), F2 (the `|| true`
+    set-e safety and the shape check read), and the VersionSchemeTests repair (the mobile
+    1.0 outside the filter; the 0.9.1 notes keep WhatsNewTests green) — with ONE NIT ON
+    F4:** the channel guard's bare `return` makes the sync row's door a
+    door-that-does-nothing when the deferred permission window sits BEHIND the main window
+    (P-2's class, in the narrow out-of-date-sync × ask-on-screen corner) — Sparkle's own
+    branch calls `showUpdateInFocus` there (SPUUpdater.m ~697–700 → SPUStandardUserDriver
+    .m:466–488, raising the prompt and activating the app); the suggested mirror is the
+    driver's `showUpdateInFocus?()` in place of the bare return. Unpinnable without a live
+    controller, like F4 itself. ROUTED to the reviewer for the final call (fix or
+    record-only) before round 2 spawns.
 - **THE ROUND-1 FIX PASS (the SAME reviewer session, authorized 2026-10-04; LIVE STATUS from
   the first commit — DONE(hash) / IN-PROGRESS / PENDING):** final calls on all five findings
   are CONFIRMED AS FOUND (zero disputes; the exchange's sharpenings adopted — F5's
