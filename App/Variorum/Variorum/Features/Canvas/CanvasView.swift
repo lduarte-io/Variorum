@@ -1053,9 +1053,14 @@ struct PoolDetailView: View {
         case scraps = "Scraps"
         case canvas = "Canvas"
 
+        /// 17y B2 (p): the Snippets area's Canvas face is a Canvas door
+        /// too ("Canvas = a VIEW on a post or the scraps area" — AppSpec
+        /// §12) — gone in Release, from the ONE seam (`PostMode`'s).
         static func faces(keepingCanvas: Bool) -> [Mode] {
-            [.scraps, .canvas]
+            keepingCanvas ? [.scraps, .canvas] : [.scraps]
         }
+
+        static var allCases: [Mode] { faces(keepingCanvas: PostMode.buildKeepsCanvas) }
     }
 
     @State private var mode: Mode = .scraps
@@ -1093,14 +1098,19 @@ struct PoolDetailView: View {
         ) {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Picker("Pool mode", selection: $mode) {
-                    ForEach(Mode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
+                // 17y B2 (p): with ONE face (a Release build) the picker
+                // could only re-select what shows — a control that cannot
+                // act is not drawn (P-2).
+                if Mode.allCases.count > 1 {
+                    Picker("Pool mode", selection: $mode) {
+                        ForEach(Mode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 220)
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(maxWidth: 220)
                 Spacer()
                 Button(TrayPath.menuLabel(for: .pool), systemImage: "tray") {
                     withAnimation(PostDetailView.panelAnimation) { trayShown.toggle() }

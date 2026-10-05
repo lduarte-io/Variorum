@@ -316,8 +316,9 @@ struct PostDetailView: View {
                                         Button(m.rawValue) { switchMode(to: m) }
                                     }
                                 }
-                                .help("This note's mode — Write · Takes · Read · "
-                                    + "Lenses · Compare · Blocks · Canvas (⌘1–⌘7)")
+                                // 17y B2 (p): the BUILD's row and span.
+                                .help("This note's mode — \(PostMode.modeList()) "
+                                    + "(\(PostMode.keySpan()))")
                             }
                             // The masthead's inspector cluster, rendered FROM its
                             // door table (the `LibraryCatalogView.mastheadDoors`

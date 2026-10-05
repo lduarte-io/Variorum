@@ -1309,9 +1309,11 @@ nonisolated enum CapabilityRegistry {
 
         // MARK: Modes + app scope
         Capability(
-            id: .switchMode, verb: "Switch Mode (⌘1–⌘7)", scope: .post,
+            // 17y B2 (p): the span is the BUILD's row (⌘1–⌘6 in Release,
+            // where Canvas is gone) — from `PostMode`'s one seam.
+            id: .switchMode, verb: "Switch Mode (\(PostMode.keySpan()))", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘1–7", takesAccess: nil,
+            shortcutLabel: PostMode.keyLabel(), takesAccess: nil,
             unavailableNote: "Open a note first — the modes live inside a note.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
         // MARK: The navigation core (13f batch 3 — W3/A27 + W16)

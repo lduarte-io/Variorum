@@ -165,7 +165,8 @@ struct HelperView: View {
             ("⌘E", "search for whatever is selected"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
-            ("⌘1–7", "note modes: Write · Takes · Read · Lenses · Compare · Blocks · Canvas"),
+            // 17y B2 (p): the BUILD's row — Canvas is Debug-only.
+            (PostMode.keyLabel(), "note modes: " + PostMode.modeList()),
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
@@ -287,7 +288,13 @@ struct HelperView: View {
     /// Non-private for the same reason `groups` is: the drift pins read it
     /// (13g cold review R1-2 — a dictionary entry that teaches a landing
     /// the code no longer performs is the WT-1 class in prose form).
-    static let entries: [(term: String, definition: String)] = [
+    /// 17y B2 (p): the "canvas" entry teaches a Debug-only surface, so it is
+    /// shown only where the BUILD has Canvas (`PostMode`'s one seam).
+    static let entries: [(term: String, definition: String)] = allEntries.filter {
+        $0.term != "canvas" || PostMode.buildKeepsCanvas
+    }
+
+    private static let allEntries: [(term: String, definition: String)] = [
         ("block",
          "The atomic unit — a paragraph-sized piece of writing with permanent identity. "
          + "Nothing owns blocks; notes and books just point at them."),

@@ -33,9 +33,20 @@ import Foundation
 /// (Lenses · Compare), managing (Blocks · Canvas).
 ///
 /// Raw values are the user-facing words — they also key the per-post mode
-/// memory (R79). The ⌘1–⌘7 keys derive from THIS order (EditorCommands'
+/// memory (R79). The ⌘1–⌘n keys derive from THIS order (EditorCommands'
 /// ForEach), as do the sidebar rail and the masthead menu — one order,
 /// three renderers, no way to disagree.
+///
+/// **17y B2 (p) — CANVAS IS DEBUG-ONLY** (her word at the 2026-10-04 evening
+/// sitting: "let's just do that now, in this run of things", debug-only
+/// ratified; her explicit ok on ⌘7 no longer being Canvas). The case stays
+/// (Debug keeps her tinkering surface, and every `switch` stays exhaustive);
+/// the ORDER drops it in Release — here, in `allCases`, the one derivation
+/// every renderer reads, never a per-view `#if` (P-1). Every other Canvas
+/// door reads the same seam (`buildKeepsCanvas` + the pure flavour functions
+/// below): the stored-mode decode, the ⌘-span words, the helper's dictionary
+/// entry, the Snippets area's Canvas face. `CanvasDebugOnlyTests` pins both
+/// flavours through the pure seam (the test target builds Debug only).
 nonisolated enum PostMode: String, CaseIterable, Sendable {
     case write = "Write"
     case takes = "Takes"
@@ -50,15 +61,22 @@ nonisolated enum PostMode: String, CaseIterable, Sendable {
     /// in Compare — its successor — never in a stranded default; a post
     /// left in the retired Index tab reopens in Read (the correction round,
     /// R-cor-5/7 — Read's `edit` face IS the index surface). Unknown
-    /// strings still decode nil (the caller's fallback owns those).
+    /// strings still decode nil (the caller's fallback owns those). 17y B2
+    /// (p): a mode the BUILD does not carry decodes nil too — a note she left
+    /// in Canvas reopens in the default on a Release build (PROVISIONAL —
+    /// the caller's default, Write; never a stranded mode).
     static func fromStored(_ raw: String, keepingCanvas: Bool = buildKeepsCanvas) -> PostMode? {
         if raw == "Outline" { return .compare }
         if raw == "Index" { return .read }
-        return PostMode(rawValue: raw)
+        guard let mode = PostMode(rawValue: raw),
+              order(keepingCanvas: keepingCanvas).contains(mode) else { return nil }
+        return mode
     }
 
-    // MARK: - 17y B2 (p) — the build flavour's seam (PRE-FIX SHAPE: Canvas in every build)
+    // MARK: - 17y B2 (p) — the build flavour's seam
 
+    /// THE compile condition — read by nothing but this seam. A Debug build
+    /// keeps Canvas; anything else (Release) drops it.
     static let buildKeepsCanvas: Bool = {
         #if DEBUG
         return true
@@ -67,19 +85,35 @@ nonisolated enum PostMode: String, CaseIterable, Sendable {
         #endif
     }()
 
+    /// Every mode in the row's order (Debug's row). `order(keepingCanvas:)`
+    /// filters it; a new case must join it (the row's order IS this list).
+    private static let declaredOrder: [PostMode] = [
+        .write, .takes, .read, .lenses, .compare, .blocks, .canvas,
+    ]
+
+    /// The row for a build flavour — pure, so a Debug test run pins BOTH.
     static func order(keepingCanvas: Bool) -> [PostMode] {
-        [.write, .takes, .read, .lenses, .compare, .blocks, .canvas]
+        keepingCanvas ? declaredOrder : declaredOrder.filter { $0 != .canvas }
     }
 
-    static func keyLabel(keepingCanvas: Bool) -> String {
+    /// **THE ONE DERIVATION** every renderer reads — the mode row, ⌘1–⌘n,
+    /// the sidebar rail, the masthead menu: this build's row.
+    static var allCases: [PostMode] { order(keepingCanvas: buildKeepsCanvas) }
+
+    /// "⌘1–7" (Debug) / "⌘1–6" (Release) — the registry's shortcut label and
+    /// the helper's row (one string, so `everyDeclaredShortcutIsFindable…`
+    /// keeps them one).
+    static func keyLabel(keepingCanvas: Bool = buildKeepsCanvas) -> String {
         "\u{2318}1\u{2013}\(order(keepingCanvas: keepingCanvas).count)"
     }
 
-    static func keySpan(keepingCanvas: Bool) -> String {
+    /// "⌘1–⌘7" / "⌘1–⌘6" — the long span the verbs and the help say.
+    static func keySpan(keepingCanvas: Bool = buildKeepsCanvas) -> String {
         "\u{2318}1\u{2013}\u{2318}\(order(keepingCanvas: keepingCanvas).count)"
     }
 
-    static func modeList(keepingCanvas: Bool) -> String {
+    /// "Write · Takes · Read · Lenses · Compare · Blocks[ · Canvas]".
+    static func modeList(keepingCanvas: Bool = buildKeepsCanvas) -> String {
         order(keepingCanvas: keepingCanvas).map(\.rawValue).joined(separator: " \u{00B7} ")
     }
 }
