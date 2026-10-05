@@ -1910,3 +1910,57 @@ arbitration `f3f5c3a0`; the binding record is the "19d ROUND 1" section above; f
   the reviewer's P2 probe was non-discriminating (`NSTextStorage` re-fixes a removed `.font` to a
   12-pt default) — a mutant-design lesson worth keeping: CONFIRM the mutant's value is the one
   intended (here, the captured `→ 12.0` said so) before reading a silence.
+
+---
+
+## 19f RECORD (the implementer's LIVE STATUS — Opus, 2026-10-04; DONE(hash) / IN-PROGRESS / PENDING)
+
+**NOT DONE BY THIS ENTRY (stated first, per the contract; PENDING — finalised at the stop).**
+
+**Session start (2026-10-04):** toolchain re-read — macOS 27.0 (26A428) · Xcode 27.0 (27A266a) ·
+`xcode-select -p` = `/Applications/Xcode.app/Contents/Developer` (the pinned pair). Zero instances
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`: no match). Base `505df96e` = origin, tree clean, commit
+count 4934. Read in this session, in full: this ledger's header + row f; QUESTIONS #181 (the ruled
+(i) and the ratified (a)–(h)); the 13r plan's binding principles P-1…P-9, the U3-B RECORD (pieces
+1–7, the walk, F-W5) and the LADDER's F5 exchange + fix (`15ce51b5`); `SupportMail.swift`,
+`SupportDraft.swift`, `DiagnosticsPane.swift`, `DiagnosticsCopy.swift`, the Help door in
+`EditorCommands.swift`, `ShellRouter`'s ask channel + `RootView`'s `shellConfirmAlert` host,
+`SupportDraftTests` (13), `DiagnosticsPaneTests` (8), `ShellConfirmTests`; KnownIssues row 67 (the
+app's confirms are SwiftUI `.alert`s; an app-modal `runModal()` is unpinnable headless);
+`Tools/WalkKit/README.md` + `guard.sh`/`click.sh`/`keys.sh`; `notes/SessionResiliencyProtocol.md`.
+Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
+
+**THE DESIGN (decided before any edit; the reviewer checks it):**
+- ONE question, ONE dispatcher, in `SupportMail.swift`: `SupportQuestion` (`.feedback` — "Open in
+  Mail" / "Copy the address"; `.report(file:)` — "Open in Mail" / "Show the file and copy the
+  address", carrying the report's file) and `SupportMail.ask(_:choose:roads:pasteboard:openInMail:)`
+  — it ASKS FIRST; a dismissed question opens nothing; "Open in Mail" runs the door's OWN road (the
+  closure — exactly today's `SupportMail.open`, (a)/(b) unchanged beneath the choice); the second
+  road puts `support@stargazing.tech` on the pasteboard and, for a report, reveals the file through
+  the existing `roads.reveal` — no draft, no mail app. `SupportMailRoads` is UNCHANGED (still
+  send-free; the test double `RecordingRoads` rides unmodified); the pasteboard is a parameter so a
+  pin drives the real write against a PRIVATE named pasteboard (the `TakeClipboard`/`WordsClipboard`
+  precedent — her clipboard is never a test's).
+- ONE channel + ONE presenter for the choice, `Features/Diagnostics/SupportChoice.swift`:
+  `SupportChoiceAsk` (the `ShellRouter.ask` continuation shape and its three pinned rules —
+  dismissal is an answer, a second ask answers the first, answer-and-clear is one act) and
+  `.supportChoiceAlert(_:)`, a SwiftUI `.alert` (row 67's grammar). The report door's pane hosts one;
+  the Help door asks through the WINDOW — `ShellRouter.supportChoice`, hosted by `RootView` beside
+  `shellConfirmAlert` (the ask channel's road; the `whatsNewRequested` precedent of a feature request
+  on the shell). With no window to ask in (store not open, or every window closed) the Help door —
+  always enabled — asks through an app-modal alert, its own existing no-window voice.
+- The doors: `DiagnosticsPane.send` and `EditorCommands.sendFeedback` ask through `SupportMail.ask`;
+  each door's mail road is its old act VERBATIM inside the "Open in Mail" closure (so the Help
+  door's source still reads `SupportMail.open(.feedback(.thisMac()))` — SupportDraftTests'
+  13th pin rides unmodified, and truthfully).
+- **Pin-before-fix order:** piece 1 lands the choice layer + the pane's injectable chooser/pasteboard
+  with the doors STILL composing directly (the old shape); the door pins are written against it and
+  run RED there; piece 2 flips the doors; green; then a recorded revert of the two door call sites →
+  red; restore → green.
+
+**Pieces:**
+1. The choice layer + its pins; the doors unchanged — **NOT-STARTED.**
+2. The door pins RED on piece 1's tree; the doors ask; GREEN; the revert check — **NOT-STARTED.**
+3. QUESTIONS #182 (the readings the ruling leaves open) — **NOT-STARTED.**
+4. The dev-store walk (both doors' choice, the roads in use) — **NOT-STARTED.**
+5. Finals (suites, scope, record) — **NOT-STARTED.**
