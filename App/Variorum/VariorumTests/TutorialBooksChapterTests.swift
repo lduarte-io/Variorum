@@ -16,8 +16,9 @@
 //      interpolated from what it asserts, so a rename turns it RED);
 //    · THE TRUTH — the sentence is EXECUTED headless against the store.
 //  The five rituals (taught by DOING) are walked headless the same way; R5's
-//  drags are pinned at the plan layer (synthetic drags never commit — her
-//  hand walks them, F-U1-4).
+//  drags are pinned at the plan layer (the headless shape; F-U1-4's
+//  "synthetic drags never commit" was F-B2-1's undeclared-type defect,
+//  fixed in 17y B2 — drags commit now, and her hand still spot-checks them).
 //
 
 import Dependencies

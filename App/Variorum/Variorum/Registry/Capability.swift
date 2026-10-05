@@ -744,8 +744,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // `.surface` door opens it — the note masthead's book icon, drawn only
     // while the note is a member of a book (P-2). Five `.contextMenu` acts
     // are its structure doors, each the MENU TWIN of a drag inside the panel
-    // (the U1 lesson: synthetic drags never commit, so every drag has a
-    // walked twin), all composed over the EXISTING ops (`assignPostToSection`,
+    // (every drag keeps a menu twin for discoverability and AX; U1's
+    // "synthetic drags never commit" reason was F-B2-1's undeclared-type
+    // defect, fixed in 17y B2), all composed over the EXISTING ops (`assignPostToSection`,
     // `reorderReadingPost`, `reorderSection` — no new semantics). Separate
     // declarations on the `.moveTakeEarlier`/`.moveTakeLater` grounds: each
     // its own door with its own words and its own enablement (Move Up hides

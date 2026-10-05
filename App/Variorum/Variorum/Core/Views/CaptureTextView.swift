@@ -188,13 +188,16 @@ struct CaptureTextView: NSViewRepresentable {
         view.drawsBackground = false
         // 17y B2 (m): where the CARET is, reported from the box's own
         // first-responder changes — the one truth (see `onCaretChange`).
-        // Delivered ASYNC (the B2 ladder's NIT-1): the Bookcase's autofocus
-        // raises `focusRequest` from its `.task`, so `updateNSView` →
-        // `takeFocus` → `makeFirstResponder` → `becomeFirstResponder` runs
-        // INSIDE SwiftUI's view update, and a synchronous report would write
-        // the host's `@State` there (the state-during-update class). The main
-        // queue is FIFO, so the reports keep their order and the last one
-        // delivered is the caret's latest truth.
+        // Delivered ASYNC (the B2 ladder's NIT-1): a focus request serviced
+        // during `updateNSView` (`takeFocus` → `makeFirstResponder` →
+        // `becomeFirstResponder`) would otherwise write the host's `@State`
+        // inside SwiftUI's view update (the state-during-update class). The
+        // MEASURED roads are the bar's re-raises — the padding tap and the
+        // title chip (`QuickEntryBar`); whether the Bookcase's `.task` raise
+        // can arrive with the box already windowed is UNTRACED (F-FR-1: in
+        // the hosted test window it lands window-less and `takeFocus` returns
+        // at its guard). The main queue is FIFO, so the reports keep their
+        // order and the last one delivered is the caret's latest truth.
         view.onCaretChange = { [weak coordinator = context.coordinator] inBox in
             DispatchQueue.main.async {
                 coordinator?.parent.onFocusChange?(inBox)
