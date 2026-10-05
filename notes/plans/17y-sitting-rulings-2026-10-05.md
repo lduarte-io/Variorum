@@ -89,3 +89,29 @@ orchestrator never hand-reviews a diff — above all its own B-DEDUPE `Sync/` wo
 fresh `fable-reviewer` with zero framing. The orchestrator's seat at review time is
 adjudication and dispositions only. (The kickoff's "fable-reviewer, or you per the standing
 rule" parenthetical is superseded by this instruction.)
+
+## B-DEDUPE design-material addendum (the orchestrator's precondition read, 2026-10-05 ~03:30 — SyncSpec whole + the postmortem + the classifier studied; the full design memo lands at the slice's seam)
+
+- **R-17y-5's Jekyll leg is NOT a one-line flip.** `Book.joinsPristineDedupe`'s opt-out has
+  mechanics, not just policy (the seeder header + #155): a book BORN WITH HISTORY (takemania's
+  scripted takes/savepoints) reads EDITED to the pristine classifier — a naive flip would fold
+  nothing (both copies "edited" → both survive) AND arm the RUN B defense leg to REVIVE a
+  deliberately deleted Jekyll copy while its twin stands. The honest build: the facts grammar
+  gains a SEED-DECLARED SCRIPTED-NOTE ALLOWANCE (the `seedTagPaths` precedent extended — the
+  declared note's shipped take set by hash + its shipped savepoint shape read as the SEED's
+  hands, never hers), scoped to the declared note alone; every other engagement leg errs toward
+  EDITED exactly as today. Deterministic, convergence-suite-pinned.
+- **The gathering keeper resolves rule identity by PATH, not id:** the `tag.path` fold leaves a
+  losing gathering's rule naming the dead duplicate tag (it re-points applications only), so
+  "the seed's own rule" is judged by resolving the term's tag to its PATH (dead rows readable),
+  and the kept gathering's rule re-points to the live tag as a repair write (explicit outbox
+  row, SyncSpec §7's standing rule). Fold only when BOTH copies read as the seed's own (name +
+  rule shape + no engagement: rename/re-rule/shelf/star/outflow/dial/finish/seal/own/archive
+  all keep both); per wing; smallest id keeps; losers tombstone with nothing to move (a
+  gathering holds nothing).
+- **The seeded-quicknote fold** rides the pristine pattern at note grain (reserved title +
+  content hash; any edit/tag-beyond-seed/comment keeps both).
+- **The guide facts entry has no phone collision:** the phone's guide is "the pocket guide"
+  (deliberately disjoint names/tags). Its own symmetric fold is ONE facts-wiring line on the
+  phone once the engine road exists — recorded as a MOBILE PARITY row at the slice's close,
+  never built in this pass (the zero-mobile fence holds).
