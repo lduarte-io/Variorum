@@ -78,7 +78,10 @@ struct NoteIndexColumn: View {
     }
 
     private var rowsByID: [String: Queries.TOCRow] {
-        Dictionary(uniqueKeysWithValues: model.rows.map { ($0.blockID, $0) })
+        #if DEBUG
+        NoteIndexColumnProbe.wholeNoteLookups += 1
+        #endif
+        return Dictionary(uniqueKeysWithValues: model.rows.map { ($0.blockID, $0) })
     }
 
     private var totalWords: Int {
@@ -250,6 +253,9 @@ struct NoteIndexColumn: View {
     /// A section head: fold chevron + ordinal + the heading's own words +
     /// its kid count. Selecting it syncs the face like any row.
     private func sectionRow(_ entry: ColumnRow) -> some View {
+        #if DEBUG
+        NoteIndexColumnProbe.rowsBuilt += 1
+        #endif
         let row = rowsByID[entry.row.blockID]
         let folded = collapsedSections.contains(entry.row.blockID)
         let title = row.flatMap { r -> String? in
@@ -297,6 +303,9 @@ struct NoteIndexColumn: View {
     /// mockup's calm). No editing card — the pane beside the column edits.
     @ViewBuilder
     private func blockRow(_ entry: ColumnRow) -> some View {
+        #if DEBUG
+        let _ = NoteIndexColumnProbe.rowsBuilt += 1
+        #endif
         if let row = rowsByID[entry.row.blockID] {
             let selected = selectedBlockID == row.blockID
             IndexColumnRow(
@@ -338,7 +347,10 @@ struct NoteIndexColumn: View {
     /// in from the outline walk (never a per-row `firstIndex` — the O(N²)
     /// render class the KnownIssues row names).
     private func rowControls(for blockID: String, ordinal: Int) -> some View {
-        HStack(spacing: 2) {
+        #if DEBUG
+        NoteIndexColumnProbe.liveControlRows += 1
+        #endif
+        return HStack(spacing: 2) {
             Button("↑") { Task { await model.move(blockID: blockID, up: true) } }
                 .disabled(ordinal <= 1)
             Button("↓") { Task { await model.move(blockID: blockID, up: false) } }
@@ -428,6 +440,26 @@ struct NoteIndexColumn: View {
         .overlay(alignment: .top) { Divider().overlay(tokens.line) }
     }
 }
+
+#if DEBUG
+/// **17y B1 (j) — the column's P1 probes** (the `ReadNoteHeights.extentTakes`
+/// precedent: a count a pin can read, behaviour-free). How many WHOLE-NOTE
+/// lookups were built, how many column rows were built, and how many rows
+/// built their LIVE (AppKit-backed) controls — the two per-row costs the
+/// trace measured as her scroll lag (the 17y B1 RECORD's § THE TRACE).
+@MainActor
+enum NoteIndexColumnProbe {
+    static var wholeNoteLookups = 0
+    static var rowsBuilt = 0
+    static var liveControlRows = 0
+
+    static func reset() {
+        wholeNoteLookups = 0
+        rowsBuilt = 0
+        liveControlRows = 0
+    }
+}
+#endif
 
 // MARK: - One column row (selection wash, hover-waking controls)
 
