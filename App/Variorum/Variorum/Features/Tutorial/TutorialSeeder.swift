@@ -1637,7 +1637,14 @@ enum TutorialSeeder {
         // title, and two identical rows in the ⌘K palette invite opening
         // the wrong one.
         try ops.renameContainer(twin.post.id, title: "compare & versions \u{2014} the twin")
-        try ops.applyTag(tagID, toPost: twin.post.id)
+        // 17y B3 item (c): Duplicate as Version now CARRIES the source's tags,
+        // so the twin is born wearing the guide's tag (a row copy) and this
+        // apply finds it already there. Tolerated ONLY for that refusal — the
+        // seeded result is identical (the twin wears the tag either way); any
+        // other refusal still aborts the seed.
+        do {
+            try ops.applyTag(tagID, toPost: twin.post.id)
+        } catch OperationError.alreadyTagged {}
 
         _ = try lesson(looking, "blocks \u{B7} canvas", [
             "Two more ways of looking, each a different traversal of the same "

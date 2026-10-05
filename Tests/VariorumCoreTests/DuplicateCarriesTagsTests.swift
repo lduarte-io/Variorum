@@ -25,9 +25,10 @@ import Testing
 /// its applications with it (the container cascade); redo revives them on
 /// the exact stamp (`restoreContainer`).
 ///
-/// Red-on-old, stated: on the pre-fix op the copy wears NO tag —
-/// `theDuplicateWearsEveryLiveTagOfTheSource` fails its three tag arms and
-/// `undoAndRedoCarryTheCopiesTags` its redo arm. The Diverge, promote and
+/// Red-on-old, stated (MEASURED on the pre-fix tree a93fbf6d — 4 issues): the
+/// copy wears NO tag — `theDuplicateWearsEveryLiveTagOfTheSource` fails its
+/// copy-paths and row-count arms, `undoAndRedoCarryTheCopiesTags` its do and
+/// redo arms (the disjointness arm passes vacuously over no rows). The Diverge, promote and
 /// no-intake pins are CONTROLS (green on both trees by design: they guard
 /// the change's reach, not its presence).
 @Suite("17y (c) — Duplicate as Version carries the note's tags; Diverge stays tag-less")

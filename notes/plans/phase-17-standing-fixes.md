@@ -2590,7 +2590,7 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 | 0 | This record + the b3 captures dir gitignored | IN-PROGRESS (this commit) |
 | 1 | (d) the cards view → "Cards" | NOT-STARTED |
 | 2 | (i) "unfiled" wins everywhere the chapterless state shows | NOT-STARTED |
-| 3 | (c) Duplicate as Version carries post tags (Diverge stays tag-less) | NOT-STARTED |
+| 3 | (c) Duplicate as Version carries post tags (Diverge stays tag-less) | DONE (a93fbf6d red · this commit fix) — `duplicateAsVersion` copies the source's live post-tag applications through the ceremony copy's `copyLiveTags` (made internal), in its OWN transaction (Diverge + promoteLens compose `copyPost` and stay tag-less); a ROW copy, no intake (P-17y-B3-c1). Pin `DuplicateCarriesTagsTests` RED on the pre-fix tree (`c-red.log`: "5 tests … failed … with 4 issues" — the copy's paths + row count, the undo test's do + redo arms; the three controls green) → GREEN with every duplicate-touching core suite "143 tests in 14 suites passed" (`c-green.log`). The tutorial seeder's twin apply tolerates `alreadyTagged` ONLY (the twin is now born wearing the guide tag) — the spine runs at the END. Doors (Library/Takes/chip/seeder) unchanged: no receipt changed |
 | 4 | item 11 — F-B2-7: the book view's own navigator/Outline drop gate (lock first; satisfied = nothing) | NOT-STARTED |
 | 5 | (r) the № census panel as a true overlay dropdown | NOT-STARTED |
 | 6 | (s) the starred shelf (virtual, books only, drop-to-star) | NOT-STARTED |

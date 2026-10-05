@@ -187,15 +187,32 @@ extension Operations {
     /// (whole live fan, archived takes riding with statuses preserved,
     /// commits never copied, parent trees remapped, block names copied),
     /// per-block `derived_from` edges, and ONE `version_of` edge on the
-    /// first slot pair (the post-level link's anchor). Tags, reading
+    /// first slot pair (the post-level link's anchor). Reading
     /// memberships, references, and lenses deliberately do NOT ride
     /// ("lenses never ride any copy" — spike record item 5; the rest
     /// recorded as build-time calls in the closeout). A sealed source is
     /// legal — reading isn't authoring; the source is never touched.
+    ///
+    /// **17y item (c) — the note's TAGS RIDE** (her ruling, QUESTIONS #169's
+    /// tail: "it's meant to be a duplication… let's just build it now"): the
+    /// copy wears every live tag application the source wears, as fresh rows
+    /// — the ceremony copy's `copyLiveTags` (the source's own wing's live
+    /// tags, application order kept). A ROW copy, never an applying act: no
+    /// living book hears the duplicate (PROVISIONAL P-17y-B3-c1 — the copy
+    /// family's letter, P-13ic-U2-1). The ride lives HERE, in this op's own
+    /// transaction, never in `copyPost`: Diverge (`divergePostForReading`)
+    /// and `promoteLens` compose that body and stay tag-less (her lean — a
+    /// diverged copy is meant to differ). Undo's tombstone cascades the
+    /// copy's applications; redo's `restoreContainer` revives them on the
+    /// exact stamp. Pinned `DuplicateCarriesTagsTests`.
     @discardableResult
     public func duplicateAsVersion(_ postID: String) throws -> PostCopyResult {
         let result: PostCopyResult = try database.write { db in
-            try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+            let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+            let source = try livePost(db, postID)
+            try copyLiveTags(
+                db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
+            return copy
         }
         undoStack?.register(
             label: "Duplicate as Version",

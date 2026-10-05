@@ -62,8 +62,9 @@ extension Operations {
     /// presentations and comments copied, per-block `derived_from` edges plus
     /// ONE `version_of` anchor — "always lineage-edged", §2) **with the
     /// note's live TAGS riding** (ruled §6 — "stripping would vandalize the
-    /// status/type taxonomy"; PROVISIONAL P-13ic-5 keeps the OLDER copy doors
-    /// tag-less).
+    /// status/type taxonomy"; P-13ic-5 kept the OLDER copy doors tag-less —
+    /// since 17y B3 item (c), her #169 tail ruling, Duplicate as Version
+    /// carries tags too, through `copyLiveTags`; Diverge stays tag-less).
     ///
     /// The riding tags are a ROW copy, never an APPLYING ACT: no intake fires
     /// for them (PROVISIONAL P-13ic-U2-1 — the 13i-b record's F-6 reading of
@@ -114,8 +115,9 @@ extension Operations {
 
     /// The source's live applications of live tags in its own wing, copied
     /// onto `targetID` as fresh rows (application order kept). A row copy —
-    /// see `ceremonyCopy` for why it is not an act.
-    private func copyLiveTags(
+    /// see `ceremonyCopy` for why it is not an act. Internal since 17y B3
+    /// item (c): `duplicateAsVersion` rides the same road.
+    func copyLiveTags(
         _ db: Database, from sourceID: String, to targetID: String, wingID: String, now: Date
     ) throws {
         let tagIDs = try String.fetchAll(
