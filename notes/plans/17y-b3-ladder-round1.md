@@ -69,3 +69,53 @@ the gear, the content-top line gone, the popover "arrivals · 1 waiting" with th
 waiter's add/dismiss arms (`arrivals-popover-w1.png`); the waiting row's name opened "door
 five" READ-NORMAL — masthead "in no book": **opening never seats** (`arrival-opened.png`).
 The B3 implementer's own 59-capture walk stands as the batch's full use evidence.
+
+## ROUND 1 FIXES (the reviewer's final calls + implementation — the same Fable session, authorized by the orchestrator; commits on `main`, pushed each)
+
+The implementer's cross-model exchange AGREED on all four code findings, zero disputes. The
+final calls, each implemented (or held) by this reviewer:
+
+- **MINOR-1 — CONFIRMED, FIXED (the implementer's preferred shape = mine: guard the RESOLVED
+  name).** `MembershipDoors.mintAndAdd` now resolves a blank type to "Untitled" BEFORE the E13
+  guard, so `assertBookNameIsFree` keys the name the mint stores (the old road keyed the
+  trimmed typed "" — an existing "Untitled" never refused and gained a twin; unreachable from
+  both shipped faces, a latent hole in the shared brain road). Bug-class discipline kept: the
+  pin `AddToBookMintTests.aBlankTypeIsGuardedAsTheNameItWouldStore` committed AHEAD at
+  `efd9aa95` and run on that committed tree — **RED with exactly the predicted 2 issues**
+  ("an error was expected but none was thrown"; "count == 1" over 2 live readings) — then the
+  fix at `b1fe70ff`, **GREEN "Test run with 27 tests in 2 suites passed"** (AddToBookMintTests
+  7 incl. the new pin + MembershipChoiceTests 20; DerivedData/17y-review3, zero Variorum
+  instances).
+- **MINOR-2 — CONFIRMED, ALREADY SATISFIED AT THE SEAM** (the orchestrator minted 19h for
+  F-B3-3's broadcast-test-host class before this fix pass, `4781904a`). Nothing for this seat.
+- **NIT-1 — CONFIRMED AS A FINDING, HELD TO NEXT-TOUCH (the implementer's keep argument
+  accepted on recheck; it matches this reviewer's own proposed fix, "fold at next touch").**
+  The facts stand: `BookArrivalsModel.expanded`/`toggle()` have zero production callers and
+  `expanded` is only ever false shipped, so `listingLimit` is behaviourally the `doorOpen`
+  road. The two pin subjects that keep them alive are genuinely the retired line's semantics
+  (toggle-no-op-while-empty vs the door's opens-on-empty; the-emptied-door-folds-shut vs the
+  popover's calm sentence), so a fold RETIRES subjects rather than re-points them — next-touch
+  work, not a mid-round edit. THE SAFE SCOPE, recorded for that touch: drop `expanded`/
+  `toggle()`; keep `adopt` off `doorOpen` (the popover must NOT fold on emptying); re-point
+  the listing-window pins to `setDoorOpen(true)`; retire the two line-only subjects in place.
+- **NIT-2 — CONFIRMED, FIXED (align the TABLE; the renderer's guard stays — `ReadingExport`
+  takes the Reading row).** `BookRowMenuTable.doors(for:)` now puts `.exportMarkdown`/
+  `.exportPDF` behind `if let reading` beside the state doors, so the pinned pure table says
+  exactly what the renderer draws on a facts-less row; `unknownFactsDrawNoStateDoor` edited
+  to `[.open, .star, .settings]` (a JUSTIFIED EDIT — the subject strengthened, not moved);
+  docs updated. `6e7f6639`, **GREEN "Test run with 8 tests in 1 suite passed"**
+  (BookRowMenuTests; the registry walk untouched — `contextMenuCapabilities` unchanged).
+- **NIT-3 — CONFIRMED, FIXED AS A COMMENT CORRECTION (the implementer's no-batched-fetch
+  stance accepted: ∝ the listed rows is P1-fine, no measured need).** `BookRowDoors.load`'s
+  doc now says one read transaction, one row lookup per listed id, bounded by the listing.
+  `cf60ab0d`, comment-only, zero behavior (compiled in the NIT-2 run's build).
+
+Evidence lines, verbatim: the red — "✘ Test run with 7 tests in 1 suite failed after 0.095
+seconds with 2 issues." (pin-only tree `efd9aa95`); the greens — "✔ Test run with 27 tests in
+2 suites passed" (`b1fe70ff`) · "✔ Test run with 8 tests in 1 suite passed" (`6e7f6639`).
+Suites ran from `App/Variorum/` with suite-level `-only-testing` into the reviewer's own
+`DerivedData/17y-review3`; instance check by path before each test act (none running); no
+trailers on any commit; `~/dev/variorum` untouched.
+
+**Round 2's scope, proposed:** the fixes above (two code commits + one comment commit) — a
+re-review of the diff `44a33292..cf60ab0d` plus the implementer's one sanity pass.
