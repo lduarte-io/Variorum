@@ -2846,3 +2846,36 @@ Book/facts grammar · the three gatherings' + quicknote's + guide's mint shapes 
 | 6 | Convergence suites (two-client fake server, the memo §4 matrix) + idempotence + inert-arm | DONE (8fbb322e) — `SeededFurnitureDedupeTests` 9/9: the trio fold (keeper rules resolve LIVE by path on both devices; the designation converged), the staged rule re-point + designation re-point with outbox rows, engagement-per-axis keeps both, the quicknote/guide/pool folds under the F2 cadence (defer → marker → the empty window decides; outbox asserted PRE-push), the edited-UNCHOSEN-take keeps both (the skeleton's load-bearing arm), idempotence (an extra pull: 0 applied 0 repairs), nil-inert. REVERT ROUNDS: A (take texts off the skeleton) → `anEditedLessonKeepsBothGuides` RED both arms — the forbidden retire caught; B (the guide F2 arm off) → the deferral pin RED (an arrival-batch fold); both restored, `git diff --quiet`. **CORRECTED AT THE LADDER'S ROUND 1 (honest record):** this row's original "engagement-per-axis" overclaimed — the round-1 suite covered 2 of ~10 gathering axes and a SYNTHETIC guide that concealed the BLOCKER (the shipped guide's word target/comment/seal read ENGAGED and never folded). The FIX ROUND's suite is 16 tests incl. the SHIPPED-shape fold, the real-seed Mac drift guard, and the comment/savepoint/rename/removed-member/straggler/designation arms — the ladder record carries the full list |
 | 7 | END: the touched families + the whole-Mac run (covers B3's post-END gap) + the tutorial spine + the phone build | DONE — core WHOLE **2188/246 passed** (`swift test`, the 9 new convergence tests included); the WHOLE-MAC run **3896 tests in 639 suites** with 5 standing knowns (4 IndexTierMetrics + 1 TakesFind; F-B3-1's withKnownIssue correctly OFF) and ONE real red — `DeadVocabularyTests` caught the retired phrase "shelf row" in the NEW Sync file's own comments (a database-row sense, but the scan is spelling-level): reworded to "`shelf` record", the scan re-run green 2/2, the convergence suite re-run green 9/9 (comment-only; the whole-Mac is green-with-that-fix, not re-run whole for a comment); the tutorial spine 98/13 (piece 3); the phone: BUILD SUCCEEDED + `MobileFirstWriteFurnitureTests` 12/1 at END |
 | 8 | Record close; PROVISIONALs → QUESTIONS; the fresh fable-reviewer cold round follows | DONE (this commit) — QUESTIONS **#186 (a)–(f)** in her words (the pairwise road; stale-meets-fresh; engagement axes; the designation's re-point-only; the drain corner; the phone fence exception). MOBILE PARITY (for the close's line): the pocket guide's own facts entry is ONE wiring line on the phone once its engine road exists — recorded, never built here. The FABLE cold round on this diff is next (zero framing; the orchestrator never hand-reviews its own Sync/ work) |
+
+## 17y B1 RECORD — the two performance items: (j) the in-note Index scroll · (k) the Library infinite scroll + the All-screen books cap (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit; the brief is `notes/plans/17y-b1-brief.md`)
+
+**NOT DONE (first line, per the contract — kept current):** EVERYTHING below is in flight; HER live scroll walk on the large fixture + her word is the batch's (and the 17y entry's) close gate and is NOT this session's to run; the Fable cold review follows this record's close (the orchestrator spawns it).
+
+Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
+the B1 brief whole; this file's 17y row end to end (items (j)/(k) verbatim, her smoothness bar), the
+kickoff, the RUN RECORD, the B3 RECORD whole (the (d)/(l) notes: "Cards", `BookRowMenu` on the
+Library's List-mode book rows); `notes/plans/17y-sitting-rulings-2026-10-05.md` whole;
+`notes/SessionResiliencyProtocol.md` whole; `notes/TEXTKIT2_NOTES.md` whole (§2–§3 and every
+macOS-27 measured finding); KnownIssues rows 22/49/61/87/90; AppSpec §7 (the three container stamp
+indexes + the ordering conventions); `LibraryCatalogModel` + `LibraryCatalogView` +
+`LibraryListingReads.swift` + `LibraryCatalogTagActs.swift`; `Queries.searchCatalog` /
+`catalogPostsSQL` / `LibrarySort` / `timelinePage` / `library`; `ReadModeView`, `ReadEditPane`,
+`NoteIndexColumn`, `ReadNoteLanding`, `LandingAuthority`, the book Index pane (`BookIndexView`'s
+F3 shape). Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`; no
+subagents. QUESTIONS' next free number at preflight: **#187**.
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 0 | This record + the b1 captures dir gitignored | DONE (this commit) |
+| 1 | (j) TRACE — measured, mechanism stated HERE before any fix; the book Index checked | NOT-STARTED |
+| 2 | (j) pin red-on-old → fix → green | NOT-STARTED |
+| 3 | (k) the large-fixture road (dev store, staged + restored) | NOT-STARTED |
+| 4 | (k) core: the keyset page read per sort + pins | NOT-STARTED |
+| 5 | (k) the model: pages, refresh-in-place, bounded held observation + pins | NOT-STARTED |
+| 6 | (k) the views: List + Cards infinite scroll; the All-screen books region cap + pins | NOT-STARTED |
+| 7 | Measurements (before/after, quiet machine) + the walk → `notes/plans/17y-screens/b1/` | NOT-STARTED |
+| 8 | END suites + record close (findings, PROVISIONALs → QUESTIONS #187) | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
