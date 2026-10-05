@@ -178,3 +178,8 @@ exists (the Journal is born starred); a shelf is a PLACE, not a notice (the Arri
 hide-when-empty grammar is a bell's, not navigation's); and the ★ row is the drop-to-star
 target — hiding it removes the gesture exactly when the first star wants it. Still one line
 to flip at her word; her hands at the walk are the honest test.)*
+
+*(R-17y-9 second addendum, her refinement verbatim: "only give it the one liner when you click
+on it - don't have it in the menu item line." The strip's ★ row is always the bare word —
+no count, no sentence, no badge inline; the empty-state one-liner renders ONLY in the solo'd
+board area when the starred set is empty. Binding for B3's build.)*
