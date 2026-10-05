@@ -1696,22 +1696,39 @@ in `~/dev/variorum-17y`; never commit, stash or checkout in `~/dev/variorum` whi
 lives; the worktree is removed at the pass's close (after its last push).
 DerivedData for this pass: `App/Variorum/DerivedData/17y/` (in the worktree; swept at close).
 
-**EXECUTION ORDER (hers, 2026-10-05): B0 → B-SEED → B2 → B3 → B1.** One pass, one entry; fresh
-implementer per batch; cold review per batch (B-SEED's diff is Sync-adjacent ⇒ FABLE review).
+**EXECUTION ORDER (hers, 2026-10-05, amended at her R-17y-5: B0 → B-SEED → B2 → B3 → B-DEDUPE →
+B1 → close + 0.9.2).** One pass, one entry; fresh implementer per batch; cold review per batch.
+HER STANDING FRAME (verbatim, 2026-10-05 ~02:55): "quality is always paramount, dates are always
+provisional" — Monday is the goal, never a gate; the quality bar never bends to it. Her
+pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md` (binding).
 
 - **B0 — the ledger clears: DONE** (this commit). 19e: the one-word runbook sync; the standing
   red `DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument` green (5/5 suite).
   19g: `.lineLimit(1)` at the four named sites; `ChromeLineLimitTests` green. Both reviews
   waived at her word; the documented pre-existing reds at the 19f finals are the red-on-old.
   Both 19-ledger rows flipped CLOSED. Full-Mac finals now read fully green (no named reds).
-- **B-SEED — (q) the tutorial-seed trace: NOT-STARTED (next; tonight — time-sensitive).** The
-  mechanism must be in hand before her Monday fresh-install + sign-in on the new MacBook (the
-  verification bed). A fresh `opus-implementer`, briefed by this file's 17y row item (q) + the
-  B-SEED brief section below once written; the seeder is Sync-adjacent (`ensureWelcomeShelf`,
-  `SampleLibraryDedupeFacts`) ⇒ FABLE cold review of the diff, per the standing rider.
-- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): NOT-STARTED** (after B-SEED,
-  tonight/overnight). Two trace families + three singles; pin-before-fix each; (n) finds the
-  PRIOR landing first (her "still"; the capture `notes/plans/17y-screens/title-chrome-shift.png`).
+- **B-SEED — (q) the tutorial-seed trace: CLOSED 2026-10-05 ~02:55.** The mechanism (in the
+  record before the fix): nothing on the launch path ever seeded the field guide — door-only
+  since 13b; U7 shelved it by name at birth but never minted it. The fix: `TutorialSeeder.
+  seedAtBirth` on the Welcome arrangement's arrange-now road (silent, latch-honoring, no
+  retrofit, her deletion stands, residue never silently replaced). Pins red-on-old (2 issues)
+  + two announced revert rounds (2 and 8 issues, restored); suites 103/12 + the spine 98/13
+  green; walked both voices. THE LADDER: ONE round, Fable cold review — **0/0/0/2 NIT, both
+  record-only** (`notes/plans/17y-bseed-ladder-round1.md`, bd324f15); ORCHESTRATOR'S
+  DISPOSITIONS: NIT-1 (the birth-window door swallow) stands dispositioned at P-17y-BSEED-4 /
+  #183(e) — hers, none gating; NIT-2 (the refused-then-done corner) record-only by the
+  reviewer's own honest no-pin label. No fix round owed; the ladder closes at round 1.
+  Residuals: the two-guides-after-sign-in class re-owned to B-DEDUPE (R-17y-5); her Monday
+  install is the live bed (the public 0.9.1 build predates the fix — 0.9.2 carries it).
+- **B2 — drag mechanics + three singles ((a)(b)(e)(m)(n)(p)): RUNNING** (spawned 2026-10-05
+  ~03:00; the B2 BRIEF below binds; its implementer appends the B2 RECORD after it).
+- **B-DEDUPE — the whole-set seed-duplicate fold (R-17y-5): NOT-STARTED** (between B3 and B1).
+  The guide + Jekyll into the book dedupe (#155(a) overturned at her word); the Sync/ keeper
+  for the seeded gatherings + quicknote (the Welcome keeper's adopt-by-identity pattern;
+  engagement keeps both; convergence suites mandatory). The Sync/ halves are the ORCHESTRATOR'S
+  OWN seat (the standing rider), behind a full SyncSpec + `notes/sync-postmortem-fragments.md`
+  read; a FRESH fable-reviewer cold round after. Zero schema — the marker stays 12; SyncSpec §7
+  gains the keeper's paragraph as the canon delta at close.
 - **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)): NOT-STARTED.** Runs
   Monday; closes at HER ONE SITTING (the bundled picks: (h)'s placement mock pair; (g)'s
   picker-adoption scope; any B2/B-SEED PROVISIONALs). Both mocks for (h) land as HTML files
@@ -2011,3 +2028,89 @@ today's tree.
 - **P-17y-BSEED-5 — silent:** no receipt, no navigation, one `tutorial`-category log line. (a) BUILT ·
   (b) a quiet receipt naming the guide.
 
+## 17y B2 BRIEF — the drag mechanics + three singles: items (a)(b)(e)(m)(n)(p) (written by the orchestrator 2026-10-05; ONE acceptance unit)
+
+**THE ITEMS (the binding text is this file's 17y row — read each item's cell end to end; this
+brief adds the machinery map and the fences, never a substitute for the row):**
+
+1. **(a) Unshelved → shelf drag is dead.** Her walk: dragging a book from the Bookcase's
+   UNSHELVED group onto a shelf does not work; the U1 contract promised "drop targets + drag
+   reorder + Move to Start/End". Machinery (13i-d U1 RECORD): `Features/Shelf/BookcaseStrip.swift`
+   (`BookcaseDragToken` + the `bookcaseDropSite` modifier on the strip's shelf chips),
+   `ShelfView.swift` (the section labels are drop targets), `Operations+Shelf.swift`
+   (`setReadingShelf`, `placeReading`), `Domain/BookcaseOrdering.placementWrites`. Her walk-note:
+   few shelves existed, so the strip's targets were sparse — THE TRACE DECIDES built-and-broken
+   vs never-built, and the fix follows the mechanism. Walk the real gesture afterwards (a dev-store
+   capture of a book dragged from Unshelved onto a shelf chip AND onto a section label).
+2. **(b) My-order reorder is absent beyond Send to Top/Bottom.** P-13id-U1-13 promised "a book
+   dropped on a row lands right above it"; her ask adds the AFFORDANCE — drag bars (or an
+   equivalent) visible when `order ▾ = my order` is active. Trace whether the row-drop road was
+   built; build the affordance; the drop lands exactly where aimed (the U1 arithmetic's own
+   promise, `placementWrites`).
+3. **(e) The Book Panel's drag handles render but drag does nothing.** Her capture: the Jekyll
+   seeded book, four rows, handles drawn, no drag. Machinery (13i-d U2 RECORD):
+   `Features/BookView/BookPanelView.swift` + `BookPanelModel.swift` (`BookPanelDragToken`, a
+   PRIVATE Transferable; `BookPanelBrain.dropPlan` → `BookStructureModel.postDropPlan` /
+   `chapterDropTarget` → `assignPostToSection` / `reorderReadingPost` / `reorderSection`). The
+   row names the two trace candidates: does `sort_field ≠ manual` gate it (the seeded Jekyll
+   book's sort?), and is a finished-book refusal staying SILENT against U2-8's "moves refuse
+   WITH the road"? Her stance binds either way: **a handle that cannot drag must not render** —
+   so the fix is drag-works where legal, and where the order is not manual (or the book is
+   frozen) either the handle goes or the gesture refuses with the road, per the traced mechanism
+   and U2-8's contract.
+4. **(m) The quick-note box blinks TWO cursors.** Her rule verbatim: "if the terminal cursor is
+   blinking open at the end, your cursor shouldn't be blinking as well" — exactly ONE cursor
+   blinks at a time, the Terminal voice's decorative block cursor winning while it is shown. The
+   trace decides the suppression's mechanism and owner (the quick-capture surface; find where the
+   decorative cursor is drawn and where the field's insertion point blinks).
+5. **(n) The title's chrome shift, STILL.** Her capture is
+   `notes/plans/17y-screens/title-chrome-shift.png`; her words "the chrome is still shifted up
+   when you click on the title". Her "still" marks a survivor or regression of an earlier
+   landing: **FIND THE PRIOR FIX FIRST** (search the plans/commits for the title-focus chrome
+   work — 13u2's title item and the masthead family are the first places to look), then pin
+   red-on-old against the MECHANISM, never the symptom.
+6. **(p) Canvas goes DEBUG-only.** Ruled at the evening sitting ("let's just do that now…",
+   debug-only ratified): Canvas leaves the note mode row in RELEASE builds (Debug keeps it — her
+   tinkering surface); the ⌘1–⌘7 derivation shortens to the remaining modes (her explicit ok on
+   ⌘7 no longer being Canvas); ENUMERATE Canvas's other doors (the ⌘K palette, any settings face,
+   the registry's declarations) and gate them the same way. The gate is a compile-time/runtime
+   DEBUG condition in the ONE place the mode order is derived — never per-view ifs (P-1).
+
+**RULES (the standing ones, applied):** pin before fix, red-on-old verified by revert, PER ITEM;
+no fix without a self-traced mechanism; a pin green on both sides is a hollow finding — record
+it, don't fix it. A trace that finds a SILENT refusal fixes it to refuse WITH the road (the
+registry's refusal copy), per P-2. Items are independent — commit per item, push after each, so
+a death loses at most one. Tests at each item's end (its suites + any registry walk the diff
+touches); the tutorial spine (`TutorialWalkTests`) once at the batch's end.
+
+**FENCES:** zero `Sources/VariorumCore/Sync/` · zero schema · zero custody · zero mobile code
+(the phone's Canvas/panel are its own; if an item's rule SHOULD reach the phone, record it as a
+MOBILE PARITY note in your record, build nothing there) · no seed-content edits · no new
+dependencies · (p) touches Release behavior — NO /Applications refresh in this batch (the
+pass-end window owns it).
+
+**REQUIRED READING:** this file's 17y row items (a)(b)(e)(m)(n)(p) end to end + the RUN RECORD +
+this brief · `notes/plans/phase-13i-d-bookcase.md` — the U1 RECORD and U2 RECORD whole (the
+machinery maps + P-13id-U1-13, U2-8) · QUESTIONS #170/#171 (the standing PROVISIONALs those
+surfaces carry — do not overturn any) · her capture `notes/plans/17y-screens/title-chrome-shift.png`
+· CLAUDE.md + its auto-loaded canon.
+
+**ENVIRONMENT (binding, same as B-SEED's):** work ONLY in the worktree `~/dev/variorum-17y`
+(branch `main`, push `origin main` after every commit); NEVER touch `~/dev/variorum` (a live
+session holds it). DerivedData `App/Variorum/DerivedData/17y/`. Mac tests from `App/Variorum/`,
+suite-level `-only-testing`, confirm the "Test run with N tests" line; never add a build
+configuration (a non-"Debug" configuration strips the DEBUG oracles — and (p)'s Release gate is
+tested by a compile-condition pin or a runtime seam, NEVER by adding a Release test
+configuration). Instance checks by PATH; her real-store app is never touched. The resiliency
+protocol binds: LIVE STATUS (append a "17y B2 RECORD" section after this brief) from the first
+commit; synchronous foreground waits only; no subagents; no attribution trailers. The cold
+review after your close is the orchestrator's to cast (no editor seam, no Sync/, no custody
+expected in this diff ⇒ `opus-reviewer`; if your trace reaches the editor seam — (n) might —
+SAY SO in your record so the review re-casts to Fable).
+
+**WALK EVIDENCE:** dev-store Debug captures per item under `notes/plans/17y-screens/b2/`
+(gitignored): the unshelved→shelf drag landing; a my-order row drop landing right above the row
++ the affordance visible; the Book Panel drag landing (and the refusal road where gated); ONE
+cursor in the quick-note box (Terminal voice); the title click with the chrome still; the mode
+row without Canvas (a Release-conditioned evidence road per the pin's seam — a Debug capture
+shows Canvas kept).
