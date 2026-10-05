@@ -22,7 +22,7 @@ nonisolated enum DiagnosticsCopy {
         "Off unless you turn it on. When it\u{2019}s on, macOS hands Variorum a report "
         + "after Variorum crashes \u{2014} usually the next time you open it. Reports stay "
         + "on this Mac and appear below exactly as they arrived. Nothing is ever sent on "
-        + "its own: Send Report\u{2026} opens an email draft to \(SupportDraft.address) "
+        + "its own: Send Report\u{2026} offers an email draft to \(SupportDraft.address) "
         + "with the report attached, for you to read before you send it. This Mac only."
 
     /// The one other road, named in words (the act's door is the Help menu).

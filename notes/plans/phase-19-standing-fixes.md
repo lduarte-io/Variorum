@@ -2009,7 +2009,20 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
      (`git show ba5949b4:<path>` over `App/Variorum/Variorum/Features/Settings/DiagnosticsPane.swift`
      and `App/Variorum/Variorum/EditorCommands.swift`), the suite run, then `git checkout HEAD --`
      on exactly those two paths and the suite re-run. If a session dies mid-check: `git diff` shows
-     the reverted lines; `git checkout HEAD --` those two paths restores the fix. **PENDING.**
-3. QUESTIONS #182 (the readings the ruling leaves open) — **NOT-STARTED.**
+     the reverted lines; `git checkout HEAD --` those two paths restores the fix. **DONE (this
+     commit's predecessor's tree): REVERTED → `Test run with 28 tests in 2 suites failed … with 9
+     issues` — exactly the 4 door pins, the same 9 issues as the pre-fix run; SupportDraftTests 13
+     green on BOTH sides (`19f/p2-revert.log`). RESTORED (`git diff` empty) → `Test run with 28
+     tests in 2 suites passed`, no `skipped:` line (`19f/p2-restored.log`).** No hollow pin.
+3. QUESTIONS #182 (the readings the ruling leaves open) — **DONE (this commit).** (a) the Help door
+   asks in the main window's `.alert` (raised from Settings/a note window), and with NO window an
+   app-modal alert; (b) the second road's receipts (status seam / the pane's caption / silent with
+   no store); (c) "Open in Mail" first and the default button — **its default-ness is the walk's to
+   confirm (PENDING)**; (d) **THE PASTEBOARD READING (the brief's ask, one line): the copied
+   address does NOT expire — it is a public address; the twelve words' 60 s clear exists because
+   they are a secret (the simpler position, taken);** (e) one word of the Diagnostics promise:
+   "Send Report… opens an email draft…" → "**offers**" (it asks first now; `DiagnosticsCopy.swift`,
+   pin-neutral — `thePromiseSaysWhatTheCodeDoes` checks substrings this word is not in; flagged for
+   the reviewer as the one copy line touched outside the question's own words).
 4. The dev-store walk (both doors' choice, the roads in use) — **NOT-STARTED.**
 5. Finals (suites, scope, record) — **NOT-STARTED.**
