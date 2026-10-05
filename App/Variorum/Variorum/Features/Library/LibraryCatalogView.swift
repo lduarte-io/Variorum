@@ -773,14 +773,19 @@ struct LibraryCatalogView: View {
 
     /// 13i-c U4 (§6): the owned-by badge a listed note wears (the Library is
     /// OUTSIDE every book), or nil — the setting silences the set.
-    private func ownedByBadge(_ postID: String) -> OwnershipBadgeFace.Badge? {
-        model.ownership.badge(
-            for: postID, placement: .outside,
+    /// 17y B1 (k): read from the row's OWN slice (`rowExtras(for:)`), so
+    /// another note's badge never re-draws this row.
+    private func ownedByBadge(_ extras: LibraryNoteRowExtras) -> OwnershipBadgeFace.Badge? {
+        OwnershipBadgeFace.badge(
+            extras.facts, placement: .outside,
             badgesOn: themeStore?.settings.ownershipBadges ?? true)
     }
 
     private func noteCard(_ hit: Queries.CatalogHit) -> some View {
-        let card = model.noteCards[hit.id] ?? NoteCards.Card()
+        // 17y B1 (k): the card reads its own slice of the extras — never the
+        // whole listing's dictionaries (the measured page-landing stall).
+        let extras = model.rowExtras(for: hit.id)
+        let card = extras.card ?? NoteCards.Card()
         // 13u3 UNIT B (her item 4): what the card LEADS with — her title
         // where she typed one, a daily entry's day, else the note's own
         // first words. Derived at read time, never stored, nothing renamed.
@@ -805,7 +810,7 @@ struct LibraryCatalogView: View {
                 Spacer(minLength: 0)
                 // 13i-c U4 (§6): the owned-by badge — the note's owner,
                 // clickable (the ascent), before the books line.
-                if let badge = ownedByBadge(hit.id) {
+                if let badge = ownedByBadge(extras) {
                     OwnershipBadgeView(tokens: tokens, badge: badge, postID: hit.id)
                 }
                 if !card.books.isEmpty {
@@ -830,7 +835,7 @@ struct LibraryCatalogView: View {
             // 13e E8: the same tags face the List row wears. Quiet on an
             // untagged card until the pointer arrives, so her
             // Apple-Notes-shaped list stays what it is at rest.
-            tagsRow(hit, revealsOnHover: true)
+            tagsRow(hit, tags: extras.tags, revealsOnHover: true)
         }
         .padding(.vertical, 9)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -838,7 +843,7 @@ struct LibraryCatalogView: View {
         .onTapGesture { onOpen(.post(hit.id)) }
         .contextMenu { postRowMenu(hit) }
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
-        .help(OwnershipBadgeCopy.rowHelp("Open this note", badge: ownedByBadge(hit.id)))
+        .help(OwnershipBadgeCopy.rowHelp("Open this note", badge: ownedByBadge(extras)))
     }
 
     /// 13e E8: ONE tags face, both note renderers — the `postRowMenu`
@@ -846,10 +851,12 @@ struct LibraryCatalogView: View {
     /// the note card can never offer different tag doors on the same note.
     /// Every write goes through the model, which owns the ops calls and the
     /// re-read.
-    private func tagsRow(_ hit: Queries.CatalogHit, revealsOnHover: Bool = false) -> some View {
+    private func tagsRow(
+        _ hit: Queries.CatalogHit, tags rowTags: [Tag], revealsOnHover: Bool = false
+    ) -> some View {
         NoteTagsRow(
             tokens: tokens,
-            tags: model.postTags[hit.id] ?? [],
+            tags: rowTags,
             allTags: tags.tags,
             onApply: { path in
                 Task { await model.applyTypedPath(path, to: [hit.id]) }
@@ -889,22 +896,25 @@ struct LibraryCatalogView: View {
             // `date` sort where the trailing stamp already says that day) and
             // the trailing stamp, which IS the sort's own (`sorted`).
             let stamps = LibrarySortFace.rowStamps(model.sort, for: hit)
+            // 17y B1 (k): the row's OWN slice of the extras, never the whole
+            // listing's dictionaries (the measured page-landing stall).
+            let extras = model.rowExtras(for: hit.id)
             // 13u3 UNIT B: the row leads with the same answer the card does —
             // ONE composition, so the two modes can never call a note two
             // different things (`LibrarySortFace`'s own reason, applied to
             // the name).
             let name = LibraryCardName.card(
-                for: hit, leadingTexts: model.noteCards[hit.id]?.leadingTexts ?? [])
+                for: hit, leadingTexts: extras.card?.leadingTexts ?? [])
             CatalogNoteLine(
                 tokens: tokens, title: name.lead.text,
                 date: stamps.listDay,
-                tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
+                tags: extras.tags, allTags: tags.tags,
                 onTitleTap: { openHit(hit) },
                 onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
                 onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } },
                 stamp: stamps.sorted,
                 oracleKey: hit.id,
-                badge: ownedByBadge(hit.id),
+                badge: ownedByBadge(extras),
                 badgePostID: hit.id)
         }
         .draggable(hit.id)

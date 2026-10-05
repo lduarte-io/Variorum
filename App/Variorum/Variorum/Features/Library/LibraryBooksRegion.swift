@@ -102,5 +102,19 @@ struct LibraryNoteRowHost<Content: View>: View, Equatable {
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.hit == rhs.hit }
 
-    var body: some View { content() }
+    var body: some View {
+        #if DEBUG
+        let _ = LibraryPagedNotesProbe.rowBodies += 1
+        #endif
+        content()
+    }
 }
+
+#if DEBUG
+/// The pins' count of paged-row bodies evaluated (17y B1 (k)): a page
+/// landing must re-draw no row already built.
+@MainActor
+enum LibraryPagedNotesProbe {
+    static var rowBodies = 0
+}
+#endif

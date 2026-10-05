@@ -202,6 +202,50 @@ struct LibraryInfiniteScrollTests {
         }
     }
 
+    /// **A page landing re-draws no row already built** — her bar: "SMOOTH
+    /// like the rest of the app — no performance losses are acceptable for
+    /// it! including if it's in the notes view". Measured on the 822-note
+    /// fixture (the 17y B1 RECORD's § THE (k) NUMBERS): every row read the
+    /// WHOLE listing's extras (`postTags`, `noteCards`, the owned-by facts),
+    /// so a landing page's chips and card words re-drew every row SwiftUI
+    /// held alive — 105–159 cards a landing, a 125–230 ms frame. The CARDS
+    /// leg is RED on 2f26fff2 (the one-update page without the rows' own
+    /// slices): "a page landing re-drew 7 rows already built" — the rows on
+    /// screen. The LIST leg is green on both trees (the List's landing cost
+    /// measured as the table's own update, not a row re-draw) and stays as
+    /// the guard. Every note is tagged, so the page's chips are a real
+    /// write; the Cards view also lands the page's card words.
+    @Test(arguments: [false, true])
+    func aPageLandingReDrawsNoRowAlreadyBuilt(cards: Bool) async throws {
+        #if DEBUG
+        try await withLibrary { session in
+            let ids = try notes(session, 200)
+            let tag = try session.operations.createTag(parent: nil, name: "everywhere")
+            let tagID = tag.id
+            try await session.runner.run { ops in
+                for id in ids { _ = try ops.applyTag(tagID, toPost: id) }
+            }
+            let model = LibraryCatalogModel(
+                session: session, defaults: try scrubbed(cards ? "land-cards" : "land-list"))
+            if cards { model.mode = .notes }
+            await model.search()
+            let (window, hosting) = mount(session, model)
+            defer { window.orderOut(nil); window.close() }
+            await settle(window, hosting, timeout: 1.5)
+            #expect(model.noteHits.count == LibraryCatalogModel.pageSize)
+            let built = LibraryPagedNotesProbe.rowBodies
+            #expect(built > 0, "the first page's rows on screen were built")
+
+            // The next page lands below what she is looking at (no scroll).
+            await model.loadMoreNotes()
+            await settle(window, hosting, timeout: 1.5)
+            #expect(model.noteHits.count == LibraryCatalogModel.pageSize * 2)
+            let redrawn = LibraryPagedNotesProbe.rowBodies - built
+            #expect(redrawn == 0, "a page landing re-drew \(redrawn) rows already built")
+        }
+        #endif
+    }
+
     /// **Her rider: many books never mean no notes.** Forty books under "All"
     /// in a 640-pt window: the first note row is ON SCREEN, in the listing's
     /// lower half. RED on the pre-fix tree: the notes sat below forty book

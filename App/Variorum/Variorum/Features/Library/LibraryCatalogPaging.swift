@@ -60,26 +60,85 @@ extension LibraryCatalogModel {
     }
 
     /// **A note row came on screen** (both views' `.onAppear`). Moves the near
-    /// window when it crosses a page, and asks for the next page when she is
-    /// within `prefetchMargin` rows of the end. Answers whether it asked
-    /// (`spawning: false` is the pins' road — they drive the read themselves).
+    /// window when it crosses a page, lands a waiting page when she is close
+    /// to the end, and asks for the next page early enough that it is in hand
+    /// before she gets there. Answers whether it asked (`spawning: false` is
+    /// the pins' road — they drive the read themselves).
     @discardableResult
     func noteRowAppeared(_ id: String, spawning: Bool = true) -> Bool {
         guard let position = noteIndex[id] else { return false }
         visibleNoteIndices.insert(position)
+        lastSeenPosition = position
+        if spawning { rowsMoved() }
         windowMaybeMoved(spawning: spawning)
-        guard notesHaveMore, !loadingMoreNotes,
-              position >= noteHits.count - Self.prefetchMargin else { return false }
+        if pendingLanding != nil, rowsAhead <= Self.landNowMargin {
+            landPendingPage()
+        }
+        guard canAskForMore,
+              rowsAhead < max(Self.prefetchMargin, nextPageSize / 2) else { return false }
         // The read starts on the NEXT turn, never inside the layout that
         // reported the row.
         if spawning { Task { @MainActor in await loadMoreNotes() } }
         return true
     }
 
+    /// A next page may be asked for: another exists, none is in flight or in
+    /// hand, the listing is paged (a day's answer is whole), and no newer
+    /// question is being read (`listedGeneration`).
+    var canAskForMore: Bool {
+        notesHaveMore && !loadingMoreNotes && pendingLanding == nil && editedOn == nil
+            && notesCursor != nil && listedGeneration == searchGeneration
+    }
+
+    /// How many listed rows lie below what she is looking at.
+    var rowsAhead: Int {
+        noteHits.count - 1 - (visibleNoteIndices.max() ?? lastSeenPosition)
+    }
+
+    /// **The next page's size — it GROWS** (17y B1 (k), measured): a page
+    /// LANDING costs a stall of its own in the List (the table re-measures and
+    /// re-diffs — 70–130 ms in the Debug build, barely moved by the page's
+    /// size), so the listing doubles with each page up to `maxPageSize`: a
+    /// whole corpus is a handful of landings, and each is still ONE bounded
+    /// read (∝ the page, never the corpus).
+    var nextPageSize: Int {
+        min(Self.maxPageSize, max(Self.pageSize, noteHits.count))
+    }
+
+    /// **She is scrolling** — the rows themselves say so (a row came or went
+    /// on screen; both views, where the List reports no scroll phase): a
+    /// page that arrives while the rows move WAITS for them to rest
+    /// `restInterval` — unless she gets within `landNowMargin` rows of the
+    /// end first — so a landing's stall falls in a pause, never under her
+    /// moving hand.
+    private func rowsMoved() {
+        lastRowMotion = ContinuousClock.now
+        listMoving = true
+        guard restWatch == nil else { return }
+        restWatch = Task { @MainActor [weak self] in
+            while let model = self {
+                let quiet = ContinuousClock.now - model.lastRowMotion
+                if quiet >= Self.restInterval {
+                    model.restWatch = nil
+                    model.rowsRested()
+                    return
+                }
+                try? await Task.sleep(for: Self.restInterval - quiet)
+            }
+        }
+    }
+
+    /// The rows have rested: a page in hand lands now.
+    func rowsRested() {
+        listMoving = false
+        if pendingLanding != nil { landPendingPage() }
+    }
+
     /// A note row left the screen (both views' `.onDisappear`).
     func noteRowDisappeared(_ id: String, spawning: Bool = true) {
         guard let position = noteIndex[id] else { return }
         visibleNoteIndices.remove(position)
+        if spawning { rowsMoved() }
         // The window only ever widens toward what she is looking at; it does
         // not shrink to an empty screen between two rows' callbacks.
         if !visibleNoteIndices.isEmpty { windowMaybeMoved(spawning: spawning) }
@@ -120,10 +179,22 @@ extension LibraryCatalogModel {
         guard ids != heldNoteIDs || ownershipHold == nil else { return }
         heldNoteIDs = ids
         ownershipHold?.cancel()
-        let ownership = ownership
+        guard !ids.isEmpty else {
+            ownershipHold = nil
+            return
+        }
         let session = session
-        ownershipHold = Task { @MainActor in
-            await ownership.observe(session: session, postIDs: ids, inBook: nil)
+        ownershipHold = Task { @MainActor [weak self] in
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.ownershipFacts(db, postIDs: ids, inBook: nil)
+                }) {
+                    // Each answer reaches only the rows whose facts changed.
+                    self?.landFacts(value, for: ids)
+                }
+            } catch {
+                // A failed read draws no new badge — silence, never a wrong mark.
+            }
         }
     }
 
@@ -138,12 +209,12 @@ extension LibraryCatalogModel {
     /// the question the listing is answering (a new question since — a typed
     /// letter, a sort — supersedes it, and its page never lands).
     func loadMoreNotes() async {
-        guard notesHaveMore, !loadingMoreNotes, editedOn == nil,
-              let cursor = notesCursor else { return }
+        guard canAskForMore, let cursor = notesCursor else { return }
         loadingMoreNotes = true
         let generation = searchGeneration
         let (query, sort, direction, mode) = (query, sort, direction, mode)
         let wing = session.wing.currentID
+        let limit = nextPageSize
         do {
             // The page AND its extras in ONE read, landed in ONE update — so
             // the rows on screen re-draw once per page, never once for the
@@ -152,7 +223,7 @@ extension LibraryCatalogModel {
             let (page, chips, cards, cardIDs) = try await session.database.read { db in
                 let page = try Queries.catalogNotesPage(
                     db, query: query, sort: sort, direction: direction,
-                    after: cursor, limit: Self.pageSize, wingID: wing)
+                    after: cursor, limit: limit, wingID: wing)
                 let ids = page.hits.map(\.id)
                 let plan = LibraryCardRead.plan(mode: mode, hits: page.hits)
                 return (
@@ -167,30 +238,42 @@ extension LibraryCatalogModel {
                 loadingMoreNotes = false
                 return
             }
-            // A note edited between two pages can move across the cursor; it
-            // is listed once (the first place it was read), never twice.
-            let fresh = page.hits.filter { noteIndex[$0.id] == nil }
-            let start = noteHits.count
-            noteHits += fresh
-            for (offset, hit) in fresh.enumerated() { noteIndex[hit.id] = start + offset }
-            mergeExtras(
-                chipIDs: page.hits.map(\.id), chips: chips, cardIDs: cardIDs, cards: cards)
-            // The pages this one filled are loaded (chips; cards for this mode).
-            let landed = Set(fresh.compactMap { noteIndex[$0.id] }.map { $0 / Self.pageSize })
-            chipPages.formUnion(landed)
-            cardPages.formUnion(landed)
-            notesCursor = page.next
-            notesHaveMore = page.next != nil
-            loadingMoreNotes = false
-            nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
-            holdNearFacts()
-            // Anything else the window now covers (rare — a page split by a
-            // dedupe) fills here; normally there is nothing left to read.
-            await loadNearExtras(generation: generation, replacing: false)
+            pendingLanding = PendingNotesPage(
+                page: page, chips: chips, cards: cards, cardIDs: cardIDs, generation: generation)
+            // Land now unless she is mid-scroll with rows still ahead of her
+            // (then it lands when the rows rest — `rowsMoved`).
+            if !listMoving || rowsAhead <= Self.landNowMargin { landPendingPage() }
         } catch {
             loadingMoreNotes = false
             guard generation == searchGeneration else { return }
             report(String(describing: error))
         }
+    }
+
+    /// **Land the page in hand** — ONE update: the rows, their chips, their
+    /// card words, the cursor.
+    func landPendingPage() {
+        guard let pending = pendingLanding else { return }
+        pendingLanding = nil
+        loadingMoreNotes = false
+        guard pending.generation == searchGeneration else { return }
+        let page = pending.page
+        // A note edited between two pages can move across the cursor; it is
+        // listed once (the first place it was read), never twice.
+        let fresh = page.hits.filter { noteIndex[$0.id] == nil }
+        let start = noteHits.count
+        noteHits += fresh
+        for (offset, hit) in fresh.enumerated() { noteIndex[hit.id] = start + offset }
+        mergeExtras(
+            chipIDs: page.hits.map(\.id), chips: pending.chips,
+            cardIDs: pending.cardIDs, cards: pending.cards)
+        // The pages this one filled are loaded (chips; cards for this mode).
+        let landed = Set(fresh.compactMap { noteIndex[$0.id] }.map { $0 / Self.pageSize })
+        chipPages.formUnion(landed)
+        cardPages.formUnion(landed)
+        notesCursor = page.next
+        notesHaveMore = page.next != nil
+        nearPages = Self.window(visible: visibleNoteIndices, count: noteHits.count)
+        holdNearFacts()
     }
 }

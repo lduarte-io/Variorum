@@ -162,6 +162,75 @@ struct LibraryPagingModelTests {
         }
     }
 
+    /// The listing GROWS by what it already lists (measured: a landing's
+    /// stall barely moves with the page's size, so fewer, larger landings),
+    /// each page still ONE bounded read, capped at `maxPageSize`.
+    @Test func theNextPageGrowsWithTheListing() async throws {
+        try await withNotes(page * 7 + 9) { _, model, ids in
+            await model.search()
+            var counts = [model.noteHits.count]
+            while model.notesHaveMore {
+                await model.appear(model.noteHits[model.noteHits.count - 2].id)
+                counts.append(model.noteHits.count)
+            }
+            #expect(counts == [page, page * 2, page * 4, page * 7 + 9])
+            #expect(model.noteHits.map(\.id) == ids.reversed())
+            #expect(LibraryCatalogModel.maxPageSize >= page)
+        }
+    }
+
+    /// A page read while the rows are MOVING waits for them to rest — the
+    /// landing's stall falls in a pause, never under her moving hand —
+    /// unless she is within `landNowMargin` rows of the end, where it lands
+    /// at once (she never reaches an end that is not the Library's).
+    @Test func aPageReadMidScrollLandsWhenTheRowsRest() async throws {
+        try await withNotes(page * 3) { _, model, _ in
+            await model.search()
+            let firstPage = model.noteHits
+            // Mid-scroll, far from the end: the page waits.
+            model.noteRowAppeared(firstPage[10].id, spawning: false)
+            model.listMoving = true
+            await model.loadMoreNotes()
+            #expect(model.noteHits == firstPage, "nothing landed under her moving hand")
+            #expect(model.pendingLanding != nil)
+            #expect(model.loadingMoreNotes, "the page is in hand, not yet listed")
+            model.rowsRested()
+            #expect(model.noteHits.count == page * 2, "it landed when the rows rested")
+            #expect(Array(model.noteHits.prefix(page)) == firstPage)
+
+            // Mid-scroll AT the margin: it lands at once.
+            model.listMoving = true
+            model.noteRowAppeared(model.noteHits[page * 2 - 3].id, spawning: false)
+            await model.loadMoreNotes()
+            #expect(model.noteHits.count == page * 3, "within the margin the page lands at once")
+            #expect(model.pendingLanding == nil)
+        }
+    }
+
+    /// While a NEW question is being read, no page is asked for — the old
+    /// listing's cursor under the new query and sort could land after the
+    /// new listing (rows out of order or skipped). A hole in this batch's own
+    /// new road, closed at self-review; a build pin of the guard.
+    @Test func noPageIsAskedForWhileANewQuestionIsRead() async throws {
+        try await withNotes(page * 3) { _, model, _ in
+            await model.search()
+            let generation = model.searchGeneration
+            model.setSort(.title)
+            let fresh = Task { await model.search() }
+            await Task.yield()
+            #expect(model.searchGeneration == generation + 1, "the new question is in flight")
+            #expect(!model.noteRowAppeared(model.noteHits[page - 2].id, spawning: false),
+                    "a row near the old listing's end asks for nothing")
+            await model.loadMoreNotes()
+            #expect(!model.loadingMoreNotes && model.pendingLanding == nil)
+            await fresh.value
+            #expect(model.noteHits.count == page, "the new question's first page, and only it")
+            // …and once it is listed, paging resumes on ITS cursor.
+            await model.appear(model.noteHits[page - 2].id)
+            #expect(model.noteHits.count == page * 2)
+        }
+    }
+
     @Test func theNearWindowIsThePagesAroundWhatIsOnScreen() {
         let p = LibraryCatalogModel.pageSize
         #expect(LibraryCatalogModel.window(visible: [], count: 0) == 0...0)

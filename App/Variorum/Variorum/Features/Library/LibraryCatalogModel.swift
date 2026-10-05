@@ -204,8 +204,25 @@ final class LibraryCatalogModel {
     /// Another page of notes exists beyond what is listed (the probe row's
     /// answer — never a count). The listing asks for it as she nears the end.
     var notesHaveMore = false
-    /// A next page is in flight (one at a time).
+    /// A next page is in flight (one at a time) — read, or read and waiting
+    /// to land.
     var loadingMoreNotes = false
+    /// A page read while she was scrolling, waiting for her to stop (or to
+    /// near the end) before it lands (`LibraryCatalogPaging.swift`).
+    @ObservationIgnored var pendingLanding: PendingNotesPage?
+    /// The listing is moving under her hand (rows coming and going on
+    /// screen), and when a row last did; the watch that notices the rest.
+    @ObservationIgnored var listMoving = false
+    @ObservationIgnored var lastRowMotion = ContinuousClock.now
+    @ObservationIgnored var restWatch: Task<Void, Never>?
+    /// The last row position a view said was on screen (when the visible set
+    /// is momentarily empty between two rows' callbacks).
+    @ObservationIgnored var lastSeenPosition = 0
+    /// The question the LISTED rows answer. While a newer question is being
+    /// read, no page is asked for: its cursor would be the old listing's,
+    /// read under the new question's query and sort, and could land after
+    /// the new listing — rows out of order, rows skipped.
+    @ObservationIgnored var listedGeneration = 0
     /// Each listed note's position (the visible window's arithmetic).
     @ObservationIgnored var noteIndex: [String: Int] = [:]
     /// The listed notes' positions the views say are on screen.
@@ -222,21 +239,52 @@ final class LibraryCatalogModel {
     @ObservationIgnored var windowCheckQueued = false
     /// **The owned-by badge facts — HELD for the near window only** (13i-c
     /// U4's one page-driven observation, owned here since 17y B1 (k) so the
-    /// window, not the whole listing, is what it observes).
-    @ObservationIgnored let ownership = OwnershipFactsModel()
+    /// window, not the whole listing, is what it observes). The last answer
+    /// each note had; the rows read theirs through their own slice
+    /// (`rowExtras(for:)`), never this dictionary.
+    @ObservationIgnored var heldFacts: [String: Queries.OwnershipFacts] = [:]
     @ObservationIgnored var ownershipHold: Task<Void, Never>?
     @ObservationIgnored var heldNoteIDs: [String] = []
+    /// **Each built row's own observable slice** (17y B1 (k), measured — the
+    /// `LibraryNoteRowExtras` reason). Made on a row's first build and kept:
+    /// a row SwiftUI keeps alive holds its slice, so a slice is never
+    /// replaced under it.
+    @ObservationIgnored private var rowSlices: [String: LibraryNoteRowExtras] = [:]
+    /// The extras as last written, readable WITHOUT observing them (a row's
+    /// slice is seeded from these inside the row's own build).
+    @ObservationIgnored private var tagsAsWritten: [String: [Tag]] = [:]
+    @ObservationIgnored private var cardsAsWritten: [String: NoteCards.Card] = [:]
+    /// A merge pushes its own ids into the slices (∝ the page); any other
+    /// write pushes every built slice (∝ the rows built — once per act or
+    /// question, never per page).
+    @ObservationIgnored private var mergingExtras = false
     /// Pages whose chips are loaded for the current listing; pages whose card
     /// words are loaded for the current mode.
     @ObservationIgnored var chipPages: Set<Int> = []
     @ObservationIgnored var cardPages: Set<Int> = []
     /// 13e E8: the listed notes' live tags (whole rows — see `TagChips`).
-    private(set) var postTags: [String: [Tag]] = [:]
+    /// The ROWS read their own slice (`rowExtras(for:)`); this dictionary
+    /// stays observed for every other reader (the bulk bar's untag menu).
+    private(set) var postTags: [String: [Tag]] = [:] {
+        didSet {
+            tagsAsWritten = postTags
+            if !mergingExtras {
+                for (id, slice) in rowSlices { slice.setTags(postTags[id] ?? []) }
+            }
+        }
+    }
     /// 13g R5-6: postID → the note card's read-time extras (snippet +
     /// books). Loaded ONLY in `.notes` mode and only for the hits on
     /// screen — the same bounded-to-what-is-listed discipline as
-    /// `postTags`.
-    private(set) var noteCards: [String: NoteCards.Card] = [:]
+    /// `postTags`. Rows read their slice, as for `postTags`.
+    private(set) var noteCards: [String: NoteCards.Card] = [:] {
+        didSet {
+            cardsAsWritten = noteCards
+            if !mergingExtras {
+                for (id, slice) in rowSlices { slice.setCard(noteCards[id]) }
+            }
+        }
+    }
     private(set) var lastError: String?
     /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling):
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
@@ -461,6 +509,7 @@ final class LibraryCatalogModel {
                     day: day, wing: wing, noteDepth: noteDepth)
             }
             guard generation == searchGeneration else { return }  // stale
+            listedGeneration = generation
             bookHits = listing.books
             noteHits = listing.notes
             blockHits = listing.blocks
@@ -468,7 +517,13 @@ final class LibraryCatalogModel {
             notesHaveMore = listing.next != nil
             truncatedKinds = listing.blocksOver ? [.block] : []
             reindexNotes()
-            if startingOver { visibleNoteIndices = [] }
+            if startingOver {
+                visibleNoteIndices = []
+                lastSeenPosition = 0
+            }
+            // Whatever page was in hand answered the question before this one.
+            pendingLanding = nil
+            loadingMoreNotes = false
             pruneSelectionToListing()   // R2-2: the pick follows the listing
             // The extras (chips, card words) are the NEAR pages' only — and a
             // re-asked listing's are all stale, so the window re-reads.
@@ -534,14 +589,22 @@ final class LibraryCatalogModel {
         return listing
     }
 
-    /// **The notes' page size** — a page, never a cap (17y B1 (k)): the
-    /// listing reads this many at a time and asks for the next as she nears
-    /// the end. Large enough that a page outruns a fast scroll (two screens
+    /// **The notes' FIRST page** — a page, never a cap (17y B1 (k)): the
+    /// listing reads this many first; each next page doubles what is listed
+    /// up to `maxPageSize` (`nextPageSize`) and is asked for as she nears the
+    /// end. Large enough that a page outruns a fast scroll (two screens
     /// of List rows, four of cards), small enough that a page is one quick
     /// statement (measured: ~2 ms at 20,000 notes in the edited sort).
     nonisolated static let pageSize = 80
     /// How many rows before the end of the listed notes ask for the next page.
     nonisolated static let prefetchMargin = 30
+    /// Within this many rows of the end a page in hand lands at once, scroll
+    /// or no scroll (she must never reach an end that is not the Library's).
+    nonisolated static let landNowMargin = 40
+    /// How long the rows must be still before a waiting page lands.
+    nonisolated static let restInterval = Duration.milliseconds(200)
+    /// The largest page the listing grows to (`nextPageSize`).
+    nonisolated static let maxPageSize = 1_280
     /// The block hits' cap (a search's named blocks and scraps) — the one
     /// listing still capped, and the one the truncation line now speaks for.
     nonisolated static let blockCap = 40
@@ -640,10 +703,12 @@ final class LibraryCatalogModel {
     /// The view calls this when the MODE changes (a mode switch does not
     /// re-run the search, and switching INTO a mode that draws words must
     /// fill them) — the NEAR pages' words (17y B1 (k)); farther pages fill as
-    /// she scrolls to them.
+    /// she scrolls to them. The words REPLACE what the old mode held: a mode
+    /// keeps only what it draws (`LibraryCardRead.plan` — the List keeps the
+    /// bare rows' words and no books; the Timeline keeps nothing).
     func refreshNoteCards() async {
         cardPages = []
-        await loadNearExtras(generation: searchGeneration, replacing: false, cardsOnly: true)
+        await loadNearExtras(generation: searchGeneration, replacing: true, cardsOnly: true)
     }
 
     /// **The extras of the pages near what is on screen** (17y B1 (k)): the
@@ -670,7 +735,7 @@ final class LibraryCatalogModel {
             }
             guard generation == searchGeneration else { return }  // stale extras never land
             if replacing {
-                postTags = chips
+                if !cardsOnly { postTags = chips }
                 noteCards = cards
             } else {
                 mergeExtras(chipIDs: chipIDs, chips: chips, cardIDs: cardIDs, cards: cards)
@@ -693,15 +758,49 @@ final class LibraryCatalogModel {
         chipIDs: [String], chips: [String: [Tag]],
         cardIDs: [String], cards: [String: NoteCards.Card]
     ) {
+        mergingExtras = true
+        defer { mergingExtras = false }
         if !chipIDs.isEmpty {
-            var merged = postTags
-            for id in chipIDs { merged[id] = chips[id] }
-            if merged != postTags { postTags = merged }
+            var merged = tagsAsWritten
+            var changed = false
+            for id in chipIDs where merged[id] != chips[id] {
+                merged[id] = chips[id]
+                changed = true
+            }
+            if changed { postTags = merged }
+            // ONLY these ids' rows hear it (the measured reason).
+            for id in chipIDs { rowSlices[id]?.setTags(chips[id] ?? []) }
         }
         if !cardIDs.isEmpty {
-            var merged = noteCards
-            for id in cardIDs { merged[id] = cards[id] }
-            if merged != noteCards { noteCards = merged }
+            var merged = cardsAsWritten
+            var changed = false
+            for id in cardIDs where merged[id] != cards[id] {
+                merged[id] = cards[id]
+                changed = true
+            }
+            if changed { noteCards = merged }
+            for id in cardIDs { rowSlices[id]?.setCard(cards[id]) }
+        }
+    }
+
+    /// **A row's own slice of the extras** (17y B1 (k)): the row reads its
+    /// tags, card words and owned-by facts HERE, so a write for other rows
+    /// (a page landing, a window's extras, another note's badge) never
+    /// re-draws it. Seeded from what is written, without observing it.
+    func rowExtras(for id: String) -> LibraryNoteRowExtras {
+        if let slice = rowSlices[id] { return slice }
+        let slice = LibraryNoteRowExtras(
+            tags: tagsAsWritten[id] ?? [], card: cardsAsWritten[id], facts: heldFacts[id])
+        rowSlices[id] = slice
+        return slice
+    }
+
+    /// The held observation's answer for `ids` lands in their slices — only
+    /// the notes whose facts changed hear it.
+    func landFacts(_ value: [String: Queries.OwnershipFacts], for ids: [String]) {
+        for id in ids where heldFacts[id] != value[id] {
+            heldFacts[id] = value[id]
+            rowSlices[id]?.setFacts(value[id])
         }
     }
 
@@ -721,4 +820,40 @@ final class LibraryCatalogModel {
     /// says out loud what it is. Behaviour-identical — the four acts wrote
     /// exactly this, in exactly these places.
     func report(_ message: String?) { lastError = message }
+}
+
+/// **A page of notes read and waiting to land** (17y B1 (k)): the rows, their
+/// chips and card words, and the question they answer.
+struct PendingNotesPage {
+    let page: Queries.CatalogNotesPage
+    let chips: [String: [Tag]]
+    let cards: [String: NoteCards.Card]
+    let cardIDs: [String]
+    let generation: Int
+}
+
+/// **One listed note's own observable slice** (17y B1 (k), measured on the
+/// 822-note fixture): every row used to read the WHOLE extras dictionaries
+/// (`postTags`, `noteCards`) and the whole owned-by facts, so every write —
+/// a page landing its chips, a window loading its extras, a badge for some
+/// other note — re-drew every row SwiftUI held alive: 105–159 card rows per
+/// page landing (the Cards' lazy column keeps far more than the screen),
+/// 36–86 List rows, a 100–270 ms frame each time. A row reads only its own
+/// slice; a write reaches only the rows whose values changed.
+@MainActor @Observable
+final class LibraryNoteRowExtras {
+    private(set) var tags: [Tag]
+    private(set) var card: NoteCards.Card?
+    private(set) var facts: Queries.OwnershipFacts?
+
+    init(tags: [Tag], card: NoteCards.Card?, facts: Queries.OwnershipFacts?) {
+        self.tags = tags
+        self.card = card
+        self.facts = facts
+    }
+
+    // Equal writes never notify (an @Observable setter always would).
+    func setTags(_ value: [Tag]) { if value != tags { tags = value } }
+    func setCard(_ value: NoteCards.Card?) { if value != card { card = value } }
+    func setFacts(_ value: Queries.OwnershipFacts?) { if value != facts { facts = value } }
 }
