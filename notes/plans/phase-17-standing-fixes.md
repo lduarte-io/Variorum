@@ -2587,11 +2587,11 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 
 | # | piece | status |
 |---|---|---|
-| 0 | This record + the b3 captures dir gitignored | IN-PROGRESS (this commit) |
-| 1 | (d) the cards view → "Cards" | NOT-STARTED |
-| 2 | (i) "unfiled" wins everywhere the chapterless state shows | NOT-STARTED |
-| 3 | (c) Duplicate as Version carries post tags (Diverge stays tag-less) | DONE (a93fbf6d red · this commit fix) — `duplicateAsVersion` copies the source's live post-tag applications through the ceremony copy's `copyLiveTags` (made internal), in its OWN transaction (Diverge + promoteLens compose `copyPost` and stay tag-less); a ROW copy, no intake (P-17y-B3-c1). Pin `DuplicateCarriesTagsTests` RED on the pre-fix tree (`c-red.log`: "5 tests … failed … with 4 issues" — the copy's paths + row count, the undo test's do + redo arms; the three controls green) → GREEN with every duplicate-touching core suite "143 tests in 14 suites passed" (`c-green.log`). The tutorial seeder's twin apply tolerates `alreadyTagged` ONLY (the twin is now born wearing the guide tag) — the spine runs at the END. Doors (Library/Takes/chip/seeder) unchanged: no receipt changed |
-| 4 | item 11 — F-B2-7: the book view's own navigator/Outline drop gate (lock first; satisfied = nothing) | NOT-STARTED |
+| 0 | This record + the b3 captures dir gitignored | DONE (5c1401fb) |
+| 1 | (d) the cards view → "Cards" | DONE (cad446f4 red · bb586925 fix) — `LibraryCatalogModel.Mode.label` (List · **Cards** · Timeline — the `Scope.label` precedent; the case keeps its model name), the picker renders `ForEach(Mode.allCases)` from it. Pin `LibraryCardsWordTests` (a source scan: no mode word inline + the words) RED on the pre-fix tree (`m1-red.log`: 2 issues — three inline mode words, the "Notes" segment) → GREEN in the batch below. Word PROVISIONAL-for-13s (hers, F-U6-5) |
+| 2 | (i) "unfiled" wins everywhere the chapterless state shows | DONE (893d160c red · 2b6f82fb fix) — `BookPanelCopy.noChapter` aliases the headers' `unfiled` (the three move menus — Book Panel, Index column, the navigator/Outline rows — render it); the Add receipt says "…added at the end of the book, unfiled." Pin `UnfiledWordTests` (grep-form over every Mac/Shared code line + the constant + the receipt) RED on the pre-fix tree (4 issues) → GREEN below. Two JUSTIFIED pin edits (`BookCollectingDoorsTests` constant, `BookArrivalsTests` receipt — subjects unchanged). The tutorial prose never named "No Chapter" (scanned) |
+| 3 | (c) Duplicate as Version carries post tags (Diverge stays tag-less) | DONE (a93fbf6d red · cbc0d86b fix) — `duplicateAsVersion` copies the source's live post-tag applications through the ceremony copy's `copyLiveTags` (made internal), in its OWN transaction (Diverge + promoteLens compose `copyPost` and stay tag-less); a ROW copy, no intake (P-17y-B3-c1). Pin `DuplicateCarriesTagsTests` RED on the pre-fix tree (`c-red.log`: "5 tests … failed … with 4 issues" — the copy's paths + row count, the undo test's do + redo arms; the three controls green) → GREEN with every duplicate-touching core suite "143 tests in 14 suites passed" (`c-green.log`). The tutorial seeder's twin apply tolerates `alreadyTagged` ONLY (the twin is now born wearing the guide tag) — the spine runs at the END. Doors (Library/Takes/chip/seeder) unchanged: no receipt changed |
+| 4 | item 11 — F-B2-7: the book view's own navigator/Outline drop gate (lock first; satisfied = nothing) | DONE (bd0b3c22 red · this commit fix) — `BookStructureModel.postDropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `postDropPlan`), the lock consulted FIRST and the satisfied drop a nothing (B2's MAJOR-1 / NIT-4 orderings); `filePost` speaks `BookPanelCopy.needsManualOrder` on the book view's own error face (`lastError` — where the frozen refusal already speaks), naming the order she is looking through (`viewOrder`, else the stored one). Pin `BookViewDropGateTests` RED on the pre-fix tree (`m1-red.log`: 2 issues — the re-place and the dispatcher; the successor, frozen×2 and cross-chapter controls green) → **GREEN: "121 tests in 15 suites passed"** (`m1-green.log` — the three B3 pins + BindDoor, BookArrivals, BookCollectingDoors, BookDrop, the four BookPanel suites, BookStructureModel, LibraryCardName, MembershipChoice, VocabularySweep) |
 | 5 | (r) the № census panel as a true overlay dropdown | NOT-STARTED |
 | 6 | (s) the starred shelf (virtual, books only, drop-to-star) | NOT-STARTED |
 | 7 | (l) book-row context menus beyond the Bookcase | NOT-STARTED |
@@ -2604,3 +2604,23 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 | 14 | Record close (first line, findings, PROVISIONALs → QUESTIONS #185) | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
+
+**Red-on-old method (every bug-class row):** each pin is committed AHEAD of its fix and run on that
+pre-fix committed tree (the natural red, the B2 precedent); the fix commit follows; no synthetic
+revert is in flight at any time.
+
+### THE TRACE — item 11 (F-B2-7), before the fix
+
+`BookView`'s navigator rows and Outline's post rows both drop through ONE dispatcher,
+`BookStructureModel.acceptDrop` → `.post(postID)` → `filePost(…, reposition:
+repositionsOnDrop(viewOrder:))`. `repositionsOnDrop` is false whenever the order she is looking
+through (the view-local `viewOrder`, else the stored `sort_field`) is not Manual, and
+`postDropPlan` then drops the `before` anchor (its own doc: "silently rewriting it from a drop would
+edit an order she cannot see"). A note dropped onto a SIBLING in its own chapter (or onto its own
+chapter's heading) therefore resolves to `.file(the chapter it is already in, before: nil)` →
+`assignPostToSection` to that same chapter: no row changes, `run` clears `lastError`, nothing
+speaks — under a hairline that promised "a dropped row lands right above this one". The Book
+Panel's identical gate was B2's (e) (`BookPanelBrain.dropOutcome`); its two orderings (lock first,
+satisfied = nothing) were settled by B2's ladder. Measured by the red pin on the pre-fix tree:
+`lastError == nil` for a real re-place under Created ↓.
+

@@ -20,6 +20,7 @@ import Foundation
 import Testing
 @testable import Variorum
 
+@MainActor
 @Suite("17y (d) — the Library's cards view is called \"Cards\"")
 struct LibraryCardsWordTests {
     private static var appRoot: URL {

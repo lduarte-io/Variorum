@@ -374,6 +374,77 @@ final class BookStructureModel {
         }
     }
 
+    /// What a post drop RESOLVES to on the book view's own rows (17y B3
+    /// item 11 — F-B2-7, re-owned from the B2 ladder's round 1): the Book
+    /// Panel's `BookPanelBrain.DropOutcome`, mirrored with B2's two settled
+    /// orderings.
+    nonisolated enum PostDropOutcome: Equatable, Sendable {
+        /// Write this through the standing ops.
+        case plan(PostDropPlan)
+        /// Nothing to do — dropped on itself, or already where it stands (in
+        /// a stamp order: onto its immediate SHOWN successor — NIT-4's rule).
+        case nothing
+        /// A note dropped to RE-PLACE it inside its own chapter (onto a
+        /// sibling, or its own chapter's heading) while an OPEN book reads in
+        /// a STAMP order: `postDropPlan` keeps the order she cannot see
+        /// untouched, so the drop would file the note into the chapter it is
+        /// already in — a write that changes nothing, under a hairline that
+        /// promised "lands right above". It refuses WITH the road instead.
+        case needsManualOrder
+    }
+
+    /// **THE ONE RESOLUTION every book-view post drop takes** (17y B3 item
+    /// 11): `postDropPlan`, unchanged, plus the sort gate's honest answer.
+    /// `frozen` = finished or sealed (`reading.locked` — sealing finishes
+    /// too). **The lock answers FIRST** (the B2 ladder's MAJOR-1): a frozen
+    /// book's plan runs as it is so the operation's own refusal speaks
+    /// (reopen / unseal), because the sort advice's road — save a Manual
+    /// order — is impossible there.
+    nonisolated static func postDropOutcome(
+        _ site: PostDropSite, dragged postID: String,
+        groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])],
+        reposition: Bool, frozen: Bool
+    ) -> PostDropOutcome {
+        guard let plan = postDropPlan(
+            site, dragged: postID, groups: groups, reposition: reposition)
+        else { return .nothing }
+        if frozen { return .plan(plan) }
+        // The gate: a stamp order, a plan that files the note into the
+        // chapter it is ALREADY in, where the same drop in manual order
+        // would have re-placed it.
+        if !reposition, plan.before == nil,
+           plan.sectionID == chapterKey(of: postID, in: groups),
+           let manual = postDropPlan(site, dragged: postID, groups: groups, reposition: true),
+           let before = manual.before, before != postID {
+            // Already satisfied (NIT-4): onto its immediate shown successor
+            // it would land right where it stands — no placement was asked.
+            if before == shownSuccessor(of: postID, in: groups) { return .nothing }
+            return .needsManualOrder
+        }
+        return .plan(plan)
+    }
+
+    /// The chapter a note is shown in (nil = unfiled, or a chapterless book).
+    private nonisolated static func chapterKey(
+        of postID: String,
+        in groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> String? {
+        groups.first { $0.entries.contains { $0.postID == postID } }?.section?.id
+    }
+
+    /// The note shown right after `postID` in its own group (nil = last).
+    private nonisolated static func shownSuccessor(
+        of postID: String,
+        in groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> String? {
+        guard let entries = groups.first(where: { $0.entries.contains { $0.postID == postID } })?
+                  .entries,
+              let index = entries.firstIndex(where: { $0.postID == postID }),
+              index + 1 < entries.count
+        else { return nil }
+        return entries[index + 1].postID
+    }
+
     /// True when a drop should also reposition the membership — i.e. the book
     /// is rendering in its stored MANUAL order (no view-local override, or an
     /// override that is itself manual).
@@ -427,7 +498,8 @@ final class BookStructureModel {
             let reposition = repositionsOnDrop(viewOrder: viewOrder)
             Task {
                 await filePost(
-                    postID, onto: postSite, entries: entries, reposition: reposition)
+                    postID, onto: postSite, entries: entries, reposition: reposition,
+                    viewOrder: viewOrder)
             }
         }
         return true
@@ -455,14 +527,34 @@ final class BookStructureModel {
     /// `assignPostToSection`, order through the standing
     /// `reorderReadingPost` — no new semantics, and a LOCKED book refuses
     /// through the operation itself, spoken (P-2; QUESTIONS #25(b)).
+    ///
+    /// 17y B3 item 11 (F-B2-7): it resolves through `postDropOutcome` — a
+    /// stamp-ordered re-place inside the note's own chapter used to write
+    /// nothing and say nothing; it now refuses WITH the road (the Book
+    /// Panel's words, naming the order she is looking through — `viewOrder`
+    /// when she browses in one, else the stored order), and a drop already
+    /// satisfied stays a quiet nothing. A frozen book still answers first,
+    /// through the operation (above).
     func filePost(
         _ postID: String, onto site: PostDropSite,
-        entries: [Queries.ReadingEntry], reposition: Bool
+        entries: [Queries.ReadingEntry], reposition: Bool,
+        viewOrder: Queries.ReadingOrder? = nil
     ) async {
-        guard let plan = Self.postDropPlan(
+        let plan: PostDropPlan
+        switch Self.postDropOutcome(
             site, dragged: postID, groups: grouped(entries: entries),
-            reposition: reposition)
-        else { return }
+            reposition: reposition, frozen: reading?.locked ?? false) {
+        case .nothing:
+            return
+        case .needsManualOrder:
+            let order = viewOrder.map(BookOrderChoices.label(for:))
+                ?? BookOrderChoices.storedLabel(for: reading)
+            lastError = BookPanelCopy.needsManualOrder(
+                book: reading?.name ?? "This book", order: order)
+            return
+        case .plan(let resolved):
+            plan = resolved
+        }
         await run { [readingID] ops in
             try ops.assignPostToSection(postID, in: readingID, section: plan.sectionID)
             if let before = plan.before {
