@@ -509,6 +509,9 @@ nonisolated enum BookcaseCopy {
     /// 17y B2 (b) — my order's row grip (the app's one handle glyph, ⠿ —
     /// the Lenses rows', the book view's chapter headers', the Book Panel's).
     static let gripGlyph = "\u{283F}"
+    /// The grip column's width — inside the row, pulled into the board's
+    /// 28-pt gutter so the name column never moves between orders.
+    static let gripColumn: CGFloat = 16
     static let gripHelp =
         "Drag to place this book by hand \u{2014} it lands right above the row you drop it on, "
         + "on any shelf"

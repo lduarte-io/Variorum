@@ -481,77 +481,84 @@ struct ShelfView: View {
         // 17y B2 (b): ONE value for the row drop, the grip and Send to
         // Top/Bottom (`BookcaseBoard.placesByHand`, pinned).
         let placing = BookcaseBoard.placesByHand(model.orderMode)
-        return Button {
-            onOpen(.reading(reading.id))
-        } label: {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    // 13i-d U2 ACT 0: the UNION (`ShelfBook.starred`).
-                    if book.starred {
-                        Text(StarCopy.glyph)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.star)
-                    }
-                    Text(tokens.chromeLabel(reading.name))
-                        .font(tokens.body.weight(.semibold))
-                        .foregroundStyle(tokens.ink)
-                        .lineLimit(1)
-                }
-                .frame(minWidth: 160, alignment: .leading)
-                Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent.opacity(0.85))
-                    .lineLimit(1)
-                Spacer(minLength: 12)
-                // §23: details OFF hides the row meta AND the arrivals count
-                // ("the point is that the chrome can be clean if desired") —
-                // ONE value (`BookcaseRowMeta.drawn`, pinned), 13i-d U4.
-                if let meta = BookcaseRowMeta.drawn(
-                    book, detailsShown: model.detailsShown,
-                    words: model.wordCounts[book.reading.id],
-                    progress: model.progress(for: book),
-                    gatheringCount: model.gatheringCounts[book.reading.id],
-                    archived: model.archivedCounts[book.reading.id] ?? 0) {
-                    metaText(meta)
-                        .font(tokens.small)
-                        .lineLimit(1)
-                }
-            }
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
-            // A BOOK dropped here (the Bookcase's own token — my order only,
-            // the placing mode, §24) lands right ABOVE this row. On the inner
-            // content so the row's NOTE drop below keeps its own road.
-            .bookcaseDropSite(
-                enabled: placing,
-                onHover: { rowDropTarget = $0 ? reading.id
-                    : (rowDropTarget == reading.id ? nil : rowDropTarget) }
-            ) { payload in
-                if case .book(let dragged) = payload {
-                    Task { await model.dropBook(dragged, before: reading.id) }
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .overlay(alignment: .top) {
-            // My order's insertion hairline: the dragged book lands HERE.
-            if placing, rowDropTarget == reading.id {
-                Rectangle().fill(tokens.accent.opacity(0.6)).frame(height: 1)
-            }
-        }
-        .overlay(alignment: .leading) {
+        return HStack(alignment: .firstTextBaseline, spacing: 0) {
             // 17y B2 (b) — HER DRAG-BARS ASK: in my order every row shows the
-            // app's handle (⠿), in the board's leading GUTTER so the name
-            // column never moves when the order changes. Drawn exactly where
-            // a drag can place (P-2); the whole row stays the drag source.
-            if placing {
-                Text(BookcaseCopy.gripGlyph)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .help(BookcaseCopy.gripHelp)
-                    .offset(x: -16)
+            // app's handle (⠿). It lives in a fixed GRIP COLUMN the row always
+            // carries, INSIDE the row's own bounds — drawn by opacity, never
+            // inserted — and the row is pulled into the board's gutter by that
+            // column's width, so the name column never moves when the order
+            // changes. (The first build drew it at an offset OUTSIDE the row,
+            // and the walk found rows that had moved between shelves drawing
+            // the wrong grip state — F-B2-5.) Drawn exactly where a drag can
+            // place (P-2); the whole row, grip included, is the drag source.
+            Text(BookcaseCopy.gripGlyph)
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .frame(width: BookcaseCopy.gripColumn, alignment: .leading)
+                .opacity(placing ? 1 : 0)
+                .help(placing ? BookcaseCopy.gripHelp : "")
+                .accessibilityHidden(!placing)
+            Button {
+                onOpen(.reading(reading.id))
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        // 13i-d U2 ACT 0: the UNION (`ShelfBook.starred`).
+                        if book.starred {
+                            Text(StarCopy.glyph)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.star)
+                        }
+                        Text(tokens.chromeLabel(reading.name))
+                            .font(tokens.body.weight(.semibold))
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(1)
+                    }
+                    .frame(minWidth: 160, alignment: .leading)
+                    Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent.opacity(0.85))
+                        .lineLimit(1)
+                    Spacer(minLength: 12)
+                    // §23: details OFF hides the row meta AND the arrivals count
+                    // ("the point is that the chrome can be clean if desired") —
+                    // ONE value (`BookcaseRowMeta.drawn`, pinned), 13i-d U4.
+                    if let meta = BookcaseRowMeta.drawn(
+                        book, detailsShown: model.detailsShown,
+                        words: model.wordCounts[book.reading.id],
+                        progress: model.progress(for: book),
+                        gatheringCount: model.gatheringCounts[book.reading.id],
+                        archived: model.archivedCounts[book.reading.id] ?? 0) {
+                        metaText(meta)
+                            .font(tokens.small)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.vertical, 8)
+                .contentShape(Rectangle())
+                // A BOOK dropped here (the Bookcase's own token — my order only,
+                // the placing mode, §24) lands right ABOVE this row. On the inner
+                // content so the row's NOTE drop below keeps its own road.
+                .bookcaseDropSite(
+                    enabled: placing,
+                    onHover: { rowDropTarget = $0 ? reading.id
+                        : (rowDropTarget == reading.id ? nil : rowDropTarget) }
+                ) { payload in
+                    if case .book(let dragged) = payload {
+                        Task { await model.dropBook(dragged, before: reading.id) }
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .overlay(alignment: .top) {
+                // My order's insertion hairline: the dragged book lands HERE.
+                if placing, rowDropTarget == reading.id {
+                    Rectangle().fill(tokens.accent.opacity(0.6)).frame(height: 1)
+                }
             }
         }
+        // The grip column sits in the board's gutter (see above).
+        .padding(.leading, -BookcaseCopy.gripColumn)
         .draggable(BookcaseDragToken(.book(reading.id)))
         // A NOTE (plain text — "drag posts onto a book", sitting 1) joins
         // the book: the shipped road, unchanged.

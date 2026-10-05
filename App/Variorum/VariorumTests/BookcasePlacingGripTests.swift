@@ -20,6 +20,7 @@
 //  `false` turns both red. The face itself is the walk's capture.
 //
 
+import Foundation
 import Testing
 @testable import Variorum
 
@@ -37,5 +38,8 @@ struct BookcasePlacingGripTests {
         #expect(BookcaseCopy.gripGlyph == "\u{283F}", "the app's one handle glyph")
         #expect(BookcaseCopy.gripHelp.contains("lands right above the row"),
                 "the help names P-13id-U1-12's landing rule")
+        // F-B2-5: the grip lives INSIDE the row, in a column the row is pulled
+        // into the board's 28-pt gutter by — so the column must fit it.
+        #expect(BookcaseCopy.gripColumn > 0 && BookcaseCopy.gripColumn < 28)
     }
 }
