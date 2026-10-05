@@ -444,9 +444,12 @@ struct ShelfView: View {
                 }
                 // The hint is a SOLO'd shelf's; in All an empty shelf is its
                 // header alone (four hints in a row read as noise — the walk).
+                // 17y (s): the starred shelf says its own one-liner — here,
+                // in the solo'd board, and nowhere on the strip.
                 if section.books.isEmpty, model.solo == nil, !isAll {
-                    Text(tokens.chromeLabel(
-                        "Nothing on this shelf yet — drag a book onto its name."))
+                    Text(tokens.chromeLabel(section.kind == .starred
+                        ? BookcaseCopy.starredShelfEmpty
+                        : "Nothing on this shelf yet — drag a book onto its name."))
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .padding(.vertical, 10)
@@ -472,6 +475,9 @@ struct ShelfView: View {
             switch section.kind {
             case .unshelved: return BookcaseCopy.unshelvedName
             case .shelf(let shelf): return ShelfFace.label(shelf)
+            // Never drawn (the starred shelf has no All header — it is its
+            // own scope), named for exhaustiveness.
+            case .starred: return BookcaseCopy.starredShelfName
             }
         }()
         let label = HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -518,7 +524,7 @@ struct ShelfView: View {
         let reading = book.reading
         // 17y B2 (b): ONE value for the row drop, the grip and Send to
         // Top/Bottom (`BookcaseBoard.placesByHand`, pinned).
-        let placing = BookcaseBoard.placesByHand(model.orderMode)
+        let placing = model.placesByHand
         return HStack(alignment: .firstTextBaseline, spacing: 0) {
             // 17y B2 (b) — HER DRAG-BARS ASK: in my order every row shows the
             // app's handle (⠿). It lives in a fixed GRIP COLUMN the row always
@@ -698,7 +704,7 @@ struct ShelfView: View {
         }
         // My order's own doors (§20, §24): rendered only in the PLACING mode
         // — under A–Z or last edited a hand position would not show (P-2).
-        if BookcaseBoard.placesByHand(model.orderMode) {
+        if model.placesByHand {
             Button(CapabilityRegistry.capability(.sendBookToTop).verb) {
                 Task { await model.place(reading.id, at: .top) }
             }

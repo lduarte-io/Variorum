@@ -43,10 +43,21 @@ nonisolated enum BookcaseOrderMode: String, CaseIterable, Sendable {
 }
 
 /// What the strip has selected: ALL (every shelf stacked, unshelved at the
-/// top) or ONE shelf solo'd.
+/// top), ONE shelf solo'd — or the STARRED shelf (17y item (s), R-17y-9).
 nonisolated enum BookcaseScope: Hashable, Sendable {
     case all
     case shelf(String)
+    /// **THE STARRED SHELF** (17y item (s) — R-17y-9, her words: "in library,
+    /// have an automatic 'starred' shelf that isn't deletable… it is the
+    /// books only… i do think build now"). VIRTUAL by construction (the
+    /// Home-wing precedent, R-13ia-2): no `shelf` row exists for it, so it
+    /// is undeletable, unrenamable, convergence-proof and schema-free
+    /// STRUCTURALLY — never by a guard. It is a FILTER, never a container:
+    /// a book shown there still lives on its real shelf (the starred float's
+    /// sibling, not its replacement). "Books only" = the Bookcase's readings
+    /// (books and gatherings) wearing the union star — never notes (the
+    /// sidebar's Starred section, untouched, lists both).
+    case starred
 }
 
 /// **The № census's six SOLO filters** (§23: *"books · gatherings · finished
@@ -87,6 +98,9 @@ nonisolated enum BookcaseBoard {
         enum Kind: Equatable, Sendable {
             case unshelved
             case shelf(Shelf)
+            /// 17y (s): the starred shelf's one section (a filter — its books
+            /// keep their real shelves).
+            case starred
         }
 
         let kind: Kind
@@ -97,6 +111,7 @@ nonisolated enum BookcaseBoard {
             switch kind {
             case .unshelved: "unshelved"
             case .shelf(let shelf): shelf.id
+            case .starred: BookcaseBoard.starredSectionID
             }
         }
 
@@ -130,11 +145,25 @@ nonisolated enum BookcaseBoard {
     /// filing"*); from All it lands UNSHELVED (§19's ruling).
     static func mintShelf(for scope: BookcaseScope, shelves: [Shelf]) -> String? {
         if case .shelf(let id) = effectiveScope(scope, shelves: shelves) { return id }
+        // 17y (s): the starred shelf is a FILTER, never a place a book can be
+        // put — a mint there lands unshelved, born unstarred (PROVISIONAL
+        // P-17y-B3-s4; one line to flip to "born starred").
         return nil
     }
 
     /// The key of the UNSHELVED run wherever a shelf id is a dictionary key.
     static let unshelvedKey = ""
+
+    /// The starred shelf's section id (17y (s)) — never a stored shelf's id
+    /// (those are UUIDs), so it can collide with none.
+    static let starredSectionID = "starred"
+
+    /// **The starred shelf's books** (17y (s)): every reading on the board
+    /// wearing the UNION star (`ShelfBook.starred` — the column OR the 13f
+    /// list, 13i-d U2 ACT 0), from every shelf and the unshelved run.
+    static func starredBooks(_ books: [Queries.ShelfBook]) -> [Queries.ShelfBook] {
+        books.filter(\.starred)
+    }
 
     /// Each book's resolved shelf — its id, or `unshelvedKey` (the dangling
     /// rule: a nil pointer, or one naming no live shelf of this wing).
@@ -214,6 +243,16 @@ nonisolated enum BookcaseBoard {
         mode == .mine
     }
 
+    /// **…and in a SCOPE** (17y (s)): the starred shelf is a filter over
+    /// books from many shelves, and a hand position belongs to a REAL shelf —
+    /// a row drop there would silently re-shelve the dropped book onto the
+    /// target's shelf (`dropBook`'s first half). So placing by hand is off on
+    /// the starred shelf: no grip, no row drop, no Send to Top/Bottom
+    /// (PROVISIONAL P-17y-B3-s3). Every other scope reads the mode alone.
+    static func placesByHand(_ mode: BookcaseOrderMode, in scope: BookcaseScope) -> Bool {
+        scope != .starred && placesByHand(mode)
+    }
+
     /// The № census over a set of books — every solo's count.
     static func census(_ books: [Queries.ShelfBook]) -> [BookcaseSolo: Int] {
         var counts: [BookcaseSolo: Int] = [:]
@@ -228,9 +267,15 @@ nonisolated enum BookcaseBoard {
     static func booksInScope(
         _ books: [Queries.ShelfBook], shelves: [Shelf], scope: BookcaseScope
     ) -> [Queries.ShelfBook] {
-        guard case .shelf(let id) = effectiveScope(scope, shelves: shelves) else { return books }
-        let resolved = resolvedShelves(books, shelves: shelves)
-        return books.filter { resolved[$0.reading.id] == id }
+        switch effectiveScope(scope, shelves: shelves) {
+        case .all:
+            return books
+        case .starred:
+            return starredBooks(books)
+        case .shelf(let id):
+            let resolved = resolvedShelves(books, shelves: shelves)
+            return books.filter { resolved[$0.reading.id] == id }
+        }
     }
 
     /// **THE SECTIONS** the board draws.
@@ -253,6 +298,13 @@ nonisolated enum BookcaseBoard {
                 mode: mode, lastEdited: lastEdited)
         }
         switch effectiveScope(scope, shelves: shelves) {
+        case .starred:
+            // 17y (s): ONE section, every starred book from any shelf, in the
+            // chosen order (all starred, so the float is moot), any solo
+            // applied on top.
+            return [Section(
+                kind: .starred,
+                books: ordered(starredBooks(visible), mode: mode, lastEdited: lastEdited))]
         case .shelf(let id):
             guard let shelf = shelves.first(where: { $0.id == id }) else { return [] }
             return [Section(kind: .shelf(shelf), books: run(id))]

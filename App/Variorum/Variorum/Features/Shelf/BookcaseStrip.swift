@@ -222,6 +222,7 @@ struct BookcaseStrip: View {
                     "All", active: model.effectiveScope == .all,
                     help: "Every shelf, stacked in strip order — unshelved books on top"
                 ) { model.scope = .all }
+                starredWord
                 ForEach(model.shelves, id: \.id) { shelf in
                     shelfName(shelf)
                 }
@@ -278,6 +279,40 @@ struct BookcaseStrip: View {
             }
         }
         .contextMenu { ShelfMenu(shelf: shelf, model: model, actions: menuActions) }
+    }
+
+    /// **THE STARRED SHELF's word** (17y item (s), R-17y-9 + both addenda):
+    /// beside All at the strip's head, ALWAYS shown, the bare lowercase word
+    /// — no count, no sentence, no badge inline (her second addendum; the
+    /// empty one-liner lives in the solo'd board). It solos like a shelf;
+    /// a BOOK dropped on it is STARRED (`ShelfViewModel.starBook` — the
+    /// union star's one road, the cap's refusal spoken as at every star
+    /// door); a dragged SHELF name does nothing here (the starred shelf is
+    /// virtual — it has no strip position to take). No right-click menu: it
+    /// cannot be renamed, re-glyphed, moved or deleted (structurally).
+    /// PROVISIONALs P-17y-B3-s1/s2 (place · shown always · the word).
+    private var starredWord: some View {
+        word(
+            BookcaseCopy.starredShelfName, active: model.effectiveScope == .starred,
+            help: BookcaseCopy.starredShelfHelp
+        ) { model.scope = .starred }
+        .overlay {
+            if dropTarget == BookcaseBoard.starredSectionID {
+                RoundedRectangle(cornerRadius: 3)
+                    .stroke(tokens.line, lineWidth: 1)
+                    .padding(-4)
+            }
+        }
+        .bookcaseDropSite(
+            onHover: { hovering in
+                let key = BookcaseBoard.starredSectionID
+                dropTarget = hovering ? key : (dropTarget == key ? nil : dropTarget)
+            }
+        ) { payload in
+            if case .book(let readingID) = payload {
+                Task { await model.starBook(readingID) }
+            }
+        }
     }
 
     /// One strip word (the mode-row idiom, §21): muted, or ink + weight.

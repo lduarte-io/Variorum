@@ -164,6 +164,10 @@ final class ShelfViewModel {
     /// Where + New Book lands (§19.1/§24 — the solo'd shelf, else unshelved).
     var mintShelfID: String? { BookcaseBoard.mintShelf(for: scope, shelves: shelves) }
 
+    /// Whether the rows are placed by hand HERE (17y (s): never on the
+    /// starred shelf — a filter, whose rows live on other shelves).
+    var placesByHand: Bool { BookcaseBoard.placesByHand(orderMode, in: effectiveScope) }
+
     /// Each book's resolved shelf key (`BookcaseBoard.unshelvedKey` for none).
     func shelfKey(of readingID: String) -> String? {
         BookcaseBoard.resolvedShelves(books, shelves: shelves)[readingID]
@@ -258,6 +262,29 @@ final class ShelfViewModel {
         do {
             try await session.runner.run { try $0.setReadingShelf(readingID, shelf: shelfID) }
             receipt(BookcaseCopy.reshelved(bookName, onto: shelfName))
+        } catch {
+            refuse(error)
+        }
+    }
+
+    /// **A book dropped on the strip's "starred" row STARS it** (17y item
+    /// (s), R-17y-9 — the strip's drop grammar; its menu twin is the row's
+    /// own Star/Unstar). One-way: an already-starred book is a quiet
+    /// nothing (the drop asked for what is already true). The write is the
+    /// union star's one road (`setStarred(.reading)` — both stores, the cap
+    /// counted over the union), and the cap's refusal speaks exactly as at
+    /// every star door (`OpsRefusalCopy` — `StarsModel.toggle`'s words).
+    /// Silent on success, like every star door: the ★ and the starred
+    /// shelf's row are the answer (PROVISIONAL P-17y-B3-s5).
+    func starBook(_ readingID: String) async {
+        guard let book = books.first(where: { $0.reading.id == readingID }),
+              !book.starred
+        else { return }
+        do {
+            try await session.runner.run { ops in
+                try ops.setStarred(.reading(readingID), starred: true)
+            }
+            lastError = nil
         } catch {
             refuse(error)
         }
@@ -503,6 +530,16 @@ nonisolated enum BookcaseCopy {
     static let sendToTopVerb = "Send to Top"
     static let sendToBottomVerb = "Send to Bottom"
     static let unshelvedName = "Unshelved"
+    /// 17y (s) — the starred shelf's word (R-17y-9: lowercase, the strip's
+    /// idiom — PROVISIONAL P-17y-B3-s2) and its hover (no count, no
+    /// sentence INLINE — her second addendum: the row is the bare word).
+    static let starredShelfName = "starred"
+    static let starredShelfHelp =
+        "Every starred book, wherever it\u{2019}s shelved \u{2014} drop a book here to star it"
+    /// The one-liner, drawn ONLY in the solo'd board when nothing is starred
+    /// (her addendum: "only give it the one liner when you click on it").
+    static let starredShelfEmpty =
+        "No starred books \u{2014} star one from its menu, or drop it on \u{201C}starred\u{201D}."
     static let unavailableNote = "Open the Bookcase to arrange shelves and books."
     static let placingUnavailableNote =
         "Switch the Bookcase's order to \u{201C}my order\u{201D} to place books by hand."
