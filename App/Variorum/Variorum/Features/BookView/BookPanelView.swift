@@ -221,9 +221,11 @@ struct BookPanelView: View {
             if let collapsed { model.open(book: book, at: collapsed.postID) }
         } label: {
             HStack(spacing: 4) {
-                Text("\u{283F}")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                if BookPanelBrain.chapterGripDrawn(chapterCount: snapshot.sections.count) {
+                    Text("\u{283F}")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                }
                 if marked { marker }
                 Text(tokens.chromeLabel(section.name))
                     .font(tokens.small.weight(.semibold))

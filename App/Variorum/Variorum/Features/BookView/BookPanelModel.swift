@@ -223,6 +223,11 @@ nonisolated enum BookPanelBrain {
         return index < ids.count - 1 ? .after(ids[index + 1]) : nil
     }
 
+    /// Whether a chapter row draws its ⠿ grip (17y B2, item (e)).
+    static func chapterGripDrawn(chapterCount: Int) -> Bool {
+        true
+    }
+
     /// Move Chapter Up / Down — `BookStructureModel.moveChapter(_:up:)`'s
     /// rule, as a value (nil at the edges).
     static func chapterMove(

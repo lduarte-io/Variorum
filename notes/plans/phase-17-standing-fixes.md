@@ -2134,7 +2134,7 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 | 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
 | 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (this commit) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
 | 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | DONE except the walk (034c28ad + this commit): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"19 tests in 5 suites passed"** (`p3-green.log`); **behavioural revert (the gate `true` for every order) → RED "2 tests … failed … with 2 issues"** (`p3-rv.log`), restored by checkout, `git diff --quiet`. The walk (grip visible + a row drop landing right above) rides piece 9 — HELD at 03:2x: the guard read HID idle 0 s (someone at the machine) |
-| 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | NOT-STARTED |
+| 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | IN-PROGRESS — the trace below; pins `VariorumTests/BookPanelDragGateTests.swift` committed RED ON PURPOSE (this commit) on the pre-fix behaviour (`chapterGripDrawn` added answering `true` = today's always-drawn rule, the view wired to it, no behaviour change): **"5 tests in 1 suite failed … with 4 issues"** (`p4-red.log`) — the two refusal pins red through the shipped `BookPanelModel.drop` (the status seam stays nil), the grip gate red (2), the two GUARDS green. NEXT: the fix |
 | 5 | (m) the quick-note box's double cursor | NOT-STARTED |
 | 6 | (n) the title's chrome shift — the PRIOR landing first | NOT-STARTED |
 | 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | NOT-STARTED |
@@ -2188,3 +2188,27 @@ harness: on the fixed build the same `cliclick` drag commits.
 
 **DEV-STORE ACTS TO RESTORE AT THE WALK'S END:** "field notes" (was Unshelved → research) and
 "u4 third" (was Unshelved → correspondence) — both back to Unshelved via Move to Shelf ▸ Unshelved.
+
+### THE TRACE — (e), after the shared mechanism
+
+Her capture's book (the seeded *Jekyll*): created with the default `sortField: .manual`
+(`Operations+Reading.swift:13`), never finished, four chapters — so NEITHER of the row's two gate
+candidates applies to it: every panel drop died on the undeclared type (piece 2). With that fixed,
+the panel's roads, each traced to its op:
+- **Chapter rows (the only rows that draw a grip, ⠿ — `BookPanelView.chapterRow`):** chapter order
+  is the book's own regardless of `sort_field`; a drop resolves through `chapterDropTarget` →
+  `reorderSection`. On a FINISHED/SEALED book the op throws `lockedReading` and `BookPanelModel.run`
+  speaks `BookStateCopy.refusal` — *"“X” is finished — reopen it first."* (sealed: "unseal it
+  first") — **refuses WITH the road; U2-8 holds, nothing silent** (pinned since U2,
+  `aFinishedBookRefusesInWordsAndNothingMoves`). **But a LONE chapter's grip can never act**: every
+  drop of it resolves to nil (`dropPlan` — onto itself, onto "unfiled" when already last, onto an
+  unfiled note → the end when already last) — her stance: a handle that cannot drag must not render.
+- **Note rows (no grip; the row drags):** a note onto ANOTHER chapter's row/heading files it there
+  in any order (the book view's ruling — "the chapter half of the drop always happens"). **The
+  silent gate — `sort_field ≠ manual`:** a note dropped to RE-PLACE it inside its OWN chapter (onto
+  a sibling, or onto its own chapter's heading) resolves through `BookStructureModel.postDropPlan(…,
+  reposition: false)` to `.file(post, itsOwnChapter, before: nil)` — `assignPostToSection` to the
+  chapter it is already in: a write that changes nothing, under a hairline whose own comment says "a
+  dropped row lands right above this one", and nothing speaks. That is the brief's P-2 class (a
+  silent refusal) → it must refuse WITH the road: the book's order control is the book view
+  navigator's "order · … ▾" → Manual order → Save as This Book's Order (`BookView.orderControl`).
