@@ -95,6 +95,13 @@ final class ShellRouter {
         pending?.answer(confirmed)
     }
 
+    /// **19f — Help ▸ Send Feedback…'s pre-draft choice** (her #181 (i)
+    /// ruling): the door asks its two-road question HERE and the window
+    /// presents it (`RootView`'s `.supportChoiceAlert`) — this channel's road
+    /// for a two-answer question, the `confirm` above being yes/no. The
+    /// `whatsNewRequested` precedent: a feature's request the shell carries.
+    let supportChoice = SupportChoiceAsk()
+
     // MARK: - The parked block landing (17o c/d/e round 1, MAJOR-2)
 
     /// **A block a navigation named, held for the mount that consumes it.**

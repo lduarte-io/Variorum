@@ -26,8 +26,15 @@
 //  (`didShareItems`) — so the fallback above never runs there, and Variorum
 //  cannot tell. Cancelling Mail's sheet quits Mail and the handed draft is
 //  gone; nothing is sent. The plain `mailto:` road lands in the same sheet
-//  when Mail is the default and has no account. Whether the doors should do
-//  more for a Mac without a mail account is QUESTIONS #181 (i) — hers.
+//  when Mail is the default and has no account.
+//
+//  THE PRE-DRAFT CHOICE (19f — her QUESTIONS #181 (i) ruling, 2026-10-04):
+//  so BEFORE ANY DRAFT OPENS, both doors ask — "Open in Mail" (the roads
+//  above, exactly as they were) or the road that never needs a mail app:
+//  the address onto the pasteboard and, for a report, its file shown in
+//  Finder ("Show the file and copy the address"; feedback's "Copy the
+//  address"). `SupportMail.ask` below is that question's one dispatcher;
+//  the presenters are `SupportChoice.swift`'s.
 //
 //  The roads are injected (`SupportMailRoads`), so which road a draft takes
 //  — and that nothing is ever sent — is pinned without opening a mail app.
@@ -90,7 +97,94 @@ enum SupportMail {
         refuse(SupportCopy.nothingCouldOpen)
         return .nothingCouldOpen
     }
+
+    // MARK: The pre-draft choice (19f — her #181 (i) ruling)
+
+    /// What the door's question came to.
+    enum Answer: Equatable {
+        /// She closed the question: nothing opened, nothing was copied.
+        case dismissed
+        /// "Open in Mail" — the door's own road ran, and took this road.
+        case openedInMail(Road)
+        /// The second road: the address is on the pasteboard and, for a
+        /// report, its file was shown in Finder. No draft opened.
+        case copiedAddress(revealed: URL?)
+    }
+
+    /// **THE DOOR'S ONE QUESTION, asked BEFORE any draft opens.** Nothing
+    /// opens, is copied or is shown until she answers.
+    /// - `choose` puts the question on screen and returns her answer (nil =
+    ///   dismissed) — a window's `.alert`, or with no window an app-modal
+    ///   alert (`SupportChoice.swift`).
+    /// - `openInMail` is the door's OWN mail road, run only on that answer —
+    ///   exactly the road the door took before the choice existed.
+    /// - The second road needs no mail app: `support@stargazing.tech` onto
+    ///   `pasteboard` (cleared, then set — no expiry: it is a public address)
+    ///   and the question's file, if any, shown in Finder through `roads`.
+    @discardableResult
+    static func ask(
+        _ question: SupportQuestion,
+        choose: SupportChooser,
+        roads: SupportMailRoads = LiveSupportMailRoads.shared,
+        pasteboard: NSPasteboard = .general,
+        openInMail: @MainActor () -> Road
+    ) async -> Answer {
+        switch await choose(question) {
+        case nil:
+            return .dismissed
+        case .openInMail:
+            return .openedInMail(openInMail())
+        case .copyAddress:
+            pasteboard.clearContents()
+            pasteboard.setString(SupportDraft.address, forType: .string)
+            if let file = question.file { roads.reveal(file) }
+            return .copiedAddress(revealed: question.file)
+        }
+    }
 }
+
+/// Her answer to the support doors' question (nil, where one is optional,
+/// means she dismissed it).
+nonisolated enum SupportChoice: Equatable, Sendable {
+    /// "Open in Mail" — the draft roads, unchanged beneath the choice.
+    case openInMail
+    /// "Show the file and copy the address" / "Copy the address".
+    case copyAddress
+}
+
+/// The question both support doors ask before any draft opens (19f). A
+/// report's carries its file — the second road shows it in Finder;
+/// feedback's carries none. The words are `SupportCopy`'s.
+nonisolated struct SupportQuestion: Equatable, Sendable {
+    let title: String
+    let detail: String
+    /// The first road's button.
+    let openInMail: String
+    /// The second road's button.
+    let copyAddress: String
+    /// The file the second road shows in Finder (a report's own), or nil.
+    let file: URL?
+
+    /// Help ▸ Send Feedback…: "Open in Mail" / "Copy the address".
+    static let feedback = SupportQuestion(
+        title: SupportCopy.feedbackChoiceTitle, detail: SupportCopy.feedbackChoiceDetail,
+        openInMail: SupportCopy.openInMail, copyAddress: SupportCopy.copyAddress, file: nil)
+
+    /// A crash report's Send Report…: "Open in Mail" / "Show the file and
+    /// copy the address" — the file is the report's own, the very one the
+    /// draft would attach.
+    static func report(file: URL) -> SupportQuestion {
+        SupportQuestion(
+            title: SupportCopy.reportChoiceTitle, detail: SupportCopy.reportChoiceDetail,
+            openInMail: SupportCopy.openInMail, copyAddress: SupportCopy.showFileAndCopyAddress,
+            file: file)
+    }
+}
+
+/// Puts a `SupportQuestion` on screen and returns her answer (nil =
+/// dismissed). The presenters are `SupportChoice.swift`'s; a pin passes its
+/// own.
+typealias SupportChooser = @MainActor (SupportQuestion) async -> SupportChoice?
 
 /// The real roads: AppKit's compose-email service, `NSWorkspace`.
 @MainActor

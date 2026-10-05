@@ -382,6 +382,8 @@ struct RootView: View {
             await noteBoxFacts.load(session: session, postID: noteBoxReport?.state.postID)
         }
         .shellConfirmAlert(router)
+        // 19f: Help ▸ Send Feedback…'s pre-draft choice, asked of this window.
+        .supportChoiceAlert(router.supportChoice)
         .task { await theme.start() }
         // 13i-d U5: the wing is part of every scoped read's question, so a
         // switch restarts them (snippets — `pool` — are one shared room).

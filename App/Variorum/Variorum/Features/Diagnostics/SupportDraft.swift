@@ -149,4 +149,32 @@ nonisolated enum SupportCopy {
     static let nothingCouldOpen =
         "Variorum couldn\u{2019}t open an email draft. You can write to "
         + "\(SupportDraft.address) from any mail app \u{2014} nothing was sent."
+
+    // MARK: The pre-draft choice (19f — her QUESTIONS #181 (i) ruling)
+
+    /// The two roads, in her own words at the ruling.
+    static let openInMail = "Open in Mail"
+    static let showFileAndCopyAddress = "Show the file and copy the address"
+    static let copyAddress = "Copy the address"
+
+    static let feedbackChoiceTitle = "Send feedback"
+    static let feedbackChoiceDetail =
+        "Open in Mail starts a draft to \(SupportDraft.address) in your mail app. Or Variorum "
+        + "copies the address, so you can write from any mail app. Nothing is sent until you "
+        + "send it."
+
+    static let reportChoiceTitle = "Send this crash report"
+    static let reportChoiceDetail =
+        "Open in Mail starts a draft to \(SupportDraft.address) with the report attached. Or "
+        + "Variorum shows the report\u{2019}s file in Finder and copies the address, so you can "
+        + "send it from any mail app. Nothing is sent until you send it."
+
+    /// What the second road says it did (a receipt — nothing was sent).
+    static let copiedAddress =
+        "Copied \(SupportDraft.address) \u{2014} paste it into any mail app."
+
+    static func copiedAddressShowingFile(_ fileName: String) -> String {
+        "Copied \(SupportDraft.address) and showed \(fileName) in Finder \u{2014} attach it "
+            + "to an email from any mail app."
+    }
 }

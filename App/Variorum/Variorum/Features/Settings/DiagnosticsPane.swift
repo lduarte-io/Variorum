@@ -20,6 +20,7 @@
 //  is the same file the box shows.
 //
 
+import AppKit
 import SwiftUI
 
 struct DiagnosticsPane: View {
@@ -27,9 +28,17 @@ struct DiagnosticsPane: View {
     /// The roads a draft opens through (injected for the pins; the live
     /// AppKit roads in the app).
     var roads: SupportMailRoads = LiveSupportMailRoads.shared
+    /// 19f: where the second road copies the address (a pin passes a
+    /// private pasteboard — her clipboard is never a test's).
+    var pasteboard: NSPasteboard = .general
+    /// 19f: who asks the pre-draft question. Nil = this pane's own `.alert`
+    /// (`asking`); a pin passes its own.
+    var choose: SupportChooser?
     /// Settings has no status seam of its own, so a draft that could not
     /// open says so here, under the reports (the Data Safety `note` shape).
     @State private var note: String?
+    /// 19f: the pane's own channel for the pre-draft question.
+    @State private var asking = SupportChoiceAsk()
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -82,14 +91,16 @@ struct DiagnosticsPane: View {
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
+        .supportChoiceAlert(asking)
         // A report can arrive while Settings is closed; the pane re-reads the
         // folder when it appears.
         .onAppear { crashReports.refresh() }
     }
 
     /// Send Report…: the support door's draft with this report attached,
-    /// opened on screen in a mail app. Nothing is sent here.
-    private func send(_ report: CrashReport) {
+    /// opened on screen in a mail app. Nothing is sent here. (Internal, not
+    /// private, so a pin can press the door — 19f.)
+    func send(_ report: CrashReport) {
         note = nil
         SupportMail.open(
             .crashReport(fileName: report.id, at: report.url, .thisMac()),

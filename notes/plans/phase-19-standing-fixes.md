@@ -1959,7 +1959,25 @@ Evidence dir: `App/Variorum/DerivedData/19f/` (gitignored).
   red; restore → green.
 
 **Pieces:**
-1. The choice layer + its pins; the doors unchanged — **NOT-STARTED.**
+1. The choice layer + its pins; the doors unchanged — **DONE (this commit).**
+   - `SupportMail.swift`: `SupportChoice`, `SupportQuestion` (`.feedback` / `.report(file:)`),
+     `SupportChooser`, `SupportMail.Answer` and `SupportMail.ask` (above). `SupportDraft.swift`'s
+     `SupportCopy`: her three button words verbatim ("Open in Mail", "Show the file and copy the
+     address", "Copy the address"), the two titles + details (FUNCTIONAL — 13s re-voices), the two
+     copy receipts. `SupportChoice.swift` (new): `SupportChoiceAsk`, `.supportChoiceAlert(_:)`,
+     `SupportChoiceModal` (the no-window app-modal ask). `ShellRouter.supportChoice` + `RootView`'s
+     `.supportChoiceAlert(router.supportChoice)` beside `shellConfirmAlert` (inert until piece 2).
+     `DiagnosticsPane`: injectable `pasteboard` + `choose` (nil = its own `.alert`) and `send`
+     internal so a pin can press the door — **its body still composes directly (the old shape).**
+   - Pins: `VariorumTests/SupportChoiceTests.swift` (11 — the channel's three rules + the per-shell
+     channel; the dispatcher asks FIRST (no road, no copy, no reveal before the answer); a dismissal
+     does nothing; Open in Mail runs the door's own road (the U3-B mailto, unchanged); Copy the
+     address = the address alone on a PRIVATE pasteboard, no draft, nothing revealed for feedback;
+     the report's road reveals ITS file; her words). Red-on-old by construction (new API).
+   - **Run (zero instances, `-derivedDataPath DerivedData/19f/dd`): `Test run with 37 tests in 4
+     suites passed`, no `skipped:` line** — SupportChoice 11 + SupportDraft 13 (UNMODIFIED) +
+     DiagnosticsPane 8 + ShellConfirm 5 (`19f/p1-test.log`; build `p1-bft.log`, no warning in any
+     touched file).
 2. The door pins RED on piece 1's tree; the doors ask; GREEN; the revert check — **NOT-STARTED.**
 3. QUESTIONS #182 (the readings the ruling leaves open) — **NOT-STARTED.**
 4. The dev-store walk (both doors' choice, the roads in use) — **NOT-STARTED.**
