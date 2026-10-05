@@ -129,3 +129,24 @@ remembered-open state all survive unchanged — only the layout mechanism change
 census provisionals otherwise untouched. **Runs in B3** (the faces batch; the brief gains it
 at spawn). Pin: the overlay never displaces the board's rows (red-on-old: the shipped panel
 pushes/clips); the walk captures the open panel over a populated board.
+
+## R-17y-8 — JEKYLL LEAVES THE DEFAULT SEED SET, NOW (her ruling 2026-10-05 ~03:15; the question tool: "Jekyll only now")
+
+Her words: "what are you doing to the jekyll thing? I don't want it in people's libraries
+anymore." The shape, confirmed at the question tool: **Jekyll stops seeding into fresh stores**
+(the launch loop seeds a default subset that excludes it); **existing stores are NEVER
+retrofitted** (nothing deletes anyone's Jekyll — it just stops arriving); **Help ▸ Restore
+keeps minting it on demand** (the door unchanged); the books-chapter lesson gains her intake's
+own sentence (Jekyll restorable — a seed-CONTENT edit, with the standing re-seed consequence:
+her own field guide reads it after a Restore Tutorial press). The classics gathering and
+Encryption Explained are UNCHANGED until 13s (her pick — the privacy lesson and the teaching
+props are 13s's mockup-first territory). SUPERSESSIONS: #166(b)'s Jekyll-plain leg (the seeded
+triad) is superseded — the lesson's ladder teaches with what stands; R-17y-5's Jekyll-fold leg
+is DROPPED (the scripted-history classifier allowance is unneeded — no fresh copies exist to
+fold; the addendum's design note stands as the record of why a naive flip was never safe);
+#155(a) becomes moot for fresh stores (nothing seeds Jekyll by default). A restored-later
+Jekyll wears #classics and joins the gathering exactly as today. Takemania (the takes demo
+living inside the Jekyll book) leaves the default experience with it — restorable the same
+way; 13s decides where takes-teaching lives by default. **Runs in the B-DEDUPE slice** (same
+seeder files, same reviewer); the slice's remaining fold scope: the field guide's facts entry,
+the seeded-gathering keeper (classics · starred notes · Quicknotes), the quicknote fold.
