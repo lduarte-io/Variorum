@@ -2117,7 +2117,19 @@ shows Canvas kept).
 
 ## 17y B2 RECORD — the drag mechanics + three singles, items (a)(b)(e)(m)(n)(p) (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
 
-**NOT DONE (first line, per the contract): PENDING — written at the batch's close.**
+**NOT DONE (first line, per the contract):** (1) **No human hand on the drags** — (a), (b) and (e) were
+walked with SYNTHETIC drags (`cliclick`), which now commit (the pre-fix build's identical drags did not);
+her own spot-check (planned for Monday) is the human confirmation. (2) **The RELEASE side of (p) is
+pinned, compiled and symbol-checked, never walked** — a Release build carries the real-store bundle id
+and is never launched by a session. (3) **The field guide still teaches Canvas** in its prose (lesson
+"blocks · canvas", the mode-row sentence) — seed CONTENT, fenced to 13s (F-B2-6). (4) **The book view's
+OWN same-chapter drop under a stamp order is still silent** (the sibling surface of (e)'s gate — F-B2-7,
+not this batch's surface). (5) No dark-appearance captures (light only, both voices where the surface
+has a face; (m) is Terminal-only by design — Study draws no block cursor). (6) No `/Applications` refresh
+(the pass-end window owns it). (7) Dev-store residue: my-order hand positions written by the walk's row
+drops (`shelf_position` keys on unshelved books) — invisible outside my order; everything else restored
+(shelves, Jekyll's chapter order, the voice, the order, details). Zero `Sync/`, schema, custody, mobile
+code or seed content (`git diff 8ff566e1 -- Sources Server App/Variorum/VariorumMobile` EMPTY).
 
 Preflight read in this session's own context: CLAUDE.md + its auto-loaded canon; this file's 17y
 row items (a)(b)(e)(m)(n)(p) end to end, the RUN RECORD and the B2 BRIEF; `notes/plans/17y-sitting-
@@ -2131,22 +2143,22 @@ Worktree `~/dev/variorum-17y` only; DerivedData `App/Variorum/DerivedData/17y/`;
 
 | # | piece | status |
 |---|---|---|
-| 1 | This record + the b2 captures dir gitignored | DONE (this commit) |
-| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (this commit) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
-| 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | DONE except the walk (034c28ad + this commit): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"19 tests in 5 suites passed"** (`p3-green.log`); **behavioural revert (the gate `true` for every order) → RED "2 tests … failed … with 2 issues"** (`p3-rv.log`), restored by checkout, `git diff --quiet`. The walk (grip visible + a row drop landing right above) rides piece 9 — HELD at 03:2x: the guard read HID idle 0 s (someone at the machine) |
-| 3b | (b) the grip moved INSIDE the row (F-B2-5, the walk's own catch) | DONE (this commit) — `ShelfView.shelfRow`: an `HStack` of a fixed grip column (`BookcaseCopy.gripColumn` 16 pt, the glyph drawn by OPACITY from `placing`, help only while placing) + the row's `Button`; the composite pulled `-gripColumn` into the 28-pt gutter (names unmoved between orders); `.draggable`/the note `.onDrop`/`.contextMenu` now on the composite (the grip drags too); the hairline stays on the button. `BookcasePlacingGripTests` gains the column-fits-the-gutter assertion. **"47 tests in 6 suites passed"** (`p3b-green.log`: the grip pins, Bookcase VM + brain, the Move to Shelf gate, the drag-type pins, the registry walk). The re-walk of the exposing sequence is piece 9's |
-| 3c | (b) F-B2-5 — the PRE-EXISTING row freeze (the walk's catch, the real mechanism) | DONE (883eaeb4 fix · 31dce99a hollow-round record · this commit): the fix is the SECTION-qualified row identity. The pin `BookcaseRowFreezeTests` was HOLLOW as first written (its revert round green, `p3c-rv.log`). The oracle `BookcaseRowOracle` now also records each row's FRAME (`onGeometryChange(.global)` — what a row reports of itself); with it, **the identity line's revert is RED 3 of 3** (`p3c-diag.log`, `p3c-diag-rv1/2.log`: "2 tests … failed … with 4 issues" — the moved row's record stuck at `placing == true` after A–Z and `details == true` after details off; the unmoved control live) **and the fixed tree GREEN 3 of 3** (`p3c-green1/2/3.log`). Why the frame record makes the old freeze reproducible in-process is NOT explained (recorded, not claimed); the walk's before/after (`f1` frozen · `f2`–`f4` live) is the use-shaped half. A scratch pixel scan was tried on the way and removed (frames alone were too coarse) |
-| 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | DONE except the walk (2e07a4d4 red · 78f4c824 fix · this commit): `BookPanelBrain.dropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `dropPlan`); `BookPanelModel.drop` speaks `BookPanelCopy.needsManualOrder` — *“X” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.* (PROVISIONAL words); `chapterGripDrawn` = more than one chapter. Pins RED on the pre-fix behaviour (4 issues) → GREEN "48 tests in 5 suites" (`p4-green.log`) → **behavioural revert (the gate off, the grip always) RED "5 tests … with 4 issues"** (`p4-rv.log`) on the corrected fixture, restored, `git diff --quiet`. The walk (a panel drag landing; the refusal road) rides piece 9 |
-| 5 | (m) the quick-note box's double cursor | DONE except the walk (2c60f3be red · 95f615eb fix · this commit): `CaptureNSTextView.onCaretChange` from `becomeFirstResponder`/`resignFirstResponder`, wired to the host's `onFocusChange` (the Coordinator's begin/end-EDITING reports retired); `QuickEntryBar`'s gate untouched. Pin RED on the pre-fix tree (1 issue — the arrival) → GREEN (17/4 + 21/5) → **behavioural revert (the wire removed) RED "1 test … with 2 issues"** (`p5-rv.log`), restored, `git diff --quiet`. The walk (ONE cursor, Terminal) rides piece 9. **Seam note for the review cast:** the diff touches `CaptureNSTextView` — a TK2 `NSTextView`, but OUTSIDE the editor seam by its own header (no identity attributes, no `BlockRangeIndex`, no `PaneTextAuthority`, no router claim); only first-responder overrides, no TK1 API |
-| 6 | (n) the title's chrome shift — the PRIOR landing first | DONE except the walk (c4dd3231 red · this commit): the open rename field carries NO prompt of its own (`TextField("", …)` + an accessibility label of the shown words); while the draft is empty the date is drawn by a SwiftUI `Text` with the resting face's own font/frame/alignment (in `tokens.faint`, the voice's placeholder ink) BEHIND the field — the row-10 pointer's API-free shape. Pin RED on the pre-fix code (3 issues) → **GREEN "37 tests in 4 suites passed"** (`p6-green.log`: `MastheadLayoutTests` whole incl. the new pin and the prior row-12 pin, `OneTimeCodeAutoFillTests`, `DebugOracleOwnershipTests`, `MastheadTagDoorTests`). Red-on-old is the pre-fix code itself (the pin ran red before a line of the fix existed). The walk (Study + Terminal: click a date-named note's title, the words still) rides piece 9 |
-| 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | DONE except the walk + the Release COMPILE check (c430c0aa red · this commit): `PostMode.buildKeepsCanvas` (the compile condition, read by nothing but the seam) · `order(keepingCanvas:)` · **`allCases` RETURNS the build's order** (so the mode row, ⌘1–⌘n, the rail and the masthead menu shorten in Release with no renderer touched) · `fromStored` decodes a mode the build lacks to nil (→ the caller's default, Write — PROVISIONAL) · `keyLabel`/`keySpan`/`modeList` feed the registry's `.switchMode` verb + label, the helper's row and the masthead menu's help · the helper's "canvas" dictionary entry filtered by the seam · `PoolDetailView.Mode.allCases` = `faces(keepingCanvas:)` and its picker drawn only with more than one face. Red-on-old: the seam in its pre-fix shape (Canvas kept whatever the flag) → "5 tests … with 6 issues" (`p7-red.log`); **GREEN with the mode/registry/canvas suites — "61 tests in 8 suites passed"** (`p7-green.log`: CanvasDebugOnly, NewModes (Debug's seven, unedited), the registry walk, OpenStripMenu, SidebarLayout, PostDetail mode memory, Canvas & full pool, CanvasArrival) |
+| 1 | This record + the b2 captures dir gitignored | DONE (dfd15204) |
+| 2 | (a)(b)(e) THE SHARED DRAG MECHANISM — trace, driven reproduction on the pre-fix build, pin red-on-old, fix, revert-verify | DONE (5a9fcbd1 red · 34bbdefe fix) — the fix: `App/Variorum/VariorumInfo.plist` gains `UTExportedTypeDeclarations` for the three identifiers, each conforming to `public.data`. Pin RED on the pre-fix tree (5a9fcbd1, 10 issues) → **GREEN "Test run with 3 tests in 1 suite passed"** (`p2-green.log`); the fixed instance's log carries ZERO declaration faults (473 lines, pid-filtered); **the same synthetic drag now LANDS** — the hairline lights on "research" mid-drag and "field notes" moves with the receipt *Moved “field notes” to research.*; a second drag lands "u4 third" on the "correspondence" SECTION LABEL (*Moved “u4 third” to correspondence.*) — (a)'s two drop sites walked (`b2/new/a3`, `a2`, `a5`). Red-on-old is the PRE-FIX TREE itself (pin + drag), not a synthetic revert |
+| 3 | (b) the my-order AFFORDANCE (her drag-bars ask) | DONE (034c28ad · e51857ed; walked — row 9): `BookcaseBoard.placesByHand` (Shared — the ONE value the row drop, the new ⠿ grip and Send to Top/Bottom read) + the grip in the row's leading gutter in my order only (`ShelfView.shelfRow`; `BookcaseCopy.gripGlyph/gripHelp`); pin `BookcasePlacingGripTests` (2) green with the Bookcase suites — **"19 tests in 5 suites passed"** (`p3-green.log`); **behavioural revert (the gate `true` for every order) → RED "2 tests … failed … with 2 issues"** (`p3-rv.log`), restored by checkout, `git diff --quiet`. The walk (grip visible + a row drop landing right above) rides piece 9 — HELD at 03:2x: the guard read HID idle 0 s (someone at the machine) |
+| 3b | (b) the grip moved INSIDE the row (F-B2-5's first, partial answer) | DONE (0dd108e1) — kept: a grip drawn inside its row is the sounder face, though NOT the freeze's cure (3c) — `ShelfView.shelfRow`: an `HStack` of a fixed grip column (`BookcaseCopy.gripColumn` 16 pt, the glyph drawn by OPACITY from `placing`, help only while placing) + the row's `Button`; the composite pulled `-gripColumn` into the 28-pt gutter (names unmoved between orders); `.draggable`/the note `.onDrop`/`.contextMenu` now on the composite (the grip drags too); the hairline stays on the button. `BookcasePlacingGripTests` gains the column-fits-the-gutter assertion. **"47 tests in 6 suites passed"** (`p3b-green.log`: the grip pins, Bookcase VM + brain, the Move to Shelf gate, the drag-type pins, the registry walk). The re-walk of the exposing sequence is piece 9's |
+| 3c | (b) F-B2-5 — the PRE-EXISTING row freeze (the walk's catch, the real mechanism) | DONE (883eaeb4 fix · 31dce99a hollow-round record · bc49e069 the real pin; walked — row 9): the fix is the SECTION-qualified row identity. The pin `BookcaseRowFreezeTests` was HOLLOW as first written (its revert round green, `p3c-rv.log`). The oracle `BookcaseRowOracle` now also records each row's FRAME (`onGeometryChange(.global)` — what a row reports of itself); with it, **the identity line's revert is RED 3 of 3** (`p3c-diag.log`, `p3c-diag-rv1/2.log`: "2 tests … failed … with 4 issues" — the moved row's record stuck at `placing == true` after A–Z and `details == true` after details off; the unmoved control live) **and the fixed tree GREEN 3 of 3** (`p3c-green1/2/3.log`). Why the frame record makes the old freeze reproducible in-process is NOT explained (recorded, not claimed); the walk's before/after (`f1` frozen · `f2`–`f4` live) is the use-shaped half. A scratch pixel scan was tried on the way and removed (frames alone were too coarse) |
+| 4 | (e) the Book Panel's handle rule + any silent drop gate → refusal WITH the road | DONE (2e07a4d4 red · 78f4c824 fix · 6bb6c70e revert round; walked — row 9): `BookPanelBrain.dropOutcome` (`.plan` · `.nothing` · `.needsManualOrder`, over the unchanged `dropPlan`); `BookPanelModel.drop` speaks `BookPanelCopy.needsManualOrder` — *“X” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.* (PROVISIONAL words); `chapterGripDrawn` = more than one chapter. Pins RED on the pre-fix behaviour (4 issues) → GREEN "48 tests in 5 suites" (`p4-green.log`) → **behavioural revert (the gate off, the grip always) RED "5 tests … with 4 issues"** (`p4-rv.log`) on the corrected fixture, restored, `git diff --quiet`. The walk (a panel drag landing; the refusal road) rides piece 9 |
+| 5 | (m) the quick-note box's double cursor | DONE (2c60f3be red · 95f615eb fix · 188b2ce4 revert round; walked — row 9): `CaptureNSTextView.onCaretChange` from `becomeFirstResponder`/`resignFirstResponder`, wired to the host's `onFocusChange` (the Coordinator's begin/end-EDITING reports retired); `QuickEntryBar`'s gate untouched. Pin RED on the pre-fix tree (1 issue — the arrival) → GREEN (17/4 + 21/5) → **behavioural revert (the wire removed) RED "1 test … with 2 issues"** (`p5-rv.log`), restored, `git diff --quiet`. The walk (ONE cursor, Terminal) rides piece 9. **Seam note for the review cast:** the diff touches `CaptureNSTextView` — a TK2 `NSTextView`, but OUTSIDE the editor seam by its own header (no identity attributes, no `BlockRangeIndex`, no `PaneTextAuthority`, no router claim); only first-responder overrides, no TK1 API |
+| 6 | (n) the title's chrome shift — the PRIOR landing first | DONE (c4dd3231 red · 7b77fdf8 fix; walked — row 9): the open rename field carries NO prompt of its own (`TextField("", …)` + an accessibility label of the shown words); while the draft is empty the date is drawn by a SwiftUI `Text` with the resting face's own font/frame/alignment (in `tokens.faint`, the voice's placeholder ink) BEHIND the field — the row-10 pointer's API-free shape. Pin RED on the pre-fix code (3 issues) → **GREEN "37 tests in 4 suites passed"** (`p6-green.log`: `MastheadLayoutTests` whole incl. the new pin and the prior row-12 pin, `OneTimeCodeAutoFillTests`, `DebugOracleOwnershipTests`, `MastheadTagDoorTests`). Red-on-old is the pre-fix code itself (the pin ran red before a line of the fix existed). The walk (Study + Terminal: click a date-named note's title, the words still) rides piece 9 |
+| 7 | (p) Canvas DEBUG-only — the gate in the ONE mode-order derivation | DONE (c430c0aa red · 09f5e985 fix; the Release compile — row 8; the Debug capture — row 9): `PostMode.buildKeepsCanvas` (the compile condition, read by nothing but the seam) · `order(keepingCanvas:)` · **`allCases` RETURNS the build's order** (so the mode row, ⌘1–⌘n, the rail and the masthead menu shorten in Release with no renderer touched) · `fromStored` decodes a mode the build lacks to nil (→ the caller's default, Write — PROVISIONAL) · `keyLabel`/`keySpan`/`modeList` feed the registry's `.switchMode` verb + label, the helper's row and the masthead menu's help · the helper's "canvas" dictionary entry filtered by the seam · `PoolDetailView.Mode.allCases` = `faces(keepingCanvas:)` and its picker drawn only with more than one face. Red-on-old: the seam in its pre-fix shape (Canvas kept whatever the flag) → "5 tests … with 6 issues" (`p7-red.log`); **GREEN with the mode/registry/canvas suites — "61 tests in 8 suites passed"** (`p7-green.log`: CanvasDebugOnly, NewModes (Debug's seven, unedited), the registry walk, OpenStripMenu, SidebarLayout, PostDetail mode memory, Canvas & full pool, CanvasArrival) |
 | 8 | Suites at the END + the tutorial spine | DONE (Mac, HEAD bc49e069's code, `DerivedData/17y`, zero Variorum instances): **batch 1 `end-b2.log` — "Test run with 335 tests in 62 suites passed"** (7 skipped, all `DebugOracleSingletonWindowTests` — its standing opt-in env gate): the drag-type pins · the Bookcase family (grip, row freeze, VM, brain, Move to Shelf gate, ShelfModel, BindDoor + MembershipChoice — the two `ShelfView` mounts) · the Book Panel family (gates, brain, declarations, acts) · the capture family (focus report, keys, surface, hand-off, the bar, the four quick-note suites) · the masthead/title family (`MastheadLayoutTests` whole, one-time-code, oracle ownership + singleton windows, the tag door) · the mode/canvas family (CanvasDebugOnly, NewModes, OpenStripMenu, SidebarLayout, ShellChrome, PostDetail mode memory + routing, Canvas & pool, CanvasArrival, CanvasDragTracking, the three CanvasBank suites, StarredScroll ×2) · **the registry walk** (`CapabilityRegistryTests`) · every suite that reads the helper's rows (MarkdownActs, ContextBarDoors/TagChipFit/ForwardDestination, the five WalkBuildRound suites, the seven Savepoint* suites, the three SystemHotKey suites); **batch 2 THE TUTORIAL SPINE `end-spine.log` — "Test run with 98 tests in 13 suites passed"**, no skips. **The phone: `VariorumMobile` generic iOS Simulator BUILD SUCCEEDED** (`phone-build.log`, `DerivedData/17y-mobile` — `Shared/BookcaseBoard.swift` gained `placesByHand`; the phone calls nothing of it). **The Release COMPILE: BUILD SUCCEEDED** (`release-build.log`, the existing Release configuration — nothing added — into a scratch `DerivedData/17y-release`, NEVER launched (its bundle is the real-store `io.lduarte.Variorum`), then deleted): (p)'s `#else` side compiles; `nm` finds 0 `BookcaseRowOracle` symbols in the Release binary vs 63 in Debug's (the DEBUG fence holds); the Release plist carries the three type declarations |
-| 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | IN-PROGRESS — author-free window from 03:47 (guards green per act). **(a)** walked on the fixed build at piece 2 (`new/a3`, `a2`, `a5`). **(b)** `b1-my-order-grips-terminal-light.png` (order · my order — every row's ⠿ in the gutter, names unmoved) · `b2-middrag-from-grip-over-act0.png` (the drag STARTED FROM THE GRIP; the accent insertion hairline above "act0 walk") · `b3-after-drop.png` (**"spawn walk" landed right above "act0 walk"**, beneath the starred float). The first attempt's synthetic mouse-up was missed by AppKit's drag loop (the session stayed open in `NSCoreDragManager _dragUntilMouseUp`, the app deaf to AppleEvents — my quit timed out — until a second mouse-up closed it; F-B2-4, a harness fact); a scratch log-instrumented build (2 `NSLog` lines, never committed, reverted by checkout, `git diff --quiet`) carried the successful re-run — the rest of the walk runs on it (behaviour identical to HEAD). **(m)** Terminal light: `m1-focused-frame1…4` (Bookcase box focused — AX focused element = the text area — the caret blinks, NO block cursor in any frame) · `m2-unfocused-frame1…4` (the Library's box, focus on the window — the block cursor blinks, no caret) · `m3-clicked-in-frame1…4` (clicked in — caret only, the block cursor gone in every frame). NEXT: (e) the panel drag + the refusal road · (n) both voices · (p) the Debug mode row |
-| 10 | Record close (first line, findings, PROVISIONALs → QUESTIONS #184 if any) | NOT-STARTED |
+| 9 | The walk → `notes/plans/17y-screens/b2/` (gitignored) | DONE — author-free windows 03:00–04:50, guards green per act, her real-store app never running. **(a)** `old/a1`,`a2`,`a3` (pre-fix: the session runs, nothing lights, nothing lands) · `new/a3` (fixed: the hairline on "research"), `new/a2` (*Moved “field notes” to research.*), `new/a5` (a section label: *Moved “u4 third” to correspondence.*). **(b)** `b1` (my order — every row's ⠿) · `b2` (a drag started FROM the grip; the hairline) · `b3-after-drop` (landed right above) · `b4`/`b5` (moved rows carry grips) · `f1` (THE PRE-EXISTING FREEZE: details off, the two moved rows keep their meta) · `f2`–`f4` (fixed: a moved row follows details, carries its grip in my order, none anywhere in A–Z) · `b9` (the FINAL build: a grip drop lands) · `b10` (Study: the grips). **(e)** `e1` (her capture's state: Jekyll's four chapter grips) · `e2`/`e3` (a chapter dragged by its grip lands right above "story of the door") · `e4`/`e5` (the Journal, entry-date order: a same-chapter re-place refuses — *“Journal” is sorted by Entry date ↓, so a note can’t be placed by hand — set the book’s order ▾ to Manual order and save it.*) · `e6` (Study: the panel). The chapter order restored through the panel's own Move Chapter Down twin (walked, ×2). **(m)** `m1-focused-frame1…4` (the Bookcase box holds the caret — AX: the text area — caret only), `m2-unfocused-frame1…4` (the Library's box, focus on the window — the block cursor only), `m3-clicked-in-frame1…4` (clicked in — caret only). **(n)** `n1`/`n2` (Terminal, a date-named note: resting / open — the date stays on its line) · `n3`/`n4` (Study — her capture's voice: no shift, no clip). **(p)** `p1-debug-rail-keeps-canvas` (Debug keeps Canvas — the rail's seven). The walk's harness facts: F-B2-4 |
+| 10 | Record close (first line, findings, PROVISIONALs → QUESTIONS #184) | DONE (this commit) |
 
-**REVERT STATE: NO REVERT IN FLIGHT** (F-B2-5's round ran — green both sides, the pin hollow — and was restored, `git diff --quiet`).
+**REVERT STATE: NO REVERT IN FLIGHT** (every round — (b), (e), (m), F-B2-5's hollow round and its later 3-of-3 rounds — ran from committed HEADs and was restored, `git diff --quiet`).
 
-### THE TRACE — (a)(b)(e), the shared drag mechanism (PENDING confirmation by a driven reproduction)
+### THE TRACE — (a)(b)(e), the shared drag mechanism (CONFIRMED by the driven reproduction below)
 
 The lead, from reading (no fix yet): every drag in (a), (b) and (e) rides a `Transferable` token
 whose `CodableRepresentation` names a CUSTOM exported type — `BookcaseDragToken`
@@ -2319,3 +2331,97 @@ so (b) owns it. The fix: a SECTION-qualified row identity. Re-walked live on the
 `f2` (a menu-moved row follows details ON), `f3` (my order: every row's grip, the moved one included),
 `f4` (a second row moved INSIDE my order, then A–Z: no grip anywhere) — both displaced rows ended back
 in Unshelved, their original state.
+
+### EVIDENCE SUMMARY (logs in the gitignored session scratchpad `17y-b2/`; captures in `17y-screens/b2/`)
+
+- **(a)(b)(e) shared mechanism** — the pre-fix build's launch log FAULTS on the undeclared type; the
+  pre-fix synthetic drag runs its session and lands nothing; `DragTypeDeclarationTests` RED on the
+  pre-fix tree (3 tests, 10 issues) → GREEN 3/3; the same drag LANDS on the fixed build (strip name +
+  section label), the fixed instance logs zero declaration faults.
+- **(b)** `BookcasePlacingGripTests` (gate red by revert, 2 issues) · `BookcaseRowFreezeTests` (the
+  pre-existing freeze: red 3/3 with the identity line reverted, green 3/3 fixed; its first form HOLLOW
+  and recorded as such) · walked: grips, a grip-started drop landing right above, the freeze before
+  (`f1`) and after (`f2`–`f4`), the final build (`b9`), Study (`b10`).
+- **(e)** `BookPanelDragGateTests` RED on the pre-fix behaviour (4 issues) → GREEN; revert RED (4) ·
+  walked: her capture's chapters drag and land; the stamp-order refusal with its road.
+- **(m)** `CaptureFocusReportTests` RED on the pre-fix tree (1 issue — the arrival) → GREEN; revert
+  RED (2) · walked: one cursor in both states, AX-confirmed.
+- **(n)** `MastheadLayoutTests.theOpenFieldsWordsStayWhereTheTitleRested` RED on the pre-fix code (3
+  issues — the prompt in both voices; Study 6.5 pt) → GREEN · walked both voices.
+- **(p)** `CanvasDebugOnlyTests` RED against the seam's pre-fix shape (6 issues) → GREEN · Release
+  COMPILE green + `nm` (0 oracle symbols in Release) · the Debug capture (`p1`).
+- **END:** the B2 union **335 tests / 62 suites** (7 standing opt-in skips) · the tutorial spine **98 /
+  13** · the phone BUILD SUCCEEDED · the Release compile BUILD SUCCEEDED.
+
+### FINDINGS (for the orchestrator)
+
+- **F-B2-1 — FIXED: the three in-app drag types were never declared** (items (a)(b)(e)). 13i-d's F-U1-4
+  / F-U2-4 ("synthetic drags never commit a SwiftUI drop here") recorded THIS defect as a harness
+  artifact; on the fixed build the same synthetic drags commit. The combined-walk list's "drags by hand"
+  items were never going to pass by hand.
+- **F-B2-2 — FIXED, class extension: the sidebar Open strip's row reorder** (pre-13u Act 10,
+  `OpenNoteDragToken`) carried the same undeclared type and was never walked; declared in the same
+  commit (the pin's source scan names it). Not one of her six items — it joins her Monday drag
+  spot-check (a row of the Open strip dragged to reorder).
+- **F-B2-3 — the prior (n) pin went HOLLOW at its own fix** (`bothTitleFacesShareOneBoxSoNothingShifts
+  OnClick` reads frame WRAPPERS that equal the box by construction). Kept — still true, still cheap —
+  beside the new pin that measures the drawn words. The reviewer may prefer it retired.
+- **F-B2-4 — WalkKit fact:** a synthetic mouse-up can be MISSED by AppKit's drag loop (a fast `du`
+  after the `dm`s): the session stays open (`sample <pid> | grep _dragUntilMouseUp`), the app answers no
+  AppleEvent (a quit TIMES OUT) and the next real or synthetic mouse-up ends it — post a second `du`
+  after checking. The orchestrator may fold it into `Tools/WalkKit/README.md` (not edited here).
+- **F-B2-5 — FIXED, PRE-EXISTING (U1's board): a book moved between sections froze its row** — meta,
+  grip, hairline, row-drop enablement — until the board was rebuilt (proven with U1's own details
+  toggle). The record above keeps both wrong turns (the out-of-bounds theory; the parent-read theory)
+  and the hollow first pin, in order.
+- **F-B2-6 — the field guide teaches Canvas in Release** (lesson "blocks · canvas" + the mode-row
+  sentence at `TutorialSeeder.swift:456` — "Read · Lenses · Compare · Blocks · Canvas, and …"). Seed
+  content: 13s's (fenced here). The tutorial spine is Debug and stays green.
+- **F-B2-7 — (e)'s gate has a sibling on the book view's OWN surfaces:** the navigator/Outline drop
+  (`BookStructureModel.acceptDrop` → `filePost(…, reposition: false)`) re-places a note inside its own
+  chapter of a stamp-ordered book as the same silent no-op. Not this batch's surface (the brief named the
+  Book Panel); the same `needsManualOrder` words would serve it. Owner: the orchestrator's call (a
+  standing-fixes item, or B3's touch of the book view).
+- **F-B2-8 — no regression risk noted in the type declarations:** the three identifiers are private
+  (no extension, no MIME); the Release plist carries them; nothing outside the app reads them.
+
+### PROVISIONALS (QUESTIONS #184 carries them, in her words)
+
+- **P-17y-B2-1 (b) the handle:** the app's one grip glyph ⠿ in each row's leading gutter, ALWAYS visible
+  while my order is on (never on hover), none in A–Z / last edited. (a) BUILT · (b) "≡" drag bars · (c)
+  shown on hover only.
+- **P-17y-B2-2 (e) a lone chapter shows no grip** (it cannot move anywhere — her "a handle that cannot
+  drag must not render", read literally). (a) BUILT · (b) keep the grip for the navigator's consistency.
+- **P-17y-B2-3 (e) the stamp-order refusal** speaks only for a re-place INSIDE the note's own chapter;
+  filing into ANOTHER chapter in a date-ordered book still files (at its date place, silently — the book
+  view's own ruling). Words: *“Journal” is sorted by Entry date ↓, so a note can’t be placed by hand —
+  set the book’s order ▾ to Manual order and save it.* (a) BUILT · (b) refuse every note drop in a stamp
+  order · (c) offer to switch the book to Manual order on the spot.
+- **P-17y-B2-4 (m) which cursor:** the Terminal block cursor yields the moment the caret is in the box
+  (the 13u3 contract, restored — her rule's "one at a time"). (a) BUILT · (b) the block cursor WINS
+  while the box is empty and the system caret is hidden until she types.
+- **P-17y-B2-5 (n) the open field's date** is drawn in the voice's placeholder ink (`faint`) where the
+  system placeholder grey drew it before. (a) BUILT · (b) the resting colour (`muted`) — no visible
+  change at all when the field opens.
+- **P-17y-B2-6 (p) a note left in Canvas** reopens in Write on a Release build (your real store ran
+  Canvas before this). (a) BUILT · (b) reopen in Blocks (Canvas's "managing" sibling).
+- **P-17y-B2-7 (p) the Snippets area's Canvas face goes too** (AppSpec §12: "Canvas = a VIEW on a post
+  or the scraps area"); its Scraps | Canvas picker is not drawn in Release. (a) BUILT · (b) keep the
+  Snippets canvas in Release.
+
+### MOBILE PARITY (record only — nothing built)
+
+Nothing mobile-visible. The phone has no Bookcase drags (U1's parity facts stand), no Book Panel (U2's
+F-U2-5 stands), no Terminal block cursor on its capture, no rename-field prompt of this shape, and no
+Canvas (her 2026-08-03 exceptions: "the sticky-note style of editing" is not replicated). The one
+Shared/ addition (`BookcaseBoard.placesByHand`) is unused there; the phone built green.
+
+### SEAM NOTE (for the review cast)
+
+No `Sources/VariorumCore/Sync/`, no schema, no custody, no editor seam in the strict sense
+(`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier untouched). Two text surfaces ARE in
+the diff: **(m)** `CaptureNSTextView` — a TK2 `NSTextView`, OUTSIDE the editor seam by its own header
+(no identity attributes, no `BlockRangeIndex`, no `PaneTextAuthority`, no router claim), the change only
+first-responder overrides and no TK1 API; **(n)** the masthead title — a SwiftUI `TextField` (the
+measurement read SwiftUI's own field editor). The orchestrator decides whether that re-casts to Fable.
+
