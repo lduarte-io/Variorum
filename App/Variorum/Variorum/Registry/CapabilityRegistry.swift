@@ -1672,7 +1672,10 @@ nonisolated enum CapabilityRegistry {
             availability: always),
         Capability(
             id: .unarchiveBook, verb: BookStateCopy.unarchiveVerb, scope: .book,
-            doors: [.surface],
+            // 17y B3 item (l): + `.contextMenu` — the book row menu beyond
+            // the Bookcase (`BookRowMenu`) renders it on an archived book
+            // (the Archived surface's rows, an archived starred book).
+            doors: [.surface, .contextMenu],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BookStateCopy.unavailableNote,
             availability: always),

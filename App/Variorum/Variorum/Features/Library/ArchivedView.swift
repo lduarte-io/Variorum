@@ -59,11 +59,17 @@ struct ArchivedView: View {
     /// 13i-e U2: a book row's Open — composition decides what opening a book
     /// means (the shell's `.reading` route). Defaults to nothing (a pin's mount).
     var openBook: (String) -> Void = { _ in }
+    /// 17y B3 item (l): the star door for the BOOKS group's row menu (nil in
+    /// a harness mount — the menu then draws no star).
+    var starDoor: StarDoor? = nil
     @State private var model: RecoveryViewModel
     /// 13i-e U2 — the BOOKS group's brain and the shared state doors (the
     /// Unarchive/Delete acts, their confirms and receipts).
     @State private var books: ArchivedBooksModel
     @State private var doors: BookStateDoors
+    /// 17y B3 item (l): the book rows' context menu (`BookRowMenu`) — over
+    /// THIS surface's state doors, whose confirms it already hosts.
+    @State private var rowDoors: BookRowDoors
     @State private var query = ""
     /// The Trash road out (N3: Archive → Unarchive → Library, or Delete →
     /// the Trash). One confirm host, the shared wording.
@@ -80,15 +86,19 @@ struct ArchivedView: View {
         session: AppSession, library: LibraryViewModel,
         openPost: @escaping (String) -> Void,
         openBook: @escaping (String) -> Void = { _ in },
+        starDoor: StarDoor? = nil,
         books: ArchivedBooksModel? = nil
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
         self.openBook = openBook
+        self.starDoor = starDoor
         _model = State(initialValue: RecoveryViewModel(session: session))
         _books = State(initialValue: books ?? ArchivedBooksModel(session: session))
-        _doors = State(initialValue: BookStateDoors(session: session))
+        let doors = BookStateDoors(session: session)
+        _doors = State(initialValue: doors)
+        _rowDoors = State(initialValue: BookRowDoors(session: session, stateDoors: doors))
     }
 
     /// The listing this surface shows, narrowed by the name filter. A pure
@@ -120,6 +130,10 @@ struct ArchivedView: View {
         .task(id: session.wing.currentID) { await books.start() }
         // The state doors' ONE confirm road (Delete Book's three confirms).
         .bookStateConfirms(doors)
+        // 17y B3 item (l): the row menus' settings sheet (their state doors
+        // are `doors`, confirmed just above — never hosted twice).
+        .bookRowDoors(rowDoors, hostsStateConfirms: false)
+        .onChange(of: books.books, initial: true) { _, now in rowDoors.adopt(now) }
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
@@ -292,6 +306,13 @@ struct ArchivedView: View {
                     }
                 }
             }
+        }
+        // 17y B3 item (l): the book row menu (the Bookcase's, trimmed of
+        // position) — this row's buttons' twins, plus star and settings.
+        .contextMenu {
+            BookRowMenu(
+                readingID: reading.id, doors: rowDoors, starDoor: starDoor,
+                open: { openBook(reading.id) })
         }
     }
 

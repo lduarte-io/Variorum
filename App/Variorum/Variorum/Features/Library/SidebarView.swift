@@ -171,6 +171,10 @@ struct SidebarView: View {
     let stars: StarsModel
     /// The star door, for this view's note rows AND its Starred rows.
     var starDoor: StarDoor?
+    /// 17y B3 item (l): the Starred section's BOOK rows render the book row
+    /// menu (`BookRowMenu`); the composition root owns its brain. nil (a
+    /// harness mount) keeps the plain Star/Unstar menu.
+    var bookRowDoors: BookRowDoors? = nil
     @Binding var selection: SidebarSelection?
     /// 13f batch 4 (W1/A25): "Open Beside" on an Open-strip row — the
     /// split's door where the window's open notes already live.
@@ -508,8 +512,17 @@ struct SidebarView: View {
                 }
             }
             .padding(.horizontal, Self.groupPadding)
+            // 17y B3 item (l): the starred books' facts (≤ the star cap) and
+            // what their row menus present.
+            .task(id: starredBookIDs) { await bookRowDoors?.load(starredBookIDs) }
+            .modifier(OptionalBookRowDoorsHost(doors: bookRowDoors))
             separator
         }
+    }
+
+    /// The Starred section's BOOK ids, in star order (≤ the cap — P1).
+    private var starredBookIDs: [String] {
+        stars.items.filter { $0.target.kind == .reading }.map(\.target.id)
     }
 
     private func starredRow(_ item: Queries.StarredItem) -> some View {
@@ -541,7 +554,13 @@ struct SidebarView: View {
         }
         .onTapGesture { selection = destination }
         .contextMenu {
-            if let starDoor {
+            // 17y B3 item (l): a starred BOOK's row carries the book row menu
+            // (the Bookcase's, trimmed of position); a note keeps its star.
+            if item.target.kind == .reading, let bookRowDoors {
+                BookRowMenu(
+                    readingID: item.target.id, doors: bookRowDoors, starDoor: starDoor,
+                    open: { selection = destination })
+            } else if let starDoor {
                 Button(starDoor.title(for: item.target)) {
                     starDoor.toggle(item.target)
                 }

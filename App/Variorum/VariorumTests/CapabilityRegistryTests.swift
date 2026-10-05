@@ -315,6 +315,11 @@ struct CapabilityRegistryTests {
             // a new line): the BOOK PANEL's row menus — the five structure
             // doors (each a drag's menu twin) and the remove/release door.
             .union(BookPanelView.contextMenuCapabilities)
+            // 17y B3 item (l) (A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the BOOK ROW MENU beyond the Bookcase
+            // (the Library's book rows, the Starred section's, the Archived
+            // books group's) — its acts, one of them (Unarchive) newly doored.
+            .union(BookRowMenu.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

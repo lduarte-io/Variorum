@@ -338,9 +338,18 @@ final class LibraryCatalogModel {
         if let anchor = selectionAnchor, !listed.contains(anchor) { selectionAnchor = nil }
     }
 
+    /// 17y B3 item (l): the book rows' context menu brain (the Bookcase's
+    /// menu trimmed of position — `BookRowMenu`, the shared home). Its facts
+    /// are the LISTED book hits' rows, read once per listing.
+    @ObservationIgnored let bookRowDoors: BookRowDoors
+
+    /// The book hits' ids, in listing order — what the row menus' facts read.
+    var listedBookIDs: [String] { hits.filter { $0.kind == .book }.map(\.id) }
+
     init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
         self.defaults = defaults
+        self.bookRowDoors = BookRowDoors(session: session)
         // A remembered value the enum does not PARSE (a hand-edited plist,
         // an older build's key) reads as the shipped default.
         //

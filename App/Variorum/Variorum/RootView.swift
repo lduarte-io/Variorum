@@ -49,6 +49,9 @@ struct RootView: View {
     /// window state — it is synced, so every window shows the same five;
     /// each window observes it for itself, exactly as it does the library.
     @State private var stars: StarsModel
+    /// 17y B3 item (l): the sidebar Starred section's BOOK rows' menu brain
+    /// (`BookRowMenu` — the Bookcase's menu trimmed of position).
+    @State private var starredBookDoors: BookRowDoors
     /// 13i-d U5 — the WINGS (the shared `Core/Views` brain): the Bookcase's
     /// switcher and the note rows' Move/Copy to Wing doors read this one.
     @State private var wings: WingsModel
@@ -157,6 +160,7 @@ struct RootView: View {
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
         _stars = State(initialValue: StarsModel(session: session))
+        _starredBookDoors = State(initialValue: BookRowDoors(session: session))
         _wings = State(initialValue: WingsModel(session: session))
         _theme = State(initialValue: ThemeStore(session: session))
     }
@@ -175,6 +179,7 @@ struct RootView: View {
             SidebarView(
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, stars: stars, starDoor: starDoor,
+                bookRowDoors: starredBookDoors,
                 selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
@@ -959,7 +964,9 @@ struct RootView: View {
                 session: session, library: library,
                 openPost: { postID in openHere(.post(postID)) },
                 // 13i-e U2 (R-13ie-1): an archived book opens in the book view.
-                openBook: { readingID in openHere(.reading(readingID)) })
+                openBook: { readingID in openHere(.reading(readingID)) },
+                // 17y B3 item (l): the BOOKS group's row menu carries the star.
+                starDoor: starDoor)
         }
     }
 

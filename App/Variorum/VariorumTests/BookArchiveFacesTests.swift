@@ -129,9 +129,15 @@ struct BookArchiveDeclarationTests {
         #expect(archive.doors == [.contextMenu, .surface])
         let unarchive = CapabilityRegistry.capability(.unarchiveBook)
         #expect(unarchive.verb == "Unarchive" && unarchive.scope == .book)
-        #expect(unarchive.doors == [.surface], "an archived book is never on the Bookcase")
+        // 17y B3 item (l) — A JUSTIFIED EDIT: Unarchive gains a context door
+        // (the book row menu beyond the Bookcase renders it on an archived
+        // book); the subject — never on the BOOKCASE's menu, where an
+        // archived book never stands — holds below, unchanged.
+        #expect(unarchive.doors == [.surface, .contextMenu])
+        #expect(BookRowMenu.contextMenuCapabilities.contains(.unarchiveBook))
         #expect(ShelfView.contextMenuCapabilities.contains(.archiveBook))
-        #expect(!ShelfView.contextMenuCapabilities.contains(.unarchiveBook))
+        #expect(!ShelfView.contextMenuCapabilities.contains(.unarchiveBook),
+                "an archived book is never on the Bookcase")
         #expect(BookSettingsSheet.surfaceCapabilities.contains(.archiveBook))
         #expect(BookSettingsSheet.surfaceCapabilities.contains(.unarchiveBook))
         #expect(ArchivedView.surfaceCapabilities.contains(.unarchiveBook))

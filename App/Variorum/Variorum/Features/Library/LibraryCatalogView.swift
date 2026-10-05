@@ -229,6 +229,9 @@ struct LibraryCatalogView: View {
         // 13i-d U5: a wing switch re-asks the catalog (the wing is part of
         // the question).
         .task(id: session.wing.currentID) { await model.search() }
+        // 17y B3 item (l): the book rows' menu facts — the listed books only.
+        .task(id: model.listedBookIDs) { await model.bookRowDoors.load(model.listedBookIDs) }
+        .bookRowDoors(model.bookRowDoors)
         .wingMoveConfirm($wingMove, wings: wings) { Task { await model.search() } }
         // 13i-c U4: the owned-by badge's facts, keyed on the listed notes.
         .task(id: listedNoteIDs) {
@@ -606,6 +609,13 @@ struct LibraryCatalogView: View {
                             onDoubleClick: { openHit(hit) })
                         .listRowBackground(
                             rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
+                        // 17y B3 item (l): a BOOK row's menu — the Bookcase's
+                        // trimmed of position (`BookRowMenu`, one table).
+                        .contextMenu {
+                            BookRowMenu(
+                                readingID: hit.id, doors: model.bookRowDoors,
+                                starDoor: starDoor, open: { openHit(hit) })
+                        }
                     }
                 }
             }
