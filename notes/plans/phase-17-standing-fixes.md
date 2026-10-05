@@ -1757,12 +1757,19 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   Sherlock classifier's contract — the deviation from R-17y-5's sketch is the memo's
   PROVISIONAL (i), hers to overturn.
 - **B3 — faces, vocabulary, ruled behaviors ((c)(d)(g)(o)(h)(i)(f)(l)(r)(s) + the F-B2-7
-  rider): RUNNING** (spawned 2026-10-05 ~06:15, fresh `opus-implementer`; the standalone brief
-  `notes/plans/17y-b3-brief.md` + the rulings file bind — Gate 1 PRE-ANSWERED (R-17y-1…4), the
-  mock steps collapsed, items (r) the census overlay and (s) the starred shelf ruled in
-  (R-17y-9), item 11 = F-B2-7's book-view gate with B2's two orderings. No sitting gates it:
-  closes on the orchestrator's verification + its ladder; PROVISIONALs bundle to QUESTIONS.
-  The implementer appends "17y B3 RECORD" at this file's tail.
+  rider): IMPLEMENTER CLOSED ~09:40; LADDER IN ITS EXCHANGE.** All eleven items built with
+  red-on-old pins, walked in use (59 captures, both voices); whole-Mac END 3887/638 green
+  (+ three post-END commits covered by their targeted suites — B-DEDUPE's END run covers the
+  whole-target gap); phone build green; one transient 529 death mid-run, resumed in place, no
+  work lost. The orchestrator's spot-walk: the starred shelf, the census overlay (zero push),
+  the Arrivals icon + "arrivals · 1 waiting" popover, open-never-seats ("in no book" after).
+  THE LADDER: round 1 re-cast to FABLE on the implementer's seam flag ((f)'s default's-meaning
+  change + the (c) core touch) — **0/0/2/3, a clean batch** (`17y-b3-ladder-round1.md`,
+  4781904a). MINOR-2 done at the seam (19h minted, VR-112); F-B3-1 → B-DEDUPE (lesson 4's
+  prose + its withKnownIssue wrapper); MINOR-1 + the three NITs in the cross-model exchange
+  (findings to the implementer verbatim; the reviewer finalizes and implements its confirmed
+  fixes). QUESTIONS #185 (a)–(j) carries the PROVISIONALs. Residue, deliberate: three Trash
+  items from its walk (listed in the B3 RECORD), recoverable 30 days.
 - **B1 — the two performance items ((j)(k)): NOT-STARTED.** Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
   pagination on `(stamp, id)`, never a raised cap + the All-screen books region cap; the close
@@ -1772,8 +1779,13 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
 **CANON DELTAS OWED AT THE ENTRY'S CLOSE (accumulating; landed exactly as ruled, contract line
 + pointer):** AppSpec §12 — Canvas is Debug-only ((p), her "debug-only ratified"): the Release
 note mode row is six modes ⌘1–⌘6 and the Snippets area's Canvas face is off in Release
-(P-17y-B2-7/#184(g)); pointer to the B2 RECORD. SyncSpec §7 — the seeded-gathering/quicknote
-keeper's paragraph (B-DEDUPE's, at its close).
+(P-17y-B2-7/#184(g)); pointer to the B2 RECORD. AppSpec §12, from B3 (the Fable round's note
+(b)): the Arrivals door is the book masthead's ICON with the ONE word "Arrivals" (R-17y-1/2 —
+the content-top line's idiom retires from §12's text); the Library cards view is "Cards"; the
+chapterless word is "unfiled" (R-17y-4); the Bookcase strip carries the VIRTUAL starred shelf
+(R-17y-9); the app's one wing FOLLOWS the focused pane's note on open and focus (her (f)
+ruling) — each a contract line + a pointer to the B3 RECORD/rulings file. SyncSpec §7 — the
+seeded-furniture fold's paragraph (B-DEDUPE's, at its close).
 
 **Standing facts for a successor:** preflight done in full 2026-10-05 (CLAUDE.md canon · master
 plan post-13r pointer · KnownIssues · QUESTIONS #166–#182 · the 17y row a–q end to end · the
