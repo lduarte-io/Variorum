@@ -242,7 +242,7 @@ extension SyncEngine {
                 switch try gatheringIsSeedsOwn(db, row: candidate, gathering: gathering) {
                 case true: seedOwn.append(candidate)
                 case false: continue
-                case nil: return .deferred  // a `shelf` record still in flight
+                case nil: return .deferred  // in-flight evidence (a `shelf` record, or MAJOR-3's absent rule tag)
                 }
             }
             guard seedOwn.count > 1 else { continue }
@@ -723,25 +723,32 @@ extension SeededFurnitureClassifier {
             arguments: [postID, seedPathsJSON]) ?? false
         if engagement { return .engaged }
 
+
         let placements = try Row.fetchAll(
             db,
             sql: """
-                SELECT block_id, chosen_variant_id FROM container_block
+                SELECT id, block_id, chosen_variant_id FROM container_block
                 WHERE container_id = ? AND deleted_at IS NULL
                 ORDER BY position, id
                 """,
             arguments: [postID])
         guard !placements.isEmpty else { return .straggling }
+        var placementIndex: [String: Int] = [:]
+        for (index, placement) in placements.enumerated() {
+            placementIndex[placement["id"] as String] = index
+        }
 
         var parts: [String] = [post["title"] as String? ?? "",
                                "lk:\(post["locked"] as Int? ?? 0)"]
-        // The note's live comments, as (block-ordinal, text) tuples in
-        // placement order — identity, not engagement (BLOCKER-1): the
-        // seed's own comment matches across copies; hers differ.
+        // The note's live comments, as (the placement's index among ALL
+        // placements, text) tuples — identity, not engagement (BLOCKER-1):
+        // the seed's own comment matches across copies; hers differ. The
+        // round-2 MINOR: the index is the block's REAL position, so the
+        // same text on a DIFFERENT block never folds.
         let comments = try Row.fetchAll(
             db,
             sql: """
-                SELECT cb.position AS pos, cb.id AS pid, bc.text AS text
+                SELECT cb.id AS pid, bc.text AS text
                 FROM block_comment bc
                 JOIN container_block cb ON cb.block_id = bc.block_id
                 WHERE cb.container_id = ? AND cb.deleted_at IS NULL
@@ -749,12 +756,9 @@ extension SeededFurnitureClassifier {
                 ORDER BY cb.position, cb.id, bc.text
                 """,
             arguments: [postID])
-        var commentOrdinal: [String: Int] = [:]
         parts += comments.map { row -> String in
-            let key = (row["pos"] as String? ?? "") + "|" + (row["pid"] as String? ?? "")
-            let ordinal = commentOrdinal.count
-            if commentOrdinal[key] == nil { commentOrdinal[key] = ordinal }
-            return "c\(commentOrdinal[key]!):\(hash(row["text"] as String? ?? ""))"
+            let index = placementIndex[row["pid"] as String? ?? ""] ?? -1
+            return "c\(index):\(hash(row["text"] as String? ?? ""))"
         }
         for placement in placements {
             let blockID: String = placement["block_id"]

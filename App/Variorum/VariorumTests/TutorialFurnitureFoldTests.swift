@@ -12,7 +12,10 @@
 //  every real guide was unfoldable while the synthetic suite stayed green.
 //  Any future seed-content change that trips a NEW engagement leg turns
 //  this red at the next test run — the drift net the round-1 BLOCKER
-//  demanded.
+//  demanded. (Round-2 caveat, recorded: the two mints here share UUID
+//  sequences and clocks — id/timestamp EXCLUSION from the signature is
+//  carried by the core two-client fold test's distinct prefixes and clock
+//  offset, never by this guard alone.)
 //
 
 import Dependencies

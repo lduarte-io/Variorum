@@ -401,6 +401,49 @@ struct SeededFurnitureDedupeTests {
             "an edited copy is never retired — content differs, both stand")
     }
 
+    @Test func theSameCommentOnADifferentBlockKeepsBoth() async throws {
+        // The round-2 MINOR's pin: the comment tuple carries the block's
+        // REAL placement index, so an identical comment TEXT attached to a
+        // DIFFERENT block never reads identical. RED ON OLD: the ordinal
+        // was first-seen-among-comment-bearers, and this exact pair folded.
+        let (a, b, _) = try pairWithFacts(guide: false)
+        let twoParagraphs = "First thought.\n\nSecond thought."
+        let noteA = try a.with { ops, db -> String in
+            let tag = try ops.createTag(name: Self.quicknotePath)
+            let minted = try ops.importPost(
+                title: Self.quicknoteTitle, text: twoParagraphs, undoLabel: "Quick note")
+            _ = try ops.applyTag(tag.id, toPost: minted.container.id)
+            let block = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE container_id = ? ORDER BY position LIMIT 1",
+                    arguments: [minted.container.id])!
+            }
+            _ = try ops.addBlockComment(to: block, text: "the same words")
+            return minted.container.id
+        }
+        _ = noteA
+        try b.with { ops, db in
+            let tag = try ops.createTag(name: Self.quicknotePath)
+            let minted = try ops.importPost(
+                title: Self.quicknoteTitle, text: twoParagraphs, undoLabel: "Quick note")
+            _ = try ops.applyTag(tag.id, toPost: minted.container.id)
+            let secondBlock = try db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE container_id = ? ORDER BY position",
+                    arguments: [minted.container.id])[1]
+            }
+            _ = try ops.addBlockComment(to: secondBlock, text: "the same words")
+        }
+
+        try await converge(a, b)
+
+        #expect(try liveIDs(
+            b, table: "container", where: "title = ?", [Self.quicknoteTitle]).count == 2,
+            "same text, different block — the pair differs, both stand")
+    }
+
     @Test func aForeignTagOnTheQuicknoteKeepsBoth() async throws {
         let (a, b, _) = try pairWithFacts(guide: false)
         try seedQuicknote(a)

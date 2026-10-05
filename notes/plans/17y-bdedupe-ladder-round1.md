@@ -107,3 +107,24 @@ re-reviews the fix diff fresh.
   wording corrected to enumerate what is pinned.
 
 ROUND 2 (fresh fable-reviewer) re-reviews the fix diff next.
+
+## ROUND 2 (fresh fable-reviewer, fix diff 3001ee3c..1958c45b): NO NEW BLOCKER/MAJOR — NO ROUND 3
+
+Every round-1 finding CONFIRMED (fixed or recorded; the reviewer re-ran the suites firsthand
+— 16/16, the Mac guard 1/1, whole core 2195/246 — and verified red-on-old by static trace
+against the pre-fix tree; it also chased and CLOSED the one hazard its own confirmation could
+have created: a permanently-absent tag row cannot exist — `PurgeFamily` never roots at `tag`,
+so absent is strictly in-flight). Round 2's own findings, all landed at this adjudication
+seam (commit below): **MINOR** — the comment tuple now carries the block's REAL placement
+index (same text on a different block never folds; pinned red-on-old,
+`theSameCommentOnADifferentBlockKeepsBoth` — suite 17/17); **NIT** the `:245` comment names
+both in-flight legs; **NIT** the #186 footnote's attribution tidied (the quoted phrase lives
+in (b); the head's own falsehood was its unqualified fold-to-one claim); **NIT** the drift
+guard carries its round-2 caveat (id/clock exclusion is the core two-client test's, never
+this guard's alone). The reviewer's deviation note stands recorded: locked-rides-identity
+also reaches the standalone note/pool grains — safe by construction, only identical pairs
+fold.
+
+**THE B-DEDUPE LADDER CLOSES: round 1 (1/3/2/2) → the orchestrator's fix round (every
+finding fixed or recorded, two real-shape pins, revert-proven) → round 2 clean (1 MINOR +
+3 NITs, all landed same-seam). The batch's acceptance now holds AGAINST THE REAL SEED.**
