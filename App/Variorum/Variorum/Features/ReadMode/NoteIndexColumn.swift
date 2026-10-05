@@ -22,6 +22,7 @@
 //  (`edit` and `read` alike) behind the outline toggle she loves.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -70,6 +71,9 @@ struct NoteIndexColumn: View {
     @State private var moveTarget: Queries.TOCRow?
     @State private var moveOrdinalText = ""
     @State private var trayShown = false
+    /// Whether the column is moving under her hand (17y B1 (j)): a row the
+    /// scroll carries under a resting pointer must not wake its controls.
+    @State private var scrollPhase = NoteIndexScrollPhase()
 
     // MARK: - Derived structure
 
@@ -169,6 +173,10 @@ struct NoteIndexColumn: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
+                }
+                .onScrollPhaseChange { _, phase in
+                    let moving = phase != .idle
+                    if scrollPhase.moving != moving { scrollPhase.moving = moving }
                 }
                 .onChange(of: columnTarget) { _, target in
                     // A landing or a seed lands the COLUMN on its row (a
@@ -281,6 +289,7 @@ struct NoteIndexColumn: View {
         return IndexColumnRow(
             tokens: tokens,
             selected: selectedBlockID == entry.row.blockID,
+            scrollPhase: scrollPhase,
             content: {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Button(folded ? "▸" : "▾") {
@@ -327,6 +336,7 @@ struct NoteIndexColumn: View {
         IndexColumnRow(
             tokens: tokens,
             selected: selected,
+            scrollPhase: scrollPhase,
             content: {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("▸")
@@ -367,31 +377,31 @@ struct NoteIndexColumn: View {
     /// EVERY realized row were the other half of her "laggy" scroll (the
     /// record's § THE TRACE: with the lookup gone the column still ran at
     /// ~120 ms a frame; with resting rows drawing no controls, 11 ms). A
-    /// RESTING row draws the same hint (`RestingRowControls`, sized to the
-    /// live set); the hovered and the selected row draw the live controls
-    /// OVER that hint's own frame — so waking a row never moves its layout.
+    /// RESTING row draws the same hint as ONE cached image
+    /// (`RestingRowControls.hint`, the live set's measured footprint), and
+    /// the selected row — or the hovered one while the column is still —
+    /// draws the live controls in that same footprint, so waking a row never
+    /// moves its layout. (Measured on the 2,000-block note: drawing the hint
+    /// as views cost ~20 ms a frame; waking each row the scroll carried under
+    /// the pointer cost ~20 more — the record's after-measurement.)
     @ViewBuilder
     private func rowControls(for row: Queries.TOCRow, ordinal: Int, live: Bool) -> some View {
-        RestingRowControls(tokens: tokens)
-            .opacity(live ? 0 : 1)
-            #if DEBUG
-            .onGeometryChange(for: CGSize.self) { $0.size } action: {
-                NoteIndexColumnProbe.restingSize = $0
-            }
-            #endif
-            .overlay(alignment: .trailing) {
-                if live {
-                    // At its OWN size, never the hint's proposal — so the pin
-                    // below measures the live set's real footprint.
-                    liveRowControls(for: row, ordinal: ordinal)
-                        .fixedSize()
-                        #if DEBUG
-                        .onGeometryChange(for: CGSize.self) { $0.size } action: {
-                            NoteIndexColumnProbe.liveSize = $0
-                        }
-                        #endif
+        if live {
+            liveRowControls(for: row, ordinal: ordinal)
+                // At its OWN size inside the hint's footprint — the pin
+                // measures this, and the two are one size by construction.
+                .fixedSize()
+                #if DEBUG
+                .onGeometryChange(for: CGSize.self) { $0.size } action: {
+                    NoteIndexColumnProbe.liveSize = $0
                 }
-            }
+                #endif
+                .frame(
+                    width: RestingRowControls.footprint.width,
+                    height: RestingRowControls.footprint.height, alignment: .trailing)
+        } else {
+            RestingRowControls.hint(tokens: tokens)
+        }
     }
 
     private func liveRowControls(for row: Queries.TOCRow, ordinal: Int) -> some View {
@@ -501,16 +511,14 @@ enum NoteIndexColumnProbe {
     static var wholeNoteLookups = 0
     static var rowsBuilt = 0
     static var liveControlRows = 0
-    /// What the resting hint and the live set each drew (the hint is sized to
-    /// the live set — the geometry pin holds them together).
-    static var restingSize: CGSize?
+    /// What the live set drew at its own size (the hint's footprint is held
+    /// to it by the geometry pin).
     static var liveSize: CGSize?
 
     static func reset() {
         wholeNoteLookups = 0
         rowsBuilt = 0
         liveControlRows = 0
-        restingSize = nil
         liveSize = nil
     }
 }
@@ -518,20 +526,20 @@ enum NoteIndexColumnProbe {
 
 // MARK: - The resting rows' hint (17y B1 (j))
 
-/// **What a resting row shows where the `↑ ↓ ⋯` doors wake** — drawn, never
-/// built from controls: two small rounded keys and the menu's dots, in the
-/// voice's ink, at the row's own 25 % rest. The live set is drawn OVER this
-/// frame when the row is hovered or selected, so the size here is the live
-/// set's own (measured off the mini controls — `NoteIndexColumnScrollCostTests`
-/// holds the two together); nothing here can be clicked, because nothing here
-/// is awake (a click on a resting row selects it, and its hover wakes the
-/// doors first).
+/// **What a resting row shows where the `↑ ↓ ⋯` doors wake** — two small
+/// rounded keys and the menu's dots, in the voice's ink, at the row's own 25 %
+/// rest. Drawn ONCE per ink into an image (`hint(tokens:)`), so a resting row
+/// costs one image view however fast she scrolls; nothing here can be clicked,
+/// because nothing here is awake (a click on a resting row selects it, and its
+/// hover wakes the doors first).
 struct RestingRowControls: View {
     let tokens: VoiceTokens
 
     /// The live mini controls' footprint, measured (79 × 13 pt on macOS 27.0:
     /// two 25.5-pt keys, the 24-pt menu, 2-pt gaps) — the geometry pin holds
-    /// the hint to it, so a row's title truncates exactly where it always did.
+    /// the live set to it, so a row's title truncates exactly where it always
+    /// did and a waking row never moves.
+    static let footprint = CGSize(width: 79, height: 13)
     static let keyFrame = CGSize(width: 25.5, height: 13)
     static let menuWidth: CGFloat = 24
     static let spacing: CGFloat = 2
@@ -549,6 +557,7 @@ struct RestingRowControls: View {
             .foregroundStyle(tokens.ink)
             .frame(width: Self.menuWidth, height: Self.keyFrame.height)
         }
+        .frame(width: Self.footprint.width, height: Self.footprint.height, alignment: .trailing)
         .accessibilityHidden(true)
     }
 
@@ -562,6 +571,59 @@ struct RestingRowControls: View {
             .background(tokens.ink.opacity(0.1), in: RoundedRectangle(cornerRadius: 4))
             .frame(width: Self.keyFrame.width, height: Self.keyFrame.height)
     }
+
+    // MARK: The one image a resting row shows
+
+    /// Rendered once per ink (a voice or appearance change is a new ink),
+    /// at the Retina scale. Bounded: one entry per ink the app has shown.
+    @MainActor private static var images: [String: Image] = [:]
+
+    @MainActor
+    static func hint(tokens: VoiceTokens) -> some View {
+        let key = inkKey(tokens.ink)
+        let image: Image
+        if let cached = images[key] {
+            image = cached
+        } else {
+            let renderer = ImageRenderer(content: RestingRowControls(tokens: tokens))
+            renderer.scale = 2
+            image = renderer.cgImage.map { Image(decorative: $0, scale: 2) }
+                ?? Image(nsImage: NSImage())
+            images[key] = image
+        }
+        return image
+            .resizable()
+            .frame(width: footprint.width, height: footprint.height)
+            .accessibilityHidden(true)
+    }
+
+    /// The ink's identity as its sRGB components (a `Color`'s description is
+    /// not a promise).
+    @MainActor
+    static func inkKey(_ ink: Color) -> String {
+        guard let rgb = NSColor(ink).usingColorSpace(.sRGB) else { return "\(ink)" }
+        return String(format: "%.4f,%.4f,%.4f,%.4f",
+                      rgb.redComponent, rgb.greenComponent, rgb.blueComponent, rgb.alphaComponent)
+    }
+}
+
+/// **Whether a column row's doors are awake** (17y B1 (j)) — pure, so the
+/// rule is pinned without a pointer: the SELECTED row always; a HOVERED row
+/// only while the column is still. A row the scroll carries under a resting
+/// pointer passes by without building its AppKit controls (measured: that
+/// churn alone cost ~20 ms a frame on the 2,000-block note).
+enum NoteIndexRowWake {
+    static func isLive(selected: Bool, hovering: Bool, scrolling: Bool) -> Bool {
+        selected || (hovering && !scrolling)
+    }
+}
+
+/// The column's scroll phase, observed by its rows (never by the column's own
+/// body — a phase change re-draws the rows' doors, not the whole note's list).
+@MainActor
+@Observable
+final class NoteIndexScrollPhase {
+    var moving = false
 }
 
 // MARK: - One column row (selection wash, hover-waking controls)
@@ -569,6 +631,9 @@ struct RestingRowControls: View {
 private struct IndexColumnRow<Content: View, Trailing: View>: View {
     let tokens: VoiceTokens
     let selected: Bool
+    /// 17y B1 (j): a hovered row wakes its doors only while the column is
+    /// still (`NoteIndexRowWake`).
+    let scrollPhase: NoteIndexScrollPhase
     @ViewBuilder var content: () -> Content
     /// The trailing controls, told whether the row is LIVE (hovered or
     /// selected) — 17y B1 (j): only a live row builds the AppKit controls.
@@ -585,7 +650,8 @@ private struct IndexColumnRow<Content: View, Trailing: View>: View {
                     .foregroundStyle(tokens.accent)
             }
             content()
-            trailing(hovering || selected)
+            trailing(NoteIndexRowWake.isLive(
+                selected: selected, hovering: hovering, scrolling: scrollPhase.moving))
                 .opacity(hovering || selected ? 1 : 0.25)
         }
         .padding(.horizontal, 8)

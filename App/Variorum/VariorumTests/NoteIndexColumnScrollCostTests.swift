@@ -67,8 +67,11 @@ struct NoteIndexColumnScrollCostTests {
             let model = BlockTOCViewModel(session: session, postID: post.id)
             await model.primeRows()
             #expect(model.rows.count == Self.blockCount)
+            // AWAY from the machine's pointer: a row the scroll carries under
+            // a real pointer is HOVERED, and hover legitimately wakes a row's
+            // doors — the claim here is about rows nothing is pointing at.
             let window = NSWindow(
-                contentRect: NSRect(x: 100, y: 100, width: 340, height: 600),
+                contentRect: Self.frameAwayFromThePointer(),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
             let hosting = NSHostingView(rootView: AnyView(
@@ -91,6 +94,15 @@ struct NoteIndexColumnScrollCostTests {
                 "the column's scroll view (a long note's column is taller than the window)")
             return try await body(model, scroll, window)
         }
+    }
+
+    /// A 340 × 600 frame on the far side of the screen from the pointer.
+    private static func frameAwayFromThePointer() -> NSRect {
+        let mouse = NSEvent.mouseLocation
+        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let x = mouse.x < screen.midX ? screen.maxX - 360 : screen.minX + 20
+        let y = mouse.y < screen.midY ? screen.maxY - 620 : screen.minY + 20
+        return NSRect(x: x, y: y, width: 340, height: 600)
     }
 
     private func pump(_ window: NSWindow, _ view: NSView, turns: Int = 6) async {
@@ -174,19 +186,37 @@ struct NoteIndexColumnScrollCostTests {
     }
 
     /// **The resting hint is the live set's own footprint** (a geometry
-    /// oracle — the fix's face). Waking a row draws the live controls OVER
-    /// the hint's frame, so the row never moves; and the hint must be the
-    /// live set's size, or the eye sees the doors jump as a row wakes.
+    /// oracle — the fix's face). The live controls draw at their OWN size
+    /// inside the hint's footprint; if the two differed, the eye would see the
+    /// doors jump as a row wakes and the title would truncate somewhere new.
     @Test func theRestingHintIsTheLiveControlsFootprint() async throws {
         try await withColumn(selected: "Line 3 of the long note.") { _, _, _ in
             #if DEBUG
-            let resting = try #require(NoteIndexColumnProbe.restingSize)
             let live = try #require(NoteIndexColumnProbe.liveSize)
-            #expect(abs(resting.width - live.width) <= 0.5,
-                    "resting hint \(resting) vs live controls \(live): widths differ")
-            #expect(abs(resting.height - live.height) <= 0.5,
-                    "resting hint \(resting) vs live controls \(live): heights differ")
+            let hint = RestingRowControls.footprint
+            #expect(abs(hint.width - live.width) <= 0.5,
+                    "hint footprint \(hint) vs live controls \(live): widths differ")
+            #expect(abs(hint.height - live.height) <= 0.5,
+                    "hint footprint \(hint) vs live controls \(live): heights differ")
             #endif
+            // …and the drawn hint itself fills exactly that footprint.
+            let drawn = NSHostingView(rootView: RestingRowControls(
+                tokens: VoiceTokens.fallback(for: .light))).fittingSize
+            #expect(abs(drawn.width - RestingRowControls.footprint.width) <= 0.5
+                    && abs(drawn.height - RestingRowControls.footprint.height) <= 0.5,
+                    "the drawn hint is \(drawn), its footprint \(RestingRowControls.footprint)")
         }
+    }
+
+    /// **The wake rule** (pure): the selected row is always awake; a hovered
+    /// row only while the column is still — a row the scroll carries under a
+    /// resting pointer must not build its AppKit controls (measured ~20 ms a
+    /// frame of churn on the 2,000-block note). No red-on-old form exists: the
+    /// shipped column had no wake decision at all — every row was live.
+    @Test func aHoveredRowWakesOnlyWhileTheColumnIsStill() {
+        #expect(NoteIndexRowWake.isLive(selected: true, hovering: false, scrolling: true))
+        #expect(NoteIndexRowWake.isLive(selected: false, hovering: true, scrolling: false))
+        #expect(!NoteIndexRowWake.isLive(selected: false, hovering: true, scrolling: true))
+        #expect(!NoteIndexRowWake.isLive(selected: false, hovering: false, scrolling: false))
     }
 }
