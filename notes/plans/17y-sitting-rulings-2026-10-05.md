@@ -115,3 +115,17 @@ rule" parenthetical is superseded by this instruction.)
   (deliberately disjoint names/tags). Its own symmetric fold is ONE facts-wiring line on the
   phone once the engine road exists — recorded as a MOBILE PARITY row at the slice's close,
   never built in this pass (the zero-mobile fence holds).
+
+## Item (r) — minted live 2026-10-05 ~03:10 (her report + capture; folds into the 17y row's cell at the next safe seam — B2 holds the 17 file)
+
+**(r) THE № CENSUS PANEL BECOMES A TRUE DROPDOWN.** Her words with the capture
+(`notes/plans/17y-screens/census-pushdown-clips.png`): "see how the book dropdown sits above
+the text and cuts it off weirdly? lets fix this dropdown so it's a dropdown, not a push down."
+The defect: the census panel (13i-d U1 — "opens under the strip and remembers being open")
+renders over the board here and clips the first book row mid-height. The fix: the panel
+becomes an OVERLAY dropdown — floats above the list, zero layout push, no row ever half-drawn;
+its position (under the strip's №), its contents (the six solo rows), the solo acts and the
+remembered-open state all survive unchanged — only the layout mechanism changes. P-13id-U1's
+census provisionals otherwise untouched. **Runs in B3** (the faces batch; the brief gains it
+at spawn). Pin: the overlay never displaces the board's rows (red-on-old: the shipped panel
+pushes/clips); the walk captures the open panel over a populated board.
