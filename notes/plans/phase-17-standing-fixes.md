@@ -1727,3 +1727,74 @@ plan post-13r pointer · KnownIssues · QUESTIONS #166–#182 · the 17y row a�
 resiliency protocol · TEXTKIT2_NOTES owed before B1's brief · per-item records read per batch).
 No `Sync/`, custody or schema expected anywhere in this pass — if an item needs one, STOP (§12 /
 author event). Her pending picks bundle into ONE sitting at B3's close — no dripped questions.
+
+## 17y B-SEED BRIEF — item (q), the tutorial-seed trace (written by the orchestrator 2026-10-05; the implementer's ONE acceptance unit)
+
+**THE DEFECT (her report, the 2026-10-04 evening planning sitting — the full intake is
+`notes/plans/phase-13s-onboarding-intake-2026-10-04.md`):** on her onboarding pass the field
+guide was the ONLY element that did not appear — it had to be restored via Help ▸ Restore
+Tutorial… while everything else (Sherlock, Jekyll, *Encryption Explained*, the Welcome shelf,
+the classics gathering, the quicknote) "was just there". Routed here at her word: *"we can trace
+the bug before i install on the new mac tomorrow"*. **Her Monday fresh-install + SIGN-IN on the
+new MacBook is the live verification bed — the mechanism must be in hand tonight.**
+
+**THE TASK, in order:**
+1. **TRACE FIRST — no fix without a self-traced concrete mechanism.** Establish by reading and
+   by a driven reproduction WHY a fresh store's first open lacks the field guide. The
+   orchestrator's reconnaissance (verify, don't adopt): the launch task in
+   `App/Variorum/Variorum/VariorumApp.swift` (~lines 180–250) seeds every sample book
+   (`SampleLibrarySeeder.Book.all` behind its `SyncGate`), the starred gathering, and runs
+   `SampleLibraryWelcome.arrangeAtLaunch` at a fresh store's birth — but NOTHING on the launch
+   path seeds the TUTORIAL: `TutorialSeeder.findOrSeed` runs only from doors (`ShellActions.
+   openTutorial`, Help ▸ Restore Tutorial…). If that is the mechanism, a fresh signed-OUT store
+   is born with Welcome listing a guide that does not exist (`SampleLibraryWelcome.
+   seededBookNames(guideName:)` names it; the §19 ruling says Welcome HOLDS it). Confirm, and
+   also answer the SIGNED-IN road end-to-end (the Monday bed): the books' gate defers seeding
+   until a clean first sync and discovery-by-reserved-name then skips what the corpus brought —
+   state exactly what the guide's story is on that road (her corpus holds a live field guide).
+   State both roads' mechanisms in the B-SEED RECORD before writing the fix.
+2. **PROPOSE BEFORE BUILDING (the in-batch fork rule — the implementer proposes, the architect
+   rules):** if the fix is anything OTHER than a minimal app-side launch occasion for the guide
+   (same shape as the books: the fresh-store-birth fact + the SyncGate + the seeder's own
+   `discover` idempotence, silent, honoring a reader's deletion), message the orchestrator with
+   the proposal and WAIT. In particular: a tutorial DEDUPE FAMILY would live in
+   `Sources/VariorumCore/Sync/` — that is a HARD STOP (report it; Sync/ is Fable work and this
+   pass expects none). The Jekyll precedent (18l-c U6: seeded everywhere, judged nowhere — the
+   two-fresh-devices-offline residual recorded, not repaired) is the recorded road for leaving
+   the guide OUT of the dedupe; name the residual in the record if the fix takes it.
+3. **THE FIX + PINS:** pin-before-fix, red-on-old verified by revert. The pin: the fresh-store
+   birth road leaves a live field guide present (and on Welcome, per §19) — RED on the old tree.
+   Keep the fix MINIMAL: 13s reshapes the whole seed set later (the intake's "way too many
+   books" — deliberately sequenced BEHIND this trace); build nothing of that here. The tutorial
+   spine (`TutorialWalkTests`) and the Welcome/seeder suites ride green; a changed seeding
+   occasion must not retrofit EXISTING stores (the `declined` mark's contract) and must not ask
+   anything at first open (R-13r-11: no popup — the seed is silent furniture).
+4. **EVIDENCE:** the pins; the affected suites at the unit's end (never the full suite at the
+   start); a scripted fresh-DEV-STORE launch walk showing the guide present on Welcome at first
+   open (captures under `notes/plans/17y-screens/b-seed/`, gitignored dir pattern); the signed-in
+   road's story stated in the record (her Monday install is its live bed).
+
+**FENCES:** zero `Sources/VariorumCore/Sync/` lines (STOP + report instead) · zero schema · zero
+custody · zero mobile (the phone's guide is its own seeder's — `MobileTutorialSeeder` untouched)
+· no seed-CONTENT edits (13s owns content) · no new settings, no new dependencies.
+
+**REQUIRED READING (never delegated):** this file's 17y row item (q) + this brief + the RUN
+RECORD above · `notes/plans/phase-13s-onboarding-intake-2026-10-04.md` · the 13i-d U7 RECORD +
+its F-U7-1 continuation in `notes/plans/phase-13i-d-bookcase.md` · QUESTIONS #177 ·
+`App/Variorum/Shared/SampleLibrary/SampleLibraryWelcome.swift` + `SampleLibrarySeeder.swift`
+(the SyncGate/Outcome grammar) · `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift`
+· `App/Variorum/Variorum/Registry/ShellActions.swift` (the door family) · the launch task in
+`VariorumApp.swift`. CLAUDE.md and its auto-loaded canon bind as everywhere.
+
+**ENVIRONMENT (binding):** work in the WORKTREE `~/dev/variorum-17y` ONLY (branch `main`; push
+`origin main` after every commit) — NEVER touch `~/dev/variorum` (a live session holds it).
+DerivedData: `App/Variorum/DerivedData/17y/`. Mac tests from `App/Variorum/` with suite-level
+`-only-testing`; confirm the "Test run with N tests" line; NEVER add a build configuration;
+instance checks via `pgrep -fl 'Variorum.app/Contents/MacOS'` discriminated BY PATH; the
+author's real-store app is NEVER quit or killed; no /Applications refresh in this batch.
+`notes/SessionResiliencyProtocol.md` binds: LIVE STATUS (the B-SEED RECORD section you append
+below this brief) from the FIRST commit; commit per piece, push after each; synchronous
+foreground waits only (poll, never `tail -f | grep`); no subagents. Commits carry NO
+Co-Authored-By / Claude-Session trailer. The cold review after your close is FABLE's
+(Sync-adjacent subject), spawned by the orchestrator — leave the diff clean and the record
+self-contained.
