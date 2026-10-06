@@ -1,6 +1,6 @@
 # librarywalkpolish — the Library walk's polish pass (the FIRST pass on the VR numbering; minted 2026-10-05 ~20:45 from the author's live 17y walk sitting)
 
-> **STATUS: LADDER ROUND 1 BACK (1 MAJOR · 5 MINOR · 5 NIT, `librarywalkpolish-ladder-round1.md`); the FIX ROUND running in a fresh session** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> **STATUS: THE FIX ROUND DONE (all eight items, END 522/80 green, c7d58bef); LADDER ROUND 2 running — FABLE (the fix diff touches the read tier: the one-line NoteIndexColumn lineLimit — the seam rule binds on content, not size). Then VR-122 (the guide currency pass) → HER re-walk → the release.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
