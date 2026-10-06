@@ -407,6 +407,7 @@ struct ShelfView: View {
             // library she is in, and the door to the others.
             if let wings {
                 WingSwitcherMenu(tokens: tokens, wings: wings)
+                    .reportsPress { model.mastheadDoorOpened() }
             }
             Spacer()
             Button(tokens.chromeLabel("Today's Entry")) { onTodaysEntry() }

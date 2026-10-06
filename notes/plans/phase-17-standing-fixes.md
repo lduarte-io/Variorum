@@ -2715,6 +2715,18 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
+### THE TRACE — W-3, before the fix
+
+`BookcaseStrip.utilityRun` draws № (a Button toggling `model.censusOpen`), order ▾ (`VoicedMenu` →
+a SwiftUI `Menu`, `.menuStyle(.button)`) and details; `ShelfView` hangs the open float over the
+board's top-right as an in-window overlay (17y (r)), and the masthead carries the wing switcher ▾
+(another `Menu`) and, when the strip overflows, the ⋯ shelf popover. NOTHING connected them: no
+masthead door read or wrote `censusOpen`, and a SwiftUI `Menu` exposes no open callback at all, so
+the float stood open, unchanged, under every menu that opened over the same corner (macOS 26's
+translucent menu material shows the float's rows through the menu — her "covers"). The fix is the
+missing connection (the press that opens a masthead menu/popover closes the float), never the
+float's LOOK (propose-only with her, out of scope).
+
 **Red-on-old method (every bug-class row):** each pin is committed AHEAD of its fix and run on that
 pre-fix committed tree (the natural red, the B2 precedent); the fix commit follows; no synthetic
 revert is in flight at any time.
@@ -3435,7 +3447,7 @@ and measurement here is a MOUNTED test-host window (the brief's "mounted suites 
 |---|---|---|
 | 0 | This record + the bwalk captures dir gitignored | DONE (this commit) |
 | 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | DONE (871ca738 red · this commit fix) — the rule is pure and in ONE home, `LibraryCatalogModel.scope(afterPicking:from:)` / `mode(afterPicking:from:)`, behind two doors the pickers now call (`pickMode` answers whether the moved scope owes a re-read; `pickScope` moves the view; the caller spawns `search()`, the file's convention; `modeChanged()` keeps the mode's own consequences). Red-on-old: the pickers' source pin committed ahead of the fix — RED on 871ca738's tree, "1 test … with 4 issues" (`bwalk/w2-red.log`: both pickers wrote `model.mode = $0` / `model.scope = $0`) → GREEN with the rule's pins (both switches + every untouched combination) and the doors over a real listing (Cards under All lists no book; All in Cards → List, the books back), beside `LibraryDayFilterTests`, `LibraryCardsWordTests`, `LibraryCardNameTests`: **"33 tests in 4 suites passed"** (`bwalk/w2-green.log`). PROVISIONAL edges → #188 (a). Face: no new chrome (the two existing segmented pickers move together) |
-| 2 | W-3 the census float dismissed by any masthead menu/popover — pin + fix (her priority 1) | NOT-STARTED |
+| 2 | W-3 the census float dismissed by any masthead menu/popover — pin + fix (her priority 1) | DONE (4fa07bdf red · this commit fix) — § THE TRACE — W-3 below. ONE state door, `ShelfViewModel.mastheadDoorOpened()` (an open float closes, the remembered close; № stays its own toggle), reached by every masthead menu/popover: order ▾ and the wing switcher ▾ (SwiftUI `Menu`s — no open callback, so the PRESS that opens them reports, through the new shared `Core/Views/PressReporter`: an inert AppKit view behind the control, a local mouse-down monitor, the event passed on untouched, one pure rule `PressReporterView.reports`), the ⋯ shelf panel (its button's own action), and a shelf name's RIGHT-click menu (`secondaryOnly` — a name's plain click solos and leaves the float). Red-on-old: the source pin committed ahead — RED on 4fa07bdf's tree, "1 test … with 4 issues" (`bwalk/w3-red.log`) → GREEN with the model rule, the press rule and the MOUNTED board (each reporter handed a synthetic press straight to its monitor body — never through the window, where a real `Menu` would start modal tracking: order ▾ + wing ▾ close the float, a press beside a door closes nothing, a name's plain click leaves it, its right-click closes it), beside the Bookcase family: **"44 tests in 12 suites passed"** (`bwalk/w3-green.log`). No capture of a LIVE menu (a native menu window, the author at the machine — no GUI drive); her re-walk is the face |
 | 3 | W-1 the List's notes on the lazy column, the List's exact face — the opt-in measurement rig (committed ahead), before-measure/captures, build, after-measure/captures, pins | IN-PROGRESS — the rig `LibraryListFaceRigTests` written (opt-in `VARIORUM_LIBRARY_LIST_FACE=1`), compiling next |
 | 4 | W-7 Terminal Cards readability (NEW, her live sitting) — before/after mounted captures, a Terminal-only idiom change | NOT-STARTED |
 | 5 | W-4 the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | NOT-STARTED |

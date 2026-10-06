@@ -69,6 +69,17 @@ final class ShelfViewModel {
     var orderMode: BookcaseOrderMode { didSet { prefs.orderMode = orderMode } }
     var detailsShown: Bool { didSet { prefs.detailsShown = detailsShown } }
     var censusOpen: Bool { didSet { prefs.censusOpen = censusOpen } }
+
+    /// **17y B-WALK W-3 — a masthead menu or popover opened: the № float
+    /// goes** (her ruling: the float must never cover an open masthead menu —
+    /// "unexcusable UI. not good at all"). Every masthead menu/popover door
+    /// reports here (order ▾, the wing switcher ▾, the ⋯ shelf panel, a shelf
+    /// name's right-click menu); № itself stays the float's own toggle. The
+    /// close is the remembered one (the float stays closed until № opens it
+    /// again — PROVISIONAL, #188). A closed float stays closed (no write).
+    func mastheadDoorOpened() {
+        if censusOpen { censusOpen = false }
+    }
     private(set) var collapsed: Set<String>
     private(set) var defaultShelfID: String?
 

@@ -185,7 +185,11 @@ struct BookcaseStrip: View {
         HStack(alignment: .center, spacing: 14) {
             names
             if overflowed {
-                Button("\u{22EF}") { panelShown.toggle() }
+                // 17y B-WALK W-3: opening the ⋯ panel dismisses the № float.
+                Button("\u{22EF}") {
+                    panelShown.toggle()
+                    model.mastheadDoorOpened()
+                }
                     .buttonStyle(.plain)
                     .font(tokens.navigation)
                     .foregroundStyle(tokens.muted)
@@ -267,6 +271,9 @@ struct BookcaseStrip: View {
             }
         }
         .draggable(BookcaseDragToken(.shelf(shelf.id)))
+        // 17y B-WALK W-3: a name's right-click menu dismisses the № float
+        // (its plain click solos the shelf and leaves the float alone).
+        .reportsPress(secondaryOnly: true) { model.mastheadDoorOpened() }
         .bookcaseDropSite(
             onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
         ) { payload in
@@ -368,6 +375,9 @@ struct BookcaseStrip: View {
             }
             .help("A\u{2013}Z · last edited · my order — "
                 + "\u{201C}my order\u{201D} is where you place books by hand")
+            // 17y B-WALK W-3: a `Menu` says nothing when it opens, so the
+            // press that opens it dismisses the № float.
+            .reportsPress { model.mastheadDoorOpened() }
             StatusDot(tokens: tokens)
             Button(tokens.chromeLabel("details")) { model.detailsShown.toggle() }
                 .buttonStyle(.plain)
