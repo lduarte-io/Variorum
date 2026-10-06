@@ -3558,9 +3558,13 @@ float's LOOK (propose-only with her, out of scope).
 ### FINDINGS (F-BW-N — each dispositioned)
 
 - **F-BW-1 — the field guide's lesson 7 teaches "my order" and Send to Top**, both hidden for 0.9.2
-  (VR-118). Seed content, fenced; the ritual R5 pin carries the stale claim as a `withKnownIssue`
-  that turns red when the lesson is re-worded or hand placing returns. **DEFERRED — KnownIssues,
-  owner librarywalkpolish** (the orchestrator's seed-content touch, or VR-120's return).
+  (VR-118). Seed content, fenced; the ritual R5 pin carried the stale claim as a `withKnownIssue`
+  that read only the MODEL — it would have turned red when hand placing returned, NEVER when the
+  lesson was re-worded (it never read the seed; round 1's MINOR-3 — this sentence first claimed
+  both, corrected here). **DEFERRED — KnownIssues, owner librarywalkpolish**; then made A PRE-0.9.2
+  GATE by round 1 and **FIXED at the round-1 fix round** (the lesson reworded to what 0.9.2 ships,
+  a seed-text pin `noLessonTeachesADoorThisReleaseHides` in the wrapper's place —
+  `notes/plans/librarywalkpolish-ladder-round1.md` § THE FIX ROUND, row 3).
 - **F-BW-2 — `ChromeLineLimitTests` red on `NoteIndexColumn.swift:393`** (a `.fixedSize()` on the
   index column's live row controls without a stated line policy — 17y B1 (j), 15b081d2 (f8977039 moved it to :393 — round-1 correction)). Pre-existing
   on this pass's tree; read-tier code, untouched here. **DEFERRED — KnownIssues, owner

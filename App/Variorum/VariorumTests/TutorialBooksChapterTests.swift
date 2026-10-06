@@ -464,29 +464,37 @@ struct TutorialBooksLessonTests {
     }
 
     /// **Lesson 7 — the Bookcase.** "Your books live on shelves, alphabetical
-    /// until you choose otherwise — switch to your own order to place them by
-    /// hand. The shelves run left to right exactly as All stacks them top to
-    /// bottom. Unshelved books wait at the top until you file them."
+    /// until you choose otherwise. The shelves run left to right exactly as
+    /// All stacks them top to bottom. Unshelved books wait at the top until
+    /// you file them."
+    ///
+    /// **JUSTIFIED EDIT (librarywalkpolish F-BW-1 — round 1's MINOR-3, a
+    /// PRE-0.9.2 GATE; the seed reword AUTHORIZED for the fix round):** the
+    /// lesson's first sentence lost "— switch to your own order to place them
+    /// by hand", the order ▾ sentence names the rows the release OFFERS
+    /// (`offeredOrderModes` — A–Z · last edited; "my order" steps back with
+    /// VR-118), and Send to Top left with it; the "try it" names last edited
+    /// instead, and its truth is executed below.
     @Test func lessonSevenTheBookcase() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "the bookcase")
-            #expect(text.contains("Your books live on shelves, alphabetical until you choose otherwise \u{2014} switch to your own order to place them by hand."))
-            #expect(text.contains("The shelves run left to right exactly as All stacks them top to bottom."))
+            #expect(text.contains("Your books live on shelves, alphabetical until you choose otherwise. The shelves run left to right exactly as All stacks them top to bottom."))
             #expect(text.contains("Unshelved books wait at the top until you file them."))
-            for label in BookcaseOrderMode.allCases.map(\.label) {
-                #expect(text.contains(label), "the order ▾ says \(label)")
-            }
-            #expect(text.contains(BookcaseCopy.moveToShelfVerb))
-            #expect(text.contains(BookcaseCopy.sendToTopVerb))
-            #expect(text.contains(StarCopy.starRow))
-            #expect(text.contains(BookcaseCopy.unshelvedName))
-            #expect(text.contains(Operations.welcomeShelfName))
-
             // Alphabetical until she chooses otherwise: the board's default.
             let suite = "u7-lesson7-\(UUID().uuidString)"
             let defaults = try #require(UserDefaults(suiteName: suite))
             defer { defaults.removePersistentDomain(forName: suite) }
-            #expect(ShelfViewModel(session: session, defaults: defaults).orderMode == .alphabetical)
+            let model = ShelfViewModel(session: session, defaults: defaults)
+            #expect(model.orderMode == .alphabetical)
+            for label in model.offeredOrderModes.map(\.label) {
+                #expect(text.contains(label), "the order ▾ says \(label)")
+            }
+            #expect(text.contains("The order \u{25BE} beside them reads A\u{2013}Z or last edited."))
+            #expect(text.contains("Switch the order \u{25BE} to \(BookcaseOrderMode.lastEdited.label) and the books you worked in most recently come first."))
+            #expect(text.contains(BookcaseCopy.moveToShelfVerb))
+            #expect(text.contains(StarCopy.starRow))
+            #expect(text.contains(BookcaseCopy.unshelvedName))
+            #expect(text.contains(Operations.welcomeShelfName))
 
             let ops = session.operations
             let second = try ops.createShelf(name: "Essays")
@@ -500,6 +508,25 @@ struct TutorialBooksLessonTests {
             let names = all.first?.books.map(\.reading.name) ?? []
             #expect(names == names.sorted { $0.localizedStandardCompare($1) == .orderedAscending },
                     "alphabetical within the run")
+
+            // "Switch the order ▾ to last edited and the books you worked in
+            // most recently come first": the door picks it, the board draws
+            // it, and the newest stamp leads.
+            model.pickOrder(.lastEdited)
+            #expect(model.effectiveOrderMode == .lastEdited)
+            let made = Date(timeIntervalSince1970: 1_782_950_400)
+            let worn = Queries.ShelfBook(
+                reading: Reading(id: "a", name: "a worn book", kind: .book, createdAt: made, updatedAt: made),
+                postCount: 1, sectionCount: 0, arrivalCount: 0)
+            let fresh = Queries.ShelfBook(
+                reading: Reading(id: "z", name: "z fresh book", kind: .book, createdAt: made, updatedAt: made),
+                postCount: 1, sectionCount: 0, arrivalCount: 0)
+            let stamps = [
+                "a": DateFormatter.variorumISO8601.string(from: made),
+                "z": DateFormatter.variorumISO8601.string(from: made.addingTimeInterval(3_600)),
+            ]
+            #expect(BookcaseBoard.ordered([worn, fresh], mode: .lastEdited, lastEdited: stamps)
+                .map(\.reading.id) == ["z", "a"], "the most recently worked-in book comes first")
         }
     }
 
@@ -797,8 +824,9 @@ struct TutorialBooksRitualTests {
         }
     }
 
-    /// **R5 — the shelf gesture:** drag a book onto a shelf name; switch order
-    /// to "my order" and place one by hand; star one and see it float. The
+    /// **R5 — the shelf gesture:** drag a book onto a shelf name; switch the
+    /// order ▾ to last edited (0.9.2 — my order's hand placing walks only
+    /// while the release offers it, VR-118/VR-120); star one and see it float. The
     /// drags' HANDLERS are pinned here (synthetic drags never commit — her
     /// hand walks them); the menu twins are the same model calls.
     @Test func ritualFiveTheShelfGesture() async throws {
@@ -820,20 +848,28 @@ struct TutorialBooksRitualTests {
             await model.reshelve(beta.id, to: shelf.id)
             #expect(try await db.read { try Queries.reading($0, id: alpha.id)?.shelfId } == shelf.id)
 
-            // My order: place one by hand (drag = Send to Top's model call).
-            model.orderMode = .mine
-            await model.place(beta.id, at: .top)
-            for _ in 0..<300 where model.sections.first(where: { $0.id == shelf.id })?.books.first?.reading.id != beta.id {
-                try? await Task.sleep(for: .milliseconds(10))
-            }
-            // JUSTIFIED EDIT (librarywalkpolish VR-118, R-LWP-4): "my order"
-            // steps back WHOLE for 0.9.2, so lesson 7's "switch the order ▾ to
-            // my order and place a book by hand" is a claim this release does
-            // not offer — the guide's prose is SEED CONTENT (fenced from the
-            // batch; F-BW-1 routes it). Carried as a KNOWN issue that turns RED
-            // the moment hand placing returns (VR-120) or the lesson is
-            // re-worded — either way this wrapper must then go.
-            withKnownIssue("lesson 7 teaches my order, hidden for 0.9.2 (VR-118; seed content — F-BW-1)") {
+            // Last edited — what lesson 7 teaches THIS release: the order ▾'s
+            // second row, picked through its own door, drawn by the board.
+            model.pickOrder(.lastEdited)
+            #expect(model.effectiveOrderMode == .lastEdited)
+
+            // My order (hand placing) — walked ONLY while the release offers
+            // it. JUSTIFIED EDIT (librarywalkpolish F-BW-1, round 1's MINOR-3):
+            // VR-118 steps my order back for 0.9.2 and lesson 7 no longer
+            // teaches it. The B-WALK round carried this arm as a
+            // `withKnownIssue` it described as turning red "when the lesson is
+            // re-worded" — FALSE: the wrapper read only the model, never the
+            // seed, and burned this loop's full 3-second wait on every run.
+            // What holds the lesson to the release is now
+            // `noLessonTeachesADoorThisReleaseHides` (it reads the seed); this
+            // arm runs unchanged when VR-120 returns hand placing (one value)
+            // and costs nothing while it is off.
+            if model.handPlacingOffered {
+                model.orderMode = .mine
+                await model.place(beta.id, at: .top)
+                for _ in 0..<300 where model.sections.first(where: { $0.id == shelf.id })?.books.first?.reading.id != beta.id {
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
                 #expect(model.sections.first { $0.id == shelf.id }?.books.map(\.reading.id) == [beta.id, alpha.id])
             }
 

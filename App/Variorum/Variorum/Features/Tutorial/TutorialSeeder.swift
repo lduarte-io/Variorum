@@ -2138,10 +2138,16 @@ enum TutorialSeeder {
 
         // Lesson 7 + ritual R5 (its drags are hers; every drag has a menu
         // twin, named here too) + the place/finder boundary (§22/§23).
+        // librarywalkpolish F-BW-1 (round 1's MINOR-3, a PRE-0.9.2 GATE):
+        // "my order" and Send to Top/Bottom step back for 0.9.2 (VR-118, her
+        // R-LWP-4), so the lesson teaches what the release ships — the
+        // order ▾'s A–Z · last edited and the drop onto a shelf's name.
+        // Words functional; 13s re-voices; VR-120's return brings the
+        // hand-placing sentence back (`noLessonTeachesADoorThisReleaseHides`
+        // holds every lesson to the release's doors).
         _ = try lesson(books, "the bookcase", [
-            "Your books live on shelves, alphabetical until you choose otherwise "
-            + "\u{2014} switch to your own order to place them by hand. The "
-            + "shelves run left to right exactly as All stacks them top to "
+            "Your books live on shelves, alphabetical until you choose otherwise. "
+            + "The shelves run left to right exactly as All stacks them top to "
             + "bottom. Unshelved books wait at the top until you file them.",
 
             "The shelves are the strip across the top of the Bookcase: All, "
@@ -2149,13 +2155,13 @@ enum TutorialSeeder {
             + "came on. \u{FF0B} shelf makes another; right-click a shelf to "
             + "rename it, give it a glyph, make it the default, or delete it "
             + "(its books just return to Unshelved). The order \u{25BE} beside "
-            + "them reads A\u{2013}Z, last edited, or my order.",
+            + "them reads A\u{2013}Z or last edited.",
 
             "Try it: drag a book onto a shelf's name to file it there (or "
             + "right-click the book \u{25B8} Move to Shelf). Switch the order "
-            + "\u{25BE} to my order and place a book by hand \u{2014} drag it, or "
-            + "right-click \u{25B8} Send to Top. Then star a book (right-click "
-            + "\u{25B8} Star): starred books float first, under any order.",
+            + "\u{25BE} to last edited and the books you worked in most recently "
+            + "come first. Then star a book (right-click \u{25B8} Star): starred "
+            + "books float first, under any order.",
 
             "The Bookcase is a PLACE \u{2014} arranged by you, and it stays "
             + "where you put it. Finding is the Library's work: search and the "
