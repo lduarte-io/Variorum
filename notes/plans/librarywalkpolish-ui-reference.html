@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Census & Strip Mockups</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 80px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px;}
+  h2{font-size:17px;margin:40px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:70ch;line-height:1.45;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:980px;margin:0 0 10px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;position:relative;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin-bottom:8px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;padding:16px 22px 10px;}
+  .crumb{font-size:17px;color:var(--rust);font-weight:600;}
+  .crumb .home{color:var(--ink);font-weight:600;}
+  .crumb .dot{color:var(--muted);font-weight:400;padding:0 6px;}
+  .mastright{color:var(--muted);font-size:13px;}
+  .mastright b{color:var(--ink);font-weight:600;}
+  .striprow{display:flex;align-items:center;gap:4px;padding:6px 22px 12px;font-size:13.5px;border-bottom:1px solid var(--hair);flex-wrap:wrap;}
+  .striprow .right{margin-left:auto;color:var(--muted);display:flex;gap:14px;align-items:center;}
+  .s{padding:3px 9px;border-radius:6px;color:var(--ink);}
+  .s.muted{color:var(--muted);}
+  .s.solo{font-weight:700;}
+  .board{padding:10px 22px 16px;}
+  .brow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--hair);font-size:15px;}
+  .brow:last-child{border-bottom:none;}
+  .brow .t{font-weight:600;}
+  .brow .t .star{color:var(--star);font-size:13px;margin-right:6px;}
+  .brow .t .h{color:var(--rust);font-weight:400;font-size:12.5px;margin-left:14px;font-family:ui-monospace,Menlo,monospace;}
+  .brow .meta{color:var(--muted);font-size:12.5px;}
+  /* census option A: the menu's sibling */
+  .float{position:absolute;right:88px;top:44px;background:#fff;border:1px solid #d8d1c6;border-radius:8px;box-shadow:0 8px 24px rgba(50,40,30,.14),0 1px 3px rgba(50,40,30,.08);min-width:210px;padding:5px 0;font-size:13px;z-index:3;}
+  .float .fr{display:flex;justify-content:space-between;padding:4.5px 14px;}
+  .float .fr:hover{background:var(--wash);}
+  .float .fr .n{color:var(--ink);}
+  .float .fr .solo{color:var(--muted);font-size:12px;}
+  /* census option B: the strip swaps */
+  .censusline .s{color:var(--ink);}
+  .censusline .cnt{font-weight:700;margin-right:3px;}
+  .censusline .solo-hint{color:var(--muted);font-size:12px;margin-left:2px;}
+  /* strip options */
+  .chip{padding:3px 10px;border-radius:7px;}
+  .opt2 .chip{background:var(--washlite);}
+  .opt2 .chip.solo{background:var(--accent-fill);font-weight:700;}
+  .opt1 .chip:nth-child(odd){background:var(--washlite);}
+  .opt1 .chip.solo{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--rust);}
+  .opt4 .sep{color:#cfc7bb;padding:0 2px;}
+  /* folder tabs */
+  .tabs{display:flex;gap:2px;padding:10px 22px 0;align-items:flex-end;}
+  .tab{padding:5px 13px 6px;border:1px solid var(--hair);border-bottom:none;border-radius:8px 8px 0 0;background:var(--washlite);font-size:13.5px;color:var(--muted);}
+  .tab.solo{background:var(--paper);color:var(--ink);font-weight:700;position:relative;top:1px;}
+  .tabedge{border-top:1px solid var(--hair);margin:0 0 0 0;}
+</style>
+</head>
+<body>
+<h1>Two decisions, drawn</h1>
+<p class="sub">Study voice approximation. Part 1 — where the № census lives · Part 2 — the shelf strip's delineation.</p>
+
+<h2>Part 1 · Option A — the float becomes the order menu's sibling</h2>
+<p class="note">Same material, hairline and shadow as the order ▾ menu, hugged tight under №, width fit to content. It reads as "a menu that belongs here" — and because it IS menu-like, opening order ▾ dismisses it (the covering bug dies by construction).</p>
+<div class="mock">
+  <div class="masthead"><span class="crumb">Bookcase <span class="dot">·</span> <span class="home">Home ▾</span></span><span class="mastright">Today's Entry&nbsp;&nbsp;+ New Book</span></div>
+  <div class="striprow"><span class="s solo">All</span><span class="s">starred</span><span class="s">u1 welcome</span><span class="s">☾ The Work</span><span class="s">correspondence</span><span class="s">research</span><span class="s muted">+ shelf</span>
+    <span class="right"><b>№</b> · order · A–Z ▾ · details</span></div>
+  <div class="float">
+    <div class="fr"><span class="n">19 books</span><span class="solo">solo</span></div>
+    <div class="fr"><span class="n">9 gatherings</span><span class="solo">solo</span></div>
+    <div class="fr"><span class="n">1 finished</span><span class="solo">solo</span></div>
+    <div class="fr"><span class="n">2 owned</span><span class="solo">solo</span></div>
+    <div class="fr"><span class="n">7 living</span><span class="solo">solo</span></div>
+    <div class="fr"><span class="n">2 with arrivals</span><span class="solo">solo</span></div>
+  </div>
+  <div class="board">
+    <div class="brow"><span class="t"><span class="star">★</span>bind walk<span class="h">#bind13ib</span></span><span class="meta">4 notes · 8w · living</span></div>
+    <div class="brow"><span class="t"><span class="star">★</span>Journal<span class="h">#walked</span></span><span class="meta">10 notes · 52w</span></div>
+    <div class="brow"><span class="t">dream journal<span class="h">#dream</span></span><span class="meta">5 notes · 25w · gathering</span></div>
+    <div class="brow"><span class="t">refresh walk<span class="h">#spawn13ib</span></span><span class="meta">5 notes · 10w · gathering</span></div>
+  </div>
+</div>
+
+<h2>Part 1 · Option B — № swaps the strip line itself (no float at all)</h2>
+<p class="note">Click № and the shelf strip row BECOMES the census row — same line, zero float, zero push, nothing covered ever. Each count is a solo door; click № again (or a count) to come back. The calmest option; the census stops being a panel and becomes a second reading of the same line.</p>
+<div class="mock">
+  <div class="masthead"><span class="crumb">Bookcase <span class="dot">·</span> <span class="home">Home ▾</span></span><span class="mastright">Today's Entry&nbsp;&nbsp;+ New Book</span></div>
+  <div class="striprow censusline"><span class="s"><span class="cnt">19</span> books</span><span class="s"><span class="cnt">9</span> gatherings</span><span class="s"><span class="cnt">1</span> finished</span><span class="s"><span class="cnt">2</span> owned</span><span class="s"><span class="cnt">7</span> living</span><span class="s"><span class="cnt">2</span> with arrivals</span><span class="solo-hint">— click one to solo</span>
+    <span class="right"><b>№ ✕</b> · order · A–Z ▾ · details</span></div>
+  <div class="board">
+    <div class="brow"><span class="t"><span class="star">★</span>bind walk<span class="h">#bind13ib</span></span><span class="meta">4 notes · 8w · living</span></div>
+    <div class="brow"><span class="t"><span class="star">★</span>Journal<span class="h">#walked</span></span><span class="meta">10 notes · 52w</span></div>
+    <div class="brow"><span class="t">dream journal<span class="h">#dream</span></span><span class="meta">5 notes · 25w · gathering</span></div>
+    <div class="brow"><span class="t">refresh walk<span class="h">#spawn13ib</span></span><span class="meta">5 notes · 10w · gathering</span></div>
+  </div>
+</div>
+
+<h2>Part 2 · The strip — four delineations</h2>
+<p class="note">Option 1 is your alternating idea: every other name on a barely-there wash. Option 2 gives every name a quiet chip and FILLS the solo'd one — tab-state without tab furniture. Option 3 is the literal folder look. Option 4 is the minimal interpunct road.</p>
+
+<div class="mock"><div style="padding:10px 22px 4px"><span class="tag">OPTION 1 — alternating super-light wash</span></div>
+  <div class="striprow opt1"><span class="chip solo">All</span><span class="chip">starred</span><span class="chip">u1 welcome</span><span class="chip">☾ The Work</span><span class="chip">correspondence</span><span class="chip">research</span><span class="chip">later essays</span><span class="chip">translations</span><span class="chip muted">+ shelf</span><span class="right"><b>№</b> · order · A–Z ▾ · details</span></div>
+</div>
+
+<div class="mock"><div style="padding:10px 22px 4px"><span class="tag">OPTION 2 — quiet chips, the solo'd one filled</span></div>
+  <div class="striprow opt2"><span class="chip solo">All</span><span class="chip">starred</span><span class="chip">u1 welcome</span><span class="chip">☾ The Work</span><span class="chip">correspondence</span><span class="chip">research</span><span class="chip">later essays</span><span class="chip">translations</span><span class="chip muted">+ shelf</span><span class="right"><b>№</b> · order · A–Z ▾ · details</span></div>
+</div>
+
+<div class="mock"><div style="padding:10px 22px 4px"><span class="tag">OPTION 3 — folder tabs on the board's hairline</span></div>
+  <div class="tabs"><span class="tab solo">All</span><span class="tab">starred</span><span class="tab">u1 welcome</span><span class="tab">☾ The Work</span><span class="tab">correspondence</span><span class="tab">research</span><span class="tab">later essays</span><span class="tab">translations</span><span class="tab" style="border-style:dashed">+ shelf</span></div>
+  <div class="tabedge"></div>
+  <div class="board">
+    <div class="brow"><span class="t"><span class="star">★</span>bind walk<span class="h">#bind13ib</span></span><span class="meta">4 notes · 8w · living</span></div>
+    <div class="brow"><span class="t"><span class="star">★</span>Journal<span class="h">#walked</span></span><span class="meta">10 notes · 52w</span></div>
+  </div>
+</div>
+
+<div class="mock"><div style="padding:10px 22px 4px"><span class="tag">OPTION 4 — interpuncts, nothing else</span></div>
+  <div class="striprow opt4"><span class="s solo">All</span><span class="sep">·</span><span class="s">starred</span><span class="sep">·</span><span class="s">u1 welcome</span><span class="sep">·</span><span class="s">☾ The Work</span><span class="sep">·</span><span class="s">correspondence</span><span class="sep">·</span><span class="s">research</span><span class="sep">·</span><span class="s">later essays</span><span class="sep">·</span><span class="s">translations</span><span class="sep">·</span><span class="s muted">+ shelf</span><span class="right"><b>№</b> · order · A–Z ▾ · details</span></div>
+</div>
+
+</body>
+</html>
