@@ -142,8 +142,9 @@ pushshots [N]                   # copy the N newest (default 2) → Pro, all pat
 **Dropping screenshots into a Pro Claude session** doesn't work directly — the image is on
 the Air, the session reads files on the Pro. Instead: take the screenshot(s), run the helper
 in a **local Air shell**, then paste (⌘V) into the Claude session. Lands in `~/shots/` on the Pro.
-- one shot: `pushshot` (newest) or `pushshot <file>`
-- several at once: `pushshots` (2 newest), `pushshots 3` (3 newest), or `pushshots a.png b.png` —
+- one shot: `pushshot` (newest), or a specific file e.g. `pushshot ~/Desktop/some-file.png`
+- several at once: `pushshots` (2 newest), `pushshots 3` (3 newest), or name them explicitly
+  e.g. `pushshots ~/Desktop/a.png ~/Desktop/b.png` —
   all paths land on the clipboard space-separated; one paste attaches them all.
 
 Sitting at the Pro itself: same commands without the `ssh home` / `ssh -t home` wrapper.
