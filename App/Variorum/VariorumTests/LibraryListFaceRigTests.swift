@@ -48,6 +48,14 @@ nonisolated enum LibraryListFaceRig {
     static var label: String {
         ProcessInfo.processInfo.environment["VARIORUM_LIBRARY_LIST_FACE_LABEL"] ?? "run"
     }
+    /// librarywalkpolish round 1's NIT-5 — the DARK pass (R51: dark is a
+    /// fully black room in both voices). `TEST_RUNNER_VARIORUM_LIBRARY_LIST_
+    /// FACE_APPEARANCE=dark` mounts every rig window `.darkAqua`; anything else
+    /// (or nothing) keeps the light `.aqua` every earlier capture used.
+    static var appearance: NSAppearance? {
+        ProcessInfo.processInfo.environment["VARIORUM_LIBRARY_LIST_FACE_APPEARANCE"] == "dark"
+            ? NSAppearance(named: .darkAqua) : NSAppearance(named: .aqua)
+    }
 }
 
 @MainActor
@@ -154,7 +162,7 @@ struct LibraryListFaceRigTests {
             contentRect: NSRect(x: 40, y: 40, width: width, height: height),
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
-        window.appearance = NSAppearance(named: .aqua)
+        window.appearance = LibraryListFaceRig.appearance
         let hosting = NSHostingView(rootView: AnyView(
             LibraryCatalogView(
                 session: session, model: model, library: LibraryViewModel(session: session),
@@ -356,7 +364,7 @@ struct LibraryListFaceRigTests {
                 contentRect: NSRect(x: 40, y: 40, width: 1000, height: 560),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
-            window.appearance = NSAppearance(named: .aqua)
+            window.appearance = LibraryListFaceRig.appearance
             let hosting = NSHostingView(rootView: AnyView(ShelfView(
                 session: session, model: model, readings: ReadingsViewModel(session: session),
                 onOpen: { _ in }, onTodaysEntry: {}).environment(theme)))
