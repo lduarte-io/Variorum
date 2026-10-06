@@ -75,6 +75,9 @@ struct LibraryMoreNotesRow: View {
 struct LibraryPagedNotes<Row: View>: View {
     let model: LibraryCatalogModel
     let tokens: VoiceTokens
+    /// librarywalkpolish VR-113: the List mode draws its rows on this same
+    /// lazy engine, wearing the List's face — its sentinel row too.
+    var listFace = false
     /// The B1 ladder's MAJOR-1: the one row input the rows do NOT observe —
     /// read HERE, in the live hierarchy, so a flip re-evaluates this body
     /// and the hosts below compare unequal (see `LibraryNoteRowHost`).
@@ -92,8 +95,16 @@ struct LibraryPagedNotes<Row: View>: View {
                 .onDisappear { model.noteRowDisappeared(hit.id) }
         }
         if model.notesHaveMore {
-            LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
-                .onAppear { Task { await model.loadMoreNotes() } }
+            Group {
+                if listFace {
+                    LibraryListRow {
+                        LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
+                    }
+                } else {
+                    LibraryMoreNotesRow(tokens: tokens, loading: model.loadingMoreNotes)
+                }
+            }
+            .onAppear { Task { await model.loadMoreNotes() } }
         }
     }
 }
