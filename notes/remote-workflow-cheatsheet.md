@@ -66,6 +66,29 @@ ssh -t home 'tmux new-session -t fragments \; set destroy-unattached on'   # ext
 The general pattern, for any future workspace:
 `ssh -t home tmux new -A -s <name> -c <dir>` once, then the grouped-view one-liner with `-t <name>` for each extra tab.
 
+## Rebuilding a workspace (after it was fully exited / killed)
+
+Check what's alive first: `ssh home tmux ls` — then run the block for whichever
+workspace is missing (each errors harmlessly with "duplicate session" if it already exists):
+
+```zsh
+# variorum (3 windows)
+ssh home 'tmux new -d -s variorum -c ~/dev/variorum -n var-1 && tmux neww -d -t "variorum:" -c ~/dev/variorum -n var-2 && tmux neww -d -t "variorum:" -c ~/dev/variorum -n var-3'
+
+# variorum-mobile
+ssh home 'tmux new -d -s mobile -c ~/dev/variorum-mobile -n mobile && tmux neww -d -t "mobile:" -c ~/dev/variorum-mobile -n mobile-2'
+
+# stargazing-tech
+ssh home 'tmux new -d -s stargazing -c ~/dev/stargazing.tech -n star-1 && tmux neww -d -t "stargazing:" -c ~/dev/stargazing.tech -n star-2'
+
+# fragments
+ssh home 'tmux new -d -s fragments -c ~/dev/fragments -n frag-1 && tmux neww -d -t "fragments:" -c ~/dev/fragments -n frag-2'
+```
+
+(`-d` = build it detached, without your terminal jumping in; attach afterwards with the
+usual tab commands. A single lost WINDOW inside a living session is simpler: from inside,
+`tmux neww -c <dir> -n <name>`.)
+
 **After closing the lid / losing Wi-Fi:** every tab's ssh dies. Not broken —
 re-paste each tab's command (up-arrow ↑ then enter), re-park tabs 2–3. Nothing was lost.
 
