@@ -108,6 +108,31 @@ final class ShelfViewModel {
         return shelfKey(of: readingID) != (sectionShelfID ?? BookcaseBoard.unshelvedKey)
     }
 
+    /// **W-5's class, completed (librarywalkpolish round 1's NIT-3):** a
+    /// shelf NAME (the strip's chip, the ⋯ panel's row) outlines only where
+    /// its drop acts — a book from ANOTHER shelf (it re-shelves here), or
+    /// ANOTHER shelf's name (it moves before this one). A book over its own
+    /// shelf's name (`reshelve`'s same-shelf guard) and a name over itself
+    /// (the drop's own guard) release into nothing, so they light nothing.
+    func shelfNameDropLights(shelfID: String) -> Bool {
+        switch dragInFlight {
+        case .book(let readingID)?: shelfKey(of: readingID) != shelfID
+        case .shelf(let draggedID)?: draggedID != shelfID
+        case nil: false
+        }
+    }
+
+    /// The strip's "starred" word outlines only for a book its drop would
+    /// STAR — never an already-starred one (`starBook`'s guard: the drop asks
+    /// for what is already true) and never a shelf name (the starred shelf is
+    /// virtual; it takes no strip position).
+    func starredDropLights() -> Bool {
+        guard case .book(let readingID)? = dragInFlight,
+              let book = books.first(where: { $0.reading.id == readingID })
+        else { return false }
+        return !book.starred
+    }
+
     // MARK: The two droppers (librarywalkpolish VR-115 — one popover idiom)
 
     /// The order popover is open (a menu's life: never remembered).
@@ -130,6 +155,15 @@ final class ShelfViewModel {
     func pickOrder(_ mode: BookcaseOrderMode) {
         orderMode = mode
         orderOpen = false
+    }
+
+    /// **A menu's life ended** (librarywalkpolish round 1's MINOR-1): the
+    /// board left the screen (⌘K/⌘N/⌘J, a sidebar click), its window stopped
+    /// being key, or the app stopped being active — the order popover closes,
+    /// as a menu would, so it never greets her return. The census is a
+    /// REMEMBERED float (#188(b)), never a menu, and is untouched.
+    func orderMenuLifeEnded() {
+        if orderOpen { orderOpen = false }
     }
 
     // MARK: "My order" steps back for 0.9.2 (librarywalkpolish VR-118)

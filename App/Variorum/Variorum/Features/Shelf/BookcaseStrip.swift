@@ -273,14 +273,18 @@ struct BookcaseStrip: View {
             help: "\(count) \(count == 1 ? "book" : "books")" + (isDefault ? " · opens here" : "")
         ) { model.scope = .shelf(shelf.id) }
         // §7: a hairline while a book or a name hovers over this one — since
-        // VR-119 the chip's own edge.
+        // VR-119 the chip's own edge — and (round 1's NIT-3, W-5's class
+        // completed) only where the drop would act.
         .overlay { chipOutline(dropTarget == shelf.id) }
         .draggable(model.beginDrag(.shelf(shelf.id)))
         // 17y B-WALK W-3: a name's right-click menu dismisses the № float
         // (its plain click solos the shelf and leaves the float alone).
         .reportsPress(secondaryOnly: true) { model.mastheadDoorOpened() }
         .bookcaseDropSite(
-            onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
+            onHover: { hovering in
+                let lights = hovering && model.shelfNameDropLights(shelfID: shelf.id)
+                dropTarget = lights ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget)
+            }
         ) { payload in
             switch payload {
             case .book(let readingID):
@@ -309,10 +313,14 @@ struct BookcaseStrip: View {
             help: BookcaseCopy.starredShelfHelp
         ) { model.scope = .starred }
         .overlay { chipOutline(dropTarget == BookcaseBoard.starredSectionID) }
+        // Round 1's NIT-3: the outline lights only for a book its drop would
+        // star — an already-starred book or a shelf name releases into
+        // nothing, so it is offered nothing.
         .bookcaseDropSite(
             onHover: { hovering in
                 let key = BookcaseBoard.starredSectionID
-                dropTarget = hovering ? key : (dropTarget == key ? nil : dropTarget)
+                let lights = hovering && model.starredDropLights()
+                dropTarget = lights ? key : (dropTarget == key ? nil : dropTarget)
             }
         ) { payload in
             if case .book(let readingID) = payload {
@@ -580,10 +588,14 @@ struct ShelfOverflowPanel: View {
             }
         }
         // Reorder by dragging the panel's rows (§7, ruled) — and a book
-        // dropped here re-shelves, exactly as on a strip name.
+        // dropped here re-shelves, exactly as on a strip name (and outlines
+        // exactly as one does: only where the drop acts — round 1's NIT-3).
         .draggable(model.beginDrag(.shelf(shelf.id)))
         .bookcaseDropSite(
-            onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
+            onHover: { hovering in
+                let lights = hovering && model.shelfNameDropLights(shelfID: shelf.id)
+                dropTarget = lights ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget)
+            }
         ) { payload in
             switch payload {
             case .book(let readingID):

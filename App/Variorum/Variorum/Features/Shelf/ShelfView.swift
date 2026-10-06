@@ -219,6 +219,12 @@ struct ShelfView: View {
                 .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
             }
         }
+        // librarywalkpolish round 1's MINOR-1: the order popover lives like a
+        // menu, and a menu never outlives its surface — it closes when the
+        // board leaves the screen, when its window stops being key, and when
+        // the app stops being active.
+        .onDisappear { model.orderMenuLifeEnded() }
+        .reportsMenuLifeEnds { model.orderMenuLifeEnded() }
         .task { await model.start() }
         .task { await model.refreshAggregates() }
         #if DEBUG
@@ -1156,10 +1162,19 @@ struct BookDragChip: View {
 /// **The book row as a drag source** — the payload made (and recorded) when
 /// the drag begins; the preview is the chip AT THE GRAB POINT. SwiftUI centres
 /// a drag preview over its SOURCE view (Apple's own words for
-/// `draggable(_:preview:)`), so the preview is a canvas the row's own size —
+/// `draggable(_:preview:)`), so the preview is a canvas CENTRED ON THE ROW —
 /// clear everywhere but the chip, which sits centred on where the pointer
 /// took hold (the row's last hover point, which is where a press lands). The
 /// image therefore rides under the cursor, never at the title's x-offset.
+///
+/// **librarywalkpolish round 1's MAJOR-1:** the canvas was the row's OWN size,
+/// so a grab off the row's vertical centre, or within half a chip of either
+/// end, CUT the chip (the reviewer's probe: a trailing-end grab lost 82 of
+/// 186 pt — the end of the book's name). The canvas now grows by the chip's
+/// own size on every side — still centred over the row, so the chip, placed
+/// at grab + margin, stays exactly under the cursor and is never cut. (The
+/// other shape — clamping the chip inside a row-sized canvas — would move it
+/// OFF the cursor near the row's edges: the offset R-LWP-3 forbids.)
 struct BookDragSource: ViewModifier {
     let book: Queries.ShelfBook
     let tokens: VoiceTokens
@@ -1179,9 +1194,9 @@ struct BookDragSource: ViewModifier {
             }
     }
 
-    /// The preview canvas (pure placement, pinned): the source's size, the
-    /// chip centred on the grab point (the row's centre when no pointer was
-    /// seen — a keyboard-less mouse always is).
+    /// Where the chip centres, in the SOURCE's space (pure, pinned): the grab
+    /// point, held to the row (the row's centre when no pointer was seen — a
+    /// keyboard-less mouse always is).
     static func chipCenter(size: CGSize, grab: CGPoint?) -> CGPoint {
         let point = grab ?? CGPoint(x: size.width / 2, y: size.height / 2)
         return CGPoint(
@@ -1189,13 +1204,53 @@ struct BookDragSource: ViewModifier {
             y: min(max(point.y, 0), max(size.height, 0)))
     }
 
-    @ViewBuilder
+    /// **The canvas and the chip's place in it** (pure, pinned — MAJOR-1):
+    /// the source grown by one chip on every side (centred over the source,
+    /// as SwiftUI places it), the chip's top-left at grab + margin − half a
+    /// chip, on whole points (so its edges draw crisp, exactly as a bare
+    /// chip's do — at most half a point from the exact grab).
+    static func placement(
+        source: CGSize, chip: CGSize, grab: CGPoint?
+    ) -> (canvas: CGSize, chipOrigin: CGPoint) {
+        let center = chipCenter(size: source, grab: grab)
+        let canvas = CGSize(
+            width: max(source.width, 1) + 2 * chip.width,
+            height: max(source.height, 1) + 2 * chip.height)
+        let origin = CGPoint(
+            x: (center.x + chip.width / 2).rounded(),
+            y: (center.y + chip.height / 2).rounded())
+        return (canvas, origin)
+    }
+
     static func canvas(
         book: Queries.ShelfBook, tokens: VoiceTokens, size: CGSize, grab: CGPoint?
     ) -> some View {
-        let center = chipCenter(size: size, grab: grab)
-        BookDragChip(book: book, tokens: tokens)
-            .position(center)
-            .frame(width: max(size.width, 1), height: max(size.height, 1))
+        GrabCanvas(source: size, grab: grab) {
+            BookDragChip(book: book, tokens: tokens)
+        }
+    }
+}
+
+/// The drag canvas's layout: it measures its one subview (the chip) and
+/// answers `BookDragSource.placement` — the margin IS the chip's own size,
+/// whatever the book's name makes it.
+private struct GrabCanvas: Layout {
+    let source: CGSize
+    let grab: CGPoint?
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let chip = subviews.first?.sizeThatFits(.unspecified) ?? .zero
+        return BookDragSource.placement(source: source, chip: chip, grab: grab).canvas
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        guard let chipView = subviews.first else { return }
+        let chip = chipView.sizeThatFits(.unspecified)
+        let origin = BookDragSource.placement(source: source, chip: chip, grab: grab).chipOrigin
+        chipView.place(
+            at: CGPoint(x: bounds.minX + origin.x, y: bounds.minY + origin.y),
+            anchor: .topLeading, proposal: ProposedViewSize(chip))
     }
 }

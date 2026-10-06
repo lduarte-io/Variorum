@@ -104,6 +104,43 @@ struct BookcaseDragFaceTests {
         }
     }
 
+    /// **Round 1's NIT-3 — the class completes:** the strip's outlines ask
+    /// the same question the headers do. A shelf NAME (the strip's chip and
+    /// the ⋯ panel's row share the rule) lights for a book from another shelf
+    /// or another shelf's name — never for a book already on it, never for
+    /// itself. The "starred" word lights only for a book not yet starred —
+    /// never for a starred one, never for a shelf name.
+    @Test func aStripOutlineLightsOnlyWhereItsDropActs() async throws {
+        try await withSession { session in
+            let ops = session.operations
+            let work = try ops.createShelf(name: "Work")
+            let ideas = try ops.createShelf(name: "Ideas")
+            let onWork = try ops.createReading(name: "on work", kind: .book, shelfId: work.id)
+            let starred = try ops.createReading(name: "starred", kind: .book, shelfId: work.id)
+            try ops.setStarred(.reading(starred.id), starred: true)
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            let observe = Task { await model.start() }
+            defer { observe.cancel() }
+            for _ in 0..<300 where !(model.books.count == 2 && model.books.contains(where: \.starred)) {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+
+            #expect(!model.shelfNameDropLights(shelfID: work.id), "nothing in flight lights nothing")
+            #expect(!model.starredDropLights())
+            _ = model.beginDrag(.book(onWork.id))
+            #expect(!model.shelfNameDropLights(shelfID: work.id), "its own shelf's name: the drop does nothing")
+            #expect(model.shelfNameDropLights(shelfID: ideas.id), "another shelf's name re-shelves it")
+            #expect(model.starredDropLights(), "a book not yet starred: the drop stars it")
+            _ = model.beginDrag(.book(starred.id))
+            #expect(!model.starredDropLights(), "an already-starred book: the drop asks for what is true")
+            #expect(model.shelfNameDropLights(shelfID: ideas.id))
+            _ = model.beginDrag(.shelf(ideas.id))
+            #expect(!model.shelfNameDropLights(shelfID: ideas.id), "a name over itself: nothing")
+            #expect(model.shelfNameDropLights(shelfID: work.id), "a name over another moves before it")
+            #expect(!model.starredDropLights(), "the starred shelf takes no shelf name")
+        }
+    }
+
     /// The payload is made when a drag BEGINS, never while the board draws —
     /// the rule above reads the drag in flight, so an eager payload would
     /// name the last row drawn. Mounting a board with books makes none.
@@ -149,37 +186,48 @@ struct BookcaseDragFaceTests {
         #expect(BookDragSource.chipCenter(size: size, grab: CGPoint(x: 900, y: -5)) == CGPoint(x: 800, y: 0))
     }
 
-    /// W-4's image, rendered: the preview is a canvas the SOURCE's size
+    /// W-4's image, rendered: the preview is a canvas centred on the SOURCE
     /// (SwiftUI centres a preview over its source — Apple's words for
     /// `draggable(_:preview:)`), clear but for the compact chip, whose ink
     /// sits around the grab point — a press far right of the title drags the
     /// title THERE, not at its own x.
+    ///
+    /// **JUSTIFIED EDIT (librarywalkpolish round 1's MAJOR-1):** the canvas
+    /// is no longer the source's size — it grows by the chip on every side
+    /// (a row-sized canvas cut the chip on most grabs). What this pin holds
+    /// is unchanged in substance: centred over the source, the chip's ink
+    /// sits on the grab — so the ink's offset from the CANVAS's centre is
+    /// the grab's offset from the ROW's centre.
     @Test func thePreviewIsTheTitleAtTheGrabPoint() throws {
-        let made = Date(timeIntervalSince1970: 1_782_864_000)
-        let book = Queries.ShelfBook(
-            reading: Reading(id: "b", name: "Encryption Explained", kind: .book,
-                             createdAt: made, updatedAt: made),
-            postCount: 0, sectionCount: 0, arrivalCount: 0)
+        let book = Self.book("Encryption Explained")
         let size = CGSize(width: 800, height: 34)
-        let grab = CGPoint(x: 600, y: 17)
-        let renderer = ImageRenderer(content: BookDragSource.canvas(
-            book: book, tokens: .studyLight, size: size, grab: grab))
-        renderer.scale = 1
-        let image = try #require(renderer.nsImage)
-        #expect(abs(image.size.width - size.width) < 1 && abs(image.size.height - size.height) < 1,
-                "the canvas is the source's size (\(image.size))")
-        let tiff = try #require(image.tiffRepresentation)
-        let rep = try #require(NSBitmapImageRep(data: tiff))
-        var minX = Int.max, maxX = Int.min
-        for x in 0..<rep.pixelsWide {
-            for y in 0..<rep.pixelsHigh where (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.1 {
-                minX = min(minX, x); maxX = max(maxX, x)
-            }
+        let bare = try Self.inkBox(BookDragChip(book: book, tokens: .studyLight))
+        for grab in [CGPoint(x: 600, y: 17), CGPoint(x: 12, y: 30), CGPoint(x: 400, y: 0)] {
+            let (canvas, ink) = try Self.render(BookDragSource.canvas(
+                book: book, tokens: .studyLight, size: size, grab: grab))
+            #expect(canvas.width > size.width + bare.width && canvas.height > size.height + bare.height,
+                    "the canvas grows by a chip on every side (\(canvas))")
+            let offset = CGPoint(x: ink.midX - canvas.width / 2, y: ink.midY - canvas.height / 2)
+            let wanted = CGPoint(x: grab.x - size.width / 2, y: grab.y - size.height / 2)
+            #expect(abs(offset.x - wanted.x) <= 1.5 && abs(offset.y - wanted.y) <= 1.5,
+                    "centred over the row, the chip sits on the grab \(grab) (ink \(ink), canvas \(canvas))")
+            #expect(ink.width < 260, "compact — the title, never the full row (\(ink.width) pt)")
         }
-        #expect(minX < maxX, "the chip is drawn")
-        let center = CGFloat(minX + maxX) / 2
-        #expect(abs(center - grab.x) < 2, "the chip centres on the grab point (ink \(minX)…\(maxX))")
-        #expect(CGFloat(maxX - minX) < 260, "compact — the title, never the full row (\(maxX - minX) pt)")
+    }
+
+    /// MAJOR-1's placement, pure: the canvas is the source plus one chip on
+    /// every side; the chip's top-left is grab + margin − half a chip, on
+    /// whole points; a grab past the row is held to it.
+    @Test func thePlacementIsTheGrabPlusAChipMargin() {
+        let source = CGSize(width: 800, height: 34)
+        let chip = CGSize(width: 186, height: 31)
+        let at = BookDragSource.placement(source: source, chip: chip, grab: CGPoint(x: 790, y: 4))
+        #expect(at.canvas == CGSize(width: 1172, height: 96))
+        #expect(at.chipOrigin == CGPoint(x: 883, y: 20))  // 790 + 93, 4 + 15.5 → whole points
+        let none = BookDragSource.placement(source: source, chip: chip, grab: nil)
+        #expect(none.chipOrigin == CGPoint(x: 493, y: 33), "no pointer seen: the row's centre")
+        let past = BookDragSource.placement(source: source, chip: chip, grab: CGPoint(x: 900, y: -5))
+        #expect(past.chipOrigin == CGPoint(x: 893, y: 16), "held to the row: (800, 0) + half a chip")
     }
 
     // MARK: - Round 1 (librarywalkpolish ladder) — the fix round's pins
@@ -195,7 +243,11 @@ struct BookcaseDragFaceTests {
     @Test func theChipIsNeverCutAtTheRowsEdges() throws {
         let book = Self.book("Encryption Explained")
         let size = CGSize(width: 800, height: 34)
-        let bare = try Self.inkBox(BookDragChip(book: book, tokens: .studyLight))
+        // The bare chip rendered with room around it: its hairline strokes
+        // ON its edge, so half a point of ink falls outside its frame — a
+        // render at the frame's own size clips that half (measured: 186 × 32
+        // framed vs 188 × 34 whole), and the reference is the WHOLE ink.
+        let bare = try Self.inkBox(BookDragChip(book: book, tokens: .studyLight).padding(4))
         for grab in [CGPoint(x: 600, y: 4), CGPoint(x: 790, y: 17)] {
             let ink = try Self.inkBox(BookDragSource.canvas(
                 book: book, tokens: .studyLight, size: size, grab: grab))
