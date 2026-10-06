@@ -266,4 +266,74 @@ struct BookcaseMastheadPopoverTests {
         }
         #endif
     }
+
+    // MARK: - Round 1 (librarywalkpolish ladder) — the fix round's pins
+
+    /// **Round 1's MINOR-1 — the order popover lives like a MENU, and a menu
+    /// never outlives its surface** (the reviewer's pin, as specified: red on
+    /// the shipped board, whose only close was a board-local catcher). Open
+    /// it, take the board off screen (⌘K/⌘N/⌘J or a sidebar click replace the
+    /// root exactly this way), bring the board back: closed. And — a menu's
+    /// other two ends — it closes when its window stops being key and when
+    /// the app stops being active. The census is NOT a menu (its open state
+    /// is remembered, #188(b)) and rides none of these.
+    @Test func theOrderPopoverNeverOutlivesItsBoard() async throws {
+        try await withSession { session in
+            _ = try session.operations.createReading(name: "alpha", kind: .book)
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            model.censusOpen = false
+            let readings = ReadingsViewModel(session: session)
+            let board = {
+                AnyView(ShelfView(
+                    session: session, model: model, readings: readings,
+                    onOpen: { _ in }, onTodaysEntry: {}))
+            }
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: board())
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer { window.orderOut(nil); window.close() }
+            @MainActor func settle(_ turns: Int = 30) async {
+                for _ in 0..<turns {
+                    hosting.layoutSubtreeIfNeeded()
+                    window.displayIfNeeded()
+                    Self.pump()
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
+            }
+            await settle(60)
+
+            model.toggleOrder()
+            await settle()
+            #expect(model.orderOpen)
+            hosting.rootView = AnyView(Text("elsewhere"))
+            await settle()
+            hosting.rootView = board()
+            await settle()
+            #expect(!model.orderOpen, "navigating away and back finds no popover open")
+
+            model.toggleOrder()
+            await settle()
+            #expect(model.orderOpen)
+            NotificationCenter.default.post(name: NSWindow.didResignKeyNotification, object: window)
+            await settle(5)
+            #expect(!model.orderOpen, "its window stopped being key — a menu closes")
+
+            model.toggleOrder()
+            await settle()
+            #expect(model.orderOpen)
+            NotificationCenter.default.post(name: NSApplication.didResignActiveNotification, object: NSApp)
+            await settle(5)
+            #expect(!model.orderOpen, "the app stopped being active — a menu closes")
+
+            model.censusOpen = true
+            NotificationCenter.default.post(name: NSWindow.didResignKeyNotification, object: window)
+            await settle(5)
+            #expect(model.censusOpen, "the census is a remembered float, never a menu")
+        }
+    }
 }

@@ -181,4 +181,81 @@ struct BookcaseDragFaceTests {
         #expect(abs(center - grab.x) < 2, "the chip centres on the grab point (ink \(minX)…\(maxX))")
         #expect(CGFloat(maxX - minX) < 260, "compact — the title, never the full row (\(maxX - minX) pt)")
     }
+
+    // MARK: - Round 1 (librarywalkpolish ladder) — the fix round's pins
+
+    /// **Round 1's MAJOR-1 — the chip is NEVER CUT** (the reviewer's pin, as
+    /// specified: red on the shipped canvas). The preview canvas was the
+    /// row's own size with the chip centred on the grab, so a grab off the
+    /// row's vertical centre, or within half a chip of either end, clipped
+    /// it — the reviewer's probe lost 82 of 186 pt (the end of the book's
+    /// name) on a trailing-end grab. At a grab 4 pt under the row's top and
+    /// one 10 pt short of its trailing end, the rendered chip's ink must be
+    /// a bare `BookDragChip`'s whole ink.
+    @Test func theChipIsNeverCutAtTheRowsEdges() throws {
+        let book = Self.book("Encryption Explained")
+        let size = CGSize(width: 800, height: 34)
+        let bare = try Self.inkBox(BookDragChip(book: book, tokens: .studyLight))
+        for grab in [CGPoint(x: 600, y: 4), CGPoint(x: 790, y: 17)] {
+            let ink = try Self.inkBox(BookDragSource.canvas(
+                book: book, tokens: .studyLight, size: size, grab: grab))
+            #expect(abs(ink.width - bare.width) <= 1 && abs(ink.height - bare.height) <= 1,
+                    "a grab at \(grab) draws the whole chip — ink \(ink.size), bare \(bare.size)")
+        }
+    }
+
+    static func book(_ name: String) -> Queries.ShelfBook {
+        let made = Date(timeIntervalSince1970: 1_782_864_000)
+        return Queries.ShelfBook(
+            reading: Reading(id: "b", name: name, kind: .book, createdAt: made, updatedAt: made),
+            postCount: 0, sectionCount: 0, arrivalCount: 0)
+    }
+
+    /// The rendered view's canvas and the box its ink covers (alpha over
+    /// ~10 %), at scale 1 — rows counted from the TOP.
+    static func render<V: View>(_ view: V) throws -> (canvas: CGSize, ink: CGRect) {
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 1
+        let image = try #require(renderer.cgImage)
+        let (width, height) = (image.width, image.height)
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8,
+                bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        try #require(drawn)
+        var (minX, minY, maxX, maxY) = (Int.max, Int.max, Int.min, Int.min)
+        for y in 0..<height {
+            for x in 0..<width where pixels[(y * width + x) * 4 + 3] > 25 {
+                minX = min(minX, x); maxX = max(maxX, x)
+                minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        try #require(minX <= maxX, "something is drawn")
+        return (CGSize(width: width, height: height),
+                CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1))
+    }
+
+    static func inkBox<V: View>(_ view: V) throws -> CGRect { try render(view).ink }
+
+    /// **Round 1's NIT-3 — the strip's drop outlines ask the rule** (the
+    /// source pin, committed AHEAD of the fix: red on the shipped strip,
+    /// whose "starred" word and shelf names outlined for ANY hovering drag —
+    /// an already-starred book over "starred", a book over its OWN shelf's
+    /// name, a shelf name over itself — each releasing into a silent guard).
+    /// W-5's rule completes: an outline lights only where the drop acts.
+    @Test func theStripsOutlinesAskTheRule() throws {
+        let strip = try String(
+            contentsOf: Self.appRoot.appending(path: "Variorum/Features/Shelf/BookcaseStrip.swift"),
+            encoding: .utf8)
+        #expect(strip.contains("model.starredDropLights()"),
+                "the starred word outlines only for a book its drop would star")
+        #expect(strip.components(separatedBy: "model.shelfNameDropLights(").count - 1 >= 2,
+                "a shelf name (the strip's and the ⋯ panel's) outlines only where its drop acts")
+    }
 }

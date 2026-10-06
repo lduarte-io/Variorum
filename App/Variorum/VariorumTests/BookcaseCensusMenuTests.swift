@@ -126,6 +126,47 @@ struct BookcaseCensusMenuTests {
         #expect(!R.reports(kind: .leftMouseUp, modifiers: [], at: inside, in: bounds, secondaryOnly: false))
     }
 
+    /// **Round 1's NIT-1 (librarywalkpolish ladder) — a reporter answers only
+    /// for the part of it that is ON SCREEN** (the reviewer's pin, as
+    /// specified: red on the shipped `bounds.contains`). A shelf name
+    /// scrolled out of the strip kept a ghost hit zone — a press beside the
+    /// strip, over wherever the scrolled-away name would have been, closed the
+    /// № float. A reporter half inside a scrolled `NSClipView`: a press on its
+    /// visible part reports; a press inside its bounds but outside its
+    /// `visibleRect` reports nothing.
+    @Test func aPressOutsideTheVisiblePartReportsNothing() throws {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 300, height: 120),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer { window.close() }
+        let content = NSView(frame: NSRect(x: 0, y: 0, width: 300, height: 120))
+        window.contentView = content
+        // The strip's clip shows document x 0…100; the reporter spans 80…140.
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 100, height: 40))
+        let document = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 40))
+        let reporter = PressReporterView(frame: NSRect(x: 80, y: 0, width: 60, height: 40))
+        document.addSubview(reporter)
+        scroll.documentView = document
+        content.addSubview(scroll)
+        content.layoutSubtreeIfNeeded()
+        var presses = 0
+        reporter.onPress = { presses += 1 }
+        func press(windowX: CGFloat) throws {
+            let event = try #require(NSEvent.mouseEvent(
+                with: .rightMouseDown, location: NSPoint(x: windowX, y: 20), modifierFlags: [],
+                timestamp: 0, windowNumber: window.windowNumber, context: nil, eventNumber: 0,
+                clickCount: 1, pressure: 1))
+            reporter.handle(event)
+        }
+        #expect(reporter.visibleRect.width > 0 && reporter.visibleRect.width < reporter.bounds.width,
+                "the reporter is half scrolled out (visible \(reporter.visibleRect))")
+        try press(windowX: 90)
+        #expect(presses == 1, "a press on its visible part reports")
+        try press(windowX: 120)
+        #expect(presses == 1, "a press in its bounds but off screen (beside the strip) reports nothing")
+    }
+
     private nonisolated static func pump() {
         MainActor.assumeIsolated {
             RunLoop.main.run(until: Date().addingTimeInterval(0.02))

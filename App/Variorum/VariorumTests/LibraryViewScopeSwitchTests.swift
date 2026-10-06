@@ -14,8 +14,11 @@
 //  not seeing books").
 //
 //  THE TWO SWITCHES (ruled): picking Cards moves the scope All → Notes;
-//  picking All while in Cards moves the view off Cards, to List. Every other
-//  combination is untouched (the edges are PROVISIONAL — QUESTIONS #188).
+//  picking All while in Cards moves the view off Cards, to List. GENERALIZED
+//  at librarywalkpolish round 1 (MINOR-5) and RULED by her (~23:00: "yes,
+//  generalized change is fine to work with" — R-LWP-6's amendment): Cards
+//  moves ANY scope to Notes, and any scope but Notes picked inside Cards
+//  moves the view to List. List and the Timeline are untouched.
 //
 //  Red-on-old, stated: the source scan was committed AHEAD of the fix and ran
 //  red on that tree — both pickers wrote the model's value directly
@@ -57,13 +60,18 @@ struct LibraryViewScopeSwitchTests {
 
     typealias Model = LibraryCatalogModel
 
-    /// Switch one: picking Cards moves All → Notes — and only All.
-    @Test func pickingCardsMovesAllToNotes() {
-        #expect(Model.scope(afterPicking: .notes, from: .all) == .posts)
-        // Untouched (PROVISIONAL — #188): Cards over Notes, Books, Blocks.
-        #expect(Model.scope(afterPicking: .notes, from: .posts) == .posts)
-        #expect(Model.scope(afterPicking: .notes, from: .books) == .books)
-        #expect(Model.scope(afterPicking: .notes, from: .blocks) == .blocks)
+    /// Switch one: picking Cards moves the scope to Notes — from ANY scope.
+    /// **JUSTIFIED EDIT (librarywalkpolish round 1's MINOR-5, then HER RULING
+    /// — R-LWP-6 generalized, ~23:00: "yes, generalized change is fine to
+    /// work with"):** the first build moved only All, so Cards over Books or
+    /// Blocks said "No notes match" over a full library — the same dishonest
+    /// state her two rulings removed, reachable two ways. Committed AHEAD of
+    /// the rule's change (red on the All-only rule).
+    @Test func pickingCardsMovesAnyScopeToNotes() {
+        for scope in Model.Scope.allCases {
+            #expect(Model.scope(afterPicking: .notes, from: scope) == .posts,
+                    "Cards over \(scope) reads Notes")
+        }
         // Leaving Cards never moves the scope back.
         for scope in Model.Scope.allCases {
             #expect(Model.scope(afterPicking: .list, from: scope) == scope)
@@ -71,16 +79,15 @@ struct LibraryViewScopeSwitchTests {
         }
     }
 
-    /// Switch two: picking All while in Cards moves the view to List — and
-    /// only from Cards, and only for All.
-    @Test func pickingAllInCardsMovesToList() {
-        #expect(Model.mode(afterPicking: .all, from: .notes) == .list)
-        #expect(Model.mode(afterPicking: .all, from: .list) == .list)
-        #expect(Model.mode(afterPicking: .all, from: .timeline) == .timeline)
-        for scope in [Model.Scope.books, .posts, .blocks] {
-            for mode in Model.Mode.allCases {
-                #expect(Model.mode(afterPicking: scope, from: mode) == mode)
-            }
+    /// Switch two: picking any scope but Notes while in Cards moves the view
+    /// to List — only from Cards (her R-LWP-6, generalized: Cards shows notes
+    /// alone, so All, Books and Blocks each leave it).
+    @Test func pickingANonNotesScopeInCardsMovesToList() {
+        for scope in Model.Scope.allCases {
+            #expect(Model.mode(afterPicking: scope, from: .notes) == (scope == .posts ? .notes : .list),
+                    "\(scope) picked in Cards")
+            #expect(Model.mode(afterPicking: scope, from: .list) == .list)
+            #expect(Model.mode(afterPicking: scope, from: .timeline) == .timeline)
         }
     }
 
@@ -145,24 +152,30 @@ struct LibraryViewScopeSwitchTests {
         }
     }
 
-    /// The untouched combinations, through the doors: Cards over Books keeps
-    /// Books (no re-read owed); Books in Cards keeps Cards; List under All
-    /// stays List; the Timeline never moves the scope.
-    @Test func theOtherCombinationsAreUntouched() async throws {
+    /// The generalized combinations, through the doors (her R-LWP-6,
+    /// generalized — JUSTIFIED EDIT, the same ruling as the table above):
+    /// Cards over Books moves the scope to Notes (a re-read owed); Blocks
+    /// picked in Cards leaves Cards for List; Notes picked in Cards stays in
+    /// Cards; List and the Timeline never move the scope, and picking a
+    /// scope there never moves the view.
+    @Test func theGeneralizedCombinationsThroughTheDoors() async throws {
         try await withLibrary { session in
             let model = Model(session: session, defaults: try scrubbed("others"))
             model.pickScope(.books)
-            #expect(!model.pickMode(.notes), "Cards over Books moves nothing")
-            #expect(model.scope == .books && model.mode == .notes)
+            #expect(model.pickMode(.notes), "Cards over Books moves the scope — a re-read owed")
+            #expect(model.scope == .posts && model.mode == .notes)
+            model.pickScope(.posts)
+            #expect(model.mode == .notes, "Notes in Cards keeps Cards")
             model.pickScope(.blocks)
-            #expect(model.mode == .notes, "Blocks in Cards keeps Cards")
+            #expect(model.mode == .list, "Blocks in Cards moves the view to List")
+            #expect(model.scope == .blocks)
             #expect(!model.pickMode(.list))
             model.pickScope(.all)
             #expect(model.mode == .list, "All in List stays List")
             #expect(!model.pickMode(.timeline), "the Timeline never moves the scope")
             #expect(model.scope == .all)
-            model.pickScope(.all)
-            #expect(model.mode == .timeline, "All in the Timeline stays the Timeline")
+            model.pickScope(.books)
+            #expect(model.mode == .timeline, "Books in the Timeline stays the Timeline")
         }
     }
 }

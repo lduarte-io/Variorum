@@ -413,6 +413,55 @@ struct TutorialBooksLessonTests {
         }
     }
 
+    /// **librarywalkpolish F-BW-1 — NO LESSON TEACHES A DOOR THIS RELEASE
+    /// HIDES (round 1's MINOR-3; A PRE-0.9.2 GATE).** VR-118 hid "my order"
+    /// and Send to Top/Bottom for 0.9.2 (her R-LWP-4), and lesson 7 still
+    /// taught both — this is the pin that READS THE SEED TEXT (the B-WALK
+    /// round's `withKnownIssue` in R5 read only the model, so a re-worded
+    /// lesson could never have turned it). Every lesson of the WHOLE guide is
+    /// held to what the release offers: the order ▾'s hidden rows by their
+    /// own labels (`offeredOrderModes`), and — while hand placing steps back —
+    /// Send to Top/Bottom by their own verbs and the "own order" phrasing.
+    /// When VR-120 returns hand placing, the hidden set empties and the pin
+    /// holds nothing back. Committed AHEAD of the reword (red on the shipped
+    /// seed).
+    @Test func noLessonTeachesADoorThisReleaseHides() async throws {
+        try await withChapterWorld { session, db, guideID in
+            let suite = "lwp-hidden-doors-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let model = ShelfViewModel(session: session, defaults: defaults)
+            var hidden = BookcaseOrderMode.allCases
+                .filter { !model.offeredOrderModes.contains($0) }
+                .map(\.label)
+            if !model.handPlacingOffered {
+                hidden += [BookcaseCopy.sendToTopVerb, BookcaseCopy.sendToBottomVerb, "own order"]
+            }
+            #expect(hidden.contains(BookcaseOrderMode.mine.label) == !model.handPlacingOffered,
+                    "the hidden set is the release's own (VR-118)")
+            let lessons = try await db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT post_id FROM reading_post
+                        WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'
+                        """,
+                    arguments: [guideID]
+                ).map { id in
+                    (try Container.fetchOne(db, key: id)?.title ?? id,
+                     try Queries.renderedText(db, containerID: id))
+                }
+            }
+            #expect(lessons.count > chapterTitles.count, "the whole guide is read, not one chapter")
+            for (title, text) in lessons {
+                for door in hidden {
+                    #expect(!text.localizedCaseInsensitiveContains(door),
+                            "\u{201C}\(title)\u{201D} teaches \u{201C}\(door)\u{201D}, which 0.9.2 hides")
+                }
+            }
+        }
+    }
+
     /// **Lesson 7 — the Bookcase.** "Your books live on shelves, alphabetical
     /// until you choose otherwise — switch to your own order to place them by
     /// hand. The shelves run left to right exactly as All stacks them top to
