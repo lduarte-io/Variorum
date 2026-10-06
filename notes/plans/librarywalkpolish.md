@@ -12,7 +12,7 @@
 > cards · the real drag all "good"; the drag's delectable-moment want VR-124; Timeline's
 > books-honesty bug VR-125 (hoped pre-launch, "doesn't reopen our current phase"); the
 > dark heading band VR-126 (her #188(m) ruling: the bands match; hoped pre-launch); the
-> Restore Tutorial mention added to the notes at her word. **THE RELEASE IS RUNNING.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> Restore Tutorial mention added to the notes at her word. **0.9.2 IS RELEASED AND LIVE (2026-10-06 ~01:35): build 5178; DMG sha256 f1e71b74…, published first and verify-PASSED; the live appcast byte-identical (PASS after edge propagation); the site repo's commit 77c42d7; /Applications refreshed from the DMG behind the A1 rail (codesign verified, 0.9.2); the dev store's fixture RESTORED (cmp-verified). Remaining: her ONE press (Help ▸ Restore Tutorial on the refreshed app) → her new-Mac install (the fold's live run) → the arc's paperwork close.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
