@@ -3368,3 +3368,36 @@ commit, NOT-DONE first line. END: the Library-touching Mac suites + core
 `LibraryPagingTests` (the whole-Mac END is not owed — the reviewer's round covers the gap).
 QUESTIONS' next free number: **#188**. A fresh `opus-reviewer` cold round follows the
 hand-back.
+
+## 17y B-WALK RECORD — her walk's fix round, items W-1…W-5 (W-6 GATED on her word) (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
+
+**NOT DONE (first line, per the contract):** IN PROGRESS — this line is rewritten at the close. Until
+then: every row below not marked DONE is not done; W-6 is NOT built (gated on her confirming word,
+which arrives only by an orchestrator message).
+
+Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
+the B-WALK BRIEF whole; this file's 17y row end to end, the kickoff, the RUN RECORD (the HER WALK
+blocks — her words bind every item); the B1 RECORD (§ THE (k) DESIGN, § THE (k) NUMBERS, F-B1-5);
+the B2 BRIEF + B2 RECORD + its fix round (the drag-type mechanism and sites); the B3 RECORD (item
+(r)'s census overlay + the strip); `notes/plans/17y-b1-ladder-round1.md` whole; QUESTIONS #187
+(its (i) carries her answer); KnownIssues' List row; `notes/SessionResiliencyProtocol.md` whole;
+the Library feature files (`LibraryCatalogView/Model/Paging/BooksRegion`), `NoteTagChips`,
+`RowClick`; the Bookcase files as each item reaches them. Worktree `~/dev/variorum-17y` only;
+DerivedData `App/Variorum/DerivedData/17y-wfix`; no subagents. THE AUTHOR IS AT THE MACHINE: no
+GUI driving, no store staged or restored, no running Variorum instance touched — every capture
+and measurement here is a MOUNTED test-host window (the brief's "mounted suites fine"). Captures:
+`notes/plans/17y-screens/bwalk/` (gitignored).
+
+### LIVE STATUS (flipped per commit; PENDING = unverified)
+
+| # | piece | status |
+|---|---|---|
+| 0 | This record + the bwalk captures dir gitignored | DONE (this commit) |
+| 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | NOT-STARTED |
+| 2 | W-1 the List's notes on the lazy column, the List's exact face — before-measure/captures, build, after-measure/captures, pins | NOT-STARTED |
+| 3 | W-3 the census float dismissed by any masthead menu/popover — pin + fix | NOT-STARTED |
+| 4 | W-5 no insertion line in a derived order — pin + fix | NOT-STARTED |
+| 5 | W-4 the compact drag image + the adoption list — pin + fix | NOT-STARTED |
+| 6 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
