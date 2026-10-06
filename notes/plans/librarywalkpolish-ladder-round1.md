@@ -149,4 +149,137 @@ Residues, named (not fixed — neither is a silent nothing): (1) a shelf name dr
 
 #### FOR ROUND 2 (the fix diff, this session's)
 
-The range is `3b98c225..<this commit>`; the ORCHESTRATOR'S commit inside it is 7855bbac (her R-LWP-6 ruling + VR-122 — not this round's). This round's commits: 89dc8356 (LIVE STATUS) · **05de8ae0 the red pins ahead** · 557fbb1e (three red pins corrected before any fix, re-run red) · **13ae453a the Bookcase three (MAJOR-1 · MINOR-1 · NIT-3)** · **4e793168 NIT-1** · **aca85619 MINOR-5** · **c63ba1dc NIT-4's line** · **0919c814 F-BW-1 + MINOR-3 (the seed reword)** · 8c60e66c / 87f8daac (MAJOR-1's revert check, announced and restored) · **02e171e2 the rig's dark switch** · 3 record-only commits (the probe's announcement, the dark-pass report, the END). Seams: zero `Sources/` (no `Sync/`, schema, custody), zero `Shared/`, zero mobile; ONE read-tier line (`NoteIndexColumn.swift`, `.lineLimit(1)` only — `notes/TEXTKIT2_NOTES.md` read first; no editor-seam code touched); seed CONTENT in lesson 7 only (authorized). New shared Mac chrome: `Core/Views/MenuLifeReporter.swift`. Expected cast: `opus-reviewer` (the read-tier line is a chrome line policy, not editor-seam logic — the orchestrator's call).
+The range is `3b98c225..<this commit>`; the ORCHESTRATOR'S commit inside it is 7855bbac (her R-LWP-6 ruling + VR-122 — not this round's). This round's commits: 89dc8356 (LIVE STATUS) · **05de8ae0 the red pins ahead** · 557fbb1e (three red pins corrected before any fix, re-run red) · **13ae453a the Bookcase three (MAJOR-1 · MINOR-1 · NIT-3)** · **4e793168 NIT-1** · **aca85619 MINOR-5** · **c63ba1dc NIT-4's line** · **0919c814 F-BW-1 + MINOR-3 (the seed reword)** · 8c60e66c / 87f8daac (MAJOR-1's revert check, announced and restored) · **02e171e2 the rig's dark switch** · 3 record-only commits (the probe's announcement, the dark-pass report, the END). Seams: zero `Sources/` (no `Sync/`, schema, custody), zero `Shared/`, zero mobile; ONE read-tier line (`NoteIndexColumn.swift`, `.lineLimit(1)` only — `notes/TEXTKIT2_NOTES.md` read first; no editor-seam code touched); seed CONTENT in lesson 7 only (authorized). New shared Mac chrome: `Core/Views/MenuLifeReporter.swift`. Expected cast: `opus-reviewer` (the read-tier line is a chrome line policy, not editor-seam logic — the orchestrator's call; the orchestrator RE-CAST to Fable at 896b8166 — the seam rule binds on content).
+
+---
+
+# librarywalkpolish batch 1 — cold-review ladder ROUND 2 (fresh `fable-reviewer`, 2026-10-05; the fix diff `3b98c225..c7d58bef`, 7855bbac excluded as the orchestrator's)
+
+**Verdict: NO new BLOCKER · NO new MAJOR · 0 MINOR · 1 NIT (record-only, mechanism SPECULATIVE — no fix landed). Every round-1 fix is CONFIRMED sound; the ladder needs no round 3.** The reviewer executed
+REVIEW_PROMPT.md verbatim in its own scratch DerivedData (`17y-review8`), read the whole diff and
+the touched files' surrounding code itself, and re-ran the touched suites first-hand: **51 tests in
+8 suites green** (BookcaseDragFace, BookcaseCensusMenu, BookcaseMastheadPopover,
+LibraryViewScopeSwitch, TutorialBooksLesson, TutorialBooksRitual, ChromeLineLimit — green now —
+and NoteIndexColumnScrollCost). The fix round's local logs corroborated rather than trusted: the
+END "522 tests in 80 suites passed" read from `bwalk/fix/end-mac.log`; every red-on-old read from
+`red.log`/`red2.log` (NIT-1's two issues, MINOR-1's three arms, F-BW-1's two seed hits, NIT-3's
+source pin, MINOR-5's rule table) and MAJOR-1's revert run from `major1-revert.log`
+(`theChipIsNeverCutAtTheRowsEdges` red under the shipped placement against the CORRECTED
+reference). TEXTKIT2_NOTES §3–4 re-read for the read-tier touch: nothing there bears on a SwiftUI
+line-policy chrome line.
+
+## The three scrutiny items (the spawn's), each given this reviewer's own judgment
+
+1. **The NIT-3 class-sweep extension (strip names + ⋯ panel rows beyond the starred word) —
+   the orchestrator's sustainment is CONFIRMED.** Traced on the code: each new gate mirrors its
+   drop's OWN pre-existing guard exactly — `shelfNameDropLights` vs `reshelve`'s same-shelf
+   return (ShelfViewModel:386) and the handlers' `guard draggedID != shelf.id`
+   (BookcaseStrip:293/604); `starredDropLights` vs `starBook`'s `!book.starred` guard (:407);
+   a shelf payload over "starred" lights nothing and its handler does nothing. The drops
+   themselves are byte-untouched, so no product behavior was invented — only the OFFER was made
+   honest, which is §12's standing law ("a door that did nothing speaks a refusal" — the
+   false-offer class W-5 applied at her own word to this surface's sibling targets). #188(k)
+   carries exactly what changed and each rule is one small pure function to overturn. Sustained.
+2. **The three self-corrections — each verified SOUND, none a patch over a misread.**
+   (a) *The chip reference's half-point hairline:* the reference measures INK, and a frame-sized
+   render clips the hairline's outer half-point (it strokes ON the edge); `.padding(4)` un-clips
+   the measurement and adds no ink. The old tree's failures survive the correction by arithmetic
+   (ink 188×21 and 104×34 vs the whole 188×34 — a chip centred at y 4 spans [−13, 21], at x 790
+   spans [697, 883] on an 800-wide source), and the revert log shows the pin red against the
+   corrected reference. (b) *`visibleRect` not self-clipped on 27:* the `bounds ∩ visibleRect`
+   shape is correct under EITHER OS behavior (if `visibleRect ⊆ bounds` the intersection is a
+   no-op), the pin asserts the half-shown precondition at runtime, and its guard arm (a press on
+   screen beside the reporter) defeats a `visibleRect`-only fix — traced end to end on the pin's
+   geometry (window x 120 → reporter-local 40, inside bounds, outside the 20-pt shown slice).
+   (c) *The dropped "own order" ban:* "gatherings & arrivals" teaches "it can wear your own
+   order: drag one note above the other" — a BOOK's internal NOTE order (manual `sort_field`,
+   `reading_post` reorder), a live shipped door unrelated to VR-118's hidden Bookcase my-order;
+   the ban would have flagged a true lesson. Dropping it was right, and the final pin still
+   catches the actual hidden doors.
+3. **`noLessonTeachesADoorThisReleaseHides` + the lesson-7 reword.** The pin reads the WHOLE
+   guide (`TutorialSeeder.restore` seeds every chapter; the SQL walks every live member;
+   `lessons.count > chapterTitles.count` trips if the world ever shrinks) against a hidden set
+   DERIVED from the model — `offeredOrderModes` + `handPlacingOffered`, labels/verbs read from
+   the app's own constants, so a 13s re-voicing tracks and VR-120's return empties the set.
+   **It WOULD catch a future lesson teaching a hidden door by its label or verb** (the only
+   stable mechanical signature); a PARAPHRASED teaching escapes it — a named limit the pin's own
+   doc claims nothing beyond, and exactly VR-122's (and her walk's) territory. Red-on-old is
+   mechanically certain (the shipped seed contained "my order" and "Send to Top";
+   `localizedCaseInsensitiveContains` hits both — the 2 issues in `red2.log`). **Lesson 7's
+   reworded sentences verified TRUE of the shipped surface, each against the code:** the default
+   is `.alphabetical` (BookcasePrefs:43) and a stored my-order READS A–Z while hidden
+   (`effectiveOrder`); the order ▾ offers exactly A–Z · last edited (`offeredOrderModes`,
+   ShelfViewModel:197, drawn at BookcaseStrip:490); "the books you worked in most recently come
+   first" is `BookcaseBoard.ordered`'s `a > b // newest first` (BookcaseBoard:212) — with
+   starred floating first, which the lesson's own star sentence teaches; the drop-onto-a-name
+   and Move to Shelf doors are live. The one stale sibling (the strip sentence not naming the
+   "starred" word) is NAMED and owned by VR-122, rightly left.
+
+## The read-tier line (the reason this round is Fable's) — judged on its own context
+
+`NoteIndexColumn.swift:393` — `.lineLimit(1)` on `liveRowControls`' HStack, directly above the
+pre-existing `.fixedSize()`. The content is three one-glyph controls (↑ · ↓ · the ⋯ `Menu`, which
+already carried its own policy pair), so the stated policy changes no size — the
+footprint-equality pin (`NoteIndexColumnScrollCostTests`) green in this reviewer's own run. It is
+the P-8/b6dae25 class rule applied where the scan found it missing; NOTHING else in the file
+changed; no TextKit object, no editor-seam type, no measurement road is touched — TK2's §3–4
+concerns (identity stamps, viewport, fixing) have no purchase on a SwiftUI chrome line policy.
+`ChromeLineLimitTests`' standing red WAS the red-on-old; it flips green. CLEAN.
+
+## Findings
+
+- **[NIT, SPECULATIVE — record-only, no fix] · `App/Variorum/Variorum/Core/Views/MenuLifeReporter.swift:66` ·
+  `stopObserving()` uses the blanket `NotificationCenter.default.removeObserver(self)`**, which
+  removes EVERY default-center observation registered with this view as observer — the
+  long-cautioned hazard being system/superclass registrations stripped alongside your own.
+  Evidence: the call site, and Apple's standing guidance to remove by name where the observer
+  outlives the registration moment. Mechanism NOT traced: this reviewer could not identify any
+  concrete default-center registration AppKit makes with a plain `NSView` as observer on
+  macOS 27 that the blanket call would strip, so no failure can be demonstrated and no
+  red-on-old pin could exist — by the hallucination guard this is below the fix bar, and the
+  view is final, dedicated, and registers exactly two observations. Proposed shape if ever
+  touched: two name-scoped removals. RECORDED for the orchestrator's seam; deliberately NOT
+  landed (no pinnable mechanism; no churn on fresh shared chrome mid-ladder without one).
+
+## The clean bill (what this reviewer checked first-hand and found solid)
+
+- **MAJOR-1:** `BookDragSource.placement`'s math verified by hand — the canvas spans
+  [−chip, source+chip] per axis centred over the source, the chip's top-left at
+  `center + chip/2` in canvas space puts the chip's CENTRE exactly on the grab in source space
+  (≤ 0.5 pt rounding), and the chip can never touch the canvas edge (margin = one whole chip);
+  `GrabCanvas` measures its one subview so any book name sets its own margin. The clamp
+  alternative stays rejected per R-LWP-3. Red → green → revert-red all corroborated from logs
+  plus arithmetic. Her re-walk remains the live-drag check (NOT-DONE first line, honest).
+- **MINOR-1:** `MenuLifeReporterView` observes its OWN window's `didResignKey` + the app's
+  `didResignActive` (re-registered per window move, deregistered on nil-window and dismantle,
+  `hitTest` nil — never a click target); `orderMenuLifeEnded()` is guarded (no write when
+  closed) and touches ONLY `orderOpen` — the census float verified untouched (the pin's fourth
+  arm, green both sides as a guard). The three red arms are independent (each starts closed —
+  the 557fbb1e correction, verified in the pin's body). The board's `.onDisappear` carries the
+  root-swap close; the remount arm drives a REAL root swap.
+- **MINOR-5:** the generalized pair is two one-line pure functions; the doors (`pickMode`
+  returning whether the question changed → the caller's `search()`; `pickScope` always
+  re-reading, the mode move riding the view's `onChange`) are byte-untouched and their only
+  call sites verified (LibraryCatalogView:476/494). List and the Timeline provably untouched
+  (`mode(afterPicking:)` acts only from `.notes`); leaving Cards never moves the scope back.
+  Mode/scope are in-memory only (no persisted restoration road bypasses the doors). Her ruling
+  R-LWP-6-as-amended is verbatim-anchored in the plan file; #188(a) closed.
+- **NIT-1:** the intersection shape, the measured non-clipping `visibleRect`, the pin's
+  geometry and its anti-overshoot guard arm — all traced (above).
+- **The records:** KnownIssues' two rows resolved in place with the corrected history
+  (the F-BW-1 row now says what the old wrapper actually read); #188 (a)/(d)/(k)/(l)/(m)
+  current and honest; the fix-round record's commit map matches `git log` exactly; 7855bbac
+  verified record-only (QUESTIONS + the plan file, zero code); no commit in the range carries
+  a trailer; zero `Sources/`, zero `Shared/`, zero mobile confirmed by the diff stat; the
+  phone's seeder never taught my order (no mobile reword owed).
+- **NIT-5 / the dark pass:** record-only as briefed; #188(m) poses the List's dark heading
+  band with the three probes' results, nothing built — the right call under the
+  no-literal/no-token finding (a system material is hers to judge). The untracked
+  `notes/plans/17y-screens/walk-mockups.html` predates this review session and was left alone.
+- **Residues named, not silent:** the same-position shelf-name drop (a write, not a guard) and
+  #188(l)'s cross-window corner now spanning the strip — both recorded, hers to order.
+
+**Ladder consequence: no new BLOCKER/MAJOR ⇒ no round 3. The one NIT is record-only at this
+reviewer's final call (the cross-model contract's confirm-and-implement path requires a traceable
+mechanism; this one has none). The fix diff stands as committed; the pass moves to VR-122 and her
+re-walk.**
