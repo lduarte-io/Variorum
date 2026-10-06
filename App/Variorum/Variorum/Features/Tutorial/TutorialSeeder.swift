@@ -545,12 +545,17 @@ enum TutorialSeeder {
 
         _ = try lesson(welcome, "getting around", [
             // 13i-d U7 (F-U1-5): the sidebar area is the BOOKCASE (§7).
-            "The sidebar has four places. BOOKCASE is home: your books, and a dashed "
+            // librarywalkpolish VR-122 (F-1, F-2): the sidebar has had FIVE
+            // places since the post-13l polish round added ARCHIVED
+            // (`SidebarView.areas`), and the Library's views are List · Cards
+            // · Timeline (17y (d)'s word). Words functional, 13s re-voices.
+            "The sidebar has five places. BOOKCASE is home: your books, and a dashed "
             + "box that reads \u{201C}new note — just start typing\u{201D} — type a first line "
             + "there and \u{23CE} mints a note and opens it. LIBRARY is everything, "
-            + "searchable, with a List and a Timeline view. POOL holds notes that "
+            + "searchable, with List, Cards and Timeline views. POOL holds notes that "
             + "belong to no book yet. SNIPPETS holds loose scraps — pieces of text "
-            + "that aren't notes at all.",
+            + "that aren't notes at all. ARCHIVED keeps the notes and books you set "
+            + "aside \u{2014} forever, no clock.",
 
             "\u{2318}K finds anything: notes, books, blocks, and commands — type a few "
             + "letters and \u{23CE} opens the hit. \u{2318}N makes a new note from anywhere. "
@@ -596,7 +601,10 @@ enum TutorialSeeder {
             "The sidebar keeps an OPEN list of the notes this window has open, in the "
             + "order you opened them \u{2014} \u{2318}\u{21E7}1 through \u{2318}\u{21E7}9 jump "
             + "straight to them, drag the rows to rearrange, and \u{2715} closes a ROW "
-            + "and nothing else (the note is untouched). \u{2318}[ and \u{2318}] walk back "
+            // librarywalkpolish VR-122 (F-3): back/forward are ⌥⌘[ / ⌥⌘]
+            // since 13u4 UNIT S1 (PROVISIONAL #130 — ⌘[ / ⌘] outdent and
+            // indent); both sentences below taught the old pair.
+            + "and nothing else (the note is untouched). \u{2325}\u{2318}[ and \u{2325}\u{2318}] walk back "
             + "and forward through where this pane has been, like a browser.",
 
             // 13k round 2 (R2-1, the WT-1 class): this sentence taught the
@@ -617,7 +625,7 @@ enum TutorialSeeder {
             // three doors (`ContextBarDoors.Door`: back · book · forward).
             "Above the page sits the CONTEXT BAR \u{2014} always the same three doors: "
             + "\u{2190} and \u{2192} walk back and forward through where this pane has "
-            + "been (\u{2318}[ and \u{2318}] are the same doors), and the book glyph "
+            + "been (\u{2325}\u{2318}[ and \u{2325}\u{2318}] are the same doors), and the book glyph "
             + "opens the book this note lives in at this very note. One more thing "
             + "joins them only when there is something to say: a note that has deleted "
             + "blocks wears a quiet \u{232B} badge with the count, and it opens "
@@ -629,8 +637,11 @@ enum TutorialSeeder {
             + "\u{238B} puts the field away, and \u{2318}\u{21E7}I opens the same field "
             + "from anywhere in the note.",
 
+            // librarywalkpolish VR-122 (F-4): the RIGHT-CLICK row reads Star /
+            // Unstar (`StarDoor.title`); "Toggle Star" is the ⌘K act's verb.
+            // Written plainly — the pin reads `StarCopy.starRow` (the H pattern).
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
-            + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to fifteen, "
+            + "\u{201C}Star\u{201D} pins it to the sidebar's top \u{2014} up to fifteen, "
             + "meant for what you are in right now rather than as a filing system. And "
             // 13g cold review R1-2: batch 7 (R6-4) moved the quick note's
             // landing — tagged, into the smart Quicknotes book — and this
@@ -706,7 +717,9 @@ enum TutorialSeeder {
             // out of the registry); the helper had already been corrected.
             "New blocks can also be asked for directly: \u{2318}\u{21E7}\u{23CE} (New Block "
             + "Below) mints an empty block right under the one you're in and "
-            + "puts your cursor in it — Write and Takes alike; the block \u{25BE} "
+            // librarywalkpolish VR-122 (F-5): the end-of-note row is on TAKES'
+            // block ▾ only (`TakesBottomBar`; Write's has New block below).
+            + "puts your cursor in it — Write and Takes alike; in Takes, the block \u{25BE} "
             + "menu in the bottom bar also has \u{FF0B} New block at the end of the "
             + "note. Either way, just keep typing.",
 
@@ -749,9 +762,11 @@ enum TutorialSeeder {
 
             "## Headings are sizes",
 
+            // librarywalkpolish VR-122 (F-6): the submenu's rows read
+            // "Heading 1/2/3" (`MarkdownActs.headingRows`).
             "A line that starts with #, ## or ### is a heading \u{2014} those three, "
             + "and nothing else. Put your cursor on this line and use Format "
-            + "\u{25B8} Heading \u{25B8} 2 to see it happen; the line above is "
+            + "\u{25B8} Heading \u{25B8} Heading 2 to see it happen; the line above is "
             + "already one. Setting a lead REPLACES whatever lead the line had, so "
             + "a heading becomes a bullet in one press rather than becoming a "
             + "bullet with a stray # in it.",
@@ -794,7 +809,11 @@ enum TutorialSeeder {
             "The lighthouse keeper counted the ships going out, and never once "
             + "the ships coming home.",
 
-            "Click into that paragraph and press \u{2318}T (or \u{FF0B} take in the bottom "
+            // librarywalkpolish VR-122 (F-7): a note opens in WRITE the first
+            // time, and there ⌘T only mints the take behind a receipt and the
+            // bar has no "+ take" — the board is where this paragraph happens.
+            "Press \u{2318}2 for Takes, click into that paragraph and press \u{2318}T (or "
+            + "\u{FF0B} take in the bottom "
             + "bar): a second take appears beside it, born as a copy of what you "
             + "were reading. Rewrite it freely — bolder, quieter, backwards. The "
             + "first take is untouched. \u{2325}\u{2318}T makes a BLANK take instead, for a "
@@ -812,8 +831,11 @@ enum TutorialSeeder {
             + "looking at; chosen is what the note is.\u{201D} \u{2318}\u{23CE} chooses the take "
             + "you're in; nothing else changes the note.",
 
+            // librarywalkpolish VR-122 (F-8): in Write, ⌘⏎ and ⌃⌘←/→ only open
+            // the takes panel (`EditorView.handleRouted`) — stepping, paging
+            // and the style: menu are the board's.
             "The block below carries four takes of one sentence, ready for "
-            + "practice. Open its fan (\u{2318}\u{21E7}T), step through them with \u{2303}\u{2318}\u{2190} "
+            + "practice. In Takes (\u{2318}2), open its fan (\u{2318}\u{21E7}T), step through them with \u{2303}\u{2318}\u{2190} "
             + "and \u{2303}\u{2318}\u{2192}, and choose your favorite.",
 
             "The rain came in from the sea without an opinion about any of us.",
@@ -1773,13 +1795,18 @@ enum TutorialSeeder {
             // lesson has been one door ahead of the app since. The door is
             // back where the margin now is — on the LEFT — and it appears
             // when she points at a block, which the words say.
+            //
+            // librarywalkpolish VR-122 (F-12): …and 13l RETIRED that hover ＋
+            // (her 8c rider: "I need the comment + on the left removed … it's
+            // too crowded"; `BlockDecor` records it), so the promise left
+            // with the door. The margin card/badge, ⌘⇧' and both bars'
+            // comments button stay.
             "A COMMENT is a working note on a BLOCK — about the writing, not in "
             + "it: \u{201C}take 1 is better, but take 2's ending\u{2026}\u{201D}. This block "
             + "carries one; it renders in the margin with a // prefix. Click it "
             + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere. "
             + "The comments button sits in the bottom bar in Write and Takes "
-            + "alike, and in Write, pointing at an uncommented block offers a "
-            + "quiet \u{FF0B} in the left margin right where its note would sit.",
+            + "alike.",
 
             "Comments survive the knife: divide or merge a commented block and "
             + "the note rides onto the successors. Deleted comments stay "
@@ -1866,8 +1893,11 @@ enum TutorialSeeder {
 
             // 13b 4D (N32(b)/(c) \u{2014} S4-8/S4-15): snippets are individual
             // items; the groups-vs-tags distinction said plainly.
+            // librarywalkpolish VR-122 (F-9): the Snippets area's Canvas face
+            // is Debug-only since 17y (p) — "or on a canvas card" left (the
+            // guide teaches Canvas only through `lookingLessonContent`).
             "Each snippet is its own item and can wear TAGS: right-click a "
-            + "snippet row \u{2014} here, in the side panel, or on a canvas card "
+            + "snippet row \u{2014} here, or in the side panel "
             + "\u{2014} and Tags\u{2026} opens its tag sheet. Worth keeping "
             + "straight: a GROUP is a container (a snippet lives in exactly "
             + "one; Move to Group moves it), while a TAG is a label (a snippet "
@@ -2034,10 +2064,16 @@ enum TutorialSeeder {
             + "clicking a card opens the note in the full editor; its \u{25B8} "
             + "expands it in place, right here.",
 
-            "Three views of a book share the toggle at the top. OUTLINE is "
+            // librarywalkpolish VR-122 (F-10): the toggle is FOUR —
+            // Outline · Index · Book · Read (`BookView.bookMasthead`; the book
+            // Index since pre-13u Act 10 wave 2c, editable in place since the
+            // correction round). Words functional, 13s re-voices.
+            "Four views of a book share the toggle at the top. OUTLINE is "
             + "this scroll, and it is where a book gets WRITTEN: chapter "
             + "headings, notes you can collapse, and the same editor you "
-            + "write a note in. BOOK is a two-page spread \u{2014} each page is one "
+            + "write a note in. INDEX keeps a column of the chapters and notes "
+            + "beside the whole text; click any block in the text and it goes "
+            + "live right where it is. BOOK is a two-page spread \u{2014} each page is one "
             + "whole note, and the page you are in is editable as Write or "
             + "as its takes; \u{25C0} \u{25B6} turn the leaf two notes at a "
             + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
@@ -2150,9 +2186,14 @@ enum TutorialSeeder {
             + "The shelves run left to right exactly as All stacks them top to "
             + "bottom. Unshelved books wait at the top until you file them.",
 
+            // librarywalkpolish VR-122 (F-11 — the round-2 ladder's one note
+            // for this pass): the strip reads All · starred · the shelves since
+            // 17y (s) (R-17y-9's VIRTUAL shelf — no menu, never deleted).
             "The shelves are the strip across the top of the Bookcase: All, "
-            + "then each shelf by name \u{2014} Welcome is the one this guide "
-            + "came on. \u{FF0B} shelf makes another; right-click a shelf to "
+            + "then starred, then each shelf by name \u{2014} Welcome is the one this guide "
+            + "came on. Starred isn't a shelf you file into: it shows every starred "
+            + "book, wherever it's shelved, and it can't be renamed or deleted. "
+            + "\u{FF0B} shelf makes another; right-click a shelf to "
             + "rename it, give it a glyph, make it the default, or delete it "
             + "(its books just return to Unshelved). The order \u{25BE} beside "
             + "them reads A\u{2013}Z or last edited.",
@@ -2161,7 +2202,8 @@ enum TutorialSeeder {
             + "right-click the book \u{25B8} Move to Shelf). Switch the order "
             + "\u{25BE} to last edited and the books you worked in most recently "
             + "come first. Then star a book (right-click \u{25B8} Star): starred "
-            + "books float first, under any order.",
+            + "books float first, under any order, and starred gathers them all "
+            + "in one place.",
 
             "The Bookcase is a PLACE \u{2014} arranged by you, and it stays "
             + "where you put it. Finding is the Library's work: search and the "
