@@ -14,10 +14,10 @@ app has.)
 **Jekyll steps back.** *The Strange Case of Dr Jekyll and Mr Hyde* no longer seeds into new
 libraries — add it any time from Help ▸ Restore. Existing libraries keep what they have.
 
-**Drags work everywhere now.** Dragging books onto shelves, reordering in "my order",
-dragging chapters in the Book Panel and reordering the Open list were all silently dead —
-the app had never declared its own drag types. All fixed, with a visible handle in
-"my order".
+**Drags work now.** Dragging books onto shelves, dragging chapters in the Book Panel and
+reordering the Open list were all silently dead — the app had never declared its own drag
+types. All fixed. (Reordering books by hand steps back for one release and returns, done
+properly, in a small update.)
 
 **A starred shelf.** The Bookcase strip opens with "starred" — your starred books in one
 place. Drop a book on it to star it.

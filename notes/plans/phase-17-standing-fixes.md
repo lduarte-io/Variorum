@@ -1844,7 +1844,29 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   might be nice... open to ideas"). Also hers: no release-notes line for the hover fix; her
   real store quit again; "not sure what book panel drags is" (answered in the reply). **THE
   B-WALK FIX ROUND SPAWNS NOW (fresh opus-implementer; the brief at this file's tail; an
-  opus-reviewer round after).** Then HER GATES:
+  opus-reviewer round after).** **HER SECOND SITTING RETURN (~20:25, rulings relayed to the
+  running round the same turn):** (W-4 refined) the drag starts anywhere on the row and the
+  title-chip image rides AT THE CURSOR — "so dragging into something feels natural and you
+  aren't dragging with an offset"; (W-6 UNGATED + EXPANDED, her shape) — "let's just hide
+  'my order' from the user, hide the send to top and bottom options, and add it next week or
+  something as a post release update... voila, it sidesteps the whole issue" (machinery
+  stays; a stored my-order preference reads a–z while hidden, never rewritten — PROVISIONAL);
+  (W-7 NEW) the TERMINAL Cards readability pulled IN from the 13s routing — "let's fix
+  terminal looking so impossible to read on the cards somehow (we can change the font size
+  or spacing)"; her priority order blessed (census-menu bug · List scroll · cards/notes ·
+  terminal cards · drag image · reorder hiding); "quality first, always. So it's fine if it
+  takes longer." The 0.9.2 drags line REWORDED for the deferral (the draft edited; shown to
+  her). The census-float LOOK + strip delineation went to her as LOCAL HTML MOCKUPS
+  (`notes/plans/17y-screens/walk-mockups.html`, gitignored) — her picks pending. **HER
+  PROCESS DIRECTIVE, recorded:** these items frame as a NEW FIX PHASE under the NEW
+  NUMBERING — the live VR-### GitHub issues (VR-N = issue #N; the morning's bulk mint
+  carried the KnownIssues rows in) — "it's time to start using our new numbering with our
+  same style of making planned phase documents"; a fresh-orchestrator seam approaches ("I
+  feel like we're getting to the point of starting a new orchestrator"). The orchestrator's
+  proposed shape (pending her word, in the same reply): the walk items mint as VR-113+
+  issues + a plan doc in the standing style; the running round re-homes as that pass's
+  batch 1; this orchestrator carries it through the 0.9.2 release then hard-stops; 17y
+  closes on its own a–s scope. Then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
