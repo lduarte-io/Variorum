@@ -58,6 +58,9 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
   more readable)." Conservative; Study's Cards untouched; her eye judges.
 - **R-LWP-6 — the view/scope honesty switches.** "yes to building the cards notes auto
   switch and if someone clicks on all from inside card view, move them off the card view."
+  **RULED GENERAL at her word (~23:00: "yes, generalized change is fine to work with"):
+  Cards ⇒ scope Notes from ANY scope; a non-Notes scope picked inside Cards ⇒ List — the
+  round-1 provisional closes as her ruling.**
 - **Her priority order:** census-menu bug · List scroll · cards/notes · terminal cards ·
   drag image · reorder hiding. **The numbering:** the live VR-### GitHub issues (VR-N =
   issue #N) — "I like it, variorum and virtual reality."
@@ -73,6 +76,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 | VR-117 | Terminal's Cards readability pass (R-LWP-5) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
 | VR-118 | Book reorder steps back for 0.9.2: "my order" + Send to Top/Bottom + grips hidden whole (R-LWP-4) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
 | VR-119 | The strip's delineation: Option 2 — restrained light-wash squares, solo'd chip filled, per the committed reference (R-LWP-2) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-122 | THE FIELD GUIDE'S FULL CURRENCY PASS — a PRE-0.9.2 GATE (her instruction verbatim in the issue): every lesson read against the shipped surface (17y + the 13i family + this pass); functional corrections land as seed content riding the standing re-seed; judgment wordings recorded for her 13s re-voicing; run by the orchestrator or a fresh subagent AFTER the ladder closes, right before the release | the close (after the ladder, before the release) | OPEN — gates 0.9.2 |
 | VR-120 | Book reorder RETURNS, done properly — the editor block drag's feel as the bar (R-LWP-4's other half) | — POST-RELEASE, at her word; NOT this pass's build | OPEN (deferred) |
 | VR-121 | The Book Panel's drag feel — works, ships as-is in 0.9.2 (her ruling at the walk: "note it as an issue that has to be fixed until it reaches the blocks drag and drop level of smooth, but we can leave it in for now. it does work, and it's a more hidden surface so I'll let it stay"); the post-release drag-feel family beside VR-120, the editor's block drag the shared bar | — POST-RELEASE, with VR-120 | OPEN (deferred) |
 
@@ -85,7 +89,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 - **Her gates:** the re-walk (the List feel is VR-113's close; the faces hers), her FEEL per
   the governing frame, the 0.9.2 notes (already APPROVED, R-17y-10; the reworded drags line
   shown), the release word.
-- **The close:** the 0.9.2 release run (R-13r-15's road; GATED on F-BW-1 — the field guide's lesson 7 must stop teaching hidden doors BEFORE the release; the reword lands in the ladder's fix round with the standing re-seed consequence) · the ledger dispositioned ·
+- **The close:** the 0.9.2 release run (R-13r-15's road; GATED on F-BW-1 AND on VR-122 — the field guide's full currency pass runs after the ladder, right before the release — the field guide's lesson 7 must stop teaching hidden doors BEFORE the release; the reword lands in the ladder's fix round with the standing re-seed consequence) · the ledger dispositioned ·
   the issues closed on GitHub as their rows close · 17y's deferred MACHINE acts run once
   here at the arc's end (the `/Applications` refresh at a zero-instance window behind A1 ·
   her real store's guide re-seed via Help ▸ Restore Tutorial… · the DerivedData sweep (17y,
