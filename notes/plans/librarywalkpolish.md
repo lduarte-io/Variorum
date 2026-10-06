@@ -25,6 +25,18 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
   solos must COMPOSE with a solo'd shelf (filter within the shelf). VR-115 verifies the
   shipped behavior first; if a census solo exits the shelf today, the compose builds.
   (Option B — the strip-swap — ruled OUT by the rider, "even though that looks nice".)
+  **AMENDED at her ~20:40 screenshots (the sibling INVERTS — the menu comes to the app, not
+  the float to the menu):** the NATIVE order menu "looks out of place in the app"; the
+  census float's "font and sizing and such is better, but solo is fairly meaningless -
+  highlighting the selected row would be better... is there something in between...? like
+  making the order menu look a bit more in tune with the rest of the app?" THE RULED
+  IN-BETWEEN: **ONE shared masthead-popover idiom for BOTH droppers (№ and order ▾)** — the
+  app's own typography (the float's current font/sizing kept), hairline + menu-grade
+  shadow, width-to-content; the SELECTED/ACTIVE row carries a quiet wash highlight (the
+  strip's filled-chip language); NO checkmarks, NO "solo" column (the row itself is the
+  act; clicking the highlighted census row clears its solo — PROVISIONAL); the order
+  popover's rows are a–z · last edited (my order hidden this release, VR-118); opening
+  either dismisses the other.
 - **R-LWP-2 — the strip is OPTION 2, in her design language.** "it is very subtle and square
   - not ugly standard web ui pills, some restrained, tasteful, light wash squares... I like
   the subtle tone indicator too." Every shelf name on a quiet near-square light-wash chip;
