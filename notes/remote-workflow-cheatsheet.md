@@ -20,6 +20,26 @@ ssh -t home 'tmux new-session -t variorum \; set destroy-unattached on'
 ssh -t home tmux new -A -s mobile
 ```
 
+## More workspaces — same pattern (primary attach + extra views)
+
+Every session has a second window pre-made; park an extra view on it with `C-b 1`.
+
+```zsh
+# variorum-mobile, extra view → C-b 1 parks on mobile-2
+ssh -t home 'tmux new-session -t mobile \; set destroy-unattached on'
+
+# stargazing-tech (windows star-1, star-2)
+ssh -t home tmux new -A -s stargazing
+ssh -t home 'tmux new-session -t stargazing \; set destroy-unattached on'   # extra view → C-b 1
+
+# fragments (windows frag-1, frag-2)
+ssh -t home tmux new -A -s fragments
+ssh -t home 'tmux new-session -t fragments \; set destroy-unattached on'   # extra view → C-b 1
+```
+
+The general pattern, for any future workspace:
+`ssh -t home tmux new -A -s <name> -c <dir>` once, then the grouped-view one-liner with `-t <name>` for each extra tab.
+
 **After closing the lid / losing Wi-Fi:** every tab's ssh dies. Not broken —
 re-paste each tab's command (up-arrow ↑ then enter), re-park tabs 2–3. Nothing was lost.
 
