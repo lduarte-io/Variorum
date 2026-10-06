@@ -4,6 +4,32 @@
 
 ---
 
+## SSH basics
+
+```zsh
+ssh home                  # plain terminal ON the Pro (no tmux) — leave with exit or Ctrl-D
+ssh home '<command>'      # run one command on the Pro and come straight back
+ssh -t home <command>     # same but interactive (what the tmux one-liners use)
+scp home:/path/file .     # copy a file Pro → Air (proview wraps this + opens it)
+~.                        # typed at the start of a line: force-kill a HUNG ssh
+```
+
+`home` = the Pro (`~/.ssh/config` alias, key auth, works from anywhere via Tailscale).
+
+```zsh
+# gracefully quit MY Variorum app on the Pro (⌘Q equivalent; real store only, never dev builds)
+ssh home 'osascript -e "tell application id \"io.lduarte.Variorum\" to quit"'
+```
+
+## Captive portals (hotel/café/office guest Wi-Fi)
+
+1. Tailscale menu → Exit Node → **None** (fail-closed: nothing flows until you do this)
+2. `open http://captive.apple.com` — forces the portal login page into your browser
+   (plain-HTTP trick; `http://neverssl.com` is the backup)
+*[removed for publication]*
+
+---
+
 ## Daily start — four Ghostty tabs on the Air, paste one each
 
 ```zsh
