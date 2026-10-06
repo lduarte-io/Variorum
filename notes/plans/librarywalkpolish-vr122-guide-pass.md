@@ -1,6 +1,20 @@
 # VR-122 — the field guide's full currency pass (librarywalkpolish, a PRE-0.9.2 GATE)
 
-**NOT DONE (first line, per the contract):** PENDING — written at close.
+**NOT DONE (first line, per the contract):** (1) **NO GUI WALK / no dev-store re-seed** — the brief
+fenced every store (the dev store holds a staged fixture; "do not stage/restore any store"), so no
+Restore Tutorial… press ran on any store and no capture was taken; the evidence is the seeded TEXT
+itself, read back from fresh mints by the pins (what a fresh store is born with, byte for byte),
+and the use-shaped close is the arc's close — her real store's re-seed + her read as she rewords;
+(2) **the J-items are recorded, not built** (by design — hers at 13s); (3) **two non-guide drifts
+found and NOT fixed** (outside the authorized surface): the ⌘/ helper's retired tag-fold row and
+its "right-click ▸ Toggle Star" (J-15, `HelperView.swift`), and AppSpec §12's stale "Takes … the
+first-open default" line (J-17, canon) — both routed to the orchestrator; (4) the privacy chapter's
+two lessons are Shared copy (`PostureCopy.swift` §7) — judged TRUE, not edited (outside the
+surface, 13s's territory); (5) the phone's own guide (`MobileTutorialSeeder`, "the pocket guide")
+was not audited — the zero-mobile fence; (6) no Release launch — the flavour-dependent text is the
+existing seam (`TutorialBuildFlavorTests`), and every edit here is flavour-independent; (7) the
+librarywalkpolish ledger row is left to the orchestrator (a concurrent writer committed to that
+file mid-session — f11a5aa6).
 
 **Her instruction (verbatim, the issue):** "I also want to be sure that the field guide is up to date
 fully from all of these changes + the 13i changes. Let's make sure either you or a subagent runs
@@ -26,11 +40,19 @@ behind every claim in doubt (cited per row below).
 
 | # | piece | status |
 |---|---|---|
-| 0 | This record: the audit table (every lesson × verdict × anchor) + the fix list + the judgment list | DONE (this commit) |
-| 1 | The red pins, committed AHEAD of the seed edits, run red on the shipped seed | PENDING |
-| 2 | The seed edits (F-1…F-12), the pins green | PENDING |
-| 3 | END: the tutorial spine + seeder + books-chapter + ritual suites + the seed pin + the shipped-shape core fold | PENDING |
-| 4 | Record close (NOT-DONE first line, counts, diff size) | PENDING |
+| 0 | This record: the audit table (every lesson × verdict × anchor) + the fix list + the judgment list | DONE (3afce924) |
+| 1 | The red pins, committed AHEAD of the seed edits, run red on the shipped seed | DONE (5c36c049) — NEW `TutorialCurrencyTests` (9 tests: F-1+F-2, F-3, F-4, F-5, F-6, F-7+F-8, F-9, F-10, F-12 — each claim-class had NO pin) + JUSTIFIED EDITS `lessonSevenTheBookcase` / `ritualFiveTheShelfGesture` (F-11). RED on 5c36c049's shipped seed: **"27 tests in 3 suites failed … with 21 issues"** — every prose arm red (18 in the new suite, 3 in lesson 7); every truth/source-scan arm green on both sides by design (the bars' rows, `PoolDetailView.Mode.faces`, the masthead's four tabs, R5's starred scope) (`scratchpad/vr122/red-f1-f12.log`) |
+| 2 | The seed edits (F-1…F-12), the pins green | DONE (4ff2bab3) — `TutorialSeeder.swift` +60 −18 (the PROSE: 18 string lines rewritten + 6 added; the rest are the per-fix `// VR-122 (F-n)` notes). **"27 tests in 3 suites passed"** (`green1.log`) |
+| 3 | END: the tutorial spine + seeder + books-chapter + ritual suites + the seed pin + the shipped-shape core fold | DONE — **Mac: "Test run with 226 tests in 33 suites passed after 207.483 seconds"**, `** TEST EXECUTE SUCCEEDED **`, ZERO skipped, zero known issues (`end-mac.log`; the list `end-suites.txt`): the spine's 11 `TutorialWalkTests` suites · `TutorialBooksLessonTests` (incl. `noLessonTeachesADoorThisReleaseHides`) · `TutorialBooksRitualTests` · `TutorialBuildFlavorTests` · **`TutorialFurnitureFoldTests` (the REAL-SEED drift guard — two fresh mints still FOLDABLE with EQUAL signatures)** · `TutorialCurrencyTests` · every seed-reading suite (LaunchFurniture, SampleLibraryWelcome, CalmAsks, EncryptionBookDoor, EncryptionExplainedDrill, NewModes, ShellConfirm, the three Snippets-door suites, TakeCardDoor, LaunchSeedTombstone, StarredGatheringSeeder, JekyllTakemaniaSeed) + the three StarDoor suites (F-4's neighbours). **Core: `swift test --filter SeededFurnitureDedupeTests` — "17 tests in 1 suite passed"** (the shipped-shape fold `twoIdenticalGuidesFoldWholeFamilyWithTheF2Cadence` among them; `end-core.log`). Fences: `git diff 3afce924..HEAD -- App/Variorum/Shared Sources Server App/Variorum/VariorumMobile` EMPTY — no phone build owed |
+| 4 | Record close (NOT-DONE first line, counts, diff size) | DONE (this commit) |
+
+**HEADLINE:** 41 lessons — **TRUE 31 · STALE-FIXED 10** (12 fixes, F-1…F-12) — + 5 rituals TRUE (R5
+extended); **JUDGMENT-FOR-HER 15** (J-1…J-14, J-16) + **2 routed to the orchestrator** (J-15 the
+helper's drift, J-17 AppSpec's stale first-open line). No QUESTIONS entry: no genuine product
+ambiguity surfaced (every fix is a fact of the shipped code or a ruling; the judgment items are
+hers by kind, not open questions).
+
+**REVERT STATE: NO REVERT IN FLIGHT** (red-on-old was the committed pre-fix tree, the B2 precedent).
 
 ## HOW EACH CLAIM WAS JUDGED
 
@@ -136,8 +158,9 @@ new.
 
 ## THE RE-SEED CONSEQUENCE (one line, as scheduled)
 
-These are seed-CONTENT edits: a fresh store is born with the new words; her real store's guide
-re-seeds via Help ▸ Restore Tutorial… at the arc's close (already scheduled in
-`notes/plans/librarywalkpolish.md` § THE SHAPE OF THE PASS), and a 0.9.1-minted guide and a
-0.9.2-minted guide differ in content, so the pairwise furniture fold keeps both across that version
-boundary (the fold judges content identity — the standing B-DEDUPE consequence).
+These are seed-CONTENT edits riding the re-seed ALREADY SCHEDULED at the arc's close: a fresh
+store is born with the new words, and her real store's guide re-seeds via Help ▸ Restore Tutorial…
+before the new-Mac sign-in (`notes/plans/new-mac-sync-verification-2026-10-06.md`'s ordering), so
+both sides are the current seeder's and the pairwise fold reads them as the seed's own — no new
+class: 0.9.2's earlier seed edits (B-DEDUPE's MAJOR-2 + F-B3-1, the F-BW-1 reword) already made a
+0.9.1-minted guide differ from a 0.9.2 one, and the drift guard proves two 0.9.2 mints still fold.
