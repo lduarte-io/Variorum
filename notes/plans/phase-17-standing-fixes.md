@@ -1891,7 +1891,10 @@ the content-top line's idiom retires from §12's text); the Library cards view i
 chapterless word is "unfiled" (R-17y-4); the Bookcase strip carries the VIRTUAL starred shelf
 (R-17y-9); the app's one wing FOLLOWS the focused pane's note on open and focus (her (f)
 ruling) — each a contract line + a pointer to the B3 RECORD/rulings file. SyncSpec §7 — the
-seeded-furniture fold's paragraph (B-DEDUPE's, at its close).
+seeded-furniture fold's paragraph (B-DEDUPE's, at its close). PLUS a STALENESS CORRECTION
+(VR-122's routed J-17, 2026-10-06): §12's "Takes … the first-open default" line is stale —
+the shipped first-open mode is WRITE (`PostDetailView`'s `?? .write`, S4-20, the guide's own
+lesson); corrected as doc accuracy with the S4-20 pointer, never a behavior change.
 
 **Standing facts for a successor:** preflight done in full 2026-10-05 (CLAUDE.md canon · master
 plan post-13r pointer · KnownIssues · QUESTIONS #166–#182 · the 17y row a–q end to end · the

@@ -3,8 +3,10 @@
 > **STATUS: THE BATCH-1 LADDER CLOSED CLEAN (round 1: 1 MAJOR · 5 MINOR · 5 NIT → the fresh
 > fix round, all eight landed, END 522/80 → round 2 FABLE: 0 BLOCKER · 0 MAJOR · 0 MINOR ·
 > 1 NIT record-only-speculative, every fix CONFIRMED, no round 3 — `librarywalkpolish-ladder-
-> round1.md` carries the whole arc, f83e7058). NOW RUNNING: VR-122, the guide currency pass
-> (a pre-0.9.2 gate). Then HER re-walk → her word → the release + the arc's close.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> round1.md` carries the whole arc, f83e7058). VR-122 DONE (the guide current; 12 fixes,
+> 15 reword items recorded for her). NOW RUNNING: the FINAL cold round (the VR-122 seed
+> diff + the orchestrator's J-15 helper fix). Then HER re-walk → her word → the release +
+> the arc's close.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
@@ -80,7 +82,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 | VR-117 | Terminal's Cards readability pass (R-LWP-5) | 1 | BUILT — the ladder CLOSED clean 2026-10-06; closes at her re-walk |
 | VR-118 | Book reorder steps back for 0.9.2: "my order" + Send to Top/Bottom + grips hidden whole (R-LWP-4) | 1 | BUILT — the ladder CLOSED clean 2026-10-06; closes at her re-walk |
 | VR-119 | The strip's delineation: Option 2 — restrained light-wash squares, solo'd chip filled, per the committed reference (R-LWP-2) | 1 | BUILT — the ladder CLOSED clean 2026-10-06; closes at her re-walk |
-| VR-122 | THE FIELD GUIDE'S FULL CURRENCY PASS — a PRE-0.9.2 GATE (her instruction verbatim in the issue): every lesson read against the shipped surface (17y + the 13i family + this pass); functional corrections land as seed content riding the standing re-seed; judgment wordings recorded for her 13s re-voicing; run by the orchestrator or a fresh subagent AFTER the ladder closes, right before the release | the close (after the ladder, before the release) | OPEN — gates 0.9.2 |
+| VR-122 | THE FIELD GUIDE'S FULL CURRENCY PASS — a PRE-0.9.2 GATE (her instruction verbatim in the issue): every lesson read against the shipped surface (17y + the 13i family + this pass); functional corrections land as seed content riding the standing re-seed; judgment wordings recorded for her 13s re-voicing; run by the orchestrator or a fresh subagent AFTER the ladder closes, right before the release | the close (after the ladder, before the release) | DONE 2026-10-06 ~00:40 — 41 lessons audited: 31 true · 10 fixed (F-1…F-12, red-on-old 27 issues → green; `librarywalkpolish-vr122-guide-pass.md`) · 15 judgment items recorded FOR HER reword; all 5 rituals true; new `TutorialCurrencyTests` pin the drifted claim-classes; the fold drift guard green on the edited seed. The final cold round covers its diff. |
 | VR-120 | Book reorder RETURNS, done properly — the editor block drag's feel as the bar (R-LWP-4's other half) | — POST-RELEASE, at her word; NOT this pass's build | OPEN (deferred) |
 | VR-121 | The Book Panel's drag feel — works, ships as-is in 0.9.2 (her ruling at the walk: "note it as an issue that has to be fixed until it reaches the blocks drag and drop level of smooth, but we can leave it in for now. it does work, and it's a more hidden surface so I'll let it stay"); the post-release drag-feel family beside VR-120, the editor's block drag the shared bar | — POST-RELEASE, with VR-120 | OPEN (deferred) |
 
