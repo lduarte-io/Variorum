@@ -259,7 +259,12 @@ extension LibraryCatalogModel {
         guard pending.generation == searchGeneration else { return }
         let page = pending.page
         // A note edited between two pages can move across the cursor; it is
-        // listed once (the first place it was read), never twice.
+        // listed once (the first place it was read), never twice. Moved the
+        // OTHER way — above every page read so far — it is ABSENT until the
+        // next question or act (the B1 ladder's NIT-2): the one-shot
+        // listing's own staleness, the shipped 40-row class — the catalog
+        // re-asks on Library appear and after every row act, and an
+        // already-listed note keeps its old position either way.
         let fresh = page.hits.filter { noteIndex[$0.id] == nil }
         let start = noteHits.count
         noteHits += fresh

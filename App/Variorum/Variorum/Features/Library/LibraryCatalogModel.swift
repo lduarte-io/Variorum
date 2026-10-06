@@ -520,6 +520,16 @@ final class LibraryCatalogModel {
             if startingOver {
                 visibleNoteIndices = []
                 lastSeenPosition = 0
+                // The B1 ladder's NIT-4: a NEW question drops the slices of
+                // notes it does not list, so the dictionary — and the
+                // per-write loops over it — stay ∝ the listing, never ∝
+                // every note ever listed this session. A still-listed id
+                // KEEPS its slice OBJECT (the implementer's caveat: a live
+                // row whose body the Equatable host skips holds its slice,
+                // and a replaced one would go stale under it); `filter`
+                // keeps the same instances. `refresh` never prunes — it
+                // re-reads the same listing in place.
+                rowSlices = rowSlices.filter { noteIndex[$0.key] != nil }
             }
             // Whatever page was in hand answered the question before this one.
             pendingLanding = nil
@@ -728,6 +738,15 @@ final class LibraryCatalogModel {
         let plan = LibraryCardRead.plan(
             mode: mode, hits: cardWanted.flatMap { notesOfPage($0) })
         let (cardIDs, books) = (plan.ids, plan.books)
+        // The B1 ladder's MINOR-1 (the implementer's sharper guard — on the
+        // IDS, not the pages): nothing wanted means no read is dispatched.
+        // The window Task runs at row-callback rate while she scrolls, and
+        // an empty read per turn was a reader-pool round-trip serving
+        // nothing; gating on the ids also covers wanted pages that yield no
+        // id (a List page of all-titled notes plans zero card reads). The
+        // REPLACING path stays unguarded: its empty assignment is the mode
+        // switch's clearing (`eachModeReadsWhatItDraws` pins it).
+        if !replacing, chipIDs.isEmpty, cardIDs.isEmpty { return }
         do {
             let (chips, cards) = try await session.database.read { db in
                 (chipIDs.isEmpty ? [:] : try TagChips.load(db, postIDs: chipIDs),

@@ -714,7 +714,7 @@ struct LibraryCatalogView: View {
                         onDoubleClick: { openHit(hit) })
                     .listRowBackground(
                         rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
-                    // 17y B1 item (l): a BOOK row's menu — the Bookcase's
+                    // 17y B3 item (l): a BOOK row's menu — the Bookcase's
                     // trimmed of position (`BookRowMenu`, one table).
                     .contextMenu {
                         BookRowMenu(
