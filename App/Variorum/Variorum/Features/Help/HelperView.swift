@@ -219,9 +219,12 @@ struct HelperView: View {
             ("View ▸ Close Split", "fold the window back to one pane"),
             ("File ▸ New Window", "a second full window; right-click a note row ▸ "
                 + "Open in New Window for a note on its own"),
-            ("right-click ▸ \(StarCopy.verb)", "star a note or book — the Starred "
-                + "section sits at the sidebar's top (up to fifteen); \u{2318}K has the "
-                + "same row"),
+            // The final round's finding 2: the right-click rows wear
+            // StarCopy.starRow ("Star"/"Unstar"); ONLY the ⌘K act wears
+            // StarCopy.verb — the helper must not join the two.
+            ("right-click ▸ \(StarCopy.starRow)", "star a note or book — the Starred "
+                + "section sits at the sidebar's top (up to fifteen); \u{2318}K's "
+                + "\u{201C}\(StarCopy.verb)\u{201D} is the same act"),
         ]),
         // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
         // finding was that a door which moves without a line here is a door
@@ -234,9 +237,9 @@ struct HelperView: View {
             // taught the old home and the fold while the ⌘⇧I row and the
             // "context bar" dictionary entry already said the true thing.
             ("tag cards (masthead)", "a note's tags live in the masthead's right edge "
-                + "as coloured cards: \u{FF0B} adds one (type it — "
-                + "\u{201C}/\u{201D} nests), \u{2715} takes it off, and the \u{FF03} "
-                + "(or \u{2318}\u{21E7}I) opens the add field with the cursor in it"),
+                + "as coloured cards: the \u{FF03} (or \u{2318}\u{21E7}I) opens the tag "
+                + "field with the cursor in it — type a path (\u{201C}/\u{201D} nests), "
+                + "\u{23CE} applies; \u{2715} on a card takes it off"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
             ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
@@ -389,8 +392,8 @@ struct HelperView: View {
         // 13g batch 7 (R6-1): the word for the cards she asked for.
         ("tag",
          "A hierarchical label (life/goals/2024) applied to a note or a block — never a "
-         + "place, so tagging moves nothing. On a note they show as coloured cards on "
-         + "the context bar; \u{FF0B} adds, \u{2715} removes, and a tag keeps its colour "
+         + "place, so tagging moves nothing. On a note they show as coloured cards in "
+         + "the masthead; \u{FF03} adds, \u{2715} removes, and a tag keeps its colour "
          + "everywhere. Settings (\u{2318},) manages the whole taxonomy and can make a "
          + "gathering from tags."),
         // 13g batch 7 (R6-4): quick notes now file themselves.
@@ -433,7 +436,8 @@ struct HelperView: View {
         ("star",
          "A shortcut to a note or a book, pinned at the sidebar's top under "
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
-         + "\(StarCopy.verb), or the same row in ⌘K. Up to fifteen: stars are meant to "
+         + "\(StarCopy.starRow), or \u{2318}K's \u{201C}\(StarCopy.verb)\u{201D} — the "
+         + "same act. Up to fifteen: stars are meant to "
          + "be the things you're in right now, not a filing system."),
         // 13g batch 3 (L8/L9): the formatting vocabulary. Storage is
         // markdown-as-content (F-1), so the words she needs are the ones the
