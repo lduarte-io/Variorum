@@ -68,17 +68,6 @@ struct LibraryListFaceRigTests {
         }
     }
 
-    private static var outDir: URL {
-        let dir = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // VariorumTests
-            .deletingLastPathComponent()  // App/Variorum
-            .deletingLastPathComponent()  // App
-            .deletingLastPathComponent()  // repo
-            .appending(path: "notes/plans/17y-screens/bwalk/face")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir
-    }
-
     private func withLibrary<T>(
         _ body: @MainActor (AppSession) async throws -> T
     ) async throws -> T {
@@ -117,6 +106,15 @@ struct LibraryListFaceRigTests {
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(20))
         }
+    }
+
+    /// Hold a settled state on screen under a name the capture script reads
+    /// (`BWALK|<name>` in the title — the script screen-captures the window
+    /// by its id while the state holds; the sandboxed host writes nothing).
+    private func hold(_ window: NSWindow, _ hosting: NSView, _ name: String) async {
+        window.title = "BWALK|\(name)"
+        await settle(window, hosting, 1.8)
+        window.title = "rig"
     }
 
     /// The face fixture: three books (the one-list shape), forty notes —
@@ -188,13 +186,29 @@ struct LibraryListFaceRigTests {
         return rep
     }
 
+    /// The test host is SANDBOXED (it cannot write into the repo), so every
+    /// artifact leaves through the log: `BWALK|<name>|<i>|<n>|<base64 chunk>`
+    /// lines, reassembled into `notes/plans/17y-screens/bwalk/face/` by
+    /// `Tools`-free one-liner in the record (never a container read).
+    private static func emit(_ data: Data, _ name: String) {
+        let text = data.base64EncodedString()
+        let size = 60_000
+        let count = max(1, (text.count + size - 1) / size)
+        var index = text.startIndex
+        for chunk in 0..<count {
+            let end = text.index(index, offsetBy: size, limitedBy: text.endIndex) ?? text.endIndex
+            print("BWALK|\(name)|\(chunk)|\(count)|\(text[index..<end])")
+            index = end
+        }
+    }
+
     private static func write(_ rep: NSBitmapImageRep, _ name: String) {
         guard let data = rep.representation(using: .png, properties: [:]) else { return }
-        try? data.write(to: outDir.appending(path: name))
+        emit(data, name)
     }
 
     private static func write(text: String, _ name: String) {
-        try? text.write(to: outDir.appending(path: name), atomically: true, encoding: .utf8)
+        emit(Data(text.utf8), name)
     }
 
     // MARK: - The face
@@ -218,6 +232,7 @@ struct LibraryListFaceRigTests {
             let label = LibraryListFaceRig.label
             var report = "# \(label) · \(voice) · 1000×720 · scope All · List\n"
             report += geometry(hosting, model: model, title: "top")
+            await hold(window, hosting, "\(label)-\(voice)-top")
             if let rep = Self.snapshot(hosting) {
                 Self.write(rep, "\(label)-\(voice)-top.png")
                 report += Self.pixelReport(rep, scale: rep.size.width > 0
@@ -231,6 +246,7 @@ struct LibraryListFaceRigTests {
                 clip.scroll(to: NSPoint(x: 0, y: 300))
                 scroll.reflectScrolledClipView(clip)
                 await settle(window, hosting, 1.0)
+                await hold(window, hosting, "\(label)-\(voice)-scrolled300")
                 if let rep = Self.snapshot(hosting) {
                     Self.write(rep, "\(label)-\(voice)-scrolled300.png")
                 }
@@ -246,11 +262,13 @@ struct LibraryListFaceRigTests {
                 model.clickNoteRow(ids[1], modifiers: .init(command: false, shift: false))
                 model.clickNoteRow(ids[3], modifiers: .init(command: true, shift: false))
                 await settle(window, hosting, 1.0)
+                await hold(window, hosting, "\(label)-\(voice)-picked")
                 if let rep = Self.snapshot(hosting) {
                     Self.write(rep, "\(label)-\(voice)-picked.png")
                 }
                 report += geometry(hosting, model: model, title: "picked")
             }
+            report += Self.hierarchy(hosting)
             Self.write(text: report, "\(label)-\(voice)-geometry.txt")
         }
     }
@@ -274,6 +292,7 @@ struct LibraryListFaceRigTests {
             let (window, hosting) = mount(session, model, theme: theme, height: 720)
             defer { window.orderOut(nil); window.close() }
             await settle(window, hosting, 1.5)
+            await hold(window, hosting, "\(LibraryListFaceRig.label)-\(voice)-manybooks")
             if let rep = Self.snapshot(hosting) {
                 Self.write(rep, "\(LibraryListFaceRig.label)-\(voice)-manybooks.png")
             }
@@ -298,6 +317,41 @@ struct LibraryListFaceRigTests {
             out += String(format: "notes region  x %.2f…%.2f  y %.2f…%.2f\n",
                           notes.minX, notes.maxX, notes.minY, notes.maxY)
         }
+        return out
+    }
+
+    /// The AppKit structure under the catalog: every scroll view's document,
+    /// the table facts where a table draws the rows, every effect view's
+    /// material (what the engines draw headers and rows with).
+    private static func hierarchy(_ root: NSView) -> String {
+        var out = "## hierarchy\n"
+        func walk(_ view: NSView, depth: Int) {
+            guard depth < 40 else { return }
+            if let table = view as? NSTableView {
+                out += "NSTableView \(type(of: table)) style \(table.style.rawValue) rows \(table.numberOfRows) "
+                    + "intercell \(table.intercellSpacing) grid \(table.gridStyleMask.rawValue) "
+                    + "autoHeights \(table.usesAutomaticRowHeights) floats \(table.floatsGroupRows) "
+                    + "rowHeight \(table.rowHeight) sizeStyle \(table.effectiveRowSizeStyle.rawValue)\n"
+                for row in 0..<min(table.numberOfRows, 8) {
+                    let rect = table.rect(ofRow: row)
+                    let rowView = table.rowView(atRow: row, makeIfNecessary: false)
+                    out += "  row \(row) \(rect) view \(rowView.map { String(describing: type(of: $0)) } ?? "nil") "
+                        + "group \(rowView?.isGroupRowStyle ?? false)\n"
+                }
+            }
+            if let effect = view as? NSVisualEffectView {
+                let frame = effect.convert(effect.bounds, to: root)
+                out += "NSVisualEffectView material \(effect.material.rawValue) blending \(effect.blendingMode.rawValue) "
+                    + "state \(effect.state.rawValue) frame \(frame)\n"
+            }
+            if let scroll = view as? NSScrollView {
+                let frame = scroll.convert(scroll.bounds, to: root)
+                out += "NSScrollView \(type(of: scroll)) frame \(frame) document \(scroll.documentView?.frame ?? .zero) "
+                    + "insets \(scroll.contentInsets) automaticInsets \(scroll.automaticallyAdjustsContentInsets)\n"
+            }
+            for sub in view.subviews { walk(sub, depth: depth + 1) }
+        }
+        walk(root, depth: 0)
         return out
     }
 
@@ -432,6 +486,7 @@ struct LibraryListFaceRigTests {
         defer { window.orderOut(nil); window.close() }
         await settle(window, hosting, 1.5)
         let scroll = try #require(Self.notesScroll(in: hosting))
+        let visible = window.occlusionState.contains(.visible)
         let before = LibraryPagedNotesProbe.rowBodies
         let flinger = Flinger(scroll: scroll, speed: speed, limit: seconds)
         let link = hosting.displayLink(target: flinger, selector: #selector(Flinger.tick(_:)))
@@ -445,7 +500,7 @@ struct LibraryListFaceRigTests {
         }
         flinger.finish()
         return FeelRun(
-            label: "\(cards ? "Cards" : "List ") \(Int(speed)) pt/s run \(run)",
+            label: "\(cards ? "Cards" : "List ") \(Int(speed)) pt/s run \(run)\(visible ? "" : " (OCCLUDED)")",
             gaps: flinger.gaps, travelled: flinger.travelled,
             listed: model.noteHits.count,
             rowsBuilt: LibraryPagedNotesProbe.rowBodies - before)

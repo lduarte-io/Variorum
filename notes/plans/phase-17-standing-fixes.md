@@ -3449,6 +3449,22 @@ GUI driving, no store staged or restored, no running Variorum instance touched �
 and measurement here is a MOUNTED test-host window (the brief's "mounted suites fine"). Captures:
 `notes/plans/17y-screens/bwalk/` (gitignored).
 
+**SECOND SCOPE UPDATE (the orchestrator's message, 2026-10-05 ~20:50 — binding; the round is now
+BATCH 1 of the "librarywalkpolish" pass, `notes/plans/librarywalkpolish.md`, rulings R-LWP-1…6;
+this brief and this record stay here as spawned):** the item map — **W-1 = VR-113 · W-2 = VR-114 ·
+W-3 = VR-115 · W-4 + W-5 = VR-116 · W-7 = VR-117 · W-6 = VR-118 · VR-119 NEW.** (1) **VR-115 GROWS**
+(R-LWP-1, her pick OPTION A): the census float restyles as the order ▾ menu's LITERAL SIBLING (same
+material, hairline, shadow, width-to-content, seated under №) to the committed reference
+`notes/plans/librarywalkpolish-ui-reference.html` Part 1 Option A; the dismissal rule stands; PLUS
+her rider "you should be able to sort within a shelf for the books versus gatherings" — VERIFY
+whether a census solo composes with a solo'd shelf today or exits to All; if it exits, BUILD the
+compose; record the shipped behavior either way. (2) **VR-119 NEW** (R-LWP-2, her pick OPTION 2): the
+strip's delineation to the same reference's Part 2 OPTION 2, in her words — "very subtle and square
+- not ugly standard web ui pills, some restrained, tasteful, light wash squares... I like the subtle
+tone indicator too": every shelf name on a quiet near-square light-wash chip, the solo'd one filled
+with the subtle accent tone; token-layer only; both voices (Terminal derived from the same tokens);
+captures both voices. Priority order unchanged; the strip rides beside the census work.
+
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
 | # | piece | status |
@@ -3460,6 +3476,8 @@ and measurement here is a MOUNTED test-host window (the brief's "mounted suites 
 | 4 | W-7 Terminal Cards readability (NEW, her live sitting) — before/after mounted captures, a Terminal-only idiom change | NOT-STARTED |
 | 5 | W-4 the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | NOT-STARTED |
 | 6 | W-6 the reorder hiding (UNGATED, her bigger shape) + W-5 the dead insertion line (folds in if the trace says so) | NOT-STARTED |
+| 2b | VR-115's growth: the census float as the order menu's sibling (Option A) + the solos-compose-within-a-shelf rider (verify first) | NOT-STARTED |
+| 2c | VR-119 the strip's light-wash squares, the solo'd one filled (Option 2) | NOT-STARTED |
 | 7 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
