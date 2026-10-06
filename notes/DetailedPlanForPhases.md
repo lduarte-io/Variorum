@@ -1,12 +1,20 @@
 # Variorum — Detailed Plan for Phases (Master Plan)
 
-This is the master build plan. It holds: the phase table, the **current phase pointer**, and the **most recently closed phase's** one-paragraph closeout — all earlier closeouts and every superseded pointer live VERBATIM in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 lean-docs rule, the author's call on the Fragments precedent; AppSpec §14 rolls its dated deltas into `notes/AppSpecDeltaArchive.md` the same way). Per-phase execution plans live in `notes/plans/`, written **just-in-time, one phase ahead** — never plan the whole app up front. The closeout of phase N is the starting context for phase N+1.
+This is the master build plan. It holds: the phase table, the **IN-FLIGHT table** (one row per concurrent effort — the 2026-10-06 workflow transition), and the **most recently closed phase's** one-paragraph closeout — all earlier closeouts and every superseded pointer live VERBATIM in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 lean-docs rule, the author's call on the Fragments precedent; AppSpec §14 rolls its dated deltas into `notes/AppSpecDeltaArchive.md` the same way). Per-phase execution plans live in `notes/plans/`, written **just-in-time, one phase ahead** — never plan the whole app up front. The closeout of phase N is the starting context for phase N+1.
 
 **Workflow rules** (also in `CLAUDE.md`): every step in an execution plan has tests; tests run at the END of a step/phase, never at the start of a session (the previous closeout is the baseline); schema/model changes get their own commit; deferred work goes to `KnownIssuesAndTechDebt.md` only with an owning phase named. **Closeout of phase N includes writing phase N+1's execution plan AND a kickoff message** (at the top of that plan file) that a fresh session can start from — and, since 2026-08-01, **rolling the newly superseded pointer, the previous phase's closeout paragraph, and AppSpec §14's outgoing delta into their archives** in the same commit.
 
 ---
 
-## Current phase
+## In flight
+
+**Since 2026-10-06 this project runs SEVERAL efforts at once** — the workflow-transition record is `notes/plans/workflow-transition-2026-10-06.md`; the live board is Linear (team **VX**), mirrored to `notes/TICKETS.md` at bout starts; CLAUDE.md's "Tracker & parallel work" section carries the binding rules. One row per effort below — Linear carries day-to-day status; this table changes only at kickoffs and merges. The standing rules in one breath: each effort on its own ticket-named branch in its own worktree, merged to `main` by PR (merge commits only); **closeouts SERIALIZE** (two efforts never close at once — first-ready merges first, the next rebases onto it); the shared ledgers (this file, `notes/TICKETS.md`, `notes/QUESTIONS.md`, AppSpec §14's delta line) are touched only at merge moments, on latest main, by the merging session; at most ONE `Sync/`-or-custody-touching effort runs at a time; anything touching the screen or a store holds a `Tools/stage` claim.
+
+| Effort | Ticket · branch | Worktree · machine | State |
+|---|---|---|---|
+| *(none in flight yet — 13o · 13x · 13s kick off under the new workflow)* | | | |
+
+### Latest closeout
 
 *[removed for publication]*
 

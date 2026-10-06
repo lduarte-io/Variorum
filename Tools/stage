@@ -1,0 +1,159 @@
+#!/bin/bash
+# stage — the Pro's exclusive stage lock (ruled 2026-10-06;
+# notes/plans/workflow-transition-2026-10-06.md §5).
+#
+# "The stage" is everything that touches the screen or a store: GUI walks (cliclick),
+# launching the Debug app, UI-driving test runs, dev-store resets/reseeds, and the
+# /Applications Release refresh. Headless `swift build` / `swift test` never needs it.
+# The lock lives OUTSIDE every worktree (~/.variorum/stage.d) so all sessions on this
+# machine share it. The Air has no stage of its own: it ssh'es to the Pro and claims
+# this one. Claims EXPIRE so a dead session can never wedge the machine; releasing or
+# stealing another session's live claim (--force) is the author's word only.
+#
+# Usage:
+#   stage status
+#   stage claim --who <session> --reason <text> [--minutes N]   (default 30, max 240)
+#   stage renew --who <session> [--minutes N]                   (extend your own claim)
+#   stage release --who <session> [--force]
+#   stage log
+#
+# Exit codes: 0 = ok / stage is yours; 1 = refused (held by someone else); 2 = usage.
+
+set -euo pipefail
+
+DIR="$HOME/.variorum"
+LOCK="$DIR/stage.d"      # directory creation is the atomic claim
+META="$LOCK/claim"
+LOG="$DIR/stage.log"
+MAX_MINUTES=240
+DEFAULT_MINUTES=30
+
+mkdir -p "$DIR"
+now() { date +%s; }
+stamp() { date "+%Y-%m-%d %H:%M:%S"; }
+logline() { echo "$(stamp)  $*" >> "$LOG"; }
+usage() { sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+
+read_meta() {
+  WHO=""; REASON=""; CLAIMED=""; EXPIRES_EPOCH=0
+  # shellcheck disable=SC1090
+  [ -f "$META" ] && . "$META"
+}
+
+# Clears an expired or stale (meta-less, >60s old) lock. Returns with the lock gone or live.
+clear_if_dead() {
+  [ -d "$LOCK" ] || return 0
+  if [ ! -f "$META" ]; then
+    local born
+    born=$(stat -f %m "$LOCK" 2>/dev/null || echo 0)
+    if [ $(( $(now) - born )) -gt 60 ]; then
+      rm -rf "$LOCK"; logline "CLEARED   stale meta-less lock"
+    fi
+    return 0
+  fi
+  read_meta
+  if [ "$(now)" -ge "${EXPIRES_EPOCH:-0}" ]; then
+    rm -rf "$LOCK"; logline "EXPIRED   who=$WHO reason=$REASON"
+  fi
+}
+
+mins_left() { read_meta; echo $(( (EXPIRES_EPOCH - $(now) + 59) / 60 )); }
+
+write_meta() { # $1=who $2=reason $3=minutes
+  {
+    printf "WHO=%q\n" "$1"
+    printf "REASON=%q\n" "$2"
+    printf "CLAIMED=%q\n" "$(stamp)"
+    printf "EXPIRES_EPOCH=%q\n" "$(( $(now) + $3 * 60 ))"
+  } > "$META"
+}
+
+cmd="${1:-status}"; shift || true
+WHO_ARG=""; REASON_ARG=""; MINUTES=$DEFAULT_MINUTES; FORCE=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --who)     WHO_ARG="${2:?--who needs a value}"; shift 2 ;;
+    --reason)  REASON_ARG="${2:?--reason needs a value}"; shift 2 ;;
+    --minutes) MINUTES="${2:?--minutes needs a value}"; shift 2 ;;
+    --force)   FORCE=1; shift ;;
+    *) echo "stage: unknown argument '$1'"; usage ;;
+  esac
+done
+case "$MINUTES" in (*[!0-9]*|'') echo "stage: --minutes must be a number"; exit 2 ;; esac
+[ "$MINUTES" -gt $MAX_MINUTES ] && MINUTES=$MAX_MINUTES
+[ "$MINUTES" -lt 1 ] && MINUTES=1
+
+case "$cmd" in
+  status)
+    clear_if_dead
+    if [ -d "$LOCK" ]; then
+      read_meta
+      echo "STAGE HELD by '$WHO' — $REASON (claimed $CLAIMED, ~$(mins_left) min left)"
+      exit 1
+    fi
+    echo "STAGE FREE"
+    ;;
+
+  claim)
+    [ -n "$WHO_ARG" ] && [ -n "$REASON_ARG" ] || { echo "stage claim: --who and --reason are required"; exit 2; }
+    clear_if_dead
+    if [ -d "$LOCK" ]; then
+      read_meta
+      if [ "$WHO" = "$WHO_ARG" ]; then  # re-claim by the holder = renew
+        write_meta "$WHO_ARG" "$REASON_ARG" "$MINUTES"
+        logline "RENEWED   who=$WHO_ARG reason=$REASON_ARG minutes=$MINUTES"
+        echo "STAGE RENEWED for '$WHO_ARG' — $MINUTES min"
+        exit 0
+      fi
+      if [ "$FORCE" = 1 ]; then
+        logline "STOLEN    from=$WHO by=$WHO_ARG reason=$REASON_ARG (author's word required)"
+        rm -rf "$LOCK"
+      else
+        echo "STAGE REFUSED — held by '$WHO': $REASON (~$(mins_left) min left)."
+        echo "Wait, message that session, or re-run with --force AT THE AUTHOR'S WORD ONLY."
+        exit 1
+      fi
+    fi
+    if mkdir "$LOCK" 2>/dev/null; then
+      write_meta "$WHO_ARG" "$REASON_ARG" "$MINUTES"
+      logline "CLAIMED   who=$WHO_ARG reason=$REASON_ARG minutes=$MINUTES"
+      echo "STAGE CLAIMED by '$WHO_ARG' for $MINUTES min — release when done: Tools/stage release --who $WHO_ARG"
+    else
+      echo "STAGE REFUSED — lost the claim race; re-run 'stage status'."
+      exit 1
+    fi
+    ;;
+
+  renew)
+    [ -n "$WHO_ARG" ] || { echo "stage renew: --who is required"; exit 2; }
+    clear_if_dead
+    [ -d "$LOCK" ] || { echo "STAGE FREE — nothing to renew (claim instead)."; exit 1; }
+    read_meta
+    [ "$WHO" = "$WHO_ARG" ] || { echo "STAGE HELD by '$WHO', not '$WHO_ARG' — renew refused."; exit 1; }
+    write_meta "$WHO" "$REASON" "$MINUTES"
+    logline "RENEWED   who=$WHO minutes=$MINUTES"
+    echo "STAGE RENEWED for '$WHO' — $MINUTES min"
+    ;;
+
+  release)
+    [ -n "$WHO_ARG" ] || [ "$FORCE" = 1 ] || { echo "stage release: --who is required (--force at the author's word)"; exit 2; }
+    clear_if_dead
+    [ -d "$LOCK" ] || { echo "STAGE already FREE"; exit 0; }
+    read_meta
+    if [ "$WHO" = "$WHO_ARG" ] || [ "$FORCE" = 1 ]; then
+      [ "$WHO" != "$WHO_ARG" ] && logline "FORCED-RELEASE of=$WHO by=${WHO_ARG:-unnamed} (author's word required)"
+      rm -rf "$LOCK"
+      logline "RELEASED  who=$WHO"
+      echo "STAGE RELEASED (was '$WHO')"
+    else
+      echo "STAGE HELD by '$WHO', not '$WHO_ARG' — release refused (--force at the author's word only)."
+      exit 1
+    fi
+    ;;
+
+  log)
+    [ -f "$LOG" ] && tail -25 "$LOG" || echo "(no stage history yet)"
+    ;;
+
+  *) usage ;;
+esac
