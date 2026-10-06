@@ -1789,13 +1789,14 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   views whole-corpus, the books region), the walk, findings F-B1-1…10, and the staging recipe
   for HER walk; QUESTIONS #187 (a)–(h) PROVISIONAL + her real question (i) (the List's
   per-new-row cost); KnownIssues row 22's Library leg BUILT (closes at her walk) + four rows
-  owned by 12. END: core 2204/247 · Mac 388/64 · phone build green. **THE LADDER: FABLE round 1
-  BACK — 0 BLOCKER · 1 MAJOR · 1 MINOR · 5 NIT (`17y-b1-ladder-round1.md`): MAJOR-1 an
-  appearance (light↔dark) flip leaves standing Library rows in the OLD scheme's token colors
-  (the batch's own Equatable row-gating compares on `hit` alone; mechanism empirically
-  verified, pin named); MINOR-1 a no-op reader-pool read at scroll rate; NITs record/comment
-  class. The CROSS-MODEL EXCHANGE running (findings to the implementer verbatim → reviewer
-  final call + implements its confirmed fixes → suites green → sanity pass).** HER GATES remain:
+  owned by 12. END: core 2204/247 · Mac 388/64 · phone build green. **THE LADDER CLOSED CLEAN
+  2026-10-05 ~19:10 (`17y-b1-ladder-round1.md`): round 1 FABLE 0 BLOCKER · 1 MAJOR · 1 MINOR ·
+  5 NIT (MAJOR-1 the appearance-flip stale-row class from the batch's own Equatable gating —
+  empirically verified) → the exchange (all seven agreed, none disputed; "this regression is
+  mine") → the reviewer's final calls + fixes at 671f2e5e·5d26208d·a6bf9b68·d7951743 (pin
+  red-on-old, synthetic revert verified, 46/6 + 8/8 green) → the sanity pass ALL SOUND
+  (58/8 re-run green; no round 2 owed under the cross-model flow — the B3 precedent).** The
+  orchestrator's spot-walk next; then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset

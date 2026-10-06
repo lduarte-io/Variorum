@@ -222,3 +222,26 @@ standing ladder rules).
   `LibraryPagingTests` 8/8. Commits: 671f2e5e (the red pin) · 5d26208d (MAJOR-1's fix + revert
   round) · a6bf9b68 (MINOR-1 + NIT-1/2/4) · this one (the records). The implementer's sanity pass
   over this diff closes the ladder per the standing flow.
+
+### THE SANITY PASS (the implementer, 2026-10-05 ~19:10): ALL SOUND — THE LADDER CLOSES
+
+Verdicts on the reviewer's diff 7f75ac8c..d7951743 (the orchestrator's two notes-only commits
+excluded; no edits made; tree clean at d7951743): **all four fixes SOUND, nothing returns to
+the reviewer.** The implementer re-ran 58 tests / 8 suites green in its own DerivedData on the
+quiet machine (the appearance pin, both landing legs and `eachModeReadsWhatItDraws` included).
+Notable verifications beyond the pins: the re-run rows get the NEW ink (LibraryCatalogView
+reads the scheme for its `tokens`, so it re-runs in the same top-down pass and the row closure
+the hosts call is the new one — checked deliberately, because the pin counts row bodies and
+would also pass on a stale-tokens re-run); MINOR-1's guard is behaviour-identical by
+construction (the old empty read merged nothing) with page marking unchanged; NIT-4's caveat
+holds by construction (`Dictionary.filter` keeps slice OBJECTS for still-listed rows; a
+returning id gets a fresh row identity and slice; refresh never prunes). The VoiceTokens
+refusal accepted (MainActor-isolated `Equatable` vs the nonisolated `==` that `.equatable()`
+needs). ONE OPTIONAL non-blocking note, recorded for next touch: the appearance pin mounts the
+List only — Cards shares `LibraryPagedNotes`, so a cards arm would be belt-and-braces.
+
+**THE B1 LADDER CLOSES: round 1 (0 BLOCKER · 1 MAJOR · 1 MINOR · 5 NIT) → the exchange (all
+seven agreed, none disputed) → the reviewer's final calls + fixes (pin red-on-old, synthetic
+revert verified, suites green) → the sanity pass ALL SOUND (the B3-precedent close; no round 2
+owed under the cross-model flow). What remains is HERS: the live scroll walk, the drag
+spot-check, and her word.**

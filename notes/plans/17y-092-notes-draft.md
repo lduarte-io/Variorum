@@ -32,10 +32,13 @@ you type — and can create the tag or book right there.
 **The app follows you across wings.** Opening a note from another wing switches the app to
 that wing, with a quiet "Now in …" note.
 
-**[B1 — PLACEHOLDER] The Library scrolls everything.** No more 40-note window — both views
-(List and Cards) scroll your whole collection smoothly.
+**The Library scrolls everything.** The 40-note window is gone — List and Cards now scroll
+your whole collection, in every sort, reading a little at a time as you go. And under All,
+a big bookcase keeps to its own half so your notes always show.
 
-**[B1 — PLACEHOLDER] Smoother index scrolling** in long notes.
+**The note's index keeps up.** Scrolling the index beside a long note used to stutter and
+leap — a quick flick could throw you to the top. It now moves at the display's own pace,
+the whole way down.
 
 **Smaller things.** The № census floats over the Bookcase instead of pushing it down · the
 Library's card view is named "Cards" · the chapterless group reads "unfiled" everywhere ·
