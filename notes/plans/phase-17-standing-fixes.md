@@ -2723,6 +2723,54 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
+### THE W-1 FACE — measured off the shipped table, rebuilt to it (VR-113)
+
+**The rig** (`LibraryListFaceRigTests`, opt-in `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1`, committed
+AHEAD of the engine change so one rig measured both): the same fixture (3 books, 40 notes — tags
+none/one/two, stated days, an untitled note) mounted in a 1000×720 test-host window, both voices,
+light; artifacts leave through the log (the test host is sandboxed) and the window is captured ON
+SCREEN by its id (`screencapture -l`, this shell's own Screen Recording grant — her pointer and
+apps untouched). **The shipped List, read through its `NSTableView`:** style `.inset`, floating
+group rows, automatic row heights; a 10-pt top inset; headers 28 pt; book rows 25 pt (Terminal) /
+30 (Study), note rows 26 / 30 — each its content + 8; 20 pt between a section's last row and the
+next header; content 16 pt in on both sides; a 1-pt separator at every row's foot from 16 to 16 pt
+short of the edge (230 on Study's white — the system separator ink); and the FIRST header FLOATS
+at the very top (its hairline at the list's 27 pt, its rows from 38), darker hairline + a soft
+shade + a full-width shadow line under it. **Rebuilt** as `LibraryListFace` (rows, headers on
+`LazyVStack(pinnedViews: .sectionHeaders)`, the header material `.headerView`), then verified by
+the SAME rig: every separator below the first header at the same y and ink as before, both
+voices. **Deviations, said:** (1) a pinned header's material blurs the row beneath less visibly
+than the table's (the on-screen scrolled pair) — her eye's; (2) **F-BW-3 — the OLD List drew NO
+pick** in the mounted captures (`before-<voice>-picked-screen.png`: two rows picked, the panel's
+subject set, no wash or border on any row — `.listRowBackground` set inside B1's `Equatable` row
+host never reached the table); the new engine draws row 56's wash + tinted border as designed
+(`after-<voice>-picked-screen.png`) — a restored face, not a parity break.
+
+### THE W-1 FEEL — the same fling, before and after (822 notes, scope Notes, 1000×800, the Debug test host; `bwalk/face/{before,after}-feel.txt` + per-frame gaps)
+
+A display link drives the scroll: CLIP = the clip view moved by elapsed × speed each tick (either
+engine); WHEEL = a phased trackpad-shaped scroll event built from a NEVER-POSTED `CGEvent`, handed
+straight to the scroll view (nothing reaches the system's event stream). 3,750 pt/s is B1's
+"brisk flick" (a hand's speed); 7,500 pt/s twice it. Two runs each; mean / max frame gap; frames
+> 25 ms; none > 50 ms ANYWHERE, before or after.
+
+| road · view · speed | BEFORE (the table) | AFTER (the lazy face) | Cards (the bar) |
+|---|---|---|---|
+| clip · List · 3,750 | 9.3 / 32.1 · 2 — 9.1 / 27.2 · 1 | **8.9 / 29.3 · 1 — 8.9 / 26.7 · 2** | 8.5–9.2 / 17–33 · 0–2 |
+| clip · List · 7,500 | 18.9 / 31.7 · 13 — 19.0 / 36.6 · 17 | **13.0 / 33.3 · 4 — 13.8 / 28.2 · 4** | 8.8–9.2 / 21–33 · 0–1 |
+| wheel · List · 3,750 | the table never moved (0 rows built — direct wheel delivery does not drive it) | **8.4 / 16.7 · 0 — 8.5 / 16.7 · 0** | 8.4–8.6 / 16.7–31.7 · 0–1 |
+| wheel · List · 7,500 | (as above) | **13.8 / 29.6 · 5 — 11.2 / 25.0 · 1** | 8.6 / 16.7–18.7 · 0 |
+
+**Read honestly:** at a hand's speed the List now runs at Cards' cadence (8.4–8.9 ms mean, no frame
+over 30 ms on the wheel road); at twice a hand's speed it improved from ~19 ms to ~11–14 ms mean
+(>25 ms frames 13–17 → 1–5) and still trails Cards (its rows are a third the height, so ~2.5× the
+NEW rows per frame at the same speed — the per-row cost is the row's own content: chips with ✕/＋
+buttons, tooltips, two stamps). This harness UNDER-reports the old table (its programmatic and
+wheel roads skip the table's prepared-region overdraw that B1's real trackpad sample caught — the
+real app read ~48 fps there); the after engine responds to the wheel road the way it does to a
+hand. Release unmeasured (no Release launch). Her re-walk is the feel's judge (the governing
+frame).
+
 ### THE TRACE — W-3, before the fix
 
 `BookcaseStrip.utilityRun` draws № (a Button toggling `model.censusOpen`), order ▾ (`VoicedMenu` →
@@ -3484,7 +3532,7 @@ voices; captures of both popovers.
 | 0 | This record + the bwalk captures dir gitignored | DONE (this commit) |
 | 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | DONE (871ca738 red · this commit fix) — the rule is pure and in ONE home, `LibraryCatalogModel.scope(afterPicking:from:)` / `mode(afterPicking:from:)`, behind two doors the pickers now call (`pickMode` answers whether the moved scope owes a re-read; `pickScope` moves the view; the caller spawns `search()`, the file's convention; `modeChanged()` keeps the mode's own consequences). Red-on-old: the pickers' source pin committed ahead of the fix — RED on 871ca738's tree, "1 test … with 4 issues" (`bwalk/w2-red.log`: both pickers wrote `model.mode = $0` / `model.scope = $0`) → GREEN with the rule's pins (both switches + every untouched combination) and the doors over a real listing (Cards under All lists no book; All in Cards → List, the books back), beside `LibraryDayFilterTests`, `LibraryCardsWordTests`, `LibraryCardNameTests`: **"33 tests in 4 suites passed"** (`bwalk/w2-green.log`). PROVISIONAL edges → #188 (a). Face: no new chrome (the two existing segmented pickers move together) |
 | 2 | W-3 the census float dismissed by any masthead menu/popover — pin + fix (her priority 1) | DONE (4fa07bdf red · this commit fix) — § THE TRACE — W-3 below. ONE state door, `ShelfViewModel.mastheadDoorOpened()` (an open float closes, the remembered close; № stays its own toggle), reached by every masthead menu/popover: order ▾ and the wing switcher ▾ (SwiftUI `Menu`s — no open callback, so the PRESS that opens them reports, through the new shared `Core/Views/PressReporter`: an inert AppKit view behind the control, a local mouse-down monitor, the event passed on untouched, one pure rule `PressReporterView.reports`), the ⋯ shelf panel (its button's own action), and a shelf name's RIGHT-click menu (`secondaryOnly` — a name's plain click solos and leaves the float). Red-on-old: the source pin committed ahead — RED on 4fa07bdf's tree, "1 test … with 4 issues" (`bwalk/w3-red.log`) → GREEN with the model rule, the press rule and the MOUNTED board (each reporter handed a synthetic press straight to its monitor body — never through the window, where a real `Menu` would start modal tracking: order ▾ + wing ▾ close the float, a press beside a door closes nothing, a name's plain click leaves it, its right-click closes it), beside the Bookcase family: **"44 tests in 12 suites passed"** (`bwalk/w3-green.log`). No capture of a LIVE menu (a native menu window, the author at the machine — no GUI drive); her re-walk is the face |
-| 3 | W-1 the List's notes on the lazy column, the List's exact face — the opt-in measurement rig (committed ahead), before-measure/captures, build, after-measure/captures, pins | IN-PROGRESS — the rig `LibraryListFaceRigTests` written (opt-in `VARIORUM_LIBRARY_LIST_FACE=1`), compiling next |
+| 3 | W-1 (VR-113) the List's notes on the lazy column, the List's exact face — the opt-in measurement rig (committed ahead), before-measure/captures, build, after-measure/captures, pins | DONE (rig 4d89078e…cc59e029 · engine 377a2b11 · pins + header tune 73a10161) — § THE W-1 FACE + § THE W-1 FEEL below. The List mode's rows (and, in the one-list shape, its books and blocks and the three section headers — THE SEAM, recorded: a `List` and a `LazyVStack` cannot share one scroll) ride `LibraryPagedNotes`' lazy engine in `LibraryListFace` (new); the CAPPED books region keeps its native List. Acceptance: (a) LOOK PARITY — before/after on-screen captures at the same positions both voices (`bwalk/face/{before,after}-<voice>-{top,scrolled300,picked,manybooks}-screen.png`) + the pixel geometry identical row for row (every separator at the same y and ink — the diff of the two geometry dumps differs ONLY in the floating header's shading, tuned) + the parity pins `LibraryListFaceTests` (pitch 26/30, the foot separator 16→16, every stamp on one trailing edge, the floating first header + its 10-pt lead) GREEN both voices, with a BITE check (row inset 4→5: 31 issues, restored, `git diff --quiet`); (b) FEEL — no frame > 50 ms anywhere, the hand-speed fling at Cards' cadence (numbers below); (c) every Library-touching Mac suite green on the new engine, ZERO edits needed: **"244 tests in 34 suites passed"** (`bwalk/w1-suites.log`); (d) the appearance-flip, landing-skip and infinite-scroll pins among them, green unedited |
 | 4 | W-7 Terminal Cards readability (NEW, her live sitting) — before/after mounted captures, a Terminal-only idiom change | NOT-STARTED |
 | 5 | W-4 the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | NOT-STARTED |
 | 6 | W-6 the reorder hiding (UNGATED, her bigger shape) + W-5 the dead insertion line (folds in if the trace says so) | PARTLY DONE with row 2b (the hiding is built and pinned there — my order out of the order rows, every hand-placing door off by one value); W-5's trace + the drag image remain (row 5) |
