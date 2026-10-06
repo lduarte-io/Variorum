@@ -99,3 +99,32 @@ the claim corrections) · MINOR-5 (the generalized switches, PROVISIONAL) · NIT
 (`visibleRect` + pin) · NIT-3 (the starred-word false offer, the class sweep) · NIT-4's fix
 half (the `.lineLimit` one-liner, `ChromeLineLimitTests` green) · NIT-5 (the `.darkAqua`
 pass). Round 2 (fresh reviewer) re-reviews the fix diff.
+
+### THE FIX ROUND (fresh session) — `opus-implementer`, 2026-10-05 ~22:20; LIVE STATUS from the first commit
+
+**NOT DONE (first line, per the contract): PENDING — the round is running; this line is rewritten at the close.**
+
+Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
+this file whole; `notes/plans/librarywalkpolish.md` (the governing frame, R-LWP-1…6); the 17 file's
+"17y B-WALK BRIEF" + "17y B-WALK RECORD" whole; QUESTIONS #188; KnownIssues' F-BW-1/F-BW-2 rows;
+`notes/SessionResiliencyProtocol.md`; `notes/TEXTKIT2_NOTES.md` (NIT-4 touches a read-tier file —
+one `.lineLimit`, nothing else). Worktree `~/dev/variorum-17y` ONLY; DerivedData
+`App/Variorum/DerivedData/17y-wfix2`; no subagents; the author may be at the machine — headless
+builds/tests only, no GUI driving, no store staged or restored, the running Debug instance (pid
+from the 17y DerivedData) untouched. Captures: `notes/plans/17y-screens/bwalk/` (gitignored).
+SEED CONTENT AUTHORIZED for this session for lesson 7 ONLY (the B-SEED/B-DEDUPE precedent).
+
+| # | item | status |
+|---|---|---|
+| 0 | This LIVE STATUS | DONE (this commit) |
+| 1 | MAJOR-1 — the drag canvas grows by a chip-sized margin per axis, chip at grab + margin (the reviewer's red pin first) | NOT-STARTED |
+| 2 | MINOR-1 — the order popover closes on the board's disappearance, window resign-key, app deactivation (the reviewer's pin first) | NOT-STARTED |
+| 3 | MINOR-3 + F-BW-1 — lesson 7 reworded to what 0.9.2 ships; the seed-text pin replaces the hollow half; the wait short-circuits; the three claim sentences corrected — A PRE-0.9.2 GATE | NOT-STARTED |
+| 4 | MINOR-5 — the generalized scope-honesty rule (PROVISIONAL): Cards ⇒ Notes from any scope; a non-Notes scope inside Cards ⇒ List | NOT-STARTED |
+| 5 | NIT-1 — `PressReporter` tests `visibleRect` (the reviewer's pin first) | NOT-STARTED |
+| 6 | NIT-3 — the strip's "starred" word outlines only when the drop acts; the class sweep table | NOT-STARTED |
+| 7 | NIT-4's fix half — `.lineLimit(1)` beside `.fixedSize()` at `NoteIndexColumn.swift:393`; `ChromeLineLimitTests` red → green | NOT-STARTED |
+| 8 | NIT-5 — ONE `.darkAqua` pass of the List-face rig + Bookcase mounts; captures + report | NOT-STARTED |
+| 9 | END suites (the batch's + Bookcase/Library families + tutorial books + ChromeLineLimitTests) + record close | NOT-STARTED |
+
+**REVERT STATE: NO REVERT IN FLIGHT.**
