@@ -390,6 +390,7 @@ struct NoteIndexColumn: View {
             liveRowControls(for: row, ordinal: ordinal)
                 // At its OWN size inside the hint's footprint — the pin
                 // measures this, and the two are one size by construction.
+                .lineLimit(1)  // P-8 (19g class): a fixedSize chrome site states its line policy
                 .fixedSize()
                 #if DEBUG
                 .onGeometryChange(for: CGSize.self) { $0.size } action: {

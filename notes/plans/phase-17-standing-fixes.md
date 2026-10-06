@@ -3564,7 +3564,8 @@ float's LOOK (propose-only with her, out of scope).
 - **F-BW-2 — `ChromeLineLimitTests` red on `NoteIndexColumn.swift:393`** (a `.fixedSize()` on the
   index column's live row controls without a stated line policy — 17y B1 (j), 15b081d2 (f8977039 moved it to :393 — round-1 correction)). Pre-existing
   on this pass's tree; read-tier code, untouched here. **DEFERRED — KnownIssues, owner
-  librarywalkpolish** (one `.lineLimit` beside it, read-tier review).
+  librarywalkpolish** (one `.lineLimit` beside it, read-tier review). **FIXED at the round-1 fix
+  round** (`notes/plans/librarywalkpolish-ladder-round1.md` § THE FIX ROUND, row 7).
 - **F-BW-3 — the OLD List drew no pick** in the mounted captures (`.listRowBackground` set inside
   B1's `Equatable` row host never reached the table): ⌘/⇧-picked rows and the panel's subject
   showed nothing. **FIXED by construction** in VR-113 (the lazy face draws row 56's wash + border —
