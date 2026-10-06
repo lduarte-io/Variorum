@@ -127,7 +127,7 @@ SEED CONTENT AUTHORIZED for this session for lesson 7 ONLY (the B-SEED/B-DEDUPE 
 | 8 | NIT-5 — ONE `.darkAqua` pass of the List-face rig + Bookcase mounts; captures + report | IN-PROGRESS — the pass RAN (this commit: the rig's opt-in `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_APPEARANCE=dark`, `.aqua` stays the default): 4 face tests × 2 voices green, 18 on-screen captures by window id into `bwalk/fix/dark/` (a title-watching capture helper, scratchpad-only). Reading them: one parity finding under probe (the List's pinned header in dark vs the native table's — numbers in § THE DARK PASS, PENDING) |
 | 9 | END suites (the batch's + Bookcase/Library families + tutorial books + ChromeLineLimitTests) + record close | NOT-STARTED |
 
-**REVERT STATE: NO REVERT IN FLIGHT** (MAJOR-1's behavioural revert ran and was restored: `git checkout --` + `git diff --quiet` clean).
+**REVERT STATE: A PROBE EDIT IN FLIGHT** — `LibraryListFace.swift`'s header material set to `.state = .active` to test the dark-pass hypothesis (never to be committed); the file is committed as shipped (02e171e2), so the restore is `git checkout -- App/Variorum/Variorum/Features/Library/LibraryListFace.swift` + `git diff --quiet`. (MAJOR-1's earlier behavioural revert ran and was restored clean.)
 
 #### THE CLASS SWEEP — every Bookcase drop target's outline/hairline vs. whether its drop acts (W-5's false-offer class, completed at NIT-3)
 
