@@ -8,8 +8,14 @@ Linear holds status; the repo holds truth. This tool keeps the repo's read-cheap
              the existing snapshot untouched (it carries its own generation stamp).
   vx key     How to store the API key.
 
-The key is a Linear PERSONAL API KEY in the login Keychain:
-  security add-generic-password -s variorum-linear -a "$USER" -w     (prompts; paste the key)
+The key is a Linear PERSONAL API KEY, read from (first match wins):
+  1. the login Keychain item 'variorum-linear'
+       security add-generic-password -s variorum-linear -a "$USER" -w
+     (needs a real GUI session — over ssh the Keychain refuses with
+      "User interaction is not allowed")
+  2. ~/.variorum/linear.key  (chmod 600; the ssh-friendly road:
+       mkdir -p ~/.variorum && cat > ~/.variorum/linear.key   # paste, Enter, Ctrl-D
+       chmod 600 ~/.variorum/linear.key)
 """
 
 import json
@@ -50,8 +56,16 @@ def keychain_key():
             ["security", "find-generic-password", "-s", "variorum-linear", "-w"],
             capture_output=True, text=True, check=True,
         )
-        return out.stdout.strip()
+        key = out.stdout.strip()
+        if key:
+            return key
     except subprocess.CalledProcessError:
+        pass
+    key_file = Path.home() / ".variorum" / "linear.key"
+    try:
+        key = key_file.read_text().strip()
+        return key or None
+    except OSError:
         return None
 
 
