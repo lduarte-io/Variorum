@@ -52,8 +52,13 @@ struct BookcaseCensusMenuTests {
     @Test func everyMastheadMenuDoorReachesTheDismissal() throws {
         let strip = try Self.source("Variorum/Features/Shelf/BookcaseStrip.swift")
         let shelf = try Self.source("Variorum/Features/Shelf/ShelfView.swift")
-        #expect(strip.contains(".reportsPress { model.mastheadDoorOpened() }"),
-                "the order ▾ menu reports its press")
+        // JUSTIFIED EDIT (librarywalkpolish VR-115, R-LWP-1 amended): order ▾
+        // is no longer a native `Menu` — it is the app's own popover door,
+        // whose toggle closes the census itself (`toggleOrder`, pinned in
+        // `BookcaseMastheadPopoverTests`). The subject is unchanged: opening
+        // order ▾ dismisses the float.
+        #expect(strip.contains("Button { model.toggleOrder() }"),
+                "the order ▾ door opens through the dropper toggle that closes the float")
         #expect(strip.contains("panelShown.toggle()\n                    model.mastheadDoorOpened()")
                     || strip.contains("model.mastheadDoorOpened()\n                    panelShown"),
                 "the ⋯ shelf panel's door dismisses the float")
@@ -181,7 +186,14 @@ struct BookcaseCensusMenuTests {
             let all = Self.reporters(in: hosting)
             let primary = all.filter { !$0.secondaryOnly }
             let names = all.filter(\.secondaryOnly)
-            #expect(primary.count == 2, "order ▾ and the wing switcher ▾ report (found \(primary.count))")
+            // JUSTIFIED EDIT (VR-115): order ▾ is the app's own door now (its
+            // toggle closes the float — `openingEitherDropperClosesTheOther`);
+            // the wing switcher ▾ is the masthead's one native menu left.
+            #expect(primary.count == 1, "the wing switcher ▾ reports (found \(primary.count))")
+            model.censusOpen = true
+            model.toggleOrder()
+            #expect(!model.censusOpen, "opening order ▾ dismissed the float")
+            model.orderOpen = false
             #expect(!names.isEmpty, "the shelf names report their right-click")
 
             for reporter in primary {

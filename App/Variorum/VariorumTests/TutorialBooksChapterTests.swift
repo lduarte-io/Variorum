@@ -776,7 +776,16 @@ struct TutorialBooksRitualTests {
             for _ in 0..<300 where model.sections.first(where: { $0.id == shelf.id })?.books.first?.reading.id != beta.id {
                 try? await Task.sleep(for: .milliseconds(10))
             }
-            #expect(model.sections.first { $0.id == shelf.id }?.books.map(\.reading.id) == [beta.id, alpha.id])
+            // JUSTIFIED EDIT (librarywalkpolish VR-118, R-LWP-4): "my order"
+            // steps back WHOLE for 0.9.2, so lesson 7's "switch the order ▾ to
+            // my order and place a book by hand" is a claim this release does
+            // not offer — the guide's prose is SEED CONTENT (fenced from the
+            // batch; F-BW-1 routes it). Carried as a KNOWN issue that turns RED
+            // the moment hand placing returns (VR-120) or the lesson is
+            // re-worded — either way this wrapper must then go.
+            withKnownIssue("lesson 7 teaches my order, hidden for 0.9.2 (VR-118; seed content — F-BW-1)") {
+                #expect(model.sections.first { $0.id == shelf.id }?.books.map(\.reading.id) == [beta.id, alpha.id])
+            }
 
             // Star one: it floats first, under any order.
             try ops.setStarred(.reading(alpha.id), starred: true)

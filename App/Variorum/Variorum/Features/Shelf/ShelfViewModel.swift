@@ -79,6 +79,63 @@ final class ShelfViewModel {
     /// again — PROVISIONAL, #188). A closed float stays closed (no write).
     func mastheadDoorOpened() {
         if censusOpen { censusOpen = false }
+        orderOpen = false
+    }
+
+    // MARK: The two droppers (librarywalkpolish VR-115 — one popover idiom)
+
+    /// The order popover is open (a menu's life: never remembered).
+    var orderOpen = false
+
+    /// **№** — the census popover; opening it closes the order popover
+    /// (opening either dismisses the other — R-LWP-1 amended).
+    func toggleCensus() {
+        censusOpen.toggle()
+        if censusOpen { orderOpen = false }
+    }
+
+    /// **order ▾** — the order popover; opening it closes the census.
+    func toggleOrder() {
+        orderOpen.toggle()
+        if orderOpen, censusOpen { censusOpen = false }
+    }
+
+    /// An order row picked: the order is hers, the popover closes.
+    func pickOrder(_ mode: BookcaseOrderMode) {
+        orderMode = mode
+        orderOpen = false
+    }
+
+    // MARK: "My order" steps back for 0.9.2 (librarywalkpolish VR-118)
+
+    /// **Her ruling R-LWP-4:** "let's just hide 'my order' from the user,
+    /// hide the send to top and bottom options, and add it next week or
+    /// something as a post release update". OFF for this release: the order
+    /// popover offers a–z · last edited, and every hand-placing door (the
+    /// grips, the row drops, Send to Top/Bottom — all `placesByHand`'s) is
+    /// gone. The MACHINERY stays (`shelf_position`, `placeReading`, the
+    /// placement arithmetic) for its return (VR-120) — which is this one
+    /// value, and which the machinery's own pins turn on per model.
+    nonisolated static let handPlacingOfferedThisRelease = false
+    var handPlacingOffered = ShelfViewModel.handPlacingOfferedThisRelease
+
+    /// **The order the board DRAWS.** A stored "my order" (a preference she
+    /// set before this release) reads as A–Z while hand placing is not
+    /// offered — and is NEVER rewritten, so the return finds it where she
+    /// left it (PROVISIONAL, QUESTIONS #188).
+    nonisolated static func effectiveOrder(
+        _ stored: BookcaseOrderMode, handPlacingOffered: Bool
+    ) -> BookcaseOrderMode {
+        stored == .mine && !handPlacingOffered ? .alphabetical : stored
+    }
+
+    var effectiveOrderMode: BookcaseOrderMode {
+        Self.effectiveOrder(orderMode, handPlacingOffered: handPlacingOffered)
+    }
+
+    /// The order popover's rows.
+    var offeredOrderModes: [BookcaseOrderMode] {
+        BookcaseOrderMode.allCases.filter { $0 != .mine || handPlacingOffered }
     }
     private(set) var collapsed: Set<String>
     private(set) var defaultShelfID: String?
@@ -160,7 +217,7 @@ final class ShelfViewModel {
     var sections: [BookcaseBoard.Section] {
         BookcaseBoard.sections(
             books: books, shelves: shelves, scope: scope, solo: solo,
-            mode: orderMode, lastEdited: lastEdited)
+            mode: effectiveOrderMode, lastEdited: lastEdited)
     }
 
     /// The № census over what is in scope (a count never promises books a
@@ -177,7 +234,7 @@ final class ShelfViewModel {
 
     /// Whether the rows are placed by hand HERE (17y (s): never on the
     /// starred shelf — a filter, whose rows live on other shelves).
-    var placesByHand: Bool { BookcaseBoard.placesByHand(orderMode, in: effectiveScope) }
+    var placesByHand: Bool { BookcaseBoard.placesByHand(effectiveOrderMode, in: effectiveScope) }
 
     /// Each book's resolved shelf key (`BookcaseBoard.unshelvedKey` for none).
     func shelfKey(of readingID: String) -> String? {

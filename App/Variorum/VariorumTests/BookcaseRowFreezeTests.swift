@@ -89,6 +89,10 @@ struct BookcaseRowFreezeTests {
             let moving = try ops.createReading(name: "moving", kind: .book, shelfId: work.id)
             let staying = try ops.createReading(name: "staying", kind: .book, shelfId: ideas.id)
             let model = ShelfViewModel(session: session, defaults: defaults)
+            // JUSTIFIED EDIT (librarywalkpolish VR-118): my order steps back
+            // for 0.9.2; the freeze pin keeps its placing arm alive by the one
+            // value hand placing's return flips (VR-120).
+            model.handPlacingOffered = true
             model.orderMode = .mine
             BookcaseRowOracle.forgetAll()
 

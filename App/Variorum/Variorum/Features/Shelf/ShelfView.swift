@@ -170,33 +170,6 @@ struct ShelfView: View {
                 }
             }
             .frame(maxHeight: listContentHeight > 0 ? listContentHeight : nil, alignment: .top)
-            // 17y item (r) — THE № PANEL IS A TRUE DROPDOWN (her report: "it's
-            // a dropdown, not a push down"). 13i-d U1 drew it IN FLOW between
-            // the strip and the board, so opening it pushed every row down
-            // by its height (148 pt, measured) and, in a window whose height
-            // was spoken for, clipped the first row at the scroll region's top
-            // edge. It now FLOATS over the board's top-right — hung from the
-            // board's top edge (= the strip's bottom), right-aligned at the
-            // strip's own 28-pt inset under the utility run's №, exactly where
-            // it sat: zero layout push. The board draws above its later
-            // siblings (`zIndex`) so a tall panel over a short board floats
-            // over the entry bar too. Contents, solo acts and the remembered-
-            // open state are untouched. (A first build hung it from the strip
-            // with a custom bottom guide; SwiftUI ignored the guide and drew it
-            // ABOVE the strip — the walk caught it, the pin now measures it.)
-            .overlay(alignment: .topTrailing) {
-                if model.censusOpen {
-                    BookcaseCensusPanel(model: model, tokens: tokens)
-                        #if DEBUG
-                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                            BookcaseRowOracle.recordFrame(
-                                BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
-                        }
-                        #endif
-                        .padding(.trailing, 28)
-                }
-            }
-            .zIndex(1)
             entryBar
             // Batch 14: the ⌘k advice bar rides the WINDOW BOTTOM (her
             // ask); the entry box stays high with the list.
@@ -204,6 +177,48 @@ struct ShelfView: View {
             hintBar
         }
         .background(tokens.surface)
+        // librarywalkpolish VR-115 — THE TWO DROPPERS, ONE IDIOM. № and order
+        // ▾ open `MastheadPopover`s seated under their own controls (each
+        // control publishes its anchor), floating over the board — zero
+        // layout push (17y (r)'s rule, kept). The census stays open as she
+        // works (its remembered state); the order popover lives like a menu:
+        // a press anywhere else closes it (consumed, as a menu's is).
+        .overlayPreferenceValue(MastheadDropperAnchors.self) { anchors in
+            GeometryReader { proxy in
+                ZStack(alignment: .topLeading) {
+                    if model.orderOpen {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture { model.orderOpen = false }
+                    }
+                    if model.censusOpen, let anchor = anchors[.census] {
+                        let rect = proxy[anchor]
+                        BookcaseCensusPanel(model: model, tokens: tokens)
+                            #if DEBUG
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                BookcaseRowOracle.recordFrame(
+                                    BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
+                            }
+                            #endif
+                            .padding(.leading, max(0, rect.minX - Self.popoverTextInset))
+                            .padding(.top, rect.maxY + MastheadPopover.gap)
+                    }
+                    if model.orderOpen, let anchor = anchors[.order] {
+                        let rect = proxy[anchor]
+                        BookcaseOrderPanel(model: model, tokens: tokens)
+                            #if DEBUG
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                BookcaseRowOracle.recordFrame(
+                                    BookcaseRowOracle.orderPanelKey, $0, owner: oracleOwner)
+                            }
+                            #endif
+                            .padding(.leading, max(0, rect.minX + Self.orderLabelInset - Self.popoverTextInset))
+                            .padding(.top, rect.maxY + MastheadPopover.gap)
+                    }
+                }
+                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+            }
+        }
         .task { await model.start() }
         .task { await model.refreshAggregates() }
         #if DEBUG
@@ -367,6 +382,12 @@ struct ShelfView: View {
             }
         }
     }
+
+    /// A popover row's words start this far in from its edge (the outer 4 +
+    /// the row's 12), so the rows' text sits right under its control's text.
+    static let popoverTextInset: CGFloat = 4 + MastheadPopover.rowInsets.leading
+    /// order ▾'s words start 5 pt inside its hover box.
+    static let orderLabelInset: CGFloat = 5
 
     #if DEBUG
     private func recordRow(_ readingID: String, placing: Bool) {
@@ -1080,6 +1101,8 @@ enum BookcaseRowOracle {
     /// frames under (never a reading id — those are UUIDs).
     static let stripKey = "\u{2116}strip"
     static let censusPanelKey = "\u{2116}panel"
+    /// librarywalkpolish VR-115: the order popover's frame.
+    static let orderPanelKey = "\u{2116}order"
 
     /// A pin's door: start from empty.
     static func forgetAll() {

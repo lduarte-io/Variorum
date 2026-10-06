@@ -110,10 +110,16 @@ struct BookcaseCensusOverlayTests {
             let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
             let panel = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey),
                                      "the open panel recorded its frame")
-            #expect(abs(panel.minY - strip.maxY) < 1.5,
-                    "the panel's top hangs from the strip's bottom (strip \(strip), panel \(panel))")
-            #expect(abs(panel.maxX - (strip.maxX - 28)) < 1.5,
-                    "right-aligned under the utility run (strip \(strip), panel \(panel))")
+            // JUSTIFIED EDIT (librarywalkpolish VR-115, R-LWP-1 amended): the
+            // panel is now the ONE masthead popover, SEATED UNDER № (its rows'
+            // words under the mark) rather than right-aligned at the strip's
+            // foot — so it hangs from the №'s bottom, inside the strip's foot,
+            // never above the strip. The push half (this pin's subject) is
+            // unchanged.
+            #expect(panel.minY > strip.minY + 10 && panel.minY <= strip.maxY + 1.5,
+                    "the panel hangs under the №, never over the masthead (strip \(strip), panel \(panel))")
+            #expect(panel.maxX <= strip.maxX - 20,
+                    "seated under the utility run, on the board (strip \(strip), panel \(panel))")
 
             model.censusOpen = false
             await settle(window, hosting, turns: 40) { false }

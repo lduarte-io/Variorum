@@ -288,6 +288,10 @@ struct BookcaseViewModelTests {
     @Test func myOrdersDoorsAndTheCrossShelfDrop() async throws {
         try await withBookcaseSession { session, db, defaults in
             let model = ShelfViewModel(session: session, defaults: defaults)
+            // JUSTIFIED EDIT (librarywalkpolish VR-118): my order steps back
+            // for 0.9.2 — the MACHINERY stays pinned for its return (VR-120),
+            // turned on per model by the one value its return flips.
+            model.handPlacingOffered = true
             model.orderMode = .mine
             let observe = Task { await model.start() }
             defer { observe.cancel() }

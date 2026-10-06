@@ -92,4 +92,178 @@ struct BookcaseMastheadPopoverTests {
         #expect(!strip.contains("VoicedMenu("), "order ▾ is no longer the native menu")
         #expect(!strip.contains("active ? \"clear\" : \"solo\""), "no solo/clear column")
     }
+
+    // MARK: - The idiom's own pins (landed with the fix)
+
+    /// Opening either dropper closes the other; any other masthead menu
+    /// closes both; a pick closes the order popover.
+    @Test func openingEitherDropperClosesTheOther() async throws {
+        try await withSession { session in
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            model.censusOpen = false
+            model.toggleCensus()
+            #expect(model.censusOpen && !model.orderOpen)
+            model.toggleOrder()
+            #expect(model.orderOpen && !model.censusOpen, "order ▾ closed the census")
+            model.toggleCensus()
+            #expect(model.censusOpen && !model.orderOpen, "№ closed the order popover")
+            model.toggleOrder()
+            model.mastheadDoorOpened()
+            #expect(!model.censusOpen && !model.orderOpen, "the wing switcher closes both")
+            model.toggleOrder()
+            model.pickOrder(.lastEdited)
+            #expect(model.orderMode == .lastEdited && !model.orderOpen, "a pick is the act and closes")
+            model.toggleOrder()
+            model.toggleOrder()
+            #expect(!model.orderOpen, "order ▾ again closes it")
+        }
+    }
+
+    /// VR-118's rule, pure: a stored my order DRAWS A–Z while hand placing
+    /// steps back; the offered orders are A–Z · last edited; turned back on
+    /// (the machinery's return), my order is offered and placed again.
+    @Test func myOrderStepsBackAndReturnsByOneValue() async throws {
+        #expect(!ShelfViewModel.handPlacingOfferedThisRelease, "0.9.2: hand placing steps back")
+        #expect(ShelfViewModel.effectiveOrder(.mine, handPlacingOffered: false) == .alphabetical)
+        #expect(ShelfViewModel.effectiveOrder(.lastEdited, handPlacingOffered: false) == .lastEdited)
+        #expect(ShelfViewModel.effectiveOrder(.mine, handPlacingOffered: true) == .mine)
+        try await withSession { session in
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            #expect(model.offeredOrderModes == [.alphabetical, .lastEdited])
+            model.orderMode = .mine
+            #expect(model.effectiveOrderMode == .alphabetical && !model.placesByHand)
+            model.handPlacingOffered = true
+            #expect(model.offeredOrderModes == [.alphabetical, .lastEdited, .mine])
+            #expect(model.effectiveOrderMode == .mine && model.placesByHand, "the return is one value")
+        }
+    }
+
+    /// The rows, as data: the census's six (the active solo washed, a zero row
+    /// inert, no "solo" word anywhere); the washed row's click CLEARS it
+    /// (PROVISIONAL #188). The order's two (the drawn order washed — a stored
+    /// my order shows A–Z washed).
+    @Test func theRowsAreTheActs() async throws {
+        try await withSession { session in
+            let ops = session.operations
+            _ = try ops.createReading(name: "a book", kind: .book)
+            let defaults = try defaults()
+            BookcasePrefs(defaults: defaults, wingID: "").orderMode = .mine
+            let model = ShelfViewModel(session: session, defaults: defaults)
+            let observe = Task { await model.start() }
+            defer { observe.cancel() }
+            for _ in 0..<300 where model.books.isEmpty { try? await Task.sleep(for: .milliseconds(10)) }
+
+            var rows = BookcaseCensusPanel.rows(model)
+            #expect(rows.map(\.id) == BookcaseSolo.allCases.map(\.rawValue))
+            #expect(rows.allSatisfy { !$0.selected })
+            #expect(!rows.contains { $0.title.contains("solo") || $0.title.contains("clear") })
+            #expect(rows.first { $0.id == "books" }?.enabled == true)
+            #expect(rows.first { $0.id == "gatherings" }?.enabled == false, "a zero row is inert")
+            rows.first { $0.id == "books" }?.action()
+            rows = BookcaseCensusPanel.rows(model)
+            #expect(model.solo == .books)
+            #expect(rows.filter(\.selected).map(\.id) == ["books"], "the active solo's row is washed")
+            rows.first { $0.id == "books" }?.action()
+            #expect(model.solo == nil, "the washed row's click clears it")
+
+            let order = BookcaseOrderPanel.rows(model)
+            #expect(order.map(\.title) == ["A\u{2013}Z", "last edited"])
+            #expect(order.filter(\.selected).map(\.title) == ["A\u{2013}Z"],
+                    "a stored my order shows A–Z washed (the order the board draws)")
+        }
+    }
+
+    /// **The rider, VERIFIED (her "you should be able to sort within a shelf
+    /// for the books versus gatherings"):** a census solo COMPOSES with a
+    /// solo'd shelf — it filters WITHIN it, never exits to All — and the
+    /// census counts what that shelf holds. Shipped behaviour (13i-d U1's
+    /// `BookcaseBoard.sections` applies the solo inside every scope; nothing
+    /// clears a solo when the shelf changes): this pin guards it — green on
+    /// both sides, a verification, never a fix.
+    @Test func aCensusSoloFiltersWithinASoloedShelf() async throws {
+        try await withSession { session in
+            let ops = session.operations
+            let work = try ops.createShelf(name: "Work")
+            let spec = try RuleGrammar.encode(.star)
+            _ = try ops.createReading(name: "work book", kind: .book, shelfId: work.id)
+            let gathering = try ops.createReading(
+                name: "work gathering", kind: .gathering, querySpec: spec, shelfId: work.id)
+            _ = try ops.createReading(
+                name: "loose gathering", kind: .gathering, querySpec: spec)
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            let observe = Task { await model.start() }
+            defer { observe.cancel() }
+            for _ in 0..<300 where model.books.count < 3 { try? await Task.sleep(for: .milliseconds(10)) }
+            model.scope = .shelf(work.id)
+            model.toggleSolo(.gatherings)
+            #expect(model.effectiveScope == .shelf(work.id), "the solo never exits the shelf")
+            #expect(model.sections.map(\.id) == [work.id])
+            #expect(model.sections.first?.books.map(\.reading.id) == [gathering.id],
+                    "only the shelf's gatherings")
+            #expect(model.census[.gatherings] == 1 && model.census[.books] == 1,
+                    "the census counts the shelf, not the wing")
+            model.scope = .all
+            #expect(model.solo == .gatherings, "the solo rides a shelf change")
+        }
+    }
+
+    private nonisolated static func pump() {
+        MainActor.assumeIsolated {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.02))
+        }
+    }
+
+    /// **The mounted board:** each popover hangs UNDER the strip's controls
+    /// (never above the strip, never pushing a row), the order popover right
+    /// of the census's seat (under order ▾, right of №).
+    @Test func thePopoversAreSeatedUnderTheirControls() async throws {
+        #if DEBUG
+        try await withSession { session in
+            let book = try session.operations.createReading(name: "alpha", kind: .book)
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            model.censusOpen = false
+            BookcaseRowOracle.forgetAll()
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: ShelfView(
+                session: session, model: model, readings: ReadingsViewModel(session: session),
+                onOpen: { _ in }, onTodaysEntry: {}))
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer { window.orderOut(nil); window.close() }
+            @MainActor func settle(_ turns: Int = 60, until: () -> Bool = { false }) async {
+                for _ in 0..<turns {
+                    hosting.layoutSubtreeIfNeeded()
+                    window.displayIfNeeded()
+                    Self.pump()
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(10))
+                    if until() { return }
+                }
+            }
+            await settle(150) { BookcaseRowOracle.frame(book.id) != nil }
+            let row = try #require(BookcaseRowOracle.frame(book.id))
+            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
+
+            model.toggleCensus()
+            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey) != nil }
+            let census = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey))
+            #expect(census.minY > strip.minY + 10 && census.minY <= strip.maxY + 1.5,
+                    "the census hangs under its control, inside the strip's foot (strip \(strip), panel \(census))")
+            #expect(census.maxX <= strip.maxX, "it stays on the board")
+
+            model.toggleOrder()
+            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey) != nil }
+            let order = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey))
+            #expect(!model.censusOpen)
+            #expect(order.minY > strip.minY + 10 && order.minY <= strip.maxY + 1.5,
+                    "the order popover hangs under order ▾ (strip \(strip), panel \(order))")
+            #expect(order.minX > census.minX, "under order ▾, right of the №")
+            let rowNow = try #require(BookcaseRowOracle.frame(book.id))
+            #expect(abs(rowNow.minY - row.minY) < 0.5, "an open popover pushes no row")
+        }
+        #endif
+    }
 }

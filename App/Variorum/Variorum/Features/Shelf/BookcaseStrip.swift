@@ -176,6 +176,7 @@ struct BookcaseStrip: View {
     @State private var visibleWidth: CGFloat = 0
     @State private var dropTarget: String?
     @State private var panelShown = false
+    @State private var orderHovering = false
 
     private var overflowed: Bool { contentWidth > visibleWidth + 0.5 }
 
@@ -343,7 +344,10 @@ struct BookcaseStrip: View {
 
     private var utilityRun: some View {
         HStack(alignment: .center, spacing: 10) {
-            Button("\u{2116}") { model.censusOpen.toggle() }
+            // librarywalkpolish VR-115: № and order ▾ open the ONE masthead
+            // popover idiom (`MastheadPopover`, seated by the board under the
+            // control's published anchor); opening either closes the other.
+            Button("\u{2116}") { model.toggleCensus() }
                 .buttonStyle(.plain)
                 .font(tokens.small)
                 // A solo in force is never invisible: the mark wears ink and
@@ -353,31 +357,9 @@ struct BookcaseStrip: View {
                 .lineLimit(1)
                 .fixedSize()
                 .help(censusHelp)
+                .mastheadDropperAnchor(.census)
             StatusDot(tokens: tokens)
-            VoicedMenu(
-                tokens: tokens, label: "order \u{00B7} \(model.orderMode.label)", role: .quiet
-            ) {
-                // An inline picker: the menu's native checkmark marks the
-                // order in force (a `Label` image drew nothing — the walk).
-                Picker("", selection: Binding(
-                    get: { model.orderMode },
-                    set: { mode in
-                        model.orderMode = mode
-                        if mode == .lastEdited { Task { await model.refreshAggregates() } }
-                    })
-                ) {
-                    ForEach(BookcaseOrderMode.allCases, id: \.self) { mode in
-                        Text(mode.label).tag(mode)
-                    }
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-            }
-            .help("A\u{2013}Z · last edited · my order — "
-                + "\u{201C}my order\u{201D} is where you place books by hand")
-            // 17y B-WALK W-3: a `Menu` says nothing when it opens, so the
-            // press that opens it dismisses the № float.
-            .reportsPress { model.mastheadDoorOpened() }
+            orderDoor
             StatusDot(tokens: tokens)
             Button(tokens.chromeLabel("details")) { model.detailsShown.toggle() }
                 .buttonStyle(.plain)
@@ -391,6 +373,30 @@ struct BookcaseStrip: View {
         }
         .lineLimit(1)  // 19g: a one-line counts row (P-8)
         .fixedSize()
+    }
+
+    /// **order ▾** — the app's own door (VR-115: the native menu "looks out
+    /// of place in the app"), worded and inked as the quiet chrome menu it
+    /// replaces; it names the order the board DRAWS (a stored "my order"
+    /// reads A–Z while hand placing steps back — VR-118).
+    private var orderDoor: some View {
+        Button { model.toggleOrder() } label: {
+            Text(tokens.chromeLabel("order \u{00B7} \(model.effectiveOrderMode.label)") + " \u{25BE}")
+                .font(tokens.small)
+                .foregroundStyle(model.orderOpen ? tokens.ink : tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(
+                    orderHovering || model.orderOpen ? tokens.wash : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 4))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { orderHovering = $0 }
+        .help("How the books are ordered on every shelf \u{2014} A\u{2013}Z or last edited")
+        .mastheadDropperAnchor(.order)
     }
 
     /// Hover reveals the counts while the № is collapsed (§19(c)'s "hover to
@@ -411,45 +417,53 @@ struct BookcaseStrip: View {
 
 /// Every count, each row a SOLO filter — click to solo, again to clear. A
 /// zero row is faint and inert (P-2: it could only empty the board).
+/// **VR-115 (R-LWP-1 amended):** the rows are the ONE masthead popover's —
+/// the active solo's row washed, no "solo"/"clear" column ("solo is fairly
+/// meaningless - highlighting the selected row would be better"); the
+/// washed row's click CLEARS it (PROVISIONAL, #188).
 struct BookcaseCensusPanel: View {
     let model: ShelfViewModel
     let tokens: VoiceTokens
 
-    var body: some View {
+    /// The rows, as data (pinned).
+    static func rows(_ model: ShelfViewModel) -> [MastheadPopoverRow] {
         let census = model.census
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(BookcaseSolo.allCases, id: \.self) { solo in
-                let count = census[solo] ?? 0
-                let active = model.solo == solo
-                Button {
-                    model.toggleSolo(solo)
-                } label: {
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(tokens.chromeLabel(solo.label(count: count)))
-                            .fontWeight(active ? .semibold : .regular)
-                            .foregroundStyle(active ? tokens.ink : (count == 0 ? tokens.faint : tokens.muted))
-                            .lineLimit(1)
-                        Spacer(minLength: 12)
-                        Text(tokens.chromeLabel(active ? "clear" : "solo"))
-                            .foregroundStyle(tokens.faint)
-                            .lineLimit(1)
-                            .opacity(count == 0 && !active ? 0 : 1)
-                    }
-                    .font(tokens.small)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(count == 0 && !active)
+        return BookcaseSolo.allCases.map { solo in
+            let count = census[solo] ?? 0
+            let active = model.solo == solo
+            return MastheadPopoverRow(
+                id: solo.rawValue, title: solo.label(count: count),
+                selected: active, enabled: count > 0 || active
+            ) { model.toggleSolo(solo) }
+        }
+    }
+
+    var body: some View {
+        MastheadPopover(tokens: tokens, rows: Self.rows(model))
+    }
+}
+
+/// **The order popover** (VR-115): the orders this release offers (a–z ·
+/// last edited — my order steps back, VR-118), the one the board draws
+/// washed; a pick closes it.
+struct BookcaseOrderPanel: View {
+    let model: ShelfViewModel
+    let tokens: VoiceTokens
+
+    static func rows(_ model: ShelfViewModel) -> [MastheadPopoverRow] {
+        model.offeredOrderModes.map { mode in
+            MastheadPopoverRow(
+                id: mode.rawValue, title: mode.label,
+                selected: model.effectiveOrderMode == mode
+            ) {
+                model.pickOrder(mode)
+                if mode == .lastEdited { Task { await model.refreshAggregates() } }
             }
         }
-        .padding(.vertical, 5)
-        .frame(width: 220)
-        // The BOARD's own ground (`surface`), so the panel reads as part of
-        // the page under a hairline — never a tinted card (the walk).
-        .background(tokens.surface)
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
+    }
+
+    var body: some View {
+        MastheadPopover(tokens: tokens, rows: Self.rows(model))
     }
 }
 
