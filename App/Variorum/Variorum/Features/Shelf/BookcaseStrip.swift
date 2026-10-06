@@ -275,7 +275,7 @@ struct BookcaseStrip: View {
         // §7: a hairline while a book or a name hovers over this one — since
         // VR-119 the chip's own edge.
         .overlay { chipOutline(dropTarget == shelf.id) }
-        .draggable(BookcaseDragToken(.shelf(shelf.id)))
+        .draggable(model.beginDrag(.shelf(shelf.id)))
         // 17y B-WALK W-3: a name's right-click menu dismisses the № float
         // (its plain click solos the shelf and leaves the float alone).
         .reportsPress(secondaryOnly: true) { model.mastheadDoorOpened() }
@@ -581,7 +581,7 @@ struct ShelfOverflowPanel: View {
         }
         // Reorder by dragging the panel's rows (§7, ruled) — and a book
         // dropped here re-shelves, exactly as on a strip name.
-        .draggable(BookcaseDragToken(.shelf(shelf.id)))
+        .draggable(model.beginDrag(.shelf(shelf.id)))
         .bookcaseDropSite(
             onHover: { dropTarget = $0 ? shelf.id : (dropTarget == shelf.id ? nil : dropTarget) }
         ) { payload in

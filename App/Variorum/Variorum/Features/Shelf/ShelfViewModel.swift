@@ -82,6 +82,32 @@ final class ShelfViewModel {
         orderOpen = false
     }
 
+    // MARK: What is being dragged (librarywalkpolish VR-116, W-5)
+
+    /// The Bookcase drag in flight, recorded where its payload is made — the
+    /// payload is an `@autoclosure` SwiftUI evaluates when the drag BEGINS
+    /// (pinned: mounting a board evaluates none). A drop target's hover cannot
+    /// read a payload, so this is how a target knows whether its drop would
+    /// act. Never observed (nothing draws from it); a cancelled drag leaves a
+    /// stale value that only the NEXT drag — which overwrites it — could read.
+    @ObservationIgnored private(set) var dragInFlight: BookcaseDrag?
+
+    /// The payload for a Bookcase drag, and the record of it.
+    func beginDrag(_ drag: BookcaseDrag) -> BookcaseDragToken {
+        dragInFlight = drag
+        return BookcaseDragToken(drag)
+    }
+
+    /// **W-5 (her "remove the useless line"):** a section header's drop
+    /// re-shelves a BOOK onto its shelf — so it lights only for a book that
+    /// is NOT already there (`reshelve`'s same-shelf guard makes that drop a
+    /// silent nothing — a door that does nothing must not offer, §12), and
+    /// never for a dragged shelf name (a header takes no shelf).
+    func headerDropLights(sectionShelfID: String?) -> Bool {
+        guard case .book(let readingID)? = dragInFlight else { return false }
+        return shelfKey(of: readingID) != (sectionShelfID ?? BookcaseBoard.unshelvedKey)
+    }
+
     // MARK: The two droppers (librarywalkpolish VR-115 — one popover idiom)
 
     /// The order popover is open (a menu's life: never remembered).

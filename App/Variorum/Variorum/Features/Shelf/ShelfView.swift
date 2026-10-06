@@ -539,9 +539,16 @@ struct ShelfView: View {
                 Rectangle().fill(tokens.line).frame(height: 1)
             }
         }
+        // librarywalkpolish VR-116 (W-5): the hairline lights only where a
+        // drop would ACT — a book from another shelf (never the book's own
+        // shelf, never a shelf name) — so a drag inside a shelf in A–Z shows
+        // no line that releases into nothing.
         .bookcaseDropSite(
-            onHover: { headerDropTarget = $0 ? section.id
-                : (headerDropTarget == section.id ? nil : headerDropTarget) }
+            onHover: { hovering in
+                let lights = hovering && model.headerDropLights(sectionShelfID: section.shelfID)
+                headerDropTarget = lights ? section.id
+                    : (headerDropTarget == section.id ? nil : headerDropTarget)
+            }
         ) { payload in
             if case .book(let readingID) = payload {
                 Task { await model.reshelve(readingID, to: section.shelfID) }
@@ -638,7 +645,10 @@ struct ShelfView: View {
         }
         // The grip column sits in the board's gutter (see above).
         .padding(.leading, -BookcaseCopy.gripColumn)
-        .draggable(BookcaseDragToken(.book(reading.id)))
+        // librarywalkpolish VR-116 (W-4, R-LWP-3): the drag starts anywhere
+        // on the row and SHOWS the book's title chip at the cursor — never the
+        // row's scattered full-width snapshot.
+        .modifier(BookDragSource(book: book, tokens: tokens) { model.beginDrag(.book(reading.id)) })
         // A NOTE (plain text — "drag posts onto a book", sitting 1) joins
         // the book: the shipped road, unchanged.
         .onDrop(of: [.plainText], isTargeted: nil) { providers in
@@ -1111,3 +1121,81 @@ enum BookcaseRowOracle {
     }
 }
 #endif
+
+// MARK: - The book drag's face (librarywalkpolish VR-116 — W-4, R-LWP-3)
+
+/// **The compact drag image** — her words: "maybe as you drag it becomes just
+/// the title", and "it should move to be where your cursor is so dragging
+/// into something feels natural and you aren't dragging with an offset". The
+/// book's star (when starred) and name, on the board's own paper with a
+/// hairline — the row's title, lifted.
+struct BookDragChip: View {
+    let book: Queries.ShelfBook
+    let tokens: VoiceTokens
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 5) {
+            if book.starred {
+                Text(StarCopy.glyph)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.star)
+            }
+            Text(tokens.chromeLabel(book.reading.name))
+                .font(tokens.body.weight(.semibold))
+                .foregroundStyle(tokens.ink)
+        }
+        .lineLimit(1)
+        .fixedSize()
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
+    }
+}
+
+/// **The book row as a drag source** — the payload made (and recorded) when
+/// the drag begins; the preview is the chip AT THE GRAB POINT. SwiftUI centres
+/// a drag preview over its SOURCE view (Apple's own words for
+/// `draggable(_:preview:)`), so the preview is a canvas the row's own size —
+/// clear everywhere but the chip, which sits centred on where the pointer
+/// took hold (the row's last hover point, which is where a press lands). The
+/// image therefore rides under the cursor, never at the title's x-offset.
+struct BookDragSource: ViewModifier {
+    let book: Queries.ShelfBook
+    let tokens: VoiceTokens
+    let payload: () -> BookcaseDragToken
+
+    @State private var grab: CGPoint?
+    @State private var size: CGSize = .zero
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
+            .onContinuousHover(coordinateSpace: .local) { phase in
+                if case .active(let point) = phase { grab = point }
+            }
+            .draggable(payload()) {
+                Self.canvas(book: book, tokens: tokens, size: size, grab: grab)
+            }
+    }
+
+    /// The preview canvas (pure placement, pinned): the source's size, the
+    /// chip centred on the grab point (the row's centre when no pointer was
+    /// seen — a keyboard-less mouse always is).
+    static func chipCenter(size: CGSize, grab: CGPoint?) -> CGPoint {
+        let point = grab ?? CGPoint(x: size.width / 2, y: size.height / 2)
+        return CGPoint(
+            x: min(max(point.x, 0), max(size.width, 0)),
+            y: min(max(point.y, 0), max(size.height, 0)))
+    }
+
+    @ViewBuilder
+    static func canvas(
+        book: Queries.ShelfBook, tokens: VoiceTokens, size: CGSize, grab: CGPoint?
+    ) -> some View {
+        let center = chipCenter(size: size, grab: grab)
+        BookDragChip(book: book, tokens: tokens)
+            .position(center)
+            .frame(width: max(size.width, 1), height: max(size.height, 1))
+    }
+}
