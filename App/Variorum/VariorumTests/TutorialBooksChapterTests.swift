@@ -421,10 +421,11 @@ struct TutorialBooksLessonTests {
     /// lesson could never have turned it). Every lesson of the WHOLE guide is
     /// held to what the release offers: the order ▾'s hidden rows by their
     /// own labels (`offeredOrderModes`), and — while hand placing steps back —
-    /// Send to Top/Bottom by their own verbs and the "own order" phrasing.
-    /// When VR-120 returns hand placing, the hidden set empties and the pin
-    /// holds nothing back. Committed AHEAD of the reword (red on the shipped
-    /// seed).
+    /// Send to Top/Bottom by their own verbs. (Not "own order": a BOOK's own
+    /// note order is real and taught in "gatherings & arrivals" — the first
+    /// red run caught that phrase there.) When VR-120 returns hand placing,
+    /// the hidden set empties and the pin holds nothing back. Committed AHEAD
+    /// of the reword (red on the shipped seed).
     @Test func noLessonTeachesADoorThisReleaseHides() async throws {
         try await withChapterWorld { session, db, guideID in
             let suite = "lwp-hidden-doors-\(UUID().uuidString)"
@@ -435,7 +436,7 @@ struct TutorialBooksLessonTests {
                 .filter { !model.offeredOrderModes.contains($0) }
                 .map(\.label)
             if !model.handPlacingOffered {
-                hidden += [BookcaseCopy.sendToTopVerb, BookcaseCopy.sendToBottomVerb, "own order"]
+                hidden += [BookcaseCopy.sendToTopVerb, BookcaseCopy.sendToBottomVerb]
             }
             #expect(hidden.contains(BookcaseOrderMode.mine.label) == !model.handPlacingOffered,
                     "the hidden set is the release's own (VR-118)")

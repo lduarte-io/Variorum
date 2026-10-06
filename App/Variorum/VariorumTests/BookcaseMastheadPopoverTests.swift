@@ -316,6 +316,9 @@ struct BookcaseMastheadPopoverTests {
             await settle()
             #expect(!model.orderOpen, "navigating away and back finds no popover open")
 
+            // Each arm starts from a closed popover, so no arm leans on the
+            // one before it.
+            model.orderOpen = false
             model.toggleOrder()
             await settle()
             #expect(model.orderOpen)
@@ -323,6 +326,7 @@ struct BookcaseMastheadPopoverTests {
             await settle(5)
             #expect(!model.orderOpen, "its window stopped being key — a menu closes")
 
+            model.orderOpen = false
             model.toggleOrder()
             await settle()
             #expect(model.orderOpen)

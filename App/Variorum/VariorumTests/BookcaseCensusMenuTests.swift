@@ -159,12 +159,24 @@ struct BookcaseCensusMenuTests {
                 clickCount: 1, pressure: 1))
             reporter.handle(event)
         }
-        #expect(reporter.visibleRect.width > 0 && reporter.visibleRect.width < reporter.bounds.width,
-                "the reporter is half scrolled out (visible \(reporter.visibleRect))")
+        // MEASURED (macOS 27): a view that does not clip to its bounds (the
+        // macOS 14+ default) reports a `visibleRect` NOT intersected with its
+        // own bounds — here the clip's whole window, (-80, 0, 100, 40) in the
+        // reporter's space. The part of the reporter on screen is the two
+        // intersected.
+        let shown = reporter.bounds.intersection(reporter.visibleRect)
+        #expect(shown.width > 0 && shown.width < reporter.bounds.width,
+                "the reporter is half scrolled out (shown \(shown), visibleRect \(reporter.visibleRect))")
         try press(windowX: 90)
         #expect(presses == 1, "a press on its visible part reports")
         try press(windowX: 120)
         #expect(presses == 1, "a press in its bounds but off screen (beside the strip) reports nothing")
+        // A guard on the fix's shape (green on both sides): the clip's
+        // window alone is not the reporter — a press on screen beside it
+        // reports nothing.
+        let before = presses
+        try press(windowX: 10)
+        #expect(presses == before, "a press on screen but outside the reporter reports nothing")
     }
 
     private nonisolated static func pump() {
