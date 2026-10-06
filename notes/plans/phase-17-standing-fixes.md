@@ -1806,7 +1806,21 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   travel, the row under the resting pointer waking on stop; in passing the starred shelf at
   the strip's head and the census OVERLAY (zero push) on the final tree. **HER WALK, LIVE
   (2026-10-05 evening, running list):** (j) PASSED in her words — "the scroll on index within
-  a note's outline feels great now - beautiful." Then HER GATES:
+  a note's outline feels great now - beautiful." **(k)-RIDER FINDING, hers (~19:35, with her
+  install's screenshots): the Library on the walk bed read as "a disaster" vs her install's
+  "normal calm list of books" — "absolutely has to be reverted."** The orchestrator's
+  same-turn analysis: three stacked causes — the dev store's TERMINAL voice (her install runs
+  Study; not B1's), the fixture's 34 test books TRIPPING the books-region cap (her 12-book
+  store never triggers it; the cap's CUT ROW at the seam is the real new-look offense), and
+  600 tagged fixture notes' chips. The notes List itself is byte-identical in look (native
+  List kept; paging invisible but the quiet sentinel); NO cards switch was built ("#187(i)"
+  remains open; nothing was authorized or changed there). Her ruling PENDING on the books
+  region: revert the rider vs keep-but-redesign the seam. **HER SECOND FINDING (~19:40,
+  pre-existing seam, her ruling in it):** "Notes [the Cards view] takes away your ability to
+  see books - the other selector should automatically switch from 'All' to 'Notes' in that
+  case" — the Cards VIEW renders notes only (true on 0.9.1 too, her install's screenshot),
+  so the SCOPE chip reading "All" is dishonest there; her ruled shape = picking Cards
+  auto-switches the scope chip All→Notes. Disposition pending the same reply. Then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
