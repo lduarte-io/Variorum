@@ -1866,7 +1866,15 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   proposed shape (pending her word, in the same reply): the walk items mint as VR-113+
   issues + a plan doc in the standing style; the running round re-homes as that pass's
   batch 1; this orchestrator carries it through the 0.9.2 release then hard-stops; 17y
-  closes on its own a–s scope. Then HER GATES:
+  closes on its own a–s scope. **CONFIRMED AND MINTED (~20:50): the pass is
+  `librarywalkpolish` (her name), plan `notes/plans/librarywalkpolish.md` (the governing
+  frame hers verbatim: "spiritually the pre-release bug pass... is not done til this all
+  feels good and is solid" — 0.9.2 gates on HER FEEL at that pass's close); issues VR-113..
+  120 live on GitHub; her picks landed (census OPTION A the menu's sibling + the
+  compose-within-a-shelf rider; strip OPTION 2 "restrained, tasteful, light wash squares" —
+  the committed reference `librarywalkpolish-ui-reference.html`); the B-WALK round RE-HOMES
+  as that pass's batch 1 (this brief and record stay here; the ledger there).** Then HER
+  GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
