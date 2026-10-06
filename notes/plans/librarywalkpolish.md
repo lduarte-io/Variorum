@@ -1,6 +1,6 @@
 # librarywalkpolish — the Library walk's polish pass (the FIRST pass on the VR numbering; minted 2026-10-05 ~20:45 from the author's live 17y walk sitting)
 
-> **STATUS: BATCH 1 BUILT + HANDED BACK (~22:05); the opus-reviewer cold round running** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> **STATUS: LADDER ROUND 1 BACK (1 MAJOR · 5 MINOR · 5 NIT, `librarywalkpolish-ladder-round1.md`); the FIX ROUND running in a fresh session** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
@@ -85,7 +85,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 - **Her gates:** the re-walk (the List feel is VR-113's close; the faces hers), her FEEL per
   the governing frame, the 0.9.2 notes (already APPROVED, R-17y-10; the reworded drags line
   shown), the release word.
-- **The close:** the 0.9.2 release run (R-13r-15's road) · the ledger dispositioned ·
+- **The close:** the 0.9.2 release run (R-13r-15's road; GATED on F-BW-1 — the field guide's lesson 7 must stop teaching hidden doors BEFORE the release; the reword lands in the ladder's fix round with the standing re-seed consequence) · the ledger dispositioned ·
   the issues closed on GitHub as their rows close · 17y's deferred MACHINE acts run once
   here at the arc's end (the `/Applications` refresh at a zero-instance window behind A1 ·
   her real store's guide re-seed via Help ▸ Restore Tutorial… · the DerivedData sweep (17y,

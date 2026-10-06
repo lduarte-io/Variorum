@@ -2723,79 +2723,6 @@ DerivedData `App/Variorum/DerivedData/17y/`; no subagents.
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
-### THE TRACE — W-5, before the fix (and why it did not fold into W-6)
-
-In A–Z (and last edited) a book row's own drop site and insertion hairline read `placesByHand`
-(false outside my order — and, since VR-118, false everywhere), so no row ever drew a line there.
-The only LINE a book drag lights in a derived order is a section header's: `ShelfView.sectionHeader`
-wears `bookcaseDropSite` with an `onHover` that set `headerDropTarget` for EVERY hovering payload,
-drawing a 1-pt `tokens.line` at the header's foot — exactly above the section's first row, so it
-reads as an insertion line. Its drop re-shelves a `.book` onto the section's shelf — and
-`ShelfViewModel.reshelve` begins `guard shelfKey(of:) != target else { return }`: a book dragged
-within its own shelf (her gesture — trying to reorder in A–Z) lights its own header's line and
-releases into a silent nothing; a dragged shelf NAME lights it too and does nothing at all. A
-door that does nothing must not offer (§12): the hairline now lights only where the drop acts.
-
-### THE W-1 FACE — measured off the shipped table, rebuilt to it (VR-113)
-
-**The rig** (`LibraryListFaceRigTests`, opt-in `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1`, committed
-AHEAD of the engine change so one rig measured both): the same fixture (3 books, 40 notes — tags
-none/one/two, stated days, an untitled note) mounted in a 1000×720 test-host window, both voices,
-light; artifacts leave through the log (the test host is sandboxed) and the window is captured ON
-SCREEN by its id (`screencapture -l`, this shell's own Screen Recording grant — her pointer and
-apps untouched). **The shipped List, read through its `NSTableView`:** style `.inset`, floating
-group rows, automatic row heights; a 10-pt top inset; headers 28 pt; book rows 25 pt (Terminal) /
-30 (Study), note rows 26 / 30 — each its content + 8; 20 pt between a section's last row and the
-next header; content 16 pt in on both sides; a 1-pt separator at every row's foot from 16 to 16 pt
-short of the edge (230 on Study's white — the system separator ink); and the FIRST header FLOATS
-at the very top (its hairline at the list's 27 pt, its rows from 38), darker hairline + a soft
-shade + a full-width shadow line under it. **Rebuilt** as `LibraryListFace` (rows, headers on
-`LazyVStack(pinnedViews: .sectionHeaders)`, the header material `.headerView`), then verified by
-the SAME rig: every separator below the first header at the same y and ink as before, both
-voices. **Deviations, said:** (1) a pinned header's material blurs the row beneath less visibly
-than the table's (the on-screen scrolled pair) — her eye's; (2) **F-BW-3 — the OLD List drew NO
-pick** in the mounted captures (`before-<voice>-picked-screen.png`: two rows picked, the panel's
-subject set, no wash or border on any row — `.listRowBackground` set inside B1's `Equatable` row
-host never reached the table); the new engine draws row 56's wash + tinted border as designed
-(`after-<voice>-picked-screen.png`) — a restored face, not a parity break.
-
-### THE W-1 FEEL — the same fling, before and after (822 notes, scope Notes, 1000×800, the Debug test host; `bwalk/face/{before,after}-feel.txt` + per-frame gaps)
-
-A display link drives the scroll: CLIP = the clip view moved by elapsed × speed each tick (either
-engine); WHEEL = a phased trackpad-shaped scroll event built from a NEVER-POSTED `CGEvent`, handed
-straight to the scroll view (nothing reaches the system's event stream). 3,750 pt/s is B1's
-"brisk flick" (a hand's speed); 7,500 pt/s twice it. Two runs each; mean / max frame gap; frames
-> 25 ms; none > 50 ms ANYWHERE, before or after.
-
-| road · view · speed | BEFORE (the table) | AFTER (the lazy face) | Cards (the bar) |
-|---|---|---|---|
-| clip · List · 3,750 | 9.3 / 32.1 · 2 — 9.1 / 27.2 · 1 | **8.9 / 29.3 · 1 — 8.9 / 26.7 · 2** | 8.5–9.2 / 17–33 · 0–2 |
-| clip · List · 7,500 | 18.9 / 31.7 · 13 — 19.0 / 36.6 · 17 | **13.0 / 33.3 · 4 — 13.8 / 28.2 · 4** | 8.8–9.2 / 21–33 · 0–1 |
-| wheel · List · 3,750 | the table never moved (0 rows built — direct wheel delivery does not drive it) | **8.4 / 16.7 · 0 — 8.5 / 16.7 · 0** | 8.4–8.6 / 16.7–31.7 · 0–1 |
-| wheel · List · 7,500 | (as above) | **13.8 / 29.6 · 5 — 11.2 / 25.0 · 1** | 8.6 / 16.7–18.7 · 0 |
-
-**Read honestly:** at a hand's speed the List now runs at Cards' cadence (8.4–8.9 ms mean, no frame
-over 30 ms on the wheel road); at twice a hand's speed it improved from ~19 ms to ~11–14 ms mean
-(>25 ms frames 13–17 → 1–5) and still trails Cards (its rows are a third the height, so ~2.5× the
-NEW rows per frame at the same speed — the per-row cost is the row's own content: chips with ✕/＋
-buttons, tooltips, two stamps). This harness UNDER-reports the old table (its programmatic and
-wheel roads skip the table's prepared-region overdraw that B1's real trackpad sample caught — the
-real app read ~48 fps there); the after engine responds to the wheel road the way it does to a
-hand. Release unmeasured (no Release launch). Her re-walk is the feel's judge (the governing
-frame).
-
-### THE TRACE — W-3, before the fix
-
-`BookcaseStrip.utilityRun` draws № (a Button toggling `model.censusOpen`), order ▾ (`VoicedMenu` →
-a SwiftUI `Menu`, `.menuStyle(.button)`) and details; `ShelfView` hangs the open float over the
-board's top-right as an in-window overlay (17y (r)), and the masthead carries the wing switcher ▾
-(another `Menu`) and, when the strip overflows, the ⋯ shelf popover. NOTHING connected them: no
-masthead door read or wrote `censusOpen`, and a SwiftUI `Menu` exposes no open callback at all, so
-the float stood open, unchanged, under every menu that opened over the same corner (macOS 26's
-translucent menu material shows the float's rows through the menu — her "covers"). The fix is the
-missing connection (the press that opens a masthead menu/popover closes the float), never the
-float's LOOK (propose-only with her, out of scope).
-
 **Red-on-old method (every bug-class row):** each pin is committed AHEAD of its fix and run on that
 pre-fix committed tree (the natural red, the B2 precedent); the fix commit follows; no synthetic
 revert is in flight at any time.
@@ -3474,7 +3401,7 @@ hand-back.
 
 ## 17y B-WALK RECORD — her walk's fix round, items W-1…W-5 (W-6 GATED on her word) (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
 
-**NOT DONE (first line, per the contract):** (1) **NO GUI WALK of any item** — the author was at the machine for the whole round, so every capture and measurement is a MOUNTED test-host window (captured on screen by its own window id, or rendered in-process); her re-walk is the use-shaped close for all seven items, and **the List's feel (VR-113) closes only on her feel** (the governing frame); (2) **no drag was driven** — VR-116's cursor-anchored chip is verified by rendering its preview canvas and by Apple's documented placement rule ("centered over the source view"), never by a live drag; (3) **no Release measurement** (no Release launch — every frame number is the Debug test host); (4) **the field guide's lesson 7 still teaches "my order" + Send to Top** — seed content, fenced (F-BW-1, KnownIssues, owner librarywalkpolish); (5) **`ChromeLineLimitTests` stays RED on `NoteIndexColumn.swift:393`** — pre-existing (17y B1's f8977039, read tier), untouched here (F-BW-2, KnownIssues, owner librarywalkpolish); (6) the full-row drag-snapshot ADOPTION LIST (row 5) is enumerated, not built; (7) the strip names' own drop outline keeps its same-shelf false offer (the brief kept the strip's targets; #188(k) hers); (8) no Escape key closes the order popover (#188(d)); (9) the whole-Mac END was not owed and not run (the brief) — the union below + core `LibraryPagingTests`; (10) no `/Applications` refresh (the pass's close owns it).
+**NOT DONE (first line, per the contract):** (1) **NO GUI WALK of any item** — the author was at the machine for the whole round, so every capture and measurement is a MOUNTED test-host window (captured on screen by its own window id, or rendered in-process); her re-walk is the use-shaped close for all seven items, and **the List's feel (VR-113) closes only on her feel** (the governing frame); (2) **no drag was driven** — VR-116's cursor-anchored chip is verified by rendering its preview canvas and by Apple's documented placement rule ("centered over the source view"), never by a live drag; (3) **no Release measurement** (no Release launch — every frame number is the Debug test host); (4) **the field guide's lesson 7 still teaches "my order" + Send to Top** — seed content, fenced (F-BW-1, KnownIssues, owner librarywalkpolish); (5) **`ChromeLineLimitTests` stays RED on `NoteIndexColumn.swift:393`** — pre-existing (17y B1's 15b081d2; f8977039 moved it to :393 — round-1 correction), untouched here (F-BW-2, KnownIssues, owner librarywalkpolish); (6) the full-row drag-snapshot ADOPTION LIST (row 5) is enumerated, not built; (7) the strip names' own drop outline keeps its same-shelf false offer (the brief kept the strip's targets; #188(k) hers); (8) no Escape key closes the order popover (#188(d)); (9) the whole-Mac END was not owed and not run (the brief) — the union below + core `LibraryPagingTests`; (10) no `/Applications` refresh (the pass's close owns it).
 
 **SCOPE UPDATE (the orchestrator's message mid-session, 2026-10-05 ~20:30 — from her live sitting;
 binding; her words verbatim):** (1) **W-4 REFINED** — "you should be able to start the drag from
@@ -3549,10 +3476,84 @@ voices; captures of both popovers.
 | 5 | W-4 (VR-116) the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | DONE (6c04ab78 red · this commit fix) — with W-5 (row 6). THE FACT IT RESTS ON (a Sonnet lookup, external, read-only): Apple's own text for `draggable(_:preview:)` / `onDrag(_:preview:)` — "The preview is centered over the source view" (developer.apple.com/…/swiftui/view/draggable(_:preview:)); no SwiftUI anchor API exists, and nothing documents the cursor. So `BookDragSource` (new, `ShelfView.swift`): the whole row stays the drag source (start anywhere); its preview is a CANVAS the row's own size, clear everywhere but `BookDragChip` (★ + the name, the row's title type, on the board's paper with a hairline) CENTRED ON THE GRAB POINT (the row's last hover point — where a press lands); centred over the source, the chip therefore sits under the cursor, never at the title's x-offset. Pins: the placement rule (pure), the RENDERED canvas (`ImageRenderer`: the source's size; the chip's ink centred on a grab at x 600 of an 800-pt row, under 260 pt wide). **NOT walked** — no drag can be driven with her at the machine; her re-walk sees it (the drag spot-check). THE ADOPTION LIST (the full-row-snapshot class — every `.draggable`/`.onDrag` with no preview, each adopts the compact-at-cursor face at its next touch): the Library List/Cards note rows (`LibraryCatalogView` `.draggable(hit.id)`) · the sidebar Open strip rows (`SidebarView` `OpenNoteDragToken`) · the Pool rows (`PoolPostsView` `.draggable(item.postID)`) · the book view's navigator/Outline rows and chapter headings (`BookView` ×4) · the Book Panel's note rows and chapter grips (`BookPanelView` ×2) · the Snippets/scraps rows (`ScrapsPanel`, `BlocksAreaView` — `onDrag` providers) · the Compare and Lenses board cards (`CompareBoardView`, `LensesBoardView` — card-sized already; listed for completeness) · the strip's shelf names (a word-sized source — its own snapshot is already compact) |
 | 6 | W-6 (VR-118) the reorder hiding (UNGATED, her bigger shape) + W-5 (VR-116) the dead insertion line | DONE — W-6 with row 2b (635c1c4c). **W-5 does NOT collapse into it** — TRACED (§ THE TRACE — W-5): the line she saw in A–Z was never a reorder line (a row's drop and hairline already read `placesByHand`, false outside my order) but a section HEADER's drop hairline, drawn at the header's foot right above its first row for ANY dragged book or shelf name, while a book dropped on its OWN shelf's header re-shelves nowhere (`reshelve`'s same-shelf guard returns silently) and a header takes no shelf at all. FIX (6c04ab78 red · this commit): `ShelfViewModel.beginDrag` records the drag in flight where its payload is made (the payload `@autoclosure`, evaluated when the drag BEGINS — pinned: mounting a board with rows makes none) and `headerDropLights(sectionShelfID:)` lights a header only for a BOOK from another shelf; the strip's shelf drags record themselves too. A drop on another shelf's header still lands (pinned) — the drop-on-shelf targets are otherwise unchanged (the strip names' own outlines untouched). Pins GREEN with the whole Bookcase family + popover/strip/census pins + the registry walk + literal colours: **"87 tests in 17 suites passed"** (`bwalk/w4-green.log`) |
 | 2b | VR-115's growth (AMENDED): ONE masthead-popover idiom for № AND order ▾ (the float's typography, the selected row washed, no checkmarks/solo column; order rows a–z · last edited) + the compose rider (verify first) — with VR-118's effective order (my order hidden, the stored preference never rewritten) since the order rows need it | DONE (dc92b8ee red · 635c1c4c fix; captures with row 2c) — **THE RIDER, VERIFIED FIRST: a census solo ALREADY COMPOSES with a solo'd shelf** (`BookcaseBoard.sections` applies the solo inside every scope and nothing clears a solo when the shelf changes; the census counts the shelf's books) — pinned as a verification (`aCensusSoloFiltersWithinASoloedShelf`, green on both sides by design), nothing built. THE IDIOM: `Core/Views/MastheadPopover.swift` (the rows face — the float's own small type and row insets, the selected row on `QuietFill.chosen`, a hairline + a menu-grade shadow (light only — the app's shadow precedent), width to content; `MastheadDropper` anchors) · № and the new app-drawn order ▾ door publish anchors and the board's ROOT overlay seats each popover under its control (the rows' words under the control's words), floating — zero push · `ShelfViewModel.toggleCensus`/`toggleOrder`/`pickOrder` (opening either closes the other; the wing switcher's press closes both) · the order popover lives like a menu (a press elsewhere closes it, consumed) · the census rows: six, the active solo washed, a zero row inert, the washed row's click clears (PROVISIONAL #188). **VR-118 rides it (her priority last, free here — the order rows needed it):** `handPlacingOffered` (OFF this release, one value — the return), `effectiveOrderMode` (a stored my order DRAWS A–Z, never rewritten — PROVISIONAL #188), `offeredOrderModes` = A–Z · last edited; `placesByHand` reads the effective order, so the grips, the row drops and Send to Top/Bottom all go with it. Red-on-old: 2 tests, 3 issues on dc92b8ee (`bwalk/vr115-red.log`) → GREEN with the idiom's pins (mutual dismissal, the step-back + return-by-one-value, the rows as data, the compose verification, the MOUNTED seat: both popovers under their controls inside the strip's foot, order right of №, no row pushed) beside the Bookcase family, the registry walk and the literal-colour pin: **"81 tests in 15 suites passed"** (`bwalk/vr115-green.log`). JUSTIFIED EDITS (each labeled in place): the W-3 pin (order ▾ is the app's door — `toggleOrder` closes the float; one native menu left, the wing switcher), the B3 overlay pin (the seat under № instead of right-aligned at the strip's foot; its no-push subject unchanged), the B2 machinery pins (`BookcaseBoardTests.myOrdersDoors…`, `BookcaseRowFreezeTests` — `handPlacingOffered = true`, the machinery pinned for its return), and the tutorial ritual R5's my-order claim carried as `withKnownIssue` (lesson 7 TEACHES my order — seed content, F-BW-1) — the spine's books suites "17 tests in 2 suites passed … with 1 known issue" (`bwalk/vr118-tutorial.log`) |
-| 2c | VR-119 the strip's light-wash squares, the solo'd one filled (Option 2) | DONE (bfb6bc18 red · this commit fix) — every strip word (All · starred · each shelf · + shelf) on a near-square chip (`QuietFill.corner` 4, insets 3 × 9, 6 pt apart), the resting fill `QuietFill.rest` (the voice's wash, lightened), the solo'd one `QuietFill.chosen` (the accent tone — the SAME fill the popovers' selected row wears) and set in weight; every chip's word in INK per the reference (PROVISIONAL #188 — the old strip muted the inactive words); a drag's hover outline is the chip's own edge. Red-on-old: the source pin committed ahead, RED 1 test 2 issues (`bwalk/vr119-red.log`) → GREEN with the Bookcase family, the popover pins, the literal-colour pin: "52 tests in 15 suites" — **51 green + ONE PRE-EXISTING RED NOT MINE: `ChromeLineLimitTests` names `Features/ReadMode/NoteIndexColumn.swift:393` (17y B1's f8977039, the read tier — F-BW-2, routed, untouched)**; my own new `.fixedSize()` (the popover) stated its line policy at the same run (`bwalk/vr119-green.log`). **THE CAPTURES (on-screen, the mounted test host's own window captured by id — `bwalk/face/after-bookcase-<voice>-{strip-all,census-open,order-open,strip-shelf-solo}-screen.png`, both voices, light):** the chips at rest with All filled; № open under the mark with "2 gatherings" washed; order ▾ open under its door with a–z washed (no my order); a shelf solo'd and filled |
+| 2c | VR-119 the strip's light-wash squares, the solo'd one filled (Option 2) | DONE (bfb6bc18 red · this commit fix) — every strip word (All · starred · each shelf · + shelf) on a near-square chip (`QuietFill.corner` 4, insets 3 × 9, 6 pt apart), the resting fill `QuietFill.rest` (the voice's wash, lightened), the solo'd one `QuietFill.chosen` (the accent tone — the SAME fill the popovers' selected row wears) and set in weight; every chip's word in INK per the reference (PROVISIONAL #188 — the old strip muted the inactive words); a drag's hover outline is the chip's own edge. Red-on-old: the source pin committed ahead, RED 1 test 2 issues (`bwalk/vr119-red.log`) → GREEN with the Bookcase family, the popover pins, the literal-colour pin: "52 tests in 15 suites" — **51 green + ONE PRE-EXISTING RED NOT MINE: `ChromeLineLimitTests` names `Features/ReadMode/NoteIndexColumn.swift:393` (17y B1's 15b081d2, moved to :393 by f8977039 — F-BW-2, routed, untouched)**; my own new `.fixedSize()` (the popover) stated its line policy at the same run (`bwalk/vr119-green.log`). **THE CAPTURES (on-screen, the mounted test host's own window captured by id — `bwalk/face/after-bookcase-<voice>-{strip-all,census-open,order-open,strip-shelf-solo}-screen.png`, both voices, light):** the chips at rest with All filled; № open under the mark with "2 gatherings" washed; order ▾ open under its door with a–z washed (no my order); a shelf solo'd and filled |
 | 7 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | DONE (this commit) — **Mac, the union of every Library- and Bookcase-touching suite + the pins of this round + the tutorial's books suites + the registry walk + the colour and line-policy scans: "Test run with 350 tests in 55 suites" — 348 PASSED + 1 KNOWN ISSUE (mine, labeled: R5's my-order claim, F-BW-1) + 1 PRE-EXISTING RED NOT MINE (`ChromeLineLimitTests` → `NoteIndexColumn.swift:393`, F-BW-2 — that file untouched since 128c4af1, verified)** (`bwalk/end-mac.log`, HEAD 70af21a8's code). **Core: `swift test --filter LibraryPagingTests` — "8 tests in 1 suite passed"** (`bwalk/end-core.log`). The phone: no build owed — ZERO `App/Variorum/Shared`, `Sources`, `Server`, `VariorumMobile` change across the round (`git diff 128c4af1 --stat` over those paths EMPTY). QUESTIONS #188 (a)–(k); KnownIssues: the List row BUILT (closes at her re-walk) + two owned rows (F-BW-1, F-BW-2) |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
+
+### THE TRACE — W-5, before the fix (and why it did not fold into W-6)
+
+In A–Z (and last edited) a book row's own drop site and insertion hairline read `placesByHand`
+(false outside my order — and, since VR-118, false everywhere), so no row ever drew a line there.
+The only LINE a book drag lights in a derived order is a section header's: `ShelfView.sectionHeader`
+wears `bookcaseDropSite` with an `onHover` that set `headerDropTarget` for EVERY hovering payload,
+drawing a 1-pt `tokens.line` at the header's foot — exactly above the section's first row, so it
+reads as an insertion line. Its drop re-shelves a `.book` onto the section's shelf — and
+`ShelfViewModel.reshelve` begins `guard shelfKey(of:) != target else { return }`: a book dragged
+within its own shelf (her gesture — trying to reorder in A–Z) lights its own header's line and
+releases into a silent nothing; a dragged shelf NAME lights it too and does nothing at all. A
+door that does nothing must not offer (§12): the hairline now lights only where the drop acts.
+
+### THE W-1 FACE — measured off the shipped table, rebuilt to it (VR-113)
+
+**The rig** (`LibraryListFaceRigTests`, opt-in `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1`, committed
+AHEAD of the engine change so one rig measured both): the same fixture (3 books, 40 notes — tags
+none/one/two, stated days, an untitled note) mounted in a 1000×720 test-host window, both voices,
+light; artifacts leave through the log (the test host is sandboxed) and the window is captured ON
+SCREEN by its id (`screencapture -l`, this shell's own Screen Recording grant — her pointer and
+apps untouched). **The shipped List, read through its `NSTableView`:** style `.inset`, floating
+group rows, automatic row heights; a 10-pt top inset; headers 28 pt; book rows 25 pt (Terminal) /
+30 (Study), note rows 26 / 30 — each its content + 8; 20 pt between a section's last row and the
+next header; content 16 pt in on both sides; a 1-pt separator at every row's foot from 16 to 16 pt
+short of the edge (230 on Study's white — the system separator ink); and the FIRST header FLOATS
+at the very top (its hairline at the list's 27 pt, its rows from 38), darker hairline + a soft
+shade + a full-width shadow line under it. **Rebuilt** as `LibraryListFace` (rows, headers on
+`LazyVStack(pinnedViews: .sectionHeaders)`, the header material `.headerView`), then verified by
+the SAME rig: every separator below the first header at the same y and ink as before, both
+voices. **Deviations, said:** (1) a pinned header's material blurs the row beneath less visibly
+than the table's (the on-screen scrolled pair) — her eye's; (2) **F-BW-3 — the OLD List drew NO
+pick** in the mounted captures (`before-<voice>-picked-screen.png`: two rows picked, the panel's
+subject set, no wash or border on any row — `.listRowBackground` set inside B1's `Equatable` row
+host never reached the table); the new engine draws row 56's wash + tinted border as designed
+(`after-<voice>-picked-screen.png`) — a restored face, not a parity break.
+
+### THE W-1 FEEL — the same fling, before and after (822 notes, scope Notes, 1000×800, the Debug test host; `bwalk/face/{before,after}-feel.txt` + per-frame gaps)
+
+A display link drives the scroll: CLIP = the clip view moved by elapsed × speed each tick (either
+engine); WHEEL = a phased trackpad-shaped scroll event built from a NEVER-POSTED `CGEvent`, handed
+straight to the scroll view (nothing reaches the system's event stream). 3,750 pt/s is B1's
+"brisk flick" (a hand's speed); 7,500 pt/s twice it. Two runs each; mean / max frame gap; frames
+> 25 ms; none > 50 ms ANYWHERE, before or after.
+
+| road · view · speed | BEFORE (the table) | AFTER (the lazy face) | Cards (the bar) |
+|---|---|---|---|
+| clip · List · 3,750 | 9.3 / 32.1 · 2 — 9.1 / 27.2 · 1 | **8.9 / 29.3 · 1 — 8.9 / 26.7 · 2** | 8.5–9.2 / 17–33 · 0–2 |
+| clip · List · 7,500 | 18.9 / 31.7 · 13 — 19.0 / 36.6 · 17 | **13.0 / 33.3 · 4 — 13.8 / 28.2 · 4** | 8.8–9.2 / 21–33 · 0–1 |
+| wheel · List · 3,750 | the table never moved (0 rows built — direct wheel delivery does not drive it) | **8.4 / 16.7 · 0 — 8.5 / 16.7 · 0** | 8.4–8.6 / 16.7–31.7 · 0–1 |
+| wheel · List · 7,500 | (as above) | **13.8 / 29.6 · 5 — 11.2 / 25.0 · 1** | 8.6 / 16.7–18.7 · 0 |
+
+**Read honestly:** at a hand's speed the List now runs at Cards' cadence (8.4–8.9 ms mean, no frame
+over 30 ms on the wheel road); at twice a hand's speed it improved from ~19 ms to ~11–14 ms mean
+(>25 ms frames 13–17 → 1–5) and still trails Cards (its rows are a third the height, so ~2.5× the
+NEW rows per frame at the same speed — the per-row cost is the row's own content: chips with ✕/＋
+buttons, tooltips, two stamps). This harness UNDER-reports the old table (its programmatic and
+wheel roads skip the table's prepared-region overdraw that B1's real trackpad sample caught — the
+real app read ~48 fps there); the after engine responds to the wheel road the way it does to a
+hand. Release unmeasured (no Release launch). Her re-walk is the feel's judge (the governing
+frame).
+
+### THE TRACE — W-3, before the fix
+
+`BookcaseStrip.utilityRun` draws № (a Button toggling `model.censusOpen`), order ▾ (`VoicedMenu` →
+a SwiftUI `Menu`, `.menuStyle(.button)`) and details; `ShelfView` hangs the open float over the
+board's top-right as an in-window overlay (17y (r)), and the masthead carries the wing switcher ▾
+(another `Menu`) and, when the strip overflows, the ⋯ shelf popover. NOTHING connected them: no
+masthead door read or wrote `censusOpen`, and a SwiftUI `Menu` exposes no open callback at all, so
+the float stood open, unchanged, under every menu that opened over the same corner (macOS 26's
+translucent menu material shows the float's rows through the menu — her "covers"). The fix is the
+missing connection (the press that opens a masthead menu/popover closes the float), never the
+float's LOOK (propose-only with her, out of scope).
+
 
 ### FINDINGS (F-BW-N — each dispositioned)
 
@@ -3561,7 +3562,7 @@ voices; captures of both popovers.
   that turns red when the lesson is re-worded or hand placing returns. **DEFERRED — KnownIssues,
   owner librarywalkpolish** (the orchestrator's seed-content touch, or VR-120's return).
 - **F-BW-2 — `ChromeLineLimitTests` red on `NoteIndexColumn.swift:393`** (a `.fixedSize()` on the
-  index column's live row controls without a stated line policy — 17y B1 (j), f8977039). Pre-existing
+  index column's live row controls without a stated line policy — 17y B1 (j), 15b081d2 (f8977039 moved it to :393 — round-1 correction)). Pre-existing
   on this pass's tree; read-tier code, untouched here. **DEFERRED — KnownIssues, owner
   librarywalkpolish** (one `.lineLimit` beside it, read-tier review).
 - **F-BW-3 — the OLD List drew no pick** in the mounted captures (`.listRowBackground` set inside
