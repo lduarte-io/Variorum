@@ -8,6 +8,12 @@ deletion-safety artifact: every open VR number resolves below, so the eventual `
 sweep orphans nothing.** Canon keeps its historical VR spellings; the JSON export (runbook Phase 3)
 archives the issues themselves.
 
+> **THE MOBILE TEAM SPLIT (2026-10-06, her word — "its board is in a way different place… two
+> separate mcp epics" avoided):** team **VM** (Variorum Mobile) minted beside VX; the Mobile
+> project and its tickets moved — **VX-32 → VM-4** (the flagship) · **VX-55 → VM-3** ·
+> **VX-56 → VM-2** · **VX-57 → VM-1**. Old identifiers REDIRECT in Linear; read this table's
+> VX-32/55/56/57 as those VM numbers. Future mobile epics mint in VM.
+
 ## The three in flight
 VR-1 → **VX-7** (13s) · VR-2 → **VX-5** (13o) · VR-3 → **VX-6** (13x)
 

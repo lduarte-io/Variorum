@@ -139,6 +139,24 @@ session roster); the lock file is the arbiter, messages the courtesy channel.
 - Her paid-plan note (2026-10-06): she bought the Linear subscription pre-emptively — the
   250-issue free cap is MOOT; archive-to-stay-under-cap guidance is void.
 
+**Phase 1b — the settings pass + the VM split (2026-10-06, later the same day):**
+- [x] **Team VM (Variorum Mobile)** minted at her word — mobile's own board and numbering (the
+      duplicate-epic-names argument; the catch-up reading mints its tickets there). The Mobile
+      project + tickets moved: VX-32 → **VM-4** (flagship) · VX-55 → VM-3 · VX-56 → VM-2 ·
+      VX-57 → VM-1 (old identifiers redirect). VM carries its own Needs Lillian + Parked states;
+      labels are workspace-level and shared. The mobile BRANCH SHAPE (keep the long-lived
+      `mobile` branch with VM-ticket branches off it and periodic mobile→main merges, or adopt
+      main-based worktrees) is the catch-up reading's to propose.
+- [x] **The Linear GitHub settings pass ran via Claude-in-Chrome** (she debugged the extension):
+      *Link commits to issues* ON — its webhook created via `gh` on the repo (hook id 693297999,
+      push events, Linear's payload URL + secret); *Branch format* = **identifier-title** (the
+      bare `vx-123-slug` — matches the already-pushed branches); *auto link/create on merge* is
+      Business-plan-only and not needed (our branches/PRs always carry the id).
+- [ ] **Branch protection: BLOCKED BY GITHUB'S PLAN** — a free-plan PRIVATE repo cannot enable
+      it (403 "Upgrade to GitHub Pro or make this repository public"). Options, hers: GitHub Pro
+      (*[removed for publication]*) for the platform belt, or skip — CLAUDE.md's rule is the real enforcement (every
+      committer is her or a session bound by it); the belt only guards against ourselves.
+
 **Phase 2 — validation:** ~1–2 weeks of real use across the parallel efforts; her word closes it.
 
 **Phase 3 — GitHub cleanup (only after her validation word):**
