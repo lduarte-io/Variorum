@@ -246,6 +246,39 @@ struct LibraryInfiniteScrollTests {
         #endif
     }
 
+    /// **Standing rows follow an appearance flip** (the B1 ladder's MAJOR-1 —
+    /// a regression of this batch's own `Equatable` row hosts): the
+    /// appearance choice reaches the rows only through the `colorScheme`
+    /// environment (`NSApp.appearance` / the system — never an observable
+    /// ThemeStore write), the catalog re-derives its scheme-keyed tokens, and
+    /// a host equal on its `hit` alone skipped every standing row's body — so
+    /// the rows kept the OLD scheme's ink/wash while every non-gated surface
+    /// switched (a dark room with light-ink rows). RED on the pre-fix tree:
+    /// "an appearance flip re-drew 0 standing rows". The fixture is titled,
+    /// untagged, bookless notes so the first settle reaches a steady state
+    /// (no extras or facts land between the two counts) — the only thing
+    /// that changes between them is the appearance.
+    @Test func standingRowsFollowAnAppearanceFlip() async throws {
+        #if DEBUG
+        try await withLibrary { session in
+            try notes(session, 30)
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("appearance"))
+            await model.search()
+            let (window, hosting) = mount(session, model)
+            defer { window.orderOut(nil); window.close() }
+            window.appearance = NSAppearance(named: .aqua)
+            await settle(window, hosting, timeout: 2)
+            let before = LibraryPagedNotesProbe.rowBodies
+            #expect(before > 0, "the rows on screen were built")
+            window.appearance = NSAppearance(named: .darkAqua)
+            await settle(window, hosting, timeout: 2)
+            let redrawn = LibraryPagedNotesProbe.rowBodies - before
+            #expect(redrawn > 0,
+                    "an appearance flip re-drew \(redrawn) standing rows — stale-scheme rows are illegible")
+        }
+        #endif
+    }
+
     /// **Her rider: many books never mean no notes.** Forty books under "All"
     /// in a 640-pt window: the first note row is ON SCREEN, in the listing's
     /// lower half. RED on the pre-fix tree: the notes sat below forty book
