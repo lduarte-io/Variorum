@@ -98,6 +98,9 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
   here at the arc's end (the `/Applications` refresh at a zero-instance window behind A1 ·
   her real store's guide re-seed via Help ▸ Restore Tutorial… · the DerivedData sweep (17y,
   17y-mobile, 17y-review2..6, 17y-wfix) · the worktree removed after its last push) · memory
-  updated · hard stop. **The fresh orchestrator starts the NEXT pass she kicks off** (13s,
+  updated · HER NEW-MAC INSTALL follows the release (download from the website, 0.9.2
+  only — the first LIVE run of the furniture fold; the verification doc + her fresh
+  session's kickoff prompt: `notes/plans/new-mac-sync-verification-2026-10-06.md`) · hard
+  stop. **The fresh orchestrator starts the NEXT pass she kicks off** (13s,
   VR-120's return, the mobile catch-up — her pick), from a clean plan file, per the standing
   one-phase-per-seat rule.
