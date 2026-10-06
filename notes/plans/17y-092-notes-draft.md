@@ -8,8 +8,13 @@ Quicknotes, the first quick note and the tutorial scraps each fold to one copy w
 untouched. Anything you've touched is always kept.
 
 **The field guide is there from the start.** A new library is born with its guide on the
-Welcome shelf — no restore needed. (And the guide now teaches exactly the modes the released
-app has.)
+Welcome shelf — no restore needed. The guide was also read end-to-end against this release
+and corrected where the app had moved on. Already running an earlier build? Your copy stays
+as it is until you press **Help ▸ Restore Tutorial…** — one press fetches the updated
+edition. (HER WORD at the walk: "sure, mention the restore tutorial in the notes"; the
+SHIPPED file is App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-0.9.2.md — it also
+carries short factual clauses for this pass's visible changes, shown to her in the release
+reply.)
 
 **Jekyll steps back.** *The Strange Case of Dr Jekyll and Mr Hyde* no longer seeds into new
 libraries — add it any time from Help ▸ Restore. Existing libraries keep what they have.
