@@ -75,11 +75,15 @@ struct LibraryMoreNotesRow: View {
 struct LibraryPagedNotes<Row: View>: View {
     let model: LibraryCatalogModel
     let tokens: VoiceTokens
+    /// The B1 ladder's MAJOR-1: the one row input the rows do NOT observe —
+    /// read HERE, in the live hierarchy, so a flip re-evaluates this body
+    /// and the hosts below compare unequal (see `LibraryNoteRowHost`).
+    @Environment(\.colorScheme) private var scheme
     @ViewBuilder let row: (Queries.CatalogHit) -> Row
 
     var body: some View {
         ForEach(model.noteHits, id: \.id) { hit in
-            LibraryNoteRowHost(hit: hit) { row(hit) }
+            LibraryNoteRowHost(hit: hit, scheme: scheme) { row(hit) }
                 .equatable()
                 // The rows on screen drive the paging (the next page as she
                 // nears the end) and the near window (the extras and the
@@ -94,13 +98,29 @@ struct LibraryPagedNotes<Row: View>: View {
     }
 }
 
-/// One paged row, equal to another on its hit alone — so a page appended
-/// below never re-draws the rows above it.
+/// One paged row, equal to another on its hit AND its colour scheme — so a
+/// page appended below never re-draws the rows above it, while a row whose
+/// INK changed is never skipped. The scheme rides the equality for the B1
+/// ladder's MAJOR-1: an appearance flip reaches the rows only through the
+/// `colorScheme` environment (never an observable ThemeStore write), so a
+/// host equal on its hit alone kept every standing row in the OLD scheme's
+/// ink/wash while the non-gated chrome switched. Voice and palette changes
+/// are observable reads inside the row's own body and heal on their own;
+/// the scheme is the one untracked token input, so it is the one named
+/// here. (Comparing the whole `VoiceTokens` was the first cut and would
+/// cover future inputs in one clause, but its `Equatable` conformance is
+/// MainActor-isolated under the app target's default isolation and this
+/// `==` must stay nonisolated for `.equatable()` — any FUTURE token input
+/// that is not an observable read inside the row's body must be added to
+/// this comparison, or it inherits MAJOR-1's staleness.)
 struct LibraryNoteRowHost<Content: View>: View, Equatable {
     let hit: Queries.CatalogHit
+    let scheme: ColorScheme
     @ViewBuilder let content: () -> Content
 
-    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.hit == rhs.hit }
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.hit == rhs.hit && lhs.scheme == rhs.scheme
+    }
 
     var body: some View {
         #if DEBUG
