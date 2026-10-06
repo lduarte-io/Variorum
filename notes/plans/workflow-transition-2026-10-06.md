@@ -153,7 +153,26 @@ the Wednesday polish family). The GitHub export reconciles anything this census 
 
 **VR → VX map:** lands in `notes/plans/vr-to-vx-map.md` at the mint pass.
 
-## 9. What deliberately does NOT change
+## 9. Naming & pointer conventions (the "what number is that epic?" contract — settled 2026-10-06)
+
+- **The grouping is a Linear PROJECT** — Linear's native epic-equivalent; when she says "epic,"
+  sessions hear "Linear project." Projects have names, not numbers, so:
+- **Every effort gets ONE FLAGSHIP TICKET** — the project's first issue, titled the effort's name.
+  The flagship's number IS the effort's number; it names the branch (`vx-NNN-slug`) and the PR
+  (`VX-NNN: …`); its description carries the plan-file path. Child tickets per acceptance unit /
+  bug hang beside it in the same project.
+- **Plan files:** existing phase files keep their names (`phase-13o-*.md` — the phase vocabulary
+  is canon); NEW post-phase efforts name theirs `notes/plans/vx-NNN-<slug>.md`. Fix records:
+  `notes/plans/fixes/vx-NNN-<slug>.md` (§1 item 7).
+- **Two-way pointers, always:** the plan file's header carries `Ticket: VX-NNN · Project: <name> ·
+  Branch: vx-NNN-<slug>`; the ticket's description carries the plan-file path. The repo stays the
+  one source of truth; Linear is the pointer system over it.
+- **Answering "I'm ready to tackle the MCP connection epic — what number is that? what are we
+  doing?":** look in `notes/TICKETS.md` (or Linear) for the project, read its flagship ticket's
+  number, open the plan file its description names. Every session can answer this offline from
+  the snapshot + the plan file.
+
+## 10. What deliberately does NOT change
 
 The cast and ladder rules, the review prompt, sizing guidance, the resiliency protocol, the
 author-only list, canon discipline, the §12 lockstep rule, the memory-repo rhythm, the two-Mac
