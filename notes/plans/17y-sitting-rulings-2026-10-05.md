@@ -222,7 +222,11 @@ until the first ⌘J mints the born-starred Journal — R-17y-9's shown-always o
 the face; whether empty-at-birth is the want is hers at 13s. (The cut set under this
 statement: Encryption Explained, the classics gathering, the Quicknotes gathering, the seeded
 quicknote — "maybe one standalone note" possibly standing in for the last. 13s's mockup-first
-territory per R-17y-8; nothing here runs in 17y.)
+territory per R-17y-8; nothing here runs in 17y.) HER DISPOSITION of the starred-shelf
+consequence, same sitting: "i'll take a look at how an empty starred shelf looks and make a
+decision then. i don't think it's necessarily bad - it teaches users that books can be
+starred. i'll keep it in mind though" — decided at 13s on her look; the teaching reading
+matches R-17y-9's shown-always reasoning.
 
 ## THE OVERNIGHT MANDATE (hers, 2026-10-05 ~04:30 — verbatim; binds the rest of the pass)
 
