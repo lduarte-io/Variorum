@@ -471,7 +471,9 @@ struct LibraryCatalogView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .frame(maxWidth: 320)
-                Picker("", selection: Binding(get: { model.scope }, set: { model.scope = $0; Task { await model.search() } })) {
+                // 17y B-WALK W-2 (her ruling): picking All while in Cards
+                // moves the view to List — the model's door decides.
+                Picker("", selection: Binding(get: { model.scope }, set: { model.pickScope($0); Task { await model.search() } })) {
                     ForEach(LibraryCatalogModel.Scope.allCases, id: \.self) { scope in
                         Text(tokens.chromeLabel(scope.label)).tag(scope)
                     }
@@ -485,7 +487,12 @@ struct LibraryCatalogView: View {
                 .disabled(model.editedOn != nil)
                 .help(model.editedOn == nil
                       ? LibraryCopy.scopeDoor : LibraryCopy.scopeDoorUnderADay)
-                Picker("", selection: Binding(get: { model.mode }, set: { model.mode = $0 })) {
+                // 17y B-WALK W-2 (her ruling): picking Cards moves the scope
+                // All → Notes (Cards shows notes only); a moved scope is a
+                // new question, so it re-reads.
+                Picker("", selection: Binding(get: { model.mode }, set: {
+                    if model.pickMode($0) { Task { await model.search() } }
+                })) {
                     // 17y (d): each mode's word from its one home — "Cards".
                     ForEach(LibraryCatalogModel.Mode.allCases, id: \.self) { mode in
                         Text(tokens.chromeLabel(mode.label)).tag(mode)

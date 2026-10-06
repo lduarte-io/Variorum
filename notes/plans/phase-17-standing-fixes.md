@@ -3393,7 +3393,7 @@ and measurement here is a MOUNTED test-host window (the brief's "mounted suites 
 | # | piece | status |
 |---|---|---|
 | 0 | This record + the bwalk captures dir gitignored | DONE (this commit) |
-| 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | NOT-STARTED |
+| 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | DONE (871ca738 red · this commit fix) — the rule is pure and in ONE home, `LibraryCatalogModel.scope(afterPicking:from:)` / `mode(afterPicking:from:)`, behind two doors the pickers now call (`pickMode` answers whether the moved scope owes a re-read; `pickScope` moves the view; the caller spawns `search()`, the file's convention; `modeChanged()` keeps the mode's own consequences). Red-on-old: the pickers' source pin committed ahead of the fix — RED on 871ca738's tree, "1 test … with 4 issues" (`bwalk/w2-red.log`: both pickers wrote `model.mode = $0` / `model.scope = $0`) → GREEN with the rule's pins (both switches + every untouched combination) and the doors over a real listing (Cards under All lists no book; All in Cards → List, the books back), beside `LibraryDayFilterTests`, `LibraryCardsWordTests`, `LibraryCardNameTests`: **"33 tests in 4 suites passed"** (`bwalk/w2-green.log`). PROVISIONAL edges → #188 (a). Face: no new chrome (the two existing segmented pickers move together) |
 | 2 | W-1 the List's notes on the lazy column, the List's exact face — before-measure/captures, build, after-measure/captures, pins | NOT-STARTED |
 | 3 | W-3 the census float dismissed by any masthead menu/popover — pin + fix | NOT-STARTED |
 | 4 | W-5 no insertion line in a derived order — pin + fix | NOT-STARTED |

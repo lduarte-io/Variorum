@@ -66,6 +66,46 @@ final class LibraryCatalogModel {
     var scope: Scope = .all
     var mode: Mode = .list
 
+    // MARK: - The view and the scope switch each other (17y B-WALK W-2)
+
+    /// **Her two rulings, the walk of 2026-10-05:** the Cards view renders
+    /// NOTES only, so a scope reading "All" over it claims books the screen
+    /// never shows — "the other selector should automatically switch from
+    /// 'All' to 'Notes' in that case", and "if someone clicks on all from
+    /// inside card view, move them off the card view". Pure, both halves:
+    /// picking Cards moves All → Notes; picking All in Cards moves the view to
+    /// List. Every other combination keeps what it had (PROVISIONAL —
+    /// QUESTIONS #188: Cards over Books/Blocks, leaving Cards, the Timeline).
+    nonisolated static func scope(afterPicking mode: Mode, from scope: Scope) -> Scope {
+        mode == .notes && scope == .all ? .posts : scope
+    }
+
+    nonisolated static func mode(afterPicking scope: Scope, from mode: Mode) -> Mode {
+        scope == .all && mode == .notes ? .list : mode
+    }
+
+    /// **The view picker's door.** Writes the mode and, under the ruling, the
+    /// scope it moves; answers whether the QUESTION changed (a moved scope
+    /// owes a re-read — the caller spawns `search()`, this file's convention).
+    /// The mode's own consequences stay `modeChanged()`'s (the view's
+    /// `onChange`).
+    @discardableResult
+    func pickMode(_ next: Mode) -> Bool {
+        mode = next
+        let moved = Self.scope(afterPicking: next, from: scope)
+        guard moved != scope else { return false }
+        scope = moved
+        return true
+    }
+
+    /// **The scope picker's door.** Writes the scope and, under the ruling,
+    /// moves the view off Cards; the caller re-reads (a scope is always a new
+    /// question).
+    func pickScope(_ next: Scope) {
+        scope = next
+        mode = Self.mode(afterPicking: next, from: mode)
+    }
+
     // MARK: - The sort (18h batch 1, her row 10 — ruling R-Q8's first half)
 
     /// **What the notes are ordered by**, and which way. Her words: *"i need
