@@ -228,11 +228,15 @@ struct HelperView: View {
         // she cannot find — so the tag chips and the bar's two groups get
         // their rows the same day they ship.
         ShortcutGroup(title: "The note's bars", items: [
-            ("tag cards (top bar)", "a note's tags live on the context bar as coloured "
-                + "cards, showing by default: \u{FF0B} adds one (type it — "
-                + "\u{201C}/\u{201D} nests), \u{2715} takes it off. The \u{FF03} icon folds "
-                + "them away and back (\u{2318}\u{21E7}I does the same), and where you "
-                + "leave it is where it stays"),
+            // VR-122's routed J-15, verified and fixed at the orchestrator's
+            // seam: the fold is RETIRED (the Act 10 note above — "the fold is
+            // gone") and the cards live in the MASTHEAD — this row still
+            // taught the old home and the fold while the ⌘⇧I row and the
+            // "context bar" dictionary entry already said the true thing.
+            ("tag cards (masthead)", "a note's tags live in the masthead's right edge "
+                + "as coloured cards: \u{FF0B} adds one (type it — "
+                + "\u{201C}/\u{201D} nests), \u{2715} takes it off, and the \u{FF03} "
+                + "(or \u{2318}\u{21E7}I) opens the add field with the cursor in it"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
             ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
