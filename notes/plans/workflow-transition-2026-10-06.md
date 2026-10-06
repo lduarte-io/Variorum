@@ -152,18 +152,23 @@ session roster); the lock file is the arbiter, messages the courtesy channel.
       push events, Linear's payload URL + secret); *Branch format* = **identifier-title** (the
       bare `vx-123-slug` — matches the already-pushed branches); *auto link/create on merge* is
       Business-plan-only and not needed (our branches/PRs always carry the id).
-- [ ] **Branch protection: BLOCKED BY GITHUB'S PLAN** — a free-plan PRIVATE repo cannot enable
-      it (403 "Upgrade to GitHub Pro or make this repository public"). Options, hers: GitHub Pro
-      (*[removed for publication]*) for the platform belt, or skip — CLAUDE.md's rule is the real enforcement (every
-      committer is her or a session bound by it); the belt only guards against ourselves.
+- [x] **Branch protection: SKIPPED AT HER WORD** (2026-10-06, "that's fine… i'm not that worried
+      about it") — a free-plan PRIVATE repo cannot enable it (403: GitHub Pro or public only);
+      CLAUDE.md's PR rule is the enforcement, every committer being her or a session bound by it.
 
-**Phase 2 — validation:** ~1–2 weeks of real use across the parallel efforts; her word closes it.
+**Phase 2 — validation: COLLAPSED AT HER WORD** (2026-10-06, "go ahead and do the validation
+window, github sweep, and finish everything up") — the time-window gate was replaced by the
+COMPLETE reconciliation (`notes/plans/vr-to-vx-map.md`: every open VR number resolved against
+the live listing), which is the stronger safety.
 
-**Phase 3 — GitHub cleanup (only after her validation word):**
-- [ ] Export ALL issues (open + closed, with comments) to
-      `notes/source/github-issues-export-2026-10.json`; commit.
-- [ ] Delete every GitHub issue (`gh issue delete <n> --yes` loop; permanent). Burned numbers never
-      return; from here every new GitHub number is a PR.
+**Phase 3 — GitHub cleanup — ✔ RAN 2026-10-06:**
+- [x] ALL 130 issues (119 open · 11 closed, 13 comments) exported to
+      `notes/source/github-issues-export-2026-10-06.json`; committed and pushed BEFORE deletion.
+- [x] Every GitHub issue DELETED (`gh issue delete` sweep; verified 0 remaining). Burned numbers
+      never return; from here every new GitHub number is a PR. **THE TRANSITION IS COMPLETE** —
+      what remains open is operation, not migration: /mcp OAuth per new session (she ran it
+      2026-10-06), and the three kickoffs (the plan files carry their kickoff messages:
+      `phase-13o-search.md` · `phase-13x-library-portability.md` · `phase-13s-voice-onboarding.md`).
 
 ## 8. The open-item census (to re-mint; verified 2026-10-06)
 

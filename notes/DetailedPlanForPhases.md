@@ -12,9 +12,9 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| 13o — Search | **VX-5** · `vx-5-13o-search` | `~/dev/variorum-13o` · the Pro | ready — awaiting her kickoff (opens with the design sitting) |
-| 13x — Library portability | **VX-6** · `vx-6-13x-library-portability` | `~/dev/variorum-13x` · the Pro | ready — awaiting her kickoff (custody ⇒ the Fable rider) |
-| 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | the Air's clone, on the pushed branch | ready — awaiting her kickoff |
+| 13o — Search | **VX-5** · `vx-5-13o-search` | `~/dev/variorum-13o` · the Pro | ready — kickoff atop `notes/plans/phase-13o-search.md` (opens with the design sitting) |
+| 13x — Library portability | **VX-6** · `vx-6-13x-library-portability` | `~/dev/variorum-13x` · the Pro | ready — kickoff atop `notes/plans/phase-13x-library-portability.md` (custody ⇒ the Fable rider; holds the one Sync/ slot) |
+| 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | the Air's clone, on the pushed branch | ready — kickoff atop `notes/plans/phase-13s-voice-onboarding.md` (the Air; suites via the Pro's stage) |
 
 ### Latest closeout
 
