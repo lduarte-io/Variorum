@@ -92,7 +92,14 @@ session roster); the lock file is the arbiter, messages the courtesy channel.
 ## 6. Parallel sessions
 
 - **One worktree per effort**, the mobile precedent: `~/dev/variorum-13o`, `~/dev/variorum-13x`, …
-  (`~/dev/variorum` stays `main` — integration + her daily canon edits).
+  (`~/dev/variorum` stays `main` — integration + her daily canon edits; NEVER switched off main).
+- **Sessions seat THEMSELVES (her rider, 2026-10-06 — "the first job of the orchestrator is to
+  make sure it's in the right place"):** she launches from anywhere; the orchestrator resolves
+  the branch, freshens origin, finds or creates the worktree (fresh ticket/run worktrees are
+  `~/dev/variorum-<vx-nnn>`, cut from `origin/main`), runs everything from it, and REMOVES it at
+  closeout once the PR merges. The full procedure is the phase skills' "Workspace setup" section
+  (identical in both). On the Air: the one clone switches branches instead (one effort at a time
+  there).
 - **Kickoff declares the effort's surfaces** and checks overlap against the other in-flight rows.
 - **At most ONE `Sync/`-or-custody-touching effort at a time** (the Fable rider unchanged).
 - **Closeouts serialize**: two efforts never close at once; first-ready merges first, the next

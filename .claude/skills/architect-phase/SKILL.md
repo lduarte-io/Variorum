@@ -27,6 +27,18 @@ The argument may be a **phase name** (13o), a **Linear ticket id** (vx-5 / VX-5 
 - **Several ticket ids = a RUN** (the standing-fix runs' successor — RUN A/B's and 17y's shape, lettered no more): mint ONE fresh **RUN TICKET** titled `Run: <theme>` listing the members, make the members its SUB-ISSUES (they keep their own numbers and close one by one as their fixes land — commit messages say `Part of VX-<member>`), and the run ticket's number names the ONE branch (`vx-NNN-<run-slug>`) and ONE PR for the whole run. The run's record file is `notes/plans/fixes/vx-NNN-<run-slug>.md`; a run row joins the in-flight table at kickoff and retires at merge. **Pin-before-fix binds PER MEMBER; the cold review covers the run's whole diff** (Fable whenever ANY member touches `Sync/`, custody/keychain or the editor seam).
 - **Linear duties either way:** the effort's ticket(s) move In Progress at kickoff, In Review at the ladder, Done rides the PR merge (via the MCP where present, else noted for the author). Work happens on the effort's branch in its worktree; `main` is never pushed directly by build sessions.
 
+## Workspace setup — the orchestrator's FIRST job (ruled 2026-10-06; IDENTICAL in both phase skills, edit together)
+
+The author launches you from anywhere — the main checkout, a stale directory, wherever. She never manages worktrees; before preflight ends, seat yourself:
+
+1. **Resolve the effort's branch** (the flagship/ticket description, the in-flight table; for a fresh ticket/run, mint it — `vx-NNN-<slug>` from the ticket number).
+2. **Freshen main:** `git -C ~/dev/variorum fetch origin`, and `pull --ff-only` there only if that checkout is clean and on `main`. **Never switch the MAIN checkout off `main`** — other sessions and her daily use depend on it.
+3. **Find or make the worktree:** the in-flight table names one → use it (`git -C <worktree> merge --ff-only main` at a fresh kickoff; `pull --ff-only origin <branch>` thereafter). Branch exists, no worktree → `git -C ~/dev/variorum worktree add ~/dev/variorum-<name> <branch>`. Fresh ticket/run → `git -C ~/dev/variorum worktree add -b vx-NNN-<slug> ~/dev/variorum-<vx-nnn> origin/main`, push the branch, add the in-flight row (ticket · branch · worktree · machine). Naming: phases keep the table's names (`~/dev/variorum-13o`); tickets/runs use `~/dev/variorum-<vx-nnn>`.
+4. **Run ALL work from the worktree** — your own commands and every implementer brief name its absolute path; nothing is ever committed from the main checkout. **On the AIR** there are no worktrees: the one clone switches to the effort's branch (`git pull && git switch <branch>`) — legal there because the Air runs one effort at a time.
+5. **Sanity before the first spawn:** `git -C <worktree> status` clean (a dirty tree is a prior session's unadopted work — assess per the resume rules, never discard), branch is the effort's, upstream set.
+
+At closeout, after the PR merges: retire the in-flight row and **remove the effort's worktree** (`git worktree remove` — disposable once merged; the long-lived `~/dev/variorum-mobile` stays).
+
 ## The mandate (what makes this shape different)
 
 - **You hold an architect mandate for the phase** (the R117 precedent):
