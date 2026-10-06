@@ -3372,8 +3372,27 @@ hand-back.
 ## 17y B-WALK RECORD — her walk's fix round, items W-1…W-5 (W-6 GATED on her word) (`opus-implementer`, 2026-10-05; LIVE STATUS from the first commit)
 
 **NOT DONE (first line, per the contract):** IN PROGRESS — this line is rewritten at the close. Until
-then: every row below not marked DONE is not done; W-6 is NOT built (gated on her confirming word,
-which arrives only by an orchestrator message).
+then: every row below not marked DONE is not done.
+
+**SCOPE UPDATE (the orchestrator's message mid-session, 2026-10-05 ~20:30 — from her live sitting;
+binding; her words verbatim):** (1) **W-4 REFINED** — "you should be able to start the drag from
+anywhere on the row though - even if it's only the title it should move to be where your cursor is so
+dragging into something feels natural and you aren't dragging with an offset": the drag starts from
+anywhere on the row and the compact title image rides AT THE CURSOR (anchored under the grab point),
+never at the title's original x-offset. (2) **W-6 UNGATED, a BIGGER shape** — "let's just hide 'my
+order' from the user, hide the send to top and bottom options, and add it next week or something as a
+post release update - the ability to reorder books is here! voila, it sidesteps the whole issue":
+"my order" leaves order ▾ entirely; Send to Top/Bottom hide; the grips and row-reorder drags go with
+them; the MACHINERY (`shelf_position`, `placeReading`) stays untouched for its return. The edge to
+decide and record PROVISIONAL: a saved my-order preference reads as a–z while hidden, never rewritten.
+Starred-floats-first untouched. W-5 may collapse into it — said here if it does. (3) **W-7 NEW** — the
+TERMINAL voice's Cards readability: "let's fix terminal looking so impossible to read on the cards
+somehow (we can change the font size or spacing to make it more readable)" — a conservative pass on
+Cards under Terminal ONLY (body size, line spacing, card breathing room), Study's Cards untouched, no
+literal outside the token layer, before/after captures from a mounted test host (never the app's
+GUI). **Her priority order** (followed from here): census-menu bug (W-3) · the List scroll (W-1) ·
+the cards/notes switches (W-2 — already DONE) · Terminal cards readability (W-7) · the drag image
+(W-4) · the reorder hiding (W-6, with W-5).
 
 Preflight read in this session's own context (never delegated): CLAUDE.md + its auto-loaded canon;
 the B-WALK BRIEF whole; this file's 17y row end to end, the kickoff, the RUN RECORD (the HER WALK
@@ -3394,10 +3413,11 @@ and measurement here is a MOUNTED test-host window (the brief's "mounted suites 
 |---|---|---|
 | 0 | This record + the bwalk captures dir gitignored | DONE (this commit) |
 | 1 | W-2 the view/scope auto-switches (ruled) — pins + fix | DONE (871ca738 red · this commit fix) — the rule is pure and in ONE home, `LibraryCatalogModel.scope(afterPicking:from:)` / `mode(afterPicking:from:)`, behind two doors the pickers now call (`pickMode` answers whether the moved scope owes a re-read; `pickScope` moves the view; the caller spawns `search()`, the file's convention; `modeChanged()` keeps the mode's own consequences). Red-on-old: the pickers' source pin committed ahead of the fix — RED on 871ca738's tree, "1 test … with 4 issues" (`bwalk/w2-red.log`: both pickers wrote `model.mode = $0` / `model.scope = $0`) → GREEN with the rule's pins (both switches + every untouched combination) and the doors over a real listing (Cards under All lists no book; All in Cards → List, the books back), beside `LibraryDayFilterTests`, `LibraryCardsWordTests`, `LibraryCardNameTests`: **"33 tests in 4 suites passed"** (`bwalk/w2-green.log`). PROVISIONAL edges → #188 (a). Face: no new chrome (the two existing segmented pickers move together) |
-| 2 | W-1 the List's notes on the lazy column, the List's exact face — before-measure/captures, build, after-measure/captures, pins | NOT-STARTED |
-| 3 | W-3 the census float dismissed by any masthead menu/popover — pin + fix | NOT-STARTED |
-| 4 | W-5 no insertion line in a derived order — pin + fix | NOT-STARTED |
-| 5 | W-4 the compact drag image + the adoption list — pin + fix | NOT-STARTED |
-| 6 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | NOT-STARTED |
+| 2 | W-3 the census float dismissed by any masthead menu/popover — pin + fix (her priority 1) | NOT-STARTED |
+| 3 | W-1 the List's notes on the lazy column, the List's exact face — the opt-in measurement rig (committed ahead), before-measure/captures, build, after-measure/captures, pins | IN-PROGRESS — the rig `LibraryListFaceRigTests` written (opt-in `VARIORUM_LIBRARY_LIST_FACE=1`), compiling next |
+| 4 | W-7 Terminal Cards readability (NEW, her live sitting) — before/after mounted captures, a Terminal-only idiom change | NOT-STARTED |
+| 5 | W-4 the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | NOT-STARTED |
+| 6 | W-6 the reorder hiding (UNGATED, her bigger shape) + W-5 the dead insertion line (folds in if the trace says so) | NOT-STARTED |
+| 7 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
