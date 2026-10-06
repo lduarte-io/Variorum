@@ -206,6 +206,24 @@ new Mac until it runs 0.9.2, or install 0.9.2 directly (close). The other 0.9.1-
 duplicates (gatherings · quicknote · Sherlock) fold once the Mac updates; Jekyll alone would
 persist. HER CALL PENDING — recorded here so the close ritual checks it.
 
+**FOR 13s's INTAKE — HER FINAL SEED SET (her words, same sitting ~18:40):** "it's still
+scheduled in 13s that we'll be reducing what is already in the pre-seeded set to just being
+the field guide, sherlock holmes, maybe one standalone note, and an empty starred notes
+gathering. i think that's the final set i decided - also the journal empty I suppose (or does
+it not appear when it's empty?)". The orchestrator's answers, same turn (code-verified): the
+daily JOURNAL is not seeded today and needs no seeding — no seeder mints it; the first ⌘J /
+Today's Entry filing mints it (designated, born starred, pinned) and from then on it is
+archive-only, undeletable, comes back when a day arrives — so the reduced set leaves it
+exactly as is. The QUICKNOTES gathering, once cut from the seed, has the same backstop
+(`ensureQuicknotesBook`: the first quicknote filing mints + designates it; a designation she
+dangled by deleting is honored — no re-mint). ONE CONSEQUENCE FOR 13s TO CONFIRM: with
+Quicknotes cut, the born-starred furniture is gone, so a fresh store's STARRED SHELF is EMPTY
+until the first ⌘J mints the born-starred Journal — R-17y-9's shown-always one-liner covers
+the face; whether empty-at-birth is the want is hers at 13s. (The cut set under this
+statement: Encryption Explained, the classics gathering, the Quicknotes gathering, the seeded
+quicknote — "maybe one standalone note" possibly standing in for the last. 13s's mockup-first
+territory per R-17y-8; nothing here runs in 17y.)
+
 ## THE OVERNIGHT MANDATE (hers, 2026-10-05 ~04:30 — verbatim; binds the rest of the pass)
 
 "I'm stepping away for the night - continue onwards with the plan and rule things provisionally
