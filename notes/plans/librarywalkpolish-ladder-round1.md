@@ -283,3 +283,40 @@ concerns (identity stamps, viewport, fixing) have no purchase on a SwiftUI chrom
 reviewer's final call (the cross-model contract's confirm-and-implement path requires a traceable
 mechanism; this one has none). The fix diff stands as committed; the pass moves to VR-122 and her
 re-walk.**
+
+## THE FINAL ROUND (fresh `opus-reviewer`, 2026-10-06; diff c7d58bef..057d8153 — VR-122's guide pass + the orchestrator's J-15 helper fix; the last machine gate before her walk)
+
+**Verdict: 0 BLOCKER · 0 MAJOR · 3 MINOR · 3 NIT — nothing stops the release; the three
+MINORs were ⌘/ helper copy, all FIXED AT THIS SEAM with the pin the class never had.**
+
+**THE ROUND'S HEADLINE IS THE ORCHESTRATOR'S OWN ERROR, owned:** the J-15 helper fix was
+wrong TWICE — its new row taught a ＋ the masthead cards do not render
+(`MastheadTagCluster.chipsShowAddDoor == false`; the ＃ is the one door), and its
+"Toggle Star did not reproduce" conclusion was itself the error (the helper's
+`StarCopy.verb` IS "Toggle Star" while every right-click row wears `StarCopy.starRow` —
+reading the dynamic expression and assuming the constant matched the rows was exactly the
+shallow check the hallucination guard exists to catch). The round was spawned with "zero
+deference to the orchestrator's edit" and earned it. Dispositions (same-model, the
+orchestrator's): findings 1–3 CONFIRMED-FIXED at this seam, the reviewer's exact shapes,
+with `HelperCurrencyTests` committed RED AHEAD (5 issues across 3 arms) → GREEN
+(NIT-4's answer: the helper's claim-classes now carry the currency pin the guide just
+got); NIT-5 (three partial bindings in `TutorialCurrencyTests`) RECORD-ONLY, tighten at
+next touch — none hollow for its own F; NIT-6 (J-17 landing guidance: keep S4-20's
+per-post mode memory as a local persistent fact, never folded into 17q's separate scroll
+parenthetical) ABSORBED into the canon-deltas-owed line.
+
+**The clean bill held:** every F-1…F-12 rewritten sentence verified TRUE against the
+shipped code site by site; no true sentence broken (each touched lesson read whole; the
+staged block indices still land); the currency pins bind to the app's own constants with
+per-arm red-on-old traced; the fold drift guard RE-RUN by the reviewer (Mac 122/16 + core
+`SeededFurnitureDedupeTests` 17/17 — two fresh mints of the EDITED seed still fold).
+
+**The two observations, both landed:** (1) 0.9.1 installs keep their pre-VR-122 guide
+until Help ▸ Restore Tutorial — new users get the corrected guide at birth; existing beta
+users need the restore press (any notes mention is hers, the notes approved). (2) **THE
+RE-SEED ORDER IS LOAD-BEARING:** her real store's guide re-seed must run ON the refreshed
+0.9.2 build — a 0.9.1-seeder re-seed would reproduce keep-both at the new-Mac sign-in;
+the close list now says so explicitly.
+
+**THE PASS'S MACHINE GATES ARE ALL CLOSED.** What remains is HERS: the re-walk, the word,
+the release, the arc's close.

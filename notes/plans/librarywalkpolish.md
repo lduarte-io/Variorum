@@ -3,10 +3,11 @@
 > **STATUS: THE BATCH-1 LADDER CLOSED CLEAN (round 1: 1 MAJOR · 5 MINOR · 5 NIT → the fresh
 > fix round, all eight landed, END 522/80 → round 2 FABLE: 0 BLOCKER · 0 MAJOR · 0 MINOR ·
 > 1 NIT record-only-speculative, every fix CONFIRMED, no round 3 — `librarywalkpolish-ladder-
-> round1.md` carries the whole arc, f83e7058). VR-122 DONE (the guide current; 12 fixes,
-> 15 reword items recorded for her). NOW RUNNING: the FINAL cold round (the VR-122 seed
-> diff + the orchestrator's J-15 helper fix). Then HER re-walk → her word → the release +
-> the arc's close.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> round1.md` carries the whole arc). VR-122 DONE (the guide current; 12 fixes, 15 reword
+> items recorded for her). THE FINAL ROUND DONE (0 BLOCKER · 0 MAJOR; its three helper-copy
+> MINORs fixed at the seam with `HelperCurrencyTests` red→green — incl. the orchestrator's
+> own twice-wrong J-15 fix, owned in the record). **ALL MACHINE GATES CLOSED. NOW: HER
+> re-walk → her word → the release + the arc's close.** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
@@ -99,7 +100,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
   the issues closed on GitHub as their rows close · 17y's deferred MACHINE acts run once
   here at the arc's end (the `/Applications` refresh at a zero-instance window behind A1 ·
   her real store's guide re-seed via Help ▸ Restore Tutorial… · the DerivedData sweep (17y,
-  17y-mobile, 17y-review2..6, 17y-wfix) · the worktree removed after its last push) · memory
+  17y-mobile, 17y-review2..9, 17y-wfix, 17y-wfix2, 17y-vr122, 17y-orch) · the worktree removed after its last push) · memory
   updated · HER NEW-MAC INSTALL follows the release (download from the website, 0.9.2
   only — the first LIVE run of the furniture fold; the verification doc + her fresh
   session's kickoff prompt: `notes/plans/new-mac-sync-verification-2026-10-06.md`) · hard
