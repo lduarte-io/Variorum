@@ -74,6 +74,7 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 | VR-118 | Book reorder steps back for 0.9.2: "my order" + Send to Top/Bottom + grips hidden whole (R-LWP-4) | 1 (building) | OPEN |
 | VR-119 | The strip's delineation: Option 2 — restrained light-wash squares, solo'd chip filled, per the committed reference (R-LWP-2) | 1 (building) | OPEN |
 | VR-120 | Book reorder RETURNS, done properly — the editor block drag's feel as the bar (R-LWP-4's other half) | — POST-RELEASE, at her word; NOT this pass's build | OPEN (deferred) |
+| VR-121 | The Book Panel's drag feel — works, ships as-is in 0.9.2 (her ruling at the walk: "note it as an issue that has to be fixed until it reaches the blocks drag and drop level of smooth, but we can leave it in for now. it does work, and it's a more hidden surface so I'll let it stay"); the post-release drag-feel family beside VR-120, the editor's block drag the shared bar | — POST-RELEASE, with VR-120 | OPEN (deferred) |
 
 ## THE SHAPE OF THE PASS
 
