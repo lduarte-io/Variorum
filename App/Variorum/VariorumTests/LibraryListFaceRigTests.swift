@@ -417,10 +417,37 @@ struct LibraryListFaceRigTests {
         /// Nothing more to list: the fling ends at the Library's end.
         var exhausted: () -> Bool = { false }
 
+        /// WHEEL: each tick delivers a phased, continuous (trackpad-shaped)
+        /// scroll-wheel event STRAIGHT to the scroll view's `scrollWheel(with:)`
+        /// — built from a `CGEvent` that is never posted, so nothing reaches
+        /// the system's event stream or her pointer. CLIP: the clip view is
+        /// moved by hand (no scroll-view machinery at all).
+        var wheel = false
+        private var phase: Int64 = 1
+        private var startY: CGFloat = 0
+
         init(scroll: NSScrollView, speed: CGFloat, limit: TimeInterval) {
             self.scroll = scroll
             self.speed = speed
             self.limit = limit
+        }
+
+        private func deliver(dy: CGFloat, phase: Int64) {
+            guard let cg = CGEvent(
+                scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1,
+                wheel1: Int32(-dy.rounded()), wheel2: 0, wheel3: 0) else { return }
+            cg.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
+            cg.setIntegerValueField(.scrollWheelEventScrollPhase, value: phase)
+            cg.setIntegerValueField(.scrollWheelEventMomentumPhase, value: 0)
+            cg.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: Int64(-dy.rounded()))
+            if let window = scroll.window {
+                let center = scroll.convert(NSPoint(x: scroll.bounds.midX, y: scroll.bounds.midY), to: nil)
+                let screen = window.convertPoint(toScreen: center)
+                let height = NSScreen.screens.first?.frame.height ?? 0
+                cg.location = CGPoint(x: screen.x, y: height - screen.y)
+            }
+            guard let event = NSEvent(cgEvent: cg) else { return }
+            scroll.scrollWheel(with: event)
         }
 
         @objc func tick(_ link: CADisplayLink) {
@@ -437,14 +464,27 @@ struct LibraryListFaceRigTests {
             let documentHeight = scroll.documentView?.frame.height ?? 0
             let maxY = max(0, documentHeight - clip.bounds.height)
             let step = speed * CGFloat(dt)
-            let target = min(maxY, clip.bounds.origin.y + step)
-            travelled += target - clip.bounds.origin.y
-            clip.scroll(to: NSPoint(x: 0, y: target))
-            scroll.reflectScrolledClipView(clip)
+            let from = clip.bounds.origin.y
+            let target: CGFloat
+            if wheel {
+                // The wheel road scrolls asynchronously (responsive scrolling):
+                // travel is read as where the clip IS, from where it started.
+                if phase == 1 { startY = from }
+                deliver(dy: phase == 1 ? 0 : step, phase: phase)
+                phase = 2
+                target = clip.bounds.origin.y
+                travelled = target - startY
+            } else {
+                target = min(maxY, from + step)
+                travelled += target - from
+                clip.scroll(to: NSPoint(x: 0, y: target))
+                scroll.reflectScrolledClipView(clip)
+            }
             if now - started > limit || (target >= maxY - 0.5 && exhausted()) { finish() }
         }
 
         func finish() {
+            if wheel, phase == 2, !done { deliver(dy: 0, phase: 4) }
             link?.invalidate()
             link = nil
             done = true
@@ -472,7 +512,8 @@ struct LibraryListFaceRigTests {
     }
 
     private func feel(
-        _ session: AppSession, cards: Bool, speed: CGFloat, seconds: TimeInterval, run: Int
+        _ session: AppSession, cards: Bool, speed: CGFloat, seconds: TimeInterval, run: Int,
+        wheel: Bool
     ) async throws -> FeelRun {
         let theme = ThemeStore(session: session)
         let observing = Task { await theme.start() }
@@ -489,6 +530,7 @@ struct LibraryListFaceRigTests {
         let visible = window.occlusionState.contains(.visible)
         let before = LibraryPagedNotesProbe.rowBodies
         let flinger = Flinger(scroll: scroll, speed: speed, limit: seconds)
+        flinger.wheel = wheel
         let link = hosting.displayLink(target: flinger, selector: #selector(Flinger.tick(_:)))
         flinger.link = link
         flinger.exhausted = { !model.notesHaveMore && !model.loadingMoreNotes }
@@ -500,7 +542,7 @@ struct LibraryListFaceRigTests {
         }
         flinger.finish()
         return FeelRun(
-            label: "\(cards ? "Cards" : "List ") \(Int(speed)) pt/s run \(run)\(visible ? "" : " (OCCLUDED)")",
+            label: "\(wheel ? "wheel" : "clip ") \(cards ? "Cards" : "List ") \(Int(speed)) pt/s run \(run)\(visible ? "" : " (OCCLUDED)")",
             gaps: flinger.gaps, travelled: flinger.travelled,
             listed: model.noteHits.count,
             rowsBuilt: LibraryPagedNotesProbe.rowBodies - before)
@@ -525,17 +567,20 @@ struct LibraryListFaceRigTests {
             }
             var report = "# \(LibraryListFaceRig.label) — the feel (822 notes, scope Notes, 1000×800, Debug test host)\n"
             var detail = ""
+            for wheel in [true, false] {
             for speed in [CGFloat(3_750), 7_500] {
                 for cards in [false, true] {
                     for run in 1...2 {
                         let result = try await feel(
-                            session, cards: cards, speed: speed, seconds: 6, run: run)
+                            session, cards: cards, speed: speed, seconds: 6, run: run,
+                            wheel: wheel)
                         report += result.summary + "\n"
                         detail += "## \(result.label)\n"
                             + result.gaps.map { String(format: "%.1f", $0) }.joined(separator: " ")
                             + "\n"
                     }
                 }
+            }
             }
             Self.write(text: report, "\(LibraryListFaceRig.label)-feel.txt")
             Self.write(text: detail, "\(LibraryListFaceRig.label)-feel-frames.txt")

@@ -3465,6 +3465,18 @@ tone indicator too": every shelf name on a quiet near-square light-wash chip, th
 with the subtle accent tone; token-layer only; both voices (Terminal derived from the same tokens);
 captures both voices. Priority order unchanged; the strip rides beside the census work.
 
+**THIRD SCOPE UPDATE (the orchestrator's message, ~21:00 — R-LWP-1 AMENDED at her screenshots; the
+binding text is `notes/plans/librarywalkpolish.md` R-LWP-1's amendment, read before building):** the
+direction INVERTS — the NATIVE order menu "looks out of place in the app"; the float's "font and
+sizing and such is better, but solo is fairly meaningless - highlighting the selected row would be
+better". THE RULED SHAPE: ONE shared masthead-popover idiom for BOTH droppers (№ and order ▾) — the
+float's current typography kept; hairline + menu-grade shadow, width-to-content, seated under its
+control; the SELECTED/ACTIVE row carries a quiet wash (the strip's filled-chip language); NO
+checkmarks, NO "solo" column — the row is the act, re-clicking the highlighted census row CLEARS its
+solo (PROVISIONAL); the order popover's rows a–z · last edited (my order hidden, VR-118); opening
+either dismisses the other. The compose rider and verify-first stand; token layer only; both
+voices; captures of both popovers.
+
 ### LIVE STATUS (flipped per commit; PENDING = unverified)
 
 | # | piece | status |
@@ -3476,7 +3488,7 @@ captures both voices. Priority order unchanged; the strip rides beside the censu
 | 4 | W-7 Terminal Cards readability (NEW, her live sitting) — before/after mounted captures, a Terminal-only idiom change | NOT-STARTED |
 | 5 | W-4 the compact drag image AT THE CURSOR, from anywhere on the row (refined) + the adoption list | NOT-STARTED |
 | 6 | W-6 the reorder hiding (UNGATED, her bigger shape) + W-5 the dead insertion line (folds in if the trace says so) | NOT-STARTED |
-| 2b | VR-115's growth: the census float as the order menu's sibling (Option A) + the solos-compose-within-a-shelf rider (verify first) | NOT-STARTED |
+| 2b | VR-115's growth (AMENDED): ONE masthead-popover idiom for № AND order ▾ (the float's typography, the selected row washed, no checkmarks/solo column; order rows a–z · last edited) + the compose rider (verify first) — with VR-118's effective order (my order hidden, the stored preference never rewritten) since the order rows need it | NOT-STARTED |
 | 2c | VR-119 the strip's light-wash squares, the solo'd one filled (Option 2) | NOT-STARTED |
 | 7 | END suites + record close (findings, PROVISIONALs → QUESTIONS #188) | NOT-STARTED |
 
