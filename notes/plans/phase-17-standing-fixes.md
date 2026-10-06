@@ -1820,7 +1820,31 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   see books - the other selector should automatically switch from 'All' to 'Notes' in that
   case" — the Cards VIEW renders notes only (true on 0.9.1 too, her install's screenshot),
   so the SCOPE chip reading "All" is dishonest there; her ruled shape = picking Cards
-  auto-switches the scope chip All→Notes. Disposition pending the same reply. Then HER GATES:
+  auto-switches the scope chip All→Notes. Disposition pending the same reply. **THE WALK'S
+  FULL RETURN (~19:55, with five dev-store screenshots — Study voice, she flipped it
+  herself): THE "DISASTER" DISSOLVED BY HER OWN CATCH** — "I see now that I was on cards the
+  whole time on the dev store... I just fell victim to the same bug I wanted to start - the
+  confusing user experience of being on 'all' but not seeing books. Lol, it's almost funny."
+  NO revert anywhere: **the (k) RIDER IS APPROVED in her words** ("The book page is fine
+  visually and the way books and notes split the screen is great - the UI of the scroll is
+  fine... books do not need to flow whole above notes - I like the change visually").
+  **HER RULINGS AND FINDINGS, the B-WALK round's binding list:** (W-1) #187(i) ANSWERED FIX
+  — "the scroll itself is not fine... glitching and lags on the way down. ew!! not in our
+  app"; (W-2) BOTH auto-switches ruled — "yes to building the cards notes auto switch and if
+  someone clicks on all from inside card view, move them off the card view"; (W-3) the
+  census float COVERS the order ▾ menu when clicked second — "unexcusable UI. not good at
+  all"; (W-4) the drag image is the row's scattered full-line text — "needs to be clearer
+  what is being dragged... maybe as you drag it becomes just the title"; (W-5) in a–z order
+  a book drag shows an insertion line that does nothing on release — "remove the useless
+  line"; (W-6, HER OFFER pending her confirm) my-order drag-to-reorder "so laggy and such a
+  mess... doesn't inspire confidence... we can postpone the drag to reorder feature -
+  that's fine" (the editor's block drag named as the bar). PROPOSE-ONLY with her: the census
+  float's look ("a little big ugly still... any other ideas?") and the strip's delineation
+  ("the words need more delination... maybe subtle subtle tab colors... the folder look
+  might be nice... open to ideas"). Also hers: no release-notes line for the hover fix; her
+  real store quit again; "not sure what book panel drags is" (answered in the reply). **THE
+  B-WALK FIX ROUND SPAWNS NOW (fresh opus-implementer; the brief at this file's tail; an
+  opus-reviewer round after).** Then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
@@ -3285,3 +3309,62 @@ keyset paging at corpus scale is the mobile project's question (its lists were n
   byte-for-byte) — no `Sync/`, no migration, no schema.
 - DEBUG-only: `ScaleFixture.swift` + its hook in `VariorumApp.swift`; `Tools/ScaleFixture/`.
 
+
+## 17y B-WALK BRIEF — her walk's fix round (written by the orchestrator 2026-10-05 ~20:10; ONE acceptance unit; a fresh `opus-implementer` session)
+
+**Preflight (your own context, never delegated):** CLAUDE.md + its auto-loaded canon; this
+file's 17y row + the RUN RECORD's HER WALK blocks (her words there are the BINDING findings)
++ the B1 RECORD (§ THE (k) DESIGN, § THE (k) NUMBERS, finding F-B1-5) + the B2 RECORD (the
+drag-type mechanism and sites) + the B3 RECORD (item (r)'s census overlay + the strip) +
+`notes/plans/17y-b1-ladder-round1.md` whole; `notes/QUESTIONS.md` #187 (its (i) carries her
+answer); the Library feature files (`LibraryCatalogView/Model/Paging/BooksRegion/
+PagedNotes`), `NoteTagChips`, the Bookcase's board/strip files for W-3/4/5.
+**Environment:** worktree `~/dev/variorum-17y` ONLY (never ~/dev/variorum); DerivedData
+`App/Variorum/DerivedData/17y-wfix`; pathspec-limited commits, NO trailers, push after every
+commit; LIVE STATUS from the first commit; `notes/SessionResiliencyProtocol.md` binds; STOP
+on any `Sync/`/schema/custody/mobile/seed need. **THE AUTHOR IS AT THE MACHINE** and the
+scale fixture is STAGED on the dev store: build and test headlessly (mounted suites fine),
+NO GUI driving, NEVER stage/restore any store, NEVER touch a running Variorum instance.
+
+**The items (each with a red-on-old or build pin; her words in the RUN RECORD bind):**
+- **W-1 — THE LIST SCROLL (the round's core; #187(i) answered FIX).** The mechanism is
+  known (F-B1-5: `NSTableView` automatic row heights + hosting per inserted row, ~3–4 ms,
+  framework-side). The ruled road: the List mode's NOTES render on the same lazy-column
+  engine Cards uses (`LibraryPagedNotes`' road) wearing EXACTLY the List's row face — pitch,
+  separators, title/`＋`/chips, right-aligned timestamp, selection (click, ⌘-click, range),
+  double-click open, context menus, the day filter, acts-in-place, the sentinel row. Books
+  region + section headers keep their construction unless the seam forces otherwise (record
+  it if so). ACCEPTANCE: (a) LOOK PARITY — same-position before/after captures compared +
+  the row geometry pinned (pitch, separator, timestamp alignment); (b) FEEL — a
+  hand-speed-class fling on the 822-note fixture at Cards' own cadence (no frame > 50 ms;
+  mean/max reported before/after, display-link probe); (c) every Library-touching suite
+  green (justified edits ONLY where a pin probed NSTableView internals, each labeled); (d)
+  the appearance-flip, landing-skip and infinite-scroll pins keep passing on the new engine.
+- **W-2 — the view/scope auto-switches (RULED):** picking Cards switches scope All→Notes;
+  picking All while in Cards switches the view off Cards (to List). Other combinations
+  untouched (record any edge as PROVISIONAL). Pins: both switches.
+- **W-3 — the census float vs the menus (RULED):** the № census overlay must never cover an
+  open masthead menu — opening order ▾ (or any masthead menu/popover) DISMISSES the float;
+  № toggles cleanly beside them. Pin the dismissal state rule; captures for the faces.
+- **W-4 — the drag image (RULED shape):** a Bookcase book-row drag presents a COMPACT drag
+  image — the title (star + name), never the scattered full-width row snapshot. Fix the
+  Bookcase row now; ENUMERATE in the record every other site sharing the full-row-snapshot
+  class (Library rows, panel rows) as the adoption list (next touch).
+- **W-5 — the dead insertion line (RULED):** in a DERIVED order (a–z · last edited) a
+  book-row drag shows NO reorder insertion line (release is not an act there — the line is
+  a false offer; §12's rule: a door that does nothing must not offer). Drop-on-shelf
+  targets unchanged. Pin: no insertion target under a–z; a shelf drop still lands.
+- **W-6 — GATED on her word (it arrives by message; do NOT build before it):** postpone
+  my-order drag-to-reorder — hide the grips, disable row-reorder drags; Send to Top/Bottom
+  and the my-order sort itself STAY; a KnownIssues row re-owns the feel pass (the editor's
+  block drag named as the bar); the 0.9.2 notes' drags line rewords (the orchestrator
+  handles the notes edit).
+
+**NOT in scope:** the census float's LOOK and the strip's delineation (propose-only, with
+her); anything `Sync/`; Cards' own styling; the phone.
+
+**Record:** append "## 17y B-WALK RECORD" at this file's tail, LIVE STATUS from the first
+commit, NOT-DONE first line. END: the Library-touching Mac suites + core
+`LibraryPagingTests` (the whole-Mac END is not owed — the reviewer's round covers the gap).
+QUESTIONS' next free number: **#188**. A fresh `opus-reviewer` cold round follows the
+hand-back.
