@@ -3018,7 +3018,11 @@ pointer wakes the moment the scroll stops (`j-after-wake-after-scroll.png`).
   below what is on screen), the block hits of a typed query still capped at 40 and said so. A NEW
   question (query · scope · sort · direction · day · wing) starts over; an ACT on a row re-reads IN
   PLACE at the depth she scrolled to (one statement ∝ what is listed, once per act). The day filter's
-  answer stays the whole set (unchanged).
+  answer stays the whole set (unchanged). Mid-listing edits (the ladder's NIT-2): a note that moves
+  ACROSS the cursor is listed once, never twice (the landing dedupe); one that moves ABOVE every page
+  read so far is ABSENT until the next question or act — the one-shot listing's own staleness, the
+  shipped 40-row class (the catalog re-asks on Library appear and after every row act, and an
+  already-listed note keeps its old position either way).
 - **P1 — the near window**: only the pages around what is on screen (page-quantized) load their
   extras (tag chips, card words) and have their ownership facts HELD (the model owns the one
   observation, re-aimed only when the window's ids change); the window is unobserved by the views
@@ -3225,7 +3229,10 @@ fixture never exists outside a DEBUG build.)
 
 ### PROVISIONALs (QUESTIONS #187 — in her words there)
 
-P-17y-B1-j1 (the resting row controls drawn as a still image, a shade lighter) · P-17y-B1-k1 (the
+P-17y-B1-j1 (the resting row controls drawn as a still image, a shade lighter — and a still image
+to ACCESSIBILITY too, the ladder's NIT-5: VoiceOver reaches the real ↑ ↓ ⋯ on the SELECTED row,
+selecting being one VO act; the scroll-free alternative, hers to order, is custom accessibility
+actions on every row, reachable without selecting) · P-17y-B1-k1 (the
 batch sizes: 80, then growing, capped at 1,280; asked for well before the end) · k2 (a batch read
 mid-scroll waits for the rows to rest — 200 ms — or lands at once within 40 rows of the end) · k3
 (books are listed whole; the books region under All splits off past half the height) · k4 (a typed

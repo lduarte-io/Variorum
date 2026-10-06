@@ -170,6 +170,55 @@ standing ladder rules).
   sentence: custom accessibility actions on every row (not AppKit controls — scroll-free,
   VO-reachable without selection).
 
-### The reviewer's final calls + fixes
+### The reviewer's final calls + fixes (the reviewer's own session, 2026-10-05; every call final)
 
-- (pending at this commit; the reviewer implements its confirmed fixes itself and appends here)
+- **MAJOR-1 — CONFIRMED, FIXED.** Pin first, the standing discipline:
+  `standingRowsFollowAnAppearanceFlip` (`LibraryInfiniteScrollTests`) mounts the catalog, settles
+  a titled/untagged/bookless fixture to a steady state (nothing but the appearance changes between
+  the two counts), flips `window.appearance` aqua → darkAqua and counts standing-row bodies — **RED
+  on the pre-fix tree exactly as traced ("an appearance flip re-drew 0 standing rows"), committed
+  red at 671f2e5e.** The fix (5d26208d): `LibraryNoteRowHost` compares its colour SCHEME beside its
+  hit, the scheme read by `LibraryPagedNotes`' own `@Environment(\.colorScheme)` — the live
+  hierarchy, never a captured snapshot. **The implementer's `VoiceTokens`-equality alternative was
+  tried FIRST and refused by the compiler:** `VoiceTokens`' `Equatable` conformance is
+  MainActor-isolated under the app target's default isolation, and the host's `==` must stay
+  nonisolated for `.equatable()` ("main actor-isolated conformance of 'VoiceTokens' to 'Equatable'
+  cannot be used in nonisolated context") — widening into `Shared/Theme` to de-isolate it was not
+  this ladder's call, so the reviewer's scheme-field shape landed, with the future-input contract
+  written at the host's doc (any future token input that is not an observable read inside the row's
+  body must join the comparison, or it inherits this class). Pin GREEN; the landing pin
+  (`aPageLandingReDrawsNoRowAlreadyBuilt`) green beside it — a page landing still skips every
+  standing row (the scheme is constant across a landing). **SYNTHETIC REVERT verified:** the `==`
+  clause alone reverted → the pin red again ("re-drew 0 standing rows") → restored → suite 5/5
+  green.
+- **MINOR-1 — CONFIRMED, FIXED (a6bf9b68)** with the implementer's sharper guard, on the IDS:
+  `if !replacing, chipIDs.isEmpty, cardIDs.isEmpty { return }` after the pages are marked (a wanted
+  page that yields no id — a List page of all-titled notes — now also dispatches nothing); the
+  REPLACING path stays unguarded (its empty assignment is the mode switch's clearing;
+  `eachModeReadsWhatItDraws` green). Behaviour-identical by construction — no pin owed, said
+  honestly (any observable-behaviour pin would be green on both sides); the paging suites are the
+  guard.
+- **NIT-1 — FIXED (a6bf9b68):** the moved books-section comment's one word back to B3 (item (l) is
+  B3's).
+- **NIT-2 — record-only as ruled, RECORDED:** the MISS half now stands beside the never-twice half
+  at the landing dedupe comment (a6bf9b68) and in the B1 RECORD's listing bullet (this commit),
+  carrying the implementer's scoping facts (the catalog re-asks on Library appear and after every
+  row act; an already-listed note keeps its old position; the shipped 40-row one-shot class).
+- **NIT-3 — record-only, SPECULATIVE as labelled; no code change.** This round record is its
+  record; the shipped tree carried the same task pair and no deterministic red form exists.
+- **NIT-4 — CONFIRMED as a bounded fix (a6bf9b68):** a NEW question prunes `rowSlices` to its own
+  listing, so the dictionary and the per-write loops stay ∝ the listing, never ∝ every note ever
+  listed this session. The implementer's caveat honoured by construction: a still-listed id KEEPS
+  its slice OBJECT (`filter` keeps instances — a live row whose body the Equatable host skips holds
+  its slice, and a replaced one would go stale under it); `refresh` never prunes. Cleanliness; the
+  paging suites are the guard.
+- **NIT-5 — record-only as ruled, RECORDED:** the sentence beside P-17y-B1-j1 in the B1 RECORD and
+  the rider in QUESTIONS #187(a) (this commit), naming the implementer's alternative for her call —
+  custom accessibility actions on every row, scroll-free, VO-reachable without selecting.
+- **END OF THE FIX PASS, suites green in the reviewer's own DerivedData (`17y-review6`):** the six
+  Mac suites — `LibraryInfiniteScrollTests` (6 cases, the new pin among them) ·
+  `LibraryPagingModelTests` · `NoteIndexColumnScrollCostTests` · `NoteTagsRowHoverTests` ·
+  `LibraryDayFilterTests` · `LibraryCardNameTests` — **46 tests / 6 suites green**, plus core
+  `LibraryPagingTests` 8/8. Commits: 671f2e5e (the red pin) · 5d26208d (MAJOR-1's fix + revert
+  round) · a6bf9b68 (MINOR-1 + NIT-1/2/4) · this one (the records). The implementer's sanity pass
+  over this diff closes the ladder per the standing flow.
