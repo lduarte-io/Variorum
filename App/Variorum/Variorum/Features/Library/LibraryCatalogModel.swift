@@ -72,16 +72,21 @@ final class LibraryCatalogModel {
     /// NOTES only, so a scope reading "All" over it claims books the screen
     /// never shows — "the other selector should automatically switch from
     /// 'All' to 'Notes' in that case", and "if someone clicks on all from
-    /// inside card view, move them off the card view". Pure, both halves:
-    /// picking Cards moves All → Notes; picking All in Cards moves the view to
-    /// List. Every other combination keeps what it had (PROVISIONAL —
-    /// QUESTIONS #188: Cards over Books/Blocks, leaving Cards, the Timeline).
+    /// inside card view, move them off the card view". **GENERALIZED at
+    /// librarywalkpolish round 1 (MINOR-5) and RULED by her (R-LWP-6's
+    /// amendment, ~23:00: "yes, generalized change is fine to work with"):**
+    /// the All-only first build left Cards over Books or Blocks saying "No
+    /// notes match" over a full library — the same dishonest state, reachable
+    /// two ways. Pure, both halves: picking Cards moves ANY scope to Notes;
+    /// picking any scope but Notes while in Cards moves the view to List.
+    /// List and the Timeline are untouched; leaving Cards never moves the
+    /// scope back.
     nonisolated static func scope(afterPicking mode: Mode, from scope: Scope) -> Scope {
-        mode == .notes && scope == .all ? .posts : scope
+        mode == .notes ? .posts : scope
     }
 
     nonisolated static func mode(afterPicking scope: Scope, from mode: Mode) -> Mode {
-        scope == .all && mode == .notes ? .list : mode
+        mode == .notes && scope != .posts ? .list : mode
     }
 
     /// **The view picker's door.** Writes the mode and, under the ruling, the
