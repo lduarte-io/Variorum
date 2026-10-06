@@ -85,6 +85,7 @@ ssh home                        # plain remote shell on the Pro, no tmux
 ssh home tmux ls                # what sessions are alive on the Pro
 tmux neww -c <dir> -n <name>    # (from inside tmux) new window starting in <dir>
 ssh home tmux kill-server       # nuclear: kill ALL tmux sessions on the Pro
+proview <path-on-pro>           # copy a Pro file (mockup.html etc.) here and open it
 ```
 
 Sitting at the Pro itself: same commands without the `ssh home` / `ssh -t home` wrapper.
