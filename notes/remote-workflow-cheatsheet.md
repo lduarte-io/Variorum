@@ -136,12 +136,15 @@ tmux neww -c <dir> -n <name>    # (from inside tmux) new window starting in <dir
 ssh home tmux kill-server       # nuclear: kill ALL tmux sessions on the Pro
 proview <path-on-pro>           # copy a Pro file (mockup.html etc.) here and open it
 pushshot                        # copy newest Air screenshot → Pro, path to clipboard
+pushshots [N]                   # copy the N newest (default 2) → Pro, all paths to clipboard
 ```
 
 **Dropping screenshots into a Pro Claude session** doesn't work directly — the image is on
-the Air, the session reads files on the Pro. Instead: take the screenshot, run `pushshot`
-(no arg = newest; or `pushshot <file>`), then paste (⌘V) the path it put on your clipboard
-into the Claude session. Lands in `~/shots/` on the Pro.
+the Air, the session reads files on the Pro. Instead: take the screenshot(s), run the helper
+in a **local Air shell**, then paste (⌘V) into the Claude session. Lands in `~/shots/` on the Pro.
+- one shot: `pushshot` (newest) or `pushshot <file>`
+- several at once: `pushshots` (2 newest), `pushshots 3` (3 newest), or `pushshots a.png b.png` —
+  all paths land on the clipboard space-separated; one paste attaches them all.
 
 Sitting at the Pro itself: same commands without the `ssh home` / `ssh -t home` wrapper.
 
