@@ -106,6 +106,7 @@ struct MastheadPopover: View {
             }
         }
         .padding(.vertical, 5)
+        .lineLimit(1)  // P-8: one line per row, so the width-to-content is never a wrapped one
         .fixedSize()
         .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))

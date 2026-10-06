@@ -299,6 +299,62 @@ struct LibraryListFaceRigTests {
         }
     }
 
+    /// **The Bookcase's faces for her eye** (librarywalkpolish VR-115 /
+    /// VR-119, captured on screen by the script): the strip's chips at rest
+    /// and with a shelf solo'd, the № popover (a solo washed), the order
+    /// popover — both voices, light.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theBookcaseFaces(voice: ThemeVoice) async throws {
+        try await withLibrary { session in
+            let ops = session.operations
+            let welcome = try ops.createShelf(name: "Welcome")
+            let work = try ops.createShelf(name: "\u{263E} The Work")
+            _ = try ops.createShelf(name: "correspondence")
+            _ = try ops.createShelf(name: "research")
+            let rule = try RuleGrammar.encode(.star)
+            let journal = try ops.createReading(name: "Journal", kind: .book, shelfId: welcome.id)
+            try ops.setStarred(.reading(journal.id), starred: true)
+            _ = try ops.createReading(name: "bind walk", kind: .book, shelfId: work.id)
+            _ = try ops.createReading(name: "dream journal", kind: .gathering, querySpec: rule, shelfId: work.id)
+            _ = try ops.createReading(name: "refresh walk", kind: .gathering, querySpec: rule)
+            _ = try ops.createReading(name: "field notes", kind: .book)
+            _ = try ops.createReading(name: "Encryption Explained", kind: .book, shelfId: welcome.id)
+            try ops.setThemeVoice(voice)
+            let theme = ThemeStore(session: session)
+            let observing = Task { await theme.start() }
+            defer { observing.cancel() }
+            let model = ShelfViewModel(session: session, defaults: try scrubbed("bookcase"))
+            model.censusOpen = false
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1000, height: 560),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.appearance = NSAppearance(named: .aqua)
+            let hosting = NSHostingView(rootView: AnyView(ShelfView(
+                session: session, model: model, readings: ReadingsViewModel(session: session),
+                onOpen: { _ in }, onTodaysEntry: {}).environment(theme)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 560)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer { window.orderOut(nil); window.close() }
+            await settle(window, hosting, 2.0)
+            let label = LibraryListFaceRig.label
+            await hold(window, hosting, "\(label)-bookcase-\(voice)-strip-all")
+            model.toggleCensus()
+            model.toggleSolo(.gatherings)
+            await settle(window, hosting, 0.8)
+            await hold(window, hosting, "\(label)-bookcase-\(voice)-census-open")
+            model.toggleOrder()
+            await settle(window, hosting, 0.8)
+            await hold(window, hosting, "\(label)-bookcase-\(voice)-order-open")
+            model.orderOpen = false
+            model.toggleSolo(.gatherings)
+            model.scope = .shelf(work.id)
+            await settle(window, hosting, 0.8)
+            await hold(window, hosting, "\(label)-bookcase-\(voice)-strip-shelf-solo")
+        }
+    }
+
     private func geometry(_ hosting: NSView, model: LibraryCatalogModel, title: String) -> String {
         var out = "## \(title) — note rows (content frames, catalog space)\n"
         let frames = LibraryPanelOracle.noteRowFrames

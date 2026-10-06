@@ -201,13 +201,21 @@ struct BookcaseStrip: View {
                             close: { panelShown = false })
                     }
             }
-            Button(tokens.chromeLabel("+ shelf")) { onNewShelf() }
-                .buttonStyle(.plain)
-                .font(tokens.navigation)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(1)
-                .fixedSize()
-                .help("Make a new shelf at the end of the strip")
+            Button { onNewShelf() } label: {
+                Text(tokens.chromeLabel("+ shelf"))
+                    .font(tokens.navigation)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .fixedSize()
+                    // VR-119: the reference's "+ shelf" rests on a chip too.
+                    .padding(Self.chipInsets)
+                    .background(
+                        Self.chipFill(active: false, tokens: tokens),
+                        in: RoundedRectangle(cornerRadius: QuietFill.corner))
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Make a new shelf at the end of the strip")
             // Clear air between the shelf names and the utility run (her
             // build note, §24) — the app's own measure, never a pixel copy.
             Spacer(minLength: 36)
@@ -222,7 +230,7 @@ struct BookcaseStrip: View {
 
     private var names: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .firstTextBaseline, spacing: 22) {
+            HStack(alignment: .firstTextBaseline, spacing: Self.chipSpacing) {
                 word(
                     "All", active: model.effectiveScope == .all,
                     help: "Every shelf, stacked in strip order — unshelved books on top"
@@ -232,8 +240,10 @@ struct BookcaseStrip: View {
                     shelfName(shelf)
                 }
             }
-            .padding(.vertical, 3)
-            .padding(.horizontal, 4)
+            // VR-119: the chips carry their own room — the line keeps a hair
+            // of air so a hover outline is never clipped.
+            .padding(.vertical, 1)
+            .padding(.horizontal, 1)
             .lineLimit(1)  // 19g: the strip is one line by contract (P-8)
             .fixedSize()
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }
@@ -262,15 +272,9 @@ struct BookcaseStrip: View {
             ShelfFace.label(shelf), active: model.effectiveScope == .shelf(shelf.id),
             help: "\(count) \(count == 1 ? "book" : "books")" + (isDefault ? " · opens here" : "")
         ) { model.scope = .shelf(shelf.id) }
-        .overlay {
-            // §7: the ONLY rectangle the strip draws — a hairline while a
-            // book or a name hovers over this one.
-            if dropTarget == shelf.id {
-                RoundedRectangle(cornerRadius: 3)
-                    .stroke(tokens.line, lineWidth: 1)
-                    .padding(-4)
-            }
-        }
+        // §7: a hairline while a book or a name hovers over this one — since
+        // VR-119 the chip's own edge.
+        .overlay { chipOutline(dropTarget == shelf.id) }
         .draggable(BookcaseDragToken(.shelf(shelf.id)))
         // 17y B-WALK W-3: a name's right-click menu dismisses the № float
         // (its plain click solos the shelf and leaves the float alone).
@@ -304,13 +308,7 @@ struct BookcaseStrip: View {
             BookcaseCopy.starredShelfName, active: model.effectiveScope == .starred,
             help: BookcaseCopy.starredShelfHelp
         ) { model.scope = .starred }
-        .overlay {
-            if dropTarget == BookcaseBoard.starredSectionID {
-                RoundedRectangle(cornerRadius: 3)
-                    .stroke(tokens.line, lineWidth: 1)
-                    .padding(-4)
-            }
-        }
+        .overlay { chipOutline(dropTarget == BookcaseBoard.starredSectionID) }
         .bookcaseDropSite(
             onHover: { hovering in
                 let key = BookcaseBoard.starredSectionID
@@ -323,7 +321,14 @@ struct BookcaseStrip: View {
         }
     }
 
-    /// One strip word (the mode-row idiom, §21): muted, or ink + weight.
+    /// One strip word. **librarywalkpolish VR-119 (R-LWP-2, her Option 2):**
+    /// every name sits on a quiet near-square light-wash CHIP, the solo'd one
+    /// FILLED with the subtle accent tone and set in weight — her words,
+    /// "very subtle and square - not ugly standard web ui pills, some
+    /// restrained, tasteful, light wash squares... I like the subtle tone
+    /// indicator too" (the committed reference, Part 2 / OPTION 2: every
+    /// chip's word in ink, the solo'd one bold on the fill — PROVISIONAL
+    /// against the old muted-inactive words, #188).
     private func word(
         _ text: String, active: Bool, help: String, action: @escaping () -> Void
     ) -> some View {
@@ -331,13 +336,36 @@ struct BookcaseStrip: View {
             Text(tokens.chromeLabel(text))
                 .font(tokens.navigation)
                 .fontWeight(active ? .semibold : .regular)
-                .foregroundStyle(active ? tokens.ink : tokens.muted)
+                .foregroundStyle(tokens.ink)
                 .lineLimit(1)
                 .fixedSize()
+                .padding(Self.chipInsets)
+                .background(
+                    Self.chipFill(active: active, tokens: tokens),
+                    in: RoundedRectangle(cornerRadius: QuietFill.corner))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help(help)
+    }
+
+    /// The chip's fill (VR-119): the masthead's one quiet language — resting
+    /// wash, or the chosen tone (`QuietFill`, the popovers' selected row too).
+    static func chipFill(active: Bool, tokens: VoiceTokens) -> Color {
+        active ? QuietFill.chosen(tokens) : QuietFill.rest(tokens)
+    }
+
+    /// The chip's room around its word (the reference's 3 × 10 at 13.5 px,
+    /// nearer square).
+    static let chipInsets = EdgeInsets(top: 3, leading: 9, bottom: 3, trailing: 9)
+    /// The air between two chips (the reference's 4 px, a touch more).
+    static let chipSpacing: CGFloat = 6
+
+    /// A drag's hover outline on a chip — the chip's own square, never a
+    /// rectangle drawn around it (§7's only rectangle, now the chip's edge).
+    private func chipOutline(_ shown: Bool) -> some View {
+        RoundedRectangle(cornerRadius: QuietFill.corner)
+            .stroke(shown ? tokens.line : Color.clear, lineWidth: 1)
     }
 
     // MARK: The utility run — № · order ▾ · details
