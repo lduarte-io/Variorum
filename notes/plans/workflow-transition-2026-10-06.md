@@ -115,18 +115,29 @@ session roster); the lock file is the arbiter, messages the courtesy channel.
 - [ ] `gh auth login -h github.com` (the current token is invalid).
 - [ ] GitHub branch protection on `main`: require a pull request before merging; keep her admin bypass.
 
-**Phase 1 — the mint pass (Fable, via MCP/API, same day as Phase 0):**
-- [ ] Projects: 13o — Search · 13x — Library portability · 13s — Voice & onboarding (descriptions
-      point at their canon rows/plan files).
-- [ ] Umbrella tickets per project; branch names taken from them; worktrees created
-      (`~/dev/variorum-13o`, `~/dev/variorum-13x`; 13s branches on the Air).
-- [ ] Open letters re-minted (census §8) with "(was 19h)" etc. in the title; ledger files get a
-      one-line succession note per open entry pointing at its VX ticket.
-- [ ] KnownIssues live rows → tickets (dedupe against the letter/VR tickets — e.g. the Book Panel
-      drag-feel row IS VR-121); then the file becomes a stub.
-- [ ] Open VR items (§8) re-minted with "(was VR-NNN)" titles; `notes/plans/vr-to-vx-map.md` written.
-- [ ] `Tools/vx sync` generates the first `notes/TICKETS.md`; CLAUDE.md transition pointers cleaned.
-- [ ] The In-flight table gets its first rows as sessions actually kick off.
+**Phase 1 — the mint pass — ✔ RAN 2026-10-06 (the API-key road; 59 open tickets, 15 projects):**
+- [x] Projects + FLAGSHIPS: **13o = VX-5** (`vx-5-13o-search`) · **13x = VX-6**
+      (`vx-6-13x-library-portability`) · **13s = VX-7** (`vx-7-13s-voice-onboarding`) — worktrees
+      `~/dev/variorum-13o` / `~/dev/variorum-13x` created; all three branches pushed.
+- [x] THE FULL FUTURE ROADMAP minted as backlog projects with flagships (her ask — "the delight
+      path, the mcp path"): 12 Hardening = VX-22 · 13h = VX-23 · 13m = VX-24 · 13n MCP = VX-25 ·
+      13q Delight = VX-26 · 13t = VX-27 · 13w = VX-28 · 16 Images = VX-29 · 18a = VX-30 ·
+      18b = VX-31 · Mobile = VX-32 · v1 release readiness = VX-33.
+- [x] Open letters re-minted (19h → VX-8 · 17r → VX-9 · 17s → VX-10 · 17w → VX-11 · 17x → VX-12 ·
+      17z → VX-13 · 17j → VX-14); succession notes at both ledgers' heads.
+- [x] Open VR items re-minted (VR-120/121/123/124 → VX-15/16/17/18 Parked post-release;
+      VR-125/126/127 → VX-19/20/21 Todo + Pre-launch); `notes/plans/vr-to-vx-map.md` written.
+- [x] KnownIssues ABSORBED: the file FROZEN at `notes/KnownIssuesArchive-2026-10-06.md` (tickets
+      cite rows by line number; freeze note appended so lines stay stable), stub in its place;
+      rows → VX-34…57 (project-12 FAMILY tickets by the rows' own family names; per-row tickets
+      where individually schedulable; the two flagged mobile rows VX-55/56 stand alone) +
+      VX-58…63 (Parked singles: ex-18n, accessibility, EPUB, grammar, more export, Apple Notes
+      import). The dedupe held: row 108 IS VX-16, rows 44/96/104 ARE VX-9/11/12.
+- [x] `notes/TICKETS.md` generated (59 open); the In-flight table carries the three ready rows.
+- Label note: the polish class wears Linear's existing **Improvement** label (no separate Polish
+  label); Debt · Exploration · Mobile · Pre-launch minted new beside Bug/Feature/Improvement.
+- Her paid-plan note (2026-10-06): she bought the Linear subscription pre-emptively — the
+  250-issue free cap is MOOT; archive-to-stay-under-cap guidance is void.
 
 **Phase 2 — validation:** ~1–2 weeks of real use across the parallel efforts; her word closes it.
 
@@ -171,6 +182,11 @@ the Wednesday polish family). The GitHub export reconciles anything this census 
   doing?":** look in `notes/TICKETS.md` (or Linear) for the project, read its flagship ticket's
   number, open the plan file its description names. Every session can answer this offline from
   the snapshot + the plan file.
+- **THE ORPHAN-POINTER SWEEP (her ratification 2026-10-06 — "we'll make sure that any linear
+  ticket that doesn't have a plan-file path gets found and added"):** she generally goes through
+  Fable for issues and plans, so orphans should be rare; any ticket minted without a repo pointer
+  (a phone-minted one, a quick note in the UI) gets its pointer added at the next triage — the
+  session that notices owns the fix, and a bout-start `vx sync` read is the natural notice point.
 
 ## 10. What deliberately does NOT change
 

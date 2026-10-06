@@ -1,5 +1,12 @@
 # Phase 17 — Standing Fixes (STANDING PLAN)
 
+> **THE 2026-10-06 SUCCESSION (the workflow transition — `notes/plans/workflow-transition-2026-10-06.md`):
+> the lettered era is CLOSED at her word ("no more letters"). This file is an ARCHIVE of its run
+> records; its still-open letters were RE-MINTED as VX tickets on the Linear board and run there:
+> 17j → VX-14 · 17r → VX-9 · 17s → VX-10 · 17w → VX-11 · 17x → VX-12 · 17z → VX-13.
+> Their records below remain the binding mechanism text those tickets cite.**
+
+
 > **THE ALPHABET IS FULL (her word, 2026-10-04):** 17z took the last letter the same night it was
 > minted, and the author ruled the succession at the 13i family close — **new entries open in
 > `notes/plans/phase-19-standing-fixes.md` (19a, 19b, … 19z) from now on.** This file stays the

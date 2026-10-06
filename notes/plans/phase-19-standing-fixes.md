@@ -1,5 +1,11 @@
 # Phase 19 — Standing Fixes (STANDING PLAN, the second ledger)
 
+> **THE 2026-10-06 SUCCESSION (the workflow transition — `notes/plans/workflow-transition-2026-10-06.md`):
+> the lettered era is CLOSED at her word ("no more letters") — the 19 alphabet ends here, never
+> having passed h. New fixes are VX tickets on the Linear board. The one open letter re-minted:
+> 19h → VX-8. The records below remain the binding mechanism text that ticket cites.**
+
+
 > **This phase does not close.** It is the successor ledger to Phase 17, opened at the author's
 > word on 2026-10-04, the night 17's alphabet filled (17z took the last letter): *"we don't have
 > phase 19 right now, right? make a note that future small issues like the 17 rounds should start
