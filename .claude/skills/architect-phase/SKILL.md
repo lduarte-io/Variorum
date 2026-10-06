@@ -1,7 +1,7 @@
 ---
 name: architect-phase
-description: Run a feature/design-heavy Variorum phase under the architect shape — the orchestrator holds an architect mandate, spawns a fresh implementer session per batch (CLAUDE.md's standing cast), keeps repo-first records, runs the review ladder, and bundles author questions into sittings. Use when the author invokes it for a phase (e.g. /architect-phase 18l).
-argument-hint: "[phase number, e.g. 13c — omit to take the master plan's current-phase pointer]"
+description: Run a feature/design-heavy Variorum phase under the architect shape — the orchestrator holds an architect mandate, spawns a fresh implementer session per batch (CLAUDE.md's standing cast), keeps repo-first records, runs the review ladder, and bundles author questions into sittings. Use when the author invokes it for a phase or ticket (e.g. /architect-phase 18l, /architect-phase vx-5, or several ids for a RUN).
+argument-hint: "[phase or ticket id(s): 13c · vx-5 · several ids = a run — omit to take the in-flight table's next effort]"
 ---
 
 # architect-phase — the architect/orchestrator shape
@@ -18,6 +18,14 @@ lands as themed batches rather than one linear plan. CLAUDE.md's
 standing rules (author-only calls, invariants, testing expectations,
 commit conventions) bind here exactly as everywhere; where this file
 and CLAUDE.md conflict, CLAUDE.md wins.
+
+## Resolving the argument (the Linear era — ruled 2026-10-06; this section is IDENTICAL in both phase skills, edit them together)
+
+The argument may be a **phase name** (13o), a **Linear ticket id** (vx-5 / VX-5 / vm-4 — case-insensitive), or **several ticket ids, which means a RUN**. No argument: take the next ready effort from the master plan's IN-FLIGHT table, confirming with the author if more than one is ready.
+
+- **One ticket id:** resolve it in the board snapshot (`~/dev/variorum/notes/TICKETS.md` — main's copy, by that absolute path; the Linear MCP for live detail). A **FLAGSHIP** ticket (a project's first issue, titled the effort's name) means the WHOLE EFFORT — identical to naming the phase: its description carries the plan file and branch, the in-flight table the worktree/machine. A **non-flagship** ticket means that one ticket's work: branch `vx-N-<slug>`, PR titled `VX-N: …`, record per CLAUDE.md's small-fix rule (commit message + PR; a ladder, or a `Sync/`/custody/editor-seam diff, adds `notes/plans/fixes/vx-N-<slug>.md`).
+- **Several ticket ids = a RUN** (the standing-fix runs' successor — RUN A/B's and 17y's shape, lettered no more): mint ONE fresh **RUN TICKET** titled `Run: <theme>` listing the members, make the members its SUB-ISSUES (they keep their own numbers and close one by one as their fixes land — commit messages say `Part of VX-<member>`), and the run ticket's number names the ONE branch (`vx-NNN-<run-slug>`) and ONE PR for the whole run. The run's record file is `notes/plans/fixes/vx-NNN-<run-slug>.md`; a run row joins the in-flight table at kickoff and retires at merge. **Pin-before-fix binds PER MEMBER; the cold review covers the run's whole diff** (Fable whenever ANY member touches `Sync/`, custody/keychain or the editor seam).
+- **Linear duties either way:** the effort's ticket(s) move In Progress at kickoff, In Review at the ladder, Done rides the PR merge (via the MCP where present, else noted for the author). Work happens on the effort's branch in its worktree; `main` is never pushed directly by build sessions.
 
 ## The mandate (what makes this shape different)
 
@@ -143,7 +151,10 @@ and CLAUDE.md conflict, CLAUDE.md wins.
   author confirms or redirects it at each phase kickoff. (13b–13c ran
   other casts; that history is `notes/ProcessHistory.md`'s.)
 - **Preflight before the first spawn:** CLAUDE.md and its auto-loaded
-  canon, the master plan, KnownIssues, `notes/QUESTIONS.md`, the phase
+  canon, the master plan (incl. the IN-FLIGHT table),
+  `notes/plans/workflow-transition-2026-10-06.md`, the board snapshot
+  `~/dev/variorum/notes/TICKETS.md` (the frozen ledger it replaced:
+  `notes/KnownIssuesArchive-2026-10-06.md`), `notes/QUESTIONS.md`, the phase
   plan, `notes/SessionResiliencyProtocol.md` — plus `notes/SyncSpec.md`
   and `notes/TEXTKIT2_NOTES.md` whenever the phase touches their seams
   (they are NOT auto-loaded; a batch brief that touches sync or the
@@ -287,14 +298,14 @@ never rewrite history.
 
 ## Closeout (the standing CLAUDE.md ritual, unabridged)
 
-Results + counts in the plan file; master plan table + pointer +
-closeout-log paragraph, the superseded pointer, prior closeout and
-AppSpec §14's outgoing delta rolled into `notes/PhaseCloseoutArchive.md`
+Results + counts in the plan file; master plan table + the effort's
+IN-FLIGHT row retired + closeout-log paragraph, the superseded pieces
+and AppSpec §14's outgoing delta rolled into `notes/PhaseCloseoutArchive.md`
 / `notes/AppSpecDeltaArchive.md`; canonical-doc deltas applied exactly
 as the author ruled them (never beyond — and as a CONTRACT line plus a
 pointer to the plan's ruling, never a paragraph of history: AppSpec's
-size is a context cost every session pays); KnownIssues rows resolved
-or re-owned; every ledger row dispositioned or re-owned — no orphans;
+size is a context cost every session pays); the effort's board tickets
+closed or re-owned — no orphans; the PR merges to `main` as a MERGE COMMIT;
 the MOBILE PARITY line (a `notes/MobileSoul.md` ledger row, or the
 words "nothing mobile-visible"); the author handoff
 (`notes/handoffs/phase-NN-handoff.md`, her checklist at the top,

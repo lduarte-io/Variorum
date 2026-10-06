@@ -205,6 +205,20 @@ the Wednesday polish family). The GitHub export reconciles anything this census 
   doing?":** look in `notes/TICKETS.md` (or Linear) for the project, read its flagship ticket's
   number, open the plan file its description names. Every session can answer this offline from
   the snapshot + the plan file.
+- **THE THREE SIZES OF WORK, and the RUN (her ask 2026-10-06 — "sometimes I want to run multiple
+  bug fixes together under one orchestrator"):** (1) a SINGLE small ticket runs alone — its own
+  branch `vx-N-slug`, its own PR, record = commit message + PR (§1 item 7). (2) **A RUN bundles
+  several small tickets under ONE orchestrator** — the standing-fix runs' successor (RUN A/B,
+  17y): mint one fresh **RUN TICKET** (`Run: <theme>`), members become its SUB-ISSUES keeping
+  their own numbers and closing one by one as their fixes land; the run ticket's number names
+  the ONE branch (`vx-NNN-<run-slug>`) and ONE PR; the record file is
+  `notes/plans/fixes/vx-NNN-<run-slug>.md`; a run row joins the in-flight table; pin-before-fix
+  binds PER MEMBER and the cold review covers the run's whole diff. The door:
+  `/run-phase vx-a vx-b vx-c` (or `/architect-phase` — both skills resolve ticket ids and carry
+  this section's text since 2026-10-06). (3) a PHASE/EPIC is a PROJECT with a flagship —
+  "phase" was always two fused things: a product-scoped chunk (now project + flagship) and an
+  EXECUTION RITUAL (one orchestrator, preflight, cast, ladder, closeout), and the ritual binds
+  per orchestrator session at every size.
 - **THE ORPHAN-POINTER SWEEP (her ratification 2026-10-06 — "we'll make sure that any linear
   ticket that doesn't have a plan-file path gets found and added"):** she generally goes through
   Fable for issues and plans, so orphans should be rare; any ticket minted without a repo pointer
