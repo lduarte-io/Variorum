@@ -112,3 +112,34 @@
   starred NOTES show empty at birth; born-starred BOOKS (Journal, Quicknotes) stand, and the
   starred SHELF (built at 17y item (s), R-17y-9) can have Journal on it. The earlier
   born-starred flag above is answered by this.
+
+## INTAKE FROM 17y + librarywalkpolish (2026-10-06, the 0.9.2 close — at her word: "make a note for the 13s session of where those extra rewording items are")
+
+The 0.9.2 pass changed user-facing words AFTER her App Strings workbook was minted, so the
+workbook does not carry them. **The field guide is EXCLUDED from this intake at her word**
+("field guide differences don't matter, because I'll simply restore that one" — her restored
+copy IS the current text; reword it in place). What 13s should know about:
+
+- **The ⌘/ helper changed FOUR entries** (not in the workbook): the "tag cards (masthead)"
+  row, the Windows star row + the "star" dictionary entry (the right-click word is
+  `StarCopy.starRow`, ⌘K's act is `StarCopy.verb` — keep both constants interpolated; the
+  `HelperCurrencyTests` pins bind the claims), and the "tag" dictionary entry. File:
+  `App/Variorum/Variorum/Features/Help/HelperView.swift`. Diff:
+  `git diff 6c8e4f02..origin/main -- App/Variorum/Variorum/Features/Help/HelperView.swift`.
+- **FIFTEEN judgment-shaped wording items (J-1…J-14, J-16) are recorded, deliberately not
+  built** — whether/how the guide and helper should TEACH the new surfaces (the census
+  popover, the Cards/Notes switch, drop-to-star, the cross-wing "Now in …", the Arrivals
+  icon's two states, inline book creation in the add-to-book picker, "unfiled", book archive
+  in the map lessons, the Book Panel, …). THE LIST: `notes/plans/librarywalkpolish-vr122-
+  guide-pass.md` (the audit table carries each with its anchor). These are 13s's re-voicing
+  decisions, hers.
+- **Wording guards now exist and will bite re-voicing:** `TutorialCurrencyTests` (lesson
+  claims bound to the app's constants), `noLessonTeachesADoorThisReleaseHides` (the hidden-
+  door set derives from the model — a paraphrase escapes it, a label tracks),
+  `HelperCurrencyTests`, `DeadVocabularyTests`. A 13s re-voice that renames a door updates
+  the constant, and the pins follow for free; prose that contradicts a door goes red.
+- **Release notes: from 0.9.3 SHE WRITES THEM herself** (R-17y-10 — "i'll write them myself
+  in the future"); nobody drafts unless she asks.
+- Standing from the earlier 17y sittings, already in this file's territory: her FINAL SEED
+  SET statement + the starred-shelf-empty look decision (the 17y rulings file's "FOR 13s's
+  INTAKE" section, verbatim).
