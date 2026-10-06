@@ -81,20 +81,28 @@ final class PressReporterView: NSView {
 
     /// The monitor's body (internal: the pins hand it an event directly —
     /// never through the window, where a `Menu` would start its tracking).
+    ///
+    /// **librarywalkpolish round 1's NIT-1:** only the part of the reporter
+    /// that is ON SCREEN answers — its bounds intersected with its
+    /// `visibleRect` (MEASURED on macOS 27: a view that does not clip to its
+    /// bounds, the macOS 14+ default, reports a `visibleRect` NOT intersected
+    /// with its own bounds, so neither alone is the visible part). A shelf
+    /// name scrolled out of the strip had kept a ghost hit zone beside it.
     func handle(_ event: NSEvent) {
         guard let window, event.window === window else { return }
         let point = convert(event.locationInWindow, from: nil)
         if Self.reports(
-            kind: event.type, modifiers: event.modifierFlags, at: point, in: bounds,
-            secondaryOnly: secondaryOnly)
+            kind: event.type, modifiers: event.modifierFlags, at: point,
+            in: bounds.intersection(visibleRect), secondaryOnly: secondaryOnly)
         {
             onPress?()
         }
     }
 
-    /// **The rule** (pure, pinned): a mouse-down inside the bounds — a
-    /// primary press or a secondary one (right-click, control-click); with
-    /// `secondaryOnly`, the secondary ones alone.
+    /// **The rule** (pure, pinned): a mouse-down inside the given rect (the
+    /// reporter's visible part) — a primary press or a secondary one
+    /// (right-click, control-click); with `secondaryOnly`, the secondary ones
+    /// alone.
     static func reports(
         kind: NSEvent.EventType, modifiers: NSEvent.ModifierFlags, at point: NSPoint,
         in bounds: NSRect, secondaryOnly: Bool
