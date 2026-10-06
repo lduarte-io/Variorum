@@ -299,6 +299,33 @@ struct LibraryListFaceRigTests {
         }
     }
 
+    /// **Cards, both voices, for her eye** (librarywalkpolish VR-117 —
+    /// Terminal's readability pass; Study's Cards must not move).
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theCardsFaces(voice: ThemeVoice) async throws {
+        try await withLibrary { session in
+            try faceFixture(session)
+            let long = try session.operations.createPost(title: "Questions for later")
+            _ = try session.operations.newBlock(
+                in: long.id,
+                text: "Nothing about the plan survived the first hour, which was almost a relief. "
+                    + "By evening the argument had worn itself smooth and neither of us remembered "
+                    + "who had started it, or why it had seemed to matter so much at noon.")
+            try session.operations.setThemeVoice(voice)
+            let theme = ThemeStore(session: session)
+            let observing = Task { await theme.start() }
+            defer { observing.cancel() }
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("cards-face"))
+            model.mode = .notes
+            model.scope = .posts
+            await model.search()
+            let (window, hosting) = mount(session, model, theme: theme, height: 720)
+            defer { window.orderOut(nil); window.close() }
+            await settle(window, hosting, 2.0)
+            await hold(window, hosting, "\(LibraryListFaceRig.label)-cards-\(voice)-top")
+        }
+    }
+
     /// **The Bookcase's faces for her eye** (librarywalkpolish VR-115 /
     /// VR-119, captured on screen by the script): the strip's chips at rest
     /// and with a shelf solo'd, the № popover (a solo washed), the order

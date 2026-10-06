@@ -849,7 +849,10 @@ struct LibraryCatalogView: View {
         // where she typed one, a daily entry's day, else the note's own
         // first words. Derived at read time, never stored, nothing renamed.
         let name = LibraryCardName.card(for: hit, leadingTexts: card.leadingTexts)
-        return VStack(alignment: .leading, spacing: 2) {
+        // librarywalkpolish VR-117: the card's metrics by voice — Terminal's
+        // readability pass; Study's the shipped face, untouched.
+        let face = LibraryCardFace.of(tokens)
+        return VStack(alignment: .leading, spacing: face.leadToPreview) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(name.lead.text)
                     .font(tokens.body)
@@ -886,7 +889,8 @@ struct LibraryCatalogView: View {
             if let preview = LibraryCardName.previewLine(name) {
                 let empty = preview == LibraryCopy.noTextYet
                 Text(preview)
-                    .font(tokens.small)
+                    .font(face.previewFont)
+                    .lineSpacing(face.previewLineSpacing)
                     .foregroundStyle(empty ? tokens.faint : tokens.muted)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -896,7 +900,7 @@ struct LibraryCatalogView: View {
             // Apple-Notes-shaped list stays what it is at rest.
             tagsRow(hit, tags: extras.tags, revealsOnHover: true)
         }
-        .padding(.vertical, 9)
+        .padding(.vertical, face.verticalPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .onTapGesture { onOpen(.post(hit.id)) }
