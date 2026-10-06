@@ -1804,7 +1804,9 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   follow-system road** (system dark flip re-inked every STANDING card row at an unchanged
   scroll position; flipped back); the index column flung ~1,400 rows deep at 1.3 % CPU, full
   travel, the row under the resting pointer waking on stop; in passing the starred shelf at
-  the strip's head and the census OVERLAY (zero push) on the final tree. Then HER GATES:
+  the strip's head and the census OVERLAY (zero push) on the final tree. **HER WALK, LIVE
+  (2026-10-05 evening, running list):** (j) PASSED in her words — "the scroll on index within
+  a note's outline feels great now - beautiful." Then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
