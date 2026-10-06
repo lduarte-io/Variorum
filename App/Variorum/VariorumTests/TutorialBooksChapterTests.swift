@@ -495,6 +495,17 @@ struct TutorialBooksLessonTests {
             #expect(text.contains(StarCopy.starRow))
             #expect(text.contains(BookcaseCopy.unshelvedName))
             #expect(text.contains(Operations.welcomeShelfName))
+            // JUSTIFIED EDIT (librarywalkpolish VR-122, F-11 — the round-2
+            // ladder's one note for this pass): the strip reads All · starred ·
+            // the shelves since 17y (s) (R-17y-9's virtual shelf), and the
+            // strip sentence said "All, then each shelf by name". The lesson
+            // names the word from its one home, says what it is, and the star
+            // sentence says starred books gather there; R5 executes it.
+            #expect(text.contains("All, then \(BookcaseCopy.starredShelfName), then each shelf by name"),
+                    "the strip sentence names the starred shelf by the strip's own word")
+            #expect(text.contains("can't be renamed or deleted"),
+                    "…and says why its right-click has no menu (virtual by construction)")
+            #expect(text.contains("\(BookcaseCopy.starredShelfName) gathers them all in one place"))
 
             let ops = session.operations
             let second = try ops.createShelf(name: "Essays")
@@ -881,6 +892,15 @@ struct TutorialBooksRitualTests {
                 #expect(BookcaseBoard.ordered(onShelf, mode: mode, lastEdited: [:]).first?.reading.id == alpha.id,
                         "starred floats first under \(mode.label)")
             }
+            // JUSTIFIED EDIT (librarywalkpolish VR-122, F-11): lesson 7 now
+            // says starred books gather on the strip's "starred" — executed:
+            // the starred scope holds the starred book, still on its shelf.
+            let onStarred = BookcaseBoard.booksInScope(
+                snapshot.books, shelves: snapshot.shelves, scope: .starred).map(\.reading.id)
+            #expect(onStarred.contains(alpha.id) && !onStarred.contains(beta.id),
+                    "the starred shelf shows the starred book, and only the starred")
+            #expect(try await db.read { try Queries.reading($0, id: alpha.id)?.shelfId } == shelf.id,
+                    "…which still lives on its real shelf (a filter, never a container)")
         }
     }
 }
