@@ -1795,8 +1795,16 @@ pre-answered rulings R-17y-1…6: `notes/plans/17y-sitting-rulings-2026-10-05.md
   empirically verified) → the exchange (all seven agreed, none disputed; "this regression is
   mine") → the reviewer's final calls + fixes at 671f2e5e·5d26208d·a6bf9b68·d7951743 (pin
   red-on-old, synthetic revert verified, 46/6 + 8/8 green) → the sanity pass ALL SOUND
-  (58/8 re-run green; no round 2 owed under the cross-model flow — the B3 precedent).** The
-  orchestrator's spot-walk next; then HER GATES:
+  (58/8 re-run green; no round 2 owed under the cross-model flow — the B3 precedent).** THE
+  ORCHESTRATOR'S SPOT-WALK DONE 2026-10-05 ~18:50 (the fixed Debug build at d7951743, fixture
+  staged, captures `17y-screens/b1/orch-walk/`, gitignored): the List scrolled the whole
+  corpus to its TRUE END (Fixture 0593 → 0000 → the store's 1886 Jekyll notes — no 40-row
+  wall) with the books region fixed in its own half; Cards paged with 0.5 % CPU under a
+  resting pointer (the hover-loop fix holding); **MAJOR-1's fix verified LIVE on the
+  follow-system road** (system dark flip re-inked every STANDING card row at an unchanged
+  scroll position; flipped back); the index column flung ~1,400 rows deep at 1.3 % CPU, full
+  travel, the row under the resting pointer waking on stop; in passing the starred shelf at
+  the strip's head and the census OVERLAY (zero push) on the final tree. Then HER GATES:
   the live scroll walk + drag spot-check, the 0.9.2 notes approval, the entry-close word.
   (Original state line follows for the record:) NOT-STARTED. Runs LAST (Monday night → Tuesday);
   (j) trace-first (the height-estimate/jump-correction family; TEXTKIT2_NOTES read); (k) keyset
