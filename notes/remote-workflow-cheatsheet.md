@@ -135,7 +135,13 @@ ssh home tmux ls                # what sessions are alive on the Pro
 tmux neww -c <dir> -n <name>    # (from inside tmux) new window starting in <dir>
 ssh home tmux kill-server       # nuclear: kill ALL tmux sessions on the Pro
 proview <path-on-pro>           # copy a Pro file (mockup.html etc.) here and open it
+pushshot                        # copy newest Air screenshot → Pro, path to clipboard
 ```
+
+**Dropping screenshots into a Pro Claude session** doesn't work directly — the image is on
+the Air, the session reads files on the Pro. Instead: take the screenshot, run `pushshot`
+(no arg = newest; or `pushshot <file>`), then paste (⌘V) the path it put on your clipboard
+into the Claude session. Lands in `~/shots/` on the Pro.
 
 Sitting at the Pro itself: same commands without the `ssh home` / `ssh -t home` wrapper.
 
