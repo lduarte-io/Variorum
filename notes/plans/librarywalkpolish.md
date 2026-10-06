@@ -1,6 +1,6 @@
 # librarywalkpolish — the Library walk's polish pass (the FIRST pass on the VR numbering; minted 2026-10-05 ~20:45 from the author's live 17y walk sitting)
 
-> **STATUS: BATCH 1 BUILDING** (the round spawned inside 17y as "B-WALK" re-homes here whole —
+> **STATUS: BATCH 1 BUILT + HANDED BACK (~22:05); the opus-reviewer cold round running** (the round spawned inside 17y as "B-WALK" re-homes here whole —
 > its binding brief and running record live in `notes/plans/phase-17-standing-fixes.md`
 > (§ "17y B-WALK BRIEF" / § "17y B-WALK RECORD"); this file is the pass's ledger, rulings
 > record and close plan. Same worktree (`~/dev/variorum-17y`), same orchestrator through the
@@ -66,13 +66,13 @@ sitting). The 17y entry's own close is bookkeeping; the MISSION closes here.
 
 | VR | item | batch | status |
 |---|---|---|---|
-| VR-113 | The Library List scrolls the whole corpus at the display's pace — the List's notes on the lazy-column engine, wearing the List's exact face (her answered #187(i): "the hit is too big... not in our app") | 1 (building) | OPEN |
-| VR-114 | The Cards/scope honesty switches, both directions (R-LWP-6) | 1 (building) | OPEN |
-| VR-115 | The № census float: Option A menu-sibling look + never-covers-menus + the solos-compose-within-a-shelf rider (R-LWP-1) | 1 (building; the LOOK lands with the reference) | OPEN |
-| VR-116 | The drag image: cursor-anchored title chip + the dead insertion line removed (R-LWP-3; the a–z false-offer finding) | 1 (building) | OPEN |
-| VR-117 | Terminal's Cards readability pass (R-LWP-5) | 1 (building) | OPEN |
-| VR-118 | Book reorder steps back for 0.9.2: "my order" + Send to Top/Bottom + grips hidden whole (R-LWP-4) | 1 (building) | OPEN |
-| VR-119 | The strip's delineation: Option 2 — restrained light-wash squares, solo'd chip filled, per the committed reference (R-LWP-2) | 1 (building) | OPEN |
+| VR-113 | The Library List scrolls the whole corpus at the display's pace — the List's notes on the lazy-column engine, wearing the List's exact face (her answered #187(i): "the hit is too big... not in our app") | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-114 | The Cards/scope honesty switches, both directions (R-LWP-6) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-115 | The № census float: Option A menu-sibling look + never-covers-menus + the solos-compose-within-a-shelf rider (R-LWP-1) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-116 | The drag image: cursor-anchored title chip + the dead insertion line removed (R-LWP-3; the a–z false-offer finding) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-117 | Terminal's Cards readability pass (R-LWP-5) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-118 | Book reorder steps back for 0.9.2: "my order" + Send to Top/Bottom + grips hidden whole (R-LWP-4) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
+| VR-119 | The strip's delineation: Option 2 — restrained light-wash squares, solo'd chip filled, per the committed reference (R-LWP-2) | 1 | BUILT 2026-10-05 ~22:05 — closes at her re-walk (the ladder running) |
 | VR-120 | Book reorder RETURNS, done properly — the editor block drag's feel as the bar (R-LWP-4's other half) | — POST-RELEASE, at her word; NOT this pass's build | OPEN (deferred) |
 | VR-121 | The Book Panel's drag feel — works, ships as-is in 0.9.2 (her ruling at the walk: "note it as an issue that has to be fixed until it reaches the blocks drag and drop level of smooth, but we can leave it in for now. it does work, and it's a more hidden surface so I'll let it stay"); the post-release drag-feel family beside VR-120, the editor's block drag the shared bar | — POST-RELEASE, with VR-120 | OPEN (deferred) |
 
