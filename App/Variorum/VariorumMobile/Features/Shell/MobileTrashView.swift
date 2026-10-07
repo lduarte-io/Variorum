@@ -2,13 +2,28 @@
 //  MobileTrashView.swift
 //  VariorumMobile
 //
-//  **"Archived & Deleted" — the phone's recovery surface** (round 2, batch
-//  4 — PR2). Reached from the Library listing's trailing row and pushed as
-//  its own screen (a deliberately-opened surface, never a held one: its
-//  stranded-originals arm walks lineage families).
+//  **THE TRASH ROOM — a utility you visit** (round 2, batch 4 — PR2;
+//  **narrowed from the combined "Archived & Deleted" surface at batch 6c**).
+//  Pushed as its own screen (a deliberately-opened surface, never a held
+//  one: its stranded-originals arm walks lineage families).
 //
-//  **TWO SECTIONS** — the Trash's countdown and Archived's no-clock calm —
-//  because conflating them would make archive read as a deletion.
+//  **HER RULING, verbatim (QUESTIONS #84):** *"Two rooms — The Mac's own
+//  asymmetry, translated literally. Archive becomes a room you browse; the
+//  Trash becomes a utility you visit. Two doors, two destinations, nothing
+//  shared."* Batch 4's combined screen — Trash section → `Divider` →
+//  Archived section — was known-interim BY HER WORD, and this is its close.
+//  The two promises it held apart in one scroll are now two rooms:
+//  everything here is on the 30-day clock, and `MobileArchiveView` is the
+//  kept-forever one. **Its door is the LIBRARY's path line 🗑**
+//  (`MobileRecoveryDoors`), the analogue of her Mac B1 ruling — the masthead
+//  trash icon that replaced a ⋯ menu — and the SHELF renders the same door
+//  from the same declaration, because a deleted BOOK rows here while books
+//  live on the Shelf (the design record's finding 1).
+//
+//  **Both purge doors live here and nowhere else** (her round-3 rider), and
+//  the split is where that could have been lost: `MobileArchiveModel` has no
+//  purge road at all, so the rule is now structural in the Archive room
+//  rather than merely absent from its view body.
 //
 //  ── THE TWO SHAPES THIS SURFACE CHOSE, AND WHY ───────────────────────────
 //
@@ -56,8 +71,6 @@ struct MobileTrashView: View {
 
     static let allFilterWord = "All"
     static let emptyTrashLine = "Nothing in the Trash."
-    static let emptyArchivedLine = "Nothing archived."
-    static let unarchiveVerb = "Unarchive"
 
     static func truncationMarker(shown: Int) -> String {
         "Showing the first \(shown) — narrow the filter to see more."
@@ -78,18 +91,6 @@ struct MobileTrashView: View {
                 if model.trashTruncated {
                     emptyLine(Self.truncationMarker(shown: model.trash.count))
                 }
-                Divider().overlay(tokens.line).padding(.vertical, 10)
-                archivedHeader
-                if model.archived.isEmpty {
-                    emptyLine(Self.emptyArchivedLine)
-                } else {
-                    ForEach(model.archived, id: \.postID) { item in
-                        archivedRow(item)
-                    }
-                }
-                if model.archivedTruncated {
-                    emptyLine(Self.truncationMarker(shown: model.archived.count))
-                }
             }
             .padding(.horizontal, 8)
         }
@@ -99,7 +100,6 @@ struct MobileTrashView: View {
         // The filter and the sort are applied IN SQL, so a change restarts
         // the observation rather than re-sorting a window of the wrong set.
         .task(id: model.restartToken) { await model.startTrash() }
-        .task { await model.startArchived() }
         // Delete Now / Empty Trash — ONE confirm host, over a REAL
         // `@Bindable` projection (§15's trap (a)) AND with the act's value
         // riding into the action closure (`presenting:` — batch 4.5b's
@@ -159,21 +159,6 @@ struct MobileTrashView: View {
         .padding(.bottom, 6)
     }
 
-    private var archivedHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(tokens.path([RecoveryCopy.archivedSection]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-            // The difference stated, so the two sections are never read as
-            // one thing: archive has NO clock.
-            Text(tokens.chromeLabel(RecoveryCopy.archivedForever))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-        }
-        .padding(.horizontal, 12)
-        .padding(.bottom, 6)
-    }
-
     /// newest ⇄ oldest, her round-3 second control.
     private var sortDoor: some View {
         Button {
@@ -211,12 +196,19 @@ struct MobileTrashView: View {
         .padding(.bottom, 8)
     }
 
+    /// The room's prose lines — the empty line and the truncation marker.
+    /// **The plain sentence rides as the accessibility label** (the standing
+    /// rule; the Terminal voice lowercases chrome, and a marker VoiceOver
+    /// reads as *"showing the first 200 — narrow the filter to see more."*
+    /// is chrome leaking into speech). Added at the 6c fix wave beside n9's
+    /// marker pin.
     private func emptyLine(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
+            .accessibilityLabel(text)
     }
 
     /// The receipts and refusals, pinned to the bottom so an act's answer
@@ -292,39 +284,6 @@ struct MobileTrashView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("Open note")
                 }
-                Spacer(minLength: 0)
-            }
-        }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-    }
-
-    private func archivedRow(_ item: Queries.TimelineItem) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(MobileLibraryViewModel.rowTitle(item))
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(1)
-            HStack(spacing: 18) {
-                Button {
-                    let model = model
-                    Task { await model.unarchive(item) }
-                } label: {
-                    Text(tokens.chromeLabel(Self.unarchiveVerb))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Self.unarchiveVerb)
-                Button {
-                    onOpen(item.postID)
-                } label: {
-                    Text(tokens.chromeLabel("Open note"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Open note")
                 Spacer(minLength: 0)
             }
         }

@@ -1229,13 +1229,17 @@ final class EditorViewModel {
         // (`MarkdownActs.apply`, `toggleCheckbox`,
         // `insertNewlineContinuingLists`, `deleteWithoutNewline`) is one
         // refactor away from separating an arming from its
-        // `replaceCharacters`; the binding makes that harmless.
+        // `replaceCharacters`; the binding makes that harmless. `binds` adds
+        // the CONTENT check `.openTail` needs to `describes`' geometry (VM-5
+        // stability pass, MAJOR 2 — the shared binding's hole, so both
+        // consumers collect the guard at once).
         let armed = pendingEdit
         pendingEdit = nil
         let bound = armed.flatMap {
-            $0.describes(
+            $0.binds(
                 editedRange: editedRange, delta: delta,
-                documentLength: index.documentLength) ? $0 : nil
+                documentLength: index.documentLength,
+                landedText: { viewText($0) }) ? $0 : nil
         }
         if armed != nil, bound == nil {
             // M13's Mac twin (round-2 ladder round 1, MINOR 5): the paste's
@@ -3311,7 +3315,7 @@ final class EditorViewModel {
             // stop the toasting. The J38 class, other direction.
             showReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            refuse(VersionActs.words(error))
+            refuse(VersionActs.words(error, seal: .mac))
         }
     }
 
@@ -4330,15 +4334,21 @@ final class EditorViewModel {
 /// `auditIdentityProjection()` and `applyPendingIfClean()` are the model's
 /// existing members.
 extension EditorViewModel: TailCrystallizerHost {
-    func transferTailPrefixToLastEntry(_ units: Int) {
+    func transferTailPrefixToLastEntry(_ units: Int) -> Bool {
         index.transferTailPrefixToLastEntry(units)
     }
 
     func crystallizeIndex(
         minted: [(blockID: String, variantID: String, length: Int)],
         remainingTailLength: Int?
-    ) {
+    ) -> Bool {
         index.crystallize(minted: minted, remainingTailLength: remainingTailLength)
+    }
+
+    /// The same road `storageDidEdit` takes when the index's other four
+    /// mutators refuse (VM-5, MINOR 4).
+    func recoverFromRefusedIndexMutation() {
+        desyncRecovery()
     }
 
     func surfaceKnownText(variantID: String) -> String? {

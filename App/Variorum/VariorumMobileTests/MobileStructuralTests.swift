@@ -1110,6 +1110,19 @@ struct MobileNoRedirectSweepTests {
             // exempted explicitly rather than by narrowing the walk.
             (file: "StoreProtection.swift", literal: "a Mac"),
         ]
+        // ONE PREFIX exemption (the VM-5 merge, 2026-10-07): the Jekyll
+        // sample book's restore instructions name the Mac's Help ▸ Restore
+        // because that door exists ONLY there today — 17y kept Jekyll for
+        // the Mac's Restore doors and removed the phone's seed, and the
+        // phone's OWN sample-restore door is still OWED (MobileSoul PL-17;
+        // board: VM-8). The copy is honest about the one road that exists;
+        // §4.4's no-redirect bar is answered by the ticket, not by hiding
+        // the road. Matched by file + prefix because the literal is a long
+        // multiline body. THIS EXEMPTION RETIRES when VM-8 builds the
+        // phone's restore door and the copy generalizes.
+        let exemptPrefixes: [(file: String, prefix: String)] = [
+            (file: "SampleLibraryJekyllBook.swift", prefix: "\n        u{201C}The Strange Case of Dr Jekyll"),
+        ]
         var walked = 0
         var offenders: [String] = []
         for root in roots {
@@ -1129,6 +1142,12 @@ struct MobileNoRedirectSweepTests {
                     guard !exempt.contains(where: {
                         $0.file == url.lastPathComponent && $0.literal == literal
                     }) else { continue }
+                    // …and the prefix exemption is CAPPED AT ONE occurrence
+                    // (round-1 MINOR 2): a future sentence naming the Mac
+                    // added INSIDE the exempted literal still trips the sweep.
+                    guard !(exemptPrefixes.contains(where: {
+                        $0.file == url.lastPathComponent && literal.hasPrefix($0.prefix)
+                    }) && literal.ranges(of: Self.forbidden).count == 1) else { continue }
                     offenders.append("\(url.lastPathComponent): \"\(literal)\"")
                 }
             }

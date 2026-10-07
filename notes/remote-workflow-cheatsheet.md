@@ -4,6 +4,41 @@
 
 ---
 
+## Starting fresh — sit at the Pro (the Keychain rule)
+
+The tmux **server** (the one background process that holds every session) keeps
+the rights of wherever it was born, forever. Born in a GUI terminal **on the
+Pro** → every shell inside it can use the Keychain. Born over ssh → Keychain
+refuses ("User interaction is not allowed": gh, security) until the server is
+killed and reborn at the Pro. So after a reboot or a full shutdown, the FIRST
+start happens in Ghostty sitting at the Pro (Screen Sharing counts):
+
+```zsh
+# in a Ghostty tab ON the Pro
+ws variorum        # builds the workspace (windows var-1/var-2/var-3) + attaches this tab
+ws mobile          # if mobile work is planned — C-b d to leave it running and step away
+```
+
+Start `claude` inside window var-1 (and var-2/var-3 for more seats — `C-b 1` /
+`C-b 2` to reach them). Once the server is alive, every later `ws` from the Air
+just attaches — the rights are already right.
+
+## Shutting everything down (deliberate — nothing else ever kills work)
+
+Quit the claude sessions first, then:
+
+```zsh
+tmux kill-server                  # at the Pro: ALL sessions, the whole server
+ssh home tmux kill-server         #   …same from the Air (killing from anywhere is fine —
+                                  #   it's the next START that must happen at the Pro)
+tmux kill-session -t variorum     # just one workspace; the others keep running
+```
+
+`exit` in a shell closes that one pane/window for real; a session dies with its
+last window. Everything softer (lid, Wi-Fi, closing Ghostty) only detaches.
+
+---
+
 ## SSH basics
 
 ```zsh
@@ -39,28 +74,29 @@ ws variorum 3    # Tab 3 — third view, already parked on var-3
 ws mobile        # Tab 4 — variorum-mobile (windows mobile-1, mobile-2)
 ```
 
-`ws` **builds whatever is missing** (the session, the named windows) and then
-attaches — so the SAME command works on a fresh day, after a lid-close, and
-after a full tmux kill. There is no separate rebuild step anymore, and no
-C-b parking: views 2/3 land on their window by themselves. Re-pasting is
-always safe.
+`ws` = **workspace**. It **builds whatever is missing** (the session, the named
+windows) and then attaches the tab you typed it in — so the SAME command works
+on a fresh day, after a lid-close, and after a full tmux kill. If everything
+already exists and is full of running work, it builds nothing and only
+attaches: safe to paste any time. No separate rebuild step, no C-b parking —
+views 2/3 land on their window by themselves.
 
 - Primary (`ws <name>`) = the real session. Views (`ws <name> 2`, `3`, …) =
   grouped viewers that self-destruct when their tab closes; tmux auto-names
   them `variorum-1`, `variorum-2`… — that's normal, they're disposable glass.
 - Known workspaces: `variorum` · `mobile` · `stargazing` · `fragments`.
   Anything else defaults to `~/dev/<name>`.
-- Sitting at the Pro itself: `~/bin/ws variorum 2` (same script, no ssh).
+- Sitting at the Pro itself: the same `ws variorum 2` works (an alias there
+  runs the script directly, no ssh).
 - The plumbing: `~/bin/ws` on the Pro (the real script), a tiny `ws()` ssh
   wrapper in the Air's `~/.zshrc`. Read the script if you're curious — it's
   the old daily-start/rebuild one-liners made idempotent.
 
-**Keychain caveat (the GUI-born-server rule):** if NO tmux server is alive on
-the Pro (first start after a reboot or `kill-server`), running `ws` from the
-Air births the server over ssh — shells inside it then can't reach the
-Keychain ("User interaction is not allowed"); automation falls back to the
-file credentials in `~/.variorum/`. When that matters, start the first
-session from a GUI terminal ON the Pro (Screen Sharing counts).
+**Keychain caveat:** if NO tmux server is alive (after a reboot or
+`kill-server`), a `ws` from the Air would birth an ssh-born server — shells
+inside it can't reach the Keychain, and automation falls back to the file
+credentials in `~/.variorum/`. Begin at the Pro instead — see **Starting
+fresh** at the top.
 
 **After closing the lid / losing Wi-Fi:** every tab's ssh dies. Not broken —
 re-paste each tab's command (up-arrow ↑ then enter). Nothing was lost.
@@ -75,6 +111,20 @@ re-paste each tab's command (up-arrow ↑ then enter). Nothing was lost.
 - Typing `exit` in a shell → that shell is **gone for real** (this is also how you *deliberately* close a pane or window — a window dies with its last pane; the session dies with its last window).
 
 ---
+
+## The words (what's what in tmux)
+
+| Word | What it is |
+|---|---|
+| **server** | the ONE background tmux process on the Pro holding everything below; born with the first session, dies only with `kill-server`; its birthplace decides Keychain rights |
+| **session** (= workspace) | a named set of windows: `variorum`, `mobile`. What a tab attaches to; its name is the bottom-left `[bracket]` |
+| **window** | a full-screen tab INSIDE a session — `var-1`, `var-2`, `var-3`. The bottom-bar list; `C-b 1` jumps between them |
+| **pane** | a split inside one window (`C-b %` / `C-b "`); one shell each. You aren't using these yet |
+| **view** (grouped session) | what `ws variorum 2` opens: technically a session of its own that OWNS no windows — it shares variorum's windows and just keeps its own "which window am I showing" pointer. Owning that pointer is why it needs its own name (`variorum-1`, `variorum-2`…, the longer bracket), and it evaporates when its tab closes |
+| **client** (the glass) | a Ghostty tab + ssh attached to a session. Unplugging a client never touches the session |
+
+So: `variorum` = session · `var-2` = a window inside it · `variorum-1` = a view
+(disposable mini-session sharing variorum's windows) · a Ghostty tab = a client.
 
 ## Keys you'll use constantly (inside tmux; C-b = Ctrl and b together, release, then the key)
 

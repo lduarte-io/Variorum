@@ -76,13 +76,22 @@ protocol TailCrystallizerHost: AnyObject {
     var index: BlockRangeIndex { get }
     /// `attachLeadingTailRunIfNeeded` only: the tail's leading newline run
     /// becomes the last entry's trailing content
-    /// (`BlockRangeIndex.transferTailPrefixToLastEntry`).
-    func transferTailPrefixToLastEntry(_ units: Int)
+    /// (`BlockRangeIndex.transferTailPrefixToLastEntry`). Answers the
+    /// index's own Bool: `false` = REFUSED, nothing moved (VM-5, MINOR 4 —
+    /// the mutator refuses where it used to trap).
+    func transferTailPrefixToLastEntry(_ units: Int) -> Bool
     /// `finishMint` only: the minted blocks join the tiling
-    /// (`BlockRangeIndex.crystallize`).
+    /// (`BlockRangeIndex.crystallize`). `false` = REFUSED, as above.
     func crystallizeIndex(
         minted: [(blockID: String, variantID: String, length: Int)],
-        remainingTailLength: Int?)
+        remainingTailLength: Int?) -> Bool
+    /// `attachLeadingTailRunIfNeeded` and `finishMint`: one of the two
+    /// mutators above REFUSED — the band's bookkeeping no longer describes
+    /// the surface, so the platform takes the SAME honest road its storage-
+    /// edit consumers take when the index's other four mutators refuse
+    /// (`desyncRecovery()` on both: flush, re-read, re-render from the
+    /// store, with the DEBUG assertion that names the impossible state).
+    func recoverFromRefusedIndexMutation()
     /// `attachLeadingTailRunIfNeeded` only: what the surface is known to hold
     /// for the last entry's variant (the ledger — read, never the surface, so
     /// the attachment works with the view already gone at teardown).
@@ -101,6 +110,10 @@ protocol TailCrystallizerHost: AnyObject {
     func clearBulkPending()
     /// `finishMint`: a verdict armed before the mint describes a tail that
     /// may no longer exist — disarm it (the sharpest stale case).
+    /// `attachLeadingTailRunIfNeeded`: the attachment moves the tiling by an
+    /// equal-length transfer the binding's length oracle cannot see (VM-5
+    /// stability pass, MINOR 3). Clears the ARMING only — never the paste's
+    /// bulk intent, which both callers may still be carrying on purpose.
     func disarmPendingEdit()
     /// `finishMint`: the reconciler asked for a re-render from the store, or
     /// the tail region vanished under the flight.
@@ -277,18 +290,44 @@ final class TailCrystallizer {
     /// kept-open run behind AND when Enters land in a reopened tail — a
     /// typed gap is durable content the moment it exists, successor or
     /// not (the "like any normal editor" behavior the author named).
-    private func attachLeadingTailRunIfNeeded(host: some TailCrystallizerHost) {
+    ///
+    /// Answers whether the band may PROCEED: `false` only when the index
+    /// REFUSED the transfer (VM-5, MINOR 4 — its `precondition`s became a
+    /// refusal), in which case the host's recovery has already run. Every
+    /// ordinary "nothing to attach" exit answers `true`.
+    private func attachLeadingTailRunIfNeeded(host: some TailCrystallizerHost) -> Bool {
         guard !host.holdsTailForStructuralFlight, !mintInFlight,
-              host.index.tailLength != nil else { return }
+              host.index.tailLength != nil else { return true }
         guard let last = host.index.entries.indices.last,
               host.index.entries[last].editable,
               let variantID = host.index.entries[last].variantID,
               let knownText = host.surfaceKnownText(variantID: variantID)
-        else { return }
+        else { return true }
         let run = text.prefix(while: { $0 == "\n" }).count
-        guard run > 0 else { return }
+        guard run > 0 else { return true }
         let oldRange = host.index.range(ofEntryAt: last)
-        host.transferTailPrefixToLastEntry(run)
+        // Unreachable today (the guards above establish every precondition,
+        // and this band's `text` and the index's tail length move in
+        // lockstep) — but the index REFUSES rather than trapping, and a
+        // refusal means the bookkeeping disagrees with the surface: nothing
+        // below may run against it, and the platform's honest road heals.
+        guard host.transferTailPrefixToLastEntry(run) else {
+            host.recoverFromRefusedIndexMutation()
+            return false
+        }
+        // The tiling MOVED — disarm, as every index-changing door does (VM-5
+        // stability pass, MINOR 3). This move is EQUAL-LENGTH (the entry
+        // grows by exactly what the tail loses), so `ArmedEdit.describes`'
+        // length oracle cannot see it — the reason `displaySlot` gives for
+        // disarming structurally. Reachable with a LIVE arming only from the
+        // idle tick (the consume road consumed it already; `finishMint`
+        // disarms before its re-run): a stale `.tail` arming over the run
+        // would otherwise bind a gate-less edit there and charge the TAIL
+        // for characters the last entry now owns (pinned:
+        // `theLeadingRunAttachmentDisarmsAStaleArming`). The paste's bulk
+        // intent is NOT dropped with it — `disarmPendingEdit` clears the
+        // arming only, and the plan just below may be reading that intent.
+        host.disarmPendingEdit()
         // Ownership moves; bytes don't: the block-ID attribute grows over
         // the old separator position + run−1 tail newlines.
         EditorSurfaceStorage.setBlockID(
@@ -299,6 +338,7 @@ final class TailCrystallizer {
         let newText = knownText + String(repeating: "\n", count: run)
         host.recordSurfaceText(variantID: variantID, text: newText)
         host.autosave.record(variantID: variantID, text: newText, charDelta: run)
+        return true
     }
 
     /// The tail-edit crystallization (and, with `forcedKind`, the idle
@@ -310,7 +350,10 @@ final class TailCrystallizer {
         // 1, MAJOR 3): finishMint re-runs this and the paste-during-mint
         // still gets bulk semantics.
         guard !mintInFlight else { return }
-        attachLeadingTailRunIfNeeded(host: host)
+        // A refused attachment has already taken the honest road (the host's
+        // recovery re-renders from the store); planning over a tail the index
+        // just declined to describe would mint from bookkeeping that is wrong.
+        guard attachLeadingTailRunIfNeeded(host: host) else { return }
         guard host.index.tailLength != nil else {
             host.clearBulkPending()
             return
@@ -448,9 +491,20 @@ final class TailCrystallizer {
         // clear): a paste that arrived DURING the mint parked its intent
         // here on purpose, and the crystallization re-run below consumes it.
         host.disarmPendingEdit()
-        host.crystallizeIndex(
+        // Unreachable today (`region` above proves the tail is open and
+        // `applied` is non-empty, and nothing between re-enters the index) —
+        // but a refusal means the storage was just rewritten for a tiling
+        // the index declined to adopt, so nothing below may stamp against
+        // it: the platform's honest road re-renders from the store (VM-5,
+        // MINOR 4), and this exit settles like every other.
+        guard host.crystallizeIndex(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
             remainingTailLength: outcome.newTail?.utf16.count)
+        else {
+            host.recoverFromRefusedIndexMutation()
+            host.applyPendingIfClean()
+            return
+        }
         text = outcome.newTail ?? ""
         let index = host.index
         let firstNew = index.entries.count - outcome.applied.count

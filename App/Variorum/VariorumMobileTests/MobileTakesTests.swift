@@ -478,4 +478,140 @@ struct MobileTakesTests {
             #expect(model.takes.pillContent(blockID: seed.blockB) == nil)
         }
     }
+
+    // MARK: B45-2 — the `displaySlot` / `slots[i]` coupling (4.5c-phone item 1)
+
+    /// **THE CRYSTALLIZATION WINDOW IS REAL, AND IT IS THE WHOLE FINDING.**
+    ///
+    /// `finishMint` calls `index.crystallize(…)` and never assigns `slots`,
+    /// so from the mint until the next projection `index.entries` genuinely
+    /// outruns `slots`. This pins that state as a fact of the shipped code
+    /// rather than a claim in a record — everything below rests on it.
+    ///
+    /// BOUNDARY CHARACTERIZATION: green on both trees (nothing this item
+    /// changed touches the divergence; the fix changes what `displaySlot`
+    /// does WITH it).
+    @Test func aCrystallizedBlockIsInTheIndexBeforeItIsInTheSlots() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            #expect(model.slots.count == 2 && model.index.entries.count == 2)
+
+            let minted = try await mintATailBlock(model, storage)
+
+            #expect(model.index.entries.count == 3, "the index gained the minted block")
+            #expect(model.slots.count == 2, "`slots` did NOT — this is the window")
+            #expect(model.index.entries.last?.blockID == minted,
+                    "and crystallize APPENDS, so the divergence is a length, not an order")
+            #expect(model.slot(for: minted) == nil,
+                    "which is exactly why every shipped caller bails first")
+            _ = db
+        }
+    }
+
+    /// **THE SHAPE A REORDER-TAKES DOOR PRODUCES — and it must not trap.**
+    ///
+    /// B45-2. `displaySlot` finds its entry in `index.entries` and then wrote
+    /// `slots[i]`, two different arrays. Inside the window above, a block
+    /// minted moments ago has a valid `entries` index that is OUT OF RANGE in
+    /// `slots`. Nothing reaches that today only because both takes-controller
+    /// doors guard on `slot(for:)` first — a caller-side accident, and batch
+    /// 7's PR8 reorder-takes is scheduled straight into this room (the
+    /// stability survey: *"a takes door on a fresh mint makes `slots[i]` an
+    /// out-of-range trap"*).
+    ///
+    /// So this drives what such a door drives: `displaySlot` for a block the
+    /// projection has not echoed back yet. **It is deliberately a call on the
+    /// model's own door rather than through `flip`/`peek`** — those two bail
+    /// at their guard, which is the accident under test; a pin routed through
+    /// them would be green over nothing.
+    ///
+    /// **RED ON OLD (production, `MobileEditorViewModel.displaySlot`):** with
+    /// `slots[i] = slot` restored, this test does not fail — it **TRAPS**
+    /// ("Swift/ContiguousArrayBuffer.swift:690: Fatal error: Index out of
+    /// range"), taking the runner down. The quoted output is in the batch
+    /// record.
+    @Test func displayingAFreshlyMintedBlocksSlotDoesNotTrap() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let minted = try await mintATailBlock(model, storage)
+            let mintedVariant = try #require(
+                model.index.entries.last?.variantID, "the mint carries its variant")
+
+            // A reorder door's own act: show this block a different text for
+            // the take it now leads with.
+            model.displaySlot(
+                Queries.RenderedBlock(
+                    blockID: minted, placementID: "p-\(minted)", position: "z",
+                    variantID: mintedVariant, text: "Reordered.",
+                    activeVariantCount: 2, liveVariantCount: 2, commentCount: 0,
+                    variantLocked: false),
+                for: minted)
+
+            // The surface and the index moved… (the still-open tail "t" sits
+            // after the minted block, so this is a contains, not a suffix).
+            #expect(storage.string.contains("Reordered."))
+            #expect(!storage.string.contains("Minted paragraph"))
+            #expect(model.index.entries.last?.blockID == minted)
+            #expect(model.index.entries.last?.length == ("Reordered." as NSString).length,
+                    "the index entry was rebuilt for the new text")
+            #expect(model.index.documentLength == storage.length,
+                    "index and storage still agree — the tiling is intact")
+            // …and `slots` was left alone, which is the honest end state: a
+            // block the projection has not echoed back has no slot bookkeeping
+            // to update, and the next projection brings it.
+            #expect(model.slots.count == 2)
+            #expect(model.slot(for: minted) == nil)
+            #expect(model.identityAuditFailures == 0)
+            _ = db
+        }
+    }
+
+    /// The other half of the same door, so the fix is not "it stops writing":
+    /// a block that IS in `slots` still has its slot updated, by identity.
+    ///
+    /// **RED ON OLD:** green on both trees by construction — inside this
+    /// state the two indexes coincide, which is precisely why the shipped
+    /// coupling looked safe. It is here as the fix's control: an
+    /// implementation that satisfied the pin above by writing nothing at all
+    /// would fail this one.
+    @Test func aBlockTheProjectionKnowsStillHasItsSlotUpdated() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            #expect(model.slot(for: seed.blockA)?.variantID == seed.a2,
+                    "the peeked take is what the slot bookkeeping now says")
+            #expect(model.slots.count == 2)
+            #expect(model.slots[1].blockID == seed.blockB,
+                    "and the neighbour's slot was not the one written")
+            _ = db
+        }
+    }
+}
+
+/// Opens a tail, types a paragraph past its own newline, and settles the
+/// mint — leaving the editor in the crystallization window with the minted
+/// block in `index.entries` and absent from `slots`. Returns its block id.
+///
+/// The timing is the shipped rule (`MobileEditorCrystallizationTests`'s own
+/// sequence): a paragraph completes when the NEXT one begins.
+@MainActor
+private func mintATailBlock(
+    _ model: MobileEditorViewModel, _ storage: NSTextStorage
+) async throws -> String {
+    let before = Set(model.index.entries.map(\.blockID))
+    typeAtEnd(model, storage, "\n")
+    typeAtEnd(model, storage, "Minted paragraph")
+    typeAtEnd(model, storage, "\n")
+    typeAtEnd(model, storage, "t")
+    await model.awaitMintSettle()
+    return try #require(
+        model.index.entries.map(\.blockID).first { !before.contains($0) },
+        "the tail crystallized into a block")
 }

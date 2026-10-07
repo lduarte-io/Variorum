@@ -133,6 +133,59 @@ struct ArmedEditTests {
             editedRange: NSRange(location: 22, length: 1), delta: 1, documentLength: 22),
             "the tiling changed under the arming (a render or a crystallization)")
     }
+
+    /// **VM-5 stability pass, MAJOR 2 — the CONTENT half, as a pure rule.**
+    /// `binds` = `describes` + the one content check: an `.openTail` arming
+    /// binds only when the landed character IS the newline it means; every
+    /// other verdict is content-agnostic and binds on geometry alone. (The
+    /// behavioural red-on-old pins are the two
+    /// `aStaleOpenTailArmingNeverBindsAGateLessCharacter`s — this one states
+    /// the rule they rest on, and that the reader is asked only for
+    /// `.openTail`.)
+    @Test func anOpenTailArmingBindsOnlyTheNewlineItMeans() {
+        let openTail = ArmedEdit(
+            verdict: .openTail, range: NSRange(location: 5, length: 0),
+            documentLength: 5, replacementLength: 1)
+        let landing = (editedRange: NSRange(location: 5, length: 1), delta: 1, length: 5)
+        /// Binds `edit` against a landing whose bytes read `landed`; answers
+        /// whether it bound and how many times the reader was consulted.
+        func binds(_ edit: ArmedEdit, landed: String) -> (bound: Bool, reads: Int) {
+            var reads = 0
+            var askedFor: [NSRange] = []
+            let bound = edit.binds(
+                editedRange: landing.editedRange, delta: landing.delta,
+                documentLength: landing.length,
+                landedText: { range in
+                    reads += 1
+                    askedFor.append(range)
+                    return landed
+                })
+            #expect(askedFor.allSatisfy { $0 == NSRange(location: 5, length: 1) },
+                    "the reader is asked for exactly the landed bytes")
+            return (bound, reads)
+        }
+        #expect(openTail.describes(
+            editedRange: landing.editedRange, delta: landing.delta, documentLength: landing.length),
+            "the geometry alone cannot tell the two landings apart")
+
+        let newline = binds(openTail, landed: "\n")
+        #expect(newline.bound)
+        #expect(newline.reads == 1)
+        let character = binds(openTail, landed: "x")
+        #expect(!character.bound, "a gate-less character is not the separator the verdict declares")
+        #expect(character.reads == 1)
+
+        let block = ArmedEdit(
+            verdict: .block(index: 0), range: NSRange(location: 5, length: 0),
+            documentLength: 5, replacementLength: 1)
+        let agnostic = binds(block, landed: "x")
+        #expect(agnostic.bound)
+        #expect(agnostic.reads == 0, "content-agnostic verdicts never pay the read")
+        // Geometry still rules first: a moved index declines before content.
+        #expect(!openTail.binds(
+            editedRange: landing.editedRange, delta: landing.delta, documentLength: 6,
+            landedText: { _ in "\n" }))
+    }
 }
 
 // MARK: - The Mac editor's binding
@@ -284,6 +337,44 @@ struct MacEditRoutingTests {
                 // AGREE, which is exactly the half the pre-fix tree lost.
                 #expect(stored == ["Alpha", "Beta beta", "Gamma"],
                         "the store is unchanged, and still agrees with the surface")
+            }
+        }
+    }
+
+    /// **The Mac twin of the VM-5 stability pass's MAJOR 2** (the phone's
+    /// `aStaleOpenTailArmingNeverBindsAGateLessCharacter`). `ArmedEdit` is
+    /// the shared brain both `storageDidEdit`s consume through, so the
+    /// content hole was both platforms' — the round-2 crash fix's own
+    /// precedent (this file's header: a shared brain gaining a guard is
+    /// where both platforms collect at once).
+    ///
+    /// The gate approves the tail-opening `"\n"` at the document end and
+    /// arms `.openTail`; a gate-less `"x"` lands at the same spot instead.
+    /// RED ON THE PRE-FIX TREE: the arming binds on geometry alone, the
+    /// index opens an empty tail over a visible character, the audit fires,
+    /// and nothing ever records the character — the store keeps "Alpha".
+    @Test func aStaleOpenTailArmingNeverBindsAGateLessCharacter() async throws {
+        try await withEditor(seedBlocks: ["Alpha"]) { harness in
+            try await withMacEditorAssertionsMuted {
+                let model = harness.model
+                let storage = try #require(harness.textView.textStorage)
+                #expect(model.index.tailLength == nil, "precondition: no tail yet")
+
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 5, length: 0), replacement: "\n"))
+                storage.replaceCharacters(in: NSRange(location: 5, length: 0), with: "x")
+
+                #expect(harness.documentText == "Alphax")
+                #expect(model.index.tailLength == nil,
+                        "no tail opened: the landed character is not the newline the verdict means")
+                #expect(model.index.entries.map(\.length) == [6])
+                #expect(model.index.documentLength == storage.length)
+                #expect(model.identityAuditFailures == 0)
+                #expect(model.desyncRecoveryCount == 0)
+                await harness.flush()
+                let stored = try harness.storeSlots().compactMap(\.text)
+                #expect(stored == ["Alphax"],
+                        "the character reached the store instead of being stranded")
             }
         }
     }

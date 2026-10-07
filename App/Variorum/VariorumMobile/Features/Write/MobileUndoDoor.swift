@@ -263,9 +263,19 @@ final class MobileUndoDoor {
 
     /// **The A12 warning's DETAIL, in phone words.** The question is shared
     /// (`StructuralUndoCopy.discardingUndoQuestion`); this half is not,
-    /// because the Mac's names ⌘S and a chord is a platform fact. The road
-    /// it names is the phone's own: the block's Block History face, which
-    /// is where a savepoint is read back here.
+    /// because the Mac's names ⌘S and a chord is a platform fact.
+    ///
+    /// **It names a FACE, deliberately, and not a road** — and since batch
+    /// 9 that distinction is load-bearing: her ⋯ letter moved `Block
+    /// History…` off the block ⋯ and onto each live take card's own ⋯
+    /// (bar ⑂ → the take's ⋯ → the row, composed at
+    /// `MobileTakesBrowserController.historyTitle`), so a sentence that
+    /// spelled the road would now be three taps long and would go stale
+    /// the next time she moves it. The face is where a savepoint is read
+    /// back here, the face's NAME is what she looks for, and the guide's
+    /// "five places" lesson is where the road is taught.
+    /// **If this sentence ever grows a road, compose it from that
+    /// constant** rather than typing the menu names again.
     static func discardingUndoDetail(_ warning: UndoStack.PendingUndoWarning) -> String {
         let subject = warning.bufferCount == 1
             ? "One take has been edited since"

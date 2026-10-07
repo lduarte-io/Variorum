@@ -187,6 +187,25 @@ nonisolated enum CrossBlockRefusal {
         let entries = index.entries
 
         // 1. The seam keystroke the two carves declined.
+        //
+        // `isDeletion: true` IS HARDCODED, AND THAT IS DELIBERATE — the
+        // shield that makes it true is named here so an arm-list edit can
+        // never make it false silently (VM-5 stability pass, NIT 5). This
+        // terminal is handed no replacement, so step 1 reads every lone
+        // inter-entry separator as a deletion. A TYPE-OVER of one never
+        // arrives: #109's clamp (`CrossBlockCompound.clampedToBlockText`'s
+        // degenerate shape, QUESTIONS #111) answers EVERY lone-separator
+        // replacement with a zero-length in-block edit, and BOTH platforms
+        // declare `.clampedInBlockEdit` above this terminal; the arms above
+        // the clamp (the find fence, the two carves, J9) never claim a
+        // non-empty replacement here. Pinned by name across both declared
+        // lists: `EditorEditRouteTableTests
+        // .aLoneSeparatorTypedOverNeverReachesTheDiagnosis`. If that pin
+        // ever goes red, DO NOT simply pass the real fact: a non-deletion
+        // reading falls through to `.surfaceNotSettled`, whose "try that
+        // again in a moment" road is false for a type-over (retrying changes
+        // nothing) — that shape would need its own cause and sentence, which
+        // is the author's copy to rule, not this function's to improvise.
         if let (before, after) = index.interEntrySeparatorPair(deleting: range, isDeletion: true) {
             for i in [before, after] {
                 if !entries[i].editable {

@@ -86,6 +86,25 @@ struct MobileRefusalTableTests {
                 == "This note is locked — unlock it to divide the block.")
     }
 
+    /// **THE QUICK NOTE'S SEAL ARM JOINS THE ONE SENTENCE** (VM-5 whole-round
+    /// pass, MINOR 3). The box OWNS the note it minted and autosaves into it,
+    /// so a seal landing by sync mid-capture refuses its flush `.lockedPost`
+    /// and this sentence renders in the box's red slot. It said *"This note is
+    /// sealed, so it can't take new text. Unseal it in the note to keep
+    /// writing."* — the Mac's noun and a door ("Unseal") that exists nowhere on
+    /// the phone, whose button is Lock Note / Unlock Note. It now COMPOSES the
+    /// shared shape with the phone's own words (QUESTIONS #159 (a)), never a
+    /// literal of its own.
+    ///
+    /// *Red on the old tree:* the arm returned its own literal.
+    @Test func theQuickNotesSealArmSpeaksThePhonesOwnDoorWords() {
+        let line = MobileQuickNoteCopy.refusal(OperationError.lockedPost(id: "p"))
+        #expect(line == SealedNoteCopy.sentence(act: "keep writing", words: .phone))
+        #expect(line == "This note is locked — unlock it to keep writing.")
+        #expect(!line.localizedCaseInsensitiveContains("seal"),
+                "the Mac's seal vocabulary on the phone: \(line)")
+    }
+
     /// Ruling V: the crystallizer's error voice (U2's host member, the phone's
     /// conformance) speaks the table instead of dumping the error — and a
     /// non-operation error keeps its description.

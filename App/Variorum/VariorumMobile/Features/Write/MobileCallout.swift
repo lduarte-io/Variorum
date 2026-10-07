@@ -54,6 +54,54 @@ nonisolated enum MobileCallout {
         }
     }
 
+    // MARK: - The colour SWATCH (round 2, batch 7 — PR19; the Mac's 13e E1
+    // `CalloutMenu.swatchImage`, phone-imaged)
+
+    /// The swatch's edge, in points — a `UIMenu` row image sits on the cap
+    /// height of the title beside it (the Mac's 14 pt, same reason).
+    static let swatchSize: CGFloat = 14
+
+    /// A colour chip for one palette token, for the callout submenu's rows.
+    ///
+    /// **It stores and carries a NAME, never a value** (AppSpec §7's R1):
+    /// the fill comes from `color(_:)` above — the SAME resolution the
+    /// block's own frame uses — so the swatch is a PREVIEW and never a
+    /// second source of truth, and a palette change reaches the menu and the
+    /// blocks together.
+    ///
+    /// **`.alwaysOriginal` is load-bearing** — the exact twin of the Mac's
+    /// `isTemplate = false`: a template image is recoloured by UIKit to the
+    /// menu's tint, which is the one thing a colour swatch must not be.
+    ///
+    /// The dynamic `UIColor` is RESOLVED here because an image holds pixels,
+    /// not traits; `dark` defaults to the trait in force, so a menu built
+    /// after an appearance flip draws the wash the block will wear (rows are
+    /// rebuilt per `apply`, which is what makes that true in practice).
+    static func swatchImage(
+        for name: String, dark: Bool? = nil, size: CGFloat = swatchSize
+    ) -> UIImage {
+        let style: UIUserInterfaceStyle = (dark ?? (UITraitCollection.current
+            .userInterfaceStyle == .dark)) ? .dark : .light
+        let fill = color(name).resolvedColor(
+            with: UITraitCollection(userInterfaceStyle: style))
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        let image = renderer.image { context in
+            let body = CGRect(x: 0.5, y: 0.5, width: size - 1, height: size - 1)
+            let path = UIBezierPath(roundedRect: body, cornerRadius: 3)
+            fill.setFill()
+            path.fill()
+            // A hairline edge, because the lighter washes are close enough
+            // to a light menu's own background to read as nothing at all
+            // (the Mac's own note, and its own reason).
+            UIColor.separator.setStroke()
+            path.lineWidth = 1
+            path.stroke()
+            _ = context
+        }
+        image.accessibilityLabel = name
+        return image.withRenderingMode(.alwaysOriginal)
+    }
+
     /// The wash for a named color — the Mac palette's exact hexes, dynamic
     /// per trait (unknown names fail-open to blue, the Mac's rule).
     static func color(_ name: String?) -> UIColor {

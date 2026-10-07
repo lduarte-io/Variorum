@@ -270,6 +270,38 @@ struct EditorEditRouteTableTests {
         #expect(Self.three.route(span, "Fresh.", arms: Self.phone).route == expected)
     }
 
+    /// **THE SHIELD BEHIND `CrossBlockRefusal.diagnose`'s HARDCODED
+    /// `isDeletion: true`** (VM-5 stability pass, NIT 5). The terminal
+    /// diagnosis is handed no replacement and reads every lone inter-entry
+    /// separator as a seam DELETE. That is true only because a TYPE-OVER of
+    /// a lone separator never reaches it: #109's clamp answers every one
+    /// (its degenerate shape — QUESTIONS #111) with a zero-length in-block
+    /// edit, on BOTH declared lists. This pins that claim over every
+    /// inter-entry separator of a note mixing texted, EMPTY (both edges of a
+    /// run of two) and fanned blocks, under an open tail — so an arm-list
+    /// edit that ever lets one through fails here BY NAME instead of making
+    /// the diagnosis' deletion reading silently false (its comment says what
+    /// to do then). A guard pin: green before and after the NIT's change,
+    /// which is a comment naming this shield, not a behaviour change.
+    @Test func aLoneSeparatorTypedOverNeverReachesTheDiagnosis() {
+        let note = Note([
+            slot("b0", text: "alpha"), slot("b1", text: ""), slot("b2", text: ""),
+            slot("b3", text: "beta", fan: 2), slot("b4", text: "gamma"),
+        ], tail: "open")
+        let index = note.index
+        let ranges = index.entryRanges()
+        for k in 0..<(ranges.count - 1) {
+            let seam = NSRange(location: ranges[k].upperBound, length: 1)
+            #expect(index.interEntrySeparatorPair(deleting: seam, isDeletion: true) != nil,
+                    "precondition: \(seam) is an inter-entry separator")
+            for (name, arms) in [("mac", Self.mac), ("phone", Self.phone)] {
+                let claimed = note.route(seam, "x", arms: arms).route
+                #expect(Self.arm(of: claimed) == .clampedInBlockEdit,
+                        "\(name): typing over the separator at \(seam.location) is the clamp's, never the diagnosis'")
+            }
+        }
+    }
+
     /// **Mid-paragraph to mid-paragraph** — the compound on both, with the
     /// shared planner's own answer.
     @Test func aMidToMidSpanIsTheCompoundOnBothPlatforms() throws {

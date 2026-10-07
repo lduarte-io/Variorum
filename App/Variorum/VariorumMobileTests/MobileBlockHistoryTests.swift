@@ -432,13 +432,27 @@ struct MobileBlockHistoryTests {
                 default: return []
                 }
             }
-            for line in words {
+            // **BATCH 6b — the sanctioned flip, and what it does NOT change.**
+            // The region still renders NO purge door of its own (her evolved
+            // rule: Delete Now lives on trash surfaces, never in the writing
+            // flow), and this face is not one. What changed is the
+            // EXPLAINER: the phone now HAS a trash surface for takes — the
+            // per-note tray's Leaving section — so the sentence names it
+            // instead of ending after Put back. The distinction the pin now
+            // holds is exactly the one that matters: naming a road ≠ being
+            // one.
+            for line in words where line != MobileBlockHistoryController.deletedExplainer {
                 #expect(!line.contains(RecoveryCopy.deleteNowVerb),
                         "no purge door, and no promise of one: \(line)")
                 #expect(!line.contains("Mac"), "no redirect anywhere: \(line)")
             }
+            #expect(!MobileBlockHistorySheetView.surfaceCapabilities.contains("deleteNow"),
+                    "the face still renders no purge door of its own")
             #expect(MobileBlockHistoryController.deletedExplainer
-                    == "On the \(TrashWindow.days)-day clock. Put one back here.")
+                    == "On the \(TrashWindow.days)-day clock. Put one back here; "
+                        + "to end a take's remaining days early, "
+                        + "\(MobileNoteTrayModel.purgeRoadPhrase).")
+            #expect(!MobileBlockHistoryController.deletedExplainer.contains("Mac"))
         }
     }
 
@@ -753,14 +767,29 @@ struct MobileBlockHistoryTests {
                 == BlockHistoryCopy.restoredSavepoint)
         #expect(MobileBlockHistoryController.predatesSplitRowFlag == "predates a split")
         #expect(MobileBlockMenuController.commitTitle == "Commit Take")
-        #expect(MobileBlockMenuController.historyTitle == "Block History…")
-        #expect(MobileBlockMenuController.rowTitles.contains("Block History…"))
-        // The pairing her G2 ruling asked for, in the phone's grammar: the
-        // two doors are adjacent in the one block-acts menu.
-        let titles = MobileBlockMenuController.rowTitles
-        let commit = try #require(titles.firstIndex(of: MobileBlockMenuController.commitTitle))
-        let history = try #require(titles.firstIndex(of: MobileBlockMenuController.historyTitle))
-        #expect(history == commit + 1, "history is the natural pair to commit")
+
+        // **SANCTIONED FLIP (batch 9) — HER MOVE, held from both sides.**
+        // This assertion used to read `MobileBlockMenuController.historyTitle
+        // == "Block History…"` plus `rowTitles.contains(…)` plus her G2
+        // adjacency (`history == commit + 1`). Her letter moved the door:
+        // *"take history should move into the three ... menu on each take
+        // rather than the main three dot menu."*
+        //
+        // So the pin holds the NEW fact and the precondition that still
+        // constrains it: the word is the SHARED face's own name — not a
+        // second literal minted on the way over — and it is nowhere in the
+        // block ⋯'s vocabulary any more.
+        #expect(MobileTakesBrowserController.historyTitle == "Block History…")
+        #expect(MobileTakesBrowserController.historyTitle
+                == "\(BlockHistoryPath.name)…",
+                "the row's word is composed from the shared name, never rewritten")
+        #expect(!MobileBlockMenuController.rowTitles.contains { $0.contains("History") },
+                "the block ⋯ carries no history row: \(MobileBlockMenuController.rowTitles)")
+        // Commit STAYS on the block ⋯ (she moved the listing, not the act),
+        // so her G2 commit/history adjacency is deliberately over — recorded
+        // here rather than silently dropped with the assertion.
+        #expect(MobileBlockMenuController.rowTitles
+                .contains(MobileBlockMenuController.commitTitle))
 
         for copy in [
             MobileBlockHistoryController.committedStatus,
@@ -792,5 +821,62 @@ struct MobileBlockHistoryTests {
         #expect(BlockHistoryCopy.deletedRegionExplainer(purgeRoad: "open the tray")
                 == "On the \(TrashWindow.days)-day clock. Put one back here; to end a "
                 + "take's remaining days early, open the tray.")
+    }
+
+    /// **THE DELETED REGION PROMISES NO PURGE ROAD THE APP DOES NOT HAVE**
+    /// — §70's handed-forward hook, re-examined at batch 6c and answered
+    /// with the fact that decides it.
+    ///
+    /// 6c gave the phone a **Trash room** with both purge doors in it, which
+    /// looks like the second half of this sentence arriving. It is not:
+    /// **this region lists deleted TAKES, and takes do not row in the global
+    /// Trash** — `TrashScope.listedKinds` excludes `.take` by her D1 ruling
+    /// (*a deleted take on a living block is not a note leaving the
+    /// library*), and `TrashScope.kinds(filter:)` cannot widen past it. So
+    /// naming the Trash room here would point her at a room where the take
+    /// she is reading about does not appear: a door that cannot act (P-2)
+    /// wearing a true sentence's clothes.
+    ///
+    /// The road that WILL make it true is the per-note tray's Leaving
+    /// section (batch 6b), where a deleted take carries Put back and Delete
+    /// Now with confirm-every-time (§69.3). **This pin holds the
+    /// precondition**, so the flip is one argument and the reason is not
+    /// re-derived: if a later batch makes takes reachable from a purge road,
+    /// the first two expectations here change with it.
+    /// **THE FLIP, AND ITS PRECONDITION, HELD BOTH WAYS** (batch 6b's
+    /// deliverable 4 — 6c declined this flip on a traced fact and left this
+    /// pin holding the precondition; the tray's Leaving section is the road
+    /// that makes it true, and it exists now).
+    ///
+    /// It was `theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave`. The two
+    /// halves it holds:
+    ///
+    /// - the sentence NAMES a road that really carries a take — the tray's
+    ///   Leaving section, where a deleted take wears Put back and Delete Now
+    ///   — and it names it through the door's own composed phrase, so a
+    ///   re-word of the chip or the segment cannot leave this sentence
+    ///   pointing at a door that no longer exists;
+    /// - it still never names the GLOBAL Trash, and the global Trash still
+    ///   does not list takes (her D1 ruling). That was the whole of 6c's
+    ///   trace and it has not changed — what changed is that the phone grew
+    ///   the OTHER road.
+    @Test func theDeletedRegionNamesTheTrayAsItsPurgeRoad() async throws {
+        // The precondition 6c pinned, still true — takes are NOT in the
+        // global Trash, so the sentence must never send her there.
+        #expect(!TrashScope.listedKinds.contains(.take))
+        #expect(!MobileTrashView.filterKinds.contains(.take))
+
+        let phone = MobileBlockHistoryController.deletedExplainer
+        #expect(phone == BlockHistoryCopy.deletedRegionExplainer(
+            purgeRoad: MobileNoteTrayModel.purgeRoadPhrase))
+        #expect(phone.contains(MobileNoteTrayModel.purgeRoadPhrase),
+                "it names the road that really carries the take: \(phone)")
+        #expect(phone.contains(MobileBlocksSegment.leaving.word))
+        #expect(!phone.contains(RecoveryCopy.trashSection),
+                "it must not name a room the take is not in")
+        // And the road it names is a REAL door: the tray's Leaving section
+        // renders Delete Now on a take row (the pin that drives it is
+        // `MobileNoteTrayTests.aTakeCanBeEndedEarlyHereAndItAsksEveryTime`).
+        #expect(MobileBlocksSegment.allCases.contains(.leaving))
     }
 }

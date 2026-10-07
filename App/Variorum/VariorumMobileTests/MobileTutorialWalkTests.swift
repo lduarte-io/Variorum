@@ -610,6 +610,45 @@ struct MobileTutorialWritingWalkTests {
         }
     }
 
+    /// **THE SAVEPOINT PARAGRAPH'S ROADS EXIST** (batch 9's fix wave,
+    /// cold-review MAJOR 2 — the second of the two shipped lessons that
+    /// went on naming the retired block-⋯ history row).
+    ///
+    /// Both doors it teaches are asserted against the menus that carry
+    /// them, so a MOVE reds here rather than shipping a false
+    /// instruction into her pocket guide: `Commit Take` must still be a
+    /// block-⋯ row, and `Block History…` must NOT be — it is a take
+    /// card's row now, reached through the bar's ⑂.
+    ///
+    /// **Red on old (behavioural revert):** restore the pre-fix sentence
+    /// (*"Commit Take, in ⋯ … and Block History… beside it"*) and the
+    /// beside-it assertion reds.
+    @Test func theSavepointLessonTeachesRoadsThatStillExist() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "blocks & typing"))
+            }
+            // The act that STAYED, named from the menu that still holds it.
+            #expect(prose.contains(MobileBlockMenuController.commitTitle))
+            #expect(MobileBlockMenuController.rowTitles
+                    .contains(MobileBlockMenuController.commitTitle))
+            // The face that MOVED, named from the door that now carries it…
+            #expect(prose.contains(MobileTakesBrowserController.historyTitle))
+            #expect(!MobileBlockMenuController.rowTitles.contains {
+                $0.localizedCaseInsensitiveContains("history")
+            }, "the block ⋯ no longer carries it, so the lesson must not say it does")
+            // …and the lesson must not put the two side by side any more.
+            #expect(!prose.contains("\(MobileTakesBrowserController.historyTitle) beside"),
+                    "the retired 'beside it' pairing must not be taught")
+            #expect(prose.contains("⑂ on the bottom bar"),
+                    "the takes road, in the phone's own glyph")
+            // The no-redirect principle, as everywhere in the guide.
+            #expect(!prose.contains("Mac"))
+            #expect(!prose.contains("⌘"))
+        }
+    }
+
     /// The formatting lesson's acts fire on its own text: bold wraps a
     /// selection, the heading picker's direct pick and clear land, and a
     /// tap on the staged box ticks it — stored bytes byte-checked.
@@ -1404,6 +1443,140 @@ struct MobileTutorialStarCapTests {
             #expect(lessonCount == MobileTutorialSeeder.plan.flatMap(\.lessons).count,
                     "the seed ran WHOLE past the refused star")
             #expect(noteStars == Operations.starLimit, "her 15 note stars are untouched")
+        }
+    }
+}
+
+// MARK: - keeping & letting go (PR22 — the deletion chapter, batch 6b)
+
+/// **THE FIVE-PLACES MAP, RE-TAUGHT IN PHONE GRAMMAR** (round 2, batch 6b —
+/// §69.8). The Mac's field guide teaches the same map, the two sizes of
+/// moment, and the TWO EXITS by doing; its text names Mac doors and chords,
+/// so the pocket guide re-teaches rather than copying (MobileSoul §4.4).
+///
+/// Same anti-drift discipline as the privacy suite: the prose names the app's
+/// OWN words where it can (`TrashWindow.days`, the tray's segment words), so
+/// a re-worded door makes this red rather than merely stale.
+@MainActor
+@Suite("Mobile tutorial walk — keeping & letting go")
+struct MobilePocketGuideDeletionTests {
+    @Test func theChapterSitsBeforePrivacyAndCarriesTwoLessons() {
+        let index = try? #require(
+            MobileTutorialSeeder.plan.firstIndex { $0.chapter == "keeping & letting go" })
+        let privacy = MobileTutorialSeeder.plan.firstIndex {
+            $0.chapter == "keeping it private"
+        }
+        #expect(index != nil)
+        if let index, let privacy { #expect(index < privacy) }
+        #expect(MobileTutorialSeeder.plan.first {
+            $0.chapter == "keeping & letting go"
+        }?.lessons == ["the five places", "the two exits"])
+    }
+
+    /// All five places are named, each with the phone road that reaches it —
+    /// and the take's own paragraph, which is the one thing the Trash never
+    /// holds (her D1 ruling).
+    @Test func theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "the five places"))
+            }
+            // 1–5, each by name.
+            #expect(prose.contains("WHERE YOU LEFT IT"))
+            #expect(prose.contains("ARCHIVED"))
+            #expect(prose.contains("THE TRASH"))
+            #expect(prose.contains("THIS NOTE'S VERSIONS"))
+            #expect(prose.contains("THIS BLOCK'S HISTORY"))
+            // The roads, in the phone's own words.
+            #expect(prose.contains(MobileBlocksSegment.archived.word))
+            #expect(prose.contains(MobileBlocksSegment.leaving.word))
+            #expect(prose.contains(MobileBlockMenuController.archiveTitle))
+            // **THE ROAD, not merely the FACE'S NAME** (batch 9's fix
+            // wave, cold-review MAJOR 2). This line used to read
+            // `prose.contains(BlockHistoryPath.name)` — the face's name —
+            // so the navigation sentence could be arbitrarily wrong and
+            // the pin stayed green. It WAS wrong: batch 9 moved the door
+            // off the block ⋯ onto each take's own ⋯, and this lesson —
+            // the guide's ONLY road to the came-from and deleted-takes
+            // regions — went on teaching the retired one, in a store that
+            // ships. So the pin now asserts the road that EXISTS and
+            // refuses the road that does not.
+            #expect(prose.contains(MobileTakesBrowserController.historyTitle))
+            #expect(prose.contains("⑂ on the bottom bar"),
+                    "the takes road, in the phone's own glyph")
+            #expect(!prose.contains("⋯ on the bottom bar, then \(BlockHistoryPath.name)"),
+                    "the retired block-⋯ road must not be taught")
+            #expect(prose.contains(RecoveryCopy.putBackVerb))
+            #expect(prose.contains(RecoveryCopy.deleteNowVerb))
+            #expect(prose.contains("\(TrashWindow.days) days"))
+            // The take's exception — the one thing the Trash never holds.
+            #expect(prose.contains("TAKES are the one thing that never rows in the Trash"))
+            // The no-redirect principle: no Mac door, no chord.
+            #expect(!prose.contains("Mac"))
+            #expect(!prose.contains("⌘"))
+        }
+    }
+
+    /// The two exits, told apart — and the lesson ASKS her to do both, which
+    /// is the guide's own device (every lesson performs what it teaches).
+    @Test func theTwoExitsLessonTellsDeletionFromTransformationAndStagesBoth()
+        async throws
+    {
+        try await withPocketGuideWorld { _, db, bookID in
+            let noteID = try await db.read { db in
+                try lessonID(db, bookID: bookID, "the two exits")
+            }
+            let prose = try await db.read { db in
+                try Queries.renderedText(db, containerID: noteID)
+            }
+            #expect(prose.contains("DELETION GOES TO THE TRASH"))
+            #expect(prose.contains("TRANSFORMATION GOES TO LINEAGE"))
+            // The distinction that matters: a transformed original is NOT
+            // deleted, so it wears no countdown.
+            #expect(prose.contains("kept WHOLE and set aside"))
+            #expect(prose.contains("wears no countdown"))
+            #expect(prose.contains(BlockHistoryPath.cameFromSection))
+            #expect(prose.contains(BlockHistoryPath.bringBackVerb))
+            #expect(prose.contains(MobileBlocksSegment.leaving.word))
+            #expect(!prose.contains("Mac"))
+
+            // The staged block the lesson asks her to act on — and its take,
+            // so the divide it teaches is the fanned kind whose original is
+            // exactly what "Came from" holds.
+            let blocks = try await db.read { db in
+                try Queries.blockTOC(db, post: noteID)
+            }
+            let last = try #require(blocks.last)
+            #expect(last.hasFan, "the practice block carries a take")
+            #expect(last.text?.contains("Delete me") == true)
+        }
+    }
+
+    /// **THE BATCH-5 REVIEW'S GUIDE NIT, CLOSED** (its own words: *"the
+    /// pocket guide now describes a shelf that does not exist"*). The
+    /// "getting around" lesson described a full-width Today's Entry door
+    /// batch 5 had replaced with a BADGE, and `grep` found no mention of the
+    /// quick-note box anywhere in the seeder — the surface that batch made
+    /// half the shelf.
+    @Test func theShelfLessonDescribesTheShelfThatExists() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "getting around"))
+            }
+            // The badge, in the ONE declaration's own words (a re-word of
+            // the door reds this rather than leaving it stale).
+            #expect(prose.contains(MobileShelfFaces.todayDoorTitle))
+            #expect(prose.contains("badge"))
+            // …and its fallback state, which is a real road she can meet.
+            #expect(prose.contains("its own row at the list's end"))
+            // The quick-note box, which had no mention at all.
+            #expect(prose.contains("QUICK NOTE box"))
+            #expect(prose.contains("just start typing"))
+            #expect(prose.contains("open ↵"))
+            // The retired shape is gone.
+            #expect(!prose.contains("✎ Today's Entry opens today's journal page"))
         }
     }
 }
