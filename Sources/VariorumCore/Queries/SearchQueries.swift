@@ -167,7 +167,7 @@ extension Queries {
         after cursor: SearchComposer.Cursor? = nil, limit: Int = 50,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchPage {
-        let environment = try searchEnvironment(db)
+        let environment = try searchEnvironment(db, scope: scope)
         var passages: [SearchPassage] = []
         if cursor == nil, let day = query.wornDay {
             passages += try wornDayPassages(
@@ -204,7 +204,7 @@ extension Queries {
         after cursor: SearchComposer.GroupCursor? = nil, limit: Int = 25, perGroup: Int = 3,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchGroupPage {
-        let environment = try searchEnvironment(db)
+        let environment = try searchEnvironment(db, scope: scope)
         var worn: [SearchPassage] = []
         if cursor == nil, let day = query.wornDay {
             worn = try wornDayPassages(
@@ -316,7 +316,7 @@ extension Queries {
         _ db: Database, query: SearchQuery, scope: SearchScope,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchCounts? {
-        let environment = try searchEnvironment(db)
+        let environment = try searchEnvironment(db, scope: scope)
         var everything = query
         everything.visibility = .includingArchived
         var worn: [SearchPassage] = []
@@ -377,7 +377,7 @@ extension Queries {
     ) throws -> [SearchTagAssociation.Association] {
         let typed = SearchTagAssociation.typedPaths(of: query.filter)
         guard !typed.isEmpty else { return [] }
-        let environment = try searchEnvironment(db)
+        let environment = try searchEnvironment(db, scope: scope)
         guard let candidates = SearchComposer.associationCandidates(
             query, scope: scope, environment: environment) else { return [] }
         var stored: [String] = []
@@ -414,8 +414,13 @@ extension Queries {
         return SearchTagAssociation.associate(candidates: read, typedPaths: stored, tagPaths: paths)
     }
 
-    /// The fragments the composer reads from their one home.
-    static func searchEnvironment(_ db: Database) throws -> SearchComposer.Environment {
+    /// The fragments the composer reads from their one home. `scope` (13o
+    /// U3): a `.book(id)` scope naming a GATHERING carries its membership —
+    /// the ONE function its assembly reads (`gatheringMembership`, the
+    /// architect's ruling B).
+    static func searchEnvironment(
+        _ db: Database, scope: SearchScope? = nil
+    ) throws -> SearchComposer.Environment {
         SearchComposer.Environment(
             versionPredicate: { alias in versionHistoryPredicate(alias: alias, of: .anyLiveNote) },
             wingScope: { column, wingID in
@@ -424,7 +429,32 @@ extension Queries {
             },
             editedOn: { alias in editedOnSQL(alias: alias) },
             starredNoteIDs: try starredNoteIDs(db),
-            livingBook: { alias in livingBookSQL(alias: alias) })
+            livingBook: { alias in livingBookSQL(alias: alias) },
+            gathering: try scope.flatMap { try searchGathering(db, scope: $0) })
+    }
+
+    /// A `.book(id)` scope's gathering membership (nil when the scope names
+    /// no live gathering — a BOOK's members are its rows). A dead or missing
+    /// reading is no gathering: the membership-row arm answers it (nothing).
+    static func searchGathering(
+        _ db: Database, scope: SearchScope
+    ) throws -> SearchComposer.GatheringMembership? {
+        guard case .book(let id) = scope.within,
+              let reading = try Queries.reading(db, id: id), reading.kind == .gathering
+        else { return nil }
+        guard let membership = try gatheringMembership(db, reading) else { return .assemblesNothing }
+        return .members(
+            conditions: membership.conditions,
+            arguments: membership.arguments.map { value -> SearchComposer.Value in
+                switch value?.databaseValue.storage {
+                case .string(let s): .text(s)
+                case .int64(let i): .integer(i)
+                case .double(let d): .real(d)
+                // The membership's arguments are ids and stored text; a NULL
+                // or a blob never reaches it (pinned by the parity cells).
+                case .null, .blob, nil: .text("")
+                }
+            })
     }
 
     /// **"A LIVING book" — intake is on** (13o U3, the mode facet's one

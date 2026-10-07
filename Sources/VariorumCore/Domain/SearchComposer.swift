@@ -76,19 +76,47 @@ public enum SearchComposer {
         /// "A LIVING book" over a reading alias, no placeholders — intake's
         /// own candidate predicate (`Queries.livingBookSQL`, 13o U3).
         public var livingBook: @Sendable (_ alias: String) -> String
+        /// **The scope's GATHERING membership** (13o U3, the architect's
+        /// ruling B): when the scope is `.book(id)` and that reading is a
+        /// GATHERING, who its assembled members are — the ONE function its
+        /// assembly reads (`Queries.gatheringMembership`), over the home
+        /// alias `c`. nil when the scope is not a gathering's (a BOOK's
+        /// members are its membership rows).
+        public var gathering: GatheringMembership?
 
         public init(
             versionPredicate: @escaping @Sendable (String) -> String,
             wingScope: @escaping @Sendable (String, String) -> (sql: String, arguments: [Value]),
             editedOn: @escaping @Sendable (String) -> String,
             starredNoteIDs: [String],
-            livingBook: @escaping @Sendable (String) -> String = { _ in "0" }
+            livingBook: @escaping @Sendable (String) -> String = { _ in "0" },
+            gathering: GatheringMembership? = nil
         ) {
             self.versionPredicate = versionPredicate
             self.wingScope = wingScope
             self.editedOn = editedOn
             self.starredNoteIDs = starredNoteIDs
             self.livingBook = livingBook
+            self.gathering = gathering
+        }
+    }
+
+    /// A gathering scope's membership (13o U3, ruling B).
+    public enum GatheringMembership: Equatable, Sendable {
+        /// The gathering assembles EMPTY (archived, no rule, a malformed
+        /// one) — its search answers nothing.
+        case assemblesNothing
+        /// Its members: conditions over the home container `c`, ANDed, with
+        /// their arguments in order.
+        case members(conditions: [String], arguments: [Value])
+
+        /// The scope clause over `c` (no placeholders beyond `arguments`).
+        var clause: (sql: String, arguments: [Value]) {
+            switch self {
+            case .assemblesNothing: ("0", [])
+            case .members(let conditions, let arguments):
+                ("(" + conditions.joined(separator: " AND ") + ")", arguments)
+            }
         }
     }
 
@@ -260,12 +288,25 @@ public enum SearchComposer {
             conditions.append("c.id = ?")
             arguments.append(.text(id))
         case .book(let id):
-            conditions.append("""
-                (c.id IN (SELECT rp.post_id FROM reading_post rp
-                           WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member')
-                 OR d.reading_id = ?)
-                """)
-            arguments += [.text(id), .text(id)]
+            switch environment.gathering {
+            case nil:
+                conditions.append("""
+                    (c.id IN (SELECT rp.post_id FROM reading_post rp
+                               WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member')
+                     OR d.reading_id = ?)
+                    """)
+                arguments += [.text(id), .text(id)]
+            case .assemblesNothing:
+                // 13o U3 (ruling B): a gathering that assembles nothing
+                // answers EMPTY — its own name included.
+                conditions.append("0")
+            case .members(let members, let memberArguments):
+                // 13o U3 (ruling B): its ASSEMBLED members — the assembly's
+                // own conditions, evaluated per examined match (∝ matches).
+                conditions.append(
+                    "((c.id IS NOT NULL AND " + members.joined(separator: " AND ") + ") OR d.reading_id = ?)")
+                arguments += memberArguments + [.text(id)]
+            }
         }
 
         let archived = """
@@ -501,11 +542,18 @@ public enum SearchComposer {
             common.append("c.id = ?")
             commonArguments.append(.text(id))
         case .book(let id):
-            common.append("""
-                c.id IN (SELECT rp.post_id FROM reading_post rp
-                          WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member')
-                """)
-            commonArguments.append(.text(id))
+            if let gathering = environment.gathering {
+                // 13o U3 (ruling B): a gathering's assembled members.
+                let clause = gathering.clause
+                common.append(clause.sql)
+                commonArguments += clause.arguments
+            } else {
+                common.append("""
+                    c.id IN (SELECT rp.post_id FROM reading_post rp
+                              WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member')
+                    """)
+                commonArguments.append(.text(id))
+            }
         }
         switch query.visibility {
         case .living:

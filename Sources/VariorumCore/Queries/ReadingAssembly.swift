@@ -406,45 +406,13 @@ extension Queries {
             arguments += filterArguments
 
         case .gathering:
-            // 13i-e (R-13ie-3, her confirmation inside R-13ie-4): an ARCHIVED
-            // gathering STOPS ASSEMBLING — "a saved rule put away" answers
-            // EMPTY here, so every reader THROUGH the assembly (the book
-            // surfaces, export, the bind and its preview, the Bookcase's
-            // gathering counts) follows by construction; the four readers that
-            // run a rule OUTSIDE it skip an archived gathering themselves (the
-            // Pool's tuck, the chip's gathering leg, the Library card's feed,
-            // the word counts). A BOOK keeps assembling while archived — it
-            // opens from Archived with its members (the edit law).
-            if reading.archivedAt != nil { return [] }
-            var conditions = [
-                "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
-            ]
-            // 13i-c (R-13ic-4): NO rule shows NOTHING — the match-all
-            // tolerance letter died with the rule-less sweep (v1_20); a
-            // rule-less gathering lives only as a Trash restoree until it
-            // gets a rule. MALFORMED fails closed as before.
-            let match: (conditions: [String], arguments: [(any DatabaseValueConvertible)?])
-            var stars = StarContext()
-            switch RuleGrammar.read(reading.querySpec) {
-            case .malformed, .none: return []
-            case .rule(let term):
-                // 13i-b U4 (F-U3-3): the ★ term's context — read only when
-                // the rule carries one, so a held observation of a star
-                // gathering TRACKS the 'starred' setting (an un-star evicts
-                // on the next emission) and every other gathering's never
-                // touches it.
-                match = ruleMatchSQL(
-                    term, wingID: reading.wingId,
-                    starredNoteIDs: try stars.ids(db, for: term))
-            }
-            conditions += match.conditions
-            arguments += match.arguments
-            // 13i-c U2 — HIDE-OWNED (the sitting record §6): a gathering that
-            // hides owned notes (its own toggle, else the global default —
-            // SHOW) composes the ONE exclusion fragment.
-            if try hidesOwned(db, reading) {
-                conditions.append(ownedElsewhereExclusion(alias: "c"))
-            }
+            // 13o U3 (ruling B): WHO IS A MEMBER is the ONE function the
+            // search composer reads too (`gatheringMembership`) — the two can
+            // never drift. nil = this gathering assembles EMPTY (archived; no
+            // rule; a malformed one).
+            guard let membership = try gatheringMembership(db, reading) else { return [] }
+            let conditions = membership.conditions
+            arguments += membership.arguments
             // A smart reading has no positions; `manual` is meaningless for
             // it — fall back to created_at ascending (PROVISIONAL, see
             // phase closeout).
@@ -651,6 +619,66 @@ extension Queries {
     // could not spell as `undraftable`; the hazard it guarded (a save
     // through the draft silently dropping a term) is gone by construction
     // now: the rule editor's state IS the v2 grammar (`Domain/RuleEditing`).)
+
+    /// **A GATHERING's MEMBERSHIP — the ONE predicate** (13o U3, the
+    /// architect's ruling B: *"the gathering's membership WHERE factored into
+    /// ONE function that BOTH assembleReading and the composer read … the two
+    /// can never drift"*). The WHERE conditions over a `container c` that
+    /// make a note an ASSEMBLED member of this gathering — the ambient
+    /// live/unarchived/post clauses, the wing and the rule (`ruleMatchSQL`),
+    /// and the hide-owned exclusion when the gathering hides owned notes —
+    /// with their arguments in order. **nil = the gathering assembles EMPTY**:
+    /// archived (13i-e — "a saved rule put away"), no rule (R-13ic-4) or a
+    /// malformed one (fails closed). Byte-identical to the assembly's arm as
+    /// it stood before 13o U3 (moved, not rewritten).
+    ///
+    /// Read by `assembleReading`'s gathering arm and by the search's
+    /// `.book(id)` scope on a gathering (`Queries.searchEnvironment(_:scope:)`).
+    static func gatheringMembership(
+        _ db: Database, _ reading: Reading
+    ) throws -> (conditions: [String], arguments: [(any DatabaseValueConvertible)?])? {
+        // 13i-e (R-13ie-3, her confirmation inside R-13ie-4): an ARCHIVED
+        // gathering STOPS ASSEMBLING — "a saved rule put away" answers
+        // EMPTY here, so every reader THROUGH the assembly (the book
+        // surfaces, export, the bind and its preview, the Bookcase's
+        // gathering counts) follows by construction; the four readers that
+        // run a rule OUTSIDE it skip an archived gathering themselves (the
+        // Pool's tuck, the chip's gathering leg, the Library card's feed,
+        // the word counts). A BOOK keeps assembling while archived — it
+        // opens from Archived with its members (the edit law).
+        guard reading.kind == .gathering, reading.archivedAt == nil else { return nil }
+        var conditions = [
+            "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
+        ]
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        // 13i-c (R-13ic-4): NO rule shows NOTHING — the match-all
+        // tolerance letter died with the rule-less sweep (v1_20); a
+        // rule-less gathering lives only as a Trash restoree until it
+        // gets a rule. MALFORMED fails closed as before.
+        let match: (conditions: [String], arguments: [(any DatabaseValueConvertible)?])
+        var stars = StarContext()
+        switch RuleGrammar.read(reading.querySpec) {
+        case .malformed, .none: return nil
+        case .rule(let term):
+            // 13i-b U4 (F-U3-3): the ★ term's context — read only when
+            // the rule carries one, so a held observation of a star
+            // gathering TRACKS the 'starred' setting (an un-star evicts
+            // on the next emission) and every other gathering's never
+            // touches it.
+            match = ruleMatchSQL(
+                term, wingID: reading.wingId,
+                starredNoteIDs: try stars.ids(db, for: term))
+        }
+        conditions += match.conditions
+        arguments += match.arguments
+        // 13i-c U2 — HIDE-OWNED (the sitting record §6): a gathering that
+        // hides owned notes (its own toggle, else the global default —
+        // SHOW) composes the ONE exclusion fragment.
+        if try hidesOwned(db, reading) {
+            conditions.append(ownedElsewhereExclusion(alias: "c"))
+        }
+        return (conditions, arguments)
+    }
 
     /// The v2 rule's SQL half over a `container c` scope — the ONE
     /// implementation (13i-a; `smartMatchSQL`'s successor) shared by reading
