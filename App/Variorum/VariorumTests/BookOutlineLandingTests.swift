@@ -892,11 +892,9 @@ extension BookOutlineLandingTests {
             print("VX-75 PIN: maxShift=\(Int(maxShift)) heightFloor=\(Int(heightFloor)) "
                 + "of \(Int(preHeight)) vanished=\(vanished.sorted()) shifts=\(shiftStory.suffix(6))")
             #expect(maxShift <= 150,
-                    "no neighbour moves under the swap — max shift \(Int(maxShift)) pt "
-                    + "(\(shiftStory.suffix(4)))")
+                    "no neighbour moves under the swap — max shift \(Int(maxShift)) pt (\(shiftStory.suffix(4)))")
             #expect(heightFloor > preHeight - 200,
-                    "the focused row never dips toward the editor's birth height: "
-                    + "floor \(Int(heightFloor)) of \(Int(preHeight))")
+                    "the focused row never dips toward the editor's birth height: floor \(Int(heightFloor)) of \(Int(preHeight))")
             #expect(vanished.isEmpty,
                     "no realized row de-materializes under the swap: \(vanished.sorted())")
         }
