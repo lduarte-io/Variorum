@@ -294,10 +294,11 @@ arm-list edit cannot make the mis-diagnosis live silently.
 
 ## FIX WAVE (implementer — Opus 5.5, 2026-10-06)
 
-**LIVE STATUS:** MAJOR 2 FIXED (both platforms, pins red→green, Mac twin
-included); MINOR 3 FIXED (pin red→green); MINOR 4 + NIT 5 in progress;
-final suites (mobile full, Mac editor-brain, core `swift test`) PENDING.
-Scope is exactly the four ACCEPTED rows; MAJOR 1 (VM-2) untouched.
+**LIVE STATUS:** all four rows dispositioned — MAJOR 2 FIXED (both
+platforms), MINOR 3 FIXED, MINOR 4 FIXED (doctrine; contract pins, no
+red-on-old claimed), NIT 5 shield NAMED + guard-pinned. Mac editor-brain
+suites green. PENDING: mobile targeted editor-brain suites, the FULL
+mobile suite, core `swift test`. MAJOR 1 (VM-2) untouched.
 
 **Not done in this wave (stated first, per the record rule):** MAJOR 1 /
 VM-2 (structural-flight keystroke fence) — not this wave's, by her ruling.
@@ -427,3 +428,98 @@ red and green is MAJOR 2's `binds`, whose switch returns `true` for a
 is the disarm's.
 
 **Green after:** the same `MobileEditRoutingBindingTests` run above (7/7).
+
+### MINOR 4 — two `precondition`-trapping mutators vs the refuse doctrine
+
+**Mechanism, traced myself — and why there is NO red-on-old pin.** Both
+mutators' only callers are the shared `TailCrystallizer`, through the
+host doors `transferTailPrefixToLastEntry` / `crystallizeIndex` (one line
+each on both view models; no other production caller — grep-verified).
+`attachLeadingTailRunIfNeeded` establishes every transfer precondition
+before the call (tail open, an entry exists, `run > 0`, and the band's
+`text` moves in lockstep with the index's tail length, so the tail holds
+the run); `finishMint` reads `region = index.tailRange` (⇒ tail open) and
+guards `applied` non-empty, and between those guards and the call nothing
+re-enters the index (`replaceTailRegion` writes under
+`suppressEditProcessing`; its own desync arm only schedules a Task). So
+no production road reaches either trap: this is the doctrine class the
+disposition named, made true — not an observed crash fixed. **No pin is
+claimed red-on-old.**
+
+**Fix.** Both mutators now return `Bool` with no `@discardableResult`,
+refusing (mutating nothing) on exactly the states their preconditions
+named, plus the overflow fold (transfer) and a negative-length fold
+(crystallize) — the band header's "this struct cannot hold a negative
+length" made true of all six. The band header in `BlockRangeIndex.swift`
+now says SIX and names where the two new refusals go. The host doors
+return the index's Bool; a new host door,
+`recoverFromRefusedIndexMutation()` (named for its two band callers), is
+`desyncRecovery()` on BOTH view models — the SAME road the storage-edit
+consumers take for the other four (flush, re-read, re-render from the
+store, the DEBUG assertion naming the impossible state — so the DEBUG
+voice the trap gave is kept, not traded for a silent flag). In the band:
+a refused attachment returns `false` and `crystallizeIfNeeded` stops
+before planning over bookkeeping the index declined; a refused
+`crystallizeIndex` recovers and settles (`applyPendingIfClean` — the
+protocol's "every exit" contract) before any stamp runs against it.
+Considered and declined: routing to `requestFullRender` alone (finishMint's
+own region-nil arm) — it only sets a flag and waits for a delivery that a
+refused attachment (no store write) may never produce, and it would have
+silenced the DEBUG voice.
+
+**Pins:** `BlockRangeIndexTests.theLeadingRunTransferRefusesInsteadOfTrapping`
+and `.crystallizeRefusesInsteadOfTrapping` — CONTRACT pins for the new
+refuse shape (each named state refused; a refusal mutates nothing; the
+ordinary transfer still lands byte- and total-neutral). On the pre-fix
+code they would trap by construction — that is the definition of the
+change, not evidence of a reachable bug, and they are not offered as
+red-on-old. The two existing `crystallize…` pins now assert the `true`
+they always relied on (their calls would otherwise drop the new result).
+
+### NIT 5 — `diagnose` hardcodes `isDeletion: true`
+
+**Traced myself, and why the real fact was NOT passed.** `diagnose`'s one
+production caller is `EditorEditRoute.route`'s terminal (it holds the
+replacement; the Mac's `.refuseAwaitingSync` impossible arm reaches it
+through the `message(range:index:slots:)` convenience). A TYPE-OVER of a
+lone inter-entry separator never arrives there: `clampedToBlockText`'s
+degenerate shape answers every such span with a zero-length in-block
+span (traced for a texted leading entry, an EMPTY leading entry, and
+runs of empties — the leading-trim's `length > 0` asymmetry still lands
+the span in the empty entry itself), `clampedInBlockEdit` claims it
+whenever the replacement is non-empty, BOTH declared lists carry
+`.clampedInBlockEdit`, and every arm above it declines a non-empty
+replacement (the find fence only under a find sweep). Passing the real
+fact would NOT improve the diagnosis: a non-deletion reading skips step 1
+and falls to step 4, `.surfaceNotSettled`, whose road ("Try that again in
+a moment") is FALSE for a type-over — retrying changes nothing — whereas
+the deletion reading's `.seamKeystrokeDeclined` ("This keystroke can't
+join these two blocks") at least describes the act. A truthful
+non-deletion answer would need a NEW cause and sentence — author copy,
+not mine to invent. So the disposition's second option: the shield is
+NAMED at the site (`CrossBlockRefusal.swift`, step 1), with what to do if
+it ever fails.
+
+**Pin (a GUARD pin, green on both sides — the NIT's change is a comment):**
+`EditorEditRouteTableTests.aLoneSeparatorTypedOverNeverReachesTheDiagnosis`
+— every inter-entry separator of a note mixing texted, empty (a run of
+two) and fanned blocks under an open tail, typed over, is the clamp's on
+BOTH declared lists. An arm-list edit that ever lets one through now
+fails by name instead of making the deletion reading silently false.
+
+**Mac editor-brain suites after MINOR 4 + NIT 5** (by struct name, the
+two-suites-per-file trap honored): `✔ Test run with 268 tests in 24
+suites passed after 12.198 seconds.` (BlockRangeIndexTests ·
+ArmedEditTests · MacEditRoutingTests · MacEditRoutingCrashTests ·
+CrystallizationPlannerTests · CrystallizationReconcilerTests ·
+CrossBlockCompoundTests · BoundaryClampTests · UndoHintAndRefusalTests ·
+EditorEditRouteTableTests · IdentityProjectionAuditWalkTests ·
+MacIdentityAuditWiringTests · EditorChurnCostTests · SeamMergeTests ·
+WholeBlockDeleteTests · EditorSeamCostTests · EditorSeamMountedCostTests ·
+TypedReturnTests · SpaceEaterTests · GestureSoakTests ·
+EditorSessionTests · ReviewRoundFixTests · ReturnKeyTraceTests ·
+TypewriterRoomTests) and `✔ Test run with 91 tests in 14 suites passed
+after 4.099 seconds.` (StructuralGestureTests.swift's ten suites — incl.
+`anIdleMintIsNeverBornMidStructuralFlight`, the Mac's flight hold over
+the attachment — SoftNewlineTests · TypedReturnKeyTests ·
+PlainPasteRuleTests · PlainPasteDoorTests).
