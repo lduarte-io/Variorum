@@ -109,6 +109,38 @@ nonisolated enum LibraryOpenCopy {
         "This copy sits in iCloud Drive, so it is copied onto this \(ProtectionCopy.deviceName) first. "
         + ProtectionCopy.liveLibraryNotInICloudDrive
 
+    // MARK: - The hand-off door (13x F1, ladder R1-MAJOR — deliverable 1's
+    // face; QC's folder pair, produced where she can find and AirDrop it)
+
+    /// The one verb, both faces — kept literally equal to the registry's
+    /// (`.handOffLibrary`) so the two can never drift.
+    static let handOffDoor = "Send Library to Another Mac…"
+    static let handOffSheetTitle = "Send Library to Another Mac"
+    static let handOffPanelMessage =
+        "Choose where to put the travelling folder — somewhere easy to find and AirDrop."
+    static let handOffPanelPrompt = "Put It Here"
+    static let handOffProducingLine =
+        "Making the travelling folder — a sealed copy of your library and its key file…"
+    /// QC's teaching, said at the success moment (its mirror is the
+    /// missing-key-file refusal's remedy).
+    static func handOffDoneLead(folder: String) -> String {
+        "“\(folder)” is ready. Send the WHOLE folder — the key file travels with it, "
+        + "and without the key file the library opens nothing."
+    }
+    static let handOffRevealDoor = "Show in Finder"
+    /// Corner 33 at the producing end: a pair without its key file would
+    /// arrive unopenable, so nothing is made.
+    static let handOffNoKeyFileRefusal =
+        "No key file sits beside this library yet, so a travelling copy would arrive "
+        + "unopenable. Nothing was made."
+    static let handOffFailedLead =
+        "The travelling folder couldn't be made — nothing travels half-made."
+    /// Data Safety's twin (the FAQ entry's own name).
+    static let handOffSectionTitle = "Moving to another Mac"
+    static let handOffSectionBody =
+        "One folder holds a sealed copy of your library and its key file. AirDrop the "
+        + "whole folder to the other Mac and open it there with File ▸ Open Library…"
+
     // MARK: - Progress / receipts
 
     static let classifyingLine = "Reading what you picked…"

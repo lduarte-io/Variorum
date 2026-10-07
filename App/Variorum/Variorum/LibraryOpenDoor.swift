@@ -51,6 +51,90 @@ final class LibraryOpenPresenter {
     }
 }
 
+/// 13x F1 (ladder R1-MAJOR) — the HAND-OFF door's presenter: one per
+/// scene (the File menu's and Settings' twin), the open-door pattern,
+/// the destination panel's seam split from the act so the pins drive
+/// `begin` directly (the picker-pin precedent).
+@MainActor
+@Observable
+final class LibraryHandOffPresenter {
+    var model: LibraryHandOffModel?
+
+    /// The destination panel, then the one flow.
+    func openPanel(session: AppSession?, bootstrap: AppBootstrap) {
+        guard model == nil, let session,
+              let storeURL = bootstrap.liveStoreURL else { return }
+        let panel = NSOpenPanel()
+        panel.title = LibraryOpenCopy.handOffSheetTitle
+        panel.message = LibraryOpenCopy.handOffPanelMessage
+        panel.prompt = LibraryOpenCopy.handOffPanelPrompt
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = FileManager.default.urls(
+            for: .downloadsDirectory, in: .userDomainMask).first
+        guard panel.runModal() == .OK, let picked = panel.url else { return }
+        begin(session: session, storeURL: storeURL, into: picked)
+    }
+
+    func begin(session: AppSession, storeURL: URL, into parent: URL) {
+        let fresh = LibraryHandOffModel(reveal: { folder in
+            NSWorkspace.shared.activateFileViewerSelecting([folder])
+        })
+        model = fresh
+        Task {
+            await fresh.begin(
+                database: session.database, storeURL: storeURL, into: parent)
+        }
+    }
+
+    func dismiss() { model = nil }
+}
+
+/// The hand-off's one face: producing → done (QC's teaching +
+/// Show in Finder) → or the worded refusal.
+struct LibraryHandOffSheet: View {
+    @Bindable var model: LibraryHandOffModel
+    var onClose: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(LibraryOpenCopy.handOffSheetTitle)
+                .font(.title3.weight(.semibold))
+            switch model.phase {
+            case .producing:
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text(LibraryOpenCopy.handOffProducingLine)
+                        .foregroundStyle(.secondary)
+                }
+            case .done(let folder):
+                Text(LibraryOpenCopy.handOffDoneLead(folder: folder.lastPathComponent))
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Spacer()
+                    Button(LibraryOpenCopy.handOffRevealDoor) { model.revealAgain() }
+                    Button("Done") { onClose() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .refused(let message, let detail):
+                Text(message)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack { Spacer(); Button("Close") { onClose() } }
+            }
+        }
+        .padding(22)
+        .frame(minWidth: 460, alignment: .leading)
+    }
+}
+
 /// The flow's one face — phases rendered plainly; the voice tokens are
 /// the session's where one exists, the fallback elsewhere (the lobby).
 struct LibraryOpenSheet: View {

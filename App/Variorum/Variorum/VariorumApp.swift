@@ -42,6 +42,11 @@ struct VariorumApp: App {
     /// can never both fire over one model.
     @State private var libraryOpen = LibraryOpenPresenter()
     @State private var settingsLibraryOpen = LibraryOpenPresenter()
+    /// 13x F1 (ladder R1-MAJOR): the hand-off door's presenters — the
+    /// File menu's and Data Safety's twin, one per scene like the
+    /// adoption pair above.
+    @State private var handOff = LibraryHandOffPresenter()
+    @State private var settingsHandOff = LibraryHandOffPresenter()
     /// 13x U2 row 7 — the restore-hold's observable state (the marker
     /// beside the store, projected): the banner renders it, the sync
     /// session's gate reads it. Built at the first task (it needs the
@@ -66,6 +71,16 @@ struct VariorumApp: App {
                 ) {
                     if let model = libraryOpen.model {
                         LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
+                    }
+                }
+                // 13x F1 (R1-MAJOR): the hand-off sheet — the File door's
+                // progress/done/refusal face, beside the adoption sheet.
+                .sheet(isPresented: Binding(
+                    get: { handOff.model != nil },
+                    set: { if !$0 { handOff.dismiss() } })
+                ) {
+                    if let model = handOff.model {
+                        LibraryHandOffSheet(model: model) { handOff.dismiss() }
                     }
                 }
         }
@@ -113,7 +128,7 @@ struct VariorumApp: App {
             // Check for Updates… door (rendered only where it can act).
             EditorCommands(
                 bootstrap: bootstrap, windows: windows, updates: appDelegate.updates,
-                openDoor: libraryOpen)
+                openDoor: libraryOpen, handOffDoor: handOff)
         }
         noteWindows
     }
@@ -464,6 +479,11 @@ struct VariorumApp: App {
                     // this one can never both fire).
                     restoreDoor: { picked in
                         settingsLibraryOpen.begin(bootstrap: bootstrap, picked: picked)
+                    },
+                    // 13x F1 (R1-MAJOR): Data Safety's hand-off twin —
+                    // Settings' OWN presenter, the restore door's pattern.
+                    handOffDoor: {
+                        settingsHandOff.openPanel(session: session, bootstrap: bootstrap)
                     })
                     .sheet(isPresented: Binding(
                         get: { settingsLibraryOpen.model != nil },
@@ -471,6 +491,14 @@ struct VariorumApp: App {
                     ) {
                         if let model = settingsLibraryOpen.model {
                             LibraryOpenSheet(model: model) { settingsLibraryOpen.dismiss() }
+                        }
+                    }
+                    .sheet(isPresented: Binding(
+                        get: { settingsHandOff.model != nil },
+                        set: { if !$0 { settingsHandOff.dismiss() } })
+                    ) {
+                        if let model = settingsHandOff.model {
+                            LibraryHandOffSheet(model: model) { settingsHandOff.dismiss() }
                         }
                     }
             } else {

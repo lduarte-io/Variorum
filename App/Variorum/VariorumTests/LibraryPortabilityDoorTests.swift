@@ -188,6 +188,72 @@ struct LibraryPortabilityDoorTests {
         #expect(message.contains("the key file travels with it"))
     }
 
+    // MARK: F1 R1-MAJOR — the hand-off door's flow (the face over the U1
+    // brains; the finding's evidence was the zero-caller grep)
+
+    /// 13x F1 (ladder R1-MAJOR): deliverable 1's FACE — the one flow
+    /// behind File ▸ Send Library to Another Mac… and Data Safety's twin.
+    /// The producing arm lands `.done`, reveals the folder ONCE (the
+    /// injected Finder seam; `revealAgain` is the done face's door), and
+    /// the folder is QC's pair — it classifies as `.folderHoldingPair`,
+    /// so the adoption door opens it with no new shape. The refusal arm:
+    /// a library with NO key file beside it words corner 33's refusal
+    /// (nothing made, nothing revealed). The old tree had NO door at all
+    /// (the reviewer's zero-caller grep is the red); these pins guard the
+    /// door now built.
+    @Test func theHandOffDoorProducesThePairRevealsItAndWordsItsRefusal() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // The open keyed library + its live key file (the producer's input).
+        let store = dir.appendingPathComponent("home/variorum.sqlite")
+        let key = StoreKey.mint()
+        let database = try AppDatabase.openStore(at: store, custody: .inMemory(initial: key))
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "the day's word", kdf: fastKDF())
+        try envelope.write(at: envelope.preferredURL(besideStore: store))
+        let destination = dir.appendingPathComponent("Chosen", isDirectory: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+
+        let revealed = LockIsolated<[URL]>([])
+        let model = LibraryHandOffModel(reveal: { folder in
+            revealed.withValue { $0.append(folder) }
+        })
+        await model.begin(database: database, storeURL: store, into: destination)
+        guard case .done(let folder) = model.phase else {
+            Issue.record("expected .done, got \(model.phase)")
+            return
+        }
+        #expect(folder.lastPathComponent.hasPrefix(LibraryHandOff.folderPrefix))
+        #expect(revealed.value == [folder], "revealed exactly once, at completion")
+        // QC's pair: the folder classifies with no new shape — the
+        // adoption door opens what this door produced.
+        guard case .folderHoldingPair = LibraryClassifier.classify(at: folder) else {
+            Issue.record("the produced folder did not classify as the pair")
+            return
+        }
+        model.revealAgain()
+        #expect(revealed.value.count == 2, "the done face's Show in Finder door")
+        _ = database.asRebindable().binding.lock()
+
+        // The refusal arm: no key file beside the library — corner 33's
+        // refusal, worded; nothing lands in the destination.
+        let bareStore = dir.appendingPathComponent("bare/variorum.sqlite")
+        let bareKey = StoreKey.mint()
+        let bareDatabase = try AppDatabase.openStore(
+            at: bareStore, custody: .inMemory(initial: bareKey))
+        let before = try FileManager.default.contentsOfDirectory(atPath: destination.path)
+        let refusedReveals = LockIsolated<[URL]>([])
+        let refused = LibraryHandOffModel(reveal: { folder in
+            refusedReveals.withValue { $0.append(folder) }
+        })
+        await refused.begin(database: bareDatabase, storeURL: bareStore, into: destination)
+        #expect(refused.phase == .refused(LibraryOpenCopy.handOffNoKeyFileRefusal, detail: nil))
+        #expect(refusedReveals.value.isEmpty, "a refusal reveals nothing")
+        let after = try FileManager.default.contentsOfDirectory(atPath: destination.path)
+        #expect(after == before, "the refusal made nothing — not even an empty folder")
+        _ = bareDatabase.asRebindable().binding.lock()
+    }
+
     // MARK: Row 6 — the whole flow over a real pair (typed road → confirm
     // → adopt → hold + custody + reopen)
 

@@ -34,10 +34,12 @@ struct DataSafetyPane: View {
     let protection: ProtectionController?
     @State private var model: DataSafetyModel
 
-    /// P-1: the four acts this surface renders, declared once and walked
-    /// (pre-13x 3b: the decrypted export joins).
+    /// P-1: the five acts this surface renders, declared once and walked
+    /// (pre-13x 3b: the decrypted export joins; 13x F1 R1-MAJOR: the
+    /// hand-off twin joins).
     static let surfaceCapabilities: [CapabilityID] = [
         .backUpNow, .chooseBackupFolder, .forgetBackupFolder, .exportPlaintextLibrary,
+        .handOffLibrary,
     ]
 
     /// pre-13x 3b (copy §4): the decrypted export's brain, made when the door
@@ -49,14 +51,19 @@ struct DataSafetyPane: View {
     /// *Restore from Backup* — Settings' own adoption presenter acts; nil
     /// hosts list the copies with no doors (evidence stays honest).
     let restoreDoor: ((URL) -> Void)?
+    /// 13x F1 (R1-MAJOR): the hand-off act's Data Safety twin — Settings'
+    /// own presenter acts; nil hosts render no door (P-2).
+    let handOffDoor: (() -> Void)?
 
     init(
         services: AppServices?, protection: ProtectionController? = nil,
-        restoreDoor: ((URL) -> Void)? = nil
+        restoreDoor: ((URL) -> Void)? = nil,
+        handOffDoor: (() -> Void)? = nil
     ) {
         self.services = services
         self.protection = protection
         self.restoreDoor = restoreDoor
+        self.handOffDoor = handOffDoor
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -71,6 +78,7 @@ struct DataSafetyPane: View {
             if model.isWired {
                 copiesSection
                 restoreFromBackupSection
+                handOffSection
                 folderSection
                 exportsSection
                 plaintextExportSection
@@ -163,6 +171,31 @@ struct DataSafetyPane: View {
                             .disabled(model.busy)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // MARK: - Moving to another Mac (13x F1, R1-MAJOR — deliverable 1's twin)
+
+    /// The hand-off act's Data Safety face: one sentence saying what the
+    /// folder is and how it is used, and the ONE declared door (the File
+    /// menu renders the same act). Settings' own presenter runs the
+    /// panel + flow + sheet.
+    @ViewBuilder
+    private var handOffSection: some View {
+        if let handOffDoor {
+            Section(LibraryOpenCopy.handOffSectionTitle) {
+                Text(LibraryOpenCopy.handOffSectionBody)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button(CapabilityRegistry.capability(.handOffLibrary).verb) {
+                        handOffDoor()
+                    }
+                    .disabled(model.busy)
+                    Spacer()
                 }
             }
         }

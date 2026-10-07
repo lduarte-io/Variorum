@@ -77,6 +77,9 @@ struct AppSettingsView: View {
     /// 13x U2 row 6: the Restore surface's per-row door (Settings' own
     /// adoption presenter behind it). nil hosts render no Open… rows.
     let restoreDoor: ((URL) -> Void)?
+    /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
+    /// presenter behind it). nil hosts render no door.
+    let handOffDoor: (() -> Void)?
 
     init(
         session: AppSession, services: AppServices? = nil,
@@ -84,7 +87,8 @@ struct AppSettingsView: View {
         appearance: AppearanceController? = nil,
         updates: UpdateChannel? = nil,
         crashReports: CrashReporting? = nil,
-        restoreDoor: ((URL) -> Void)? = nil
+        restoreDoor: ((URL) -> Void)? = nil,
+        handOffDoor: (() -> Void)? = nil
     ) {
         self.session = session
         self.services = services
@@ -93,6 +97,7 @@ struct AppSettingsView: View {
         self.updates = updates
         self.crashReports = crashReports
         self.restoreDoor = restoreDoor
+        self.handOffDoor = handOffDoor
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -301,7 +306,8 @@ struct AppSettingsView: View {
             // restoring one does — including to things that were deleted.
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
-                services: services, protection: protection, restoreDoor: restoreDoor)
+                services: services, protection: protection, restoreDoor: restoreDoor,
+                handOffDoor: handOffDoor)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.

@@ -32,6 +32,9 @@ struct EditorCommands: Commands {
     /// 13x U2 row 6: the main scene's adoption-door presenter — File ▸
     /// Open Library… drives the same one flow the lobby faces do.
     let openDoor: LibraryOpenPresenter
+    /// 13x F1 (ladder R1-MAJOR): the hand-off door's presenter — File ▸
+    /// Send Library to Another Mac… (deliverable 1's menu face).
+    let handOffDoor: LibraryHandOffPresenter
 
     /// The key window's routing channel — nil only before any window has
     /// registered (the first frames), where every door is already disabled
@@ -83,6 +86,8 @@ struct EditorCommands: Commands {
     /// rendered).
     static let menuRendered: [CapabilityID] = [
         .newPost, .todaysEntry, .findAnything, .commitTake,
+        // 13x F1 (R1-MAJOR): the hand-off act's File door.
+        .handOffLibrary,
         // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
         // menu — the two moments, one grain apart.
         .saveNoteVersion,
@@ -303,6 +308,17 @@ struct EditorCommands: Commands {
             // (P-2), and the flow's teardown needs the composed root.
             Button(LibraryOpenCopy.openLibraryDoor) {
                 openDoor.openPanel(bootstrap: bootstrap)
+            }
+            .disabled(session == nil)
+            // 13x F1 (ladder R1-MAJOR; the 13x row's deliverable 1) — the
+            // HAND-OFF ACT's menu face: the travelling folder pair (QC),
+            // produced where she can find and AirDrop it, revealed in
+            // Finder. DECLARED (`.handOffLibrary` — the registry walk's
+            // letter; the Open Library… sibling above stays the undeclared
+            // standard-item class it was recorded as). Enabled at `.ready`
+            // only: the producer's input is the OPEN keyed store.
+            Button(verb(.handOffLibrary)) {
+                handOffDoor.openPanel(session: session, bootstrap: bootstrap)
             }
             .disabled(session == nil)
             Divider()

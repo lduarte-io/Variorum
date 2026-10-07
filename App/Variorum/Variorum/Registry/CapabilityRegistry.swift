@@ -2065,6 +2065,18 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "The unencrypted export lives in Settings ▸ Data Safety.",
             availability: always),
+        // 13x F1 (ladder R1-MAJOR; the 13x row's deliverable 1): the
+        // travelling folder pair (the kickoff ruling QC) — File's door and
+        // Data Safety's twin render the ONE act; reveal-in-Finder at
+        // completion. The verb is kept literally equal to
+        // `LibraryOpenCopy.handOffDoor` so the faces can never drift.
+        Capability(
+            id: .handOffLibrary, verb: "Send Library to Another Mac…", scope: .app,
+            doors: [.menuBar, .surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The travelling copy is made while your library is open — "
+                + "File ▸ Send Library to Another Mac…, or Settings ▸ Data Safety.",
+            availability: always),
 
         // MARK: Diagnostics (13r U3-B — Settings ▸ Diagnostics, R-13r-5)
         // The Data Safety shape: `.surface`, app scope, always available as

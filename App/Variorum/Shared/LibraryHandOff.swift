@@ -26,6 +26,7 @@
 
 import Foundation
 import GRDB
+import Observation
 import VariorumCore
 
 nonisolated enum LibraryHandOff {
@@ -147,4 +148,72 @@ nonisolated enum LibraryHandOff {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
+}
+
+/// 13x F1 (ladder R1-MAJOR) — THE HAND-OFF DOOR's one flow behind both
+/// faces (File ▸ Send Library to Another Mac… and Data Safety's twin):
+/// the destination picked by the face's panel, the producer run OFF the
+/// main thread over the OPEN keyed store, the folder revealed at
+/// completion (the injected seam — the Mac wires Finder; the pins
+/// record), every refusal worded per arm. The brains stay
+/// `LibraryHandOff.produce` — this model adds NO file mechanics.
+@MainActor
+@Observable
+final class LibraryHandOffModel {
+    enum Phase: Equatable {
+        case producing
+        case done(folder: URL)
+        /// A worded refusal; `detail` carries the quiet facts.
+        case refused(String, detail: String?)
+    }
+    private(set) var phase: Phase = .producing
+    /// Reveal-in-Finder, injected (the Mac activates Finder; tests record).
+    private let reveal: @MainActor (URL) -> Void
+
+    init(reveal: @escaping @MainActor (URL) -> Void) {
+        self.reveal = reveal
+    }
+
+    /// THE ACT: produce off-main, then reveal once. `database` is the
+    /// OPEN keyed store at `storeURL` (the producer's own precondition).
+    func begin(database: AppDatabase, storeURL: URL, into parent: URL) async {
+        phase = .producing
+        let outcome: Result<LibraryHandOff.Product, any Error> = await Task.detached(
+            priority: .userInitiated
+        ) {
+            do {
+                return .success(try LibraryHandOff.produce(
+                    from: database, storeURL: storeURL, into: parent))
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        switch outcome {
+        case .success(let product):
+            phase = .done(folder: product.folder)
+            reveal(product.folder)
+        case .failure(let error):
+            phase = Self.refusal(for: error)
+        }
+    }
+
+    /// The done face's door — the folder shown again on request.
+    func revealAgain() {
+        if case .done(let folder) = phase { reveal(folder) }
+    }
+
+    /// The per-arm words (facts binding; the strings 13s's).
+    nonisolated static func refusal(for error: any Error) -> Phase {
+        guard let handOff = error as? LibraryHandOff.HandOffError else {
+            return .refused(
+                LibraryOpenCopy.handOffFailedLead, detail: String(describing: error))
+        }
+        switch handOff {
+        case .noKeyFile:
+            return .refused(LibraryOpenCopy.handOffNoKeyFileRefusal, detail: nil)
+        case .keyFileUnreadable(let detail), .destinationUnwritable(let detail),
+             .snapshotFailed(let detail):
+            return .refused(LibraryOpenCopy.handOffFailedLead, detail: detail)
+        }
+    }
 }

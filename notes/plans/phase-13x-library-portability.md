@@ -1229,7 +1229,7 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 |---|---|---|
 | (0) baseline | whole core suite headless on the merged tree | DONE (this commit) — **2334 tests in 269 suites PASSED** (133 s) + StringsWorkbook 40/6; skips the standing env-gated ones only (13o's gated measurement suites · the real-server pass · the fixture minters). U2b's 2254/258 + 13o's +80/+11, as the brief expected |
 | R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | BUILT (this commit; mechanism re-traced and CONFIRMED — the settled-design entry) — the pin + red-on-old revert PENDING the stage slot |
-| R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | NOT STARTED |
+| R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | BUILT (this commit) — File ▸ Send Library to Another Mac… + Data Safety's "Moving to another Mac" twin over ONE flow (`LibraryHandOffModel` → `LibraryHandOff.produce` off-main → reveal-in-Finder), DECLARED (`.handOffLibrary`, menuBar+surface — the walk's letter), per-arm refusals; strings in the F1 table below; the Mac pin PENDING the stage slot |
 | M1 | key ceremonies refuse under a standing hold (P-R1-1) | NOT STARTED |
 | M2 | the hold write's failure refuses the adoption | NOT STARTED |
 | M3 | per-arm failure copy (pre-move arms claim no dated copy) | NOT STARTED |
@@ -1241,6 +1241,17 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 | N4 | P-U1-1's plaintextLibrary disposition recorded | NOT STARTED |
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
+
+#### NEW STRINGS FOR 13s (F1's additions to the U2 table; facts binding, words provisional — `LibraryOpenCopy` unless noted)
+
+| string (constant) | where it renders |
+|---|---|
+| `handOffDoor` / the registry verb "Send Library to Another Mac…" (kept literally equal) | the File menu + Data Safety's door |
+| `handOffSheetTitle` · `handOffPanelMessage` · `handOffPanelPrompt` | the destination panel + the sheet |
+| `handOffProducingLine` · `handOffDoneLead(folder:)` (QC's teaching at the success moment) · `handOffRevealDoor` | the hand-off sheet |
+| `handOffNoKeyFileRefusal` (corner 33 at the producing end) · `handOffFailedLead` | the refusal arms |
+| `handOffSectionTitle` "Moving to another Mac" (the FAQ entry's name) · `handOffSectionBody` | Data Safety's section |
+| `ProtectionCopy.followCastleKeyFileAppleOpenable` (the R1-BLOCKER notice's body/waiting line) | the follow notice + banner |
 
 #### THE SETTLED DESIGN, PER FIX (written before the code; revised in place as each lands)
 
