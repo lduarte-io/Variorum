@@ -194,4 +194,7 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     typed with ⏎ past the keyboard-up page, her scroll back up, typing again, a Today-door re-entry).
     NEXT on resume: run `testWalkEnd`, inspect, delete the probe + the driver, run the touched suites + the FULL
     mobile suite once, final dispositions here.
+  - While parked: `cec83e59` — `currentPlace()` takes the direct TK2 fragment lookup at the viewport's top first
+    (it runs on every layout pass that moves the page), `closestPosition` as fallback. **COMPILED ONLY — its pin run
+    is PENDING** (the stage is another session's until the resume).
   - Walk captures — run 1 inspected (5/6 items ✓, end-of-note re-walk prepared). Final suites — PENDING.
