@@ -4288,15 +4288,21 @@ final class EditorViewModel {
 /// `auditIdentityProjection()` and `applyPendingIfClean()` are the model's
 /// existing members.
 extension EditorViewModel: TailCrystallizerHost {
-    func transferTailPrefixToLastEntry(_ units: Int) {
+    func transferTailPrefixToLastEntry(_ units: Int) -> Bool {
         index.transferTailPrefixToLastEntry(units)
     }
 
     func crystallizeIndex(
         minted: [(blockID: String, variantID: String, length: Int)],
         remainingTailLength: Int?
-    ) {
+    ) -> Bool {
         index.crystallize(minted: minted, remainingTailLength: remainingTailLength)
+    }
+
+    /// The same road `storageDidEdit` takes when the index's other four
+    /// mutators refuse (VM-5, MINOR 4).
+    func recoverFromRefusedIndexMutation() {
+        desyncRecovery()
     }
 
     func surfaceKnownText(variantID: String) -> String? {
