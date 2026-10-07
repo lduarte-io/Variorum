@@ -74,8 +74,31 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
   mobile-round-2 §17–§20 · SessionResiliencyProtocol implementer half · TEXTKIT2 §3 iOS findings · the three
   *[removed for publication]*
   `notes/plans/vm-10-screens/` gitignored.
-  - Arm 1 (arrival) — NOT-STARTED: trace by running (hosted `MobileWriteScreen`, KVO on `contentOffset` with
-    call stacks), then pin.
-  - Arm 2 (⏎ forced scroll) — NOT-STARTED.
-  - Arm 3 (scroll-back fight) — NOT-STARTED.
+  - TRACE HARNESS (temporary probe `VariorumMobileTests/MobileWriteScrollTraceProbe.swift`, deleted at close):
+    the REAL `MobileWriteScreen` (and, for the shell road, the real `MobileShellView` → Library → row push) in
+    a scene-attached key window 402×874; KVO on `contentOffset` recording the call stack of every change;
+    swizzled `setContentOffset(_:animated:)` / `scrollRectToVisible(_:animated:)` / `scrollRangeToVisible`
+    recording each INITIATOR. **Machinery fact:** Simulator.app is NOT installed on this machine (Xcode 27's
+    `Developer/Applications` is empty), so the headless device stays in hardware-keyboard mode — the software
+    keyboard was forced IN-PROCESS for the keyboard-up runs (WebKitTestRunner's route:
+    `GSEventSetHardwareKeyboardAttached(false, 0)` + `+[UIKeyboard isInHardwareKeyboardMode]` → NO; measured
+    effect: keyboard guide 387 pt, text view 340 pt, room 323 pt).
+  - **Arm 2 (⏎ forced scroll) — TRACED (pre-fix tree, `0f0624e7`+probe).** ⏎ typed at the document END through
+    the real door (`MobileEditorTextView.insertText`): offsetY **1776.7 → 2471.3**, first-visible char = last-
+    visible char = **2691** (the new empty line, nothing else) — no keyboard, 30-paragraph note. With the keyboard
+    up: 30 paragraphs **2343.3**, first = last visible = 2691; a **3-paragraph** note: offsetY **0 → 254.0**,
+    first = last visible = **267** — the whole note scrolls away. Mid-document ⏎ at the viewport's last line:
+    offsetY 303.3 → **336.0** (a 32.7-pt minimal reveal — correct). THE MECHANISM (initiators, in order): UIKit's
+    `-[UITextView _scrollToCaretIfNeeded]` (the caret rect, minimal), then `-[UITextView _scrollToSelectionIfNeeded]`
+    (from `textInputDidChange:`) calling `scrollRectToVisible(_:animated:)` with the selection's LINE rect — which
+    for the document's LAST line is padded by the bottom `textContainerInset` (the typewriter room): **(15, 2242.9,
+    372, 711.4)** vs a mid-document line's (20, 987.5, 362, 22.7). Taller than the 675-pt viewport, it is
+    bottom-aligned, so the caret's line lands at the TOP over a page of room. Our code issues no scroll here.
+  - **Arm 3 (fight) — TRACING.** A programmatic scroll-up after ⏎ + typing STAYS for 5 s (the only offset moves
+    are UIKit's own TK2 content-size anchoring, `_setContentOffsetWithoutRecordingScrollPosition`, ±32/96 pt that
+    keep the visible text in place); no timer/mint/delivery re-scroll found. Typing after scrolling the caret off
+    screen re-runs `_scrollToSelectionIfNeeded` (the arm-2 rect) — the repeat of the forced scroll.
+  - **Arm 1 (arrival) — TRACING.** Every arrival measured lands at offset 0, caret {0,0}, first visible char 1:
+    bare screen (focus off/on), the real shell road (Library → row push), and keyboard-up (30- and 3-paragraph
+    notes). So "nothing remembered → top" is ALREADY true on the pre-fix tree (its pin will be green-on-old).
   - Walk captures — NOT-STARTED. Final suites — PENDING.
