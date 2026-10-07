@@ -1000,6 +1000,48 @@ deferred pieces.
 
 ### U2b RECORD (the drills implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
 
+**U2b DRILLS CLOSED — 2026-10-07.** Ledger row 10's five drill legs ALL GREEN, headless
+end to end (fake server + throwaway stores under `swift test`; ZERO stage claims, zero
+GUI, no subagents, foreground waits only). The DRILL TABLE below is the evidence: leg 1
+the same-Mac restore (hold → duplicate-survives → Resume → tombstone catch-up → the QD
+one-conflict-card pin, dumps byte-identical, one device identity); leg 2 the per-leg
+opens (day's passphrase · twelve words · the in-memory A arm · the older-key day pair
+byte-untouched across a re-key · the second look, with the collision rule's three
+verdicts composed); leg 3 the plaintext-export re-open (same-owner cursor-0 catch-up
+with ZERO pushes — §14.13's letter — and the foreign-owner adopt road into its own
+partition); leg 4 the returner/purge fence (corner 37 verified by construction; the
+purged family drops through the 13j ledger at the pre-drain reconcile, the kept outbox's
+queued family edit SWEPT WITH IT — nothing ever reaches the server's fence); leg 5 the
+newer-schema refusal at the model's two consults with the exact identifier facts. **THE
+WHOLE CORE SUITE: 2254 tests in 258 suites PASSED** (115 s; +7 tests/+3 suites over the
+U2 baseline 2247/255 — exactly this batch's three drill files) plus the StringsWorkbook
+target's 40/6; skips are the standing env-gated three only. **THE FENCE HELD
+ABSOLUTELY:** `git diff 96e8ccc8..HEAD` is three new test files + this record — zero
+lines under `Sources/` at all, so zero `Sync/`, zero custody/keychain, `Migrations.swift`
+untouched. ONE red across the whole batch, traced at the mechanism and fixed in the TEST
+alone (leg 4's missing B-side janitor leg — the table row carries the trace); no
+production fix was needed anywhere, so no red-on-old pin was owed (the hallucination
+guard's fix clause never engaged). **DEFERRED PIECES: NONE** — no drill demanded an
+engine line (the Shared `roundsHeld` chokepoint stood up to every leg; nothing
+re-sequences post-merge from this batch). Deliberately NOT run here, already evidenced
+elsewhere: the Shared faces' rendering (the hold gate/banner/picker/flow) is the U2 Mac
+slot's 5/5 + two reverts — this batch asserts the core facts those faces render, and no
+stage act ran. Commits: 997fe89e · 1232525b · c6f7fdea · 8eea177a · the close, every one
+pushed at its landing.
+
+#### INTERPRETATIONS RECORDED (for the orchestrator; none gates the core)
+
+- **Leg 5's "at the model":** `LibraryOpenModel` is app-target code (a Mac-suite run —
+  a stage act this brief forbids), so the drill runs the model's TWO CONSULTS 1:1
+  (`land` = `LibraryClassifier.classify`; `settle` = `schemaVerdict(at:key:)`, verified
+  call-for-call against the shipped source) and pins the exact facts its refusal
+  `detail` joins; the rendering seam itself stands on the U2 slot evidence. If the
+  orchestrator wants a model-face pin for the newer-schema arm specifically, it is a
+  stage-slot item, not a headless one.
+- **Leg 1's pool close:** the harness closes the pool and drains a leftover WAL through
+  one keyed connection before adopting (the app reaches the same closed state through
+  `AppBootstrap`'s lock road); recorded in the drill's own comment, test-world only.
+
 #### LIVE STATUS
 
 | leg | drill | status |
@@ -1010,8 +1052,9 @@ deferred pieces.
 | 4 | Returner / purge fence (a backup older than the purge horizon; nothing re-pushes a purged row) | DONE (this commit; same file, 1 test GREEN after the one traced composition fix — the table row below) |
 | 5 | The newer-schema refusal at the model's consult (both classifier stages over a real pair; the sentence's exact facts) | DONE (this commit; in `LibraryKeyLegDrillTests` — the table row below) |
 
-No revert is in flight. No subagents; synchronous foreground waits only; NO stage claims
-(every drill is headless — fake server + throwaway stores under `swift test`).
+No revert is in flight (none ever started — no production code changed, so no
+behavioural revert was owed). No subagents; synchronous foreground waits only; NO stage
+claims (every drill is headless — fake server + throwaway stores under `swift test`).
 
 #### THE SETTLED DESIGN, PER LEG (written before the code; revised in place as each lands)
 
