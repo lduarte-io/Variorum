@@ -719,3 +719,118 @@ conventions; list every new string in your record for 13s. The hallucination gua
 (red-on-old pins by behavioural revert for every refusal/guard). Append `### U2 RECORD` (LIVE
 STATUS first) from your first commit; commit per piece; push every commit; work only in
 `~/dev/variorum-13x`.
+
+### U2 RECORD (the implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
+
+#### LIVE STATUS
+
+| row | piece | status |
+|---|---|---|
+| 6 | The two doors + welcome/waiting/absent-store slots | NOT STARTED — settled design below |
+| 7 | The restore-hold landing state, both doors | NOT STARTED — settled design below |
+| 9 | The iCloud-Drive live-library guard | NOT STARTED — settled design below |
+| 8 | The Resume reconciliation (pre-merge-safe half) | NOT STARTED — settled design below |
+
+No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
+claimed by this session (the 13o scheduler owns it tonight) — every Mac-suite run stops at its
+seam as PENDING-behind-the-stage. Build order note (the U1 precedent — the letter bends so no
+piece waits on an unbuilt input): row 7's CORE flag lands before row 6's Shared model, because
+the door's completion writes the hold; the rows still CLOSE in the brief's order 6 → 7 → 9 → 8.
+
+#### THE SETTLED DESIGN, PER ROW (written before the code; revised in place as each lands)
+
+- **Row 6 — THE TWO DOORS, one brain.** Core halves (headless-pinned):
+  `Persistence/BackupRestoreCandidates.swift` — the Restore surface's listing brain: the app's
+  own snapshot pairs in a folder (the backup-name parser's strictness restated from
+  `StoreBackup.date(fromBackupURL:)`), each snapshot's serving key file resolved THROUGH the
+  U1 classifier (one pair brain, never a second), its envelope read keylessly into
+  WHICH-CREDENTIAL-OPENS-THIS facts (decision 11 rendered: the day's passphrase wrap · the
+  twelve words · the Apple copy · the master copy), and the SAME-FINGERPRINT SECOND LOOK
+  (ledger 14's U4→13x half): a candidate whose fp8 equals the LIVE library's key fingerprint
+  is served by the live custody (Touch ID / the current passphrase) — a flag the face words.
+  Shared: `LibraryOpenModel` (@MainActor @Observable, `App/Variorum/Shared/`) — the ONE flow
+  both framed doors drive: classify (U1's verdicts; refusal-shaped verdicts render
+  `LibraryOpenCopy` sentences — the bare-store remedy teaches "send the whole folder");
+  `folderHoldingStores` offers, never guesses; encrypted pairs open by the LOBBY'S OWN ROADS
+  over the SOURCE pair (the Apple road tried silently first — `StoreLobby.openWithAppleKey`;
+  else `StoreLobby.envelopeRoad(storeURL: source, …, vaultRoad:)` — reuse, never re-derive);
+  the post-unlock `LibraryClassifier.schemaVerdict` renders newer/unreadable honestly; a
+  CONFIRM step says what will happen (the aside home, the safety copy, the source untouched,
+  sync-waits line, the row-9 line when the source sits in iCloud Drive); the adoption is U1's
+  `LibraryAdoption` (ready-state road: onWillLock → close pool → execute off-main → reopen
+  with the opener — an `AppBootstrap.adoptLibrary(opening:work:)` sibling of `rekeyLibrary`;
+  lobby-state road: execute directly, then reopen); AT COMPLETION the custody-collision rule's
+  write through the EXISTING doors (verdict `alreadyAligned` ⇒ nothing; else the opener lands
+  in the shape the ADOPTED store's effective gate dictates — auto ⇒ `saveAuto`, biometric ⇒
+  `saveGated` (both promptless, shipped), passphrase ⇒ no item, the custody law's letter; a
+  gated held item is unreadable without a prompt BY DESIGN, so a differing-or-unreadable held
+  key composes as `adoptOpeningKey` — the write is idempotent; recorded as the rule's
+  application, not a change to it) — then the restore hold (row 7) and the reopen. M/C/the
+  device identity untouched (the memo). Faces: *File ▸ Open Library…* in EditorCommands'
+  `.newItem` group (no key equivalent — the New Window precedent; enabled at `.ready`, P-2:
+  the lobby faces carry their own doors), the `libraryMissingOpenDoor` button on
+  `LibraryMissingView` (the copy constant shipped unrendered at 1a), the same door on the
+  WAITING face (§3.8's second door), and *Restore from Backup…* on Data Safety — a section
+  listing `BackupRestoreCandidates` rows (the in-container folder; the second folder's listing
+  recorded PROVISIONAL below) with per-row credential sentences and an Open… driving the one
+  model. "WELCOME" INTERPRETATION (recorded): no distinct welcome state exists in the build —
+  the fresh-install Auto road mints silently with no face; the door's welcome-slot rendering
+  is the absent-store face + the File menu (PROVISIONAL P-U2-1).
+- **Row 7 — THE RESTORE-HOLD.** Core: `Persistence/LibraryRestoreHold.swift` — a marker FILE
+  beside the store (`variorum-restore-hold.json`: held-at + the copy's as-of day), per-store
+  BY LOCATION exactly as the semantics demand; set by the door at every adoption's completion
+  (round 3: one landing state everywhere a copy is adopted), cleared by Resume alone; never
+  travels (the hand-off folder and the snapshots carry only the pair). Shared: `SyncSession`
+  gains ONE chokepoint — `roundsHeld: (@MainActor () -> Bool)?` consulted in `triggerSync()`
+  and `flush()` (every trigger road funnels there: settle, became-active, the post-configure
+  trigger), nil = never held (every existing composition unchanged); the Mac wires it to the
+  marker's read. The BANNER (`RestoreHoldBar`, beside `ProtectionNoticeBar` in the one
+  bottom inset): the round-3 ruling's sentence rendered PROVISIONAL from `LibraryOpenCopy`
+  (as-of day · Sync is waiting · deleted-will-leave/edits-will-return · duplicate-first) +
+  **Resume Sync** = clear the marker + `services.resumeSync()` (QD composes free: the kept
+  outbox pushes at the first resumed round because nothing cleared it). The banner renders
+  whenever the hold stands, account or none (PROVISIONAL P-U2-2). On a machine with no
+  custody/account the hold is additionally covered by the existing not-yet-enrolled state
+  (round 3's "cheap" half — enrollment already waits on a deliberate press).
+- **Row 9 — THE GUARD.** Core: `Persistence/LibraryPlacementGuard.swift` — two pure rules,
+  headless-pinned: `isInsideICloudDrive(URL)` (the Mobile Documents home) and
+  `isLiveLibraryFolder(picked:storeURL:)` (the store's own folder, or the store file itself).
+  Faces: the backup-destination picker (`DataSafetyModel.chooseFolder`) REFUSES the live
+  library's own folder with copy §6's why-not sentence verbatim (copy §8's note names this
+  refusal as 13x's); the adoption door's confirm renders the same sentence as an
+  informational line when the picked SOURCE sits inside iCloud Drive (the door adopts BY
+  COPY, so the guard teaches rather than refuses there — the kickoff's "rides the door").
+- **Row 8 — THE RESUME RECONCILIATION, pre-merge-safe half.** Core:
+  `Persistence/LocalMachineryRecreation.swift` — the four local-only tables
+  (`SyncSchema.localOnlyTables`) recreated inside a re-opened plaintext export BEFORE ANY
+  WRITE (§14.13 + ledger 22: the copied outbox triggers still name them, so the landed copy
+  takes no write until they exist), DDL restated from the migration WITH a schema-equality
+  pin against a fresh store's `sqlite_master` (drift fails the suite); red-on-old: a write
+  against an un-recreated export REFUSES (the old behavior demonstrated), lands after. The
+  door's PLAINTEXT ROAD composes it: land the copy (a key-file-less `LibraryAdoption` plan —
+  the U1 brain gains the optional-key-file arm), recreate the tables, then the
+  `startNewLibrary` recipe verbatim over the landed file (fresh key + `StoreIdentity
+  .establish` + Auto dials + `saveAuto` — ledger 5's "plaintext → fresh key + identity"; the
+  route's open ENCRYPTS it, the shipped 13p migration); fresh tables = cursor 0 + empty
+  outbox, so the same-account re-open enrolls and pulls with ZERO pushes — §14.13's letter,
+  falling out of the shipped machinery rather than built beside it. Resume's routing is the
+  EXISTING reconcile + doors (enroll via custody-absent enrollment with a fresh identity;
+  the follow where keys rotated; foreign/no owner ⇒ the Connect/adopt road —
+  `AppServices.connectLibrary`, shipped); NOTHING of it is rebuilt. POST-MERGE half, recorded:
+  any engine-side hold line if the Shared chokepoint proves insufficient, and row 10's drills
+  (returner/purge-fence · stale-outbox conflict cards · per-posture legs) — not this batch's.
+
+#### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
+
+- (none yet)
+
+#### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
+
+- **P-U2-1** — "welcome" slot read as the absent-store face + the File menu (no distinct
+  welcome state exists in the build).
+- **P-U2-2** — the hold banner renders whenever the hold stands, signed in or not; Resume is
+  always one press (on an account-less machine it clears the hold and does nothing else).
+
+#### NEW STRINGS FOR 13s (every rendered word this batch mints; facts binding, words provisional)
+
+- (listed as rendered)
