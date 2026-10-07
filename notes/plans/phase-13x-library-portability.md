@@ -244,3 +244,33 @@ sequences the non-Sync/custody work first (the design memo, the hand-off act on 
 machinery, the door shells + the classifier brain, VX-64's tool fix, copy rendering) and the
 Sync-composition work (enroll/adopt/follow wiring, custody-collision rules, engine gating if
 any of it must live in `Sync/`) after 13o's merge.
+
+## THE RESTORE-HOLD PROPOSAL (round 3 — the orchestrator's answer to her "what is actually
+good UI for this case?"; her ratification lands below it)
+
+**The shape: adopting a copy lands the library OPEN with sync WAITING — a landing state, not a
+toggle.** A standing banner on the adopted library:
+
+> *This is your library as of <date>. Sync is waiting — **Resume** to catch up with your
+> account. Notes you deleted since will leave again; edits made since will come back. To keep
+> something from this backup, duplicate it first — duplicates stay.*
+
+**[Resume Sync]** is one press; until it, no round runs for this store.
+
+- **Why it answers the bewilderment:** the trash-recovery user gets time INSIDE the restored
+  library, at the exact moment it matters, with the recipe that actually works — a DUPLICATE
+  mints fresh UUIDs, so it survives the catch-up, while the re-trashed original honestly leaves
+  again (tombstone-wins is correct and said). No silent re-deletion, no reading-the-fine-print
+  dependence.
+- **Why it is cheap:** on a NEW Mac the hold IS the existing not-yet-enrolled state (enrollment
+  already waits on a deliberate press — the door simply never auto-runs it); on the SAME Mac
+  (where custody would auto-rejoin at the next round — her instinct's true half) the hold is
+  one per-store "held after restore" flag consulted at the round-trigger seam, the un-followed
+  device's banner/refused-rounds precedent re-worn.
+- **What it is NOT:** 18a's general pause. No Settings toggle, no pause-any-time, no cadence
+  semantics — the door's own landing state only; 18a later generalizes and absorbs it.
+- **Slot note:** the gate aims at the round-trigger seam in `Shared` (`SyncSession`), needing no
+  `Sources/VariorumCore/Sync/` line before 13o's merge; if the honest home proves engine-side,
+  that line sequences into the post-merge batch.
+- **Composes with QD:** the kept outbox pushes at Resume, not at landing — the dead Mac's last
+  edits travel exactly once, visibly.
