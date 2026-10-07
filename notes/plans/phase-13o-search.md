@@ -1142,3 +1142,16 @@ LibraryPagingModelTests, the NoteRowSelection/ShelfAndPalette/ShellLanding suite
 FindAndReplaceTests, CapabilityRegistryTests) — adopted into the closeout checklist.
 
 **ROUND 2 OPENS:** a FRESH fable-reviewer over the fix diff + the round-1 record.
+
+---
+
+## LADDER — ROUND 2 (2026-10-07 ~06:1x; a FRESH fable-reviewer over the fix diff 7d7923ab..76c3abdc)
+
+**Verdict: 0 BLOCKER · 0 MAJOR · 0 MINOR · 0 NIT — CLEAN BILL. The ladder CLOSES (no round 3).**
+Each fix verified against its finding's exact mechanism; BOTH bug-class pins independently
+reproduced red-on-old in a scratch clone (the parser pin's 2 issues; the worn-facts pin's 2,
+with the cursor/worn-only control arms green on OLD — the fix moved nothing it shouldn't);
+the justified palette-pin edit UPHELD by an independent sweep of every `.prefix(` expectation
+(none encodes the old widened-word shape); `swift test --filter Search` re-run by the
+reviewer itself — 95/14 green, SearchP1Tests unmoved; scope hygiene confirmed (no Sync/, no
+editor seam, no trailers). The closeout checklist stands as the remaining owed work.
