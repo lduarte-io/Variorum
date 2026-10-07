@@ -54,7 +54,7 @@ struct MobileFilterTests {
             try await session.runner.run { ops in
                 let shelved = try ops.createPost(title: "Shelved note")
                 _ = try ops.createPost(title: "Floating note")
-                let book = try ops.createReading(name: "Poems", kind: .curated)
+                let book = try ops.createReading(name: "Poems", kind: .book)
                 _ = try ops.addPostToReading(shelved.id, to: book.id)
                 let pool = try ops.createPool(title: "Pool")
                 _ = try ops.newBlock(in: pool.id, text: "A loose sentence.", at: .end)
@@ -136,10 +136,10 @@ struct MobileFilterTests {
     @Test func aBookRowOpensThatBookAndWearsTheShelfsOwnFaces() async throws {
         try await withEditorWorld { session, _ in
             let (openID, finishedID) = try await session.runner.run { ops -> (String, String) in
-                let open = try ops.createReading(name: "Aster", kind: .curated)
+                let open = try ops.createReading(name: "Aster", kind: .book)
                 let note = try ops.createPost(title: "A member")
                 _ = try ops.addPostToReading(note.id, to: open.id)
-                let finished = try ops.createReading(name: "Zebra", kind: .curated)
+                let finished = try ops.createReading(name: "Zebra", kind: .book)
                 try ops.lockReading(finished.id)
                 return (open.id, finished.id)
             }
@@ -194,9 +194,9 @@ struct MobileFilterTests {
     @Test func theBooksListingIsWindowedAndSaysSo() async throws {
         try await withEditorWorld { session, _ in
             try await session.runner.run { ops in
-                _ = try ops.createReading(name: "Aster", kind: .curated)
-                _ = try ops.createReading(name: "Basil", kind: .curated)
-                _ = try ops.createReading(name: "Cedar", kind: .curated)
+                _ = try ops.createReading(name: "Aster", kind: .book)
+                _ = try ops.createReading(name: "Basil", kind: .book)
+                _ = try ops.createReading(name: "Cedar", kind: .book)
             }
             let library = MobileLibraryViewModel(session: session, listingLimit: 2)
             library.filter = .books
@@ -262,7 +262,7 @@ struct MobileFilterTests {
         try await withEditorWorld { session, _ in
             try await session.runner.run { ops in
                 _ = try ops.createPost(title: "A note")
-                _ = try ops.createReading(name: "Poems", kind: .curated)
+                _ = try ops.createReading(name: "Poems", kind: .book)
             }
             let library = MobileLibraryViewModel(session: session)
             let scraps = MobileScrapsModel(session: session)
@@ -311,7 +311,7 @@ struct MobileFilterTests {
             // Newer note · Poems · Older note.
             let bookID = try await session.runner.run { ops -> String in
                 _ = try ops.createPost(title: "Older note")
-                let book = try ops.createReading(name: "Poems", kind: .curated)
+                let book = try ops.createReading(name: "Poems", kind: .book)
                 _ = try ops.createPost(title: "Newer note")
                 return book.id
             }
@@ -389,7 +389,7 @@ struct MobileFilterTests {
         // Made long ago, touched yesterday.
         let book = Queries.ShelfBook(
             reading: Reading(
-                id: "book", name: "Poems", kind: .curated,
+                id: "book", name: "Poems", kind: .book,
                 createdAt: day("2020-01-01T00:00:00.000Z"),
                 updatedAt: day("2026-08-30T00:00:00.000Z")),
             postCount: 0, sectionCount: 0)
@@ -513,7 +513,7 @@ struct MobileFilterTests {
         try await withEditorWorld { session, _ in
             try await session.runner.run { ops in
                 _ = try ops.createPost(title: "A note")
-                _ = try ops.createReading(name: "Poems", kind: .curated)
+                _ = try ops.createReading(name: "Poems", kind: .book)
             }
             let library = MobileLibraryViewModel(session: session)
             let scraps = MobileScrapsModel(session: session)
@@ -558,7 +558,7 @@ struct MobileFilterTests {
     @Test func theArchiveRoomInheritsTheRowNarrowedToWhatCanExistThere() async throws {
         try await withEditorWorld { session, _ in
             let archivedID = try await session.runner.run { ops -> String in
-                _ = try ops.createReading(name: "Poems", kind: .curated)
+                _ = try ops.createReading(name: "Poems", kind: .book)
                 let pool = try ops.createPool(title: "Pool")
                 _ = try ops.newBlock(in: pool.id, text: "A loose sentence.", at: .end)
                 let note = try ops.createPost(title: "Set aside")
@@ -666,7 +666,7 @@ struct MobileFilterTests {
     @Test func theShellGivesTheLibraryTheShelfsOwnBooks() async throws {
         try await withEditorWorld { session, _ in
             try await session.runner.run { ops in
-                _ = try ops.createReading(name: "Aster", kind: .curated)
+                _ = try ops.createReading(name: "Aster", kind: .book)
             }
             let suite = "filters-shell-\(UUID().uuidString)"
             let defaults = try #require(UserDefaults(suiteName: suite))

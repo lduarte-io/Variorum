@@ -461,7 +461,7 @@ struct MobileFilterRowGeometryTests {
         try await withEditorWorld { session, _ in
             try await session.runner.run { ops in
                 _ = try ops.createPost(title: "A note")
-                _ = try ops.createReading(name: "Poems", kind: .curated)
+                _ = try ops.createReading(name: "Poems", kind: .book)
             }
             let sortLabel = MobileSortDoor.label(
                 sortWord: MobileLibraryViewModel.sortWord(.lastTouched))

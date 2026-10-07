@@ -144,6 +144,13 @@ final class MobileLibraryViewModel {
         switch sort {
         case .createdAt, .entryDate: date = book.reading.createdAt
         case .lastTouched, .lastMajorRevision: date = book.reading.updatedAt
+        // 18h added `.title` (A–Z on the displayed name — a NAME sort, not a
+        // stamp), and the phone's `setSort` REFUSES it until the phone offers
+        // it (PL-22's 18h note), so this arm is unreachable today. If the
+        // phone ever offers title sort, the union's interleave needs its own
+        // rule (names, not stamps) — this stamp is only the exhaustiveness
+        // answer, not a design.
+        case .title: date = book.reading.createdAt
         }
         // The canonical encoding — byte-identical to what the container rows
         // carry, so the two kinds' stamps really are comparable strings

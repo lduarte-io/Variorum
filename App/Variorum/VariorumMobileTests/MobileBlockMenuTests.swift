@@ -674,13 +674,16 @@ struct MobileBlockMenuTests {
                 await Task.yield()
             }
 
-            let stamps = try await db.read { db in
+            // (Row is not Sendable under main's stricter concurrency — carry
+            // the two values out, not the Row; the VM-5 merge's mechanical fix.)
+            let stamps: (archived: String?, deleted: String?)? = try await db.read { db in
                 try Row.fetchOne(
                     db, sql: "SELECT archived_at, deleted_at FROM block WHERE id = ?",
                     arguments: [seed.blockA])
+                    .map { ($0["archived_at"], $0["deleted_at"]) }
             }
-            #expect(stamps?["archived_at"] as String? != nil, "the archive stamp landed")
-            #expect(stamps?["deleted_at"] as String? == nil,
+            #expect(stamps?.archived != nil, "the archive stamp landed")
+            #expect(stamps?.deleted == nil,
                     "archive is not deletion — no tombstone, no clock")
             #expect(model.index.entries.map(\.blockID) == [seed.blockB],
                     "the block left the surface")

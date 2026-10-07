@@ -333,7 +333,7 @@ struct MobileNavigationTests {
         try await withEditorWorld { session, _ in
             let (noteID, bookID) = try await session.runner.run { ops -> (String, String) in
                 (try ops.createPost(title: "Harbor").id,
-                 try ops.createReading(name: "Poems", kind: .curated).id)
+                 try ops.createReading(name: "Poems", kind: .book).id)
             }
             let stars = MobileStarsModel(session: session)
             await stars.toggle(.post(noteID), from: .library)
@@ -441,7 +441,7 @@ struct MobileNavigationTests {
     @Test func theBooksNewNoteDoorMintsInsideItAndOpensForWriting() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops -> String in
-                try ops.createReading(name: "Essays", kind: .curated).id
+                try ops.createReading(name: "Essays", kind: .book).id
             }
             let written = LockIsolatedBox<String?>(nil)
             try await withHostedSurface(
@@ -484,7 +484,7 @@ struct MobileNavigationTests {
     @Test func aRefusedBookDoorMintsNothingAndSpeaksTheFamilysVoice() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "Poems", kind: .curated)
+                let book = try ops.createReading(name: "Poems", kind: .book)
                 try ops.lockReading(book.id)
                 return book.id
             }
@@ -549,7 +549,7 @@ struct MobileNavigationTests {
     @Test func aRefusedBookDoorSpeaksBesideTheDoorSheTapped() async throws {
         try await withEditorWorld { session, _ in
             let bookID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "Poems", kind: .curated)
+                let book = try ops.createReading(name: "Poems", kind: .book)
                 // A SCREENFUL — the whole point of the finding is a list
                 // long enough to put the header and the doors far apart.
                 for i in 0..<12 {
@@ -605,7 +605,7 @@ struct MobileNavigationTests {
                 let post = try ops.createPost(title: "Collected")
                 try ops.applyTag(tag.id, toPost: post.id)
                 return try ops.createReading(
-                    name: "Everything essays", kind: .smart,
+                    name: "Everything essays", kind: .gathering,
                     querySpec: #"{"tags":["essays"]}"#).id
             }
             try await withHostedSurface(
@@ -641,7 +641,7 @@ struct MobileNavigationTests {
     @Test func aNewChapterShowsInTheContentsEvenBeforeItHoldsAnything() async throws {
         try await withEditorWorld { session, _ in
             let bookID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "The Book", kind: .curated)
+                let book = try ops.createReading(name: "The Book", kind: .book)
                 let first = try ops.createSection(in: book.id, name: "Openings")
                 let post = try ops.createPost(title: "One")
                 _ = try ops.addPostToReading(post.id, to: book.id)
@@ -700,7 +700,7 @@ struct MobileNavigationTests {
     @Test func aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty() async throws {
         try await withEditorWorld { session, _ in
             let bookID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "The Book", kind: .curated)
+                let book = try ops.createReading(name: "The Book", kind: .book)
                 let one = try ops.createSection(in: book.id, name: "One")
                 _ = try ops.createSection(in: book.id, name: "Two")
                 let three = try ops.createSection(in: book.id, name: "Three")

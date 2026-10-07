@@ -90,6 +90,7 @@ struct MobileEmptyStoreTests {
                     model: MobileLibraryViewModel(session: session),
                     scraps: MobileScrapsModel(session: session),
                     stars: MobileStarsModel(session: session),
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in }).body)
             #expect(carries(MobileEmptyStoreCopy.noNotes, in: shown),
@@ -124,7 +125,7 @@ struct MobileEmptyStoreTests {
                     quickNote: MobileQuickNoteModel(session: session),
                     tokens: tokens, tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {})
+                    onSettings: {})
             ) { surface in
                 await surface.settle(40)
                 let labels = surface.visibleLabels
@@ -163,6 +164,7 @@ struct MobileEmptyStoreTests {
                     model: model,
                     scraps: MobileScrapsModel(session: session),
                     stars: MobileStarsModel(session: session),
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in }).body)
             #expect(!carries(MobileEmptyStoreCopy.noNotes, in: shown),

@@ -276,6 +276,8 @@ struct MobileLivenessTests {
             // Nothing she typed was lost: the held flush landed.
             #expect(try await storedText(db, variantID: minted.variant.id) == "Base. Typed.",
                     "the stale grant's flush is never wasted — only its pen is refused")
+        }
+    }
 
     // MARK: The INTERIOR arms (the Fable sweep's finding 7)
 

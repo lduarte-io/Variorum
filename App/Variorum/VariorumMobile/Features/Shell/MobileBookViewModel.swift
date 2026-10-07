@@ -100,7 +100,7 @@ final class MobileBookViewModel {
                 // Smart readings refuse sections by model rule, so the
                 // read is skipped rather than returning an empty list —
                 // the same shape `assembleReading` uses for `hasChapters`.
-                let chapters = reading?.kind == .curated
+                let chapters = reading?.kind == .book
                     ? try Queries.readingSections(db, readingID: id) : []
                 // MINOR 4: only when the window actually cut something, so
                 // the ordinary book pays nothing for the corner. Mirrors the
@@ -217,7 +217,7 @@ final class MobileBookViewModel {
     /// state she can reverse in Details, one tap away, and a door that
     /// silently vanished when she finished a book would teach nothing.
     var showsBookDoors: Bool {
-        reading?.kind == .curated
+        reading?.kind == .book
     }
 
     /// **+ new note** — the Mac's own door (R62/R75), through the Mac's own

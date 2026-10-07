@@ -285,14 +285,17 @@ struct MobileVersionsTests {
 
             #expect(model.versions.isEmpty, "it has left this list for good")
             #expect(model.status?.text == VersionsPath.promoted)
-            let live = try await db.read { db in
+            // (Row is not Sendable under main's stricter concurrency — carry
+            // the two values out, not the Row; the VM-5 merge's mechanical fix.)
+            let live: (archived: String?, locked: Int)? = try await db.read { db in
                 try Row.fetchOne(
                     db, sql: "SELECT archived_at, locked FROM container WHERE id = ?",
                     arguments: [promoted])
+                    .map { ($0["archived_at"], $0["locked"] ?? 0) }
             }
             let row = try #require(live)
-            #expect(row["archived_at"] == nil as String?, "unarchived — a note of its own")
-            #expect(row["locked"] == 0, "and unsealed")
+            #expect(row.archived == nil, "unarchived — a note of its own")
+            #expect(row.locked == 0, "and unsealed")
         }
     }
 
