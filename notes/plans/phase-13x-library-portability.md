@@ -412,3 +412,147 @@ claim the stage (`Tools/stage claim` / `release`); headless core runs don't. **N
 her real store, `Sync/`, custody items, or `Persistence/Migrations.swift` (13o holds v1_22
 there). Ambiguity that gates a row: STOP and write it into the record for the orchestrator.
 PROVISIONAL otherwise, recorded per row.
+
+### U1 RECORD (the implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
+
+#### LIVE STATUS
+
+| row | piece | status |
+|---|---|---|
+| 1 | The classifier (verdict table pinned) | NOT-STARTED — design settled below |
+| 2 | The hand-off producer (folder pair; round-trip pin) | NOT-STARTED — design settled below |
+| 3 | Adopt-by-copy move-aside brain | NOT-STARTED — design settled below |
+| 4 | Custody-collision memo + rule | MEMO WRITTEN (below, before the code); rule NOT-STARTED |
+| 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | NOT-STARTED — design settled below |
+
+No revert is in flight. No subagents; synchronous foreground waits only; stage free at seat.
+
+#### THE SETTLED DESIGN, PER ROW (written before the code; revised in place as each lands)
+
+- **Row 1 — `Sources/VariorumCore/Persistence/LibraryClassifier.swift`** (new file; core, same
+  module as the migrator so the superseded check reads `AppDatabase.migrator` directly).
+  `classify(at:)` is keyless by construction: an encrypted copy's inside is unreadable until a
+  secret is typed, so the newer-schema verdict has TWO stages — keyless for a plaintext file
+  (read-only open, `hasBeenSuperseded` + unknown identifiers), and `schemaVerdict(at:key:)`
+  for the opened encrypted copy (the door's post-unlock consult; never runs the migrator).
+  Verdicts: encrypted library with key file beside (`StoreKeyEnvelope.locate` — the hand-off
+  shape and a hand-copied library alike) · snapshot pair (the `…keys.json` pair rule, the
+  folder's fingerprint file matched by the name's fp8, the legacy folder file for stamp-only
+  names) · a picked folder holding a pair · plaintext export (Variorum-shaped, the four
+  `SyncSchema.localOnlyTables` ALL absent) · plaintext full library (pre-13p store — a verdict
+  the ruled table does not name; PROVISIONAL P-U1-1 below) · bare store with no key file (the
+  honest refusal; also any non-SQLite file with no key file — ciphertext and not-a-database
+  are indistinguishable without a key, recorded) · newer schema · not a Variorum store (a
+  readable SQLite file without the Variorum shape; also folders holding none) ·
+  `.unreadable` (present-but-unopenable plaintext — the P12/P13 honesty class; PROVISIONAL
+  P-U1-2) · a folder holding SEVERAL stores reports them and never guesses (PROVISIONAL
+  P-U1-3). Refusal-guarding verdicts pinned red-first by behavioural revert (committed-green
+  first per the resiliency addendum 11, then revert-run-restore, outputs quoted below).
+- **Row 2 — `App/Variorum/Shared/LibraryHandOff.swift`** (Shared, the brief's letter; the U2
+  door renders it, reveal-in-Finder is the door's). `produce(database:storeURL:into:now:)`:
+  folder `Variorum Library — <yyyy-MM-dd>` (same-day repeats ` (2)`, ` (3)` — PROVISIONAL
+  P-U1-4) holding `variorum.sqlite` (GRDB `backup(to:)` from the open keyed connection — the
+  `StoreBackup` road; sealed self-contained via the existing `StoreBackup.integrityCheck`,
+  which flattens WAL and sweeps sidecars) + the LIVE key file's bytes under its OWN
+  fingerprint name (so `StoreKeyEnvelope.locate(besideStore:)` finds it and the pair
+  classifies as an ordinary encrypted-library-with-key-file — QC's "the bare `.sqlite` stays
+  the one open format"). NO key file beside the store ⇒ refuse (`corner 33`: a pair without
+  its key file opens nothing — the act must not produce a dead folder). Pins: the throwaway
+  round-trip (produce → classify → the pair's key file unwraps to the SAME key → the snapshot
+  opens under it and reads a pre-snapshot row) in `VariorumTests` (Mac suite, stage claimed);
+  the DEV-STORE drill (produce from the real dev store via its silent custody read — reads
+  only; in-memory custody for the open; classify back; integrity "ok") in the same suite.
+- **Row 3 — `Sources/VariorumCore/Persistence/LibraryAdoption.swift`** (core; headless file
+  mechanics the U2 door composes). `plan(...)` (pure URLs) + `execute(plan)`. Order, pinned:
+  (1) refuse while the live store looks open (a non-empty `-wal` — the lock-time copy's own
+  rule) or the source pair is missing/unreadable; (2) A1-shaped SAFETY COPY of the closed
+  live store + every key file beside it into `Backups/safety-copies/
+  variorum-adopt-safety-<stamp>/`; (3) MOVE the live store + every key file beside it into
+  the timestamped recoverable home `Previous Libraries/<stamp>/` (whole files, never
+  deleted — the old library's key files are its recovery legs and travel WITH it, so the
+  store folder afterwards holds exactly the adopted pair); (4) COPY the source pair in
+  (`variorum.sqlite` + the key file under its own name) — the SOURCE is only ever read.
+  The one non-atomic window (between 3 and 4) is recoverable from BOTH the aside home and
+  the safety copy; mechanics PROVISIONAL P-U1-5 (the whole shape, for the orchestrator's
+  QUESTIONS log at close).
+- **Row 4 — the memo is the section below;** the rule is `CustodyCollisionRule` (core, pure,
+  pinned) — a DECISION only; the one write it names goes through the EXISTING custody save
+  door at U2's door, so no custody write-path change is needed and nothing re-sequences to
+  the post-merge half (verified against `StoreKeyCustody`/`StoreKeyKeychain` as shipped).
+- **Row 5 — `Tools/VaultBootstrap/VaultBootstrapMain.swift`** moves onto the StoreUnlock
+  road: require the store EXISTS and is ENCRYPTED (this tool never runs the plaintext→
+  encrypted migration — a behavior change from the bare-open era, recorded); the key file
+  beside the store (`StoreKeyEnvelope.loadCurrent`) + the typed passphrase (the
+  `--passphrase-file` the tool already takes — the same secret the vault arm needs) unwrap
+  the library key; `openStore(at:custody:.inMemory(initial:))` — no Keychain consulted, the
+  key dies with the process. A key file without a passphrase wrap refuses honestly (the
+  tool's vault arms need the passphrase regardless; no `--recovery-words` door is added).
+  Evidence: the headless drill on an encrypted THROWAWAY (fixture minted by an env-gated
+  core test, `VX64_FIXTURE_DIR`), dry-run against fake coordinates (`http://127.0.0.1:9` —
+  the expected network refusal lands AFTER the open and the store-count line, which is the
+  proof); red-on-old by reverting the one file to its parent and re-running (the old road's
+  exact refusal quoted below). Mechanism, traced at the kickoff triage and re-confirmed:
+  `VaultBootstrapMain.swift:101` bare `openStore(at:)` resolves the ambient
+  `\.storeKeyCustody` (`AppDatabase+Dependency.swift` `ambientStoreKeyCustody`), whose
+  liveValue is the REAL store's device-Keychain custody — unreadable from an unsigned CLI
+  and the wrong store besides — so `resolveStoreKey` refuses `keyUnavailable` on every
+  encrypted store the tool is pointed at.
+
+#### ROW 4 — THE CUSTODY-COLLISION MEMO (the rule, written BEFORE the code; the friction doctrine's shape)
+
+**The case (the sync trace's honest-list item 2):** an older-key copy of THE SAME library —
+a pre-Replace-All-Keys snapshot, a pre-Castle copy — adopted on the Mac the library lives
+on. The store id matches (the id is stable across re-keys, §3.5), so this device's custody
+item for (scope, store id) exists and holds the LIVE library key L_new; the copy opened by
+ITS OWN day's key file under L_old (decision 11: the day's passphrase · the words unless
+regenerated · a Standard-era A copy). After adoption the now-live file is under L_old —
+custody's held key no longer opens the library the device will launch into.
+
+**The rule: custody adopts the key that OPENS the now-live file.** At the adoption's
+completion the library-key custody item for (scope, store id) is REPLACED with the key that
+opened the adopted copy — through the EXISTING save door (`StoreKeyCustody` /
+`StoreKeyGuard`), never a new write path. The custody SHAPE follows the posture unchanged
+(Standard: the silent bound item; Castle: the gated item; Always ask: NO item — the opener
+is held for the session only, exactly as any unlock). M, C and the DEVICE IDENTITY are
+UNTOUCHED — they are ACCOUNT-level facts riding the sync-custody item (§3.3), not facts
+about which file sits at the store path; the device stays enrolled, and what sync then does
+is the restore-hold + Resume reconciliation's (U2).
+
+**The consequence, said rather than discovered:** replacing the item RETIRES the silent
+road into the MOVED-ASIDE library — by design. The moved-aside library keeps its own
+key-file roads: its key files travel with it into the aside home (row 3's move), so its
+day's passphrase, the words, its Standard-era A copy, and (online) the master through the
+vault still open it — decision 11's promise, unchanged. The same-fingerprint second look
+(ledger 14's U4→13x half) afterwards serves the ADOPTED key's snapshots from the live
+custody, exactly as it served the old key's before.
+
+**U1 builds the DECISION, not the write:** `CustodyCollisionRule.verdict(custodyHeld:
+opening:)` — `alreadyAligned` (fingerprints equal: a same-key copy, ledger 14's class) ·
+`adoptOpeningKey` (custody exists, fingerprints differ: the collision; the door replaces at
+completion) · `mintFreshCustody` (no custody for the store id: a new-Mac arrival — corner
+33's fresh-enrollment class; the opener lands as this device's first custody). Pure,
+pinned; the write itself is U2's door act through the shipped door. READ-ONLY composition
+confirmed: no custody/keychain code changes in U1, and none needed later — the rule's
+write is an ordinary `save` under the same (scope, store id) name.
+
+#### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
+
+- (none yet)
+
+#### PROVISIONALS (recorded per row for the orchestrator)
+
+- **P-U1-1** — a plaintext FULL library (local tables present — a pre-13p store) is a
+  verdict of its own (`plaintextLibrary`), not in the ruled seven; the door's handling is
+  U2's.
+- **P-U1-2** — a present-but-unopenable plaintext store classifies `.unreadable(reason:)`,
+  never guessed into a neighboring verdict (the P12/P13 class).
+- **P-U1-3** — a picked folder holding SEVERAL stores reports the candidates
+  (`folderHoldingStores`) for the door to offer; the classifier never picks one.
+- **P-U1-4** — hand-off same-day folder-name collisions append ` (2)`, ` (3)`, ….
+- **P-U1-5** — the move-aside mechanics as designed above (aside home `Previous
+  Libraries/<stamp>/` inside the store folder; safety copy under `Backups/safety-copies/`;
+  key files travel with the library they open).
+
+#### MACHINERY NOTES
+
+- (none yet)
