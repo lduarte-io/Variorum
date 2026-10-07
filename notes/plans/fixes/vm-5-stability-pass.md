@@ -289,3 +289,89 @@ arm-list edit cannot make the mis-diagnosis live silently.
 | MINOR 3 (`attachLeadingTailRunIfNeeded` skips the disarm doctrine) | **ACCEPTED — FIX WAVE** (one `host.disarmPendingEdit()`; doctrine class, pin if the probe shape is cheap, else the traced mechanism + justification stand per the guard) |
 | MINOR 4 (two precondition-trapping mutators vs the refuse doctrine) | **ACCEPTED — FIX WAVE** (the refuse-Bool conversion; doctrine class — both callers guard today, so no red-on-old exists; recorded as such) |
 | NIT 5 (`diagnose` hardcodes `isDeletion: true`) | **ACCEPTED — FIX WAVE** (pass the real fact or name the shield) |
+
+---
+
+## FIX WAVE (implementer — Opus 5.5, 2026-10-06)
+
+**LIVE STATUS:** MAJOR 2 + MINOR 3 pins written and RED on the pre-fix tree
+(mobile, measured below); Mac twin of MAJOR 2 written, red run PENDING;
+fixes NOT yet applied; MINOR 4 / NIT 5 not started. Scope is exactly the
+four ACCEPTED rows; MAJOR 1 (VM-2) untouched.
+
+**Not done in this wave (stated first, per the record rule):** MAJOR 1 /
+VM-2 (structural-flight keystroke fence) — not this wave's, by her ruling.
+
+### MAJOR 2 — `.openTail` arming binds content-blind
+
+**Mechanism, traced myself.** `shouldChangeText` (phone
+`MobileEditorViewModel.swift:1536-1604`, Mac `EditorViewModel.swift`
+twin) arms `.openTail` only for `replacement == "\n"` at the exact
+document end of a tail-less, multi-block-capable note
+(`BlockRangeIndex.verdict`, `replacementIsSingleNewline`). The consume
+(`storageDidEdit`, phone :1795-1821, Mac :1229-1247) binds the arming
+through `ArmedEdit.describes`, whose three oracles are geometry +
+arithmetic only: same `documentLength`, `delta == replacementLength −
+range.length` (1 == 1), and the inclusive location bound for an empty
+approval (5 ≤ 5). A gate-less 1-char insert of ANY character at that
+spot satisfies all three, so `.openTail` binds → `index.openTail()` →
+the index declares offset 5 a separator with an empty tail behind it
+while storage holds the visible character there. Nothing records it
+(the `.openTail` arm records no autosave), so the store keeps "Alpha" and
+the next full render drops the character. `.block`/`.tail` are
+content-agnostic; `.closeTail` is a deletion (no landed bytes, and while
+the arming is fresh the deleted character at its offset IS the
+separator) — the hole is exactly `.openTail`. The SAME `ArmedEdit` is the
+Mac consumer's binding, line for line, so the hole is both platforms'.
+
+**Pin (mobile):** `MobileEditRoutingBindingTests.aStaleOpenTailArmingNeverBindsAGateLessCharacter`
+(`App/Variorum/VariorumMobileTests/MobileEditRoutingTests.swift`).
+*[removed for publication]*
+`-only-testing:VariorumMobileTests/MobileEditRoutingBindingTests`):
+
+```
+✘ Test run with 7 tests in 1 suite failed after 0.281 seconds with 7 issues.
+aStaleOpenTailArmingNeverBindsAGateLessCharacter — 4 issues:
+  model.index.tailLength → 0                      (expected nil)
+  model.index.entries.map(\.length) → [5]         (expected [6])
+  model.identityAuditFailures → 1                 (expected 0)
+  stored → "Alpha"                                (expected "Alphax" — the character never reached the store)
+```
+
+(The reviewer's probe 3 measured `tailLength=Optional(0) audit=1
+desync=0`; reproduced exactly, plus the store half: the "x" is lost.)
+
+### MINOR 3 — `attachLeadingTailRunIfNeeded` skips the disarm doctrine
+
+**Mechanism, traced myself.** The attachment
+(`TailCrystallizer.swift:280-302`) grows the last entry over the tail's
+leading newline run and shrinks the tail by the same count —
+`documentLength` unchanged, so `describes`' length oracle cannot see the
+tiling move. Every other index-changing door disarms. **Which roads reach
+the attachment with a LIVE arming:** the consume road reaches it only
+after `storageDidEdit` has already consumed the arming; `finishMint`
+disarms BEFORE its re-run; so only the idle tick (and the phone's
+`finish()` teardown) can — and only if the tail is newline-led and
+UNATTACHED at that tick. On the phone that state is produced by a
+crystallization that skipped the attachment (the band's `!mintInFlight`
+early return while a newline lands at the tail's start) and then ended
+WITHOUT `finishMint` — the mint's FAILURE arm (`mintInFlight = false`,
+report, settle; no disarm, no re-run). (A second road: `desyncRecovery`'s
+re-render preserves an unattached tail, then an arming parks before the
+already-armed idle clock fires. The Mac adds the structural-flight hold.)
+The chain is long, as the reviewer labeled it — but every link is a
+production road, so the pin builds it rather than a fiction.
+
+**Pin (mobile):** `MobileEditRoutingBindingTests.theLeadingRunAttachmentDisarmsAStaleArming`
+— the mint failure produced by a seal reaching the STORE the editor has
+not ingested (the busy-deferral shape of a synced seal); every
+precondition asserted in the pin (mint in flight; run still the tail's;
+the mint failed with nothing crystallized; the attachment moved the
+tiling with the bytes unmoved). **RED on the pre-fix tree** (same run):
+
+```
+theLeadingRunAttachmentDisarmsAStaleArming — 3 issues (every precondition green):
+  model.index.entries.map(\.length) → [7]   (expected [6]: the stale .tail arming bound; the BLOCK's character was charged to the tail)
+  model.index.tailLength → 6                (expected 7)
+  model.identityAuditFailures → 1           (expected 0: the separator offset holds "o")
+```

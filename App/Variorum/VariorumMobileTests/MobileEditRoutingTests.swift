@@ -299,6 +299,162 @@ struct MobileEditRoutingBindingTests {
             #expect(model.identityAuditFailures == 0)
         }
     }
+
+    /// **VM-5 stability pass, MAJOR 2 — the binding policed geometry and
+    /// net change, never CONTENT, and `.openTail` is a content verdict.**
+    ///
+    /// The gate approves a typed `"\n"` at the exact document end and arms
+    /// `.openTail`; the newline never lands (the armed-but-never-landed class
+    /// `ArmedEdit`'s own doc names — E1 proved consult/perform mismatches
+    /// occur on her hardware). The next report is a GATE-LESS one-character
+    /// insert of `"x"` at the same spot (autocorrect / dictation / a
+    /// marked-text commit). All three geometry oracles pass — same document
+    /// length, net +1 exactly as approved, an empty approval's inclusive
+    /// location bound — so the arming BOUND, `index.openTail()` ran, and the
+    /// index declared position 5 a separator with an empty tail behind it
+    /// while the storage held a visible `"x"` there.
+    ///
+    /// RED ON THE PRE-FIX TREE (the reviewer's probe 3, measured:
+    /// `tailLength=Optional(0) audit=1 desync=0`). In Release the DEBUG
+    /// audit is compiled out: the `"x"` is unowned, never autosaved, and
+    /// dropped at the next full render — one character of her prose, gone
+    /// with no sentence. The flush assertion below is that loss, observed.
+    ///
+    /// GREEN AFTER: the landed character is not the newline the verdict
+    /// means, so the arming is declined and `fallbackVerdict` routes the
+    /// report from scratch — `.block(0)`, the block the character joined.
+    @Test func aStaleOpenTailArmingNeverBindsAGateLessCharacter() async throws {
+        try await withEditorWorld { session, db in
+            try await withEditorAssertionsMuted {
+                let post = try await session.runner.run { ops in
+                    try ops.createPost(title: "open tail content", profile: .blog)
+                }
+                let minted = try await session.runner.run { ops in
+                    try ops.newBlock(in: post.id, text: "Alpha", at: .end)
+                }
+                let (model, storage) = makeEditor(session, postID: post.id)
+                await model.loadOnce()
+                #expect(model.index.tailLength == nil, "precondition: no tail yet")
+
+                // The gate approves the tail-opening newline (`.openTail`)…
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 5, length: 0), replacement: "\n"))
+                // …which never lands; a gate-less "x" arrives instead.
+                systemPathEdit(storage, range: NSRange(location: 5, length: 0), replacement: "x")
+
+                #expect(storage.string == "Alphax")
+                #expect(model.index.tailLength == nil,
+                        "no tail opened: the landed character is not the newline the verdict means")
+                #expect(model.index.entries.map(\.length) == [6],
+                        "the character joined the block it landed in")
+                #expect(model.index.documentLength == storage.length)
+                #expect(model.identityAuditFailures == 0,
+                        "position 5 is prose, never a separator")
+                #expect(model.desyncRecoveryCount == 0,
+                        "a declined arming is not a refusal — the report routes by fallback")
+                await model.autosave.flushNow()
+                let stored = try await storedText(db, variantID: minted.variant.id)
+                #expect(stored == "Alphax",
+                        "the character reached the store instead of being stranded")
+            }
+        }
+    }
+
+    /// **VM-5 stability pass, MINOR 3 — the leading-run attachment moves the
+    /// tiling without disarming the pending edit.** Every other
+    /// index-changing door disarms (`renderFull`, `applyDifferential`,
+    /// `displaySlot`, `finishMint`); the attachment grows the last entry over
+    /// the tail's leading newline run and shrinks the tail by the same
+    /// amount, so `documentLength` does not move and `describes`' length
+    /// oracle cannot see the tiling change (the reason `displaySlot`'s own
+    /// comment gives for disarming structurally).
+    ///
+    /// **The precondition, produced through production roads only.** On
+    /// this platform an UNATTACHED newline-led tail meets a live arming at
+    /// the idle tick only after a crystallization that skipped the
+    /// attachment ended WITHOUT `finishMint` (whose disarm-then-re-run is the
+    /// success road's own protection): a newline typed at the tail's start
+    /// while a mint is in flight (the band's `!mintInFlight` guard skips the
+    /// attachment), and that mint then FAILS — here because a seal reached
+    /// the store the editor has not yet ingested (a seal synced from another
+    /// device lands exactly so: deliveries defer while the editor is busy).
+    /// The failure arm resets the flight and returns; no disarm, no
+    /// attachment. The idle tick then attaches with the stale arming live.
+    ///
+    /// RED ON THE PRE-FIX TREE: the stale `.tail` arming — approved for the
+    /// tail's first character, which the attachment has since made the last
+    /// entry's — binds a gate-less deletion there (same length, net −1 as
+    /// approved, inside the approved range), so `applyTailEdit` shrinks the
+    /// TAIL for a character the BLOCK lost: the separator offset now holds
+    /// prose ("o"), the tail reads "ne\ntwo", and the DEBUG audit fires.
+    ///
+    /// GREEN AFTER: the attachment disarms; the report routes by
+    /// `fallbackVerdict` to `.block(0)` — the block the character left.
+    @Test func theLeadingRunAttachmentDisarmsAStaleArming() async throws {
+        try await withEditorWorld { session, _ in
+            try await withEditorAssertionsMuted {
+                let post = try await session.runner.run { ops in
+                    try ops.createPost(title: "attachment disarm", profile: .blog)
+                }
+                _ = try await session.runner.run { ops in
+                    try ops.newBlock(in: post.id, text: "Alpha", at: .end)
+                }
+                let (model, storage) = makeEditor(session, postID: post.id)
+                await model.loadOnce()
+                typeAtEnd(model, storage, "\n")    // opens the tail
+                typeAtEnd(model, storage, "one")   // "Alpha\none"
+
+                // A seal reaches the STORE; this editor has not ingested it
+                // (no header observation in the harness — the busy-deferral
+                // shape), so its gate still admits typing.
+                try await session.runner.run { ops in try ops.lockPost(post.id) }
+
+                // Typing past "one" completes a paragraph: a mint flies.
+                typeAtEnd(model, storage, "\ntwo")
+                #expect(model.mintInFlight, "precondition: a mint is in flight")
+                // A blank line typed at the TAIL'S START during the flight:
+                // the band's in-flight guard skips the attachment.
+                #expect(typeEdit(
+                    model, storage, range: NSRange(location: 6, length: 0), replacement: "\n\n"))
+                #expect(storage.string == "Alpha\n\n\none\ntwo")
+                #expect(model.index.entries.map(\.length) == [5])
+                #expect(model.index.tailLength == 9, "precondition: the run is still the tail's")
+
+                // A stale `.tail` arming over the tail's first character —
+                // approved, never landed.
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 6, length: 1), replacement: ""))
+
+                // The mint FAILS under the seal: the failure arm neither
+                // disarms nor attaches.
+                await model.awaitMintSettle()
+                #expect(!model.mintInFlight)
+                #expect(model.index.entries.map(\.length) == [5],
+                        "precondition: the mint failed — nothing crystallized")
+
+                // The idle tick: the attachment moves the tiling.
+                model.idleMintTail()
+                #expect(model.index.entries.map(\.length) == [7],
+                        "precondition: the run attached to the last block")
+                #expect(model.index.tailLength == 7)
+                #expect(storage.string == "Alpha\n\n\none\ntwo", "the bytes never moved")
+
+                // A gate-less deletion where the stale arming pointed.
+                systemPathEdit(storage, range: NSRange(location: 6, length: 1), replacement: "")
+
+                #expect(storage.string == "Alpha\n\none\ntwo")
+                #expect(model.index.entries.map(\.length) == [6],
+                        "the block the character left is the one that shrank")
+                #expect(model.index.tailLength == 7, "the tail lost nothing")
+                #expect(model.index.documentLength == storage.length)
+                #expect(model.identityAuditFailures == 0,
+                        "the separator offset still holds the separator")
+                #expect(model.desyncRecoveryCount == 0,
+                        "a declined arming is not a refusal — the report routes by fallback")
+                await model.awaitMintSettle()  // the second mint fails too; let it land
+            }
+        }
+    }
 }
 
 // MARK: - M15 Q2: the DEBUG identity audit checks the separator's CHARACTER
