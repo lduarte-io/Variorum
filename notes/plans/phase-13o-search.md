@@ -904,6 +904,12 @@ sibling's model). A book/chapter-name hit has nothing to land on and is not list
 own name is the masthead). **PROVISIONAL either way:** the field is session-local (not
 remembered per book).
 
+**P6 SENSITIVITY PROBE — IN FLIGHT (announced before it starts):** the tree is committed clean at
+`a97f285b`; the probe edits ONLY `Sources/VariorumCore/Domain/SearchComposer.swift` (the `hits`
+`.members` arm made to read the membership ROWS instead — the "second path" the ruling forbids)
+and restores it by `git checkout -- Sources/VariorumCore/Domain/SearchComposer.swift`. If a
+successor finds this line without its result, run that checkout first.
+
 #### §U3 RULINGS (the architect, 2026-10-07 — verbatim, BINDING; P6/P7 build to these)
 
 > **PROPOSAL 1 — RULED: B, the join.** The measurement is decisive (A's per-keystroke assembly
