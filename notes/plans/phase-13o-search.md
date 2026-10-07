@@ -262,6 +262,13 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 
 PENDING flags: none yet.
 
+**REVERT PROBES IN FLIGHT (P6, 2026-10-06):** the only file the probes edit is
+`Sources/VariorumCore/Persistence/SearchIndex.swift`, committed clean at `77aedb95`; a successor
+finding it dirty restores it with `git checkout -- Sources/VariorumCore/Persistence/SearchIndex.swift`
+(safe — committed). Probes: R1 drop the INSERT triggers · R2 take `deleted_at` out of the UPDATE
+triggers' watch · R3 drop the variant take UPDATE trigger · R4 remove the WHEN guard · R5 drop
+the DELETE triggers.
+
 **LIVE STATUS (2026-10-06): STOPPED AT SEAM 2** — P0–P4 landed and pushed; the fork was ruled
 (§FORK RULINGS, `880abf8f`) and P4 is built exactly to it. The tree is clean. Waiting on the
 architect's `Sync/` side (the DERIVED set + the walk + the export-test accommodation). Nothing is
