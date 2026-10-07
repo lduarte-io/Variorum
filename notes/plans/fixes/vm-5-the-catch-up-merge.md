@@ -43,9 +43,10 @@ behavior is main's tip BY CONSTRUCTION.
 
 | round | brief | result |
 |---|---|---|
-| 1 — the RESOLUTION review | `notes/REVIEW_PROMPT.md` verbatim over `dd7cad84..HEAD` with both parents in view (the 13-conflict resolution + the semantic fix-ups; the MobileEditorViewModel auto-merge eyeballed) | DISPATCHED |
-| 2 — the DEDICATED STABILITY PASS | the crash class + the editor's range/identity math as one body on the FINAL seam (batch 1 + 1b + M22 + 4.5c-phone + the 13u1 shared brain, as merged); owns M27 | PENDING |
-| 3 — the WHOLE-ROUND PASS | the round's entire mobile-side diff (`46ffa0c`'s round start → this tree, `App/Variorum/VariorumMobile/**`), briefed on nothing but the diff | PENDING |
+| 1 — the RESOLUTION review | `notes/REVIEW_PROMPT.md` verbatim over `dd7cad84..HEAD` with both parents in view | **CLOSED** — 0B/0M/3m/2n, all FIXED same-wave (dispositions in `vm-5-review-round-1.md`); clean bill on the load-bearing items incl. the Mac discharged-by-construction argument, examined and upheld |
+| 2 — the DEDICATED STABILITY PASS | the crash class + the range/identity math on the FINAL seam; owns M27 | **CLOSED** — M27 DISSOLVED (measured); MAJOR 1 = the ticketed VM-2, now MEASURED, held out by her ruling; MAJOR 2 + 2 MINOR + 1 NIT fixed by the Opus wave (`bf6619b4..a055d92b` — red pins quoted in the record, incl. a Mac twin pin proving the latent Mac hole; the Mac consumer deliberately joined the fix). ⚠ the wave touches `Shared/EditorBrain/` + one Mac file: the MERGE stays zero-Shared; the EFFORT no longer is — verification widened (Mac editor-brain suites 268/24 + 91/14 green; the FULL Mac suite runs before the PR) |
+| 3b — the FOCUSED ROUND 3 (the ladder's cap round, on the wave's diff `9a6aedaa..a055d92b`) | the new `binds()` semantics hunted adversarially (a legitimate non-"\n" tail-opening landing?); the Mac consumer extension; MINOR 4's refusal roads; the pins' reds | DISPATCHED |
+| 3 — the WHOLE-ROUND PASS | the round's entire mobile-side diff (`46ffa0c`'s round start → this tree), briefed on nothing but the diff | queued behind round 3 |
 
 Findings + dispositions land here per round; fix waves per her cast (Opus 5.5 implements; the
 orchestrator may take mechanical ones).
