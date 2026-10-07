@@ -311,9 +311,101 @@ final class MobileEditorViewModel {
     /// the surface in charge there.
     func noteLivenessGranted() {
         isLive = true
-        if !takesBrowser.isOpen {
+        if !takesBrowser.isOpen, !noteIsGone {
             textView?.isEditable = true
         }
+    }
+
+    /// **THE NOTE THIS SURFACE STANDS ON IS GONE** (4.5c-phone item 2 —
+    /// §63's routed-out "the live editor over a tombstone").
+    ///
+    /// Both tab stacks stay alive by design, so deleting a note from the
+    /// LIBRARY tab leaves the other stack's `MobileWriteScreen` standing on
+    /// a tombstone: nothing pops it (the §49-filed `onDeleted` fix reaches
+    /// only the deleting stack), and the next tab tap handed that surface
+    /// the pen.
+    ///
+    /// **WHAT THAT COST, MEASURED — not the loss it was first recorded as**
+    /// (round-1 MINOR 3, and the correction matters because a belt believed
+    /// to stop corruption is weighed differently from one that stops a
+    /// confusing surface). **No byte was ever written into a tombstone, pre-
+    /// fix or post-fix:** `Operations.autosave` resolves through
+    /// `liveVariant`, which throws `variantNotFound` for a tombstoned
+    /// variant, and `deleteContainer`'s cascade tombstones the note's blocks
+    /// and variants. So the pre-fix defect is that **the surface took
+    /// keystrokes it could never save** — every flush refusing, and the raw
+    /// `variantNotFound(id: "…")` landing in her status line.
+    ///
+    /// The fact comes from the ONE header door (`adoptHeader`), which is the
+    /// only thing that ever answers with the store's own reading:
+    /// `Queries.containerHeader` returns nil exactly when the container row
+    /// is missing or tombstoned, and it is never called speculatively — so a
+    /// nil answer means the store said so, never "not loaded yet".
+    ///
+    /// It is deliberately NOT `isLive`. `isLive` means *the authority granted
+    /// this surface the pen*, and only the authority may write it; this means
+    /// *there is nothing here to write into*. Keeping them apart is what
+    /// makes the resurrection road heal itself: a Put back from the Trash
+    /// flips this false and the surface takes keystrokes again, where
+    /// latching `isLive` would have left her looking at a restored note she
+    /// could not type in until some later grant.
+    @ObservationIgnored private(set) var noteIsGone = false
+
+    /// The refusal's sentence — spoken by the gate, and by the liveness
+    /// authority at the moment it declines the pen (the authority's road
+    /// drops the keyboard, so the gate is never consulted there).
+    ///
+    /// Phone-local because it is about a PHONE surface's own state — a Write
+    /// screen left standing on a tombstone by the alive-stacks shape, which
+    /// the Mac has no twin of. If the Mac ever grows the same refusal it
+    /// hoists this then (MobileSoul §3), rather than writing a second
+    /// sentence about one 30-day clock.
+    ///
+    /// **CONDITIONAL ABOUT THE TRASH, ON PURPOSE** (round-1 MINOR 5). The
+    /// fact underneath is `Queries.containerHeader == nil`, which is true for
+    /// a MISSING row as well as a tombstoned one — and the phone has a real
+    /// Delete Now door, so a stale surface can outlive its note's departure
+    /// from the Trash entirely. Promising a door with nothing behind it is
+    /// the failure this round words refusals to avoid; one sentence true in
+    /// both shapes beats a second store read to tell them apart.
+    static var deletedNoteRefusal: String {
+        "This note was deleted \u{2014} if it's still in the Trash "
+            + "(\(TrashWindow.days) days), put it back there to keep writing."
+    }
+
+    /// Asks the STORE whether this surface's note is still live and adopts
+    /// the answer through the one header door, so `noteIsGone`, `header` and
+    /// the display title can never disagree about it.
+    ///
+    /// The authority calls this at the moment it is about to hand over the
+    /// pen. It is not the observation's job: `observeContainerHeader` is a
+    /// delivery whose latency is real, and a tab tap landing inside that
+    /// latency would take the pen on a stale answer. One indexed row read
+    /// per liveness grant — a tab tap or a push, never a keystroke.
+    @discardableResult
+    func confirmNoteStillLive() async -> Bool {
+        do {
+            adoptHeader(try await session.database.read { [postID] db in
+                try Queries.containerHeader(db, containerID: postID)
+            })
+        } catch {
+            // A read that FAILED is not an answer about existence
+            // (cancellation at teardown, a store that could not be opened):
+            // the last store answer stands rather than a guess.
+            //
+            // **DELIBERATELY SILENT, unlike this door's two siblings**
+            // (round-1 NIT 8, ENDORSED). `loadOnce` and `observeHeader` both
+            // surface a non-cancellation error, because each is the road that
+            // was going to PAINT something and has nothing to paint. This one
+            // is a belt consulted inside a liveness handoff: refusing the pen
+            // because a read failed would strand her on a note that is
+            // probably fine, and (MINOR 3's measurement) keeping it cannot
+            // cost a byte, since a tombstoned variant refuses every write.
+            // The cost of speaking here is a sentence about plumbing on a
+            // surface that is working; the cost of staying silent is nothing
+            // she can lose. Recorded so the silence reads as a decision.
+        }
+        return !noteIsGone
     }
 
     /// Production attach: the text view's storage + the canary + the gate
@@ -349,6 +441,33 @@ final class MobileEditorViewModel {
                     completion(nil)
                 })
                 root.present(alert, animated: true)
+            }
+        }
+        // PR19: the emoji row's own plumbing — a small OWNED sheet rather
+        // than the alert its siblings use, and the divergence is the whole
+        // point of the row (PROVISIONAL, recorded).
+        //
+        // **Why not the alert:** `UIAlertController` hands out its own
+        // `UITextField` and there is no public way to replace it or to name
+        // its input mode — and the emoji KEYBOARD is precisely what needs a
+        // field we own (`MobileEmojiTextField`). The two roads that keep the
+        // alert are both worse: overlaying our field on the alert's private
+        // view hierarchy is brittle across OS versions, and a hand-rolled
+        // emoji grid as an `inputView` would invent a curated glyph list the
+        // system already has. `MobileEmojiPromptController` is public API
+        // only, matches the phone's sheet grammar, and — a real gain — its
+        // buttons ARE drivable in process, which a `UIAlertController`'s
+        // measurably are not (the surface driver's own recorded finding).
+        if blockMenu.promptForEmoji == nil {
+            blockMenu.promptForEmoji = { [weak textView] title, message, completion in
+                guard let root = textView?.window?.rootViewController else {
+                    completion(nil)
+                    return
+                }
+                root.present(
+                    MobileEmojiPromptController(
+                        title: title, message: message, completion: completion),
+                    animated: true)
             }
         }
         if blockMenu.confirmDestructive == nil {
@@ -501,6 +620,15 @@ final class MobileEditorViewModel {
             }
         } catch is CancellationError {
         } catch {
+            // **THE STREAM EXITS HERE AND IS NEVER RESTARTED** — context
+            // named at the round-1 review, deliberately NOT rebuilt in its
+            // fix wave (a retry/backoff shape is a design act, not a
+            // drive-by). After one transient observation error this surface's
+            // header can only be re-answered by `loadOnce` or by
+            // `confirmNoteStillLive` — which is exactly why the liveness
+            // authority's tombstone arm re-confirms instead of refusing on
+            // its last delivery (MAJOR 1): were it still short-circuiting,
+            // one dropped stream would make a stale `noteIsGone` terminal.
             statusMessage = String(describing: error)
         }
     }
@@ -530,6 +658,46 @@ final class MobileEditorViewModel {
         displayTitle = value.map {
             DisplayTitle.note(
                 title: $0.title, entryDate: $0.entryDate, createdAt: $0.createdAt)
+        }
+        // **THE RELINQUISH HALF** (item 2). The store's answer about whether
+        // this note exists arrives here and nowhere else, so this is where a
+        // surface learns its subject went — including while it is holding the
+        // keyboard, which is the sync road (deleted on the Mac) and the
+        // note's own ⋯ door a beat before the pop.
+        //
+        // The keyboard drops the moment the note does; the pen itself is the
+        // authority's to move, so `isLive` is not touched here (see
+        // `noteIsGone`). Both directions are written, so a Put back from the
+        // Trash restores the surface rather than stranding it.
+        //
+        // **AND IT DELIBERATELY SAYS NOTHING HERE** — a widening considered
+        // at the round-1 MAJOR 2 fix and DECLINED, traced rather than
+        // assumed. Speaking the refusal at this transition would clobber the
+        // receipt on her commonest deletion road: `deleteNote` reports
+        // *"Moved to the Trash…"* and the observation then delivers nil a
+        // beat later, so the note's OWN ⋯ door would answer its own act with
+        // a refusal about a door she just used. The refusal is spoken where
+        // it is DECIDED instead (`MobileLivenessAuthority.refuseOverTombstone`),
+        // which covers every road that hands this surface the pen.
+        //
+        // What that leaves: the SYNC road — deleted on the Mac while she is
+        // looking at it here — drops the keyboard with nothing on screen
+        // until the next grant or keystroke speaks. Recorded as a known
+        // residue, not an oversight; closing it wants a way to tell "this
+        // surface deleted it" from "someone else did", which is a design act.
+        //
+        // **AND IT IS OWNED, not left to whoever next edits this function**
+        // (round-2 MINOR R2-3): the leftover-review-backlog row in
+        // `notes/plans/mobile-round-2-handoff-2026-08-30.md` §7.2 carries the
+        // mechanism and that design question; the VOICE half — what the phone
+        // should SAY here — is flagged for the author.
+        let wasGone = noteIsGone
+        noteIsGone = (value == nil)
+        if noteIsGone, !wasGone {
+            textView?.endEditing(true)
+            textView?.isEditable = false
+        } else if !noteIsGone, wasGone, isLive, !takesBrowser.isOpen {
+            textView?.isEditable = true
         }
     }
 
@@ -851,16 +1019,52 @@ final class MobileEditorViewModel {
     func copyNote(to destination: MobileClipboard.Destination = .general) async {
         guard await flushPendingText() else { return }
         let openTail = mintableTail ? openTailText : ""
+        let displayed = displayedTextByBlock
         do {
-            let markdown = try await session.database.read { [postID] db in
+            let projection = try await session.database.read { [postID] db in
                 try MobileNoteClipboard.markdown(
-                    db, postID: postID, openTail: openTail)
+                    db, postID: postID, openTail: openTail, displayed: displayed)
             }
-            report(MobileNoteClipboard.copy(markdown, to: destination).message)
+            // The receipt carries the projection's OWN answer about which
+            // road it took — so the one copy that cannot follow the screen
+            // (the callout corner) says so instead of reading as ordinary.
+            report(MobileNoteClipboard.copy(projection, to: destination).message)
         } catch {
             report(MobileNoteClipboard.Outcome
                 .failed(String(describing: error)).message)
         }
+    }
+
+    /// **M23 ≡ R15 — what this surface is DISPLAYING, block by block.**
+    ///
+    /// Her ruling: *"copy should follow what's on the screen."* This is the
+    /// ruled SHAPE of it — **ask the surface what it is displaying**, never
+    /// a second selection-derivation rule (§31). There is no derivation
+    /// here to get wrong: `slots` IS the display. A peek (and a lens
+    /// activation, which drives the same primitive) swaps the slot's variant
+    /// and text inside `MobileTakesController.overlay(_:)` BEFORE the VM
+    /// ever sees the projection, so a displayed slot already holds the
+    /// displayed take.
+    ///
+    /// **EMPTY when nothing is peeked, and that is load-bearing:** the copy
+    /// door then takes the road that shipped, byte for byte — the surface's
+    /// own `peeks` dictionary is the cheap, exact answer to "is anything on
+    /// screen other than the store's chosen", so the no-lens case needs no
+    /// proof beyond it.
+    ///
+    /// Text resolves LEDGER-FIRST, the peek overlay's own rule, so a take
+    /// edited a keystroke ago copies the bytes on screen. (The door flushes
+    /// first, which makes that a no-op on the ordinary road and the honest
+    /// answer on a refused one.)
+    var displayedTextByBlock: [String: String] {
+        guard !takes.peeks.isEmpty else { return [:] }
+        var displayed: [String: String] = [:]
+        for slot in slots {
+            guard let variantID = slot.variantID else { continue }
+            displayed[slot.blockID] = surfaceKnownText(variantID: variantID)
+                ?? slot.text ?? ""
+        }
+        return displayed
     }
 
     /// The open tail exactly as the surface holds it right now — read from
@@ -997,6 +1201,23 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// **SAVE A VERSION — the whole note's moment** (batch 6c; the note ⋯
+    /// sheet's row, ⌘⇧S's phone twin).
+    ///
+    /// The DECISION layer is shared (`Shared/VersionActs.swift`) and it is
+    /// what makes the flush non-optional: a moment saved while a keystroke
+    /// is still pending would be a moment missing the words that summoned
+    /// it. This door adds only the phone's voice — its receipt and its
+    /// refusal both land in the ONE status slot, which is rendered wherever
+    /// the acting door is standing (the ⋯ sheet, or the masthead).
+    func saveVersion() async {
+        do {
+            report(try await VersionActs.save(session: session, postID: postID))
+        } catch {
+            report(VersionActs.words(error))
+        }
+    }
+
     /// The delete door's confirm words — the shared deletion vocabulary, so
     /// the phone and the Mac cannot describe one clock two ways.
     ///
@@ -1011,14 +1232,25 @@ final class MobileEditorViewModel {
     static var deleteNoteConfirmTitle: String { RecoveryCopy.deleteNoteConfirmTitle }
     static var deleteNoteConfirmDetail: String { RecoveryCopy.deleteNoteConfirmDetail }
 
+    /// **THE REFUSAL FORWARDS TOO** (4.5c-phone item 4 — A1-18's 4.5c share,
+    /// and the LAST `String(describing:)` fallback in this door's family).
+    ///
+    /// `DeletionRefusal` was built at 4.5b to be the one home for the deletion
+    /// story's refusals, precisely because three private tables each covered a
+    /// different subset of `OperationError` and each fell through to a bare
+    /// enum dump — so one refused act read three ways depending on the door.
+    /// This was the third table. Its ONE mapped case (`containerNotFound` →
+    /// *"That note is already gone."*) is byte-identical there, so nothing she
+    /// has already seen changes; what changes is everything the `default` used
+    /// to dump — `lockedPost` and the whole "already back" family now speak,
+    /// and a case none of them anticipated arrives as a sentence that still
+    /// carries the technical name rather than as `lockedVariant` alone.
+    ///
+    /// `act: .delete` is passed explicitly: the same `OperationError` wants
+    /// different words at a delete door and a put-back door, which is why
+    /// `Act` is a parameter there rather than two functions.
     static func deleteNoteRefusal(_ error: Error) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
-        switch error {
-        case .containerNotFound:
-            return "That note is already gone."
-        default:
-            return String(describing: error)
-        }
+        DeletionRefusal.words(error, act: .delete)
     }
 
     private func setSeal(locked: Bool) async {
@@ -1202,7 +1434,29 @@ final class MobileEditorViewModel {
             // replay at stale offsets (the differential's own posture).
             textView?.undoManager?.removeAllActions()
         }
-        slots[i] = slot
+        // **B45-2 — the slot write is BY IDENTITY, never by the index's own
+        // index.** `i` indexes `index.entries`, and the two arrays really do
+        // diverge: `finishMint` APPENDS to the index (`index.crystallize`)
+        // and never assigns `slots`, so throughout a crystallization window
+        // `entries` outruns `slots` and `slots[i]` is an out-of-range TRAP
+        // for any freshly minted block. Nothing reaches here for such a
+        // block today only because both takes-controller callers guard on
+        // `slot(for:)`, which searches `slots` — a CALLER-SIDE ACCIDENT, not
+        // an invariant, and batch 7's reorder-takes door walks into exactly
+        // this room (the stability survey's own words: *"a takes door on a
+        // fresh mint makes `slots[i]` an out-of-range trap"*).
+        //
+        // A block the projection has not echoed back yet simply has no slot
+        // bookkeeping to update — the next projection brings it, which is
+        // already the state `slot(for:)` reports for it. Deliberately NOT
+        // appended: `slots` is index-parallel with `entries` for every other
+        // reader (`planCrossBlockEdit`'s arities, the browser's position
+        // count), and inventing a row here would end the lag that
+        // `StructuralGesturePlanner.World.fanArity` and
+        // `CrossBlockEditPlanner` both guard for on purpose.
+        if let s = slots.firstIndex(where: { $0.blockID == blockID }) {
+            slots[s] = slot
+        }
         var entries = index.entries
         entries[i] = BlockRangeIndex.Entry(
             blockID: slot.blockID,
@@ -1247,6 +1501,29 @@ final class MobileEditorViewModel {
         // The liveness belt (S3 ladder BLOCKER): a stood-down surface is
         // read-tier — resigned and uneditable already; this refusal is the
         // third guard for whatever slips past both (PROVISIONAL wording).
+        // **THE TOMBSTONE BELT** (item 2), and it is FIRST of the three on
+        // purpose — the ORDER here decides which true sentence she reads.
+        //
+        // The authority stands a surface down when it refuses the pen over a
+        // tombstone, so by the time a keystroke arrives `!isLive` is also
+        // true; below the liveness belt this door would answer *"This note is
+        // live in your other tab"* about a note that is in the Trash. Above
+        // it, the more specific truth wins, and it is the one with a road in
+        // it.
+        //
+        // Its position above the SEAL is not a constraint at all, and the
+        // comment that claimed one is corrected here (round-1 NIT 9): a gone
+        // note has a nil `header`, so `header?.locked == true` is false
+        // whatever the order — the seal belt could never speak for it.
+        //
+        // Both the pen and the keyboard are already withdrawn by the time a
+        // keystroke could arrive here on the ordinary roads; this is the
+        // guard for whatever slips past both — a marked-text commit already
+        // in flight, a hardware keyboard on a surface iOS has not resigned.
+        if noteIsGone {
+            refuse(Self.deletedNoteRefusal)
+            return false
+        }
         if !isLive {
             refuse("This note is live in your other tab.")
             return false

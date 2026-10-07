@@ -193,6 +193,27 @@ batches 1/1b/2/3/3b + R12 + R22/M26. It does NOT yet have batch 4.
 
 ## 3. THE BINDING BATCH MAP — THE ONLY SCHEDULE
 
+> ### ⚠️ STALE CELLS BELOW — 2026-08-30. **`§7`'s TABLE IS AUTHORITATIVE.**
+>
+> This map was written 2026-08-22 and its per-row cells were NOT all
+> refreshed as work landed. **Read `mobile-round-2-handoff-2026-08-30.md`
+> §7 first** — it carries every scheduled item of this round in exactly
+> one row, done or remaining, with a column saying whether 13u blocks it.
+>
+> **Landed since this map was written, whatever its cells say below:**
+> **4.5b**'s cold review (discharged by 13l's Fable review) · **4.5d**'s
+> fix round (its finding: 13 of 14 already fixed uncommitted) ·
+> **PL-10(b)** the duplicate-book-name guard · **batch 5** built,
+> refined to her two live rulings, and cold-reviewed · **batch 6a** the
+> Block History twin, built and cold-reviewed · the **architecture
+> review** · the **archive/trash design session** (she ruled **Two
+> rooms**) · the **five-MAJOR fix round** · the **`main` iOS build
+> break**, found and fixed.
+>
+> **Suites 513/86 → 582/93.** Anything below that contradicts this
+> banner is stale, not a second opinion.
+
+
 *(Inventory rows are cited **PR**n to avoid colliding with her ruling
 numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 
@@ -208,12 +229,12 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | **4.5 (THE CONSOLIDATED FIX ROUND — dispatch first)** | **Every finding from every cold review of batches 1–4, plus her four named rows and both successor Acts.** Full ordered enumeration: `mobile-round-2.md` **§52**. In brief, by consequence: **Q1** the quick-note clamp DESTROYS stored text · **Q2** a refused mint at a leaving wipes the box AND the error · **the batch-4 BLOCKER** — four confirm buttons read back state SwiftUI has already cleared (Delete Now · Empty Trash · Library-row Delete Note · Shelf-row Delete Book) and the A12 warning's **Undo CANCELS it** · then §45's MAJORs (the fan fence read from a frozen projection · the 320 pt strip overflow · the surviving O(N²) twin in `planVisibleTakeEdit` · the geometry pins asserting constants against themselves) · §49's two MAJORs · §44's MAJOR (the Mac gets the gap fence's REFUSAL but not its FACE) · **B45-1** `AppBootstrap` runs migrations synchronously on the MAIN THREAD before first paint (a **P2** violation) · **B45-2** the `displaySlot`/`slots[i]` coupling that batch 7's PR8 walks into · **B45-3** the crash trace's six unowned items · **B45-4** THE ON-DEVICE SWEEP (E1 + M16, ONE window) · **+ ACT 1's findings** (a fresh cold read over the round's whole shipped diff) **+ ACT 2's findings** (the never-became-work sweep) | ⏳ | **ITS EXIT CONDITION IS THE DEDICATED STABILITY PASS** (the row below). 4.5 is NOT done until that pass has run. Its own build half is reviewed under R28 like any batch |
 | ↳ **4.5a** capture & lifecycle (Q1 · Q2 · Q3 · Q4 · Q5–Q10 · A1-19 · B45-1 measured) | ✅ built → §58 · ✅ **FIXED** → §62 | ✅ round 1 → §59 (5 MAJOR, all accepted) · ❌ **ROUND 2 OWED** (dispatched, died on the API limit before reading anything) |
 | ↳ **4.5b** deletion doors & the confirm BLOCKER (+ the accessibility-harness fix, + the `TrashPutBack` hoist) | ✅ **built** → §63 | ❌ **COLD REVIEW OWED** (dispatched, died on the API limit before reading anything). **This is the only in-flight work touching `Shared/` and the Mac** |
-| ↳ **4.5d** the keyboard bar's geometry | ✅ built → §60 | ✅ reviewed → §61 (2 MAJOR + 6 MINOR + 6 NIT) · ❌ **FIX ROUND OWED** (dispatched, died on the API limit after establishing baseline; **it left an experimental revert in the tree, which the architect found and restored — see §64**) |
+| ↳ **4.5d** the keyboard bar's geometry | ✅ built → §60 | ✅ reviewed → §61 · ✅ **FIX ROUND DONE 2026-08-30** (`mobile-batch-4.5d-record.md`) — 13 of 14 findings were ALREADY FIXED uncommitted, so nothing was re-fixed; the one real act was proving a never-run red pin. ~~FIX ROUND OWED~~ (dispatched, died on the API limit after establishing baseline; **it left an experimental revert in the tree, which the architect found and restored — see §64**) |
 | ↳ **4.5c** the editor & the shared brain — **THE LARGEST REMAINING RISK IN THE ROUND** | ❌ **NEVER RAN.** WAVE 2, alone (every target compiles against `Shared/EditorBrain/`) | ❌ owed |
 | ↳ **4.5e** the shared lifecycle files + the Mac's quick-capture twins | ❌ **NEVER RAN.** WAVE 3, alone | ❌ owed |
 | **4.5e (born 2026-08-22 — three findings converge on two `Shared/` files nobody owned)** | **B45-1's fix** (`AppBootstrap` opens the store and runs migrations synchronously on the main thread before first paint — a **P2** violation; MEASURED at 54.0 ms first launch / 5.0 ms reopen / 3.6 ms at 100k, so **flat in corpus size** and O(migrations), not a hang today, but the migration set only grows and the device number is unknown) · **A1-21** the `postAutosaves` removal path (the quick note adds one coordinator per capture) · **A1-15's** two inverted comments. **Owns `Shared/AppBootstrap.swift` + `Shared/AppSession.swift`.** Born because the architect's §1 brief gave 4.5a *"the `AppSession` lines"* without listing the file — 4.5a refused to reach across and reported, which is the fence catching the architect's own error | ⏳ **WAVE 3, alone** — those two files are compiled against by every target, exactly like 4.5c's editor brain | ❌ owed (R28) |
-| **5 (queued)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** · **NEW 2026-08-22 (§53 items 6 + 7): the shelf has NO keyboard-avoidance opt-out** (`MobileShelfView.swift:101` carries only `.background(tokens.room.ignoresSafeArea())`, unlike Write's `.ignoresSafeArea(.keyboard)`) **and R26/R27 pin a DWELLING text field into that layout** — default avoidance insets the whole `VStack`, so the tab bar rides the keyboard and the bounded books list collapses, making **her ruled "about half the phone screen" the first casualty**; plus **the quick note's mint cost at corpus scale, never measured** (`MobilePerfWalkTests` has no quick-note leg; the 100k dev store exists) — measure alongside the layout change, fix only if the number earns it | queued behind 4.5 (same shelf files) | ❌ owed |
-| 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
+| **5 — ✅ BUILT + REVIEWED 2026-08-30** (`mobile-batch-5-record.md`, `mobile-batch-5-cold-review.md`; her two live refinements folded in) | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** · **NEW 2026-08-22 (§53 items 6 + 7): the shelf has NO keyboard-avoidance opt-out** (`MobileShelfView.swift:101` carries only `.background(tokens.room.ignoresSafeArea())`, unlike Write's `.ignoresSafeArea(.keyboard)`) **and R26/R27 pin a DWELLING text field into that layout** — default avoidance insets the whole `VStack`, so the tab bar rides the keyboard and the bounded books list collapses, making **her ruled "about half the phone screen" the first casualty**; plus **the quick note's mint cost at corpus scale, never measured** (`MobilePerfWalkTests` has no quick-note leg; the 100k dev store exists) — measure alongside the layout change, fix only if the number earns it | queued behind 4.5 (same shelf files) | ❌ owed |
+| 6 | **SPLIT 2026-08-30.** **6a ✅ DONE** — the Block History twin (absorbs PR5 deleted takes + PR15 the lineage door; `mobile-round-2.md` §70 + `mobile-batch-6a-cold-review.md`), closing the deleted-take dark window. **6b ❌ owed** — PR3 the per-note tray (§69.3's ruled three-section shape) · PR6 archive/unarchive · PR14 the lens-dangles notice · PR22 the guide's deletion chapter. **6c ❌ owed** — the **Two-rooms IA**, UNBLOCKED by her 2026-08-30 ruling (`mobile-archive-trash-design/`) | 6a ✅ | 6a ✅ · 6b/6c ❌ owed |
 | 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · **PR21 replace — and it HOISTS `FindReplaceGate` WITH it, never after** (§56's A1-17): that gate is Mac-app-local today, and the phone is safe only because `MobileEditorTextView.swift:754` returns `supportsTextReplacement: false`. **The phone's editor now routes cross-block spans into merge-then-edit and whole-block deletion**, so a machine-driven find-and-replace sweep must never be able to restructure the post. Same shape as B45-2 — a known hazard with a dated collision, and this row is the date | | ❌ owed |
 | 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** — **and it closes §53's item 5 in the same act**: `MobileEditorStyle.storedVoice` is an unenforced `nonisolated(unsafe)` main-thread convention (`MobileEditorStyle.swift:48`) read from a `nonisolated` `MarkdownFace.style`. No live race today; the stated trip is *"a future off-main markdown pass"* — **which is M14's Read fix, also in this batch.** The tripwire and its closer are already in one batch; the row simply never said so · **M14's UNMEASURED HALF** — the SwiftUI `Text`-per-paragraph sizing on the Read surface, which needs a rendered view (§19 promised it "is measured there too" and it had landed in no map; measurement only, no fix — the decision is hers, §6 item 1) | | ❌ owed |
 | — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** | ❌ owed |
@@ -1363,7 +1384,7 @@ Core **1453/154** and Mac **1843/312** both baseline-exact.
 |---|---|---|
 | **6a — the Block History twin** | Her four regions in her order (savepoint runs · archived+Unarchive · deleted+clock+Put back, **no purge door** · came-from with ALL originals + Bring back). **CLOSES THE DELETED-TAKE DARK WINDOW** — LR1-3's live data hole. Door renamed `Take History…` → **`Block History…`** | `Shared/BlockHistoryFace.swift` hoist; **Mac rode 1843/312 with zero Mac test files edited** — the hoist proof. Two KnownIssues forked-brain entries discharged |
 | **5 — the shelf** | Her twice-stated complaint fixed. Quick note takes Today's Entry's box; books bounded; **the box is ONE LINE at rest (70 pt) and 50% of the shelf focused (466 pt)**; Today's Entry became a badge with a fallback row so it is reachable in every state; starter Journal seeds once | The writing floor restated **in lines** (`6 × smallLineHeight + chrome = 140 pt`) and **pinned across 2,408 shelf states** — the promise, not the arithmetic. Worst case **144 vs 140** (SE-class, keyboard up, 40 books, AX5) |
-| **4.5d + PL-10(b)** | §61's fix round verified **already done** (13/14) — correctly NOT re-fixed. `assertBookNameIsFree` wired; `BookNameCopy` **hoisted** to `Shared/` | Revert-proved a real bug: **two live books with one name got through the rename door**. Four pre-existing book pins stayed green throughout, which is why it shipped unwired |
+| **4.5d + PL-10(b)** | §61's fix round verified **already done** (13/14) — correctly NOT re-fixed. `assertBookNameIsFree` wired; `BookNameCopy` **hoisted** to `Shared/` | Revert-showed the gate's absence: **two live books with one name got through the rename door**. Four pre-existing book pins stayed green throughout, which is why it shipped unwired. **SEVERITY CORRECTED 2026-08-30 by the author:** this is a **UI courtesy gate, not a data-integrity defect.** Her words: *"the mac app ruled that the UI would deny duplicate book namings but it wouldn't cause a deeper issue… it can be UI gated on the rename area, but it's not a serious bug or issue."* **Verified against the schema: there is NO uniqueness on `reading.name`** — the only reading-side unique index is `uq_reading_post_live` on membership pairs — so duplicate book names are LEGAL in the model and nothing downstream breaks. The wiring was still the right call (the phone should gate where the Mac gates), but earlier records here called it "a real bug" and that overstated it. |
 | **the architecture review** | `notes/plans/mobile-architecture-review.md` — **0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT** | Findings-only; **no simulator used** (static + a standalone `swiftc` harness), so none of it can carry the contamination below |
 | **the archive/trash design session** | `notes/plans/mobile-archive-trash-design/` — four options, local self-contained HTML | **SHE RULED: option 2, Two rooms** (§10.1), plus the Library-filter row (§10.2) |
 
@@ -1512,3 +1533,61 @@ For §2b's handback checklist: **13u item 17 (the read-view edit jump) is BUILT 
 records in `notes/plans/act10-correction-round.md`). **13u was RE-SPLIT into FOUR** (13u1 seam · 13u2 feel · 13u3
 faces · 13u4 restyle + dark) — the record is the 13u plan's 2026-09-01/02 banner; the mobile-shared items (2 · 4 ·
 5 · 6 · 9) keep their homes inside those letters. Nothing else on the Mac side changed the checklist.
+
+## 12.2 🔴 HANDED IN FROM THE MAC'S 2026-09-12 USE-REPORT ROUND — THE WRITE PAGE OPENS SHOWING NONE OF THE TEXT (her report; her ruling: the mobile session's, standalone or with 13u)
+
+*(Written 2026-09-12 by the Mac round's Fable orchestrator, at her instruction the same day: "the mobile
+bug can be noted and I can handle it in a separate variorum mobile session — that repo has its own
+rules, if it's not shared. I would like you to write about it in the plans for that repo though, to be
+completed as a standalone part or with 13u, if I work on mobile after 13u is done." The Mac round's
+record is `notes/plans/use-report-round-2026-09-12.md` on `main` — ledger row 7, §4.9, her ruling R-Q9;
+her report `notes/author-reports/2026-09-12-use-report.md`.)*
+
+**Her words (2026-09-12, verbatim):** *"the mobile app also has this issue to an even worse degree where
+it defaults to showing NONE of the written text lines, which also drives me insane."* — and at the
+sitting she named the surface: **the Write page when a note opens** (not the takes browser sheet).
+
+**What the Mac found about ITS twin (so the class is understood, not the code):** on the Mac the Takes
+board scrolled her CURRENT block to the TOP of the viewport on every entry (`scrollTo(anchor: .top)`)
+and the typewriter room — the clear extent below the last row — let the LAST block sit at the top with
+nothing above it; a two-block note therefore opened showing only its empty third block. **Nothing of
+that is shared code**: it is board code under `App/Variorum/Variorum/Features/Takes/`. The Mac's ruled
+fix (R-Q1): a per-note scroll memory for the session, restored on entry, and a landing that REVEALS a
+block only when it is off-screen, minimally — never a land-at-top.
+
+**The phone's candidate mechanism (traced by reading on `main` at `3805e210`; unproven — the pin
+decides):** the phone's Write page keeps a typewriter room as a BOTTOM INSET on its `UITextView`, and
+its own code states the contract: *"the typewriter room's bottom inset already makes any block's top a
+legitimate scroll target"* (`MobileEditorViewModel.jumpToBlock`, ~`:838–860`, the block-list jump). An
+ARRIVAL that lands the caret at the note's END (`MobileWriteView`'s arrival — "the Today door's
+straight-into-typing invitation", ~`:40`/`:162`) and reveals it therefore shows the room and no text —
+the same CLASS as the Mac's, in the phone's own scroll (`contentOffset` on a `UITextView`; nothing in
+`App/Variorum/Shared/` scrolls). Whether the keyboard's rise compounds it (the visible band shrinks to
+the room above the keyboard) is the first thing to measure.
+
+**The ruled shape (hers, from the Mac sitting — the phone builds its OWN version):** (1) opening a note
+REVEALS the caret's line minimally — never lands it at the top — unless the note is being entered with
+nothing remembered, in which case the page opens at the TOP; (2) the page's offset is remembered per
+note for the SESSION and restored on re-entry (the Mac's `scrollAnchors` class); (3) the room stays.
+Evidence of the kind: a pin on the arrival (a three-block note whose caret is in the last block opens
+with block 1 visible — red on old), a pin on the memory, and a simulator walk with captures. **Fences:**
+nothing in `Shared/EditorBrain/` (13u1's), nothing in the cross-block planner; the phone's own
+`MobileEditorViewModel`/`MobileWriteView` arrival only.
+
+**Where it runs:** at her word — as a standalone mobile unit, or folded into the mobile catch-up after
+13u (this handoff's §12.1 says why the post-13u1 merge is the careful one). The Mac round's MOBILE
+PARITY LINE is `notes/MobileSoul.md` §6 row **PL-22** on `main`.
+
+### 12.2a · PASTE-READY KICKOFF for the standalone mobile unit (written 2026-09-12 at her ask; paste into a fresh session opened in `~/dev/variorum-mobile`)
+
+> You are running ONE standalone mobile unit of the Variorum iPhone app: **the Write page opens showing none of the written text** — her 2026-09-12 report. Work in `~/dev/variorum-mobile` on branch `mobile` (verify: `git status -sb`, `git log --oneline -5`; `main` is NOT merged into `mobile` for this unit — do not merge, do not pull `main`). This is a fix unit, not the round's resumption: batches 5–8 and the owed reviews in this handoff's §3 stay where they are.
+>
+> **READ, YOURSELF, IN THIS ORDER:** `CLAUDE.md` · `notes/MobileSoul.md` (§3 the drift rule, §4.4, §6 the parity ledger) · this handoff's **§12.2** (the item: her words, the Mac twin's mechanism, the phone's traced candidate, the ruled shape, the fences) · §12.1 (why `Shared/EditorBrain/` and the cross-block planner are off limits while 13u1 is pending) · §10.4–§10.5 and §11.4 (the simulator and DerivedData rules) · §2 row "the accessibility flag on your simulator" · `notes/plans/mobile-round-2.md` §17–§20 (the M12 flicker row — the phone's arrival and reveal history) · `notes/SessionResiliencyProtocol.md`'s implementer half · the phone's Write arrival code: `App/Variorum/VariorumMobile/Features/Write/MobileWriteView.swift` (the arrival, ~`:40`/`:162`) and `MobileEditorViewModel.swift` (`jumpToBlock` ~`:838–860` — the room's stated contract; find the arrival's own caret placement and reveal), `MobileEditorTextView.swift` (the bottom inset / typewriter room).
+>
+> **THE RULED SHAPE (hers, from the Mac's 2026-09-12 sitting — SETTLED, build to it):** (1) opening a note REVEALS the caret's line minimally — never lands it at the top of the viewport — unless nothing is remembered for the note, in which case the page opens at the TOP; (2) the page's scroll offset is remembered per note for the SESSION and restored on re-entry; (3) the typewriter room stays exactly as it is. The Mac's twin defect was a `scrollTo(anchor: .top)` on the current block plus the room letting the last block sit at the top — the phone's is its own code (`UITextView` content offset); nothing in `App/Variorum/Shared/` scrolls, and nothing there may change.
+>
+> **PIN BEFORE FIX — no exceptions.** First TRACE the mechanism by running it, not by reading: a three-block note whose caret is in the last block, opened cold — capture where the page lands (the simulator's screenshot + the text view's `contentOffset` and `contentSize` at the settle, with and without the keyboard raised). Then write the red-on-old pin in `VariorumMobileTests` (the arrival lands block 1 visible when the caret is in block 3 with nothing remembered — measure the red number on the pre-fix code and record it), then fix, then green. A second pin for the memory (leave with block 2 at the top → re-enter → block 2 at the top). A pin green on both sides means the finding is hollow: record it, do not "fix" it.
+>
+> **RULES THAT BIND:** one simulator for this session, chosen by UDID from the valid iOS 26.2 devices (the iPhone 17 family, iPhone Air, the one iPhone 16e — the iPhone 16-series are iOS 18.3 and invalid), NEVER `booted`; arm its accessibility flag first (`xcrun simctl spawn <UDID> defaults read com.apple.Accessibility ApplicationAccessibilityEnabled` must be `1`, else `defaults write … -bool true`); one `-derivedDataPath` of your own; mobile tests via `xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile -destination 'platform=iOS Simulator,id=<UDID>'` with suite-level `-only-testing:` and the `Test run with N tests` line read (Swift Testing counts skipped tests); the checkpoint protocol — commit per coherent piece, push `origin mobile` after every commit, a LIVE STATUS section in your record from the first commit (a new section `### 12.2b · RECORD` appended to this handoff), PENDING on every unverified claim, synchronous foreground waits only (poll a log; never end your turn awaiting a background run), no subagents beyond the standing one-at-a-time rule; NO `Co-Authored-By` / `Claude-Session` trailers; never rewrite history; path-scoped `git add`; nothing in `Shared/`, nothing in `Sources/`, no schema, no `Sync/`; no product invention — a decision the ruled shape does not make goes to `notes/QUESTIONS.md` at the next free number with 2–3 options, built PROVISIONAL.
+>
+> **THE ACCEPTANCE GATE IS USE:** a simulator walk with captures under a gitignored `notes/plans/mobile-write-arrival-screens/` — a long note opened cold shows its first lines; a note left scrolled mid-way re-opens there; the Today door's straight-into-typing arrival still lands the caret ready to type (the room intact); with the keyboard up the caret's line is visible. **THE REVIEW:** an Opus cold review is mandatory (the standing 17-entry rule: `notes/REVIEW_PROMPT.md` verbatim, a fresh agent with zero context from you, anchored on your record); a Fable review only if the diff touched the editor seam (it should not). **CLOSE:** the touched mobile suites + the phone's arrival/perf suites green, the record's dispositions (FIXED with the pin's name and the red-on-old numbers · DISMISSED AS HOLLOW · DEFERRED with an owner), `notes/MobileSoul.md` §6 row PL-22's mobile half flipped (on `main` — tell her; do not edit `main` from this session), and a one-paragraph report to her.

@@ -3496,9 +3496,22 @@ Both tab stacks are alive by design. The in-note door pops the screen;
 **the Library row door passes no `onDeleted`.** So: open a note, switch
 tabs, delete it from the Library row → the editor stays mounted, gets
 re-granted liveness on return, blanks its title, and **remains editable
-over a deleted note.** Keystrokes there autosave into tombstoned
-variants and are **lost**. The batch's own in-note door handles this
+over a deleted note.** ~~Keystrokes there autosave into tombstoned
+variants and are **lost**.~~ The batch's own in-note door handles this
 correctly; this one doesn't.
+
+> **[CORRECTED 2026-08-31 — 4.5c-phone's cold review, MINOR 3, MEASURED.]**
+> The struck sentence is FALSE and was believed through the fix's design.
+> **No byte was ever written into a tombstone**, before the fix or after:
+> `Operations.autosave` resolves through `liveVariant`, which throws
+> `variantNotFound` for a tombstoned variant, and `deleteContainer`'s
+> cascade tombstones the note's blocks and variants. **The real cost is
+> still a defect and still worth the fix:** the surface accepted keystrokes
+> it could never save, and every flush refused with a raw
+> `variantNotFound(id: "…")` dumped into her status line. The distinction
+> matters for anything that weighs this seam's belts later — a belt believed
+> to stop CORRUPTION is treated differently from one that stops a confusing
+> surface. Full record: `mobile-batch-45c-phone-cold-review.md`.
 
 ### 🟠 MAJOR — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`
 M-C forbids it at birth, and **it is already drifting on day one**: the
@@ -3668,7 +3681,7 @@ the full verification block. Nothing below was inherited on trust.
 | 8 | 🟠 **The vertical geometry pins assert constants against themselves** (`air >= air`) — so the recorded guarantee that *"a future iOS trips here"* **does not exist**. §15 trap 1, for the fifth time | §45 (bar family) | **4.5d** |
 | 9 | 🟠 **Q4 — the background grant introduced a TERMINATION class that did not exist.** Taken asynchronously one hop after the phase change (Apple names exactly this as the anti-pattern) and **with no expiration handler**: an ungranted assertion writes SQLite unprotected (`0xdead10cc`), an overrun with no handler is fatal (`0x2182bad2`) — and the flush's last leg is a network round | §45 | **4.5a** |
 | 10 | 🟠 **Q3 — an emptied box leaves a live, empty, untitled note.** A5-3 disclosed an abandoned ONE-WORD note; it did not sanction a note with no content at all | §45 | **4.5a** |
-| 11 | 🟠 **§49 — deleting a note from the Library leaves a LIVE EDITOR on the tombstone.** The in-note door pops the screen; the Library row door passes no `onDeleted`. Keystrokes there autosave into tombstoned variants and are **lost** | §49 | **4.5b** |
+| 11 | 🟠 **§49 — deleting a note from the Library leaves a LIVE EDITOR on the tombstone.** The in-note door pops the screen; the Library row door passes no `onDeleted`. ~~Keystrokes there autosave into tombstoned variants and are **lost**~~ — **[CORRECTED 2026-08-31, 4.5c-phone's cold review MINOR 3, measured: no byte ever reached a tombstone (`Operations.autosave` refuses a tombstoned variant); the surface accepted keystrokes it could never save and dumped the raw `variantNotFound(id: "…")`. See §49's correction block]** | §49 | **4.5b** |
 | 12 | 🟠 **§49 — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`.** M-C forbids it at birth and **it is already drifting on day one** (the two surfaces answer *"where did it go?"* differently). The batch hoisted the WORDS and stopped one layer short of the DECISIONS | §49 | **4.5b** |
 | 13 | 🟠 **B45-1 — `AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** (`VariorumMobileApp.swift` constructs it as `@State`). A **P2 violation** — OverallModel §5. Same family as the Keychain launch hop 13e batch 9 fixed. *"A measurement is one signpost away"* and none was ever briefed — **measure, then fix** | her row, §Acts | **4.5a** |
 | 14 | 🟠 **B45-2 — the `displaySlot` / `slots[i]` coupling**, out-of-range-safe only by caller accident during the crystallization window. **PR8 reorder-takes is scheduled at batch 7**, so the schedule is walking straight into it. Make it explicit | her row, §Acts | **4.5c** |
@@ -5776,6 +5789,14 @@ rule: **explicit-path staging while another session is live**, which this
 batch followed and which is exactly what kept the damage to four empty
 renames.
 
+**AND ONE CONSEQUENCE THIS ACCOUNT OWED, LANDED HERE 2026-08-30** (batch 6a's
+own cold review asked for it at m6, and the Fable sweep's O2 routed it): the
+deletion of `OriginPeek.swift` went into `a232455` **without its replacement**,
+which arrived only with batch 6a's commit — so **the MAC TARGET COULD NOT
+COMPILE from `a232455` to `16ba929^`**. A bisect through that window fails to
+build, and it fails for a reason unrelated to whatever is being bisected. The
+full account is `notes/plans/mobile-round-2-orchestrator-handoff.md` §11.3.
+
 ### What batch 6a deliberately did NOT build
 
 - **The archive/trash IA separation on the phone** (§69.5) — her explicit
@@ -5802,3 +5823,34 @@ renames.
 - When batch 6b gives the phone its note-level trash section, the deleted
   region's explainer gains its second half by passing that door's name to
   `BlockHistoryCopy.deletedRegionExplainer(purgeRoad:)`. Nothing else moves.
+
+## §71 — THE 2026-08-30 PARALLEL BOUT: WHERE ITS RECORDS LIVE (a pointer section, so nothing sits only in a file nobody opens)
+
+**Four pieces of work landed this day whose records are in their OWN
+files, not in this one.** They are listed here because this plan is what
+a fresh session reads, and a record it cannot find is a record that does
+not exist.
+
+| work | record |
+|---|---|
+| **Batch 5** — the shelf layout (R26/R27/R27b) + her two live refinements (one-line box; the writing room made a pinned guarantee) | `notes/plans/mobile-batch-5-record.md` · cold review: `notes/plans/mobile-batch-5-cold-review.md` |
+| **Batch 6a** — the Block History twin | **§70 of THIS file** · cold review: `notes/plans/mobile-batch-6a-cold-review.md` |
+| **Batch 6b** — THE PER-NOTE TRAY (§69.3's ruled three sections; the Q8 door in the blocks sheet's segments; PR6's block archive door; the 6c explainer flip; PR14's lens-dangle notice; PR22's deletion chapter) | brief: `notes/plans/mobile-batch-6b-brief.md` · record: `notes/plans/mobile-batch-6b-record.md` — **it FLIPS 6c's §1 D5**, which was correctly declined at the time and became true the moment this batch gave a deleted take a purge road |
+| **Batch 6c** — THE TWO-ROOMS IA (her #84 ruling built: the Trash room · the Archive room · the two doors + the Shelf's second renderer · **the Versions face**) | brief: `notes/plans/mobile-batch-6c-brief.md` · record: `notes/plans/mobile-batch-6c-record.md` — **its §1 D5 records a brief premise that did not hold and was NOT built** (the Block History explainer's second half: that region lists deleted TAKES and `TrashScope` keeps takes out of the global Trash, so the new room is not that road — batch 6b's tray is) |
+| **Batch 4.5d's fix round** + PL-10(b) the duplicate-book-name guard | `notes/plans/mobile-batch-4.5d-record.md` |
+| **The five-MAJOR fix round** (B1 · C2 · A1 · A2 · C1) | `notes/plans/mobile-major-fix-round-record.md` |
+| **The mobile app's first architecture review** | `notes/plans/mobile-architecture-review.md` |
+| **The archive/trash design session** (four IA options; she ruled **Two rooms**) | `notes/plans/mobile-archive-trash-design/` (`proposal.html` + `README.md`) |
+| **The session's own handoff + THE WHOLE-ROUND STATUS TABLE** | `notes/plans/mobile-round-2-handoff-2026-08-30.md` — **§7 is authoritative over the batch map's cells** |
+| **THE FABLE SWEEP REVIEW (2026-08-30, at her resumption ruling — a Fable orchestrator took the seat; ONE Fable cold reviewer sweeps the Opus-era work + docs BEFORE any §4 batch runs; its findings go to ONE Opus fix session under R28)** | brief: `notes/plans/mobile-fable-sweep-review-brief.md` · findings: `notes/plans/mobile-fable-sweep-review.md` — it also discharges the OWED five-MAJOR-round review and 4.5a's owed ladder round 2, to the extent its record says it covered them; it does NOT discharge the stability pass or the whole-round pass |
+
+**Suites moved 513/86 → 582/93.** Hygiene held: zero schema, zero
+`Sources/`, zero `Sync/`, marker 7.
+
+**Two findings from that day that are NOT mobile's** and are recorded
+where the Mac will meet them (QUESTIONS #91): `main` did not build for
+iOS at all (R3-2's sentence placed in the macOS-only branch of a
+`Shared/` conditional — found, proven pre-existing, fixed), and a
+separate *behaviour* failure in the same 13p-fix work
+(`CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable`)
+which was deliberately **not** touched.

@@ -216,6 +216,7 @@ second flight **mints a second row with nothing beneath it to notice**:
 | `MobileTodayDoor` | opens rather than mints | **safe by the operation** — the review says so and it is right |
 | `MobileMembership`, `MobileTagManager`, tag/edge/reading-membership doors | refused by a live-unique index or an `alreadyInReading` guard | **outcome safe** |
 | `choose` / `setTakeLabel` / lock toggles | last-write-wins on one row | **not a duplication class** — a latch there would only hide a second tap that changed nothing |
+| `MobileLenses.adoptView` *(added 2026-08-30 by the Fable sweep, finding 1)* | a second preservation lens | **defect** — the `lens` table has no uniqueness (the only lens-side live-unique index is `uq_lens_choice_live` on `(lens_id, block_id)`), and `adoptPicksPreservingChosen` inserts its preservation row UNCONDITIONALLY, ahead of any pick validation. **LATCHED at the Opus fix round the same day** |
 
 ### The fix
 
@@ -236,7 +237,11 @@ finding is about a shared home carrying things only one platform uses.
 
 Adopted at the three doors above (`MobileComments.run` — one funnel covering
 all five comment verbs; `MobileTakesBrowser.branchDisplayed` and `mint`;
-`MobileCreateBookModel.create`).
+`MobileCreateBookModel.create`) — **and, since the Fable sweep's finding 1
+the same day, at a FOURTH: `MobileLensesModel.adoptView`** (see the table
+row and the correction below). `saveIntoActiveLens` is deliberately left
+unlatched beside it: its upsert-and-clear writes converge, so a second
+flight lands the same state.
 
 **Pins** (`MobileWriteLatchTests`, six new): the latch's own contract and its
 clear-on-exit, plus the three doors driven with two real concurrent `Task`s —
@@ -257,15 +262,42 @@ unchanged on that code):
 The last line is the correction stated as evidence: **one book**, and a
 refusal for a gesture she made once.
 
+**The fourth pin, added 2026-08-30 with the sweep's finding-1 fix**
+(`twoTapsOnAdoptLeaveOnePreservationLens`), proven red the same way — the
+latch removed from `adoptView`, the pin compiling unchanged:
+
+```
+✘ twoTapsOnAdoptLeaveOnePreservationLens   (preservations → 2) == 1
+```
+
 ### Left open, and it now has this file to point at
 
-Seventeen other unlatched files remain unlatched, on purpose. The table above
+Sixteen other unlatched files remain unlatched, on purpose. The table above
 verdicts the classes; what has NOT been done is a per-door trace of every one
 of them. Each is either safe by its operation or costs a refusal message at
-worst, and none of them can mint an uncaught duplicate row by the reasoning
-above — but that reasoning is a class argument, not seventeen traces. A
-mobile batch adopting the latch as it touches each door is the right shape,
-and the latch now exists for it.
+worst.
+
+**⚠️ CORRECTION, 2026-08-30 (the Fable sweep, finding 1 — ACCEPTED, zero
+disputes).** This paragraph used to end *"and none of them can mint an
+uncaught duplicate row by the reasoning above"*. **That universal sentence
+was false, and the hedge beside it — "that reasoning is a class argument, not
+seventeen traces" — is exactly why.** `MobileLenses.adoptView` was on the
+review's own twenty-file list, was never classified in the table above, and
+mints an uncaught duplicate preservation lens on a double tap. It is now
+latched and pinned (the table row + the pin above); the count above dropped
+from seventeen to sixteen with it. **The rule this leaves behind: a class
+argument may be stated as a class argument and never as coverage.** The
+remaining sixteen are still un-traced, and a mobile batch adopting the latch
+as it touches each door is still the right shape.
+
+**One door is safe only by its HOST, and the next batch to touch it must
+know that.** `MobileBlockHistory.commitNow` appends a savepoint with no
+dedupe — manual `commit` always inserts (`Operations+Variant.swift:38-58`) —
+so a second flight would leave two savepoints of one moment. Today its ONE
+caller is a `UIMenu` action (`MobileBlockMenu.swift:156-158`), which dismisses
+on the first tap, so the door cannot fire twice. **If batch 6b or 9 gives the
+Block History sheet its own commit BUTTON, that door needs the latch** — a
+persistent `Button { Task { … } }` removes the only thing protecting it.
 
 ---
 

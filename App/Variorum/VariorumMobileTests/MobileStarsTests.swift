@@ -92,7 +92,15 @@ struct MobileStarsTests {
             #expect(!model.isStarred(.post(ids[cap])))
             let refusal = try #require(model.lastError)
             #expect(refusal == MobileStarsModel.capRefusal(limit: cap))
-            #expect(refusal.contains("top of the shelf"), "the phone's own road is named")
+            // **RE-POINTED AT BATCH 10.** This line read `"top of the shelf"`
+            // — the road the sentence named until that batch moved the
+            // starred list off the shelf at her word (*"I don't like where it
+            // appears above the shelf"*). The RULE it was written to protect
+            // is unchanged and is what it still asserts: the refusal names a
+            // road that EXISTS ON THE PHONE. What changed is which one.
+            #expect(refusal.contains(MobileStarsModel.pageName),
+                    "the phone's own road is named")
+            #expect(!refusal.contains("shelf"), "and it is no longer the shelf's")
             #expect(!refusal.contains("sidebar"), "never the Mac's surface")
             #expect(!refusal.contains("Mac"))
         }

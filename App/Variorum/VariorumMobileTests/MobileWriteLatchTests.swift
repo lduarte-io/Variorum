@@ -204,4 +204,83 @@ struct MobileWriteLatchTests {
                     "the latch's half — one gesture must not answer with a refusal")
         }
     }
+
+    // MARK: The lenses adopt door — the falsifier of the class argument
+
+    /// **TWO TAPS ON "✓ make this the note" LEAVE ONE PRESERVATION LENS.**
+    ///
+    /// The Fable sweep's finding 1 (2026-08-30). The fix round's record
+    /// closed MAJOR 1 with a universal sentence — *"none of them can mint
+    /// an uncaught duplicate row"* — and this door falsifies it. Every
+    /// layer says yes to the second flight:
+    ///
+    /// · the door is a persistent plain `Button { Task { … } }`, so unlike
+    ///   the alert-hosted save/rename doors it does not dismiss on the
+    ///   first tap, and it keeps rendering because `viewDiverges` stays
+    ///   true until the first flight's own refresh self-heals the peeks;
+    /// · `adoptView` captures `picks` BEFORE its first suspension, so the
+    ///   second flight passes `guard !picks.isEmpty` with the same picks;
+    /// · `adoptPicksPreservingChosen` inserts its preservation `Lens`
+    ///   UNCONDITIONALLY, ahead of any pick validation, and the `lens`
+    ///   table carries no uniqueness (the only lens-side live-unique index
+    ///   is `uq_lens_choice_live` on `(lens_id, block_id)`).
+    ///
+    /// So the store keeps both, and she is left hand-deleting a duplicate
+    /// "chosen until …" lens — the same clutter class as the branch doors
+    /// above, on a door the class argument said was covered.
+    ///
+    /// **AND THE PIN ASSERTS THE DECLINE, NOT ONLY THE COUNT** (R2-5, the
+    /// fix diff's own cold review). A row count has a silent-green
+    /// direction: if the second flight ever scheduled entirely after the
+    /// first completed, the self-healed peeks would empty
+    /// `displayedDivergences`, `adoptViewOnce` would return at
+    /// `guard !picks.isEmpty`, and ONE row would be counted with the latch
+    /// removed. `adoptView` now returns the latch's verdict, so the pin
+    /// reads the thing it is actually about: the first tap FLEW and the
+    /// second was TURNED AWAY. Both are asserted, because the count still
+    /// carries the user-visible half.
+    ///
+    /// **Red-on-old:** point `adoptView` back at `adoptViewOnce` directly
+    /// (drop the latch) and the second flight is admitted — the verdict is
+    /// `true` and the count is two.
+    @Test func twoTapsOnAdoptLeaveOnePreservationLens() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops -> (String, String) in
+                let post = try ops.createPost(title: "lens adopt", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: "Chosen words.", at: .end)
+                let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+                try ops.autosave(second.id, text: "The other reading.", charDelta: 5)
+                return (post.id, a.block.id)
+            }
+            let (model, _) = makeEditor(session, postID: seed.0)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.0, editor: model)
+            await lenses.refresh()
+
+            // Arrange a divergent view — this is what renders the door.
+            model.takes.flip(blockID: seed.1, forward: true)
+            await lenses.refresh()
+            #expect(lenses.viewDiverges, "the adopt door has ground to render")
+
+            let first = Task { await lenses.adoptView() }
+            let second = Task { await lenses.adoptView() }
+            let firstFlew = await first.value
+            let secondFlew = await second.value
+
+            #expect(firstFlew, "the gesture she made really ran")
+            #expect(!secondFlew,
+                    "…and the second tap was DECLINED by the latch — not merely tidy")
+
+            let preservations = try await liveRows(
+                db,
+                sql: """
+                    SELECT COUNT(*) FROM lens
+                    WHERE container_id = ? AND deleted_at IS NULL
+                    """,
+                [seed.0])
+            #expect(preservations == 1,
+                    "one gesture, ONE preserved arrangement — not two")
+        }
+    }
 }

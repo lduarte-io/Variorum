@@ -24,9 +24,11 @@
 //    2. **Archived takes** — set aside, no clock, with Unarchive.
 //    3. **Deleted takes** — the 30-day clock and Put back, and **NO PURGE
 //       DOOR** (her evolved rule: Delete Now lives on TRASH SURFACES only —
-//       never in the writing flow. The phone's note-level trash section is
-//       batch 6b's; until it lands the phone's deleted-region explainer says
-//       the clock and Put back and promises no door that isn't there).
+//       never in the writing flow). Since batch 6b the region's explainer
+//       NAMES the road that does carry one: the per-note tray's **Leaving**
+//       section (blocks ▸ leaving), where a deleted take wears Put back and
+//       Delete Now. It still never names the global Trash, which by her D1
+//       ruling does not list takes at all.
 //    4. **Came from** — ALL of a merge's originals (never `.first` — the 13l
 //       walk's P-3), each with its text and a one-button `placeBlock` way
 //       back through the SHARED act (`PreservedOriginPutBack`).
@@ -40,15 +42,37 @@
 //  a SwiftUI `List` with sections), the flush-and-refusal idiom every phone
 //  door already speaks, and the door's placement.
 //
-//  ── THE DOOR ─────────────────────────────────────────────────────────────
+//  ── THE DOOR — MOVED AT BATCH 9, BY HER LETTER ───────────────────────────
 //  Her G2 ruling put the Mac's door in the bottom chrome *"beside Commit —
-//  history is the natural pair to commit"*. On the phone, Commit Take lives
-//  in the block ⋯ (the phone's ONE block-acts home) and the history door has
-//  always sat immediately beside it, so the pairing she asked for is already
-//  the phone's shape; what changed at this batch is the NAME — `Take
-//  History…` became `Block History…`, which is her F2 report answered at the
-//  door: *"it's unclear that history is under Note, that makes it seem like
-//  the Note's history."*
+//  history is the natural pair to commit"*, and the phone answered it with
+//  a `Block History…` row in the block ⋯ next to `Commit Take` (batch 6a
+//  also fixed the NAME there — `Take History…` became `Block History…`, her
+//  F2 report answered one noun over: *"it's unclear that history is under
+//  Note, that makes it seem like the Note's history"*).
+//
+//  **She then moved it herself** (2026-08-23): *"i also think that take
+//  history should move into the three ... menu on each take rather than the
+//  main three dot menu."* So the door is now a row on EVERY LIVE TAKE
+//  CARD's ⋯ inside the takes browser
+//  (`MobileTakesBrowserController.openHistory`), and the block ⋯ has none.
+//  The word did not fork on the way over: that row's title is composed from
+//  the SHARED `BlockHistoryPath.name`, so it still says `Block History…` and
+//  a re-word lands once.
+//
+//  **What the move buys, and it is the reason the shape is right rather
+//  than merely obedient:** `open(blockID:focused:)` now takes the take the
+//  door was pressed ON, so the savepoint run that opens expanded is THAT
+//  take's — where the block-⋯ road could only ever offer the block's
+//  DISPLAYED take, whichever card she was actually asking about.
+//
+//  **What it costs, recorded rather than discovered later:** the browser
+//  refuses to open on a GAP block (an un-synced placement with no variant —
+//  *"This block hasn't fully synced; it is read-only for now"*), so this
+//  face is no longer reachable on one. The block ⋯'s row was; nothing else
+//  is. A gap block's history is thin by construction (no live take, so no
+//  savepoint runs — at most deleted takes and origins), and the state is a
+//  sync race rather than a place she sits, but it IS a road that closed and
+//  it is on her sitting list.
 //
 //  ── SCOPING, AND WHY THERE IS NO JUMP DOOR ───────────────────────────────
 //  The Mac's pane stands open beside a live editor, so its caret can wander
@@ -129,13 +153,35 @@ final class MobileBlockHistoryController {
     /// The confirm's message (AppSpec §9's documented warning class).
     static var predatesSplitWarning: String { BlockHistoryCopy.predatesSplitDetail }
 
-    /// **The phone's deleted-region explainer.** The lead half is shared;
-    /// the clause naming where Delete Now lives is each platform's, and the
-    /// phone's honest answer today is that it has no such door yet — so it
-    /// passes nil and the sentence ends after Put back. It must NEVER name
-    /// the Mac's tray: that is the no-redirect breach (MobileSoul §4.4).
+    /// **The phone's deleted-region explainer — and its second half LANDED
+    /// AT BATCH 6b.** The lead half is shared; the clause naming where
+    /// Delete Now lives is each platform's, and it must NEVER name the Mac's
+    /// tray: that is the no-redirect breach (MobileSoul §4.4).
+    ///
+    /// **Why it was `nil` until now, kept so nobody re-derives it.** §70
+    /// handed the flip forward to *"when batch 6b gives the phone its
+    /// note-level trash section"*, and batch 6c — which gave the phone a
+    /// Trash ROOM with both purge doors in it — correctly DECLINED to flip
+    /// it on that room's arrival: **this region lists deleted TAKES, and
+    /// takes do not row in the global Trash.** `TrashScope.listedKinds` is
+    /// `[.note, .book, .block, .preservedOriginal]` by her D1 ruling, and
+    /// `TrashScope.kinds(filter:)` cannot widen past it, so naming the Trash
+    /// room here would have sent her to a room where the take she is reading
+    /// about does not appear — a door that cannot act (P-2), wearing a true
+    /// sentence's clothes.
+    ///
+    /// The road that makes the sentence true is the one §69.3 ruled and this
+    /// batch built: the per-note tray's **Leaving** section, where a deleted
+    /// take carries **Put back** and **Delete Now** with confirm-every-time.
+    /// The phrase is `MobileNoteTrayModel.purgeRoadPhrase`, composed from the
+    /// door's own two words rather than written a second time here.
+    /// `MobileBlockHistoryTests.theDeletedRegionNamesTheTrayAsItsPurgeRoad`
+    /// holds it, and holds the precondition BOTH ways: the sentence names a
+    /// road that really carries the take, and still never names the global
+    /// Trash, which still does not list takes.
     static var deletedExplainer: String {
-        BlockHistoryCopy.deletedRegionExplainer(purgeRoad: nil)
+        BlockHistoryCopy.deletedRegionExplainer(
+            purgeRoad: MobileNoteTrayModel.purgeRoadPhrase)
     }
 
     /// The phone's edition of "no saved moments yet" — the Mac's names ⌘S,
@@ -168,12 +214,17 @@ final class MobileBlockHistoryController {
 
     // MARK: - Open / close
 
-    /// The ⋯'s "Block History…": opens on the caret's block, remembering the
-    /// take she is in so its run opens expanded.
-    func open(blockID: String) {
+    /// Opens the face on a block, remembering which take's run to expand.
+    ///
+    /// `focused` is the take card the door was pressed on (batch 9's
+    /// per-take ⋯ — see the header). `nil` keeps the original rule: the
+    /// block's DISPLAYED take, which is what a block-scale door could know.
+    /// Either way the id is held for the face's life, so a remote flip
+    /// mid-read cannot silently swap whose past she is reading.
+    func open(blockID: String, focused: String? = nil) {
         guard let model, let slot = model.slot(for: blockID) else { return }
         openBlockID = blockID
-        focusedVariantID = slot.variantID
+        focusedVariantID = focused ?? slot.variantID
         history = Queries.BlockHistory()
         loaded = false
         seededExpansion = false

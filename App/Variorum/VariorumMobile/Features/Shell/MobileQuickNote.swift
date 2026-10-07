@@ -983,6 +983,23 @@ final class MobileQuickNoteModel {
             // never a spin — and the ordinary re-arm on her next keystroke
             // is unchanged.
             armMintClock()
+            // **AND THE CARET GOES, THOUGH THE TEXT STAYS** (the R28 round
+            // 2 review's R2-2). `reset()` is what drops focus on the roads
+            // that clear the box — and this road deliberately does NOT
+            // clear it, so until now a refused leaving left the keyboard
+            // standing over the Library, above an invisible box holding
+            // un-filed text and an error she could not see: the sweep's
+            // finding-6 symptom, arriving from a state its fix never
+            // reached. A leaving is a leaving of the SHELF SURFACE, focus
+            // included; her text and its reason are still here when she
+            // comes back to the Shelf.
+            //
+            // Accepted, recorded consequence: `open()` shares this body, so
+            // a ⏎ (or open-door) press whose mint is refused now drops the
+            // keyboard too. It is the same honest reading — the gesture
+            // asked to leave the box for the note and could not — and the
+            // error it leaves on screen is the thing worth looking at.
+            setFocused(false)
             return nil
         }
         // A5-4 option (c): the existing shared drain, no new registry and
@@ -1004,6 +1021,12 @@ final class MobileQuickNoteModel {
             // error stands. Returning nil also keeps the box the single
             // writer — nothing navigates onto a note whose text the box is
             // still holding.
+            //
+            // The caret goes here too, and for the same reason as the
+            // refused-mint road above (R2-2): the box keeps her keystrokes
+            // and the coordinator's error, and neither is worth a keyboard
+            // standing over the tab she moved to.
+            setFocused(false)
             return nil
         }
         reset()
@@ -1012,8 +1035,34 @@ final class MobileQuickNoteModel {
     }
 
     /// Back to an empty box, owning nothing.
+    ///
+    /// **AND WITHOUT THE CARET** (the Fable sweep's finding 6, 2026-08-30 —
+    /// the verdict §62 item 3 deliberately left to fresh eyes). A box that
+    /// was FOCUSED BUT NEVER MINTED takes `file()`'s first guard — `reset()`
+    /// and out, no hand-off, nothing announced — and `handOffCount` is the
+    /// only signal the face drops the keyboard on. So tap the box, type
+    /// nothing, tap Library, and the keyboard stood over the Library on a
+    /// shelf nobody could see: the same visible symptom as §59's MAJOR 3,
+    /// from a different state. (The tab bar really is reachable with the
+    /// keyboard up — batch 5's own keyboard-avoidance finding lifts it onto
+    /// the keyboard — so this is an ordinary gesture, not a corner.)
+    ///
+    /// **The fix is at the FOCUS seam, never at the counter.** The shipped
+    /// `handOffCount == 0` contract is RIGHT — nothing was handed off, and
+    /// bumping it would make the box claim a filing it never made. What is
+    /// true instead is that a leaving is a leaving of the SHELF SURFACE,
+    /// focus included: `reset()` runs on every road the box lets go by (the
+    /// never-minted empty box, the withdrawal, the completed hand-off), so
+    /// the caret goes with it here, and the face releases first responder
+    /// when the model says the box no longer holds it.
+    ///
+    /// *(R2-2, the fix diff's own cold review: the two REFUSAL roads out of
+    /// `file()` never reach here — by design, since Q2 keeps her text — so
+    /// they drop focus themselves at the point they return. The rule is the
+    /// same rule; only the road that carries it differs.)*
     private func reset() {
         cancelMintClock()
+        setFocused(false)
         // A boundary restore queued for the next turn would otherwise land
         // AFTER this, writing a filed note's text back into an empty box.
         restoreTask?.cancel()
@@ -1119,6 +1168,15 @@ struct MobileQuickNoteBox: View {
         .onChange(of: model.handOffCount) { _, _ in
             // The box has let go; the keyboard should let go with it.
             focused = false
+        }
+        .onChange(of: model.isFocused) { _, wants in
+            // The other direction of the same seam (the Fable sweep's
+            // finding 6): the model can also say the box has let go of the
+            // caret — which `reset()` now does on EVERY road out, including
+            // the never-minted empty box that announces no hand-off at all.
+            // Only the drop is honoured: raising the keyboard is always the
+            // user's own act, never a model's.
+            if !wants { focused = false }
         }
         .onChange(of: model.pendingOpen) { _, _ in
             if let postID = model.takePendingOpen() { onOpen(postID) }

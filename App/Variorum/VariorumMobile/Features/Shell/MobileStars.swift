@@ -62,9 +62,16 @@ final class MobileStarsModel {
     @ObservationIgnored private var errorClearTask: Task<Void, Never>?
 
     /// Which tab root a star door lives on.
+    ///
+    /// **`.starred` joins at batch 10**, with the page that lists them: an
+    /// un-star fired from the starred page is a door refusal like any
+    /// other, and without its own home it would have reported on the two
+    /// roots that did not fire it — precisely the D2 defect this enum was
+    /// added to close.
     enum DoorHome {
         case shelf
         case library
+        case starred
     }
 
     init(session: AppSession) {
@@ -73,7 +80,24 @@ final class MobileStarsModel {
 
     // MARK: - Pure brains (pinned)
 
-    static let sectionHeader = "★ starred"
+    /// **The page's name** (batch 10) — the tab door's word, the path
+    /// line's, and the word every refusal names when it points at the
+    /// list. One symbol, so a re-wording cannot leave a sentence pointing
+    /// at a surface that is called something else.
+    nonisolated static let pageName = "Starred"
+
+    /// The empty state. It names the ACT that fills the page, because a
+    /// page that says only "nothing here" is a dead end.
+    nonisolated static let emptyLine =
+        "Nothing starred yet — press and hold a note or a book, then choose Star."
+
+    /// A starred row's spoken label: the name and what KIND of thing it is
+    /// (an explicit label replaces the one SwiftUI would compose from the
+    /// row's children, so the kind must be said or it leaves the tree —
+    /// the Library book row's own measured lesson).
+    nonisolated static func spokenRow(name: String, kind: StarTarget.Kind) -> String {
+        "\(name), \(kind == .reading ? "book" : "note")"
+    }
 
     /// What a root renders: its own door's refusal, or a homeless
     /// (store-read) error anywhere.
@@ -90,9 +114,17 @@ final class MobileStarsModel {
     /// The cap's refusal in PHONE words: the road it names is the
     /// phone's own starred list (the Mac copy names the sidebar, which
     /// does not exist here).
+    ///
+    /// **RE-POINTED AT BATCH 10, and it is a bug-class fix rather than a
+    /// re-wording.** It said *"in the starred list at the top of the
+    /// shelf"* — and this batch retired that list from the shelf at her
+    /// instruction (*"I don't like where it appears above the shelf"*), so
+    /// the sentence would have sent her to a place that no longer exists.
+    /// The name now comes from `pageName`, the one symbol the tab door and
+    /// the path line also read, so a re-wording can never strand it again.
     nonisolated static func capRefusal(limit: Int) -> String {
-        "You can star \(limit) things at a time — un-star one in the starred "
-            + "list at the top of the shelf, and this can take its place."
+        "You can star \(limit) things at a time — un-star one in \(pageName), "
+            + "and this can take its place."
     }
 
     /// Where a starred row navigates — the phone's route vocabulary.

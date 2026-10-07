@@ -500,7 +500,8 @@ struct MobileCrossBlockEditTests {
     /// its sources to lineage (AppSpec §9's W resolution), so the pre-edit
     /// text was never destroyed — and one undo puts the paragraphs back
     /// where they were. The Mac's own compound label rides the shared brain,
-    /// so a future undo door on this phone reads the same words.
+    /// so this phone's undo door reads the same words (M20, batch 4 — the
+    /// door was still "future" when this was written; 4.5c-phone item 5).
     ///
     /// RED ON OLD: pre-batch nothing landed, so there was no entry at all.
     @Test func theWholeActIsOneUndoEntryAndTheParagraphsComeBack() async throws {
@@ -723,7 +724,15 @@ struct MobileCrossBlockEditTests {
         for line in lines {
             #expect(!line.contains("Mac"))
             #expect(!line.contains("bufferChanged"), "never the raw enum")
-            #expect(!line.contains("\u{2325}\u{2318}Z"), "there is no undo door on this phone yet")
+            // The phone HAS an undo door (M20, batch 4 — `MobileUndoDoor`,
+            // rendered with its label in the masthead and the ⋯ sheet). What
+            // it has no culture of is CHORDS, so copy naming ⌥⌘Z would point
+            // her at a Mac keystroke this surface cannot receive — the
+            // no-redirect principle, which is what this assertion is for.
+            // *(4.5c-phone item 5: the old reason — "there is no undo door on
+            // this phone yet" — has been false since batch 4. The assertion
+            // was right and its reason had gone stale under it.)*
+            #expect(!line.contains("\u{2325}\u{2318}Z"), "the phone has no chord to name")
         }
         #expect(lines[0].contains("nothing was changed"),
                 "a rolled-back gesture must not read as a half-done one")

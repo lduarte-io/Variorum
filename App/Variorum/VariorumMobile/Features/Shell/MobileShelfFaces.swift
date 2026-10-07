@@ -87,6 +87,21 @@ nonisolated enum MobileShelfFaces {
         return parts.joined(separator: " · ")
     }
 
+    /// **What a book ROW says aloud** — its name-with-state AND its meta line,
+    /// PLAIN (the standing rule: VoiceOver reads words, not chrome styling, so
+    /// a label is never voice-cased).
+    ///
+    /// It exists because an explicit `accessibilityLabel` on a row REPLACES the
+    /// composed one SwiftUI would have built from the row's children — measured
+    /// at the filter batch: labelling the Library's book rows with the name
+    /// alone dropped the count and tags out of the accessibility tree
+    /// entirely, while the Shelf's own rows (which set no label) still spoke
+    /// both. One rule, so the two listings cannot come to say different things
+    /// about the same book.
+    static func spokenRow(name: String, meta: String) -> String {
+        meta.isEmpty ? name : "\(name), \(meta)"
+    }
+
     /// The pin door's word, state-mirroring (parity C2 — the Mac shelf
     /// menu's own words; voice-cased at render). Pure so the door's
     /// vocabulary is pinned, not promised.
