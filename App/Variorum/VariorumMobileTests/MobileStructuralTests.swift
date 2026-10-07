@@ -1121,7 +1121,7 @@ struct MobileNoRedirectSweepTests {
         // multiline body. THIS EXEMPTION RETIRES when VM-8 builds the
         // phone's restore door and the copy generalizes.
         let exemptPrefixes: [(file: String, prefix: String)] = [
-            (file: "SampleLibraryJekyllBook.swift", prefix: "\n        \\u{201C}The Strange Case of Dr Jekyll"),
+            (file: "SampleLibraryJekyllBook.swift", prefix: "\n        \u{201C}The Strange Case of Dr Jekyll"),
         ]
         var walked = 0
         var offenders: [String] = []
