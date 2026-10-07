@@ -904,8 +904,33 @@ sibling's model). A book/chapter-name hit has nothing to land on and is not list
 own name is the masthead). **PROVISIONAL either way:** the field is session-local (not
 remembered per book).
 
-**LIVE STATUS (2026-10-07): P0 DONE; P1's two proposals written (this commit) — AWAITING THE
-ARCHITECT'S RULINGS; building the un-gated pieces (P2 onward) meanwhile.**
+#### §U3 RULINGS (the architect, 2026-10-07 — verbatim, BINDING; P6/P7 build to these)
+
+> **PROPOSAL 1 — RULED: B, the join.** The measurement is decisive (A's per-keystroke assembly
+> scan is P1's banned shape — ×5.8 across ×5 corpus; B stays ∝ matches), and the architecture is
+> the real reason: the gathering's membership WHERE factored into ONE function that BOTH
+> assembleReading and the composer read is the one-pure-authority doctrine applied — the two can
+> never drift, exactly the editedOnSQL precedent. Your stated consequences are all consistent with
+> ruled law and are ACCEPTED AS STATED: hide-owned composes as the gathering's own pages show;
+> archived (13i-e) / no-rule (R-13ic-4) / malformed gatherings answer EMPTY; the archived facet
+> adds nothing inside a gathering. Pin the one-function sharing (a drift test: the composer's arm
+> and assembleReading's arm are the same function reference, or EXPLAIN-equal).
+>
+> **PROPOSAL 2 — RULED: F1, the answer sheet's small sibling in place of the book's content while
+> the field holds words.** Reasons: one search idiom in the whole app (the sheet SHE picked, at its
+> second home), Esc/clear/glyph restoring the mode untouched, and landing identical to the
+> Library's (the mockup's shared-everywhere section is binding — Write at the block, find seeded).
+> F2 would mint a second search face; F3 breaks the one-landing rule. The component moves to
+> Core/Views are CORRECT per CLAUDE.md's shared-home rule (a view consumed by two features moves at
+> the next touch) — keep the moves parity-shaped (names preserved, zero test edits where possible,
+> the 3C pattern). The RootView closure is the right composition road. Proceed P6/P7.
+> — the architect
+
+(Machinery note: the commit `152e6fcb` flipped the gated rows but its record edit missed — this
+commit lands the rulings' text. No history rewritten.)
+
+**LIVE STATUS (2026-10-07): P0 + P1 DONE; both proposals RULED (above — B and F1); P2 (the
+tag-association join) in progress; P6/P7 now un-gated.**
 
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
