@@ -409,6 +409,95 @@ struct MobileWriteScrollTraceProbe {
         }
     }
 
+    @Test func traceTapToContinue() async throws {
+        ScrollInitiators.install()
+        SoftwareKeyboard.force()
+        for (paragraphs, selectFirst) in [(8, true), (8, false), (5, true)] {
+            try await withEditorWorld { session, _ in
+                let postID = try await seedTraceNote(session, paragraphs: paragraphs)
+                let model = MobileEditorViewModel(session: session, postID: postID)
+                let host = TraceHost(MobileWriteScreen(
+                    session: session, postID: postID, beginEditing: false, editor: model))
+                defer { host.tearDown() }
+                let label = "tap p=\(paragraphs) selectFirst=\(selectFirst)"
+                for _ in 0..<200 {
+                    if let tv = model.textView, tv.textStorage.length > 0 { break }
+                    await host.settle(1)
+                }
+                let tv = try #require(model.textView)
+                await host.settle(30)
+                traceSnapshot(tv, label, "opened")
+                saveTraceImage(host.window, "tap-opened-p\(paragraphs)")
+                ScrollInitiators.log = []
+                if selectFirst {
+                    tv.selectedRange = NSRange(location: tv.textStorage.length, length: 0)
+                    _ = tv.becomeFirstResponder()
+                } else {
+                    _ = tv.becomeFirstResponder()
+                    tv.selectedRange = NSRange(location: tv.textStorage.length, length: 0)
+                }
+                for step in 1...4 {
+                    await host.settle(25)
+                    traceSnapshot(tv, label, "tapped +\(Double(step) * 0.5)s")
+                }
+                saveTraceImage(host.window, "tap-settled-p\(paragraphs)-\(selectFirst)")
+                ScrollInitiators.dump(label + " tap")
+            }
+        }
+    }
+
+    @Test func traceGeometryWhileScrolledAway() async throws {
+        ScrollInitiators.install()
+        SoftwareKeyboard.force()
+        try await withEditorWorld { session, _ in
+            let postID = try await seedTraceNote(session, paragraphs: 30)
+            let model = MobileEditorViewModel(session: session, postID: postID)
+            let host = TraceHost(MobileWriteScreen(
+                session: session, postID: postID, beginEditing: true, editor: model))
+            defer { host.tearDown() }
+            let label = "geom"
+            for _ in 0..<200 {
+                if let tv = model.textView, tv.textStorage.length > 0 { break }
+                await host.settle(1)
+            }
+            let tv = try #require(model.textView)
+            await host.settle(40)
+            tv.selectedRange = NSRange(location: tv.textStorage.length, length: 0)
+            await host.settle(30)
+            tv.insertText("\n")
+            await host.settle(30)
+            traceSnapshot(tv, label, "after ⏎")
+            tv.setContentOffset(CGPoint(x: 0, y: tv.contentOffset.y - 500), animated: false)
+            await host.settle(10)
+            traceSnapshot(tv, label, "scrolled up 500")
+            ScrollInitiators.log = []
+            // The interactive keyboard engaging: the guide (and so the text
+            // view) changes height and springs back.
+            let surface = tv.superview!
+            let original = surface.frame
+            surface.frame.size.height = original.height - 120
+            surface.layoutIfNeeded()
+            await host.settle(15)
+            traceSnapshot(tv, label, "shrunk 120")
+            surface.frame = original
+            surface.layoutIfNeeded()
+            await host.settle(30)
+            traceSnapshot(tv, label, "restored")
+            ScrollInitiators.dump(label + " geometry")
+            // Keyboard down and up again.
+            ScrollInitiators.log = []
+            tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - 200)), animated: false)
+            traceSnapshot(tv, label, "scrolled up again")
+            _ = tv.resignFirstResponder()
+            await host.settle(30)
+            traceSnapshot(tv, label, "keyboard down")
+            _ = tv.becomeFirstResponder()
+            await host.settle(40)
+            traceSnapshot(tv, label, "keyboard up again")
+            ScrollInitiators.dump(label + " keyboard round trip")
+        }
+    }
+
     @Test func traceReturnKey() async throws {
         ScrollInitiators.install()
         for (where_, focus) in [("midbottom", true), ("end", true), ("endnofocus", false)] {

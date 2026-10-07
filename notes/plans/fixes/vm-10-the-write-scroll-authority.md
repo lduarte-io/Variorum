@@ -101,4 +101,29 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
   - **Arm 1 (arrival) — TRACING.** Every arrival measured lands at offset 0, caret {0,0}, first visible char 1:
     bare screen (focus off/on), the real shell road (Library → row push), and keyboard-up (30- and 3-paragraph
     notes). So "nothing remembered → top" is ALREADY true on the pre-fix tree (its pin will be green-on-old).
+  - **More arm-3 tracing.** (i) A geometry change alone (the surface ±120 pt) re-reveals nothing (0 initiators).
+    (ii) **The fight, found:** with the keyboard up, the caret on the empty line after ⏎ and the page scrolled
+    back up 500 pt, a keyboard DOWN/UP round trip (what `.interactive` dismissal does when her drag engages the
+    keyboard and it springs back) re-runs `-[UITextView _scrollToSelectionIfNeeded]` from `-[UITextView
+    _layoutText]` ← `layoutSubviews` ← `-[UIWindow layoutViewsForTrackedGuides]` inside `-[UIInputWindowController
+    moveFromPlacement:toPlacement:…]`, with the room-padded rect **(15, 2434.9, 372, 711.4)**: offsetY **1643.3 →
+    2435.0**, first/last visible **2680/2691** — thrown back onto the room. (iii) Tap-to-continue (open without
+    focus, caret to the end, keyboard rises) reveals MINIMALLY (8 paragraphs: 0 → 305.0, caret at the viewport's
+    foot) — correct; and typing a character after scrolling the caret away also reveals minimally (the room
+    padding attaches ONLY to the empty extra line fragment after a trailing newline — exactly the ⏎ state).
+  - **PINS — `VariorumMobileTests/MobileWriteScrollAuthorityTests` (7 tests), RED-ON-OLD RUN on the pre-fix tree**
+    (production code untouched; `-collect-test-diagnostics never` — a failing run otherwise hangs xcodebuild 600 s
+    collecting simulator diagnostics, a machinery fact):
+    - `aReturnAtTheEndRevealsTheNewLineMinimallyAndKeepsTheText` — **RED**: offsetY 1689.7 → **2439.3**, first
+      visible char **2691** = the new empty line (2 issues).
+    - `aReturnAtTheEndOfAShortNoteKeepsTheWholeNoteOnScreen` — **RED**: offsetY 0 → **254.0**, first visible **267**
+      — the whole 3-paragraph note gone (2 issues).
+    - `aNoteLeftMidwayReopensWhereSheLeftIt` — **RED**: left at first visible char 970, re-entry at offsetY **0**
+      / char 1 (1 issue).
+    - GREEN ON OLD (guards, not pins — recorded so nobody counts them as red-on-old):
+      `aReturnMidDocumentStillRevealsTheCaretMinimally`, `aNoteNeverVisitedOpensAtTheTop` (arm 1's "nothing
+      remembered → top" — already true), `aRelayoutAfterHerScrollUpNeverForcesTheRoom` (the focus round trip in
+      HARDWARE-keyboard mode does not reach the placement animation — the fight's real trigger needs the software
+      keyboard, which the committed pins deliberately never force process-wide), and
+      `typingAfterScrollingTheCaretAwayRevealsItMinimally` (old: 587.3 → 1717.7, caret at the foot — minimal).
   - Walk captures — NOT-STARTED. Final suites — PENDING.
