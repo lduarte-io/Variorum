@@ -729,7 +729,7 @@ STATUS first) from your first commit; commit per piece; push every commit; work 
 | 6 | The two doors + welcome/waiting/absent-store slots | IN-PROGRESS — the listing brain landed this commit (`BackupRestoreCandidates`, pins 3/3 headless); the Shared model, the faces and the custody write remain |
 | 7 | The restore-hold landing state, both doors | IN-PROGRESS — the CORE flag landed this commit (`LibraryRestoreHold`, pins 4/4 headless); the SyncSession gate, the banner + Resume and the door wire remain |
 | 9 | The iCloud-Drive live-library guard | IN-PROGRESS — the CORE rules landed this commit (`LibraryPlacementGuard`, pins 2/2 headless); the picker refusal + the door's line remain |
-| 8 | The Resume reconciliation (pre-merge-safe half) | NOT STARTED — settled design below |
+| 8 | The Resume reconciliation (pre-merge-safe half) | IN-PROGRESS — the CORE halves landed this commit (`LocalMachineryRecreation` 3/3 + the `LibraryAdoption` plaintext arm, pins green); the door's plaintext road + Resume's composition remain |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
 claimed by this session (the 13o scheduler owns it tonight) — every Mac-suite run stops at its
@@ -837,6 +837,19 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   listed with nil credentials (said, never hidden); the SECOND LOOK lighting on the live
   key's pair by envelope fingerprint (fp8-less legacy names included) and never without a
   live key in hand.
+- **Row 8 core — `LocalMachineryRecreationTests`, 3/3 green** (headless, over the PRODUCTION
+  export): the RED-ON-OLD is live inside the pin — a synced-table write against the
+  un-recreated export REFUSES WHOLE (the copied outbox trigger names the dropped table;
+  ledger 22's recorded consequence demonstrated), the SAME write lands after recreation WITH
+  its outbox row; §14.13's state verified (empty outbox · no cursor · no seqs before the
+  write); the restated DDL pinned STRUCTURALLY equal to a freshly migrated store's
+  (`PRAGMA table_info` per table — drift fails the suite) and the DDL map pinned to cover
+  `SyncSchema.localOnlyTables` exactly (a future registry table without a restated CREATE
+  fails loudly).
+- **Row 8 core — the `LibraryAdoption` plaintext arm** (`LibraryAdoptionTests` now 6/6): a
+  nil-key-file plan lands the export byte-identical with NO key file beside it (the fresh
+  mint is the door's next step), the old family still steps aside whole, the source
+  untouched; the U1 pins all green unchanged around the optional (`landedKeyFile: URL?`).
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 

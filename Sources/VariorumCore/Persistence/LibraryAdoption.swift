@@ -42,15 +42,19 @@ public enum LibraryAdoption {
         public var storeURL: URL
         /// The picked copy — read, never written.
         public var sourceStore: URL
-        /// The key file that serves it (the classifier's verdict carries it).
-        public var sourceKeyFile: URL
+        /// The key file that serves it (the classifier's verdict carries
+        /// it). nil = the PLAINTEXT road (13x U2 row 8 — ledger 5's
+        /// "plaintext → fresh key + identity": no pair travels; the door
+        /// mints a fresh key and establishes identity AFTER the landing).
+        public var sourceKeyFile: URL?
         /// Step 3's home: `Backups/safety-copies/variorum-adopt-safety-<stamp>/`.
         public var safetyCopyFolder: URL
         /// Step 4's home: `Previous Libraries/<stamp>/`.
         public var asideFolder: URL
-        /// Step 5's landings.
+        /// Step 5's landings (`landedKeyFile` nil on the plaintext road —
+        /// nothing travels to land).
         public var landedStore: URL
-        public var landedKeyFile: URL
+        public var landedKeyFile: URL?
     }
 
     /// What one executed adoption did.
@@ -81,20 +85,26 @@ public enum LibraryAdoption {
     }
 
     /// The pure half: every URL, from the inputs and the clock alone.
+    /// `sourceKeyFile` nil = the plaintext road (no pair travels; the
+    /// caller mints a fresh key + identity after the landing).
     public static func plan(
-        adopting sourceStore: URL, keyFile sourceKeyFile: URL,
+        adopting sourceStore: URL, keyFile sourceKeyFile: URL?,
         intoStoreAt storeURL: URL, now: Date
     ) -> Plan {
         let folder = storeURL.deletingLastPathComponent()
         let stamp = stampFormatter.string(from: now)
-        let landedKeyFile: URL
-        if let envelope = try? StoreKeyEnvelope.load(at: sourceKeyFile) {
-            landedKeyFile = envelope.preferredURL(besideStore: storeURL)
+        let landedKeyFile: URL?
+        if let sourceKeyFile {
+            if let envelope = try? StoreKeyEnvelope.load(at: sourceKeyFile) {
+                landedKeyFile = envelope.preferredURL(besideStore: storeURL)
+            } else {
+                // The execute step refuses an unreadable key file before
+                // anything moves; this fallback only keeps `plan` total.
+                landedKeyFile = folder.appendingPathComponent(
+                    sourceKeyFile.lastPathComponent, isDirectory: false)
+            }
         } else {
-            // The execute step refuses an unreadable key file before
-            // anything moves; this fallback only keeps `plan` total.
-            landedKeyFile = folder.appendingPathComponent(
-                sourceKeyFile.lastPathComponent, isDirectory: false)
+            landedKeyFile = nil
         }
         return Plan(
             storeURL: storeURL,
@@ -118,23 +128,26 @@ public enum LibraryAdoption {
         let fm = FileManager.default
 
         // 1. The source pair, verified readable — before anything changes.
+        //    (The plaintext road has no pair: the store alone travels.)
         guard fm.fileExists(atPath: plan.sourceStore.path) else {
             throw AdoptionError.sourceMissing(plan.sourceStore.path)
         }
-        guard fm.fileExists(atPath: plan.sourceKeyFile.path) else {
-            throw AdoptionError.sourceKeyFileMissing(plan.sourceKeyFile.path)
-        }
-        let sourceKeyFileBytes: Data
-        do {
-            let loaded = try StoreKeyEnvelope.load(at: plan.sourceKeyFile)
-            guard loaded != nil else {
-                throw AdoptionError.sourceKeyFileMissing(plan.sourceKeyFile.path)
+        var sourceKeyFileBytes: Data?
+        if let sourceKeyFile = plan.sourceKeyFile {
+            guard fm.fileExists(atPath: sourceKeyFile.path) else {
+                throw AdoptionError.sourceKeyFileMissing(sourceKeyFile.path)
             }
-            sourceKeyFileBytes = try Data(contentsOf: plan.sourceKeyFile)
-        } catch let error as AdoptionError {
-            throw error
-        } catch {
-            throw AdoptionError.sourceKeyFileUnreadable(String(describing: error))
+            do {
+                let loaded = try StoreKeyEnvelope.load(at: sourceKeyFile)
+                guard loaded != nil else {
+                    throw AdoptionError.sourceKeyFileMissing(sourceKeyFile.path)
+                }
+                sourceKeyFileBytes = try Data(contentsOf: sourceKeyFile)
+            } catch let error as AdoptionError {
+                throw error
+            } catch {
+                throw AdoptionError.sourceKeyFileUnreadable(String(describing: error))
+            }
         }
 
         // 2. The live store must look closed.
@@ -195,7 +208,9 @@ public enum LibraryAdoption {
             try fm.createDirectory(
                 at: plan.landedStore.deletingLastPathComponent(), withIntermediateDirectories: true)
             try fm.copyItem(at: plan.sourceStore, to: plan.landedStore)
-            try sourceKeyFileBytes.write(to: plan.landedKeyFile, options: .atomic)
+            if let sourceKeyFileBytes, let landedKeyFile = plan.landedKeyFile {
+                try sourceKeyFileBytes.write(to: landedKeyFile, options: .atomic)
+            }
         } catch {
             throw AdoptionError.landingFailed(String(describing: error))
         }

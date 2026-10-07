@@ -93,13 +93,14 @@ struct LibraryAdoptionTests {
         // The copy LANDED: byte-identical store, the key file under its
         // canonical name, served by `locate`, read by the classifier.
         #expect(try Data(contentsOf: storeURL) == sourceStoreBytes)
-        #expect(plan.landedKeyFile.lastPathComponent
+        let landedKeyFile = try #require(plan.landedKeyFile)
+        #expect(landedKeyFile.lastPathComponent
             == StoreKeyEnvelope.filename(
                 forFingerprint: StoreKeyEnvelope.fingerprint(of: sourceKey)))
         #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.resolvingSymlinksInPath()
-            == plan.landedKeyFile.resolvingSymlinksInPath())
+            == landedKeyFile.resolvingSymlinksInPath())
         #expect(LibraryClassifier.classify(at: storeURL)
-            == .encryptedLibrary(store: storeURL, keyFile: plan.landedKeyFile))
+            == .encryptedLibrary(store: storeURL, keyFile: landedKeyFile))
         let reopenedNew = try AppDatabase.onDisk(url: storeURL, key: sourceKey)
         let newTitle = try reopenedNew.read {
             try String.fetchOne($0, sql: "SELECT title FROM container WHERE id = 'the-arriving-copy'")
@@ -129,11 +130,49 @@ struct LibraryAdoptionTests {
             adopting: sourceStore, keyFile: pairNamed,
             intoStoreAt: storeURL, now: Date(timeIntervalSince1970: 1_800_000_000))
         try LibraryAdoption.execute(plan)
-        #expect(plan.landedKeyFile.lastPathComponent
+        let landedKeyFile = try #require(plan.landedKeyFile)
+        #expect(landedKeyFile.lastPathComponent
             == StoreKeyEnvelope.filename(forFingerprint: StoreKeyEnvelope.fingerprint(of: key)))
-        #expect(FileManager.default.fileExists(atPath: plan.landedKeyFile.path))
+        #expect(FileManager.default.fileExists(atPath: landedKeyFile.path))
         #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.resolvingSymlinksInPath()
-            == plan.landedKeyFile.resolvingSymlinksInPath())
+            == landedKeyFile.resolvingSymlinksInPath())
+    }
+
+    /// 13x U2 row 8 — THE PLAINTEXT ROAD (ledger 5's "plaintext → fresh
+    /// key + identity"): no pair travels; the landing is the store alone,
+    /// the old family still steps aside whole, and NO key file lands (the
+    /// door mints a fresh key + identity after this).
+    @Test func aPlaintextAdoptionLandsTheStoreAloneAndStillStepsTheOldFamilyAside() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
+        _ = try makeLibrary(at: storeURL, passphrase: "old word", marker: "the-old-library")
+        let oldKeyFile = try #require(StoreKeyEnvelope.locate(besideStore: storeURL))
+        // The arriving plaintext copy — a real production export.
+        let exportSource = dir.appendingPathComponent("arrival/variorum.sqlite")
+        let plain = dir.appendingPathComponent("arrival/Variorum-unencrypted.sqlite")
+        do {
+            let key = StoreKey.mint()
+            let database = try AppDatabase.openStore(at: exportSource, custody: .inMemory(initial: key))
+            try StorePlaintextExport.export(from: database, to: plain)
+            _ = database.asRebindable().binding.lock()
+        }
+        let plainBytes = try Data(contentsOf: plain)
+
+        let plan = LibraryAdoption.plan(
+            adopting: plain, keyFile: nil,
+            intoStoreAt: storeURL, now: Date(timeIntervalSince1970: 1_800_000_000))
+        #expect(plan.landedKeyFile == nil)
+        let receipt = try LibraryAdoption.execute(plan)
+        // The old family aside whole (store + its key file).
+        #expect(receipt.movedAside.map(\.lastPathComponent).sorted()
+            == ["variorum.sqlite", oldKeyFile.lastPathComponent].sorted())
+        // The landed store is the export, byte-identical; NO key file
+        // beside it (the fresh mint is the door's next step).
+        #expect(try Data(contentsOf: storeURL) == plainBytes)
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL) == nil)
+        // The source untouched.
+        #expect(try Data(contentsOf: plain) == plainBytes)
     }
 
     /// No standing library (the library-missing state): nothing steps
