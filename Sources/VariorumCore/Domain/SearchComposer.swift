@@ -450,6 +450,42 @@ public enum SearchComposer {
         return Statement(sql: sql, arguments: arguments)
     }
 
+    /// **The worn notes' TRUE group facts** (ladder round 1, MINOR-1): for
+    /// the notes a worn day names that did not rank onto the group page,
+    /// what their groups would have said — `(g_home, g_best, g_hits,
+    /// g_lines)` — in ONE counts-style statement over the SAME hits builder
+    /// (the dispositions' adopted shape: never per-note queries). The lead
+    /// groups then carry a real "all N ›" road instead of a fabricated
+    /// 1/0 stub (R-13o-9), and the page's keyset cursor stays untouched.
+    /// nil when the text half cannot match anything (a worn-only question —
+    /// the 1-hit head is then honest). Cost: one walk of the matches
+    /// restricted to the named homes (∝ the matches, the hits' own class).
+    public static func wornGroupFacts(
+        _ query: SearchQuery, scope: SearchScope, homeIDsJSON: String,
+        environment: Environment
+    ) throws -> Statement? {
+        guard let hits = try hits(
+            query, scope: scope, visibility: query.visibility,
+            extra: ["d.reading_id IS NULL", "c.id IN (SELECT value FROM json_each(?))"],
+            environment: environment)
+        else { return nil }
+        // MATERIALIZED (the counts statement's own precedent): flattened
+        // into the aggregate, bm25() would leave its FTS query context and
+        // SQLite refuses it ("unable to use function bm25").
+        let sql = """
+            WITH hits AS MATERIALIZED (\(hits.sql)),
+            scored AS (
+              SELECT h.*, \(scoreSQL) AS score
+              FROM hits h
+            )
+            SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
+                   SUM(s.kind <> 'title') AS g_lines
+            FROM scored s
+            GROUP BY s.home_id
+            """
+        return Statement(sql: sql, arguments: hits.arguments + [.text(homeIDsJSON)])
+    }
+
     // MARK: - The counts (13o U2 — the band's honest per-kind numbers)
 
     /// **What the whole question finds, per kind** — counted over the SAME

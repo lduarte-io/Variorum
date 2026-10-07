@@ -231,8 +231,28 @@ extension Queries {
         // The worn day leads the first page; a worn note that also has hits
         // keeps ONE group, in the lead.
         let wornIDs = worn.compactMap(\.noteID)
+        // Ladder round 1, MINOR-1: a worn note whose group ranks BEYOND this
+        // page would otherwise lead as a fabricated 1/0 stub — no lines, no
+        // "all N ›" road, and the model's dedupe later drops its ranked
+        // group (R-13o-9's road lost). ONE counts-style statement over
+        // exactly the missing worn ids reads the TRUE facts; the next-page
+        // cursor above stays sourced from `built` alone, and the dedupe
+        // stays (the lead group now IS the road).
+        var wornFacts: [String: (best: Double, hits: Int, lines: Int)] = [:]
+        let missing = wornIDs.filter { id in !built.contains { $0.homeID == id } }
+        if !missing.isEmpty,
+           let statement = try SearchComposer.wornGroupFacts(
+               query, scope: scope,
+               homeIDsJSON: String(decoding: try JSONEncoder().encode(missing), as: UTF8.self),
+               environment: environment) {
+            for row in try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments)) {
+                wornFacts[row["g_home"]] = (row["g_best"], row["g_hits"], row["g_lines"])
+            }
+        }
         var ordered = wornIDs.map { id in
-            built.first { $0.homeID == id } ?? (homeID: id, best: nil, hits: 1, lines: 0, rows: [])
+            built.first { $0.homeID == id }
+                ?? wornFacts[id].map { (homeID: id, best: Optional($0.best), hits: $0.hits, lines: $0.lines, rows: []) }
+                ?? (homeID: id, best: nil, hits: 1, lines: 0, rows: [])
         }
         ordered += built.filter { !wornIDs.contains($0.homeID) }
 

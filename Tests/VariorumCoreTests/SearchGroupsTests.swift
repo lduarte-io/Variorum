@@ -215,6 +215,44 @@ struct SearchGroupsTests {
         }
     }
 
+    /// Ladder round 1, MINOR-1 (red-on-old, verified by revert): a worn note
+    /// whose BODY hits rank beyond the page still leads with its TRUE group
+    /// facts — hit and line counts read in ONE counts-style statement over
+    /// the missing worn ids (`SearchComposer.wornGroupFacts`) — so the lead
+    /// group carries a real "all N ›" road instead of the fabricated 1/0
+    /// stub (R-13o-9: no listing without a road; the model's page dedupe
+    /// would otherwise drop the ranked group and its lines with it). The
+    /// next-page cursor stays sourced from the page's own groups, and a
+    /// worn-ONLY note keeps its honest 1-hit head.
+    @Test func aWornNoteRankedBeyondThePageLeadsWithItsTrueCounts() throws {
+        try withOperations { ops, db in
+            let titled = try ops.createPost(title: "September 14 Logbook")
+            _ = try ops.newBlock(in: titled.id, text: "september 14 september 14 all day")
+            let worn = try ops.createPost(entryDate: "2026-09-14")
+            _ = try ops.newBlock(in: worn.id, text: "we met on september 14")
+            _ = try ops.newBlock(in: worn.id, text: "september 14 again, later")
+
+            let page = try groups(db, "september 14", limit: 1)
+            #expect(page.groups.map(\.homeID) == [worn.id, titled.id],
+                    "the worn note leads; the page's one ranked group follows")
+            let lead = try #require(page.groups.first)
+            #expect(lead.hitCount == 2 && lead.lineCount == 2,
+                    "TRUE facts over the worn ids — never a fabricated 1/0")
+            #expect(lead.titleMatched && lead.lines.isEmpty,
+                    "counts-style: the road's numbers, not preview lines")
+            #expect(lead.bestScore != nil, "its best hit's score rides too")
+            #expect(page.next?.homeID == titled.id,
+                    "the keyset cursor stays the page's own groups' — the lead never moves it")
+
+            // The worn-ONLY control: no body hits, the honest 1-hit head.
+            let bare = try ops.createPost(entryDate: "2026-09-15")
+            _ = try ops.newBlock(in: bare.id, text: "nothing matching here")
+            let barePage = try groups(db, "september 15", limit: 25)
+            let bareLead = try #require(barePage.groups.first { $0.homeID == bare.id })
+            #expect(bareLead.hitCount == 1 && bareLead.lineCount == 0 && bareLead.bestScore == nil)
+        }
+    }
+
     // MARK: - The Blocks scope's leaf
 
     @Test func theDocKindLeafNarrowsToOneKind() throws {
