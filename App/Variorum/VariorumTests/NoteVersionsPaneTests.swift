@@ -485,6 +485,62 @@ struct NoteVersionsPaneTests {
         }
     }
 
+    // MARK: - A refused flush refuses the moment (VM-5 whole-round pass, MINOR 4)
+
+    /// **THE SHARED ACTS CONSULT THE FLUSH — the Mac's face of it.** Bytes
+    /// pending on a take a remote lock froze (the coordinator keeps them; its
+    /// own flush can never land them): ⌘⇧S used to mint a moment WITHOUT
+    /// them and report the receipt, and Restore's save-of-now missed them
+    /// before taking their blocks. Both now refuse, in the standing
+    /// unsaved-changes words, and nothing is written. Headless on purpose —
+    /// the decision is `VersionActs`', one file both apps compile; the phone's
+    /// twin pins (`MobileVersionsTests`) drive it through a real editor.
+    ///
+    /// *Red on the pre-fix `VersionActs` / `AppSession` (reverted for the
+    /// run, recorded):* the save landed a receipt and one moment.
+    @Test func aRefusedFlushRefusesSaveAndRestoreOnTheMac() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the note")
+            let block = try session.operations.newBlock(in: post.id, text: "A block.")
+            // A surface's coordinator, holding typed bytes (no debounce clock —
+            // only an explicit flush moves them)…
+            let coordinator = session.autosave(
+                forPost: post.id, sleep: { _ in throw CancellationError() })
+            defer { session.releaseAutosave(forPost: post.id) }
+            coordinator.record(
+                variantID: block.variant.id, text: "A block. Pending.", charDelta: 9)
+            // …and a lock arriving underneath them.
+            try session.operations.lockVariant(block.variant.id)
+
+            let model = NoteVersionsModel(session: session, postID: post.id)
+            let standing = "Unsaved changes couldn't be written — resolve that first, then retry."
+
+            await model.save()
+            #expect(model.status?.isRefusal == true, "⌘⇧S reported a moment it never fully saved")
+            #expect(model.status?.text == standing)
+            #expect(try await db.read { try Queries.noteVersions($0, of: post.id) }.isEmpty,
+                    "a moment was minted missing the pending words")
+
+            // Restore's save-of-now: one real moment to restore, then the ask.
+            try session.operations.saveNoteVersion(post.id)
+            let moment = try #require(
+                try await db.read { try Queries.noteVersions($0, of: post.id) }.first)
+            await model.restore(moment)
+            #expect(model.status?.isRefusal == true, "the restore landed over pending words")
+            #expect(model.status?.text == standing)
+            #expect(try await db.read { try Queries.noteVersions($0, of: post.id) }.count == 1,
+                    "the restore saved a moment of now without the pending words")
+            #expect(coordinator.isDirty, "keep-pending holds — the text is not lost")
+        }
+    }
+
     // MARK: - Harness
 
     private func mounted(

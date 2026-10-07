@@ -317,7 +317,7 @@ MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
 |---|---|
 | MINOR 2 — the `.bookless` empty state | DONE (this commit) — red 3/3 → green; targeted 29/3 green |
 | MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | DONE (this commit) — phone red 5 issues → green 66/4; Mac red 2 issues → green 15/1 |
-| MINOR 4 — `VersionActs.save`/`restore` past a refused flush | NOT-STARTED — design: the flush reports whether the post's buffer landed; both acts refuse (a typed `VersionActs` refusal worded with the standing unsaved-changes sentence) when it did not |
+| MINOR 4 — `VersionActs.save`/`restore` past a refused flush | IN-PROGRESS — fix + pins committed WIP; phone pins RED on the pre-fix tree (5 issues, recorded below when the piece closes); NEXT: the Mac pin's red-on-old by reverting ONLY `Shared/VersionActs.swift` + `Shared/AppSession.swift` to `6f5d3539` (restore = `git checkout HEAD -- <those two>`), then green runs both platforms |
 | Final full mobile suite | PENDING |
 
 ### MINOR 2 — FIXED (red → green)

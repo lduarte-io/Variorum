@@ -625,6 +625,81 @@ struct MobileVersionsTests {
             }
         }
     }
+
+    // MARK: - A REFUSED FLUSH REFUSES THE MOMENT (VM-5 whole-round pass, MINOR 4)
+
+    /// A note with typed bytes pending on a take a remote lock froze — the
+    /// coordinator's keep-pending posture, the state its own flush can never
+    /// land. Built the way `lockNoteRefusesWhileAPendingFlushCannotLand`
+    /// builds it: a real editor model, a real gate-routed keystroke, then the
+    /// lock arriving underneath.
+    @MainActor
+    private func pendingOnALockedTake(
+        _ session: AppSession
+    ) async throws -> (postID: String, editor: MobileEditorViewModel) {
+        let seeded = try await session.runner.run { ops in
+            let post = try ops.createPost(title: "moment", profile: .blog)
+            let block = try ops.newBlock(
+                in: post.id, text: "Hello there.", at: .end, registeringUndo: false)
+            return (postID: post.id, variantID: block.variant.id)
+        }
+        let (editor, storage) = makeEditor(session, postID: seeded.postID)
+        await editor.loadOnce()
+        #expect(typeEdit(
+            editor, storage,
+            range: NSRange(location: ("Hello there." as NSString).length, length: 0),
+            replacement: " Pending."))
+        try await session.runner.run { ops in try ops.lockVariant(seeded.variantID) }
+        return (seeded.postID, editor)
+    }
+
+    /// **SAVE A VERSION REFUSES WHEN THE FLUSH COULD NOT LAND** — the shared
+    /// act's own header: *"a version saved while a keystroke is still pending
+    /// would be a moment missing the words that summoned it"*. The flush ran
+    /// but its outcome was never consulted, so the moment was minted WITHOUT
+    /// her pending bytes and the door said "Saved". It now refuses in the
+    /// sibling doors' standing words (`deleteNote` / `lockNote`), and no
+    /// moment is minted.
+    ///
+    /// *Red on the old tree:* the receipt was `VersionsPath.saved` and the
+    /// store held one moment lacking " Pending.".
+    @Test func aRefusedFlushRefusesTheSaveAndMintsNoMoment() async throws {
+        try await withEditorWorld { session, db in
+            let (postID, editor) = try await pendingOnALockedTake(session)
+
+            await editor.saveVersion()
+
+            #expect(editor.statusMessage == MobileEditorViewModel.unsavedChangesRefusal)
+            let moments = try await db.read { try Queries.noteVersions($0, of: postID) }
+            #expect(moments.isEmpty, "a moment was minted missing her pending words")
+            #expect(editor.autosave.isDirty, "keep-pending holds — the text is not lost")
+        }
+    }
+
+    /// **RESTORE'S SAVE-OF-NOW, the same hole with the worse consequence** —
+    /// the restore then takes the blocks those pending bytes belong to. It
+    /// refuses BEFORE anything moves: no moment of NOW is saved, nothing is
+    /// restored, the bytes stay pending on a live take.
+    ///
+    /// *Red on the old tree:* the restore landed (a receipt; a second moment
+    /// — the save-of-NOW, missing the pending bytes — beside the first).
+    @Test func aRefusedFlushRefusesTheRestoreAndNothingMoves() async throws {
+        try await withEditorWorld { session, db in
+            let (postID, editor) = try await pendingOnALockedTake(session)
+            try await saveAMoment(session, of: postID)
+            let model = MobileVersionsModel(session: session, postID: postID)
+            await model.load()
+            let item = try #require(model.versions.first)
+
+            await model.confirmRestore(item)
+
+            #expect(model.status?.isRefusal == true)
+            #expect(model.status?.text == MobileEditorViewModel.unsavedChangesRefusal)
+            let moments = try await db.read { try Queries.noteVersions($0, of: postID) }
+            #expect(moments.count == 1, "the restore saved a moment of NOW without her pending words")
+            #expect(editor.autosave.isDirty, "keep-pending holds — the text is not lost")
+        }
+    }
 }
 
 /// The longest run of consecutive words two sentences share, case- and

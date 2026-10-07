@@ -968,8 +968,12 @@ final class MobileEditorViewModel {
     /// missing her last seconds — the standing Mac defect, KnownIssues
     /// "Copy doors read the store past a dirty buffer"). It speaks its own
     /// refusal, so callers may simply `guard`.
-    static let unsavedChangesRefusal =
-        "Unsaved changes couldn't be written — resolve that first, then retry."
+    ///
+    /// *(A forward since the VM-5 whole-round pass, MINOR 4: the sentence's
+    /// one home is `OpsRefusalCopy.unsavedChanges`, because the shared
+    /// `VersionActs` speaks it too and a second phone-visible literal would
+    /// be this file's own drift class. The name stays so every pin rides.)*
+    static let unsavedChangesRefusal = OpsRefusalCopy.unsavedChanges
 
     @discardableResult
     func flushPendingText() async -> Bool {
