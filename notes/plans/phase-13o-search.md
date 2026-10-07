@@ -694,8 +694,8 @@ P-13o-U2-9 (continuation): choosing `on a day…` / `between days…` ARMS at on
 already armed) and opens the date field(s) in a popover — the shipped door's own convention (a
 date field opens on today), so the band's chip and the listing answer from the first click.
 
-**LIVE STATUS (2026-10-06, the continuation): P0–P4 committed; P5 (land-at-match: the find
-seed) next.**
+**LIVE STATUS (2026-10-06, the continuation): P0–P5 committed; P6 (⌘K passages + the road row)
+next.**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 

@@ -89,8 +89,9 @@ struct LibraryCatalogView: View {
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
     /// Stage C: block hits land caret-precise when the shell provides the
-    /// door (nil falls back to plain navigation).
-    var onOpenBlock: ((SidebarSelection, String) -> Void)? = nil
+    /// door (nil falls back to plain navigation). 13o U2 (D6): a search
+    /// passage's landing carries its find seed beside the block.
+    var onOpenBlock: ((SidebarSelection, String, EditorFindSeed?) -> Void)? = nil
     /// 13f batch 4 (W1/A25): the split's row door.
     var onOpenBeside: ((String) -> Void)? = nil
     /// 13f batch 5b (W2/A26): the note-only window's row door.
@@ -391,15 +392,19 @@ struct LibraryCatalogView: View {
             })
     }
 
-    /// **A passage was clicked** — its note (or scraps group) opens AT its
-    /// block through the shell's caret-precise landing road (Stage C); a
+    /// **A passage was clicked — LAND AT THE MATCH** (13o U2, D6 — her
+    /// land-at-match): its note (or scraps group) opens IN WRITE AT ITS
+    /// BLOCK through the shell's caret-precise landing road (Stage C), with
+    /// the passage's matched words as the find seed — the arriving editor
+    /// selects the match and arms the find bar, so ⌘G steps onward. A
     /// name-level hit with no block opens the note.
     private func openPassage(_ passage: SearchPassage) {
         guard let home = passage.noteID else { return }
         withAnimation(Self.panelAnimation) { model.closeInfo() }
         let selection: SidebarSelection = passage.family == .scraps ? .pool(home) : .post(home)
         if let block = passage.blockID, let onOpenBlock {
-            onOpenBlock(selection, block)
+            onOpenBlock(selection, block, LibrarySearchFace.findSeed(
+                kind: passage.kind, rendered: passage.isRenderedTake, snippet: passage.snippet))
         } else {
             onOpen(selection)
         }

@@ -572,7 +572,8 @@ struct RootView: View {
     /// rule (a split never shows one note twice) cannot be bypassed by
     /// adding a door, and is spoken in one voice wherever it fires.
     private func adopt(
-        _ destination: SidebarSelection, in pane: PaneID, landing blockID: String? = nil
+        _ destination: SidebarSelection, in pane: PaneID, landing blockID: String? = nil,
+        find: EditorFindSeed? = nil
     ) {
         // 17o c/d/e round 1 (MAJOR-2) + round 2 (MINOR-1): **a navigation
         // expires a parked block landing and installs the one it names — in
@@ -586,7 +587,7 @@ struct RootView: View {
         // no door can park without navigating. The shell keeps the outcome,
         // because saying the same-note refusal out loud is the shell's job,
         // not the router's (P-4).
-        switch router.adopt(destination, in: pane, landing: blockID) {
+        switch router.adopt(destination, in: pane, landing: blockID, find: find) {
         case .adopted:
             break
         case .focusedExistingPane:
@@ -855,7 +856,11 @@ struct RootView: View {
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,
                 onOpen: openHere,
-                onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
+                // 13o U2 (D6): a search passage lands at its block with its
+                // find seed — the same caret-precise road, one more value.
+                onOpenBlock: { picked, blockID, find in
+                    open(picked, blockID: blockID, find: find, in: pane)
+                },
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
                 // The correction round, batch E (row 33): the panel's book
@@ -894,6 +899,7 @@ struct RootView: View {
                 PostDetailView(
                     session: session, postID: postID,
                     initialBlockID: target(for: postID),
+                    initialFind: router.landingFind(for: postID),
                     recentBookIDs: router.workspace.recentBookIDs)
                     // **The park is spent when it lands.** A re-mount is not
                     // a navigation — the shell re-creates this view whenever
@@ -948,7 +954,8 @@ struct RootView: View {
                 // second face (Phase 11, A7).
                 PoolDetailView(
                     session: session, poolID: poolID,
-                    initialBlockID: target(for: poolID))
+                    initialBlockID: target(for: poolID),
+                    initialFind: router.landingFind(for: poolID))
                     .onAppear { router.spendLanding(for: poolID) }
                     .id("\(poolID)#\(router.landingGeneration(for: poolID))")
             } else {
@@ -1028,11 +1035,13 @@ struct RootView: View {
         adopt(.reading(bookID), in: pane)
     }
 
-    /// Navigation with an optional caret-precise block landing (Stage C).
+    /// Navigation with an optional caret-precise block landing (Stage C) —
+    /// and, for a search passage, its find seed (13o U2, D6).
     private func open(
-        _ picked: SidebarSelection, blockID: String?, in pane: PaneID? = nil
+        _ picked: SidebarSelection, blockID: String?, find: EditorFindSeed? = nil,
+        in pane: PaneID? = nil
     ) {
-        adopt(picked, in: pane ?? router.workspace.focusedPane, landing: blockID)
+        adopt(picked, in: pane ?? router.workspace.focusedPane, landing: blockID, find: find)
     }
 
 #if DEBUG
