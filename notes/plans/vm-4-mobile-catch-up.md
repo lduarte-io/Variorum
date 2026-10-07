@@ -10,6 +10,38 @@ does plus the plan. The kickoff text is not repeated here — read it on main.)*
 
 ---
 
+## HER RULINGS AT THE PLAN'S DELIVERY (2026-10-06 evening — verbatim-faithful; these govern)
+
+1. **The branch shape is RATIFIED (b):** *"go ahead and do the final mobile -> main merge and
+   retire the long lived branch and verify that everything is still working."* VM-5 is GO.
+2. **THE CAST:** *"Fable will orchestrate but use Opus 5.5 for implementation - Fable cold review
+   where you want / need."* — Fable orchestrates (and resolves the merge as integration work, the
+   merging-session rule; stated to her in the report, redirectable); Opus 5.5 implements build
+   units and fix waves; Fable cold reviews at the orchestrator's judgment (the resolution diff,
+   the stability pass and the whole-round pass all get one — the seam is in them).
+3. **Pull-forwards: ONLY VM-10 post-merge** — *"let's only do VM-10 post merge - not sure what
+   that one even is."* VM-2 and VM-3 stay in Backlog for a later run.
+4. **VM-10 WIDENS — her new report, the bug that "most drives me insane … a constant issue":**
+   *"when i make a new line, it scrolls so i only see empty page and it fights me when I try to
+   scroll back up. showing empty space should be allowed if you scroll there but it shouldn't be
+   forced. not sure if that bug is fixed on mobile but I don't think it is - the whitespace at the
+   end issue was a problem that the core work was going to fix and did in fact fix."*
+   So VM-10 is the phone Write page's whole SCROLL AUTHORITY, three arms: (a) the ARRIVAL shows
+   none of the text (PL-22's ruled shape — reveal minimally, per-note session memory, the room
+   stays); (b) a NEW LINE forces a scroll onto the empty room; (c) the scroll-back FIGHT —
+   something re-scrolls against her gesture. **Her product rule, verbatim and binding: empty space
+   may be SHOWN if you scroll there; it is never FORCED.** Pin-before-fix per arm; the trace run,
+   not read.
+5. **The QUESTIONS renumber: ordered** (*"also, fix the questions numbering"*) — rides the merge.
+6. **Memory: collapse is ratified in direction** (*"collapsing the mobile and variorum core repos
+   like this - memory, branches, etc. I'm very open to"*), with her design question answered in
+   the report: ONE memory STORE (the main repo — it is what auto-loads in every worktree and
+   syncs across both Macs), DISTINCT FILES where platform content genuinely diverges (two memory
+   notes on one topic — one phone, one core — exactly as she floated: "that might be fine").
+   The seeded `…-variorum-mobile/memory/` dir retires to a pointer stub.
+7. **The phases: ratified as planned** (*"I'm fine with your plans on the phases"*). **The merge
+   install: she is ready** (*"I'll be ready for the merge install as well"*).
+
 ## LIVE STATUS (the resiliency protocol's record — newest first)
 
 - **2026-10-06/07 — THE PLANNING SESSION RAN TO ITS HARD STOP.** Preflight COMPLETE in the
