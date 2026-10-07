@@ -19,7 +19,7 @@ behavior is main's tip BY CONSTRUCTION.
 | core `swift test` | **2204/247 + 40/6 GREEN** (baseline-exact vs 17y's record) |
 | iOS app build (Release-sim) | **GREEN** |
 | iOS test bundle build | **GREEN** |
-| full mobile suite (iPhone 17 Pro sim <simulator-udid>, accessibility armed, own DerivedData, stage held) | PENDING — running |
+*[removed for publication]*
 | Mac suite | **DISCHARGED BY CONSTRUCTION, not by a run** — the merge changes zero Mac-reaching source lines vs main's tip (the table above), so the Mac target's inputs are byte-identical to the tree 17y closed green (3896/639 + the 5 standing knowns). Recorded honestly; any reviewer may overrule and demand the run |
 
 ## The round-2 closeout obligations (the standing handoff §7 — thirteen, numbered 1–8 · 10 · 11 · 13 · 12)
@@ -43,7 +43,7 @@ behavior is main's tip BY CONSTRUCTION.
 
 | round | brief | result |
 |---|---|---|
-| 1 — the RESOLUTION review | `notes/REVIEW_PROMPT.md` verbatim over `dd7cad84..HEAD` with both parents in view (the 13-conflict resolution + the semantic fix-ups; the MobileEditorViewModel auto-merge eyeballed) | PENDING |
+| 1 — the RESOLUTION review | `notes/REVIEW_PROMPT.md` verbatim over `dd7cad84..HEAD` with both parents in view (the 13-conflict resolution + the semantic fix-ups; the MobileEditorViewModel auto-merge eyeballed) | DISPATCHED |
 | 2 — the DEDICATED STABILITY PASS | the crash class + the editor's range/identity math as one body on the FINAL seam (batch 1 + 1b + M22 + 4.5c-phone + the 13u1 shared brain, as merged); owns M27 | PENDING |
 | 3 — the WHOLE-ROUND PASS | the round's entire mobile-side diff (`46ffa0c`'s round start → this tree, `App/Variorum/VariorumMobile/**`), briefed on nothing but the diff | PENDING |
 
