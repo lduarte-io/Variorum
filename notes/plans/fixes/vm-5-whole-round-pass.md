@@ -306,6 +306,16 @@ finding; stated so the subject list is not read as shipped.
 
 ## FIX WAVE (implementer)
 
+**NOT DONE, stated first:** no GUI walk / screen capture (the brief named no
+screens folder and set the gate as targeted suites + the full mobile suite;
+the evidence for MINOR 2's face is the hosted-surface pins reading the
+RENDERED accessibility tree); no full Mac suite (targeted Mac suites only,
+per the brief); `notes/QUESTIONS.md` untouched (shared ledger — #159's
+"not yet touched" list loses two members at merge, see MINOR 3); the two
+same-class shared recovery sentences (`RecoveryCopy.sealedPutBackRefusal`,
+`DeletionRefusal`'s `.lockedPost` arm) NOT changed (outside the brief); the
+other `flushExistingAutosave` callers NOT traced for MINOR 4's class.
+
 **Implementer:** Opus, 2026-10-06, briefed by the orchestrator with exactly
 three findings — MINOR 2, MINOR 3 (+ its `VersionActs` rider), MINOR 4.
 MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
@@ -318,7 +328,7 @@ MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
 | MINOR 2 — the `.bookless` empty state | DONE (this commit) — red 3/3 → green; targeted 29/3 green |
 | MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | DONE (this commit) — phone red 5 issues → green 66/4; Mac red 2 issues → green 15/1 |
 | MINOR 4 — `VersionActs.save`/`restore` past a refused flush | DONE (WIP `9ac9c68e` + this commit) — phone red 5 → green; Mac red 6 → green 71/6; the revert is RESTORED (`git diff HEAD` clean of both files) |
-| Final full mobile suite | PENDING |
+| Final full mobile suite | DONE — `Test run with 808 tests in 126 suites passed after 381.180 seconds with 4 known issues.` (`** TEST SUCCEEDED **`; zero ✘; the 4 known issues are the standing two in `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` and two in `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape`; 802 → 808 = this wave's six new phone pins) |
 
 ### MINOR 2 — FIXED (red → green)
 
@@ -517,3 +527,35 @@ and was not traced here; the answer is now there to consult.
 (`NoteVersionsPaneTests` + `TutorialWherePlacesActsTests` (its four
 `VersionActs.save` walks) + `ConfirmationsSettingTests` + `IAAndTrashShapeTests`
 + `RefusalTableConvergenceTests` + `OpsRefusalTableIntegrityTests`).
+
+### Close
+
+**Every row dispositioned:** MINOR 2 FIXED (pin
+`aBooklessDoorOverBookedNotesNeverSaysTheStoreIsEmpty`, red 3 issues) ·
+MINOR 3 FIXED (pins `theQuickNotesSealArmSpeaksThePhonesOwnDoorWords` +
+`aSealedNoteRefusesARestoreInTheFamilysVoice`, red 5 issues; Mac
+`thePaneTellsAReceiptFromARefusal`, red 2) · MINOR 4 FIXED (pins
+`aRefusedFlushRefusesTheSaveAndMintsNoMoment` +
+`aRefusedFlushRefusesTheRestoreAndNothingMoves`, red 5; Mac
+`aRefusedFlushRefusesSaveAndRestoreOnTheMac`, red 6). No finding was hollow.
+
+**Every PROVISIONAL sentence this wave wrote** (13s re-voices them):
+1. `MobileListingFilter.noBooklessLine` — *"No bookless notes — every note is
+   in a book."* (the one new literal).
+2. The quick note's seal act clause *"keep writing"* → the composed *"This
+   note is locked — unlock it to keep writing."* (no new literal — the act
+   is the only new word; the sentence is `SealedNoteCopy`'s, itself
+   PROVISIONAL under QUESTIONS #159).
+3. *(Not new, recorded for completeness:)* the versions arm now composes
+   *"This note is locked — unlock it to restore a version."* (phone) /
+   *"This note is sealed — unseal it to restore a version."* (Mac — was
+   *"marked complete"*), both under #159 (a).
+
+**End runs:** full mobile `Test run with 808 tests in 126 suites passed …
+*[removed for publication]*
+`71 tests in 6 suites passed` (`NoteVersionsPaneTests` +
+`TutorialWherePlacesActsTests` + `ConfirmationsSettingTests` +
+`IAAndTrashShapeTests` + `RefusalTableConvergenceTests` +
+`OpsRefusalTableIntegrityTests`). Zero `Sources/VariorumCore/` lines, zero
+schema, zero build-config lines (the working tree's unstaged
+`Package.resolved` diff predates this wave and was never staged).
