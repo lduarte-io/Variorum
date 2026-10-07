@@ -262,6 +262,12 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 
 PENDING flags: none yet.
 
+**LIVE STATUS (2026-10-06): STOPPED AT SEAM 1** — P0–P3 landed and pushed (`0d5f1eac` · `bb37ad9d`
+· `da6eba15` · `39c7f748`); the tree is clean. Waiting on the architect's ruling of §FORK (F1–F4)
+here. On the ruling, the next act is P4 (migration `v1_22` alone, built exactly to the ruling),
+which then turns `SyncSchemaTests.registryMatchesLiveSchemaExactly` red → SEAM 2. Nothing is
+reverted, nothing half-built.
+
 #### §FORK — THE PROPOSAL (P1; the implementer proposes, the architect rules — nothing of the schema half is built until the ruling lands here)
 
 **The bench** — `Tests/VariorumCoreTests/SearchForkMeasurementTests.swift`, gated behind
