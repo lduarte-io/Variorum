@@ -248,4 +248,4 @@ the in-flight row retires; the worktree is removed after the merge.
 | 4 | U1 substrate | NOT STARTED |
 | 5 | U2 finder (gated on 3) | NOT STARTED |
 | 6 | U3 scopes/facets/join | NOT STARTED |
-| 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks | NOT STARTED |
+| 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks — **PING the 13x session (`variorum-c0`) at the merge** (its 2026-10-06 ack + ask; it rebases and opens its Sync-composition batch on the ping) | NOT STARTED |
