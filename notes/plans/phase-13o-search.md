@@ -808,7 +808,7 @@ cap line, `RootView`'s book/library composition. Machinery: no deaths so far.
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
-| P1 | THE TWO PROPOSALS (brief items 1 + 2): the within-a-GATHERING scope's mechanism with its measurement line, and the within-book face's fork — written below, pushed, sent to the orchestrator. **→ SEAM: neither half builds before its ruling lands here.** | NOT-STARTED |
+| P1 | THE TWO PROPOSALS (brief items 1 + 2): the within-a-GATHERING scope's mechanism with its measurement line, and the within-book face's fork — written below, pushed, sent to the orchestrator. **→ SEAM: neither half builds before its ruling lands here.** | DONE (this commit) — §U3-PROPOSAL 1 + 2 below; the gated bench `SearchGatheringScopeMeasurementTests`; AWAITING THE RULINGS |
 | P2 | CORE — the TAG-ASSOCIATION JOIN (brief item 3): a pure Domain association rule (intake-rule positive tag terms + the `auto_tag_ids` outflow, each by its own mechanism's subtree rule), the candidate statement in the ONE composer, `Queries.searchTagAssociations`; pins | NOT-STARTED |
 | P3 | CORE — THE MODE FACETS (brief item 4): an AST leaf over the reading row's FACTS (gathering · living · owned · finished · sealed), composed in the one composer; pins (+ EXPLAIN where the plan matters) | NOT-STARTED |
 | P4 | APP — the Books section reads the join (associated books TOP-RANKED, the row says WHY — "#dream flows here"); a `#tag` alone answers its books; the band's `+ book state` chip; model pins | NOT-STARTED |
@@ -821,7 +821,91 @@ cap line, `RootView`'s book/library composition. Machinery: no deaths so far.
 
 PENDING flags: none yet.
 
-**LIVE STATUS (2026-10-07): P0 landing; P1 next.**
+#### §U3-PROPOSAL 1 — THE WITHIN-A-GATHERING SCOPE'S MECHANISM (P1; nothing of P6 builds before the ruling lands here)
+
+**The question** (P-13o-U1-10, now due): `.book(id)` on a GATHERING must search its ASSEMBLED
+members — the rule evaluated at query time, never a second assembly path; no rule ⇒ empty (the
+ruled closed reading). Two mechanisms:
+
+- **A — the member-id predicate:** run the gathering's assembly FIRST (`Queries.assembleReading`,
+  verbatim — the one road) and hand its ids to the hits walk as an uncorrelated `c.id IN
+  (json_each(…))` set (the BOOK scope's own shape: membership as an IN-list, the assembly standing
+  in for the rows).
+- **B — the join:** compose the gathering's assembly CONDITIONS into the hits walk over the home
+  container `c` — evaluated per examined MATCH. The conditions come from ONE home: `assembleReading`'s
+  gathering arm is refactored so its WHERE (the ambient live/unarchived/post clauses + the wing + the
+  rule from `ruleMatchSQL` + the hide-owned exclusion; an ARCHIVED gathering, NO rule and a MALFORMED
+  rule ⇒ assembles EMPTY) is one function both the assembly and the search read (through the
+  composer's `Environment`, the `editedOn`/`versionPredicate` precedent) — so the two can never
+  disagree about who is a member, by construction.
+
+**The measurement** — `Tests/VariorumCoreTests/SearchGatheringScopeMeasurementTests.swift`, gated
+behind U1's `VARIORUM_SEARCH_MEASURE=1`. PAGE REQUESTS (the P1 suite's deterministic pager
+counters), the hits walk ranked to a 50-row page (the cost the page, group and counts statements
+share), two corpora of one shape, the second 5×: `notes × 10` single-take blocks, every 10th note
+tagged `#dream`, a gathering `{"tag":…dream}`; a RARE probe in two notes (one a member), a MID term
+in every 25th block (none of them members, by the corpus's arithmetic), and `the` in every block.
+
+| 10k blocks → 50k blocks (100 → 500 members) | unscoped Library walk | **A** = assembly + set walk | **B** = join |
+|---|---|---|---|
+| the assembly alone | — | **6,032 → 35,139** (×5.8: a scan of the wing's notes) | — |
+| rare `zanzibar` (10 hits) | 285 → 321 | 6,285 → 35,418 | **373 → 419** |
+| mid `midterm` (400 → 2,000 matches, 0 members) | 3,660 → 28,061 | 8,012 → 51,121 | **4,380 → 29,982** |
+| common `the` (every block) | 48,792 → 360,336 | **27,929 → 215,717** | 81,897 → 530,578 |
+
+**Reading the numbers:** A's floor is the ASSEMBLY — a scan of the wing's notes with the rule per
+note — paid on every keystroke, ∝ the CORPUS (×5.8 across ×5); it loses to B by **15–85×** on the
+rare and mid terms that type-ahead produces once two letters are typed. B is ∝ the MATCHES (the
+P1 class — the rare term's ×1.12 across ×5 is the log residue U1 measured) and costs 1.07–1.5× the
+unscoped Library walk for the same term; it loses to A only on a term in EVERY block (×2.5),
+where the per-match rule `EXISTS` outweighs a set probe — and even there it stays inside the cost
+class the Library already pays for that same term.
+
+**RECOMMENDATION: B, the join**, with the assembly's conditions factored into ONE function read by
+both `assembleReading` and the composer (the refactor is byte-identical for the assembly — its
+statement text pinned unchanged). Consequences, all by construction: hide-owned composes exactly as
+the gathering's own pages show (a non-Library surface — R-13o-10 exempts only the Library); an
+archived gathering, a rule-less one and a malformed one answer EMPTY; the archived facet inside a
+gathering adds nothing (an archived note is not an ASSEMBLED member — the assembly's own
+`archived_at IS NULL`); the worn-day arm composes the same conditions at note level. **If the
+architect prefers A** it is buildable (the set rides one JSON argument; the cost floor above is
+the price).
+
+#### §U3-PROPOSAL 2 — THE WITHIN-BOOK FACE (P1; nothing of P7's face half builds before the ruling lands here)
+
+**Ruled already (R-13o-14):** option 1's PLACEMENT — the book masthead's right, resting as a 🔍
+glyph (beside the Arrivals icon and the gear, on the title line both mastheads share — the
+navigator's and the Index column's), expanding to the field on click; Esc or an empty blur
+collapses it. **The fork the mockup leaves:** option 1 draws only the field — WHERE THE ANSWER
+SHOWS is unruled (option 2's band was the other placement, not picked). Three shapes:
+
+- **F1 — the answer sheet's small sibling, IN PLACE of the book's content (RECOMMENDED).** While
+  the field holds words, the mode's body (Index's pane, Outline, Book, Read) yields to the book's
+  answer: a band (the echo · "N passages in M notes" · the quiet `in: this book` chip · `+ archived`
+  where it can add anything) over the passages GROUPED under their notes — exactly the Library's
+  sheet grammar at book scale (note head · ≤3 marked lines · "in another take" · `all N ›` a real
+  road, groups paged). Clearing the field / Esc / the glyph again returns the mode exactly as it
+  was (nothing in the book's own state moves). Why: her "very capable search within a book" wants
+  the passages' room, and ONE idiom across Library and book means one thing to learn; the
+  Library's line/chip/face pieces move to the shared home (`Core/Views/`, CLAUDE.md's
+  two-consumer rule) rather than being copied.
+- **F2 — a popover under the field** (the ⌘K idiom): the same grouped passages in a bounded
+  popover with `more ›`. Least furniture and the book stays in view; but a long answer in a
+  popover is cramped, and a click-out discards the answer.
+- **F3 — the Index narrows:** the field switches the book to Index and filters its note column to
+  the matching notes with their passage lines nested beneath. Stays in the book's own surface;
+  but it is one mode's face, and landing would naturally stay in the Index's editor — not "land-
+  at-match identical to the Library's" as briefed.
+
+**Landing (briefed, not a fork):** identical to the Library's — the passage opens its note IN
+WRITE AT ITS BLOCK with the find seed (the match selected, ⌘G steps), through the shell's
+caret-precise road; `BookView` gains one closure from `RootView` for it (composition, never a
+sibling's model). A book/chapter-name hit has nothing to land on and is not listed (the book's
+own name is the masthead). **PROVISIONAL either way:** the field is session-local (not
+remembered per book).
+
+**LIVE STATUS (2026-10-07): P0 DONE; P1's two proposals written (this commit) — AWAITING THE
+ARCHITECT'S RULINGS; building the un-gated pieces (P2 onward) meanwhile.**
 
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
