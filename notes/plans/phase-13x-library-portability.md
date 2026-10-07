@@ -1268,6 +1268,8 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
 
+**THE MAC SLOT'S PLAN (named BEFORE any revert starts — the resiliency rule; every edit is over COMMITTED state e8a8fd78, so every restore is `git checkout --` on the one file, verified by an empty `git diff`):** claim "13x F1 pins" (≤40 min) → RUN 0 green (Phase13pControllerTests · Phase13pLobbyTests · LibraryPortabilityDoorTests · LibraryHandOffTests, test-without-building) → REVERT A (the BLOCKER's reconcile arm removed from ProtectionController.swift) → controller suite red on exactly the adopted-pair pin → restore → REVERT B (the M1 hold guard removed from PostureSwitchModel.swift) → red on exactly the hold-ceremony pin → restore → REVERT C (failureWording collapsed to the old one-lead-for-every-arm) → door suite red on exactly the per-arm-words pin → restore → REVERT D (the two suspension guards removed from probeAppleRoad) → lobby suite red on exactly the suspended-probe pin → restore → REVERT E (the fingerprint condition dropped from the gated arm) → door suite red on exactly the foreign-pair pin → restore → FINAL green across the four → release on the result line. M2's revert already ran headless (recorded above). Rebuilds are compiles, not stage acts, but run inside the claim for simplicity; statuses flip to DONE here only after the release.
+
 #### NEW STRINGS FOR 13s (F1's additions to the U2 table; facts binding, words provisional — `LibraryOpenCopy` unless noted)
 
 | string (constant) | where it renders |
