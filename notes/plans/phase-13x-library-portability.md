@@ -378,11 +378,11 @@ verbatim-by-reference)
 
 | # | item | owner | status |
 |---|---|---|---|
-| 1 | The classifier (verdict table pinned) | U1 | NOT STARTED |
-| 2 | The hand-off producer (folder pair; round-trip pin) | U1 | NOT STARTED |
-| 3 | Adopt-by-copy move-aside brain (mechanics PROVISIONAL → QUESTIONS) | U1 | NOT STARTED |
-| 4 | Custody-collision memo + rule (read-only now; write-path → U2 post-merge if needed) | U1 | NOT STARTED |
-| 5 | VX-64 — VaultBootstrap onto StoreUnlock (closes the ticket) | U1 | NOT STARTED |
+| 1 | The classifier (verdict table pinned) | U1 | DONE (811c1e23; 20 pins, red-first reverts — the U1 RECORD) |
+| 2 | The hand-off producer (folder pair; round-trip pin) | U1 | DONE (195668f6; 4/4 incl. the dev-store round-trip) |
+| 3 | Adopt-by-copy move-aside brain (mechanics PROVISIONAL → QUESTIONS) | U1 | DONE (e049ebf5; 5/5; P-U1-5 for QUESTIONS) |
+| 4 | Custody-collision memo + rule (read-only now; write-path → U2 post-merge if needed) | U1 | DONE (memo d2ca39f9 · rule 40f03b01; NO write-path change needed) |
+| 5 | VX-64 — VaultBootstrap onto StoreUnlock (closes the ticket) | U1 | DONE (87fba14f; drill + red-on-old revert; VX-64 closes) |
 | 6 | The two doors + welcome/waiting/absent-store slots | U2 | NOT STARTED |
 | 7 | The restore-hold landing state, both doors (banner · Resume · outbox-at-Resume) | U2 | NOT STARTED |
 | 8 | The Resume reconciliation (enroll/follow/adopt · export's four tables · returner) | U2 | NOT STARTED |
@@ -415,12 +415,23 @@ PROVISIONAL otherwise, recorded per row.
 
 ### U1 RECORD (the implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
 
+**U1 CLOSED — 2026-10-07.** All five ledger rows DONE with evidence of their kind: the
+classifier's verdict table pinned 20/20 with red-first behavioural reverts; the hand-off
+folder round-trip green on a throwaway AND on the real dev store (the Mac-suite run under
+the 13o-scheduled slot-1 claim, 4/4, zero skips, stage held ~1 min of the 25); the
+move-aside brain 5/5; the custody-collision memo written before its rule, 4/4, read-only
+composition confirmed; VX-64 fixed on the StoreUnlock road with the headless throwaway
+drill and the red-on-old revert quoted both ways. Core suite whole: 2234/251 green
+(+40/6 workbook). No `Sync/`, no custody/keychain code, no `Migrations.swift`, zero
+migrations; her real store untouched. PROVISIONALs P-U1-1…5 recorded for the
+orchestrator's QUESTIONS log.
+
 #### LIVE STATUS
 
 | row | piece | status |
 |---|---|---|
 | 1 | The classifier (verdict table pinned) | DONE (811c1e23 + the red-first evidence below) |
-| 2 | The hand-off producer (folder pair; round-trip pin) | BUILT, compiles (`build-for-testing` green); pins PENDING — the Mac-suite run waits on the stage (held by the VM-5 merge orchestrator at claim time); runs before U1 closes |
+| 2 | The hand-off producer (folder pair; round-trip pin) | DONE (195668f6; `LibraryHandOffTests` 4/4 incl. the dev-store drill — the pin entry below) |
 | 3 | Adopt-by-copy move-aside brain | DONE (this commit; `LibraryAdoptionTests` 5/5 — mechanics PROVISIONAL P-U1-5) |
 | 4 | Custody-collision memo + rule | DONE (memo at d2ca39f9 BEFORE the code; rule this commit, `CustodyCollisionRuleTests` 4/4; read-only composition confirmed — nothing re-sequences to U2's post-merge half) |
 | 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | DONE (87fba14f; the headless drill + red-on-old revert below; closes VX-64) |
@@ -537,6 +548,18 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
+- **Row 2 — `LibraryHandOffTests`, 4/4 green, ZERO skips** (`xcodebuild …
+  test-without-building -only-testing:VariorumTests/LibraryHandOffTests`, 2026-10-07
+  00:51, under the slot-1 stage claim per the 13o scheduler — claimed 00:51:09, released
+  the moment the result landed, ~1 min of the 25 used; `** TEST EXECUTE SUCCEEDED **`):
+  the throwaway ROUND-TRIP (produce → the classifier reads the folder and the bare file →
+  the travelled key file unwraps by the passphrase to the SAME key → the snapshot opens
+  under it and reads the pre-snapshot row → the source untouched), the no-key-file
+  refusal leaving nothing behind, the same-day ` (2)` collision rule, and **THE DEV-STORE
+  DRILL RAN** (0.133 s, not skipped): the folder produced FROM THE REAL DEV STORE via its
+  own custody read (reads only; in-memory custody for the open), classified back as the
+  folder pair, integrity "ok", the travelled key file the dev library's own — the U1
+  evidence line's round-trip, on the dev store.
 - **THE CORE SUITE, WHOLE (U1 evidence): 2234 tests in 251 suites PASSED** (`swift test`,
   122 s, headless — plus the StringsWorkbook target's 40 in 6). Skips are the standing
   env-gated ones only: the real-server integration pass, the workbook scratch writer, and
