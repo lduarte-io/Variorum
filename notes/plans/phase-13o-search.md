@@ -250,7 +250,7 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | # | Piece | Status |
 |---|---|---|
 | P0 | This piece plan (the first commit) | DONE (this commit) |
-| P1 | MEASUREMENTS + THE FORK PROPOSAL — contentless vs external-content FTS5; doc normalization (per source row vs per rendered unit); where scope (note/wing/archived) lives. A throwaway measurement suite over synthetic corpora; numbers + tradeoffs written below. **→ SEAM 1: stop for the architect's ruling before the schema half.** | NOT-STARTED |
+| P1 | MEASUREMENTS + THE FORK PROPOSAL — contentless vs external-content FTS5; doc normalization (per source row vs per rendered unit); where scope (note/wing/archived) lives. A throwaway measurement suite over synthetic corpora; numbers + tradeoffs written below. **→ SEAM 1: stop for the architect's ruling before the schema half.** | DONE (this commit) — the proposal is §FORK below; AWAITING THE RULING |
 | P2 | Domain, fork-independent: the `SearchQuery` AST (text terms + filter tree, R-13o-8) + the v1 grammar parser (words · "phrases" · `#tag` · facets) + the DATE-PARSE predicate (R-13o-6 — "september 14" / "sep 14" / "9/14" → day bounds), pure, exhaustive little tests | NOT-STARTED |
 | P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | NOT-STARTED |
 | P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | NOT-STARTED |
@@ -261,6 +261,113 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | P9 | Close: the named suites green at the END, every claim flipped from PENDING, the report | NOT-STARTED |
 
 PENDING flags: none yet.
+
+#### §FORK — THE PROPOSAL (P1; the implementer proposes, the architect rules — nothing of the schema half is built until the ruling lands here)
+
+**The bench** — `Tests/VariorumCoreTests/SearchForkMeasurementTests.swift`, gated behind
+`VARIORUM_SEARCH_MEASURE=1` (skipped in the ordinary suite; re-runnable by any reviewer). The
+REAL migrated schema on an on-disk (unkeyed) store, raw-SQL corpora of 1,000 / 5,000 notes × 10
+blocks (every 10th block a second take ⇒ 11k / 55k take docs), 50-word takes from a deterministic
+Zipf vocabulary of 30k pseudo-words (a sprinkle accented), 10% of notes in a second wing. Wall
+times are best-of-5 on the M3; PAGES are `SQLITE_DBSTATUS_CACHE_HIT+MISS` (deterministic page
+requests through the pager — what the FTS5 C code reads, which VM-step counters cannot see).
+
+**The probe (the linked SQLCipher 4.18.0 community = SQLite 3.53.4):** FTS5 ✔ ·
+`contentless_delete=1` ✔ · a VIEW as external content ✔ (`snippet()` over it highlights with the
+tokenizer's own folding — "The [Café] was [naïve]" for `cafe AND naive`) · `remove_diacritics 2`
+prefix folding ✔ (`res*` finds "Résumé") · `integrity-check` with `rank=1` over the view-backed
+table ✔ — and it **DETECTS silent source drift** (a source text changed behind the index's back ⇒
+SQLITE_CORRUPT_VTAB) · a contentless table's `snippet()` = NULL.
+
+**The four content modes** — X = external content over a doc table that HOLDS a text copy ·
+V = external content over a VIEW resolving text from the SOURCE rows (doc table = ids only) ·
+C = contentless (`contentless_delete=1`) · R = a regular FTS5 table (its own `_content` copy):
+
+| at 55k take docs | X | V | C | R |
+|---|---|---|---|---|
+| doc table / FTS (KB) — the `variant` table itself is 16,968 | 16,332 / 19,100 | **4,664 / 19,100** | 4,664 / 19,208 | 4,664 / 30,792 |
+| backfill, 11k → 55k docs (ms) | 101 → 657 | 96 → 663 | 97 → 719 | 103 → 1,109 |
+| one autosave, own txn, 11k → 55k (ms · pages) | 0.80 → 0.96 · 21 → 23 | **0.78 → 0.87 · 20 → 23** | 0.91 → 1.33 · 34 → 37 | 0.96 → 1.28 · 32 → 34 |
+| snippet() | ✔ | ✔ | ✘ (NULL) | ✔ |
+| `rebuild` / index-vs-TRUTH integrity check | ✔ / vs the copy | ✔ / **vs the source rows** | ✘ / internal only | ✔ / vs its copy |
+
+The autosave PAGE counts are FLAT across a 5× corpus in every mode (the P1 shape the plan wants
+pinned). Query cost is the SAME in every mode (±10%) and is ∝ MATCHES — ~2 page requests per
+match (bm25 reads each match's docsize row): at 55k docs, ORDER BY rank LIMIT 50 + snippet, Home
+scope — rare term (3 hits) 0.12–0.16 ms · mid (2.4k) ~1.5 ms · common (55k) ~32 ms · 2-char
+prefix (45k) ~24 ms · 3-char prefix (17k) ~8.5 ms · two-term AND (50) ~0.45 ms.
+
+**Where scope lives** (V, 55k; COLUMN = the doc row carries the fact · JOIN = resolved through the
+placement `uq_cblock_ownership` + the container PK):
+
+| query | majority scope (Home, 90%) | wing-two (10%) | ONE note | a 50-note book (join) |
+|---|---|---|---|---|
+| common term — col / join (ms) | 31.8 / 32.4 | 32.2 / 36.6 | 45.5 / 74.1 | 39.0 |
+| mid term — col / join (ms) | 1.46 / 1.63 | 1.33 / 2.53 | 2.08 / 3.79 | 4.19 |
+
+(Driving a note-scope from its own docs via `rowid IN (…)` was measured too and LOSES — FTS5
+still walks the term's whole doclist: 31 ms common, 13.7 ms mid.)
+
+**Prefix-index sizing** (V, 55k): none 8.8 MB / 2-char prefix 32.6 ms · `'3'` 12.7 MB / 33.6 ms ·
+**`'2 3'` 19.1 MB / 25.7 ms** · `'2 3 4'` 23.5 MB / 24.9 ms.
+
+**THE RECOMMENDATION (four parts, each ruleable on its own):**
+
+- **F1 — content mode: V, external content over a VIEW of the source rows.** Text stored ONCE
+  (the source rows are the content); `snippet()`/`highlight()` native with the index's own folding
+  (so what matched and what is highlighted are one sameness rule — R-13o-11 needs no Swift twin);
+  `rebuild` native (the backfill and the rebuild door are one statement); the integrity check
+  compares the index against TRUTH, not a copy; the cheapest writes measured. Its contract: the
+  index is updated in the SAME statement as every source text write with OLD = what was indexed —
+  exactly what AFTER triggers give (pinned per write layer at P6; the integrity check is the net).
+  Sound under VACUUM (the doc rowid is an `INTEGER PRIMARY KEY`; source rows are named by their
+  TEXT id, never their implicit rowid). **Fallback: X** if the architect wants the derived family
+  self-contained (a full second copy of every take — +16 MB per 55k takes — checked against the
+  copy). **Not C** (no snippets ⇒ a second, Swift-side folding rule deciding highlights — a drift
+  class; dearest writes). **Not R** (the text duplicated inside the index; slowest backfill).
+- **F2 — normalization: ONE DOC ROW PER SOURCE TEXT FIELD.** kind ≡ a (table, column) pair:
+  `take` (variant.working_text) · `take_label` (variant.label) · `block_name` (block.name) ·
+  `comment` (block_comment.text) · `title` (container.title) · `note_meta`
+  (container.floating_notes) · `book` (reading.name) · `chapter` (reading_section.name). A doc
+  exists iff its source row is LIVE (`deleted_at IS NULL`) AND the field is non-NULL; archived rows
+  stay indexed with an archived fact (R-13o-6). Rejected — per RENDERED UNIT (per block / per
+  note): a keystroke would re-tokenize the whole unit (∝ note size, not the edit), building the unit
+  needs sibling aggregation inside a trigger (a read), and a hit could no longer name its take for
+  land-at-match. **`scrap` becomes a query-time FACET** (a take whose home container is a pool),
+  not a stored kind: a variant row cannot know its container without a read (R-13o-4). The kind
+  vocabulary stays closed and additive — VX-72's savepoints join as one more kind
+  (`commit_point.text`).
+- **F3 — scope: OWN-ROW FACTS ONLY on the doc** (`block_id` / `container_id` / `reading_id` as
+  the source row itself carries them, the row's OWN `wing_id` for title/note_meta/book, the row's
+  OWN archived fact). Every trigger reads only NEW/OLD and the doc family (to find its rowid) — no
+  other table, ever. The home note / wing / note-archive / version-ness / pool-ness of BLOCK-HOSTED
+  docs resolve at query time inside the ONE composer, through the I2 placement seek + the
+  container PK. Measured price: +2% (common, majority scope) to +60–90% (minority scopes); the cost
+  CLASS is unchanged (∝ matches). This deviates from the plan's "wing + archived columns … never
+  joins at keystroke rate" for block-hosted docs — deliberately: the alternative (S2: `note_id` /
+  `wing_id` / note-archived propagated onto take/comment/name docs) needs structural READS inside
+  the variant/comment/placement triggers (the live placement + the container row) and ~8
+  propagation triggers whose completeness under every remote-apply arrival order becomes its own
+  correctness surface. Because the index is DERIVED and local-only, S2 stays reachable later as a
+  local-only migration + one rebuild (no lockstep) if U2's walk finds minority scopes slow.
+  **If the architect prefers S2 now**, it is buildable — the reads would be the placement seek and
+  the container PK, and the R-13o-4 record would name them.
+- **F4 — tokenizer + prefixes:** `unicode61 remove_diacritics 2` (R-13o-11), `prefix='2 3'` (the
+  plan's type-ahead sizing: −25% on 2-char prefixes for 2.2× index size; the trailing token becomes
+  a prefix term only at ≥ 2 characters — a 1-character prefix is the whole corpus). ONE indexed
+  column (`body`): a kind's weight is a query-time bm25 multiplier, because a second sparse
+  `name` column would make bm25 PENALIZE short titles (column-average length normalization) —
+  the opposite of title-weighted.
+
+**Table names under F1–F4 (for SEAM 2, so the registry line can be drafted at the ruling):**
+`search_doc` · `search_fts` · `search_fts_config` · `search_fts_data` · `search_fts_docsize` ·
+`search_fts_idx` (external content has no `_content` shadow) — plus the VIEW `search_text`, which
+the walk's `type = 'table'` never sees. (X and C: the same six; R adds `search_fts_content`.)
+**One consequence for the seam's owner:** `StorePlaintextExport` drops `SyncSchema.localOnlyTables`
+from the export, so registering the search family there means an export carries the capture
+triggers but not their tables (the outbox's own recorded consequence — 13x's open door reconciles);
+a separate DERIVED set that the walk subtracts and the export KEEPS would hand 13x a working index
+instead. The orchestrator's call; flagged, not decided.
 
 ### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
 
