@@ -151,6 +151,23 @@ follows it.
   → the three-unit plan below stands; the deferred ideas are Linear tickets in project 13o
   (VX-72 Search Everything · VX-73 the power-search grammar), each pointing at this file.
 
+## THE MOCKUP RULINGS — her picks, 2026-10-06 (verbatim-faithful; BINDING; closes ledger row 3)
+
+- **R-13o-13 — THE DAY DOOR'S WORD: "when".** Her words: *"I like 'when' for the day door."*
+  The control reads **when ▾** at rest, opening: on a day… · between days… · any day (the
+  mockup's wording 2); the armed state shows in the band as a clearable chip.
+- **R-13o-14 — WITHIN-BOOK SEARCH: the masthead magnifier.** Her words: *"I like search this
+  book to the right (option 1), but collapse it into a magnifying glass and only expand it
+  when clicked on."* → option 1's placement, resting as a 🔍 glyph at the book masthead's
+  right, expanding to the field on click. The FACE is ruled now; the build stays U3's.
+- **R-13o-15 — DIRECTION C, THE ANSWER SHEET.** Her words: *"I like direction C, the answer
+  sheet, the best. i feel like it could also grow a more advanced mode easily - an extra
+  dropdown for a more full search if we want to add that later. let's do that."* → U2 builds
+  direction C: the ONE results band (query echo · honest counts · filters as quiet chips),
+  passages GROUPED under their notes, every "all N ›" a real road. The band is shaped so an
+  ADVANCED-SEARCH DROPDOWN can join it later without rework — recorded on VX-73 with her
+  words; nothing of the advanced mode is built now ("if we want to add that later").
+
 ## BINDING PRINCIPLES — the 13b constitution, carried per the skill
 
 P-1…P-9 bind BYTE-VERBATIM as written in `.claude/skills/architect-phase/SKILL.md` (one
@@ -510,18 +527,73 @@ capture · **derived-index capture** — and the smell test survives intact for 
 trigger that wants another table's value, or a rule, is the §9 smell, and stops for her decision.
 The closeout amends OverallModel §9 + AppSpec §6's trigger sentence to exactly this (R-13o-4).
 
-### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
+### U2 — THE FINDER (UN-GATED by R-13o-13…15; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
 
-The Library's search-active state per the picked mockup: the Passages section (snippets,
-grouped under the shipped Books/Notes/Blocks idiom) · land-at-match (LandingTarget; the find
-bar pre-armed so ⌘G steps onward) · ⌘K body hits under its title hits · the day filter grows
-its RANGE with her wording for "on day…" (asked at the mockup sitting) · the block/scrap cap
-falls to paging (R-13o-9) · owned notes show badged (R-13o-10) · the date-parse predicate
-wired. Registry: every new door declared (P-1).
+The Library's search-active state per **DIRECTION C** (R-13o-15; the mockup
+`notes/plans/mockups/13o-search.html` is the visual record): the results BAND + passages
+grouped under their notes · land-at-match (LandingTarget; the find bar pre-armed so ⌘G steps
+onward) · ⌘K body hits under its title hits · the day door becomes **when ▾** with the range
+(R-13o-13) · the block/scrap cap falls to paging (R-13o-9) · owned notes show badged
+(R-13o-10) · the date-parse/worn-day predicate wired. Registry: every new door declared (P-1).
+
+### U2 BRIEF (the implementer session's self-contained instructions)
+
+**Who you are:** the U2 implementer (Opus, xhigh), ONE session, ONE acceptance unit — the
+finder's faces. Work ONLY in `~/dev/variorum-13o` (branch `vx-5-13o-search`). **Required
+reading:** this plan file WHOLE (the SITTING RECORD + MOCKUP RULINGS + §FORK RULINGS are
+binding; the U1 RECORD tells you what the substrate gives you) · the mockup file's Direction
+C + its shared-everywhere section (`notes/plans/mockups/13o-search.html`) ·
+`notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from your FIRST commit).
+Maintain the **U2 RECORD** below as LIVE STATUS. At most ONE Sonnet subagent, external facts
+only, read-only.
+
+**The pieces (direction C, built on `Queries.searchPassages` — extend the query layer only
+through the one composer):**
+1. **The BAND** (`Features/Library/`): appears only while a query is active — the query echo,
+   honest per-kind counts, the quiet chips (`in: <wing>` · an armed `#tag ✕` · the armed
+   when-range ✕ · `+ archived`). VoiceTokens only, both voices, dark; no pills/underline
+   furniture beyond the mockup's. Shape the band's trailing end so a LATER advanced-search
+   dropdown can join without rework (R-13o-15's growth note — build NOTHING of it).
+2. **Passages grouped under their notes** — note title row (DisplayTitle), its page of
+   snippet lines with `<mark>`-class highlighting from the index's own snippet segments,
+   "in another take" badges where the hit's take is unrendered, "all N ›" a REAL road (pages
+   through the keyset). Blocks & scraps join the same grouped listing; `blockCap` DIES —
+   delete the constant, page like the notes (R-13o-9).
+3. **The when door** (R-13o-13): the control-row word becomes **when ▾** → on a day… ·
+   between days… · any day; armed state = the band's chip; the day answer stays the unpaged
+   SET it is today; the RANGE rides `Queries.editedOnSQL`'s bounds unchanged in rule.
+4. **Land-at-match:** clicking a passage opens the note in Write AT that block with the match
+   selected and the find bar armed with the query (⌘G steps onward). **FENCE: ride the
+   existing LandingTarget + EditorFind controller APIs — zero changes inside
+   `EditorTextView`/`BlockRangeIndex`/`PaneSurface` internals. If a seam change proves
+   genuinely needed, STOP and report (that opens TEXTKIT2_NOTES + the Fable rider — the
+   architect's call, never yours).**
+5. **⌘K:** a bounded few passages under the title hits (`CommandPalette` — same
+   `searchPassages`, small page), landing exactly as 4.
+6. **Wiring truths:** owned-book notes always list here, badged (R-13o-10 — the Library is
+   exempt; pin it); versions never appear (the composer already fences — face-level pin);
+   archived behind the band's quiet word; the worn-day predicate makes "september 14" find
+   the nameless note end-to-end; scraps list in every wing (P-13o-U1-5 RATIFIED).
+7. **Registry (P-1):** every new door declared; refusal/receipt copy through the standing
+   kind seam; the registry walk green.
+8. **Pins:** view-model state-transition tests for the band/grouping/paging; the cap's death
+   pinned (a 41st block hit reachable); land-at-match + ⌘G pinned at the feature-API level;
+   copy pins. The Mac suites you touch + **the tutorial spine (TutorialWalkTests)** green at
+   the END.
+
+**Environment:** the plan's environment-traps block VERBATIM binds. Mac app tests run from
+`App/Variorum/` with suite-level `-only-testing` and **a HELD `Tools/stage` claim** (claim →
+run → release; headless `swift build`/`swift test` needs none). No Release builds, no
+`/Applications` refresh, never touch a real-store instance. The orchestrator's walk +
+screenshots follow your close — your "done" is a claim, the walk verifies.
+
+### U2 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
+
+*(empty — the U2 session writes here.)*
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 
-Within-a-book search (the same engine scoped; its face per the mockup round) · the
+Within-a-book search (the same engine scoped; its face RULED R-13o-14: option 1's masthead placement resting as a magnifying-glass glyph, expanding to the field on click) · the
 **tag-association join** (#tag surfaces the books/gatherings associated through intake rule +
 outflow, TOP-RANKED — the §12 ruling) · the mode-facet chips (gathering · living · owned ·
 finished · sealed — facts, never tags) · the archived facet's face · polish + the walk.
@@ -554,8 +626,8 @@ the in-flight row retires; the worktree is removed after the merge.
 |---|---|---|
 | 1 | Sitting record + execution plan authored | DONE (this commit) |
 | 2 | Linear: VX-72 (Search Everything) · VX-73 (power-search grammar) minted in project 13o | DONE — see tickets |
-| 3 | Mockup round (`mockups/13o-search.html`) → her pick + "on day…" wording | OPEN — next act |
+| 3 | Mockup round (`mockups/13o-search.html`) → her picks | **DONE 2026-10-06** — R-13o-13 "when" · R-13o-14 the book masthead magnifier (build at U3) · R-13o-15 direction C with the band's advanced-dropdown growth note (→ VX-73) |
 | 4 | U1 substrate | **DONE 2026-10-06** — P0–P9 landed (close 3251cce7); the ORCHESTRATOR'S CHECK: commits + clean pushed tree verified, the four search suites + MigrationTests re-run green on the orchestrator's own machine (46/46 + 42/42 at seam 2), the U1 RECORD complete with the close banner and zero PENDING. Evidence of the unit's kind: state-transition + P1 page-count pins (headless substrate; USE evidence arrives with U2's walk). P-13o-U1-5 RATIFIED by the author same day (the question tool): SHARED ROOM — scrap hits list in every wing's search, matching the Snippets surface; wing isolation stays total for everything else |
-| 5 | U2 finder (gated on 3) | NOT STARTED |
+| 5 | U2 finder (gated on 3) | IN PROGRESS — un-gated 2026-10-06, implementer spawned on the U2 BRIEF |
 | 6 | U3 scopes/facets/join | NOT STARTED |
 | 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks — **PING the 13x session (`variorum-c0`) at the merge** (its 2026-10-06 ack + ask; it rebases and opens its Sync-composition batch on the ping) | NOT STARTED |
