@@ -1169,3 +1169,10 @@ two phase-sized units per phase) and the 17-entry review rule.
 
 *[removed for publication]*
 - *(Phase 13i-e’s closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at this closeout, per the standing rule.)*
+
+## Rolled from the master plan at the 13o closeout (2026-10-07) — verbatim
+
+*[removed for publication]*
+
+*(The superseded 13i-e-closed pointer and the 13r OPEN-PAUSED pointer rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at this closeout, per the standing rule.)*
+

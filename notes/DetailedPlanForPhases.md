@@ -12,16 +12,15 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| 13o — Search | **VX-5** · `vx-5-13o-search` | `~/dev/variorum-13o` · the Pro | ready — kickoff atop `notes/plans/phase-13o-search.md` (opens with the design sitting) |
 | 13x — Library portability | **VX-6** · `vx-6-13x-library-portability` | `~/dev/variorum-13x` · the Pro | OPEN — kicked off 2026-10-06; sitting complete, U1 building; Sync/-custody slot LENT to 13o at her word (R-13o-1 — 13o merges first, 13x's Sync half follows the rebase); VX-64 triaged in. Record: `notes/plans/phase-13x-library-portability.md` |
 | 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | `~/dev/variorum-13s` · the Pro (seat moved from the Air at kickoff — her launch words; she attaches from the Air) | OPEN — kicked off 2026-10-06; the ONBOARDING half (13s-b) runs first at her word, mockup-first per the intake; record: `notes/plans/phase-13s-voice-onboarding.md` |
 | VX-75 — book Outline first-edit flash | **VX-75** · `vx-75-book-outline-first-edit-flash` | `~/dev/variorum-vx-75` · the Pro | OPEN — kicked off 2026-10-06 (her report, same evening); single-ticket fix under the architect shape, Fable investigates+implements at her word, `fable-reviewer` cold review (editor-seam suspect: the book Outline read-tier → live-editor swap); surfaces: book Outline/Index mode + the pane/editor seam; ZERO `Sync/`. Record: `notes/plans/fixes/vx-75-book-outline-first-edit-flash.md` |
 
 ### Latest closeout
 
-*[removed for publication]*
+**→ 13o CLOSED 2026-10-07 — SEARCH, BUILT WHOLE IN ONE OVERNIGHT RUN under her PROVISIONAL-and-continue mandate (the record `notes/plans/phase-13o-search.md` — the sitting R-13o-1…12, the mockup rulings R-13o-13…15, §FORK RULINGS, §U3 RULINGS, three unit RECORDs, the two-round ladder, THE PHASE CLOSEOUT; PR #133, merge commit 1dae44f8).** The one finder lives: body search over the living corpus on a local-only derived FTS5 index (v1_22 — ZERO lockstep, marker stays 12), the answer sheet (her direction C), ⌘K passages, the **when ▾** range door, the book masthead's 🔍, the tag-association join, the mode facets, the caps' death, land-at-match with ⌘G armed; the plaintext export now searches by itself. The ladder: R1 0B/0M/3m/2n — five findings, five implementer AGREEs, zero disputes, the reviewer's own fix pass with revert-verified pins; R2 CLEAN BILL. Finals: core 2,284/258 EXIT 0; the widened Mac closeout runs 246/33 + the order suite alone. Canon deltas as ruled (the THIRD trigger duty R-13o-4 · the derived family · §12's SEARCH line · QUESTIONS #201 · MobileSoul PL-47). Tickets: VX-5 + VX-44 Done; minted VX-72/73/78/79. HER MORNING: the ratify bundle (#201), her own walk (`notes/handoffs/phase-13o-handoff.md` — the checklist is at its top), and 13x un-gated by this merge (R-13o-1's chain complete).
 
-*(The superseded 13i-e-closed pointer and the 13r OPEN-PAUSED pointer rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at this closeout, per the standing rule.)*
+*(The outgoing 13r closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at this closeout, per the standing rule.)*
 
 
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
