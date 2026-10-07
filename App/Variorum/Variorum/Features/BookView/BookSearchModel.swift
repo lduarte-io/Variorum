@@ -64,6 +64,9 @@ final class BookSearchModel {
     private(set) var loadingMore = false
     /// The groups opened to "all N ›" — each its own paged road.
     private(set) var expansions: [String: Expansion] = [:]
+    /// A failed read, said where the book says its other failures (the
+    /// book view's bottom line) — never a silently empty answer.
+    private(set) var lastError: String?
 
     /// What one opened group lists: its passages, page by page.
     struct Expansion: Equatable {
@@ -102,6 +105,7 @@ final class BookSearchModel {
     /// was drawn OVER it, never instead of it (F1).
     func close() {
         isOpen = false
+        lastError = nil
         generation += 1
         text = ""
         words = ""
@@ -150,6 +154,7 @@ final class BookSearchModel {
                 try Self.answer(db, query: parsed.query, readingID: readingID, after: nil)
             }
             guard asked == generation else { return }
+            lastError = nil
             question = parsed.query
             words = parsed.words
             counts = answer.counts
@@ -162,6 +167,7 @@ final class BookSearchModel {
             question = parsed.query
             words = parsed.words
             clearAnswer()
+            lastError = String(describing: error)
         }
     }
 

@@ -387,7 +387,7 @@ struct BookView: View {
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
         .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? structure.lastError {
+            if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
                     .font(tokens.small)
                     .alarmVoice()
