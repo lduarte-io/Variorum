@@ -943,3 +943,5 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   (row 10's drills — fake-server legs free, Mac pins filed with the scheduler); the
   orchestrator's WALK stays a considered act (the dev store's Castle gate may need her — the
   pre-13x 5b precedent), never forced overnight.
+- Resequence (13o, within my slot-me-anywhere): 13o's U3 suite batch takes the next gap; my 40
+  slides to ~05:00–06:00 after VM-10's remainder; the go token unchanged.
