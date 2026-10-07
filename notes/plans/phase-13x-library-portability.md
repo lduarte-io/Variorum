@@ -274,3 +274,141 @@ toggle.** A standing banner on the adopted library:
   that line sequences into the post-merge batch.
 - **Composes with QD:** the kept outbox pushes at Resume, not at landing — the dead Mac's last
   edits travel exactly once, visibly.
+
+**ROUND 3 RULED (2026-10-06): THE RESTORE-HOLD ON BOTH DOORS** — one landing state everywhere a
+copy is adopted; the transport user presses Resume at once, the recovery user gets the window
+and the duplicate-first recipe. (Her pick of the recommended option, the question tool.)
+
+---
+
+## EXECUTION PLAN (authored 2026-10-06 after the kickoff sitting; built to the rulings above)
+
+**Cast:** Fable implementers end to end (the custody rider covers nearly every surface this
+phase touches), ONE at a time, each a FRESH session briefed ONLY by this file's named sections;
+`fable-reviewer` for the end-of-phase ladder (same-model ⇒ the orchestrator arbitrates
+disputes against the spec). The author may redirect at any point.
+**Sizing:** TWO phase-sized acceptance units (U1 brains · U2 doors+hold) + a closeout tail
+(U3) — inside the guidance. Each unit closes on USE-shaped evidence, never pins alone.
+**Sequencing law (the slot redirect):** ZERO `Sync/` or custody/keychain edits before 13o's PR
+merges; U1 is chosen to be clean of them; U2's Sync-composition pieces land after the merge +
+rebase. Zero migrations anticipated (marker stays 12); if one is ever needed it claims `v1_23`+
+HERE first.
+
+### U1 — THE BRAINS (headless-first; no `Sync/`, no custody edits; one implementer session)
+
+1. **The picked-thing CLASSIFIER** (pure; `VariorumCore` Persistence/Domain): URL → verdict —
+   encrypted library with key file beside (fingerprint match) · a snapshot pair (backup- or
+   hand-off-named) · a picked FOLDER holding a pair · a plaintext export (synced tables with
+   `sync_version`/`owner_id`, the four local-only tables ABSENT) · bare `.sqlite` with no key
+   file (the honest refusal naming the remedy) · a newer-schema copy (the migrator's superseded
+   check rendered honestly) · not a Variorum store. Exact tests per verdict; no crypto invented.
+2. **THE HAND-OFF PRODUCER:** "Variorum Library — <date>" folder = a sealed snapshot (GRDB
+   `backup(to:)` from the open keyed connection — the `StoreBackup` road, never a raw WAL copy)
+   + the live key file's copy. A Shared function the U2 door renders; reveal-in-Finder at
+   completion. Words PROVISIONAL from the pre-13x copy conventions; 13s re-voices.
+3. **THE ADOPT-BY-COPY MOVE-ASIDE BRAIN** (her lean, direction-ruled): the current library +
+   key file step aside to a timestamped, recoverable home before the copy lands in the app's
+   own place; an A1-shaped safety copy first; the source pair NEVER touched. Mechanics
+   PROVISIONAL (logged to QUESTIONS at U1's close).
+4. **THE CUSTODY-COLLISION MEMO + RULE** (older-key same-Mac adopt): what custody holds after
+   an adoption whose library key differs from custody's — written as a short design section in
+   this file BEFORE the code (the friction doctrine's shape), built to it, pinned. The lean:
+   custody adopts the key that OPENS the now-live file; M/C/identity unchanged (account-level);
+   the moved-aside library keeps its own key-file roads. **READ-ONLY composition of custody —
+   if the rule turns out to need a custody-item WRITE-path change, that piece moves to U2's
+   post-merge half rather than touching custody now.**
+5. **VX-64:** `Tools/VaultBootstrap` onto the StoreUnlock road (key file + typed secret +
+   in-memory custody; no Keychain consulted). Evidence: the tool opens an encrypted THROWAWAY
+   store headless, dry-run against the fake shapes; her real corpus never touched. Closes
+   VX-64 (commit message carries the traced mechanism + the pin; `Part of VX-6`'s phase record
+   is this file).
+
+**U1 evidence:** core suite green; the classifier's verdict table pinned; the hand-off folder
+produced on the DEV store and opened back by the classifier (round-trip); VaultBootstrap run
+headless on a throwaway. Mac-suite runs (Shared pieces) claim `Tools/stage` around themselves.
+
+### U2 — THE DOORS + THE HOLD (after 13o's merge for its Sync-composition half; one session,
+a second if the seam demands it)
+
+1. *File ▸ Open Library…* + the welcome / waiting / absent-store integrations (§3.7/§3.8 name
+   the slots) · *Restore from Backup…* on Data Safety listing the app's own pairs WITH
+   which-credential-opens-which (decision 11's pair model rendered).
+2. The open composition over the lobby's existing roads (Touch ID / passphrase / words / A /
+   the vault road) — reuse, never re-derive.
+3. **THE RESTORE-HOLD (both doors — RULED):** the adopted library lands open, sync WAITING; the
+   banner + one **Resume Sync** press; the kept outbox pushes at Resume; the per-store
+   held-after-restore flag consulted at the round-trigger seam (`Shared`'s `SyncSession` — the
+   un-followed device's precedent); engine-side lines, if truly needed, land post-merge only.
+4. **The reconciliation at Resume:** same owner ⇒ enroll (fresh identity off-machine; the
+   existing identity on-machine) / the follow where keys rotated; foreign or no owner ⇒ the
+   adopt road (re-stamp + `resyncReinitialize`); the plaintext export recreates the FOUR
+   local-only tables BEFORE ANY WRITE (§14.13 + ledger 22), cursor-0 + empty outbox under the
+   same account; a non-zero-cursor fresh identity reconciles as a 13j RETURNER.
+5. The refusal/banner/sentence rendering (PROVISIONAL words, listed for 13s), incl. the
+   iCloud-Drive live-library guard (ledger 4, copy §6's sentence) and the duplicate-first
+   recipe in the hold banner.
+
+**U2 evidence (use-shaped; the stage held):** the DRILLS on throwaway scopes + the fake server —
+same-Mac restore (hold → duplicate → Resume → the duplicate survives, the re-trashed original
+leaves, said); new-Mac-shaped adopt per posture leg (Standard-silent · passphrase · words ·
+older-key day-passphrase); the plaintext-export re-open; the returner/purge fence; the
+newer-schema refusal; the stale-outbox conflict-card pin. Then the ORCHESTRATOR'S WALK on the
+dev store. Her real-device AirDrop leg and any Air second-Mac leg are HERS at the acceptance
+walk — paused and asked, never worked around.
+
+### U3 — CLOSEOUT: the ladder (fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, over
+the whole diff; ≤3 rounds) · the FAQ brief un-flagged (Q4's ruling) · canon deltas as ruled ·
+the in-flight row retired + closeout paragraph · tickets closed (VX-6, VX-64) · MOBILE PARITY
+line (expected: "nothing mobile-visible" — the phone's restore story rides enroll-by-sync) ·
+the handoff `notes/handoffs/phase-13x-handoff.md` · PR `VX-6: …` as a MERGE COMMIT (after 13o
+per the serialized rule) · worktree removed · build-debris tidy · hard stop.
+
+### ENVIRONMENT TRAPS (every brief carries these + the architect skill's invariant core
+verbatim-by-reference)
+
+- Restore drills on THROWAWAY scopes and the fake server ONLY — never her real store; the A1
+  rail before any real-store act; never quit/kill a real-store instance.
+- Every `xcodebuild test` run claims `Tools/stage` (13o and 13s run beside us); headless
+  `swift build`/`swift test` is free.
+- ZERO `Sync/`/custody edits before 13o's merge (the slot redirect above) — if a piece demands
+  one, STOP, record, and re-sequence it into U2's post-merge half.
+- Work from `~/dev/variorum-13x` only; push after every commit; the resiliency protocol binds.
+
+### THE LEDGER (every row owned; statuses flip in the same commit as the work)
+
+| # | item | owner | status |
+|---|---|---|---|
+| 1 | The classifier (verdict table pinned) | U1 | NOT STARTED |
+| 2 | The hand-off producer (folder pair; round-trip pin) | U1 | NOT STARTED |
+| 3 | Adopt-by-copy move-aside brain (mechanics PROVISIONAL → QUESTIONS) | U1 | NOT STARTED |
+| 4 | Custody-collision memo + rule (read-only now; write-path → U2 post-merge if needed) | U1 | NOT STARTED |
+| 5 | VX-64 — VaultBootstrap onto StoreUnlock (closes the ticket) | U1 | NOT STARTED |
+| 6 | The two doors + welcome/waiting/absent-store slots | U2 | NOT STARTED |
+| 7 | The restore-hold landing state, both doors (banner · Resume · outbox-at-Resume) | U2 | NOT STARTED |
+| 8 | The Resume reconciliation (enroll/follow/adopt · export's four tables · returner) | U2 | NOT STARTED |
+| 9 | The iCloud-Drive live-library guard (pre-13x ledger 4) | U2 | NOT STARTED |
+| 10 | The drills (per-leg; the fake server; the stale-outbox pin) | U2 | NOT STARTED |
+| 11 | The FAQ brief un-flagged + handed out (Q4) | U3 | NOT STARTED |
+| 12 | Canon deltas · closeout ritual · handoff · PR after 13o | U3 | NOT STARTED |
+
+### BATCH U1 BRIEF (spawn-ready; a FRESH Fable implementer, ONE session)
+
+Read, in order: `CLAUDE.md` + its auto-canon; `notes/SessionResiliencyProtocol.md` (the
+checkpoint protocol binds from the FIRST commit; synchronous foreground waits only; no
+subagents); **this file WHOLE**; `notes/plans/pre-13x-postures-design.md` §§1–3, §6, §14
+(corners 13 · 33 · 44) and its ledger rows 4 · 5 · 14 · 22; `notes/plans/pre-13x-copy.md` §6 +
+§8; `notes/SyncSpec.md` §3 + §7 (READ for context — you edit NOTHING under
+`Sources/VariorumCore/Sync/` or the custody/keychain items this session; the slot redirect
+above is binding). Code: `Sources/VariorumCore/Persistence/{StoreKey,StoreKeyEnvelope,
+StoreBinding,AppDatabase+Dependency}.swift`, `App/Variorum/Shared/{StoreBackup,StoreProtection,
+AppBootstrap}.swift`, `Tools/VaultBootstrap/VaultBootstrapMain.swift`,
+`Tools/StringsWorkbook/Sources/StoreUnlock.swift`.
+**Do:** ledger rows 1–5, in that order, per the U1 section above. Work in
+`~/dev/variorum-13x` on `vx-6-13x-library-portability`; commit per piece, push after every
+commit; LIVE STATUS section (append a `### U1 RECORD` below) from the first commit. The
+hallucination guard binds: VX-64's fix lands with a red-on-old pin verified by behavioural
+revert; every classifier verdict pinned red-first where it guards a refusal. Mac-suite runs
+claim the stage (`Tools/stage claim` / `release`); headless core runs don't. **Never** touch
+her real store, `Sync/`, custody items, or `Persistence/Migrations.swift` (13o holds v1_22
+there). Ambiguity that gates a row: STOP and write it into the record for the orchestrator.
+PROVISIONAL otherwise, recorded per row.
