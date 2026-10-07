@@ -855,6 +855,20 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   was 2234/251, the +13/+4 are this batch's suites). The MAC APP TARGET COMPILES clean with
   every face wired (`xcodebuild -scheme Variorum build`, `** BUILD SUCCEEDED **` — a compile
   is not a stage act; no test host, no store).
+- **The Mac pins — `VariorumTests/LibraryPortabilityDoorTests`, WRITTEN AND COMPILED
+  (`build-for-testing` `** TEST BUILD SUCCEEDED **`), RUN PENDING-BEHIND-THE-STAGE** (one
+  `-only-testing:VariorumTests/LibraryPortabilityDoorTests` pass when the orchestrator files
+  the slot): the HOLD GATE (held → zero transport calls on trigger AND flush; resumed → one
+  round runs), the hold model's marker→Resume round-trip (Resume once, idempotent), the
+  PICKER REFUSAL (the live library's folder refused with the ONE sentence, nothing
+  remembered; a sibling folder accepted), the flow's bare refusal speaking QC's remedy, and
+  the WHOLE FLOW over a real pair (typed road — a wrong word refuses and stays; the right
+  word confirms; adopt lands byte-identical + canonical key file + the HOLD standing +
+  custody carrying the opener + reopen into ready). **The two red-on-old reverts run WITH
+  that slot** (recorded in the test file's header): revert `SyncSession`'s two `roundsHeld`
+  guards ⇒ the gate pin reds; revert `acceptPickedFolder`'s placement guard ⇒ the picker pin
+  reds. The refactor behind the picker pin: `chooseFolder` split at the panel seam
+  (`acceptPickedFolder` — a real `NSOpenPanel` cannot run under a test host).
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 

@@ -250,6 +250,13 @@ final class DataSafetyModel {
         guard !busy else { return }
         guard let picked = ExportPanels.chooseFolder(
             prompt: "Use This Folder") else { return }
+        await acceptPickedFolder(picked)
+    }
+
+    /// The post-panel half, its own door so the pins can drive it (a real
+    /// `NSOpenPanel` cannot run under a test host).
+    func acceptPickedFolder(_ picked: URL) async {
+        guard !busy else { return }
         // 13x U2 row 9 (pre-13x ledger 4; copy §8's recorded note): the
         // live library's own folder — or one that contains it — is never
         // a backup destination; the refusal renders copy §6's why-not
