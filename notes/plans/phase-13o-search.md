@@ -238,6 +238,15 @@ for EXTERNAL facts only (e.g. FTS5/GRDB API confirmation), read-only — never f
 
 ### U1 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
+**U1 CLOSED (2026-10-06) — what U1 did NOT do, first:** no faces and no app wiring (the Library
+field, ⌘K, a Settings "rebuild" row, a post-restore integrity pass — U2's and later); no
+tag-association join, mode facets or within-a-GATHERING scope (U3's — P-13o-U1-10); no canon
+deltas (the closeout's — R-13o-4's OverallModel §9 / AppSpec §6 lines); no `notes/QUESTIONS.md`
+entries (a shared ledger, touched only at the merge moment — the PROVISIONALs P-13o-U1-1…10 below
+ride to the closeout ratify bundle, as the architect ruled for 1–4); no walk or GUI evidence (the
+brief's headless-only rule — this unit's evidence is the suites, the revert/sensitivity probes and
+the counter-pinned P1 numbers); zero `Sync/` lines from this seat (seam 2 was the architect's).
+
 **Seat:** the U1 implementer (Opus, xhigh), seated 2026-10-06 in `~/dev/variorum-13o` on
 `vx-5-13o-search`. Required reading done in-context (this file whole, SyncSpec in full, the
 resiliency protocol; plus the code it names — `Migrations.swift`, `Triggers.swift`,
@@ -258,9 +267,9 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | DONE (`77aedb95` + this commit) — `SearchIndexCaptureTests` 11/11 green; every layer's pin RED under its trigger's revert (the table below). Wing ISOLATION is a query property → P7's pins. |
 | P7 | The ONE Domain SQL composer (AST → SQL) + `Queries.searchPassages(_:scope:filters:)` — bm25 ranked (title-weighted, rendered-take boosted), snippeted, wing-scoped always, note/book scopes, archived facet, paged with a road to everything (R-13o-9); EXPLAIN pins | DONE (this commit) — `Domain/SearchComposer.swift` (the one composer: `ftsMatch` quotes every leaf as an FTS5 string — no user text is ever FTS5 syntax, separator-only words drop, negation-only text refuses; `passages` = FTS MATCH → doc by rowid → home via the I2 placement seek + container/block/reading PKs → wing (ALWAYS) · within · archived facet · version fence · the filter tree → `bm25 × kind weight × rendered boost` → keyset page on (score, doc id) → snippets for the PAGE rows only (a page-driven `CROSS JOIN` FTS lookup by rowid); `wornDay` = the dated arm (seeks `idx_container_entry_date`) + the undated arm (one range per window on `idx_container_undated_created`, UNION ALL'd); the filter half: #path/tag-id SUBTREE driven from the root (an index RANGE on `uq_tag_path_live`), starred, day RANGE (edited = the shipped union rule, now `Queries.editedOnSQL(alias:)` with `editedOnClause` its byte-identical nil form, pinned) / created, family). `Queries/SearchQueries.swift`: `searchPassages(_:query:scope:after:limit:calendar:)` → `SearchPage {passages, next}`; `SearchPassage` (kind · source · family · note/block/reading · `homeTitle` by `DisplayTitle` · archived · rendered · snippet segments); the worn-day arm confirmed by `DisplayTitle` itself (one display brain). `SearchPassagesTests` 14/14 green. **PROVISIONALs:** P-13o-U1-5 scraps list in every wing (the shipped catalog's P-13id-U5-4 kept); P-13o-U1-6 the kind weights (title/book 3 · chapter 2.5 · block name 2 · label 1.5 · take 1 · comment/floating notes 0.8) and the rendered boost ×1.25; P-13o-U1-7 a text-less query returns no passages (filter-only browsing stays the Library listing); P-13o-U1-8 a released (unplaced) block's takes stay indexed but never list (no home to land in); P-13o-U1-9 a typed `#path` matches case-insensitively; P-13o-U1-10 within-a-GATHERING scope (a rule, no rows) is U3's — `.book(id)` on a gathering finds only its own name. |
 | P8 | P1 measurements as pins + the NUMBERS here (update cost ∝ the edit, flat across corpus sizes; query cost ∝ matches; the keystroke road bounded) + the architect's addition: the integrity check's DRIFT pin | DONE (this commit; sensitivity probes PENDING, below) — `SearchP1Tests` 2/2 green: (1) PAGE REQUESTS (`SQLITE_DBSTATUS_CACHE_HIT+MISS`, deterministic) over two corpora of one shape, 2k and 10k blocks (5×), capture triggers live: **autosave 24.1 → 26.1 pages/edit** (flat, pinned ≤ 1.5×); **fixed-match queries** (20 probe takes): `zanzibar` 335 → 467 · `zanzibar quokkaprobe` 413 → 634 · the type-ahead `quokkapr` 334 → 468 (pinned ≤ 2× — the residue is logarithmic: each per-match B-tree seek and FTS5's segment levels deepen ~one page; a corpus-proportional cost would be ≥ 5×); **an every-block term** `the` 8,368 → 49,251 (∝ matches, pinned > 3×). (2) **DRIFT**: a take's text changed with its capture trigger dropped → the doc set reads whole but `indexMatchesContent` = false; the rebuild heals; the new words become findable. **A P7 correction found BY these pins:** the snippet stage had been page-DRIVEN (`page CROSS JOIN search_fts` — one FTS5 query per page row by rowid); FTS5 re-opens every segment per such query — 802 page requests for a 20-row page vs 326 for one more walk of the matches joined to the page (Bloom-filtered) — so the composer now walks once (`search_fts JOIN page`) and the EXPLAIN pin says so. |
-| P9 | Close: the named suites green at the END, every claim flipped from PENDING, the report | NOT-STARTED |
+| P9 | Close: the named suites green at the END, every claim flipped from PENDING, the report | DONE (this commit) — **the full core suite at the END: `swift test` EXIT 0 — VariorumCoreTests 2,255 tests in 253 suites PASSED (incl. the 3 gated bench tests counted-as-skipped, the live-Supabase pass and `writeAScratchLibraryLikeHers` skipped as before) + StringsWorkbookTests 40 in 6 PASSED.** The U1 search suites alone: `SearchQueryParserTests` + `SearchDateParseTests` 19 · `SearchIndexCaptureTests` 11 · `SearchPassagesTests` 14 · `SearchP1Tests` 2 · `MigrationTests` 28 (incl. the backfill pin). No PENDING claim remains. |
 
-PENDING flags: none yet.
+PENDING flags: none (every claim below is verified).
 
 **P6 REVERT PROBES — DONE, tree restored and re-verified green (11/11).** Each probe edited ONLY
 `Persistence/SearchIndex.swift` (committed clean at `77aedb95`), ran `SearchIndexCaptureTests`,
@@ -283,8 +292,9 @@ runs its loop (the probe was mis-aimed, not the pin). **S2b** — `+kind/+src_id
 per-edit RETIRE lookup: the autosave pin goes RED (38.1 → 97.1 pages/edit across 5×). The P1 pins
 catch a corpus walk on both roads.
 
-**LIVE STATUS (2026-10-06): P0–P8 DONE, P9 (the full core suite) RUNNING — PENDING.** Seam 2
-landed by the architect (`46ced35a`); P5–P8 built on it. The tree is clean; no revert in flight.
+**LIVE STATUS (2026-10-06): U1 CLOSED — P0–P9 DONE, the full core suite green at the end, the
+tree clean, nothing reverted or in flight.** Ready for the orchestrator (U2 is gated on the mockup
+pick; the ladder runs over the combined diff after U3).
 
 **SEAM 2 — THE RED'S EXACT SHAPE** (full core suite after `v1_22`: 2227 tests in 250 suites, ONE
 failing expectation, everything else green — the gated bench's 3 tests skip as designed):
