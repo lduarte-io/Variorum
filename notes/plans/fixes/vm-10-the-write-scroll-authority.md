@@ -1,5 +1,14 @@
 # VM-10 — The Write page's SCROLL AUTHORITY (her one pull-forward)
 
+> **NOT DONE BY THE IMPLEMENTER (read first):** no cold review (the orchestrator's — Fable, per the cast) · MobileSoul
+> PL-22's flip, VM-10 → Done, and the phone-install offer (the orchestrator's close) · no ON-DEVICE run (simulator
+> iOS 26.2 only; her phone is 26.6) · arm 3's keyboard-up evidence is the in-process forced-keyboard trace + the
+> clock-seam guard pin, NOT a real-finger `.interactive` drag (XCUITest swipes never engaged the interactive
+> dismissal) · arm 1's "caret in block 3, nothing remembered → block 1" red-on-old pin is HOLLOW (every arrival road
+> already landed at the top — recorded, not fixed) · ONE line outside the brief's three files
+> (`Features/Shell/MobileShellRouter.swift`, the memory's owner — PROVISIONAL #200(c)) · `notes/QUESTIONS.md` #200
+> minted on the branch at the brief's instruction (the shared ledger, normally a merge-moment touch).
+
 **Ticket: VM-10 · Project: Mobile — editor & capture faces · Branch: `vm-10-the-write-scroll-authority` · Worktree: `~/dev/variorum-vm-10` (cut from main @ `0f0624e7`, post-VM-5)**
 
 ## Her words (the binding product rule)
@@ -216,4 +225,35 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     (re-entry with memory) ✓ · with the keyboard up the caret's line is visible → `03a`, `07c`, `08c`, `09a` ✓.
     `04a`/`04b` are the misfired run-1 step (kept, labelled as such above).
   - The temporary probe (`MobileWriteScrollTraceProbe.swift`) and the throwaway driver (`VM10WalkDriver.swift`)
-    are DELETED. Final suites — PENDING (next).
+    are DELETED.
+  - **FINAL SUITES (the simulator rebooted first — the walk had detached the hardware keyboard system-wide — and the
+    accessibility flag re-armed to 1 after the reboot reset it to 0):** the FULL mobile suite, once:
+    **"Test run with 818 tests in 128 suites passed … with 4 known issues"** (`** TEST EXECUTE SUCCEEDED **`) — the
+    ~808/126 baseline + this unit's 10 tests in 2 suites, exact; zero skipped; the 4 known issues are the standing
+    ones (2 × `MobileTrashTests` — the deliberate empty-tree diagnostic; 2 × `MobileTutorialWalkTests` — the fanned
+    divide lesson). The touched suites inside it: `MobileWriteScrollAuthorityTests` 8/8 · `MobileScrollAuthorityBrainTests`
+    2/2 · `MobileBlockListTests` (the `jumpToBlock` road) · `MobileTypewriterRoomTests` (the room's existence) ·
+    `MobilePerfWalkTests` (the 100k typing budget, with the per-layout place read in) — all green.
+  - **FENCE (whole branch, `0f0624e7..HEAD`):** `Features/Write/MobileEditorTextView.swift` ·
+    `MobileEditorViewModel.swift` (the arrival road + the gate delegate's scroll-delegate forward, nothing in routing)
+    · `MobileWriteView.swift` · `Features/Shell/MobileShellRouter.swift` (one stored property) · the pins file ·
+    notes. Nothing in `Shared/`, `Sources/`, `Sync/`, schema, project or scheme files.
+
+## DISPOSITIONS (implementer close, 2026-10-07)
+
+| Arm | Disposition | Pin(s) · the red-on-old number |
+|---|---|---|
+| **1 · the arrival** | **(a) "nothing remembered → TOP": HOLLOW** — true on the pre-fix tree on every road measured (bare screen focus off/on, the real shell's Library push, keyboard up, tap-to-continue); not fixed, guarded. Her "opens showing none of the text" did not reproduce from any arrival road on this tree: the measured producer of a text-less page is arms 2/3's room reveal, which fires the moment she types ⏎ or the keyboard re-places — FIXED there. **(b) the session memory: FIXED.** **(c) the room stays: untouched.** | (a) `aNoteNeverVisitedOpensAtTheTop` — guard, green on old (offset 0, first char 1). (b) `aNoteLeftMidwayReopensWhereSheLeftIt` — **RED on old: re-entry offsetY 0 where she left at char 970**; green: 881.3 / char 970. (c) `MobileTypewriterRoomTests` green |
+| **2 · the ⏎ forced scroll** | **FIXED** — the scroll authority (rule 1: no reveal reaches past the text's foot; both layers) | `aReturnAtTheEndRevealsTheNewLineMinimallyAndKeepsTheText` — **RED: 1689.7 → 2439.3 (pre-fix tree) / 1721.7 → 2471.3 (revert), first visible = the new empty line 2691**; green: 1721.7 → 1754.3, first visible 1922. `aReturnAtTheEndOfAShortNoteKeepsTheWholeNoteOnScreen` — **RED: 0 → 254, first visible 267 (whole note gone)**; green: stays 0. Guard: `aReturnMidDocumentStillRevealsTheCaretMinimally` |
+| **3 · the scroll-back fight** | **FIXED, honest shape** (gesture timing is not synthesizable in process): the traced mechanism — the keyboard's placement re-running `_scrollToSelectionIfNeeded` with the room rect (forced keyboard: **1643.3 → 2435.0, first/last visible 2680/2691**), plus the keyboard tracking-element road that bypassed the subclass override — + rule 2 (her gesture holds the page) + the second layer + the walk captures `08a`/`08b` | `whileHerPanHoldsThePageNoRevealMovesIt` (the fix's own guard pin, clock seam — not red-on-old) · `MobileScrollAuthorityBrainTests` ×2 · forced-keyboard probe, after: within-window round trip holds (1257.3/1449.3 untouched), refocus **15/15 minimal** (was 5/5 on the room before the second layer). Guards green on old: `aRelayoutAfterHerScrollUpNeverForcesTheRoom` (hardware-keyboard mode never reaches the placement road) · `typingAfterScrollingTheCaretAwayRevealsItMinimally` |
+
+**PROVISIONAL (QUESTIONS #200):** (a) the 0.6 s her-gesture window · (b) the caret remembered with the page ·
+(c) the memory owned by `MobileShellRouter`.
+
+**Second-order facts found on the way (each now pinned or recorded above, for TEXTKIT2's iOS section at the
+orchestrator's word):** UIKit pads the LAST (extra) line fragment's reveal rect with the bottom
+`textContainerInset`; the keyboard tracking-element road can reach UIScrollView's `scrollRectToVisible` without a
+subclass's override; mid-placement `contentSize` and a bounds-derived inset disagree for an instant; a caret reveal
+computed on TK2 estimates can leave the caret under the keyboard, and `scrollRectToVisible` declines to move while
+the estimated `contentSize` ends above the laid-out caret; headless simulators keep hardware-keyboard mode and
+`GSEventSetHardwareKeyboardAttached(false, 0)` (from any process) flips it system-wide until a reboot.
