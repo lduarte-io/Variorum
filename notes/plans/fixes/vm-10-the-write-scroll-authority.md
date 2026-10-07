@@ -197,4 +197,23 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
   - While parked: `cec83e59` — `currentPlace()` takes the direct TK2 fragment lookup at the viewport's top first
     (it runs on every layout pass that moves the page), `closestPosition` as fallback. **COMPILED ONLY — its pin run
     is PENDING** (the stage is another session's until the resume).
-  - Walk captures — run 1 inspected (5/6 items ✓, end-of-note re-walk prepared). Final suites — PENDING.
+  - **RESUMED 03:39** (the orchestrator re-claimed the stage). `cec83e59`'s pins: **10/10 green**. Machinery: the
+    simulator's accessibility flag read **0** after the interleave (it was 1 at start) — re-armed to 1 before any
+    further run.
+  - **WALK RUN 2 (`testWalkEnd`, the end-of-note road walked as she journals; keyboard up) — ALL ✓:**
+    `07a-today-entry-caret-at-end` · `07b-after-return-5` / `07b-after-return-7` · **`07c-return-at-the-end-of-a-
+    growing-entry`** (⏎ at the end of nine typed paragraphs: paragraphs 6–9 on screen, the caret on the new line at
+    the page's foot — the forced empty page is gone) · `08a-scrolled-back-up-after-return` → **`08b-scrolled-back-
+    up-3s-later`** (her drag back up holds; the entry's top on screen 3 s later) · `08c-typing-again-after-
+    scrolling-up` (the next keystroke reveals the caret's line minimally, text above it) · **`09a-today-door-re-
+    entry-remembers`** (back out, Today's Entry again: her place and her caret, keyboard up, ready to type) ·
+    `09b-today-door-re-entry-typing` (typing lands at her caret).
+  - **THE WALK'S CAPTURE LIST (both runs; gitignored `notes/plans/vm-10-screens/`):** a long note opened cold shows
+    its first lines → `01-long-note-opened-cold` ✓ · a note left mid-way re-opens there → `02a`/`02b`/`02c` ✓ · ⏎
+    mid-note does not jump to empty page → `03a`/`03b` ✓ (also `04c`/`04d`, a second mid-note ⏎) · ⏎ at the END
+    does not jump → `07b`/`07c` ✓ · scroll-up after ⏎ sticks → `05b` (mid-note) and `08a`/`08b` (end of note) ✓ ·
+    the Today door's straight-into-typing arrival lands ready to type → `06a`/`06b` (fresh entry) and `09a`/`09b`
+    (re-entry with memory) ✓ · with the keyboard up the caret's line is visible → `03a`, `07c`, `08c`, `09a` ✓.
+    `04a`/`04b` are the misfired run-1 step (kept, labelled as such above).
+  - The temporary probe (`MobileWriteScrollTraceProbe.swift`) and the throwaway driver (`VM10WalkDriver.swift`)
+    are DELETED. Final suites — PENDING (next).
