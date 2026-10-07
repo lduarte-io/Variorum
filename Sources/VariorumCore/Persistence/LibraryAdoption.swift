@@ -17,6 +17,9 @@ import Foundation
 //   3. the A1-shaped SAFETY COPY: the closed store's bytes and every key
 //      file beside it, into `Backups/safety-copies/
 //      variorum-adopt-safety-<stamp>/` (the standing A1 rail's home);
+//   3½. the RESTORE HOLD, when the caller asks for one (13x F1, ladder
+//      R1-M2): written BEFORE the move so a failed write refuses with
+//      nothing moved and nothing ever lands un-held;
 //   4. the MOVE ASIDE: the store, its (quiet) sidecars and every key file
 //      move WHOLE into `Previous Libraries/<stamp>/` — never deleted; the
 //      old library's key files are its recovery legs and travel WITH it
@@ -76,12 +79,34 @@ public enum LibraryAdoption {
         case libraryLooksOpen(String)
         /// Step 3 failed — NOTHING has moved; the library stands as it was.
         case safetyCopyFailed(String)
+        /// 13x F1 (ladder R1-M2): step 3½ failed — the RESTORE HOLD could
+        /// not be written. NOTHING has moved (the safety copy may exist —
+        /// a read-only addition); the adoption refuses rather than land a
+        /// copy that would catch up silently at the next trigger.
+        case holdWriteFailed(String)
         /// Step 4 failed mid-move — the safety copy exists; what moved is
         /// in the aside folder, the rest in place. The message says both.
         case moveAsideFailed(String)
         /// Step 5 failed — the old library is whole in the aside home AND
         /// the safety copy; the store path may be empty (§3.7 routes it).
         case landingFailed(String)
+    }
+
+    /// 13x F1 (ladder R1-M2): the restore hold written INSIDE the
+    /// adoption, between the safety copy and the move — so a failed write
+    /// refuses with NOTHING moved, nothing ever lands un-held, and the
+    /// ordinary refusal arms (steps 1–3) never leave a stray marker. The
+    /// marker is not in the departing set, so it stands beside the landed
+    /// copy; a post-hold failure leaves it standing — the conservative
+    /// direction (`LibraryRestoreHold.read`'s own: unreadable means held).
+    public struct HoldRequest: Equatable, Sendable {
+        /// The adopted copy's own day (the banner's clause; nil = unknown).
+        public var asOf: Date?
+        public var now: Date
+        public init(asOf: Date?, now: Date) {
+            self.asOf = asOf
+            self.now = now
+        }
     }
 
     /// The pure half: every URL, from the inputs and the clock alone.
@@ -122,9 +147,12 @@ public enum LibraryAdoption {
     }
 
     /// The acting half. Blocking (library-sized copies) — callers run it
-    /// off the main thread with the pool CLOSED.
+    /// off the main thread with the pool CLOSED. `holding` non-nil writes
+    /// the RESTORE HOLD between the safety copy and the move (R1-M2 —
+    /// the adoption doors pass it; a failed write refuses with nothing
+    /// moved); nil keeps the pure file mechanics (the drills' own calls).
     @discardableResult
-    public static func execute(_ plan: Plan) throws -> Receipt {
+    public static func execute(_ plan: Plan, holding: HoldRequest? = nil) throws -> Receipt {
         let fm = FileManager.default
 
         // 1. The source pair, verified readable — before anything changes.
@@ -183,6 +211,19 @@ public enum LibraryAdoption {
                 }
             } catch {
                 throw AdoptionError.safetyCopyFailed(String(describing: error))
+            }
+        }
+
+        // 3½. The RESTORE HOLD (R1-M2) — BEFORE the move, so a failed
+        //     write refuses with nothing moved and nothing ever lands
+        //     un-held. The refusal arms above never reach this line, so
+        //     an ordinary refusal leaves no stray marker.
+        if let holding {
+            do {
+                try LibraryRestoreHold.set(
+                    besideStore: plan.storeURL, asOf: holding.asOf, now: holding.now)
+            } catch {
+                throw AdoptionError.holdWriteFailed(String(describing: error))
             }
         }
 

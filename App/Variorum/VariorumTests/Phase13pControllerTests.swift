@@ -1228,6 +1228,42 @@ struct Phase13pControllerTests {
         #expect(w.backing.gated == key && w.backing.auto == nil, "custody untouched until she types")
     }
 
+    /// 13x F1 (ladder R1-M1 — P-R1-1): a standing RESTORE HOLD refuses
+    /// the two ROTATION ceremonies at the door, one sentence — their road
+    /// drains the outbox and pulls to head before any screen (`rotate`
+    /// step 1), which would breach round 3's "no round runs until Resume"
+    /// and QD's "the kept outbox pushes at Resume". Use Standard stays
+    /// open (traced honest: `leaveCastle` drives no engine), and a nil
+    /// hold wiring never refuses (every composition without the Mac's
+    /// marker projection is unchanged). RED ON OLD: the guard removed ⇒
+    /// `.enter`/`.replaceKeys` sail past the door under a standing hold.
+    @Test func aStandingRestoreHoldRefusesTheRotationCeremoniesAtTheDoor() async throws {
+        let w = try world(standard: false, enrolled: true)
+        w.controller.restoreHoldStands = { true }
+        let runner = PostureSwitchRunner(leaves: inertLeaves(for: w))
+        for mode in [PostureSwitchModel.Mode.enter, .replaceKeys] {
+            let model = PostureSwitchModel(
+                mode: mode, runner: runner, controller: w.controller, vaultTie: nil)
+            await model.start()
+            #expect(model.phase == .failed(ProtectionCopy.resumeSyncFirst),
+                    "\(mode): \(model.phase)")
+        }
+        // Use Standard is not the breach class: whatever the inert
+        // runner's door then answers, it is never the hold's sentence.
+        let leave = PostureSwitchModel(
+            mode: .leave, runner: runner, controller: w.controller, vaultTie: nil)
+        await leave.start()
+        #expect(leave.phase != .failed(ProtectionCopy.resumeSyncFirst), "\(leave.phase)")
+        // No hold wired ⇒ nothing refuses on its account.
+        let unwired = try world(standard: false, enrolled: true)
+        let unwiredModel = PostureSwitchModel(
+            mode: .replaceKeys, runner: PostureSwitchRunner(leaves: inertLeaves(for: unwired)),
+            controller: unwired.controller, vaultTie: nil)
+        await unwiredModel.start()
+        #expect(unwiredModel.phase != .failed(ProtectionCopy.resumeSyncFirst),
+                "\(unwiredModel.phase)")
+    }
+
     /// pre-13x 3a (ledger 43 — the follow's own carry, as the REGRESSION
     /// guard the brief names): the device identity rides every custody
     /// move — silent → the gate (the identity-only bound item beside the

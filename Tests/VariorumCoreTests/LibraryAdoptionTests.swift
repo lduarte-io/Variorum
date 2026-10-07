@@ -196,6 +196,78 @@ struct LibraryAdoptionTests {
     }
 
     /// REFUSALS that change NOTHING on disk.
+    /// 13x F1 (ladder R1-M2): the RESTORE HOLD rides INSIDE the adoption —
+    /// written between the safety copy and the move — so (a) a successful
+    /// adoption lands ALREADY held, (b) a failed hold write REFUSES with
+    /// nothing moved (`holdWriteFailed`; before this fix the doors'
+    /// `try? LibraryRestoreHold.set` at completion swallowed the failure
+    /// and the landed copy caught up silently at the next trigger — the
+    /// exact silent catch-up round 3 exists to prevent), and (c) the
+    /// ordinary refusal arms never leave a stray marker. The failure seam
+    /// is seeded by occupying the marker's path with a non-empty
+    /// directory. RED ON OLD: the step-3½ block removed ⇒ the
+    /// blocked-marker adoption SUCCEEDS, un-held.
+    @Test func theHoldRidesInsideTheAdoptionAndAFailedWriteRefusesWithNothingMoved() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
+        let oldKey = try makeLibrary(at: storeURL, passphrase: "old word", marker: "the-old-library")
+        _ = oldKey
+        let oldKeyFile = try #require(StoreKeyEnvelope.locate(besideStore: storeURL))
+        let oldStoreBytes = try Data(contentsOf: storeURL)
+        let sourceStore = dir.appendingPathComponent("arrival/variorum.sqlite")
+        _ = try makeLibrary(at: sourceStore, passphrase: "new word", marker: "the-arriving-copy")
+        let sourceKeyFile = try #require(StoreKeyEnvelope.locate(besideStore: sourceStore))
+
+        // (c) An ordinary refusal with a hold REQUESTED leaves no stray
+        // marker — the refusal arms run before step 3½.
+        let refusing = LibraryAdoption.plan(
+            adopting: dir.appendingPathComponent("nowhere/variorum.sqlite"),
+            keyFile: sourceKeyFile, intoStoreAt: storeURL,
+            now: Date(timeIntervalSince1970: 1_800_000_050))
+        #expect {
+            try LibraryAdoption.execute(refusing, holding: .init(asOf: nil, now: Date()))
+        } throws: { error in
+            if case LibraryAdoption.AdoptionError.sourceMissing = error { return true }
+            return false
+        }
+        #expect(!LibraryRestoreHold.isHeld(besideStore: storeURL),
+                "a refused adoption writes no marker")
+
+        // (b) The marker's path occupied by a NON-EMPTY DIRECTORY: the
+        // hold write fails ⇒ the adoption refuses with NOTHING moved.
+        let markerURL = LibraryRestoreHold.markerURL(besideStore: storeURL)
+        try FileManager.default.createDirectory(at: markerURL, withIntermediateDirectories: true)
+        try Data("occupant".utf8).write(
+            to: markerURL.appendingPathComponent("occupant", isDirectory: false))
+        let blocked = LibraryAdoption.plan(
+            adopting: sourceStore, keyFile: sourceKeyFile,
+            intoStoreAt: storeURL, now: Date(timeIntervalSince1970: 1_800_000_100))
+        #expect {
+            try LibraryAdoption.execute(blocked, holding: .init(asOf: nil, now: Date()))
+        } throws: { error in
+            if case LibraryAdoption.AdoptionError.holdWriteFailed = error { return true }
+            return false
+        }
+        #expect(try Data(contentsOf: storeURL) == oldStoreBytes,
+                "the old library stands byte-identical — nothing moved")
+        #expect(!FileManager.default.fileExists(atPath: blocked.asideFolder.path),
+                "no move-aside began")
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.lastPathComponent
+                == oldKeyFile.lastPathComponent, "the old key file still serves the path")
+
+        // (a) The obstruction removed: the adoption lands — ALREADY held,
+        // with the as-of day riding the marker.
+        try FileManager.default.removeItem(at: markerURL)
+        let asOf = Date(timeIntervalSince1970: 1_780_000_000)
+        let good = LibraryAdoption.plan(
+            adopting: sourceStore, keyFile: sourceKeyFile,
+            intoStoreAt: storeURL, now: Date(timeIntervalSince1970: 1_800_000_200))
+        try LibraryAdoption.execute(good, holding: .init(asOf: asOf, now: Date()))
+        let hold = try #require(LibraryRestoreHold.read(besideStore: storeURL))
+        #expect(hold.asOf == asOf, "the landed copy is held, carrying its own day")
+    }
+
     @Test func aHotWalRefusesBeforeAnythingMoves() throws {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }

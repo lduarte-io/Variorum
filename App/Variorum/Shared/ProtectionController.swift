@@ -468,6 +468,12 @@ final class ProtectionController {
     /// `followIntoStandard()`, wired by the composition root; nil = no
     /// runner (the reconcile only records the reading).
     @ObservationIgnored var followIntoStandardAct: (@MainActor () async throws -> Void)?
+    /// 13x F1 (ladder R1-M1 — P-R1-1): does a RESTORE HOLD stand on this
+    /// library (round 3's landing state)? Wired by the composition root
+    /// to the same marker projection the sync gate reads; nil = never
+    /// held (every existing composition unchanged). The two ROTATION
+    /// ceremonies' door consults it and refuses with one sentence.
+    @ObservationIgnored var restoreHoldStands: (@MainActor () -> Bool)?
 
     func openFollow() {
         guard activeFollow == nil else { return }

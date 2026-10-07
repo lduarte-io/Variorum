@@ -278,9 +278,14 @@ final class LibraryOpenModel {
             work = {
                 let plan = LibraryAdoption.plan(
                     adopting: source, keyFile: keyFile, intoStoreAt: storeURL, now: Date())
-                try LibraryAdoption.execute(plan)
+                // 13x F1 (R1-M2): the hold rides INSIDE the adoption,
+                // written before the move — a failed write refuses with
+                // nothing moved; nothing ever lands un-held (the old
+                // `try?` here swallowed exactly the silent catch-up
+                // round 3 exists to prevent).
+                try LibraryAdoption.execute(
+                    plan, holding: .init(asOf: asOf, now: Date()))
                 Self.landCustody(openingKey: key, scope: scope, storeURL: storeURL, gate: gate)
-                try? LibraryRestoreHold.set(besideStore: storeURL, asOf: asOf, now: Date())
             }
         case .plaintext(let source):
             // Ledger 5's road: land → recreate the four local tables
@@ -293,7 +298,11 @@ final class LibraryOpenModel {
             work = {
                 let plan = LibraryAdoption.plan(
                     adopting: source, keyFile: nil, intoStoreAt: storeURL, now: Date())
-                try LibraryAdoption.execute(plan)
+                // 13x F1 (R1-M2): the hold inside the adoption, before
+                // the move (see the encrypted road's note) — the later
+                // mint steps run on a landed copy that is ALREADY held.
+                try LibraryAdoption.execute(
+                    plan, holding: .init(asOf: asOf, now: Date()))
                 try LocalMachineryRecreation.recreateIfMissing(inPlaintextStoreAt: storeURL)
                 let storeID = try StoreIdentity.establish(besideStore: storeURL, key: freshKey)
                 gate.saveDials(ProtectionDials(), scope, storeID)
@@ -301,7 +310,6 @@ final class LibraryOpenModel {
                 // plaintext store's open mints into custody) — recorded,
                 // not hidden; the reopen below carries the key either way.
                 _ = gate.guardFor(scope).saveAuto(freshKey)
-                try? LibraryRestoreHold.set(besideStore: storeURL, asOf: asOf, now: Date())
             }
         }
         do {

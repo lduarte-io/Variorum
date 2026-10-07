@@ -196,6 +196,10 @@ struct VariorumApp: App {
                             hold.onResume = { [weak fresh] in
                                 await fresh?.resumeSync()
                             }
+                            // 13x F1 (R1-M1): the rotation ceremonies'
+                            // door reads the SAME projection — Replace
+                            // All Keys / Use Castle refuse while held.
+                            bootstrap.protection.restoreHoldStands = { hold.isHeld }
                         }
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every

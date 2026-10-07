@@ -680,6 +680,11 @@ nonisolated extension ProtectionCopy {
     static let followWaitingDoor = "Enter…"
     /// On every key door meanwhile.
     static let pickUpKeysFirst = "Pick up your new keys first — enter your passphrase."
+    /// 13x F1 (ladder R1-M1 — P-R1-1; words PROVISIONAL, 13s re-voices):
+    /// the restore hold's sentence at the two rotation ceremonies' door.
+    static let resumeSyncFirst =
+        "Resume sync first — this library was just restored from a copy, and sync "
+        + "is waiting for your go."
     // Account moved to Standard (a device that was Castle)
     static func followMovedToStandard(device: String, day: String) -> String {
         "Your account is back in Standard — set on \(device) on \(day). This \(deviceName) "
