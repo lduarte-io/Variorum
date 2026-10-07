@@ -847,7 +847,10 @@ struct LibraryCatalogView: View {
         // The TITLE opens instantly, as today (her click model — the body
         // selects, the words open).
         CatalogBookLine(
-            tokens: tokens, title: hit.title, detail: hit.detail,
+            tokens: tokens, title: hit.title,
+            // 13o U3: under the archived facet an archived book says so.
+            detail: model.searchState.archivedBooks.contains(hit.id)
+                ? LibrarySearchCopy.archivedBookDetail(hit.detail) : hit.detail,
             // 13o U3: an ASSOCIATED book's row says why it is listed (the
             // tag-association join — the mockup's "#dream flows here").
             association: model.searchState.bookReasons[hit.id].map(LibrarySearchCopy.association),

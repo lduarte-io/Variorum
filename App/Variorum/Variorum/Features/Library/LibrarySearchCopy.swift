@@ -156,8 +156,18 @@ nonisolated enum LibrarySearchCopy {
         }
     }
 
-    /// An archived group's mark (only ever drawn under the facet).
+    /// An archived group's mark (only ever drawn under the facet) — and,
+    /// since 13o U3, the badge an archived passage wears.
     static let archivedMark = "archived"
+
+    /// **An archived NOTE's line under its head** (13o U3 — under the facet
+    /// the rows say which they are; PROVISIONAL P-13o-U3-5's words).
+    static let archivedNote = "archived note \u{2014} kept out of the Library"
+
+    /// An archived BOOK's row detail ("book · archived").
+    static func archivedBookDetail(_ detail: String?) -> String {
+        (detail.map { $0 + " \u{00B7} " } ?? "") + archivedMark
+    }
 
     /// **The archived foot** (D4 — PROVISIONAL P-13o-U2-3's wording): with
     /// the facet off and archived matches present, the sheet's last line

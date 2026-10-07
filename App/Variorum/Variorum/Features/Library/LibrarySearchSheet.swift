@@ -150,10 +150,23 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
             } else {
                 LibraryListRow { poolHead(group) }
             }
+            // 13o U3 — the archived facet's face: under the facet a row says
+            // which it is (R-13o-6). An archived NOTE says so once, under its
+            // head; a passage archived on its own (its take or block) wears
+            // the badge itself.
+            if group.note != nil, group.isArchived {
+                quiet(LibrarySearchCopy.archivedNote)
+                    .padding(.leading, LibraryListFace.rowInsets.leading + 14)
+                    .padding(.bottom, 2)
+            }
             let open = state.expansions[group.homeID]
             let lines = open?.lines ?? group.lines
             ForEach(lines) { passage in
-                LibrarySearchLine(tokens: tokens, passage: passage) { onOpenPassage(passage) }
+                LibrarySearchLine(
+                    tokens: tokens, passage: passage,
+                    archivedBadge: LibrarySearchFace.wearsArchivedBadge(
+                        archived: passage.isArchived, inArchivedGroup: group.isArchived)
+                ) { onOpenPassage(passage) }
                     .padding(.leading, LibraryListFace.rowInsets.leading + 14)
                     .padding(.trailing, LibraryListFace.rowInsets.trailing)
                     .padding(.vertical, 2)
@@ -232,6 +245,9 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
 struct LibrarySearchLine: View {
     let tokens: VoiceTokens
     let passage: SearchPassage
+    /// 13o U3: the passage is archived on its own (its take or its block) —
+    /// only ever under the archived facet.
+    var archivedBadge = false
     let onOpen: () -> Void
 
     var body: some View {
@@ -247,17 +263,26 @@ struct LibrarySearchLine: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
             if LibrarySearchFace.isInAnotherTake(kind: passage.kind, rendered: passage.isRenderedTake) {
-                Text(tokens.chromeLabel(LibrarySearchCopy.inAnotherTake))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(tokens.line))
-                    .fixedSize()
+                badge(LibrarySearchCopy.inAnotherTake)
+            }
+            if archivedBadge {
+                badge(LibrarySearchCopy.archivedMark)
             }
             Spacer(minLength: 0)
         }
         .contentShape(Rectangle())
         .onTapGesture(perform: onOpen)
+    }
+
+    /// The mockup's quiet badge (hairline-bordered, muted).
+    private func badge(_ word: String) -> some View {
+        Text(tokens.chromeLabel(word))
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .padding(.horizontal, 5)
+            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(tokens.line))
+            .lineLimit(1)
+            .fixedSize()
     }
 }
 
@@ -283,6 +308,14 @@ enum LibrarySearchFace {
     /// A take hit the note does not render (the mockup's badge).
     static func isInAnotherTake(kind: SearchPassage.Kind, rendered: Bool) -> Bool {
         kind == .take && !rendered
+    }
+
+    /// **A passage wears the archived badge** (13o U3 — the archived facet's
+    /// face, R-13o-6: *"rows say which they are"*) when something archived
+    /// touches it and its GROUP is not already marked archived (an archived
+    /// note says so once, under its head).
+    static func wearsArchivedBadge(archived: Bool, inArchivedGroup: Bool) -> Bool {
+        archived && !inArchivedGroup
     }
 
 }

@@ -159,6 +159,9 @@ nonisolated struct LibrarySearchListing: Equatable, Sendable {
     /// join — the row says why: the mockup's "#dream flows here"); a book a
     /// name hit lists has no entry.
     var bookReasons: [String: SearchTagAssociation.Reason] = [:]
+    /// The listed books that are ARCHIVED (13o U3 — under the archived
+    /// facet the rows say which they are).
+    var archivedBooks: Set<String> = []
     var groups: [SearchGroup] = []
     var next: SearchComposer.GroupCursor?
 }
@@ -204,6 +207,8 @@ final class LibrarySearchModel {
     private(set) var books: [Queries.CatalogHit] = []
     /// Why each associated book is listed (13o U3 — its row's words).
     private(set) var bookReasons: [String: SearchTagAssociation.Reason] = [:]
+    /// The listed books that are archived (13o U3 — only under the facet).
+    private(set) var archivedBooks: Set<String> = []
     /// The answer sheet's groups — notes and scraps groups, best first.
     private(set) var groups: [SearchGroup] = []
     /// Where the next page of groups starts; nil when none follows.
@@ -281,6 +286,7 @@ final class LibrarySearchModel {
         counts = listing?.counts
         books = listing?.books ?? []
         bookReasons = listing?.bookReasons ?? [:]
+        archivedBooks = listing?.archivedBooks ?? []
         groups = listing?.groups ?? []
         next = listing?.next
         loadingMore = false
@@ -400,6 +406,7 @@ final class LibrarySearchModel {
             let section = try books(db, question: question, wing: wing, calendar: calendar)
             listing.books = section.hits
             listing.bookReasons = section.reasons
+            listing.archivedBooks = section.archived
         }
         // A typed tag ALONE answers with its books only (13o U3): its notes
         // need words (P-13o-U2-6, narrowed).
@@ -432,16 +439,20 @@ final class LibrarySearchModel {
     /// the catalog's own rows (`Queries.catalogBookHits`).
     nonisolated static func books(
         _ db: Database, question: LibrarySearchQuestion, wing: String, calendar: Calendar
-    ) throws -> (hits: [Queries.CatalogHit], reasons: [String: SearchTagAssociation.Reason]) {
+    ) throws -> (
+        hits: [Queries.CatalogHit], reasons: [String: SearchTagAssociation.Reason], archived: Set<String>
+    ) {
         let query = question.scoped(.books)
         let scope = SearchScope(wingID: wing)
         var ids: [String] = []
         var seen: Set<String> = []
         var reasons: [String: SearchTagAssociation.Reason] = [:]
+        var archived: Set<String> = []
         for association in try Queries.searchTagAssociations(db, query: query, scope: scope)
         where seen.insert(association.readingID).inserted {
             ids.append(association.readingID)
             reasons[association.readingID] = association.reason
+            if association.isArchived { archived.insert(association.readingID) }
         }
         if question.hasWords {
             var cursor: SearchComposer.Cursor?
@@ -449,11 +460,17 @@ final class LibrarySearchModel {
                 let page = try Queries.searchPassages(
                     db, query: query, scope: scope, after: cursor, limit: 200, calendar: calendar)
                 for passage in page.passages {
-                    if let id = passage.readingID, seen.insert(id).inserted { ids.append(id) }
+                    guard let id = passage.readingID else { continue }
+                    // The BOOK's own archived fact (its name hit's; a chapter
+                    // hit wears its book's).
+                    if passage.isArchived, passage.kind == .book || passage.kind == .chapter {
+                        archived.insert(id)
+                    }
+                    if seen.insert(id).inserted { ids.append(id) }
                 }
                 cursor = page.next
             } while cursor != nil
         }
-        return (try Queries.catalogBookHits(db, ids: ids), reasons)
+        return (try Queries.catalogBookHits(db, ids: ids), reasons, archived)
     }
 }
