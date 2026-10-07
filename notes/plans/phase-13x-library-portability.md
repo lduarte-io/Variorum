@@ -37,3 +37,95 @@ per the standing seams, never her real store; the A1 safety-copy ritual guards a
 leg), pause and ask — never work around. Ambiguity that gates the core stops and reports;
 PROVISIONAL otherwise, logged in QUESTIONS. Closeout per CLAUDE.md: the in-flight row retires,
 the PR merges, hard stop.
+
+---
+
+## STATUS
+
+**OPEN — kicked off 2026-10-06 (the Pro).** Orchestrator seated; preflight complete; the KICKOFF
+SITTING is in progress — the design look and agenda below went to the author the same day. The
+execution plan lands under §EXECUTION PLAN after her rulings. **The 13b constitution P-1…P-9
+binds this phase byte-verbatim** (`.claude/skills/architect-phase/SKILL.md`; the pre-13x §0
+bind-by-reference precedent). This phase HOLDS the one Sync/-custody slot: custody/keychain and
+every `Sync/` line are Fable work with a Fable cold review, end to end.
+
+## SEAT RECORD (2026-10-06)
+
+- Preflight read whole, never delegated: CLAUDE.md + auto-canon · the workflow transition record ·
+  the master plan's in-flight table · `notes/TICKETS.md` · QUESTIONS (current through #188) ·
+  the resiliency protocol · **SyncSpec IN FULL** · `notes/sync-postmortem-fragments.md` ·
+  `notes/FuturePhases.md`'s 13x row whole · `notes/plans/pre-13x-postures-design.md` §§0–17 +
+  its ledger + copy §6/§8.
+- Workspace: `~/dev/variorum-13x` ff'd to main (18270b70) and pushed; status clean; upstream set.
+- Linear: VX-6 → In Progress. The in-flight row flipped OPEN on main (569d5eab).
+- Memory: `vx-6-13x-run-state` written and pushed (ced6c5c).
+
+### VX-64 TRIAGE (at kickoff, as ordered)
+
+**Verdict: CORRECTLY HOMED in 13x; the mechanism is REAL, confirmed in code.**
+`Tools/VaultBootstrap/VaultBootstrapMain.swift:101` calls bare `AppDatabase.openStore(at:)`;
+with nil custody that road resolves the ambient `\.storeKeyCustody` dependency
+(`Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift:88`), and on an encrypted store
+whose custody holds no key `resolveStoreKey` refuses honestly — so the tool cannot open an
+encrypted store headless. The proven headless road is in-tree:
+`Tools/StringsWorkbook/Sources/StoreUnlock.swift` (the key file beside the store + typed-secret
+unwrap + `StoreKeyCustody.inMemory` — exactly the lobby's call, no Keychain touched). Fix-vs-
+retire is sitting question Q3; the fix is small and exercises exactly the adoption door's own
+key legs, so it is a natural in-phase single.
+
+## THE DESIGN LOOK (what this phase builds, on what substrate)
+
+**The promise:** *"airdrop your corpus to your new computer and it will work"* — true by built
+doors. Four deliverables (the 13x row) + VX-64:
+
+1. **THE HAND-OFF ACT** — an in-app door that produces the travelling pair (a sealed snapshot of
+   the library + its key file) somewhere a user can actually find and AirDrop; never "dig in
+   ~/Library". The pair is corner 33's shape: a library arriving WITH its key file opens by the
+   lobby's ordinary roads; without it nothing opens. Snapshot via the proven keyed road (GRDB
+   `backup(to:)` from the open connection — the `StoreBackup` machinery), never a raw copy of a
+   live WAL store.
+2. **THE ADOPTION DOOR** — *File ▸ Open Library…* plus the same door in the welcome/absent-store/
+   waiting states (pre-13x §3.7/§3.8 already name it). It composes pre-13x's roads and INVENTS NO
+   crypto: classify the picked thing (encrypted library + key file · a backup pair · a plaintext
+   export · bare file with no key file ⇒ the honest refusal) → open by the lobby's roads (Standard
+   same-iCloud: silently through A; else the passphrase / twelve words, vault road online) → the
+   reconciliation (§14.13 + ledger 22): a plaintext export RECREATES the four local-only tables
+   BEFORE any write; same owner ⇒ enroll with a fresh device identity (the follow if keys rotated;
+   a non-zero cursor reconciles as a 13j RETURNER); different/no owner ⇒ the adopt road (re-stamp +
+   `resyncReinitialize`). The iCloud-Drive live-library guard (ledger 4, copy §6's why-not
+   sentence) rides the door.
+3. **THE SAME-MAC OLDER-KEY RESTORE** — a copy from before a Replace All Keys or a Castle entry
+   opens by ITS OWN snapshot-pair key file (decision 11: the day's passphrase · the words unless
+   regenerated · a Standard-era A copy); the same-fingerprint second look (ledger 14's U4→13x
+   half) serves same-key snapshots from the live library's custody. The restore surface says which
+   credential opens which copy, and the drill proves each leg.
+4. **THE THREE FAQ ENTRIES PUBLISH** (copy §8: *Moving to a new Mac* · *Restoring a backup* · the
+   live-library iCloud-Drive entry's held clause) — ledger 71; the outbound brief road
+   (`notes/stargazing-help-faq-brief-pre13x.md` un-flags its ⚠ NOT YET BUILT marks) through her to
+   the site agent.
+5. **VX-64** — vault-bootstrap onto the StoreUnlock road (or retired), per Q3.
+
+**What this phase does NOT do:** no schema change, no mirror work, NO §12 lockstep event —
+the marker stays 12; the door composes substrate pre-13x already deployed. No new key, no new
+wrap, no new RPC. Restore drills run on throwaway scopes and the fake server, never her real
+store; the real-device AirDrop leg and any second-Mac (Air) leg are HERS, paused-and-asked.
+
+**Surfaces declared (the overlap check):** `Sources/VariorumCore/Sync/` + custody/keychain
+(the slot is mine) · `App/Variorum/Shared/` protection/lobby/bootstrap files · the File menu +
+welcome/waiting faces · Settings ▸ Data Safety (the restore surface) · `Tools/VaultBootstrap` ·
+the help-FAQ brief. **Flagged against the other in-flight rows:** (a) 13o may want ONE `Sync/`
+registry line (an FTS local-only table joining `SyncSchema.localOnlyTables`) while this phase
+holds the slot — her call on sequencing, raised at this sitting; (b) 13s owns copy re-voicing
+and the onboarding FLOW — 13x builds the functional door where the welcome/waiting states
+already stand and leaves flow design to 13s-b; the copy this phase renders stays
+`pre-13x-copy.md`-sourced, 13s re-voices later.
+
+## THE SITTING AGENDA (2026-10-06 — her rulings land here verbatim)
+
+- **Q1 — the adoption door's destination semantics** (gates the whole door).
+- **Q2 — the hand-off artifact's shape** (gates the hand-off act + the door's classifier).
+- **Q3 — VX-64 fix vs retire.**
+- **Q4 — the FAQ entries' publication road at close.**
+- Raised beside the questions: the 13o `Sync/`-line sequencing; the Air as a real second-machine
+  drill leg (needs her hands); two workflow hiccups for the first wave (the bout-start
+  `vx sync` dirty-main friction; the three-way in-flight-table race on same-day kickoffs).
