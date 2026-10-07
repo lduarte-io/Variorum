@@ -651,3 +651,34 @@ with the 13o scheduler. `caffeinate -dims` detached; commit+push per piece; memo
 ### THE NIGHT'S EVENTS (accruing)
 - Stage order stood at her retirement: VM-5 (holding, renewals) → 13x slot 1 → vx-75 → 13s →
   13o's U2.
+
+### BATCH U2 BRIEF (drafted early under the overnight mandate; SPAWNS ONLY AFTER the U1 CLOSED
+banner stands — one implementer at a time)
+
+Read, in order: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md` (checkpoint
+protocol from the FIRST commit; foreground waits; no subagents); **this file WHOLE** — the
+sitting rulings, the U1 RECORD and its custody-collision memo are your inputs;
+`notes/plans/pre-13x-postures-design.md` §§3.6–3.8, §5–§7, §14 (corners 13 · 33 · 37 · 45);
+`notes/plans/pre-13x-copy.md` §3 · §5 · §6 · §8; `notes/SyncSpec.md` §3 + §7 (READ-ONLY).
+Code: `App/Variorum/Shared/{AppBootstrap,StoreProtection,StoreBackup,SyncSession*}.swift`, the
+U1-minted files (`LibraryClassifier`, the move-aside brain, the hand-off producer), the lobby
+views, the Data Safety pane.
+
+**Do: ledger rows 6–9's PRE-MERGE-SAFE halves** per §U2 above, in order 6 → 7 → 9 → 8:
+the two doors + the welcome/waiting/absent-store slots (row 6); the RESTORE-HOLD landing state
+at the Shared round-trigger seam with the banner + Resume press + outbox-at-Resume (row 7 —
+both doors, her round-3 ruling); the iCloud-Drive live-library guard rendering copy §6's
+sentence (row 9); the Resume reconciliation COMPOSED FROM Shared over existing core APIs
+(row 8 — enroll/follow/adopt routing, the plaintext export's four-tables-recreated-before-any-
+write, the returner road). **HARD FENCE (the slot redirect):** ZERO edits under
+`Sources/VariorumCore/Sync/`, zero custody/keychain-item changes, never
+`Persistence/Migrations.swift`; a piece that genuinely demands one is RECORDED (`DEFERRED —
+post-merge`) in your U2 RECORD and skipped, never worked around. **STAGE DISCIPLINE TONIGHT:**
+the 13o session schedules the stage — you NEVER claim it; headless `swift build`/`swift test`
+and fake-server legs run freely; when a Mac-suite pin run is ready, STOP at that seam, record
+PENDING-behind-the-stage, message NOTHING, and end your piece — the orchestrator files the
+slot and a GO (or a closer) runs it. Words: render PROVISIONAL strings from the copy file's
+conventions; list every new string in your record for 13s. The hallucination guard binds
+(red-on-old pins by behavioural revert for every refusal/guard). Append `### U2 RECORD` (LIVE
+STATUS first) from your first commit; commit per piece; push every commit; work only in
+`~/dev/variorum-13x`.
