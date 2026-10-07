@@ -255,19 +255,24 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | DONE (this commit) — §R-13o-4 RECORD below |
 | P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | DONE (this commit) — built to §FORK RULINGS F1–F4: `Persistence/SearchIndex.swift` (`search_doc` AUTOINCREMENT + `uq_search_doc_src(kind, src_id)` · the `search_text` view · `search_fts` · 24 capture triggers `search_<table>_<kind>_{insert,update,delete}`, one generator · `SearchIndex.rebuild` = the backfill engine) + `v1_22_search_index` in `Migrations.swift` (create → `idx_container_undated_created` → rebuild). `MigrationTests` updated (tables, indexes, the v1_16→head index delta) + a backfill pin `theSearchIndexBackfillsAnOlderStoreAtMigration` (all eight kinds findable after migrating a v1_21 store; tombstoned take absent; archived take indexed with its fact; accents fold; integrity-check passes) — 28/28 green. **Full core suite: 2227 tests / 250 suites, exactly ONE red — the planned seam** (SEAM 2 below). |
 | P5 | The rebuild door (a maintenance operation: drop + rebuild from truth) + the integrity check (doc rows vs source rows) | DONE (this commit) — `Operations+SearchIndex.swift`: `rebuildSearchIndex()` (rebuild + verify in ONE transaction; no synced row, no stamp, no undo entry) and `verifySearchIndex()`; `SearchIndex.integrity` (`Persistence/SearchIndex.swift`) → `SearchIndexIntegrity` {docCount · missing · orphaned · factDrift · indexMatchesContent (FTS5 `integrity-check` rank=1 vs the view = vs TRUTH)}. Faces (a Settings row, a post-restore pass) are a later unit's — the doors exist. |
-| P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | IN-PROGRESS — `SearchIndexCaptureTests` 11/11 GREEN (this commit): every kind + every edit via operations; archive flags / tombstones drop; own facts follow any writer (wing, archived); accents fold through the triggers; the cascades (block → takes/labels/comments, note → everything, book → chapters) incl. exact-stamp revival; a physical DELETE retires; a two-client fake-server round (insert, edit, tombstone arrive by `SyncRow.apply` — indexed exactly like local writes; nothing derived in the outbox); a whole-row same-values remote rewrite writes ONE row (the WHEN guard); rebuild idempotent + outbox untouched; the integrity check names missing/orphaned/fact-drift and the rebuild heals all three; the 24-trigger exact set + a no-foreign-table read walk. **REMAINING: the revert probes (red-on-old per layer) — PENDING, recorded below as they run.** Wing ISOLATION is a query property → P7's pins. |
+| P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | DONE (`77aedb95` + this commit) — `SearchIndexCaptureTests` 11/11 green; every layer's pin RED under its trigger's revert (the table below). Wing ISOLATION is a query property → P7's pins. |
 | P7 | The ONE Domain SQL composer (AST → SQL) + `Queries.searchPassages(_:scope:filters:)` — bm25 ranked (title-weighted, rendered-take boosted), snippeted, wing-scoped always, note/book scopes, archived facet, paged with a road to everything (R-13o-9); EXPLAIN pins | NOT-STARTED |
 | P8 | P1 measurements as pins + the NUMBERS here (update cost ∝ the edit, flat across corpus sizes; query cost ∝ matches; the keystroke road bounded) | NOT-STARTED |
 | P9 | Close: the named suites green at the END, every claim flipped from PENDING, the report | NOT-STARTED |
 
 PENDING flags: none yet.
 
-**REVERT PROBES IN FLIGHT (P6, 2026-10-06):** the only file the probes edit is
-`Sources/VariorumCore/Persistence/SearchIndex.swift`, committed clean at `77aedb95`; a successor
-finding it dirty restores it with `git checkout -- Sources/VariorumCore/Persistence/SearchIndex.swift`
-(safe — committed). Probes: R1 drop the INSERT triggers · R2 take `deleted_at` out of the UPDATE
-triggers' watch · R3 drop the variant take UPDATE trigger · R4 remove the WHEN guard · R5 drop
-the DELETE triggers.
+**P6 REVERT PROBES — DONE, tree restored and re-verified green (11/11).** Each probe edited ONLY
+`Persistence/SearchIndex.swift` (committed clean at `77aedb95`), ran `SearchIndexCaptureTests`,
+and restored by `git checkout --`:
+
+| probe | the revert | red pins (the layer each proves) |
+|---|---|---|
+| R1 | no INSERT capture triggers | operations (every kind's first write), REMOTE APPLY (the phone's arriving rows unindexed), cascades, facts, rebuild/integrity, the exact trigger set — 9 of 11 red |
+| R2 | `deleted_at` out of the UPDATE triggers' watch | the CASCADES (block → label/name/comment, note → all, book → chapter still found), operations (a deleted comment/chapter lingers), archive/tombstone, REMOTE tombstone — 4 red |
+| R3 | no `variant`·`take` UPDATE trigger | operations (autosave keeps the old words), REMOTE APPLY (the phone's edit: "lights" still found, "fog" not), cascades, archive, accent folding, the exact set — 6 red |
+| R4 | the WHEN guard removed (fire on every write) | only the same-values remote rewrite (`changes == 1` → more) — the guard is pure economy, pinned on its own |
+| R5 | no DELETE triggers | the physical delete (the janitor's road) + the exact set — 2 red |
 
 **LIVE STATUS (2026-10-06): STOPPED AT SEAM 2** — P0–P4 landed and pushed; the fork was ruled
 (§FORK RULINGS, `880abf8f`) and P4 is built exactly to it. The tree is clean. Waiting on the
