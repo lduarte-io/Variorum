@@ -1105,3 +1105,25 @@ the in-flight row retires; the worktree is removed after the merge.
 **The reviewer is authorized** (same session, the REVIEW_PROMPT's own contract) to implement
 the four confirmed code fixes with red-on-old pins verified by revert; then the suites green +
 one implementer sanity pass; round 2 re-reviews the fixes with a FRESH reviewer.
+
+### ROUND 1 FIX PASS (2026-10-07 04:3x–05:0x — the reviewer, same session; all four confirmed fixes landed, committed per fix, pushed)
+
+| fix | commit | the pin + its red-on-old evidence |
+|---|---|---|
+| MINOR-2 — the type-ahead tail must END the input (the end-index form; the `#/` extension covered) | `7d7923ab` | `SearchQueryParserTests.aTagTypedAfterAWordLeavesTheWordWhole` — PIN-BEFORE-FIX: run RED on the old parser (2 issues — the `#lucid` and `#/` arms; the after-a-tag control green), GREEN after. The dispositions' named classes stay green; parser suites 20/20 |
+| MINOR-1 — the worn-day lead carries TRUE group facts (`SearchComposer.wornGroupFacts`, ONE counts-style statement over exactly the missing worn ids; cursor stays `built`'s; the dedupe stays — the lead group IS the road) | `71c2355c` | `SearchGroupsTests.aWornNoteRankedBeyondThePageLeadsWithItsTrueCounts` — VERIFIED BY REVERT: the two source files checked out clean with only the pin applied → RED (hitCount/lineCount 1/0, bestScore nil); fix restored → GREEN. One build note on the record: the facts CTE needed `hits AS MATERIALIZED` (the counts statement's precedent — flattened into the aggregate, bm25() leaves its FTS context and SQLite refuses). Composer suites 31/31 |
+| NIT-1 — ONE words reader (`SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift`, the PARSER's letter on `#`/`#/` per the adopted caveat); both sheets' models read it; `removingTag` reads the same primitives, semantics unchanged | `07c1fbe1` | `LibrarySearchFaceTests.theOneWordsReaderSpeaksTheParsersLetter` (new-behavior pin, not bug-class) — the rule's letter + both models reading it; the book's echo now keeps a quoted phrase whole |
+| NIT-2 — `Environment.livingBook` loses its silent `"0"` default (`gathering:`'s nil stays, nil is meaningful) | `15bffd32` | not bug-class; one construction site, zero test edits — compile is the pin |
+| MINOR-2 rider — ONE Mac pin had incidentally encoded the old widened-word letter (`PaletteSearchTests.thePalettesQuestionIsTheBodysOnly`: `.prefix("dream")` for "dream #journal"); JUSTIFIED EDIT to `.word`, the pin's body-only subject unchanged | `787d7e19` | found by the Mac batch's ONE red (exactly this expectation), edited with the justification inline, batch re-run green |
+
+**Suites at the end (the fix pass's close):** core FULL suite `swift test` EXIT 0 —
+VariorumCoreTests **2,284 tests in 258 suites PASSED** (the standing honest skips only: the two
+gated benches, the live-Supabase pass, `writeAScratchLibraryLikeHers`) + StringsWorkbookTests
+40/6; the Mac batch — the 11 relevant suites (`LibrarySearchState/Face/Landing/Wiring/Join/
+Archived` · `LibraryWhenRange` · `PaletteSearch` · `BookSearch` · `BookWindowRoad` ·
+`LibraryDayFilter`), suite-level `-only-testing` after a fresh `build-for-testing` — **69 tests
+in 11 suites PASSED, TEST EXECUTE SUCCEEDED, zero skipped** — under a HELD stage claim
+(`13o reviewer fix pass`, 04:52:57 → released on the result; the coordinator's go on a free
+stage). Next per the dispositions: one implementer sanity pass over this diff, then round 2
+with a FRESH reviewer. P-13o-U1-4's wording amendment ("and the word must end the input")
+rides to the ratify bundle as dispositioned.
