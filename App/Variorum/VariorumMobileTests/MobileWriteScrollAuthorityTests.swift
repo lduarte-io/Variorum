@@ -212,7 +212,7 @@ struct MobileWriteScrollAuthorityTests {
     /// `_scrollToSelectionIfNeeded` with the room-padded rect (trace, keyboard
     /// up: 1643 → 2435, first/last visible 2680/2691). Here the relayout is a
     /// focus round trip (hardware-keyboard mode: the accessory bar's rise
-    /// changes the guide). RED ON OLD — the number lands in the record.
+    /// changes the guide). GREEN ON OLD (a GUARD, not a red-on-old pin) — the number lands in the record.
     @Test func aRelayoutAfterHerScrollUpNeverForcesTheRoom() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await seedParagraphs(session, 30)
@@ -242,7 +242,7 @@ struct MobileWriteScrollAuthorityTests {
     /// **Typing after she scrolled the caret away reveals it minimally — never
     /// the room.** The fight's keystroke face: she scrolls up to read, carries
     /// on typing, and UIKit's `_scrollToSelectionIfNeeded` (from
-    /// `textInputDidChange:`) used to throw the page back onto the room. RED
+    /// `textInputDidChange:`) guards the minimal re-reveal (green on old: without a trailing newline there is no room padding, so old was minimal too; the record's provenance block is the authority).
     /// ON OLD — the number lands in the record. Revealing the caret's line at
     /// the viewport's foot is the ordinary, ruled minimal reveal.
     @Test func typingAfterScrollingTheCaretAwayRevealsItMinimally() async throws {
