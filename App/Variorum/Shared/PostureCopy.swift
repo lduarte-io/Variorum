@@ -638,6 +638,15 @@ nonisolated extension ProtectionCopy {
         "Until then this \(deviceName) opens and reads as before — what you write meanwhile "
         + "stays under the old key until you enter your passphrase."
     }
+    /// 13x F1 (ladder R1-BLOCKER; words PROVISIONAL, 13s re-voices — the
+    /// FACTS binding: the restored copy's key file holds an Apple-account
+    /// wrap from its Standard day; the follow mints a fresh key and
+    /// retires that file).
+    static var followCastleKeyFileAppleOpenable: String {
+        "Your account is in Castle, but this library's key file still holds a copy "
+        + "under your Apple account — it came with the copy you restored. Enter your "
+        + "passphrase once to give your library a fresh key and retire that copy."
+    }
     // Keys replaced elsewhere (a device that has not followed yet)
     static func followKeysReplaced(device: String, day: String) -> String {
         "Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."

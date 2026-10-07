@@ -1228,7 +1228,7 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 | finding | fix | status |
 |---|---|---|
 | (0) baseline | whole core suite headless on the merged tree | DONE (this commit) — **2334 tests in 269 suites PASSED** (133 s) + StringsWorkbook 40/6; skips the standing env-gated ones only (13o's gated measurement suites · the real-server pass · the fixture minters). U2b's 2254/258 + 13o's +80/+11, as the brief expected |
-| R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | NOT STARTED — re-trace first (the hallucination guard) |
+| R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | BUILT (this commit; mechanism re-traced and CONFIRMED — the settled-design entry) — the pin + red-on-old revert PENDING the stage slot |
 | R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | NOT STARTED |
 | M1 | key ceremonies refuse under a standing hold (P-R1-1) | NOT STARTED |
 | M2 | the hold write's failure refuses the adoption | NOT STARTED |
@@ -1241,3 +1241,42 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 | N4 | P-U1-1's plaintextLibrary disposition recorded | NOT STARTED |
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
+
+#### THE SETTLED DESIGN, PER FIX (written before the code; revised in place as each lands)
+
+- **R1-BLOCKER — my own re-trace CONFIRMS the reviewer's mechanism at every step** (the
+  hallucination guard's own walk, from the shipped source): (1) the adoption lands the
+  Standard-era pair's key file (an `apple` wrap of L_old) beside the store whole
+  (`LibraryAdoption` step 5, the canonical name); (2) `landCustody` reads
+  `effectiveGate` — same store id ⇒ enrolled ⇒ `Posture.derive` `.indeterminate(shape:)`
+  (StoreProtection.swift:92–94), the raw key behind the gate ⇒ shape `.castle` ⇒
+  `.biometric` ⇒ `saveGated(L_old)`; (3) at ready, `reconcileFollow`'s rotation arm keys
+  on `custody.corpusKeyID != vaultKeyID` (ProtectionController.swift:621) — the ids AGREE
+  (this device followed the Castle entry when it happened; custody's sync material is
+  untouched by the adoption); the decision-35 arm keys on `shape == .silent` (:641) — the
+  shape is GATED; the follow-into-Standard arm needs `hasAppleHeldCopy` — false;
+  `reconcileAppleKey` under determined Castle only clears flags (:1453–1458). No detector
+  ever closes the exposure; `StoreBackup.writeSnapshotKeyFile` then copies the LIVE key
+  file's bytes into every post-restore snapshot pair. **The fix:** a fourth material-in-hand
+  arm in `reconcileFollow` — the account DETERMINED Castle (`!reading.hasAppleHeldCopy`),
+  ids agreed, and the LIVE key file carrying an `apple` copy ⇒ owe the follow under a NEW
+  `FollowNotice.Kind` `.castleKeyFileAppleOpenable` (the silent shape keeps its own kind,
+  whose sentence says "opens without asking" — factually wrong for a gated custody; the
+  FILE is the exposure here, not the gate). The follow's act needs NOTHING new: the
+  no-rotation road in `runFollow` (PostureSwitch.swift:767–787 — ids equal, same master, no
+  previous key) re-keys the library and `retireOldKeyFiles` removes the apple-carrying file
+  from the live folder; `locate` prefers the fingerprint-named current file, so a legacy
+  format-1 file with wraps kept for old snapshots can never re-trigger the arm. Guards match
+  the shipped decision-35 arm (`!switchInProgress`; the verdict writes nothing). New copy
+  `followCastleKeyFileAppleOpenable` (PROVISIONAL, 13s's table extended); `waitingBody`
+  renders the same sentence (the mismatch-kind precedent: no keys were replaced, sync is
+  not paused, so the waiting line would be untrue); `laterSubline` reuses the castle
+  mismatch's (accurate: writing stays under the old, Apple-openable key until the follow).
+  **The pin (the record's named one):** in `Phase13pControllerTests` beside the decision-35
+  pins — a gated-custody enrolled world whose key file carries passphrase AND apple wraps,
+  vault reading Castle with the custody's own corpus id ⇒ the follow is OWED with the new
+  kind; the sibling pins (gated shape + no apple copy under Castle ⇒ nothing owed; gated
+  shape + apple copy under STANDARD ⇒ the silent follow into Standard) stand untouched.
+  Red-on-old by behavioural revert: the new arm's if-block removed (the old behavior — no
+  detector), the pin goes red, the siblings stay green; restore by `git checkout --`
+  verified by empty diff.
