@@ -35,6 +35,24 @@ struct LibrarySearchFaceTests {
                 == "Type a word to search inside #dream #life/goals.")
     }
 
+    /// Ladder round 1, NIT-1: ONE words reader for every band's echo
+    /// (`SearchFieldWords`, the shared home), speaking the PARSER's letter —
+    /// a quoted phrase rides whole, `#path` is a tag (trailing slashes
+    /// trimmed), a lone `#` is a word, and `#/` is NEITHER. Both sheets'
+    /// models read it (`LibrarySearchQuestion.read`, `BookSearchModel.read`).
+    @Test func theOneWordsReaderSpeaksTheParsersLetter() {
+        #expect(SearchFieldWords.words(of: "dream  \"old  house\" #life/goals # #/ rain")
+                == "dream \"old  house\" # rain",
+                "phrases whole, tags and #/ aside, a lone # a word")
+        #expect(SearchFieldWords.tagPaths(of: "#a #b/c/ #/ # words") == ["a", "b/c"])
+        let question = LibrarySearchQuestion.read("lantern #x/ #/")
+        #expect(question?.words == "lantern" && question?.tagPaths == ["x"],
+                "the Library's question reads the shared rule")
+        let book = BookSearchModel.read("lantern \"two words\" #x", visibility: .living)
+        #expect(book?.words == "lantern \"two words\"",
+                "the book's echo reads the SAME rule — a phrase no longer splits")
+    }
+
     @Test func theMatchedWordsAreMarkedAndTheRestIsMuted() {
         let tokens = VoiceTokens.resolve(voice: .study, dark: false)
         // The composer's own marked snippet (STX/ETX around the match), read

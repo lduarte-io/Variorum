@@ -242,10 +242,10 @@ final class BookSearchModel {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
         let query = SearchQueryParser.parse(
             text, typeAhead: true, visibility: visibility, locale: locale, calendar: calendar)
-        let words = text.split(whereSeparator: \.isWhitespace)
-            .filter { !($0.hasPrefix("#") && $0.count > 1) }
-            .joined(separator: " ")
-        return (query, words)
+        // NIT-1 (round 1): the ONE shared words rule (`SearchFieldWords` —
+        // quoted phrases whole, the parser's letter on `#` / `#/`), not a
+        // second naive split beside the Library's.
+        return (query, SearchFieldWords.words(of: text))
     }
 
     /// The book's scope: its own wing, `.book(id)` (a book's rows or a

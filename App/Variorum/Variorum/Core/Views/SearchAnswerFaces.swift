@@ -84,6 +84,66 @@ nonisolated enum SearchAnswerFace {
     }
 }
 
+/// **The field's tokens, read ONE way for every band's echo** (ladder round
+/// 1, NIT-1 — the Library's and the book's bands each carried their own
+/// words rule; one home now, beside the sheets' other shared pieces).
+/// Whitespace-separated with quoted phrases kept whole (the v1 grammar's
+/// own token shape), each token classified EXACTLY as `SearchQueryParser`
+/// reads it — the adopted caveat: the PARSER's letter, neither old copy —
+/// a `#path` is a TAG (trailing slashes trimmed), a lone `#` is a WORD,
+/// and `#/` (an empty path) is NEITHER (the parser's tag branch drops it).
+nonisolated enum SearchFieldWords {
+    /// The band's echo: the words as typed, tags (and the dropped `#/`)
+    /// aside.
+    static func words(of text: String) -> String {
+        tokens(of: text).filter { !isTagShaped($0) }.joined(separator: " ")
+    }
+
+    /// The typed `#tag` paths, in the order typed.
+    static func tagPaths(of text: String) -> [String] {
+        tokens(of: text).filter(isTag).map(tagPath)
+    }
+
+    /// The v1 grammar's own token shape: whitespace-separated, a quoted
+    /// phrase kept whole (`SearchQueryParser`'s reading).
+    static func tokens(of text: String) -> [String] {
+        var tokens: [String] = []
+        var current = ""
+        var quoted = false
+        for ch in text {
+            if isQuote(ch) { quoted.toggle(); current.append(ch); continue }
+            if ch.isWhitespace, !quoted {
+                if !current.isEmpty { tokens.append(current); current = "" }
+            } else {
+                current.append(ch)
+            }
+        }
+        if !current.isEmpty { tokens.append(current) }
+        return tokens
+    }
+
+    /// The parser's tag: `#` + a non-empty path once trailing slashes trim.
+    static func isTag(_ token: String) -> Bool {
+        isTagShaped(token) && !tagPath(token).isEmpty
+    }
+
+    /// What the parser's TAG BRANCH takes (`#/` included — it then drops
+    /// it, so the token is no word either).
+    static func isTagShaped(_ token: String) -> Bool {
+        token.hasPrefix("#") && token.count > 1
+    }
+
+    static func tagPath(_ token: String) -> String {
+        var path = String(token.dropFirst())
+        while path.hasSuffix("/") { path.removeLast() }
+        return path
+    }
+
+    private static func isQuote(_ ch: Character) -> Bool {
+        ch == "\"" || ch == "\u{201C}" || ch == "\u{201D}"
+    }
+}
+
 /// **One quiet chip** — the mockup's: a hairline-bordered label on the
 /// paper, its ✕ when it can be taken off; an INVITATION (a filter not yet
 /// applied) wears a dashed border and the muted ink.

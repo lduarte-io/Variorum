@@ -74,11 +74,12 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
         if let bookState {
             query.filter = query.filter.map { .all([$0, .bookState(bookState)]) } ?? .bookState(bookState)
         }
-        let tokens = tokens(of: text)
+        // NIT-1 (round 1): the words/tag reading is the ONE shared rule
+        // (`SearchFieldWords`, the parser's letter — `#/` is neither).
         return LibrarySearchQuestion(
             query: query,
-            words: tokens.filter { !isTag($0) }.joined(separator: " "),
-            tagPaths: tokens.filter(isTag).map(tagPath))
+            words: SearchFieldWords.words(of: text),
+            tagPaths: SearchFieldWords.tagPaths(of: text))
     }
 
     /// The question narrowed to a scope picker's choice (D3) — what the
@@ -107,47 +108,22 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// type-ahead tail never changes under the ✕ (a word that was whole
     /// stays whole).
     static func removingTag(_ path: String, from text: String) -> String {
-        let all = tokens(of: text)
+        let all = SearchFieldWords.tokens(of: text)
         let key = path.lowercased()
-        let kept = all.filter { !(isTag($0) && tagPath($0).lowercased() == key) }
+        func isThisTag(_ token: String) -> Bool {
+            SearchFieldWords.isTag(token) && SearchFieldWords.tagPath(token).lowercased() == key
+        }
+        let kept = all.filter { !isThisTag($0) }
         guard kept.count != all.count else { return text }
         let endsOpen = text.last.map { !$0.isWhitespace } ?? false
-        let lastWasTag = all.last.map { isTag($0) && tagPath($0).lowercased() == key } ?? false
+        let lastWasTag = all.last.map(isThisTag) ?? false
         let joined = kept.joined(separator: " ")
         return joined.isEmpty ? "" : joined + ((endsOpen && !lastWasTag) ? "" : " ")
     }
 
-    // The v1 grammar's own token shape: whitespace-separated, a quoted
-    // phrase kept whole (`SearchQueryParser`'s reading).
-    private static func tokens(of text: String) -> [String] {
-        var tokens: [String] = []
-        var current = ""
-        var quoted = false
-        for ch in text {
-            if isQuote(ch) { quoted.toggle(); current.append(ch); continue }
-            if ch.isWhitespace, !quoted {
-                if !current.isEmpty { tokens.append(current); current = "" }
-            } else {
-                current.append(ch)
-            }
-        }
-        if !current.isEmpty { tokens.append(current) }
-        return tokens
-    }
-
-    private static func isQuote(_ ch: Character) -> Bool {
-        ch == "\"" || ch == "\u{201C}" || ch == "\u{201D}"
-    }
-
-    private static func isTag(_ token: String) -> Bool {
-        token.hasPrefix("#") && !tagPath(token).isEmpty
-    }
-
-    private static func tagPath(_ token: String) -> String {
-        var path = String(token.dropFirst())
-        while path.hasSuffix("/") { path.removeLast() }
-        return path
-    }
+    // (NIT-1, round 1: the token/words/tag reading MOVED to the shared home
+    // — `SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift` — the book's
+    // band is its second consumer; the rule is the PARSER's letter.)
 }
 
 /// **One read of the answer sheet** — the band's numbers, the Books
