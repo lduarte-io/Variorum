@@ -84,7 +84,7 @@ public enum SearchTagAssociation {
                 walk(inner, negated: !negated)
             case .tagPath(let path):
                 if !negated, seen.insert(path.lowercased()).inserted { ordered.append(path) }
-            case .tag, .starred, .days, .family, .docKind:
+            case .tag, .starred, .days, .family, .docKind, .bookState:
                 break
             }
         }

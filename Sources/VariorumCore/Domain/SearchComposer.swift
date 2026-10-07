@@ -73,17 +73,22 @@ public enum SearchComposer {
         public var editedOn: @Sendable (_ alias: String) -> String
         /// The starred notes (the star list is a bounded setting).
         public var starredNoteIDs: [String]
+        /// "A LIVING book" over a reading alias, no placeholders — intake's
+        /// own candidate predicate (`Queries.livingBookSQL`, 13o U3).
+        public var livingBook: @Sendable (_ alias: String) -> String
 
         public init(
             versionPredicate: @escaping @Sendable (String) -> String,
             wingScope: @escaping @Sendable (String, String) -> (sql: String, arguments: [Value]),
             editedOn: @escaping @Sendable (String) -> String,
-            starredNoteIDs: [String]
+            starredNoteIDs: [String],
+            livingBook: @escaping @Sendable (String) -> String = { _ in "0" }
         ) {
             self.versionPredicate = versionPredicate
             self.wingScope = wingScope
             self.editedOn = editedOn
             self.starredNoteIDs = starredNoteIDs
+            self.livingBook = livingBook
         }
     }
 
@@ -691,6 +696,27 @@ public enum SearchComposer {
             // An associated reading is a BOOK-level answer.
             case .reading: return (kind == .book ? "1" : "0", [])
             }
+        case .bookState(let state):
+            let fact = bookStateSQL(state, alias: "r", environment: environment)
+            switch level {
+            // Only a book or chapter hit names a reading row (`r` is joined
+            // for those alone) — a facet narrows the answer to books.
+            case .passage: return ("(d.reading_id IS NOT NULL AND r.id IS NOT NULL AND \(fact))", [])
+            case .note: return ("0", [])
+            case .reading: return ("(\(fact))", [])
+            }
+        }
+    }
+
+    /// A mode facet as a fact over a reading alias (the № census's reading,
+    /// `BookcaseSolo`; living is intake's own predicate from its one home).
+    static func bookStateSQL(_ state: SearchBookState, alias r: String, environment: Environment) -> String {
+        switch state {
+        case .gathering: "\(r).kind = 'gathering'"
+        case .living: environment.livingBook(r)
+        case .owned: "(\(r).kind = 'book' AND \(r).owned = 1)"
+        case .finished: "\(r).locked = 1"
+        case .sealed: "\(r).sealed_at IS NOT NULL"
         }
     }
 

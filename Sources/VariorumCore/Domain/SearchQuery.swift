@@ -101,6 +101,32 @@ public indirect enum SearchFilter: Equatable, Sendable {
     /// never of a note, so a note-level arm (the worn day) reads it as
     /// "only a name-level kind" — `.title` — and nothing else.
     case docKind(SearchDocKind)
+    /// **A MODE FACET** (13o U3 — the 13i sitting record §12 item 2: *"mode
+    /// facets as search filters — gathering · living · owned · finished ·
+    /// sealed (facts on the row, NEVER tags)"*): a FACT of the READING row a
+    /// book or chapter hit names. A note, a scrap and a worn-day hit carry no
+    /// reading row, so a facet narrows the answer to BOOKS — the mirror of an
+    /// armed day, which narrows it to notes (PROVISIONAL P-13o-U3-3).
+    case bookState(SearchBookState)
+}
+
+/// **The mode facets' vocabulary** (13o U3) — each a fact on the `reading`
+/// row, read exactly as the Bookcase's № census reads it (`BookcaseSolo`).
+public enum SearchBookState: String, Equatable, Sendable, CaseIterable {
+    /// A gathering (a saved rule, assembled at read).
+    case gathering
+    /// A LIVING book — intake is on (the sitting record §1: *"any book whose
+    /// intake is on"*): a book, not finished, not archived (an archived
+    /// book's intake is paused, R-13ie-4), with a rule
+    /// (`Queries.livingBookSQL` — intake's own candidate predicate).
+    case living
+    /// An OWNED book (§6).
+    case owned
+    /// A FINISHED book — sealed books count too (Sealed is Finished + text
+    /// immutability, §5; the census's own reading).
+    case finished
+    /// A SEALED book.
+    case sealed
 }
 
 /// **The index's doc KINDS** (F2 — one doc per source text field, a closed

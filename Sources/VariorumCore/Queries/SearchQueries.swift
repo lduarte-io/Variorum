@@ -423,7 +423,21 @@ extension Queries {
                 return (scope.sql, wingID.isEmpty ? [] : [.text(wingID)])
             },
             editedOn: { alias in editedOnSQL(alias: alias) },
-            starredNoteIDs: try starredNoteIDs(db))
+            starredNoteIDs: try starredNoteIDs(db),
+            livingBook: { alias in livingBookSQL(alias: alias) })
+    }
+
+    /// **"A LIVING book" — intake is on** (13o U3, the mode facet's one
+    /// home in SQL; the 13i sitting record §1: *"any book whose intake is
+    /// on"*). EXACTLY the SQL half of intake's own candidate predicate
+    /// (`Operations.livingBooks`: a live BOOK, not finished, not archived —
+    /// an archived book's intake is paused, R-13ie-4 — with a rule) and of
+    /// the census's `BookcaseBoard.isLiving`. The one residual, recorded: a
+    /// MALFORMED stored rule (reachable only by a hand edit or a corrupt
+    /// row) reads here as a rule — intake and the census decode it and fail
+    /// it closed; a facet cannot decode JSON in SQL (P-13o-U3-4).
+    public static func livingBookSQL(alias r: String) -> String {
+        "(\(r).kind = 'book' AND \(r).locked = 0 AND \(r).archived_at IS NULL AND \(r).query_spec IS NOT NULL)"
     }
 
     static func arguments(_ values: [SearchComposer.Value]) -> StatementArguments {
