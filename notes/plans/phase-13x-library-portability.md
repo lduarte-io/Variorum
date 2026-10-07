@@ -727,8 +727,8 @@ STATUS first) from your first commit; commit per piece; push every commit; work 
 | row | piece | status |
 |---|---|---|
 | 6 | The two doors + welcome/waiting/absent-store slots | NOT STARTED — settled design below |
-| 7 | The restore-hold landing state, both doors | NOT STARTED — settled design below |
-| 9 | The iCloud-Drive live-library guard | NOT STARTED — settled design below |
+| 7 | The restore-hold landing state, both doors | IN-PROGRESS — the CORE flag landed this commit (`LibraryRestoreHold`, pins 4/4 headless); the SyncSession gate, the banner + Resume and the door wire remain |
+| 9 | The iCloud-Drive live-library guard | IN-PROGRESS — the CORE rules landed this commit (`LibraryPlacementGuard`, pins 2/2 headless); the picker refusal + the door's line remain |
 | 8 | The Resume reconciliation (pre-merge-safe half) | NOT STARTED — settled design below |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
@@ -822,7 +822,14 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
-- (none yet)
+- **Row 7 core — `LibraryRestoreHoldTests`, 4/4 green** (headless `swift test`): the
+  set/read/clear round-trip; a fresh adoption overwrites the standing hold; an UNREADABLE
+  marker reads as HELD, never absence (the conservative direction — Resume still clears it);
+  holds independent per store location.
+- **Row 9 core — `LibraryPlacementGuardTests`, 2/2 green** (headless): iCloud Drive detected
+  by the `Mobile Documents` path COMPONENT (component, never substring — pinned both ways);
+  the live library's folder, the store file itself and a containing ancestor refuse as
+  destinations while siblings and external volumes pass.
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 
