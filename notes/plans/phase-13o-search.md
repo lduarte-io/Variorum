@@ -200,6 +200,47 @@ diff after U3; REVIEW_PROMPT verbatim; hard cap three rounds.
    across corpus sizes), query cost ∝ matches, keystroke road bounded — the day-search
    ladder's measurement discipline.
 
+### U1 BRIEF (the implementer session's self-contained instructions)
+
+**Who you are:** the U1 implementer (Opus, xhigh), ONE session, ONE acceptance unit — the
+search substrate, headless. Work ONLY in `~/dev/variorum-13o` (branch `vx-5-13o-search`).
+**Required reading before anything:** this plan file WHOLE (the sitting record is binding) ·
+`notes/SyncSpec.md` IN FULL (you build beside sync machinery) ·
+`notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from your FIRST commit:
+commit per piece, push every commit, LIVE STATUS in the U1 RECORD below, PENDING for every
+unverified claim, synchronous foreground waits only). You may run at most ONE Sonnet subagent,
+for EXTERNAL facts only (e.g. FTS5/GRDB API confirmation), read-only — never for repo reading.
+
+**Scope = the U1 list above (items 1–6), with these precisions:**
+- **The ONE hard fence: you never edit `Sources/VariorumCore/Sync/`** (Fable work, CLAUDE.md).
+  Your migration WILL turn `SyncSchemaTests`' completeness walk red (new tables unregistered).
+  That red is the planned SEAM: stop there, write the exact table names into the U1 RECORD,
+  push, and report — the orchestrator lands the registry line, then you continue. Treat that
+  one red as expected at that seam only; everything else stays green.
+- **The in-batch fork (the implementer proposes, the architect rules):** contentless vs
+  external-content FTS5, and the doc-table normalization (one doc row per source row vs per
+  rendered unit) — PROPOSE in the U1 RECORD with measurements/tradeoffs BEFORE committing that
+  half; build only after the ruling lands in this file.
+- Tokenizer: `unicode61 remove_diacritics 2` (R-13o-11); prefix indexes sized for type-ahead.
+  The doc family is KIND-TAGGED from birth (R-13o-6's born-ready rule) and carries wing + 
+  archived columns so scoping/facets are predicates, never joins at keystroke rate.
+- Triggers: MECHANICAL ONLY (R-13o-4 — the ruled third duty). Raw text mirroring; zero domain
+  reads in a body. Land the Phase-2 re-assessment protocol's short record in the U1 RECORD
+  before the first trigger line (the OverallModel §9 provenance demands it).
+- The SearchQuery AST + ONE SQL composer in Domain (R-13o-8); `Queries.searchPassages` rides
+  it; the date-parse predicate is a pure Domain function with exhaustive little tests.
+- Pins per U1 item 6 — red-on-old verified by revert for every bug-class claim; the
+  three-layer capture pins (operations · cascade · fake-server remote apply) are the unit's
+  heart; P1 measurements recorded as NUMBERS in the record.
+- Schema commit FIRST and alone (`v1_22`), consumers after (CLAUDE.md's rule).
+- Headless only: `swift build` / `swift test [--filter …]` on the core package — no stage, no
+  xcodebuild, no app launches, nothing GUI. Environment traps: the plan's block above, verbatim.
+
+### U1 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
+
+*(empty — the U1 session writes here: per-piece DONE(hash)/IN-PROGRESS/NOT-STARTED lines, the
+fork proposal, the Sync-seam table names, the re-assessment record, P1 numbers, PENDING flags.)*
+
 ### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
 
 The Library's search-active state per the picked mockup: the Passages section (snippets,
