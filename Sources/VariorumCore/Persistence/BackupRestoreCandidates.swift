@@ -126,7 +126,7 @@ public enum BackupRestoreCandidates {
     /// exactly as the writer formats it (`StoreBackup.date(fromBackupURL:)`
     /// restated; a foreign name that merely starts with a stamp is not the
     /// app's).
-    static func backupDate(_ url: URL) -> Date? {
+    public static func backupDate(_ url: URL) -> Date? {
         let name = url.deletingPathExtension().lastPathComponent
         guard name.hasPrefix("variorum-backup-") else { return nil }
         let rest = name.dropFirst("variorum-backup-".count)

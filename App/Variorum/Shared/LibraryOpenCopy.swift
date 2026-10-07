@@ -1,0 +1,119 @@
+//
+//  LibraryOpenCopy.swift
+//  Variorum (shared — the adoption doors' and the restore-hold's words)
+//
+//  Phase 13x, U2 — PROVISIONAL strings per the pre-13x copy conventions
+//  (honest content, placeholder voice; 13s re-voices — every constant here
+//  is listed in the U2 RECORD's strings table). The kickoff rulings carry
+//  the binding sentences: QC's missing-key-file remedy ("send the whole
+//  folder — the key file travels with it"), the round-3 restore-hold
+//  banner (her ratified shape), and copy §6's why-not sentence, which
+//  stays at its ONE home (`ProtectionCopy.liveLibraryNotInICloudDrive`)
+//  and is RENDERED by this phase's two faces.
+//
+
+import Foundation
+import VariorumCore
+
+nonisolated enum LibraryOpenCopy {
+    // MARK: - The doors' names (QB: two framed doors, one machinery)
+
+    static let openLibraryDoor = "Open Library…"
+    static let restoreSectionTitle = "Restore from Backup"
+    static let openCandidateDoor = "Open…"
+    static let sheetTitle = "Open a Library"
+
+    // MARK: - Refusals (worded per verdict; the facts are the classifier's)
+
+    /// Corner 33 + QC's remedy sentence.
+    static let bareStoreRefusal =
+        "This library is sealed, and no key file came with it — nothing can open it alone. "
+        + "Ask for the whole folder: the key file travels with it."
+    static let newerSchemaRefusal =
+        "This library was written by a newer Variorum than this one. "
+        + "Update Variorum, then open it again."
+    static let notAVariorumStoreRefusal = "This isn't a Variorum library."
+    static let unreadableRefusal = "This file couldn't be read as a library."
+    /// The chooser's lead when a picked folder holds several stores
+    /// (P-U1-3: reported, never guessed).
+    static let severalStoresLead = "This folder holds more than one library — pick one."
+    static let wrongKeyRefusal =
+        "That key file doesn't open this library — it belongs to another copy."
+
+    // MARK: - The unlock step (the lobby's roads over the picked pair)
+
+    static let unlockLead = "This library is sealed. Enter its passphrase to open it."
+    static let unlockWordsDoor = "Use its twelve words instead"
+
+    // MARK: - The confirm step (what will happen, said before it does)
+
+    static let confirmLead = "Ready to open this library."
+    static let confirmStepAside =
+        "Your current library steps aside first — a dated copy stays on this Mac "
+        + "(Previous Libraries, next to your library), and a safety copy is kept with "
+        + "your backups. The file you picked is only read."
+    static let confirmFreshSlot = "Nothing stands here yet — the library you picked lands whole."
+    static let confirmSyncWaits =
+        "After it opens, sync waits until you press Resume — nothing uploads or "
+        + "downloads before that."
+    /// The plaintext road's extra sentence (ledger 5: fresh key + identity).
+    static let confirmPlaintext =
+        "This is an unencrypted copy. It gets a fresh key of its own the moment it "
+        + "lands, and opens encrypted."
+    static let confirmDoor = "Open This Library"
+
+    // MARK: - The restore-hold banner (round 3, her ratified shape)
+
+    static func holdBanner(asOfDay: String?) -> String {
+        let lead = asOfDay.map { "This is your library as of \($0). " }
+            ?? "This library was just restored from a copy. "
+        return lead
+            + "Sync is waiting — Resume to catch up with your account. Notes you deleted "
+            + "since will leave again; edits made since will come back. To keep something "
+            + "from this backup, duplicate it first — duplicates stay."
+    }
+    static let resumeSyncDoor = "Resume Sync"
+
+    // MARK: - The restore surface's rows (decision 11 rendered)
+
+    /// The which-credential sentence for one candidate's facts.
+    static func credentialLine(
+        _ credentials: BackupRestoreCandidates.Credentials, secondLook: Bool
+    ) -> String {
+        var roads: [String] = []
+        if secondLook { roads.append("your current passphrase or \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName)") }
+        if credentials.passphrase { roads.append("the passphrase of its day") }
+        if credentials.recovery { roads.append("your twelve words") }
+        if credentials.apple { roads.append("your Apple account") }
+        if credentials.master, !secondLook { roads.append("your current passphrase (online)") }
+        guard !roads.isEmpty else { return bareCandidateLine }
+        return "Opens with " + roads.joined(separator: " · ") + "."
+    }
+    static let bareCandidateLine =
+        "No key file serves this copy — it can't be opened. Its key file may be in "
+        + "another backup folder."
+    static let restoreSectionBody =
+        "Each copy below opens the same way your library does, with the keys of its day. "
+        + "Opening one makes it your library — the current one steps aside, recoverable."
+
+    // MARK: - Row 9's faces (the ONE why-not sentence rendered)
+
+    /// The backup-folder picker's refusal of the live library's own folder
+    /// (copy §8's recorded note). The sentence is ProtectionCopy's.
+    static let pickedLiveLibraryFolderRefusal =
+        "That's the folder your library lives in — backups need a place of their own. "
+        + ProtectionCopy.liveLibraryNotInICloudDrive
+    /// The adoption confirm's informational line when the SOURCE sits in
+    /// iCloud Drive (the door adopts by copy; the guard teaches).
+    static let sourceInICloudDriveLine =
+        "This copy sits in iCloud Drive, so it is copied onto this \(ProtectionCopy.deviceName) first. "
+        + ProtectionCopy.liveLibraryNotInICloudDrive
+
+    // MARK: - Progress / receipts
+
+    static let classifyingLine = "Reading what you picked…"
+    static let adoptingLine = "Opening the library — your current one is stepping aside…"
+    static let adoptionFailedLead =
+        "The library couldn't be opened. Nothing you picked was changed; your current "
+        + "library is whole in its dated copy and the safety copy."
+}

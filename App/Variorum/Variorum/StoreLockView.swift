@@ -36,6 +36,10 @@ import VariorumCore
 
 struct StoreLockView: View {
     @Bindable var lobby: StoreLobby
+    /// 13x U2 row 6 — §3.8's second door on the WAITING face ("open an
+    /// existing library"): non-nil only where the composition offers it
+    /// (the waiting state; never the Castle lobby — P-2).
+    var openDoor: (() -> Void)? = nil
 
     @State private var passphrase = ""
     @State private var recoveryText = ""
@@ -203,6 +207,13 @@ struct StoreLockView: View {
                         .disabled(lobby.busy || passphrase.isEmpty)
                 }
             }
+        }
+        if let openDoor, lobby.isWaitingForICloudKeychain {
+            // 13x U2 row 6: the waiting state's own copy of the door —
+            // the same one flow the File menu drives.
+            Button(ProtectionCopy.libraryMissingOpenDoor) { openDoor() }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .disabled(lobby.busy)
         }
         if lobby.recoveryOffered {
             DisclosureGroup(isExpanded: $showsRecoveryRoad) {

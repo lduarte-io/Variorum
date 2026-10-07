@@ -1,0 +1,228 @@
+//
+//  LibraryOpenDoor.swift
+//  Variorum (Mac)
+//
+//  Phase 13x, U2 rows 6+7 — THE DOORS' MAC FACES: the presenter (one per
+//  scene — the main window's serves File ▸ Open Library… and the lobby
+//  faces; Settings' serves Restore from Backup…), the sheet that renders
+//  the one Shared flow (`LibraryOpenModel`), and the RESTORE-HOLD BANNER
+//  (round 3's landing state — the bottom-bar idiom beside
+//  `ProtectionNoticeBar`, a standing bar until the one Resume press).
+//  Every sentence is `LibraryOpenCopy`'s (PROVISIONAL; 13s re-voices).
+//
+
+import AppKit
+import SwiftUI
+import UniformTypeIdentifiers
+import VariorumCore
+
+/// One scene's door state: holds the flow model while a flow runs; the
+/// scene attaches ONE sheet over it (two scenes = two presenters, so the
+/// main window's sheet and Settings' can never both fire).
+@MainActor
+@Observable
+final class LibraryOpenPresenter {
+    var model: LibraryOpenModel?
+
+    /// The File-menu / face door: pick a thing, then run the one flow.
+    func openPanel(bootstrap: AppBootstrap) {
+        guard model == nil else { return }
+        let panel = NSOpenPanel()
+        panel.title = LibraryOpenCopy.sheetTitle
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        // The one open format plus the folder pair (QC) — anything else
+        // classifies honestly rather than being unpickable.
+        panel.allowedContentTypes = [.folder, .data]
+        guard panel.runModal() == .OK, let picked = panel.url else { return }
+        begin(bootstrap: bootstrap, picked: picked)
+    }
+
+    /// The restore surface's per-row door (the source already known).
+    func begin(bootstrap: AppBootstrap, picked: URL) {
+        let fresh = LibraryOpenModel(bootstrap: bootstrap)
+        model = fresh
+        fresh.begin(picked: picked)
+    }
+
+    func dismiss() {
+        model = nil
+    }
+}
+
+/// The flow's one face — phases rendered plainly; the voice tokens are
+/// the session's where one exists, the fallback elsewhere (the lobby).
+struct LibraryOpenSheet: View {
+    @Bindable var model: LibraryOpenModel
+    var onClose: () -> Void
+
+    @State private var passphrase = ""
+    @State private var recoveryText = ""
+    @State private var showsRecoveryRoad = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(LibraryOpenCopy.sheetTitle)
+                .font(.title3.weight(.semibold))
+            switch model.phase {
+            case .classifying:
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text(LibraryOpenCopy.classifyingLine).foregroundStyle(.secondary)
+                }
+            case .refused(let message, let detail):
+                Text(message)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack { Spacer(); Button("Close") { onClose() } }
+            case .choosing(let stores):
+                Text(LibraryOpenCopy.severalStoresLead)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(stores, id: \.self) { store in
+                    Button(store.lastPathComponent) { model.choose(store) }
+                }
+                HStack { Spacer(); Button("Cancel") { onClose() } }
+            case .unlock:
+                Text(LibraryOpenCopy.unlockLead)
+                    .fixedSize(horizontal: false, vertical: true)
+                if model.passphraseOffered {
+                    PeekableSecretField(
+                        label: "Encryption passphrase", text: $passphrase,
+                        onSubmit: { submitPassphrase() })
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: 320)
+                }
+                if model.recoveryOffered {
+                    DisclosureGroup(isExpanded: $showsRecoveryRoad) {
+                        TextField(
+                            "The 12 recovery words, separated by spaces",
+                            text: $recoveryText, axis: .vertical)
+                            .lineLimit(3, reservesSpace: true)
+                            .autocorrectionDisabled()
+                            .privacySensitive()
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: 360)
+                        Button("Unlock with Recovery Phrase") { submitRecovery() }
+                            .disabled(model.busy || recoveryText.trimmingCharacters(
+                                in: .whitespacesAndNewlines).isEmpty)
+                    } label: {
+                        Text(LibraryOpenCopy.unlockWordsDoor)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: 360)
+                }
+                if let error = model.lastError {
+                    Text(error)
+                        .font(.caption)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if model.showsOfflineNote {
+                    Text(ProtectionCopy.lobbyOfflineNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    Spacer()
+                    Button("Cancel") { onClose() }
+                    if model.passphraseOffered {
+                        Button("Unlock") { submitPassphrase() }
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(model.busy || passphrase.isEmpty)
+                    }
+                }
+            case .confirm:
+                Text(LibraryOpenCopy.confirmLead)
+                    .font(.callout.weight(.semibold))
+                Text(model.willStepAside
+                     ? LibraryOpenCopy.confirmStepAside
+                     : LibraryOpenCopy.confirmFreshSlot)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if model.isPlaintextRoad {
+                    Text(LibraryOpenCopy.confirmPlaintext)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if model.sourceInICloudDrive {
+                    Text(LibraryOpenCopy.sourceInICloudDriveLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text(LibraryOpenCopy.confirmSyncWaits)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Spacer()
+                    Button("Cancel") { onClose() }
+                    Button(LibraryOpenCopy.confirmDoor) {
+                        Task { await model.confirmAdoption() }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy)
+                }
+            case .adopting:
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text(LibraryOpenCopy.adoptingLine).foregroundStyle(.secondary)
+                }
+            case .done:
+                // The reopen is already routing; the sheet leaves.
+                Color.clear.frame(height: 1)
+                    .onAppear { onClose() }
+            }
+        }
+        .padding(22)
+        .frame(minWidth: 460, alignment: .leading)
+    }
+
+    private func submitPassphrase() {
+        let typed = passphrase
+        passphrase = ""
+        Task { await model.unlock(passphrase: typed) }
+    }
+
+    private func submitRecovery() {
+        let text = recoveryText
+        recoveryText = ""
+        Task { await model.unlock(recoveryText: text) }
+    }
+}
+
+/// THE RESTORE-HOLD BANNER (round 3's ruled landing state): a standing
+/// bottom bar on the adopted library — the ruled sentence + the ONE
+/// Resume press; no dismiss (the hold IS the state; Resume ends it).
+struct RestoreHoldBar: View {
+    @Bindable var model: RestoreHoldModel
+
+    var body: some View {
+        if model.isHeld {
+            HStack(spacing: 10) {
+                Text(LibraryOpenCopy.holdBanner(asOfDay: model.asOfDay))
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer()
+                Button(LibraryOpenCopy.resumeSyncDoor) {
+                    Task { await model.resume() }
+                }
+                .disabled(model.resuming)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(.bar)
+            .overlay(alignment: .top) { Divider() }
+        }
+    }
+}

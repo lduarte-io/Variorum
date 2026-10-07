@@ -29,6 +29,9 @@ struct EditorCommands: Commands {
     /// 13r U2: the app's update channel (Sparkle). Only its door's
     /// rendering and enablement are read here; the act is the channel's.
     let updates: UpdateChannel
+    /// 13x U2 row 6: the main scene's adoption-door presenter — File ▸
+    /// Open Library… drives the same one flow the lobby faces do.
+    let openDoor: LibraryOpenPresenter
 
     /// The key window's routing channel — nil only before any window has
     /// registered (the first frames), where every door is already disabled
@@ -290,6 +293,18 @@ struct EditorCommands: Commands {
             Button(verb(.todaysEntry)) { creationActions()?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
                 .disabled(!canReachCreationTarget)
+            Divider()
+            // 13x U2 row 6 (QB) — *File ▸ Open Library…*: the adoption
+            // door's menu home. UNDECLARED like New Window (a standard
+            // File item; nothing in the registry duplicates it) and with
+            // NO key equivalent for the same recorded reason (inventing a
+            // chord owes a collision sweep no ruling asked for). Enabled
+            // at `.ready` only — the lobby faces carry their own doors
+            // (P-2), and the flow's teardown needs the composed root.
+            Button(LibraryOpenCopy.openLibraryDoor) {
+                openDoor.openPanel(bootstrap: bootstrap)
+            }
+            .disabled(session == nil)
             Divider()
             // 13f batch 5b (W2/A26) — File ▸ New Window, the full-app kind.
             //

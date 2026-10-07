@@ -693,6 +693,69 @@ final class AppBootstrap {
             })
     }
 
+    // MARK: - 13x U2: THE ADOPTION ROADS (row 6 — the doors' composition)
+
+    /// The live store's url (the adoption's landing slot and the hold
+    /// marker's home) — the test slot's under a test opener.
+    var liveStoreURL: URL? {
+        testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+    }
+
+    /// The READY-state adoption: tear down exactly as a lock does
+    /// (flush/savepoint/stop via `onWillLock`, the `.ready` tree down,
+    /// the pool CLOSED through the binding), run the adoption `work`
+    /// off-main (the U1 brain + the door's completion acts), then REOPEN
+    /// — with the opener as in-memory custody on success (the pair's
+    /// first open is silent; under Auto the custody write already landed
+    /// inside `work`, under the demanded modes the lobby law holds), or
+    /// with NOTHING on failure, letting the route find what stands (the
+    /// aside home and the safety copy are the nets — `LibraryAdoption`'s
+    /// order guarantees them before anything moved). `work`'s error
+    /// rethrows AFTER the reopen, the `rekeyLibrary` shape.
+    func adoptLibrary(
+        reopeningWith key: StoreKey?,
+        work: @escaping @Sendable () throws -> Void
+    ) async throws {
+        struct AdoptionNotReady: Error {}
+        guard case .ready = state, let binding else { throw AdoptionNotReady() }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        let outcome: Result<Void, any Error> = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            do {
+                try work()
+                return .success(())
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        switch outcome {
+        case .success:
+            beginOpening(unlockedKey: key)
+        case .failure:
+            beginOpening()
+        }
+        await awaitOpen()
+        if case .failure(let error) = outcome { throw error }
+    }
+
+    /// The NON-ready road's reopen (the welcome/waiting/absent-store
+    /// doors): the model ran the adoption work itself — no pool was ever
+    /// open in these states, and `LibraryAdoption` refuses a hot `-wal`
+    /// regardless — so what remains is leaving the standing lobby (its
+    /// Apple re-probe stopped) and routing the open with the opener in
+    /// hand.
+    func reopenAfterAdoption(unlockedKey key: StoreKey?) {
+        if case .waitingForICloudKeychain(let lobby) = state { lobby.stopWaiting() }
+        if case .locked(let lobby) = state { lobby.stopWaiting() }
+        beginOpening(unlockedKey: key)
+    }
+
     // MARK: - pre-13x 2b: THE RE-KEY ROAD (§4 step 4 — "the pool closed
     // first; off-main")
 

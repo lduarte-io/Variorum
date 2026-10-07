@@ -45,9 +45,18 @@ struct DataSafetyPane: View {
     @State private var plaintextExport: PlaintextExportModel?
     @State private var exportPassphrase = ""
 
-    init(services: AppServices?, protection: ProtectionController? = nil) {
+    /// 13x U2 row 6 (QB's second framed door): the per-row Open… behind
+    /// *Restore from Backup* — Settings' own adoption presenter acts; nil
+    /// hosts list the copies with no doors (evidence stays honest).
+    let restoreDoor: ((URL) -> Void)?
+
+    init(
+        services: AppServices?, protection: ProtectionController? = nil,
+        restoreDoor: ((URL) -> Void)? = nil
+    ) {
         self.services = services
         self.protection = protection
+        self.restoreDoor = restoreDoor
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -61,6 +70,7 @@ struct DataSafetyPane: View {
         Form {
             if model.isWired {
                 copiesSection
+                restoreFromBackupSection
                 folderSection
                 exportsSection
                 plaintextExportSection
@@ -110,6 +120,50 @@ struct DataSafetyPane: View {
             }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Restore from Backup (13x U2 row 6 — QB's second framed door)
+
+    /// The app's own snapshot pairs, newest first, each saying WHICH
+    /// CREDENTIAL OPENS IT (decision 11 rendered; the same-fingerprint
+    /// second look leads where it lights). The row's Open… drives the one
+    /// adoption flow — classify, the lobby's roads, the confirm, the
+    /// hold. PROVISIONAL (recorded): the in-container folder's copies
+    /// only; the second folder's listing waits on the walk's verdict
+    /// (its candidates open through File ▸ Open Library… meanwhile).
+    @ViewBuilder
+    private var restoreFromBackupSection: some View {
+        if !model.restoreCandidates.isEmpty {
+            Section(LibraryOpenCopy.restoreSectionTitle) {
+                Text(LibraryOpenCopy.restoreSectionBody)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(model.restoreCandidates, id: \.snapshot) { candidate in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(candidate.date.formatted(
+                                date: .abbreviated, time: .shortened))
+                                .font(.callout)
+                            Text(candidate.credentials.map {
+                                LibraryOpenCopy.credentialLine(
+                                    $0, secondLook: candidate.opensWithLiveCustody)
+                            } ?? LibraryOpenCopy.bareCandidateLine)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        if let restoreDoor, candidate.keyFile != nil {
+                            Button(LibraryOpenCopy.openCandidateDoor) {
+                                restoreDoor(candidate.snapshot)
+                            }
+                            .disabled(model.busy)
+                        }
+                    }
+                }
             }
         }
     }

@@ -726,10 +726,10 @@ STATUS first) from your first commit; commit per piece; push every commit; work 
 
 | row | piece | status |
 |---|---|---|
-| 6 | The two doors + welcome/waiting/absent-store slots | IN-PROGRESS — the listing brain landed this commit (`BackupRestoreCandidates`, pins 3/3 headless); the Shared model, the faces and the custody write remain |
-| 7 | The restore-hold landing state, both doors | IN-PROGRESS — the CORE flag landed this commit (`LibraryRestoreHold`, pins 4/4 headless); the SyncSession gate, the banner + Resume and the door wire remain |
-| 9 | The iCloud-Drive live-library guard | IN-PROGRESS — the CORE rules landed this commit (`LibraryPlacementGuard`, pins 2/2 headless); the picker refusal + the door's line remain |
-| 8 | The Resume reconciliation (pre-merge-safe half) | IN-PROGRESS — the CORE halves landed this commit (`LocalMachineryRecreation` 3/3 + the `LibraryAdoption` plaintext arm, pins green); the door's plaintext road + Resume's composition remain |
+| 6 | The two doors + welcome/waiting/absent-store slots | BUILT this commit — the one Shared flow (`LibraryOpenModel`), both framed doors and the three face slots, the custody-collision write through the shipped save doors; app target compiles; the Mac-suite pins are the NEXT piece (PENDING-behind-the-stage) |
+| 7 | The restore-hold landing state, both doors | BUILT this commit — the `SyncSession.roundsHeld` chokepoint (triggerSync + flush), `RestoreHoldModel`, the `RestoreHoldBar` banner + Resume (clear → `resumeSync`), the hold written at every adoption's completion; Mac pins PENDING-behind-the-stage |
+| 9 | The iCloud-Drive live-library guard | BUILT this commit — the backup-folder picker refuses the live library's folder with copy §6's sentence (`DataSafetyModel.chooseFolder`), the adoption confirm renders the same sentence over an iCloud-Drive source; Mac pins PENDING-behind-the-stage |
+| 8 | The Resume reconciliation (pre-merge-safe half) | BUILT this commit — the door's plaintext road (land → recreate → fresh key + identity + Auto dials + the silent item → the route's open encrypts) and Resume's composition over the EXISTING machinery (`resumeSync` — enroll/follow/adopt routing is the shipped reconcile's); the drills are row 10's, post-merge |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
 claimed by this session (the 13o scheduler owns it tonight) — every Mac-suite run stops at its
@@ -850,6 +850,11 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   nil-key-file plan lands the export byte-identical with NO key file beside it (the fresh
   mint is the door's next step), the old family still steps aside whole, the source
   untouched; the U1 pins all green unchanged around the optional (`landedKeyFile: URL?`).
+- **THE CORE SUITE, WHOLE (after every U2 core piece): 2247 tests in 255 suites PASSED**
+  (`swift test`, 108 s, headless — plus the StringsWorkbook target's 40 in 6; U1's baseline
+  was 2234/251, the +13/+4 are this batch's suites). The MAC APP TARGET COMPILES clean with
+  every face wired (`xcodebuild -scheme Variorum build`, `** BUILD SUCCEEDED **` — a compile
+  is not a stage act; no test host, no store).
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 

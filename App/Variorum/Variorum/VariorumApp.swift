@@ -36,6 +36,17 @@ struct VariorumApp: App {
     /// `RootView` installs it (it holds the `openWindow` the summon needs);
     /// installing is idempotent, so a second window costs nothing.
     @State private var hotKeys = GlobalHotKeyCenter()
+    /// 13x U2 row 6 — the adoption doors' presenters: the MAIN scene's
+    /// (File ▸ Open Library… + the lobby faces' doors) and SETTINGS' own
+    /// (the Restore surface) — two instances so the two scenes' sheets
+    /// can never both fire over one model.
+    @State private var libraryOpen = LibraryOpenPresenter()
+    @State private var settingsLibraryOpen = LibraryOpenPresenter()
+    /// 13x U2 row 7 — the restore-hold's observable state (the marker
+    /// beside the store, projected): the banner renders it, the sync
+    /// session's gate reads it. Built at the first task (it needs the
+    /// bootstrap's store home).
+    @State private var restoreHold: RestoreHoldModel?
 
     var body: some Scene {
         // Batch 7: a sane fresh-window size (the oversized-window report —
@@ -45,6 +56,70 @@ struct VariorumApp: App {
         // 13f batch 5b: the group gains an id so File ▸ New Window can open
         // another one by name.
         WindowGroup(id: EditorCommands.mainWindowGroupID) {
+            mainWindowContent
+                // 13x U2 row 6: the one adoption sheet of the MAIN scene
+                // (the File door and the lobby faces all drive this
+                // presenter).
+                .sheet(isPresented: Binding(
+                    get: { libraryOpen.model != nil },
+                    set: { if !$0 { libraryOpen.dismiss() } })
+                ) {
+                    if let model = libraryOpen.model {
+                        LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
+                    }
+                }
+        }
+        .defaultSize(width: 1240, height: 840)
+        // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
+        // ONE thing). Her words: *"i don't even konw if we need that empty
+        // whitespace that says Variorum at the top - let's try getting rid
+        // of it"* and *"the back bar should be flush with the top to match
+        // the bar at the bottom, which sits underneath the floating left
+        // pane."*
+        //
+        // MEASURED, not assumed (the Debug build, captured and zoomed): the
+        // sidebar's `Section` header — which the plan named as the source —
+        // renders NOTHING on macOS 26. The word she sees is the WINDOW
+        // TITLE, drawn in a band across the top of the DETAIL pane with a
+        // divider under it, and that band is exactly what stands between the
+        // window's top edge and the pane's first row. `.toolbar(removing:
+        // .title)` in `RootView` takes the word and the divider together, so
+        // the pane's own chrome — the context bar, when there is one — is
+        // the topmost thing in the detail. That is the flush edge her WT-3
+        // asks for, mirroring the status bar along the bottom.
+        //
+        // The strip that REMAINS above it is the window's toolbar row, and
+        // it is not empty: it carries the traffic lights, New Note and the
+        // sidebar toggle. `.unifiedCompact` is the shortest honest form of
+        // it — everything stays reachable and the band stops being taller
+        // than the things in it.
+        //
+        // TWO ATTEMPTS MEASURED AND REJECTED on the way here (screenshots in
+        // the batch record):
+        //   · `.ignoresSafeArea(.container, edges: .top)` on the detail — the
+        //     toolbar band is OPAQUE, so the pane's first row slid under it
+        //     and became unreadable. A worse bug than the whitespace.
+        //   · `.windowStyle(.hiddenTitleBar)` — captured before and after and
+        //     compared at the same key state: NO visible difference once the
+        //     title itself is removed. A modifier that changes window
+        //     behaviour and nothing on screen is not worth carrying.
+        //     (It also LOOKED like it un-floated the sidebar; the
+        //     discriminating capture — the ORIGINAL binary, not key — proved
+        //     the floating card is simply the KEY-WINDOW appearance. Recorded
+        //     because the wrong conclusion was one screenshot away.)
+        .windowToolbarStyle(.unifiedCompact)
+        .commands {
+            // 13r U2: the update channel rides in for the app menu's
+            // Check for Updates… door (rendered only where it can act).
+            EditorCommands(
+                bootstrap: bootstrap, windows: windows, updates: appDelegate.updates,
+                openDoor: libraryOpen)
+        }
+        noteWindows
+    }
+
+    @ViewBuilder
+    private var mainWindowContent: some View {
             switch bootstrap.state {
             case .ready(let session):
                 RootView(
@@ -65,6 +140,15 @@ struct VariorumApp: App {
                     // live (never in a Debug build), and then no door shows.
                     .environment(\.checkForUpdatesDoor, appDelegate.updates.syncRowDoor)
                     .task {
+                        // 13x U2 row 7: the hold's projection — fresh per
+                        // ready (this task re-runs after every adoption's
+                        // reopen), BEFORE the services guard so a re-ready
+                        // always re-reads the marker.
+                        if restoreHold == nil {
+                            restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
+                        } else {
+                            restoreHold?.refresh()
+                        }
                         guard services == nil else { return }
                         let fresh = AppServices(
                             session: session,
@@ -88,6 +172,16 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // 13x U2 row 7: the restore-hold's gate — wired
+                        // BEFORE start() so no first round outruns it; the
+                        // one Resume press clears the hold and catches up
+                        // (QD: the kept outbox pushes in that round).
+                        if let hold = restoreHold {
+                            fresh.sync.roundsHeld = { hold.isHeld }
+                            hold.onResume = { [weak fresh] in
+                                await fresh?.resumeSync()
+                            }
+                        }
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every
                         // open note (⌘Q's leaving doctrine — the same
@@ -227,9 +321,16 @@ struct VariorumApp: App {
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
+                    // 13x U2 row 7: the restore-hold banner stacks above
+                    // them — a standing bar until the one Resume press.
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        ProtectionNoticeBar(
-                            controller: bootstrap.protection, services: services)
+                        VStack(spacing: 0) {
+                            if let restoreHold {
+                                RestoreHoldBar(model: restoreHold)
+                            }
+                            ProtectionNoticeBar(
+                                controller: bootstrap.protection, services: services)
+                        }
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in
@@ -250,62 +351,31 @@ struct VariorumApp: App {
                 StoreLockView(lobby: lobby)
             case .waitingForICloudKeychain(let lobby):
                 // pre-13x 2a (§3.8): Standard's waiting state — the same
-                // face, copy §2d's words, the doors that act.
-                StoreLockView(lobby: lobby)
+                // face, copy §2d's words, the doors that act. 13x U2
+                // row 6: §3.8's second door — "open an existing library".
+                StoreLockView(lobby: lobby, openDoor: {
+                    libraryOpen.openPanel(bootstrap: bootstrap)
+                })
             case .libraryMissing(let lobby):
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
-                LibraryMissingView(lobby: lobby)
+                // 13x U2 row 6: the third door lands (copy §3's "Open an
+                // Existing Library…", shipped unrendered since 1a).
+                LibraryMissingView(lobby: lobby, openDoor: {
+                    libraryOpen.openPanel(bootstrap: bootstrap)
+                })
             case .failed(let error, let recovery):
                 // 13p ladder R1-M3: `recovery` is the sidecar-present
                 // unlock road — non-nil when the key custody is empty but
                 // `variorum-keys.json` with wraps sits beside the store.
                 StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
             }
-        }
-        .defaultSize(width: 1240, height: 840)
-        // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
-        // ONE thing). Her words: *"i don't even konw if we need that empty
-        // whitespace that says Variorum at the top - let's try getting rid
-        // of it"* and *"the back bar should be flush with the top to match
-        // the bar at the bottom, which sits underneath the floating left
-        // pane."*
-        //
-        // MEASURED, not assumed (the Debug build, captured and zoomed): the
-        // sidebar's `Section` header — which the plan named as the source —
-        // renders NOTHING on macOS 26. The word she sees is the WINDOW
-        // TITLE, drawn in a band across the top of the DETAIL pane with a
-        // divider under it, and that band is exactly what stands between the
-        // window's top edge and the pane's first row. `.toolbar(removing:
-        // .title)` in `RootView` takes the word and the divider together, so
-        // the pane's own chrome — the context bar, when there is one — is
-        // the topmost thing in the detail. That is the flush edge her WT-3
-        // asks for, mirroring the status bar along the bottom.
-        //
-        // The strip that REMAINS above it is the window's toolbar row, and
-        // it is not empty: it carries the traffic lights, New Note and the
-        // sidebar toggle. `.unifiedCompact` is the shortest honest form of
-        // it — everything stays reachable and the band stops being taller
-        // than the things in it.
-        //
-        // TWO ATTEMPTS MEASURED AND REJECTED on the way here (screenshots in
-        // the batch record):
-        //   · `.ignoresSafeArea(.container, edges: .top)` on the detail — the
-        //     toolbar band is OPAQUE, so the pane's first row slid under it
-        //     and became unreadable. A worse bug than the whitespace.
-        //   · `.windowStyle(.hiddenTitleBar)` — captured before and after and
-        //     compared at the same key state: NO visible difference once the
-        //     title itself is removed. A modifier that changes window
-        //     behaviour and nothing on screen is not worth carrying.
-        //     (It also LOOKED like it un-floated the sidebar; the
-        //     discriminating capture — the ORIGINAL binary, not key — proved
-        //     the floating card is simply the KEY-WINDOW appearance. Recorded
-        //     because the wrong conclusion was one screenshot away.)
-        .windowToolbarStyle(.unifiedCompact)
-        .commands {
-            // 13r U2: the update channel rides in for the app menu's
-            // Check for Updates… door (rendered only where it can act).
-            EditorCommands(bootstrap: bootstrap, windows: windows, updates: appDelegate.updates)
-        }
+    }
+
+    /// The scenes beside the main window (13f's two window kinds, the
+    /// quick-note pad, the helper, Settings) — unchanged but for hosting;
+    /// split out when 13x U2 gave the main WindowGroup its adoption sheet.
+    @SceneBuilder
+    private var noteWindows: some Scene {
         // 13f batch 5b (W2/A26 — her round-2 ruling: BOTH window kinds).
         // The lightweight NOTE-ONLY window: one note, its detail and its
         // context bar, and deliberately no sidebar, no Open strip and no
@@ -388,7 +458,21 @@ struct VariorumApp: App {
                     updates: appDelegate.updates,
                     // 13r U3-B: Settings ▸ Diagnostics — the ONE crash-
                     // reporting owner (opt-in, default OFF).
-                    crashReports: appDelegate.crashReports)
+                    crashReports: appDelegate.crashReports,
+                    // 13x U2 row 6: the Restore surface's per-row door —
+                    // Settings' OWN presenter (the main scene's sheet and
+                    // this one can never both fire).
+                    restoreDoor: { picked in
+                        settingsLibraryOpen.begin(bootstrap: bootstrap, picked: picked)
+                    })
+                    .sheet(isPresented: Binding(
+                        get: { settingsLibraryOpen.model != nil },
+                        set: { if !$0 { settingsLibraryOpen.dismiss() } })
+                    ) {
+                        if let model = settingsLibraryOpen.model {
+                            LibraryOpenSheet(model: model) { settingsLibraryOpen.dismiss() }
+                        }
+                    }
             } else {
                 Text("Open the main window first.")
                     .padding(24)
