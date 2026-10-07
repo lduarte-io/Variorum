@@ -36,11 +36,16 @@ VX.
 ## Verification (filled at close)
 
 - core: 2204/247 + 40/6 GREEN (baseline-exact)
-- mobile suite: PENDING — final numbers at close
-- Mac: discharged by construction (zero Mac-reaching lines changed vs main's tip) — recorded in
-  the ladder file; reviewers invited to overrule
-- the ladder: three Fable passes (resolution · stability · whole-round) — results in
-  `notes/plans/fixes/vm-5-the-catch-up-merge.md`
+- mobile suite: 802/126 GREEN post-wave (4 standing known issues); the FINAL number re-run at
+  the close
+- Mac: the merge itself reaches zero Mac lines (construction argument upheld by round 1); the
+  stability WAVE then fixed the shared brain + one Mac consumer, so the Mac verification widened
+  — targeted editor-brain suites 268/24 + 91/14 GREEN; the FULL Mac suite runs before the PR
+- THE LADDER CLOSED: round 1 (resolution) 0B/0M/3m/2n all fixed · round 2 (stability) M27
+  DISSOLVED measured, MAJOR 2 fixed with red pins on BOTH platforms (the Mac twin hole was real),
+  VM-2 re-measured and HELD per her ruling · round 3 (cap) 0B/0M/0m, 2 NITs recorded. The
+  whole-round pass (obligation ZERO) ran last — its record:
+  `notes/plans/fixes/vm-5-whole-round-pass.md`
 
 ## Where everything lives
 
