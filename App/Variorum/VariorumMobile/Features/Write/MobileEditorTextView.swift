@@ -138,11 +138,105 @@ nonisolated enum MobileTypewriterRoom {
     }
 }
 
+// MARK: - The scroll authority (VM-10 — her rule, the brain)
+
+/// **VM-10, her rule verbatim (2026-10-06):** *"showing empty space should be
+/// allowed if you scroll there but it shouldn't be forced."*
+///
+/// THE TRACED MECHANISM (`notes/plans/fixes/vm-10-the-write-scroll-authority.md`
+/// has the stacks and numbers): UIKit's own `-[UITextView
+/// _scrollToSelectionIfNeeded]` reveals the selection's LINE rect through
+/// `scrollRectToVisible(_:animated:)`, and when the caret sits on the empty
+/// line after a trailing newline that rect is padded by the bottom
+/// `textContainerInset` — which on this surface IS the typewriter room, a
+/// page tall. Taller than the viewport, it is bottom-aligned, so the caret's
+/// line lands at the TOP over a page of room. It fires after a typed ⏎
+/// (`textInputDidChange:` — arm 2) and on every relayout while she holds the
+/// keyboard, the keyboard's placement animation above all (arm 3's fight —
+/// her drag engages `.interactive` dismissal, the keyboard springs back, and
+/// the reveal throws her onto the room again). No line of ours issues those
+/// scrolls; every one of them passes through `scrollRectToVisible`, so that
+/// is where the authority sits.
+///
+/// Two rules, both pure so they are pinned without a window:
+/// 1. **A reveal never reaches past the text** — the requested rect is
+///    clamped at the text's bottom edge, so revealing the last line is the
+///    same minimal reveal as revealing any other line. The room's EXISTENCE
+///    is untouched (P24, her ruled shape (c)): it stays real scrollable
+///    range, reachable by her scroll and only by her scroll.
+/// 2. **Her gesture wins** — while her pan is live (dragging or decelerating)
+///    and for `userScrollQuiet` after her finger last moved the page, no
+///    programmatic reveal moves it. A TAP is not a pan (the caret reveal of a
+///    tap-to-type still runs); typing after the quiet window reveals the
+///    caret's line minimally, which is the ruled shape.
+nonisolated enum MobileScrollAuthority {
+    /// How long after her last pan movement (or her finger's release) the
+    /// page stays hers. PROVISIONAL (QUESTIONS #200(a)) — long enough to cover
+    /// the keyboard's spring-back animation after an `.interactive` drag
+    /// (~0.25–0.4 s on the device class), short enough that a deliberate tap
+    /// to type a moment later is never swallowed.
+    static let userScrollQuiet: CFTimeInterval = 0.6
+
+    /// Rule 1: the rect UIKit asked to reveal, never reaching past the text's
+    /// bottom edge. A rect wholly below the text (not produced by any traced
+    /// road — the caret always sits on a text line) collapses to a one-point
+    /// rect AT the text's foot rather than into the room.
+    static func revealRect(_ requested: CGRect, textBottom: CGFloat) -> CGRect {
+        guard requested.maxY > textBottom else { return requested }
+        guard requested.minY < textBottom else {
+            return CGRect(x: requested.minX, y: max(0, textBottom - 1), width: requested.width, height: 1)
+        }
+        var clamped = requested
+        clamped.size.height = textBottom - requested.minY
+        return clamped
+    }
+
+    /// Rule 2: is the page still hers?
+    static func herGestureHolds(
+        now: CFTimeInterval, lastUserScroll: CFTimeInterval,
+        dragging: Bool, decelerating: Bool
+    ) -> Bool {
+        dragging || decelerating || now - lastUserScroll < userScrollQuiet
+    }
+}
+
+/// **The page's PLACE, content-anchored** (VM-10, her ruled shape (2): the
+/// page's offset remembered per note for the session and restored on
+/// re-entry). Never a raw pixel offset — TK2 estimates every fragment it has
+/// not laid out, so the same y means a different paragraph on the way back
+/// (the Mac's measured lesson, `EditorRouter.scrollPlaces`). The anchor is the
+/// character offset where the layout fragment at the viewport's top begins;
+/// `inset` is how far below that fragment's top the viewport's top edge sat.
+/// The caret rides along so a focus arrival reveals HER line, minimally
+/// (PROVISIONAL — QUESTIONS #200(b)).
+struct MobileWritePlace: Equatable, Sendable {
+    let anchor: Int
+    let inset: CGFloat
+    let caret: NSRange
+}
+
 // MARK: - The text view
 
 @MainActor
 final class MobileEditorTextView: UITextView {
     private let canary = MobileFallbackCanary()
+
+    // MARK: The scroll authority's state (VM-10)
+
+    /// When her own pan last moved the page (or her finger lifted from it) —
+    /// rule 2's clock. Stamped by the scroll view's own pan recognizer and by
+    /// every decelerating layout tick.
+    private(set) var lastUserScroll: CFTimeInterval = -.infinity
+
+    /// The clock — a test seam and nothing else (the pins step it past the
+    /// quiet window instead of sleeping on the main actor).
+    var clock: () -> CFTimeInterval = { CACurrentMediaTime() }
+
+    /// Called as the view leaves its window with the page's place at that
+    /// moment — the VM's road into the session memory (VM-10). Leaving the
+    /// window is the one moment the layout still answers; after it the
+    /// representable may be released concurrently with the screen.
+    var onLeavingWindow: ((MobileWritePlace) -> Void)?
 
     /// The keyboard bar's acts controller + the checkbox tap's router —
     /// retained here because `UIBarButtonItem` targets and gesture-recognizer
@@ -244,9 +338,141 @@ final class MobileEditorTextView: UITextView {
     /// viewport, never the whole post; a width change escalates to a full
     /// pass inside the refresh itself.
     override func layoutSubviews() {
+        // VM-10 rule 2: a fling's frames are hers too. Stamped BEFORE super,
+        // because `super.layoutSubviews` is where UIKit's `_layoutText` runs
+        // `_scrollToSelectionIfNeeded` (the arm-3 trace's own frame).
+        if isDecelerating { lastUserScroll = clock() }
         super.layoutSubviews()
         updateTypewriterRoom()
         refreshChrome(scope: .nearViewport)
+        notePlaceIfMoved()
+    }
+
+    /// The page's place as of the last layout pass that MOVED it (VM-10).
+    /// Kept because the leaving moment cannot always answer: measured, a
+    /// surface whose window is going away no longer resolves its viewport's
+    /// positions, so `currentPlace()` there returns nil. Equality-gated on
+    /// the offset — a pass that did not move the page computes nothing — and
+    /// viewport-local when it does (one position + one fragment lookup at the
+    /// viewport's top edge; never the document).
+    private var lastPlace: (offsetY: CGFloat, place: MobileWritePlace)?
+
+    private func notePlaceIfMoved() {
+        guard lastPlace?.offsetY != contentOffset.y, let place = currentPlace() else { return }
+        lastPlace = (contentOffset.y, place)
+    }
+
+    // MARK: The scroll authority (VM-10 — the one choke point)
+
+    /// Every reveal UIKit makes on this surface — the caret after a keystroke
+    /// (`_scrollToCaretIfNeeded`), the selection's line after an edit or a
+    /// relayout (`_scrollToSelectionIfNeeded`), `scrollRangeToVisible` —
+    /// arrives here (traced: the record's initiator stacks). The two rules
+    /// are `MobileScrollAuthority`'s; this only feeds them the live facts.
+    override func scrollRectToVisible(_ rect: CGRect, animated: Bool) {
+        if MobileScrollAuthority.herGestureHolds(
+            now: clock(), lastUserScroll: lastUserScroll,
+            dragging: isDragging, decelerating: isDecelerating) {
+            return
+        }
+        super.scrollRectToVisible(
+            MobileScrollAuthority.revealRect(rect, textBottom: textBottom()), animated: animated)
+    }
+
+    /// The text's bottom edge in content coordinates: the content height
+    /// less the room. Never above the caret's own line — `contentSize` can
+    /// trail the layout by a pass right after an edit, and a clamp computed
+    /// from a stale size must still reveal the line the caret is on.
+    private func textBottom() -> CGFloat {
+        let fromContent = contentSize.height - textContainerInset.bottom
+        guard let selection = selectedTextRange else { return fromContent }
+        let caret = caretRect(for: selection.end)
+        guard !caret.isNull, !caret.isInfinite else { return fromContent }
+        return max(fromContent, caret.maxY)
+    }
+
+    /// Rule 2's other half: the scroll view's OWN pan recognizer reports her
+    /// drag (began · changed · ended — the release itself is the moment the
+    /// keyboard's spring-back animation starts). Installed in `make()`.
+    @objc func herPanMoved(_ pan: UIPanGestureRecognizer) {
+        switch pan.state {
+        case .began, .changed, .ended, .cancelled:
+            noteHerScroll()
+        default:
+            break
+        }
+    }
+
+    /// Stamps rule 2's clock (the pan target's body, and the pins' seam —
+    /// a pan cannot be synthesized in process).
+    func noteHerScroll() {
+        lastUserScroll = clock()
+    }
+
+    // MARK: The page's place (VM-10 — her ruled shape (2))
+
+    /// Where the page is: the layout fragment at the viewport's top, and how
+    /// far into it the viewport's edge sits. `.ensuresLayout`-free — the top
+    /// of the viewport is laid out by definition. nil before any text.
+    func currentPlace() -> MobileWritePlace? {
+        guard textStorage.length > 0,
+              let tlm = textLayoutManager,
+              let cm = tlm.textContentManager
+        else { return nil }
+        let caret = selectedRange
+        guard contentOffset.y > 0.5 else {
+            return MobileWritePlace(anchor: 0, inset: 0, caret: caret)
+        }
+        let top = CGPoint(x: textContainerInset.left + 1, y: contentOffset.y + 1)
+        guard let position = closestPosition(to: top) else { return nil }
+        let offset = self.offset(from: beginningOfDocument, to: position)
+        guard let location = cm.location(tlm.documentRange.location, offsetBy: offset),
+              let fragment = tlm.textLayoutFragment(for: location)
+        else { return nil }
+        let fragmentStart = cm.offset(
+            from: tlm.documentRange.location, to: fragment.rangeInElement.location)
+        return MobileWritePlace(
+            anchor: fragmentStart,
+            inset: contentOffset.y - (fragment.layoutFragmentFrame.minY + textContainerInset.top),
+            caret: caret)
+    }
+
+    /// Puts the page back at a remembered place: the caret first (clamped to
+    /// today's text — the note may have changed since), then the offset from
+    /// the anchor's fragment, laid out on exactly that fragment (the
+    /// hybrid-jump cost class — `jumpToBlock`'s primitive). Not clamped
+    /// against `contentSize`, for `jumpToBlock`'s recorded reason: TK2's
+    /// estimate can run under the real layout at the target.
+    func restore(_ place: MobileWritePlace) {
+        let length = textStorage.length
+        let caretLocation = min(place.caret.location, length)
+        selectedRange = NSRange(
+            location: caretLocation, length: min(place.caret.length, length - caretLocation))
+        let anchor = min(place.anchor, length)
+        guard anchor > 0 || place.inset > 0.5,
+              let geometry = firstLineGeometry(atOffset: anchor)
+        else {
+            setContentOffset(.zero, animated: false)
+            return
+        }
+        let target = geometry.fragmentMinY + textContainerInset.top + place.inset
+        setContentOffset(CGPoint(x: 0, y: max(0, target)), animated: false)
+    }
+
+    override func willMove(toWindow newWindow: UIWindow?) {
+        if newWindow == nil, window != nil, let place = leavingPlace() {
+            onLeavingWindow?(place)
+        }
+        super.willMove(toWindow: newWindow)
+    }
+
+    /// The place to remember as the page leaves: the live answer when the
+    /// layout still gives one, else the last place a layout pass recorded
+    /// (with the caret as it stands NOW — the selection needs no layout).
+    private func leavingPlace() -> MobileWritePlace? {
+        if let live = currentPlace() { return live }
+        guard let cached = lastPlace?.place else { return nil }
+        return MobileWritePlace(anchor: cached.anchor, inset: cached.inset, caret: selectedRange)
     }
 
     /// P24: the bottom inset IS the typewriter room, recomputed from the
@@ -636,6 +862,11 @@ final class MobileEditorTextView: UITextView {
         // margins were the floor's headline finding. Bottom is managed by
         // the typewriter room (P24) at every layout.
         view.textContainerInset = UIEdgeInsets(top: 8, left: 15, bottom: 8, right: 15)
+        // VM-10 rule 2: the scroll view's own pan recognizer tells the
+        // authority when the page is hers (an added target — UIScrollView's
+        // own handling is untouched).
+        view.panGestureRecognizer.addTarget(
+            view, action: #selector(MobileEditorTextView.herPanMoved(_:)))
 
         // Batch 2: the bar's six live acts (LK8 minus ⑂/⋯ per P-2) replace
         // the batch-1 shell. Batch 3: chrome + bar resolve from the live

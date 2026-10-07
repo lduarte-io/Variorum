@@ -267,6 +267,46 @@ struct MobileWriteScrollAuthorityTests {
         }
     }
 
+    /// **Her gesture wins — the authority's own guard pin** (arm 3's rule:
+    /// *"no programmatic scroll overrides a live or just-finished user
+    /// pan"*). A pan cannot be synthesized in process, so this drives the
+    /// authority at its traced choke point: her pan's stamp (the recognizer
+    /// target's own body), then a reveal UIKit would make — refused while the
+    /// page is hers; once the quiet window passes, the same reveal runs and is
+    /// MINIMAL. NOT a red-on-old pin (the clock is new API); the fight's real
+    /// trigger is recorded with its trace numbers in the record.
+    @Test func whileHerPanHoldsThePageNoRevealMovesIt() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await seedParagraphs(session, 30)
+            let (model, surface) = host(session, postID: postID, beginEditing: true)
+            defer { surface.tearDown() }
+            await waitForText(model, surface)
+            let tv = try #require(model.textView as MobileEditorTextView?)
+            caretAtEndOnTheViewportFoot(tv)
+            await surface.settle(20)
+            tv.insertText("\n")
+            await surface.settle(40)
+            // She drags back up to read.
+            var now: CFTimeInterval = 1_000
+            tv.clock = { now }
+            tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - 600)), animated: false)
+            tv.noteHerScroll()
+            let hers = tv.contentOffset.y
+            let caret = tv.caretRect(for: try #require(tv.selectedTextRange).end)
+
+            now += 0.3 // inside the quiet window: the spring-back's moment
+            tv.scrollRectToVisible(caret, animated: false)
+            #expect(tv.contentOffset.y == hers, "a reveal inside her gesture's window moves nothing")
+
+            now += 1.0 // she has let go and the page has settled
+            tv.scrollRectToVisible(caret, animated: false)
+            let after = PageReading(tv)
+            #expect(after.caretLineVisible, "after the window the ordinary reveal runs")
+            #expect(after.firstVisibleChar < tv.textStorage.length,
+                    "…minimally: text above the caret, never a page of room")
+        }
+    }
+
     // MARK: Arm 1 — the arrival (her ruled shape)
 
     /// **Nothing remembered → the page opens at the TOP.** GREEN ON OLD — the
@@ -309,6 +349,8 @@ struct MobileWriteScrollAuthorityTests {
                 #expect(leftAt > ranges[10].location, "the page sits mid-note when she leaves")
                 surface.tearDown()
                 await surface.settle(10)
+                #expect(router.writePlaces.place(for: postID) != nil,
+                        "leaving remembered the page's place")
             }
             // Re-entry: a FRESH screen (the push builds a new one), same session.
             let (model, surface) = host(session, postID: postID, router: router)
@@ -321,5 +363,41 @@ struct MobileWriteScrollAuthorityTests {
             #expect(abs(back.firstVisibleChar - leftAt) <= 90,
                     "re-opened at the place she left (first visible \(back.firstVisibleChar), left at \(leftAt), offsetY \(back.offsetY))")
         }
+    }
+}
+
+/// The authority's two rules, pure.
+@Suite("VM-10 — the scroll authority's brain")
+struct MobileScrollAuthorityBrainTests {
+    @Test func aRevealNeverReachesPastTheText() {
+        // The traced last-line rect: (15, 2242.9, 372, 711.4) with the text
+        // ending at 2297 — clamped to the line's own extent.
+        let clamped = MobileScrollAuthority.revealRect(
+            CGRect(x: 15, y: 2242.9, width: 372, height: 711.4), textBottom: 2297)
+        #expect(clamped.minY == 2242.9)
+        #expect(abs(clamped.maxY - 2297) < 0.001)
+        #expect(clamped.width == 372)
+        // A mid-document line rect is untouched.
+        let line = CGRect(x: 20, y: 987.5, width: 362, height: 22.7)
+        #expect(MobileScrollAuthority.revealRect(line, textBottom: 2297) == line)
+        // A rect wholly in the room collapses to the text's foot.
+        let inRoom = MobileScrollAuthority.revealRect(
+            CGRect(x: 0, y: 2400, width: 10, height: 300), textBottom: 2297)
+        #expect(inRoom.maxY <= 2297 && inRoom.height == 1)
+    }
+
+    @Test func herGestureHoldsWhileLiveAndForTheQuietWindow() {
+        let quiet = MobileScrollAuthority.userScrollQuiet
+        #expect(MobileScrollAuthority.herGestureHolds(
+            now: 10, lastUserScroll: -.infinity, dragging: true, decelerating: false))
+        #expect(MobileScrollAuthority.herGestureHolds(
+            now: 10, lastUserScroll: -.infinity, dragging: false, decelerating: true))
+        #expect(MobileScrollAuthority.herGestureHolds(
+            now: 10, lastUserScroll: 10 - quiet / 2, dragging: false, decelerating: false))
+        #expect(!MobileScrollAuthority.herGestureHolds(
+            now: 10, lastUserScroll: 10 - quiet - 0.01, dragging: false, decelerating: false))
+        #expect(!MobileScrollAuthority.herGestureHolds(
+            now: 10, lastUserScroll: -.infinity, dragging: false, decelerating: false),
+            "never touched: the page is UIKit's to reveal")
     }
 }

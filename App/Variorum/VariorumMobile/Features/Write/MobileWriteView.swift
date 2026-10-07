@@ -31,6 +31,25 @@ struct MobileWriteView: UIViewRepresentable {
     func updateUIView(_ uiView: MobileWriteSurfaceView, context: Context) {}
 }
 
+/// **The Write page's session memory: where each note was left** (VM-10, her
+/// ruled shape (2) — the Mac's `EditorRouter.scrollPlaces` twin, the phone's
+/// own version). Session-only: never persisted, never synced, gone at relaunch
+/// (the Mac's letter — *"not across launches"*). Owned by the shell router,
+/// the one session-lived composition object both tab stacks share, so a note
+/// re-opened on either stack lands where it was last left. Keyed by note.
+@MainActor
+final class MobileWritePlaces {
+    private var places: [String: MobileWritePlace] = [:]
+
+    func place(for postID: String) -> MobileWritePlace? {
+        places[postID]
+    }
+
+    func remember(_ place: MobileWritePlace, for postID: String) {
+        places[postID] = place
+    }
+}
+
 /// The Write screen: the surface under a voiced masthead (batch 3 — the
 /// look canon lands: the voice room, the title in the voice's title type,
 /// status rows in the chrome register). Since S3 batch 1 this is THE
@@ -179,6 +198,8 @@ struct MobileWriteScreen: View {
                 if let router {
                     await router.editors.register(model, tab: tab)
                 }
+                // VM-10: the session's page memory, before the arrival reads it.
+                model.placeMemory = router?.writePlaces
                 await model.arrive(focus: beginEditing)
                 await model.start()
             }

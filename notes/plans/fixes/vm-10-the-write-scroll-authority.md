@@ -126,4 +126,27 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
       HARDWARE-keyboard mode does not reach the placement animation — the fight's real trigger needs the software
       keyboard, which the committed pins deliberately never force process-wide), and
       `typingAfterScrollingTheCaretAwayRevealsItMinimally` (old: 587.3 → 1717.7, caret at the foot — minimal).
+  - **THE FIX (commit after `d35b0188`).** `MobileEditorTextView`: `MobileScrollAuthority` (pure, two rules) +
+    `override scrollRectToVisible(_:animated:)` — the ONE choke point every UIKit reveal on this surface passes
+    through (the traced initiators). Rule 1: a reveal rect never reaches past the text's bottom edge (content
+    height − the room, never above the caret's own line) — the last line is revealed exactly like any other line;
+    the room's EXISTENCE is untouched (still real scrollable range, hers to scroll into). Rule 2: while her pan is
+    live (dragging/decelerating) or within `userScrollQuiet` (0.6 s, PROVISIONAL #200(a)) of her pan's last
+    movement or release (stamped by an added target on the scroll view's OWN `panGestureRecognizer` + every
+    decelerating layout tick), no reveal moves the page. The page's PLACE (`MobileWritePlace`, content-anchored:
+    the fragment at the viewport top + the inset into it + the caret) is read at layout passes that moved the
+    page (equality-gated, viewport-local) and handed to the session memory as the surface leaves its window
+    (MEASURED: at `willMove(toWindow: nil)` the live layout no longer resolves positions — the cached place is
+    what serves). `MobileEditorViewModel.arrive`: a remembered place is restored (caret, then the offset from the
+    anchor's fragment — `jumpToBlock`'s primitive) before the focus raise; nothing remembered → the first
+    render's top landing, unchanged. `MobileWritePlaces` (session-only, never persisted) is defined in
+    `MobileWriteView.swift` and OWNED by `MobileShellRouter` — **one stored-property line outside the brief's
+    three named files** (`Features/Shell/MobileShellRouter.swift`; still phone-local, nothing in `Shared/`) —
+    because the memory must outlive any one screen and the router is the session-lived object both tab stacks
+    share (the Mac keeps its twin on `EditorRouter` for the same reason). Recorded as PROVISIONAL #200(c).
+  - **GREEN AFTER (same pins, fixed tree): 10/10** (`MobileWriteScrollAuthorityTests` 8 + the pure
+    `MobileScrollAuthorityBrainTests` 2). End-⏎ **1689.7 → 1722.3** (a 32.7-pt one-line reveal; first visible 1922,
+    text above the caret); short-note ⏎ **0 → 0** (first visible 1); memory re-entry **offsetY 881.3, first visible
+    970** = where she left. New guard pin `whileHerPanHoldsThePageNoRevealMovesIt` (the authority's rule 2 at its
+    choke point via the clock seam — a pan cannot be synthesized in process; NOT a red-on-old pin).
   - Walk captures — NOT-STARTED. Final suites — PENDING.
