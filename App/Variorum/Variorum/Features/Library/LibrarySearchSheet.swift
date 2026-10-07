@@ -269,19 +269,4 @@ enum LibrarySearchFace {
         kind == .take && !rendered
     }
 
-    /// **The find seed a passage lands with** (D6): a TAKE's first matched
-    /// run, as the index marked it in the snippet — the text as written, so
-    /// the find bar's literal search meets it; it STEPS (is selected) only in
-    /// the take the note shows (PROVISIONAL P-13o-U2-4). A name, label or
-    /// comment hit lands at its block with no seed — its words are not in
-    /// the prose to find.
-    static func findSeed(
-        kind: SearchPassage.Kind, rendered: Bool, snippet: [SearchSnippetSegment]
-    ) -> EditorFindSeed? {
-        guard kind == .take,
-              let run = snippet.first(where: \.isMatch)?.text
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !run.isEmpty else { return nil }
-        return EditorFindSeed(needle: run, steps: rendered)
-    }
 }

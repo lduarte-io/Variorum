@@ -40,15 +40,15 @@ struct LibrarySearchLandingTests {
 
     @Test func aPassageSeedsItsFirstMatchedRunAsWritten() {
         let marked = SearchComposer.snippetSegments("…a \u{2}Café\u{3} by the \u{2}harbor\u{3}…")
-        #expect(LibrarySearchFace.findSeed(kind: .take, rendered: true, snippet: marked)
+        #expect(SearchLanding.findSeed(kind: .take, rendered: true, snippet: marked)
                 == EditorFindSeed(needle: "Café", steps: true),
                 "the text as written — the bar's literal search meets it")
-        #expect(LibrarySearchFace.findSeed(kind: .take, rendered: false, snippet: marked)
+        #expect(SearchLanding.findSeed(kind: .take, rendered: false, snippet: marked)
                 == EditorFindSeed(needle: "Café", steps: false),
                 "an unrendered take arms the bar without selecting (P-13o-U2-4)")
-        #expect(LibrarySearchFace.findSeed(kind: .blockName, rendered: false, snippet: marked) == nil,
+        #expect(SearchLanding.findSeed(kind: .blockName, rendered: false, snippet: marked) == nil,
                 "a name's words are not in the prose to find")
-        #expect(LibrarySearchFace.findSeed(
+        #expect(SearchLanding.findSeed(
             kind: .take, rendered: true, snippet: SearchComposer.snippetSegments("no marks")) == nil)
     }
 
@@ -83,7 +83,7 @@ struct LibrarySearchLandingTests {
             model.query = "cafe "
             await model.search()
             let line = try #require(model.searchState.groups.first?.lines.first)
-            #expect(LibrarySearchFace.findSeed(kind: line.kind, rendered: line.isRenderedTake, snippet: line.snippet)
+            #expect(SearchLanding.findSeed(kind: line.kind, rendered: line.isRenderedTake, snippet: line.snippet)
                     == EditorFindSeed(needle: "Café", steps: true),
                     "typed without its accent, it lands on the words as she wrote them (R-13o-11)")
         }

@@ -247,9 +247,14 @@ struct RootView: View {
                 onKey: { windows.noteKey(windowID) })
         }
         .sheet(isPresented: $paletteOpen) {
-            CommandPaletteView(model: palette) { picked, blockID in
-                open(picked, blockID: blockID)
-            }
+            CommandPaletteView(
+                model: palette,
+                onOpen: { picked, blockID in open(picked, blockID: blockID) },
+                // 13o U2 (D7): a passage lands at its match (D6) …
+                onLand: { picked, blockID, find in open(picked, blockID: blockID, find: find) },
+                // … and the road row opens the Library's answer sheet on the
+                // same words (R-13o-9).
+                onSearchLibrary: { words in searchLibrary(words) })
             .environment(theme)
         }
         // pre-13x 5b (ledger 64 — decision 24): THE iCLOUD DRIVE OFFER's
@@ -1033,6 +1038,15 @@ struct RootView: View {
     private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
         bookAscent = BookAscent(bookID: bookID, postID: postID)
         adopt(.reading(bookID), in: pane)
+    }
+
+    /// **⌘K's road to the rest** (13o U2, D7 — R-13o-9): the Library's field
+    /// takes the palette's words and its answer sheet asks them; the focused
+    /// pane goes to the Library.
+    private func searchLibrary(_ words: String) {
+        catalog.query = words
+        Task { await catalog.search() }
+        adopt(.library, in: router.workspace.focusedPane)
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C) —

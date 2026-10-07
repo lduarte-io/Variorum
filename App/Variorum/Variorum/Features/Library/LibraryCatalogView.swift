@@ -403,7 +403,7 @@ struct LibraryCatalogView: View {
         withAnimation(Self.panelAnimation) { model.closeInfo() }
         let selection: SidebarSelection = passage.family == .scraps ? .pool(home) : .post(home)
         if let block = passage.blockID, let onOpenBlock {
-            onOpenBlock(selection, block, LibrarySearchFace.findSeed(
+            onOpenBlock(selection, block, SearchLanding.findSeed(
                 kind: passage.kind, rendered: passage.isRenderedTake, snippet: passage.snippet))
         } else {
             onOpen(selection)

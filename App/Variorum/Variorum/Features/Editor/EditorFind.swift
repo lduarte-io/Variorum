@@ -344,45 +344,10 @@ nonisolated enum TakesReplacePlan {
     }
 }
 
-// MARK: - 13o U2 — the FIND SEED (land-at-match, D6)
-
-/// **What a search passage hands the editor it lands in** (13o U2 — her
-/// land-at-match, the mockup's shared section: *"Clicking a passage opens the
-/// note at that block with the match selected and the find bar armed, so ⌘G
-/// keeps stepping"*). A ONE-SHOT seed beside the caret's
-/// (`EditorViewModel.pendingFindSeed`), applied once at the arriving editor's
-/// first render through this file's own doors — `performFind` — and nothing
-/// inside the text view, the block index or the pane surface.
-///
-/// `needle` is the matched words AS THE INDEX MARKED THEM in the passage's
-/// snippet — the text as written, so the find bar's literal search meets it
-/// even though the index folds case and accents (R-13o-11). `steps` says the
-/// match is in the text the note SHOWS (a rendered take): the editor selects
-/// it. An unrendered take's hit only ARMS the bar — the words are not on the
-/// page to select (PROVISIONAL P-13o-U2-4).
-nonisolated struct EditorFindSeed: Equatable, Hashable, Sendable {
-    let needle: String
-    let steps: Bool
-}
-
-/// The seed's pure half (pinned): where the needle sits in the surface's
-/// text, from the landed block's start onward.
-nonisolated enum FindSeedLanding {
-    /// The first occurrence of `needle` at or after `start` — the literal
-    /// text first (the snippet's words ARE the source's), then folding case
-    /// and diacritics (the index's own sameness, should the buffer differ in
-    /// either); nil when the words are not there.
-    static func range(of needle: String, in text: String, from start: Int) -> NSRange? {
-        let haystack = text as NSString
-        guard !needle.isEmpty, start >= 0, start <= haystack.length else { return nil }
-        let rest = NSRange(location: start, length: haystack.length - start)
-        for options: NSString.CompareOptions in [.literal, [.caseInsensitive, .diacriticInsensitive]] {
-            let found = haystack.range(of: needle, options: options, range: rest)
-            if found.location != NSNotFound { return found }
-        }
-        return nil
-    }
-}
+// (13o U2: the FIND SEED — `EditorFindSeed` and its pure `FindSeedLanding` —
+// lives in `Shared/SearchLanding.swift`, beside the landing value it rides
+// with; the editor's half of land-at-match is `EditorViewModel.applyFindSeed`,
+// which runs this file's `performFind`.)
 
 // MARK: - The editor's find doors
 
