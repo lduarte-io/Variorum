@@ -1083,3 +1083,25 @@ the in-flight row retires; the worktree is removed after the merge.
 **CLOSEOUT CHECKLIST ADOPTED from the review (so the closeout cannot drop them):** the R-13o-4 canon amendments (OverallModel §9 + AppSpec §6's trigger sentence; the §12 search contract line) · the PROVISIONAL ratify bundle into QUESTIONS · the MOBILE PARITY row · VX-44 closes as the SEARCH half only (replace-across-library not built — correct to the row's letter) · MINOR-3's VX-79.
 
 **DISPOSITION FLOW (cross-model, CLAUDE.md):** findings sent VERBATIM to their units' implementers (MINOR-2 → U1's session; MINOR-1 → U2's; NIT-1/2 → U3's); agree/dispute returns to the reviewer, which makes the final call and implements its confirmed fixes itself; then suites green + one implementer sanity pass; round 2 re-reviews the fixes.
+
+### ROUND 1 DISPOSITIONS (2026-10-07 ~05:1x — every finding AGREED by its unit's implementer; zero disputes)
+
+- **MINOR-1 AGREED (U2)** + implementation guidance adopted: ONE counts-style composer statement
+  over the worn ids (never per-note queries); the next-page cursor stays sourced from `built`
+  only; the merge-late alternative REJECTED (a line-less head until she scrolls). U2's honest
+  note on why its pins missed it is on the record.
+- **MINOR-2 AGREED (U1)** + EXTENDED: the `"dream #/"` empty-path tag also skips the reset —
+  the fix covers both; the end-index form preferred (it states "still being typed" directly);
+  three named existing tests must stay green; **P-13o-U1-4's wording gains "and the word must
+  end the input"** at the ratify bundle.
+- **MINOR-3 DISPOSITIONED, no code:** the order-sensitivity half was stale (VX-78 existed);
+  the rebuild-face half → **VX-79 minted** (project 13o); the closeout checklist carries it.
+- **NIT-1 AGREED (U3)** + caveat adopted: the shared words-reader takes the PARSER's letter on
+  `#/` (neither current copy — `SearchQueryParser` treats it as neither tag nor word); lift
+  beside `SearchAnswerCopy`, read from both sheets.
+- **NIT-2 AGREED (U3):** drop `livingBook`'s default (one construction site, zero test edits,
+  compile-error beats silent fail-closed); `gathering:`'s nil default STAYS (nil is meaningful).
+
+**The reviewer is authorized** (same session, the REVIEW_PROMPT's own contract) to implement
+the four confirmed code fixes with red-on-old pins verified by revert; then the suites green +
+one implementer sanity pass; round 2 re-reviews the fixes with a FRESH reviewer.
