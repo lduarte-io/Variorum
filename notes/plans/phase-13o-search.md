@@ -274,6 +274,11 @@ and restored by `git checkout --`:
 | R4 | the WHEN guard removed (fire on every write) | only the same-values remote rewrite (`changes == 1` → more) — the guard is pure economy, pinned on its own |
 | R5 | no DELETE triggers | the physical delete (the janitor's road) + the exact set — 2 red |
 
+**P8 SENSITIVITY PROBES IN FLIGHT:** S1 edits `Domain/SearchComposer.swift`, S2
+`Persistence/SearchIndex.swift` — both committed clean at `a4db3a15`; a successor finding either
+dirty restores it with `git checkout -- <file>` (safe). S1 disables the placement seek (`+pl.block_id`);
+S2 disables the doc-key seek inside the UPDATE trigger (`+kind`, `+src_id`).
+
 **LIVE STATUS (2026-10-06): STOPPED AT SEAM 2** — P0–P4 landed and pushed; the fork was ruled
 (§FORK RULINGS, `880abf8f`) and P4 is built exactly to it. The tree is clean. Waiting on the
 architect's `Sync/` side (the DERIVED set + the walk + the export-test accommodation). Nothing is
