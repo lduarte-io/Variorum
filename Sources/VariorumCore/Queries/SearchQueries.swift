@@ -317,13 +317,16 @@ extension Queries {
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchCounts? {
         let environment = try searchEnvironment(db)
+        var everything = query
+        everything.visibility = .includingArchived
         var worn: [SearchPassage] = []
         if let day = query.wornDay {
-            var everything = query
-            everything.visibility = .includingArchived
             worn = try wornDayPassages(
                 db, query: everything, scope: scope, day: day, calendar: calendar, environment: environment)
         }
+        // 13o U3: the books a typed tag is ASSOCIATED with count as books
+        // (the Books section lists them) — living, and with the facet on.
+        let associated = try searchTagAssociations(db, query: everything, scope: scope)
         func json(_ ids: [String]) throws -> String {
             String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
         }
@@ -332,15 +335,20 @@ extension Queries {
             wornLivingNoteIDs: try json(worn.filter { !$0.isArchived }.compactMap(\.noteID)),
             wornAllNoteIDs: try json(worn.compactMap(\.noteID)),
             wornArchivedNoteIDs: try json(worn.filter(\.isArchived).compactMap(\.noteID)),
+            associatedLivingBookIDs: try json(associated.filter { !$0.isArchived }.map(\.readingID)),
+            associatedAllBookIDs: try json(associated.map(\.readingID)),
+            associatedArchivedBookIDs: try json(associated.filter(\.isArchived).map(\.readingID)),
             environment: environment)
         else {
-            // No words — a worn day alone still names its notes.
-            guard !worn.isEmpty else { return nil }
-            let living = worn.filter { !$0.isArchived }.count
+            // No words — a worn day alone still names its notes, and a typed
+            // tag alone its associated books (13o U3).
+            guard !worn.isEmpty || !associated.isEmpty else { return nil }
+            let livingNotes = worn.filter { !$0.isArchived }.count
+            let livingBooks = associated.filter { !$0.isArchived }.count
             return SearchCounts(
-                living: .init(books: 0, notes: living, passages: 0, scraps: 0),
-                all: .init(books: 0, notes: worn.count, passages: 0, scraps: 0),
-                archivedPlaces: worn.count - living)
+                living: .init(books: livingBooks, notes: livingNotes, passages: 0, scraps: 0),
+                all: .init(books: associated.count, notes: worn.count, passages: 0, scraps: 0),
+                archivedPlaces: (worn.count - livingNotes) + (associated.count - livingBooks))
         }
         guard let row = try Row.fetchOne(db, sql: statement.sql, arguments: arguments(statement.arguments))
         else { return nil }
@@ -349,6 +357,61 @@ extension Queries {
             all: .init(books: row["all_books"], notes: row["all_notes"],
                        passages: row["all_passages"], scraps: row["all_scraps"]),
             archivedPlaces: row["archived_places"])
+    }
+
+    // MARK: - The tag-association join (13o U3 — the 13i sitting record §12)
+
+    /// **The books and gatherings a typed `#tag` is ASSOCIATED with** —
+    /// through their intake rule (the tag flows there) or their outflow (their
+    /// writing carries it) — ranked as `SearchTagAssociation` decides, ahead
+    /// of every name hit (her §12 ruling: *"a tag's results surface the
+    /// books/gatherings associated with it … top-ranked"*). Wing-scoped
+    /// always; under the query's archived facet; the query's filter half
+    /// composes at reading level (the mode facets narrow it). Library scope
+    /// only (a book's own search has none). Empty when no tag is typed.
+    ///
+    /// P1: ∝ the wing's readings (the Bookcase's class — one candidates
+    /// statement) + the typed tags' path lookups + one bounded path read.
+    public static func searchTagAssociations(
+        _ db: Database, query: SearchQuery, scope: SearchScope
+    ) throws -> [SearchTagAssociation.Association] {
+        let typed = SearchTagAssociation.typedPaths(of: query.filter)
+        guard !typed.isEmpty else { return [] }
+        let environment = try searchEnvironment(db)
+        guard let candidates = SearchComposer.associationCandidates(
+            query, scope: scope, environment: environment) else { return [] }
+        var stored: [String] = []
+        for path in typed {
+            let lookup = SearchComposer.typedTagPaths(path, wingID: scope.wingID, environment: environment)
+            for found in try String.fetchAll(db, sql: lookup.sql, arguments: arguments(lookup.arguments))
+            where !stored.contains(found) {
+                stored.append(found)
+            }
+        }
+        guard !stored.isEmpty else { return [] }
+        let rows = try Row.fetchAll(db, sql: candidates.sql, arguments: arguments(candidates.arguments))
+        let read = rows.map { row in
+            SearchTagAssociation.Candidate(
+                readingID: row["id"], name: row["name"], ruleSpec: row["query_spec"],
+                outflowTagIDs: Reading.decodeOutflow(row["auto_tag_ids"]), isArchived: row["archived"])
+        }
+        var referenced: [String] = []
+        var seen: Set<String> = []
+        for candidate in read {
+            var ids = candidate.outflowTagIDs
+            if case .rule(let term) = RuleGrammar.read(candidate.ruleSpec) {
+                ids += RuleGrammar.positiveTagIDs(of: term)
+            }
+            for id in ids where seen.insert(id).inserted { referenced.append(id) }
+        }
+        guard !referenced.isEmpty else { return [] }
+        let json = String(decoding: try JSONEncoder().encode(referenced), as: UTF8.self)
+        let pathsStatement = SearchComposer.tagPaths(idsJSON: json, wingID: scope.wingID, environment: environment)
+        var paths: [String: String] = [:]
+        for row in try Row.fetchAll(db, sql: pathsStatement.sql, arguments: arguments(pathsStatement.arguments)) {
+            paths[row["id"]] = row["path"]
+        }
+        return SearchTagAssociation.associate(candidates: read, typedPaths: stored, tagPaths: paths)
     }
 
     /// The fragments the composer reads from their one home.

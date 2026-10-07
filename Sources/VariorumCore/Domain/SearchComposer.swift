@@ -419,9 +419,17 @@ public enum SearchComposer {
     ///
     /// Result columns: books, notes, passages, scraps, all_books, all_notes,
     /// all_passages, all_scraps, archived_places.
+    ///
+    /// 13o U3 — the TAG-ASSOCIATION JOIN's books fold into the books counts
+    /// exactly as the worn-day notes fold into the notes (JSON id arrays,
+    /// decided in Swift by `SearchTagAssociation`): living, all, and the
+    /// archived ones among what the facet would add. `[]` (the default) adds
+    /// none — every pre-U3 caller reads unchanged.
     public static func counts(
         _ query: SearchQuery, scope: SearchScope, wornLivingNoteIDs: String, wornAllNoteIDs: String,
-        wornArchivedNoteIDs: String, environment: Environment
+        wornArchivedNoteIDs: String, associatedLivingBookIDs: String = "[]",
+        associatedAllBookIDs: String = "[]", associatedArchivedBookIDs: String = "[]",
+        environment: Environment
     ) throws -> Statement? {
         guard let hits = try hits(query, scope: scope, visibility: .includingArchived, environment: environment)
         else { return nil }
@@ -431,13 +439,17 @@ public enum SearchComposer {
         let sql = """
             WITH hits AS MATERIALIZED (\(hits.sql))
             SELECT
-              (SELECT COUNT(DISTINCT h.reading_id) FROM hits h WHERE \(book) AND NOT h.archived) AS books,
+              (SELECT COUNT(DISTINCT k.id) FROM (
+                 SELECT h.reading_id AS id FROM hits h WHERE \(book) AND NOT h.archived
+                 UNION ALL SELECT value FROM json_each(?)) k) AS books,
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note) AND NOT h.archived
                  UNION ALL SELECT value FROM json_each(?)) n) AS notes,
               (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title' AND NOT h.archived) AS passages,
               (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title' AND NOT h.archived) AS scraps,
-              (SELECT COUNT(DISTINCT h.reading_id) FROM hits h WHERE \(book)) AS all_books,
+              (SELECT COUNT(DISTINCT k.id) FROM (
+                 SELECT h.reading_id AS id FROM hits h WHERE \(book)
+                 UNION ALL SELECT value FROM json_each(?)) k) AS all_books,
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note)
                  UNION ALL SELECT value FROM json_each(?)) n) AS all_notes,
@@ -445,12 +457,15 @@ public enum SearchComposer {
               (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title') AS all_scraps,
               (SELECT COUNT(DISTINCT p.id) FROM (
                  SELECT COALESCE(h.reading_id, h.home_id) AS id FROM hits h WHERE h.archived
+                 UNION ALL SELECT value FROM json_each(?)
                  UNION ALL SELECT value FROM json_each(?)) p) AS archived_places
             """
         return Statement(
             sql: sql,
             arguments: hits.arguments
-                + [.text(wornLivingNoteIDs), .text(wornAllNoteIDs), .text(wornArchivedNoteIDs)])
+                + [.text(associatedLivingBookIDs), .text(wornLivingNoteIDs),
+                   .text(associatedAllBookIDs), .text(wornAllNoteIDs),
+                   .text(wornArchivedNoteIDs), .text(associatedArchivedBookIDs)])
     }
 
     // MARK: - The worn-day arm (R-13o-6)
@@ -531,6 +546,79 @@ public enum SearchComposer {
         return statements
     }
 
+    // MARK: - The tag-association join's reads (13o U3 — the 13i sitting record §12)
+
+    /// **The typed tag's stored paths** in the scope's wing — live, matched
+    /// case-insensitively (the typed `#path`'s letter everywhere in search,
+    /// P-13o-U1-9). Result column: path.
+    public static func typedTagPaths(
+        _ path: String, wingID: String, environment: Environment
+    ) -> Statement {
+        let wing = environment.wingScope("t.wing_id", wingID)
+        return Statement(
+            sql: """
+                SELECT t.path FROM tag t
+                WHERE t.deleted_at IS NULL AND \(wing.sql) AND t.path = ? COLLATE NOCASE
+                ORDER BY t.path
+                """,
+            arguments: wing.arguments + [.text(path)])
+    }
+
+    /// **The live paths of the tags a set of readings references** (their
+    /// rules' terms and their outflows), in the scope's wing — bounded by the
+    /// ids (`idsJSON`, a JSON array). Result columns: id, path.
+    public static func tagPaths(
+        idsJSON: String, wingID: String, environment: Environment
+    ) -> Statement {
+        let wing = environment.wingScope("t.wing_id", wingID)
+        return Statement(
+            sql: """
+                SELECT t.id, t.path
+                FROM json_each(?) j CROSS JOIN tag t ON t.id = j.value AND t.deleted_at IS NULL
+                WHERE \(wing.sql)
+                """,
+            arguments: [.text(idsJSON)] + wing.arguments)
+    }
+
+    /// **The association's CANDIDATES** — the scope wing's live readings
+    /// that carry a rule or an outflow, under the archived facet and the
+    /// query's filter half read at READING level (the mode facets narrow
+    /// them; a family or kind that is not a book's, or a day, excludes
+    /// them; a tag term is the association's own KEY, decided in Swift by
+    /// `SearchTagAssociation`). ∝ the wing's readings (the Bookcase's own
+    /// class). nil outside the Library scope — a book's search has no
+    /// association to surface. Result columns: id, name, query_spec,
+    /// auto_tag_ids, archived.
+    public static func associationCandidates(
+        _ query: SearchQuery, scope: SearchScope, environment: Environment
+    ) -> Statement? {
+        guard case .library = scope.within else { return nil }
+        let wing = environment.wingScope("r.wing_id", scope.wingID)
+        var conditions = [
+            "r.deleted_at IS NULL", wing.sql,
+            "(r.query_spec IS NOT NULL OR r.auto_tag_ids IS NOT NULL)",
+        ]
+        var arguments = wing.arguments
+        switch query.visibility {
+        case .living: conditions.append("r.archived_at IS NULL")
+        case .includingArchived: break
+        case .archivedOnly: conditions.append("r.archived_at IS NOT NULL")
+        }
+        if let filter = query.filter {
+            let composed = composeFilter(filter, level: .reading, wingID: scope.wingID, environment: environment)
+            conditions.append(composed.sql)
+            arguments += composed.arguments
+        }
+        return Statement(
+            sql: """
+                SELECT r.id, r.name, r.query_spec, r.auto_tag_ids, (r.archived_at IS NOT NULL) AS archived
+                FROM reading r
+                WHERE \(conditions.joined(separator: "\n  AND "))
+                ORDER BY r.id
+                """,
+            arguments: arguments)
+    }
+
     // MARK: - The filter half
 
     enum Level {
@@ -539,6 +627,8 @@ public enum SearchComposer {
         case passage
         /// A note row: the container `c` alone (the worn-day arm).
         case note
+        /// A reading row `r` alone (13o U3 — the association's candidates).
+        case reading
     }
 
     static func composeFilter(
@@ -557,17 +647,26 @@ public enum SearchComposer {
             let part = composeFilter(inner, level: level, wingID: wingID, environment: environment)
             return ("NOT COALESCE(" + part.sql + ", 0)", part.arguments)
         case .tagPath(let path):
+            // A reading row is not tagged: the typed tag is the association's
+            // KEY there (`SearchTagAssociation` decides), never a constraint.
+            if level == .reading { return ("1", []) }
             let rootWing = environment.wingScope("root.wing_id", wingID)
             return tagSubtree(
                 root: "root.path = ? COLLATE NOCASE AND \(rootWing.sql)",
                 rootArguments: [.text(path)] + rootWing.arguments, level: level)
         case .tag(let id):
+            if level == .reading { return ("1", []) }
             return tagSubtree(root: "root.id = ?", rootArguments: [.text(id)], level: level)
         case .starred:
+            // "The NOTE is starred" — a reading row is no note.
+            if level == .reading { return ("0", []) }
             let ids = environment.starredNoteIDs
             guard !ids.isEmpty else { return ("0", []) }
             return ("c.id IN (" + ids.map { _ in "?" }.joined(separator: ", ") + ")", ids.map { .text($0) })
         case .days(let range):
+            // A book carries no edit stamp — an armed day excludes books at
+            // every level (the passage level's own answer for a book hit).
+            if level == .reading { return ("0", []) }
             switch range.field {
             case .edited:
                 return ("COALESCE(" + environment.editedOn("c") + ", 0)",
@@ -577,16 +676,20 @@ public enum SearchComposer {
             }
         case .family(let family):
             switch (family, level) {
+            case (.notes, .reading), (.scraps, .reading): return ("0", [])
             case (.notes, _): return ("c.kind = 'post'", [])
             case (.scraps, _): return ("c.kind = 'pool'", [])
             case (.books, .passage): return ("d.reading_id IS NOT NULL", [])
             case (.books, .note): return ("0", [])
+            case (.books, .reading): return ("1", [])
             }
         case .docKind(let kind):
             switch level {
             case .passage: return ("d.kind = ?", [.text(kind.rawValue)])
             // A worn-day hit is a NAME-level hit with no doc behind it.
             case .note: return (kind == .title ? "1" : "0", [])
+            // An associated reading is a BOOK-level answer.
+            case .reading: return (kind == .book ? "1" : "0", [])
             }
         }
     }
@@ -618,6 +721,8 @@ public enum SearchComposer {
                      WHERE root.deleted_at IS NULL AND \(root))
             """
         switch level {
+        case .reading:
+            return ("1", [])  // unreachable: `composeFilter` answers a reading row first
         case .note:
             return ("COALESCE(" + notes + ", 0)", rootArguments)
         case .passage:
