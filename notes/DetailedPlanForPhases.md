@@ -15,6 +15,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | 13o — Search | **VX-5** · `vx-5-13o-search` | `~/dev/variorum-13o` · the Pro | ready — kickoff atop `notes/plans/phase-13o-search.md` (opens with the design sitting) |
 | 13x — Library portability | **VX-6** · `vx-6-13x-library-portability` | `~/dev/variorum-13x` · the Pro | OPEN — kicked off 2026-10-06 (the design sitting); HOLDS the one Sync/-custody slot (Fable end to end); VX-64 triaged in. Record: `notes/plans/phase-13x-library-portability.md` |
 | 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | the Air's clone, on the pushed branch | ready — kickoff atop `notes/plans/phase-13s-voice-onboarding.md` (the Air; suites via the Pro's stage) |
+| Mobile — the catch-up merge | **VM-5** · `vm-5-the-catch-up-merge` | `~/dev/variorum-vm-5` · the Pro | OPEN — the final mobile→main merge + round-2 close (her GO 2026-10-06); 68 mobile commits home, markers 7→12 reconciled; surfaces: `App/Variorum/VariorumMobile/` + notes unions + the QUESTIONS renumber; ZERO `Sync/`. Closeouts serialize — this PR lands on latest main. Record: `notes/plans/vm-4-mobile-catch-up.md` |
 
 ### Latest closeout
 
