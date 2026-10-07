@@ -57,6 +57,57 @@ final class VM10WalkDriver: XCTestCase {
         sleep(1)
     }
 
+    /// The END-of-note road, walked as she journals: the Today entry, the
+    /// caret at the end, paragraph after paragraph typed with ⏎ until the
+    /// text outgrows the keyboard-up page; then her scroll back up; then a
+    /// re-entry through the Today door (the session memory + focus).
+    @MainActor
+    func testWalkEnd() throws {
+        continueAfterFailure = true
+        softwareKeyboard()
+        app = XCUIApplication()
+        app.launch()
+        sleep(3)
+        _ = tapVisible(app.buttons, containing: "later", timeout: 3)
+        sleep(1)
+        XCTAssertTrue(tapVisible(app.buttons, containing: "Today's Entry"))
+        sleep(3)
+        let tv = app.textViews.firstMatch
+        XCTAssertTrue(tv.waitForExistence(timeout: 5))
+        // Her finger in the room below the text: the caret goes to the end.
+        tv.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)).tap()
+        sleep(1)
+        shot("07a-today-entry-caret-at-end")
+        tv.typeText("\n")
+        for n in 1...9 {
+            tv.typeText("Journal paragraph \(n), a few more words so it fills a line or two of the page.")
+            tv.typeText("\n")
+            usleep(400_000)
+            if n == 5 || n == 7 { sleep(1); shot("07b-after-return-\(n)") }
+        }
+        sleep(2)
+        shot("07c-return-at-the-end-of-a-growing-entry")
+        // Her scroll back up — and she waits.
+        tv.swipeDown(velocity: .slow)
+        sleep(1)
+        shot("08a-scrolled-back-up-after-return")
+        sleep(3)
+        shot("08b-scrolled-back-up-3s-later")
+        // She carries on typing: the caret's line is revealed minimally.
+        tv.typeText("and on")
+        sleep(2)
+        shot("08c-typing-again-after-scrolling-up")
+        // Re-entry through the Today door: her place and her caret.
+        goBack()
+        sleep(1)
+        XCTAssertTrue(tapVisible(app.buttons, containing: "Today's Entry"))
+        sleep(3)
+        shot("09a-today-door-re-entry-remembers")
+        tv.typeText(" again")
+        sleep(2)
+        shot("09b-today-door-re-entry-typing")
+    }
+
     @MainActor
     func testWalk() throws {
         continueAfterFailure = true

@@ -180,9 +180,18 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     `MobileScrollAuthorityBrainTests` 2, plus `MobileBlockListTests`/`MobileTypewriterRoomTests` green beside them);
     red-on-old re-proved by behavioural revert and restored (tree clean). The real-app WALK RAN ONCE (throwaway
     XCUITest driver `VariorumMobileUITests/VM10WalkDriver.swift`, run via the `TK2SpikeUITests` scheme — no scheme
-    edits; real touches; 17 captures written to the gitignored `notes/plans/vm-10-screens/`, **NOT YET INSPECTED —
-    PENDING**). The driver's runner-side `GSEventSetHardwareKeyboardAttached` did NOT raise the app's software
-    keyboard (headless hardware-keyboard mode persists for the app process) — keyboard-up evidence is the
-    in-process probe's (above). NEXT on resume: inspect the captures (re-walk any that misfire), delete the probe +
-    the driver, run the touched suites + the FULL mobile suite once, final dispositions here.
-  - Walk captures — RAN, PENDING inspection. Final suites — PENDING.
+    edits; real touches; 17 captures written to the gitignored `notes/plans/vm-10-screens/`).
+  - **WALK RUN 1 — INSPECTED while parked (local files only, no stage use).** CORRECTION to the line above as
+    first written: the runner-side `GSEventSetHardwareKeyboardAttached(false, 0)` IS system-wide — the real app's
+    software keyboard rose (03a onward). Verdicts: `01-long-note-opened-cold` ✓ (the 69-paragraph "the short walk"
+    shows its first lines) · `02a-left-mid-way` → `02b-back-in-library` → `02c-reopened-where-left` ✓ (02c shows the
+    identical lines at the identical place; three distinct md5s, a real Library visit between) · `03a-caret-mid-note`
+    → `03b-return-mid-note` ✓ (keyboard up: ⏎ mid-note moves the page one line, text intact) · `04*` **MISFIRED** —
+    twelve swipes never reached the note's end, the tap landed mid-paragraph, so 04c/04d are a second mid-note ⏎
+    (behaving), NOT the end-of-note case · `05b-scrolled-up-3s-later-still-there` ✓ (mid-note) · `06a/06b` ✓ (the
+    Today door lands ready to type, keyboard up, typed text appears). **Prepared, not yet run:** `testWalkEnd` in the
+    same driver — the end-of-note road walked as she journals (the Today entry, caret at the end, nine paragraphs
+    typed with ⏎ past the keyboard-up page, her scroll back up, typing again, a Today-door re-entry).
+    NEXT on resume: run `testWalkEnd`, inspect, delete the probe + the driver, run the touched suites + the FULL
+    mobile suite once, final dispositions here.
+  - Walk captures — run 1 inspected (5/6 items ✓, end-of-note re-walk prepared). Final suites — PENDING.
