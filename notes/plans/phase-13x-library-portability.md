@@ -605,6 +605,15 @@ write is an ordinary `save` under the same (scope, store id) name.
   wait never idles the session; recorded rather than silent.
 - The app target compiles under default MainActor isolation — Shared types need explicit
   `nonisolated` (every sibling carries it; `LibraryHandOff` joined them).
+- **The stage sequence for row 2's run (the 13o-scheduler arrangement; the addendum below):**
+  the first atomic claim-waiter was KILLED on the orchestrator's stand-down directive
+  before it ever claimed (verified: its output held no claim line; VM-5 then re-claimed
+  22:11, "ladder reviews + final suite"). The orchestrator's GO followed — slot 1, claim
+  reason "13x U1 row-2 pins (<=25 min)", 25-minute expiry, the ONE `-only-testing` pass,
+  release the instant the counts line lands, flips/commits AFTER release, one renew max.
+  The test bundle was PRE-BUILT during the wait (`build-for-testing` — not a stage act),
+  so the claimed window pays only for the run; the re-armed waiter claims atomically on
+  the holder's release.
 - The record-opening commit (`d2ca39f9`) carries a `Co-Authored-By` trailer against
   CLAUDE.md's no-trailer rule (the harness reminder won a reflex it should not have).
   Caught immediately after the push; a pushed commit is never rewritten without her word,
