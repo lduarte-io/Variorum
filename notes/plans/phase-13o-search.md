@@ -555,7 +555,7 @@ the in-flight row retires; the worktree is removed after the merge.
 | 1 | Sitting record + execution plan authored | DONE (this commit) |
 | 2 | Linear: VX-72 (Search Everything) · VX-73 (power-search grammar) minted in project 13o | DONE — see tickets |
 | 3 | Mockup round (`mockups/13o-search.html`) → her pick + "on day…" wording | OPEN — next act |
-| 4 | U1 substrate | NOT STARTED |
+| 4 | U1 substrate | **DONE 2026-10-06** — P0–P9 landed (close 3251cce7); the ORCHESTRATOR'S CHECK: commits + clean pushed tree verified, the four search suites + MigrationTests re-run green on the orchestrator's own machine (46/46 + 42/42 at seam 2), the U1 RECORD complete with the close banner and zero PENDING. Evidence of the unit's kind: state-transition + P1 page-count pins (headless substrate; USE evidence arrives with U2's walk). P-13o-U1-5 (scraps across wings) surfaced to the author with the U1 report |
 | 5 | U2 finder (gated on 3) | NOT STARTED |
 | 6 | U3 scopes/facets/join | NOT STARTED |
 | 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks — **PING the 13x session (`variorum-c0`) at the merge** (its 2026-10-06 ack + ask; it rebases and opens its Sync-composition batch on the ping) | NOT STARTED |
