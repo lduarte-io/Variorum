@@ -252,7 +252,7 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | P0 | This piece plan (the first commit) | DONE (this commit) |
 | P1 | MEASUREMENTS + THE FORK PROPOSAL — contentless vs external-content FTS5; doc normalization (per source row vs per rendered unit); where scope (note/wing/archived) lives. A throwaway measurement suite over synthetic corpora; numbers + tradeoffs written below. **→ SEAM 1: stop for the architect's ruling before the schema half.** | DONE (this commit) — the proposal is §FORK below; AWAITING THE RULING |
 | P2 | Domain, fork-independent: the `SearchQuery` AST (text terms + filter tree, R-13o-8) + the v1 grammar parser (words · "phrases" · `#tag` · facets) + the DATE-PARSE predicate (R-13o-6 — "september 14" / "sep 14" / "9/14" → day bounds), pure, exhaustive little tests | DONE (this commit) — `Domain/SearchQuery.swift` (the AST: `SearchQuery` = text tree + filter tree + `wornDay` + `visibility`; `SearchScope` with the wing mandatory), `Domain/SearchQueryParser.swift`, `Domain/SearchDateParse.swift`; `SearchQueryParserTests` 19/19 green (2 suites). PROVISIONALs: P-13o-U1-1 a day inside a sentence of words is words (the whole free text must be the day); P-13o-U1-2 a numeric day impossible in the locale's order reads the other way round ("14/9" in en_US); P-13o-U1-3 dotted numeric days only where the locale writes them; P-13o-U1-4 the type-ahead tail is a prefix only at ≥ 2 characters |
-| P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | NOT-STARTED |
+| P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | DONE (this commit) — §R-13o-4 RECORD below |
 | P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | NOT-STARTED |
 | P5 | The rebuild door (a maintenance operation: drop + rebuild from truth) + the integrity check (doc rows vs source rows) | NOT-STARTED |
 | P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | NOT-STARTED |
@@ -368,6 +368,48 @@ from the export, so registering the search family there means an export carries 
 triggers but not their tables (the outbox's own recorded consequence — 13x's open door reconciles);
 a separate DERIVED set that the walk subtracts and the export KEEPS would hand 13x a working index
 instead. The orchestrator's call; flagged, not decided.
+
+#### §R-13o-4 RECORD — the Phase-2 re-assessment protocol, run for the third trigger duty (P3; written before any trigger line)
+
+The protocol (`notes/plans/phase-02-operations-lifecycle.md`, Risks — "the trigger smell"):
+the trigger families are a CLOSED set; pressure for a new trigger is diagnostic; re-assess in
+order, and get the author's decision before any trigger gains domain knowledge. She ruled the
+extension (R-13o-4, "Agree on your recommendation for R1") — this record is the provenance
+OverallModel §9 demands, run honestly against the shape being built.
+
+1. **Mis-filed semantics?** (operation logic wearing a propagation costume) — NO. The index must
+   reflect every text write REGARDLESS OF LAYER, and three layers write text without passing
+   through any operation: the tombstone CASCADES (a block's tombstone reaches its takes and
+   comments inside `cascade_block_tombstone*`; a note's reaches its blocks; a book's its chapters),
+   REMOTE APPLY (`SyncRow.apply` — a generic UPDATE-then-INSERT of whole rows, no operation), and
+   the §7 REPAIRS + the purge janitor (explicit SQL; the janitor's physical DELETE). An
+   operations-layer capture misses all three by construction — the exact argument that put outbox
+   capture in triggers (SyncSpec §3). The capture is propagation, not semantics.
+2. **Mis-decomposed operation?** — NO. No operation is being split or bent; the triggers carry
+   no operation's rule, and no operation reads the index to decide anything.
+3. **Mis-shaped schema?** — NO. The index is DERIVED, LOCAL-ONLY and REBUILDABLE from truth at
+   any moment (P5's rebuild door; the integrity check compares it against the source rows). No
+   invariant lives in it; no rule needs it as a home; deleting it loses nothing. The source schema
+   is untouched.
+
+**The domain-knowledge test (OverallModel §9's smell list), item by item — what the capture
+triggers do NOT know:** which take RENDERS (chosen-pointer vs default fallback) · what a saved
+VERSION is (the archived_at = created_at classifier) · what a SCRAP is (pool-ness of a home) ·
+wing ISOLATION semantics (a dangling wing reads Home) · lock / seal · dirtiness · churn ·
+ownership · intake. Every one of those is resolved at QUERY time by the one composer from
+rows-as-truth. **What they DO, exactly:** per source (table, text column) — `variant.working_text`,
+`variant.label`, `block.name`, `block_comment.text`, `container.title`,
+`container.floating_notes`, `reading.name`, `reading_section.name` — on INSERT / UPDATE / DELETE,
+mirror the field's EXISTENCE (row live ∧ field non-NULL) and its RAW TEXT into the index, plus the
+source row's OWN id / parent-id / own wing / own archived columns. **Reads inside a body: the doc
+family only** (to find the doc's rowid). No other table, ever (under F3 as proposed; if the
+architect rules S2, this record names the two structural reads S2 would add — the live
+placement by `block_id` and the container row by id — before they are written).
+
+**Verdict: the closed set extends by exactly one family** — tombstone propagation · outbox
+capture · **derived-index capture** — and the smell test survives intact for the future: a search
+trigger that wants another table's value, or a rule, is the §9 smell, and stops for her decision.
+The closeout amends OverallModel §9 + AppSpec §6's trigger sentence to exactly this (R-13o-4).
 
 ### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
 
