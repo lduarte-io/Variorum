@@ -744,12 +744,33 @@ final class AppBootstrap {
         if case .failure(let error) = outcome { throw error }
     }
 
+    /// 13x F1 (ladder R1-M4): the non-ready adoption road calls this
+    /// BEFORE its `work` — the standing lobby's Apple re-probe polls
+    /// every ~5 s and `complete(key)` would open the pool over the
+    /// DEPARTING store mid-move (two bindings over two files, an
+    /// unowned state). Idempotent; the lobby stays on screen, its probe
+    /// silent, until the reopen routes — or `resumeLobbyAfterFailedAdoption`
+    /// re-arms it.
+    func suspendLobbyForAdoption() {
+        if case .waitingForICloudKeychain(let lobby) = state { lobby.suspendForAdoption() }
+        if case .locked(let lobby) = state { lobby.suspendForAdoption() }
+    }
+
+    /// R1-M4's failure half: a refused non-ready adoption leaves the
+    /// lobby standing — it must go back to WAITING (the probe re-armed)
+    /// rather than wait dead until a relaunch.
+    func resumeLobbyAfterFailedAdoption() {
+        if case .waitingForICloudKeychain(let lobby) = state { lobby.resumeAfterAdoption() }
+        if case .locked(let lobby) = state { lobby.resumeAfterAdoption() }
+    }
+
     /// The NON-ready road's reopen (the welcome/waiting/absent-store
     /// doors): the model ran the adoption work itself — no pool was ever
     /// open in these states, and `LibraryAdoption` refuses a hot `-wal`
     /// regardless — so what remains is leaving the standing lobby (its
-    /// Apple re-probe stopped) and routing the open with the opener in
-    /// hand.
+    /// Apple re-probe stopped — R1-M4 suspends it BEFORE the work; this
+    /// stop is the belt for any road that skipped the suspension) and
+    /// routing the open with the opener in hand.
     func reopenAfterAdoption(unlockedKey key: StoreKey?) {
         if case .waitingForICloudKeychain(let lobby) = state { lobby.stopWaiting() }
         if case .locked(let lobby) = state { lobby.stopWaiting() }

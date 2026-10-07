@@ -188,6 +188,39 @@ struct LibraryPortabilityDoorTests {
         #expect(message.contains("the key file travels with it"))
     }
 
+    // MARK: F1 R1-M3 — the failure words are true per arm
+
+    /// 13x F1 (ladder R1-M3): the failure lead's FACTS are per arm — a
+    /// pre-move refusal never claims the dated copy or the safety copy
+    /// (neither exists on those arms), the mid-move arm names its two
+    /// REAL nets, and the landing arm keeps the old lead (whose facts
+    /// are true exactly there — by the landing, both nets exist; a
+    /// post-work reopen failure is past the landing by construction).
+    /// RED ON OLD: one lead for every arm — a user whose source was
+    /// missing was pointed at recovery artifacts that were never made.
+    @Test func theAdoptionFailureWordsAreTruePerArm() {
+        let preMove: [LibraryAdoption.AdoptionError] = [
+            .sourceMissing("x"), .sourceKeyFileMissing("x"), .sourceKeyFileUnreadable("x"),
+            .libraryLooksOpen("x"), .safetyCopyFailed("x"), .holdWriteFailed("x"),
+        ]
+        for arm in preMove {
+            let (lead, detail) = LibraryOpenModel.failureWording(for: arm)
+            #expect(lead == LibraryOpenCopy.adoptionRefusedNothingMoved, "\(arm)")
+            #expect(!lead.contains("dated copy") && !lead.contains("safety copy"),
+                    "no false recovery facts on a pre-move arm: \(arm)")
+            #expect(detail == "x")
+        }
+        let (mid, _) = LibraryOpenModel.failureWording(
+            for: LibraryAdoption.AdoptionError.moveAsideFailed("m"))
+        #expect(mid == LibraryOpenCopy.adoptionFailedMidMove)
+        let (landing, _) = LibraryOpenModel.failureWording(
+            for: LibraryAdoption.AdoptionError.landingFailed("l"))
+        #expect(landing == LibraryOpenCopy.adoptionFailedLead)
+        struct Odd: Error {}
+        let (unknown, _) = LibraryOpenModel.failureWording(for: Odd())
+        #expect(unknown == LibraryOpenCopy.adoptionFailedLead)
+    }
+
     // MARK: F1 R1-MAJOR — the hand-off door's flow (the face over the U1
     // brains; the finding's evidence was the zero-caller grep)
 
@@ -252,6 +285,75 @@ struct LibraryPortabilityDoorTests {
         let after = try FileManager.default.contentsOfDirectory(atPath: destination.path)
         #expect(after == before, "the refusal made nothing — not even an empty folder")
         _ = bareDatabase.asRebindable().binding.lock()
+    }
+
+    // MARK: F1 R1-M5 — no spurious Touch ID on a provably foreign pair
+
+    /// 13x F1 (ladder R1-M5): picking an encrypted pair on a gated
+    /// (Castle) Mac compares FINGERPRINTS promptless first — the pair's
+    /// and the LIVE key file's are both on disk, and the gated item can
+    /// only ever serve a SAME-key copy. A provably foreign pair skips
+    /// the biometric ask entirely and falls straight to the typed
+    /// roads; a same-key pair still takes exactly the one ask (the
+    /// second look's gated arm, unchanged where it can help). RED ON
+    /// OLD: `gatedItemExists` fired `unlockGated` before the envelope
+    /// could say the key never fit — a spurious prompt that then
+    /// "failed" into the typed roads on the exact older-key-restore
+    /// road this phase ships.
+    @Test func aProvablyForeignPairSkipsTheGatedAskAndASameKeyPairStillGetsIt() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let pair = try makePair(in: dir, passphrase: "the travelling word")
+        let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
+        try FileManager.default.createDirectory(
+            at: storeURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        // The LIVE library's key file on disk — a DIFFERENT key's.
+        let liveKey = StoreKey.mint()
+        var liveEnvelope = StoreKeyEnvelope()
+        try liveEnvelope.setPassphraseWrap(
+            key: liveKey, passphrase: "the live word", kdf: fastKDF())
+        try liveEnvelope.write(at: liveEnvelope.preferredURL(besideStore: storeURL))
+
+        // A gated (Castle) custody whose unlocks are COUNTED.
+        let backing = InMemoryStoreKeyGuardBacking(
+            gated: liveKey, biometryAvailable: true, biometricSucceeds: true)
+        let prompts = LockIsolated(0)
+        var gate = StoreLaunchGate.scripted(dials: ProtectionDials(), backing: backing)
+        let baseGuardFor = gate.guardFor
+        gate.guardFor = { scope in
+            var seam = baseGuardFor(scope)
+            let baseUnlock = seam.unlockGated
+            seam.unlockGated = {
+                prompts.withValue { $0 += 1 }
+                return await baseUnlock()
+            }
+            return seam
+        }
+        let bootstrap = AppBootstrap(
+            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "/x", reason: "unused")) },
+            gate: gate, testStoreURL: storeURL)
+        await bootstrap.awaitOpen()
+
+        // FOREIGN fingerprints: the ask is SKIPPED — straight to the
+        // typed roads, zero prompts.
+        let model = LibraryOpenModel(bootstrap: bootstrap)
+        model.begin(picked: pair.store)
+        try await waitUntil { if case .unlock = model.phase { return true }; return false }
+        #expect(prompts.value == 0, "a provably foreign pair fires no biometric prompt")
+
+        // A SAME-key pair: the one ask still serves it into confirm.
+        let sameStore = dir.appendingPathComponent("same/variorum.sqlite")
+        let sameDatabase = try AppDatabase.openStore(
+            at: sameStore, custody: .inMemory(initial: liveKey))
+        _ = sameDatabase.asRebindable().binding.lock()
+        var sameEnvelope = StoreKeyEnvelope()
+        try sameEnvelope.setPassphraseWrap(
+            key: liveKey, passphrase: "the live word", kdf: fastKDF())
+        try sameEnvelope.write(at: sameEnvelope.preferredURL(besideStore: sameStore))
+        let second = LibraryOpenModel(bootstrap: bootstrap)
+        second.begin(picked: sameStore)
+        try await waitUntil { if case .confirm = second.phase { return true }; return false }
+        #expect(prompts.value == 1, "the same-key pair takes exactly the one gated ask")
     }
 
     // MARK: Row 6 — the whole flow over a real pair (typed road → confirm

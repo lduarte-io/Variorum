@@ -598,12 +598,39 @@ final class StoreLobby {
         waitingTask = nil
     }
 
+    /// 13x F1 (ladder R1-M4): the adoption flow SUSPENDS the standing
+    /// lobby BEFORE its work — the re-probe must not open the pool over
+    /// a departing store (a probe firing between the flow's wal check
+    /// and the move left two bindings over two files). Stopping the
+    /// polling task alone is not enough: a probe already awaiting the
+    /// Apple road completes AFTER the cancel, so `probeAppleRoad` also
+    /// re-checks the flag past its await. The typed roads need a user
+    /// and the adoption sheet stands over the lobby's fields — recorded,
+    /// not guarded.
+    private(set) var suspendedForAdoption = false
+
+    func suspendForAdoption() {
+        suspendedForAdoption = true
+        stopWaiting()
+    }
+
+    /// A FAILED non-ready adoption resumes the lobby (the flow shows its
+    /// refusal; the lobby must go back to waiting rather than wait dead
+    /// until a relaunch).
+    func resumeAfterAdoption(every interval: Duration = .seconds(5)) {
+        suspendedForAdoption = false
+        if isWaitingForICloudKeychain { beginWaiting(every: interval) }
+    }
+
     /// One probe: true when the key arrived and the open began.
     @discardableResult
     func probeAppleRoad() async -> Bool {
-        guard let appleRoad, !busy else { return false }
+        guard let appleRoad, !busy, !suspendedForAdoption else { return false }
         appleProbes += 1
         guard let key = await appleRoad() else { return false }
+        // R1-M4: the in-flight re-check — a suspension that landed while
+        // this probe awaited the road completes NOTHING.
+        guard !suspendedForAdoption else { return false }
         stopWaiting()
         complete(key)
         return true

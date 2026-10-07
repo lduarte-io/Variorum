@@ -145,7 +145,25 @@ nonisolated enum LibraryOpenCopy {
 
     static let classifyingLine = "Reading what you picked…"
     static let adoptingLine = "Opening the library — your current one is stepping aside…"
+    /// 13x F1 (ladder R1-M3): the failure copy is PER ARM — this lead's
+    /// facts (the dated copy + the safety copy exist) are TRUE only once
+    /// the adoption moved past the landing's start, so it renders for
+    /// the landing arm and the unknown class alone; the pre-move arms
+    /// say nothing moved, and the mid-move arm names its two nets.
     static let adoptionFailedLead =
         "The library couldn't be opened. Nothing you picked was changed; your current "
         + "library is whole in its dated copy and the safety copy."
+    /// The pre-move refusals (source missing/unreadable · the hot `-wal` ·
+    /// a failed safety copy or hold write): NOTHING moved, and no dated
+    /// copy exists to point at.
+    static let adoptionRefusedNothingMoved =
+        "The library couldn't be opened. Nothing moved — your current library stands "
+        + "as it was, and the file you picked was only read."
+    /// The mid-move arm: the safety copy EXISTS (it lands before any
+    /// move), and what moved is in the aside home.
+    static let adoptionFailedMidMove =
+        "The library couldn't be opened — it stopped while your current library was "
+        + "stepping aside. Your whole library is in its safety copy (Backups ▸ "
+        + "safety-copies, beside your library), and the files that moved are in "
+        + "Previous Libraries. The file you picked was only read."
 }

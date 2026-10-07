@@ -144,6 +144,23 @@ final class LibraryOpenModel {
 
     private var pendingSource: (store: URL, keyFile: URL)?
 
+    /// R1-M5's promptless comparison: TRUE only when BOTH fingerprints
+    /// are readable and DIFFER — the gated key provably cannot open the
+    /// pair (custody is aligned with the live key file by the custody
+    /// law; the file is its promptless proxy). Unknown on either side
+    /// keeps the gated ask — the second look may still serve it.
+    nonisolated static func pairIsProvablyForeign(
+        pairKeyFile: URL, liveStoreURL: URL?
+    ) -> Bool {
+        guard let pair = try? StoreKeyEnvelope.load(at: pairKeyFile),
+              let pairFingerprint = pair.keyFingerprint,
+              let liveStoreURL,
+              let live = try? StoreKeyEnvelope.loadCurrent(besideStore: liveStoreURL),
+              let liveFingerprint = live.keyFingerprint
+        else { return false }
+        return pairFingerprint != liveFingerprint
+    }
+
     private func beginUnlock(store: URL, keyFile: URL) async {
         pendingSource = (store, keyFile)
         let scope = bootstrap.storeVariant.rawValue
@@ -168,7 +185,16 @@ final class LibraryOpenModel {
         }
         // The second look's GATED arm: one Touch ID ask serves a same-key
         // copy under Castle — only offered-by-doing when the item exists.
-        if guardSeam.gatedItemExists() {
+        // 13x F1 (ladder R1-M5): the fingerprints are compared PROMPTLESS
+        // first — the pair's and the LIVE key file's are both on disk,
+        // and the gated item can only ever serve a SAME-key copy; a
+        // provably foreign pair skips the ask entirely (no spurious
+        // Touch ID that then "fails" into the typed roads, on the exact
+        // older-key-restore road this phase ships). Equal or UNKNOWN on
+        // either side keeps the one ask.
+        if guardSeam.gatedItemExists(),
+           !Self.pairIsProvablyForeign(
+               pairKeyFile: keyFile, liveStoreURL: bootstrap.liveStoreURL) {
             if let gatedKey = await guardSeam.unlockGated(),
                let envelope = try? StoreKeyEnvelope.load(at: keyFile),
                envelope.belongs(to: gatedKey) {
@@ -261,7 +287,10 @@ final class LibraryOpenModel {
     func confirmAdoption() async {
         guard !busy, case .confirm = phase, let road else { return }
         guard let storeURL = bootstrap.liveStoreURL else {
-            phase = .refused(LibraryOpenCopy.adoptionFailedLead, detail: "no store path resolved")
+            // R1-M3: nothing has moved on this arm — the lead must not
+            // point at recovery artifacts that do not exist.
+            phase = .refused(
+                LibraryOpenCopy.adoptionRefusedNothingMoved, detail: "no store path resolved")
             return
         }
         busy = true
@@ -316,23 +345,66 @@ final class LibraryOpenModel {
             if case .ready = bootstrap.state {
                 try await bootstrap.adoptLibrary(reopeningWith: reopenKey, work: work)
             } else {
-                let outcome: Result<Void, any Error> = await Task.detached(
-                    priority: .userInitiated
-                ) {
-                    do {
-                        try work()
-                        return .success(())
-                    } catch {
-                        return .failure(error)
+                // 13x F1 (ladder R1-M4): the standing lobby's Apple
+                // re-probe stops BEFORE the work — `complete(key)` would
+                // open the pool over the departing store mid-move. If
+                // the probe already won the race, the state is READY
+                // now: take the ready road, which closes the pool it
+                // opened. A failure re-arms the probe (the lobby must
+                // not wait dead behind the refusal).
+                bootstrap.suspendLobbyForAdoption()
+                if case .ready = bootstrap.state {
+                    try await bootstrap.adoptLibrary(reopeningWith: reopenKey, work: work)
+                } else {
+                    let outcome: Result<Void, any Error> = await Task.detached(
+                        priority: .userInitiated
+                    ) {
+                        do {
+                            try work()
+                            return .success(())
+                        } catch {
+                            return .failure(error)
+                        }
+                    }.value
+                    if case .failure(let error) = outcome {
+                        bootstrap.resumeLobbyAfterFailedAdoption()
+                        throw error
                     }
-                }.value
-                if case .failure(let error) = outcome { throw error }
-                bootstrap.reopenAfterAdoption(unlockedKey: reopenKey)
+                    bootstrap.reopenAfterAdoption(unlockedKey: reopenKey)
+                }
             }
             phase = .done
         } catch {
-            phase = .refused(
-                LibraryOpenCopy.adoptionFailedLead, detail: String(describing: error))
+            // 13x F1 (ladder R1-M3): the words are PER ARM — the catch
+            // holds the typed error, and the lead's facts must be true
+            // for the arm that threw (the old one lead claimed the
+            // dated copy and the safety copy on arms where neither
+            // exists).
+            let (lead, detail) = Self.failureWording(for: error)
+            phase = .refused(lead, detail: detail)
+        }
+    }
+
+    /// R1-M3's map — which lead is TRUE for which failure arm:
+    /// pre-move arms (nothing moved, no dated copy) · the mid-move arm
+    /// (the safety copy + the aside home, named) · the landing arm and
+    /// the unknown class (the old lead — its facts hold exactly there:
+    /// by the landing, the dated copy and the safety copy both exist,
+    /// and a post-work reopen failure is past the landing by
+    /// construction).
+    nonisolated static func failureWording(for error: any Error) -> (String, String?) {
+        guard let adoption = error as? LibraryAdoption.AdoptionError else {
+            return (LibraryOpenCopy.adoptionFailedLead, String(describing: error))
+        }
+        switch adoption {
+        case .sourceMissing(let detail), .sourceKeyFileMissing(let detail),
+             .sourceKeyFileUnreadable(let detail), .libraryLooksOpen(let detail),
+             .safetyCopyFailed(let detail), .holdWriteFailed(let detail):
+            return (LibraryOpenCopy.adoptionRefusedNothingMoved, detail)
+        case .moveAsideFailed(let detail):
+            return (LibraryOpenCopy.adoptionFailedMidMove, detail)
+        case .landingFailed(let detail):
+            return (LibraryOpenCopy.adoptionFailedLead, detail)
         }
     }
 
