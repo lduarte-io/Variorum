@@ -94,6 +94,27 @@ says otherwise.
 
 ## LIVE STATUS (the resiliency protocol's record — newest first)
 
+- **2026-10-06 eve — VM-5 THE MERGE IS IN.** Worktree `~/dev/variorum-vm-5`, branch
+  `vm-5-the-catch-up-merge` (from `origin/main` @ `dd7cad84`); in-flight roster row pushed to main
+  (`1ca1c393`). The merge commit `575cf057` (all 68 mobile SHAs preserved); 13 conflicts resolved —
+  docs: CLAUDE.md + KnownIssues → main's; the plan file → union (kickoff + plan); the handoff →
+  union (main's 2026-09-02 pointer + mobile's §12.2); MobileSoul → main's base + mobile's PL-10/11
+  delivery rows + the PL-25 dedupe (17u's row → PL-25b); **QUESTIONS → mobile's #84–#94 RENUMBERED
+  #189–#199** (mapping table at the section head; main's stale "#179" next-free marker corrected to
+  #200 and moved to the file's true end). Code: MobileLibraryView = mobile's union listing + main's
+  Act-0 empty state (books-aware guard — a semantic widening, justified in place);
+  MobileStarterJournal + its tests → MAIN's (R-pre13u-1's first-write design supersedes mobile's
+  2026-08-30 B1 wait — the 20 s wait stays deleted); LivenessTests → true union (main's 18k-C5 P26
+  pin + mobile's 4.5c suite; the common-suffix brace severing repaired); StarsTests → main's
+  `limit: cap` + mobile's batch-10 re-pointing; TutorialSeeder → mobile's lesson at the merged cap
+  (fifteen, #112(b)); app root → the duplicate comment dropped. Fix-ups `fabaf53e`: the 13i
+  vocabulary sweep (.curated→.book, .smart→.gathering; the bookStamp `.title` arm — unreachable
+  until the phone offers title sort), main's EmptyStore tests onto the union signature, Row kept
+  inside `db.read` (main's stricter concurrency). **iOS app + test bundle BUILD; core suite
+  2204/247 + 40/6 GREEN (baseline-exact).** Stage CLAIMED; the full mobile simulator suite running;
+  Mac suite next, then the three Fable passes (resolution · stability · whole-round), the round-2
+  obligations, the PR, the archive tag, and her install.
+
 - **2026-10-06/07 — THE PLANNING SESSION RAN TO ITS HARD STOP.** Preflight COMPLETE in the
   kickoff's order (VM memory + main's CLAUDE.md + the transition record · the standing mobile
   entry point with the handback results §9–§12 · the parity ledger PL-17…PL-47 on main ·
