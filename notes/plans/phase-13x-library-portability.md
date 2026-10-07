@@ -1210,3 +1210,13 @@ the result line, never hold through analysis. **Fences that remain:** zero
 expected); her real store never; no subagents; foreground waits; no trailers. Append
 `### F1 RECORD` (LIVE STATUS first) from the first commit; commit per fix, push every commit;
 close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
+
+### THE NIGHT'S EVENTS — LADDER/MERGE ADDENDUM (for the bundle; chronological)
+- Ladder R1 landed (2999c13c): 1 BLOCKER · 1 MAJOR · 5 MINOR · 4 NIT, all ELEVEN accepted at
+  the dispositions table above. **For her morning eye, the two that matter:** the BLOCKER —
+  the same-Mac Standard-era-pair-onto-Castle adoption would have left the live library
+  Apple-openable in steady state (deliverable 3's own scenario; the reviewer's catch, exactly
+  what the ladder exists for); and the MAJOR — the hand-off act had a brain but NO door (the
+  orchestrator's gap between the U1/U2 briefs, owned as such).
+- 13o's main MERGED into the branch clean (the catch-up; build green); custody work is
+  IN-SLOT again. F1 spawned on the merged tree for all eleven findings.
