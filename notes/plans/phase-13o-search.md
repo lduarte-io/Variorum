@@ -375,6 +375,45 @@ triggers but not their tables (the outbox's own recorded consequence — 13x's o
 a separate DERIVED set that the walk subtracts and the export KEEPS would hand 13x a working index
 instead. The orchestrator's call; flagged, not decided.
 
+#### §FORK RULINGS (the architect, 2026-10-06 — binding; the implementer builds to these)
+
+- **F1 — RULED: V**, external content over the view of the source rows, exactly as proposed.
+  The deciding reasons adopted: one sameness rule end-to-end (what matched IS what highlights —
+  no Swift folding twin to drift), the integrity check against TRUTH (the probe's
+  SQLITE_CORRUPT_VTAB detection is the derived family's honesty net), cheapest writes, text
+  stored once. The V contract line is adopted verbatim: every source text write updates the
+  index in the same statement with OLD = what was indexed (AFTER triggers), pinned per write
+  layer at P6, the integrity check as the net.
+- **F2 — RULED as proposed:** one doc row per source text FIELD; the eight (table, column)
+  kinds; live-and-non-NULL existence; archived rows indexed with their fact; `scrap` a
+  query-time facet (a stored kind would need a trigger READ — exactly what R-13o-4 forbids);
+  the kind vocabulary closed and additive (VX-72's `commit_point.text` joins as a ninth kind
+  someday, nothing reshapes).
+- **F3 — RULED as proposed: own-row facts only**, the plan's "wing + archived columns" wording
+  AMENDED to match for block-hosted docs (the plan bends to the measurement, not the reverse:
+  S2's ~8 propagation triggers with structural reads inside trigger bodies is a correctness
+  surface the mechanical-duty ruling exists to refuse). The cost class is unchanged
+  (∝ matches); the absolute minority-scope prices (2.5 ms mid-term, 74 ms common-term-in-one-
+  note at 55k docs) sit inside budget for a debounced search road. **WATCH-ITEM (named
+  remedy):** if U2/U3's real-surface walks find a scoped road slow in the hand, S2 is the
+  remedy — a local-only migration + one rebuild, no lockstep; the R-13o-4 record would then
+  name the placement-seek and container-PK reads as the sanctioned exception.
+- **F4 — RULED as proposed:** `unicode61 remove_diacritics 2` · `prefix='2 3'` · ONE indexed
+  column with kind-weight as a query-time bm25 multiplier (the sparse-column penalty argument
+  is correct and recorded).
+- **THE EXPORT CONSEQUENCE — RULED: the DERIVED set.** `SyncSchema` gains `derivedTables`
+  (the six search tables): the completeness walk's equality becomes
+  localOnly ∪ derived == schema − synced, `StorePlaintextExport` keeps dropping
+  **localOnlyTables only** — so an exported library carries a WORKING index and its capture
+  triggers stay satisfied (no broken-trigger writes in the no-lock-in file; the open-format
+  guarantee is the reason — an exported store is the product's promise, and the outbox's
+  recorded broken-trigger consequence should not grow a second instance when one named set
+  avoids it). All of it is the seam-2 Fable work (the granted slot): registry sets + the walk's
+  test line + the export's unchanged drop list verified by its tests.
+- **SEAM 2 stands as briefed:** the implementer commits `v1_22` (P4), records, pushes, stops;
+  the architect lands the `Sync/` registry + walk + export-test accommodation; the implementer
+  resumes P5–P9. The P-13o-U1-1…4 date-parse provisionals ride to the closeout ratify bundle.
+
 #### §R-13o-4 RECORD — the Phase-2 re-assessment protocol, run for the third trigger duty (P3; written before any trigger line)
 
 The protocol (`notes/plans/phase-02-operations-lifecycle.md`, Risks — "the trigger smell"):
