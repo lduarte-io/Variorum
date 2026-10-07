@@ -63,6 +63,21 @@ struct SearchQueryParserTests {
                 "a tag being typed is never a prefix word")
     }
 
+    /// Ladder round 1, MINOR-2 (red-on-old): the type-ahead tail is the word
+    /// STILL BEING TYPED — it must END the input. A `#tag` typed after the
+    /// word (the empty-path `#/` included — the implementer's extension)
+    /// means the word is finished; the old check read the TAG's last
+    /// character and widened the finished word to a prefix.
+    @Test func aTagTypedAfterAWordLeavesTheWordWhole() {
+        #expect(parse("dream #lucid").text == .word("dream"),
+                "the word does not end the input — it is not being typed")
+        #expect(parse("dream #lucid").filter == .tagPath("lucid"))
+        #expect(parse("dream #/").text == .word("dream"),
+                "an empty-path tag (dropped by the tag branch) still ends the word")
+        #expect(parse("#life dream").text == .prefix("dream"),
+                "a word typed AFTER a tag is still the tail")
+    }
+
     @Test func punctuationRidesTheWordForTheTokenizerToSplit() {
         // The index's own tokenizer splits "don't" — the parser never does.
         #expect(parse("don't stop ").text == .all([.word("don't"), .word("stop")]))

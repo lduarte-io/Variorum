@@ -33,7 +33,13 @@ public enum SearchQueryParser {
         var terms: [SearchText] = []
         var tags: [SearchFilter] = []
         var freeWords: [String] = []          // the text the worn-day reader sees
-        var lastBareWordIndex: Int?           // index into `terms`
+        // The last bare word and where it ENDS in the input: the type-ahead
+        // tail is the word STILL BEING TYPED, which means it must end the
+        // input (ladder round 1, MINOR-2 — a `#tag`, the dropped `#/`
+        // included, typed after a word means that word is finished; the old
+        // last-character check read the TAG's final character and widened
+        // the finished word to a prefix).
+        var lastBareWord: (index: Int, end: String.Index)?
 
         var index = input.startIndex
         while index < input.endIndex {
@@ -52,7 +58,6 @@ public enum SearchQueryParser {
                     terms.append(.phrase(body))
                     freeWords.append(body)
                 }
-                lastBareWordIndex = nil
                 index = end < input.endIndex ? input.index(after: end) : end
                 continue
             }
@@ -69,16 +74,17 @@ public enum SearchQueryParser {
             } else {
                 terms.append(.word(token))
                 freeWords.append(token)
-                lastBareWordIndex = terms.count - 1
+                lastBareWord = (terms.count - 1, end)
             }
             index = end
         }
 
-        // The type-ahead tail: the last bare word, still being typed.
-        if typeAhead, let last = lastBareWordIndex, last == terms.count - 1,
-           let final = input.last, !final.isWhitespace, !isQuote(final),
-           case .word(let word) = terms[last], word.count >= 2 {
-            terms[last] = .prefix(word)
+        // The type-ahead tail: the last bare word, still being typed — so it
+        // must END the input (nothing follows it, not even whitespace).
+        if typeAhead, let last = lastBareWord, last.end == input.endIndex,
+           last.index == terms.count - 1,
+           case .word(let word) = terms[last.index], word.count >= 2 {
+            terms[last.index] = .prefix(word)
         }
 
         let text: SearchText? = switch terms.count {
