@@ -997,3 +997,106 @@ that demands an engine line is recorded `DEFERRED — post-merge` with the trace
 now. No stage claims; foreground waits; no subagents; commit per piece, push every commit;
 LIVE STATUS from the first commit. Close with a "U2b DRILLS CLOSED" banner listing any
 deferred pieces.
+
+### U2b RECORD (the drills implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
+
+#### LIVE STATUS
+
+| leg | drill | status |
+|---|---|---|
+| 1 | Same-Mac restore end to end (hold → duplicate → Resume; tombstone catch-up; the QD stale-outbox conflict-card pin) | NOT STARTED — design settled below |
+| 2 | Per-leg opens on an adopted copy (passphrase · twelve words · older-key day pair · same-fingerprint second look · the A arm) | NOT STARTED — design settled below |
+| 3 | Plaintext-export re-open end to end (same-owner cursor-0 zero-push enroll · foreign-owner adopt road) | NOT STARTED — design settled below |
+| 4 | Returner / purge fence (a backup older than the purge horizon; nothing re-pushes a purged row) | NOT STARTED — design settled below |
+| 5 | The newer-schema refusal at the model's consult (both classifier stages over a real pair; the sentence's exact facts) | NOT STARTED — design settled below |
+
+No revert is in flight. No subagents; synchronous foreground waits only; NO stage claims
+(every drill is headless — fake server + throwaway stores under `swift test`).
+
+#### THE SETTLED DESIGN, PER LEG (written before the code; revised in place as each lands)
+
+All five legs are NEW SUITES in `Tests/VariorumCoreTests` (the fence's "new TESTS in test
+targets" letter): they compose the U1/U2-minted brains (`LibraryClassifier` ·
+`LibraryAdoption` · `LibraryRestoreHold` · `CustodyCollisionRule` ·
+`LocalMachineryRecreation` · `StoreKeyEnvelope`'s wrap roads) with the two-client
+fake-server harness (`SyncClient`/`FakeSyncServer`), in PRODUCTION'S round order
+(`productionRound`/`productionQuiescence` — the RUN B default; purge legs use the
+PurgeConvergence idiom of explicit rounds + dump equality instead, per `ProductionRound`'s
+own doc). Where a drill asserts what a DOOR does, it runs the door's own recorded call
+sequence (the `LibraryOpenModel.confirmAdoption` work closure: plan → execute →
+custody-collision verdict → hold-set; the plaintext road's land → recreate → establish →
+dials → saveAuto → hold). The Shared-seam faces themselves (the `SyncSession.roundsHeld`
+gate, the banner, the model's refusal sentences) are ALREADY evidenced by the U2 Mac slot
+run (5/5 + both reverts) — the drills assert the core facts those faces render, and no
+stage act runs in this batch.
+
+- **Leg 1 — `LibrarySameMacRestoreDrillTests.swift`.** Two devices (A on an ON-DISK
+  ENCRYPTED store with in-memory custody, B in-memory) converge over the fake server; A
+  dirty-edits a take (outbox row QUEUED, unpushed — the dead Mac's last words); the backup
+  PAIR is taken from A (`db.backup(to:)` under the backup name + the pair's `.keys.json`
+  beside — row 42's shape, fastKDF wrap); the account then moves on WITHOUT A (B edits the
+  same take and pushes; B trashes a note and pushes). The restore: A's pool closed, the
+  pair classified (`.snapshotPair`), the second look composes `alreadyAligned` (same key,
+  live custody), `LibraryAdoption` plan/execute into A's own store path, the HOLD set —
+  then, held: the kept outbox STILL carries the stale row (QD), the since-trashed note is
+  LIVE in the copy and is DUPLICATED (`duplicateAsVersion` — fresh UUIDs). Resume = clear
+  the marker + production rounds to quiescence with B. Pins: the duplicate SURVIVES on
+  both devices and the server; the re-trashed original leaves again (tombstone catch-up);
+  the stale-dirty row lands as EXACTLY ONE conflict card (S5) carrying the dead Mac's
+  words, on both devices; same device identity throughout (same-Mac custody — the server
+  sees no new device); outboxes empty, dumps byte-identical.
+- **Leg 2 — `LibraryKeyLegDrillTests.swift` (with leg 5).** One encrypted library whose
+  envelope carries ALL FOUR wraps (passphrase/fastKDF · the real BIP-39 twelve words ·
+  an in-memory Apple key A · a master copy is decision 11's "online" arm, drilled as the
+  wrap API's existing pins — not re-pinned here); a hand-off pair minted from it. (a) the
+  day's passphrase unwraps the pair to the SAME key and the snapshot opens and reads; a
+  wrong word refuses `wrongPassphrase`; (b) the twelve words unwrap and open; wrong words
+  refuse; (c) the A arm: `unwrapKey(apple:)` with the in-memory A — nothing typed — opens
+  it (the Standard-silent leg through the shipped seams, no real Keychain); (d) the
+  OLDER-KEY day pair: the live library re-keys L1→L2 (`StoreEncryptionMigration.rekey`, a
+  Replace-All-Keys-shaped event) with a NEW key file under a NEW word; the OLD pair's
+  bytes are untouched (backup folders never rewritten — pinned byte-for-byte), it still
+  opens by ITS day's word, the new word refuses on it, L2 does not open it; the collision
+  rule composes `adoptOpeningKey` (custody L2 vs opener L1) — and `mintFreshCustody` with
+  no custody (the new-Mac class); (e) the SECOND LOOK: a post-re-key snapshot's envelope
+  `belongs(to:)` the live key ⇒ served from live custody, `alreadyAligned`.
+- **Leg 3 — `LibraryExportAndReturnerDrillTests.swift` (with leg 4).** Origin client O
+  (on-disk, keyed) syncs real content; `StorePlaintextExport.export`; the export
+  classifies `.plaintextExport`; the door's plaintext road runs VERBATIM on a fresh
+  machine path (nil-key-file `LibraryAdoption` → `LocalMachineryRecreation` →
+  `StoreIdentity.establish` + fresh key → hold). §14.13 pinned BEFORE the first round:
+  empty outbox, no cursor row, no row seqs. A fresh-identity client over the landed store
+  (custody in-memory, the open ENCRYPTS it — the shipped 13p migration) resumes:
+  pull-from-0 lands the corpus, the push pushes ZERO rows, cursor at head, dump
+  byte-identical with O. The FOREIGN-OWNER arm: the same landed shape under a second
+  provisioned account takes the adopt road (`restampOwner` + `resyncReinitialize`) — the
+  upload lands in the NEW account's partition at its own sequence from 1, and the first
+  account's rows are untouched.
+- **Leg 4 — same file.** A (on-disk encrypted, pair-backed) and B converge on a family F
+  + a bystander note; A dirty-edits a family take (outbox QUEUED); the backup pair is
+  taken (F LIVE in it, cursor non-zero); A then deletes F, the stamps backdate past the
+  30-day window, rounds run, A's janitor SWEEPS — F purged (mirror + local + ledger). The
+  restore: the pair adopted on a FRESH machine path, opened by its day's word
+  (`mintFreshCustody`), a FRESH device identity + the backup's non-zero cursor = corner
+  37's RETURNER by construction. Its first round runs the scheduled shape
+  (`reconcileLedger` → pull → push → sweep): the purged family drops locally through the
+  13j ledger, NOTHING of F re-lands on the mirror (the stale outbox row included — the
+  QUEUED family edit never resurrects the purged row), the ledger entries stand, the
+  bystander and B converge with the returner by dump equality.
+- **Leg 5 — in `LibraryKeyLegDrillTests.swift`.** The model's consult drilled 1:1 over
+  REAL copies a newer build "wrote" (a future identifier inserted into
+  `grdb_migrations`): stage 1 KEYLESS — the plaintext copy refuses `.newerSchema` with
+  the exact identifier list; an ENCRYPTED newer copy honestly classifies as its pair
+  (unreadable inside, by construction) and the POST-UNLOCK consult
+  (`schemaVerdict(at:key:)`) returns `.newer` with the same exact identifiers — the facts
+  `LibraryOpenModel.land/settle` join into the refusal's `detail` (the model's switch
+  arms are the U2-evidenced Shared seam; its two consults ARE these calls, verified
+  call-for-call against the shipped source and recorded here). A `.behindThisBuild` copy
+  (an old store) stays an OPEN road, never a refusal — pinned beside it.
+
+#### DRILL TABLE (leg × scenario × counts × verdict — filled as each leg lands; PENDING until its run completes)
+
+| leg | scenario | counts | verdict |
+|---|---|---|---|
+| — | — | — | — |
+
