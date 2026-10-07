@@ -237,3 +237,91 @@ enum SearchIndex {
         try db.execute(sql: "INSERT INTO search_fts (search_fts) VALUES ('rebuild')")
     }
 }
+
+// MARK: - The integrity check (the derived family's honesty net)
+
+/// One doc's identity: its kind and its source row.
+public struct SearchDocKey: Hashable, Sendable, CustomStringConvertible {
+    public let kind: String
+    public let srcID: String
+    public var description: String { "\(kind):\(srcID)" }
+}
+
+/// **What the integrity check found** (13o U1 P5). Two independent nets:
+/// the DOC set against the source rows (every live non-NULL field has its
+/// doc, no doc outlives its field, every doc's own facts are its source
+/// row's), and the INDEX against its content — FTS5's own
+/// `integrity-check` with `rank = 1`, which re-tokenizes the view (the
+/// SOURCE text, F1) and compares it with what is indexed: a source text
+/// changed behind the index's back reads as a mismatch here
+/// (SQLITE_CORRUPT_VTAB — the U1 bench's probe, now the drift pin).
+public struct SearchIndexIntegrity: Equatable, Sendable {
+    public let docCount: Int
+    /// Live, non-NULL source fields with no doc.
+    public let missing: [SearchDocKey]
+    /// Docs whose source field is dead, NULL, or gone — or of no known kind.
+    public let orphaned: [SearchDocKey]
+    /// Docs whose own facts (parent id, wing, archived) disagree with their
+    /// source row.
+    public let factDrift: [SearchDocKey]
+    /// FTS5's index-vs-content check passed.
+    public let indexMatchesContent: Bool
+
+    public var isHealthy: Bool {
+        missing.isEmpty && orphaned.isEmpty && factDrift.isEmpty && indexMatchesContent
+    }
+}
+
+extension SearchIndex {
+    /// Runs both nets. Cost ∝ the corpus — a maintenance read, never a
+    /// keystroke road. Needs a WRITABLE connection: FTS5's check is spelled
+    /// as an INSERT into the virtual table (it writes nothing).
+    static func integrity(_ db: Database) throws -> SearchIndexIntegrity {
+        var missing: [SearchDocKey] = []
+        var orphaned: [SearchDocKey] = []
+        var drift: [SearchDocKey] = []
+        for source in sources {
+            let live = "s.deleted_at IS NULL AND s.\(source.column) IS NOT NULL"
+            missing += try String.fetchAll(db, sql: """
+                SELECT s.id FROM \(source.table) s
+                WHERE \(live) AND NOT EXISTS (
+                  SELECT 1 FROM search_doc d WHERE d.kind = '\(source.kind)' AND d.src_id = s.id)
+                ORDER BY s.id
+                """).map { SearchDocKey(kind: source.kind, srcID: $0) }
+            orphaned += try String.fetchAll(db, sql: """
+                SELECT d.src_id FROM search_doc d
+                WHERE d.kind = '\(source.kind)' AND NOT EXISTS (
+                  SELECT 1 FROM \(source.table) s WHERE s.id = d.src_id AND \(live))
+                ORDER BY d.src_id
+                """).map { SearchDocKey(kind: source.kind, srcID: $0) }
+            // Every doc column the kind does not set must be NULL / 0 too —
+            // a fact on the wrong column is drift as much as a wrong value.
+            let set = Dictionary(uniqueKeysWithValues: source.facts.map { ($0.column, $0.expression) })
+            let checks = ["block_id", "container_id", "reading_id", "wing_id", "archived"].map { column -> String in
+                if let expression = set[column] {
+                    return "d.\(column) IS NOT \(expression.replacingOccurrences(of: "R.", with: "s."))"
+                }
+                return column == "archived" ? "d.archived <> 0" : "d.\(column) IS NOT NULL"
+            }.joined(separator: " OR ")
+            drift += try String.fetchAll(db, sql: """
+                SELECT d.src_id FROM search_doc d JOIN \(source.table) s ON s.id = d.src_id
+                WHERE d.kind = '\(source.kind)' AND (\(checks))
+                ORDER BY d.src_id
+                """).map { SearchDocKey(kind: source.kind, srcID: $0) }
+        }
+        let known = sources.map { "'\($0.kind)'" }.joined(separator: ", ")
+        orphaned += try Row.fetchAll(db, sql: """
+            SELECT kind, src_id FROM search_doc WHERE kind NOT IN (\(known)) ORDER BY kind, src_id
+            """).map { SearchDocKey(kind: $0["kind"], srcID: $0["src_id"]) }
+        let docCount = try Int.fetchOne(db, sql: "SELECT count(*) FROM search_doc") ?? 0
+        var indexMatches = true
+        do {
+            try db.execute(sql: "INSERT INTO search_fts (search_fts, rank) VALUES ('integrity-check', 1)")
+        } catch let error as DatabaseError where error.resultCode == .SQLITE_CORRUPT {
+            indexMatches = false
+        }
+        return SearchIndexIntegrity(
+            docCount: docCount, missing: missing, orphaned: orphaned,
+            factDrift: drift, indexMatchesContent: indexMatches)
+    }
+}
