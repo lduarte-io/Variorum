@@ -740,25 +740,24 @@ plaintext road all composed and COMPILING (app build and test bundle both green 
 are not stage acts). The FENCE held: `git diff` over all U2 commits shows ZERO changes under
 `Sources/VariorumCore/Sync/`, zero custody/keychain code (the collision write only CALLS the
 shipped `saveAuto`/`saveGated` doors), and `Migrations.swift` untouched — nothing demanded a
-fenced edit, so NO "DEFERRED — post-merge" piece exists from this half. **WHAT REMAINS:**
-(1) PENDING-BEHIND-THE-STAGE — one Mac-suite pass
-(`-only-testing:VariorumTests/LibraryPortabilityDoorTests`) plus its two behavioural-revert
-red checks (the hold-gate guards · the picker guard), filed for the orchestrator's slot;
-(2) the POST-MERGE half — row 10's drills (same-Mac restore · per-posture legs · the
+fenced edit, so NO "DEFERRED — post-merge" piece exists from this half. **THE PENDING MAC RUN CLOSED 2026-10-07 under the orchestrator's GO slot: 5/5 green +
+both behavioural-revert reds exact (the PINS entry below quotes them); ~8 of 40 minutes
+used, released on the result line.** **WHAT REMAINS:**
+(1) the POST-MERGE half — row 10's drills (same-Mac restore · per-posture legs · the
 plaintext-export re-open · returner/purge fence · newer-schema · the stale-outbox
 conflict-card pin, all on throwaway scopes + the fake server) and the orchestrator's walk;
 any engine-side hold line only if the drills show the Shared chokepoint insufficient
-(nothing so far says so); (3) the strings table below is 13s's input. Commits:
-a1a76031 · 72d6293e · 59d59268 · f140a5f0 · a5e05baa · 85f4b9cf (+ this one), every one
-pushed at its landing.
+(nothing so far says so); (2) the strings table below is 13s's input. Commits:
+a1a76031 · 72d6293e · 59d59268 · f140a5f0 · a5e05baa · 85f4b9cf · cfdf9b49 · 13a88180
+(+ the slot-close), every one pushed at its landing.
 
 #### LIVE STATUS
 
 | row | piece | status |
 |---|---|---|
-| 6 | The two doors + welcome/waiting/absent-store slots | PRE-MERGE DONE (a5e05baa + 85f4b9cf) — the Mac pins' RUN is PENDING-behind-the-stage |
-| 7 | The restore-hold landing state, both doors | PRE-MERGE DONE (72d6293e + a5e05baa + 85f4b9cf) — the gate/banner pins' RUN is PENDING-behind-the-stage |
-| 9 | The iCloud-Drive live-library guard | PRE-MERGE DONE (72d6293e + a5e05baa + 85f4b9cf) — the picker pin's RUN is PENDING-behind-the-stage |
+| 6 | The two doors + welcome/waiting/absent-store slots | PRE-MERGE DONE — Mac pins RAN GREEN under the slot (5/5; reverts verified) |
+| 7 | The restore-hold landing state, both doors | PRE-MERGE DONE — the gate pin green AND red-on-old by revert A (quoted below) |
+| 9 | The iCloud-Drive live-library guard | PRE-MERGE DONE — the picker pin green AND red-on-old by revert B (quoted below) |
 | 8 | The Resume reconciliation (pre-merge-safe half) | PRE-MERGE DONE (f140a5f0 + a5e05baa) — the drills are row 10's, post-merge |
 
 STAGE SLOT (2026-10-07 04:20, the orchestrator's GO "13x: go (40)"): claimed by
@@ -768,11 +767,11 @@ test-context guard (`@Dependency(\.date) has no test implementation`, AppSession
 via the adoption's reopen into `.ready`) — a TEST-HARNESS gap, not a product finding; fixed
 by wrapping the flow pin in `withDependencies` (the Phase8ServicesTests pattern), rebuilt,
 re-run: **5/5 GREEN, `** TEST EXECUTE SUCCEEDED **`** (hold gate · hold model · picker
-refusal · bare remedy · the whole flow). REVERT A STARTING (next commit applies it): the two
-`roundsHeld` guards in `SyncSession.triggerSync`/`flush` reverted on this COMMITTED state —
-`git checkout -- App/Variorum/Shared/SyncSession.swift` is the restore; expected red:
-`heldRoundsNeverRunAndTheResumedFlushRunsOne`. No subagents; synchronous foreground waits
-only. Build order note (the U1 precedent — the letter bends so no
+refusal · bare remedy · the whole flow). BOTH REVERTS RAN AND RESTORED (the slot's
+runs 2 and 3; exact reds quoted in PINS below); each restore by `git checkout --` on the one
+file, verified by an EMPTY `git diff`; the stage RELEASED the instant run 3's result line
+landed (~8 of the 40 minutes used, NO renew). No revert is in flight. No subagents;
+synchronous foreground waits only. Build order note (the U1 precedent — the letter bends so no
 piece waits on an unbuilt input): row 7's CORE flag lands before row 6's Shared model, because
 the door's completion writes the hold; the rows still CLOSE in the brief's order 6 → 7 → 9 → 8.
 
@@ -894,20 +893,29 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   was 2234/251, the +13/+4 are this batch's suites). The MAC APP TARGET COMPILES clean with
   every face wired (`xcodebuild -scheme Variorum build`, `** BUILD SUCCEEDED **` — a compile
   is not a stage act; no test host, no store).
-- **The Mac pins — `VariorumTests/LibraryPortabilityDoorTests`, WRITTEN AND COMPILED
-  (`build-for-testing` `** TEST BUILD SUCCEEDED **`), RUN PENDING-BEHIND-THE-STAGE** (one
-  `-only-testing:VariorumTests/LibraryPortabilityDoorTests` pass when the orchestrator files
-  the slot): the HOLD GATE (held → zero transport calls on trigger AND flush; resumed → one
-  round runs), the hold model's marker→Resume round-trip (Resume once, idempotent), the
-  PICKER REFUSAL (the live library's folder refused with the ONE sentence, nothing
-  remembered; a sibling folder accepted), the flow's bare refusal speaking QC's remedy, and
-  the WHOLE FLOW over a real pair (typed road — a wrong word refuses and stays; the right
-  word confirms; adopt lands byte-identical + canonical key file + the HOLD standing +
-  custody carrying the opener + reopen into ready). **The two red-on-old reverts run WITH
-  that slot** (recorded in the test file's header): revert `SyncSession`'s two `roundsHeld`
-  guards ⇒ the gate pin reds; revert `acceptPickedFolder`'s placement guard ⇒ the picker pin
-  reds. The refactor behind the picker pin: `chooseFolder` split at the panel seam
-  (`acceptPickedFolder` — a real `NSOpenPanel` cannot run under a test host).
+- **The Mac pins — `VariorumTests/LibraryPortabilityDoorTests`, RAN UNDER THE SLOT
+  (2026-10-07 04:20, GO "13x: go (40)"; claimed 40 min, used ~8, released on run 3's result
+  line, no renew): 5/5 GREEN, `** TEST EXECUTE SUCCEEDED **`** — the HOLD GATE (held → zero
+  transport calls on trigger AND flush; resumed → one round runs), the hold model's
+  marker→Resume round-trip (Resume once, idempotent), the PICKER REFUSAL (the ONE sentence,
+  nothing remembered; a sibling folder accepted), the flow's bare refusal speaking QC's
+  remedy, and the WHOLE FLOW over a real pair (wrong word refuses and stays; the right word
+  confirms; adopt lands byte-identical + canonical key file + the HOLD standing + custody
+  carrying the opener + reopen into ready). Run 1's FIRST pass caught a test-harness gap
+  (the dependency test-context guard at the reopen's AppSession) — fixed in the test alone
+  (`withDependencies`, the Phase8 pattern, commit 13a88180), re-run green.
+  **RED-ON-OLD, both reverts over the COMMITTED green (runs 2 and 3, rebuild each):**
+  REVERT A (the two `roundsHeld` guards removed from `SyncSession.triggerSync`/`flush`) went
+  red on EXACTLY the gate pin — `✘ heldRoundsNeverRunAndTheResumedFlushRunsOne … Expectation
+  failed: await transport.dataCalls == 0` (a held session ran a round) — the other four
+  green. REVERT B (the placement guard removed from `acceptPickedFolder`) went red on
+  EXACTLY the picker pin, all three arms — `Expectation failed: model.note ==
+  LibraryOpenCopy.pickedLiveLibraryFolderRefusal` · `model.note?.contains("corrupt a live
+  database") == true` · `BackupDestination.isSet(in: defaults()) == false` (the live folder
+  was REMEMBERED as a destination) — the other four green. Each restore by `git checkout --`
+  on the one file, verified by an empty `git diff`; the behavioural revert verifies both
+  guards in both directions. The refactor behind the picker pin: `chooseFolder` split at the
+  panel seam (`acceptPickedFolder` — a real `NSOpenPanel` cannot run under a test host).
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 
