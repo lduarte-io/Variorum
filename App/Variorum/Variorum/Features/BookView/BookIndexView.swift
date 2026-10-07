@@ -814,13 +814,9 @@ struct BookIndexView<Masthead: View>: View {
                                 noteRow(entry, nested: nested)
                             }
                         }
-                        if model.truncated {
-                            Text(tokens.chromeLabel(
-                                "showing the first \(BookViewModel.entryWindow) notes"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                                .padding(.vertical, 8)
-                        }
+                        // 13o U3 (P-13o-U3-8): the window's line carries its
+                        // road — "show 300 more ›" — never a cap without one.
+                        BookWindowLine(tokens: tokens, model: model)
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)

@@ -1569,14 +1569,10 @@ struct BookView: View {
                     if structure.chaptersActive {
                         bodyChapterEndZone  // N21: drag a chapter past the last
                     }
-                    if model.truncated {
-                        Text("Showing the first \(BookViewModel.entryWindow) notes — "
-                            + "the rest of this book isn't loaded yet "
-                            + "(windowing arrives with Phase 12).")
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .padding(.vertical, 8)
-                    }
+                    // 13o U3 (P-13o-U3-8): the window's line with its road
+                    // (the stale "windowing arrives with Phase 12" promise
+                    // retired — the road IS the windowing).
+                    BookWindowLine(tokens: tokens, model: model)
                     // Sitting 9 batch 6: the add-post door lives IN the
                     // book's flow too, where writing ends — the navigator
                     // rail's twin (R62/R75; discoverability is the point).
