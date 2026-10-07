@@ -861,7 +861,7 @@ extension BookOutlineLandingTests {
                 hosting.layoutSubtreeIfNeeded()
                 window.layoutIfNeeded()
                 window.displayIfNeeded()
-                RunLoop.main.run(until: Date().addingTimeInterval(0.02))
+                pump(0.02)
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(20))
                 watchdog.beat()
