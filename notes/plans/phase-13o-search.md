@@ -238,8 +238,29 @@ for EXTERNAL facts only (e.g. FTS5/GRDB API confirmation), read-only — never f
 
 ### U1 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-*(empty — the U1 session writes here: per-piece DONE(hash)/IN-PROGRESS/NOT-STARTED lines, the
-fork proposal, the Sync-seam table names, the re-assessment record, P1 numbers, PENDING flags.)*
+**Seat:** the U1 implementer (Opus, xhigh), seated 2026-10-06 in `~/dev/variorum-13o` on
+`vx-5-13o-search`. Required reading done in-context (this file whole, SyncSpec in full, the
+resiliency protocol; plus the code it names — `Migrations.swift`, `Triggers.swift`,
+`SyncSchema.localOnlyTables` + `SyncSchemaTests`' walk, `StorePlaintextExport`, the catalog
+queries in `ShelfQueries.swift`, `PostRender`'s rendered-take fragment, `wingScope`, the Phase-2
+plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so far.
+
+**THE PIECE PLAN (each piece its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This piece plan (the first commit) | DONE (this commit) |
+| P1 | MEASUREMENTS + THE FORK PROPOSAL — contentless vs external-content FTS5; doc normalization (per source row vs per rendered unit); where scope (note/wing/archived) lives. A throwaway measurement suite over synthetic corpora; numbers + tradeoffs written below. **→ SEAM 1: stop for the architect's ruling before the schema half.** | NOT-STARTED |
+| P2 | Domain, fork-independent: the `SearchQuery` AST (text terms + filter tree, R-13o-8) + the v1 grammar parser (words · "phrases" · `#tag` · facets) + the DATE-PARSE predicate (R-13o-6 — "september 14" / "sep 14" / "9/14" → day bounds), pure, exhaustive little tests | NOT-STARTED |
+| P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | NOT-STARTED |
+| P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | NOT-STARTED |
+| P5 | The rebuild door (a maintenance operation: drop + rebuild from truth) + the integrity check (doc rows vs source rows) | NOT-STARTED |
+| P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | NOT-STARTED |
+| P7 | The ONE Domain SQL composer (AST → SQL) + `Queries.searchPassages(_:scope:filters:)` — bm25 ranked (title-weighted, rendered-take boosted), snippeted, wing-scoped always, note/book scopes, archived facet, paged with a road to everything (R-13o-9); EXPLAIN pins | NOT-STARTED |
+| P8 | P1 measurements as pins + the NUMBERS here (update cost ∝ the edit, flat across corpus sizes; query cost ∝ matches; the keystroke road bounded) | NOT-STARTED |
+| P9 | Close: the named suites green at the END, every claim flipped from PENDING, the report | NOT-STARTED |
+
+PENDING flags: none yet.
 
 ### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
 
