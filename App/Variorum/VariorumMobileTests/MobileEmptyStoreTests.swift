@@ -171,4 +171,125 @@ struct MobileEmptyStoreTests {
                     "a Library with notes in it must not say the store is empty")
         }
     }
+
+    // MARK: - The provenance door's own empty line (VM-5 whole-round pass, MINOR 2)
+
+    /// **UNDER BOOKLESS, A LIBRARY WHOSE NOTES ARE ALL IN BOOKS NEVER SAYS THE
+    /// STORE IS EMPTY.** The journal-first default books every day's entry, so
+    /// "every note is in a book" is an ordinary state — and the Bookless door's
+    /// note listing (`Queries.poolPosts`) is then empty while the store is not.
+    /// The old guard read only the DOOR's listing, so this surface rendered the
+    /// fresh-install trio — *"No notes yet."* · *"+ New Note starts one."* ·
+    /// *"Have an account? Settings ▸ Sync signs you in."* — three sentences
+    /// that are false or misleading there, producing the exact "my writing is
+    /// gone" reading the trio exists to prevent (`MobileEmptyStore.swift`'s
+    /// own header).
+    ///
+    /// MOUNTED, not dumped: the rendered tree is what she reads. Both
+    /// observations run (the app's own `.task`s), and the pin checks they
+    /// loaded before it reads the empty state, so it cannot pass on a listing
+    /// that simply had not arrived.
+    @Test func aBooklessDoorOverBookedNotesNeverSaysTheStoreIsEmpty() async throws {
+        try await withEditorWorld { session, _ in
+            try await session.runner.run { ops in
+                let note = try ops.createPost(title: "Shelved note")
+                let book = try ops.createReading(name: "Poems", kind: .book)
+                _ = try ops.addPostToReading(note.id, to: book.id)
+            }
+            let tokens = VoiceTokens.terminalLight
+            let library = MobileLibraryViewModel(session: session)
+            library.filter = .bookless
+            try await withHostedSurface(
+                MobileLibraryView(
+                    model: library,
+                    scraps: MobileScrapsModel(session: session),
+                    stars: MobileStarsModel(session: session),
+                    books: MobileShelfViewModel(session: session),
+                    tokens: tokens, tabBar: { EmptyView() },
+                    onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
+            ) { surface in
+                await surface.settle(50)
+                // The pin's premise, asserted rather than assumed: the store
+                // HAS a note, and the Bookless door has none to list.
+                #expect(library.all.count == 1, "the note listing must have loaded")
+                #expect(library.bookless.isEmpty, "the booked note is not bookless")
+                let labels = surface.visibleLabels
+                for sentence in [
+                    MobileEmptyStoreCopy.noNotes,
+                    MobileEmptyStoreCopy.noNotesDoor,
+                    MobileEmptyStoreCopy.signIn,
+                ] {
+                    #expect(!labels.contains { $0.contains(tokens.chromeLabel(sentence)) },
+                            "Bookless over booked notes says the store is empty: \(sentence) — labels were \(labels)")
+                }
+                // …and the door says what IS true, in its own line (the
+                // plain sentence is the accessibility label — the books
+                // listing's empty-line rule).
+                #expect(labels.contains(MobileListingFilter.noBooklessLine),
+                        "the Bookless door's own empty line is missing — labels were \(labels)")
+            }
+        }
+    }
+
+    /// The complement: when the store genuinely holds NO notes, the trio is
+    /// true under the Bookless door too — so it speaks there, and the
+    /// door's own line (which would claim notes exist in books) does not.
+    @Test func aBooklessDoorOverAnEmptyStoreStillSpeaksTheTrio() async throws {
+        try await withEditorWorld { session, _ in
+            let tokens = VoiceTokens.terminalLight
+            let library = MobileLibraryViewModel(session: session)
+            library.filter = .bookless
+            try await withHostedSurface(
+                MobileLibraryView(
+                    model: library,
+                    scraps: MobileScrapsModel(session: session),
+                    stars: MobileStarsModel(session: session),
+                    books: MobileShelfViewModel(session: session),
+                    tokens: tokens, tabBar: { EmptyView() },
+                    onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
+            ) { surface in
+                await surface.settle(50)
+                let labels = surface.visibleLabels
+                for sentence in [
+                    MobileEmptyStoreCopy.noNotes,
+                    MobileEmptyStoreCopy.noNotesDoor,
+                    MobileEmptyStoreCopy.signIn,
+                ] {
+                    #expect(labels.contains { $0.contains(tokens.chromeLabel(sentence)) },
+                            "an empty store under Bookless lost the trio: \(sentence) — labels were \(labels)")
+                }
+                #expect(!labels.contains(MobileListingFilter.noBooklessLine),
+                        "the Bookless line claims notes are in books when there are none — labels were \(labels)")
+            }
+        }
+    }
+
+    /// **THE RULE, DOOR BY DOOR** — the pure table `emptyListing` documents,
+    /// pinned whole so a door that gains or loses a line has to say so here.
+    @Test func theEmptyLineIsDecidedByWhatIsTrueOnEveryDoor() {
+        typealias Model = MobileLibraryViewModel
+        // All and Notes: the listing IS the store's, so empty means empty.
+        for door in [MobileListingFilter.all, .notes] {
+            #expect(Model.emptyListing(filter: door, doorNotes: 0, storeNotes: 0, booksShown: 0)
+                    == .storeEmpty)
+            #expect(Model.emptyListing(filter: door, doorNotes: 2, storeNotes: 2, booksShown: 0)
+                    == nil)
+        }
+        // All's union: books on screen are rows, so nothing is empty.
+        #expect(Model.emptyListing(filter: .all, doorNotes: 0, storeNotes: 0, booksShown: 1) == nil)
+        // Bookless: the trio only when the STORE is empty; otherwise its own line.
+        #expect(Model.emptyListing(filter: .bookless, doorNotes: 0, storeNotes: 0, booksShown: 0)
+                == .storeEmpty)
+        #expect(Model.emptyListing(filter: .bookless, doorNotes: 0, storeNotes: 3, booksShown: 0)
+                == .noBookless)
+        #expect(Model.emptyListing(filter: .bookless, doorNotes: 1, storeNotes: 3, booksShown: 0)
+                == nil)
+        // Books and Scraps never reach the note listing's empty state.
+        for door in [MobileListingFilter.books, .scraps] {
+            #expect(Model.emptyListing(filter: door, doorNotes: 0, storeNotes: 0, booksShown: 0)
+                    == nil)
+        }
+        // The door's line is a real sentence and names no other door.
+        #expect(!MobileListingFilter.noBooklessLine.isEmpty)
+    }
 }

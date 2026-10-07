@@ -435,7 +435,14 @@ struct MobileLibraryView<TabBar: View>: View {
         // via bookRows and never reaches this body — the round-1 NIT 2).
         // Only the plain listing speaks; the Scraps filter has its own
         // line, and a search's "Nothing found." is a different fact.
-        if model.visible.isEmpty, shelved.rows.isEmpty, model.filter != .scraps {
+        // **VM-5 whole-round pass, MINOR 2:** WHICH line is the model's pure
+        // rule (`emptyListing`) — the trio is a claim about the STORE, so the
+        // Bookless door over notes that are all in books says its own line
+        // instead of "No notes yet." (The old `filter != .scraps` clause is
+        // gone with the guard: this body never runs under Scraps, and the
+        // rule answers nil there anyway.)
+        switch model.emptyListing(booksShown: shelved.rows.count) {
+        case .storeEmpty?:
             VStack(spacing: 6) {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
@@ -448,6 +455,16 @@ struct MobileLibraryView<TabBar: View>: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
+        case .noBookless?:
+            // The books listing's empty-line shape (`bookRows`), and its
+            // accessibility rule: the plain sentence, never voice-cased.
+            Text(tokens.chromeLabel(MobileListingFilter.noBooklessLine))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 24)
+                .accessibilityLabel(MobileListingFilter.noBooklessLine)
+        case nil:
+            EmptyView()
         }
         ForEach(model.rows(books: shelved.rows)) { row in
             switch row {

@@ -123,6 +123,22 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
     /// cannot hold a static stored property — and because a listing's own
     /// words belong beside the door that opens it.
     static let noBooksLine = "No books yet."
+
+    /// **The Bookless door's empty line, when the store HAS notes** (VM-5
+    /// whole-round pass, MINOR 2). The door lists `Queries.poolPosts` — notes
+    /// no book holds, a note a smart book collects counting as held (the
+    /// door's own documented rule) — so an empty listing here is an ordinary
+    /// state, not an empty store: the journal-first default books every day's
+    /// entry. It used to render the fresh-install trio (`MobileEmptyStoreCopy`)
+    /// instead, whose *"No notes yet."* was false here and whose sign-in line
+    /// read as "your writing hasn't arrived". When the store genuinely holds no
+    /// notes the trio still speaks under this door too, because then it is
+    /// true (`MobileLibraryViewModel.emptyListing`).
+    ///
+    /// **PROVISIONAL copy** — her voice pass (13s) rewords it with the rest of
+    /// the empty-state lines; it lives here, beside `noBooksLine`, so the
+    /// listing doors' own words have one home.
+    static let noBooklessLine = "No bookless notes — every note is in a book."
 }
 
 // MARK: - The renderer

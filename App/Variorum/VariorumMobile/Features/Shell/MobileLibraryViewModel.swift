@@ -94,6 +94,60 @@ final class MobileLibraryViewModel {
         }
     }
 
+    // MARK: - What an empty note listing SAYS (VM-5 whole-round pass, MINOR 2)
+
+    /// The two things an empty note listing can honestly say.
+    nonisolated enum EmptyListing: Equatable, Sendable {
+        /// The store holds no notes: the fresh-install trio
+        /// (`MobileEmptyStoreCopy` — no notes yet · the New Note door · the
+        /// sign-in road), every sentence of which is true then.
+        case storeEmpty
+        /// The Bookless door found nothing while the store HAS notes — they
+        /// are all in books (`MobileListingFilter.noBooklessLine`).
+        case noBookless
+    }
+
+    /// **WHICH EMPTY LINE, IF ANY — decided by what is TRUE, not by which
+    /// door's listing happens to be empty.**
+    ///
+    /// The old guard asked only whether the DOOR's listing was empty, so the
+    /// Bookless door over a store whose notes are all in books said *"No notes
+    /// yet."* — false there — plus a sign-in line that read as "your writing
+    /// hasn't arrived" (the cold read's MINOR 2). The fresh-install trio is a
+    /// claim about the STORE, so it now needs the store's note listing empty:
+    ///
+    /// | door | rows to show | store's notes | says |
+    /// |---|---|---|---|
+    /// | all / notes | none, and (all) no books either | — (the listing IS the store's) | the trio |
+    /// | bookless | none | none | the trio — true here too |
+    /// | bookless | none | some | the Bookless door's own line |
+    /// | books / scraps | — | — | nothing here: their sections speak for themselves |
+    ///
+    /// `.notes` was checked for the same class and is honest: its listing IS
+    /// the store's whole live note listing, so *"No notes yet."* is true
+    /// whenever it renders. `notesInStore` is the bounded `all` listing —
+    /// non-empty exactly when one live note exists, which is all this asks.
+    /// PURE, so the table above is pinned rather than promised.
+    nonisolated static func emptyListing(
+        filter: Filter, doorNotes: Int, storeNotes: Int, booksShown: Int
+    ) -> EmptyListing? {
+        guard doorNotes == 0, booksShown == 0 else { return nil }
+        switch filter {
+        case .all, .notes: return .storeEmpty
+        case .bookless: return storeNotes == 0 ? .storeEmpty : .noBookless
+        case .books, .scraps: return nil
+        }
+    }
+
+    /// The surface's question, answered from this model's own listings.
+    /// `booksShown` is the books half the surface is rendering (non-zero only
+    /// under `.all`'s union).
+    func emptyListing(booksShown: Int) -> EmptyListing? {
+        Self.emptyListing(
+            filter: filter, doorNotes: visible.count, storeNotes: all.count,
+            booksShown: booksShown)
+    }
+
     // MARK: - THE UNION (#93(b))
 
     /// **`All` IS THE BOOKS + NOTES UNION** — her ruling, verbatim: *"All

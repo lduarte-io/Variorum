@@ -315,7 +315,67 @@ MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
 
 | piece | state |
 |---|---|
-| MINOR 2 — the `.bookless` empty state | NOT-STARTED — design: the store-empty trio renders only where the store's note listing is genuinely empty; `.bookless` with notes present gets its own per-door line (PROVISIONAL copy, in `MobileListingFilter` beside `noBooksLine`) |
+| MINOR 2 — the `.bookless` empty state | DONE (this commit) — red 3/3 → green; targeted 29/3 green |
 | MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | NOT-STARTED — design: compose `SealedNoteCopy.sentence(act:words:)` (`.phone` in the box; `VersionActs.words` takes the platform's `SealedNoteCopy.Words` as a REQUIRED parameter, each call site passing its own) |
 | MINOR 4 — `VersionActs.save`/`restore` past a refused flush | NOT-STARTED — design: the flush reports whether the post's buffer landed; both acts refuse (a typed `VersionActs` refusal worded with the standing unsaved-changes sentence) when it did not |
 | Final full mobile suite | PENDING |
+
+### MINOR 2 — FIXED (red → green)
+
+**Mechanism, traced (inputs → wrong output).** A store whose notes are all
+in books (the journal-first default makes it ordinary). Filter `.bookless`:
+`MobileLibraryViewModel.visible` is `bookless` (`Queries.poolPosts` → the
+Pool's LOOSE class) `== []`; `listingRows`' `shelved` is `[]` (books join
+only under `.all`); the guard `visible.isEmpty, shelved.rows.isEmpty,
+filter != .scraps` passed and the fresh-install trio rendered — *"No notes
+yet."* (false), *"+ New Note starts one."*, *"Have an account? Settings ▸
+Sync signs you in."* (reads as "your writing hasn't arrived"). The guard
+asked whether the DOOR's listing was empty; the trio is a claim about the
+STORE.
+
+**Pin (red on the pre-fix tree, the absence half only — it compiled there):**
+`MobileEmptyStoreTests.aBooklessDoorOverBookedNotesNeverSaysTheStoreIsEmpty`
+— one booked note, `.bookless`, the REAL `MobileLibraryView` hosted (the
+filter batch's `withHostedSurface` shape), premise asserted (`all.count ==
+1`, `bookless` empty). RED, quoted: `✘ Test aBooklessDoorOverBookedNotesNeverSaysTheStoreIsEmpty() failed after 1.601 seconds with 3 issues.`
+— one per sentence, the rendered tree reading
+`[…, "no notes yet.", "+ new note starts one.", "have an account? settings ▸ sync signs you in.", "Archived"]`;
+`✘ Test run with 6 tests in 1 suite failed after 3.991 seconds with 3 issues.`
+
+**Fix.** The decision is a pure rule, `MobileLibraryViewModel.emptyListing(
+filter:doorNotes:storeNotes:booksShown:)` → `.storeEmpty` / `.noBookless` /
+nil (the table is in its doc): the trio renders where the STORE's note
+listing (`all`) is empty — under `.all` / `.notes` as before (their listing
+IS the store's), and under `.bookless` only when the store genuinely holds no
+notes (then it is true there too). `.bookless` with notes present renders its
+own line. The view switches on the rule; the dead `filter != .scraps` clause
+went with the old guard (the body never runs under Scraps; the rule answers
+nil there anyway).
+
+**`.notes` / `.books` checked for the same class:** `.books` speaks its own
+`noBooksLine` through `bookRows` and never reaches this body — honest.
+`.notes`' listing is the store's whole live note listing, so *"No notes
+yet."* is true whenever it renders (the one corner — books present, no notes
+— leaves the sign-in line as a road, not a false claim): no false output, so
+no pin and no change (the hallucination guard).
+
+**PROVISIONAL copy (one string, in `MobileListingFilter` beside
+`noBooksLine` so 13s re-voices the listing doors' words in one place):**
+- `MobileListingFilter.noBooklessLine` = *"No bookless notes — every note is
+  in a book."* — true by the door's own documented rule (a note a smart book
+  collects counts as held; 13i's "a gathering gives no home" nuance is the
+  Mac Pool's tuck face, and the phone's shelf shows gatherings as books).
+
+**New pins (green):** the red pin above, now also asserting the line's
+presence; `aBooklessDoorOverAnEmptyStoreStillSpeaksTheTrio` (mounted — the
+trio where it is true, the door's line absent);
+`theEmptyLineIsDecidedByWhatIsTrueOnEveryDoor` (the pure table, all five
+doors). Green, quoted: `✔ Test run with 29 tests in 3 suites passed after 41.599 seconds.`
+(`MobileEmptyStoreTests` + `MobileFilterTests` + `MobileLibraryTests`).
+
+**Residual, observed and NOT changed (pre-existing at `.all`, not this
+finding):** a store whose only notes are ARCHIVED shows the trio's *"No
+notes yet."* under `.all`/`.notes` (and now `.bookless`) — `observeLibrary`
+excludes archived notes. The Archived door trails the listing, so the notes
+are one tap away; making the trio archive-aware needs a new read. Recorded
+for the orchestrator; no pin owed here.
