@@ -420,6 +420,118 @@ struct LibraryPortabilityDoorTests {
         }
     }
 
+    // MARK: F2 R2-1 — a press while the probe's won open is in flight
+    // defers to the settled road (M4's residual closed)
+
+    /// 13x F2 (ladder R2-1): the waiting lobby's probe completing BEFORE
+    /// the Adopt press leaves the state at `.opening` for the pool
+    /// open's whole duration — there the F1 suspension is a no-op (no
+    /// lobby stands) and the old `.ready`-only re-check fell through to
+    /// the detached work, which moved the live store aside WHILE the
+    /// in-flight open held it (the wal gate reads a just-opened,
+    /// not-yet-written pool as closed; the open then installed a
+    /// session over the aside-moved inode — edits landing in Previous
+    /// Libraries). The fix AWAITS the in-flight open and re-routes the
+    /// settled state through the ready road, whose teardown closes the
+    /// pool it opened. RED ON OLD: with the opener parked, the press
+    /// lands `.done`, the slot's bytes become the source's and the hold
+    /// stands — all while the open is still in flight.
+    @Test func aPressWhileTheProbesWonOpenIsInFlightDefersToTheReadyRoad() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            try await openingRaceBody()
+        }
+    }
+
+    @MainActor
+    private func openingRaceBody() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let pair = try makePair(in: dir, passphrase: "the travelling word")
+        let sourceBytes = try Data(contentsOf: pair.store)
+
+        // The LIVE library: a real closed encrypted store at the slot,
+        // whose key file (the scripted box's) carries an Apple copy —
+        // Standard's WAITING state routes while A has not arrived.
+        let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
+        let liveKey = StoreKey.mint()
+        let liveDatabase = try AppDatabase.openStore(
+            at: storeURL, custody: .inMemory(initial: liveKey))
+        _ = liveDatabase.asRebindable().binding.lock()
+        let liveBytes = try Data(contentsOf: storeURL)
+        let apple = AppleKey.mint()
+        var liveEnvelope = StoreKeyEnvelope()
+        try liveEnvelope.setAppleWrappedCopy(
+            key: liveKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        let appleBacking = InMemoryAppleKeyBacking()  // A absent at launch
+
+        // The opener PARKS its first call — the probe's open stays in
+        // flight for exactly as long as the pin needs.
+        let firstOpenGate = DispatchSemaphore(value: 0)
+        let openCalls = LockIsolated(0)
+        let bootstrap = AppBootstrap(
+            testOpener: {
+                let call = openCalls.withValue { (count: inout Int) -> Int in
+                    count += 1
+                    return count
+                }
+                if call == 1 { firstOpenGate.wait() }
+                return .success(try! AppDatabase.inMemory())
+            },
+            gate: .scripted(
+                dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking(),
+                envelope: liveEnvelope, appleKey: appleBacking),
+            testStoreURL: storeURL)
+        await bootstrap.awaitOpen()
+        guard case .waitingForICloudKeychain(let lobby) = bootstrap.state else {
+            Issue.record("expected the waiting state")
+            return
+        }
+
+        // The sheet reaches confirm while the lobby still waits —
+        // suspension lands only at the press (deliberate, recorded).
+        let model = LibraryOpenModel(bootstrap: bootstrap)
+        model.begin(picked: pair.store)
+        try await waitUntil { if case .unlock = model.phase { return true }; return false }
+        await model.unlock(passphrase: "the travelling word")
+        try await waitUntil { if case .confirm = model.phase { return true }; return false }
+
+        // A ARRIVES; the probe wins BEFORE the press — the state is
+        // `.opening` with the open parked.
+        appleBacking.key = apple
+        #expect(await lobby.probeAppleRoad())
+        guard case .opening = bootstrap.state else {
+            Issue.record("the probe's win must leave the state opening")
+            return
+        }
+
+        // THE PRESS, mid-open: nothing may move while the open is in
+        // flight.
+        let press = Task { await model.confirmAdoption() }
+        try await Task.sleep(for: .seconds(2))
+        #expect(model.phase == .adopting,
+                "the press waits on the in-flight open — it never runs the work over it")
+        #expect(try Data(contentsOf: storeURL) == liveBytes,
+                "the live store is untouched while the open is in flight")
+        #expect(!LibraryRestoreHold.isHeld(besideStore: storeURL),
+                "no hold lands while the open is in flight")
+
+        // The parked open completes; the press re-routes through the
+        // READY road, whose teardown closes the pool it opened — the
+        // adoption then lands whole.
+        firstOpenGate.signal()
+        _ = await press.value
+        #expect(model.phase == .done)
+        #expect(try Data(contentsOf: storeURL) == sourceBytes)
+        #expect(LibraryRestoreHold.isHeld(besideStore: storeURL))
+        guard case .ready = bootstrap.state else {
+            Issue.record("the adoption must reopen into ready")
+            return
+        }
+    }
+
     // MARK: - A tiny settle loop (foreground, bounded)
 
     private func waitUntil(

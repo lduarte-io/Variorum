@@ -347,14 +347,41 @@ final class LibraryOpenModel {
             } else {
                 // 13x F1 (ladder R1-M4): the standing lobby's Apple
                 // re-probe stops BEFORE the work — `complete(key)` would
-                // open the pool over the departing store mid-move. If
-                // the probe already won the race, the state is READY
-                // now: take the ready road, which closes the pool it
-                // opened. A failure re-arms the probe (the lobby must
-                // not wait dead behind the refusal).
+                // open the pool over the departing store mid-move.
                 bootstrap.suspendLobbyForAdoption()
+                // 13x F2 (ladder R2-1 — M4's residual): a probe that
+                // completed BEFORE the press leaves the state at
+                // `.opening` for the pool open's whole duration (routing
+                // + SQLCipher open + migration), where the suspension
+                // above is a no-op (no lobby stands) and the adoption's
+                // wal gate reads a just-opened pool that has not written
+                // yet as closed — the move-aside would relocate the
+                // store out from under the in-flight open, which then
+                // installs a session over the aside-moved inode (her
+                // edits landing in Previous Libraries). So: AWAIT any
+                // in-flight open to settle before deciding the road,
+                // re-suspending each time it lands (a settle into a
+                // lobby state is a FRESH instance whose probe is live).
+                // A settle into ready takes the ready road, whose
+                // teardown closes the pool it opened; a failure on the
+                // detached road re-arms the probe (the lobby must not
+                // wait dead behind the refusal).
+                while bootstrap.opening != nil {
+                    await bootstrap.awaitOpen()
+                    bootstrap.suspendLobbyForAdoption()
+                }
                 if case .ready = bootstrap.state {
                     try await bootstrap.adoptLibrary(reopeningWith: reopenKey, work: work)
+                } else if case .opening = bootstrap.state {
+                    // `.opening` with NO open task is another ceremony's
+                    // transient (adopt/re-key between their state write
+                    // and their reopen) — unreachable from this sheet in
+                    // practice, and REFUSED rather than raced: nothing
+                    // has moved on this arm.
+                    phase = .refused(
+                        LibraryOpenCopy.adoptionRefusedNothingMoved,
+                        detail: "the library is still opening")
+                    return
                 } else {
                     let outcome: Result<Void, any Error> = await Task.detached(
                         priority: .userInitiated

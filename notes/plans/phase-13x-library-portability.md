@@ -1405,3 +1405,70 @@ nothing). Fences as F1's (no Migrations, no new Sync/ lines expected — R2-1's 
 her store never). Stage: likely NOT needed (headless pins reachable per the report's test
 shape); if a Mac run is truly owed, the lock file arbitrates — honest short claim. Append
 `### F2 RECORD`; commit per fix, push; close "F2 CLOSED" with the finding map + final counts.
+
+### F2 RECORD (the tail fix session's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
+
+#### LIVE STATUS
+
+| finding | fix | status |
+|---|---|---|
+| R2-1 | the `.opening` edge closed: await-then-re-route at the press | CODE + PIN WRITTEN (this commit) — run PENDING behind the stage claim |
+| R2-2 | ONE source of truth: the registry verb READS `LibraryOpenCopy.handOffDoor` + the equality pin | CODE + PIN WRITTEN — run PENDING behind the stage claim |
+| R2-3 | record-only: the close's full-suite run watches | PENDING (the close) |
+
+**No revert is in flight.** The one planned behavioural revert (named here BEFORE it
+starts, per the resiliency addendum): **REVERT F (R2-1)** — remove the F2 block from
+`LibraryOpenModel.confirmAdoption`'s non-ready arm (the `while bootstrap.opening != nil`
+await loop and the `.opening` refusal arm), restoring the old `.ready`-only re-check;
+expected red on EXACTLY `aPressWhileTheProbesWonOpenIsInFlightDefersToTheReadyRoad`
+(phase lands `.done`, the slot's bytes become the source's, the hold stands — all while
+the open is parked), every sibling green; restore by `git checkout --` over COMMITTED
+state, verified by an empty `git diff`. R2-2 gets NO behavioural revert by design: no
+behavior differs on the old tree (the two strings are equal today — the reviewer's own
+"no behavior is wrong today, hence NIT"), so a red-on-old demand would be hollow there;
+the equality pin is the ENFORCEMENT of the no-drift claim going forward, red the moment
+the registry verb decouples from the constant.
+
+#### R2-1 — the re-trace (this session's own, per the hallucination guard; CONFIRMED against source)
+
+1. The waiting lobby's probe (`StoreLobby.probeAppleRoad`, StoreLaunchGate.swift) completing
+   between the sheet's open and the Adopt press calls `complete(key)` →
+   `AppBootstrap.beginOpening` → `state = .opening`, the pool open detached for its whole
+   duration (routing + SQLCipher open + migration check).
+2. The press: `confirmAdoption`'s non-ready arm — `suspendLobbyForAdoption()` matches only
+   the two LOBBY states (AppBootstrap.swift), a no-op at `.opening`; the old re-check was
+   `if case .ready` only → `.opening` fell through to the detached work.
+3. The wal gate (LibraryAdoption.swift step 2) refuses only a `-wal` with size > 0 — a
+   just-opened pool that has not written leaves no such file — so the move-aside relocates
+   the live store's inode out from under the in-flight open.
+4. `reopenAfterAdoption` → `beginOpening` no-ops on `guard opening == nil`; the in-flight
+   open's `finish` then installs a session over the aside-moved inode — edits land in
+   `Previous Libraries/<stamp>/` while the adopted copy sits held at the live path.
+
+**The pick (the disposition offered two shapes):** await-then-re-route, NOT
+suspend-at-flow-begin — because suspend-at-begin does not close the edge, it only moves
+it (a probe completing before ANY suspension still leaves `.opening`, where suspension
+is a no-op against no lobby), it would demand resume plumbing on every cancel/refusal
+road of the sheet, and it would retire the deliberate, recorded choice to keep the probe
+alive while she merely browses. The landed shape, at the one place the work can launch:
+after the F1 suspension, `while bootstrap.opening != nil { await bootstrap.awaitOpen();
+bootstrap.suspendLobbyForAdoption() }` (each settle into a lobby is a FRESH instance
+whose probe is live — hence the re-suspend per lap; the loop cannot spin, since each lap
+awaits a real task and a completed task nils `opening` inside its own `finish`); then
+`.ready` takes the ready road, whose teardown closes the pool the probe's open opened;
+a residual `.opening` with NO open task (another ceremony's transient — unreachable from
+this sheet in practice) REFUSES `adoptionRefusedNothingMoved` rather than racing it; the
+other settled states take the detached road exactly as before (no pool stands in any of
+them). The M4 disposition's letter — "the probe stops before work on every adoption
+road" — is now satisfied on the last entry.
+
+#### R2-2 — the one-line honest shape
+
+The registry's `.handOffLibrary` now declares `verb: LibraryOpenCopy.handOffDoor`
+(CapabilityRegistry.swift) — the copy constant is the ONE source of truth, so the F1 13s
+table's re-voicing of that constant is real (it reaches the File menu and Data Safety
+alike, both of which render the registry's verb); both sites' "can never drift" comments
+replaced with the true mechanism, and the equality pin
+(`theHandOffVerbReadsTheOneCopyConstant`, CapabilityRegistryTests) is the enforcement the
+old claim never had. The alternative (killing the constant and re-pointing the 13s table
+at the registry) was not taken: it would move a her-facing string out of the copy layer.
