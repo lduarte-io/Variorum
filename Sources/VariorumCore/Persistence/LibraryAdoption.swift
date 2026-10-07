@@ -220,6 +220,14 @@ public enum LibraryAdoption {
         //     an ordinary refusal leaves no stray marker.
         if let holding {
             do {
+                // The empty-slot arm: the store FOLDER may not exist yet
+                // (the landing used to be what created it — found by the
+                // flow pin under the F1 slot, run 0); creating it here is
+                // what the landing does anyway, and an occupied marker
+                // path still fails the write below.
+                try fm.createDirectory(
+                    at: plan.storeURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true)
                 try LibraryRestoreHold.set(
                     besideStore: plan.storeURL, asOf: holding.asOf, now: holding.now)
             } catch {
