@@ -154,4 +154,25 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     red pins with the FINAL pin file. Restore = `git checkout -- App/Variorum/VariorumMobile/Features/Write/`
     (the tree is committed, so that restore is safe). A successor reading this line with no "REVERT DONE" below
     must run that restore first.
+  - **REVERT DONE, RESTORED (`git checkout`, tree clean at `e47d48b0`+record).** With the FINAL pin file the three
+    pins are red again under the revert: end-⏎ **1721.7 → 2471.3** (first visible 2691 = the new empty line), short
+    note **0 → 254** (first visible 267), memory re-entry **offsetY 0** (left at 970). Guards green throughout.
+  - **SECOND LAYER + KEYBOARD-UP PROOF (`e47d48b0`), traced on the forced software keyboard (probe):** (1) the
+    keyboard's tracking-element road (`UITrackingElementWindowController moveFromPlacement:…`) was seen reaching
+    UIScrollView's `scrollRectToVisible` WITHOUT the subclass override (its 376.4-pt room-padded rect unclamped,
+    landing at 2471.3 = the room) — so an `override setContentOffset(_:animated:)` now refuses to carry the page
+    past the text's foot on ANY programmatic animated move (her pans/flings are unanimated per-frame; `jumpToBlock`
+    and `restore` are unanimated by design and untouched). (2) The text's bottom is now the LOWER of
+    `contentSize − room` and TK2's `usageBoundsForTextContainer` (floored at the caret): mid-placement the room
+    (323) and `contentSize` (3165, keyboard-down) were measured DISAGREEING, which put the "bottom" 350 pt into
+    the room and let the tracking road through both clamps. (3) A one-shot verify after a reveal's animation ends
+    (`scrollViewDidEndScrollingAnimation`, forwarded by the gate delegate; ≤ 1 s after a grant, never in her
+    gesture): if TK2's re-estimation moved the caret off the page (measured: a minimal reveal computed at the
+    caret's estimated 2342.7, real 2470.7), reveal it once more — computing the offset itself, because UIKit's
+    `scrollRectToVisible` was measured DECLINING to move while the estimated `contentSize` ended above the
+    laid-out caret. **Keyboard-up results after (3 runs each, identical):** 30 paragraphs ⏎ → offset 2149.3, caret
+    2470.7–2489.3 at the viewport's foot, first visible 2332; 3 paragraphs ⏎ → stays 0, whole note visible; the
+    keyboard down/up round trip inside her 0.6 s window → holds her place (1257.3 / 1449.3, untouched); a
+    deliberate refocus long after any pan → **15/15 rounds minimal** (2149.3; the pre-layer runs landed 5/5 on the
+    room at 2471.3).
   - Walk captures — NOT-STARTED. Final suites — PENDING.
