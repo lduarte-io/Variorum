@@ -722,14 +722,36 @@ STATUS first) from your first commit; commit per piece; push every commit; work 
 
 ### U2 RECORD (the implementer's record; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
 
+**U2 PRE-MERGE HALF CLOSED — 2026-10-07.** Rows 6 → 7 → 9 → 8's pre-merge-safe halves are
+BUILT with headless evidence recorded: four core brains pinned green (the hold marker 4/4 ·
+the placement guard 2/2 · the restore candidates 3/3 · the recreation 3/3 with the
+refused-then-lands red demonstrated live, + the adoption's plaintext arm), the whole core
+suite 2247/255 (+40/6 workbook; U1's baseline +13/+4), the one Shared flow + both framed
+doors + the three face slots + the hold gate/banner/Resume + both row-9 faces + the
+plaintext road all composed and COMPILING (app build and test bundle both green — compiles
+are not stage acts). The FENCE held: `git diff` over all U2 commits shows ZERO changes under
+`Sources/VariorumCore/Sync/`, zero custody/keychain code (the collision write only CALLS the
+shipped `saveAuto`/`saveGated` doors), and `Migrations.swift` untouched — nothing demanded a
+fenced edit, so NO "DEFERRED — post-merge" piece exists from this half. **WHAT REMAINS:**
+(1) PENDING-BEHIND-THE-STAGE — one Mac-suite pass
+(`-only-testing:VariorumTests/LibraryPortabilityDoorTests`) plus its two behavioural-revert
+red checks (the hold-gate guards · the picker guard), filed for the orchestrator's slot;
+(2) the POST-MERGE half — row 10's drills (same-Mac restore · per-posture legs · the
+plaintext-export re-open · returner/purge fence · newer-schema · the stale-outbox
+conflict-card pin, all on throwaway scopes + the fake server) and the orchestrator's walk;
+any engine-side hold line only if the drills show the Shared chokepoint insufficient
+(nothing so far says so); (3) the strings table below is 13s's input. Commits:
+a1a76031 · 72d6293e · 59d59268 · f140a5f0 · a5e05baa · 85f4b9cf (+ this one), every one
+pushed at its landing.
+
 #### LIVE STATUS
 
 | row | piece | status |
 |---|---|---|
-| 6 | The two doors + welcome/waiting/absent-store slots | BUILT this commit — the one Shared flow (`LibraryOpenModel`), both framed doors and the three face slots, the custody-collision write through the shipped save doors; app target compiles; the Mac-suite pins are the NEXT piece (PENDING-behind-the-stage) |
-| 7 | The restore-hold landing state, both doors | BUILT this commit — the `SyncSession.roundsHeld` chokepoint (triggerSync + flush), `RestoreHoldModel`, the `RestoreHoldBar` banner + Resume (clear → `resumeSync`), the hold written at every adoption's completion; Mac pins PENDING-behind-the-stage |
-| 9 | The iCloud-Drive live-library guard | BUILT this commit — the backup-folder picker refuses the live library's folder with copy §6's sentence (`DataSafetyModel.chooseFolder`), the adoption confirm renders the same sentence over an iCloud-Drive source; Mac pins PENDING-behind-the-stage |
-| 8 | The Resume reconciliation (pre-merge-safe half) | BUILT this commit — the door's plaintext road (land → recreate → fresh key + identity + Auto dials + the silent item → the route's open encrypts) and Resume's composition over the EXISTING machinery (`resumeSync` — enroll/follow/adopt routing is the shipped reconcile's); the drills are row 10's, post-merge |
+| 6 | The two doors + welcome/waiting/absent-store slots | PRE-MERGE DONE (a5e05baa + 85f4b9cf) — the Mac pins' RUN is PENDING-behind-the-stage |
+| 7 | The restore-hold landing state, both doors | PRE-MERGE DONE (72d6293e + a5e05baa + 85f4b9cf) — the gate/banner pins' RUN is PENDING-behind-the-stage |
+| 9 | The iCloud-Drive live-library guard | PRE-MERGE DONE (72d6293e + a5e05baa + 85f4b9cf) — the picker pin's RUN is PENDING-behind-the-stage |
+| 8 | The Resume reconciliation (pre-merge-safe half) | PRE-MERGE DONE (f140a5f0 + a5e05baa) — the drills are row 10's, post-merge |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
 claimed by this session (the 13o scheduler owns it tonight) — every Mac-suite run stops at its
@@ -876,7 +898,32 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   welcome state exists in the build).
 - **P-U2-2** — the hold banner renders whenever the hold stands, signed in or not; Resume is
   always one press (on an account-less machine it clears the hold and does nothing else).
+- **P-U2-3** — the Restore surface lists the IN-CONTAINER folder's pairs only for now; the
+  second folder's rows wait on the walk's verdict (its copies open through File ▸ Open
+  Library… meanwhile — the same flow, the user picks the file).
+- **P-U2-4** — a GATED custody item beside a differing opener composes as `adoptOpeningKey`
+  (the item is unreadable without a prompt BY DESIGN; the write is the same promptless
+  delete-then-add, idempotent when the keys agree) — the rule applied, not changed.
+- **P-U2-5** — a REFUSED custody save at the door's completion does not abort the adoption:
+  the recovery roads cover the next launch (the key file's wraps; a plaintext road's refused
+  silent item self-heals — `openStore` mints over a plaintext store), recorded rather than
+  guessed into a rollback.
 
-#### NEW STRINGS FOR 13s (every rendered word this batch mints; facts binding, words provisional)
+#### NEW STRINGS FOR 13s (every rendered word this batch mints; facts binding, words provisional — all in `App/Variorum/Shared/LibraryOpenCopy.swift` unless noted)
 
-- (listed as rendered)
+| string (constant) | where it renders |
+|---|---|
+| `openLibraryDoor` "Open Library…" | the File menu (QB door 1) |
+| `restoreSectionTitle` / `restoreSectionBody` / `openCandidateDoor` | Data Safety's Restore section (QB door 2) |
+| `sheetTitle` "Open a Library" | the flow sheet + the open panel |
+| `bareStoreRefusal` (QC's remedy sentence verbatim at its tail) | the bare/keyless refusal |
+| `newerSchemaRefusal` · `notAVariorumStoreRefusal` · `unreadableRefusal` · `wrongKeyRefusal` | the classifier-verdict refusals |
+| `severalStoresLead` | the folder-holding-several chooser |
+| `unlockLead` · `unlockWordsDoor` | the typed-roads step |
+| `confirmLead` · `confirmStepAside` · `confirmFreshSlot` · `confirmSyncWaits` · `confirmPlaintext` · `confirmDoor` | the confirm step |
+| `holdBanner(asOfDay:)` (round 3's ruled sentence) · `resumeSyncDoor` | the restore-hold banner |
+| `credentialLine(_:secondLook:)` · `bareCandidateLine` | the Restore rows (decision 11 rendered) |
+| `pickedLiveLibraryFolderRefusal` (lead + `ProtectionCopy.liveLibraryNotInICloudDrive` verbatim) | the backup-folder picker refusal (row 9) |
+| `sourceInICloudDriveLine` (lead + the same ONE sentence) | the confirm's iCloud-Drive line (row 9) |
+| `classifyingLine` · `adoptingLine` · `adoptionFailedLead` | the flow's progress/failure |
+| (existing) `ProtectionCopy.libraryMissingOpenDoor` | NOW RENDERED on the absent-store AND waiting faces (shipped unrendered since pre-13x 1a) |
