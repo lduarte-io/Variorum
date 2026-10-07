@@ -589,7 +589,83 @@ screenshots follow your close — your "done" is a claim, the walk verifies.
 
 ### U2 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-*(empty — the U2 session writes here.)*
+**Seat:** the U2 implementer (Opus, xhigh), seated 2026-10-06 in `~/dev/variorum-13o` on
+`vx-5-13o-search` (pulled at `5a34b842`). Required reading done in-context: this plan WHOLE (the
+sitting record, the mockup rulings, §FORK RULINGS, the U1 RECORD), the mockup's Direction C + its
+shared-everywhere section, `notes/SessionResiliencyProtocol.md`, TEXTKIT2_NOTES (land-at-match
+reaches a pane), the 13b constitution P-1…P-9 + application notes; the code it builds on — the
+U1 substrate (`SearchQuery`/`SearchQueryParser`/`SearchDateParse`/`SearchComposer`/
+`Queries.searchPassages`), the Library feature (`LibraryCatalogModel` + `…Paging`/`…View`/
+`…DayFilter`/`…Copy`/`…ListFace`/`…ListingReads`), `CommandPalette`, the landing road
+(`ShellRouter.adopt(landing:)` → `PostDetailView.jump(to:)` → `EditorView(caretSeed:)` →
+`EditorViewModel.applyFocusSeeds`), `EditorFind.performFind`, `WriteIntent`/`CommandRouter`'s
+park-and-clear rules, the registry walk (`CapabilityRegistryTests`). Machinery: no deaths so far.
+
+**THE DESIGN AS BUILT (decisions the brief does not make are marked PROVISIONAL — they ride to the
+closeout ratify bundle with U1's; nothing here re-opens a ruling):**
+
+- **D1 — the SEARCH STATE** is the Library while the field's text parses (v1 grammar) to a query
+  with WORDS. It replaces the shipped title-LIKE narrowing on that road (R-13o-7: the field IS the
+  one finder). The **band** shows whenever the question is non-empty — words, a typed `#tag`, or an
+  armed when-range (PROVISIONAL P-13o-U2-1: the brief's "only while a query is active" read as
+  "while the SearchQuery is non-empty", so an armed day is never invisible state).
+- **D2 — the answer sheet (Direction C):** a BOOKS section (book + chapter hits, one row per book,
+  all of them — ∝ the wing's books, the Bookcase's class) then ONE ranked stream of GROUPS — a note
+  (or a scraps group) per row-head, ordered by its best hit, keyset-paged by group; each group
+  shows its top 3 passage lines and an **all N ›** that expands it IN PLACE and pages its passages
+  through `searchPassages(scope: .note(id))` (a real road). Note group heads ARE the List's note
+  rows (`postRow` — click selects + info panel, ⌘/⇧ pick, menu, tags, owned badge), so the pick,
+  the bulk bar and the panel keep working while searching: in the search state `noteHits` mirrors
+  the note groups in order (the near-window extras/facts machinery reads it unchanged). Scraps
+  groups head as their Snippets group (not pickable — not notes). `blockCap` and the truncation
+  line DIE (R-13o-9).
+- **D3 — the scope picker in the search state:** All · Notes (`.family(.notes)`) · Books
+  (`.family(.books)`) · Blocks (scraps ∪ block-name hits — a new AST leaf `.docKind`, composed in
+  the ONE composer). The band's counts are the WHOLE question's per kind (books · notes · passages
+  · scraps), independent of the scope picker (PROVISIONAL P-13o-U2-2: per-kind counts tell her
+  what the other scopes hold).
+- **D4 — archived:** the band's quiet `+ archived` chip toggles the facet (living ↔ including
+  archived; armed it reads `archived ✕`); with the facet off and archived matches present, the
+  sheet's foot says so with a `show archived` word (PROVISIONAL P-13o-U2-3 wording: "N more in the
+  archive" — U3 owns the facet's polish).
+- **D5 — the when door (R-13o-13):** `when ▾` opens on a day… · between days… · any day; the armed
+  state is the band's clearable chip; the no-words day answer stays the unpaged SET (now a RANGE,
+  `Queries.editedOnSQL`'s bounds unchanged in rule); with words, the range is the AST's `.days`
+  filter. Arming still moves a books/blocks scope to Notes (QUESTIONS #104's shipped clause).
+- **D6 — land-at-match:** a passage click opens its note IN WRITE AT ITS BLOCK through the shipped
+  landing road (`adopt(landing:)` → `jump(to:)` → the caret seed), carrying ONE more one-shot seed
+  beside the caret's: the FIND seed — the passage's own matched word as the index highlighted it
+  (the snippet's first match run, so it is the text as written). The arriving Write editor, after
+  placing the caret at the block's start, puts the word on the find pasteboard (what ⌘E does) and
+  runs `performFind(.show)` + `performFind(.next)` — EditorFind's own controller API — so the
+  match is SELECTED and ⌘G steps onward. Zero lines in `EditorTextView`/`BlockRangeIndex`/
+  `PaneSurface`; the seed is `EditorViewModel.applyFocusSeeds`' third one-shot beside
+  `pendingCaretSeed`/`pendingFanSeed`. A hit in an UNRENDERED take arms the bar without stepping
+  (the match is not in the shown text — PROVISIONAL P-13o-U2-4); name/label/comment/title hits land
+  at the block or note with no find seed.
+- **D7 — ⌘K:** a bounded few passages (5) under the title hits, landing as D6, plus one road row
+  to the rest ("All matches in the Library ›" — opens the Library's search state on the same words;
+  R-13o-9's no-cap-without-a-road, PROVISIONAL P-13o-U2-5).
+- **D8 — P-9:** the search state's brain is its OWN model (`LibrarySearchModel`), owned by the
+  catalog model the way `bookRowDoors` is; the band and the sheet are their own view files.
+
+**THE PIECE PLAN (each its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record + piece plan (the first commit) | DONE (this commit) |
+| P1 | CORE: the composer grows the GROUP page (top-K per group + group facts, keyset on best score) and the COUNTS statement (living + archived, per kind) over ONE shared hits builder (the shipped passages statement byte-unchanged in shape); `.docKind` AST leaf; `DayBounds` range init; `Queries.searchGroups` / `Queries.searchCounts`; headless pins (grouping, keyset, counts = the listing, EXPLAIN) | NOT STARTED |
+| P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | NOT STARTED |
+| P3 | The band + the answer sheet (views; both voices via VoiceTokens) | NOT STARTED |
+| P4 | The when door (range) — model + face + pins | NOT STARTED |
+| P5 | Land-at-match (the find seed) + pins at the feature-API level (⌘G steps) | NOT STARTED |
+| P6 | ⌘K passages + the road row + pins | NOT STARTED |
+| P7 | Wiring truths pins (owned notes listed badged; versions never; archived behind the word; "september 14" end-to-end; scraps in every wing) + registry declarations + walk | NOT STARTED |
+| P8 | Close: touched Mac suites + TutorialWalkTests green at the END (held stage claim), record final | NOT STARTED |
+
+PENDING flags: none yet.
+
+**LIVE STATUS (2026-10-06): P0 committed; P1 next.**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 
