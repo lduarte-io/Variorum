@@ -650,6 +650,36 @@ own U2.
 
 ## THE OVERNIGHT MANDATE + THE MORNING BUNDLE (2026-10-06 evening → 07)
 
+### ☀︎ THE MORNING DIGEST (read this first; everything below it is the night's detail)
+
+**The phase built end to end overnight.** U1 (brains + VX-64) → U2 (both doors + your
+restore-hold) → U2b (row 10's five drills, all green) → the LADDER: round 1 (1 BLOCKER · 1
+MAJOR · 5 MINOR · 4 NIT) → F1 (all eleven fixed/recorded, six reverts red-on-exact-pin) →
+round 2 (10/11 FIXED-PROPERLY, zero new BLOCKER/MAJOR — no round 3) → F2 (the last MINOR +
+NIT closed). 13o merged mid-night; main is merged in; custody work ran in-slot. Final counts:
+core 2335/269 + workbook 40/6 (twice), Mac door/registry suites 106/5 (twice). Marker 12, zero
+migrations, your real store untouched all night. **The reviewer's BLOCKER catch mattered:** a
+same-Mac Standard-era restore onto a Castle account would have stayed Apple-openable silently
+— fixed as a fourth reconcile arm, revert-verified.
+
+**YOUR CHECKLIST (in order):**
+1. **The walk gate (blocks my hands-on walk):** the dev store stands in Castle behind Touch
+   ID — unlock it at your sitting while I drive, or authorize a dev-scope re-pose.
+2. **The ratify bundle** (each one line to overturn; they land in QUESTIONS at the merge):
+   P-U1-1…5 · P-U2-1…5 · P-R1-1 (ceremonies refuse under a standing hold) · P-F1-1…4
+   (incl. the BLOCKER notice's own FollowNotice kind) · F2's await-then-re-route shape.
+3. **The acceptance legs (your hands):** AirDrop between real devices through the new
+   File ▸ Send Library to Another Mac… → open on the other side; the optional Air second-Mac
+   leg.
+4. **Process notes:** one commit (d2ca39f9) carries a Co-Authored-By trailer against the rule
+   — caught, recorded, not rewritten; the two kickoff workflow hiccups (bout-start `vx sync`
+   leaves main dirty; the in-flight-table same-day race) still stand for your word; the 13o
+   scheduling seat worked well as a pattern.
+5. **Then closeout:** my walk → canon deltas exactly as your sittings ruled → the FAQ brief
+   un-flagged and handed to you for the site agent → QUESTIONS/ledger landings → PR `VX-6:…`
+   (merge commit; serialization clear — 13o landed) → handoff file → worktree removed → hard
+   stop.
+
 **Her words at retirement (verbatim):** *"I'm retiring for the evening - continue your work and
 rule everything that you can provisionally in my absence, gathering notes in a handoff document
 for me in case I don't want to wake you, as is our normal custom."* → PROVISIONAL-and-continue
