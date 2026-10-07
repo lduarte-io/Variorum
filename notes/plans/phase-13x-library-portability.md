@@ -1004,7 +1004,7 @@ deferred pieces.
 
 | leg | drill | status |
 |---|---|---|
-| 1 | Same-Mac restore end to end (hold → duplicate → Resume; tombstone catch-up; the QD stale-outbox conflict-card pin) | NOT STARTED — design settled below |
+| 1 | Same-Mac restore end to end (hold → duplicate → Resume; tombstone catch-up; the QD stale-outbox conflict-card pin) | DONE (this commit; `LibrarySameMacRestoreDrillTests` 1/1 GREEN first run — the table row below) |
 | 2 | Per-leg opens on an adopted copy (passphrase · twelve words · older-key day pair · same-fingerprint second look · the A arm) | NOT STARTED — design settled below |
 | 3 | Plaintext-export re-open end to end (same-owner cursor-0 zero-push enroll · foreign-owner adopt road) | NOT STARTED — design settled below |
 | 4 | Returner / purge fence (a backup older than the purge horizon; nothing re-pushes a purged row) | NOT STARTED — design settled below |
@@ -1098,5 +1098,5 @@ stage act runs in this batch.
 
 | leg | scenario | counts | verdict |
 |---|---|---|---|
-| — | — | — | — |
+| 1 | Same-Mac restore: converge 2 devices → the Mac's last edit QUEUED unpushed → backup pair (stamp-named + its own `.keys.json`) → account moves on (take edited + pushed; note trashed + pushed) → pool closed → classify `.snapshotPair` → second look `alreadyAligned` → adopt into the SAME path → HOLD set (as-of == the pair's stamp) → held: kept outbox verified, trashed note LIVE, `duplicateAsVersion` → Resume (clear) → production rounds to quiescence | cursor-at-backup > 0, restored cursor == it; conflict cards == 1 on BOTH devices, text == the dead Mac's words; server text wins the row; original re-tombstoned on both; duplicate live on both + the mirror; outboxes 0/0; dumps byte-identical; ONE device identity (same-Mac custody) | **GREEN first run** (`swift test --filter LibrarySameMacRestoreDrillTests`, 1/1, 0.126 s) — no failure, no fix, no revert |
 
