@@ -274,16 +274,17 @@ and restored by `git checkout --`:
 | R4 | the WHEN guard removed (fire on every write) | only the same-values remote rewrite (`changes == 1` → more) — the guard is pure economy, pinned on its own |
 | R5 | no DELETE triggers | the physical delete (the janitor's road) + the exact set — 2 red |
 
-**P8 SENSITIVITY PROBES IN FLIGHT:** S1 edits `Domain/SearchComposer.swift`, S2
-`Persistence/SearchIndex.swift` — both committed clean at `a4db3a15`; a successor finding either
-dirty restores it with `git checkout -- <file>` (safe). S1 disables the placement seek (`+pl.block_id`);
-S2 disables the doc-key seek inside the UPDATE trigger (`+kind`, `+src_id`).
+**P8 SENSITIVITY PROBES — DONE, tree restored** (sources committed clean at `a4db3a15`; each probe
+restored by `git checkout --`): **S1** — the placement seek disabled in the composer
+(`+pl.block_id`): the fixed-match pins go RED (`zanzibar` 515 → 1,447 pages across 5×; `the`
+26,588 → 539,471). **S2** — `+kind/+src_id` on the UPDATE trigger's orphan-DELETE: GREEN, and
+rightly so — that DELETE's `NOT (live NEW)` term is constant-false for a live edit, so SQLite never
+runs its loop (the probe was mis-aimed, not the pin). **S2b** — `+kind/+src_id` on the trigger's
+per-edit RETIRE lookup: the autosave pin goes RED (38.1 → 97.1 pages/edit across 5×). The P1 pins
+catch a corpus walk on both roads.
 
-**LIVE STATUS (2026-10-06): STOPPED AT SEAM 2** — P0–P4 landed and pushed; the fork was ruled
-(§FORK RULINGS, `880abf8f`) and P4 is built exactly to it. The tree is clean. Waiting on the
-architect's `Sync/` side (the DERIVED set + the walk + the export-test accommodation). Nothing is
-reverted, nothing half-built. On resume: P5 → P9 (P8 gains the integrity-check DRIFT pin, the
-architect's addition).
+**LIVE STATUS (2026-10-06): P0–P8 DONE, P9 (the full core suite) RUNNING — PENDING.** Seam 2
+landed by the architect (`46ced35a`); P5–P8 built on it. The tree is clean; no revert in flight.
 
 **SEAM 2 — THE RED'S EXACT SHAPE** (full core suite after `v1_22`: 2227 tests in 250 suites, ONE
 failing expectation, everything else green — the gated bench's 3 tests skip as designed):
