@@ -1871,6 +1871,12 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: CollectingCopy.openUnavailableNote,
             availability: always),
+        // 13o U3 — the book masthead's 🔍 (R-13o-14), its one renderer.
+        Capability(
+            id: .searchThisBook, verb: "Search This Book\u{2026}", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "", availability: always),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],

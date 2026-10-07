@@ -950,6 +950,11 @@ struct RootView: View {
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)
+                },
+                // 13o U3 (the architect's F1): a book's search passage lands
+                // exactly as the Library's — Write at its block, find seeded.
+                onOpenSearchHit: { postID, blockID, find in
+                    open(.post(postID), blockID: blockID, find: find, in: pane)
                 })
                 .id(readingID)
         case .pool(let poolID):
