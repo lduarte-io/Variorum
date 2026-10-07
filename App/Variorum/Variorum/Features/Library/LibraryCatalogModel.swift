@@ -223,12 +223,25 @@ final class LibraryCatalogModel {
     /// Set by the view's binding, which also spawns `search()` — no hidden
     /// didSet task (deterministic under test; the generation guard orders
     /// the UI's unordered spawns).
+    ///
+    /// **13o U2 — the field IS the one finder** (R-13o-7): its text is read
+    /// into the search AST (`LibrarySearchQuestion`); a question with WORDS
+    /// is the SEARCH STATE (`searchState` — Direction C's answer sheet), and
+    /// the shipped title-LIKE narrowing on this road is retired with it.
     var query = ""
+    /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
+    /// band's numbers, the Books section, the groups and their expansions.
+    /// Owned here the way `bookRowDoors` is; this model routes the field's
+    /// question to it and lands the note groups' heads in `noteHits`.
+    @ObservationIgnored let searchState: LibrarySearchModel
     /// **The listing, by kind** (17y B1 (k) — her launch blocker: the Library
     /// showed the 40 newest notes and stopped). Every book of the wing; the
     /// NOTES paged in as she scrolls (`LibraryCatalogPaging.swift` — keyset
-    /// pages, never a cap); the block hits of a typed query, still capped and
-    /// said so. Written only by this file's reads and the paging extension.
+    /// pages, never a cap). **In the search state** (13o U2, D2) the books are
+    /// the Books section's and the notes are the answer sheet's NOTE GROUPS'
+    /// heads, in rank order — so the pick, the bulk bar, the info panel and
+    /// the near window's extras keep working while she searches. Written only
+    /// by this file's reads and the paging extensions.
     var bookHits: [Queries.CatalogHit] = []
     var noteHits: [Queries.CatalogHit] = [] {
         // The one flag the catalog's own body reads (17y B1 (k)): a page
@@ -238,9 +251,12 @@ final class LibraryCatalogModel {
     }
     /// The listing has note rows at all (the section and the empty answer).
     private(set) var hasNoteRows = false
-    var blockHits: [Queries.CatalogHit] = []
-    /// Everything listed, in the listing's order (books · notes · blocks).
-    var hits: [Queries.CatalogHit] { bookHits + noteHits + blockHits }
+    /// Everything listed, in the listing's order (books · notes). The block
+    /// arm LEFT at 13o U2 (R-13o-9 — "the 40 cap with no escape is
+    /// terrible"): a block is only ever listed by a typed question, and a
+    /// typed question is the search state, where named blocks and scraps
+    /// join the grouped answer sheet and page like the notes.
+    var hits: [Queries.CatalogHit] { bookHits + noteHits }
 
     // MARK: - The notes' paging state (17y B1 (k) — the extension is the brain)
 
@@ -493,6 +509,7 @@ final class LibraryCatalogModel {
         self.session = session
         self.defaults = defaults
         self.bookRowDoors = BookRowDoors(session: session)
+        self.searchState = LibrarySearchModel(session: session)
         // A remembered value the enum does not PARSE (a hand-edited plist,
         // an older build's key) reads as the shipped default.
         //
@@ -518,11 +535,14 @@ final class LibraryCatalogModel {
     }
 
     /// **A NEW QUESTION** (a typed query, a scope, a sort, a direction, a day,
-    /// a wing): the listing starts over — every book, the FIRST page of notes,
-    /// the capped block hits. The notes beyond the page arrive as she scrolls
-    /// (`loadMoreNotes`, 17y B1 (k)).
+    /// a wing, the archived facet): the listing starts over — every book, the
+    /// FIRST page of notes (or, in the search state, of the answer sheet's
+    /// groups). The rest arrive as she scrolls (`loadMoreNotes`, 17y B1 (k);
+    /// `loadMoreSearchGroups`, 13o U2).
     func search() async {
-        await read(noteDepth: Self.pageSize, startingOver: true)
+        await read(
+            noteDepth: Self.pageSize, groupDepth: LibrarySearchModel.groupPageSize,
+            startingOver: true)
     }
 
     /// **The SAME question, re-asked IN PLACE** after an act on the listing's
@@ -530,37 +550,48 @@ final class LibraryCatalogModel {
     /// row menu): every note she has scrolled through is re-read in ONE
     /// statement (∝ what is listed, once per act — never per scroll), so the
     /// list she is halfway down stays where it is instead of snapping back to
-    /// its first page.
+    /// its first page. The search state re-reads its groups to the depth she
+    /// paged to, the same way (13o U2).
     func refresh() async {
-        await read(noteDepth: max(Self.pageSize, noteHits.count), startingOver: false)
+        await read(
+            noteDepth: max(Self.pageSize, noteHits.count),
+            groupDepth: max(LibrarySearchModel.groupPageSize, searchState.groups.count),
+            startingOver: false)
     }
 
     /// The one read behind both doors.
-    private func read(noteDepth: Int, startingOver: Bool) async {
+    private func read(noteDepth: Int, groupDepth: Int, startingOver: Bool) async {
         searchGeneration += 1
         let generation = searchGeneration
         do {
-            let query = query
             let (sort, direction, scope) = (sort, direction, scope)
             // Her day, in her calendar, converted once — the query compares
             // the store's own UTC text (18h batch 2).
             let day = editedOn.flatMap { DayBounds(day: $0, calendar: LibraryDayFace.calendar) }
+            // 13o U2 (R-13o-7/8): the field's text as the one AST. A cleared
+            // field ends the question, the archived facet with it (D4).
+            let question = LibrarySearchQuestion.read(
+                query,
+                range: day.map { SearchDayRange(field: .edited, start: $0.start, end: $0.end) },
+                visibility: searchState.visibility)
+            if question == nil { searchState.resetFacet() }
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).
             let wing = session.wing.currentID
             let listing = try await session.database.read { db in
                 try Self.listing(
-                    db, query: query, scope: scope, sort: sort, direction: direction,
-                    day: day, wing: wing, noteDepth: noteDepth)
+                    db, question: question, scope: scope, sort: sort, direction: direction,
+                    day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth)
             }
             guard generation == searchGeneration else { return }  // stale
             listedGeneration = generation
             bookHits = listing.books
             noteHits = listing.notes
-            blockHits = listing.blocks
             notesCursor = listing.next
             notesHaveMore = listing.next != nil
-            truncatedKinds = listing.blocksOver ? [.block] : []
+            searchState.land(
+                listing.search, question: question, scope: scope, wing: wing,
+                generation: generation, startingOver: startingOver)
             reindexNotes()
             if startingOver {
                 visibleNoteIndices = []
@@ -588,35 +619,54 @@ final class LibraryCatalogModel {
             holdNearFacts()
             await loadNearExtras(generation: generation, replacing: true)
             lastError = nil
+            // An in-place re-ask keeps the groups she opened open, re-read.
+            if !startingOver { await searchState.reloadExpansions() }
         } catch {
             guard generation == searchGeneration else { return }
             lastError = String(describing: error)
         }
     }
 
-    /// What one read returns (the listing's three arms).
+    /// What one read returns (the listing's arms; the search state's answer
+    /// when the field asks with words).
     struct Listing {
         var books: [Queries.CatalogHit] = []
         var notes: [Queries.CatalogHit] = []
-        var blocks: [Queries.CatalogHit] = []
         var next: Queries.CatalogCursor?
-        var blocksOver = false
+        var search: LibrarySearchListing?
     }
 
     /// **One read, every arm the scope shows** — and only those: a scope
     /// that draws no notes reads none.
+    ///
+    /// **13o U2 — the field's question decides the road** (D1): words are
+    /// the SEARCH STATE (the answer sheet, `LibrarySearchModel.listing` —
+    /// the books it names, its note groups' heads as the notes); a `#tag`
+    /// typed without words lists nothing until words join it (PROVISIONAL
+    /// P-13o-U2-6 — the band names the tag and asks for them); no question
+    /// at all is the shipped listing, unnarrowed.
     nonisolated static func listing(
-        _ db: Database, query: String, scope: Scope, sort: Queries.LibrarySort,
-        direction: SortDirection, day: DayBounds?, wing: String, noteDepth: Int
+        _ db: Database, question: LibrarySearchQuestion?, scope: Scope,
+        sort: Queries.LibrarySort, direction: SortDirection, day: DayBounds?, wing: String,
+        noteDepth: Int, groupDepth: Int
     ) throws -> Listing {
         var listing = Listing()
+        if let question {
+            guard question.hasWords else { return listing }
+            let answer = try LibrarySearchModel.listing(
+                db, question: question, scope: scope, wing: wing, groupDepth: groupDepth)
+            listing.books = answer.books
+            listing.notes = answer.groups.compactMap(\.note)
+            listing.search = answer
+            return listing
+        }
         // **The day's answer is a SET, so it is not paged** (18h ladder
         // R1-4): "which notes did I edit on Sep 8" is answered whole, and the
-        // books and blocks stand down (they carry no edit stamp).
+        // books stand down (they carry no edit stamp).
         if let day {
             guard scope == .all || scope == .posts else { return listing }
             listing.notes = try Queries.searchCatalog(
-                db, query: query, limitPerKind: nil, sort: sort, direction: direction,
+                db, query: "", limitPerKind: nil, sort: sort, direction: direction,
                 editedOn: day, wingID: wing)
             .filter { $0.kind == .post }
             return listing
@@ -624,22 +674,14 @@ final class LibraryCatalogModel {
         if scope == .all || scope == .books {
             // Every book of the wing (∝ the wing's books — the Bookcase's own
             // class): a book listing is never a page.
-            listing.books = try Queries.catalogBooks(db, query: query, limit: nil, wingID: wing)
+            listing.books = try Queries.catalogBooks(db, query: "", limit: nil, wingID: wing)
         }
         if scope == .all || scope == .posts {
             let page = try Queries.catalogNotesPage(
-                db, query: query, sort: sort, direction: direction,
+                db, query: "", sort: sort, direction: direction,
                 limit: noteDepth, wingID: wing)
             listing.notes = page.hits
             listing.next = page.next
-        }
-        if scope == .all || scope == .blocks {
-            // The block hits of a typed query — named blocks and scraps —
-            // stay capped and SAY so (one more than drawn is the proof).
-            let blocks = try Queries.catalogBlocks(
-                db, query: query, limit: blockCap + 1, wingID: wing)
-            listing.blocksOver = blocks.count > blockCap
-            listing.blocks = Array(blocks.prefix(blockCap))
         }
         return listing
     }
@@ -660,16 +702,12 @@ final class LibraryCatalogModel {
     nonisolated static let restInterval = Duration.milliseconds(200)
     /// The largest page the listing grows to (`nextPageSize`).
     nonisolated static let maxPageSize = 1_280
-    /// The block hits' cap (a search's named blocks and scraps) — the one
-    /// listing still capped, and the one the truncation line now speaks for.
-    nonisolated static let blockCap = 40
-
-    /// **Which KINDS are showing fewer rows than the store holds** — since
-    /// 17y B1 (k) only ever the block hits (books are all listed; notes page).
-    private(set) var truncatedKinds: Set<Queries.CatalogHit.Kind> = []
-
-    /// The List body draws the block hits, so their cap is its to say.
-    var listingIsTruncated: Bool { truncatedKinds.contains(.block) }
+    // **The block cap DIED at 13o U2** (R-13o-9, her words: *"block / scrap 40
+    // cap should not exist - the 40 cap with no escape is terrible"*):
+    // `blockCap`, `truncatedKinds`, `listingIsTruncated` and the truncation
+    // line they spoke through are gone. Named blocks and scraps are found by
+    // the search state's composer and page like the notes — every "all N ›"
+    // a real road — so no listing in the Library is capped any more.
 
     /// Trim each kind to the page and say WHICH kinds were over.
     /// `nil` = uncapped (the day's answer), which is never truncated.

@@ -666,7 +666,7 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
 | P1 | CORE: the composer grows the GROUP page (top-K per group + group facts, keyset on best score) and the COUNTS statement (living + archived, per kind) over ONE shared hits builder (the shipped passages statement byte-unchanged in shape); `.docKind` AST leaf; `DayBounds` range init; `Queries.searchGroups` / `Queries.searchCounts`; headless pins (grouping, keyset, counts = the listing, EXPLAIN) | DONE (this commit) — `SearchComposer.hits` (one builder; `passages` rebuilt on it and verified BYTE-IDENTICAL against a pre-refactor snapshot of three shapes — living/facet/archived-only, library/book/note, cursor/no-cursor), `SearchComposer.groups` (`scored AS MATERIALIZED`, grouped by home, keyset `(g_best, g_home)`, top-K by `ROW_NUMBER` with the title ranked last, snippets for the top rows only) and `SearchComposer.counts` (one `hits AS MATERIALIZED` walk; living + all + archived places; worn ids folded in as JSON), `SearchFilter.docKind` + `SearchDocKind` (pinned = `SearchIndex.sources`' kinds), `DayBounds(firstDay:lastDay:)`; `Queries.searchGroups` (worn day leads page one, merged with its own group; note heads read as the catalog's `CatalogHit` for the page's homes only) + `Queries.searchCounts` + `SearchGroup`/`SearchGroupPage`/`SearchCounts`. `SearchGroupsTests` 8/8 + `SearchPassagesTests` 14/14 green; `SearchP1Tests` 2/2 green with the sheet probes added — **group page 225 → 344 pages, counts 147 → 228 across the 5× corpus (fixed matches; the passages road's own ×1.4–1.5 log residue)** |
-| P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | IN-PROGRESS — the core half landed (the predecessor's adopted `catalogBookHits` + its pin, this commit); the Mac model + routing + pins next |
+| P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | DONE (`6d86c95c` core half + this commit) — `Features/Library/LibrarySearchModel.swift` (`LibrarySearchQuestion` — the field's text → the AST + the range, `scoped(_:)` D3, `removingTag` for the chip's ✕; `LibrarySearchListing`; the model: facet, question, counts, books, groups + cursor, expansions "all N ›" paged by `searchPassages(.note(home))`, the pure reads `listing`/`groupPage`/`books`) · `LibrarySearchRouting.swift` (the catalog's seam: `isSearching`, `searchGroupAppeared` → `loadMoreSearchGroups` appending heads to `noteHits` once each, `removeTypedTag`, `toggleArchivedFacet`) · `LibraryCatalogModel` routes the field (words → the answer sheet; a `#tag` alone → nothing listed, P-13o-U2-6; none → the shipped listing UNNARROWED — the title-LIKE road retired), `refresh` re-reads groups to depth with opened groups re-read; **`blockCap`, `truncatedKinds`, `listingIsTruncated`, the block arm, `LibraryCopy.showingTheFirst` and `LibraryTruncationLine` DELETED**. The List view's block section/truncation row removed (the sheet's faces are P3). Pins: `LibrarySearchStateTests` (10 — the AST read, scopes, the chip ✕, the heads mirror the groups, tag-alone, the counts never move with the scope, **the 41st named block and the 41st–60th scrap reachable**, a superseded page never lands, in-place re-read at depth with groups kept open, the facet) — compiled (build-for-testing EXIT 0), **run PENDING (the stage is held by VM-5; runs at P8)**. JUSTIFIED EDITS: `LibraryDayFilterTests.theClearDoorReturnsTheWholeLibrary` (the named block is a passage of its note's group now) and `.theNotesBodysTruncationIsAboutNotes` (the truncation flag died) |
 | P3 | The band + the answer sheet (views; both voices via VoiceTokens) | NOT STARTED |
 | P4 | The when door (range) — model + face + pins | NOT STARTED |
 | P5 | Land-at-match (the find seed) + pins at the feature-API level (⌘G steps) | NOT STARTED |
@@ -674,10 +674,17 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 | P7 | Wiring truths pins (owned notes listed badged; versions never; archived behind the word; "september 14" end-to-end; scraps in every wing) + registry declarations + walk | NOT STARTED |
 | P8 | Close: touched Mac suites + TutorialWalkTests green at the END (held stage claim), record final | NOT STARTED |
 
-PENDING flags: none yet.
+PENDING flags: **the Mac pins have not RUN** (the stage is held by the VM-5 merge orchestrator;
+every Mac suite this unit touches runs together at P8 under a held claim) — `LibrarySearchStateTests`
+and the two justified `LibraryDayFilterTests` edits are compiled only.
 
-**LIVE STATUS (2026-10-06, the continuation): P0–P1 committed; the predecessor's in-flight core
-edit adopted (P2's first commit); P2's Mac model next.**
+**New PROVISIONAL (continuation):** P-13o-U2-6 — a `#tag` typed WITHOUT words lists nothing
+(the band names the tag; the sheet asks for words) — the composer serves no text-less question
+(P-13o-U1-7), the shipped title-LIKE road found nothing for "#tag" either, and the tag-association
+join that answers a tag alone is U3's.
+
+**LIVE STATUS (2026-10-06, the continuation): P0–P2 committed; P3 (the band + the answer sheet's
+faces) next.**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 

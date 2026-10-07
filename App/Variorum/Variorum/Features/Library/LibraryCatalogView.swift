@@ -596,7 +596,7 @@ struct LibraryCatalogView: View {
         // decides, never a guessed count).
         let capped = LibraryBooksRegion.capsBooks(
             scope: model.scope, books: model.bookHits.count,
-            showsMore: model.hasNoteRows || !model.blockHits.isEmpty,
+            showsMore: model.hasNoteRows,
             pitch: bookRowPitch, lead: LibraryBooksRegion.defaultLead, height: listAreaHeight)
         return VStack(spacing: 0) {
             if capped {
@@ -630,7 +630,6 @@ struct LibraryCatalogView: View {
     private func listColumn(includesBooks: Bool) -> some View {
         let showsBooks = includesBooks && !model.bookHits.isEmpty
         let showsNotes = model.hasNoteRows
-        let showsBlocks = !model.blockHits.isEmpty
         // Row 56: the List draws NO selection of its own — the pick and the
         // panel's subject render through `rowBackground` (the wash + a tinted
         // border), on note and book rows alike; the model owns the pick.
@@ -650,7 +649,7 @@ struct LibraryCatalogView: View {
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel("Books"))
                     }
-                    if showsNotes || showsBlocks { sectionGap }
+                    if showsNotes { sectionGap }
                 }
                 if showsNotes {
                     Section {
@@ -670,19 +669,8 @@ struct LibraryCatalogView: View {
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel("Notes"))
                     }
-                    if showsBlocks { sectionGap }
                 }
-                if showsBlocks {
-                    Section {
-                        if !showsBooks, !showsNotes { LibraryListLead() }
-                        ForEach(model.blockHits, id: \.id) { hit in
-                            LibraryListRow { blockLine(hit) }
-                        }
-                    } header: {
-                        LibraryListHeader(title: tokens.chromeLabel("Blocks"))
-                    }
-                }
-                if model.bookHits.isEmpty, !showsNotes, !showsBlocks {
+                if model.bookHits.isEmpty, !showsNotes {
                     // 18h batch 2: a day that finds nothing says WHY — the one
                     // wording, shared with the Notes mode below.
                     LibraryListLead()
@@ -696,11 +684,8 @@ struct LibraryCatalogView: View {
                         }
                     }
                 }
-                // R1-4: a capped listing says so rather than reading as the
-                // library — since 17y B1 (k) only the block hits are capped.
-                if model.listingIsTruncated {
-                    LibraryListRow { LibraryTruncationLine(tokens: tokens) }
-                }
+                // (13o U2, R-13o-9: the truncation line LEFT with the block
+                // cap — no Library listing is capped any more.)
             }
             .padding(.bottom, LibraryListFace.bottomInset)
         }

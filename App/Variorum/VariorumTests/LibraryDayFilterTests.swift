@@ -173,8 +173,16 @@ struct LibraryDayFilterTests {
             #expect(cleared)
             model.setEditedOn(nil)
             await model.search()
-            #expect(Set(model.hits.map(\.kind)) == [.book, .post, .block],
-                    "every kind is back")
+            // JUSTIFIED EDIT (13o U2 — R-13o-7 the field is the one finder,
+            // R-13o-9 the block cap died): a named block is no longer a
+            // capped row of its own kind; it is a PASSAGE of its note's group
+            // on the answer sheet, found and reachable there. The subject —
+            // ✕ puts every kind back — is unchanged.
+            #expect(Set(model.hits.map(\.kind)) == [.book, .post],
+                    "the book and the note are back")
+            #expect(model.searchState.groups.first { $0.homeID == note.id }?.lines
+                        .contains { $0.kind == .blockName && $0.blockID == block.block.id } == true,
+                    "…and the named block, in its note's group")
         }
     }
 
@@ -442,7 +450,10 @@ struct LibraryDayFilterTests {
 
             #expect(model.hits.filter { $0.kind == .book }.count == LibraryCatalogModel.pageSize + 1,
                     "every book is listed — books are not a page")
-            #expect(!model.listingIsTruncated, "…so nothing is truncated")
+            // JUSTIFIED EDIT (13o U2, R-13o-9): `listingIsTruncated` died with
+            // the block cap — no Library listing is capped, so there is no
+            // truncation flag left to be false. The subject stands on the two
+            // facts that remain: every book drawn, every note drawn.
             #expect(!model.notesHaveMore, "every note is drawn: no further page")
             #expect(model.hits.filter { $0.kind == .post }.count == 3)
         }

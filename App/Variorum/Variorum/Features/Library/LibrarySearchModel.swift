@@ -1,0 +1,407 @@
+//
+//  LibrarySearchModel.swift
+//  Variorum (Mac)
+//
+//  **13o U2 — THE LIBRARY'S SEARCH STATE, its own brain** (P-9; the plan's
+//  U2 RECORD, D1–D8). Her rulings: the Library field IS the one finder
+//  ("library field should be one giant finder — no new search mode",
+//  R-13o-7), and the search state is DIRECTION C, the answer sheet ("I like
+//  direction C, the answer sheet, the best", R-13o-15): ONE results band
+//  (the query's echo, honest counts, the filters as quiet chips) over the
+//  passages GROUPED under their notes, every "all N ›" a real road
+//  (R-13o-9 — "the 40 cap with no escape is terrible").
+//
+//  What lives here: the QUESTION (the field's text read into the one AST —
+//  `SearchQueryParser`, R-13o-8 — plus the day range and the archived
+//  facet), the ANSWER (the band's counts, the Books section's rows, the
+//  ranked groups and their road to the next page), and each group's
+//  "all N ›" expansion. What does NOT: the read's generation guard and the
+//  landing into the List's own rows — the catalog's (`LibraryCatalogModel`
+//  owns this model the way it owns `bookRowDoors`, and routes the field's
+//  question here; `LibrarySearchRouting.swift` is that seam).
+//
+//  Every read is ONE composer road (`Queries.searchGroups` / `searchCounts`
+//  / `searchPassages`) — no search SQL is composed here (R-13o-8's rule).
+//
+
+import Foundation
+import GRDB
+import Observation
+import VariorumCore
+
+// MARK: - The question (pure)
+
+/// **What the Library field asks** — its text read once into the one AST,
+/// with the day range and the archived facet. Pure, so a pin holds the rule.
+nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
+    /// The whole question — words, typed `#tags`, the day range, the facet —
+    /// and NO scope: the band's counts read this (D3 — the counts tell her
+    /// what every scope holds, PROVISIONAL P-13o-U2-2).
+    let query: SearchQuery
+    /// The words as typed, the `#tags` aside — the band's echo.
+    let words: String
+    /// The typed `#tag` paths, in the order typed — the band's chips.
+    let tagPaths: [String]
+
+    /// **The answer sheet's state** (D1): the question has WORDS the index
+    /// can be asked about. A `#tag` alone, or a day alone, is a question
+    /// without words — the band says it, and the sheet asks for words
+    /// (a `#tag` alone, PROVISIONAL P-13o-U2-6) or the shipped day listing
+    /// answers (a day alone, D5).
+    var hasWords: Bool { query.text != nil }
+
+    /// The field's text as a question — nil when the field holds nothing to
+    /// ask (blank). `range` is the armed `when` range: with words it joins
+    /// the filter half (D5 — `Queries.editedOnSQL`'s rule, unchanged).
+    static func read(
+        _ text: String, range: SearchDayRange? = nil, visibility: SearchVisibility = .living,
+        locale: Locale = .current, calendar: Calendar = JournalDay.storeCalendar
+    ) -> LibrarySearchQuestion? {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        var query = SearchQueryParser.parse(
+            text, typeAhead: true, visibility: visibility, locale: locale, calendar: calendar)
+        if let range {
+            query.filter = query.filter.map { .all([$0, .days(range)]) } ?? .days(range)
+        }
+        let tokens = tokens(of: text)
+        return LibrarySearchQuestion(
+            query: query,
+            words: tokens.filter { !isTag($0) }.joined(separator: " "),
+            tagPaths: tokens.filter(isTag).map(tagPath))
+    }
+
+    /// The question narrowed to a scope picker's choice (D3) — what the
+    /// groups and the Books section read.
+    func scoped(_ scope: LibraryCatalogModel.Scope) -> SearchQuery {
+        guard let narrow = Self.scopeFilter(scope) else { return query }
+        var scoped = query
+        scoped.filter = query.filter.map { .all([$0, narrow]) } ?? narrow
+        return scoped
+    }
+
+    /// The scope picker's four answers (D3): All · Notes · Books · Blocks —
+    /// Blocks is the scraps family beside block NAMES (the `.docKind` leaf).
+    static func scopeFilter(_ scope: LibraryCatalogModel.Scope) -> SearchFilter? {
+        switch scope {
+        case .all: nil
+        case .posts: .family(.notes)
+        case .books: .family(.books)
+        case .blocks: .any([.family(.scraps), .docKind(.blockName)])
+        }
+    }
+
+    /// **The field's text without one typed `#tag`** — the band chip's ✕.
+    /// Rebuilt token by token (single spaces); a text that ended in space
+    /// still does, and so does one whose LAST token was the tag — so the
+    /// type-ahead tail never changes under the ✕ (a word that was whole
+    /// stays whole).
+    static func removingTag(_ path: String, from text: String) -> String {
+        let all = tokens(of: text)
+        let key = path.lowercased()
+        let kept = all.filter { !(isTag($0) && tagPath($0).lowercased() == key) }
+        guard kept.count != all.count else { return text }
+        let endsOpen = text.last.map { !$0.isWhitespace } ?? false
+        let lastWasTag = all.last.map { isTag($0) && tagPath($0).lowercased() == key } ?? false
+        let joined = kept.joined(separator: " ")
+        return joined.isEmpty ? "" : joined + ((endsOpen && !lastWasTag) ? "" : " ")
+    }
+
+    // The v1 grammar's own token shape: whitespace-separated, a quoted
+    // phrase kept whole (`SearchQueryParser`'s reading).
+    private static func tokens(of text: String) -> [String] {
+        var tokens: [String] = []
+        var current = ""
+        var quoted = false
+        for ch in text {
+            if isQuote(ch) { quoted.toggle(); current.append(ch); continue }
+            if ch.isWhitespace, !quoted {
+                if !current.isEmpty { tokens.append(current); current = "" }
+            } else {
+                current.append(ch)
+            }
+        }
+        if !current.isEmpty { tokens.append(current) }
+        return tokens
+    }
+
+    private static func isQuote(_ ch: Character) -> Bool {
+        ch == "\"" || ch == "\u{201C}" || ch == "\u{201D}"
+    }
+
+    private static func isTag(_ token: String) -> Bool {
+        token.hasPrefix("#") && !tagPath(token).isEmpty
+    }
+
+    private static func tagPath(_ token: String) -> String {
+        var path = String(token.dropFirst())
+        while path.hasSuffix("/") { path.removeLast() }
+        return path
+    }
+}
+
+/// **One read of the answer sheet** — the band's numbers, the Books
+/// section, the first page of groups and the road to the next.
+nonisolated struct LibrarySearchListing: Equatable, Sendable {
+    var counts: SearchCounts?
+    var books: [Queries.CatalogHit] = []
+    var groups: [SearchGroup] = []
+    var next: SearchComposer.GroupCursor?
+}
+
+// MARK: - The model
+
+@MainActor
+@Observable
+final class LibrarySearchModel {
+    /// A group page — the composer's own default (one statement ∝ the
+    /// matches, pinned flat in core's `SearchP1Tests`).
+    nonisolated static let groupPageSize = 25
+    /// Each group's top passages (Direction C's "top 3").
+    nonisolated static let linesPerGroup = 3
+    /// An "all N ›" page of one group's passages.
+    nonisolated static let linePageSize = 50
+    /// How many groups before the end of the listed ones ask for the next
+    /// page (the notes' `prefetchMargin`, at the groups' own scale).
+    nonisolated static let prefetchMargin = 8
+
+    @ObservationIgnored let session: AppSession
+
+    /// **The archived facet** (D4 — R-13o-6: archived matches are indexed
+    /// but out of the default results behind one facet). A question she
+    /// asks, never remembered (the day filter's own reason: a Library that
+    /// reopened still showing the archive is the invisible-state hazard).
+    private(set) var visibility: SearchVisibility = .living
+
+    /// The question the LISTED answer answers — nil when the Library is not
+    /// searching. The band reads it whenever it is non-nil (P-13o-U2-1).
+    private(set) var question: LibrarySearchQuestion?
+    /// The band's numbers (nil without words).
+    private(set) var counts: SearchCounts?
+    /// The Books section: every book a book or chapter hit names, ranked by
+    /// its best hit (∝ the wing's books — the Bookcase's own class).
+    private(set) var books: [Queries.CatalogHit] = []
+    /// The answer sheet's groups — notes and scraps groups, best first.
+    private(set) var groups: [SearchGroup] = []
+    /// Where the next page of groups starts; nil when none follows.
+    private(set) var next: SearchComposer.GroupCursor?
+    /// A next page is in flight (one at a time).
+    private(set) var loadingMore = false
+    /// The groups opened to "all N ›" — each its own paged road.
+    private(set) var expansions: [String: Expansion] = [:]
+
+    /// What one opened group lists: its passages, page by page.
+    struct Expansion: Equatable {
+        var lines: [SearchPassage] = []
+        var next: SearchComposer.Cursor?
+        var loading = false
+    }
+
+    /// The scope and wing the listed answer was read under (the paging and
+    /// the expansions ask the same question).
+    @ObservationIgnored private(set) var scope: LibraryCatalogModel.Scope = .all
+    @ObservationIgnored private(set) var wing = ""
+    /// The catalog generation the listed answer belongs to.
+    @ObservationIgnored private(set) var generation = 0
+    /// Each listed group's position (the paging's arithmetic).
+    @ObservationIgnored private(set) var groupIndex: [String: Int] = [:]
+
+    init(session: AppSession) {
+        self.session = session
+    }
+
+    /// **The answer sheet is showing** (D1) — the question has words.
+    var isAnswering: Bool { question?.hasWords == true }
+
+    /// The band shows whenever the field asks anything (P-13o-U2-1); the
+    /// catalog also shows it for an armed day.
+    var asksAnything: Bool { question != nil }
+
+    var hasMoreGroups: Bool { next != nil }
+
+    /// The facet's door (D4): living ↔ including archived. The caller
+    /// re-reads (this file's convention — a facet is a new question).
+    func toggleArchived() {
+        visibility = visibility == .living ? .includingArchived : .living
+    }
+
+    /// Put the facet back to the living corpus (a cleared field).
+    func resetFacet() {
+        visibility = .living
+    }
+
+    // MARK: - Landing (the catalog's road — `LibrarySearchRouting.swift`)
+
+    /// A question's answer lands — a NEW question replaces everything
+    /// (expansions included); the same question re-asked in place keeps the
+    /// groups she opened.
+    func land(
+        _ listing: LibrarySearchListing?, question: LibrarySearchQuestion?,
+        scope: LibraryCatalogModel.Scope, wing: String, generation: Int, startingOver: Bool
+    ) {
+        let sameQuestion = question == self.question && scope == self.scope && wing == self.wing
+        self.question = question
+        self.scope = scope
+        self.wing = wing
+        self.generation = generation
+        counts = listing?.counts
+        books = listing?.books ?? []
+        groups = listing?.groups ?? []
+        next = listing?.next
+        loadingMore = false
+        reindexGroups()
+        if startingOver || !sameQuestion || listing == nil {
+            expansions = [:]
+        } else {
+            // In place (an act on the listing's own rows): an opened group
+            // that is still listed STAYS open — the catalog re-reads its
+            // lines from the start (`reloadExpansions`), so nothing she is
+            // reading closes under her and nothing open is stale.
+            let listed = Set(groups.map(\.homeID))
+            expansions = expansions.filter { listed.contains($0.key) }
+                .mapValues { _ in Expansion(loading: true) }
+        }
+    }
+
+    /// Re-read every open group from its first page (an in-place landing).
+    func reloadExpansions() async {
+        for homeID in expansions.keys.sorted() {
+            await loadLines(homeID, after: nil)
+        }
+    }
+
+    private func reindexGroups() {
+        var index: [String: Int] = [:]
+        for (position, group) in groups.enumerated() { index[group.homeID] = position }
+        groupIndex = index
+    }
+
+    /// The next page of groups arrived — appended, each home ONCE (a worn
+    /// note leads page one and may rank again further down).
+    /// Answers the groups that were new.
+    @discardableResult
+    func append(_ page: SearchGroupPage, generation: Int) -> [SearchGroup] {
+        guard generation == self.generation else { return [] }
+        let fresh = page.groups.filter { groupIndex[$0.homeID] == nil }
+        let start = groups.count
+        groups += fresh
+        for (offset, group) in fresh.enumerated() { groupIndex[group.homeID] = start + offset }
+        next = page.next
+        loadingMore = false
+        return fresh
+    }
+
+    /// How many listed groups lie below `homeID` (nil if it is not listed).
+    func groupsAhead(of homeID: String) -> Int? {
+        groupIndex[homeID].map { groups.count - 1 - $0 }
+    }
+
+    func beginLoadingMore() { loadingMore = true }
+    func endLoadingMore() { loadingMore = false }
+
+    // MARK: - "all N ›" — one group's whole road (R-13o-9)
+
+    /// Open a group to all its passages (the first page), or close it.
+    func toggleExpansion(_ homeID: String) async {
+        if expansions[homeID] != nil {
+            expansions[homeID] = nil
+            return
+        }
+        expansions[homeID] = Expansion(loading: true)
+        await loadLines(homeID, after: nil)
+    }
+
+    /// The next page of an opened group's passages.
+    func loadMoreLines(_ homeID: String) async {
+        guard let open = expansions[homeID], !open.loading, let cursor = open.next else { return }
+        expansions[homeID]?.loading = true
+        await loadLines(homeID, after: cursor)
+    }
+
+    private func loadLines(_ homeID: String, after cursor: SearchComposer.Cursor?) async {
+        guard let question else { return }
+        let askedGeneration = generation
+        let query = question.scoped(scope)
+        let within = SearchScope(wingID: wing, within: .note(id: homeID))
+        do {
+            let page = try await session.database.read { db in
+                try Queries.searchPassages(
+                    db, query: query, scope: within, after: cursor, limit: Self.linePageSize)
+            }
+            // A newer answer (or the same group closed) owns the sheet now.
+            guard askedGeneration == generation, self.question == question,
+                  expansions[homeID] != nil else { return }
+            expansions[homeID]?.lines += Self.lines(of: page.passages)
+            expansions[homeID]?.next = page.next
+            expansions[homeID]?.loading = false
+        } catch {
+            guard expansions[homeID] != nil else { return }
+            expansions[homeID]?.loading = false
+        }
+    }
+
+    /// A group's LINES are its passages that are not its name (the head
+    /// already says the name — `SearchGroup.lines`' own rule).
+    nonisolated static func lines(of passages: [SearchPassage]) -> [SearchPassage] {
+        passages.filter { $0.kind != .title && $0.kind != .wornDay }
+    }
+
+    // MARK: - The reads (pure, over a Database)
+
+    /// **The answer sheet, read once** (D2): the band's counts (the whole
+    /// question, no scope — D3), the Books section (scopes All and Books),
+    /// and `groupDepth` groups (every scope but Books). Each is one
+    /// composer statement; the Books section pages the books family to its
+    /// end (∝ the wing's books).
+    nonisolated static func listing(
+        _ db: Database, question: LibrarySearchQuestion, scope: LibraryCatalogModel.Scope,
+        wing: String, groupDepth: Int, calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> LibrarySearchListing {
+        var listing = LibrarySearchListing()
+        let where_ = SearchScope(wingID: wing)
+        listing.counts = try Queries.searchCounts(
+            db, query: question.query, scope: where_, calendar: calendar)
+        if scope == .all || scope == .books {
+            listing.books = try books(db, question: question, wing: wing, calendar: calendar)
+        }
+        if scope != .books {
+            let page = try Queries.searchGroups(
+                db, query: question.scoped(scope), scope: where_, limit: groupDepth,
+                perGroup: linesPerGroup, calendar: calendar)
+            listing.groups = page.groups
+            listing.next = page.next
+        }
+        return listing
+    }
+
+    /// The next page of groups after `cursor`.
+    nonisolated static func groupPage(
+        _ db: Database, question: LibrarySearchQuestion, scope: LibraryCatalogModel.Scope,
+        wing: String, after cursor: SearchComposer.GroupCursor,
+        calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> SearchGroupPage {
+        try Queries.searchGroups(
+            db, query: question.scoped(scope), scope: SearchScope(wingID: wing), after: cursor,
+            limit: groupPageSize, perGroup: linesPerGroup, calendar: calendar)
+    }
+
+    /// The Books section: every book the books family names, best hit
+    /// first, as the catalog's own rows (`Queries.catalogBookHits`).
+    nonisolated static func books(
+        _ db: Database, question: LibrarySearchQuestion, wing: String, calendar: Calendar
+    ) throws -> [Queries.CatalogHit] {
+        let query = question.scoped(.books)
+        var ids: [String] = []
+        var seen: Set<String> = []
+        var cursor: SearchComposer.Cursor?
+        repeat {
+            let page = try Queries.searchPassages(
+                db, query: query, scope: SearchScope(wingID: wing), after: cursor, limit: 200,
+                calendar: calendar)
+            for passage in page.passages {
+                if let id = passage.readingID, seen.insert(id).inserted { ids.append(id) }
+            }
+            cursor = page.next
+        } while cursor != nil
+        return try Queries.catalogBookHits(db, ids: ids)
+    }
+}
