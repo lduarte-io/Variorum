@@ -1,0 +1,51 @@
+# VM-5 — The catch-up merge (mobile → main) & the Mobile Round 2 close
+
+**Ticket: VM-5 · Project: Mobile — the merge & round-2 close · Branch: `vm-5-the-catch-up-merge`**
+*(Her GO 2026-10-06. The merge narrative lives in `notes/plans/vm-4-mobile-catch-up.md`'s LIVE
+STATUS; this file is the ladder record + the round-2 closeout's obligations disposition.)*
+
+## The merge, in two lines
+
+`origin/main` (dd7cad84, marker 12) + `mobile` (68 commits, batches 5–10 + 4.5c-phone + §12.2) →
+merge commit `575cf057` + fix-ups `fabaf53e`. **The whole diff vs main sits inside
+`App/Variorum/VariorumMobile/**` + `notes/**`** — zero `Sync/`, zero `Shared/`, zero Mac-target,
+zero schema, zero pbxproj, `planVisibleTakeEdit` zero swift hits (all grep-verified). Mac/core
+behavior is main's tip BY CONSTRUCTION.
+
+## Verification
+
+| gate | result |
+|---|---|
+| core `swift test` | **2204/247 + 40/6 GREEN** (baseline-exact vs 17y's record) |
+| iOS app build (Release-sim) | **GREEN** |
+| iOS test bundle build | **GREEN** |
+| full mobile suite (iPhone 17 Pro sim <simulator-udid>, accessibility armed, own DerivedData, stage held) | PENDING — running |
+| Mac suite | **DISCHARGED BY CONSTRUCTION, not by a run** — the merge changes zero Mac-reaching source lines vs main's tip (the table above), so the Mac target's inputs are byte-identical to the tree 17y closed green (3896/639 + the 5 standing knowns). Recorded honestly; any reviewer may overrule and demand the run |
+
+## The round-2 closeout obligations (the standing handoff §7 — thirteen, numbered 1–8 · 10 · 11 · 13 · 12)
+
+| # | obligation | disposition |
+|---|---|---|
+| 1 | 13l's manifest | COMPLETE as of 13l's close (the 2026-08-23 amendment made post-close edits forbidden); nothing owed |
+| 2 | M17/M25 → TEXTKIT2 §3 | DONE long since — §3's "iOS 26 measured findings" carries both (exclusion-path presence; input APIs bypassing the delegate) |
+| 3 | the parity ledger | DONE at this merge — PL-14 flipped CLOSED (6b), PL-3 flipped DELIVERED, PL-10/11 carry mobile's delivery rows, PL-25 dedup (17u → PL-25b); commit `40de737c` |
+| 4 | the forked-brains row | ABSORBED into VM-1 (the board), including the post-archive additions (batches 7 + 6b's six) — the row's content cannot orphan again |
+| 5 | the master plan + MOBILE PARITY line | the in-flight VM-5 row retires at the PR; the closeout paragraph + parity line land in the PR's ledger commit (the merging session, on latest main) |
+| 6 | the author handoff | `notes/handoffs/vm-5-handoff.md`, written at close |
+| 7 | the merge to main at her word (R9) | THIS EFFORT — discharged by the VM-5 PR |
+| 8 | M16 — settle or own | OWNED: VM-13 (the device queue, Needs Lillian) — a named owner on the board |
+| 10 | QUESTIONS | DONE at this merge — mobile's #84–#94 renumbered **#189–#199** with the mapping table; main's stale next-free marker corrected (#200) and moved to the file's end; the held-for-her items live as Needs Lillian tickets (VM-4's bundle, VM-13) |
+| 11 | the two standing riders | DONE — the named-coordinate-space drag rule → MobileSoul §5 truth 9 (`40de737c`); the CarryAllMerge sibling note + `MobileQuickNoteModel.charDelta` → VM-1 |
+| 13 | the second Mac manifest (tripwire) | NOT TRIPPED — the merge's Mac-reaching diff is ZERO files; there is nothing for a second manifest to carry. The tripwire survives for future VM work under R8 |
+| 12 | R16 → canon | DISCHARGED by 13u1 (reassigned there 2026-08-23; the cross-block law landed in AppSpec §12 with the phase) |
+
+## The ladder (three Fable passes, strictly sequential)
+
+| round | brief | result |
+|---|---|---|
+| 1 — the RESOLUTION review | `notes/REVIEW_PROMPT.md` verbatim over `dd7cad84..HEAD` with both parents in view (the 13-conflict resolution + the semantic fix-ups; the MobileEditorViewModel auto-merge eyeballed) | PENDING |
+| 2 — the DEDICATED STABILITY PASS | the crash class + the editor's range/identity math as one body on the FINAL seam (batch 1 + 1b + M22 + 4.5c-phone + the 13u1 shared brain, as merged); owns M27 | PENDING |
+| 3 — the WHOLE-ROUND PASS | the round's entire mobile-side diff (`46ffa0c`'s round start → this tree, `App/Variorum/VariorumMobile/**`), briefed on nothing but the diff | PENDING |
+
+Findings + dispositions land here per round; fix waves per her cast (Opus 5.5 implements; the
+orchestrator may take mechanical ones).
