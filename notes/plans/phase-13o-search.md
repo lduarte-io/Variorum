@@ -253,7 +253,7 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 | P1 | MEASUREMENTS + THE FORK PROPOSAL — contentless vs external-content FTS5; doc normalization (per source row vs per rendered unit); where scope (note/wing/archived) lives. A throwaway measurement suite over synthetic corpora; numbers + tradeoffs written below. **→ SEAM 1: stop for the architect's ruling before the schema half.** | DONE (this commit) — the proposal is §FORK below; AWAITING THE RULING |
 | P2 | Domain, fork-independent: the `SearchQuery` AST (text terms + filter tree, R-13o-8) + the v1 grammar parser (words · "phrases" · `#tag` · facets) + the DATE-PARSE predicate (R-13o-6 — "september 14" / "sep 14" / "9/14" → day bounds), pure, exhaustive little tests | DONE (this commit) — `Domain/SearchQuery.swift` (the AST: `SearchQuery` = text tree + filter tree + `wornDay` + `visibility`; `SearchScope` with the wing mandatory), `Domain/SearchQueryParser.swift`, `Domain/SearchDateParse.swift`; `SearchQueryParserTests` 19/19 green (2 suites). PROVISIONALs: P-13o-U1-1 a day inside a sentence of words is words (the whole free text must be the day); P-13o-U1-2 a numeric day impossible in the locale's order reads the other way round ("14/9" in en_US); P-13o-U1-3 dotted numeric days only where the locale writes them; P-13o-U1-4 the type-ahead tail is a prefix only at ≥ 2 characters |
 | P3 | The Phase-2 re-assessment record for R-13o-4's third trigger duty (below), BEFORE any trigger line | DONE (this commit) — §R-13o-4 RECORD below |
-| P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | NOT-STARTED |
+| P4 | Migration `v1_22` ALONE: the doc table + the FTS5 table (`unicode61 remove_diacritics 2`, prefix indexes) + the mechanical capture triggers + the backfill (the rebuild SQL run once). **→ SEAM 2: SyncSchemaTests' completeness walk goes red — the exact new table names land here, push, stop for the orchestrator's registry line.** | DONE (this commit) — built to §FORK RULINGS F1–F4: `Persistence/SearchIndex.swift` (`search_doc` AUTOINCREMENT + `uq_search_doc_src(kind, src_id)` · the `search_text` view · `search_fts` · 24 capture triggers `search_<table>_<kind>_{insert,update,delete}`, one generator · `SearchIndex.rebuild` = the backfill engine) + `v1_22_search_index` in `Migrations.swift` (create → `idx_container_undated_created` → rebuild). `MigrationTests` updated (tables, indexes, the v1_16→head index delta) + a backfill pin `theSearchIndexBackfillsAnOlderStoreAtMigration` (all eight kinds findable after migrating a v1_21 store; tombstoned take absent; archived take indexed with its fact; accents fold; integrity-check passes) — 28/28 green. **Full core suite: 2227 tests / 250 suites, exactly ONE red — the planned seam** (SEAM 2 below). |
 | P5 | The rebuild door (a maintenance operation: drop + rebuild from truth) + the integrity check (doc rows vs source rows) | NOT-STARTED |
 | P6 | The capture pins — operations · cascade · fake-server remote apply (each red when its trigger is dropped, verified by revert) + tombstone/archive transitions + wing isolation + accent/case folding + rebuild idempotence | NOT-STARTED |
 | P7 | The ONE Domain SQL composer (AST → SQL) + `Queries.searchPassages(_:scope:filters:)` — bm25 ranked (title-weighted, rendered-take boosted), snippeted, wing-scoped always, note/book scopes, archived facet, paged with a road to everything (R-13o-9); EXPLAIN pins | NOT-STARTED |
@@ -262,11 +262,25 @@ plan's trigger-smell protocol, the 13p spike memo's Q1). Machinery: no deaths so
 
 PENDING flags: none yet.
 
-**LIVE STATUS (2026-10-06): STOPPED AT SEAM 1** — P0–P3 landed and pushed (`0d5f1eac` · `bb37ad9d`
-· `da6eba15` · `39c7f748`); the tree is clean. Waiting on the architect's ruling of §FORK (F1–F4)
-here. On the ruling, the next act is P4 (migration `v1_22` alone, built exactly to the ruling),
-which then turns `SyncSchemaTests.registryMatchesLiveSchemaExactly` red → SEAM 2. Nothing is
-reverted, nothing half-built.
+**LIVE STATUS (2026-10-06): STOPPED AT SEAM 2** — P0–P4 landed and pushed; the fork was ruled
+(§FORK RULINGS, `880abf8f`) and P4 is built exactly to it. The tree is clean. Waiting on the
+architect's `Sync/` side (the DERIVED set + the walk + the export-test accommodation). Nothing is
+reverted, nothing half-built. On resume: P5 → P9 (P8 gains the integrity-check DRIFT pin, the
+architect's addition).
+
+**SEAM 2 — THE RED'S EXACT SHAPE** (full core suite after `v1_22`: 2227 tests in 250 suites, ONE
+failing expectation, everything else green — the gated bench's 3 tests skip as designed):
+`SyncSchemaTests.registryMatchesLiveSchemaExactly`, `SyncSchemaTests.swift:29` —
+`SyncSchema.localOnlyTables == allTables.subtracting(synced)` is false:
+`localOnlyTables` = {sync_outbox, sync_row_seq, _sync_applying, sync_state};
+`allTables − synced` = those four **+ {search_doc, search_fts, search_fts_config, search_fts_data,
+search_fts_docsize, search_fts_idx}**. Exactly the six predicted at §FORK; no `_content` shadow
+(external content); `sqlite_sequence` (born of `search_doc`'s AUTOINCREMENT) is outside the walk
+(`NOT LIKE 'sqlite_%'`); the view `search_text` is `type='view'`, outside it too. The six are
+also `SearchIndex.tables` (`Persistence/SearchIndex.swift`, internal, same module) should the
+DERIVED set want to name them from one place. `StorePlaintextExportTests` is GREEN as things
+stand (the search family is in no local-only list, so the export already carries it whole —
+the derived ruling's intended outcome).
 
 #### §FORK — THE PROPOSAL (P1; the implementer proposes, the architect rules — nothing of the schema half is built until the ruling lands here)
 
