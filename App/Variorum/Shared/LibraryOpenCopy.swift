@@ -117,8 +117,11 @@ nonisolated enum LibraryOpenCopy {
     // MARK: - The hand-off door (13x F1, ladder R1-MAJOR — deliverable 1's
     // face; QC's folder pair, produced where she can find and AirDrop it)
 
-    /// The one verb, both faces — kept literally equal to the registry's
-    /// (`.handOffLibrary`) so the two can never drift.
+    /// The one verb, both faces — the registry's `.handOffLibrary`
+    /// declares its verb FROM this constant (13x F2, ladder R2-2: one
+    /// source of truth — re-voicing this line reaches the File menu and
+    /// Data Safety alike, and the CapabilityRegistryTests equality pin
+    /// goes red the moment the two decouple).
     static let handOffDoor = "Send Library to Another Mac…"
     static let handOffSheetTitle = "Send Library to Another Mac"
     static let handOffPanelMessage =

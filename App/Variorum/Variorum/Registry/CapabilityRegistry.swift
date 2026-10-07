@@ -2068,10 +2068,15 @@ nonisolated enum CapabilityRegistry {
         // 13x F1 (ladder R1-MAJOR; the 13x row's deliverable 1): the
         // travelling folder pair (the kickoff ruling QC) — File's door and
         // Data Safety's twin render the ONE act; reveal-in-Finder at
-        // completion. The verb is kept literally equal to
-        // `LibraryOpenCopy.handOffDoor` so the faces can never drift.
+        // completion. The verb IS `LibraryOpenCopy.handOffDoor` (13x F2,
+        // ladder R2-2: both faces render THIS declaration, so the copy
+        // constant is the one source of truth and a 13s re-voicing of it
+        // reaches the File menu and Data Safety alike — the old duplicated
+        // literal left the constant dead and the no-drift claim enforced
+        // by nothing; the equality pin in CapabilityRegistryTests is the
+        // enforcement now).
         Capability(
-            id: .handOffLibrary, verb: "Send Library to Another Mac…", scope: .app,
+            id: .handOffLibrary, verb: LibraryOpenCopy.handOffDoor, scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "The travelling copy is made while your library is open — "
