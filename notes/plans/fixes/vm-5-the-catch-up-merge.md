@@ -20,7 +20,7 @@ behavior is main's tip BY CONSTRUCTION.
 | iOS app build (Release-sim) | **GREEN** |
 | iOS test bundle build | **GREEN** |
 *[removed for publication]*
-| Mac suite | **DISCHARGED BY CONSTRUCTION, not by a run** — the merge changes zero Mac-reaching source lines vs main's tip (the table above), so the Mac target's inputs are byte-identical to the tree 17y closed green (3896/639 + the 5 standing knowns). Recorded honestly; any reviewer may overrule and demand the run |
+| Mac suite | **RUN IN FULL at the close** (the stability wave touched the shared brain, so the construction argument narrowed): **3,972 tests / 654 suites — 3,951 passed, 1 expected failure, 3 reds, NONE the merge's**: the two `LongBlockLayoutHostedTests` phantom reds are the known load-red family (GREEN isolated, 20/2 minus the third); `OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors` is **PRE-EXISTING ON MAIN** (red on main's own tip `b6113a66`, isolated, 2 issues — the Index chapter panel clips its ink at the 240-pt floor; ticketed VX-side at this close). The old construction argument's record:  **DISCHARGED BY CONSTRUCTION, not by a run** — the merge changes zero Mac-reaching source lines vs main's tip (the table above), so the Mac target's inputs are byte-identical to the tree 17y closed green (3896/639 + the 5 standing knowns). Recorded honestly; any reviewer may overrule and demand the run |
 
 ## The round-2 closeout obligations (the standing handoff §7 — thirteen, numbered 1–8 · 10 · 11 · 13 · 12)
 
