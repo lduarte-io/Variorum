@@ -30,67 +30,40 @@ ssh home 'osascript -e "tell application id \"io.lduarte.Variorum\" to quit"'
 
 ---
 
-## Daily start — four Ghostty tabs on the Air, paste one each
+## Daily start — four Ghostty tabs on the Air, one word each (since 2026-10-06 evening)
 
 ```zsh
-# Tab 1 — variorum, primary (claude lives here)
-ssh -t home tmux new -A -s variorum
-
-# Tab 2 — variorum, second view → then press  C-b 1  to park it on var-2
-ssh -t home 'tmux new-session -t variorum \; set destroy-unattached on'
-
-# Tab 3 — variorum, third view → then press  C-b 2  to park it on var-3
-ssh -t home 'tmux new-session -t variorum \; set destroy-unattached on'
-
-# Tab 4 — variorum-mobile
-ssh -t home tmux new -A -s mobile
+ws variorum      # Tab 1 — primary; claude lives here, window var-1
+ws variorum 2    # Tab 2 — second view, already parked on var-2
+ws variorum 3    # Tab 3 — third view, already parked on var-3
+ws mobile        # Tab 4 — variorum-mobile (windows mobile-1, mobile-2)
 ```
 
-## More workspaces — same pattern (primary attach + extra views)
+`ws` **builds whatever is missing** (the session, the named windows) and then
+attaches — so the SAME command works on a fresh day, after a lid-close, and
+after a full tmux kill. There is no separate rebuild step anymore, and no
+C-b parking: views 2/3 land on their window by themselves. Re-pasting is
+always safe.
 
-Every session has a second window pre-made; park an extra view on it with `C-b 1`.
+- Primary (`ws <name>`) = the real session. Views (`ws <name> 2`, `3`, …) =
+  grouped viewers that self-destruct when their tab closes; tmux auto-names
+  them `variorum-1`, `variorum-2`… — that's normal, they're disposable glass.
+- Known workspaces: `variorum` · `mobile` · `stargazing` · `fragments`.
+  Anything else defaults to `~/dev/<name>`.
+- Sitting at the Pro itself: `~/bin/ws variorum 2` (same script, no ssh).
+- The plumbing: `~/bin/ws` on the Pro (the real script), a tiny `ws()` ssh
+  wrapper in the Air's `~/.zshrc`. Read the script if you're curious — it's
+  the old daily-start/rebuild one-liners made idempotent.
 
-```zsh
-# variorum-mobile, extra view → C-b 1 parks on mobile-2
-ssh -t home 'tmux new-session -t mobile \; set destroy-unattached on'
-
-# stargazing-tech (windows star-1, star-2)
-ssh -t home tmux new -A -s stargazing
-ssh -t home 'tmux new-session -t stargazing \; set destroy-unattached on'   # extra view → C-b 1
-
-# fragments (windows frag-1, frag-2)
-ssh -t home tmux new -A -s fragments
-ssh -t home 'tmux new-session -t fragments \; set destroy-unattached on'   # extra view → C-b 1
-```
-
-The general pattern, for any future workspace:
-`ssh -t home tmux new -A -s <name> -c <dir>` once, then the grouped-view one-liner with `-t <name>` for each extra tab.
-
-## Rebuilding a workspace (after it was fully exited / killed)
-
-Check what's alive first: `ssh home tmux ls` — then run the block for whichever
-workspace is missing (each errors harmlessly with "duplicate session" if it already exists):
-
-```zsh
-# variorum (3 windows)
-ssh home 'tmux new -d -s variorum -c ~/dev/variorum -n var-1 && tmux neww -d -t "variorum:" -c ~/dev/variorum -n var-2 && tmux neww -d -t "variorum:" -c ~/dev/variorum -n var-3'
-
-# variorum-mobile
-ssh home 'tmux new -d -s mobile -c ~/dev/variorum-mobile -n mobile && tmux neww -d -t "mobile:" -c ~/dev/variorum-mobile -n mobile-2'
-
-# stargazing-tech
-ssh home 'tmux new -d -s stargazing -c ~/dev/stargazing.tech -n star-1 && tmux neww -d -t "stargazing:" -c ~/dev/stargazing.tech -n star-2'
-
-# fragments
-ssh home 'tmux new -d -s fragments -c ~/dev/fragments -n frag-1 && tmux neww -d -t "fragments:" -c ~/dev/fragments -n frag-2'
-```
-
-(`-d` = build it detached, without your terminal jumping in; attach afterwards with the
-usual tab commands. A single lost WINDOW inside a living session is simpler: from inside,
-`tmux neww -c <dir> -n <name>`.)
+**Keychain caveat (the GUI-born-server rule):** if NO tmux server is alive on
+the Pro (first start after a reboot or `kill-server`), running `ws` from the
+Air births the server over ssh — shells inside it then can't reach the
+Keychain ("User interaction is not allowed"); automation falls back to the
+file credentials in `~/.variorum/`. When that matters, start the first
+session from a GUI terminal ON the Pro (Screen Sharing counts).
 
 **After closing the lid / losing Wi-Fi:** every tab's ssh dies. Not broken —
-re-paste each tab's command (up-arrow ↑ then enter), re-park tabs 2–3. Nothing was lost.
+re-paste each tab's command (up-arrow ↑ then enter). Nothing was lost.
 
 ---
 
