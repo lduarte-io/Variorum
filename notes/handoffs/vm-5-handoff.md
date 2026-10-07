@@ -2,14 +2,17 @@
 
 ## Your checklist (top, as always)
 
-- [ ] **Unlock your phone at the install moment** — the Release install lands batches 5–10 +
-      everything main shipped since, at marker 12 (the features you lost at the 2026-10-01
-      main-built install come back: the Trash two-rooms + Versions, the Library kind filters,
-      the per-note tray, the ⋯ vocabulary, the fan's hands, block multi-select, the starred
-      page, the shelf↔library swipe band, New Note/New Chapter in a book).
-- [ ] **VM-10 lands right after** (your only pull-forward): the Write page's scroll authority —
+- [x] **THE INSTALL IS DONE — your phone already carries the merged build** (installed over
+      wifi 2026-10-07, early hours; `devicectl` returned success). Everything you lost at the
+      2026-10-01 main-built install is back — the Trash two-rooms + Versions, the Library kind
+      filters, the per-note tray, the ⋯ vocabulary, the fan's hands, block multi-select, the
+      starred page, the shelf↔library swipe band, New Note/New Chapter in a book — now at
+      marker 12 with all of main's two months beside them. Just open it.
+- [ ] **VM-10 runs overnight/next** (your only pull-forward): the Write page's scroll authority —
       the arrival, the new-line forced scroll, and the scroll-back fight, under your rule
       *"showing empty space should be allowed if you scroll there but it shouldn't be forced."*
+      Its worktree is cut; it starts at 13o's stage slot (the queue: 13x → vx-75 → VM-10). If it
+      lands before you wake, a SECOND install will be offered on your checklist's refresh.
 - [ ] **The device queue when you have a window** (VM-13, one trip): the selection-defect
       experiment (one minute), the Face ID walk, the 100k Sherlock perf leg, M16, D9, the emoji
       overlap, the swipe band's real pan.
@@ -29,6 +32,8 @@
       (this session's own floor, so it could not saw it off; `origin/mobile` and the tag are
       already handled at the close).
 
+## MERGED: PR #131, merge commit `750eafde` (2026-10-07) · the ritual ran (`0f0624e7`) · `origin/mobile` retired behind tag `archive/mobile-2026-10`
+
 ## What happened (one paragraph)
 
 Mobile Round 2 came home: the `mobile` branch's 68 commits (batches 5–10, 4.5c-phone, the
@@ -47,11 +52,9 @@ VX.
 ## Verification (filled at close)
 
 - core: 2204/247 + 40/6 GREEN (baseline-exact)
-- mobile suite: 802/126 GREEN post-wave (4 standing known issues); the FINAL number re-run at
-  the close
-- Mac: the merge itself reaches zero Mac lines (construction argument upheld by round 1); the
-  stability WAVE then fixed the shared brain + one Mac consumer, so the Mac verification widened
-  — targeted editor-brain suites 268/24 + 91/14 GREEN; the FULL Mac suite runs before the PR
+- mobile suite FINAL: **808/126 GREEN** (4 standing knowns; +6 pins from the whole-round wave)
+- Mac FINAL: the FULL suite ran — **3,972/654, zero merge-caused reds** (two known load-flakes
+  green isolated; one PRE-EXISTING main red reproduced on main's own tip → **VX-77**)
 - THE LADDER CLOSED: round 1 (resolution) 0B/0M/3m/2n all fixed · round 2 (stability) M27
   DISSOLVED measured, MAJOR 2 fixed with red pins on BOTH platforms (the Mac twin hole was real),
   VM-2 re-measured and HELD per her ruling · round 3 (cap) 0B/0M/0m, 2 NITs recorded. The
