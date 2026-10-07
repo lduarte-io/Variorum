@@ -1149,3 +1149,21 @@ stage act runs in this batch.
 | 3(foreign owner) | The same landed shape under a SECOND provisioned account: the rows arrive stamped by the OTHER owner (asserted) → the adopt road (`restampOwner` + `resyncReinitialize`) → upload | cursor rewound to 0; accepted > 0, rejected/deferred 0; Y's head == its own accepted count (its own sequence from 1); the same row id lives under BOTH partitions independently; X's head UNCHANGED; outbox 0 | **GREEN** (`aForeignOwnersExportTakesTheAdoptRoadIntoItsOwnPartition`, 0.250 s) |
 | 4 | Returner/purge fence: family + bystander converged LIVE → the queued family edit → backup pair → family deleted, stamps backdated past 30 days, rounds, A's sweep PURGES (mirror+local+ledger) → the pair adopted on a FRESH Mac (day's word; `mintFreshCustody`; HOLD) → fresh identity + the backup's non-zero cursor (corner 37 verified) → Resume → the scheduled first round (`reconcileLedger` → pull→push → sweep) | reconcile dropped > 0 rows; the family physically gone locally; the QUEUED family edit swept WITH the family (outbox entry gone — B2's letter) and `push.purged == 0` (nothing even reached the fence); the mirror holds nothing of the family; the ledger count UNCHANGED by the returner; the bystander lives; dumps r == b, outboxes 0/0; the new identity's cursor recorded | **GREEN** (`aBackupOlderThanThePurgeHorizonReconcilesAndNothingRePushesAPurgedRow`, 0.257 s). ONE red on the drill's first run, TRACED: the final dump equality failed because B had never run ITS OWN janitor leg — it still held the family's tombstoned rows while the returner had physically dropped them (the PurgeConvergence precedent's own step, "B's own sweep reconciles the rest"). A COMPOSITION gap in the drill, not a product mechanism — fixed in the test alone by adding B's sweep, with the pre-sweep state asserted so the trace stays visible; ZERO production code touched |
 
+- **U2b DRILLS CLOSED (096e9b59)** — row 10's five legs all green headless (core 2254/258;
+  the batch diff is three test files + the record, ZERO Sources/ lines; her store untouched;
+  the one first-run red was drill composition, traced, fixed in the test alone). NO deferred
+  pieces — the Shared chokepoint held through every leg. Two recorded interpretations: (a) the
+  newer-schema MODEL-FACE pin is a stage-slot item — folded into the walk slot's list; (b) the
+  leg-1 WAL-drain note is test-world only.
+- **LADDER ROUND 1 OPENED overnight** (the build is complete pre-merge; zero deferred pieces,
+  so the diff under review is the phase's whole diff): a fresh `fable-reviewer`, REVIEW_PROMPT
+  verbatim, zero framing, report to `notes/plans/13x-ladder-round1.md` committed unedited.
+  Remaining after it: fixes (if any) → the walk (stage; the dev-store Castle gate question —
+  HELD FOR HER whether she unlocks it or we re-pose the dev store) → 13o's merge → catch-up
+  merge + suite re-run → ladder round 2 → closeout.
+
+### HELD FOR HER — ADDITION
+- **The walk's dev-store gate:** the dev store stands in Castle behind Touch ID (the pre-13x
+  5b precedent — no agent can pass it). For my hands-on walk of the two doors: either she
+  unlocks the dev store at her morning sitting while I drive, or she authorizes re-posing the
+  dev store (a throwaway posture change on the DEV scope only). Her call; nothing walked until.
