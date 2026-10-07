@@ -49,3 +49,10 @@ behavior is main's tip BY CONSTRUCTION.
 
 Findings + dispositions land here per round; fix waves per her cast (Opus 5.5 implements; the
 orchestrator may take mechanical ones).
+
+## THE STAGE/MERGE SCHEDULE (her ruling via 13o, 2026-10-06 late — 13o decides order; recorded verbatim-faithful)
+
+- The current VM-5 claim covers the ladder's tail through the final full mobile suite; release at the PR; renew honestly.
+- MERGE ORDER: first-ready-first governs VM-5 (13o is days from PR — no collision); report the PR-ready moment to 13o for the greenlight. Standing exception R-13o-1: 13x merges only after 13o lands; small-fix PRs (vx-75) merge when ready.
+- After VM-5's release the stage queue is: 13x's short suite run (≤25 min) → vx-75's 45-min walk+pin slot (hard-blocked) → VM-10 (60–120 min, interruptible; message 13o when its worktree is ready for the start slot).
+- The phone INSTALL has STANDING approval: a short cleanliness claim whenever her unlocked phone is in hand, schedule-independent, never mid-someone-else's-claim.
