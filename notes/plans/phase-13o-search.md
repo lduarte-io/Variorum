@@ -808,13 +808,13 @@ cap line, `RootView`'s book/library composition. Machinery: no deaths so far.
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
-| P1 | THE TWO PROPOSALS (brief items 1 + 2): the within-a-GATHERING scope's mechanism with its measurement line, and the within-book face's fork — written below, pushed, sent to the orchestrator. **→ SEAM: neither half builds before its ruling lands here.** | DONE (this commit) — §U3-PROPOSAL 1 + 2 below; the gated bench `SearchGatheringScopeMeasurementTests`; AWAITING THE RULINGS |
+| P1 | THE TWO PROPOSALS (brief items 1 + 2): the within-a-GATHERING scope's mechanism with its measurement line, and the within-book face's fork — written below, pushed, sent to the orchestrator. **→ SEAM: neither half builds before its ruling lands here.** | DONE (this commit) — §U3-PROPOSAL 1 + 2 below; the gated bench `SearchGatheringScopeMeasurementTests`; RULED — B and F1 (§U3 RULINGS) |
 | P2 | CORE — the TAG-ASSOCIATION JOIN (brief item 3): a pure Domain association rule (intake-rule positive tag terms + the `auto_tag_ids` outflow, each by its own mechanism's subtree rule), the candidate statement in the ONE composer, `Queries.searchTagAssociations`; pins | NOT-STARTED |
 | P3 | CORE — THE MODE FACETS (brief item 4): an AST leaf over the reading row's FACTS (gathering · living · owned · finished · sealed), composed in the one composer; pins (+ EXPLAIN where the plan matters) | NOT-STARTED |
 | P4 | APP — the Books section reads the join (associated books TOP-RANKED, the row says WHY — "#dream flows here"); a `#tag` alone answers its books; the band's `+ book state` chip; model pins | NOT-STARTED |
 | P5 | APP — the archived facet's face finished end-to-end (brief item 5) | NOT-STARTED |
-| P6 | CORE — the gathering scope, built to the P1 ruling | NOT-STARTED — gated on the ruling |
-| P7 | APP — the within-book magnifier (R-13o-14) + its results face, built to the P1 ruling; land-at-match identical to the Library's | NOT-STARTED — gated on the ruling |
+| P6 | CORE — the gathering scope, built to the P1 ruling | NOT-STARTED — RULED (§U3 RULINGS), un-gated |
+| P7 | APP — the within-book magnifier (R-13o-14) + its results face, built to the P1 ruling; land-at-match identical to the Library's | NOT-STARTED — RULED (§U3 RULINGS), un-gated |
 | P8 | APP — the Book Index's cap gets a road (brief item 8, PROVISIONAL) | NOT-STARTED |
 | P9 | Registry (P-1) declarations for every new door; copy through the kind seam; polish | NOT-STARTED |
 | P10 | Close: the touched Mac suites + TutorialWalkTests green at the END (a slot from the "13o" scheduler, a HELD stage claim); the walk + captures if the slot allows; the record final | NOT-STARTED |
