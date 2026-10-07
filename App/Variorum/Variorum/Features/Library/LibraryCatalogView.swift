@@ -346,11 +346,11 @@ struct LibraryCatalogView: View {
             counts: state.counts?.kinds(state.visibility),
             visibility: state.visibility,
             wingName: wings?.currentName ?? WingWords.home,
-            dayChip: model.editedOn.map { day in
-                (label: LibraryDayFace.openLabel(day: day, now: Date()),
+            dayChip: model.editedRange.map { range in
+                (label: LibraryDayFace.chipLabel(range, now: Date()),
                  help: LibraryDayFace.caveat,
                  onClear: {
-                     model.setEditedOn(nil)
+                     model.setEditedRange(nil)
                      Task { await model.search() }
                  })
             },
@@ -624,15 +624,17 @@ struct LibraryCatalogView: View {
                         .offset(y: Self.segmentedLabelDrop)
                     }
                     // 18h batch 2 (her row 11): *"search for any note edited
-                    // on a particular day."*
-                    LibraryDayField(
-                        tokens: tokens, day: model.editedOn,
-                        onPick: { day in
-                            model.setEditedOn(day)
+                    // on a particular day."* 13o U2 (her R-13o-13): the door
+                    // reads `when ▾` and grows its range; the armed state is
+                    // the band's chip.
+                    LibraryWhenDoor(
+                        tokens: tokens, range: model.editedRange,
+                        onPick: { range in
+                            model.setEditedRange(range)
                             Task { await model.search() }
                         },
                         onClear: {
-                            model.setEditedOn(nil)
+                            model.setEditedRange(nil)
                             Task { await model.search() }
                         })
                     .offset(y: Self.segmentedLabelDrop)
@@ -773,8 +775,8 @@ struct LibraryCatalogView: View {
                     // wording, shared with the Notes mode below.
                     LibraryListLead()
                     LibraryListRow {
-                        if let day = model.dayForEmptyAnswer {
-                            LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
+                        if let range = model.rangeForEmptyAnswer {
+                            LibraryDayEmptyAnswer(tokens: tokens, range: range, query: model.query)
                         } else {
                             Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
                                 .font(tokens.small)
@@ -873,8 +875,8 @@ struct LibraryCatalogView: View {
                     }
                 }
                 if !model.hasNoteRows {
-                    if let day = model.dayForEmptyAnswer {
-                        LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
+                    if let range = model.rangeForEmptyAnswer {
+                        LibraryDayEmptyAnswer(tokens: tokens, range: range, query: model.query)
                             .padding(24)
                     } else {
                         Text(tokens.chromeLabel(LibraryCopy.noNotesMatch))

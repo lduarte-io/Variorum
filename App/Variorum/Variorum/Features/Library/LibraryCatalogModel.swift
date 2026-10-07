@@ -179,7 +179,16 @@ final class LibraryCatalogModel {
     /// her Library, and a filter is a question she asked once. A Library that
     /// reopened tomorrow still narrowed to yesterday — with most of her notes
     /// invisible — is the invisible-state hazard, not a convenience.
-    private(set) var editedOn: String?
+    ///
+    /// **13o U2 — the door grew its RANGE** (her R-13o-13, `when ▾` → on a
+    /// day… · between days… · any day): the armed value is a run of days,
+    /// first through last inclusive; one day is a run of one.
+    private(set) var editedRange: LibraryDayRange?
+
+    /// **The armed range's FIRST day** — nil when no day is armed; a one-day
+    /// range IS its day (the 18h callers and pins read the one-day filter
+    /// through this name, unchanged).
+    var editedOn: String? { editedRange?.first }
 
     /// nil clears. Same convention as `setSort`: this writes, and the caller
     /// spawns `search()`, so a pin drives exactly the two steps the field
@@ -196,9 +205,18 @@ final class LibraryCatalogModel {
         // A key that is not a real day would filter by a guess; refusing it
         // leaves the Library as it was (`DayBounds`' own nil rule, one layer
         // up so the model never holds a value the query would drop).
-        guard let day else { editedOn = nil; return }
-        guard JournalDay.isValid(day) else { return }
-        editedOn = day
+        guard let day else { editedRange = nil; return }
+        guard let range = LibraryDayRange(day: day) else { return }
+        setEditedRange(range)
+    }
+
+    /// **The `when` door's range** (13o U2, R-13o-13) — the same door as
+    /// `setEditedOn`, a run of days wide: nil clears; arming moves a
+    /// books/blocks scope to Notes (QUESTIONS #104's clause, unchanged).
+    /// The caller spawns `search()`.
+    func setEditedRange(_ range: LibraryDayRange?) {
+        editedRange = range
+        guard range != nil else { return }
         if scope == .books || scope == .blocks { scope = .posts }
     }
 
@@ -213,10 +231,14 @@ final class LibraryCatalogModel {
     /// day's sentence would not be. `setEditedOn` makes that case unreachable
     /// by moving the scope, so this is the guard that keeps it unreachable
     /// rather than a path she can walk.
-    var dayForEmptyAnswer: String? {
-        guard let editedOn else { return nil }
+    var dayForEmptyAnswer: String? { rangeForEmptyAnswer?.first }
+
+    /// The same guard, the whole armed range (13o U2 — what the empty
+    /// answer's sentence names: one day, or between two).
+    var rangeForEmptyAnswer: LibraryDayRange? {
+        guard let editedRange else { return nil }
         switch scope {
-        case .all, .posts: return editedOn
+        case .all, .posts: return editedRange
         case .books, .blocks: return nil
         }
     }
@@ -567,7 +589,11 @@ final class LibraryCatalogModel {
             let (sort, direction, scope) = (sort, direction, scope)
             // Her day, in her calendar, converted once — the query compares
             // the store's own UTC text (18h batch 2).
-            let day = editedOn.flatMap { DayBounds(day: $0, calendar: LibraryDayFace.calendar) }
+            // 13o U2: the armed RANGE (first through last, inclusive) —
+            // `DayBounds`' range form, the same noon-anchored rule.
+            let day = editedRange.flatMap {
+                DayBounds(firstDay: $0.first, lastDay: $0.last, calendar: LibraryDayFace.calendar)
+            }
             // 13o U2 (R-13o-7/8): the field's text as the one AST. A cleared
             // field ends the question, the archived facet with it (D4).
             let question = LibrarySearchQuestion.read(

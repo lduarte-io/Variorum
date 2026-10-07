@@ -105,23 +105,27 @@ struct LibraryDayFilterTests {
             #expect(Set(noteIDs(model)) == [old.id, fresh.id], "both notes, unfiltered")
 
             // The REAL control, driven the way the DatePicker drives it.
+            // (13o U2, a JUSTIFIED EDIT — her R-13o-13: the door is `when ▾`
+            // now, `LibraryWhenDoor`; its one-day field's own binding is the
+            // one this pin drove, and the pick it hands back is a range of
+            // one day.)
             var picked: String?
-            let field = LibraryDayField(
+            let field = LibraryWhenDoor(
                 tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                day: model.editedOn, now: today,
-                onPick: { picked = $0 }, onClear: {})
-            field.dateBinding.wrappedValue = today
+                range: model.editedRange, now: today,
+                onPick: { picked = $0.first }, onClear: {})
+            field.dayBinding.wrappedValue = today
             let firstPick = try #require(picked)
             model.setEditedOn(firstPick)
             await model.search()
             #expect(noteIDs(model) == [fresh.id], "the day she picked, and only it")
 
             picked = nil
-            let armed = LibraryDayField(
+            let armed = LibraryWhenDoor(
                 tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                day: model.editedOn, now: today,
-                onPick: { picked = $0 }, onClear: {})
-            armed.dateBinding.wrappedValue = earlier
+                range: model.editedRange, now: today,
+                onPick: { picked = $0.first }, onClear: {})
+            armed.dayBinding.wrappedValue = earlier
             let secondPick = try #require(picked)
             model.setEditedOn(secondPick)
             await model.search()
@@ -139,13 +143,16 @@ struct LibraryDayFilterTests {
     /// runs, and nothing else here reproduces it.
     @Test func openingTheClosedDoorPicksToday() async throws {
         try await withTravellingLibrary { _, clock in
-            var picked: String?
-            let field = LibraryDayField(
+            // 13o U2, a JUSTIFIED EDIT (R-13o-13): the door is `when ▾`, and
+            // `on a day…` is the choice that used to be the closed door's
+            // press — it still arms TODAY, as one day.
+            var picked: LibraryDayRange?
+            let field = LibraryWhenDoor(
                 tokens: VoiceTokens.resolve(voice: .study, dark: false),
-                day: nil, now: clock.current,
+                range: nil, now: clock.current,
                 onPick: { picked = $0 }, onClear: {})
             field.openOnToday()
-            #expect(picked == day(of: clock.current))
+            #expect(picked == LibraryDayRange(day: day(of: clock.current)))
         }
     }
 
@@ -165,9 +172,9 @@ struct LibraryDayFilterTests {
             #expect(model.hits.map(\.kind) == [.post], "a day names notes")
 
             var cleared = false
-            let field = LibraryDayField(
+            let field = LibraryWhenDoor(
                 tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                day: model.editedOn, now: clock.current,
+                range: model.editedRange, now: clock.current,
                 onPick: { _ in }, onClear: { cleared = true })
             field.onClear()
             #expect(cleared)
@@ -591,7 +598,10 @@ struct LibraryDayFilterTests {
             DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
         // 13i-d U6 (c), a JUSTIFIED EDIT — her §21 note: "'on day…' wants
         // clearer wording"; the door now names what it filters by.
-        #expect(LibraryDayFace.closedLabel == "edited on\u{2026}")
+        // 13o U2, a JUSTIFIED EDIT again — her R-13o-13: "I like 'when' for
+        // the day door" (the ▾ is the menu's own); the armed day's words
+        // moved to the band's chip and stay `openLabel`'s.
+        #expect(LibraryDayFace.closedLabel == "when")
         #expect(LibraryDayFace.openLabel(day: "2026-09-09", now: now, calendar: calendar)
                 == "edited on Sep 9")
         #expect(LibraryDayFace.dayWords(day: "not a day", now: now, calendar: calendar)
