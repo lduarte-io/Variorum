@@ -499,12 +499,25 @@ final class MobileEditorTextView: UITextView {
         guard contentOffset.y > 0.5 else {
             return MobileWritePlace(anchor: 0, inset: 0, caret: caret)
         }
-        let top = CGPoint(x: textContainerInset.left + 1, y: contentOffset.y + 1)
-        guard let position = closestPosition(to: top) else { return nil }
-        let offset = self.offset(from: beginningOfDocument, to: position)
-        guard let location = cm.location(tlm.documentRange.location, offsetBy: offset),
-              let fragment = tlm.textLayoutFragment(for: location)
-        else { return nil }
+        // The fragment at the viewport's top edge: one TK2 lookup in
+        // container coordinates (this runs on every layout pass that moved
+        // the page, so the cheap road comes first). When the top edge is not
+        // over a laid-out fragment — she scrolled into the room, or layout
+        // has not reached it — the nearest text position stands in.
+        let containerTop = CGPoint(x: 1, y: max(0, contentOffset.y - textContainerInset.top + 1))
+        let fragment: NSTextLayoutFragment
+        if let direct = tlm.textLayoutFragment(for: containerTop) {
+            fragment = direct
+        } else {
+            let top = CGPoint(x: textContainerInset.left + 1, y: contentOffset.y + 1)
+            guard let position = closestPosition(to: top),
+                  let location = cm.location(
+                    tlm.documentRange.location,
+                    offsetBy: self.offset(from: beginningOfDocument, to: position)),
+                  let nearest = tlm.textLayoutFragment(for: location)
+            else { return nil }
+            fragment = nearest
+        }
         let fragmentStart = cm.offset(
             from: tlm.documentRange.location, to: fragment.rangeInElement.location)
         return MobileWritePlace(
