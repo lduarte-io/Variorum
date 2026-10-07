@@ -962,3 +962,38 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   pre-13x 5b precedent), never forced overnight.
 - Resequence (13o, within my slot-me-anywhere): 13o's U3 suite batch takes the next gap; my 40
   slides to ~05:00–06:00 after VM-10's remainder; the go token unchanged.
+- 04:20 the go token honored: the door-pin slot ran ~8 of 40 min — run 1 green 5/5 (after a
+  test-harness-only withDependencies fix, committed before any revert), revert A red exactly
+  on the hold gate, revert B red exactly on the picker's three arms, both restored diff-empty;
+  stage released on the result line, 13o confirmed. **U2's pre-merge half is FULLY evidenced —
+  no pending Mac run remains.**
+
+### BATCH U2b BRIEF — ROW 10's DRILLS (headless; a FRESH implementer; spawned under the
+overnight mandate)
+
+Read, in order: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md`; **this file
+WHOLE** (the rulings, U1 + U2 RECORDS are your inputs); `notes/plans/pre-13x-postures-design.md`
+§6 · §7 · §12 · §14 (corners 13 · 33 · 37 · 44); `notes/SyncSpec.md` §5–§7 (read-only);
+`notes/sync-postmortem-fragments.md`. Code: the U1/U2-minted files; the convergence-suite
+homes under `Tests/VariorumCoreTests` (the two-client fake-server harness).
+
+**Do — ledger row 10, the drill set, ALL HEADLESS (fake server + throwaway stores; ZERO stage,
+zero GUI):** (1) the same-Mac restore drill end to end — adopt a backup pair of a live
+throwaway library, the hold ON, duplicate a since-trashed note inside the restored copy,
+Resume → the duplicate SURVIVES the catch-up, the re-trashed original leaves (tombstone
+catch-up said), the kept outbox's stale-dirty row lands as exactly ONE conflict card (the QD
+pin); (2) the per-leg opens on an adopted copy — passphrase · twelve words · the older-key
+day-passphrase pair (decision 11) · the same-fingerprint second look (the Standard/A leg
+composes through the shipped in-memory custody seams — no real Keychain); (3) the plaintext-
+export re-open end to end (export → classify → adopt → same-owner enroll from cursor 0 with an
+EMPTY outbox, zero pushes; a foreign owner takes the adopt road); (4) the returner/purge-fence
+drill — a backup older than a purge horizon reconciles through the 13j ledger at its first
+round, nothing re-pushes a purged row; (5) the newer-schema refusal rendered honestly at the
+model. **Record a DRILL TABLE** (leg × scenario × counts × verdict) in a `### U2b RECORD`.
+**Fence unchanged:** zero `Sources/VariorumCore/Sync/` or custody-code or `Migrations.swift`
+edits — new TESTS in test targets are fine and expected; a drill failure is traced at the
+mechanism and fixed ONLY in 13x-owned Shared/Persistence code with a red-on-old pin; a fix
+that demands an engine line is recorded `DEFERRED — post-merge` with the trace, never built
+now. No stage claims; foreground waits; no subagents; commit per piece, push every commit;
+LIVE STATUS from the first commit. Close with a "U2b DRILLS CLOSED" banner listing any
+deferred pieces.
