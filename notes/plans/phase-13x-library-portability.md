@@ -688,6 +688,14 @@ with the 13o scheduler. `caffeinate -dims` detached; commit+push per piece; memo
   deliberately NOT rewritten (pushed history). Every later commit trailer-free.
 - U2's implementer spawned on the early-drafted brief (pre-merge-safe half; no stage claims —
   Mac pin runs stop at PENDING seams and file through the orchestrator).
+- **U2 PRE-MERGE HALF CLOSED (cfdf9b49)** — rows 6/7/9/8's safe halves with headless evidence
+  (core 2247/255, +13 tests; app + build-for-testing compile); fence VERIFIED zero
+  Sync//custody/Migrations across all U2 commits — NO deferred post-merge piece exists from
+  this half. ONE Mac pin pass (LibraryPortabilityDoorTests, 5 pins + 2 revert red checks)
+  PENDING-behind-the-stage — filed with the 13o scheduler (≈40 min budget). P-U2-1..5
+  recorded in the U2 RECORD (QUESTIONS at merge); every new string in the record's 13s table.
+  Remaining for the phase: that pin slot → then the POST-MERGE half (row 10's drills + the
+  orchestrator's walk, after 13o's merge + rebase) → U3 ladder/closeout.
 
 ### BATCH U2 BRIEF (drafted early under the overnight mandate; SPAWNS ONLY AFTER the U1 CLOSED
 banner stands — one implementer at a time)
