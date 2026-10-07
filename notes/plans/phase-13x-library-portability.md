@@ -423,7 +423,7 @@ PROVISIONAL otherwise, recorded per row.
 | 2 | The hand-off producer (folder pair; round-trip pin) | BUILT, compiles (`build-for-testing` green); pins PENDING — the Mac-suite run waits on the stage (held by the VM-5 merge orchestrator at claim time); runs before U1 closes |
 | 3 | Adopt-by-copy move-aside brain | DONE (this commit; `LibraryAdoptionTests` 5/5 — mechanics PROVISIONAL P-U1-5) |
 | 4 | Custody-collision memo + rule | DONE (memo at d2ca39f9 BEFORE the code; rule this commit, `CustodyCollisionRuleTests` 4/4; read-only composition confirmed — nothing re-sequences to U2's post-merge half) |
-| 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | NOT-STARTED — design settled below |
+| 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | DONE (87fba14f; the headless drill + red-on-old revert below; closes VX-64) |
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage free at seat.
 
@@ -537,6 +537,20 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
+- **Row 5 — THE VX-64 DRILL (headless, throwaway, no stage, no Keychain prompt — the
+  legacy login-keychain item's absence pre-checked with `security find-generic-password`,
+  not found):** fixture minted by `VX64_FIXTURE_DIR=… swift test --filter
+  Vx64DrillFixtureTests` (encrypted store + production-KDF passphrase-wrapped key file +
+  pass.txt, in the session scratchpad). **NEW tool** (`87fba14f`), dry-run against the
+  deliberately-fake `http://127.0.0.1:9`: `store unlocked by the key file's passphrase
+  road (key 9850fae6…; no Keychain consulted)` → `Store: 4 synced rows across 21 tables;
+  outbox 4 pending.` → dies only at the fake host's connection refusal (NSURLError -1004
+  naming `/rest/v1/key_vault` — AFTER the open, which is the proof). **RED ON OLD**
+  (`VaultBootstrapMain.swift` checked out at its parent `40f03b01`, rebuilt, same
+  command): `StoreOpenError(… "This library is encrypted, and its key is not available
+  on this device.", keyUnavailable: true)`, exit 1 — no unlock line, no store counts, no
+  network contact. Restored to `87fba14f`, rebuilt, re-ran: the green lines above again.
+  The behavioural revert verifies the pin in both directions.
 - **Row 4 — `CustodyCollisionRuleTests`, 4/4 green** (headless): the memo's three arms
   (same-key aligned · older-key adopts the opener · no-custody mints fresh) plus the
   production-fingerprint shape pin. The rule is a pure DECISION; the write it names is the
