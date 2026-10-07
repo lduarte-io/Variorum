@@ -192,6 +192,19 @@ struct LibraryPortabilityDoorTests {
     // → adopt → hold + custody + reopen)
 
     @Test func theFlowAdoptsAPairWritesTheHoldAndLandsCustody() async throws {
+        // The adoption's reopen lands `.ready`, whose AppSession reads
+        // `\.date`/`\.uuid` — a test context must provide them (the
+        // Phase8ServicesTests pattern; found by run 1 under the slot).
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            try await flowAdoptionBody()
+        }
+    }
+
+    @MainActor
+    private func flowAdoptionBody() async throws {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
         let pair = try makePair(in: dir, passphrase: "the travelling word")

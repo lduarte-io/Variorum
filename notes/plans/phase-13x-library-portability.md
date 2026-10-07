@@ -761,9 +761,18 @@ pushed at its landing.
 | 9 | The iCloud-Drive live-library guard | PRE-MERGE DONE (72d6293e + a5e05baa + 85f4b9cf) — the picker pin's RUN is PENDING-behind-the-stage |
 | 8 | The Resume reconciliation (pre-merge-safe half) | PRE-MERGE DONE (f140a5f0 + a5e05baa) — the drills are row 10's, post-merge |
 
-No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
-claimed by this session (the 13o scheduler owns it tonight) — every Mac-suite run stops at its
-seam as PENDING-behind-the-stage. Build order note (the U1 precedent — the letter bends so no
+STAGE SLOT (2026-10-07 04:20, the orchestrator's GO "13x: go (40)"): claimed by
+`13x-u2-implementer`, reason "13x U2 door pins (<=40 min)", 40-minute expiry. RUN 1 first
+landed ONE red — `theFlowAdoptsAPairWritesTheHoldAndLandsCustody` hit the swift-dependencies
+test-context guard (`@Dependency(\.date) has no test implementation`, AppSession.swift:736
+via the adoption's reopen into `.ready`) — a TEST-HARNESS gap, not a product finding; fixed
+by wrapping the flow pin in `withDependencies` (the Phase8ServicesTests pattern), rebuilt,
+re-run: **5/5 GREEN, `** TEST EXECUTE SUCCEEDED **`** (hold gate · hold model · picker
+refusal · bare remedy · the whole flow). REVERT A STARTING (next commit applies it): the two
+`roundsHeld` guards in `SyncSession.triggerSync`/`flush` reverted on this COMMITTED state —
+`git checkout -- App/Variorum/Shared/SyncSession.swift` is the restore; expected red:
+`heldRoundsNeverRunAndTheResumedFlushRunsOne`. No subagents; synchronous foreground waits
+only. Build order note (the U1 precedent — the letter bends so no
 piece waits on an unbuilt input): row 7's CORE flag lands before row 6's Shared model, because
 the door's completion writes the hold; the rows still CLOSE in the brief's order 6 → 7 → 9 → 8.
 
