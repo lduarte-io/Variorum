@@ -726,7 +726,7 @@ STATUS first) from your first commit; commit per piece; push every commit; work 
 
 | row | piece | status |
 |---|---|---|
-| 6 | The two doors + welcome/waiting/absent-store slots | NOT STARTED — settled design below |
+| 6 | The two doors + welcome/waiting/absent-store slots | IN-PROGRESS — the listing brain landed this commit (`BackupRestoreCandidates`, pins 3/3 headless); the Shared model, the faces and the custody write remain |
 | 7 | The restore-hold landing state, both doors | IN-PROGRESS — the CORE flag landed this commit (`LibraryRestoreHold`, pins 4/4 headless); the SyncSession gate, the banner + Resume and the door wire remain |
 | 9 | The iCloud-Drive live-library guard | IN-PROGRESS — the CORE rules landed this commit (`LibraryPlacementGuard`, pins 2/2 headless); the picker refusal + the door's line remain |
 | 8 | The Resume reconciliation (pre-merge-safe half) | NOT STARTED — settled design below |
@@ -830,6 +830,13 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
   by the `Mobile Documents` path COMPONENT (component, never substring — pinned both ways);
   the live library's folder, the store file itself and a containing ancestor refuse as
   destinations while siblings and external volumes pass.
+- **Row 6 core — `BackupRestoreCandidatesTests`, 3/3 green** (headless): the strict name
+  filter over real fixtures (the A1-rail and malformed-stamp foreign names never listed);
+  newest-first; the classifier-resolved serving key file per candidate (own pair ·
+  fingerprint file · legacy file); decision 11's credential facts per wrap; the BARE class
+  listed with nil credentials (said, never hidden); the SECOND LOOK lighting on the live
+  key's pair by envelope fingerprint (fp8-less legacy names included) and never without a
+  live key in hand.
 
 #### PROVISIONALS (recorded per row for the orchestrator; strings listed for 13s at the bottom)
 
