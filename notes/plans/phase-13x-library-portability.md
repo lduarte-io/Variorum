@@ -420,7 +420,7 @@ PROVISIONAL otherwise, recorded per row.
 | row | piece | status |
 |---|---|---|
 | 1 | The classifier (verdict table pinned) | DONE (811c1e23 + the red-first evidence below) |
-| 2 | The hand-off producer (folder pair; round-trip pin) | NOT-STARTED — design settled below |
+| 2 | The hand-off producer (folder pair; round-trip pin) | BUILT, compiles (`build-for-testing` green); pins PENDING — the Mac-suite run waits on the stage (held by the VM-5 merge orchestrator at claim time); runs before U1 closes |
 | 3 | Adopt-by-copy move-aside brain | NOT-STARTED — design settled below |
 | 4 | Custody-collision memo + rule | MEMO WRITTEN (below, before the code); rule NOT-STARTED |
 | 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | NOT-STARTED — design settled below |
@@ -568,6 +568,15 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### MACHINERY NOTES
 
+- **Row 2's suite run queued behind the stage:** at the first claim attempt the stage was
+  HELD by the VM-5 merge orchestrator (~117 min; a claim that landed between this session's
+  seat-time `status` read and the claim). Not stolen (the author's word only). The code is
+  committed compiling (`build-for-testing` green — a compile is not a stage act: no test
+  host launches, no store is touched); the suite runs under a held claim before U1 closes,
+  and rows 3–5 (all headless) proceed meanwhile — the row order's LETTER bends so the stage
+  wait never idles the session; recorded rather than silent.
+- The app target compiles under default MainActor isolation — Shared types need explicit
+  `nonisolated` (every sibling carries it; `LibraryHandOff` joined them).
 - The record-opening commit (`d2ca39f9`) carries a `Co-Authored-By` trailer against
   CLAUDE.md's no-trailer rule (the harness reminder won a reflex it should not have).
   Caught immediately after the push; a pushed commit is never rewritten without her word,
