@@ -1412,18 +1412,19 @@ shape); if a Mac run is truly owed, the lock file arbitrates — honest short cl
 
 | finding | fix | status |
 |---|---|---|
-| R2-1 | the `.opening` edge closed: await-then-re-route at the press | CODE + PIN WRITTEN (this commit) — run PENDING behind the stage claim |
-| R2-2 | ONE source of truth: the registry verb READS `LibraryOpenCopy.handOffDoor` + the equality pin | CODE + PIN WRITTEN — run PENDING behind the stage claim |
-| R2-3 | record-only: the close's full-suite run watches | PENDING (the close) |
+| R2-1 | the `.opening` edge closed: await-then-re-route at the press | DONE (efccfb6c) — pin GREEN by name (2.18 s, the mid-flight grace visible); REVERT F red-on-old VERIFIED (below); restore diff-empty |
+| R2-2 | ONE source of truth: the registry verb READS `LibraryOpenCopy.handOffDoor` + the equality pin | DONE (e5987ccf) — `theHandOffVerbReadsTheOneCopyConstant` green in the 5-suite run |
+| R2-3 | record-only: the close's full-suite runs watch | DONE — TWO clean full headless runs at close (2335/269 + 40/6, twice); the flake did NOT recur; nothing fixed, per the disposition |
 
-**No revert is in flight.** The one planned behavioural revert (named here BEFORE it
-starts, per the resiliency addendum): **REVERT F (R2-1)** — remove the F2 block from
-`LibraryOpenModel.confirmAdoption`'s non-ready arm (the `while bootstrap.opening != nil`
-await loop and the `.opening` refusal arm), restoring the old `.ready`-only re-check;
-expected red on EXACTLY `aPressWhileTheProbesWonOpenIsInFlightDefersToTheReadyRoad`
-(phase lands `.done`, the slot's bytes become the source's, the hold stands — all while
-the open is parked), every sibling green; restore by `git checkout --` over COMMITTED
-state, verified by an empty `git diff`. R2-2 gets NO behavioural revert by design: no
+**No revert is in flight (the slot is CLOSED; evidence below).** The one behavioural
+revert, named here BEFORE it started per the resiliency addendum: **REVERT F (R2-1)** —
+remove the F2 block from `LibraryOpenModel.confirmAdoption`'s non-ready arm (the
+`while bootstrap.opening != nil` await loop and the `.opening` refusal arm), restoring
+the old `.ready`-only re-check; expected red on EXACTLY
+`aPressWhileTheProbesWonOpenIsInFlightDefersToTheReadyRoad` (phase lands `.done`, the
+slot's bytes become the source's, the hold stands — all while the open is parked),
+every sibling green; restore by `git checkout --` over COMMITTED state, verified by an
+empty `git diff`. R2-2 gets NO behavioural revert by design: no
 behavior differs on the old tree (the two strings are equal today — the reviewer's own
 "no behavior is wrong today, hence NIT"), so a red-on-old demand would be hollow there;
 the equality pin is the ENFORCEMENT of the no-drift claim going forward, red the moment
@@ -1472,3 +1473,45 @@ replaced with the true mechanism, and the equality pin
 (`theHandOffVerbReadsTheOneCopyConstant`, CapabilityRegistryTests) is the enforcement the
 old claim never had. The alternative (killing the constant and re-pointing the 13s table
 at the registry) was not taken: it would move a her-facing string out of the copy layer.
+
+#### THE SLOT'S EVIDENCE (one claim, "13x-F2" — "13x F2 pins: R2-1 run + REVERT F + R2-2 equality pin", ~7 of 40 min; claimed with the lock FREE, released on the final result line; every edit over committed state)
+
+- **BUILD:** `build-for-testing` SUCCEEDED with both fixes and both pins (no stage —
+  a build, not a run).
+- **RUN 1 (green):** the five suites — LibraryPortabilityDoorTests ·
+  CapabilityRegistryTests · Phase13pControllerTests · Phase13pLobbyTests ·
+  LibraryHandOffTests — **106 tests in 5 suites PASSED** (3.2 s); the R2-1 pin shown
+  passing BY NAME (`aPressWhileTheProbesWonOpenIsInFlightDefersToTheReadyRoad`,
+  2.18 s — the two-second mid-flight grace visible in its runtime).
+- **REVERT F** (the F2 block removed, the old `.ready`-only re-check restored): red on
+  EXACTLY the named pin with **4 issues** — `Expectation failed: model.phase ==
+  .adopting` (the press landed `.done` with the open still parked) · `Expectation
+  failed: try Data(contentsOf: storeURL) == liveBytes` (the slot's bytes became the
+  source's mid-open) · `Expectation failed: !LibraryRestoreHold.isHeld(besideStore:
+  storeURL)` (the hold stood mid-open) · the trailing ready guard (on the old road the
+  press never awaits the open, so ready had not landed when the press returned) — the
+  work RAN over the in-flight open, exactly the finding's mechanism; **every sibling
+  green (8/8)**.
+- **RESTORE:** `git checkout -- App/Variorum/Shared/LibraryOpenModel.swift`;
+  `git diff` EMPTY (0 lines).
+- **FINAL (green):** the five suites **106/5 PASSED** again; stage RELEASED on the
+  result line.
+- **THE CLOSE'S HEADLESS RUNS (R2-3's watch):** the whole core suite + StringsWorkbook,
+  TWICE — **2335 tests in 269 suites PASSED (146 s) + 40 tests in 6 suites PASSED**,
+  both runs, matching the F1 record and the round-2 report exactly. The round-2
+  unattributed flake did NOT recur; per the disposition, nothing was fixed and the
+  next full run (the closeout baseline) keeps watching.
+
+### F2 CLOSED — 2026-10-07
+
+| finding | outcome |
+|---|---|
+| **R2-1** (MINOR — the `.opening` residual of M4) | **FIXED (efccfb6c)** — own re-trace CONFIRMED; await-then-re-route landed (the press awaits any in-flight open, re-suspending each settle, then routes ready through `adoptLibrary`'s teardown; a task-less `.opening` refuses nothing-moved); pin red-on-old by REVERT F, restore diff-empty. The M4 letter — "the probe stops before work on EVERY adoption road" — is satisfied on its last entry |
+| **R2-2** (NIT — `handOffDoor` dead copy) | **FIXED (e5987ccf)** — the registry's `.handOffLibrary` declares `verb: LibraryOpenCopy.handOffDoor` (ONE source of truth; the 13s re-voicing is real); both no-drift comments now state the mechanism; the equality pin `theHandOffVerbReadsTheOneCopyConstant` is the enforcement (green-on-old by the strings' present equality — the NIT's fix is structural, and the pin's red is the future decoupling) |
+| **R2-3** (NIT — the unattributed flake) | **RECORDED, NOTHING FIXED** — did not recur across TWO full headless runs at this close (2335/269 + 40/6 twice); the closeout baseline keeps the watch |
+
+**FINAL COUNTS: Mac — 106 tests in 5 suites PASSED (twice, around the revert); core —
+2335 tests in 269 suites PASSED + StringsWorkbook 40/6 (twice).** Fences held: zero
+`Persistence/Migrations.swift` edits (marker stays 12); zero `Sources/VariorumCore/Sync/`
+lines (R2-1's seam is Shared, as the brief expected); her real store untouched; no
+subagents; foreground waits only; no trailers; commits per fix, each pushed.
