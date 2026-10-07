@@ -466,7 +466,8 @@ struct MobileFilterTests {
                     onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
             ) { surface in
                 await surface.settle(50)
-                let restingLabel = MobileSortDoor.label(sortWord: "last touched")
+                let restingLabel = MobileSortDoor.label(
+                    sortWord: MobileLibraryViewModel.sortWord(.lastTouched))
                 #expect(surface.visibleLabels.contains(restingLabel),
                         "labels were \(surface.visibleLabels)")
 
@@ -498,7 +499,7 @@ struct MobileFilterTests {
                 #expect(byDate[0] > byDate[1],
                         "the listing did not re-order under entry date")
                 #expect(surface.visibleLabels.contains(
-                            MobileSortDoor.label(sortWord: "entry date")),
+                            MobileSortDoor.label(sortWord: MobileLibraryViewModel.sortWord(.entryDate))),
                         "the door does not re-speak its stamp — labels were \(surface.visibleLabels)")
             }
         }
@@ -520,7 +521,8 @@ struct MobileFilterTests {
             let stars = MobileStarsModel(session: session)
             let (shelf, observing) = await startedShelf(session)
             defer { observing.cancel() }
-            let sortLabel = MobileSortDoor.label(sortWord: "last touched")
+            let sortLabel = MobileSortDoor.label(
+                    sortWord: MobileLibraryViewModel.sortWord(.lastTouched))
 
             try await withHostedSurface(
                 MobileLibraryView(
