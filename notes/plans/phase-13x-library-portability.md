@@ -1220,3 +1220,24 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
   orchestrator's gap between the U1/U2 briefs, owned as such).
 - 13o's main MERGED into the branch clean (the catch-up; build green); custody work is
   IN-SLOT again. F1 spawned on the merged tree for all eleven findings.
+
+### F1 RECORD (the fix session's record; LIVE STATUS first — flipped in the same commit as each fix; PENDING = unverified)
+
+#### LIVE STATUS
+
+| finding | fix | status |
+|---|---|---|
+| (0) baseline | whole core suite headless on the merged tree | DONE (this commit) — **2334 tests in 269 suites PASSED** (133 s) + StringsWorkbook 40/6; skips the standing env-gated ones only (13o's gated measurement suites · the real-server pass · the fixture minters). U2b's 2254/258 + 13o's +80/+11, as the brief expected |
+| R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | NOT STARTED — re-trace first (the hallucination guard) |
+| R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | NOT STARTED |
+| M1 | key ceremonies refuse under a standing hold (P-R1-1) | NOT STARTED |
+| M2 | the hold write's failure refuses the adoption | NOT STARTED |
+| M3 | per-arm failure copy (pre-move arms claim no dated copy) | NOT STARTED |
+| M4 | the waiting-lobby probe stops before `work` | NOT STARTED |
+| M5 | fingerprint comparison before the gated prompt | NOT STARTED |
+| N1 | Sync-now speaks the refusal under the hold | NOT STARTED |
+| N2 | `schemaVerdict`'s fallback annotated/read-only | NOT STARTED |
+| N3 | the `LibraryRestoreHold` header corrected | NOT STARTED |
+| N4 | P-U1-1's plaintextLibrary disposition recorded | NOT STARTED |
+
+No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
