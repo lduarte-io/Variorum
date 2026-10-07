@@ -204,3 +204,43 @@ produces the PAIR KEPT TOGETHER — a plain folder ("Variorum Library — <date>
 + key file, AirDropped as one thing; the door takes the `.sqlite` (finding the key file beside
 it) or the folder itself; and the missing-key-file refusal names the remedy ("send the whole
 folder — the key file travels with it").
+
+## THE KICKOFF SITTING — ROUND 2 (2026-10-06; her words verbatim)
+
+**QB RULED — TWO FRAMED DOORS:** *File ▸ Open Library…* (arriving copies — the welcome/waiting
+states and the File menu) + *Restore from Backup…* on the Data Safety surface (listing the app's
+own snapshot pairs, saying which credential opens which). One machinery, one classifier,
+distinct framing.
+
+**QC RULED — THE FOLDER PAIR:** the hand-off act produces "Variorum Library — <date>" (sealed
+snapshot + key file); the bare `.sqlite` stays the one open format; the missing-key-file refusal
+teaches "send the whole folder — the key file travels with it." No package, no new UTI.
+
+**QD RULED — KEEP THE COPIED OUTBOX:** a restored ciphertext backup's outbox pushes at rejoin;
+a dead Mac's last unpushed edits survive as pushes/conflict cards (S5); the stale-card price
+accepted. (The plaintext export's four tables stay recreated EMPTY — §14.13 unchanged.)
+
+**QA — HELD, handed back with her thinking (verbatim):** *"I think a catch up could be fine,
+but then we have the issue of tombstones being saved by sync — a user who goes to a backup
+version to save something they put in the trash and got rid of might be bewildered to find that
+it's gone. I'm also conflicted — what do you think is actually good UI for this case? I think
+the read of a backup as a restore is a fair read in general honestly. I don't think we need a
+rollback road, the logout and reset up is fine. Maybe this goes back to offering a sync pause?
+like they can not sync immediately? in which case, we don't need to build that during this
+phase, it might achieve the UX we want though."* → The orchestrator's recommendation goes back
+as ROUND 3: the RESTORE-HOLD landing state (below). No general rollback road — ratified out
+(the logout-and-re-set-up road stands).
+
+## THE SLOT REDIRECT (author, 2026-10-06, at the 13o sitting — VERIFIED against
+`origin/vx-5-13o-search`'s plan file, R-13o-1; relayed by the 13o orchestrator cross-session)
+
+Her words (the 13o record): *"you can have the slot, 13x will wait on you"* · *"I'm planning on
+you merging first."* → **13o holds the one Sync/-custody slot for its single data-only registry
+line and MERGES TO MAIN FIRST. 13x makes ZERO `Sync/` or custody/keychain edits until 13o's PR
+merges, then rebases onto it** (the serialized-closeout rule). Migration ids: 13o claims
+`v1_22`; **13x anticipates ZERO migrations (no schema event, marker stays 12)** — if one is ever
+minted this plan file claims `v1_23`+ first. **Batch consequence:** the execution plan
+sequences the non-Sync/custody work first (the design memo, the hand-off act on the backup
+machinery, the door shells + the classifier brain, VX-64's tool fix, copy rendering) and the
+Sync-composition work (enroll/adopt/follow wiring, custody-collision rules, engine gating if
+any of it must live in `Sync/`) after 13o's merge.
