@@ -624,3 +624,30 @@ first governs VM-5 and small-fix PRs around us, but 13x's PR KEEPS its R-13o-1 s
 13x merges after 13o lands. The stage order tonight (13o's assignment): VM-5's held claim →
 13x slot 1 (the U1 row-2 pin run, ≤25 min, release on the result line) → vx-75 → 13s → 13o's
 own U2.
+
+## THE OVERNIGHT MANDATE + THE MORNING BUNDLE (2026-10-06 evening → 07)
+
+**Her words at retirement (verbatim):** *"I'm retiring for the evening - continue your work and
+rule everything that you can provisionally in my absence, gathering notes in a handoff document
+for me in case I don't want to wake you, as is our normal custom."* → PROVISIONAL-and-continue
+is ON; author-only hard stops HELD and bundled here; this section IS the morning handoff.
+
+### STATE AT HER RETIREMENT
+U1: four rows DONE + pushed; row 2's pin suite armed as STAGE SLOT 1 (13o's scheduling —
+VM-5's ladder holds the stage, renewing). The night's intended road: slot 1 runs → U1 CLOSED →
+the U2 brief authored here → the U2 implementer spawned on the PRE-MERGE-SAFE half (faces,
+doors, the hold at the Shared seam; zero `Sync/`/custody/Migrations edits — anything demanding
+one is recorded and deferred to the post-merge batch). Suites: headless free; Mac runs filed
+with the 13o scheduler. `caffeinate -dims` detached; commit+push per piece; memory current.
+
+### HELD FOR HER (accruing; nothing actioned without her)
+- The acceptance walk's REAL legs (end of phase): AirDrop between real devices; the optional
+  Air second-Mac leg; her hands, paused-and-asked.
+- Nothing else held yet.
+
+### PROVISIONALS RULED OVERNIGHT (accruing; each one line to overturn)
+- (none yet)
+
+### THE NIGHT'S EVENTS (accruing)
+- Stage order stood at her retirement: VM-5 (holding, renewals) → 13x slot 1 → vx-75 → 13s →
+  13o's U2.
