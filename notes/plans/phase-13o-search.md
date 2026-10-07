@@ -718,9 +718,19 @@ L6 pins measured (`.setSearchString` → the find pasteboard; `nextMatch` from t
 sheet while searching (PROVISIONAL, recorded); (4) a `#tag` alone lists nothing (P-13o-U2-6,
 U3's join is the real answer).
 
-**LIVE STATUS (2026-10-06 23:0x, the continuation): P0–P7 committed and pushed; P8 drafted —
-WAITING for the stage (the orchestrator's queue), then the run list above, then the record's
-PENDING slots flipped.**
+**P8 RUN NOTE (2026-10-07 ~02:05, stage held by `13o-U2-implementer`):** the run list (38
+suites) went 265/266 — the one red is `NoteOpenLandingTests.aReopenMidNoteComesBackToThePageExactly`
+(left 1463 · back 1479), red twice in the batch, GREEN alone (left 1391 · back 1391), and red in
+the batch WITHOUT this unit's six new suites (234/235) — an ordering interaction (another suite's
+global typography state moves the page). **A PROBE REVERT IS STARTING to prove whether it is
+pre-existing:** `git checkout f41f7f44 -- App/Variorum` (the app tree before any U2 Mac line) +
+the unit's added app files removed from the working tree, the same 32 pre-existing suites run,
+then `git checkout HEAD -- App/Variorum` restores everything (all of it committed at `HEAD` —
+nothing uncommitted is at risk). If this record says "PROBE REVERT IN FLIGHT" and nothing after
+it, run `git checkout HEAD -- App/Variorum && git status` to restore.
+
+**LIVE STATUS (2026-10-07, the continuation): P0–P7 committed and pushed; P8 running — PROBE
+REVERT IN FLIGHT (above).**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 
