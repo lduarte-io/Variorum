@@ -72,8 +72,11 @@ struct LibrarySearchArchivedTests {
             try ops.archiveContainer(stored.id)
             let live = try ops.createPost(title: "Live")
             let kept = try ops.newBlock(in: live.id, text: "orchid on the sill")
-            let shelved = try ops.newBlock(in: live.id, text: "orchid set aside")
-            try ops.archiveBlock(shelved.block.id)
+            // An archived TAKE inside a living note (an archived BLOCK leaves
+            // its note — `archiveBlock` releases the placement — so it has no
+            // home to list under: P-13o-U1-8).
+            let shelved = try ops.branchVariant(kept.block.id, from: kept.variant.id)
+            try ops.archiveVariant(shelved.id)
             let book = try ops.createReading(name: "Orchid book", kind: .book)
             try ops.archiveReading(book.id)
 
@@ -95,8 +98,8 @@ struct LibrarySearchArchivedTests {
             let badged = liveGroup.lines.filter {
                 LibrarySearchFace.wearsArchivedBadge(archived: $0.isArchived, inArchivedGroup: liveGroup.isArchived)
             }
-            #expect(badged.map(\.sourceID) == [shelved.variant.id],
-                    "the archived BLOCK's passage wears the badge inside a living note")
+            #expect(badged.map(\.sourceID) == [shelved.id],
+                    "the archived TAKE's passage wears the badge inside a living note")
             #expect(stretched.books.map(\.id) == [book.id])
             #expect(stretched.archivedBooks == [book.id], "the archived book's row says so")
         }
