@@ -15,8 +15,21 @@ Reading of the words (to verify at reproduction, not to build on): the flash is 
 - **DONE** — preflight: CLAUDE.md canon (auto), TEXTKIT2_NOTES.md (full), SessionResiliencyProtocol.md (full), master plan in-flight table (no surface overlap: 13o search / 13x portability / 13s voice-onboarding / VM-5 mobile; none claims the book Outline or the editor seam), QUESTIONS.md targeted pass (#43, #97, #99, #103 — the Outline/note-box/landing entries).
 - **DONE** — static trace of the suspect seam (findings below).
 - **DONE** — walk preparation: Debug build GREEN (`App/Variorum/DerivedData/vx75/Build/Products/Debug/Variorum.app` in the worktree; log `DerivedData/vx75-build.log`); WalkKit helpers compiled (`/tmp/walk-cap`, `/tmp/walk-scroll`, `Tools/WalkKit/wl2`); terminal host holds BOTH grants (AX true · SCREEN true, probed); zero Variorum instances running; ffmpeg + cliclick present. Capture plan: `screencapture -v -V 6` around the first prose click, frames out via ffmpeg, artifacts under the gitignored `DerivedData/vx75-walk/`.
-- **IN-PROGRESS** — reproduction: WAITING on the stage (HELD by the VM-5 merge orchestrator, claimed 20:34; a watcher polls each minute) — the walk never steals a live claim.
-- **NOT-STARTED** — mechanism trace · pin (red-on-old, revert-verified) · fix · ladder (fable-reviewer) · PR.
+- **DONE** — the PROBE PIN written (speculative-finding road: pin FIRST as the confirm): `BookOutlineLandingTests.theFirstClickIntoEditingHoldsTheColumnSteady` — expands a story read-cheap, settles, then `focus(storyID, caret: 120)` (the prose click's exact call) and SAMPLES the `BookOutlineGeometry` oracles every settle turn: max neighbour top-shift (tolerance 150 pt — legit read↔live inset drift is ≤ ~48), the focused row's height floor (> pre − 200), and no witness anchor de-realizing mid-swap. RED ⇒ the column-geometry class is confirmed; GREEN ⇒ the column is acquitted in-harness and the walk's frames adjudicate a window-level class. `build-for-testing` compiling headlessly (`DerivedData/vx75-bft.log`).
+- **IN-PROGRESS** — reproduction: WAITING on the stage (HELD by the VM-5 merge orchestrator, claimed 20:34, renewed; a watcher polls each minute) — the walk never steals a live claim.
+- **NOT-STARTED** — mechanism trace · the fix + its red-on-old revert-verified pin · ladder (fable-reviewer) · PR.
+
+## The walk runbook (one stage claim covers both acts)
+
+**Scheduling (her ruling, 2026-10-06 evening): 13o decides the test-run order across the five named sessions — this session claims ONLY on 13o's assignment.** Answered its questionnaire same turn: one ~35–45 min slot (walk ~15–20 + suite run ~5–10), hard-blocked, not the row-85 idle-machine class; a second similar slot after the fix lands, to be requested when ready.
+
+1. On 13o's go: `Tools/stage claim --who "VX-75 orchestrator" --reason "first-edit flash reproduction + pin run" --minutes 45`.
+2. `guard.sh --author` → `open -n` the vx75 Debug app → pid by PATH (`pgrep -f 'DerivedData/vx75/.../MacOS'`).
+3. Shelf capture (`/tmp/walk-cap`) → click Sherlock (Outline opens by default) → ▸-unfold a story read-cheap → small scroll → capture for prose coordinates.
+4. ≥3 s of HID quiet → `screencapture -v -V 6 DerivedData/vx75-walk/flash.mov` (background) → sleep ~1.5 → `click.sh <pid> <x> <y>` into the prose → let the recording finish → `ffmpeg -vsync 0` frames → read the frames around the click (whole-window vs. column scope; translation vs. blanking; the shake's magnitude).
+5. Second prose click on another note under the same session — the clean steady state on film too; then quit the dev instance BY IDENTITY, re-check `pgrep`.
+6. The pin run under the same claim: `xcodebuild test … -only-testing:VariorumTests/BookOutlineLandingTests` (suite level), read the `VX-75 PIN:` line.
+7. Release the stage; findings land here before any fix.
 
 ## The surface, as read (static trace, pre-reproduction)
 
