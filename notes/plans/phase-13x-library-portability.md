@@ -669,11 +669,25 @@ with the 13o scheduler. `caffeinate -dims` detached; commit+push per piece; memo
 - Nothing else held yet.
 
 ### PROVISIONALS RULED OVERNIGHT (accruing; each one line to overturn)
-- (none yet)
+- **P-U1-1…P-U1-5 (the U1 RECORD carries each in full; they land in QUESTIONS at the merge
+  moment per the shared-ledger rule):** the classifier's three extra honest verdicts
+  (plaintextLibrary · unreadable · a folder holding several stores — reported, never guessed);
+  the hand-off folder's same-day " (2)" naming; the move-aside mechanics (A1 safety copy →
+  whole-folder move into Previous Libraries/<stamp>/ → land + canonical key-file name; the
+  source byte-untouched, pinned).
 
 ### THE NIGHT'S EVENTS (accruing)
 - Stage order stood at her retirement: VM-5 (holding, renewals) → 13x slot 1 → vx-75 → 13s →
   13o's U2.
+- 00:50:57 the stage freed; 00:51:09 the implementer claimed slot 1 exactly as armed; the pin
+  suite ran 4/4 zero skips + the dev-store round-trip drill (reads only, 0.133 s); RELEASED on
+  the result line (~1 min of the 25). **U1 CLOSED (185eb846)** — ledger rows 1–5 DONE, core
+  2234/251 (+40/6 workbook), the diff verified clean of `Sync/`/custody-items/Migrations;
+  VX-64's fix is in (87fba14f — Done rides the PR). ONE PROCESS SLIP for her eyes: d2ca39f9
+  carries a Co-Authored-By trailer against the no-trailer rule — caught post-push, recorded,
+  deliberately NOT rewritten (pushed history). Every later commit trailer-free.
+- U2's implementer spawned on the early-drafted brief (pre-merge-safe half; no stage claims —
+  Mac pin runs stop at PENDING seams and file through the orchestrator).
 
 ### BATCH U2 BRIEF (drafted early under the overnight mandate; SPAWNS ONLY AFTER the U1 CLOSED
 banner stands — one implementer at a time)
