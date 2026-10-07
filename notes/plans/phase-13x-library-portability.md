@@ -129,3 +129,78 @@ already stand and leaves flow design to 13s-b; the copy this phase renders stays
 - Raised beside the questions: the 13o `Sync/`-line sequencing; the Air as a real second-machine
   drill leg (needs her hands); two workflow hiccups for the first wave (the bout-start
   `vx sync` dirty-main friction; the three-way in-flight-table race on same-day kickoffs).
+
+## THE KICKOFF SITTING — ROUND 1 (2026-10-06; her words verbatim)
+
+**Q3 RULED — fix in-phase:** VX-64's vault-bootstrap moves onto the StoreUnlock road. **Q4
+RULED — brief at close:** the FAQ entries publish via the outbound brief at closeout, facts
+binding, 13s re-voices.
+
+**Q1 answered with a counter-question (verbatim):** *"I'm interested in adopt by copy but how is
+this going to work with sync? I'm concerned a backup will read as a copy that has been offline
+and then just sync. should we have a deliberate way of opening backups versus new copies? what
+are we NOT thinking about complexity wise?"*
+
+**Q2 answered with a counter-question (verbatim):** *"what's the advantage of the package? I feel
+like the sqlite file seems more obvious for the open format and makes the same door more
+reusable for backups"*
+
+### THE SYNC TRACE (the orchestrator's answer to Q1, against the built substrate)
+
+**Her instinct is half-designed-away and half-right, and the half that is right is an INTENT
+problem, not a machinery problem.**
+
+- **On a NEW Mac a copy cannot "just sync."** §3.3's law: a copy is WRITING, never a device —
+  no sync key and no device identity travel in the file (identity lives in custody). A machine
+  with no custody for that store id must ENROLL, which is deliberate and visible at the door
+  (Standard: through the iCloud key, nothing typed but the door still acts; Castle: the
+  passphrase/words once).
+- **On the SAME Mac her instinct is exactly right:** the store id matches, custody exists and
+  carries keys + the device identity, so an adopted backup rejoins sync automatically at the
+  next round — the designed 13l same-Mac erase-and-restore behavior. It pulls from its old
+  cursor to head and CATCHES UP to the account's current state. Nothing is destroyed (CAS +
+  S5 + tombstone-rescue), but:
+- **THE REAL FORK IS INTENT.** (1) *Transport* — "bring my library to this machine": catch-up is
+  exactly right. (2) *Rollback* — "I want my library as it was three weeks ago": under a live
+  account, catch-up VISIBLY UNDOES the restore (newer server rows win the metadata; newer
+  tombstones re-delete notes deleted since; the backup's older texts land at best as conflict
+  cards). A true whole-account rollback is the delete-and-set-up-again road (corner 31 — re-stamp
+  + re-upload the SAME library, everything kept), which already exists and is heavy and honest.
+  The door therefore must SAY which one it does, on both roads, whenever the account holds newer
+  state: *"this copy will catch up to your account's current state — to roll the account back to
+  this copy's day, [the deliberate road]."* Per-note history stays Versions' job.
+- **What we were NOT yet thinking about (the honest list):**
+  1. **The copied outbox.** A ciphertext backup carries the four local tables, outbox included.
+     Keeping it means a dead Mac's last unpushed edits SURVIVE a restore (they push; where the
+     account moved on they land as conflict cards — S5, nothing lost). Clearing it would
+     silently STRAND those edits (dirty text with no queued push = divergence that never
+     converges). Lean: KEEP the outbox; accept a few stale conflict cards on an old restore as
+     the honest price. (The plaintext export is the opposite by design: its four tables are
+     recreated EMPTY — §14.13's zero-pushes rule stands.)
+  2. **Same-store-id custody collisions on an OLDER-KEY restore.** A pre-Replace-All-Keys copy
+     adopted on the Mac the library lives on: custody holds the NEW library key for that store
+     id, the copy opens by its own day's key file instead; what custody holds afterwards (adopt
+     the old key in? keep both roads?) must be designed deliberately, not discovered.
+  3. **The purge fence.** A backup older than a Delete-Now purge horizon carries rows the ledger
+     says are purged; the 13j returner reconciliation (fresh id + non-zero cursor, corner 37)
+     must be routed through the door and DRILLED, not assumed.
+  4. **Tombstone catch-up reads as loss.** Notes deleted since the backup die again at the first
+     pull — correct for transport, surprising for rollback; the door's sentence carries it.
+  5. **A copy from a NEWER build refuses honestly** (the migrator's superseded check) — the door
+     renders that refusal rather than a crash.
+  6. **Dedupe families re-meet** (seeded furniture, sample library) when an old copy returns —
+     the engine's folds are idempotent; both-engaged keeps both; recorded, drilled lightly.
+  7. **No "peek inside a backup without adopting it" exists in this phase** — that browsing
+     surface is 18b's; 13x says so at the door rather than half-building it.
+
+### THE ARTIFACT TRACE (the answer to Q2)
+
+The package's one real advantage is ATOMICITY + double-click: an AirDropped bare `.sqlite`
+WITHOUT its key file opens nothing (corner 33), and a package makes forgetting the key file
+impossible while giving Finder one icon to open. Its costs: a new UTI/format, a second shape
+beside the backup pair forever, and it is NOT what backup folders hold. Her lean (the bare
+`.sqlite` as the one open format, the same door serving backups) is sound if the hand-off act
+produces the PAIR KEPT TOGETHER — a plain folder ("Variorum Library — <date>") holding snapshot
++ key file, AirDropped as one thing; the door takes the `.sqlite` (finding the key file beside
+it) or the folder itself; and the missing-key-file refusal names the remedy ("send the whole
+folder — the key file travels with it").
