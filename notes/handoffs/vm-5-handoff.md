@@ -13,10 +13,21 @@
 - [ ] **The device queue when you have a window** (VM-13, one trip): the selection-defect
       experiment (one minute), the Face ID walk, the 100k Sherlock perf leg, M16, D9, the emoji
       overlap, the swipe band's real pan.
-- [ ] **Ratify bundle:** the renumbered mobile QUESTIONS **#189–#199** (the unruled ones:
-      #192 Block History's one-take sentence · #194 batch-5 PROVISIONALs · #195 the architecture
-      review's MINORs to slot) + the VM board's Needs Lillian rows (VM-4's sitting leftovers,
-      VM-13).
+- [ ] **VM-2 priority call:** the structural-flight keystroke fence is now MEASURED store
+      corruption (a settle-window keystroke visibly undoes a divide; the merge twin silently
+      loses prose — the stability pass's probe is on the ticket). You held it out of VM-5;
+      does the measurement change its slot?
+- [ ] **Ratify bundle:** QUESTIONS **#159's addendum** (the wave brought in two Mac seal
+      sentences under your ruled direction — one word ratifies or reverts) · the renumbered
+      mobile QUESTIONS **#189–#199** (the unruled ones: #192 Block History's one-take sentence ·
+      #194 batch-5 PROVISIONALs · #195 the architecture review's MINORs to slot) · the wave's
+      PROVISIONAL copy (the bookless empty line "No bookless notes — every note is in a book." ·
+      the quick note's "unlock it to keep writing") — all 13s-revoicable · the VM board's
+      Needs Lillian rows (VM-4's sitting leftovers, VM-13).
+- [ ] **One-command cleanup when convenient:** the old mobile worktree —
+      `git -C ~/dev/variorum worktree remove ~/dev/variorum-mobile && git -C ~/dev/variorum branch -D mobile`
+      (this session's own floor, so it could not saw it off; `origin/mobile` and the tag are
+      already handled at the close).
 
 ## What happened (one paragraph)
 
