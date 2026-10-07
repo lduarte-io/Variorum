@@ -294,10 +294,10 @@ arm-list edit cannot make the mis-diagnosis live silently.
 
 ## FIX WAVE (implementer — Opus 5.5, 2026-10-06)
 
-**LIVE STATUS:** MAJOR 2 + MINOR 3 pins written and RED on the pre-fix tree
-(mobile, measured below); Mac twin of MAJOR 2 written, red run PENDING;
-fixes NOT yet applied; MINOR 4 / NIT 5 not started. Scope is exactly the
-four ACCEPTED rows; MAJOR 1 (VM-2) untouched.
+**LIVE STATUS:** MAJOR 2 FIXED (both platforms, pins red→green, Mac twin
+included); MINOR 3 FIXED (pin red→green); MINOR 4 + NIT 5 in progress;
+final suites (mobile full, Mac editor-brain, core `swift test`) PENDING.
+Scope is exactly the four ACCEPTED rows; MAJOR 1 (VM-2) untouched.
 
 **Not done in this wave (stated first, per the record rule):** MAJOR 1 /
 VM-2 (structural-flight keystroke fence) — not this wave's, by her ruling.
@@ -341,6 +341,44 @@ aStaleOpenTailArmingNeverBindsAGateLessCharacter — 4 issues:
 (The reviewer's probe 3 measured `tailLength=Optional(0) audit=1
 desync=0`; reproduced exactly, plus the store half: the "x" is lost.)
 
+**Pin (Mac twin):** `MacEditRoutingTests.aStaleOpenTailArmingNeverBindsAGateLessCharacter`
+(`App/Variorum/VariorumTests/EditRoutingTests.swift`) — the Mac consumer
+binds through the same `ArmedEdit`, so the hole was latent there too.
+**RED on the pre-fix tree** (`-only-testing:VariorumTests/MacEditRoutingTests`):
+
+```
+✘ Test run with 6 tests in 1 suite failed after 0.248 seconds with 4 issues.
+  model.index.tailLength → 0                      (expected nil)
+  model.index.entries.map(\.length) → [5]         (expected [6])
+  model.identityAuditFailures → 1                 (expected 0)
+  storeSlots ≠ ["Alphax"]                         (value unprinted under `try`; the
+                                                   assertion now binds a `let` first)
+```
+
+**Fix.** `ArmedEdit.binds(editedRange:delta:documentLength:landedText:)`
+(`Shared/EditorBrain/EditorEditRouting.swift`) — `describes`' geometry,
+then an EXHAUSTIVE verdict switch: `.openTail` binds only when the landed
+`replacementLength` characters at the approval's location read
+`EditorDocument.separator` (the gate's approved "\n" and, by
+`openTail()`'s own doc, the separator); `.block/.tail/.closeTail/.refuse`
+bind on geometry alone and never pay the read. BOTH consumers now bind
+through it (`MobileEditorViewModel.storageDidEdit`,
+`EditorViewModel.storageDidEdit`), passing their own `viewText`. A
+declined arming falls to `fallbackVerdict`, which already answers
+`.block(last)` for this input — no new routing. `describes` is unchanged
+(its nine unit pins ride unmodified). The Mac consumer change is the
+shared brain's consequence, not a second unit: leaving the Mac on
+`describes` would ship a known latent twin of the fixed hole (this
+file's own M13/MacEditRoutingTests precedent). Added one pure pin,
+`ArmedEditTests.anOpenTailArmingBindsOnlyTheNewlineItMeans` (the rule +
+the reader asked only for `.openTail`, exactly the landed bytes) — a
+contract pin on the new API, not a red-on-old claim.
+
+**Green after:** mobile `MobileEditRoutingBindingTests` — `✔ Test run with
+7 tests in 1 suite passed after 0.225 seconds.`; Mac `MacEditRoutingTests`
++ `ArmedEditTests` — `✔ Test run with 16 tests in 2 suites passed after
+0.207 seconds.`
+
 ### MINOR 3 — `attachLeadingTailRunIfNeeded` skips the disarm doctrine
 
 **Mechanism, traced myself.** The attachment
@@ -375,3 +413,17 @@ theLeadingRunAttachmentDisarmsAStaleArming — 3 issues (every precondition gree
   model.index.tailLength → 6                (expected 7)
   model.identityAuditFailures → 1           (expected 0: the separator offset holds "o")
 ```
+
+**Fix.** One `host.disarmPendingEdit()` in `attachLeadingTailRunIfNeeded`,
+directly after the transfer, with the reason at the line; the host
+protocol's doc for `disarmPendingEdit` now names both band callers and
+states that it clears the ARMING only (both platforms' implementations are
+`pendingEdit = nil`; the paste's bulk intent stays — the plan right after
+the attachment may be reading it, and on the consume road the arming was
+already consumed, so the disarm is a no-op there). **Isolation of the
+red:** the red run was the fully pre-fix tree; the only other fix between
+red and green is MAJOR 2's `binds`, whose switch returns `true` for a
+`.tail` arming before any read — it cannot affect this pin, so the green
+is the disarm's.
+
+**Green after:** the same `MobileEditRoutingBindingTests` run above (7/7).

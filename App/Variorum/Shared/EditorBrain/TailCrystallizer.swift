@@ -101,6 +101,10 @@ protocol TailCrystallizerHost: AnyObject {
     func clearBulkPending()
     /// `finishMint`: a verdict armed before the mint describes a tail that
     /// may no longer exist — disarm it (the sharpest stale case).
+    /// `attachLeadingTailRunIfNeeded`: the attachment moves the tiling by an
+    /// equal-length transfer the binding's length oracle cannot see (VM-5
+    /// stability pass, MINOR 3). Clears the ARMING only — never the paste's
+    /// bulk intent, which both callers may still be carrying on purpose.
     func disarmPendingEdit()
     /// `finishMint`: the reconciler asked for a re-render from the store, or
     /// the tail region vanished under the flight.
@@ -289,6 +293,19 @@ final class TailCrystallizer {
         guard run > 0 else { return }
         let oldRange = host.index.range(ofEntryAt: last)
         host.transferTailPrefixToLastEntry(run)
+        // The tiling MOVED — disarm, as every index-changing door does (VM-5
+        // stability pass, MINOR 3). This move is EQUAL-LENGTH (the entry
+        // grows by exactly what the tail loses), so `ArmedEdit.describes`'
+        // length oracle cannot see it — the reason `displaySlot` gives for
+        // disarming structurally. Reachable with a LIVE arming only from the
+        // idle tick (the consume road consumed it already; `finishMint`
+        // disarms before its re-run): a stale `.tail` arming over the run
+        // would otherwise bind a gate-less edit there and charge the TAIL
+        // for characters the last entry now owns (pinned:
+        // `theLeadingRunAttachmentDisarmsAStaleArming`). The paste's bulk
+        // intent is NOT dropped with it — `disarmPendingEdit` clears the
+        // arming only, and the plan just below may be reading that intent.
+        host.disarmPendingEdit()
         // Ownership moves; bytes don't: the block-ID attribute grows over
         // the old separator position + run−1 tail newlines.
         EditorSurfaceStorage.setBlockID(
