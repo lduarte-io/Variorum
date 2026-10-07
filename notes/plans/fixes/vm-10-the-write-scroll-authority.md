@@ -70,3 +70,12 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
 ## LIVE STATUS
 
 - 2026-10-07 early: brief staged pre-go; worktree ready at `0f0624e7`; awaiting 13o's stage slot.
+- 2026-10-07 (implementer, Opus 5.5): reading done (this brief · CLAUDE.md · handoff §12.2/§12.2a/§10.4–§11.4 ·
+  mobile-round-2 §17–§20 · SessionResiliencyProtocol implementer half · TEXTKIT2 §3 iOS findings · the three
+  *[removed for publication]*
+  `notes/plans/vm-10-screens/` gitignored.
+  - Arm 1 (arrival) — NOT-STARTED: trace by running (hosted `MobileWriteScreen`, KVO on `contentOffset` with
+    call stacks), then pin.
+  - Arm 2 (⏎ forced scroll) — NOT-STARTED.
+  - Arm 3 (scroll-back fight) — NOT-STARTED.
+  - Walk captures — NOT-STARTED. Final suites — PENDING.
