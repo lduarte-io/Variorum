@@ -609,3 +609,9 @@ write is an ordinary `save` under the same (scope, store id) name.
   CLAUDE.md's no-trailer rule (the harness reminder won a reflex it should not have).
   Caught immediately after the push; a pushed commit is never rewritten without her word,
   so it stands recorded here and every subsequent commit is trailer-free.
+
+**SLOT-REDIRECT ADDENDUM (2026-10-06, the 13o scheduler, relayed cross-session):** first-ready-
+first governs VM-5 and small-fix PRs around us, but 13x's PR KEEPS its R-13o-1 sequencing —
+13x merges after 13o lands. The stage order tonight (13o's assignment): VM-5's held claim →
+13x slot 1 (the U1 row-2 pin run, ≤25 min, release on the result line) → vx-75 → 13s → 13o's
+own U2.
