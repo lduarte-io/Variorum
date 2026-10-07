@@ -942,14 +942,22 @@ stale text on the keystroke's turn — the dropped-keys shape; now `BookSearchMo
 at once and the binding spawns `search()` (the Library field's own convention). Found by reading,
 before any run; no pin can type into an AppKit field headlessly — the walk covers it.
 
+**SELF-REVIEW REFINEMENT (`324d2bea`):** over a typed tag ALONE, the band's archived and
+book-state chips were offered even when the tag had no associated book at all (nothing either
+could act on — P-2); they are now offered only when the tag's books are counted
+(`LibrarySearchModel.answersAnything`, the band's archived-chip guard). Words keep U2's rule.
+
 **CORE, HEADLESS, AT THE END OF THE CORE WORK (03:1x):** `swift test` EXIT 0 — VariorumCoreTests
 **2,282 tests in 258 suites PASSED** (skipped, honestly: the two gated benches' 4 tests — U1's fork
 bench and U3's gathering-scope bench — the live-Supabase pass and `writeAScratchLibraryLikeHers`,
 as before) + StringsWorkbookTests 40 in 6 PASSED.
 
 **LIVE STATUS (2026-10-07 03:2x): P0–P9 DONE and pushed; the Mac pins (P4 · P5 · P7 · P8) and the
-touched suites + TutorialWalkTests await the granted stage slot (queue position three, ~04:30–05:30
-— the architect confirms before any claim); then P10.**
+touched suites + TutorialWalkTests await the stage: the architect RESEQUENCED — a 30–35 min slot
+at VM-10's next pin boundary, ahead of 13x, on the architect's literal "claim now"; suites first,
+release on the last result line, confirm; the stage returns to VM-10 right after (no own walk in
+this slot — the architect's acceptance walk follows the close). The batch script is
+`.build/u3logs/run-mac-suites.sh` (56 suites); then P10.**
 
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
