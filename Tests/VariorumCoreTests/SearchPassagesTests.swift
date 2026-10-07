@@ -400,9 +400,11 @@ struct SearchPassagesTests {
             #expect(!plan.contains { $0 == "SCAN \(alias)" || $0.hasPrefix("SCAN \(alias) ") },
                     "SCAN \(alias) is a corpus walk:\n\(text)")
         }
-        // The snippet stage is driven by the PAGE rows, one FTS lookup each.
-        let last = plan.suffix(2).joined(separator: "\n")
-        #expect(last.contains("SCAN page") && last.contains("search_fts VIRTUAL TABLE INDEX"),
+        // The snippet stage: one more walk of the matches, joined to the PAGE
+        // by rowid (a Bloom-filtered probe), so snippet() runs for page rows
+        // only — never a per-row FTS5 query (each re-opens every segment).
+        let tail = plan.suffix(5).joined(separator: "\n")
+        #expect(tail.contains("SCAN search_fts VIRTUAL TABLE INDEX") && tail.contains("SEARCH page USING"),
                 "snippets are cut for the page rows only:\n\(text)")
     }
 

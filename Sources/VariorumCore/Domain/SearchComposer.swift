@@ -19,8 +19,12 @@ import Foundation
 /// - the ranking is `bm25 × the kind's weight × the rendered-take boost`
 ///   (F4: one column, kind weight at query time), keyset-paged on
 ///   `(score, doc id)` so every match is reachable (R-13o-9);
-/// - snippets are computed for the PAGE rows only (a second FTS lookup per
-///   page row by rowid), never for every match.
+/// - snippets are computed for the PAGE rows only: a second walk of the
+///   match's doclists (cheap — no ranking reads) joined to the page by rowid,
+///   so `snippet()` runs for the ≤ `limit` rows that join. (Measured at U1:
+///   a page-DRIVEN lookup — one FTS5 query per page row by rowid — costs a
+///   full FTS5 query initialization per row, every segment opened each time:
+///   660–790 page requests for a 20-row page against 160–190 for one walk.)
 ///
 /// The fragments whose rules live elsewhere — the version classifier, the
 /// wing rule, the edited-in-a-window rule, the starred list — come in through
@@ -268,7 +272,7 @@ public enum SearchComposer {
               LIMIT ?
             )
             SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM page CROSS JOIN search_fts ON search_fts.rowid = page.doc_id
+            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid
             WHERE search_fts MATCH ?
             ORDER BY page.score, page.doc_id
             """
