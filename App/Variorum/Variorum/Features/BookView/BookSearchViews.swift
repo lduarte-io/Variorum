@@ -61,7 +61,10 @@ struct BookSearchDoor: View {
             if model.isOpen {
                 TextField(tokens.chromeLabel(BookSearchCopy.placeholder), text: Binding(
                     get: { model.text },
-                    set: { value in Task { await model.setText(value) } }))
+                    set: { value in
+                        model.edit(value)
+                        Task { await model.search() }
+                    }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .frame(minWidth: 90, idealWidth: 160, maxWidth: 180)

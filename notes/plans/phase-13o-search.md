@@ -936,8 +936,20 @@ pin stayed green, rightly (a membership IN-list is index-driven too). The pins a
 (Machinery note: the commit `152e6fcb` flipped the gated rows but its record edit missed — this
 commit lands the rulings' text. No history rewritten.)
 
-**LIVE STATUS (2026-10-07): P0 + P1 DONE; both proposals RULED (above — B and F1); P2 (the
-tag-association join) in progress; P6/P7 now un-gated.**
+**SELF-REVIEW FIX (before the stage run, recorded):** the book field's binding first wrote its
+text INSIDE the read's task (`Task { await setText(value) }`), so the field's own binding read
+stale text on the keystroke's turn — the dropped-keys shape; now `BookSearchModel.edit(_:)` writes
+at once and the binding spawns `search()` (the Library field's own convention). Found by reading,
+before any run; no pin can type into an AppKit field headlessly — the walk covers it.
+
+**CORE, HEADLESS, AT THE END OF THE CORE WORK (03:1x):** `swift test` EXIT 0 — VariorumCoreTests
+**2,282 tests in 258 suites PASSED** (skipped, honestly: the two gated benches' 4 tests — U1's fork
+bench and U3's gathering-scope bench — the live-Supabase pass and `writeAScratchLibraryLikeHers`,
+as before) + StringsWorkbookTests 40 in 6 PASSED.
+
+**LIVE STATUS (2026-10-07 03:2x): P0–P9 DONE and pushed; the Mac pins (P4 · P5 · P7 · P8) and the
+touched suites + TutorialWalkTests await the granted stage slot (queue position three, ~04:30–05:30
+— the architect confirms before any claim); then P10.**
 
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both

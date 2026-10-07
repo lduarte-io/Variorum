@@ -114,9 +114,18 @@ final class BookSearchModel {
         clearAnswer()
     }
 
-    /// The field's text changed: read it into the one AST and ask.
-    func setText(_ value: String) async {
+    /// **A keystroke** — the text is written AT ONCE (the field's binding
+    /// reads it back on the same turn; a write deferred into the read's task
+    /// would hand the field stale text and drop keys, the Library field's own
+    /// convention); the caller spawns `search()`.
+    func edit(_ value: String) {
         text = value
+    }
+
+    /// The field's text changed: read it into the one AST and ask (`edit` +
+    /// `search`, the pins' one-step road).
+    func setText(_ value: String) async {
+        edit(value)
         await search()
     }
 
