@@ -1048,6 +1048,9 @@ struct PoolDetailView: View {
     let poolID: String
     /// Stage C: a caret-precise landing (palette/Library block hits).
     var initialBlockID: String? = nil
+    /// 13o U2 (D6 — land-at-match): a scrap passage's matched words, riding
+    /// the block landing (`PostDetailView.initialFind`'s twin).
+    var initialFind: EditorFindSeed? = nil
 
     enum Mode: String, CaseIterable {
         case scraps = "Scraps"
@@ -1065,6 +1068,7 @@ struct PoolDetailView: View {
 
     @State private var mode: Mode = .scraps
     @State private var pendingCaret: Int?
+    @State private var pendingFind: EditorFindSeed?
     /// **The scraps area's own tray, in its own side panel** (the post-13l
     /// polish round, ledger row 9 + batch 1's deferred item).
     ///
@@ -1123,7 +1127,9 @@ struct PoolDetailView: View {
             Divider()
             switch mode {
             case .scraps:
-                EditorView(session: session, postID: poolID, caretSeed: pendingCaret)
+                EditorView(
+                    session: session, postID: poolID, caretSeed: pendingCaret,
+                    findSeed: pendingFind)
                     .id("\(poolID)-caret-\(pendingCaret ?? -1)")
             case .canvas:
                 // A pool has no lens home — the save-picks door hides.
@@ -1147,7 +1153,10 @@ struct PoolDetailView: View {
                     else { return nil }
                     return BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i).location
                 }
-                if let offset { pendingCaret = offset }
+                if let offset {
+                    pendingFind = initialFind  // before the caret re-keys the editor
+                    pendingCaret = offset
+                }
             }
         }
     }

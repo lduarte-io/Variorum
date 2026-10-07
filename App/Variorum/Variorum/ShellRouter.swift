@@ -125,24 +125,29 @@ final class ShellRouter {
     struct BlockLanding: Equatable, Sendable {
         let containerID: String
         let blockID: String
+        /// 13o U2 (D6 — land-at-match): a search passage's matched words,
+        /// riding the landing they belong to — parked, expired and spent
+        /// WITH it (never a second park that could outlive its block).
+        var find: EditorFindSeed? = nil
 
         /// A landing for a destination, if that destination is a container
         /// that can hold one and a block was actually named. Living here is
         /// what lets the one adoption door take a `String?` and still be the
         /// only place the pair is assembled.
-        init?(_ destination: SidebarSelection, blockID: String?) {
+        init?(_ destination: SidebarSelection, blockID: String?, find: EditorFindSeed? = nil) {
             guard let blockID else { return nil }
             switch destination {
             case .post(let id), .pool(let id):
-                self.init(containerID: id, blockID: blockID)
+                self.init(containerID: id, blockID: blockID, find: find)
             default:
                 return nil
             }
         }
 
-        init(containerID: String, blockID: String) {
+        init(containerID: String, blockID: String, find: EditorFindSeed? = nil) {
             self.containerID = containerID
             self.blockID = blockID
+            self.find = find
         }
     }
 
@@ -200,15 +205,22 @@ final class ShellRouter {
     func adopt(
         _ destination: SidebarSelection,
         in pane: PaneID? = nil,
-        landing blockID: String? = nil
+        landing blockID: String? = nil,
+        find: EditorFindSeed? = nil
     ) -> WorkspaceModel.SelectionOutcome {
-        park(BlockLanding(destination, blockID: blockID))
+        park(BlockLanding(destination, blockID: blockID, find: find))
         return workspace.select(destination, in: pane)
     }
 
     /// What a mounting container should land on, if this park is its own.
     func landing(for containerID: String) -> String? {
         blockLanding?.containerID == containerID ? blockLanding?.blockID : nil
+    }
+
+    /// The parked landing's find seed (13o U2, D6), if the park is this
+    /// container's — the same park, so it is spent and expired with it.
+    func landingFind(for containerID: String) -> EditorFindSeed? {
+        blockLanding?.containerID == containerID ? blockLanding?.find : nil
     }
 
     /// **Spend it.** Called by the shell the moment a container's detail

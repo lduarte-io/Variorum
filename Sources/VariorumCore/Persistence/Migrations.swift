@@ -834,6 +834,46 @@ extension AppDatabase {
         migrator.registerMigration("v1_21_reading_archive") { db in
             try db.execute(sql: "ALTER TABLE reading ADD COLUMN archived_at TEXT;")
         }
+        // **13o — THE SEARCH INDEX** (the plan `notes/plans/phase-13o-search.md`:
+        // her sitting rulings R-13o-3/4/6/11 and the §FORK RULINGS F1–F4).
+        //
+        // A DERIVED, LOCAL-ONLY family (R-13o-3 — the `sync_outbox`
+        // precedent): `search_doc` (one row per source text field — F2),
+        // the `search_text` view (the text resolved from the SOURCE rows —
+        // F1), the FTS5 `search_fts` over it (`unicode61 remove_diacritics
+        // 2`, prefixes 2 and 3 — F4), and R-13o-4's third trigger family,
+        // DERIVED-INDEX CAPTURE: mechanical mirroring of each source field's
+        // existence and raw text, reading nothing but NEW/OLD and the doc
+        // family (`Persistence/SearchIndex.swift` holds the shape and the
+        // plan's §R-13o-4 RECORD its provenance).
+        //
+        // **NOT a SyncSpec §12 lockstep event**: nothing here carries
+        // `sync_version`, nothing is pushed, no mirror changes — the marker
+        // stays 12. The family joins the sync registry's DERIVED set (the
+        // §FORK RULINGS' export ruling) so the completeness walk knows it is
+        // deliberately unsynced and an exported store keeps a working index.
+        //
+        // **The backfill is the rebuild engine, run once** — every live
+        // source row's fields derived into docs, then the index re-read from
+        // the view. Measured at ~0.66 s for 55k takes (the U1 bench).
+        //
+        // One more LOCAL index rides here for the search's WORN-DAY arm
+        // (R-13o-6 — a nameless, undated note wears the day it was created):
+        // `idx_container_undated_created`, partial on exactly the undated
+        // live containers, so "september 14" finds those notes by range
+        // seeks on the day's own window instead of a walk of every note. Its
+        // WHERE is a predicate no existing query states, so no shipped plan
+        // can change under it (SQLite uses a partial index only when the
+        // query implies its WHERE). Local index, no §12 event — the v1_15 /
+        // v1_17 precedent.
+        migrator.registerMigration("v1_22_search_index") { db in
+            try SearchIndex.create(db)
+            try db.execute(sql: """
+                CREATE INDEX idx_container_undated_created ON container(created_at)
+                  WHERE deleted_at IS NULL AND (entry_date IS NULL OR entry_date = '');
+                """)
+            try SearchIndex.rebuild(db)
+        }
         return migrator
     }
 }

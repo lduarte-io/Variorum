@@ -64,6 +64,7 @@ struct EditorView: View {
     init(
         session: AppSession, postID: String, inline: Bool = false,
         caretSeed: Int? = nil, fanSeed: String? = nil,
+        findSeed: EditorFindSeed? = nil,
         barPlacement: BarPlacement = .bottom,
         gutter: ProseGutter = .contained
     ) {
@@ -75,6 +76,8 @@ struct EditorView: View {
         let model = EditorViewModel(session: session, postID: postID)
         model.pendingCaretSeed = caretSeed
         model.pendingFanSeed = fanSeed
+        // 13o U2 (D6): a search passage's landing — the third one-shot.
+        model.pendingFindSeed = findSeed
         _model = State(initialValue: model)
     }
 

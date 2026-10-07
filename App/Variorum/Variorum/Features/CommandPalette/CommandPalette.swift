@@ -22,6 +22,12 @@ struct PaletteItem: Identifiable, Equatable {
         case book
         case post
         case block
+        /// 13o U2 (D7): a body hit — a passage of a note or a scrap, under
+        /// the title hits, landing AT its match (D6).
+        case passage
+        /// 13o U2 (D7): the road to the rest — the Library's answer sheet on
+        /// the same words (R-13o-9: no capped listing without a road).
+        case allMatches
     }
     let id: String
     let kind: Kind
@@ -31,6 +37,12 @@ struct PaletteItem: Identifiable, Equatable {
     /// hit must NAVIGATE; caret-precise landing is Stage C's).
     var homeContainerID: String?
     var homeIsPool = false
+    /// Passage rows (13o U2): the block the passage lives on and the find
+    /// seed it lands with (`SearchLanding.findSeed`'s rule).
+    var blockID: String?
+    var find: EditorFindSeed?
+    /// The all-matches row (13o U2): the words it carries to the Library.
+    var words: String?
 
     static func == (lhs: PaletteItem, rhs: PaletteItem) -> Bool {
         lhs.id == rhs.id
@@ -89,9 +101,19 @@ final class PaletteModel {
         let query = query
         // 13i-d U5: ⌘K searches the CURRENT WING (§9).
         let wing = session.wing.currentID
-        let hits = (try? await session.database.read { db in
-            try Queries.searchCatalog(db, query: query, limitPerKind: 12, wingID: wing)
-        }) ?? []
+        // 13o U2 (D7): the body search rides the same read — the one AST
+        // (R-13o-8), a bounded few passages under the title hits.
+        let asked = Self.passageQuestion(query)
+        let (hits, passages) = (try? await session.database.read { db in
+            (try Queries.searchCatalog(db, query: query, limitPerKind: 12, wingID: wing),
+             // The body hits never cost the title hits: a failed passage read
+             // answers none, and the catalog's rows still land.
+             asked.flatMap {
+                 try? Queries.searchPassages(
+                     db, query: $0, scope: SearchScope(wingID: wing),
+                     limit: Self.passageCount).passages
+             } ?? [])
+        }) ?? ([], [])
         guard mine == generation else { return }  // a newer keystroke won
         result += hits.map { hit in
             PaletteItem(
@@ -100,18 +122,76 @@ final class PaletteModel {
                 title: hit.title, detail: hit.detail,
                 homeContainerID: hit.homeContainerID, homeIsPool: hit.homeIsPool)
         }
+        result += passages.compactMap(Self.passageItem)
+        if asked != nil {
+            // R-13o-9's letter: the few above are never the end of the road.
+            result.append(PaletteItem(
+                id: "all-matches", kind: .allMatches,
+                title: CommandPaletteCopy.allMatches, detail: nil,
+                // As typed (untrimmed): the Library reads the SAME question —
+                // a word still being typed stays the same prefix there.
+                words: query))
+        }
         items = result
         selectedIndex = 0  // N11: a fresh list selects its top row
+    }
+
+    // MARK: - 13o U2 (D7) — the body hits
+
+    /// How many passages ⌘K shows under its title hits (D7 — "a bounded few").
+    nonisolated static let passageCount = 5
+
+    /// The palette's question for the index: the field's words through the
+    /// one v1 grammar (R-13o-8), the passages that are BODY hits — never a
+    /// title (the note row above already says it) and never a book's name
+    /// (the book row does). nil without words.
+    nonisolated static func passageQuestion(_ text: String) -> SearchQuery? {
+        var query = SearchQueryParser.parse(text)
+        guard query.text != nil else { return nil }
+        let body: SearchFilter = .all([.not(.docKind(.title)), .not(.family(.books))])
+        query.filter = query.filter.map { .all([$0, body]) } ?? body
+        return query
+    }
+
+    /// A passage as a palette row — its words, its home, its landing (D6).
+    nonisolated static func passageItem(_ passage: SearchPassage) -> PaletteItem? {
+        guard let home = passage.noteID, passage.kind != .wornDay else { return nil }
+        let words = passage.snippet.map(\.text).joined()
+        return PaletteItem(
+            id: "passage-\(passage.id)", kind: .passage,
+            title: words.isEmpty ? passage.homeTitle : words,
+            detail: CommandPaletteCopy.passageHome(passage.homeTitle),
+            homeContainerID: home, homeIsPool: passage.family == .scraps,
+            blockID: passage.blockID,
+            find: SearchLanding.findSeed(
+                kind: passage.kind, rendered: passage.isRenderedTake, snippet: passage.snippet))
     }
 
     /// Executes a row. Block hits carry their block ID beside the home
     /// selection (Stage C: the caret lands ON the block, not just in the
     /// right post — the round-2 MINOR's recorded remainder).
+    ///
+    /// 13o U2 (D7): a PASSAGE lands at its match through `onLand` (the
+    /// shell's block landing with its find seed — D6), falling back to the
+    /// block landing; the ALL-MATCHES row hands its words to
+    /// `onSearchLibrary` (the Library's answer sheet on the same question).
     func execute(
         _ item: PaletteItem,
-        onOpen: (SidebarSelection, _ blockID: String?) -> Void
+        onOpen: (SidebarSelection, _ blockID: String?) -> Void,
+        onLand: ((SidebarSelection, _ blockID: String, EditorFindSeed?) -> Void)? = nil,
+        onSearchLibrary: ((String) -> Void)? = nil
     ) {
         switch item.kind {
+        case .passage:
+            guard let home = item.homeContainerID else { return }
+            let selection: SidebarSelection = item.homeIsPool ? .pool(home) : .post(home)
+            if let block = item.blockID, let onLand {
+                onLand(selection, block, item.find)
+            } else {
+                onOpen(selection, item.blockID)
+            }
+        case .allMatches:
+            if let words = item.words { onSearchLibrary?(words) }
         case .command:
             if let index = Int(item.id.dropFirst("command-".count)),
                commands.indices.contains(index) {
@@ -136,6 +216,11 @@ final class PaletteModel {
 struct CommandPaletteView: View {
     let model: PaletteModel
     let onOpen: (SidebarSelection, _ blockID: String?) -> Void
+    /// 13o U2 (D7): a passage's landing at its match, and the all-matches
+    /// road — the shell's (nil in a harness: a passage falls back to its
+    /// block landing, the road does nothing).
+    var onLand: ((SidebarSelection, String, EditorFindSeed?) -> Void)? = nil
+    var onSearchLibrary: ((String) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -172,18 +257,18 @@ struct CommandPaletteView: View {
                 }
                 .onSubmit {
                     if let selected = model.selectedItem {
-                        model.execute(selected) { selection, blockID in
-                            onOpen(selection, blockID)
-                        }
+                        model.execute(
+                            selected, onOpen: { selection, blockID in onOpen(selection, blockID) },
+                            onLand: onLand, onSearchLibrary: onSearchLibrary)
                         dismiss()
                     }
                 }
             Divider().overlay(tokens.line)
             List(model.items) { item in
                 Button {
-                    model.execute(item) { selection, blockID in
-                        onOpen(selection, blockID)
-                    }
+                    model.execute(
+                        item, onOpen: { selection, blockID in onOpen(selection, blockID) },
+                        onLand: onLand, onSearchLibrary: onSearchLibrary)
                     dismiss()
                 } label: {
                     HStack(spacing: 8) {
@@ -199,8 +284,9 @@ struct CommandPaletteView: View {
                             .foregroundStyle(tokens.muted)
                             .frame(width: 16)
                         Text(item.title)
-                            .font(tokens.body)
-                            .foregroundStyle(tokens.ink)
+                            .font(item.kind == .passage ? tokens.small : tokens.body)
+                            .foregroundStyle(item.kind == .allMatches ? tokens.accent : tokens.ink)
+                            .lineLimit(1)
                         if let detail = item.detail {
                             Text(tokens.chromeLabel(detail))
                                 .font(tokens.small)
@@ -231,6 +317,16 @@ struct CommandPaletteView: View {
         case .book: "book"
         case .post: "doc.text"
         case .block: "square.on.square"
+        case .passage: "text.quote"
+        case .allMatches: "magnifyingglass"
         }
     }
+}
+
+/// What the palette's 13o rows say (one place — F-0).
+nonisolated enum CommandPaletteCopy {
+    /// The road row (PROVISIONAL P-13o-U2-5).
+    static let allMatches = "All matches in the Library \u{203A}"
+    /// A passage row's home.
+    static func passageHome(_ title: String) -> String { "in \(title)" }
 }

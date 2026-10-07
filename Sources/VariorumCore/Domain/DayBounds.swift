@@ -61,6 +61,24 @@ public struct DayBounds: Equatable, Sendable {
         end = DateFormatter.variorumISO8601.string(from: calendar.startOfDay(for: nextNoon))
     }
 
+    /// **A RUN of local days, first through last INCLUSIVE** (13o U2 — the
+    /// Library's `when ▾` door grows its range, R-13o-13): `[first's start,
+    /// last's end)`, each end the calendar's own (the same noon-anchored rule
+    /// as one day, so a range across a DST change tiles exactly). `day` names
+    /// the FIRST day. nil when either key is not a real day or the two are
+    /// out of order; `first == last` is exactly `init?(day:)`.
+    public init?(
+        firstDay: String, lastDay: String, calendar: Calendar = JournalDay.storeCalendar
+    ) {
+        guard let first = DayBounds(day: firstDay, calendar: calendar),
+              let last = DayBounds(day: lastDay, calendar: calendar),
+              first.start < last.end
+        else { return nil }
+        day = firstDay
+        start = first.start
+        end = last.end
+    }
+
     // **There is deliberately no `init(containing: Date)`** (the ladder's
     // R1-8). One shipped briefly, force-unwrapping its own failable sibling
     // on the grounds that `dayString` and `date(from:)` are inverses — true
