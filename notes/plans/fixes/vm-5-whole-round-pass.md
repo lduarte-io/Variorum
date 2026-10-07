@@ -317,7 +317,7 @@ MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
 |---|---|
 | MINOR 2 — the `.bookless` empty state | DONE (this commit) — red 3/3 → green; targeted 29/3 green |
 | MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | DONE (this commit) — phone red 5 issues → green 66/4; Mac red 2 issues → green 15/1 |
-| MINOR 4 — `VersionActs.save`/`restore` past a refused flush | IN-PROGRESS — fix + pins committed WIP; phone pins RED on the pre-fix tree (5 issues, recorded below when the piece closes); NEXT: the Mac pin's red-on-old by reverting ONLY `Shared/VersionActs.swift` + `Shared/AppSession.swift` to `6f5d3539` (restore = `git checkout HEAD -- <those two>`), then green runs both platforms |
+| MINOR 4 — `VersionActs.save`/`restore` past a refused flush | DONE (WIP `9ac9c68e` + this commit) — phone red 5 → green; Mac red 6 → green 71/6; the revert is RESTORED (`git diff HEAD` clean of both files) |
 | Final full mobile suite | PENDING |
 
 ### MINOR 2 — FIXED (red → green)
@@ -448,3 +448,72 @@ is the old sentence's own clause, kept.
 + `MobileEmptyStoreTests`); Mac `✔ Test run with 15 tests in 1 suite passed after 1.633 seconds.`
 (`NoteVersionsPaneTests` — the whole Mac target compiled with the new
 signature).
+
+### MINOR 4 — FIXED (red → green, both platforms)
+
+**Mechanism, traced.** `VersionActs.save` ran `await
+session.flushExistingAutosave(forPost:)` — a bare `coordinator.flushNow()` —
+and never asked whether it landed. On a refused flush (bytes pending on a
+take a remote lock froze; `AutosaveCoordinator.flushNow` puts a refused
+entry BACK into `pending`, so `isDirty` stays true) the save proceeded:
+`saveNoteVersion` copied the STORE, minting a moment WITHOUT the pending
+bytes, and the door reported `VersionsPath.saved`. `restore` had the same
+hole with the worse shape: its save-of-now missed the bytes, then the
+restore took the blocks they belonged to (the bytes left pending against
+tombstoned rows). The family's own header names exactly this failure; the
+sibling ⋯ doors (`deleteNote` / `lockNote` → `flushPendingText`) already
+guard it.
+
+**Pins (red on the pre-fix tree):**
+- PHONE, new, driven through a real editor (a gate-routed keystroke, then
+  `lockVariant` underneath — `lockNoteRefusesWhileAPendingFlushCannotLand`'s
+  construction): `MobileVersionsTests.aRefusedFlushRefusesTheSaveAndMintsNoMoment`
+  — `✘ … failed after 0.074 seconds with 2 issues.` The red's own values:
+  `editor.statusMessage → "Saved a version — the whole note as it is now, in Versions."`
+  and one moment whose preview is `"Hello there."` — her `" Pending."` missing.
+- PHONE, new: `MobileVersionsTests.aRefusedFlushRefusesTheRestoreAndNothingMoves`
+  — `✘ … failed after 0.052 seconds with 3 issues.` Red values: the restore's
+  receipt (*"The note says this again — and where it was a moment ago is
+  saved in Versions, so you can go back."*) and `moments.count → 2` (the
+  save-of-now, missing the bytes). Together:
+  `✘ Test run with 17 tests in 1 suite failed after 31.785 seconds with 5 issues.`
+- MAC, new, headless through the real `NoteVersionsModel` (a held
+  coordinator's pending record + `lockVariant`):
+  `NoteVersionsPaneTests.aRefusedFlushRefusesSaveAndRestoreOnTheMac` — run
+  red by reverting ONLY `Shared/VersionActs.swift` + `Shared/AppSession.swift`
+  to `6f5d3539` after the WIP commit, then restored with `git checkout HEAD
+  --` (diff-verified): `✘ Test aRefusedFlushRefusesSaveAndRestoreOnTheMac() failed after 0.052 seconds with 6 issues.`
+  / `✘ Test run with 16 tests in 1 suite failed after 1.673 seconds with 6 issues.`
+
+**Fix.** `AppSession.flushExistingAutosave(forPost:)` now ANSWERS whether
+the post's buffer is clean after the flush (`@discardableResult -> Bool`;
+`true` when nothing is held — nothing pending by its own rule; every other
+caller reads exactly as before). `VersionActs.save` and `restore` guard on
+it and throw `VersionActs.Refusal.unsavedChanges` (the `RecoveryRefusal`
+shape — nothing was attempted, so not an `OperationError`) BEFORE any op
+runs; `VersionActs.words` words it with the standing sentence. **The
+sentence got ONE shared home** rather than a new literal:
+`OpsRefusalCopy.unsavedChanges` (it names no door — the integrity walk's
+rule holds), and the phone's `MobileEditorViewModel.unsavedChangesRefusal`
+now FORWARDS to it (its pins ride). Every door onto the shared acts is
+covered: the phone's ⋯ Save a Version and Versions room; the Mac's ⌘⇧S on
+Write and the Takes board, and its Versions pane.
+
+**Recorded, not changed:** the Mac's structural doors still carry the same
+sentence as ~15 byte-identical literals (`EditorSurfaceController`,
+`TakesStructureController`, `TakesViewModel`) and the phone two more
+(`MobileTakesBrowser`, `MobileBlockHistory`) — pre-existing; each a one-line
+forward to `OpsRefusalCopy.unsavedChanges` at its next touch. And
+`flushExistingAutosave`'s other callers (`NoteDeletion`, `BlockHistoryPane`,
+`SnippetsSurface`, `ShellActions`, `AppSession`'s own two) still discard the
+answer — whether any of THEM acts past a refused flush is not this finding
+and was not traced here; the answer is now there to consult.
+
+**No PROVISIONAL copy** — the refusal is the standing sentence.
+
+**Green, quoted:** phone `✔ Test run with 23 tests in 2 suites passed after 31.798 seconds.`
+(`MobileVersionsTests` + `MobileRefusalTableTests`); Mac
+`✔ Test run with 71 tests in 6 suites passed after 6.655 seconds.`
+(`NoteVersionsPaneTests` + `TutorialWherePlacesActsTests` (its four
+`VersionActs.save` walks) + `ConfirmationsSettingTests` + `IAAndTrashShapeTests`
++ `RefusalTableConvergenceTests` + `OpsRefusalTableIntegrityTests`).
