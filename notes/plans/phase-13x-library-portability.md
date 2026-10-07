@@ -1378,3 +1378,30 @@ No revert is in flight (the slot's five ran and RESTORED — the evidence sectio
   Red-on-old by behavioural revert: the new arm's if-block removed (the old behavior — no
   detector), the pin goes red, the siblings stay green; restore by `git checkout --`
   verified by empty diff.
+
+## THE LADDER — ROUND 2 (2026-10-07; the report `notes/plans/13x-ladder-round2.md`, committed
+unedited at 4533d27f): ten of eleven FIXED-PROPERLY; M4 INSUFFICIENT at one edge → R2-1;
+new findings 1 MINOR · 2 NIT, ZERO new BLOCKER/MAJOR ⇒ no round 3 (the ladder rule); the
+reviewer's own headless verification matched F1's counts exactly (2335/269 + 40/6 + 44/8).
+
+### ROUND-2 DISPOSITIONS (the orchestrator, under the overnight mandate)
+
+| finding | disposition |
+|---|---|
+| **R2-1** (MINOR — a press landing while state == .opening runs the adoption over a store the pool is opening; edits can land in the moved-aside file) | **ACCEPTED — F2 fixes.** The honest shape is SUSPEND-AT-FLOW-BEGIN or await-then-re-route for `.opening`; F2 re-traces and picks, the reviewer's named red-on-old pin binds. The M4 disposition's letter ("the probe stops before work on every adoption road") is only now fully satisfied. |
+| R2-2 (NIT — `handOffDoor` is dead copy; the registry verb renders instead) | ACCEPTED — F2: ONE source of truth — the registry's declared verb reads the copy constant (so the 13s table's re-voicing is real), or the dead constant dies; F2 picks the one-line honest shape and pins it. |
+| R2-3 (NIT — one unattributed full-suite flake, name lost) | **RECORD-ONLY:** unattributed on the evidence; the next two full-suite runs (F2's close + the closeout baseline) watch for recurrence; if seen again with a name, it gets its own trace — never a blind fix. |
+
+### FIX SESSION F2 BRIEF (a FRESH Fable; the ladder's tail — small and strictly scoped)
+
+Read: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md`; **this file's DISPOSITIONS
+tables (both rounds), the F1 RECORD, and `notes/plans/13x-ladder-round2.md` WHOLE** (R2-1's
+trace + named pin bind); then only the code the report names (`LibraryOpenModel.swift:347–352`,
+`AppBootstrap.swift:229–231`, the hand-off faces for R2-2). **Do:** (1) R2-1 per its
+disposition — your own re-trace first, then the fix, the named pin red-on-old verified by
+behavioural revert; (2) R2-2's one-line honest shape + its render pin; (3) the full core suite
+headless at close (watching for R2-3's flake — if it recurs, RECORD name + output, fix
+nothing). Fences as F1's (no Migrations, no new Sync/ lines expected — R2-1's seam is Shared;
+her store never). Stage: likely NOT needed (headless pins reachable per the report's test
+shape); if a Mac run is truly owed, the lock file arbitrates — honest short claim. Append
+`### F2 RECORD`; commit per fix, push; close "F2 CLOSED" with the finding map + final counts.
