@@ -422,7 +422,7 @@ PROVISIONAL otherwise, recorded per row.
 | 1 | The classifier (verdict table pinned) | DONE (811c1e23 + the red-first evidence below) |
 | 2 | The hand-off producer (folder pair; round-trip pin) | BUILT, compiles (`build-for-testing` green); pins PENDING — the Mac-suite run waits on the stage (held by the VM-5 merge orchestrator at claim time); runs before U1 closes |
 | 3 | Adopt-by-copy move-aside brain | DONE (this commit; `LibraryAdoptionTests` 5/5 — mechanics PROVISIONAL P-U1-5) |
-| 4 | Custody-collision memo + rule | MEMO WRITTEN (below, before the code); rule NOT-STARTED |
+| 4 | Custody-collision memo + rule | DONE (memo at d2ca39f9 BEFORE the code; rule this commit, `CustodyCollisionRuleTests` 4/4; read-only composition confirmed — nothing re-sequences to U2's post-merge half) |
 | 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | NOT-STARTED — design settled below |
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage free at seat.
@@ -537,6 +537,10 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
+- **Row 4 — `CustodyCollisionRuleTests`, 4/4 green** (headless): the memo's three arms
+  (same-key aligned · older-key adopts the opener · no-custody mints fresh) plus the
+  production-fingerprint shape pin. The rule is a pure DECISION; the write it names is the
+  existing custody save door, U2's door act — no custody/keychain code was touched.
 - **Row 3 — `LibraryAdoptionTests`, 5/5 green** (headless): the whole-move happy path (old
   library aside WHOLE and still opening by its own key; the A1-shaped safety copy; the
   landed copy byte-identical, its key file under the canonical name, served by `locate`
