@@ -428,6 +428,18 @@ instead. The orchestrator's call; flagged, not decided.
   the architect lands the `Sync/` registry + walk + export-test accommodation; the implementer
   resumes P5–P9. The P-13o-U1-1…4 date-parse provisionals ride to the closeout ratify bundle.
 
+#### SEAM 2 — LANDED (the architect's own commit, 2026-10-06; the granted `Sync/` slot)
+
+The derived set is in: `SyncSchema.derivedTables = SearchIndex.tables` (one source of truth,
+same module); the completeness walk now pins `localOnly ∪ derived == schema − synced` AND the
+two sets disjoint; `StorePlaintextExport` is byte-unchanged (drops `localOnlyTables` alone) with
+its doc comment carrying the ruling and a NEW pin — `theExportKeepsTheDerivedSearchIndexWorking`:
+the exported file carries the six tables and answers `MATCH 'lighthouse'` through a bare
+connection. Suites: SyncSchemaTests + StorePlaintextExportTests + MigrationTests 42/42 green.
+**P4's rider RULED: `idx_container_undated_created` is APPROVED** — local-only, partial, no
+§12 event (the v1_15/v1_17 index precedent: mirrors carry no client indexes), no shipped query
+states its condition; it serves the worn-day seek and stays. The implementer resumes P5–P9.
+
 #### §R-13o-4 RECORD — the Phase-2 re-assessment protocol, run for the third trigger duty (P3; written before any trigger line)
 
 The protocol (`notes/plans/phase-02-operations-lifecycle.md`, Risks — "the trigger smell"):
