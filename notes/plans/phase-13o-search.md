@@ -43,3 +43,31 @@ beside you. Declare this phase's surfaces at kickoff against the in-flight table
 screen or a store — every `xcodebuild test` run, walks, Debug launches — claims `Tools/stage`
 first; headless `swift build`/`swift test` is yours freely. Cast, ladder, closeout ritual, hard
 stop: CLAUDE.md as ever; the closeout retires this effort's in-flight row and the PR merges.
+
+---
+
+## STATUS — SEATED, PREFLIGHT DONE, DESIGN SITTING OPEN (2026-10-06, the orchestrator)
+
+Seated per the skill's workspace setup: worktree `~/dev/variorum-13o`, branch `vx-5-13o-search`
+ff'd to main (18270b70) with upstream set; VX-5 moved **In Progress**. Preflight complete
+(CLAUDE.md + canon, the workflow transition record, the in-flight table, main's TICKETS.md,
+QUESTIONS.md's open tail + the search-adjacent entries #63/#104/#157/#187, the 13i sitting
+record §12/§21, SyncSpec §12 + §3's local-only precedent, the 13p FTS5 spike record, and the
+shipped code: `Queries.searchCatalog`/`catalogBooks`/`catalogBlocks`/`catalogPostsSQL` +
+`editedOnClause`, `LibraryCatalogModel.listing` (17y B1 paging, `blockCap = 40`),
+`CommandPalette`, `EditorFind`, `TakesFind*`, `SyncSchema.localOnlyTables`, `Triggers.swift`).
+
+**SURFACES DECLARED (vs the in-flight table):** `Sources/VariorumCore/Queries/` ·
+`Sources/VariorumCore/Domain/` (pure query/match rules) · `Sources/VariorumCore/Persistence/`
+(one migration if an index is ruled in) · `App/Variorum/Variorum/Features/Library/` ·
+`Features/CommandPalette/` · possibly a new `Features/Search/` module and a within-book face in
+`Features/BookView/`. **Two flagged seams, held for the author at the sitting:** (1) a new
+local-only index table must join `SyncSchema.localOnlyTables` (`Sync/SyncSchema.swift`) — a
+data-only registry line, but a `Sync/` line all the same, and 13x holds the slot; (2)
+`Persistence/Migrations.swift` is append-shared with any other effort minting a migration —
+13o claims its migration id at the sitting and records it here. No custody, no keychain, no
+editor-core internals anticipated (any in-note landing rides the existing `LandingTarget` /
+find-bar machinery; TEXTKIT2_NOTES joins the required reading of any batch that touches a pane).
+
+The DESIGN SITTING's brief + question agenda were delivered to the author in-session this turn;
+her rulings land here verbatim as they arrive, then the execution plan is authored below.
