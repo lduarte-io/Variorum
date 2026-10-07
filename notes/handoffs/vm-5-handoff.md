@@ -8,11 +8,18 @@
       filters, the per-note tray, the ⋯ vocabulary, the fan's hands, block multi-select, the
       starred page, the shelf↔library swipe band, New Note/New Chapter in a book — now at
       marker 12 with all of main's two months beside them. Just open it.
-- [ ] **VM-10 runs overnight/next** (your only pull-forward): the Write page's scroll authority —
-      the arrival, the new-line forced scroll, and the scroll-back fight, under your rule
-      *"showing empty space should be allowed if you scroll there but it shouldn't be forced."*
-      Its worktree is cut; it starts at 13o's stage slot (the queue: 13x → vx-75 → VM-10). If it
-      lands before you wake, a SECOND install will be offered on your checklist's refresh.
+- [x] **VM-10 IS DONE AND ON YOUR PHONE TOO** (PR #132, second wifi install, clean). The
+      "drives me insane" bug's real cause was UIKit's own caret reveal padding the line by the
+      typewriter room — now: opening a note restores where you left it (caret included), ⏎
+      reveals one line instead of a page of empty room, and nothing programmatic scrolls while
+      your finger is on the page. Your rule is the law in the code: empty space shows only when
+      YOU scroll there. (The "opens at the top" arrival half turned out HOLLOW — the text-less
+      page was always the reveal; recorded honestly.)
+- [ ] **Ratify #200(a–c)** (the VM-10 PROVISIONALs): (a) the 0.6 s your-gesture window — with
+      its consequence addendum read (it can swallow a typed-caret reveal or a find-next scroll
+      for ≤0.6 s after a pan; the reviewer's optional tightening — typing voids the window — is
+      one word away); (b) the caret rides the place memory; (c) the memory lives on the shell
+      router, session-only.
 - [ ] **The device queue when you have a window** (VM-13, one trip): the selection-defect
       experiment (one minute), the Face ID walk, the 100k Sherlock perf leg, M16, D9, the emoji
       overlap, the swipe band's real pan.
@@ -32,7 +39,7 @@
       (this session's own floor, so it could not saw it off; `origin/mobile` and the tag are
       already handled at the close).
 
-## MERGED: PR #131, merge commit `750eafde` (2026-10-07) · the ritual ran (`0f0624e7`) · `origin/mobile` retired behind tag `archive/mobile-2026-10`
+## MERGED: PR #131 (`750eafde`) + VM-10 PR #132 (`ae7c3bb3`) · the ritual ran · `origin/mobile` retired behind `archive/mobile-2026-10` · BOTH builds installed to your phone overnight
 
 ## What happened (one paragraph)
 
