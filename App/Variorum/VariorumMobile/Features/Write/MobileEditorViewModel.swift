@@ -1791,13 +1791,17 @@ final class MobileEditorViewModel {
         // `fallbackVerdict`, which recomputes against the pre-edit index
         // and cannot produce a negative length for a deletion (the trace's
         // §3a lemma). Rejecting an arming never refuses the EDIT; it only
-        // declines the shortcut.
+        // declines the shortcut. `binds` = the geometry (`describes`) plus
+        // the CONTENT check `.openTail` needs (VM-5 stability pass, MAJOR 2:
+        // a stale tail-opening arming must never bind a gate-less character
+        // that is not the newline it means).
         let armed = pendingEdit
         pendingEdit = nil
         let bound = armed.flatMap {
-            $0.describes(
+            $0.binds(
                 editedRange: editedRange, delta: delta,
-                documentLength: index.documentLength) ? $0 : nil
+                documentLength: index.documentLength,
+                landedText: { viewText($0) }) ? $0 : nil
         }
         // E1 — the settling experiment's REPORT half: the numbers that
         // decide whether the gate and the storage report are 1:1 inside one

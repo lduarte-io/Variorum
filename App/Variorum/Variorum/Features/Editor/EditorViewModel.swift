@@ -1225,13 +1225,17 @@ final class EditorViewModel {
         // (`MarkdownActs.apply`, `toggleCheckbox`,
         // `insertNewlineContinuingLists`, `deleteWithoutNewline`) is one
         // refactor away from separating an arming from its
-        // `replaceCharacters`; the binding makes that harmless.
+        // `replaceCharacters`; the binding makes that harmless. `binds` adds
+        // the CONTENT check `.openTail` needs to `describes`' geometry (VM-5
+        // stability pass, MAJOR 2 — the shared binding's hole, so both
+        // consumers collect the guard at once).
         let armed = pendingEdit
         pendingEdit = nil
         let bound = armed.flatMap {
-            $0.describes(
+            $0.binds(
                 editedRange: editedRange, delta: delta,
-                documentLength: index.documentLength) ? $0 : nil
+                documentLength: index.documentLength,
+                landedText: { viewText($0) }) ? $0 : nil
         }
         if armed != nil, bound == nil {
             // M13's Mac twin (round-2 ladder round 1, MINOR 5): the paste's

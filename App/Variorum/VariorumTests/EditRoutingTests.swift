@@ -133,6 +133,59 @@ struct ArmedEditTests {
             editedRange: NSRange(location: 22, length: 1), delta: 1, documentLength: 22),
             "the tiling changed under the arming (a render or a crystallization)")
     }
+
+    /// **VM-5 stability pass, MAJOR 2 — the CONTENT half, as a pure rule.**
+    /// `binds` = `describes` + the one content check: an `.openTail` arming
+    /// binds only when the landed character IS the newline it means; every
+    /// other verdict is content-agnostic and binds on geometry alone. (The
+    /// behavioural red-on-old pins are the two
+    /// `aStaleOpenTailArmingNeverBindsAGateLessCharacter`s — this one states
+    /// the rule they rest on, and that the reader is asked only for
+    /// `.openTail`.)
+    @Test func anOpenTailArmingBindsOnlyTheNewlineItMeans() {
+        let openTail = ArmedEdit(
+            verdict: .openTail, range: NSRange(location: 5, length: 0),
+            documentLength: 5, replacementLength: 1)
+        let landing = (editedRange: NSRange(location: 5, length: 1), delta: 1, length: 5)
+        /// Binds `edit` against a landing whose bytes read `landed`; answers
+        /// whether it bound and how many times the reader was consulted.
+        func binds(_ edit: ArmedEdit, landed: String) -> (bound: Bool, reads: Int) {
+            var reads = 0
+            var askedFor: [NSRange] = []
+            let bound = edit.binds(
+                editedRange: landing.editedRange, delta: landing.delta,
+                documentLength: landing.length,
+                landedText: { range in
+                    reads += 1
+                    askedFor.append(range)
+                    return landed
+                })
+            #expect(askedFor.allSatisfy { $0 == NSRange(location: 5, length: 1) },
+                    "the reader is asked for exactly the landed bytes")
+            return (bound, reads)
+        }
+        #expect(openTail.describes(
+            editedRange: landing.editedRange, delta: landing.delta, documentLength: landing.length),
+            "the geometry alone cannot tell the two landings apart")
+
+        let newline = binds(openTail, landed: "\n")
+        #expect(newline.bound)
+        #expect(newline.reads == 1)
+        let character = binds(openTail, landed: "x")
+        #expect(!character.bound, "a gate-less character is not the separator the verdict declares")
+        #expect(character.reads == 1)
+
+        let block = ArmedEdit(
+            verdict: .block(index: 0), range: NSRange(location: 5, length: 0),
+            documentLength: 5, replacementLength: 1)
+        let agnostic = binds(block, landed: "x")
+        #expect(agnostic.bound)
+        #expect(agnostic.reads == 0, "content-agnostic verdicts never pay the read")
+        // Geometry still rules first: a moved index declines before content.
+        #expect(!openTail.binds(
+            editedRange: landing.editedRange, delta: landing.delta, documentLength: 6,
+            landedText: { _ in "\n" }))
+    }
 }
 
 // MARK: - The Mac editor's binding
@@ -319,7 +372,8 @@ struct MacEditRoutingTests {
                 #expect(model.identityAuditFailures == 0)
                 #expect(model.desyncRecoveryCount == 0)
                 await harness.flush()
-                #expect(try harness.storeSlots().compactMap(\.text) == ["Alphax"],
+                let stored = try harness.storeSlots().compactMap(\.text)
+                #expect(stored == ["Alphax"],
                         "the character reached the store instead of being stranded")
             }
         }

@@ -134,6 +134,9 @@ nonisolated struct ArmedEdit {
     ///
     /// A rejection is never a refusal of the EDIT — it only declines the
     /// shortcut, and the report is routed from scratch.
+    ///
+    /// **This is the GEOMETRY half; the consumers bind through `binds`**,
+    /// which adds the one CONTENT check a verdict's meaning needs (below).
     func describes(editedRange: NSRange, delta: Int, documentLength current: Int) -> Bool {
         guard documentLength == current else { return false }
         // Subsumes the earlier `-delta <= range.length` bound: an approved
@@ -149,6 +152,54 @@ nonisolated struct ArmedEdit {
         return range.length > 0
             ? editedRange.location < range.upperBound
             : editedRange.location <= range.upperBound
+    }
+
+    /// **THE BINDING both `storageDidEdit`s consume through: the geometry
+    /// above, then the CONTENT check for the one verdict whose meaning IS
+    /// content** (VM-5 stability pass, MAJOR 2).
+    ///
+    /// `describes` polices where an edit landed and by how much — never WHAT
+    /// landed — and for three of the four armable verdicts that is the whole
+    /// truth: `.block` and `.tail` are content-agnostic (any characters in
+    /// that region belong to it), and `.closeTail` is a deletion (it lands
+    /// no bytes to read, and while the arming describes its report the
+    /// character it removed at the separator offset WAS the separator).
+    ///
+    /// **`.openTail` is the exception.** The gate arms it only for a typed
+    /// `"\n"` at the exact document end, and consuming it declares that
+    /// character a SEPARATOR. A gate-LESS one-character insert of anything
+    /// else at that spot (autocorrect, dictation, a marked-text commit
+    /// arriving after an armed newline that never landed — the consult/
+    /// perform mismatch class E1 proved on her hardware) passes every
+    /// geometry oracle — same length, net +1, the empty approval's inclusive
+    /// bound — and the old binding opened an empty tail over a visible
+    /// character: unowned, never autosaved, dropped at the next full render.
+    /// So the landed bytes are read here (`replacementLength` characters at
+    /// the approval's location — `describes` has just proven the landing
+    /// starts there and nets exactly that), and anything but the separator
+    /// declines the arming; `fallbackVerdict` then routes the report from
+    /// scratch and answers the block the character joined.
+    ///
+    /// `landedText` reads the POST-edit surface (the storage the report
+    /// describes); it is consulted only for `.openTail`, so the ordinary
+    /// keystroke pays nothing. The switch is EXHAUSTIVE on purpose: a new
+    /// armable verdict must decide here whether its meaning is content.
+    func binds(
+        editedRange: NSRange, delta: Int, documentLength current: Int,
+        landedText: (NSRange) -> String
+    ) -> Bool {
+        guard describes(editedRange: editedRange, delta: delta, documentLength: current)
+        else { return false }
+        switch verdict {
+        case .openTail:
+            // "\n" is what the gate approved (`replacementIsSingleNewline`)
+            // and what the tail's separator IS (`openTail()`'s own doc: the
+            // typed newline that opened the tail is the separator before it).
+            return landedText(NSRange(location: range.location, length: replacementLength))
+                == EditorDocument.separator
+        case .block, .tail, .closeTail, .refuse:
+            return true
+        }
     }
 }
 
