@@ -344,6 +344,11 @@ nonisolated enum TakesReplacePlan {
     }
 }
 
+// (13o U2: the FIND SEED — `EditorFindSeed` and its pure `FindSeedLanding` —
+// lives in `Shared/SearchLanding.swift`, beside the landing value it rides
+// with; the editor's half of land-at-match is `EditorViewModel.applyFindSeed`,
+// which runs this file's `performFind`.)
+
 // MARK: - The editor's find doors
 
 @MainActor

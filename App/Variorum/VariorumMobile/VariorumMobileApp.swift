@@ -191,10 +191,20 @@ struct VariorumMobileApp: App {
                         let furniture = MobileFirstWriteFurniture(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
+                            // Two ACCOUNT facts, and only account facts. The
+                            // A4 fence — a store that can never sync has no
+                            // corpus on its way, so it must never wait for
+                            // one — lives at `seedIfNeeded`, beside the
+                            // store variant it is a fact about (R2-3).
+                            // Composing it in here instead restated
+                            // `storeVariant` through a fourth closure and
+                            // let the unsafe pair be built.
+                            //
+                            // Captured STRONGLY, deliberately: the closures
+                            // outlive nothing (the seed is awaited right
+                            // here), and a nil'd weak reference would read as
+                            // "no account", which is the unsafe direction.
                             gate: MobileStarterJournal.SyncGate(
-                                // Captured STRONGLY, deliberately: a nil'd
-                                // weak reference would read as "no
-                                // account", which is the unsafe direction.
                                 belongsToAnAccount: {
                                     fresh.sync.isConfigured
                                         || fresh.account.variorum != nil

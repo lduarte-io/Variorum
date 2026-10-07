@@ -15,6 +15,37 @@
 //    (the parity inventory's headline). Move to Trash, confirmed, with the
 //    destination and the clock named.
 //
+//  **BATCH 6c ADDS THE NOTE'S TWO TIME CONTROLS** — `Save a Version` and
+//  `Versions…` — and the pairing IS a teaching surface, not a pair of rows
+//  (the archive/trash design record's finding 2). The Mac teaches the two
+//  sizes of moment with two chords: ⌘S saves THIS TAKE's moment, ⌘⇧S saves
+//  THIS NOTE's. The phone has no chord culture (PL-11's own words), so the
+//  teaching needs another home — and it already had one, because the phone
+//  keeps block acts in the **block ⋯** and note acts here. **As it stood
+//  at 6c, kept because it was TRUE WHEN WRITTEN** (`MobileBlockMenu`'s own
+//  convention for a superseded note):
+//
+//      block ⋯  →  Commit Take    +  Block History…
+//      note  ⋯  →  Save a Version +  Versions…
+//
+//  **THE BLOCK ROW OF THAT DIAGRAM IS HISTORY, NOT CURRENT** (round 2,
+//  batch 9 — her ⋯ letter: *"take history should move into the three ...
+//  menu on each take rather than the main three dot menu"*). `Block
+//  History…` left the block ⋯ and now lives on every live take card's
+//  own ⋯ in the takes browser (`MobileTakesBrowserController.historyTitle`),
+//  so the block grain's pair is broken on purpose — `MobileBlockMenu`'s
+//  header carries the whole reasoning. What SURVIVES is exactly the row
+//  below it: the NOTE ⋯ still holds its own *write a moment / see the
+//  moments* pair, which is now the only place the phone teaches it, and
+//  which is why this file's own shape did not change.
+//
+//  Two grains, and since batch 9 only ONE of them still holds its own
+//  *write a moment / see the moments* pair here. **PROVISIONAL — the
+//  design record's Q5:** it grows a
+//  three-row sheet to five, and the alternative (a sixth masthead chip) was
+//  refused because that row already wraps five and its crowding is flagged
+//  for her.
+//
 //  **Why a SHEET and not a `Menu`** (the inventory recommended a `Menu`;
 //  this is the recorded deviation, and it is the round's own trap-2 rule
 //  paying rent): a SwiftUI `Menu`'s rows present into a separate context-
@@ -47,6 +78,11 @@ struct MobileNoteActionsSheet: View {
     let tokens: VoiceTokens
     /// The note went — the screen must navigate away from a tombstone.
     let onDeleted: () -> Void
+    /// **Versions… (batch 6c)** — dismiss this sheet and push the note's
+    /// Versions screen. nil in harness/preview use, where the row is still
+    /// rendered and pinned: it is the DOOR that is optional, never the row,
+    /// so a pin can prove the row exists and fires.
+    var onOpenVersions: (() -> Void)?
     @State private var deletePresented = false
     @Environment(\.dismiss) private var dismiss
 
@@ -67,6 +103,11 @@ struct MobileNoteActionsSheet: View {
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
+            // The note's two TIME controls first — the grain pairing the
+            // phone teaches here instead of with chords (finding 2).
+            saveVersionRow
+            versionsRow
+            Divider().overlay(tokens.line)
             undoRow
             redoRow
             Divider().overlay(tokens.line)
@@ -138,6 +179,79 @@ struct MobileNoteActionsSheet: View {
                 .lineLimit(4)
                 .accessibilityLabel(message)
         }
+    }
+
+    /// **Save a Version** — ⌘⇧S's phone twin, and the whole note's moment.
+    /// The sentence is the shared one (`VersionsPath`): the Mac and the
+    /// phone must not describe one machinery two ways.
+    ///
+    /// The sheet STAYS UP: this is a save, not a departure, and its receipt
+    /// (or refusal) is what `reportLine` below renders — a refusal spoken
+    /// behind a covering sheet was §49's own MINOR.
+    private var saveVersionRow: some View {
+        actRow(
+            title: VersionsPath.saveVerb,
+            detail: Self.saveRowDetail,
+            tint: tokens.accent
+        ) {
+            let model = model
+            Task { await model.saveVersion() }
+        }
+    }
+
+    /// **Versions…** — the moments of this note. Dismiss the sheet, then ask
+    /// the shell to push.
+    ///
+    /// **The order is deliberate; the "proven road" claim this comment used
+    /// to make was not** (the cold review's m4). It cited the shell's
+    /// settings-sheet grammar — which is DEBUG-only, unpinned, and a
+    /// different shape: there the shell flips its own `settingsPresented`
+    /// flag and appends to the path in ONE scope, while here an
+    /// environment `dismiss()` inside the sheet is followed by a callback up
+    /// the tree. Nothing was measured, and no failure was ever traced. What
+    /// the fix wave did instead of re-asserting it: DRIVE the composed road
+    /// on a mounted `MobileShellView`
+    /// (`MobileVersionsTests.theVersionsRowOpensTheRoomThroughTheWholeShell`),
+    /// so the claim is a pin rather than a comment.
+    private var versionsRow: some View {
+        actRow(
+            title: VersionsPath.menuLabel,
+            detail: Self.versionsRowDetail,
+            tint: tokens.accent
+        ) {
+            dismiss()
+            onOpenVersions?()
+        }
+    }
+
+    // MARK: - The two rows' own detail lines (phone-voiced, and listed)
+
+    /// **These two lines are the phone's OWN, and that is a recorded gap
+    /// rather than a licence** (the cold review's m2). `VersionsCopy` holds
+    /// every SENTENCE about the machinery; what it has no home for is a
+    /// menu row's one-line detail, which is a face fact — an iOS sheet row
+    /// has a subtitle and a Mac menu item does not.
+    ///
+    /// The first draft's save-row line read *"saves this whole note as it is
+    /// right now"* — one word off a clause inside `VersionsPath.empty`, i.e.
+    /// the same sentence living twice, which is exactly what that shared
+    /// file's header forbids. It is re-voiced here to say what the row
+    /// LEAVES BEHIND rather than to restate the act, and the pin
+    /// (`theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed`)
+    /// enumerates all four phone-voiced Versions strings and holds them
+    /// clear of the shared sentences.
+    ///
+    /// **`VersionsPath.saveDetail` is the durable answer** and it is on the
+    /// next Shared-touching batch's list (`Shared/` is fenced this round).
+    static let saveRowDetail = "keeps a moment of the note, to come back to"
+
+    /// Composed from the shared VERBS rather than invented: this row's
+    /// detail is a list of what is behind the door, and those three words
+    /// are `VersionsPath`'s own.
+    static var versionsRowDetail: String {
+        "\(VersionsPath.openVerb.lowercased()), "
+            + "\(VersionsPath.restoreVerb.lowercased()) or "
+            + "\(VersionsPath.promoteVerb.lowercased()) a saved moment"
     }
 
     /// The stack's undo end. Rendered only when there IS one — P-2: a door

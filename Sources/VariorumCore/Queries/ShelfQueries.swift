@@ -951,17 +951,38 @@ extension Queries {
                 """,
             arguments: StatementArguments(
                 [trimmed, like] + (readingScope?.arguments ?? []) + [limit ?? -1]))
-        return books.map {
-            CatalogHit(
-                kind: .book, id: $0["id"], title: $0["name"],
-                // 13i-d U6 (a): the ruled nouns (the sitting record §1 —
-                // "smart" retired app-wide, §14): a GATHERING is never a
-                // book, and a SEALED book says so (Finished = the table of
-                // contents is done; Sealed = the book is done, §5).
-                detail: ($0["kind"] as String) == "gathering" ? "gathering"
-                    : (($0["sealed_at"] as String?) != nil ? "sealed book"
-                       : (($0["locked"] as Int) == 1 ? "finished book" : "book")))
-        }
+        return books.map(catalogBookHit)
+    }
+
+    /// One book row as the catalog names it — factored at 13o U2 so the
+    /// search state's book rows wear the same words.
+    static func catalogBookHit(_ row: Row) -> CatalogHit {
+        CatalogHit(
+            kind: .book, id: row["id"], title: row["name"],
+            // 13i-d U6 (a): the ruled nouns (the sitting record §1 —
+            // "smart" retired app-wide, §14): a GATHERING is never a
+            // book, and a SEALED book says so (Finished = the table of
+            // contents is done; Sealed = the book is done, §5).
+            detail: (row["kind"] as String) == "gathering" ? "gathering"
+                : ((row["sealed_at"] as String?) != nil ? "sealed book"
+                   : ((row["locked"] as Int) == 1 ? "finished book" : "book")))
+    }
+
+    /// **The catalog's book rows for named books** (13o U2 — the search
+    /// state's Books section: the books a book or chapter hit names), in the
+    /// order given, the dead ones dropped. Bounded by the ids.
+    public static func catalogBookHits(_ db: Database, ids: [String]) throws -> [CatalogHit] {
+        guard !ids.isEmpty else { return [] }
+        let json = String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.name, r.kind, r.locked, r.sealed_at
+                FROM json_each(?) j CROSS JOIN reading r ON r.id = j.value AND r.deleted_at IS NULL
+                ORDER BY j.key
+                """,
+            arguments: [json])
+        return rows.map(catalogBookHit)
     }
 
     /// **The catalog's BLOCK arm** — named blocks anywhere and scraps by their
@@ -1101,18 +1122,28 @@ extension Queries {
     /// `theSavepointArmIsDrivenByTheDaysOwnSavepoints` (the plan) and
     /// `theDaySearchsWorkTracksTheDaysSavepointsNotTheCorpusBlocks` (the
     /// steps).
-    static let editedOnClause = """
-        (
-             (COALESCE(last_touched_at, created_at) >= ?
-              AND COALESCE(last_touched_at, created_at) < ?)
-          OR id IN (
-               SELECT cb.container_id FROM commit_point cp
-               JOIN variant v ON v.id = cp.variant_id
-               JOIN container_block cb ON cb.block_id = v.block_id
-                AND cb.deleted_at IS NULL
-               WHERE cp.created_at >= ? AND cp.created_at < ?)
-        )
-        """
+    static let editedOnClause = editedOnSQL(alias: nil)
+
+    /// The ONE "edited in this window" rule, over a container named `alias`
+    /// (13o U1 — the search composer's day-RANGE filter reads it through
+    /// `SearchComposer.Environment`, so the rule ships once). `nil` is the
+    /// shipped unqualified statement, byte for byte (`editedOnClause`).
+    /// Placeholders, in order: start, end, start, end.
+    static func editedOnSQL(alias: String?) -> String {
+        let q = alias.map { "\($0)." } ?? ""
+        return """
+            (
+                 (COALESCE(\(q)last_touched_at, \(q)created_at) >= ?
+                  AND COALESCE(\(q)last_touched_at, \(q)created_at) < ?)
+              OR \(q)id IN (
+                   SELECT cb.container_id FROM commit_point cp
+                   JOIN variant v ON v.id = cp.variant_id
+                   JOIN container_block cb ON cb.block_id = v.block_id
+                    AND cb.deleted_at IS NULL
+                   WHERE cp.created_at >= ? AND cp.created_at < ?)
+            )
+            """
+    }
 
     // MARK: - The note picker's feed (pre-13u Act 10, item 14)
 

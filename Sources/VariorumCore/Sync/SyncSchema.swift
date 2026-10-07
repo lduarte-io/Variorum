@@ -349,6 +349,17 @@ public enum SyncSchema {
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
     ]
 
+    /// DERIVED machinery — equally local-only under SYNC (never in a payload
+    /// or a mirror; the completeness walk subtracts this set beside the one
+    /// above and pins the two disjoint) but KEPT by the plaintext export:
+    /// the search index is derivable from the rows the export carries, and
+    /// the no-lock-in file should open with WORKING full-text search and
+    /// satisfied capture triggers rather than growing the outbox's recorded
+    /// broken-trigger consequence a second instance (13o §FORK RULINGS,
+    /// 2026-10-06 — the derived-set ruling; the architect's seam-2 commit).
+    /// `StorePlaintextExport` drops `localOnlyTables` ALONE.
+    public static let derivedTables: Set<String> = SearchIndex.tables
+
     private static let byName: [String: SyncTable] = Dictionary(
         uniqueKeysWithValues: tables.map { ($0.name, $0) })
 

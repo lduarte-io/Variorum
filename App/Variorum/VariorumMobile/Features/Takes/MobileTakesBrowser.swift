@@ -75,6 +75,21 @@ final class MobileTakesBrowserController {
     /// tap that changed nothing.
     private let mintLatch = MobileWriteLatch()
 
+    /// **THE STRUCTURAL DOORS' LATCH (batch 7 — the `commitNow` rider's own
+    /// criterion, applied forward).** `takeToBlockBelow` and `takesToBlocks`
+    /// each MINT rows, and `takesToBlocks` mints a whole run of them; both
+    /// await a flush before they write, which is a wide window. The card ⋯'s
+    /// row dismisses on the first tap and could not fire twice, but **"All
+    /// Takes to Blocks" is a persistent chrome BUTTON in the sheet's actions
+    /// row** — the exact non-dismissing host the rider names — so the pair
+    /// latches rather than only the one that needs it (a door and its twin
+    /// with different concurrency rules is the drift class).
+    ///
+    /// Separate from `mintLatch` deliberately: a take mint and a structural
+    /// conversion are different gestures, and one wedging the other would be
+    /// a refusal she never asked for.
+    private let structureLatch = MobileWriteLatch()
+
     /// The pixels' hook: state or content changed — re-render the sheet.
     var onChanged: (() -> Void)?
 
@@ -223,6 +238,53 @@ final class MobileTakesBrowserController {
         } catch {
             model.report(Self.refusalMessage(error, verb: .label))
         }
+    }
+
+    // MARK: - History (batch 9 — HER MOVE: the door leaves the block ⋯ and
+    // lands on each take's own card)
+
+    /// The card ⋯'s history row, verbatim her instruction: *"take history
+    /// should move into the three ... menu on each take rather than the main
+    /// three dot menu."*
+    ///
+    /// **The word is COMPOSED from the shared face's own name, never written
+    /// again** (`BlockHistoryPath.name`, `Shared/BlockHistoryFace.swift`) —
+    /// the block ⋯ carried a `"Block History…"` literal, and moving a row is
+    /// exactly the moment a literal becomes two literals. It still reads
+    /// `Block History…` byte-for-byte, which is also the honest word for
+    /// what opens: the face is the BLOCK's whole past (batch 6a's F2
+    /// rename), reached from a take rather than scoped to one.
+    ///
+    /// **`nonisolated` since batch 9's fix wave (cold-review MAJOR 2):**
+    /// the pocket guide's two history lessons compose this row's word
+    /// instead of re-typing it — they had gone on teaching the retired
+    /// block-⋯ road for a whole batch — and `MobileTutorialSeeder` runs
+    /// off the main actor. Composition is what makes the walk's pin red
+    /// on the next move rather than merely stale.
+    nonisolated static var historyTitle: String { "\(BlockHistoryPath.name)…" }
+
+    /// Opens the Block History face on the open block, with THIS take's
+    /// savepoint run expanded.
+    ///
+    /// **It closes the browser first, and that is the phone's own established
+    /// grammar rather than a compromise:** the note ⋯'s `Versions…` row
+    /// dismisses its sheet and then asks the shell to push. Two reasons make
+    /// it the right one here too. The mechanical one: both faces are overlay
+    /// views installed lazily as SIBLINGS on the page's host, so their z-order
+    /// is whichever opened FIRST in the session — a history sheet raised over
+    /// a live browser would render under it for anyone who had opened the
+    /// browser first, and neither view is `accessibilityViewIsModal`, so both
+    /// surfaces' labels would sit in one tree. The product one: the browser
+    /// is where you CHOOSE a take and the history face is where you read what
+    /// a block has been — one subject at a time is the phone's calm default.
+    ///
+    /// `close()` also flushes (through `refreshTakesFromStore`), so a card
+    /// edited a keystroke ago is in the store before the face reads it — the
+    /// standing flush-first contract, and the reason this is async.
+    func openHistory(variantID: String) async {
+        guard let model, let blockID = openBlockID else { return }
+        await close()
+        model.blockHistory.open(blockID: blockID, focused: variantID)
     }
 
     /// Back into the fan — the road the archive refusals name.
@@ -480,6 +542,167 @@ final class MobileTakesBrowserController {
         model.recordTakeEdit(variantID: variantID, text: text, charDelta: cost)
     }
 
+    // MARK: - Fan ORDER (PL-10(a) — the phone's face on `reorderTake`)
+
+    /// **The reorder door, composed from the Mac's ruled semantics (#57).**
+    /// Move a take one place EARLIER (`delta < 0`) or LATER in its block's
+    /// fan. The card ⋯'s Move Take Up / Move Take Down rows call this.
+    ///
+    /// **NO DRAG, deliberately, and the call is recorded rather than
+    /// re-derived:** the phone's card list is a scroll of manual-frame cards
+    /// inside an overlay sheet, and 13e's canvas-drag rider (the jitter fix)
+    /// named a coordinate-space rule that any new drag on this app owes —
+    /// a first iOS drag-reorder is its own project, not a row in a takes
+    /// batch. Two menu rows are the phone-native shape (the phone has no
+    /// chord culture either — #57(d)'s keyless arrows read as menu rows
+    /// here).
+    ///
+    /// **The Mac's shipped answer, matched arm for arm** (`TakesStructure
+    /// Controller.moveTake`):
+    /// - **flush first, then read the fan FROM THE STORE.** The takes
+    ///   projection is deliberately frozen while a buffer is dirty, so a
+    ///   projection-read neighbour is an ENABLEMENT hint and never an
+    ///   authorization — a take that arrived mid-burst would otherwise make
+    ///   the move land beside the wrong card. This is the very room B45-2's
+    ///   structural fix exists for, one layer up.
+    /// - **stepping happens within the ACTIVE fan** (#57(b)): an archived
+    ///   take keeps its own key and is neither stepped onto nor stepped over.
+    /// - **the ends refuse by name** (#57(e)'s "greys rather than vanishing",
+    ///   in the phone's register: the row is rendered DISABLED at the end it
+    ///   cannot move, and this belt still speaks if the store disagrees with
+    ///   what the card showed).
+    /// - **a LOCKED take may be moved** (#57(a)) — the lock freezes the
+    ///   BUFFER, not identity metadata; the op's own rule, not a door's.
+    /// - **no touch, no churn** (#57(c)) — the op's, and nothing here adds any.
+    ///
+    /// **No latch, and the reason is the rider's own criterion:** every
+    /// caller is a `UIMenu` row, which dismisses on the first tap, so the
+    /// door cannot fire twice. A future non-dismissing host takes
+    /// `MobileWriteLatch` the same day.
+    func moveTake(variantID: String, by delta: Int) async {
+        guard let model, let blockID = openBlockID, delta != 0 else { return }
+        guard await model.flushPendingText() else { return }
+        let fan: [Variant]
+        do {
+            fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+        } catch {
+            model.report(Self.refusalMessage(error, verb: .reorder))
+            return
+        }
+        let active = fan.filter { $0.status == .active }
+        guard let index = active.firstIndex(where: { $0.id == variantID }) else {
+            model.report(Self.fanChangedRefusal)
+            return
+        }
+        let target = index + delta
+        guard active.indices.contains(target) else {
+            model.report(delta < 0 ? Self.alreadyFirstRefusal : Self.alreadyLastRefusal)
+            return
+        }
+        let anchor = active[target].id
+        do {
+            try await runner.run { ops in
+                try ops.reorderTake(
+                    variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
+            }
+            model.report(delta < 0 ? Self.movedUpNote : Self.movedDownNote)
+            await model.refreshTakesFromStore()
+            onChanged?()
+        } catch {
+            model.report(Self.refusalMessage(error, verb: .reorder))
+        }
+    }
+
+    /// Can this card step in this direction? The card ⋯ reads it to render
+    /// the row DISABLED rather than absent at the fan's end (#57(e)'s
+    /// "greys rather than vanishing"). A projection read, so it is an
+    /// enablement HINT — `moveTake` re-decides from the store.
+    func canMoveTake(variantID: String, by delta: Int) -> Bool {
+        let cards = cards()
+        guard cards.count > 1,
+              let index = cards.firstIndex(where: { $0.variantID == variantID })
+        else { return false }
+        return cards.indices.contains(index + delta)
+    }
+
+    // MARK: - Take ↔ block structure (PL-10(d) — the phone's face on the
+    // AR-1 ops; the semantics are #58's and are never re-decided here)
+
+    /// **Her A20 on the phone** (`takeToBlockBelow`): this take leaves the
+    /// fan and becomes its own block directly below.
+    ///
+    /// **AR-1 in one line: the new block gets a COPY and the original is
+    /// ARCHIVED on its own block** — never a row move. Everything the door
+    /// could be tempted to pre-check is decided INSIDE the write instead
+    /// (fan arity/I10, the blank take, the seal, a locked take's
+    /// permission), which is the Mac's own posture and the only honest one
+    /// over a deliberately-frozen projection: this door offers the row and
+    /// speaks the op's real answer.
+    ///
+    /// **The op registers its own structural undo AND redo** — verified at
+    /// `Operations+TakeStructure.registerTakeConversions`, one entry
+    /// carrying inverse and redo from do-time pre-images — so nothing is
+    /// registered here (a second registration would be two entries for one
+    /// act).
+    func takeToBlockBelow(variantID: String) async {
+        guard let model, let blockID = openBlockID else { return }
+        await structureLatch.run {
+            guard await model.flushPendingText() else { return }
+            do {
+                try await self.runner.run { ops in
+                    _ = try ops.takeToBlockBelow(blockID, variantID: variantID)
+                }
+                model.report(MobileTakeStructureCopy.movedNote, action: .undo)
+                await model.refreshTakesFromStore()
+                await self.reloadArchived()
+                self.onChanged?()
+            } catch {
+                model.report(Self.refusalMessage(error, verb: .takeToBlock))
+            }
+        }
+    }
+
+    /// **Her A21's second half on the phone** (`takesToBlocks`): every OTHER
+    /// take of this block becomes its own block below it, in fan order,
+    /// under ONE undo entry.
+    ///
+    /// **The block keeps showing what it showed** (#58(c)) — the take the
+    /// slot RENDERS stays put and the alternates become the run below it, so
+    /// the note reads exactly as it read. Blank takes are SKIPPED and the
+    /// receipt says so (#58(d)); archived takes ride nowhere (#58(f)). All
+    /// of that is the op's; this door carries the flush, the latch and the
+    /// words.
+    func takesToBlocks() async {
+        guard let model, let blockID = openBlockID else { return }
+        await structureLatch.run {
+            guard await model.flushPendingText() else { return }
+            do {
+                let result: Operations.TakesToBlocksResult
+                    = try await self.runner.run { ops in
+                    try ops.takesToBlocks(blockID)
+                }
+                model.report(
+                    MobileTakeStructureCopy.convertedNote(
+                        blocks: result.converted.count,
+                        skippedBlanks: result.skippedBlankTakes),
+                    action: .undo)
+                await model.refreshTakesFromStore()
+                await self.reloadArchived()
+                self.onChanged?()
+            } catch {
+                model.report(Self.refusalMessage(error, verb: .takesToBlocks))
+            }
+        }
+    }
+
+    /// Is there anything for "All Takes to Blocks" to convert? P-2's
+    /// enablement hint for the chrome door — a fan with at least one OTHER
+    /// take. The op still owns the verdict (`noConvertibleTakes` when every
+    /// alternate is blank), and it speaks.
+    var canTurnTakesIntoBlocks: Bool { cards().count > 1 }
+
     // MARK: - Archive / delete (each card's ⋯)
 
     func archive(variantID: String) async {
@@ -554,7 +777,66 @@ final class MobileTakesBrowserController {
 
     // MARK: - Refusal copy (the ops' REAL refusals, in the phone's words)
 
-    enum Verb { case choose, branch, blank, archive, delete, lock, unlock, unarchive, label }
+    enum Verb {
+        case choose, branch, blank, archive, delete, lock, unlock, unarchive, label
+        /// Batch 7 (PL-10): the fan-order door and the two AR-1 doors.
+        case reorder, takeToBlock, takesToBlocks
+    }
+
+    // MARK: - Batch 7's row vocabulary (declared once — the card ⋯ renders
+    // it and the drift pin reads it; a title written at the menu would be a
+    // second copy of the same word)
+
+    /// The fan-order pair (PL-10(a)). "Up"/"Down" and not the Mac's
+    /// "earlier"/"later" because #57(e)'s rule is that the direction word
+    /// follows the strip, and the phone's cards are a vertical STACK — the
+    /// case the Mac itself draws ▲▼ for.
+    static let moveUpTitle = "Move Take Up"
+    static let moveDownTitle = "Move Take Down"
+    /// E5's row (PL-10(d)) — the block it mints stands immediately below,
+    /// which is the whole promise, so the title says so.
+    static let takeToBlockTitle = "Take to New Block Below"
+    /// E6b's chrome door, in the sheet's actions row (the one door onto the
+    /// block-scoped half of the pair).
+    static let takesToBlocksTitle = "All Takes to Blocks"
+
+    /// The card ⋯'s pre-batch-7 rows, promoted from menu literals to named
+    /// statics so `cardRowTitles` below is the ONE place the order lives and
+    /// the menu composes it (batch 7 adds three rows to this menu, which is
+    /// exactly the moment a literal becomes several literals — the
+    /// `historyTitle` lesson, applied to its neighbours).
+    static let labelRowTitle = "Label Take…"
+    static let lockTitle = "Lock Take"
+    static let unlockTitle = "Unlock Take"
+    static let archiveTitle = "Archive Take"
+    static let deleteTitle = "Delete Take"
+
+    /// The card ⋯'s rows in order, for one take, in the vocabulary's own
+    /// register (the pin's oracle — the rendered casing is `chromeCase`'s).
+    /// The move rows are always PRESENT once a fan exists and are DISABLED
+    /// at the end they cannot reach (#57(e): "greys rather than vanishing");
+    /// a one-take fan draws neither (P-2, and #57(e)'s own last clause).
+    static func cardRowTitles(fanned: Bool, locked: Bool) -> [String] {
+        var rows = [historyTitle, labelRowTitle]
+        if fanned { rows += [moveUpTitle, moveDownTitle] }
+        rows += [locked ? unlockTitle : lockTitle,
+                 takeToBlockTitle, archiveTitle, deleteTitle]
+        return rows
+    }
+
+    // MARK: - Batch 7's own words
+
+    /// The fan moved under the door between the card's render and the tap
+    /// (a remote archive, a delete on the Mac). It keeps her picks — there
+    /// is nothing to re-click — and mints nothing.
+    static let fanChangedRefusal = "This block's takes changed — try the move again."
+    static let alreadyFirstRefusal = "This take is already first in the fan."
+    static let alreadyLastRefusal = "This take is already last in the fan."
+    /// The receipts. "Up"/"Down" rather than the Mac's "earlier"/"later"
+    /// because the phone's cards are a vertical STACK and #57(e)'s own rule
+    /// is that the direction word follows the strip — ▲▼ in a stack.
+    static let movedUpNote = "Take moved up."
+    static let movedDownNote = "Take moved down."
 
     /// The in-sheet locked-take refusal (parity C4a — the unlock door is
     /// ON this card's ⋯, one tap away, so the copy points at it; the
@@ -593,8 +875,30 @@ final class MobileTakesBrowserController {
             case .unlock: "unlock a take"
             case .unarchive: "unarchive a take"
             case .label: "label a take"
+            case .reorder: "reorder takes"
+            case .takeToBlock: "move a take into a block"
+            case .takesToBlocks: "turn takes into blocks"
             }
             return "This note is locked — unlock it to \(act)."
+        // 13e batch 3's two AR-1 refusals, in the phone's register (the Mac
+        // words the same two facts in `OpsRefusalCopy`, which is Mac-app-
+        // local — the fork is recorded on the KnownIssues forked-brains row
+        // with every other copy home this app cannot reach).
+        case .emptyTakeCannotBecomeABlock:
+            return "That take is empty — there's no text to become a block."
+        case .noConvertibleTakes:
+            return "This block has no other takes with text in them — "
+                + "nothing to turn into blocks."
+        case .lastActiveVariant where verb == .takeToBlock:
+            // I10 through this door reads differently from the delete door's
+            // I10: nothing is being removed, so naming Delete Block would be
+            // wrong. It names the act that actually splits a block in two —
+            // and it names the PHONE's door for it, never a Mac chord
+            // (`MobileBlockMenuController.divideTitle`, composed so a rename
+            // reaches this sentence).
+            return "This block has only one take — a take moves out when there's "
+                + "another one left behind. Use \(MobileBlockMenuController.divideTitle) "
+                + "in the ⋯ menu instead."
         case .lastActiveVariant:
             // I10's letter: removing the last active take is not a take
             // operation — it is deleting the block. Since S4 batch 1 the

@@ -767,6 +767,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // the grouped-by control and the filter's terms are NOT acts — they
     // change what she sees, never the store (the Library `sort ▾` precedent).
     case openBookSettings, setJournalTrait, saveFilterAsGathering
+    // 13o U3 — SEARCH WITHIN A BOOK (her R-13o-14: the masthead's
+    // magnifying glass, "only expand it when clicked on"; the architect's F1:
+    // the answer sheet's small sibling in place of the book's content). The
+    // glyph is a door onto a surface — declared for the `.openBookSettings` /
+    // `.showBookPanel` reason; the field's words and its chips are not acts
+    // (they change what she sees, never the store — the Library band's
+    // class, U2's registry record).
+    case searchThisBook
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries

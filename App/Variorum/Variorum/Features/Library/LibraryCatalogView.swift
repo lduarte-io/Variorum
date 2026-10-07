@@ -89,8 +89,9 @@ struct LibraryCatalogView: View {
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
     /// Stage C: block hits land caret-precise when the shell provides the
-    /// door (nil falls back to plain navigation).
-    var onOpenBlock: ((SidebarSelection, String) -> Void)? = nil
+    /// door (nil falls back to plain navigation). 13o U2 (D6): a search
+    /// passage's landing carries its find seed beside the block.
+    var onOpenBlock: ((SidebarSelection, String, EditorFindSeed?) -> Void)? = nil
     /// 13f batch 4 (W1/A25): the split's row door.
     var onOpenBeside: ((String) -> Void)? = nil
     /// 13f batch 5b (W2/A26): the note-only window's row door.
@@ -177,7 +178,18 @@ struct LibraryCatalogView: View {
             VStack(spacing: 0) {
                 header
                 Divider().overlay(tokens.line)
+                // 13o U2 (Direction C, R-13o-15): the search state's ONE
+                // piece of furniture — the band — whenever the field asks
+                // anything or a day is armed (P-13o-U2-1).
+                if showsBand {
+                    searchBand
+                    Divider().overlay(tokens.line)
+                }
                 switch model.mode {
+                case .list where model.searchState.asksAnything,
+                     .notes where model.searchState.asksAnything:
+                    // The answer sheet, in every mode that lists notes (D2).
+                    searchSheet
                 case .list: listBody
                 case .notes: notesBody
                 case .timeline:
@@ -317,6 +329,92 @@ struct LibraryCatalogView: View {
         // means here — re-read).
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.refresh() }
+        }
+    }
+
+    // MARK: - The search state's faces (13o U2 — Direction C, R-13o-15)
+
+    /// The band shows whenever the field asks anything, or a day is armed —
+    /// never in the Timeline, which runs its own listing.
+    private var showsBand: Bool {
+        model.showsCatalogControls && (model.searchState.asksAnything || model.editedOn != nil)
+    }
+
+    private var searchBand: some View {
+        let state = model.searchState
+        return LibrarySearchBand(
+            tokens: tokens, question: state.question,
+            counts: state.counts?.kinds(state.visibility),
+            visibility: state.visibility,
+            wingName: wings?.currentName ?? WingWords.home,
+            dayChip: model.editedRange.map { range in
+                (label: LibraryDayFace.chipLabel(range, now: Date()),
+                 help: LibraryDayFace.caveat,
+                 onClear: {
+                     model.setEditedRange(nil)
+                     Task { await model.search() }
+                 })
+            },
+            onRemoveTag: { path in
+                model.removeTypedTag(path)
+                Task { await model.search() }
+            },
+            onToggleArchived: {
+                model.toggleArchivedFacet()
+                Task { await model.search() }
+            },
+            // 13o U3 — the mode facet: arming moves a notes/blocks scope to
+            // Books (the day's mirror); the ✕ clears it.
+            bookState: state.bookState,
+            offersBookState: model.offersBookState,
+            onPickBookState: { picked in
+                model.armBookState(picked)
+                Task { await model.search() }
+            })
+    }
+
+    private var searchSheet: some View {
+        LibrarySearchSheet(
+            model: model, tokens: tokens,
+            onShowArchived: {
+                model.toggleArchivedFacet()
+                Task { await model.search() }
+            },
+            onOpenPassage: { openPassage($0) },
+            onOpenPool: { onOpen(.pool($0)) },
+            noteHead: { hit in
+                LibraryListRow {
+                    postRow(hit)
+                } background: {
+                    rowBackground(
+                        picked: model.selectedPosts.contains(hit.id),
+                        subject: model.infoHit?.id == hit.id)
+                }
+            },
+            bookRow: { hit in
+                LibraryListRow {
+                    bookLine(hit)
+                } background: {
+                    rowBackground(picked: false, subject: model.infoHit?.id == hit.id)
+                }
+            })
+    }
+
+    /// **A passage was clicked — LAND AT THE MATCH** (13o U2, D6 — her
+    /// land-at-match): its note (or scraps group) opens IN WRITE AT ITS
+    /// BLOCK through the shell's caret-precise landing road (Stage C), with
+    /// the passage's matched words as the find seed — the arriving editor
+    /// selects the match and arms the find bar, so ⌘G steps onward. A
+    /// name-level hit with no block opens the note.
+    private func openPassage(_ passage: SearchPassage) {
+        guard let home = passage.noteID else { return }
+        withAnimation(Self.panelAnimation) { model.closeInfo() }
+        let selection: SidebarSelection = passage.family == .scraps ? .pool(home) : .post(home)
+        if let block = passage.blockID, let onOpenBlock {
+            onOpenBlock(selection, block, SearchLanding.findSeed(
+                kind: passage.kind, rendered: passage.isRenderedTake, snippet: passage.snippet))
+        } else {
+            onOpen(selection)
         }
     }
 
@@ -484,9 +582,12 @@ struct LibraryCatalogView: View {
                 // edit stamp and stand down while one is armed, so the scope
                 // stands down with them rather than offering picks that
                 // would list nothing (P-2).
-                .disabled(model.editedOn != nil)
-                .help(model.editedOn == nil
-                      ? LibraryCopy.scopeDoor : LibraryCopy.scopeDoorUnderADay)
+                // 13o U3: an armed MODE FACET names BOOKS the same way, so
+                // the scope stands down under it too (PROVISIONAL P-13o-U3-3).
+                .disabled(model.editedOn != nil || model.searchState.bookState != nil)
+                .help(model.editedOn != nil ? LibraryCopy.scopeDoorUnderADay
+                      : (model.searchState.bookState != nil
+                         ? LibrarySearchCopy.scopeDoorUnderABookState : LibraryCopy.scopeDoor))
                 // 17y B-WALK W-2 (her ruling): picking Cards moves the scope
                 // All → Notes (Cards shows notes only); a moved scope is a
                 // new question, so it re-reads.
@@ -514,27 +615,42 @@ struct LibraryCatalogView: View {
                     // (the control reports a baseline its label does not
                     // draw on), so the menu and the day door meet the
                     // segmented line by `segmentedLabelDrop`.
-                    LibrarySortMenu(
-                        tokens: tokens, sort: model.sort, direction: model.direction,
-                        onPick: { pick in
-                            model.setSort(pick)
-                            Task { await model.search() }
-                        },
-                        onDirection: { pick in
-                            model.setDirection(pick)
-                            Task { await model.search() }
-                        })
-                    .offset(y: Self.segmentedLabelDrop)
+                    if model.isSearching {
+                        // 13o U2 (PROVISIONAL P-13o-U2-7): the answer sheet is
+                        // ranked by relevance (D2), so the sort door — which
+                        // could not change that order — stands down for the
+                        // mockup's own words, a label (P-2: a door that
+                        // cannot act is not drawn).
+                        Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .help(LibrarySearchCopy.relevanceHelp)
+                            .offset(y: Self.segmentedLabelDrop)
+                    } else {
+                        LibrarySortMenu(
+                            tokens: tokens, sort: model.sort, direction: model.direction,
+                            onPick: { pick in
+                                model.setSort(pick)
+                                Task { await model.search() }
+                            },
+                            onDirection: { pick in
+                                model.setDirection(pick)
+                                Task { await model.search() }
+                            })
+                        .offset(y: Self.segmentedLabelDrop)
+                    }
                     // 18h batch 2 (her row 11): *"search for any note edited
-                    // on a particular day."*
-                    LibraryDayField(
-                        tokens: tokens, day: model.editedOn,
-                        onPick: { day in
-                            model.setEditedOn(day)
+                    // on a particular day."* 13o U2 (her R-13o-13): the door
+                    // reads `when ▾` and grows its range; the armed state is
+                    // the band's chip.
+                    LibraryWhenDoor(
+                        tokens: tokens, range: model.editedRange,
+                        onPick: { range in
+                            model.setEditedRange(range)
                             Task { await model.search() }
                         },
                         onClear: {
-                            model.setEditedOn(nil)
+                            model.setEditedRange(nil)
                             Task { await model.search() }
                         })
                     .offset(y: Self.segmentedLabelDrop)
@@ -596,7 +712,7 @@ struct LibraryCatalogView: View {
         // decides, never a guessed count).
         let capped = LibraryBooksRegion.capsBooks(
             scope: model.scope, books: model.bookHits.count,
-            showsMore: model.hasNoteRows || !model.blockHits.isEmpty,
+            showsMore: model.hasNoteRows,
             pitch: bookRowPitch, lead: LibraryBooksRegion.defaultLead, height: listAreaHeight)
         return VStack(spacing: 0) {
             if capped {
@@ -630,7 +746,6 @@ struct LibraryCatalogView: View {
     private func listColumn(includesBooks: Bool) -> some View {
         let showsBooks = includesBooks && !model.bookHits.isEmpty
         let showsNotes = model.hasNoteRows
-        let showsBlocks = !model.blockHits.isEmpty
         // Row 56: the List draws NO selection of its own — the pick and the
         // panel's subject render through `rowBackground` (the wash + a tinted
         // border), on note and book rows alike; the model owns the pick.
@@ -650,7 +765,7 @@ struct LibraryCatalogView: View {
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel("Books"))
                     }
-                    if showsNotes || showsBlocks { sectionGap }
+                    if showsNotes { sectionGap }
                 }
                 if showsNotes {
                     Section {
@@ -670,25 +785,14 @@ struct LibraryCatalogView: View {
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel("Notes"))
                     }
-                    if showsBlocks { sectionGap }
                 }
-                if showsBlocks {
-                    Section {
-                        if !showsBooks, !showsNotes { LibraryListLead() }
-                        ForEach(model.blockHits, id: \.id) { hit in
-                            LibraryListRow { blockLine(hit) }
-                        }
-                    } header: {
-                        LibraryListHeader(title: tokens.chromeLabel("Blocks"))
-                    }
-                }
-                if model.bookHits.isEmpty, !showsNotes, !showsBlocks {
+                if model.bookHits.isEmpty, !showsNotes {
                     // 18h batch 2: a day that finds nothing says WHY — the one
                     // wording, shared with the Notes mode below.
                     LibraryListLead()
                     LibraryListRow {
-                        if let day = model.dayForEmptyAnswer {
-                            LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
+                        if let range = model.rangeForEmptyAnswer {
+                            LibraryDayEmptyAnswer(tokens: tokens, range: range, query: model.query)
                         } else {
                             Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
                                 .font(tokens.small)
@@ -696,11 +800,8 @@ struct LibraryCatalogView: View {
                         }
                     }
                 }
-                // R1-4: a capped listing says so rather than reading as the
-                // library — since 17y B1 (k) only the block hits are capped.
-                if model.listingIsTruncated {
-                    LibraryListRow { LibraryTruncationLine(tokens: tokens) }
-                }
+                // (13o U2, R-13o-9: the truncation line LEFT with the block
+                // cap — no Library listing is capped any more.)
             }
             .padding(.bottom, LibraryListFace.bottomInset)
         }
@@ -746,7 +847,13 @@ struct LibraryCatalogView: View {
         // The TITLE opens instantly, as today (her click model — the body
         // selects, the words open).
         CatalogBookLine(
-            tokens: tokens, title: hit.title, detail: hit.detail,
+            tokens: tokens, title: hit.title,
+            // 13o U3: under the archived facet an archived book says so.
+            detail: model.searchState.archivedBooks.contains(hit.id)
+                ? LibrarySearchCopy.archivedBookDetail(hit.detail) : hit.detail,
+            // 13o U3: an ASSOCIATED book's row says why it is listed (the
+            // tag-association join — the mockup's "#dream flows here").
+            association: model.searchState.bookReasons[hit.id].map(LibrarySearchCopy.association),
             onTitleTap: { openHit(hit) })
         // Row 33 (a): the WHOLE row is the target — the line used to be only
         // as wide as its words, so a click right of "book" was a dead click
@@ -770,32 +877,9 @@ struct LibraryCatalogView: View {
         }
     }
 
-    /// A BLOCK hit's line: it opens its HOME surface (round 2, MINOR: dead
-    /// rows violated fire-and-speak) — caret-precise where the shell offers
-    /// the Stage C door.
-    private func blockLine(_ hit: Queries.CatalogHit) -> some View {
-        HStack {
-            Image(systemName: "square.on.square").foregroundStyle(tokens.muted)
-            Text(hit.title).font(tokens.small).lineLimit(1)
-            if let home = hit.detail {
-                Text(tokens.chromeLabel("in \(home)"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-            }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if let home = hit.homeContainerID {
-                let selection: SidebarSelection =
-                    hit.homeIsPool ? .pool(home) : .post(home)
-                if let onOpenBlock {
-                    onOpenBlock(selection, hit.id)
-                } else {
-                    onOpen(selection)
-                }
-            }
-        }
-    }
+    // (13o U2: the BLOCK hit's line LEFT with the block arm — a named block
+    // or a scrap is a passage of its group on the answer sheet now, and lands
+    // through `openPassage`, the same caret-precise road it used.)
 
     /// 13g batch 6 (R5-6) — the Apple-Notes-shaped list: title · date ·
     /// the first bit of text · the book it's in, per her screenshot. NOTES
@@ -813,8 +897,8 @@ struct LibraryCatalogView: View {
                     }
                 }
                 if !model.hasNoteRows {
-                    if let day = model.dayForEmptyAnswer {
-                        LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
+                    if let range = model.rangeForEmptyAnswer {
+                        LibraryDayEmptyAnswer(tokens: tokens, range: range, query: model.query)
                             .padding(24)
                     } else {
                         Text(tokens.chromeLabel(LibraryCopy.noNotesMatch))
@@ -1121,6 +1205,9 @@ struct CatalogBookLine: View {
     let tokens: VoiceTokens
     let title: String
     let detail: String?
+    /// 13o U3 — why an associated book is listed ("#dream flows here"),
+    /// beside its name in the accent (the mockup's own); nil elsewhere.
+    var association: String? = nil
     let onTitleTap: () -> Void
 
     static let probeSpace = "catalog-book-line"
@@ -1136,6 +1223,12 @@ struct CatalogBookLine: View {
                 .font(tokens.body)
                 .baselineProbe("book.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            if let association {
+                Text(tokens.chromeLabel(association))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+            }
             if let detail {
                 Text(tokens.chromeLabel(detail))
                     .font(tokens.small)
