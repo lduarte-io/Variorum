@@ -1155,3 +1155,27 @@ the justified palette-pin edit UPHELD by an independent sweep of every `.prefix(
 (none encodes the old widened-word shape); `swift test --filter Search` re-run by the
 reviewer itself — 95/14 green, SearchP1Tests unmoved; scope hygiene confirmed (no Sync/, no
 editor seam, no trailers). The closeout checklist stands as the remaining owed work.
+
+---
+
+## THE PHASE CLOSEOUT (2026-10-07, the overnight close under her PROVISIONAL-and-continue mandate)
+
+**13o — SEARCH is BUILT WHOLE in one night.** Three units (U1 substrate · U2 finder · U3
+scopes/facets/join), every unit orchestrator-verified AND walk-passed (shots committed at
+`notes/plans/13o-screens/01–11`); a two-round ladder (R1 0B/0M/3m/2n, five findings five
+AGREEs zero disputes, the reviewer's own fix pass with revert-verified red-on-old pins; R2
+CLEAN BILL — no round 3); the sanity pass SANE with both observations adopted. **Finals:**
+core `swift test` 2,284 tests / 258 suites EXIT 0; the widened Mac closeout runs 123/14 +
+111/18 (the tutorial spine's eleven included) + NoteOpenLandingTests 12/12 alone — zero reds.
+**Canon deltas applied exactly as ruled:** OverallModel §9 + AppSpec §6 (the third trigger
+duty, R-13o-4) · AppSpec §7 (the local-only derived family) · §12 (the SEARCH contract line)
+· §14's head (13i-a/13i-b rolled to the archive) · QUESTIONS #201 (the ratify bundle) ·
+MobileSoul PL-47 (the parity row) · FuturePhases' 13o row CLOSED. **Tickets:** VX-5 Done at
+the merge · VX-44 Done with it (the row's library-search half IS this phase; replace-across-
+library was never its letter) · minted en route: VX-72 (Search Everything) · VX-73 (the
+power grammar + the band's future dropdown) · VX-78 (the pre-existing order flake) · VX-79
+(the rebuild/integrity face). **Zero `Sync/` beyond the granted seam-2 registry commit; zero
+editor-core lines; v1_22 local-only — the lockstep marker STAYS 12, no deploy, nothing
+refuses.** Migration-id claim honored (v1_22; 13x claims v1_23+). HELD FOR HER: nothing —
+the ⚠️s all resolved in-night; the ratify bundle and her own walk are the morning's items
+(`notes/handoffs/phase-13o-handoff.md`).
