@@ -69,5 +69,183 @@ data-only registry line, but a `Sync/` line all the same, and 13x holds the slot
 editor-core internals anticipated (any in-note landing rides the existing `LandingTarget` /
 find-bar machinery; TEXTKIT2_NOTES joins the required reading of any batch that touches a pane).
 
-The DESIGN SITTING's brief + question agenda were delivered to the author in-session this turn;
-her rulings land here verbatim as they arrive, then the execution plan is authored below.
+The DESIGN SITTING's brief + question agenda were delivered to the author in-session 2026-10-06;
+her rulings landed the same sitting — the SITTING RECORD below is binding. The execution plan
+follows it.
+
+---
+
+## THE SITTING RECORD — her rulings, 2026-10-06 (verbatim-faithful; BINDING)
+
+- **R-13o-1 — MERGE ORDER + THE SYNC/ SLOT.** Her words: *"let's just decide that this phase
+  will merge to main first, and do the numbering of migrations based on that. merging to main
+  can't happen simultaneously, so I'm wondering why changing the migration id is even an issue
+  later?"* and *"Go ahead and do R2, you can have the slot, 13x will wait on you. I think you
+  can send 13x a message if needed."* → 13o holds the one Sync/-custody slot for its data-only
+  registry line (`SyncSchema.localOnlyTables` + the completeness-walk accommodation); **13o
+  merges to main FIRST; 13x waits on that merge.** (The slot message went to the likely-13x
+  session `variorum-c0` the same turn, worded ignorable if mis-addressed.) Her migration-id
+  question answered on the record: a collision only bites a DEV store that already ran a
+  branch's migration under a name later changed at rebase (GRDB records applied names);
+  serialized merges + claim-at-plan-time dissolve it, and with 13o merging first it is moot.
+- **R-13o-2 — THE GOAL RATIFIED.** Her words: *"Your goal sounds excellent - that's a perfect
+  bar and goal."* The bar: any words you ever wrote, findable in under a keystroke's breath, at
+  any corpus size, from the place you'd naturally ask — search as the FINDER half of the
+  place/finder boundary.
+- **R-13o-3 — FTS5.** *"Agreed on the FTS5."* A local-only derived index family (the
+  `sync_outbox` precedent — no mirror, no lockstep, the marker stays 12) + an explicit rebuild
+  door.
+- **R-13o-4 — THE THIRD TRIGGER DUTY.** *"Agree on your recommendation for R1"* → the closed
+  trigger set (OverallModel §9) extends by one MECHANICAL duty: **derived-index capture** —
+  the outbox-capture class (fires regardless of writing layer; zero domain knowledge). The
+  Phase-2 re-assessment protocol is run and recorded at U1 before the first trigger line; the
+  OverallModel §9 + AppSpec §6 contract lines amend at closeout exactly to this ruling.
+- **R-13o-5 — MIGRATION IDS.** *"effort claims its id in its plan file is good, if you think
+  it's good in the in flight table that's fine. do the ids have to be sequential? I'm planning
+  on you merging first."* → **13o claims `v1_22`** (head is `v1_21`). On the record: ids are
+  labels — GRDB's mechanism is REGISTRATION ORDER (append-only against stores that already
+  ran), so sequential naming is our legibility convention, not a mechanism; claim-in-plan-file
+  is the rule from here on (the in-flight table may carry the claim at the next merge moment).
+- **R-13o-6 — WHAT THE INDEX CONTAINS.** *"Index - needs to be on all live active takes."* On
+  the everything-search: *"we did talk about the appeal of being able to search through
+  everything - including deleted and archived and savepoints… I lean towards thinking that it
+  shouldn't be the default search, but it is a very unbeatable product idea - anything you've
+  ever written, saved. I think the history search someday would be nice."* → DEFAULT search =
+  the LIVING corpus (all live active takes, titles, book/gathering/chapter names, block names +
+  take labels, scraps, block comments, floating notes); archived notes/books/takes indexed but
+  OUT of default results behind one facet; savepoint history + the Trash are NOT in 13o — the
+  index is born KIND-TAGGED so those classes join later additively (ticket VX-72). Versions
+  stay excluded (the ruled posture). *"the derived display name would be good to do"* → the
+  nameless note's worn date becomes findable (built as query-time date parsing, not a stored
+  rendering — see U1).
+- **R-13o-7 — WHERE SEARCH LIVES.** *"I agree that library field should be one giant finder -
+  no new search mode. that being said, I feel like it could have pretty substantial UI in the
+  full search mode, so that should be considered and maybe make some html mockups for how it
+  could be brought together."* → ONE finder (the Library field; ⌘K keeps its quick-jump role
+  with body hits); the Library's SEARCH-ACTIVE state may carry substantial UI — an HTML mockup
+  round (local file, the 13i-bookcase pattern) GATES U2's faces; she picks at a sitting.
+- **R-13o-8 — THE COMPLEX-QUERY DIRECTION.** Her words: *"I eventually hope to allow people to
+  do more complex searches - what's the lift on queries kinda? like, notes with 'dream' that
+  aren't in the Journal book, over 500 words in the note… I don't think that has to be done
+  right now, but that is a shape I'm interested in, so I want to know if what we're building is
+  working in that direction."* → BINDING on 13o's shape: the query layer is a pure Domain
+  **SearchQuery AST** (text terms + a filter tree) with the SQL composed from it — v1's grammar
+  (words, #tag, day range, facets) parses into it, and the future grammar (boolean, in:/not
+  in:book, word-count thresholds — the RuleGrammar/gathering-rule kinship, saved searches) is a
+  later parser + UI over the SAME AST (ticket VX-73). Lift assessed on the record: modest —
+  FTS narrows by text, every other predicate is ordinary SQL over rows-as-truth.
+- **R-13o-9 — THE CAP DIES.** *"block / scrap 40 cap should not exist - the 40 cap with no
+  escape is terrible."* → block/scrap hits page like the notes (17y B1's mechanism); no capped
+  listing without a road to the rest, anywhere in search.
+- **R-13o-10 — HIDE-OWNED IS A NON-LIBRARY THING.** *"owned book notes should show in the
+  library with search, by default. hide owned is a non library thing."* → the Library,
+  searching included, is EXEMPT from `hide_owned_default`; owned-book notes list badged (the
+  13i-c badge family). Non-Library surfaces keep composing the default as ruled at 13i.
+- **R-13o-11 — ACCENT-INSENSITIVE.** *"I think it's fine to not be accent sensitive - the
+  library is discovery, sometimes autocorrect throws an accent on there."* → the index folds
+  case AND diacritics (unicode61, `remove_diacritics 2`) — recorded as the deliberate third
+  sameness rule beside the Write/Takes bars' pinned pair (which stay accent-sensitive,
+  untouched).
+- **R-13o-12 — SIZING + DEFERRALS.** *"I approve what you want, log these follow up tickets
+  and ideas and whatever isn't built today in linear with the plan note as required as well."*
+  → the three-unit plan below stands; the deferred ideas are Linear tickets in project 13o
+  (VX-72 Search Everything · VX-73 the power-search grammar), each pointing at this file.
+
+## BINDING PRINCIPLES — the 13b constitution, carried per the skill
+
+P-1…P-9 bind BYTE-VERBATIM as written in `.claude/skills/architect-phase/SKILL.md` (one
+capability registry · fire-and-DO · one text surface/one liveness authority · broadcasts carry
+signals never decisions · the friction doctrine · the tutorial is the executable spec · find
+bugs before she does · standing law consolidated · no frontend god objects), plus that file's
+application notes. Phase-specific additions by this sitting: R-13o-4 (the third trigger duty,
+mechanical only — any trigger wanting domain knowledge remains the §9 smell), and R-13o-8's
+AST rule (no search SQL composed outside the one Domain composer).
+
+## THE EXECUTION PLAN (authored 2026-10-06, post-sitting)
+
+**Cast:** the standing default — Opus implements (`opus-implementer`, xhigh), one fresh session
+per unit; Fable orchestrates (this seat) and cold-reviews (`fable-reviewer` — required anyway:
+the diff carries a `Sync/` registry line and U1 is substrate). One ladder over the combined
+diff after U3; REVIEW_PROMPT verbatim; hard cap three rounds.
+
+### U1 — THE SUBSTRATE (one implementer session; evidence: headless suites + pinned P1 numbers)
+
+1. **Migration `v1_22`** (its own commit before consumers): the search-index family — a thin
+   local-only doc table (kind-tagged: `take · title · book · chapter · block_name · take_label ·
+   scrap · comment · note_meta`, entity ids, wing scoping columns, archived flag) + the FTS5
+   table over it (`unicode61 remove_diacritics 2`, prefix indexes for type-ahead). Contentless
+   vs external-content: the implementer PROPOSES with measurements, the architect rules (the
+   in-batch fork rule). Backfill = the rebuild road run once inside the migration.
+2. **The third trigger duty** (R-13o-4; the re-assessment protocol's record lands here first):
+   mechanical capture triggers on the text-bearing source tables (variant / container / reading /
+   reading_section / block / block_comment — insert, text-column update, tombstone), mirroring
+   raw text into the doc family. No domain reads inside a trigger body, ever.
+3. **The rebuild door:** a maintenance operation (drop + rebuild from truth, integrity check
+   comparing doc rows against source rows) — the restore/doubt/drift net; also the migration's
+   backfill engine.
+4. **The `Sync/` registry line** (R-13o-1's grant): the doc + FTS shadow tables join
+   `SyncSchema.localOnlyTables` (or the walk gains a declared shadow-prefix rule — smallest
+   honest diff wins); the completeness walk stays the pin.
+5. **Core queries:** `Queries.searchPassages(_:scope:filters:)` over the **SearchQuery AST**
+   (R-13o-8 — the one pure Domain composer): ranked (bm25, title-weighted, rendered-take
+   boosted), snippeted, wing-scoped always, book- and note-scoped variants, archived facet,
+   paged with a road to everything (R-13o-9). **The date-parse predicate** (R-13o-6's display
+   name): a pure Domain parser reading day-shaped query text ("september 14", "sep 14",
+   "9/14") into entry-date/created-date bounds OR'd into the note arm — locale-honest, no
+   stored rendering to go stale.
+6. **Pins:** capture across ALL THREE write layers (operations, cascade, a fake-server remote
+   apply — red-on-old each); rebuild idempotence + integrity; tombstone/archive transitions
+   drop/flag doc rows; wing isolation; accent/case folding; the AST composer's SQL (EXPLAIN
+   pins against the drift class); **P1 measurements**: index update cost ∝ the edit (flat
+   across corpus sizes), query cost ∝ matches, keystroke road bounded — the day-search
+   ladder's measurement discipline.
+
+### U2 — THE FINDER (gated on her mockup pick; one implementer session; evidence: suites + the orchestrator's walk + screenshots)
+
+The Library's search-active state per the picked mockup: the Passages section (snippets,
+grouped under the shipped Books/Notes/Blocks idiom) · land-at-match (LandingTarget; the find
+bar pre-armed so ⌘G steps onward) · ⌘K body hits under its title hits · the day filter grows
+its RANGE with her wording for "on day…" (asked at the mockup sitting) · the block/scrap cap
+falls to paging (R-13o-9) · owned notes show badged (R-13o-10) · the date-parse predicate
+wired. Registry: every new door declared (P-1).
+
+### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
+
+Within-a-book search (the same engine scoped; its face per the mockup round) · the
+**tag-association join** (#tag surfaces the books/gatherings associated through intake rule +
+outflow, TOP-RANKED — the §12 ruling) · the mode-facet chips (gathering · living · owned ·
+finished · sealed — facts, never tags) · the archived facet's face · polish + the walk.
+
+**MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
+`notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
+voices, the §21 design-language anchor (the app's own idioms; no pills, no underlines); her
+pick + "on day…" wording land here as rulings.
+
+**Environment traps (every brief carries this verbatim):** instance checks via
+`pgrep -fl 'Variorum.app/Contents/MacOS'` discriminated by PATH; real-store instances by
+STORE, never quit/kill one; no Release builds or `/Applications` refreshes while one lives;
+every `xcodebuild test`/walk/Debug launch claims `Tools/stage` first (headless `swift
+build`/`swift test` free); Mac tests from `App/Variorum/`, suite-level `-only-testing`,
+confirm the "Test run with N tests" line, skipped-count honesty; NEVER a custom build
+configuration; zsh `pipestatus`; A1 backups into `Backups/safety-copies/` before any
+real-store touch; commit per piece, push after every commit, synchronous foreground waits;
+never `git checkout` over uncommitted work. Work ONLY in `~/dev/variorum-13o`.
+
+**Closeout (beyond the standing ritual):** canon deltas exactly as ruled — OverallModel §9 +
+AppSpec §6's trigger sentence gains the third duty (R-13o-4); AppSpec §12 gains the search
+contract line; the sameness-rule note; VX-5 Done rides the merge, VX-44 closes with U2 (the
+body search IS the find&replace row's library half); MOBILE PARITY: the index + queries ride
+VariorumCore onto the phone — the faces are the mobile catch-up's (a MobileSoul ledger row);
+the in-flight row retires; the worktree is removed after the merge.
+
+### LEDGER
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Sitting record + execution plan authored | DONE (this commit) |
+| 2 | Linear: VX-72 (Search Everything) · VX-73 (power-search grammar) minted in project 13o | DONE — see tickets |
+| 3 | Mockup round (`mockups/13o-search.html`) → her pick + "on day…" wording | OPEN — next act |
+| 4 | U1 substrate | NOT STARTED |
+| 5 | U2 finder (gated on 3) | NOT STARTED |
+| 6 | U3 scopes/facets/join | NOT STARTED |
+| 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks | NOT STARTED |
