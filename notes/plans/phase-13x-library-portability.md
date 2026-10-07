@@ -1223,18 +1223,77 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 
 ### F1 RECORD (the fix session's record; LIVE STATUS first — flipped in the same commit as each fix; PENDING = unverified)
 
+**F1 CLOSED — 2026-10-07.** All eleven round-1 findings landed per the dispositions table:
+the BLOCKER and the MAJOR fixed with their faces and pins, M1–M5 fixed each with its pin,
+N1–N3 fixed, N4 recorded (P-F1-1). Every behavior-guarding fix carries a red-on-old pin
+verified by BEHAVIOURAL REVERT over committed state (M2's headless; the BLOCKER's, M1's,
+M3's, M4's and M5's under the ONE stage claim "13x F1 pins" — claimed with the lock free,
+~16 of 40 min used, released on the final result line; every revert red on EXACTLY its
+named pin with every sibling green, every restore verified by an empty `git diff`). The
+MAJOR's red is the reviewer's zero-caller grep (a missing feature; its new pins guard the
+door now built). ONE production refinement landed mid-slot, found by the flow pin's run 0:
+M2's step 3½ creates the store folder before the marker write (the empty-slot arm —
+4dc05ed6, committed before any revert started). **FINAL COUNTS: Mac pins 76 tests in 4
+suites PASSED (Phase13pControllerTests · Phase13pLobbyTests · LibraryPortabilityDoorTests ·
+LibraryHandOffTests); the WHOLE core suite 2335 tests in 269 suites PASSED headless
+(+1 over the merged-tree baseline 2334/269 — M2's adoption pin) + StringsWorkbook 40/6;
+skips the standing env-gated ones only.** Zero `Persistence/Migrations.swift` edits, zero
+migrations (marker stays 12); custody/ProtectionController edits were IN-SLOT per the
+brief; her real store untouched; no subagents; foreground waits only; no trailers.
+
+#### F1 CLOSED — every finding mapped
+
+| finding | outcome |
+|---|---|
+| R1-BLOCKER | FIXED (e1ef77c0) — the `castleKeyFileAppleOpenable` reconcile arm; pin red-on-old by REVERT A under the slot |
+| R1-MAJOR | FIXED (9ad6cc35) — both hand-off faces + reveal-in-Finder + strings; pins green under the slot (the old red = the zero-caller grep) |
+| M1 | FIXED (a7e64a56) — the rotation ceremonies refuse under a standing hold; pin red-on-old by REVERT B |
+| M2 | FIXED (a7e64a56 + 4dc05ed6) — the hold inside `execute`, step 3½; pin red-on-old by the HEADLESS revert (recorded above) |
+| M3 | FIXED (bc50beeb) — per-arm failure words; pin red-on-old by REVERT C |
+| M4 | FIXED (bc50beeb) — the lobby suspended before `work`, the in-flight probe closed; pin red-on-old by REVERT D |
+| M5 | FIXED (bc50beeb) — promptless fingerprint comparison before the gated ask; pin red-on-old by REVERT E |
+| N1 | FIXED (e8a8fd78) — the Sync-now door speaks the refusal (UI-honesty arm; the gate itself is the U2 pin's) |
+| N2 | FIXED (e8a8fd78) — the fallback's recorded sentence at `schemaVerdict` |
+| N3 | FIXED (e8a8fd78) — the `LibraryRestoreHold` header's false clause corrected |
+| N4 | RECORDED (e8a8fd78) — P-F1-1 (the `plaintextLibrary` arm's returner story), QUESTIONS at the merge |
+
+#### THE SLOT'S REVERT EVIDENCE (one claim, "13x F1 pins", ~16/40 min; every edit over committed state; restores by `git checkout --`, each verified by an empty `git diff`)
+
+- **RUN 0 (green):** first pass caught M2's empty-slot gap (the hold write's parent folder —
+  a REAL production refinement, fixed + committed 4dc05ed6 before any revert); re-run
+  **76/4 PASSED**.
+- **REVERT A** (the BLOCKER's reconcile arm removed): red on EXACTLY
+  `anAdoptedStandardEraPairUnderACastleVaultOwesTheFollowThatRetiresItsAppleCopy` —
+  `Expectation failed: w.controller.followNotice` (no notice, no re-key, the wrap stands);
+  the other 49 green.
+- **REVERT B** (the M1 hold guard removed from `start()`): red on EXACTLY
+  `aStandingRestoreHoldRefusesTheRotationCeremoniesAtTheDoor` — both arms
+  (`model.phase == .failed(ProtectionCopy.resumeSyncFirst)` failed for `.enter` AND
+  `.replaceKeys`); the other 49 green.
+- **REVERT C** (`failureWording` collapsed to one-lead-for-every-arm): red on EXACTLY
+  `theAdoptionFailureWordsAreTruePerArm` — 13 issues (every pre-move arm's lead claimed the
+  dated/safety copy again; the mid-move lead gone); the other 7 green.
+- **REVERT D** (the two suspension guards removed from `probeAppleRoad`): red on EXACTLY
+  `aSuspendedLobbysProbeCompletesNothingEvenWhenAlreadyInFlight` —
+  `Expectation failed: !completed && completions.value == 0` (the in-flight probe completed
+  past the cancel); the other 13 green.
+- **REVERT E** (the fingerprint condition dropped from the gated arm): red on EXACTLY
+  `aProvablyForeignPairSkipsTheGatedAskAndASameKeyPairStillGetsIt` — `prompts.value == 0`
+  and `== 1` both failed (the spurious ask fired on the foreign pair); the other 7 green.
+- **FINAL (green):** the four suites **76/4 PASSED**; stage RELEASED on the result line.
+
 #### LIVE STATUS
 
 | finding | fix | status |
 |---|---|---|
-| (0) baseline | whole core suite headless on the merged tree | DONE (this commit) — **2334 tests in 269 suites PASSED** (133 s) + StringsWorkbook 40/6; skips the standing env-gated ones only (13o's gated measurement suites · the real-server pass · the fixture minters). U2b's 2254/258 + 13o's +80/+11, as the brief expected |
-| R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | BUILT (this commit; mechanism re-traced and CONFIRMED — the settled-design entry) — the pin + red-on-old revert PENDING the stage slot |
-| R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | BUILT (this commit) — File ▸ Send Library to Another Mac… + Data Safety's "Moving to another Mac" twin over ONE flow (`LibraryHandOffModel` → `LibraryHandOff.produce` off-main → reveal-in-Finder), DECLARED (`.handOffLibrary`, menuBar+surface — the walk's letter), per-arm refusals; strings in the F1 table below; the Mac pin PENDING the stage slot |
-| M1 | key ceremonies refuse under a standing hold (P-R1-1) | BUILT (with the BLOCKER's commit window; this commit) — `restoreHoldStands` seam on the controller (nil = never held), the two ROTATION ceremonies (.enter/.replaceKeys) refuse `resumeSyncFirst` at `PostureSwitchModel.start` (leaveCastle traced engine-free, stays open; marker resume exempt); wired to the Mac's marker projection; Mac pin PENDING the stage slot |
-| M2 | the hold write's failure refuses the adoption | BUILT (this commit) — the hold rides INSIDE `LibraryAdoption.execute` (step 3½, between safety copy and move: a failed write refuses `holdWriteFailed` with NOTHING moved; ordinary refusals leave no stray marker; nothing ever lands un-held); both door roads pass `holding:`, the `try?` swallows gone. Pin GREEN headless (`LibraryAdoptionTests` 7/7); **red-on-old revert STARTING next** (the step-3½ block removed, restore by `git checkout --` on the one committed file) |
-| M3 | per-arm failure copy (pre-move arms claim no dated copy) | BUILT (this commit) — `failureWording(for:)` maps each `AdoptionError` arm to a TRUE lead (pre-move ⇒ `adoptionRefusedNothingMoved`; mid-move ⇒ its two real nets; landing + unknown keep the old lead, whose facts hold exactly there); the no-store-path guard reworded too; pin PENDING the stage slot |
-| M4 | the waiting-lobby probe stops before `work` | BUILT (this commit) — `StoreLobby.suspendForAdoption` (stop + flag; `probeAppleRoad` re-checks the flag PAST its await, closing the in-flight race the cancel alone cannot) · `resumeAfterAdoption` re-arms on a failed adoption · the model suspends BEFORE `work` and re-checks for a probe that won the race (ready road then); pin PENDING the stage slot |
-| M5 | fingerprint comparison before the gated prompt | BUILT (this commit) — `pairIsProvablyForeign` (both fingerprints on disk, promptless; differ ⇒ skip the gated ask; equal/unknown keep it); the counting-guard pin PENDING the stage slot |
+| (0) baseline | whole core suite headless on the merged tree | DONE (59fc3101) — **2334 tests in 269 suites PASSED** (133 s) + StringsWorkbook 40/6; skips the standing env-gated ones only (13o's gated measurement suites · the real-server pass · the fixture minters). U2b's 2254/258 + 13o's +80/+11, as the brief expected |
+| R1-BLOCKER | the Castle/apple-copy reconcile arm + the landing's surfacing | DONE (e1ef77c0; mechanism re-traced and CONFIRMED — the settled-design entry; pin green + REVERT A red-on-old under the slot) |
+| R1-MAJOR | the hand-off door's two faces + reveal-in-Finder + strings | DONE (9ad6cc35) — File ▸ Send Library to Another Mac… + Data Safety's "Moving to another Mac" twin over ONE flow (`LibraryHandOffModel` → `LibraryHandOff.produce` off-main → reveal-in-Finder), DECLARED (`.handOffLibrary`, menuBar+surface — the walk's letter), per-arm refusals; strings in the F1 table below; pins green under the slot |
+| M1 | key ceremonies refuse under a standing hold (P-R1-1) | DONE (a7e64a56) — `restoreHoldStands` seam on the controller (nil = never held), the two ROTATION ceremonies (.enter/.replaceKeys) refuse `resumeSyncFirst` at `PostureSwitchModel.start` (leaveCastle traced engine-free, stays open; marker resume exempt); wired to the Mac's marker projection; pin green + REVERT B red-on-old under the slot |
+| M2 | the hold write's failure refuses the adoption | DONE (a7e64a56 + 4dc05ed6) — the hold rides INSIDE `LibraryAdoption.execute` (step 3½, between safety copy and move: a failed write refuses `holdWriteFailed` with NOTHING moved; ordinary refusals leave no stray marker; nothing ever lands un-held; the store folder created first — the empty-slot arm); both door roads pass `holding:`, the `try?` swallows gone. Pin GREEN headless (`LibraryAdoptionTests` 7/7); red-on-old revert RAN AND RESTORED (red on exactly the new pin, 5 issues; restore by `git checkout --`, empty diff; 7/7 green after) |
+| M3 | per-arm failure copy (pre-move arms claim no dated copy) | DONE (bc50beeb) — `failureWording(for:)` maps each `AdoptionError` arm to a TRUE lead (pre-move ⇒ `adoptionRefusedNothingMoved`; mid-move ⇒ its two real nets; landing + unknown keep the old lead, whose facts hold exactly there); the no-store-path guard reworded too; pin green + REVERT C red-on-old under the slot |
+| M4 | the waiting-lobby probe stops before `work` | DONE (bc50beeb) — `StoreLobby.suspendForAdoption` (stop + flag; `probeAppleRoad` re-checks the flag PAST its await, closing the in-flight race the cancel alone cannot) · `resumeAfterAdoption` re-arms on a failed adoption · the model suspends BEFORE `work` and re-checks for a probe that won the race (ready road then); pin green + REVERT D red-on-old under the slot |
+| M5 | fingerprint comparison before the gated prompt | DONE (bc50beeb) — `pairIsProvablyForeign` (both fingerprints on disk, promptless; differ ⇒ skip the gated ask; equal/unknown keep it); pin green + REVERT E red-on-old under the slot |
 | N1 | Sync-now speaks the refusal under the hold | DONE (this commit) — the door consults `roundsHeld` and speaks `syncNowHeldRefusal` through the session's StatusCenter (kind refusal — §12's rule); UI-only arm, the gate itself is the U2 hold-gate pin's |
 | N2 | `schemaVerdict`'s fallback annotated/read-only | DONE (this commit) — the fallback keeps its honest reason (a WAL-journaled copy refuses a read-only open) and now carries `openForInspection`'s recorded sentence verbatim-in-kind |
 | N3 | the `LibraryRestoreHold` header corrected | DONE (this commit) — the false "move-aside relocates the whole store-folder family" clause replaced with the true guarantee (every adoption rewrites it — now INSIDE execute per M2; Resume alone clears) |
@@ -1266,9 +1325,9 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
   Downloads default) rather than a fixed drop; the act is DECLARED (`.handOffLibrary`,
   menuBar + surface) while Open Library… stays the recorded undeclared standard-item class.
 
-No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
+No revert is in flight (the slot's five ran and RESTORED — the evidence section above; M2's ran headless before it). No subagents; synchronous foreground waits only; the stage was claimed ONCE ("13x F1 pins", ~16/40 min) and is RELEASED.
 
-**THE MAC SLOT'S PLAN (named BEFORE any revert starts — the resiliency rule; every edit is over COMMITTED state e8a8fd78, so every restore is `git checkout --` on the one file, verified by an empty `git diff`):** claim "13x F1 pins" (≤40 min) → RUN 0 green (Phase13pControllerTests · Phase13pLobbyTests · LibraryPortabilityDoorTests · LibraryHandOffTests, test-without-building) → REVERT A (the BLOCKER's reconcile arm removed from ProtectionController.swift) → controller suite red on exactly the adopted-pair pin → restore → REVERT B (the M1 hold guard removed from PostureSwitchModel.swift) → red on exactly the hold-ceremony pin → restore → REVERT C (failureWording collapsed to the old one-lead-for-every-arm) → door suite red on exactly the per-arm-words pin → restore → REVERT D (the two suspension guards removed from probeAppleRoad) → lobby suite red on exactly the suspended-probe pin → restore → REVERT E (the fingerprint condition dropped from the gated arm) → door suite red on exactly the foreign-pair pin → restore → FINAL green across the four → release on the result line. M2's revert already ran headless (recorded above). Rebuilds are compiles, not stage acts, but run inside the claim for simplicity; statuses flip to DONE here only after the release.
+**THE MAC SLOT'S PLAN (named BEFORE any revert started — the resiliency rule; every edit over COMMITTED state, so every restore was `git checkout --` on the one file, verified by an empty `git diff`):** claim "13x F1 pins" (≤40 min) → RUN 0 green (Phase13pControllerTests · Phase13pLobbyTests · LibraryPortabilityDoorTests · LibraryHandOffTests, test-without-building) → REVERT A (the BLOCKER's reconcile arm) → REVERT B (the M1 hold guard) → REVERT C (failureWording collapsed) → REVERT D (the probe's suspension guards) → REVERT E (the fingerprint condition) — each red on exactly its pin, each restored — → FINAL green → release on the result line. EXECUTED AS PLANNED; the outputs are the evidence section above.
 
 #### NEW STRINGS FOR 13s (F1's additions to the U2 table; facts binding, words provisional — `LibraryOpenCopy` unless noted)
 
