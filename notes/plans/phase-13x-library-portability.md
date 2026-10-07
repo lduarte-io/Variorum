@@ -537,6 +537,10 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
+- **THE CORE SUITE, WHOLE (U1 evidence): 2234 tests in 251 suites PASSED** (`swift test`,
+  122 s, headless — plus the StringsWorkbook target's 40 in 6). Skips are the standing
+  env-gated ones only: the real-server integration pass, the workbook scratch writer, and
+  this batch's own `mintTheDrillFixture` (env-gated by design).
 - **Row 5 — THE VX-64 DRILL (headless, throwaway, no stage, no Keychain prompt — the
   legacy login-keychain item's absence pre-checked with `security find-generic-password`,
   not found):** fixture minted by `VX64_FIXTURE_DIR=… swift test --filter
