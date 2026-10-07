@@ -935,3 +935,11 @@ the door's completion writes the hold; the rows still CLOSE in the brief's order
 | `sourceInICloudDriveLine` (lead + the same ONE sentence) | the confirm's iCloud-Drive line (row 9) |
 | `classifyingLine` · `adoptingLine` · `adoptionFailedLead` | the flow's progress/failure |
 | (existing) `ProtectionCopy.libraryMissingOpenDoor` | NOW RENDERED on the absent-store AND waiting faces (shipped unrendered since pre-13x 1a) |
+- The pin slot SLOTTED by 13o: after VM-10 (60–120 min, interruptible; 13o's own U2 walk may
+  interleave) — the go is the literal token "13x: go (40)", est 2–3 h out; slot-1 discipline.
+  AND: 13o's PR may merge TONIGHT — the merge ping would un-gate the post-merge half early;
+  the conditional night plan: merge main INTO the branch (merge commits only — pushed history
+  is never rewritten; "rebase" in the rule read as catch-up), then spawn the post-merge batch
+  (row 10's drills — fake-server legs free, Mac pins filed with the scheduler); the
+  orchestrator's WALK stays a considered act (the dev store's Castle gate may need her — the
+  pre-13x 5b precedent), never forced overnight.
