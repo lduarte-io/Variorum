@@ -14,7 +14,8 @@ Reading of the words (to verify at reproduction, not to build on): the flash is 
 - **DONE** — kickoff: ticket minted (VX-75), worktree seated, in-flight row landed on main (rode the 13s kickoff commit `fe48c535` — a concurrent session's `git add`/commit swept this effort's two ledger edits in; content verified correct, message names only 13s).
 - **DONE** — preflight: CLAUDE.md canon (auto), TEXTKIT2_NOTES.md (full), SessionResiliencyProtocol.md (full), master plan in-flight table (no surface overlap: 13o search / 13x portability / 13s voice-onboarding / VM-5 mobile; none claims the book Outline or the editor seam), QUESTIONS.md targeted pass (#43, #97, #99, #103 — the Outline/note-box/landing entries).
 - **DONE** — static trace of the suspect seam (findings below).
-- **IN-PROGRESS** — reproduction: Debug build running (`App/Variorum/DerivedData/vx75-build.log` in the worktree); the stage is HELD by the VM-5 merge orchestrator until ~21:10 (claimed 20:34, ~35 min) — the walk waits for a free stage, never steals.
+- **DONE** — walk preparation: Debug build GREEN (`App/Variorum/DerivedData/vx75/Build/Products/Debug/Variorum.app` in the worktree; log `DerivedData/vx75-build.log`); WalkKit helpers compiled (`/tmp/walk-cap`, `/tmp/walk-scroll`, `Tools/WalkKit/wl2`); terminal host holds BOTH grants (AX true · SCREEN true, probed); zero Variorum instances running; ffmpeg + cliclick present. Capture plan: `screencapture -v -V 6` around the first prose click, frames out via ffmpeg, artifacts under the gitignored `DerivedData/vx75-walk/`.
+- **IN-PROGRESS** — reproduction: WAITING on the stage (HELD by the VM-5 merge orchestrator, claimed 20:34; a watcher polls each minute) — the walk never steals a live claim.
 - **NOT-STARTED** — mechanism trace · pin (red-on-old, revert-verified) · fix · ladder (fable-reviewer) · PR.
 
 ## The surface, as read (static trace, pre-reproduction)
