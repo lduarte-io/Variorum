@@ -777,6 +777,10 @@ RECORD** below is your LIVE STATUS). One Sonnet subagent max, external facts, re
 7. **Pins:** composer-level pins for the gathering scope + association join (EXPLAIN where
    plans matter); face/view-model state-transition tests; the touched Mac suites + the
    tutorial spine green at the END.
+8. **The Book Index's own cap falls** (U2's close flagged it: `BookIndexView`'s "showing the
+   first N notes" is a cap with NO road to the rest — her ruled-against class, R-13o-9's own
+   words). Give it the notes-paging treatment or an honest "all N ›" road; small, PROVISIONAL
+   (flag as P-13o-U3-n for the ratify bundle since the surface is the book's, not search's).
 
 **Fences, verbatim from U2's (all binding):** zero `Sync/`; zero editor-core internals;
 query-layer only through the one composer; environment traps verbatim; Mac suite runs under a
@@ -818,6 +822,6 @@ the in-flight row retires; the worktree is removed after the merge.
 | 2 | Linear: VX-72 (Search Everything) · VX-73 (power-search grammar) minted in project 13o | DONE — see tickets |
 | 3 | Mockup round (`mockups/13o-search.html`) → her picks | **DONE 2026-10-06** — R-13o-13 "when" · R-13o-14 the book masthead magnifier (build at U3) · R-13o-15 direction C with the band's advanced-dropdown growth note (→ VX-73) |
 | 4 | U1 substrate | **DONE 2026-10-06** — P0–P9 landed (close 3251cce7); the ORCHESTRATOR'S CHECK: commits + clean pushed tree verified, the four search suites + MigrationTests re-run green on the orchestrator's own machine (46/46 + 42/42 at seam 2), the U1 RECORD complete with the close banner and zero PENDING. Evidence of the unit's kind: state-transition + P1 page-count pins (headless substrate; USE evidence arrives with U2's walk). P-13o-U1-5 RATIFIED by the author same day (the question tool): SHARED ROOM — scrap hits list in every wing's search, matching the Snippets surface; wing isolation stays total for everything else |
-| 5 | U2 finder (gated on 3) | IN PROGRESS — un-gated 2026-10-06, implementer spawned on the U2 BRIEF |
+| 5 | U2 finder (gated on 3) | **DONE 2026-10-07** — built across two implementer sessions (an accidental user stop mid-P2; the continuation adopted the in-flight edit per the record; close 2fdffd12); orchestrator-verified (headless re-run green) AND **WALK-PASSED 02:2x–02:3x** (shots: `App/Variorum/DerivedData/13o-walk/shots/01–06`): the band's honest counts + chips · grouped passages with highlights · in-another-take badges · owned-by badges (R-13o-10) · land-at-match with the find bar armed and 1w selected · ⌘G stepping · ⌘K passages + the All-matches row · the when ▾ popover exactly R-13o-13 · relevance label while searching · the query surviving the landing round-trip. The D6 refinement (direct-select + ⌘E-style arming) ACCEPTED. P-13o-U2-6…9 join the ratify bundle. Main (0f0624e7) merged into the branch at this seam (67064457) |
 | 6 | U3 scopes/facets/join | NOT STARTED |
 | 7 | Ladder → closeout → PR `VX-5: …` merges FIRST (R-13o-1); 13x unblocks — **PING the 13x session (`variorum-c0`) at the merge** (its 2026-10-06 ack + ask; it rebases and opens its Sync-composition batch on the ping) | NOT STARTED |
