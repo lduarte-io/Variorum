@@ -704,6 +704,52 @@ Within-a-book search (the same engine scoped; its face RULED R-13o-14: option 1'
 outflow, TOP-RANKED — the §12 ruling) · the mode-facet chips (gathering · living · owned ·
 finished · sealed — facts, never tags) · the archived facet's face · polish + the walk.
 
+### U3 BRIEF (the implementer session's self-contained instructions; authored at the overnight open)
+
+**Who you are:** the U3 implementer (Opus, xhigh), a FRESH session, ONE acceptance unit —
+scopes, facets & the join. Work ONLY in `~/dev/variorum-13o` (branch `vx-5-13o-search`); pull
+first. **Required reading:** this plan file WHOLE (the three rulings blocks + the U1/U2
+RECORDs — build ON the substrate and U2's faces, never beside them) · the mockup's Direction
+C + within-book Option 1 (`notes/plans/mockups/13o-search.html`) ·
+`notes/SessionResiliencyProtocol.md` (checkpoint protocol from the first commit; the **U3
+RECORD** below is your LIVE STATUS). One Sonnet subagent max, external facts, read-only.
+
+**The pieces:**
+1. **Within-a-book search** (R-13o-14): the book masthead's trailing 🔍 glyph — nothing else
+   at rest — expanding to the field on click (Esc/empty-blur collapses); the SAME engine with
+   `.book` scope; results in the book's own idiom (the answer-sheet band's small sibling or an
+   in-place list — PROPOSE in the U3 RECORD before building the face half if the mockup
+   leaves you a real fork); land-at-match identical to the Library's.
+2. **The within-a-GATHERING scope** (P-13o-U1-10, now due): `.book(id)` on a gathering
+   searches its ASSEMBLED members — the rule evaluated at query time through the ONE composer
+   (never a second assembly path); a gathering with no rule answers empty (the ruled closed
+   reading). PROPOSE the mechanism (rule → member-id predicate vs join) with a measurement
+   line before building.
+3. **The tag-association join** (the §12 ruling): a query whose parse carries a tag term
+   surfaces the books/gatherings ASSOCIATED with that tag — intake-rule tag terms AND
+   `auto_tag_ids` outflow — TOP-RANKED in the Books group, worded so the row says WHY (the
+   mockup's "#dream flows here"). Pure-function the association read; pin it.
+4. **The mode-facet chips** (facts, never tags): the band's "+ book state" chip opening
+   gathering · living · owned · finished · sealed; composing with everything else through the
+   AST's filter tree only.
+5. **The archived facet's face** finished end-to-end (the band chip + the quiet word's road,
+   U2's "show archived" wiring completed wherever U2 left it PENDING).
+6. **Registry (P-1)** declarations for every new door; copy through the kind seam; polish per
+   the mockup.
+7. **Pins:** composer-level pins for the gathering scope + association join (EXPLAIN where
+   plans matter); face/view-model state-transition tests; the touched Mac suites + the
+   tutorial spine green at the END.
+
+**Fences, verbatim from U2's (all binding):** zero `Sync/`; zero editor-core internals;
+query-layer only through the one composer; environment traps verbatim; Mac suite runs under a
+HELD stage claim — **you are in a SCHEDULED stage queue: message the session named "13o"
+(the scheduler) for a slot BEFORE claiming; headless swift build/test is free.** End-of-
+session report: hashes, self-assessment, PENDING flags, proposals awaiting rulings.
+
+### U3 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
+
+*(empty — the U3 session writes here.)*
+
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
 voices, the §21 design-language anchor (the app's own idioms; no pills, no underlines); her
