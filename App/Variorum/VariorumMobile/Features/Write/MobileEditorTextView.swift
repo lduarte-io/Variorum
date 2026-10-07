@@ -370,25 +370,101 @@ final class MobileEditorTextView: UITextView {
     /// arrives here (traced: the record's initiator stacks). The two rules
     /// are `MobileScrollAuthority`'s; this only feeds them the live facts.
     override func scrollRectToVisible(_ rect: CGRect, animated: Bool) {
-        if MobileScrollAuthority.herGestureHolds(
-            now: clock(), lastUserScroll: lastUserScroll,
-            dragging: isDragging, decelerating: isDecelerating) {
-            return
-        }
+        if herGestureHolds() { return }
+        if isFirstResponder { revealGrantedAt = clock() }
         super.scrollRectToVisible(
             MobileScrollAuthority.revealRect(rect, textBottom: textBottom()), animated: animated)
     }
 
-    /// The text's bottom edge in content coordinates: the content height
-    /// less the room. Never above the caret's own line — `contentSize` can
-    /// trail the layout by a pass right after an edit, and a clamp computed
-    /// from a stale size must still reveal the line the caret is on.
-    private func textBottom() -> CGFloat {
-        let fromContent = contentSize.height - textContainerInset.bottom
-        guard let selection = selectedTextRange else { return fromContent }
+    /// **The second layer, for the road that bypasses the first** (traced,
+    /// intermittently: the keyboard's tracking-element road —
+    /// `UITrackingElementWindowController moveFromPlacement:…` — was seen
+    /// reaching UIScrollView's `scrollRectToVisible` WITHOUT this subclass's
+    /// override, its 376-pt room-padded rect unclamped, landing on the room).
+    /// Every reveal ends in an ANIMATED `setContentOffset`; so a programmatic
+    /// animated move may never carry the page past the point where the
+    /// text's foot meets the viewport's foot — unless she is already past it,
+    /// in which case it may not push her further. Her own scrolling is never
+    /// this call (pans and flings set the offset frame by frame, unanimated),
+    /// and neither are the deliberate jumps (`jumpToBlock`, `restore`), which
+    /// are unanimated by design: the room remains a legitimate target there.
+    override func setContentOffset(_ contentOffset: CGPoint, animated: Bool) {
+        guard animated else {
+            super.setContentOffset(contentOffset, animated: false)
+            return
+        }
+        if herGestureHolds() { return }
+        let foot = textBottom() - bounds.height + adjustedContentInset.bottom
+        var target = contentOffset
+        target.y = min(target.y, max(self.contentOffset.y, foot))
+        super.setContentOffset(target, animated: true)
+    }
+
+    private func herGestureHolds() -> Bool {
+        MobileScrollAuthority.herGestureHolds(
+            now: clock(), lastUserScroll: lastUserScroll,
+            dragging: isDragging, decelerating: isDecelerating)
+    }
+
+    /// When a reveal was last granted while she held the keyboard — the
+    /// one-shot verify's window (below).
+    private var revealGrantedAt: CFTimeInterval = -.infinity
+
+    /// **TK2's estimates can move the caret after a reveal is computed**
+    /// (TEXTKIT2 §2's class, measured here: a far caret jump's minimal
+    /// reveal computed at the caret's ESTIMATED y, then real layout moved it
+    /// ~128 pt lower, leaving it under the viewport). Before this unit the
+    /// room-padded overshoot masked that for the last line by accident. So
+    /// once a reveal's animation ends (the gate delegate forwards
+    /// `scrollViewDidEndScrollingAnimation`), the caret's now-laid-out rect
+    /// is checked once and, if it fell off the page, revealed once more —
+    /// minimally, through both layers. Bounded: one verify per grant, only
+    /// within a second of it, never during her gesture.
+    func revealCaretIfLostToEstimates() {
+        guard clock() - revealGrantedAt < 1.0 else { return }
+        revealGrantedAt = -.infinity
+        guard isFirstResponder, !herGestureHolds(), let selection = selectedTextRange else { return }
         let caret = caretRect(for: selection.end)
-        guard !caret.isNull, !caret.isInfinite else { return fromContent }
-        return max(fromContent, caret.maxY)
+        guard !caret.isNull, !caret.isInfinite else { return }
+        let top = contentOffset.y + adjustedContentInset.top
+        let bottom = contentOffset.y + bounds.height - adjustedContentInset.bottom
+        guard caret.minY < top || caret.maxY > bottom else { return }
+        // The minimal offset, computed here rather than through UIKit's
+        // `scrollRectToVisible` — measured: that call declines to move when
+        // TK2's ESTIMATED `contentSize` still ends above the laid-out caret
+        // (the very drift this verify exists for), so it leaves her caret
+        // under the keyboard. Not bounded by that estimate, for the reason
+        // `jumpToBlock` records; still through this view's animated
+        // `setContentOffset`, so the room clamp and her-gesture rule hold.
+        let margin: CGFloat = 4
+        let target = caret.maxY > bottom
+            ? caret.maxY + margin - bounds.height + adjustedContentInset.bottom
+            : caret.minY - margin - adjustedContentInset.top
+        setContentOffset(CGPoint(x: contentOffset.x, y: max(0, target)), animated: true)
+    }
+
+    /// The text's bottom edge in content coordinates — the lower of two
+    /// readings, floored at the caret's own line.
+    ///
+    /// · `contentSize` less the room alone is NOT enough, measured: during the
+    ///   keyboard's placement the room (this view's inset, re-derived from its
+    ///   height) and `contentSize` (UIKit's, re-derived a pass later) were
+    ///   seen to DISAGREE for an instant — room 323 against a keyboard-down
+    ///   size of 3165 — putting the "text bottom" 350 pt into the room, so the
+    ///   tracking road's room-padded reveal passed both clamps and landed on
+    ///   empty page. TK2's own used extent (`usageBoundsForTextContainer`)
+    ///   never contains the room, so the lower of the two is the honest edge.
+    /// · Floored at the caret's line: an estimate may trail the layout right
+    ///   after an edit, and a clamp must still reveal the line she is on.
+    private func textBottom() -> CGFloat {
+        var bottom = contentSize.height - textContainerInset.bottom
+        if let tlm = textLayoutManager {
+            bottom = min(bottom, tlm.usageBoundsForTextContainer.maxY + textContainerInset.top)
+        }
+        guard let selection = selectedTextRange else { return bottom }
+        let caret = caretRect(for: selection.end)
+        guard !caret.isNull, !caret.isInfinite else { return bottom }
+        return max(bottom, caret.maxY)
     }
 
     /// Rule 2's other half: the scroll view's OWN pan recognizer reports her

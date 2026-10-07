@@ -2314,6 +2314,14 @@ final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
             replacement: text,
             isPaste: (textView as? MobileEditorTextView)?.isPasting == true)
     }
+
+    /// VM-10: a reveal's animation has ended — the scroll authority's
+    /// one-shot check that TK2's estimates did not carry the caret off the
+    /// page (the text view's `revealCaretIfLostToEstimates` holds the rule).
+    /// Scroll-delegate traffic only; nothing here touches edit routing.
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        (scrollView as? MobileEditorTextView)?.revealCaretIfLostToEstimates()
+    }
 }
 
 // MARK: - The storage delegate bridge

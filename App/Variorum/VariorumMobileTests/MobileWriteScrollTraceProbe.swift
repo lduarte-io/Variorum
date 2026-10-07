@@ -109,9 +109,7 @@ enum ScrollInitiators {
         print("TRACE[\(label)] initiators: \(log.count)")
         for (what, stack) in log {
             print("TRACE[\(label)]   >> \(what)")
-            let frames = stack.dropFirst(1).filter {
-                $0.contains("UIKit") || $0.contains("VariorumMobile") || $0.contains("UIFoundation")
-            }.prefix(16)
+            let frames = stack.dropFirst(1).prefix(14)
             for f in frames {
                 let parts = f.split(separator: " ", omittingEmptySubsequences: true)
                 print("TRACE[\(label)]        \(parts.count > 3 ? parts[3...].joined(separator: " ") : f)")
@@ -484,17 +482,37 @@ struct MobileWriteScrollTraceProbe {
             await host.settle(30)
             traceSnapshot(tv, label, "restored")
             ScrollInitiators.dump(label + " geometry")
-            // Keyboard down and up again.
+            // Keyboard down and up again, RIGHT AFTER her pan's release (the
+            // interactive spring-back's timing — her pan stamped).
             ScrollInitiators.log = []
             tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - 200)), animated: false)
-            traceSnapshot(tv, label, "scrolled up again")
+            (tv as? MobileEditorTextView)?.noteHerScroll()
+            traceSnapshot(tv, label, "scrolled up again (pan released)")
             _ = tv.resignFirstResponder()
-            await host.settle(30)
+            await host.settle(5)
             traceSnapshot(tv, label, "keyboard down")
             _ = tv.becomeFirstResponder()
+            await host.settle(12)
+            traceSnapshot(tv, label, "keyboard up again (within her window)")
             await host.settle(40)
-            traceSnapshot(tv, label, "keyboard up again")
+            traceSnapshot(tv, label, "keyboard up again +1s")
             ScrollInitiators.dump(label + " keyboard round trip")
+            // A deliberate refocus long after any pan: the ordinary reveal —
+            // five rounds (the tracking-element road is timing-dependent).
+            for round in 1...5 {
+                ScrollInitiators.log = []
+                tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - 400)), animated: false)
+                await host.settle(40)
+                _ = tv.resignFirstResponder()
+                await host.settle(40)
+                _ = tv.becomeFirstResponder()
+                await host.settle(60)
+                traceSnapshot(tv, label, "refocus round \(round)")
+                let tracking = ScrollInitiators.log.contains { $0.1.contains { $0.contains("TrackingElement") } }
+                print("TRACE[\(label)] refocus round \(round) tracking-road=\(tracking) initiators=\(ScrollInitiators.log.map(\.0))")
+                if round == 1 { ScrollInitiators.dump(label + " refocus r1") }
+                ScrollInitiators.log = []
+            }
         }
     }
 

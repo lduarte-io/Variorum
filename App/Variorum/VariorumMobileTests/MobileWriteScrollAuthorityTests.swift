@@ -85,8 +85,14 @@ private func host(
 /// Places the caret at the document's end with its line the LAST visible
 /// line — the ordinary journaling position, where her ⏎ lands.
 @MainActor
-private func caretAtEndOnTheViewportFoot(_ tv: UITextView) {
+private func caretAtEndOnTheViewportFoot(
+    _ tv: UITextView, _ surface: HostedSurface<MobileWriteScreen>
+) async {
     tv.selectedRange = NSRange(location: tv.textStorage.length, length: 0)
+    // Setting the caret while she holds the keyboard starts UIKit's own
+    // animated reveal (and the authority's one-shot verify after it) — let
+    // both land before placing the page, or the placement races them.
+    await surface.settle(50)
     // TK2's estimates settle as the target lays out, so place, lay out, and
     // place again until the caret's line really is the last visible line.
     for _ in 0..<4 {
@@ -96,6 +102,7 @@ private func caretAtEndOnTheViewportFoot(_ tv: UITextView) {
             CGPoint(x: 0, y: max(0, caret.maxY - tv.bounds.height + 4)), animated: false)
         tv.layoutIfNeeded()
     }
+    await surface.settle(20)
 }
 
 /// The reading line the record quotes.
@@ -122,8 +129,7 @@ struct MobileWriteScrollAuthorityTests {
             defer { surface.tearDown() }
             await waitForText(model, surface)
             let tv = try #require(model.textView)
-            caretAtEndOnTheViewportFoot(tv)
-            await surface.settle(20)
+            await caretAtEndOnTheViewportFoot(tv, surface)
             let before = PageReading(tv)
             let endBefore = tv.textStorage.length
             report("end-return before", tv)
@@ -214,8 +220,7 @@ struct MobileWriteScrollAuthorityTests {
             defer { surface.tearDown() }
             await waitForText(model, surface)
             let tv = try #require(model.textView)
-            caretAtEndOnTheViewportFoot(tv)
-            await surface.settle(20)
+            await caretAtEndOnTheViewportFoot(tv, surface)
             tv.insertText("\n")
             await surface.settle(40)
             // She scrolls back up to read.
@@ -247,8 +252,7 @@ struct MobileWriteScrollAuthorityTests {
             defer { surface.tearDown() }
             await waitForText(model, surface)
             let tv = try #require(model.textView)
-            caretAtEndOnTheViewportFoot(tv)
-            await surface.settle(20)
+            await caretAtEndOnTheViewportFoot(tv, surface)
             // She scrolls well above her caret (a page and a half).
             tv.setContentOffset(
                 CGPoint(x: 0, y: max(0, tv.contentOffset.y - 1.5 * tv.bounds.height)),
@@ -282,8 +286,7 @@ struct MobileWriteScrollAuthorityTests {
             defer { surface.tearDown() }
             await waitForText(model, surface)
             let tv = try #require(model.textView as MobileEditorTextView?)
-            caretAtEndOnTheViewportFoot(tv)
-            await surface.settle(20)
+            await caretAtEndOnTheViewportFoot(tv, surface)
             tv.insertText("\n")
             await surface.settle(40)
             // She drags back up to read.
