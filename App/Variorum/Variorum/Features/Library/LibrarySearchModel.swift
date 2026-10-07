@@ -245,8 +245,13 @@ final class LibrarySearchModel {
     /// catalog also shows it for an armed day.
     var asksAnything: Bool { question != nil }
 
-    /// The sheet answers something (13o U3): words, or a typed tag's books.
-    var answersAnything: Bool { question?.answers == true }
+    /// The sheet answers something (13o U3): words, or a typed tag that HAS
+    /// associated books (counted — living or archived). A tag with none
+    /// answers nothing, so no facet is offered over it (P-2).
+    var answersAnything: Bool {
+        guard let question else { return false }
+        return question.hasWords || (!question.tagPaths.isEmpty && counts != nil)
+    }
 
     var hasMoreGroups: Bool { next != nil }
 

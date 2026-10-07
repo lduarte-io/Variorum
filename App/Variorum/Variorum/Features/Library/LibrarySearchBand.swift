@@ -77,8 +77,10 @@ struct LibrarySearchBand: View {
             } else if offersBookState {
                 LibrarySearchBookStateMenu(tokens: tokens, onPick: onPickBookState)
             }
-            // The facet applies to an answer — words, or a typed tag's books.
-            if question?.answers == true {
+            // The facet applies to an answer — words, or a typed tag whose
+            // books (living or archived) are counted (P-2: never a chip that
+            // could not act).
+            if let question, question.hasWords || (question.answers && counts != nil) {
                 if visibility == .living {
                     LibrarySearchChip(
                         tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.archivedOff),
