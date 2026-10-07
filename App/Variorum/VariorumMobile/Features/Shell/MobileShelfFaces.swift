@@ -151,8 +151,10 @@ nonisolated enum MobileShelfFaces {
     static let archiveDailyJournalDoorTitle = "Archive"
     static let archiveDailyJournalDetail = BookArchiveCopy.dailyJournalCaption
 
-    /// The archive landed — the phone has no Archived surface yet, so the
-    /// receipt names the road that IS here.
+    /// The archive landed — the phone has an Archived room for NOTES but no
+    /// archived-BOOKS group in it yet (owed: MobileSoul 13i-e row / VM-6 (4d);
+    /// the VM-5 round-1 review corrected this line), so the receipt names the
+    /// road that IS here.
     static func archivedDailyJournalReceipt(name: String) -> String {
         "Archived \u{201C}\(name)\u{201D} \u{2014} it comes back when a day arrives (Today\u{2019}s Entry)."
     }

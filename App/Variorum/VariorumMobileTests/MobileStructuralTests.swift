@@ -1142,9 +1142,12 @@ struct MobileNoRedirectSweepTests {
                     guard !exempt.contains(where: {
                         $0.file == url.lastPathComponent && $0.literal == literal
                     }) else { continue }
-                    guard !exemptPrefixes.contains(where: {
+                    // …and the prefix exemption is CAPPED AT ONE occurrence
+                    // (round-1 MINOR 2): a future sentence naming the Mac
+                    // added INSIDE the exempted literal still trips the sweep.
+                    guard !(exemptPrefixes.contains(where: {
                         $0.file == url.lastPathComponent && literal.hasPrefix($0.prefix)
-                    }) else { continue }
+                    }) && literal.ranges(of: Self.forbidden).count == 1) else { continue }
                     offenders.append("\(url.lastPathComponent): \"\(literal)\"")
                 }
             }

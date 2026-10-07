@@ -1453,7 +1453,7 @@ final class MobileEditorViewModel {
         // reader (`planCrossBlockEdit`'s arities, the browser's position
         // count), and inventing a row here would end the lag that
         // `StructuralGesturePlanner.World.fanArity` and
-        // `CrossBlockEditPlanner` both guard for on purpose.
+        // `CrossBlockCompound` both guard for on purpose.
         if let s = slots.firstIndex(where: { $0.blockID == blockID }) {
             slots[s] = slot
         }

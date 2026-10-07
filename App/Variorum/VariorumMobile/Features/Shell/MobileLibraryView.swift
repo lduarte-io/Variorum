@@ -429,8 +429,9 @@ struct MobileLibraryView<TabBar: View>: View {
         // NO empty state at all — an empty store showed a path line, a
         // search field, a filter row and nothing else, which reads as a
         // broken app rather than a new one. Under the union listing the
-        // guard also requires the BOOKS half empty — under `.books`/`.all`
-        // with books present, "no notes yet" over real rows would lie.
+        // guard also requires the BOOKS half empty — under `.all` with books
+        // present, "no notes yet" over real rows would lie (`.books` renders
+        // via bookRows and never reaches this body — the round-1 NIT 2).
         // Only the plain listing speaks; the Scraps filter has its own
         // line, and a search's "Nothing found." is a different fact.
         if model.visible.isEmpty, shelved.rows.isEmpty, model.filter != .scraps {

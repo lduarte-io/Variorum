@@ -96,11 +96,14 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
     /// library has"* (#85). Three doors are deliberately absent, and the reason
     /// is a MODEL FACT rather than a face call:
     ///
-    /// - **books** — `reading` carries **no `archived_at`** (AppSpec §7;
-    ///   `Migrations.swift`'s `CREATE TABLE reading`). A book finishes or is
-    ///   deleted; it never archives. An Archive "books" door could never have
-    ///   content — P-2 in its strongest form, since no future row could arrive
-    ///   without a schema change.
+    /// - **books** — ⚠ the ORIGINAL reason here ("`reading` carries no
+    ///   `archived_at`") was TRUE when this door was built and is FALSE since
+    ///   13i-e (the VM-5 merge's round-1 review, MINOR 1): `Reading.archivedAt`
+    ///   exists, `Operations+ReadingArchive` exists, and the phone's own shelf
+    ///   long-press archives the daily Journal. The door stays absent today
+    ///   only because the phone's archived-BOOKS face is OWED, not impossible —
+    ///   MobileSoul's 13i-e row (F-U1-4; her 2026-10-04 walk mistook the hidden
+    ///   state for a sync bug) and the board's VM-6 (4d) own it.
     /// - **bookless** — the bookless read is `Queries.poolPosts`, whose own
     ///   WHERE clause excludes archived posts. No archived-and-bookless core
     ///   read exists, and adding one is a fenced change.
@@ -110,8 +113,9 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
     ///   Mac's Archived is NOTES only (the post-13l ruling) — matched, not
     ///   invented past.
     ///
-    /// *(Recorded for her as a QUESTIONS candidate: book-archiving would be a
-    /// schema event AND a SyncSpec §12 lockstep event — nobody's to improvise.)*
+    /// *(The old closing note said book-archiving "would be a schema event…
+    /// nobody's to improvise" — it HAPPENED: 13i-e's v1_21/marker-12 event.
+    /// What remains is the phone's face, owed at VM-6.)*
     static let archiveDoors: [MobileListingFilter] = [.all, .notes]
 
     /// The books listing's empty line. It lives here rather than on

@@ -1,5 +1,7 @@
 # Mobile Round 2 — ORCHESTRATOR HANDOFF
 
+> **NUMBER KEY (the VM-5 merge, 2026-10-07):** this record's QUESTIONS citations #84–#94 are the MOBILE-era numbers, renumbered at the merge to **#189–#199** (the mapping table heads the "Mobile Round 2 — RENUMBERED" section of `notes/QUESTIONS.md`; main's own #84–#94 are different entries).
+
 > # ⚠️ THIS FILE HAS TWO KICKOFFS. THE ONE BELOW IS HISTORY.
 >
 > **A fresh mobile session starts at the SECOND half of this file** —

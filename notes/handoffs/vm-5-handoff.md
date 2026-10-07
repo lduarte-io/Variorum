@@ -29,8 +29,8 @@ union listing + main's empty state composed). The whole diff vs main sits inside
 schema (grep-verified), so Mac/core behavior is main's tip by construction. The QUESTIONS
 numbering collision is fixed (mobile's #84–#94 → #189–#199, mapping table in place; main's own
 stale next-free marker corrected). The round-2 closeout obligations are dispositioned in
-`notes/plans/fixes/vm-5-the-catch-up-merge.md`; the long-lived `mobile` branch is retired behind
-tag `archive/mobile-2026-10`; all future VM work runs on main-based `vm-N` worktrees exactly like
+`notes/plans/fixes/vm-5-the-catch-up-merge.md`; the long-lived `mobile` branch RETIRES at the close choreography (the tag
+`archive/mobile-2026-10` is cut there, then the branch and its worktree go); all future VM work runs on main-based `vm-N` worktrees exactly like
 VX.
 
 ## Verification (filled at close)

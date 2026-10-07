@@ -105,9 +105,11 @@ final class MobileLibraryViewModel {
     /// promises.
     ///
     /// **The LIBRARY only.** The Archive room's `.all` is untouched: there,
-    /// the coincidence with `.notes` is FORCED rather than chosen — `reading`
-    /// carries no `archived_at`, so nothing but a note can be archived
-    /// (`MobileListingFilter.archiveDoors`).
+    /// the coincidence with `.notes` holds TODAY because the phone's
+    /// archived-BOOKS face is still owed — not because the model forbids it
+    /// (since 13i-e `Reading.archivedAt` is real; the VM-5 round-1 review's
+    /// MINOR 1 corrected this comment). The owed face: MobileSoul 13i-e row /
+    /// VM-6 (4d); `MobileListingFilter.archiveDoors` carries the fuller note.
     ///
     /// The books passed in are the SURFACE's windowed set — the `.books`
     /// filter's own rows and its own window, so a book reads identically

@@ -1,5 +1,7 @@
 # Mobile Round 2 — WHERE MOBILE STANDS (written 2026-09-01 at her ask, by the second Fable seat)
 
+> **NUMBER KEY (the VM-5 merge, 2026-10-07):** this record's QUESTIONS citations #84–#94 are the MOBILE-era numbers, renumbered at the merge to **#189–#199** (the mapping table heads the "Mobile Round 2 — RENUMBERED" section of `notes/QUESTIONS.md`; main's own #84–#94 are different entries).
+
 *Her question: "I don't have much of an idea of what all the different batches are, what work
 remains, if the biometric lock is already in place…" — a full accounting in one place. Everything
 below is verifiable in the batch records named; counts re-derived at each unit close.*
