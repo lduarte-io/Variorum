@@ -218,6 +218,11 @@ final class LibraryCatalogModel {
         editedRange = range
         guard range != nil else { return }
         if scope == .books || scope == .blocks { scope = .posts }
+        // 13o U3: a day names NOTES and a mode facet names BOOKS — together
+        // they answer nothing, so the day she arms now takes the facet's
+        // place (the facet's chip is not offered while a day is armed —
+        // `LibrarySearchRouting.offersBookState`).
+        searchState.setBookState(nil)
     }
 
     /// **The day the empty answer may speak about** — nil when something the
@@ -599,7 +604,7 @@ final class LibraryCatalogModel {
             let question = LibrarySearchQuestion.read(
                 query,
                 range: day.map { SearchDayRange(field: .edited, start: $0.start, end: $0.end) },
-                visibility: searchState.visibility)
+                visibility: searchState.visibility, bookState: searchState.bookState)
             if question == nil { searchState.resetFacet() }
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).
@@ -668,9 +673,10 @@ final class LibraryCatalogModel {
     /// **13o U2 — the field's question decides the road** (D1): words are
     /// the SEARCH STATE (the answer sheet, `LibrarySearchModel.listing` —
     /// the books it names, its note groups' heads as the notes); a `#tag`
-    /// typed without words lists nothing until words join it (PROVISIONAL
-    /// P-13o-U2-6 — the band names the tag and asks for them); no question
-    /// at all is the shipped listing, unnarrowed.
+    /// typed without words lists the books it is ASSOCIATED with and no
+    /// notes until words join it (13o U3's join; PROVISIONAL P-13o-U2-6,
+    /// narrowed — the band names the tag and asks for the words); no
+    /// question at all is the shipped listing, unnarrowed.
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion?, scope: Scope,
         sort: Queries.LibrarySort, direction: SortDirection, day: DayBounds?, wing: String,
@@ -678,7 +684,8 @@ final class LibraryCatalogModel {
     ) throws -> Listing {
         var listing = Listing()
         if let question {
-            guard question.hasWords else { return listing }
+            // 13o U3: a typed tag alone answers too — its associated books.
+            guard question.answers else { return listing }
             let answer = try LibrarySearchModel.listing(
                 db, question: question, scope: scope, wing: wing, groupDepth: groupDepth)
             listing.books = answer.books

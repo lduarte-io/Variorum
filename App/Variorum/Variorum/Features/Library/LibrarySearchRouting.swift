@@ -95,4 +95,25 @@ extension LibraryCatalogModel {
     func toggleArchivedFacet() {
         searchState.toggleArchived()
     }
+
+    // MARK: - The mode facets (13o U3 — the sitting record §12 item 2)
+
+    /// **The `+ book state` chip is offered** when the sheet answers
+    /// something and no day is armed: a day names NOTES and a mode facet
+    /// names BOOKS, so under a day the facet could never act (P-2 — a door
+    /// that can never act is not drawn).
+    var offersBookState: Bool {
+        searchState.answersAnything && editedRange == nil
+    }
+
+    /// **Arm a mode facet** (nil clears) — the mirror of arming a day
+    /// (QUESTIONS #104's clause): a facet names BOOKS, so a notes or blocks
+    /// scope moves to Books (All stays All); while one is armed the scope
+    /// picker stands down exactly as it does under a day (PROVISIONAL
+    /// P-13o-U3-3). The caller spawns `search()`.
+    func armBookState(_ state: SearchBookState?) {
+        searchState.setBookState(state)
+        guard state != nil else { return }
+        if scope == .posts || scope == .blocks { pickScope(.books) }
+    }
 }

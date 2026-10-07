@@ -55,6 +55,54 @@ nonisolated enum LibrarySearchCopy {
     static let archivedOffHelp = "Include archived notes, books and takes"
     static let archivedOnHelp = "Back to the living library \u{2014} leave the archive out"
 
+    /// **The mode facet's chip** (13o U3 — the mockup's `+ book state`; the
+    /// 13i sitting record §12's mode facets, facts never tags). The
+    /// invitation, its five choices (the mockup's own words — Direction B's
+    /// "Books that are: gathering · living · owned · finished · sealed"), and
+    /// the armed chip's noun (PROVISIONAL P-13o-U3-2: a state alone in a
+    /// chip reads as a noun of books, so it says so).
+    static let bookStateOff = "+ book state"
+    static let bookStateOffHelp = "Narrow the books to one state \u{2014} "
+        + "gatherings, living, owned, finished or sealed"
+    static let bookStateOnHelp = "Back to every book, whatever its state"
+
+    /// The scope picker's help while a facet is armed (it stands down, as
+    /// under a day — a facet names books).
+    static let scopeDoorUnderABookState = "A book state names books \u{2014} "
+        + "clear it in the band to search notes and blocks again"
+
+    static func bookStateChoice(_ state: SearchBookState) -> String {
+        switch state {
+        case .gathering: "gathering"
+        case .living: "living"
+        case .owned: "owned"
+        case .finished: "finished"
+        case .sealed: "sealed"
+        }
+    }
+
+    static func bookStateChip(_ state: SearchBookState) -> String {
+        switch state {
+        case .gathering: "gatherings"
+        case .living: "living books"
+        case .owned: "owned books"
+        case .finished: "finished books"
+        case .sealed: "sealed books"
+        }
+    }
+
+    /// **Why an ASSOCIATED book is listed** (13o U3 — the tag-association
+    /// join; the mockup's own "#dream flows here"). Notes carrying the typed
+    /// tag flow into it, or its writing carries the tag (the outflow — the
+    /// Collecting pane's "Notes written here are tagged"). PROVISIONAL
+    /// P-13o-U3-2 for the second's words.
+    static func association(_ reason: SearchTagAssociation.Reason) -> String {
+        switch reason {
+        case .flowsIn(let path): "#\(path) flows here"
+        case .taggedHere(let path): "notes here are tagged #\(path)"
+        }
+    }
+
     /// **A tag typed without words** (PROVISIONAL P-13o-U2-6): the band
     /// names the tag; the sheet asks for the words.
     static func tagAlone(_ paths: [String]) -> String {

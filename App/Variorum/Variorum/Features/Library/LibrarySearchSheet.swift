@@ -43,23 +43,26 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                 if let question = state.question, !question.hasWords {
-                    // PROVISIONAL P-13o-U2-6: a tag alone asks for words.
-                    LibraryListLead()
+                    // 13o U3: a tag alone lists the books it is ASSOCIATED
+                    // with (the join); its notes still ask for words
+                    // (PROVISIONAL P-13o-U2-6, narrowed).
+                    if !state.books.isEmpty {
+                        booksSection
+                        Color.clear.frame(height: LibraryListFace.sectionGap)
+                    } else {
+                        LibraryListLead()
+                    }
                     LibraryListRow {
                         Text(tokens.chromeLabel(LibrarySearchCopy.tagAlone(question.tagPaths)))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                     }
+                    if let places = archivedFootPlaces {
+                        LibraryListRow { archivedFoot(places) }
+                    }
                 } else {
                     if !state.books.isEmpty {
-                        Section {
-                            LibraryListLead()
-                            ForEach(state.books, id: \.id) { hit in
-                                bookRow(hit)
-                            }
-                        } header: {
-                            LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.booksHeader))
-                        }
+                        booksSection
                         if !state.groups.isEmpty {
                             Color.clear.frame(height: LibraryListFace.sectionGap)
                         }
@@ -103,6 +106,19 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
             .padding(.bottom, LibraryListFace.bottomInset)
         }
         .background(tokens.surface)
+    }
+
+    /// The Books section: the associated books first (each row says why —
+    /// the catalog's `bookRow` reads `bookReasons`), then the name hits.
+    private var booksSection: some View {
+        Section {
+            LibraryListLead()
+            ForEach(state.books, id: \.id) { hit in
+                bookRow(hit)
+            }
+        } header: {
+            LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.booksHeader))
+        }
     }
 
     /// The archived foot (D4): the facet is off and the archive holds

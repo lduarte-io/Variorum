@@ -32,6 +32,12 @@ struct LibrarySearchBand: View {
     var dayChip: (label: String, help: String, onClear: () -> Void)?
     let onRemoveTag: (String) -> Void
     let onToggleArchived: () -> Void
+    /// **The mode facet** (13o U3): the armed state, whether the chip is
+    /// offered at all (`LibraryCatalogModel.offersBookState` — never under a
+    /// day), and its door (nil clears).
+    var bookState: SearchBookState? = nil
+    var offersBookState = false
+    var onPickBookState: (SearchBookState?) -> Void = { _ in }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -62,8 +68,17 @@ struct LibrarySearchBand: View {
                     tokens: tokens, label: tokens.chromeLabel(dayChip.label),
                     help: dayChip.help, onClear: dayChip.onClear)
             }
-            // The facet applies to an answer sheet — words only.
-            if question?.hasWords == true {
+            // 13o U3 — the MODE FACET: an invitation that opens the five
+            // states, or the armed state with its ✕.
+            if let bookState {
+                LibrarySearchChip(
+                    tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.bookStateChip(bookState)),
+                    help: LibrarySearchCopy.bookStateOnHelp, onClear: { onPickBookState(nil) })
+            } else if offersBookState {
+                LibrarySearchBookStateMenu(tokens: tokens, onPick: onPickBookState)
+            }
+            // The facet applies to an answer — words, or a typed tag's books.
+            if question?.answers == true {
                 if visibility == .living {
                     LibrarySearchChip(
                         tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.archivedOff),
@@ -85,12 +100,38 @@ struct LibrarySearchBand: View {
         .background(tokens.wash.opacity(0.5))
     }
 
-    /// "— 3 books · 29 notes …" with words; nothing for a tag or a day alone
-    /// (the sheet or the listing below says what they mean).
+    /// "— 3 books · 29 notes …" with words, or for a typed tag's books (13o
+    /// U3); nothing for a day alone (the listing below says what it means).
     private var countsLine: String? {
-        guard question?.hasWords == true else { return nil }
+        guard let question, question.answers else { return nil }
+        guard question.hasWords || counts != nil else { return nil }
         let words = counts.map(LibrarySearchCopy.counts) ?? LibrarySearchCopy.nothingFound
         return "\u{2014} " + words
+    }
+}
+
+/// **The `+ book state` invitation** (13o U3 — the mockup's chip; the 13i
+/// sitting record §12's mode facets): a quiet dashed chip that opens the five
+/// states, each a FACT on the book's row, never a tag.
+struct LibrarySearchBookStateMenu: View {
+    let tokens: VoiceTokens
+    let onPick: (SearchBookState?) -> Void
+
+    var body: some View {
+        Menu {
+            ForEach(SearchBookState.allCases, id: \.self) { state in
+                Button(tokens.chromeLabel(LibrarySearchCopy.bookStateChoice(state))) { onPick(state) }
+            }
+        } label: {
+            LibrarySearchChip(
+                tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.bookStateOff), invitation: true)
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .lineLimit(1)
+        .fixedSize()
+        .help(LibrarySearchCopy.bookStateOffHelp)
     }
 }
 

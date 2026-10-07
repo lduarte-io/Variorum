@@ -362,6 +362,14 @@ struct LibraryCatalogView: View {
             onToggleArchived: {
                 model.toggleArchivedFacet()
                 Task { await model.search() }
+            },
+            // 13o U3 — the mode facet: arming moves a notes/blocks scope to
+            // Books (the day's mirror); the ✕ clears it.
+            bookState: state.bookState,
+            offersBookState: model.offersBookState,
+            onPickBookState: { picked in
+                model.armBookState(picked)
+                Task { await model.search() }
             })
     }
 
@@ -574,9 +582,12 @@ struct LibraryCatalogView: View {
                 // edit stamp and stand down while one is armed, so the scope
                 // stands down with them rather than offering picks that
                 // would list nothing (P-2).
-                .disabled(model.editedOn != nil)
-                .help(model.editedOn == nil
-                      ? LibraryCopy.scopeDoor : LibraryCopy.scopeDoorUnderADay)
+                // 13o U3: an armed MODE FACET names BOOKS the same way, so
+                // the scope stands down under it too (PROVISIONAL P-13o-U3-3).
+                .disabled(model.editedOn != nil || model.searchState.bookState != nil)
+                .help(model.editedOn != nil ? LibraryCopy.scopeDoorUnderADay
+                      : (model.searchState.bookState != nil
+                         ? LibrarySearchCopy.scopeDoorUnderABookState : LibraryCopy.scopeDoor))
                 // 17y B-WALK W-2 (her ruling): picking Cards moves the scope
                 // All → Notes (Cards shows notes only); a moved scope is a
                 // new question, so it re-reads.
@@ -837,6 +848,9 @@ struct LibraryCatalogView: View {
         // selects, the words open).
         CatalogBookLine(
             tokens: tokens, title: hit.title, detail: hit.detail,
+            // 13o U3: an ASSOCIATED book's row says why it is listed (the
+            // tag-association join — the mockup's "#dream flows here").
+            association: model.searchState.bookReasons[hit.id].map(LibrarySearchCopy.association),
             onTitleTap: { openHit(hit) })
         // Row 33 (a): the WHOLE row is the target — the line used to be only
         // as wide as its words, so a click right of "book" was a dead click
@@ -1188,6 +1202,9 @@ struct CatalogBookLine: View {
     let tokens: VoiceTokens
     let title: String
     let detail: String?
+    /// 13o U3 — why an associated book is listed ("#dream flows here"),
+    /// beside its name in the accent (the mockup's own); nil elsewhere.
+    var association: String? = nil
     let onTitleTap: () -> Void
 
     static let probeSpace = "catalog-book-line"
@@ -1203,6 +1220,12 @@ struct CatalogBookLine: View {
                 .font(tokens.body)
                 .baselineProbe("book.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
+            if let association {
+                Text(tokens.chromeLabel(association))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+            }
             if let detail {
                 Text(tokens.chromeLabel(detail))
                     .font(tokens.small)

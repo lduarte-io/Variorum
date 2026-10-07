@@ -45,16 +45,24 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
 
     /// **The answer sheet's state** (D1): the question has WORDS the index
     /// can be asked about. A `#tag` alone, or a day alone, is a question
-    /// without words — the band says it, and the sheet asks for words
-    /// (a `#tag` alone, PROVISIONAL P-13o-U2-6) or the shipped day listing
-    /// answers (a day alone, D5).
+    /// without words — the band says it; a `#tag` alone is answered by the
+    /// books it is ASSOCIATED with (13o U3, the tag-association join — the
+    /// sheet still asks for words for its notes, P-13o-U2-6 narrowed), and a
+    /// day alone by the shipped day listing (D5).
     var hasWords: Bool { query.text != nil }
+
+    /// **The sheet can answer** (13o U3): words, or a typed `#tag` whose
+    /// associated books are an answer of their own.
+    var answers: Bool { hasWords || !tagPaths.isEmpty }
 
     /// The field's text as a question — nil when the field holds nothing to
     /// ask (blank). `range` is the armed `when` range: with words it joins
     /// the filter half (D5 — `Queries.editedOnSQL`'s rule, unchanged).
+    /// `bookState` is the armed MODE FACET (13o U3 — the sitting record
+    /// §12's "mode facets as search filters"), a leaf of the same filter half.
     static func read(
         _ text: String, range: SearchDayRange? = nil, visibility: SearchVisibility = .living,
+        bookState: SearchBookState? = nil,
         locale: Locale = .current, calendar: Calendar = JournalDay.storeCalendar
     ) -> LibrarySearchQuestion? {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
@@ -62,6 +70,9 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
             text, typeAhead: true, visibility: visibility, locale: locale, calendar: calendar)
         if let range {
             query.filter = query.filter.map { .all([$0, .days(range)]) } ?? .days(range)
+        }
+        if let bookState {
+            query.filter = query.filter.map { .all([$0, .bookState(bookState)]) } ?? .bookState(bookState)
         }
         let tokens = tokens(of: text)
         return LibrarySearchQuestion(
@@ -144,6 +155,10 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
 nonisolated struct LibrarySearchListing: Equatable, Sendable {
     var counts: SearchCounts?
     var books: [Queries.CatalogHit] = []
+    /// **Why each ASSOCIATED book is listed** (13o U3, the tag-association
+    /// join — the row says why: the mockup's "#dream flows here"); a book a
+    /// name hit lists has no entry.
+    var bookReasons: [String: SearchTagAssociation.Reason] = [:]
     var groups: [SearchGroup] = []
     var next: SearchComposer.GroupCursor?
 }
@@ -171,15 +186,24 @@ final class LibrarySearchModel {
     /// asks, never remembered (the day filter's own reason: a Library that
     /// reopened still showing the archive is the invisible-state hazard).
     private(set) var visibility: SearchVisibility = .living
+    /// **The armed MODE FACET** (13o U3 — the sitting record §12: gathering ·
+    /// living · owned · finished · sealed, facts never tags): the band's
+    /// `+ book state` chip. A question she asks, never remembered (the
+    /// facet's own reason above). nil = none.
+    private(set) var bookState: SearchBookState?
 
     /// The question the LISTED answer answers — nil when the Library is not
     /// searching. The band reads it whenever it is non-nil (P-13o-U2-1).
     private(set) var question: LibrarySearchQuestion?
     /// The band's numbers (nil without words).
     private(set) var counts: SearchCounts?
-    /// The Books section: every book a book or chapter hit names, ranked by
-    /// its best hit (∝ the wing's books — the Bookcase's own class).
+    /// The Books section: the books a typed `#tag` is ASSOCIATED with first
+    /// (13o U3 — the join, top-ranked), then every book a book or chapter
+    /// hit names, ranked by its best hit (∝ the wing's books — the
+    /// Bookcase's own class).
     private(set) var books: [Queries.CatalogHit] = []
+    /// Why each associated book is listed (13o U3 — its row's words).
+    private(set) var bookReasons: [String: SearchTagAssociation.Reason] = [:]
     /// The answer sheet's groups — notes and scraps groups, best first.
     private(set) var groups: [SearchGroup] = []
     /// Where the next page of groups starts; nil when none follows.
@@ -216,6 +240,9 @@ final class LibrarySearchModel {
     /// catalog also shows it for an armed day.
     var asksAnything: Bool { question != nil }
 
+    /// The sheet answers something (13o U3): words, or a typed tag's books.
+    var answersAnything: Bool { question?.answers == true }
+
     var hasMoreGroups: Bool { next != nil }
 
     /// The facet's door (D4): living ↔ including archived. The caller
@@ -224,9 +251,17 @@ final class LibrarySearchModel {
         visibility = visibility == .living ? .includingArchived : .living
     }
 
-    /// Put the facet back to the living corpus (a cleared field).
+    /// The mode facet's door (13o U3): arm one state, or clear (nil). The
+    /// caller re-reads; the scope it moves is the catalog's
+    /// (`LibraryCatalogModel.armBookState`).
+    func setBookState(_ state: SearchBookState?) {
+        bookState = state
+    }
+
+    /// Put the facets back (a cleared field): the living corpus, no state.
     func resetFacet() {
         visibility = .living
+        bookState = nil
     }
 
     // MARK: - Landing (the catalog's road — `LibrarySearchRouting.swift`)
@@ -245,6 +280,7 @@ final class LibrarySearchModel {
         self.generation = generation
         counts = listing?.counts
         books = listing?.books ?? []
+        bookReasons = listing?.bookReasons ?? [:]
         groups = listing?.groups ?? []
         next = listing?.next
         loadingMore = false
@@ -361,9 +397,13 @@ final class LibrarySearchModel {
         listing.counts = try Queries.searchCounts(
             db, query: question.query, scope: where_, calendar: calendar)
         if scope == .all || scope == .books {
-            listing.books = try books(db, question: question, wing: wing, calendar: calendar)
+            let section = try books(db, question: question, wing: wing, calendar: calendar)
+            listing.books = section.hits
+            listing.bookReasons = section.reasons
         }
-        if scope != .books {
+        // A typed tag ALONE answers with its books only (13o U3): its notes
+        // need words (P-13o-U2-6, narrowed).
+        if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(
                 db, query: question.scoped(scope), scope: where_, limit: groupDepth,
                 perGroup: linesPerGroup, calendar: calendar)
@@ -384,24 +424,36 @@ final class LibrarySearchModel {
             limit: groupPageSize, perGroup: linesPerGroup, calendar: calendar)
     }
 
-    /// The Books section: every book the books family names, best hit
-    /// first, as the catalog's own rows (`Queries.catalogBookHits`).
+    /// **The Books section** (13o U3): the books a typed `#tag` is
+    /// ASSOCIATED with first — top-ranked, each with its reason (the 13i
+    /// sitting record §12: *"a tag's results surface the books/gatherings
+    /// associated with it … top-ranked"*; `Queries.searchTagAssociations`) —
+    /// then every book the books family names, best hit first, each once; as
+    /// the catalog's own rows (`Queries.catalogBookHits`).
     nonisolated static func books(
         _ db: Database, question: LibrarySearchQuestion, wing: String, calendar: Calendar
-    ) throws -> [Queries.CatalogHit] {
+    ) throws -> (hits: [Queries.CatalogHit], reasons: [String: SearchTagAssociation.Reason]) {
         let query = question.scoped(.books)
+        let scope = SearchScope(wingID: wing)
         var ids: [String] = []
         var seen: Set<String> = []
-        var cursor: SearchComposer.Cursor?
-        repeat {
-            let page = try Queries.searchPassages(
-                db, query: query, scope: SearchScope(wingID: wing), after: cursor, limit: 200,
-                calendar: calendar)
-            for passage in page.passages {
-                if let id = passage.readingID, seen.insert(id).inserted { ids.append(id) }
-            }
-            cursor = page.next
-        } while cursor != nil
-        return try Queries.catalogBookHits(db, ids: ids)
+        var reasons: [String: SearchTagAssociation.Reason] = [:]
+        for association in try Queries.searchTagAssociations(db, query: query, scope: scope)
+        where seen.insert(association.readingID).inserted {
+            ids.append(association.readingID)
+            reasons[association.readingID] = association.reason
+        }
+        if question.hasWords {
+            var cursor: SearchComposer.Cursor?
+            repeat {
+                let page = try Queries.searchPassages(
+                    db, query: query, scope: scope, after: cursor, limit: 200, calendar: calendar)
+                for passage in page.passages {
+                    if let id = passage.readingID, seen.insert(id).inserted { ids.append(id) }
+                }
+                cursor = page.next
+            } while cursor != nil
+        }
+        return (try Queries.catalogBookHits(db, ids: ids), reasons)
     }
 }
