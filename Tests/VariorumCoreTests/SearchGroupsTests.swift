@@ -236,6 +236,28 @@ struct SearchGroupsTests {
         }
     }
 
+    // MARK: - The Books section's rows (the catalog's own words)
+
+    @Test func theBooksSectionReadsTheNamedBooksInTheOrderGiven() throws {
+        try withOperations { ops, db in
+            let first = try ops.createReading(name: "Zinnia", kind: .book)
+            let gathering = try ops.createReading(
+                name: "Aster", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let gone = try ops.createReading(name: "Gone", kind: .book)
+            try ops.deleteReading(gone.id)
+            let hits = try db.read { db in
+                try Queries.catalogBookHits(db, ids: [first.id, gone.id, gathering.id, "missing"])
+            }
+            #expect(hits.map(\.id) == [first.id, gathering.id], "in the order given; dead and missing dropped")
+            #expect(hits.map(\.detail) == ["book", "gathering"], "the catalog's own nouns")
+            #expect(hits.allSatisfy { $0.kind == .book })
+            let listed = try db.read { try Queries.catalogBooks($0, query: "", limit: nil) }
+            #expect(listed.first { $0.id == first.id } == hits.first,
+                    "the same row the listing draws — one builder")
+            #expect(try db.read { try Queries.catalogBookHits($0, ids: []) }.isEmpty)
+        }
+    }
+
     // MARK: - The range (the when door)
 
     @Test func aDayRangeTilesFirstThroughLastInclusive() throws {

@@ -599,7 +599,18 @@ U1 substrate (`SearchQuery`/`SearchQueryParser`/`SearchDateParse`/`SearchCompose
 `…DayFilter`/`…Copy`/`…ListFace`/`…ListingReads`), `CommandPalette`, the landing road
 (`ShellRouter.adopt(landing:)` → `PostDetailView.jump(to:)` → `EditorView(caretSeed:)` →
 `EditorViewModel.applyFocusSeeds`), `EditorFind.performFind`, `WriteIntent`/`CommandRouter`'s
-park-and-clear rules, the registry walk (`CapabilityRegistryTests`). Machinery: no deaths so far.
+park-and-clear rules, the registry walk (`CapabilityRegistryTests`).
+
+**MACHINERY (honesty, the resiliency protocol's rule 7):** the first U2 session was STOPPED by an
+accidental user action mid-piece, after P0 (`84a7a759`) and P1 (`f41f7f44`), both pushed. It left
+ONE uncommitted edit: `Queries/ShelfQueries.swift` — `catalogBookHit(_:)` factored out of
+`catalogBooks` (byte-identical nouns) + a new `catalogBookHits(_:ids:)` (the named books' catalog
+rows in the order given, dead ones dropped — the search state's Books section, D2). Its last words
+were "Now the search state's own model (P-9: its own file and brain)", i.e. P2. **A CONTINUATION
+session (Opus, xhigh) was seated 2026-10-06 from the repo alone** (this plan whole, the mockup's
+Direction C + shared section, the resiliency protocol, the diff, the code above) and ADOPTED the
+edit as P2's first commit, with a core pin (`SearchGroupsTests.theBooksSectionReadsTheNamedBooks
+InTheOrderGiven` — 9/9 green). Nothing of the predecessor's design is re-derived; D1–D8 stand.
 
 **THE DESIGN AS BUILT (decisions the brief does not make are marked PROVISIONAL — they ride to the
 closeout ratify bundle with U1's; nothing here re-opens a ruling):**
@@ -655,7 +666,7 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
 | P1 | CORE: the composer grows the GROUP page (top-K per group + group facts, keyset on best score) and the COUNTS statement (living + archived, per kind) over ONE shared hits builder (the shipped passages statement byte-unchanged in shape); `.docKind` AST leaf; `DayBounds` range init; `Queries.searchGroups` / `Queries.searchCounts`; headless pins (grouping, keyset, counts = the listing, EXPLAIN) | DONE (this commit) — `SearchComposer.hits` (one builder; `passages` rebuilt on it and verified BYTE-IDENTICAL against a pre-refactor snapshot of three shapes — living/facet/archived-only, library/book/note, cursor/no-cursor), `SearchComposer.groups` (`scored AS MATERIALIZED`, grouped by home, keyset `(g_best, g_home)`, top-K by `ROW_NUMBER` with the title ranked last, snippets for the top rows only) and `SearchComposer.counts` (one `hits AS MATERIALIZED` walk; living + all + archived places; worn ids folded in as JSON), `SearchFilter.docKind` + `SearchDocKind` (pinned = `SearchIndex.sources`' kinds), `DayBounds(firstDay:lastDay:)`; `Queries.searchGroups` (worn day leads page one, merged with its own group; note heads read as the catalog's `CatalogHit` for the page's homes only) + `Queries.searchCounts` + `SearchGroup`/`SearchGroupPage`/`SearchCounts`. `SearchGroupsTests` 8/8 + `SearchPassagesTests` 14/14 green; `SearchP1Tests` 2/2 green with the sheet probes added — **group page 225 → 344 pages, counts 147 → 228 across the 5× corpus (fixed matches; the passages road's own ×1.4–1.5 log residue)** |
-| P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | NOT STARTED |
+| P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | IN-PROGRESS — the core half landed (the predecessor's adopted `catalogBookHits` + its pin, this commit); the Mac model + routing + pins next |
 | P3 | The band + the answer sheet (views; both voices via VoiceTokens) | NOT STARTED |
 | P4 | The when door (range) — model + face + pins | NOT STARTED |
 | P5 | Land-at-match (the find seed) + pins at the feature-API level (⌘G steps) | NOT STARTED |
@@ -665,7 +676,8 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 
 PENDING flags: none yet.
 
-**LIVE STATUS (2026-10-06): P0–P1 committed; P2 (the Mac model) next.**
+**LIVE STATUS (2026-10-06, the continuation): P0–P1 committed; the predecessor's in-flight core
+edit adopted (P2's first commit); P2's Mac model next.**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 
