@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13s — the onboarding tour, click-through</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --accent:#3a5a8c;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:26px 24px 90px;}
+  h1{font-size:21px;font-weight:600;margin:0 0 2px;}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;max-width:88ch;line-height:1.5;}
+  .topnav{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap;font-family:ui-sans-serif,system-ui;}
+  .topnav button{background:#fff;border:1px solid var(--hair);border-radius:7px;padding:5px 14px;font-size:13px;color:var(--ink);cursor:pointer;}
+  .topnav button:hover{background:var(--wash);}
+  .topnav .where{color:var(--muted);font-size:13px;min-width:200px;}
+  .dots{display:flex;gap:5px;flex-wrap:wrap;}
+  .dots span{width:9px;height:9px;border-radius:50%;background:#d8d1c6;cursor:pointer;display:inline-block;}
+  .dots span.on{background:var(--rust);}
+  .dots span.leg{border-radius:2px;}
+  /* ——— the stage ——— */
+  #stage{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:1080px;height:640px;position:relative;box-shadow:0 1px 3px rgba(60,50,40,.08);overflow:hidden;display:flex;}
+  .side{width:178px;border-right:1px solid var(--hair);background:var(--washlite);padding:14px 0 0;flex:none;display:flex;flex-direction:column;}
+  .brand{font-size:12px;letter-spacing:2.4px;color:var(--muted);padding:2px 18px 14px;font-weight:600;}
+  .sitem{padding:6px 18px;font-size:14.5px;color:var(--ink);cursor:default;}
+  .sitem.on{background:var(--accent-fill);font-weight:700;}
+  .sitem.dim{color:var(--muted);}
+  .main{flex:1;display:flex;flex-direction:column;position:relative;min-width:0;}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;padding:14px 22px 8px;}
+  .crumb{font-size:16.5px;font-weight:600;}
+  .crumb .home{color:var(--ink);}
+  .crumb .dot{color:var(--muted);font-weight:400;padding:0 6px;}
+  .crumb .here{color:var(--rust);}
+  .mastright{color:var(--muted);font-size:13px;display:flex;gap:14px;font-family:ui-sans-serif,system-ui;}
+  .striprow{display:flex;align-items:center;gap:4px;padding:4px 22px 10px;font-size:13px;border-bottom:1px solid var(--hair);font-family:ui-sans-serif,system-ui;}
+  .s{padding:3px 10px;border-radius:6px;background:var(--washlite);border:1px solid var(--hair);color:var(--ink);}
+  .s.solo{background:var(--accent-fill);font-weight:700;}
+  .s.ghost{border:none;background:none;color:var(--muted);}
+  .board{padding:8px 22px 0;overflow:hidden;flex:1;}
+  .shelfhead{color:var(--muted);font-size:11.5px;letter-spacing:1.6px;margin:10px 0 2px;font-family:ui-sans-serif,system-ui;}
+  .brow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 2px;border-bottom:1px solid var(--hair);font-size:15px;}
+  .brow .t{font-weight:600;}
+  .brow .t .star{color:var(--star);font-size:13px;margin-right:6px;}
+  .brow .t .kind{color:var(--muted);font-weight:400;font-size:12px;margin-left:12px;font-family:ui-sans-serif,system-ui;}
+  .brow .meta{color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  /* bottom band */
+  .bottomband{margin-top:auto;}
+  .quickentry{margin:0 22px 10px;padding:9px 14px;border:1px dashed var(--hair);border-radius:8px;color:var(--muted);font-size:14px;font-style:italic;background:var(--washlite);}
+  .bottombar{border-top:1px solid var(--hair);background:var(--washlite);padding:5px 22px;display:flex;justify-content:flex-end;color:var(--muted);font-size:11.5px;font-family:ui-sans-serif,system-ui;}
+  .badge{position:absolute;right:20px;bottom:46px;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:0 6px 20px rgba(50,40,30,.12);padding:10px 14px;font-size:13.5px;max-width:240px;font-family:ui-sans-serif,system-ui;}
+  .badge .hi{font-weight:700;}
+  .badge .row{margin-top:7px;display:flex;gap:12px;}
+  .badge .go{color:var(--accent);font-weight:700;cursor:pointer;}
+  .badge .no{color:var(--muted);cursor:pointer;}
+  /* book + note views */
+  .moderow{display:flex;gap:2px;padding:0 22px 8px;font-size:13px;border-bottom:1px solid var(--hair);font-family:ui-sans-serif,system-ui;}
+  .m{padding:3px 11px;border-radius:6px;color:var(--muted);}
+  .m.on{background:var(--accent-fill);color:var(--ink);font-weight:700;}
+  .indexlist{padding:4px 22px;}
+  .irow{display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--hair);font-size:14.5px;}
+  .irow .n{color:var(--muted);font-size:12px;margin-right:10px;font-family:ui-monospace,Menlo,monospace;}
+  .irow .meta{color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  .prose{padding:18px 56px 10px;max-width:640px;line-height:1.62;font-size:16px;overflow:hidden;}
+  .prose p{margin:0 0 14px;position:relative;}
+  .prose p .bmenu{position:absolute;left:-30px;top:1px;color:var(--muted);font-size:13px;cursor:pointer;}
+  .menupop{position:absolute;background:#fff;border:1px solid #d8d1c6;border-radius:8px;box-shadow:0 8px 24px rgba(50,40,30,.16);min-width:220px;padding:5px 0;font-size:13.5px;z-index:4;font-family:ui-sans-serif,system-ui;}
+  .menupop .mi{padding:5px 14px;}
+  .menupop .mi:hover{background:var(--wash);}
+  .menupop .mi.hot{background:var(--accent-fill);font-weight:700;}
+  .menupop .sep{border-top:1px solid var(--hair);margin:4px 0;}
+  /* takes board */
+  .takeswrap{padding:14px 26px;overflow:hidden;}
+  .ghostrow{color:var(--muted);font-size:13.5px;padding:6px 2px;border-bottom:1px solid var(--hair);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fan{display:flex;gap:14px;margin:16px 0;}
+  .take{flex:1;background:var(--washlite);border:1px solid var(--hair);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.55;position:relative;}
+  .take.chosen{background:#eef2f7;border-color:#c9d4e4;}
+  .take .tl{font-size:11px;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;font-family:ui-sans-serif,system-ui;}
+  .take .tl .ck{color:var(--star);font-weight:700;}
+  /* read view */
+  .readpage{padding:26px 90px;max-width:620px;line-height:1.75;font-size:16.5px;}
+  .readswitch{position:absolute;top:14px;right:22px;font-size:12.5px;color:var(--muted);font-family:ui-sans-serif,system-ui;}
+  .readswitch b{color:var(--ink);}
+  /* library rows */
+  .lrow{display:flex;align-items:baseline;gap:10px;padding:8px 2px;border-bottom:1px solid var(--hair);font-size:14.5px;}
+  .lrow .st{color:#c9c1b6;cursor:pointer;}
+  .lrow .st.on{color:var(--star);}
+  .lrow .meta{margin-left:auto;color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  .tagchip{font-size:11.5px;background:var(--wash);border:1px solid var(--hair);border-radius:5px;padding:1px 7px;color:var(--muted);font-family:ui-sans-serif,system-ui;}
+  /* coach machinery */
+  .spot{position:relative;z-index:3;box-shadow:0 0 0 4px rgba(154,79,46,.55), 0 0 0 9999px rgba(46,42,38,.38);border-radius:8px;cursor:pointer;background:var(--paper);}
+  .coach{position:absolute;z-index:5;background:#fff;border:1px solid #d8d1c6;border-radius:12px;box-shadow:0 14px 40px rgba(50,40,30,.22);padding:14px 18px;max-width:300px;font-size:13.8px;line-height:1.5;font-family:ui-sans-serif,system-ui;}
+  .coach .step{font-size:11px;letter-spacing:1.4px;color:var(--muted);margin-bottom:6px;}
+  .coach .tt{font-weight:700;font-size:14.5px;margin-bottom:4px;font-family:'Iowan Old Style',Georgia,serif;}
+  .coach .end{margin-top:10px;color:var(--muted);font-size:12px;cursor:pointer;}
+  .coach .nextbtn{margin-top:10px;display:inline-block;color:var(--accent);font-weight:700;cursor:pointer;margin-right:14px;}
+  .centercard{position:absolute;z-index:5;left:50%;top:44%;transform:translate(-50%,-50%);background:#fff;border:1px solid #d8d1c6;border-radius:14px;box-shadow:0 18px 50px rgba(50,40,30,.25);padding:26px 30px;max-width:430px;font-size:14.5px;line-height:1.55;}
+  .centercard .tt{font-size:18px;font-weight:700;margin-bottom:8px;}
+  .centercard .choices{margin-top:16px;display:flex;flex-direction:column;gap:9px;font-family:ui-sans-serif,system-ui;font-size:13.5px;}
+  .centercard .c1{color:var(--accent);font-weight:700;cursor:pointer;}
+  .centercard .c2{color:var(--rust);font-weight:600;cursor:pointer;}
+  .centercard .c3{color:var(--muted);cursor:pointer;}
+  .dimall{position:absolute;inset:0;background:rgba(46,42,38,.38);z-index:2;}
+  /* notes under the stage */
+  .notes{max-width:1080px;background:#fff;border:1px solid var(--hair);border-radius:10px;margin-top:12px;padding:16px 20px;font-size:13.5px;line-height:1.55;}
+  .notes h3{margin:0 0 6px;font-size:13px;letter-spacing:1.4px;color:var(--rust);}
+  .notes ul{margin:6px 0 0;padding-left:20px;}
+  .notes li{margin-bottom:5px;}
+  .notes .q{color:var(--star);font-weight:600;}
+  .copylabel{display:inline-block;background:var(--wash);border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;font-family:ui-sans-serif,system-ui;margin-left:8px;vertical-align:1px;}
+  /* ideas frame */
+  .ideas{padding:26px 34px;overflow:auto;height:100%;box-sizing:border-box;}
+  .ideas h2{font-size:17px;margin:0 0 4px;}
+  .ideas .grid{display:flex;gap:18px;margin:14px 0 22px;flex-wrap:wrap;}
+  .vcard{width:250px;background:var(--washlite);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;font-size:13px;font-family:ui-sans-serif,system-ui;position:relative;}
+  .vcard .cap{font-size:11px;letter-spacing:1.2px;color:var(--rust);margin-bottom:8px;font-weight:700;}
+  kbd{background:var(--wash);border:1px solid var(--hair);border-radius:4px;padding:0 5px;font-size:12px;font-family:ui-monospace,Menlo,monospace;}
+</style>
+</head>
+<body>
+<h1>13s-b — the onboarding tour <span class="copylabel">click-through mockup · 2026-10-06 · all copy FIRST DRAFT</span></h1>
+<p class="sub">Built to the kickoff sitting's rulings R-13s-1…5 (the plan file carries them verbatim). <b>How to read:</b> ⟵ ⟶ arrow keys or the buttons; clicking the <span style="color:var(--rust);font-weight:700">spotlit</span> element also advances — that is the real tour's grammar (your real click IS the next step). Square dots are the optional keep-going leg. Every frame's margin notes sit under the stage: what the step teaches, and the open questions bundled for your next sitting.</p>
+<div class="topnav">
+  <button id="prev">⟵ back</button>
+  <button id="next">next ⟶</button>
+  <span class="dots" id="dots"></span>
+  <span class="where" id="where"></span>
+</div>
+<div id="stage"></div>
+<div class="notes" id="notes"></div>
+
+<script>
+/* ———————— shared chrome templates ———————— */
+function sidebar(on){
+  const items=["Bookcase","Library","Starred","Pool","Snippets","Archived"];
+  return `<div class="side" id="sidebar"><div class="brand">VARIORUM</div>`+
+    items.map(i=>`<div class="sitem ${i===on?'on':''} ${["Starred","Archived"].includes(i)?'dim':''}">${i}</div>`).join("")+
+    `</div>`;
+}
+function bottomband(o){
+  o=o||{};
+  return `<div class="bottomband">
+    ${o.noQuick?'':'<div class="quickentry" id="quickentry">new note — just start typing…</div>'}
+    <div class="bottombar"><span>${o.receipt||""}</span></div>
+  </div>`+(o.badge?`<div class="badge" id="badge"><span class="hi">👋 New here?</span><br>A two-minute tour shows you the house.<div class="row"><span class="go" id="badgego">Take the tour</span><span class="no">Not now</span></div></div>`:"");
+}
+function bookcase(o){
+  o=o||{};
+  return sidebar("Bookcase")+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Home ▾</span></div>
+      <div class="mastright"><span>№</span><span>a–z ▾</span><span>details</span></div></div>
+    <div class="striprow"><span class="s">★ starred</span><span class="s solo">All</span><span class="s">Welcome</span><span class="s ghost">+ shelf</span></div>
+    <div class="board">
+      <div class="shelfhead">WELCOME</div>
+      <div class="brow" id="row-guide"><span class="t">The Field Guide<span class="kind">book · 9 lessons</span></span><span class="meta">came with the app</span></div>
+      <div class="brow" id="row-sherlock"><span class="t">The Adventures of Sherlock Holmes<span class="kind">book · 12 notes</span></span><span class="meta">came with the app</span></div>
+      <div class="shelfhead">UNSHELVED</div>
+      <div class="brow"><span class="t">starred notes<span class="kind">gathering · empty</span></span><span class="meta">collects what you star</span></div>
+    </div>
+    ${bottomband(o)}
+  </div>`;
+}
+function bookIndex(){
+  const ch=[["01","A Scandal in Bohemia"],["02","The Red-Headed League"],["03","A Case of Identity"],["04","The Boscombe Valley Mystery"],["05","The Five Orange Pips"],["06","The Man with the Twisted Lip"]];
+  return sidebar("Bookcase")+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Home</span><span class="dot">·</span><span class="here">The Adventures of Sherlock Holmes</span></div>
+      <div class="mastright"><span>🛎</span><span>⚙︎</span></div></div>
+    <div class="moderow" id="bookmodes"><span class="m">Outline</span><span class="m on">Index</span><span class="m">Book</span><span class="m">Read</span></div>
+    <div class="indexlist" id="indexlist">
+      ${ch.map((c,i)=>`<div class="irow" ${i===0?'id="irow-scandal"':''}><span><span class="n">▸ ${c[0]}</span>${c[1]}</span><span class="meta">unfiled</span></div>`).join("")}
+      <div class="irow"><span class="n" style="border:none">…</span><span class="meta">6 more</span></div>
+    </div>
+    ${bottomband({noQuick:true})}
+  </div>`;
+}
+const PARA1=`To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex.`;
+const PARA1B=`To Sherlock Holmes she is always <i>the</i> woman — the only one who ever beat him, and the only one he never names. In his eyes she eclipses the whole of her sex.`;
+function noteChrome(mode,inner,extra){
+  const modes=["Write","Takes","Read","Lenses","Compare","Blocks"];
+  return sidebar("Bookcase")+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Sherlock Holmes</span><span class="dot">·</span><span class="here">A Scandal in Bohemia</span></div>
+      <div class="mastright"><span>☆</span><span>⚙︎</span></div></div>
+    <div class="moderow" id="notemodes">${modes.map(m=>`<span class="m ${m===mode?'on':''}" ${m==="Takes"?'id="mode-takes"':''}>${m}</span>`).join("")}</div>
+    ${inner}
+    ${bottomband({noQuick:true})}
+    ${extra||""}
+  </div>`;
+}
+function noteWrite(menuOpen){
+  return noteChrome("Write",`<div class="prose" id="prose">
+    <p id="para1"><span class="bmenu" id="bmenu">⌄</span>${PARA1}</p>
+    <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.</p>
+    <p>He was, I take it, the most perfect reasoning and observing machine that the world has seen…</p>
+  </div>`,
+  menuOpen?`<div class="menupop" style="left:210px;top:170px" id="blockmenu">
+    <div class="mi hot" id="mi-newtake">New take <span style="color:var(--muted);font-weight:400">(copies this text)</span></div>
+    <div class="mi">New blank take</div><div class="sep"></div>
+    <div class="mi">Divide…</div><div class="mi">Merge with next</div><div class="sep"></div>
+    <div class="mi">Comment…</div><div class="mi">Callout…</div>
+  </div>`:"");
+}
+function noteTakes(){
+  return noteChrome("Takes",`<div class="takeswrap">
+    <div class="ghostrow">¶ It was not that he felt any emotion akin to love for Irene Adler…</div>
+    <div class="fan" id="fan">
+      <div class="take chosen"><div class="tl"><span>TAKE 1 · the original</span><span class="ck">✓ chosen</span></div>${PARA1}</div>
+      <div class="take" id="take2"><div class="tl"><span>TAKE 2 · just now</span><span></span></div>${PARA1B}</div>
+    </div>
+    <div class="ghostrow">¶ He was, I take it, the most perfect reasoning and observing machine…</div>
+  </div>`);
+}
+function noteRead(){
+  return noteChrome("Read",`<div class="readswitch">edit · <b>read</b></div><div class="readpage" id="readpage">
+    <p>${PARA1}</p>
+    <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.</p>
+  </div>`);
+}
+function libraryScreen(o){
+  o=o||{};
+  return sidebar("Library")+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Library</span></div>
+      <div class="mastright"><span>List</span><span>sort ▾</span></div></div>
+    <div class="board">
+      <div class="lrow" id="lrow-yours"><span class="st ${o.starred?'on':''}" id="starbtn">★</span><span style="font-weight:600">What I want this for</span>
+        ${o.tagged?'<span class="tagchip">#ideas</span>':''}${o.tagpick?'<span class="tagchip" id="tagpick" style="border-style:dashed">+ tag</span>':''}
+        <span class="meta">just now · in no book${o.inbook?' · Essays':''}</span></div>
+      <div class="lrow"><span class="st">★</span>A Scandal in Bohemia<span class="meta">Sherlock Holmes</span></div>
+      <div class="lrow"><span class="st">★</span>Lesson 1 — the house<span class="meta">The Field Guide</span></div>
+    </div>
+    ${bottomband({receipt:o.receipt||""})}
+  </div>`+(o.bookmenu?`<div class="menupop" style="right:220px;top:120px"><div class="mi hot" id="mi-addbook">Add to Book…</div><div class="mi">Move to Wing…</div><div class="sep"></div><div class="mi">New book from this note…</div></div>`:"")
+  +(o.tagpop?`<div class="menupop" style="left:430px;top:122px"><div class="mi" style="color:var(--muted)">type to search tags…</div><div class="mi hot">New tag “ideas”</div><div class="mi">life/journal</div></div>`:"");
+}
+function snippetsScreen(){
+  return sidebar("Snippets")+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Snippets</span></div><div class="mastright"><span>+ group</span></div></div>
+    <div class="board">
+      <div class="shelfhead">LOOSE</div>
+      <div class="brow" id="snip1"><span class="t" style="font-weight:400;font-style:italic">“a sentence you liked but cut — it waits here”</span><span class="meta">came with the app</span></div>
+    </div>
+    ${bottomband({noQuick:true})}
+  </div>`;
+}
+
+/* ———————— coach helpers ———————— */
+function coach(x,y,step,title,body,showNext){
+  return `<div class="coach" style="left:${x}px;top:${y}px">
+    <div class="step">${step}</div><div class="tt">${title}</div>${body}
+    ${showNext?'<span class="nextbtn" data-adv="1">next ⟶</span>':''}<div class="end">End tour</div></div>`;
+}
+
+/* ———————— the frames ———————— */
+const frames=[
+{label:"cover", where:"cover — how to read this",
+ build:s=>{s.innerHTML=`<div class="ideas">
+   <h2>The onboarding tour — every screen, every sentence</h2>
+   <p style="max-width:70ch;line-height:1.6">What you ruled at the kickoff sitting, rendered: <b>one tour + an optional keep-going leg</b> (R-13s-1), a <b>calm first open with a helpful corner badge</b> — no popup (R-13s-2), the <b>quick-entry line back at the bottom</b> with the badge above the bar on the right (R-13s-3), <b>coach-marks on the real app</b> whose centerpiece is <b>making a take in Write, then opening Takes</b>, inside Sherlock (R-13s-4), over the <b>final seed set</b> (R-13s-5: starred notes empty · Sherlock · the Field Guide · maybe one standalone note).</p>
+   <p style="max-width:70ch;line-height:1.6;color:var(--muted)">Frames 1–10 are the core leg (~2 minutes). Square dots are the keep-going leg (~2 more). The last frame is ideas &amp; variations. Arrow keys move; clicking the spotlit thing advances, because in the real tour your click <i>is</i> the step. All words are first drafts in the Study register — plain words, no “commit”, no “variant”.</p></div>`;},
+ notes:`<h3>THE SHAPE</h3>Core leg: the rooms → a real book → inside it → Write → make a take → the fan → Read → one note of your own → the end card. Keep-going leg: star · tag · into a book · snippets → the Field Guide. Both roads end pointing at the Field Guide (your funnel).`},
+
+{label:"first open", where:"first open — calm, no popup",
+ build:s=>{s.innerHTML=bookcase({badge:true});},
+ spot:"#badgego", notes:`<h3>FIRST OPEN (R-13s-2 + R-13s-3)</h3>The room at rest: the final seed set, nothing moving, no modal. The quick-entry line sits at the <b>bottom, above the bottom bar, with air between it and the books</b>; the badge above the bar on the right. <ul><li><span class="q">Q1 — badge lifecycle:</span> after “Not now”, does it come back next launch, shrink to a corner dot, or sleep until Help ▸ Take the Tour? Proposed: it returns quieter (one line, no wave) for the next three opens, then only the dot.</li><li><span class="q">Q2:</span> fresh stores wake in Study (ruled) — this mockup is Study light throughout.</li></ul>`},
+
+{label:"step 1", where:"step 1 of 8 — the rooms",
+ build:s=>{s.innerHTML=bookcase({})+coach(200,150,"STEP 1 OF 8","The rooms",
+  `Books live on the <b>Bookcase</b>. <b>Library</b> is every note you have, in one list. <b>Pool</b> holds notes that belong to no book, and <b>Snippets</b> keeps scraps too small to be notes.`,true);},
+ spot:"#sidebar", spotNoAdv:true,
+ notes:`<h3>STEP 1 — ORIENTATION</h3>The only step with nothing to click — the card's <b>next ⟶</b> advances. Spotlight = the whole sidebar. “Archived” and “Starred” deliberately not explained here (the leg and the guide own them).<ul><li><span class="q">Q:</span> is four rooms already too many words for one card? Alternative: name only Bookcase + Library here, let Pool/Snippets wait for the leg.</li></ul>`},
+
+{label:"step 2", where:"step 2 of 8 — open the book",
+ build:s=>{s.innerHTML=bookcase({})+coach(420,205,"STEP 2 OF 8","A real book to poke",
+  `<i>The Adventures of Sherlock Holmes</i> came with the app so you can try everything on a real one. <b>Click it.</b>`);},
+ spot:"#row-sherlock",
+ notes:`<h3>STEP 2 — THE WOW DOOR</h3>Your real click opens the real book — the tour never fakes a screen. Sherlock is the “wow factor” guide (your word at launch).`},
+
+{label:"step 3", where:"step 3 of 8 — inside a book",
+ build:s=>{s.innerHTML=bookIndex()+coach(560,180,"STEP 3 OF 8","Inside a book",
+  `The <b>Index</b> lists the book's notes — one per adventure here. A book doesn't own its notes; it points at them, so a note can sit in many books at once. <b>Open “A Scandal in Bohemia.”</b>`);},
+ spot:"#irow-scandal",
+ notes:`<h3>STEP 3 — BOOK → NOTE</h3>Teaches the level between the Bookcase and the page (your intake: “how you move between book → note”). The pointer line (“a note can sit in many books”) is the one conceptual sentence of the whole tour — <span class="q">keep or cut?</span> The book's own mode row (Outline · Index · Book · Read) is visible but not taught; the guide owns it.`},
+
+{label:"step 4", where:"step 4 of 8 — Write",
+ build:s=>{s.innerHTML=noteWrite(false)+coach(640,120,"STEP 4 OF 8","Write — just write",
+  `A note opens in <b>Write</b>: an ordinary page. Type anywhere. Every paragraph is quietly its own <b>block</b> — which is what makes the next trick possible. <span class="nextbtn" data-adv="1">next ⟶</span>`);},
+ spot:"#prose", spotNoAdv:true,
+ notes:`<h3>STEP 4 — THE CALM PAGE FIRST</h3>“The calm default proves itself before the machinery is ever met” — Write is shown as nothing special on purpose. The word <b>block</b> is introduced in one clause, no diagram.<ul><li><span class="q">Q:</span> should this step wait for a real keystroke (type one word to advance) instead of next ⟶? More alive, slightly bossier.</li></ul>`},
+
+{label:"step 5", where:"step 5 of 8 — make a take (R-13s-4)",
+ build:s=>{s.innerHTML=noteWrite(true)+coach(500,230,"STEP 5 OF 8","Make a take",
+  `A block can keep <b>more than one version of itself</b> — they're called <b>takes</b>. Click <b>New take</b>, then change a few words. The original isn't overwritten; it keeps its own card.`);},
+ spot:"#mi-newtake",
+ notes:`<h3>STEP 5 — THE CENTERPIECE (her ruling: “they should at least make a take in write”)</h3>The ⌄ handle on the paragraph opens the block menu; the tour spotlights <b>New take (copies this text)</b>. After the click the buffer is the second take — the user edits freely; the tour waits for any edit, then offers step 6.<ul><li><span class="q">Q3 — the gesture:</span> the block ⌄ menu (shown) vs a keyboard road vs the tour card carrying its own “make the take for me” button. The menu teaches a reusable door; the button is friendlier. Proposed: the menu, with the card saying exactly where to click.</li><li><span class="q">Q6 — the souvenir:</span> does the toured take stay in Sherlock afterwards (a trace of your first take) or does “Done” offer to tidy it? Sherlock's sign-in fold is unharmed either way (#186's Sherlock rule).</li></ul>`},
+
+{label:"step 6", where:"step 6 of 8 — the fan",
+ build:s=>{s.innerHTML=noteTakes()+coach(700,96,"STEP 6 OF 8","Both takes, side by side",
+  `This is <b>Takes</b> — the same note, machinery summoned. The <b>✓</b> take is what the page shows; click the other to swap. Nothing is lost when you choose; choosing is reversible, forever.`);},
+ spot:"#mode-takes",
+ notes:`<h3>STEP 6 — SEE WHAT YOU MADE</h3>Advance road: clicking <b>Takes</b> in the mode row (spotlit) brings this board; the card then anchors the fan. The one-sentence creed (“nothing is lost… reversible, forever”) is the product's heart said once — <span class="q">right words?</span> The other blocks render as muted single-line rows (the real Takes board's grammar).`},
+
+{label:"step 7", where:"step 7 of 8 — Read",
+ build:s=>{s.innerHTML=noteRead()+coach(660,210,"STEP 7 OF 8","Read — the calm page",
+  `<b>Read</b> is for rereading without any machinery at all. When something catches your eye, click the sentence — it drops you back into editing right there. <span class="nextbtn" data-adv="1">next ⟶</span>`);},
+ spot:"#readpage", spotNoAdv:true,
+ notes:`<h3>STEP 7 — CLOSE THE TRIANGLE</h3>Write · Takes · Read are the three modes the tour teaches (your launch message named the main editor views; Index lives on the book level and was taught at step 3). Lenses / Compare / Blocks deliberately untouched — field-guide territory.`},
+
+{label:"step 8", where:"step 8 of 8 — one of your own",
+ build:s=>{s.innerHTML=bookcase({})+coach(380,330,"STEP 8 OF 8","Now one of yours",
+  `Down here, always: <b>new note — just start typing</b>. A note needs no book — it lands in your Library (and waits in the Pool until you shelve it somewhere, if you ever do).`);},
+ spot:"#quickentry",
+ notes:`<h3>STEP 8 — THE BOOKLESS NOTE (your intake: “Write *one* note that isn't in a book”)</h3>Back on the Bookcase; the quick-entry line is the spotlight — its bottom placement (R-13s-3) makes it the natural last stop. Typing one line and pressing ⏎ mints the note and advances.<ul><li><span class="q">Q:</span> should the tour have them actually type (the note then EXISTS — their first real object) or just point the line out? Proposed: actually type — ending the tour owning something is the best ending there is.</li></ul>`},
+
+{label:"end card", where:"the end card — the fork (R-13s-1)",
+ build:s=>{s.innerHTML=bookcase({})+`<div class="dimall"></div><div class="centercard">
+   <div class="tt">That's the essentials.</div>
+   Rooms on the left · books point at notes · notes keep takes · nothing is ever lost.
+   <div class="choices">
+     <span class="c1" data-adv="1">Keep going — two more minutes (stars, tags, books, snippets)</span>
+     <span class="c2">Open the Field Guide — the whole story, lesson by lesson</span>
+     <span class="c3">Done — go write</span>
+   </div></div>`;},
+ notes:`<h3>THE FORK (R-13s-1 — one tour, optional leg)</h3>Three doors, in this order: the leg · the Field Guide · out. Whichever is taken, the Field Guide was named — the funnel you asked for. “Done — go write” leaves the cursor in the note they just made (continuity beats a blank room).<ul><li><span class="q">Q:</span> the fork's middle door opens the guide's Lesson 1 directly vs just revealing the book on the shelf. Proposed: open Lesson 1 — one fewer dead end.</li></ul>`},
+
+{label:"leg · star", where:"keep going 1 of 4 — star it", leg:true,
+ build:s=>{s.innerHTML=libraryScreen({})+coach(430,170,"KEEP GOING · 1 OF 4","Star what matters",
+  `Click the <b>star</b>. Starred notes float up everywhere, and the <i>starred notes</i> gathering on your Bookcase collects them by itself.`);},
+ spot:"#starbtn",
+ notes:`<h3>LEG 1 — STAR</h3>Lands in the Library on the note they just wrote (titled by its first words — honest to the real app). The empty seeded “starred notes” gathering gets its first member — the seed set explains itself.`},
+
+{label:"leg · tag", where:"keep going 2 of 4 — tag it", leg:true,
+ build:s=>{s.innerHTML=libraryScreen({starred:true,tagpick:true,tagpop:true})+coach(620,230,"KEEP GOING · 2 OF 4","Tags",
+  `A note can wear <b>tags</b> — little names like <i>ideas</i> or <i>life/journal</i>. Books can collect by tag: tag a note and the right book brings it in on its own. Make the tag <b>ideas</b>.`);},
+ spot:"#tagpick",
+ notes:`<h3>LEG 2 — TAG</h3>The searchable picker (the 17y one) with “New tag” — the leg teaches the door, not the taxonomy. The gathering sentence plants the smart-book seed without the word “gathering”.<ul><li><span class="q">Q:</span> is the collect-by-tag sentence one idea too many for this card?</li></ul>`},
+
+{label:"leg · book", where:"keep going 3 of 4 — into a book", leg:true,
+ build:s=>{s.innerHTML=libraryScreen({starred:true,tagged:true,bookmenu:true})+coach(440,300,"KEEP GOING · 3 OF 4","Put it in a book",
+  `<b>Add to Book</b> files this note into a book — or makes a new book around it. A note can sit in many books at once; the books just point.`);},
+ spot:"#mi-addbook",
+ notes:`<h3>LEG 3 — THE BOOK DOOR (your intake: “clicking on the book icon”)</h3>Context menu shown; the real surface may prefer the Book Panel or the masthead door — <span class="q">which door should the leg teach?</span> Proposed: whichever door the 0.9.2 app considers primary (Add to Book in the note's menu), so the tour never teaches a side door.`},
+
+{label:"leg · snippets", where:"keep going 4 of 4 — snippets", leg:true,
+ build:s=>{s.innerHTML=snippetsScreen()+coach(430,200,"KEEP GOING · 4 OF 4","Scraps live here",
+  `<b>Snippets</b> keeps the pieces that aren't notes yet — cut sentences, stray lines. Drag one into any draft when it's time; the scrap stays here too. One example scrap is waiting for you.`);},
+ spot:"#snip1",
+ notes:`<h3>LEG 4 — SNIPPETS (your intake: “Example snippet that points you to the snippets page”)</h3>The seeded example scrap gives the room one inhabitant — <span class="q">confirm a seeded scrap joins the final seed set</span> (it wasn't in your stated list; it's small and silent, but it is one more thing at first open).`},
+
+{label:"leg end", where:"the leg's end — the Field Guide",
+ build:s=>{s.innerHTML=bookcase({})+coach(420,165,"THE END","The Field Guide",
+  `Everything else — takes in depth, divide and merge, books that collect by rule, protection — lives in <b>The Field Guide</b>, as lessons you can play through. It stays on your Bookcase. That's the tour — go write.`);},
+ spot:"#row-guide",
+ notes:`<h3>THE LEG'S END = THE CORE'S END CARD, SAID LONGER</h3>Both roads end on the guide (your funnel). Clicking the guide row opens it; “go write” otherwise returns to their note.`},
+
+{label:"ideas", where:"ideas & variations — for the next sitting",
+ build:s=>{s.innerHTML=`<div class="ideas">
+   <h2>Ideas &amp; variations</h2>
+   <div style="font-size:13px;color:var(--muted);margin-bottom:4px">THE BADGE — three temperatures (R-13s-2's “think clippy showing up in the corner”; the waving-photo idea is recorded as declined in the plan file)</div>
+   <div class="grid">
+     <div class="vcard"><div class="cap">A · THE CARD (shown in frame 1)</div><span style="font-weight:700">👋 New here?</span><br>A two-minute tour shows you the house.<br><span style="color:var(--accent);font-weight:700">Take the tour</span> · <span style="color:var(--muted)">Not now</span></div>
+     <div class="vcard"><div class="cap">B · THE ONE-LINER</div><span style="color:var(--accent);font-weight:600">New here? the two-minute tour →</span><br><span style="color:var(--muted);font-size:12px">a single quiet line above the bar; dismiss ×; no card chrome at all</span></div>
+     <div class="vcard"><div class="cap">C · THE DOT</div><span style="font-size:16px">◉</span> <span style="color:var(--muted);font-size:12px">a small pulsing dot in the corner that expands to A on hover — calmer still, but strangers may never hover</span></div>
+   </div>
+   <div style="font-size:13px;color:var(--muted);margin-bottom:4px">AFTER “NOT NOW” — proposed ladder</div>
+   <p style="max-width:70ch;font-size:13.5px;line-height:1.55">Next three opens: variant B (the one-liner). After that: variant C (the dot) forever, plus Help ▸ <i>Take the Tour</i>. Completing or ending the tour retires badge and dot both. — <span class="q">your call at the next sitting (open Q1).</span></p>
+   <div style="font-size:13px;color:var(--muted);margin:14px 0 4px">THE QUICKSTART NOTE (the intake's “super simple fast read that stands alone”)</div>
+   <p style="max-width:70ch;font-size:13.5px;line-height:1.55">Proposed: it IS the “maybe one standalone note” of your seed list — titled <i>Start here</i>, two short screens of prose saying what the tour says (for people who never click badges), ending at the Field Guide. Lives bookless in the Pool/Library top. The badge's twin door: “read the two-minute version instead.” — <span class="q">open Q2.</span></p>
+   <div style="font-size:13px;color:var(--muted);margin:14px 0 4px">EVERYTHING BUNDLED FOR THE NEXT SITTING</div>
+   <ul style="font-size:13.5px;line-height:1.6;max-width:80ch">
+     <li><b>Q1</b> badge lifecycle (the ladder above?)</li>
+     <li><b>Q2</b> the Quickstart note: in or out, and where it lives</li>
+     <li><b>Q3</b> the make-a-take gesture the tour teaches (block ⌄ menu as shown?)</li>
+     <li><b>Q4</b> tour interruption: quitting mid-tour → badge returns offering to resume?</li>
+     <li><b>Q5</b> the leg's four stops as shown (star · tag · book · snippets)?</li>
+     <li><b>Q6</b> the Sherlock take souvenir: stays or tidied at Done?</li>
+     <li><b>Q7</b> step 1's four rooms vs two; step 3's pointer sentence; step 6's creed sentence — copy temperature checks</li>
+     <li><b>Q8</b> a seeded example scrap in Snippets (leg 4) — joins the seed set?</li>
+   </ul></div>`;},
+ notes:`<h3>WHAT HAPPENS NEXT</h3>You walk this file (⟵⟶), mark up anything — wording, order, temperature — and the next iteration lands here same-day. When every screen reads right, U1/U2 briefs go to an implementer and the real tour is built to THIS file as its spec (P-6: a walk test rides every step).`}
+];
+
+/* ———————— driver ———————— */
+let i=0;
+const stage=document.getElementById("stage"),notes=document.getElementById("notes"),
+      dots=document.getElementById("dots"),where=document.getElementById("where");
+frames.forEach((f,n)=>{const d=document.createElement("span");if(f.leg)d.className="leg";d.onclick=()=>go(n);dots.appendChild(d);});
+function go(n){
+  i=Math.max(0,Math.min(frames.length-1,n));
+  const f=frames[i];
+  stage.innerHTML="";f.build(stage);
+  if(f.spot){const el=stage.querySelector(f.spot);if(el){el.classList.add("spot");if(!f.spotNoAdv)el.onclick=()=>go(i+1);}}
+  stage.querySelectorAll("[data-adv]").forEach(el=>el.onclick=()=>go(i+1));
+  notes.innerHTML=f.notes||"";where.textContent=(i+1)+" / "+frames.length+" — "+f.where;
+  [...dots.children].forEach((d,n2)=>d.classList.toggle("on",n2===i));
+}
+document.getElementById("prev").onclick=()=>go(i-1);
+document.getElementById("next").onclick=()=>go(i+1);
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1);});
+go(0);
+</script>
+</body>
+</html>
