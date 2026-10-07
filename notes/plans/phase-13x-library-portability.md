@@ -419,7 +419,7 @@ PROVISIONAL otherwise, recorded per row.
 
 | row | piece | status |
 |---|---|---|
-| 1 | The classifier (verdict table pinned) | NOT-STARTED — design settled below |
+| 1 | The classifier (verdict table pinned) | DONE (811c1e23 + the red-first evidence below) |
 | 2 | The hand-off producer (folder pair; round-trip pin) | NOT-STARTED — design settled below |
 | 3 | Adopt-by-copy move-aside brain | NOT-STARTED — design settled below |
 | 4 | Custody-collision memo + rule | MEMO WRITTEN (below, before the code); rule NOT-STARTED |
@@ -537,7 +537,20 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
-- (none yet)
+- **Row 1 — `LibraryClassifierTests`, 20/20 green** (`swift test --filter
+  LibraryClassifierTests`, headless, no stage). Red-first on the refusal-guarding verdicts
+  by behavioural revert over the COMMITTED green (`811c1e23`; addendum-11 order): **REVERT
+  A** (every bare-no-key-file arm answered `.encryptedLibrary` — the naive open-whatever
+  behavior) went red on exactly the three bare pins
+  (`anEncryptedStoreWithNoKeyFileAnywhereRefusesAsBare`,
+  `anOpaqueNonDatabaseFileWithNoKeyFileRefusesAsBare`,
+  `aSnapshotWhoseNamedKeyIsNowhereRefusesAsBare` — 3 issues, the other 17 green); **REVERT
+  B** (the superseded check skipped in both stages) went red on exactly the two
+  newer-schema pins (`aPlaintextStoreFromANewerBuildRefusesWithItsUnknownMigrations`,
+  `theSchemaVerdictRefusesANewerEncryptedCopyWithItsUnknowns` — 2 issues). Both restored by
+  `git checkout --`; the restored tree re-ran 20/20 green. The verdict-table pin list IS
+  the suite: one pin per verdict row, plus the three snapshot key-file roads, the two
+  stage-2 refusals, and the backup-name parser.
 
 #### PROVISIONALS (recorded per row for the orchestrator)
 
@@ -555,4 +568,7 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### MACHINERY NOTES
 
-- (none yet)
+- The record-opening commit (`d2ca39f9`) carries a `Co-Authored-By` trailer against
+  CLAUDE.md's no-trailer rule (the harness reminder won a reflex it should not have).
+  Caught immediately after the push; a pushed commit is never rewritten without her word,
+  so it stands recorded here and every subsequent commit is trailer-free.
