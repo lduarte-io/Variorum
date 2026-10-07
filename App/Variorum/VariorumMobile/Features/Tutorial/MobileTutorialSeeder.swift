@@ -75,6 +75,14 @@ enum MobileTutorialSeeder {
         ("takes", ["your first take", "swipe & choose", "the browser", "lenses"]),
         ("structure", ["divide", "divide with takes", "merge"]),
         ("the library of things", ["comments & callouts", "the seal", "the voice switch"]),
+        // ROUND 2, BATCH 6b — **PR22, the deletion chapter** (§69.8). The
+        // Mac's field guide teaches the five places, the two sizes of
+        // moment, and the TWO EXITS by doing; this is the same map
+        // RE-TAUGHT in phone grammar rather than copied, because the Mac's
+        // text names Mac doors and chords (MobileSoul §4.4). It lands here,
+        // after the things themselves and before privacy, because a reader
+        // needs to know what a thing IS before being told where it goes.
+        ("keeping & letting go", ["the five places", "the two exits"]),
         // PHASE 13p, knot 6 — the privacy chapter's PHONE edition, ONE
         // lesson. Her Batch-1 rider is why it is here at all: *"some
         // people will be mobile only users"* — a phone-only reader meets
@@ -219,6 +227,9 @@ enum MobileTutorialSeeder {
         let takes = try ops.createSection(in: book.id, name: "takes")
         let structure = try ops.createSection(in: book.id, name: "structure")
         let library = try ops.createSection(in: book.id, name: "the library of things")
+        // Round 2, batch 6b — PR22's chapter (§69.8): the five-places map
+        // and the two exits, in phone grammar.
+        let keeping = try ops.createSection(in: book.id, name: "keeping & letting go")
         // 13p, knot 6: the privacy chapter (phone edition — one lesson).
         let privacy = try ops.createSection(in: book.id, name: "keeping it private")
 
@@ -268,16 +279,31 @@ enum MobileTutorialSeeder {
         ])
 
         _ = try lesson(welcome, "getting around", [
-            "The SHELF is home: your books, with this one pinned to the top — "
-            + "pinned books always sit first, and a long press on a book row "
-            + "pins or unpins it. ✎ Today's Entry opens today's journal page, "
-            + "making it if the day hasn't started. + new note starts a "
-            + "bookless note and drops you straight into writing; + new book, "
-            + "at the list's end, starts a fresh book — hand-picked, a dated "
-            + "journal, or a smart book collecting by tags. A long press "
-            + "also STARS a note or a book (up to fifteen) — starred things "
-            + "sit above everything at the shelf's very top, and the same "
-            + "press takes the star back off.",
+            // Batch 6b (PR22's rider): this lesson described a shelf that
+            // batch 5 had already replaced — Today's Entry as a full-width
+            // door, and no mention at all of the quick-note box, which is
+            // now half the screen. Rewritten to the shelf that exists.
+            "The SHELF is home: your books at the top, with this one pinned "
+            + "first — pinned books always sit first, and a long press on a "
+            + "book row pins or unpins it. The daily journal's row wears a "
+            + "small \(MobileShelfFaces.todayDoorTitle) badge: tap it and "
+            + "today's entry opens, made if the day hasn't started yet. "
+            + "(With no journal on the shelf the same door stands as its own "
+            + "row at the list's end, and pressing it makes one.) + new note "
+            + "starts a bookless note and drops you straight into writing; "
+            + "+ new book, at the list's end, starts a fresh book — "
+            + "hand-picked, a dated journal, or a smart book collecting by "
+            + "tags. A long press also STARS a note or a book (up to fifteen) — "
+            + "starred things sit above everything at the shelf's very top, "
+            + "and the same press takes the star back off.",
+
+            "Under the books is the QUICK NOTE box, and it is the shelf's "
+            + "main room on purpose: just start typing and a note is already "
+            + "being kept — no door to press first. The blinking cursor is "
+            + "the invitation. The open ↵ door beside it takes what you've "
+            + "written into the full editor when you want the rest of the "
+            + "machinery; leave it alone and it stays a note like any other, "
+            + "waiting in the Library.",
 
             "The LIBRARY tab is everything, newest first, with search across "
             + "titles, days, and book names — and a sort door: order the "
@@ -352,10 +378,20 @@ enum MobileTutorialSeeder {
             + "and ⋯ holds the block's own acts — comments, callout, "
             + "savepoints, a new block below, divide, merge, delete.",
 
+            // The ROAD is composed, never re-typed (batch 9's fix wave,
+            // cold-review MAJOR 2): `Block History…` LEFT the block ⋯ at
+            // batch 9 — her letter moved it onto each take's own ⋯ — and
+            // this lesson still taught the retired road. The row's word
+            // comes from the door itself (`historyTitle`, composed in its
+            // turn from the SHARED `BlockHistoryPath.name`), so a re-word
+            // lands here for free and a MOVE reds the walk's pin.
             "Your writing is always autosaved; a SAVEPOINT is the "
-            + "deliberate extra. Commit Take, in ⋯, keeps the exact text "
-            + "of the take you're in, forever — and Block History… beside "
-            + "it opens everything this block has been: every take's saved "
+            + "deliberate extra. \(MobileBlockMenuController.commitTitle), in ⋯, "
+            + "keeps the exact text of the take you're in, forever — and the "
+            + "moments themselves are read back one door along: ⑂ on the "
+            + "bottom bar opens this block's takes, and each take's own ⋯ "
+            + "carries \(MobileTakesBrowserController.historyTitle), which opens "
+            + "everything this block has been: every take's saved "
             + "moments, with restore; the takes it archived or deleted, with "
             + "a way back; and the block it came out of. A savepoint from "
             + "before a divide says so, and asks first: restoring it brings "
@@ -659,6 +695,87 @@ enum MobileTutorialSeeder {
             + "touches no text at all — what a note says and how the app "
             + "dresses are different things, and only you change either.",
         ])
+
+        // ———————————————————————— keeping & letting go ————————————————————
+        // PR22 (§69.8): the five-places map and the two exits, re-taught in
+        // phone grammar. Nothing here names a Mac door or a chord.
+
+        _ = try lesson(keeping, "the five places", [
+            "Everything you have ever written here is in exactly ONE of five "
+            + "places. When something isn't where you left it, this is the "
+            + "list to walk — and the point of the list is that it is short "
+            + "and it is complete.",
+
+            "1 — WHERE YOU LEFT IT: in its note, in the books that hold it, "
+            + "in the Library. Most of the time that is the whole answer.",
+
+            "2 — ARCHIVED: kept out of the way, forever, with no countdown. "
+            + "Whole NOTES have their own room, the Archived row at the end "
+            + "of the Library's list. A single BLOCK you set aside stays with "
+            + "its note — tap blocks on the masthead, then the archived "
+            + "segment. Archive Block, in the bottom bar's ⋯, is how one "
+            + "gets there, and Put back is how it comes home.",
+
+            "3 — THE TRASH: what is leaving. Notes, books and blocks, each "
+            + "with \(TrashWindow.days) days on a countdown you can see and "
+            + "Put back on every row; the 🗑 sits on the Library's top line "
+            + "and on the Shelf's. Delete Now, in the Trash, ends the days "
+            + "early — and asks first, every single time.",
+
+            "4 — THIS NOTE'S VERSIONS: the moments you saved of the whole "
+            + "note. ⋯ up by the title, then Versions… — read one, restore "
+            + "it, or promote it into a note of its own.",
+
+            // **THE GUIDE'S ONLY ROAD to the came-from and deleted-takes
+            // regions**, so a wrong sentence here is worse than a dead
+            // door — it is a TAUGHT road that cannot act (P-2's own
+            // class). Batch 9 moved the face off the block ⋯ and onto
+            // each take's; the road below is composed from the door that
+            // now carries it.
+            "5 — THIS BLOCK'S HISTORY: one block's whole time. ⑂ on the "
+            + "bottom bar opens this block's takes; each take's own ⋯ carries "
+            + "\(MobileTakesBrowserController.historyTitle) — every take's saved "
+            + "moments, the takes this block archived or deleted, and the "
+            + "block it came out of.",
+
+            "TAKES are the one thing that never rows in the Trash: a take on "
+            + "its own is too small to make sense of out of context. It has "
+            + "two homes instead — its block's History, and its note's "
+            + "blocks ▸ leaving, which lists every deleted take of every "
+            + "block in this note and is the only place a take can be ended "
+            + "early.",
+        ])
+
+        let exits = try lesson(keeping, "the two exits", [
+            "There are exactly TWO ways a thing leaves the page, and they "
+            + "are not the same thing. Telling them apart is most of knowing "
+            + "where to look.",
+
+            "DELETION GOES TO THE TRASH. Delete a block, a note or a book "
+            + "and nothing is destroyed: it is marked, given "
+            + "\(TrashWindow.days) days, and listed where you can see the "
+            + "clock run. Put back is on the row for the whole window.",
+
+            "TRANSFORMATION GOES TO LINEAGE. Divide a block and the original "
+            + "is kept WHOLE and set aside — it was never deleted, so it is "
+            + "not in the Trash and wears no countdown. Merge two blocks and "
+            + "both originals are kept the same way. They wait in Block "
+            + "History ▸ Came from, with Bring back.",
+
+            "Both exits, on the block below. First: ⋯ ▸ Delete Block, then "
+            + "tap blocks on the masthead and the leaving segment — its row "
+            + "is there with its days, and Put back returns it. Then put the "
+            + "cursor mid-sentence and ⋯ ▸ Divide Block, and open Block "
+            + "History ▸ Came from on either half: the block you just cut is "
+            + "standing there whole.",
+
+            "Delete me and put me back, then cut me in two. Nothing you do "
+            + "to this paragraph can lose it.",
+        ])
+        // The lesson's last block is the one it asks her to act on; a take
+        // on it makes the divide the second half teaches the fanned kind,
+        // whose original is exactly what "Came from" holds.
+        try take(on: exits.blocks[4], "Delete me, put me back, then cut me in two.")
 
         // ————————————————————————— keeping it private ————————————————————
         //

@@ -26,17 +26,36 @@ import GRDB // AsyncValueObservation iteration (member import visibility)
 import Observation
 import VariorumCore
 
+/// **ONE ROW OF THE LIBRARY'S LISTING** (her #93(b): *"All should be a book +
+/// notes union"*).
+///
+/// Two kinds, never a third: the Library lists notes and books, and scraps
+/// keep their own section (`MobileScrapsSection`) because a scrap is a BLOCK
+/// with its own row grammar, not a listing row. The enum is exhaustive on
+/// purpose — a kind that ever joins the union has to be answered at the
+/// renderer rather than falling through to a row that is quietly wrong.
+nonisolated enum MobileLibraryRow: Identifiable, Sendable {
+    case note(Queries.TimelineItem)
+    case book(Queries.ShelfBook)
+
+    /// Kind-prefixed so a note and a book can never collide on a raw UUID.
+    var id: String {
+        switch self {
+        case .note(let item): return "note:\(item.postID)"
+        case .book(let book): return "book:\(book.reading.id)"
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class MobileLibraryViewModel {
-    enum Filter: String, CaseIterable, Sendable {
-        case all
-        case bookless
-        /// The scraps area (parity C3 — her "view your pool of scraps …
-        /// and maybe add to it"): standalone blocks, not notes — the
-        /// listing is `MobileScrapsModel`'s, not this model's.
-        case scraps
-    }
+    /// **THE ONE FILTER VOCABULARY** (the filter batch, her #85/#92) — the
+    /// declaration moved to `MobileListingFilter` when the Archive room grew
+    /// the same row, and this name stays as its handle so no call site had to
+    /// learn a second word for the same thing. `.books` and `.notes` are her
+    /// #92(a) additions; `.bookless` and `.scraps` are untouched.
+    typealias Filter = MobileListingFilter
 
     @ObservationIgnored private let session: AppSession
     /// Bounded on purpose (P1) — `observeLibrary` requires a limit.
@@ -60,14 +79,191 @@ final class MobileLibraryViewModel {
         self.listingLimit = listingLimit
     }
 
+    /// The NOTE half of the listing. `.all` and `.notes` deliver the same
+    /// notes; what distinguishes them since her #93(b) is that `.all` also
+    /// carries the BOOKS — see `rows(books:)`, which is what the surface
+    /// renders.
     var visible: [Queries.TimelineItem] {
         switch filter {
-        case .all: return all
+        case .all, .notes: return all
         case .bookless: return bookless
-        // Scraps are blocks, not notes — their listing is the scraps
-        // model's; this note listing is empty under that filter.
-        case .scraps: return []
+        // Books are readings and scraps are blocks — neither is a note, so
+        // this note listing is empty under both. Their rows come from the
+        // shelf model and `MobileScrapsModel` respectively.
+        case .books, .scraps: return []
         }
+    }
+
+    // MARK: - What an empty note listing SAYS (VM-5 whole-round pass, MINOR 2)
+
+    /// The two things an empty note listing can honestly say.
+    nonisolated enum EmptyListing: Equatable, Sendable {
+        /// The store holds no notes: the fresh-install trio
+        /// (`MobileEmptyStoreCopy` — no notes yet · the New Note door · the
+        /// sign-in road), every sentence of which is true then.
+        case storeEmpty
+        /// The Bookless door found nothing while the store HAS notes — they
+        /// are all in books (`MobileListingFilter.noBooklessLine`).
+        case noBookless
+    }
+
+    /// **WHICH EMPTY LINE, IF ANY — decided by what is TRUE, not by which
+    /// door's listing happens to be empty.**
+    ///
+    /// The old guard asked only whether the DOOR's listing was empty, so the
+    /// Bookless door over a store whose notes are all in books said *"No notes
+    /// yet."* — false there — plus a sign-in line that read as "your writing
+    /// hasn't arrived" (the cold read's MINOR 2). The fresh-install trio is a
+    /// claim about the STORE, so it now needs the store's note listing empty:
+    ///
+    /// | door | rows to show | store's notes | says |
+    /// |---|---|---|---|
+    /// | all / notes | none, and (all) no books either | — (the listing IS the store's) | the trio |
+    /// | bookless | none | none | the trio — true here too |
+    /// | bookless | none | some | the Bookless door's own line |
+    /// | books / scraps | — | — | nothing here: their sections speak for themselves |
+    ///
+    /// `.notes` was checked for the same class and is honest: its listing IS
+    /// the store's whole live note listing, so *"No notes yet."* is true
+    /// whenever it renders. `notesInStore` is the bounded `all` listing —
+    /// non-empty exactly when one live note exists, which is all this asks.
+    /// PURE, so the table above is pinned rather than promised.
+    nonisolated static func emptyListing(
+        filter: Filter, doorNotes: Int, storeNotes: Int, booksShown: Int
+    ) -> EmptyListing? {
+        guard doorNotes == 0, booksShown == 0 else { return nil }
+        switch filter {
+        case .all, .notes: return .storeEmpty
+        case .bookless: return storeNotes == 0 ? .storeEmpty : .noBookless
+        case .books, .scraps: return nil
+        }
+    }
+
+    /// The surface's question, answered from this model's own listings.
+    /// `booksShown` is the books half the surface is rendering (non-zero only
+    /// under `.all`'s union).
+    func emptyListing(booksShown: Int) -> EmptyListing? {
+        Self.emptyListing(
+            filter: filter, doorNotes: visible.count, storeNotes: all.count,
+            booksShown: booksShown)
+    }
+
+    // MARK: - THE UNION (#93(b))
+
+    /// **`All` IS THE BOOKS + NOTES UNION** — her ruling, verbatim: *"All
+    /// should be a book + notes union - otherwise it just doesn't make
+    /// sense."* It OVERTURNS the batch's shipped PROVISIONAL 3, which built
+    /// `.all` as the note listing on the ground that it changed nothing at
+    /// rest; the union is the app's own kind-filter grammar (the Trash room's
+    /// `All` is the union of its kinds), and it is what the door's word
+    /// promises.
+    ///
+    /// **The LIBRARY only.** The Archive room's `.all` is untouched: there,
+    /// the coincidence with `.notes` holds TODAY because the phone's
+    /// archived-BOOKS face is still owed — not because the model forbids it
+    /// (since 13i-e `Reading.archivedAt` is real; the VM-5 round-1 review's
+    /// MINOR 1 corrected this comment). The owed face: MobileSoul 13i-e row /
+    /// VM-6 (4d); `MobileListingFilter.archiveDoors` carries the fuller note.
+    ///
+    /// The books passed in are the SURFACE's windowed set — the `.books`
+    /// filter's own rows and its own window, so a book reads identically
+    /// under either door and neither listing invents a second row rule.
+    func rows(books: [Queries.ShelfBook]) -> [MobileLibraryRow] {
+        Self.union(notes: visible, books: filter == .all ? books : [], sort: sort)
+    }
+
+    /// **THE BOOK'S STAMP UNDER THE ACTIVE SORT — PROVISIONAL** (her ruling
+    /// left the interleaving detail unspecified, and it is recorded rather
+    /// than quietly chosen).
+    ///
+    /// A note is ordered by the stamp its sort names (`Queries.LibrarySort`'s
+    /// own COALESCE expression); a book carries only `created_at` and
+    /// `updated_at`, so each sort maps to the NEAREST of the two:
+    ///
+    /// | sort | the note's stamp | the book's |
+    /// |---|---|---|
+    /// | created | `created_at` | **`created_at`** |
+    /// | entry date | `COALESCE(entry_date, created_at)` | **`created_at`** — a book has no entry date, so it behaves exactly as an undated note does under that sort |
+    /// | last touched | `COALESCE(last_touched_at, created_at)` | **`updated_at`** |
+    /// | last meaningful edit | `COALESCE(last_major_revision_at, created_at)` | **`updated_at`** — a book has no churn stamp; `updated_at` is the nearest thing it has to "when this last changed" |
+    ///
+    /// **The one wart, stated:** under ENTRY DATE a note's stamp may be a bare
+    /// day (`2026-12-01`) while a book's is a full ISO instant
+    /// (`2026-12-01T…`), so a book created on a day sorts just above a note
+    /// dated that day. That is the SAME lexicographic wart the core's own
+    /// COALESCE already has between dated and undated notes — inherited, not
+    /// introduced.
+    nonisolated static func bookStamp(
+        _ book: Queries.ShelfBook, sort: Queries.LibrarySort
+    ) -> String {
+        let date: Date
+        switch sort {
+        case .createdAt, .entryDate: date = book.reading.createdAt
+        case .lastTouched, .lastMajorRevision: date = book.reading.updatedAt
+        // 18h added `.title` (A–Z on the displayed name — a NAME sort, not a
+        // stamp), and the phone's `setSort` REFUSES it until the phone offers
+        // it (PL-22's 18h note), so this arm is unreachable today. If the
+        // phone ever offers title sort, the union's interleave needs its own
+        // rule (names, not stamps) — this stamp is only the exhaustiveness
+        // answer, not a design.
+        case .title: date = book.reading.createdAt
+        }
+        // The canonical encoding — byte-identical to what the container rows
+        // carry, so the two kinds' stamps really are comparable strings
+        // (`DateFormatter.variorumISO8601`, AppSpec §6).
+        return DateFormatter.variorumISO8601.string(from: date)
+    }
+
+    /// The interleave itself — PURE, so the rule is pinned rather than
+    /// promised. Newest first, matching the listing's own `direction: .desc`.
+    ///
+    /// **Ties are broken deterministically** (they are near-impossible at
+    /// millisecond precision, but a listing whose order depends on sort
+    /// stability is a listing that can flicker): equal stamps put the NOTE
+    /// first — the resting surface keeps its shape — and equal stamps within
+    /// one kind keep their source order, which for notes is the query's own
+    /// `(stamp, id)` total order and for books is the Shelf's order.
+    nonisolated static func union(
+        notes: [Queries.TimelineItem], books: [Queries.ShelfBook],
+        sort: Queries.LibrarySort
+    ) -> [MobileLibraryRow] {
+        struct Keyed {
+            let stamp: String
+            let kindRank: Int
+            let index: Int
+            let row: MobileLibraryRow
+        }
+        var keyed: [Keyed] = []
+        keyed.reserveCapacity(notes.count + books.count)
+        for (index, item) in notes.enumerated() {
+            keyed.append(Keyed(stamp: item.stamp, kindRank: 0, index: index, row: .note(item)))
+        }
+        for (index, book) in books.enumerated() {
+            keyed.append(
+                Keyed(stamp: bookStamp(book, sort: sort), kindRank: 1, index: index,
+                      row: .book(book)))
+        }
+        return keyed.sorted { left, right in
+            if left.stamp != right.stamp { return left.stamp > right.stamp }
+            if left.kindRank != right.kindRank { return left.kindRank < right.kindRank }
+            return left.index < right.index
+        }.map(\.row)
+    }
+
+    /// **The books listing's WINDOW** (#92(a) — books as rows).
+    ///
+    /// The FETCH is author-scale by core's own contract: `Queries.bookshelf`
+    /// takes no limit and `ShelfQueries`' header says why (*"reading rows +
+    /// counted joins — author-scale"*), which is exactly why the Shelf holds
+    /// it unbounded. So what this bounds is what the SURFACE BUILDS — the
+    /// scraps area's own shape (`MobileScrapsModel`'s window over a whole
+    /// delivery), and `count > window` is exact truth rather than a probe
+    /// approximation, so an exact-window shelf can never false-positive the
+    /// marker.
+    func windowedBooks(
+        _ books: [Queries.ShelfBook]
+    ) -> (rows: [Queries.ShelfBook], truncated: Bool) {
+        TrashListing.windowed(books, window: listingLimit)
     }
 
     // MARK: - The sort picker (parity C3 — ruling 9)

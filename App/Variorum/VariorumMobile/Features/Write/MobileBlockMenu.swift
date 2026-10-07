@@ -2,14 +2,42 @@
 //  MobileBlockMenu.swift
 //  VariorumMobile
 //
-//  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Takes… · Comments… ·
-//  Callout ▸ · Name Block… · Commit Take · Block History… (parity C4a,
-//  widened to the four-region face at round 2 batch 6a) ·
-//  Divide Block · Merge with Previous · Delete Block, on the caret's
-//  block, through TWO doors that cannot drift (the CalloutMenu
-//  one-vocabulary precedent): the keyboard bar's ⋯ and the extended edit
-//  menu both render `menuElements` — ONE builder decides the words and
-//  the order.
+//  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Comments… · Callout ▸ ·
+//  Name Block… · Commit Take · New Block Below · Divide Block · Merge
+//  with Previous · Archive Block · Delete Block, on the caret's block,
+//  through TWO doors that cannot drift (the CalloutMenu one-vocabulary
+//  precedent): the keyboard bar's ⋯ and the extended edit menu both
+//  render `menuElements` — ONE builder decides the words and the order.
+//
+//  **TWO ROWS LEFT THIS MENU AT ROUND 2 BATCH 9, BOTH BY HER LETTER**
+//  (2026-08-23, `notes/author-reports/2026-08-23-device-walk-and-product-
+//  asks.md`), and the absences are recorded here rather than left to be
+//  re-derived from a diff:
+//
+//  · **`Takes…` is GONE** — her words: *"i also don't think takes needs to
+//    be an option on the three dot menu, it's already the middle bar."* It
+//    literally is: the keyboard bar rests on **Aa · ⑂ · ⋯** and ⑂ is the
+//    middle act, opening the same browser on the same caret block
+//    (`MobileKeyboardBarController.fireTakes`). The row was a second door
+//    onto one surface, one inch away from the first. The
+//    `includeTakes:` parameter went with it — it existed ONLY to keep this
+//    row out of the edit menu's Block submenu, which carries its own flat
+//    `Takes…` (`MobileEditMenu.takesTitle`, untouched: that door is the
+//    SELECTION's, not this menu's, and she did not name it).
+//  · **`Block History…` MOVED** — her words: *"take history should move
+//    into the three ... menu on each take rather than the main three dot
+//    menu."* Its home is now every live take card's own ⋯ in the takes
+//    browser (`MobileTakesBrowserController.historyTitle`, composed from
+//    the SHARED `BlockHistoryPath.name` so the word did not fork on the
+//    way over). One consequence is recorded at that door: the face is no
+//    longer reachable on a GAP block, because the browser refuses to open
+//    on one.
+//
+//  **Her G2 commit/history pairing therefore ends here, deliberately and
+//  visibly.** `Commit Take` stays: it is a block-scale act on the caret's
+//  DISPLAYED take, and she asked for the listing to move, not the act.
+//  The pairing survives one grain up — the note ⋯ keeps its own
+//  `Save a Version` + `Versions…` twin (batch 6c's finding 2).
 //
 //  Every row performs a STANDING act or delivers the ops' real refusal
 //  (P-2): Takes/Comments open their sheets; Callout rides the mirrored
@@ -18,10 +46,23 @@
 //  doors (M10; Delete joined at the S4 ladder — MAJOR 1's latch +
 //  flush-guard contract) — the deleted-blocks TRAY stays
 //  Mac-side in v1 (the refusal-free recovery road, named in the note).
-//  "Archive Block" is a recorded DELIBERATE ABSENCE: no such operation
-//  exists (blocks archive nowhere — only containers and takes do), the
-//  Mac offers no such door, and rendering one would invent product
-//  behavior.
+//  **"ARCHIVE BLOCK" LANDED AT ROUND 2 BATCH 6b (PR6), and the note above
+//  it is kept because it was TRUE WHEN WRITTEN and is now exactly false.**
+//  It said the row was a deliberate absence because *"no such operation
+//  exists (blocks archive nowhere — only containers and takes do), the Mac
+//  offers no such door"*. **13j's round-7 ruling built both ops**
+//  (`archiveBlock` / `unarchiveBlock`), the Mac's tray grew an archived
+//  section for them the same phase, and `Queries.archivedBlocks` has been
+//  reading that population ever since — so the phone was the one platform
+//  where a block could be UN-archived (from this batch's tray) and never
+//  archived. A capability with a way back and no way in is the half-door
+//  class, so the row is here now, one place above Delete Block: archive is
+//  the gentler of the two ways a block leaves the page.
+//
+//  Its way BACK is the tray — blocks ▸ archived — which is why the ruling
+//  that built the op and the batch that built the tray had to meet before
+//  this row could honestly exist (P-2: a door that sets a block aside owes
+//  a visible road to the place it set it aside in).
 //
 //  PROMPTS (Name…, Emoji…, the delete confirm) ride injectable seams —
 //  production installs UIAlertController plumbing at attach; tests
@@ -59,7 +100,7 @@ final class MobileBlockMenuController {
     ///
     /// **What it covers, and what it does not, stated so the boundary is not
     /// re-derived:** it guards the write roads this controller OWNS —
-    /// `applyCallout` (the callout submenu's toggle, four colours, remove and
+    /// `applyCallout` (the callout submenu's toggle, five colours, remove and
     /// emoji rows all land here) and `rename`. The structural rows (Insert
     /// Below · Divide · Merge · Delete) hand straight to
     /// `MobileStructuralController`, which latches them one layer down, and
@@ -86,31 +127,33 @@ final class MobileBlockMenuController {
 
     // MARK: - The row vocabulary (one builder, two doors)
 
-    static let takesTitle = "Takes…"
     static let commentsTitle = "Comments…"
     static let calloutTitle = "Callout"
     static let nameTitle = "Name Block…"
-    /// The savepoint pair (parity C4a — AppSpec §9's deliberate-commit
+    /// The savepoint WRITER (parity C4a — AppSpec §9's deliberate-commit
     /// pillar reaches the phone: Commit acts on the caret block's DISPLAYED
-    /// take, and History opens that block's whole past, both through
-    /// `MobileBlockHistoryController`).
-    static let commitTitle = "Commit Take"
-    /// **Renamed at round 2 batch 6a**: the door opens ONE cohesive face for
-    /// the whole BLOCK — every take's savepoint run, its archived and deleted
-    /// takes, and where it came from — so calling it "Take History" was the
-    /// same small dishonesty her F2 report caught on the Mac (*"it's unclear
-    /// that history is under Note, that makes it seem like the Note's
-    /// history"*), one noun over. It sits immediately beside Commit Take,
-    /// which is her G2 pairing (*"history is the natural pair to commit"*) in
-    /// the phone's grammar: the ⋯ is this phone's bottom chrome for block
-    /// acts.
-    static let historyTitle = "Block History…"
+    /// take, through `MobileBlockHistoryController`). **Its old partner
+    /// left at batch 9** — the header's G2 note has the whole reasoning —
+    /// so this is a savepoint pair no longer; the READER is each take
+    /// card's own `MobileTakesBrowserController.historyTitle`.
+    ///
+    /// `nonisolated` because the pocket guide's savepoint lesson composes
+    /// the word rather than re-typing it (batch 9's fix wave, MAJOR 2),
+    /// and `MobileTutorialSeeder` runs off the main actor.
+    nonisolated static let commitTitle = "Commit Take"
     /// The insert door (parity C4b item 1 — the registry's own verb).
     /// It heads the structural family: minting under the block is the
     /// gentlest structural act, so it reads before the knives.
     static let insertBelowTitle = "New Block Below"
     static let divideTitle = "Divide Block"
     static let mergeTitle = "Merge with Previous"
+    /// **PR6 — the block-level archive door** (13j's round-7 ruling built
+    /// `archiveBlock`; the Mac wears it in the block TOC and the Takes
+    /// bottom bar through `CapabilityID.archiveBlock`). It sits immediately
+    /// above Delete Block because the two are the same shape — a block
+    /// leaves the page — and this is the gentler one: kept, forever, no
+    /// clock, one tap back from blocks ▸ archived.
+    static let archiveTitle = "Archive Block"
     static let deleteTitle = "Delete Block"
     /// The Mac CalloutMenu's row words, mirrored (one vocabulary).
     static let calloutToggleTitle = "Toggle Callout"
@@ -119,9 +162,8 @@ final class MobileBlockMenuController {
 
     /// The flat titles both doors must agree on (the drift pin's oracle).
     static var rowTitles: [String] {
-        [takesTitle, commentsTitle, calloutTitle, nameTitle,
-         commitTitle, historyTitle,
-         insertBelowTitle, divideTitle, mergeTitle, deleteTitle]
+        [commentsTitle, calloutTitle, nameTitle, commitTitle,
+         insertBelowTitle, divideTitle, mergeTitle, archiveTitle, deleteTitle]
     }
 
     /// The callout submenu's titles in order (separators excluded) —
@@ -132,20 +174,16 @@ final class MobileBlockMenuController {
             + [calloutEmojiTitle, calloutRemoveTitle]
     }
 
-    /// The menu's elements for one block — consumed by the bar's ⋯
-    /// (whole) and the edit menu's Block submenu (minus Takes…, which
-    /// already rides flat there — S2's own item, byte-untouched).
+    /// The menu's elements for one block — consumed by the bar's ⋯ and by
+    /// the edit menu's Block submenu, which since batch 9 render the SAME
+    /// list with no arm between them (the `includeTakes:` split died with
+    /// the row it existed for — see the header).
     /// Displayed titles are VOICE-CASED (P26/P43, parity A3 — the flip
     /// of P26/P43's recorded system-register posture): `rowTitles` stays
     /// the canonical vocabulary, `chromeCase` is the render register.
-    func menuElements(blockID: String, includeTakes: Bool) -> [UIMenuElement] {
+    func menuElements(blockID: String) -> [UIMenuElement] {
         let cased = MobileEditorStyle.chromeCase
         var elements: [UIMenuElement] = []
-        if includeTakes {
-            elements.append(UIAction(title: cased(Self.takesTitle)) { [weak self] _ in
-                self?.model?.openTakesBrowser(blockID: blockID)
-            })
-        }
         elements.append(UIAction(title: cased(Self.commentsTitle)) { [weak self] _ in
             self?.model?.openComments(blockID: blockID)
         })
@@ -156,9 +194,6 @@ final class MobileBlockMenuController {
         elements.append(UIAction(title: cased(Self.commitTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.blockHistory.commitNow(blockID: blockID) }
-        })
-        elements.append(UIAction(title: cased(Self.historyTitle)) { [weak self] _ in
-            self?.model?.blockHistory.open(blockID: blockID)
         })
         elements.append(UIAction(title: cased(Self.insertBelowTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
@@ -171,6 +206,14 @@ final class MobileBlockMenuController {
         elements.append(UIAction(title: cased(Self.mergeTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.structural.mergeWithPrevious() }
+        })
+        // PR6: archive before delete — the gentler exit reads first, the
+        // same way Insert Below heads the structural family "before the
+        // knives". NOT `.destructive`: nothing is destroyed and there is no
+        // clock, which is exactly what distinguishes it from the row below.
+        elements.append(UIAction(title: cased(Self.archiveTitle)) { [weak self] _ in
+            guard let model = self?.model else { return }
+            Task { await model.structural.archiveBlock(blockID: blockID) }
         })
         elements.append(UIAction(
             title: cased(Self.deleteTitle), attributes: .destructive
@@ -187,8 +230,27 @@ final class MobileBlockMenuController {
                 Task { await self?.applyCallout(blockID: blockID, edit: .toggle) }
             },
         ]
+        // **PR19 — THE COLOUR ROWS WEAR THEIR COLOUR** (the Mac's 13e E1,
+        // phone-imaged through `MobileCallout.swatchImage`, which resolves
+        // the SAME `color(_:)` the block's own frame does — a preview, never
+        // a second source of truth, and the stored value is still the NAME).
+        //
+        // **The word stays beside the chip, deliberately** — the Mac's own
+        // reason, which binds here twice over: a swatch alone would be the
+        // one control in the app that cannot be read aloud (R93's legibility
+        // mandate, and MobileSoul §5.6's VoiceOver expectation), and the
+        // words are what the drift pin compares against `CalloutMenu`'s.
+        // So `calloutRowTitles` is UNCHANGED by this batch: no row was
+        // added, only an image hung on the FIVE that existed
+        // (`MobileCallout.names` — blue · green · sand · violet · rose,
+        // value-mirroring the Mac's `CalloutPalette`; the count is derived
+        // from that array everywhere and was mis-stated as four in three
+        // places, corrected at the fix wave — cold review NIT 1).
         rows += MobileCallout.names.map { name in
-            UIAction(title: cased(name.capitalized)) { [weak self] _ in
+            UIAction(
+                title: cased(name.capitalized),
+                image: MobileCallout.swatchImage(for: name)
+            ) { [weak self] _ in
                 Task { await self?.applyCallout(blockID: blockID, edit: .color(name)) }
             }
         }
@@ -226,16 +288,38 @@ final class MobileBlockMenuController {
         }
     }
 
-    private func promptEmoji(blockID: String) {
-        guard let promptForText else { return }
-        promptForText(
-            "Callout Emoji",
-            "A leading glyph for this callout (leave empty for none).",
-            nil
-        ) { [weak self] glyph in
+    static let emojiPromptTitle = "Callout Emoji"
+    static let emojiPromptMessage = "A leading glyph for this callout (leave empty for none)."
+
+    /// **PR19's emoji road.** The seam is SEPARATE from `promptForText` and
+    /// **falls back to it when nothing installed one** — so the emoji
+    /// keyboard is a strict upgrade over the prompt that shipped, and every
+    /// harness that injects only `promptForText` keeps driving this door
+    /// unchanged (the fallback is structural, not promised).
+    ///
+    /// Semantics are the Mac `CalloutMenu.promptEmoji`'s exactly, and both
+    /// arms honour them: cancel = nil (nothing happens); EMPTY is a real
+    /// answer ("no glyph"), which is why the completion cannot collapse the
+    /// two.
+    var promptForEmoji:
+        (@MainActor (_ title: String, _ message: String,
+                     _ completion: @escaping @MainActor (String?) -> Void) -> Void)?
+
+    /// Internal, not private, for the `requestLabel` reason: the menu row is
+    /// a one-line forward to this, `UIMenu` rows are not invocable in
+    /// process, and the ROW's presence is pinned separately by the callout
+    /// drift pin — so this is where the door's behaviour is driven.
+    func promptEmoji(blockID: String) {
+        let land: @MainActor (String?) -> Void = { [weak self] glyph in
             guard let glyph else { return } // cancelled
             Task { await self?.applyCallout(blockID: blockID, edit: .emoji(glyph)) }
         }
+        if let promptForEmoji {
+            promptForEmoji(Self.emojiPromptTitle, Self.emojiPromptMessage, land)
+            return
+        }
+        guard let promptForText else { return }
+        promptForText(Self.emojiPromptTitle, Self.emojiPromptMessage, nil, land)
     }
 
     // MARK: - Name (the block's handle — `setBlockName`)
@@ -282,9 +366,8 @@ final class MobileBlockMenuController {
         }
     }
 
-    // MARK: - Delete block (confirm, since the phone has no structural
-    // undo — v1's recorded posture; the tray's recovery DOOR rides
-    // PL-3/13j)
+    // MARK: - Delete block (confirmed, and since batch 6b the confirm names
+    // the tray — the durable road back, beside the session's undo)
 
     /// The confirm's detail.
     ///
@@ -294,11 +377,12 @@ final class MobileBlockMenuController {
     /// phone face. J8's copy doctrine says otherwise, and her own morning
     /// report is the evidence: a promise a user cannot act on is not a fact
     /// she can use, it is a place she goes looking for and does not find.
-    /// This phone has NO tray face and NO undo door (v1's recorded posture,
-    /// verified by sweep this batch: no `restoreBlock` door anywhere in
-    /// `VariorumMobile`, and the structural undo stack is used only for
-    /// compounds), so the confirm says the two things that are true here and
-    /// promises nothing else.
+    /// This phone had NO tray face and NO undo door then (v1's recorded
+    /// posture, verified by sweep at that batch: no `restoreBlock` door
+    /// anywhere in `VariorumMobile`, and the structural undo stack used only
+    /// for compounds), so the confirm said the two things that were true and
+    /// promised nothing else. **Both halves have since landed** — see the two
+    /// graduations below.
     ///
     /// It does NOT say "do it on the Mac" — the no-redirect principle
     /// (MobileSoul §4) — and it does not say "gone forever" either, because
@@ -308,15 +392,25 @@ final class MobileBlockMenuController {
     /// second half FALSE.** It used to end *"There's no undo here"*, which
     /// was true when written and is the exact class J8 warns about from the
     /// other side: a copy line that keeps saying no after the door opens.
-    /// The structural undo door (her R10) now stands on the receipt this
-    /// delete writes and in the note's ⋯, so the confirm names the road it
-    /// really has. The tray twin is still the ledger's (batch 5) and is
-    /// still not promised here.
+    /// The structural undo door (her R10) stands on the receipt this delete
+    /// writes and in the note's ⋯, so the confirm names the road it has.
+    ///
+    /// **ROUND 2 BATCH 6b — IT GRADUATES AGAIN, and for the same reason a
+    /// second time.** The clause above ended *"The tray twin is still the
+    /// ledger's and is still not promised here"* — the tray landed at this
+    /// batch (§69.3), so the promise is real and the confirm makes it.
+    /// Undo is the SESSION's road back (it dies with the app; the phone's
+    /// stack is in-memory by construction); the tray is the DURABLE one, and
+    /// a destructive confirm owes her the durable one first.
     /// Pinned static — a promise made in a literal is a promise no test can
     /// keep.
-    static let deleteConfirmDetail =
-        "The block leaves this note, with its takes. Undo is on the receipt "
-        + "afterwards, and in the note's ⋯."
+    static var deleteConfirmDetail: String {
+        "The block leaves this note, with its takes. "
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.prefix(1).uppercased())"
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.dropFirst()) for "
+            + "\(TrashWindow.days) days; Undo is on the receipt afterwards, "
+            + "and in the note's ⋯."
+    }
 
     static let deleteNeedsItsConfirm =
         "Deleting a block needs its confirmation — nothing was deleted."

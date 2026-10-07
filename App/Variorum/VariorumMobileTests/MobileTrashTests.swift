@@ -41,27 +41,118 @@ private func seedDeletedNote(
 struct MobileTrashTests {
     // MARK: - The listing
 
-    /// Two sections, and they are NOT one list: the Trash's countdown and
-    /// Archived's no-clock calm. Conflating them would make archive read as
-    /// a deletion, which is the one thing they must never do to each other.
-    @Test func theSurfaceCarriesBothSectionsAndTheirDifferentPromises() async throws {
+    /// **TWO ROOMS, AND EACH CARRIES ONLY ITS OWN PROMISE** (batch 6c — her
+    /// QUESTIONS #84 ruling: *"two doors, two destinations, nothing
+    /// shared"*).
+    ///
+    /// Batch 4's pin asserted both promises on ONE screen, which was that
+    /// screen's honest shape. Under Two rooms the assertion inverts and
+    /// becomes stronger: the Trash room shows the 30-day clock **and never
+    /// the kept-forever line**, and the Archive room shows kept-forever
+    /// **and never a countdown**. Conflating them would make archive read as
+    /// a deletion, which is the one thing the two states must never do to
+    /// each other — and after a split, "each room shows only its own" is the
+    /// form of that promise a screen can actually break.
+    ///
+    /// **AND THE VERSION FENCE, ON THE ONE SURFACE THAT COULD NEWLY LEAK
+    /// ONE** (added at the 6c fix wave, cold-review n8). A saved moment is a
+    /// container born ARCHIVED, so the new Archive room is exactly the phone
+    /// listing where the born-archived classifier could show her a thing
+    /// whose one home is Note ▸ Versions. The fence itself is the core's
+    /// (`Queries.versionHistoryPredicate` and `observeArchivedPosts`'s
+    /// `excludingVersionHistory: true` default, nine core pins deep) — what
+    /// was missing was a phone-side pin holding it over the phone's own
+    /// room, so a later face that passes `false` for a reason that seemed
+    /// good says so here.
+    @Test func theTwoRoomsCarryOnlyTheirOwnPromises() async throws {
         try await withEditorWorld { session, _ in
             let deleted = try await seedDeletedNote(session, title: "Gone")
             let archivedID = try await makePost(session, blocks: ["Kept."])
             try await session.runner.run { ops in try ops.archiveContainer(archivedID) }
+            // A note with a saved moment — the moment is a container born
+            // archived, and it must NOT row in the Archive room.
+            let noteWithMoment = try await makePost(
+                session, blocks: ["A note that keeps its moments elsewhere."])
+            try await session.runner.run { ops in
+                try ops.saveNoteVersion(noteWithMoment)
+            }
+            let momentID = try await session.database.read { db in
+                try Queries.noteVersions(db, of: noteWithMoment).first?.postID
+            }
+            let moment = try #require(momentID)
 
-            let model = MobileTrashModel(session: session)
+            let trash = MobileTrashModel(session: session)
             try await withHostedSurface(
-                MobileTrashView(model: model, tokens: .terminalLight, onOpen: { _ in })
+                MobileTrashView(model: trash, tokens: .terminalLight, onOpen: { _ in })
             ) { surface in
                 await surface.settle(40)
                 let labels = surface.visibleLabels
-                #expect(model.trash.contains { $0.id == deleted })
-                #expect(model.archived.contains { $0.postID == archivedID })
-                // Both promises are ON SCREEN, in words.
+                #expect(trash.trash.contains { $0.id == deleted })
                 #expect(labels.contains { $0.contains("30 days") },
                         "labels were \(labels)")
-                #expect(labels.contains { $0.contains(RecoveryCopy.archivedForever) })
+                // The other room's promise is NOT here.
+                #expect(!labels.contains { $0.contains(RecoveryCopy.archivedForever) },
+                        "labels were \(labels)")
+            }
+
+            let archive = MobileArchiveModel(session: session)
+            try await withHostedSurface(
+                MobileArchiveView(model: archive, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                #expect(archive.archived.contains { $0.postID == archivedID })
+                #expect(labels.contains { $0.contains(RecoveryCopy.archivedForever) },
+                        "labels were \(labels)")
+                // NO countdown anywhere in the room that keeps things.
+                #expect(!labels.contains { $0.contains("days left") })
+                #expect(!labels.contains { $0.contains("30 days") })
+                // n8: the saved moment is born archived and stays OUT — in
+                // the room's own listing and on its screen.
+                #expect(!archive.archived.contains { $0.postID == moment },
+                        "a moment's one home is its note's Versions")
+                #expect(archive.archived.contains { $0.postID == archivedID },
+                        "and the fence is not just an empty room")
+            }
+        }
+    }
+
+    /// **THE COMBINED SURFACE'S NAME IS GONE FROM THE LIBRARY, WHERE ITS
+    /// DOOR STOOD.** `RecoveryCopy.surfaceName` — *"Archived & Deleted"* —
+    /// was the label of the Library's trailing row, opening one screen that
+    /// held both states; its awkward two-noun shape is exactly what the
+    /// design record blames on the conflation. The string stays in `Shared/`
+    /// (the Mac's own file, fenced this batch); what this pin holds is that
+    /// the LIBRARY no longer speaks it and says the two rooms' words
+    /// instead.
+    ///
+    /// **The corpus-wide claim is TRUE and is not what is driven** (the 6c
+    /// cold review's n7): `RecoveryCopy.surfaceName` has zero call sites
+    /// anywhere under `VariorumMobile/` — grep-verified, and re-verifiable
+    /// in one line — but a pin that mounts one surface proves it of that
+    /// surface. The doc says which is which so a later reader does not read
+    /// this as a corpus guard it cannot be.
+    @Test func theCombinedSurfacesNameIsGoneFromThePhone() async throws {
+        try await withEditorWorld { session, _ in
+            let library = MobileLibraryViewModel(session: session)
+            let scraps = MobileScrapsModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            try await withHostedSurface(
+                MobileLibraryView(
+                    model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
+                    tokens: .terminalLight, tabBar: { EmptyView() },
+                    onOpen: { _ in },
+                    onOpenTrash: {}, onOpenArchive: {})
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                #expect(!labels.contains(RecoveryCopy.surfaceName),
+                        "labels were \(labels)")
+                // What stands in its place: the narrowed row, and the glyph
+                // door whose LABEL is the room's word.
+                #expect(labels.contains(MobileRecoveryDoors.archiveLabel))
+                #expect(labels.contains(MobileRecoveryDoors.trashLabel))
             }
         }
     }
@@ -250,19 +341,21 @@ struct MobileTrashTests {
         }
     }
 
-    /// Un-archive is the Archived section's one act, and it is a real
-    /// button too. Archive has no clock, so this is a plain state flip.
+    /// Un-archive is the Archive room's one act, and it is a real button
+    /// too. Archive has no clock, so this is a plain state flip. (Batch 4's
+    /// pin, following its act into the room the split gave it — the act, the
+    /// receipt and the assertions are unchanged.)
     @Test func theRealUnarchiveButtonBringsANoteBack() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: ["Kept quietly."])
             try await session.runner.run { ops in try ops.archiveContainer(postID) }
-            let model = MobileTrashModel(session: session)
+            let model = MobileArchiveModel(session: session)
 
             try await withHostedSurface(
-                MobileTrashView(model: model, tokens: .terminalLight, onOpen: { _ in })
+                MobileArchiveView(model: model, tokens: .terminalLight, onOpen: { _ in })
             ) { surface in
                 await surface.settle(40)
-                #expect(surface.activate(MobileTrashView.unarchiveVerb),
+                #expect(surface.activate(MobileArchiveView.unarchiveVerb),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(40)
             }
@@ -273,7 +366,7 @@ struct MobileTrashTests {
                     arguments: [postID])
             }
             #expect(archivedAt == nil)
-            #expect(model.receipt == MobileTrashModel.unarchivedReceipt)
+            #expect(model.receipt == MobileArchiveModel.unarchivedReceipt)
         }
     }
 
@@ -398,10 +491,144 @@ struct MobileTrashTests {
         }
     }
 
+    // MARK: - The 6c fix wave (the cold review's n9 and n10)
+
+    /// **BOTH ROOMS' WINDOWS SAY SO, ON SCREEN** (n9 — an inherited gap that
+    /// arrived on a new surface).
+    ///
+    /// The listings have been windowed since batch 4 (P1's Phase 10
+    /// discipline: `window + 1`, a probe row, `TrashListing.windowed`) and
+    /// the markers have never been driven — so *"the window is never
+    /// silent"* was a claim about code nothing read. Both rooms are seeded
+    /// past a deliberately tiny window and the marker is asserted where she
+    /// would read it.
+    ///
+    /// It also holds the two rooms to **one sentence**: the Archive room and
+    /// Note ▸ Versions have no filter to narrow, so they share
+    /// `MobileRoomListing.truncationMarker` (declared once at this fix wave
+    /// — the Archive room's private copy is retired), while the Trash's own
+    /// marker keeps its *"narrow the filter"* half because the Trash HAS a
+    /// filter.
+    ///
+    /// **NEW COVERAGE for the two rooms** (the markers were built at batch
+    /// 4/6c and merely unpinned); the Versions room's marker is red-on-old
+    /// and is pinned in its own suite.
+    @Test func bothRoomsSayWhenTheWindowIsHidingSomething() async throws {
+        try await withEditorWorld { session, _ in
+            _ = try await seedDeletedNote(session, title: "First gone")
+            _ = try await seedDeletedNote(session, title: "Second gone")
+            for title in ["First kept", "Second kept"] {
+                let id = try await makePost(session, blocks: [title])
+                try await session.runner.run { ops in try ops.archiveContainer(id) }
+            }
+
+            let trash = MobileTrashModel(session: session, window: 1)
+            try await withHostedSurface(
+                MobileTrashView(model: trash, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(trash.trash.count == 1)
+                #expect(trash.trashTruncated)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileTrashView.truncationMarker(shown: 1)),
+                        "labels were \(labels)")
+                // The Trash's sentence is the one WITH the filter half.
+                #expect(MobileTrashView.truncationMarker(shown: 1)
+                    .contains("narrow the filter"))
+            }
+
+            let archive = MobileArchiveModel(session: session, window: 1)
+            try await withHostedSurface(
+                MobileArchiveView(model: archive, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(archive.archived.count == 1)
+                #expect(archive.truncated)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileRoomListing.truncationMarker(shown: 1)),
+                        "labels were \(labels)")
+                // …and the filterless rooms' sentence does not claim one.
+                #expect(!MobileRoomListing.truncationMarker(shown: 1)
+                    .contains("filter"))
+            }
+        }
+    }
+
+    /// **EACH ROOM'S "OPEN NOTE" DOOR IS DRIVEN, ON THE REAL SURFACE** (n10
+    /// — the one door on the two new surfaces no pin activated, in the round
+    /// that shipped four dead-door classes; §15's trap (b) is the whole
+    /// reason this suite mounts anything at all).
+    ///
+    /// The two doors mean different things and are asserted separately: the
+    /// Archive room's row opens the archived note ITSELF (an archived note
+    /// is a work, not a deletion — MobileSoul §4.3's see-your-data road),
+    /// and a Trash row's opens the still-live note the deleted thing came
+    /// FROM.
+    ///
+    /// **RED-ON-OLD** for either half by pointing its `onOpen` at anything
+    /// else: the id carried is asserted, not merely that something fired.
+    @Test func bothRoomsOpenNoteDoorsReallyOpenTheRightNote() async throws {
+        try await withEditorWorld { session, db in
+            // The Archive room: the row opens the archived note itself.
+            let archivedID = try await makePost(session, blocks: ["Kept and openable."])
+            try await session.runner.run { ops in try ops.archiveContainer(archivedID) }
+            let openedFromArchive = LockIsolatedBox<String?>(nil)
+            let archive = MobileArchiveModel(session: session)
+            try await withHostedSurface(
+                MobileArchiveView(
+                    model: archive, tokens: .terminalLight,
+                    onOpen: { openedFromArchive.value = $0 })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate("Open note"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+            }
+            #expect(openedFromArchive.value == archivedID,
+                    "the archived note opens — itself, not something near it")
+
+            // The Trash room: a deleted BLOCK's row opens the note it came
+            // from, which is still live.
+            let postID = try await makePost(session, blocks: ["Keep.", "Cut."])
+            let (editor, _) = await makeSurfaceEditor(session, postID: postID)
+            let doomed = editor.index.entries[1].blockID
+            await editor.structural.deleteBlock(blockID: doomed)
+            let rows = try await db.read { [now = session.now] db in
+                try Queries.trash(db, now: now)
+            }
+            #expect(rows.contains { $0.id == doomed && $0.noteID == postID })
+
+            let openedFromTrash = LockIsolatedBox<String?>(nil)
+            let trash = MobileTrashModel(session: session)
+            try await withHostedSurface(
+                MobileTrashView(
+                    model: trash, tokens: .terminalLight,
+                    onOpen: { openedFromTrash.value = $0 })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate("Open note"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+            }
+            #expect(openedFromTrash.value == postID,
+                    "a deleted block's row opens the note it came from")
+        }
+    }
+
     /// **Empty Trash is not rendered when the Trash is empty** (P-2), and
-    /// the ONLY place either purge door exists is this surface — her
+    /// the ONLY place either purge door exists is the TRASH ROOM — her
     /// round-3 rider: *"never accidental full delete from within a note."*
-    @Test func thePurgeDoorsExistNowhereButHere() async throws {
+    ///
+    /// **BATCH 6c EXTENDED THIS PIN BECAUSE THE SPLIT IS WHERE THE RULE
+    /// COULD HAVE BEEN LOST.** Batch 4's version asserted the absence on a
+    /// note's own surfaces only, because there was one recovery screen and
+    /// the purge doors were on it. Now there are two rooms, and the archived
+    /// listing that used to sit UNDER the same header — beneath the same
+    /// Empty Trash button — is its own screen with its own model. So the
+    /// nowhere-else assertion now names all three places a leak could
+    /// appear: the **Archive room**, the **Library** (whose path line grew a
+    /// door this batch), and a note's own surfaces.
+    @Test func thePurgeDoorsExistNowhereButInTheTrashRoom() async throws {
         try await withEditorWorld { session, _ in
             // An empty Trash renders no Empty Trash door at all.
             let model = MobileTrashModel(session: session)
@@ -410,6 +637,44 @@ struct MobileTrashTests {
             ) { surface in
                 await surface.settle(30)
                 #expect(!surface.visibleLabels.contains(RecoveryCopy.emptyTrashVerb))
+            }
+
+            // **THE ARCHIVE ROOM** — kept-forever, and no purge door of any
+            // kind. It holds a real archived note, so this is an absence
+            // asserted over a populated screen, never a vacuous one.
+            let archivedID = try await makePost(session, blocks: ["Kept."])
+            try await session.runner.run { ops in try ops.archiveContainer(archivedID) }
+            let archive = MobileArchiveModel(session: session)
+            try await withHostedSurface(
+                MobileArchiveView(model: archive, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileArchiveView.unarchiveVerb),
+                        "the room really rendered its rows — labels were \(labels)")
+                #expect(!labels.contains(RecoveryCopy.deleteNowVerb), "labels were \(labels)")
+                #expect(!labels.contains(RecoveryCopy.emptyTrashVerb))
+                #expect(!labels.contains { $0.hasPrefix(RecoveryCopy.deleteNowVerb) })
+            }
+
+            // **THE LIBRARY** — it gained a door to the Trash this batch,
+            // and a door to a room is not a purge door.
+            let library = MobileLibraryViewModel(session: session)
+            let scraps = MobileScrapsModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            try await withHostedSurface(
+                MobileLibraryView(
+                    model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
+                    tokens: .terminalLight, tabBar: { EmptyView() },
+                    onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileRecoveryDoors.trashLabel),
+                        "the door itself is there — labels were \(labels)")
+                #expect(!labels.contains(RecoveryCopy.deleteNowVerb))
+                #expect(!labels.contains(RecoveryCopy.emptyTrashVerb))
             }
 
             // And a NOTE's own surfaces carry neither purge verb — the
@@ -427,6 +692,24 @@ struct MobileTrashTests {
                 #expect(!labels.contains(RecoveryCopy.emptyTrashVerb))
             }
         }
+    }
+
+    /// **TAKES STILL DO NOT ROW IN THE GLOBAL TRASH AFTER THE SPLIT**
+    /// (`TrashScope`, her D1 ruling — a deleted take on a living block is
+    /// not a note leaving the library). The brief names this as a
+    /// pinned-still-true precondition of the split, and it is also the fact
+    /// that decides deliverable 5: because a take is not listed here, this
+    /// room is not the road that ends a take's remaining days early, and the
+    /// Block History explainer must not name it. See
+    /// `MobileBlockHistoryTests.theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave`.
+    @Test func theTrashRoomStillListsNoTakes() async throws {
+        #expect(!TrashScope.listedKinds.contains(.take))
+        #expect(!TrashScope.filterKinds.contains(.take))
+        // A filter can never widen the listing past D1 — asked of the one
+        // function the room's observation actually calls.
+        #expect(!TrashScope.kinds(filter: .take).contains(.take))
+        #expect(!TrashScope.kinds(filter: nil).contains(.take))
+        #expect(!MobileTrashView.filterKinds.contains(.take))
     }
 
     /// **A REFUSAL BELONGS IN THE RED SLOT AND A RECEIPT DOES NOT** (§49's
@@ -513,10 +796,15 @@ struct MobileTrashTests {
             == RecoveryCopy.sealedPutBackRefusal)
         #expect(DeletionRefusal.words(OperationError.lockedPost(id: "p"), act: .delete)
             != RecoveryCopy.sealedPutBackRefusal)
-        // The two surfaces' own tables now answer identically.
-        #expect(MobileTrashModel.refusal(.containerNotFound(id: "c"))
+        // The two surfaces' own tables now answer identically. (The Trash
+        // room's side reads the shared home DIRECTLY since the 6c fix wave's
+        // n5 — its one-line forward is gone, along with the byte-identical
+        // twin the Archive room had grown beside it.)
+        #expect(DeletionRefusal.words(OperationError.containerNotFound(id: "c"),
+                                      act: .putBack)
             == MobileBookDetailsModel.refusal(.containerNotFound(id: "c")))
-        #expect(MobileTrashModel.refusal(.readingNotFound(id: "r"))
+        #expect(DeletionRefusal.words(OperationError.readingNotFound(id: "r"),
+                                      act: .putBack)
             == MobileBookDetailsModel.refusal(.readingNotFound(id: "r")))
         // The fallback is a SENTENCE that still carries the name — never a
         // bare dump, and never a swallow.

@@ -316,9 +316,10 @@ struct BlockRangeIndexTests {
 
     @Test func crystallizeConvertsTailPrefixIntoEntries() {
         var index = BlockRangeIndex(slots: [slot("a", text: "one")], tail: "para\nrest")
-        index.crystallize(
+        let crystallized = index.crystallize(
             minted: [("b", "vb", 4)],
             remainingTailLength: 4)
+        #expect(crystallized)
         #expect(index.entries.map(\.blockID) == ["a", "b"])
         #expect(index.range(ofEntryAt: 1) == NSRange(location: 4, length: 4))
         #expect(index.tailRange == NSRange(location: 9, length: 4))
@@ -328,9 +329,64 @@ struct BlockRangeIndexTests {
 
     @Test func crystallizeCanCloseTheTail() {
         var index = BlockRangeIndex(slots: [], tail: "entry text")
-        index.crystallize(minted: [("a", "va", 10)], remainingTailLength: nil)
+        let crystallized = index.crystallize(minted: [("a", "va", 10)], remainingTailLength: nil)
+        #expect(crystallized)
         #expect(index.entries.map(\.blockID) == ["a"])
         #expect(index.tailRange == nil)
         #expect(index.documentLength == 10)
+    }
+
+    // MARK: - VM-5 stability pass, MINOR 4: the band's two mutators refuse too
+
+    /// **The CONTRACT of the conversion, not a red-on-old claim.** These two
+    /// kept their `precondition`s through the round-2 conversion; their only
+    /// callers (the shared `TailCrystallizer`'s attachment and `finishMint`)
+    /// guard every precondition today, so no production road was ever
+    /// observed — or traced — to trap (the VM-5 record). What is pinned here
+    /// is the header's law, now true of all six: each named impossible
+    /// state is REFUSED, and a refusal mutates NOTHING. (On the pre-fix code
+    /// these calls would kill the test process by construction — that is the
+    /// definition of the change, not evidence of a reachable bug.)
+    @Test func theLeadingRunTransferRefusesInsteadOfTrapping() {
+        var index = BlockRangeIndex(slots: [slot("a", text: "one")], tail: "\n\nx")
+        let before = index
+        let zero = index.transferTailPrefixToLastEntry(0)
+        #expect(zero == false, "a run needs at least one unit")
+        let longerThanTail = index.transferTailPrefixToLastEntry(4)
+        #expect(longerThanTail == false, "the tail must contain the run")
+        #expect(index == before, "a refusal mutates nothing")
+
+        var closed = threeBlocks()
+        let noTail = closed.transferTailPrefixToLastEntry(1)
+        #expect(noTail == false, "no open tail to transfer from")
+        var entryless = BlockRangeIndex(entries: [], tailLength: 3)
+        let nothingToAttachTo = entryless.transferTailPrefixToLastEntry(1)
+        #expect(nothingToAttachTo == false, "no entry to attach to")
+        #expect(entryless.tailLength == 3)
+
+        // …and the ordinary transfer still lands, bytes and total unchanged.
+        let moved = index.transferTailPrefixToLastEntry(2)
+        #expect(moved)
+        #expect(index.entries.map(\.length) == [5])
+        #expect(index.tailLength == 1)
+        #expect(index.documentLength == before.documentLength)
+    }
+
+    @Test func crystallizeRefusesInsteadOfTrapping() {
+        var closed = threeBlocks()
+        let before = closed
+        let noTail = closed.crystallize(minted: [("z", "vz", 1)], remainingTailLength: nil)
+        #expect(noTail == false, "no open tail to crystallize")
+        #expect(closed == before, "a refusal mutates nothing")
+
+        var open = BlockRangeIndex(slots: [slot("a", text: "one")], tail: "para")
+        let openBefore = open
+        let nothingMinted = open.crystallize(minted: [], remainingTailLength: nil)
+        #expect(nothingMinted == false, "a crystallization needs at least one mint")
+        let negativeMint = open.crystallize(minted: [("b", "vb", -1)], remainingTailLength: nil)
+        #expect(negativeMint == false, "this struct never holds a negative length")
+        let negativeTail = open.crystallize(minted: [("b", "vb", 4)], remainingTailLength: -1)
+        #expect(negativeTail == false)
+        #expect(open == openBefore, "a refusal mutates nothing")
     }
 }

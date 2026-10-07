@@ -51,9 +51,12 @@ import VariorumCore
 
 struct MobileShelfView<TabBar: View>: View {
     @Bindable var model: MobileShelfViewModel
-    /// The starred set (parity C3, her ruling 10): the section at the
-    /// shelf's top + the book rows' star door (ONE model, threaded by
-    /// the shell — the Mac StarDoor's one-value discipline).
+    /// The starred set (parity C3, her ruling 10) — since batch 10 this
+    /// surface wears only the book rows' STAR DOOR and the star refusal's
+    /// message slot; the starred LIST moved to its own page at her word
+    /// (*"I don't like where it appears above the shelf, I think it's
+    /// awkward placing"*). Still ONE model, threaded by the shell — the Mac
+    /// StarDoor's one-value discipline.
     @Bindable var stars: MobileStarsModel
     /// The home-screen quick note (round 2, M5). Owned by the shell router
     /// so the app-lifecycle seam can reach it; the shelf only wears it.
@@ -64,10 +67,14 @@ struct MobileShelfView<TabBar: View>: View {
     /// Open a note straight into typing — the Today button's landing AND
     /// the + New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
-    /// Open a note for reading/editing without raising the keyboard —
-    /// a starred NOTE row's landing (parity C3).
-    let onOpenNote: (String) -> Void
     let onSettings: () -> Void
+    /// **The Trash room's door, SECOND renderer** (batch 6c — the design
+    /// record's finding 1, and PROVISIONAL by its Q6). Books live HERE and
+    /// a deleted book rows in the Trash, so a trash door reachable only from
+    /// the Library would put a tab switch between deleting a book and
+    /// getting it back. One declaration (`MobileRecoveryDoors`), two
+    /// renderers, no new surface. nil in harness/preview use.
+    var onOpenTrash: (() -> Void)?
 
     @State private var createBookPresented = false
 
@@ -83,7 +90,6 @@ struct MobileShelfView<TabBar: View>: View {
                 let split = MobileShelfLayout.split(
                     region: proxy.size.height,
                     bookRows: model.orderedBooks.count,
-                    starredRows: stars.items.count,
                     extraRows: extraBooksRegionRows,
                     // Her 2026-08-30 ruling: one line until she clicks in.
                     writing: quickNote.isFocused ? .expanded : .collapsed)
@@ -185,7 +191,6 @@ struct MobileShelfView<TabBar: View>: View {
     private var booksRegion: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                starredSection
                 ForEach(model.orderedBooks, id: \.reading.id) { book in
                     bookRow(book)
                 }
@@ -223,6 +228,9 @@ struct MobileShelfView<TabBar: View>: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
+            if let onOpenTrash {
+                MobileTrashDoor(tokens: tokens, act: onOpenTrash)
+            }
             Button {
                 Task {
                     if let postID = await model.newNote() {
@@ -342,74 +350,24 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// The starred section (parity C3 — the face's home, this batch's
-    /// call: the Mac's sidebar-top placement mirrored onto the phone's
-    /// home surface). Renders only when anything is starred; rows
-    /// navigate — book to its contents, note into its page.
-    ///
-    /// It lives INSIDE the bounded books region by design (batch 5):
-    /// nothing above the writing area may grow without limit, which is
-    /// the whole of R27.2. *(Its placement is separately hers — batch 10
-    /// carries her "I don't like where it appears above the shelf".)*
-    @ViewBuilder
-    private var starredSection: some View {
-        if !stars.items.isEmpty {
-            HStack {
-                Text(tokens.chromeLabel(MobileStarsModel.sectionHeader))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 4)
-            .padding(.bottom, 2)
-            ForEach(stars.items, id: \.target) { item in
-                starredRow(item)
-            }
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 6)
-        }
-    }
-
-    private func starredRow(_ item: Queries.StarredItem) -> some View {
-        Button {
-            switch MobileStarsModel.route(for: item.target) {
-            case .book(let id): onOpenBook(id)
-            case .note(let id, _): onOpenNote(id)
-            case .bookRead(let id): onOpenBook(id)
-            // A star never names the recovery surface (PR2's route joined
-            // `MobileRoute` at round 2 batch 4) — stated rather than
-            // defaulted, so a future route has to be answered here.
-            case .recovery: break
-            }
-        } label: {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("★")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                Text(tokens.chromeLabel(stars.displayName(item)))
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                    .lineLimit(1)
-                Spacer(minLength: 12)
-                Text(tokens.chromeLabel(item.target.kind == .reading ? "book" : "note"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .contextMenu {
-            Button(tokens.chromeLabel(MobileStarsModel.doorTitle(starred: true))) {
-                let stars = stars
-                let target = item.target
-                Task { await stars.toggle(target, from: .shelf) }
-            }
-        }
-    }
+    // **THE STARRED SECTION IS RETIRED FROM THIS SURFACE** (batch 10 —
+    // her words: *"we have the ability to star a note but I don't like
+    // where it appears above the shelf, I think it's awkward placing"*).
+    //
+    // It is a MOVE, not a deletion: the header, the rows and the un-star
+    // door all live on `MobileStarredView` now, reached by the band's
+    // swipe-right and by the tab bar's own door. Retiring it here is what
+    // the brief conditions on — *"should STOP rendering there only if the
+    // new face replaces its job"* — and the new face replaces it whole,
+    // including the books the shelf section also listed.
+    //
+    // Two consequences, both deliberate: the books region no longer
+    // reserves height for stars (the layout brain's `starredRows` parameter
+    // was retired with them at the cold review's NIT 1 — its only caller had
+    // been passing `0`), and the shelf's `onOpenNote` callback went with the
+    // rows that were its only caller.
+    // What STAYS here is the shelf's own star DOOR (the book row's
+    // long-press) and its message slot, because the door still fires here.
 
     /// "+ new book" (parity C2 — her feel-round finding): the list's own
     /// trailing row, where a list of books naturally ends with the door
