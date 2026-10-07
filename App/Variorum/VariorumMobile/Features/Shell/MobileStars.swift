@@ -167,7 +167,7 @@ final class MobileStarsModel {
 
     /// Note stars resolve their display name through the ONE brain
     /// (title → entry day → created day — the C2 one-chain doctrine).
-    /// Bounded by the cap: at most five point-reads.
+    /// Bounded by the cap: at most `Operations.starLimit` point-reads.
     private func resolveNames() async {
         let postIDs = items.filter { $0.target.kind == .post }.map(\.target.id)
         guard !postIDs.isEmpty else {

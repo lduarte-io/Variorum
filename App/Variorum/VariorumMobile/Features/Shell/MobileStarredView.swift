@@ -29,7 +29,8 @@
 //  (the Phase 10 discipline). This one is bounded by the DATA instead:
 //  `Operations.setStarred` refuses past `Operations.starLimit`, and
 //  `Queries.starred` returns live targets only — so the list is at most
-//  five rows by construction, which is the argument `MobileStarsModel`'s
+//  `Operations.starLimit` rows (15 since her #112(b) ruling) by
+//  construction, which is the argument `MobileStarsModel`'s
 //  own observation already makes (*"Held: at most `starLimit` rows by
 //  construction"*). A render window over a list that can never reach it,
 //  and a marker that can never render, would be exactly the dead guard the

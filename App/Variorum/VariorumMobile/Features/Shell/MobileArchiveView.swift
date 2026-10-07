@@ -31,14 +31,17 @@
 //  a two-line masthead with nothing between them — and the Library's row drops
 //  into it as ONE brain (`MobileFilterRow`) rather than a second copy.
 //
-//  **Its door set is NARROWER than the Library's, and by a MODEL FACT rather
-//  than a face call:** `reading` carries no `archived_at` (AppSpec §7), so a
-//  book cannot be archived and a "books" door here could never have content —
-//  P-2 in its strongest form. `bookless` and `scraps` fail the same test for a
-//  different reason (no core read exists for archived-and-bookless, and the
-//  only archived-block read is per-NOTE). The trace lives on
-//  `MobileListingFilter.archiveDoors`; book-archiving would be a schema event,
-//  logged for her rather than improvised.
+//  **Its door set is NARROWER than the Library's — TODAY by an OWED FACE,
+//  no longer by a model fact:** the old reason here ("`reading` carries no
+//  `archived_at`") was falsified by 13i-e (`Reading.archivedAt`,
+//  `Operations+ReadingArchive`; the shelf long-press archives the daily
+//  Journal) — the VM-5 whole-round pass's MINOR 1 corrected this header.
+//  THIS FILE is where the owed archived-BOOKS group lands (MobileSoul
+//  13i-e row / VM-6 (4d) — her 2026-10-04 walk mistook the hidden state
+//  for a sync bug). `bookless` and `scraps` stay absent for their own
+//  reasons (no core read exists for archived-and-bookless; the only
+//  archived-block read is per-NOTE). The fuller trace:
+//  `MobileListingFilter.archiveDoors`.
 //
 
 import SwiftUI

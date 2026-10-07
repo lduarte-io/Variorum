@@ -81,9 +81,10 @@ struct MobileLibraryView<TabBar: View>: View {
                         // with them (#93(b)'s union).
                         listingRows
                         // The Archived room's door belongs under a NOTE
-                        // listing — it opens archived NOTES (§0's model
-                        // fact: a book cannot be archived at all), so it
-                        // does not trail the books or scraps listings.
+                        // listing — it opens archived NOTES (books CAN
+                        // archive since 13i-e; the room's BOOKS group is
+                        // the owed face, VM-6 (4d)), so it does not trail
+                        // the books or scraps listings.
                         // **The rule is this BRANCH**, not a guard inside
                         // the row: the two listings that are not note
                         // listings are rendered above, so a clause on
