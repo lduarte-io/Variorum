@@ -4,15 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Source of truth (authoritative)
 
-These documents define **Variorum**. When implementing, refactoring, or making decisions, treat them as canonical:
+These documents define **Variorum**. When implementing, refactoring, or making decisions, treat them as canonical.
+
+Auto-loaded (every session and subagent pays for these — the lean set, adopted from main's
+CLAUDE.md 2026-10-06 at her VM-4 instruction: the old 8-file auto-load overflowed the 150k-char
+context limit):
 
 - Vision for the app: @notes/CoreDescription.md
-- App Spec: @notes/AppSpec.md
 - System Mental Model: @notes/OverallModel.md
-- Sync Architecture: @notes/SyncSpec.md
-- Detailed Build Plan: @notes/DetailedPlanForPhases.md
-- Known Issues & Tech Debt: @notes/KnownIssuesAndTechDebt.md
-- TextKit 2 build companion (editor phases): @notes/TEXTKIT2_NOTES.md
+- App Spec: @notes/AppSpec.md
+
+Read EXPLICITLY, never auto-loaded — these bind exactly as before; the only change is WHEN they
+load:
+
+- `notes/SyncSpec.md` — authoritative for everything sync. Read in full before touching
+  `Sources/VariorumCore/Sync/`, custody/keychain code, or any schema change (§12 lockstep).
+- `notes/TEXTKIT2_NOTES.md` — before any editor-seam work and after every OS point update.
+- `notes/DetailedPlanForPhases.md` and `notes/KnownIssuesAndTechDebt.md` — at every kickoff and
+  closeout. ⚠ On THIS branch both are the frozen pre-2026-10 era; the live master plan, board
+  snapshot (`notes/TICKETS.md`) and workflow rules are MAIN's — read them from
+  `~/dev/variorum/notes/` by absolute path (the 2026-10-06 workflow transition;
+  `~/dev/variorum/CLAUDE.md` "Tracker & parallel work").
 
 Original source material (requirements verbatim, original spec, design rationale, chat transcript) is preserved in `notes/source/` — history, not truth.
 
