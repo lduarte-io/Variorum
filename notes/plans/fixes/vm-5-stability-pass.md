@@ -294,11 +294,10 @@ arm-list edit cannot make the mis-diagnosis live silently.
 
 ## FIX WAVE (implementer — Opus 5.5, 2026-10-06)
 
-**LIVE STATUS:** all four rows dispositioned — MAJOR 2 FIXED (both
-platforms), MINOR 3 FIXED, MINOR 4 FIXED (doctrine; contract pins, no
-red-on-old claimed), NIT 5 shield NAMED + guard-pinned. Mac editor-brain
-suites green. PENDING: mobile targeted editor-brain suites, the FULL
-mobile suite, core `swift test`. MAJOR 1 (VM-2) untouched.
+**LIVE STATUS: WAVE CLOSED** — all four ACCEPTED rows dispositioned and
+every named suite green at the end (numbers in "Close" below). Awaiting
+the orchestrator's next step (round 3 / sanity pass). MAJOR 1 (VM-2)
+untouched.
 
 **Not done in this wave (stated first, per the record rule):** MAJOR 1 /
 VM-2 (structural-flight keystroke fence) — not this wave's, by her ruling.
@@ -523,3 +522,38 @@ after 4.099 seconds.` (StructuralGestureTests.swift's ten suites — incl.
 `anIdleMintIsNeverBornMidStructuralFlight`, the Mac's flight hold over
 the attachment — SoftNewlineTests · TypedReturnKeyTests ·
 PlainPasteRuleTests · PlainPasteDoorTests).
+
+### Close — dispositions and the end-of-wave runs
+
+| row | disposition |
+|---|---|
+| MAJOR 2 | **FIXED** — `ArmedEdit.binds` (content check for `.openTail`), both consumers. Pins red→green: mobile `MobileEditRoutingBindingTests.aStaleOpenTailArmingNeverBindsAGateLessCharacter` (red: tail 0 · block [5] · audit 1 · stored "Alpha") and Mac twin `MacEditRoutingTests.aStaleOpenTailArmingNeverBindsAGateLessCharacter` (red: tail 0 · block [5] · audit 1 · store ≠ "Alphax"); contract pin `ArmedEditTests.anOpenTailArmingBindsOnlyTheNewlineItMeans` |
+| MINOR 3 | **FIXED** — the attachment disarms. Pin red→green: `MobileEditRoutingBindingTests.theLeadingRunAttachmentDisarmsAStaleArming` (red: block [7] · tail 6 · audit 1; every precondition green), its precondition built through production roads only (a seal reaching the store un-ingested fails the in-flight mint, whose failure arm neither disarms nor attaches) |
+| MINOR 4 | **FIXED (doctrine class — no red-on-old exists, none claimed)** — refuse-`Bool` conversion; refusals take `desyncRecovery` on both platforms via `recoverFromRefusedIndexMutation`; contract pins `BlockRangeIndexTests.theLeadingRunTransferRefusesInsteadOfTrapping` / `.crystallizeRefusesInsteadOfTrapping` |
+| NIT 5 | **SHIELD NAMED (the disposition's second option, by trace)** — passing the real fact would land a type-over on `.surfaceNotSettled`'s false road; guard pin `EditorEditRouteTableTests.aLoneSeparatorTypedOverNeverReachesTheDiagnosis` (green both sides, by design) |
+
+*[removed for publication]*
+the stage held by the effort):**
+
+- Mobile editor-brain suites by struct name (24 named, 24 ran):
+  `✔ Test run with 161 tests in 24 suites passed after 4.194 seconds.`
+- **Mobile FULL suite** (`-only-testing:VariorumMobileTests`):
+  `Test run with 802 tests in 126 suites passed after 382.237 seconds with
+  4 known issues.` — the 800/126 baseline + this wave's two new pins; the
+  4 known issues are the standing ones.
+- Mac editor-brain suites by struct name: `268 tests in 24 suites` +
+  `91 tests in 14 suites`, both passed (listed above under NIT 5).
+- Core, headless `swift test`: `✔ Test run with 2204 tests in 247 suites
+  passed after 139.907 seconds.` + `✔ Test run with 40 tests in 6 suites
+  passed after 45.568 seconds.`
+
+**Fences held:** zero `Sources/VariorumCore/Sync/`, zero schema, no build
+configuration touched, no Release build, `/Applications` untouched. The
+merge's zero-`Shared/` fence is now FALSE for this effort's branch by the
+disposition's own note (the wave's four `Shared/EditorBrain/` files); the
+Mac's `EditorViewModel.swift` gained the `binds` call and the two host
+doors — the shared brain's consequence on its second consumer, not a
+second unit.
+
+**PROVISIONAL:** none — no product behaviour was decided in this wave (NIT
+5 deliberately kept the shipped sentence rather than inventing one).
