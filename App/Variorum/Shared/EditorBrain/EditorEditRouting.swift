@@ -195,6 +195,13 @@ nonisolated struct ArmedEdit {
             // "\n" is what the gate approved (`replacementIsSingleNewline`)
             // and what the tail's separator IS (`openTail()`'s own doc: the
             // typed newline that opened the tail is the separator before it).
+            //
+            // ⚠ The read's range shape names the landed bytes ONLY because an
+            // `.openTail` approval is always EMPTY ({docEnd, 0}), which makes
+            // `describes`' location bound exact. For a NON-empty approval,
+            // `describes` admits strictly-inside starts — a future
+            // content-semantic verdict must derive the landing's true start,
+            // never reuse this read shape (the VM-5 round-3 NIT R3-1).
             return landedText(NSRange(location: range.location, length: replacementLength))
                 == EditorDocument.separator
         case .block, .tail, .closeTail, .refuse:
