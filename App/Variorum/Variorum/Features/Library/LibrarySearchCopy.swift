@@ -16,11 +16,11 @@ import VariorumCore
 nonisolated enum LibrarySearchCopy {
     // MARK: - The band
 
-    /// The query's echo — the words, as typed, in quotes (the mockup's
-    /// `“dream”`).
-    static func echo(_ words: String) -> String {
-        "\u{201C}\(words)\u{201D}"
-    }
+    // 13o U3: the words BOTH answer sheets say moved to their shared home
+    // (`SearchAnswerCopy`, `Core/Views/SearchAnswerFaces.swift`); the names
+    // below FORWARD, so every pre-move reader and pin reads unchanged.
+
+    static func echo(_ words: String) -> String { SearchAnswerCopy.echo(words) }
 
     /// **The honest counts** (D3): what the WHOLE question finds, per kind —
     /// "3 books · 29 notes · 118 passages · 6 scraps", a kind with nothing
@@ -48,12 +48,10 @@ nonisolated enum LibrarySearchCopy {
     static func tagChip(_ path: String) -> String { "#\(path)" }
     static func removeTagHelp(_ path: String) -> String { "Stop narrowing to #\(path)" }
 
-    /// The archived facet's chip (D4): an invitation at rest, the armed word
-    /// with its ✕ when on.
-    static let archivedOff = "+ archived"
-    static let archivedOn = "archived"
-    static let archivedOffHelp = "Include archived notes, books and takes"
-    static let archivedOnHelp = "Back to the living library \u{2014} leave the archive out"
+    static var archivedOff: String { SearchAnswerCopy.archivedOff }
+    static var archivedOn: String { SearchAnswerCopy.archivedOn }
+    static var archivedOffHelp: String { SearchAnswerCopy.archivedOffHelp }
+    static var archivedOnHelp: String { SearchAnswerCopy.archivedOnHelp }
 
     /// **The mode facet's chip** (13o U3 — the mockup's `+ book state`; the
     /// 13i sitting record §12's mode facets, facts never tags). The
@@ -130,51 +128,20 @@ nonisolated enum LibrarySearchCopy {
     /// A scraps group's home word (the mockup's "· in Snippets").
     static let inSnippets = "in Snippets"
 
-    /// "all N ›" — the group's whole road (R-13o-9).
-    static func allLines(_ n: Int) -> String { "all \(n) \u{203A}" }
-    /// The open group's road closed again.
-    static let fewerLines = "fewer \u{2039}"
-    /// The next page of an open group's passages.
-    static let moreLines = "more \u{203A}"
-    static let loadingMore = "loading more\u{2026}"
-
-    /// The badge a hit in an UNRENDERED take wears (the mockup's own).
-    static let inAnotherTake = "in another take"
-
-    /// What a non-prose passage IS — said before its words, so a block's
-    /// name never reads as its prose (PROVISIONAL P-13o-U2-8). Takes and
-    /// titles say nothing (the line is prose; the head is the title).
-    static func kindWord(_ kind: SearchPassage.Kind) -> String? {
-        switch kind {
-        case .take, .title, .wornDay: nil
-        case .takeLabel: "take label"
-        case .blockName: "block name"
-        case .comment: "comment"
-        case .noteMeta: "floating notes"
-        case .book: "book"
-        case .chapter: "chapter"
-        }
-    }
-
-    /// An archived group's mark (only ever drawn under the facet) — and,
-    /// since 13o U3, the badge an archived passage wears.
-    static let archivedMark = "archived"
-
-    /// **An archived NOTE's line under its head** (13o U3 — under the facet
-    /// the rows say which they are; PROVISIONAL P-13o-U3-5's words).
-    static let archivedNote = "archived note \u{2014} kept out of the Library"
+    static func allLines(_ n: Int) -> String { SearchAnswerCopy.allLines(n) }
+    static var fewerLines: String { SearchAnswerCopy.fewerLines }
+    static var moreLines: String { SearchAnswerCopy.moreLines }
+    static var loadingMore: String { SearchAnswerCopy.loadingMore }
+    static var inAnotherTake: String { SearchAnswerCopy.inAnotherTake }
+    static func kindWord(_ kind: SearchPassage.Kind) -> String? { SearchAnswerCopy.kindWord(kind) }
+    static var archivedMark: String { SearchAnswerCopy.archivedMark }
+    static var archivedNote: String { SearchAnswerCopy.archivedNote }
 
     /// An archived BOOK's row detail ("book · archived").
     static func archivedBookDetail(_ detail: String?) -> String {
         (detail.map { $0 + " \u{00B7} " } ?? "") + archivedMark
     }
 
-    /// **The archived foot** (D4 — PROVISIONAL P-13o-U2-3's wording): with
-    /// the facet off and archived matches present, the sheet's last line
-    /// says how many places they would add, with the door.
-    static func archivedFoot(_ places: Int) -> String {
-        "\(places) more in the archive \u{2014}"
-    }
-
-    static let showArchived = "show archived"
+    static func archivedFoot(_ places: Int) -> String { SearchAnswerCopy.archivedFoot(places) }
+    static var showArchived: String { SearchAnswerCopy.showArchived }
 }

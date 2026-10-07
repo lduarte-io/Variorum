@@ -135,50 +135,5 @@ struct LibrarySearchBookStateMenu: View {
     }
 }
 
-/// **One quiet chip** — the mockup's: a hairline-bordered label on the
-/// paper, its ✕ when it can be taken off; an INVITATION (a filter not yet
-/// applied) wears a dashed border and the muted ink.
-struct LibrarySearchChip: View {
-    let tokens: VoiceTokens
-    let label: String
-    var help: String? = nil
-    var invitation = false
-    var onTap: (() -> Void)? = nil
-    var onClear: (() -> Void)? = nil
-
-    var body: some View {
-        let face = HStack(spacing: 4) {
-            Text(label)
-                .font(tokens.small)
-                .foregroundStyle(invitation ? tokens.muted : tokens.ink)
-                .lineLimit(1)
-            if let onClear {
-                Button(action: onClear) {
-                    Text("\u{2715}")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(help ?? "Clear")
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 1.5)
-        .background(RoundedRectangle(cornerRadius: 6).fill(tokens.surface))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(
-                    tokens.line,
-                    style: StrokeStyle(lineWidth: 1, dash: invitation ? [3, 2] : [])))
-        .fixedSize()
-        .help(help ?? "")
-        Group {
-            if let onTap {
-                Button(action: onTap) { face }
-                    .buttonStyle(.plain)
-            } else {
-                face
-            }
-        }
-    }
-}
+// (13o U3: `LibrarySearchChip` MOVED to `Core/Views/SearchAnswerFaces.swift` —
+// the book's band is its second consumer; name preserved.)

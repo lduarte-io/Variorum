@@ -384,7 +384,7 @@ final class LibrarySearchModel {
     /// A group's LINES are its passages that are not its name (the head
     /// already says the name — `SearchGroup.lines`' own rule).
     nonisolated static func lines(of passages: [SearchPassage]) -> [SearchPassage] {
-        passages.filter { $0.kind != .title && $0.kind != .wornDay }
+        SearchAnswerFace.lines(of: passages)  // 13o U3: the shared rule, both sheets
     }
 
     // MARK: - The reads (pure, over a Database)
