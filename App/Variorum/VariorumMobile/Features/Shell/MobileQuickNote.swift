@@ -127,7 +127,11 @@ enum MobileQuickNoteCopy {
     ///
     /// PROVISIONAL copy (13s owns her voice). **If 4.5b hoists a shared
     /// refusal vocabulary (A1-18 — three deletion homes today), these
-    /// sentences join it rather than becoming a fourth home.**
+    /// sentences join it rather than becoming a fourth home.** *(The seal
+    /// arm JOINED it at the VM-5 whole-round pass, MINOR 3: 18m U3 built the
+    /// one sealed-note sentence (`SealedNoteCopy`, QUESTIONS #159 (a)), and
+    /// this arm still spoke the Mac's "sealed … Unseal it" — a door no phone
+    /// screen has; the phone's button is Lock Note / Unlock Note.)*
     static func refusal(_ error: Error) -> String {
         // **13p Batch 4, item (i) — RATIFIED by the author** (*"i think
         // that's fine on demanding unlock first, if a user wants to set
@@ -150,7 +154,11 @@ enum MobileQuickNoteCopy {
         }
         switch error {
         case .lockedPost:
-            return "This note is sealed, so it can't take new text. Unseal it in the note to keep writing."
+            // The ONE sealed-note sentence in the phone's own door words —
+            // composed, never a literal of this box's (VM-5 whole-round pass,
+            // MINOR 3). Reachable when a seal lands by sync while the box
+            // holds the note it minted: the flush refuses, the text stays.
+            return SealedNoteCopy.sentence(act: "keep writing", words: .phone)
         case .lockedVariant:
             return "This take is locked, so it can't take new text."
         case .containerNotFound, .variantNotFound, .blockNotFound:

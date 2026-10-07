@@ -101,15 +101,29 @@ enum VersionActs {
     }
 
     /// The refusals, in the recovery family's own voice.
-    static func words(_ error: Error) -> String {
+    ///
+    /// **`seal:` is the platform's own note-seal door words, and it is
+    /// REQUIRED** (VM-5 whole-round pass, MINOR 3's rider). This file is a
+    /// shared home both apps compile, so the seal arm cannot name either
+    /// app's door itself — it read *"This note is marked complete — unseal it
+    /// to restore a version."*, the Mac's verb rendered on the phone, whose
+    /// button says Unlock Note. It now composes the ONE sealed-note sentence
+    /// (`SealedNoteCopy`, QUESTIONS #159 (a)) with the words each caller's
+    /// own target supplies (`.mac` / `.phone`). No default, on purpose: a
+    /// default would make one platform's words silently the other's — each
+    /// door decides.
+    static func words(_ error: Error, seal: SealedNoteCopy.Words) -> String {
         guard let error = error as? OperationError else {
             return DeletionRefusal.fallback(error)
         }
         switch error {
         case .notVersionHistory:
             return "That isn't one of this note's saved versions any more."
+        // Only `restoreNoteVersion` raises this in the family (a SEALED note
+        // may be SAVED — reading is not authoring; the op's own doc), so the
+        // act clause names the restore.
         case .lockedPost:
-            return "This note is marked complete — unseal it to restore a version."
+            return SealedNoteCopy.sentence(act: "restore a version", words: seal)
         case .postHasNoBlocks:
             return "There's nothing in this note to save a version of yet."
         case .containerNotFound:

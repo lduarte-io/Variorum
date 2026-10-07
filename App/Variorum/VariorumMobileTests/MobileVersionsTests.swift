@@ -462,8 +462,14 @@ struct MobileVersionsTests {
 
             await model.confirmRestore(item)
             #expect(model.status?.isRefusal == true)
+            // VM-5 whole-round pass, MINOR 3's rider: the phone's OWN seal
+            // words (its button is Unlock Note), composed through the one
+            // sealed-note sentence — never the Mac's "unseal". This pin used
+            // to hold the shared home's Mac-worded literal; red on that tree.
             #expect(model.status?.text
-                == "This note is marked complete — unseal it to restore a version.")
+                == SealedNoteCopy.sentence(act: "restore a version", words: .phone))
+            #expect(model.status?.text
+                == "This note is locked — unlock it to restore a version.")
         }
     }
 

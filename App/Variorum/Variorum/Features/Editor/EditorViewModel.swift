@@ -3269,7 +3269,7 @@ final class EditorViewModel {
             // stop the toasting. The J38 class, other direction.
             showReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            refuse(VersionActs.words(error))
+            refuse(VersionActs.words(error, seal: .mac))
         }
     }
 

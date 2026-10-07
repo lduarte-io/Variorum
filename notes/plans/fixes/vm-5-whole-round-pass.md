@@ -316,7 +316,7 @@ MINOR 1 / NIT 6 (fixed by the orchestrator, `ddc68c6e`), MINOR 5
 | piece | state |
 |---|---|
 | MINOR 2 — the `.bookless` empty state | DONE (this commit) — red 3/3 → green; targeted 29/3 green |
-| MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | NOT-STARTED — design: compose `SealedNoteCopy.sentence(act:words:)` (`.phone` in the box; `VersionActs.words` takes the platform's `SealedNoteCopy.Words` as a REQUIRED parameter, each call site passing its own) |
+| MINOR 3 — the quick note's `.lockedPost` arm + the `VersionActs.words` rider | DONE (this commit) — phone red 5 issues → green 66/4; Mac red 2 issues → green 15/1 |
 | MINOR 4 — `VersionActs.save`/`restore` past a refused flush | NOT-STARTED — design: the flush reports whether the post's buffer landed; both acts refuse (a typed `VersionActs` refusal worded with the standing unsaved-changes sentence) when it did not |
 | Final full mobile suite | PENDING |
 
@@ -379,3 +379,72 @@ notes yet."* under `.all`/`.notes` (and now `.bookless`) — `observeLibrary`
 excludes archived notes. The Archived door trails the listing, so the notes
 are one tap away; making the trio archive-aware needs a new read. Recorded
 for the orchestrator; no pin owed here.
+
+### MINOR 3 (+ its `VersionActs` rider) — FIXED (red → green, both platforms)
+
+**Mechanism.** Two arms spoke the Mac's seal vocabulary on the phone, whose
+ruled words are `SealedNoteCopy.Words.phone` = state *"locked"*, verb
+*"unlock"* (its button is Lock Note / Unlock Note):
+(1) `MobileQuickNoteCopy.refusal`'s `.lockedPost` arm — *"This note is
+sealed, so it can't take new text. Unseal it in the note to keep writing."*
+— reachable when a seal lands by sync while the box holds the note it minted
+(the coordinator's `onError` → this sentence in the box's red slot);
+(2) the shared `VersionActs.words`' `.lockedPost` arm — *"This note is
+marked complete — unseal it to restore a version."* — a shared home both
+apps compile, so the phone's Versions face said "unseal" too (and the Mac's
+said "marked complete", a noun no Mac door says).
+
+**Pins (red on the pre-fix tree):**
+- PHONE, new — `MobileRefusalTableTests.theQuickNotesSealArmSpeaksThePhonesOwnDoorWords`:
+  `✘ Test theQuickNotesSealArmSpeaksThePhonesOwnDoorWords() failed after 0.005 seconds with 3 issues.`
+- PHONE, updated (it pinned the Mac-worded literal) — `MobileVersionsTests.aSealedNoteRefusesARestoreInTheFamilysVoice`,
+  driven through the real `MobileVersionsModel.confirmRestore`:
+  `✘ Test aSealedNoteRefusesARestoreInTheFamilysVoice() failed after 0.049 seconds with 2 issues.`
+  — together `✘ Test run with 21 tests in 2 suites failed after 32.052 seconds with 5 issues.`
+- MAC, updated — `NoteVersionsPaneTests.thePaneTellsAReceiptFromARefusal`
+  (it asserted `contains("marked complete")`):
+  `✘ Test thePaneTellsAReceiptFromARefusal() failed after 0.140 seconds with 2 issues.`
+  / `✘ Test run with 15 tests in 1 suite failed after 1.701 seconds with 2 issues.`
+
+**Fix — COMPOSED, never a new literal.** The quick note's arm returns
+`SealedNoteCopy.sentence(act: "keep writing", words: .phone)` → *"This note
+is locked — unlock it to keep writing."* `VersionActs.words` gains a
+REQUIRED `seal: SealedNoteCopy.Words` parameter (no default — a default
+would make one platform's words silently the other's) and its arm returns
+`SealedNoteCopy.sentence(act: "restore a version", words: seal)`; the three
+Mac call sites (`NoteVersionsPane`, `TakesViewModel`, `EditorViewModel`) pass
+`.mac`, the six phone sites (`MobileVersions` ×5, `MobileEditorViewModel`)
+pass `.phone`. Only `restoreNoteVersion` raises `.lockedPost` in the family
+(saving a sealed note is legal — the op's doc), so the act clause stays
+"restore a version".
+
+**THE MAC'S WORDS — what changed, and why the pin was updated rather than
+kept.** The Mac now reads *"This note is sealed — unseal it to restore a
+version."* (was *"…marked complete — unseal it…"*). The verb is unchanged
+(the Mac's Unseal door); the noun becomes the Mac's ruled seal noun — the
+18m U3 one-sentence shape, QUESTIONS #159 (a). The Mac pin is updated to the
+composed sentence with this justification written at the pin.
+
+**⚠ FOR THE ORCHESTRATOR (not mine to decide, flagged):** QUESTIONS #159's
+own text lists BOTH of these sentences under *"Not yet touched, listed so
+one word from you can bring them in"*. This wave brings them in on the
+orchestrator's brief, under #159's PROVISIONAL status, without her word
+recorded. At merge, #159's "not yet touched" list loses these two members
+(the quick note's and the versions door's) — the shared ledger is the
+merging session's to edit, so this record does not touch
+`notes/QUESTIONS.md`. **Same class, NOT touched (out of this brief):** the
+two shared recovery sentences #159 also lists — `RecoveryCopy.sealedPutBackRefusal`
+(*"…marked complete — unseal it to put this back."*) and
+`DeletionRefusal.words`' `.lockedPost` arm (*"…marked complete — unseal it
+first."*) — still render "unseal" on the phone's Trash/tray doors.
+
+**PROVISIONAL copy (composed, so no new literal — the acts are the only new
+words):** the quick note's act *"keep writing"* (→ *"This note is locked —
+unlock it to keep writing."*); the versions arm's act *"restore a version"*
+is the old sentence's own clause, kept.
+
+**Green, quoted:** phone `✔ Test run with 66 tests in 4 suites passed after 45.750 seconds.`
+(`MobileRefusalTableTests` + `MobileVersionsTests` + `MobileQuickNoteTests`
++ `MobileEmptyStoreTests`); Mac `✔ Test run with 15 tests in 1 suite passed after 1.633 seconds.`
+(`NoteVersionsPaneTests` — the whole Mac target compiled with the new
+signature).

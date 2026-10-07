@@ -289,7 +289,8 @@ struct MobileEmptyStoreTests {
             #expect(Model.emptyListing(filter: door, doorNotes: 0, storeNotes: 0, booksShown: 0)
                     == nil)
         }
-        // The door's line is a real sentence and names no other door.
+        // The door's line is a real sentence, distinct from the trio's.
         #expect(!MobileListingFilter.noBooklessLine.isEmpty)
+        #expect(MobileListingFilter.noBooklessLine != MobileEmptyStoreCopy.noNotes)
     }
 }

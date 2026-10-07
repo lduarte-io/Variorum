@@ -213,7 +213,16 @@ struct NoteVersionsPaneTests {
             try await session.runner.run { [post] ops in try ops.lockPost(post) }
             await model.restore(saved)
             #expect(model.status?.isRefusal == true)
-            #expect(model.status?.text.contains("marked complete") == true)
+            // VM-5 whole-round pass, MINOR 3's rider: the shared versions
+            // door's seal arm now composes the ONE sealed-note sentence with
+            // each platform's own door words (QUESTIONS #159 (a)) — on the
+            // Mac "sealed" / "unseal", its Seal / Unseal button. It read
+            // "marked complete" here, a noun no Mac door says, and the same
+            // literal rendered "unseal" on the phone.
+            #expect(model.status?.text
+                == SealedNoteCopy.sentence(act: "restore a version", words: .mac))
+            #expect(model.status?.text
+                == "This note is sealed — unseal it to restore a version.")
         }
     }
 

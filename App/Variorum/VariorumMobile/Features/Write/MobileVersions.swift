@@ -136,7 +136,7 @@ final class MobileVersionsModel {
             }
             (versions, truncated) = TrashListing.windowed(rows, window: window)
         } catch {
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .phone))
         }
     }
 
@@ -164,7 +164,7 @@ final class MobileVersionsModel {
             // three acts over an unread subject. The refusal is spoken on
             // the listing instead, which is where she can act on it.
             closeReader()
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .phone))
         }
     }
 
@@ -188,7 +188,7 @@ final class MobileVersionsModel {
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .phone))
         }
     }
 
@@ -204,7 +204,7 @@ final class MobileVersionsModel {
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .phone))
         }
     }
 
@@ -222,7 +222,7 @@ final class MobileVersionsModel {
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .phone))
         }
     }
 

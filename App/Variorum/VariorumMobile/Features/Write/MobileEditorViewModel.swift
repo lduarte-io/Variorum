@@ -1214,7 +1214,7 @@ final class MobileEditorViewModel {
         do {
             report(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            report(VersionActs.words(error))
+            report(VersionActs.words(error, seal: .phone))
         }
     }
 

@@ -167,7 +167,7 @@ final class NoteVersionsModel {
         do {
             status = .receipt(try await body(session, postID))
         } catch {
-            status = .refusal(VersionActs.words(error))
+            status = .refusal(VersionActs.words(error, seal: .mac))
         }
     }
 }
