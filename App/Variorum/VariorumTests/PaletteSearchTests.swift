@@ -106,7 +106,12 @@ struct PaletteSearchTests {
 
     @Test func thePalettesQuestionIsTheBodysOnly() {
         let query = PaletteModel.passageQuestion("dream #journal")
-        #expect(query?.text == .prefix("dream"))
+        // Ladder round 1, MINOR-2 — a JUSTIFIED EDIT: a word followed by a
+        // typed #tag is FINISHED (the type-ahead tail must END the input),
+        // so it reads .word now. This pin's subject — the body-only filter —
+        // is unchanged; the old .prefix expectation incidentally encoded the
+        // widened-word behavior the parser fix closed.
+        #expect(query?.text == .word("dream"))
         #expect(query?.filter == .all([.tagPath("journal"),
                                        .all([.not(.docKind(.title)), .not(.family(.books))])]))
         #expect(PaletteModel.passageQuestion("#journal") == nil, "a tag alone asks the index nothing")
