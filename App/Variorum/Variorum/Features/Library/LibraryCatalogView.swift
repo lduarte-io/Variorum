@@ -177,7 +177,18 @@ struct LibraryCatalogView: View {
             VStack(spacing: 0) {
                 header
                 Divider().overlay(tokens.line)
+                // 13o U2 (Direction C, R-13o-15): the search state's ONE
+                // piece of furniture — the band — whenever the field asks
+                // anything or a day is armed (P-13o-U2-1).
+                if showsBand {
+                    searchBand
+                    Divider().overlay(tokens.line)
+                }
                 switch model.mode {
+                case .list where model.searchState.asksAnything,
+                     .notes where model.searchState.asksAnything:
+                    // The answer sheet, in every mode that lists notes (D2).
+                    searchSheet
                 case .list: listBody
                 case .notes: notesBody
                 case .timeline:
@@ -317,6 +328,80 @@ struct LibraryCatalogView: View {
         // means here — re-read).
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.refresh() }
+        }
+    }
+
+    // MARK: - The search state's faces (13o U2 — Direction C, R-13o-15)
+
+    /// The band shows whenever the field asks anything, or a day is armed —
+    /// never in the Timeline, which runs its own listing.
+    private var showsBand: Bool {
+        model.showsCatalogControls && (model.searchState.asksAnything || model.editedOn != nil)
+    }
+
+    private var searchBand: some View {
+        let state = model.searchState
+        return LibrarySearchBand(
+            tokens: tokens, question: state.question,
+            counts: state.counts?.kinds(state.visibility),
+            visibility: state.visibility,
+            wingName: wings?.currentName ?? WingWords.home,
+            dayChip: model.editedOn.map { day in
+                (label: LibraryDayFace.openLabel(day: day, now: Date()),
+                 help: LibraryDayFace.caveat,
+                 onClear: {
+                     model.setEditedOn(nil)
+                     Task { await model.search() }
+                 })
+            },
+            onRemoveTag: { path in
+                model.removeTypedTag(path)
+                Task { await model.search() }
+            },
+            onToggleArchived: {
+                model.toggleArchivedFacet()
+                Task { await model.search() }
+            })
+    }
+
+    private var searchSheet: some View {
+        LibrarySearchSheet(
+            model: model, tokens: tokens,
+            onShowArchived: {
+                model.toggleArchivedFacet()
+                Task { await model.search() }
+            },
+            onOpenPassage: { openPassage($0) },
+            onOpenPool: { onOpen(.pool($0)) },
+            noteHead: { hit in
+                LibraryListRow {
+                    postRow(hit)
+                } background: {
+                    rowBackground(
+                        picked: model.selectedPosts.contains(hit.id),
+                        subject: model.infoHit?.id == hit.id)
+                }
+            },
+            bookRow: { hit in
+                LibraryListRow {
+                    bookLine(hit)
+                } background: {
+                    rowBackground(picked: false, subject: model.infoHit?.id == hit.id)
+                }
+            })
+    }
+
+    /// **A passage was clicked** — its note (or scraps group) opens AT its
+    /// block through the shell's caret-precise landing road (Stage C); a
+    /// name-level hit with no block opens the note.
+    private func openPassage(_ passage: SearchPassage) {
+        guard let home = passage.noteID else { return }
+        withAnimation(Self.panelAnimation) { model.closeInfo() }
+        let selection: SidebarSelection = passage.family == .scraps ? .pool(home) : .post(home)
+        if let block = passage.blockID, let onOpenBlock {
+            onOpenBlock(selection, block)
+        } else {
+            onOpen(selection)
         }
     }
 
@@ -514,17 +599,30 @@ struct LibraryCatalogView: View {
                     // (the control reports a baseline its label does not
                     // draw on), so the menu and the day door meet the
                     // segmented line by `segmentedLabelDrop`.
-                    LibrarySortMenu(
-                        tokens: tokens, sort: model.sort, direction: model.direction,
-                        onPick: { pick in
-                            model.setSort(pick)
-                            Task { await model.search() }
-                        },
-                        onDirection: { pick in
-                            model.setDirection(pick)
-                            Task { await model.search() }
-                        })
-                    .offset(y: Self.segmentedLabelDrop)
+                    if model.isSearching {
+                        // 13o U2 (PROVISIONAL P-13o-U2-7): the answer sheet is
+                        // ranked by relevance (D2), so the sort door — which
+                        // could not change that order — stands down for the
+                        // mockup's own words, a label (P-2: a door that
+                        // cannot act is not drawn).
+                        Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .help(LibrarySearchCopy.relevanceHelp)
+                            .offset(y: Self.segmentedLabelDrop)
+                    } else {
+                        LibrarySortMenu(
+                            tokens: tokens, sort: model.sort, direction: model.direction,
+                            onPick: { pick in
+                                model.setSort(pick)
+                                Task { await model.search() }
+                            },
+                            onDirection: { pick in
+                                model.setDirection(pick)
+                                Task { await model.search() }
+                            })
+                        .offset(y: Self.segmentedLabelDrop)
+                    }
                     // 18h batch 2 (her row 11): *"search for any note edited
                     // on a particular day."*
                     LibraryDayField(
@@ -755,32 +853,9 @@ struct LibraryCatalogView: View {
         }
     }
 
-    /// A BLOCK hit's line: it opens its HOME surface (round 2, MINOR: dead
-    /// rows violated fire-and-speak) — caret-precise where the shell offers
-    /// the Stage C door.
-    private func blockLine(_ hit: Queries.CatalogHit) -> some View {
-        HStack {
-            Image(systemName: "square.on.square").foregroundStyle(tokens.muted)
-            Text(hit.title).font(tokens.small).lineLimit(1)
-            if let home = hit.detail {
-                Text(tokens.chromeLabel("in \(home)"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-            }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if let home = hit.homeContainerID {
-                let selection: SidebarSelection =
-                    hit.homeIsPool ? .pool(home) : .post(home)
-                if let onOpenBlock {
-                    onOpenBlock(selection, hit.id)
-                } else {
-                    onOpen(selection)
-                }
-            }
-        }
-    }
+    // (13o U2: the BLOCK hit's line LEFT with the block arm — a named block
+    // or a scrap is a passage of its group on the answer sheet now, and lands
+    // through `openPassage`, the same caret-precise road it used.)
 
     /// 13g batch 6 (R5-6) — the Apple-Notes-shaped list: title · date ·
     /// the first bit of text · the book it's in, per her screenshot. NOTES

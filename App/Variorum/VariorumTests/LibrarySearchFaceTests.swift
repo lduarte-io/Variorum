@@ -1,0 +1,82 @@
+//
+//  LibrarySearchFaceTests.swift
+//  VariorumTests
+//
+//  **13o U2 — the answer sheet's FACES** (Direction C, R-13o-15): the band's
+//  words (the echo, the honest counts, the chips' words), the snippet's
+//  marks in the index's own folding, the "in another take" badge, the kind
+//  words — the pure rules the band and the sheet render — plus a mount of
+//  the band in both voices, light and dark (the walk is the acceptance; this
+//  holds that the face builds and lays out in every room).
+//
+
+import AppKit
+import Foundation
+import SwiftUI
+import Testing
+import VariorumCore
+@testable import Variorum
+
+@MainActor
+@Suite("13o U2 — the answer sheet's faces (the band's words, the marks, the badge)")
+struct LibrarySearchFaceTests {
+    @Test func theCountsAreHonestPerKindAndLeaveOutWhatIsNotThere() {
+        #expect(LibrarySearchCopy.counts(.init(books: 3, notes: 29, passages: 118, scraps: 6))
+                == "3 books \u{00B7} 29 notes \u{00B7} 118 passages \u{00B7} 6 scraps",
+                "the mockup's own line")
+        #expect(LibrarySearchCopy.counts(.init(books: 0, notes: 1, passages: 1, scraps: 0))
+                == "1 note \u{00B7} 1 passage")
+        #expect(LibrarySearchCopy.counts(.init(books: 0, notes: 0, passages: 0, scraps: 0))
+                == LibrarySearchCopy.nothingFound)
+        #expect(LibrarySearchCopy.echo("dream") == "\u{201C}dream\u{201D}")
+        #expect(LibrarySearchCopy.wingChip("Home") == "in: Home")
+        #expect(LibrarySearchCopy.allLines(7) == "all 7 \u{203A}")
+        #expect(LibrarySearchCopy.tagAlone(["dream", "life/goals"])
+                == "Type a word to search inside #dream #life/goals.")
+    }
+
+    @Test func theMatchedWordsAreMarkedAndTheRestIsMuted() {
+        let tokens = VoiceTokens.resolve(voice: .study, dark: false)
+        // The composer's own marked snippet (STX/ETX around the match), read
+        // through its one public reader — the segments the sheet is handed.
+        let line = LibrarySearchFace.snippet(
+            SearchComposer.snippetSegments("…woke with the \u{2}dream\u{3} still wet…"),
+            tokens: tokens)
+        #expect(String(line.characters) == "…woke with the dream still wet…")
+        let runs = line.runs.map { (String(line[$0.range].characters), $0.backgroundColor, $0.foregroundColor) }
+        #expect(runs.count == 3)
+        #expect(runs[1].0 == "dream" && runs[1].1 == tokens.wash && runs[1].2 == tokens.ink,
+                "the match wears the wash, in the ink (the mockup's mark)")
+        #expect(runs[0].1 == nil && runs[0].2 == tokens.muted && runs[2].2 == tokens.muted)
+    }
+
+    @Test func aHitInAnUnrenderedTakeSaysSoAndOnlyATakeCan() {
+        #expect(LibrarySearchFace.isInAnotherTake(kind: .take, rendered: false))
+        #expect(!LibrarySearchFace.isInAnotherTake(kind: .take, rendered: true))
+        #expect(!LibrarySearchFace.isInAnotherTake(kind: .comment, rendered: false),
+                "a comment is not a take")
+        #expect(LibrarySearchCopy.kindWord(.take) == nil && LibrarySearchCopy.kindWord(.title) == nil,
+                "prose and the head say nothing")
+        #expect(LibrarySearchCopy.kindWord(.blockName) == "block name"
+                && LibrarySearchCopy.kindWord(.comment) == "comment"
+                && LibrarySearchCopy.kindWord(.noteMeta) == "floating notes"
+                && LibrarySearchCopy.kindWord(.takeLabel) == "take label")
+    }
+
+    @Test(arguments: [ThemeVoice.terminal, .study], [false, true])
+    func theBandLaysOutInEveryRoom(voice: ThemeVoice, dark: Bool) throws {
+        let tokens = VoiceTokens.resolve(voice: voice, dark: dark)
+        let question = try #require(LibrarySearchQuestion.read("dream #journal "))
+        let band = LibrarySearchBand(
+            tokens: tokens, question: question,
+            counts: .init(books: 3, notes: 29, passages: 118, scraps: 6),
+            visibility: .living, wingName: "Home",
+            dayChip: (label: "edited on Sep 14", help: "", onClear: {}),
+            onRemoveTag: { _ in }, onToggleArchived: {})
+        let host = NSHostingView(rootView: band.frame(width: 900))
+        host.frame = NSRect(x: 0, y: 0, width: 900, height: 60)
+        host.layoutSubtreeIfNeeded()
+        let fitting = host.fittingSize
+        #expect(fitting.height > 16 && fitting.height < 60, "one quiet line: \(fitting)")
+    }
+}
