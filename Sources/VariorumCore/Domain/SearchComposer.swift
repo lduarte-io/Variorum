@@ -89,7 +89,12 @@ public enum SearchComposer {
             wingScope: @escaping @Sendable (String, String) -> (sql: String, arguments: [Value]),
             editedOn: @escaping @Sendable (String) -> String,
             starredNoteIDs: [String],
-            livingBook: @escaping @Sendable (String) -> String = { _ in "0" },
+            // No default (ladder round 1, NIT-2): a caller that forgot to
+            // wire the living-book rule would silently answer nothing for
+            // the living facet — a compile error beats a quiet fail-closed.
+            // `gathering`'s nil default STAYS: nil is meaningful (the scope
+            // names no gathering).
+            livingBook: @escaping @Sendable (String) -> String,
             gathering: GatheringMembership? = nil
         ) {
             self.versionPredicate = versionPredicate
