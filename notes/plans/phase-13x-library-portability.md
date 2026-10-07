@@ -421,7 +421,7 @@ PROVISIONAL otherwise, recorded per row.
 |---|---|---|
 | 1 | The classifier (verdict table pinned) | DONE (811c1e23 + the red-first evidence below) |
 | 2 | The hand-off producer (folder pair; round-trip pin) | BUILT, compiles (`build-for-testing` green); pins PENDING — the Mac-suite run waits on the stage (held by the VM-5 merge orchestrator at claim time); runs before U1 closes |
-| 3 | Adopt-by-copy move-aside brain | NOT-STARTED — design settled below |
+| 3 | Adopt-by-copy move-aside brain | DONE (this commit; `LibraryAdoptionTests` 5/5 — mechanics PROVISIONAL P-U1-5) |
 | 4 | Custody-collision memo + rule | MEMO WRITTEN (below, before the code); rule NOT-STARTED |
 | 5 | VX-64 — VaultBootstrap onto the StoreUnlock road | NOT-STARTED — design settled below |
 
@@ -537,6 +537,12 @@ write is an ordinary `save` under the same (scope, store id) name.
 
 #### PINS / DRILLS / COUNTS (filled as pieces land; PENDING until the run completes)
 
+- **Row 3 — `LibraryAdoptionTests`, 5/5 green** (headless): the whole-move happy path (old
+  library aside WHOLE and still opening by its own key; the A1-shaped safety copy; the
+  landed copy byte-identical, its key file under the canonical name, served by `locate`
+  and read by the classifier; the SOURCE pair byte-identical after), the pair-name
+  normalization, the empty-slot landing, and the two nothing-changed refusals (hot `-wal`;
+  missing source/key file) pinned by whole-folder before/after snapshots.
 - **Row 1 — `LibraryClassifierTests`, 20/20 green** (`swift test --filter
   LibraryClassifierTests`, headless, no stage). Red-first on the refusal-guarding verdicts
   by behavioural revert over the COMMITTED green (`811c1e23`; addendum-11 order): **REVERT
