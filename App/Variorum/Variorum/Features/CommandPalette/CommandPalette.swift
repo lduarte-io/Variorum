@@ -106,8 +106,10 @@ final class PaletteModel {
         let asked = Self.passageQuestion(query)
         let (hits, passages) = (try? await session.database.read { db in
             (try Queries.searchCatalog(db, query: query, limitPerKind: 12, wingID: wing),
-             try asked.map {
-                 try Queries.searchPassages(
+             // The body hits never cost the title hits: a failed passage read
+             // answers none, and the catalog's rows still land.
+             asked.flatMap {
+                 try? Queries.searchPassages(
                      db, query: $0, scope: SearchScope(wingID: wing),
                      limit: Self.passageCount).passages
              } ?? [])
