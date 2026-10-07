@@ -654,7 +654,7 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
-| P1 | CORE: the composer grows the GROUP page (top-K per group + group facts, keyset on best score) and the COUNTS statement (living + archived, per kind) over ONE shared hits builder (the shipped passages statement byte-unchanged in shape); `.docKind` AST leaf; `DayBounds` range init; `Queries.searchGroups` / `Queries.searchCounts`; headless pins (grouping, keyset, counts = the listing, EXPLAIN) | NOT STARTED |
+| P1 | CORE: the composer grows the GROUP page (top-K per group + group facts, keyset on best score) and the COUNTS statement (living + archived, per kind) over ONE shared hits builder (the shipped passages statement byte-unchanged in shape); `.docKind` AST leaf; `DayBounds` range init; `Queries.searchGroups` / `Queries.searchCounts`; headless pins (grouping, keyset, counts = the listing, EXPLAIN) | DONE (this commit) — `SearchComposer.hits` (one builder; `passages` rebuilt on it and verified BYTE-IDENTICAL against a pre-refactor snapshot of three shapes — living/facet/archived-only, library/book/note, cursor/no-cursor), `SearchComposer.groups` (`scored AS MATERIALIZED`, grouped by home, keyset `(g_best, g_home)`, top-K by `ROW_NUMBER` with the title ranked last, snippets for the top rows only) and `SearchComposer.counts` (one `hits AS MATERIALIZED` walk; living + all + archived places; worn ids folded in as JSON), `SearchFilter.docKind` + `SearchDocKind` (pinned = `SearchIndex.sources`' kinds), `DayBounds(firstDay:lastDay:)`; `Queries.searchGroups` (worn day leads page one, merged with its own group; note heads read as the catalog's `CatalogHit` for the page's homes only) + `Queries.searchCounts` + `SearchGroup`/`SearchGroupPage`/`SearchCounts`. `SearchGroupsTests` 8/8 + `SearchPassagesTests` 14/14 green; `SearchP1Tests` 2/2 green with the sheet probes added — **group page 225 → 344 pages, counts 147 → 228 across the 5× corpus (fixed matches; the passages road's own ×1.4–1.5 log residue)** |
 | P2 | `LibrarySearchModel` + the catalog's search-state routing (noteHits mirrors note groups; `blockCap` + truncation DIE); model pins (the band's state, grouping, paging, the cap's death — a 41st scrap reachable) | NOT STARTED |
 | P3 | The band + the answer sheet (views; both voices via VoiceTokens) | NOT STARTED |
 | P4 | The when door (range) — model + face + pins | NOT STARTED |
@@ -665,7 +665,7 @@ closeout ratify bundle with U1's; nothing here re-opens a ruling):**
 
 PENDING flags: none yet.
 
-**LIVE STATUS (2026-10-06): P0 committed; P1 next.**
+**LIVE STATUS (2026-10-06): P0–P1 committed; P2 (the Mac model) next.**
 
 ### U3 — SCOPES, FACETS & THE JOIN (one implementer session; evidence: suites + walk)
 

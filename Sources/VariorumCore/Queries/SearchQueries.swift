@@ -52,6 +52,99 @@ public struct SearchPage: Equatable, Sendable {
     public let next: SearchComposer.Cursor?
 }
 
+/// **One group of the answer sheet** (13o U2, Direction C): a home — a note,
+/// or a scraps group — and its best passages.
+public struct SearchGroup: Equatable, Sendable, Identifiable {
+    public var id: String { homeID }
+    public let homeID: String
+    /// A scraps group (a pool container), not a note.
+    public let isPool: Bool
+    /// The home's name as every surface shows it (`DisplayTitle`).
+    public let homeTitle: String
+    /// A NOTE group's head as the catalog's own hit (nil for a scraps group).
+    public let note: Queries.CatalogHit?
+    /// The home itself is archived (only ever true under the facet).
+    public let isArchived: Bool
+    /// The group's best hit's score (nil for a worn-day-only group).
+    public let bestScore: Double?
+    /// Every hit of the group (its title hit included).
+    public let hitCount: Int
+    /// Its PASSAGES — the hits that are not the title ("N passages").
+    public let lineCount: Int
+    /// The group's name matched (a title hit, or the day a nameless note
+    /// wears).
+    public let titleMatched: Bool
+    /// Its best passages, in rank order (at most the page's `perGroup`).
+    public let lines: [SearchPassage]
+
+    public init(
+        homeID: String, isPool: Bool, homeTitle: String, note: Queries.CatalogHit?,
+        isArchived: Bool, bestScore: Double?, hitCount: Int, lineCount: Int,
+        titleMatched: Bool, lines: [SearchPassage]
+    ) {
+        self.homeID = homeID
+        self.isPool = isPool
+        self.homeTitle = homeTitle
+        self.note = note
+        self.isArchived = isArchived
+        self.bestScore = bestScore
+        self.hitCount = hitCount
+        self.lineCount = lineCount
+        self.titleMatched = titleMatched
+        self.lines = lines
+    }
+}
+
+/// One page of groups and the road to the next.
+public struct SearchGroupPage: Equatable, Sendable {
+    public let groups: [SearchGroup]
+    /// nil when this page holds the last group.
+    public let next: SearchComposer.GroupCursor?
+}
+
+/// **The band's numbers** (13o U2): what the whole question finds, per kind,
+/// living and with the archived facet on.
+public struct SearchCounts: Equatable, Sendable {
+    public struct Kinds: Equatable, Sendable {
+        /// Distinct books (a book's own name, or one of its chapters).
+        public let books: Int
+        /// Distinct notes (a hit inside, its title, or the day it wears).
+        public let notes: Int
+        /// The notes' non-title hits.
+        public let passages: Int
+        /// The scraps groups' non-title hits.
+        public let scraps: Int
+
+        public init(books: Int, notes: Int, passages: Int, scraps: Int) {
+            self.books = books
+            self.notes = notes
+            self.passages = passages
+            self.scraps = scraps
+        }
+
+        public var isEmpty: Bool { books == 0 && notes == 0 && passages == 0 && scraps == 0 }
+    }
+
+    /// The living corpus (the default).
+    public let living: Kinds
+    /// Living and archived (the facet on).
+    public let all: Kinds
+    /// Distinct places (notes, scraps groups, books) an ARCHIVED hit lands
+    /// in — what the facet would add.
+    public let archivedPlaces: Int
+
+    public init(living: Kinds, all: Kinds, archivedPlaces: Int) {
+        self.living = living
+        self.all = all
+        self.archivedPlaces = archivedPlaces
+    }
+
+    /// The numbers under a visibility.
+    public func kinds(_ visibility: SearchVisibility) -> Kinds {
+        visibility == .living ? living : all
+    }
+}
+
 extension Queries {
     /// **THE SEARCH** (13o U1 — R-13o-2's bar: any words she ever wrote,
     /// findable from the place she would ask). `query` is the AST (R-13o-8 —
@@ -85,32 +178,177 @@ extension Queries {
         else { return SearchPage(passages: passages, next: nil) }
         let rows = try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
         for row in rows {
-            let kindRaw: String = row["kind"]
-            guard let kind = SearchPassage.Kind(rawValue: kindRaw) else { continue }
-            let readingID: String? = row["reading_id"]
-            let homeKind: String? = row["home_kind"]
-            let family: SearchFamily = readingID != nil ? .books : (homeKind == "pool" ? .scraps : .notes)
-            let homeTitle: String
-            if readingID != nil {
-                homeTitle = row["reading_name"] ?? ""
-            } else if homeKind == "pool" {
-                homeTitle = DisplayTitle.pool(
-                    title: row["home_title"], createdAtStamp: row["home_created_at"], calendar: calendar)
-            } else {
-                homeTitle = DisplayTitle.note(
-                    title: row["home_title"], entryDate: row["home_entry_date"],
-                    createdAt: row["home_created_at"], calendar: calendar)
-            }
-            passages.append(SearchPassage(
-                kind: kind, sourceID: row["src_id"], family: family,
-                noteID: row["home_id"], blockID: row["block_id"], readingID: readingID,
-                homeTitle: homeTitle, isArchived: row["archived"], isRenderedTake: row["rendered"],
-                snippet: SearchComposer.snippetSegments(row["snippet"] ?? "")))
+            if let passage = passage(from: row, calendar: calendar) { passages.append(passage) }
         }
         let next: SearchComposer.Cursor? = rows.count == limit
             ? rows.last.map { SearchComposer.Cursor(score: $0["score"], docID: $0["doc_id"]) }
             : nil
         return SearchPage(passages: passages, next: next)
+    }
+
+    // MARK: - The answer sheet's groups (13o U2 — Direction C, R-13o-15)
+
+    /// **One page of the answer sheet** — the matches grouped by their home
+    /// (a note or a scraps group), the best-ranked groups first, each with
+    /// its top `perGroup` passages (`SearchComposer.groups`). The FIRST page
+    /// (`after == nil`) leads with the nameless notes WEARING the day the
+    /// query names (R-13o-6), merged with their own group where they also
+    /// have hits. Each NOTE group carries its head as the catalog's own hit
+    /// (`CatalogHit` — the same display name, stamps and profile a Library
+    /// row reads), read for the page's homes only.
+    ///
+    /// P1: one composer statement (∝ the matches) + one bounded read of the
+    /// page's homes.
+    public static func searchGroups(
+        _ db: Database, query: SearchQuery, scope: SearchScope,
+        after cursor: SearchComposer.GroupCursor? = nil, limit: Int = 25, perGroup: Int = 3,
+        calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> SearchGroupPage {
+        let environment = try searchEnvironment(db)
+        var worn: [SearchPassage] = []
+        if cursor == nil, let day = query.wornDay {
+            worn = try wornDayPassages(
+                db, query: query, scope: scope, day: day, calendar: calendar, environment: environment)
+        }
+        var built: [(homeID: String, best: Double?, hits: Int, lines: Int, rows: [SearchPassage])] = []
+        var next: SearchComposer.GroupCursor?
+        if let statement = try SearchComposer.groups(
+            query, scope: scope, after: cursor, limit: limit, perGroup: perGroup, environment: environment) {
+            let rows = try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
+            for row in rows {
+                let homeID: String = row["home_id"]
+                let passage = passage(from: row, calendar: calendar)
+                if built.last?.homeID == homeID {
+                    if let passage { built[built.count - 1].rows.append(passage) }
+                } else {
+                    built.append((homeID, row["g_best"], row["g_hits"], row["g_lines"], passage.map { [$0] } ?? []))
+                }
+            }
+            if built.count == limit, let last = built.last, let best = last.best {
+                next = SearchComposer.GroupCursor(best: best, homeID: last.homeID)
+            }
+        }
+        // The worn day leads the first page; a worn note that also has hits
+        // keeps ONE group, in the lead.
+        let wornIDs = worn.compactMap(\.noteID)
+        var ordered = wornIDs.map { id in
+            built.first { $0.homeID == id } ?? (homeID: id, best: nil, hits: 1, lines: 0, rows: [])
+        }
+        ordered += built.filter { !wornIDs.contains($0.homeID) }
+
+        let homes = try searchGroupHomes(db, ids: ordered.map(\.homeID), calendar: calendar)
+        let groups = ordered.compactMap { group -> SearchGroup? in
+            guard let home = homes[group.homeID] else { return nil }
+            return SearchGroup(
+                homeID: group.homeID, isPool: home.isPool, homeTitle: home.title,
+                note: home.note, isArchived: home.isArchived, bestScore: group.best,
+                hitCount: group.hits, lineCount: group.lines,
+                titleMatched: wornIDs.contains(group.homeID) || group.hits > group.lines,
+                lines: group.rows.filter { $0.kind != .title })
+        }
+        return SearchGroupPage(groups: groups, next: next)
+    }
+
+    /// The homes a group page names — note heads as the catalog's hit.
+    private static func searchGroupHomes(
+        _ db: Database, ids: [String], calendar: Calendar
+    ) throws -> [String: (isPool: Bool, title: String, note: CatalogHit?, isArchived: Bool)] {
+        guard !ids.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
+        var homes: [String: (isPool: Bool, title: String, note: CatalogHit?, isArchived: Bool)] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT c.id, c.kind, c.title, c.entry_date, c.created_at, c.profile,
+                       COALESCE(c.last_touched_at, c.created_at) AS touched_at,
+                       (c.archived_at IS NOT NULL) AS archived
+                FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
+                """,
+            arguments: [json]) {
+            let id: String = row["id"]
+            let isPool = (row["kind"] as String) == "pool"
+            let title: String = isPool
+                ? DisplayTitle.pool(title: row["title"], createdAtStamp: row["created_at"], calendar: calendar)
+                : DisplayTitle.note(
+                    title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"],
+                    calendar: calendar)
+            let note: CatalogHit? = isPool ? nil : CatalogHit(
+                kind: .post, id: id, title: title, detail: row["entry_date"],
+                storedTitle: DisplayTitle.isAbsent(row["title"]) ? nil : row["title"],
+                createdAt: row["created_at"], lastTouchedAt: row["touched_at"], profile: row["profile"])
+            homes[id] = (isPool, title, note, row["archived"])
+        }
+        return homes
+    }
+
+    /// One composed hit row → a passage (nil for an unknown kind).
+    static func passage(from row: Row, calendar: Calendar) -> SearchPassage? {
+        let kindRaw: String = row["kind"]
+        guard let kind = SearchPassage.Kind(rawValue: kindRaw) else { return nil }
+        let readingID: String? = row["reading_id"]
+        let homeKind: String? = row["home_kind"]
+        let family: SearchFamily = readingID != nil ? .books : (homeKind == "pool" ? .scraps : .notes)
+        let homeTitle: String
+        if readingID != nil {
+            homeTitle = row["reading_name"] ?? ""
+        } else if homeKind == "pool" {
+            homeTitle = DisplayTitle.pool(
+                title: row["home_title"], createdAtStamp: row["home_created_at"], calendar: calendar)
+        } else {
+            homeTitle = DisplayTitle.note(
+                title: row["home_title"], entryDate: row["home_entry_date"],
+                createdAt: row["home_created_at"], calendar: calendar)
+        }
+        return SearchPassage(
+            kind: kind, sourceID: row["src_id"], family: family,
+            noteID: row["home_id"], blockID: row["block_id"], readingID: readingID,
+            homeTitle: homeTitle, isArchived: row["archived"], isRenderedTake: row["rendered"],
+            snippet: SearchComposer.snippetSegments(row["snippet"] ?? ""))
+    }
+
+    // MARK: - The band's counts (13o U2)
+
+    /// **What the whole question finds, per kind** — living and with the
+    /// archived facet on, from ONE walk of the matches (`SearchComposer
+    /// .counts`), the worn-day notes folded into the notes (R-13o-6). nil
+    /// when the query has no words the index can serve.
+    public static func searchCounts(
+        _ db: Database, query: SearchQuery, scope: SearchScope,
+        calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> SearchCounts? {
+        let environment = try searchEnvironment(db)
+        var worn: [SearchPassage] = []
+        if let day = query.wornDay {
+            var everything = query
+            everything.visibility = .includingArchived
+            worn = try wornDayPassages(
+                db, query: everything, scope: scope, day: day, calendar: calendar, environment: environment)
+        }
+        func json(_ ids: [String]) throws -> String {
+            String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
+        }
+        guard let statement = try SearchComposer.counts(
+            query, scope: scope,
+            wornLivingNoteIDs: try json(worn.filter { !$0.isArchived }.compactMap(\.noteID)),
+            wornAllNoteIDs: try json(worn.compactMap(\.noteID)),
+            wornArchivedNoteIDs: try json(worn.filter(\.isArchived).compactMap(\.noteID)),
+            environment: environment)
+        else {
+            // No words — a worn day alone still names its notes.
+            guard !worn.isEmpty else { return nil }
+            let living = worn.filter { !$0.isArchived }.count
+            return SearchCounts(
+                living: .init(books: 0, notes: living, passages: 0, scraps: 0),
+                all: .init(books: 0, notes: worn.count, passages: 0, scraps: 0),
+                archivedPlaces: worn.count - living)
+        }
+        guard let row = try Row.fetchOne(db, sql: statement.sql, arguments: arguments(statement.arguments))
+        else { return nil }
+        return SearchCounts(
+            living: .init(books: row["books"], notes: row["notes"], passages: row["passages"], scraps: row["scraps"]),
+            all: .init(books: row["all_books"], notes: row["all_notes"],
+                       passages: row["all_passages"], scraps: row["all_scraps"]),
+            archivedPlaces: row["archived_places"])
     }
 
     /// The fragments the composer reads from their one home.

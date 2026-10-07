@@ -173,6 +173,69 @@ public enum SearchComposer {
         _ query: SearchQuery, scope: SearchScope, after cursor: Cursor?, limit: Int,
         environment: Environment
     ) throws -> Statement? {
+        guard let hits = try hits(query, scope: scope, visibility: query.visibility, environment: environment)
+        else { return nil }
+        var arguments = hits.arguments
+        var keyset = ""
+        if cursor != nil {
+            keyset = "WHERE (s.score > ? OR (s.score = ? AND s.doc_id > ?))"
+        }
+        let sql = """
+            WITH hits AS (\(hits.sql)),
+            scored AS (
+              SELECT h.*, \(scoreSQL) AS score
+              FROM hits h
+            ),
+            page AS (
+              SELECT s.* FROM scored s
+              \(keyset)
+              ORDER BY s.score, s.doc_id
+              LIMIT ?
+            )
+            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
+            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid
+            WHERE search_fts MATCH ?
+            ORDER BY page.score, page.doc_id
+            """
+        if let cursor {
+            arguments += [.real(cursor.score), .real(cursor.score), .integer(cursor.docID)]
+        }
+        arguments += [.integer(Int64(limit)), .text(hits.match)]
+        return Statement(sql: sql, arguments: arguments)
+    }
+
+    /// The score of a hit row `h` — `bm25 × the kind's weight × the
+    /// rendered-take boost` (lower is better; bm25 is negative).
+    static var scoreSQL: String {
+        let weight = "CASE h.kind "
+            + kindWeights.map { "WHEN '\($0.kind)' THEN \($0.weight)" }.joined(separator: " ")
+            + " ELSE 1.0 END"
+        return "h.bm * (\(weight)) * (CASE WHEN h.rendered THEN \(renderedBoost) ELSE 1.0 END)"
+    }
+
+    /// **The HITS** — every matching doc with its home's facts, scoped,
+    /// faceted and filtered — as ONE CTE body that every statement over the
+    /// matches composes on (the passage page, the group page, the counts),
+    /// so no two of them can disagree about what a hit is (13o U2).
+    struct Hits {
+        /// The CTE body (`SELECT … FROM search_fts … WHERE search_fts MATCH ? …`).
+        let sql: String
+        /// Its placeholders, in order — the MATCH first.
+        let arguments: [Value]
+        /// The FTS5 expression (a snippet stage re-binds it).
+        let match: String
+    }
+
+    /// The hits body; nil when the text half cannot match anything. `extra`
+    /// conditions (over `d`, `c`, `b`, `r`) join the scope's, last.
+    ///
+    /// Result columns: doc_id, kind, src_id, block_id, reading_id, home_id,
+    /// home_kind, home_title, home_entry_date, home_created_at, reading_name,
+    /// reading_kind, archived, rendered, bm.
+    static func hits(
+        _ query: SearchQuery, scope: SearchScope, visibility: SearchVisibility,
+        extra: [String] = [], environment: Environment
+    ) throws -> Hits? {
         guard let text = query.text, let match = try ftsMatch(text) else { return nil }
         var arguments: [Value] = [.text(match)]
         var conditions: [String] = ["(c.id IS NOT NULL OR r.id IS NOT NULL)"]
@@ -204,7 +267,7 @@ public enum SearchComposer {
             (d.archived = 1 OR c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL
              OR (d.kind = 'chapter' AND r.archived_at IS NOT NULL))
             """
-        switch query.visibility {
+        switch visibility {
         case .living:
             conditions.append("NOT \(archived)")
         case .includingArchived:
@@ -219,6 +282,7 @@ public enum SearchComposer {
             conditions.append(composed.sql)
             arguments += composed.arguments
         }
+        conditions += extra
 
         // The rendered take: `PostRender`'s rule (chosen while it renders —
         // live, active, this block's — else the block's default), decided
@@ -235,16 +299,10 @@ public enum SearchComposer {
                                   AND ch.deleted_at IS NULL AND ch.status = 'active')
             END
             """
-        let weight = "CASE h.kind "
-            + kindWeights.map { "WHEN '\($0.kind)' THEN \($0.weight)" }.joined(separator: " ")
-            + " ELSE 1.0 END"
-
-        var keyset = ""
-        if let cursor {
-            keyset = "WHERE (s.score > ? OR (s.score = ? AND s.doc_id > ?))"
-        }
+        // Leading and trailing newline: the body sits inside `WITH hits AS (…)`
+        // exactly where the shipped page statement wrote it.
         let sql = """
-            WITH hits AS (
+
               SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, d.block_id AS block_id,
                      d.reading_id AS reading_id, c.id AS home_id, c.kind AS home_kind,
                      c.title AS home_title, c.entry_date AS home_entry_date,
@@ -260,27 +318,139 @@ public enum SearchComposer {
               LEFT JOIN reading r ON r.id = d.reading_id AND r.deleted_at IS NULL
               WHERE search_fts MATCH ?
                 AND \(conditions.joined(separator: "\n    AND "))
-            ),
-            scored AS (
-              SELECT h.*, h.bm * (\(weight)) * (CASE WHEN h.rendered THEN \(renderedBoost) ELSE 1.0 END) AS score
+
+            """
+        return Hits(sql: sql, arguments: arguments, match: match)
+    }
+
+    // MARK: - The group page (13o U2 — Direction C's answer sheet, R-13o-15)
+
+    /// Where a GROUP page resumes: the last group's `(best score, home id)`.
+    public struct GroupCursor: Equatable, Sendable {
+        public let best: Double
+        public let homeID: String
+        public init(best: Double, homeID: String) {
+            self.best = best
+            self.homeID = homeID
+        }
+    }
+
+    /// **The answer sheet's page** — the matches GROUPED by their home (a
+    /// note, or a scraps group), the groups ranked by their BEST hit and
+    /// keyset-paged on `(best, home id)`, each carrying its top `perGroup`
+    /// hits with their snippets (a title hit ranks last inside its group —
+    /// the group's head already says the title). Book and chapter hits are
+    /// not groups (the Books section reads them as passages). Every group is
+    /// reachable by paging; every hit of a group is reachable through
+    /// `passages` scoped `.note(home)` — "all N ›" (R-13o-9).
+    ///
+    /// P1: ONE walk of the matches ranks and groups them (the scored CTE is
+    /// materialized and read twice), and snippets are cut for the page's top
+    /// rows only — the passage page's own shape, one level up.
+    ///
+    /// Result columns: the hits' columns, score, g_best, g_hits (every hit of
+    /// the group), g_lines (its non-title hits), rn (the hit's place in its
+    /// group), snippet — ordered by group, then place.
+    public static func groups(
+        _ query: SearchQuery, scope: SearchScope, after cursor: GroupCursor?, limit: Int,
+        perGroup: Int, environment: Environment
+    ) throws -> Statement? {
+        guard let hits = try hits(
+            query, scope: scope, visibility: query.visibility,
+            extra: ["d.reading_id IS NULL"], environment: environment)
+        else { return nil }
+        var arguments = hits.arguments
+        var keyset = ""
+        if cursor != nil {
+            keyset = "WHERE (g.g_best > ? OR (g.g_best = ? AND g.g_home > ?))"
+        }
+        let sql = """
+            WITH hits AS (\(hits.sql)),
+            scored AS MATERIALIZED (
+              SELECT h.*, \(scoreSQL) AS score
               FROM hits h
             ),
-            page AS (
-              SELECT s.* FROM scored s
+            grouped AS (
+              SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
+                     SUM(s.kind <> 'title') AS g_lines
+              FROM scored s
+              GROUP BY s.home_id
+            ),
+            gpage AS (
+              SELECT g.* FROM grouped g
               \(keyset)
-              ORDER BY s.score, s.doc_id
+              ORDER BY g.g_best, g.g_home
               LIMIT ?
+            ),
+            ranked AS (
+              SELECT s.*, g.g_best, g.g_hits, g.g_lines,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY s.home_id ORDER BY (s.kind = 'title'), s.score, s.doc_id
+                     ) AS rn
+              FROM scored s JOIN gpage g ON g.g_home = s.home_id
+            ),
+            top AS (
+              SELECT * FROM ranked WHERE rn <= ?
             )
-            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid
+            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
+            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid
             WHERE search_fts MATCH ?
-            ORDER BY page.score, page.doc_id
+            ORDER BY top.g_best, top.home_id, top.rn
             """
         if let cursor {
-            arguments += [.real(cursor.score), .real(cursor.score), .integer(cursor.docID)]
+            arguments += [.real(cursor.best), .real(cursor.best), .text(cursor.homeID)]
         }
-        arguments += [.integer(Int64(limit)), .text(match)]
+        arguments += [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
         return Statement(sql: sql, arguments: arguments)
+    }
+
+    // MARK: - The counts (13o U2 — the band's honest per-kind numbers)
+
+    /// **What the whole question finds, per kind** — counted over the SAME
+    /// hits the pages list (one builder), under the archived facet ON, so the
+    /// living numbers and the "+ archived" numbers come from one walk:
+    /// books (distinct books a book or chapter hit names) · notes (distinct
+    /// note homes, plus the nameless notes the worn-day arm found — confirmed
+    /// in Swift by the one display brain, so their ids come in as JSON
+    /// arrays, the living ones and all of them) · passages (a note's
+    /// non-title hits) · scraps (a scraps group's non-title hits) ·
+    /// archived_places (distinct homes or books any ARCHIVED hit lands in —
+    /// what the facet would add).
+    ///
+    /// Result columns: books, notes, passages, scraps, all_books, all_notes,
+    /// all_passages, all_scraps, archived_places.
+    public static func counts(
+        _ query: SearchQuery, scope: SearchScope, wornLivingNoteIDs: String, wornAllNoteIDs: String,
+        wornArchivedNoteIDs: String, environment: Environment
+    ) throws -> Statement? {
+        guard let hits = try hits(query, scope: scope, visibility: .includingArchived, environment: environment)
+        else { return nil }
+        let book = "h.reading_id IS NOT NULL"
+        let note = "h.reading_id IS NULL AND h.home_kind = 'post'"
+        let pool = "h.reading_id IS NULL AND h.home_kind = 'pool'"
+        let sql = """
+            WITH hits AS MATERIALIZED (\(hits.sql))
+            SELECT
+              (SELECT COUNT(DISTINCT h.reading_id) FROM hits h WHERE \(book) AND NOT h.archived) AS books,
+              (SELECT COUNT(DISTINCT n.id) FROM (
+                 SELECT h.home_id AS id FROM hits h WHERE \(note) AND NOT h.archived
+                 UNION ALL SELECT value FROM json_each(?)) n) AS notes,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title' AND NOT h.archived) AS passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title' AND NOT h.archived) AS scraps,
+              (SELECT COUNT(DISTINCT h.reading_id) FROM hits h WHERE \(book)) AS all_books,
+              (SELECT COUNT(DISTINCT n.id) FROM (
+                 SELECT h.home_id AS id FROM hits h WHERE \(note)
+                 UNION ALL SELECT value FROM json_each(?)) n) AS all_notes,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title') AS all_passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title') AS all_scraps,
+              (SELECT COUNT(DISTINCT p.id) FROM (
+                 SELECT COALESCE(h.reading_id, h.home_id) AS id FROM hits h WHERE h.archived
+                 UNION ALL SELECT value FROM json_each(?)) p) AS archived_places
+            """
+        return Statement(
+            sql: sql,
+            arguments: hits.arguments
+                + [.text(wornLivingNoteIDs), .text(wornAllNoteIDs), .text(wornArchivedNoteIDs)])
     }
 
     // MARK: - The worn-day arm (R-13o-6)
@@ -411,6 +581,12 @@ public enum SearchComposer {
             case (.scraps, _): return ("c.kind = 'pool'", [])
             case (.books, .passage): return ("d.reading_id IS NOT NULL", [])
             case (.books, .note): return ("0", [])
+            }
+        case .docKind(let kind):
+            switch level {
+            case .passage: return ("d.kind = ?", [.text(kind.rawValue)])
+            // A worn-day hit is a NAME-level hit with no doc behind it.
+            case .note: return (kind == .title ? "1" : "0", [])
             }
         }
     }

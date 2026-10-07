@@ -107,6 +107,20 @@ private func queryCost(_ db: AppDatabase, _ text: String) throws -> (pages: Int,
     }
 }
 
+/// Page requests of the answer sheet's first group page and its counts.
+private func sheetCost(_ db: AppDatabase, _ text: String) throws -> (groups: Int, counts: Int) {
+    try db.read { db in
+        let query = SearchQueryParser.parse(text, locale: Locale(identifier: "en_US"))
+        let scope = SearchScope(wingID: "")
+        _ = pageRequests(db, reset: true)
+        let page = try Queries.searchGroups(db, query: query, scope: scope)
+        let groups = pageRequests(db, reset: true)
+        let counts = try Queries.searchCounts(db, query: query, scope: scope)
+        #expect(page.groups.count == 2 && counts?.living.passages == 20, "the two probe notes, their 20 takes")
+        return (groups, pageRequests(db, reset: false))
+    }
+}
+
 @Suite("13o — P1: the search family's cost shape", .serialized)
 struct SearchP1Tests {
     @Test func theIndexUpdateIsFlatAndQueriesTrackTheirMatchesNotTheCorpus() throws {
@@ -132,6 +146,18 @@ struct SearchP1Tests {
             // grow. A corpus-proportional cost would be ≥ 5×.
             #expect(Double(l.pages) <= Double(s.pages) * 2,
                     "'\(probe)': cost tracks the matches (fixed) × log, never the corpus (5×)")
+        }
+
+        // 13o U2 — the answer sheet's two new statements (the group page and
+        // the band's counts) are the same cost class: a fixed match set costs
+        // the same in both corpora.
+        for probe in ["zanzibar ", "quokkapr"] {
+            let s = try sheetCost(small, probe)
+            let l = try sheetCost(large, probe)
+            print("[13o-P1] sheet '\(probe)': 2k blocks groups \(s.groups) · counts \(s.counts) pages"
+                  + " · 10k blocks groups \(l.groups) · counts \(l.counts) pages")
+            #expect(Double(l.groups) <= Double(s.groups) * 2 && Double(l.counts) <= Double(s.counts) * 2,
+                    "'\(probe)': the sheet tracks its matches (fixed) × log, never the corpus (5×)")
         }
 
         // …and a term that matches EVERY block grows with its matches —
