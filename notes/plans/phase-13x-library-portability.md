@@ -1167,3 +1167,46 @@ stage act runs in this batch.
   5b precedent — no agent can pass it). For my hands-on walk of the two doors: either she
   unlocks the dev store at her morning sitting while I drive, or she authorizes re-posing the
   dev store (a throwaway posture change on the DEV scope only). Her call; nothing walked until.
+
+## THE LADDER — ROUND 1 (2026-10-07; the report `notes/plans/13x-ladder-round1.md`, committed
+unedited at 2999c13c; counts 1 BLOCKER · 1 MAJOR · 5 MINOR · 4 NIT; the clean bill's 14 items
+noted, the reviewer re-ran all ten headless suites itself 49/49)
+
+### DISPOSITIONS (the orchestrator, same-model arbitration, under the overnight mandate —
+every fix lands with its own traced mechanism + red-on-old pin in F1; dispositions here are
+the ruling of record)
+
+| finding | disposition |
+|---|---|
+| **R1-BLOCKER** (same-Mac adoption of a Standard-era pair onto a Castle account leaves the live library Apple-openable — both reconcile detectors blind) | **ACCEPTED — F1's first fix.** The posture law is the spec; the adoption's landing must surface the owed follow/re-key exactly as the new-Mac road does. Custody code — LEGAL now (13o merged; the slot is 13x's again). F1 re-traces before fixing; the record's named red-on-old pin binds. |
+| **R1-MAJOR** (the hand-off act has no door — deliverable 1 is brain-only) | **ACCEPTED — F1 builds the face:** the File-menu door + the Data Safety twin + reveal-in-Finder over `LibraryHandOff.produce`; words PROVISIONAL from the copy conventions, listed for 13s. An honest gap between U1's and U2's briefs — the orchestrator's miss, recorded as such. |
+| M1 (the hold doesn't gate the ceremonies' direct `pullToHead`) | ACCEPTED, shape **P-R1-1 (PROVISIONAL)**: Replace All Keys / Use Castle REFUSE under a standing restore hold with one sentence — the pick-up-keys-first grammar's sibling. The plain follow stays untouched (traced honest: no content round). |
+| M2 (`try?` swallows a failed hold write) | ACCEPTED: a failed hold write REFUSES the adoption before anything moves — nothing ever lands un-held. |
+| M3 (`adoptionFailedLead` claims false recovery facts on pre-move arms) | ACCEPTED: per-arm copy; pre-move refusals say nothing moved. |
+| M4 (the waiting-lobby Apple probe races a non-ready adoption) | ACCEPTED: the probe stops before `work` on every adoption road. |
+| M5 (spurious Touch ID on provably-foreign pairs) | ACCEPTED: fingerprint comparison promptless first; the gated read only where custody's key could serve the pair. |
+| N1 (Sync-now is a silent no-op under the hold) | ACCEPTED: it speaks the refusal (the one status seam, kind refusal). |
+| N2 (`schemaVerdict`'s unannotated read-write fallback) | ACCEPTED: read-only open or the annotation stating why not. |
+| N3 (the `LibraryRestoreHold` header's inaccurate claim) | ACCEPTED: comment corrected. |
+| N4 (P-U1-1's implemented-but-unrecorded disposition) | ACCEPTED: recorded in F1's record pass. |
+
+### FIX SESSION F1 BRIEF (a FRESH Fable implementer; spawned on the MERGED tree — main's
+1dae44f8 is in; custody edits are IN-SLOT now)
+
+Read: `CLAUDE.md` + auto-canon (note OverallModel §9's third trigger duty — post-merge canon);
+`notes/SessionResiliencyProtocol.md`; **this file WHOLE**; **the round-1 report
+`notes/plans/13x-ladder-round1.md` WHOLE** — the findings' own traces and named pins bind;
+`notes/plans/pre-13x-postures-design.md` §3.3–§3.8 · §7 · §14 (corners 33 · 45);
+`notes/plans/pre-13x-copy.md` §5 · §6. **Do, in this order:** (0) baseline — the whole core
+suite headless on the merged tree, counts recorded (expect U2b's 2254/258 + 13o's additions);
+(1) the BLOCKER per its disposition — re-trace the mechanism yourself first (the hallucination
+guard), then the fix in the custody/landing seam, the record's red-on-old pin verified by
+behavioural revert; (2) the MAJOR — the hand-off door's two faces + reveal-in-Finder +
+PROVISIONAL strings (13s table extended); (3) M1–M5 then N1–N4 per the dispositions, each
+with its pin where it guards behavior. **Stage:** the scheduler seat closed — the LOCK FILE is
+the arbiter: claim honestly for your Mac pin runs ("13x F1 pins", short budget), release on
+the result line, never hold through analysis. **Fences that remain:** zero
+`Persistence/Migrations.swift` edits (claim `v1_23`+ HERE first if ever needed — not
+expected); her real store never; no subagents; foreground waits; no trailers. Append
+`### F1 RECORD` (LIVE STATUS first) from the first commit; commit per fix, push every commit;
+close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
