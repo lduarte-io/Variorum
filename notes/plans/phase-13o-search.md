@@ -1127,3 +1127,18 @@ in 11 suites PASSED, TEST EXECUTE SUCCEEDED, zero skipped** — under a HELD sta
 stage). Next per the dispositions: one implementer sanity pass over this diff, then round 2
 with a FRESH reviewer. P-13o-U1-4's wording amendment ("and the word must end the input")
 rides to the ratify bundle as dispositioned.
+
+### THE SANITY PASS (2026-10-07 ~05:4x — U2's implementer, read-only, over 7d7923ab..76c3abdc): **SANE**
+
+MINOR-1 confirmed landed as the dispositions meant it (one statement over `hits(extra:)` with
+the placeholder bound where `hits()` appends; cursor from `built` alone; the dedupe now CORRECT
+because the lead carries exactly what the dropped group would have); MINOR-2 traced against the
+tag chip's ✕ and seven other pinned queries (none reads differently); the palette pin edit
+justified; the NITs clean. **Two observations adopted, neither blocking:** (1) a worn note's
+lead group shows true counts + the road but no preview lines — honest but uneven; an optional
+same-statement top-lines read is a possible follow-up, recorded for her walk; (2) **the
+CLOSEOUT's final Mac run widens** to U2's other touched suites (the tutorial spine,
+LibraryPagingModelTests, the NoteRowSelection/ShelfAndPalette/ShellLanding suites,
+FindAndReplaceTests, CapabilityRegistryTests) — adopted into the closeout checklist.
+
+**ROUND 2 OPENS:** a FRESH fable-reviewer over the fix diff + the round-1 record.
