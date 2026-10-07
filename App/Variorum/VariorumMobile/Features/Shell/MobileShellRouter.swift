@@ -47,6 +47,12 @@ final class MobileShellRouter {
     /// store's session once the bootstrap is ready.
     @ObservationIgnored let quickNote = MobileQuickNoteModel()
 
+    /// **Where each note's Write page was left, for the session** (VM-10, her
+    /// ruled arrival shape (2)). Here for the same reason `quickNote` is: it
+    /// must outlive any one screen, and this is the session-lived object both
+    /// tab stacks share. The type and every rule live in the Write feature.
+    @ObservationIgnored let writePlaces = MobileWritePlaces()
+
     /// The live phone voice — the shell's one authority (LK2).
     private(set) var voice: ThemeVoice
 

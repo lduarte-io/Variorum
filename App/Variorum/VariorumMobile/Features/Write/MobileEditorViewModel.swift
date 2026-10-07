@@ -417,6 +417,9 @@ final class MobileEditorViewModel {
         textView.delegate = gate
         gateDelegate = gate
         textView.onCanaryFired = { [weak self] message in self?.canaryMessage = message }
+        // VM-10: the page's place reaches the session memory as the surface
+        // leaves its window (the one moment its layout still answers).
+        textView.onLeavingWindow = { [weak self] place in self?.rememberPlace(place) }
         textView.armCanary()
         attach(storage: textView.textStorage)
         // S2: the takes chrome (badge/gutter/marker/pill) + the swipe-peek
@@ -529,11 +532,33 @@ final class MobileEditorViewModel {
     /// authoritative first load, then the Today door's focus raise
     /// ("cold launch → typing in two taps", now true instead of dead code
     /// sequenced after a `start()` that never returns).
+    ///
+    /// **VM-10 — her ruled arrival shape:** a note she has visited this
+    /// session re-opens at the place she left it, caret and all (the session
+    /// memory, `placeMemory`); a note never visited opens at the TOP (the
+    /// first render's own landing — measured true on every road, the guard
+    /// pin keeps it so). The focus raise then reveals the caret's line
+    /// MINIMALLY — UIKit's own reveal, through the text view's scroll
+    /// authority, which never lets it reach into the typewriter room.
     func arrive(focus: Bool) async {
         await loadOnce()
+        if let place = placeMemory?.place(for: postID) {
+            textView?.restore(place)
+        }
         if focus {
             textView?.becomeFirstResponder()
         }
+    }
+
+    /// **The session's page memory** (VM-10, her ruled shape (2)) — the
+    /// shell's, handed in by the screen before the arrival; nil in harness
+    /// and preview use (and then nothing is remembered, by construction).
+    @ObservationIgnored var placeMemory: MobileWritePlaces?
+
+    /// The text view's leaving-the-window report lands here (wired at
+    /// `attach`): the page's place, kept for this note for the session.
+    func rememberPlace(_ place: MobileWritePlace) {
+        placeMemory?.remember(place, for: postID)
     }
 
     /// Runs for the editor's lifetime: header + the takes projection, live.
@@ -2288,6 +2313,14 @@ final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
             in: range,
             replacement: text,
             isPaste: (textView as? MobileEditorTextView)?.isPasting == true)
+    }
+
+    /// VM-10: a reveal's animation has ended — the scroll authority's
+    /// one-shot check that TK2's estimates did not carry the caret off the
+    /// page (the text view's `revealCaretIfLostToEstimates` holds the rule).
+    /// Scroll-delegate traffic only; nothing here touches edit routing.
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        (scrollView as? MobileEditorTextView)?.revealCaretIfLostToEstimates()
     }
 }
 
