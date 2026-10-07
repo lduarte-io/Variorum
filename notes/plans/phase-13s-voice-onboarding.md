@@ -38,3 +38,14 @@ Debug launch happens ON THE PRO — ssh over, claim `Tools/stage`
 release. The Air is never possessed by suites. Sittings with her carry the phase: bundle
 questions, present mockups/copy tables for her ruling, land rulings repo-first. Closeout per
 CLAUDE.md: the in-flight row retires, the PR merges, hard stop.
+
+---
+
+## KICKOFF RECORD (2026-10-06 evening — the VX-7 orchestrator; the sitting runs next)
+
+- **Seat:** the PRO, worktree `~/dev/variorum-13s`, branch ff'd to main (a7412d2c) and pushed. The kickoff above expected the Air; she launched with "you are implementing and coding on the mac pro right now" — the in-flight row reflects the move (main b6113a66). She attaches from the Air; the Air views the branch by `git pull && git switch`. Suites, when they come, run HERE under a held `Tools/stage` claim (the "over ssh" line above was written for an Air seat; flagged at the sitting).
+- **Scope at launch, her word:** the ONBOARDING half (13s-b) first, not the rewording (13s-a). 13s-a's hand-ins (copy §11, the J-list, the "13s re-voices" family, VX-45, release notes) are swept and WAIT.
+- **Preflight complete:** CLAUDE.md canon · workflow transition · master plan in-flight table · TICKETS.md (regenerated, 79 open; copy-labeled sweep found VX-45 only) · QUESTIONS.md (open-item sweep + the #179–#188 tail whole) · the 13s intake (2026-10-04) · FuturePhases 13s row whole · resiliency protocol. SyncSpec/TEXTKIT2 deferred until a batch touches their seams (seed-dedupe work would be Sync-adjacent — noted below).
+- **Surfaces declared (overlap check):** first-run/onboarding chrome, tutorial/Help features, seed content. 13o (search surfaces): low overlap. 13x (Sync/custody, portability doors): none NOW — but a later seed-set reshape touching `SampleLibraryDedupeFacts` is a `Sync/` touch, and the Sync slot queue is 13o → 13x (R-13o-1); 13s-b's seed code waits its turn or lands clear of `Sync/`. VM-5 (mobile merge): closeouts serialize; we are early and unaffected.
+- **Linear:** VX-7 In Progress. Pro→Air ssh tested: OFF (Connection refused — Remote Login disabled on the Air); not needed for this flow.
+- **Execution shape standing from the intake (her 2026-10-04 ruling):** MOCKUP-FIRST — every screen and sentence approved before Swift. Mockups as self-contained local HTML, absolute paths.
