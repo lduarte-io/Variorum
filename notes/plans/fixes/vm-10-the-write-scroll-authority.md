@@ -149,4 +149,9 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     text above the caret); short-note ⏎ **0 → 0** (first visible 1); memory re-entry **offsetY 881.3, first visible
     970** = where she left. New guard pin `whileHerPanHoldsThePageNoRevealMovesIt` (the authority's rule 2 at its
     choke point via the clock seam — a pan cannot be synthesized in process; NOT a red-on-old pin).
+  - **REVERT IN FLIGHT (2026-10-07 ~03:20):** behavioural revert of the fix on the working tree over committed
+    `e47d48b0` (the authority's two layers made pass-through, the arrival restore disabled) to re-prove the three
+    red pins with the FINAL pin file. Restore = `git checkout -- App/Variorum/VariorumMobile/Features/Write/`
+    (the tree is committed, so that restore is safe). A successor reading this line with no "REVERT DONE" below
+    must run that restore first.
   - Walk captures — NOT-STARTED. Final suites — PENDING.
