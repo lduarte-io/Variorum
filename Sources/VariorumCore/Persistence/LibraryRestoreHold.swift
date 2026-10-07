@@ -7,14 +7,16 @@ import Foundation
 // The flag is a MARKER FILE beside the store (`variorum-restore-hold.json`),
 // per-store BY LOCATION — "held after restore" is a fact about the file
 // sitting at the store path, exactly what the location encodes. It is set
-// by the adoption door at every completion, cleared by the one Resume
-// press, and consulted at the round-trigger seam (`Shared`'s `SyncSession`
-// — the un-followed device's refused-rounds precedent re-worn). It never
-// travels: the hand-off folder and every snapshot pair carry only the
-// store and its key file, and `LibraryAdoption`'s move-aside relocates the
-// whole store-folder family, so a stale marker never outlives the library
-// it was written for at the live path (the door rewrites it fresh at each
-// adoption regardless).
+// by the adoption itself (inside `LibraryAdoption.execute`, step 3½ —
+// 13x F1 R1-M2: before the move, so nothing ever lands un-held), cleared
+// by the one Resume press, and consulted at the round-trigger seam
+// (`Shared`'s `SyncSession` — the un-followed device's refused-rounds
+// precedent re-worn). It never travels: the hand-off folder and every
+// snapshot pair carry only the store and its key file. The marker is NOT
+// in the move-aside's departing set (store, sidecars and key files only
+// — 13x F1 R1-N3's correction of this header's earlier claim): the
+// guarantee against a stale marker is that EVERY adoption rewrites it
+// and Resume alone clears it.
 //
 // Deliberately NOT a row in `sync_state`: that table is the engine's
 // (writes there from door code would be ad-hoc row edits below the

@@ -64,6 +64,11 @@ nonisolated enum LibraryOpenCopy {
 
     // MARK: - The restore-hold banner (round 3, her ratified shape)
 
+    /// 13x F1 (ladder R1-N1 — §12's a-door-that-did-nothing rule): the
+    /// Sync-now door's refusal while the restore hold stands.
+    static let syncNowHeldRefusal =
+        "Sync is waiting since the restore — press Resume Sync in the banner below."
+
     static func holdBanner(asOfDay: String?) -> String {
         let lead = asOfDay.map { "This is your library as of \($0). " }
             ?? "This library was just restored from a copy. "

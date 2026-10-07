@@ -1235,10 +1235,36 @@ close with an "F1 CLOSED" banner listing every finding → FIXED(hash)/recorded.
 | M3 | per-arm failure copy (pre-move arms claim no dated copy) | BUILT (this commit) — `failureWording(for:)` maps each `AdoptionError` arm to a TRUE lead (pre-move ⇒ `adoptionRefusedNothingMoved`; mid-move ⇒ its two real nets; landing + unknown keep the old lead, whose facts hold exactly there); the no-store-path guard reworded too; pin PENDING the stage slot |
 | M4 | the waiting-lobby probe stops before `work` | BUILT (this commit) — `StoreLobby.suspendForAdoption` (stop + flag; `probeAppleRoad` re-checks the flag PAST its await, closing the in-flight race the cancel alone cannot) · `resumeAfterAdoption` re-arms on a failed adoption · the model suspends BEFORE `work` and re-checks for a probe that won the race (ready road then); pin PENDING the stage slot |
 | M5 | fingerprint comparison before the gated prompt | BUILT (this commit) — `pairIsProvablyForeign` (both fingerprints on disk, promptless; differ ⇒ skip the gated ask; equal/unknown keep it); the counting-guard pin PENDING the stage slot |
-| N1 | Sync-now speaks the refusal under the hold | NOT STARTED |
-| N2 | `schemaVerdict`'s fallback annotated/read-only | NOT STARTED |
-| N3 | the `LibraryRestoreHold` header corrected | NOT STARTED |
-| N4 | P-U1-1's plaintextLibrary disposition recorded | NOT STARTED |
+| N1 | Sync-now speaks the refusal under the hold | DONE (this commit) — the door consults `roundsHeld` and speaks `syncNowHeldRefusal` through the session's StatusCenter (kind refusal — §12's rule); UI-only arm, the gate itself is the U2 hold-gate pin's |
+| N2 | `schemaVerdict`'s fallback annotated/read-only | DONE (this commit) — the fallback keeps its honest reason (a WAL-journaled copy refuses a read-only open) and now carries `openForInspection`'s recorded sentence verbatim-in-kind |
+| N3 | the `LibraryRestoreHold` header corrected | DONE (this commit) — the false "move-aside relocates the whole store-folder family" clause replaced with the true guarantee (every adoption rewrites it — now INSIDE execute per M2; Resume alone clears) |
+| N4 | P-U1-1's plaintextLibrary disposition recorded | DONE (this commit) — P-F1-1 below; QUESTIONS at the merge moment |
+
+#### PROVISIONALS (F1's; they land in QUESTIONS at the merge moment per the shared-ledger rule)
+
+- **P-F1-1 (R1-N4 — P-U1-1's IMPLEMENTED disposition, now recorded):** `LibraryOpenModel.land`
+  routes `.plaintextLibrary` (a pre-13p FULL plaintext library) down the SAME plaintext road as
+  an export — but unlike an export its four local-only tables SURVIVE (`recreateIfMissing`
+  skips present tables), so a surviving cursor and possibly a non-empty outbox ride under a
+  FRESH store id + fresh identity: a corner-37 RETURNER with QD-class outbox pushes, screened
+  by the ledger reconcile at its first round. A DIFFERENT §14.13 story than the export's
+  zero-push letter — now a recorded CHOICE, not a discovery (overturning it means wiping the
+  four tables on the `plaintextLibrary` arm).
+- **P-R1-1 (M1's ruled shape, applied):** Replace All Keys / Use Castle refuse under a standing
+  restore hold with ONE sentence (`resumeSyncFirst`); Use Standard stays open (traced
+  engine-free); the marker's crashed-rotation RESUME stays exempt (recovery — the
+  followPending guard's own exemption).
+- **P-F1-2 (M1's wiring breadth):** the hold consult is nil on compositions without the Mac's
+  marker projection (the phone, tests) — never held there by construction; the phone gains no
+  adoption door this phase, so nothing is reachable un-gated.
+- **P-F1-3 (the BLOCKER's notice kind):** the adopted-pair exposure speaks under its OWN
+  `FollowNotice` kind (`castleKeyFileAppleOpenable`) rather than re-wearing the decision-35
+  sentence, whose "opens without asking" would be false under a gated custody; waiting body =
+  its own sentence (the mismatch precedent: no keys replaced, sync not paused), sub-line
+  shared with the mismatch (same fact). Words 13s's.
+- **P-F1-4 (the hand-off door's shape):** the destination is a chosen folder (NSOpenPanel,
+  Downloads default) rather than a fixed drop; the act is DECLARED (`.handOffLibrary`,
+  menuBar + surface) while Open Library… stays the recorded undeclared standard-item class.
 
 No revert is in flight. No subagents; synchronous foreground waits only; stage unclaimed at seat (the lock file is the arbiter now — claims will say "13x F1 pins", short budget, released on the result line).
 

@@ -463,6 +463,14 @@ struct SyncStatusRow: View {
     private func perform(_ act: SyncRowFace.Door.Act) {
         switch act {
         case .syncNow:
+            // 13x F1 (ladder R1-N1): a door that did nothing speaks a
+            // refusal (§12's rule) — under a standing restore hold
+            // `triggerSync` returns on the gate, so the door says why
+            // instead of going quiet; the banner's Resume is the act.
+            if sync.roundsHeld?() == true {
+                services.session.status.refuse(LibraryOpenCopy.syncNowHeldRefusal)
+                return
+            }
             sync.triggerSync()
         case .openAccount(let tab):
             accountSheetTab = tab

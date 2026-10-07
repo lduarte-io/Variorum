@@ -292,6 +292,15 @@ public enum LibraryClassifier {
             do {
                 queue = try DatabaseQueue(path: url.path, configuration: configuration)
             } catch {
+                // 13x F1 (ladder R1-N2 — `openForInspection`'s recorded
+                // sentence, owed here too): a WAL-journaled copy can
+                // refuse a read-only open outright, so the fallback opens
+                // read-write — SELECT-only inside, but SQLite may
+                // materialize `-shm`/`-wal` sidecars beside the PICKED
+                // SOURCE. Recorded, not hidden: on a read-only volume the
+                // fallback fails too and the verdict is `.unreadable`,
+                // never a guess (the never-rewritten doctrine's honest
+                // edge, same as stage 1's).
                 queue = try DatabaseQueue(
                     path: url.path, configuration: AppDatabase.configuration(key: key))
             }
