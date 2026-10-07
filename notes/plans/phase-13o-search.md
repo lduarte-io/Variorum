@@ -790,7 +790,38 @@ session report: hashes, self-assessment, PENDING flags, proposals awaiting rulin
 
 ### U3 RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-*(empty — the U3 session writes here.)*
+**Seat:** the U3 implementer (Opus, xhigh), a FRESH session seated 2026-10-07 in
+`~/dev/variorum-13o` on `vx-5-13o-search` (pulled at `37c65a53`; main merged in at `67064457`).
+Required reading done in-context: this plan WHOLE (the sitting record, the mockup rulings,
+§FORK RULINGS, the U1 + U2 RECORDs), the mockup (Direction C + within-book Option 1 + the shared
+section), `notes/SessionResiliencyProtocol.md`, the 13b constitution P-1…P-9 + application notes,
+the 13i sitting record §3/§4/§12/§22–§23 (the join's and the facets' ruling text), the FuturePhases
+13o row; the code it builds on — `SearchQuery`/`SearchQueryParser`/`SearchComposer`/
+`Queries.searchPassages|searchGroups|searchCounts`, `RuleGrammar`, `assembleReading` +
+`ruleMatchSQL`, `Operations.livingBooks`, `BookcaseBoard.isLiving`, the Library search faces
+(`LibrarySearch{Model,Routing,Band,Sheet,Copy}`, `LibraryCatalogModel.read/listing`),
+`Shared/SearchLanding.swift`, `BookView`'s masthead, `BookViewModel.entryWindow` + the Index's
+cap line, `RootView`'s book/library composition. Machinery: no deaths so far.
+
+**THE PIECE PLAN (each its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record + piece plan (the first commit) | DONE (this commit) |
+| P1 | THE TWO PROPOSALS (brief items 1 + 2): the within-a-GATHERING scope's mechanism with its measurement line, and the within-book face's fork — written below, pushed, sent to the orchestrator. **→ SEAM: neither half builds before its ruling lands here.** | NOT-STARTED |
+| P2 | CORE — the TAG-ASSOCIATION JOIN (brief item 3): a pure Domain association rule (intake-rule positive tag terms + the `auto_tag_ids` outflow, each by its own mechanism's subtree rule), the candidate statement in the ONE composer, `Queries.searchTagAssociations`; pins | NOT-STARTED |
+| P3 | CORE — THE MODE FACETS (brief item 4): an AST leaf over the reading row's FACTS (gathering · living · owned · finished · sealed), composed in the one composer; pins (+ EXPLAIN where the plan matters) | NOT-STARTED |
+| P4 | APP — the Books section reads the join (associated books TOP-RANKED, the row says WHY — "#dream flows here"); a `#tag` alone answers its books; the band's `+ book state` chip; model pins | NOT-STARTED |
+| P5 | APP — the archived facet's face finished end-to-end (brief item 5) | NOT-STARTED |
+| P6 | CORE — the gathering scope, built to the P1 ruling | NOT-STARTED — gated on the ruling |
+| P7 | APP — the within-book magnifier (R-13o-14) + its results face, built to the P1 ruling; land-at-match identical to the Library's | NOT-STARTED — gated on the ruling |
+| P8 | APP — the Book Index's cap gets a road (brief item 8, PROVISIONAL) | NOT-STARTED |
+| P9 | Registry (P-1) declarations for every new door; copy through the kind seam; polish | NOT-STARTED |
+| P10 | Close: the touched Mac suites + TutorialWalkTests green at the END (a slot from the "13o" scheduler, a HELD stage claim); the walk + captures if the slot allows; the record final | NOT-STARTED |
+
+PENDING flags: none yet.
+
+**LIVE STATUS (2026-10-07): P0 landing; P1 next.**
 
 **MOCKUP ROUND (the U2 gate, orchestrator-authored):** one local HTML file,
 `notes/plans/mockups/13o-search.html` — 2–3 directions for the search-active Library, both
