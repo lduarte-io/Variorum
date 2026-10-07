@@ -175,4 +175,14 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
     keyboard down/up round trip inside her 0.6 s window → holds her place (1257.3 / 1449.3, untouched); a
     deliberate refocus long after any pan → **15/15 rounds minimal** (2149.3; the pre-layer runs landed 5/5 on the
     room at 2471.3).
-  - Walk captures — NOT-STARTED. Final suites — PENDING.
+  - **PARKED 2026-10-07 ~03:25 at the orchestrator's pause (the stage interleave), at a clean pin boundary.**
+    Where it stands: arms 1/2/3 FIXED, all pins GREEN on the committed tree (`MobileWriteScrollAuthorityTests` 8 +
+    `MobileScrollAuthorityBrainTests` 2, plus `MobileBlockListTests`/`MobileTypewriterRoomTests` green beside them);
+    red-on-old re-proved by behavioural revert and restored (tree clean). The real-app WALK RAN ONCE (throwaway
+    XCUITest driver `VariorumMobileUITests/VM10WalkDriver.swift`, run via the `TK2SpikeUITests` scheme — no scheme
+    edits; real touches; 17 captures written to the gitignored `notes/plans/vm-10-screens/`, **NOT YET INSPECTED —
+    PENDING**). The driver's runner-side `GSEventSetHardwareKeyboardAttached` did NOT raise the app's software
+    keyboard (headless hardware-keyboard mode persists for the app process) — keyboard-up evidence is the
+    in-process probe's (above). NEXT on resume: inspect the captures (re-walk any that misfire), delete the probe +
+    the driver, run the touched suites + the FULL mobile suite once, final dispositions here.
+  - Walk captures — RAN, PENDING inspection. Final suites — PENDING.
