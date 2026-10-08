@@ -735,7 +735,14 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   **REVERT V99-E (named before it runs):** on the tip, (1) `act`'s `.resume` arm → `return .enterCastle`; (2)
   `ceremonyDoneBody`'s body → `act == .replaceKeys ? replaceKeysDone : castleDoneBody(outcome)`; (3) `replaceKeys()`'s Done →
   `.done(insuranceOff: false, hasOffer: false)`. Expected RED: F1's five pins (incl. the restart's two door blocks, now
-  first in that test) and S1's Done line (it rides the selector); everything else green.
+  first in that test) and S1's Done line (it rides the selector); everything else green. **RESULT (06:05, over fafafd59 +
+  the three edits, built, `PostureSwitchTests`): "Test run with 65 tests in 1 suite failed … with 30 issues"** — F1(ii) 7 ·
+  the selector 10 · F1(i) 3 · F1(iii) 5 (the unreachable-iCloud-key door block, the act, `.authorize`, the Done, the outcome)
+  · F1(iv) 3 · S1's two Done lines; nothing else. The restore-hold block stayed GREEN under it (the reverted act reads
+  `.enterCastle`, which the restart's hold check also covers) — its own red is V99-E′ below. Restored, `git diff` clean.
+  **REVERT V99-E′ (named before it runs):** the restart's restore-hold check deleted (the `if act == .enterCastle || act ==
+  .replaceKeys, controller.restoreHoldStands?() == true { … }` block). Expected RED: the restart pin's restore-hold block
+  alone (run as that one test).
 - F2 fix: DONE — `DoorFacts.vaultHasAppleHeldCopy` (the vault's word as the door read it); `accountPostureIsStandard`
   reads it, the posture only before the door answered. Green PENDING.
   **REVERT V99-F:** `accountPostureIsStandard` → `controller.posture == .standard`. Expected RED: the F2 pin's two
