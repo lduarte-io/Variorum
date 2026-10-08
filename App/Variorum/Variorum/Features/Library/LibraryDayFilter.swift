@@ -126,6 +126,46 @@ nonisolated enum LibraryDayFace {
         return TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
 
+    // MARK: VX-87 — the popover's words (direction 1, R-VX83-2)
+
+    /// **The armed SENTENCE** — the popover's confirmation, at its foot (the
+    /// mockup's direction 1, verbatim in shape): *Showing notes edited **on
+    /// Oct 6**.* · *Showing notes edited **Oct 1 – Oct 6**.* With nothing armed
+    /// it says the clearing word's own state the same way — *…edited **on any
+    /// day**.* (PROVISIONAL P-VX83-B1: the mockup draws only armed states).
+    /// The emphasized part is built from the same day words the band's chip
+    /// uses (`dayWords` / `rangeWords`), so the sentence inside the popover and
+    /// the chip outside it cannot disagree.
+    struct Sentence: Equatable {
+        let lead: String
+        /// The armed words — drawn emphasized.
+        let emphasis: String
+        let tail: String
+        var plain: String { lead + emphasis + tail }
+    }
+
+    static func sentence(
+        range: LibraryDayRange?, now: Date, calendar: Calendar = LibraryDayFace.calendar,
+        locale: Locale = .current
+    ) -> Sentence {
+        let armed: String
+        if let range {
+            armed = range.isOneDay
+                ? "on " + dayWords(day: range.first, now: now, calendar: calendar, locale: locale)
+                : rangeWords(range, now: now, calendar: calendar, locale: locale)
+        } else {
+            armed = "on " + anyDay
+        }
+        return Sentence(lead: "Showing notes edited ", emphasis: armed, tail: ".")
+    }
+
+    /// The foot's quiet hint at rest (the mockup's "esc closes") — and, while
+    /// a run waits for its last day, what the next press does (PROVISIONAL
+    /// P-VX83-B1's sibling: the mockup's reading, "click the first day, click
+    /// the last", said at the moment it matters).
+    static let escHint = "esc closes"
+    static let runEndHint = "now press the last day"
+
     /// The door's own two hovers (the 18h ladder's R3-8 — they were literals
     /// in the view's body, two rows from the sentences this type already
     /// owns; F-0's "no string-as-rule in a view", applied to the copy beside
