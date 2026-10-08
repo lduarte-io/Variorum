@@ -167,21 +167,19 @@
 <div class="notes" id="notes"></div>
 
 <script>
-/* ———————— the red V (approximation of notes/brand/variorum-v-on-red.svg; the real asset ships) ———————— */
+/* ———————— the red V, faithful two-tone (approximation of notes/brand/variorum-v-faithful-red.svg — R-13s-25: the black V with white between its stripes, on the red; the real asset ships) ———————— */
 function vmark(size){
   size=size||18;
   return `<svg class="vmark" width="${size}" height="${size}" viewBox="0 0 48 48">
     <rect width="48" height="48" rx="10" fill="#FC120C"/>
-    <g stroke="#17120e" fill="none">
-      <path d="M9.5 9 L23 41" stroke-width="5.4"/>
-      <path d="M15.5 9 L25.2 32.5" stroke-width="2.3"/>
-      <path d="M19.8 9 L26.8 26.5" stroke-width="1.9"/>
-      <path d="M23.6 9 L28.2 21.5" stroke-width="1.5"/>
-      <path d="M38.5 9 L25 41" stroke-width="5.4"/>
-      <path d="M32.5 9 L22.8 32.5" stroke-width="2.3"/>
-      <path d="M28.2 9 L21.2 26.5" stroke-width="1.9"/>
+    <path d="M9 8.5 L18.5 8.5 L26.8 41 L20.8 41 Z" fill="#17120e"/>
+    <path d="M29.5 8.5 L39 8.5 L27.2 41 L21.2 41 Z" fill="#17120e"/>
+    <g stroke="#fdfcf8" fill="none">
+      <path d="M13.4 8.5 L22.9 40" stroke-width="1.7"/>
+      <path d="M16.2 8.5 L24.7 37.5" stroke-width="1.3"/>
+      <path d="M34.6 8.5 L25.1 40" stroke-width="1.7"/>
+      <path d="M31.8 8.5 L23.3 37.5" stroke-width="1.3"/>
     </g>
-    <path d="M21.5 38 L23 41.5 L26.5 41.5 L25 38 Z" fill="#17120e"/>
   </svg>`;
 }
 /* ———————— chrome templates, drawn from her screenshots ———————— */
@@ -343,7 +341,7 @@ const frames=[
  build:s=>{s.innerHTML=`<div class="ideas">
    <h2>${vmark(26)}The tour, v4</h2>
    <p style="max-width:74ch;line-height:1.6">Eleven short steps, about two minutes, then a fork and an optional leg. The copy is rewritten in the Start Here register: plain sentences, calm and direct, nothing cute. The deeper modes now get a step of their own. The take step says, once, why the app exists. The end card names Start Here. The logo rides along: the striped V, ratified 2026-08-25, in the red edition you called distinct and sharp.</p>
-   <p style="max-width:74ch;line-height:1.6;color:var(--muted)">The logo build item beside the tour: the macOS app icon drawn from <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">notes/brand/variorum-v-on-red.svg</span> composed for the squircle, plus the About window; the small mark on the welcome line (shown here) is a candidate placement, yours to keep or cut. The mark in this file is an approximation; the real asset ships.</p></div>`;},
+   <p style="max-width:74ch;line-height:1.6;color:var(--muted)">The logo build item beside the tour, as you ruled it: the faithful two-tone edition, <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">notes/brand/variorum-v-faithful-red.svg</span>, the black V with white between its stripes on the red. Placements, closed with your agreement: the macOS app icon on the squircle, the About window, and the small mark on the welcome line. The mark in this file is an approximation; the real asset ships.</p></div>`;},
  notes:`<h3>WHAT THE ARCHITECT CHANGED ON ITS OWN (R-13s-23)</h3>Beyond your named items: the heart line at the take step, the deeper-modes step, the end card's Start Here sentence, the explicit way home at step 10, and the full de-AI-ism pass over every card. Each is one line to overturn. The subagent assessment (R-13s-20) runs against this version; its findings land in the plan file.`},
 
 {label:"first open", where:"first open — the quiet offer",
@@ -475,7 +473,7 @@ const frames=[
      <li><b>Q16</b>: where the letter from Lillian lives. Seed work, never mentioned in the tour.</li>
      <li><b>Q17</b>: the seeded example snippet, in or out of the final seed set.</li>
      <li><b>Q18</b>: step 10's reading of the round trip. If you meant the Book tab, one screenshot or the screen grant redraws it.</li>
-     <li><b>Q19</b>: the logo's in-app placements. Proposed: the app icon (the red edition on the squircle) and About, plus the welcome-line mark shown in this file. More is possible (the lobby, export title pages); calm says less.</li>
+     <li><b>Q19</b>: CLOSED (R-13s-25, "agree w your assesment"): the app icon from the faithful two-tone edition, About, and the welcome-line mark. Nothing more.</li>
    </ul>
    <div style="font-size:13px;color:var(--muted);margin:16px 0 4px">WHAT HAPPENS NEXT</div>
    <p style="max-width:80ch;font-size:13.5px;line-height:1.6">The subagent assessment (R-13s-20) runs against this version; its findings land in the plan file and the worthwhile ones fold into v5. On your per-screen approval, U1/U2 briefs go to the implementer and the real tour builds to this file as its spec, with the logo build item beside it. No Swift before approval.</p></div>`;},

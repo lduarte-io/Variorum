@@ -133,6 +133,8 @@ She resumed on the Air and ruled a **worktree** for this effort — her words: *
 5. **The de-AI-ism pass**: all card copy and the badge rewritten without em dashes or emoji; UI glyphs (the book icon, ψ) remain chrome, named in words inside sentences.
 6. **Q14 recommendation**: the toured take stays afterwards (Sherlock is the sandbox; a trace of your first take is a feature, and the fold is safe either way). Hers to overturn.
 
+**R-13s-25 — The logo EDITION corrected, and Q19 closed (2026-10-08, her next message, verbatim):** *"different red - one with white in it as well. normal version of what ichose. agree w your assesment"*. So: not the one-color-on-red edition but the **faithful two-tone, as generated** — `notes/brand/variorum-v-faithful-red.svg` (the red ground with the black V carrying white between its stripes; the family sheet's "faithful two-tone (as generated)" panel). And "agree w your assessment" closes **Q19 as the architect's lean: the app icon (this edition on the squircle) + About + the welcome-line mark, nothing more.**
+
 ## RESUME PROMPTS — the mockup-walk sitting (written 2026-10-06 night at her ask; **SUPERSEDED — the walk ran 2026-10-07 on the Air; the round-1 sitting record above is the live state**)
 
 **State at sleep:** mockup delivered and pushed (b4abda9a); rulings R-13s-1…5 recorded above; open questions Q1–Q8 bundled (the EXECUTION PLAN's list + the mockup's ideas frame); 13s out of the stage queue (13o schedules; nothing needed for a mockup sitting); NO Swift before her per-screen approval.
