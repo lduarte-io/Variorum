@@ -945,3 +945,28 @@ in U-C's uncommitted set, so nothing lands until U-C commits; pin-before-fix eac
 popover overhangs the window's right edge ~24 pt (AppKit's own edge behavior; shot 15);
 Study-light's popover is a pale card with a faint edge (shot 16); Terminal's run band
 uses the at-rest fill and may read faint (shots 12/15 — U-B's own flag, P-VX83-B4).
+
+## §FIX PASS (the orchestrator's own, 2026-10-08 ~01:4x — the walk's findings + her wording rulings; commits 57caca0b · 528b0019)
+
+- **F-W-1 — HOLLOW AS CLASSIFIED (the hallucination guard's outcome: recorded, not fixed).**
+  The pin came FIRST: an end-to-end probe (the exact plain text, both the passages road and
+  the sheet's own group lines) ran GREEN on the pre-fix code — the pure rule coalesces three
+  space-separated runs and every call site hands the full snippet. The walker's "always" was
+  then traced to its REAL mechanism: the SEEDED text is "always _the_ woman"
+  (SherlockAdventures.txt:5 — Doyle's emphasis as Markdown underscores), whose gaps " _"/"_ "
+  are PUNCTUATION — F-W-2's class exactly. The probe stays as a regression pin.
+- **F-W-2 — FIXED (P-VX83-W2, provisional for the bundle):** `firstMatchedSpan` crosses SHORT
+  separators — ≤ 2 characters, never a newline — kept AS WRITTEN (the literal find still
+  lands). Covers both walker cases: "always _the_ woman" and "Good-night, Mister Sherlock"
+  arm whole. REVERT-VERIFIED: the old body red with 5 issues (the seeded e2e's two arms + the
+  three separator cells); restored green 6/6.
+- **F-W-3 — FIXED:** the band's em-dash is the ECHO's separator (`LibrarySearchFace.countsLead`,
+  the rule extracted pure and pinned); a tag alone leads with bare counts.
+- **R-VX83-10 APPLIED (her C8 ruling):** within search the rows wear her word — the kind line
+  "commit · Oct 6", the band counts "N commits", the field-guide sentence re-worded; justified
+  edits to the C6 face cells (labeled in place); the currency cell follows by construction
+  (it reads the constants). The schema kind id stays `savepoint` (vocabulary, not copy).
+- OWED: the touched Mac suites under a short test-only slot (requested), then the walker's
+  short verification errand (the fixed needle in the field · the bare-counts band · the
+  commits wording · the chip in the real band — appended to the walk brief when the suites
+  are green).
