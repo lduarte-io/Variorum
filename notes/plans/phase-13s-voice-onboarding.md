@@ -1020,3 +1020,5 @@ xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,name=<the
 | 11 | Evidence: the draft↔seed byte proof, the old↔new pin sweep, Mac `build-for-testing`, self-assessment, stage commands | NOT-STARTED |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
+
+**U1b STATUS: UNIT CLOSED (2026-10-08 ~14:20).** Built (seven pieces + the readme placeholder), stage-window green (Mac 163/20 + 118/16, mobile 70/11 with the one out-of-unit 13x red attributed, seven+one red-on-old recipes), the crown walk VERIFIED the true first open, the ladder run WHOLE: round 1 (0B/1M/1m/1n → the star-fold MAJOR and the receipt MINOR fixed in the arbitrated pass, the fan-order in-window fix ratified), round 2 CLEAN BILL (0/0/0/2 record-only NITs — the ladder closes, no round 3; the two-client star pin re-verified red-on-old at the reviewer's own seat). Remaining window obligations (the final stage window): the classics-door receipt pin + the Mac suites' post-fix run. The record set: the U1b RECORD + notes/plans/13s-ladders/u1b-round{1,2}.md.
