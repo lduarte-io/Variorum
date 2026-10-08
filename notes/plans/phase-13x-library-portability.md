@@ -1854,3 +1854,10 @@ on the chip face stack and on the kind word; the badge was already compliant). G
 in VX-83's stage batch and reaches main with VX-83's PR, which merges AFTER 13x. So 13x's
 closeout Mac run shows `everyBareFixedSizeStatesItsLinePolicy` red, KNOWN and owned —
 never a 13x regression.
+
+## THE LADDER — ROUND 3 (2026-10-07 evening; the cap's last round — EARNED by new code after
+round 2: VX-80 (custody seam, pulled in at her word), W-1 (StoreBinding), W-2 (chrome) and the
+two adjudicated pins). A FRESH `fable-reviewer` (CLAUDE.md: custody ⇒ Fable review), spawned
+with `notes/REVIEW_PROMPT.md` VERBATIM, `{PHASE}` = 13x, zero framing; the report lands at
+`notes/plans/13x-ladder-round3.md`, committed unedited by the orchestrator. If the Fable
+safeguards stop the reviewer, the cast change goes to her before any substitute spawns.
