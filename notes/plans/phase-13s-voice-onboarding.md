@@ -573,8 +573,8 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
 | item | status |
 |---|---|
 | F-U2-W-1 — the end card's doors truncate | DONE (6d38781a) — the doors WRAP (bounded to 3 lines) on `TourDoorStyle`, which is `VoicedButtonStyle`'s ink, hover wash and press fade without its one-line clamp; the card and the pin read ONE door table (`TourEndCard.choices`). Pin `TourEndCardTests.theEndCardsDoorsWrapRatherThanTruncate` (both rooms, the Terminal monospace the walk caught): each door's drawn height ≥ the same words' unlimited height at the drawn width, and the doors stay inside the card. `build-for-testing` GREEN. **Run + red-on-old PENDING the next window:** the old clamp drew one line where the words need two, which the pin's first arm reads |
-| F-U2-W-2 — leg 3's add to book is absent | TRACED; fix PROPOSED, NOT BUILT (the in-batch fork rule: the architect rules first) — below |
-| the residual — the quick entry re-takes the caret on the Bookcase during steps 1–2 | TRACED to two candidate roads; RECORD-ONLY (not cheap, and not confirmable headless) — below |
+| F-U2-W-2 — leg 3's add to book is absent | DONE (f4476b06) — OPTION A as ruled (aefca70f): a pure effect `Tour.Effect.showPoolTucked`, emitted at leg 3's entry beside `navigate(.pool)` and performed by the composition root on its Pool model through an idempotent `PoolPostsModel.showTucked()` (the masthead's "show" is a toggle, so a second ask must never close it); leaving the Pool still tucks it (`tuckAway`). Copy untouched. Pins: `TourWalkTests` leg-3 effects (headless, GREEN); `TourEngineTests.legThreeOpensThePoolsTuckedRunOnArrival` + `TourPoolTuckTests.showTuckedOnlyOpensAndLeavingStillTucks` (PENDING the window). The trace and the ruling are below; P-U2-16 carries (B)/(C) |
+| the residual — the quick entry re-takes the caret on the Bookcase during steps 1–2 | TRACED to two candidate roads; RECORDED-NOT-FIXED (the ruling at aefca70f) — owned as **VX-112** |
 | A1 — the dark card has no visible edge | DONE (9c43e57f) — `TourCardChrome`: in the dark room the edge is the room's FAINT ink and the shadow is real (0.6/24 pt); the light room keeps the floating-chrome look that already separated cleanly. Walk-checked, not pinned (a taste row's evidence is the capture) |
 | A2 — placement avoids nothing | DONE (03121a2c rule, 1d72fbf0 app) — `Tour.place` takes an AVOID-LIST: keep-clear regions plus the lit ring's own frame inflated by `ringClearance`. On each side it tries the anchor's alignment, then centred, then the far alignment, then the container's ends; a candidate on a keep-clear region is PUSHED along its side past it (the first free gutter), then clear corners, then the old rule last. Regions report through `.tourKeepClear()`, inert outside a tour: the sidebar column, the note masthead, the Bookcase masthead and strip, Write's bar, the Takes bar, the Bookcase hint bar. Pins: `TourWalkTests.aCardAvoidsTheKeepClearRegionsAndTheRingsOwnFrame` (headless, GREEN) + `TourSpotlightTests.aKeepClearRegionReportsWhileATourRuns` (PENDING the window). **NOT BUILT: the card-width flex against one-word last lines** (A2's "may") — SwiftUI exposes no widow measure short of a `TextRenderer` layout pass per candidate width, which is not cheap; recorded for the walk's eye |
 | A3 — the tour under the Takes panel's scrim; two rings at once | DONE (03121a2c, 1d72fbf0) — ONE ring by construction: `TourSpotlight.lit` returns the first candidate on screen only, and step 6 rings the panel's "Open Takes mode" while the panel is up, else the ⑂ badge. While the panel is up at steps 5–6, the card moves INTO the panel (`TourPanelSlot` at the panel's foot draws `spotlight.panelCard`, above the sheet's scrim) and the window's copy steps aside. Pins: the single-ring arms in `TourWalkTests` (GREEN) and `TourSpotlightTests` (PENDING); the panel card is the walk's |
@@ -608,3 +608,51 @@ This is reproducible on the target seed by design: leg 1 stars the note, and the
 Why record-only: the fix belongs in the shared capture box (also the quick-note pad's) and in the re-attach focus class. The right rule is `PaneTextView`'s: re-take only what it held at detach, never steal. Even with it, a release in the same pass as a re-attach can still race. That is not a cheap fix, and a fix without a self-traced live mechanism breaks the hallucination guard. The proposed next step, for the ladder or a VX: a Mac pin that releases focus and then detaches and re-attaches the box (red-on-old for road 1), and then the held-focus rule. The cost meanwhile: typing into the box mid-step mints a note, and the tour re-anchors around it (the rule never takes it for step 11's note out of turn).
 
 **RULING ON F-U2-W-2 (architect, 2026-10-08 ~09:20 — the in-batch fork):** **Option (A) BUILDS** — when leg 3 brings her to the Pool, the tour also opens the "in gatherings" run (the same act as the masthead's "show"), scoped to the tour only; her row appears under the Pool's own label with "add to book" ringed; leaving the Pool hides the run as today. Why (A): the approved sentence stays byte-true with zero new copy; the reveal is an act the user could take themselves; the smallest spec-defensible surface. (B) costs an untaught click (cards never depend on undocumented acts); (C) rewrites approved copy — hers, not tonight's; (D) reorders her approved legs — never. **PROVISIONAL P-U2-16:** (B) and (C) recorded as her alternatives. The quick-entry focus re-grab stays RECORDED-NOT-FIXED at the implementer's reasoning (shared capture box, needs a red Mac pin first, racy beside the tour's release) — minted as its own VX ticket so it is owned, not dropped.
+
+**THE FIX ROUND CLOSES (the implementer, 2026-10-08).** Every walk item and every assessment BUILD item is dispositioned: F-U2-W-1, F-U2-W-2 (option A) and A1–A7 are built; A2's card-width flex is not built (reason in its row); the focus re-grab is VX-112. Core `swift test` at the end: **2381 tests in 273 suites + 40 in 6 GREEN**. `build-for-testing` GREEN, no warning in a touched file.
+
+**THE FINAL STAGE-WINDOW COMMANDS for the verify window** (from `<home>/dev/variorum-13s/App/Variorum`, foreground, `pipestatus`, the "Test run with N tests" line; the `PostureSwitchTests` reds are VX-106's baseline and in neither list):
+
+Run 1 — the tour's pins, U1a's offer, the registry walk, the colour pin (expect TourScriptTests 7 · TourSpotlightTests 7 · TourEngineTests 5 · TourEntryTests 1 · TourEndCardTests 1 · TourPoolTuckTests 1 · TourOfferLineTests 6 · CapabilityRegistryTests 29 · NoLiteralColourTests 2 = **59 tests in 9 suites**):
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/TourScriptTests -only-testing:VariorumTests/TourSpotlightTests \
+  -only-testing:VariorumTests/TourEngineTests -only-testing:VariorumTests/TourEntryTests \
+  -only-testing:VariorumTests/TourEndCardTests -only-testing:VariorumTests/TourPoolTuckTests \
+  -only-testing:VariorumTests/TourOfferLineTests -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/NoLiteralColourTests
+```
+Run 2 — the first window's 49 suites, as is, plus the two suites that mount what this round touched beyond them (`MembershipChoiceTests` mounts the Pool, `TakesArticleScrollTests` the Takes bar). Expect 210 + 20 + 40 = **270 tests in 51 suites**:
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/BookcaseQuickEntryPlacementTests -only-testing:VariorumTests/BookcaseRowFreezeTests \
+  -only-testing:VariorumTests/BookcaseCensusOverlayTests -only-testing:VariorumTests/BookcaseDragFaceTests \
+  -only-testing:VariorumTests/QuickEntryBarTests \
+  -only-testing:VariorumTests/NoteBoxCompositionTests -only-testing:VariorumTests/NoteBoxGeometryTests \
+  -only-testing:VariorumTests/PostDetailModeMemoryTests -only-testing:VariorumTests/PostDetailRoutingTests \
+  -only-testing:VariorumTests/SidebarSmokeTests -only-testing:VariorumTests/WriteTakesPanelTests \
+  -only-testing:VariorumTests/StarredScrollLayoutTests -only-testing:VariorumTests/StarredScrollMountTests \
+  -only-testing:VariorumTests/BookIndexEditingTests -only-testing:VariorumTests/BookIndexLandingTests \
+  -only-testing:VariorumTests/BookIndexGroupingTests \
+  -only-testing:VariorumTests/BookOutlineLandingTests -only-testing:VariorumTests/BookOutlineRowsTests \
+  -only-testing:VariorumTests/BookRedesignMountTests \
+  -only-testing:VariorumTests/BookFocusFoldTests -only-testing:VariorumTests/BookViewTests \
+  -only-testing:VariorumTests/OutlineWritingSurfaceTests -only-testing:VariorumTests/SpreadBookViewTests \
+  -only-testing:VariorumTests/CommitBarLayoutTests \
+  -only-testing:VariorumTests/TakesArticleRenderTests -only-testing:VariorumTests/TakeCardDoorTests \
+  -only-testing:VariorumTests/TakesEmptyStateTests \
+  -only-testing:VariorumTests/ContextBarCaptureTests -only-testing:VariorumTests/NoteWindowFirstPassTests \
+  -only-testing:VariorumTests/BookAnchorTests -only-testing:VariorumTests/BookCarryTests \
+  -only-testing:VariorumTests/PagedAnchorReportTests -only-testing:VariorumTests/BookChooserOrderTests \
+  -only-testing:VariorumTests/ContextBarTests -only-testing:VariorumTests/AscentDoorTests \
+  -only-testing:VariorumTests/AscentRoutingTests -only-testing:VariorumTests/MultiBookEditNoteRuleTests \
+  -only-testing:VariorumTests/MultiBookEditNoteTriggerTests -only-testing:VariorumTests/DivergeDoorTests \
+  -only-testing:VariorumTests/MastheadTagDoorTests -only-testing:VariorumTests/PoolTuckFaceTests \
+  -only-testing:VariorumTests/ShellChromeTests -only-testing:VariorumTests/SidebarLayoutTests \
+  -only-testing:VariorumTests/OneTimeCodeAutoFillTests \
+  -only-testing:VariorumTests/NavigationHistoryTests -only-testing:VariorumTests/OpenNotesTests \
+  -only-testing:VariorumTests/WorkspaceNamingTests -only-testing:VariorumTests/WorkspaceModelTests \
+  -only-testing:VariorumTests/NavigationDoorsTests \
+  -only-testing:VariorumTests/MembershipChoiceTests -only-testing:VariorumTests/TakesArticleScrollTests
+```
+The red-on-old evidence each new pin owes at that window: `TourEndCardTests` reads the walk's truncation (the old one-line clamp drew one line where two are needed); the single-ring arm reads the walk's two-ring capture; `TourPoolTuckTests` reads the toggle's re-close (a second `toggleTucked` would have closed the run). Before the reruns, the window can revert each fix and run its pin to watch it fail first, if it wants the evidence; the pins are written so that it can.
