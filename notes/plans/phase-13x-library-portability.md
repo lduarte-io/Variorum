@@ -1545,3 +1545,29 @@ at the registry) was not taken: it would move a her-facing string out of the cop
 `Persistence/Migrations.swift` edits (marker stays 12); zero `Sources/VariorumCore/Sync/`
 lines (R2-1's seam is Shared, as the brief expected); her real store untouched; no
 subagents; foreground waits only; no trailers; commits per fix, each pushed.
+
+## THE MORNING SITTING (2026-10-07 — her rulings, verbatim where hers)
+
+- **The ratify bundle: RATIFIED WHOLE** — P-U1-1…5 · P-U2-1…5 · P-R1-1 · P-F1-1…4 · F2's
+  await-then-re-route shape, all 16 as recorded. They land in QUESTIONS at the merge moment.
+  Her one note, verbatim: *"the only note i'll make is that VX-80 has been made and I want you
+  to pull it in now and make the fixes under /architect-phase discipline. I'm concerned about
+  some of the mechanics of airdropping and how they'll work when I already potentially have a
+  different key on the machine, if all the key mechanics have been thought through, etc."*
+- **VX-80 PULLED INTO 13x (supersedes her incident-day "after 13x is merged in"):** the
+  Castle-follow recovery-door fix builds NOW, on THIS branch, under this phase's held
+  Sync/-custody slot — a fresh Fable implementer (custody seam = Fable end to end), the
+  record file `notes/plans/fixes/vx-80-castle-follow-recovery-door.md` brought over from its
+  branch as the brief's spine, pin-before-fix per the record's named red-on-old shape, its own
+  cold-review round over the VX-80 diff before the merge. VX-80 closes with the 13x PR;
+  commits say "Part of VX-80". The vx-80 branch retires at the merge (its one commit is the
+  record, which rides here).
+- **The walk gate: UNLOCK WHILE I DRIVE** — she Touch-IDs the dev store at the walk; no
+  re-pose.
+- **The acceptance legs: Pro → Air, guided, AFTER the walk.** Known wrinkle to solve at the
+  leg: the Air's installed app is public 0.9.2 (5178), which has no 13x doors — the receiving
+  side needs a 13x build (plan: a dev build carried to the Air, her hands; decided at the leg).
+- **The two workflow hiccups: RULE NOW** — options presented at this sitting; rulings land
+  below when made.
+- Operating context: oct7coordinator's author hold covers this closeout's walk, legs, short
+  Mac pin runs and the /Applications refresh; this session messages it at the merge.
