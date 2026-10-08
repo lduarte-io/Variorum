@@ -438,3 +438,20 @@ is the builder's call; I flag it so the pin can cover the Done too.
 **[NIT] the class sweep's row 1 — AGREE.** The row states the posture gate as the safety mechanism without its limit.
 If the MAJOR is fixed in this unit the row becomes "the vault's word (`masterWrappedByAppleHeld != nil`) + the
 readable / vault-id refusals"; if deferred, the row must carry the residual the way row 2 carries its corner.
+
+## ROUND 1 — ORCHESTRATOR DISPOSITION (2026-10-08, overnight mandate — her word: "use your own judgement on what's in scope")
+
+All three findings AGREED by the implementer with self-traced mechanisms (c40cd03b); the orchestrator verified the
+MAJOR's premise in code (the ceremony fetches the vault at :524; the Apple-held decision at :1193 reads
+`leaves.posture()`). **RULED IN-UNIT, all three** — the same stale-posture class this ticket exists to close, one call
+above the key-file fix; leaving the MAJOR out would keep a road that silently flips the ACCOUNT's posture.
+Scope for the fix pass, including the implementer's refinements: (1) the vault's word (`masterWrappedByAppleHeld != nil`)
+replaces the posture guard in `appleHeldCopyForStandard` AND its door twin `appleKeyReadable(keptUnder:)`, keeping the
+readable/vault-id refusals; (2) the harness's Standard worlds get a vault Apple-held copy (a parameter; the deliberate
+mismatch tests opt out) — every moved test named in the record with its reason, none weakened; (3) the double-crash
+marker carries the road's facts AND an explicit another-device bit, so the second resume keeps the custody move, the
+retirement, the offer, the Done's other-device sentence and the words rule; (4) the NIT's row rewritten to the final rule.
+Red-on-old pins per finding, a named revert each. **VX-106:** if the harness change turns VX-106's two tests green, that
+is RECORDED, not claimed as VX-106's fix — the arm-order question stays variorum-da's (a harness fix can hide a product
+question). Per the cross-model flow the REVIEWER makes the final call and implements; then the suites green; then one
+implementer sanity pass.
