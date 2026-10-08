@@ -56,5 +56,16 @@ moved-aside one) can still be opened afterward, by which credential.
    right thing and never merge one account's library into another's sync?
 9. **The same library on two Macs after a hand-off.** Same store id on both machines: device
    identity, cursors, the outbox, conflict-as-variant — does anything collide or double-push?
-10. **Anything else that could go wrong** — her words. Look for the road nobody wrote a test
-    for.
+10. **Anything else that could go wrong — and this one is NOT optional and NOT bounded by the
+    list above.** Her explicit instruction (2026-10-07): the reviewer must go BEYOND what her
+    prompt and foci 1–9 cover and really *think* — independently and adversarially — about
+    what different problems could arise. Foci 1–9 are where she happened to look; she is
+    concerned something is still being missed precisely because nobody has thought of it yet.
+    So: before closing, spend real effort generating your OWN failure scenarios for a phase that
+    moves encrypted libraries and their keys between files, folders, Macs, postures and
+    accounts — new combinations, unusual user sequences, filesystem and OS behaviors, timing,
+    partial states, things a real person would plausibly do that no test imagines. Trace each
+    candidate in the code. Report every one you generated in a dedicated **"Beyond the foci"**
+    section: the scenario, the traced outcome, and its verdict (a finding with severity, or
+    SAFE with the mechanism that makes it so). An empty or token section is itself a failure of
+    this focus.
