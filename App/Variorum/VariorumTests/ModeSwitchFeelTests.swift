@@ -116,6 +116,10 @@ struct ModeSwitchFeelTests {
                 UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
                 UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
             }
+            // 13s-b U1a (A JUSTIFIED EDIT): this rig was measured in the world
+            // a voiceless store used to read — Terminal. A store with no voice
+            // reads Study since her 2026-10-05 ruling, so the world is named.
+            try session.operations.setThemeVoice(.terminal)
             let theme = ThemeStore(session: session)
             let observing = Task { await theme.start() }
             defer { observing.cancel() }

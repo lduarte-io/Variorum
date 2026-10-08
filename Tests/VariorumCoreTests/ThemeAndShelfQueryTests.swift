@@ -12,7 +12,12 @@ struct AppearanceSettingsTests {
     @Test func defaultsMatchTheSittingsLetter() throws {
         try withOperations { _, db in
             let settings = try db.read { try Queries.themeSettings($0) }
-            #expect(settings.voice == .terminal, "R1: the Terminal voice LEADS")
+            // 13s-b U1a (her explicit ruling, 2026-10-05 — "default mode study
+            // is an explicit ruling"): a STORE that carries no voice wakes in
+            // Study. JUSTIFIED EDIT: this line pinned R1's Terminal here; the
+            // ruling moved the unset read and nothing else (the next suite
+            // pins what stays).
+            #expect(settings.voice == .study, "2026-10-05: a fresh store wakes in Study")
             #expect(settings.seamsVisible == false, "§12: boundaries invisible at rest")
             #expect(settings.editingIndicator == .off, "R14/R22: off is the default")
             #expect(settings.inlineComments == false, "R7: margin is the ruling")
@@ -119,9 +124,49 @@ struct AppearanceSettingsTests {
                     """)
             }
             let settings = try db.read { try Queries.themeSettings($0) }
-            #expect(settings.voice == .terminal)
+            // 13s-b U1a: an unreadable voice reads as the store's own default,
+            // which is Study since 2026-10-05 (a JUSTIFIED EDIT of `.terminal`).
+            #expect(settings.voice == .study)
             #expect(settings.editingIndicator == .off)
         }
+    }
+
+    // MARK: - Study as the fresh-store voice (13s-b U1a — her 2026-10-05 ruling)
+
+    /// **The flip is the UNSET read and nothing else.** Her ruling: a fresh
+    /// store wakes in Study; existing stores keep whatever voice is set — a
+    /// default flip, never a migration. So: no key reads Study; a store that
+    /// CARRIES a voice reads exactly that voice, Terminal included; and the
+    /// read writes nothing (no seed, no outbox row — a migration in disguise
+    /// would be both).
+    @Test func aFreshStoreWakesInStudyAndAStoreThatCarriesAVoiceKeepsIt() throws {
+        try withOperations { ops, db in
+            #expect(try db.read { try Queries.themeSettings($0) }.voice == .study)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'theme_voice'") == 0,
+                    "no seed: the default lives in the read")
+            #expect(try !db.outboxContains("setting", "theme_voice"),
+                    "reading the default wrote nothing to sync")
+
+            try ops.setThemeVoice(.terminal)
+            #expect(try db.read { try Queries.themeSettings($0) }.voice == .terminal,
+                    "a store carrying Terminal keeps Terminal")
+            try ops.setThemeVoice(.study)
+            #expect(try db.read { try Queries.themeSettings($0) }.voice == .study)
+        }
+    }
+
+    /// The two defaults are NAMED apart on purpose: the voice an unanswered
+    /// STORE reads (Study, the ruling) and the placeholder a host draws
+    /// before any store has answered — or forever, with no store at all —
+    /// which stays the leading voice (R1's Terminal), `VoiceTokens.fallback`'s
+    /// twin. Moving the placeholder would re-voice every storeless host (the
+    /// lobby, previews, every mounted test surface) without a store ever
+    /// having said Study.
+    @Test func theUnsetStoreVoiceIsStudyAndThePlaceholderStaysTheLeadingVoice() {
+        #expect(Queries.ThemeSettings.unsetStoreVoice == .study)
+        #expect(Queries.ThemeSettings().voice == .terminal,
+                "the pre-landing / storeless placeholder is unchanged")
     }
 
     // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)

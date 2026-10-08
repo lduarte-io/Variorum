@@ -145,7 +145,10 @@ struct TakesEntryBandTests {
                 made.append((minted.block.id, minted.variant.id))
             }
             if !flashOn { try session.operations.setArrivalFlash(false) }
-            if voice != .terminal { try session.operations.setThemeVoice(voice) }
+            // 13s-b U1a (A JUSTIFIED EDIT): a store with no voice reads STUDY
+            // since her 2026-10-05 ruling, so the Terminal arm must say so —
+            // left unset it would silently measure Study twice.
+            try session.operations.setThemeVoice(voice)
             // Her settings, as the app hands them down (the one store every
             // surface reads — a board with no store reads the defaults).
             let theme = ThemeStore(session: session)
