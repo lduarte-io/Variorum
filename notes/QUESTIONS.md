@@ -2260,3 +2260,27 @@ and keep the old citations; this table is how they resolve.)*
 *(Next free number: **#202** — #200 is VM-10's, minted 2026-10-07. The previous marker here read #179 and was STALE — entries through #188 already existed below it; corrected at the VM-5 merge, which also renumbered the mobile branch's eleven entries to #189–#199 above this line.)*
 
 #201 — **THE 13o RATIFY BUNDLE (2026-10-07; the binding records are `notes/plans/phase-13o-search.md`'s U1/U2/U3 RECORDs + the ladder sections — each PROVISIONAL built as its (a), each a line or a constant to change).** The sets: **P-13o-U1-1…10** (the date-parse edges — with U1-4's wording AMENDED by the ladder: the type-ahead tail is a prefix only at ≥2 characters AND when the word ends the input; the kind weights title/book 3 · chapter 2.5 · block name 2 · label 1.5 · take 1 · comment/notes 0.8 with the ×1.25 shown-take boost; a text-less query returns no passages; released blocks indexed but never listed; `#path` case-insensitive; U1-5 scraps-shared-room ALREADY RATIFIED at your word same day) · **P-13o-U2-1…9** (the finder's design-as-built edges incl. #6 a `#tag` alone asks for words, #7 the sort menu reads "relevance · best first" while results show, #8 non-prose passages say what they are + the sheet replaces Cards, #9 the when door applies at once and opens its popover) · **P-13o-U3-1…8** (the join's directions/ranking/wording; a book-state facet narrows to BOOKS ONLY — the most product-shaped one, its interplay with the scope picker and the day door yours; "living" counts a malformed rule as a rule; the archived marks; the book band's words; the book's search living with the book view; the window road's shape). Plus two recorded observations for your walk: the worn-day lead group carries true counts + the road but no preview lines (honest, uneven — an optional same-statement top-lines read is the named follow-up), and VX-79 owns the rebuild/integrity FACE (the ops exist, pinned, faceless). **Status: open — walk at your next sitting.**
+
+## 13x — Library portability (2026-10-08)
+
+#202 — **THE 13x BUNDLE (record: `notes/plans/phase-13x-library-portability.md`).** **RATIFIED by her at the
+morning sitting (2026-10-07), all sixteen as recorded:** P-U1-1…5 (the classifier's extra honest verdicts —
+`plaintextLibrary`, `.unreadable(reason:)`, several-stores reported never picked; same-day " (2)" naming; the
+move-aside mechanics) · P-U2-1…5 (welcome = the absent-store face + File menu; the hold banner renders whenever
+held, Resume one press; Restore lists the in-container folder only; a gated item beside a differing opener composes
+as `adoptOpeningKey`; a refused custody save never aborts the adoption) · P-R1-1 (Replace All Keys / Use Castle
+refuse under a standing hold; Use Standard open; the crashed-rotation resume exempt) · P-F1-1…4 (a full plaintext
+library keeps its four local tables — a returner; the phone's hold gate nil by construction; the BLOCKER notice's own
+`FollowNotice` kind; the hand-off destination a chosen folder, the act declared) · F2's await-then-re-route.
+**PROVISIONAL — made AFTER her ratification, for her review (each one line to overturn):** (a) **F3's staged read**
+(the orchestrator's Q1–Q4 rulings): every read of a picked file runs on a private copy in a per-consult owner-only
+temp folder removed by `defer` — a crash can leave one (ciphertext, or plaintext only when the picked file already
+was); its copy cost ∝ the picked library, accepted for a deliberate one-time act. (b) **R4-1's fresh-slot failure
+sentence**: "The library couldn't be opened. No library was here before, nothing was moved, and the file you picked
+was only read." (c) **R4-2/W-4's account-less banner variant**: "…Sync is waiting until you press Resume. To keep
+something from this backup, duplicate it first — duplicates stay." — shown only when the Mac has no account, read at
+render. (d) **W-3's notice sentence**: the Castle/Apple-wrap follow notice says the copy is "from before Castle" and
+names no cause. Words are 13s's to re-voice; the facts are this phase's. Her rulings at the close, recorded here as
+their home: **no iCloud-destination warning on the hand-off, for now** ("note it for if the question ever comes up
+later again"); **no unnecessary caps in rendered copy**. Tickets born of the close: VX-95 · VX-99 · VX-100 · VX-101
+and the landing-residuals ticket. **Status: (a)–(d) open for her eye; the rest RATIFIED.**
