@@ -256,3 +256,18 @@ The parked prompt above stands with exactly these changes: (a) the seat line unc
 ### If she resumes ON THE AIR (paste-ready)
 
 > /architect-phase vx-7 — resume 13s-b at the MOCKUP WALK, on the Air. Seat yourself: `cd ~/dev/variorum && git pull && git switch vx-7-13s-voice-onboarding && git pull` (the Air's one clone switches branches — no worktrees here), and `git pull` the shared memory repo FIRST (`~/.claude/projects/-<home>-dev-variorum/memory`). NEVER run `Tools/vx sync` off main — read `notes/TICKETS.md` as committed. Read WHOLE: `notes/plans/phase-13s-voice-onboarding.md` (kickoff → KICKOFF RECORD → SITTING RECORD R-13s-1…5 → EXECUTION PLAN → RESUME PROMPTS), the intake `notes/plans/phase-13s-onboarding-intake-2026-10-04.md`, and the memory file `vx-7-13s-run-state`. Then give me the mockup's path — `~/dev/variorum/notes/plans/13s-mockups/onboarding-tour.html` — I'll walk the 17 frames and report; you record my rulings VERBATIM repo-first (numbering continues R-13s-6+), bring me the Q1–Q8 bundle with recommendations, iterate the mockup same-day, commit+push per piece (the memory repo immediately after every write). NO Swift before my per-screen approval. The Air's posture is a rule: headless `swift build`/`swift test` at most — EVERY suite/walk runs on the Pro via the stage, and stage scheduling belongs to the 13o session on the Pro (a mockup sitting needs none; defer build-batch stage coordination to a Pro-seated session or ssh per CLAUDE.md).
+
+## U1a RECORD (the first-open surface, the Sync-free half — Opus implementer, Pro seat, 2026-10-08)
+
+**What this unit did NOT do (first line, per the contract):** nothing yet — live record; this line is rewritten at close.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 — quick entry back to the Bookcase's bottom (R-13s-3) | IN-PROGRESS — trace done (R3 → R102 hug → R109; see piece notes); the move is next |
+| 2 — the tour offer line (R-13s-6/13) + its local retire-forever flag | NOT-STARTED — design: pure lifecycle rule in core `Domain/TourOffer` (headless), a UserDefaults ledger + model app-side, the line on the Bookcase above the hint bar, right side |
+| 3 — Study as the fresh-store default voice (2026-10-05) | NOT-STARTED — design: the unset-key read in `Queries.ThemeSettings` flips; stores carrying a value untouched by construction |
+| 4 — the logo (R-13s-24/25): AppIcon set, About, the offer line's mark | NOT-STARTED |
+| 5 — Help ▸ tour entry (shares piece 2's stub) | NOT-STARTED |
+| stage-window Mac runs | NOT-STARTED — commands land in the self-assessment |
