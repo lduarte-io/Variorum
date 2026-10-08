@@ -370,7 +370,16 @@ final class PostureSwitchRunner {
     /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
     /// step 2 — A READ (never minted), and the vault's id when it names one.
     private func appleKeyReadable(keptUnder fetched: KeyVaultClient.FetchedVault) -> Bool? {
-        guard leaves.posture() == .standard else { return nil }
+        // VX-99 round 1 (MAJOR): the VAULT's word, never the posture read.
+        // A Castle account owes no Apple copy (nil); a Standard one does.
+        // The door is the twin of `appleHeldCopyForStandard`'s belt — before
+        // this both gated on `leaves.posture() == .standard`, so a STALE or
+        // INDETERMINATE posture (the account left/entered Castle elsewhere and
+        // this device had not reconciled) decided the Apple copy, which on the
+        // ceremony's enrolled road FLIPS THE ACCOUNT's posture (decision 8:
+        // posture is the account's once a vault exists; decision 35: no
+        // posture-driven write on a stale reading).
+        guard fetched.format.masterWrappedByAppleHeld != nil else { return nil }
         guard let apple = leaves.appleKeys.read() else { return false }
         if let vaultID = fetched.format.appleKeyID, vaultID != apple.id { return false }
         return true
@@ -1187,10 +1196,20 @@ final class PostureSwitchRunner {
     /// When the vault names an id, the key read must BE that id: a
     /// different Apple ID's device could only hand M′ to the wrong Apple
     /// account's key. Either miss refuses (`appleKeyUnreachable`).
+    /// VX-99 round 1 (MAJOR): the owed-or-not test is the VAULT's word —
+    /// `masterWrappedByAppleHeld != nil` (Standard) — not `leaves.posture()`.
+    /// The ceremony fetches the vault one branch above (:524) and this belt
+    /// holds it, so decision 8 (posture is the account's once a vault exists)
+    /// and decision 35 (no posture-driven write on a stale/indeterminate
+    /// reading) govern: a stale CASTLE read on a genuinely Standard account
+    /// must NOT drop the copy, and a stale STANDARD read on a Castle account
+    /// must NOT add one. The caller still gates `entersCastle ? nil : …`, so
+    /// the enter-Castle road (whose fetched vault is still the OLD Standard
+    /// one) is unaffected.
     private func appleHeldCopyForStandard(
         keptUnder fetched: KeyVaultClient.FetchedVault
     ) throws -> (key: SymmetricKey, id: String)? {
-        guard leaves.posture() == .standard else { return nil }
+        guard fetched.format.masterWrappedByAppleHeld != nil else { return nil }
         guard let apple = leaves.appleKeys.read() else {
             leaves.log("posture switch: Replace All Keys under Standard — the iCloud key is not readable here; refused before any write")
             throw PostureSwitchError.appleKeyUnreachable
@@ -1359,7 +1378,27 @@ final class PostureSwitchRunner {
                 material = try CorpusRotation.materialFollowing(fetched.format, master: held.masterSymmetricKey)
             }
             guard let held = material else { throw PostureSwitchError.syncKeysUnavailable }
-            try await writeMarker(marker.advanced(to: .reencrypt))
+            // VX-99 round 1 (MINOR): the `.reencrypt` marker carries THE
+            // ROAD's facts, not `marker.advanced(to:)`'s copy of the ORIGINAL
+            // marker (`entersCastle: false` for a Replace All Keys, no follow
+            // flag). A SECOND crash inside the walk below leaves this marker
+            // pending; without the road's facts the next resume read the
+            // marker's stale `entersCastle`/`follow` — `byAnotherDevice`
+            // cannot re-fire at `.reencrypt` (the corpus key id now matches) —
+            // and moved custody to `.auto`, said "keys replaced" on a Castle
+            // account, and skipped `retireOldKeyFiles`. The Apple copy was
+            // never at risk (`appleCopy: !vaultSaysCastle` reads the fresh
+            // fetch). Documented residual (the record's ROUND-1 FIX PASS):
+            // the Done's other-device sentence and the latent words rule
+            // still key on `byAnotherDevice`, so a double-crashed
+            // another-device resume speaks the ordinary Done; both are
+            // cosmetic / unreachable in production (both resume doors pass
+            // `recoveryWords: nil`).
+            try await writeMarker(RotationMarker(
+                step: .reencrypt, entersCastle: roadEntersCastle,
+                oldKeyFingerprint: marker.oldKeyFingerprint, newKeyFingerprint: marker.newKeyFingerprint,
+                newCorpusKeyID: marker.newCorpusKeyID, startedAt: marker.startedAt,
+                follow: (marker.isFollow || byAnotherDevice) ? true : nil))
             let final = try await reencryptAndComplete(vault: vault, transport: transport, material: held)
             material = final.material
             reencrypted = final.reencrypted

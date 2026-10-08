@@ -359,7 +359,7 @@ local-only, the library) is Castle.
 
 | # | writer (file:line) | verdict | the gate / the mechanism |
 |---|---|---|---|
-| 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d); revert V99-A | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on `posture == .standard` (and refuses an unreadable / another account's A); local-only: `!entersCastle && posture == .standard`; entering Castle: nil |
+| 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d), the round-1 MAJOR pin; reverts V99-A, V99-C | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on **THE VAULT'S WORD** (`fetched.format.masterWrappedByAppleHeld != nil` — round 1's MAJOR fix, replacing the `posture == .standard` guard that a stale/indeterminate read could flip; the readable / vault-id refusals kept) AND the caller's load-bearing `entersCastle ? nil` suspenders (the enter-Castle road's fetched vault is still the OLD Standard one); the door twin `appleKeyReadable` reads the same word; local-only: `!entersCastle && posture == .standard` (no vault — the library's own posture, decision 8); entering Castle: nil |
 | 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (the decisions :1338–1339, the call :1376) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) + pin (e) (the another-device road); reverts V99-A, V99-B | the orchestrator's ruling (5ce7175b): `appleCopy: !vaultSaysCastle` — the vault just fetched — for the whole arm; the road's `entersCastle` from the vault when `byAnotherDevice`, the marker's otherwise. (First built as `!marker.entersCastle && posture == .standard` at 37e26d2e; superseded at 2a667130.) Residual: the double-crash corner under THE RESUME-RULE DELTA |
 | 3 | the same writer via `runFollow` (:799, :818 — incl. the ceremony's CAS-refused → follow road) | SAFE (behavior unchanged) | `appleCopy: !entersCastle`, `entersCastle = fetched.format.masterWrappedByAppleHeld == nil` — the vault just fetched (decision 8). Pinned: `aCastleFollowerOfReplaceAllKeysFinishesTheWalkAndListsNoOffer` (`apple == nil`), `aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitch…` (`apple == nil`), the Standard sibling in (c) (`apple != nil`) |
 | 4 | `PostureSwitchRunner.followIntoStandard` (:912, the write :926) | SAFE | reached only through `followIntoStandardAct` (`VariorumApp.swift:271`, `VariorumMobileApp.swift:129`) from `reconcileFollow`'s arm `reading.hasAppleHeldCopy … !switchInProgress` (`ProtectionController.swift:707`) — the VAULT says Standard (the account left Castle elsewhere, §7). Pinned: `theFollowIntoStandardAddsTheAppleCopy…` |
@@ -455,3 +455,65 @@ Red-on-old pins per finding, a named revert each. **VX-106:** if the harness cha
 is RECORDED, not claimed as VX-106's fix — the arm-order question stays variorum-da's (a harness fix can hide a product
 question). Per the cross-model flow the REVIEWER makes the final call and implements; then the suites green; then one
 implementer sanity pass.
+
+## ROUND 1 — FIX PASS (the reviewer implements, cross-model flow — LIVE STATUS; PENDING = unverified)
+
+**Final calls (the reviewer, under the coordinator's authorization 2026-10-08):** all three round-1 findings
+CONFIRMED and built in-unit per the orchestrator's disposition. Scope exactly as disposed: the vault's word in
+`appleHeldCopyForStandard` AND its door twin `appleKeyReadable`; the harness's Standard worlds made
+account-consistent via one parameter with the deliberate-mismatch tests opting out; the double-crash `.reencrypt`
+marker carrying the road's facts; the NIT's sweep row rewritten.
+
+- **The MAJOR fix — DONE, compiles (TEST BUILD SUCCEEDED).** `PostureSwitch.swift`:
+  `appleHeldCopyForStandard(keptUnder:)` and `appleKeyReadable(keptUnder:)` both gate on
+  `fetched.format.masterWrappedByAppleHeld != nil` (the vault's word) in place of `leaves.posture() == .standard`,
+  keeping the readable / vault-id refusals. The caller's `entersCastle ? nil : …` guard STAYS load-bearing (the
+  enter-Castle road's fetched vault is still the OLD Standard one, so the belt alone would read it Standard and add a
+  copy — the `entersCastle` guard is the suspenders). The local-only road (`!entersCastle && posture == .standard`,
+  :638) is UNCHANGED — a genuinely local-only library has no vault, so its posture IS its own (decision 8's second
+  sentence); not in the MAJOR's scope.
+- **The MINOR fix — DONE, compiles.** `PostureSwitch.swift` resume `.vaultWrite`/`.reencrypt` arm: the `.reencrypt`
+  advance is now `RotationMarker(step: .reencrypt, entersCastle: roadEntersCastle, …, follow: (marker.isFollow ||
+  byAnotherDevice) ? true : nil)` in place of `marker.advanced(to: .reencrypt)`. NO Sources/ touch: the fix stays
+  entirely in `App/Variorum/Shared/PostureSwitch.swift` using the EXISTING `RotationMarker` fields — I deliberately
+  did NOT add a marker field (which would touch `Sources/VariorumCore/Sync/CorpusRotation.swift`, outside this
+  custody round's ruled surface). The load-bearing facts (roadEntersCastle → custody to the gate, retirement, the
+  offer, outcome.entersCastle) are all carried. **Documented residual (not built — needs a field in Sync/):** the
+  Done's other-device sentence (`followedAnotherDevicesSwitch`/`otherDeviceName`) and the words rule
+  (`recoveryWords: byAnotherDevice ? nil : …`) still key on `byAnotherDevice`, which is spent at `.reencrypt`, so a
+  double-crashed another-device resume speaks the ORDINARY Done and (if a caller passed words) would land them —
+  both are cosmetic-only / unreachable in production (both resume doors pass `recoveryWords: nil`,
+  `PostureSwitchModel.swift:549`). Carrying them needs an `RotationMarker.byAnotherDevice` field (a Sync/ change) —
+  flagged for the orchestrator.
+- **The harness change — DONE, compiles.** `PostureSwitchTests.makeWorld` gains `vaultSaysCastle: Bool? = nil`
+  (nil ⇒ derive from `standard`: a Standard world's ACCOUNT is now genuinely Standard — the vault carries an
+  Apple-held copy under this device's A, landed right after `setUp`). Five deliberate-mismatch tests opt out with
+  `vaultSaysCastle: true` (named below). No assertion weakened — the opt-outs keep their Castle-shaped vault and
+  their existing expectations verbatim.
+  - MOVED / re-fixtured (reason: the fixture is now account-consistent; the production code's behavior on a genuinely
+    Standard account is UNCHANGED): the default Standard worlds' vault now carries A, so a Standard RAK keeps the
+    account Standard and a sibling follows into Standard (the behavior these tests already assert). No expectation
+    changed; the fixture was corrected. The suite run names every test whose pass/fail flips.
+  - OPT-OUTS (kept Castle-shaped, `vaultSaysCastle: true`): `theMismatchFollowReKeys…`,
+    `aStandardBornLibraryWithNoCustodyJoinsCastleThroughTheFollow`,
+    `aFollowKilledAfterTheReKeyResumesAndStillRetiresTheOldKeyFiles`, `aWrappedLegacyKeyFileStaysAtTheFollow`,
+    `thePosturePinsHoldInTheTwoDeviceWorld` (part a). Each is a documented posture-MISMATCH (a Standard-shaped
+    library FOLLOWING into a Castle account) and asserts `masterWrappedByAppleHeld == nil`.
+- **The two new pins — DONE, compile.** `PostureSwitchTests.swift`, after pin (e):
+  (MAJOR) `aStandardAccountsReplaceAllKeysUnderAStaleCastlePostureKeepsTheAppleCopyByTheVaultsWord`;
+  (MINOR) `aDoubleCrashedAnotherDeviceResumeKeepsTheRoadsCastleFactsNotTheStaleMarker`.
+- **Build:** `xcodebuild build-for-testing -scheme Variorum -destination 'platform=macOS'` (scratch DerivedData):
+  **TEST BUILD SUCCEEDED** — the pins, both fixes and the harness change compile. Also the phone compile re-run is
+  owed before close (shared file).
+- **Reverts (named BEFORE they run):** **V99-C** (the MAJOR) — in `appleHeldCopyForStandard` AND `appleKeyReadable`,
+  `fetched.format.masterWrappedByAppleHeld != nil` → `leaves.posture() == .standard` (the pre-fix guard). Expected:
+  RED on the MAJOR pin (the door `appleKeyReadable` + the vault/key-file Apple copy dropped under the stale Castle
+  read); every other test green. **V99-D** (the MINOR) — the `.reencrypt` advance back to
+  `marker.advanced(to: .reencrypt)`. Expected: RED on the MINOR pin alone (custody `.auto`, outcome not entersCastle,
+  the old key file not retired); every other test green, the MAJOR pin green.
+- **Runs owed (PENDING — under the stage slot):** PostureSwitchTests (red via V99-C, red via V99-D, full green), the
+  batch-1 suite set (the runner's whole reach + the Phase13p suites), the tutorial spine; core headless `swift test`
+  (the diff touches no `Sources/`, so the 13x baseline stands — a confirmation run only if time); the phone compile.
+  **VX-106's two pre-existing reds:** if the account-consistent fixture turns them green, RECORDED here, never
+  claimed as VX-106's fix (the arm-order question stays variorum-da's).
+- **The NIT — DONE.** The class-sweep row 1 rewritten below.

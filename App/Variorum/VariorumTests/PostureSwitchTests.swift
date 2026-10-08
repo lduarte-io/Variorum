@@ -577,8 +577,21 @@ struct PostureSwitchTests {
         deviceName: String = "test device",
         // F1 (BLOCKER-1): the emulated mirror's A5 visibility window, in
         // logical ticks (0 = none — every standing world).
-        mirrorHorizon: Int64 = 0
+        mirrorHorizon: Int64 = 0,
+        // VX-99 round 1 (harness, the orchestrator's disposition): whether the
+        // ACCOUNT (the vault) is Castle-shaped. nil = derive from `standard`
+        // (a Standard world's account is genuinely Standard — the vault carries
+        // an Apple-held copy under this device's A; a Castle world's account is
+        // Castle). Before VX-99 every makeWorld vault was Castle-shaped
+        // (`setUp` mints no Apple copy), so a Standard world was a posture
+        // MISMATCH (Standard key file + silent custody over a Castle-shaped
+        // vault) that MASKED the headline bug's direction (ii) — a Standard
+        // RAK ADDED the copy to a Castle-shaped vault. The deliberate-mismatch
+        // tests (the posture-pins two-device world; the Standard-shaped library
+        // FOLLOWING into Castle) pass `vaultSaysCastle: true` to keep it.
+        vaultSaysCastle: Bool? = nil
     ) async throws -> World {
+        let accountCastle = vaultSaysCastle ?? !standard
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-2b-switch-\(UUID().uuidString)", isDirectory: true)
         let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
@@ -646,6 +659,19 @@ struct PostureSwitchTests {
             #expect(keyStore.save(minted))
             material = minted
             vaultEmu = emu; vaultClient = client; mirror = server
+            // VX-99 round 1 (harness): a Standard account's vault carries the
+            // Apple-held copy of M under this device's A (sync setup's shape,
+            // decision 30/§3.4) — the fixture is now account-CONSISTENT, so a
+            // Standard RAK keeps it Standard and the vault's word drives the
+            // key file. `setUp` mints no copy (Castle-shaped), so land it here.
+            if !accountCastle {
+                let fetched = try #require(try await client.fetchVault())
+                try await client.updateVault(
+                    try fetched.format.settingAppleHeldCopy(
+                        masterKey: minted.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id),
+                    expectedRevision: fetched.revision,
+                    keyProof: KeyProofMaterial(master: minted.masterSymmetricKey))
+            }
         }
 
         // The key file beside the store (format 2, its own fingerprint name).
@@ -1830,7 +1856,10 @@ struct PostureSwitchTests {
     /// `.reencrypt` marker), and the old Standard-era key file stayed
     /// beside the Castle library.
     @Test func theMismatchFollowReKeysTheLibraryMovesCustodyBehindTheGateAndRemovesTheOldKeyFile() async throws {
-        let world = try await makeWorld()
+        // VX-99 round 1 (harness): a DELIBERATE MISMATCH — a Standard-shaped
+        // library (an `apple` copy in its key file, silent custody) over a
+        // CASTLE account; `vaultSaysCastle: true` keeps the account Castle.
+        let world = try await makeWorld(vaultSaysCastle: true)
         defer { world.tearDown() }
         let material = try #require(world.oldMaterial)
         let mirror = try #require(world.mirror)
@@ -1906,7 +1935,9 @@ struct PostureSwitchTests {
     /// road with no custody held is exactly this) — the composition pin the
     /// session's routing (`EnrollDirectionsTests`) relies on; recorded.
     @Test func aStandardBornLibraryWithNoCustodyJoinsCastleThroughTheFollow() async throws {
-        let world = try await makeWorld()
+        // VX-99 round 1 (harness): a DELIBERATE MISMATCH — a Standard-born
+        // library joining a CASTLE account; `vaultSaysCastle: true` keeps it.
+        let world = try await makeWorld(vaultSaysCastle: true)
         defer { world.tearDown() }
         let material = try #require(world.oldMaterial)
         let mirror = try #require(world.mirror)
@@ -1949,7 +1980,9 @@ struct PostureSwitchTests {
     /// resume did not know it was a follow — the Standard-era key file
     /// stayed beside the Castle library after a crash.
     @Test func aFollowKilledAfterTheReKeyResumesAndStillRetiresTheOldKeyFiles() async throws {
-        let world = try await makeWorld()
+        // VX-99 round 1 (harness): a DELIBERATE MISMATCH — a Standard-shaped
+        // library FOLLOWING into a Castle account; `vaultSaysCastle: true`.
+        let world = try await makeWorld(vaultSaysCastle: true)
         defer { world.tearDown() }
         let oldFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
         let oldURL = world.oldKeyFileURL
@@ -1982,7 +2015,9 @@ struct PostureSwitchTests {
     /// fingerprint-named file goes. RED ON OLD (batch C4): a removal keyed
     /// on the legacy NAME alone took it.
     @Test func aWrappedLegacyKeyFileStaysAtTheFollow() async throws {
-        let world = try await makeWorld()
+        // VX-99 round 1 (harness): a DELIBERATE MISMATCH — a Standard-shaped
+        // library FOLLOWING into a Castle account; `vaultSaysCastle: true`.
+        let world = try await makeWorld(vaultSaysCastle: true)
         defer { world.tearDown() }
         let oldFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
         var wrapped = StoreKeyEnvelope(storeID: oldFile.storeID)
@@ -2454,6 +2489,112 @@ struct PostureSwitchTests {
                 "the old Standard-era key file retired from the live folder (the follow's 2d.4 rule)")
         #expect(outcome.preSwitchSnapshots == [oldPair], "A was Standard-shaped: the follow's offer is listed")
         #expect(a.appleBacking.key == a.apple, "the iCloud key untouched")
+        #expect(try await a.marker() == nil)
+    }
+
+    // MARK: - VX-99 round 1 (the cold reviewer's findings — the vault's word on every road)
+
+    /// VX-99 round 1 (MAJOR) — THE VAULT'S WORD, NOT THE STALE POSTURE, ON THE
+    /// CEREMONY's ENROLLED ROAD. A genuinely STANDARD account (the vault
+    /// carries an Apple-held copy under this device's A) whose device READS
+    /// Castle — a stale/indeterminate reading (the account left Castle on
+    /// another device; this one has not reconciled). Replace All Keys here
+    /// must keep the account Standard: the vault KEEPS its Apple-held copy and
+    /// the new key file carries one. RED ON OLD (the production decision
+    /// reverted — V99-C): both `appleKeyReadable` (the door) and
+    /// `appleHeldCopyForStandard` (the belt) gated on
+    /// `leaves.posture() == .standard`, so the stale CASTLE read returned nil
+    /// — the vault write DROPPED the copy and the account silently RE-ENTERED
+    /// Castle, forcing every other device to follow (decision 8 / 35; §5's
+    /// Replace-All-Keys row: the vault under the SAME posture's wrappers).
+    @Test func aStandardAccountsReplaceAllKeysUnderAStaleCastlePostureKeepsTheAppleCopyByTheVaultsWord() async throws {
+        // A genuinely Standard account (the harness now lands the vault's A copy).
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let before = try await world.vault()
+        #expect(before.format.masterWrappedByAppleHeld != nil && before.format.appleKeyID == world.apple.id,
+                "a Standard account — the vault carries the Apple-held copy")
+        #expect(world.appleBacking.key == world.apple, "the iCloud key is readable here")
+        // THE STALE READING: the device still reads Castle (not yet reconciled).
+        world.posture = .castle
+
+        // THE DOOR owes the copy by the vault's word, not the Castle read.
+        #expect(try await world.runner.checkDoor().appleKeyReadable == true,
+                "the door reads the vault's word, not the stale Castle posture")
+
+        let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+        #expect(!outcome.entersCastle)
+        let material = try #require(outcome.material)
+        let after = try await world.vault()
+        #expect(after.format.masterWrappedByAppleHeld != nil && after.format.appleKeyID == world.apple.id,
+                "the account STAYS Standard — the vault keeps its Apple-held copy (never flipped to Castle by a stale read)")
+        #expect(try after.format.unwrapMaster(withAppleKey: world.apple.symmetricKey) == material.masterSymmetricKey,
+                "M′ under the account's own A")
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey))
+        #expect(newFile.apple != nil && newFile.appleKeyID == world.apple.id,
+                "Standard's Replace All Keys: the new key file carries the Apple copy under the account's own A")
+        #expect(try newFile.unwrapKey(apple: world.apple.symmetricKey) == newKey, "L′ under A")
+    }
+
+    /// VX-99 round 1 (MINOR) — THE DOUBLE-CRASH MARKER CARRIES THE ROAD's
+    /// FACTS. A's STANDARD Replace All Keys is killed BEFORE its own vault
+    /// write; B enters Castle but is itself killed MID-WALK, so the account is
+    /// Castle and the rotation INCOMPLETE; A resumes as the FOLLOW into B's
+    /// switch, picks up M′, and is killed AGAIN inside the re-encryption walk,
+    /// leaving a `.reencrypt` marker pending. A's SECOND resume must still
+    /// follow the ACCOUNT into Castle. RED ON OLD (V99-D): the `.reencrypt`
+    /// marker was `marker.advanced(to:)`'d from A's ORIGINAL Replace All Keys
+    /// marker (`entersCastle: false`, no follow flag), and `byAnotherDevice`
+    /// cannot re-fire at `.reencrypt` (the corpus key id now matches), so the
+    /// second resume moved custody to `.auto`, said "keys replaced" on a
+    /// Castle account, and skipped `retireOldKeyFiles`. (The Apple copy was
+    /// never at risk on either side — `appleCopy: !vaultSaysCastle` reads the
+    /// fresh fetch.)
+    @Test func aDoubleCrashedAnotherDeviceResumeKeepsTheRoadsCastleFactsNotTheStaleMarker() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let b = try await makeWorld(sharing: a, deviceName: "sibling device")
+        defer { b.tearDown() }
+        #expect(try StoreKeyEnvelope.load(at: a.oldKeyFileURL)?.apple != nil, "A's library is Standard-shaped")
+
+        // A's own Replace All Keys killed BEFORE its vault write.
+        arm(a, faultAt: .beforeVaultWrite)
+        await #expect(throws: PostureSwitchError.injectedFault(.beforeVaultWrite)) {
+            _ = try await a.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: a.words)
+        }
+        #expect(try await a.marker()?.step == .vaultWrite, "A's own Replace All Keys marker; its write never landed")
+        arm(a, faultAt: nil)
+
+        // B enters Castle but is itself killed MID-WALK: the account is Castle,
+        // the rotation INCOMPLETE (the vault carries a previous corpus key).
+        let mirror = try #require(a.mirror)
+        await mirror.setCrashNextReencrypt(true)
+        await #expect(throws: URLError.self) {
+            _ = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
+        }
+        #expect(try await a.vault().format.masterWrappedByAppleHeld == nil, "the account is Castle now")
+        #expect(try await a.vault().format.previousCorpusKey != nil, "B's rotation is still finishing")
+
+        // A resumes as the FOLLOW into B's switch, picks up M′, and is killed
+        // AGAIN inside the re-encryption walk — a `.reencrypt` marker is left.
+        #expect(a.posture == .standard, "A's posture read is still Standard — the stale shape")
+        await mirror.setCrashNextReencrypt(true)
+        await #expect(throws: URLError.self) {
+            _ = try await a.runner.resume(passphrase: "sesame")
+        }
+        #expect(try await a.marker()?.step == .reencrypt, "A's second-crash marker, mid-walk")
+
+        // A resumes ONCE MORE: the road's CASTLE facts must survive — the
+        // `.reencrypt` marker is the only carrier (byAnotherDevice is spent).
+        let outcome = try await a.runner.resume(passphrase: "sesame")
+        #expect(outcome.entersCastle, "the road followed B into Castle — not 'keys replaced' on a Castle account")
+        let aFile = try a.keyFile(outcome.newKeyFingerprint)
+        #expect(aFile.apple == nil && aFile.appleKeyID == nil, "a Castle account's key file carries no Apple copy (held on both sides)")
+        #expect(a.calls.custodyTargets.last == .biometric && a.posture == .castle, "custody to the gate, never silent")
+        #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path),
+                "the old Standard-era key file retired from the live folder (the follow's 2d.4 rule)")
         #expect(try await a.marker() == nil)
     }
 
@@ -4096,7 +4237,10 @@ struct PostureSwitchTests {
     /// written.
     @Test func thePosturePinsHoldInTheTwoDeviceWorld() async throws {
         // (a) Standard under Castle ⇒ the mismatch follow ⇒ gated at the next open.
-        let acting = try await makeWorld()
+        // VX-99 round 1 (harness): a DELIBERATE MISMATCH — the whole point of
+        // (a) is a Standard-shaped library under a CASTLE account;
+        // `vaultSaysCastle: true` keeps the account Castle-shaped.
+        let acting = try await makeWorld(vaultSaysCastle: true)
         defer { acting.tearDown() }
         let material = try #require(acting.oldMaterial)
         #expect(try await acting.vault().format.masterWrappedByAppleHeld == nil, "the 2b world's account is Castle-shaped")
