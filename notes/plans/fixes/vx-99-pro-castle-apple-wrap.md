@@ -932,7 +932,14 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
     mid-walk: the second start, the other ceremony and the follow each refused `switchInProgress`, each worded
     `resumeReplacingKeysBody`; a Use Castle killed mid-walk: each worded `resumeBody`.
   Build-for-testing of the pins commit 5ff2d440: DONE — **TEST BUILD SUCCEEDED** (`vx99-dd`, headless, no stage); its
-  products cloned aside (`r2b-red-products`) so the red runs on the pins commit's own bundle. Red run PENDING (stage).
+  products cloned aside (`r2b-red-products`) so the red runs on the pins commit's own bundle.
+- Red run: DONE — slot 5 (`vx-99-impl3`, claimed 07:06, zero Variorum instances), `PostureSwitchTests` over the `red`
+  bundle: **"Test run with 68 tests in 1 suite failed … with 4 issues"** — pin (a) 1 (:3223, the `.resumeAsk` guard: the
+  resume door refused; its three refusal controls green) · pin (c) 3 (:3339, the three Replace All Keys wordings; its
+  Castle half green); the other 65 green. Pin (b) read GREEN in that run, and rightly: it reads the pane SOURCE at run
+  time, and the working tree held the tip's faces. Run again with the two pane files checked out FROM 5ff2d440 (the pins
+  commit's own faces), that one test: **"Test run with 1 test … failed … with 4 issues"** — :3291 (bare `resumeBody`) +
+  :3293 (no selector caption), once per pane; its selector lines green. Tree restored (`git status` clean).
   ORDER, said plainly: the fixes below were written and built BEFORE the red run (to keep the stage slot to test runs
   alone); the red still runs on the bundle built from 5ff2d440, before any fix existed.
 - Fix (1): DONE (this commit) — `if facts.rotationInProgress, !isResume` in `start()`. Green PENDING.
