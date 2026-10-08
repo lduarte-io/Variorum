@@ -1170,7 +1170,7 @@ core `swift test` 2,284 tests / 258 suites EXIT 0; the widened Mac closeout runs
 **Canon deltas applied exactly as ruled:** OverallModel §9 + AppSpec §6 (the third trigger
 duty, R-13o-4) · AppSpec §7 (the local-only derived family) · §12 (the SEARCH contract line)
 · §14's head (13i-a/13i-b rolled to the archive) · QUESTIONS #201 (the ratify bundle) ·
-MobileSoul PL-47 (the parity row) · FuturePhases' 13o row CLOSED. **Tickets:** VX-5 Done at
+MobileSoul PL-47b (the parity row; renumbered from a duplicated PL-47 at the 13x closeout, 2026-10-08) · FuturePhases' 13o row CLOSED. **Tickets:** VX-5 Done at
 the merge · VX-44 Done with it (the row's library-search half IS this phase; replace-across-
 library was never its letter) · minted en route: VX-72 (Search Everything) · VX-73 (the
 power grammar + the band's future dropdown) · VX-78 (the pre-existing order flake) · VX-79

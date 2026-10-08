@@ -17,7 +17,7 @@
 5. **The post-merge /Applications refresh** runs through the stage coordinator together with vx-82andmore's. Your Pro
    is at **0.9.2 (5544) from 0787f028** now; the refresh brings four small wording fixes made after that build (the
    lowercase "whole", the "from before Castle" notice, the fresh-slot failure sentence, the account-aware banner).
-6. **Optional:** renumber MobileSoul's duplicated **PL-47** (minted for both 13r and 13o) whenever you like — 13x took
+6. ✔ **Done at your word (2026-10-08):** 13o's duplicate became **PL-47b** (13r keeps PL-47). Was: renumber MobileSoul's duplicated **PL-47** (minted for both 13r and 13o) whenever you like — 13x took
    PL-48 and left the others alone.
 
 ## What 13x is (for a fresh session)
