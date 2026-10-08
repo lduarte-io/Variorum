@@ -191,7 +191,13 @@ struct TutorialBooksLessonTests {
             #expect(text.contains("the \(Operations.welcomeShelfName) shelf"))
             #expect(text.contains("the \(Operations.starredNotesGatheringName) gathering"),
                     "the seeded gathering, by its own name")
-            #expect(text.contains("\u{25B8} \(StarCopy.starRow))"), "the star door, by the row's own word")
+            // Landing ladder R1 NIT-2 (the reviewer's fix, implementer AGREE):
+            // the probe's old trailing ")" anchored the lesson's parenthetical
+            // "(right-click it ▸ Star)" but read as a typo and coupled the pin
+            // to punctuation; the row's word is the claim, and it occurs once
+            // in this lesson's prose. KEPT behavior — green on both sides of
+            // this edit by design (nothing seeded changes).
+            #expect(text.contains("\u{25B8} \(StarCopy.starRow)"), "the star door, by the row's own word")
             // The U7 continuation (F-U7-1 RULED): the ONE seed tag both books'
             // shipped notes wear.
             #expect(text.contains("#\(SampleLibrarySeeder.classicsTagPath)"))
