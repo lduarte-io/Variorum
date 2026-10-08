@@ -133,7 +133,7 @@ chapters; no chapter renames; the two guide-pointing cards need no change.
 | 00-overview.md | DONE |
 | chapter-01-welcome.md | DONE |
 | chapter-02-writing.md | DONE |
-| chapter-03-takes.md | NOT STARTED |
+| chapter-03-takes.md | DONE |
 | chapter-04-structure.md | NOT STARTED |
 | chapter-05-deleting.md | NOT STARTED |
 | chapter-06-where-things-go.md | NOT STARTED |
