@@ -9,6 +9,24 @@ close; the morning note appended to `notes/handoffs/phase-13x-handoff.md`.
 
 ## LIVE STATUS
 
+**VX-106 BUILT — 2026-10-08 (the Fable implementer; three commits: 7cabf33d the record's finding + baseline,
+8fa9146d the precedence pin, and this close commit).** What this unit found and did, in one paragraph: the brief's
+piece 1 was ALREADY ON THE BASE — VX-99's `vaultSaysCastle` harness arm (155188c5/096361d7, merged at 9819bff8) is
+exactly the fix, through the real emulated-RPC road (`settingAppleHeldCopy` + `updateVault` under proof + CAS — the
+`relandAppleHeldCopy`/`leaveCastle` shape), and the two "reds" ran 69/69 GREEN on 4adb8801 (VX-99's own run, the
+greening "recorded, not claimed"); re-traced here, nothing to write. The unit's real deliverable is the NEW precedence
+pin `aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle` (PostureSwitchTests
+:4088–4207): a Castle-by-vault account + an Apple-wrapped live key file + a pending passphrase change (witnessed through
+`changeElsewhere` itself) ⇒ the reconcile owes `castleKeyFileAppleOpenable` and NO change notice; the follow by the
+vault's current word retires the file and records the current descriptor + digest, so no change notice remains. It
+COMPILES (Mac `build-for-testing`, TEST BUILD SUCCEEDED); its green and REVERT V106-A's red are the orchestrator's
+under the stage (THE PENDING MAC COMMANDS). Core headless: baseline AND close both **2383 tests in 277 suites PASSED +
+StringsWorkbook 40/6**. Fences honored: zero production code, zero `Sources/`, zero `Persistence/Migrations.swift`,
+the arm ORDER untouched, no stage claim, no `xcodebuild test`, no app launch, no subagents, foreground waits only, no
+trailers, her real store never. Residual, not this unit's: a pre-existing `#UnnecessaryEffectMarker` warning at
+`PostureSwitchTests.swift:925` (outside the pin). Nothing for `notes/QUESTIONS.md` (no PROVISIONAL — piece 3 re-worlded
+no test). The orchestrator's remaining pieces: 3 (the Mac runs + the revert), 4 (the cold review), 5 (the PR).
+
 | piece | status |
 |---|---|
 | 0. baseline — core headless + the two reds confirmed on the branch's base | DONE (this commit) — core headless on da0e88a9: **2383 tests in 277 suites PASSED** (158.9 s) + StringsWorkbook 40/6 (46.2 s); skips the standing env-gated ones only. The Mac confirmation is PENDING-behind-the-stage — **and the expected answer is NOT red: the pair is already GREEN on the base** (see THE BASE ALREADY CARRIES PIECE 1 below). |
@@ -18,8 +36,9 @@ close; the morning note appended to `notes/handoffs/phase-13x-handoff.md`.
 | 4. cold review (fresh Fable, `notes/REVIEW_PROMPT.md` verbatim) + dispositions | PENDING |
 | 5. PR `VX-106: …` → merge commit → branch deleted → /Applications refresh (A1 first) → handoff note | PENDING |
 
-The brief's (4), core headless at close: PENDING (runs after the pin's commit; zero `Sources/` change, so the baseline
-is expected to repeat — recorded when it does, never before).
+The brief's (4), core headless at close: DONE (this commit) — on 8fa9146d's tree, **2383 tests in 277 suites PASSED**
+(150.1 s) + StringsWorkbook 40/6 (47.3 s); the same skips as the baseline. Identical to the baseline, as a zero-`Sources/`
+unit must be.
 
 ### THE BASE ALREADY CARRIES PIECE 1 (the implementer's first finding, 2026-10-08 — read before anything else)
 
