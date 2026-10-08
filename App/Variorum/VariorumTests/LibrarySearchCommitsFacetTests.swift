@@ -108,8 +108,11 @@ struct LibrarySearchCommitsFacetTests {
     }
 
     /// The question carries the facet (the one AST's flag); the band offers
-    /// the chip only for WORDS — a tag alone, a day alone and no question at
-    /// all give it nothing to add (P-2).
+    /// the INVITATION only for WORDS — a tag alone, a day alone and no
+    /// question at all give it nothing to add (P-2) — while the ARMED chip
+    /// shows whenever the facet is armed and the band speaks (ladder R1
+    /// NIT-1: an armed state is never invisible, P-13o-U2-1; the facet
+    /// survives the words leaving the field, so its ✕ must too).
     @Test func theChipIsOfferedOnlyWhenTheQuestionHasWords() {
         let off = LibrarySearchQuestion.read("lanterns")
         let on = LibrarySearchQuestion.read("lanterns", savepoints: true)
@@ -120,6 +123,16 @@ struct LibrarySearchCommitsFacetTests {
         #expect(!LibrarySearchBand.offersCommits(nil))
         // Her word (R-VX83-9), the archived chip's grammar.
         #expect(LibrarySearchCopy.commitsOff == "+ commits" && LibrarySearchCopy.commitsOn == "commits")
+        // Ladder R1 NIT-1 — the ARMED chip's own rule (red under the pre-fix
+        // gate, which hid BOTH chip states without words; revert-verified):
+        let tagAlone = LibrarySearchQuestion.read("#harbor")
+        #expect(LibrarySearchBand.showsArmedCommits(tagAlone, armed: true),
+                "armed under a tag alone: the ✕ stays reachable")
+        #expect(!LibrarySearchBand.showsArmedCommits(tagAlone, armed: false),
+                "unarmed under a tag alone: no chip (the invitation is words-only, P-2)")
+        #expect(LibrarySearchBand.showsArmedCommits(on, armed: true))
+        #expect(!LibrarySearchBand.showsArmedCommits(nil, armed: true),
+                "no question, no band — a blank field has already reset the facet")
     }
 
     // MARK: - The line and the landing

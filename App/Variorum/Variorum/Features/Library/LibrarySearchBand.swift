@@ -47,12 +47,29 @@ struct LibrarySearchBand: View {
     var includesSavepoints = false
     var onToggleSavepoints: () -> Void = {}
 
-    /// **The `+ commits` chip is offered only when the question has WORDS**
-    /// (PROVISIONAL, accepted at the §U-C RULINGS): savepoints are found by
-    /// their text, so a tag alone or a day alone — listed without the index —
-    /// gives the facet nothing to add (P-2: never a chip that cannot act).
+    /// **The `+ commits` INVITATION is offered only when the question has
+    /// WORDS** (PROVISIONAL, accepted at the §U-C RULINGS): savepoints are
+    /// found by their text, so a tag alone or a day alone — listed without
+    /// the index — gives the facet nothing to add (P-2: never a chip that
+    /// cannot act).
     nonisolated static func offersCommits(_ question: LibrarySearchQuestion?) -> Bool {
         question?.hasWords == true
+    }
+
+    /// **The ARMED `commits ✕` chip shows whenever the facet is armed and the
+    /// band speaks** (ladder R1 NIT-1, the U-C implementer's own reading: the
+    /// P-2 guard above was the INVITATION's; an ARMED state must never be
+    /// invisible — P-13o-U2-1's letter). The facet survives the words leaving
+    /// the field (it resets only with a blank field), so without this the
+    /// chip's ✕ — the facet's one clear door short of emptying the field —
+    /// vanished while the facet stayed armed and re-surfaced with the next
+    /// word. Armed under a tag alone it narrows nothing (the text-less roads
+    /// never consult it), but it is still a standing fact of the question,
+    /// said where every other armed fact is said.
+    nonisolated static func showsArmedCommits(
+        _ question: LibrarySearchQuestion?, armed: Bool
+    ) -> Bool {
+        armed && question != nil
     }
 
     var body: some View {
@@ -117,18 +134,18 @@ struct LibrarySearchBand: View {
                 }
             }
             // VX-72 — the COMMITS facet, beside `+ archived`, its grammar: a
-            // dashed invitation at rest, the armed word with its ✕.
-            if Self.offersCommits(question) {
-                if includesSavepoints {
-                    LibrarySearchChip(
-                        tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOn),
-                        help: LibrarySearchCopy.commitsOnHelp, onClear: onToggleSavepoints)
-                } else {
-                    LibrarySearchChip(
-                        tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOff),
-                        help: LibrarySearchCopy.commitsOffHelp, invitation: true,
-                        onTap: onToggleSavepoints)
-                }
+            // dashed invitation at rest (words only, P-2), the armed word
+            // with its ✕ WHENEVER armed (ladder R1 NIT-1 — an armed state is
+            // never invisible, P-13o-U2-1).
+            if Self.showsArmedCommits(question, armed: includesSavepoints) {
+                LibrarySearchChip(
+                    tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOn),
+                    help: LibrarySearchCopy.commitsOnHelp, onClear: onToggleSavepoints)
+            } else if Self.offersCommits(question) {
+                LibrarySearchChip(
+                    tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOff),
+                    help: LibrarySearchCopy.commitsOffHelp, invitation: true,
+                    onTap: onToggleSavepoints)
             }
             // R-13o-15's growth note: the trailing end stays open for a later
             // advanced-search dropdown (VX-73). Nothing is built there.
