@@ -17,7 +17,9 @@ Reading of the words (to verify at reproduction, not to build on): the flash is 
 - **DONE** — walk preparation: Debug build GREEN (`App/Variorum/DerivedData/vx75/Build/Products/Debug/Variorum.app` in the worktree; log `DerivedData/vx75-build.log`); WalkKit helpers compiled (`/tmp/walk-cap`, `/tmp/walk-scroll`, `Tools/WalkKit/wl2`); terminal host holds BOTH grants (AX true · SCREEN true, probed); zero Variorum instances running; ffmpeg + cliclick present. Capture plan: `screencapture -v -V 6` around the first prose click, frames out via ffmpeg, artifacts under the gitignored `DerivedData/vx75-walk/`.
 - **DONE** — the PROBE PIN written (speculative-finding road: pin FIRST as the confirm): `BookOutlineLandingTests.theFirstClickIntoEditingHoldsTheColumnSteady` — expands a story read-cheap, settles, then `focus(storyID, caret: 120)` (the prose click's exact call) and SAMPLES the `BookOutlineGeometry` oracles every settle turn: max neighbour top-shift (tolerance 150 pt — legit read↔live inset drift is ≤ ~48), the focused row's height floor (> pre − 200), and no witness anchor de-realizing mid-swap. RED ⇒ the column-geometry class is confirmed; GREEN ⇒ the column is acquitted in-harness and the walk's frames adjudicate a window-level class. `build-for-testing` compiling headlessly (`DerivedData/vx75-bft.log`).
 - **IN-PROGRESS** — reproduction: WAITING on the stage (HELD by the VM-5 merge orchestrator, claimed 20:34, renewed; a watcher polls each minute) — the walk never steals a live claim.
-- **NOT-STARTED** — mechanism trace · the fix + its red-on-old revert-verified pin · ladder (fable-reviewer) · PR.
+- **DONE** — reproduction walk (frames), mechanism traced, red-on-old pin, fix, behavioral revert (RED→GREEN), fixed-build walk (no blank frame), regression run (30 suites; the only reds are VX-77's, pre-existing).
+- **IN-PROGRESS** — ladder round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim.
+- **NOT-STARTED** — PR `VX-75: …` (merge commit) after the ladder.
 
 ## The walk runbook (one stage claim covers both acts)
 
@@ -77,7 +79,16 @@ Dev store, Debug build (`io.lduarte.Variorum.debug`), under a held `Tools/stage`
 
 ## The pin and the fix
 
-*(pending — pin red-on-old, verified by behavioral revert, before any fix claim)*
+**The fix (commit `6ff214c8`, files `Features/BookView/BookView.swift` + `Features/Editor/EditorView.swift`):**
+- `OutlinePostRow`'s expanded body is ONE shape for both states: the header, then (near the viewport) a `ZStack` holding the read surface (identity `read-<postID>`, kept while `!(isLive && liveShowing)`) and, when live, the inline editor (identity `<postID>`) at `opacity(liveShowing ? 1 : 0)` + `allowsHitTesting(liveShowing)`. The read surface therefore keeps its identity across the focus flip — it is NOT dismantled by the click — and leaves only when the editor first shows the note. `liveShowing` (row `@State`) resets on the editor's `onDisappear` (unfocus, far-from-viewport release, collapse).
+- `EditorView.onLiveShowing` → `InlineEditorSurface.onShowing` → the inline `Coordinator` fires it ONCE, from `remeasure()`, the first time a report is made with `model.loaded` true — i.e. right after the height measured from the initial render is written to the frame binding, in the SAME main-queue turn, so the frame grows, the editor turns opaque and the read surface leaves in one SwiftUI update. The full-document editor and every other inline host (spread, pool) pass nil — byte-unchanged behaviour.
+- P-3 holds: the read surface is never live; there is still exactly one live editor (the invisible one is the live editor, already registered and taking the caret seed).
+
+**Pin, red-on-old by behavioral revert:** `theFirstClickIntoEditingNeverShowsAnEmptyNote`, tightened before the fix landed so an editor counts as SHOWING the story only at its real height (a 24-pt birth frame holding the text does not count). Fix tree: `emptyTurns=[]` — suite 10/10 green (`DerivedData/vx75-pinrun3.log`). Pre-fix `BookView.swift` restored over the fix tree (`git show HEAD~1:…`; the fix committed first, restored by `git checkout --`): `emptyTurns=[0, 1]` — RED (`vx75-revert.log`). The geometry probe stays green on both sides (it was the acquittal, not the pin).
+
+**The fixed-build walk (2026-10-07 19:42, fresh launch — the cold first-click conditions):** the same road (Sherlock → ▸ A Scandal in Bohemia → scroll 15 → one prose click), recorded (`fixed.mov`, re-extracted at a fixed 30 fps so no distinct frame can drop): **no frame loses its text** — the smallest frame in the whole recording is the first; the only jumps are UPWARD (`x0106` +275 KB, `x0112` +192 KB — the live ring and the note box's bar arriving). `x0105` (read surface) and `x0112` (live: the clicked block ringed, caret at block 12/262, the box's bar filled) show the identical text at identical positions. The "slight shake" does not appear.
+
+**Regression run (same claim):** the 30 suites that mount `BookView`/the inline editor/`StableSurface` — 173 tests in 29 suites: green except 3 issues in two tests, `OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors` and `BookOrderConversionTests.theNavigatorsChromeStaysInsideItsColumn` (chrome clipped at a column floor). **Both fail identically on this branch's PRE-fix tree** (`vx75-prefix-margins.log`) — pre-existing, already ticketed as **VX-77** (red on main, found by VM-5); the navigator sibling was added to VX-77 by comment. Not this fix's.
 
 ## Ladder
 
