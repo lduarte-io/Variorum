@@ -1919,9 +1919,10 @@ Work only in `~/dev/variorum-13x`.
 | 1 — R3-1 pins, the ruled set — the old-tree run | DONE (this commit) — 7 pins compiled against TODAY's code, **all 7 RED** (15 issues; quoted in "THE OLD-TREE RUN" below). (b″) and the `.keyRejected` halves name the split's new case, so they land WITH the fix and their red is the behavioural revert. The core suite on this branch head is red by exactly these 7 until the fix lands. |
 | 1 — R3-1 fix (the four constraints) | DONE (this commit) — `LibraryClassifier.withStagedRead` (stage 1's plaintext read + stage 2's consult; `openForInspection` and the read-write fallback GONE), `LibraryAdoption` step 5 lands main + non-empty `-wal`, never `-shm`; `SchemaVerdict.keyRejected` (VX-80's letter) beside `.unreadable(reason:)`; `settle` maps each to its true sentence. The 8 hot-copy pins + the premise-updated `theSchemaVerdictUnderAWrongKeyIsKeyRejectedNeverAGuess` GREEN; the 8 neighbouring suites 48/8 GREEN headless; zero `variorum-picked-*` residue in the 0700 per-user temp after the run |
 | 1 — R3-1 Mac sentence pins (b″)(c) | DONE (this commit; COMPILED — `build-for-testing` ** TEST BUILD SUCCEEDED **; RUN **PENDING-behind-the-stage**) — `aGenuineKeyMismatchStillSettlesToTheWrongKeySentence` (green on both sides by design — the class-separation guard) and `aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence` (red on old: the single `.unreadable` arm wore the wrong-key sentence), both through `LibraryOpenModel`'s real flow |
-| 1 — R3-1 behavioural reverts A/B/C | **IN-PROGRESS — REVERTS STARTING** over the COMMITTED fixed tree (64412dba; restore = `git checkout -- <file>`, then `git diff --quiet` + sha256 against HEAD). A: `LibraryAdoption.swift` step 5 drops the wal copy; B: `LibraryClassifier.withStagedRead` reads the picked file in place (the old read-only open + read-write fallback); C: `schemaVerdict`'s split collapses (every failure `.keyRejected` — the old one-sentence-for-both). One revert at a time; if this session dies mid-revert, `git diff` against 64412dba shows exactly what is reverted. |
+| 1 — R3-1 behavioural reverts A/B/C/C′ | DONE (this commit) — all four run over the committed 64412dba, each red exactly where predicted, each restored by `git checkout --` with `git diff --quiet` EMPTY and both files' sha256 matching the pre-revert capture (quoted in "THE REVERT EVIDENCE" below). **No revert is in flight.** |
+| 3 — the full core at close | IN-PROGRESS |
 | 2 — R3-2 the gate closures read the marker + pin + revert | DONE (this commit; COMPILED, RUN + revert **PENDING-behind-the-stage**) — `RestoreHoldModel.markerGate` (one stat of `LibraryRestoreHold.isHeld(besideStore:)`) + `wireGates(sync:protection:)`, the composition root's ONE wiring (`VariorumApp` calls it; the two `{ hold.isHeld }` closures gone); the projection keeps the banner. Pin `theHoldGatesReadTheMarkerWithNoViewAlive` (marker written after wiring, projection stale ⇒ both gates HELD, zero transport calls; the clear opens both and a round runs) |
-| 3 — the full core at close + `build-for-testing` + the PENDING Mac commands | NOT-STARTED |
+| 3 — `build-for-testing` + the PENDING Mac commands | DONE (64412dba — ** TEST BUILD SUCCEEDED **, private derived data `App/Variorum/DerivedData/13x-f3`, an APFS clone of the walk's; the walk's own products untouched) |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
 claimed or touched by this session (no `xcodebuild test`, no app launch). The measurement
@@ -2070,4 +2071,22 @@ road (the `-shm` rewritten/created; the wal tail dropped at the landing), and th
 non-writable arm reads `.unreadable` CANTOPEN in BOTH the read-only open and its read-write
 fallback — so on stage 1 it settles to `unreadableRefusal` ("This file couldn't be read as a
 library."), not the wrong-key sentence; false all the same (the copy is whole). Pinned.
+
+#### THE REVERT EVIDENCE (core, headless — `swift test --filter "LibraryHotCopyAdoptionTests|LibraryClassifierTests"`, 28 tests in 2 suites; over the committed fixed tree 64412dba)
+
+| revert (one file, never committed) | red — exactly these, every other pin green | restore |
+|---|---|---|
+| **A** — `LibraryAdoption.swift` step 5 drops the `-wal` copy (the old main-file-alone landing) | **6 tests / 6 issues**, every one `title → nil`: (a) `aHotCopiedLibraryLandsWithEveryRowItsWalHolds`, (b) `anShmLessHotCopyReadsTrueAndLandsWhole`, (b′) `anShmLessHotCopyInANonWritableFolderReadsTrueAndLandsWhole`, and the three plaintext pins | `git checkout --`; diff EMPTY; sha256 OK |
+| **B** — `withStagedRead` reads the PICKED file in place (the old read-only open + read-write fallback) | **7 tests / 11 issues**: (a) `variorum.sqlite-shm was rewritten`; (b) a `-shm` appeared; (b′) `got .unreadable(reason: "SQLite error 14: unable to open database file …")`; (c) the folder lost `-wal` + `-shm`, `variorum.sqlite was rewritten`; plaintext trio `-shm` rewritten; plaintext shm-less a `-shm` appeared; plaintext non-writable `got .unreadable(… error 14 …)` + `title → nil`. (b″) stays green — a torn copy has no wal to fold. | `git checkout --`; diff EMPTY; sha256 OK |
+| **C** — the split collapsed: every failure `.keyRejected` (the old one sentence for both) | **1 test / 2 issues**: (b″) `aTornCopyUnderItsRightKeyIsUnreadableNeverTheWrongKeyClass` — `verdict → .keyRejected`, "a torn copy reads unreadable, got .keyRejected" | `git checkout --`; diff EMPTY; sha256 OK |
+| **C′** — the over-correction: the `.keyRejected` arm removed (a genuine wrong key falls to `.unreadable`) | **2 tests / 3 issues**: (c)'s hot AND closed `== .keyRejected` (`→ .unreadable(reason: "SQLite error 26: file is not a database …")`), and `theSchemaVerdictUnderAWrongKeyIsKeyRejectedNeverAGuess` — the class-separation guard bites in BOTH directions | `git checkout --`; diff EMPTY; sha256 OK |
+
+Pre-revert sha256 (64412dba): `LibraryAdoption.swift` 77204a95…ad17 · `LibraryClassifier.swift`
+0f8d55fa…4b7f — matched after every restore.
+
+**The Mac pins' reds are PENDING-behind-the-stage**, by the recipes in the closing section:
+the torn-copy sentence pin under REVERT C (expected: `.refused(wrongKeyRefusal)`), the
+genuine-mismatch sentence pin under REVERT C′ (expected: `.refused(unreadableRefusal, …)` —
+it is green on both sides of the ORIGINAL tree by design), and the R3-2 gate pin under its own
+revert (`markerGate` reading the projection).
 
