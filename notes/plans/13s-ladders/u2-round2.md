@@ -132,3 +132,51 @@ both rounds carries a written disposition: round 1's two MINORs fixed (33fd6b89)
 (2b71ce6b), NIT-1 record-as-accepted (to the merge's QUESTIONS beside P-U2-9), round 2's one
 MINOR fixed (5a119f3a). The one open residual remains the end card's live re-walk on the fresh
 binary — the next stage window's, tracked in the U2 RECORD.
+
+## F-U2-W-3 (the fresh-store walk's finding, routed to this seat — 2026-10-08)
+
+**The trace, whole.** The coordinator's popover-vs-direct hypothesis is FALSIFIED: both roads run
+the identical door (`ContextBar.bookDoor` → `onOpenBook(first.id)` / the list row → the same
+closure → `RootView.openBook` → `bookAscent` + `adopt(.reading)`). And option (a)'s mechanism —
+the direct-road entry selecting the toured note — ALREADY EXISTS in the model, link by link:
+`BookView.takeAscentRequest` → `BookViewModel.requestReveal` (BookViewModel.swift:1175 — it seats
+`standingAnchorPostID` beside the reveal), `carryPlace(from: .outline)` →
+`BookAnchor.currentPost(.outline)` = `focusedPostID ?? standingPostID` (BookAnchor.swift), and the
+Index's `landOrSeed` (BookIndexView.swift:712) lands the reveal OR seeds from
+`focused ?? standing ?? entries[0]`, with `select` ALWAYS reporting `noteIndexSelection` (the
+box's "is a note selected", by its own doc). Every static interleaving I could construct —
+Outline-first, Index-first, entries-late, the departing Outline's reveal-watcher
+(BookView.swift:1714) eating the carry — still ends SELECTED through the standing fallback. The
+walked empty box is therefore a VIEW-LIFECYCLE race (the one nil-writer is
+`BookIndexView.onDisappear`'s `noteIndexSelection(nil)`; a new-appears-before-old-disappears
+remount ordering is the plausible culprit) that this headless seat cannot reproduce or pin.
+
+**The choice, stated (the coordinator asked): (b), the rule-side fallback — because (a) is
+unpinnable honestly.** A model-level pin for (a) ("ascent → carry → Index selected") is GREEN on
+the old tree — the model already does it — so it would be hollow under the guard, and the actual
+racing link cannot be named without the stage. (b) is deterministic, headlessly red-on-old, and
+robust to WHICHEVER link raced: whenever the box holds no note — for any reason — the beat keeps
+a ring and earns its line. The race itself stays recorded here for the stage window's eyes, not
+guessed at.
+
+**The fix (eea127a7).** `Tour.Facts` gains `bookNoteSelected` (the box holds a note, selected or
+live — a window fact of exactly `bookNoteLive`'s class, produced beside it in `TourPlaces.facts`
+from the same published box report, book places only; `RootView.tourBookNoteSelected` is the
+`tourBookNoteLive` twin reading `report.state.postID != nil`). `ringGroups(.downAndUp)` at a book
+rings the step's own `.noteBoxEditHere` ONLY while the box holds a note; an empty box rings the
+toured note's own Index row with the Index tab behind it — step 9's exact group shape, and the
+row is the walk's VERIFIED recovery (clicking it selects, drops into index-edit AND advances —
+the reducer's facts already handle the act, as the walk confirmed). `isRoadBack(.downAndUp)`
+mirrors (`!bookNoteSelected` at a book), so the road-back line shows exactly when the fallback
+rings. Step 9's own ring already fell to the row+tab group (present behavior, unchanged); its
+sentence's truth in the raced state returns with the race's own fix, owed to the stage window.
+**Pin red-on-old, watched:**
+`TourWalkTests.stepTenInABookWithAnEmptyNoteBoxRingsTheNotesIndexRow` written FIRST — **RED, 2
+issues** on the old rule (no ring group, no line), the holding-box arm green on both sides (it
+pins the kept edit-here ring); **GREEN after**, with ONE justified fixture edit (the main-leg
+walk now SAYS `bookNoteSelected: true` where it always implicitly stood). Tour suites **37/3
+GREEN**. The full core run's only reds are U4's uncommitted mid-sweep savepoint-wording pair
+(`SavepointRuns.swift` + `SavepointCadenceTests.swift`, both dirty in this shared tree —
+attributed, untouched). The app half (four small edits, every Mac callsite kept compiling by
+defaults) is parse-checked at this seat; the Mac compile runs at the implementer's sanity pass
+and the stage window, and the fix's live re-walk rides the final stage window as routed.
