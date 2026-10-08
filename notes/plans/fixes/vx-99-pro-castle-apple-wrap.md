@@ -612,14 +612,14 @@ reviewer, which doubles as her ruled "Opus 5.5 cold review at the end either way
    (`theMismatchFollowReKeys…`, `aStandardBornLibraryWithNoCustodyJoinsCastleThroughTheFollow`,
    `aFollowKilledAfterTheReKey…`, `aWrappedLegacyKeyFileStaysAtTheFollow`, `thePosturePinsHold…` (a)) test a
    Standard-shaped library FOLLOWING INTO a Castle account. Under the new Standard default, `runFollow` reads the vault
-   (unchanged code, :783) and would follow into Standard, which is correct for that vault and simply not those tests'
+   (unchanged code, :792) and would follow into Standard, which is correct for that vault and simply not those tests'
    subject. The follow logic itself did not move. The sixth (`aNearEmptyCopys…`) is posture-agnostic. Its Standard
    form refuses `appleKeyUnreachable` only because `makeWorld(sharing:)` mints a NEW iCloud key per world, so every
    sibling is a different-Apple-ID device. **Harness limitation, recorded:** the harness cannot express a same-Apple-ID
    SIBLING on a Standard account. That case is covered single-device (the MAJOR pin, (b)'s control, (c)), not in sibling
    form.
 2. **Is any road's posture decision now inconsistent? Not for the Apple copy.** Every road that holds a fetched vault now
-   reads it: the door (:372), the belt (:1209), the follow (:783), the resume arm (:1338). The local-only road reads the
+   reads it: the door (:382), the belt (:1212), the follow (:792), the resume arm (:1357). The local-only road reads the
    library's own posture, with no vault (decision 8). The posture is still READ in three places, all pre-existing and
    outside VX-99's class (none can put an Apple copy on a Castle account):
    - **(a) Custody on the Replace All Keys road** (`moveCustodyForSwitch(entersCastle: false)` →
