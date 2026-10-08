@@ -149,6 +149,25 @@ func withEditor<T>(
     seedBlocks: [String] = [],
     _ body: @MainActor (EditorHarness) async throws -> T
 ) async throws -> T {
+    // 13s closeout (the whole-target run's trace — the TakesEntryBand
+    // idiom, 5787e3fe, applied at the family's ONE factory): the editor
+    // harness is born PROCESS-FRESH. `EditorTypography.current` and its
+    // `isAdopted` latch are process globals; since the Study no-voice
+    // default (U1a piece 3), the first voiceless store a suite opens
+    // adopts STUDY and leaves it set, so every LATER harness in the same
+    // process — the next test in this very suite included — would measure
+    // serif metrics its constants never assumed. Pre-13s a voiceless
+    // store adopted Terminal, which IS process-fresh, so this block pins
+    // the historical invariant rather than changing one; the globals go
+    // back as found so a mixed batch's neighbours see what they saw.
+    let foundTypography = EditorTypography.current
+    let foundAdopted = EditorTypography.isAdopted
+    defer {
+        EditorTypography.current = foundTypography
+        EditorTypography.isAdopted = foundAdopted
+    }
+    EditorTypography.current = EditorTypography.resolve(voice: .terminal, inlineComments: false)
+    EditorTypography.isAdopted = false
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
     let tick = LockIsolated(0)
@@ -165,6 +184,14 @@ func withEditor<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
     } operation: { @MainActor in
         let session = AppSession(database: db)
+        // The same closeout trace's second half: the store CARRIES the
+        // Terminal voice row (the TakesEntryBand fixture's own shape), so
+        // any adoption DURING a test — a theme store an attached view
+        // starts, a landing's read — adopts Terminal, exactly what every
+        // measurement in this family was calibrated against before the
+        // Study no-voice default existed. A suite probing the default
+        // itself builds its own voiceless store on purpose.
+        try session.operations.setThemeVoice(.terminal)
         let post = try session.operations.createPost(title: "T", profile: profile)
         for text in seedBlocks {
             // **A FIXTURE MINT IS NOT A GESTURE** (13u1 UNIT 2). `newBlock`
