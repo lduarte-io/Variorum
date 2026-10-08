@@ -725,7 +725,7 @@ The red-on-old evidence each new pin owes at that window: `TourEndCardTests` rea
 | 4 | Mint-time default casing (R-13s-36/38): `defaultDailyJournalBookName` → "journal", `defaultQuicknoteBookName` → "quicknotes"; fresh-only by construction (stated below); app-copy casing follows via the constants | DONE (this commit) — the two CORE constants flipped with ruling notes. **HOW FRESH-ONLY HOLDS (the brief's ask):** both constants are read ONLY at mint time and as storeless display fallbacks — the daily designation derives from the `'daily'` MARKER (13i-a dropped the name leg; the keeper repair keys the marker), Quicknotes discovery is the DESIGNATION setting, and NO writer renames an existing book; the fold's name signature is `BookNaming.sameName` (case-folded), so an old "Quicknotes" still folds with a fresh "quicknotes". The phone's starter journal reads the same constant → its fresh mints follow (one vocabulary, no mobile code change). APP COPY that NAMES the default gathering now reads the ONE constant (R-13s-38's never-mixed: the QuickNote placeholder/filedNote/refusal line, the ⌘/ dictionary + workspace entries, the guide's two lesson sentences — seed-string casing rides per the brief); "the daily Journal" as a CONCEPT noun and the "Use as Daily Journal" door are vocabulary, not labels — untouched. CORE PINS run GREEN at this seat: `theFreshJournalMintIsLowercaseAndAnExistingBookKeepsItsName` + `theFreshQuicknotesMintIsLowercaseAndAnExistingGatheringKeepsItsName` (each: the ruled value — red-on-old trivially — AND the never-renamed existing-book arm); whole core `swift test` **2423/280 + 40/6 GREEN** (two captured runs — `u1b-core.log`/`u1b-core2.log`, scratchpad; ONE earlier uncaptured run showed 2 transient issues that did not reproduce across two captured re-runs — noted honestly for the stage window's eye). Mac + mobile `build-for-testing` GREEN; the four Mac pin flips (QuickNoteTests ×3, TutorialWalkTests, NodSetTests) ride the stage window |
 | 5 | Dedupe facts: every seeded object of the NEW set folds (readme + example scrap join the container facts; the retired objects' facts KEPT for the installed base); red-on-old pin per changed fact | DONE (this commit) — **ZERO `Sources/VariorumCore/Sync/` lines change** (`git diff --stat -- Sources/VariorumCore/Sync/` EMPTY — the FACTS are injected app-side by design, and the mechanism's container grain already folds any reserved-titled post/pool; the custody-slot grant was held for a mechanism change that proved unnecessary — the honest outcome, not a dodge: the mechanism was read whole before concluding it). The changes: `ReadmeSeeder.furnitureFact` (post "readme") + `ExampleSnippetSeeder.furnitureFact` (pool "example snippets") + **`MacFurnitureFacts.compose()`** — the Mac's ONE named, pinnable composition (was inline in `VariorumApp`'s closure), carrying the guide half + the two new facts + EVERY retained fact (the three gatherings — classics/starred/quicknotes are all still mintable (door / seeder / first capture) and the installed base carries copies; the reserved quicknote and EE's pristine facts stay for the same reason). PINS (written, RUN PENDING the stage window): `theRealReadmeAndExampleSnippetAreFoldableAndTwoMintsAgree` (the BLOCKER-1 drift-guard shape: two REAL mints classify foldable with EQUAL signatures) + `theMacFactsCarryTheFinalSetAndKeepTheInstalledBases` (the WIRING pin — the per-fact behavioural-revert target: drop a fact and the engine never looks at that title). The core mechanism suite (`SeededFurnitureDedupeTests` 18 tests) is untouched and GREEN in the whole-core runs above. Mac `build-for-testing` GREEN |
 | 6 | The privacy chapter's EE pointer (U3 disposition 1): TRACED — the pointer is OUTSIDE her two ruled never-soften sentences; the minimal currency fix lands | DONE (this commit) — the trace is the record's PIECE-6 TRACE section (the pointer is `privacyLessonTwoParagraphs`' FOURTH paragraph, a separate constant from the two pinned floor sentences → the minimal fix applies). THE FIX: the pointer paragraph DROPPED from copy §7's lesson 2 (both tutorials render the constants, so the Mac's and the phone's chapters follow together); `privacyBookDoorSentence` + `encryptionBookName` retired with it; **the ruled floor sentences are BYTE-IDENTICAL** (`privacyStandardFloorSentence`/`privacyCastleFloorSentence` untouched — diff-verifiable). THE SIBLING (same class, same disposition-1 rule): the Data Safety runbook §8's "The whole story … is the book “Encryption Explained” on your Bookcase." clause dropped in BOTH twins (`DataSafetyCopy.runbook` + `notes/DataSafetyRunbook.md` — the one-document pin keeps them matched); its floors untouched. PINS flipped as JUSTIFIED EDITS, each inverting the retired arm to ABSENCE (`TutorialWalkTests`, `MobileTutorialWalkTests`, `DataSafetyTests.sectionEight…`); the paragraph loops shrink with the constant. The "SET" caps + em dashes INSIDE fenced copy §7: HELD for her (the disposition's own line — her caps ban vs her never-soften rule is hers to reconcile). Core + Mac + mobile builds GREEN |
-| 7 | Self-assessment + READY-FOR-STAGE commands | NOT-STARTED |
+| 7 | Self-assessment + READY-FOR-STAGE commands | DONE (this commit) — the PROVISIONALs P-U1b-1…6, the self-assessment, the three stage runs' exact commands, the eight per-fact red-on-old recipes (the casing one ALREADY RUN headless at this seat, red-confirmed and restored), the watch-outs. END core run GREEN 2423/280 + 40/6 |
 
 **REVERT STATE: NO REVERT IN FLIGHT.**
 
@@ -734,3 +734,94 @@ The red-on-old evidence each new pin owes at that window: `TourEndCardTests` rea
 The pointer sentence is the FOURTH paragraph of `ProtectionCopy.privacyLessonTwoParagraphs` (`App/Variorum/Shared/PostureCopy.swift:808–809`): *"The whole story — every key, where it lives, what happens when you switch, why an old backup behaves the way it does — is in the book “Encryption Explained” on this shelf."* Her ruled never-soften sentences are pinned as their OWN constants beside it — `privacyStandardFloorSentence` (:813, lesson 2 ¶1's Keep sentence) and `privacyCastleFloorSentence` (:816, ¶2's "nobody can help" sentence) — and the pointer paragraph is neither: it has its own separate pin constant (`privacyBookDoorSentence`, :818). **The pointer is OUTSIDE the fenced sentences → the minimal currency fix applies** (the ruled paragraphs stay byte-identical). One SIBLING of the same class found in the trace: `DataSafetyCopy` (`Features/Settings/DataSafetyCopy.swift:380–382`) carries the same "whole story … is the book “Encryption Explained” on your Bookcase" pointer — same mechanism, same disposition-1 rule, fixed in the same piece with its floor lines untouched. The "SET" caps + em dashes INSIDE fenced copy §7 stay HELD for her (the U3 disposition's own line).
 
 **U2 STATUS: UNIT CLOSED (2026-10-08 ~10:55).** Built, twice stage-verified (263/56; 59/9 + 270/51), twice walked (the full core leg + the full keep-going leg incl. the fixed leg 3), the UI assessment's A1–A7 built, the ladder run WHOLE: round 1 (0B/0M/2m/2n → both MINORs fixed red-on-old by the reviewer, NIT-2 fixed, NIT-1 record-as-accepted), round 2 (0B/0M/1m fixed in-round 5a119f3a → the ladder closes, no round 3), the implementer's sanity pass CONFIRMED (the two-line mirror, nothing rode the commit, no adjacent road). Every finding dispositioned; the full ladder record: `notes/plans/13s-ladders/u2-round1.md` + `u2-round2.md`. OWED to the next stage window (tracked): the end card's doors + A4's muted line re-walk on the fresh binary, and `TourEndCardTests`' first run.
+
+### U1b PROVISIONALs (QUESTIONS-ready at the merge; each with the alternatives)
+
+- **P-U1b-1 — the example scrap's SHAPE** (R-13s-26 "your call"): (a) built — ONE snippet (a block carrying the disclaimer line) in its OWN small group titled **"example snippets"** (every snippet lives in a `kind='pool'` group; a reserved title is what the fold keys on), seeded FIRST so the group is the Snippets rail's oldest and therefore its lead card (the tour's leg-4 target). (b) the snippet inside the guide's "tutorial scraps" group (fewer groups, but Restore Tutorial's wholesale replace would own it). (c) another group name, hers.
+- **P-U1b-2 — the readme's block boundaries** (R-13s-39 "a reading of mine"): (a) built — five blocks at the reference's PARAGRAPH LINES, with "While Write is meant…" and "This is the point…" as SEPARATE blocks (the ruling names "the 'This is the point…' block" as the style/navigation takes' own home). (b) the two lines as ONE block with an internal newline (I4 allows it; the takes would then hang on the joined block).
+- **P-U1b-3 — the classics door's menu title**: (a) built — **"Restore the “classics” Gathering"** (quotes the reserved name like the book doors; says the KIND, since "classics" alone names nothing a stranger knows). (b) "Restore “classics”" (the book doors' exact idiom). (c) "Restore the Classics Gathering" (no quotes).
+- **P-U1b-4 — the retired objects' dedupe facts are KEPT** (classics/starred/quicknotes gatherings, the reserved quicknote, EE's pristine facts): (a) built — their objects remain mintable (the door / the seeder / first capture) or carried by the installed base, so pairs must keep folding. (b) drop the facts of what no longer seeds (both copies would then always survive — safe but messier for her own stores).
+- **P-U1b-5 — the Jekyll rename's installed-base corner** (R-13s-38's fresh-mints-only reading): an existing title-case Jekyll is never found by a Restore press (discovery is exact-name), so the press mints a lowercase twin beside it — nothing lost, either deletable, Jekyll outside the pristine dedupe (QUESTIONS #155's standing class). (a) built — accepted and recorded. (b) make the door's discovery case-fold on `BookNaming.sameName` (adopts her old copy; a wider behavior change than the ruling asked).
+- **P-U1b-6 — the app copy that NAMES the default gathering reads the constant** (so it says "quicknotes" now): (a) built — R-13s-38's never-mixed casing beside the board it describes. (b) keep the chrome title-case (mixed casing on every fresh store). The "the daily Journal" CONCEPT noun and the "Use as Daily Journal" door are vocabulary, not labels — untouched either way.
+
+### U1b SELF-ASSESSMENT (the implementer, at the stage hand-off — 2026-10-08)
+
+**Built (seven commits):** bb3c4f0b the record · 6075e15c the final seed set (launch + arrangement + the phone's EE leg + the example scrap + the disclosure) · 1409b339 the readme placeholder · 8b41ea74 the restore doors (EE out whole, the classics door in, Jekyll lowercased) · b4979816 the mint-time casing defaults + the copy follow-through · 2ce6cb52 the dedupe facts (ZERO `Sync/` lines — the record row says why) · abc8f0a6 the privacy-pointer currency fix (both twins).
+
+**Verified at this seat (headless + builds only):** whole core `swift test` **2423 tests in 280 suites + 40 in 6 GREEN** at the unit's END (`u1b-core-end.log`; two earlier captured greens; ONE uncaptured earlier run showed 2 transient issues that never reproduced — flagged for the window's eye, likely the order-sensitive class the 13o closeout met); the CASING red-on-old RUN HERE by behavioural revert (both constants flipped back → the two core pins RED with exactly their ruled-value issues → restored, `git diff --quiet` clean → green 2/2); the readme's byte-exactness script-proven against the reference; Mac `build-for-testing` GREEN after every piece (no new warnings); mobile `build` + `build-for-testing` GREEN.
+
+**PENDING, and why:** (1) every Mac/simulator pin RUN — the stage window (commands below; this seat runs no `xcodebuild test` by the machine rules); (2) the remaining per-fact red-on-old reverts — they are Mac-suite evidence, so they run AT the window (recipes below; the U2 lesson applies: after any revert check that rebuilds the app, REBUILD before a walk); (3) the walk (fresh dev store: the final set — Bookcase shows sherlock + the field guide + starred notes only; readme atop the Library with its two fans; the example snippet leading Snippets; Help ▸ Restore menu: no EE row, the classics door mints-and-opens; a quicknote capture mints lowercase "quicknotes") — the orchestrator's, under a coordinator GO; (4) the triage LANDING re-pins the guide's lesson content to the new facts (the chapter world's staged objects are flagged in-file for it).
+
+**Watch-outs for the reviewer and the window:**
+1. **The chapter-world staging** (`TutorialBooksChapterTests.withChapterWorld`) now mints the classics gathering and a staged quicknote as "the reader's acts" so the SHIPPED lesson claims still execute true — deliberate, flagged for the triage landing, which rewords the lessons and re-pins. If the landing forgets, the staged world is the tell.
+2. **`EncryptionExplainedDrillTests` still seeds EE directly** (its subject is the chapter + the books' content on the projection tier, driven by `seedIfNeeded`, which legally mints any `Book.all` member) — the suite framing calls itself "the Mac's launch shape", which is now stale COMMENTARY; the landing or 13s-a may re-word it. Behavior pins stay honest.
+3. **The one uncaptured core transient** (2 issues, once, unreproduced ×3) — if the window's widened runs meet it, the 13o/TakesArticleScroll order-sensitive class is the first suspect, not this unit's seed work.
+4. **`aFreshLaunchSeedsTheReadmePlaceholderLastWithItsTakes`'s newest-arm** compares `created_at` strings under the test clock; under the REAL clock the readme still seeds last in the same `beforeArranging` sequence. If the walk's Library shows the readme below the guide, the first suspect is the LIBRARY SORT's stamp (edited vs created), not the seed order.
+5. **The classics door composes `arrangeWelcome` first** — on a store with NO classic books it still mints the tag + an EMPTY gathering on Welcome (honest: the rule shows whatever gets tagged later). The walk should see that case once.
+
+### U1b STAGE-WINDOW COMMANDS (from `<home>/dev/variorum-13s/App/Variorum`, under the held claim, foreground, `pipestatus` checked, the "Test run with N tests" line confirmed)
+
+**Mac run 1 — the seed/door/facts pins + the flipped suites + the registry walk:**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/LaunchFurnitureTests \
+  -only-testing:VariorumTests/SampleLibraryWelcomeTests \
+  -only-testing:VariorumTests/EncryptionBookDoorTests \
+  -only-testing:VariorumTests/TutorialFurnitureFoldTests \
+  -only-testing:VariorumTests/SampleLibraryDedupeFactsTests \
+  -only-testing:VariorumTests/SampleLibraryTests \
+  -only-testing:VariorumTests/EncryptionExplainedSeedTests \
+  -only-testing:VariorumTests/JekyllTakemaniaSeedTests \
+  -only-testing:VariorumTests/LaunchSeedTombstoneTests \
+  -only-testing:VariorumTests/StarredGatheringSeederTests \
+  -only-testing:VariorumTests/CalmAsksTests \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/ShellConfirmTests \
+  -only-testing:VariorumTests/QuickNoteDoorTests \
+  -only-testing:VariorumTests/QuickNoteMintTests \
+  -only-testing:VariorumTests/QuickNoteWindowTests \
+  -only-testing:VariorumTests/QuickNoteWordTests \
+  -only-testing:VariorumTests/NodSetTests \
+  -only-testing:VariorumTests/DataSafetyRunbookTests
+```
+**Mac run 2 — the tutorial spine (seed-content worlds) + the drill:**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialDoorTests \
+  -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/TutorialTakesActsTests \
+  -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialDeletionActsTests \
+  -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests \
+  -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialLibraryActsTests \
+  -only-testing:VariorumTests/TutorialFannedMatrixTests \
+  -only-testing:VariorumTests/TutorialBooksLessonTests -only-testing:VariorumTests/TutorialBooksRitualTests \
+  -only-testing:VariorumTests/TutorialCurrencyTests -only-testing:VariorumTests/TutorialBuildFlavorTests \
+  -only-testing:VariorumTests/EncryptionExplainedDrillTests
+```
+**Mobile run (the window's simulator; the claim covers CoreSimulator):**
+```
+xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,name=<the window's device>' test \
+  -only-testing:VariorumMobileTests/MobileFirstWriteFurnitureTests \
+  -only-testing:VariorumMobileTests/MobileFirstWriteTombstoneTests \
+  -only-testing:VariorumMobileTests/MobileTutorialBookShapeTests \
+  -only-testing:VariorumMobileTests/MobileTutorialDoorTests \
+  -only-testing:VariorumMobileTests/MobilePocketGuidePrivacyTests \
+  -only-testing:VariorumMobileTests/MobilePocketGuideDeletionTests \
+  -only-testing:VariorumMobileTests/MobileStarterJournalTests \
+  -only-testing:VariorumMobileTests/MobilePhoneProtectionCopyTests \
+  -only-testing:VariorumMobileTests/MobileStructuralTests \
+  -only-testing:VariorumMobileTests/MobileCopyRegisterSweepTests \
+  -only-testing:VariorumMobileTests/MobileNoRedirectSweepTests
+```
+
+**THE PER-FACT RED-ON-OLD RECIPES (run at the window; each a TEMPORARY one-line-class inverse of the committed tree, never committed, restored with `git checkout -- <file>` and `git diff --quiet` verified; REBUILD after the restore before any walk — the U2 stale-binary lesson):**
+1. **EE back in the launch:** `Book.launchSet` → `[.sherlock, .encryptionExplained]` → `aFreshLaunchSeedsTheFinalSet` RED (the EE arms).
+2. **The scrap seed off:** remove the `ExampleSnippetSeeder.seedAtBirth` line in `LaunchFurniture` → the final-set pin's scrap arms RED.
+3. **The readme seed off:** remove the `ReadmeSeeder.seedAtBirth` line → `aFreshLaunchSeedsTheReadmePlaceholderLastWithItsTakes` RED.
+4. **The arrangement mints again:** add `_ = try restoreClassicsGathering(ops: ops)` into `SampleLibraryWelcome.arrange` after step 3 → `theArrangementTagsTheClassicsAndMintsNoGathering` RED (the behavioural inverse of the retired mint).
+5. **The tutorial door mints EE again:** add `_ = try? await SeededBookRestore.restore(session: session, book: .encryptionExplained)` into `openTutorial` before the arrangement → `openingTheTutorialMintsNoEncryptionBook` RED.
+6. **A fold fact dropped:** remove `ReadmeSeeder.furnitureFact` (then `ExampleSnippetSeeder.furnitureFact`) from `MacFurnitureFacts.compose()` → `theMacFactsCarryTheFinalSetAndKeepTheInstalledBases` RED per fact.
+7. **The casing constants:** ALREADY RUN AT THIS SEAT, headless (both flipped back → the two core pins RED with their ruled-value issues → restored clean → green). No window time owed.
+8. **The pointer back:** re-add the pointer paragraph to `privacyLessonTwoParagraphs` → the two walk suites' absence arms RED (`TutorialPrivacyChapterTests`, and `DataSafetyRunbookTests` for the runbook's twin if its clause is restored).
+
+**U1b STATUS: READY-FOR-STAGE (implementer side closed, 2026-10-08).** All seven pieces DONE and pushed; core whole GREEN at the END; every Mac/simulator pin WRITTEN and building; the commands and revert recipes above are the window's whole script. The cold review (FABLE, per the unit's standing rule) follows the window or runs on the diff now, the orchestrator's call.
