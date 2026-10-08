@@ -1022,3 +1022,75 @@ pre-existing, NITs. **Ruled:**
   — the fix session may tidy the line numbers; the move is recorded, not made. The SPECULATIVE A re-read → recorded.
 A fresh narrow implementer; one stage slot; the orchestrator verifies the delta itself (no round 4 — her call at the
 morning handoff whether a review of this delta is wanted before anything else builds on it).
+
+## ROUND 3 — FIX PASS (a fresh narrow Opus implementer, 2026-10-08 — LIVE STATUS; PENDING = unverified)
+
+**Scope, exactly as disposed above:** the MAJOR and MINOR-1, both by RESTORING the pre-F3 behavior on those roads. MINOR-2
+(the ticket), MINOR-3 (VX-107) and the NITs untouched. Surfaces: `Shared/PostureSwitch.swift` (the resume's enrolled arm
+only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero phone files. Base: 0d752865.
+
+**THE TRACES (mine, from the code at 0d752865):**
+- **MAJOR.** `resume`'s enrolled arm: `byAnotherDevice` = the stamp ≠ the vault's corpus key id at ANY step (F3, :1408–1413)
+  → on F3's S2 (this device's OWN stamped `.reencrypt` marker, `!isFollow` — the ceremony writes it only after its own vault
+  write landed and custody took M′; the resume's own-road rewrite keeps `follow: nil`) the arm ends `if byAnotherDevice {
+  outcome.followedAnotherDevicesSwitch = true }` (:1517–1519) → `ceremonyDoneBody` branch 1 → `enteredCastleAfterAnotherDevice`
+  / `keysReplacedAfterAnotherDevice`: "The twelve words shown here are NOT your account's". The flag's ONLY readers are the two
+  Done selectors (`ceremonyDoneBody`, `castleDoneBody` — grep), so the flag is the face and nothing else. Before F3 that road
+  read as the device's own (`byAnotherDevice` required `.vaultWrite`) and never set the flag.
+- **MINOR-1.** The same arm passes `accountPosture: vaultSaysCastle ? .castle : .standard` (:1442, :1516) → `moveCustodyForSwitch`
+  (:1211–1212) moves custody to the ACCOUNT's posture on a road that does not enter Castle → the F3 custody world (A Castle,
+  its RAK killed mid-walk, B follows and uses Standard) resumes to custody `.auto` with the key file carrying `apple` (the
+  vault's word) → `reconcileFollow`'s follow-into-Standard arm (`ProtectionController.swift:707`: `reading.hasAppleHeldCopy,
+  keyFile?.apple == nil || shape == .gatedOrNone, !switchInProgress`) can never fire → `movedToStandardNotice` (:711) is never
+  set. Before F3 custody moved by the posture read (gated on a device still reading Castle), and the ready's arm made the move
+  WITH the notice.
+
+**THE FIX (the settled design, built after the pins):**
+- MAJOR: the flag (and its device name) is set only where the ceremony's own write NEVER landed — `byAnotherDevice &&
+  !(marker.step == .reencrypt && !marker.isFollow)`. The road keeps every F3 FACT (custody, the account's posture, the
+  retirement, the offer, the words rule); its Done falls to the selector's ordinary branches, exactly the road it took before
+  F3 — over S2's facts (the account entered Castle, a fresh backup written) that is `enteredCastleDone`; over an account still
+  Standard, Replace All Keys' Done; a Use Castle act whose account went Standard, copy §5's `followMovedToStandard` (its name
+  and day now set on this road too). NO new sentence: every one is existing copy without a words claim. The `.vaultWrite`
+  case and the second-crash ambiguity unchanged (VX-107's).
+- MINOR-1: `accountPosture` overrides the read only where it TIGHTENS — `vaultSaysCastle ? .castle : nil` (the into-Castle
+  direction the reviewer said may stay); into Standard, custody by the read. The Apple copy still follows the vault's word.
+
+### LIVE STATUS
+
+- Pins: IN-PROGRESS (this commit) — `PostureSwitchTests`:
+  - MAJOR (new, MARK "VX-99 round 3"): `aResumeFromThisDevicesOwnLandedWriteNeverSaysItsWordsAreNotTheAccountsWhenAnotherDeviceRotatedAgain`
+    — S2's world with `b.words = a.words` before B's `enterCastle` (the vault's twelve-words copy of M″ opens with A's words,
+    asserted), A resumed through `PostureSwitchModel(mode: .resume(aMarker))` → `start()` → `.resumeAsk` → `resume(passphrase:)`
+    → no flag; F3's facts kept (the outcome entered Castle, custody `.biometric`); the Done contains neither "not your account's"
+    nor "twelve words" and equals `enteredCastleDone`; the marker cleared.
+  - MAJOR, the existing S2 pin `aResumedReplaceAllKeysWhoseAccountWasRotatedAgainElsewhereIsAnotherDevicesRoad` (same name):
+    its flag expectation flips (`outcome.followedAnotherDevicesSwitch && outcome.otherDeviceName == "sibling device"` →
+    `!outcome.followedAnotherDevicesSwitch` — the flag IS the MAJOR's mechanism); every other expectation kept (the account's
+    Castle, no Apple copy, L′ under B's M″, the words not landed — its message corrected: the marker cannot tell kept from
+    replaced words — custody behind the gate, the old key file retired, the offer, the marker cleared).
+  - MINOR-1, RE-POINTED by name: `aResumedCastleReplaceAllKeysMovesCustodyByTheAccountsPostureNotTheDevicesReading` →
+    `aResumedCastleReplaceAllKeysWhoseAccountLeftCastleElsewhereLeavesCustodyToTheReadysAnnouncedFollow` — WHY: the ruling
+    reverses the old name's claim (custody by the account → custody by the read, the account's move left to the announcing
+    ready). Its custody line flips (`.auto`/Standard → `.biometric`/Castle); its other lines kept (own Replace All Keys, no
+    flag, the key file's Apple copy, Replace All Keys' Done, the marker cleared); NEW tail — the next ready: A's controller
+    (`controller(for:material:)`, custody adopted as the bootstrap leaves it after the reopen — a gated custody's resident is
+    the key in hand, a silent one's none), `followIntoStandardAct` wired, `reconcile()` → `movedToStandardNotice` of kind
+    `.movedToStandard` naming "sibling device", and custody then `.auto` (the announced follow moved it).
+  Build-for-testing of the pins commit: PENDING.
+- Red run (the pins commit's bundle, `PostureSwitchTests` alone): PENDING — expected: the new MAJOR pin at its flag and its
+  three Done lines; the S2 pin at its flag line; the re-pointed MINOR-1 pin at its custody line and its notice line (its
+  post-reconcile custody line is green on both sides — `.auto` either way); every other test green (68 + 1 = 69 tests).
+- Fix (MAJOR): NOT-STARTED — the design above.
+- Fix (MINOR-1): NOT-STARTED — the design above.
+- **REVERT V99-M (named before it runs — the MAJOR):** on the tip, the flag's condition `if byAnotherDevice, !ownWriteLanded`
+  → `if byAnotherDevice` (F3's: the flag on every another-device road). Expected RED: the new MAJOR pin's flag + three Done
+  lines, the S2 pin's flag line; nothing else. PENDING.
+- **REVERT V99-N (named before it runs — MINOR-1):** on the tip, the arm's `accountPosture:` argument → `vaultSaysCastle ?
+  .castle : .standard` (F3's: custody to the account's posture in both directions). Expected RED: the re-pointed MINOR-1
+  pin's custody line and its notice line; nothing else. PENDING.
+- Green (each suite its own `-only-testing`): PENDING — `PostureSwitchTests`; the batch-1 20-suite set (ROUND 2b's list);
+  the 13-suite tutorial spine; `ProtectionSurfaceRenderTests` + `ProtectionTierFaceTests`.
+- Phone: not owed — no phone file touched (`Shared/PostureSwitch.swift` compiles into the phone; a phone build-for-testing
+  is run anyway as a compile check: PENDING).
+- Core: not re-run — zero `Sources/`.

@@ -2941,12 +2941,17 @@ struct PostureSwitchTests {
     /// `.reencrypt` marker stamps the id A minted; the vault's is B's, so A's
     /// resume is the follow into B's switch: custody to the gate, the old
     /// Standard-era key file retired, the offer listed (A was Standard-shaped),
-    /// the ceremony's words NOT landed (the account's words are B's), and the
-    /// other-device Done. RED ON OLD: `byAnotherDevice` fired at `.vaultWrite`
-    /// only — A took the "write landed, custody did not" pickup as if it were
-    /// its own road: custody by the stale posture read (silent on a Castle
-    /// account), no retirement (the Apple-openable file stayed beside the
-    /// library), no offer, and the words typed landed as if the account's.
+    /// and the ceremony's words NOT landed (conservative: whether they are
+    /// still the account's depends on what B's rotation did with them). RED ON
+    /// OLD: `byAnotherDevice` fired at `.vaultWrite` only — A took the "write
+    /// landed, custody did not" pickup as if it were its own road: custody by
+    /// the stale posture read (silent on a Castle account), no retirement (the
+    /// Apple-openable file stayed beside the library), no offer, and the words
+    /// typed landed as if the account's. VX-99 round 3 (the MAJOR): the road
+    /// keeps every one of those facts but NOT the conflict-follow flag — A's
+    /// own write landed FIRST (its stamped `.reencrypt` marker), so ledger 61's
+    /// "your words are not the account's" is never this road's Done (the
+    /// words-kept pin below: `aResumeFromThisDevicesOwnLandedWrite…`).
     @Test func aResumedReplaceAllKeysWhoseAccountWasRotatedAgainElsewhereIsAnotherDevicesRoad() async throws {
         let a = try await makeWorld()
         defer { a.tearDown() }
@@ -2971,15 +2976,16 @@ struct PostureSwitchTests {
                 "the vault's id is B's second rotation's, not the one A's marker stamped")
 
         let outcome = try await a.runner.resume(passphrase: "sesame", recoveryWords: a.words)
-        #expect(outcome.followedAnotherDevicesSwitch && outcome.otherDeviceName == "sibling device",
-                "the road is ANOTHER device's: \(outcome)")
+        #expect(!outcome.followedAnotherDevicesSwitch,
+                "A's own write landed FIRST — never the conflict-follow's flag (round 3's MAJOR): \(outcome)")
         #expect(outcome.entersCastle, "it follows the account into Castle")
         let aFile = try a.keyFile(outcome.newKeyFingerprint)
         let aKey = try aFile.unwrapKey(passphrase: "sesame")
         #expect(StoreEncryptionMigration.opens(a.storeURL, key: aKey))
         #expect(aFile.apple == nil && aFile.appleKeyID == nil, "no Apple copy on a Castle account")
         #expect(try aFile.unwrapKey(master: bMaterial.masterSymmetricKey) == aKey, "L′ under B's M″")
-        #expect(aFile.recovery == nil, "A's words are not landed — the account's words are B's")
+        #expect(aFile.recovery == nil,
+                "A's typed words are not landed — conservative: the marker cannot tell whether B's rotation kept or replaced them")
         #expect(a.calls.custodyTargets.last == .biometric && a.posture == .castle, "custody behind the gate")
         #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path),
                 "the Standard-era key file retired from the live folder (the follow's 2d.4 rule)")
@@ -3078,16 +3084,22 @@ struct PostureSwitchTests {
         #expect(try await b.marker() == nil)
     }
 
-    /// VX-99 round 2, finding 3 — CUSTODY BY THE ACCOUNT, not the device's
-    /// reading. A CASTLE account's Replace All Keys (custody behind the gate,
-    /// the posture read Castle) lands and is killed mid-walk; B (also Castle-
-    /// shaped) follows, finishing the walk, then uses Standard. A resumes: its
-    /// own Replace All Keys — the Done stays Replace All Keys' — but the
-    /// ACCOUNT is Standard, so the custody target is the account's (silent),
-    /// matching the Apple copy the key file now carries. RED ON OLD: custody
-    /// re-saved by `leaves.posture()` — behind the gate on a Standard account,
-    /// a key file and a custody that disagreed until the next ready healed it.
-    @Test func aResumedCastleReplaceAllKeysMovesCustodyByTheAccountsPostureNotTheDevicesReading() async throws {
+    /// VX-99 round 2, finding 3 → round 3, MINOR-1 (RE-POINTED by name — was
+    /// `aResumedCastleReplaceAllKeysMovesCustodyByTheAccountsPostureNotTheDevicesReading`;
+    /// the orchestrator's ruling, option (b), restores the pre-F3 custody rule
+    /// for the into-Standard direction). A CASTLE account's Replace All Keys
+    /// (custody behind the gate, the posture read Castle) lands and is killed
+    /// mid-walk; B (also Castle-shaped) follows, finishing the walk, then uses
+    /// Standard. A resumes: its own Replace All Keys — the Done stays Replace
+    /// All Keys' — and the new key file carries the Apple copy (the vault's
+    /// word), but custody stays BY THE READ, behind the gate, so the next
+    /// ready's follow into Standard moves it WITH §7's one-time notice ("Your
+    /// account is back in Standard — set on [device] on [day]"). RED ON HEAD
+    /// (round 2's F3, custody by the account): the resume itself moved custody
+    /// silent with no sentence — the key file then carried `apple` and the
+    /// shape was silent, so the ready's arm never fired and the notice never
+    /// spoke: the Mac stopped asking for Touch ID and nothing said why.
+    @Test func aResumedCastleReplaceAllKeysWhoseAccountLeftCastleElsewhereLeavesCustodyToTheReadysAnnouncedFollow() async throws {
         let a = try await makeWorld(standard: false)
         defer { a.tearDown() }
         let b = try await makeWorld(standard: false, sharing: a, deviceName: "sibling device")
@@ -3107,11 +3119,24 @@ struct PostureSwitchTests {
         let outcome = try await a.runner.resume(passphrase: "sesame", recoveryWords: a.words)
         #expect(!outcome.entersCastle && !outcome.followedAnotherDevicesSwitch, "A's own Replace All Keys")
         let aFile = try a.keyFile(outcome.newKeyFingerprint)
-        #expect(aFile.apple != nil, "a Standard account's key file carries the Apple copy")
-        #expect(a.calls.custodyTargets.last == .auto && a.posture == .standard,
-                "custody silent — the ACCOUNT's posture, matching the key file")
+        #expect(aFile.apple != nil, "a Standard account's key file carries the Apple copy (the vault's word)")
+        #expect(a.calls.custodyTargets.last == .biometric && a.posture == .castle,
+                "custody by the read — still behind the gate; the ready's follow moves it, announced")
         #expect(ProtectionCopy.ceremonyDoneBody(act: .replaceKeys, outcome: outcome) == ProtectionCopy.replaceKeysDone)
         #expect(try await a.marker() == nil)
+
+        // THE NEXT READY: A's controller as the bootstrap leaves it after the
+        // re-key's reopen — a gated custody adopts the key in hand as its
+        // resident, a silent one adopts none (corner 45's custody shape) — with
+        // the follow into Standard wired the app's way.
+        let ready = controller(for: a, material: a.keyStore.load())
+        ready.adoptResident(a.posture == .castle ? a.keyInHand : nil)
+        ready.followIntoStandardAct = { try await a.runner.followIntoStandard() }
+        await ready.reconcile()
+        let moved = ready.movedToStandardNotice
+        #expect(moved?.kind == .movedToStandard && moved?.device == "sibling device",
+                "§7's one-time notice names the device that left Castle: \(String(describing: moved))")
+        #expect(a.calls.custodyTargets.last == .auto && a.posture == .standard, "the announced follow moved custody silent")
     }
 
     /// VX-99 round 2, finding 4 (MINOR, pre-existing) — THE PRODUCTION GAP the
@@ -3352,6 +3377,69 @@ struct PostureSwitchTests {
                 #expect(PostureSwitchModel.message(for: refusal) == ProtectionCopy.resumeBody, "\(refusal)")
             }
         }
+    }
+
+    // MARK: - VX-99 round 3 (the Opus 5.5 cap review — `vx-99-ladder-round3.md`; the orchestrator's disposition)
+
+    /// VX-99 round 3, the MAJOR (introduced by round 2's F3, S2): A RESUME
+    /// FROM THIS DEVICE's OWN LANDED WRITE NEVER SAYS ITS WORDS ARE NOT THE
+    /// ACCOUNT's. A's own Standard Replace All Keys lands its vault write under
+    /// its twelve words and is killed mid-walk — its own stamped `.reencrypt`
+    /// marker, written only after that write and custody. B follows (finishing
+    /// the walk), then enters Castle TYPING THE SAME WORDS (decision 33's typed
+    /// road), so the vault's twelve-words copy of M″ opens with A's words. A
+    /// resumes through the model: F3's stamp rule still reads the road as
+    /// another device's for its FACTS (the account's Castle, custody behind the
+    /// gate), but the Done makes no words claim — A's words DID land, and they
+    /// are the account's whenever B typed them; the marker cannot tell typed
+    /// from regenerated. RED ON HEAD: F3 set `followedAnotherDevicesSwitch` on
+    /// this road, so the Done was ledger 61's "The twelve words shown here are
+    /// NOT your account's: your account's words are the ones sibling device
+    /// showed…" — pointing her away from the only paper copy of the account's
+    /// floor secret.
+    @Test func aResumeFromThisDevicesOwnLandedWriteNeverSaysItsWordsAreNotTheAccountsWhenAnotherDeviceRotatedAgain() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let b = try await makeWorld(sharing: a, deviceName: "sibling device")  // built BEFORE any switch
+        defer { b.tearDown() }
+        let mirror = try #require(a.mirror)
+        await mirror.setCrashNextReencrypt(true)
+        await #expect(throws: URLError.self) {
+            _ = try await a.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: a.words)
+        }
+        let aMarker = try #require(try await a.marker())
+        #expect(aMarker.step == .reencrypt && !aMarker.entersCastle && !aMarker.isFollow && aMarker.newCorpusKeyID != nil,
+                "A's own Replace All Keys: its write landed (the stamped .reencrypt marker), killed mid-walk")
+        // B follows (finishing A's walk), then enters Castle TYPING A's words.
+        _ = try await b.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        b.words = a.words
+        let bCastle = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
+        let bMaterial = try #require(bCastle.material)
+        let vault = try await a.vault()
+        #expect(vault.format.masterWrappedByAppleHeld == nil, "the account is Castle")
+        #expect(vault.format.classKey(for: .corpus)?.keyID != aMarker.newCorpusKeyID,
+                "B's second rotation — the vault's id is not the one A's marker stamped (F3's S2)")
+        #expect(try vault.format.unwrapMaster(withRecoveryKey: RecoveryPhrase.recoveryWrapKey(words: a.words))
+                == bMaterial.masterSymmetricKey, "A's twelve words open the account — the fact the Done must never deny")
+
+        let controller = makeController(for: a)
+        let model = PostureSwitchModel(mode: .resume(aMarker), runner: a.runner, controller: controller, vaultTie: nil)
+        await model.start()
+        #expect(model.phase == .resumeAsk(needsPassphrase: true), "\(model.phase)")
+        await model.resume(passphrase: "sesame")
+        guard case .done = model.phase else {
+            Issue.record("the resume finishes: \(model.phase)")
+            return
+        }
+        let outcome = try #require(model.outcome)
+        #expect(!outcome.followedAnotherDevicesSwitch, "this device's own write landed first — not ledger 61's road: \(outcome)")
+        #expect(outcome.entersCastle && a.calls.custodyTargets.last == .biometric && a.posture == .castle,
+                "F3's facts kept: the account's Castle, custody behind the gate")
+        #expect(!model.doneBody.lowercased().contains("not your account's"), "\(model.doneBody)")
+        #expect(!model.doneBody.lowercased().contains("twelve words"), "no words claim either way: \(model.doneBody)")
+        #expect(model.doneBody == ProtectionCopy.enteredCastleDone,
+                "the selector's ordinary Done over the road's facts (the account entered Castle, a fresh backup made): \(model.doneBody)")
+        #expect(try await a.marker() == nil)
     }
 
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
