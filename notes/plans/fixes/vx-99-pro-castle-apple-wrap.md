@@ -740,7 +740,23 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   reads it, the posture only before the door answered. Green PENDING.
   **REVERT V99-F:** `accountPostureIsStandard` → `controller.posture == .standard`. Expected RED: the F2 pin's two
   directions alone.
-- F3 fix: NOT-STARTED. F4 fix: NOT-STARTED. F6 (NITs): NOT-STARTED. F7 fix: NOT-STARTED.
+- F3 fix (option a, S1 + S2): DONE — in the resume's enrolled arm: the STAMP decides at every step that carries one
+  (`byAnotherDevice = vaultKeyID != marker.newCorpusKeyID`; the pre-F1 device-name fallback at `.vaultWrite` only, as
+  before); the road's posture is the ACCOUNT's — `roadEntersCastle = (byAnotherDevice || marker.isFollow) ? vaultSaysCastle
+  : (marker.entersCastle && vaultSaysCastle)` (the insurance, the offer, the retirement, the outcome, the Done) and
+  `accountPosture` from the vault for the custody target (threaded through `rekeyCustodyAndSnapshot` →
+  `moveCustodyForSwitch`; every other road keeps the posture read); S1's Done names the device that left Castle and its day
+  (`Outcome.otherDeviceDay`; the selector's branch 4 → copy §5's existing `followMovedToStandard`). Green PENDING.
+  **REVERT V99-G (named before it runs):** on the tip, (1) the discriminator → round 1's (`guard marker.step == .vaultWrite,
+  vaultKeyID != material?.corpusKeyID else { return false }` FIRST, then the stamp); (2) `roadEntersCastle = byAnotherDevice
+  ? vaultSaysCastle : entersCastle`; (3) the arm's `accountPosture:` argument → nil. Expected RED: S1, S2, the rewritten
+  marker, the follow's own marker, custody by the account; everything else green.
+- F4 fix: DONE — `runCeremony`: `guard enrolled || entersCastle else { throw .replaceKeysNeedsSync }` right after the
+  enrolled reading, before the derive, the pause and any write; the model words it with the switches' offline line
+  (`serverUnreachable`, hoisted from the URLError arm). Use Castle's local-only road untouched. Green PENDING.
+  **REVERT V99-H:** the guard deleted. Expected RED: the gap pin + the re-pointed pin (d)'s two refusals; its Use Castle
+  control green.
+- F6 (NITs): NOT-STARTED. F7 fix: NOT-STARTED.
 - Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
 - Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
 - Phone compile (`MobilePostureSheets.swift` touched): PENDING.

@@ -168,6 +168,11 @@ final class PostureSwitchRunner {
         /// §2b), naming `otherDeviceName` from the vault's `updated_by_device`.
         var followedAnotherDevicesSwitch: Bool = false
         var otherDeviceName: String? = nil
+        /// VX-99 round 2 (finding 3, S1): the vault's `updated_at` when the
+        /// Done names ANOTHER device's posture act with its day — this
+        /// device's own Use Castle landed, and the ACCOUNT left Castle on
+        /// another device before the resume (`otherDeviceName` names it).
+        var otherDeviceDay: String? = nil
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -510,6 +515,23 @@ final class PostureSwitchRunner {
         let signedIn = await leaves.signedIn()
         let custody = await leaves.keyStore.offMain { $0.load() }
         let enrolled = leaves.vault != nil && leaves.transport != nil && signedIn && custody != nil
+        // VX-99 round 2 (finding 4 — decision 9: every key door is an ONLINE
+        // act for an ENROLLED library): the Replace All Keys DOOR admits only
+        // an enrolled library (`replaceKeysNotEnrolled`), so reaching the
+        // local-only road here is the check-then-act gap — a session that
+        // lapsed during the screens, a custody read that failed. That road
+        // rotated NOTHING for Replace All Keys (steps 4–7 alone: the master
+        // and corpus keys untouched, the vault untouched, a key file without
+        // the master-wrapped copy) while its Done said other devices would
+        // ask for the passphrase; and under an indeterminate reading its
+        // posture read could wrap L′ under A on a Castle account. Refused
+        // before anything is written. Use Castle's local-only road (a
+        // pre-sync library — decision 8's second sentence; §4's "Without
+        // sync: steps 4–7 only") is untouched.
+        guard enrolled || entersCastle else {
+            leaves.log("posture switch: Replace All Keys reached the runner without the enrolled library in hand (vault, transport, session, custody) — refused before anything is written (decision 9)")
+            throw PostureSwitchError.replaceKeysNeedsSync
+        }
         // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
         // enrolled road derives against the FETCHED vault (an unchanged
         // word reuses the vault's descriptor, so a sibling's held lobby
@@ -1045,10 +1067,14 @@ final class PostureSwitchRunner {
     /// road passes whether its vault write carried an Apple-held copy, its
     /// local-only road passes the posture's Standard, the follow and the
     /// resume's enrolled arm pass the vault's word (the vault just fetched).
+    /// `accountPosture` (VX-99 round 2, finding 3): the ACCOUNT's posture
+    /// when the caller holds the vault's word for it (the resume's enrolled
+    /// arm) — custody moves to it on a road that does not enter Castle; nil
+    /// = the posture read (`leaves.posture()`), every other road's.
     private func rekeyCustodyAndSnapshot(
         entersCastle: Bool, appleCopy: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
-        listPreSwitchPairs: Bool, follow: Bool = false
+        listPreSwitchPairs: Bool, follow: Bool = false, accountPosture: Posture? = nil
     ) async throws -> Outcome {
         // ————— 4. RE-KEY THIS LIBRARY: the NEW key file first, then the swap —————
         phase = .rekeyingLibrary
@@ -1068,7 +1094,7 @@ final class PostureSwitchRunner {
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 5. CUSTODY (both items) —————
-        try await moveCustodyForSwitch(entersCastle: entersCastle)
+        try await moveCustodyForSwitch(entersCastle: entersCastle, accountPosture: accountPosture)
         try await writeMarker(RotationMarker(
             step: .snapshot, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
@@ -1158,15 +1184,17 @@ final class PostureSwitchRunner {
         }
     }
 
-    private func moveCustodyForSwitch(entersCastle: Bool) async throws {
+    private func moveCustodyForSwitch(entersCastle: Bool, accountPosture: Posture? = nil) async throws {
         phase = .movingCustody
         let target: StoreAtOpenMode
         if entersCastle {
             let biometry = leaves.biometryAvailable()
             target = (leaves.alwaysAsk() || !biometry) ? .passphrase : .biometric
         } else {
+            // VX-99 round 2 (finding 3): the account's posture when the
+            // caller holds the vault's word (decision 8), else the read.
             target = StoreAtOpenMode.effective(
-                posture: leaves.posture(), dials: ProtectionDials(alwaysAsk: leaves.alwaysAsk()))
+                posture: accountPosture ?? leaves.posture(), dials: ProtectionDials(alwaysAsk: leaves.alwaysAsk()))
         }
         switch await leaves.moveCustody(target) {
         case .changed: break
@@ -1345,13 +1373,24 @@ final class PostureSwitchRunner {
             // ledger 61). 5b's device-name reading (`updated_by_device` ≠ this
             // device) survives ONLY as the fallback for a marker written before
             // F1 (no id stamped) — it misread the recorded corner (our write
-            // landed, a FOLLOWER finished and stamped its own name). A
-            // `.reencrypt` marker is never this case (written only after this
-            // device's own write and custody). `updated_by_device` now only
-            // NAMES the sentence.
+            // landed, a FOLLOWER finished and stamped its own name).
+            // `updated_by_device` now only NAMES the sentence.
+            // VX-99 round 2 (finding 3, S2 — the orchestrator's ruling, option
+            // a): the STAMP decides at EVERY step that carries one, not at
+            // `.vaultWrite` alone. The old premise — "a `.reencrypt` marker is
+            // never this case (written only after this device's own write and
+            // custody)" — fails whenever another device acts AFTER this
+            // device's write: A's own Replace All Keys killed mid-walk; B
+            // follows, finishes, then enters Castle (a SECOND rotation). The
+            // vault's id is then B's, not the one A stamped, so the road is
+            // another device's — exactly as at `.vaultWrite`. A follow's own
+            // marker carries no stamp (`runFollow`), so its custody-pending
+            // resume still reads as its own; the marker this arm rewrites for
+            // another device's road keeps the id A minted (below), so a SECOND
+            // crash still reads as another device's.
             let byAnotherDevice: Bool = {
-                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID else { return false }
                 if let stamped = marker.newCorpusKeyID { return vaultKeyID != stamped }
+                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID else { return false }
                 guard let writer = fetched.format.updatedByDevice else { return false }
                 return writer != leaves.deviceName()
             }()
@@ -1366,14 +1405,24 @@ final class PostureSwitchRunner {
             // vault it just fetched, so the road reads the account from it,
             // exactly as `runFollow` does — never from the posture read, which
             // under an indeterminate reading is the custody SHAPE. The Apple
-            // copy: present exactly when the vault carries an Apple-held copy
-            // (own write: what this device's Standard Replace All Keys wrote;
-            // another device's: the account's posture). The road's posture:
-            // the VAULT's when the road is the follow into another device's
-            // switch (custody, the old key files' retirement and the offer
-            // follow the account); the marker's own when the write was ours.
+            // copy: present exactly when the vault carries an Apple-held copy.
+            // VX-99 round 2 (finding 3 — option a, S1): the ROAD's posture is
+            // the account's on EVERY story, not on another device's alone —
+            // the custody target (`accountPosture`), and whether the road
+            // ENTERED Castle (the insurance, the offer, the old key files'
+            // retirement, the Done): another device's road and a follow's own
+            // marker follow the account (`vaultSaysCastle`, `runFollow`'s
+            // rule); this device's own ceremony entered Castle only if its act
+            // was the switch AND the account is still Castle — A's Use Castle
+            // landed, B followed and then used Standard (no rotation, the
+            // stamp still A's): the account is Standard, so A's road ends
+            // Standard (custody silent, the Apple copy, no insurance-off, no
+            // offer, a Done that names B's act). A Replace All Keys never
+            // enters Castle by its own act, whatever the account's posture.
             let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil
-            let roadEntersCastle = byAnotherDevice ? vaultSaysCastle : entersCastle
+            let roadEntersCastle = (byAnotherDevice || marker.isFollow)
+                ? vaultSaysCastle : (entersCastle && vaultSaysCastle)
+            let accountPosture: Posture = vaultSaysCastle ? .castle : .standard
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase
                 // (or the twelve words — 2c: the follow's own resume).
@@ -1401,17 +1450,17 @@ final class PostureSwitchRunner {
             // marker (`entersCastle: false` for a Replace All Keys, no follow
             // flag). A SECOND crash inside the walk below leaves this marker
             // pending; without the road's facts the next resume read the
-            // marker's stale `entersCastle`/`follow` — `byAnotherDevice`
-            // cannot re-fire at `.reencrypt` (the corpus key id now matches) —
-            // and moved custody to `.auto`, said "keys replaced" on a Castle
-            // account, and skipped `retireOldKeyFiles`. The Apple copy was
-            // never at risk (`appleCopy: !vaultSaysCastle` reads the fresh
-            // fetch). Documented residual (the record's ROUND-1 FIX PASS):
-            // the Done's other-device sentence and the latent words rule
-            // still key on `byAnotherDevice`, so a double-crashed
-            // another-device resume speaks the ordinary Done; both are
-            // cosmetic / unreachable in production (both resume doors pass
-            // `recoveryWords: nil`).
+            // marker's stale `entersCastle`/`follow` and moved custody to
+            // `.auto`, skipped `retireOldKeyFiles` and returned an outcome
+            // that had not entered Castle (the runner's log line said "keys
+            // replaced"). The Apple copy was never at risk (it reads the fresh
+            // fetch). VX-99 round 2 (finding 3; the NIT to carry the vault's
+            // id here NOT adopted — the record): `newCorpusKeyID` stays the
+            // id THIS marker was stamped with. On another device's road that
+            // is the id this device minted for a write that never landed — so
+            // the second resume's stamp still differs from the vault's and the
+            // road still reads as another device's (the other-device Done, the
+            // words rule), round 1's recorded residual closed by the same rule.
             try await writeMarker(RotationMarker(
                 step: .reencrypt, entersCastle: roadEntersCastle,
                 oldKeyFingerprint: marker.oldKeyFingerprint, newKeyFingerprint: marker.newKeyFingerprint,
@@ -1440,10 +1489,16 @@ final class PostureSwitchRunner {
                                        recoveryWords: byAnotherDevice ? nil : typedWords,
                                        recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
-                listPreSwitchPairs: roadEntersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice)
+                listPreSwitchPairs: roadEntersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice,
+                accountPosture: accountPosture)
             if byAnotherDevice {
                 outcome.followedAnotherDevicesSwitch = true
                 outcome.otherDeviceName = fetched.format.updatedByDevice
+            } else if entersCastle, !marker.isFollow, !roadEntersCastle {
+                // S1: this device's own Use Castle, the account Standard now —
+                // the Done names the device that left Castle and its day.
+                outcome.otherDeviceName = fetched.format.updatedByDevice
+                outcome.otherDeviceDay = fetched.updatedAt
             }
             return outcome
 

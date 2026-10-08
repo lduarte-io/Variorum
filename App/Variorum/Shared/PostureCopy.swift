@@ -928,7 +928,10 @@ nonisolated extension ProtectionCopy {
     ///    61's sentence (into Castle) or its sibling (not into Castle);
     /// 2. a follow's own resume ⇒ the follow's Done;
     /// 3. the outcome entered Castle ⇒ the Castle Done by the snapshot's fate;
-    /// 4. otherwise ⇒ Replace All Keys' Done — never a Castle claim.
+    /// 4. the act WAS entering Castle but the account is Standard now (finding
+    ///    3, S1: another device left Castle after this device's own write) ⇒
+    ///    copy §5's existing "back in Standard" line, naming that device;
+    /// 5. otherwise ⇒ Replace All Keys' Done — never a Castle claim.
     /// (`.leaveCastle` never reaches a Done: its road ends at `.leftCastle`.)
     static func ceremonyDoneBody(act: CeremonyAct, outcome: PostureSwitchRunner.Outcome?) -> String {
         guard let outcome else {
@@ -942,6 +945,10 @@ nonisolated extension ProtectionCopy {
         }
         if act.isFollow { return followDoneBody }
         if outcome.entersCastle { return castleDoneBody(outcome) }
+        if act == .enterCastle {
+            return followMovedToStandard(
+                device: outcome.otherDeviceName ?? anotherDevice, day: day(from: outcome.otherDeviceDay))
+        }
         return replaceKeysDone
     }
 }
