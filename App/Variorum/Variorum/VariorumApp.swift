@@ -133,6 +133,19 @@ struct VariorumApp: App {
         noteWindows
     }
 
+    /// The launch seed's REAL gate (17y B-SEED's composition, byte-moved —
+    /// 13s-b U1b's diagnosis only NAMED it so the DEBUG walk override above
+    /// has one production body to fall through to): captured strongly,
+    /// deliberately — the closures outlive nothing, and a nil'd weak
+    /// reference would read as "no account", which is the unsafe direction.
+    private func productionSeedGate(_ fresh: AppServices) -> SampleLibrarySeeder.SyncGate {
+        SampleLibrarySeeder.SyncGate(
+            belongsToAnAccount: {
+                fresh.sync.isConfigured || fresh.account.variorum != nil
+            },
+            hasSyncedCleanly: { fresh.sync.status.lastSuccessAt != nil })
+    }
+
     @ViewBuilder
     private var mainWindowContent: some View {
             switch bootstrap.state {
@@ -322,21 +335,37 @@ struct VariorumApp: App {
                         // verbatim into `LaunchFurniture.seed` so the pins
                         // drive this exact composition — its header carries
                         // every seed's reasons.
+                        let seedGate: SampleLibrarySeeder.SyncGate
+                        #if DEBUG
+                        // 13s-b U1b DIAGNOSIS (the coordinator's fresh-walk
+                        // block, 2026-10-08 — the U1b record's section): the
+                        // DEV scope carries a persisted device-bound session
+                        // that a store reset never clears, so EVERY fresh
+                        // dev store takes the arrive-by-sync road and — dev
+                        // sync being off by the A4 fence — waits forever,
+                        // seeding nothing and marking nothing (F-BSEED-4's
+                        // recorded corner, QUESTIONS #183). A WALK of the
+                        // fresh seed therefore needs this launch treated as
+                        // unowned: the env key below does exactly that,
+                        // DEBUG-only (the ScaleFixture idiom — walk
+                        // machinery, zero Release bytes, zero store state).
+                        // A REAL fresh install is signed out (the session
+                        // is device-bound), takes Road 1 and seeds — the
+                        // production pin `aFreshLaunchSeedsTheFinalSet`
+                        // drives that composition headlessly.
+                        if ProcessInfo.processInfo
+                            .environment["VARIORUM_SEED_GATE_UNOWNED"] == "1" {
+                            seedGate = .unowned
+                        } else {
+                            seedGate = productionSeedGate(fresh)
+                        }
+                        #else
+                        seedGate = productionSeedGate(fresh)
+                        #endif
                         await LaunchFurniture.seed(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
-                            gate: SampleLibrarySeeder.SyncGate(
-                                // Captured strongly, deliberately: the
-                                // closures outlive nothing, and a nil'd weak
-                                // reference would read as "no account",
-                                // which is the unsafe direction.
-                                belongsToAnAccount: {
-                                    fresh.sync.isConfigured
-                                        || fresh.account.variorum != nil
-                                },
-                                hasSyncedCleanly: {
-                                    fresh.sync.status.lastSuccessAt != nil
-                                }))
+                            gate: seedGate)
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
