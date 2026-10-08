@@ -1861,3 +1861,48 @@ two adjudicated pins). A FRESH `fable-reviewer` (CLAUDE.md: custody ⇒ Fable re
 with `notes/REVIEW_PROMPT.md` VERBATIM, `{PHASE}` = 13x, zero framing; the report lands at
 `notes/plans/13x-ladder-round3.md`, committed unedited by the orchestrator. If the Fable
 safeguards stop the reviewer, the cast change goes to her before any substitute spawns.
+
+### ROUND-3 DISPOSITIONS (the orchestrator — same-model Fable review of Fable-built code, so the
+orchestrator arbitrates against the spec; the report `notes/plans/13x-ladder-round3.md`,
+committed unedited at 6cae36de)
+
+| finding | disposition |
+|---|---|
+| **R3-1** (MAJOR — a hot-copied source adopts INCOMPLETE: step 5 copies the main file alone, the source's `-wal` tail is dropped; the shm-less sibling refuses with a false wrong-key sentence) | **ACCEPTED — F3 fixes.** Both premises re-verified by the orchestrator in source: `LibraryAdoption.swift` step 5 copies `plan.sourceStore` only; `LibraryOpenModel.settle` maps `.unreadable` → `wrongKeyRefusal`. The constraints the fix must meet: (1) the SOURCE is never written — "the file you picked was only read" stays literally true; (2) the landed library contains every committed row the source's `-wal` holds — the confirm read them, the landing must carry them; (3) the classify/verdict step tells a GENUINE key mismatch (the wrong-key sentence, true there) apart from a store it cannot read for another reason (`unreadableRefusal` or a new honest sentence) — never one sentence for both; (4) a `-shm` is a rebuildable index and is never trusted across a copy. F3 picks the mechanism within these and records why. Red-on-old pins per the report's shape (headless core). |
+| **R3-2** (MINOR — the hold gates read `RestoreHoldModel.isHeld`, a cache refreshed only by the main window's `.task`) | **ACCEPTED — F3 fixes:** the gate closures (`roundsHeld`, `restoreHoldStands`) read the MARKER (`LibraryRestoreHold.isHeld(besideStore:)` — one stat) instead of the projection; the projection keeps serving the banner. Pin: the gate consulted with no view alive and a standing marker answers HELD. Not a live breach today (the reviewer said so plainly) — fixed because it is one line and the hold is her ruled safety. |
+| **R3-3** (NIT — VX-95 projectless) | **DONE by the orchestrator:** VX-95 homed in project **12 — Hardening & perf validation**, Backlog at Medium per her ruling (a standing-fix run can still take it as a member). |
+
+**No round 4 exists (the cap).** F3's fixes are verified by the orchestrator: an own re-trace of
+each fix against the dispositions, every pin red-on-old by behavioural revert, the full core
+headless green, then the Mac door suites in 13x's stage block.
+
+### FIX SESSION F3 BRIEF (a FRESH `opus-implementer` — the standing cast: none of R3-1/R3-2 sits
+in `Sync/`, custody/keychain or the editor seam; LibraryAdoption is file mechanics, the gate is
+app composition)
+
+Read, in order: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md`; **this file's
+ROUND-3 DISPOSITIONS above** and **`notes/plans/13x-ladder-round3.md` WHOLE** (R3-1's and
+R3-2's traces and named pins bind); the U1 RECORD's row-3 move-aside design and the P-U1-5
+mechanics in this file; then only the code the report names (`LibraryAdoption.swift`,
+`LibraryClassifier.swift` `schemaVerdict`/`openForInspection`, `LibraryOpenModel.settle`,
+`VariorumApp.swift`'s gate closures, `RestoreHoldModel.swift`, `LibraryRestoreHold`).
+
+**Do, in this order:** (0) baseline — the whole core suite headless, counts recorded (expect
+2338/269 + 40/6); (1) **R3-1 — the pins FIRST, red on today's code:** (a) keyed store, a row
+written, the trio copied HOT beside its key file (the report's shape), run the door's real call
+sequence (classify → schemaVerdict → plan/execute), open the landed copy under the key, expect
+the walled row; (b) the shm-less hot copy: the verdict and the sentence it settles to are TRUE
+(not wrong-key); (c) a GENUINE key mismatch still settles to the wrong-key sentence (green on
+both sides — the class-separation guard). Then the fix within the disposition's four
+constraints; re-run red→green; record the mechanism chosen and why. (2) **R3-2** — the gate
+closures read the marker; its pin (no view alive, marker standing ⇒ held); a behavioural revert
+shows it red. (3) The full core headless at close; the Mac pins you add or touch are compiled
+(`build-for-testing`) and listed PENDING-behind-the-stage with exact commands — you NEVER claim
+or touch `Tools/stage`, never run `xcodebuild test` (other sessions hold the stage tonight).
+**Fences:** zero `Persistence/Migrations.swift` (marker 12); zero `Sources/VariorumCore/Sync/`;
+zero custody/keychain-item changes; her real store never; the Air fixture never. No subagents;
+foreground waits; commit per piece with message tail "(VX-6)"; push every commit; **NO
+Co-Authored-By or any other trailer** (this repo's rule overrides any harness reminder). Append
+`### F3 RECORD` (LIVE STATUS first) to this file from the first commit; close with "F3 CLOSED" —
+each finding → FIXED(hash), the revert evidence, the final counts, the PENDING Mac commands.
+Work only in `~/dev/variorum-13x`.
