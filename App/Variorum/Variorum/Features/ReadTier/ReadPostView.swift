@@ -135,11 +135,14 @@ private struct ReadPostSurface: NSViewRepresentable {
         let textView = ReadPostTextView.makeReadSurface()
         textView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: textView)
+        // VX-92 ladder R1-1: wired BEFORE attach — attach can apply a
+        // pending projection synchronously, and the one-shot announce it
+        // fires must not burn on nil (the editor twin's exact order).
+        model.onShowing = onShowing
         model.attach(textView: textView)
         context.coordinator.install(textView: textView)
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onBadgeTap = onBadgeTap
-        model.onShowing = onShowing
         textView.onPlainClick = { [weak coordinator = context.coordinator] offset in
             coordinator?.onFocusRequest?(offset)
         }
