@@ -191,3 +191,13 @@ swapped files there). Everything below marked "traced" or "ran" was done at this
 - **Discipline:** every U4 commit is pathspec-limited to its unit's files; the record opened before
   any code (LIVE STATUS from `0f4055fb`), REVERT STATE line honest, PENDING marked where the stage
   window owes the run. No canon edit, no Sync/, no schema.
+
+## ARBITRATION (orchestrator, same-model ladder; ~13:55)
+
+- **MINOR-1 — the BUILD STANDS; the PROVISIONAL is RESTATED (fix pass, record edit only).** The reviewer's own judgment is adopted: reading (a) respects R-13s-31/32. But the collision it found is substantive — "saved moment" is ALSO the whole-note Versions vocabulary at four sites, which half-recreates the very confusion her R-VX83-10 reason names — so P-U4-1 is rewritten with: the collision (the four sites), the two-explanations fact (tour+guide say savepoint; ⌘/+receipts say saved moment), the honest count (seven), and OPTION (c) — no defining noun at all. **This goes on her morning list as a named taste call: (a) saved moment as built · (b) savepoint per R-13s-32's letter · (c) no noun.** Nothing rebuilds tonight.
+- **MINOR-2 — FIX:** the ⌘/ note ▾ row drops the dead "history" door and lists the real menu from the `VersionsPath` constants; the reviewer's named red-on-old pin.
+- **MINOR-3 — FIX:** the fence's sentence-end set becomes "." and "!" only (a "?" title is a header); the control-test literal added red-on-old.
+- **NIT-1 — FIX (record):** P-U4-5 gains the one honest sentence (the fence judges literals, never composed strings).
+- **NIT-2 — DONE (orchestrator, this commit):** the closeout checklist gains the merge guard.
+
+Routing: the U4 implementer runs the fix pass AFTER the triage landing reports (one implementer at a time); U4 round 2 re-reviews the fixes after U1b's round 2 (one reviewer at a time).
