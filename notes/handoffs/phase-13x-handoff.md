@@ -61,3 +61,22 @@ Pro's no-crash follow as its data point.
   provisioning profile covers both Macs.
 - The orchestrator switched from Fable to Opus mid-phase at your word (the Fable safeguards kept interrupting);
   every custody-touching subagent and reviewer stayed Fable.
+
+
+## Overnight addendum — VX-106, 13x's last change (2026-10-08, her mandate)
+
+**Done while you slept; nothing needs you except one wording question.**
+- **VX-106 merged.** The two `PostureSwitchTests` that went red at 13x's merge were already fixed by VX-99's harness
+  change by the time VX-106 started — so VX-106 delivered the guard instead: a new test that **locks the rule that a
+  pending "passphrase changed elsewhere" notice can never delay the follow that removes an Apple-openable key
+  file under Castle**. It turns red if anyone reorders those checks. PostureSwitchTests 70/70, Phase13pControllerTests
+  50/50, a Fable cold review with 0 BLOCKER / 0 MAJOR.
+- **No /Applications refresh:** the stage coordinator ruled it unneeded — VX-106 changed a test file only, and your
+  5740 (from VX-99's merge) already runs the identical app code. 13s's end-of-run refresh installs main next.
+- **One question for you — QUESTIONS #205:** in that rare world, typing your OLD passphrase into the follow says
+  "That isn't your library's passphrase", which isn't quite true (it's the account's word that changed). Lean:
+  say the passphrase was changed on [device] on [day]. A wording call for you and 13s.
+- **Process lessons now in both phase skills:** the closeout Mac run covers suites for every changed SOURCE file
+  (this is how the two reds slipped past 13x's close); a phase plan's STATUS banner is flipped at close (13o/13r/
+  13y had stale OPEN banners — fixed); merged branches are deleted; run evidence is deleted at merge.
+- **The Sync/-custody slot** passed to 13s's U1b at VX-106's merge, by the coordinator.

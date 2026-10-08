@@ -4085,6 +4085,126 @@ struct PostureSwitchTests {
         #expect(controller.changeNotice == nil, "the record agrees with the vault")
     }
 
+    /// VX-106 — THE PRECEDENCE PIN (the 13x closeout orchestrator's ruling on
+    /// the ticket, 2026-10-08: fix the harness, KEEP THE ARM ORDER). The
+    /// world where BOTH arms have their facts: a CASTLE account by its vault,
+    /// a LIVE key file that still carries an `apple` copy (the Standard-era
+    /// file — the exposure 13x's `castleKeyFileAppleOpenable` arm exists
+    /// for), custody's keys the vault's (no rotation) — AND a passphrase
+    /// change pending elsewhere (the file records the vault's OLD descriptor,
+    /// which `changeElsewhere` alone DOES read — witnessed below, so the
+    /// precedence is proven over a real notice, never a vacuous one). The
+    /// reconcile owes the FOLLOW and NO change notice: the follow closes a
+    /// live exposure, the notice is informational, and the follow's own act
+    /// resolves it — the no-rotation road's new key file records the vault's
+    /// CURRENT descriptor and recovery-wrap digest (`writeNewKeyFile`'s
+    /// `recordVaultReconciliation`) and `retireOldKeyFiles` removes the
+    /// Apple-carrying file — so after the follow a reconcile owes nothing:
+    /// no follow, no change notice. The follow must use the vault's CURRENT
+    /// word (the retired one refuses in place, nothing written). RED ON OLD
+    /// (REVERT V106-A, named in the VX-106 record — the arms reordered so an
+    /// owed change notice pre-empts the Apple-openable arm): `followNotice`
+    /// nil and `changeNotice` the passphrase kind at the first reconcile.
+    @Test func aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle() async throws {
+        // VX-99's harness: a DELIBERATE MISMATCH — a Standard-shaped library
+        // (the `apple` copy in its key file) over a CASTLE account.
+        let world = try await makeWorld(vaultSaysCastle: true)
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        // The vault carries words too, so the digest leg of the record is real.
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: world.words, material: material)
+        let before = try await world.vault()
+        #expect(before.format.masterWrappedByAppleHeld == nil, "the account is Castle-shaped")
+        #expect(before.format.recoveryWrapDigest != nil)
+        // The live key file: the Apple copy (the exposure) + the vault's
+        // record as it stood (the landing sites' record — 3a/3b's).
+        let oldURL = world.oldKeyFileURL
+        var file = try #require(try StoreKeyEnvelope.load(at: oldURL))
+        #expect(file.apple != nil && file.appleKeyID == world.apple.id, "the live key file is Apple-openable")
+        try file.recordVaultReconciliation(
+            kdf: before.format.kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: before.format.recoveryWrapDigest)
+        try file.write(at: oldURL)
+        // The passphrase CHANGED elsewhere (the core act another device runs):
+        // a new descriptor, the words untouched, nothing rotated.
+        let new = "a-new-word-the-follow-must-use"
+        _ = try await VaultEnrollment(client: client).changePassphrase(authorizedBy: .passphrase("sesame"), newPassphrase: new)
+        let changed = try await world.vault()
+        #expect(changed.format.kdf != before.format.kdf && changed.format.recoveryWrapDigest == before.format.recoveryWrapDigest)
+        #expect(changed.format.classKey(for: .corpus)?.keyID == material.corpusKeyID, "a passphrase change rotates nothing")
+        #expect(changed.format.masterWrappedByAppleHeld == nil, "…and the account stays Castle")
+
+        let controller = makeController(for: world)
+        controller.switchRunner = world.runner
+        controller.foreignOwner = { _ in false }
+        controller.readVaultPosture = { [client] in
+            guard let fetched = try? await client.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-2b", hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+                format: fetched.format, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
+        }
+        // THE PREMISE WITNESSED: over this same file and reading, the change
+        // detection alone DOES read a pending passphrase change — the arm
+        // below outranks it; it never hides a notice that was not there.
+        let pendingReading = try #require(await controller.readVaultPosture?())
+        let recorded = try #require(try StoreKeyEnvelope.load(at: oldURL))
+        let pending = ProtectionController.changeElsewhere(keyFile: recorded, reading: pendingReading, device: "test device", day: "")
+        #expect(pending?.kind == .passphraseChangedElsewhere, "a passphrase change IS pending: \(String(describing: pending))")
+
+        await controller.reconcile()
+        let owed = try #require(controller.followNotice, "the follow is OWED — the exposure outranks the informational notice")
+        #expect(owed.kind == .castleKeyFileAppleOpenable, "its own kind: \(owed.kind)")
+        #expect(owed.corpusKeyID == material.corpusKeyID, "the keys unchanged — the no-rotation follow serves it")
+        #expect(controller.changeNotice == nil, "NO change notice beside the follow — the follow resolves it")
+        #expect(controller.notice == .follow(owed) && controller.followPending)
+        #expect(controller.posture == .castle && !controller.postureIndeterminate, "the vault's word DETERMINES")
+        #expect(FileManager.default.fileExists(atPath: oldURL.path) && world.calls.rekeys == 0, "the verdict writes nothing")
+
+        // The follow through its own door. The retired word refuses in place
+        // (the ACCOUNT's word opens M, and the account's word moved).
+        controller.openFollow()
+        let model = try #require(controller.activeFollow)
+        model.choosePassphrase()
+        #expect(model.phase == .askPassphrase)
+        await model.enter(passphrase: "sesame")
+        #expect(model.phase == .askPassphrase && model.lastError == ProtectionCopy.passphraseNotTheLibrarys,
+                "\(model.phase) \(model.lastError ?? "nil")")
+        #expect(world.calls.rekeys == 0 && FileManager.default.fileExists(atPath: oldURL.path), "a wrong word writes nothing")
+        await model.enter(passphrase: new)
+        guard case .done = model.phase else {
+            Issue.record("the follow ran to Done: \(model.phase) \(model.lastError ?? "")")
+            return
+        }
+        let outcome = try #require(model.outcome)
+        #expect(outcome.entersCastle && outcome.reencrypted == 0, "the no-rotation follow — the keys were never replaced")
+        #expect(world.calls.rekeys == 1, "the library RE-KEYED")
+        #expect(world.calls.custodyTargets == [.biometric] && world.posture == .castle, "custody behind the gate")
+        #expect(world.keyStore.load()?.corpusKeyID == material.corpusKeyID, "custody's keys unchanged")
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the Apple-openable key file RETIRED from the live folder")
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        #expect(newFile.apple == nil && newFile.appleKeyID == nil, "NO Apple copy on the new file")
+        let newKey = try newFile.unwrapKey(passphrase: new)
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey) && !StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey),
+                "the library under L′, which the NEW word opens")
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try newFile.unwrapKey(passphrase: "sesame") }
+        // THE RESOLUTION: the follow wrote the vault's CURRENT descriptor and
+        // digest into the new file — exactly what the change notice asks for.
+        #expect(newFile.passphrase?.kdf == changed.format.kdf && newFile.vaultKDF == changed.format.kdf,
+                "the P copy under the vault's CURRENT descriptor, recorded")
+        #expect(newFile.vaultRecoveryWrapDigest == changed.format.recoveryWrapDigest && newFile.vaultCorpusKeyID == material.corpusKeyID,
+                "the digest and the corpus key id recorded")
+        #expect(!controller.followPending && controller.followNotice == nil && controller.changeNotice == nil)
+        #expect(try await world.marker() == nil)
+        await controller.reconcile()
+        #expect(controller.followNotice == nil, "nothing more to follow")
+        #expect(controller.changeNotice == nil, "the record agrees with the vault — no change notice remains after the follow")
+        #expect(controller.notice != .follow(owed) && controller.notice != .followWaiting(owed))
+    }
+
     /// THE FOLLOW FROM THE WORD JUST TYPED (ledger 54; §7 step 1): the
     /// sibling opened its lobby by the passphrase, whose derived key sits in
     /// the session under the VAULT's descriptor; at ready the follow is owed
