@@ -1095,4 +1095,113 @@ extension BookOutlineLandingTests {
                     "no displayed turn after focusing elsewhere shows the story's row empty — empty at \(leg2.empty)")
         }
     }
+
+    /// **VX-91 — THE STRESS PROBE, built as the CONFIRM** (her report:
+    /// rapid clicking across the expanded Sherlock outline sometimes
+    /// jitters, worst case "the title that you clicked on will appear alone
+    /// in the middle of the page, with no other text on the screen"; not
+    /// reliably reproducible, seen on both Macs, pre-dates VX-75's fix. Her
+    /// rule: no fix without a clear diagnosis and a pin — so this probe IS
+    /// the diagnosis attempt. RED confirms a mechanism class and the hunt
+    /// narrows from its story; GREEN acquits the harness-reachable classes
+    /// and VX-91 records the findings).
+    ///
+    /// The storm is her gesture at her pace: everything expanded, then a
+    /// focus+reveal (the navigator's click) on a different story every
+    /// ~100 ms, twelve times, never waiting for a landing to finish. The
+    /// asserts are about the AFTERMATH — a brief blank on a long jump is
+    /// virtualization's normal beat; what must never happen is the state
+    /// STICKING: anchors gone, a story row collapsed, a viewport of
+    /// placeholders with no prose, a landing still spinning.
+    @Test func rapidClickingAcrossExpandedStoriesSettlesWithProseOnScreen() async throws {
+        try await withLandingBook(posts: 9, longAt: [1, 4, 7], chapters: true) { session, db, readingID, postIDs, _ in
+            let stories = [postIDs[1], postIDs[4], postIDs[7]]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog(budget: 8)
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+
+            // Her setup: ALL text expanded, the first story's surface real.
+            model.expandAll()
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 160)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 10)
+            let anchors = stories.map { BookOutlineRows.Row.noteAnchor($0) }
+            let before = BookOutlineGeometry.anchorTops
+            #expect(before.count >= 6, "the expanded column is realized around the fold: \(before.count)")
+
+            // THE STORM: twelve focus+reveal clicks across the three
+            // stories, one every ~3 displayed turns (~100 ms), plus a
+            // click-out mid-storm (she doesn't only click IN). Diagnostics
+            // recorded per turn; no asserts in here.
+            var stormBlankTurns = 0
+            var turnsSinceClick = 0
+            var clicks = 0
+            var cycle = 0
+            for _ in 0..<44 {
+                watchdog.beat()
+                if turnsSinceClick >= 3, clicks < 12 {
+                    turnsSinceClick = 0
+                    clicks += 1
+                    if clicks == 7 {
+                        model.focus(nil)  // the mid-storm click-out
+                    } else {
+                        let story = stories[cycle % stories.count]
+                        cycle += 1
+                        model.focus(story, caret: 120)
+                        model.requestReveal(story)
+                    }
+                } else {
+                    turnsSinceClick += 1
+                }
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                if storySurfaces(in: hosting).isEmpty { stormBlankTurns += 1 }
+                pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(15))
+                watchdog.beat()
+            }
+
+            // THE AFTERMATH: the storm is over; the state must settle.
+            let target = stories[(cycle - 1) % stories.count]
+            let targetAnchor = BookOutlineRows.Row.noteAnchor(target)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pendingReveal == nil && !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 100)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 20)
+
+            let now = BookOutlineGeometry.anchorTops
+            let vanished = before.keys.filter { now[$0] == nil }.sorted()
+            let storyHeights = anchors.map { Int(BookOutlineGeometry.rowHeights[$0] ?? 0) }
+            print("VX-91 PROBE: clicks=\(clicks) stormBlankTurns=\(stormBlankTurns) "
+                + "vanished=\(vanished) storyHeights=\(storyHeights) "
+                + "targetTop=\(String(describing: now[targetAnchor].map(Int.init))) "
+                + "trace=\(BookOutlineGeometry.trace.suffix(18))")
+
+            #expect(vanished.isEmpty,
+                    "every anchor realized before the storm still reports after it: \(vanished)")
+            #expect(model.pendingReveal == nil, "no landing is left spinning after the storm")
+            #expect(!storySurfaces(in: hosting).isEmpty,
+                    "prose is on screen after the storm — never a page of placeholders under the clicked title")
+            for (anchor, height) in zip(anchors, storyHeights) {
+                #expect(height > 1500,
+                        "no expanded story's row collapsed under the storm: \(anchor) at \(height) pt")
+            }
+        }
+    }
 }

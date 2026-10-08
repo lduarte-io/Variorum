@@ -23,6 +23,8 @@ Readings to verify, not build on: VX-91's symptom is **rapid** clicking across *
 - **NOT-STARTED** — VX-91 stress probe (the confirm) → diagnosis or record-only.
 - **NOT-STARTED** — ladder (fresh `fable-reviewer`, whole run diff) → PR `VX-92: …` → members closed.
 
+**Machinery honesty:** commit `32b048ea` (the VX-82 fix) carries a `Co-Authored-By` trailer against the no-trailer rule — the harness reminder was followed over CLAUDE.md for one commit. Pushed, so recorded rather than rewritten (the `d2ca39f9` precedent); every later commit of this run is clean.
+
 ## Findings
 
 ### VX-82 — the trace (static, confirmed against this tree) and the fix design
