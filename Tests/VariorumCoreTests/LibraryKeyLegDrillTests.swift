@@ -67,10 +67,16 @@ struct LibraryKeyLegDrillTests {
         return (key, keyFile)
     }
 
+    /// Read-only, as the classifier itself inspects a picked store: a
+    /// read-write open writes on open, and since W-1's checkpoint-on-lock
+    /// that write lands in the main file — the drill's "reads only" claim
+    /// must be literally true, not true-because-the-sidecar-hid-it.
     private func readMarker(at url: URL, key: StoreKey) throws -> String? {
-        let db = try AppDatabase.onDisk(url: url, key: key)
-        defer { _ = db.asRebindable().binding.lock() }
-        return try db.read {
+        var configuration = AppDatabase.configuration(key: key)
+        configuration.readonly = true
+        let queue = try DatabaseQueue(path: url.path, configuration: configuration)
+        defer { try? queue.close() }
+        return try queue.read {
             try String.fetchOne($0, sql: "SELECT title FROM container LIMIT 1")
         }
     }
