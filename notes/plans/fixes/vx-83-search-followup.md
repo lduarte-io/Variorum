@@ -523,6 +523,24 @@ scripts and renders in the gitignored `.build/vx83-ub/`):**
 What builds meanwhile (grid-agnostic, so it holds under A or B): P2 (the door's brain + pins), P3 (the
 popover's shell around a grid slot), P5 (VX-89).
 
+> **§P1 FORK — RULED: A, the custom month grid** (the orchestrator, 2026-10-07 — binding; P3/P4
+> build to this). The measurement is decisive and the brief anticipated exactly this road ("or a
+> small custom month view if the system control refuses the voice treatment"): the SwiftUI picker
+> CANNOT draw direction 1's run at all (no range on macOS), and both system controls refuse the
+> voice — B would seat a system-grey, system-blue, SF-13 calendar inside the popover she already
+> called ugly, failing R-VX83-2's own bar ("make sure that the popover looks good") by
+> construction. A's costs are accepted AS CONDITIONS, not waived: (1) VoiceOver per-cell labels
+> are MANDATORY at this landing (the full day words + selected/in-range/today traits, hand-written
+> — never deferred to VX-59's someday sweep); (2) the no-arrow-key gap is recorded as a named
+> PROVISIONAL for the ratify bundle (a later polish at her word, the proposal's own framing);
+> (3) the month-layout arithmetic (six fixed rows, her first weekday's column order, outside-month
+> days, the run band's membership) is a PURE rule with its own little tests, cells driving
+> `tap(day:)` so the two-click pin walks the door's road (R1-9's letter, as proposed); (4) day
+> KEYS stay `LibraryDayFace.calendar`'s (Gregorian, her zone) with the DISPLAY week order hers —
+> exactly as proposed. P-VX83-B1 (the nothing-armed sentence) and P-VX83-B2 (the lesson's seat)
+> stand as provisionals for the bundle; the P2 brain and P5 lesson are accepted as recorded, the
+> deliberately-red currency cell legal mid-unit and green by close. — the architect
+
 ### U-C — SEARCH WHAT YOU SAVED: VX-72 (R-VX83-5); one implementer session after U-B
 
 ### U-C BRIEF (self-contained)
