@@ -63,14 +63,14 @@ struct LibraryTagListingTests {
     /// third (the SUBTREE), #other on a fourth, a fifth untagged.
     private struct Classics {
         let hound: Container, study: Container, sign: Container, other: Container, plain: Container
-        let classics: Tag
+        let classics: VariorumCore.Tag
     }
 
     private func classics(_ ops: Operations) throws -> Classics {
         let classics = try ops.createTag(name: "classics")
         let doyle = try ops.createTag(parent: classics.id, name: "doyle")
         let otherTag = try ops.createTag(name: "other")
-        func note(_ title: String, _ tag: Tag?) throws -> Container {
+        func note(_ title: String, _ tag: VariorumCore.Tag?) throws -> Container {
             let post = try ops.createPost(title: title)
             _ = try ops.newBlock(in: post.id, text: "\(title) — the words of it")
             if let tag { _ = try ops.applyTag(tag.id, toPost: post.id) }
