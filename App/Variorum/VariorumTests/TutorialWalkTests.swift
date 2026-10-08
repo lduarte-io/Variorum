@@ -2435,7 +2435,9 @@ struct TutorialDeletionActsTests {
             // deliberate, and where the joined blocks went.
             #expect(past.contains("says nothing at the time"),
                     "the declined message's teaching, in the lesson's mouth")
-            #expect(past.contains("BOTH"),
+            // 13s-b triage landing: "BOTH" is plain prose now (her R-13s-30
+            // caps ban) — the claim, ALL of a merge's originals, unchanged.
+            #expect(past.contains("lists both of the blocks it joined"),
                     "…and a merge's originals are ALL of them (her C2 ruling)")
         }
     }
@@ -2446,7 +2448,9 @@ struct TutorialDeletionActsTests {
         try await withTutorialWorld { session, db, bookID in
             let deleting = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let deletingTexts = try await slots(db, deleting).compactMap(\.text)
-            for prefix in ["SCRATCH ONE", "SCRATCH TWO", "SCRATCH THREE"] {
+            // 13s-b triage landing: the staged prefixes read in sentence case
+            // (her R-13s-30 caps ban); each act after its colon is unchanged.
+            for prefix in ["Scratch one", "Scratch two", "Scratch three"] {
                 #expect(deletingTexts.contains { $0.hasPrefix(prefix) },
                         "\(prefix) is staged to be deleted")
             }
@@ -2455,7 +2459,7 @@ struct TutorialDeletionActsTests {
                 try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
             }
             let trioTexts = try await slots(db, trio).compactMap(\.text)
-            for prefix in ["ARCHIVE ME", "DELETE ME", "MOVE ME OUT"] {
+            for prefix in ["Archive me", "Delete me", "Move me out"] {
                 #expect(trioTexts.contains { $0.hasPrefix(prefix) }, "\(prefix) is staged")
             }
 
@@ -2482,7 +2486,7 @@ struct TutorialDeletionActsTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let before = try harness.storeSlots()
-            let scratch = try staged(harness, "SCRATCH ONE")
+            let scratch = try staged(harness, "Scratch one")
 
             let selection = try tripleClickSelection(harness, scratch.blockID)
             let scratchEntry = try entryRange(harness, scratch.blockID)
@@ -2524,8 +2528,8 @@ struct TutorialDeletionActsTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let before = try harness.storeSlots()
-            let two = try staged(harness, "SCRATCH TWO")
-            let three = try staged(harness, "SCRATCH THREE")
+            let two = try staged(harness, "Scratch two")
+            let three = try staged(harness, "Scratch three")
 
             // The ⌘-click door itself (the surface's own entry point).
             #expect(harness.model.pickBlock(
@@ -2570,7 +2574,7 @@ struct TutorialDeletionActsTests {
             window.makeKeyAndOrderFront(nil)
             window.makeFirstResponder(harness.textView)
 
-            let scratch = try staged(harness, "SCRATCH ONE")
+            let scratch = try staged(harness, "Scratch one")
             harness.replace(try tripleClickSelection(harness, scratch.blockID), with: "")
             await harness.flush()
             #expect(session.undoMenuState.topLabel == "Delete Blocks")
@@ -2601,9 +2605,9 @@ struct TutorialDeletionActsTests {
                 try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
-            let keeper = try staged(harness, "ARCHIVE ME")
-            let doomed = try staged(harness, "DELETE ME")
-            let mover = try staged(harness, "MOVE ME OUT")
+            let keeper = try staged(harness, "Archive me")
+            let doomed = try staged(harness, "Delete me")
+            let mover = try staged(harness, "Move me out")
 
             // ARCHIVE — the Block-menu / right-click door.
             harness.textView.setSelectedRange(
@@ -2672,8 +2676,8 @@ struct TutorialDeletionActsTests {
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let order = try harness.storeSlots().map(\.blockID)
-            let keeper = try staged(harness, "ARCHIVE ME")
-            let doomed = try staged(harness, "DELETE ME")
+            let keeper = try staged(harness, "Archive me")
+            let doomed = try staged(harness, "Delete me")
 
             harness.textView.setSelectedRange(
                 NSRange(location: try entryRange(harness, keeper.blockID).location, length: 0))
@@ -2929,7 +2933,9 @@ struct TutorialDeletionActsTests {
             }
             let projected = try await projection(db, lesson)
             let host = try #require(projected.slots.first {
-                $0.text?.hasPrefix("Deleted TAKES wait") == true
+                // 13s-b triage landing (the LANDING BRIEF's hook — the spare-take
+                // prose pins move WITH ch 05): "Deleted TAKES" reads "Deleted takes".
+                $0.text?.hasPrefix("Deleted takes wait") == true
             })
             let fan = try #require(projected.fans[host.blockID])
             #expect(fan.count == 2, "the spare take is staged")
