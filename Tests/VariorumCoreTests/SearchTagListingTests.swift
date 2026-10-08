@@ -218,6 +218,42 @@ struct SearchTagListingTests {
         }
     }
 
+    /// **Ladder R1 MINOR (U-A AGREED):** a block whose HOME is archived — the
+    /// one archived shape this road can list, since an archived BLOCK's
+    /// placement is released and never lists (P-13o-U1-8) — enters only under
+    /// the archived facet AND carries the archived FACT, so the row can wear
+    /// the mark (R-13o-6's letter, "rows say which they are"; P-VX83-3 read
+    /// as the implementer meant it: every row the facet brings in says so).
+    /// RED-ON-OLD: the shipped statement never selected the home's archive
+    /// and the hit defaulted false — verified by revert at the fix.
+    @Test func anArchivedHomesBlockEntersOnlyUnderTheFacetWearingItsFact() throws {
+        try withOperations { ops, db in
+            let idea = try ops.createTag(name: "idea")
+            let kept = try ops.createPost(title: "Kept")
+            let keptBlock = try ops.newBlock(in: kept.id, text: "a living thought")
+            _ = try ops.applyTag(idea.id, toBlock: keptBlock.block.id)
+            let shelved = try ops.createPost(title: "Shelved")
+            let shelvedBlock = try ops.newBlock(in: shelved.id, text: "a put-away thought")
+            _ = try ops.applyTag(idea.id, toBlock: shelvedBlock.block.id)
+            try ops.archiveContainer(shelved.id)
+
+            let living = try db.read { db in
+                try Queries.catalogTaggedBlocks(db, narrowing: question("#idea"), wingID: "")
+            }
+            #expect(living.map(\.id) == [keptBlock.block.id],
+                    "the archived home's block waits for the facet")
+            let withFacet = try db.read { db in
+                try Queries.catalogTaggedBlocks(
+                    db, narrowing: question("#idea", visibility: .includingArchived), wingID: "")
+            }
+            #expect(Set(withFacet.map(\.id)) == [keptBlock.block.id, shelvedBlock.block.id])
+            #expect(withFacet.first { $0.id == shelvedBlock.block.id }?.isArchived == true,
+                    "the facet's row says which it is (R-13o-6)")
+            #expect(withFacet.first { $0.id == keptBlock.block.id }?.isArchived == false,
+                    "a living home's block stays unmarked")
+        }
+    }
+
     // MARK: - The counts (the band stays honest)
 
     @Test func theCountsAreTheListingsOwn() throws {

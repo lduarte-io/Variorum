@@ -176,6 +176,25 @@ struct LibraryTagListingTests {
             #expect(model.blockHits.first?.homeIsPool == true && model.blockHits.first?.title == "a classic line")
             #expect(model.searchState.counts?.living.blocks == 1 && model.searchState.counts?.living.notes == 3,
                     "the band counts the whole question, whatever the scope (D3)")
+            // Ladder R1 MINOR (U-A AGREED): with the facet toggled, a block
+            // whose HOME is archived joins the Blocks listing WEARING its
+            // fact — the row says which it is (R-13o-6; the note rows'
+            // CatalogArchivedMark rule, now the block rows' too). Red on the
+            // pre-fix tree: the hit carried no archived fact.
+            let shelved = try ops.createPost(title: "Shelved")
+            let shelvedBlock = try ops.newBlock(in: shelved.id, text: "a put-away classic")
+            _ = try ops.applyTag(s.classics.id, toBlock: shelvedBlock.block.id)
+            try ops.archiveContainer(shelved.id)
+            await model.search()
+            #expect(model.blockHits.map(\.id) == [scrap.block.id],
+                    "the archived home's block waits for the facet")
+            model.toggleArchivedFacet()
+            await model.search()
+            #expect(Set(model.blockHits.map(\.id)) == [scrap.block.id, shelvedBlock.block.id])
+            #expect(model.blockHits.first { $0.id == shelvedBlock.block.id }?.isArchived == true
+                    && model.blockHits.first { $0.id == scrap.block.id }?.isArchived == false,
+                    "the facet's row wears the mark; the living one does not")
+            model.toggleArchivedFacet()
             model.pickScope(.all)
             await model.search()
             #expect(model.blockHits.isEmpty, "the blocks list is the Blocks scope's alone")

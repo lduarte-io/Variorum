@@ -885,6 +885,11 @@ struct LibraryCatalogView: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
             }
+            if hit.isArchived {
+                // Ladder R1 MINOR: a block the archived facet brought in says
+                // so, exactly as the note rows do (R-13o-6, P-VX83-3).
+                CatalogArchivedMark(tokens: tokens)
+            }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

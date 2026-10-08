@@ -36,7 +36,8 @@ extension Queries {
                 SELECT b.id AS id, b.name AS name,
                        SUBSTR(COALESCE(\(renderedTakeTextSQL), ''), 1, 240) AS text,
                        c.id AS home_id, c.kind AS home_kind, c.title AS home_title,
-                       c.entry_date AS home_entry_date, c.created_at AS home_created_at
+                       c.entry_date AS home_entry_date, c.created_at AS home_created_at,
+                       (c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL) AS archived
                 FROM (\(narrowing.driver)) t
                 CROSS JOIN block b ON b.id = t.tagged_id
                 JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
@@ -56,7 +57,14 @@ extension Queries {
             return CatalogHit(
                 kind: .block, id: row["id"],
                 title: blockHandle(name: row["name"], text: row["text"]),
-                detail: home, homeContainerID: row["home_id"], homeIsPool: isPool)
+                detail: home, homeContainerID: row["home_id"], homeIsPool: isPool,
+                // Ladder R1 MINOR: the archived FACT rides the hit so the row
+                // can wear the mark (R-13o-6, "rows say which they are") — one
+                // rule with the narrowing's own archived-only clause (the
+                // block half moot today: a released placement never lists;
+                // an archived POOL home rightly earns the mark too). The
+                // column is always present on this statement.
+                isArchived: row["archived"])
         }
     }
 
