@@ -323,6 +323,15 @@ public enum Tour {
             }
             enter(following, &state, &effects)
             settle(&state, &effects, freshReport: false)
+            // Round 2 (the U2 ladder): the leg's end finishes at the guide on
+            // THIS road too — a "next" pressed while she already sits at the
+            // field guide (her report outran the leg's navigate) must finish,
+            // not stall with `enter`'s navigate skipped and nothing said.
+            // Mirrors the `.facts` arm below; only leg 4's next can land here
+            // (`settle` cannot cascade through leg 4 without a fresh report).
+            if state.step == .legEnd, let finished = finishAtGuide(state) {
+                return Outcome(state: nil, effects: effects + finished)
+            }
             return Outcome(state: state, effects: effects)
 
         case .choose(let choice):

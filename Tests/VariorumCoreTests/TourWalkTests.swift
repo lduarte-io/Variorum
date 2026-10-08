@@ -529,6 +529,38 @@ struct TourWalkTests {
         #expect(v.effects == [.navigate(.area(.bookcase))])
     }
 
+    /// Round 2 (the U2 ladder): the `.next` road into the leg's end while she
+    /// is ALREADY at the field guide — her report from the guide landed
+    /// before the leg's navigate settled, so leg 4 kept her — finishes there,
+    /// exactly as the facts road does. Neither a navigate off the guide nor a
+    /// silent stall: `finishAtGuide` speaks on both roads.
+    @Test func nextAtLegFourWhileAlreadyAtTheGuideFinishesThereInsteadOfStalling() {
+        var w = Self.walk(to: .endCard)
+        w.send(.choose(.keepGoing))
+        w.report(Self.ownNote(starred: true, tags: 1))
+        w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        #expect(w.step == .legSnippets)
+        // Her ⌘K to the guide lands BEFORE the leg's navigate settles:
+        // previousPlace is the Pool, not Snippets, so leg 4 keeps her.
+        w.report(.init(place: .book(Self.guide)))
+        #expect(w.step == .legSnippets)
+        w.effects = []
+        w.send(.next)
+        #expect(w.state == nil)
+        #expect(w.effects == [.finish(completed: true)],
+                "finish, not a stall: \(w.effects)")
+        // At Snippets, the same press keeps the designed yank home (P-U2-7).
+        var v = Self.walk(to: .endCard)
+        v.send(.choose(.keepGoing))
+        v.report(Self.ownNote(starred: true, tags: 1))
+        v.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        v.report(.init(place: .area(.snippets)))
+        v.effects = []
+        v.send(.next)
+        #expect(v.step == .legEnd)
+        #expect(v.effects == [.navigate(.area(.bookcase))])
+    }
+
     @Test func nextIsInertOnACardThatWaitsForHerAct() {
         for step in [Tour.Step.seededBook, .write, .makeTake, .downAndUp, .ownNote] {
             var w = Self.walk(to: step)
