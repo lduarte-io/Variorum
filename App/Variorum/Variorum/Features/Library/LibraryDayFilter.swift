@@ -15,11 +15,13 @@
 //  1. `LibraryDayFace` — the WORDS: the door's label, and the honest empty
 //     answer, said in ONE place so the List mode and the Notes mode can
 //     never word the same silence differently.
-//  2. `LibraryWhenDoor` — the door: since 13o U2 (her R-13o-13, *"I like
-//     'when' for the day door"*) it reads **when ▾** and opens on a day… ·
-//     between days… · any day; the armed state is the results band's
-//     clearable chip. (It was `LibraryDayField`, the `edited on…` field with
-//     its ✕, from 18h batch 2 to 13o.)
+//  2. `LibraryDayRange` — the armed run of days, and the empty answer's
+//     face. The door itself — **when ▾** since 13o U2 (her R-13o-13, *"I
+//     like 'when' for the day door"*) — lives in `LibraryWhenDoor.swift`
+//     since VX-87 rebuilt it to her direction 1 (R-VX83-2: one popover, a
+//     month grid, the armed sentence). (It was `LibraryDayField`, the
+//     `edited on…` field with its ✕, from 18h batch 2 to 13o; a menu that
+//     opened a date-field popover from 13o to VX-87.)
 //
 //  The day itself is a canonical `yyyy-MM-dd` key in HER calendar; the
 //  conversion to the UTC window the stored stamps compare against is core's
@@ -68,20 +70,31 @@ nonisolated enum LibraryDayFace {
     static var calendar: Calendar { JournalDay.storeCalendar }
 
     /// **The door: `when ▾`** (13o U2 — her R-13o-13, *"I like 'when' for
-    /// the day door"*, the mockup's wording 2). The ▾ is the menu's own. It
-    /// was *edited on…* from 13i-d U6 (c) — her §21 note, "'on day…' wants
-    /// clearer wording" — to 13o, where the door grew its RANGE.
+    /// the day door"*, the mockup's wording 2). It was *edited on…* from 13i-d
+    /// U6 (c) — her §21 note, "'on day…' wants clearer wording" — to 13o,
+    /// where the door grew its RANGE.
     static let closedLabel = "when"
 
-    /// The door's three choices (R-13o-13: "on a day… · between days… · any
-    /// day").
-    static let onADay = "on a day\u{2026}"
-    static let betweenDays = "between days\u{2026}"
+    /// **The popover's mode row and its clearing word** (VX-87 — her
+    /// direction 1, R-VX83-2: *on a day · between days*, with *any day* at the
+    /// card's foot). R-13o-13's menu read "on a day… · between days…"; the
+    /// ellipses meant "this opens something more", and they left with the
+    /// menu — on a mode row the words open nothing (the mockup draws them
+    /// bare).
+    static let onADay = "on a day"
+    static let betweenDays = "between days"
     static let anyDay = "any day"
-    /// The open questions' own words, beside their date fields.
-    static let onWord = "on"
-    static let fromWord = "from"
-    static let toWord = "to"
+
+    /// **What VoiceOver says** (the §P1 ruling's condition 1 — written by
+    /// hand at this landing): the month steps, and a day's standing after its
+    /// full date (`LibraryWhenGrid.spoken`).
+    static let previousMonth = "Previous month"
+    static let nextMonth = "Next month"
+    static let spokenChosenDay = "chosen day"
+    static let spokenRunStart = "first day of the run"
+    static let spokenRunEnd = "last day of the run"
+    static let spokenInRun = "in the run"
+    static let spokenToday = "today"
 
     /// One armed day: *edited on Sep 9* — the same day words every stamp in
     /// the Library uses (`TimeStampFace.day`, core `Domain`). The band's
@@ -125,6 +138,46 @@ nonisolated enum LibraryDayFace {
         guard let date = JournalDay.date(from: day, calendar: calendar) else { return day }
         return TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
+
+    // MARK: VX-87 — the popover's words (direction 1, R-VX83-2)
+
+    /// **The armed SENTENCE** — the popover's confirmation, at its foot (the
+    /// mockup's direction 1, verbatim in shape): *Showing notes edited **on
+    /// Oct 6**.* · *Showing notes edited **Oct 1 – Oct 6**.* With nothing armed
+    /// it says the clearing word's own state the same way — *…edited **on any
+    /// day**.* (PROVISIONAL P-VX83-B1: the mockup draws only armed states).
+    /// The emphasized part is built from the same day words the band's chip
+    /// uses (`dayWords` / `rangeWords`), so the sentence inside the popover and
+    /// the chip outside it cannot disagree.
+    struct Sentence: Equatable {
+        let lead: String
+        /// The armed words — drawn emphasized.
+        let emphasis: String
+        let tail: String
+        var plain: String { lead + emphasis + tail }
+    }
+
+    static func sentence(
+        range: LibraryDayRange?, now: Date, calendar: Calendar = LibraryDayFace.calendar,
+        locale: Locale = .current
+    ) -> Sentence {
+        let armed: String
+        if let range {
+            armed = range.isOneDay
+                ? "on " + dayWords(day: range.first, now: now, calendar: calendar, locale: locale)
+                : rangeWords(range, now: now, calendar: calendar, locale: locale)
+        } else {
+            armed = "on " + anyDay
+        }
+        return Sentence(lead: "Showing notes edited ", emphasis: armed, tail: ".")
+    }
+
+    /// The foot's quiet hint at rest (the mockup's "esc closes") — and, while
+    /// a run waits for its last day, what the next press does (PROVISIONAL
+    /// P-VX83-B1's sibling: the mockup's reading, "click the first day, click
+    /// the last", said at the moment it matters).
+    static let escHint = "esc closes"
+    static let runEndHint = "then the last day"
 
     /// The door's own two hovers (the 18h ladder's R3-8 — they were literals
     /// in the view's body, two rows from the sentences this type already
@@ -209,144 +262,6 @@ nonisolated struct LibraryDayRange: Equatable, Sendable {
 
     init?(day: String) {
         self.init(first: day, last: day)
-    }
-}
-
-// MARK: - The door
-
-/// **THE `when ▾` DOOR** (13o U2 — her R-13o-13: *"I like 'when' for the
-/// day door"*). At rest it reads `when ▾`; opening it offers **on a day…** ·
-/// **between days…** · **any day**. Choosing a day ARMS it at once — today,
-/// the answer she most often wants and what a date field does everywhere
-/// (the shipped door's own convention) — and opens a small popover holding
-/// the date field(s) to move it; the armed state is the results band's
-/// clearable chip (the band's `dayChip`), so the filter is never invisible
-/// state. `any day` clears.
-///
-/// Every act a pin needs is a member — the closures the menu and the date
-/// fields run (`openOnToday`, `openBetween`, `dayBinding`, `fromBinding`,
-/// `toBinding`) — so a pin drives the door's own road, never a hand-fed value
-/// (the 18h ladder's R1-9).
-struct LibraryWhenDoor: View {
-    /// The date control's reserved width (the shipped field's measured room
-    /// for `9/12/2026` plus the stepper it grows on focus).
-    static let fieldWidth: CGFloat = 108
-
-    /// Which question the popover is asking.
-    enum Asking: Hashable, Identifiable {
-        case oneDay, between
-        var id: Self { self }
-    }
-
-    let tokens: VoiceTokens
-    /// The armed range; nil = any day.
-    let range: LibraryDayRange?
-    /// "now" — defaulted for the app, injected by a pin.
-    var now: Date = Date()
-    var calendar: Calendar = LibraryDayFace.calendar
-    let onPick: (LibraryDayRange) -> Void
-    let onClear: () -> Void
-
-    @State private var asking: Asking?
-
-    private var today: String { JournalDay.dayString(from: now, calendar: calendar) }
-
-    /// **on a day…** — arms one day: the armed range's first day, else today.
-    func openOnToday() {
-        if let day = LibraryDayRange(day: range?.first ?? today) { onPick(day) }
-    }
-
-    /// **between days…** — arms the armed range as it stands, else today
-    /// through today (she moves either end from there).
-    func openBetween() {
-        if let range { onPick(range) } else if let day = LibraryDayRange(day: today) { onPick(day) }
-    }
-
-    private func date(_ key: String?) -> Date {
-        key.flatMap { JournalDay.date(from: $0, calendar: calendar) } ?? now
-    }
-
-    private func key(_ date: Date) -> String {
-        JournalDay.dayString(from: date, calendar: calendar)
-    }
-
-    /// The one-day field's own binding (what its `DatePicker` sets).
-    var dayBinding: Binding<Date> {
-        Binding(
-            get: { date(range?.first) },
-            set: { if let day = LibraryDayRange(day: key($0)) { onPick(day) } })
-    }
-
-    /// The range's FROM field: moving it past TO carries TO along.
-    var fromBinding: Binding<Date> {
-        Binding(
-            get: { date(range?.first) },
-            set: { value in
-                let from = key(value)
-                let to = max(from, range?.last ?? from)
-                if let next = LibraryDayRange(first: from, last: to) { onPick(next) }
-            })
-    }
-
-    /// The range's TO field: moving it before FROM carries FROM along.
-    var toBinding: Binding<Date> {
-        Binding(
-            get: { date(range?.last) },
-            set: { value in
-                let to = key(value)
-                let from = min(to, range?.first ?? to)
-                if let next = LibraryDayRange(first: from, last: to) { onPick(next) }
-            })
-    }
-
-    var body: some View {
-        VoicedMenu(tokens: tokens, label: LibraryDayFace.closedLabel, role: .secondary) {
-            Button(LibraryDayFace.onADay) {
-                openOnToday()
-                asking = .oneDay
-            }
-            Button(LibraryDayFace.betweenDays) {
-                openBetween()
-                asking = .between
-            }
-            Divider()
-            Button(LibraryDayFace.anyDay) { onClear() }
-                .disabled(range == nil)
-        }
-        .help(range == nil ? LibraryDayFace.closedDoorHelp : LibraryDayFace.caveat)
-        .popover(item: $asking, arrowEdge: .bottom) { ask in
-            HStack(spacing: 8) {
-                switch ask {
-                case .oneDay:
-                    word(LibraryDayFace.onWord)
-                    field(dayBinding)
-                case .between:
-                    word(LibraryDayFace.fromWord)
-                    field(fromBinding)
-                    word(LibraryDayFace.toWord)
-                    field(toBinding)
-                }
-            }
-            .padding(12)
-        }
-    }
-
-    private func word(_ text: String) -> some View {
-        Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
-    }
-
-    private func field(_ binding: Binding<Date>) -> some View {
-        DatePicker("", selection: binding, displayedComponents: .date)
-            .datePickerStyle(.field)
-            .labelsHidden()
-            .font(tokens.small)
-            // The control DRAWS a calendar, so it draws the one the filter
-            // means (the 18h ladder's R2-6 — the shipped field's reason).
-            .environment(\.calendar, calendar)
-            .environment(\.timeZone, calendar.timeZone)
-            .frame(width: Self.fieldWidth)
     }
 }
 

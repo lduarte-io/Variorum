@@ -284,6 +284,151 @@ struct TutorialCurrencyTests {
         }
     }
 
+    // MARK: - VX-89 — the finder's lesson (R-VX83-3)
+    //
+    // Her question at the 13o follow-up report — *"were search details added
+    // to the field guide?"* — they were not (`TutorialSeeder` said "search"
+    // three times in passing); R-VX83-3: *"add the content to the field guide
+    // now, with whatever information a user needs for it."* The lesson is new,
+    // so every pin below is RED on the pre-VX-89 seed (`prose` throws
+    // `missing("search")`; the plan has no such title). The H pattern: the
+    // prose is plain, each door it names is read from its own home here.
+
+    /// The lesson sits in the Library's chapter, right after the lesson that
+    /// teaches the tags it leans on (`#tag` alone narrows to the tagged notes).
+    @Test func theSearchLessonFollowsTheTagsItLeansOn() {
+        let chapter = TutorialSeeder.plan.first { $0.chapter == "the library of things" }?.lessons ?? []
+        let tags = chapter.firstIndex(of: "comments & tags")
+        #expect(tags != nil)
+        #expect(chapter.firstIndex(of: TutorialSeeder.searchLessonTitle) == tags.map { $0 + 1 })
+    }
+
+    /// **Every finder door the lesson names, by its own home's word** — the
+    /// answer sheet's road, the wing chip, the other-take badge, the find
+    /// chords (the registry's), the tag offer (VX-84b), the `when ▾` door's
+    /// words and its sentence (VX-87 — the mode row's words lost their menu
+    /// ellipses with the menu), `+ archived`, the book's 🔍 (the masthead
+    /// door's glyph, scanned — it is an inline symbol name) and ⌘K's road row.
+    @Test func theSearchLessonNamesEveryFinderDoorByItsOwnWord() async throws {
+        try await withGuide { _, db, guideID in
+            let text = try await prose(db, guideID, TutorialSeeder.searchLessonTitle)
+            func quoted(_ word: String) -> String { "\u{201C}\(word)\u{201D}" }
+
+            #expect(try AppSource.read("Variorum/Features/Library/LibraryCatalogView.swift")
+                .contains("Search books, notes, blocks"), "the field the lesson calls the search field")
+            #expect(LibrarySearchCopy.allLines(7) == "all 7 \u{203A}")
+            #expect(text.contains(quoted("all N \u{203A}")), "the answer sheet's road, in its own shape")
+            #expect(text.contains(quoted(LibrarySearchCopy.wingChip(WingWords.home))))
+            #expect(text.contains(quoted(LibrarySearchCopy.inAnotherTake)))
+
+            let next = try #require(CapabilityRegistry.capability(.findNext).shortcutLabel)
+            let previous = try #require(CapabilityRegistry.capability(.findPrevious).shortcutLabel)
+            #expect(text.contains("\(next) steps to the next match, \(previous) back"),
+                    "the find chords are the registry's")
+
+            #expect(text.contains(quoted(LibrarySearchCopy.tagOffer("name"))), "the band's tag offer")
+
+            #expect(text.contains("\(LibraryDayFace.closedLabel) \u{25BE}"), "the when door at rest")
+            for word in [LibraryDayFace.onADay, LibraryDayFace.betweenDays, LibraryDayFace.anyDay] {
+                #expect(text.contains(quoted(word)), "the when door's \(word)")
+            }
+            var utc = Calendar(identifier: .gregorian)
+            utc.timeZone = TimeZone(identifier: "UTC")!
+            let now = try #require(DateFormatter.variorumISO8601.date(from: "2026-10-07T12:00:00.000Z"))
+            let sentence = LibraryDayFace.sentence(
+                range: LibraryDayRange(day: "2026-10-06"), now: now, calendar: utc,
+                locale: Locale(identifier: "en_US"))
+            #expect(text.contains(quoted(sentence.plain)), "the popover's own sentence")
+
+            #expect(text.contains(quoted(LibrarySearchCopy.archivedOff)))
+            // VX-72 (U-C — U-B's rider): the commits facet's chip, her word
+            // (R-VX83-9), and the word its lines wear.
+            #expect(text.contains(quoted(LibrarySearchCopy.commitsOff)), "the + commits chip")
+            #expect(text.contains(quoted(try #require(SearchAnswerCopy.kindWord(.savepoint)))),
+                    "the savepoint line's word")
+            #expect(try AppSource.read("Variorum/Features/BookView/BookSearchViews.swift")
+                .contains("Image(systemName: \"magnifyingglass\")"), "the book masthead's door is a 🔍")
+            #expect(text.contains("\u{1F50D} at the right of the book's masthead"))
+            #expect(text.contains(quoted(CommandPaletteCopy.allMatches)), "⌘K's road row")
+        }
+    }
+
+    /// **The lesson's two practice acts hold on the guide itself** (P-6 — the
+    /// tutorial is the executable spec): the practice word answers with the
+    /// lesson's own paragraph ALONE, whose line lands with the word armed and
+    /// stepping, and the paragraph holds it twice so ⌘G has somewhere to go;
+    /// `#tutorial` typed alone narrows the Library to the guide (VX-84a's
+    /// listing), every lesson listed and nothing listed that lacks the tag.
+    @Test func theSearchLessonsPracticeHoldsOnTheGuideItself() async throws {
+        try await withGuide { session, db, guideID in
+            let suite = "vx89-search-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defaults.removePersistentDomain(forName: suite)
+            let model = LibraryCatalogModel(session: session, defaults: defaults)
+            let word = TutorialSeeder.searchPracticeWord
+
+            let lessonIDs: [String: String] = try await db.read { db in
+                Dictionary(try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT c.id AS id, c.title AS title FROM reading_post rp
+                        JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                        """,
+                    arguments: [guideID]
+                ).map { ($0["title"] as String, $0["id"] as String) },
+                uniquingKeysWith: { first, _ in first })
+            }
+            let searchLesson = try #require(lessonIDs[TutorialSeeder.searchLessonTitle])
+
+            model.query = word
+            await model.search()
+            #expect(model.isSearching)
+            #expect(model.searchState.groups.map(\.homeID) == [searchLesson],
+                    "the practice word answers with this lesson alone")
+            let line = try #require(model.searchState.groups.first?.lines.first)
+            #expect(SearchLanding.findSeed(
+                kind: line.kind, rendered: line.isRenderedTake, snippet: line.snippet)
+                == EditorFindSeed(needle: word, steps: true),
+                "the line lands with the word selected and the bar armed")
+            let blockText = try await db.read { db in
+                try Queries.renderPost(db, containerID: searchLesson)
+                    .first { $0.blockID == line.blockID }?.text ?? ""
+            }
+            #expect(blockText.components(separatedBy: word).count - 1 == 2,
+                    "the paragraph holds the word twice — ⌘G has a next one")
+
+            model.query = "#\(TutorialSeeder.tagName)"
+            await model.search()
+            #expect(!model.isSearching, "a tag alone is the Library's own listing")
+            var listed = model.noteHits.map(\.id)
+            while model.notesHaveMore {
+                let before = listed.count
+                await model.loadMoreNotes()
+                listed = model.noteHits.map(\.id)
+                if listed.count == before { break }
+            }
+            for title in TutorialSeeder.plan.flatMap(\.lessons) {
+                #expect(listed.contains(try #require(lessonIDs[title])), "\u{201C}\(title)\u{201D} is listed")
+            }
+            let listedJSON = String(data: try JSONEncoder().encode(listed), encoding: .utf8)
+            let untagged = try await db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT c.id FROM container c
+                        WHERE c.id IN (SELECT value FROM json_each(?))
+                          AND NOT EXISTS (
+                            SELECT 1 FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                            WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
+                              AND t.deleted_at IS NULL AND t.path = ?)
+                        """,
+                    arguments: [listedJSON, TutorialSeeder.tagName])
+            }
+            #expect(untagged.isEmpty, "nothing listed lacks the tag")
+        }
+    }
+
     /// **F-12 — no lesson promises the retired hover ＋.** 13l retired 13e
     /// E7's add-a-comment chip on an uncommented block (her 8c rider: "I need
     /// the comment + on the left removed … it's too crowded"; `BlockDecor`

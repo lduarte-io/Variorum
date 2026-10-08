@@ -11,11 +11,16 @@ The seeded book *Encryption Explained* is the long form the FAQ mirrors; the tut
 
 ## What changed since the pre-13x FAQ brief
 
-- **13x is IMMINENT, not shipped.** At this writing the author reports release is days away and 13x (the
-  open-a-library-file door and its guards) lands in that window. The three entries below that the old brief
-  flagged **⚠ NOT YET BUILT** may now be STAGED exactly as written — but **published only on the author's
-  explicit word that 13x shipped**. Until that word, today's road remains the `RESTORE.md` recipe each backup
-  folder carries. Do not soften the flag on your own schedule.
+- **UPDATED 2026-10-08 — 13x is BUILT, MERGED and VERIFIED on real devices** (the author's own library moved
+  Mac → Mac by AirDrop and opened whole). The three entries marked **✔ 13x** below are final in their FACTS and
+  ready to stage. **Publish them with the first PUBLIC release that carries 13x** — the public download today is
+  0.9.2 (build 5178), which does NOT have these doors; until that release is out, `RESTORE.md` stays the road the
+  FAQ may name. The author gives the publish word with that release. (Superseded wording, kept for the record:
+  "13x is IMMINENT, not shipped… published only on the author's explicit word that 13x shipped.")
+- **What 13x adds that the drafted entries did not know:** a third door, **File ▸ Send Library to Another
+  Mac…** (also in Settings ▸ Data Safety), which writes a folder holding a sealed copy of the library and its key
+  file — send the whole folder; and **the restore hold** — after a copy is opened, sync waits until the user
+  presses **Resume Sync** in the banner, and Resume then catches the copy up to the account.
 - **The write-authorization mechanism changed (13y, 2026-09-24), with NO user-visible change to any entry:** the
   server now verifies key-holding by per-request single-use challenges over a per-account integrity secret
   (previously: a stored hash the client's value was compared against). Every user-facing sentence below stands
@@ -54,7 +59,7 @@ already in an enrolled device's custody reach the library key and the master key
 
 ## The entries — the ruled copy verbatim, each with its facts
 
-Entries marked **⚠ 13x** are the stage-now / publish-on-her-go set described above.
+Entries marked **✔ 13x** are built and verified; stage them now and publish with the first public release that carries 13x (above).
 
 - **I forgot my passphrase.** *Any device that opens your library can set a new one: Settings ▸ Encryption ▸
   Change Passphrase ▸ Forgot. In Castle that takes Touch ID or your twelve words. If no device opens and you
@@ -65,11 +70,13 @@ Entries marked **⚠ 13x** are the stage-now / publish-on-her-go set described a
 - **Moving to a new Mac.** *Standard: sign into iCloud and Variorum; with sync on, everything arrives;
   without sync, open a copy of your library from your backup folder. Castle: sign in and type your passphrase
   or twelve words once; without sync, open a backup and type them.*
-  — **⚠ 13x:** the two "without sync" halves name the in-app open-a-copy door. Stage as written; until her go,
-  today's road is the `RESTORE.md` recipe in every backup folder (quit, move the current library aside, put the
-  copy in its place, open) — it ends in the same place: the restored copy opens by its key file's roads and then
-  enrolls. Facts otherwise: a restored snapshot enrolls like any library — Standard nothing typed, Castle the
-  passphrase or the words once.
+  — **✔ 13x (built):** the doors exist. On the old Mac, **File ▸ Send Library to Another Mac…** writes a folder
+  (a sealed copy + its key file) to AirDrop whole; on the new Mac, **File ▸ Open Library…** (also on the welcome
+  and waiting screens) opens it. The receiving Mac's current library steps aside first — kept in a dated
+  "Previous Libraries" folder beside it, plus a safety copy with the backups — and the picked folder is only
+  read. After it opens, **sync waits until Resume Sync is pressed**; a Mac new to that library then joins sync by
+  enrolling — Standard nothing typed, Castle the passphrase once. Until the public release carries 13x, today's
+  road is the `RESTORE.md` recipe in every backup folder.
 
 - **Restoring a backup.** *A backup folder holds sealed copies and a key file. Open a copy through File ▸
   Open Library; it opens the same way your library does — through your Apple account in Standard, with your
@@ -77,8 +84,12 @@ Entries marked **⚠ 13x** are the stage-now / publish-on-her-go set described a
   your twelve words — and, on the Mac your library lives on, a backup of that same library also opens with your
   current passphrase. To sync it again it joins your account like any device: on its own through your Apple
   account in Standard; with your passphrase once in Castle.*
-  — **⚠ 13x:** "File ▸ Open Library" is 13x's door; stage as written, `RESTORE.md` is today's road. Facts
-  otherwise, all true of the build: every snapshot has ITS OWN key file beside it, written with it and never
+  — **✔ 13x (built):** "File ▸ Open Library" exists, and Settings ▸ Data Safety lists the backup folder's
+  copies under **Restore from Backup**, each saying which credential opens it. **One fact to carry:** after
+  opening a backup, sync waits until **Resume Sync** is pressed, and Resume catches the copy up to the account —
+  notes deleted since leave again and edits made since come back; to keep something from the backup, duplicate it
+  first (duplicates stay). It does NOT roll the whole account back to the backup's day. Facts otherwise, all true
+  of the build: every snapshot has ITS OWN key file beside it, written with it and never
   rewritten; a backup opens by whatever its key file's copies open under (the passphrase of its day, the twelve
   words, an enrolled device's master-wrapped copy — and, if made in Standard, the iCloud key); a backup carries
   no sync key and no device identity — it rejoins sync only by ENROLLING, with a fresh device identity.
@@ -196,13 +207,39 @@ Entries marked **⚠ 13x** are the stage-now / publish-on-her-go set described a
   while they're being written, which can corrupt a live database — backups are complete, sealed copies, which
   is what a synced folder is good at. To have your writing on every device, use sync.*
   — Facts: backups MAY be kept in iCloud Drive (the offer at the first backup run); the LIVE library never
-  lives there. **⚠ 13x:** the folder picker's refusal of the library's own folder is 13x's guard; until her
-  go, the sentence is advice and the FAQ may carry it as such.
+  lives there. **✔ 13x (built):** the backup-folder picker refuses the library's own folder with this
+  sentence, and Open Library… says it when a picked copy sits in iCloud Drive.
+
+## SEARCH — added 2026-10-08 (13o built 2026-10-07; the VX-83 follow-up confirmed it in use the same night)
+
+The finder is BUILT and VERIFIED in use (the author's own first-use report drove VX-83's refinements;
+everything below is shipped behavior, walked on the real build). **Publish with the first public release
+that carries 13o + VX-83** — the public 0.9.2 (5178) has none of it. No ruled FAQ copy exists for search
+yet (13s re-voices later), so these are the FACTS help/FAQ sentences may be written from, in the register
+above.
+
+- **One finder.** The Library's search field answers everything: words rank passages under their notes with
+  honest counts and quiet filter chips; a `#tag` alone lists the tagged notes themselves (sortable, scoped
+  to the wing), with the books the tag flows into on top; a plain word that names a tag offers it as a
+  one-press chip (`tag: #name ›`) — saying it's a tag is an explicit act, never guessed.
+- **when ▾** opens a calendar popover: one day, or a span pressed as first-day-then-last-day with the run
+  washing in; the sentence at its foot is the confirmation, and nothing narrows until a day is pressed.
+- **Takes are in every search; savepoints behind "+ commits".** Every live take of every paragraph is
+  searched by default. The explicit `+ commits` filter adds everything ever saved — each hit marked
+  "commit · <day>". `+ archived` adds archived material. These filters are facts about the question,
+  always visible as chips while armed.
+- **Click a result, land at the match:** the note opens in Write with the match selected and the find bar
+  armed with the matched words; ⌘G steps onward.
+- **A book's masthead 🔍** runs the same engine scoped inside that book; ⌘K carries passages under its
+  title hits.
+- **Search is local by construction** — the index is derived on-device and never syncs; the server could
+  not build it (it stores sealed values). The FAQ may connect this to the privacy story; the policy brief's
+  boundaries already agree.
 
 ## What the FAQ must NOT say (the code does not keep it)
 
-- Any in-app "open a library file" / "File ▸ Open Library" door AS SHIPPED, before her 13x confirmation (the
-  three ⚠ entries above are staged, not live).
+- Any of 13x's doors (Open Library…, Send Library to Another Mac…, Restore from Backup) as AVAILABLE before the
+  first public release that carries 13x is out — they are built, but the public 0.9.2 (5178) does not have them.
 - A remaining-rows count for a key replacement still finishing (the app names the device and the day only).
 - Per-note locks (never built — deliberately; the app-lock is the posture's gate).
 - A Standard follow that picks new keys up silently: after Replace All Keys or entering Castle EVERY device
@@ -214,3 +251,9 @@ Entries marked **⚠ 13x** are the stage-now / publish-on-her-go set described a
 - Anything the companion policy brief's cautions forbid (same date; they agree): no "reset" or operator
   recovery road; never "your writing is in iCloud" for Standard; no cross-account activity inference (closed at
   13y — the per-account line replaced it).
+- *(search, added 2026-10-08)* That search finds deleted text: the Trash is not searched (deliberate — a later
+  feature may add search INSIDE the Trash), and whole-note Versions are never searched.
+- *(search)* That savepoints/commits surface in an ordinary search: only behind the explicit "+ commits" filter.
+- *(search)* The indexing technology by name (the standing never-name-FTS5 rule).
+- *(search)* Any of the search doors as AVAILABLE before the first public release carrying 13o + VX-83 is out
+  (the 13x gate's twin above — same release, in all likelihood).

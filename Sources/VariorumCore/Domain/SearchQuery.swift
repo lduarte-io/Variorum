@@ -31,18 +31,29 @@ public struct SearchQuery: Equatable, Sendable {
     public var wornDay: SearchDayPattern?
     /// The archived facet (R-13o-6: archived notes/books/takes are INDEXED but
     /// out of the default results behind one facet). Saved versions never
-    /// list under any visibility (the ruled posture); the Trash and savepoint
-    /// history are not 13o's (VX-72).
+    /// list under any visibility (the ruled posture); savepoint history is
+    /// its own facet (`includesSavepoints`, VX-72); the Trash is not search's
+    /// (VX-93 — a search INSIDE the Trash, R-VX83-5).
     public var visibility: SearchVisibility
+    /// **The commits facet** (VX-72 — her R-VX83-5, "search what you saved";
+    /// the chip says `+ commits`, R-VX83-9): savepoint history joins the
+    /// answer. OFF by default and in every road but the Library's facet — a
+    /// savepoint NEVER lists without it (the composer's doc-row kind fence,
+    /// the §U-C RULINGS' condition 2). Orthogonal to `visibility`: a
+    /// savepoint of an archived take, block or note lists only with the
+    /// archived facet too; saved versions stay fenced under both (P-VX83-C1).
+    public var includesSavepoints: Bool
 
     public init(
         text: SearchText? = nil, filter: SearchFilter? = nil,
-        wornDay: SearchDayPattern? = nil, visibility: SearchVisibility = .living
+        wornDay: SearchDayPattern? = nil, visibility: SearchVisibility = .living,
+        includesSavepoints: Bool = false
     ) {
         self.text = text
         self.filter = filter
         self.wornDay = wornDay
         self.visibility = visibility
+        self.includesSavepoints = includesSavepoints
     }
 
     /// Nothing to search by: no text, no worn day, no filter.
@@ -130,8 +141,8 @@ public enum SearchBookState: String, Equatable, Sendable, CaseIterable {
 }
 
 /// **The index's doc KINDS** (F2 — one doc per source text field, a closed
-/// and additive vocabulary; VX-72's savepoint text joins as one more). The
-/// raw values ARE the stored `search_doc.kind` (pinned against
+/// and additive vocabulary; VX-72's savepoint text joined as the ninth at
+/// `v1_23`). The raw values ARE the stored `search_doc.kind` (pinned against
 /// `SearchIndex.sources`).
 public enum SearchDocKind: String, Equatable, Sendable, CaseIterable {
     case take
@@ -142,6 +153,9 @@ public enum SearchDocKind: String, Equatable, Sendable, CaseIterable {
     case noteMeta = "note_meta"
     case book
     case chapter
+    /// A savepoint's immutable text (`commit_point.text`, VX-72) — listed
+    /// only under the savepoints facet.
+    case savepoint
 }
 
 /// The archived facet (R-13o-6).

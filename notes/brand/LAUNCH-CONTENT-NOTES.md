@@ -1,7 +1,7 @@
 # Launch-content continuity notes
 
 The session-independent record of the marketing/launch-content work
-(2026-09-26 → 2026-10-04): what exists, the standing rules decided along the
+(2026-09-26 → 2026-10-08): what exists, the standing rules decided along the
 way, and what's still owed. Written so a fresh session can pick up fine-tuning
 on these posts without the original chat. Keep this file current when any of
 it changes.
@@ -61,11 +61,16 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
    keys, enums, sequence numbers — the CAS skeleton. Mentioning the
    maintained disclosure list is a credibility asset, not a liability.
    (Verified against SyncSpec's wire-is-ciphertext section, 2026-10-04.)
-4. **Search copy:** only settled 13o facts until its design sitting rules the
-   technical fork — never name FTS5. The takes/savepoints-search claim
-   ("find the sentence you cut three weeks ago") is BRACKETED in every file;
-   flip it on only if 13o rules takes/savepoints into the index. That scope is
-   the marketing-critical question to raise at the 13o sitting.
+4. **Search copy — SETTLED (13o 2026-10-07 + VX-83 2026-10-08, confirmed in
+   her use):** takes are in every search; savepoints behind the explicit
+   "+ commits" filter; a day or a between-days span via the when ▾ calendar;
+   `#tag` alone lists the tagged notes; a word naming a tag offers the tag as
+   a chip; land-at-match with the find bar armed, ⌘G steps. The
+   takes/savepoints claim is UNBRACKETED in every file as of 2026-10-08, with
+   the fact fence beside it: savepoints only behind "+ commits"; the Trash
+   and whole-note Versions are NOT searched (never "finds deleted text").
+   Still never name FTS5. The FAQ brief carries its own SEARCH section (same
+   date); publish-gated to the first public release carrying 13o + VX-83.
 5. **Competitors:** never claim a competitor is slow without measurements
    (especially Obsidian — community favorite, benchmark bait). The
    unassailable form: file-based tools search each note's one surviving text;
@@ -130,8 +135,12 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
   wants the guarantee LOUD; it has two bracket slots on the product page).
 - One real performance measurement captured before the HN thread.
 - Re-verify the Apple Notes ~10k observation on current macOS.
-- After the 13o sitting: flip or delete the bracketed search claims in
-  show-hn.md, blog-launch-post.md, and the product page §8.
+- ~~After the 13o sitting: flip or delete the bracketed search claims in
+  show-hn.md, blog-launch-post.md, and the product page §8.~~ DONE 2026-10-08
+  (VX-83's closeout pass — flipped to the built truth with fact fences
+  beside each; the FAQ brief gained its SEARCH section the same pass; all
+  DRAFT, presented in the VX-83 handoff for her approval before the site
+  agent sees any of it).
 - Mobile status wording on the product page §13, at publish.
 - Cross-link the blog post ↔ product page when both are on the site.
 - Shorts 04+ (candidates in `video/README.md`); the embed captures per

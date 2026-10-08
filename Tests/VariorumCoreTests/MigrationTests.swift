@@ -213,6 +213,70 @@ struct MigrationTests {
         }
     }
 
+    /// **VX-72 — v1_23's BACKFILL** (the rebuild road run once over v1_23's
+    /// nine kinds): a store that already holds savepoints when the ninth kind
+    /// arrives has every one findable the moment the migration lands —
+    /// including a savepoint of a TOMBSTONED take, because the savepoint doc
+    /// mirrors its `commit_point` ROW (the §U-C RULINGS' FORK 1 = A: the
+    /// take's liveness resolves at query time, under the facet) — each
+    /// carrying its own parent fact; v1_22's eight kinds are re-derived
+    /// beside it and the index passes FTS5's integrity check. Red on the
+    /// pre-VX-72 tree by construction: no such migration or kind existed.
+    @Test func theSavepointKindBackfillsAStoreThatAlreadyHoldsSavepoints() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_22_search_index")
+        let stamp = "2026-10-06T00:00:00.000Z"
+        try queue.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, created_at, updated_at)
+                  VALUES ('n1', 'post', 'Harbor Log', '\(stamp)', '\(stamp)');
+                INSERT INTO block (id, default_variant_id, created_at, updated_at)
+                  VALUES ('b1', 'v1', '\(stamp)', '\(stamp)');
+                INSERT INTO variant (id, block_id, working_text, fan_position, created_at, updated_at)
+                  VALUES ('v1', 'b1', 'the lighthouse today', 'a0', '\(stamp)', '\(stamp)');
+                INSERT INTO variant (id, block_id, working_text, fan_position, created_at, updated_at, deleted_at)
+                  VALUES ('v2', 'b1', 'a deleted take', 'a1', '\(stamp)', '\(stamp)', '\(stamp)');
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                  VALUES ('p1', 'n1', 'b1', 'a0', 'v1', '\(stamp)', '\(stamp)');
+                INSERT INTO commit_point (id, variant_id, text, kind, created_at)
+                  VALUES ('cp1', 'v1', 'the Café at the harbor', 'manual', '\(stamp)');
+                INSERT INTO commit_point (id, variant_id, text, kind, created_at)
+                  VALUES ('cp2', 'v2', 'a saved harbor thought', 'auto', '\(stamp)');
+                """)
+        }
+        #expect(try queue.read { db in
+            try Int.fetchOne(db, sql: "SELECT count(*) FROM search_doc WHERE kind = 'savepoint'")
+        } == 0, "a v1_22 store indexes no savepoint")
+        try AppDatabase.migrator.migrate(queue)
+        func hits(_ match: String) throws -> [String] {
+            try queue.read { db in
+                try String.fetchAll(db, sql: """
+                    SELECT d.kind || ':' || d.src_id FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid
+                    WHERE search_fts MATCH ? ORDER BY d.kind, d.src_id
+                    """, arguments: [match])
+            }
+        }
+        #expect(try hits("harbor") == ["savepoint:cp1", "savepoint:cp2", "title:n1"],
+                "every savepoint ROW is indexed — a dead take's too (its liveness is the query's)")
+        #expect(try hits("cafe") == ["savepoint:cp1"], "accents and case fold")
+        #expect(try hits("lighthouse") == ["take:v1"], "v1_22's kinds re-derived beside it")
+        let parents = try queue.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT src_id, variant_id, block_id, container_id FROM search_doc
+                WHERE kind = 'savepoint' ORDER BY src_id
+                """).map { "\($0["src_id"] as String)→\(($0["variant_id"] as String?) ?? "nil")" }
+        }
+        #expect(parents == ["cp1→v1", "cp2→v2"], "each carries its OWN parent fact, nothing more (F3)")
+        let takeVariantFacts = try queue.read { db in
+            try Int.fetchOne(db, sql: "SELECT count(*) FROM search_doc WHERE kind <> 'savepoint' AND variant_id IS NOT NULL")
+        }
+        #expect(takeVariantFacts == 0, "the new column is the savepoint's alone")
+        try queue.write { db in
+            try db.execute(sql: "INSERT INTO search_fts (search_fts, rank) VALUES ('integrity-check', 1)")
+        }
+    }
+
     @Test func allIndexesExist() throws {
         let db = try AppDatabase.inMemory()
         let indexes = try db.read { db in

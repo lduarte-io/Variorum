@@ -799,13 +799,19 @@ extension Queries {
         /// hits, and nil-defaulted so every existing caller compiles
         /// unchanged.
         public let profile: String?
+        /// **The note is ARCHIVED** (VX-84a — a `#tag` typed alone narrows
+        /// the Library, and with the archived facet on its archived notes
+        /// join: R-13o-6's "rows say which they are"). Only ever true on that
+        /// road (the catalog's own listing leaves archived notes out);
+        /// false-defaulted so every existing caller compiles unchanged.
+        public let isArchived: Bool
 
         public init(
             kind: Kind, id: String, title: String, detail: String?,
             storedTitle: String? = nil,
             homeContainerID: String? = nil, homeIsPool: Bool = false,
             createdAt: String? = nil, lastTouchedAt: String? = nil,
-            profile: String? = nil
+            profile: String? = nil, isArchived: Bool = false
         ) {
             self.kind = kind
             self.id = id
@@ -817,6 +823,7 @@ extension Queries {
             self.createdAt = createdAt
             self.lastTouchedAt = lastTouchedAt
             self.profile = profile
+            self.isArchived = isArchived
         }
 
         /// Is this note a DAILY ENTRY? (`profile='journal'` — the mint's

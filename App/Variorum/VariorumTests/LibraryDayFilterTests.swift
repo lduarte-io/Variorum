@@ -84,6 +84,29 @@ struct LibraryDayFilterTests {
         model.hits.filter { $0.kind == .post }.map(\.id)
     }
 
+    /// VX-87: the `when` popover as its door opens it (the door's own
+    /// `openingState`), its brain and month held in boxes so its acts persist
+    /// across calls exactly as the door's `@State` holds them.
+    private final class Box<Value> {
+        var value: Value
+        init(_ value: Value) { self.value = value }
+    }
+
+    private func whenPopover(
+        range: LibraryDayRange?, now: Date,
+        onPick: @escaping (LibraryDayRange) -> Void = { _ in }, onClear: @escaping () -> Void = {}
+    ) -> LibraryWhenPopover {
+        let opening = LibraryWhenDoor.openingState(range: range, today: day(of: now))
+        let brain = Box(opening.brain)
+        let month = Box(opening.month ?? LibraryWhenMonth(year: 2026, month: 9))
+        return LibraryWhenPopover(
+            tokens: VoiceTokens.resolve(voice: .terminal, dark: false), range: range, now: now,
+            calendar: LibraryDayFace.calendar,
+            brain: Binding(get: { brain.value }, set: { brain.value = $0 }),
+            month: Binding(get: { month.value }, set: { month.value = $0 }),
+            onPick: onPick, onClear: onClear)
+    }
+
     // MARK: - The value reaches the query
 
     /// THE FACE PIN the brief names — driven through the date control's own
@@ -104,28 +127,26 @@ struct LibraryDayFilterTests {
             await model.search()
             #expect(Set(noteIDs(model)) == [old.id, fresh.id], "both notes, unfiltered")
 
-            // The REAL control, driven the way the DatePicker drives it.
+            // The REAL control, driven the way its cells drive it.
             // (13o U2, a JUSTIFIED EDIT — her R-13o-13: the door is `when ▾`
-            // now, `LibraryWhenDoor`; its one-day field's own binding is the
-            // one this pin drove, and the pick it hands back is a range of
-            // one day.)
+            // now, `LibraryWhenDoor`. VX-87, a second JUSTIFIED EDIT — her
+            // direction 1, R-VX83-2: the date FIELD died with the menu; a day
+            // is a CELL of the popover's month grid, and its press is the
+            // popover's `press(_:)` — the closure this pin drives. The pick it
+            // hands back is a range of one day, as before.)
             var picked: String?
-            let field = LibraryWhenDoor(
-                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                range: model.editedRange, now: today,
-                onPick: { picked = $0.first }, onClear: {})
-            field.dayBinding.wrappedValue = today
+            let field = whenPopover(
+                range: model.editedRange, now: today, onPick: { picked = $0.first })
+            field.press(day(of: today))
             let firstPick = try #require(picked)
             model.setEditedOn(firstPick)
             await model.search()
             #expect(noteIDs(model) == [fresh.id], "the day she picked, and only it")
 
             picked = nil
-            let armed = LibraryWhenDoor(
-                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                range: model.editedRange, now: today,
-                onPick: { picked = $0.first }, onClear: {})
-            armed.dayBinding.wrappedValue = earlier
+            let armed = whenPopover(
+                range: model.editedRange, now: today, onPick: { picked = $0.first })
+            armed.press(day(of: earlier))
             let secondPick = try #require(picked)
             model.setEditedOn(secondPick)
             await model.search()
@@ -133,26 +154,33 @@ struct LibraryDayFilterTests {
         }
     }
 
-    /// The closed door opens on TODAY — a date field's own convention, and
-    /// the answer she most often wants.
+    /// The closed door opens on TODAY'S MONTH — and, since VX-87, arms
+    /// NOTHING until a day is pressed.
     ///
-    /// **Driven through the door's OWN action** (the ladder's R1-9): this
-    /// used to set `dateBinding` and passed only because the pin fed it the
-    /// value the Button would have computed, so changing the door to open on
-    /// yesterday left it green. `openOnToday()` is the closure the Button
-    /// runs, and nothing else here reproduces it.
-    @Test func openingTheClosedDoorPicksToday() async throws {
+    /// **Driven through the door's OWN action** (the ladder's R1-9): the
+    /// press runs `LibraryWhenDoor.openingState`, and nothing else here
+    /// reproduces it.
+    ///
+    /// JUSTIFIED EDIT (VX-87 — her direction 1, R-VX83-2, and her report's
+    /// *"it's very unclear if there's confirmation"*): this pin held the
+    /// opposite until now — `openOnToday()` armed TODAY the moment the menu's
+    /// `on a day…` was chosen (P-13o-U2-9, the shipped date field's own
+    /// convention), which is exactly the silent arming her report names. The
+    /// supersession is FOR THIS DOOR (the U-B record): opening shows today's
+    /// month, the sentence says "on any day", and today arms only when she
+    /// presses it.
+    @Test func openingTheClosedDoorShowsTodaysMonthAndArmsNothing() async throws {
         try await withTravellingLibrary { _, clock in
-            // 13o U2, a JUSTIFIED EDIT (R-13o-13): the door is `when ▾`, and
-            // `on a day…` is the choice that used to be the closed door's
-            // press — it still arms TODAY, as one day.
             var picked: LibraryDayRange?
-            let field = LibraryWhenDoor(
-                tokens: VoiceTokens.resolve(voice: .study, dark: false),
-                range: nil, now: clock.current,
-                onPick: { picked = $0 }, onClear: {})
-            field.openOnToday()
-            #expect(picked == LibraryDayRange(day: day(of: clock.current)))
+            let today = day(of: clock.current)
+            let opening = LibraryWhenDoor.openingState(range: nil, today: today)
+            #expect(opening.month == LibraryWhenMonth(dayKey: today), "it opens on today's month")
+            #expect(opening.brain.mode == .oneDay && !opening.brain.waitsForRunEnd)
+            #expect(picked == nil, "and nothing is armed by opening")
+
+            let field = whenPopover(range: nil, now: clock.current, onPick: { picked = $0 })
+            field.press(today)
+            #expect(picked == LibraryDayRange(day: today), "today arms when she presses it")
         }
     }
 
@@ -171,12 +199,13 @@ struct LibraryDayFilterTests {
             await model.search()
             #expect(model.hits.map(\.kind) == [.post], "a day names notes")
 
+            // VX-87, a JUSTIFIED EDIT (direction 1): the clearing word is the
+            // popover's `any day`, and its act is `clear()` — the closure the
+            // word runs (it was the menu's `any day` item calling `onClear`).
             var cleared = false
-            let field = LibraryWhenDoor(
-                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
-                range: model.editedRange, now: clock.current,
-                onPick: { _ in }, onClear: { cleared = true })
-            field.onClear()
+            let field = whenPopover(
+                range: model.editedRange, now: clock.current, onClear: { cleared = true })
+            field.clear()
             #expect(cleared)
             model.setEditedOn(nil)
             await model.search()

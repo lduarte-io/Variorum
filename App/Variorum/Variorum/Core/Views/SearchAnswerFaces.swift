@@ -48,8 +48,17 @@ nonisolated enum SearchAnswerCopy {
         case .noteMeta: "floating notes"
         case .book: "book"
         case .chapter: "chapter"
+        // VX-72: a saved state of a take (only under the commits facet) —
+        // its line also says its day (`savepoint(day:)`, P-VX83-C6; the
+        // WORD is hers — R-VX83-10: "fix it to being commits").
+        case .savepoint: "commit"
         }
     }
+
+    /// **A savepoint line's word** (VX-72, P-VX83-C6; R-VX83-10 — her "fix it
+    /// to being commits": within search the rows wear the chip's word): the
+    /// kind and the day it was saved — "commit · Oct 6".
+    static func savepoint(day: String) -> String { "commit \u{00B7} \(day)" }
 
     /// An archived group's mark (only ever drawn under the facet) — and,
     /// since 13o U3, the badge an archived passage wears.
@@ -179,6 +188,7 @@ struct LibrarySearchChip: View {
                 .strokeBorder(
                     tokens.line,
                     style: StrokeStyle(lineWidth: 1, dash: invitation ? [3, 2] : [])))
+        .lineLimit(1)  // P-8 (R-13u4-5): a chip is one line — the label's own limit sits outside the scan's window
         .fixedSize()
         .help(help ?? "")
         Group {
@@ -206,10 +216,11 @@ struct LibrarySearchLine: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            if let word = SearchAnswerCopy.kindWord(passage.kind) {
+            if let word = LibrarySearchFace.kindLabel(kind: passage.kind, savedAt: passage.savedAt, now: Date()) {
                 Text(tokens.chromeLabel(word))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
+                    .lineLimit(1)  // P-8 (R-13u4-5): a kind word is one line
                     .fixedSize()
             }
             Text(LibrarySearchFace.snippet(passage.snippet, tokens: tokens))
@@ -244,10 +255,19 @@ struct LibrarySearchLine: View {
 enum LibrarySearchFace {
     /// The snippet's runs as one attributed line — the matched runs on the
     /// wash in the ink, the rest muted (the mockup's `<mark>`).
+    ///
+    /// **VX-88 (the 13o follow-up run — D-5): newline runs fold to one space
+    /// HERE, at the face.** A snippet whose window crosses a newline inside
+    /// its block (I4 — newlines are content; FTS5's snippet copies the raw
+    /// text) drew two tight lines, or a line and a blank one, inside one
+    /// passage row while its neighbours drew one — her *"the spacing between
+    /// the results is weird"* (§M5, confirmed by `SearchPassageLineRhythmTests`).
+    /// The index and the composer stay byte-untouched; only what the row
+    /// draws folds.
     static func snippet(_ segments: [SearchSnippetSegment], tokens: VoiceTokens) -> AttributedString {
         var line = AttributedString()
         for segment in segments {
-            var run = AttributedString(segment.text)
+            var run = AttributedString(foldingNewlines(segment.text))
             if segment.isMatch {
                 run.foregroundColor = tokens.ink
                 run.backgroundColor = tokens.wash
@@ -257,6 +277,55 @@ enum LibrarySearchFace {
             line += run
         }
         return line
+    }
+
+    /// **One visible separator for every newline run** (VX-88, D-5): a run of
+    /// whitespace holding at least one line break — "\n", "\r\n", a blank
+    /// line, U+2028/2029, with any spaces around them — becomes ONE space;
+    /// whitespace without a line break is the text's own and is kept.
+    static func foldingNewlines(_ text: String) -> String {
+        guard text.contains(where: \.isNewline) else { return text }
+        var folded = ""
+        var pending = ""          // a whitespace run not yet written
+        var pendingBreaks = false
+        func flush() {
+            folded += pendingBreaks ? " " : pending
+            pending = ""
+            pendingBreaks = false
+        }
+        for ch in text {
+            if ch.isWhitespace {
+                pending.append(ch)
+                if ch.isNewline { pendingBreaks = true }
+            } else {
+                flush()
+                folded.append(ch)
+            }
+        }
+        flush()
+        return folded
+    }
+
+    /// **What a passage line says before its words** (VX-72 adds the
+    /// savepoint's day): the kind word, and for a savepoint its day in the
+    /// one stamp-wording brain's own words (`TimeStampFace.day` — "Oct 6",
+    /// the year when it is not this one). nil for prose and names.
+    nonisolated static func kindLabel(
+        kind: SearchPassage.Kind, savedAt: String?, now: Date,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String? {
+        guard let word = SearchAnswerCopy.kindWord(kind) else { return nil }
+        guard kind == .savepoint,
+              let saved = savedAt.flatMap({ DateFormatter.variorumISO8601.date(from: $0) })
+        else { return word }
+        return SearchAnswerCopy.savepoint(day: TimeStampFace.day(saved, now: now, calendar: calendar, locale: locale))
+    }
+
+    /// **The band's counts lead** (F-W-3, the VX-83 walk's W4 oddity): the
+    /// em-dash SEPARATES the counts from the query's echo — with no echo (a
+    /// tag alone) the counts lead bare, never a dash with nothing before it.
+    static func countsLead(_ words: String, afterEcho: Bool) -> String {
+        afterEcho ? "\u{2014} " + words : words
     }
 
     /// A take hit the note does not render (the mockup's badge).

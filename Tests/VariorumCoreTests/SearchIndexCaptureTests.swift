@@ -326,7 +326,16 @@ struct SearchIndexCaptureTests {
 
     /// The third family's exact set, pinned the way `TriggerCoverageTests`
     /// pins the cascades: adding or losing a capture trigger is a visible
-    /// diff. Three per source field (F2's eight kinds).
+    /// diff. Three per source field (F2's eight kinds + VX-72's ninth, the
+    /// savepoint — `v1_23`).
+    ///
+    /// JUSTIFIED EDIT (VX-72): the count 24 → 27, and the mechanical-only
+    /// check made SOURCE-AWARE — it used to list a fixed set of "other"
+    /// tables that included `commit_point`, which a savepoint trigger now
+    /// names as its OWN source in its ON clause; it now refuses EVERY table
+    /// in the schema but the trigger's own source and the derived family
+    /// (strictly stronger: a savepoint trigger reading `variant` — the
+    /// FORK 1 shape the ruling refused — turns it red).
     @Test func theCaptureTriggerSetIsExactlyThreePerSourceField() throws {
         let db = try AppDatabase.inMemory()
         let names = try db.read { db in
@@ -335,17 +344,23 @@ struct SearchIndexCaptureTests {
         let expected: Set<String> = Set(SearchIndex.sources.flatMap { source in
             ["insert", "update", "delete"].map { "search_\(source.table)_\(source.kind)_\($0)" }
         })
-        #expect(expected.count == 24)
+        #expect(expected.count == 27)
         #expect(names == expected)
         // Mechanical only (R-13o-4): no capture trigger body names any table
         // but its own source (in its ON clause) and the derived family.
-        let otherTables = ["container_block", "commit_point", "edge", "tag", "post_tag", "block_tag",
-                           "reading_post", "wing", "shelf", "setting", "sync_outbox", "_sync_applying"]
+        let schemaTables = try db.read { db in
+            Set(try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master
+                WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'grdb_%'
+                """))
+        }.subtracting(SearchIndex.tables)
+        #expect(schemaTables.contains("variant") && schemaTables.contains("commit_point"))
         for name in names {
-            let sql = try #require(try db.read { db in
-                try String.fetchOne(db, sql: "SELECT sql FROM sqlite_master WHERE name = ?", arguments: [name])
+            let (sql, ownTable) = try #require(try db.read { db -> (String, String)? in
+                try Row.fetchOne(db, sql: "SELECT sql, tbl_name FROM sqlite_master WHERE name = ?", arguments: [name])
+                    .map { ($0["sql"], $0["tbl_name"]) }
             })
-            for table in otherTables {
+            for table in schemaTables.subtracting([ownTable]) {
                 #expect(!sql.contains(" \(table) ") && !sql.contains(" \(table)\n") && !sql.contains(" \(table);"),
                         "\(name) reads \(table) — a capture trigger reads only NEW/OLD and the derived family")
             }

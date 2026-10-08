@@ -90,12 +90,17 @@ struct LibrarySearchJoinTests {
             #expect(state.answersAnything, "…but the tag answers with its books")
             #expect(model.bookHits.map(\.id) == [s.gathering.id, s.journal.id, s.outflow.id],
                     "flows-in by name, then the outflow — never the merely NAMED book")
-            #expect(model.noteHits.isEmpty, "notes still ask for words (P-13o-U2-6, narrowed)")
+            // JUSTIFIED EDIT (VX-84a): this read `noteHits.isEmpty` — "notes
+            // still ask for words (P-13o-U2-6, narrowed)". Her report
+            // superseded it (D-1: a tag alone narrows the Library), so the
+            // tagged note lists under the associated books.
+            #expect(model.noteHits.map(\.id) == [s.note.id], "the note the tag names, listed (D-1)")
             #expect(state.bookReasons[s.journal.id].map(LibrarySearchCopy.association) == "#dream flows here",
                     "the mockup's own words")
             #expect(state.bookReasons[s.outflow.id].map(LibrarySearchCopy.association)
                     == "notes here are tagged #dream/lucid")
-            #expect(state.counts?.living.books == 3, "the band counts them")
+            #expect(state.counts?.living.books == 3 && state.counts?.living.notes == 1,
+                    "the band counts them — and the tagged note (VX-84a)")
         }
     }
 

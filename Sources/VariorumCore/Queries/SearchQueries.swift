@@ -16,6 +16,11 @@ public struct SearchPassage: Equatable, Sendable, Identifiable {
         /// A nameless note WEARING the day the query names (R-13o-6) — a
         /// name-level hit with no index doc behind it.
         case wornDay = "worn_day"
+        /// A SAVEPOINT's text (VX-72 — only under the commits facet): the
+        /// words a take held when it was saved. `sourceID` is the commit,
+        /// `blockID` its take's block; `isRenderedTake` says whether its TAKE
+        /// renders (the landing's step rule, P-VX83-C4).
+        case savepoint
     }
 
     /// "kind:sourceID" — stable across pages and rebuilds.
@@ -42,6 +47,10 @@ public struct SearchPassage: Equatable, Sendable, Identifiable {
     /// The words around the match, matched runs flagged (empty for a worn-day
     /// hit — the whole name matched).
     public let snippet: [SearchSnippetSegment]
+    /// A savepoint hit's moment — its commit's `created_at`, the store's ISO
+    /// text (VX-72: the line says the day it was saved, P-VX83-C6). nil for
+    /// every other kind.
+    public let savedAt: String?
 }
 
 /// One page of passages and the road to the next (R-13o-9 — no capped
@@ -114,15 +123,30 @@ public struct SearchCounts: Equatable, Sendable {
         public let passages: Int
         /// The scraps groups' non-title hits.
         public let scraps: Int
+        /// The BLOCKS a text-less tag question names by their own (block-
+        /// level) tags (VX-84a — the Blocks scope's listing under a tag
+        /// alone); always 0 when the question has words (the passages and
+        /// scraps above count those).
+        public let blocks: Int
+        /// The SAVEPOINTS the words find (VX-72 — under the commits facet
+        /// only, P-VX83-C3: their own kind beside the living passages and
+        /// scraps); always 0 off the facet.
+        public let savepoints: Int
 
-        public init(books: Int, notes: Int, passages: Int, scraps: Int) {
+        public init(
+            books: Int, notes: Int, passages: Int, scraps: Int, blocks: Int = 0, savepoints: Int = 0
+        ) {
             self.books = books
             self.notes = notes
             self.passages = passages
             self.scraps = scraps
+            self.blocks = blocks
+            self.savepoints = savepoints
         }
 
-        public var isEmpty: Bool { books == 0 && notes == 0 && passages == 0 && scraps == 0 }
+        public var isEmpty: Bool {
+            books == 0 && notes == 0 && passages == 0 && scraps == 0 && blocks == 0 && savepoints == 0
+        }
     }
 
     /// The living corpus (the default).
@@ -323,7 +347,9 @@ extension Queries {
             kind: kind, sourceID: row["src_id"], family: family,
             noteID: row["home_id"], blockID: row["block_id"], readingID: readingID,
             homeTitle: homeTitle, isArchived: row["archived"], isRenderedTake: row["rendered"],
-            snippet: SearchComposer.snippetSegments(row["snippet"] ?? ""))
+            snippet: SearchComposer.snippetSegments(row["snippet"] ?? ""),
+            // Only the commits facet's statements carry the column (VX-72).
+            savedAt: row.hasColumn("saved_at") ? row["saved_at"] : nil)
     }
 
     // MARK: - The band's counts (13o U2)
@@ -361,21 +387,38 @@ extension Queries {
             environment: environment)
         else {
             // No words — a worn day alone still names its notes, and a typed
-            // tag alone its associated books (13o U3).
-            guard !worn.isEmpty || !associated.isEmpty else { return nil }
+            // tag alone its associated books (13o U3) AND, since VX-84a (D-1),
+            // the notes and blocks it TAGS: the listing's own narrowing,
+            // counted by the one composer (Library scope only — a book's
+            // search keeps its own words-only road).
+            var tagged = (notes: 0, allNotes: 0, blocks: 0, allBlocks: 0)
+            if case .library = scope.within,
+               let listing = SearchComposer.listingCounts(query, wingID: scope.wingID, environment: environment),
+               let row = try Row.fetchOne(db, sql: listing.sql, arguments: arguments(listing.arguments)) {
+                tagged = (row["notes"], row["all_notes"], row["blocks"], row["all_blocks"])
+            }
+            guard !worn.isEmpty || !associated.isEmpty || tagged.allNotes > 0 || tagged.allBlocks > 0
+            else { return nil }
             let livingNotes = worn.filter { !$0.isArchived }.count
             let livingBooks = associated.filter { !$0.isArchived }.count
             return SearchCounts(
-                living: .init(books: livingBooks, notes: livingNotes, passages: 0, scraps: 0),
-                all: .init(books: associated.count, notes: worn.count, passages: 0, scraps: 0),
-                archivedPlaces: (worn.count - livingNotes) + (associated.count - livingBooks))
+                living: .init(books: livingBooks, notes: livingNotes + tagged.notes, passages: 0, scraps: 0,
+                              blocks: tagged.blocks),
+                all: .init(books: associated.count, notes: worn.count + tagged.allNotes, passages: 0, scraps: 0,
+                           blocks: tagged.allBlocks),
+                archivedPlaces: (worn.count - livingNotes) + (associated.count - livingBooks)
+                    + (tagged.allNotes - tagged.notes) + (tagged.allBlocks - tagged.blocks))
         }
         guard let row = try Row.fetchOne(db, sql: statement.sql, arguments: arguments(statement.arguments))
         else { return nil }
+        // VX-72: the commits facet's statement says its savepoints (P-VX83-C3).
+        let saved = row.hasColumn("savepoints") ? (living: row["savepoints"] as Int, all: row["all_savepoints"] as Int)
+            : (living: 0, all: 0)
         return SearchCounts(
-            living: .init(books: row["books"], notes: row["notes"], passages: row["passages"], scraps: row["scraps"]),
+            living: .init(books: row["books"], notes: row["notes"], passages: row["passages"], scraps: row["scraps"],
+                          savepoints: saved.living),
             all: .init(books: row["all_books"], notes: row["all_notes"],
-                       passages: row["all_passages"], scraps: row["all_scraps"]),
+                       passages: row["all_passages"], scraps: row["all_scraps"], savepoints: saved.all),
             archivedPlaces: row["archived_places"])
     }
 
@@ -491,13 +534,17 @@ extension Queries {
     }
 
     static func arguments(_ values: [SearchComposer.Value]) -> StatementArguments {
-        StatementArguments(values.map { value -> DatabaseValue in
-            switch value {
-            case .text(let s): return s.databaseValue
-            case .integer(let i): return i.databaseValue
-            case .real(let d): return d.databaseValue
-            }
-        })
+        StatementArguments(values.map(databaseValue))
+    }
+
+    /// One composer argument as GRDB binds it (VX-84a: the catalog's own
+    /// listing statements bind the composer's narrowing through this too).
+    static func databaseValue(_ value: SearchComposer.Value) -> DatabaseValue {
+        switch value {
+        case .text(let s): s.databaseValue
+        case .integer(let i): i.databaseValue
+        case .real(let d): d.databaseValue
+        }
     }
 
     /// The worn-day arm: candidate notes by their day key (dated) and their
@@ -549,7 +596,7 @@ extension Queries {
                 passages.append(SearchPassage(
                     kind: .wornDay, sourceID: id, family: .notes, noteID: id, blockID: nil,
                     readingID: nil, homeTitle: shown, isArchived: row["archived"],
-                    isRenderedTake: false, snippet: []))
+                    isRenderedTake: false, snippet: [], savedAt: nil))
             }
         }
         return passages.sorted { $0.homeTitle > $1.homeTitle || ($0.homeTitle == $1.homeTitle && $0.sourceID < $1.sourceID) }

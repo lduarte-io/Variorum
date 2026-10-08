@@ -4,7 +4,7 @@ Drafted 2026-10-04 for stargazing.tech: the full "what is Variorum" reference
 page — the one curious visitors land on, distinct from the launch blog post.
 Written as final page copy below the line; `[brackets]` are hers to fill or
 confirm. Facts are checked against canon as of today; the two items marked
-PENDING (search scope, mobile) should be re-checked at publish time. The page
+PENDING (mobile) should be re-checked at publish time (search scope settled 2026-10-08). The page
 is long by design — it's the reference — but every section stands alone, so
 cutting sections is safe; reordering within sections isn't always (they build).
 
@@ -239,15 +239,22 @@ takes and all. The journal restriction was only ever a default.
   one typo in an old piece never reshuffles your whole library. Noisy
   "last touched" sorting exists too, if you want it.
 - **The library** shows everything, as a list or as cards, with sort controls
-  and a by-day filter`[; date-range filtering — confirm shipped at publish]`.
-- **Search** `[PENDING — re-check scope at publish; written to the settled
-  design]`: full-text search across the whole library, scoped to one book or
-  one note when you want it, with filters for tags, dates, and kinds of book.
-  Search is client-side by design — it has to be, because the sync server
-  can't read your writing (see Privacy) — and it runs over a real database,
-  which is exactly where local search is fast.`[ If the takes/savepoints
-  scope ships: Search also sees your takes and savepoints — the sentence you
-  cut three weeks ago is findable.]`
+  and a by-day filter`[VX-83 VERIFIED 2026-10-08 — a day AND a between-days
+  span via the when ▾ calendar; publish with the release that carries it]`.
+- **Search** `[13o+VX-83 VERIFIED 2026-10-08 — built and confirmed in use
+  (her own first-use report drove the follow-up fixes); publish with the
+  first public release that carries them]`: full-text search across the
+  whole library, scoped to one book or one note when you want it, with
+  filters for tags, a day or a span of days, and kinds of book. Search is
+  client-side by design — it has to be, because the sync server can't read
+  your writing (see Privacy) — and it runs over a real database, which is
+  exactly where local search is fast. And since every version is a row,
+  search sees every take a paragraph holds — not just the one on the page —
+  and an explicit "+ commits" filter searches everything you ever saved: the
+  paragraph you rewrote three weeks ago is still findable. `[FACT fence:
+  takes are in every search; savepoints ONLY behind "+ commits" — never
+  imply they surface by default. The Trash and whole-note Versions are not
+  searched — never "finds deleted text".]`
 
 <a name="snippets"></a>
 ## 9. Snippets and references
@@ -308,11 +315,12 @@ rest** — the whole store, always, not an optional checkbox.
   offline, the "losing" version isn't overwritten or auto-merged into word
   salad — it arrives as another take on the block, side by side, yours to
   judge. The conflict dialog is just… the fan.
-- **You own the file.** Your whole collection is one database file. Copy it,
-  back it up, AirDrop it to a new Mac and open it there with your passphrase —
-  no export-import dance, no server in the loop. And because it's encrypted,
-  the file in transit is noise to anyone without your keys. `[13x-gated —
-  verify the move-your-library flow shipped before publishing]`
+- **You own the file.** Your whole collection is one encrypted database file.
+  Back it up, or take it to a new Mac: Send Library to Another Mac packs it
+  with its key file into one folder — AirDrop the folder and open it there,
+  through your Apple account or with your passphrase. No export-import dance,
+  no server in the loop, and in transit it's noise to anyone without your
+  keys. `[publish with the first public release that carries 13x]`
 - **The exit is always open:** plain-Markdown export of anything, anytime.
   `[open-format guarantee wording — hers; the release strategy wants this
   loud]`
@@ -375,9 +383,10 @@ It keeps what you choose to keep: takes, savepoints, lineage. It does not
 record keystrokes or reconstruct every change. Coarse, not forensic.
 
 **What's the file format?**
-A single SQLite database (encrypted), local to your Mac — a file you can
-copy, back up, or AirDrop to a new Mac and open with your passphrase.
+A single SQLite database (encrypted), local to your Mac — a file you can back
+up, or send to a new Mac as one folder with its key file and open there.
 Markdown export for everything, anytime. `[open-format guarantee line]`
+`[publish with the first public release that carries 13x]`
 
 **What does it cost?**
 *[removed for publication]*
