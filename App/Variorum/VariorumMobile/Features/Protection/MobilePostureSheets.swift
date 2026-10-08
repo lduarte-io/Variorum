@@ -40,9 +40,10 @@ struct MobilePostureSwitchSheet: View {
                 switch model.phase {
                 case .checking:
                     title("Checking…")
-                case .explain where model.mode == .replaceKeys:
+                case .explain where model.act == .replaceKeys:
                     // pre-13x 3b — copy §4's Replace All Keys screen, the
-                    // phone's register (the checkbox as a marked row).
+                    // phone's register (the checkbox as a marked row). VX-99
+                    // round 2 (finding 1): by the ACT, as on the Mac.
                     title(ProtectionCopy.replaceKeysTitle)
                     prose(ProtectionCopy.replaceKeysBody)
                     if model.accountPostureIsStandard { prose(ProtectionCopy.replaceKeysStandardAddendum) }
@@ -164,15 +165,15 @@ struct MobilePostureSwitchSheet: View {
                     }, primaryEnabled: !model.busy && acknowledged && !(needsPassphrase && passphrase.isEmpty),
                           quiet: "Cancel", { onDone() })
                 case .running:
-                    title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle
-                          : model.mode == .replaceKeys ? ProtectionCopy.replaceKeysTitle
-                          : ProtectionCopy.enterCastleTitle)
+                    // VX-99 round 2 (finding 1): the act's title — the one selector.
+                    title(model.runningTitle)
                     running(runningLine)
                     prose("Keep Variorum open. If it quits, the switch picks up where it stopped.")
                 case .done(let insuranceOff, _):
                     title("Done")
-                    // pre-13x 5a (ledger 61): the conflict-follow's own Done (copy §2b).
-                    prose(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.castleDoneBody(model.outcome))
+                    // pre-13x 5a (ledger 61) → VX-99 round 2 (finding 1): the one
+                    // selector over the act and the outcome's road, as on the Mac.
+                    prose(model.doneBody)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
                     doors(primary: "Continue", {
                         model.continueFromDone()
@@ -208,7 +209,7 @@ struct MobilePostureSwitchSheet: View {
                     prose("Your Apple account holds a key again. Nothing else changed.")
                     doors(primary: "Close", { onDone() })
                 case .resumeAsk:
-                    title(ProtectionCopy.resumeBody)
+                    title(model.resumeAskTitle)
                     prose(ProtectionCopy.resumeNeedsPassphrase)
                     secretField(ProtectionCopy.passphraseFieldLabel, text: $passphrase)
                     doors(primary: "Finish", { Task { await model.resume(passphrase: passphrase) } },

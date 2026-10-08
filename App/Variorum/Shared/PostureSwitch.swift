@@ -77,7 +77,11 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// follow has not happened) — pick up the new keys first.
     case syncKeysUnavailable
     /// A rotation is already in progress on this device — resume it.
-    case switchInProgress(RotationMarker.Step)
+    /// `act`: the PENDING MARKER's act (VX-99 round 2b), so the refusal's
+    /// words name what did not finish (`ProtectionCopy.ceremonyResumeTitle`);
+    /// nil at the `busy` guards — another road of this runner is in flight
+    /// and no marker exists to read.
+    case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)
     /// No rotation is in progress — nothing to resume.
     case nothingToResume
     /// The resume needs the passphrase (M′ or L′ must be unwrapped from a
@@ -111,6 +115,15 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// words — the new keys could not be wrapped under them and the words
     /// would die silently; refused before anything is written.
     case wordsRequired
+    /// VX-99 round 2 (finding 4 — decision 9: every key door is an ONLINE
+    /// act for an ENROLLED library): Replace All Keys reached the runner
+    /// without the enrolled library in hand (a vault, the transport, a
+    /// session, sync custody). The door admits only an enrolled library,
+    /// so this is the check-then-act gap (a session that lapsed during the
+    /// screens; a custody read that failed) — refused before anything is
+    /// written, never run as the local-only road (steps 4–7 alone would
+    /// rotate nothing and the Done would claim otherwise).
+    case replaceKeysNeedsSync
 }
 
 @MainActor
@@ -159,6 +172,11 @@ final class PostureSwitchRunner {
         /// §2b), naming `otherDeviceName` from the vault's `updated_by_device`.
         var followedAnotherDevicesSwitch: Bool = false
         var otherDeviceName: String? = nil
+        /// VX-99 round 2 (finding 3, S1): the vault's `updated_at` when the
+        /// Done names ANOTHER device's posture act with its day — this
+        /// device's own Use Castle landed, and the ACCOUNT left Castle on
+        /// another device before the resume (`otherDeviceName` names it).
+        var otherDeviceDay: String? = nil
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -356,21 +374,38 @@ final class PostureSwitchRunner {
         /// key file's recorded descriptor no longer matches it.
         var vaultKDF: PassphraseKDF.Descriptor? = nil
         /// pre-13x ladder round 2, F3 (MINOR-N4 — decision 32's door
-        /// pattern applied to MAJOR-3 (b)): under a STANDARD posture,
+        /// pattern applied to MAJOR-3 (b)): on a STANDARD ACCOUNT (the
+        /// vault's word — it carries an Apple-held copy; VX-99 round 1),
         /// whether the account's iCloud key is READABLE here and IS the
-        /// vault's (nil under Castle — no Apple-held copy is owed there).
+        /// vault's (nil on a Castle account — no Apple-held copy is owed).
         /// Replace All Keys refuses AT THE DOOR on `false`, before any
         /// screen — before F3 the refusal fired at step 2, after the words
         /// screens, and regenerated words then opened nothing, unsaid. The
         /// runner's own step-2 check (`appleHeldCopyForStandard`) stays as
         /// the belt.
         var appleKeyReadable: Bool? = nil
+        /// VX-99 round 2 (finding 2): the VAULT's word on the account's
+        /// posture — whether it carries an Apple-held copy (Standard) — as
+        /// the door read it; nil when not enrolled (no vault read). The
+        /// Replace All Keys screen's decision-30 addendum renders on THIS,
+        /// the word the door (`appleKeyReadable`) and the belt
+        /// (`appleHeldCopyForStandard`) already act on.
+        var vaultHasAppleHeldCopy: Bool? = nil
     }
 
     /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
     /// step 2 — A READ (never minted), and the vault's id when it names one.
     private func appleKeyReadable(keptUnder fetched: KeyVaultClient.FetchedVault) -> Bool? {
-        guard leaves.posture() == .standard else { return nil }
+        // VX-99 round 1 (MAJOR): the VAULT's word, never the posture read.
+        // A Castle account owes no Apple copy (nil); a Standard one does.
+        // The door is the twin of `appleHeldCopyForStandard`'s belt — before
+        // this both gated on `leaves.posture() == .standard`, so a STALE or
+        // INDETERMINATE posture (the account left/entered Castle elsewhere and
+        // this device had not reconciled) decided the Apple copy, which on the
+        // ceremony's enrolled road FLIPS THE ACCOUNT's posture (decision 8:
+        // posture is the account's once a vault exists; decision 35: no
+        // posture-driven write on a stale reading).
+        guard fetched.format.masterWrappedByAppleHeld != nil else { return nil }
         guard let apple = leaves.appleKeys.read() else { return false }
         if let vaultID = fetched.format.appleKeyID, vaultID != apple.id { return false }
         return true
@@ -395,7 +430,8 @@ final class PostureSwitchRunner {
             vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
             vaultCorpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
             vaultKDF: fetched.format.kdf,
-            appleKeyReadable: appleKeyReadable(keptUnder: fetched))
+            appleKeyReadable: appleKeyReadable(keptUnder: fetched),
+            vaultHasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil)
     }
 
     // MARK: - The two switches + Replace All Keys
@@ -472,7 +508,7 @@ final class PostureSwitchRunner {
     private func runCeremony(road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
         guard let libraryKey = leaves.libraryKeyInHand() else {
@@ -483,6 +519,23 @@ final class PostureSwitchRunner {
         let signedIn = await leaves.signedIn()
         let custody = await leaves.keyStore.offMain { $0.load() }
         let enrolled = leaves.vault != nil && leaves.transport != nil && signedIn && custody != nil
+        // VX-99 round 2 (finding 4 — decision 9: every key door is an ONLINE
+        // act for an ENROLLED library): the Replace All Keys DOOR admits only
+        // an enrolled library (`replaceKeysNotEnrolled`), so reaching the
+        // local-only road here is the check-then-act gap — a session that
+        // lapsed during the screens, a custody read that failed. That road
+        // rotated NOTHING for Replace All Keys (steps 4–7 alone: the master
+        // and corpus keys untouched, the vault untouched, a key file without
+        // the master-wrapped copy) while its Done said other devices would
+        // ask for the passphrase; and under an indeterminate reading its
+        // posture read could wrap L′ under A on a Castle account. Refused
+        // before anything is written. Use Castle's local-only road (a
+        // pre-sync library — decision 8's second sentence; §4's "Without
+        // sync: steps 4–7 only") is untouched.
+        guard enrolled || entersCastle else {
+            leaves.log("posture switch: Replace All Keys reached the runner without the enrolled library in hand (vault, transport, session, custody) — refused before anything is written (decision 9)")
+            throw PostureSwitchError.replaceKeysNeedsSync
+        }
         // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
         // enrolled road derives against the FETCHED vault (an unchanged
         // word reuses the vault's descriptor, so a sibling's held lobby
@@ -493,6 +546,16 @@ final class PostureSwitchRunner {
         var material: DeviceKeyMaterial?
         var reencrypted = 0
         var recoveryWrapDigest: String?
+        // VX-99: THE ONE DECISION for the new key file's Apple copy, made per
+        // road below and threaded into step 4 — the key file follows the
+        // VAULT's rule, never "any iCloud key readable here". Before VX-99
+        // `writeNewKeyFile` read A whenever the road did not enter Castle, so
+        // a Replace All Keys on a CASTLE account wrapped L′ under the iCloud
+        // key a Mac still held from its Standard era (her Pro, 2026-09-07).
+        // VX-99 round 2 (finding 7): the decision carries the KEY itself —
+        // the one the belt verified — not a Bool that `writeNewKeyFile`
+        // turned into a second read after the walk.
+        var appleKeyForKeyFile: AppleKey?
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
 
         if enrolled, let vault = leaves.vault, let transport = leaves.transport {
@@ -545,9 +608,18 @@ final class PostureSwitchRunner {
             // discriminator (own write landed ⇔ the vault's id is this one).
             // F2 (MAJOR-3 b): the Apple-held copy kept under the SAME A —
             // read, never minted; refused when unreadable or not the vault's.
-            let appleHeld: (key: SymmetricKey, id: String)? = entersCastle
+            let appleHeld: AppleKey? = entersCastle
                 ? nil : try appleHeldCopyForStandard(keptUnder: fetched)
-            let prepared = try CorpusRotation.prepare(current: current, secrets: secrets, appleHeldCopy: appleHeld)
+            // VX-99 (enrolled road): the key file carries an Apple copy
+            // exactly when the vault write carries one — Standard's Replace
+            // All Keys (decision 30, §7 step 5), never a Castle account's.
+            // VX-99 round 2 (finding 7): under the SAME A — the vault's copy
+            // of M′ and the key file's copy of L′ are one pair; a swap of the
+            // iCloud item during the walk can no longer split them.
+            appleKeyForKeyFile = appleHeld
+            let prepared = try CorpusRotation.prepare(
+                current: current, secrets: secrets,
+                appleHeldCopy: appleHeld.map { (key: $0.symmetricKey, id: $0.id) })
             try await writeMarker(RotationMarker(
                 step: .vaultWrite, entersCastle: entersCastle,
                 newCorpusKeyID: prepared.corpusKeyID, startedAt: stamp))
@@ -621,12 +693,16 @@ final class PostureSwitchRunner {
             secrets = try await Task.detached(priority: .userInitiated) {
                 try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
             }.value
+            // VX-99 (local-only road — no vault): since round 2's finding 4
+            // only USE CASTLE reaches this road (Replace All Keys refuses
+            // above), and entering Castle never carries an Apple copy.
+            appleKeyForKeyFile = nil
             leaves.log("posture switch: local-only — steps 4–7 only")
         }
 
         // ————— 4–6: the library, custody, the snapshot —————
         let outcome = try await rekeyCustodyAndSnapshot(
-            entersCastle: entersCastle, libraryKey: libraryKey,
+            entersCastle: entersCastle, appleKey: appleKeyForKeyFile, libraryKey: libraryKey,
             keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords,
                                    recoveryWrapDigest: recoveryWrapDigest),
             material: material, reencrypted: reencrypted, stamp: stamp,
@@ -670,7 +746,7 @@ final class PostureSwitchRunner {
     private func followTyped(road: UUID, passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard let libraryKey = leaves.libraryKeyInHand() else {
             throw PostureSwitchError.libraryKeyUnavailable
@@ -724,7 +800,7 @@ final class PostureSwitchRunner {
     private func followDerived(road: UUID, passphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard let libraryKey = leaves.libraryKeyInHand() else {
             throw PostureSwitchError.libraryKeyUnavailable
@@ -761,6 +837,10 @@ final class PostureSwitchRunner {
         fetched: KeyVaultClient.FetchedVault, vault: KeyVaultClient, unwrapped: DeviceKeyMaterial,
         libraryKey: StoreKey, keyFile: KeyFileInputs, secretName: String
     ) async throws -> Outcome {
+        // The VAULT's word (decision 8): no Apple-held copy ⇒ Castle. VX-99:
+        // the new key file's Apple copy follows the same word (`appleKey:`
+        // read only when `!entersCastle`, at both calls below) — the
+        // account's posture, read from the vault just fetched.
         let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
         let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
@@ -777,7 +857,7 @@ final class PostureSwitchRunner {
            held.masterKey == unwrapped.masterKey, fetched.format.previousCorpusKey == nil {
             leaves.log("follow: the keys are unchanged — the account is \(entersCastle ? "Castle" : "Standard"); the library re-keys and custody moves (no rotation)")
             let outcome = try await rekeyCustodyAndSnapshot(
-                entersCastle: entersCastle, libraryKey: libraryKey,
+                entersCastle: entersCastle, appleKey: entersCastle ? nil : leaves.appleKeys.read(), libraryKey: libraryKey,
                 keyFile: keyFile,
                 material: held, reencrypted: 0, stamp: stamp,
                 listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
@@ -796,7 +876,7 @@ final class PostureSwitchRunner {
         guard let transport = leaves.transport else { throw PostureSwitchError.syncKeysUnavailable }
         let final = try await reencryptAndComplete(vault: vault, transport: transport, material: following)
         let outcome = try await rekeyCustodyAndSnapshot(
-            entersCastle: entersCastle, libraryKey: libraryKey,
+            entersCastle: entersCastle, appleKey: entersCastle ? nil : leaves.appleKeys.read(), libraryKey: libraryKey,
             keyFile: keyFile,
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
@@ -994,10 +1074,23 @@ final class PostureSwitchRunner {
     /// follow. `listPreSwitchPairs`: whether the app's own pre-switch pairs
     /// are offered — only when this library was Standard before (their
     /// "still open through your Apple account" is true exactly then).
+    /// `appleKey` (VX-99 — required, every road decides; round 2's finding
+    /// 7 carries the KEY, not a Bool): the iCloud key the new key file wraps
+    /// L′ under, or nil — the ceremony's enrolled road passes the A its belt
+    /// verified (exactly when its vault write carried an Apple-held copy, so
+    /// both copies sit under ONE A), its local-only road (Use Castle only)
+    /// nil, the follow and the resume's enrolled arm the A read when the
+    /// vault's word is Standard (the vault just fetched).
+    /// `accountPosture` (VX-99 round 2, finding 3; round 3, MINOR-1): the
+    /// ACCOUNT's posture when the caller holds the vault's word for it AND it
+    /// tightens (the resume's enrolled arm passes Castle only) — custody
+    /// moves to it on a road that does not enter Castle; nil = the posture
+    /// read (`leaves.posture()`), every other road's and the into-Standard
+    /// direction's (the ready's follow makes that move, with its notice).
     private func rekeyCustodyAndSnapshot(
-        entersCastle: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
+        entersCastle: Bool, appleKey: AppleKey?, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
-        listPreSwitchPairs: Bool, follow: Bool = false
+        listPreSwitchPairs: Bool, follow: Bool = false, accountPosture: Posture? = nil
     ) async throws -> Outcome {
         // ————— 4. RE-KEY THIS LIBRARY: the NEW key file first, then the swap —————
         phase = .rekeyingLibrary
@@ -1009,7 +1102,7 @@ final class PostureSwitchRunner {
             step: .rekeyLibrary, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
-        try await writeNewKeyFile(newKey: newKey, entersCastle: entersCastle, keyFile: keyFile, material: material)
+        try await writeNewKeyFile(newKey: newKey, appleKey: appleKey, keyFile: keyFile, material: material)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
@@ -1017,7 +1110,7 @@ final class PostureSwitchRunner {
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 5. CUSTODY (both items) —————
-        try await moveCustodyForSwitch(entersCastle: entersCastle)
+        try await moveCustodyForSwitch(entersCastle: entersCastle, accountPosture: accountPosture)
         try await writeMarker(RotationMarker(
             step: .snapshot, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
@@ -1044,10 +1137,15 @@ final class PostureSwitchRunner {
     /// THE NEW KEY FILE under the new fingerprint: L′ under P (the same
     /// fresh descriptor the vault's M′ wrap used — the lobby derives ONCE,
     /// §3.6), under W when the words are in hand, under M′ when enrolled;
-    /// the Apple copy ONLY under Standard's Replace All Keys; the vault's
-    /// descriptor + corpus key id recorded. The OLD key file stays.
+    /// the Apple copy ONLY under Standard's Replace All Keys (and a follow
+    /// under a Standard account) — `appleKey`, the caller's decision AND key
+    /// (VX-99: never "the road does not enter Castle", which wrapped L′
+    /// under any readable iCloud key on a Castle account; round 2's finding
+    /// 7: never a second read here, which the belt's vault-id check never
+    /// saw); the vault's descriptor + corpus key id recorded. The OLD key
+    /// file stays.
     private func writeNewKeyFile(
-        newKey: StoreKey, entersCastle: Bool, keyFile: KeyFileInputs, material: DeviceKeyMaterial?
+        newKey: StoreKey, appleKey apple: AppleKey?, keyFile: KeyFileInputs, material: DeviceKeyMaterial?
     ) async throws {
         let storeURL = leaves.storeURL
         let gate = leaves.gate
@@ -1062,7 +1160,6 @@ final class PostureSwitchRunner {
         let passphraseKey = keyFile.passphraseKey
         let recoveryWords = keyFile.recoveryWords
         guard passphrase != nil || passphraseKey != nil || recoveryWords != nil else { throw PostureSwitchError.secretRequired }
-        let apple: AppleKey? = entersCastle ? nil : leaves.appleKeys.read()
         let envelope: StoreKeyEnvelope = try await Task.detached(priority: .userInitiated) {
             var envelope = StoreKeyEnvelope(storeID: storeID)
             if let passphraseKey {
@@ -1104,15 +1201,18 @@ final class PostureSwitchRunner {
         }
     }
 
-    private func moveCustodyForSwitch(entersCastle: Bool) async throws {
+    private func moveCustodyForSwitch(entersCastle: Bool, accountPosture: Posture? = nil) async throws {
         phase = .movingCustody
         let target: StoreAtOpenMode
         if entersCastle {
             let biometry = leaves.biometryAvailable()
             target = (leaves.alwaysAsk() || !biometry) ? .passphrase : .biometric
         } else {
+            // VX-99 round 2 (finding 3): the account's posture when the
+            // caller holds the vault's word (decision 8) — round 3, MINOR-1:
+            // only a tightening one (Castle) — else the read.
             target = StoreAtOpenMode.effective(
-                posture: leaves.posture(), dials: ProtectionDials(alwaysAsk: leaves.alwaysAsk()))
+                posture: accountPosture ?? leaves.posture(), dials: ProtectionDials(alwaysAsk: leaves.alwaysAsk()))
         }
         switch await leaves.moveCustody(target) {
         case .changed: break
@@ -1160,10 +1260,22 @@ final class PostureSwitchRunner {
     /// When the vault names an id, the key read must BE that id: a
     /// different Apple ID's device could only hand M′ to the wrong Apple
     /// account's key. Either miss refuses (`appleKeyUnreachable`).
+    /// VX-99 round 1 (MAJOR): the owed-or-not test is the VAULT's word —
+    /// `masterWrappedByAppleHeld != nil` (Standard) — not `leaves.posture()`.
+    /// The ceremony fetches the vault at step 1 (`runCeremony`'s
+    /// `vault.fetchVault()` after the drain) and this belt holds it, so
+    /// decision 8 (posture is the account's once a vault exists)
+    /// and decision 35 (no posture-driven write on a stale/indeterminate
+    /// reading) govern: a stale CASTLE read on a genuinely Standard account
+    /// must NOT drop the copy, and a stale STANDARD read on a Castle account
+    /// must NOT add one. The caller still gates `entersCastle ? nil : …`, so
+    /// the enter-Castle road (whose fetched vault is still the OLD Standard
+    /// one) is unaffected. VX-99 round 2 (finding 7): returns the VERIFIED
+    /// key itself — the caller wraps the key file's copy of L′ under it too.
     private func appleHeldCopyForStandard(
         keptUnder fetched: KeyVaultClient.FetchedVault
-    ) throws -> (key: SymmetricKey, id: String)? {
-        guard leaves.posture() == .standard else { return nil }
+    ) throws -> AppleKey? {
+        guard fetched.format.masterWrappedByAppleHeld != nil else { return nil }
         guard let apple = leaves.appleKeys.read() else {
             leaves.log("posture switch: Replace All Keys under Standard — the iCloud key is not readable here; refused before any write")
             throw PostureSwitchError.appleKeyUnreachable
@@ -1172,7 +1284,7 @@ final class PostureSwitchRunner {
             leaves.log("posture switch: Replace All Keys under Standard — the iCloud key read here (\(apple.id.prefix(8))) is not the account's (\(vaultID.prefix(8))); refused before any write")
             throw PostureSwitchError.appleKeyUnreachable
         }
-        return (apple.symmetricKey, apple.id)
+        return apple
     }
 
     // MARK: - §7 THE OFFER's act
@@ -1281,13 +1393,24 @@ final class PostureSwitchRunner {
             // ledger 61). 5b's device-name reading (`updated_by_device` ≠ this
             // device) survives ONLY as the fallback for a marker written before
             // F1 (no id stamped) — it misread the recorded corner (our write
-            // landed, a FOLLOWER finished and stamped its own name). A
-            // `.reencrypt` marker is never this case (written only after this
-            // device's own write and custody). `updated_by_device` now only
-            // NAMES the sentence.
+            // landed, a FOLLOWER finished and stamped its own name).
+            // `updated_by_device` now only NAMES the sentence.
+            // VX-99 round 2 (finding 3, S2 — the orchestrator's ruling, option
+            // a): the STAMP decides at EVERY step that carries one, not at
+            // `.vaultWrite` alone. The old premise — "a `.reencrypt` marker is
+            // never this case (written only after this device's own write and
+            // custody)" — fails whenever another device acts AFTER this
+            // device's write: A's own Replace All Keys killed mid-walk; B
+            // follows, finishes, then enters Castle (a SECOND rotation). The
+            // vault's id is then B's, not the one A stamped, so the road is
+            // another device's — exactly as at `.vaultWrite`. A follow's own
+            // marker carries no stamp (`runFollow`), so its custody-pending
+            // resume still reads as its own; the marker this arm rewrites for
+            // another device's road keeps the id A minted (below), so a SECOND
+            // crash still reads as another device's.
             let byAnotherDevice: Bool = {
-                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID else { return false }
                 if let stamped = marker.newCorpusKeyID { return vaultKeyID != stamped }
+                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID else { return false }
                 guard let writer = fetched.format.updatedByDevice else { return false }
                 return writer != leaves.deviceName()
             }()
@@ -1296,6 +1419,45 @@ final class PostureSwitchRunner {
             } else if marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID {
                 leaves.log("posture switch: resume — this device's own vault write landed (the vault's corpus key id is the one this ceremony minted); custody picks M′ up by the typed secret")
             }
+            // VX-99 (the orchestrator's ruling, 5ce7175b — decision 8: the
+            // posture is the ACCOUNT's once a vault exists; decision 35: no
+            // posture-driven write on a stale reading): this arm HOLDS the
+            // vault it just fetched, so the road reads the account from it,
+            // exactly as `runFollow` does — never from the posture read, which
+            // under an indeterminate reading is the custody SHAPE. The Apple
+            // copy: present exactly when the vault carries an Apple-held copy.
+            // VX-99 round 2 (finding 3 — option a, S1): the ROAD's posture is
+            // the account's on EVERY story, not on another device's alone —
+            // the custody target (`accountPosture`), and whether the road
+            // ENTERED Castle (the insurance, the offer, the old key files'
+            // retirement, the Done): another device's road and a follow's own
+            // marker follow the account (`vaultSaysCastle`, `runFollow`'s
+            // rule); this device's own ceremony entered Castle only if its act
+            // was the switch AND the account is still Castle — A's Use Castle
+            // landed, B followed and then used Standard (no rotation, the
+            // stamp still A's): the account is Standard, so A's road ends
+            // Standard (the Apple copy, no insurance-off, no offer, a Done
+            // that names B's act; custody by the read — below). A Replace All
+            // Keys never enters Castle by its own act, whatever the account's
+            // posture.
+            let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil
+            let roadEntersCastle = (byAnotherDevice || marker.isFollow)
+                ? vaultSaysCastle : (entersCastle && vaultSaysCastle)
+            // VX-99 round 3 (MINOR-1 — the orchestrator's ruling, option (b),
+            // restoring the pre-F3 custody rule for the into-STANDARD
+            // direction): the account's posture overrides the posture read
+            // only where it TIGHTENS (Castle). An account that left Castle
+            // elsewhere leaves custody to the read — behind the gate on a
+            // device still reading Castle — so the next ready's follow into
+            // Standard (`ProtectionController.reconcileFollow`) moves it WITH
+            // §7's one-time notice ("Your account is back in Standard — set on
+            // [device] on [day]"). Round 2's F3 moved it silent here, saying
+            // nothing, and the Apple copy the key file then carried (the
+            // vault's word, below — unchanged) kept that arm from ever firing:
+            // the device stopped asking for Touch ID and nothing said why. A
+            // key file and a custody that disagree until that ready is the
+            // announced road, not a gap.
+            let tighteningPosture: Posture? = vaultSaysCastle ? .castle : nil
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase
                 // (or the twelve words — 2c: the follow's own resume).
@@ -1318,7 +1480,33 @@ final class PostureSwitchRunner {
                 material = try CorpusRotation.materialFollowing(fetched.format, master: held.masterSymmetricKey)
             }
             guard let held = material else { throw PostureSwitchError.syncKeysUnavailable }
-            try await writeMarker(marker.advanced(to: .reencrypt))
+            // VX-99 round 1 (MINOR): the `.reencrypt` marker carries THE
+            // ROAD's facts, not `marker.advanced(to:)`'s copy of the ORIGINAL
+            // marker (`entersCastle: false` for a Replace All Keys, no follow
+            // flag). A SECOND crash inside the walk below leaves this marker
+            // pending; without the road's facts the next resume read the
+            // marker's stale `entersCastle`/`follow` and moved custody to
+            // `.auto`, skipped `retireOldKeyFiles` and returned an outcome
+            // that had not entered Castle (the runner's log line said "keys
+            // replaced"). The Apple copy was never at risk (it reads the fresh
+            // fetch). VX-99 round 2 (finding 3; the NIT to carry the vault's
+            // id here NOT adopted — the record): `newCorpusKeyID` stays the
+            // id THIS marker was stamped with. On another device's road that
+            // is the id this device minted for a write that never landed — so
+            // the second resume's stamp still differs from the vault's and the
+            // road still reads as another device's (the other-device Done, the
+            // words rule), round 1's recorded residual closed by the same rule.
+            // And `entersCastle` is the ROAD's only where the road follows the
+            // account (another device's road, a follow's marker); on this
+            // device's OWN road it stays the ACT's — recomputed against the
+            // fresh vault at every resume anyway — so a resume that stops
+            // here to ask the passphrase does not forget it was finishing a
+            // Use Castle (S1's Done; the pane's door label).
+            try await writeMarker(RotationMarker(
+                step: .reencrypt, entersCastle: (byAnotherDevice || marker.isFollow) ? roadEntersCastle : entersCastle,
+                oldKeyFingerprint: marker.oldKeyFingerprint, newKeyFingerprint: marker.newKeyFingerprint,
+                newCorpusKeyID: marker.newCorpusKeyID, startedAt: marker.startedAt,
+                follow: (marker.isFollow || byAnotherDevice) ? true : nil))
             let final = try await reencryptAndComplete(vault: vault, transport: transport, material: held)
             material = final.material
             reencrypted = final.reencrypted
@@ -1329,7 +1517,11 @@ final class PostureSwitchRunner {
             // W copy, the P copy landing when the passphrase is next typed.
             let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
             var outcome = try await rekeyCustodyAndSnapshot(
-                entersCastle: entersCastle, libraryKey: libraryKey,
+                // VX-99: the vault's word (above) — the marker's
+                // `entersCastle` is false for Replace All Keys in EITHER
+                // posture, so it never decides the Apple copy.
+                entersCastle: roadEntersCastle, appleKey: vaultSaysCastle ? nil : leaves.appleKeys.read(),
+                libraryKey: libraryKey,
                 // The ceremony's words are NOT landed when another device's
                 // rotation is what this resume picked up (M1's rule): the
                 // account's words are the other device's; the W copy lands
@@ -1338,10 +1530,33 @@ final class PostureSwitchRunner {
                                        recoveryWords: byAnotherDevice ? nil : typedWords,
                                        recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
-                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice)
-            if byAnotherDevice {
+                listPreSwitchPairs: roadEntersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice,
+                accountPosture: tighteningPosture)
+            // VX-99 round 3 (the MAJOR — the orchestrator's ruling, restoring
+            // the pre-F3 face): the conflict-follow's flag — ledger 61's "the
+            // twelve words shown here are not your account's" — is true only
+            // where this ceremony's own vault write NEVER landed. This
+            // device's OWN `.reencrypt` marker (`!isFollow`: the ceremony
+            // writes it only after its own write landed and custody took M′,
+            // and this arm's own-road rewrite keeps it so) means its words DID
+            // land; another device's LATER rotation (F3's S2) may have kept
+            // them — typed from the paper, decision 33 — or replaced them, and
+            // the marker cannot tell which. So that road keeps every F3 fact
+            // above (custody, the account's posture, the retirement, the
+            // offer, the words rule) but never the flag: its Done is the
+            // selector's ordinary one, with no words claim — the road it took
+            // before F3. The `.vaultWrite` case and the second-crash
+            // ambiguity stay as they were (VX-107's).
+            let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow
+            if byAnotherDevice, !ownWriteLanded {
                 outcome.followedAnotherDevicesSwitch = true
                 outcome.otherDeviceName = fetched.format.updatedByDevice
+            } else if entersCastle, !marker.isFollow, !roadEntersCastle {
+                // S1: this device's own Use Castle, the account Standard now —
+                // the Done names the device that left Castle and its day (on
+                // the stamped road above too: B left Castle, then rotated).
+                outcome.otherDeviceName = fetched.format.updatedByDevice
+                outcome.otherDeviceDay = fetched.updatedAt
             }
             return outcome
 

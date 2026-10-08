@@ -267,7 +267,8 @@ struct MobileProtectionSheet: View {
                          : ProtectionCopy.finishReplacingKeysDoor) {
                         controller.openSwitch(.resume(pending), vaultTie: VaultTie.make(services: services))
                     }
-                    alarm(ProtectionCopy.resumeBody)
+                    // VX-99 round 2b: by the marker's act (F1's selector).
+                    alarm(ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending)))
                 } else if controller.posture == .standard {
                     door(ProtectionCopy.useCastleDoor) {
                         controller.openSwitch(.enter, vaultTie: VaultTie.make(services: services))

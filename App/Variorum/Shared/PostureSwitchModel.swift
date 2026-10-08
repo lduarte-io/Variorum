@@ -24,6 +24,47 @@ import Foundation
 import Observation
 import VariorumCore
 
+/// VX-99 round 2 (finding 1 — the cold review's MAJOR): WHICH act a
+/// ceremony face is speaking for. The mode names it for a fresh ceremony;
+/// for a RESUME it is the pending marker's act (`init(resuming:)`) — a
+/// switch into Castle, a Replace All Keys, or a FOLLOW (the marker's
+/// `follow` flag; into Castle or not by the marker's posture). The running
+/// title, the resume's ask, the Done and the restart all read this ONE
+/// value on both platforms (`ProtectionCopy.ceremonyRunningTitle` ·
+/// `ceremonyResumeTitle` · `ceremonyDoneBody`; the model's flow).
+nonisolated enum CeremonyAct: Equatable, Sendable {
+    case enterCastle
+    case replaceKeys
+    case leaveCastle
+    /// A follow's marker (2c / 2d.4): this device was picking up keys
+    /// another device minted — into Castle or not.
+    case follow(entersCastle: Bool)
+
+    /// The act a pending marker records.
+    init(resuming marker: RotationMarker) {
+        if marker.isFollow {
+            self = .follow(entersCastle: marker.entersCastle)
+        } else {
+            self = marker.entersCastle ? .enterCastle : .replaceKeys
+        }
+    }
+
+    /// Whether the act, by itself, enters Castle (the road's outcome may
+    /// still say otherwise — the Done reads the outcome first).
+    var entersCastle: Bool {
+        switch self {
+        case .enterCastle: return true
+        case .replaceKeys, .leaveCastle: return false
+        case .follow(let entersCastle): return entersCastle
+        }
+    }
+
+    var isFollow: Bool {
+        if case .follow = self { return true }
+        return false
+    }
+}
+
 @MainActor
 @Observable
 final class PostureSwitchModel: Identifiable {
@@ -128,10 +169,42 @@ final class PostureSwitchModel: Identifiable {
         if case .resume = mode { return true }
         return false
     }
+
+    /// VX-99 round 2 (finding 1): the act this ceremony speaks for — the
+    /// mode's, or a resume's MARKER's. Every face branch and every flow
+    /// branch that used to ask `mode == .replaceKeys` asks this instead.
+    var act: CeremonyAct {
+        switch mode {
+        case .enter: return .enterCastle
+        case .leave: return .leaveCastle
+        case .replaceKeys: return .replaceKeys
+        // The MARKER's act — before VX-99 round 2 every branch read
+        // `mode == .replaceKeys`, so a resume of ANY marker was the Castle
+        // ceremony: its title, its "Entering Castle didn't finish", its
+        // Done ("…a new key that your Apple account never held") over a
+        // Replace All Keys, and — on a restart — its flow into
+        // `runner.enterCastle`.
+        case .resume(let marker): return CeremonyAct(resuming: marker)
+        }
+    }
+
+    /// The running screen's title, by the act (both faces render it).
+    var runningTitle: String { ProtectionCopy.ceremonyRunningTitle(act) }
+    /// The resume's passphrase screen title, by the act (both faces).
+    var resumeAskTitle: String { ProtectionCopy.ceremonyResumeTitle(act) }
+    /// The Done's body, by the act and the outcome's road (both faces).
+    var doneBody: String { ProtectionCopy.ceremonyDoneBody(act: act, outcome: outcome) }
     /// pre-13x 3b (Replace All Keys' faces): the Standard addendum renders
-    /// under a Standard posture; the checkbox hides when a door handed the
-    /// new passphrase in (it IS the new one).
-    var accountPostureIsStandard: Bool { controller.posture == .standard }
+    /// on a Standard ACCOUNT; the checkbox hides when a door handed the new
+    /// passphrase in (it IS the new one). VX-99 round 2 (finding 2): the
+    /// account is the VAULT's word as the door read it — the same word the
+    /// act keeps M′ under A by (round 1's door + belt) — so under a stale or
+    /// indeterminate reading the screen and the act agree (decision 8 · 30).
+    /// The device's posture only before the door has answered.
+    var accountPostureIsStandard: Bool {
+        if let vaultSaysStandard = facts?.vaultHasAppleHeldCopy { return vaultSaysStandard }
+        return controller.posture == .standard
+    }
     var passphraseHandedIn: Bool { passphraseInHand != nil }
 
     // MARK: - The door
@@ -168,7 +241,16 @@ final class PostureSwitchModel: Identifiable {
         do {
             let facts = try await runner.checkDoor()
             self.facts = facts
-            if facts.rotationInProgress {
+            // Decision 32's still-finishing door — for every mode BUT the
+            // RESUME (VX-99 round 2b, item 1): `rotationInProgress` (the
+            // vault's previous key) is exactly the state this device's OWN
+            // ceremony leaves when it dies mid-walk, and the resume is the
+            // road that finishes it ("the acting device resumes through its
+            // marker and never starts a second"). Refusing it here left the
+            // marker standing — every round refused — and a one-device
+            // account paused for good. The resume's runner road reads the
+            // fresh vault itself (`PostureSwitchRunner.resume`).
+            if facts.rotationInProgress, !isResume {
                 phase = .failed(stillFinishingSentence)
                 return
             }
@@ -177,29 +259,8 @@ final class PostureSwitchModel: Identifiable {
             case .leave: phase = .leaveConfirm
             case .resume: await resume(passphrase: nil)
             case .replaceKeys:
-                // The front check (§5's row): enrolled; holding the CURRENT
-                // master — the key file's recorded corpus id against the
-                // vault's (a stale one ⇒ *this account's keys don't match
-                // this library*; the follow's door is the notice bar's).
-                guard facts.enrolled else {
-                    phase = .failed(ProtectionCopy.replaceKeysNotEnrolled)
-                    return
-                }
-                if let vaultID = facts.vaultCorpusKeyID, let recorded = controller.keyFileVaultCorpusKeyID,
-                   recorded != vaultID {
-                    phase = .failed(Self.message(for: CorpusRotationError.staleMaster(vaultKeyID: vaultID, heldKeyID: recorded)))
-                    return
-                }
-                // pre-13x ladder round 2, F3 (MINOR-N4): MAJOR-3 (b)'s refusal
-                // AT THE DOOR — decision 32's pattern. Under Standard the
-                // account's iCloud key must be readable here and be the
-                // vault's (decision 30: the new master is re-wrapped under
-                // the SAME A, never a minted one); before F3 this fired at
-                // step 2, after Screens 2–4, and *Generate New Ones* had
-                // then shown twelve words that opened nothing. The runner's
-                // own check stays as the belt.
-                if facts.appleKeyReadable == false {
-                    phase = .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable)
+                if let refusal = replaceKeysFrontCheck(facts) {
+                    phase = .failed(refusal)
                     return
                 }
                 phase = .explain
@@ -209,11 +270,33 @@ final class PostureSwitchModel: Identifiable {
         }
     }
 
+    /// Replace All Keys' FRONT CHECK — one rule for the door and for a
+    /// resume that RESTARTS a Replace All Keys (VX-99 round 2, finding 1,
+    /// arm iii). §5's row: enrolled; holding the CURRENT master — the key
+    /// file's recorded corpus id against the vault's (a stale one ⇒ *this
+    /// account's keys don't match this library*; the follow's door is the
+    /// notice bar's). pre-13x ladder round 2, F3 (MINOR-N4): MAJOR-3 (b)'s
+    /// refusal AT THE DOOR — decision 32's pattern: on a Standard account
+    /// the account's iCloud key must be readable here and be the vault's
+    /// (decision 30: the new master is re-wrapped under the SAME A, never a
+    /// minted one); before F3 this fired at step 2, after Screens 2–4, and
+    /// *Generate New Ones* had then shown twelve words that opened nothing.
+    /// The runner's own check stays as the belt.
+    private func replaceKeysFrontCheck(_ facts: PostureSwitchRunner.DoorFacts) -> String? {
+        guard facts.enrolled else { return ProtectionCopy.replaceKeysNotEnrolled }
+        if let vaultID = facts.vaultCorpusKeyID, let recorded = controller.keyFileVaultCorpusKeyID,
+           recorded != vaultID {
+            return Self.message(for: CorpusRotationError.staleMaster(vaultKeyID: vaultID, heldKeyID: recorded))
+        }
+        if facts.appleKeyReadable == false { return ProtectionCopy.replaceKeysAppleKeyUnreachable }
+        return nil
+    }
+
     // MARK: - §2b Screen 1 → 2 / 3
 
     func continueFromExplain() {
         guard case .explain = phase else { return }
-        if mode == .replaceKeys {
+        if act == .replaceKeys {
             // The words in hand already (a regeneration handed them in) ⇒
             // straight to the authorization; else the words screens.
             if wordsInHand != nil { advanceAfterWords() } else { advanceToWords() }
@@ -288,7 +371,7 @@ final class PostureSwitchModel: Identifiable {
         case .confirm(let shown): phase = .wordsConfirm(shown)
         case .done:
             wordsInHand = words.wordsInHand
-            if mode == .replaceKeys {
+            if act == .replaceKeys {
                 advanceAfterWords()
             } else {
                 phase = .floor(needsPassphrase: passphraseInHand == nil)
@@ -418,7 +501,7 @@ final class PostureSwitchModel: Identifiable {
     /// the VAULT's copy — a retired word (the key file's recorded descriptor
     /// no longer the vault's) is refused with copy §5's sentence.
     func authorize(passphrase typed: String) async {
-        guard case .authorize = phase, !busy, mode == .replaceKeys else { return }
+        guard case .authorize = phase, !busy, act == .replaceKeys else { return }
         lastError = nil
         guard !typed.isEmpty else {
             lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.emptyPassphrase)
@@ -442,7 +525,7 @@ final class PostureSwitchModel: Identifiable {
 
     /// The checkbox's new passphrase (≥ 12, matched); then the act.
     func commitNewPassphrase(_ new: String, confirmation: String) async {
-        guard case .newPassphrase = phase, !busy, mode == .replaceKeys else { return }
+        guard case .newPassphrase = phase, !busy, act == .replaceKeys else { return }
         lastError = nil
         guard new.count >= ProtectionCopy.passphraseFloor else {
             lastError = ProtectionCopy.passphraseTooShort
@@ -481,7 +564,12 @@ final class PostureSwitchModel: Identifiable {
                 try await change(passphrase, new)
                 passphraseInHand = new
             }
-            phase = .done(insuranceOff: false, hasOffer: false)
+            // VX-99 round 2 (finding 1, arm iv): the OUTCOME's road, never a
+            // hard-coded "no notice, no offer" — when the vault's CAS refuse
+            // made this road the FOLLOW into another device's Castle
+            // (`runCeremony`'s re-read), the insurance went off and the
+            // pre-switch pairs are listed, and the face must say both.
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
         } catch {
             phase = .failed(wording(for: error))
         }
@@ -552,7 +640,24 @@ final class PostureSwitchModel: Identifiable {
         } catch PostureSwitchError.passphraseRequired {
             phase = .resumeAsk(needsPassphrase: true)
         } catch PostureSwitchError.restartRequired {
-            // The vault write never landed: the ceremony starts over.
+            // The vault write never landed: the ceremony starts over — the
+            // MARKER's OWN ceremony (VX-99 round 2, finding 1, arm iii): the
+            // runner cleared the marker, and `act` still names what it
+            // recorded, so a Replace All Keys restarts Replace All Keys (its
+            // screen, its words, `.authorize`, `runner.replaceAllKeys`),
+            // never the Castle ceremony's floor and `runner.enterCastle`. A
+            // restart is a fresh rotation, so it passes that ceremony's own
+            // door first: the restore hold (the resume road's exemption ends
+            // here — the restarted road drains and pulls) and, for Replace
+            // All Keys, the front check (`facts` were read at `start()`).
+            if act == .enterCastle || act == .replaceKeys, controller.restoreHoldStands?() == true {
+                phase = .failed(ProtectionCopy.resumeSyncFirst)
+                return
+            }
+            if act == .replaceKeys, let facts, let refusal = replaceKeysFrontCheck(facts) {
+                phase = .failed(refusal)
+                return
+            }
             phase = .explain
         } catch {
             phase = .failed(wording(for: error))
@@ -601,6 +706,10 @@ final class PostureSwitchModel: Identifiable {
         return sentence + " " + ProtectionCopy.freshWordsNeverLanded
     }
 
+    /// The switches' one offline sentence (copy row: the runner's transport
+    /// wording) — named once so the refusal and the URL error share it.
+    static let serverUnreachable = "Couldn't reach the server — check your connection and try again."
+
     static func message(for error: any Error) -> String {
         switch error {
         case CorpusRotationError.rotationInProgress:
@@ -622,7 +731,17 @@ final class PostureSwitchModel: Identifiable {
             return ProtectionController.keyUnavailable
         case PostureSwitchError.syncKeysUnavailable:
             return "Pick up your new keys first — enter your passphrase."
+        case PostureSwitchError.switchInProgress(_, let act?):
+            // VX-99 round 2b (item 2's sibling): a road refused because THIS
+            // device's marker is pending speaks the MARKER's act through
+            // F1's one selector — before it, "Entering Castle didn't finish"
+            // over a pending Replace All Keys at every door (the follow's
+            // included: `PostureFollowModel` words through here).
+            return ProtectionCopy.ceremonyResumeTitle(act)
         case PostureSwitchError.switchInProgress:
+            // The busy guard: another road of this runner is in flight and
+            // no marker exists to read — the shipped sentence, unchanged
+            // (its own wording is a residual for 13s; the record's round 2b).
             return ProtectionCopy.resumeBody
         case PostureSwitchError.nothingToResume:
             return "Nothing is left to finish."
@@ -649,8 +768,14 @@ final class PostureSwitchModel: Identifiable {
             return "That switch doesn't apply right now."
         case VaultEnrollmentError.wrongPassphrase:
             return ProtectionCopy.passphraseNotTheLibrarys
+        case PostureSwitchError.replaceKeysNeedsSync:
+            // VX-99 round 2 (finding 4 — decision 9): the switches' offline
+            // line (`pre-13x-copy.md`'s row: "Replace All Keys / Use Castle /
+            // Use Standard offline" speaks the transport wording), so the gap
+            // and a dropped connection read alike.
+            return serverUnreachable
         case is URLError:
-            return "Couldn't reach the server — check your connection and try again."
+            return serverUnreachable
         default:
             return EncryptionSession.message(for: error)
         }

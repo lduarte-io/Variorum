@@ -874,4 +874,81 @@ nonisolated extension ProtectionCopy {
         case .written: return enteredCastleDone
         }
     }
+
+    // MARK: VX-99 round 2 (finding 1) — THE ONE SELECTOR over the act and the
+    // outcome's road, for both platforms' ceremony faces. Before it the faces
+    // asked `mode == .replaceKeys`, so a RESUME (any marker) spoke the Castle
+    // ceremony: a resumed Replace All Keys was told "You're in Castle. Your
+    // library has a new key that your Apple account never held" over a key
+    // file the Apple account opens (decision 30's exact case), and a Replace
+    // All Keys whose road became the follow into another device's switch lost
+    // ledger 61's words sentence.
+
+    /// The running screen's title, by the act (a follow's resume by the
+    /// posture its marker records — the pane's door label's own rule).
+    static func ceremonyRunningTitle(_ act: CeremonyAct) -> String {
+        switch act {
+        case .leaveCastle: return leaveCastleTitle
+        case .replaceKeys: return replaceKeysTitle
+        case .enterCastle: return enterCastleTitle
+        case .follow(let entersCastle): return entersCastle ? enterCastleTitle : replaceKeysTitle
+        }
+    }
+
+    /// The resume's passphrase screen title, by the act: copy §2b's
+    /// `resumeBody` only where the act enters Castle; its PROVISIONAL
+    /// sibling everywhere else.
+    static func ceremonyResumeTitle(_ act: CeremonyAct) -> String {
+        act.entersCastle ? resumeBody : resumeReplacingKeysBody
+    }
+
+    /// **VX-99 round 2 (finding 1) — PROVISIONAL (13s re-voices; QUESTIONS at
+    /// the merge):** `resumeBody`'s sibling for a resumed Replace All Keys (or
+    /// the resumed follow of one) — "Entering Castle didn't finish" is false
+    /// there. The act swapped, nothing else.
+    static let resumeReplacingKeysBody =
+        "Replacing your keys didn't finish on this \(deviceName) — sync is paused until it "
+        + "completes. Nothing is lost; finishing picks up exactly where it stopped."
+
+    /// **VX-99 round 2 (finding 1, arm iv) — PROVISIONAL (ledger 61's family;
+    /// 13s re-voices; QUESTIONS at the merge):** the conflict-follow's Done
+    /// when the other device REPLACED the keys and the account did NOT enter
+    /// Castle — `enteredCastleAfterAnotherDevice`'s "entered Castle first"
+    /// would be false there. Ledger 61's words sentence kept (sentence case).
+    static func keysReplacedAfterAnotherDevice(device: String?) -> String {
+        "Another device replaced your keys first, so this \(deviceName) picked up that device's keys "
+        + "instead. The twelve words shown here are not your account's: your account's words are "
+        + "the ones \(device ?? anotherDevice) showed when it replaced your keys — those are the set "
+        + "to keep."
+    }
+
+    /// The Done's body, by the act and the OUTCOME's road — the outcome
+    /// first, because a road can end somewhere its act did not aim:
+    /// 1. the road became the follow into another device's switch ⇒ ledger
+    ///    61's sentence (into Castle) or its sibling (not into Castle);
+    /// 2. a follow's own resume ⇒ the follow's Done;
+    /// 3. the outcome entered Castle ⇒ the Castle Done by the snapshot's fate;
+    /// 4. the act WAS entering Castle but the account is Standard now (finding
+    ///    3, S1: another device left Castle after this device's own write) ⇒
+    ///    copy §5's existing "back in Standard" line, naming that device;
+    /// 5. otherwise ⇒ Replace All Keys' Done — never a Castle claim.
+    /// (`.leaveCastle` never reaches a Done: its road ends at `.leftCastle`.)
+    static func ceremonyDoneBody(act: CeremonyAct, outcome: PostureSwitchRunner.Outcome?) -> String {
+        guard let outcome else {
+            if act.isFollow { return followDoneBody }
+            return act.entersCastle ? enteredCastleDone : replaceKeysDone
+        }
+        if outcome.followedAnotherDevicesSwitch {
+            return outcome.entersCastle
+                ? enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
+                : keysReplacedAfterAnotherDevice(device: outcome.otherDeviceName)
+        }
+        if act.isFollow { return followDoneBody }
+        if outcome.entersCastle { return castleDoneBody(outcome) }
+        if act == .enterCastle {
+            return followMovedToStandard(
+                device: outcome.otherDeviceName ?? anotherDevice, day: day(from: outcome.otherDeviceDay))
+        }
+        return replaceKeysDone
+    }
 }
