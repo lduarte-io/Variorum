@@ -1763,9 +1763,12 @@ the other's work.
 - *Convergence suites:* zero `Sync/` lines; the only convergence-suite reds are W-1's,
   bisect-traced to bf44f53f (piece 5).
 - *Fences:* zero Migrations (marker 12) · zero Sync/ · real store and Air fixture untouched.
-- **PENDING(stage): the Mac suite's GREEN run (4/4)** — flips this banner final when the
-  orchestrator runs `-only-testing:VariorumTests/VX80CastleFollowRecoveryTests` on the fixed
-  tree.
+- **DONE: the Mac suite's GREEN run — 4 tests in 1 suite PASSED** (the orchestrator, under the
+  author hold, 2026-10-07 ~22:30, `-only-testing:VariorumTests/VX80CastleFollowRecoveryTests`
+  on the fixed tree; the RED on old ran at 21:58). The piece-5 W-1 fallout (the two
+  hot-WAL-premise pins) adjudicated by the orchestrator at 36615337 — W-1 stands, the pins'
+  premises updated; full core then 2338/269 + 40/6 GREEN. **VX-80 BUILT — FINAL.** Its cold
+  review rides the phase's post-walk review round.
 
 ### WALK FINDING W-2 (MAJOR; found live after W-1's fix let the adoption act)
 
