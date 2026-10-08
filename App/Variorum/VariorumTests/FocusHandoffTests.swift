@@ -80,6 +80,18 @@ func withEditorWorld<T>(
     posts: [[String]],
     _ body: @MainActor (EditorWorldHarness) async throws -> T
 ) async throws -> T {
+    // 13s closeout — the same block `withEditor` carries (its comment has
+    // the trace): process-fresh typography, restored as found, and the
+    // store carries the Terminal voice row so any in-test adoption keeps
+    // the voice every measurement here was calibrated against.
+    let foundTypography = EditorTypography.current
+    let foundAdopted = EditorTypography.isAdopted
+    defer {
+        EditorTypography.current = foundTypography
+        EditorTypography.isAdopted = foundAdopted
+    }
+    EditorTypography.current = EditorTypography.resolve(voice: .terminal, inlineComments: false)
+    EditorTypography.isAdopted = false
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
     let tick = LockIsolated(0)
@@ -96,6 +108,7 @@ func withEditorWorld<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
     } operation: { @MainActor in
         let session = AppSession(database: db)
+        try session.operations.setThemeVoice(.terminal)
         var postIDs: [String] = []
         for (i, blocks) in posts.enumerated() {
             let post = try session.operations.createPost(title: "P\(i)")

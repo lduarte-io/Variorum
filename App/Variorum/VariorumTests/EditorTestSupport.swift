@@ -143,6 +143,34 @@ struct EditorHarness {
 /// test that wants the far side of the window passes its own date.
 let harnessNow = Date(timeIntervalSince1970: 1_782_864_000 + 3_600)
 
+/// 13s closeout — the Study-default harness class as a NAMED PIN, for
+/// harnesses that cannot route through `withEditor` (a suite's own session
+/// helper; a pure-board test whose layout math reads `EditorDocument.baseFont`
+/// through a computed property). Same mechanism as the factory block below:
+/// save the process typography globals, begin process-fresh Terminal — the
+/// state every calibrated constant assumed pre-13s — and `restore()`, always
+/// in the caller's `defer`, puts them back as found. A harness that also
+/// opens a store should pair this with `setThemeVoice(.terminal)` so any
+/// in-test adoption keeps the calibrated voice.
+@MainActor
+struct TerminalMetricsPin {
+    private let typography: EditorTypography.Resolved
+    private let adopted: Bool
+
+    init() {
+        typography = EditorTypography.current
+        adopted = EditorTypography.isAdopted
+        EditorTypography.current = EditorTypography.resolve(
+            voice: .terminal, inlineComments: false)
+        EditorTypography.isAdopted = false
+    }
+
+    func restore() {
+        EditorTypography.current = typography
+        EditorTypography.isAdopted = adopted
+    }
+}
+
 @MainActor
 func withEditor<T>(
     profile: Profile? = nil,
