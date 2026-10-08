@@ -238,6 +238,9 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   **"Test run with 2346 tests in 270 suites passed" + "40 tests in 6 suites passed"** (the 13x closeout's own
   baseline numbers); skips only the standing env-gated set (13o's gated measurement suites, the real-server pass,
   the fixture minters).
+- The phone COMPILE: DONE — `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+  build` into a scratch DerivedData: **BUILD SUCCEEDED** (`Shared/PostureSwitch.swift` compiles there; the
+  changed signatures are private to the runner). No simulator run.
 - The PRE-EXISTING proof: DONE — main's exact code (`origin/main` c71d7f68: its `PostureSwitch.swift` + its
   `PostureSwitchTests.swift` swapped in, `git diff --stat origin/main -- App Sources` EMPTY, built) under the same
   slot: **"Test run with 46 tests in 1 suite failed … with 2 issues"** — the same two tests at main's own lines
