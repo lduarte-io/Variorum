@@ -1251,8 +1251,15 @@ extension BookOutlineLandingTests {
     /// width-matched memory mounts its surfaces WHEN SHE SETS OUT — the
     /// old gate never mounts them at all on this road.
     @Test func focusingAFarExpandedStoryMountsItsSurfacesWithoutWaitingForTheViewport() async throws {
-        try await withLandingBook(posts: 40, longAt: [30], chapters: false) { session, db, readingID, postIDs, _ in
-            let storyID = postIDs[30]
+        // 80 cards with the story at 70: the row must start BEYOND the near
+        // BAND, not merely below the fold — `NearBand` makes a row near
+        // whenever its top is within margin+margin (~5,000 pt), and this
+        // pin's first cut staged the story at ~3,300 pt, where the ordinary
+        // near road mounted it on BOTH trees and the pin was hollow (the
+        // slot-2 revert run caught it green; the premise had only asked for
+        // below-the-fold).
+        try await withLandingBook(posts: 80, longAt: [70], chapters: false) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[70]
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
@@ -1276,10 +1283,13 @@ extension BookOutlineLandingTests {
             // realization, at THIS width (the StableSurface write road).
             model.rememberSurfaceSize(
                 storyID, CGSize(width: model.outlineContentWidth, height: 16000))
-            // The premise: the story is far below the fold, and nothing of
-            // it is mounted (its text is in no text view in the tree).
+            // The premise: the story starts BEYOND the near band (top ≥
+            // margin + margin — `NearBand.decide` can then never flip it
+            // near without a scroll), and after quiet turns for any flip
+            // that would dispute that, nothing of it is mounted.
             let top = try #require(anchorTop(BookOutlineRows.Row.noteAnchor(storyID)))
-            #expect(top > landingWindowHeight, "the story starts far below the fold: \(Int(top))")
+            #expect(top > 5200, "the story starts beyond the near band: \(Int(top))")
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 10)
             func storyMounted() -> Bool {
                 var found = false
                 func walk(_ v: NSView) {
