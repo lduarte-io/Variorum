@@ -759,7 +759,9 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   **REVERT V99-G (named before it runs):** on the tip, (1) the discriminator → round 1's (`guard marker.step == .vaultWrite,
   vaultKeyID != material?.corpusKeyID else { return false }` FIRST, then the stamp); (2) `roadEntersCastle = byAnotherDevice
   ? vaultSaysCastle : entersCastle`; (3) the arm's `accountPosture:` argument → nil. Expected RED: S1, S2, the rewritten
-  marker, the follow's own marker, custody by the account; everything else green.
+  marker, the follow's own marker, custody by the account; everything else green. **RESULT (06:15): "Test run with 65 tests in
+  1 suite failed … with 19 issues"** — S1 7 · S2 6 · the rewritten marker 2 · the follow's own marker 3 · custody by the
+  account 1, at the red run's own lines; nothing else. Restored, `git diff` clean.
 - F4 fix: DONE — `runCeremony`: `guard enrolled || entersCastle else { throw .replaceKeysNeedsSync }` right after the
   enrolled reading, before the derive, the pause and any write; the model words it with the switches' offline line
   (`serverUnreachable`, hoisted from the URLError arm). Use Castle's local-only road untouched. Green PENDING.
