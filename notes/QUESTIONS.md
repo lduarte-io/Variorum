@@ -2323,9 +2323,11 @@ one-device account); Replace All Keys refuses its local-only road (decision 9). 
 re-voices):** `resumeReplacingKeysBody` — "Replacing your keys didn't finish on this Mac — sync is paused until it completes.
 Nothing is lost; finishing picks up exactly where it stopped." · `keysReplacedAfterAnotherDevice` — ledger 61's family when the
 other device REPLACED keys rather than entering Castle ("Another device replaced your keys first … the twelve words shown here
-are not your account's …"). **(c) Kept as the shipped words, one residual for 13s:** a `switchInProgress` refusal at the
-runner's busy guard (another road already running, no marker to read) still says "Entering Castle didn't finish" — false
-there; an honest sentence would be new copy. **(d) Round 4 not run (the cap):** round 3's two fixes (the S2 Done no longer
+are not your account's …"), the twin of the shipped `enteredCastleAfterAnotherDevice` (both re-voice together; the shipped
+one's shouty "NOT" was lowercased at the post-merge review). **(c) Kept as the shipped words, one residual for 13s:** a
+`switchInProgress` refusal at the runner's busy guard (another road already running — including mid-RESUME, when a marker
+DOES exist but the synchronous `busy` guard cannot read it) still says "Entering Castle didn't finish" — false there; an
+honest sentence would be new copy. **(d) Round 4 not run (the cap):** round 3's two fixes (the S2 Done no longer
 claims her words are not the account's; a resume into Standard leaves custody to the ready's announced follow) were verified
 by the orchestrator's own read of the delta + red-on-old pins + named reverts, not by a fourth cold review — yours to order
 before anything builds on it. **(e) Tickets minted from the ladder:** VX-106 (two PostureSwitchTests red on main since 13x —
