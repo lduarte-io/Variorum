@@ -17,8 +17,9 @@ Reading of the words (to verify at reproduction, not to build on): the flash is 
 - **DONE** — walk preparation: Debug build GREEN (`App/Variorum/DerivedData/vx75/Build/Products/Debug/Variorum.app` in the worktree; log `DerivedData/vx75-build.log`); WalkKit helpers compiled (`/tmp/walk-cap`, `/tmp/walk-scroll`, `Tools/WalkKit/wl2`); terminal host holds BOTH grants (AX true · SCREEN true, probed); zero Variorum instances running; ffmpeg + cliclick present. Capture plan: `screencapture -v -V 6` around the first prose click, frames out via ffmpeg, artifacts under the gitignored `DerivedData/vx75-walk/`.
 - **DONE** — the PROBE PIN written (speculative-finding road: pin FIRST as the confirm): `BookOutlineLandingTests.theFirstClickIntoEditingHoldsTheColumnSteady` — expands a story read-cheap, settles, then `focus(storyID, caret: 120)` (the prose click's exact call) and SAMPLES the `BookOutlineGeometry` oracles every settle turn: max neighbour top-shift (tolerance 150 pt — legit read↔live inset drift is ≤ ~48), the focused row's height floor (> pre − 200), and no witness anchor de-realizing mid-swap. RED ⇒ the column-geometry class is confirmed; GREEN ⇒ the column is acquitted in-harness and the walk's frames adjudicate a window-level class. `build-for-testing` compiling headlessly (`DerivedData/vx75-bft.log`).
 - **DONE** — reproduction walk (frames), mechanism traced, red-on-old pin, fix, behavioral revert (RED→GREEN), fixed-build walk (no blank frame), regression run (30 suites; the only reds are VX-77's, pre-existing).
-- **DONE** — ladder round 1: findings + dispositions + the reviewer's final call recorded (0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT; zero confirmed code fixes — R1-1 hollow record-only, R1-2 dismissed on recheck, R1-3 fixed, R1-4 ticketed).
-- **NOT-STARTED** — PR `VX-75: …` (merge commit) after the ladder.
+- **DONE** — ladder round 1 closed (0 BLOCKER · 0 MAJOR; R1-1 hollow record-only, R1-2 dismissed on recheck, R1-3 fixed, R1-4 ticketed as **VX-82**); no code fix owed ⇒ no round 2.
+- **DONE** — latest main merged into the branch (clean; main's own edits to `BookView.swift`/`EditorView.swift` merged without conflict) and re-verified on the merged tree: 41 tests in 11 suites green, both VX-75 pins holding (`DerivedData/vx75-postmerge.log`).
+- **IN-PROGRESS** — PR `VX-75: …` (merge commit) at her standing go (2026-10-07: "go ahead and merge it when you've finished the fix / review").
 
 ## The walk runbook (one stage claim covers both acts)
 
@@ -106,3 +107,11 @@ Dev store, Debug build (`io.lduarte.Variorum.debug`), under a held `Tools/stage`
 - **R1-4 — CONFIRMED.** The mechanism paragraph now names both directions; the ticket mint is the orchestrator's.
 
 **Zero confirmed code fixes ⇒ no fix pass, no suite run owed (no code changed since the green pin run); the diff under review stands as reviewed.** Next: the implementer's sanity pass over the round's record edits, then the PR.
+
+## Closeout
+
+- **Mobile parity:** nothing mobile-visible (the book Outline is a Mac surface; the phone has no read→live view swap of this shape).
+- **Canon:** no AppSpec/OverallModel delta — a rendering fix inside the shipped contract (P3's one live editor unchanged).
+- **Tickets:** VX-75 closes with the PR; **VX-82** (the inverse live→read beat) filed to 12 — Hardening; VX-77 carries the pre-existing column-floor reds (the navigator sibling added by comment).
+- **Install refresh — HELD FOR HER:** the `/Applications/Variorum.app` refresh needs a zero-instance window, and her real-store instance was RUNNING at merge time (pid seen 2026-10-07 evening). Never quit by a session; the refresh waits for her next closed-app window (A1 safety copy → Release build → copy → codesign verify).
+- **Process note for the skills (her question at kickoff):** the phase skills' argument grammar doesn't say what to do when the argument DESCRIBES a bug with no ticket yet — the session minted the VX ticket first (CLAUDE.md's "fixes are VX tickets" makes it the only coherent reading). A one-line addition was offered to her, not made.
