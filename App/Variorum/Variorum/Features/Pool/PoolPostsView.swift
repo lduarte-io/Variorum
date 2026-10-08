@@ -448,6 +448,8 @@ struct PoolPostsView: View {
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                 .help("Into a book — the pool's whole point. Search opens; finished books say so.")
+                // 13s-b U2: the leg's third stop ("Click into add to book").
+                .tourAnchor(.poolAddToBook(item.postID), cornerRadius: 6)
             }
         }
         .contentShape(Rectangle())

@@ -597,9 +597,27 @@ struct SidebarView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                // 13s-b U2: each place is a door the tour can point at (step
+                // 10's "Bookcase in the sidebar heads home", and the road back
+                // whenever she wanders off).
+                .tourAnchor(.sidebarArea(Self.tourArea(area.destination)), cornerRadius: 6)
             }
         }
+        // 13s-b U2: step 1 rings the five places as one group.
+        .tourAnchor(.sidebarAreas)
         .padding(.horizontal, Self.groupPadding)
+    }
+
+    /// 13s-b U2: a place's name in the tour's vocabulary (the five areas
+    /// only — the table above is all this is ever asked about).
+    static func tourArea(_ destination: SidebarSelection) -> Tour.Area {
+        switch destination {
+        case .library: .library
+        case .poolPosts: .pool
+        case .blocks: .snippets
+        case .archived: .archived
+        default: .bookcase
+        }
     }
 
     // MARK: - "this note" — the mode rail (batch 14's ruling)
@@ -652,6 +670,8 @@ struct SidebarView: View {
                     }
                     .buttonStyle(.plain)
                     .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
+                    // 13s-b U2: step 8 points at Lenses; steps 4–5 at Write.
+                    .tourAnchor(.sidebarMode(TourPlaces.mode(m)), cornerRadius: 6)
                 }
             }
             .padding(.horizontal, Self.groupPadding)
@@ -810,6 +830,10 @@ struct SidebarView: View {
         }
         #endif
         .onTapGesture { selection = destination }
+        // 13s-b U2: the leg's first stop points at her note's row (its
+        // right-click carries Star). Inside the strip's own scroll, so the
+        // ring sits on the row's edge rather than outside it.
+        .tourAnchor(.sidebarOpenRow(noteID), cornerRadius: 6, outset: 0)
         .draggable(OpenNoteDragToken(noteID: noteID))
         .dropDestination(for: OpenNoteDragToken.self) { tokens, _ in
             guard let dragged = tokens.first?.noteID, dragged != noteID,

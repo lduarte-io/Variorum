@@ -371,6 +371,12 @@ struct BlocksAreaView: View {
                 LazyVStack(alignment: .leading, spacing: 6) {
                     ForEach(filtered, id: \.block.blockID) { item in
                         card(area, item)
+                            // 13s-b U2: the leg's last stop points at the
+                            // first snippet the area shows.
+                            .tourAnchor(
+                                item.block.blockID == filtered.first?.block.blockID
+                                    ? .firstSnippetCard : nil,
+                                cornerRadius: 9)
                     }
                     if filtered.isEmpty {
                         // An empty SCOPE with no filters typed is an empty

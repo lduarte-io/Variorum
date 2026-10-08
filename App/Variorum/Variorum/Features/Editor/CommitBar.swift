@@ -593,6 +593,9 @@ struct CommitBar: View {
     private var takesDoor: some View {
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
+            // 13s-b U2: step 5 points here first ("Click Takes in the bottom
+            // bar"). Chrome, never the text: the ring is the button's.
+            .tourAnchor(.barTakes, cornerRadius: 5)
     }
 
     private var commitDoor: some View {

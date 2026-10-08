@@ -671,6 +671,9 @@ struct ShelfView: View {
                 }
             }
             .buttonStyle(.plain)
+            // 13s-b U2: step 2 points at the seeded book's row, the leg's end
+            // at the field guide's (and step 3's road back into the book).
+            .tourAnchor(.bookcaseRow(reading.id))
             .overlay(alignment: .top) {
                 // My order's insertion hairline: the dragged book lands HERE.
                 if placing, rowDropTarget == reading.id {

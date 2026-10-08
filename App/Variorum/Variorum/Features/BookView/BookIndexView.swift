@@ -919,6 +919,9 @@ struct BookIndexView<Masthead: View>: View {
                 select(entry.postID, scrollPane: true)
             },
             menu: { AnyView(chapterFilingMenu(entry.postID)) })
+            // 13s-b U2: step 9 points at the note she climbed with, selected
+            // here. Inside the column's own scroll: the ring sits on its edge.
+            .tourAnchor(.indexNoteRow(entry.postID), cornerRadius: 6, outset: 0)
             .id("bix-\(entry.postID)")
     }
 

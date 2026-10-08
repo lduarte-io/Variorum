@@ -590,6 +590,18 @@ struct BookView: View {
         }
         .buttonStyle(.plain)
         .help(modeHelp(mode))
+        // 13s-b U2: step 9's climb ends on the Index tab.
+        .tourAnchor(.bookModeTab(Self.tourMode(mode)), cornerRadius: 5)
+    }
+
+    /// 13s-b U2: a book mode in the tour's vocabulary.
+    static func tourMode(_ mode: BookStructureModel.ViewMode) -> Tour.BookMode {
+        switch mode {
+        case .outline: .outline
+        case .index: .index
+        case .spread: .book
+        case .read: .read
+        }
     }
 
     private func modeHelp(_ mode: BookStructureModel.ViewMode) -> String {
@@ -2673,6 +2685,9 @@ private struct OutlinePostRow: View {
         .help(OwnershipBadgeCopy.rowHelp(
             "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+        // 13s-b U2: step 3 points at the first story's card (the card's body
+        // IS the door into the note's own page).
+        .tourAnchor(.outlineCard(entry.postID), cornerRadius: 10)
     }
 }
 

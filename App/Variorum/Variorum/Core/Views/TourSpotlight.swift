@@ -136,7 +136,10 @@ struct TourRing: View {
 /// starting or ending a tour can never re-create a door's own state (a focused
 /// field, a live editor).
 private struct TourAnchorModifier: ViewModifier {
-    let anchor: Tour.Anchor
+    /// nil: this door is not a tour anchor right now (a list whose FIRST row
+    /// is the anchor passes nil for the rest — the modifier stays the same,
+    /// so a row moving to the top never changes its structure).
+    let anchor: Tour.Anchor?
     let cornerRadius: CGFloat
     let outset: CGFloat
 
@@ -144,21 +147,27 @@ private struct TourAnchorModifier: ViewModifier {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    /// Which spotlight this door registered with (a restarted tour is a new
-    /// one; the old one is gone with its window's engine).
-    @State private var registered: ObjectIdentifier?
+    /// Which spotlight this door registered with, and as which anchor (a
+    /// restarted tour is a new spotlight; the old one is gone with its
+    /// window's engine).
+    @State private var registered: Registration?
+
+    private struct Registration: Equatable {
+        let spotlight: ObjectIdentifier
+        let anchor: Tour.Anchor
+    }
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    private var lit: Bool { spotlight?.isLit(anchor) ?? false }
+    private var lit: Bool { anchor.map { spotlight?.isLit($0) ?? false } ?? false }
 
     func body(content: Content) -> some View {
         content
             .overlay {
                 ZStack {
-                    if lit, let spotlight {
+                    if lit, let spotlight, let anchor {
                         TourRing(tokens: tokens, cornerRadius: cornerRadius, outset: outset)
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 frame in spotlight.report(frame, for: anchor)
@@ -180,18 +189,23 @@ private struct TourAnchorModifier: ViewModifier {
                 unregister()
                 register()
             }
+            .onChange(of: anchor) { _, _ in
+                // The door now names another anchor (or none).
+                unregister()
+                register()
+            }
     }
 
     private func register() {
-        guard let spotlight, registered == nil else { return }
+        guard let spotlight, let anchor, registered == nil else { return }
         spotlight.arrive(anchor)
-        registered = ObjectIdentifier(spotlight)
+        registered = Registration(spotlight: ObjectIdentifier(spotlight), anchor: anchor)
     }
 
     private func unregister() {
         guard let registered else { return }
-        if let spotlight, ObjectIdentifier(spotlight) == registered {
-            spotlight.depart(anchor)
+        if let spotlight, ObjectIdentifier(spotlight) == registered.spotlight {
+            spotlight.depart(registered.anchor)
         }
         self.registered = nil
     }
@@ -202,7 +216,7 @@ extension View {
     /// tour. `outset` and `cornerRadius` shape the ring to the door (a row's
     /// soft corners, a word's tight ones).
     func tourAnchor(
-        _ anchor: Tour.Anchor,
+        _ anchor: Tour.Anchor?,
         cornerRadius: CGFloat = TourRing.cornerRadius,
         outset: CGFloat = TourRing.outset
     ) -> some View {

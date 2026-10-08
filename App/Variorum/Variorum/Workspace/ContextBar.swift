@@ -246,6 +246,8 @@ struct ContextBar: View {
         .buttonStyle(.plain)
         .disabled(!bookEnabled)
         .help(WorkspaceNaming.ascentHelp(topBook: books.first?.name, count: books.count))
+        // 13s-b U2: step 9's climb, and step 10's way back up.
+        .tourAnchor(.contextBarBook, cornerRadius: 5)
         .popover(isPresented: $listingBooks, arrowEdge: .bottom) { bookList }
     }
 

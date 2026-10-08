@@ -110,6 +110,8 @@ struct WriteTakesPanel: View {
                     dismiss()
                 }
                 .help("The full board — every block's takes at once (⌘2)")
+                // 13s-b U2: step 6's second half ("then Open Takes mode").
+                .tourAnchor(.panelOpenTakesMode, cornerRadius: 6)
                 Button("Close") { dismiss() }
             }
             if model.isJournalShaped {
@@ -274,6 +276,8 @@ struct WriteTakesPanel: View {
             }
             .disabled(slot.variantID == nil)
             .help("A new take that starts as a copy of what's shown (⌘T)")
+            // 13s-b U2: step 5's door, once the panel is up.
+            .tourAnchor(.panelNewTake, cornerRadius: 5)
             Text("·").foregroundStyle(tokens.faint)
             Button("＋ blank take") {
                 Task {
