@@ -48,9 +48,9 @@ nonisolated enum TourOfferCopy {
     /// The small V's image asset — the ONE mark About draws too (piece 4;
     /// `notes/brand/tools/appicon.py` writes it; `AppMarkTests` pins it).
     static let markAssetName = "VariorumMark"
-    /// **U1a STUB — U2 replaces it.** The tour door's honest answer while the
-    /// engine does not exist yet: a door that did nothing says so (18i).
-    static let stubRefusal = "The tour isn't in this build yet."
+    // (U1a's `stubRefusal` — "The tour isn't in this build yet." — retired at
+    // 13s-b U2 with the stub it spoke for: `RootView.startTour()` runs the
+    // tour now. P-U1a-5 closes with it.)
 }
 
 /// **The offer's model: the device's one record, the phase, the timer.**

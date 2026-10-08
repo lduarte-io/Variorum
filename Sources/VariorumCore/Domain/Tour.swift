@@ -294,12 +294,12 @@ public enum Tour {
     public static func start(
         seededBookID: String?, firstStoryID: String?, fieldGuideID: String?,
         facts: Facts = .unknown
-    ) -> Outcome {
+    ) -> (state: State, effects: [Effect]) {
         let state = State(
             seededBookID: seededBookID, firstStoryID: firstStoryID,
             fieldGuideID: fieldGuideID, facts: facts)
         let effects: [Effect] = facts.place == .area(.bookcase) ? [] : [.navigate(.area(.bookcase))]
-        return Outcome(state: state, effects: effects)
+        return (state, effects)
     }
 
     /// The whole rule.

@@ -70,6 +70,10 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
+    /// 13s-b U2 — THE TOUR, while one runs in THIS window (nil otherwise).
+    /// Per window by construction (`RootView` is the window); born at
+    /// `startTour()`, dropped when the tour finishes or ends.
+    @State private var tour: TourEngine?
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -238,6 +242,10 @@ struct RootView: View {
         // band's only content away; `.ignoresSafeArea` above takes the band
         // itself. A TRY, per her word — one modifier to put back.
         .toolbar(removing: .title)
+        // 13s-b U2 — the tour's cards over the whole window (never a dim —
+        // R-13s-12) and its spotlight in every door's environment (nil, and
+        // so inert, whenever no tour runs).
+        .tourLayer(tour, sources: tourSources)
         .environment(theme)
         // 13i-d U6 (k): the shared wings model reaches the note ▾ menus (both
         // bars render the cross-wing doors) without threading it through
@@ -815,15 +823,85 @@ struct RootView: View {
     }
 
     /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
-    /// Tour (piece 5, through `router.tourRequested`). **U1a STUB — U2 replaces the body with the coach-mark
-    /// engine** (mockup v5, step 1; the engine reports its end through
-    /// `TourOfferModel.tourEnded(completed:)`, which retires the offer). Until
-    /// then the line steps aside for this session (nothing is remembered, so
-    /// the next launch offers again) and the door SAYS it did nothing — a door
-    /// that did nothing speaks (18i).
+    /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
+    /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
+    /// resume), on the Bookcase, and it releases the window's first
+    /// responder first (the U1a walk's W-U1a-1: "yes" left the caret in the
+    /// quick entry, where a keystroke would mint a note). The line steps
+    /// aside now; the engine retires it at the end
+    /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
+    /// ended by End tour before it, nothing at all if the app quits mid-way).
     private func startTour() {
         tourOffer?.tourStarted()
-        session.status.refuse(TourOfferCopy.stubRefusal)
+        windows.window(for: windowID)?.makeFirstResponder(nil)
+        let session = session
+        let place = TourPlaces.place(router.workspace.focusedSelection)
+        let doors = tourDoors
+        Task {
+            let landmarks = await TourEngine.landmarks(session: session)
+            tour = TourEngine(
+                session: session, landmarks: landmarks, facts: Tour.Facts(place: place),
+                doors: doors)
+        }
+    }
+
+    /// What the tour's effects DO in this window — the shell's own roads.
+    private var tourDoors: TourEngine.Doors {
+        TourEngine.Doors(
+            navigate: { place in
+                guard let destination = TourPlaces.selection(place),
+                      router.workspace.focusedSelection != destination
+                else { return }
+                adopt(destination, in: router.workspace.focusedPane)
+            },
+            openFieldGuide: {
+                ShellActions(session: session, shell: router).openTutorial()
+            },
+            recordCompleted: { tourOffer?.tourEnded(completed: true) },
+            finished: { completed in
+                tourOffer?.tourEnded(completed: completed)
+                tour = nil
+            })
+    }
+
+    /// The window's facts, as readers the tour's overlay evaluates in ITS
+    /// body (so the caret's observation never lands on this shell's — the
+    /// note box's MAJOR-1 lesson). The caret reading is composed HERE: the
+    /// editor's model is a sibling feature's, and only the composition root
+    /// reads it, handing the tour plain values.
+    private var tourSources: TourFactSources {
+        let router = router
+        let session = session
+        let stars = stars
+        let bookNoteLive = tourBookNoteLive
+        return TourFactSources(
+            selection: { router.workspace.focusedSelection },
+            noteDetail: {
+                (session.commandRouter.activePostID, session.commandRouter.activeMode)
+            },
+            caret: {
+                guard let editor = session.editorRouter.editing else { return nil }
+                return TourCaretReading(
+                    postID: editor.postID,
+                    blockID: editor.caretBlockID,
+                    ordinal: editor.caretOrdinal,
+                    takeCounts: Dictionary(
+                        editor.badges.map { ($0.blockID, $0.variantCount) },
+                        uniquingKeysWith: { max($0, $1) }),
+                    panelBlockID: editor.fanPanel?.blockID)
+            },
+            bookNoteLive: { bookNoteLive },
+            isStarred: { stars.isStarred(.post($0)) })
+    }
+
+    /// Whether the focused pane's BOOK has its note box live — the "edit
+    /// here" door took (the same gate `noteBoxView` draws the box by).
+    private var tourBookNoteLive: Bool {
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane],
+              let report = noteBoxReport, report.readingID == showing
+        else { return false }
+        return report.state.isLive
     }
 
     /// The pane seam's family in the shared oracle.
@@ -1186,6 +1264,20 @@ struct RootView: View {
 // adopt this channel in about five lines.
 
 private extension View {
+    /// **13s-b U2 — the tour's layer**: its cards over the whole window and
+    /// its spotlight in every door's environment. Its own function for the
+    /// confirm's reason below (the body's expression is at the type
+    /// checker's budget). With no tour, the spotlight is nil — every
+    /// `.tourAnchor` in the app is inert — and there is no overlay at all.
+    func tourLayer(_ tour: TourEngine?, sources: TourFactSources) -> some View {
+        overlay {
+            if let tour {
+                TourOverlay(engine: tour, sources: sources)
+            }
+        }
+        .environment(tour?.spotlight)
+    }
+
     /// Hosts whatever the shell is asking. Its own function for a mundane
     /// reason worth recording: inlined in `RootView.body` the presenting
     /// `.alert` pushed that already-enormous expression past the type
