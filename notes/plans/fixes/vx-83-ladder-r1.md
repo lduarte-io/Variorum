@@ -220,3 +220,29 @@ suites — `LibrarySearchCommitsFacetTests` · `LibraryTagListingTests` · `Libr
 `ChromeLineLimitTests` — green, zero skipped; (2) the NIT-1 ANNOUNCED GATE REVERT (above);
 (3) record the results here. Then the implementer sanity pass over the fix diff
 (`dd572d82..HEAD`'s code commits), then round 2 with a FRESH reviewer.
+
+## THE SLOT (2026-10-08 02:32–02:35 — oct7coordinator's GO; claimed `searchfollowup`, released;
+no Variorum instance at any point, checked by path; `/Applications` untouched)
+
+1. **The 13 touched Mac suites on HEAD** (`test-without-building` on the pre-slot
+   `build-for-testing`): **91 tests in 13 suites PASSED, ZERO skipped, TEST EXECUTE SUCCEEDED**
+   — `LibrarySearchCommitsFacetTests` (the 4 incl. the new armed-chip cells) ·
+   `LibraryTagListingTests` (incl. the extended facet-toggled blocks cells) ·
+   `LibraryWhenDoorTests` · `LibraryWhenRangeTests` · `LibraryDayFilterTests` ·
+   `LibrarySearchFaceTests` · `LibrarySearchStateTests` · `LibrarySearchJoinTests` ·
+   `LibrarySearchArchivedTests` · `LibrarySearchLandingTests` · `LibraryRowAlignmentTests` ·
+   `LibraryListFaceTests` · `ChromeLineLimitTests`.
+2. **The NIT-1 ANNOUNCED GATE REVERT (everything committed first):** `showsArmedCommits`'s body
+   short-circuited to the OLD gate's meaning (`armed && question?.hasWords == true`), rebuilt,
+   `LibrarySearchCommitsFacetTests` run → **RED, 1 issue, exactly the armed-under-tag-alone cell**
+   (`Expectation failed: LibrarySearchBand.showsArmedCommits(tagAlone, armed: true)`,
+   LibrarySearchCommitsFacetTests.swift:129). Restored by `git checkout HEAD --
+   …/LibrarySearchBand.swift`, rebuilt, re-run **4/4 GREEN**; `git status` CLEAN.
+3. Stage released 02:35; `oct7coordinator` messaged.
+
+**ROUND 1's FIX PASS IS COMPLETE.** Every confirmed finding landed with its evidence: the MINOR
+pin-before-fix red (1 issue) + post-commit revert re-verification; NIT-1's gate revert red (1
+issue) at the slot; NIT-2 no-pin-owed (structurally unreachable). Core 2,321/265 green at the
+end; the 13 touched Mac suites 91/13 zero-skipped at the slot. Next per the dispositions: one
+implementer SANITY PASS over the fix diff (`b41a7c4e` · `9e52a0eb` · `f9350c48` + this record),
+then ROUND 2 with a FRESH reviewer.
