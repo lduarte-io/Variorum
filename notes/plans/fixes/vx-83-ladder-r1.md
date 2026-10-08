@@ -246,3 +246,93 @@ issue) at the slot; NIT-2 no-pin-owed (structurally unreachable). Core 2,321/265
 end; the 13 touched Mac suites 91/13 zero-skipped at the slot. Next per the dispositions: one
 implementer SANITY PASS over the fix diff (`b41a7c4e` · `9e52a0eb` · `f9350c48` + this record),
 then ROUND 2 with a FRESH reviewer.
+
+---
+
+# ROUND 2 (fresh cold reviewer, 2026-10-08 — zero round-1 context by design)
+
+**Reviewer:** fable-reviewer ("searchfollowup R2 reviewer"), fresh session,
+`notes/REVIEW_PROMPT.md` run verbatim. **Subject (the ladder rule — round 2 re-reviews the
+fixes):** the round-1 fix diff — `b41a7c4e` (NIT-2) · `9e52a0eb` (NIT-1) · `f9350c48` (MINOR) —
+against this record's findings, dispositions and fix table, judged for correctness,
+completeness, pin honesty, and nothing-new. Read whole, in-session, never delegated: CLAUDE.md
++ its auto-loaded canon · this record whole · the run record
+`notes/plans/fixes/vx-83-search-followup.md` (the U-A record incl. §SEAM, the sitting rulings,
+the U-B/U-C close banners) · the three diffs file by file · the touched sites in today's full
+source (`LibraryWhenDoor.swift` + `LibraryWhenMonthGrid.swift`, `LibrarySearchBand.swift` +
+`LibrarySearchModel.swift` + `LibrarySearchRouting.swift` + `LibraryCatalogModel.read` +
+`LibraryCatalogView`'s band wiring, `TagListingQueries.swift` + `SearchComposer.
+listingNarrowing` + `CatalogHit` + `blockLine`/`CatalogArchivedMark`) · the new/extended pins
+by source. Headless only — no stage slot needed (the Mac evidence read from THE SLOT's
+recorded 91/13 zero-skipped run and the announced gate-revert table above).
+
+## Verdict: 0 BLOCKER · 0 MAJOR · 0 MINOR · 0 NIT — CLEAN BILL. No round 3.
+
+## What I verified, per fix (mechanisms traced myself)
+
+1. **NIT-2 (`b41a7c4e`) — correct, complete, honestly un-pinned.** The disposition's
+   correction is real: `LibraryWhenMonth(dayKey:)` is FAILABLE (`LibraryWhenMonthGrid.swift:47`)
+   so it could not close the `??` chain; the components init (`:40`) is total — it NORMALIZES
+   (`year*12 + month−1`), so no injected calendar could mint an invalid month. `calendar` and
+   `now` are the door's own properties, defaulting to `LibraryDayFace.calendar =
+   JournalDay.storeCalendar` — Gregorian in her zone (`JournalDay.swift:112–116`), the filter's
+   calendar as the disposition says. Structural unreachability re-traced: the press seeds
+   `month` via `openingState` before `shown = true` (`LibraryWhenDoor.swift:148–151`). No
+   dated-constant `LibraryWhenMonth(year:…)` remains in production (grepped; the only other
+   production call is `adding(months:)`, self-referential). No pin owed — round 1 classed the
+   finding clarity-class, and the guard's rule asks a written justification for those, which
+   the commit carries.
+2. **NIT-1 (`9e52a0eb`) — correct, complete, the gate-revert evidence honest.** The behavior
+   matrix is exactly the disposition's: words+armed → armed chip (unchanged) · words+unarmed →
+   invitation (unchanged) · tag-alone+armed → armed chip (THE FIX) · tag-alone+unarmed →
+   nothing (invitation stays words-only) · nil question → nothing (`showsArmedCommits` guards
+   on nil). The load-bearing disposition claim — "a day alone counts blank, so
+   armed-chip-with-only-a-day cannot arise" — VERIFIED in code, and it matters because the
+   band DOES render under a day alone with `question == nil`: `LibrarySearchQuestion.read`
+   returns nil on blank text regardless of an armed day (`LibrarySearchModel.swift:73`), and
+   `LibraryCatalogModel.read` calls `searchState.resetFacet()` exactly then
+   (`LibraryCatalogModel.swift:619`), which zeroes `includesSavepoints`
+   (`LibrarySearchModel.swift:294–298`) — so no hidden armed facet can survive into the
+   day-alone band, and even the transient pre-reset render is guarded by the nil-question arm.
+   The ✕ road with no words verified: `onToggleSavepoints` →
+   `toggleSavepointsFacet()` + `search()` (`LibraryCatalogView.swift:385–388`), and the
+   text-less roads never consult the flag, so the re-read is sound. Pin honesty: the four new
+   cells are real and the announced GATE REVERT is the right form for an added API (a file
+   revert would not compile; the body short-circuited to the old gate's MEANING flips exactly
+   the armed-under-tag-alone cell — the slot's table above records that exact 1-issue red at
+   LibrarySearchCommitsFacetTests.swift:129). The old cells pass on both sides BY DESIGN (the
+   invitation gate is unchanged) — not hollow, they pin the unchanged half.
+3. **MINOR (`f9350c48`) — correct, complete, pin re-verified red-on-old BY MY OWN REVERT.**
+   The one-rule claim is byte-exact: the SELECT's
+   `(c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL)` mirrors the narrowing's own
+   `archivedOnly` clause (`SearchComposer.swift:817`), and the living arm excludes both flags
+   (`:813`) so the fact is only ever true on facet-admitted rows. The column is non-null by
+   construction (0/1), the call site reads it explicitly (no default relied on), and
+   `CatalogHit.isArchived` stays false-defaulted for every other caller —
+   `catalogTaggedBlocks` has exactly ONE production caller (`LibraryCatalogModel.swift:733`,
+   the listing road that feeds `blockLine`), so no other surface is owed the fact. The face is
+   the note rows' exact idiom (mark after the home text, before the Spacer —
+   `LibraryCatalogView.swift:888–892`, the same `CatalogArchivedMark`). **Evidence re-run
+   myself (headless):** `SearchTagListingTests` + seam 12/12 GREEN at HEAD (11 tests pre-fix
+   in the file, 12 now — exactly the one new pin, matching 2,320 → 2,321); then the announced
+   revert probe — `git checkout f9350c48~1 -- Sources/VariorumCore/Queries/
+   TagListingQueries.swift`, the pin alone → **RED, 1 issue, exactly the fact assertion**
+   (`SearchTagListingTests.swift:250`, `isArchived == true` failed; entry/exclusion arms
+   green), restored by `git checkout HEAD --`, `git status` CLEAN. The record's pin table is
+   honest to the letter.
+
+## Nothing-new sweep
+
+The three diffs touch only the named files (diffstats read): zero
+`Sources/VariorumCore/Sync/`, zero editor seam (`EditorTextView`/`BlockRangeIndex`/
+`PaneSurface`/`PaneTextAuthority`), zero custody, zero schema, zero triggers; no default's
+meaning moved (the invitation's words-only PROVISIONAL stands as accepted; the armed chip's
+visibility is P-13o-U2-1's own letter, not a new rule). No contradicting pin exists (the old
+words-only cells pin the invitation, which did not move). The Mac-side evidence — the 13
+touched suites 91/13 zero-skipped incl. the extended `theBlocksScopeListsTheBlocksTheTagNames`
+and the gate revert — is THE SLOT's recorded run, read not re-run (test-only; no slot needed
+from this seat). Commit hygiene: no `Co-Authored-By`/`Claude-Session` trailers on any of the
+three commits; tree clean at `0e5d33cb`; no history rewrites.
+
+**ROUND 2 CLOSES: 0 BLOCKER · 0 MAJOR · 0 MINOR · 0 NIT. The round-1 fixes stand as landed;
+the ladder earns no round 3.**
