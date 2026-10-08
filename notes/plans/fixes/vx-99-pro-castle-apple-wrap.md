@@ -1166,3 +1166,28 @@ MAJOR + MINORs — same-model, the orchestrator arbitrated), round 3 Opus 5.5 = 
 **Canon:** no AppSpec/SyncSpec delta (the fix makes the code honor pre-13x decisions 8, 9, 30, 32, 35 and §3.4 as already
 written). QUESTIONS #204 carries the bundle. MOBILE PARITY: PL-50. Tickets out: VX-106 · VX-107 · VX-108 · VX-109 · VX-110.
 The in-flight row retired at the merge. The author handoff: `notes/handoffs/vx-99-handoff.md`.
+
+## POST-MERGE REVIEW (2026-10-08 — her order, relayed by oct7coordinator: a fresh Fable read of everything VX-99 landed)
+
+**Why:** the last Fable read was round 1; round 2's resume-road fixes and round 3's delta (orchestrator-verified at the
+cap, QUESTIONS #204(d)) never had one. **Range:** `9819bff8^1..9819bff8` — exactly VX-99's landed diff (7 files,
++1760/−118). Her relayed range `c71d7f6..9819bff8` also spans VX-83's merge (44 files); the reviewer was given the exact
+VX-99 range. **Fable ran clean — no stall, no safeguard trip** (so no Opus fallback was needed). Report, unedited:
+`notes/plans/fixes/vx-99-post-merge-review.md`. **Result: 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT** — and it discharges
+#204(d): round 3's `ownWriteLanded` and `tighteningPosture` re-derived by hand and confirmed.
+
+**Dispositions (the orchestrator's, at her word "she trusts you to"):**
+- **NIT 1 (the shipped `enteredCastleAfterAnotherDevice` says "are NOT your account's" — shouty caps, against her standing
+  sentence-case rule) — FIXED NOW** on this branch: `PostureCopy.swift` lowercased, the two literal assertions in
+  `Phase13pProtectionBrainTests` updated (`PostureSwitchTests`' doc comment quoting the OLD output verbatim is left as the
+  historical quote it is). Copy only, no logic: no red-on-old pin applies (a case change is not a bug class); the evidence
+  is the suites green under a test-only slot (`vx-99-pmr`, zero instances): `ProtectionCopyTests` 10/10 (it holds
+  both changed assertions — the file is `Phase13pProtectionBrainTests.swift`, whose name is not a suite; a first
+  invocation by the file name executed 0 tests and was discarded, not counted), `ProtectionDialsTests` 9/9,
+  `PostureSwitchTests` 70/70. #204(b) now names both siblings.
+- **NIT 2 (#204(c)'s busy-arm "no marker exists" is half-true: mid-resume the marker exists, the `busy` guard just can't
+  read it) — #204(c) amended** so 13s's one sentence covers the marker-pending busy case too. No code.
+- **NIT 3 (the class-sweep rows' line numbers rotted) — recorded:** read those rows by SYMBOL (`writeNewKeyFile`,
+  `appleHeldCopyForStandard`, `resume`'s enrolled arm), never by line. No new obligation.
+No new tickets: every residual the reviewer re-traced already has an owner (VX-107 · VX-108 · VX-109 · VX-110 · round 3's
+recorded residuals). No `/Applications` refresh (her word); her 5740 differs from main by this one lowercase word only.

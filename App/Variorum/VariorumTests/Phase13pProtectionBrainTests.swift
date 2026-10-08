@@ -268,7 +268,7 @@ struct ProtectionCopyTests {
         // WHY — those are the words that device SHOWED when it entered
         // Castle ("like look at what you just put into Castle").
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
-                == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's: your account's words are the ones Lillian's iPhone showed when it entered Castle — those are the set to keep.")
+                == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are not your account's: your account's words are the ones Lillian's iPhone showed when it entered Castle — those are the set to keep.")
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil)
                 .hasSuffix("another device showed when it entered Castle — those are the set to keep."))
         #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
@@ -426,7 +426,7 @@ struct ProtectionCopyTests {
         // you just put into Castle". The device is named as the one that
         // SHOWED the account's words, not merely as an address.
         let done = ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
-        #expect(done.contains("are NOT your account's"))
+        #expect(done.contains("are not your account's"))
         #expect(done.contains("Lillian's iPhone showed when it entered Castle"))
         #expect(done.contains("the set to keep"))
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil)
