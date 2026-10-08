@@ -573,7 +573,10 @@ struct SampleLibraryWelcomeTests {
         // 13s-b U1b: the arrangement no longer makes the gathering or a
         // quick note, so the disclosure must not claim either (the same
         // MINOR-D3/D4 exact-scope rule, pointing the other way).
-        #expect(!detail.contains(SampleLibraryWelcome.classicsGatheringName),
+        // The window's first run corrected this ORACLE: the bare name is
+        // a substring of the KEPT #classics tag sentence two arms down —
+        // the absence arm narrows to the QUOTED gathering claim.
+        #expect(!detail.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"),
                 "it no longer claims the gathering")
         #expect(!detail.contains("quick note"), "…nor the quick note")
         #expect(detail.contains("#\(SampleLibrarySeeder.classicsTagPath)"),

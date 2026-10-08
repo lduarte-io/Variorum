@@ -190,7 +190,13 @@ enum ReadmeSeeder {
                             db, sql: "SELECT default_variant_id FROM block WHERE id = ?",
                             arguments: [blockID])
                     }) else { continue }
-                    for text in texts {
+                    // REVERSED on purpose (the window's first-run find):
+                    // `branchVariant` seats a branch right AFTER its
+                    // parent, so two branches of the one original land in
+                    // reverse mint order — minting take 2 first leaves the
+                    // stored fan [original, take 1, take 2], the
+                    // reference's own faithful order (R-13s-39).
+                    for text in texts.reversed() {
                         let minted = try ops.branchVariant(blockID, from: original)
                         try ops.autosave(minted.id, text: text, charDelta: text.count)
                     }

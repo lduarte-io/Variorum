@@ -296,8 +296,12 @@ struct LaunchFurnitureTests {
             #expect(!membered, "bookless — Pool/Library, no book")
             #expect(entryDate == nil && wing == "")
             // The DISPLAYED page is the five paragraphs, byte-exact (the
-            // chosen takes are the originals).
-            #expect(rendered == ReadmeSeeder.paragraphs.joined(separator: "\n"))
+            // chosen takes are the originals). The window's first run
+            // corrected this ORACLE: `renderedText` joins blocks with a
+            // BLANK line (`joinRenderedTexts`' separator — the page reads
+            // with paragraph breaks), not "\n"; the stored text was
+            // byte-exact all along.
+            #expect(rendered == ReadmeSeeder.paragraphs.joined(separator: "\n\n"))
             // The alternates are REAL takes on their ruled blocks, in fan
             // order after the chosen original, byte-exact.
             let fans = try await db.read { db -> [Int: [String]] in
