@@ -14,7 +14,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 |---|---|---|---|
 | 13x — Library portability | **VX-6** · `vx-6-13x-library-portability` | `~/dev/variorum-13x` · the Pro | OPEN — kicked off 2026-10-06; sitting complete, U1 building; Sync/-custody slot LENT to 13o at her word (R-13o-1 — 13o merges first, 13x's Sync half follows the rebase); VX-64 triaged in. Record: `notes/plans/phase-13x-library-portability.md` |
 | 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | `~/dev/variorum-13s` · the Pro (seat moved from the Air at kickoff — her launch words; she attaches from the Air) | OPEN — kicked off 2026-10-06; the ONBOARDING half (13s-b) runs first at her word, mockup-first per the intake; record: `notes/plans/phase-13s-voice-onboarding.md` |
-| VX-75 — book Outline first-edit flash | **VX-75** · `vx-75-book-outline-first-edit-flash` | `~/dev/variorum-vx-75` · the Pro | OPEN — kicked off 2026-10-06 (her report, same evening); single-ticket fix under the architect shape, Fable investigates+implements at her word, `fable-reviewer` cold review (editor-seam suspect: the book Outline read-tier → live-editor swap); surfaces: book Outline/Index mode + the pane/editor seam; ZERO `Sync/`. Record: `notes/plans/fixes/vx-75-book-outline-first-edit-flash.md` |
 
 ### Latest closeout
 
