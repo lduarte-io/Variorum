@@ -36,9 +36,9 @@ nonisolated enum LibrarySearchCopy {
         add(kinds.scraps, "scrap", "scraps")
         // VX-84a: a tag typed alone names BLOCKS by their own tags too.
         add(kinds.blocks, "block", "blocks")
-        // VX-72 (P-VX83-C3): under the commits facet the savepoints are said
+        // VX-72 (P-VX83-C3; R-VX83-10 — the counts wear her word too)
         // as their own kind, beside the living passages.
-        add(kinds.savepoints, "savepoint", "savepoints")
+        add(kinds.savepoints, "commit", "commits")
         return parts.isEmpty ? nothingFound : parts.joined(separator: " \u{00B7} ")
     }
 

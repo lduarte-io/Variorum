@@ -49,14 +49,16 @@ nonisolated enum SearchAnswerCopy {
         case .book: "book"
         case .chapter: "chapter"
         // VX-72: a saved state of a take (only under the commits facet) —
-        // its line also says its day (`savepoint(day:)`, P-VX83-C6).
-        case .savepoint: "savepoint"
+        // its line also says its day (`savepoint(day:)`, P-VX83-C6; the
+        // WORD is hers — R-VX83-10: "fix it to being commits").
+        case .savepoint: "commit"
         }
     }
 
-    /// **A savepoint line's word** (VX-72, P-VX83-C6): the kind and the day it
-    /// was saved — "savepoint · Oct 6".
-    static func savepoint(day: String) -> String { "savepoint \u{00B7} \(day)" }
+    /// **A savepoint line's word** (VX-72, P-VX83-C6; R-VX83-10 — her "fix it
+    /// to being commits": within search the rows wear the chip's word): the
+    /// kind and the day it was saved — "commit · Oct 6".
+    static func savepoint(day: String) -> String { "commit \u{00B7} \(day)" }
 
     /// An archived group's mark (only ever drawn under the facet) — and,
     /// since 13o U3, the badge an archived passage wears.
@@ -317,6 +319,13 @@ enum LibrarySearchFace {
               let saved = savedAt.flatMap({ DateFormatter.variorumISO8601.date(from: $0) })
         else { return word }
         return SearchAnswerCopy.savepoint(day: TimeStampFace.day(saved, now: now, calendar: calendar, locale: locale))
+    }
+
+    /// **The band's counts lead** (F-W-3, the VX-83 walk's W4 oddity): the
+    /// em-dash SEPARATES the counts from the query's echo — with no echo (a
+    /// tag alone) the counts lead bare, never a dash with nothing before it.
+    static func countsLead(_ words: String, afterEcho: Bool) -> String {
+        afterEcho ? "\u{2014} " + words : words
     }
 
     /// A take hit the note does not render (the mockup's badge).

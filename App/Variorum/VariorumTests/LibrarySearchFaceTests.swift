@@ -20,6 +20,15 @@ import VariorumCore
 @MainActor
 @Suite("13o U2 — the answer sheet's faces (the band's words, the marks, the badge)")
 struct LibrarySearchFaceTests {
+    // F-W-3 (the VX-83 walk's W4 oddity): the em-dash is the ECHO's
+    // separator — a tag alone leads with the counts bare.
+    @Test func theCountsLeadBareWithoutAnEcho() {
+        #expect(LibrarySearchFace.countsLead("1 book \u{00B7} 17 notes", afterEcho: false)
+                == "1 book \u{00B7} 17 notes")
+        #expect(LibrarySearchFace.countsLead("3 books \u{00B7} 29 notes", afterEcho: true)
+                == "\u{2014} 3 books \u{00B7} 29 notes")
+    }
+
     @Test func theCountsAreHonestPerKindAndLeaveOutWhatIsNotThere() {
         #expect(LibrarySearchCopy.counts(.init(books: 3, notes: 29, passages: 118, scraps: 6))
                 == "3 books \u{00B7} 29 notes \u{00B7} 118 passages \u{00B7} 6 scraps",

@@ -1866,7 +1866,7 @@ enum TutorialSeeder {
         // `#tutorial` alone, and the practice word — are walk-asserted (P-6).
         // VX-72 (U-B's rider, the same run's U-C): ONE sentence for the
         // `+ commits` facet (her word, R-VX83-9) — savepoint history joins
-        // the answer, each line marked "savepoint" with its day.
+        // the answer, each line marked "commit" with its day (R-VX83-10).
         _ = try lesson(library, searchLessonTitle, [
             "The search field at the top of the Library is the one place to look "
             + "for anything you wrote. Type words and it searches the TEXT itself: "
@@ -1920,7 +1920,7 @@ enum TutorialSeeder {
             + "press \u{201C}+ archived\u{201D} in the band, and that chip's "
             + "\u{2715} leaves them out again. What you saved is searchable the "
             + "same way: \u{201C}+ commits\u{201D} brings in the words your "
-            + "savepoints kept, each such line marked \u{201C}savepoint\u{201D} "
+            + "commits kept, each such line marked \u{201C}commit\u{201D} "
             + "with the day it was saved. Inside a book, the \u{1F50D} at the "
             + "right of the book's masthead searches that book alone \u{2014} the "
             + "same kind of answer, scoped to the book. And \u{2318}K finds "

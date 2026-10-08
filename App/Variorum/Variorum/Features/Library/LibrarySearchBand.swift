@@ -142,11 +142,14 @@ struct LibrarySearchBand: View {
 
     /// "— 3 books · 29 notes …" with words, or for a typed tag's books (13o
     /// U3); nothing for a day alone (the listing below says what it means).
+    /// F-W-3 (the VX-83 walk): the em-dash SEPARATES the counts from the
+    /// echo, so with no echo (a tag alone) the counts lead bare — a dash
+    /// with nothing in front of it was the walker's W4 oddity.
     private var countsLine: String? {
         guard let question, question.answers else { return nil }
         guard question.hasWords || counts != nil else { return nil }
         let words = counts.map(LibrarySearchCopy.counts) ?? LibrarySearchCopy.nothingFound
-        return "\u{2014} " + words
+        return LibrarySearchFace.countsLead(words, afterEcho: !question.words.isEmpty)
     }
 }
 

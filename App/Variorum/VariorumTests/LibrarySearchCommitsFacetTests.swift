@@ -12,7 +12,7 @@
 //  key — is `SearchSavepointFacetTests`): the Library's question carries the
 //  facet and never remembers it; the band offers the chip only when the
 //  question has WORDS; off the facet the Library lists no savepoint, on it the
-//  saved words list under their note with the band saying "N savepoints"; a
+//  saved words list under their note with the band saying "N commits" (R-VX83-10); a
 //  savepoint line says its day (P-VX83-C6); a savepoint lands STEPPING only in
 //  the take the note shows (P-VX83-C4).
 //
@@ -124,19 +124,20 @@ struct LibrarySearchCommitsFacetTests {
 
     // MARK: - The line and the landing
 
-    /// A savepoint line says "savepoint · Oct 6" — the day in the one
-    /// stamp-wording brain's words, the year when it is not this one; the
-    /// other kinds read as shipped.
+    /// A savepoint line says "commit · Oct 6" (R-VX83-10 — her word: within
+    /// search the rows wear the chip's word; JUSTIFIED EDIT from the C6
+    /// "savepoint" cells) — the day in the one stamp-wording brain's words,
+    /// the year when it is not this one; the other kinds read as shipped.
     @Test func aSavepointLineSaysItsDay() {
         let locale = Locale(identifier: "en_US")
         let now = ISO8601DateFormatter().date(from: "2026-10-08T12:00:00Z")!
         #expect(LibrarySearchFace.kindLabel(
             kind: .savepoint, savedAt: "2026-10-06T15:30:00.000Z", now: now, calendar: utc, locale: locale)
-            == "savepoint \u{00B7} Oct 6")
+            == "commit \u{00B7} Oct 6")
         #expect(LibrarySearchFace.kindLabel(
             kind: .savepoint, savedAt: "2025-03-02T15:30:00.000Z", now: now, calendar: utc, locale: locale)
-            == "savepoint \u{00B7} Mar 2, 2025")
-        #expect(LibrarySearchFace.kindLabel(kind: .savepoint, savedAt: nil, now: now) == "savepoint",
+            == "commit \u{00B7} Mar 2, 2025")
+        #expect(LibrarySearchFace.kindLabel(kind: .savepoint, savedAt: nil, now: now) == "commit",
                 "no day read — the kind alone")
         #expect(LibrarySearchFace.kindLabel(kind: .take, savedAt: nil, now: now) == nil, "prose says nothing")
         #expect(LibrarySearchFace.kindLabel(kind: .comment, savedAt: nil, now: now) == "comment")
