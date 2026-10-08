@@ -72,6 +72,13 @@ struct ShelfView: View {
     /// the composition root and handed in). nil in harness mounts: the
     /// masthead then reads "Bookcase" alone, exactly as before.
     var wings: WingsModel? = nil
+    /// 13s-b U1a (R-13s-2/6/13) — **the first-open tour offer's row**, built
+    /// by the composition root and RENDERED here, between the quick-entry box
+    /// and the bottom bar (her R-13s-3: "the tutorial offer can live above
+    /// that bar on the right side"). The Bookcase never holds the onboarding
+    /// feature's model — it draws the view it is handed (the sidebar note
+    /// box's road). nil (harness mounts, a retired offer at launch): no row.
+    var offerLine: AnyView? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -183,6 +190,14 @@ struct ShelfView: View {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, owner: oracleOwner)
                 }
                 #endif
+            if let offerLine {
+                offerLine
+                    #if DEBUG
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                        BookcaseRowOracle.recordFrame(BookcaseRowOracle.offerRowKey, $0, owner: oracleOwner)
+                    }
+                    #endif
+            }
             hintBar
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
@@ -1137,6 +1152,8 @@ enum BookcaseRowOracle {
     /// bar's, so a pin can read where the box sits (`BookcaseQuickEntryPlacementTests`).
     static let entryKey = "\u{2116}entry"
     static let hintBarKey = "\u{2116}hint"
+    /// 13s-b U1a (R-13s-2/6/13): the tour offer's row, when it has one.
+    static let offerRowKey = "\u{2116}offer"
 
     /// A pin's door: start from empty.
     static func forgetAll() {

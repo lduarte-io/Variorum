@@ -509,6 +509,10 @@ struct CapabilityRegistryTests {
             // Report… and Delete Report on each received crash report, and is
             // their ONLY renderer — a report is sent from where it was read.
             .union(DiagnosticsPane.surfaceCapabilities)
+            // 13s-b U1a (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the Bookcase's first-open TOUR OFFER renders the
+            // tour's inline door, its "yes" (`.takeTour`).
+            .union(TourOfferLine.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

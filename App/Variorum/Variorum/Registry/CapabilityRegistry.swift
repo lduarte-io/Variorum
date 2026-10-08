@@ -2033,6 +2033,15 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
 
+        // 13s-b U1a (R-13s-2/6/13): the tour's one entry. Its verb IS the
+        // Help menu's name for it (`TourOfferCopy.menuTitle` — the help-road
+        // sentence reads the same constant, so the three can never drift).
+        Capability(
+            id: .takeTour, verb: TourOfferCopy.menuTitle, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
+
         // MARK: Data safety (13l Act 4 — Settings ▸ Data Safety)
         // The `.deleteNow` shape exactly: `.surface`, app scope, always
         // available as an ACT, with the per-gesture condition living on the

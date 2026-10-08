@@ -141,7 +141,9 @@ struct VariorumApp: App {
                     session: session, services: services,
                     protection: bootstrap.protection, windows: windows,
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
-                    calmAsks: appDelegate.calmAsks)
+                    calmAsks: appDelegate.calmAsks,
+                    // 13s-b U1a: the first-open tour offer's one model.
+                    tourOffer: appDelegate.tourOffer)
                     .onAppear {
                         appDelegate.session = session
                         #if DEBUG

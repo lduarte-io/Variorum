@@ -66,6 +66,10 @@ struct RootView: View {
     /// 13r U3-A: the calm-asks scheduler (the app delegate's one instance);
     /// this window registers the backup-folder ask once its services exist.
     let calmAsks: CalmAskScheduler?
+    /// 13s-b U1a (R-13s-2/6/13): the first-open tour offer — the app
+    /// delegate's ONE model (one per process, every window's Bookcase reads
+    /// it); nil in harness mounts, which then draw no offer.
+    let tourOffer: TourOfferModel?
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -139,7 +143,8 @@ struct RootView: View {
         // system for her chord (it would fight the running app for it).
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
-        calmAsks: CalmAskScheduler? = nil
+        calmAsks: CalmAskScheduler? = nil,
+        tourOffer: TourOfferModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -148,6 +153,7 @@ struct RootView: View {
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
         self.calmAsks = calmAsks
+        self.tourOffer = tourOffer
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -791,6 +797,28 @@ struct RootView: View {
             })
     }
 
+    // MARK: - The tour (13s-b U1a — R-13s-2/6/13; U2 builds the engine)
+
+    /// The offer line for the Bookcase's slot: a row exactly when the model
+    /// keeps one this process (`TourOfferModel.holdsRow` — an offer to make,
+    /// or one that retired since launch and keeps its height so nothing moves).
+    private var tourOfferLine: AnyView? {
+        guard let tourOffer, tourOffer.holdsRow else { return nil }
+        return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
+    }
+
+    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and (piece 5) Help ▸
+    /// Take the Tour. **U1a STUB — U2 replaces the body with the coach-mark
+    /// engine** (mockup v5, step 1; the engine reports its end through
+    /// `TourOfferModel.tourEnded(completed:)`, which retires the offer). Until
+    /// then the line steps aside for this session (nothing is remembered, so
+    /// the next launch offers again) and the door SAYS it did nothing — a door
+    /// that did nothing speaks (18i).
+    private func startTour() {
+        tourOffer?.tourStarted()
+        session.status.refuse(TourOfferCopy.stubRefusal)
+    }
+
     /// The pane seam's family in the shared oracle.
     static let paneSeamFamily = "paneDivider"
 
@@ -854,7 +882,10 @@ struct RootView: View {
                 session: session, model: shelf, readings: readings,
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
-                starDoor: starDoor, wings: wings)
+                starDoor: starDoor, wings: wings,
+                // 13s-b U1a: the tour offer's row — built HERE (composition)
+                // and rendered by the Bookcase alone ("Bookcase only").
+                offerLine: tourOfferLine)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:

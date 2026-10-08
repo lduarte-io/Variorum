@@ -40,6 +40,11 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// registers from the window that holds the store's services.
     let calmAsks = CalmAskScheduler.live()
 
+    /// 13s-b U1a (R-13s-2/6/13): **the first-open tour offer's one model** —
+    /// one per app for the `whatsNew` reason (decided once at launch from the
+    /// device's local record); every window's Bookcase draws its line.
+    let tourOffer = TourOfferModel.forThisApp()
+
     /// 13r U3-B — R-13r-5: **the app's ONE crash-reporting owner** (MetricKit,
     /// opt-in, default OFF). Here for the `appearance` reason: one per app,
     /// alive before the first window — and a subscriber registered at launch
