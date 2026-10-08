@@ -108,7 +108,10 @@ struct TourOverlay: View {
         let step = engine.state.step
         let spot = placement(for: step, in: container)
         if step == .endCard {
-            TourEndCard(tokens: tokens, scheme: scheme) { engine.choose($0) }
+            TourEndCard(
+                tokens: tokens, scheme: scheme,
+                readmeExists: engine.readmeNoteExists
+            ) { engine.choose($0) }
                 .fixedSize(horizontal: false, vertical: true)
                 .modifier(MeasuredCard(size: $cardSize))
                 // Placed by layout, not by `offset`, so the card's frame (and
@@ -330,7 +333,16 @@ struct TourCoachCard: View {
 struct TourEndCard: View {
     let tokens: VoiceTokens
     let scheme: ColorScheme
+    /// The readme honesty gate (extra-pass MINOR-1).
+    let readmeExists: Bool
     let onChoose: (Tour.EndChoice) -> Void
+
+    /// The aside's one choice, pure so the pin can hold it: the full
+    /// approved aside while a readme exists, the journal sentence alone
+    /// while none does (never a false promise).
+    static func asideText(readmeExists: Bool) -> String {
+        readmeExists ? TourScript.endAside : TourScript.endAsideJournalAlone
+    }
 
     /// The mockup's `.centercard` `max-width: 450px`.
     static let width: CGFloat = 450
@@ -348,7 +360,7 @@ struct TourEndCard: View {
                 .fixedSize(horizontal: false, vertical: true)
             // A4 (the U2 UI assessment): muted, not tiny — the readme and ⌘J
             // line reads at the body's size in the muted ink.
-            Text(TourScript.endAside)
+            Text(Self.asideText(readmeExists: readmeExists))
                 .font(tokens.body)
                 .foregroundStyle(tokens.muted)
                 .lineSpacing(2)

@@ -175,6 +175,12 @@ enum TourScript {
     /// A5: no time promise on the main leg — "two more minutes" lives on the
     /// fork's first door only.
     static let endAside = "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one."
+    /// The no-readme form (the extra-pass MINOR-1 honesty gate, PROVISIONAL):
+    /// an existing store that predates the seeded readme must not be promised
+    /// one, so the aside keeps only the journal sentence — the approved
+    /// second sentence minus its connective. The full aside returns the
+    /// moment a readme exists (a fresh store, or VX-105's landing).
+    static let endAsideJournalAlone = "\u{2318}J opens today's journal entry, whenever you want one."
     static let keepGoing = "Keep going: two more minutes on stars, tags, books and snippets"
     static let openFieldGuide = "Open the field guide, every feature as a lesson"
     static let done = "Done, go write"

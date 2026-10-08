@@ -831,8 +831,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case restoreClassicsGathering
     /// 13s-b U1a (R-13s-2/6/13): **the tour's ONE entry** — the first-open
     /// offer line's "yes" (`.surface`) and Help ▸ Take the Tour (`.menuBar`,
-    /// piece 5). App scope; always available as an act (the U2 engine is what
-    /// it opens — until then a stub that speaks).
+    /// piece 5). App scope; always available as an act — it starts the U2
+    /// tour engine at step 1 (Q12: a mid-tour request starts over; no
+    /// resume state exists).
     case takeTour
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you

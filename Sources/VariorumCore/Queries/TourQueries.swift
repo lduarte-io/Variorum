@@ -13,11 +13,22 @@ extension Queries {
         public var seededBookID: String?
         public var firstStoryID: String?
         public var fieldGuideID: String?
+        /// Whether a live, unarchived note wearing the readme's reserved
+        /// title exists in the wing (the extra-pass MINOR-1 honesty gate:
+        /// the end card's readme sentence shows only when it is true; an
+        /// existing store that predates the U1b seed reads false until
+        /// VX-105 lands her finished text). Defaulted so older callers
+        /// and fixtures keep compiling unchanged.
+        public var readmeNoteExists: Bool
 
-        public init(seededBookID: String?, firstStoryID: String?, fieldGuideID: String?) {
+        public init(
+            seededBookID: String?, firstStoryID: String?, fieldGuideID: String?,
+            readmeNoteExists: Bool = false
+        ) {
             self.seededBookID = seededBookID
             self.firstStoryID = firstStoryID
             self.fieldGuideID = fieldGuideID
+            self.readmeNoteExists = readmeNoteExists
         }
     }
 
@@ -27,7 +38,7 @@ extension Queries {
     /// (the seeds' keepers converge on one anyway).
     public static func tourLandmarks(
         _ db: Database, seededBookName: String, firstStoryTitle: String,
-        fieldGuideName: String, wingID: String
+        fieldGuideName: String, wingID: String, readmeTitle: String? = nil
     ) throws -> TourLandmarks {
         func book(named name: String) throws -> String? {
             try String.fetchOne(
@@ -51,9 +62,23 @@ extension Queries {
                     """,
                 arguments: [bookID, firstStoryTitle])
         }
+        // The readme gate (extra-pass MINOR-1): a live, unarchived post
+        // wearing the reserved title, in this wing. Versions are born
+        // archived, so the archived_at filter fences them for free.
+        let readmeExists = try readmeTitle.map { title in
+            try Bool.fetchOne(
+                db, sql: """
+                    SELECT EXISTS(
+                        SELECT 1 FROM container
+                        WHERE kind = 'post' AND title = ? AND wing_id = ?
+                          AND deleted_at IS NULL AND archived_at IS NULL)
+                    """,
+                arguments: [title, wingID]) ?? false
+        } ?? false
         return TourLandmarks(
             seededBookID: seeded, firstStoryID: firstStory,
-            fieldGuideID: try book(named: fieldGuideName))
+            fieldGuideID: try book(named: fieldGuideName),
+            readmeNoteExists: readmeExists)
     }
 
     /// One note's facts the tour's step 11 and its leg wait on: its live tags

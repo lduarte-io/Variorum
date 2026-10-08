@@ -2041,9 +2041,10 @@ nonisolated enum CapabilityRegistry {
         // Help menu's name for it (`TourOfferCopy.menuTitle` — the help-road
         // sentence reads the same constant, so the three can never drift).
         // Doors: the offer line's "yes" (`.surface`) and Help ▸ Take the Tour
-        // (`.menuBar`, piece 5). No palette row yet: the palette's acts are
-        // `ShellActions`', and the tour's entry is the shell's — U2's call
-        // once the engine exists.
+        // (`.menuBar`, piece 5) — both run `RootView.startTour()`, which is
+        // the U2 engine's real entry (step 1, no resume — Q12). No palette
+        // row: the palette's acts are `ShellActions`', and the tour's entry
+        // deliberately stays the shell's two doors.
         Capability(
             id: .takeTour, verb: TourOfferCopy.menuTitle, scope: .app,
             doors: [.surface, .menuBar],

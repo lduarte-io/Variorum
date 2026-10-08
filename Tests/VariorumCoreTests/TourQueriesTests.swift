@@ -19,6 +19,43 @@ struct TourQueriesTests {
         }
     }
 
+    /// The extra-pass MINOR-1 honesty gate: the end card's readme sentence
+    /// may only show when a live, unarchived note wearing the reserved title
+    /// exists in the wing. An existing store that predates the seeded readme
+    /// answers false; a version (born archived) never counts; the fact is
+    /// read only when the title is asked for.
+    @Test func theReadmeGateAnswersOnlyForALiveUnarchivedReadmeInTheWing() throws {
+        try withOperations { ops, db in
+            func gate(_ wing: String = "") throws -> Bool {
+                try db.read {
+                    try Queries.tourLandmarks(
+                        $0, seededBookName: "x", firstStoryTitle: "y",
+                        fieldGuideName: "z", wingID: wing,
+                        readmeTitle: "readme"
+                    ).readmeNoteExists
+                }
+            }
+            #expect(try gate() == false, "an empty store promises nothing")
+            let readme = try ops.createPost(title: "readme")
+            #expect(try gate() == true)
+            // Unasked, the fact stays false (older callers unchanged).
+            #expect(try db.read {
+                try Queries.tourLandmarks(
+                    $0, seededBookName: "x", firstStoryTitle: "y",
+                    fieldGuideName: "z", wingID: "")
+            }.readmeNoteExists == false)
+            // Another wing does not see it.
+            let other = try ops.createWing(name: "work")
+            #expect(try gate(other.id) == false)
+            // Archived (a version's shape) stops counting; deleted too.
+            try ops.archiveContainer(readme.id)
+            #expect(try gate() == false, "archived never promises")
+            try ops.unarchiveContainer(readme.id)
+            try ops.deleteContainer(readme.id)
+            #expect(try gate() == false, "deleted never promises")
+        }
+    }
+
     @Test func theLandmarksAreFoundByTheirExactNamesInTheWing() throws {
         try withOperations { ops, db in
             let sherlock = try ops.createReading(name: "the adventures of sherlock holmes", kind: .book)

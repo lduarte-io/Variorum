@@ -860,3 +860,22 @@ private func settle(
         if predicate() { return }
     }
 }
+
+
+/// The extra-pass MINOR-1 honesty gate: the end card never promises a
+/// readme the store does not hold. Red-on-old by construction (the choice
+/// function does not exist before the gate), and the two texts are pinned
+/// to the approved aside and its journal-alone derivation.
+@Suite("13s-b extra pass — the end card's readme honesty gate")
+struct TourEndCardAsideGateTests {
+    @Test func theAsideNeverPromisesAReadmeTheStoreDoesNotHold() {
+        #expect(TourEndCard.asideText(readmeExists: true) == TourScript.endAside)
+        #expect(TourEndCard.asideText(readmeExists: false) == TourScript.endAsideJournalAlone)
+        #expect(TourScript.endAside.hasPrefix("readme"))
+        #expect(!TourScript.endAsideJournalAlone.contains("readme"),
+                "the no-readme form must not name what is not there")
+        // The derivation rule: the journal-alone form IS the approved second
+        // sentence minus its connective, byte for byte.
+        #expect(TourScript.endAside.hasSuffix("And " + TourScript.endAsideJournalAlone))
+    }
+}

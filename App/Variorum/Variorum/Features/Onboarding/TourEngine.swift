@@ -48,6 +48,9 @@ final class TourEngine {
 
     @ObservationIgnored private let doors: Doors
     @ObservationIgnored private let session: AppSession
+    /// The readme honesty gate (extra-pass MINOR-1), read once with the
+    /// landmarks: the end card's readme sentence renders only when true.
+    @ObservationIgnored let readmeNoteExists: Bool
     /// Whether the tour has ended (a second end is a no-op).
     @ObservationIgnored private var over = false
 
@@ -56,6 +59,7 @@ final class TourEngine {
     ) {
         self.session = session
         self.doors = doors
+        self.readmeNoteExists = landmarks.readmeNoteExists
         let begun = Tour.start(
             seededBookID: landmarks.seededBookID, firstStoryID: landmarks.firstStoryID,
             fieldGuideID: landmarks.fieldGuideID, facts: facts)
@@ -74,7 +78,8 @@ final class TourEngine {
         let found = try? await session.database.read { db in
             try Queries.tourLandmarks(
                 db, seededBookName: seeded, firstStoryTitle: story,
-                fieldGuideName: guide, wingID: wing)
+                fieldGuideName: guide, wingID: wing,
+                readmeTitle: ReadmeSeeder.title)
         }
         return found ?? .init(seededBookID: nil, firstStoryID: nil, fieldGuideID: nil)
     }
