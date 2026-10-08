@@ -746,7 +746,9 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
 - F2 fix: DONE — `DoorFacts.vaultHasAppleHeldCopy` (the vault's word as the door read it); `accountPostureIsStandard`
   reads it, the posture only before the door answered. Green PENDING.
   **REVERT V99-F:** `accountPostureIsStandard` → `controller.posture == .standard`. Expected RED: the F2 pin's two
-  directions alone.
+  directions alone. **RESULT (06:10): "Test run with 65 tests in 1 suite failed … with 2 issues"** — the F2 pin's two
+  directions (:2864 `model.accountPostureIsStandard`, :2875 `!model.accountPostureIsStandard`), nothing else. Restored,
+  `git diff` clean.
 - F3 fix (option a, S1 + S2): DONE — in the resume's enrolled arm: the STAMP decides at every step that carries one
   (`byAnotherDevice = vaultKeyID != marker.newCorpusKeyID`; the pre-F1 device-name fallback at `.vaultWrite` only, as
   before); the road's posture is the ACCOUNT's — `roadEntersCastle = (byAnotherDevice || marker.isFollow) ? vaultSaysCastle
