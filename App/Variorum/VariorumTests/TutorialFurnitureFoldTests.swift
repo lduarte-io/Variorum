@@ -135,4 +135,91 @@ struct TutorialFurnitureFoldTests {
             Issue.record("the twin's verdicts disagree or read engaged: \(String(describing: first.twin)) / \(String(describing: second.twin))")
         }
     }
+
+    // MARK: - 13s-b U1b piece 5 — the birth furniture joins the fold
+
+    private func mintAndJudgeBirthFurniture(
+        seed: UInt64
+    ) async throws -> (readme: SeededFurnitureClassifier.Verdict,
+                       scrap: SeededFurnitureClassifier.Verdict) {
+        try await withSeedWorld(seed: seed) { session, db in
+            guard case .seeded = await ExampleSnippetSeeder.seedAtBirth(session: session) else {
+                throw ChapterWorldError.seedRefused("example snippet")
+            }
+            guard case .seeded(let readmeID) = await ReadmeSeeder.seedAtBirth(session: session) else {
+                throw ChapterWorldError.seedRefused("readme")
+            }
+            return try await db.read { db in
+                let scrapID = try String.fetchOne(
+                    db,
+                    sql: "SELECT id FROM container WHERE kind = 'pool' AND title = ? AND deleted_at IS NULL",
+                    arguments: [ExampleSnippetSeeder.groupTitle])
+                let scrap = try scrapID.map {
+                    try SeededFurnitureClassifier.noteVerdict(
+                        db, postID: $0, within: nil, seedTagPaths: [], hash: BridgeHash.body(_:))
+                } ?? .straggling
+                let readme = try SeededFurnitureClassifier.noteVerdict(
+                    db, postID: readmeID, within: nil, seedTagPaths: [], hash: BridgeHash.body(_:))
+                return (readme, scrap)
+            }
+        }
+    }
+
+    /// **The REAL-SEED drift guard for the 13s-b birth furniture** (the
+    /// BLOCKER-1 net's shape exactly): the shipped readme — five blocks,
+    /// two of them fanned — and the example snippet group, each minted by
+    /// their real seeders, classify FOLDABLE, and two fresh mints carry
+    /// EQUAL signatures, or a fresh install's sign-in keeps two of each
+    /// forever. RED ON OLD by construction (the old tree seeds neither);
+    /// the per-fact behavioural revert at the stage window is the WIRING
+    /// pin below (drop a fact and the engine never looks at the title).
+    @Test func theRealReadmeAndExampleSnippetAreFoldableAndTwoMintsAgree() async throws {
+        let first = try await mintAndJudgeBirthFurniture(seed: 1886)
+        let second = try await mintAndJudgeBirthFurniture(seed: 1892)
+
+        guard case .foldable(let readmeA) = first.readme,
+              case .foldable(let readmeB) = second.readme
+        else {
+            Issue.record("the shipped readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
+            return
+        }
+        #expect(readmeA == readmeB, "two fresh readme mints are the SAME seed — they must fold")
+
+        guard case .foldable(let scrapA) = first.scrap,
+              case .foldable(let scrapB) = second.scrap
+        else {
+            Issue.record("the shipped example group must classify FOLDABLE: \(String(describing: first.scrap)) / \(String(describing: second.scrap))")
+            return
+        }
+        #expect(scrapA == scrapB)
+    }
+
+    /// **The WIRING pin (per changed fact — the stage window's behavioural
+    /// revert target):** the Mac's ONE composed facts value carries every
+    /// seeded object of the final set — the guide + its pool and twin, the
+    /// readme, the example group — AND keeps the installed base's and the
+    /// still-mintable objects' facts (the three gatherings with their
+    /// shapes, the reserved quicknote): Quicknotes still mints at first
+    /// capture, the classics gathering behind its door, and stores born
+    /// before this build carry the rest, so their pairs must keep folding.
+    @Test func theMacFactsCarryTheFinalSetAndKeepTheInstalledBases() {
+        let facts = MacFurnitureFacts.compose()
+        #expect(facts.guideBookName == TutorialSeeder.bookName)
+        #expect(facts.guideTagPath == TutorialSeeder.tagName)
+        let containers = facts.containers.map { ($0.title, $0.kind) }
+        #expect(containers.contains { $0 == (TutorialSeeder.scrapPoolTitle, "pool") })
+        #expect(containers.contains { $0 == (TutorialSeeder.twinTitle, "post") })
+        #expect(containers.contains { $0 == (ReadmeSeeder.title, "post") },
+                "the readme folds on sign-in (R-13s-5's release constraint)")
+        #expect(containers.contains { $0 == (ExampleSnippetSeeder.groupTitle, "pool") },
+                "the example snippet group folds on sign-in")
+        #expect(containers.contains { $0 == (SampleLibraryWelcome.quicknoteTitle, "post") },
+                "the installed base's seeded quicknote keeps folding")
+        let gatherings = facts.gatherings.map(\.name)
+        #expect(gatherings.contains(SampleLibraryWelcome.classicsGatheringName))
+        #expect(gatherings.contains(Operations.starredNotesGatheringName))
+        #expect(gatherings.contains(Operations.defaultQuicknoteBookName))
+    }
 }
+
+private enum ChapterWorldError: Error { case seedRefused(String) }

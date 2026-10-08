@@ -178,13 +178,10 @@ struct VariorumApp: App {
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half
                             // alone — its pocket guide is the parity row).
-                            furnitureFacts: {
-                                let guide = TutorialSeeder.furnitureFactsHalf()
-                                return SampleLibrarySeeder.furnitureDedupeFacts(
-                                    guideBookName: guide.guideBookName,
-                                    guideTagPath: guide.guideTagPath,
-                                    guideContainers: guide.containers)
-                            }(),
+                            // 13s-b U1b: composed in ONE named, pinnable
+                            // place — and it now carries the readme and the
+                            // example snippet (the birth furniture's folds).
+                            furnitureFacts: MacFurnitureFacts.compose(),
                             // The retired-credential sweep — REQUIRED at the
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })

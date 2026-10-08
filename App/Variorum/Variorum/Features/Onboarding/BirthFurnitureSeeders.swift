@@ -29,7 +29,12 @@
 //  objects have no doors to race.
 //
 //  MOBILE PARITY: the phone seeds neither (its onboarding furniture is the
-//  mobile project's own) — recorded, never built here.
+//  mobile project's own) — recorded, never built here. Like the guide's,
+//  their fold facts ride the MAC half only (`MacFurnitureFacts`): the
+//  phone's engine stays inert on these titles and converges by receiving
+//  the outcome rows (the nil-inert posture), and a pair met during a
+//  posture-ceremony DRAIN folds at the regular engine's next pull — the
+//  B-DEDUPE guide corner, unchanged.
 //
 
 import Dependencies
@@ -37,6 +42,30 @@ import Foundation
 import GRDB
 import OSLog
 import VariorumCore
+
+/// **The MAC's furniture-fold facts, composed in ONE named place** (13s-b
+/// U1b piece 5 — pinnable, where the old composition lived inline in
+/// `VariorumApp`'s closure): the SHARED half (the three seeded gatherings
+/// and the reserved quicknote — KEPT for the installed base and the
+/// still-mintable objects: Quicknotes mints at every store's first capture,
+/// the classics gathering behind its door, and stores born before this
+/// build carry the rest) + the GUIDE half + the two birth-furniture
+/// containers this unit seeded, so EVERY seeded object of the final set
+/// folds on sign-in (R-13s-5's release constraint; the 17y B-DEDUPE rules
+/// bind each grain).
+@MainActor
+enum MacFurnitureFacts {
+    nonisolated static func compose() -> SeededFurnitureDedupeFacts {
+        let guide = TutorialSeeder.furnitureFactsHalf()
+        return SampleLibrarySeeder.furnitureDedupeFacts(
+            guideBookName: guide.guideBookName,
+            guideTagPath: guide.guideTagPath,
+            guideContainers: guide.containers + [
+                ExampleSnippetSeeder.furnitureFact,
+                ReadmeSeeder.furnitureFact,
+            ])
+    }
+}
 
 /// **The readme placeholder** (R-13s-39 — her exact content ruling; the
 /// order R-13s-29 with the letter absent). A standalone BOOKLESS note
@@ -60,6 +89,16 @@ import VariorumCore
 @MainActor
 enum ReadmeSeeder {
     nonisolated static let title = "readme"
+
+    /// The furniture fold's identity for the readme (13s-b U1b piece 5):
+    /// a reserved-titled BOOKLESS note — two fresh devices' seeds fold at
+    /// the container grain, content-identical and unengaged only (any tag,
+    /// membership, savepoint or edit of hers keeps both — the standing
+    /// B-DEDUPE rules). No seed-authored tag paths: a tag on the readme is
+    /// always her hand.
+    nonisolated static var furnitureFact: SeededFurnitureDedupeFacts.ReservedContainer {
+        .init(title: title, kind: "post")
+    }
 
     /// The five blocks, in order (her reference's bytes).
     nonisolated static let paragraphs: [String] = [
@@ -178,6 +217,12 @@ enum ExampleSnippetSeeder {
     /// Her ruled text, EXACTLY (R-13s-26): the standard disclaimer line.
     nonisolated static let snippetText =
         "Any resemblance to actual persons, living or dead, is purely coincidental."
+
+    /// The furniture fold's identity for the example group (piece 5): the
+    /// pool grain, the "tutorial scraps" precedent exactly.
+    nonisolated static var furnitureFact: SeededFurnitureDedupeFacts.ReservedContainer {
+        .init(title: groupTitle, kind: "pool")
+    }
 
     enum BirthSeed: Equatable {
         case seeded(poolID: String)
