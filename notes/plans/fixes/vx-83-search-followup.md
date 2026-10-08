@@ -970,7 +970,8 @@ uses the at-rest fill and may read faint (shots 12/15 — U-B's own flag, P-VX83
   touched suites 34 tests / 4 suites PASSED, TEST EXECUTE SUCCEEDED — after ONE justified
   edit the first run caught (the singular counts cell "1 note · 1 savepoint" → "1 commit",
   missed by the plural-only sweep; labeled in place). Core at this HEAD: 2,320/265.
-- NEXT: the walker's
+- The walker's VERIFICATION RAN AND IS ACCEPTED (§WALK EXECUTION 2 + §WALK JUDGMENT 2,
+  shots 17–22). Previously: the walker's
   short verification errand (the fixed needle in the field · the bare-counts band · the
   commits wording · the chip in the real band — appended to the walk brief when the suites
   are green).
@@ -986,3 +987,17 @@ Stage claimed on oct7coordinator's GO, after 13x's slot · Debug rebuilt at HEAD
 - Residue: the scratch note `2026-10-08` (empty buffer, one commit holding the word) stays in the DEV store, left as the V4 fixture.
 
 Instance quit by bundle id; pgrep clean. Shots `17…22`.
+
+## §WALK JUDGMENT 2 (the orchestrator, 2026-10-08 — over §WALK EXECUTION 2, shots 17–22)
+
+**ACCEPTED, V1–V4 all.** The widened needle lands whole in both coats (the underscored span
+selected as written, 3w; the punctuated span, 4w); the tag-alone band leads bare with
+`+ commits` correctly NOT offered there (the facet needs words — the ruled P-2 guard working);
+the commits facet seen end-to-end in the real app (nothing found without the chip, the saved
+words behind it, "commit · oct 8" on the line, the non-stepping arm arming without a step —
+P-VX83-C4 exactly as ruled). **One residue, record-only (P-VX83-W3, the bundle's):** landing
+in a ONE-LINE empty note parks the caret flush at the bar's bottom edge with no air — the
+1-line document clamps at AppKit's own scroll floor, so the comfort band's top air has
+nowhere to come from; the line IS visible (her complaint was HIDDEN), the air is a tiny-
+document corner. **Residue 2:** the walker's V4 scratch note stays in the DEV store as the
+fixture (fenced; harmless). THE RUN'S BUILD PHASE IS CLOSED — the ladder opens.
