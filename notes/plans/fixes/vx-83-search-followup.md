@@ -201,7 +201,7 @@ and widens: the hidden strip is the bar's, read from `clip.contentInsets`.
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
-| P1 | **VX-86 core** — the needle rule (D-3) as ONE pure core rule beside `SearchSnippetSegment` (the first CONTIGUOUS matched span; whitespace-only gaps coalesce; a gap holding a newline ends the span — the find bar is one line) + core pins (the rule's cells; the mechanism: FTS5 marks "sherlock holmes" as two runs) — headless, revert-probed | NOT STARTED |
+| P1 | **VX-86 core** — the needle rule (D-3) as ONE pure core rule beside `SearchSnippetSegment` (the first CONTIGUOUS matched span; whitespace-only gaps coalesce; a gap holding a newline ends the span — the find bar is one line) + core pins (the rule's cells; the mechanism: FTS5 marks "sherlock holmes" as two runs) — headless, revert-probed | DONE (`68508196`) — `SearchSnippetSegment.firstMatchedSpan` (`Domain/SearchComposer.swift`); `SearchFindSeedSpanTests` 4/4 GREEN. **Mechanism confirmed on a REAL snippet:** "sherlock holmes" over "It was Sherlock Holmes who…" marks `["Sherlock", "Holmes"]`, two runs. **REVERT PROBE** (committed first; the body short-circuited to the shipped first-run letter, restored by `git checkout --`, re-run green): **RED — 5 issues in 3 tests** (the three coalescing cells, the first-span-not-a-later-one cell, the real snippet's needle `"Sherlock"`). The newline-ends-the-span cell is a refinement inside D-3 (the find bar is one line), recorded as PROVISIONAL P-VX83-1 |
 | P2 | **Mac pins on the PRE-FIX app tree** (red-on-old, the members' own pins): VX-86 `SearchLanding.findSeed` two-runs arm · VX-85 the landed line vs the bar-adjusted band (a far block AND a note's first line) · VX-88 the §M5 confirm (a newline snippet's row height vs a plain one) · VX-84a tag-alone lists the tagged notes (+ the words control) → ONE stage slot (ask `oct7coordinator`), reds recorded | NOT STARTED |
 | P3 | **VX-86 Mac** — `SearchLanding.findSeed` reads the core rule | NOT STARTED |
 | P4 | **VX-85** — the find seed's park is a BANDED reveal kind (the mode-switch arm's sibling; `restCaretLineInTheBand` the one rule, now computed against the BAR-ADJUSTED viewport — `clip.contentInsets`, zero without a bar, so every shipped landing is byte-unchanged); `JumpPrimitive`'s scroll floor follows the clip's top inset (0 without one) so a first-line match can rest below the bar | NOT STARTED |
@@ -211,7 +211,12 @@ and widens: the hidden strip is the bar's, read from `clip.contentInsets`.
 | P8 | **VX-84b** — the tag-offer chip (D-2): one pure rule home + the composer's wing-scoped live-tag read + the band chip + the press routing; pins | NOT STARTED |
 | P9 | Close — full core `swift test` + the touched Mac suites + `TutorialWalkTests` green at the END (stage slot), record final, report | NOT STARTED |
 
-PENDING flags: none yet (nothing claimed).
+PENDING flags: none yet.
+
+**PROVISIONALs (the U-A rows — ride to the closeout ratify bundle; QUESTIONS.md is the merge
+moment's):**
+- **P-VX83-1** (VX-86, inside D-3): a gap holding a NEWLINE ends the needle's span (the find bar
+  holds one line; a newline inside a block is content, I4) — "Sherlock⏎Holmes" arms "Sherlock".
 
 ### U-B — THE DESIGN MEMBERS: VX-87 (gated on her mockup pick) + VX-89 (gated on her word;
 may route to 13s). Brief authored after the sitting lands its rulings here.
