@@ -113,6 +113,26 @@ She resumed on the Air and ruled a **worktree** for this effort — her words: *
 
 **R-13s-19 — The flow itself re-derived.** *"I just don't know if this tour seems like it's capturing the right flow that a viewer would go through."* v3 rebuilds the step sequence from the screenshots' own order (Bookcase → book Outline → open a note → Write/bottom bar → the take road → Takes mode → back up the ladder → your own note), not from v2's skeleton.
 
+## SITTING RECORD — THE MOCKUP WALK, ROUND 3 (2026-10-08, on the Air; her markup of v3; rulings R-13s-20…24 + the architect's own changes under R-13s-23's mandate)
+
+**R-13s-20 — A subagent assessment.** *"I want you to run a subagent to assess this flow against the field guide and see what on the screen they think users would be curious or confused about."* One read-only agent, briefed on the mockup, the field guide source, and her screenshots; findings land in this file.
+
+**R-13s-21 — The modes are pointed to.** *"I also do want the different modes pointed to and have at least one quick line about the for lenses and compare and blcoks."* Built as its own small step (one line each), with R-13s-18's words: Lenses shows different takes of this note side by side; Compare sets other notes beside this one; Blocks is the workbench.
+
+**R-13s-22 — The tone ruling.** *"i feel like it just needs a bit more polish - also try to reduce AIisms in your writing like emoji's and em dashes and keep the calm professional tone that I had in my piece of writing."* And the register joke, kept for the record: *"sherlock holmes is also always there as good writing inspo! just kindding (kinda), don't want it being a tutorial from the 1800s."* So: modern plain prose, no emoji in copy, no em dashes, her Start Here register.
+
+**R-13s-23 — The architect's latitude.** *"what do YOU think the flow needs to improve? you can make those changes you believe in before starting the subagent. don't be overly focused on my feedback - it might be too whackamole, focus on what you believe would lead to the best results from this app, from this tour."*
+
+**R-13s-24 — THE LOGO JOINS 13s-b.** *"also, look for the logos and add a logo to the app - the red V that i identified as one of my favorites. that change should come with the onboarding flow."* Resolved against the brand record: the STRIPED V is the ratified logo (TASTE.md's close, her 2026-08-25 "yeah, that's going to be the logo"), and "the red V" is its red edition, `notes/brand/variorum-v-on-red.svg` on `#FC120C`. Scope: a 13s-b build item beside the tour (the macOS app icon from the red edition; any in-app placement is Q19, proposed calm: icon + About, with the mockup's welcome-line mark as a candidate). TASTE.md's icon-execution list (the squircle treatment) is the how.
+
+**ARCHITECT CHANGES (mine, built in v4 under R-13s-23 — each one line to overturn):**
+1. **The heart line.** The tour never said why the app exists; the take step now carries one sentence of her pitch ("takes, like takes in film, and they are the heart of Variorum"). Mechanics with a reason land better than mechanics alone.
+2. **The deeper modes as their own small step** (R-13s-21's content, step 6) rather than a bloated card: eleven short steps beat ten where one is overloaded.
+3. **The end card points at Start Here** ("a short welcome note, waiting in your Library") — my provisional answer to Q15: discoverability by one calm sentence at the exact moment the tour ends, not a badge or a pin.
+4. **An explicit way home**: step 10 ends by sending them to Bookcase in the sidebar, so the last hop is navigation they perform, not a teleport.
+5. **The de-AI-ism pass**: all card copy and the badge rewritten without em dashes or emoji; UI glyphs (the book icon, ψ) remain chrome, named in words inside sentences.
+6. **Q14 recommendation**: the toured take stays afterwards (Sherlock is the sandbox; a trace of your first take is a feature, and the fold is safe either way). Hers to overturn.
+
 ## RESUME PROMPTS — the mockup-walk sitting (written 2026-10-06 night at her ask; **SUPERSEDED — the walk ran 2026-10-07 on the Air; the round-1 sitting record above is the live state**)
 
 **State at sleep:** mockup delivered and pushed (b4abda9a); rulings R-13s-1…5 recorded above; open questions Q1–Q8 bundled (the EXECUTION PLAN's list + the mockup's ideas frame); 13s out of the stage queue (13o schedules; nothing needed for a mockup sitting); NO Swift before her per-screen approval.
