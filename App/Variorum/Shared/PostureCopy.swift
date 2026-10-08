@@ -850,7 +850,7 @@ nonisolated extension ProtectionCopy {
     /// 13s re-voices (QUESTIONS #138).
     static func enteredCastleAfterAnotherDevice(device: String?) -> String {
         "Another device entered Castle first, so this \(deviceName) picked up that device's keys "
-        + "instead. The twelve words shown here are NOT your account's: your account's words are "
+        + "instead. The twelve words shown here are not your account's: your account's words are "
         + "the ones \(device ?? anotherDevice) showed when it entered Castle — those are the set "
         + "to keep."
     }
