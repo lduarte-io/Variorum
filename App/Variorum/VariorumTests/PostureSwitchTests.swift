@@ -2742,6 +2742,29 @@ struct PostureSwitchTests {
             arm(world, faultAt: nil)
             return (world, marker)
         }
+        // FIRST, the restart passes through Replace All Keys' OWN door — the
+        // front check's unreachable iCloud key refuses before any screen…
+        do {
+            let (unreachable, pending) = try await killedBeforeItsVaultWrite()
+            defer { unreachable.tearDown() }
+            unreachable.appleBacking.key = nil
+            let restarted = PostureSwitchModel(
+                mode: .resume(pending), runner: unreachable.runner, controller: makeController(for: unreachable), vaultTie: nil)
+            await restarted.start()
+            #expect(restarted.phase == .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable), "\(restarted.phase)")
+        }
+        // …and a standing restore hold refuses the rotation it would start.
+        do {
+            let (held, pending) = try await killedBeforeItsVaultWrite()
+            defer { held.tearDown() }
+            let heldController = makeController(for: held)
+            heldController.restoreHoldStands = { true }
+            let restarted = PostureSwitchModel(mode: .resume(pending), runner: held.runner, controller: heldController, vaultTie: nil)
+            await restarted.start()
+            #expect(restarted.phase == .failed(ProtectionCopy.resumeSyncFirst), "\(restarted.phase)")
+        }
+
+        // THEN the restart itself, end to end.
         let (world, marker) = try await killedBeforeItsVaultWrite()
         defer { world.tearDown() }
         let before = try await world.vault()
@@ -2769,28 +2792,6 @@ struct PostureSwitchTests {
         #expect(after.format.classKey(for: .corpus)?.keyID != before.format.classKey(for: .corpus)?.keyID, "the keys were replaced")
         #expect(world.calls.custodyTargets.last == .auto && world.posture == .standard)
         #expect(model.doneBody == ProtectionCopy.replaceKeysDone)
-
-        // The restart passes through Replace All Keys' OWN door — the front
-        // check's unreachable iCloud key refuses before any screen…
-        do {
-            let (unreachable, pending) = try await killedBeforeItsVaultWrite()
-            defer { unreachable.tearDown() }
-            unreachable.appleBacking.key = nil
-            let restarted = PostureSwitchModel(
-                mode: .resume(pending), runner: unreachable.runner, controller: makeController(for: unreachable), vaultTie: nil)
-            await restarted.start()
-            #expect(restarted.phase == .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable), "\(restarted.phase)")
-        }
-        // …and a standing restore hold refuses the rotation it would start.
-        do {
-            let (held, pending) = try await killedBeforeItsVaultWrite()
-            defer { held.tearDown() }
-            let heldController = makeController(for: held)
-            heldController.restoreHoldStands = { true }
-            let restarted = PostureSwitchModel(mode: .resume(pending), runner: held.runner, controller: heldController, vaultTie: nil)
-            await restarted.start()
-            #expect(restarted.phase == .failed(ProtectionCopy.resumeSyncFirst), "\(restarted.phase)")
-        }
     }
 
     /// VX-99 round 2, finding 1 — arm (iv): A REPLACE ALL KEYS WHOSE ROAD

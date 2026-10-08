@@ -365,15 +365,23 @@ final class PostureSwitchRunner {
         /// key file's recorded descriptor no longer matches it.
         var vaultKDF: PassphraseKDF.Descriptor? = nil
         /// pre-13x ladder round 2, F3 (MINOR-N4 — decision 32's door
-        /// pattern applied to MAJOR-3 (b)): under a STANDARD posture,
+        /// pattern applied to MAJOR-3 (b)): on a STANDARD ACCOUNT (the
+        /// vault's word — it carries an Apple-held copy; VX-99 round 1),
         /// whether the account's iCloud key is READABLE here and IS the
-        /// vault's (nil under Castle — no Apple-held copy is owed there).
+        /// vault's (nil on a Castle account — no Apple-held copy is owed).
         /// Replace All Keys refuses AT THE DOOR on `false`, before any
         /// screen — before F3 the refusal fired at step 2, after the words
         /// screens, and regenerated words then opened nothing, unsaid. The
         /// runner's own step-2 check (`appleHeldCopyForStandard`) stays as
         /// the belt.
         var appleKeyReadable: Bool? = nil
+        /// VX-99 round 2 (finding 2): the VAULT's word on the account's
+        /// posture — whether it carries an Apple-held copy (Standard) — as
+        /// the door read it; nil when not enrolled (no vault read). The
+        /// Replace All Keys screen's decision-30 addendum renders on THIS,
+        /// the word the door (`appleKeyReadable`) and the belt
+        /// (`appleHeldCopyForStandard`) already act on.
+        var vaultHasAppleHeldCopy: Bool? = nil
     }
 
     /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
@@ -413,7 +421,8 @@ final class PostureSwitchRunner {
             vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
             vaultCorpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
             vaultKDF: fetched.format.kdf,
-            appleKeyReadable: appleKeyReadable(keptUnder: fetched))
+            appleKeyReadable: appleKeyReadable(keptUnder: fetched),
+            vaultHasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil)
     }
 
     // MARK: - The two switches + Replace All Keys

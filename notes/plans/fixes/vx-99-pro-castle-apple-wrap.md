@@ -717,9 +717,30 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
     `aLocalOnlyLibrarysReplaceAllKeysRefusesAndItsUseCastleRoadStillRuns` (both postures refuse; Use Castle's local-only road
     kept as the control — the old pin had no Use Castle half, so the control is new).
   - F7: `theNewKeyFilesAppleCopyIsUnderTheICloudKeyTheBeltVerifiedNotOneReadAfterTheWalk`.
-- Red run (the pins commit, `PostureSwitchTests` alone): PENDING — the stage.
-- F1 fix: NOT-STARTED. F2 fix: NOT-STARTED. F3 fix: NOT-STARTED. F4 fix: NOT-STARTED. F6 (NITs): NOT-STARTED. F7 fix:
-  NOT-STARTED.
+- Red run (the pins commit 43316f21, `PostureSwitchTests` alone): DONE — slot 4 (`vx-99-impl2`, claimed 05:43, zero
+  Variorum instances), `test-without-building` over the pins commit's build: **"Test run with 65 tests in 1 suite failed …
+  with 63 issues"** — EXACTLY the thirteen new pins, each at its expectations and nowhere else (52 standing tests green,
+  round 1's included): pin (d) re-pointed 8 (both postures: no throw, a new key file, the library re-keyed, custody moved) ·
+  F1(ii) 7 · F1 selector 10 · F1(i) 3 · F1(iii) 4 (the floor, not `.authorize`; the act `.enterCastle`; no outcome — the
+  restart's door blocks sit after the throw and did not run here: their red is the F1 revert's, below) · F1(iv) 3 · F2 2 ·
+  S1 7 · S2 6 · the rewritten marker 2 · the follow's own marker 3 · custody by the account 1 · the gap 5 · F7 2 (the key
+  file under the swapped A; `.wrongAppleKey`).
+- F1 fix: DONE (this commit's predecessor pair — see the log) — `act` maps a resume to its MARKER's act
+  (`CeremonyAct(resuming:)`); the selector reads the OUTCOME first (the conflict-follow → ledger 61's sentence or its
+  PROVISIONAL sibling `keysReplacedAfterAnotherDevice`; a follow's resume → `followDoneBody`; Castle entered → the Castle
+  Done; else Replace All Keys' Done); the running title + the resume's ask by the act (`resumeReplacingKeysBody`,
+  PROVISIONAL, where the act does not enter Castle); `replaceKeys()` reads the outcome's insurance + offer; the restart
+  re-enters the marker's own ceremony through its own door (the restore hold; Replace All Keys' front check, now the ONE
+  helper `replaceKeysFrontCheck` the door shares). Green PENDING.
+  **REVERT V99-E (named before it runs):** on the tip, (1) `act`'s `.resume` arm → `return .enterCastle`; (2)
+  `ceremonyDoneBody`'s body → `act == .replaceKeys ? replaceKeysDone : castleDoneBody(outcome)`; (3) `replaceKeys()`'s Done →
+  `.done(insuranceOff: false, hasOffer: false)`. Expected RED: F1's five pins (incl. the restart's two door blocks, now
+  first in that test) and S1's Done line (it rides the selector); everything else green.
+- F2 fix: DONE — `DoorFacts.vaultHasAppleHeldCopy` (the vault's word as the door read it); `accountPostureIsStandard`
+  reads it, the posture only before the door answered. Green PENDING.
+  **REVERT V99-F:** `accountPostureIsStandard` → `controller.posture == .standard`. Expected RED: the F2 pin's two
+  directions alone.
+- F3 fix: NOT-STARTED. F4 fix: NOT-STARTED. F6 (NITs): NOT-STARTED. F7 fix: NOT-STARTED.
 - Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
 - Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
 - Phone compile (`MobilePostureSheets.swift` touched): PENDING.
