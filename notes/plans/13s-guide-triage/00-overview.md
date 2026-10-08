@@ -128,6 +128,13 @@ chapters; no chapter renames; the two guide-pointing cards need no change.
 
 ## Status (flipped per chapter commit)
 
+**DRAFTING COMPLETE — 2026-10-08.** All ten chapters drafted, committed and pushed, one
+commit per chapter. A final self-sweep verified: exactly one savepoint survival (chapter
+03, logged), zero caps-for-emphasis in final text, and every remaining em dash in a
+final text is a verbatim quote of a shipped UI string. Ready for the landing (Opus port,
+Fable cold review) per R-13s-35's lifted gates; the landing flags are collected above
+and in each chapter's change log.
+
 | File | State |
 |------|-------|
 | 00-overview.md | DONE |
