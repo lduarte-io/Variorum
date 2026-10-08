@@ -884,9 +884,9 @@ enum TutorialSeeder {
 
         let firstTake = try lesson(takes, "your first take", [
             "The fan is the reason this app exists: a block can hold several "
-            + "parallel TAKES — whole alternative texts — side by side, none of "
-            + "them lost, as long as you like. Most blocks live with one take; "
-            + "the ones you're unsure about can hold ten.",
+            + "parallel takes, whole alternative texts, side by side, none of "
+            + "them lost, for as long as you like. Most blocks live with one "
+            + "take; the ones you're unsure about can hold ten.",
 
             "The next paragraph can't decide what it wants to be. It's yours to "
             + "fan out.",
@@ -897,96 +897,105 @@ enum TutorialSeeder {
             // librarywalkpolish VR-122 (F-7): a note opens in WRITE the first
             // time, and there ⌘T only mints the take behind a receipt and the
             // bar has no "+ take" — the board is where this paragraph happens.
-            "Press \u{2318}2 for Takes, click into that paragraph and press \u{2318}T (or "
-            + "\u{FF0B} take in the bottom "
-            + "bar): a second take appears beside it, born as a copy of what you "
-            + "were reading. Rewrite it freely — bolder, quieter, backwards. The "
-            + "first take is untouched. \u{2325}\u{2318}T makes a BLANK take instead, for a "
+            "Press \u{2318}2 for Takes, click into that paragraph and press "
+            + "\u{2318}T (or \u{FF0B} take in the bottom bar): a second take "
+            + "appears beside it, born as a copy of what you were reading. "
+            + "Rewrite it freely: bolder, quieter, backwards. The first take is "
+            + "untouched. \u{2325}\u{2318}T makes a blank take instead, for a "
             + "genuinely different attempt.",
 
-            "Notice: exactly one pane is ever live for typing — the one with the "
+            "Notice: exactly one pane is ever live for typing, the one with the "
             + "ring. Click any take to make it the live one. Your keystrokes only "
             + "ever land in the ring.",
         ])
         _ = firstTake
 
         let choosing = try lesson(takes, "choosing & the board", [
-            "Takes are for trying; CHOOSING is deciding. The take with the "
-            + "\u{2713} is what the note actually says — \u{201C}visible is what you're "
-            + "looking at; chosen is what the note is.\u{201D} \u{2318}\u{23CE} chooses the take "
-            + "you're in; nothing else changes the note.",
+            "Takes are for trying; choosing is deciding. The take with the "
+            + "\u{2713} is what the note actually says. Visible is what you're "
+            + "looking at; chosen is what the note is. \u{2318}\u{23CE} chooses "
+            + "the take you're in; nothing else changes the note.",
 
             // librarywalkpolish VR-122 (F-8): in Write, ⌘⏎ and ⌃⌘←/→ only open
             // the takes panel (`EditorView.handleRouted`) — stepping, paging
             // and the style: menu are the board's.
             "The block below carries four takes of one sentence, ready for "
-            + "practice. In Takes (\u{2318}2), open its fan (\u{2318}\u{21E7}T), step through them with \u{2303}\u{2318}\u{2190} "
-            + "and \u{2303}\u{2318}\u{2192}, and choose your favorite.",
+            + "practice. In Takes (\u{2318}2), open its fan (\u{2318}\u{21E7}T), "
+            + "step through them with \u{2303}\u{2318}\u{2190} and "
+            + "\u{2303}\u{2318}\u{2192}, and choose your favorite.",
 
             "The rain came in from the sea without an opinion about any of us.",
 
             // 13b 4D (S4-24(1)/N40): the scroll+pager hybrid + the fixed
             // strip — the prose keeps pace with the ruled behavior.
             "When a fan holds more takes than fit, the strip scrolls freely "
-            + "sideways AND pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6} — \u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn "
-            + "the pages from the keyboard, and the counter always agrees with "
-            + "what you scrolled to. Take cards keep one steady height; a long "
-            + "take scrolls inside its card. The style: menu in the board's top "
-            + "line picks how fans open — stack, carousel, margin grid, or slot "
-            + "split — and \u{238B} closes every fan at once.",
+            + "sideways and pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6}. "
+            + "\u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn the "
+            + "pages from the keyboard, and the counter always agrees with what "
+            + "you scrolled to. Take cards keep one steady height; a long take "
+            + "scrolls inside its card. The style: menu in the board's top line "
+            + "picks how fans open (stack, carousel, margin grid, or slot split), "
+            + "and \u{238B} closes every fan at once.",
         ])
         let fanned = choosing.blocks[2]
         try take(on: fanned, "The rain arrived off the sea like a verdict none of us had appealed.")
-        try take(on: fanned, "Sea rain, indifferent rain — it fell on the just and the unjust and the ferry schedule alike.")
+        try take(on: fanned, "Sea rain, indifferent rain: it fell on the just and the unjust and the ferry schedule alike.")
         try take(on: fanned, "The rain came in from the sea, and the sea did not explain itself.")
 
         let keeping = try lesson(takes, "keeping takes safe", [
-            "Everything autosaves, always. A COMMIT is more deliberate: \u{2318}S "
-            + "keeps an immutable savepoint of the take you're in — a version you "
+            // 13s-b triage landing (R-13s-31/32): THE GUIDE'S ONE “savepoint” — the
+            // explanatory common noun defining commit at its first teach, the tour's
+            // step-4 exemplar's twin; every other savepoint in the guide says commit.
+            "Everything autosaves, always. A commit is the deliberate one: "
+            + "\u{2318}S keeps a savepoint of the take you're in, a version you "
             + "can always come back to, no matter what you type over it. Commits "
-            + "append; nothing ever overwrites one.",
+            + "only ever add; nothing overwrites one.",
 
             // 13u3 UNIT D (item 14): the lesson teaches the two keys, because
             // the door asks for a name now. The fast road is still two keys,
             // and saying so here is what keeps ⌘S from feeling slower.
             "Try it here: click into this paragraph, change a few words, press "
-            + "\u{2318}S. A small field appears: type a name for the moment — "
-            + "\u{201C}before the rewrite\u{201D} — or just press \u{23CE} to "
-            + "save it unnamed. Then press history in the bottom bar, right "
-            + "beside commit. Your savepoint is listed under this take, its name "
-            + "first where it has one; Restore loads any savepoint back into the "
-            + "take, Name (or Rename) changes what it is called — the name is "
-            + "always editable, the saved text never is — and committing again "
-            + "just adds another.",
+            + "\u{2318}S. A small field appears: type a name for the moment, "
+            + "\u{201C}before the rewrite\u{201D}, or just press \u{23CE} to save "
+            + "it unnamed. Then press history in the bottom bar, right beside "
+            + "commit. Your commit is listed under this take, its name first "
+            + "where it has one. Restore loads any commit back into the take. "
+            + "Name (or Rename) changes what it is called; the name is always "
+            + "editable, the saved text never is. And committing again just adds "
+            + "another.",
 
-            "The block below has a spare take to practice ARCHIVING on. Click "
-            + "into the second take and press \u{2318}\u{21E7}A — it leaves the board, out "
-            + "of the fan but never gone.",
+            "The block below has a spare take to practice archiving on. Click "
+            + "into the second take and press \u{2318}\u{21E7}A. It leaves the "
+            + "board, out of the fan but never gone.",
 
-            "Never gone means never gone: an \u{201C}archived \u{B7} 1\u{201D} door appears "
-            + "right under that block's takes. Open it and Unarchive puts the "
-            + "take straight back in the fan — no leaving the board. (Write's "
-            + "takes panel keeps the same archived list, if you're over there.)",
+            "Never gone means never gone: an \u{201C}archived \u{B7} 1\u{201D} "
+            + "door appears right under that block's takes. Open it and Unarchive "
+            + "puts the take straight back in the fan, no leaving the board. "
+            + "(Write's takes panel keeps the same archived list, if you're over "
+            + "there.)",
 
             // 13j batch 7 (the J10 content-refresh sweep): J11 gave the app
             // its own savepoint cadence and this lesson still described a
             // history with nothing in it but ⌘S. The words follow
             // `SavepointCadenceCopy` / `SavepointRuns` — the setting's own
             // home — so the lesson and the switch cannot drift apart.
-            "You are not the only one keeping savepoints. LEAVING a note — "
-            + "closing it, switching away, quitting — quietly saves one "
-            + "savepoint for each take you changed while you were in it, and a "
-            + "note you leave open gets one after about two hours. A take you "
-            + "haven't changed is never saved twice. Those quiet ones are muted "
-            + "and fold into a single \u{201C}N quiet savepoints \u{B7} show\u{201D} "
-            + "line, so the ones you took yourself stay the ones you see. "
-            + "Settings (\u{2318},) \u{25B8} Writing has the one switch — every "
-            + "time you leave, only after a note sits untouched, or only when "
-            + "you press \u{2318}S — and whichever you pick, the app still saves "
-            + "a take right before anything could put your words out of reach.",
+            // 13s-b triage landing (LC-1 — U4's watch-out, P-U4-2): “the ones you
+            // made yourself”, the cadence pane's own verb (“Commits you made
+            // yourself with ⌘S”), where the draft said “took”.
+            "You are not the only one committing. Leaving a note (closing it, "
+            + "switching away, quitting) quietly commits each take you changed "
+            + "while you were in it, and a note you leave open gets a commit "
+            + "after about two hours. A take you haven't changed is never saved "
+            + "twice. The quiet ones are muted and fold into a single \u{201C}N "
+            + "quiet commits \u{B7} show\u{201D} line, so the ones you made "
+            + "yourself stay the ones you see. Settings (\u{2318},) \u{25B8} "
+            + "Writing has the one switch: every time you leave, only after a "
+            + "note sits untouched, or only when you press \u{2318}S. Whichever "
+            + "you pick, the app still saves a take right before anything could "
+            + "put your words out of reach.",
         ])
         try take(on: keeping.blocks[2],
-            "This is the spare take — archive me: click into me, then \u{2318}\u{21E7}A.")
+            "This is the spare take. Archive me: click into me, then \u{2318}\u{21E7}A.")
 
         // ———————————————————————————— structure ————————————————————————————
 
