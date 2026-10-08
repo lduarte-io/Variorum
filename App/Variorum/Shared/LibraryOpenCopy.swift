@@ -140,7 +140,7 @@ nonisolated enum LibraryOpenCopy {
     /// QC's teaching, said at the success moment (its mirror is the
     /// missing-key-file refusal's remedy).
     static func handOffDoneLead(folder: String) -> String {
-        "“\(folder)” is ready. Send the WHOLE folder — the key file travels with it, "
+        "“\(folder)” is ready. Send the whole folder — the key file travels with it, "
         + "and without the key file the library opens nothing."
     }
     static let handOffRevealDoor = "Show in Finder"
