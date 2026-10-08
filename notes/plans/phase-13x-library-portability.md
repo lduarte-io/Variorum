@@ -1714,3 +1714,25 @@ W-1 walk-finding fix (uncommitted `StoreBinding.swift` edit at this record's fir
 the walk record's own disposition names the split: the orchestrator owns StoreBinding, this
 session owns AppBootstrap). Every VX-80 commit is pathspec-limited so neither session sweeps
 the other's work.
+
+### WALK FINDING W-2 (MAJOR; found live after W-1's fix let the adoption act)
+
+**The post-adoption reopen leaves the window content-sized and un-resizable, the hold banner
+off-screen.** The adoption landed perfectly on disk (Previous Libraries/<stamp>/ with store +
+sidecars + key file; `variorum-restore-hold.json`; the adopt-safety copy — P-U1-5 verified
+live) and the HOLD BANNER RENDERS EXACTLY AS RULED (the full-window capture:
+"This is your library as of October 7, 2026. Sync is waiting — Resume to catch up with your
+account. Notes you deleted since will leave again; edits made since will come back. To keep
+something from this backup, duplicate it first — duplicates stay." + Resume Sync) — but the
+reopened window measures 1440×2734 pt on a 1117-pt display, `set size` via System Events is
+refused (it re-reads 2734), and the banner + bottom bar sit ~1600 pt below the screen edge:
+the hold's ONE face is invisible and the Resume door unreachable by eye. MECHANISM
+(hypothesis, to confirm in code): the lobby faces run under content-size window resizability;
+the adoption reopen re-enters through a lobby-shaped state and the full library root then
+renders under the lingering content-size regime — unbounded ideal height, user resize ignored.
+NOTE for VX-81's file: this is the same teardown-and-reopen root seam the Air's crash fired
+in. DISPOSITION: ACCEPTED — fix in-phase (the orchestrator's, unless it touches the
+implementer's open files); relaunch behavior checked first (a sane relaunch bounds the blast
+radius to the adoption's first session); evidence: the walk's full-window captures + a pin on
+the resizability state if it proves state-derived, else walk-verified chrome with the capture
+as the record.
