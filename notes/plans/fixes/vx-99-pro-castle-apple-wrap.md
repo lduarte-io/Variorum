@@ -603,3 +603,48 @@ marker field, another stage slot and another custody review; every key-protectin
 and pinned. VX-106's pair greened under the account-consistent harness — RECORDED, not claimed (the arm-order question
 stays variorum-da's). Next: one implementer check pass over the whole diff, then round 2 by a fresh Opus 5.5
 reviewer, which doubles as her ruled "Opus 5.5 cold review at the end either way" (Fable already had round 1).
+
+## ROUND 1 — IMPLEMENTER SANITY PASS (the Opus implementer, 2026-10-08 — headless, read-only over 155188c5 + c1daa77c; no stage, no fixes)
+
+**Verdict: no regression found; nothing blocks round 2.** Three questions, each traced:
+
+1. **Does an opt-out hide a regression? No.** Of the six `vaultSaysCastle: true` opt-outs, five
+   (`theMismatchFollowReKeys…`, `aStandardBornLibraryWithNoCustodyJoinsCastleThroughTheFollow`,
+   `aFollowKilledAfterTheReKey…`, `aWrappedLegacyKeyFileStaysAtTheFollow`, `thePosturePinsHold…` (a)) test a
+   Standard-shaped library FOLLOWING INTO a Castle account. Under the new Standard default, `runFollow` reads the vault
+   (unchanged code, :783) and would follow into Standard, which is correct for that vault and simply not those tests'
+   subject. The follow logic itself did not move. The sixth (`aNearEmptyCopys…`) is posture-agnostic. Its Standard
+   form refuses `appleKeyUnreachable` only because `makeWorld(sharing:)` mints a NEW iCloud key per world, so every
+   sibling is a different-Apple-ID device. **Harness limitation, recorded:** the harness cannot express a same-Apple-ID
+   SIBLING on a Standard account. That case is covered single-device (the MAJOR pin, (b)'s control, (c)), not in sibling
+   form.
+2. **Is any road's posture decision now inconsistent? Not for the Apple copy.** Every road that holds a fetched vault now
+   reads it: the door (:372), the belt (:1209), the follow (:783), the resume arm (:1338). The local-only road reads the
+   library's own posture, with no vault (decision 8). The posture is still READ in three places, all pre-existing and
+   outside VX-99's class (none can put an Apple copy on a Castle account):
+   - **(a) Custody on the Replace All Keys road** (`moveCustodyForSwitch(entersCastle: false)` →
+     `effective(posture: leaves.posture())`). This is by design: Replace All Keys re-saves custody "in its current
+     shape". So under the MAJOR pin's stale Castle read on a Standard account, the vault and the key file say Standard
+     while custody stays gated. The next ready's follow-into-Standard arm (`ProtectionController.swift:707`, gated
+     shape + an Apple-held copy) heals that mismatch.
+   - **(b) `leaveCastle`'s `guard leaves.posture() == .castle`** (and the pane offering Use Standard). Under a stale
+     Castle read on an already-Standard account, it rewrites the vault's Apple-held copy under THIS device's iCloud key
+     (`settingAppleHeldCopy` replaces). For the same Apple ID that is idempotent; for a different Apple ID it re-homes
+     the account's copy, a user act behind the consent sentence.
+   - **(c) The Use Castle door** under a stale Standard read on a Castle account. It runs a full rotation with the
+     insurance turned off: a Castle Replace All Keys under the entering copy.
+
+   (b) and (c) are for round 2's / the orchestrator's awareness, not this unit's.
+3. **Does anything break the follow or the enter-Castle road? No.**
+   - **Enter-Castle:** the belt is never reached (`entersCastle ? nil :` stays load-bearing, as the reviewer
+     documented). `appleKeyReadable`'s only consumer is `PostureSwitchModel.swift:201` inside the `.replaceKeys` case,
+     so a Standard vault's now-non-nil fact never gates `.enter`/`.leave`/`.resume`.
+   - **The follow:** `runFollow` is untouched.
+   - **The marker:** the new `.reencrypt` marker carries all seven `RotationMarker` fields and equals
+     `advanced(to: .reencrypt)` on every road except an another-device one.
+   - **One visible side effect, correct:** the Finish door's label reads `pending.entersCastle`
+     (`ProtectionPane.swift:318`, `MobileProtectionSheet.swift:265`). A double-crashed another-device resume now offers
+     "Finish entering Castle" instead of "Finish replacing keys". That matches the road, since the account IS Castle.
+     The single-crash road's later markers already did this since 2a667130.
+   - **Phone:** the phone suite's runner use (`MobileProtectionTests.swift:1477`) drives a follow only, so round 1 does
+     not reach it. Its compile was re-run green by the reviewer.
