@@ -193,7 +193,7 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
 
 ## LIVE STATUS (the implementer flips each line in the same commit as its piece; PENDING = unverified)
 
-- Pins (a)–(d) written, RED on the pre-fix code: IN-PROGRESS — written in `PostureSwitchTests.swift`
+- Pins (a)–(d) written, RED on the pre-fix code: DONE — written in `PostureSwitchTests.swift`
   (the `VX-99` MARK after `replaceAllKeysRefusesAnUnreachableAppleKeyAtTheDoorBeforeAnyScreen`):
   (a) `aCastleReplaceAllKeysWritesNoAppleCopyIntoTheNewKeyFileWhileTheICloudKeyIsReadable`;
   (b) `aCastleReplaceAllKeysResumedAfterACrashWritesNoAppleCopyAndAStandardOneStillDoes` (three seams —
@@ -210,22 +210,33 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   (seam 1, mid re-encryption), :2324 (seam 2, after the vault write), :2341 (seam 3, `.rekeyLibrary`) — the
   STANDARD resume control inside (b) passed; (d) :2387 — its Standard control passed. **Two further reds are
   NOT this diff's** — see "PRE-EXISTING REDS" below.
-- The fix: DONE (this commit) — `PostureSwitch.swift`: ONE decision per road threaded as a required
+- The fix: DONE (37e26d2e) — `PostureSwitch.swift`: ONE decision per road threaded as a required
   `appleCopy:` into `rekeyCustodyAndSnapshot` → `writeNewKeyFile` (`let apple: AppleKey? = appleCopy ?
   leaves.appleKeys.read() : nil`). Ceremony, enrolled: `appleCopyInKeyFile = appleHeld != nil` (exactly when
   the vault write carries an Apple-held copy); ceremony, local-only: `!entersCastle && leaves.posture() ==
   .standard`; resume: `!entersCastle && leaves.posture() == .standard` (the plan's letter — see "THE RESUME
   RULE" below); the follow (both calls): `!entersCastle` (the vault's word, behavior unchanged). Entering Castle
   stays nil on every road. Doc comments on `writeNewKeyFile` / `rekeyCustodyAndSnapshot` / `runFollow` updated.
-  Green run PENDING.
-- Behavioral revert (named here BEFORE it runs): NAMED — **REVERT V99-A**: in `rekeyCustodyAndSnapshot`, the
+  GREEN — see the Mac suites line.
+- Behavioral revert (named here BEFORE it runs): DONE — **REVERT V99-A**: in `rekeyCustodyAndSnapshot`, the
   one hand-off line `try await writeNewKeyFile(newKey: newKey, appleCopy: appleCopy, …)` → `appleCopy:
   !entersCastle` — exactly the pre-fix decision for every road (ceremony, resume, follow). Expected: RED on
   (a), (b) seams 1–3 and (d)'s Castle arm; their Standard controls, the standing Standard pin (c) and every
-  other test unchanged. Run PENDING.
-- Class sweep table: NOT-STARTED
-- Core headless run: NOT-STARTED
-- Mac suites under a stage slot: NOT-STARTED
+  other test unchanged. **RESULT (over 37e26d2e + the one-line edit, built, `-only-testing:VariorumTests/
+  PostureSwitchTests`): "Test run with 49 tests in 1 suite failed … with 8 issues" — RED exactly on (a) :2261 +
+  :2263, (b) :2305 / :2324 / :2341, (d) :2387 (the pre-fix run's six expectations, line for line); the two
+  PRE-EXISTING reds identical; nothing else.** Restored with `git checkout --`; `git diff` CLEAN; rebuilt.
+- Class sweep table: IN-PROGRESS — below.
+- Core headless run: NOT-STARTED (the diff touches no `Sources/`; run at the end, headless).
+- Mac suites under a stage slot: DONE (the coordinator's slot, `vx-99-impl`, zero Variorum instances at each
+  run's start; over the RESTORED fix, 37e26d2e's code) — **batch 1, the runner's whole reach** (`PostureSwitchTests`
+  · `PostureSwitchDrillTests` · `VX80CastleFollowRecoveryTests` · `AppleRelinkDoorTests` · `CopyRegisterPinTests` ·
+  `Phase13pControllerTests` · `EncryptionFlowTests`' nine suites · `Phase13pProtectionBrainTests`' five suites):
+  **"Test run with 178 tests in 20 suites failed … with 2 issues"** — 174 passed, the 2 skipped are
+  `PostureSwitchDrillTests`' standing opt-in gate (`VARIORUM_POSTURE_DRILL=1`), the 2 issues are EXACTLY the two
+  PRE-EXISTING reds below; (a), (b), (d) and the Standard pin (c) passed by name. **Batch 2, THE TUTORIAL SPINE**
+  (the eleven `TutorialWalkTests` suites + `TutorialBooksLessonTests` + `TutorialBooksRitualTests`): **"Test run
+  with 99 tests in 13 suites passed"**, no skips.
 
 ## PRE-EXISTING REDS in `PostureSwitchTests` (found by this run; NOT this diff's; NOT fixed here — handed to the orchestrator)
 
