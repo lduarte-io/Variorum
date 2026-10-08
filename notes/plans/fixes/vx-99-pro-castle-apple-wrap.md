@@ -774,7 +774,14 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   vault's M′ copy and the key file's L′ copy), the follow and the resume's arm read A only where the vault's word is Standard
   (same moment as before), the local-only road (Use Castle only, since F4) passes nil. Green PENDING.
   **REVERT V99-I:** in `runCeremony`, `appleKeyForKeyFile = appleHeld` → `appleKeyForKeyFile = appleHeld != nil ?
-  leaves.appleKeys.read() : nil` (the re-read after the walk). Expected RED: the F7 pin alone.
+  leaves.appleKeys.read() : nil` (the re-read after the walk). Expected RED: the F7 pin alone. **RESULT (06:25): "Test run
+  with 65 tests in 1 suite passed" — GREEN, and the NAMING was wrong, not the pin:** that edit re-reads A at the DECISION site
+  (step 2, right after the belt — BEFORE the walk), so it reads the same A the belt verified; 8f66bc1f read A inside
+  `writeNewKeyFile` at step 4, AFTER the walk. The red run (43316f21 = 8f66bc1f's runner) showed the pin red at the real
+  site (:3173 + `.wrongAppleKey`). Restored, `git diff` clean.
+  **REVERT V99-I′ (named before it runs — the corrected revert):** in `writeNewKeyFile`, the parameter binding renamed
+  `appleKey decided:` and, before the detached task, `let apple: AppleKey? = decided != nil ? leaves.appleKeys.read() : nil`
+  — 8f66bc1f's re-read, at its own place and time. Expected RED: the F7 pin alone.
 - F6 (NITs): DONE — (1) the `(:524)` cite → the symbol (`runCeremony`'s `vault.fetchVault()` after the drain); (2)
   `DoorFacts.appleKeyReadable`'s doc → "on a Standard ACCOUNT (the vault's word)"; (3) **the rewritten `.reencrypt` marker's
   `newCorpusKeyID` — NOT ADOPTED, disposition:** under finding 3's ruled rule (the stamp decides at every step) the id this
