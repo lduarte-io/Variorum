@@ -106,6 +106,33 @@ struct ChromeMinHeightTests {
         }
     }
 
+    /// 13x walk finding W-2 — the class's fourth instance: the restore-hold
+    /// banner sits in the main window's bottom safe-area inset (non-scrolling
+    /// chrome) and its ruled ~230-char sentence carried an unlimited
+    /// `fixedSize(h:false, v:true)`. Live, the adopted library's window
+    /// opened at 1440×2734 pt on a 1117-pt display — resize refused, the
+    /// banner and its Resume door below the screen edge — and stayed that
+    /// way across a relaunch for as long as the hold stood.
+    @Test func restoreHoldBarNearZeroWidthProbeStaysBounded() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-w2-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = dir.appendingPathComponent("variorum.sqlite")
+        try LibraryRestoreHold.set(
+            besideStore: store,
+            asOf: Date(timeIntervalSince1970: 1_791_331_200), now: Date())
+        let model = RestoreHoldModel(storeURL: store)
+        #expect(model.isHeld, "the condition needs a standing hold")
+        let host = NSHostingController(rootView: RestoreHoldBar(model: model))
+        let probed = host.sizeThatFits(in: NSSize(width: 1, height: 0))
+        #expect(probed.height < 400,
+                "the hold banner must not set the window's minimum height: \(probed.height) pt")
+        let rendered = host.sizeThatFits(in: NSSize(width: 1100, height: 0))
+        #expect(rendered.height > 20 && rendered.height < 120,
+                "at a real width the ruled sentence still renders whole: \(rendered.height) pt")
+    }
+
     /// The block must still be a REAL multi-line rendering at the footer's
     /// actual width — the line limits bound the pathological probe, never
     /// the ordinary wrap (R94: the cause renders inline, readable).

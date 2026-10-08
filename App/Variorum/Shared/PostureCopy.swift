@@ -638,6 +638,17 @@ nonisolated extension ProtectionCopy {
         "Until then this \(deviceName) opens and reads as before — what you write meanwhile "
         + "stays under the old key until you enter your passphrase."
     }
+    /// 13x F1 (ladder R1-BLOCKER; words PROVISIONAL, 13s re-voices — the
+    /// FACTS binding: the live key file holds an Apple-account wrap from
+    /// before Castle; the follow mints a fresh key and retires that file).
+    /// W-3: the cause is NOT always a restore — a Mac whose key file
+    /// predates the account's Castle entry lands here on its own (her Pro,
+    /// 2026-10-08), so the sentence states the fact and never a cause.
+    static var followCastleKeyFileAppleOpenable: String {
+        "Your account is in Castle, but this library's key file still holds a copy "
+        + "under your Apple account from before Castle. Enter your passphrase once to "
+        + "give your library a fresh key and retire that copy."
+    }
     // Keys replaced elsewhere (a device that has not followed yet)
     static func followKeysReplaced(device: String, day: String) -> String {
         "Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."
@@ -671,6 +682,11 @@ nonisolated extension ProtectionCopy {
     static let followWaitingDoor = "Enter…"
     /// On every key door meanwhile.
     static let pickUpKeysFirst = "Pick up your new keys first — enter your passphrase."
+    /// 13x F1 (ladder R1-M1 — P-R1-1; words PROVISIONAL, 13s re-voices):
+    /// the restore hold's sentence at the two rotation ceremonies' door.
+    static let resumeSyncFirst =
+        "Resume sync first — this library was just restored from a copy, and sync "
+        + "is waiting for your go."
     // Account moved to Standard (a device that was Castle)
     static func followMovedToStandard(device: String, day: String) -> String {
         "Your account is back in Standard — set on \(device) on \(day). This \(deviceName) "

@@ -1183,6 +1183,87 @@ struct Phase13pControllerTests {
         #expect(castle.controller.followNotice == nil && castle.controller.notice != .follow(owed))
     }
 
+    /// 13x F1 (ladder R1-BLOCKER) — THE ADOPTED STANDARD-ERA PAIR on the
+    /// Mac the library lives on: the vault says CASTLE, the corpus key
+    /// ids AGREE (this device followed when Castle was entered), custody
+    /// is GATED — and the LIVE key file carries an `apple` copy, because
+    /// the adoption door landed a pre-Castle snapshot pair whole. No
+    /// earlier arm fires (the rotation arm needs differing ids; the
+    /// silent arm needs the silent shape; the Apple arm under Castle only
+    /// clears flags) — so before this arm the library stayed
+    /// Apple-openable in steady state, and every later snapshot copied
+    /// the wrap (`writeSnapshotKeyFile` copies the live file's bytes).
+    /// The follow is OWED under its own kind; the verdict writes nothing
+    /// (the act is the no-rotation follow's, whose `retireOldKeyFiles`
+    /// removes the file). RED ON OLD: the arm's if-block removed ⇒
+    /// `followNotice` stays nil — no notice, no re-key, the wrap stands
+    /// (the round-1 report's named pin).
+    @Test func anAdoptedStandardEraPairUnderACastleVaultOwesTheFollowThatRetiresItsAppleCopy() async throws {
+        let key = StoreKey.mint()
+        var pairFile = StoreKeyEnvelope()
+        try pairFile.setPassphraseWrap(key: key, passphrase: "the-old-day", kdf: fastKDF())
+        try pairFile.setAppleWrappedCopy(
+            key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-standard-era")
+        let w = try world(standard: false, key: key, envelope: pairFile, enrolled: true)
+        #expect(w.controller.libraryKeyCustodyShape == .gatedOrNone,
+                "the adoption's landCustody saved the opener GATED — the silent arm cannot be the detector")
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
+        let fileBefore = w.envelopeBox.value
+        await w.controller.reconcile()
+        let owed = try #require(
+            w.controller.followNotice,
+            "the follow is OWED — the live key file is Apple-openable under a Castle account")
+        #expect(owed.kind == .castleKeyFileAppleOpenable,
+                "its OWN kind — custody is gated, so the mismatch kind's 'still opens without asking' would be false")
+        #expect(owed.corpusKeyID == "corpus", "the keys are unchanged — the no-rotation follow serves it")
+        #expect(owed.body == ProtectionCopy.followCastleKeyFileAppleOpenable)
+        #expect(owed.waitingBody == ProtectionCopy.followCastleKeyFileAppleOpenable,
+                "no keys were replaced and sync is not paused — copy §5's waiting line would be untrue")
+        #expect(owed.laterSubline == ProtectionCopy.followCastleStillOpensLaterSubline,
+                "the same fact as the mismatch: writing after Later stays under the old, Apple-openable key")
+        #expect(w.controller.notice == .follow(owed) && w.controller.followPending)
+        #expect(w.controller.posture == .castle && !w.controller.postureIndeterminate, "the vault's word DETERMINES")
+        #expect(w.envelopeBox.value == fileBefore, "the verdict writes nothing — the act is the follow's")
+        #expect(w.backing.gated == key && w.backing.auto == nil, "custody untouched until she types")
+    }
+
+    /// 13x F1 (ladder R1-M1 — P-R1-1): a standing RESTORE HOLD refuses
+    /// the two ROTATION ceremonies at the door, one sentence — their road
+    /// drains the outbox and pulls to head before any screen (`rotate`
+    /// step 1), which would breach round 3's "no round runs until Resume"
+    /// and QD's "the kept outbox pushes at Resume". Use Standard stays
+    /// open (traced honest: `leaveCastle` drives no engine), and a nil
+    /// hold wiring never refuses (every composition without the Mac's
+    /// marker projection is unchanged). RED ON OLD: the guard removed ⇒
+    /// `.enter`/`.replaceKeys` sail past the door under a standing hold.
+    @Test func aStandingRestoreHoldRefusesTheRotationCeremoniesAtTheDoor() async throws {
+        let w = try world(standard: false, enrolled: true)
+        w.controller.restoreHoldStands = { true }
+        let runner = PostureSwitchRunner(leaves: inertLeaves(for: w))
+        for mode in [PostureSwitchModel.Mode.enter, .replaceKeys] {
+            let model = PostureSwitchModel(
+                mode: mode, runner: runner, controller: w.controller, vaultTie: nil)
+            await model.start()
+            #expect(model.phase == .failed(ProtectionCopy.resumeSyncFirst),
+                    "\(mode): \(model.phase)")
+        }
+        // Use Standard is not the breach class: whatever the inert
+        // runner's door then answers, it is never the hold's sentence.
+        let leave = PostureSwitchModel(
+            mode: .leave, runner: runner, controller: w.controller, vaultTie: nil)
+        await leave.start()
+        #expect(leave.phase != .failed(ProtectionCopy.resumeSyncFirst), "\(leave.phase)")
+        // No hold wired ⇒ nothing refuses on its account.
+        let unwired = try world(standard: false, enrolled: true)
+        let unwiredModel = PostureSwitchModel(
+            mode: .replaceKeys, runner: PostureSwitchRunner(leaves: inertLeaves(for: unwired)),
+            controller: unwired.controller, vaultTie: nil)
+        await unwiredModel.start()
+        #expect(unwiredModel.phase != .failed(ProtectionCopy.resumeSyncFirst),
+                "\(unwiredModel.phase)")
+    }
+
     /// pre-13x 3a (ledger 43 — the follow's own carry, as the REGRESSION
     /// guard the brief names): the device identity rides every custody
     /// move — silent → the gate (the identity-only bound item beside the

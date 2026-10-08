@@ -86,6 +86,23 @@ enum VaultBootstrapCLI {
         guard FileManager.default.fileExists(atPath: storePath) else {
             throw CLIError.storeMissing(storePath)
         }
+        let storeURL = URL(fileURLWithPath: storePath)
+        // VX-64 (Phase 13x U1 row 5) — THE STOREUNLOCK ROAD. The bare
+        // `openStore(at:)` this tool shipped with resolves the AMBIENT
+        // `\.storeKeyCustody` — the REAL store's device-Keychain item,
+        // unreadable from an unsigned CLI and the wrong store besides —
+        // so on every encrypted store `resolveStoreKey` refused
+        // `keyUnavailable` and the tool could not run headless at all.
+        // The proven road (StringsWorkbook's `StoreUnlock`): the key file
+        // beside the store + the typed secret the tool ALREADY takes
+        // (`--passphrase-file` — the same passphrase the vault arms need)
+        // + in-memory custody. No Keychain is consulted; the key lives in
+        // this process's memory and dies with it. The tool now also
+        // REFUSES a plaintext store outright: it must never be the thing
+        // that runs the one-time encryption migration on a library.
+        guard StoreFilePresence.classify(at: storeURL) == .encryptedOrUnknown else {
+            throw CLIError.storeNotEncrypted(storePath)
+        }
         let passphraseData: Data
         do {
             passphraseData = try Data(contentsOf: URL(fileURLWithPath: passphraseFile))
@@ -98,7 +115,27 @@ enum VaultBootstrapCLI {
         print("vault-bootstrap: store \(storePath)")
         print("vault-bootstrap: project \(projectURL.absoluteString), session user \(userID)\(dryRun ? " — DRY RUN" : "")")
 
-        let database = try AppDatabase.openStore(at: URL(fileURLWithPath: storePath))
+        let storeKey: StoreKey
+        do {
+            guard let envelope = try StoreKeyEnvelope.loadCurrent(besideStore: storeURL) else {
+                throw CLIError.noKeyFile(storeURL.deletingLastPathComponent().path)
+            }
+            guard envelope.passphrase != nil else {
+                throw CLIError.noPassphraseRoad
+            }
+            // Argon2id at the file's own descriptor (floor-checked) —
+            // RFC 3394 refuses a wrong word, never yields garbage bytes.
+            storeKey = try envelope.unwrapKey(passphrase: passphrase)
+        } catch StoreKeyEnvelopeError.wrongPassphrase {
+            throw CLIError.wrongPassphrase
+        } catch let error as StoreKeyEnvelopeError {
+            throw CLIError.keyFileUnreadable(String(describing: error))
+        }
+        print("vault-bootstrap: store unlocked by the key file's passphrase road "
+            + "(key \(StoreKeyEnvelope.shortFingerprint(StoreKeyEnvelope.fingerprint(of: storeKey)))…; "
+            + "no Keychain consulted)")
+        let database = try AppDatabase.openStore(
+            at: storeURL, custody: .inMemory(initial: storeKey))
         let sessionProvider = StaticSessionProvider(
             session: UserSession(accessToken: accessToken, userID: userID))
         let bootstrap = VaultBootstrap(
@@ -121,6 +158,11 @@ enum VaultBootstrapCLI {
 
     enum CLIError: Error, CustomStringConvertible {
         case storeMissing(String)
+        case storeNotEncrypted(String)
+        case noKeyFile(String)
+        case noPassphraseRoad
+        case wrongPassphrase
+        case keyFileUnreadable(String)
         case passphraseFileMissing(String)
         case accessTokenFileMissing(String)
 
@@ -128,6 +170,18 @@ enum VaultBootstrapCLI {
             switch self {
             case .storeMissing(let path):
                 return "no store exists at \(path) — refusing to mint one (check the path)"
+            case .storeNotEncrypted(let path):
+                return "\(path) is not an encrypted Variorum store — this tool opens only an "
+                    + "already-encrypted library and never runs the encryption migration"
+            case .noKeyFile(let folder):
+                return "no key file (variorum-keys-….json) sits beside the store in \(folder)"
+            case .noPassphraseRoad:
+                return "this library's key file holds no passphrase copy — set an encryption "
+                    + "passphrase in the app first"
+            case .wrongPassphrase:
+                return "that passphrase does not unlock this library (nothing was opened)"
+            case .keyFileUnreadable(let reason):
+                return "the key file beside the store could not be used: \(reason)"
             case .passphraseFileMissing(let path):
                 return "cannot read the passphrase file at \(path)"
             case .accessTokenFileMissing(let path):
