@@ -229,3 +229,5 @@ recommendation); the MINOR and NIT are the new door's voice.
 - **MINOR-1 — FIX IN-LADDER:** mirror the sibling's `didAnything` receipt in the classics door's adopted arm (the ruled voice, 18i J33 + 13i-d U7). Same fix pass.
 - **NIT-1 — RECORD-ONLY, accepted:** the standing wording class rides the book doors' family; nothing tonight.
 - **Sequencing:** stage window (running) → my fresh-store walk → release → the fix pass (headless) → round 2 re-reviews the fixes (fresh reviewer). The walk's validity is unaffected by MAJOR-1 (a two-client fold edge, invisible to a single store).
+
+**In-window fix RATIFIED (orchestrator, ~11:40):** the fan-order defect fix (92d4da7f — the seeder mints same-parent alternates reversed so the stored fan reads [original, take 1, take 2] per R-13s-39's faithful order) is ACCEPTED as within the U1a/U2 precedent: the pin's first red IS the red-on-old capture, the trace is mechanism-level (branchVariant seats after its parent), and the flag was honest. Round 2's scope includes 92d4da7f (the fix + the two corrected pin oracles).
