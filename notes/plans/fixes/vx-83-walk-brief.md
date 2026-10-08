@@ -1,0 +1,131 @@
+# VX-83 — the WALKER's errand (U-A acceptance evidence)
+
+**Who you are:** `vx83walker` — the hands-on walker for the VX-83 run. You EXECUTE this
+errand; the `searchfollowup` session (the run's orchestrator) JUDGES the evidence and owns
+every decision. You exist because searchfollowup is a background session whose host
+(ClaudeCode.app) holds no GUI grants; YOUR terminal world does. **Nothing beyond this
+errand: no code edits, no fixes, no record edits outside §WALK EXECUTION, no tickets.**
+
+**Required reading first:** this file WHOLE · `Tools/WalkKit/README.md` WHOLE (every
+pitfall in it is binding — especially: quit YOUR instance by bundle id only, NEVER a ⌘Q
+keystroke; discriminate instances by PATH; her `/Applications` instance is never touched).
+Work in `<home>/dev/variorum-vx-83` (branch `vx-83-search-followup`);
+`git pull --ff-only` first.
+
+## Step 0 — grant self-check (before anything)
+
+`swift -e 'import ApplicationServices; import CoreGraphics; print("AX:", AXIsProcessTrusted(), "SCREEN:", CGPreflightScreenCaptureAccess())'`
+Both must be true. If either is false, STOP and tell the author which toggle her terminal
+app needs (System Settings ▸ Privacy & Security ▸ Accessibility / Screen & System Audio
+Recording) — granting is hers, never yours.
+
+## Step 1 — the stage
+
+SendMessage the session named `oct7coordinator`: you are "vx83walker (searchfollowup's
+walker)", you need a GUI walk of the Debug app on the dev store, ~25 min, not urgent.
+Claim ONLY on its explicit GO:
+`Tools/stage claim --who vx83walker --reason "VX-83 U-A acceptance walk (for searchfollowup)" --minutes 30`
+Release + message it when done. Never idle a turn waiting; if the GO is pending, say so
+to the author and stop cleanly — she relaunches you or the coordinator's GO arrives.
+
+## Step 2 — build + launch (dev store ONLY)
+
+1. `pgrep -fl 'Variorum.app/Contents/MacOS'` — note every instance; the `/Applications`
+   one (hers) is NEVER touched, quit, or clicked.
+2. Build: `cd App/Variorum && xcodebuild -scheme Variorum -configuration Debug -destination 'platform=macOS' -derivedDataPath DerivedData/vx83-walk build` (Debug = the fenced dev store; NEVER any other configuration).
+3. Launch: `open -n DerivedData/vx83-walk/Build/Products/Debug/Variorum.app`; find YOUR
+   pid by that path. Every launch takes a dev-store backup — expected.
+4. Build the capture helper: `swiftc -O -o /tmp/walk-cap Tools/WalkKit/capture-windows.swift`.
+   Capture per step; READ each PNG yourself before moving on (a blank shot = a problem).
+
+## Step 3 — the walk (capture EVERY lettered expectation; the dev store carries the
+Sherlock sample library with tags `classics` and `sherlock holmes`)
+
+- **W1 (the sheet):** click into the Library's search field, type `sherlock holmes`.
+  EXPECT: the answer sheet — band with honest counts, books section, passages grouped
+  under notes with both words marked. SHOT.
+- **W2 (land-at-match, VX-85+86):** click a passage DEEP in a long note (the Beryl
+  Coronet's "took it up and opened the bureau" line is the one from her report). EXPECT:
+  Write opens; the matched line is FULLY VISIBLE with air below the find bar (never
+  hidden under it); the find bar's field holds BOTH words ("Sherlock Holmes"); the match
+  is selected. SHOT. Then press ⌘G. EXPECT: steps to the next occurrence. SHOT.
+- **W3 (the first-line case, VX-85):** back in the Library (⌘K → Library → ⏎ if needed),
+  search words that hit a note's FIRST line (her shots: "good-night mister sherlock" hits
+  the outline note's first line). Click that first-line passage. EXPECT: the line sits
+  BELOW the bar, readable, not flush under it. SHOT.
+- **W4 (tag alone, VX-84a):** clear the field, type `#classics`. EXPECT: the books-flow
+  section on top ("#classics flows here"), then the TAGGED NOTES as the Library's own
+  rows; the sort door reads its live sort (e.g. "edited · newest first ▾"), the scope
+  picker is live; NO "Type a word to search inside #classics." line anywhere. SHOT.
+- **W5 (the offer chip, VX-84b):** clear, type `classics` (no #). EXPECT: honest text
+  results only, and the band offers `tag: #classics ›`. SHOT. Press the chip. EXPECT: the
+  field becomes the #classics question and W4's listing appears. SHOT.
+- **W6 (spacing, VX-88 + the chips, VX-94):** search `sherlock holmes` again; find a note
+  group whose passages include a multi-sentence/multi-line block (her report's uneven
+  group). EXPECT: every passage line sits in one even rhythm — no pair of tight lines
+  inside one row beside padded neighbours; band chips render as single lines. SHOT.
+
+**If ANY expectation fails:** capture it, write it in §WALK EXECUTION exactly as seen,
+and continue the remaining steps (never fix, never retry past one relaunch — the
+README's first-launch pitfall allows ONE quit-and-relaunch of YOUR instance if the first
+launch eats keystrokes).
+
+## Step 4 — evidence lands repo-first
+
+1. Copy the keeper shots (≤10, one per lettered expectation) to
+   `notes/plans/vx83-screens/01-….png` … (committed — the 13o-screens precedent).
+2. APPEND a `## §WALK EXECUTION (vx83walker, <date>)` section at the very END of
+   `notes/plans/fixes/vx-83-search-followup.md`: per-step one-liners (seen/failed), the
+   shots' filenames, any anomaly verbatim. Touch NOTHING else in that file.
+3. Quit YOUR instance: `osascript -e 'tell application id "io.lduarte.Variorum.debug" to quit'`,
+   re-check pgrep. Commit (`VX-83 walk evidence: … Part of VX-83`, NO attribution
+   trailers — CLAUDE.md's rule), push.
+
+## Step 5 — hand back
+
+Release the stage claim; message `oct7coordinator` (done); message `searchfollowup` with:
+pass/fail per lettered expectation, the record section is in, the commit hash. The
+JUDGMENT is searchfollowup's — report, don't conclude.
+
+## APPENDIX (added by the orchestrator once U-B's popover landed at HEAD): the VX-87 captures — R-VX83-2's acceptance shots, taken in the SAME slot right after W6
+
+- **W7 (the popover's states):** in the Library, press `when ▾`. Capture: (a) just-opened,
+  nothing armed (the sentence reads the any-day state; confirm the BAND shows NO day chip);
+  (b) press a day → one-day armed (sentence "Showing notes edited on …"; the band's chip
+  appears); (c) switch to "between days", press a first day then a second → the run washed
+  between the chosen ends, the sentence naming the run. SHOT each. The popover draws inside
+  the main window, so `screencapture -l <main window id>` catches it (the WalkKit UNIT D fact).
+- **W8 (no silent arm + Esc):** fresh field, open `when ▾`, switch the mode row back and
+  forth, then Esc WITHOUT pressing a day. EXPECT: the popover closes, the band gained NO
+  chip, the listing never narrowed. SHOT after Esc (the band bare). Also eyeball the
+  popover's arrow/background tone against its card in dark (the one thing headless renders
+  could not show).
+- **W9 (rooms):** repeat W7(c) in DARK (`defaults write io.lduarte.Variorum.debug
+  appearanceChoice dark`, relaunch YOUR instance; restore `system` after — the WalkKit
+  appearance fact). If the Settings voice flip works per the README's coordinates, repeat
+  once in the OTHER voice (light is enough there); if it fights you, the current voice's
+  light+dark is the minimum and SAY SO in §WALK EXECUTION — the author judges from what
+  lands.
+- These shots join the same `notes/plans/vx83-screens/` set (numbered on from the U-A ones)
+  and the same §WALK EXECUTION log. If you pulled the brief before this appendix existed,
+  `git pull --ff-only` again before your slot.
+
+## APPENDIX 2 (the fix-pass verification — a SHORT errand, ~10 min; added after the fix pass went green)
+
+Pull first (`git pull --ff-only`), rebuild per Step 2 (the fix pass changed the app), then:
+- **V1 (the needle, F-W-2):** search `always the woman`, click the Scandal opening passage.
+  EXPECT: the find bar holds `always _the_ woman` (the underscores are the note's own
+  Markdown emphasis — as written) and the whole span is selected. SHOT.
+- **V2 (the needle, the punctuation case):** search `good-night mister sherlock`, click its
+  passage. EXPECT: the bar holds `Good-night, Mister Sherlock`, selected. SHOT.
+- **V3 (the band, F-W-3):** type `#classics` alone. EXPECT: the band reads `1 book · 17
+  notes …` with NO leading dash (the dash returns only when words are typed). SHOT.
+- **V4 (the commits facet, the one unseen face):** search a word you've committed
+  (make one if needed: type a scratch line in a note, commit ⌘S, edit the line away, then
+  search the committed word). EXPECT: without the chip, nothing of the old text lists;
+  press `+ commits` in the band → the saved words list, each line marked `commit · <day>`,
+  the band counting "N commits"; click one → lands at the block with the bar armed (not
+  stepping — the words left the buffer). SHOTS (band + lines; the landing).
+- Evidence exactly as before: shots numbered on from 16 in `notes/plans/vx83-screens/`,
+  a §WALK EXECUTION 2 section appended at the record's END, commit (`Part of VX-83`),
+  push, stage released, hand-back to `searchfollowup`.

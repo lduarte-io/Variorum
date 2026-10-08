@@ -90,10 +90,25 @@ extension LibraryCatalogModel {
         query = LibrarySearchQuestion.removingTag(path, from: query)
     }
 
+    /// **The band's `tag: #path ›` press** (VX-84b — D-2, ratified
+    /// R-VX83-1: the explicit act): the word that named the tag becomes the
+    /// tag in the field (`LibrarySearchQuestion.acceptingTagOffer`); the
+    /// caller spawns `search()` (this file's convention) — a lone word thus
+    /// lands on the tag's narrowed listing (D-1).
+    func acceptTagOffer(_ offer: SearchTagOffer.Offer) {
+        query = LibrarySearchQuestion.acceptingTagOffer(offer, in: query)
+    }
+
     /// **The band's archived chip** (D4): the facet flips; the caller
     /// re-reads.
     func toggleArchivedFacet() {
         searchState.toggleArchived()
+    }
+
+    /// **The band's commits chip** (VX-72): the savepoints facet flips; the
+    /// caller re-reads.
+    func toggleSavepointsFacet() {
+        searchState.toggleSavepoints()
     }
 
     // MARK: - The mode facets (13o U3 — the sitting record §12 item 2)

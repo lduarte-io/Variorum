@@ -20,7 +20,10 @@
 //
 //  New road, new pins (her design row): on the pre-change tree they do not
 //  compile (`LibraryWhenDoor`, `LibraryDayRange`, `setEditedRange` did not
-//  exist; the door armed exactly one day).
+//  exist; the door armed exactly one day). VX-87 (her direction 1, R-VX83-2)
+//  rebuilt the door as ONE popover with a month grid; the door's-closures pin
+//  and the run's SET pin drive the popover's own `ask`/`press` now (JUSTIFIED
+//  EDITS, labelled in place), and the wording pin reads the mode row.
 //
 
 import Dependencies
@@ -69,6 +72,28 @@ struct LibraryWhenRangeTests {
     private func day(of date: Date) -> String { JournalDay.dayString(from: date) }
     private let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
 
+    /// VX-87: the `when` popover as its door opens it, its brain and month in
+    /// boxes so its acts persist across calls as the door's `@State` does.
+    private final class Box<Value> {
+        var value: Value
+        init(_ value: Value) { self.value = value }
+    }
+
+    private func popover(
+        range: LibraryDayRange?, now: Date, calendar: Calendar = LibraryDayFace.calendar,
+        onPick: @escaping (LibraryDayRange) -> Void
+    ) -> LibraryWhenPopover {
+        let opening = LibraryWhenDoor.openingState(
+            range: range, today: JournalDay.dayString(from: now, calendar: calendar))
+        let brain = Box(opening.brain)
+        let month = Box(opening.month ?? LibraryWhenMonth(year: 2026, month: 9))
+        return LibraryWhenPopover(
+            tokens: tokens, range: range, now: now, calendar: calendar,
+            brain: Binding(get: { brain.value }, set: { brain.value = $0 }),
+            month: Binding(get: { month.value }, set: { month.value = $0 }),
+            onPick: onPick, onClear: {})
+    }
+
     // MARK: - The range itself
 
     @Test func aRangeIsASetOfRealDaysInOrder() {
@@ -81,29 +106,39 @@ struct LibraryWhenRangeTests {
 
     // MARK: - The door's own closures
 
-    @Test func betweenDaysArmsAndEachEndCarriesTheOtherAlong() throws {
+    /// JUSTIFIED EDIT (VX-87 — her direction 1, R-VX83-2): this pin drove the
+    /// 13o door's `between days…` (which ARMED today–today at once) and its
+    /// FROM/TO date fields (each end carrying the other along). Direction 1
+    /// retired all three: between days is a mode of ONE popover, nothing arms
+    /// until a day is pressed, and a run is two presses on the month grid. The
+    /// subject stands — the door's own acts make a run of days and never an
+    /// empty one — driven through the popover's own `ask`/`press`, the
+    /// closures its mode row and cells run.
+    @Test func betweenDaysTwoPressesMakeTheRunAndNeverAnEmptyOne() throws {
         let now = try #require(DateFormatter.variorumISO8601.date(from: "2026-09-17T12:00:00.000Z"))
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "UTC")!
-        var picked: LibraryDayRange?
-        let closed = LibraryWhenDoor(
-            tokens: tokens, range: nil, now: now, calendar: calendar,
-            onPick: { picked = $0 }, onClear: {})
-        closed.openBetween()
-        #expect(picked == LibraryDayRange(day: "2026-09-17"), "between days… arms today through today")
+        var picked: [LibraryDayRange] = []
+        let closed = popover(range: nil, now: now, calendar: calendar, onPick: { picked.append($0) })
+        closed.ask(.between)
+        #expect(picked.isEmpty, "between days arms nothing by itself (it armed today at once on 13o)")
+        closed.press("2026-09-01")
+        closed.press("2026-09-14")
+        #expect(picked == [LibraryDayRange(day: "2026-09-01"),
+                           LibraryDayRange(first: "2026-09-01", last: "2026-09-14")],
+                "the first press arms its day, the second the run")
 
-        let armed = LibraryWhenDoor(
-            tokens: tokens, range: LibraryDayRange(first: "2026-09-10", last: "2026-09-14"),
-            now: now, calendar: calendar, onPick: { picked = $0 }, onClear: {})
-        armed.fromBinding.wrappedValue = try #require(JournalDay.date(from: "2026-09-01", calendar: calendar))
-        #expect(picked == LibraryDayRange(first: "2026-09-01", last: "2026-09-14"), "FROM moves alone")
-        armed.fromBinding.wrappedValue = try #require(JournalDay.date(from: "2026-09-20", calendar: calendar))
-        #expect(picked == LibraryDayRange(day: "2026-09-20"), "FROM past TO carries TO along")
-        armed.toBinding.wrappedValue = try #require(JournalDay.date(from: "2026-09-05", calendar: calendar))
-        #expect(picked == LibraryDayRange(day: "2026-09-05"), "TO before FROM carries FROM along")
-
-        armed.openOnToday()
-        #expect(picked == LibraryDayRange(day: "2026-09-10"), "on a day… narrows an armed run to its first day")
+        let armed = popover(
+            range: LibraryDayRange(first: "2026-09-10", last: "2026-09-14"), now: now,
+            calendar: calendar, onPick: { picked.append($0) })
+        picked = []
+        armed.press("2026-09-20")
+        armed.press("2026-09-05")
+        #expect(picked.last == LibraryDayRange(first: "2026-09-05", last: "2026-09-20"),
+                "pressed backwards, the run is put in order — never empty")
+        armed.ask(.oneDay)
+        armed.press("2026-09-10")
+        #expect(picked.last == LibraryDayRange(day: "2026-09-10"), "on a day narrows to one pressed day")
     }
 
     // MARK: - The range reaches the listing
@@ -121,11 +156,13 @@ struct LibraryWhenRangeTests {
             clock.set(today)
             let from = day(of: today.addingTimeInterval(-3 * 86_400))
             let to = day(of: today.addingTimeInterval(-1 * 86_400))
+            // JUSTIFIED EDIT (VX-87, direction 1): the run is made by the
+            // popover's two presses (it was the 13o TO field's binding).
             var picked: LibraryDayRange?
-            let door = LibraryWhenDoor(
-                tokens: tokens, range: LibraryDayRange(first: from, last: from), now: today,
-                onPick: { picked = $0 }, onClear: {})
-            door.toBinding.wrappedValue = try #require(JournalDay.date(from: to))
+            let door = popover(range: nil, now: today, onPick: { picked = $0 })
+            door.ask(.between)
+            door.press(from)
+            door.press(to)
             model.setEditedRange(try #require(picked))
             await model.search()
             #expect(Set(model.noteHits.map(\.id)) == [made[1], made[2]],
@@ -180,9 +217,13 @@ struct LibraryWhenRangeTests {
         #expect(LibraryDayFace.emptyAnswer(range: one, now: now, calendar: calendar)
                 == LibraryDayFace.emptyAnswer(day: "2026-09-09", now: now, calendar: calendar),
                 "one day says exactly what it always said")
+        // JUSTIFIED EDIT (VX-87): R-13o-13's "when" and "any day" stand; the
+        // menu's "on a day… · between days…" became direction 1's MODE ROW
+        // (R-VX83-2, the mockup's own words), and a mode opens nothing more,
+        // so the ellipses left with the menu.
         #expect(LibraryDayFace.closedLabel == "when" && LibraryDayFace.anyDay == "any day"
-                && LibraryDayFace.onADay == "on a day\u{2026}"
-                && LibraryDayFace.betweenDays == "between days\u{2026}",
-                "her R-13o-13 wording, verbatim")
+                && LibraryDayFace.onADay == "on a day"
+                && LibraryDayFace.betweenDays == "between days",
+                "her wording: R-13o-13's door, direction 1's mode row")
     }
 }

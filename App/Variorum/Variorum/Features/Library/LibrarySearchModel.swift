@@ -46,13 +46,14 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// **The answer sheet's state** (D1): the question has WORDS the index
     /// can be asked about. A `#tag` alone, or a day alone, is a question
     /// without words — the band says it; a `#tag` alone is answered by the
-    /// books it is ASSOCIATED with (13o U3, the tag-association join — the
-    /// sheet still asks for words for its notes, P-13o-U2-6 narrowed), and a
-    /// day alone by the shipped day listing (D5).
+    /// books it is ASSOCIATED with (13o U3, the tag-association join) and,
+    /// since VX-84a (D-1, superseding P-13o-U2-6), by the catalog's own
+    /// listing NARROWED to the notes (and, in the Blocks scope, the blocks)
+    /// it tags; a day alone by the shipped day listing (D5).
     var hasWords: Bool { query.text != nil }
 
-    /// **The sheet can answer** (13o U3): words, or a typed `#tag` whose
-    /// associated books are an answer of their own.
+    /// **The field asks something answerable** (13o U3; VX-84a): words, or a
+    /// typed `#tag` — its associated books and the notes it narrows to.
     var answers: Bool { hasWords || !tagPaths.isEmpty }
 
     /// The field's text as a question — nil when the field holds nothing to
@@ -60,14 +61,19 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// the filter half (D5 — `Queries.editedOnSQL`'s rule, unchanged).
     /// `bookState` is the armed MODE FACET (13o U3 — the sitting record
     /// §12's "mode facets as search filters"), a leaf of the same filter half.
+    ///
+    /// `savepoints` is the COMMITS facet (VX-72 — her R-VX83-5, "search what
+    /// you saved"; the chip `+ commits`, R-VX83-9): savepoint history joins
+    /// the answer. Off, the one composer's fence keeps every savepoint out.
     static func read(
         _ text: String, range: SearchDayRange? = nil, visibility: SearchVisibility = .living,
-        bookState: SearchBookState? = nil,
+        bookState: SearchBookState? = nil, savepoints: Bool = false,
         locale: Locale = .current, calendar: Calendar = JournalDay.storeCalendar
     ) -> LibrarySearchQuestion? {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
         var query = SearchQueryParser.parse(
             text, typeAhead: true, visibility: visibility, locale: locale, calendar: calendar)
+        query.includesSavepoints = savepoints
         if let range {
             query.filter = query.filter.map { .all([$0, .days(range)]) } ?? .days(range)
         }
@@ -121,6 +127,28 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
         return joined.isEmpty ? "" : joined + ((endsOpen && !lastWasTag) ? "" : " ")
     }
 
+    /// **The field's text with an offered tag ACCEPTED** (VX-84b — D-2,
+    /// ratified R-VX83-1: a plain word naming a tag offers it; the press is
+    /// the explicit act). The word that named the tag BECOMES `#path` — so a
+    /// lone word turns into a tag alone (D-1's narrowed listing) and a word
+    /// beside others narrows the ranked sheet — every other token as typed,
+    /// single-spaced, ending in a space (the tag is complete; nothing is left
+    /// a type-ahead tail). A word no longer in the field (she typed on) adds
+    /// the tag beside what is there.
+    static func acceptingTagOffer(_ offer: SearchTagOffer.Offer, in text: String) -> String {
+        var tokens = SearchFieldWords.tokens(of: text)
+        let tag = "#" + offer.path
+        func unquoted(_ token: String) -> String {
+            token.trimmingCharacters(in: CharacterSet(charactersIn: "\"\u{201C}\u{201D}"))
+        }
+        if let i = tokens.firstIndex(where: { !SearchFieldWords.isTagShaped($0) && unquoted($0) == offer.word }) {
+            tokens[i] = tag
+        } else {
+            tokens.append(tag)
+        }
+        return tokens.joined(separator: " ") + " "
+    }
+
     // (NIT-1, round 1: the token/words/tag reading MOVED to the shared home
     // — `SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift` — the book's
     // band is its second consumer; the rule is the PARSER's letter.)
@@ -140,6 +168,9 @@ nonisolated struct LibrarySearchListing: Equatable, Sendable {
     var archivedBooks: Set<String> = []
     var groups: [SearchGroup] = []
     var next: SearchComposer.GroupCursor?
+    /// VX-84b (D-2, ratified R-VX83-1): the tags the question's WORDS name —
+    /// the band's `tag: #path ›` invitations.
+    var tagOffers: [SearchTagOffer.Offer] = []
 }
 
 // MARK: - The model
@@ -170,6 +201,11 @@ final class LibrarySearchModel {
     /// `+ book state` chip. A question she asks, never remembered (the
     /// facet's own reason above). nil = none.
     private(set) var bookState: SearchBookState?
+    /// **The COMMITS facet** (VX-72 — her R-VX83-5: *"do the savepoints …
+    /// it's the most important product story (anything you've saved)"*; the
+    /// chip `+ commits`, her R-VX83-9): savepoint history joins the answer.
+    /// A question she asks, never remembered (the archived facet's reason).
+    private(set) var includesSavepoints = false
 
     /// The question the LISTED answer answers — nil when the Library is not
     /// searching. The band reads it whenever it is non-nil (P-13o-U2-1).
@@ -187,6 +223,10 @@ final class LibrarySearchModel {
     private(set) var archivedBooks: Set<String> = []
     /// The answer sheet's groups — notes and scraps groups, best first.
     private(set) var groups: [SearchGroup] = []
+    /// **The tags the words name** (VX-84b — D-2, ratified R-VX83-1): the
+    /// band offers each as `tag: #path ›`; the press is the explicit act
+    /// (`LibraryCatalogModel.acceptTagOffer`). Empty without words.
+    private(set) var tagOffers: [SearchTagOffer.Offer] = []
     /// Where the next page of groups starts; nil when none follows.
     private(set) var next: SearchComposer.GroupCursor?
     /// A next page is in flight (one at a time).
@@ -237,6 +277,11 @@ final class LibrarySearchModel {
         visibility = visibility == .living ? .includingArchived : .living
     }
 
+    /// The commits facet's door (VX-72): on ↔ off. The caller re-reads.
+    func toggleSavepoints() {
+        includesSavepoints.toggle()
+    }
+
     /// The mode facet's door (13o U3): arm one state, or clear (nil). The
     /// caller re-reads; the scope it moves is the catalog's
     /// (`LibraryCatalogModel.armBookState`).
@@ -244,10 +289,12 @@ final class LibrarySearchModel {
         bookState = state
     }
 
-    /// Put the facets back (a cleared field): the living corpus, no state.
+    /// Put the facets back (a cleared field): the living corpus, no state,
+    /// no savepoints.
     func resetFacet() {
         visibility = .living
         bookState = nil
+        includesSavepoints = false
     }
 
     // MARK: - Landing (the catalog's road — `LibrarySearchRouting.swift`)
@@ -269,6 +316,7 @@ final class LibrarySearchModel {
         bookReasons = listing?.bookReasons ?? [:]
         archivedBooks = listing?.archivedBooks ?? []
         groups = listing?.groups ?? []
+        tagOffers = listing?.tagOffers ?? []
         next = listing?.next
         loadingMore = false
         reindexGroups()
@@ -389,8 +437,11 @@ final class LibrarySearchModel {
             listing.bookReasons = section.reasons
             listing.archivedBooks = section.archived
         }
-        // A typed tag ALONE answers with its books only (13o U3): its notes
-        // need words (P-13o-U2-6, narrowed).
+        // The ranked groups need WORDS; a typed tag alone is the catalog's
+        // own narrowed listing (VX-84a, D-1 — `LibraryCatalogModel.listing`).
+        // VX-84b (D-2): the tags the words name, offered in the band (the
+        // whole question's, never the scope's — like the counts, D3).
+        listing.tagOffers = try Queries.searchTagOffers(db, query: question.query, scope: where_)
         if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(
                 db, query: question.scoped(scope), scope: where_, limit: groupDepth,

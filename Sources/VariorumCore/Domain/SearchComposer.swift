@@ -132,6 +132,9 @@ public enum SearchComposer {
     static let kindWeights: [(kind: String, weight: Double)] = [
         ("title", 3.0), ("book", 3.0), ("chapter", 2.5), ("block_name", 2.0),
         ("take_label", 1.5), ("take", 1.0), ("comment", 0.8), ("note_meta", 0.8),
+        // VX-72 (PROVISIONAL P-VX83-C2): a saved state ranks just under the
+        // living take — the living words lead, their savepoints follow.
+        ("savepoint", 0.9),
     ]
     /// The rendered take's boost over the block's other takes.
     static let renderedBoost = 1.25
@@ -218,10 +221,11 @@ public enum SearchComposer {
         if cursor != nil {
             keyset = "WHERE (s.score > ? OR (s.score = ? AND s.doc_id > ?))"
         }
+        let saved = savedAtStage("page", query)
         let sql = """
             WITH hits AS (\(hits.sql)),
             scored AS (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             ),
             page AS (
@@ -230,8 +234,8 @@ public enum SearchComposer {
               ORDER BY s.score, s.doc_id
               LIMIT ?
             )
-            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid
+            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
+            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid\(saved.join)
             WHERE search_fts MATCH ?
             ORDER BY page.score, page.doc_id
             """
@@ -243,12 +247,27 @@ public enum SearchComposer {
     }
 
     /// The score of a hit row `h` — `bm25 × the kind's weight × the
-    /// rendered-take boost` (lower is better; bm25 is negative).
-    static var scoreSQL: String {
+    /// rendered-take boost` (lower is better; bm25 is negative). Under the
+    /// commits facet (VX-72) a savepoint's `rendered` says whether ITS TAKE
+    /// renders (the landing reads it), so the boost is held to takes there —
+    /// a savepoint never wears it (P-VX83-C2). Off the facet no savepoint is
+    /// a hit and the shipped text stands byte for byte.
+    static func scoreSQL(_ query: SearchQuery) -> String {
         let weight = "CASE h.kind "
             + kindWeights.map { "WHEN '\($0.kind)' THEN \($0.weight)" }.joined(separator: " ")
             + " ELSE 1.0 END"
-        return "h.bm * (\(weight)) * (CASE WHEN h.rendered THEN \(renderedBoost) ELSE 1.0 END)"
+        let boosted = query.includesSavepoints ? "h.rendered AND h.kind = 'take'" : "h.rendered"
+        return "h.bm * (\(weight)) * (CASE WHEN \(boosted) THEN \(renderedBoost) ELSE 1.0 END)"
+    }
+
+    /// **A savepoint's DAY, read for the page rows only** (VX-72 — the line
+    /// wears "savepoint · Oct 6", P-VX83-C6): the commit's `created_at` by its
+    /// key, joined at the snippet stage over the ≤ `limit` rows that list
+    /// (∝ the page, never the matches). Nothing off the facet.
+    static func savedAtStage(_ rows: String, _ query: SearchQuery) -> (column: String, join: String) {
+        guard query.includesSavepoints else { return ("", "") }
+        return (", cp.created_at AS saved_at",
+                "\nLEFT JOIN commit_point cp ON cp.id = \(rows).src_id AND \(rows).kind = 'savepoint'")
     }
 
     /// **The HITS** — every matching doc with its home's facts, scoped,
@@ -277,6 +296,17 @@ public enum SearchComposer {
         guard let text = query.text, let match = try ftsMatch(text) else { return nil }
         var arguments: [Value] = [.text(match)]
         var conditions: [String] = ["(c.id IS NOT NULL OR r.id IS NOT NULL)"]
+        // **VX-72 — the SAVEPOINT FENCE** (the §U-C RULINGS' condition 2; her
+        // R-VX83-5 split: "anything you've saved" is a door she opens). Off
+        // the commits facet a savepoint doc NEVER lists: the doc-row kind
+        // fence, evaluated at the doc's own loop before any home is looked up
+        // (pinned: never lists without the facet). Under the facet a
+        // savepoint lists only while its TAKE is live — the take is sought by
+        // key (`sv`, below) and everything past it is the take docs' road:
+        // FORK 1 = A, the liveness resolved here, at query time, never by a
+        // trigger (R-13o-4).
+        let savepoints = query.includesSavepoints
+        conditions.append(savepoints ? "(d.kind <> 'savepoint' OR sv.id IS NOT NULL)" : "d.kind <> 'savepoint'")
 
         // The WING, always (the 13i sitting record §12) — a book's own wing
         // for book/chapter docs, the home container's otherwise. Scraps (a
@@ -314,7 +344,14 @@ public enum SearchComposer {
             }
         }
 
-        let archived = """
+        // A savepoint carries no archived fact of its own: its TAKE's is read
+        // through `sv` (P-VX83-C1 — an archived take's savepoints are archived
+        // history, listed with `+ archived` too).
+        let archived = savepoints ? """
+            (d.archived = 1 OR c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL
+             OR (d.kind = 'chapter' AND r.archived_at IS NOT NULL)
+             OR (d.kind = 'savepoint' AND sv.status = 'archived'))
+            """ : """
             (d.archived = 1 OR c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL
              OR (d.kind = 'chapter' AND r.archived_at IS NOT NULL))
             """
@@ -339,7 +376,12 @@ public enum SearchComposer {
         // live, active, this block's — else the block's default), decided
         // from the doc's OWN facts wherever they suffice; one seek only for a
         // default take whose block points at ANOTHER take.
-        let rendered = """
+        //
+        // VX-72: under the commits facet a SAVEPOINT's `rendered` says whether
+        // ITS TAKE (`sv`) is the one the block renders — the same rule, read
+        // over the take — so its landing steps exactly where a take hit's
+        // would (P-VX83-C4); the score never boosts it (`scoreSQL`).
+        let takeRendered = """
             CASE
               WHEN d.kind <> 'take' THEN 0
               WHEN pl.chosen_variant_id = d.src_id AND d.archived = 0 THEN 1
@@ -350,11 +392,31 @@ public enum SearchComposer {
                                   AND ch.deleted_at IS NULL AND ch.status = 'active')
             END
             """
+        let rendered = savepoints ? """
+            CASE
+              WHEN d.kind = 'savepoint' THEN (CASE
+                WHEN pl.chosen_variant_id = sv.id AND sv.status = 'active' THEN 1
+                WHEN b.default_variant_id IS NOT sv.id THEN 0
+                WHEN pl.chosen_variant_id IS NULL OR pl.chosen_variant_id = sv.id THEN 1
+                ELSE NOT EXISTS (SELECT 1 FROM variant ch
+                                  WHERE ch.id = pl.chosen_variant_id AND ch.block_id = sv.block_id
+                                    AND ch.deleted_at IS NULL AND ch.status = 'active')
+              END)
+              ELSE \(takeRendered)
+            END
+            """ : takeRendered
+        // The facet's road to a savepoint's block: its take, by key (a NULL
+        // `variant_id` — every other kind — joins nothing), then the I2
+        // placement and the block by the take's `block_id`.
+        let blockKey = savepoints ? "COALESCE(d.block_id, sv.block_id)" : "d.block_id"
+        let takeJoin = savepoints
+            ? "\n  LEFT JOIN variant sv ON sv.id = d.variant_id AND sv.deleted_at IS NULL"
+            : ""
         // Leading and trailing newline: the body sits inside `WITH hits AS (…)`
         // exactly where the shipped page statement wrote it.
         let sql = """
 
-              SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, d.block_id AS block_id,
+              SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, \(blockKey) AS block_id,
                      d.reading_id AS reading_id, c.id AS home_id, c.kind AS home_kind,
                      c.title AS home_title, c.entry_date AS home_entry_date,
                      c.created_at AS home_created_at, r.name AS reading_name, r.kind AS reading_kind,
@@ -362,10 +424,10 @@ public enum SearchComposer {
                      \(rendered) AS rendered,
                      bm25(search_fts) AS bm
               FROM search_fts
-              JOIN search_doc d ON d.id = search_fts.rowid
-              LEFT JOIN container_block pl ON pl.block_id = d.block_id AND pl.deleted_at IS NULL
+              JOIN search_doc d ON d.id = search_fts.rowid\(takeJoin)
+              LEFT JOIN container_block pl ON pl.block_id = \(blockKey) AND pl.deleted_at IS NULL
               LEFT JOIN container c ON c.id = COALESCE(d.container_id, pl.container_id) AND c.deleted_at IS NULL
-              LEFT JOIN block b ON b.id = d.block_id AND b.deleted_at IS NULL
+              LEFT JOIN block b ON b.id = \(blockKey) AND b.deleted_at IS NULL
               LEFT JOIN reading r ON r.id = d.reading_id AND r.deleted_at IS NULL
               WHERE search_fts MATCH ?
                 AND \(conditions.joined(separator: "\n    AND "))
@@ -415,10 +477,11 @@ public enum SearchComposer {
         if cursor != nil {
             keyset = "WHERE (g.g_best > ? OR (g.g_best = ? AND g.g_home > ?))"
         }
+        let saved = savedAtStage("top", query)
         let sql = """
             WITH hits AS (\(hits.sql)),
             scored AS MATERIALIZED (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             ),
             grouped AS (
@@ -443,8 +506,8 @@ public enum SearchComposer {
             top AS (
               SELECT * FROM ranked WHERE rn <= ?
             )
-            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid
+            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
+            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid\(saved.join)
             WHERE search_fts MATCH ?
             ORDER BY top.g_best, top.home_id, top.rn
             """
@@ -480,7 +543,7 @@ public enum SearchComposer {
         let sql = """
             WITH hits AS MATERIALIZED (\(hits.sql)),
             scored AS (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             )
             SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
@@ -523,6 +586,16 @@ public enum SearchComposer {
         let book = "h.reading_id IS NOT NULL"
         let note = "h.reading_id IS NULL AND h.home_kind = 'post'"
         let pool = "h.reading_id IS NULL AND h.home_kind = 'pool'"
+        // VX-72 (P-VX83-C3): under the commits facet a savepoint hit counts as
+        // its OWN kind — `passages` and `scraps` stay the living text, and the
+        // savepoints are said beside them ("N savepoints"). Off the facet no
+        // savepoint is a hit and the shipped text stands.
+        let line = query.includesSavepoints ? "h.kind NOT IN ('title', 'savepoint')" : "h.kind <> 'title'"
+        let savepointCounts = query.includesSavepoints ? """
+            ,
+              (SELECT COUNT(*) FROM hits h WHERE h.reading_id IS NULL AND h.kind = 'savepoint' AND NOT h.archived) AS savepoints,
+              (SELECT COUNT(*) FROM hits h WHERE h.reading_id IS NULL AND h.kind = 'savepoint') AS all_savepoints
+            """ : ""
         let sql = """
             WITH hits AS MATERIALIZED (\(hits.sql))
             SELECT
@@ -532,20 +605,20 @@ public enum SearchComposer {
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note) AND NOT h.archived
                  UNION ALL SELECT value FROM json_each(?)) n) AS notes,
-              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title' AND NOT h.archived) AS passages,
-              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title' AND NOT h.archived) AS scraps,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND \(line) AND NOT h.archived) AS passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND \(line) AND NOT h.archived) AS scraps,
               (SELECT COUNT(DISTINCT k.id) FROM (
                  SELECT h.reading_id AS id FROM hits h WHERE \(book)
                  UNION ALL SELECT value FROM json_each(?)) k) AS all_books,
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note)
                  UNION ALL SELECT value FROM json_each(?)) n) AS all_notes,
-              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title') AS all_passages,
-              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title') AS all_scraps,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND \(line)) AS all_passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND \(line)) AS all_scraps,
               (SELECT COUNT(DISTINCT p.id) FROM (
                  SELECT COALESCE(h.reading_id, h.home_id) AS id FROM hits h WHERE h.archived
                  UNION ALL SELECT value FROM json_each(?)
-                 UNION ALL SELECT value FROM json_each(?)) p) AS archived_places
+                 UNION ALL SELECT value FROM json_each(?)) p) AS archived_places\(savepointCounts)
             """
         return Statement(
             sql: sql,
@@ -596,15 +669,7 @@ public enum SearchComposer {
                 commonArguments.append(.text(id))
             }
         }
-        switch query.visibility {
-        case .living:
-            common.append("c.archived_at IS NULL")
-        case .includingArchived:
-            common.append("NOT (\(environment.versionPredicate("c")))")
-        case .archivedOnly:
-            common.append("c.archived_at IS NOT NULL")
-            common.append("NOT (\(environment.versionPredicate("c")))")
-        }
+        common += noteVisibility(query.visibility, environment: environment)
         if let filter = query.filter {
             let composed = composeFilter(filter, level: .note, wingID: scope.wingID, environment: environment)
             common.append(composed.sql)
@@ -638,6 +703,198 @@ public enum SearchComposer {
                 arguments: createdWindows.flatMap { [Value.text($0.start), .text($0.end)] + commonArguments }))
         }
         return statements
+    }
+
+    /// The archived facet at NOTE level over the container `c` — the worn-day
+    /// arm's own clauses (factored, byte-identical, at VX-84a so the text-less
+    /// TAG road reads the same rule): living leaves archived notes out; with
+    /// the facet on, saved VERSIONS stay fenced.
+    static func noteVisibility(_ visibility: SearchVisibility, environment: Environment) -> [String] {
+        switch visibility {
+        case .living:
+            ["c.archived_at IS NULL"]
+        case .includingArchived:
+            ["NOT (\(environment.versionPredicate("c")))"]
+        case .archivedOnly:
+            ["c.archived_at IS NOT NULL", "NOT (\(environment.versionPredicate("c")))"]
+        }
+    }
+
+    // MARK: - The text-less TAG road (VX-84a — the 13o follow-up run's D-1)
+
+    /// **What the catalog's own listing composes when a `#tag` is typed with
+    /// no words** (VX-84 — her report: *"searching a tag is not revealing the
+    /// notes tagged that at all"*; the provisional call D-1 in
+    /// `notes/plans/fixes/vx-83-search-followup.md`: a tag alone NARROWS THE
+    /// LIBRARY like a day does). The FTS road needs words (P-13o-U1-7 stands
+    /// for it); this is the composer's text-less road, served as a NARROWING
+    /// the listing statements wrap — the notes page keeps its own sort and
+    /// keyset, the blocks list its own order — so nothing here ranks.
+    ///
+    /// Two halves, one truth:
+    /// - **`driver`** — the PLAN: a `SELECT … AS tagged_id` of the ids the typed
+    ///   tags name (each typed `#path`'s SUBTREE, its root found by a range on
+    ///   `uq_tag_path_live`, its applications by tag id — `post_tag` for
+    ///   notes, `block_tag` for blocks; several tags INTERSECT). A listing
+    ///   drives from it (`CROSS JOIN`), so a page costs ∝ the tag's
+    ///   applications — never a walk of the wing's notes looking for tagged
+    ///   ones (measured: the VX-84a seam record).
+    /// - **`conditions`** — the TRUTH: the whole question over the listing's
+    ///   aliases (`c` the note or home container; `b` the block) — liveness,
+    ///   the wing ALWAYS (scraps homes in every wing, P-13o-U1-5), the
+    ///   archived facet, and the filter half read by the one `composeFilter`
+    ///   (the typed tags again — the driver is only the plan's shape — plus an
+    ///   armed day, a book-state facet, …).
+    ///
+    /// nil when the question has WORDS (the answer sheet's road) or no typed
+    /// tag to drive from.
+    public struct ListingNarrowing: Equatable, Sendable {
+        public let driver: String
+        public let driverArguments: [Value]
+        public let conditions: String
+        public let conditionArguments: [Value]
+    }
+
+    /// Which listing a narrowing is for.
+    public enum ListingKind: Sendable {
+        /// The notes listing: `c` is the note (`post_tag` drives).
+        case notes
+        /// The blocks listing: `b` the block, `c` its placement's home
+        /// (`block_tag` drives) — the Blocks scope, by BLOCK-level tags.
+        case blocks
+    }
+
+    public static func listingNarrowing(
+        _ query: SearchQuery, kind: ListingKind, wingID: String, environment: Environment
+    ) -> ListingNarrowing? {
+        guard query.text == nil, let filter = query.filter else { return nil }
+        let paths = drivingTagPaths(filter)
+        guard !paths.isEmpty else { return nil }
+        let rootWing = environment.wingScope("root.wing_id", wingID)
+        let applications = kind == .notes
+            ? ("pt.post_id", "CROSS JOIN post_tag pt ON pt.tag_id = applied.id AND pt.deleted_at IS NULL")
+            : ("bt.block_id", "CROSS JOIN block_tag bt ON bt.tag_id = applied.id AND bt.deleted_at IS NULL")
+        // DISTINCT, twice over (both measured at the seam): a note wearing a
+        // tag AND its child is in the subtree twice and must list once; and
+        // SQLite never flattens a DISTINCT subquery into the outer join, so
+        // the driver keeps its own order (root → applied → applications by
+        // tag id) instead of being inverted into a scan of EVERY live
+        // application in the store.
+        let one = """
+            SELECT DISTINCT \(applications.0) AS tagged_id \(appliedTags(join: "CROSS JOIN"))
+                      \(applications.1)
+                     WHERE root.deleted_at IS NULL AND root.path = ? COLLATE NOCASE AND \(rootWing.sql)
+            """
+        let driver = paths.map { _ in one }.joined(separator: "\nINTERSECT\n")
+        let driverArguments = paths.flatMap { [Value.text($0)] + rootWing.arguments }
+
+        var conditions: [String]
+        var arguments: [Value] = []
+        switch kind {
+        case .notes:
+            let wing = environment.wingScope("c.wing_id", wingID)
+            // `+c.kind` (the worn-day arm's precedent): the kind index must
+            // never be the road to `c` — measured at the seam, a flattened
+            // driver let the planner search `c` BY KIND per application in
+            // the never-touched arm (∝ the wing's notes); the join's PK seek
+            // is the only road left.
+            conditions = ["+c.kind = 'post'", "c.deleted_at IS NULL", wing.sql]
+            arguments += wing.arguments
+            conditions += noteVisibility(query.visibility, environment: environment)
+            let composed = composeFilter(filter, level: .note, wingID: wingID, environment: environment)
+            conditions.append(composed.sql)
+            arguments += composed.arguments
+        case .blocks:
+            let wing = environment.wingScope("c.wing_id", wingID)
+            conditions = ["b.deleted_at IS NULL", "c.deleted_at IS NULL", "(c.kind = 'pool' OR \(wing.sql))"]
+            arguments += wing.arguments
+            switch query.visibility {
+            case .living:
+                conditions += ["c.archived_at IS NULL", "b.archived_at IS NULL"]
+            case .includingArchived:
+                conditions.append("NOT (\(environment.versionPredicate("c")))")
+            case .archivedOnly:
+                conditions += ["(c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL)",
+                               "NOT (\(environment.versionPredicate("c")))"]
+            }
+            let composed = composeFilter(filter, level: .block, wingID: wingID, environment: environment)
+            conditions.append(composed.sql)
+            arguments += composed.arguments
+        }
+        return ListingNarrowing(
+            driver: driver, driverArguments: driverArguments,
+            conditions: conditions.joined(separator: "\n  AND "), conditionArguments: arguments)
+    }
+
+    /// The tags a text-less question can DRIVE from: the typed `#path`s of
+    /// its top-level conjunction (never one under `any`/`not` — those narrow,
+    /// they cannot enumerate).
+    static func drivingTagPaths(_ filter: SearchFilter) -> [String] {
+        switch filter {
+        case .tagPath(let path): [path]
+        case .all(let children): children.flatMap(drivingTagPaths)
+        default: []
+        }
+    }
+
+    /// **The text-less road's counts** (VX-84a — the band stays honest under a
+    /// tag alone): the narrowed notes and blocks, living and with the
+    /// archived facet on, each one walk of its driver. nil when the question
+    /// is not text-less-with-a-tag. Result columns: notes, all_notes, blocks,
+    /// all_blocks.
+    public static func listingCounts(
+        _ query: SearchQuery, wingID: String, environment: Environment
+    ) -> Statement? {
+        var living = query
+        living.visibility = .living
+        var everything = query
+        everything.visibility = .includingArchived
+        guard let notes = listingNarrowing(living, kind: .notes, wingID: wingID, environment: environment),
+              let allNotes = listingNarrowing(everything, kind: .notes, wingID: wingID, environment: environment),
+              let blocks = listingNarrowing(living, kind: .blocks, wingID: wingID, environment: environment),
+              let allBlocks = listingNarrowing(everything, kind: .blocks, wingID: wingID, environment: environment)
+        else { return nil }
+        func noteCount(_ n: ListingNarrowing) -> String {
+            """
+            (SELECT COUNT(*) FROM (\(n.driver)) t
+               CROSS JOIN container c ON c.id = t.tagged_id
+              WHERE \(n.conditions))
+            """
+        }
+        func blockCount(_ n: ListingNarrowing) -> String {
+            """
+            (SELECT COUNT(*) FROM (\(n.driver)) t
+               CROSS JOIN block b ON b.id = t.tagged_id
+               JOIN container_block pl ON pl.block_id = b.id AND pl.deleted_at IS NULL
+               JOIN container c ON c.id = pl.container_id
+              WHERE \(n.conditions))
+            """
+        }
+        let sql = """
+            SELECT \(noteCount(notes)) AS notes, \(noteCount(allNotes)) AS all_notes,
+                   \(blockCount(blocks)) AS blocks, \(blockCount(allBlocks)) AS all_blocks
+            """
+        var arguments: [Value] = []
+        for n in [notes, allNotes, blocks, allBlocks] {
+            arguments += n.driverArguments + n.conditionArguments
+        }
+        return Statement(sql: sql, arguments: arguments)
+    }
+
+    /// **The wing's live tag vocabulary** (VX-84b — the tag OFFER's
+    /// candidates; `SearchTagOffer` decides in Swift, the index's own
+    /// sameness). ∝ the wing's tags — the class the typed tag's own path
+    /// lookup already pays per keystroke (`typedTagPaths` reads the same
+    /// index). Result column: path.
+    public static func wingTagVocabulary(wingID: String, environment: Environment) -> Statement {
+        let wing = environment.wingScope("t.wing_id", wingID)
+        return Statement(
+            sql: """
+                SELECT t.path FROM tag t
+                WHERE t.deleted_at IS NULL AND \(wing.sql)
+                ORDER BY t.path
+                """,
+            arguments: wing.arguments)
     }
 
     // MARK: - The tag-association join's reads (13o U3 — the 13i sitting record §12)
@@ -723,6 +980,12 @@ public enum SearchComposer {
         case note
         /// A reading row `r` alone (13o U3 — the association's candidates).
         case reading
+        /// A BLOCK row (VX-84a — the text-less TAG road's blocks listing):
+        /// the block `b` and its placement's home container `c`. A tag term
+        /// is the BLOCK's own (block-level, `block_tag` — the Blocks scope's
+        /// D-1 reading); the home answers starred / day / family as a
+        /// passage's does; a block is no book and no indexed doc.
+        case block
     }
 
     static func composeFilter(
@@ -774,7 +1037,7 @@ public enum SearchComposer {
             case (.notes, _): return ("c.kind = 'post'", [])
             case (.scraps, _): return ("c.kind = 'pool'", [])
             case (.books, .passage): return ("d.reading_id IS NOT NULL", [])
-            case (.books, .note): return ("0", [])
+            case (.books, .note), (.books, .block): return ("0", [])
             case (.books, .reading): return ("1", [])
             }
         case .docKind(let kind):
@@ -784,6 +1047,8 @@ public enum SearchComposer {
             case .note: return (kind == .title ? "1" : "0", [])
             // An associated reading is a BOOK-level answer.
             case .reading: return (kind == .book ? "1" : "0", [])
+            // A listed block is no indexed doc (VX-84a).
+            case .block: return ("0", [])
             }
         case .bookState(let state):
             let fact = bookStateSQL(state, alias: "r", environment: environment)
@@ -791,7 +1056,7 @@ public enum SearchComposer {
             // Only a book or chapter hit names a reading row (`r` is joined
             // for those alone) — a facet narrows the answer to books.
             case .passage: return ("(d.reading_id IS NOT NULL AND r.id IS NOT NULL AND \(fact))", [])
-            case .note: return ("0", [])
+            case .note, .block: return ("0", [])
             case .reading: return ("(\(fact))", [])
             }
         }
@@ -809,6 +1074,30 @@ public enum SearchComposer {
         }
     }
 
+    /// **The subtree walk's FROM clause, one copy** (VX-84a factored it out
+    /// of `tagSubtree`, byte-identical, so the text-less road's driver reads
+    /// the same walk): driven FROM THE ROOT — the applied tags are found by a
+    /// RANGE on `uq_tag_path_live (wing_id, path)` — [path, path || '0') holds
+    /// every path that starts with the root's ('0' follows '/') — and the exact
+    /// subtree test is the residual; then the applications by tag id. Cost ∝
+    /// the subtree's applications, never every tag application.
+    static let appliedTagsSQL = appliedTags(join: "JOIN")
+
+    /// The walk with its JOIN keyword named: `JOIN` is the shipped text, byte
+    /// for byte; the text-less road's DRIVER asks for `CROSS JOIN`, which
+    /// pins the planner to the order the walk is written in (root → applied →
+    /// the applications by tag id) — measured at the seam, a free order let
+    /// it scan every live application in the store to satisfy DISTINCT.
+    static func appliedTags(join: String) -> String {
+        """
+        FROM tag root
+                  \(join) tag applied ON applied.wing_id = root.wing_id AND applied.deleted_at IS NULL
+                   AND applied.path >= root.path AND applied.path < root.path || '0'
+                   AND (applied.path = root.path
+                        OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/')
+        """
+    }
+
     /// A tag term, SUBTREE-matched through the root's LIVE path (the
     /// gathering rule's own reading — `ruleSQL`'s letter, wing-scoped: the
     /// applied tag shares the root's wing). A note matches by its own tags; a
@@ -818,18 +1107,7 @@ public enum SearchComposer {
     private static func tagSubtree(
         root: String, rootArguments: [Value], level: Level
     ) -> (sql: String, arguments: [Value]) {
-        // Driven FROM THE ROOT: the applied tags are found by a RANGE on
-        // `uq_tag_path_live (wing_id, path)` — [path, path || '0') holds every
-        // path that starts with the root's ('0' follows '/') — and the exact
-        // subtree test is the residual; then the applications by tag id. Cost
-        // ∝ the subtree's applications, never every tag application.
-        let applied = """
-            FROM tag root
-                      JOIN tag applied ON applied.wing_id = root.wing_id AND applied.deleted_at IS NULL
-                       AND applied.path >= root.path AND applied.path < root.path || '0'
-                       AND (applied.path = root.path
-                            OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/')
-            """
+        let applied = appliedTagsSQL
         let notes = """
             c.id IN (SELECT pt.post_id \(applied)
                       JOIN post_tag pt ON pt.tag_id = applied.id AND pt.deleted_at IS NULL
@@ -840,6 +1118,14 @@ public enum SearchComposer {
             return ("1", [])  // unreachable: `composeFilter` answers a reading row first
         case .note:
             return ("COALESCE(" + notes + ", 0)", rootArguments)
+        case .block:
+            // VX-84a: a listed block by its OWN tags (block-level only).
+            let blocks = """
+                b.id IN (SELECT bt.block_id \(applied)
+                          JOIN block_tag bt ON bt.tag_id = applied.id AND bt.deleted_at IS NULL
+                         WHERE root.deleted_at IS NULL AND \(root))
+                """
+            return ("COALESCE(" + blocks + ", 0)", rootArguments)
         case .passage:
             let blocks = """
                 d.block_id IN (SELECT bt.block_id \(applied)
@@ -882,4 +1168,56 @@ public enum SearchComposer {
 public struct SearchSnippetSegment: Equatable, Sendable {
     public let text: String
     public let isMatch: Bool
+}
+
+extension SearchSnippetSegment {
+    /// **The words a landing arms the find bar with** (VX-86 — her report:
+    /// *"only the first word of what you searched is filled in"*; the
+    /// provisional call D-3, `notes/plans/fixes/vx-83-search-followup.md`).
+    ///
+    /// FTS5 marks EACH matched term's occurrence as its own run, so
+    /// "sherlock holmes" over "…Sherlock Holmes…" arrives as
+    /// `[Sherlock][ ][Holmes]` — and the landing used to take the first run
+    /// alone. The needle is the snippet's first CONTIGUOUS matched span:
+    /// matched runs separated only by horizontal whitespace coalesce, as
+    /// written ("Sherlock Holmes" — case and spacing preserved, so the find
+    /// bar's literal search meets the text); a gap holding anything else —
+    /// punctuation, another word, a NEWLINE (I4 content; the find bar holds
+    /// one line) — ends the span, so scattered terms keep the first run (the
+    /// bar cannot hold a disjunction). nil when nothing is marked.
+    ///
+    /// One pure home so the phone's search face lands the same words.
+    public static func firstMatchedSpan(_ segments: [SearchSnippetSegment]) -> String? {
+        guard let first = segments.firstIndex(where: \.isMatch) else { return nil }
+        var span = segments[first].text
+        var i = first + 1
+        while i < segments.count {
+            let segment = segments[i]
+            if segment.isMatch {
+                span += segment.text               // two marked runs abutting
+                i += 1
+            } else if i + 1 < segments.count, segments[i + 1].isMatch,
+                      isSpanGap(segment.text) {
+                span += segment.text + segments[i + 1].text
+                i += 2
+            } else {
+                break
+            }
+        }
+        let trimmed = span.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// A gap the span crosses, kept AS WRITTEN so the literal find still
+    /// lands: horizontal whitespace of any length, or a SHORT separator of
+    /// at most 2 characters — "-", ", ", and the Markdown emphasis gaps
+    /// " _" / "_ " that the VX-83 walk found arming "always" alone from the
+    /// seeded "always _the_ woman" (§WALK JUDGMENT, F-W-2). A newline of any
+    /// kind always ends the span — the find bar holds one line (I4: newlines
+    /// are content; P-VX83-1). PROVISIONAL P-VX83-W2: this ≤ 2-character
+    /// widening of D-3's whitespace-only letter.
+    private static func isSpanGap(_ text: String) -> Bool {
+        guard !text.isEmpty, !text.contains(where: \.isNewline) else { return false }
+        return text.allSatisfy(\.isWhitespace) || text.count <= 2
+    }
 }

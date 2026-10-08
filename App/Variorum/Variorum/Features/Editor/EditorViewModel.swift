@@ -2135,13 +2135,21 @@ final class EditorViewModel {
             performFind(.show)
             textView.window?.makeFirstResponder(textView)
             updateCaretContext()
-            revealLanding(match.location, textView: textView)
+            // VX-85 (D-4): the match rests in the COMFORT BAND below the bar
+            // this landing just showed — never flush at the clip's top, the
+            // strip the bar covers (her report: "the search bar hides the
+            // result").
+            revealLanding(match.location, textView: textView, kind: .banded)
         } else {
             let board = NSPasteboard(name: .find)
             board.clearContents()
             board.setString(seed.needle, forType: .string)
             performFind(.show)
             textView.window?.makeFirstResponder(textView)
+            // VX-85: no reveal of this arm's own (nothing is selected) — but
+            // the caret seed's reveal, parked a step ago, lands the block under
+            // the bar this arm shows too; it rests banded, the same rule.
+            if pendingRevealOffset != nil { pendingRevealKind = .banded }
         }
     }
 
@@ -2152,7 +2160,7 @@ final class EditorViewModel {
     /// 6,211 pt below the viewport on a 250-paragraph note). The DETAIL editor
     /// only: the inline book/pool editor scrolls inside its host's scroll view
     /// and has none of its own, and `JumpPrimitive` refuses a nil one anyway.
-    private func revealLanding(_ offset: Int, textView: NSTextView) {
+    private func revealLanding(_ offset: Int, textView: NSTextView, kind: RevealKind = .plain) {
         guard scrollView != nil else { return }
         // PARKED, never performed here — measured, which is why: at the moment
         // a landing runs, `setSurfaceContent` has just replaced the storage and
@@ -2175,6 +2183,7 @@ final class EditorViewModel {
         // points; the honest hop(G₂) then finds nothing). A hop for an older
         // generation leaves the park alone; the bump guarantees hop(G₂).
         pendingRevealOffset = offset
+        pendingRevealKind = kind
         pendingRevealGeneration = overlayGeometryGeneration
     }
 
@@ -2185,6 +2194,16 @@ final class EditorViewModel {
     /// The generation the park was made under (R1-5) — a settle hop for an
     /// OLDER generation is not the one the park is waiting for.
     @ObservationIgnored private var pendingRevealGeneration = 0
+
+    /// **What KIND of reveal the park is** (VX-85, the 13o follow-up run —
+    /// D-4). `.plain` is #98(a)'s shipped reveal (a line already on screen
+    /// stays; one off screen lands at the viewport top). `.banded` rests the
+    /// line in the COMFORT BAND — the mode-switch arrival's own rule
+    /// (`restCaretLineInTheBand`), never a second reveal mechanism: a SEARCH
+    /// landing's find bar overlays the clip's top, so "the viewport top" is
+    /// exactly where the bar hides the match. The kind dies with its park.
+    enum RevealKind: Equatable { case plain, banded }
+    @ObservationIgnored private(set) var pendingRevealKind: RevealKind = .plain
 
     // MARK: - The session scroll anchor's restore, parked for the same hop (round 2, RAISE-M1)
 
@@ -2309,14 +2328,19 @@ final class EditorViewModel {
         // (the bump that parked it is undelivered, so the next display pass
         // schedules it).
         guard generation >= pendingRevealGeneration else { return }
+        let kind = pendingRevealKind
         pendingRevealOffset = nil
+        pendingRevealKind = .plain  // the kind dies with its park
         guard let textView, let scrollView,
               textView.selectedRange().location == offset else { return }
         // 18l-c U8 (b): a MODE SWITCH's reveal is #98(a) resolved and then
         // BANDED — the caret's line rests inside the comfort band (the top
         // air, never flush; two lines of room below) — one landing, never a
-        // second jump after this one.
-        if pendingModeSwitchArrival != nil {
+        // second jump after this one. VX-85 (D-4): a SEARCH landing's reveal
+        // is banded too (the `.banded` kind its find seed parked) — the band
+        // read against the bar-adjusted viewport, so the match rests BELOW
+        // the find bar the landing showed.
+        if pendingModeSwitchArrival != nil || kind == .banded {
             restCaretLineInTheBand(offset, textView: textView, scrollView: scrollView)
             return
         }
@@ -2429,6 +2453,7 @@ final class EditorViewModel {
         pendingAnchorInset = 0  // the inset dies with its park (round-1 NIT-1)
         let caret = pendingRevealOffset
         pendingRevealOffset = nil
+        pendingRevealKind = .plain  // the kind dies with its park (VX-85)
         JumpPrimitive.jump(
             toOffset: range.location, textView: textView, scrollView: scrollView,
             landingInset: inset)
@@ -2467,18 +2492,27 @@ final class EditorViewModel {
     /// Rest the LINE holding `offset` where `ComfortBand.restCaretLine` says
     /// (#98(a) resolved, then banded) — one `JumpPrimitive` jump, and none when
     /// the line already rests there.
+    ///
+    /// **VX-85 — the band is read against the BAR-ADJUSTED viewport** (D-4):
+    /// a shown find bar overlays the clip's top (measured on 27.0 — the clip
+    /// keeps its frame and says so in its `contentInsets`), so the viewport a
+    /// line can be SEEN in starts at the bar's bottom edge
+    /// (`JumpPrimitive.findBarInsets` — zero with no bar, where this is the
+    /// 18l-c rule byte for byte).
     private func restCaretLineInTheBand(
         _ offset: Int, textView: NSTextView, scrollView: NSScrollView
     ) {
         guard let span = JumpPrimitive.lineSpan(ofOffset: offset, in: textView) else { return }
         let visible = scrollView.contentView.bounds
-        let top = CGFloat(span.top) - visible.minY
+        let bar = JumpPrimitive.findBarInsets(of: scrollView)
+        let top = CGFloat(span.top) - visible.minY - CGFloat(bar.top)
         let rest = writeBand(textView).restCaretLine(
-            top: top, height: CGFloat(span.bottom - span.top), viewport: visible.height)
+            top: top, height: CGFloat(span.bottom - span.top),
+            viewport: visible.height - CGFloat(bar.top + bar.bottom))
         guard abs(rest - top) > 0.5 else { return }
         JumpPrimitive.jump(
             toOffset: offset, textView: textView, scrollView: scrollView,
-            landingInset: Double(rest))
+            landingInset: Double(rest) + bar.top)
     }
 
     /// **The arrival flash's sink** (18l-c U8 (a)) — the decor layer's

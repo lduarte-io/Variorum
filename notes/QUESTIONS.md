@@ -2257,7 +2257,7 @@ and keep the old citations; this table is how they resolve.)*
 
 #200 — **PROVISIONAL, built most-spec-defensible — three calls her ruled shape does not make** (record: `notes/plans/fixes/vm-10-the-write-scroll-authority.md`). **(a) How long the page stays hers after a pan.** Built: **0.6 s** after her pan's last movement or release (plus the whole of a fling's deceleration), during which no programmatic reveal moves the page; a TAP is not a pan, so tap-to-type still reveals the caret at once. Options: (i) 0.6 s, built — covers the keyboard's spring-back after an `.interactive` drag (the traced fight) and never swallows a deliberate tap a moment later; (ii) longer (1–2 s) — safer against slow spring-backs, but a quick "scroll, then type" would find its first keystroke's reveal suppressed; (iii) no window, live-pan only — the spring-back after release would still throw her (the fight survives). ****CONSEQUENCE ADDENDUM (the cold review's MINOR 2 — so this ratification is on true consequences):** the 0.6 s window is ORIGIN-BLIND — for ≤0.6 s after a pan it also swallows reveals you asked for through a non-pan door: (i) typing with the caret off-screen inside the window types blind until the first keystroke after it (self-healing); (ii) a find-navigator "next match" tap inside the window highlights without scrolling (the second tap works). The reviewer's optional tightening — void the window from the edit door, since typing is your newest intent — is red-on-old pinnable and one small arm; choosing it is part of this (a). (b) The memory remembers the CARET with the page.** Built: the page's place (content-anchored) AND her caret are kept per note; a focus arrival then reveals HER line minimally (usually it is already on screen, so nothing moves). Options: (i) page + caret, built; (ii) page only — the caret lands at the start of the note as today, and a focus arrival would reveal line 1, undoing the restored place on every Today-door re-entry; (iii) page only and no focus reveal — the keyboard rises with the caret off screen. **(c) Where the memory lives.** Built: on `MobileShellRouter` (one stored-property line outside the three files the brief named — still phone-local; nothing in `Shared/`), session-only, never persisted, keyed by note so either tab stack re-opens where the note was last left — the twin of the Mac's `EditorRouter.scrollPlaces`. Options: (i) the router, built; (ii) a process-global store in the Write feature — no file outside the brief's three, but a global singleton (CLAUDE.md's rule against them); (iii) `AppSession` — fenced (`Shared/`) for this unit.
 
-*(Next free number: **#202** — #200 is VM-10's, minted 2026-10-07. The previous marker here read #179 and was STALE — entries through #188 already existed below it; corrected at the VM-5 merge, which also renumbered the mobile branch's eleven entries to #189–#199 above this line.)*
+*(Next free number: **#206** — #205 is VX-106's, 2026-10-08; before it the marker read **#204** — #203 is VX-83's, minted 2026-10-08 at its merge. The previous marker here read #179 and was STALE — entries through #188 already existed below it; corrected at the VM-5 merge, which also renumbered the mobile branch's eleven entries to #189–#199 above this line.)*
 
 #201 — **THE 13o RATIFY BUNDLE (2026-10-07; the binding records are `notes/plans/phase-13o-search.md`'s U1/U2/U3 RECORDs + the ladder sections — each PROVISIONAL built as its (a), each a line or a constant to change).** The sets: **P-13o-U1-1…10** (the date-parse edges — with U1-4's wording AMENDED by the ladder: the type-ahead tail is a prefix only at ≥2 characters AND when the word ends the input; the kind weights title/book 3 · chapter 2.5 · block name 2 · label 1.5 · take 1 · comment/notes 0.8 with the ×1.25 shown-take boost; a text-less query returns no passages; released blocks indexed but never listed; `#path` case-insensitive; U1-5 scraps-shared-room ALREADY RATIFIED at your word same day) · **P-13o-U2-1…9** (the finder's design-as-built edges incl. #6 a `#tag` alone asks for words, #7 the sort menu reads "relevance · best first" while results show, #8 non-prose passages say what they are + the sheet replaces Cards, #9 the when door applies at once and opens its popover) · **P-13o-U3-1…8** (the join's directions/ranking/wording; a book-state facet narrows to BOOKS ONLY — the most product-shaped one, its interplay with the scope picker and the day door yours; "living" counts a malformed rule as a rule; the archived marks; the book band's words; the book's search living with the book view; the window road's shape). Plus two recorded observations for your walk: the worn-day lead group carries true counts + the road but no preview lines (honest, uneven — an optional same-statement top-lines read is the named follow-up), and VX-79 owns the rebuild/integrity FACE (the ops exist, pinned, faceless). **Status: open — walk at your next sitting.**
 
@@ -2284,3 +2284,56 @@ names no cause. Words are 13s's to re-voice; the facts are this phase's. Her rul
 their home: **no iCloud-destination warning on the hand-off, for now** ("note it for if the question ever comes up
 later again"); **no unnecessary caps in rendered copy**. Tickets born of the close: VX-95 · VX-99 · VX-100 · VX-101
 and the landing-residuals ticket. **Status: the sixteen RATIFIED; (a)–(d) ACCEPTED FOR NOW at her word (2026-10-08, verbatim: "i'm sure the questions #202 are fine for now") — reopen any at will.**
+
+## VX-83 — the 13o search follow-up (2026-10-08)
+
+#203 — **THE VX-83 RATIFY BUNDLE (2026-10-08; the binding record is `notes/plans/fixes/vx-83-search-followup.md` —
+her first-use report, the sitting rulings R-VX83-1…10, the U-A/U-B/U-C RECORDs, the §U-C RULINGS + §P1 FORK ruling,
+the §FIX PASS, both §WALK JUDGMENTs; the ladder: `notes/plans/fixes/vx-83-ladder-r1.md`).** **ALREADY HER-RATIFIED,
+listed for the record:** the tag calls (R-VX83-1 — a `#tag` alone narrows to the tagged notes' own listing, a plain
+word naming a tag OFFERS the chip; the fold-in alternative DEAD, her "i do support needing to say it's a tag
+explicitly") · the when-door direction 1 (R-VX83-2, screenshots taken and judged) · the facet word **`+ commits`**
+everywhere in SEARCH (R-VX83-9's same-night reversal + R-VX83-10 — lines read "commit · <day>", counts "N commits";
+Settings, receipts and Block History keep "savepoint", and whether THEY move is 13s's sitting) · the grid's
+no-arrow-keys v1 (R-VX83-8 → VX-98). **OPEN FOR YOUR WALK (each built as recorded, each a line or a constant to
+change):** **P-VX83-1…6** (U-A: a newline always ends the find seed's span; the non-stepping arm's caret reveal rests
+banded too; the archived facet's tag-alone rows wear the mark; the Blocks scope is a whole set, newest first,
+block-level tags only; a tag alone's NOTES are post-level applications only; the offer's sameness/leaf/≤3 rule with
+the press replacing the naming word) · **P-VX83-W2** (the span widening — gaps ≤2 characters holding no newline
+coalesce, kept as written; both your walk cases ride it: "always _the_ woman", "Good-night, Mister Sherlock") ·
+**P-VX83-W3** (record-only residue: a ONE-LINE empty note lands the caret flush under the find bar — the tiny
+document clamps at AppKit's own scroll floor; the line is visible, the air has nowhere to come from) ·
+**P-VX83-B1…B4** (U-B: the nothing-armed sentence "…on any day."; the lesson's seat in "the library of things" after
+"comments & tags"; B3 = the arrow-key gap, DECIDED by R-VX83-8; the grid's first-press/fresh-run/band-fill/today
+details) · **P-VX83-C1…C8** (U-C: archived orthogonality; the 0.9 kind weight under the living takes; the counts'
+own kind, no default-road foot; the landing's step rule + its stated residual; ⌘K and the book 🔍 stay
+savepoint-free; the kind line's day words; C7 = the chip's help texts, re-drafted around "commits"; C8 RESOLVED by
+R-VX83-10, kept for the record) · the **P-13o-U2-9 supersession** (the when door arms NOTHING until a day is pressed
+— this door only) · the **P-13o-U2-6 supersession** (a `#tag` alone now ANSWERS with the tagged notes — R-VX83-1).
+**Status: open — walk at your next sitting.**
+
+#204 — **THE VX-99 RATIFY BUNDLE (2026-10-08; the binding record is `notes/plans/fixes/vx-99-pro-castle-apple-wrap.md` —
+the findings, her rulings, the three ladder rounds `vx-99-ladder-round{1,2,3}.md`, every orchestrator disposition).**
+Built overnight under her mandate ("use your own judgement on what's in scope"); each is hers to keep or reverse.
+**(a) Scope widened past the headline, all in the same stale-posture class:** the vault's word (not the device's posture
+read) now decides the Apple-held copy on every Replace All Keys road (round 1's MAJOR — a stale read could silently flip the
+ACCOUNT's posture); the resumed ceremony's faces speak the marker's act (round 2's MAJOR — "Finish replacing keys" could walk
+into Use Castle and enter it); the resume door finishes its own mid-walk rotation (it refused, stranding sync on a
+one-device account); Replace All Keys refuses its local-only road (decision 9). **(b) Two PROVISIONAL sentences (13s
+re-voices):** `resumeReplacingKeysBody` — "Replacing your keys didn't finish on this Mac — sync is paused until it completes.
+Nothing is lost; finishing picks up exactly where it stopped." · `keysReplacedAfterAnotherDevice` — ledger 61's family when the
+other device REPLACED keys rather than entering Castle ("Another device replaced your keys first … the twelve words shown here
+are not your account's …"). **(c) Kept as the shipped words, one residual for 13s:** a `switchInProgress` refusal at the
+runner's busy guard (another road already running, no marker to read) still says "Entering Castle didn't finish" — false
+there; an honest sentence would be new copy. **(d) Round 4 not run (the cap):** round 3's two fixes (the S2 Done no longer
+claims her words are not the account's; a resume into Standard leaves custody to the ready's announced follow) were verified
+by the orchestrator's own read of the delta + red-on-old pins + named reverts, not by a fourth cold review — yours to order
+before anything builds on it. **(e) Tickets minted from the ladder:** VX-106 (two PostureSwitchTests red on main since 13x —
+they pass under VX-99's account-consistent harness, recorded not claimed; the arm-order question is variorum-da's), VX-107
+(double-crash residuals + the regenerated-words silence), VX-108 (Use Castle / Leave Castle doors read the posture), VX-109
+(`CorpusRotation.begin` re-fetch race — `Sync/`), VX-110 (Use Castle's local-only road for an enrolled library + the rekey
+banners). Status: open.
+
+## VX-106 — the follow's wrong-word sentence in a changed-elsewhere world (2026-10-08)
+
+#205 — **A copy question for her and 13s (VX-106's round-1 MINOR; record `notes/plans/fixes/vx-106-posture-harness-standard-world.md`).** When a Castle account's Mac owes the Apple-openable follow AND the passphrase was changed on another device, the ruled precedence (the follow outranks the change notice — locked by VX-106's pin) means the "your passphrase was changed on [device] on [day]" notice never shows; if she then types her OLD passphrase into the follow, the refusal says **"That isn't your library's passphrase"** — not quite true: it IS the library's old word; the ACCOUNT's word moved elsewhere. The same sentence already shows in two sibling changed-elsewhere worlds. Options: (i) keep the sentence (rare corner; the right word works); (ii) in a changed-elsewhere world, the follow's refusal names the change — e.g. "Your passphrase was changed on [device] on [day] — enter the new one" (the model already knows the descriptor differs); (iii) let the change notice speak alongside the follow. Lean: (ii). Words 13s's. **Status: open for her.**

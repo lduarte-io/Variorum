@@ -37,7 +37,7 @@ nonisolated enum JumpCorrectionLoop {
         targetMinY: (Double) -> Double?
     ) -> Result {
         run(
-            initialTop: initialTop, maxScroll: { maxScroll }, tolerance: tolerance,
+            initialTop: initialTop, minScroll: 0, maxScroll: { maxScroll }, tolerance: tolerance,
             maxIterations: maxIterations, targetMinY: targetMinY)
     }
 
@@ -50,14 +50,21 @@ nonisolated enum JumpCorrectionLoop {
     /// "clamped at the document edge" arm below reported convergence a dozen
     /// paragraphs above the target. A constant range behaves exactly as
     /// before (the overload above).
+    ///
+    /// `minScroll` (VX-85, the 13o follow-up run) is the lowest scroll the
+    /// clip may rest at — 0, as it always was, except while a find bar
+    /// overlays the clip's top, when the clip may scroll that strip's height
+    /// ABOVE the document so its first line can rest below the bar
+    /// (`JumpPrimitive.findBarInsets`; AppKit's own contentInsets model).
     static func run(
         initialTop: Double,
+        minScroll: Double = 0,
         maxScroll: () -> Double,
         tolerance: Double = 1.0,
         maxIterations: Int = 6,
         targetMinY: (Double) -> Double?
     ) -> Result {
-        var top = min(max(0, initialTop), maxScroll())
+        var top = min(max(minScroll, initialTop), maxScroll())
         var iterations = 0
         while true {
             guard let minY = targetMinY(top) else {
@@ -69,7 +76,7 @@ nonisolated enum JumpCorrectionLoop {
             if iterations >= maxIterations {
                 return Result(finalTop: top, iterations: iterations, converged: false)
             }
-            let next = min(max(0, minY), maxScroll())
+            let next = min(max(minScroll, minY), maxScroll())
             if next == top {
                 // Clamped (target near the document edge): as close as the
                 // scroll geometry allows.
@@ -256,6 +263,21 @@ enum JumpPrimitive {
         return (span.top + origin, span.bottom + origin)
     }
 
+    /// **What a SHOWN find bar covers of the clip** (VX-85, the 13o follow-up
+    /// run — MEASURED on macOS 27.0 by a headless AppKit probe): the scroll
+    /// view lays its `NSTextFinderBarView` (32 pt) OVER the clip's top edge —
+    /// the clip keeps its whole frame and its bounds origin does not move —
+    /// and says so through the CLIP's own `contentInsets` (top 32 · bottom 6).
+    /// So the clip's top strip is exactly where a landing's line is hidden.
+    /// Zero whenever no bar is shown, so every caller that reads it is
+    /// byte-unchanged without one (whatever else might set an inset).
+    /// Re-measure at the next point release (TEXTKIT2_NOTES §5's matrix).
+    static func findBarInsets(of scrollView: NSScrollView) -> (top: Double, bottom: Double) {
+        guard scrollView.isFindBarVisible else { return (0, 0) }
+        let insets = scrollView.contentView.contentInsets
+        return (Double(max(0, insets.top)), Double(max(0, insets.bottom)))
+    }
+
     /// Lands the LINE containing `offset` (UTF-16) at the viewport top —
     /// or, with `landingInset`, that many points BELOW the viewport top.
     ///
@@ -314,6 +336,12 @@ enum JumpPrimitive {
         // 2,368 pt above it. On a frame that does not move (every settled
         // landing) this is the same number it always was.
         func maxScroll() -> Double { Double(max(0, textView.frame.height - clip.bounds.height)) }
+        // VX-85: while a find bar overlays the clip's top, the clip may rest
+        // that strip's height above the document (AppKit's contentInsets
+        // model), so a landing that asks for the bar's height of air can
+        // place even the FIRST line below the bar. Without a bar this is 0 —
+        // the floor every jump has always had.
+        let minScroll = -findBarInsets(of: scrollView).top
         let docLength = contentManager.offset(
             from: contentManager.documentRange.location,
             to: contentManager.documentRange.endLocation)
@@ -331,7 +359,7 @@ enum JumpPrimitive {
         else { return }
 
         func scroll(to y: Double) {
-            let wanted = min(max(0, y), maxScroll())
+            let wanted = min(max(minScroll, y), maxScroll())
             clip.scroll(to: NSPoint(x: 0, y: wanted))
             scrollView.reflectScrolledClipView(clip)
             layoutManager.textViewportLayoutController.layoutViewport()
@@ -361,6 +389,7 @@ enum JumpPrimitive {
         let estimate = Double(clamped) / Double(docLength) * textHeight - landingInset
         _ = JumpCorrectionLoop.run(
             initialTop: estimate,
+            minScroll: minScroll,
             maxScroll: maxScroll
         ) { top in
             scroll(to: top)

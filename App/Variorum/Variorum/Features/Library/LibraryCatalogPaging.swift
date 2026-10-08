@@ -85,8 +85,15 @@ extension LibraryCatalogModel {
     /// A next page may be asked for: another exists, none is in flight or in
     /// hand, the listing is paged (a day's answer is whole), and no newer
     /// question is being read (`listedGeneration`).
+    ///
+    /// VX-84a: a `#tag` typed alone is a PAGED listing even with a day armed
+    /// beside it (the day joins the tag's narrowing — only the day ALONE is
+    /// answered whole), so the day stands the paging down only when nothing
+    /// narrows the listing; otherwise the tag's notes past the first page
+    /// would be a cap with no road (R-13o-9).
     var canAskForMore: Bool {
-        notesHaveMore && !loadingMoreNotes && pendingLanding == nil && editedOn == nil
+        notesHaveMore && !loadingMoreNotes && pendingLanding == nil
+            && (editedOn == nil || listedNarrowing != nil)
             && notesCursor != nil && listedGeneration == searchGeneration
     }
 
@@ -213,6 +220,9 @@ extension LibraryCatalogModel {
         loadingMoreNotes = true
         let generation = searchGeneration
         let (query, sort, direction, mode) = (query, sort, direction, mode)
+        // VX-84a: a tag typed alone narrows EVERY page the way it narrowed
+        // the first — the field's text is the tag, never a title to LIKE.
+        let narrowing = listedNarrowing
         let wing = session.wing.currentID
         let limit = nextPageSize
         do {
@@ -222,8 +232,8 @@ extension LibraryCatalogModel {
             // half of a page's stall).
             let (page, chips, cards, cardIDs) = try await session.database.read { db in
                 let page = try Queries.catalogNotesPage(
-                    db, query: query, sort: sort, direction: direction,
-                    after: cursor, limit: limit, wingID: wing)
+                    db, query: narrowing == nil ? query : "", sort: sort, direction: direction,
+                    after: cursor, limit: limit, wingID: wing, narrowing: narrowing)
                 let ids = page.hits.map(\.id)
                 let plan = LibraryCardRead.plan(mode: mode, hits: page.hits)
                 return (

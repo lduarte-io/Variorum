@@ -1,5 +1,7 @@
 # Phase 13r — Distribution Mechanics (the Sparkle round)
 
+> **✔ CLOSED 2026-10-04** — see `## PHASE 13r — CLOSEOUT` at the end of this file and the closeout archive. *(Banner added 2026-10-08: the OPEN status line below is history.)*
+
 **STATUS: OPEN — RESUMED 2026-10-04 (`/architect-phase 13r`, her invocation; the Fable
 orchestrator seat). The kickoff sitting is COMPLETE: every ruling is made (R-13r-1…9 below),
 the plan is fully made. The LIVE STATUS block at the bottom carries the resume record and the

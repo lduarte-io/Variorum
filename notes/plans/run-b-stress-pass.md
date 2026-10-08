@@ -1,5 +1,7 @@
 # RUN B — S1: THE STRESS-TEST PASS (findings file)
 
+> **✔ DONE 2026-09-21** — all ten questions answered, every one HOLDS (`## VERDICT SUMMARY`); the routed items were delivered: Q1 + Q3 by 13y (closed 2026-09-24), Q8 by 13x (closed 2026-10-08). *(Banner added 2026-10-08: the OPEN status line below is history.)*
+
 **STATUS: OPEN — 2026-09-21.** The hosted read-only stress pass over pre-13x's ten closeout
 questions (`notes/plans/pre-13x-postures-design.md`, CONSIDERATIONS AT THE CLOSEOUT, line ~2481),
 slotted S1 between B1 and B2 per her kickoff answer. **This session is READ-ONLY on the product:**

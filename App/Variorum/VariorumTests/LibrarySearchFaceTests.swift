@@ -20,6 +20,15 @@ import VariorumCore
 @MainActor
 @Suite("13o U2 — the answer sheet's faces (the band's words, the marks, the badge)")
 struct LibrarySearchFaceTests {
+    // F-W-3 (the VX-83 walk's W4 oddity): the em-dash is the ECHO's
+    // separator — a tag alone leads with the counts bare.
+    @Test func theCountsLeadBareWithoutAnEcho() {
+        #expect(LibrarySearchFace.countsLead("1 book \u{00B7} 17 notes", afterEcho: false)
+                == "1 book \u{00B7} 17 notes")
+        #expect(LibrarySearchFace.countsLead("3 books \u{00B7} 29 notes", afterEcho: true)
+                == "\u{2014} 3 books \u{00B7} 29 notes")
+    }
+
     @Test func theCountsAreHonestPerKindAndLeaveOutWhatIsNotThere() {
         #expect(LibrarySearchCopy.counts(.init(books: 3, notes: 29, passages: 118, scraps: 6))
                 == "3 books \u{00B7} 29 notes \u{00B7} 118 passages \u{00B7} 6 scraps",
@@ -31,8 +40,12 @@ struct LibrarySearchFaceTests {
         #expect(LibrarySearchCopy.echo("dream") == "\u{201C}dream\u{201D}")
         #expect(LibrarySearchCopy.wingChip("Home") == "in: Home")
         #expect(LibrarySearchCopy.allLines(7) == "all 7 \u{203A}")
-        #expect(LibrarySearchCopy.tagAlone(["dream", "life/goals"])
-                == "Type a word to search inside #dream #life/goals.")
+        // JUSTIFIED EDIT (VX-84a): `tagAlone` ("Type a word to search inside
+        // #dream #life/goals.") DIED with P-13o-U2-6 — a tag typed alone
+        // narrows the Library's own listing now (D-1); the band counts the
+        // blocks it names beside the books and notes.
+        #expect(LibrarySearchCopy.counts(.init(books: 1, notes: 12, passages: 0, scraps: 0, blocks: 3))
+                == "1 book \u{00B7} 12 notes \u{00B7} 3 blocks")
     }
 
     /// Ladder round 1, NIT-1: ONE words reader for every band's echo

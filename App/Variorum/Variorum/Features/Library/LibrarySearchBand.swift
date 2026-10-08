@@ -38,6 +38,39 @@ struct LibrarySearchBand: View {
     var bookState: SearchBookState? = nil
     var offersBookState = false
     var onPickBookState: (SearchBookState?) -> Void = { _ in }
+    /// **The tags the words name** (VX-84b — D-2, ratified R-VX83-1): each a
+    /// quiet invitation, `tag: #path ›`; the press is the explicit act.
+    var tagOffers: [SearchTagOffer.Offer] = []
+    var onAcceptTagOffer: (SearchTagOffer.Offer) -> Void = { _ in }
+    /// **The COMMITS facet** (VX-72 — her R-VX83-5; the word hers, R-VX83-9):
+    /// on or off, and its door.
+    var includesSavepoints = false
+    var onToggleSavepoints: () -> Void = {}
+
+    /// **The `+ commits` INVITATION is offered only when the question has
+    /// WORDS** (PROVISIONAL, accepted at the §U-C RULINGS): savepoints are
+    /// found by their text, so a tag alone or a day alone — listed without
+    /// the index — gives the facet nothing to add (P-2: never a chip that
+    /// cannot act).
+    nonisolated static func offersCommits(_ question: LibrarySearchQuestion?) -> Bool {
+        question?.hasWords == true
+    }
+
+    /// **The ARMED `commits ✕` chip shows whenever the facet is armed and the
+    /// band speaks** (ladder R1 NIT-1, the U-C implementer's own reading: the
+    /// P-2 guard above was the INVITATION's; an ARMED state must never be
+    /// invisible — P-13o-U2-1's letter). The facet survives the words leaving
+    /// the field (it resets only with a blank field), so without this the
+    /// chip's ✕ — the facet's one clear door short of emptying the field —
+    /// vanished while the facet stayed armed and re-surfaced with the next
+    /// word. Armed under a tag alone it narrows nothing (the text-less roads
+    /// never consult it), but it is still a standing fact of the question,
+    /// said where every other armed fact is said.
+    nonisolated static func showsArmedCommits(
+        _ question: LibrarySearchQuestion?, armed: Bool
+    ) -> Bool {
+        armed && question != nil
+    }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -62,6 +95,14 @@ struct LibrarySearchBand: View {
                     tokens: tokens, label: LibrarySearchCopy.tagChip(path),
                     help: LibrarySearchCopy.removeTagHelp(path),
                     onClear: { onRemoveTag(path) })
+            }
+            // VX-84b: a word that names a tag offers it — an invitation (the
+            // dashed chip), one press away.
+            ForEach(tagOffers, id: \.path) { offer in
+                LibrarySearchChip(
+                    tokens: tokens, label: LibrarySearchCopy.tagOffer(offer.path),
+                    help: LibrarySearchCopy.tagOfferHelp(offer.path), invitation: true,
+                    onTap: { onAcceptTagOffer(offer) })
             }
             if let dayChip {
                 LibrarySearchChip(
@@ -92,6 +133,20 @@ struct LibrarySearchBand: View {
                         help: LibrarySearchCopy.archivedOnHelp, onClear: onToggleArchived)
                 }
             }
+            // VX-72 — the COMMITS facet, beside `+ archived`, its grammar: a
+            // dashed invitation at rest (words only, P-2), the armed word
+            // with its ✕ WHENEVER armed (ladder R1 NIT-1 — an armed state is
+            // never invisible, P-13o-U2-1).
+            if Self.showsArmedCommits(question, armed: includesSavepoints) {
+                LibrarySearchChip(
+                    tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOn),
+                    help: LibrarySearchCopy.commitsOnHelp, onClear: onToggleSavepoints)
+            } else if Self.offersCommits(question) {
+                LibrarySearchChip(
+                    tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOff),
+                    help: LibrarySearchCopy.commitsOffHelp, invitation: true,
+                    onTap: onToggleSavepoints)
+            }
             // R-13o-15's growth note: the trailing end stays open for a later
             // advanced-search dropdown (VX-73). Nothing is built there.
             Spacer(minLength: 0)
@@ -104,11 +159,14 @@ struct LibrarySearchBand: View {
 
     /// "— 3 books · 29 notes …" with words, or for a typed tag's books (13o
     /// U3); nothing for a day alone (the listing below says what it means).
+    /// F-W-3 (the VX-83 walk): the em-dash SEPARATES the counts from the
+    /// echo, so with no echo (a tag alone) the counts lead bare — a dash
+    /// with nothing in front of it was the walker's W4 oddity.
     private var countsLine: String? {
         guard let question, question.answers else { return nil }
         guard question.hasWords || counts != nil else { return nil }
         let words = counts.map(LibrarySearchCopy.counts) ?? LibrarySearchCopy.nothingFound
-        return "\u{2014} " + words
+        return LibrarySearchFace.countsLead(words, afterEcho: !question.words.isEmpty)
     }
 }
 
