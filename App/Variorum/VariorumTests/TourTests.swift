@@ -867,6 +867,7 @@ private func settle(
 /// function does not exist before the gate), and the two texts are pinned
 /// to the approved aside and its journal-alone derivation.
 @Suite("13s-b extra pass — the end card's readme honesty gate")
+@MainActor
 struct TourEndCardAsideGateTests {
     @Test func theAsideNeverPromisesAReadmeTheStoreDoesNotHold() {
         #expect(TourEndCard.asideText(readmeExists: true) == TourScript.endAside)

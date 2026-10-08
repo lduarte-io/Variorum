@@ -77,6 +77,10 @@ struct AboutView: View {
         .padding(.horizontal, 64)
         .padding(.top, 36)
         .padding(.bottom, 32)
+        // P-8: every text in this fixed About panel is a one-line label
+        // (the wordmark and the version line) — the environment limit
+        // states the policy for all of them at the fixed-size site.
+        .lineLimit(1)
         .fixedSize()
         .background(tokens.surface)
     }
