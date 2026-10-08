@@ -99,7 +99,7 @@ struct LibrarySearchCommitsFacetTests {
             #expect(line.kind == .savepoint && line.sourceID == saved.id && line.blockID == minted.block.id)
             #expect(line.savedAt != nil, "its day rides the row")
             let counts = try #require(model.searchState.counts?.kinds(model.searchState.visibility))
-            #expect(LibrarySearchCopy.counts(counts) == "1 note \u{00B7} 1 savepoint")
+            #expect(LibrarySearchCopy.counts(counts) == "1 note \u{00B7} 1 commit")
 
             model.query = ""
             await model.search()

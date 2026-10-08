@@ -966,7 +966,11 @@ uses the at-rest fill and may read faint (shots 12/15 — U-B's own flag, P-VX83
   "commit · Oct 6", the band counts "N commits", the field-guide sentence re-worded; justified
   edits to the C6 face cells (labeled in place); the currency cell follows by construction
   (it reads the constants). The schema kind id stays `savepoint` (vocabulary, not copy).
-- OWED: the touched Mac suites under a short test-only slot (requested), then the walker's
+- **The Mac suites RAN GREEN (2026-10-08 01:5x, the 15-min claim, released):** the four
+  touched suites 34 tests / 4 suites PASSED, TEST EXECUTE SUCCEEDED — after ONE justified
+  edit the first run caught (the singular counts cell "1 note · 1 savepoint" → "1 commit",
+  missed by the plural-only sweep; labeled in place). Core at this HEAD: 2,320/265.
+- NEXT: the walker's
   short verification errand (the fixed needle in the field · the bare-counts band · the
   commits wording · the chip in the real band — appended to the walk brief when the suites
   are green).
