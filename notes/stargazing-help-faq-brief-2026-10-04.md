@@ -210,6 +210,32 @@ Entries marked **✔ 13x** are built and verified; stage them now and publish wi
   lives there. **✔ 13x (built):** the backup-folder picker refuses the library's own folder with this
   sentence, and Open Library… says it when a picked copy sits in iCloud Drive.
 
+## SEARCH — added 2026-10-08 (13o built 2026-10-07; the VX-83 follow-up confirmed it in use the same night)
+
+The finder is BUILT and VERIFIED in use (the author's own first-use report drove VX-83's refinements;
+everything below is shipped behavior, walked on the real build). **Publish with the first public release
+that carries 13o + VX-83** — the public 0.9.2 (5178) has none of it. No ruled FAQ copy exists for search
+yet (13s re-voices later), so these are the FACTS help/FAQ sentences may be written from, in the register
+above.
+
+- **One finder.** The Library's search field answers everything: words rank passages under their notes with
+  honest counts and quiet filter chips; a `#tag` alone lists the tagged notes themselves (sortable, scoped
+  to the wing), with the books the tag flows into on top; a plain word that names a tag offers it as a
+  one-press chip (`tag: #name ›`) — saying it's a tag is an explicit act, never guessed.
+- **when ▾** opens a calendar popover: one day, or a span pressed as first-day-then-last-day with the run
+  washing in; the sentence at its foot is the confirmation, and nothing narrows until a day is pressed.
+- **Takes are in every search; savepoints behind "+ commits".** Every live take of every paragraph is
+  searched by default. The explicit `+ commits` filter adds everything ever saved — each hit marked
+  "commit · <day>". `+ archived` adds archived material. These filters are facts about the question,
+  always visible as chips while armed.
+- **Click a result, land at the match:** the note opens in Write with the match selected and the find bar
+  armed with the matched words; ⌘G steps onward.
+- **A book's masthead 🔍** runs the same engine scoped inside that book; ⌘K carries passages under its
+  title hits.
+- **Search is local by construction** — the index is derived on-device and never syncs; the server could
+  not build it (it stores sealed values). The FAQ may connect this to the privacy story; the policy brief's
+  boundaries already agree.
+
 ## What the FAQ must NOT say (the code does not keep it)
 
 - Any of 13x's doors (Open Library…, Send Library to Another Mac…, Restore from Backup) as AVAILABLE before the
@@ -225,3 +251,9 @@ Entries marked **✔ 13x** are built and verified; stage them now and publish wi
 - Anything the companion policy brief's cautions forbid (same date; they agree): no "reset" or operator
   recovery road; never "your writing is in iCloud" for Standard; no cross-account activity inference (closed at
   13y — the per-account line replaced it).
+- *(search, added 2026-10-08)* That search finds deleted text: the Trash is not searched (deliberate — a later
+  feature may add search INSIDE the Trash), and whole-note Versions are never searched.
+- *(search)* That savepoints/commits surface in an ordinary search: only behind the explicit "+ commits" filter.
+- *(search)* The indexing technology by name (the standing never-name-FTS5 rule).
+- *(search)* Any of the search doors as AVAILABLE before the first public release carrying 13o + VX-83 is out
+  (the 13x gate's twin above — same release, in all likelihood).

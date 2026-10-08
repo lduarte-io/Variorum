@@ -42,65 +42,48 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-                if let question = state.question, !question.hasWords {
-                    // 13o U3: a tag alone lists the books it is ASSOCIATED
-                    // with (the join); its notes still ask for words
-                    // (PROVISIONAL P-13o-U2-6, narrowed).
-                    if !state.books.isEmpty {
-                        booksSection
+                // VX-84a: the sheet shows only for a question WITH WORDS (the
+                // catalog routes a tag typed alone to its own narrowed listing
+                // — D-1), so the words-ask branch for a tag alone is gone.
+                if !state.books.isEmpty {
+                    booksSection
+                    if !state.groups.isEmpty {
                         Color.clear.frame(height: LibraryListFace.sectionGap)
-                    } else {
-                        LibraryListLead()
                     }
+                }
+                if !state.groups.isEmpty {
+                    Section {
+                        if state.books.isEmpty { LibraryListLead() }
+                        ForEach(state.groups) { group in
+                            groupView(group)
+                                .onAppear { model.searchGroupAppeared(group) }
+                                .onDisappear { model.searchGroupDisappeared(group) }
+                        }
+                        if state.hasMoreGroups {
+                            LibraryListRow {
+                                Text(tokens.chromeLabel(
+                                    state.loadingMore ? LibrarySearchCopy.loadingMore : ""))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.faint)
+                                    .frame(maxWidth: .infinity, minHeight: 18, alignment: .leading)
+                            }
+                            .onAppear { Task { await model.loadMoreSearchGroups() } }
+                        }
+                    } header: {
+                        LibraryListHeader(title: tokens.chromeLabel(
+                            LibrarySearchCopy.groupsHeader(state.scope)))
+                    }
+                }
+                if state.books.isEmpty, state.groups.isEmpty {
+                    LibraryListLead()
                     LibraryListRow {
-                        Text(tokens.chromeLabel(LibrarySearchCopy.tagAlone(question.tagPaths)))
+                        Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                     }
-                    if let places = archivedFootPlaces {
-                        LibraryListRow { archivedFoot(places) }
-                    }
-                } else {
-                    if !state.books.isEmpty {
-                        booksSection
-                        if !state.groups.isEmpty {
-                            Color.clear.frame(height: LibraryListFace.sectionGap)
-                        }
-                    }
-                    if !state.groups.isEmpty {
-                        Section {
-                            if state.books.isEmpty { LibraryListLead() }
-                            ForEach(state.groups) { group in
-                                groupView(group)
-                                    .onAppear { model.searchGroupAppeared(group) }
-                                    .onDisappear { model.searchGroupDisappeared(group) }
-                            }
-                            if state.hasMoreGroups {
-                                LibraryListRow {
-                                    Text(tokens.chromeLabel(
-                                        state.loadingMore ? LibrarySearchCopy.loadingMore : ""))
-                                        .font(tokens.small)
-                                        .foregroundStyle(tokens.faint)
-                                        .frame(maxWidth: .infinity, minHeight: 18, alignment: .leading)
-                                }
-                                .onAppear { Task { await model.loadMoreSearchGroups() } }
-                            }
-                        } header: {
-                            LibraryListHeader(title: tokens.chromeLabel(
-                                LibrarySearchCopy.groupsHeader(state.scope)))
-                        }
-                    }
-                    if state.books.isEmpty, state.groups.isEmpty {
-                        LibraryListLead()
-                        LibraryListRow {
-                            Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                        }
-                    }
-                    if let places = archivedFootPlaces {
-                        LibraryListRow { archivedFoot(places) }
-                    }
+                }
+                if let places = archivedFootPlaces {
+                    LibraryListRow { archivedFoot(places) }
                 }
             }
             .padding(.bottom, LibraryListFace.bottomInset)

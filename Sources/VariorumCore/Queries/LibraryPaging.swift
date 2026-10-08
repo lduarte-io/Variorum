@@ -60,22 +60,50 @@ extension Queries {
     /// uncapped (pinned: `LibraryPagingTests` walks every sort both ways and
     /// compares). One statement; it asks for ONE more row than it returns, so
     /// the page knows whether another follows without a counting statement.
+    ///
+    /// **`narrowing` — a `#tag` typed with no words** (VX-84a, the 13o
+    /// follow-up run's D-1: a tag alone narrows the Library like a day does).
+    /// The question's TEXT-LESS road, read through the ONE composer
+    /// (`SearchComposer.listingNarrowing` — R-13o-8: this file composes its
+    /// fragment, never re-derives the tag SQL): each arm DRIVES from the
+    /// tag's applications (`CROSS JOIN` — a page costs ∝ the tag's notes,
+    /// never a walk of the wing's notes in sort order hunting for tagged ones;
+    /// the seam record's measurement) and keeps its own sort and keyset, so
+    /// the sort door orders a tag's notes exactly as it orders the Library.
+    /// The composer's conditions carry the archived facet (the shipped
+    /// `archived_at IS NULL` is its living letter). nil is the shipped
+    /// statement, byte for byte; a narrowing the road cannot serve (words, or
+    /// no typed tag) FAILS CLOSED — an empty page, never the whole Library
+    /// under a question it did not answer.
     public static func catalogNotesPage(
         _ db: Database, query: String,
         sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
-        after cursor: CatalogCursor? = nil, limit: Int, wingID: String? = nil
+        after cursor: CatalogCursor? = nil, limit: Int, wingID: String? = nil,
+        narrowing: SearchQuery? = nil
     ) throws -> CatalogNotesPage {
         precondition(limit > 0, "a page holds at least one note")
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let like = "%\(catalogLikeEscaped(trimmed))%"
         let scope = wingID.map { wingScope(column: "wing_id", wingID: $0) }
+        let narrowed = try narrowing.flatMap { question in
+            SearchComposer.listingNarrowing(
+                question, kind: .notes, wingID: wingID ?? "",
+                environment: try searchEnvironment(db))
+        }
+        if narrowing != nil, narrowed == nil { return CatalogNotesPage(hits: [], next: nil) }
         let sql = catalogNotesPageSQL(
             sort: sort, direction: direction, hasCursor: cursor != nil,
-            wingScope: scope?.sql)
-        // Each arm binds: the query (3×), the wing's arguments, the cursor
-        // (key, id), its own limit; the merged page binds the outer limit.
+            wingScope: scope?.sql, narrowing: narrowed)
+        // Each arm binds: the narrowing's driver and conditions (when one
+        // narrows), the query (3×), the wing's arguments, the cursor (key,
+        // id), its own limit; the merged page binds the outer limit.
         func armArguments() -> [(any DatabaseValueConvertible)?] {
-            var arguments: [(any DatabaseValueConvertible)?] = [trimmed, like, like]
+            var arguments: [(any DatabaseValueConvertible)?] = []
+            if let narrowed {
+                arguments += (narrowed.driverArguments + narrowed.conditionArguments)
+                    .map { databaseValue($0) as (any DatabaseValueConvertible)? }
+            }
+            arguments += [trimmed, like, like]
             arguments += scope?.arguments ?? []
             if let cursor { arguments += [cursor.key, cursor.id] }
             arguments.append(limit + 1)
@@ -97,7 +125,10 @@ extension Queries {
                 storedTitle: DisplayTitle.isAbsent(row["title"]) ? nil : row["title"],
                 createdAt: row["created_at"],
                 lastTouchedAt: row["touched_at"],
-                profile: row["profile"])
+                profile: row["profile"],
+                // VX-84a: only the narrowed page selects the fact (the shipped
+                // statement lists no archived note at all).
+                isArchived: (row["archived"] as Bool?) ?? false)
         }
         let next: CatalogCursor? = rows.count > limit
             ? CatalogCursor(key: rows[limit - 1]["sort_key"], id: rows[limit - 1]["id"])
@@ -108,7 +139,8 @@ extension Queries {
     /// The page's statement — built in ONE place so the pins'
     /// `EXPLAIN QUERY PLAN` and step counts read the shipped text.
     static func catalogNotesPageSQL(
-        sort: LibrarySort, direction: SortDirection, hasCursor: Bool, wingScope: String?
+        sort: LibrarySort, direction: SortDirection, hasCursor: Bool, wingScope: String?,
+        narrowing: SearchComposer.ListingNarrowing? = nil
     ) -> String {
         let dir = direction == .desc ? "DESC" : "ASC"
         let comparison = direction == .desc ? "<" : ">"
@@ -118,6 +150,26 @@ extension Queries {
             let cursor = hasCursor
                 ? "\n  AND (\(key)\(collation), id) \(comparison) (?, ?)" : ""
             let wing = wingScope.map { "\n  AND \($0)" } ?? ""
+            if let narrowing {
+                // VX-84a: DRIVEN from the tag's applications (the composer's
+                // driver, CROSS JOIN keeps it the outer loop); the composer's
+                // conditions say everything else — liveness, wing, the facet,
+                // the filter half. No `INDEXED BY`: the sort index would make
+                // the walk ∝ the wing's notes.
+                return """
+                    SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                           c.created_at AS created_at, c.profile AS profile,
+                           COALESCE(c.last_touched_at, c.created_at) AS touched_at,
+                           (c.archived_at IS NOT NULL) AS archived,
+                           \(key) AS sort_key
+                    FROM (\(narrowing.driver)) t
+                    CROSS JOIN container c ON c.id = t.tagged_id
+                    WHERE \(narrowing.conditions)\(extraWhere)
+                      AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')\(wing)\(cursor)
+                    ORDER BY \(key)\(collation) \(dir), id \(dir)
+                    LIMIT ?
+                    """
+            }
             return """
                 SELECT id, title, entry_date, created_at, profile,
                        COALESCE(last_touched_at, created_at) AS touched_at,
@@ -146,6 +198,8 @@ extension Queries {
                 key: "created_at", collation: "",
                 extraWhere: " AND last_touched_at IS NULL",
                 index: "idx_container_touched")
+            // (VX-84a: a narrowed page's arms carry no `INDEXED BY` — `arm`
+            // returns the driven shape before the index is ever named.)
             return """
                 SELECT * FROM (\(touched))
                 UNION ALL

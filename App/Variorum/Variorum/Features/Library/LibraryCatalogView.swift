@@ -186,9 +186,12 @@ struct LibraryCatalogView: View {
                     Divider().overlay(tokens.line)
                 }
                 switch model.mode {
-                case .list where model.searchState.asksAnything,
-                     .notes where model.searchState.asksAnything:
-                    // The answer sheet, in every mode that lists notes (D2).
+                case .list where model.isSearching,
+                     .notes where model.isSearching:
+                    // The answer sheet, in every mode that lists notes (D2) —
+                    // a question WITH WORDS. VX-84a (D-1): a `#tag` typed
+                    // alone is the Library's OWN listing, narrowed (the band
+                    // above it still says the question).
                     searchSheet
                 case .list: listBody
                 case .notes: notesBody
@@ -369,6 +372,18 @@ struct LibraryCatalogView: View {
             offersBookState: model.offersBookState,
             onPickBookState: { picked in
                 model.armBookState(picked)
+                Task { await model.search() }
+            },
+            // VX-84b (D-2): the press is the explicit act — fire-and-DO.
+            tagOffers: state.tagOffers,
+            onAcceptTagOffer: { offer in
+                model.acceptTagOffer(offer)
+                Task { await model.search() }
+            },
+            // VX-72 — the commits facet (a new question: the caller re-reads).
+            includesSavepoints: state.includesSavepoints,
+            onToggleSavepoints: {
+                model.toggleSavepointsFacet()
                 Task { await model.search() }
             })
     }
@@ -786,7 +801,22 @@ struct LibraryCatalogView: View {
                         LibraryListHeader(title: tokens.chromeLabel("Notes"))
                     }
                 }
-                if model.bookHits.isEmpty, !showsNotes {
+                if !model.blockHits.isEmpty {
+                    // VX-84a (D-1): a `#tag` typed alone in the Blocks scope
+                    // lists the blocks it names by their own tags — the
+                    // catalog's own block rows (handle · its home), landing at
+                    // the block.
+                    if showsBooks || showsNotes { sectionGap }
+                    Section {
+                        if !showsBooks, !showsNotes { LibraryListLead() }
+                        ForEach(model.blockHits, id: \.id) { hit in
+                            LibraryListRow { blockLine(hit) }
+                        }
+                    } header: {
+                        LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.blocksHeader))
+                    }
+                }
+                if model.bookHits.isEmpty, !showsNotes, model.blockHits.isEmpty {
                     // 18h batch 2: a day that finds nothing says WHY — the one
                     // wording, shared with the Notes mode below.
                     LibraryListLead()
@@ -802,10 +832,78 @@ struct LibraryCatalogView: View {
                 }
                 // (13o U2, R-13o-9: the truncation line LEFT with the block
                 // cap — no Library listing is capped any more.)
+                // VX-84a: under a tag typed alone the archive's matches are
+                // offered at the foot, as the answer sheet's foot offers them.
+                if let places = tagListingArchivedPlaces {
+                    LibraryListRow { tagListingArchivedFoot(places) }
+                }
             }
             .padding(.bottom, LibraryListFace.bottomInset)
         }
         .background(tokens.surface)
+    }
+
+    /// VX-84a: a tag typed alone (no words), the archived facet off, and the
+    /// archive holding matches — the answer sheet's foot rule, on the listing.
+    private var tagListingArchivedPlaces: Int? {
+        let state = model.searchState
+        guard state.question != nil, !model.isSearching, state.visibility == .living,
+              let places = state.counts?.archivedPlaces, places > 0 else { return nil }
+        return places
+    }
+
+    private func tagListingArchivedFoot(_ places: Int) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(tokens.chromeLabel(LibrarySearchCopy.archivedFoot(places)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+            Button(tokens.chromeLabel(LibrarySearchCopy.showArchived)) {
+                model.toggleArchivedFacet()
+                Task { await model.search() }
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .font(tokens.small)
+        }
+    }
+
+    /// **A listed BLOCK's line** (VX-84a — the Blocks scope under a tag typed
+    /// alone; the pre-U2 block row's face): its handle, its home, a click
+    /// lands at the block through the shell's caret-precise road (no find
+    /// seed — nothing was searched as text).
+    private func blockLine(_ hit: Queries.CatalogHit) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(Image(systemName: "square.on.square"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+            Text(hit.title)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            if let home = hit.detail {
+                Text(tokens.chromeLabel(LibrarySearchCopy.blockHome(home)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
+            if hit.isArchived {
+                // Ladder R1 MINOR: a block the archived facet brought in says
+                // so, exactly as the note rows do (R-13o-6, P-VX83-3).
+                CatalogArchivedMark(tokens: tokens)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard let home = hit.homeContainerID else { return }
+            withAnimation(Self.panelAnimation) { model.closeInfo() }
+            let selection: SidebarSelection = hit.homeIsPool ? .pool(home) : .post(home)
+            if let onOpenBlock {
+                onOpenBlock(selection, hit.id, nil)
+            } else {
+                onOpen(selection)
+            }
+        }
     }
 
     /// The List's air between a section's last row and the next header.
@@ -879,7 +977,8 @@ struct LibraryCatalogView: View {
 
     // (13o U2: the BLOCK hit's line LEFT with the block arm — a named block
     // or a scrap is a passage of its group on the answer sheet now, and lands
-    // through `openPassage`, the same caret-precise road it used.)
+    // through `openPassage`, the same caret-precise road it used. VX-84a
+    // brought a block line back for ONE listing — `blockLine`, above.)
 
     /// 13g batch 6 (R5-6) — the Apple-Notes-shaped list: title · date ·
     /// the first bit of text · the book it's in, per her screenshot. NOTES
@@ -958,6 +1057,9 @@ struct LibraryCatalogView: View {
                 // clickable (the ascent), before the books line.
                 if let badge = ownedByBadge(extras) {
                     OwnershipBadgeView(tokens: tokens, badge: badge, postID: hit.id)
+                }
+                if hit.isArchived {
+                    CatalogArchivedMark(tokens: tokens)   // VX-84a
                 }
                 if !card.books.isEmpty {
                     Text(tokens.chromeLabel(card.books.joined(separator: " · ")))
@@ -1062,7 +1164,8 @@ struct LibraryCatalogView: View {
                 stamp: stamps.sorted,
                 oracleKey: hit.id,
                 badge: ownedByBadge(extras),
-                badgePostID: hit.id)
+                badgePostID: hit.id,
+                archived: hit.isArchived)
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1279,6 +1382,10 @@ struct CatalogNoteLine: View {
     /// nothing, so the shipped alignment pins measure exactly what they did).
     var badge: OwnershipBadgeFace.Badge? = nil
     var badgePostID: String = ""
+    /// VX-84a: the note is archived — only ever on the tag-alone listing
+    /// under the archived facet (R-13o-6, "rows say which they are"); false
+    /// draws nothing, so the shipped alignment pins measure what they did.
+    var archived = false
 
     static let probeSpace = "catalog-note-line"
 
@@ -1310,6 +1417,9 @@ struct CatalogNoteLine: View {
             if let badge {
                 OwnershipBadgeView(tokens: tokens, badge: badge, postID: badgePostID)
             }
+            if archived {
+                CatalogArchivedMark(tokens: tokens)
+            }
             Spacer()
             // Her row 9: *"see the created time and last edited time easily
             // on the library."* At the row's trailing edge, muted, on the
@@ -1320,6 +1430,25 @@ struct CatalogNoteLine: View {
                 oracleKey: oracleKey, oracleSlot: "row.stamp")
         }
         .coordinateSpace(name: Self.probeSpace)
+    }
+}
+
+/// **The quiet "archived" mark a listed note wears** (VX-84a — a `#tag`
+/// typed alone with the archived facet on lists the tag's archived notes, and
+/// each says so: R-13o-6's letter, the answer sheet's own badge word and
+/// shape — `SearchAnswerCopy.archivedMark`).
+struct CatalogArchivedMark: View {
+    let tokens: VoiceTokens
+
+    var body: some View {
+        Text(tokens.chromeLabel(SearchAnswerCopy.archivedMark))
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .padding(.horizontal, 5)
+            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(tokens.line))
+            .lineLimit(1)
+            .fixedSize()
+            .help(SearchAnswerCopy.archivedNote)
     }
 }
 

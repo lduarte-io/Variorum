@@ -872,7 +872,30 @@ extension AppDatabase {
                 CREATE INDEX idx_container_undated_created ON container(created_at)
                   WHERE deleted_at IS NULL AND (entry_date IS NULL OR entry_date = '');
                 """)
-            try SearchIndex.rebuild(db)
+            // Frozen on v1_22's own eight kinds (VX-72 split the list so a
+            // later kind never reaches a store mid-chain — `v1_23` below).
+            try SearchIndex.rebuild(db, sources: SearchIndex.sourcesV1_22)
+        }
+        // **VX-72 — SAVEPOINTS JOIN THE SEARCH INDEX** (her R-VX83-5: *"do the
+        // savepoints … it's the most important product story (anything
+        // you've saved)"*; the run record `notes/plans/fixes/vx-83-search-
+        // followup.md`, its §U-C RULINGS). The NINTH doc kind, `savepoint`
+        // (`commit_point.text`), exactly as F2 reserved it ("VX-72's
+        // savepoints join as one more kind") — nothing reshapes:
+        // `search_doc` gains the savepoint's own-row parent fact
+        // (`variant_id`, nullable), the `search_text` view is recreated with
+        // the ninth arm, and the savepoint's three capture triggers join
+        // R-13o-4's family (reading NEW/OLD and the doc family only). The
+        // savepoint's take liveness and its home resolve at QUERY time, under
+        // the facet only (FORK 1 ruled A — F3's road).
+        //
+        // **NOT a SyncSpec §12 lockstep event** (v1_22's class): the change is
+        // to the DERIVED, local-only family — no synced column, no mirror, the
+        // marker stays 12; `commit_point` itself is untouched. **The backfill
+        // is the rebuild road, run once** over v1_23's frozen nine kinds.
+        migrator.registerMigration("v1_23_savepoint_search") { db in
+            try SearchIndex.addSavepoints(db)
+            try SearchIndex.rebuild(db, sources: SearchIndex.sourcesV1_23)
         }
         return migrator
     }

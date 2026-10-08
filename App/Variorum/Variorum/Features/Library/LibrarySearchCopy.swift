@@ -34,6 +34,11 @@ nonisolated enum LibrarySearchCopy {
         add(kinds.notes, "note", "notes")
         add(kinds.passages, "passage", "passages")
         add(kinds.scraps, "scrap", "scraps")
+        // VX-84a: a tag typed alone names BLOCKS by their own tags too.
+        add(kinds.blocks, "block", "blocks")
+        // VX-72 (P-VX83-C3; R-VX83-10 — the counts wear her word too)
+        // as their own kind, beside the living passages.
+        add(kinds.savepoints, "commit", "commits")
         return parts.isEmpty ? nothingFound : parts.joined(separator: " \u{00B7} ")
     }
 
@@ -47,6 +52,16 @@ nonisolated enum LibrarySearchCopy {
     /// become chips); its ✕ takes the tag out of the field.
     static func tagChip(_ path: String) -> String { "#\(path)" }
     static func removeTagHelp(_ path: String) -> String { "Stop narrowing to #\(path)" }
+
+    /// **The COMMITS facet's chip** (VX-72 — her R-VX83-5 split, "search what
+    /// you saved"; the word hers: *"hmm. i take it back - do + commits"*,
+    /// R-VX83-9): the invitation at rest, the armed word with its ✕ — the
+    /// archived chip's grammar. The help texts are PROVISIONAL wording (one
+    /// constant each, the bundle's).
+    static let commitsOff = "+ commits"
+    static let commitsOn = "commits"
+    static let commitsOffHelp = "Include your commits \u{2014} the words every savepoint of your takes kept"
+    static let commitsOnHelp = "Back to the living text \u{2014} leave your commits out"
 
     static var archivedOff: String { SearchAnswerCopy.archivedOff }
     static var archivedOn: String { SearchAnswerCopy.archivedOn }
@@ -101,11 +116,24 @@ nonisolated enum LibrarySearchCopy {
         }
     }
 
-    /// **A tag typed without words** (PROVISIONAL P-13o-U2-6): the band
-    /// names the tag; the sheet asks for the words.
-    static func tagAlone(_ paths: [String]) -> String {
-        "Type a word to search inside " + paths.map(tagChip).joined(separator: " ") + "."
+    // (VX-84a: `tagAlone` — "Type a word to search inside #tag." — DIED with
+    // P-13o-U2-6. A tag typed alone narrows the Library's own listing now
+    // (D-1), so nothing asks for words.)
+
+    /// **The tag offer** (VX-84b — D-2's own words, ratified R-VX83-1): a
+    /// plain word that names a tag offers it, `tag: #exampletag ›`.
+    static func tagOffer(_ path: String) -> String { "tag: #\(path) \u{203A}" }
+    static func tagOfferHelp(_ path: String) -> String {
+        "Show the notes tagged #\(path) \u{2014} your word names a tag"
     }
+
+    /// The listing's section for a tag's blocks (VX-84a — the Blocks scope
+    /// under a tag typed alone).
+    static let blocksHeader = "Blocks"
+
+    /// A listed block's home, beside its handle (the pre-U2 block row's
+    /// words).
+    static func blockHome(_ home: String) -> String { "in \(home)" }
 
     /// **The sort door, while the answer sheet shows** (PROVISIONAL
     /// P-13o-U2-7): the sheet is ranked by relevance (D2) — the mockup's own

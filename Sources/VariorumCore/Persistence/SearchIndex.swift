@@ -51,7 +51,25 @@ import GRDB
 /// Frozen by convention once shipped: `v1_22` calls `createSearchIndex`, so a
 /// later reshape is a NEW migration that drops and recreates (the
 /// `createOutboxCaptureTriggers` discipline) — never an edit here that only
-/// fresh stores would see.
+/// fresh stores would see. **Each migration therefore reads its OWN frozen
+/// kind list** (`sourcesV1_22`, `sourcesV1_23`); `sources` is the CURRENT
+/// family the rebuild door derives and the integrity check verifies.
+///
+/// **The NINTH kind — `savepoint` (VX-72, `v1_23`; her R-VX83-5 "search what
+/// you saved", the §U-C RULINGS in `notes/plans/fixes/vx-83-search-followup.md`).**
+/// `commit_point.text`, one doc per savepoint. `commit_point` has NO tombstone
+/// (append-only, I5): the doc mirrors the ROW's existence — INSERT (the
+/// append), physical DELETE (the purge janitor's prune and family purge — so
+/// purge coordination is correct by construction: the row's own DELETE
+/// retires its doc in the same statement), and an UPDATE arm watching
+/// `text`/`variant_id` (inert under I5 — a rename writes `message`, unwatched —
+/// but remote apply's generic UPDATE-then-INSERT makes it load-bearing
+/// insurance). Its own-row fact is its parent, `variant_id`. Whether the
+/// savepoint's TAKE is live, and everything past it (block, placement, home,
+/// wing, archive, versions), resolves at QUERY time, under the facet only —
+/// F3's road, ruled FORK 1 (A): no variant-side trigger could retire or
+/// revive a savepoint's entry without reading `commit_point`, which
+/// R-13o-4's letter forbids.
 enum SearchIndex {
     /// The derived family's TABLES (the virtual table + its five shadows'
     /// four that exist under external content + the doc table) — the set the
@@ -74,11 +92,43 @@ enum SearchIndex {
         /// Source columns whose change can move a fact (beside the text
         /// column and `deleted_at`).
         let factColumns: [String]
+        /// The source table carries a tombstone (`deleted_at`). `commit_point`
+        /// does not (I5) — its doc exists iff its ROW exists.
+        var tombstoned = true
+
+        /// The field's EXISTENCE over a row alias (`NEW`, `OLD`, `s`) — what
+        /// a doc mirrors: the row live and the field non-NULL.
+        func live(_ r: String) -> String {
+            tombstoned
+                ? "\(r).deleted_at IS NULL AND \(r).\(column) IS NOT NULL"
+                : "\(r).\(column) IS NOT NULL"
+        }
+
+        /// The columns the UPDATE arm watches: the text, the tombstone, the
+        /// own facts.
+        var watchedColumns: [String] {
+            [column] + (tombstoned ? ["deleted_at"] : []) + factColumns
+        }
     }
 
-    /// The eight kinds (F2). Their facts are the source row's OWN columns
-    /// (F3) — never another table's.
-    static let sources: [Source] = [
+    /// The CURRENT family — every kind the rebuild door derives and the
+    /// integrity check verifies.
+    static let sources: [Source] = sourcesV1_23
+
+    /// **`v1_23`'s family** (VX-72): v1_22's eight + the savepoint. Frozen.
+    static let sourcesV1_23: [Source] = sourcesV1_22 + [savepoint]
+
+    /// **The ninth kind** (VX-72): a savepoint's immutable text, its own
+    /// parent fact the take it was saved from.
+    static let savepoint = Source(
+        kind: "savepoint", table: "commit_point", column: "text",
+        facts: [("variant_id", "R.variant_id")],
+        factColumns: ["variant_id"], tombstoned: false)
+
+    /// **`v1_22`'s family — the eight kinds (F2).** Frozen: `v1_22` creates
+    /// and backfills exactly these. Their facts are the source row's OWN
+    /// columns (F3) — never another table's.
+    static let sourcesV1_22: [Source] = [
         Source(kind: "take", table: "variant", column: "working_text",
                facts: [("block_id", "R.block_id"), ("archived", "(R.status = 'archived')")],
                factColumns: ["block_id", "status"]),
@@ -110,7 +160,8 @@ enum SearchIndex {
 
     // MARK: - Schema (v1_22)
 
-    /// Creates the family and its capture triggers. Called once, by `v1_22`.
+    /// Creates the family and its capture triggers. Called once, by `v1_22`
+    /// — over `sourcesV1_22`, frozen.
     static func create(_ db: Database) throws {
         try db.execute(sql: """
             CREATE TABLE search_doc (
@@ -125,16 +176,7 @@ enum SearchIndex {
             );
             CREATE UNIQUE INDEX uq_search_doc_src ON search_doc(kind, src_id);
             """)
-        try db.execute(sql: """
-            CREATE VIEW search_text AS
-            SELECT d.id AS id,
-              CASE d.kind
-            \(sources.map { source in
-                "    WHEN '\(source.kind)' THEN (SELECT s.\(source.column) FROM \(source.table) s WHERE s.id = d.src_id)"
-              }.joined(separator: "\n"))
-              END AS body
-            FROM search_doc d;
-            """)
+        try db.execute(sql: textViewSQL(sourcesV1_22))
         try db.execute(sql: """
             CREATE VIRTUAL TABLE search_fts USING fts5(
               body,
@@ -143,9 +185,40 @@ enum SearchIndex {
               prefix = '2 3'
             );
             """)
-        for source in sources {
+        for source in sourcesV1_22 {
             try createCaptureTriggers(db, source)
         }
+    }
+
+    /// The `search_text` view over a kind list (F1 — each doc's text read
+    /// from its SOURCE row).
+    private static func textViewSQL(_ sources: [Source]) -> String {
+        """
+            CREATE VIEW search_text AS
+            SELECT d.id AS id,
+              CASE d.kind
+            \(sources.map { source in
+                "    WHEN '\(source.kind)' THEN (SELECT s.\(source.column) FROM \(source.table) s WHERE s.id = d.src_id)"
+              }.joined(separator: "\n"))
+              END AS body
+            FROM search_doc d;
+            """
+    }
+
+    // MARK: - Schema (v1_23 — VX-72, the savepoint kind)
+
+    /// **Adds the ninth kind** (VX-72). Called once, by `v1_23`, which then
+    /// backfills by the rebuild road over `sourcesV1_23`. The doc gains the
+    /// savepoint's own-row parent fact (`variant_id` — nullable, NULL for
+    /// every other kind; approved at the §U-C RULINGS, condition 5); the view
+    /// is recreated with the ninth arm (FTS5 reads its external content by
+    /// NAME, at query time — the virtual table itself is untouched); the
+    /// savepoint's three capture triggers join the family.
+    static func addSavepoints(_ db: Database) throws {
+        try db.execute(sql: "ALTER TABLE search_doc ADD COLUMN variant_id TEXT")
+        try db.execute(sql: "DROP VIEW search_text")
+        try db.execute(sql: textViewSQL(sourcesV1_23))
+        try createCaptureTriggers(db, savepoint)
     }
 
     /// One source field's three capture triggers. One shape for all eight
@@ -153,9 +226,7 @@ enum SearchIndex {
     private static func createCaptureTriggers(_ db: Database, _ source: Source) throws {
         let kind = source.kind
         let col = source.column
-        func exists(_ r: String) -> String {
-            "\(r).deleted_at IS NULL AND \(r).\(col) IS NOT NULL"
-        }
+        func exists(_ r: String) -> String { source.live(r) }
         func factValues(_ r: String) -> String {
             source.facts.map { $0.expression.replacingOccurrences(of: "R.", with: "\(r).") }
                 .joined(separator: ", ")
@@ -188,8 +259,8 @@ enum SearchIndex {
             """)
         // UPDATE: only when the text, the liveness or an own fact moved (a
         // remote apply rewrites whole rows — same values must cost nothing).
-        let watched = ([col, "deleted_at"] + source.factColumns).joined(separator: ", ")
-        let changed = ([col, "deleted_at"] + source.factColumns)
+        let watched = source.watchedColumns.joined(separator: ", ")
+        let changed = source.watchedColumns
             .map { "OLD.\($0) IS NOT NEW.\($0)" }.joined(separator: " OR ")
         try db.execute(sql: """
             CREATE TRIGGER \(name)_update
@@ -220,8 +291,9 @@ enum SearchIndex {
     /// Rebuilds the whole family FROM TRUTH: every doc re-derived from the
     /// live source rows, then the index re-read from the view. Idempotent;
     /// cost ∝ the corpus (a maintenance act and the one-time backfill — never
-    /// a keystroke road).
-    static func rebuild(_ db: Database) throws {
+    /// a keystroke road). A migration names its own frozen kind list; the
+    /// rebuild door derives the current family.
+    static func rebuild(_ db: Database, sources: [Source] = SearchIndex.sources) throws {
         try db.execute(sql: "DELETE FROM search_doc")
         for source in sources {
             let factNames = source.facts.map(\.column).joined(separator: ", ")
@@ -231,7 +303,7 @@ enum SearchIndex {
             try db.execute(sql: """
                 INSERT INTO search_doc (kind, src_id, \(factNames))
                 SELECT '\(source.kind)', s.id, \(factValues) FROM \(source.table) s
-                WHERE s.deleted_at IS NULL AND s.\(source.column) IS NOT NULL
+                WHERE \(source.live("s"))
                 """)
         }
         try db.execute(sql: "INSERT INTO search_fts (search_fts) VALUES ('rebuild')")
@@ -281,7 +353,12 @@ extension SearchIndex {
         var orphaned: [SearchDocKey] = []
         var drift: [SearchDocKey] = []
         for source in sources {
-            let live = "s.deleted_at IS NULL AND s.\(source.column) IS NOT NULL"
+            // The kind's EXISTENCE rule (VX-72, the §U-C RULINGS' condition
+            // 3): a tombstoned table's live non-NULL field; a savepoint's
+            // physical ROW — never its take's liveness, so a dead take's
+            // lingering savepoint docs read as CORRECT (resolved at query
+            // time), never as drift.
+            let live = source.live("s")
             missing += try String.fetchAll(db, sql: """
                 SELECT s.id FROM \(source.table) s
                 WHERE \(live) AND NOT EXISTS (
@@ -297,7 +374,7 @@ extension SearchIndex {
             // Every doc column the kind does not set must be NULL / 0 too —
             // a fact on the wrong column is drift as much as a wrong value.
             let set = Dictionary(uniqueKeysWithValues: source.facts.map { ($0.column, $0.expression) })
-            let checks = ["block_id", "container_id", "reading_id", "wing_id", "archived"].map { column -> String in
+            let checks = ["block_id", "container_id", "reading_id", "wing_id", "variant_id", "archived"].map { column -> String in
                 if let expression = set[column] {
                     return "d.\(column) IS NOT \(expression.replacingOccurrences(of: "R.", with: "s."))"
                 }

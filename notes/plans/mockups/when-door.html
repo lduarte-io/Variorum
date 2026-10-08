@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VX-87 — the when ▾ door, three directions</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --accent-fill:#efe6db;
+    --today:#3a5a8c;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 80px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px;max-width:78ch;line-height:1.45;}
+  h2{font-size:17px;margin:44px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:76ch;line-height:1.45;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:980px;margin:0 0 10px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:visible;position:relative;}
+  .tagl{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin:10px 0 0 22px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+  .ctlrow{display:flex;align-items:center;gap:10px;padding:12px 22px 10px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--hair);flex-wrap:wrap;}
+  .field{background:#fff;border:1px solid var(--hair);border-radius:6px;padding:3px 10px;color:var(--muted);min-width:230px;font-size:13.5px;}
+  .seg{display:flex;border:1px solid var(--hair);border-radius:6px;overflow:hidden;font-size:12.5px;}
+  .seg span{padding:3px 10px;background:var(--washlite);color:var(--muted);border-right:1px solid var(--hair);}
+  .seg span:last-child{border-right:none;}
+  .seg span.on{background:var(--accent-fill);color:var(--ink);font-weight:600;}
+  .when{color:var(--ink);font-size:13px;}
+  .when .armed{color:var(--rust);}
+  .pop{position:relative;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:0 8px 28px rgba(60,50,40,.14);width:300px;margin:8px 0 18px 540px;padding:12px 14px 12px;font-size:13px;}
+  .pop:before{content:"";position:absolute;top:-6px;left:40px;width:10px;height:10px;background:#fff;border-left:1px solid var(--hair);border-top:1px solid var(--hair);transform:rotate(45deg);}
+  .popwide{width:342px;}
+  .modes{display:flex;border:1px solid var(--hair);border-radius:7px;overflow:hidden;font-size:12.5px;margin-bottom:10px;font-family:ui-sans-serif,system-ui;}
+  .modes span{flex:1;text-align:center;padding:4px 0;background:var(--washlite);color:var(--muted);border-right:1px solid var(--hair);}
+  .modes span:last-child{border-right:none;}
+  .modes span.on{background:var(--accent-fill);color:var(--ink);font-weight:600;}
+  .cal{font-family:ui-sans-serif,system-ui;font-size:12px;margin:2px 0 6px;}
+  .cal .mhead{display:flex;justify-content:space-between;align-items:center;color:var(--ink);font-weight:600;padding:0 2px 6px;}
+  .cal .mhead .nav{color:var(--muted);letter-spacing:2px;}
+  .cal table{width:100%;border-collapse:collapse;}
+  .cal th{color:var(--muted);font-weight:400;font-size:10.5px;padding:2px 0;}
+  .cal td{text-align:center;padding:3px 0;color:var(--ink);border-radius:5px;}
+  .cal td.dim{color:#c9c1b6;}
+  .cal td.sel{background:var(--accent-fill);font-weight:700;}
+  .cal td.inrun{background:var(--wash);}
+  .cal td.today{color:var(--today);font-weight:700;}
+  .sentence{color:var(--muted);font-size:12.5px;border-top:1px solid var(--washlite);padding-top:8px;margin-top:4px;line-height:1.45;}
+  .sentence b{color:var(--ink);font-weight:600;}
+  .rowbtns{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px;}
+  .quiet{color:var(--rust);}
+  .ghost{color:var(--muted);}
+  .fields{display:flex;gap:8px;align-items:center;margin:4px 0 2px;font-size:12.5px;color:var(--muted);}
+  .dfield{background:#fff;border:1px solid var(--hair);border-radius:6px;padding:2px 8px;color:var(--ink);font-size:12.5px;}
+  .chips{display:flex;gap:8px;padding:8px 22px;border-bottom:1px solid var(--hair);background:var(--washlite);font-size:12.5px;color:var(--muted);}
+  .chip{border:1px solid var(--hair);border-radius:6px;background:#fff;padding:1px 8px;color:var(--ink);}
+  .chip .x{color:var(--muted);margin-left:5px;}
+  .presets{font-family:ui-sans-serif,system-ui;font-size:12.5px;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .presets span{border:1px solid var(--hair);border-radius:6px;padding:2px 9px;color:var(--ink);background:var(--washlite);}
+  .presets span.on{background:var(--accent-fill);font-weight:600;}
+</style>
+</head>
+<body>
+<h1>VX-87 — the <b>when ▾</b> door, three directions</h1>
+<p class="sub">Your report: the date selector is ugly, confirmation is unclear, and the
+menu-that-opens-a-popover chain feels nested. All three directions below share the same
+cure: <b>one surface</b> opens from the <b>when ▾</b> press (no menu first), the choice and
+the dates live together, and an <b>armed sentence</b> inside the surface says exactly what
+is armed, as you change it — the confirmation is the sentence, and the band's chip repeats
+it after the popover closes. "any day" clears from the same surface. Pick one, or mix.</p>
+
+<h2>Direction 1 — the calendar popover <span style="font-weight:400;color:var(--muted);font-size:13px">(recommended)</span></h2>
+<p class="note">One popover with a mode row (<i>on a day · between days</i>), a real month
+grid, and the armed sentence at the foot. One day: click it. A run: click the first day,
+click the last — the run washes in as you go. Nothing arms until you touch a date; Esc or
+clicking out keeps whatever the sentence last said. <i>any day</i> sits at the foot as the
+clearing word.</p>
+<div class="mock">
+  <span class="tagl">Library · the control row, the door at rest</span>
+  <div class="ctlrow">
+    <span class="field">search the library…</span>
+    <span class="seg"><span class="on">All</span><span>Books</span><span>Notes</span><span>Blocks</span></span>
+    <span style="flex:1"></span>
+    <span class="ghost">edited · newest first ▾</span>
+    <span class="when">when ▾</span>
+  </div>
+  <div class="pop">
+    <div class="modes"><span class="on">on a day</span><span>between days</span></div>
+    <div class="cal">
+      <div class="mhead"><span class="nav">‹</span><span>October 2026</span><span class="nav">›</span></div>
+      <table>
+        <tr><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th><th>S</th></tr>
+        <tr><td class="dim">28</td><td class="dim">29</td><td class="dim">30</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+        <tr><td>5</td><td class="sel">6</td><td class="today">7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+        <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td class="dim">1</td></tr>
+      </table>
+    </div>
+    <div class="sentence">Showing notes edited <b>on Oct 6</b>.</div>
+    <div class="rowbtns"><span class="quiet">any day</span><span class="ghost">esc closes</span></div>
+  </div>
+</div>
+<div class="mock">
+  <span class="tagl">the same popover, between days — first and last clicked, the run washed</span>
+  <div class="pop popwide" style="margin-left:60px;">
+    <div class="modes"><span>on a day</span><span class="on">between days</span></div>
+    <div class="cal">
+      <div class="mhead"><span class="nav">‹</span><span>October 2026</span><span class="nav">›</span></div>
+      <table>
+        <tr><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th><th>S</th></tr>
+        <tr><td class="dim">28</td><td class="dim">29</td><td class="dim">30</td><td class="sel">1</td><td class="inrun">2</td><td class="inrun">3</td><td class="inrun">4</td></tr>
+        <tr><td class="inrun">5</td><td class="sel">6</td><td class="today">7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+      </table>
+    </div>
+    <div class="sentence">Showing notes edited <b>Oct 1 – Oct 6</b>.</div>
+    <div class="rowbtns"><span class="quiet">any day</span><span class="ghost">esc closes</span></div>
+  </div>
+  <div class="chips"><span>“dream”</span><span class="chip">in: Home</span><span class="chip">edited Oct 1 – Oct 6<span class="x">✕</span></span></div>
+</div>
+
+<h2>Direction 2 — the quiet sentence popover</h2>
+<p class="note">No grid: the popover is one readable sentence with editable pieces —
+<i>on&nbsp;/&nbsp;between</i> is a two-word mode choice, the dates are compact fields (type or
+step). Smallest furniture, fastest for a known date; less glanceable for "what week was
+that". The armed sentence doubles as the preview line.</p>
+<div class="mock">
+  <span class="tagl">opens from when ▾ — everything on one card</span>
+  <div class="pop popwide" style="margin-left:540px;">
+    <div class="modes"><span class="on">on a day</span><span>between days</span></div>
+    <div class="fields"><span>on</span><span class="dfield">Oct 6, 2026</span><span class="ghost">⌃stepper · or type</span></div>
+    <div class="sentence">Showing notes edited <b>on Oct 6</b>.</div>
+    <div class="rowbtns"><span class="quiet">any day</span><span class="ghost">esc closes</span></div>
+  </div>
+</div>
+
+<h2>Direction 3 — presets first, calendar behind</h2>
+<p class="note">The popover leads with the answers you usually mean — <i>today ·
+yesterday · this week · last week</i> — one press each; <i>pick days…</i> unfolds direction
+1's grid beneath for everything else. Most presses become one click; the cost is a slightly
+busier card and a second step for arbitrary dates.</p>
+<div class="mock">
+  <span class="tagl">opens from when ▾</span>
+  <div class="pop popwide" style="margin-left:540px;">
+    <div class="presets"><span class="on">today</span><span>yesterday</span><span>this week</span><span>last week</span><span>pick days…</span></div>
+    <div class="sentence">Showing notes edited <b>today, Oct 7</b>.</div>
+    <div class="rowbtns"><span class="quiet">any day</span><span class="ghost">esc closes</span></div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:30px">Shared in every direction: the press opens ONE
+surface (the old menu dies); nothing arms silently; the sentence inside is the
+confirmation and the band's chip repeats it outside; <i>any day</i> clears from the same
+card; both voices and dark get the token treatment at build time.</p>
+</body>
+</html>

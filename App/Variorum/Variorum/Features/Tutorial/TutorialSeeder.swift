@@ -254,7 +254,11 @@ enum TutorialSeeder {
                              lookingLessonContent().title]),
         // 13i-d U7: "books & the shelf" LEFT this chapter — its content moved
         // (swept) into the books chapter below as "a book from the inside".
-        ("the library of things", ["comments & tags",
+        // VX-89 (R-VX83-3 — her *"add the content to the field guide now,
+        // with whatever information a user needs for it"*): "search" JOINS,
+        // right after the lesson that teaches tags — the finder leans on
+        // them (`#tag` alone narrows the Library to the notes wearing it).
+        ("the library of things", ["comments & tags", searchLessonTitle,
                                    "pool & scraps", "export — it's all yours",
                                    "the seal", "three ways of working"]),
         // 13i-d U7 — **THE BOOKS CHAPTER** (the sitting record §25, written at
@@ -275,6 +279,16 @@ enum TutorialSeeder {
     /// The books chapter's name, in one place (the plan, the section and the
     /// chapter's suite mean the same words).
     nonisolated static let booksChapter = "books & the bookcase"
+
+    /// **VX-89 — the finder's lesson**, its title in one place (the plan, the
+    /// seed and `TutorialCurrencyTests`' search pins mean the same words).
+    nonisolated static let searchLessonTitle = "search"
+
+    /// The word the search lesson's practice paragraph carries TWICE, so a
+    /// search for it answers with that paragraph alone and ⌘G has a second
+    /// one to step to (the act is walk-asserted — P-6). The prose spells it
+    /// plainly; the pin ties the two.
+    nonisolated static let searchPracticeWord = "marginalia"
 
     // MARK: - Discovery (reads — the doomed set for a wholesale replace)
 
@@ -1837,6 +1851,89 @@ enum TutorialSeeder {
         _ = try ops.addBlockComment(
             to: commentsTags.blocks[0].block.id,
             text: "a comment lives in the margin — about the block, never inside its text")
+
+        // VX-89 — **THE FINDER'S LESSON** (her question at the 13o follow-up
+        // report: *"were search details added to the field guide?"* — they
+        // were not; R-VX83-3: *"add the content to the field guide now, with
+        // whatever information a user needs for it"*). Functional words only
+        // (the VR-122 seed-edit class — 13s re-voices the guide), written as
+        // the finder stands at the VX-83 run's close: the one field, the
+        // answer sheet, land-at-match with ⌘G, `#tag` ALONE narrowing to the
+        // tagged notes (VX-84a, R-VX83-1) and the tag offer (VX-84b), the
+        // rebuilt `when ▾` (VX-87, direction 1), `+ archived`, the book's 🔍,
+        // ⌘K's passages. Every door named here is tied to its own home by
+        // `TutorialCurrencyTests`' search pins, and the two practice acts —
+        // `#tutorial` alone, and the practice word — are walk-asserted (P-6).
+        // VX-72 (U-B's rider, the same run's U-C): ONE sentence for the
+        // `+ commits` facet (her word, R-VX83-9) — savepoint history joins
+        // the answer, each line marked "commit" with its day (R-VX83-10).
+        _ = try lesson(library, searchLessonTitle, [
+            "The search field at the top of the Library is the one place to look "
+            + "for anything you wrote. Type words and it searches the TEXT itself: "
+            + "the body of every note \u{2014} every take, not only the one showing "
+            + "\u{2014} and titles, snippets, comments, block names and take labels. "
+            + "Capitals and accents don't matter: \u{201C}cafe\u{201D} finds "
+            + "\u{201C}Caf\u{E9}\u{201D}.",
+
+            "Words answer as a sheet. A band under the field counts what was found "
+            + "\u{2014} books, notes, passages \u{2014} and its chips say what is "
+            + "narrowing the search, starting with the wing you're in "
+            + "(\u{201C}in: Home\u{201D}): search looks inside one wing, though "
+            + "snippets are found from every wing. Books whose names match come "
+            + "first; then each note that matches, best match first, with up to "
+            + "three of its matching lines and the words highlighted. "
+            + "\u{201C}all N \u{203A}\u{201D} on a note opens the rest of its lines.",
+
+            "Click a line and you land IN the note: in Write, at that block, the "
+            + "match selected and the find bar already holding your words. "
+            + "\u{2318}G steps to the next match, \u{21E7}\u{2318}G back. A line "
+            + "marked \u{201C}in another take\u{201D} matched a take that isn't "
+            + "showing \u{2014} you land at its block with the find bar ready, and "
+            + "nothing is selected, because those words aren't on the page.",
+
+            "A TAG typed alone narrows the Library to the notes wearing it. Type "
+            + "#tutorial and the Library shows this guide's notes \u{2014} every "
+            + "lesson wears that tag \u{2014} as its own rows, in the order its "
+            + "sort \u{25BE} says, with any books the tag flows into listed on top. "
+            + "A tag covers the tags under it: #life finds a note tagged "
+            + "life/goals too. Put words beside a tag and it narrows the search "
+            + "instead: #tutorial rain looks for rain in these lessons only (the "
+            + "choosing lesson's rain takes answer). "
+            + "And when a word you type is the name of a tag, the band offers it "
+            + "\u{2014} \u{201C}tag: #name \u{203A}\u{201D} \u{2014} and one click "
+            + "searches the tag.",
+
+            "when \u{25BE}, beside the sort, narrows the Library to a day. It opens "
+            + "a small calendar with two choices above it. \u{201C}on a day\u{201D}: "
+            + "click a day. \u{201C}between days\u{201D}: click the first day, then "
+            + "the last, and the run between them fills in. The sentence under the "
+            + "calendar always says what is showing \u{2014} \u{201C}Showing notes "
+            + "edited on Oct 6.\u{201D} \u{2014} and that sentence is the "
+            + "confirmation: nothing changes until you click a day, and Esc or a "
+            + "click outside keeps exactly what it says. \u{201C}any day\u{201D} "
+            + "clears it, and so does the \u{2715} on the day's chip in the band. "
+            + "One honest limit: a note keeps one edit stamp, so a note edited on "
+            + "two days answers for the later one \u{2014} the earlier day finds it "
+            + "where a savepoint landed.",
+
+            "Archived notes stay out of the way: search leaves them out until you "
+            + "press \u{201C}+ archived\u{201D} in the band, and that chip's "
+            + "\u{2715} leaves them out again. What you saved is searchable the "
+            + "same way: \u{201C}+ commits\u{201D} brings in the words your "
+            + "commits kept, each such line marked \u{201C}commit\u{201D} "
+            + "with the day it was saved. Inside a book, the \u{1F50D} at the "
+            + "right of the book's masthead searches that book alone \u{2014} the "
+            + "same kind of answer, scoped to the book. And \u{2318}K finds "
+            + "passages too: under the notes and books whose names match, a few "
+            + "matching lines, and \u{201C}All matches in the Library "
+            + "\u{203A}\u{201D} to open the whole answer.",
+
+            "Try it: open the Library and type marginalia. This paragraph "
+            + "answers \u{2014} click its line and you land right here, in Write, "
+            + "with the word selected and the find bar holding it. Press \u{2318}G "
+            + "and the selection steps to the next marginalia. Then try "
+            + "#tutorial on its own, and watch the Library become this guide.",
+        ])
 
         // 13i-d U7: "books & the shelf" MOVED — swept — into the books
         // chapter at the end of this book ("a book from the inside" carries

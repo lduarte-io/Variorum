@@ -16,11 +16,15 @@
 //  edge; a place already inside the band stays EXACTLY where it is (the ruled
 //  viewport-fraction carries are untouched mid-band).
 //
-//  **Scope is the mode switch's landing ONLY** — the callers decide that, never
+//  **Scope is the mode switch's landing** — the callers decide that, never
 //  this file: Write's bare mode-switch arrival (its #98(a) reveal and the
 //  13u2b carry), the Takes article's ENTRY landing (her R-18l-13's road), and
-//  note Read's mode-switch seed. Clicks, find steps and note-opens keep their
-//  shipped reveals.
+//  note Read's mode-switch seed — **plus, since VX-85 (the 13o follow-up run,
+//  its provisional call D-4), a SEARCH passage's landing in Write**, whose
+//  find bar overlays the clip's top: the match rests in the band read against
+//  the bar-adjusted viewport, never flush under the bar. Clicks, find STEPS
+//  (⌘G — AppKit's finder reveals those) and note-opens keep their shipped
+//  reveals.
 //
 //  **The two edges are NAMED, and they are the SURFACE's own numbers.** The
 //  top is the surface's RESTING top air — the room its page shows above its
