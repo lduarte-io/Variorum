@@ -3554,15 +3554,22 @@ struct TutorialPrivacyChapterTests {
             .ignoresCase().wordBoundaryKind(.simple)
     }
 
+    /// **13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 bound, the U3
+    /// RECORD's disposition 4):** the chapter MOVED LAST — *"it makes more
+    /// sense to have the safety after the workflow and the workflow
+    /// together"* — so its right place is the guide's close, after the books
+    /// chapter (the workflow's capstone), where the map's neighbour seat was.
+    /// RED ON OLD: the old plan seats it seventh, right after the map.
     @Test func theChapterIsTwoLessonsInTheRightPlace() {
         let index = TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter }
         #expect(index != nil)
-        let places = TutorialSeeder.plan.firstIndex { $0.chapter == placesChapter }
-        #expect(places != nil)
-        #expect(index != nil && places != nil)
-        if let index, let places {
-            #expect(index == places + 1,
-                    "the recovery map raises the question this chapter answers")
+        let books = TutorialSeeder.plan.firstIndex { $0.chapter == TutorialSeeder.booksChapter }
+        #expect(books != nil)
+        #expect(index != nil && books != nil)
+        if let index, let books {
+            #expect(index == TutorialSeeder.plan.count - 1,
+                    "safety after the workflow — the guide's closing word")
+            #expect(index == books + 1, "right after the workflow's capstone")
         }
         // pre-13x 5a: copy §7's two lessons, by the copy's own titles.
         #expect(TutorialSeeder.plan.first { $0.chapter == privacyChapter }?.lessons

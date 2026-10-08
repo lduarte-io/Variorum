@@ -231,31 +231,6 @@ enum TutorialSeeder {
         ("where things go",
          ["the five places", "saving a moment", "what a copy carries",
           "the two exits"]),
-        // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
-        // verbatim: *"yes, short chapter, and make the options that are in
-        // settings clear (require lock every time to open, don't, what you
-        // need to reset it, saving it in keychain or not, etc.). It should
-        // also be clear to a user everything they have to lose to lose
-        // their writing AND that there's an option for a plaintext backup
-        // if they want. basically give them their options in a non scary
-        // way, but in a serious way."*
-        //
-        // It sits right after "where things go" because that chapter is
-        // the recovery map, and this one is the same map's other face: the
-        // reader has just learned every place their writing is kept, and
-        // the honest next questions are "who else can read it" and "what
-        // would it take to lose it for good". Two lessons — SHORT, as she
-        // ruled.
-        //
-        // pre-13x 5a (copy §7 — the postures design §1.22): the SHORT
-        // chapter re-seeded as copy §7's two lessons, VERBATIM from the copy
-        // constants both seeders render (`ProtectionCopy.privacyLesson…`);
-        // the walk asserts copy §7's own parenthetical — both modes, both
-        // floors, keystone 3, keystone 4, and the book's door — so the
-        // chapter cannot drift from the copy file's facts. The full story
-        // is the seeded book *Encryption Explained*.
-        ("keeping it private",
-         [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
         // 17y B-DEDUPE (MAJOR-2): the last lesson's title follows the BUILD
         // — Release (no Canvas after (p)) titles it "blocks"; the mint and
         // this plan read the ONE pure function, so the shape pins stay in
@@ -276,14 +251,49 @@ enum TutorialSeeder {
         // sentence the field guide must be able to say TRUTHFULLY of the
         // shipped build"). The eleven lesson sentences and the five rituals,
         // in the guide's card form; `TutorialBooksChapterTests` executes each
-        // sentence's truth and every ritual headless. It sits LAST: it leans
-        // on tags (the library of things) and on everything a note can do.
+        // sentence's truth and every ritual headless. It closes the WORKFLOW
+        // (since 13s-b the privacy chapter closes the guide): it leans on
+        // tags (the library of things) and on everything a note can do.
         // Lesson 9's second sentence (archive · can't delete · comes back) is
         // 13i-e's unbuilt guard and is withheld until it ships (F-U7-2).
         (booksChapter, ["the classics walk", "a book from the inside",
                         "membership, not ownership", "gatherings & arrivals",
                         "owned, finished, sealed", "the bookcase",
                         "the journal & the pool", "wings"]),
+        // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
+        // verbatim: *"yes, short chapter, and make the options that are in
+        // settings clear (require lock every time to open, don't, what you
+        // need to reset it, saving it in keychain or not, etc.). It should
+        // also be clear to a user everything they have to lose to lose
+        // their writing AND that there's an option for a plaintext backup
+        // if they want. basically give them their options in a non scary
+        // way, but in a serious way."*
+        //
+        // (Until 13s-b) it sat right after "where things go" because that chapter is
+        // the recovery map, and this one is the same map's other face: the
+        // reader has just learned every place their writing is kept, and
+        // the honest next questions are "who else can read it" and "what
+        // would it take to lose it for good". Two lessons — SHORT, as she
+        // ruled.
+        //
+        // pre-13x 5a (copy §7 — the postures design §1.22): the SHORT
+        // chapter re-seeded as copy §7's two lessons, VERBATIM from the copy
+        // constants both seeders render (`ProtectionCopy.privacyLesson…`);
+        // the walk asserts copy §7's own parenthetical — both modes, both
+        // floors, keystone 3, keystone 4, and the book's door — so the
+        // chapter cannot drift from the copy file's facts. (The book's door
+        // retired at 13s-b U1b with the book's seed — R-13s-37; the walk
+        // now asserts its ABSENCE.)
+        //
+        // 13s-b triage landing — **MOVED LAST** (R-13s-30's bound, her words:
+        // *"I'll move the safety chapter later in the book, it makes more sense
+        // to have the safety after the workflow and the workflow together"*; the
+        // U3 RECORD's disposition 4): the workflow chapters run unbroken and the
+        // guide closes on the serious chapter. The lost adjacency to the map is
+        // the move's stated tradeoff; both lessons open self-contained, and the
+        // copy §7 text is untouched (the fence).
+        ("keeping it private",
+         [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
     ]
 
     /// The books chapter's name, in one place (the plan, the section and the
@@ -511,13 +521,14 @@ enum TutorialSeeder {
         // The post-13l polish round (row 19): the map, right after the chapter
         // that raises the question.
         let places = try ops.createSection(in: book.id, name: "where things go")
-        // Phase 13p, knot 6: the privacy chapter — the recovery map's
-        // other face, right after it.
-        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
-        // 13i-d U7: the books chapter — last.
+        // 13i-d U7: the books chapter — the workflow's last.
         let books = try ops.createSection(in: book.id, name: booksChapter)
+        // Phase 13p, knot 6: the privacy chapter. 13s-b triage landing
+        // (R-13s-30 / the U3 RECORD's disposition 4): MOVED LAST — safety
+        // after the workflow, the guide's closing word.
+        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
 
         /// One lesson: a `.generic` post inside the book, tagged, blocks in
         /// order. Returns the minted block results for act-ready shaping.
@@ -1729,22 +1740,6 @@ enum TutorialSeeder {
             try take(on: middle, "the middle block's second take: it rides to the Trash too.")
         }
 
-        // ————————————————————————— keeping it private —————————————————————
-        //
-        // pre-13x 5a — copy §7's SHORT chapter (the postures design §1.22 /
-        // §8): two lessons, their paragraphs VERBATIM from the copy
-        // constants (`PostureCopy.swift`), the device nouns interpolated.
-        // What's true in every mode; Standard and Castle and what you must
-        // keep in each; the open-app sentence; the door to the seeded book
-        // *Encryption Explained*, which carries the whole story. The 13p
-        // dials lesson and its loss-math composition retired with the
-        // presets, the escrow dial and the reset door they described (§13).
-
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
-                       ProtectionCopy.privacyLessonOneParagraphs)
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
-                       ProtectionCopy.privacyLessonTwoParagraphs)
-
         // ——————————————————————————— ways of looking ———————————————————————
 
         // pre-13u Act 10 wave 2c (item 16, W8-1) gave this chapter two
@@ -2419,6 +2414,24 @@ enum TutorialSeeder {
             + "are the only crossings. Home holds the journal, your quick notes "
             + "and this guide, and it can't be deleted.",
         ])
+
+        // ————————————————————————— keeping it private —————————————————————
+        //
+        // pre-13x 5a — copy §7's SHORT chapter (the postures design §1.22 /
+        // §8): two lessons, their paragraphs VERBATIM from the copy
+        // constants (`PostureCopy.swift`), the device nouns interpolated.
+        // What's true in every mode; Standard and Castle and what you must
+        // keep in each; the open-app sentence (the door to the seeded book
+        // *Encryption Explained* retired at 13s-b U1b, R-13s-37). The 13p
+        // dials lesson and its loss-math composition retired with the
+        // presets, the escrow dial and the reset door they described (§13).
+        // 13s-b triage landing: minted LAST (the chapter moved last; a
+        // membership's position is its mint order), the text untouched.
+
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
+                       ProtectionCopy.privacyLessonOneParagraphs)
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
+                       ProtectionCopy.privacyLessonTwoParagraphs)
 
         return book.id
     }

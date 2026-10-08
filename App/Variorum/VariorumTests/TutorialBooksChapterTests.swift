@@ -146,12 +146,19 @@ private let chapterTitles = [
 @Suite("Tutorial contract — books & the bookcase, the eleven lessons (§25)")
 struct TutorialBooksLessonTests {
 
-    /// The chapter is in the plan, LAST, eight lessons — and the seeded book
-    /// matches (the spine's `theSeededBookMatchesTheLessonPlanExactly` holds
-    /// the order; this holds the chapter's own shape).
+    /// The chapter is in the plan, eight lessons, LAST OF THE WORKFLOW — and
+    /// the seeded book matches (the spine's `theSeededBookMatchesTheLessonPlanExactly`
+    /// holds the order; this holds the chapter's own shape). **13s-b triage
+    /// landing — A JUSTIFIED EDIT:** the privacy chapter moved behind it to
+    /// close the guide (R-13s-30's bound, the U3 RECORD's disposition 4), so
+    /// the books chapter is second-to-last now, the workflow's capstone; the
+    /// test's name keeps its history.
     @Test func theChapterIsEightLessonsLastInTheGuide() async throws {
-        #expect(TutorialSeeder.plan.last?.chapter == TutorialSeeder.booksChapter)
-        #expect(TutorialSeeder.plan.last?.lessons == chapterTitles)
+        let books = TutorialSeeder.plan.dropLast().last
+        #expect(books?.chapter == TutorialSeeder.booksChapter)
+        #expect(books?.lessons == chapterTitles)
+        #expect(TutorialSeeder.plan.last?.chapter == "keeping it private",
+                "the privacy chapter closes the guide, after the workflow")
         #expect(!TutorialSeeder.plan.flatMap(\.lessons).contains("books & the shelf"),
                 "the old lesson MOVED into this chapter — it is not taught twice")
         try await withChapterWorld { _, db, guideID in
