@@ -1743,6 +1743,30 @@ the walk record's own disposition names the split: the orchestrator owns StoreBi
 session owns AppBootstrap). Every VX-80 commit is pathspec-limited so neither session sweeps
 the other's work.
 
+**VX-80 BUILT — record → evidence (one line each):**
+- *The mechanism (the record §"The mechanism"):* re-traced live against this branch —
+  `Posture.derive` reads the stranded shape indeterminate-Standard-by-custody-shape ⇒ route
+  `.open` ⇒ wrong-key NOTADB ⇒ `failedOutcome`'s `keyUnavailable`-only guard ⇒ doorless. The
+  record's account confirmed exactly.
+- *The pin, red-on-old (the record's named shape):* `theStrandedStoreOffersTheRecoveryLobby
+  AndTheTypedWordOpensIt` — the orchestrator's 21:58 stage run on the pre-fix tree: FAILING at
+  the `#require(recovery…)` line, "recovery was nil", the SQLCipher wrong-key signature
+  (hmac check failed, pgno=1) in the log. Commits 838d68b6 (pin) → f88e51a5 (fix after red).
+- *The fix shape (the record §"The fix shape"):* `StoreOpenError.keyRejected` (typed, core,
+  `openStore`'s NOTADB-with-key-in-hand classification) + `failedOutcome`'s one guard widened
+  (`keyUnavailable || keyRejected`) — the SAME typed-secrets lobby, zero view changes, zero
+  new crypto roads; on unlock the standing machinery completes the follow (reconcile → the
+  marker's resume doors → custody moves, snapshot, old key file retired, marker cleared).
+- *The saveAuto check (the record's own instruction):* the demanded-gate test pins no-silent-
+  item; the silent-shape heal pinned as designed (piece 3's trace).
+- *State-transition tests:* core 2 (headless GREEN) + Mac 4 (compiled; run stage-pending).
+- *Convergence suites:* zero `Sync/` lines; the only convergence-suite reds are W-1's,
+  bisect-traced to bf44f53f (piece 5).
+- *Fences:* zero Migrations (marker 12) · zero Sync/ · real store and Air fixture untouched.
+- **PENDING(stage): the Mac suite's GREEN run (4/4)** — flips this banner final when the
+  orchestrator runs `-only-testing:VariorumTests/VX80CastleFollowRecoveryTests` on the fixed
+  tree.
+
 ### WALK FINDING W-2 (MAJOR; found live after W-1's fix let the adoption act)
 
 **The post-adoption reopen leaves the window content-sized and un-resizable, the hold banner
