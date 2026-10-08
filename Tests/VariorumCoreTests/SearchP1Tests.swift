@@ -38,8 +38,10 @@ private func pageRequests(_ db: Database, reset: Bool) -> Int {
 /// hers does). Every block says "the"; filler words vary deterministically;
 /// the same 20 PROBE blocks (the first two notes) say "zanzibar" and
 /// "quokkaprobe" in every corpus — so a probe's match set is fixed while the
-/// corpus grows.
-private func corpus(notes: Int) throws -> AppDatabase {
+/// corpus grows. VX-72: `savepointsPerTake` saved states per take (each its
+/// take's words and one more — a paragraph saved as it grew), captured by the
+/// ninth kind's own trigger as they are written.
+private func corpus(notes: Int, savepointsPerTake: Int = 0) throws -> AppDatabase {
     let db = try AppDatabase.inMemory()
     try db.write { db in
         try db.execute(sql: "INSERT INTO _sync_applying VALUES (1)") // no outbox rows: a bench bed
@@ -59,6 +61,9 @@ private func corpus(notes: Int) throws -> AppDatabase {
             INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """)
+        let save = try db.makeStatement(sql: """
+            INSERT INTO commit_point (id, variant_id, text, kind, created_at) VALUES (?, ?, ?, 'auto', ?)
+            """)
         var seed: UInt64 = 7
         func word() -> String {
             seed = seed &* 6364136223846793005 &+ 1442695040888963407
@@ -75,6 +80,9 @@ private func corpus(notes: Int) throws -> AppDatabase {
                 try take.execute(arguments: [blockID + "-v", blockID, text, now, now])
                 try place.execute(arguments: [blockID + "-p", noteID, blockID, String(format: "a%02d", b),
                                               blockID + "-v", now, now])
+                for k in 0..<savepointsPerTake {
+                    try save.execute(arguments: [blockID + "-s\(k)", blockID + "-v", text + " saved\(k)", now])
+                }
             }
         }
         try db.execute(sql: "DELETE FROM _sync_applying")
@@ -97,14 +105,36 @@ private func editCost(_ db: AppDatabase, count: Int) throws -> Double {
     return Double(total) / Double(count)
 }
 
-/// Page requests of one `searchPassages` call.
-private func queryCost(_ db: AppDatabase, _ text: String) throws -> (pages: Int, hits: Int) {
+/// Page requests of one `searchPassages` call (VX-72: `savepoints` = the
+/// commits facet).
+private func queryCost(
+    _ db: AppDatabase, _ text: String, savepoints: Bool = false, limit: Int = 50
+) throws -> (pages: Int, hits: Int) {
     try db.read { db in
-        let query = SearchQueryParser.parse(text, locale: Locale(identifier: "en_US"))
+        var query = SearchQueryParser.parse(text, locale: Locale(identifier: "en_US"))
+        query.includesSavepoints = savepoints
         _ = pageRequests(db, reset: true)
-        let page = try Queries.searchPassages(db, query: query, scope: SearchScope(wingID: ""), limit: 50)
+        let page = try Queries.searchPassages(db, query: query, scope: SearchScope(wingID: ""), limit: limit)
         return (pageRequests(db, reset: false), page.passages.count)
     }
+}
+
+/// Average page requests of `count` savepoints written to the probe take,
+/// each its own transaction — a commit's own write, with every trigger it
+/// fires (the outbox's and the ninth kind's capture).
+private func commitCost(_ db: AppDatabase, count: Int) throws -> Double {
+    var total = 0
+    for i in 0..<count {
+        try db.write { db in
+            _ = pageRequests(db, reset: true)
+            try db.execute(sql: """
+                INSERT INTO commit_point (id, variant_id, text, kind, created_at)
+                VALUES (?, 'n000000-b0-v', ?, 'manual', '2026-10-06T00:00:01.000Z')
+                """, arguments: ["cp-probe-\(i)", "a deliberate savepoint of the probe take number \(i)"])
+            total += pageRequests(db, reset: false)
+        }
+    }
+    return Double(total) / Double(count)
 }
 
 /// Page requests of the answer sheet's first group page and its counts.
@@ -167,6 +197,62 @@ struct SearchP1Tests {
         let lAll = try queryCost(large, "the ")
         print("[13o-P1] query 'the' (every block): 2k blocks \(sAll.pages) pages · 10k blocks \(lAll.pages) pages")
         #expect(Double(lAll.pages) > Double(sAll.pages) * 3, "∝ matches: 5× the matches, several × the pages")
+    }
+
+    // MARK: - VX-72 — the savepoint kind keeps the shape (the §U-C RULINGS' condition 4)
+
+    /// The ninth kind joins the SHARED index (F2), so its postings sit in
+    /// every term's doclist: three facts, as page requests.
+    /// 1. CAPTURE ∝ the commit — a savepoint's write is flat across a 5×
+    ///    corpus that already holds three savepoints per take.
+    /// 2. The FACET's road ∝ its matches — a fixed probe (20 takes + their 60
+    ///    savepoints) costs the same in both corpora.
+    /// 3. **The DEFAULT road keeps its CLASS** (condition 4 — a class change
+    ///    is a stop): with savepoints indexed at scale, a fixed probe still
+    ///    costs the same across the 5× corpus (∝ its matches — now including
+    ///    the fenced savepoint postings, a bounded constant), the answer is
+    ///    unchanged, and the delta against the same corpus WITHOUT
+    ///    savepoints is printed and bounded by the postings' own factor.
+    @Test func theSavepointKindKeepsTheCostShape() throws {
+        let k = 3
+        let plain = try corpus(notes: 200)                         // 2,000 blocks, no savepoints
+        let small = try corpus(notes: 200, savepointsPerTake: k)   // + 6,000 savepoints
+        let large = try corpus(notes: 1_000, savepointsPerTake: k) // 10,000 blocks + 30,000 — 5×
+
+        // 1 — capture.
+        let smallCommit = try commitCost(small, count: 60)
+        let largeCommit = try commitCost(large, count: 60)
+        print("[VX-72-P1] commit pages/savepoint: 2k blocks \(smallCommit) · 10k blocks \(largeCommit)")
+        #expect(largeCommit <= smallCommit * 1.5, "a savepoint's capture is ∝ the commit, flat across a 5× corpus")
+
+        for probe in ["zanzibar ", "quokkapr"] {
+            // 2 — the facet's road.
+            let sFacet = try queryCost(small, probe, savepoints: true, limit: 100)
+            let lFacet = try queryCost(large, probe, savepoints: true, limit: 100)
+            print("[VX-72-P1] facet '\(probe)': 2k \(sFacet.pages) pages / \(sFacet.hits) hits · 10k \(lFacet.pages) / \(lFacet.hits)")
+            #expect(sFacet.hits == 20 * (1 + k) && lFacet.hits == 20 * (1 + k), "the 20 probe takes and their savepoints")
+            #expect(Double(lFacet.pages) <= Double(sFacet.pages) * 2, "'\(probe)': the facet tracks its matches, never the corpus")
+
+            // 3 — the default road: the class, the answer, the delta.
+            let base = try queryCost(plain, probe)
+            let sDefault = try queryCost(small, probe)
+            let lDefault = try queryCost(large, probe)
+            print("[VX-72-P1] DEFAULT '\(probe)': no savepoints 2k \(base.pages) · with \(k)/take 2k \(sDefault.pages) · 10k \(lDefault.pages) pages"
+                  + " (delta ×\(String(format: "%.2f", Double(sDefault.pages) / Double(base.pages))))")
+            #expect(base.hits == 20 && sDefault.hits == 20 && lDefault.hits == 20, "the default answer is unchanged")
+            #expect(Double(lDefault.pages) <= Double(sDefault.pages) * 2,
+                    "'\(probe)': the DEFAULT road's class holds — ∝ its matches, never the corpus (condition 4)")
+            #expect(Double(sDefault.pages) <= Double(base.pages) * Double(1 + k),
+                    "'\(probe)': the delta is bounded by the fenced postings' own factor")
+        }
+
+        // An every-block term, default road: the delta of walking the fenced
+        // postings at full scale (printed — the bm25 statistics consequence).
+        let baseAll = try queryCost(plain, "the ")
+        let savedAll = try queryCost(small, "the ")
+        print("[VX-72-P1] DEFAULT 'the' (every block): no savepoints \(baseAll.pages) · with \(k)/take \(savedAll.pages) pages"
+              + " (delta ×\(String(format: "%.2f", Double(savedAll.pages) / Double(baseAll.pages))))")
+        #expect(savedAll.hits == baseAll.hits, "the same living answer")
     }
 
     // MARK: - The integrity check sees drift (the architect's seam-2 addition)
