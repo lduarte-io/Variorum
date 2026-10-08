@@ -212,8 +212,16 @@ final class ReadPostViewModel {
            zip(new, slots).allSatisfy({ $0.blockID == $1.blockID && $0.variantID == $1.variantID }) {
             applyDifferential(new)
         } else {
-            renderFull(new)
+            // VX-82: `loaded` flips BEFORE the render — the announce is
+            // `remeasure`'s tail and `renderFull` calls it synchronously, so
+            // flipping after meant the first (often only) measure of real
+            // content saw `loaded` false and an idle surface never announced
+            // (caught by the pin's handover-completes assert, first run: the
+            // outgoing editor lingered forever). This call's own
+            // differential-vs-full choice was decided above; nothing in
+            // `renderFull` re-enters `applyProjection`.
             loaded = true
+            renderFull(new)
         }
     }
 
