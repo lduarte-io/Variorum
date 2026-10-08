@@ -548,7 +548,10 @@ final class PostureSwitchRunner {
         // `writeNewKeyFile` read A whenever the road did not enter Castle, so
         // a Replace All Keys on a CASTLE account wrapped L′ under the iCloud
         // key a Mac still held from its Standard era (her Pro, 2026-09-07).
-        var appleCopyInKeyFile = false
+        // VX-99 round 2 (finding 7): the decision carries the KEY itself —
+        // the one the belt verified — not a Bool that `writeNewKeyFile`
+        // turned into a second read after the walk.
+        var appleKeyForKeyFile: AppleKey?
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
 
         if enrolled, let vault = leaves.vault, let transport = leaves.transport {
@@ -601,13 +604,18 @@ final class PostureSwitchRunner {
             // discriminator (own write landed ⇔ the vault's id is this one).
             // F2 (MAJOR-3 b): the Apple-held copy kept under the SAME A —
             // read, never minted; refused when unreadable or not the vault's.
-            let appleHeld: (key: SymmetricKey, id: String)? = entersCastle
+            let appleHeld: AppleKey? = entersCastle
                 ? nil : try appleHeldCopyForStandard(keptUnder: fetched)
             // VX-99 (enrolled road): the key file carries an Apple copy
             // exactly when the vault write carries one — Standard's Replace
             // All Keys (decision 30, §7 step 5), never a Castle account's.
-            appleCopyInKeyFile = appleHeld != nil
-            let prepared = try CorpusRotation.prepare(current: current, secrets: secrets, appleHeldCopy: appleHeld)
+            // VX-99 round 2 (finding 7): under the SAME A — the vault's copy
+            // of M′ and the key file's copy of L′ are one pair; a swap of the
+            // iCloud item during the walk can no longer split them.
+            appleKeyForKeyFile = appleHeld
+            let prepared = try CorpusRotation.prepare(
+                current: current, secrets: secrets,
+                appleHeldCopy: appleHeld.map { (key: $0.symmetricKey, id: $0.id) })
             try await writeMarker(RotationMarker(
                 step: .vaultWrite, entersCastle: entersCastle,
                 newCorpusKeyID: prepared.corpusKeyID, startedAt: stamp))
@@ -681,16 +689,16 @@ final class PostureSwitchRunner {
             secrets = try await Task.detached(priority: .userInitiated) {
                 try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
             }.value
-            // VX-99 (local-only road — no vault): the library's own posture
-            // decides, exactly as `appleHeldCopyForStandard` does for the
-            // vault's side; entering Castle never carries one.
-            appleCopyInKeyFile = !entersCastle && leaves.posture() == .standard
+            // VX-99 (local-only road — no vault): since round 2's finding 4
+            // only USE CASTLE reaches this road (Replace All Keys refuses
+            // above), and entering Castle never carries an Apple copy.
+            appleKeyForKeyFile = nil
             leaves.log("posture switch: local-only — steps 4–7 only")
         }
 
         // ————— 4–6: the library, custody, the snapshot —————
         let outcome = try await rekeyCustodyAndSnapshot(
-            entersCastle: entersCastle, appleCopy: appleCopyInKeyFile, libraryKey: libraryKey,
+            entersCastle: entersCastle, appleKey: appleKeyForKeyFile, libraryKey: libraryKey,
             keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords,
                                    recoveryWrapDigest: recoveryWrapDigest),
             material: material, reencrypted: reencrypted, stamp: stamp,
@@ -826,9 +834,9 @@ final class PostureSwitchRunner {
         libraryKey: StoreKey, keyFile: KeyFileInputs, secretName: String
     ) async throws -> Outcome {
         // The VAULT's word (decision 8): no Apple-held copy ⇒ Castle. VX-99:
-        // the new key file's Apple copy follows the same word (`appleCopy:
-        // !entersCastle` at both calls below) — the account's posture, read
-        // from the vault just fetched.
+        // the new key file's Apple copy follows the same word (`appleKey:`
+        // read only when `!entersCastle`, at both calls below) — the
+        // account's posture, read from the vault just fetched.
         let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
         let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
@@ -845,7 +853,7 @@ final class PostureSwitchRunner {
            held.masterKey == unwrapped.masterKey, fetched.format.previousCorpusKey == nil {
             leaves.log("follow: the keys are unchanged — the account is \(entersCastle ? "Castle" : "Standard"); the library re-keys and custody moves (no rotation)")
             let outcome = try await rekeyCustodyAndSnapshot(
-                entersCastle: entersCastle, appleCopy: !entersCastle, libraryKey: libraryKey,
+                entersCastle: entersCastle, appleKey: entersCastle ? nil : leaves.appleKeys.read(), libraryKey: libraryKey,
                 keyFile: keyFile,
                 material: held, reencrypted: 0, stamp: stamp,
                 listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
@@ -864,7 +872,7 @@ final class PostureSwitchRunner {
         guard let transport = leaves.transport else { throw PostureSwitchError.syncKeysUnavailable }
         let final = try await reencryptAndComplete(vault: vault, transport: transport, material: following)
         let outcome = try await rekeyCustodyAndSnapshot(
-            entersCastle: entersCastle, appleCopy: !entersCastle, libraryKey: libraryKey,
+            entersCastle: entersCastle, appleKey: entersCastle ? nil : leaves.appleKeys.read(), libraryKey: libraryKey,
             keyFile: keyFile,
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
@@ -1062,17 +1070,19 @@ final class PostureSwitchRunner {
     /// follow. `listPreSwitchPairs`: whether the app's own pre-switch pairs
     /// are offered — only when this library was Standard before (their
     /// "still open through your Apple account" is true exactly then).
-    /// `appleCopy` (VX-99 — required, every road decides): whether the new
-    /// key file carries L′ under the iCloud key — the ceremony's enrolled
-    /// road passes whether its vault write carried an Apple-held copy, its
-    /// local-only road passes the posture's Standard, the follow and the
-    /// resume's enrolled arm pass the vault's word (the vault just fetched).
+    /// `appleKey` (VX-99 — required, every road decides; round 2's finding
+    /// 7 carries the KEY, not a Bool): the iCloud key the new key file wraps
+    /// L′ under, or nil — the ceremony's enrolled road passes the A its belt
+    /// verified (exactly when its vault write carried an Apple-held copy, so
+    /// both copies sit under ONE A), its local-only road (Use Castle only)
+    /// nil, the follow and the resume's enrolled arm the A read when the
+    /// vault's word is Standard (the vault just fetched).
     /// `accountPosture` (VX-99 round 2, finding 3): the ACCOUNT's posture
     /// when the caller holds the vault's word for it (the resume's enrolled
     /// arm) — custody moves to it on a road that does not enter Castle; nil
     /// = the posture read (`leaves.posture()`), every other road's.
     private func rekeyCustodyAndSnapshot(
-        entersCastle: Bool, appleCopy: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
+        entersCastle: Bool, appleKey: AppleKey?, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
         listPreSwitchPairs: Bool, follow: Bool = false, accountPosture: Posture? = nil
     ) async throws -> Outcome {
@@ -1086,7 +1096,7 @@ final class PostureSwitchRunner {
             step: .rekeyLibrary, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
-        try await writeNewKeyFile(newKey: newKey, appleCopy: appleCopy, keyFile: keyFile, material: material)
+        try await writeNewKeyFile(newKey: newKey, appleKey: appleKey, keyFile: keyFile, material: material)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
@@ -1122,12 +1132,14 @@ final class PostureSwitchRunner {
     /// fresh descriptor the vault's M′ wrap used — the lobby derives ONCE,
     /// §3.6), under W when the words are in hand, under M′ when enrolled;
     /// the Apple copy ONLY under Standard's Replace All Keys (and a follow
-    /// under a Standard account) — `appleCopy`, the caller's decision
+    /// under a Standard account) — `appleKey`, the caller's decision AND key
     /// (VX-99: never "the road does not enter Castle", which wrapped L′
-    /// under any readable iCloud key on a Castle account); the vault's
-    /// descriptor + corpus key id recorded. The OLD key file stays.
+    /// under any readable iCloud key on a Castle account; round 2's finding
+    /// 7: never a second read here, which the belt's vault-id check never
+    /// saw); the vault's descriptor + corpus key id recorded. The OLD key
+    /// file stays.
     private func writeNewKeyFile(
-        newKey: StoreKey, appleCopy: Bool, keyFile: KeyFileInputs, material: DeviceKeyMaterial?
+        newKey: StoreKey, appleKey apple: AppleKey?, keyFile: KeyFileInputs, material: DeviceKeyMaterial?
     ) async throws {
         let storeURL = leaves.storeURL
         let gate = leaves.gate
@@ -1142,7 +1154,6 @@ final class PostureSwitchRunner {
         let passphraseKey = keyFile.passphraseKey
         let recoveryWords = keyFile.recoveryWords
         guard passphrase != nil || passphraseKey != nil || recoveryWords != nil else { throw PostureSwitchError.secretRequired }
-        let apple: AppleKey? = appleCopy ? leaves.appleKeys.read() : nil
         let envelope: StoreKeyEnvelope = try await Task.detached(priority: .userInitiated) {
             var envelope = StoreKeyEnvelope(storeID: storeID)
             if let passphraseKey {
@@ -1244,17 +1255,19 @@ final class PostureSwitchRunner {
     /// account's key. Either miss refuses (`appleKeyUnreachable`).
     /// VX-99 round 1 (MAJOR): the owed-or-not test is the VAULT's word —
     /// `masterWrappedByAppleHeld != nil` (Standard) — not `leaves.posture()`.
-    /// The ceremony fetches the vault one branch above (:524) and this belt
-    /// holds it, so decision 8 (posture is the account's once a vault exists)
+    /// The ceremony fetches the vault at step 1 (`runCeremony`'s
+    /// `vault.fetchVault()` after the drain) and this belt holds it, so
+    /// decision 8 (posture is the account's once a vault exists)
     /// and decision 35 (no posture-driven write on a stale/indeterminate
     /// reading) govern: a stale CASTLE read on a genuinely Standard account
     /// must NOT drop the copy, and a stale STANDARD read on a Castle account
     /// must NOT add one. The caller still gates `entersCastle ? nil : …`, so
     /// the enter-Castle road (whose fetched vault is still the OLD Standard
-    /// one) is unaffected.
+    /// one) is unaffected. VX-99 round 2 (finding 7): returns the VERIFIED
+    /// key itself — the caller wraps the key file's copy of L′ under it too.
     private func appleHeldCopyForStandard(
         keptUnder fetched: KeyVaultClient.FetchedVault
-    ) throws -> (key: SymmetricKey, id: String)? {
+    ) throws -> AppleKey? {
         guard fetched.format.masterWrappedByAppleHeld != nil else { return nil }
         guard let apple = leaves.appleKeys.read() else {
             leaves.log("posture switch: Replace All Keys under Standard — the iCloud key is not readable here; refused before any write")
@@ -1264,7 +1277,7 @@ final class PostureSwitchRunner {
             leaves.log("posture switch: Replace All Keys under Standard — the iCloud key read here (\(apple.id.prefix(8))) is not the account's (\(vaultID.prefix(8))); refused before any write")
             throw PostureSwitchError.appleKeyUnreachable
         }
-        return (apple.symmetricKey, apple.id)
+        return apple
     }
 
     // MARK: - §7 THE OFFER's act
@@ -1479,7 +1492,7 @@ final class PostureSwitchRunner {
                 // VX-99: the vault's word (above) — the marker's
                 // `entersCastle` is false for Replace All Keys in EITHER
                 // posture, so it never decides the Apple copy.
-                entersCastle: roadEntersCastle, appleCopy: !vaultSaysCastle,
+                entersCastle: roadEntersCastle, appleKey: vaultSaysCastle ? nil : leaves.appleKeys.read(),
                 libraryKey: libraryKey,
                 // The ceremony's words are NOT landed when another device's
                 // rotation is what this resume picked up (M1's rule): the
