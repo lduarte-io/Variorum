@@ -2260,3 +2260,21 @@ Compiled: Mac TEST BUILD SUCCEEDED · VariorumMobile BUILD SUCCEEDED.
    *[removed for publication]*
 6. **Next: her Air leg** — the code under test is exactly 0787f028 (every later branch commit is
    record-only); then closeout + the PR.
+
+### WALK FINDING W-3 (her real Pro, 2026-10-08 00:51 — the first launch of the 13x install)
+
+**The R1-BLOCKER detector fired on her REAL Pro library — a TRUE positive with a FALSE cause
+clause.** She clicked File ▸ Send Library to Another Mac… and the follow notice
+`castleKeyFileAppleOpenable` showed: "…still holds a copy under your Apple account — it came
+with the copy you restored." She had restored nothing. Read-only verification (field NAMES
+only, no secret values): the live key file `variorum-keys-182738de…json` (Sep 7) carries an
+`apple` wrap + `appleKeyID`; the account entered Castle later and nothing retired that wrap —
+so her Pro library has been Apple-openable under a Castle account all along, invisible to the
+pre-13x detectors (round 1's BLOCKER shape, reached WITHOUT an adoption). The detection is
+right; only the sentence's cause is wrong. **FIXED (words only, facts this phase's):**
+`ProtectionCopy.followCastleKeyFileAppleOpenable` now says "from before Castle" — true on
+every road into the state — and states no cause. The pins reference the constant (unchanged).
+The /Applications build she runs (5544, 0787f028) carries the old sentence; the post-merge
+refresh carries the fix. Her follow (entering the passphrase) closes the exposure; it doubles
+as VX-81's discriminating repro (the follow on the Pro at 27.0), with VX-80's door and the A1
+copy `13x-refresh-20261008T061038Z` as the nets.
