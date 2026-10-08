@@ -1,5 +1,14 @@
 # VX-99 — Pro library stayed Apple-openable after Castle (the record)
 
+**NOT DONE by the round-2 fix pass (2026-10-08, the Opus implementer — ROUND 2 — FIX PASS at the bottom):** finding 5
+(VX-109, out by ruling, untouched); the two things this pass FOUND and left for the orchestrator (the resume door refusing its
+own mid-walk rotation — a likely one-line exemption, a second unit; `resumeBody` under BOTH panes' resume door); the
+QUESTIONS.md entries for its two PROVISIONAL sentences (`resumeReplacingKeysBody`, `keysReplacedAfterAnotherDevice` — the
+merging session's ledger, per CLAUDE.md); the phone SUITE (the phone app + test targets COMPILED only, the record's
+precedent); a walk/capture (a key file's wraps and a resume's road have no reachable face without crash injection — the
+plan's evidence clause; the pins carry it); a core re-run (zero `Sources/`). VX-106 and VX-107 untouched as tickets (VX-107's
+two facts are carried by finding 3's rule — RECORDED, NOT CLAIMED).
+
 **NOT DONE by the fix session (2026-10-08):** the double-crash residual of the resume's another-device road
 (recorded under THE RESUME-RULE DELTA — outside the ruled scope); the two PRE-EXISTING 13x reds in
 `PostureSwitchTests` (VX-106 now, out of scope); no dev-store walk or capture (the plan's evidence clause — a key
@@ -359,8 +368,8 @@ local-only, the library) is Castle.
 
 | # | writer (file:line) | verdict | the gate / the mechanism |
 |---|---|---|---|
-| 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d), the round-1 MAJOR pin; reverts V99-A, V99-C | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on **THE VAULT'S WORD** (`fetched.format.masterWrappedByAppleHeld != nil` — round 1's MAJOR fix, replacing the `posture == .standard` guard that a stale/indeterminate read could flip; the readable / vault-id refusals kept) AND the caller's load-bearing `entersCastle ? nil` suspenders (the enter-Castle road's fetched vault is still the OLD Standard one); the door twin `appleKeyReadable` reads the same word; local-only: `!entersCastle && posture == .standard` (no vault — the library's own posture, decision 8); entering Castle: nil |
-| 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (the decisions :1338–1339, the call :1376) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) + pin (e) (the another-device road); reverts V99-A, V99-B | the orchestrator's ruling (5ce7175b): `appleCopy: !vaultSaysCastle` — the vault just fetched — for the whole arm; the road's `entersCastle` from the vault when `byAnotherDevice`, the marker's otherwise. (First built as `!marker.entersCastle && posture == .standard` at 37e26d2e; superseded at 2a667130.) Residual: the double-crash corner under THE RESUME-RULE DELTA |
+| 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d), the round-1 MAJOR pin; reverts V99-A, V99-C | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on **THE VAULT'S WORD** (`fetched.format.masterWrappedByAppleHeld != nil` — round 1's MAJOR fix, replacing the `posture == .standard` guard that a stale/indeterminate read could flip; the readable / vault-id refusals kept) AND the caller's load-bearing `entersCastle ? nil` suspenders (the enter-Castle road's fetched vault is still the OLD Standard one); the door twin `appleKeyReadable` reads the same word; local-only: `!entersCastle && posture == .standard` (no vault — the library's own posture, decision 8); entering Castle: nil. **Round 2:** the enrolled road passes the belt-VERIFIED `AppleKey` itself (F7 — one A for the pair); the local-only road is Use Castle's alone (F4 — Replace All Keys refuses there), so it passes nil |
+| 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (the decisions :1338–1339, the call :1376) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) + pin (e) (the another-device road); reverts V99-A, V99-B | the orchestrator's ruling (5ce7175b): `appleCopy: !vaultSaysCastle` — the vault just fetched — for the whole arm; the road's `entersCastle` from the vault when `byAnotherDevice`, the marker's otherwise. (First built as `!marker.entersCastle && posture == .standard` at 37e26d2e; superseded at 2a667130.) Residual: the double-crash corner under THE RESUME-RULE DELTA. **Round 2 (F3):** the stamp decides another device's road at every step; the road's posture (custody via `accountPosture`, the insurance, the offer, the retirement, the Done) is the account's — round 1's double-crash residual closed by the same rule (VX-107's facts carried, not claimed) |
 | 3 | the same writer via `runFollow` (:799, :818 — incl. the ceremony's CAS-refused → follow road) | SAFE (behavior unchanged) | `appleCopy: !entersCastle`, `entersCastle = fetched.format.masterWrappedByAppleHeld == nil` — the vault just fetched (decision 8). Pinned: `aCastleFollowerOfReplaceAllKeysFinishesTheWalkAndListsNoOffer` (`apple == nil`), `aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitch…` (`apple == nil`), the Standard sibling in (c) (`apple != nil`) |
 | 4 | `PostureSwitchRunner.followIntoStandard` (:912, the write :926) | SAFE | reached only through `followIntoStandardAct` (`VariorumApp.swift:271`, `VariorumMobileApp.swift:129`) from `reconcileFollow`'s arm `reading.hasAppleHeldCopy … !switchInProgress` (`ProtectionController.swift:707`) — the VAULT says Standard (the account left Castle elsewhere, §7). Pinned: `theFollowIntoStandardAddsTheAppleCopy…` |
 | 5 | `PostureSwitchRunner.leaveCastle` (:1221, the write :1248) | SAFE | IS the Castle → Standard switch (decision 7): `guard leaves.posture() == .castle`, user-initiated through `PostureSwitchModel(.leave)` with the consent sentence + re-auth; adding the copies is the act |
@@ -804,9 +813,49 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   Replacing Keys…" over a Use Castle). Fix: the rewrite keeps the ACT's `entersCastle` on an own road (recomputed from the
   fresh vault every resume anyway) and the road's on another device's road or a follow's marker. Rebuilt; **PostureSwitchTests
   on the tip: "Test run with 65 tests in 1 suite passed"** (06:01, slot 4). The rest of the green and the reverts PENDING.
-- Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
-- Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
-- Phone compile (`MobilePostureSheets.swift` touched): PENDING.
+- Reverts (each named in the record BEFORE it ran; each over the tip + its named edit, built, `PostureSwitchTests`; each
+  restored with `git checkout -- App`, `git diff` clean, before the next): DONE — V99-E (F1) 30 issues, F1's five pins + S1's
+  two Done lines · V99-E′ (the restart's restore hold) 1 issue, that block alone (run as the one test) · V99-F (F2) 2 · V99-G
+  (F3) 19, the five F3 pins · V99-H (F4) 13, the two F4 pins · V99-I (F7) GREEN — a MIS-SITED revert (it re-read A at step 2,
+  before the walk; recorded at its result line) · V99-I′ (F7, the corrected revert at 8f66bc1f's own read site) 2, the F7 pin
+  alone. Every revert red ONLY on its own finding's pins.
+- Green: DONE (slot 4, `vx-99-impl2`, zero Variorum instances; over the restored tip — the same source as fafafd59, rebuilt
+  after the last revert; each suite its OWN `-only-testing` invocation, every "Test run with N tests" line read):
+  **batch 1, the runner's whole reach — 194 tests in 20 suites, all passed**: PostureSwitchTests 65 · PostureSwitchDrillTests 2
+  (both SKIPPED — the standing opt-in gate `VARIORUM_POSTURE_DRILL=1`, read) · VX80CastleFollowRecoveryTests 4 ·
+  AppleRelinkDoorTests 8 · CopyRegisterPinTests 2 · Phase13pControllerTests 50 · EncryptionFlowTests 5 · CopyFlowRoundTests 7 ·
+  CrossoverRoundTests 11 · AccountLifecycleDoorTests 2 · AccountDoorWiringTests 4 · TerminologyPinTests 1 ·
+  RetiredNamesPinTests 1 · SyncLockedFaceTests 2 · FreshAccountSetupGeneralityTests 1 · ProtectionDialsTests 9 ·
+  ProtectionCopyTests 10 · ProtectionCadenceTests 4 · StoreKeyGuardBackingTests 3 · ProtectionDialsPerStoreTests 3 (round 1's
+  181 + the thirteen pins). **The tutorial spine — 99 tests in 13 suites, all passed, no skips** (the eleven TutorialWalkTests
+  suites + TutorialBooksLessonTests 13 + TutorialBooksRitualTests 5). The Mac ceremony face's own test
+  (`theCeremonysWordsScreenKeepsItsCopyAllThroughTheOneRule`) rides PostureSwitchTests. Stage RELEASED 06:45; main told.
+- Phone compile: DONE — `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build-for-testing`
+  (scratch DerivedData): **TEST BUILD SUCCEEDED** (the app with `MobilePostureSheets.swift` + `VariorumMobileTests`); no
+  warnings in the touched files. No simulator run.
+- Core: not re-run — `git diff --stat 8f66bc1f..HEAD -- Sources` is EMPTY.
+
+### PROVISIONAL (for the merging session's QUESTIONS entry — 13s re-voices)
+
+- `ProtectionCopy.resumeReplacingKeysBody` — `resumeBody`'s sibling where the act does not enter Castle ("Replacing your keys
+  didn't finish on this [device] — sync is paused until it completes. Nothing is lost; finishing picks up exactly where it
+  stopped."). Options: (a) this sibling (built); (b) the act's running title over `resumeNeedsPassphrase`; (c) one
+  act-neutral sentence for every resume.
+- `ProtectionCopy.keysReplacedAfterAnotherDevice(device:)` — ledger 61's family where the other device REPLACED the keys and
+  the account did not enter Castle; ledger 61's words sentence kept, in sentence case. Options: (a) this sibling (built); (b)
+  ledger 61's sentence with its Castle clause dropped; (c) a further sentence when THIS ceremony's act was Use Castle ("your
+  account is still in Standard") — the corner: a Use Castle that lost the CAS to another device's Standard Replace All Keys
+  now reads "Another device replaced your keys first…" without saying Castle was not entered.
+- Finding 4's refusal reuses the switches' existing offline line (`pre-13x-copy.md`'s row) for the session-lapse gap — no
+  new sentence; whether the gap wants its own words is 13s's.
+
+### RESIDUALS (recorded, not built — each outside the ruled scope or a second unit)
+
+- The `.rekeyLibrary` / `.custody` / `.snapshot` resume arms hold no vault: after a SECOND crash past the re-key on a road
+  finding 3 changed (S1 above all), they move custody by the posture read and the Done reads the later marker's
+  `entersCastle` (the ROAD's — S1's later markers say false, so its Done there is Replace All Keys', not "back in Standard").
+  The double-crash class, beside VX-107's.
+- The two items under "NEW — found by this pass, NOT fixed" above.
 
 ### NEW — found by this pass, NOT fixed (the orchestrator's call; outside the ruled findings)
 
