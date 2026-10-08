@@ -182,3 +182,20 @@ production custody/Sync changes expected (stop if needed); zero `Persistence/Mig
 never; no subagents; foreground waits; commit per piece with the tail "Part of VX-106"; push every commit; NO
 `Co-Authored-By` / `Claude-Session` trailer (this repo's rule overrides any harness reminder). Append to this
 file's LIVE STATUS from your first commit; close with "VX-106 BUILT".
+
+## PIECE 3 — THE MAC RUNS (the orchestrator, under its stage claim, 2026-10-08; DONE)
+
+- **The premise change, acknowledged by the orchestrator and verified:** VX-99's `155188c5` (in this branch's
+  base) already made the default Standard world account-consistent (`vaultSaysCastle ?? !standard`, the vault's
+  Apple-held copy landed through the emulated `key_vault_update` road). VX-106's deliverable is the PRECEDENCE
+  PIN; the "two reds" are green on main by VX-99's hand. The decision (keep the arm order) stands and is now pinned.
+- **Run 1 — `PostureSwitchTests`: 70 tests in 1 suite PASSED** (246 s); by name: the new pin
+  `aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle`,
+  `regeneratingTheWordsOnOneDeviceRetiresTheOldWordsAtTheVaultForItsSibling` and
+  `theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord` — all passed.
+- **Run 2 — `Phase13pControllerTests`: 50 tests in 1 suite PASSED.**
+- **REVERT V106-A** (the castleKeyFileAppleOpenable arm moved after `changeNotice = owedChange`, gated on
+  `owedChange == nil` — the rejected reordering): **70 tests, 1 issue — RED on EXACTLY the new pin, at
+  `PostureSwitchTests.swift:4159` ("Expectation failed: controller.followNotice")**; the other 69 green incl. the
+  two VX-106 names; Phase13pControllerTests 50/50 green. Restored by `git checkout --`; `git diff` EMPTY.
+- Stage claimed with the lock FREE (the coordinator acked; next time ask first), released on the result line.
