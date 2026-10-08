@@ -1663,8 +1663,13 @@ too (one review over the phase's whole added diff).**
   Expected on TODAY'S code: 1 test, FAILING at the `#require(recovery…)` line ("recovery was
   nil" — the doorless dead end her Air hit). That failure IS the red-on-old confirmation; the
   brief's order holds (no fix line lands before it is confirmed).
-- **PIECE 2 — the fix:** NOT-STARTED (awaits the confirmed red). The settled design, traced
-  this session against the shipped code:
+  **RED CONFIRMED** — the orchestrator ran the pin under the author hold at 21:58: 1 test
+  FAILING exactly at the `#require(recovery…)` line (VX80CastleFollowRecoveryTests.swift:159,
+  "recovery was nil"), the SQLCipher wrong-key signature in the log (hmac check failed for
+  pgno=1). Red-on-old on exactly the named pin; the fix was unblocked.
+- **PIECE 2 — the fix:** DONE (this commit, built AFTER the confirmed red; `swift build`
+  green; the GREEN pin run + the revert evidence ride piece 4's Mac-suite run, stage-pending).
+  Built exactly as designed, traced this session against the shipped code:
   (a) CORE (`Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift`): `StoreOpenError`
   gains the typed fact **`keyRejected: Bool`** (default false) — true for exactly one refusal
   class: an ENCRYPTED store whose resolved key (custody-held) failed the open with SQLCipher's

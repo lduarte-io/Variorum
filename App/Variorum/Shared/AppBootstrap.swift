@@ -404,12 +404,27 @@ final class AppBootstrap {
     /// envelope's own unlock roads instead of a dead end. Before this,
     /// that state was doorless while the plan's own words claimed
     /// "Batch 2's recovery roads re-derive".
+    ///
+    /// VX-80 (the Castle-follow crash window): the WRONG-KEY class earns
+    /// the SAME lobby — a key in hand that SQLCipher refused (typed:
+    /// `keyRejected`) beside a wraps-bearing sidecar is the stranded state
+    /// a death between the follow's verified swap and its custody move
+    /// leaves behind: the store is whole under the NEW key, the NEWEST
+    /// sidecar wraps exactly that key, and custody opens with the old one
+    /// forever. The typed word unlocks through the sidecar; the ready
+    /// housekeeping's reconcile then finds the pending `RotationMarker`
+    /// and the resume road completes the interrupted follow (custody
+    /// finally moves, snapshot, old key file retired, marker cleared).
+    /// Before this, that state was the doorless dead end of the 2026-10-07
+    /// production incident (the VX-80 record).
     private nonisolated static func failedOutcome(
         _ error: AppDatabase.StoreOpenError,
         gate: StoreLaunchGate,
         storeURL: URL?
     ) -> OpenOutcome {
-        guard error.keyUnavailable else { return .failed(error, recovery: nil) }
+        guard error.keyUnavailable || error.keyRejected else {
+            return .failed(error, recovery: nil)
+        }
         // P11 disposition note: an UNREADABLE sidecar reads as no roads
         // here — the failure surface stays doorless for it (unchanged
         // behavior; the StoreOpenError's own reason renders). The lobby
@@ -420,8 +435,11 @@ final class AppBootstrap {
         let recovery = envelope?.recovery != nil
         guard passphrase || recovery else { return .failed(error, recovery: nil) }
         // `demand: .passphrase` names the roads this lobby renders (typed
-        // secrets only — no gated item exists, or the open would not have
-        // failed); the failure surface words its own frame.
+        // secrets only — on the empty-custody class no gated item exists,
+        // or the open would not have failed; on the wrong-key class any
+        // gated item holds exactly the key that just failed, so the typed
+        // secrets are the only honest roads); the failure surface words
+        // its own frame.
         return .failed(error, recovery: LobbyFacts(
             demand: .passphrase,
             biometryOffered: false,
