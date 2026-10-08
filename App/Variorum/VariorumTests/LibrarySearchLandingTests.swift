@@ -204,6 +204,152 @@ struct LibrarySearchLandingTests {
         }
     }
 
+    // MARK: - VX-86 — the whole matched phrase arms the bar (the 13o follow-up run, VX-83)
+
+    /// Her report: *"also only the first word of what you searched is filled
+    /// in"* — "sherlock holmes" landed armed as "Sherlock". FTS5 marks each
+    /// term as its own run; the seed took the first run alone (§M3). Red on
+    /// the pre-fix tree: the needle was "Sherlock".
+    @Test func aTwoWordQueryArmsTheBarWithBothWordsAsWritten() {
+        let marked = SearchComposer.snippetSegments("It was \u{2}Sherlock\u{3} \u{2}Holmes\u{3} who knocked")
+        #expect(SearchLanding.findSeed(kind: .take, rendered: true, snippet: marked)
+                == EditorFindSeed(needle: "Sherlock Holmes", steps: true),
+                "the first CONTIGUOUS matched span (D-3) — both words, as written")
+        let scattered = SearchComposer.snippetSegments("\u{2}Sherlock\u{3} said that \u{2}Holmes\u{3} was")
+        #expect(SearchLanding.findSeed(kind: .take, rendered: true, snippet: scattered)
+                == EditorFindSeed(needle: "Sherlock", steps: true),
+                "control: scattered terms keep the first run (the bar holds no disjunction)")
+    }
+
+    @Test func theSearchStatesOwnPassageLandsTheWholePhrase() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 5))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let note = try session.operations.createPost(title: "Baker Street")
+            _ = try session.operations.newBlock(in: note.id, text: "It was Sherlock Holmes who knocked first.")
+            let suite = "vx86-landing-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defaults.removePersistentDomain(forName: suite)
+            let model = LibraryCatalogModel(session: session, defaults: defaults)
+            model.query = "sherlock holmes"
+            await model.search()
+            let line = try #require(model.searchState.groups.first?.lines.first)
+            #expect(SearchLanding.findSeed(kind: line.kind, rendered: line.isRenderedTake, snippet: line.snippet)
+                    == EditorFindSeed(needle: "Sherlock Holmes", steps: true),
+                    "the search state's own passage hands the bar the whole phrase")
+        }
+    }
+
+    // MARK: - VX-85 — the landed match never rests under the bar (the 13o follow-up run, VX-83)
+
+    /// Where the landed line sits, against the SHOWN find bar: its top and
+    /// bottom in the clip, the bar's bottom edge (the bar overlays the clip's
+    /// top — measured on 27.0, said by `clip.contentInsets`), and the clip's
+    /// unobscured bottom.
+    private func placeUnderTheBar(
+        of offset: Int, _ textView: NSTextView, _ scrollView: NSScrollView
+    ) throws -> (top: Double, bottom: Double, barBottom: Double, viewBottom: Double, scrolled: Double) {
+        let clip = scrollView.contentView
+        let span = try #require(JumpPrimitive.lineSpan(ofOffset: offset, in: textView))
+        let bar = try #require(scrollView.findBarView)
+        let barInClip = clip.convert(bar.bounds, from: bar)
+        return (span.top, span.bottom, Double(barInClip.maxY),
+                Double(clip.bounds.maxY - clip.contentInsets.bottom), Double(clip.bounds.minY))
+    }
+
+    /// The band's two edges in Write (the comfort band's own numbers: the
+    /// container's top air, `ComfortBand.bottomLines` of the base line).
+    private func band(_ textView: NSTextView) -> (topAir: Double, bottomRoom: Double) {
+        (Double(textView.textContainerOrigin.y),
+         Double(ComfortBand.bottomLines * TypewriterRoom.lineHeight(of: EditorDocument.baseFont)))
+    }
+
+    /// Her report: *"when you click onto a result, it looks like it wasn't
+    /// working but it's because the search bar hides the result, which is at
+    /// the top of the page."* The find seed's reveal landed the match's line
+    /// FLUSH at the clip's top — the very strip the just-shown bar covers
+    /// (§M2). Red on the pre-fix tree: the line's top sat ~32 pt above the
+    /// bar's bottom edge.
+    @Test func aFarMatchRestsInTheComfortBandBelowTheShownBar() async throws {
+        var blocks = (0..<60).map { "paragraph \($0) carries plain words for the measure" }
+        blocks[45] = "the harbor at dawn"
+        try await withFindPasteboard {
+            try await withLandedEditor(
+                blocks: blocks, landingAt: 45, find: EditorFindSeed(needle: "harbor", steps: true)
+            ) { _, textView, scrollView, offset in
+                let text = textView.string as NSString
+                let match = text.range(of: "harbor", options: .literal,
+                                       range: NSRange(location: offset, length: text.length - offset))
+                #expect(textView.selectedRange() == match, "the landing selected the match")
+                #expect(scrollView.isFindBarVisible)
+                let place = try placeUnderTheBar(of: match.location, textView, scrollView)
+                let edges = band(textView)
+                #expect(place.top >= place.barBottom + edges.topAir - 1,
+                        "the line rests in the band's top air BELOW the bar, never under it: \(place)")
+                #expect(place.bottom <= place.viewBottom - edges.bottomRoom + 1,
+                        "…with the band's room below: \(place)")
+            }
+        }
+    }
+
+    /// The same defect with no scroll at all: a match in a note's FIRST line
+    /// (a one-block journal entry — the ordinary case) sits at the page's top,
+    /// under the 32-pt bar, and the reveal's visibility guard called it on
+    /// screen. Red on the pre-fix tree.
+    @Test func aMatchInTheNotesFirstLineIsNotHiddenUnderTheBar() async throws {
+        try await withFindPasteboard {
+            try await withLandedEditor(
+                blocks: ["Sherlock Holmes knocked at the door", "a second block", "a third block"],
+                landingAt: 0, find: EditorFindSeed(needle: "Holmes", steps: true)
+            ) { _, textView, scrollView, _ in
+                let match = (textView.string as NSString).range(of: "Holmes")
+                #expect(textView.selectedRange() == match)
+                let place = try placeUnderTheBar(of: match.location, textView, scrollView)
+                #expect(place.top >= place.barBottom + band(textView).topAir - 1,
+                        "the first line clears the bar, with the band's air: \(place)")
+            }
+        }
+    }
+
+    /// Control (green on both trees): a match already resting mid-band does
+    /// not move the page — the band never lurches a line she can see.
+    @Test func aMatchAlreadyRestingMidPageLeavesThePageAlone() async throws {
+        let blocks = (0..<12).map { $0 == 4 ? "the harbor at dawn" : "plain block \($0)" }
+        try await withFindPasteboard {
+            try await withLandedEditor(
+                blocks: blocks, landingAt: 4, find: EditorFindSeed(needle: "harbor", steps: true)
+            ) { _, textView, scrollView, _ in
+                let place = try placeUnderTheBar(of: textView.selectedRange().location, textView, scrollView)
+                #expect(abs(place.scrolled) < 0.5, "the page did not move: \(place)")
+                #expect(place.top >= place.barBottom + band(textView).topAir - 1)
+            }
+        }
+    }
+
+    /// The non-stepping arm (an unrendered take's hit — the words are not on
+    /// the page) selects nothing, but the caret seed still revealed the landed
+    /// block FLUSH at the top — under the bar this arm shows too. Red on the
+    /// pre-fix tree.
+    @Test func anUnrenderedSeedsBlockRestsBelowTheShownBar() async throws {
+        let blocks = (0..<60).map { "paragraph \($0) carries plain words for the measure" }
+        try await withFindPasteboard {
+            try await withLandedEditor(
+                blocks: blocks, landingAt: 45, find: EditorFindSeed(needle: "hidden", steps: false)
+            ) { _, textView, scrollView, offset in
+                #expect(textView.selectedRange() == NSRange(location: offset, length: 0),
+                        "nothing selected — the caret rests at the landed block")
+                let place = try placeUnderTheBar(of: offset, textView, scrollView)
+                #expect(place.top >= place.barBottom + band(textView).topAir - 1,
+                        "the landed block's first line clears the bar: \(place)")
+            }
+        }
+    }
+
     @Test func anUnrenderedTakesSeedArmsTheBarAndSelectsNothing() async throws {
         try await withFindPasteboard {
             try await withLandedEditor(
