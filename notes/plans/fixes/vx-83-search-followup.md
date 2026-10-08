@@ -774,7 +774,38 @@ every savepoint of your takes", armed "Back to the living text — leave savepoi
 - **P-VX83-C6** the savepoint line's kind word is "savepoint · Oct 6" — the word plus its day
   (`TimeStampFace.day`), faint like every kind word.
 
-## LADDER (after U-B, over the run's whole diff)
+> #### §U-C RULINGS (the architect, 2026-10-08 — binding; P1–P8 build to these)
+>
+> **FORK 1 — RULED: A, liveness at query time.** The trace is accepted as decisive and the
+> stop was exactly right: (B) is dead on arrival — R-13o-4's letter is a ruled fence, and
+> the probe's SQLITE_CORRUPT result shows the "clever trigger" alternative isn't even
+> correct; (C) is dead on the arrival-order fact alone (and would still need the query-time
+> check, so it buys nothing). A is F3's own doctrine applied again — own-row facts on the
+> doc, every cross-row truth resolved at query time in the ONE composer — and its lingering
+> class (a dead take's savepoints indexed but never listed until purge) is the SAME accepted
+> class as released blocks (P-13o-U1-8), not a new one. FIVE CONDITIONS, binding:
+> (1) the savepoint doc mirrors its `commit_point` row ONLY — INSERT · physical DELETE (the
+> janitor's road — purge coordination is thereby correct by construction; say so in the
+> record) · the UPDATE arm KEPT (remote apply's generic UPDATE-then-INSERT makes it
+> load-bearing insurance, never dead code); (2) the composer resolves the variant's liveness
+> by key ONLY under the facet, and the DEFAULT road's savepoint exclusion is the doc-row
+> kind fence, pinned by the never-lists-without-the-facet pin; (3) `SearchIndex.integrity` /
+> `verifySearchIndex` learns the ninth kind's existence rule — doc ⇔ physical commit_point
+> row, NOT variant liveness — so a dead take's lingering savepoint docs read as CORRECT, not
+> drift; (4) P4's measurement includes the DEFAULT road's delta with savepoints indexed at
+> scale (the recorded bm25-statistics consequence), and a change in the default road's cost
+> CLASS is a stop, not a note (the implementer's own offer, made binding); (5) the new
+> nullable `search_doc.variant_id` column is approved (local-only derived; the rebuild is
+> its backfill).
+>
+> **PROPOSAL 2 — RULED: `+ savepoints`** (armed `savepoints ✕`, the archived chip's
+> grammar). The collision argument is decisive: "+ saved versions" would name the ONE thing
+> search fences under every facet — actively false, not merely vague — and "+ history"
+> reaches toward two things this facet deliberately is not (the Trash, VX-93; archived,
+> its own chip). The app's own noun wins. The proposed help texts and the offered-only-
+> with-words rule are accepted as PROVISIONAL wording for the bundle (one constant each if
+> she re-words at the walk). **C1–C6 are accepted to build as recorded** — C2's 0.9 weight
+> and C4's residual are honestly stated; ride the bundle. — the architect
 
 Fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
 repo-first here; cross-model dispositions per CLAUDE.md; hard cap three rounds.
