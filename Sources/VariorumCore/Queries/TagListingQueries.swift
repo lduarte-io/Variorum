@@ -60,6 +60,20 @@ extension Queries {
         }
     }
 
+    /// **The tags a question's WORDS name** (VX-84b — D-2: the band offers
+    /// `tag: #path ›` for a plain word that names a tag). The wing's live
+    /// vocabulary through the one composer, the decision `SearchTagOffer`'s
+    /// (its one pure home). Library scope only; empty without words.
+    public static func searchTagOffers(
+        _ db: Database, query: SearchQuery, scope: SearchScope
+    ) throws -> [SearchTagOffer.Offer] {
+        guard query.text != nil, case .library = scope.within else { return [] }
+        let statement = SearchComposer.wingTagVocabulary(
+            wingID: scope.wingID, environment: try searchEnvironment(db))
+        let vocabulary = try String.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
+        return SearchTagOffer.offers(for: query, vocabulary: vocabulary)
+    }
+
     /// A listed block's handle: its NAME when it has one, else the first line
     /// of words its rendered take holds (the catalog's "first-line handle"),
     /// else the word "block".

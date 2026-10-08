@@ -808,6 +808,22 @@ public enum SearchComposer {
         return Statement(sql: sql, arguments: arguments)
     }
 
+    /// **The wing's live tag vocabulary** (VX-84b — the tag OFFER's
+    /// candidates; `SearchTagOffer` decides in Swift, the index's own
+    /// sameness). ∝ the wing's tags — the class the typed tag's own path
+    /// lookup already pays per keystroke (`typedTagPaths` reads the same
+    /// index). Result column: path.
+    public static func wingTagVocabulary(wingID: String, environment: Environment) -> Statement {
+        let wing = environment.wingScope("t.wing_id", wingID)
+        return Statement(
+            sql: """
+                SELECT t.path FROM tag t
+                WHERE t.deleted_at IS NULL AND \(wing.sql)
+                ORDER BY t.path
+                """,
+            arguments: wing.arguments)
+    }
+
     // MARK: - The tag-association join's reads (13o U3 — the 13i sitting record §12)
 
     /// **The typed tag's stored paths** in the scope's wing — live, matched
