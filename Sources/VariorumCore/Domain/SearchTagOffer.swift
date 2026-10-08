@@ -8,8 +8,9 @@ import Foundation
 /// tag-application doc would need a cross-table read in a trigger, the
 /// R-13o-4 fence) — and the band OFFERS the tag instead, one press away).
 ///
-/// THE ONE PURE HOME of the offer rule, so her redirect (should she rule the
-/// fold-in alternative instead) is a change here and nowhere else:
+/// RATIFIED at the run's sitting (R-VX83-1 — her words: *"i do support
+/// needing to say it's a tag explicitly"*; the fold-in alternative is dead):
+/// the offer is the explicit act. THE ONE PURE HOME of the offer rule:
 ///
 /// - a typed WORD (or a quoted phrase) offers every live tag of the wing
 ///   whose LEAF — the path's last segment — it IS;

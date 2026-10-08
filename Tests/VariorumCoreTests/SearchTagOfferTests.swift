@@ -7,8 +7,8 @@
 //  `exampletag` (§M1(b): nothing in the index carries tag paths — by design,
 //  R-13o-4's fence). The provisional call D-2: a word that NAMES a tag OFFERS
 //  the tag (the band's `tag: #path ›`); the ranked stream stays text-honest.
-//  The rule's one pure home is `SearchTagOffer` (her redirect, if she rules
-//  the fold-in alternative, is a change there alone).
+//  The rule's one pure home is `SearchTagOffer`; D-2 RATIFIED at the run's
+//  sitting (R-VX83-1 — the offer is the explicit act; the fold-in is dead).
 //
 //  Red-on-old: a new road (no offer existed). Verified by REVERT — the rule's
 //  body short-circuited to `[]` turns every offering cell red (the U-A
