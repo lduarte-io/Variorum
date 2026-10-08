@@ -19,7 +19,9 @@ import Foundation
 /// - sameness is the index's own (R-13o-11): case AND diacritics folded, so
 ///   "cafe" offers `#café` exactly as it finds "Café";
 /// - a tag the question already TYPES is never offered (it is already
-///   asked);
+///   asked), and neither is one the field CANNOT type — a path holding
+///   whitespace (`#old house` reads as the tag `old` and the word `house`
+///   in the v1 grammar), whose press could not ask for it (P-2);
 /// - ordered: exact leaves before prefix leaves, then the shallower path,
 ///   then the path (digit-aware) — at most `limit` offers.
 ///
@@ -70,7 +72,8 @@ public enum SearchTagOffer {
         var seen: Set<String> = []
         for path in vocabulary {
             let key = fold(path)
-            guard !typed.contains(key), !seen.contains(key) else { continue }
+            guard !typed.contains(key), !seen.contains(key),
+                  !path.contains(where: \.isWhitespace) else { continue }
             let leaf = fold(String(path.split(separator: "/").last ?? Substring(path)))
             guard !leaf.isEmpty else { continue }
             // The first word that names it (exact before prefix).

@@ -122,6 +122,28 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
         return joined.isEmpty ? "" : joined + ((endsOpen && !lastWasTag) ? "" : " ")
     }
 
+    /// **The field's text with an offered tag ACCEPTED** (VX-84b — D-2,
+    /// ratified R-VX83-1: a plain word naming a tag offers it; the press is
+    /// the explicit act). The word that named the tag BECOMES `#path` — so a
+    /// lone word turns into a tag alone (D-1's narrowed listing) and a word
+    /// beside others narrows the ranked sheet — every other token as typed,
+    /// single-spaced, ending in a space (the tag is complete; nothing is left
+    /// a type-ahead tail). A word no longer in the field (she typed on) adds
+    /// the tag beside what is there.
+    static func acceptingTagOffer(_ offer: SearchTagOffer.Offer, in text: String) -> String {
+        var tokens = SearchFieldWords.tokens(of: text)
+        let tag = "#" + offer.path
+        func unquoted(_ token: String) -> String {
+            token.trimmingCharacters(in: CharacterSet(charactersIn: "\"\u{201C}\u{201D}"))
+        }
+        if let i = tokens.firstIndex(where: { !SearchFieldWords.isTagShaped($0) && unquoted($0) == offer.word }) {
+            tokens[i] = tag
+        } else {
+            tokens.append(tag)
+        }
+        return tokens.joined(separator: " ") + " "
+    }
+
     // (NIT-1, round 1: the token/words/tag reading MOVED to the shared home
     // — `SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift` — the book's
     // band is its second consumer; the rule is the PARSER's letter.)
@@ -141,6 +163,9 @@ nonisolated struct LibrarySearchListing: Equatable, Sendable {
     var archivedBooks: Set<String> = []
     var groups: [SearchGroup] = []
     var next: SearchComposer.GroupCursor?
+    /// VX-84b (D-2, ratified R-VX83-1): the tags the question's WORDS name —
+    /// the band's `tag: #path ›` invitations.
+    var tagOffers: [SearchTagOffer.Offer] = []
 }
 
 // MARK: - The model
@@ -188,6 +213,10 @@ final class LibrarySearchModel {
     private(set) var archivedBooks: Set<String> = []
     /// The answer sheet's groups — notes and scraps groups, best first.
     private(set) var groups: [SearchGroup] = []
+    /// **The tags the words name** (VX-84b — D-2, ratified R-VX83-1): the
+    /// band offers each as `tag: #path ›`; the press is the explicit act
+    /// (`LibraryCatalogModel.acceptTagOffer`). Empty without words.
+    private(set) var tagOffers: [SearchTagOffer.Offer] = []
     /// Where the next page of groups starts; nil when none follows.
     private(set) var next: SearchComposer.GroupCursor?
     /// A next page is in flight (one at a time).
@@ -270,6 +299,7 @@ final class LibrarySearchModel {
         bookReasons = listing?.bookReasons ?? [:]
         archivedBooks = listing?.archivedBooks ?? []
         groups = listing?.groups ?? []
+        tagOffers = listing?.tagOffers ?? []
         next = listing?.next
         loadingMore = false
         reindexGroups()
@@ -392,6 +422,9 @@ final class LibrarySearchModel {
         }
         // The ranked groups need WORDS; a typed tag alone is the catalog's
         // own narrowed listing (VX-84a, D-1 — `LibraryCatalogModel.listing`).
+        // VX-84b (D-2): the tags the words name, offered in the band (the
+        // whole question's, never the scope's — like the counts, D3).
+        listing.tagOffers = try Queries.searchTagOffers(db, query: question.query, scope: where_)
         if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(
                 db, query: question.scoped(scope), scope: where_, limit: groupDepth,

@@ -373,6 +373,12 @@ struct LibraryCatalogView: View {
             onPickBookState: { picked in
                 model.armBookState(picked)
                 Task { await model.search() }
+            },
+            // VX-84b (D-2): the press is the explicit act — fire-and-DO.
+            tagOffers: state.tagOffers,
+            onAcceptTagOffer: { offer in
+                model.acceptTagOffer(offer)
+                Task { await model.search() }
             })
     }
 

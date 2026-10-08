@@ -38,6 +38,10 @@ struct LibrarySearchBand: View {
     var bookState: SearchBookState? = nil
     var offersBookState = false
     var onPickBookState: (SearchBookState?) -> Void = { _ in }
+    /// **The tags the words name** (VX-84b — D-2, ratified R-VX83-1): each a
+    /// quiet invitation, `tag: #path ›`; the press is the explicit act.
+    var tagOffers: [SearchTagOffer.Offer] = []
+    var onAcceptTagOffer: (SearchTagOffer.Offer) -> Void = { _ in }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -62,6 +66,14 @@ struct LibrarySearchBand: View {
                     tokens: tokens, label: LibrarySearchCopy.tagChip(path),
                     help: LibrarySearchCopy.removeTagHelp(path),
                     onClear: { onRemoveTag(path) })
+            }
+            // VX-84b: a word that names a tag offers it — an invitation (the
+            // dashed chip), one press away.
+            ForEach(tagOffers, id: \.path) { offer in
+                LibrarySearchChip(
+                    tokens: tokens, label: LibrarySearchCopy.tagOffer(offer.path),
+                    help: LibrarySearchCopy.tagOfferHelp(offer.path), invitation: true,
+                    onTap: { onAcceptTagOffer(offer) })
             }
             if let dayChip {
                 LibrarySearchChip(

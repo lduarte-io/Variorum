@@ -39,7 +39,9 @@ struct SearchTagOfferTests {
         #expect(offers("life ", ["life", "life/goals"]) == ["life"], "the parent's leaf is its own")
         #expect(SearchTagOffer.offers(for: query("dream journal "), vocabulary: ["dream"])
                 == [SearchTagOffer.Offer(path: "dream", word: "dream")], "the naming word rides the offer")
-        #expect(offers("\"old house\" ", ["old house"]) == ["old house"], "a quoted phrase names a spaced leaf")
+        #expect(offers("\"dream\" ", ["dream"]) == ["dream"], "a quoted word names its leaf")
+        #expect(offers("\"old house\" ", ["old house"]).isEmpty,
+                "a tag the field cannot TYPE (a space in its path) is never offered — its press could not ask for it")
     }
 
     @Test func onlyTheStillTypedTailOffersByPrefix() {

@@ -107,6 +107,13 @@ nonisolated enum LibrarySearchCopy {
     // P-13o-U2-6. A tag typed alone narrows the Library's own listing now
     // (D-1), so nothing asks for words.)
 
+    /// **The tag offer** (VX-84b — D-2's own words, ratified R-VX83-1): a
+    /// plain word that names a tag offers it, `tag: #exampletag ›`.
+    static func tagOffer(_ path: String) -> String { "tag: #\(path) \u{203A}" }
+    static func tagOfferHelp(_ path: String) -> String {
+        "Show the notes tagged #\(path) \u{2014} your word names a tag"
+    }
+
     /// The listing's section for a tag's blocks (VX-84a — the Blocks scope
     /// under a tag typed alone).
     static let blocksHeader = "Blocks"

@@ -200,6 +200,47 @@ struct LibraryTagListingTests {
         }
     }
 
+    // MARK: - VX-84b — a word that names a tag offers it (D-2, ratified R-VX83-1)
+
+    /// Her exact case: `exampletag` answered "nothing found" though a note is
+    /// tagged `exampletag`. The stream stays text-honest; the band OFFERS the
+    /// tag, and one press lands on its notes (D-1's listing).
+    @Test func aWordNamingATagOffersItAndThePressListsItsNotes() async throws {
+        try await withLibrary { session, model in
+            let ops = session.operations
+            let tag = try ops.createTag(name: "exampletag")
+            let note = try ops.createPost(title: "Tagged")
+            _ = try ops.newBlock(in: note.id, text: "nothing that says the word")
+            _ = try ops.applyTag(tag.id, toPost: note.id)
+            model.query = "exampletag"
+            await model.search()
+            #expect(model.isSearching && model.searchState.groups.isEmpty,
+                    "the ranked stream stays text-honest — no passage says the word")
+            let offer = try #require(model.searchState.tagOffers.first)
+            #expect(model.searchState.tagOffers == [SearchTagOffer.Offer(path: "exampletag", word: "exampletag")])
+            #expect(LibrarySearchCopy.tagOffer(offer.path) == "tag: #exampletag \u{203A}", "D-2's own words")
+
+            model.acceptTagOffer(offer)
+            #expect(model.query == "#exampletag ", "the naming word became the tag")
+            await model.search()
+            #expect(!model.isSearching && model.noteHits.map(\.id) == [note.id],
+                    "the press lands on the tag's narrowed listing (D-1)")
+            #expect(model.searchState.tagOffers.isEmpty, "a typed tag is never offered again")
+        }
+    }
+
+    @Test func theRewriteReplacesOnlyTheNamingWord() {
+        func accept(_ path: String, _ word: String, _ text: String) -> String {
+            LibrarySearchQuestion.acceptingTagOffer(.init(path: path, word: word), in: text)
+        }
+        #expect(accept("dream", "dream", "dream journal") == "#dream journal ",
+                "beside other words the tag narrows the sheet")
+        #expect(accept("exampletag", "examp", "examp") == "#exampletag ", "the tail it completed")
+        #expect(accept("dream", "dream", "\"dream\" lamp") == "#dream lamp ",
+                "a quoted word is replaced whole")
+        #expect(accept("dream", "dream", "#x  rain") == "#x rain #dream ", "a word since typed away: the tag joins")
+    }
+
     /// Control (green on both trees): with words beside the tag, the answer
     /// sheet reads exactly as shipped — the tag a filter of the ranked groups.
     @Test func withWordsTheTagFiltersTheAnswerSheetAsShipped() async throws {
