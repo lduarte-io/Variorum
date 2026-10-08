@@ -25,6 +25,11 @@ struct MigrationTests {
         // in-store libraries + Bookcase shelves. The Home wing is VIRTUAL
         // (no row; '' pointers) — the table holds additional wings only.
         "wing", "shelf",
+        // 13o (v1_22): the DERIVED, LOCAL-ONLY search family — the doc
+        // table, the FTS5 virtual table and its four external-content
+        // shadows (no `_content` — the text lives in the source rows).
+        "search_doc", "search_fts",
+        "search_fts_config", "search_fts_data", "search_fts_docsize", "search_fts_idx",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -61,6 +66,10 @@ struct MigrationTests {
         "idx_commit_created",
         // 13i-a (v1_18): the shelf strip's per-wing order walk.
         "idx_shelf_wing",
+        // 13o (v1_22): the search doc's source key (the capture triggers'
+        // lookup) + the worn-day arm's partial index over undated live
+        // containers. Both LOCAL, no §12 event.
+        "uq_search_doc_src", "idx_container_undated_created",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -134,10 +143,74 @@ struct MigrationTests {
         try AppDatabase.migrator.migrate(queue)
         let after = try indexes()
         // 13i-a: the full chain past v1_16 now adds v1_17's day-search
-        // index AND v1_18's shelf-order index.
-        #expect(after.subtracting(before) == ["idx_commit_created", "idx_shelf_wing"],
-                "v1_17 + v1_18 add exactly these indexes")
+        // index AND v1_18's shelf-order index; 13o: v1_22's two.
+        #expect(after.subtracting(before) == [
+            "idx_commit_created", "idx_shelf_wing",
+            "uq_search_doc_src", "idx_container_undated_created",
+        ], "v1_17 + v1_18 + v1_22 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
+    }
+
+    /// **13o — v1_22's BACKFILL** (the rebuild engine run once inside the
+    /// migration): a store that already holds words when the index arrives
+    /// has every live field findable the moment the migration lands — takes,
+    /// a take label, a block name, a comment, a title, floating notes, a book
+    /// and a chapter — while a TOMBSTONED take is not, an ARCHIVED take is
+    /// indexed with its fact, and accents/case fold (R-13o-11). Red on the
+    /// pre-13o tree by construction: no such migration or table existed.
+    @Test func theSearchIndexBackfillsAnOlderStoreAtMigration() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_21_reading_archive")
+        try queue.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, floating_notes, created_at, updated_at)
+                  VALUES ('n1', 'post', 'Lighthouse Diary', 'margin musings', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO block (id, default_variant_id, name, created_at, updated_at)
+                  VALUES ('b1', 'v1', 'opening gambit', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO variant (id, block_id, working_text, label, fan_position, created_at, updated_at)
+                  VALUES ('v1', 'b1', 'The Café was naïve', 'gentler take', 'a0', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO variant (id, block_id, working_text, status, fan_position, created_at, updated_at)
+                  VALUES ('v2', 'b1', 'an archived thought', 'archived', 'a1', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO variant (id, block_id, working_text, fan_position, created_at, updated_at, deleted_at)
+                  VALUES ('v3', 'b1', 'a deleted thought', 'a2', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                  VALUES ('p1', 'n1', 'b1', 'a0', 'v1', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO block_comment (id, block_id, text, created_at, updated_at)
+                  VALUES ('c1', 'b1', 'check the tide tables', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO reading (id, name, kind, created_at, updated_at)
+                  VALUES ('r1', 'Coastal Book', 'book', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                INSERT INTO reading_section (id, reading_id, name, position, created_at, updated_at)
+                  VALUES ('s1', 'r1', 'Harbour Chapter', 'a0', '2026-10-06T00:00:00.000Z', '2026-10-06T00:00:00.000Z');
+                """)
+        }
+        #expect(try queue.read { try $0.tableExists("search_doc") } == false)
+        try AppDatabase.migrator.migrate(queue)
+        func hits(_ match: String) throws -> [String] {
+            try queue.read { db in
+                try String.fetchAll(db, sql: """
+                    SELECT d.kind || ':' || d.src_id FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid
+                    WHERE search_fts MATCH ? ORDER BY d.kind, d.src_id
+                    """, arguments: [match])
+            }
+        }
+        #expect(try hits("cafe naive") == ["take:v1"], "accents and case fold")
+        #expect(try hits("gentler") == ["take_label:v1"])
+        #expect(try hits("gambit") == ["block_name:b1"])
+        #expect(try hits("tide") == ["comment:c1"])
+        #expect(try hits("lighthouse") == ["title:n1"])
+        #expect(try hits("musings") == ["note_meta:n1"])
+        #expect(try hits("coastal") == ["book:r1"])
+        #expect(try hits("harbour") == ["chapter:s1"])
+        #expect(try hits("archived") == ["take:v2"], "archived takes stay indexed (R-13o-6)")
+        #expect(try hits("deleted") == [], "a tombstoned take is never indexed")
+        let archived = try queue.read { db in
+            try Bool.fetchOne(db, sql: "SELECT archived FROM search_doc WHERE kind = 'take' AND src_id = 'v2'")
+        }
+        #expect(archived == true, "…carrying its own archived fact")
+        try queue.write { db in
+            try db.execute(sql: "INSERT INTO search_fts (search_fts, rank) VALUES ('integrity-check', 1)")
+        }
     }
 
     @Test func allIndexesExist() throws {

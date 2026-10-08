@@ -514,12 +514,28 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     // "this delta does not describe me" as a negative result, and answering
     // it with `false` costs one branch.
     //
-    // NONE OF THESE FOUR CARRIES `@discardableResult`, DELIBERATELY
+    // NONE OF THESE CARRIES `@discardableResult`, DELIBERATELY
     // (round-2 ladder round 1, MINOR 2). The whole point of the change is
     // that a caller MUST react to a refusal; the attribute tells the
     // compiler not to warn when one doesn't, which is precisely how the
     // pre-fix `precondition`s shipped. Every call site guards the Bool
     // today, and a future one that forgets should be told.
+    //
+    // SIX, NOT FOUR, SINCE THE VM-5 STABILITY PASS (MINOR 4). The band's
+    // two crystallization mutators — `transferTailPrefixToLastEntry` and
+    // `crystallize`, below — kept their `precondition`s through the round-2
+    // conversion, so this header promised a law two of its own members
+    // broke, and both were one new caller away from the shipped crash
+    // class. They refuse now on exactly the states their preconditions
+    // named (plus the overflow and negative-length folds the four above
+    // carry). Their only callers are the shared `TailCrystallizer`'s
+    // attachment and `finishMint`, through each view model's host doors,
+    // and a `false` there stops the band and takes the SAME road as the
+    // four: the platform's `desyncRecovery()`
+    // (`TailCrystallizerHost.recoverFromRefusedIndexMutation`). No red-on-old
+    // pin exists for either and none is claimed: both callers guard every
+    // precondition today (traced in the VM-5 record), so this is the
+    // doctrine made true, not a fixed observed crash.
 
     mutating func applyBlockEdit(at index: Int, lengthDelta: Int) -> Bool {
         guard entries.indices.contains(index) else { return false }
@@ -555,31 +571,44 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     /// last entry's trailing content — the entry grows, the tail shrinks,
     /// the document's bytes and total length are unchanged (the separator
     /// conceptually slides to the transferred run's end).
-    mutating func transferTailPrefixToLastEntry(_ units: Int) {
-        precondition(units > 0, "transfer needs at least one unit")
-        precondition(!entries.isEmpty, "no entry to attach to")
-        precondition((tailLength ?? -1) >= units, "the tail must contain the run")
-        entries[entries.count - 1].length += units
-        tailLength = (tailLength ?? 0) - units
+    ///
+    /// REFUSES (mutating nothing) unless the run is at least one unit, an
+    /// entry exists to attach to, and the open tail contains the run — the
+    /// three states its `precondition`s used to trap on (VM-5, MINOR 4).
+    mutating func transferTailPrefixToLastEntry(_ units: Int) -> Bool {
+        guard units > 0, !entries.isEmpty, let tail = tailLength, tail >= units
+        else { return false }
+        let last = entries.count - 1
+        let (length, overflow) = entries[last].length.addingReportingOverflow(units)
+        guard !overflow else { return false }
+        entries[last].length = length
+        tailLength = tail - units
+        return true
     }
 
     /// Crystallization bookkeeping (the view edit is the caller's job): the
     /// tail's completed paragraphs became real blocks; the remainder stays
     /// open. `remainingTailLength` nil ⇒ the tail region closed entirely
-    /// (bulk segmentation consumes it) — unless entries would then be empty,
-    /// which the invariant forbids (guarded by the callers: a mint always
-    /// leaves at least one entry).
+    /// (bulk segmentation consumes it) — and entries can never be left
+    /// empty by it, because at least one mint is required.
+    ///
+    /// REFUSES (mutating nothing) when no tail is open or nothing was minted
+    /// — the two states its `precondition`s used to trap on (VM-5, MINOR 4)
+    /// — and on a negative length, which this struct never holds.
     mutating func crystallize(
         minted: [(blockID: String, variantID: String, length: Int)],
         remainingTailLength: Int?
-    ) {
-        precondition(tailLength != nil, "no open tail to crystallize")
-        precondition(!minted.isEmpty, "crystallize needs at least one mint")
+    ) -> Bool {
+        guard tailLength != nil, !minted.isEmpty,
+              minted.allSatisfy({ $0.length >= 0 }),
+              (remainingTailLength ?? 0) >= 0
+        else { return false }
         for mint in minted {
             entries.append(Entry(
                 blockID: mint.blockID, variantID: mint.variantID,
                 length: mint.length, editable: true))
         }
         tailLength = remainingTailLength
+        return true
     }
 }

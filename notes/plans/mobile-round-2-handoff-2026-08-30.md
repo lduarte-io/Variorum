@@ -44,7 +44,7 @@ This file is the delta and the work inventory.
 | branch | `mobile`, pushed |
 | **mobile suite** | **582 / 93 green** (independently re-run at cutover, not inherited) |
 | core | **1453 / 154** — baseline exact |
-| Mac | **1843 / 312** — baseline exact; unverified since the fix round touched no Mac file (`git status` over `Variorum`/`Shared`/`VariorumTests` was empty) |
+| Mac | **1843 / 312** — baseline exact; unverified since the fix round touched no Mac file (`git status` over `Variorum`/`Shared`/`VariorumTests` was empty). **⚠️ EXPECT A KNOWN RED THAT IS NOT THIS ROUND'S** (added at the Fable sweep, finding 5): the `fa522d6` merge brought `main`'s 13p-fix keychain work into this tree, and QUESTIONS **#91** — written by the same session — records `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable` failing on CLEAN `main`, deliberately not fixed here and routed to the Mac session. It may already be fixed by a later 13p-fix ladder round; **unverified here**. Do not spend the which-kind-of-red time this repo keeps paying — check #91 first |
 | hygiene | zero `Sources/` (**vs the MERGE-BASE**), zero `Sync/`, zero `EditorBrain/`, no build config, marker **7** |
 | `main` | **moved 8 commits during the session** — the 13p-fix ladder, a tech-debt sweep, the pre-13u round plan. **No merge attempted; the post-13u merge is deliberately the next session's, not this one's** |
 
@@ -199,3 +199,78 @@ leg) which **only her phone can give**.
    self-reported one hollow pin — both are the guard working.
 7. **A dying agent leaves WORK as well as corruption** (§10.5) — read a
    failed agent's tree for both.
+
+---
+
+# 7. 🔵 THE WHOLE-ROUND STATUS TABLE (written 2026-08-30 at her ask)
+
+*Her words: "I'm still unsure of what has been done and what remains to
+be done, knowing that the mac will be completing a fix round, then all
+of 13u, before mobile is resumed."*
+
+**Read the two tables as one story: everything mobile round 2 ever
+scheduled is in exactly one row below.** Nothing is in both.
+
+## 7.1 ✅ DONE — built AND cold-reviewed unless the cell says otherwise
+
+| # | What | Built | Reviewed |
+|---|---|---|---|
+| **1** | M1 **the editor crash** (the round's reason) · M2a–M2e | ✅ | ✅ rounds 1+2 closed |
+| **1b** | M11/PR18 whole-block-selection delete | ✅ | ✅ rounds 1+2 |
+| **2** | M3 the copy door · M4 bar air | ✅ | ✅ |
+| **3** | M22 **merge-then-edit** (its hoist exposed a P1 violation shipped on the Mac since 2026-07-09 — 23.8 s → 0.003 s) | ✅ | ✅ |
+| **3b** | M5 **the home-screen quick note** | ✅ | ✅ (found 2 BLOCKERs) |
+| **—** | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ✅ |
+| **4** | M20 the undo door · delete a note · **the Trash** · delete a book · the on-leaving savepoint | ✅ | ✅ (found 1 BLOCKER) |
+| **4.5a** | Capture & lifecycle — **Q1/Q2, two of the round's three BLOCKERs** (the quick note destroying stored text; a refused save wiping the box AND its error) | ✅ built + fixed | ⚠️ round 1 done · **ROUND 2 OWED** |
+| **4.5b** | Deletion doors — **the third BLOCKER** (four dead confirm buttons; the A12 warning whose Undo *cancelled* it) + the accessibility harness + the `TrashPutBack` hoist | ✅ | ✅ **discharged by 13l's Fable review** |
+| **4.5d** | The keyboard bar's geometry | ✅ | ✅ · **fix round DONE 2026-08-30** — and its finding was that **13 of 14 fixes already existed uncommitted**, so the right act was to fix nothing |
+| **5** | **The shelf layout** R26/R27/R27b — her twice-stated complaint — **plus her two live refinements** (one-line box; the writing room made a pinned guarantee across 2,408 states) | ✅ | ✅ |
+| **6a** | **The Block History twin** — closes the **deleted-take dark window** (deleted takes were invisible *and* un-restorable on the phone) | ✅ | ✅ |
+| **—** | **PL-10(b)** the duplicate-book-name guard — the phone had zero sites where the Mac gates at five. **A UI courtesy gate, NOT a data defect** (author, 2026-08-30; no uniqueness exists on `reading.name`) | ✅ | ✅ **reviewed at the Fable sweep (2026-08-30)** — `mobile-fable-sweep-review.md` §2b discharge. *(Corrected there, finding 4: this cell used to read "✅ (was 4.5d's)", which the same document contradicted at §11.2 — 4.5d's cold review PREDATES this build work, so the wiring, the `BookNameCopy` hoist, `excluding:` and its three pins had no review at all until the sweep.)* |
+| **—** | **The handback checklist**, actually run — 13l's four all landed; **nothing returned to mobile** | ✅ | n/a |
+| **—** | **The mobile app's FIRST architecture review** — 0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT | ✅ | n/a (it *is* a review) |
+| **—** | **The archive/trash design session** — 4 IA options; **she ruled "Two rooms"** | ✅ | n/a |
+| **—** | **The five-MAJOR fix round** — B1 the starter-Journal seeding before sign-in (**could pollute her real synced corpus**) · C2 fanned blocks reporting "one take" · A1's latch · A2 the liveness race · C1 truncated explainers | ✅ | ⚠️ **its own R28 review OWED** |
+| **—** | **`main` did not build for iOS** — R3-2's sentence placed in the macOS-only branch of a `Shared/` conditional. Proven pre-existing, fixed | ✅ | n/a |
+
+**Suites: 513/86 → 582/93.** Hygiene held the whole round: **zero
+schema, zero `Sources/`, zero `Sync/`, marker 7.**
+
+## 7.2 ⏳ REMAINING — and the fence is the point
+
+**Column "needs Mac?" is the answer to her question.** 🔴 rows cannot
+start until 13u lands; 🟢 rows could run tomorrow.
+
+| # | What | needs Mac? |
+|---|---|---|
+| **6c** | ~~**The Two-rooms IA**~~ — **DONE 2026-08-31** (built `799ff11` · cold-reviewed 0 BLOCKER/0 MAJOR · fix wave `52a00fc`; the Versions face shipped WITH it; records: `mobile-batch-6c-record.md` + `-cold-review.md`; D5's purge-road hook deliberately waits for 6b's tray, precondition-pinned) | ✅ done |
+| **—** | ~~**The Library's filter vocabulary**~~ — **DONE 2026-08-31** (built `19e52d5` · reviewed · fix wave `8b4d38b`; her #92 rulings + the #93(b) All = books+notes union; the Archive wears the honest reduced set — book-archiving is 13i's, #93(a); records: `mobile-batch-filters-record.md` + `-cold-review.md`) | ✅ done |
+| **6b** | ~~**The per-note tray**~~ — **DONE 2026-08-31** (built `8a956b3` · cold-reviewed 0 BLOCKER/0 MAJOR · fix wave `afbcf8d`; the tray in §69.3's ruled shape + the blocks chip's three segments (Q8 answered by placement) + PR6's archive doors both directions + 6c's D5 flip + PR14's lens-dangle notices + PR22's guide chapter; **PL-14 CLOSES**; records: `mobile-batch-6b-record.md` + `-cold-review.md`) | ✅ done |
+| **9** | ~~The editor's ⋯ menu · text selection~~ — **DONE 2026-08-31** (built `1260da4` · cold-reviewed 2 MAJOR/2 MINOR/4 NIT · fix wave `f0cb1f1`; verify-first found undo+redo ALREADY in the note ⋯ since batch 4 — her ask predates the build her phone runs; `Takes…` left the block ⋯; Block History moved to the per-take ⋯ opening FOCUSED; the merge vocabulary is a PROPOSE-ONLY section in the record §5 for her bundle; **the SELECTION DEFECT is TRACED-NOT-FIXED** — record §4.3–§4.5: four candidates, measured rule-outs, and a ONE-MINUTE device experiment of hers that collapses the table, joining the device queue; the stranded-`isEditable` defect it found is OWNED by the leftover-backlog batch with its fix shape ruled; records: `mobile-batch-9-record.md` + `-cold-review.md`) | ✅ done (the selection fix awaits her device experiment) |
+| **4.5c** | ~~**Phone-local half only**~~ — **DONE 2026-08-31** (built `4788a95` — through TWO session deaths on the survival-record posture — · cold-reviewed 2 MAJOR/4 MINOR/4 NIT · wave `06d6163` · ROUND 2 re-review 0B/0M/3m/2n · wave 2 `6eec90e`; B45-2 fixed by-identity; the tombstone-liveness fix at the seam with the entry arm and belt both store-confirming before any refusal; Rename Lens → `presenting:`; the seam carves DEFERRED to post-13u by ruling; the sync-road silent-drop residual OWNED on the leftover-backlog row; records: `mobile-batch-45c-phone-record.md` + `-cold-review.md`) | ✅ done |
+| **7** | ~~Reorder takes · take→block · copy-follows-screen · swatches + emoji · block multi-select~~ — **PHONE-LOCAL HALF DONE 2026-08-31** (built `73945ed` · cold-reviewed 2 MAJOR/4 MINOR/2 NIT · fix wave `548513d`; reorder composing #57's ruled edges · the AR-1 doors with the structural latch on the chrome button · M23 copy-follows-screen with the callout corner's HONEST receipt (the `exportMapped`→`public` one-worder rides the #94 post-merge list) · swatches+emoji with the drift pin extended · block multi-select composing `deleteWholeBlockRun`, Merge Selected deliberately withheld pending her batch-9 proposal ruling; records: `mobile-batch-7-record.md` + `-cold-review.md`). **STILL FENCE-BLOCKED, #94: PR21 replace (FindReplaceGate hoist) · copy-all-takes (TakeClipboard hoist)** — the post-13u merge session's | ✅ phone-local done (two #94 items ride the merge) |
+| **10** | ~~Swipe shelf↔library · the starred face · in-book doors~~ — **DONE 2026-09-01** (built through four protocol checkpoint commits · cold-reviewed 2 MAJOR/4 MINOR/2 NIT · fix wave `8cb9c25`; the Starred‹Shelf›Library band with a settle spring, both stacks kept alive (driven); the starred page as a face — the smart book stays 13i's; New Note gated inside the mint's transaction + New Chapter curated-only, refusals spoken beside the doors; the assign-to-chapter door's placement is HER call; records: `mobile-batch-10-record.md` + `-cold-review.md`) | ✅ done — **the round PAUSES here at her word; resumes after 13u + the merge** |
+| **8** | Tag-chip grammar (**HOIST `applyTypedPath`**) · cadence/pruning settings · PL-9's judgment acts · document settings · the forked voice brain (HOIST) · M14's unmeasured half | 🟢 no |
+| **—** | **THE LEFTOVER REVIEW BACKLOG** (the seat road's item 7 — one consolidated batch): the three reviews' **MINORs/NITs** + architecture **MINOR 3** (unsynchronised `voice` global) and **MINOR 4** (refusal copy's ten homes, 71 raw dumps) — **plus, since 2026-08-31, one real DEFECT with its fix's shape already ruled: 🟠 `isEditable` CAN BE STRANDED FALSE, leaving her page permanently read-only with no sheet on screen.** Three overlay sheets (takes browser · comments · block history) each save the page's `isEditable`, force it false, and restore what they saved (`MobileTakesBrowserView.swift:226-234` · `MobileCommentsSheetView.swift:127-136` · `MobileBlockHistorySheetView.swift:143-150`); interleave two and the inner one saves the OUTER one's `false`, so the last restore leaves the page non-editable and nothing on the surface explains why. **Measured** at batch 9's selection trace and **independently reproduced by that batch's cold reviewer** (its MAJOR 1). **Text-loss-adjacent** — she cannot type in her own note. **THE FIX, ruled at adjudication so this batch inherits a decision:** replace the three per-sheet save/restore pairs with **ONE nesting-aware editability authority on the write surface** — a depth count (sheets push/pop; editable only at depth 0) or an equivalent restore-to-rest rule — the same "one authority" move `PaneTextAuthority` already is for liveness; **pin the two-sheet interleave red-on-old** (browser open → history open → browser close → history close ⇒ page ends editable). Batch 9's own door is already properly nested and its A6 pin (`theHistoryDoorLeavesThePageEditableAfterwards`) STAYS. Whether any pre-batch-9 road reaches the interleave is **un-established** (both other sheets are summoned from the keyboard bar, which a covering sheet hides) — so it may be latent, and that is a reason to fix it, not to wait. **AND THE SAME PHOTOGRAPH HAS A SECOND VICTIM, ROUTED HERE 2026-08-31 (batch 4.5c-phone's cold review, MINOR 4 — adjudicated as this row's, not that batch's, because the ruled fix retires the whole class):** the three sheets restore their captured `pageWasEditable` **unconditionally**, so if the NOTE DIES while a sheet is up — the sync road, or a delete on the other tab — `adoptHeader`'s relinquish sets `isEditable = false` (a no-op; the sheet already did) and the sheet's close then hands the keyboard back **over a tombstone**. No bytes move (the gate belt refuses each keystroke and `Operations.autosave` refuses a tombstoned variant either way), but 4.5c-phone's stated intent — *"the keyboard drops the moment the note does"* — is defeated, and it is the exact inverse of the stranded-false defect above: the same unconditional restore, leaking in the other direction. **The ruled fix covers both by construction** if the authority DERIVES editability at rest (`isLive && !noteIsGone && !sealed`) rather than restoring a photograph — so build it as a derivation, not as a depth-counted photograph, and **pin this direction too** (note open → sheet open → note deleted → sheet close ⇒ page ends NON-editable). The phone now has six writers of `textView.isEditable` across four files; one derivation retires the class. **AND ITS SIBLING RESIDUAL, ROUTED HERE 2026-08-31 (4.5c-phone's round-2 review, MINOR R2-3 — the same batch's second deferral, given the same owner so neither sits in a plan file that closes): 🟠 THE SYNC ROAD DROPS THE KEYBOARD WITH NOTHING ON SCREEN.** When the note dies under a surface that is HOLDING the pen — deleted on the Mac and delivered here, the road no grant covers — `adoptHeader`'s relinquish (`MobileEditorViewModel.swift:616-657`) ends her typing and **says nothing at all**, until some later grant or keystroke speaks. It is a deliberate DECLINE, traced not assumed, and the trace is sound: speaking at that transition would clobber the receipt on her commonest deletion road (`deleteNote` reports *"Moved to the Trash…"* and the observation delivers nil a beat later, so the note's own ⋯ door would answer its own act with a refusal about a door she just used — `MobileDeletionTests.deletingANoteMovesItToTheTrashAndSaysSo` pins that receipt). Two qualifications the original record did not carry, verified by the round-2 reviewer: on that road the screen is DISMISSING (`MobileNoteActions.swift:145-148`), so the clobber would be a flash under an animation rather than a state she is left in; and the Library-row road cannot clobber at all (it reports on the LIBRARY model). **THE DESIGN QUESTION THIS NEEDS ANSWERED — it is why this is a design act and not a patch: how does a relinquish tell *"this surface deleted it"* from *"someone else did"*?** Answer that and the sentence can be spoken exactly where it is true. **The MECHANISM half is this row's; the VOICE half — what the phone should SAY when sync deletes the note under her hands — is flagged for the author's bundle** (MobileSoul §5.3's discoverability family: it is a copy decision about a surface she is standing on, not an implementation choice). Full records: `mobile-batch-9-record.md` §4.6 · `mobile-batch-45c-phone-cold-review.md` MINOR 4 + MINOR R2-3 + WAVE 2 RESULTS item 3 | 🟢 no |
+| **—** | **4.5a's ladder round 2** · **the 5-MAJOR round's own review** · **4.5e verification** · **R24** (3 sites, minutes) | 🟢 no |
+| **—** | **PL-13/PL-14/PL-9 faces** — data-safety twin, remaining recovery faces, the bridge-door judgment | 🟢 no |
+| **—** | **The dedicated stability pass** — 4.5's **exit condition**; owns **M27** | 🟢 no |
+| **—** | **The whole-round pass** — closeout obligation **ZERO** | 🟢 no |
+| **—** | **Closeout** — 13 obligations; **QUESTIONS.md still has ZERO round-2 entries** while ~15 items are held for her | 🟢 no |
+| **4.6** | **The quick note's second pass** — a **live lost-prose defect**. Waits on **13u item 9** to rule quick-capture ownership for both platforms | 🔴 **13u** |
+| **4.5c** | Its **cross-block semantics** half | 🔴 **13u item 5** |
+| **—** | Architecture **MINOR 1** — the O(N²) in `Shared/EditorBrain/BlockRangeIndex.swift` | 🔴 **13u item 8** (it *is* that row) |
+| **—** | Architecture **MINOR 2** — refusal vocabulary forked across both targets | 🔴 13u-adjacent |
+| **—** | **U-1 … U-5, U-7** — the handback checklist's 13u half | 🔴 **13u items 7–8** |
+| **—** | **The `main` → `mobile` merge** | 🔴 **after 13u** |
+| **—** | **PL-15's device items** — the live Face ID walk · Read-mode memory at 100k. **Only her phone can give these** | 🟣 **her device** |
+
+## 7.3 THE ONE-LINE ANSWER TO HER QUESTION
+
+**Fifteen of the remaining twenty-one rows do not need the Mac at all.**
+Only **six** wait on 13u, and every one of them is in the editor seam —
+which is exactly the seam 13u exists to settle. **The round's three
+BLOCKERs are all fixed and merged**; what remains is one live defect
+(4.6's lost prose, blocked by design), breadth (batches 7–10), and the
+round's own closing discipline (two standalone passes + closeout).

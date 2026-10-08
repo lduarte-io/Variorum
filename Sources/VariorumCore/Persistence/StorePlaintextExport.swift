@@ -21,6 +21,12 @@ import GRDB
 /// name the dropped tables, so a re-opened export cannot take a WRITE until
 /// its local tables are recreated — the open door's reconciliation step.
 ///
+/// The DERIVED set (`SyncSchema.derivedTables` — the 13o search-index
+/// family) is deliberately NOT dropped (the §FORK RULINGS derived-set
+/// ruling, 2026-10-06): the no-lock-in file opens with working full-text
+/// search, and its capture triggers stay satisfied — the broken-trigger
+/// consequence above never grows a second instance.
+///
 /// Never scheduled, never into the backups folder (the caller's picker
 /// refuses that), a user-chosen destination only; an existing file is never
 /// overwritten.

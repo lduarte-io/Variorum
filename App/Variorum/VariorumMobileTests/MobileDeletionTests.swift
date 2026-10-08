@@ -134,6 +134,7 @@ struct MobileDeletionTests {
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in })
             ) { surface in
@@ -257,28 +258,81 @@ struct MobileDeletionTests {
         }
     }
 
-    /// **The recovery surface's door is on the Library, and it is a real
-    /// button.** (The row is the `+ new book` precedent: a list ends with
-    /// the way to the things that left it.)
-    @Test func theLibraryCarriesTheRecoveryDoor() async throws {
+    /// **TWO DOORS, TWO DESTINATIONS** (batch 6c — her QUESTIONS #84
+    /// ruling). Batch 4's pin drove ONE door labelled *"Archived & Deleted"*;
+    /// under Two rooms the Library carries two, and each must reach its own
+    /// room. Both are real Buttons driven through the real accessibility
+    /// activation, and the assertion that matters is that they are
+    /// DIFFERENT: a split whose two doors both opened the same screen would
+    /// pass a "the door exists" pin and fail the ruling entirely.
+    @Test func theLibraryCarriesBothRoomsDoors() async throws {
         try await withEditorWorld { session, _ in
             let library = MobileLibraryViewModel(session: session)
             let scraps = MobileScrapsModel(session: session)
             let stars = MobileStarsModel(session: session)
-            let opened = LockIsolatedBox(false)
+            let trash = LockIsolatedBox(false)
+            let archive = LockIsolatedBox(false)
 
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in },
-                    onOpenRecovery: { opened.value = true })
+                    onOpenTrash: { trash.value = true },
+                    onOpenArchive: { archive.value = true })
             ) { surface in
-                #expect(surface.activate(RecoveryCopy.surfaceName),
+                await surface.settle(20)
+                // The path line's 🗑 — option 2's own letter, and the
+                // analogue of her Mac B1 masthead trash icon.
+                #expect(surface.activate(MobileRecoveryDoors.trashLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+                #expect(trash.value, "the glyph really opens the Trash room")
+                #expect(!archive.value, "and it is NOT the archive door")
+
+                // The trailing row, NARROWED: it says Archived and opens
+                // only the archive.
+                #expect(surface.activate(MobileRecoveryDoors.archiveLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+                #expect(archive.value, "the row really opens the Archive room")
+            }
+        }
+    }
+
+    /// **THE SHELF RENDERS THE SAME TRASH DOOR, FROM THE SAME DECLARATION**
+    /// (batch 6c, PROVISIONAL — the design record's finding 1 and its Q6).
+    ///
+    /// Books live on the Shelf and a deleted BOOK rows in the Trash, so a
+    /// trash door reachable only from the Library would put a tab switch
+    /// between deleting a book and getting it back. The pin drives the real
+    /// door on the real shelf and asserts it carries the SAME label the
+    /// Library's does — one declaration, two renderers, which is what stops
+    /// the two path lines drifting about what 🗑 means.
+    @Test func theShelfCarriesTheSameTrashDoor() async throws {
+        try await withEditorWorld { session, _ in
+            let shelf = MobileShelfViewModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            let quick = MobileQuickNoteModel()
+            let opened = LockIsolatedBox(false)
+
+            try await withHostedSurface(
+                MobileShelfView(
+                    model: shelf, stars: stars, quickNote: quick,
+                    tokens: .terminalLight, tabBar: { EmptyView() },
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
+                    onSettings: {},
+                    onOpenTrash: { opened.value = true })
+            ) { surface in
+                await surface.settle(20)
+                #expect(surface.activate(MobileRecoveryDoors.trashLabel),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(20)
             }
-            #expect(opened.value, "the door really opens the surface")
+            #expect(opened.value, "the shelf's door really opens the Trash room")
+            // ONE declaration: the label the Shelf drove is the Library's.
+            #expect(MobileRecoveryDoors.trashLabel == RecoveryCopy.trashSection)
         }
     }
 
@@ -292,6 +346,48 @@ struct MobileDeletionTests {
             #expect(await model.deleteNote() == false)
             #expect(model.statusMessage == "That note is already gone.")
         }
+    }
+
+    /// **THE LAST `String(describing:)` IN THIS DOOR'S FAMILY IS CLOSED**
+    /// (4.5c-phone item 4 — A1-18's 4.5c share).
+    ///
+    /// `DeletionRefusal` exists because three private tables each covered a
+    /// different subset of `OperationError` and each fell through to a bare
+    /// enum dump, so one refused act read three ways depending on the door.
+    /// Two of the three were adopted at 4.5b; `deleteNoteRefusal` was the
+    /// third, and this pins that it now forwards rather than deciding.
+    ///
+    /// **SCOPE, STATED HONESTLY — this is a contract pin, not a road pin.**
+    /// `deleteContainer`'s only reachable refusal today is
+    /// `containerNotFound` (its body's one guard is `liveContainer`), and BOTH
+    /// tables word that identically — so nothing she can currently reach
+    /// changes, and `deletingAnAlreadyGoneNoteSpeaksPlainly` above still
+    /// passes unmodified, which is the proof. What closed is the FALLBACK: the
+    /// next refusal this op learns to throw arrives as a sentence instead of
+    /// `lockedPost(id: "…")`, which is the whole reason A1-18 wanted one home.
+    ///
+    /// **RED ON OLD (production, `MobileEditorViewModel.deleteNoteRefusal`):**
+    /// the pre-fix table returns `String(describing:)` for every case but one,
+    /// so the two `lockedPost`/`containerNotDeleted` rows below fail with the
+    /// raw enum text. Quoted in the batch record.
+    @Test func theNoteDeleteDoorSpeaksTheSharedDeletionVocabulary() {
+        let cases: [Error] = [
+            OperationError.containerNotFound(id: "c1"),
+            OperationError.lockedPost(id: "p1"),
+            OperationError.containerNotDeleted(id: "c1"),
+            OperationError.variantNotFound(id: "v1"),
+        ]
+        for error in cases {
+            let spoken = MobileEditorViewModel.deleteNoteRefusal(error)
+            #expect(spoken == DeletionRefusal.words(error, act: .delete),
+                    "the door forwards rather than keeping a table of its own")
+            #expect(!spoken.contains("OperationError"), "never the raw enum")
+            #expect(!spoken.contains("id: \""), "nor its associated values")
+        }
+        // The one case both tables always mapped, named so the pin records
+        // that this sentence did NOT change.
+        #expect(MobileEditorViewModel.deleteNoteRefusal(
+            OperationError.containerNotFound(id: "c1")) == "That note is already gone.")
     }
 
     // MARK: - PR4 · Delete a book
@@ -323,7 +419,7 @@ struct MobileDeletionTests {
                     quickNote: MobileQuickNoteModel(), tokens: .terminalLight,
                     tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {})
+                    onSettings: {})
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)
@@ -403,7 +499,7 @@ struct MobileDeletionTests {
                     model: shelf, stars: stars, quickNote: quickNote,
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {})
+                    onSettings: {})
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)

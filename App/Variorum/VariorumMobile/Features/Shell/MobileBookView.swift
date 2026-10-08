@@ -24,13 +24,41 @@ struct MobileBookView: View {
     /// Read; voice-cased at render; pinned).
     static let detailsDoorTitle = "Details"
 
+    // MARK: - Batch 10's two doors (her *"when you're within a book, there
+    // should be a new note and new chapter button, which the mac up does
+    // have"*)
+
+    /// **The note door reuses the phone's ONE new-note word**
+    /// (`MobileNewNoteDoor.doorTitle`, which the shelf and the Library path
+    /// lines already say). The Mac's own in-book door reads `+ new note`;
+    /// this is that word in the phone's casing, and taking it from the
+    /// existing symbol is what stops a third spelling appearing.
+    static var newNoteDoorTitle: String { MobileNewNoteDoor.doorTitle }
+
+    /// The chapter door + its alert — the Mac's own words (`BookView`'s
+    /// `+ new chapter` / "New Chapter" / "Name" / "Create"), in the phone's
+    /// casing. Voice-cased at render; pinned.
+    static let newChapterDoorTitle = "+ New Chapter"
+    static let newChapterAlertTitle = "New Chapter"
+    static let newChapterFieldTitle = "Name"
+    static let newChapterConfirmTitle = "Create"
+
     @State private var model: MobileBookViewModel
     @State private var detailsPresented = false
+    /// Batch 10: the New Chapter alert and its field (a real `@State`
+    /// binding — §15's trap (a)).
+    @State private var newChapterPresented = false
+    @State private var chapterNameField = ""
     private let session: AppSession
     let tokens: VoiceTokens
     let onOpen: (String) -> Void
     /// The Read flow door (P35's inversion — Read is the door now).
     let onRead: () -> Void
+    /// A NEWLY MINTED note opens for WRITING (batch 10 — the brief's
+    /// letter: *"the minted note opens for writing"*, and the phone's own
+    /// `+ New Note` grammar on both other roots). nil in harness/preview
+    /// use, where the screen is mounted without a stack to push onto.
+    let onOpenForWriting: ((String) -> Void)?
     /// The book went (round 2 batch 4 — PR4): pop this screen, because a
     /// contents list of a tombstoned book is exactly what the delete door
     /// must not leave behind. nil in harness/preview use.
@@ -40,6 +68,7 @@ struct MobileBookView: View {
         session: AppSession, readingID: String, tokens: VoiceTokens,
         onOpen: @escaping (String) -> Void,
         onRead: @escaping () -> Void,
+        onOpenForWriting: ((String) -> Void)? = nil,
         onDeleted: (() -> Void)? = nil
     ) {
         _model = State(initialValue: MobileBookViewModel(session: session, readingID: readingID))
@@ -47,6 +76,7 @@ struct MobileBookView: View {
         self.tokens = tokens
         self.onOpen = onOpen
         self.onRead = onRead
+        self.onOpenForWriting = onOpenForWriting
         self.onDeleted = onDeleted
     }
 
@@ -82,6 +112,21 @@ struct MobileBookView: View {
                         .foregroundStyle(tokens.muted)
                         .padding(20)
                 }
+                bookDoors
+                // **A REFUSAL SPEAKS WHERE THE TAP WAS** (the batch-10 cold
+                // review, MAJOR 2). The doors trail the contents list, so on
+                // a book longer than a screen the header's slot is off the
+                // top of the viewport and a refused door read as nothing
+                // happening. This is the phone's own root-slot grammar —
+                // `MobileStarredView` puts `stars.error(on:)` beside the door
+                // that fired it for exactly this reason.
+                if let refusal = model.doorRefusal {
+                    Text(refusal)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.alarm)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 12)
+                }
             }
         }
         .background(tokens.room.ignoresSafeArea())
@@ -110,7 +155,73 @@ struct MobileBookView: View {
                 onDeleted: { onDeleted?() })
                 .presentationDetents([.medium, .large])
         }
+        // Batch 10 — the Mac's own alert, word for word (`BookView`'s "New
+        // Chapter" / "Name" / "Create" / "Cancel").
+        .alert(Self.newChapterAlertTitle, isPresented: $newChapterPresented) {
+            TextField(Self.newChapterFieldTitle, text: $chapterNameField)
+            Button(tokens.chromeLabel(Self.newChapterConfirmTitle)) {
+                let name = chapterNameField
+                let model = model
+                Task { await model.newChapter(named: name) }
+            }
+            // The face gate (the rename door's own rule, C2 ladder R1-3):
+            // a blank name never fires a silent no-op.
+            .disabled(!MobileBookViewModel.canName(chapterNameField))
+            Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
+        }
         .task { await model.start() }
+    }
+
+    /// **THE TWO DOORS INSIDE A BOOK** (batch 10, her ask). They trail the
+    /// contents list — the `+ new book` precedent: a list ends with the way
+    /// to add to it.
+    ///
+    /// **Rendered on CURATED books only** (`showsBookDoors`): on a smart
+    /// book both are ABSENT rather than present-and-refusing, because
+    /// derived membership has no row to mint and chapters are refused by
+    /// model rule — P-2's own case, and the phone's `showsDailyDoor`
+    /// precedent. On a FINISHED book they stay and REFUSE in the family's
+    /// voice — **and the refusal renders immediately beneath them**, which
+    /// is what makes that divergence honest (the cold review's MAJOR 2: a
+    /// door kept so it can explain must explain where the finger is).
+    /// Details' Reopen row is one tap away and a door that vanished on
+    /// finishing would explain nothing.
+    @ViewBuilder
+    private var bookDoors: some View {
+        if model.showsBookDoors {
+            Button {
+                let model = model
+                Task {
+                    if let postID = await model.newNote() {
+                        onOpenForWriting?(postID)
+                    }
+                }
+            } label: {
+                doorRow(Self.newNoteDoorTitle)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Self.newNoteDoorTitle)
+            Button {
+                chapterNameField = ""
+                newChapterPresented = true
+            } label: {
+                doorRow(Self.newChapterDoorTitle)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Self.newChapterDoorTitle)
+        }
+    }
+
+    private func doorRow(_ title: String) -> some View {
+        HStack {
+            Text(tokens.chromeLabel(title))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+            Spacer()
+        }
+        .padding(.vertical, 11)
+        .padding(.horizontal, 20)
+        .contentShape(Rectangle())
     }
 
     private var header: some View {

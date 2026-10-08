@@ -102,11 +102,6 @@ nonisolated enum MobileShelfLayout {
     /// side. Also stands in for the trailing `+ new book` row and the
     /// Today fallback row, which carry the same padding at `tokens.small`.
     static let bookRowHeight: CGFloat = 42
-    /// `starredRow`: `tokens.body` with 8 pt of padding a side.
-    static let starredRowHeight: CGFloat = 36
-    /// The starred section's header line plus its trailing divider block.
-    static let starredChromeHeight: CGFloat = 38
-
     /// The quick-note box's own chrome inside the writing region — the
     /// status row, the box's padding, and the spacing between them. What
     /// is left is the FIELD.
@@ -161,15 +156,17 @@ nonisolated enum MobileShelfLayout {
     /// The natural height of everything the books region wants to show.
     /// `extraRows` counts the region's trailing doors (`+ new book`, and
     /// the Today fallback row when it renders).
-    static func naturalBooksHeight(
-        bookRows: Int, starredRows: Int, extraRows: Int
-    ) -> CGFloat {
+    ///
+    /// **The starred rows left this region at batch 10** and the parameter
+    /// that reserved height for them went with them at the cold review's
+    /// NIT 1: its only caller had passed `0` since the starred page shipped,
+    /// and a live parameter whose every value is dead reads as a rule the
+    /// shelf does not have. Her writing-floor guarantee is unchanged — the
+    /// pin that spans it simply no longer spans a dimension the shelf cannot
+    /// enter.
+    static func naturalBooksHeight(bookRows: Int, extraRows: Int) -> CGFloat {
         var height = CGFloat(max(0, bookRows)) * bookRowHeight
         height += CGFloat(max(0, extraRows)) * bookRowHeight
-        if starredRows > 0 {
-            height += starredChromeHeight
-            height += CGFloat(starredRows) * starredRowHeight
-        }
         return height
     }
 
@@ -179,7 +176,7 @@ nonisolated enum MobileShelfLayout {
     /// The result always partitions it exactly (`books + writing == region`
     /// for any non-negative region), so nothing can fall off the bottom.
     static func split(
-        region: CGFloat, bookRows: Int, starredRows: Int, extraRows: Int,
+        region: CGFloat, bookRows: Int, extraRows: Int,
         writing state: WritingState = .expanded
     ) -> Split {
         guard region > 0 else { return Split(booksHeight: 0, writingHeight: 0) }
@@ -192,8 +189,7 @@ nonisolated enum MobileShelfLayout {
             return Split(booksHeight: region - box, writingHeight: box)
         }
 
-        let natural = naturalBooksHeight(
-            bookRows: bookRows, starredRows: starredRows, extraRows: extraRows)
+        let natural = naturalBooksHeight(bookRows: bookRows, extraRows: extraRows)
         // Her ~8 books, and the trailing door that always sits under them.
         let rowCap = CGFloat(visibleBookRowCap) * bookRowHeight + bookRowHeight
         // Her half-the-screen.

@@ -38,11 +38,11 @@ nonisolated enum LibraryCopy {
     static let scopeDoorUnderADay =
         "A day names notes \u{2014} clear it to scope books and blocks again"
 
-    /// **The cap, spoken** (P-2's grammar: the app says what it did). Drawn
-    /// under a listing that had more rows than it drew.
-    static func showingTheFirst(_ page: Int) -> String {
-        "showing the first \(page) \u{2014} narrow the search"
-    }
+    // **The cap's sentence LEFT with the cap** (13o U2, R-13o-9): "showing
+    // the first 40 — narrow the search" spoke for the block hits' cap, the
+    // last capped listing in the Library. The cap is gone — named blocks and
+    // scraps page in the search state's answer sheet — so nothing is left
+    // for the line to say.
 
     /// The paged listing's end while the next page is on its way (17y B1 (k)).
     static let loadingMoreNotes = "loading more notes…"
@@ -51,21 +51,4 @@ nonisolated enum LibraryCopy {
     /// (13g's own literal, moved here at 13u3 UNIT B when the card's second
     /// line stopped being "whatever the snippet was").
     static let noTextYet = "No text yet"
-}
-
-
-/// The quiet line under a capped listing. One view, both modes — the same
-/// reason the sentences above live in one place.
-struct LibraryTruncationLine: View {
-    let tokens: VoiceTokens
-    var page: Int = LibraryCatalogModel.blockCap
-
-    var body: some View {
-        Text(tokens.chromeLabel(LibraryCopy.showingTheFirst(page)))
-            .font(tokens.small)
-            .foregroundStyle(tokens.faint)
-            .lineLimit(1)
-            .fixedSize()
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
 }

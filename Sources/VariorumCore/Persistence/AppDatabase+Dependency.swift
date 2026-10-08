@@ -39,11 +39,26 @@ extension AppDatabase {
         /// sidecar-present unlock road on this typed fact, never on
         /// matching the reason's prose.
         public let keyUnavailable: Bool
+        /// VX-80 (the Castle-follow crash window): true for exactly ONE
+        /// refusal class — an ENCRYPTED store whose resolved key WAS in
+        /// hand and failed the open with SQLCipher's not-a-database class
+        /// (a wrong key, or a file that is not a database at all —
+        /// indistinguishable by design). The stranded state this types: a
+        /// re-key completed its verified swap and the process died before
+        /// custody moved, so custody opens the file with the OLD key
+        /// forever. The failure surface keys the sidecar-present unlock
+        /// road on this typed fact, never on the reason's prose (R1-M3's
+        /// own precedent).
+        public let keyRejected: Bool
 
-        public init(storePath: String, reason: String, keyUnavailable: Bool = false) {
+        public init(
+            storePath: String, reason: String,
+            keyUnavailable: Bool = false, keyRejected: Bool = false
+        ) {
             self.storePath = storePath
             self.reason = reason
             self.keyUnavailable = keyUnavailable
+            self.keyRejected = keyRejected
         }
     }
 
@@ -92,8 +107,8 @@ extension AppDatabase {
             try FileManager.default.createDirectory(
                 at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             let custody = custody ?? ambientStoreKeyCustody()
-            let key = try resolveStoreKey(
-                at: url, presence: StoreFilePresence.classify(at: url), custody: custody)
+            let presence = StoreFilePresence.classify(at: url)
+            let key = try resolveStoreKey(at: url, presence: presence, custody: custody)
             // The one-time plaintext→encrypted migration (13p): a no-op on
             // fresh and already-encrypted stores (it also sweeps a crashed
             // attempt's stale temp), the verified export/swap road on a
@@ -101,7 +116,22 @@ extension AppDatabase {
             // being restored through this door, which is exactly how the
             // R13p-15 aged-out plaintext tail comes back in encrypted.
             try StoreEncryptionMigration.migrateIfNeeded(at: url, key: key)
-            return try AppDatabase.onDisk(url: url, key: key)
+            do {
+                return try AppDatabase.onDisk(url: url, key: key)
+            } catch let error as DatabaseError
+                where presence == .encryptedOrUnknown && error.resultCode == .SQLITE_NOTADB {
+                // VX-80: the WRONG-KEY class, typed. The key in hand came
+                // from custody (an encrypted presence never mints), and
+                // SQLCipher's first page read refused it — the Castle-follow
+                // crash window's stranded state (store re-keyed, custody
+                // never moved). The failure surface keys its recovery road
+                // on `keyRejected`, never on this reason's prose. No key
+                // material rides the reason: the failing statement is a
+                // schema read (the PRAGMA key road is separately redacted).
+                throw StoreOpenError(
+                    storePath: url.path, reason: String(describing: error),
+                    keyRejected: true)
+            }
         } catch let error as StoreOpenError {
             throw error
         } catch {

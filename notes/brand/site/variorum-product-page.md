@@ -308,11 +308,12 @@ rest** — the whole store, always, not an optional checkbox.
   offline, the "losing" version isn't overwritten or auto-merged into word
   salad — it arrives as another take on the block, side by side, yours to
   judge. The conflict dialog is just… the fan.
-- **You own the file.** Your whole collection is one database file. Copy it,
-  back it up, AirDrop it to a new Mac and open it there with your passphrase —
-  no export-import dance, no server in the loop. And because it's encrypted,
-  the file in transit is noise to anyone without your keys. `[13x-gated —
-  verify the move-your-library flow shipped before publishing]`
+- **You own the file.** Your whole collection is one encrypted database file.
+  Back it up, or take it to a new Mac: Send Library to Another Mac packs it
+  with its key file into one folder — AirDrop the folder and open it there,
+  through your Apple account or with your passphrase. No export-import dance,
+  no server in the loop, and in transit it's noise to anyone without your
+  keys. `[publish with the first public release that carries 13x]`
 - **The exit is always open:** plain-Markdown export of anything, anytime.
   `[open-format guarantee wording — hers; the release strategy wants this
   loud]`
@@ -375,9 +376,10 @@ It keeps what you choose to keep: takes, savepoints, lineage. It does not
 record keystrokes or reconstruct every change. Coarse, not forensic.
 
 **What's the file format?**
-A single SQLite database (encrypted), local to your Mac — a file you can
-copy, back up, or AirDrop to a new Mac and open with your passphrase.
+A single SQLite database (encrypted), local to your Mac — a file you can back
+up, or send to a new Mac as one folder with its key file and open there.
 Markdown export for everything, anytime. `[open-format guarantee line]`
+`[publish with the first public release that carries 13x]`
 
 **What does it cost?**
 *[removed for publication]*

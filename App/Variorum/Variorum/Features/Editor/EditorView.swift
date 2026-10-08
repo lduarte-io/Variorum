@@ -48,6 +48,12 @@ struct EditorView: View {
     /// canary, the seal line, the block-selection banner) keep the host's
     /// own measure and only the prose reaches into the whitespace.
     var gutter: ProseGutter = .contained
+    /// VX-75: the INLINE surface says, once, when it first shows the note —
+    /// its initial render is in and the height measured from it has been
+    /// reported. A host that keeps something on screen until then (the book
+    /// Outline's read surface) releases it here. Ignored by the full-document
+    /// editor.
+    var onLiveShowing: (() -> Void)? = nil
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
     /// 13b 4D (S4-19, her ruling): drag handles reveal on hover — a
@@ -64,17 +70,22 @@ struct EditorView: View {
     init(
         session: AppSession, postID: String, inline: Bool = false,
         caretSeed: Int? = nil, fanSeed: String? = nil,
+        findSeed: EditorFindSeed? = nil,
         barPlacement: BarPlacement = .bottom,
-        gutter: ProseGutter = .contained
+        gutter: ProseGutter = .contained,
+        onLiveShowing: (() -> Void)? = nil
     ) {
         self.session = session
         self.postID = postID
         self.inline = inline
         self.barPlacement = barPlacement
         self.gutter = gutter
+        self.onLiveShowing = onLiveShowing
         let model = EditorViewModel(session: session, postID: postID)
         model.pendingCaretSeed = caretSeed
         model.pendingFanSeed = fanSeed
+        // 13o U2 (D6): a search passage's landing — the third one-shot.
+        model.pendingFindSeed = findSeed
         _model = State(initialValue: model)
     }
 
@@ -120,7 +131,8 @@ struct EditorView: View {
             blockSelectionBanner
             if inline {
                 InlineEditorSurface(
-                    model: model, height: $inlineHeight, chrome: chrome, gutter: gutter)
+                    model: model, height: $inlineHeight, chrome: chrome, gutter: gutter,
+                    onShowing: onLiveShowing)
                     .frame(height: inlineHeight)
                     // THE BLEED (13u3 UNIT A1) — see `ReadPostView`'s twin:
                     // the frame reaches into the host's whitespace while
@@ -550,6 +562,8 @@ struct InlineEditorSurface: NSViewRepresentable {
     var chrome = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
     /// 13u3 UNIT A1: the host's prose placement (see `EditorView.gutter`).
     var gutter: ProseGutter = .contained
+    /// VX-75 (see `EditorView.onLiveShowing`).
+    var onShowing: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator {
         Coordinator(model: model)
@@ -558,6 +572,7 @@ struct InlineEditorSurface: NSViewRepresentable {
     func makeNSView(context: Context) -> EditorTextView {
         let textView = EditorTextView.makeInlineEditor()
         textView.proseGutter = gutter
+        context.coordinator.onShowing = onShowing
         context.coordinator.surfaceDelegate.wire(to: textView)
         context.coordinator.applyChrome(chrome, to: textView)
         model.attach(textView: textView, scrollView: nil)
@@ -574,6 +589,7 @@ struct InlineEditorSurface: NSViewRepresentable {
 
     func updateNSView(_ nsView: EditorTextView, context: Context) {
         // Projection-driven through the model; the width is SwiftUI's.
+        context.coordinator.onShowing = onShowing
         context.coordinator.viewUpdated(chrome: chrome, gutter: gutter, on: nsView)
     }
 
@@ -591,6 +607,11 @@ struct InlineEditorSurface: NSViewRepresentable {
         private var storageToken: NSObjectProtocol?
         private var reportHeight: ((CGFloat) -> Void)?
         private var appliedChrome: EditorSurfaceChrome?
+        /// VX-75: the host's "this surface now shows its note" door, fired
+        /// once — by the first report measured after the initial render, so
+        /// the height binding and the host's release land in the same turn.
+        var onShowing: (() -> Void)?
+        private var announcedShowing = false
 
         init(model: EditorViewModel) {
             self.model = model
@@ -773,6 +794,10 @@ struct InlineEditorSurface: NSViewRepresentable {
             let height = max(PaneMeasurement.height(of: textView), 24)
             lastReportedHeight = height
             reportHeight?(height)
+            if model.loaded, !announcedShowing {
+                announcedShowing = true
+                onShowing?()
+            }
         }
 
         func uninstall() {

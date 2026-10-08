@@ -1871,6 +1871,12 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: CollectingCopy.openUnavailableNote,
             availability: always),
+        // 13o U3 — the book masthead's 🔍 (R-13o-14), its one renderer.
+        Capability(
+            id: .searchThisBook, verb: "Search This Book\u{2026}", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "", availability: always),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],
@@ -2058,6 +2064,23 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "The unencrypted export lives in Settings ▸ Data Safety.",
+            availability: always),
+        // 13x F1 (ladder R1-MAJOR; the 13x row's deliverable 1): the
+        // travelling folder pair (the kickoff ruling QC) — File's door and
+        // Data Safety's twin render the ONE act; reveal-in-Finder at
+        // completion. The verb IS `LibraryOpenCopy.handOffDoor` (13x F2,
+        // ladder R2-2: both faces render THIS declaration, so the copy
+        // constant is the one source of truth and a 13s re-voicing of it
+        // reaches the File menu and Data Safety alike — the old duplicated
+        // literal left the constant dead and the no-drift claim enforced
+        // by nothing; the equality pin in CapabilityRegistryTests is the
+        // enforcement now).
+        Capability(
+            id: .handOffLibrary, verb: LibraryOpenCopy.handOffDoor, scope: .app,
+            doors: [.menuBar, .surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The travelling copy is made while your library is open — "
+                + "File ▸ Send Library to Another Mac…, or Settings ▸ Data Safety.",
             availability: always),
 
         // MARK: Diagnostics (13r U3-B — Settings ▸ Diagnostics, R-13r-5)

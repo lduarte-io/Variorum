@@ -28,6 +28,8 @@ struct BookView: View {
     /// settings sheet (the sitting record §4's "the book's ⋯ menu" — the
     /// book's one masthead door, P-13id-U3-1), declared at last.
     static let surfaceCapabilities: [CapabilityID] = [.openBookSettings]
+        // 13o U3 — the masthead's 🔍 (R-13o-14), the search-within-a-book door.
+        + [.searchThisBook]
 
     let session: AppSession
     let readingID: String
@@ -55,6 +57,12 @@ struct BookView: View {
     /// departing one, so an unstamped clear would erase the box the next book
     /// just filled (the `CommandRouter.unregisterDetail` token, one seam over).
     var onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)?
+    /// **13o U3 — where a search passage lands** (the architect's F1:
+    /// "landing identical to the Library's"): the note opens IN WRITE AT ITS
+    /// BLOCK with the find seed, through the shell's caret-precise road —
+    /// composition (`RootView`), never a sibling's model. nil = no landing
+    /// road (a test host); the passage then does nothing.
+    var onOpenSearchHit: ((_ postID: String, _ blockID: String?, _ find: EditorFindSeed?) -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
     /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
@@ -72,6 +80,10 @@ struct BookView: View {
     /// the masthead's `group ▾` sets it, the Index regroups by it. Its own
     /// model (P-9), remembered per book in a LOCAL store.
     @State private var grouping: BookIndexGroupingModel
+    /// 13o U3 — SEARCH WITHIN THIS BOOK (R-13o-14 + the architect's F1): its
+    /// own model (P-9) — the masthead's 🔍 and the answer drawn over the
+    /// mode's body. Injectable for `model`'s reason.
+    @State private var bookSearch: BookSearchModel
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -92,7 +104,9 @@ struct BookView: View {
         onPaneFocusRequest: (() -> Void)? = nil,
         revealPostID: String? = nil,
         onRevealConsumed: (() -> Void)? = nil,
-        onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil
+        onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
+        bookSearch: BookSearchModel? = nil,
+        onOpenSearchHit: ((String, String?, EditorFindSeed?) -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -102,6 +116,7 @@ struct BookView: View {
         self.revealPostID = revealPostID
         self.onRevealConsumed = onRevealConsumed
         self.onNoteBox = onNoteBox
+        self.onOpenSearchHit = onOpenSearchHit
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
@@ -120,6 +135,8 @@ struct BookView: View {
                 ?? BookArchivedModel(session: session, readingID: readingID))
         _ownership = State(initialValue: ownership ?? OwnershipFactsModel())
         _grouping = State(initialValue: grouping ?? BookIndexGroupingModel(readingID: readingID))
+        _bookSearch = State(
+            initialValue: bookSearch ?? BookSearchModel(session: session, readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -234,6 +251,9 @@ struct BookView: View {
                     ownershipBadge: { ownershipBadge($0) },
                     grouping: grouping,
                     hostsQuietReceipt: BookNoteBox.bookHostsQuietReceipt(noteBoxReport?.state),
+                    // 13o U3 (F1): in Index the answer covers the PANE — the
+                    // column keeps the masthead (and so the field) in view.
+                    searchAnswer: bookSearch.isAnswering ? AnyView(searchSheet) : nil,
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
                         // focused in Outline through the ascent's own door
@@ -252,6 +272,7 @@ struct BookView: View {
                     BookArchivedLine(model: archived, structure: structure)
                     outlineBody
                 }
+                .overlay { searchAnswerOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
@@ -259,6 +280,7 @@ struct BookView: View {
                 SpreadBookView(
                     session: session, model: model, structure: structure,
                     archived: archived)
+                    .overlay { searchAnswerOverlay }
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
                 // infinite scroll, and true book pagination. Neither is
@@ -284,8 +306,10 @@ struct BookView: View {
                         onRevealLanded: { model.consumeReveal() },
                         sizes: model.flowSurfaceSizes,
                         extentsCache: model.flowExtents)
+                    .overlay { searchAnswerOverlay }
                 case .pages:
                     pagedRead
+                        .overlay { searchAnswerOverlay }
                 }
             }
         } panel: {
@@ -363,7 +387,7 @@ struct BookView: View {
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
         .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? structure.lastError {
+            if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
                     .font(tokens.small)
                     .alarmVoice()
@@ -434,6 +458,26 @@ struct BookView: View {
         }
     }
 
+    // MARK: - Search within this book (13o U3 — R-13o-14 + the architect's F1)
+
+    /// The book's answer sheet — the passages land through the shell's road.
+    private var searchSheet: some View {
+        BookSearchSheet(tokens: tokens, model: bookSearch) { postID, blockID, find in
+            onOpenSearchHit?(postID, blockID, find)
+        }
+    }
+
+    /// **Drawn OVER the mode's body while the field holds words** — an
+    /// overlay, never a container (the Outline's measure is claimed inside
+    /// its own body; an overlay leaves every mode's layout, scroll and live
+    /// editor exactly as they were, so clearing the field returns the mode
+    /// untouched).
+    @ViewBuilder private var searchAnswerOverlay: some View {
+        if bookSearch.isAnswering {
+            searchSheet
+        }
+    }
+
     // MARK: - The navigator (R43: chapters · outline · settings)
 
     /// The book's masthead chrome — title, the mode tabs, settings, the
@@ -462,6 +506,9 @@ struct BookView: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
             Spacer(minLength: 2)
+            // 13o U3 — SEARCH THIS BOOK (her R-13o-14): the masthead's right,
+            // a magnifying glass at rest, the field only when clicked.
+            BookSearchDoor(tokens: tokens, model: bookSearch)
             // 17y B3 item (h) — THE ARRIVALS DOOR (R-17y-1): the small icon
             // beside the gear, calm when nothing waits, presence when
             // something does; its popover lists the rows. A BOOK's door
@@ -1522,14 +1569,10 @@ struct BookView: View {
                     if structure.chaptersActive {
                         bodyChapterEndZone  // N21: drag a chapter past the last
                     }
-                    if model.truncated {
-                        Text("Showing the first \(BookViewModel.entryWindow) notes — "
-                            + "the rest of this book isn't loaded yet "
-                            + "(windowing arrives with Phase 12).")
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .padding(.vertical, 8)
-                    }
+                    // 13o U3 (P-13o-U3-8): the window's line with its road
+                    // (the stale "windowing arrives with Phase 12" promise
+                    // retired — the road IS the windowing).
+                    BookWindowLine(tokens: tokens, model: model)
                     // Sitting 9 batch 6: the add-post door lives IN the
                     // book's flow too, where writing ends — the navigator
                     // rail's twin (R62/R75; discoverability is the point).
@@ -2299,6 +2342,22 @@ private struct OutlinePostRow: View {
     /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
     @State private var dropTargeted = false
 
+    /// VX-75: whether the live editor mounted in this row has drawn its note
+    /// at its real height. Until it has, the read surface stays mounted under
+    /// it and the editor stays invisible, so a click into editing never shows
+    /// an empty note while the editor's first projection is on its way.
+    @State private var liveShowing = false
+
+    /// VX-82 — the INVERSE swap's flag: whether the CURRENTLY mounted read
+    /// surface has drawn the note at its real height (`ReadPostView.
+    /// onShowing`; reset when that surface leaves). On leaving edit mode the
+    /// fresh read surface mounts empty and fills asynchronously, so the
+    /// outgoing editor HOLDS — mounted, visible, inert — exactly until this
+    /// flips, the mirror of what `liveShowing` does for the forward swap.
+    /// Every condition reads row `@State` already correct in the body
+    /// evaluation that acts on it, so no `onChange` ordering is involved.
+    @State private var readShowing = false
+
     /// The card's preview — **the BOOK's, in hand before this row's first
     /// frame** (13u2 UNIT A2, item 18). It used to be this row's own `@State`,
     /// filled by a `.task` that rendered the WHOLE note; the card therefore
@@ -2314,83 +2373,105 @@ private struct OutlinePostRow: View {
     var body: some View {
         Group {
             if model.isExpanded(entry.postID) {
-                if model.liveFocusedPostID == entry.postID {
-                    // THE FOCUSED NOTE. 18d batch 1 (U-10/U-17): the editor
-                    // renders NO bar here — its doors are in the sidebar's
-                    // note box — so the row is the prose at Write's measure
-                    // and nothing else. The gutter it used to reserve is
-                    // gone with the bar that lived in it.
-                    VStack(alignment: .leading, spacing: 6) {
-                        postHeader
-                            .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                            .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                        if nearViewport {
-                            StableSurface(
-                                known: model.rememberedSurfaceSize(entry.postID),
-                                followsShrinks: true,
-                                // 18d batch 4 (U-12): the settle is the ONE
-                                // occasion this note's remembered length
-                                // reaches the disk — the memory itself takes
-                                // every geometry report, and a live editor
-                                // reports on every keystroke.
-                                settled: { model.persistSurfaceSize(entry.postID) },
-                                remember: { model.rememberSurfaceSize(entry.postID, $0) }
-                            ) {
-                                EditorView(
-                                    session: session, postID: entry.postID, inline: true,
-                                    caretSeed: model.caretSeed, fanSeed: model.fanSeed,
-                                    barPlacement: .inSidebarBox,
-                                    gutter: gutter)
+                // ONE expanded shape for both states (VX-75). The focused
+                // note's live editor and the read-cheap surface used to be two
+                // separate branches, so focusing dismantled the read surface
+                // at once while the editor was still born empty — every frame
+                // until its first projection showed a blank row (her "whole
+                // screen text disappears"). In one ZStack the read surface
+                // keeps its identity across the focus flip and is released
+                // only once the editor has drawn the note at its real height.
+                // P-3 holds: the read surface is never live, and there is
+                // still exactly one live editor.
+                let isLive = model.liveFocusedPostID == entry.postID
+                VStack(alignment: .leading, spacing: 6) {
+                    // The HEADER is the handle, not the prose: an expanded
+                    // post shows a text surface, and a drag over it would
+                    // fight selection. 18d batch 1 (U-10/U-17): the focused
+                    // note's editor renders NO bar here — its doors are in the
+                    // sidebar's note box — so the row is the prose at Write's
+                    // measure and nothing else.
+                    postHeader
+                        .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                    // VX-91: `nearViewport` alone left the clicked far
+                    // story's row a placeholder until the scroll ARRIVED —
+                    // the title-alone-over-blank beat. The row she is on
+                    // her way to pre-mounts (`outlineRowPreMounts`: focused
+                    // or the reveal's target, with a width-matched memory
+                    // so the reservation holds the column's geometry).
+                    if nearViewport || model.outlineRowPreMounts(entry.postID) {
+                        ZStack(alignment: .topLeading) {
+                            if !(isLive && liveShowing) {
+                                StableSurface(
+                                    known: model.rememberedSurfaceSize(entry.postID),
+                                    followsShrinks: false,
+                                    settled: { model.persistSurfaceSize(entry.postID) },
+                                    remember: { model.rememberSurfaceSize(entry.postID, $0) }
+                                ) {
+                                    ReadPostView(
+                                        session: session, postID: entry.postID,
+                                        gutter: gutter,
+                                        onFocusRequest: { offset in
+                                            model.focus(entry.postID, caret: offset)
+                                        },
+                                        onBadgeTap: { blockID in
+                                            // Interpretation 1 (PROVISIONAL): focus
+                                            // FIRST, then the fan panel opens on the
+                                            // one live surface.
+                                            model.focus(entry.postID, fanBlock: blockID)
+                                        },
+                                        onShowing: { readShowing = true })
+                                }
+                                .id("read-\(entry.postID)")
+                                .onAppear { materialized() }
+                                .onDisappear { readShowing = false }
                             }
-                            .id(entry.postID)
-                            .onAppear { materialized() }
-                        } else {
-                            surfacePlaceholder
-                        }
-                    }
-                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
-                } else {
-                    // Expanded, read-cheap: prose at the measure. (The facts
-                    // that used to sit in the gutter beside it are the note
-                    // box's now — state 2, for whichever note the book is
-                    // pointing at.)
-                    VStack(alignment: .leading, spacing: 6) {
-                        // The HEADER is the handle, not the prose: an
-                        // expanded post shows a read-cheap text surface,
-                        // and a drag over it would fight selection.
-                        postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                        if nearViewport {
-                            StableSurface(
-                                known: model.rememberedSurfaceSize(entry.postID),
-                                followsShrinks: false,
-                                settled: { model.persistSurfaceSize(entry.postID) },
-                                remember: { model.rememberSurfaceSize(entry.postID, $0) }
-                            ) {
-                                ReadPostView(
-                                    session: session, postID: entry.postID,
-                                    gutter: gutter,
-                                    onFocusRequest: { offset in
-                                        model.focus(entry.postID, caret: offset)
-                                    },
-                                    onBadgeTap: { blockID in
-                                        // Interpretation 1 (PROVISIONAL): focus
-                                        // FIRST, then the fan panel opens on the
-                                        // one live surface.
-                                        model.focus(entry.postID, fanBlock: blockID)
-                                    })
+                            // VX-82: `isLive` alone unmounted the editor the
+                            // instant focus left, while the fresh read surface
+                            // above was still empty — a reserved-height blank
+                            // beat ∝ the story (her "that pause is noticable").
+                            // The editor now lingers — visible, no hit testing,
+                            // never first responder — until that surface has
+                            // drawn the note (`readShowing`), the exact mirror
+                            // of the forward swap's hold. A re-click during the
+                            // beat finds it still mounted: instant return.
+                            if isLive || (liveShowing && !readShowing) {
+                                StableSurface(
+                                    known: model.rememberedSurfaceSize(entry.postID),
+                                    followsShrinks: true,
+                                    // 18d batch 4 (U-12): the settle is the ONE
+                                    // occasion this note's remembered length
+                                    // reaches the disk — the memory itself takes
+                                    // every geometry report, and a live editor
+                                    // reports on every keystroke.
+                                    settled: { model.persistSurfaceSize(entry.postID) },
+                                    remember: { model.rememberSurfaceSize(entry.postID, $0) }
+                                ) {
+                                    EditorView(
+                                        session: session, postID: entry.postID, inline: true,
+                                        caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                                        barPlacement: .inSidebarBox,
+                                        gutter: gutter,
+                                        onLiveShowing: { liveShowing = true })
+                                }
+                                .id(entry.postID)
+                                .opacity(liveShowing ? 1 : 0)
+                                // VX-82: no hit testing while lingering — a
+                                // click during the beat falls through to the
+                                // read surface's own focus-request road.
+                                .allowsHitTesting(isLive && liveShowing)
+                                .onAppear { materialized() }
+                                .onDisappear { liveShowing = false }
                             }
-                            .id("read-\(entry.postID)")
-                            .onAppear { materialized() }
-                        } else {
-                            surfacePlaceholder
                         }
+                    } else {
+                        surfacePlaceholder
                     }
-                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 }
+                .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                .padding(.bottom, 26)
+                .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
             } else {
                 collapsedPostCard
                     .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)

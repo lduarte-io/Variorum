@@ -425,6 +425,9 @@ struct BookIndexView<Masthead: View>: View {
     /// quiet slot (false while the sidebar's LIVE note box hosts it —
     /// `BookNoteBox.bookHostsQuietReceipt`).
     let hostsQuietReceipt: Bool
+    /// 13o U3 — the book's search answer (the architect's F1), drawn over the
+    /// pane while the masthead's field holds words; nil otherwise.
+    let searchAnswer: AnyView?
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -496,9 +499,11 @@ struct BookIndexView<Masthead: View>: View {
         ownershipBadge: @escaping (String) -> OwnershipBadgeFace.Badge? = { _ in nil },
         grouping: BookIndexGroupingModel? = nil,
         hostsQuietReceipt: Bool = true,
+        searchAnswer: AnyView? = nil,
         onEditInOutline: @escaping (String) -> Void
     ) {
         self.hostsQuietReceipt = hostsQuietReceipt
+        self.searchAnswer = searchAnswer
         self.session = session
         self.model = model
         self.structure = structure
@@ -620,6 +625,11 @@ struct BookIndexView<Masthead: View>: View {
                 }
                 pane
             }
+            // 13o U3 (the architect's F1): the book's search answer is drawn
+            // OVER the pane while the field holds words — the column (and its
+            // masthead's field) stays in view, and the pane underneath stays
+            // exactly as it was.
+            .overlay { if let searchAnswer { searchAnswer } }
         } panel: {
             column
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
@@ -804,13 +814,9 @@ struct BookIndexView<Masthead: View>: View {
                                 noteRow(entry, nested: nested)
                             }
                         }
-                        if model.truncated {
-                            Text(tokens.chromeLabel(
-                                "showing the first \(BookViewModel.entryWindow) notes"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                                .padding(.vertical, 8)
-                        }
+                        // 13o U3 (P-13o-U3-8): the window's line carries its
+                        // road — "show 300 more ›" — never a cap without one.
+                        BookWindowLine(tokens: tokens, model: model)
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)

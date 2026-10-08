@@ -93,20 +93,38 @@ struct MobileBlockMenuTests {
             // uncased comparison is the SANCTIONED flip.
             let cased = { MobileEditorStyle.chromeCase($0) }
 
-            // The bar's ⋯ renders the WHOLE row set (Takes… first).
-            let barElements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true)
+            // The bar's ⋯ renders the WHOLE row set.
+            let barElements = model.blockMenu.menuElements(blockID: seed.blockA)
             let barTitles = barElements.map(\.title)
             #expect(barTitles == MobileBlockMenuController.rowTitles.map(cased))
-            #expect(barTitles.first == "takes…", "terminal chrome lowercases")
+            #expect(barTitles.first == "comments…", "terminal chrome lowercases")
 
-            // The edit menu's Block submenu renders the SAME rows minus
-            // the flat Takes… item it already carries (one builder — the
-            // doors cannot drift).
-            let submenuElements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: false)
-            #expect(submenuElements.map(\.title)
-                == Array(MobileBlockMenuController.rowTitles.dropFirst()).map(cased))
+            // **SANCTIONED FLIP (batch 9):** the two doors now render the
+            // IDENTICAL list. The `includeTakes:` split existed only to keep
+            // `Takes…` out of the edit menu's Block submenu, which carries
+            // its own flat one — and her letter retired the row, so the
+            // split had nothing left to suppress. One builder, one list,
+            // no arm.
+            //
+            // **Read through the SEAM, not the builder twice** (batch 9's
+            // fix wave, cold-review NIT 1): with the arm gone, calling
+            // `menuElements` a second time and comparing to the same
+            // oracle pinned nothing the line above had not. The claim
+            // that WAS unpinned is the one `MobileEditMenuSeam` makes —
+            // that the edit menu's Block submenu is this same list — so
+            // this half now composes the real edit menu and reads that
+            // submenu's children.
+            //
+            // **Red on old (behavioural revert):** drop a row on the way
+            // through the seam (`.dropLast()` on `menuElements`'s result
+            // in `MobileEditMenuSeam`) and this reds while the bar's own
+            // assertion above stays green.
+            let composed = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 1, length: 0), suggested: [])
+            let blockSubmenu = try #require(
+                composed.children.first { $0.title == cased("Block") } as? UIMenu)
+            #expect(blockSubmenu.children.map(\.title)
+                == MobileBlockMenuController.rowTitles.map(cased))
 
             // The callout submenu's words are the Mac CalloutMenu's rows,
             // mirrored (toggle · five colors · emoji · remove).
@@ -120,6 +138,41 @@ struct MobileBlockMenuTests {
                 == ["Toggle Callout", "Blue", "Green", "Sand", "Violet", "Rose",
                     "Emoji…", "Remove Callout"])
 
+            // **PR19 (batch 7) — THE DRIFT PIN IS EXTENDED, NEVER
+            // WEAKENED.** The row WORDS above are untouched: no row was
+            // added, an image was hung on the FIVE that existed (the
+            // palette is blue · green · sand · violet · rose — the literal
+            // list two assertions above says so, and the fix wave corrected
+            // the "four" this comment used to claim; cold review NIT 1).
+            // What is new is
+            // the composition claim — the COLOUR rows wear a swatch and the
+            // non-colour rows do not, which is the Mac `CalloutMenu.Row`'s
+            // own `swatch` nil-ness rule (nil on toggle, emoji and Remove:
+            // Remove takes a frame AWAY rather than choosing one).
+            //
+            // **Red on old (behavioural revert):** drop `image:` from the
+            // colour rows' `UIAction` in `calloutSubmenu` and the first
+            // half reds; hang one on Remove and the second half does.
+            let colourWords = Set(MobileCallout.names.map { cased($0.capitalized) })
+            for row in callout.children.compactMap({ $0 as? UIAction }) {
+                if colourWords.contains(row.title) {
+                    #expect(row.image != nil,
+                            "a colour row wears its colour (PR19)")
+                } else {
+                    #expect(row.image == nil,
+                            "\(row.title) names no colour, so it wears no swatch")
+                }
+            }
+            // And the swatch is a PREVIEW of the one palette, never a second
+            // source of truth: it is built from `MobileCallout.color(_:)`,
+            // and it must NOT be a template image — UIKit would recolour a
+            // template to the menu's tint, which is the one thing a colour
+            // chip must not be (the Mac's `isTemplate = false`, exactly).
+            let swatch = MobileCallout.swatchImage(for: "sand")
+            #expect(swatch.renderingMode == .alwaysOriginal)
+            #expect(swatch.size == CGSize(width: MobileCallout.swatchSize,
+                                          height: MobileCallout.swatchSize))
+
             // Delete is the destructive row (the card-⋯ grammar).
             let delete = try #require(
                 barElements.first {
@@ -131,8 +184,7 @@ struct MobileBlockMenuTests {
             // register follows the voice, never a hardcoded lowering).
             MobileEditorStyle.voice = .study
             defer { MobileEditorStyle.voice = .terminal }
-            let studyTitles = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true).map(\.title)
+            let studyTitles = model.blockMenu.menuElements(blockID: seed.blockA).map(\.title)
             #expect(studyTitles == MobileBlockMenuController.rowTitles)
         }
     }
@@ -217,6 +269,172 @@ struct MobileBlockMenuTests {
         }
     }
 
+    // MARK: - PR19's emoji road (batch 7)
+
+    /// **The RULE, pinned against fakes.** `UITextInputMode` has no public
+    /// initializer, so the selection rule is lifted out of
+    /// `MobileEmojiTextField.textInputMode` into a pure function — which is
+    /// exactly where a typo would silently disable the whole feature (the
+    /// override would just keep returning `super`, i.e. the ordinary
+    /// keyboard, and nothing would look broken).
+    ///
+    /// **Red on old (behavioural revert):** change `emojiLanguage` to
+    /// anything else, or `first { … == }` to `first { … != }`, and both
+    /// halves red.
+    @Test func theEmojiKeyboardRuleFindsTheEmojiModeAndFallsBackWhenThereIsNone() {
+        struct Mode { let language: String? }
+        let withEmoji = [Mode(language: "en-US"), Mode(language: "emoji"),
+                         Mode(language: "fr-FR")]
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: withEmoji, primaryLanguage: \.language)?.language == "emoji")
+
+        // THE FALLBACK ARM, which is the one that ships to a user who
+        // removed the emoji keyboard: nil, so the field returns
+        // `super.textInputMode` — the ordinary keyboard, i.e. exactly the
+        // prompt that shipped before this batch. Structural, not promised.
+        let withoutEmoji = [Mode(language: "en-US"), Mode(language: nil)]
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: withoutEmoji, primaryLanguage: \.language) == nil)
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: [Mode](), primaryLanguage: \.language) == nil)
+    }
+
+    /// **THE EMOJI SHEET STAYS USABLE AT ACCESSIBILITY TEXT SIZES** (the
+    /// batch-7 fix wave, cold review MINOR 4).
+    ///
+    /// As shipped, the sheet fixed itself at one hard 220 pt detent over a
+    /// stack pinned leading/trailing/top ONLY — no bottom constraint, no
+    /// scroll. `.headline` and `.footnote` both scale and the message wraps
+    /// to more lines, so at accessibility sizes the Cancel/Set row was
+    /// pushed past the sheet's bottom with nothing to scroll it back: the
+    /// only road out was swipe-to-dismiss, which is a CANCEL, so the emoji
+    /// could never be SET at large text sizes. MobileSoul §5.6 names
+    /// Dynamic Type as a phone-native expectation.
+    ///
+    /// The content now scrolls (and the detent clamps, with `.medium()`
+    /// beside it so the sheet may grow). Driven at an accessibility size in
+    /// a real window: the stack outgrows the detent, and `Set` is still
+    /// reachable — inside the scroll's content, with somewhere to scroll to.
+    ///
+    /// **Red on old (behavioural revert):** pin the stack straight to
+    /// `view` again (drop the scroll wrapper) and the `#require` for the
+    /// scroll reds, with the reachability assertions behind it.
+    @Test func theEmojiSheetsButtonsStayReachableAtAccessibilityTextSizes() async throws {
+        let controller = MobileEmojiPromptController(
+            title: "Callout Emoji",
+            message: "One character. Leave it empty to remove the emoji.",
+            completion: { _ in })
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 220))
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil }
+
+        // The largest system text size, applied the way iOS applies it.
+        controller.traitOverrides.preferredContentSizeCategory =
+            .accessibilityExtraExtraExtraLarge
+        controller.view.frame = window.bounds
+        controller.view.layoutIfNeeded()
+
+        func descendant(_ root: UIView, _ id: String) -> UIView? {
+            for child in root.subviews {
+                if child.accessibilityIdentifier == id { return child }
+                if let found = descendant(child, id) { return found }
+            }
+            return nil
+        }
+        let scroll = try #require(
+            descendant(controller.view, "callout.emoji.scroll") as? UIScrollView)
+        let set = try #require(descendant(controller.view, "callout.emoji.set"))
+
+        // The content genuinely outgrows the sheet at this size — which is
+        // exactly what used to push the buttons off it.
+        #expect(scroll.contentSize.height > scroll.bounds.height,
+                "content \(scroll.contentSize.height) vs frame \(scroll.bounds.height)")
+        // …and `Set` is inside that content, so scrolling reaches it.
+        #expect(set.isDescendant(of: scroll))
+        let inContent = set.convert(set.bounds, to: scroll)
+        #expect(inContent.maxY <= scroll.contentSize.height + 1)
+        #expect(scroll.contentSize.height - scroll.bounds.height > 0,
+                "there is somewhere to scroll to")
+    }
+
+    /// **The SEAM's fallback, and the Mac's semantics travelling with the
+    /// new chrome.** `promptForEmoji` is a separate seam so the emoji
+    /// keyboard can ride a field we own — and it falls back to
+    /// `promptForText` when nothing installed one, which is what keeps every
+    /// harness that injects only the old seam driving this door.
+    ///
+    /// **Red on old (behavioural revert):** delete the `promptForText`
+    /// fallback arm in `promptEmoji` and the first half reds (the glyph
+    /// never lands); make `land` treat `""` as a cancel and the third does.
+    @Test func theEmojiRowFallsBackToTheTextPromptAndKeepsTheMacsSemantics() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .toggle)
+
+            // ONLY the old seam is installed — no `promptForEmoji`.
+            var asked: [String] = []
+            var answer: String?
+            model.blockMenu.promptForText = { title, message, _, completion in
+                asked.append(title)
+                #expect(message == MobileBlockMenuController.emojiPromptMessage)
+                completion(answer)
+            }
+            model.blockMenu.promptForEmoji = nil
+
+            answer = "🕯"
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(asked == [MobileBlockMenuController.emojiPromptTitle])
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","emoji":"🕯","kind":"callout"}"#)
+
+            // EMPTY is a REAL answer — "no glyph" (the Mac
+            // `CalloutMenu.promptEmoji` rule, travelling with the chrome).
+            answer = ""
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","kind":"callout"}"#)
+
+            // CANCEL does nothing at all.
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .emoji("🌙"))
+            answer = nil
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","emoji":"🌙","kind":"callout"}"#)
+        }
+    }
+
+    /// The new seam WINS when it is installed — otherwise the emoji keyboard
+    /// would never be reached in production, where both seams exist.
+    ///
+    /// **Red on old (behavioural revert):** reorder `promptEmoji` so the
+    /// `promptForText` arm is tried first and this reds.
+    @Test func theEmojiSeamIsPreferredOverTheTextPromptWhenBothExist() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            var textAsked = 0
+            var emojiAsked = 0
+            model.blockMenu.promptForText = { _, _, _, completion in
+                textAsked += 1
+                completion(nil)
+            }
+            model.blockMenu.promptForEmoji = { _, _, completion in
+                emojiAsked += 1
+                completion(nil)
+            }
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            #expect(emojiAsked == 1)
+            #expect(textAsked == 0)
+        }
+    }
+
     @Test func calloutAndNameRefuseUnderASealedNote() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedTwoBlockPost(session)
@@ -281,8 +499,7 @@ struct MobileBlockMenuTests {
             await model.loadOnce()
             model.blockMenu.confirmDestructive = nil
 
-            let elements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true)
+            let elements = model.blockMenu.menuElements(blockID: seed.blockA)
             #expect(MenuActionHandler.activate(
                 MobileEditorStyle.chromeCase(MobileBlockMenuController.deleteTitle),
                 in: elements),
@@ -365,19 +582,35 @@ struct MobileBlockMenuTests {
             // pin changed WITH the fact it pins.** M20 built the structural
             // undo door, so "There's no undo here" became false — the same
             // J8 failure this pin was written to prevent, arriving from the
-            // other direction. The receipt sentence is byte-unchanged; the
-            // tray is still unpromised.
-            #expect(model.statusMessage == "Block deleted.")
+            // other direction.
+            //
+            // **ROUND 2 BATCH 6b: THE THIRD SANCTIONED FLIP, and the last of
+            // this pin's "not yet" clauses.** Both strings carried an
+            // explicit note that they promised no tray *because the phone had
+            // none*; §69.3's tray landed at this batch, so both name it — the
+            // DURABLE road before the session's undo, because a destructive
+            // confirm owes her the durable one first. The phrase is COMPOSED
+            // from the door's own two words (`MobileNoteTrayModel
+            // .putBackRoadPhrase` over the chip and the segment), so a
+            // re-word cannot leave either sentence pointing at a door that no
+            // longer exists — which is what this assertion now holds.
+            #expect(model.statusMessage == MobileStructuralController.blockDeletedStatus)
+            #expect(MobileStructuralController.blockDeletedStatus
+                == "Block deleted — \(MobileNoteTrayModel.putBackRoadPhrase).")
+            #expect(MobileBlockMenuController.deleteConfirmDetail.hasPrefix(
+                "The block leaves this note, with its takes."))
             #expect(MobileBlockMenuController.deleteConfirmDetail
-                == "The block leaves this note, with its takes. "
-                    + "Undo is on the receipt afterwards, and in the note's ⋯.")
+                .contains("Undo is on the receipt afterwards, and in the note's ⋯."))
             for line in [MobileStructuralController.blockDeletedStatus,
                          MobileBlockMenuController.deleteConfirmDetail] {
                 // The no-redirect principle (MobileSoul §4) — unchanged.
                 #expect(!line.contains("Mac"))
-                // …and the new half: no phone string promises a surface the
-                // phone does not have. The tray twin is the parity ledger's.
-                #expect(!line.lowercased().contains("tray"))
+                // The road each names is a road THIS PHONE HAS: the tray's
+                // Leaving segment, reached from the blocks chip's sheet.
+                #expect(line.contains(MobileNoteTrayModel.roadPhrase(to: .leaving)),
+                        "line was \(line)")
+                // …and never the MAC's name for it, which names a Mac door.
+                #expect(!line.lowercased().contains("this note's tray"))
             }
             let deletedAt = try await db.read { db in
                 try String.fetchOne(
@@ -399,6 +632,104 @@ struct MobileBlockMenuTests {
             #expect(model.statusMessage
                 == "This note is locked — unlock it to delete the block.")
             #expect(model.index.entries.map(\.blockID) == [seed.blockB])
+        }
+    }
+
+    /// **PR6 — ARCHIVE BLOCK, THROUGH THE REAL ROW'S OWN HANDLER** (round 2,
+    /// batch 6b). 13j's round-7 ruling built `archiveBlock`/`unarchiveBlock`
+    /// and the Mac wore both doors from that phase; a grep of
+    /// `VariorumMobile/` for either op returned ZERO hits, so the phone had
+    /// the whole capability with no way in and (until this batch's tray) no
+    /// way back.
+    ///
+    /// The block leaves the SURFACE, its stamp lands, its takes are all still
+    /// there (archive destroys nothing), and the receipt names where it went
+    /// AND the promise that distinguishes it from the row beneath it: **no
+    /// clock**.
+    ///
+    /// **Red on old (behavioural revert):** delete the `archiveTitle` element
+    /// from `menuElements` and `MenuActionHandler.activate` returns false —
+    /// the row is not there to drive. Revert the act instead
+    /// (`archiveBlock` → a no-op) and the stamp assertion reds.
+    @Test func theArchiveRowSetsTheBlockAsideWithNoClock() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Unflushed typing lands FIRST — the structural contract's
+            // flush, so the archived copy holds every typed byte.
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed.")
+
+            let elements = model.blockMenu.menuElements(blockID: seed.blockA)
+            #expect(MenuActionHandler.activate(
+                MobileEditorStyle.chromeCase(MobileBlockMenuController.archiveTitle),
+                in: elements),
+                    "the Archive row's real handler must be drivable")
+            for _ in 0..<40 {
+                try? await Task.sleep(for: .milliseconds(10))
+                await Task.yield()
+            }
+
+            // (Row is not Sendable under main's stricter concurrency — carry
+            // the two values out, not the Row; the VM-5 merge's mechanical fix.)
+            let stamps: (archived: String?, deleted: String?)? = try await db.read { db in
+                try Row.fetchOne(
+                    db, sql: "SELECT archived_at, deleted_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+                    .map { ($0["archived_at"], $0["deleted_at"]) }
+            }
+            #expect(stamps?.archived != nil, "the archive stamp landed")
+            #expect(stamps?.deleted == nil,
+                    "archive is not deletion — no tombstone, no clock")
+            #expect(model.index.entries.map(\.blockID) == [seed.blockB],
+                    "the block left the surface")
+            #expect(try await storedText(db, variantID: seed.a1)
+                == "First block here. Typed.",
+                    "flush-first — the archived copy holds the typed bytes")
+
+            // The receipt says the promise and names the road back.
+            #expect(model.statusMessage == MobileStructuralController.blockArchivedStatus)
+            #expect(MobileStructuralController.blockArchivedStatus
+                .contains(RecoveryCopy.archivedForever))
+            #expect(MobileStructuralController.blockArchivedStatus
+                .contains(MobileNoteTrayModel.roadPhrase(to: .archived)))
+            #expect(!MobileStructuralController.blockArchivedStatus.contains("Mac"))
+
+            // It is NOT the destructive row — nothing is destroyed here.
+            let archive = try #require(
+                elements.first {
+                    $0.title == MobileEditorStyle.chromeCase(
+                        MobileBlockMenuController.archiveTitle)
+                } as? UIAction)
+            #expect(!archive.attributes.contains(.destructive))
+        }
+    }
+
+    /// The archive door refuses through the OPERATION under a seal, in phone
+    /// words, with nothing archived (P-2, fire-and-DO: no pre-check, the
+    /// ops layer's own answer).
+    @Test func archiveRefusesUnderTheSealInPhoneWords() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+
+            await model.structural.archiveBlock(blockID: seed.blockA)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it to archive the block.")
+            let stamp = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT archived_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(stamp == nil, "nothing was archived")
         }
     }
 

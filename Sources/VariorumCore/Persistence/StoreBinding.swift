@@ -93,6 +93,17 @@ public final class StoreBinding: @unchecked Sendable {
         key = nil
         mutex.unlock()
         guard let outgoing else { return (true, nil) }
+        // W-1 (the 13x closeout walk): checkpoint-truncate BEFORE the
+        // close — a plain close leaves a non-empty `-wal` beside the
+        // store, which the adoption gate (LibraryAdoption step 2) must
+        // read as "pool not closed", so the ready-road adoption could
+        // never act. The re-key road already pays this exact toll
+        // (StoreEncryptionMigration's explicit TRUNCATE). A failed
+        // checkpoint is swallowed deliberately: it degrades to the
+        // gate's honest refusal, never to an unlocked store.
+        _ = try? outgoing.writeWithoutTransaction { db in
+            try Row.fetchOne(db, sql: "PRAGMA wal_checkpoint(TRUNCATE)")
+        }
         do {
             try outgoing.close()
             return (true, nil)

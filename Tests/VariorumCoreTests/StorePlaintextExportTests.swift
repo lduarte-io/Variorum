@@ -75,4 +75,39 @@ struct StorePlaintextExportTests {
             try StorePlaintextExport.export(from: database, to: destination)
         }
     }
+
+    /// 13o §FORK RULINGS (2026-10-06), the derived-set ruling's pin: the
+    /// export KEEPS the search-index family — the no-lock-in file answers a
+    /// full-text query through a bare connection, and no derived table was
+    /// swept out with the local-only set.
+    @Test func theExportKeepsTheDerivedSearchIndexWorking() throws {
+        let dir = try scratchDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
+        let database = try AppDatabase.openStore(
+            at: storeURL, custody: .inMemory(initial: StoreKey.mint()))
+        let stamp = "2026-10-06T00:00:00Z"
+        try database.write { db in
+            try db.execute(
+                sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                arguments: ["note-derived-1", "The lighthouse keeper's ledger", stamp, stamp])
+        }
+
+        let destination = dir.appendingPathComponent("Variorum-unencrypted.sqlite")
+        try StorePlaintextExport.export(from: database, to: destination)
+
+        let plain = try DatabaseQueue(path: destination.path)
+        defer { try? plain.close() }
+        try plain.read { db in
+            let tables = Set(try String.fetchAll(
+                db, sql: "SELECT name FROM sqlite_master WHERE type = 'table'"))
+            #expect(SyncSchema.derivedTables.isSubset(of: tables),
+                    "the derived family travels whole: missing \(SyncSchema.derivedTables.subtracting(tables))")
+            let hits = try Int.fetchOne(
+                db,
+                sql: "SELECT count(*) FROM search_fts WHERE search_fts MATCH ?",
+                arguments: ["lighthouse"]) ?? 0
+            #expect(hits == 1, "the exported index answers a body query by itself")
+        }
+    }
 }

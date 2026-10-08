@@ -142,7 +142,7 @@ private func shelfSurface(
             model: shelf, stars: stars, quickNote: box,
             tokens: .terminalLight, tabBar: { EmptyView() },
             onOpenBook: { _ in }, onOpenForWriting: { _ in },
-            onOpenNote: { _ in }, onSettings: {}),
+            onSettings: {}),
         size: size)
 }
 
@@ -187,7 +187,7 @@ struct MobileShelfLayoutBrainTests {
     @Test(arguments: [0.0, 60.0, 132.0, 300.0, 596.0, 746.0, 1200.0])
     func theSplitPartitionsTheRegionExactly(region: Double) {
         let split = MobileShelfLayout.split(
-            region: CGFloat(region), bookRows: 5, starredRows: 0, extraRows: 1)
+            region: CGFloat(region), bookRows: 5, extraRows: 1)
         #expect(abs((split.booksHeight + split.writingHeight) - CGFloat(region)) < 0.001)
         #expect(split.booksHeight >= 0)
         #expect(split.writingHeight >= 0)
@@ -199,7 +199,7 @@ struct MobileShelfLayoutBrainTests {
         // 430 × 932 minus the path line, status slot and tab bar.
         let region: CGFloat = 746
         let split = MobileShelfLayout.split(
-            region: region, bookRows: 20, starredRows: 0, extraRows: 1)
+            region: region, bookRows: 20, extraRows: 1)
         let share = split.writingHeight / region
         #expect(share >= 0.5, "writing share was \(share)")
         #expect(share <= 0.62, "the books must still get a real half — \(share)")
@@ -211,9 +211,9 @@ struct MobileShelfLayoutBrainTests {
     @Test func pastEightBooksTheListStopsGrowing() {
         let region: CGFloat = 900
         let eight = MobileShelfLayout.split(
-            region: region, bookRows: 8, starredRows: 0, extraRows: 1)
+            region: region, bookRows: 8, extraRows: 1)
         let forty = MobileShelfLayout.split(
-            region: region, bookRows: 40, starredRows: 0, extraRows: 1)
+            region: region, bookRows: 40, extraRows: 1)
         #expect(eight.booksHeight == forty.booksHeight)
         #expect(eight.writingHeight == forty.writingHeight,
                 "the writing area must not move as books arrive")
@@ -230,8 +230,7 @@ struct MobileShelfLayoutBrainTests {
     @Test func atRestTheBoxIsOneLine() {
         for bookRows in [0, 2, 8, 40] {
             let rest = MobileShelfLayout.split(
-                region: 746, bookRows: bookRows, starredRows: 0,
-                extraRows: 1, writing: .collapsed)
+                region: 746, bookRows: bookRows, extraRows: 1, writing: .collapsed)
             #expect(rest.writingHeight == MobileShelfLayout.collapsedWritingHeight,
                     "books \(bookRows): \(rest.writingHeight)")
         }
@@ -243,10 +242,10 @@ struct MobileShelfLayoutBrainTests {
     /// here would mint dead air above a collapsed box instead.
     @Test func atRestTheBooksTakeEverythingElse() {
         let rest = MobileShelfLayout.split(
-            region: 746, bookRows: 40, starredRows: 0, extraRows: 1,
+            region: 746, bookRows: 40, extraRows: 1,
             writing: .collapsed)
         let open = MobileShelfLayout.split(
-            region: 746, bookRows: 40, starredRows: 0, extraRows: 1,
+            region: 746, bookRows: 40, extraRows: 1,
             writing: .expanded)
         #expect(rest.booksHeight == 746 - MobileShelfLayout.collapsedWritingHeight)
         #expect(rest.booksHeight > open.booksHeight,
@@ -258,8 +257,7 @@ struct MobileShelfLayoutBrainTests {
     @Test func theCollapsedBoxIsNeverCrushed() {
         for region in stride(from: 4.0, through: 200.0, by: 4.0) {
             let rest = MobileShelfLayout.split(
-                region: CGFloat(region), bookRows: 9, starredRows: 3,
-                extraRows: 2, writing: .collapsed)
+                region: CGFloat(region), bookRows: 9, extraRows: 2, writing: .collapsed)
             #expect(rest.writingHeight
                     == min(CGFloat(region), MobileShelfLayout.collapsedWritingHeight))
             #expect(rest.booksHeight >= 0)
@@ -272,9 +270,9 @@ struct MobileShelfLayoutBrainTests {
     @Test func aShortShelfGivesTheWritingAreaMore() {
         let region: CGFloat = 746
         let two = MobileShelfLayout.split(
-            region: region, bookRows: 2, starredRows: 0, extraRows: 1)
+            region: region, bookRows: 2, extraRows: 1)
         let twenty = MobileShelfLayout.split(
-            region: region, bookRows: 20, starredRows: 0, extraRows: 1)
+            region: region, bookRows: 20, extraRows: 1)
         #expect(two.booksHeight < twenty.booksHeight)
         #expect(two.writingHeight > twenty.writingHeight)
     }
@@ -285,9 +283,9 @@ struct MobileShelfLayoutBrainTests {
     /// rather than pinning the box.
     @Test func theBooksAbsorbTheKeyboardNotTheWritingArea() {
         let roomy = MobileShelfLayout.split(
-            region: 746, bookRows: 20, starredRows: 0, extraRows: 1)
+            region: 746, bookRows: 20, extraRows: 1)
         let cramped = MobileShelfLayout.split(
-            region: 410, bookRows: 20, starredRows: 0, extraRows: 1)
+            region: 410, bookRows: 20, extraRows: 1)
 
         #expect(cramped.booksHeight < roomy.booksHeight,
                 "the books must be what yields")
@@ -312,9 +310,14 @@ struct MobileShelfLayoutBrainTests {
     ///   minus ~291 pt of keyboard and the shelf's own chrome) through a
     ///   16 Pro Max with none;
     /// · **books** from an empty shelf to two hundred;
-    /// · **stars** from none to forty (they ride inside the bound);
     /// · **extra rows** for the `+ new book` door, with and without the
     ///   Today fallback row beside it.
+    ///
+    /// *(It spanned a fourth dimension — starred rows, none to forty — until
+    /// the cold review's NIT 1 retired the parameter that carried them: the
+    /// starred list moved to its own page at batch 10, so those states are
+    /// no longer states the shelf can be in. The promise is unchanged; the
+    /// grid stopped spanning a dimension the app cannot enter.)*
     ///
     /// The degenerate tail is honest rather than excluded: where the room
     /// is smaller than the floor itself, writing takes ALL of it.
@@ -322,28 +325,28 @@ struct MobileShelfLayoutBrainTests {
         var checked = 0
         for region in stride(from: 60.0, through: 900.0, by: 20.0) {
             for bookRows in [0, 1, 3, 8, 9, 20, 200] {
-                for starredRows in [0, 1, 7, 40] {
-                    for extraRows in [1, 2] {
-                        let split = MobileShelfLayout.split(
-                            region: CGFloat(region), bookRows: bookRows,
-                            starredRows: starredRows, extraRows: extraRows)
-                        checked += 1
-                        #expect(
-                            split.writingHeight
-                                >= min(CGFloat(region),
-                                       MobileShelfLayout.minimumWritingHeight) - 0.001,
-                            "region \(region) books \(bookRows) stars \(starredRows): writing \(split.writingHeight)")
-                        // And nothing may fall off the bottom while it holds.
-                        #expect(
-                            abs((split.booksHeight + split.writingHeight)
-                                - CGFloat(region)) < 0.001)
-                        #expect(split.booksHeight >= 0)
-                    }
+                for extraRows in [1, 2] {
+                    let split = MobileShelfLayout.split(
+                        region: CGFloat(region), bookRows: bookRows,
+                        extraRows: extraRows)
+                    checked += 1
+                    #expect(
+                        split.writingHeight
+                            >= min(CGFloat(region),
+                                   MobileShelfLayout.minimumWritingHeight) - 0.001,
+                        "region \(region) books \(bookRows): writing \(split.writingHeight)")
+                    // And nothing may fall off the bottom while it holds.
+                    #expect(
+                        abs((split.booksHeight + split.writingHeight)
+                            - CGFloat(region)) < 0.001)
+                    #expect(split.booksHeight >= 0)
                 }
             }
         }
         print("PERF[sim] writing-floor guarantee — \(checked) shelf states checked, floor \(MobileShelfLayout.minimumWritingHeight) pt")
-        #expect(checked == 43 * 7 * 4 * 2)
+        // regions × books × extra rows (the stars dimension retired with
+        // the parameter — NIT 1).
+        #expect(checked == 43 * 7 * 2)
     }
 
     /// **Why Dynamic Type cannot erode the guarantee, stated as the
@@ -359,7 +362,7 @@ struct MobileShelfLayoutBrainTests {
             for bookRows in [0, 1, 2, 4, 8, 16, 40] {
                 let split = MobileShelfLayout.split(
                     region: CGFloat(region), bookRows: bookRows,
-                    starredRows: 0, extraRows: 1)
+                    extraRows: 1)
                 #expect(split.writingHeight <= previous + 0.001,
                         "more books must never give writing MORE room")
                 previous = split.writingHeight
@@ -388,11 +391,9 @@ struct MobileShelfLayoutBrainTests {
     @Test func openingTheBoxNeverLandsBelowTheFloor() {
         for region in stride(from: 60.0, through: 900.0, by: 20.0) {
             let rest = MobileShelfLayout.split(
-                region: CGFloat(region), bookRows: 40, starredRows: 6,
-                extraRows: 1, writing: .collapsed)
+                region: CGFloat(region), bookRows: 40, extraRows: 1, writing: .collapsed)
             let open = MobileShelfLayout.split(
-                region: CGFloat(region), bookRows: 40, starredRows: 6,
-                extraRows: 1, writing: .expanded)
+                region: CGFloat(region), bookRows: 40, extraRows: 1, writing: .expanded)
             #expect(open.writingHeight
                     >= min(CGFloat(region),
                            MobileShelfLayout.minimumWritingHeight) - 0.001,
@@ -407,7 +408,7 @@ struct MobileShelfLayoutBrainTests {
     /// entirely rather than leaving her a one-line box.
     @Test func theWritingFloorOutranksTheBooks() {
         let split = MobileShelfLayout.split(
-            region: 150, bookRows: 20, starredRows: 0, extraRows: 1)
+            region: 150, bookRows: 20, extraRows: 1)
         #expect(split.writingHeight >= MobileShelfLayout.minimumWritingHeight)
         #expect(split.booksHeight <= 150 - MobileShelfLayout.minimumWritingHeight)
     }
@@ -416,22 +417,9 @@ struct MobileShelfLayoutBrainTests {
     /// the writing area takes all of it rather than overflowing.
     @Test func aRegionBelowTheFloorGivesEverythingToWriting() {
         let split = MobileShelfLayout.split(
-            region: 80, bookRows: 6, starredRows: 0, extraRows: 1)
+            region: 80, bookRows: 6, extraRows: 1)
         #expect(split.writingHeight == 80)
         #expect(split.booksHeight == 0)
-    }
-
-    /// Starred rows sit INSIDE the bounded region (batch 5's call), so
-    /// they push the books but can never push the writing area.
-    @Test func starredRowsRideInsideTheBound() {
-        let region: CGFloat = 746
-        let bare = MobileShelfLayout.split(
-            region: region, bookRows: 3, starredRows: 0, extraRows: 1)
-        let starred = MobileShelfLayout.split(
-            region: region, bookRows: 3, starredRows: 6, extraRows: 1)
-        #expect(starred.booksHeight > bare.booksHeight)
-        #expect(starred.writingHeight >= region * MobileShelfLayout.maximumBooksShare,
-                "however many stars, the writing area keeps its half")
     }
 
     /// The field's growth follows the ruled region and never degenerates.
@@ -663,7 +651,7 @@ struct MobileShelfRenderedLayoutTests {
 
     /// **HER GUARANTEE, MEASURED ACROSS THE DEVICE ENVELOPE** — every
     /// screen this app can render on, with the box open and the shelf as
-    /// hostile as it gets (forty books, stars present, keyboard up).
+    /// hostile as it gets (forty books, keyboard up).
     ///
     /// The heights are real: a 16 Pro Max, an iPhone 17, an SE-class 667,
     /// and a 320 pt Display-Zoom screen — each with and without ~291–336

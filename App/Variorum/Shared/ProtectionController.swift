@@ -129,6 +129,15 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         /// passphrase moves the key behind the gate and re-keys the
         /// library (the no-rotation follow). Copy §5's own sentence.
         case castleStillOpensOldWay
+        /// 13x F1 (ladder R1-BLOCKER): the account IS Castle and the key
+        /// ids agree, but the LIVE key file carries an `apple` copy — a
+        /// Standard-era snapshot pair adopted on this Mac (the same-Mac
+        /// older-key restore). Whatever gate custody wears, the FILE is
+        /// the exposure (§3.4's Castle row: wrapped under P, W, M only;
+        /// `retireOldKeyFiles`' own doc names it) — and every later
+        /// snapshot copies it. The same no-rotation follow re-keys the
+        /// library and retires the file.
+        case castleKeyFileAppleOpenable
         /// The account's keys were replaced elsewhere (Replace All Keys, or
         /// Castle entered while this library was already Castle-shaped).
         case keysReplaced
@@ -168,6 +177,7 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         switch kind {
         case .movedToCastle: return ProtectionCopy.followMovedToCastle(device: device, day: day)
         case .castleStillOpensOldWay: return ProtectionCopy.followCastleStillOpensOldWay
+        case .castleKeyFileAppleOpenable: return ProtectionCopy.followCastleKeyFileAppleOpenable
         case .keysReplaced: return ProtectionCopy.followKeysReplaced(device: device, day: day)
         case .movedToStandard: return ProtectionCopy.followMovedToStandard(device: device, day: day)
         case .alwaysAskRetiredWord: return ProtectionCopy.alwaysAskRetiredWord(device: device, day: day)
@@ -187,17 +197,22 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         if isChangeNotice { return ProtectionCopy.changeDismissDoor }
         return ProtectionCopy.followLaterDoor
     }
-    /// The persistent banner after *Later*. The mismatch kind renders its
-    /// own sentence again: no keys were replaced and sync is not paused,
-    /// so copy §5's waiting line would be untrue for it (recorded).
+    /// The persistent banner after *Later*. The two mismatch kinds render
+    /// their own sentence again: no keys were replaced and sync is not
+    /// paused, so copy §5's waiting line would be untrue for them (recorded).
     var waitingBody: String {
-        kind == .castleStillOpensOldWay
-            ? ProtectionCopy.followCastleStillOpensOldWay
-            : ProtectionCopy.followWaiting(device: device, day: day)
+        switch kind {
+        case .castleStillOpensOldWay: return ProtectionCopy.followCastleStillOpensOldWay
+        case .castleKeyFileAppleOpenable: return ProtectionCopy.followCastleKeyFileAppleOpenable
+        default: return ProtectionCopy.followWaiting(device: device, day: day)
+        }
     }
-    /// The notice's sub-line under its doors (copy §5, per kind).
+    /// The notice's sub-line under its doors (copy §5, per kind). The
+    /// adopted-pair kind shares the mismatch's sub-line — the same fact:
+    /// writing made after *Later* stays under the old, Apple-openable key
+    /// until the follow (ledger 50(b)'s precision).
     var laterSubline: String {
-        kind == .castleStillOpensOldWay
+        kind == .castleStillOpensOldWay || kind == .castleKeyFileAppleOpenable
             ? ProtectionCopy.followCastleStillOpensLaterSubline
             : ProtectionCopy.followLaterSubline
     }
@@ -453,6 +468,12 @@ final class ProtectionController {
     /// `followIntoStandard()`, wired by the composition root; nil = no
     /// runner (the reconcile only records the reading).
     @ObservationIgnored var followIntoStandardAct: (@MainActor () async throws -> Void)?
+    /// 13x F1 (ladder R1-M1 — P-R1-1): does a RESTORE HOLD stand on this
+    /// library (round 3's landing state)? Wired by the composition root
+    /// to the same marker projection the sync gate reads; nil = never
+    /// held (every existing composition unchanged). The two ROTATION
+    /// ceremonies' door consults it and refuses with one sentence.
+    @ObservationIgnored var restoreHoldStands: (@MainActor () -> Bool)?
 
     func openFollow() {
         guard activeFollow == nil else { return }
@@ -642,6 +663,24 @@ final class ProtectionController {
                 changeNotice = nil
                 owe(.castleStillOpensOldWay)
                 logger.notice("follow: the account is Castle and this library's custody is silent — the follow into Castle is owed (the keys unchanged)")
+                return
+            }
+            // 13x F1 (ladder R1-BLOCKER) — THE ADOPTED STANDARD-ERA PAIR:
+            // the account is Castle and the ids agree, but the LIVE key
+            // file carries an `apple` copy — a pre-Castle snapshot pair
+            // landed by the adoption door on the Mac the library lives on
+            // (the same-Mac older-key restore; custody is GATED, so the
+            // silent arm above never fires). The posture law (§3.4's
+            // Castle row: the library key wrapped under P, W, M only) is
+            // violated by the FILE itself, and every later snapshot
+            // copies it (`writeSnapshotKeyFile`), so the no-rotation
+            // follow is owed: it re-keys the library and
+            // `retireOldKeyFiles` removes the apple-carrying file. The
+            // verdict writes nothing — the act is the follow's.
+            if !reading.hasAppleHeldCopy, keyFile?.apple != nil, !switchInProgress {
+                changeNotice = nil
+                owe(.castleKeyFileAppleOpenable)
+                logger.notice("follow: the account is Castle and the live key file carries an Apple-account copy (an adopted Standard-era pair) — the follow is owed to re-key and retire it")
                 return
             }
             followNotice = nil
