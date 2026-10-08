@@ -375,3 +375,66 @@ local-only, the library) is Castle.
 
 MOBILE PARITY: `PostureSwitch.swift` is `Shared/` — the fix reaches the phone with its next install; nothing
 mobile-VISIBLE (a key file's wraps have no face).
+
+## ROUND 1 — IMPLEMENTER RESPONSES (the Opus implementer, 2026-10-08; to `vx-99-ladder-round1.md` at 818727be — nothing fixed, the stage untouched)
+
+**[MAJOR] `appleHeldCopyForStandard`'s posture guard (`PostureSwitch.swift:1193`) — AGREE.** My own trace:
+- `CorpusRotation.prepare` (`CorpusRotation.swift:~402–427`) builds a FRESH `KeyVaultFormat.create(…)` for M′ and
+  adds an Apple-held copy only `if let appleHeldCopy`; nothing carries the old M's Apple-held copy forward (it could
+  not — it wraps M, not M′). So `appleHeldCopy: nil` on a Standard account rewrites the vault Castle-shaped — the
+  ACCOUNT's posture flips (Posture.derive arm 1 reads exactly that column).
+- Direction (i) reaches it through every door gate: `PostureSwitchModel.start` (:~141–207) checks `followPending`
+  (computed only by a reconcile), the restore hold, `rotationInProgress`, `enrolled`, the recorded corpus id
+  (unchanged — leaving Castle rotates nothing), and `appleKeyReadable == false` — which is nil under a `.castle`
+  read (`appleKeyReadable(keptUnder:)`, :373, the same posture guard). And the controller re-reads the vault only at
+  READY (`AppBootstrap.readyHousekeepingBody` :589), after a switch, after the follow model acts and after a relink —
+  so a Mac left open while the phone runs Use Standard keeps its `.castle` read for the whole session. Replace All
+  Keys there drops the Apple-held copy with no consent sentence; the Done says "keys replaced". Confirmed.
+- Direction (ii) — a `.standard` read on a Castle account (an indeterminate ready's silent shape) — passes the
+  guard; the vault's `appleKeyID` is nil under Castle so the id check (:1198) cannot fire; A is read and M′ gains an
+  Apple-held copy: the account silently leaves Castle. Confirmed by reading; narrower, as the reviewer says.
+- Pre-existing (the guard predates VX-99); VX-99 made the KEY FILE agree with the vault (`appleCopyInKeyFile =
+  appleHeld != nil`), so after the fix both halves are wrong together rather than split — the fix belongs at the
+  decision, as proposed: `fetched.format.masterWrappedByAppleHeld != nil` in place of the posture guard, keeping the
+  readable / vault-id refusals.
+- **Two refinements for whoever builds it:** (1) **the door twin** — `appleKeyReadable(keptUnder:)` (:372–377) holds
+  the SAME fetched vault and the SAME `leaves.posture() == .standard` guard; left alone, direction (i)'s door would
+  pass with `nil` and the runner's belt would refuse `appleKeyUnreachable` AFTER the words screens on a device that
+  cannot read A — F3 (MINOR-N4)'s exact regression. The door should read the vault's word too, one rule with the belt.
+  (2) **the harness ripple** — the default `makeWorld()` is a MISMATCH world (Standard posture + key file over a vault
+  `setUp(passphrase:)` minted with NO Apple-held copy — the harness's own note "the 2b world's account is
+  Castle-shaped"); today a Standard-world Replace All Keys ADDS the Apple-held copy to that Castle-shaped vault (which
+  is direction (ii) inside the harness). Under the fix those runs follow the Castle-shaped vault instead, so tests
+  that rely on the old behavior will move. By READING (not run — no stage): pin (c)
+  `replaceAllKeysThroughTheDoorIsFollowedByTheSiblingAndAStaleCopyOpensNothing` (the sibling's Standard follow),
+  pin (b)'s STANDARD resume control, `theReplaceKeysCeremonyWalksCopyFoursOrderRefusesAStaleMasterAndLandsTheNewPassphraseUnderTheNewProof`
+  (decision 30's PRESENCE asserted after a default-world RAK), and likely
+  `theSiblingThatOpenedByThePassphraseFollowsAReplaceAllKeysWithZeroPrompts`,
+  `theUnfollowedDeviceOpensReadsAndWaitsWithEveryDoorSpeakingTheSentence`,
+  `aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds`. The honest repair is a harness parameter that gives
+  a Standard world a vault Apple-held copy under its own `apple` (the account really Standard), with the deliberate
+  mismatch tests (`thePosturePinsHoldInTheTwoDeviceWorld` (a), the Castle-account sibling roads) opting out
+  explicitly. **A hypothesis, untested:** the same harness change may clear VX-106's pair — the 13x arm
+  (`ProtectionController.swift:680`) fires only on `!reading.hasAppleHeldCopy`, and with the vault Standard neither
+  that arm nor the follow-into-Standard arm (:707 — the key file carries `apple`, shape `.unknown`) fires, so
+  `changeElsewhere` would run. Worth one run before VX-106 is worked separately.
+
+**[MINOR] the `.reencrypt` advance at :1362 (my recorded double-crash residual) — AGREE.** My trace matches:
+`RotationMarker.advanced(to:)` (`CorpusRotation.swift:236–240`) copies `self` and sets the step — the original
+`entersCastle` (false for Replace All Keys) and `follow` nil; the next resume enters the arm at `.reencrypt`, where
+`byAnotherDevice` cannot fire (:1316 requires `.vaultWrite`), so `roadEntersCastle = false`: custody by the stale
+posture, no `retireOldKeyFiles`, no offer; the Apple copy stays correct (`!vaultSaysCastle` reads the fresh fetch).
+The proposed fix (advance with `entersCastle: roadEntersCastle` and `follow: (marker.isFollow || byAnotherDevice) ?
+true : nil`) closes those three. **Two more facts keyed on `byAnotherDevice` are lost on the same double crash and the
+proposed marker does not carry them:** (1) the Done — `outcome.followedAnotherDevicesSwitch` / `otherDeviceName`
+(:1386–1389) — so the second resume speaks the ORDINARY Done on a road that was another device's switch (user-visible,
+copy §2b's conflict sentence lost); (2) the words rule — `recoveryWords: byAnotherDevice ? nil : typedWords` — so typed
+words would land on the new key file although they are not the account's; LATENT in production (both resume doors
+pass `recoveryWords: nil` — `PostureSwitchModel.swift:549`), live only for a caller that passes words. Whether the
+marker should carry an explicit another-device bit (or the arm should key those two on the carried follow flag — an
+ordinary follow's own resume also writes `follow: true`, so the flag alone does not mean "another device's switch")
+is the builder's call; I flag it so the pin can cover the Done too.
+
+**[NIT] the class sweep's row 1 — AGREE.** The row states the posture gate as the safety mechanism without its limit.
+If the MAJOR is fixed in this unit the row becomes "the vault's word (`masterWrappedByAppleHeld != nil`) + the
+readable / vault-id refusals"; if deferred, the row must carry the residual the way row 2 carries its corner.
