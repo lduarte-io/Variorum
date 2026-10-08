@@ -174,3 +174,49 @@ rebase over 13x's merge (R-VX83-7: first-ready merged first; this branch is seco
 findings go to the implementer verbatim; agree/dispute returns to this reviewer, which makes
 the final call and implements its confirmed fixes itself (pin-before-fix, revert-verified),
 then the suites green and one implementer sanity pass.
+
+---
+
+## DISPOSITIONS (cross-model, 2026-10-08 — every finding AGREED by its unit's implementer,
+zero disputes; the reviewer's FINAL CALL on each: CONFIRMED, with the implementers'
+refinements adopted)
+
+- **MINOR — CONFIRMED (U-A agreed: "my omission, not a design choice"; P-VX83-3 meant every
+  row the facet brings in says so).** Refinements adopted: the archived expression mirrors the
+  narrowing's own archived-only clause — `(c.archived_at IS NOT NULL OR b.archived_at IS NOT
+  NULL)`, one rule (the block half moot today: a released placement never lists; an archived
+  POOL home rightly earns the mark); the column is always present on the statement, so the hit
+  reads it without a default; the mark lands after the home text, before the Spacer.
+- **NIT-1 — CONFIRMED (U-C agreed, with a stronger reading than the finding's: its P-2 guard
+  was for the INVITATION only; hiding an ARMED state breaks P-13o-U2-1).** The armed
+  `commits ✕` shows whenever the facet is armed and the band speaks; the invitation stays
+  words-only; the reset rules stand as built (never remembered; `resetFacet()` on a blank
+  field only — a day alone counts blank, so armed-chip-with-only-a-day cannot arise); the ✕
+  road `toggleSavepointsFacet()` + `search()` is valid with no words.
+- **NIT-2 — CONFIRMED with the implementer's CORRECTION to the reviewer's suggested fix
+  (adopted):** `LibraryWhenMonth(dayKey:)` is failable and cannot close the `??` chain; the
+  components form over `now` in the filter's calendar (Gregorian — always a real month) does.
+  No pin (structurally unreachable); the test helpers' dated fallbacks are test-only and stay.
+
+## THE FIX PASS (the reviewer's own, 2026-10-08 — commit per fix, pushed; no trailers)
+
+| finding | commit | the fix | the pin + its evidence |
+|---|---|---|---|
+| NIT-2 | `b41a7c4e` | `LibraryWhenDoor.swift`: the month binding's last resort is NOW's month via `calendar.component(.year/.month, from: now)` (the filter's own calendar), never `LibraryWhenMonth(year: 2026, month: 1)` | none owed (structurally unreachable — the press seeds `month` before `shown`); compile + the slot's `LibraryWhenDoorTests` hold the door |
+| NIT-1 | `9e52a0eb` | `LibrarySearchBand`: `showsArmedCommits(question:armed:)` — the armed `commits ✕` whenever armed and the band speaks; the `+ commits` invitation stays behind `offersCommits` (words only) | 4 new cells in `LibrarySearchCommitsFacetTests.theChipIsOfferedOnlyWhenTheQuestionHasWords` (armed under tag-alone shows · unarmed doesn't · armed with words shows · nil question never). Red-on-old BY ANNOUNCED GATE REVERT at the slot (everything committed first): `showsArmedCommits` short-circuited to the old gate's meaning (`armed && hasWords`) → the armed-under-tag-alone cell RED; restored, re-run green. PENDING-on-slot below |
+| MINOR | `f9350c48` | `Queries.catalogTaggedBlocks` selects `(c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL) AS archived`; the hit carries `isArchived: row["archived"]`; `blockLine` wears `CatalogArchivedMark` after the home text | **PIN-BEFORE-FIX, core:** `SearchTagListingTests.anArchivedHomesBlockEntersOnlyUnderTheFacetWearingItsFact` ran RED on the pre-fix statement FIRST (1 issue — the fact false; the entry/exclusion arms green, rightly: the facet already admitted the block, only the FACT was missing), then the fix, then green — and REVERT-RE-VERIFIED post-commit (`git checkout f9350c48~1 -- TagListingQueries.swift`; the pin red with the same 1 issue; restored; green; tree clean). **Mac:** `LibraryTagListingTests.theBlocksScopeListsTheBlocksTheTagNames` extended with the facet-toggled cells (the archived-home block waits for the facet, joins wearing the fact, the living sibling bare) — red-on-old by the same mechanism (the hit carried no fact); runs at the slot |
+
+**Headless, at the fix pass's end (this machine):** full core `swift test` EXIT 0 —
+**VariorumCoreTests 2,321 tests in 265 suites PASSED** (one more than the pre-ladder 2,320 —
+the new MINOR pin; the standing honest skips only: the two gated benches, the live-Supabase
+pass, `writeAScratchLibraryLikeHers`) + StringsWorkbookTests 40/6; Mac `build-for-testing`
+SUCCEEDED (headless — a build needs no stage).
+
+**OWED AT THE SLOT (test-only; "ready" ping sent to `oct7coordinator`):** (1) the touched Mac
+suites — `LibrarySearchCommitsFacetTests` · `LibraryTagListingTests` · `LibraryWhenDoorTests` ·
+`LibraryWhenRangeTests` · `LibraryDayFilterTests` · `LibrarySearchFaceTests` ·
+`LibrarySearchStateTests` · `LibrarySearchJoinTests` · `LibrarySearchArchivedTests` ·
+`LibrarySearchLandingTests` · `LibraryRowAlignmentTests` · `LibraryListFaceTests` ·
+`ChromeLineLimitTests` — green, zero skipped; (2) the NIT-1 ANNOUNCED GATE REVERT (above);
+(3) record the results here. Then the implementer sanity pass over the fix diff
+(`dd572d82..HEAD`'s code commits), then round 2 with a FRESH reviewer.
