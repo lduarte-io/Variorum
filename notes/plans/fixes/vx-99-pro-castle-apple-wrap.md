@@ -766,7 +766,9 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   enrolled reading, before the derive, the pause and any write; the model words it with the switches' offline line
   (`serverUnreachable`, hoisted from the URLError arm). Use Castle's local-only road untouched. Green PENDING.
   **REVERT V99-H:** the guard deleted. Expected RED: the gap pin + the re-pointed pin (d)'s two refusals; its Use Castle
-  control green.
+  control green. **RESULT (06:20): "Test run with 65 tests in 1 suite failed … with 13 issues"** — pin (d) 8 (both postures:
+  no throw, a new key file, the library re-keyed, custody moved) · the gap 5; the Use Castle control green; nothing else.
+  Restored, `git diff` clean.
 - F7 fix: DONE — `appleHeldCopyForStandard` returns the VERIFIED `AppleKey`; `rekeyCustodyAndSnapshot` / `writeNewKeyFile`
   take `appleKey: AppleKey?` (the key, not a Bool): the ceremony's enrolled road passes the belt's key (one A for the
   vault's M′ copy and the key file's L′ copy), the follow and the resume's arm read A only where the vault's word is Standard
