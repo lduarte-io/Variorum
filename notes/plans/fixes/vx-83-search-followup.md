@@ -8,10 +8,11 @@ urgency — BEFORE any `Tools/stage` claim; headless `swift build`/`swift test` 
 
 Members (sub-issues of VX-83, each closing individually; commits say `Part of VX-NN`):
 **VX-84** tag search reveals the tagged notes · **VX-85** landing under the find bar ·
-**VX-86** first-word-only find seed · **VX-87** the when ▾ door redesign · **VX-88**
-passage-line spacing · **VX-89** the field guide's finder lesson (PENDING HER WORD — may
-route to 13s instead). Beside the run, not in it: **VX-90** (passage lines name their block —
-her feature idea, Backlog).
+**VX-86** first-word-only find seed · **VX-87** the when ▾ door redesign (direction 1,
+R-VX83-2) · **VX-88** passage-line spacing · **VX-89** the field guide's finder lesson (IN,
+R-VX83-3) · **VX-72** savepoint search behind an explicit facet (joined at the sitting,
+R-VX83-5). Beside the run, not in it: **VX-90** (passage lines name their block — her
+feature idea, Backlog) · **VX-93** (search the Trash — the split's other half, Backlog).
 
 Shape: `/architect-phase` (the RUN form). Pin-before-fix binds PER MEMBER (red-on-old
 verified by revert); ONE cold review over the run's whole diff — **fable-reviewer** (the
@@ -261,17 +262,136 @@ moment's):**
 - **P-VX83-1** (VX-86, inside D-3): a gap holding a NEWLINE ends the needle's span (the find bar
   holds one line; a newline inside a block is content, I4) — "Sherlock⏎Holmes" arms "Sherlock".
 
-### U-B — THE DESIGN MEMBERS: VX-87 (gated on her mockup pick) + VX-89 (gated on her word;
-may route to 13s). Brief authored after the sitting lands its rulings here.
+### THE SITTING RECORD — her rulings, 2026-10-07 evening (verbatim-faithful; BINDING)
 
-### THE SITTING BUNDLE (for her next reply; asked in the session, recorded here)
+- **R-VX83-1 (S-1 → VX-84, the question tool):** D-1 RATIFIED — `#tag` alone shows the
+  **narrowed listing** (the tagged notes as the Library's own note rows, sort and scope
+  pickers live and real, the books-flow section on top; words beside the tag keep the
+  ranked sheet). D-2 RATIFIED — a plain word naming a tag **offers the tag**
+  (`tag: #exampletag ›`; the click is the explicit act). Her framing on the record:
+  *"i do support needing to say it's a tag explicitly"* — the fold-in alternative is
+  DEAD, not deferred.
+- **R-VX83-2 (S-2 → VX-87):** *"I choose direction 1 on the calendar - but make sure that
+  the popover looks good and take screenshots of the app to verify the UI/UX and spacing
+  of it."* → the calendar-grid popover builds; U-B's acceptance includes SCREENSHOTS of
+  the real popover (both voices, light/dark, one-day and between-days) verified for
+  spacing before the member closes.
+- **R-VX83-3 (S-3 → VX-89):** *"I'd say add the content to the field guide now, with
+  whatever information a user needs for it. It's true that 13s is handling the rewrite but
+  that's happening in the background, this will probably be in early enough to be
+  useful."* → VX-89 is IN the run (U-B).
+- **R-VX83-4 (S-4 → U3-3):** *"I think that's fine, sounds like it's going to be handled
+  by VX-73. make a note in the VX-73 plan to bring up the tradeoffs of that decision to
+  make and what user choices / mitigations should be offered, given how it was built."*
+  → P-13o-U3-3 RATIFIED as built; the tradeoffs note is on VX-73 (done — the ticket
+  body's U3-3 rider). Reaches QUESTIONS #201 at the merge moment.
+- **R-VX83-5 (VX-72 SPLIT; joins this run as U-C):** *"split VX-72 into savepoints and
+  trash. do the savepoints that's easy now - and it's the most important product story
+  (anything you've saved), searching stuff that *wasn't* saved and was purposefully
+  deleted is a different issue. it might be better to just add a search to trash later
+  than add trash to the main search."* → VX-72 re-scoped to SAVEPOINTS and made a member
+  (U-C below); the Trash half is **VX-93** (Backlog, shaped as search-INSIDE-the-Trash).
+- **R-VX83-6 (VX-73):** stays deferred at her word (*"I'll still defer it for now since it
+  sounds like there's a significant UI component"*).
 
-- S-1: D-1/D-2 confirm-or-redirect (tag-alone narrows the listing; plain word offers the
-  tag — or fold tagged notes into results directly).
-- S-2: the when-door mockup pick (`notes/plans/mockups/when-door.html`).
-- S-3: VX-89 — in this run, or 13s's field-guide rewrite?
-- S-4: U3-3 (the book-state facet's interplay) — explained in the reply; her ruling lands
-  in QUESTIONS #201's walk, not here.
+### U-B — THE DESIGN MEMBERS: VX-87 (direction 1, R-VX83-2) + VX-89 (R-VX83-3); one
+implementer session after U-A closes
+
+### U-B BRIEF (self-contained; read with the whole record as ever)
+
+**Who you are:** the U-B implementer (Opus, xhigh), ONE session, ONE acceptance unit — the
+when door rebuilt to her direction-1 pick, and the field guide's finder lesson. Work ONLY
+in `~/dev/variorum-vx-83` (branch `vx-83-search-followup`); pull first. Required reading:
+this file WHOLE · the mockup `notes/plans/mockups/when-door.html` (direction 1 IS the
+ruling) · `notes/plans/phase-13o-search.md` (R-13o-13 and the U2 RECORD's D5/P4 — what the
+door replaces) · `notes/SessionResiliencyProtocol.md`. Maintain a §U-B RECORD below this
+brief as LIVE STATUS from your first commit. Stage via `oct7coordinator` exactly as the
+U-A stage-protocol block above says (introduce yourself as "searchfollowup U-B
+implementer").
+
+**The pieces:**
+1. **VX-87 — the when door, direction 1:** the `when ▾` press opens ONE popover (the
+   VoicedMenu dies): a two-mode row (on a day · between days), a real month GRID
+   (`.graphical` `DatePicker` restyled through VoiceTokens, or a small custom month view
+   if the system control refuses the voice treatment — PROPOSE in the record before
+   building a custom grid), the armed SENTENCE at the foot ("Showing notes edited **on
+   Oct 6**." / "…edited **Oct 1 – Oct 6**."), `any day` as the clearing word in the card,
+   Esc/click-out keeping what the sentence last said. Nothing arms until a date is
+   touched (supersedes P-13o-U2-9's arm-at-once FOR THIS DOOR — her "unclear if there's
+   confirmation" is the reason; record the supersession). The armed chip in the band
+   stays byte-as-shipped. Between-days: first click sets the start, second the end, the
+   run washing in as she clicks (the mockup's reading). `LibraryWhenRangeTests` +
+   `LibraryDayFilterTests` updated as JUSTIFIED EDITS where the door's own closures
+   change; new pins for the sentence, the no-silent-arm rule, and the two-click run.
+2. **VX-87 — the SCREENSHOT acceptance (R-VX83-2, binding):** real-app captures of the
+   popover — both voices × light/dark, one-day and between-days — into a gitignored
+   shots dir, checked for spacing/legibility BEFORE the member closes; needs a stage
+   slot (request from `oct7coordinator`). The orchestrator re-walks after your close.
+3. **VX-89 — the field guide teaches the finder:** functional words only (the VR-122
+   seed-edit class): the Library lesson gains the finder — the one field; words rank an
+   answer sheet; `#tag` alone narrows to the tagged notes (U-A's new truth — write the
+   behavior as it stands at this run's close, not as 13o shipped); when ▾; the book
+   masthead's 🔍; click a result to land in Write with ⌘G stepping; `+ archived`. Where
+   the Library lesson lives today, matching its register; currency pins per the VR-122
+   pattern (`TutorialCurrencyTests`); the REAL store's seeded field guide re-seed is the
+   CLOSEOUT's (behind the A1 rail), never yours.
+4. **Close:** touched Mac suites + the tutorial spine green at the END under a stage
+   slot; record final; report.
+
+**Fences:** U-A's verbatim (zero `Sync/`, zero editor-core internals, composer-only query
+reads, environment traps, commit-per-piece + push, no attribution trailers).
+
+### U-C — SEARCH WHAT YOU SAVED: VX-72 (R-VX83-5); one implementer session after U-B
+
+### U-C BRIEF (self-contained)
+
+**Who you are:** the U-C implementer (Opus, xhigh), ONE session, ONE acceptance unit —
+savepoint history joins the index behind an explicit facet. Work ONLY in
+`~/dev/variorum-vx-83`; pull first. Required reading: this file WHOLE ·
+`notes/plans/phase-13o-search.md` (§FORK RULINGS F1–F4, the §R-13o-4 RECORD, U1's
+trigger/migration shape — you EXTEND that design, never reshape it) · `notes/SyncSpec.md`
+§12 far enough to confirm the local-only class · `notes/SessionResiliencyProtocol.md`.
+Maintain a §U-C RECORD below as LIVE STATUS. Stage via `oct7coordinator` ("searchfollowup
+U-C implementer").
+
+**The pieces:**
+1. **Migration (its own commit, before consumers):** `savepoint` joins `SearchIndex` as
+   the NINTH kind — `commit_point.text`, a doc row live iff the commit's VARIANT is live
+   (commit_point has no tombstone of its own; the variant's tombstone/delete reach drops
+   savepoint docs — doc-family reads only, R-13o-4's letter), backfill via the rebuild
+   road. **Migration id: claim `v1_23_savepoint_search`** — 13x's branch carries no
+   migration past v1_22 at its closeout (verified 2026-10-07 by the orchestrator); IF
+   13x's merge lands a v1_23 first, rename ours to the next free id at the rebase and
+   reset the WORKTREE dev store only (the contained collision class, R-13o-5's record).
+   Record the outcome here.
+2. **Capture:** INSERT-only capture on `commit_point` (savepoints are append-only, I5;
+   `renameCommitPoint` edits `message`, which is NOT indexed — only `text` is) + the
+   variant-reach drop above. Mechanical only; the §R-13o-4 record's letter holds (no
+   reads outside NEW/OLD + the doc family). If honoring it needs a shape the letter
+   can't give you, STOP and report (the §9 smell protocol, never a clever trigger).
+3. **Visibility:** savepoint docs are OUT of every default answer by composer fence
+   (R-13o-6's ruled posture), IN only under the explicit facet. The versions fence and
+   wing scoping resolve at query time through variant → block → placement (the take
+   docs' own road; a savepoint of a released block never lists — P-13o-U1-8's letter).
+4. **The facet face:** the band grows a quiet invitation beside `+ archived` — PROPOSE
+   the word in the record (candidates: "+ saved versions" · "+ savepoints" · "+ history")
+   before building the chip; a savepoint passage wears its kind word + its savepoint's
+   day (`TimeStampFace.day`) and lands at its block with the find bar ARMED NOT STEPPING
+   when the text is no longer in the buffer (P-13o-U2-4's arm exactly). ⌘K stays
+   savepoint-free (quick-jump is the living corpus; the Library facet is the history
+   door) — PROVISIONAL.
+5. **Pins:** capture across the write layers (operations commit · the variant-reach
+   drop · fake-server remote apply of a commit_point row — red-on-old each, the U1 P6
+   pattern); rebuild/integrity cover the ninth kind; the default-answer fence (a
+   savepoint NEVER lists without the facet — the unit's most load-bearing pin); facet
+   listing + landing; P1: capture cost ∝ the commit, query cost ∝ matches (extend
+   `SearchP1Tests`' corpus with savepoint rows).
+6. **Close:** full core suite + touched Mac suites + tutorial spine green at the END;
+   record final; report.
+
+**Fences:** U-A's verbatim. One addition: the completeness walk must stay green WITHOUT
+`Sync/` edits (the derived set reads `SearchIndex.tables` — one source; if the walk goes
+red anyway, STOP and report: `Sync/` is the orchestrator's).
 
 ## LADDER (after U-B, over the run's whole diff)
 
@@ -299,7 +419,8 @@ uncommitted work. Work ONLY in `~/dev/variorum-vx-83`.
 | 2 | Worktree + branch + in-flight row | DONE 2026-10-07 |
 | 3 | This record + traces + briefs | DONE (this commit) |
 | 4 | The when-door mockup (`notes/plans/mockups/when-door.html`) | DONE (this commit) |
-| 5 | U-A (VX-84 · 85 · 86 · 88) | NOT STARTED |
-| 6 | The sitting (S-1…S-4) → U-B brief | AWAITING HER |
-| 7 | U-B (VX-87 + VX-89 as ruled) | GATED on 6 |
-| 8 | Ladder → closeout → PR `VX-83: …` (after 13x merges; rebase first) | NOT STARTED |
+| 5 | U-A (VX-84 · 85 · 86 · 88) | IN FLIGHT (the §U-A RECORD is live status; Mac pins PENDING-on-stage) |
+| 6 | The sitting (S-1…S-4 + the VX-72 split) → rulings R-VX83-1…6 | DONE 2026-10-07 (the sitting record above; Linear updated: VX-72 re-scoped + membered, VX-93 minted, VX-73's U3-3 rider, VX-89 in) |
+| 7 | U-B (VX-87 direction 1 + screenshots; VX-89) | BRIEFED — runs after U-A |
+| 8 | U-C (VX-72 savepoints) | BRIEFED — runs after U-B |
+| 9 | Ladder → closeout → PR `VX-83: …` (after 13x merges; rebase first) | NOT STARTED |
