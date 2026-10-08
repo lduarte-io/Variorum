@@ -974,3 +974,15 @@ uses the at-rest fill and may read faint (shots 12/15 — U-B's own flag, P-VX83
   short verification errand (the fixed needle in the field · the bare-counts band · the
   commits wording · the chip in the real band — appended to the walk brief when the suites
   are green).
+
+## §WALK EXECUTION 2 (vx83walker, 2026-10-08 — APPENDIX 2, the fix-pass verification)
+
+Stage claimed on oct7coordinator's GO, after 13x's slot · Debug rebuilt at HEAD bcab2e67 with a clean tree · dev store only (her `/Applications` app was not running; pgrep showed none before the launch and none after the quit) · Terminal dark (the found state, untouched).
+
+- **V1 SEEN** — `always the woman` → the Scandal opening passage: Write at block 2/262, the bar holds `always _the_ woman`, the whole span selected (`3w selected`), the line below the bar with air. → `17-V1-needle-underscore-span.png`
+- **V2 SEEN** — `good-night mister sherlock` → block 215/262: the bar holds `Good-night, Mister Sherlock`, selected (`4w selected` — the status counts "Good-night" as two words). → `18-V2-needle-punctuation-span.png`
+- **V3 SEEN** — `#classics` alone: the band reads `1 book · 17 notes  in: home  #classics ×  + book state  + archived`, NO leading dash. The `+ commits` chip is not offered on the tag-only band (with words typed it is). → `19-V3-tag-band-no-dash.png`
+- **V4 SEEN** — the committed word was staged in the dev store: a new note via the quick-entry bar (`zephyrquill walk scratch`, ⏎ opened it, titled `2026-10-08`, in no book), ⌘S → the "name this moment" prompt took focus, ⏎ saved it unnamed ("Committed."), then the line was erased (0w). Search `zephyrquill`: without the chip, `— nothing found` / "nothing matches." with `+ commits` offered (→ `20-…`). Pressing it gives the band `"zephyrquill" — 1 note · 1 commit … commits ×`, the note `2026-10-08` with the line `commit · oct 8  zephyrquill walk scratch`, the word marked (→ `21-…`). Clicking the line lands in Write at block 1/1 with the bar armed `zephyrquill`, nothing selected, no step (the words left the buffer) (→ `22-…`). Seen: the empty line's caret sits right at the bar's bottom edge, with no air below the bar (an empty note's first line).
+- Residue: the scratch note `2026-10-08` (empty buffer, one commit holding the word) stays in the DEV store, left as the V4 fixture.
+
+Instance quit by bundle id; pgrep clean. Shots `17…22`.
