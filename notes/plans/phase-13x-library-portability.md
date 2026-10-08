@@ -1571,3 +1571,45 @@ subagents; foreground waits only; no trailers; commits per fix, each pushed.
   below when made.
 - Operating context: oct7coordinator's author hold covers this closeout's walk, legs, short
   Mac pin runs and the /Applications refresh; this session messages it at the merge.
+
+### THE HICCUP RULINGS (2026-10-07, this sitting — process canon; the canonical-doc edits land at the merge per the shared-ledger rule)
+
+- **Hiccup A RULED — commit at bout start:** the bout-start `vx sync` commits+pushes the changed
+  board snapshot immediately (message "board snapshot"), a NARROW named exception to
+  build-sessions-never-push-main: the generated snapshot only, nothing else ever. Pull-first
+  stands; a push conflict regenerates and retries. Lands in CLAUDE.md's Environment bout-start
+  line at the merge.
+- **Hiccup B RULED — the atomic row-edit ritual:** a kickoff's in-flight-table edit is ONE tight
+  pull → edit → commit → push sequence with retry-on-reject (re-pull, re-apply, push). No
+  structural change. Lands in both phase skills' Workspace-setup section at the merge (edited
+  together, as ever).
+
+### VX-80 BRIEF (the pulled-in fix — a FRESH Fable implementer, ONE session; custody seam = Fable end to end)
+
+Read, in order: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md` (checkpoint per
+piece, foreground waits, no subagents); **`notes/plans/fixes/vx-80-castle-follow-recovery-door.md`
+WHOLE — the record is your spine** (mechanism, fix shape, the named red-on-old pin, code
+anchors, the saveAuto check); this file's MORNING SITTING section; **`notes/SyncSpec.md` IN
+FULL** (custody work); `notes/plans/pre-13x-postures-design.md` §3.6–§3.8 (the lobby roads) +
+§7 (the follow). Code anchors as the record lists them (PostureSwitch, AppBootstrap,
+StoreKeyEnvelope, StoreEncryptionMigration).
+
+**Do, in this order:** (1) THE PIN FIRST, red-on-old (the record's shape: store under key B,
+custody holding key A, newest sidecar wrapping B ⇒ today's code lands the doorless `.failed`
+with `recovery: nil`) — confirm red before any fix line; (2) the fix per the record: in
+`failedOutcome` (or a sibling arm), key-in-hand + NOTADB-class error + a wraps-bearing sidecar
+beside the store ⇒ offer the SAME typed-secrets lobby the empty-custody arm offers; on unlock
+the open proceeds → ready → housekeeping reconcile finds the pending marker → the resume
+completes the interrupted follow (custody finally moves, snapshot, old key file retired, marker
+cleared); (3) verify the unlocked-key re-landing (R1-M3's `saveAuto`) does NOT fire under the
+Castle demanded gate on this road — a state-transition test says so; (4) state-transition tests
+for the new arm; the two-client convergence suites untouched; (5) the full core suite headless
+at close (it is also R2-3's flake watch). **Fences:** zero `Persistence/Migrations.swift`
+(marker stays 12); ZERO `Sync/` lines expected — one genuinely demanded is a STOP-and-record,
+the orchestrator rules; her real store never; the stranded fixture lives ON THE AIR — do not
+reach for it, simulate per the record (a live-fire against a fixture COPY is a held, optional
+her-leg). **Stage:** Mac pin runs STOP at the seam — record PENDING-behind-the-stage, end the
+piece; the orchestrator runs or GOes them under the author hold. Commit per piece, message
+tail "Part of VX-80"; push every commit; no trailers. Append `### VX-80 RECORD` (LIVE STATUS
+first) to this file from the first commit; close with a "VX-80 BUILT" banner mapping record →
+evidence.
