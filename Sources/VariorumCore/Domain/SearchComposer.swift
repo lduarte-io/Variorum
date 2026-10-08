@@ -1197,7 +1197,7 @@ extension SearchSnippetSegment {
                 span += segment.text               // two marked runs abutting
                 i += 1
             } else if i + 1 < segments.count, segments[i + 1].isMatch,
-                      isHorizontalWhitespace(segment.text) {
+                      isSpanGap(segment.text) {
                 span += segment.text + segments[i + 1].text
                 i += 2
             } else {
@@ -1208,8 +1208,16 @@ extension SearchSnippetSegment {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    /// Whitespace that keeps a line one line: no newline of any kind.
-    private static func isHorizontalWhitespace(_ text: String) -> Bool {
-        !text.isEmpty && text.allSatisfy { $0.isWhitespace && !$0.isNewline }
+    /// A gap the span crosses, kept AS WRITTEN so the literal find still
+    /// lands: horizontal whitespace of any length, or a SHORT separator of
+    /// at most 2 characters — "-", ", ", and the Markdown emphasis gaps
+    /// " _" / "_ " that the VX-83 walk found arming "always" alone from the
+    /// seeded "always _the_ woman" (§WALK JUDGMENT, F-W-2). A newline of any
+    /// kind always ends the span — the find bar holds one line (I4: newlines
+    /// are content; P-VX83-1). PROVISIONAL P-VX83-W2: this ≤ 2-character
+    /// widening of D-3's whitespace-only letter.
+    private static func isSpanGap(_ text: String) -> Bool {
+        guard !text.isEmpty, !text.contains(where: \.isNewline) else { return false }
+        return text.allSatisfy(\.isWhitespace) || text.count <= 2
     }
 }
