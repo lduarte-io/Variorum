@@ -154,15 +154,16 @@ enum TutorialSeeder {
     /// 13i-d U7 (the walk's W-1): the door now composes the Welcome
     /// arrangement too, so the disclosure names it — exactly, the MINOR-D3/D4
     /// rule — before it promises the rest is untouched (PROVISIONAL wording).
+    /// 13s-b U1b: the arrangement no longer makes the classics gathering or
+    /// a quick note (R-13s-5/37), so the disclosure stopped claiming it.
     nonisolated static let replaceDetail =
         "This replaces the tutorial with a fresh copy: every note tagged exactly "
         + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
         + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. It also sets up the "
         + "\(Operations.welcomeShelfName) shelf the books chapter walks: the seeded books that sit "
-        + "unshelved go onto it, the two classic books' shipped notes are tagged "
-        + "#\(SampleLibrarySeeder.classicsTagPath), \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its notes if "
-        + "none of them lives in another book, and a \u{201C}\(SampleLibraryWelcome.classicsGatheringName)"
-        + "\u{201D} gathering and one quick note are made if they are missing. Nothing else is touched."
+        + "unshelved go onto it, the classic books' shipped notes are tagged "
+        + "#\(SampleLibrarySeeder.classicsTagPath), and \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its "
+        + "notes if none of them lives in another book. Nothing else is touched."
 
     // MARK: - The lesson plan (the coverage CONTRACT, walk-asserted)
 

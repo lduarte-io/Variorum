@@ -112,7 +112,12 @@ enum LaunchFurniture {
             // 17y B-SEED: the field guide is born with the store, on the
             // arrangement's arrange-now road only — so Welcome holds it at
             // first open (§19.3) and an existing store never grows one.
-            beforeArranging: { _ = await TutorialSeeder.seedAtBirth(session: session) },
+            // 13s-b U1b: the example snippet FIRST (the oldest group is the
+            // Snippets rail's first card — R-13s-26), then the guide.
+            beforeArranging: {
+                _ = await ExampleSnippetSeeder.seedAtBirth(session: session)
+                _ = await TutorialSeeder.seedAtBirth(session: session)
+            },
             loadMark: marks.welcome?.load,
             saveMark: marks.welcome?.save)
     }

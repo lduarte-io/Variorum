@@ -320,7 +320,16 @@ enum SampleLibrarySeeder {
         /// BOTH platforms; existing stores are never retrofitted (their
         /// marks and discovery already hold), and Help ▸ Restore keeps
         /// minting it on demand — `all` is the doors' list.
-        static let launchSet: [Book] = [.sherlock, .encryptionExplained]
+        /// **13s-b U1b (R-13s-5/37, her launch list verbatim: "field guide,
+        /// sherlock holmes, and a starred notes empty gathering"):**
+        /// *Encryption Explained* leaves the launch too, on BOTH platforms
+        /// (the R-17y-8 precedent — her ruling names people's libraries,
+        /// and a phone-seeded copy re-arrives everywhere by sync). Her word
+        /// goes further than Jekyll's did: EE is "not present and NOT
+        /// restorable", so its doors leave with it (U1b piece 3) and `all`
+        /// keeps it only as the dedupe facts' vocabulary for the installed
+        /// base.
+        static let launchSet: [Book] = [.sherlock]
 
         /// The books the sync engine's pristine-copy dedupe judges
         /// (`allDedupeFacts`) — every book whose shipped seed is PRISTINE by

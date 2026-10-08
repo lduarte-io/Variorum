@@ -157,12 +157,11 @@ struct LaunchFurnitureTests {
             #expect(facts.chapters == TutorialSeeder.plan.map(\.chapter), "every chapter, in order")
             #expect(facts.lessons == TutorialSeeder.plan.flatMap(\.lessons), "every lesson, whole")
             // …beside the rest of the seeded content, unchanged. (Justified
-            // edit, 17y B-DEDUPE R-17y-8: Jekyll left the DEFAULT seed, so
-            // it leaves this on-Welcome list — its own absence is pinned by
-            // aFreshLaunchSeedsTheSubsetWithoutJekyll below.)
-            for name in [SampleLibrarySeeder.Book.sherlock.name,
-                         SampleLibrarySeeder.Book.encryptionExplained.name,
-                         SampleLibraryWelcome.classicsGatheringName] {
+            // edit, 17y B-DEDUPE R-17y-8: Jekyll left the DEFAULT seed;
+            // justified again at 13s-b U1b, R-13s-5/37: *Encryption
+            // Explained* and the classics gathering left it too — the final
+            // set's own pin is aFreshLaunchSeedsTheFinalSet below.)
+            for name in [SampleLibrarySeeder.Book.sherlock.name] {
                 #expect(try await reading(db, named: name)?.shelfId == welcome, "\(name) on Welcome")
             }
             // Silent furniture: nothing spoken, nothing asked, nothing on ⌥⌘Z.
@@ -180,37 +179,79 @@ struct LaunchFurnitureTests {
         }
     }
 
-    /// **R-17y-8's PIN (17y B-DEDUPE): Jekyll leaves the DEFAULT seed.** A
-    /// fresh store's first launch seeds the subset — Sherlock and *Encryption
-    /// Explained* — and NO Jekyll, ever (her word: "I don't want it in
-    /// people's libraries anymore"); the launch loop iterates
-    /// `Book.launchSet` while `Book.all` keeps Jekyll for the Restore doors.
-    /// RED ON OLD: the loop iterated `Book.all` and a fresh store was born
-    /// with Jekyll (and takemania inside it).
-    @Test func aFreshLaunchSeedsTheSubsetWithoutJekyll() async throws {
+    /// **THE FINAL SET's PIN (13s-b U1b — R-13s-5/26/27/37, her launch list
+    /// verbatim: "field guide, sherlock holmes, and a starred notes empty
+    /// gathering… quicknotes and journal are created at first mint"; the
+    /// example snippet joins at her Q17 disposition).** A fresh store's
+    /// first launch leaves EXACTLY: the field guide (the birth pin above) ·
+    /// Sherlock, OWNED · the starred-notes gathering, empty · the example
+    /// snippet. And NOTHING of the retired seed — no Jekyll (R-17y-8), no
+    /// *Encryption Explained*, no classics gathering, no Quicknotes, no
+    /// seeded quicknote; none of them minted-then-removed either. RED ON
+    /// OLD, per retired fact: the old launch seeded EE, and the old
+    /// arrangement minted the classics gathering and the quicknote (which
+    /// minted Quicknotes); the old tree had no example snippet.
+    @Test func aFreshLaunchSeedsTheFinalSet() async throws {
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
             _ = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: false, clean: true), marks: device.marks)
-            #expect(
-                try await reading(db, named: SampleLibrarySeeder.Book.sherlock.name) != nil,
+            let sherlock = try #require(
+                try await reading(db, named: SampleLibrarySeeder.Book.sherlock.name),
                 "Sherlock still seeds")
-            #expect(
-                try await reading(db, named: SampleLibrarySeeder.Book.encryptionExplained.name) != nil,
-                "Encryption Explained still seeds")
-            #expect(
-                try await reading(db, named: SampleLibrarySeeder.Book.jekyllAndHyde.name) == nil,
-                "no Jekyll in a fresh library (R-17y-8)")
-            // Not minted-then-removed either: no tombstone of the name exists.
-            let everExisted = try await db.read { db in
-                try Queries.readingTombstoneExists(
-                    db, name: SampleLibrarySeeder.Book.jekyllAndHyde.name)
+            #expect(sherlock.owned, "…owned (the §7 ladder)")
+            let starred = try #require(
+                try await reading(db, named: Operations.starredNotesGatheringName),
+                "the starred-notes gathering seeds")
+            #expect(starred.kind == .gathering && starred.shelfId == nil)
+            // The retired seed: absent, and never minted at all.
+            for name in [SampleLibrarySeeder.Book.jekyllAndHyde.name,
+                         SampleLibrarySeeder.Book.encryptionExplained.name,
+                         SampleLibraryWelcome.classicsGatheringName,
+                         Operations.defaultQuicknoteBookName] {
+                #expect(try await reading(db, named: name) == nil,
+                        "no \(name) in a fresh library (R-13s-5/37)")
+                let everExisted = try await db.read { db in
+                    try Queries.readingTombstoneExists(db, name: name)
+                }
+                #expect(!everExisted, "\(name) was never minted at all")
             }
-            #expect(!everExisted, "Jekyll was never minted at all")
-            // The subset is a LAUNCH fact only: Book.all keeps Jekyll so the
-            // Restore doors and the existing-store vocabulary stay whole.
+            let quicknotes = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND title = ?",
+                    arguments: [SampleLibraryWelcome.quicknoteTitle]) ?? 0
+            }
+            #expect(quicknotes == 0, "no seeded quicknote, live or dead (R-13s-5)")
+            // The example snippet: one group, one snippet, her ruled line
+            // EXACTLY (R-13s-26) — and the OLDEST group, so the Snippets
+            // rail leads with it.
+            let (groups, snippetTexts) = try await db.read { db -> ([Container], [String]) in
+                let pools = try Queries.pools(db)
+                let scrap = pools.first { $0.title == ExampleSnippetSeeder.groupTitle }
+                let texts = try scrap.map { pool in
+                    try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT v.working_text FROM container_block cb
+                            JOIN variant v ON v.block_id = cb.block_id AND v.deleted_at IS NULL
+                            WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                            ORDER BY cb.position, cb.id
+                            """,
+                        arguments: [pool.id])
+                } ?? []
+                return (pools, texts)
+            }
+            #expect(groups.first?.title == ExampleSnippetSeeder.groupTitle,
+                    "the example group is the oldest — the rail's first")
+            #expect(snippetTexts == [ExampleSnippetSeeder.snippetText],
+                    "one snippet, the standard disclaimer line, byte-exact")
+            // The retired books stay in `Book.all` — the dedupe facts' and
+            // the surviving doors' vocabulary for the installed base.
             #expect(SampleLibrarySeeder.Book.all.contains(.jekyllAndHyde))
+            #expect(SampleLibrarySeeder.Book.all.contains(.encryptionExplained))
+            #expect(SampleLibrarySeeder.Book.launchSet == [.sherlock])
         }
     }
 

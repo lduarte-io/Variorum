@@ -62,13 +62,20 @@ private func poll(_ condition: @MainActor () -> Bool, turns: Int = 600) async {
     }
 }
 
-/// A launch's seeds, the Mac's order (`Book.all`), marks injected; returns
-/// Sherlock's outcome — what the launch occasion decides by.
+/// A launch's seeds, marks injected; returns Sherlock's outcome — what the
+/// launch occasion decides by. The DEFAULT is `Book.all` — the INSTALLED
+/// BASE's shape (stores born before 17y/13s carry Jekyll and *Encryption
+/// Explained*), which most of this suite's existing-store pins exercise;
+/// the fresh-birth pin passes `Book.launchSet`, the real launch's list
+/// (13s-b U1b — `LaunchFurnitureTests` drives the production composition).
 @MainActor
 @discardableResult
-private func launchSeeds(_ session: AppSession) async -> SampleLibrarySeeder.Outcome {
+private func launchSeeds(
+    _ session: AppSession,
+    books: [SampleLibrarySeeder.Book] = SampleLibrarySeeder.Book.all
+) async -> SampleLibrarySeeder.Outcome {
     var sherlock: SampleLibrarySeeder.Outcome = .alreadySeeded
-    for book in SampleLibrarySeeder.Book.all {
+    for book in books {
         let outcome = await SampleLibrarySeeder.seedIfNeeded(
             session: session, book: book, loadMark: { false }, saveMark: { _ in })
         if book == .sherlock { sherlock = outcome }
@@ -139,10 +146,16 @@ private let encryptionName = SampleLibrarySeeder.Book.encryptionExplained.name
 @Suite("The Welcome arrangement — the shelf, the classics, the quicknote (13i-d U7)")
 struct SampleLibraryWelcomeTests {
 
-    /// **A FRESH STORE'S BIRTH** — the whole arrangement, §19.3 included.
+    /// **A FRESH STORE'S BIRTH** — the whole arrangement over the REAL
+    /// launch set, §19.3 included. **JUSTIFIED EDIT (13s-b U1b, R-13s-5/
+    /// 26/27/37):** the fresh seed is her final set — the arrangement no
+    /// longer mints the classics gathering or the seeded quicknote (so no
+    /// Quicknotes gathering exists either), and the launch seeds Sherlock
+    /// alone of the books (`Book.launchSet`). RED ON OLD per retired fact:
+    /// the old arrangement minted both, and the old launch seeded EE.
     @Test func aFreshStoresBirthArrangesTheWholeWelcome() async throws {
         try await withWelcomeWorld { session, db in
-            let sherlock = await launchSeeds(session)
+            let sherlock = await launchSeeds(session, books: SampleLibrarySeeder.Book.launchSet)
             let mark = WelcomeMark()
             let outcome = await SampleLibraryWelcome.arrangeAtLaunch(
                 session: session, sherlock: sherlock, guideName: TutorialSeeder.bookName,
@@ -154,51 +167,31 @@ struct SampleLibraryWelcomeTests {
             #expect(mark.value == "done")
             #expect(arranged.welcome.minted)
             #expect(arranged.sherlock == .owned)
-            #expect(arranged.mintedClassics && arranged.mintedQuicknote)
-            #expect(arranged.taggedClassics > 0, "the classic books' shipped notes were tagged #classics")
+            #expect(arranged.taggedClassics > 0, "Sherlock's shipped notes were tagged #classics")
 
             let f = try await facts(db)
             // THE WELCOME SHELF — one, role'd, named, in Home.
             let welcome = try #require(f.welcomes.first)
             #expect(f.welcomes.count == 1)
             #expect(welcome.name == "Welcome" && welcome.wingId == "")
-            // The seeded content ON it (§19): the three books + the classics
-            // gathering. (The field guide is the Mac launch's own birth seed —
-            // 17y B-SEED; this pin drives the shared brain without it, and
+            // The seeded content ON it (§19, reshaped at R-13s-5): Sherlock.
+            // (The field guide is the Mac launch's own birth seed — 17y
+            // B-SEED; this pin drives the shared brain without it, and
             // `LaunchFurnitureTests` pins the guide on Welcome through the
-            // production launch. The old note here — "the guide is seeded when
-            // she first opens it" — described the defect.)
-            for name in [sherlockName, jekyllName, encryptionName,
-                         SampleLibraryWelcome.classicsGatheringName] {
-                #expect(f.shelfOf[name] == .some(welcome.id), "\(name) sits on Welcome")
-            }
+            // production launch.)
+            #expect(f.shelfOf[sherlockName] == .some(welcome.id), "Sherlock sits on Welcome")
             // §19.3 — her working objects start UNSHELVED.
-            #expect(f.shelfOf[Operations.defaultQuicknoteBookName] == .some(nil),
-                    "Quicknotes starts unshelved")
             #expect(f.shelfOf[Operations.starredNotesGatheringName] == .some(nil),
-                    "the starred-notes gathering too")
-            // Sherlock OWNED, Jekyll and the encryption book plain.
+                    "the starred-notes gathering starts unshelved")
+            // Sherlock OWNED; the retired seed absent entirely.
             #expect(f.readingByName[sherlockName]?.owned == true)
-            #expect(f.readingByName[jekyllName]?.owned == false)
-            #expect(f.readingByName[encryptionName]?.owned == false)
-            // ONE seeded quicknote, filed the quick note's own way.
-            #expect(f.quicknotes.count == 1)
-            let quicknoteID = try #require(f.quicknotes.first)
-            let (tagged, inQuicknotes, books, starred) = try await db.read { db in
-                let tag = try Queries.allTags(db).first { $0.path == Operations.quicknoteTagPath }
-                let tagged = try tag.map {
-                    try Queries.everythingTagged(db, tagID: $0.id).postIDs.contains(quicknoteID)
-                } ?? false
-                let quicknotesBook = try #require(try Queries.quicknotesBookID(db))
-                let shown = try Queries.assembleReading(db, readingID: quicknotesBook).map(\.postID)
-                return (tagged, shown.contains(quicknoteID),
-                        try Queries.noteMemberships(db, postID: quicknoteID).count,
-                        try Queries.starredReadingIDs(db).contains(quicknotesBook))
-            }
-            #expect(tagged, "it wears #quicknote")
-            #expect(inQuicknotes, "Quicknotes shows it — a live example")
-            #expect(books == 0, "a quick note is bookless")
-            #expect(starred, "Quicknotes is born starred (R-13id-5)")
+            #expect(f.readingByName[jekyllName] == nil, "no Jekyll (R-17y-8)")
+            #expect(f.readingByName[encryptionName] == nil, "no Encryption Explained (R-13s-37)")
+            #expect(f.readingByName[SampleLibraryWelcome.classicsGatheringName] == nil,
+                    "no classics gathering — its door is Help ▸ Restore (R-13s-5)")
+            #expect(f.readingByName[Operations.defaultQuicknoteBookName] == nil,
+                    "no Quicknotes — created at first mint (R-13s-37)")
+            #expect(f.quicknotes.isEmpty, "no seeded quicknote (R-13s-5)")
             #expect(session.undoStack.depth == 0, "furniture never lands on her ⌥⌘Z")
 
             // §19.3 again, later: the daily Journal ⌘J mints is unshelved.
@@ -212,14 +205,15 @@ struct SampleLibraryWelcomeTests {
         }
     }
 
-    /// **THE CLASSICS GATHERING — R1's object, on the RULED letter** (the U7
-    /// continuation — F-U7-1 ruled, its `Sync/` half 17aa1113): every shipped
-    /// note of both classic books wears `#classics`, and the gathering is made
-    /// from that ONE tag. It shows Jekyll's and Sherlock's notes side by side;
-    /// Sherlock's wear the owned mark; it holds nothing. *(A JUSTIFIED EDIT of
-    /// this pin's rule arm: P-13id-U7-1's two-book-tag rule is SUPERSEDED by
-    /// the ruling; the shown set, the badges and "holds nothing" unchanged.)*
-    @Test func theClassicsGatheringShowsBothBooksAndSherlocksWearTheOwnedMark() async throws {
+    /// **THE CLASSICS TAGGING, WITHOUT THE GATHERING (13s-b U1b — a
+    /// JUSTIFIED EDIT of the U7 continuation's gathering pin; R-13s-5/37):**
+    /// the arrangement still tags every shipped note of both classic books
+    /// `#classics` (so the gathering, now behind its own Help ▸ Restore
+    /// door, shows them the moment it is made — the door's own suite pins
+    /// that), but it MINTS NO gathering any more. RED ON OLD: the old
+    /// arrangement minted one. Driven over the installed base's shape
+    /// (both classic books present — `Book.all`).
+    @Test func theArrangementTagsTheClassicsAndMintsNoGathering() async throws {
         try await withWelcomeWorld { session, db in
             let sherlock = await launchSeeds(session)
             let mark = WelcomeMark()
@@ -227,26 +221,16 @@ struct SampleLibraryWelcomeTests {
                 session: session, sherlock: sherlock, guideName: nil,
                 loadMark: mark.load, saveMark: mark.save)
             try await db.read { db in
-                let classics = try #require(try Queries.readings(db).first {
+                #expect(try Queries.readings(db).first {
                     $0.name == SampleLibraryWelcome.classicsGatheringName
-                })
-                #expect(classics.kind == .gathering)
+                } == nil, "no classics gathering mints here — the door is its road (R-13s-5)")
                 let classicsTag = try #require(try Queries.allTags(db, wingID: "").first {
                     $0.path == SampleLibrarySeeder.classicsTagPath
                 }, "the ONE spelling the dedupe facts declare")
-                #expect(RuleGrammar.read(classics.querySpec)
-                        == .rule(SampleLibraryWelcome.classicsRule(classicsTagID: classicsTag.id)),
-                        "made from a tag — #classics, the ruled letter")
-                #expect(try Int.fetchOne(
-                    db, sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?",
-                    arguments: [classics.id]) == 0, "a gathering holds nothing")
-
-                let shown = try Queries.assembleReading(db, readingID: classics.id, limit: 300)
                 let sherlockBook = try #require(try Queries.readings(db).first { $0.name == sherlockName })
                 let jekyllBook = try #require(try Queries.readings(db).first { $0.name == jekyllName })
                 let sherlockNotes = Set(try Queries.assembleReading(db, readingID: sherlockBook.id).map(\.postID))
                 let jekyllNotes = Set(try Queries.assembleReading(db, readingID: jekyllBook.id).map(\.postID))
-                let shownIDs = Set(shown.map(\.postID))
                 // THE SEED SHAPE: every shipped note of both books wears it.
                 let tagged = Set(try String.fetchAll(
                     db,
@@ -254,10 +238,7 @@ struct SampleLibraryWelcomeTests {
                     arguments: [classicsTag.id]))
                 #expect(sherlockNotes.union(jekyllNotes) == tagged,
                         "both books' shipped notes wear #classics — and nothing else does")
-                #expect(sherlockNotes.isSubset(of: shownIDs), "every Sherlock note shows")
-                #expect(jekyllNotes.isSubset(of: shownIDs), "…beside every Jekyll note")
-                #expect(shownIDs == sherlockNotes.union(jekyllNotes), "and nothing else")
-                let badges = try Queries.ownershipFacts(db, postIDs: Array(shownIDs))
+                let badges = try Queries.ownershipFacts(db, postIDs: Array(tagged))
                 for id in sherlockNotes {
                     #expect(badges[id]?.ownedBy?.id == sherlockBook.id,
                             "a Sherlock note wears “owned by” its book")
@@ -414,11 +395,15 @@ struct SampleLibraryWelcomeTests {
             let f = try await facts(db)
             #expect(f.welcomes.map(\.id) == [hers.shelf.id], "ADOPTED — never a second Welcome")
             #expect(f.shelfOf[jekyllName] == .some(essays.id), "a book she filed stays filed")
-            for name in [sherlockName, encryptionName, SampleLibraryWelcome.classicsGatheringName] {
+            // (13s-b U1b: the classics gathering and the quicknote left the
+            // arrangement — an existing store's door shelves and owns, and
+            // mints neither.)
+            for name in [sherlockName, encryptionName] {
                 #expect(f.shelfOf[name] == .some(hers.shelf.id), "\(name) onto her Welcome")
             }
             #expect(f.readingByName[sherlockName]?.owned == true)
-            #expect(f.quicknotes.count == 1)
+            #expect(f.readingByName[SampleLibraryWelcome.classicsGatheringName] == nil)
+            #expect(f.quicknotes.isEmpty)
             #expect(session.status.spoken?.text == WelcomeDoorCopy.alreadyWholeArranged(
                 book: sherlockName, shelf: "Front Door"),
                     "the door acted, so it speaks a receipt naming HER shelf")
@@ -454,7 +439,9 @@ struct SampleLibraryWelcomeTests {
             let notesAfter = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL") ?? 0
             }
-            #expect(notesAfter == notesBefore + 1, "only the seeded quicknote — no fork copy")
+            // (13s-b U1b: the seeded quicknote left the arrangement — the
+            // old "+ 1" was it.)
+            #expect(notesAfter == notesBefore, "no fork copy, and nothing minted")
             #expect(try await facts(db).readingByName[sherlockName]?.owned == false)
         }
     }
@@ -564,8 +551,6 @@ struct SampleLibraryWelcomeTests {
             #expect(!second.didAnything)
             #expect(second.sherlock == .alreadyOwned)
             #expect(second.welcome.shelf.id == first.welcome.shelf.id)
-            #expect(second.classicsID == first.classicsID)
-            #expect(second.quicknoteID == first.quicknoteID)
             let outboxAfter = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0
             }
@@ -585,11 +570,14 @@ struct SampleLibraryWelcomeTests {
         #expect(detail.contains(Operations.welcomeShelfName), "it names the Welcome shelf")
         #expect(detail.contains(SampleLibrarySeeder.Book.sherlock.name),
                 "…the one book whose state the arrangement can change")
-        #expect(detail.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"),
-                "…the gathering it can make")
-        #expect(detail.contains("quick note"), "…and the quick note")
+        // 13s-b U1b: the arrangement no longer makes the gathering or a
+        // quick note, so the disclosure must not claim either (the same
+        // MINOR-D3/D4 exact-scope rule, pointing the other way).
+        #expect(!detail.contains(SampleLibraryWelcome.classicsGatheringName),
+                "it no longer claims the gathering")
+        #expect(!detail.contains("quick note"), "…nor the quick note")
         #expect(detail.contains("#\(SampleLibrarySeeder.classicsTagPath)"),
-                "…and that the classic books' notes are tagged (the continuation's seed half)")
+                "…and still says the classic books' notes are tagged")
         #expect(detail.hasSuffix("Nothing else is touched."),
                 "and only THEN does it promise the rest is untouched")
     }

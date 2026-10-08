@@ -64,13 +64,11 @@ final class MobileFirstWriteFurniture {
         var saveJournal: ((Bool) -> Void)?
         var loadSample: (() -> Bool)?
         var saveSample: ((Bool) -> Void)?
-        /// pre-13x 5a: *Encryption Explained*'s own mark (nil = the device
-        /// defaults under its own key, beside Sherlock's).
-        var loadEncryptionBook: (() -> Bool)?
-        var saveEncryptionBook: ((Bool) -> Void)?
         // (The Jekyll book's marks left with its seed — 17y B-DEDUPE,
         // R-17y-8: Jekyll is out of the DEFAULT seed on both platforms;
-        // `Book.launchSet` is the launch vocabulary, `Book.all` the doors'.)
+        // `Book.launchSet` is the launch vocabulary, `Book.all` the doors'.
+        // The *Encryption Explained* marks left the same way — 13s-b U1b,
+        // R-13s-5/37.)
 
         static let deviceDefaults = Marks()
     }
@@ -100,10 +98,6 @@ final class MobileFirstWriteFurniture {
 
     /// Fact 2, taken at launch and spent at the write. Nil until `prime`.
     private var storeWasEmptyAtLaunch: Bool?
-    /// pre-13x 5a: what the occasion did for *Encryption Explained* — beside
-    /// `Outcome.ran`'s two, not inside it (the phone's pins match that
-    /// case's shape; the second book records its own line).
-    private(set) var encryptionBookOutcome: SampleLibrarySeeder.Outcome?
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -228,26 +222,14 @@ final class MobileFirstWriteFurniture {
                 pacing: { await Self.holdWhileWritingLands(session) })
         }.value
 
-        // pre-13x 5a: *Encryption Explained* on the same occasion, the same
-        // gate, its own mark — paced the same way (eight short notes).
-        // An injected SAMPLE mark stands for both books unless the
-        // encryption book's own mark is injected too (production injects
-        // neither — each book reads its own defaults key): a pin that says
-        // "Sherlock is already seeded" to skip the half-megabyte parse skips
-        // this book's eight mints for the same reason.
-        let loadEncryption = marks.loadEncryptionBook ?? marks.loadSample
-        let saveEncryption = marks.saveEncryptionBook ?? (marks.loadEncryptionBook == nil ? marks.saveSample : nil)
-        let encryptionBook = await Task(priority: .utility) { @MainActor in
-            await SampleLibrarySeeder.seedIfNeeded(
-                session: session, book: .encryptionExplained,
-                storeVariant: storeVariant, gate: .unowned,
-                loadMark: loadEncryption, saveMark: saveEncryption,
-                pacing: { await Self.holdWhileWritingLands(session) })
-        }.value
-        encryptionBookOutcome = encryptionBook
-        Self.log.notice(
-            "first write (Encryption Explained): \(String(describing: encryptionBook), privacy: .public)")
-
+        // (The *Encryption Explained* seed ran here pre-13x 5a → 13s-b U1b.
+        // R-13s-5/37 removed it from the DEFAULT seed on both platforms —
+        // the R-17y-8 Jekyll precedent exactly: her ruling names people's
+        // libraries, and a phone-seeded copy re-arrives everywhere by sync.
+        // Her word goes further than Jekyll's: EE is "not present and not
+        // restorable", so the restore rows left with it too; an existing
+        // store keeps what it has.)
+        //
         // (The Jekyll/takemania seed ran here 18l-c U6 → 17y B-DEDUPE.
         // R-17y-8 removed it from the DEFAULT seed on both platforms — a
         // fresh phone is born without it, an existing store keeps what it

@@ -64,6 +64,48 @@ private func withChapterWorld<T>(
         }
         let guideID = try await TutorialSeeder.restore(session: session)
         try await SampleLibraryWelcome.arrange(session: session, guideName: TutorialSeeder.bookName)
+        // 13s-b U1b (R-13s-5/37) — A JUSTIFIED WORLD EDIT, flagged for the
+        // triage LANDING's re-pin: the arrangement no longer mints the
+        // classics gathering or the seeded quicknote, but the SHIPPED
+        // lesson content still teaches both (seed content is the landing's
+        // to reword, never this unit's). This world therefore STAGES them
+        // as the reader's own acts — the gathering through the restore
+        // door's shape (adopt-or-mint on Welcome from the #classics tag),
+        // the quicknote filed under its reserved title — so every truth
+        // arm still executes against the world the lessons describe.
+        try await session.runner.run { _ in
+            let ops = Operations(undoStack: nil)
+            @Dependency(\.database) var database
+            let welcome = try ops.ensureWelcomeShelf(wingID: "")
+            let tags = try database.read { db in try Queries.allTags(db, wingID: "") }
+            let classicsTagID = try tags.first { $0.path == SampleLibrarySeeder.classicsTagPath }?.id
+                ?? ops.createTag(name: SampleLibrarySeeder.classicsTagPath, wingID: "").id
+            let existing = try database.read { db in
+                try Queries.readings(db, wingID: "").first {
+                    BookNaming.sameName($0.name, SampleLibraryWelcome.classicsGatheringName)
+                }
+            }
+            if existing == nil {
+                _ = try ops.createReading(
+                    name: SampleLibraryWelcome.classicsGatheringName, kind: .gathering,
+                    profile: "collection", sortField: .createdAt, sortDir: .asc,
+                    querySpec: try RuleGrammar.encode(
+                        SampleLibraryWelcome.classicsRule(classicsTagID: classicsTagID)),
+                    wingId: "", shelfId: welcome.shelf.id)
+            }
+            let quicknote = try database.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT id FROM container WHERE title = ? AND deleted_at IS NULL",
+                    arguments: [SampleLibraryWelcome.quicknoteTitle])
+            }
+            if quicknote == nil {
+                let note = try ops.importPost(
+                    title: SampleLibraryWelcome.quicknoteTitle,
+                    text: "a staged quick note \u{2014} the lesson's live example.",
+                    undoLabel: "Quick Note", segmentation: .oneBlock, wingId: "")
+                _ = ops.fileAsQuicknote(note.container.id)
+            }
+        }
         return try await body(session, db, guideID)
     }
 }
