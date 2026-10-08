@@ -135,9 +135,9 @@ struct TourRing: View {
     var cornerRadius: CGFloat = TourRing.cornerRadius
     var outset: CGFloat = TourRing.outset
 
-    static let cornerRadius: CGFloat = 8
-    static let outset: CGFloat = 3
-    static let lineWidth: CGFloat = 2.5
+    nonisolated static let cornerRadius: CGFloat = 8
+    nonisolated static let outset: CGFloat = 3
+    nonisolated static let lineWidth: CGFloat = 2.5
 
     var body: some View {
         GeometryReader { proxy in

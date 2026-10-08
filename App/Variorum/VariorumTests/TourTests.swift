@@ -734,38 +734,109 @@ struct TourEndCardTests {
     /// least as tall as the same words laid out at the same width with no
     /// line limit (a truncated line is one line where the words need two),
     /// and they stay inside the card's measure.
-    @Test func theEndCardsDoorsWrapRatherThanTruncate() async throws {
+    ///
+    /// **Rendered THROUGH THE LIVE PATH** (the U2 verify walk's ask): the
+    /// real `TourOverlay` over a window, with a real engine walked to the end
+    /// card — the overlay's GeometryReader, ZStack, layout placement, the
+    /// card's `.fixedSize` and its measurement — never the card component on
+    /// its own, so a clamp anywhere in the live composition reads here.
+    @Test func theEndCardsDoorsWrapThroughTheLiveOverlay() async throws {
         #if DEBUG
-        for scheme in [ColorScheme.dark, .light] {
-            let tokens = VoiceTokens.fallback(for: scheme)
-            TourOracle.endDoorFrames = [:]
-            let window = NSWindow(
-                contentRect: NSRect(x: 40, y: 40, width: 900, height: 700),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            let hosting = NSHostingView(rootView: TourEndCard(
-                tokens: tokens, scheme: scheme, onChoose: { _ in }))
-            window.contentView = hosting
-            window.orderFrontRegardless()
-            defer {
-                window.orderOut(nil)
-                window.close()
-            }
-            await settle(window, hosting) { TourOracle.endDoorFrames.count == 3 }
-            let measure = TourEndCard.width - 60  // the card's own side padding
-            for door in TourEndCard.choices(tokens) {
-                let drawn = try #require(TourOracle.endDoorFrames[door.key], "\(door.key) drew")
-                let free = NSHostingView(rootView: Text(door.words)
-                    .font(door.font)
-                    .frame(width: drawn.width, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true))
-                let needed = free.fittingSize.height
-                #expect(drawn.height >= needed - 0.5,
-                        "\(scheme) \(door.key): drawn \(drawn.height) pt, the words need \(needed) pt — truncated")
-                #expect(drawn.width <= measure + 0.5, "\(door.key) stays inside the card")
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            for scheme in [ColorScheme.dark, .light] {
+                let engine = Self.engineAtTheEndCard(session)
+                #expect(engine.state.step == .endCard)
+                let tokens = VoiceTokens.fallback(for: scheme)
+                TourOracle.endDoorFrames = [:]
+                let window = NSWindow(
+                    contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                    styleMask: [.titled], backing: .buffered, defer: false)
+                window.isReleasedWhenClosed = false
+                let hosting = NSHostingView(rootView: LiveEndCardRig(engine: engine, scheme: scheme))
+                window.contentView = hosting
+                window.orderFrontRegardless()
+                defer {
+                    window.orderOut(nil)
+                    window.close()
+                }
+                await settle(window, hosting) { TourOracle.endDoorFrames.count == 3 }
+                await settle(window, hosting, turns: 20) { false }
+                let measure = TourEndCard.width - 60  // the card's own side padding
+                for door in TourEndCard.choices(tokens) {
+                    let drawn = try #require(
+                        TourOracle.endDoorFrames[door.key], "\(door.key) drew in the live overlay")
+                    let free = NSHostingView(rootView: Text(door.words)
+                        .font(door.font)
+                        .frame(width: drawn.width, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true))
+                    let needed = free.fittingSize.height
+                    #expect(drawn.height >= needed - 0.5,
+                            "\(scheme) \(door.key): drawn \(drawn.height) pt, the words need \(needed) pt — truncated")
+                    #expect(drawn.width <= measure + 0.5, "\(door.key) stays inside the card")
+                }
             }
         }
         #endif
+    }
+
+    /// A real engine, walked by facts to the end card (the main leg's own
+    /// road, the engine test's shape).
+    static func engineAtTheEndCard(_ session: AppSession) -> TourEngine {
+        let engine = TourEngine(
+            session: session,
+            landmarks: .init(seededBookID: "sherlock", firstStoryID: "scandal", fieldGuideID: "guide"),
+            facts: Tour.Facts(place: .area(.bookcase)),
+            doors: TourEngine.Doors(
+                navigate: { _ in }, openFieldGuide: {}, recordCompleted: {}, finished: { _ in }))
+        func write(_ block: String, _ ordinal: Int, takes: Int = 1) -> Tour.Facts {
+            .init(place: .note("scandal"), noteMode: .write,
+                  caret: .init(noteID: "scandal", blockID: block, ordinal: ordinal, takeCount: takes))
+        }
+        engine.next()
+        engine.observe(.init(place: .book("sherlock")))
+        engine.observe(.init(place: .note("scandal"), noteMode: .write))
+        engine.observe(write("b1", 1))
+        engine.observe(write("b40", 40))
+        engine.observe(write("b40", 40, takes: 2))
+        engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+        engine.next()
+        engine.next()
+        engine.next()
+        engine.observe(.init(place: .book("sherlock"), bookNoteLive: true))
+        engine.observe(.init(place: .area(.bookcase)))
+        engine.observe(.init(
+            place: .note("mine"), noteMode: .write,
+            note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0)))
+        return engine
+    }
+}
+
+/// The live composition the end card is drawn in: the real `TourOverlay`
+/// over a window-filling page (as `RootView`'s tour layer lays it), its facts
+/// standing on her own note.
+private struct LiveEndCardRig: View {
+    let engine: TourEngine
+    let scheme: ColorScheme
+
+    var body: some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay {
+                TourOverlay(engine: engine, sources: TourFactSources(
+                    selection: { .post("mine") },
+                    noteDetail: { ("mine", .write) },
+                    caret: { nil },
+                    bookNoteLive: { false },
+                    isStarred: { _ in false }))
+            }
+            .environment(\.colorScheme, scheme)
     }
 }
 
