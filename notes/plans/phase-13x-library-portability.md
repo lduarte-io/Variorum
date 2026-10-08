@@ -2278,3 +2278,16 @@ The /Applications build she runs (5544, 0787f028) carries the old sentence; the 
 refresh carries the fix. Her follow (entering the passphrase) closes the exposure; it doubles
 as VX-81's discriminating repro (the follow on the Pro at 27.0), with VX-80's door and the A1
 copy `13x-refresh-20261008T061038Z` as the nets.
+
+**W-3 — her answer and the outcome (2026-10-08 ~01:00):** she entered Castle ON THIS PRO, and
+Variorum on the Pro asks for Touch ID (gated custody). That rules out the never-followed
+reading: the Castle ceremony has written no Apple copy since Sep 5 (pre-13x 2b.3a, `apple:
+entersCastle ? nil : …`), so the Sep 7 Apple-wrapped file is NOT a Castle-entry file, and no
+Castle-only key file existed beside the library. The anomaly predates 13x (13x only revealed it)
+→ ticketed **VX-99** (High, project "v1 release readiness"; custody ⇒ Fable), evidence preserved
+at `~/dev/variorum-fixtures/pro-castle-apple-wrap-2026-10-08/` (the pre-follow key files) + the
+A1 copy. **She followed at 00:55 — it completed cleanly:** the new key file
+`variorum-keys-a1e93a2d…` carries no `apple` wrap, `182738de` retired, no crash — the VX-81
+control data point (the follow on the Pro at 27.0, commented on VX-81). The post-follow file
+carries no local `recovery` wrap — listed in VX-99 to confirm as designed or a gap. Her ruling on
+rendered copy: no unnecessary caps — the hand-off sheet's "WHOLE" lowercased (5451fa19).
