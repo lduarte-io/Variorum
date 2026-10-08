@@ -86,3 +86,26 @@ launch eats keystrokes).
 Release the stage claim; message `oct7coordinator` (done); message `searchfollowup` with:
 pass/fail per lettered expectation, the record section is in, the commit hash. The
 JUDGMENT is searchfollowup's — report, don't conclude.
+
+## APPENDIX (added by the orchestrator once U-B's popover landed at HEAD): the VX-87 captures — R-VX83-2's acceptance shots, taken in the SAME slot right after W6
+
+- **W7 (the popover's states):** in the Library, press `when ▾`. Capture: (a) just-opened,
+  nothing armed (the sentence reads the any-day state; confirm the BAND shows NO day chip);
+  (b) press a day → one-day armed (sentence "Showing notes edited on …"; the band's chip
+  appears); (c) switch to "between days", press a first day then a second → the run washed
+  between the chosen ends, the sentence naming the run. SHOT each. The popover draws inside
+  the main window, so `screencapture -l <main window id>` catches it (the WalkKit UNIT D fact).
+- **W8 (no silent arm + Esc):** fresh field, open `when ▾`, switch the mode row back and
+  forth, then Esc WITHOUT pressing a day. EXPECT: the popover closes, the band gained NO
+  chip, the listing never narrowed. SHOT after Esc (the band bare). Also eyeball the
+  popover's arrow/background tone against its card in dark (the one thing headless renders
+  could not show).
+- **W9 (rooms):** repeat W7(c) in DARK (`defaults write io.lduarte.Variorum.debug
+  appearanceChoice dark`, relaunch YOUR instance; restore `system` after — the WalkKit
+  appearance fact). If the Settings voice flip works per the README's coordinates, repeat
+  once in the OTHER voice (light is enough there); if it fights you, the current voice's
+  light+dark is the minimum and SAY SO in §WALK EXECUTION — the author judges from what
+  lands.
+- These shots join the same `notes/plans/vx83-screens/` set (numbered on from the U-A ones)
+  and the same §WALK EXECUTION log. If you pulled the brief before this appendix existed,
+  `git pull --ff-only` again before your slot.
