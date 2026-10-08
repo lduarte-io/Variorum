@@ -225,23 +225,28 @@ struct TourCoachCard: View {
                 Button(tokens.chromeLabel(TourScript.next), action: onNext)
                     .buttonStyle(VoicedButtonStyle(
                         tokens: tokens, role: .primary, font: tokens.body.weight(.semibold)))
+                    // A5 (the U2 UI assessment): ONE face in both rooms — the
+                    // quiet accent word. The light room drew a filled pill: the
+                    // window's keyboard focus landing on the card's first
+                    // button once the tour releases the first responder, and
+                    // the system focus effect painting it. A coach card's doors
+                    // are clicked, never tabbed to.
+                    .focusEffectDisabled()
+                    .focusable(false)
                     .padding(.top, 10)
             }
             if showsEnd {
                 Button(tokens.chromeLabel(TourScript.endTour), action: onEnd)
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet, font: tokens.small))
+                    .focusEffectDisabled()
+                    .focusable(false)
                     .padding(.top, 10)
             }
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 14)
         .frame(width: Self.width, alignment: .leading)
-        .background(tokens.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(tokens.line, lineWidth: 1))
-        // The app's floating-chrome shadow (light only — the fully black
-        // room, R51, carries none; `MastheadPopover`'s precedent).
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.16), radius: 18, y: 8)
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.06), radius: 1.5, y: 1)
+        .modifier(TourCardChrome(tokens: tokens, scheme: scheme, cornerRadius: 12))
         .accessibilityElement(children: .contain)
     }
 }
@@ -267,9 +272,12 @@ struct TourEndCard: View {
                 .foregroundStyle(tokens.ink)
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
+            // A4 (the U2 UI assessment): muted, not tiny — the readme and ⌘J
+            // line reads at the body's size in the muted ink.
             Text(TourScript.endAside)
-                .font(tokens.small)
+                .font(tokens.body)
                 .foregroundStyle(tokens.muted)
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
             VStack(alignment: .leading, spacing: 9) {
@@ -282,10 +290,7 @@ struct TourEndCard: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 26)
         .frame(width: Self.width, alignment: .leading)
-        .background(tokens.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(tokens.line, lineWidth: 1))
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.18), radius: 24, y: 10)
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.06), radius: 1.5, y: 1)
+        .modifier(TourCardChrome(tokens: tokens, scheme: scheme, cornerRadius: 14))
         .accessibilityElement(children: .contain)
     }
 
@@ -337,6 +342,29 @@ struct TourEndCard: View {
                 #endif
         }
         .buttonStyle(TourDoorStyle(tokens: tokens, role: door.role, font: door.font))
+        .focusEffectDisabled()
+        .focusable(false)
+    }
+}
+
+/// **The cards' one chrome** — the paper, the edge, the lift. A1 (the U2 UI
+/// assessment): in the DARK room the card had no visible edge (`tokens.line`
+/// is a near-black hairline on near-black paper, and the light-only shadow
+/// precedent drew nothing), so there the edge is the room's FAINT ink and the
+/// shadow is a real one; the light room keeps the floating-chrome look that
+/// already separated cleanly (`MastheadPopover`'s precedent).
+struct TourCardChrome: ViewModifier {
+    let tokens: VoiceTokens
+    let scheme: ColorScheme
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        content
+            .background(tokens.card, in: shape)
+            .overlay(shape.stroke(scheme == .dark ? tokens.faint : tokens.line, lineWidth: 1))
+            .shadow(color: .black.opacity(scheme == .dark ? 0.6 : 0.16), radius: scheme == .dark ? 24 : 18, y: 8)
+            .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.06), radius: 1.5, y: 1)
     }
 }
 
