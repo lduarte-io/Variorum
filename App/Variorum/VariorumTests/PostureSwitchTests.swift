@@ -591,6 +591,11 @@ struct PostureSwitchTests {
         // FOLLOWING into Castle) pass `vaultSaysCastle: true` to keep it.
         vaultSaysCastle: Bool? = nil
     ) async throws -> World {
+        // VX-99 round 2 (NIT): the parameter shapes ONLY a fresh enrolled
+        // world's vault — a sibling shares its account's, a local-only world
+        // has none — so a caller can never believe it set an account it did not.
+        precondition(vaultSaysCastle == nil || (enrolled && sharing == nil),
+                     "vaultSaysCastle shapes only a fresh enrolled world's vault")
         let accountCastle = vaultSaysCastle ?? !standard
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-2b-switch-\(UUID().uuidString)", isDirectory: true)
@@ -2163,15 +2168,12 @@ struct PostureSwitchTests {
     @Test func replaceAllKeysUnderStandardRefusesWhenTheAppleKeyIsUnreadableOrAnotherAccountsAndNeverMints() async throws {
         let world = try await makeWorld()
         defer { world.tearDown() }
-        let client = try #require(world.vaultClient)
         let material = try #require(world.oldMaterial)
-        // The account's Apple-held copy under THIS device's A (sync setup's shape).
-        let fetched = try await world.vault()
-        try await client.updateVault(
-            try fetched.format.settingAppleHeldCopy(
-                masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
-            expectedRevision: fetched.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
+        // The account's Apple-held copy under THIS device's A (sync setup's
+        // shape) — the harness lands it since VX-99 round 1; the re-wrap this
+        // test once did here is dropped (round 2's NIT), its precondition said.
         let before = try await world.vault()
+        #expect(before.format.appleKeyID == world.apple.id && before.format.masterWrappedByAppleHeld != nil)
 
         // (1) A unreadable here (propagation lag; iCloud Keychain off).
         world.appleBacking.key = nil
@@ -2217,14 +2219,10 @@ struct PostureSwitchTests {
     @Test func replaceAllKeysRefusesAnUnreachableAppleKeyAtTheDoorBeforeAnyScreen() async throws {
         let world = try await makeWorld()
         defer { world.tearDown() }
-        let client = try #require(world.vaultClient)
-        let material = try #require(world.oldMaterial)
-        let fetched = try await world.vault()
-        try await client.updateVault(
-            try fetched.format.settingAppleHeldCopy(
-                masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
-            expectedRevision: fetched.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
+        // The account's Apple-held copy under this device's A — landed by the
+        // harness since VX-99 round 1 (round 2's NIT: the re-wrap dropped).
         let before = try await world.vault()
+        #expect(before.format.appleKeyID == world.apple.id && before.format.masterWrappedByAppleHeld != nil)
         let controller = makeController(for: world)
 
         // (1) A unreadable here (propagation lag; iCloud Keychain off): the
@@ -2555,8 +2553,9 @@ struct PostureSwitchTests {
     /// marker was `marker.advanced(to:)`'d from A's ORIGINAL Replace All Keys
     /// marker (`entersCastle: false`, no follow flag), and `byAnotherDevice`
     /// cannot re-fire at `.reencrypt` (the corpus key id now matches), so the
-    /// second resume moved custody to `.auto`, said "keys replaced" on a
-    /// Castle account, and skipped `retireOldKeyFiles`. (The Apple copy was
+    /// second resume moved custody to `.auto`, returned an outcome that had
+    /// not entered Castle (the runner's LOG said "keys replaced" — no face
+    /// does: round 2's NIT), and skipped `retireOldKeyFiles`. (The Apple copy was
     /// never at risk on either side — `appleCopy: !vaultSaysCastle` reads the
     /// fresh fetch.)
     @Test func aDoubleCrashedAnotherDeviceResumeKeepsTheRoadsCastleFactsNotTheStaleMarker() async throws {
@@ -2596,7 +2595,7 @@ struct PostureSwitchTests {
         // A resumes ONCE MORE: the road's CASTLE facts must survive — the
         // `.reencrypt` marker is the only carrier (byAnotherDevice is spent).
         let outcome = try await a.runner.resume(passphrase: "sesame")
-        #expect(outcome.entersCastle, "the road followed B into Castle — not 'keys replaced' on a Castle account")
+        #expect(outcome.entersCastle, "the road followed B into Castle — the outcome enters Castle (the runner's log no longer says 'keys replaced')")
         let aFile = try a.keyFile(outcome.newKeyFingerprint)
         #expect(aFile.apple == nil && aFile.appleKeyID == nil, "a Castle account's key file carries no Apple copy (held on both sides)")
         #expect(a.calls.custodyTargets.last == .biometric && a.posture == .castle, "custody to the gate, never silent")
@@ -4359,15 +4358,11 @@ struct PostureSwitchTests {
     @Test func twoDevicesSwitchingPostureAtOnceTheSecondsCASRefuseBecomesTheFollow() async throws {
         let a = try await makeWorld()
         defer { a.tearDown() }
-        let client = try #require(a.vaultClient)
         let emu = try #require(a.vaultEmu)
-        let material = try #require(a.oldMaterial)
-        // The account STANDARD-shaped (the 2b world's vault is born without the
-        // Apple-held copy — the 2c drill's fix, the act leaving Castle performs).
-        let born = try await a.vault()
-        try await client.updateVault(
-            try born.format.settingAppleHeldCopy(masterKey: material.masterSymmetricKey, appleKey: a.apple.symmetricKey, appleKeyID: a.apple.id),
-            expectedRevision: born.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
+        // The account STANDARD-shaped — the harness lands the vault's Apple-held
+        // copy since VX-99 round 1 (round 2's NIT: this test's own re-wrap of it,
+        // and the comment that the world's vault was born without it, dropped).
+        #expect(try await a.vault().format.masterWrappedByAppleHeld != nil)
         let b = try await makeWorld(sharing: a)  // built BEFORE any switch (its seed rides the old keys)
         defer { b.tearDown() }
         let revisionBefore = try await a.vault().revision

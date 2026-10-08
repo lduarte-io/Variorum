@@ -756,7 +756,31 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   (`serverUnreachable`, hoisted from the URLError arm). Use Castle's local-only road untouched. Green PENDING.
   **REVERT V99-H:** the guard deleted. Expected RED: the gap pin + the re-pointed pin (d)'s two refusals; its Use Castle
   control green.
-- F6 (NITs): NOT-STARTED. F7 fix: NOT-STARTED.
+- F7 fix: DONE — `appleHeldCopyForStandard` returns the VERIFIED `AppleKey`; `rekeyCustodyAndSnapshot` / `writeNewKeyFile`
+  take `appleKey: AppleKey?` (the key, not a Bool): the ceremony's enrolled road passes the belt's key (one A for the
+  vault's M′ copy and the key file's L′ copy), the follow and the resume's arm read A only where the vault's word is Standard
+  (same moment as before), the local-only road (Use Castle only, since F4) passes nil. Green PENDING.
+  **REVERT V99-I:** in `runCeremony`, `appleKeyForKeyFile = appleHeld` → `appleKeyForKeyFile = appleHeld != nil ?
+  leaves.appleKeys.read() : nil` (the re-read after the walk). Expected RED: the F7 pin alone.
+- F6 (NITs): DONE — (1) the `(:524)` cite → the symbol (`runCeremony`'s `vault.fetchVault()` after the drain); (2)
+  `DoorFacts.appleKeyReadable`'s doc → "on a Standard ACCOUNT (the vault's word)"; (3) **the rewritten `.reencrypt` marker's
+  `newCorpusKeyID` — NOT ADOPTED, disposition:** under finding 3's ruled rule (the stamp decides at every step) the id this
+  device minted for a never-landed write is LOAD-BEARING — it is what keeps a second crash on another device's road reading
+  as another device's (the other-device Done, the words rule); carrying the vault's id would read that road as this device's
+  own on the second resume (the follow flag would still carry the Castle facts, but the Done would fall to the follow's and
+  typed words would land). The trap the NIT foresaw does not exist under the built rule (the minted id can never equal a
+  vault id); pinned by `aDoubleCrashedAnotherDeviceResumeStaysAnotherDevicesRoadByTheStampItsMarkerCarries`; the site's
+  comment says why. Round 1's recorded VX-107 residual (the Done + the words rule on a double crash) is closed by the same
+  rule — RECORDED, NOT CLAIMED (VX-107 stays the orchestrator's to close); (4) the "said 'keys replaced'" wording → the
+  runner's LOG line (the site's comment + round 1's MINOR pin message); (5) the false "born without the Apple-held copy"
+  comment and the three redundant re-wraps (`replaceAllKeysUnderStandardRefuses…`, `replaceAllKeysRefusesAnUnreachable…`,
+  `twoDevicesSwitchingPostureAtOnce…`) dropped for an `#expect` that the harness landed the copy; (6) `makeWorld(
+  vaultSaysCastle:)` gains a `precondition` (only a fresh enrolled world's vault). No behavioral revert — no behavior.
+- F3 correction: IN-PROGRESS — the tip's first green run (05:55) failed ONE line, S1's Done (`set on another device on an
+  earlier day`): the first `resume(nil)` (before the passphrase ask) rewrites the `.reencrypt` marker with the ROAD's
+  `entersCastle` (false on S1), so the second call no longer saw the act (and the pane's door would have said "Finish
+  Replacing Keys…" over a Use Castle). Fix: the rewrite keeps the ACT's `entersCastle` on an own road (recomputed from the
+  fresh vault every resume anyway) and the road's on another device's road or a follow's marker.
 - Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
 - Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
 - Phone compile (`MobilePostureSheets.swift` touched): PENDING.
