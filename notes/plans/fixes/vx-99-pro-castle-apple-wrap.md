@@ -648,3 +648,33 @@ reviewer, which doubles as her ruled "Opus 5.5 cold review at the end either way
      The single-crash road's later markers already did this since 2a667130.
    - **Phone:** the phone suite's runner use (`MobileProtectionTests.swift:1477`) drives a follow only, so round 1 does
      not reach it. Its compile was re-run green by the reviewer.
+
+## ROUND 2 — ORCHESTRATOR DISPOSITION (2026-10-08; same-model round — Opus reviewer, Opus implementer — so the orchestrator arbitrates against the spec)
+
+Round 2 (`notes/plans/fixes/vx-99-ladder-round2.md`, d9821e8e, unedited) found 1 MAJOR (pre-existing) + MINORs + NITs.
+The orchestrator verified the MAJOR's worst arm in code: `PostureSwitchModel.resume` maps `restartRequired` to
+`.explain` (:554–556) while the mode stays `.resume`, so `continueFromExplain` (:214) skips the Replace All Keys branch
+and walks words → `.floor` → `runner.enterCastle` (:391) — a "Finish replacing keys" press can end in ENTERING CASTLE.
+A new MAJOR earns round 3 (the cap). **Dispositions:**
+
+- **Finding 1 (MAJOR, pre-existing) — IN-UNIT.** The resume face must know WHICH act it is finishing: ONE shared
+  selector over the pending marker's act (enter Castle vs Replace All Keys, follow vs ceremony) and the outcome's road,
+  used by both platforms' running title, Done body and restart. Restart of a Replace All Keys marker restarts Replace
+  All Keys (→ `.authorize` road), never Use Castle. The Done never says "your Apple account never held" unless the
+  outcome entered Castle; the follow-of-another-device Done keeps ledger 61's words sentence. Pins per arm, red on HEAD.
+- **Finding 2 (MINOR, introduced) — IN-UNIT.** `accountPostureIsStandard` reads the door's vault word, not
+  `controller.posture` (the same rule as round 1's MAJOR).
+- **Finding 3 (MINOR; S1 introduced, S2 pre-existing) — IN-UNIT, option (a).** In the resume's enrolled arm the ROAD's
+  posture is the account's (decision 8): custody, insurance, offer, Done AND the Apple copy all from the vault's word;
+  where the vault's corpus key id is not the marker's stamped `newCorpusKeyID`, the road is another device's (words not
+  landed, the other-device Done). Pins for S1 and S2.
+- **Finding 4 (MINOR, pre-existing) — IN-UNIT.** Decision 9: the runner refuses a Replace All Keys that reaches its
+  local-only road (the door admits only enrolled libraries, so that road is only ever the check-then-act gap); Use
+  Castle's local-only road stays. Pin (d) re-pointed by name to the refusal (its Use Castle half, if any, kept).
+- **Finding 5 (MINOR, pre-existing, `Sources/…/Sync/`) — OUT → a ticket** (`CorpusRotation.begin` binding to the
+  caller's fetched revision). A narrow cross-device race; the fix is in `Sync/` (Fable work by the standing rule) and
+  wants a fetch-count seam. Not tonight.
+- **Findings 6–7 (NITs) — IN-UNIT,** including passing the belt-verified `AppleKey?` into `writeNewKeyFile` (finding 7).
+
+Cast for the fix: a FRESH `opus-implementer` (the first one passed ~490k). Round 3 (the cap): a fresh Opus 5.5
+reviewer — the last review is Opus 5.5 per her ruling. Stage: one slot via the coordinator.
