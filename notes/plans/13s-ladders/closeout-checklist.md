@@ -16,3 +16,12 @@ Shared ledgers are touched ONLY at the merge, on latest main, by this session (t
 8. **The stage coordinator:** told at the merge (the custody slot frees).
 9. **Final main merge BEFORE the PR:** origin/main at or after b494e676 (PR #140 — VX-99's post-merge copy fix, the Castle Done's "NOT" lowercased). The branch's last merge (46343a43) PREDATES it; one more merge is owed anyway for the search-lesson re-diff. The /Applications refresh then builds from post-merge main ≥ b494e676. Her app is 5740 (from 9819bff8) until the refresh.
 10. **MERGE GUARD (U4 R1 NIT-2):** the PR does not merge until `TutorialSeeder.swift` no longer quotes "N quiet savepoints · show" — i.e., the triage landing (running now) has landed its fold-line port, or failing that the one-line quote fix goes in by hand. Verify by grep at the merge.
+
+## THE FINAL STAGE WINDOW — the consolidated runsheet (request from oct7coordinator once U4 R2 + the landing review close; ~75-90 min)
+
+A. **Suites (the implementer-of-record resumed per unit, or run by the orchestrator where small):** U4's Mac 26-suite run + its fix-pass pins (the ⌘/ row pin, the fence control literal) · U4's mobile 13-suite run (the LibraryOpenCopy red is the recorded 13x baseline) · U1b's post-fix re-run (its 20-suite list; the drift guard now routes the star legs) + the classics-door receipt pin · the landing's 28-suite tutorial spine + its four red-on-old recipes (REBUILD after each restore). Any new red: trace-to-attribute before touching.
+B. **Walks (the orchestrator's):** U4's acceptance walk both voices (Block History "Commits" + fold line · Settings ▸ Writing · ⌘/ incl. the FIXED note ▾ row · a named + unnamed ⌘S receipt · the Blocks count) · the landing's spot-walk (3-4 re-voiced lessons incl. lesson 1's acts + the books chapter against the reshaped world + the privacy chapter's untouched floors) · F-U2-W-3's fixed beat live (empty-box fallback ring + road-back line; watch for the selection race with eyes open) · the U2 end-card glance stands verified.
+C. **Hygiene:** quit every instance, simulator down, dev prefs restored, release + message the coordinator.
+
+## THE EXTRA WHOLE-PHASE OPUS PASS (R-13s-35, her grant) — runs AFTER the final window closes green, headless, before any merge
+Target: the whole phase diff (the branch vs its main merge-base at the then-current tip), REVIEW_PROMPT verbatim, with the eight ladder records as context. Any BLOCKER/MAJOR → the standing ladder machinery; MINOR/NIT → dispositioned into the closeout.
