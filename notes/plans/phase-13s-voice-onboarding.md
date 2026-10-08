@@ -428,7 +428,7 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
 | piece | status |
 |---|---|
 | 0 — the record + the design (this section) | IN-PROGRESS — the design below is settled; the build-verify resolutions are traced |
-| 1 — the pure rule: `Domain/Tour.swift` + headless `TourWalkTests` (P-6) | NOT-STARTED |
+| 1 — the pure rule: `Domain/Tour.swift` + headless `TourWalkTests` (P-6) | DONE (this commit) — `swift test --filter TourWalkTests` 20/20 GREEN (with `TourOfferTests` 8/8: 28 in 2 suites); every card walked, the tolerance cases (B2 Today's Entry, wandering off, a block already fanned by an earlier tour, edges never stale, home-skips, any note at step 3, a missing seeded book) and the card placement pinned |
 | 2 — the shared spotlight: `Core/Views/TourSpotlight.swift` (the anchor modifier, the ring) | NOT-STARTED |
 | 3 — the engine + the cards: `Features/Onboarding/` (script, engine, overlay) + `RootView` wiring (`startTour()` replaces the U1a stub) | NOT-STARTED |
 | 4 — the anchors at the feature sites | NOT-STARTED |
