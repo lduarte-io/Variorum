@@ -76,23 +76,7 @@ private func withChapterWorld<T>(
         try await session.runner.run { _ in
             let ops = Operations(undoStack: nil)
             @Dependency(\.database) var database
-            let welcome = try ops.ensureWelcomeShelf(wingID: "")
-            let tags = try database.read { db in try Queries.allTags(db, wingID: "") }
-            let classicsTagID = try tags.first { $0.path == SampleLibrarySeeder.classicsTagPath }?.id
-                ?? ops.createTag(name: SampleLibrarySeeder.classicsTagPath, wingID: "").id
-            let existing = try database.read { db in
-                try Queries.readings(db, wingID: "").first {
-                    BookNaming.sameName($0.name, SampleLibraryWelcome.classicsGatheringName)
-                }
-            }
-            if existing == nil {
-                _ = try ops.createReading(
-                    name: SampleLibraryWelcome.classicsGatheringName, kind: .gathering,
-                    profile: "collection", sortField: .createdAt, sortDir: .asc,
-                    querySpec: try RuleGrammar.encode(
-                        SampleLibraryWelcome.classicsRule(classicsTagID: classicsTagID)),
-                    wingId: "", shelfId: welcome.shelf.id)
-            }
+            _ = try SampleLibraryWelcome.restoreClassicsGathering(ops: ops)
             let quicknote = try database.read { db in
                 try String.fetchOne(
                     db, sql: "SELECT id FROM container WHERE title = ? AND deleted_at IS NULL",

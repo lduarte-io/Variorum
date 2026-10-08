@@ -2014,20 +2014,24 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
-        // pre-13x 5a: the second seeded book's restore — the same
-        // mint-what's-missing road (`SampleLibrarySeeder`, per book).
+        // (The Encryption Explained restore — pre-13x 5a — RETIRED at
+        // 13s-b U1b, R-13s-37: not restorable.)
+        // 18l-c U6 (R-18l-11): the takemania book's restore — the same
+        // mint-what's-missing road (its title lowercased at 13s-b U1b,
+        // R-13s-38 — the verb follows the one name constant).
         Capability(
-            id: .restoreEncryptionBook,
-            verb: "Restore \u{201C}\(SampleLibraryEncryptionBook.name)\u{201D}",
+            id: .restoreJekyllBook,
+            verb: "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}",
             scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
-        // 18l-c U6 (R-18l-11): the takemania book's restore — the same
-        // mint-what's-missing road, the third seeded book.
+        // 13s-b U1b (R-13s-37, "classics restorable"): the classics
+        // gathering's restore — adopt-or-mint on Welcome; the verb's
+        // wording is the implementer's (PROVISIONAL P-U1b-3).
         Capability(
-            id: .restoreJekyllBook,
-            verb: "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}",
+            id: .restoreClassicsGathering,
+            verb: "Restore the \u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D} Gathering",
             scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,

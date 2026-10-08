@@ -777,11 +777,11 @@ enum SampleLibrarySeeder {
         UserDefaults.standard.bool(forKey: seededDefaultsKey(for: storeVariant, book: book))
     }
 
-    /// **The reader's decision as the STORE records it — ONE rule for both
-    /// silent roads** (18o U2 lifted it here from the ensure, R-18k-5): the
-    /// tutorial door's ensure (`SeededBookRestore.ensure`, pre-13x F3
-    /// MINOR-N3) and the launch seed (`perform` — *"honour the tombstone at
-    /// launch"*, QUESTIONS #138(f)). A TOMBSTONED reading of the book's
+    /// **The reader's decision as the STORE records it — ONE rule for the
+    /// silent road** (18o U2 lifted it here from the tutorial door's ensure,
+    /// R-18k-5; that ensure retired with Encryption Explained's doors at
+    /// 13s-b U1b, so the launch seed (`perform` — *"honour the tombstone at
+    /// launch"*, QUESTIONS #138(f)) is the rule's silent reader now). A TOMBSTONED reading of the book's
     /// reserved name — any age, a Delete Now included
     /// (`Queries.readingTombstoneExists`) — is her deletion, made on this
     /// device or arrived from another. The explicit doors (Help ▸ Restore, the

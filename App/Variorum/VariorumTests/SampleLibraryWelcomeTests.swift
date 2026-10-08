@@ -582,11 +582,13 @@ struct SampleLibraryWelcomeTests {
                 "and only THEN does it promise the rest is untouched")
     }
 
-    /// **Restore Tutorial puts the fresh guide on Welcome — beside *Encryption
-    /// Explained*, which is what makes the privacy lesson's "on this shelf"
-    /// literally true (P-13id-U7-6).** The open door on an EXISTING guide
-    /// arranges nothing.
-    @Test func restoreTutorialPutsTheGuideOnWelcomeBesideTheEncryptionBook() async throws {
+    /// **Restore Tutorial puts the fresh guide on Welcome.** The open door
+    /// on an EXISTING guide arranges nothing. **JUSTIFIED EDIT (13s-b U1b,
+    /// R-13s-37):** the beside-Encryption-Explained arm retired with the
+    /// book's ensure — the privacy lesson no longer points at it (piece 6),
+    /// so the door has no sentence to make true and mints NO book beside
+    /// the guide.
+    @Test func restoreTutorialPutsTheGuideOnWelcome() async throws {
         try await withWelcomeWorld { session, db in
             _ = await launchSeeds(session)          // an existing store
             _ = try await TutorialSeeder.restore(session: session)
@@ -605,10 +607,79 @@ struct SampleLibraryWelcomeTests {
             let f = try await facts(db)
             let welcome = try #require(f.welcomes.first)
             #expect(f.shelfOf[TutorialSeeder.bookName] == .some(welcome.id), "the guide on Welcome")
-            #expect(f.shelfOf[encryptionName] == .some(welcome.id),
-                    "…beside the book its privacy lesson names — “on this shelf”, true")
             #expect(session.status.spoken?.text == WelcomeDoorCopy.tutorialRestored(
                 guide: TutorialSeeder.bookName, shelf: "Welcome"))
+        }
+    }
+
+    /// **THE CLASSICS DOOR (13s-b U1b — R-13s-37, "classics restorable";
+    /// the U7 continuation's gathering subject, re-homed from the retired
+    /// arrangement step).** Help ▸ Restore the “classics” Gathering mints
+    /// the gathering ON Welcome from the `#classics` tag and opens it; it
+    /// shows both classic books' notes side by side, Sherlock's wearing
+    /// the owned mark; a second press ADOPTS and refuses. RED ON OLD: no
+    /// such door existed (the arrangement minted silently at birth).
+    @Test func theClassicsDoorMintsTheGatheringOnWelcomeAndAdoptsOnASecondPress() async throws {
+        try await withWelcomeWorld { session, db in
+            _ = await launchSeeds(session)          // both classic books present
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            actions.restoreClassicsGathering()
+            await poll { shell.pendingSelection != nil }
+            guard case .reading(let gatheringID)? = shell.pendingSelection else {
+                Issue.record("the door opens the gathering")
+                return
+            }
+            #expect(session.status.spoken?.text.hasPrefix("Restored the") == true,
+                    "the minting press is a receipt: \(session.status.spoken?.text ?? "nil")")
+            try await db.read { db in
+                let classics = try #require(try Queries.reading(db, id: gatheringID))
+                #expect(classics.kind == .gathering)
+                let welcome = try #require(try Shelf.fetchOne(
+                    db, sql: "SELECT * FROM shelf WHERE role = 'welcome' AND deleted_at IS NULL"))
+                #expect(classics.shelfId == welcome.id, "minted ON Welcome")
+                let classicsTag = try #require(try Queries.allTags(db, wingID: "").first {
+                    $0.path == SampleLibrarySeeder.classicsTagPath
+                })
+                #expect(RuleGrammar.read(classics.querySpec)
+                        == .rule(SampleLibraryWelcome.classicsRule(classicsTagID: classicsTag.id)),
+                        "made from the ONE seed tag")
+                #expect(try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?",
+                    arguments: [gatheringID]) == 0, "a gathering holds nothing")
+                // It shows both books' shipped notes (the door composed the
+                // arrangement, so the tagging ran first); Sherlock's wear
+                // the owned mark, Jekyll's none.
+                let shown = Set(try Queries.assembleReading(db, readingID: gatheringID, limit: 300).map(\.postID))
+                let sherlockBook = try #require(try Queries.readings(db).first { $0.name == sherlockName })
+                let jekyllBook = try #require(try Queries.readings(db).first { $0.name == jekyllName })
+                let sherlockNotes = Set(try Queries.assembleReading(db, readingID: sherlockBook.id).map(\.postID))
+                let jekyllNotes = Set(try Queries.assembleReading(db, readingID: jekyllBook.id).map(\.postID))
+                #expect(shown == sherlockNotes.union(jekyllNotes),
+                        "both books' notes, side by side — and nothing else")
+                let badges = try Queries.ownershipFacts(db, postIDs: Array(shown))
+                for id in sherlockNotes {
+                    #expect(badges[id]?.ownedBy?.id == sherlockBook.id,
+                            "a Sherlock note wears “owned by” its book")
+                }
+                for id in jekyllNotes {
+                    #expect(badges[id]?.ownedBy == nil, "Jekyll is plain — no owned mark")
+                }
+            }
+
+            // A second press: adopted, nothing new, the honest refusal.
+            session.status.clear()
+            shell.pendingSelection = nil
+            actions.restoreClassicsGathering()
+            await poll { shell.pendingSelection != nil }
+            #expect(shell.pendingSelection == .reading(gatheringID), "ADOPTED — the same gathering opens")
+            #expect(session.status.current?.kind == .refusal, "a door that minted nothing says so")
+            let count = try await db.read { db in
+                try Queries.readings(db).filter {
+                    $0.name == SampleLibraryWelcome.classicsGatheringName && $0.deletedAt == nil
+                }.count
+            }
+            #expect(count == 1, "never a twin")
         }
     }
 }

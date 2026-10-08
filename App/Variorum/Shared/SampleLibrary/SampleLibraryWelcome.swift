@@ -257,6 +257,38 @@ nonisolated enum SampleLibraryWelcome {
         }
     }
 
+    // MARK: - The classics gathering's restore brain (13s-b U1b)
+
+    /// **ADOPT-OR-MINT the classics gathering** — the retired arrangement
+    /// step 3b's exact shape, now the Help ▸ Restore door's brain (R-13s-37,
+    /// her word: "classics restorable"; the gathering left the fresh seed at
+    /// R-13s-5). At operations level so the door's runner turn and any
+    /// fixture drive ONE body: ensure Welcome, ensure the `#classics` tag,
+    /// adopt a live Home gathering wearing the rule or the reserved name,
+    /// else mint one ON Welcome. Returns the gathering and whether THIS
+    /// call minted it.
+    static func restoreClassicsGathering(ops: Operations) throws -> (id: String, minted: Bool) {
+        @Dependency(\.database) var database
+        let welcome = try ops.ensureWelcomeShelf(wingID: "")
+        let tags = try database.read { db in try Queries.allTags(db, wingID: "") }
+        let tagID = try tags.first { $0.path == SampleLibrarySeeder.classicsTagPath }?.id
+            ?? ops.createTag(name: SampleLibrarySeeder.classicsTagPath, wingID: "").id
+        let rule = classicsRule(classicsTagID: tagID)
+        if let present = try homeReadings(database, named: nil).first(where: { reading in
+            reading.kind == .gathering
+                && (RuleGrammar.read(reading.querySpec) == .rule(rule)
+                    || BookNaming.sameName(reading.name, classicsGatheringName))
+        }) {
+            return (present.id, false)
+        }
+        let gathering = try ops.createReading(
+            name: classicsGatheringName, kind: .gathering, profile: "collection",
+            sortField: .createdAt, sortDir: .asc,
+            querySpec: try RuleGrammar.encode(rule), wingId: "",
+            shelfId: welcome.shelf.id)
+        return (gathering.id, true)
+    }
+
     // MARK: - The launch occasion (fresh stores at birth)
 
     /// What a launch decided. Recorded, never surfaced (furniture is silent).
