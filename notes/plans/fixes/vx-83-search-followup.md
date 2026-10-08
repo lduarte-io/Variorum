@@ -452,7 +452,7 @@ Machinery: no deaths so far.
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record + piece plan (the first commit) | DONE (this commit) |
-| P1 | **VX-87 — the grid FORK, measured:** can the `.graphical` `DatePicker` carry direction 1 (the two-click run washing in; the voice treatment)? Probe + the proposal below; the GRID half is built only on the orchestrator's ruling | IN-PROGRESS — the probe is next |
+| P1 | **VX-87 — the grid FORK, measured:** can the `.graphical` `DatePicker` carry direction 1 (the two-click run washing in; the voice treatment)? Probe + the proposal below; the GRID half is built only on the orchestrator's ruling | DONE (this commit) — **the system control REFUSES both halves** (§P1 FORK below, measured headlessly on 27.0); the proposal (a small custom month grid) AWAITS THE ORCHESTRATOR'S RULING |
 | P2 | **VX-87 — the door's brain (grid-agnostic, pure):** the mode row's meaning, the no-silent-arm rule (opening and switching modes arm nothing; only a touched day arms — supersedes P-13o-U2-9 FOR THIS DOOR), the two-click run, the SENTENCE, `any day`; one pure home in `LibraryDayFilter.swift` + new-behavior pins (built, compiled; RUN at the slot) | NOT-STARTED |
 | P3 | **VX-87 — the popover face minus the grid:** the `when ▾` press opens ONE popover (the `VoicedMenu` dies); the mode row, the sentence at the foot, `any day` in the card, Esc/click-out keep the sentence; tokens only, both voices, dark; `LibraryWhenRangeTests` + `LibraryDayFilterTests` JUSTIFIED EDITS where the door's own closures change | NOT-STARTED |
 | P4 | **VX-87 — the month GRID** (per the ruling on P1) | BLOCKED — awaiting the orchestrator's ruling |
@@ -461,6 +461,50 @@ Machinery: no deaths so far.
 | P7 | Close — record final, self-assessment, report | NOT-STARTED |
 
 PENDING flags: none yet (nothing claimed).
+
+**§P1 FORK — the `.graphical` `DatePicker` against direction 1, MEASURED (2026-10-07; two headless
+external-fact probes — an offscreen `NSHostingView`/`NSView` rendered to PNG, never shown, no store;
+scripts and renders in the gitignored `.build/vx83-ub/`):**
+1. **SwiftUI's picker has no range on the Mac.** `DatePicker` binds ONE `Date`; `MultiDatePicker` is
+   `@available(macOS, unavailable)` in the 27.0 SDK's SwiftUI interface. So direction 1's
+   between-days reading — *first click sets the start, second the end, the run washing in* — cannot be
+   drawn by it: after the second click the picker shows the end alone, no start, no run.
+2. **It takes NO voice treatment.** The `.graphical` picker rendered with `.font(mono 11.5)` +
+   `.foregroundStyle(ink)` + `.tint(accent)` + `.accentColor(accent)` is PIXEL-IDENTICAL to the plain
+   one, light and dark: SF 13 with a bold "Oct 2026" header, the ◀ ● ▶ nav, a system-grey selection,
+   a system-BLUE today, its own bezel box (a dark-grey box on the fully black room, R51), Sunday-first.
+   The `NSDatePicker` underneath reports `font` SF 13 / `textColor` controlTextColor /
+   `backgroundColor` controlBackgroundColor.
+3. **The AppKit bridge, tried directly** (`NSDatePicker`, `.clockAndCalendar`, `datePickerMode =
+   .range`, `timeInterval` = 5 days): range mode DOES draw a run (Oct 1–6 banded), and
+   `backgroundColor`/`drawsBackground`/bezel take — but `font` (mono 11.5) and `textColor` are
+   IGNORED, the run band is system grey, today stays system blue. Its native gesture is a DRAG, so the
+   two-click reading would be an intercept in its action handler.
+
+**THE PROPOSAL (awaiting the orchestrator's ruling — nothing of the grid is built):**
+- **(A) RECOMMENDED — a small custom month grid**, `LibraryWhenMonthGrid` (its own file beside
+  `LibraryDayFilter.swift`, P-9; ~150 lines), drawn ENTIRELY from `VoiceTokens`: a header `‹ October
+  2026 ›` (the voice's small face, ink; the chevrons muted with the `VoicedMenu` hover wash); weekday
+  initials in `faint`; a FIXED six-row 7-column grid (the popover never changes height between months);
+  day digits in `tokens.small` (monospaced in Terminal by the token itself); outside-month days faint;
+  the armed day / the run's two ENDS on `QuietFill.chosen` (the app's one "this one" fill, VR-119),
+  the days BETWEEN on `tokens.wash` as one continuous band; today's digit in `accent`, semibold;
+  dark = the voice's dark tokens on the popover's own surface (no system box). Day arithmetic in
+  `LibraryDayFace.calendar` (Gregorian, her zone — the filter's one calendar); the COLUMN order follows
+  her own first weekday (`Calendar.current.firstWeekday`, so Monday-first users get the mockup's row).
+  **Every cell's press is ONE member closure (`tap(day:)`)**, so the two-click-run pin drives the door's
+  own road (the 18h ladder's R1-9) — no system calendar's cell can be driven by a pin. Costs, said
+  plainly: no arrow-key day navigation in v1 (the system picker has it — a later polish if she wants
+  it); VoiceOver gets a per-cell label ("Tuesday, October 6, 2026") + the selected trait by hand.
+- **(B) the AppKit bridge** — `NSViewRepresentable` over `NSDatePicker` in `.range` mode with a
+  two-click intercept: keyboard + VoiceOver for free; but the grid would be the ONE un-voiced surface in
+  the popover (system SF 13 + bold header, grey run, blue today, Sunday-first by locale) — exactly the
+  "ugly" she reported and the R-VX83-2 screenshot bar ("make sure that the popover looks good") — and the
+  pins could drive only the bridge's action handler, never a cell.
+- **(C) the SwiftUI `.graphical` picker** — DEAD for direction 1 by measurement (1): no run, no wash.
+
+What builds meanwhile (grid-agnostic, so it holds under A or B): P2 (the door's brain + pins), P3 (the
+popover's shell around a grid slot), P5 (VX-89).
 
 ### U-C — SEARCH WHAT YOU SAVED: VX-72 (R-VX83-5); one implementer session after U-B
 
