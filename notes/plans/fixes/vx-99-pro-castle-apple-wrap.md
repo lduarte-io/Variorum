@@ -952,6 +952,13 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
 - **REVERT V99-L (named before it runs — item 2's sibling):** `message(for:)`'s act arm deleted (every `switchInProgress` →
   `resumeBody`). Expected RED: pin (c)'s three Replace All Keys wordings alone; its Castle half and the seams pin green.
   Result PENDING.
-- Green PENDING: `PostureSwitchTests`, the batch-1 set (round 2's twenty suites), the tutorial spine (thirteen suites),
-  the two pane face suites (`ProtectionSurfaceRenderTests`, `ProtectionTierFaceTests` — they host `ProtectionPane`); the
-  phone build-for-testing.
+- Bundles PREBUILT headless (no stage), each a clone of `vx99-dd`'s products right after its build, run by
+  `test-without-building -xctestrun` (`scratchpad/r2b-suite.sh`): `red` (5ff2d440), `tip` (f5cd9f4a), `J` (the tip +
+  V99-J's edit), `L` (the tip + V99-L's edit) — every one **TEST BUILD SUCCEEDED**, the tree restored after each
+  (`git status` clean); the four app dylibs differ by md5. V99-K needs no bundle (the pin reads the source at run time).
+- Phone build-for-testing: DONE — `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+  build-for-testing` over the tip (`vx99-phone-dd`): **TEST BUILD SUCCEEDED**, no warnings in the touched file. No
+  simulator run.
+- Green PENDING (stage): `PostureSwitchTests`, the batch-1 set (round 2's twenty suites), the tutorial spine (thirteen
+  suites), the two pane face suites (`ProtectionSurfaceRenderTests`, `ProtectionTierFaceTests` — they host
+  `ProtectionPane`).
