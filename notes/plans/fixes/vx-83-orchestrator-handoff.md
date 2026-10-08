@@ -34,10 +34,13 @@ This handoff adds only what the record does not carry: live session state and th
   descriptions DO end with the 🤖 Generated-with-Claude-Code line. Merge commits only.
 - **Memory repo** (`~/.claude/projects/-<home>-dev-variorum/memory`, branch
   master): `vx-83-run-state.md` is the live map — pull before writes, push after.
-- Agents of this session: U-A/U-B/U-C implementers CLOSED (hand-backs verified). **Ladder R1
-  fable-reviewer is RUNNING at compaction** — it writes its findings INCREMENTALLY to a file in
-  the worktree and hands back by notification. On resume with no notification in sight: check
-  ListAgents / the worktree for its findings file; never spawn a twin while it runs.
+- Agents of this session: U-A/U-B/U-C implementers CLOSED (hand-backs verified; each also
+  answered its R1 disposition). **The R1 REVIEWER is RUNNING ITS FIX PASS at compaction** —
+  implementing the three confirmed findings itself (red-on-old per fix, commit per fix), its
+  record `notes/plans/fixes/vx-83-ladder-r1.md` (committed dd572d82); its one Mac-pin run
+  needs a stage slot AFTER VX-99's hold (~02:46) and it pings `oct7coordinator` itself. On
+  resume with no hand-back in sight: check ListAgents / `git log` for its fix commits; never
+  spawn a twin while it runs.
 
 ## STATE (all verified, nothing pending trust)
 
@@ -53,12 +56,19 @@ main's eeb5d80e; `+ commits` everywhere in search, R-VX83-9 superseded + R-VX83-
 
 ## THE TAIL — NEXT ACTIONS, in order
 
-1. **Ladder R1 verdict** → verify its claims by spot-check → findings land VERBATIM in the
-   record → cross-model dispositions (CLAUDE.md: findings to the unit implementers for
-   agree/dispute — resume their agents by message if alive, else the reviewer's call stands as
-   the cross-model rule says; the reviewer implements its confirmed fixes ITSELF with
-   red-on-old pins) → suites green + one implementer sanity pass → R2 with a FRESH reviewer;
-   new BLOCKER/MAJOR ⇒ R3; hard cap three.
+1. **DONE BEFORE COMPACTION — R1 verdict + dispositions:** 0 BLOCKER · 0 MAJOR · 1 MINOR ·
+   2 NIT (record: `vx-83-ladder-r1.md`); ALL THREE findings AGREED by their units, zero
+   disputes; the full fixer guidance went to the reviewer verbatim (notably U-B's correction:
+   the month fallback uses calendar COMPONENTS from `now` — `LibraryWhenMonth(dayKey:)` is
+   failable). **IN FLIGHT: the reviewer's fix pass** (MINOR: archived mark on tag-alone
+   Blocks rows — select the home's archived fact in `catalogTaggedBlocks`, carry to
+   `isArchived`, mark in `blockLine`, red-on-old core pin in SearchTagListingTests; NIT-1:
+   the armed `commits ✕` shows whenever armed, invitation stays words-only; NIT-2 the
+   components fallback). ON ITS HAND-BACK: verify by spot-check (tree, commits, the pins'
+   red-on-old evidence, suites green incl. SearchTagListing/Seam, LibraryTagListingTests,
+   LibraryRowAlignmentTests) → ONE implementer SANITY PASS, read-only, over the fix diff
+   (resume the U-A agent — the MINOR is its surface) → **R2 with a FRESH fable-reviewer over
+   the fix diff + the R1 record**; new BLOCKER/MAJOR ⇒ R3; hard cap three.
 2. **Catch-up merge** (only after R1 frees the worktree): `git merge origin/main` (NEVER
    rebase). Expected conflicts, all ledger-textual: QUESTIONS (13x took #202 — ours lands
    **#203**), MobileSoul (13x took PL-48 — ours lands **PL-49**; PL-47b fix already upstream),
@@ -111,16 +121,20 @@ instance checks by PATH, her /Applications instance never touched · the stage r
 protocol exactly · singular/plural wording sweeps (the "1 savepoint" cell) · pin-before-fix
 saved us once already (F-W-1 hollow — keep building pins FIRST) · two writers, one tree: never
 edit the record while an agent owns a section mid-flight; pathspec-limited commits only ·
-`git pull --no-rebase` in the memory repo when it rejects · the walker's V4 scratch note stays
-in the dev store (fine, fenced).
+`git pull --no-rebase` in the memory repo when it rejects · in the WORKTREE `git pull
+--ff-only` once errored "Cannot rebase onto multiple branches" — `git fetch` + `git merge
+--ff-only origin/vx-83-search-followup` is the reliable form · implementers told to "answer
+the reviewer" may misroute via the coordinator — all disposition routing goes THROUGH ME ·
+the walker's V4 scratch note stays in the dev store (fine, fenced).
 
 ## PASTE-READY KICKOFF (for the post-compaction turn, or a fresh seat)
 
 > You are **searchfollowup**, the /architect-phase orchestrator for Variorum RUN VX-83, resuming
 > after compaction. Read `notes/plans/fixes/vx-83-orchestrator-handoff.md` and
 > `notes/plans/fixes/vx-83-search-followup.md` WHOLE (both in `~/dev/variorum-vx-83`), then
-> continue from the handoff's THE TAIL exactly where the state stands: if the ladder R1
-> reviewer has handed back, verify and run the disposition flow; if it is still running, wait
-> on its notification (check ListAgents before assuming anything). Stage via `oct7coordinator`;
+> continue from the handoff's THE TAIL exactly where the state stands: R1 + dispositions are
+> DONE (3 AGREEs); the reviewer's FIX PASS was in flight at compaction — if it has handed
+> back, verify it, run the U-A sanity pass, then spawn R2 with a FRESH fable-reviewer; if it
+> is still running, wait on its notification (check ListAgents before assuming anything). Stage via `oct7coordinator`;
 > GUI via `walk-judgment-search-fixes`; no walks from this session (no TCC grants). Verify,
 > never trust: `git -C ~/dev/variorum-vx-83 status -sb && git log --oneline -8` before acting.
