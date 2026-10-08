@@ -2342,6 +2342,12 @@ private struct OutlinePostRow: View {
     /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
     @State private var dropTargeted = false
 
+    /// VX-75: whether the live editor mounted in this row has drawn its note
+    /// at its real height. Until it has, the read surface stays mounted under
+    /// it and the editor stays invisible, so a click into editing never shows
+    /// an empty note while the editor's first projection is on its way.
+    @State private var liveShowing = false
+
     /// The card's preview — **the BOOK's, in hand before this row's first
     /// frame** (13u2 UNIT A2, item 18). It used to be this row's own `@State`,
     /// filled by a `.task` that rendered the WHOLE note; the card therefore
@@ -2357,83 +2363,85 @@ private struct OutlinePostRow: View {
     var body: some View {
         Group {
             if model.isExpanded(entry.postID) {
-                if model.liveFocusedPostID == entry.postID {
-                    // THE FOCUSED NOTE. 18d batch 1 (U-10/U-17): the editor
-                    // renders NO bar here — its doors are in the sidebar's
-                    // note box — so the row is the prose at Write's measure
-                    // and nothing else. The gutter it used to reserve is
-                    // gone with the bar that lived in it.
-                    VStack(alignment: .leading, spacing: 6) {
-                        postHeader
-                            .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                            .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                        if nearViewport {
-                            StableSurface(
-                                known: model.rememberedSurfaceSize(entry.postID),
-                                followsShrinks: true,
-                                // 18d batch 4 (U-12): the settle is the ONE
-                                // occasion this note's remembered length
-                                // reaches the disk — the memory itself takes
-                                // every geometry report, and a live editor
-                                // reports on every keystroke.
-                                settled: { model.persistSurfaceSize(entry.postID) },
-                                remember: { model.rememberSurfaceSize(entry.postID, $0) }
-                            ) {
-                                EditorView(
-                                    session: session, postID: entry.postID, inline: true,
-                                    caretSeed: model.caretSeed, fanSeed: model.fanSeed,
-                                    barPlacement: .inSidebarBox,
-                                    gutter: gutter)
+                // ONE expanded shape for both states (VX-75). The focused
+                // note's live editor and the read-cheap surface used to be two
+                // separate branches, so focusing dismantled the read surface
+                // at once while the editor was still born empty — every frame
+                // until its first projection showed a blank row (her "whole
+                // screen text disappears"). In one ZStack the read surface
+                // keeps its identity across the focus flip and is released
+                // only once the editor has drawn the note at its real height.
+                // P-3 holds: the read surface is never live, and there is
+                // still exactly one live editor.
+                let isLive = model.liveFocusedPostID == entry.postID
+                VStack(alignment: .leading, spacing: 6) {
+                    // The HEADER is the handle, not the prose: an expanded
+                    // post shows a text surface, and a drag over it would
+                    // fight selection. 18d batch 1 (U-10/U-17): the focused
+                    // note's editor renders NO bar here — its doors are in the
+                    // sidebar's note box — so the row is the prose at Write's
+                    // measure and nothing else.
+                    postHeader
+                        .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                    if nearViewport {
+                        ZStack(alignment: .topLeading) {
+                            if !(isLive && liveShowing) {
+                                StableSurface(
+                                    known: model.rememberedSurfaceSize(entry.postID),
+                                    followsShrinks: false,
+                                    settled: { model.persistSurfaceSize(entry.postID) },
+                                    remember: { model.rememberSurfaceSize(entry.postID, $0) }
+                                ) {
+                                    ReadPostView(
+                                        session: session, postID: entry.postID,
+                                        gutter: gutter,
+                                        onFocusRequest: { offset in
+                                            model.focus(entry.postID, caret: offset)
+                                        },
+                                        onBadgeTap: { blockID in
+                                            // Interpretation 1 (PROVISIONAL): focus
+                                            // FIRST, then the fan panel opens on the
+                                            // one live surface.
+                                            model.focus(entry.postID, fanBlock: blockID)
+                                        })
+                                }
+                                .id("read-\(entry.postID)")
+                                .onAppear { materialized() }
                             }
-                            .id(entry.postID)
-                            .onAppear { materialized() }
-                        } else {
-                            surfacePlaceholder
-                        }
-                    }
-                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
-                } else {
-                    // Expanded, read-cheap: prose at the measure. (The facts
-                    // that used to sit in the gutter beside it are the note
-                    // box's now — state 2, for whichever note the book is
-                    // pointing at.)
-                    VStack(alignment: .leading, spacing: 6) {
-                        // The HEADER is the handle, not the prose: an
-                        // expanded post shows a read-cheap text surface,
-                        // and a drag over it would fight selection.
-                        postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                        if nearViewport {
-                            StableSurface(
-                                known: model.rememberedSurfaceSize(entry.postID),
-                                followsShrinks: false,
-                                settled: { model.persistSurfaceSize(entry.postID) },
-                                remember: { model.rememberSurfaceSize(entry.postID, $0) }
-                            ) {
-                                ReadPostView(
-                                    session: session, postID: entry.postID,
-                                    gutter: gutter,
-                                    onFocusRequest: { offset in
-                                        model.focus(entry.postID, caret: offset)
-                                    },
-                                    onBadgeTap: { blockID in
-                                        // Interpretation 1 (PROVISIONAL): focus
-                                        // FIRST, then the fan panel opens on the
-                                        // one live surface.
-                                        model.focus(entry.postID, fanBlock: blockID)
-                                    })
+                            if isLive {
+                                StableSurface(
+                                    known: model.rememberedSurfaceSize(entry.postID),
+                                    followsShrinks: true,
+                                    // 18d batch 4 (U-12): the settle is the ONE
+                                    // occasion this note's remembered length
+                                    // reaches the disk — the memory itself takes
+                                    // every geometry report, and a live editor
+                                    // reports on every keystroke.
+                                    settled: { model.persistSurfaceSize(entry.postID) },
+                                    remember: { model.rememberSurfaceSize(entry.postID, $0) }
+                                ) {
+                                    EditorView(
+                                        session: session, postID: entry.postID, inline: true,
+                                        caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                                        barPlacement: .inSidebarBox,
+                                        gutter: gutter,
+                                        onLiveShowing: { liveShowing = true })
+                                }
+                                .id(entry.postID)
+                                .opacity(liveShowing ? 1 : 0)
+                                .allowsHitTesting(liveShowing)
+                                .onAppear { materialized() }
+                                .onDisappear { liveShowing = false }
                             }
-                            .id("read-\(entry.postID)")
-                            .onAppear { materialized() }
-                        } else {
-                            surfacePlaceholder
                         }
+                    } else {
+                        surfacePlaceholder
                     }
-                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 }
+                .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                .padding(.bottom, 26)
+                .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
             } else {
                 collapsedPostCard
                     .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)

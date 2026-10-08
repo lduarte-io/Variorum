@@ -790,3 +790,191 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - VX-75 — the first click into editing holds the column steady
+
+extension BookOutlineLandingTests {
+    /// **VX-75 (her 2026-10-06 report):** *"when I click in to edit there's a
+    /// dreadful flash of the whole screen and slight shake."* The road: a note
+    /// EXPANDED and read-cheap, then a prose click — `focus(_:caret:)` — which
+    /// swaps the row's read surface for the live inline editor. The contract
+    /// this pins: the swap is INVISIBLE to the rest of the column. Every other
+    /// realized anchor holds its top (the read↔live inset drift is ≤ ~48 pt;
+    /// the tolerance is 150 so only the bug class — a dropped reservation, a
+    /// placeholder collapse, a run remount — can cross it), the focused row's
+    /// height never dips toward the editor's 24-pt birth height, and no
+    /// watched anchor stops reporting mid-swap (a de-realized run row is her
+    /// "text disappears for a split second"). Sampled EVERY settle turn —
+    /// the flash is transient, and an end-state read would stay green through
+    /// it.
+    @Test func theFirstClickIntoEditingHoldsTheColumnSteady() async throws {
+        try await withLandingBook(posts: 9, longAt: [1, 4], chapters: true) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+
+            // Her state before the click: the story unfolded READ-CHEAP (the
+            // ▸, not a focus), its surface realized and remembered-size
+            // settled — she "scrolled through everything fine".
+            model.expand(storyID)
+            let storyAnchor = BookOutlineRows.Row.noteAnchor(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                (BookOutlineGeometry.rowHeights[storyAnchor] ?? 0) > 3000
+            }, maxTurns: 120)
+            let preHeight = try #require(BookOutlineGeometry.rowHeights[storyAnchor])
+            #expect(preHeight > 3000, "the read surface realized tall: \(preHeight)")
+            // One quiet beat so geometry is settled before the click.
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
+
+            // The witnesses: every anchor realized right now, where it sits.
+            let before = BookOutlineGeometry.anchorTops
+            #expect(before.count >= 4, "several rows are realized around the story: \(before.count)")
+
+            // THE CLICK: the read tier's plain click reports an offset and
+            // the container focuses — `ReadPostView.onFocusRequest`'s exact
+            // call, mid-first-block.
+            model.focus(storyID, caret: 120)
+
+            // Sample EVERY turn while the swap settles: max top deviation per
+            // witness, the focused row's height floor, any witness that stops
+            // reporting.
+            var maxShift: CGFloat = 0
+            var shiftStory: [String] = []
+            var heightFloor = preHeight
+            var vanished: Set<String> = []
+            for turn in 0..<60 {
+                watchdog.beat()
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(20))
+                watchdog.beat()
+                let now = BookOutlineGeometry.anchorTops
+                for (id, top) in before {
+                    guard let current = now[id] else {
+                        vanished.insert(id)
+                        continue
+                    }
+                    let shift = abs(current - top)
+                    if shift > maxShift {
+                        maxShift = shift
+                        shiftStory.append("turn \(turn): \(id) \(Int(top)) → \(Int(current))")
+                    }
+                }
+                if let h = BookOutlineGeometry.rowHeights[storyAnchor], h < heightFloor {
+                    heightFloor = h
+                }
+                // Stop once the live editor holds the story and a few quiet
+                // turns have passed after it.
+                if (writingEditor(in: hosting)?.string.count ?? 0) > 5000, turn > 20 { break }
+            }
+
+            // The swap really happened (the pin is not vacuously green).
+            let editor = try #require(writingEditor(in: hosting))
+            #expect(editor.string.count > 5000, "the live editor holds the story")
+
+            print("VX-75 PIN: maxShift=\(Int(maxShift)) heightFloor=\(Int(heightFloor)) "
+                + "of \(Int(preHeight)) vanished=\(vanished.sorted()) shifts=\(shiftStory.suffix(6))")
+            #expect(maxShift <= 150,
+                    "no neighbour moves under the swap — max shift \(Int(maxShift)) pt (\(shiftStory.suffix(4)))")
+            #expect(heightFloor > preHeight - 200,
+                    "the focused row never dips toward the editor's birth height: floor \(Int(heightFloor)) of \(Int(preHeight))")
+            #expect(vanished.isEmpty,
+                    "no realized row de-materializes under the swap: \(vanished.sorted())")
+        }
+    }
+}
+
+extension BookOutlineLandingTests {
+    /// Every text view in the tree that is in a window and SHOWS real prose:
+    /// a read surface holding it, or a live editor holding it at its real
+    /// height (an editor at its 24-pt birth frame shows one line of it, and
+    /// the host keeps it invisible until its height is in).
+    @MainActor
+    private func proseSurfaces(in view: NSView) -> [NSTextView] {
+        var found: [NSTextView] = []
+        func walk(_ v: NSView) {
+            if let text = v as? NSTextView, text.window != nil, !text.isHiddenOrHasHiddenAncestor,
+               text.string.count > 1000,
+               !(text is EditorTextView) || text.frame.height > 1000 {
+                found.append(text)
+            }
+            for sub in v.subviews { walk(sub) }
+        }
+        walk(view)
+        return found
+    }
+
+    /// **VX-75 — THE MECHANISM, as she saw it** (the walk's frames: the
+    /// column blank for ~9 frames, ~0.6 s, then the same text back at the
+    /// same place). A plain click on a read-cheap story swaps the row's read
+    /// surface for the live editor; the read surface is dismantled at once
+    /// while the editor is born EMPTY and fills only when its first projection
+    /// arrives from the store. Every displayed turn between those two moments
+    /// shows no prose where the story was. The contract: from the click until
+    /// the editor holds the story, some surface is always showing it.
+    @Test func theFirstClickIntoEditingNeverShowsAnEmptyNote() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: true) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !proseSurfaces(in: hosting).isEmpty
+            }, maxTurns: 120)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
+            #expect(!proseSurfaces(in: hosting).isEmpty, "the story reads before the click")
+
+            model.focus(storyID, caret: 120)
+
+            var emptyTurns: [Int] = []
+            var editorFilledAt: Int?
+            for turn in 0..<80 {
+                watchdog.beat()
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                if proseSurfaces(in: hosting).isEmpty { emptyTurns.append(turn) }
+                if (writingEditor(in: hosting)?.string.count ?? 0) > 1000 {
+                    editorFilledAt = editorFilledAt ?? turn
+                    if turn > (editorFilledAt ?? 0) + 3 { break }
+                }
+                pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            print("VX-75 EMPTY: emptyTurns=\(emptyTurns) editorFilledAt=\(String(describing: editorFilledAt))")
+            #expect(editorFilledAt != nil, "the live editor came to hold the story")
+            #expect(emptyTurns.isEmpty,
+                    "no displayed turn shows the story with no prose — empty at turns \(emptyTurns)")
+        }
+    }
+}
