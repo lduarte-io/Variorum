@@ -282,7 +282,7 @@ The parked prompt above stands with exactly these changes: (a) the seat line unc
 
 ## U1a RECORD (the first-open surface, the Sync-free half — Opus implementer, Pro seat, 2026-10-08)
 
-**What this unit did NOT do (first line, per the contract):** nothing yet — live record; this line is rewritten at close.
+**What this unit did NOT do (first line, per the contract; rewritten at the continuation's stage hand-off, 2026-10-08):** NO Mac-suite run yet — every chrome pin is WRITTEN and waits for the stage window (the commands are in the self-assessment); NO walk or capture — this seat launches nothing, so the USE acceptance (the offer line, the help road, Help ▸ Take the Tour, About, the Dock icon, both voices) is the orchestrator's walk under a coordinator GO; NO real-store voice check (her store is unreadable headless — PENDING her word, piece 3); NO tour engine (the stub stands until U2); NO palette row for the tour (U2's call); nothing under `Sources/VariorumCore/Sync/`.
 
 ### LIVE STATUS
 
@@ -292,8 +292,8 @@ The parked prompt above stands with exactly these changes: (a) the seat line unc
 | 2 — the tour offer line (R-13s-6/13) + its local retire-forever flag | DONE (ab807118) — core rule `Domain/TourOffer` + `TourOfferTests` 8/8 GREEN headless; app model/line/stub door build green; `TourOfferLineTests` (5) WRITTEN, run PENDING the stage window; the small V arrives with piece 4 |
 | 3 — Study as the fresh-store default voice (2026-10-05) | DONE (c41c96e0) — the unset-key read flips (`ThemeSettings.unsetStoreVoice`); core pins red on the unflipped read (3 issues), green after (`AppearanceSettingsTests` 11/11); four Mac fixtures name their voice (justified edits); the real-store explicit-value check is PENDING her word (below) |
 | 4 — the logo (R-13s-24/25): AppIcon set, About, the offer line's mark | DONE (f4af2eec; the continuation) — `AppIcon.icon` (Icon Composer document) + `VariorumMark` asset from `notes/brand/tools/appicon.py`; About window; the offer line draws the mark. App + tests BUILD green (`build-for-testing`); the art checked by eye through `ictool` (all six macOS renditions) and the compiled bundle (`AppIcon.icns` + the icon stack's 16…1024 renditions, three appearances); `AppMarkTests` (5) WRITTEN, run PENDING the stage window |
-| 5 — Help ▸ tour entry (shares piece 2's stub) | DONE (this commit) — Help ▸ **Take the Tour** (PROVISIONAL P-U1a-9: "Tutorial" is the field guide's door), `.takeTour` gains `.menuBar`, a `tourRequested` request the window adopts with piece 2's one entry; build green; `TourOfferLineTests` gains its sixth pin, run PENDING the stage window |
-| stage-window Mac runs | NOT-STARTED — commands land in the self-assessment |
+| 5 — Help ▸ tour entry (shares piece 2's stub) | DONE (8ef9d870) — Help ▸ **Take the Tour** (PROVISIONAL P-U1a-9: "Tutorial" is the field guide's door), `.takeTour` gains `.menuBar`, a `tourRequested` request the window adopts with piece 2's one entry; build green; `TourOfferLineTests` gains its sixth pin, run PENDING the stage window |
+| stage-window Mac runs | READY-FOR-STAGE — headless all green (core `swift test` 2356 tests / 271 suites + 40/6, the gated skips only; `build-for-testing` green, no new warnings); the Mac runs wait for the orchestrator's claim — the exact commands are in the self-assessment below |
 
 ### Piece notes
 
@@ -324,3 +324,69 @@ The U1a implementer was STOPPED mid-piece-4 (last line: rewriting the icon gener
 - **P-U1a-7 — the About window replaces the system panel.** (a) built: our own small window (mark, the serif wordmark, the version) — the only way to set the wordmark in real type. (b) the system panel with the mark as its icon and the wordmark as a credits line (keeps the platform panel; the name stays in the system's bold face).
 - **P-U1a-8 — the V's placement on the icon:** 62% of the canvas width, a 3%-of-height optical drop (`V_WIDTH_SHARE`, `OPTICAL_DROP_SHARE`). Alternatives: 56% (more air, quieter) · 68% (bolder, closer to the brand sheet's tile).
 - **P-U1a-9 — the Help menu's tour door is "Take the Tour"** (and the transient says "Run it any time from Help ▸ Take the Tour."). (a) built: a distinct name, because "Open the Tutorial" already opens the field guide. (b) rename the field guide's door ("Open the Field Guide") and call the tour's "Tutorial", matching her R-13s-6 sentence literally (touches a 13b door and the guide's own lessons). (c) one Tutorial submenu holding both.
+
+### SELF-ASSESSMENT (the continuation implementer, at the stage hand-off — 2026-10-08)
+
+**Built (five pieces, five commits):** 7803404d the quick-entry box back at the Bookcase's foot · ab807118 the offer line and its local retire-forever record · c41c96e0 Study as the unset-store voice · f4af2eec the logo (the Icon Composer icon, the one vector mark, the About window, the line's mark) · 8ef9d870 Help ▸ Take the Tour. Pieces 1–3 are the first implementer's; 4 was adopted mid-flight from its uncommitted tree and finished; 5 is the continuation's.
+
+**Verified at this seat (headless only):** the full core suite GREEN at the end — `swift test`: 2356 tests in 271 suites + 40 in 6, the only skips the long-standing gated measurement/integration suites; `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` GREEN, no warning in any file this unit touched (the three that print are pre-existing: `PaneSurface.swift:218`, `EditorTypography.swift:137–138`); the generator is idempotent (a re-run wrote byte-identical files); the icon's six macOS renditions through `ictool` and the compiled bundle (`CFBundleIconName`, the derived `.icns`, the icon stack's 16…1024 renditions in three appearances) inspected by eye — `notes/plans/13s-screens/u1a/`; `NSFont(name: "Iowan Old Style")` resolves to `IowanOldStyle-Roman` on this Mac.
+
+**PENDING, and why:** (1) the Mac pins — the stage window (commands below); (2) the walk captures, both voices — the orchestrator's, under a coordinator GO (this seat launches nothing): the Bookcase first open (the offer line with its mark, right side, above the bar; the quick-entry box at the foot), "not now" → the help-road sentence → gone, Help ▸ Take the Tour (the stub's refusal), the About window in light and dark, the Dock icon in light and dark (P-U1a-6 is decided by eye there); (3) her real store's voice row — author-only (piece 3's note).
+
+**Watch-outs for the reviewer and the walk:**
+1. **Piece 3 has the widest reach.** Any Mac suite that lands a store without naming a voice now measures Study. The first implementer named the four whose worlds were "a voiceless store reads Terminal"; run 2 below sweeps the voice-adjacent and every changed-source suite. A red there on geometry is first suspected of the unset-voice read, and the remedy is the justified edit (name the voice the suite measures), never reverting the default.
+2. **About draws the FALLBACK tokens**, like the ⌘/ helper: a sibling `Window` scene receives no store's `ThemeStore`, so its surface, ink and the version line's small face are Terminal's in either voice; the wordmark is fixed Iowan regardless. Walk check: the version line under the serif word in a Study store. If it reads wrong, a follow-up hands the About scene the app's last-known voice — a small change, deliberately not invented here.
+3. **The mark at 16 pt:** the stripes merge to grey at 32 px (the brand's own 64/32/16 test sheet shows the same); the silhouette holds. Walk check on the offer line, both rooms.
+4. **From the help-road sentence, Help ▸ Take the Tour retires the line at once** (the core rule's `(.helpRoad, .tourStarted)`), and the stub speaks its refusal — a walkable sequence.
+5. **The icon swap spans two commits:** the old empty set's deletion rode f8edff25 (the orchestrator's note commit); its replacement is f4af2eec. A per-commit review should read them together.
+
+**THE STAGE-WINDOW COMMANDS** (from `<home>/dev/variorum-13s/App/Variorum`, under the held claim, foreground, `pipestatus` checked, the "Test run with N tests" line confirmed; the two `PostureSwitchTests` reds are VX-106's known baseline and are in neither list):
+
+Run 1 — the unit's own pins + the registry walk (expect AppMarkTests 5 · TourOfferLineTests 6 · BookcaseQuickEntryPlacementTests 2 · CapabilityRegistryTests 29 · WhatsNewTests 7 = 49 tests in 5 suites):
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/AppMarkTests \
+  -only-testing:VariorumTests/TourOfferLineTests \
+  -only-testing:VariorumTests/BookcaseQuickEntryPlacementTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/WhatsNewTests
+```
+Run 2 — piece 3's justified edits, the voice-adjacent suites, and every suite mounting a changed source (`ShelfView`, `RootView`, `EditorCommands`' router):
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/MastheadLayoutTests \
+  -only-testing:VariorumTests/MastheadStampTests -only-testing:VariorumTests/ModeSwitchFeelTests \
+  -only-testing:VariorumTests/LibraryListFaceTests -only-testing:VariorumTests/LibraryListFaceRigTests \
+  -only-testing:VariorumTests/BindDoorTests -only-testing:VariorumTests/BookcaseCensusMenuTests \
+  -only-testing:VariorumTests/BookcaseDragFaceTests -only-testing:VariorumTests/BookcaseCensusOverlayTests \
+  -only-testing:VariorumTests/BookcaseRowFreezeTests -only-testing:VariorumTests/BookcaseMastheadPopoverTests \
+  -only-testing:VariorumTests/MembershipChoiceTests -only-testing:VariorumTests/ShellChromeTests \
+  -only-testing:VariorumTests/DebugOracleTwoWindowTests \
+  -only-testing:VariorumTests/CommandRouterTests -only-testing:VariorumTests/StatusCenterTests \
+  -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/MoveAndExecuteTests \
+  -only-testing:VariorumTests/StaleWriteIntentTests -only-testing:VariorumTests/SealDoorTests \
+  -only-testing:VariorumTests/BlockTOCStatusTests -only-testing:VariorumTests/TakesWordCountTests \
+  -only-testing:VariorumTests/BlockHistoryPaletteDoorTests \
+  -only-testing:VariorumTests/BookAnchorTests -only-testing:VariorumTests/BookCarryTests \
+  -only-testing:VariorumTests/PagedAnchorReportTests -only-testing:VariorumTests/BookChooserOrderTests \
+  -only-testing:VariorumTests/ContextBarTests -only-testing:VariorumTests/AscentDoorTests \
+  -only-testing:VariorumTests/AscentRoutingTests -only-testing:VariorumTests/MultiBookEditNoteRuleTests \
+  -only-testing:VariorumTests/MultiBookEditNoteTriggerTests -only-testing:VariorumTests/DivergeDoorTests \
+  -only-testing:VariorumTests/BookPanelBrainTests -only-testing:VariorumTests/BookPanelDeclarationTests \
+  -only-testing:VariorumTests/BookPanelActingTests \
+  -only-testing:VariorumTests/NoteBoxGeometryTests -only-testing:VariorumTests/NoteBoxCompositionTests \
+  -only-testing:VariorumTests/PaneMountTests -only-testing:VariorumTests/PaneLayoutTests \
+  -only-testing:VariorumTests/PaneSplitModelTests -only-testing:VariorumTests/PaneBookBlurTests \
+  -only-testing:VariorumTests/PaneSplitDoorTests -only-testing:VariorumTests/PaneUnmountTests \
+  -only-testing:VariorumTests/PaneFocusCatcherTests -only-testing:VariorumTests/PaneHeldModeTests \
+  -only-testing:VariorumTests/ShellLandingRuleTests -only-testing:VariorumTests/ShellLandingMountTests \
+  -only-testing:VariorumTests/ShellLandingDoorTests \
+  -only-testing:VariorumTests/NavigationHistoryTests -only-testing:VariorumTests/OpenNotesTests \
+  -only-testing:VariorumTests/WorkspaceNamingTests -only-testing:VariorumTests/WorkspaceModelTests \
+  -only-testing:VariorumTests/NavigationDoorsTests \
+  -only-testing:VariorumTests/WindowRegistryTests -only-testing:VariorumTests/PaneMountWindowTests \
+  -only-testing:VariorumTests/NoteOnlyWindowTests -only-testing:VariorumTests/IndependentWorkspaceTests \
+  -only-testing:VariorumTests/TwoWindowMountTests -only-testing:VariorumTests/WindowUnmountTests \
+  -only-testing:VariorumTests/CreationTargetTests
+```
+(The type names were read from the files at this commit; several files hold more than one suite, which is why run 2 names types, not files. If the orchestrator prefers one long run, the whole `VariorumTests` target is the wider net — the closeout run's rule.)
