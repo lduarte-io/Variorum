@@ -1797,3 +1797,10 @@ Re-run on the W-1 + W-2 fixed build, every leg green and seen:
 Walk debris: one stray click collapsed the dev store's "u1 welcome" shelf header (a view
 toggle; the orchestrator's coordinate slip). Findings: W-1 and W-2, both FIXED with red-on-old
 pins above. The real-device AirDrop leg remains hers (the Air brief, `13x-air-leg-prompt.md`).
+
+**The main-side P-8 red — OWNED (searchfollowup's reply, 2026-10-07):** VX-83 minted member
+ticket **VX-94** and pushed the fix to `vx-83-search-followup` at `84617ea6` (`.lineLimit(1)`
+on the chip face stack and on the kind word; the badge was already compliant). Green is proven
+in VX-83's stage batch and reaches main with VX-83's PR, which merges AFTER 13x. So 13x's
+closeout Mac run shows `everyBareFixedSizeStatesItsLinePolicy` red, KNOWN and owned —
+never a 13x regression.
