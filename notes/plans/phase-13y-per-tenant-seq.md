@@ -1,5 +1,7 @@
 # Phase 13y — Per-Tenant `server_seq` + the Minimal Abuse Guard
 
+> **✔ CLOSED 2026-09-24** — deployed at her window (marker 8→9 live on the production mirror, both devices enrolled under the challenge protocol). The closeout paragraph lives in `notes/PhaseCloseoutArchive.md`. *(Banner added 2026-10-08: the OPEN status line below was never flipped at the close and kept misleading sessions — it is history.)*
+
 **STATUS: OPEN — kicked off 2026-09-22 at her word (`/architect-phase 13y`), the kickoff
 sitting's answers below (R-13y-1…4).** Plan authored 2026-08-30 at the 13p closeout;
 corrected 2026-09-21 (marker 8→9, the `12_` slot); **REFRESHED 2026-09-22 at this kickoff —

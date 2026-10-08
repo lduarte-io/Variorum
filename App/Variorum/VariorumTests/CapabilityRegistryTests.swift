@@ -254,6 +254,20 @@ struct CapabilityRegistryTests {
         #expect(Set(EditorCommands.menuRendered) == CapabilityRegistry.doored(.menuBar))
     }
 
+    /// 13x F2 (ladder R2-2): the hand-off verb has ONE source of truth —
+    /// the registry's `.handOffLibrary` declares its verb FROM
+    /// `LibraryOpenCopy.handOffDoor` (the 13s table's constant), and both
+    /// faces render the registry's declaration, so a re-voicing of the
+    /// constant reaches the File menu and Data Safety alike. Before the
+    /// fix the registry held a duplicated literal and the constant was
+    /// dead copy — the exact drift both comments claimed impossible.
+    /// This pin is the enforcement the claim never had: it goes red the
+    /// moment the two decouple.
+    @Test func theHandOffVerbReadsTheOneCopyConstant() {
+        #expect(CapabilityRegistry.capability(.handOffLibrary).verb
+                == LibraryOpenCopy.handOffDoor)
+    }
+
     @Test func thePaletteRendersExactlyTheDeclaredPaletteDoors() {
         // findAnything IS the palette; it needs no row inside itself.
         #expect(Set(ShellActions.paletteActs) == CapabilityRegistry.doored(.palette))

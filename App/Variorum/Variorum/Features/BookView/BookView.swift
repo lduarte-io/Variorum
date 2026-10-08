@@ -2348,6 +2348,16 @@ private struct OutlinePostRow: View {
     /// an empty note while the editor's first projection is on its way.
     @State private var liveShowing = false
 
+    /// VX-82 — the INVERSE swap's flag: whether the CURRENTLY mounted read
+    /// surface has drawn the note at its real height (`ReadPostView.
+    /// onShowing`; reset when that surface leaves). On leaving edit mode the
+    /// fresh read surface mounts empty and fills asynchronously, so the
+    /// outgoing editor HOLDS — mounted, visible, inert — exactly until this
+    /// flips, the mirror of what `liveShowing` does for the forward swap.
+    /// Every condition reads row `@State` already correct in the body
+    /// evaluation that acts on it, so no `onChange` ordering is involved.
+    @State private var readShowing = false
+
     /// The card's preview — **the BOOK's, in hand before this row's first
     /// frame** (13u2 UNIT A2, item 18). It used to be this row's own `@State`,
     /// filled by a `.task` that rendered the WHOLE note; the card therefore
@@ -2384,7 +2394,13 @@ private struct OutlinePostRow: View {
                     postHeader
                         .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    if nearViewport {
+                    // VX-91: `nearViewport` alone left the clicked far
+                    // story's row a placeholder until the scroll ARRIVED —
+                    // the title-alone-over-blank beat. The row she is on
+                    // her way to pre-mounts (`outlineRowPreMounts`: focused
+                    // or the reveal's target, with a width-matched memory
+                    // so the reservation holds the column's geometry).
+                    if nearViewport || model.outlineRowPreMounts(entry.postID) {
                         ZStack(alignment: .topLeading) {
                             if !(isLive && liveShowing) {
                                 StableSurface(
@@ -2404,12 +2420,23 @@ private struct OutlinePostRow: View {
                                             // FIRST, then the fan panel opens on the
                                             // one live surface.
                                             model.focus(entry.postID, fanBlock: blockID)
-                                        })
+                                        },
+                                        onShowing: { readShowing = true })
                                 }
                                 .id("read-\(entry.postID)")
                                 .onAppear { materialized() }
+                                .onDisappear { readShowing = false }
                             }
-                            if isLive {
+                            // VX-82: `isLive` alone unmounted the editor the
+                            // instant focus left, while the fresh read surface
+                            // above was still empty — a reserved-height blank
+                            // beat ∝ the story (her "that pause is noticable").
+                            // The editor now lingers — visible, no hit testing,
+                            // never first responder — until that surface has
+                            // drawn the note (`readShowing`), the exact mirror
+                            // of the forward swap's hold. A re-click during the
+                            // beat finds it still mounted: instant return.
+                            if isLive || (liveShowing && !readShowing) {
                                 StableSurface(
                                     known: model.rememberedSurfaceSize(entry.postID),
                                     followsShrinks: true,
@@ -2430,7 +2457,10 @@ private struct OutlinePostRow: View {
                                 }
                                 .id(entry.postID)
                                 .opacity(liveShowing ? 1 : 0)
-                                .allowsHitTesting(liveShowing)
+                                // VX-82: no hit testing while lingering — a
+                                // click during the beat falls through to the
+                                // read surface's own focus-request road.
+                                .allowsHitTesting(isLive && liveShowing)
                                 .onAppear { materialized() }
                                 .onDisappear { liveShowing = false }
                             }

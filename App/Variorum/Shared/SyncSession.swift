@@ -42,6 +42,16 @@ final class SyncSession {
     var isConfigured: Bool { scheduler != nil }
     /// False for dev-store sessions (the A4 fence's sync seam, above).
     let allowsSync: Bool
+    /// 13x U2 row 7 — THE RESTORE-HOLD's one chokepoint (the round-3
+    /// ruling: an adopted copy lands OPEN with sync WAITING until the one
+    /// Resume press). Consulted by `triggerSync()` and `flush()` — every
+    /// trigger road funnels through them (the settle observation, the
+    /// became-active hook, the post-configure trigger), so while it
+    /// answers true NO round runs for this store; the kept outbox (QD)
+    /// pushes at the first resumed round because nothing cleared it.
+    /// nil = never held (every existing composition unchanged); the Mac
+    /// wires it to the `LibraryRestoreHold` marker's standing state.
+    var roundsHeld: (@MainActor () -> Bool)?
     private let database: AppDatabase
     /// Post-write settle debounce: outbox growth quiets down for this long
     /// before a round runs (keystroke-rate autosaves coalesce; S1's outbox
@@ -152,13 +162,16 @@ final class SyncSession {
 
     /// One sync round, serialized/coalesced by the scheduler (A3).
     func triggerSync() {
+        guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
         Task { await scheduler.trigger() }
     }
 
     /// Waits for in-flight rounds — the iOS background transition uses this
-    /// to push before suspension.
+    /// to push before suspension. Held like every other road (13x row 7):
+    /// a restored library pushes nothing before Resume.
     func flush() async {
+        guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
         await scheduler.trigger()
         await scheduler.awaitIdle()

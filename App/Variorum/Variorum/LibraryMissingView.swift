@@ -18,6 +18,10 @@ import VariorumCore
 
 struct LibraryMissingView: View {
     @Bindable var lobby: LibraryMissingLobby
+    /// 13x U2 row 6 — copy §3's third door lands ("Open an Existing
+    /// Library…", shipped unrendered since 1a): nil hosts (pins, a
+    /// preview) simply don't render it (P-2).
+    var openDoor: (() -> Void)? = nil
     @Environment(\.colorScheme) private var scheme
 
     /// No session exists yet, so the face speaks the leading voice.
@@ -57,6 +61,11 @@ struct LibraryMissingView: View {
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
                 .disabled(lobby.busy)
+            }
+            if let openDoor {
+                Button(ProtectionCopy.libraryMissingOpenDoor) { openDoor() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens))
+                    .disabled(lobby.busy)
             }
             VStack(spacing: 4) {
                 Button(ProtectionCopy.libraryMissingStartDoor) {

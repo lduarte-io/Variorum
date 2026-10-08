@@ -580,6 +580,31 @@ final class BookViewModel {
         outlineSurfaceSizes.persist(postID)
     }
 
+    /// **VX-91 — should this expanded row mount its surfaces EARLY, before
+    /// it is near the viewport?** The navigator's click on a far expanded
+    /// story used to land the scroll on a viewport of `Color.clear`
+    /// placeholders — the clicked TITLE alone, no text (her report, caught
+    /// on the walk's film) — because the row's surfaces mounted only after
+    /// arrival flipped `nearViewport`, and only then began their
+    /// story-sized fills. The row she is ON HER WAY TO (focused, or the
+    /// pending reveal's target) mounts at the click instead, so the text
+    /// loads while the scroll travels.
+    ///
+    /// The width-matched-memory guard is LOAD-BEARING: with no memory at
+    /// this width `StableSurface` reserves nothing, so an early mount
+    /// would collapse a placeholder standing ~16k pt tall to its content's
+    /// birth height mid-scroll — the exact reshuffle class this exists to
+    /// calm. Such a row keeps the shipped behavior (placeholder until
+    /// near); her steady-state store has a persisted record for every
+    /// story it has realized (18d batch 4).
+    func outlineRowPreMounts(_ postID: String) -> Bool {
+        guard liveFocusedPostID == postID || pendingReveal == postID else { return false }
+        guard let remembered = rememberedSurfaceSize(postID),
+              abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance
+        else { return false }
+        return true
+    }
+
     /// Batch H (row 95): the Read ▸ Scroll flow's remembered story sizes —
     /// the same idea at the PAGE's measure (a story on the flow's 600-pt
     /// serif column is not the story at Write's measure above, so the two

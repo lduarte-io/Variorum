@@ -977,4 +977,336 @@ extension BookOutlineLandingTests {
                     "no displayed turn shows the story with no prose — empty at turns \(emptyTurns)")
         }
     }
+
+    /// A surface SHOWING the story: in a window, not hidden, holding the
+    /// story's text AT a real height. Tightened on BOTH kinds (the forward
+    /// pin tightens only the editor): the inverse swap's failure is a fresh
+    /// read surface whose storage fills a beat before its 40-pt frame grows,
+    /// and a 40-pt sliver of a 9.7k-word story is not the story showing.
+    @MainActor
+    private func storySurfaces(in view: NSView) -> [NSTextView] {
+        var found: [NSTextView] = []
+        func walk(_ v: NSView) {
+            if let text = v as? NSTextView, text.window != nil, !text.isHiddenOrHasHiddenAncestor,
+               text.string.count > 1000, text.frame.height > 1000 {
+                found.append(text)
+            }
+            for sub in v.subviews { walk(sub) }
+        }
+        walk(view)
+        return found
+    }
+
+    /// **VX-82 — THE INVERSE SWAP** (found at VX-75's ladder, R1-4; her
+    /// confirmation in the VX-75 build: "that pause is noticable"). Leaving
+    /// edit mode — the click-out margin's `focus(nil)`, a click into another
+    /// note — unmounted the live editor at once while a FRESH read surface
+    /// mounted empty and filled only when its first projection arrived, so
+    /// the row showed a reserved-height blank beat ∝ the story. The
+    /// contract, the forward pin's mirror: from the leave until the read
+    /// surface holds the story at its real height, SOME surface is always
+    /// showing it — and the handover COMPLETES (the read surface back, the
+    /// lingering editor gone; a beat, never a resident double).
+    @Test func leavingEditModeNeverShowsAnEmptyNote() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: true) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 120)
+
+            /// Into editing, handover complete: the editor holds the story at
+            /// a real height and the read surface has been released.
+            @MainActor func enterEditing() async {
+                model.focus(storyID, caret: 120)
+                await settle(window, hosting, watchdog: watchdog, until: {
+                    let showing = storySurfaces(in: hosting)
+                    return !showing.isEmpty && showing.allSatisfy { $0 is EditorTextView }
+                }, maxTurns: 160)
+                await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 6)
+            }
+
+            /// Sample every displayed turn after a leave: turns with no
+            /// surface showing the story, and when the read tier is back.
+            @MainActor func sampleLeave(_ what: String) async -> (empty: [Int], readBackAt: Int?) {
+                var emptyTurns: [Int] = []
+                var readBackAt: Int?
+                for turn in 0..<80 {
+                    watchdog.beat()
+                    hosting.layoutSubtreeIfNeeded()
+                    window.layoutIfNeeded()
+                    window.displayIfNeeded()
+                    let showing = storySurfaces(in: hosting)
+                    if showing.isEmpty { emptyTurns.append(turn) }
+                    if showing.contains(where: { !($0 is EditorTextView) }) {
+                        readBackAt = readBackAt ?? turn
+                        if turn > (readBackAt ?? 0) + 3 { break }
+                    }
+                    pump(0.02)
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(20))
+                    watchdog.beat()
+                }
+                print("VX-82 LEAVE (\(what)): emptyTurns=\(emptyTurns) "
+                    + "readBackAt=\(String(describing: readBackAt))")
+                return (emptyTurns, readBackAt)
+            }
+
+            // LEG 1 — the click-out road (`focus(nil)`; the row stays
+            // expanded).
+            await enterEditing()
+            let editor = try #require(writingEditor(in: hosting))
+            #expect(editor.string.count > 5000, "the live editor holds the story")
+            model.focus(nil)
+            let leg1 = await sampleLeave("focus(nil)")
+
+            // The handover completes: the story's lingering editor leaves.
+            await settle(window, hosting, watchdog: watchdog, until: {
+                (writingEditor(in: hosting)?.string.count ?? 0) < 5000
+            }, maxTurns: 120)
+            #expect((writingEditor(in: hosting)?.string.count ?? 0) < 5000,
+                    "the outgoing editor unmounts once the read surface shows — the linger is a beat, not a resident double")
+
+            // LEG 2 — her clicking-around road: leave by focusing ANOTHER
+            // note (short, so its own editor never passes the story filter).
+            await enterEditing()
+            model.focus(postIDs[2], caret: 0)
+            let leg2 = await sampleLeave("focus(other)")
+
+            #expect(leg1.readBackAt != nil, "the read surface came back after the click-out")
+            #expect(leg2.readBackAt != nil, "the read surface came back after focusing another note")
+            #expect(leg1.empty.isEmpty,
+                    "no displayed turn after the click-out shows the story's row empty — empty at \(leg1.empty)")
+            #expect(leg2.empty.isEmpty,
+                    "no displayed turn after focusing elsewhere shows the story's row empty — empty at \(leg2.empty)")
+        }
+    }
+
+    /// **VX-91 — THE STRESS PROBE, built as the CONFIRM** (her report:
+    /// rapid clicking across the expanded Sherlock outline sometimes
+    /// jitters, worst case "the title that you clicked on will appear alone
+    /// in the middle of the page, with no other text on the screen"; not
+    /// reliably reproducible, seen on both Macs, pre-dates VX-75's fix. Her
+    /// rule: no fix without a clear diagnosis and a pin — so this probe IS
+    /// the diagnosis attempt. RED confirms a mechanism class and the hunt
+    /// narrows from its story; GREEN acquits the harness-reachable classes
+    /// and VX-91 records the findings).
+    ///
+    /// The storm is her gesture at her pace: everything expanded, then a
+    /// focus+reveal (the navigator's click) on a different story every
+    /// ~100 ms, twelve times, never waiting for a landing to finish. The
+    /// asserts are about the AFTERMATH — a brief blank on a long jump is
+    /// virtualization's normal beat; what must never happen is the state
+    /// STICKING: anchors gone, a story row collapsed, a viewport of
+    /// placeholders with no prose, a landing still spinning.
+    @Test func rapidClickingAcrossExpandedStoriesSettlesWithProseOnScreen() async throws {
+        try await withLandingBook(posts: 9, longAt: [1, 4, 7], chapters: true) { session, db, readingID, postIDs, _ in
+            let stories = [postIDs[1], postIDs[4], postIDs[7]]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog(budget: 8)
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+
+            // Her setup: ALL text expanded, the first story's surface real.
+            model.expandAll()
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 160)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 10)
+            let anchors = stories.map { BookOutlineRows.Row.noteAnchor($0) }
+            let before = BookOutlineGeometry.anchorTops
+            #expect(before.count >= 6, "the expanded column is realized around the fold: \(before.count)")
+
+            // THE STORM: twelve focus+reveal clicks across the three
+            // stories, one every ~3 displayed turns (~100 ms), plus a
+            // click-out mid-storm (she doesn't only click IN). Diagnostics
+            // recorded per turn; no asserts in here.
+            var stormBlankTurns = 0
+            var turnsSinceClick = 0
+            var clicks = 0
+            var cycle = 0
+            for _ in 0..<44 {
+                watchdog.beat()
+                if turnsSinceClick >= 3, clicks < 12 {
+                    turnsSinceClick = 0
+                    clicks += 1
+                    if clicks == 7 {
+                        model.focus(nil)  // the mid-storm click-out
+                    } else {
+                        let story = stories[cycle % stories.count]
+                        cycle += 1
+                        model.focus(story, caret: 120)
+                        model.requestReveal(story)
+                    }
+                } else {
+                    turnsSinceClick += 1
+                }
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                if storySurfaces(in: hosting).isEmpty { stormBlankTurns += 1 }
+                pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(15))
+                watchdog.beat()
+            }
+
+            // THE AFTERMATH: the storm is over; the state must settle.
+            let target = stories[(cycle - 1) % stories.count]
+            let targetAnchor = BookOutlineRows.Row.noteAnchor(target)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pendingReveal == nil && !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 100)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 20)
+
+            let now = BookOutlineGeometry.anchorTops
+            let vanished = before.keys.filter { now[$0] == nil }.sorted()
+            let storyHeights = anchors.map { Int(BookOutlineGeometry.rowHeights[$0] ?? 0) }
+            print("VX-91 PROBE: clicks=\(clicks) stormBlankTurns=\(stormBlankTurns) "
+                + "vanished=\(vanished) storyHeights=\(storyHeights) "
+                + "targetTop=\(String(describing: now[targetAnchor].map(Int.init))) "
+                + "trace=\(BookOutlineGeometry.trace.suffix(18))")
+
+            #expect(vanished.isEmpty,
+                    "every anchor realized before the storm still reports after it: \(vanished)")
+            #expect(model.pendingReveal == nil, "no landing is left spinning after the storm")
+            #expect(!storySurfaces(in: hosting).isEmpty,
+                    "prose is on screen after the storm — never a page of placeholders under the clicked title")
+            for (anchor, height) in zip(anchors, storyHeights) {
+                #expect(height > 1500,
+                        "no expanded story's row collapsed under the storm: \(anchor) at \(height) pt")
+            }
+        }
+    }
+
+    /// **VX-91 — THE PRE-MOUNT CONSULT's truth table** (the fix's one pure
+    /// brain: `BookViewModel.outlineRowPreMounts`). The width-matched-memory
+    /// guard is load-bearing — an unreserved early mount would collapse a
+    /// tall placeholder mid-scroll — so it is pinned beside the two arms.
+    @Test func thePreMountConsultAsksForTheWayfarerAndAWidthMatchedMemory() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: false) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            // 431, not the harness's real ~696 column: `SurfaceSizeMemory`
+            // PERSISTS (real UserDefaults — the test host is the dev app),
+            // the fixture's `.incrementing` ids repeat across tests, and the
+            // suite's mounted tests persist records for these very ids at
+            // ~696 — a width-matched leak made the "no memory" arm honestly
+            // TRUE on this suite's first full run. At 431 no leaked record
+            // can match, and the arms test the consult, not the leak.
+            model.reportOutlineContentWidth(431)
+            #expect(!model.outlineRowPreMounts(storyID), "neither focused nor revealed ⇒ never")
+            model.focus(storyID)
+            #expect(!model.outlineRowPreMounts(storyID),
+                    "focused but no WIDTH-MATCHED memory ⇒ the shipped road")
+            model.rememberSurfaceSize(storyID, CGSize(width: 500, height: 16000))
+            #expect(!model.outlineRowPreMounts(storyID),
+                    "a memory from ANOTHER width reserves nothing, so it must not pre-mount")
+            model.rememberSurfaceSize(storyID, CGSize(width: 431, height: 16000))
+            #expect(model.outlineRowPreMounts(storyID), "focused + width-matched memory ⇒ pre-mounts")
+            model.focus(nil)
+            #expect(!model.outlineRowPreMounts(storyID), "focus released ⇒ back to the viewport's rule")
+            model.requestReveal(storyID)
+            #expect(model.outlineRowPreMounts(storyID), "the pending reveal's target pre-mounts too")
+        }
+    }
+
+    /// **VX-91 — the integration pin, red-on-old with NO timing race.** Her
+    /// navigator click on a far EXPANDED story used to land on a viewport of
+    /// `Color.clear` placeholders — the clicked title alone, no text (the
+    /// walk's film, `vx92-walk/leave.mov` f0235 / `storm.mov` s0060) —
+    /// because the row's surfaces mounted only after ARRIVAL flipped
+    /// `nearViewport`, and only then began story-sized fills. The structural
+    /// claim, isolated from scroll timing by using a bare `focus` (which
+    /// requests no scroll at all): a far expanded story with a
+    /// width-matched memory mounts its surfaces WHEN SHE SETS OUT — the
+    /// old gate never mounts them at all on this road.
+    @Test func focusingAFarExpandedStoryMountsItsSurfacesWithoutWaitingForTheViewport() async throws {
+        // 80 cards with the story at 70: the row must start BEYOND the near
+        // BAND, not merely below the fold — `NearBand` makes a row near
+        // whenever its top is within margin+margin (~5,000 pt), and this
+        // pin's first cut staged the story at ~3,300 pt, where the ordinary
+        // near road mounted it on BOTH trees and the pin was hollow (the
+        // slot-2 revert run caught it green; the premise had only asked for
+        // below-the-fold).
+        try await withLandingBook(posts: 80, longAt: [70], chapters: false) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[70]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.outlineContentWidth > 0
+                    && anchorTop(BookOutlineRows.Row.noteAnchor(storyID)) != nil
+            }, maxTurns: 120)
+            // Her steady state: a persisted record from an earlier
+            // realization, at THIS width (the StableSurface write road).
+            model.rememberSurfaceSize(
+                storyID, CGSize(width: model.outlineContentWidth, height: 16000))
+            // The premise: the story starts BEYOND the near band (top ≥
+            // margin + margin — `NearBand.decide` can then never flip it
+            // near without a scroll), and after quiet turns for any flip
+            // that would dispute that, nothing of it is mounted.
+            let top = try #require(anchorTop(BookOutlineRows.Row.noteAnchor(storyID)))
+            #expect(top > 5200, "the story starts beyond the near band: \(Int(top))")
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 10)
+            func storyMounted() -> Bool {
+                var found = false
+                func walk(_ v: NSView) {
+                    if let text = v as? NSTextView, text.string.count > 5000 { found = true }
+                    for sub in v.subviews where !found { walk(sub) }
+                }
+                walk(hosting)
+                return found
+            }
+            #expect(!storyMounted(), "nothing holds the story before she sets out")
+
+            // The bare focus — pure state, NO scroll request on this road
+            // (the VX-75 record), so arrival can never mount it for us.
+            model.focus(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: { storyMounted() }, maxTurns: 60)
+            #expect(storyMounted(),
+                    "the focused far story's surfaces mount and fill without waiting for the viewport — on the old gate nothing ever mounts on this road and the title lands alone")
+        }
+    }
 }

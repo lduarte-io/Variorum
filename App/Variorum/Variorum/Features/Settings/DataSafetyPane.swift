@@ -34,10 +34,12 @@ struct DataSafetyPane: View {
     let protection: ProtectionController?
     @State private var model: DataSafetyModel
 
-    /// P-1: the four acts this surface renders, declared once and walked
-    /// (pre-13x 3b: the decrypted export joins).
+    /// P-1: the five acts this surface renders, declared once and walked
+    /// (pre-13x 3b: the decrypted export joins; 13x F1 R1-MAJOR: the
+    /// hand-off twin joins).
     static let surfaceCapabilities: [CapabilityID] = [
         .backUpNow, .chooseBackupFolder, .forgetBackupFolder, .exportPlaintextLibrary,
+        .handOffLibrary,
     ]
 
     /// pre-13x 3b (copy §4): the decrypted export's brain, made when the door
@@ -45,9 +47,23 @@ struct DataSafetyPane: View {
     @State private var plaintextExport: PlaintextExportModel?
     @State private var exportPassphrase = ""
 
-    init(services: AppServices?, protection: ProtectionController? = nil) {
+    /// 13x U2 row 6 (QB's second framed door): the per-row Open… behind
+    /// *Restore from Backup* — Settings' own adoption presenter acts; nil
+    /// hosts list the copies with no doors (evidence stays honest).
+    let restoreDoor: ((URL) -> Void)?
+    /// 13x F1 (R1-MAJOR): the hand-off act's Data Safety twin — Settings'
+    /// own presenter acts; nil hosts render no door (P-2).
+    let handOffDoor: (() -> Void)?
+
+    init(
+        services: AppServices?, protection: ProtectionController? = nil,
+        restoreDoor: ((URL) -> Void)? = nil,
+        handOffDoor: (() -> Void)? = nil
+    ) {
         self.services = services
         self.protection = protection
+        self.restoreDoor = restoreDoor
+        self.handOffDoor = handOffDoor
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -61,6 +77,8 @@ struct DataSafetyPane: View {
         Form {
             if model.isWired {
                 copiesSection
+                restoreFromBackupSection
+                handOffSection
                 folderSection
                 exportsSection
                 plaintextExportSection
@@ -110,6 +128,75 @@ struct DataSafetyPane: View {
             }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Restore from Backup (13x U2 row 6 — QB's second framed door)
+
+    /// The app's own snapshot pairs, newest first, each saying WHICH
+    /// CREDENTIAL OPENS IT (decision 11 rendered; the same-fingerprint
+    /// second look leads where it lights). The row's Open… drives the one
+    /// adoption flow — classify, the lobby's roads, the confirm, the
+    /// hold. PROVISIONAL (recorded): the in-container folder's copies
+    /// only; the second folder's listing waits on the walk's verdict
+    /// (its candidates open through File ▸ Open Library… meanwhile).
+    @ViewBuilder
+    private var restoreFromBackupSection: some View {
+        if !model.restoreCandidates.isEmpty {
+            Section(LibraryOpenCopy.restoreSectionTitle) {
+                Text(LibraryOpenCopy.restoreSectionBody)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(model.restoreCandidates, id: \.snapshot) { candidate in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(candidate.date.formatted(
+                                date: .abbreviated, time: .shortened))
+                                .font(.callout)
+                            Text(candidate.credentials.map {
+                                LibraryOpenCopy.credentialLine(
+                                    $0, secondLook: candidate.opensWithLiveCustody)
+                            } ?? LibraryOpenCopy.bareCandidateLine)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        if let restoreDoor, candidate.keyFile != nil {
+                            Button(LibraryOpenCopy.openCandidateDoor) {
+                                restoreDoor(candidate.snapshot)
+                            }
+                            .disabled(model.busy)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Moving to another Mac (13x F1, R1-MAJOR — deliverable 1's twin)
+
+    /// The hand-off act's Data Safety face: one sentence saying what the
+    /// folder is and how it is used, and the ONE declared door (the File
+    /// menu renders the same act). Settings' own presenter runs the
+    /// panel + flow + sheet.
+    @ViewBuilder
+    private var handOffSection: some View {
+        if let handOffDoor {
+            Section(LibraryOpenCopy.handOffSectionTitle) {
+                Text(LibraryOpenCopy.handOffSectionBody)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button(CapabilityRegistry.capability(.handOffLibrary).verb) {
+                        handOffDoor()
+                    }
+                    .disabled(model.busy)
+                    Spacer()
+                }
             }
         }
     }

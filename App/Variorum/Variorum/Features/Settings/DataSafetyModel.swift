@@ -75,6 +75,10 @@ final class DataSafetyModel {
     /// The last thing an act had to say — a receipt or a refusal, never a
     /// silent outcome (P-2's letter applied to a Settings pane).
     private(set) var note: String?
+    /// 13x U2 row 6 — the Restore surface's rows: the in-container
+    /// folder's snapshot pairs with their which-credential facts and the
+    /// same-fingerprint second look (`BackupRestoreCandidates`).
+    private(set) var restoreCandidates: [BackupRestoreCandidates.Candidate] = []
 
     init(
         backup: StoreBackup?,
@@ -102,19 +106,25 @@ final class DataSafetyModel {
         guard let backup else { return }
         let directory = backup.directory
         let defaults = self.defaults
+        // 13x U2 row 6: the live key's fingerprint for the second look
+        // (nil — locked, plaintext-era — just never lights it).
+        let liveFingerprint = database?.storeKeyFingerprint
         let read = await Task.detached(priority: .utility) {
             let store = defaults()
             return (primary: DataSafetyModel.summarize(directory),
                     secondary: DataSafetyModel.summarizeSecondDestination(in: store),
                     exports: DataSafetyModel.summarizeExports(in: store),
                     log: BackupLog.read(store),
-                    insurance: MarkdownInsurance.isEnabled(in: store))
+                    insurance: MarkdownInsurance.isEnabled(in: store),
+                    candidates: BackupRestoreCandidates.gather(
+                        in: directory, liveKeyFingerprint: liveFingerprint))
         }.value
         primary = read.primary
         destination = read.secondary
         exports = read.exports
         log = read.log
         insuranceEnabled = read.insurance
+        restoreCandidates = read.candidates
     }
 
     /// 13p Batch 2: the opt-in's act. Turning it ON runs a backup pass so
@@ -240,6 +250,27 @@ final class DataSafetyModel {
         guard !busy else { return }
         guard let picked = ExportPanels.chooseFolder(
             prompt: "Use This Folder") else { return }
+        await acceptPickedFolder(picked)
+    }
+
+    /// The post-panel half, its own door so the pins can drive it (a real
+    /// `NSOpenPanel` cannot run under a test host).
+    func acceptPickedFolder(_ picked: URL) async {
+        guard !busy else { return }
+        // 13x U2 row 9 (pre-13x ledger 4; copy §8's recorded note): the
+        // live library's own folder — or one that contains it — is never
+        // a backup destination; the refusal renders copy §6's why-not
+        // sentence (`ProtectionCopy.liveLibraryNotInICloudDrive`, its ONE
+        // home). The store's folder is the backup directory's parent by
+        // construction (`AppServices` composes `<store folder>/Backups`).
+        if let backup,
+           LibraryPlacementGuard.isLiveLibraryFolder(
+               picked,
+               storeURL: backup.directory.deletingLastPathComponent()
+                   .appendingPathComponent("variorum.sqlite", isDirectory: false)) {
+            note = LibraryOpenCopy.pickedLiveLibraryFolderRefusal
+            return
+        }
         busy = true
         defer { busy = false }
         do {
