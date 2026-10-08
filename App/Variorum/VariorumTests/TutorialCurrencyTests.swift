@@ -133,9 +133,13 @@ struct TutorialCurrencyTests {
             let areas = SidebarView.areas
             #expect(text.contains("The sidebar has \(countWord(areas.count)) places."),
                     "the count is the area table's own")
+            // 13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 caps ban):
+            // the lesson names each place in its REAL casing now, each opening
+            // its own one-sentence description; the arm read the retired
+            // caps-for-emphasis form (`title.uppercased()`).
             for area in areas {
-                #expect(text.contains(area.title.uppercased()),
-                        "the lesson names the sidebar's \(area.title)")
+                #expect(text.contains(". \(area.title) "),
+                        "the lesson names the sidebar's \(area.title), its own sentence")
             }
             for mode in LibraryCatalogModel.Mode.allCases {
                 #expect(text.contains(mode.label), "the Library's \(mode.label) view, by its own word")

@@ -380,7 +380,9 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: workspace)
             }
-            #expect(stored.contains("\u{23CE} there FILES what you wrote"),
+            // 13s-b triage landing — the claim unchanged, the caps-for-emphasis
+            // gone (her R-13s-30 ban): "FILES" reads "files".
+            #expect(stored.contains("\u{23CE} there files what you wrote"),
                     "⏎ files the capture (R-13u-4)")
             #expect(stored.contains("\u{21E7}\u{23CE} adds another paragraph"),
                     "…and ⇧⏎ is the paragraph key")
@@ -2203,7 +2205,9 @@ struct TutorialLibraryActsTests {
 
     @Test func threeWaysLessonCarriesItsPracticeFan() async throws {
         // The A10 absorption: the polish/thread/fork teaching now lives
-        // here, act-ready.
+        // here, act-ready. (13s-b triage landing: the lesson MOVED to close
+        // the welcome chapter — U3 disposition 4 — and found by its title it
+        // walks the same; this suite keeps it where it was written.)
         try await withTutorialWorld { _, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "three ways of working") }
             let lessonProjection = try await projection(db, lesson)
@@ -2213,9 +2217,13 @@ struct TutorialLibraryActsTests {
             #expect(lessonProjection.fans[thread.blockID]?.count == 2,
                     "the thread block has its practice take")
             let texts = lessonProjection.slots.compactMap(\.text).joined()
-            #expect(texts.contains("POLISH IN PLACE"))
-            #expect(texts.contains("THREAD ONE PIECE"))
-            #expect(texts.contains("FORK THE PIECE"))
+            // 13s-b triage landing — the three roads by their sentence-case
+            // lead-ins (her R-13s-30 caps ban; the claim unchanged).
+            #expect(texts.contains("Polish in place:"))
+            #expect(texts.contains("Thread one piece:"))
+            #expect(texts.contains("Fork the piece:"))
+            #expect(TutorialSeeder.plan.first?.lessons.last == "three ways of working",
+                    "the map closes the welcome chapter (U3 disposition 4)")
         }
     }
 }

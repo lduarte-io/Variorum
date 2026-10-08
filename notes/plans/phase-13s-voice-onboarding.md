@@ -1007,7 +1007,7 @@ xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,name=<the
 | # | piece | status |
 |---|---|---|
 | 0 | This record + the verify list, before any code | DONE (this commit) |
-| 1 | ch 01 welcome (start here · getting around + the `modeRowSentence` template · the workspace) + "three ways of working" moved up to welcome's close (U3 disposition 4) | NOT-STARTED |
+| 1 | ch 01 welcome (start here · getting around + the `modeRowSentence` template · the workspace) + "three ways of working" moved up to welcome's close (U3 disposition 4) | DONE (this commit) — start here gains the vision block FIRST (the drafts' sanctioned move; four old blocks follow, re-voiced); getting around's `modeRowSentence()` call kept, only its TEMPLATE re-voiced ("…one of \(word) modes. The tabs read …"); the workspace 1:1 with the default gathering kept INTERPOLATED (`\(Operations.defaultQuicknoteBookName)` — U1b's spelling, renders "quicknotes", the draft's literal); three ways moved whole with its practice take into the `welcome` section and the plan's welcome tail. Byte proof: the scratchpad verifier renders the four seeded lessons and finds them equal to the drafts (curly-quote mapping only). PINS MOVED (Mac, RUN PENDING the stage window): `gettingAroundNamesEverySidebarPlaceAndEveryLibraryView` (`title.uppercased()` → ". \(title) " — each place opens its own sentence; red-on-old by the old caps prose), `theWorkspaceLessonTeachesTheCaptureKeys` ("FILES" → "files"), `threeWaysLessonCarriesItsPracticeFan` (sentence-case lead-ins + the welcome-tail seat). `swiftc -parse` clean |
 | 2 | ch 02 writing | NOT-STARTED |
 | 3 | ch 03 takes (the ONE savepoint survival; the fold line; LC-1) | NOT-STARTED |
 | 4 | ch 04 structure | NOT-STARTED |
