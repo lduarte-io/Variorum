@@ -530,6 +530,9 @@ struct TourEntryTests {
                 window.close()
             }
             await settle(window, hosting, turns: 40) { false }
+            await settle(window, hosting) { window.firstResponder is NSTextView }
+            #expect(window.firstResponder is NSTextView,
+                    "the precondition W-U1a-1 is about: the Bookcase put the caret in its quick entry")
 
             router.tourRequested = true
             await settle(window, hosting) { TourOracle.overlay != nil }
