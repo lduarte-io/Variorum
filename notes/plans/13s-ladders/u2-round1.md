@@ -105,3 +105,53 @@ the stale-binary episode and its correction read in full and found internally co
 and thoroughly walked, the app half is thin and composition-clean, and the record's evidence
 discipline (trace-before-touch, red-on-old by revert, the stale-binary correction) is exemplary.
 Both MINORs are small, pinnable, and inside the rule file; neither blocks the next unit.
+
+## THE CROSS-MODEL EXCHANGE AND THE FIX PASS (same session, the reviewer implementing — 2026-10-08)
+
+**The implementer's response: AGREE on all four, zero disputes**, with two scope additions on
+MINOR-1 (the gap also reaches `.deeperModes` — the rail anchor exists only with a note open — and
+`.placeFollows`, which returned `[]` at an area) and one refinement (the Open-row fallback must be
+CONDITIONAL on being off the note, or the road-back line would light while she is on the note with
+the badge merely scrolled away — A7's contradiction, inverted). On MINOR-2 it confirmed the trace
+and named the smaller fix (guard the navigate inside `enter(.legEnd)`).
+
+**Final calls (the reviewer's, per the cross-model contract):**
+- **MINOR-1 — CONFIRMED, widened scope and refinement ADOPTED, FIXED (33fd6b89).**
+  `Tour.ringGroups` gains `roadBackRow(state)` (the toured note's Open-strip row — the legs' own
+  shape) at any non-note place for `.write`/`.makeTake`/`.takeIcon`/`.takesMode`/`.deeperModes`/
+  `.placeFollows`/`.downAndUp`, and the in-note wrong-mode rail fallback extends to `.takeIcon`
+  (Write) and `.takesMode` (Takes); `isRoadBack` mirrors every new branch. The fallback fires ONLY
+  off the note, honoring the refinement: on the note in the step's own mode, the step's own ring
+  stands (lit or not) and no road back is claimed — pinned by the test's own-mode arm.
+  **Pin red-on-old, watched:** `TourWalkTests.anAreaWanderDuringTheMiddleStepsRingsTheRoadBackToTheNote`
+  written FIRST and run against the unfixed rule — RED, 18 issues (every wander arm), the
+  own-mode non-firing arm already green (it pins the refinement, not the fix); GREEN after.
+- **MINOR-2 — CONFIRMED, the implementer's smaller fix TAKEN, FIXED (33fd6b89).**
+  `enter(.legEnd)` skips the Bookcase navigate when `finishAtGuide(state)` accepts the arriving
+  report — leaving Snippets straight into the field guide now finishes with
+  `[.finish(completed: true)]` alone; every other exit keeps P-U2-7's designed yank home, pinned
+  in the same test's second arm. **Pin red-on-old, watched:**
+  `TourWalkTests.leavingSnippetsIntoTheFieldGuideFinishesWithoutYankingHerHome` — RED (1 issue:
+  the navigate preceded the finish) before the fix, GREEN after; the non-guide arm green on both
+  sides, as it should be (it pins the kept behavior).
+- **NIT-1 — RECORD-AS-ACCEPTED, not fixed (the reviewer's call).** Under A3's one-anchor reading,
+  both on-screen copies of a starred target's row ARE the door; a first-reporter-wins rule would
+  add registration-order statefulness to the spotlight for an edge the walk never reached, and
+  which copy registered first is scroll-dependent (a flickering ring is worse than two honest
+  ones). Goes to the merge's QUESTIONS text beside P-U2-9 (the ring's look is hers by eye anyway).
+- **NIT-2 — FIXED (2b71ce6b).** `TourOracle.endDoorFrames` clears in the overlay's existing
+  DEBUG `onDisappear` beside `cardFrame`. Test-oracle hygiene, no product path — no pin owed
+  (not bug-class), stated per the guard's honesty rule.
+
+**Suite after the fix pass:** full core `swift test` **GREEN — 2420 tests in 280 suites + 40 in 6**
+(the counts grew past U2's 2381/273 with the main merge and U1b's core-side pins, all green; the
+tour suites 35/3 including the two new pins). This seat is headless: the Mac `TourTests` suites are
+untouched by these fixes except through the rule they already exercise — the next stage window's
+Run 1 list needs no new suite names, and the fixes' own pins live in the headless walk, run here.
+Tree discipline honored: only `Tour.swift`, `TourWalkTests.swift`, `TourOverlay.swift` and this
+file touched; adds pathspec-limited; U1b's unstaged seeder work untouched.
+
+**For round 2 (a fresh reviewer):** the fix commits are 33fd6b89 (both MINORs + pins) and
+2b71ce6b (NIT-2); this file carries the findings, the exchange and the dispositions; the one
+open residual from round 1's clean-bill notes remains the end card's live re-walk on the fresh
+binary (owed to the next stage window, tracked in the U2 RECORD, not this round's).
