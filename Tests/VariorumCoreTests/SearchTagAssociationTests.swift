@@ -165,7 +165,12 @@ struct SearchTagAssociationTests {
             let alone = try #require(try db.read { db in
                 try Queries.searchCounts(db, query: parse("#dream"), scope: SearchScope(wingID: ""))
             }, "a typed tag ALONE now answers: its associated books")
-            #expect(alone.living == .init(books: 1, notes: 0, passages: 0, scraps: 0))
+            // JUSTIFIED EDIT (VX-84a, the 13o follow-up run): this cell read
+            // `notes: 0` under P-13o-U2-6 ("a tag alone answers with its books
+            // only"); her report superseded it ("searching a tag is not
+            // revealing the notes tagged that at all" — D-1: a tag alone
+            // narrows the Library), so the tagged note COUNTS beside its book.
+            #expect(alone.living == .init(books: 1, notes: 1, passages: 0, scraps: 0))
             #expect(alone.all.books == 2 && alone.archivedPlaces == 1)
 
             let worded = try #require(try db.read { db in

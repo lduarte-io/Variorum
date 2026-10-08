@@ -596,15 +596,7 @@ public enum SearchComposer {
                 commonArguments.append(.text(id))
             }
         }
-        switch query.visibility {
-        case .living:
-            common.append("c.archived_at IS NULL")
-        case .includingArchived:
-            common.append("NOT (\(environment.versionPredicate("c")))")
-        case .archivedOnly:
-            common.append("c.archived_at IS NOT NULL")
-            common.append("NOT (\(environment.versionPredicate("c")))")
-        }
+        common += noteVisibility(query.visibility, environment: environment)
         if let filter = query.filter {
             let composed = composeFilter(filter, level: .note, wingID: scope.wingID, environment: environment)
             common.append(composed.sql)
@@ -638,6 +630,182 @@ public enum SearchComposer {
                 arguments: createdWindows.flatMap { [Value.text($0.start), .text($0.end)] + commonArguments }))
         }
         return statements
+    }
+
+    /// The archived facet at NOTE level over the container `c` — the worn-day
+    /// arm's own clauses (factored, byte-identical, at VX-84a so the text-less
+    /// TAG road reads the same rule): living leaves archived notes out; with
+    /// the facet on, saved VERSIONS stay fenced.
+    static func noteVisibility(_ visibility: SearchVisibility, environment: Environment) -> [String] {
+        switch visibility {
+        case .living:
+            ["c.archived_at IS NULL"]
+        case .includingArchived:
+            ["NOT (\(environment.versionPredicate("c")))"]
+        case .archivedOnly:
+            ["c.archived_at IS NOT NULL", "NOT (\(environment.versionPredicate("c")))"]
+        }
+    }
+
+    // MARK: - The text-less TAG road (VX-84a — the 13o follow-up run's D-1)
+
+    /// **What the catalog's own listing composes when a `#tag` is typed with
+    /// no words** (VX-84 — her report: *"searching a tag is not revealing the
+    /// notes tagged that at all"*; the provisional call D-1 in
+    /// `notes/plans/fixes/vx-83-search-followup.md`: a tag alone NARROWS THE
+    /// LIBRARY like a day does). The FTS road needs words (P-13o-U1-7 stands
+    /// for it); this is the composer's text-less road, served as a NARROWING
+    /// the listing statements wrap — the notes page keeps its own sort and
+    /// keyset, the blocks list its own order — so nothing here ranks.
+    ///
+    /// Two halves, one truth:
+    /// - **`driver`** — the PLAN: a `SELECT … AS tagged_id` of the ids the typed
+    ///   tags name (each typed `#path`'s SUBTREE, its root found by a range on
+    ///   `uq_tag_path_live`, its applications by tag id — `post_tag` for
+    ///   notes, `block_tag` for blocks; several tags INTERSECT). A listing
+    ///   drives from it (`CROSS JOIN`), so a page costs ∝ the tag's
+    ///   applications — never a walk of the wing's notes looking for tagged
+    ///   ones (measured: the VX-84a seam record).
+    /// - **`conditions`** — the TRUTH: the whole question over the listing's
+    ///   aliases (`c` the note or home container; `b` the block) — liveness,
+    ///   the wing ALWAYS (scraps homes in every wing, P-13o-U1-5), the
+    ///   archived facet, and the filter half read by the one `composeFilter`
+    ///   (the typed tags again — the driver is only the plan's shape — plus an
+    ///   armed day, a book-state facet, …).
+    ///
+    /// nil when the question has WORDS (the answer sheet's road) or no typed
+    /// tag to drive from.
+    public struct ListingNarrowing: Equatable, Sendable {
+        public let driver: String
+        public let driverArguments: [Value]
+        public let conditions: String
+        public let conditionArguments: [Value]
+    }
+
+    /// Which listing a narrowing is for.
+    public enum ListingKind: Sendable {
+        /// The notes listing: `c` is the note (`post_tag` drives).
+        case notes
+        /// The blocks listing: `b` the block, `c` its placement's home
+        /// (`block_tag` drives) — the Blocks scope, by BLOCK-level tags.
+        case blocks
+    }
+
+    public static func listingNarrowing(
+        _ query: SearchQuery, kind: ListingKind, wingID: String, environment: Environment
+    ) -> ListingNarrowing? {
+        guard query.text == nil, let filter = query.filter else { return nil }
+        let paths = drivingTagPaths(filter)
+        guard !paths.isEmpty else { return nil }
+        let rootWing = environment.wingScope("root.wing_id", wingID)
+        let applications = kind == .notes
+            ? ("pt.post_id", "CROSS JOIN post_tag pt ON pt.tag_id = applied.id AND pt.deleted_at IS NULL")
+            : ("bt.block_id", "CROSS JOIN block_tag bt ON bt.tag_id = applied.id AND bt.deleted_at IS NULL")
+        // DISTINCT, twice over (both measured at the seam): a note wearing a
+        // tag AND its child is in the subtree twice and must list once; and
+        // SQLite never flattens a DISTINCT subquery into the outer join, so
+        // the driver keeps its own order (root → applied → applications by
+        // tag id) instead of being inverted into a scan of EVERY live
+        // application in the store.
+        let one = """
+            SELECT DISTINCT \(applications.0) AS tagged_id \(appliedTags(join: "CROSS JOIN"))
+                      \(applications.1)
+                     WHERE root.deleted_at IS NULL AND root.path = ? COLLATE NOCASE AND \(rootWing.sql)
+            """
+        let driver = paths.map { _ in one }.joined(separator: "\nINTERSECT\n")
+        let driverArguments = paths.flatMap { [Value.text($0)] + rootWing.arguments }
+
+        var conditions: [String]
+        var arguments: [Value] = []
+        switch kind {
+        case .notes:
+            let wing = environment.wingScope("c.wing_id", wingID)
+            // `+c.kind` (the worn-day arm's precedent): the kind index must
+            // never be the road to `c` — measured at the seam, a flattened
+            // driver let the planner search `c` BY KIND per application in
+            // the never-touched arm (∝ the wing's notes); the join's PK seek
+            // is the only road left.
+            conditions = ["+c.kind = 'post'", "c.deleted_at IS NULL", wing.sql]
+            arguments += wing.arguments
+            conditions += noteVisibility(query.visibility, environment: environment)
+            let composed = composeFilter(filter, level: .note, wingID: wingID, environment: environment)
+            conditions.append(composed.sql)
+            arguments += composed.arguments
+        case .blocks:
+            let wing = environment.wingScope("c.wing_id", wingID)
+            conditions = ["b.deleted_at IS NULL", "c.deleted_at IS NULL", "(c.kind = 'pool' OR \(wing.sql))"]
+            arguments += wing.arguments
+            switch query.visibility {
+            case .living:
+                conditions += ["c.archived_at IS NULL", "b.archived_at IS NULL"]
+            case .includingArchived:
+                conditions.append("NOT (\(environment.versionPredicate("c")))")
+            case .archivedOnly:
+                conditions += ["(c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL)",
+                               "NOT (\(environment.versionPredicate("c")))"]
+            }
+            let composed = composeFilter(filter, level: .block, wingID: wingID, environment: environment)
+            conditions.append(composed.sql)
+            arguments += composed.arguments
+        }
+        return ListingNarrowing(
+            driver: driver, driverArguments: driverArguments,
+            conditions: conditions.joined(separator: "\n  AND "), conditionArguments: arguments)
+    }
+
+    /// The tags a text-less question can DRIVE from: the typed `#path`s of
+    /// its top-level conjunction (never one under `any`/`not` — those narrow,
+    /// they cannot enumerate).
+    static func drivingTagPaths(_ filter: SearchFilter) -> [String] {
+        switch filter {
+        case .tagPath(let path): [path]
+        case .all(let children): children.flatMap(drivingTagPaths)
+        default: []
+        }
+    }
+
+    /// **The text-less road's counts** (VX-84a — the band stays honest under a
+    /// tag alone): the narrowed notes and blocks, living and with the
+    /// archived facet on, each one walk of its driver. nil when the question
+    /// is not text-less-with-a-tag. Result columns: notes, all_notes, blocks,
+    /// all_blocks.
+    public static func listingCounts(
+        _ query: SearchQuery, wingID: String, environment: Environment
+    ) -> Statement? {
+        var living = query
+        living.visibility = .living
+        var everything = query
+        everything.visibility = .includingArchived
+        guard let notes = listingNarrowing(living, kind: .notes, wingID: wingID, environment: environment),
+              let allNotes = listingNarrowing(everything, kind: .notes, wingID: wingID, environment: environment),
+              let blocks = listingNarrowing(living, kind: .blocks, wingID: wingID, environment: environment),
+              let allBlocks = listingNarrowing(everything, kind: .blocks, wingID: wingID, environment: environment)
+        else { return nil }
+        func noteCount(_ n: ListingNarrowing) -> String {
+            """
+            (SELECT COUNT(*) FROM (\(n.driver)) t
+               CROSS JOIN container c ON c.id = t.tagged_id
+              WHERE \(n.conditions))
+            """
+        }
+        func blockCount(_ n: ListingNarrowing) -> String {
+            """
+            (SELECT COUNT(*) FROM (\(n.driver)) t
+               CROSS JOIN block b ON b.id = t.tagged_id
+               JOIN container_block pl ON pl.block_id = b.id AND pl.deleted_at IS NULL
+               JOIN container c ON c.id = pl.container_id
+              WHERE \(n.conditions))
+            """
+        }
+        let sql = """
+            SELECT \(noteCount(notes)) AS notes, \(noteCount(allNotes)) AS all_notes,
+                   \(blockCount(blocks)) AS blocks, \(blockCount(allBlocks)) AS all_blocks
+            """
+        var arguments: [Value] = []
+        for n in [notes, allNotes, blocks, allBlocks] {
+            arguments += n.driverArguments + n.conditionArguments
+        }
+        return Statement(sql: sql, arguments: arguments)
     }
 
     // MARK: - The tag-association join's reads (13o U3 — the 13i sitting record §12)
@@ -723,6 +891,12 @@ public enum SearchComposer {
         case note
         /// A reading row `r` alone (13o U3 — the association's candidates).
         case reading
+        /// A BLOCK row (VX-84a — the text-less TAG road's blocks listing):
+        /// the block `b` and its placement's home container `c`. A tag term
+        /// is the BLOCK's own (block-level, `block_tag` — the Blocks scope's
+        /// D-1 reading); the home answers starred / day / family as a
+        /// passage's does; a block is no book and no indexed doc.
+        case block
     }
 
     static func composeFilter(
@@ -774,7 +948,7 @@ public enum SearchComposer {
             case (.notes, _): return ("c.kind = 'post'", [])
             case (.scraps, _): return ("c.kind = 'pool'", [])
             case (.books, .passage): return ("d.reading_id IS NOT NULL", [])
-            case (.books, .note): return ("0", [])
+            case (.books, .note), (.books, .block): return ("0", [])
             case (.books, .reading): return ("1", [])
             }
         case .docKind(let kind):
@@ -784,6 +958,8 @@ public enum SearchComposer {
             case .note: return (kind == .title ? "1" : "0", [])
             // An associated reading is a BOOK-level answer.
             case .reading: return (kind == .book ? "1" : "0", [])
+            // A listed block is no indexed doc (VX-84a).
+            case .block: return ("0", [])
             }
         case .bookState(let state):
             let fact = bookStateSQL(state, alias: "r", environment: environment)
@@ -791,7 +967,7 @@ public enum SearchComposer {
             // Only a book or chapter hit names a reading row (`r` is joined
             // for those alone) — a facet narrows the answer to books.
             case .passage: return ("(d.reading_id IS NOT NULL AND r.id IS NOT NULL AND \(fact))", [])
-            case .note: return ("0", [])
+            case .note, .block: return ("0", [])
             case .reading: return ("(\(fact))", [])
             }
         }
@@ -809,6 +985,30 @@ public enum SearchComposer {
         }
     }
 
+    /// **The subtree walk's FROM clause, one copy** (VX-84a factored it out
+    /// of `tagSubtree`, byte-identical, so the text-less road's driver reads
+    /// the same walk): driven FROM THE ROOT — the applied tags are found by a
+    /// RANGE on `uq_tag_path_live (wing_id, path)` — [path, path || '0') holds
+    /// every path that starts with the root's ('0' follows '/') — and the exact
+    /// subtree test is the residual; then the applications by tag id. Cost ∝
+    /// the subtree's applications, never every tag application.
+    static let appliedTagsSQL = appliedTags(join: "JOIN")
+
+    /// The walk with its JOIN keyword named: `JOIN` is the shipped text, byte
+    /// for byte; the text-less road's DRIVER asks for `CROSS JOIN`, which
+    /// pins the planner to the order the walk is written in (root → applied →
+    /// the applications by tag id) — measured at the seam, a free order let
+    /// it scan every live application in the store to satisfy DISTINCT.
+    static func appliedTags(join: String) -> String {
+        """
+        FROM tag root
+                  \(join) tag applied ON applied.wing_id = root.wing_id AND applied.deleted_at IS NULL
+                   AND applied.path >= root.path AND applied.path < root.path || '0'
+                   AND (applied.path = root.path
+                        OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/')
+        """
+    }
+
     /// A tag term, SUBTREE-matched through the root's LIVE path (the
     /// gathering rule's own reading — `ruleSQL`'s letter, wing-scoped: the
     /// applied tag shares the root's wing). A note matches by its own tags; a
@@ -818,18 +1018,7 @@ public enum SearchComposer {
     private static func tagSubtree(
         root: String, rootArguments: [Value], level: Level
     ) -> (sql: String, arguments: [Value]) {
-        // Driven FROM THE ROOT: the applied tags are found by a RANGE on
-        // `uq_tag_path_live (wing_id, path)` — [path, path || '0') holds every
-        // path that starts with the root's ('0' follows '/') — and the exact
-        // subtree test is the residual; then the applications by tag id. Cost
-        // ∝ the subtree's applications, never every tag application.
-        let applied = """
-            FROM tag root
-                      JOIN tag applied ON applied.wing_id = root.wing_id AND applied.deleted_at IS NULL
-                       AND applied.path >= root.path AND applied.path < root.path || '0'
-                       AND (applied.path = root.path
-                            OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/')
-            """
+        let applied = appliedTagsSQL
         let notes = """
             c.id IN (SELECT pt.post_id \(applied)
                       JOIN post_tag pt ON pt.tag_id = applied.id AND pt.deleted_at IS NULL
@@ -840,6 +1029,14 @@ public enum SearchComposer {
             return ("1", [])  // unreachable: `composeFilter` answers a reading row first
         case .note:
             return ("COALESCE(" + notes + ", 0)", rootArguments)
+        case .block:
+            // VX-84a: a listed block by its OWN tags (block-level only).
+            let blocks = """
+                b.id IN (SELECT bt.block_id \(applied)
+                          JOIN block_tag bt ON bt.tag_id = applied.id AND bt.deleted_at IS NULL
+                         WHERE root.deleted_at IS NULL AND \(root))
+                """
+            return ("COALESCE(" + blocks + ", 0)", rootArguments)
         case .passage:
             let blocks = """
                 d.block_id IN (SELECT bt.block_id \(applied)
