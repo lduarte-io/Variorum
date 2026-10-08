@@ -326,9 +326,7 @@ self-contained — if a question would need this session's context, the
 docs are incomplete); the next phase's plan + kickoff message authored
 just-in-time; the build-debris tidy — delete this phase's
 `App/Variorum/DerivedData/<tag>/` walk/build folders (gitignored,
-~1–2 GB each; unswept they reached 84 GB by 2026-10-01), keeping the
-small `.log`/`.sh` evidence files and any folder a still-open phase
-uses, after confirming no build is running; commit + push; hard stop
+~1–2 GB each; unswept they reached 84 GB by 2026-10-01), **and once the PR has merged to `main`, ALL of the effort's run and walk evidence is deleted too** — walk screenshots, test and build logs, revert scripts, subagent scratch folders and scratchpad copies (her ruling at the 13x closeout, 2026-10-08: the plan file's record is the evidence of record; nothing else is kept). Keep only a folder a still-open effort uses, and only after confirming no build is running; commit + push; hard stop
 — the author kicks off what's next.
 
 Two deploy-adjacent rules proven in 13b (added 2026-07-22): schema/
