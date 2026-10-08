@@ -429,9 +429,14 @@ reads, environment traps, commit-per-piece + push, no attribution trailers).
 
 ### U-B RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-**U-B IN PROGRESS — nothing closed yet.** What U-B has NOT done (kept current): no Mac suite run, no
-captures, no stage claim; the grid half of VX-87 is NOT built (see P1 — a proposal awaits the
-orchestrator's ruling); no `notes/QUESTIONS.md` entries and no canon deltas (shared ledgers — the merge
+**U-B IN PROGRESS — PAUSED FOR A RULING (2026-10-07 late).** RESUME MAP: (1) the orchestrator rules
+§P1's fork (A — the custom grid, recommended — or B); (2) then P3 + P4 build TOGETHER (the popover face +
+its grid + the headless face renders), with the JUSTIFIED EDITS to `LibraryWhenRangeTests` /
+`LibraryDayFilterTests`; (3) a ready ping to `oct7coordinator` for ONE TEST-ONLY slot (heads-up already
+sent, msg 862dd130; no claim before its GO); (4) P6 run + P7 close. Tree CLEAN and pushed at every
+step. What U-B has NOT done (kept current): no Mac suite run, no captures, no stage claim; the grid half
+of VX-87 is NOT built (see P1 — a proposal awaits the orchestrator's ruling); the shipped door is
+untouched (the app's `when ▾` works as 13o shipped it until P3); no `notes/QUESTIONS.md` entries and no canon deltas (shared ledgers — the merge
 moment's); zero `Sources/VariorumCore/Sync/` lines; zero lines in
 `EditorTextView`/`BlockRangeIndex`/`PaneSurface`; U-C (VX-72) untouched.
 
@@ -471,7 +476,8 @@ Machinery: no deaths so far.
 | P6 | **The TEST-ONLY stage slot** (via `oct7coordinator`): the new pins + `LibraryWhenRangeTests` + `LibraryDayFilterTests` + the touched Library suites + the tutorial spine + the headless face renders (checked by this session). The R-VX83-2 REAL-APP captures (both voices × light/dark × one-day/between-days, `App/Variorum/DerivedData/vx83-shots/`) are **PENDING-on-grant** (the heads-up above) — never requested from this host | NOT-STARTED |
 | P7 | Close — record final, self-assessment, report | NOT-STARTED |
 
-PENDING flags: none yet (nothing claimed).
+PENDING flags: P2's and P5's pins are BUILT, NOT RUN (the test-only slot); P5's door-words cell is red
+by design until P3; the R-VX83-2 real-app captures are PENDING-on-grant (never this host's).
 
 **§P1 FORK — the `.graphical` `DatePicker` against direction 1, MEASURED (2026-10-07; two headless
 external-fact probes — an offscreen `NSHostingView`/`NSView` rendered to PNG, never shown, no store;
