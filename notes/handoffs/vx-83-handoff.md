@@ -71,10 +71,10 @@ cd ~/dev/variorum && git show e4aa5139:notes/plans/vx83-screens/12-W7c-between-d
 - Suites at the end, on the merged tree: core **2,383 tests / 277 suites PASSED, exit 0** (+ StringsWorkbook 40/6; standing honest skips only); the Mac closeout batch
   **448 tests / 64 suites PASSED, zero skipped** (the union over every changed source file, main's e933879b rule) +
   NoteOpenLandingTests alone **12/12**.
-- PR `PR_LINE`, merge commit; members + VX-83 flipped Done in Linear; the in-flight row
+- PR **#137** (`VX-83: the 13o search follow-up — her first-use report (tag search answers, the banded landing, the whole-span needle, the when-door calendar, the search lesson, + commits)`), merge commit; members + VX-83 flipped Done in Linear; the in-flight row
   retired; board snapshot pushed.
 - Post-merge tidy per eeb5d80e: vx83-screens/, DerivedData/vx83-*, .build/vx83-* deleted on
   main (history keeps them; the record is the evidence of record).
-- The /Applications refresh: `REFRESH_STATUS`.
-- The real-store field-guide re-seed: `RESEED_STATUS`.
+- The /Applications refresh: coordinated by oct7coordinator as ONE refresh across VX-83 and VX-99 (whichever merges last runs it from main containing both — one A1 copy, one install); the final status is amended here on main at the tidy commit.
+- The real-store field-guide re-seed: routed to the walker session after the refresh; the final status is amended here on main at the tidy commit.
 - Worktree `~/dev/variorum-vx-83` removed; the memory run-state flipped CLOSED.
