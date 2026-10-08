@@ -1655,7 +1655,9 @@ too (one review over the phase's whole added diff).**
 - **PIECE 1 — the NAMED red-on-old pin + this record:** DONE (this commit —
   `App/Variorum/VariorumTests/VX80CastleFollowRecoveryTests.swift`, the suite "VX-80 — the
   Castle-follow recovery door", one test: the record's exact simulate shape). Compile check
-  PENDING (build-for-testing into a scratch DerivedData, this session, before the handback).
+  DONE — `build-for-testing` into a scratch DerivedData, `** TEST BUILD SUCCEEDED **` against
+  today's code (the W-1 StoreBinding fix in the tree; pathspec-limited commits kept the two
+  sessions' work apart, and W-1 has since landed as bf44f53f).
   **The RED run is PENDING-BEHIND-THE-STAGE** — exact command, from `App/Variorum/`:
   `xcodebuild -scheme Variorum -destination 'platform=macOS' test -only-testing:VariorumTests/VX80CastleFollowRecoveryTests`
   Expected on TODAY'S code: 1 test, FAILING at the `#require(recovery…)` line ("recovery was
