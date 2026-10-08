@@ -128,3 +128,11 @@ Under the cross-model flow they go to the implementer verbatim next; my recommen
 record-only dispositions (NIT 1 → P-U1a-4's ledger text; NIT 2 → ride W-U1a-2's existing note;
 NIT 3 → a one-line hygiene note for whichever session first mounts two Bookcases in DEBUG), with
 no code change in this unit.
+
+## DISPOSITIONS (orchestrator, 2026-10-08 ~04:05 — the cross-model exchange complete; the round AND the ladder close)
+
+The implementer AGREED to all three findings, mechanism and record-only disposition alike, disputing none (its three confirmations, each traced to file:line, are in its exchange message and stand as the agreement of record). The reviewer's final call was already record-only on all three; with zero fixes there is nothing for a round 2 to re-review — **the U1a ladder closes at round 1 with a clean bill (0B · 0M · 0m · 3 NIT, all record-only).**
+
+- **NIT-1 — AGREED, record-only:** folds into P-U1a-4's QUESTIONS text at the merge, with the implementer's named alternative (hold the row per window, only in a window that drew the line this session).
+- **NIT-2 — AGREED, propose-only (taste):** rides W-U1a-2's note for her or a later polish pass; the one scene-level pass (exclude from the Window menu + hide the title bar) is the named shape.
+- **NIT-3 — AGREED, hygiene note:** the oracle gains an owner parameter whenever a suite first mounts two Bookcases; no change now.
