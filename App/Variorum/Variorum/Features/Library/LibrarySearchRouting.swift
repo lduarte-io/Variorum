@@ -105,6 +105,12 @@ extension LibraryCatalogModel {
         searchState.toggleArchived()
     }
 
+    /// **The band's commits chip** (VX-72): the savepoints facet flips; the
+    /// caller re-reads.
+    func toggleSavepointsFacet() {
+        searchState.toggleSavepoints()
+    }
+
     // MARK: - The mode facets (13o U3 — the sitting record §12 item 2)
 
     /// **The `+ book state` chip is offered** when the sheet answers

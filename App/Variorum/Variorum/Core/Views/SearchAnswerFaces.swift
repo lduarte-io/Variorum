@@ -48,8 +48,15 @@ nonisolated enum SearchAnswerCopy {
         case .noteMeta: "floating notes"
         case .book: "book"
         case .chapter: "chapter"
+        // VX-72: a saved state of a take (only under the commits facet) —
+        // its line also says its day (`savepoint(day:)`, P-VX83-C6).
+        case .savepoint: "savepoint"
         }
     }
+
+    /// **A savepoint line's word** (VX-72, P-VX83-C6): the kind and the day it
+    /// was saved — "savepoint · Oct 6".
+    static func savepoint(day: String) -> String { "savepoint \u{00B7} \(day)" }
 
     /// An archived group's mark (only ever drawn under the facet) — and,
     /// since 13o U3, the badge an archived passage wears.
@@ -207,7 +214,7 @@ struct LibrarySearchLine: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            if let word = SearchAnswerCopy.kindWord(passage.kind) {
+            if let word = LibrarySearchFace.kindLabel(kind: passage.kind, savedAt: passage.savedAt, now: Date()) {
                 Text(tokens.chromeLabel(word))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
@@ -295,6 +302,21 @@ enum LibrarySearchFace {
         }
         flush()
         return folded
+    }
+
+    /// **What a passage line says before its words** (VX-72 adds the
+    /// savepoint's day): the kind word, and for a savepoint its day in the
+    /// one stamp-wording brain's own words (`TimeStampFace.day` — "Oct 6",
+    /// the year when it is not this one). nil for prose and names.
+    nonisolated static func kindLabel(
+        kind: SearchPassage.Kind, savedAt: String?, now: Date,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String? {
+        guard let word = SearchAnswerCopy.kindWord(kind) else { return nil }
+        guard kind == .savepoint,
+              let saved = savedAt.flatMap({ DateFormatter.variorumISO8601.date(from: $0) })
+        else { return word }
+        return SearchAnswerCopy.savepoint(day: TimeStampFace.day(saved, now: now, calendar: calendar, locale: locale))
     }
 
     /// A take hit the note does not render (the mockup's badge).

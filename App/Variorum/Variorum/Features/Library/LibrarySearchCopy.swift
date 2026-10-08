@@ -36,6 +36,9 @@ nonisolated enum LibrarySearchCopy {
         add(kinds.scraps, "scrap", "scraps")
         // VX-84a: a tag typed alone names BLOCKS by their own tags too.
         add(kinds.blocks, "block", "blocks")
+        // VX-72 (P-VX83-C3): under the commits facet the savepoints are said
+        // as their own kind, beside the living passages.
+        add(kinds.savepoints, "savepoint", "savepoints")
         return parts.isEmpty ? nothingFound : parts.joined(separator: " \u{00B7} ")
     }
 
@@ -49,6 +52,16 @@ nonisolated enum LibrarySearchCopy {
     /// become chips); its ✕ takes the tag out of the field.
     static func tagChip(_ path: String) -> String { "#\(path)" }
     static func removeTagHelp(_ path: String) -> String { "Stop narrowing to #\(path)" }
+
+    /// **The COMMITS facet's chip** (VX-72 — her R-VX83-5 split, "search what
+    /// you saved"; the word hers: *"hmm. i take it back - do + commits"*,
+    /// R-VX83-9): the invitation at rest, the armed word with its ✕ — the
+    /// archived chip's grammar. The help texts are PROVISIONAL wording (one
+    /// constant each, the bundle's).
+    static let commitsOff = "+ commits"
+    static let commitsOn = "commits"
+    static let commitsOffHelp = "Include your commits \u{2014} the words every savepoint of your takes kept"
+    static let commitsOnHelp = "Back to the living text \u{2014} leave your commits out"
 
     static var archivedOff: String { SearchAnswerCopy.archivedOff }
     static var archivedOn: String { SearchAnswerCopy.archivedOn }

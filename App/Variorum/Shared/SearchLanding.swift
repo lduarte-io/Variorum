@@ -44,10 +44,18 @@ nonisolated enum SearchLanding {
     /// taking the first run alone armed "sherlock holmes" as "Sherlock". The
     /// rule is core's one pure home (`SearchSnippetSegment.firstMatchedSpan`,
     /// D-3), so the phone lands the same words.
+    ///
+    /// VX-72 (PROVISIONAL P-VX83-C4): a SAVEPOINT lands the same way — its
+    /// `rendered` is its TAKE's, so it STEPS only when that take is the one
+    /// the note shows, and there the editor's own road still ARMS instead
+    /// when the saved words are no longer in the buffer (`applyFindSeed`'s
+    /// "words the buffer no longer holds"); an unrendered take's savepoint
+    /// arms (P-13o-U2-4's arm exactly).
     static func findSeed(
         kind: SearchPassage.Kind, rendered: Bool, snippet: [SearchSnippetSegment]
     ) -> EditorFindSeed? {
-        guard kind == .take, let span = SearchSnippetSegment.firstMatchedSpan(snippet)
+        guard kind == .take || kind == .savepoint,
+              let span = SearchSnippetSegment.firstMatchedSpan(snippet)
         else { return nil }
         return EditorFindSeed(needle: span, steps: rendered)
     }

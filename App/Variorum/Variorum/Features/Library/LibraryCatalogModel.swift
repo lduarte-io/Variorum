@@ -614,7 +614,8 @@ final class LibraryCatalogModel {
             let question = LibrarySearchQuestion.read(
                 query,
                 range: day.map { SearchDayRange(field: .edited, start: $0.start, end: $0.end) },
-                visibility: searchState.visibility, bookState: searchState.bookState)
+                visibility: searchState.visibility, bookState: searchState.bookState,
+                savepoints: searchState.includesSavepoints)
             if question == nil { searchState.resetFacet() }
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).

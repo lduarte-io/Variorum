@@ -61,14 +61,19 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// the filter half (D5 — `Queries.editedOnSQL`'s rule, unchanged).
     /// `bookState` is the armed MODE FACET (13o U3 — the sitting record
     /// §12's "mode facets as search filters"), a leaf of the same filter half.
+    ///
+    /// `savepoints` is the COMMITS facet (VX-72 — her R-VX83-5, "search what
+    /// you saved"; the chip `+ commits`, R-VX83-9): savepoint history joins
+    /// the answer. Off, the one composer's fence keeps every savepoint out.
     static func read(
         _ text: String, range: SearchDayRange? = nil, visibility: SearchVisibility = .living,
-        bookState: SearchBookState? = nil,
+        bookState: SearchBookState? = nil, savepoints: Bool = false,
         locale: Locale = .current, calendar: Calendar = JournalDay.storeCalendar
     ) -> LibrarySearchQuestion? {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
         var query = SearchQueryParser.parse(
             text, typeAhead: true, visibility: visibility, locale: locale, calendar: calendar)
+        query.includesSavepoints = savepoints
         if let range {
             query.filter = query.filter.map { .all([$0, .days(range)]) } ?? .days(range)
         }
@@ -196,6 +201,11 @@ final class LibrarySearchModel {
     /// `+ book state` chip. A question she asks, never remembered (the
     /// facet's own reason above). nil = none.
     private(set) var bookState: SearchBookState?
+    /// **The COMMITS facet** (VX-72 — her R-VX83-5: *"do the savepoints …
+    /// it's the most important product story (anything you've saved)"*; the
+    /// chip `+ commits`, her R-VX83-9): savepoint history joins the answer.
+    /// A question she asks, never remembered (the archived facet's reason).
+    private(set) var includesSavepoints = false
 
     /// The question the LISTED answer answers — nil when the Library is not
     /// searching. The band reads it whenever it is non-nil (P-13o-U2-1).
@@ -267,6 +277,11 @@ final class LibrarySearchModel {
         visibility = visibility == .living ? .includingArchived : .living
     }
 
+    /// The commits facet's door (VX-72): on ↔ off. The caller re-reads.
+    func toggleSavepoints() {
+        includesSavepoints.toggle()
+    }
+
     /// The mode facet's door (13o U3): arm one state, or clear (nil). The
     /// caller re-reads; the scope it moves is the catalog's
     /// (`LibraryCatalogModel.armBookState`).
@@ -274,10 +289,12 @@ final class LibrarySearchModel {
         bookState = state
     }
 
-    /// Put the facets back (a cleared field): the living corpus, no state.
+    /// Put the facets back (a cleared field): the living corpus, no state,
+    /// no savepoints.
     func resetFacet() {
         visibility = .living
         bookState = nil
+        includesSavepoints = false
     }
 
     // MARK: - Landing (the catalog's road — `LibrarySearchRouting.swift`)

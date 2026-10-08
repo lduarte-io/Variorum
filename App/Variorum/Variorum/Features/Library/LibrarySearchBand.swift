@@ -42,6 +42,18 @@ struct LibrarySearchBand: View {
     /// quiet invitation, `tag: #path ›`; the press is the explicit act.
     var tagOffers: [SearchTagOffer.Offer] = []
     var onAcceptTagOffer: (SearchTagOffer.Offer) -> Void = { _ in }
+    /// **The COMMITS facet** (VX-72 — her R-VX83-5; the word hers, R-VX83-9):
+    /// on or off, and its door.
+    var includesSavepoints = false
+    var onToggleSavepoints: () -> Void = {}
+
+    /// **The `+ commits` chip is offered only when the question has WORDS**
+    /// (PROVISIONAL, accepted at the §U-C RULINGS): savepoints are found by
+    /// their text, so a tag alone or a day alone — listed without the index —
+    /// gives the facet nothing to add (P-2: never a chip that cannot act).
+    nonisolated static func offersCommits(_ question: LibrarySearchQuestion?) -> Bool {
+        question?.hasWords == true
+    }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -102,6 +114,20 @@ struct LibrarySearchBand: View {
                     LibrarySearchChip(
                         tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.archivedOn),
                         help: LibrarySearchCopy.archivedOnHelp, onClear: onToggleArchived)
+                }
+            }
+            // VX-72 — the COMMITS facet, beside `+ archived`, its grammar: a
+            // dashed invitation at rest, the armed word with its ✕.
+            if Self.offersCommits(question) {
+                if includesSavepoints {
+                    LibrarySearchChip(
+                        tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOn),
+                        help: LibrarySearchCopy.commitsOnHelp, onClear: onToggleSavepoints)
+                } else {
+                    LibrarySearchChip(
+                        tokens: tokens, label: tokens.chromeLabel(LibrarySearchCopy.commitsOff),
+                        help: LibrarySearchCopy.commitsOffHelp, invitation: true,
+                        onTap: onToggleSavepoints)
                 }
             }
             // R-13o-15's growth note: the trailing end stays open for a later

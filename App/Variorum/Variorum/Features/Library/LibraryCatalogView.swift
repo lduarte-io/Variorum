@@ -379,6 +379,12 @@ struct LibraryCatalogView: View {
             onAcceptTagOffer: { offer in
                 model.acceptTagOffer(offer)
                 Task { await model.search() }
+            },
+            // VX-72 — the commits facet (a new question: the caller re-reads).
+            includesSavepoints: state.includesSavepoints,
+            onToggleSavepoints: {
+                model.toggleSavepointsFacet()
+                Task { await model.search() }
             })
     }
 
