@@ -17,7 +17,7 @@ Reading of the words (to verify at reproduction, not to build on): the flash is 
 - **DONE** — walk preparation: Debug build GREEN (`App/Variorum/DerivedData/vx75/Build/Products/Debug/Variorum.app` in the worktree; log `DerivedData/vx75-build.log`); WalkKit helpers compiled (`/tmp/walk-cap`, `/tmp/walk-scroll`, `Tools/WalkKit/wl2`); terminal host holds BOTH grants (AX true · SCREEN true, probed); zero Variorum instances running; ffmpeg + cliclick present. Capture plan: `screencapture -v -V 6` around the first prose click, frames out via ffmpeg, artifacts under the gitignored `DerivedData/vx75-walk/`.
 - **DONE** — the PROBE PIN written (speculative-finding road: pin FIRST as the confirm): `BookOutlineLandingTests.theFirstClickIntoEditingHoldsTheColumnSteady` — expands a story read-cheap, settles, then `focus(storyID, caret: 120)` (the prose click's exact call) and SAMPLES the `BookOutlineGeometry` oracles every settle turn: max neighbour top-shift (tolerance 150 pt — legit read↔live inset drift is ≤ ~48), the focused row's height floor (> pre − 200), and no witness anchor de-realizing mid-swap. RED ⇒ the column-geometry class is confirmed; GREEN ⇒ the column is acquitted in-harness and the walk's frames adjudicate a window-level class. `build-for-testing` compiling headlessly (`DerivedData/vx75-bft.log`).
 - **DONE** — reproduction walk (frames), mechanism traced, red-on-old pin, fix, behavioral revert (RED→GREEN), fixed-build walk (no blank frame), regression run (30 suites; the only reds are VX-77's, pre-existing).
-- **IN-PROGRESS** — ladder round 1: findings + dispositions recorded (0 BLOCKER · 0 MAJOR); the reviewer's final call pending.
+- **DONE** — ladder round 1: findings + dispositions + the reviewer's final call recorded (0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT; zero confirmed code fixes — R1-1 hollow record-only, R1-2 dismissed on recheck, R1-3 fixed, R1-4 ticketed).
 - **NOT-STARTED** — PR `VX-75: …` (merge commit) after the ladder.
 
 ## The walk runbook (one stage claim covers both acts)
@@ -98,4 +98,11 @@ Dev store, Debug build (`io.lduarte.Variorum.debug`), under a held `Tools/stage`
 - **R1-3 [NIT] · the record's LIVE STATUS keeps the stale "IN-PROGRESS — reproduction: WAITING on the stage" bullet.** **Disposition: AGREE — fix** (this edit).
 - **R1-4 [NIT] · the INVERSE swap (live→read on unfocus/pane-defocus/focus-elsewhere) still has the class:** a fresh `ReadPostView` mounts and fills async, so the formerly-live row shows a reserved-height blank beat. Pre-existing, byte-identical on both trees, warm-store short, off her report's road. **Disposition: AGREE — TICKET it** (deferred work is a ticket, CLAUDE.md), and the mechanism paragraph above corrected to name both directions.
 
-**Final call: PENDING the reviewer.**
+**Final call (the reviewer, same session — 2026-10-07):**
+
+- **R1-1 — CONFIRMED HOLLOW, record-only.** My own trace already failed to complete the retention road (the hop holds the coordinator `[weak self]`; SwiftUI releases it at dismantle), and no red-on-old pin is constructible. The record above IS the disposition; no code change.
+- **R1-2 — DISMISSED on recheck; the dispute is correct.** Verified against the code: the read surface's presence (`BookView.swift:2346`, `if !(isLive && liveShowing)`) and the editor's opacity (`:2389`, `.opacity(liveShowing ? 1 : 0)`) read the SAME row `@State` in the same body, so one snapshot decides both — deferring the flip keeps the read surface mounted exactly as long as the editor is transparent, and no blank frame can form under any single-flag timing. My finding's stated mechanism ("height reported, `liveShowing` deferred a turn → tall transparent editor with the read surface released") was mistraced: the release is keyed to the flag, not the height. The pin's frame criterion guards the real road (an editor revealed before its height — the pre-fix class, what made the revert red). Test unchanged.
+- **R1-3 — VERIFIED FIXED** (the stale bullet is gone from LIVE STATUS).
+- **R1-4 — CONFIRMED.** The mechanism paragraph now names both directions; the ticket mint is the orchestrator's.
+
+**Zero confirmed code fixes ⇒ no fix pass, no suite run owed (no code changed since the green pin run); the diff under review stands as reviewed.** Next: the implementer's sanity pass over the round's record edits, then the PR.
