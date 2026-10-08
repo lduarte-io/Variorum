@@ -429,6 +429,15 @@ struct ShellActions {
                         "Restored the \u{201C}\(name)\u{201D} gathering — it shows everything "
                         + "tagged #\(SampleLibrarySeeder.classicsTagPath)."
                         + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))
+                } else if let arranged, arranged.didAnything {
+                    // U1b ladder round 1, MINOR-1 — the sibling's ruled
+                    // voice (18i J33 + 13i-d U7): the gathering was only
+                    // ADOPTED, but the arrangement this door composed just
+                    // WROTE (Welcome made, a book shelved, Sherlock owned,
+                    // notes tagged), so the door ACTED and a receipt says
+                    // what — never a "did nothing" refusal over real writes.
+                    status.receipt(WelcomeDoorCopy.alreadyWholeArranged(
+                        book: name, shelf: arranged.welcome.shelf.name))
                 } else {
                     status.refuse(
                         "A \u{201C}\(name)\u{201D} gathering is already on your Bookcase.")

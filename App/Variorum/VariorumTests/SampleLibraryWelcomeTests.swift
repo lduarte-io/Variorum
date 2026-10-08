@@ -670,7 +670,9 @@ struct SampleLibraryWelcomeTests {
                 }
             }
 
-            // A second press: adopted, nothing new, the honest refusal.
+            // A second press: adopted, nothing new, the honest refusal
+            // (the arrangement already ran on the first press, so
+            // `didAnything` is false — MINOR-1's receipt arm stays quiet).
             session.status.clear()
             shell.pendingSelection = nil
             actions.restoreClassicsGathering()
@@ -683,6 +685,41 @@ struct SampleLibraryWelcomeTests {
                 }.count
             }
             #expect(count == 1, "never a twin")
+        }
+    }
+
+    /// **U1b ladder round 1, MINOR-1's pin** (red-on-old: the adopted arm
+    /// ALWAYS refused). An existing store that already holds a classics
+    /// gathering but was never arranged: the door ADOPTS the gathering,
+    /// and because the arrangement it composed just WROTE (Welcome minted,
+    /// Sherlock shelved and owned, the shipped notes tagged, the adopted
+    /// gathering itself shelved), the door ACTED — it speaks the sibling's
+    /// arranged RECEIPT (18i J33 + 13i-d U7's ruled voice), never a
+    /// "did nothing" refusal over real writes.
+    @Test func theClassicsDoorSpeaksAReceiptWhenItsArrangementWrote() async throws {
+        try await withWelcomeWorld { session, db in
+            _ = await launchSeeds(session)          // an existing store: never arranged
+            // The old seed's shape: the gathering already exists, UNSHELVED.
+            let existing = try await session.runner.run { _ -> String in
+                let ops = Operations(undoStack: nil)
+                let tag = try ops.createTag(name: SampleLibrarySeeder.classicsTagPath, wingID: "")
+                return try ops.createReading(
+                    name: SampleLibraryWelcome.classicsGatheringName, kind: .gathering,
+                    profile: "collection", sortField: .createdAt, sortDir: .asc,
+                    querySpec: try RuleGrammar.encode(
+                        SampleLibraryWelcome.classicsRule(classicsTagID: tag.id)),
+                    wingId: "").id
+            }
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            actions.restoreClassicsGathering()
+            await poll { shell.pendingSelection != nil }
+            #expect(shell.pendingSelection == .reading(existing), "ADOPTED — her gathering opens")
+            #expect(session.status.spoken?.text == WelcomeDoorCopy.alreadyWholeArranged(
+                book: SampleLibraryWelcome.classicsGatheringName, shelf: "Welcome"),
+                    "the arrangement wrote, so the door speaks the arranged receipt")
+            let f = try await facts(db)
+            #expect(f.readingByName[sherlockName]?.owned == true, "…and it really did write")
         }
     }
 }
