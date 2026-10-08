@@ -174,4 +174,168 @@ struct VX80CastleFollowRecoveryTests {
             #expect(openCount.value == 2, "one failed open, one unlocked open")
         }
     }
+
+    /// **PIECE 3 — the saveAuto gate check (the record's own instruction):**
+    /// on the recovery road under the CASTLE DEMANDED GATE, the R1-M3
+    /// unlocked-key re-landing must NOT fire — the lobby law holds (the
+    /// demanded modes never land a silent item; the marker's resume owns
+    /// custody here). The shape: a Castle device's crash window — the GATED
+    /// item holds the stale key A, the route's lobby biometric road
+    /// releases A, the open fails typed (`keyRejected`), the recovery
+    /// lobby's typed word yields B — and after `.ready` the silent item
+    /// must still not exist.
+    @Test func underTheDemandedGateTheRecoveryUnlockLandsNoSilentItem() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let keyB = StoreKey.mint()
+            let keyA = StoreKey.mint()
+            let (storeURL, sidecar) = try strandedStore(
+                in: dir, storeKey: keyB, passphrase: "sesame")
+
+            // The gated custody shape: no silent item, the gated item holds
+            // stale A, biometrics succeed (they release exactly the key
+            // that no longer opens the file).
+            let backing = InMemoryStoreKeyGuardBacking(
+                gated: keyA, biometryAvailable: true, biometricSucceeds: true)
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(), backing: backing, envelope: sidecar,
+                syncCustodyPresent: { _, _ in true })
+
+            let custodyKey = LockIsolated(keyA)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: productionOpener(
+                    storeURL: storeURL, custodyKey: custodyKey, openCount: openCount),
+                gate: gate, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+
+            // The demanded route stops at the REGULAR lobby first.
+            guard case .locked(let lockedLobby) = bootstrap.state else {
+                Issue.record("expected .locked under the demanded gate, got \(bootstrap.state)")
+                return
+            }
+            #expect(lockedLobby.biometryOffered, "the gated item exists — the biometric road renders")
+            await lockedLobby.unlockWithBiometrics()
+            await bootstrap.awaitOpen()
+
+            // The gated road released the STALE key; the open failed typed
+            // into the recovery lobby — the new arm.
+            guard case .failed(let error, let recovery) = bootstrap.state else {
+                Issue.record("expected .failed after the stale gated unlock, got \(bootstrap.state)")
+                return
+            }
+            #expect(error.keyRejected, "the wrong-key class, typed (VX-80)")
+            #expect(!error.keyUnavailable)
+            let lobby = try #require(recovery, "the recovery lobby renders on the wrong-key class")
+            #expect(lobby.passphraseOffered)
+            #expect(!lobby.biometryOffered,
+                    "typed secrets only — the gated item holds exactly the key that failed")
+
+            custodyKey.setValue(keyB)
+            await lobby.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready after the recovery unlock, got \(bootstrap.state)")
+                return
+            }
+            // THE CHECK: the effective gate derives DEMANDED (gated custody
+            // shape, Castle-shaped key file), so the R1-M3 re-landing is
+            // guarded off — no silent item may appear. A bounded settle
+            // gives the (would-be) detached save every chance to fire.
+            for _ in 0..<200 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(backing.auto == nil,
+                    "the demanded modes' lobby road never lands custody — the resume owns it")
+        }
+    }
+
+    /// The SILENT custody shape's re-landing is the designed heal, pinned:
+    /// on the Air's exact state (silent item holding stale A, gate `.auto`)
+    /// the recovery unlock's proven key REPLACES the stale silent item
+    /// (R1-M3's non-demanded re-landing), so the NEXT launch opens silently
+    /// instead of re-stranding — the reconcile's posture-mismatch arm and
+    /// the marker's resume door then complete the follow at their own
+    /// cadence. Losing this heal would re-strand every relaunch until the
+    /// resume runs.
+    @Test func underTheSilentShapeTheProvenKeyReplacesTheStaleItem() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let keyB = StoreKey.mint()
+            let keyA = StoreKey.mint()
+            let (storeURL, sidecar) = try strandedStore(
+                in: dir, storeKey: keyB, passphrase: "sesame")
+            let backing = InMemoryStoreKeyGuardBacking(auto: keyA)
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(), backing: backing, envelope: sidecar,
+                syncCustodyPresent: { _, _ in true })
+            let custodyKey = LockIsolated(keyA)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: productionOpener(
+                    storeURL: storeURL, custodyKey: custodyKey, openCount: openCount),
+                gate: gate, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .failed(_, let recovery) = bootstrap.state,
+                  let lobby = recovery else {
+                Issue.record("expected .failed with the recovery lobby, got \(bootstrap.state)")
+                return
+            }
+            custodyKey.setValue(keyB)
+            await lobby.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready after the recovery unlock, got \(bootstrap.state)")
+                return
+            }
+            var healed = false
+            for _ in 0..<400 where !healed {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+                healed = backing.auto == keyB
+            }
+            #expect(healed,
+                    "the proven key replaces the stale silent item — the next launch opens silently instead of re-stranding")
+        }
+    }
+
+    /// P11 PARITY on the new class: an UNREADABLE sidecar reads as no
+    /// roads — the failure surface stays doorless for the wrong-key class
+    /// exactly as it does for the empty-custody one (the lobby and the
+    /// controller doors carry the unreadable honesty; widening would be
+    /// new design, not a fix — the R1-M3 disposition, carried over).
+    @Test func anUnreadableSidecarStaysDoorlessOnTheWrongKeyClass() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let keyB = StoreKey.mint()
+            let keyA = StoreKey.mint()
+            let (storeURL, _) = try strandedStore(
+                in: dir, storeKey: keyB, passphrase: "sesame")
+            let backing = InMemoryStoreKeyGuardBacking(auto: keyA)
+            let envelopeBox = ScriptedEnvelopeBox(nil)
+            envelopeBox.unreadable = true
+            let gate = StoreLaunchGate.scripted(
+                dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
+                envelope: envelopeBox,
+                syncCustodyPresent: { _, _ in true })
+            let custodyKey = LockIsolated(keyA)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: productionOpener(
+                    storeURL: storeURL, custodyKey: custodyKey, openCount: openCount),
+                gate: gate, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .failed(let error, let recovery) = bootstrap.state else {
+                Issue.record("expected .failed, got \(bootstrap.state)")
+                return
+            }
+            #expect(error.keyRejected, "still the typed wrong-key refusal")
+            #expect(recovery == nil,
+                    "an unreadable sidecar offers no roads here — the true cause renders, never a lobby that cannot act")
+        }
+    }
 }

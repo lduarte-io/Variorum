@@ -1691,24 +1691,47 @@ too (one review over the phase's whole added diff).**
   cleared. The resume at `.rekeyLibrary`/`.custody` needs no passphrase on the follow shape
   (custody holds M′; `newKeyFromKeyFile` unwraps the new sidecar's master copy).
 - **PIECE 3 — the saveAuto gate check (R1-M3's re-landing under the Castle demanded gate):**
-  NOT-STARTED. Traced mechanism, recorded now: the re-land at `AppBootstrap.finish` is guarded
-  by `!currentEffectiveGate.isDemanded`. On the recovery road under a DEMANDED gate (a
-  gated-custody stranded shape — e.g. a Castle device's Replace-All-Keys crash window: the
-  gated item holds stale A, the route's lobby biometric road releases A, the open fails
-  NOTADB, the recovery lobby's typed word yields B) the gate derives demanded at ready, so
-  saveAuto MUST NOT fire — the state-transition test asserts `backing.auto` stays nil through
-  ready. On the Air's own SILENT shape the effective gate honestly reads `.auto` at that
-  instant (indeterminate posture, custody shape silent), so R1-M3's designed heal REPLACES the
-  stale silent A with the proven B — strictly better custody, and the resume's
-  `moveCustodyForSwitch` then lands the Castle shape (gated/nowhere, silent item deleted).
-  Recorded as designed behavior, not a gap.
-- **PIECE 4 — state-transition tests for the new arm:** NOT-STARTED. Planned: core headless
-  (`Tests/VariorumCoreTests`): wrong-key `openStore` throws `keyRejected == true` +
-  `keyUnavailable == false`; empty-custody keeps `keyUnavailable == true` + `keyRejected ==
-  false`; right-key opens; fresh-store mint unaffected. Mac suite: the demanded-gate recovery
-  road (piece 3's pin); the unreadable-sidecar doorless parity on the new class. The two-client
-  convergence suites untouched (boot routing only).
-- **PIECE 5 — the full headless core suite at close (R2-3's flake watch):** NOT-STARTED.
+  DONE (this commit — `underTheDemandedGateTheRecoveryUnlockLandsNoSilentItem` in the VX-80
+  Mac suite; its run rides piece 4's stage-pending command). Traced mechanism: the re-land at
+  `AppBootstrap.finish` is guarded by `!currentEffectiveGate.isDemanded`. On the recovery road
+  under a DEMANDED gate (a gated-custody stranded shape — a Castle device's Replace-All-Keys
+  crash window: the gated item holds stale A, the route's lobby biometric road releases A, the
+  open fails NOTADB typed, the recovery lobby's typed word yields B) the gate derives demanded
+  at ready, so saveAuto MUST NOT fire — the test asserts `backing.auto` stays nil through
+  ready + a bounded settle. On the Air's own SILENT shape the effective gate honestly reads
+  `.auto` at that instant (indeterminate posture, custody shape silent), so R1-M3's designed
+  heal REPLACES the stale silent A with the proven B — strictly better custody (without it,
+  every relaunch before the resume re-strands), and the resume's `moveCustodyForSwitch` then
+  lands the Castle shape. BOTH behaviors pinned (the heal:
+  `underTheSilentShapeTheProvenKeyReplacesTheStaleItem`).
+- **PIECE 4 — state-transition tests for the new arm:** DONE (this commit). Core headless
+  (`Tests/VariorumCoreTests/StoreEncryptionTests.swift`, KeyedStoreTests):
+  `openStoreTypesAWrongKeyOpenAsKeyRejected` (typed `keyRejected` + NOT `keyUnavailable` + no
+  key material in the reason (P15) + the right key still opens the untouched file) and
+  `theEmptyCustodyRefusalIsNotTheWrongKeyClass` (the class separation's other side) — both
+  GREEN headless (KeyedStoreTests 8/8). Mac suite (`VX80CastleFollowRecoveryTests`, now FOUR
+  tests): the named pin · the demanded-gate saveAuto check · the silent-shape heal · the
+  unreadable-sidecar doorless parity (P11 carried onto the new class). Compile check DONE
+  (`build-for-testing`, TEST BUILD SUCCEEDED). **The GREEN run is PENDING-BEHIND-THE-STAGE**
+  — the same command as the red run (`-only-testing:VariorumTests/VX80CastleFollowRecoveryTests`),
+  expected 4/4 PASSING. Revert evidence: the RED already ran on the actual pre-fix tree (the
+  orchestrator's 21:58 run — red-on-old on exactly the named pin, cleaner than a revert); any
+  future revert re-verification must use the NAMED pin test alone (the three newer tests
+  reference `keyRejected`, which the old tree lacks). The two-client convergence suites carry
+  ZERO VX-80 lines (boot routing only).
+- **PIECE 5 — the full headless core suite at close (R2-3's flake watch):** DONE — full
+  `swift test`: **2338 tests in 269 suites, 3 issues in 2 tests, BOTH pre-existing W-1
+  fallout, ZERO VX-80 failures.** The two: `KeyedStoreConvergenceTests.theEngineConverges
+  OverOnDiskKeyedStoresAndTheFilesStayCiphertext` (`!walBytes.isEmpty` ×2 at :105 — the pin
+  reads the WAL's bytes to prove they stay ciphertext, and W-1's checkpoint-truncate in
+  `StoreBinding.lock()` now leaves the WAL EMPTY) and `LibraryKeyLegDrillTests.theHandOff
+  FolderOpensByEachOfItsThreeWraps` (travelled-vs-home byte equality at :135 — same mechanism
+  class: the home store's on-disk bytes moved under the checkpoint). BISECT EVIDENCE
+  (throwaway worktree, removed after): GREEN at 94ad887e (pre-W-1) · RED at a8f58bdb (W-1 in,
+  the VX-80 fix NOT yet in) · RED at HEAD, failure lines identical — the introducing commit is
+  bf44f53f (W-1), not any VX-80 commit. HANDED TO THE ORCHESTRATOR (W-1 is their
+  adjudication-fix; whether the two pins' premises update or the fix narrows is their ruling).
+  Every other suite green (the StringsWorkbook target 40/40 included).
 
 **Fences held:** zero `Persistence/Migrations.swift` (marker stays 12); ZERO `Sync/` lines —
 none demanded by the traced fix (boot routing + one typed error fact); her real store never;
