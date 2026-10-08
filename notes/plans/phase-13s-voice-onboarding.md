@@ -417,4 +417,4 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
 - Confirmed visible for U1b (expected, not findings): the Encryption Explained restore door still present (R-13s-37 removes it); the Jekyll door's title still title-case (R-13s-38 lowercases it).
 - Walk evidence lives in the session scratchpad (gitignored; deleted at the merge per the closeout rule) — this record is the evidence of record. The Opus UI assessors were NOT spent here (small chrome, self-assessed); they are reserved for U2's full-tour walk.
 
-**U1a status: BUILT + SUITES GREEN + WALKED. The unit closes at its ladder round's dispositions.**
+**U1a status: UNIT CLOSED (2026-10-08 ~04:05).** Built, suites green (49/5 + 278/62 at the stage window), walked both rooms, ladder round 1 CLEAN (0B · 0M · 0m · 3 NIT, all agreed record-only — the full exchange and dispositions: `notes/plans/13s-ladders/u1a-round1.md`). The cross-model exchange ran whole: findings verbatim to the implementer, three AGREEs, zero disputes, the ladder closed at round 1. NIT-1's text joins P-U1a-4's QUESTIONS entry at the merge; NIT-2 rides W-U1a-2's for-her note; NIT-3 is a standing hygiene line. U2 spawns next.
