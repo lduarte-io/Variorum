@@ -3113,9 +3113,11 @@ struct TutorialWherePlacesActsTests {
             // THREE — what a copy carries (13u3 UNIT E, item 15(b)): her
             // sentence, both halves, in the words the app itself uses.
             let copies = try #require(prose["what a copy carries"])
-            #expect(copies.contains("carries the WORDS, not the past"),
+            // 13s-b triage landing: the copy rule's caps-for-emphasis gone (her
+            // R-13s-30 ban) — "WORDS"/"PLACES" read plainly; the claims unchanged.
+            #expect(copies.contains("carries the words, not the past"),
                     "the rule, in one clause")
-            #expect(copies.contains("only what the note PLACES"),
+            #expect(copies.contains("only what the note places"),
                     "her words: \"you're only saving the placed notes\"")
             #expect(copies.contains(BlockHistoryPath.name)
                 && copies.contains(BlockHistoryPath.doorLabel),
@@ -3131,8 +3133,9 @@ struct TutorialWherePlacesActsTests {
 
             // FOUR — the two exits (row 27), and the rule in her own shape.
             let exits = try #require(prose["the two exits"])
-            #expect(exits.contains("DELETION GOES TO THE TRASH")
-                && exits.contains("TRANSFORMATION GOES TO LINEAGE"),
+            // 13s-b triage landing: her rule, in sentence case (the draft: "The
+            // rule is short." — the old "four words long" miscounted it).
+            #expect(exits.contains("Deletion goes to the Trash; transformation goes to lineage."),
                     "her eleventh-sitting mandate, in the lesson's mouth")
             #expect(exits.contains(TrayPath.menuLabel), "the first exit's near listing")
             #expect(exits.contains(RecoveryCopy.trashSection), "…and its far one")
@@ -3150,21 +3153,21 @@ struct TutorialWherePlacesActsTests {
         try await withTutorialWorld { _, db, bookID in
             let map = try await db.read { try lessonID($0, bookID: bookID, "the five places") }
             #expect(try await slots(db, map).compactMap(\.text)
-                .contains { $0.hasPrefix("PRACTICE ME") },
+                .contains { $0.hasPrefix("Practice me") },  // 13s-b triage landing: sentence case
                     "a block to visit with the history door")
 
             let saving = try await db.read {
                 try lessonID($0, bookID: bookID, "saving a moment")
             }
             #expect(try await slots(db, saving).compactMap(\.text)
-                .contains { $0.hasPrefix("PRACTICE TAKE") },
+                .contains { $0.hasPrefix("Practice take") },
                     "a take to commit")
 
             let copies = try await db.read {
                 try lessonID($0, bookID: bookID, "what a copy carries")
             }
             let copySlots = try await slots(db, copies).compactMap(\.text)
-            #expect(copySlots.contains { $0.hasPrefix("PRACTICE COPY") },
+            #expect(copySlots.contains { $0.hasPrefix("Practice copy") },
                     "a block to save a moment of, then copy the note around")
             #expect(copySlots.count >= 3,
                     """
@@ -3175,12 +3178,12 @@ struct TutorialWherePlacesActsTests {
             let exits = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
             let exitProjection = try await projection(db, exits)
             let texts = exitProjection.slots.compactMap(\.text)
-            #expect(texts.contains { $0.hasPrefix("EXIT ONE") }, "one to delete whole")
+            #expect(texts.contains { $0.hasPrefix("Exit one") }, "one to delete whole")
             let first = try #require(exitProjection.slots.firstIndex {
-                $0.text?.hasPrefix("EXIT TWO, first half") == true
+                $0.text?.hasPrefix("Exit two, first half") == true
             })
             let second = try #require(exitProjection.slots.firstIndex {
-                $0.text?.hasPrefix("EXIT TWO, second half") == true
+                $0.text?.hasPrefix("Exit two, second half") == true
             })
             #expect(second == first + 1, "the pair to join must be ADJACENT")
             for index in [first, second] {
@@ -3267,7 +3270,7 @@ struct TutorialWherePlacesActsTests {
                 try lessonID($0, bookID: bookID, "saving a moment")
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
-            let practice = try staged(harness, "PRACTICE TAKE")
+            let practice = try staged(harness, "Practice take")  // 13s-b triage landing: sentence case
 
             // ⌘S — the take's moment, through the bar's own door.
             harness.textView.setSelectedRange(
@@ -3329,7 +3332,7 @@ struct TutorialWherePlacesActsTests {
                 try lessonID($0, bookID: bookID, "what a copy carries")
             }
             let practice = try #require(try await slots(db, lesson)
-                .first { $0.text?.hasPrefix("PRACTICE COPY") == true })
+                .first { $0.text?.hasPrefix("Practice copy") == true })  // 13s-b triage landing
             let take = try #require(practice.variantID)
 
             // ⌘S — the moment the lesson tells her to save.
@@ -3433,7 +3436,7 @@ struct TutorialWherePlacesActsTests {
             let harness = try tutorialEditor(session, db, postID: lesson)
 
             // ── EXIT ONE: deletion goes to the Trash ──────────────────────
-            let doomed = try staged(harness, "EXIT ONE")
+            let doomed = try staged(harness, "Exit one")  // 13s-b triage landing: sentence case
             harness.replace(try tripleClickSelection(harness, doomed.blockID), with: "")
             await harness.flush()
 
@@ -3449,8 +3452,8 @@ struct TutorialWherePlacesActsTests {
 
             // ── EXIT TWO: transformation goes to lineage ──────────────────
             try harness.reload()
-            let first = try staged(harness, "EXIT TWO, first half")
-            let second = try staged(harness, "EXIT TWO, second half")
+            let first = try staged(harness, "Exit two, first half")
+            let second = try staged(harness, "Exit two, second half")
             let firstRange = try entryRange(harness, first.blockID)
             let secondRange = try entryRange(harness, second.blockID)
             let span = NSRange(
@@ -3470,7 +3473,7 @@ struct TutorialWherePlacesActsTests {
             // — the lesson's own marker survives the cut it asks for.
             let standingSlots = try harness.storeSlots()
             let joined = try #require(standingSlots.first {
-                $0.text?.contains("EXIT TWO") == true
+                $0.text?.contains("Exit two") == true
             }).blockID
             #expect(after.contains(joined))
 
@@ -3634,14 +3637,16 @@ struct TutorialFannedMatrixTests {
             let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
 
             // The WHOLE/PART fork — the sentence the matrix rests on.
-            #expect(prose.contains("covered WHOLE") && prose.contains("covered only IN PART"))
+            // 13s-b triage landing: the matrix's caps-for-emphasis gone (her
+            // R-13s-30 ban) — every claim below is the same sentence, plainly.
+            #expect(prose.contains("covered whole") && prose.contains("covered only in part"))
             #expect(prose.contains("with every take on it"),
                     "a fanned block covered whole goes WHOLE — her ruling")
-            #expect(prose.contains("only the take you can SEE loses its piece"),
+            #expect(prose.contains("only the take you can see loses its piece"),
                     "…and a partly covered one touches the shown take only")
             // R-13u-2, in the lesson's mouth, BOTH kinds of break named.
-            #expect(prose.contains("MIDDLE of a paragraph at both ends"))
-            #expect(prose.contains("paragraph BREAK at either end"))
+            #expect(prose.contains("middle of a paragraph at both ends"))
+            #expect(prose.contains("paragraph break at either end"))
             #expect(prose.contains("a line break inside one"),
                     "the INTERNAL newline half of her ruling is named, not implied")
             // #11a's rule at the ends.
@@ -3654,9 +3659,11 @@ struct TutorialFannedMatrixTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
             let harness = try tutorialEditor(session, db, postID: lesson)
 
-            let top = try staged(harness, "EXIT THREE, top")
-            let middle = try staged(harness, "EXIT THREE, middle")
-            let bottom = try staged(harness, "EXIT THREE, bottom")
+            // 13s-b triage landing: the trio in sentence case — the SEEDER's own
+            // hasPrefix moved with the prose in the same commit.
+            let top = try staged(harness, "Exit three, top")
+            let middle = try staged(harness, "Exit three, middle")
+            let bottom = try staged(harness, "Exit three, bottom")
 
             // The middle really carries the fan the card promises.
             let fanBefore = try await db.read { [blockID = middle.blockID] db in
@@ -3691,7 +3698,7 @@ struct TutorialFannedMatrixTests {
 
             // And the two ends are one block whose Came from names both.
             let joined = try #require(try harness.storeSlots().first {
-                $0.text?.contains("EXIT THREE") == true
+                $0.text?.contains("Exit three") == true
             }).blockID
             let history = try await db.read { [now = session.now] db in
                 try Queries.blockHistory(db, blockID: joined, now: now)

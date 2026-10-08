@@ -1446,66 +1446,63 @@ enum TutorialSeeder {
 
         _ = try lesson(places, "the five places", [
             "Nothing here goes anywhere you can't find. At any moment, "
-            + "everything you have ever written is in exactly ONE of five "
-            + "places: where you left it \u{B7} in Archive \u{B7} in the Trash "
-            + "\u{B7} in this note's Versions \u{B7} in this block's History. "
-            + "This lesson visits all five, and the two after it teach the "
-            + "ones that are new.",
+            + "everything you have ever written is in exactly one of five places: "
+            + "where you left it \u{B7} in Archive \u{B7} in the Trash \u{B7} in "
+            + "this note's Versions \u{B7} in this block's History. This lesson "
+            + "visits all five, and the two after it teach the ones that are new.",
 
-            "ONE \u{2014} WHERE YOU LEFT IT. The ordinary case, said out loud "
-            + "because it is the one nobody thinks to say: a note you wrote "
-            + "and did nothing else to sits in your Library exactly as you "
-            + "left it, for as long as you keep it. The other four places "
-            + "exist only for things you deliberately set aside, deliberately "
-            + "changed, or deliberately saved.",
+            "One: where you left it. The ordinary case, said out loud because "
+            + "it is the one nobody thinks to say. A note you wrote and did "
+            + "nothing else to sits in your Library exactly as you left it, for "
+            + "as long as you keep it. The other four places exist only for "
+            + "things you deliberately set aside, deliberately changed, or "
+            + "deliberately saved.",
 
-            "TWO \u{2014} ARCHIVE: notes, forever, no clock. Right-click any "
-            + "note \u{25B8} Archive and it leaves the Library for ARCHIVED, "
-            + "its own item in the sidebar, with its own search. Nothing is "
-            + "counting down and nothing needs remembering \u{2014} it is "
-            + "still yours, still editable, still exportable; archiving is "
-            + "about your Library's attention, not about the note. Unarchive "
-            + "puts it back. (Blocks and takes archive too, and each waits "
-            + "where its context is: an archived block in its note's tray, an "
-            + "archived take in its block's History. A thing set aside stays "
-            + "next to what makes sense of it.)",
+            "Two: Archive. Notes, forever, no clock. Right-click any note "
+            + "\u{25B8} Archive and it leaves the Library for Archived, its own "
+            + "item in the sidebar, with its own search. Nothing is counting down "
+            + "and nothing needs remembering. It is still yours, still editable, "
+            + "still exportable; archiving is about your Library's attention, not "
+            + "about the note. Unarchive puts it back. (Blocks and takes archive "
+            + "too, and each waits where its context is: an archived block in its "
+            + "note's tray, an archived take in its block's History. A thing set "
+            + "aside stays next to what makes sense of it.)",
 
-            "THREE \u{2014} THE TRASH: what is leaving, for "
-            + "\(TrashWindow.days) days. Deleting a note, a book or a block "
-            + "starts the clock, and all three wait it out behind the trash "
-            + "icon at the top of the Library \u{2014} every row saying how "
-            + "many days are left and which note it came from, and Put back "
-            + "on any of them. A deleted TAKE is the one thing that never "
-            + "rows there: alone, out of its block, a take is too small to "
+            "Three: the Trash. What is leaving, for \(TrashWindow.days) days. "
+            + "Deleting a note, a book or a block starts the clock, and all three "
+            + "wait it out behind the trash icon at the top of the Library, every "
+            + "row saying how many days are left and which note it came from, and "
+            + "Put back on any of them. A deleted take is the one thing that "
+            + "never rows there: alone, out of its block, a take is too small to "
             + "make sense of, so it waits in that block's History instead.",
 
-            "FOUR \u{2014} THIS NOTE'S VERSIONS: moments of the WHOLE note, "
-            + "saved by hand. \u{2318}\u{21E7}S saves one; note \u{25BE} "
-            + "\u{25B8} \(VersionsPath.menuLabel) lists them, newest first, "
-            + "each with Read, Restore and Promote. A saved version is frozen "
-            + "at birth and stays out of your way \u{2014} never in the "
-            + "Library, never in Archived \u{2014} because it is not another "
-            + "note, it is this note's past. The next lesson is about the key.",
+            "Four: this note's Versions. Moments of the whole note, saved by "
+            + "hand. \u{2318}\u{21E7}S saves one; note \u{25BE} \u{25B8} "
+            + "\(VersionsPath.menuLabel) lists them, newest first, each with "
+            + "Read, Restore and Promote. A saved version is frozen at birth and "
+            + "stays out of your way, never in the Library, never in Archived, "
+            + "because it is not another note. It is this note's past. The next "
+            + "lesson is about the key.",
 
-            "FIVE \u{2014} THIS BLOCK'S HISTORY: everything ONE block has "
-            + "been. The history door sits in the bottom bar right beside "
-            + "commit, and it opens the Block History panel: each live take's "
-            + "saved moments, the takes this block archived, the takes it "
-            + "deleted (with their clocks), and \(BlockHistoryPath.cameFromSection) "
-            + "\u{2014} the blocks it came out of. Two lessons live in there, "
-            + "and they are the two that follow.",
+            "Five: this block's History. Everything one block has been. The "
+            + "history door sits in the bottom bar right beside commit, and it "
+            + "opens the Block History panel: each live take's saved moments, the "
+            + "takes this block archived, the takes it deleted (with their "
+            + "clocks), and \(BlockHistoryPath.cameFromSection), the blocks it "
+            + "came out of. Two lessons live in there, and they are the two that "
+            + "follow.",
 
-            "PRACTICE ME: I'm here to be visited. Put your cursor in me and "
-            + "press history in the bottom bar to read my (empty) past \u{2014} "
-            + "then come back after the next lesson and look again.",
+            "Practice me: I'm here to be visited. Put your cursor in me and "
+            + "press history in the bottom bar to read my (empty) past. Then come "
+            + "back after the next lesson and look again.",
 
-            "A last honest word about the map: it is a map of PLACES, not of "
+            "A last honest word about the map: it is a map of places, not of "
             + "promises about time. Archive keeps forever; the Trash keeps for "
             + "\(TrashWindow.days) days and then really does delete; a note's "
-            + "Versions and a block's History keep for as long as the note or "
-            + "the block does. Wherever something is, the surface it is on "
-            + "tells you which of those it is \u{2014} that is the whole "
-            + "design, and the reason there are five places instead of one.",
+            + "Versions and a block's History keep for as long as the note or the "
+            + "block does. Wherever something is, the surface it is on tells you "
+            + "which of those it is. That is the whole design, and the reason "
+            + "there are five places instead of one.",
         ])
 
         // Row 26 + row 19's savepoint half: the grain pairing IS the lesson,
@@ -1513,27 +1510,27 @@ enum TutorialSeeder {
         // taught (her: *"making it clear where commit / that particular
         // history by the take is, is also important"*).
         let saving = try lesson(places, "saving a moment", [
-            "Two keys save two different SIZES of the same idea, and the pair "
-            + "is worth learning together. \u{2318}S saves a moment of THIS "
-            + "TAKE \u{2014} the block you're in, the take you're looking at. "
-            + "\u{2318}\u{21E7}S saves a moment of THIS NOTE \u{2014} all of "
-            + "it, as it stands. One grain apart, one shift key apart.",
+            "Two keys save two different sizes of the same idea, and the pair "
+            + "is worth learning together. \u{2318}S saves a moment of this take "
+            + "(a commit: the block you're in, the take you're looking at). "
+            + "\u{2318}\u{21E7}S saves a moment of this note (a version: all of "
+            + "it, as it stands). One grain apart, one shift key apart.",
 
             "\u{2318}S's moments live exactly where you'd look for them: press "
-            + "history in the bottom bar, immediately beside commit. That "
-            + "pairing is deliberate \u{2014} commit WRITES a moment, history "
-            + "SHOWS the moments, and the two sit together so the bar reads as "
-            + "the block's own time controls. Every live take of the block has "
-            + "its own run in there, with the take you're in already open.",
+            + "history in the bottom bar, immediately beside commit. That pairing "
+            + "is deliberate. Commit writes a moment, history shows the moments, "
+            + "and the two sit together so the bar reads as the block's own time "
+            + "controls. Every live take of the block has its own run in there, "
+            + "with the take you're in already open.",
 
-            "PRACTICE TAKE: change a few words in me, press \u{2318}S, then "
+            "Practice take: change a few words in me, press \u{2318}S, then "
             + "press history. I'm where your moment will be listed.",
 
             "Restore beside a moment loads it back into the take. It does not "
-            + "overwrite anything: moments only ever append, so restoring an "
-            + "old one and pressing \u{2318}S again just adds another. That is "
-            + "the whole promise of a savepoint here \u{2014} you can always "
-            + "come back, including from the coming back.",
+            + "overwrite anything: moments only ever append, so restoring an old "
+            + "one and pressing \u{2318}S again just adds another. That is the "
+            + "whole promise of a commit here. You can always come back, "
+            + "including from the coming back.",
 
             // 13u3 UNIT E: *"every block, every take"* over-claimed by one
             // word — a version copies the note's PLACED blocks, which is the
@@ -1541,22 +1538,20 @@ enum TutorialSeeder {
             // the confirm's own (corrected there in the same batch: the WORDS
             // come back, the history does not).
             "\u{2318}\u{21E7}S is the same idea one size up. It copies the "
-            + "whole note as it stands \u{2014} every paragraph on the page, "
-            + "every take on them \u{2014} and keeps it under "
-            + "\(VersionsPath.menuLabel) in the note \u{25BE} menu. Restore "
-            + "makes the note say that again, and it saves where the note is "
-            + "NOW first, so none of its words are lost. Promote turns a "
-            + "moment into a note of its own, if you'd rather work with it "
-            + "than go back to it. What a copy carries \u{2014} and what it "
-            + "leaves behind \u{2014} is the next lesson.",
+            + "whole note as it stands, every paragraph on the page, every take "
+            + "on them, and keeps it under \(VersionsPath.menuLabel) in the note "
+            + "\u{25BE} menu. Restore makes the note say that again, and it saves "
+            + "where the note is now first, so none of its words are lost. "
+            + "Promote turns a moment into a note of its own, if you'd rather "
+            + "work with it than go back to it. What a copy carries, and what it "
+            + "leaves behind, is the next lesson.",
 
             "Which one to reach for? \u{2318}S when one paragraph is about to "
             + "change and you might want this wording back. \u{2318}\u{21E7}S "
-            + "before a rewrite \u{2014} anything that will touch several "
-            + "blocks at once. And you are not the only one saving: leaving a "
-            + "note quietly saves a moment for each take you changed while you "
-            + "were in it, so the \u{2318}S you forget is mostly already taken "
-            + "for you.",
+            + "before a rewrite, anything that will touch several blocks at once. "
+            + "And you are not the only one saving: leaving a note quietly "
+            + "commits each take you changed while you were in it, so the "
+            + "\u{2318}S you forget is mostly already taken for you.",
         ])
         _ = saving
 
@@ -1575,51 +1570,48 @@ enum TutorialSeeder {
         // rather than nearly true — and it is the reason RESTORE's confirm
         // counts what it takes (13u3 UNIT E's other half).
         let copies = try lesson(places, "what a copy carries", [
-            "A copy carries the WORDS, not the past. One rule, and it covers "
-            + "every gesture that makes a second thing out of a first: saving "
-            + "a version of this note (\u{2318}\u{21E7}S), duplicating a note, "
-            + "dragging a piece out of Snippets into a draft. What "
-            + "arrives is the text and every take on it \u{2014} and nothing "
-            + "standing behind them.",
+            "A copy carries the words, not the past. One rule, and it covers "
+            + "every gesture that makes a second thing out of a first: saving a "
+            + "version of this note (\u{2318}\u{21E7}S), duplicating a note, "
+            + "dragging a piece out of Snippets into a draft. What arrives is the "
+            + "text and every take on it, and nothing standing behind them.",
 
-            "So the MOMENTS do not travel. Savepoints stay on the take you "
-            + "pressed \u{2318}S on, in that block's \(BlockHistoryPath.name); "
-            + "a copy's takes are born with one fresh moment of the instant "
-            + "they were made and nothing before it. When you want the run of "
-            + "moments, you go back to the block that has them \u{2014} which "
-            + "is what the \(BlockHistoryPath.doorLabel) door is for, and why "
-            + "it is worth knowing where the original is.",
+            "So the moments do not travel. Commits stay on the take you pressed "
+            + "\u{2318}S on, in that block's \(BlockHistoryPath.name); a copy's "
+            + "takes are born with one fresh moment of the instant they were made "
+            + "and nothing before it. When you want the run of moments, you go "
+            + "back to the block that has them, which is what the "
+            + "\(BlockHistoryPath.doorLabel) door is for, and why it is worth "
+            + "knowing where the original is.",
 
-            "And a copy holds only what the note PLACES \u{2014} the "
-            + "paragraphs on the page, in their order. A note keeps things "
-            + "beside its page that are not on it: blocks a divide or a merge "
-            + "set aside whole (\(BlockHistoryPath.cameFromSection)), blocks "
-            + "you archived, blocks on their way out in "
-            + "\(TrayPath.menuLabel). None of those are in a saved version. "
-            + "They belong to the NOTE and they stay with it \u{2014} exactly "
-            + "where the map two lessons ago says they are.",
+            "And a copy holds only what the note places: the paragraphs on the "
+            + "page, in their order. A note keeps things beside its page that are "
+            + "not on it: blocks a divide or a merge set aside whole "
+            + "(\(BlockHistoryPath.cameFromSection)), blocks you archived, blocks "
+            + "on their way out in \(TrayPath.menuLabel). None of those are in a "
+            + "saved version. They belong to the note and they stay with it, "
+            + "exactly where the map two lessons ago says they are.",
 
-            "PRACTICE COPY: put your cursor in me and press \u{2318}S to save "
-            + "a moment of this take. Now press \u{2318}\u{21E7}S to save the "
-            + "whole note. Open note \u{25BE} \u{25B8} \(VersionsPath.menuLabel) "
-            + "and \(VersionsPath.openVerb) the new moment: every word is "
-            + "there, mine included. The moment you just saved is NOT "
-            + "\u{2014} it is still here, in my history, where you left it.",
+            "Practice copy: put your cursor in me and press \u{2318}S to save a "
+            + "moment of this take. Now press \u{2318}\u{21E7}S to save the whole "
+            + "note. Open note \u{25BE} \u{25B8} \(VersionsPath.menuLabel) and "
+            + "\(VersionsPath.openVerb) the new moment: every word is there, mine "
+            + "included. The moment you just saved is not. It is still here, in "
+            + "my history, where you left it.",
 
             "This is why \(VersionsPath.restoreVerb) asks before it acts. It "
-            + "replaces the note's paragraphs with the moment's, and the past "
-            + "of the paragraphs it replaces goes with them: their saved "
-            + "moments, any take you deleted from them, any comment you "
-            + "deleted. The confirm counts them and says so before you press "
-            + "it. \(VersionsPath.promoteVerb) is the road that takes nothing "
-            + "\u{2014} it makes the moment a note of its own and leaves "
-            + "everything where it is.",
+            + "replaces the note's paragraphs with the moment's, and the past of "
+            + "the paragraphs it replaces goes with them: their saved moments, "
+            + "any take you deleted from them, any comment you deleted. The "
+            + "confirm counts them and says so before you press it. "
+            + "\(VersionsPath.promoteVerb) is the road that takes nothing. It "
+            + "makes the moment a note of its own and leaves everything where it "
+            + "is.",
 
-            "None of this contradicts the map; it is the map applied to "
-            + "copies. A copy is a NEW thing in the place you made it, and "
-            + "the past of the thing you copied stays exactly where it "
-            + "already was \u{2014} which is the same reason nothing in this "
-            + "app is ever in two places at once.",
+            "None of this contradicts the map; it is the map applied to copies. "
+            + "A copy is a new thing in the place you made it, and the past of "
+            + "the thing you copied stays exactly where it already was. Which is "
+            + "the same reason nothing in this app is ever in two places at once.",
         ])
         _ = copies
 
@@ -1631,45 +1623,43 @@ enum TutorialSeeder {
         let exits = try lesson(places, "the two exits", [
             "A paragraph can leave a page two different ways, and telling them "
             + "apart answers the question this whole chapter exists for: "
-            + "\u{201C}I deleted a paragraph \u{2014} where is it?\u{201D} The "
-            + "rule is four words long. DELETION GOES TO THE TRASH; "
-            + "TRANSFORMATION GOES TO LINEAGE.",
+            + "\u{201C}I deleted a paragraph, so where is it?\u{201D} The rule is "
+            + "short. Deletion goes to the Trash; transformation goes to lineage.",
 
-            "THE FIRST EXIT \u{2014} you deleted it. Triple-click the "
-            + "paragraph below and press \u{232B}. It leaves the page onto a "
-            + "\(TrashWindow.days)-day clock, and it is now in TWO listings of "
-            + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top "
-            + "of the note, \(TrayPath.leavingTab)) and the Trash in the Library. Put "
-            + "back in either one returns it to the place it stood in. "
-            + "Deleted means LEAVING, and anything that is leaving always says "
+            "The first exit: you deleted it. Triple-click the paragraph below "
+            + "and press \u{232B}. It leaves the page onto a "
+            + "\(TrashWindow.days)-day clock, and it is now in two listings of "
+            + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top of "
+            + "the note, \(TrayPath.leavingTab)) and the Trash in the Library. "
+            + "Put back in either one returns it to the place it stood in. "
+            + "Deleted means leaving, and anything that is leaving always says "
             + "how long it has.",
 
-            "EXIT ONE: triple-click me and press \u{232B}. I'm the deletion "
-            + "\u{2014} look for me under the tray's \(TrayPath.leavingTab) view, and in the "
-            + "Trash, and put me back from either.",
+            "Exit one: triple-click me and press \u{232B}. I'm the deletion. "
+            + "Look for me under the tray's \(TrayPath.leavingTab) view, and in "
+            + "the Trash, and put me back from either.",
 
-            "THE SECOND EXIT \u{2014} it became something else. Select from "
-            + "the middle of the next paragraph to the middle of the one after "
-            + "it and press \u{232B}. The two become ONE, quietly, the way any "
-            + "editor would join them \u{2014} but the two blocks you started "
-            + "with were not deleted. They were kept whole, set aside, and the "
-            + "block they became remembers both.",
+            "The second exit: it became something else. Select from the middle "
+            + "of the next paragraph to the middle of the one after it and press "
+            + "\u{232B}. The two become one, quietly, the way any editor would "
+            + "join them. But the two blocks you started with were not deleted. "
+            + "They were kept whole, set aside, and the block they became "
+            + "remembers both.",
 
-            "EXIT TWO, first half: select from somewhere in me all the way "
-            + "into the paragraph below, and press \u{232B}.",
+            "Exit two, first half: select from somewhere in me all the way into "
+            + "the paragraph below, and press \u{232B}.",
 
-            "EXIT TWO, second half: and what we become will remember us both, "
+            "Exit two, second half: and what we become will remember us both, "
             + "by name.",
 
             "Now look. Put your cursor in the joined paragraph and press "
-            + "history: its \(BlockHistoryPath.cameFromSection) region lists "
-            + "BOTH originals \u{2014} not one of them \u{2014} each with its "
-            + "own text and a \(BlockHistoryPath.bringBackVerb) button that "
-            + "puts it into the note again, beside what it became. Nothing "
-            + "counted down. Nothing was in the Trash. All the app said at "
-            + "the time was one quiet line at the bottom, naming where the "
-            + "two originals went \u{2014} and this panel is where that line "
-            + "points.",
+            + "history: its \(BlockHistoryPath.cameFromSection) region lists both "
+            + "originals, not one of them, each with its own text and a "
+            + "\(BlockHistoryPath.bringBackVerb) button that puts it into the "
+            + "note again, beside what it became. Nothing counted down. Nothing "
+            + "was in the Trash. All the app said at the time was one quiet line "
+            + "at the bottom, naming where the two originals went, and this panel "
+            + "is where that line points.",
 
             // **13u1 UNIT 2 — the FANNED CROSS-BLOCK MATRIX**, which row 27
             // deliberately left to this phase (*"the fanned cross-block
@@ -1677,61 +1667,63 @@ enum TutorialSeeder {
             // item 5 legibility mandate is why it is here at all:
             // *teachability is a design constraint*, and the gesture now has
             // three answers where the lesson taught one.
-            "ONE MORE THING, and it is the whole shape of a big selection. "
+            "One more thing, and it is the whole shape of a big selection. "
             + "Select across several paragraphs, press \u{232B}, and every block "
-            + "you touched gets exactly ONE of two fates \u{2014} decided by how "
-            + "much of it you selected. A block you covered WHOLE leaves the "
-            + "page the FIRST way: to the Trash, with every take on it, "
-            + "together \u{2014} so \(TrayPath.putBackVerb) returns the whole family, not "
-            + "a piece of it. A block you covered only IN PART keeps its name "
-            + "and its place, and only the take you can SEE loses its piece. "
-            + "The takes you are not looking at are never touched.",
+            + "you touched gets exactly one of two fates, decided by how much of "
+            + "it you selected. A block you covered whole leaves the page the "
+            + "first way: to the Trash, with every take on it, together, so "
+            + "\(TrayPath.putBackVerb) returns the whole family, not a piece of "
+            + "it. A block you covered only in part keeps its name and its place, "
+            + "and only the take you can see loses its piece. The takes you are "
+            + "not looking at are never touched.",
 
-            "The two ENDS then join, or they don't, and that is decided by "
-            + "WHERE you cut. Cut in the MIDDLE of a paragraph at both ends "
-            + "and the remainders become one paragraph, the way any editor "
-            + "would join them \u{2014} the SECOND exit, with both originals kept "
-            + "whole under \(BlockHistoryPath.cameFromSection). Cut at a "
-            + "paragraph BREAK at either end \u{2014} the top of a block, the "
-            + "bottom of one, or a line break inside one \u{2014} and the ends keep "
-            + "their own blocks. You meant whole paragraphs, so whole "
-            + "paragraphs is what you get.",
+            "The two ends then join, or they don't, and that is decided by "
+            + "where you cut. Cut in the middle of a paragraph at both ends and "
+            + "the remainders become one paragraph, the way any editor would join "
+            + "them: the second exit, with both originals kept whole under "
+            + "\(BlockHistoryPath.cameFromSection). Cut at a paragraph break at "
+            + "either end (the top of a block, the bottom of one, or a line break "
+            + "inside one) and the ends keep their own blocks. You meant whole "
+            + "paragraphs, so whole paragraphs is what you get.",
 
-            "And there is one more way the ends stay apart: a TAKE hanging "
-            + "on one of them. A keystroke will never fold a fan away \u{2014} the "
-            + "edit lands in the take you can see, the fan stays where it "
-            + "is, and the two blocks stay two. When you do want them joined, "
-            + "merge them deliberately and choose what the takes do.",
+            "And there is one more way the ends stay apart: a take hanging on "
+            + "one of them. A keystroke will never fold a fan away. The edit "
+            + "lands in the take you can see, the fan stays where it is, and the "
+            + "two blocks stay two. When you do want them joined, merge them "
+            + "deliberately and choose what the takes do.",
 
-            "EXIT THREE, top: select from the middle of me\u{2026}",
+            "Exit three, top: select from the middle of me\u{2026}",
 
-            "EXIT THREE, middle: \u{2026}straight through all of me. I have TWO "
-            + "takes, and I go to the Trash whole \u{2014} both of them with me.",
+            "Exit three, middle: \u{2026}straight through all of me. I have two "
+            + "takes, and I go to the Trash whole, both of them with me.",
 
-            "EXIT THREE, bottom: \u{2026}to the middle of me, and press \u{232B}. Then "
-            + "look: the top and I are one paragraph, the middle is in the "
-            + "tray with both its takes, and one \u{2325}\u{2318}Z puts all of it back.",
+            "Exit three, bottom: \u{2026}to the middle of me, and press "
+            + "\u{232B}. Then look: the top and I are one paragraph, the middle "
+            + "is in the tray with both its takes, and one \u{2325}\u{2318}Z puts "
+            + "all of it back.",
 
-            "So, whenever something is missing: if you DELETED it, look where "
-            + "things are leaving \u{2014} the note's tray, then the Trash. If "
-            + "you CHANGED it \u{2014} merged, divided \u{2014} look inside "
-            + "what it became, under \(BlockHistoryPath.cameFromSection). "
-            + "There is one place the two exits meet, and it is honest about "
-            + "itself: a preserved original has no clock only while something "
-            + "descended from it is alive, so deleting the last of those "
-            + "descendants MOVES it, visibly, into the tray and onto the "
-            + "family's clock \u{2014} and the delete that does it says so in "
-            + "its own receipt, while you are standing there.",
+            "So, whenever something is missing: if you deleted it, look where "
+            + "things are leaving, the note's tray, then the Trash. If you "
+            + "changed it (merged, divided), look inside what it became, under "
+            + "\(BlockHistoryPath.cameFromSection). There is one place the two "
+            + "exits meet, and it is honest about itself: a preserved original "
+            + "has no clock only while something descended from it is alive, so "
+            + "deleting the last of those descendants moves it, visibly, into the "
+            + "tray and onto the family's clock. The delete that does it says so "
+            + "in its own receipt, while you are standing there.",
         ])
         // The fan the matrix teaches, staged on the MIDDLE block of the
         // EXIT THREE trio — the cell her item 5 ruling actually CHANGED: a
         // fanned block covered WHOLE goes to the Trash with its family
         // intact, where the older behaviour emptied the take you could see
         // and left a blank block with a fan hanging on it.
+        // 13s-b triage landing: the staged trio reads in sentence case now
+        // (“Exit three, …”), and this prefix moved IN THE SAME COMMIT as
+        // the prose — a stale prefix would silently never mint the take.
         if let middle = exits.blocks.first(where: {
-            $0.variant.workingText.hasPrefix("EXIT THREE, middle")
+            $0.variant.workingText.hasPrefix("Exit three, middle")
         }) {
-            try take(on: middle, "the middle block's second take \u{2014} it rides to the Trash too.")
+            try take(on: middle, "the middle block's second take: it rides to the Trash too.")
         }
 
         // ————————————————————————— keeping it private —————————————————————
