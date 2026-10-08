@@ -1087,17 +1087,25 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
   device showed when it entered Castle — those are the set to keep."* — while the same test's vault line (A's words open the
   account's M″) was GREEN; the S2 pin 1 (:2979 the flag); the MINOR-1 pin 2 (:3123 custody `.auto`, not `.biometric`; :3137 no
   `movedToStandardNotice`) — its post-reconcile custody line green, as expected. The other 66 green.
-- Fix (MAJOR): DONE (this commit) — `let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow`; `if
+- Fix (MAJOR): DONE (3abb8aa1) — `let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow`; `if
   byAnotherDevice, !ownWriteLanded { flag + name } else if entersCastle, !marker.isFollow, !roadEntersCastle { name + day }`.
-  Build + green PENDING.
-- Fix (MINOR-1): DONE (this commit) — `let tighteningPosture: Posture? = vaultSaysCastle ? .castle : nil` passed as the arm's
-  `accountPosture:`; the two doc comments say so. Build + green PENDING.
+  Green DONE (below).
+- Fix (MINOR-1): DONE (3abb8aa1) — `let tighteningPosture: Posture? = vaultSaysCastle ? .castle : nil` passed as the arm's
+  `accountPosture:`; the two doc comments say so. Green DONE (below).
 - **REVERT V99-M (named before it runs — the MAJOR):** on the tip, the flag's condition `if byAnotherDevice, !ownWriteLanded`
   → `if byAnotherDevice` (F3's: the flag on every another-device road). Expected RED: the new MAJOR pin's flag + three Done
-  lines, the S2 pin's flag line; nothing else. PENDING.
+  lines, the S2 pin's flag line; nothing else. **RESULT (08:15, the `M` bundle — the tip + this one-line edit, built headless,
+  the tree restored at once: `git status` clean — `PostureSwitchTests`): "Test run with 69 tests in 1 suite failed after
+  230.692 seconds with 5 issues"** — the MAJOR pin's :3435 flag + :3438/:3439/:3440 Done lines and the S2 pin's :2979 flag;
+  nothing else (the MINOR-1 pin green under it).
 - **REVERT V99-N (named before it runs — MINOR-1):** on the tip, the arm's `accountPosture:` argument → `vaultSaysCastle ?
   .castle : .standard` (F3's: custody to the account's posture in both directions). Expected RED: the re-pointed MINOR-1
-  pin's custody line and its notice line; nothing else. PENDING.
+  pin's custody line and its notice line; nothing else. **RESULT (08:19, the `N` bundle — the tip + this one-line edit, built
+  headless, the tree restored at once — `PostureSwitchTests`): "Test run with 69 tests in 1 suite failed after 231.638 seconds
+  with 2 issues"** — the MINOR-1 pin's :3123 custody line and :3137 notice line; nothing else (the MAJOR pins green under
+  it).
+- Tip `PostureSwitchTests` (08:10, the `tip` bundle = 3abb8aa1's code): **"Test run with 69 tests in 1 suite passed after
+  231.834 seconds"** (68 + the one new pin).
 - Green (each suite its own `-only-testing`): PENDING — `PostureSwitchTests`; the batch-1 20-suite set (ROUND 2b's list);
   the 13-suite tutorial spine; `ProtectionSurfaceRenderTests` + `ProtectionTierFaceTests`.
 - Phone: not owed — no phone file touched (`Shared/PostureSwitch.swift` compiles into the phone; a phone build-for-testing
