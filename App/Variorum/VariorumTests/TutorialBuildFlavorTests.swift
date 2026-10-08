@@ -45,7 +45,7 @@ struct TutorialBuildFlavorTests {
         // 13s-b triage landing — A JUSTIFIED EDIT: the modes read in their
         // real casing now (her R-13s-30 caps ban), so both arms read the
         // real-cased names; an all-caps "CANVAS" probe would pass vacuously.
-        #expect(!lesson.paragraphs.contains { $0.localizedCaseInsensitiveContains("canvas") })
+        #expect(!lesson.paragraphs.contains { $0.lowercased().contains("canvas") })
         #expect(lesson.paragraphs.contains { $0.contains("Blocks (\u{2318}6)") })
     }
 
