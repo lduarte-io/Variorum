@@ -77,7 +77,11 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// follow has not happened) — pick up the new keys first.
     case syncKeysUnavailable
     /// A rotation is already in progress on this device — resume it.
-    case switchInProgress(RotationMarker.Step)
+    /// `act`: the PENDING MARKER's act (VX-99 round 2b), so the refusal's
+    /// words name what did not finish (`ProtectionCopy.ceremonyResumeTitle`);
+    /// nil at the `busy` guards — another road of this runner is in flight
+    /// and no marker exists to read.
+    case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)
     /// No rotation is in progress — nothing to resume.
     case nothingToResume
     /// The resume needs the passphrase (M′ or L′ must be unwrapped from a
@@ -504,7 +508,7 @@ final class PostureSwitchRunner {
     private func runCeremony(road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
         guard let libraryKey = leaves.libraryKeyInHand() else {
@@ -742,7 +746,7 @@ final class PostureSwitchRunner {
     private func followTyped(road: UUID, passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard let libraryKey = leaves.libraryKeyInHand() else {
             throw PostureSwitchError.libraryKeyUnavailable
@@ -796,7 +800,7 @@ final class PostureSwitchRunner {
     private func followDerived(road: UUID, passphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
-            throw PostureSwitchError.switchInProgress(pending.step)
+            throw PostureSwitchError.switchInProgress(pending.step, act: CeremonyAct(resuming: pending))
         }
         guard let libraryKey = leaves.libraryKeyInHand() else {
             throw PostureSwitchError.libraryKeyUnavailable

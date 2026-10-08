@@ -931,13 +931,18 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
   - (c) `aRoadRefusedByAPendingMarkerSpeaksThatMarkersActNeverAlwaysEnteringCastle` — a Replace All Keys killed
     mid-walk: the second start, the other ceremony and the follow each refused `switchInProgress`, each worded
     `resumeReplacingKeysBody`; a Use Castle killed mid-walk: each worded `resumeBody`.
-  Build-for-testing PENDING. Red run PENDING.
-- Fix (1): NOT-STARTED — `if facts.rotationInProgress, !isResume` in `start()`.
-- Fix (2), the captions: NOT-STARTED — both panes `ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))`.
-- Fix (2), `switchInProgress`: NOT-STARTED — `case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)`; the
-  three pending-marker sites pass `CeremonyAct(resuming: pending)`; `message(for:)` reads `ceremonyResumeTitle(act)`,
+  Build-for-testing of the pins commit 5ff2d440: DONE — **TEST BUILD SUCCEEDED** (`vx99-dd`, headless, no stage); its
+  products cloned aside (`r2b-red-products`) so the red runs on the pins commit's own bundle. Red run PENDING (stage).
+  ORDER, said plainly: the fixes below were written and built BEFORE the red run (to keep the stage slot to test runs
+  alone); the red still runs on the bundle built from 5ff2d440, before any fix existed.
+- Fix (1): DONE (this commit) — `if facts.rotationInProgress, !isResume` in `start()`. Green PENDING.
+- Fix (2), the captions: DONE (this commit) — both panes `ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming:
+  pending))`. Green PENDING.
+- Fix (2), `switchInProgress`: DONE (this commit) — `case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)`;
+  the three pending-marker sites pass `CeremonyAct(resuming: pending)`; `message(for:)` reads `ceremonyResumeTitle(act)`,
   the busy arm `resumeBody`. The one existing pin that compares the thrown value (`aCrashAtEachOfTheThreeSeams…`'s
-  second start, `switchInProgress(.reencrypt)`) gains the act it now carries (`.enterCastle`).
+  second start, `switchInProgress(.reencrypt)`) gains the act it now carries (`.enterCastle`). Tip build: **TEST BUILD
+  SUCCEEDED**. Green PENDING.
 - **REVERT V99-J (named before it runs — item 1):** `if facts.rotationInProgress, !isResume` → `if
   facts.rotationInProgress`. Expected RED: pin (a)'s resume half alone (the `.resumeAsk` guard); its three refusals green.
   Result PENDING.

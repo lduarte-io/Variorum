@@ -1041,7 +1041,7 @@ struct PostureSwitchTests {
             #expect(try await world.vault().format.previousCorpusKey != nil)
             #expect(StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey))
             // A second start refuses while the marker stands (decision 32 on this device).
-            await #expect(throws: PostureSwitchError.switchInProgress(.reencrypt)) {
+            await #expect(throws: PostureSwitchError.switchInProgress(.reencrypt, act: .enterCastle)) {
                 _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
             }
             let outcome = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)

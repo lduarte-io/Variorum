@@ -241,7 +241,16 @@ final class PostureSwitchModel: Identifiable {
         do {
             let facts = try await runner.checkDoor()
             self.facts = facts
-            if facts.rotationInProgress {
+            // Decision 32's still-finishing door — for every mode BUT the
+            // RESUME (VX-99 round 2b, item 1): `rotationInProgress` (the
+            // vault's previous key) is exactly the state this device's OWN
+            // ceremony leaves when it dies mid-walk, and the resume is the
+            // road that finishes it ("the acting device resumes through its
+            // marker and never starts a second"). Refusing it here left the
+            // marker standing — every round refused — and a one-device
+            // account paused for good. The resume's runner road reads the
+            // fresh vault itself (`PostureSwitchRunner.resume`).
+            if facts.rotationInProgress, !isResume {
                 phase = .failed(stillFinishingSentence)
                 return
             }
@@ -722,7 +731,17 @@ final class PostureSwitchModel: Identifiable {
             return ProtectionController.keyUnavailable
         case PostureSwitchError.syncKeysUnavailable:
             return "Pick up your new keys first — enter your passphrase."
+        case PostureSwitchError.switchInProgress(_, let act?):
+            // VX-99 round 2b (item 2's sibling): a road refused because THIS
+            // device's marker is pending speaks the MARKER's act through
+            // F1's one selector — before it, "Entering Castle didn't finish"
+            // over a pending Replace All Keys at every door (the follow's
+            // included: `PostureFollowModel` words through here).
+            return ProtectionCopy.ceremonyResumeTitle(act)
         case PostureSwitchError.switchInProgress:
+            // The busy guard: another road of this runner is in flight and
+            // no marker exists to read — the shipped sentence, unchanged
+            // (its own wording is a residual for 13s; the record's round 2b).
             return ProtectionCopy.resumeBody
         case PostureSwitchError.nothingToResume:
             return "Nothing is left to finish."

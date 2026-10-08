@@ -320,7 +320,10 @@ struct ProtectionPane: View {
                                : ProtectionCopy.finishReplacingKeysDoor) {
                             controller.openSwitch(.resume(pending), vaultTie: VaultTie.make(services: services))
                         }
-                        Text(ProtectionCopy.resumeBody)
+                        // VX-99 round 2b: the caption speaks for the marker's
+                        // act (F1's selector — the door label's own rule), never
+                        // "Entering Castle didn't finish" under every marker.
+                        Text(ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending)))
                             .font(.caption)
                             .alarmVoice()
                             .fixedSize(horizontal: false, vertical: true)
