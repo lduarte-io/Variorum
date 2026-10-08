@@ -39,7 +39,11 @@ nonisolated enum BlockHistoryPath {
     /// The face's title, and the registry verb.
     static let name = "Block History"
 
-    static let savepointsSection = "Savepoints"
+    /// 13s-b U4 (her R-13s-31, *"I want that changed everywhere"*): the
+    /// region's header says COMMITS on both platforms — it said
+    /// "Savepoints". The constant's NAME keeps the old word: code names are
+    /// not the product's.
+    static let savepointsSection = "Commits"
     static let archivedSection = "Archived takes"
     static let deletedSection = "Deleted takes"
     static let cameFromSection = "Came from"
@@ -118,7 +122,7 @@ nonisolated enum BlockPastCopy {
             ? "Puts this take back among the block's archived takes, exactly "
                 + "as it was — it was archived when it was deleted"
             : "Puts this take back in the block's fan, exactly as it was — "
-                + "its label, its place in the fan and its savepoints all "
+                + "its label, its place in the fan and its commits all "
                 + "come back with it"
     }
 

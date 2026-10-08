@@ -190,7 +190,7 @@ nonisolated enum LibraryDayFace {
     /// is armed, and under the empty answer when it finds nothing.
     static let caveat =
         "A note keeps one edit stamp, so a note edited on two days answers for the later one "
-        + "\u{2014} earlier days show up where a savepoint landed."
+        + "\u{2014} earlier days show up where a commit landed."
 
     /// What an empty answer says: the fact, then the reason.
     struct EmptyAnswer: Equatable {
@@ -213,7 +213,7 @@ nonisolated enum LibraryDayFace {
         let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return EmptyAnswer(
             headline: typed.isEmpty
-                ? "No note's last edit or savepoint falls on \(words)."
+                ? "No note's last edit or commit falls on \(words)."
                 : "No note matching \u{201C}\(typed)\u{201D} was edited on \(words).",
             caveat: caveat)
     }
@@ -232,7 +232,7 @@ nonisolated enum LibraryDayFace {
         let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return EmptyAnswer(
             headline: typed.isEmpty
-                ? "No note's last edit or savepoint falls between \(from) and \(to)."
+                ? "No note's last edit or commit falls between \(from) and \(to)."
                 : "No note matching \u{201C}\(typed)\u{201D} was edited between \(from) and \(to).",
             caveat: caveat)
     }

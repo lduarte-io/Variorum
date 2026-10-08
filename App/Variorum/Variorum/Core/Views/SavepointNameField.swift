@@ -102,13 +102,24 @@ nonisolated enum SavepointNameCopy {
 
     /// The receipt when a savepoint is born NAMED — one sentence, all four
     /// commit doors, because the name is the news. An unnamed ⌘S keeps each
-    /// door's shipped sentence exactly as it was.
+    /// door's shipped sentence (Write's is "Committed.").
+    ///
+    /// 13s-b U4 (her R-13s-31): the word is COMMIT. Where the sentence
+    /// DEFINES what a commit is, "commit" would define itself — her own
+    /// R-13s-32 note, *"commit twice would just read as weird"* — so the
+    /// definition rides the app's own plain gloss, the SAVED MOMENT Block
+    /// History has spoken since 13j (PROVISIONAL P-U4-1).
     static func filed(_ name: String) -> String {
-        "Committed \u{201C}\(name)\u{201D} — an immutable savepoint of this take."
+        "Committed \u{201C}\(name)\u{201D} — an immutable saved moment of this take."
     }
 
+    /// The UNNAMED receipt of the three doors that shared one literal —
+    /// Takes/Lenses, Canvas and Compare (13s-b U4 hoisted it here, so the
+    /// sweep is one line and a pin can hold it).
+    static let unnamedReceipt = "Committed — an immutable saved moment of this take."
+
     static let help = "A name is optional and always editable afterwards — "
-        + "Block History's rename door beside the savepoint"
+        + "Block History's rename door beside the commit"
 }
 
 /// The one-line field itself.

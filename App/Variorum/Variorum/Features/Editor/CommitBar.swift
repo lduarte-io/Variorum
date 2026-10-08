@@ -604,7 +604,7 @@ struct CommitBar: View {
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
-            .help("An immutable savepoint of the take under the caret — name it, "
+            .help("An immutable saved moment of the take under the caret — name it, "
             + "or press ⏎ to save it unnamed")
     }
 
@@ -764,7 +764,7 @@ struct CommitBar: View {
         }
         .help("The note itself: its versions, its seal, its date, and the "
             + "repair that makes every newline a block (its tray is the tray "
-            + "icon at the top of the note; a block's savepoints are the "
+            + "icon at the top of the note; a block's commits are the "
             + "history door beside commit)")
     }
 

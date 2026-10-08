@@ -417,7 +417,7 @@ nonisolated extension OpsRefusalCopy {
         // 13j batch 6b (J1): the purge op's refusal for a deliberate
         // savepoint — the ⌘S immunity said in the chord that makes one.
         case .deliberateSavepointNeverPruned:
-            return "That's a deliberate ⌘S savepoint — those are never pruned, "
+            return "That's a deliberate ⌘S commit — those are never pruned, "
                 + "in any mode."
         // 13f batch 6 (W4): the star cap, refusing honestly rather than
         // evicting her oldest star. The refusal NAMES the road, which

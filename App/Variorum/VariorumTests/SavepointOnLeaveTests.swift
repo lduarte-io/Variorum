@@ -309,7 +309,8 @@ struct SavepointHistoryFaceTests {
 
     /// The words on the collapsed line, and the promise its help makes.
     @Test func theLineNamesWhatItStandsForAndTheHelpDoesNotOverclaim() {
-        #expect(SavepointRuns.runLabel(count: 4) == "4 quiet savepoints")
+        // 13s-b U4 (R-13s-31): the word on the line is COMMIT.
+        #expect(SavepointRuns.runLabel(count: 4) == "4 quiet commits")
         #expect(SavepointRuns.showVerb == "show" && SavepointRuns.hideVerb == "hide")
         #expect(SavepointRuns.runHelp.contains("never folded in"))
     }

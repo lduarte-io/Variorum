@@ -82,7 +82,10 @@ struct HelperView: View {
         ShortcutGroup(title: "Writing", items: [
             // 13u3 UNIT D (item 14): the two-key road, said in the two
             // keys — ⏎ on the empty field is the fast one.
-            ("⌘S", "commit — an immutable savepoint of the take you're in; "
+            // 13s-b U4 (R-13s-31): the definition rides the app's plain
+            // gloss, the saved moment — "commit" defining itself would read
+            // twice (her R-13s-32 note; PROVISIONAL P-U4-1).
+            ("⌘S", "commit — an immutable saved moment of the take you're in; "
                 + "name it or press ⏎ to save it unnamed"),
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
@@ -242,7 +245,7 @@ struct HelperView: View {
                 + "\u{23CE} applies; \u{2715} on a card takes it off"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
-            ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
+            ("note \u{25BE} (bottom bar)", "history (commits) · seal / unseal · the "
                 + "note's date"),
         ]),
     ]
@@ -362,7 +365,7 @@ struct HelperView: View {
          + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
          + "select in your take, and the app carries the selection to Write and acts."),
         ("commit",
-         "An immutable savepoint of one take (⌘S). It can carry a NAME — ⌘S "
+         "An immutable saved moment of one take (⌘S). It can carry a NAME — ⌘S "
          + "offers a field, ⏎ saves it named or not — and the name is editable "
          + "afterwards from Block History. Commits are append-only: restoring "
          + "one never erases another, and a name never touches the text."),

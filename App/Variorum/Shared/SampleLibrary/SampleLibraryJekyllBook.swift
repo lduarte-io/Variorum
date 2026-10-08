@@ -92,7 +92,7 @@ nonisolated enum SampleLibraryJekyllBook {
         Door\u{201D}, and the last, \u{201C}Henry Jekyll\u{2019}s Full Statement of the \
         Case\u{201D}. Between them is takemania \u{2014} the middle of the story, reworked by \
         hand over several weeks. It is a note to practise on, and its history is real: blocks \
-        with several takes beside blocks with none, savepoints spread over the weeks (some of \
+        with several takes beside blocks with none, commits spread over the weeks (some of \
         them named), paragraphs that were divided and merged (their originals wait in the \
         note\u{2019}s tray and behind the lineage doors), and a few blocks already deleted. \
         Divide it, merge it, delete from it, try the takes.

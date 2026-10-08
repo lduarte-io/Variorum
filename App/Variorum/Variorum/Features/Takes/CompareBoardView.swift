@@ -886,8 +886,7 @@ final class CompareViewModel {
             try await session.runner.run { ops in
                 _ = try ops.commit(pane.variantID, message: name)
             }
-            showReceipt(name.map(SavepointNameCopy.filed)
-                ?? "Committed — an immutable savepoint of this take.")
+            showReceipt(name.map(SavepointNameCopy.filed) ?? SavepointNameCopy.unnamedReceipt)
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }

@@ -344,7 +344,7 @@ private struct SettingsResultsPane: View {
             VStack(alignment: .leading, spacing: 7) {
                 if findings.isEmpty {
                     Text("Nothing here matches “\(query)”. Try a word from the thing itself — "
-                         + "“callout”, “dark”, “seam”, “savepoint”.")
+                         + "“callout”, “dark”, “seam”, “commit”.")
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                         // P-8, per site and deliberate: this is PROSE, and a
@@ -717,7 +717,7 @@ private struct WritingSettingsPane: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Section("Savepoints") {
+            Section("Commits") {
                 // 13j J11 (her round-1 ruling): the ONE cadence setting.
                 // SYNCED like segmentation above it, and for the same reason
                 // — it is a habit of the document, not a look of this Mac.

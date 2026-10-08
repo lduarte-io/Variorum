@@ -860,7 +860,7 @@ private struct WorkbenchInfoPanel: View {
                     if let day = DisplayTitle.day(fromStamp: row.editedAt) {
                         factRow("edited", day)
                     }
-                    factRow("saved", savepoints == 1 ? "1 savepoint" : "\(savepoints) savepoints")
+                    factRow("saved", savepoints == 1 ? "1 commit" : "\(savepoints) commits")
                     if !row.tagPaths.isEmpty {
                         factRow("tags", row.tagPaths.map { "#\($0)" }.joined(separator: " "))
                     }

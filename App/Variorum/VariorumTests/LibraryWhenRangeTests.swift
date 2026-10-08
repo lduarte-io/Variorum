@@ -213,7 +213,8 @@ struct LibraryWhenRangeTests {
         #expect(LibraryDayFace.chipLabel(run, now: now, calendar: calendar)
                 == "edited Sep 1 \u{2013} Sep 14")
         #expect(LibraryDayFace.emptyAnswer(range: run, now: now, calendar: calendar).headline
-                == "No note's last edit or savepoint falls between Sep 1 and Sep 14.")
+                == "No note's last edit or commit falls between Sep 1 and Sep 14.",
+                "13s-b U4 (R-13s-31): the empty answer says commit")
         #expect(LibraryDayFace.emptyAnswer(range: one, now: now, calendar: calendar)
                 == LibraryDayFace.emptyAnswer(day: "2026-09-09", now: now, calendar: calendar),
                 "one day says exactly what it always said")
