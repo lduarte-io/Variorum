@@ -255,6 +255,11 @@ struct DeadVocabularyTests {
                 == ["# this savepoint"])
         #expect(retired(#"static let title = "Savepoints Variorum takes for you""#)
                 == ["Savepoints Variorum takes for you"])
+        // U4 round 1, MINOR-3: a confirm's QUESTION title is a header (the
+        // app's standing idiom — "Restore the pocket guide?", "Sign out
+        // everywhere?"), so a "?" never makes a short literal prose.
+        #expect(retired(#"static let restoreTitle = "Restore this savepoint?""#)
+                == ["Restore this savepoint?"])
 
         #expect(retired(#"body: "Notes open in Write. Everything autosaves as you type; commit \u{2318}S in the bottom bar keeps a savepoint of a moment worth keeping. Scroll to the middle of the note and click into a paragraph there.")"#)
                 .isEmpty, "the tour's step-4 sentence is explanation (R-13s-32), never a label")
@@ -284,16 +289,22 @@ struct DeadVocabularyTests {
     /// **The mechanical reading of "a label or a header"**: a string literal
     /// of at most `labelWordLimit` words that does not end a sentence. A
     /// header ("Savepoints"), a count ("1 savepoint"), a picker title, a
-    /// menu row, a VoiceOver label — all short and unpunctuated. Explanatory
-    /// prose — a sentence, or a fragment of one long enough to explain — is
-    /// out of the fence's reach by construction, which is R-13s-32's shape.
+    /// menu row, a VoiceOver label, a confirm's question title ("Restore
+    /// this savepoint?") — all short. Explanatory prose — a sentence, or a
+    /// fragment of one long enough to explain — is out of the fence's reach
+    /// by construction, which is R-13s-32's shape.
+    ///
+    /// **A sentence ends at "." or "!" — never "?"** (U4 round 1, MINOR-3):
+    /// a short question is this app's standing confirm-title idiom ("Sign
+    /// out everywhere?", "Restore the pocket guide?"), so within the word
+    /// limit a "?" marks a HEADER, not prose.
     static let labelWordLimit = 6
 
     static func isLabelShaped(_ text: String) -> Bool {
         let words = text.split { !($0.isLetter || $0.isNumber) }.count
         var end = text.trimmingCharacters(in: .whitespacesAndNewlines)
         while let last = end.last, "\u{201D}\u{2019}\"')".contains(last) { end.removeLast() }
-        let endsASentence = end.hasSuffix(".") || end.hasSuffix("?") || end.hasSuffix("!")
+        let endsASentence = end.hasSuffix(".") || end.hasSuffix("!")
         return words <= labelWordLimit && !endsASentence
     }
 
