@@ -148,3 +148,10 @@ three checks. No `xcodebuild`, no app launch, nothing swapped in the shared tree
 - **The record is honest about what is pending:** every Mac pin RUN (`HelperCurrencyTests` and
   `DeadVocabularyTests` are already in the U4 stage command) and the walk, with the fixed ⌘/ row added to
   the walk's helper capture and to the final window's runsheet (`closeout-checklist.md` B).
+
+## ARBITRATION (orchestrator, same-model ladder)
+
+- **MINOR — FIX (record only):** P-U4-1 gains the round-2 facts verbatim-faithful: the shared noun predates U4 and is designed (the ~20 per-take sites; the Versions pane using it for BOTH meanings side by side; the deliberate ⌘S↔⌘⇧S pairing), so NONE of (a)/(b)/(c) removes the clash — removing it would mean renaming one side, a SEPARATE decision for her, outside the three-way choice. The disposition is not reopened; the choice sheet gets honest.
+- **NIT (cite) — FIX:** the dictionary entry cited by name, not line.
+- **NIT (the helper's missing Block History road) — FIX, adopted as in-ladder:** the group's own rule says a moved door gets a line; the helper teaching NO road to Block History fails the phase's bar. One line built from `BlockHistoryPath.name`, with the reviewer's named pin red on HEAD → green. The two stale doc comments: fix-when-touched, recorded.
+- All three in ONE short U4 implementer pass; no round 3 (nothing above NIT in code); the ladder closes on its report with dispositions written.
