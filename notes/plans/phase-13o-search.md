@@ -1,5 +1,7 @@
 # Phase 13o — Search
 
+> **✔ CLOSED 2026-10-07** — merged PR #133 (1dae44f8); see `## THE PHASE CLOSEOUT` near the end of this file. *(Banner added 2026-10-08: the STATUS section below is history.)*
+
 **Ticket: VX-5 · Project: 13o — Search · Branch: `vx-5-13o-search` · Worktree: `~/dev/variorum-13o` (the Pro)**
 
 *(This file holds the KICKOFF; the execution plan lands here AFTER the design sitting, authored
