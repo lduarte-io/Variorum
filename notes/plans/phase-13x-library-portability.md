@@ -2250,3 +2250,13 @@ Compiled: Mac TEST BUILD SUCCEEDED · VariorumMobile BUILD SUCCEEDED.
    offenders EXACTLY `Core/Views/SearchAnswerFaces.swift:182` and `:213` — 13o's, owned by
    VX-83/VX-94 (fix 84617ea6), nothing of 13x's.
 4. Core headless (since the last code change): 2346/270 + 40/6 GREEN; Mac + phone compile.
+5. **The /Applications refresh (CLAUDE.md's ritual, zero instances re-checked at each step):**
+   A1 safety copy of her real store — `variorum.sqlite` + `-wal` + `-shm` + all three key files
+   into `Backups/safety-copies/13x-refresh-20261008T061038Z/`, sha256 MATCH on the store, its
+   wal and the live key file (the real store carried a 1 MB `-wal` with no instance running —
+   the pre-W-1 close behavior this phase fixes; harmless, the next open replays it) → Release
+   build from **0787f028** → the old app (0.9.2 build 5441) moved aside, not deleted → the new
+   app ditto'd in: **0.9.2 (5544)**, `codesign --verify --deep --strict` OK (io.lduarte.Variorum,
+   *[removed for publication]*
+6. **Next: her Air leg** — the code under test is exactly 0787f028 (every later branch commit is
+   record-only); then closeout + the PR.
