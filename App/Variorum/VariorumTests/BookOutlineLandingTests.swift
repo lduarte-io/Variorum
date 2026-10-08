@@ -902,13 +902,17 @@ extension BookOutlineLandingTests {
 }
 
 extension BookOutlineLandingTests {
-    /// Every text view in the tree that is in a window and holds real prose.
+    /// Every text view in the tree that is in a window and SHOWS real prose:
+    /// a read surface holding it, or a live editor holding it at its real
+    /// height (an editor at its 24-pt birth frame shows one line of it, and
+    /// the host keeps it invisible until its height is in).
     @MainActor
     private func proseSurfaces(in view: NSView) -> [NSTextView] {
         var found: [NSTextView] = []
         func walk(_ v: NSView) {
             if let text = v as? NSTextView, text.window != nil, !text.isHiddenOrHasHiddenAncestor,
-               text.string.count > 1000 {
+               text.string.count > 1000,
+               !(text is EditorTextView) || text.frame.height > 1000 {
                 found.append(text)
             }
             for sub in v.subviews { walk(sub) }
