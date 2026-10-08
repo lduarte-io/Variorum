@@ -1079,9 +1079,14 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
     `.movedToStandard` naming "sibling device", and custody then `.auto` (the announced follow moved it).
   Build-for-testing of the pins commit cf88c841: DONE — **TEST BUILD SUCCEEDED** (`vx99-dd`, headless, no stage; no
   warning in the new lines); its products cloned aside (`r3-red-products`) so the red runs on the pins commit's own bundle.
-- Red run (the pins commit's bundle, `PostureSwitchTests` alone): PENDING — expected: the new MAJOR pin at its flag and its
-  three Done lines; the S2 pin at its flag line; the re-pointed MINOR-1 pin at its custody line and its notice line (its
-  post-reconcile custody line is green on both sides — `.auto` either way); every other test green (68 + 1 = 69 tests).
+- Red run: DONE — slot 6 (`vx-99-impl4`, claimed 08:00, zero Variorum instances), `PostureSwitchTests` over the `red` bundle
+  (cf88c841's code — 0d752865's runner + the pins): **"Test run with 69 tests in 1 suite failed after 227.532 seconds with 7
+  issues"** — exactly the expected seven: the MAJOR pin 4 (:3435 the flag; :3438 "not your account's", :3439 "twelve words",
+  :3440 `enteredCastleDone`) — HEAD's Done, verbatim from the log: *"Another device entered Castle first, so this Mac picked up
+  that device's keys instead. The twelve words shown here are NOT your account's: your account's words are the ones sibling
+  device showed when it entered Castle — those are the set to keep."* — while the same test's vault line (A's words open the
+  account's M″) was GREEN; the S2 pin 1 (:2979 the flag); the MINOR-1 pin 2 (:3123 custody `.auto`, not `.biometric`; :3137 no
+  `movedToStandardNotice`) — its post-reconcile custody line green, as expected. The other 66 green.
 - Fix (MAJOR): DONE (this commit) — `let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow`; `if
   byAnotherDevice, !ownWriteLanded { flag + name } else if entersCastle, !marker.isFollow, !roadEntersCastle { name + day }`.
   Build + green PENDING.
