@@ -369,6 +369,9 @@ moment's):**
   (U-C below); the Trash half is **VX-93** (Backlog, shaped as search-INSIDE-the-Trash).
 - **R-VX83-6 (VX-73):** stays deferred at her word (*"I'll still defer it for now since it
   sounds like there's a significant UI component"*).
+- **R-VX83-8 (2026-10-08):** *"yeah no arrow key day navigation in v1 is fine - make a
+  linear ticket for that item."* → the §P1 ruling's condition (2) is RATIFIED and its
+  deferral is **VX-98** (Backlog, project 13o) — it leaves the ratify bundle, decided.
 - **R-VX83-7 (2026-10-07 late evening — MERGE ORDER FREED; supersedes this record's
   "merges after 13x" header line, which was also her word, earlier):** *"I told 13x to
   release its hold so you and another session can move through. you should be next in the
