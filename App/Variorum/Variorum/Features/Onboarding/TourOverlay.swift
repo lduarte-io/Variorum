@@ -273,11 +273,9 @@ struct TourEndCard: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
             VStack(alignment: .leading, spacing: 9) {
-                choice(TourScript.keepGoing, .keepGoing, role: .primary,
-                       font: tokens.body.weight(.semibold))
-                choice(TourScript.openFieldGuide, .fieldGuide, role: .secondary,
-                       font: tokens.body.weight(.medium))
-                choice(TourScript.done, .done, role: .quiet, font: tokens.body)
+                ForEach(Self.choices(tokens), id: \.key) { door in
+                    choice(door)
+                }
             }
             .padding(.top, 16)
         }
@@ -291,11 +289,98 @@ struct TourEndCard: View {
         .accessibilityElement(children: .contain)
     }
 
-    private func choice(
-        _ words: String, _ choice: Tour.EndChoice, role: VoicedButtonStyle.Role, font: Font
-    ) -> some View {
-        Button(tokens.chromeLabel(words)) { onChoose(choice) }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: role, font: font))
+    /// **The three doors, as ONE table** — the card iterates it and the
+    /// no-truncation pin measures it, so the two can never disagree about a
+    /// door's words or face.
+    struct Door {
+        let key: String
+        let choice: Tour.EndChoice
+        let words: String
+        let role: VoicedButtonStyle.Role
+        let font: Font
+    }
+
+    static func choices(_ tokens: VoiceTokens) -> [Door] {
+        [
+            Door(key: "keepGoing", choice: .keepGoing, words: tokens.chromeLabel(TourScript.keepGoing),
+                 role: .primary, font: tokens.body.weight(.semibold)),
+            Door(key: "fieldGuide", choice: .fieldGuide,
+                 words: tokens.chromeLabel(TourScript.openFieldGuide),
+                 role: .secondary, font: tokens.body.weight(.medium)),
+            Door(key: "done", choice: .done, words: tokens.chromeLabel(TourScript.done),
+                 role: .quiet, font: tokens.body),
+        ]
+    }
+
+    /// The most lines a door's words may take (her two long doors are one
+    /// sentence each; three lines is the narrowest card's worst case).
+    static let doorLines = 3
+
+    private func choice(_ door: Door) -> some View {
+        Button { onChoose(door.choice) } label: {
+            Text(door.words)
+                // **F-U2-W-1 (the U2 walk): the end card's doors WRAP, never
+                // truncate.** They are sentences ("Keep going: two more
+                // minutes on stars, tags, books and snippets"), and the
+                // voiced word-button's one-line rule (`VoicedButtonStyle`,
+                // N15) cut both long ones to an ellipsis in the Terminal
+                // voice's monospace — door text never truncates. The same
+                // ink, hover wash and press fade, on as many lines as the
+                // sentence needs (bounded — P-8's line rule).
+                .lineLimit(Self.doorLines)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    TourOracle.endDoorFrames[door.key] = $0
+                }
+                #endif
+        }
+        .buttonStyle(TourDoorStyle(tokens: tokens, role: door.role, font: door.font))
+    }
+}
+
+/// **The end card's door face** — `VoicedButtonStyle`'s ink, wash and press
+/// fade, WITHOUT its one-line clamp (F-U2-W-1): a door that is a sentence
+/// wraps inside the card instead of losing its end to an ellipsis.
+struct TourDoorStyle: ButtonStyle {
+    let tokens: VoiceTokens
+    var role: VoicedButtonStyle.Role = .secondary
+    var font: Font?
+
+    func makeBody(configuration: Configuration) -> some View {
+        BodyView(configuration: configuration, tokens: tokens, role: role, font: font)
+    }
+
+    private struct BodyView: View {
+        let configuration: Configuration
+        let tokens: VoiceTokens
+        let role: VoicedButtonStyle.Role
+        let font: Font?
+        @State private var hovering = false
+        @Environment(\.isEnabled) private var enabled
+
+        var body: some View {
+            configuration.label
+                .font(font ?? tokens.body)
+                .foregroundStyle(ink)
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(
+                    hovering && enabled ? tokens.wash : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 4))
+                .opacity(configuration.isPressed ? 0.6 : (enabled ? 1 : 0.4))
+                .contentShape(Rectangle())
+                .onHover { hovering = $0 }
+        }
+
+        private var ink: Color {
+            switch role {
+            case .primary: tokens.accent
+            case .secondary: tokens.ink
+            case .quiet: tokens.muted
+            }
+        }
     }
 }
 
@@ -385,5 +470,7 @@ enum TourOracle {
     static weak var overlay: TourEngine?
     /// The card's last frame, `.global`.
     static var cardFrame: CGRect?
+    /// The end card's doors' words, as drawn (by `TourEndCard.Door.key`).
+    static var endDoorFrames: [String: CGRect] = [:]
 }
 #endif

@@ -592,6 +592,52 @@ struct TourEntryTests {
     }
 }
 
+// MARK: - The end card's doors (F-U2-W-1, the U2 walk)
+
+@MainActor
+@Suite("13s-b U2 — the end card's doors never truncate (F-U2-W-1)", .serialized)
+struct TourEndCardTests {
+    /// The walk's find: in the Terminal voice's monospace the two long doors
+    /// were cut to an ellipsis ("keep going: two more minutes on stars,
+    /// tag…"). Door text never truncates — each door's drawn words are at
+    /// least as tall as the same words laid out at the same width with no
+    /// line limit (a truncated line is one line where the words need two),
+    /// and they stay inside the card's measure.
+    @Test func theEndCardsDoorsWrapRatherThanTruncate() async throws {
+        #if DEBUG
+        for scheme in [ColorScheme.dark, .light] {
+            let tokens = VoiceTokens.fallback(for: scheme)
+            TourOracle.endDoorFrames = [:]
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 900, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: TourEndCard(
+                tokens: tokens, scheme: scheme, onChoose: { _ in }))
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting) { TourOracle.endDoorFrames.count == 3 }
+            let measure = TourEndCard.width - 60  // the card's own side padding
+            for door in TourEndCard.choices(tokens) {
+                let drawn = try #require(TourOracle.endDoorFrames[door.key], "\(door.key) drew")
+                let free = NSHostingView(rootView: Text(door.words)
+                    .font(door.font)
+                    .frame(width: drawn.width, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true))
+                let needed = free.fittingSize.height
+                #expect(drawn.height >= needed - 0.5,
+                        "\(scheme) \(door.key): drawn \(drawn.height) pt, the words need \(needed) pt — truncated")
+                #expect(drawn.width <= measure + 0.5, "\(door.key) stays inside the card")
+            }
+        }
+        #endif
+    }
+}
+
 // MARK: - The settle loop (the U1a pins' own shape)
 
 @MainActor
