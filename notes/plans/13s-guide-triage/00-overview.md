@@ -137,7 +137,7 @@ chapters; no chapter renames; the two guide-pointing cards need no change.
 | chapter-04-structure.md | DONE |
 | chapter-05-deleting.md | DONE |
 | chapter-06-where-things-go.md | DONE |
-| chapter-07-keeping-it-private.md | NOT STARTED (fence notes + flags only, as ruled) |
+| chapter-07-keeping-it-private.md | DONE (fence notes + flags only, as ruled) |
 | chapter-08-ways-of-looking.md | NOT STARTED |
 | chapter-09-library-of-things.md | NOT STARTED |
 | chapter-10-books-and-the-bookcase.md | NOT STARTED |
