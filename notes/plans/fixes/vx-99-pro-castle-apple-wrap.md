@@ -1,5 +1,13 @@
 # VX-99 — Pro library stayed Apple-openable after Castle (the record)
 
+**NOT DONE by round 3's fix pass (2026-10-08, the narrow implementer — ROUND 3 — FIX PASS at the bottom):** MINOR-2 (its
+ticket), MINOR-3 (VX-107) and the NITs (the banner sweep, `CeremonyAct`'s home, the A re-read, the sweep's line numbers)
+untouched by ruling; the three residuals this pass's traces found are recorded, not built (the regenerated sub-case's
+silence about the words, S1 under a stale Castle read, the arm's missing marker guard — noted as no defect); no walk/capture
+(a resume's road has no reachable face without crash injection — the pins carry it); no phone SUITE (the phone
+build-for-testing only; no phone file touched); no core re-run (zero `Sources/`); no QUESTIONS entry (no new sentence — every
+Done this pass's road can speak is existing copy). No review of this delta — the orchestrator verifies it (the cap).
+
 **NOT DONE by round 2b (2026-10-08, the resume-door implementer — ROUND 2b at the bottom):** the busy arm's
 `switchInProgress` sentence (no marker to read; new copy → 13s — its RESIDUAL); no walk/capture (the resume door's
 pending-marker state has no reachable face without crash injection — the pins carry it; the pane captions are pinned as
@@ -1106,8 +1114,37 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
   it).
 - Tip `PostureSwitchTests` (08:10, the `tip` bundle = 3abb8aa1's code): **"Test run with 69 tests in 1 suite passed after
   231.834 seconds"** (68 + the one new pin).
-- Green (each suite its own `-only-testing`): PENDING — `PostureSwitchTests`; the batch-1 20-suite set (ROUND 2b's list);
-  the 13-suite tutorial spine; `ProtectionSurfaceRenderTests` + `ProtectionTierFaceTests`.
-- Phone: not owed — no phone file touched (`Shared/PostureSwitch.swift` compiles into the phone; a phone build-for-testing
-  is run anyway as a compile check: PENDING).
-- Core: not re-run — zero `Sources/`.
+- Green: DONE — slot 6 (`vx-99-impl4`, 08:00–08:25, zero Variorum instances at the claim and at the release), every suite
+  over the `tip` bundle (3abb8aa1's code) in its OWN `-only-testing` invocation, every "Test run with N tests" line read:
+  **batch 1, the runner's whole reach — 198 tests in 20 suites, all passed**: PostureSwitchTests 69 (round 2b's 68 + the new
+  MAJOR pin) · PostureSwitchDrillTests 2 (both SKIPPED — the standing opt-in gate `VARIORUM_POSTURE_DRILL=1`, read) ·
+  VX80CastleFollowRecoveryTests 4 · AppleRelinkDoorTests 8 · CopyRegisterPinTests 2 · Phase13pControllerTests 50 ·
+  EncryptionFlowTests 5 · CopyFlowRoundTests 7 · CrossoverRoundTests 11 · AccountLifecycleDoorTests 2 ·
+  AccountDoorWiringTests 4 · TerminologyPinTests 1 · RetiredNamesPinTests 1 · SyncLockedFaceTests 2 ·
+  FreshAccountSetupGeneralityTests 1 · ProtectionDialsTests 9 · ProtectionCopyTests 10 · ProtectionCadenceTests 4 ·
+  StoreKeyGuardBackingTests 3 · ProtectionDialsPerStoreTests 3. **The tutorial spine — 99 tests in 13 suites, all passed, no
+  skips** (BookShape 10 · Door 10 · WritingActs 7 · TakesActs 5 · StructureActs 10 · LookingActs 6 · LibraryActs 9 ·
+  DeletionActs 13 · WherePlacesActs 7 · PrivacyChapter 2 · FannedMatrix 2 · BooksLesson 13 · BooksRitual 5). **The pane face
+  suites — ProtectionSurfaceRenderTests 6 · ProtectionTierFaceTests 5, all passed.** Stage RELEASED 08:25; main told.
+- Phone: no phone file touched; `Shared/PostureSwitch.swift` compiles into the phone, so `xcodebuild -scheme VariorumMobile
+  -destination 'generic/platform=iOS Simulator' build-for-testing` over the tip (`vx99-phone-dd`): **TEST BUILD SUCCEEDED**,
+  no warning in the touched file. No simulator run.
+- Core: not re-run — `git diff --stat 0d752865..HEAD -- Sources` is EMPTY.
+
+### RESIDUALS (recorded, not built — found by this pass's traces; the orchestrator's)
+
+- **The regenerated sub-case is now silent about the words.** When B's second rotation REGENERATED the twelve words (the S2
+  pin's own world), A's words are genuinely not the account's any more, and A's Done no longer says so (the ruling: the
+  marker cannot tell typed from regenerated, so this road makes no words claim). Nothing else says it either: the resume
+  records the vault's CURRENT recovery-wrap digest in the new key file (`KeyFileInputs.recoveryWrapDigest:
+  fetched.format.recoveryWrapDigest`), so the 4a change notice ("Your twelve words were regenerated on …" —
+  `ProtectionController.changeElsewhere`, recorded digest ≠ the vault's) never fires on that device. By trace, unpinned.
+  The reviewer's own fix sketch named this road (the digest comparison at the next ready); VX-107's class.
+- **S1 under a stale Castle read.** MINOR-1's rule applies to every road whose account is Standard, S1's Use Castle
+  included. S1's Done ("This Mac opens silently again") is true whenever the posture read is Standard — the pinned case, and
+  production's whenever the ready read the fresh vault (A's library custody is still silent: its Use Castle died before step
+  5). Under a stale Castle read, custody would stay gated until the next ready's follow, which then repeats the same
+  sentence as its notice. By trace, unpinned; narrow.
+- Noted, not a defect: `reconcileFollow`'s follow-into-Standard arm carries no marker-pending guard, so in MINOR-1's world a
+  ready BEFORE the resume can already run the announced follow (the old Castle-shaped key file has no `apple`); the resume
+  then finds custody silent by the read. Either order ends silent, the Apple copy in the key file, and the notice spoken.
