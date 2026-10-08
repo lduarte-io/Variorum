@@ -6,8 +6,8 @@
 //  `VariorumCore/Domain/Tour`, the words `TourScript`, the faces
 //  `TourOverlay`, the ring `Core/Views/TourSpotlight`).
 //
-//  One per WINDOW: `RootView` holds it in `@State` while a tour runs and nils
-//  it at the end, and it is born at the one entry U1a left
+//  One per WINDOW: `RootView` keeps it in its `TourSlot` (`@State`) while a
+//  tour runs and drops it at the end, and it is born at the one entry U1a left
 //  (`RootView.startTour()` — the offer's "yes" and Help ▸ Take the Tour). It
 //  holds no decision of its own: it feeds the window's facts to the pure
 //  rule, hands the rule's rings to the spotlight, and performs the rule's

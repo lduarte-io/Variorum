@@ -115,9 +115,12 @@ struct TourOverlay: View {
         }
     }
 
-    /// Step 6 names the badge with its real count.
+    /// Step 6 names the badge with its real count — the toured block's, read
+    /// while the caret is on it (the card's own default is the ⑂2 she made).
     private var takeCount: Int {
-        engine.state.facts.caret.map(\.takeCount) ?? 2
+        guard let caret = engine.state.facts.caret, caret.blockID == engine.state.tourBlockID
+        else { return 2 }
+        return caret.takeCount
     }
 
     /// Where the card goes: beside the lit anchor (in this overlay's space),
