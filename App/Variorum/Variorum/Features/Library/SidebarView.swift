@@ -308,6 +308,8 @@ struct SidebarView: View {
             }
         }
         .background(tokens.room)
+        // 13s-b U2 (A2): the tour's cards never cover the sidebar's navigation.
+        .tourKeepClear()
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { columnHeight = $0 }
         #if DEBUG
         // 18k C4: this column's rail, and no other window's.

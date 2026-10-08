@@ -215,6 +215,8 @@ struct CommitBar: View {
                 horizontalBody
             }
         }
+        // 13s-b U2 (A2): the tour's cards never cover the bar.
+        .tourKeepClear()
 #if DEBUG
         // 18d batch 1's retirement oracle: which arrangements are ON SCREEN.
         // "The book's editing surfaces render no bar of their own" is a claim

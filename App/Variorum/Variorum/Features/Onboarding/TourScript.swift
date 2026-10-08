@@ -44,6 +44,11 @@ enum TourScript {
 
     static let next = "next \u{27F6}"
     static let endTour = "End tour"
+    /// **A7 — PROVISIONAL P-U2-15, NEW WORDS (not in the approved mockup;
+    /// hers to strike).** Said under a card whose ring is the road BACK to
+    /// its step's place rather than the step's own target (she wandered), so
+    /// the ring and the sentence above it never contradict each other.
+    static let roadBack = "Follow the ring back."
 
     /// The small count line (the mockup's "STEP 1 OF 11", in sentence case —
     /// her caps ban, R-13s-30, and rendered text is sentence case).

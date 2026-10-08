@@ -149,6 +149,9 @@ struct ShelfView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+                // 13s-b U2 (A2): the tour's cards never cover the masthead,
+                // the strip or the bottom bar.
+                .tourKeepClear()
             Divider().overlay(tokens.line)
             BookcaseStrip(
                 model: model, tokens: tokens, menuActions: shelfMenuActions,
@@ -156,6 +159,7 @@ struct ShelfView: View {
                     shelfNameField = ""
                     newShelfPresented = true
                 })
+                .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
@@ -199,6 +203,7 @@ struct ShelfView: View {
                     #endif
             }
             hintBar
+                .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, owner: oracleOwner)

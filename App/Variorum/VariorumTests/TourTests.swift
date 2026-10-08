@@ -130,6 +130,12 @@ struct TourScriptTests {
         }
     }
 
+    /// A7 — PROVISIONAL P-U2-15: NEW words (not in the approved mockup),
+    /// pinned so a strike is one visible change.
+    @Test func theRoadBackLineIsOneMutedSentence() {
+        #expect(TourScript.roadBack == "Follow the ring back.")
+    }
+
     @Test func theCountLineReadsInSentenceCase() {
         #expect(TourScript.label(.main(number: 1, secondBeat: false)) == "Step 1 of 11")
         #expect(TourScript.label(.main(number: 10, secondBeat: true)) == "Step 10 of 11 \u{00B7} and home")
@@ -148,6 +154,7 @@ struct TourScriptTests {
         var strings: [String] = [
             TourScript.endTitle, TourScript.endBody, TourScript.endAside, TourScript.keepGoing,
             TourScript.openFieldGuide, TourScript.done, TourScript.next, TourScript.endTour,
+            TourScript.roadBack,
         ]
         for step in Tour.Step.allCases {
             if let card = TourScript.card(step) { strings += [card.title, card.body] }
@@ -202,7 +209,8 @@ struct TourSpotlightTests {
         spotlight.depart(.bookcaseRow("b"))
         #expect(spotlight.lit == [.sidebarArea(.bookcase)])
         spotlight.arrive(.panelOpenTakesMode)
-        #expect(spotlight.lit == [.sidebarArea(.bookcase), .panelOpenTakesMode], "one per group")
+        #expect(spotlight.lit == [.sidebarArea(.bookcase)],
+                "ONE ring, ever — the first candidate on screen (A3, the walk's two-ring find)")
     }
 
     @Test func theCardSitsBesideTheFirstGroupsRingUnlessItLivesInThePanel() {
@@ -274,6 +282,46 @@ struct TourSpotlightTests {
                 "the ended tour is simply gone — nothing writes to it any more")
     }
 
+    /// A6: a door taller than its viewport rings its VISIBLE part, pulled in
+    /// by its outset and stroke so the ring closes on screen; outside any
+    /// scroll view it rings whole; scrolled away, nothing.
+    @Test func theRingClosesInsideTheViewport() {
+        let door = CGRect(x: 0, y: 0, width: 300, height: 900)
+        let viewport = CGRect(x: -24, y: 200, width: 348, height: 400)
+        let pull = TourRing.outset + TourRing.lineWidth
+        let visible = TourRing.visiblePart(door, viewport: viewport, outset: TourRing.outset)
+        #expect(visible == CGRect(x: 0, y: 200 + pull, width: 300, height: 400 - 2 * pull),
+                "the closing edges sit inside the viewport (\(String(describing: visible)))")
+        #expect(TourRing.visiblePart(door, viewport: nil, outset: 3) == door)
+        #expect(TourRing.visiblePart(
+            door, viewport: CGRect(x: 0, y: 2000, width: 300, height: 400), outset: 3) == nil)
+    }
+
+    /// A2: a keep-clear region reports itself only while a tour runs, and
+    /// leaves when it leaves.
+    @Test func aKeepClearRegionReportsWhileATourRuns() async throws {
+        let holder = SpotlightHolder()
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 420, height: 260),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: KeepClearRig(holder: holder))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        let spotlight = TourSpotlight()
+        holder.spotlight = spotlight
+        await settle(window, hosting) { spotlight.keepClear.count == 1 }
+        #expect(spotlight.keepClear.count == 1)
+        #expect(spotlight.keepClear.values.first.map { $0.width > 100 } == true)
+        holder.showsFirst = false
+        await settle(window, hosting) { spotlight.keepClear.isEmpty }
+        #expect(spotlight.keepClear.isEmpty, "a region that leaves is forgotten")
+    }
+
     /// The ⑂ badge, found read-only by its identifier and glyph, in the
     /// probe's own space.
     @Test func theBadgeLocatorFindsOnlyTheBadgeOfTheBlockAsked() throws {
@@ -312,6 +360,20 @@ struct TourSpotlightTests {
 private final class SpotlightHolder {
     var spotlight: TourSpotlight?
     var showsFirst = true
+}
+
+private struct KeepClearRig: View {
+    let holder: SpotlightHolder
+
+    var body: some View {
+        VStack {
+            if holder.showsFirst {
+                Text("the bottom bar").frame(width: 280, height: 30).tourKeepClear()
+            }
+        }
+        .frame(width: 300, height: 200)
+        .environment(holder.spotlight)
+    }
 }
 
 private struct AnchorRig: View {

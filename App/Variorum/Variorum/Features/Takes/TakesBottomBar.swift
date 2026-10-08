@@ -277,6 +277,8 @@ struct TakesBottomBar: View {
             .padding(.vertical, 6)
             .background(tokens.room)
         }
+        // 13s-b U2 (A2): the tour's cards never cover the bar.
+        .tourKeepClear()
         .task(id: model.projection) { await model.refreshSegmentation() }
         // Ledger row 17: the FALLBACK host, Write's bar's twin — the pane's
         // named home is the post detail's inspector, and this bar also rides

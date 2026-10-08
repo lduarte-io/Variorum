@@ -165,6 +165,10 @@ struct WriteTakesPanel: View {
                     }
                 }
             }
+            // 13s-b U2 (A3): the tour's card, while it runs at steps 5–6 —
+            // drawn HERE, above the sheet's scrim, never under it on the
+            // window. Nothing at all outside a tour.
+            TourPanelSlot()
         }
         .padding(12)
         .frame(minWidth: 560, minHeight: 360)

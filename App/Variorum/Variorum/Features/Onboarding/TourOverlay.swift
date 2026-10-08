@@ -80,6 +80,12 @@ struct TourOverlay: View {
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { origin = $0 }
         .onChange(of: facts, initial: true) { _, now in engine.observe(now) }
+        // A3: while Write's takes panel is up at steps 5–6, the card moves
+        // INTO the panel (its slot draws it above the sheet's scrim).
+        .onChange(of: panelCardKey, initial: true) { _, _ in
+            engine.spotlight.panelCard = cardInPanel ? AnyView(coachCard(width: nil)) : nil
+        }
+        .onDisappear { engine.spotlight.panelCard = nil }
         .task(id: engine.noteOfInterest) { await engine.watchNoteFacts() }
         .task(id: badgeBlockID) { await followBadge() }
         #if DEBUG
@@ -106,19 +112,59 @@ struct TourOverlay: View {
                 .padding(.leading, spot.width)
                 .padding(.top, spot.height)
                 .transition(.opacity)
-        } else if let words = TourScript.card(step, takeCount: takeCount) {
-            TourCoachCard(
-                tokens: tokens, scheme: scheme,
-                label: TourScript.label(Tour.position(of: step)),
-                card: words,
-                showsNext: Tour.hasNext(step), showsEnd: Tour.hasEndTour(step),
-                onNext: { engine.next() }, onEnd: { engine.endTour() })
+        } else if !cardInPanel {
+            coachCard(width: TourCoachCard.width)
                 .modifier(MeasuredCard(size: $cardSize))
                 .padding(.leading, spot.width)
                 .padding(.top, spot.height)
                 .id(step)
                 .transition(.opacity)
         }
+    }
+
+    /// The step's coach card (nil width: the panel's own width — A3).
+    @ViewBuilder
+    private func coachCard(width: CGFloat?) -> some View {
+        let step = engine.state.step
+        if let words = TourScript.card(step, takeCount: takeCount) {
+            TourCoachCard(
+                tokens: tokens, scheme: scheme,
+                label: TourScript.label(Tour.position(of: step)),
+                card: words,
+                showsNext: Tour.hasNext(step), showsEnd: Tour.hasEndTour(step),
+                onNext: { engine.next() }, onEnd: { engine.endTour() },
+                width: width, roadBack: roadBack)
+        }
+    }
+
+    /// **A3 (the U2 UI assessment):** while Write's takes panel — a sheet,
+    /// whose scrim dims the window under it — is up at steps 5–6, the card is
+    /// drawn by the panel's own slot instead, above the scrim; the window's
+    /// copy steps aside so there is never a card under the dim.
+    private var cardInPanel: Bool {
+        let step = engine.state.step
+        return (step == .makeTake || step == .takeIcon)
+            && engine.state.facts.caret?.panelOpen == true
+    }
+
+    /// What the panel's card depends on — the slot is refilled when it moves.
+    private struct PanelCardKey: Equatable {
+        let step: Tour.Step
+        let inPanel: Bool
+        let takeCount: Int
+        let roadBack: Bool
+    }
+
+    private var panelCardKey: PanelCardKey {
+        PanelCardKey(
+            step: engine.state.step, inPanel: cardInPanel, takeCount: takeCount,
+            roadBack: roadBack)
+    }
+
+    /// A7 (PROVISIONAL P-U2-15): the lit ring is the ROAD BACK to the step's
+    /// place, not the step's own target — the card says so.
+    private var roadBack: Bool {
+        Tour.isRoadBack(engine.state) && !engine.spotlight.lit.isEmpty
     }
 
     /// Step 6 names the badge with its real count — the toured block's, read
@@ -138,10 +184,18 @@ struct TourOverlay: View {
             anchor = Tour.Rect(
                 x: local.minX, y: local.minY, width: local.width, height: local.height)
         }
+        // A2: the keep-clear regions the doors report (the sidebar, the
+        // mastheads, the bottom bars), in this overlay's space.
+        let avoid = engine.spotlight.keepClear.values.map { global -> Tour.Rect in
+            let local = global.offsetBy(dx: -origin.minX, dy: -origin.minY)
+            return Tour.Rect(
+                x: local.minX, y: local.minY, width: local.width, height: local.height)
+        }
         let spot = Tour.place(
             card: (Double(cardSize.width), Double(cardSize.height)), beside: anchor,
             in: (Double(container.width), Double(container.height)),
-            sides: Tour.preferredSides(step), corner: Tour.fallbackCorner(step))
+            sides: Tour.preferredSides(step), corner: Tour.fallbackCorner(step),
+            avoid: avoid)
         return CGSize(width: spot.x, height: spot.y)
     }
 
@@ -197,6 +251,12 @@ struct TourCoachCard: View {
     let showsEnd: Bool
     let onNext: () -> Void
     let onEnd: () -> Void
+    /// The card's width — the mockup's 300 pt over the window; nil (inside
+    /// Write's takes panel, A3) takes the panel's width.
+    var width: CGFloat? = TourCoachCard.width
+    /// A7 (PROVISIONAL P-U2-15): the ring is a road back, not the step's own
+    /// target — the card says so in one muted sentence.
+    var roadBack = false
 
     /// The mockup's `max-width: 300px`.
     static let width: CGFloat = 300
@@ -221,6 +281,15 @@ struct TourCoachCard: View {
                 .foregroundStyle(tokens.ink)
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
+            if roadBack {
+                // A7 (PROVISIONAL P-U2-15 — new words, hers to strike): the
+                // ring and the text stop contradicting when she has wandered.
+                Text(TourScript.roadBack)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 6)
+            }
             if showsNext {
                 Button(tokens.chromeLabel(TourScript.next), action: onNext)
                     .buttonStyle(VoicedButtonStyle(
@@ -245,7 +314,8 @@ struct TourCoachCard: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 14)
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: width, alignment: .leading)
+        .frame(maxWidth: width == nil ? .infinity : nil, alignment: .leading)
         .modifier(TourCardChrome(tokens: tokens, scheme: scheme, cornerRadius: 12))
         .accessibilityElement(children: .contain)
     }

@@ -47,6 +47,26 @@ final class TourSpotlight {
     private(set) var presence: [Tour.Anchor: Int] = [:]
     /// Where the lit anchors last were, in `.global` (the window's own space).
     private(set) var frames: [Tour.Anchor: CGRect] = [:]
+    /// **The card, when it belongs INSIDE Write's takes panel** (A3, the U2 UI
+    /// assessment): the panel is a sheet, and the window under it is dimmed
+    /// by the sheet's scrim — a coach card left there reads as the tour
+    /// switched off. While the panel is up at steps 5–6 the card is drawn by
+    /// the panel's own slot (`TourPanelSlot`), above the scrim. The overlay
+    /// builds it; this only carries it (a feature renders it, never builds it).
+    var panelCard: AnyView?
+    /// The keep-clear regions the doors report (A2): the bottom bars, the
+    /// mastheads, the sidebar — a card never sits on them. `.global`, keyed
+    /// by the reporting view's own id (a split draws two masthead copies).
+    private(set) var keepClear: [UUID: CGRect] = [:]
+
+    func reportKeepClear(_ frame: CGRect, from id: UUID) {
+        guard keepClear[id] != frame else { return }
+        keepClear[id] = frame
+    }
+
+    func forgetKeepClear(_ id: UUID) {
+        keepClear[id] = nil
+    }
 
     func setGroups(_ groups: [[Tour.Anchor]]) {
         guard groups != self.groups else { return }
@@ -84,9 +104,14 @@ final class TourSpotlight {
         frames[anchor] = frame
     }
 
-    /// The anchors ringing now: per group, its first candidate on screen.
+    /// The anchor ringing now — ONE at most (A3, the U2 UI assessment: the
+    /// walk saw two rings at once, one under the Takes panel): the first
+    /// candidate on screen, group by group.
     var lit: [Tour.Anchor] {
-        groups.compactMap { group in group.first { (presence[$0] ?? 0) > 0 } }
+        for group in groups {
+            if let anchor = group.first(where: { (presence[$0] ?? 0) > 0 }) { return [anchor] }
+        }
+        return []
     }
 
     func isLit(_ anchor: Tour.Anchor) -> Bool { lit.contains(anchor) }
@@ -95,10 +120,7 @@ final class TourSpotlight {
     /// it lives in Write's takes panel (a sheet: its frame is another
     /// window's), in which case the card takes its corner.
     var cardAnchor: Tour.Anchor? {
-        guard let first = groups.first,
-              let lit = first.first(where: { (presence[$0] ?? 0) > 0 }),
-              !lit.isInPanel
-        else { return nil }
+        guard let lit = lit.first, !lit.isInPanel else { return nil }
         return lit
     }
 
@@ -118,12 +140,35 @@ struct TourRing: View {
     static let lineWidth: CGFloat = 2.5
 
     var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(tokens.accent, lineWidth: Self.lineWidth)
-            .shadow(color: tokens.accent.opacity(0.45), radius: 7)
-            .padding(-outset)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+        GeometryReader { proxy in
+            if let visible = Self.visiblePart(
+                CGRect(origin: .zero, size: proxy.size),
+                viewport: proxy.bounds(of: .scrollView), outset: outset) {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(tokens.accent, lineWidth: Self.lineWidth)
+                    .shadow(color: tokens.accent.opacity(0.45), radius: 7)
+                    .frame(width: visible.width + 2 * outset, height: visible.height + 2 * outset)
+                    .offset(x: visible.minX - outset, y: visible.minY - outset)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    /// **A6 (the U2 UI assessment): the ring CLOSES inside the viewport.** A
+    /// door taller than its scroll view's visible part (a fanned block on the
+    /// Takes board) drew a ring whose top and bottom ran off-screen — two
+    /// rails with no ends. The ring is drawn around the door's VISIBLE part,
+    /// pulled in by its own outset and stroke so the closing edge is never
+    /// clipped; a door outside any scroll view rings whole, and a door
+    /// scrolled entirely away draws nothing.
+    nonisolated static func visiblePart(
+        _ full: CGRect, viewport: CGRect?, outset: CGFloat
+    ) -> CGRect? {
+        guard let viewport else { return full }
+        let pull = outset + lineWidth
+        let visible = full.intersection(viewport.insetBy(dx: pull, dy: pull))
+        return visible.isNull || visible.isEmpty ? nil : visible
     }
 }
 
@@ -211,7 +256,50 @@ private struct TourAnchorModifier: ViewModifier {
     }
 }
 
+/// **A region a card never covers** (A2, the U2 UI assessment): the bottom
+/// bars, the mastheads, the sidebar's navigation. Inert outside a tour — the
+/// reporter exists only while a spotlight does, as the background's CONTENT
+/// (the region's own structure never changes).
+private struct TourKeepClearModifier: ViewModifier {
+    @Environment(TourSpotlight.self) private var spotlight: TourSpotlight?
+    @State private var id = UUID()
+
+    func body(content: Content) -> some View {
+        content.background {
+            ZStack {
+                if let spotlight {
+                    Color.clear
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                            spotlight.reportKeepClear($0, from: id)
+                        }
+                        .onDisappear { spotlight.forgetKeepClear(id) }
+                }
+            }
+            .allowsHitTesting(false)
+        }
+    }
+}
+
+/// **Write's takes panel's slot for the tour's card** (A3) — draws the card
+/// the spotlight carries while the panel is up; nothing outside a tour.
+struct TourPanelSlot: View {
+    @Environment(TourSpotlight.self) private var spotlight: TourSpotlight?
+
+    var body: some View {
+        if let card = spotlight?.panelCard {
+            card
+                .padding(.top, 8)
+                .transition(.opacity)
+        }
+    }
+}
+
 extension View {
+    /// **A region the tour's card never covers** (A2) — inert outside a tour.
+    func tourKeepClear() -> some View {
+        modifier(TourKeepClearModifier())
+    }
+
     /// **This door is something the tour can point at.** Inert outside a
     /// tour. `outset` and `cornerRadius` shape the ring to the door (a row's
     /// soft corners, a word's tight ones).
