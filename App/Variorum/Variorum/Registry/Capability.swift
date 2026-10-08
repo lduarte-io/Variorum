@@ -851,6 +851,16 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// reasons — and never a palette door: an act that writes the whole
     /// library readable is not one to reach by a keystroke.
     case exportPlaintextLibrary
+    /// 13x F1 (ladder R1-MAJOR; the 13x row's deliverable 1): the HAND-OFF
+    /// act — ONE folder ("Variorum Library — <date>") holding a sealed
+    /// snapshot of the open library and its key file's copy (the kickoff
+    /// ruling QC's pair), produced somewhere findable and AirDroppable,
+    /// revealed in Finder at completion. `.menuBar` (File's door) +
+    /// `.surface` (Data Safety's twin) — one act, two faces. Deliberately
+    /// NOT `.palette`, on its Data Safety siblings' grounds: an act that
+    /// writes a travelling copy of the whole library is not one to reach
+    /// by a keystroke.
+    case handOffLibrary
     /// 13r U3-B (R-13r-5) — Settings ▸ Diagnostics' two acts on a RECEIVED
     /// crash report, `.surface` on the Data Safety precedent above: their
     /// target is the report card she is looking at, and the per-gesture

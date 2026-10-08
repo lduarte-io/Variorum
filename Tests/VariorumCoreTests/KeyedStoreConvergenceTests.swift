@@ -94,18 +94,27 @@ struct KeyedStoreConvergenceTests {
         // does checkpoint the WAL away here, this says so instead of quietly
         // becoming the dead belt. (`StoreEncryptionTests`' "WAL pages encrypt
         // too" is the live sibling pin, scanning while its pool is open.)
-        a.db.asRebindable().binding.lock()
-        b.db.asRebindable().binding.lock()
+        //
+        // **13x W-1 — the future change this paragraph anticipated arrived:**
+        // `lock()` now checkpoint-truncates, so the WAL is empty after it and
+        // this pin said so, as designed. The WAL is therefore scanned WHILE
+        // THE POOLS ARE OPEN (the sibling pin's shape), hard read and frames
+        // asserted present; the main-file scan after the lock now also covers
+        // every checkpointed frame.
         for url in [urlA, urlB] {
-            let bytes = try Data(contentsOf: url)
-            #expect(bytes.range(of: Data(prose.utf8)) == nil,
-                    "\(url.lastPathComponent) carries no plaintext prose")
             let wal = URL(fileURLWithPath: url.path + "-wal")
             let walBytes = try Data(contentsOf: wal)
             #expect(!walBytes.isEmpty,
                     "\(url.lastPathComponent)'s WAL holds frames — an empty one scans nothing")
             #expect(walBytes.range(of: Data(prose.utf8)) == nil,
                     "\(url.lastPathComponent)'s WAL carries no plaintext prose")
+        }
+        a.db.asRebindable().binding.lock()
+        b.db.asRebindable().binding.lock()
+        for url in [urlA, urlB] {
+            let bytes = try Data(contentsOf: url)
+            #expect(bytes.range(of: Data(prose.utf8)) == nil,
+                    "\(url.lastPathComponent) carries no plaintext prose")
         }
     }
 }

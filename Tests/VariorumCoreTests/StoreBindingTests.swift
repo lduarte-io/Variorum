@@ -116,6 +116,53 @@ struct StoreBindingTests {
         }
     }
 
+    /// W-1 (the 13x closeout walk): the adoption gate reads a non-empty
+    /// `-wal` beside the live store as "pool not closed" — so lock() must
+    /// leave the wal CHECKPOINTED AWAY (absent or zero bytes), including
+    /// with a live observation still consuming at lock time (the app's
+    /// ready-road condition, where the refusal was met live).
+    @Test func lockLeavesNoHotWalBesideTheClosedStore() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let (view, binding, url) = try openRebindable(in: dir, key: .mint())
+
+        // A live observation, as the ready tree holds one at lock time.
+        let firstDelivered = AsyncStream<Void>.makeStream()
+        let consumer = Task {
+            var sawFirst = false
+            for try await _ in view.observe({ db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM setting") ?? 0
+            }) {
+                if !sawFirst {
+                    sawFirst = true
+                    firstDelivered.continuation.yield()
+                }
+            }
+        }
+        for await _ in firstDelivered.stream { break }
+
+        // Fatten the wal the way a session's writes do.
+        try await view.write { db in
+            for i in 0..<200 {
+                try db.execute(
+                    sql: "INSERT OR REPLACE INTO setting (key, value) VALUES (?, ?)",
+                    arguments: ["w1-fat-\(i)", String(repeating: "x", count: 4096)])
+            }
+        }
+        let walPath = url.path + "-wal"
+        let sizeBefore = (try? FileManager.default.attributesOfItem(atPath: walPath)[.size] as? Int) ?? 0
+        #expect(sizeBefore > 0, "the condition needs a hot wal before the lock")
+
+        let outcome = binding.lock()
+        consumer.cancel()
+        _ = try? await consumer.value
+
+        let sizeAfter = (try? FileManager.default.attributesOfItem(atPath: walPath)[.size] as? Int) ?? 0
+        #expect(outcome.closedCleanly, "the close must be clean: \(outcome.closeFailure ?? "")")
+        #expect(sizeAfter == 0,
+                "a locked store's wal must be checkpointed away — the adoption gate reads >0 as a hot pool (W-1)")
+    }
+
     /// The app's teardown road, modeled: an observation started before the
     /// lock is consumed by a task; the lock lands; the task is cancelled
     /// (SwiftUI's `.task` teardown when the lobby replaces the views) and

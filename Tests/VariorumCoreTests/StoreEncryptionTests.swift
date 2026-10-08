@@ -227,6 +227,65 @@ struct KeyedStoreTests {
         #expect(custody.load() == nil,
                 "and NOTHING was minted into custody — a persisted bogus key made the dead end permanent")
     }
+
+    // MARK: - VX-80: the wrong-key class is TYPED (the Castle-follow crash window)
+
+    /// VX-80 (the record: notes/plans/fixes/vx-80-castle-follow-recovery-
+    /// door.md): an encrypted store whose custody-held key does not open it
+    /// — the stranded state a death between the follow's verified swap and
+    /// its custody move leaves behind — throws the TYPED `keyRejected`
+    /// refusal, so the failure surface keys its recovery lobby on the fact,
+    /// never on the reason's prose (R1-M3's own precedent). The class
+    /// separation from `keyUnavailable` is pinned on both sides, and the
+    /// classification never touches the file: the right key still opens it.
+    @Test func openStoreTypesAWrongKeyOpenAsKeyRejected() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent("stranded.sqlite")
+        let keyB = StoreKey.mint()  // the file is under it — the re-key completed
+        do {
+            let seeded = try AppDatabase.onDisk(url: url, key: keyB)
+            try seedCanary(seeded)
+        }
+        // Custody still holds the OLD key A — the crash fell before step 5
+        // (the custody move).
+        let keyA = StoreKey.mint()
+        do {
+            _ = try AppDatabase.openStore(at: url, custody: .inMemory(initial: keyA))
+            Issue.record("a wrong-key open must refuse")
+        } catch let error as AppDatabase.StoreOpenError {
+            #expect(error.keyRejected, "the wrong-key class is TYPED (VX-80)")
+            #expect(!error.keyUnavailable, "…and is NOT R1-M3's empty-custody class")
+            #expect(!error.reason.contains(keyA.hexEncoded)
+                    && !error.reason.contains(keyB.hexEncoded),
+                    "no key material rides the reason (the P15 rule holds)")
+        }
+        // The right key opens the same file whole.
+        let reopened = try AppDatabase.openStore(at: url, custody: .inMemory(initial: keyB))
+        let title = try reopened.read { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = 'c-canary'")
+        }
+        #expect(title == Self.canary)
+    }
+
+    /// VX-80's class separation, the other side: the empty-custody refusal
+    /// keeps its exact 13p shape — `keyUnavailable` true, `keyRejected`
+    /// false. The two typed facts never conflate (each keys the same
+    /// recovery lobby, but the distinction is load-bearing for the words
+    /// each surface speaks and for every future consumer).
+    @Test func theEmptyCustodyRefusalIsNotTheWrongKeyClass() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent("orphaned.sqlite")
+        _ = try AppDatabase.openStore(at: url, custody: .inMemory())  // mints + creates
+        do {
+            _ = try AppDatabase.openStore(at: url, custody: .inMemory())  // empty custody
+            Issue.record("an encrypted store with empty custody must refuse")
+        } catch let error as AppDatabase.StoreOpenError {
+            #expect(error.keyUnavailable)
+            #expect(!error.keyRejected, "the two typed classes never conflate")
+        }
+    }
 }
 
 @Suite("Phase 13p — the backup pin (spike Q5's corrected shape)")

@@ -151,6 +151,20 @@ final class PostureSwitchModel: Identifiable {
             phase = .failed(ProtectionCopy.pickUpKeysFirst)
             return
         }
+        // 13x F1 (ladder R1-M1 — P-R1-1): a standing RESTORE HOLD refuses
+        // the two ROTATION ceremonies at the door — their road drains the
+        // outbox and pulls to head before any screen (`rotate` step 1),
+        // which would breach round 3's "no round runs until Resume" and
+        // QD's "the kept outbox pushes at Resume". The pick-up-keys-first
+        // grammar's sibling, one sentence. Use Standard stays open
+        // (traced: `leaveCastle` drives no engine) and the marker's
+        // RESUME stays exempt (recovery — the guard above's own
+        // exemption).
+        if mode == .enter || mode == .replaceKeys,
+           controller.restoreHoldStands?() == true {
+            phase = .failed(ProtectionCopy.resumeSyncFirst)
+            return
+        }
         do {
             let facts = try await runner.checkDoor()
             self.facts = facts

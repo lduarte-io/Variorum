@@ -694,6 +694,60 @@ struct Phase13pLobbyTests {
         }
     }
 
+    /// 13x F1 (ladder R1-M4): the adoption flow SUSPENDS the standing
+    /// lobby BEFORE its work — and a probe ALREADY AWAITING the Apple
+    /// road when the suspension lands completes NOTHING (cancelling the
+    /// polling task alone could not stop it: the in-flight probe's
+    /// `complete(key)` would open the pool over the departing store
+    /// mid-move — two bindings over two files). A failed adoption's
+    /// resume re-arms the waiting road. RED ON OLD: no suspension
+    /// existed — the in-flight probe completed after `stopWaiting()`.
+    @Test func aSuspendedLobbysProbeCompletesNothingEvenWhenAlreadyInFlight() async throws {
+        actor Gate {
+            private var waiters: [CheckedContinuation<Void, Never>] = []
+            private var open = false
+            func wait() async {
+                if open { return }
+                await withCheckedContinuation { waiters.append($0) }
+            }
+            func release() {
+                open = true
+                for waiter in waiters { waiter.resume() }
+                waiters.removeAll()
+            }
+        }
+        let gate = Gate()
+        let completions = LockIsolated(0)
+        let key = StoreKey.mint()
+        let lobby = StoreLobby(
+            kind: .waitingForICloudKeychain(differentAppleID: false),
+            demand: .auto, biometryOffered: false,
+            passphraseOffered: true, recoveryOffered: false,
+            gatedRoad: { nil },
+            envelopeRoad: { _ in .failure(StoreLobby.Refusal(message: "unused")) },
+            appleRoad: { await gate.wait(); return key },
+            complete: { _ in completions.withValue { $0 += 1 } })
+        // The in-flight race, seeded deterministically: the probe parks
+        // on the Apple road; the adoption suspends; A "arrives".
+        let probe = Task { @MainActor in await lobby.probeAppleRoad() }
+        try? await Task.sleep(for: .milliseconds(20))
+        lobby.suspendForAdoption()
+        await gate.release()
+        let completed = await probe.value
+        #expect(!completed && completions.value == 0,
+                "a suspended lobby completes nothing — even a probe already in flight")
+        // The failure half: resume re-arms the waiting road; the next
+        // probe opens as the waiting state always did.
+        lobby.resumeAfterAdoption(every: .milliseconds(5))
+        var opened = false
+        for _ in 0..<400 where !opened {
+            try? await Task.sleep(for: .milliseconds(2))
+            opened = completions.value > 0
+        }
+        lobby.stopWaiting()
+        #expect(opened, "a failed adoption's resume goes back to waiting")
+    }
+
     /// A DIFFERENT Apple ID's A (the key file's copy is under another id):
     /// the waiting state says so (copy §2d's third sentence) — the
     /// passphrase road answers once; nothing is adopted from the wire.
