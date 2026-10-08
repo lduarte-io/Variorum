@@ -56,6 +56,20 @@ moved-aside one) can still be opened afterward, by which credential.
    right thing and never merge one account's library into another's sync?
 9. **The same library on two Macs after a hand-off.** Same store id on both machines: device
    identity, cursors, the outbox, conflict-as-variant — does anything collide or double-push?
+11. **(Her addition, 2026-10-07 — answered as its own focus, not folded into 3/5.) A backup
+    from one posture opened into an account that is now in the OTHER posture, BOTH directions:**
+    (a) a **Standard** backup (its key file Apple-wrapped, openable silently through iCloud
+    Keychain) opened into an account that is now **Castle**; (b) a **Castle** backup (its key
+    file passphrase/words-wrapped, opening behind the demanded gate) opened into an account
+    that is now **Standard**. Each on the SAME Mac and on a NEW Mac. Round 1's BLOCKER was
+    direction (a) on the same Mac (the fourth reconcile arm, `castleKeyFileAppleOpenable`) —
+    re-verify that fix END TO END rather than trusting it, and trace (a) on a new Mac and
+    BOTH legs of (b) from scratch: what the user is asked at open, what custody holds after,
+    what posture the landed library actually ends in versus what the account says it should
+    be, whether any key file left beside it still opens it more weakly than the account's
+    posture allows, what the next launch does, and whether sync's follow/re-key roads fire
+    when they should and stay quiet when they should.
+
 10. **Anything else that could go wrong — and this one is NOT optional and NOT bounded by the
     list above.** Her explicit instruction (2026-10-07): the reviewer must go BEYOND what her
     prompt and foci 1–9 cover and really *think* — independently and adversarially — about
