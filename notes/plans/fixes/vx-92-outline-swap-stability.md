@@ -31,7 +31,20 @@ Readings to verify, not build on: VX-91's symptom is **rapid** clicking across *
 - **DONE** — stage slot 2 (~14 min; 2026-10-07 ~23:20): **VX-91's pin verified red-on-old by behavioral revert** — with two honest test corrections the slot itself caught, both recorded because they are harness FACTS: (1) the truth-table's "no memory" arm was defeated by a **persisted `SurfaceSizeMemory` leak** (the test host shares real `UserDefaults`; `withLandingBook`'s `.incrementing` ids repeat across tests, so earlier mounted tests' persisted records matched the fixture — the test now stands at a width no leaked record can match, `ffb47313`); (2) the integration pin's first cut was **HOLLOW — caught by its own revert run coming back green**: the story staged ~3,300 pt down sits INSIDE `NearBand`'s ~5,000-pt reach, so the ordinary near road mounted it on both trees; re-staged beyond the band (`d30cc197`). Final evidence: `vx92-revert2b.log` — the old gate fails EXACTLY the sharpened pin, at the claim; `vx92-pinrun4.log` — 14/14 green on the fix tree. Stage released; no further stage needs.
 - **IN-PROGRESS** — the ladder (round 1 CLOSED, dispositions below; round 2 next over the fix diff). Then slot 3 (the VX-91-fix walk) and the PR.
 
-## Ladder
+## Slot 3 — the closeout stamp + the fix walk
+
+**Slot 3 (2026-10-08 ~00:15, ~12 min):** latest main merged into the branch IN-slot (clean — ledger commits only; 13x unmerged at that moment, its Release build already on her /Applications for the acceptance legs, untouched); `build-for-testing` + the landing suite on the MERGED tree: **14/14 green** (`vx92-closeout.log` — the round-2 recommendation satisfied). **The VX-91-fix walk (`DerivedData/vx92-walk/fixwalk.mov`, frames in `fframes/`):** three far navigator clicks on the same road as the diagnosis film — the title-over-blank beat measured **1 frame (clicks 1–2) and ~3 frames (click 3), against ~12 consecutive frames pre-fix** on the same store at the same width. The honest accounting stands (the fill is paid, started at the click); the felt delta is now filmed, not claimed: roughly an order of magnitude shorter, reading as a repaint flash rather than a beat.
+
+## Closeout
+
+- **Members:** VX-82 FIXED (the linger, pin red-on-old both legs, walk-clean) · VX-91 DIAGNOSED + FIXED within her rule (the pre-mount, pin red-on-old, felt delta filmed); both Done ride the PR. Follow-ups minted open: **VX-96** (the reveal-without-focus residual, ladder R1-2) · **VX-97** (SurfaceSizeMemory test isolation, R1-5).
+- **The ladder:** two rounds — R1 `0B·0M·3m·2n`, every finding dispositioned in writing (one code fix, two ticket deferrals, one record correction, one record-only); R2 CLEAN BILL, its one NIT cleared at the next touch; no round 3.
+- **Mobile parity:** nothing mobile-visible (the book Outline's swap seam and virtualization gate are Mac surfaces; the phone has neither).
+- **Canon:** no AppSpec/OverallModel delta — both fixes are rendering-order changes inside the shipped contract; P3's one-live-editor and P1's viewport-bounded cost hold (the reviewer verified both).
+- **The `/Applications` refresh: HELD at the coordinator's ruling** — 13x's acceptance build owns her /Applications until 13x merges; ONE refresh from merged main then covers both runs, scheduled by the coordinator (A1-first, zero-instance). THE DEBT RIDES THIS LINE.
+- **Build debris:** `DerivedData/vx92/` (the ~GB build tree) deleted at close; the small `.log` evidence files and the walk artifacts (`vx92-walk/` movs + key frames) kept until her word, the VX-75 precedent.
+
+## Ladder (the rounds' record)
 
 **Round 1 (2026-10-08, a fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim; diff `21ec6912..c88f1609`; the report `notes/plans/vx-92-ladder-round1.md`): 0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT.** Same-model flow — the orchestrator's dispositions, arbitrated against the code and the rules:
 
