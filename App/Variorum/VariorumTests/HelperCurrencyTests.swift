@@ -100,4 +100,24 @@ struct HelperCurrencyTests {
                 "the note menu's Versions… door, by its own constant")
         #expect(row.does.localizedCaseInsensitiveContains(VersionsPath.saveVerb))
     }
+
+    /// 13s-b U4 round 2 (the NIT adopted in-ladder): F1 removed the only
+    /// line that pointed at Block History's home, and the group's own rule is
+    /// that a door which moves without a line here is a door she cannot find.
+    /// So the shortcuts tab teaches the real road — the bars' `history` door,
+    /// beside commit — naming the face by its ONE constant.
+    @Test func theHelperTeachesBlockHistorysRealRoad() throws {
+        let rows = HelperView.groups.flatMap(\.items)
+        #expect(rows.contains {
+            $0.keys.localizedCaseInsensitiveContains(BlockHistoryPath.name)
+                || $0.does.localizedCaseInsensitiveContains(BlockHistoryPath.name)
+        }, "a shortcuts-tab row names \(BlockHistoryPath.name)")
+        let door = try #require(rows.first {
+            $0.does.localizedCaseInsensitiveContains(BlockHistoryPath.name)
+        })
+        #expect(door.keys.hasPrefix(BlockHistoryPath.doorLabel),
+                "the row is keyed by the bars' own door word: \(door.keys)")
+        #expect(door.does.localizedCaseInsensitiveContains("beside commit"),
+                "…and says where the door sits")
+    }
 }

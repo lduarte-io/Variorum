@@ -245,6 +245,14 @@ struct HelperView: View {
                 + "\u{23CE} applies; \u{2715} on a card takes it off"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
+            // 13s-b U4 round 2 (the NIT adopted in-ladder): this group's own
+            // rule — a door that moves gets a line — for the door that left
+            // `note ▾` at the post-13l polish round and lost its line here at
+            // U4's round 1. Block History is the BLOCK's, on both bars, beside
+            // commit; the face's name and the door's word are their constants.
+            ("\(BlockHistoryPath.doorLabel) (bottom bar)", "\(BlockHistoryPath.name), beside "
+                + "commit: everything the block you're in has been \u{2014} each take's "
+                + "commits, the takes it set aside or deleted, and the block it came out of"),
             // 13s-b U4 round 1 (MINOR-2): the row taught a "history" door
             // this menu has not carried since the post-13l polish round
             // (Block History sits beside commit — her F2: "it's unclear that
