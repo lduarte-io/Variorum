@@ -1148,3 +1148,21 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
 - Noted, not a defect: `reconcileFollow`'s follow-into-Standard arm carries no marker-pending guard, so in MINOR-1's world a
   ready BEFORE the resume can already run the announced follow (the old Castle-shaped key file has no `apple`); the resume
   then finds custody silent by the read. Either order ends silent, the Apple copy in the key file, and the notice spoken.
+
+
+## CLOSEOUT (2026-10-08, overnight under her mandate)
+
+**Verified by the orchestrator:** round 3's delta read line by line (`ownWriteLanded` gates only the Done flag;
+`tighteningPosture` overrides custody only toward Castle; every F3 fact kept); main (VX-83, `4f114c26`) merged in at
+`550bc676` with no conflict; **both targets compile on the merged tree** (Mac build-for-testing + VariorumMobile generic
+iOS Simulator build-for-testing, TEST BUILD SUCCEEDED). The Mac suites were not re-run on the merged tree — VX-83's diff is
+search-only and disjoint from every VX-99 surface; the last full run was on 4adb8801: PostureSwitchTests 69/69, the
+batch-1 set 198/20, the tutorial spine 99/13, the two pane face suites 6+5. Zero `Sources/` change across the whole
+effort; marker stays 12; no schema, no lockstep.
+
+**The ladder:** round 1 Fable (0B/1M/1m/1n — cross-model, the reviewer implemented), round 2 Opus 5.5 (1 pre-existing
+MAJOR + MINORs — same-model, the orchestrator arbitrated), round 3 Opus 5.5 = the cap and her ruled Opus end review
+(1 introduced MAJOR + 1 introduced MINOR fixed by restoring pre-F3 behavior; no round 4 — QUESTIONS #204(d)).
+**Canon:** no AppSpec/SyncSpec delta (the fix makes the code honor pre-13x decisions 8, 9, 30, 32, 35 and §3.4 as already
+written). QUESTIONS #204 carries the bundle. MOBILE PARITY: PL-50. Tickets out: VX-106 · VX-107 · VX-108 · VX-109 · VX-110.
+The in-flight row retired at the merge. The author handoff: `notes/handoffs/vx-99-handoff.md`.

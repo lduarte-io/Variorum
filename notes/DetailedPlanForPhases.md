@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | `~/dev/variorum-13s` · the PRO (seat moved back 2026-10-08 at her word — the Air lacks signing approval; design ran to completion there; the handoff `notes/plans/phase-13s-orchestrator-handoff.md`) | OPEN — at the BUILD stage since 2026-10-08: the tour APPROVED (R-13s-27), mockup v5 is the spec; two tracks at her word — U1a (first-open surface) + the field guide triage (R-13s-30); U1b gated on the Sync/-custody slot (VX-99 holds it); record: `notes/plans/phase-13s-voice-onboarding.md` |
-| VX-99 — Castle Replace All Keys writes an Apple copy | **VX-99** · `vx-99-pro-castle-apple-wrap` | `~/dev/variorum-vx-99` · the Pro | OPEN — kicked off 2026-10-08; findings DONE (cause: `PostureSwitch.writeNewKeyFile` gates the key file's Apple copy on `entersCastle`, not posture); **HOLDS THE Sync/-custody SLOT since 13x's merge (2d88dd49)** — the fix runs (cast Opus 5.5 at her word; Fable-then-Opus cold review per her ruling); surfaces: `App/Variorum/Shared/PostureSwitch.swift` + its tests (+ any sweep-found writer); stage via oct7coordinator; record: `notes/plans/fixes/vx-99-pro-castle-apple-wrap.md` |
 
 ### Latest closeout
 

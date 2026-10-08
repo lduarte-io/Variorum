@@ -2311,3 +2311,25 @@ savepoint-free; the kind line's day words; C7 = the chip's help texts, re-drafte
 R-VX83-10, kept for the record) · the **P-13o-U2-9 supersession** (the when door arms NOTHING until a day is pressed
 — this door only) · the **P-13o-U2-6 supersession** (a `#tag` alone now ANSWERS with the tagged notes — R-VX83-1).
 **Status: open — walk at your next sitting.**
+
+#204 — **THE VX-99 RATIFY BUNDLE (2026-10-08; the binding record is `notes/plans/fixes/vx-99-pro-castle-apple-wrap.md` —
+the findings, her rulings, the three ladder rounds `vx-99-ladder-round{1,2,3}.md`, every orchestrator disposition).**
+Built overnight under her mandate ("use your own judgement on what's in scope"); each is hers to keep or reverse.
+**(a) Scope widened past the headline, all in the same stale-posture class:** the vault's word (not the device's posture
+read) now decides the Apple-held copy on every Replace All Keys road (round 1's MAJOR — a stale read could silently flip the
+ACCOUNT's posture); the resumed ceremony's faces speak the marker's act (round 2's MAJOR — "Finish replacing keys" could walk
+into Use Castle and enter it); the resume door finishes its own mid-walk rotation (it refused, stranding sync on a
+one-device account); Replace All Keys refuses its local-only road (decision 9). **(b) Two PROVISIONAL sentences (13s
+re-voices):** `resumeReplacingKeysBody` — "Replacing your keys didn't finish on this Mac — sync is paused until it completes.
+Nothing is lost; finishing picks up exactly where it stopped." · `keysReplacedAfterAnotherDevice` — ledger 61's family when the
+other device REPLACED keys rather than entering Castle ("Another device replaced your keys first … the twelve words shown here
+are not your account's …"). **(c) Kept as the shipped words, one residual for 13s:** a `switchInProgress` refusal at the
+runner's busy guard (another road already running, no marker to read) still says "Entering Castle didn't finish" — false
+there; an honest sentence would be new copy. **(d) Round 4 not run (the cap):** round 3's two fixes (the S2 Done no longer
+claims her words are not the account's; a resume into Standard leaves custody to the ready's announced follow) were verified
+by the orchestrator's own read of the delta + red-on-old pins + named reverts, not by a fourth cold review — yours to order
+before anything builds on it. **(e) Tickets minted from the ladder:** VX-106 (two PostureSwitchTests red on main since 13x —
+they pass under VX-99's account-consistent harness, recorded not claimed; the arm-order question is variorum-da's), VX-107
+(double-crash residuals + the regenerated-words silence), VX-108 (Use Castle / Leave Castle doors read the posture), VX-109
+(`CorpusRotation.begin` re-fetch race — `Sync/`), VX-110 (Use Castle's local-only road for an enrolled library + the rekey
+banners). Status: open.
