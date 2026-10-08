@@ -176,7 +176,42 @@ only; never `git checkout` over uncommitted work.
 
 ### U-A RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-*(not started)*
+**Seat:** the U-A implementer (Opus, xhigh), seated 2026-10-07 in `~/dev/variorum-vx-83` on
+`vx-83-search-followup` (pulled at `ce523f3f`). Required reading done in-context, never
+delegated: this file WHOLE · `notes/plans/phase-13o-search.md` WHOLE (sitting / mockup / §FORK /
+§U3 rulings, the U1–U3 RECORDs, the ladder) · `notes/TEXTKIT2_NOTES.md` ·
+`notes/SessionResiliencyProtocol.md` · CLAUDE.md + its canon; and the code the pieces touch
+(`Shared/SearchLanding.swift`, `EditorViewModel`'s focus seeds / reveal park / comfort band,
+`JumpPrimitive`, `ComfortBand`, `EditorFind`, `Core/Views/SearchAnswerFaces.swift`,
+`LibrarySearchSheet`, `LibrarySearch{Model,Routing}`, `LibraryCatalogModel`/`View`,
+`Queries.catalogNotesPage`/`catalogPostsSQL`/`editedOnSQL`, `SearchComposer` whole,
+`Queries/SearchQueries.swift` whole). Machinery: no deaths so far.
+
+**A MEASURED FACT for VX-85 (headless AppKit probe, no window shown, no store — an external-fact
+probe, macOS 27.0):** a shown find bar does NOT shrink the clip. `NSScrollView` lays the
+`NSTextFinderBarView` (32 pt) OVER the clip's top edge and says so through the CLIP's own
+`contentInsets` (top 32 · bottom 6); the clip frame stays whole and its bounds origin does not
+move. So `JumpPrimitive`'s "line at the viewport top" (= `clip.bounds.minY`) is exactly the strip
+under the bar — and a match in a note's FIRST line (scroll 0, line top 24 pt) sits under the
+32-pt bar with NO scroll at all (the reveal's visibility guard calls it on screen). §M2 holds
+and widens: the hidden strip is the bar's, read from `clip.contentInsets`.
+
+**THE PIECE PLAN (each piece its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record + piece plan (the first commit) | DONE (this commit) |
+| P1 | **VX-86 core** — the needle rule (D-3) as ONE pure core rule beside `SearchSnippetSegment` (the first CONTIGUOUS matched span; whitespace-only gaps coalesce; a gap holding a newline ends the span — the find bar is one line) + core pins (the rule's cells; the mechanism: FTS5 marks "sherlock holmes" as two runs) — headless, revert-probed | NOT STARTED |
+| P2 | **Mac pins on the PRE-FIX app tree** (red-on-old, the members' own pins): VX-86 `SearchLanding.findSeed` two-runs arm · VX-85 the landed line vs the bar-adjusted band (a far block AND a note's first line) · VX-88 the §M5 confirm (a newline snippet's row height vs a plain one) · VX-84a tag-alone lists the tagged notes (+ the words control) → ONE stage slot (ask `oct7coordinator`), reds recorded | NOT STARTED |
+| P3 | **VX-86 Mac** — `SearchLanding.findSeed` reads the core rule | NOT STARTED |
+| P4 | **VX-85** — the find seed's park is a BANDED reveal kind (the mode-switch arm's sibling; `restCaretLineInTheBand` the one rule, now computed against the BAR-ADJUSTED viewport — `clip.contentInsets`, zero without a bar, so every shipped landing is byte-unchanged); `JumpPrimitive`'s scroll floor follows the clip's top inset (0 without one) so a first-line match can rest below the bar | NOT STARTED |
+| P5 | **VX-88** — D-5, newline runs fold at the face (`LibrarySearchFace.snippet`), pinned; only if P2's confirm went RED | NOT STARTED |
+| P6 | **VX-84a core** — the text-less TAG road in the one composer (the seam: measured, proposed here before building if a real fork) + `Queries` listing reads + core cells (post-level, block-level, subtree, wing, tombstones) | NOT STARTED |
+| P7 | **VX-84a Mac** — a tag-alone question routes to the narrowed LISTING (sort ▾ + scope picker live; band chips + honest counts; Books section unchanged above; the words-ask line dies; Blocks scope by block-level tags) | NOT STARTED |
+| P8 | **VX-84b** — the tag-offer chip (D-2): one pure rule home + the composer's wing-scoped live-tag read + the band chip + the press routing; pins | NOT STARTED |
+| P9 | Close — full core `swift test` + the touched Mac suites + `TutorialWalkTests` green at the END (stage slot), record final, report | NOT STARTED |
+
+PENDING flags: none yet (nothing claimed).
 
 ### U-B — THE DESIGN MEMBERS: VX-87 (gated on her mockup pick) + VX-89 (gated on her word;
 may route to 13s). Brief authored after the sitting lands its rulings here.
