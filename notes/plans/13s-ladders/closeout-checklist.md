@@ -14,3 +14,4 @@ Shared ledgers are touched ONLY at the merge, on latest main, by this session (t
 6. **Memory run-state:** flip to CLOSED with the morning summary; the handoff file finalized (every PENDING slot filled) LAST, per the ritual.
 7. **Build-debris tidy at the merge:** the walk/evidence folders (scratchpad u1a-walk/, u2-walk/, u2-verify/, gui-check/), this effort's DerivedData walk folders, logs — deleted per her 13x-closeout ruling; the plan file's records are the evidence of record.
 8. **The stage coordinator:** told at the merge (the custody slot frees).
+9. **Final main merge BEFORE the PR:** origin/main at or after b494e676 (PR #140 — VX-99's post-merge copy fix, the Castle Done's "NOT" lowercased). The branch's last merge (46343a43) PREDATES it; one more merge is owed anyway for the search-lesson re-diff. The /Applications refresh then builds from post-merge main ≥ b494e676. Her app is 5740 (from 9819bff8) until the refresh.
