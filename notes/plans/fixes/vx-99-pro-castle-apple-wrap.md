@@ -942,23 +942,28 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
   :3293 (no selector caption), once per pane; its selector lines green. Tree restored (`git status` clean).
   ORDER, said plainly: the fixes below were written and built BEFORE the red run (to keep the stage slot to test runs
   alone); the red still runs on the bundle built from 5ff2d440, before any fix existed.
-- Fix (1): DONE (this commit) — `if facts.rotationInProgress, !isResume` in `start()`. Green PENDING.
+- Fix (1): DONE (f5cd9f4a) — `if facts.rotationInProgress, !isResume` in `start()`. Green DONE (below).
 - Fix (2), the captions: DONE (this commit) — both panes `ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming:
-  pending))`. Green PENDING.
+  pending))`. Green DONE (below).
 - Fix (2), `switchInProgress`: DONE (this commit) — `case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)`;
   the three pending-marker sites pass `CeremonyAct(resuming: pending)`; `message(for:)` reads `ceremonyResumeTitle(act)`,
   the busy arm `resumeBody`. The one existing pin that compares the thrown value (`aCrashAtEachOfTheThreeSeams…`'s
   second start, `switchInProgress(.reencrypt)`) gains the act it now carries (`.enterCastle`). Tip build: **TEST BUILD
-  SUCCEEDED**. Green PENDING.
+  SUCCEEDED**. Green DONE (below).
 - **REVERT V99-J (named before it runs — item 1):** `if facts.rotationInProgress, !isResume` → `if
   facts.rotationInProgress`. Expected RED: pin (a)'s resume half alone (the `.resumeAsk` guard); its three refusals green.
-  Result PENDING.
+  **RESULT (07:20, the `J` bundle, `PostureSwitchTests`): "Test run with 68 tests in 1 suite failed … with 1 issue"** —
+  :3223, pin (a)'s `.resumeAsk` guard; its three refusals green; nothing else.
 - **REVERT V99-K (named before it runs — item 2, the captions):** both panes' caption back to `ProtectionCopy.resumeBody`.
   Expected RED: pin (b)'s four pane lines alone (two per pane); its selector lines green. The pin reads the source at run
-  time, so this revert runs over the tip's bundle with the working tree edited. Result PENDING.
+  time, so this revert runs over the tip's bundle with the working tree edited. **RESULT (07:24, the `tip` bundle, the
+  one test, `r2b-edit-K.py` applied): "Test run with 1 test … failed … with 4 issues"** — :3291 + :3293, once per pane;
+  the selector lines green. Restored with `git checkout -- App`, `git status` clean.
 - **REVERT V99-L (named before it runs — item 2's sibling):** `message(for:)`'s act arm deleted (every `switchInProgress` →
   `resumeBody`). Expected RED: pin (c)'s three Replace All Keys wordings alone; its Castle half and the seams pin green.
-  Result PENDING.
+  **RESULT (07:24, the `L` bundle, `PostureSwitchTests`): "Test run with 68 tests in 1 suite failed … with 3 issues"** —
+  :3339 ×3, pin (c)'s Replace All Keys wordings; its Castle half and the seams pin (the thrown value, its act included)
+  green; nothing else.
 - Bundles PREBUILT headless (no stage), each a clone of `vx99-dd`'s products right after its build, run by
   `test-without-building -xctestrun` (`scratchpad/r2b-suite.sh`): `red` (5ff2d440), `tip` (f5cd9f4a), `J` (the tip +
   V99-J's edit), `L` (the tip + V99-L's edit) — every one **TEST BUILD SUCCEEDED**, the tree restored after each
@@ -966,6 +971,25 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
 - Phone build-for-testing: DONE — `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
   build-for-testing` over the tip (`vx99-phone-dd`): **TEST BUILD SUCCEEDED**, no warnings in the touched file. No
   simulator run.
-- Green PENDING (stage): `PostureSwitchTests`, the batch-1 set (round 2's twenty suites), the tutorial spine (thirteen
-  suites), the two pane face suites (`ProtectionSurfaceRenderTests`, `ProtectionTierFaceTests` — they host
-  `ProtectionPane`).
+- Green: DONE — slot 5 (`vx-99-impl3`, 07:06–07:29, zero Variorum instances throughout), every suite over the `tip` bundle
+  (f5cd9f4a's source) in its OWN `-only-testing` invocation, every "Test run with N tests" line read:
+  **batch 1, the runner's whole reach — 197 tests in 20 suites, all passed**: PostureSwitchTests 68 (round 2's 65 + the
+  three pins) · PostureSwitchDrillTests 2 (both SKIPPED — the standing opt-in gate `VARIORUM_POSTURE_DRILL=1`, read) ·
+  VX80CastleFollowRecoveryTests 4 · AppleRelinkDoorTests 8 · CopyRegisterPinTests 2 · Phase13pControllerTests 50 ·
+  EncryptionFlowTests 5 · CopyFlowRoundTests 7 · CrossoverRoundTests 11 · AccountLifecycleDoorTests 2 ·
+  AccountDoorWiringTests 4 · TerminologyPinTests 1 · RetiredNamesPinTests 1 · SyncLockedFaceTests 2 ·
+  FreshAccountSetupGeneralityTests 1 · ProtectionDialsTests 9 · ProtectionCopyTests 10 · ProtectionCadenceTests 4 ·
+  StoreKeyGuardBackingTests 3 · ProtectionDialsPerStoreTests 3. **The tutorial spine — 99 tests in 13 suites, all passed,
+  no skips** (BookShape 10 · Door 10 · WritingActs 7 · TakesActs 5 · StructureActs 10 · LookingActs 6 · LibraryActs 9 ·
+  DeletionActs 13 · WherePlacesActs 7 · PrivacyChapter 2 · FannedMatrix 2 · BooksLesson 13 · BooksRitual 5). **The pane
+  face suites — ProtectionSurfaceRenderTests 6 · ProtectionTierFaceTests 5, all passed** (both host `ProtectionPane`).
+  Stage RELEASED 07:29; main told.
+- Core: not re-run — `git diff --stat fae43998..HEAD -- Sources` is EMPTY.
+
+### RESIDUAL (recorded, not built)
+
+- **The busy arm's sentence.** `switchInProgress` thrown at a `busy` guard (another road of this runner in flight — the
+  follow running while a ceremony door is pressed; `activeSwitch` and `activeFollow` are separate, so the pane's
+  `.disabled(activeSwitch != nil)` does not cover it) still reads `resumeBody`, "Entering Castle didn't finish on this
+  [device] … finishing picks up exactly where it stopped" — false there in a different way (nothing failed; a road is
+  running). No marker, so no act to read; the honest sentence would be new copy → 13s (QUESTIONS at the merge).
