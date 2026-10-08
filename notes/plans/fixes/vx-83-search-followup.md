@@ -861,3 +861,37 @@ Grants AX:true SCREEN:true · stage claimed on oct7coordinator's GO · Debug bui
 - **W9 SEEN** — the range repeated in Terminal LIGHT (relaunched with `appearanceChoice light`, → `15-…`) and in **STUDY light** (the voice flipped through Settings ▸ General over Accessibility, `radio group "Design voice" of group 1 of scroll area 2 of group 1`, → `16-…`). Both render the wash, chip and sentence correctly. Eyeball: in Study light the popover's card is a pale panel over the list with only a faint edge. In Study dark: not captured (the brief allows light only there). Restored afterwards: voice Terminal (AX value read back = 1), `appearanceChoice dark`.
 
 Instance quit by bundle id; pgrep clean. Shots: `notes/plans/vx83-screens/01…16` (full-resolution window captures).
+
+## §WALK JUDGMENT (the orchestrator, 2026-10-08 — over the walker's §WALK EXECUTION + shots 01–16; the probe evidence inline)
+
+**U-A ACCEPTED (W1–W6) · U-B's VX-87 captures ACCEPTED (W7–W9).** The orchestrator read the
+decisive shots itself (02: the Beryl match in clear air below the bar, both words in the
+field, 2w selected — her exact complaint, fixed; 12: the dark-room popover with the Oct 1–14
+run washed, the sentence and chip agreeing). Per-member: VX-85 ✓ (far, first-line and
+unrendered arms all below the bar) · VX-86 ✓ for adjacent pairs (but see F-W-1) · VX-88 ✓
+(one even line step) · VX-84a ✓ (the narrowed listing exactly as ruled) · VX-84b ✓ (the
+offer chip road) · VX-94 ✓ visually · VX-87 ✓ (states, no-silent-arm, Esc, rooms).
+
+**FINDINGS (fix pass after U-C closes, BEFORE the ladder — `Domain/SearchComposer.swift` is
+in U-C's uncommitted set, so nothing lands until U-C commits; pin-before-fix each):**
+- **F-W-1 (DEFECT vs the ruled D-3):** a THREE-run whitespace-separated span arms only its
+  first word — "always the woman" armed "always". The orchestrator's FTS5 probe (sqlite
+  3.54.0, the composer's own STX/ETX form) shows the snippet carries
+  `⟨always⟩ ⟨the⟩ ⟨woman⟩` — three match runs with PURE-SPACE gaps, exactly what the ruled
+  coalescing must join; two-run "Sherlock Holmes" works, so the span rule stops early
+  somewhere past the first join. Red-on-old pin: a three-run snippet arms all three words.
+- **F-W-2 (PROVISIONAL widening of D-3, the bundle's):** short PUNCTUATION gaps should
+  coalesce too — the probe shows "good-night mister sherlock" marks
+  `⟨Good⟩-⟨night⟩, ⟨Mister⟩ ⟨Sherlock⟩`, and the span rule's whitespace-only letter stops
+  at "-"/", " so the field got "Good-night" (her "only the first word" complaint in
+  another coat). Widen: a gap coalesces when it is ≤ 2 characters and holds no newline
+  (the needle stays the text AS WRITTEN, so the literal find still lands; P-VX83-1's
+  newline stop stands). Rides the bundle as P-VX83-W2.
+- **F-W-3 (copy):** with a tag alone (no words) the band leads with a bare "— 1 book ·
+  17 notes" — an em-dash with no echo in front of it. The separator draws only when the
+  echo does.
+
+**OBSERVATIONS for her eyes (taste, not defects — the shots decide):** the Terminal
+popover overhangs the window's right edge ~24 pt (AppKit's own edge behavior; shot 15);
+Study-light's popover is a pale card with a faint edge (shot 16); Terminal's run band
+uses the at-rest fill and may read faint (shots 12/15 — U-B's own flag, P-VX83-B4).
