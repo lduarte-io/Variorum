@@ -201,8 +201,6 @@ struct VariorumApp: App {
                             hold.onResume = { [weak fresh] in
                                 await fresh?.resumeSync()
                             }
-                            hold.hasAccount = fresh.sync.isConfigured
-                                || fresh.account.variorum != nil
                         }
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every
@@ -348,7 +346,17 @@ struct VariorumApp: App {
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         VStack(spacing: 0) {
                             if let restoreHold {
-                                RestoreHoldBar(model: restoreHold)
+                                // Read at RENDER from the observable account
+                                // state (W-4): the hold is wired before
+                                // `start()` restores the sign-in, so a value
+                                // captured there reads "no account" on a
+                                // signed-in Mac. Unknown (no services yet)
+                                // keeps the shipped account wording.
+                                RestoreHoldBar(
+                                    model: restoreHold,
+                                    hasAccount: services.map {
+                                        $0.account.variorum != nil || $0.sync.isConfigured
+                                    } ?? true)
                             }
                             ProtectionNoticeBar(
                                 controller: bootstrap.protection, services: services)

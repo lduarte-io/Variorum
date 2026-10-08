@@ -2305,3 +2305,35 @@ iCloud-synced (Desktop & Documents, iCloud Drive). Context for a future revisit:
 safe in iCloud (its wraps need the passphrase/words/master), but a STANDARD pair carries the
 Apple-wrapped copy into iCloud beside the library — exactly what happened with her pre-follow
 folder tonight. Not built; recorded here as the ruling's home.
+
+## THE AIR LEG — ACCEPTED (her hands, real-store road, 2026-10-08 ~01:30)
+
+The Air agent's report, its facts: built 0.9.2 (5544) from exactly 0787f028 ON the Air; A1 of
+the Air's pre-leg store (hash-verified) at `Backups/safety-copies/2026-10-08T064709Z-air-13x-leg-a1/`
+at a zero-instance window; the leg ran end to end — the pair AirDropped → File ▸ Open Library… →
+classify + the step-aside confirm → passphrase → landed under the restore hold → Resume Sync →
+sync unlock → reconciled and caught up; **library whole, spot counts confirmed by her against the
+Pro**; `Previous Libraries/2026-10-08-072743/` present (4 entries). Her ruling at the leg: the
+doubled Sherlock/Quicknotes rows are the seed-dedupe residual class — faithful transport, NOT a
+finding. **Signing deviation (permanent fix, recorded):** the Air had no signing identity and the
+Pro's build would not launch there; an Apple Development cert was minted on the Air, the Air
+*[removed for publication]*
+0787f028 used `-allowProvisioningUpdates` — the profile now licenses both Macs.
+
+**WALK FINDING W-4 (the Air leg's banner — found by her hands):** the Air (signed in) showed the
+ACCOUNT-LESS banner variant — "Sync is waiting until you press Resume. To keep something…" —
+dropping the round-3-ruled catch-up sentence ("notes you deleted since will leave again; edits
+made since will come back"). MECHANISM (traced): R4-2's `hold.hasAccount` was assigned where the
+hold is wired, BEFORE `await fresh.start()` restores the sign-in — `account.variorum` nil and no
+scheduler yet ⇒ false, captured once, never updated. My round-4 fix introduced it. **FIXED:** the
+composition root passes `hasAccount` to `RestoreHoldBar` at RENDER from the observable
+`AccountState` (`account.variorum != nil || sync.isConfigured`; unknown ⇒ the shipped account
+wording); the model's captured property removed. Red-on-old evidence is the Air's live banner;
+the door suite re-runs in a short stage slot. Mac + phone compile.
+
+**The second passphrase ask at Resume — CONFIRMED AS DESIGNED, ticketed as polish:** sync custody
+is keyed per library (`<scope>-<storeID>-sync`); a copy never carries the sync key or device
+identity (§3.3), so the Air meeting the Pro's store id enrolls — in Castle by the passphrase. Not
+a dropped unlock. The design promises "the passphrase/words once" and the adoption already had it
+in hand ⇒ **VX-100** (carry the typed passphrase one hop into the enrollment). Her future ask:
+**VX-101** — Open Library offers the backups / Previous Libraries locations.

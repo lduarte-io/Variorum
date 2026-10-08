@@ -290,6 +290,9 @@ struct LibraryOpenSheet: View {
 /// Resume press; no dismiss (the hold IS the state; Resume ends it).
 struct RestoreHoldBar: View {
     @Bindable var model: RestoreHoldModel
+    /// Whether this Mac belongs to an account, read by the composition
+    /// root at render (W-4) — the banner's account clause only.
+    var hasAccount = true
 
     var body: some View {
         if model.isHeld {
@@ -299,7 +302,7 @@ struct RestoreHoldBar: View {
                 // the window's near-zero-width minimum-size probe measures
                 // the sentence one character per line.
                 Text(LibraryOpenCopy.holdBanner(
-                    asOfDay: model.asOfDay, hasAccount: model.hasAccount))
+                    asOfDay: model.asOfDay, hasAccount: hasAccount))
                     .font(.caption)
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
