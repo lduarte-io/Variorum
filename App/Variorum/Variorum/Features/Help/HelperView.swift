@@ -245,8 +245,16 @@ struct HelperView: View {
                 + "\u{23CE} applies; \u{2715} on a card takes it off"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
-            ("note \u{25BE} (bottom bar)", "history (commits) · seal / unseal · the "
-                + "note's date"),
+            // 13s-b U4 round 1 (MINOR-2): the row taught a "history" door
+            // this menu has not carried since the post-13l polish round
+            // (Block History sits beside commit — her F2: "it's unclear that
+            // history is under Note"). It now lists the menu's own doors,
+            // each from its constant, in the menu's order (the wing doors
+            // render only while another wing exists, so they stay unsaid).
+            ("note \u{25BE} (bottom bar)", "\(VersionsPath.saveVerb.lowercased()) · "
+                + "\(VersionsPath.menuLabel.lowercased()) · "
+                + "\(SplitAtNewlinesCopy.noteDoor.lowercased()) · seal / unseal · "
+                + "the note's date · \(RecoveryCopy.deleteNoteTitle.lowercased())"),
         ]),
     ]
 

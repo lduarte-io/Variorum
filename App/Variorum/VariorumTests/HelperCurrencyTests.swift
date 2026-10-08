@@ -16,6 +16,7 @@
 //  dictionary entry kept the cards on the context bar they left at Act 10.
 //
 
+import Foundation
 import Testing
 
 @testable import Variorum
@@ -79,5 +80,24 @@ struct HelperCurrencyTests {
         if !MastheadTagCluster.chipsShowAddDoor {
             #expect(!entry.definition.contains("\u{FF0B} adds"))
         }
+    }
+
+    /// 13s-b U4 round 1, MINOR-2: the `note ▾` row taught a HISTORY door the
+    /// note menu has not carried since the post-13l polish round (06263d16 —
+    /// Block History moved to the bar beside commit; her F2 report: *"it's
+    /// unclear that history is under Note, that makes it seem like the
+    /// Note's history"*), and U4's word swap carried it forward as "history
+    /// (commits)" — pairing commits with the NOTE menu, the per-take vs
+    /// whole-note confusion her R-VX83-10 reason names. The row now lists the
+    /// menu's own doors, composed from their constants so it cannot drift.
+    @Test func theNoteMenuRowTeachesNoHistoryDoorAndNamesVersions() throws {
+        let row = try #require(HelperView.groups.flatMap(\.items).first {
+            $0.keys.hasPrefix("note \u{25BE}")
+        })
+        #expect(!row.does.localizedCaseInsensitiveContains("history"),
+                "the note menu carries no history door — Block History sits beside commit: \(row.does)")
+        #expect(row.does.localizedCaseInsensitiveContains(VersionsPath.menuLabel),
+                "the note menu's Versions… door, by its own constant")
+        #expect(row.does.localizedCaseInsensitiveContains(VersionsPath.saveVerb))
     }
 }
