@@ -637,6 +637,143 @@ U-C implementer").
 `Sync/` edits (the derived set reads `SearchIndex.tables` — one source; if the walk goes
 red anyway, STOP and report: `Sync/` is the orchestrator's).
 
+### U-C RECORD (LIVE STATUS — the implementer maintains this from its first commit)
+
+**LIVE STATUS (2026-10-08): PAUSED at the brief's two PROPOSE-THEN-STOP points — §U-C FORK 1 (the
+variant-reach drop cannot be built within R-13o-4's letter; the brief's own "STOP and report") and
+§U-C PROPOSAL 2 (the facet word, before the chip). NOTHING of the schema half is built; the tree is
+clean; no revert is in flight. Awaiting the orchestrator's rulings — both are below, each ruleable
+on its own.**
+
+**Seat:** the U-C implementer (Opus, xhigh), seated 2026-10-08 in `~/dev/variorum-vx-83` on
+`vx-83-search-followup` (pulled at `abe4b192`). Required reading done in-context, never delegated:
+this file WHOLE · `notes/plans/phase-13o-search.md` (the sitting record R-13o-1…15, the U1 brief +
+RECORD incl. §FORK + §FORK RULINGS F1–F4, SEAM 2, the §R-13o-4 RECORD) · `notes/SyncSpec.md` §3, §6,
+§7 and §12 (the LOCAL-ONLY class confirmed: v1_23 adds a column to the DERIVED `search_doc`, a view
+arm, and triggers that write only the derived family — no synced column, no mirror, no marker
+move; the E2EE classification walk covers synced tables only; the completeness walk is table-level
+and the family adds no table) · `notes/SessionResiliencyProtocol.md` · CLAUDE.md + its canon. The
+code: `Persistence/SearchIndex.swift` whole, `Domain/SearchComposer.swift` whole,
+`Queries/SearchQueries.swift` whole, `Domain/SearchQuery.swift`, `SearchQueryParser`, `v1_22` in
+`Migrations.swift`, the janitor's savepoint pruning + `PurgeFamily` (commit_point rows ARE
+physically deleted — pruning and family purges), `renameCommitPoint` (a whole-row record update),
+`SearchIndexCaptureTests`, `SearchP1Tests`, `SyncSchemaTests`' walk; Mac: `LibrarySearchModel`,
+`LibrarySearchBand`, `LibrarySearchCopy`, `SearchAnswerFaces`, `SearchLanding`,
+`EditorViewModel.applyFindSeed`. Machinery: no deaths so far.
+
+**Migration id: `v1_23_savepoint_search` is CONFIRMED OURS outright** (the orchestrator's fact,
+2026-10-08: 13x mints zero migrations — no rename fallback needed).
+
+**THE PIECE PLAN (each piece its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record + the two proposals (the first commit) | DONE (this commit) — AWAITING THE RULINGS |
+| P1 | **Migration `v1_23_savepoint_search` ALONE** (per the FORK 1 ruling): `search_doc.variant_id` (the savepoint doc's own-row parent fact), the `search_text` view recreated with the NINTH arm, the `savepoint` capture triggers on `commit_point`, the backfill by the rebuild road; `v1_22` FROZEN on its own eight-kind list (its DDL proved byte-identical before/after); MigrationTests + the capture-set pin's justified edits | NOT-STARTED — gated on FORK 1 |
+| P2 | Capture pins across the write layers (operations commit · the variant reach · fake-server remote apply · the janitor's physical delete) red-on-old by revert; rebuild + integrity cover the ninth kind | NOT-STARTED |
+| P3 | The facet in the AST + the ONE composer + `Queries` (the default-answer FENCE; the facet's road through variant → block → placement); core pins incl. the fence (with a sensitivity probe: a leaking default statement turns it red) | NOT-STARTED |
+| P4 | P1 numbers: capture ∝ the commit; queries ∝ matches with savepoint rows in `SearchP1Tests`' corpus; the DEFAULT road's cost with savepoints in the shared index, measured and recorded | NOT-STARTED |
+| P5 | Mac: the question/model carry the facet; the band's chip (the PROPOSAL 2 word); the savepoint line (kind word + day); the landing seed; pins | NOT-STARTED — the chip gated on PROPOSAL 2 |
+| P6 | U-B's rider: the field guide's "search" lesson gains ONE sentence for the facet + its currency pin | NOT-STARTED |
+| P7 | The test-only stage slot (via `oct7coordinator`): touched Mac suites + the tutorial spine | NOT-STARTED |
+| P8 | Close: full core suite at the END, record final, report | NOT-STARTED |
+
+PENDING flags: none (nothing claimed yet).
+
+#### §U-C FORK 1 — the variant-reach drop, TRACED and PROBED: the brief's mechanism cannot be built within R-13o-4's letter
+
+The brief (piece 1–2): *"a doc row live iff the commit's VARIANT is live … the variant's
+tombstone/delete reach drops savepoint docs — doc-family reads only"* — and *"If honoring it needs
+a shape the letter can't give you, STOP and report."* It does need one, in three places:
+
+1. **The DROP direction needs `commit_point.text`.** Under F1 (V — external content over the
+   `search_text` view; the doc row holds ids only), retiring an FTS entry means handing FTS5's
+   `'delete'` the text AS IT WAS INDEXED (every shipped trigger passes `OLD.<col>` — F1's adopted
+   contract). A variant trigger's NEW/OLD are the VARIANT's; the savepoint's text lives only in
+   `commit_point`. **Probe** (system sqlite3 3.54.0, the family's own shape — `search_doc` ids-only,
+   the view over the source, FTS5 external content, `unicode61 remove_diacritics 2`; scratch in
+   `/tmp`, nothing in the repo): a doc-family-only drop (doc deleted, `'delete'` handed NULL) leaves
+   "harbor" still MATCHing the dropped rowid, and `integrity-check` answers `database disk image is
+   malformed` (SQLITE_CORRUPT). Reading the text through `search_text` instead reads
+   `commit_point` inside a variant trigger — the clever trigger the letter exists to refuse.
+2. **The REVIVAL direction needs a `commit_point` read.** `restoreBlock`/`restoreContainer` revive
+   variants on their exact stamp (and a remote apply revives too); a dropped savepoint must come
+   back, which means `SELECT … FROM commit_point WHERE variant_id = NEW.id` inside the variant
+   trigger. Without it a Put-back note's savepoints would vanish from search until a rebuild.
+3. **Arrival order.** A remote apply can land a `commit_point` row under a variant this device
+   already holds dead, or before the variant arrives; the commit_point INSERT trigger cannot see the
+   variant without a read — exactly the arrival-order surface F3 refused for S2.
+
+**The options:**
+
+- **(A) RECOMMENDED — the savepoint's liveness resolves at QUERY time: F3's own road.** The doc
+  mirrors its `commit_point` ROW only — capture on INSERT (the append, I5); on DELETE (the
+  janitor's physical prune/purge — required: an un-retired entry is exactly the probe's corrupt
+  index); and an UPDATE arm watching `text`/`variant_id`, inert by I5 (a rename writes the whole
+  row, but `message` is unwatched and the WHEN guard holds it at zero work — kept for F1's
+  every-text-write contract, the shipped generator's one shape) — carrying the row's OWN parent fact,
+  `variant_id` (a new nullable `search_doc` column, the doc's own-row fact exactly as `block_id` is
+  a take's). **No variant-side trigger at all.** The composer — ONLY under the facet — seeks the
+  savepoint's variant by PK (`deleted_at IS NULL`), reaches the block through `variant.block_id` and
+  the I2 placement, and from there it is the take docs' own road: home, wing, the archived facet,
+  the versions fence, a released block never listing (P-13o-U1-8). "Live iff the variant is live"
+  then holds as a LISTING fact at every arrival order and across Put back with zero machinery; the
+  index keeps a dead take's savepoints until the janitor purges them (the released block's
+  precedent — indexed, never listed). Cost: one variant PK seek per savepoint MATCH, facet only
+  (∝ matches). The integrity check's expected set = every `commit_point` row.
+- **(B) the brief as written** — a variant trigger dropping (and, for Put back, re-adding)
+  savepoint docs: needs `commit_point` reads in both directions — outside R-13o-4's letter, the §9
+  smell, hers to decide. Not recommended.
+- **(C) a liveness FACT on the savepoint doc, flipped by the variant trigger** (doc-family-only
+  writes) — honors the letter for the flip, but item 3 still births a doc "live" under a dead
+  variant, so the composer must check the variant anyway: a redundant second truth to drift. Not
+  recommended.
+
+**A consequence to record, not a fork (F2 rules the ninth kind into the SHARED index):** every
+DEFAULT question's FTS walk now also meets the savepoint postings and fences them at the doc row —
+one rowid seek each, before any home lookup (the fence is evaluated at the doc's loop level) — and
+bm25's corpus statistics count them. The cost CLASS is unchanged (∝ the index's matches); the
+numbers land at P4. If they show the living road materially slower, I stop and report there.
+
+#### §U-C PROPOSAL 2 — the facet's WORD (before the chip is built)
+
+**Recommended: `+ savepoints`** (armed: `savepoints` with its ✕ — the `+ archived` grammar).
+- It is the app's own user-facing noun for exactly these rows: Settings' "Savepoints" pane, the
+  commit receipt ("an immutable savepoint of this take"), the day filter's own empty answer ("No
+  note's last edit or savepoint falls on …"), Block History, the field guide ("⌘S keeps
+  savepoints"). The finder would find what every other surface calls a savepoint.
+- **"+ saved versions" COLLIDES with Note ▸ Versions** (`saveNoteVersion` — whole-note saved
+  versions, which search FENCES under every facet, the ruled posture): the chip would name the one
+  thing it never shows.
+- **"+ history" is vague in two directions**: it reaches toward the Trash (VX-93 — deliberately
+  out, R-VX83-5: "searching stuff that wasn't saved and was purposefully deleted is a different
+  issue") and archived takes (`+ archived` already), and "history" names Block History, which
+  holds savepoints AND archived takes.
+
+The face I would build with it (PROVISIONAL, the archived chip's grammar): the dashed invitation
+beside `+ archived`, offered only when the question has WORDS (a tag alone or a day alone lists
+without the index — the facet could not act there, P-2); help at rest "Include what you saved —
+every savepoint of your takes", armed "Back to the living text — leave savepoints out".
+
+**The PROVISIONALs I will build unless the rulings redirect** (each to ride the ratify bundle):
+- **P-VX83-C1** the facet composes with `+ archived`, orthogonally: a savepoint whose take, block
+  or note is archived lists only with both; saved versions fenced under both.
+- **P-VX83-C2** ranking: a savepoint's kind weight 0.9 (just under a live take's 1.0) and never the
+  rendered boost — the living words lead, their saved states follow.
+- **P-VX83-C3** counts: under the facet the band counts savepoint hits as their own kind ("N
+  savepoints"); `passages` stays the living text; no "N more in your savepoints" foot (a foot would
+  make every default search pay the savepoints' homes).
+- **P-VX83-C4** landing: a savepoint passage lands at its block and STEPS only when its take is the
+  one the note shows (P-13o-U2-4's rule for takes); there the editor's own road still ARMS instead
+  whenever the words are no longer in the buffer (`applyFindSeed`'s "words the buffer no longer
+  holds"); an unrendered take's savepoint arms. Residual: the editor's find reads from the block
+  onward, so words gone from the block but present LATER in the note land there (the shipped
+  seed's own reach).
+- **P-VX83-C5** ⌘K and the book's 🔍 stay savepoint-free (the brief's ⌘K provisional, extended to
+  the book's sheet: the Library facet is the history door).
+- **P-VX83-C6** the savepoint line's kind word is "savepoint · Oct 6" — the word plus its day
+  (`TimeStampFace.day`), faint like every kind word.
+
 ## LADDER (after U-B, over the run's whole diff)
 
 Fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
@@ -666,6 +803,6 @@ uncommitted work. Work ONLY in `~/dev/variorum-vx-83`.
 | 5 | U-A (VX-84 · 85 · 86 · 88 + the VX-84b offer chip) | CLOSED 2026-10-07 23:3x (the §U-A RECORD final — every member FIXED with red-on-old; Mac 384/57 zero-skipped + NoteOpenLanding 12/12 alone, core 2,304/263) · **ORCHESTRATOR CHECK DONE**: tree clean + pushed at a15e6dd9, no live PENDING, suites re-run green on the orchestrator's machine, the red-on-old table read against each §M trace (note for the ladder: the first-cut VX-85 pins were HOLLOW on the bare harness — re-mounted on a real EditorView at the slot, 1d12917c) · the ACCEPTANCE WALK is **HELD FOR THE AUTHOR** (2026-10-07 ~23:5x): the GO arrived, but the pre-claim host check found this background session's host — `ClaudeCode.app`, launchd-spawned — holds NEITHER Accessibility NOR Screen Recording (`AXIsProcessTrusted()`/`CGPreflightScreenCaptureAccess()` false, sandboxed AND unsandboxed; the WalkKit README's 18k rule: held for the author, granting is hers, never a session's; the one alternative — driving her granted tmux server — was refused by the harness and NOT worked around). The slot was returned UNCLAIMED; test-only slots are unaffected (U-A's batch ran green from this host). UNBLOCK: grant both to ClaudeCode.app in System Settings ▸ Privacy & Security, or route the walk another way at her word; it then combines with U-B's VX-87 captures in one slot |
 | 6 | The sitting (S-1…S-4 + the VX-72 split) → rulings R-VX83-1…6 | DONE 2026-10-07 (the sitting record above; Linear updated: VX-72 re-scoped + membered, VX-93 minted, VX-73's U3-3 rider, VX-89 in) |
 | 7 | U-B (VX-87 direction 1 + screenshots; VX-89) | CLOSED 2026-10-08 00:3x (the §U-B RECORD's close banner; HEAD 40abb3d4) — **ORCHESTRATOR CHECK DONE**: tree clean + pushed, slot batch 232/27 zero-skipped first run, the flipped-subject pin read against her complaint (correct), the 16 headless renders judged by the orchestrator (direction 1 holds in both voices/rooms); ONE honest PENDING rides the walker (the R-VX83-2 captures, W7–W9, + Esc/arrow — the walk-brief appendix). Closeout carries: the real-store field-guide re-seed (A1 rail) + a MobileSoul line for the new search lesson (no phone parity rule yet) |
-| 8 | U-C (VX-72 savepoints) | BRIEFED — runs after U-B |
+| 8 | U-C (VX-72 savepoints) | IN FLIGHT 2026-10-08 — seated; PAUSED at two propose-then-stop points (the §U-C RECORD: FORK 1, PROPOSAL 2) |
 | 9 | **VX-94** (joined 2026-10-07, relayed by the 13x closeout session's P-8 sweep): ChromeLineLimitTests red on MAIN over this run's in-flight file — `SearchAnswerFaces.swift`'s chip face stack and kind word, two bare `.fixedSize()` with no line policy in the scan's 4-line window (arrived with 13o's merge; 13x deliberately left the file to this run). Fix: `.lineLimit(1)` at each site, orchestrator's own commit (the small-fix class). The PIN is the existing suite — red on main by 13x's run; GREEN proven in the U-A stage slot (the batch adds ChromeLineLimitTests) | FIXED — pending the slot's green |
 | 10 | Ladder → closeout → PR `VX-83: …` (merge order FREED, R-VX83-7 — first-ready merges first; whoever is second rebases) → the `/Applications` refresh (A1 rail, zero-instance window) → the author handoff notes | NOT STARTED |
