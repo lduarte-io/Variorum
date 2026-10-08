@@ -30,6 +30,12 @@ device's custody reach the library key and the master key.
 
 ## The entries — copy §8 verbatim, each with its facts
 
+**13x CLOSEOUT (2026-10-08) — every ⚠ NOT YET BUILT mark below is now BUILT and un-flagged** (13x, VX-6,
+verified by her hands on real devices: the Pro→Air AirDrop leg). The three held entries publish; each carries a
+"✔ BUILT in 13x" note naming the door and the one new fact the drafts predate — **the restore hold**: after
+opening a copy, sync waits until the user presses **Resume Sync** in the banner. Facts binding; 13s re-voices the
+words. The record: `notes/plans/phase-13x-library-portability.md`.
+
 Where an entry names a DOOR THE BUILD DOES NOT HAVE YET, the entry is marked **⚠ NOT YET BUILT** with the phase that
 owns it — publish that entry when the door lands, or word it on the road that exists today (named beside it). The
 Variorum brief's rule: a FAQ sentence that promises a door that does not exist is the class this phase closes, never a
@@ -48,11 +54,14 @@ sentence to publish.
   — Facts: design §2 (*a new device*), §3.8 (Standard's open road: the key file's iCloud copy through the iCloud
   key; for a sync user the iCloud key → the master key → the key file's master-wrapped copy of the library key),
   §5 (*Enroll*), §6 (a restored snapshot enrolls like any library — Standard nothing typed, Castle the passphrase
-  or the words once). **⚠ NOT YET BUILT — the two "without sync" halves name an in-app OPEN-A-COPY door, which is
-  13x's (`notes/FuturePhases.md`, the 13x row: "Open a library file…"; design §18 ledger 5).** The road that
-  exists today is the restore RECIPE the app drops into every backup folder as `RESTORE.md` (the runbook's §3:
-  quit, move the current library aside, put the copy in its place, open) — it ends in the same place: the restored
-  copy opens by its key file's roads and then enrolls.
+  or the words once). **✔ BUILT in 13x (was ⚠ NOT YET BUILT):** the in-app doors exist — on the old Mac,
+  **File ▸ Send Library to Another Mac…** (also in Settings ▸ Data Safety) writes a folder holding a sealed copy of
+  the library and its key file, to AirDrop whole; on the new Mac, **File ▸ Open Library…** (also on the welcome and
+  waiting faces) opens it. The current library on the receiving Mac steps aside first, kept in a dated "Previous
+  Libraries" folder beside it plus a safety copy with the backups; the picked folder is only read. After it opens,
+  **sync waits until Resume Sync is pressed** in the banner; a Mac new to that library then joins sync by
+  enrolling (Castle: the passphrase once at the enrollment). The `RESTORE.md` recipe remains as the
+  no-app fallback.
 
 - **Restoring a backup.** *A backup folder holds sealed copies and a key file. Open a copy through File ▸
   Open Library; it opens the same way your library does — through your Apple account in Standard, with your
@@ -66,9 +75,13 @@ sentence to publish.
   device's master, or the current passphrase online through the account's copies — and, if made in Standard, the
   iCloud key; on the Mac the library lives on, custody and the live key file pair with every snapshot of the same
   library key), §1.11 (backups are never rewritten after they are written), §3.3 (a backup carries no sync key and
-  no device identity — it rejoins sync only by ENROLLING, with a fresh device identity). **⚠ NOT YET BUILT —
-  "File ▸ Open Library" is 13x's door (ledger 5); the restore recipe (`RESTORE.md`, the runbook's §3 and §6) is
-  today's road.** Everything else in the entry is true of the build.
+  no device identity — it rejoins sync only by ENROLLING, with a fresh device identity). **✔ BUILT in 13x (was
+  ⚠ NOT YET BUILT):** "File ▸ Open Library" exists, and Settings ▸ Data Safety lists the backup folder's copies
+  under **Restore from Backup**, each row saying which credential opens it. ONE fact to add to the entry: **after
+  opening a backup, sync waits until Resume Sync is pressed, and Resume catches the copy up to the account** —
+  notes deleted since leave again and edits made since come back; to keep something from the backup, duplicate it
+  first (duplicates stay). Rolling the whole account back to a backup's day is NOT what this does (that road is
+  delete-and-set-up-again). Everything else in the entry is true of the build.
 
 - **Deleting my account and starting over.** *Deleting removes the server copy and the account's keys; your
   libraries stay on your devices and still open. Create a new account and turn on sync; the library moves to
@@ -200,7 +213,9 @@ sentence to publish.
   sealed copies, which is what a synced folder is good at. To have your writing on every device, use sync.*
   — Facts: decision 24 (backups MAY be kept in iCloud Drive — the offer at the first backup run, built at 5b; the
   LIVE library never lives there), decision 29 / ledger 4 (the folder picker's refusal of the library's own folder
-  is 13x's guard — **⚠ NOT YET BUILT**; until then the sentence is advice, and the FAQ may carry it as such).
+  is 13x's guard — **✔ BUILT in 13x (was ⚠ NOT YET BUILT)**: the backup-folder picker refuses the library's own
+  folder with copy §6's sentence, and Open Library… says the same sentence when the picked copy sits in iCloud
+  Drive; the entry publishes as written).
 
 ## What the FAQ must NOT say (the code does not keep it)
 
