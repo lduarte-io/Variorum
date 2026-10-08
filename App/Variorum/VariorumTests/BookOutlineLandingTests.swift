@@ -977,4 +977,122 @@ extension BookOutlineLandingTests {
                     "no displayed turn shows the story with no prose — empty at turns \(emptyTurns)")
         }
     }
+
+    /// A surface SHOWING the story: in a window, not hidden, holding the
+    /// story's text AT a real height. Tightened on BOTH kinds (the forward
+    /// pin tightens only the editor): the inverse swap's failure is a fresh
+    /// read surface whose storage fills a beat before its 40-pt frame grows,
+    /// and a 40-pt sliver of a 9.7k-word story is not the story showing.
+    @MainActor
+    private func storySurfaces(in view: NSView) -> [NSTextView] {
+        var found: [NSTextView] = []
+        func walk(_ v: NSView) {
+            if let text = v as? NSTextView, text.window != nil, !text.isHiddenOrHasHiddenAncestor,
+               text.string.count > 1000, text.frame.height > 1000 {
+                found.append(text)
+            }
+            for sub in v.subviews { walk(sub) }
+        }
+        walk(view)
+        return found
+    }
+
+    /// **VX-82 — THE INVERSE SWAP** (found at VX-75's ladder, R1-4; her
+    /// confirmation in the VX-75 build: "that pause is noticable"). Leaving
+    /// edit mode — the click-out margin's `focus(nil)`, a click into another
+    /// note — unmounted the live editor at once while a FRESH read surface
+    /// mounted empty and filled only when its first projection arrived, so
+    /// the row showed a reserved-height blank beat ∝ the story. The
+    /// contract, the forward pin's mirror: from the leave until the read
+    /// surface holds the story at its real height, SOME surface is always
+    /// showing it — and the handover COMPLETES (the read surface back, the
+    /// lingering editor gone; a beat, never a resident double).
+    @Test func leavingEditModeNeverShowsAnEmptyNote() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: true) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !storySurfaces(in: hosting).isEmpty
+            }, maxTurns: 120)
+
+            /// Into editing, handover complete: the editor holds the story at
+            /// a real height and the read surface has been released.
+            @MainActor func enterEditing() async {
+                model.focus(storyID, caret: 120)
+                await settle(window, hosting, watchdog: watchdog, until: {
+                    let showing = storySurfaces(in: hosting)
+                    return !showing.isEmpty && showing.allSatisfy { $0 is EditorTextView }
+                }, maxTurns: 160)
+                await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 6)
+            }
+
+            /// Sample every displayed turn after a leave: turns with no
+            /// surface showing the story, and when the read tier is back.
+            @MainActor func sampleLeave(_ what: String) async -> (empty: [Int], readBackAt: Int?) {
+                var emptyTurns: [Int] = []
+                var readBackAt: Int?
+                for turn in 0..<80 {
+                    watchdog.beat()
+                    hosting.layoutSubtreeIfNeeded()
+                    window.layoutIfNeeded()
+                    window.displayIfNeeded()
+                    let showing = storySurfaces(in: hosting)
+                    if showing.isEmpty { emptyTurns.append(turn) }
+                    if showing.contains(where: { !($0 is EditorTextView) }) {
+                        readBackAt = readBackAt ?? turn
+                        if turn > (readBackAt ?? 0) + 3 { break }
+                    }
+                    pump(0.02)
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(20))
+                    watchdog.beat()
+                }
+                print("VX-82 LEAVE (\(what)): emptyTurns=\(emptyTurns) "
+                    + "readBackAt=\(String(describing: readBackAt))")
+                return (emptyTurns, readBackAt)
+            }
+
+            // LEG 1 — the click-out road (`focus(nil)`; the row stays
+            // expanded).
+            await enterEditing()
+            let editor = try #require(writingEditor(in: hosting))
+            #expect(editor.string.count > 5000, "the live editor holds the story")
+            model.focus(nil)
+            let leg1 = await sampleLeave("focus(nil)")
+
+            // The handover completes: the story's lingering editor leaves.
+            await settle(window, hosting, watchdog: watchdog, until: {
+                (writingEditor(in: hosting)?.string.count ?? 0) < 5000
+            }, maxTurns: 120)
+            #expect((writingEditor(in: hosting)?.string.count ?? 0) < 5000,
+                    "the outgoing editor unmounts once the read surface shows — the linger is a beat, not a resident double")
+
+            // LEG 2 — her clicking-around road: leave by focusing ANOTHER
+            // note (short, so its own editor never passes the story filter).
+            await enterEditing()
+            model.focus(postIDs[2], caret: 0)
+            let leg2 = await sampleLeave("focus(other)")
+
+            #expect(leg1.readBackAt != nil, "the read surface came back after the click-out")
+            #expect(leg2.readBackAt != nil, "the read surface came back after focusing another note")
+            #expect(leg1.empty.isEmpty,
+                    "no displayed turn after the click-out shows the story's row empty — empty at \(leg1.empty)")
+            #expect(leg2.empty.isEmpty,
+                    "no displayed turn after focusing elsewhere shows the story's row empty — empty at \(leg2.empty)")
+        }
+    }
 }

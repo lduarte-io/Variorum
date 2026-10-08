@@ -25,6 +25,12 @@ struct ReadPostView: View {
     /// A badge tap: interpretation 1 (PROVISIONAL) — the container focuses
     /// the post FIRST, then opens the fan panel for this block.
     var onBadgeTap: ((String) -> Void)?
+    /// VX-82: fired once when this surface first shows its note at a real
+    /// height (`ReadPostViewModel.onShowing` — the inline editor's VX-75
+    /// announce, mirrored). A host that keeps something on screen until the
+    /// read tier is back (the book Outline's outgoing editor on the
+    /// live→read swap) releases it here. nil everywhere else.
+    var onShowing: (() -> Void)?
     /// **13u3 UNIT A1 — WHERE THIS PAGE'S PROSE SITS, and how much of the
     /// host's whitespace the surface may absorb** (`Surface/ProseGutter`).
     /// The host knows both, so the host says: the book Outline hands over
@@ -45,13 +51,15 @@ struct ReadPostView: View {
         postID: String,
         gutter: ProseGutter = .contained,
         onFocusRequest: ((Int) -> Void)? = nil,
-        onBadgeTap: ((String) -> Void)? = nil
+        onBadgeTap: ((String) -> Void)? = nil,
+        onShowing: (() -> Void)? = nil
     ) {
         self.session = session
         self.postID = postID
         self.gutter = gutter
         self.onFocusRequest = onFocusRequest
         self.onBadgeTap = onBadgeTap
+        self.onShowing = onShowing
         _model = State(initialValue: ReadPostViewModel(session: session, postID: postID))
     }
 
@@ -82,7 +90,8 @@ struct ReadPostView: View {
             }
             ReadPostSurface(
                 model: model, chrome: chrome, gutter: gutter,
-                onFocusRequest: onFocusRequest, onBadgeTap: onBadgeTap)
+                onFocusRequest: onFocusRequest, onBadgeTap: onBadgeTap,
+                onShowing: onShowing)
                 .frame(height: model.contentHeight)
                 // **THE BLEED** (13u3 UNIT A1): the surface's FRAME reaches
                 // into the host's whitespace on each side while THIS view's
@@ -115,6 +124,8 @@ private struct ReadPostSurface: NSViewRepresentable {
     let gutter: ProseGutter
     let onFocusRequest: ((Int) -> Void)?
     let onBadgeTap: ((String) -> Void)?
+    /// VX-82 (see `ReadPostView.onShowing`).
+    let onShowing: (() -> Void)?
 
     func makeCoordinator() -> ReadPostSurfaceCoordinator {
         ReadPostSurfaceCoordinator(model: model)
@@ -128,6 +139,7 @@ private struct ReadPostSurface: NSViewRepresentable {
         context.coordinator.install(textView: textView)
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onBadgeTap = onBadgeTap
+        model.onShowing = onShowing
         textView.onPlainClick = { [weak coordinator = context.coordinator] offset in
             coordinator?.onFocusRequest?(offset)
         }
@@ -138,6 +150,7 @@ private struct ReadPostSurface: NSViewRepresentable {
         // Projection-driven; the callbacks and the VOICE refresh here.
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onBadgeTap = onBadgeTap
+        model.onShowing = onShowing
         nsView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: nsView)
     }

@@ -65,6 +65,16 @@ final class ReadPostViewModel {
     /// editor's).
     @ObservationIgnored var badgeSink: (([ReadBadge]) -> Void)?
 
+    /// VX-82: the host's "this surface now shows its note" door — the
+    /// inline editor's VX-75 announce, mirrored (`InlineEditorSurface.
+    /// Coordinator.onShowing`): fired ONCE, by the first height report made
+    /// after the surface rendered real content (`loaded`), so the host's
+    /// release of whatever it was holding across the swap (the book
+    /// Outline's outgoing live editor) lands in the same turn as the
+    /// height. nil everywhere a host holds nothing — behaviour unchanged.
+    @ObservationIgnored var onShowing: (() -> Void)?
+    @ObservationIgnored private var announcedShowing = false
+
     /// Phase 13 C1 — the read tier renders the same decoration language as
     /// the editor (callouts, seams, read-only comment cards) through the
     /// shared controller; no indicator (no caret), no handles (no doors).
@@ -108,6 +118,7 @@ final class ReadPostViewModel {
     func detach() {
         canary.disarm()
         badgeSink = nil
+        onShowing = nil
         textView = nil
         // A dismantle→remake cycle on the SAME model (SwiftUI recreates
         // representables on container moves) must re-render the fresh,
@@ -118,6 +129,9 @@ final class ReadPostViewModel {
         loaded = false
         slots = []
         index = BlockRangeIndex(entries: [], tailLength: nil)
+        // VX-82: a remade surface announces again once it renders — the
+        // host's flag is idempotent, a missed announce would strand it.
+        announcedShowing = false
     }
 
     /// Runs for the view's lifetime: the post's rendered slots, live.
@@ -275,6 +289,14 @@ final class ReadPostViewModel {
         lastMeasuredWidth = max(0, textView.proseRight - textView.proseLeft)
         if abs(contentHeight - max(height, 1)) > 0.5 {
             contentHeight = max(height, 1)
+        }
+        // VX-82: the first report measured off real content is the announce
+        // (the inline editor's exact rule — `loaded` flips in
+        // `applyProjection`, and `renderFull` calls this synchronously, so
+        // the height write and the host's release share one turn).
+        if loaded, !announcedShowing {
+            announcedShowing = true
+            onShowing?()
         }
         refreshBadges()
     }
