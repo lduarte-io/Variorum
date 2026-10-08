@@ -406,7 +406,8 @@ struct DataSafetyRunbookTests {
     /// legs / loss math retired with the at-open presets; §8 is now
     /// COMPOSED from the posture cards' FLOORS (copy §1 — the same
     /// sentences the pane's cards show; the two floors of design §1.21),
-    /// and points at *Encryption Explained*. This pin holds it there.
+    /// and pointed at *Encryption Explained* until 13s-b U1b retired the
+    /// book with its pointer (R-13s-37).
     /// (5b rewrites the whole runbook per posture on top of this.)
     @Test func sectionEightIsComposedFromTheProtectionBrainAndClaimsNothingStale() {
         let runbook = DataSafetyCopy.runbook
@@ -420,7 +421,10 @@ struct DataSafetyRunbookTests {
             #expect(floor != nil)
             if let floor { #expect(runbook.contains(floor), "§8 carries the \(posture) floor verbatim from the card") }
         }
-        #expect(runbook.contains("“Encryption Explained”"), "§8 points at the seeded book")
+        // 13s-b U1b (R-13s-37, a JUSTIFIED EDIT — the arm INVERTS): the
+        // book is neither seeded nor restorable, so §8's pointer retired
+        // with it; the floors above are byte-untouched.
+        #expect(!runbook.contains("Encryption Explained"), "the retired pointer stays gone")
         #expect(!runbook.contains("at-open mode"), "the retired 13p mode vocabulary is gone from §8")
     }
 

@@ -377,9 +377,7 @@ nonisolated enum DataSafetyCopy {
         \(ProtectionCopy.postureCard(.castle).first { $0.label == "The floor" }?.text ?? "")
 
         Losing your writing means losing EVERY way back in at once — any
-        single one of them still standing gets you back in. The whole story
-        — every key, where it lives, why an old backup behaves the way it
-        does — is the book “Encryption Explained” on your Bookcase.
+        single one of them still standing gets you back in.
 
         **Check before you need to.** Neither secret is used day to day — the
         device unwraps once and remembers — so the first time you type one

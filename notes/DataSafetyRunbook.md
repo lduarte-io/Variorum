@@ -286,9 +286,7 @@ Protection pane's cards show:
 - **Castle** — the floor: lose every enrolled device AND both your passphrase and your twelve words, and your writing is gone. Nobody can help — not Apple, not us. That is the point of Castle, and it's why we ask you to write the words down.
 
 Losing your writing means losing EVERY way back in at once — any
-single one of them still standing gets you back in. The whole story
-— every key, where it lives, why an old backup behaves the way it
-does — is the book “Encryption Explained” on your Bookcase.
+single one of them still standing gets you back in.
 
 **Check before you need to.** Neither secret is used day to day — the
 device unwraps once and remembers — so the first time you type one

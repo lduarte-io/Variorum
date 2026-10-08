@@ -3573,8 +3573,13 @@ struct TutorialPrivacyChapterTests {
             #expect(two.contains(ProtectionCopy.privacyStandardFloorSentence))
             #expect(two.contains(ProtectionCopy.privacyCastleFloorSentence))
             #expect(two.contains("your passphrase is what lets a new device in"))
-            #expect(two.contains(ProtectionCopy.privacyBookDoorSentence))
-            #expect(two.contains(SampleLibraryEncryptionBook.name))
+            // 13s-b U1b (R-13s-37, the U3 disposition 1 — a JUSTIFIED
+            // EDIT): the book's-door arm INVERTS — the pointer paragraph
+            // retired with the book's seed and doors, so the chapter must
+            // no longer name a book a fresh store cannot hold. The two
+            // never-soften floor arms above are byte-untouched.
+            #expect(!two.contains(SampleLibraryEncryptionBook.name),
+                    "the retired pointer stays gone")
             // The retired 13p dials lesson is gone: no reset door, no presets.
             #expect(!one.contains("Forgot It? Reset") && !two.contains("Forgot It? Reset"))
             // The two-register rule over the rendered chapter.

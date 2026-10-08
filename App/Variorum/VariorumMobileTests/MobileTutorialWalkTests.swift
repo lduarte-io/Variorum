@@ -1395,7 +1395,10 @@ struct MobilePocketGuidePrivacyTests {
             }
             #expect(prose.contains(ProtectionCopy.privacyStandardFloorSentence))
             #expect(prose.contains(ProtectionCopy.privacyCastleFloorSentence))
-            #expect(prose.contains(ProtectionCopy.privacyBookDoorSentence))
+            // 13s-b U1b (R-13s-37): the book's-door arm inverts — the
+            // pointer paragraph retired with the book's seed and doors.
+            #expect(!prose.contains(SampleLibraryEncryptionBook.name),
+                    "the retired pointer stays gone")
             // The phone's nouns, and nothing names the Mac (the no-redirect
             // principle — a phone-only reader's whole story).
             #expect(prose.contains("Face ID opens this iPhone for you"))
