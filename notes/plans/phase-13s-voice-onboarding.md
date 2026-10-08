@@ -265,9 +265,13 @@ The parked prompt above stands with exactly these changes: (a) the seat line unc
 
 | piece | status |
 |---|---|
-| 1 — quick entry back to the Bookcase's bottom (R-13s-3) | IN-PROGRESS — trace done (R3 → R102 hug → R109; see piece notes); the move is next |
+| 1 — quick entry back to the Bookcase's bottom (R-13s-3) | DONE (this commit) — app + tests build green; the geometry pin `BookcaseQuickEntryPlacementTests` is WRITTEN, its run PENDING the stage window |
 | 2 — the tour offer line (R-13s-6/13) + its local retire-forever flag | NOT-STARTED — design: pure lifecycle rule in core `Domain/TourOffer` (headless), a UserDefaults ledger + model app-side, the line on the Bookcase above the hint bar, right side |
 | 3 — Study as the fresh-store default voice (2026-10-05) | NOT-STARTED — design: the unset-key read in `Queries.ThemeSettings` flips; stores carrying a value untouched by construction |
 | 4 — the logo (R-13s-24/25): AppIcon set, About, the offer line's mark | NOT-STARTED |
 | 5 — Help ▸ tour entry (shares piece 2's stub) | NOT-STARTED |
 | stage-window Mac runs | NOT-STARTED — commands land in the self-assessment |
+
+### Piece notes
+
+**Piece 1 — the trace and the move.** R3 (Phase 13 sitting 1) put the box at the BOTTOM with the list above it scrollable; batch 9's R102 made the board's ScrollView HUG its content (`listContentHeight`) so the box rode right under the last book; batch 14 (R109) sent the ⌘K hint to the window's foot with a `Spacer` between it and the box, keeping the box high with the list. R-13s-3 returns R3's geometry: the hug and the Spacer are gone, the board takes every point the window has (`.frame(maxHeight: .infinity, alignment: .top)`), and the box sits at the foot directly above the bottom bar. Wording untouched (`QuickEntryCopy.placeholder`). The Library's bar was always pinned at its bottom and is unchanged. Pin (a geometry oracle — a design row takes an oracle, not a revert): two new DEBUG frame keys in `BookcaseRowOracle` (`entryKey`, `hintBarKey`) and `BookcaseQuickEntryPlacementTests` (short board: the box meets the bar and sits >200 pt below the last row; 40-book board: the box and bar stay inside the window).
