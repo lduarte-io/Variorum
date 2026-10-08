@@ -278,6 +278,13 @@ public enum Tour {
         case recordCompleted
         /// The tour is over (`completed` says how it ended).
         case finish(completed: Bool)
+        /// **Open the Pool's "in gatherings" run** (F-U2-W-2, option A —
+        /// ruled 2026-10-08): leg 1's star makes her note a starred-notes
+        /// match, so the Pool TUCKS it behind its masthead's "show"; leg 3
+        /// opens that run as it arrives (the same act as "show"), so her row
+        /// and its add to book are on screen. Tour-scoped: leaving the Pool
+        /// tucks it again, as every visit does.
+        case showPoolTucked
     }
 
     /// One step of the rule: the state after (nil = the tour is over) and
@@ -505,6 +512,7 @@ public enum Tour {
             if let own = state.ownNoteID, place != .note(own) { effects.append(.navigate(.note(own))) }
         case .legBook:
             if place != .area(.pool) { effects.append(.navigate(.area(.pool))) }
+            effects.append(.showPoolTucked)
         case .legSnippets:
             if place != .area(.snippets) { effects.append(.navigate(.area(.snippets))) }
         case .legEnd:

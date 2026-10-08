@@ -201,7 +201,10 @@ struct TourWalkTests {
 
         w.report(Self.ownNote(starred: true, tags: 1))
         #expect(w.step == .legBook)
-        #expect(w.effects == [.navigate(.area(.pool))], "the leg's own choreography")
+        // The leg's own choreography — the Pool, with its in-gatherings run
+        // open (F-U2-W-2: the star made her note a starred-notes match, which
+        // the Pool tucks behind its masthead's "show").
+        #expect(w.effects == [.navigate(.area(.pool)), .showPoolTucked])
         #expect(w.rings == [[.sidebarArea(.pool)]], "until the Pool is on screen")
         w.report(Self.ownNote(starred: true, tags: 1, place: .area(.pool)))
         #expect(w.rings == [[.poolAddToBook(Self.mine)]])

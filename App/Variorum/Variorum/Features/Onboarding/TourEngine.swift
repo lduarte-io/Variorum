@@ -42,6 +42,8 @@ final class TourEngine {
         var recordCompleted: () -> Void
         /// The tour is over (`completed`: how it ended).
         var finished: (_ completed: Bool) -> Void
+        /// Open the Pool's "in gatherings" run (F-U2-W-2, option A — leg 3).
+        var showPoolTucked: () -> Void = {}
     }
 
     @ObservationIgnored private let doors: Doors
@@ -105,6 +107,7 @@ final class TourEngine {
             case .navigate(let place): doors.navigate(place)
             case .openFieldGuide: doors.openFieldGuide()
             case .recordCompleted: doors.recordCompleted()
+            case .showPoolTucked: doors.showPoolTucked()
             case .finish(let completed):
                 guard !over else { continue }
                 over = true

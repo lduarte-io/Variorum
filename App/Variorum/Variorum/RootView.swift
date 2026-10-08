@@ -857,6 +857,7 @@ struct RootView: View {
         let session = session
         let offer = tourOffer
         let slot = tourSlot
+        let pool = poolPosts
         return TourEngine.Doors(
             navigate: { place in
                 guard let destination = TourPlaces.selection(place),
@@ -878,7 +879,11 @@ struct RootView: View {
             finished: { [weak slot] completed in
                 offer?.tourEnded(completed: completed)
                 slot?.engine = nil
-            })
+            },
+            // F-U2-W-2 (option A, ruled): leg 3 opens the Pool's "in
+            // gatherings" run — the masthead's own "show", on this window's
+            // Pool model — so her starred (and so tucked) note is on screen.
+            showPoolTucked: { Task { await pool.showTucked() } })
     }
 
     /// The window's facts, as readers the tour's overlay evaluates in ITS

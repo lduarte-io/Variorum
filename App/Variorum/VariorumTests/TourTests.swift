@@ -403,13 +403,15 @@ struct TourEngineTests {
         var fieldGuides = 0
         var completions = 0
         var finishes: [Bool] = []
+        var poolReveals = 0
 
         var doors: TourEngine.Doors {
             TourEngine.Doors(
                 navigate: { self.navigations.append($0) },
                 openFieldGuide: { self.fieldGuides += 1 },
                 recordCompleted: { self.completions += 1 },
-                finished: { self.finishes.append($0) })
+                finished: { self.finishes.append($0) },
+                showPoolTucked: { self.poolReveals += 1 })
         }
     }
 
@@ -493,6 +495,45 @@ struct TourEngineTests {
         }
     }
 
+    /// F-U2-W-2 (option A, ruled): leg 3 brings her to the Pool AND opens its
+    /// in-gatherings run — her starred note is tucked there — exactly once.
+    @Test func legThreeOpensThePoolsTuckedRunOnArrival() async throws {
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write))
+            func write(_ block: String, _ ordinal: Int, takes: Int = 1) -> Tour.Facts {
+                .init(place: .note("scandal"), noteMode: .write,
+                      caret: .init(noteID: "scandal", blockID: block, ordinal: ordinal, takeCount: takes))
+            }
+            engine.observe(write("b1", 1))
+            engine.observe(write("b40", 40))
+            engine.observe(write("b40", 40, takes: 2))
+            engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+            engine.next()
+            engine.next()
+            engine.next()
+            engine.observe(.init(place: .book("sherlock"), bookNoteLive: true))
+            engine.observe(.init(place: .area(.bookcase)))
+            func mine(starred: Bool, tags: Int) -> Tour.Facts {
+                .init(place: .note("mine"), noteMode: .write,
+                      note: .init(noteID: "mine", starred: starred, tagCount: tags, bookCount: 0))
+            }
+            engine.observe(mine(starred: false, tags: 0))
+            engine.choose(.keepGoing)
+            engine.observe(mine(starred: true, tags: 0))
+            #expect(log.poolReveals == 0, "the run opens at leg 3, not before")
+            engine.observe(mine(starred: true, tags: 1))
+            #expect(engine.state.step == .legBook)
+            #expect(log.navigations.last == .area(.pool))
+            #expect(log.poolReveals == 1, "her tucked note's row is opened for the leg's door")
+        }
+    }
+
     /// The window's facts, assembled: a caret only for WRITE on the note she
     /// is in, its take count from the badges, the panel, the box only in a
     /// book, and the star through the stars model.
@@ -532,6 +573,34 @@ struct TourEngineTests {
             #expect(TourPlaces.selection(TourPlaces.place(selection)) == selection)
         }
         #expect(TourPlaces.place(nil) == .area(.bookcase), "no selection draws the Bookcase")
+    }
+}
+
+// MARK: - The Pool's tucked run, opened for the tour (F-U2-W-2)
+
+@MainActor
+@Suite("13s-b U2 — the Pool opens its tucked run for leg 3 (F-U2-W-2)", .serialized)
+struct TourPoolTuckTests {
+    /// The tour's door onto the Pool's "show" only ever OPENS (the masthead's
+    /// toggle would close the run on a second ask), and leaving the page
+    /// still tucks it away as every visit does.
+    @Test func showTuckedOnlyOpensAndLeavingStillTucks() async throws {
+        let db = try AppDatabase.inMemory()
+        await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let model = PoolPostsModel(session: AppSession(database: db))
+            #expect(!model.showsTucked, "a visit opens tucked")
+            await model.showTucked()
+            #expect(model.showsTucked)
+            await model.showTucked()
+            #expect(model.showsTucked, "a second ask never closes what the first opened")
+            model.tuckAway()
+            #expect(!model.showsTucked, "leaving the Pool tucks it away, as ever")
+        }
     }
 }
 
