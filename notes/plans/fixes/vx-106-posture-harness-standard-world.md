@@ -13,10 +13,13 @@ close; the morning note appended to `notes/handoffs/phase-13x-handoff.md`.
 |---|---|
 | 0. baseline — core headless + the two reds confirmed on the branch's base | DONE (this commit) — core headless on da0e88a9: **2383 tests in 277 suites PASSED** (158.9 s) + StringsWorkbook 40/6 (46.2 s); skips the standing env-gated ones only. The Mac confirmation is PENDING-behind-the-stage — **and the expected answer is NOT red: the pair is already GREEN on the base** (see THE BASE ALREADY CARRIES PIECE 1 below). |
 | 1. the harness fix — the default Standard world's vault carries the Apple-held copy | DONE-ON-THE-BASE by VX-99 (155188c5, refined 096361d7 — merged at 9819bff8, this branch's parent); re-traced here and CONFIRMED minimal, through the real road, zero production change. Nothing for this session to write. |
-| 2. the precedence pin (new) | IN-PROGRESS — the design settled below; the pin next |
-| 3. the full `PostureSwitchTests` + every suite exercising the changed sources, Mac, under a stage slot | PENDING (the orchestrator's; the commands listed below once the pin compiles) |
+| 2. the precedence pin (new) | DONE (this commit) — `aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle` in `PostureSwitchTests`; Mac `build-for-testing` **TEST BUILD SUCCEEDED** (scratch derived data, no stage), zero warnings in the test file; its GREEN and its revert's RED are PENDING-behind-the-stage (THE PENDING MAC COMMANDS below). The brief's piece 3 (per-test handling) found NOTHING to re-world — PIECE 3 below. |
+| 3. the full `PostureSwitchTests` + every suite exercising the changed sources, Mac, under a stage slot | PENDING (the orchestrator's — THE PENDING MAC COMMANDS below, expected counts stated) |
 | 4. cold review (fresh Fable, `notes/REVIEW_PROMPT.md` verbatim) + dispositions | PENDING |
 | 5. PR `VX-106: …` → merge commit → branch deleted → /Applications refresh (A1 first) → handoff note | PENDING |
+
+The brief's (4), core headless at close: PENDING (runs after the pin's commit; zero `Sources/` change, so the baseline
+is expected to repeat — recorded when it does, never before).
 
 ### THE BASE ALREADY CARRIES PIECE 1 (the implementer's first finding, 2026-10-08 — read before anything else)
 
@@ -49,6 +52,65 @@ sake. Piece 2 (the precedence pin) is the unit's real deliverable: the brief's p
 test combines the Castle-by-vault + Apple-wrapped-file world with a PENDING change notice; the 13x pin
 `anAdoptedStandardEraPairUnderACastleVaultOwesTheFollowThatRetiresItsAppleCopy` has no change pending, and the
 two VX-106 tests have no exposure). Zero production change, as the brief expected; no STOP condition met.
+
+### PIECE 2 — THE PRECEDENCE PIN (written before it compiled; the design is the record)
+
+**`PostureSwitchTests.aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle`**,
+placed directly after `theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord` (the notice it
+outranks). The world: `makeWorld(vaultSaysCastle: true)` — a Standard-shaped library (the `apple` copy in its key
+file, silent custody) over a CASTLE account, custody's keys the vault's; the vault given its recovery wrap (so the
+digest leg of the record is real); the key file records the vault's descriptor + digest as they stood; then the
+passphrase CHANGED at the vault through `VaultEnrollment.changePassphrase` (a new descriptor, the digest and the
+corpus id unchanged, the account still Castle). **The premise witnessed, not assumed:** over that same file and
+reading, `ProtectionController.changeElsewhere` alone returns the `passphraseChangedElsewhere` kind — so the pin
+proves precedence over a REAL pending notice, never a vacuous one. **At `reconcile()`:** `followNotice.kind ==
+.castleKeyFileAppleOpenable`, `corpusKeyID` the unchanged id, `changeNotice == nil`, `notice == .follow`,
+`followPending`, posture determined Castle, nothing written (the file still there, zero re-keys). **The follow through
+its own door:** the RETIRED word refuses in place (`passphraseNotTheLibrarys`, nothing written); the vault's CURRENT
+word runs the no-rotation road — `entersCastle && reencrypted == 0`, one re-key, custody `.biometric`, custody's
+keys unchanged, the Apple-openable file RETIRED from the live folder, the new file with NO Apple copy, L′ opened by the
+new word and refusing the old, **and the resolution: the new file's P copy AND `vaultKDF` under the vault's CURRENT
+descriptor, `vaultRecoveryWrapDigest` + `vaultCorpusKeyID` recorded**; then `followNotice == nil`, `changeNotice ==
+nil`, no marker; a second `reconcile()` owes nothing — no follow, no change notice.
+
+**REVERT V106-A (the binding red-on-old; named here BEFORE it runs, per the resiliency rule — the orchestrator runs it
+under its claim over COMMITTED state, restores with `git checkout --` on the one file, verifies an empty `git diff`):**
+in `ProtectionController.reconcileFollow` (`App/Variorum/Shared/ProtectionController.swift`), move the
+`castleKeyFileAppleOpenable` if-block (the three statements at ~:680–685) to AFTER `changeNotice = owedChange`
+(~:698) and add `owedChange == nil` as its first condition — i.e. "an owed change notice pre-empts the Apple-openable
+follow", the reordering the decision rejects. **Expected:** `PostureSwitchTests` **"70 tests in 1 suite failed … with 1
+issue"** — the new pin at EXACTLY its `try #require(controller.followNotice, "the follow is OWED …")` line (the test
+ends there); every other test green, INCLUDING the two VX-106 names (their default world carries the Apple-held copy —
+the arm never fires there either way) — and `Phase13pControllerTests` 50/50 green (the 13x pin
+`anAdoptedStandardEraPairUnderACastleVaultOwesTheFollowThatRetiresItsAppleCopy` has NO change pending, so the
+reordered arm still owes it). That isolation is the point: the pin guards the PRECEDENCE, not the arm's existence.
+**Optional REVERT V106-B** (13x's REVERT A — the arm removed whole): the new pin red at the same line AND the 13x pin
+red (`Expectation failed: w.controller.followNotice`) — proves the pin also guards the arm's existence; not required.
+
+### PIECE 3 — tests leaning on the old inconsistent default: NONE REMAIN
+
+The default `makeWorld()` is account-consistent since VX-99 (above); nothing is red on the base (69/69). The eight
+explicit-world callers (`vaultSaysCastle: true` ×7, `standard: false, vaultSaysCastle: false` ×1) each carry a
+VX-99-era comment naming the DELIBERATE mismatch and were judged one by one at VX-99's round 2 (`vx-99-ladder-round2.md`
+:221–225); re-read here, each premise IS the mismatch (follow-into-Castle, the vault's-word screens, the different-A
+sibling). No test is re-worlded by this unit; nothing PROVISIONAL to record for piece 3.
+
+### THE PENDING MAC COMMANDS (the orchestrator's, under its held stage claim; from `App/Variorum/`, zero instances)
+
+1. **The suite with the new pin:** `xcodebuild -scheme Variorum -destination 'platform=macOS'
+   -only-testing:VariorumTests/PostureSwitchTests test` → expected **"Test run with 70 tests in 1 suite passed"**
+   (VX-99's 69 + this pin). Read by NAME inside it: the new pin,
+   `regeneratingTheWordsOnOneDeviceRetiresTheOldWordsAtTheVaultForItsSibling`,
+   `theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord` — all passed. This run IS piece 0's Mac
+   confirmation: the pair is green on the tip exactly as on the base (the code the two tests exercise is byte-identical
+   to the base's — this unit changes nothing but the one new test).
+2. **The 13x sibling pin (the arm's own home):** `… -only-testing:VariorumTests/Phase13pControllerTests test` →
+   expected **"50 tests in 1 suite passed"** (VX-99's count; untouched here, the cross-check that the precedence pin
+   and the existence pin agree).
+3. **REVERT V106-A** per the recipe above → expected the one red named there; restore; re-run 1 → 70/70 green.
+4. **Breadth (the brief's "every suite exercising the changed sources"):** the only changed source is the test file
+   itself, so 1 is the whole reach; VX-99's batch-1 bundle (the runner's whole reach — 20 suites, 198 + this pin =
+   199) is the generous cross-check if the slot allows (`vx-99-pro-castle-apple-wrap.md` :1119 lists the twenty).
 
 ## THE MECHANISM (traced read-only by the orchestrator before any code — the hallucination guard)
 
