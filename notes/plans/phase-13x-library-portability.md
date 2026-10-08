@@ -1914,9 +1914,10 @@ Work only in `~/dev/variorum-13x`.
 | piece | status |
 |---|---|
 | 0 — baseline (whole core, headless) | DONE — `swift test` 2338 tests / 269 suites PASSED + StringsWorkbook 40/6 PASSED (146 s); skips = the standing env-gated set only |
-| 1 — R3-1 pins (a)(b), red on today's code | DONE (this commit) — `Tests/VariorumCoreTests/LibraryHotCopyAdoptionTests.swift`, 2 pins, **RED ON TODAY'S CODE BY DESIGN** (pin-before-fix; the evidence below). (c) NOT written — its shape waits on the ruling (Q1/Q2 below) |
-| — **STOPPED** | **The code contradicts the report's trace** (the brief's STOP condition) — measured facts below; handed back to the orchestrator for the ruling. The core suite on this branch head is red by exactly these 2 pins until the fix lands. |
-| 1 — R3-1 fix (the four constraints) | NOT-STARTED — PROPOSED mechanism below, awaiting the ruling |
+| 1 — R3-1 pins (a)(b), red on today's code | DONE (1604cd95) |
+| — STOPPED → RULED | The stop (1604cd95) was answered at 5cc2973d (the RULINGS section below): Q1–Q4 all yes, the mechanism and pin set RULED as written. RESUMED in the same session. |
+| 1 — R3-1 pins, the ruled set — the old-tree run | DONE (this commit) — 7 pins compiled against TODAY's code, **all 7 RED** (15 issues; quoted in "THE OLD-TREE RUN" below). (b″) and the `.keyRejected` halves name the split's new case, so they land WITH the fix and their red is the behavioural revert. The core suite on this branch head is red by exactly these 7 until the fix lands. |
+| 1 — R3-1 fix (the four constraints) | IN-PROGRESS — the staged read + the wal-carrying landing + the `.keyRejected` split, as ruled |
 | 2 — R3-2 the gate closures read the marker + pin + revert | NOT-STARTED (no contradiction found; settled design: a Shared composition function wiring both gates to `LibraryRestoreHold.isHeld(besideStore:)`, its Mac pin PENDING-behind-the-stage) |
 | 3 — the full core at close + `build-for-testing` + the PENDING Mac commands | NOT-STARTED |
 
@@ -2046,3 +2047,25 @@ comment already admitted can touch the picked source)
   exactly (local-only derived search index + INSERT-only capture triggers; no mirror; marker
   stays 12; zero deploy). 13x's install refresh does not wait on it; the orchestrator re-checks
   the marker after any catch-up merge anyway.
+
+#### F3 RESUMED — THE OLD-TREE RUN (2026-10-07 late, after the rulings at 5cc2973d)
+
+`swift test --filter LibraryHotCopyAdoptionTests` on the pre-fix tree (only the pins
+changed): **7 tests, 7 RED, 15 issues** — each red the one its shape predicts:
+
+| pin | old-tree red (quoted) |
+|---|---|
+| (a) `aHotCopiedLibraryLandsWithEveryRowItsWalHolds` | `title → nil`; `variorum.sqlite-shm was rewritten` |
+| (b) `anShmLessHotCopyReadsTrueAndLandsWhole` | `title → nil`; after `[…, "variorum.sqlite-shm", …]` vs before without it |
+| (b′) `anShmLessHotCopyInANonWritableFolderReadsTrueAndLandsWhole` | `verdict → .unreadable(reason: "SQLite error 14: unable to open database file - while executing SELECT * FROM sqlite_master LIMIT 1")` (the old `settle` ⇒ the FALSE wrong-key sentence) |
+| (c) `aWrongKeyConsultLeavesThePickedFolderByteIdentical` | after `[key file, "variorum.sqlite"]` vs before `[…, "variorum.sqlite-shm", "variorum.sqlite-wal"]`; `variorum.sqlite was rewritten` (462848 bytes, changed) |
+| Q4 `aHotCopiedPlaintextLibraryClassifiesWithoutATouchAndLandsWhole` | `title → nil`; the `-shm` rewritten |
+| Q4 `anShmLessHotPlaintextCopyClassifiesWithoutATouchAndLandsWhole` | `title → nil`; a `-shm` created |
+| Q4 `anShmLessHotPlaintextCopyInANonWritableFolderClassifiesTrue` | `verdict → .unreadable(…, reason: "SQLite error 14: unable to open database file …")` (stage 1 ⇒ `unreadableRefusal`, false: the copy is whole); `title → nil` |
+
+**Q4 measured — where the plaintext road DIFFERS:** the same three behaviours as the keyed
+road (the `-shm` rewritten/created; the wal tail dropped at the landing), and the
+non-writable arm reads `.unreadable` CANTOPEN in BOTH the read-only open and its read-write
+fallback — so on stage 1 it settles to `unreadableRefusal` ("This file couldn't be read as a
+library."), not the wrong-key sentence; false all the same (the copy is whole). Pinned.
+

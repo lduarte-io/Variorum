@@ -59,9 +59,21 @@ struct LibraryHotCopyAdoptionTests {
     private func makeHotCopy(
         in dir: URL, withShm: Bool
     ) throws -> (folder: URL, store: URL, keyFile: URL, key: StoreKey) {
-        let original = dir.appendingPathComponent("running/variorum.sqlite")
         let key = StoreKey.mint()
-        let database = try AppDatabase.openStore(at: original, custody: .inMemory(initial: key))
+        let made = try makeHotCopy(in: dir, withShm: withShm, key: key)
+        return (made.folder, made.store, try #require(made.keyFile), key)
+    }
+
+    /// `key` nil = a PLAINTEXT full library (the pre-13p class — stage 1's
+    /// `openForInspection` road, Q4) copied hot the same way; no key file.
+    private func makeHotCopy(
+        in dir: URL, withShm: Bool, key: StoreKey?
+    ) throws -> (folder: URL, store: URL, keyFile: URL?) {
+        let original = dir.appendingPathComponent("running/variorum.sqlite")
+        try FileManager.default.createDirectory(
+            at: original.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let database = try key.map { try AppDatabase.openStore(at: original, custody: .inMemory(initial: $0)) }
+            ?? AppDatabase.onDisk(url: original, key: nil)
         try database.writeWithoutTransaction { db in
             _ = try db.checkpoint(.truncate)
         }
@@ -75,10 +87,13 @@ struct LibraryHotCopyAdoptionTests {
                 arguments: [Self.walledID, Self.walledID])
         }
         #expect(size(sidecar(original, "-wal")) > 0, "premise: the walled row sits in the wal")
-        var envelope = StoreKeyEnvelope()
-        try envelope.setPassphraseWrap(key: key, passphrase: "the copy's word", kdf: fastKDF())
-        let originalKeyFile = envelope.preferredURL(besideStore: original)
-        try envelope.write(at: originalKeyFile)
+        var originalKeyFile: URL?
+        if let key {
+            var envelope = StoreKeyEnvelope()
+            try envelope.setPassphraseWrap(key: key, passphrase: "the copy's word", kdf: fastKDF())
+            originalKeyFile = envelope.preferredURL(besideStore: original)
+            try envelope.write(at: try #require(originalKeyFile))
+        }
 
         // THE HOT COPY — the pool is open, the wal is hot.
         let folder = dir.appendingPathComponent("hand-copied", isDirectory: true)
@@ -93,11 +108,45 @@ struct LibraryHotCopyAdoptionTests {
             try FileManager.default.copyItem(
                 at: sidecar(original, "-shm"), to: sidecar(store, "-shm"))
         }
-        let keyFile = folder.appendingPathComponent(originalKeyFile.lastPathComponent)
-        try FileManager.default.copyItem(at: originalKeyFile, to: keyFile)
+        var keyFile: URL?
+        if let originalKeyFile {
+            keyFile = folder.appendingPathComponent(originalKeyFile.lastPathComponent)
+            try FileManager.default.copyItem(at: originalKeyFile, to: try #require(keyFile))
+        }
         _ = database.asRebindable().binding.lock()
         #expect(size(sidecar(store, "-wal")) > 0, "premise: the COPY carries the hot wal")
-        return (folder, store, keyFile, key)
+        return (folder, store, keyFile)
+    }
+
+    /// A folder the user can read but not write (a locked volume, a DMG,
+    /// a read-only share) — restored to writable by `writable(_:)` so the
+    /// temporary tree can be removed.
+    private func readOnly(_ folder: URL) throws {
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: folder.path)
+    }
+
+    private func writable(_ folder: URL) {
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: folder.path)
+    }
+
+    /// A CLOSED keyed library cut after its first two pages — page 1
+    /// (the key check) intact, the rest gone: a torn copy (an interrupted
+    /// copy, a full disk) under its RIGHT key, its key file beside it.
+    private func makeTornCopy(in dir: URL) throws -> (folder: URL, store: URL, key: StoreKey) {
+        let original = dir.appendingPathComponent("whole/variorum.sqlite")
+        let key = StoreKey.mint()
+        let database = try AppDatabase.openStore(at: original, custody: .inMemory(initial: key))
+        _ = database.asRebindable().binding.lock()
+        let folder = dir.appendingPathComponent("torn", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let store = folder.appendingPathComponent("variorum.sqlite")
+        let whole = try Data(contentsOf: original)
+        #expect(whole.count > 4096 * 2, "premise: the library is longer than the cut")
+        try whole.prefix(4096 * 2).write(to: store)
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "the torn word", kdf: fastKDF())
+        try envelope.write(at: envelope.preferredURL(besideStore: store))
+        return (folder, store, key)
     }
 
     /// Every file in a folder, by name, with its bytes — the
@@ -206,6 +255,121 @@ struct LibraryHotCopyAdoptionTests {
                     "the landed library holds the row the source's wal holds")
         }
         // No -shm materialized beside the source, nothing rewritten.
+        try expectUntouched(hot.folder, before: sourceBefore)
+    }
+
+    // MARK: - (b′) the report's SYMPTOM on this stack: a non-writable folder
+
+    /// Measured at F3 (the re-trace the orchestrator ACCEPTED, Q1): in a
+    /// WRITABLE folder SQLite's read-only connection creates the missing
+    /// `-shm` and reads on — (b) above; the read fails only where no
+    /// `-shm` CAN be created. There the old consult read `.unreadable`
+    /// (SQLITE_CANTOPEN) and `settle` wore the wrong-key sentence — false
+    /// on both facts (the key is right; the copy is whole). The staged
+    /// read never needs to write beside the picked file, so the truth
+    /// holds wherever the copy sits.
+    @Test func anShmLessHotCopyInANonWritableFolderReadsTrueAndLandsWhole() throws {
+        let dir = try temporaryDirectory()
+        let hot = try makeHotCopy(in: dir, withShm: false)
+        try readOnly(hot.folder)
+        defer {
+            writable(hot.folder)
+            try? FileManager.default.removeItem(at: dir)
+        }
+        let sourceBefore = try contents(of: hot.folder)
+        let home = dir.appendingPathComponent("home/variorum.sqlite")
+
+        let (verdict, landed) = try runTheDoor(picked: hot.folder, key: hot.key, home: home)
+        #expect(verdict == .current,
+                "the right key over a whole copy reads current wherever it sits, got \(verdict)")
+        if let landedStore = landed {
+            let title = try walledTitle(atLanded: landedStore, key: hot.key)
+            #expect(title == Self.walledID,
+                    "the landed library holds the row the source's wal holds")
+        }
+        try expectUntouched(hot.folder, before: sourceBefore)
+    }
+
+    // MARK: - (c) the GENUINE mismatch — and the consult never writes
+
+    /// A key that does not open the picked store, over a CLOSED copy and
+    /// over a HOT one. Measured at F3 on the old tree: the hot arm's
+    /// read-only open refused at GRDB's `validateFormat`, the read-write
+    /// fallback reopened the PICKED file, and its close-time checkpoint
+    /// folded the wal into the picked main file and deleted its `-wal`
+    /// and `-shm` — "the file you picked was only read" made false by the
+    /// consult itself (Q2, ruled in scope).
+    @Test func aWrongKeyConsultLeavesThePickedFolderByteIdentical() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let hot = try makeHotCopy(in: dir, withShm: true)
+        let sourceBefore = try contents(of: hot.folder)
+        let wrongKey = StoreKey.mint()
+
+        let verdict = LibraryClassifier.schemaVerdict(at: hot.store, key: wrongKey)
+        #expect(verdict != .current, "a wrong key never reads as a library")
+        try expectUntouched(hot.folder, before: sourceBefore)
+    }
+
+    // MARK: - Q4 — stage 1's plaintext road takes the same staged read
+
+    /// The plaintext road's door, exactly as `LibraryOpenModel` composes
+    /// it: classify the picked folder → land (no pair) → recreate the
+    /// local tables → a fresh key + identity → the reopen (which runs the
+    /// 13p plaintext→encrypted migration) — then read the walled row.
+    private func runThePlaintextDoor(
+        picked folder: URL, home: URL
+    ) throws -> (LibraryClassifier.Verdict, title: String?) {
+        let verdict = LibraryClassifier.classify(at: folder)
+        guard case .plaintextLibrary(let store) = verdict else { return (verdict, nil) }
+        let plan = LibraryAdoption.plan(
+            adopting: store, keyFile: nil, intoStoreAt: home,
+            now: Date(timeIntervalSince1970: 1_800_000_000))
+        try LibraryAdoption.execute(plan, holding: .init(asOf: nil, now: Date()))
+        try LocalMachineryRecreation.recreateIfMissing(inPlaintextStoreAt: home)
+        let freshKey = StoreKey.mint()
+        _ = try StoreIdentity.establish(besideStore: home, key: freshKey)
+        return (verdict, try walledTitle(atLanded: home, key: freshKey))
+    }
+
+    @Test func aHotCopiedPlaintextLibraryClassifiesWithoutATouchAndLandsWhole() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let hot = try makeHotCopy(in: dir, withShm: true, key: nil)
+        let sourceBefore = try contents(of: hot.folder)
+        let (verdict, title) = try runThePlaintextDoor(
+            picked: hot.folder, home: dir.appendingPathComponent("home/variorum.sqlite"))
+        #expect(verdict == .plaintextLibrary(store: hot.store))
+        #expect(title == Self.walledID, "the landed library holds the row the source's wal holds")
+        try expectUntouched(hot.folder, before: sourceBefore)
+    }
+
+    @Test func anShmLessHotPlaintextCopyClassifiesWithoutATouchAndLandsWhole() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let hot = try makeHotCopy(in: dir, withShm: false, key: nil)
+        let sourceBefore = try contents(of: hot.folder)
+        let (verdict, title) = try runThePlaintextDoor(
+            picked: hot.folder, home: dir.appendingPathComponent("home/variorum.sqlite"))
+        #expect(verdict == .plaintextLibrary(store: hot.store))
+        #expect(title == Self.walledID, "the landed library holds the row the source's wal holds")
+        try expectUntouched(hot.folder, before: sourceBefore)
+    }
+
+    @Test func anShmLessHotPlaintextCopyInANonWritableFolderClassifiesTrue() throws {
+        let dir = try temporaryDirectory()
+        let hot = try makeHotCopy(in: dir, withShm: false, key: nil)
+        try readOnly(hot.folder)
+        defer {
+            writable(hot.folder)
+            try? FileManager.default.removeItem(at: dir)
+        }
+        let sourceBefore = try contents(of: hot.folder)
+        let (verdict, title) = try runThePlaintextDoor(
+            picked: hot.folder, home: dir.appendingPathComponent("home/variorum.sqlite"))
+        #expect(verdict == .plaintextLibrary(store: hot.store),
+                "a whole plaintext copy classifies as what it is wherever it sits, got \(verdict)")
+        #expect(title == Self.walledID, "the landed library holds the row the source's wal holds")
         try expectUntouched(hot.folder, before: sourceBefore)
     }
 }
