@@ -1016,8 +1016,8 @@ final class PostureSwitchRunner {
     /// `appleCopy` (VX-99 — required, every road decides): whether the new
     /// key file carries L′ under the iCloud key — the ceremony's enrolled
     /// road passes whether its vault write carried an Apple-held copy, its
-    /// local-only road and the resume pass the posture's Standard, the
-    /// follow passes the vault's word.
+    /// local-only road passes the posture's Standard, the follow and the
+    /// resume's enrolled arm pass the vault's word (the vault just fetched).
     private func rekeyCustodyAndSnapshot(
         entersCastle: Bool, appleCopy: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
@@ -1323,6 +1323,20 @@ final class PostureSwitchRunner {
             } else if marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID {
                 leaves.log("posture switch: resume — this device's own vault write landed (the vault's corpus key id is the one this ceremony minted); custody picks M′ up by the typed secret")
             }
+            // VX-99 (the orchestrator's ruling, 5ce7175b — decision 8: the
+            // posture is the ACCOUNT's once a vault exists; decision 35: no
+            // posture-driven write on a stale reading): this arm HOLDS the
+            // vault it just fetched, so the road reads the account from it,
+            // exactly as `runFollow` does — never from the posture read, which
+            // under an indeterminate reading is the custody SHAPE. The Apple
+            // copy: present exactly when the vault carries an Apple-held copy
+            // (own write: what this device's Standard Replace All Keys wrote;
+            // another device's: the account's posture). The road's posture:
+            // the VAULT's when the road is the follow into another device's
+            // switch (custody, the old key files' retirement and the offer
+            // follow the account); the marker's own when the write was ours.
+            let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil
+            let roadEntersCastle = byAnotherDevice ? vaultSaysCastle : entersCastle
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase
                 // (or the twelve words — 2c: the follow's own resume).
@@ -1356,12 +1370,10 @@ final class PostureSwitchRunner {
             // W copy, the P copy landing when the passphrase is next typed.
             let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
             var outcome = try await rekeyCustodyAndSnapshot(
-                // VX-99 (the resume road): the marker's `entersCastle` is
-                // false for Replace All Keys in EITHER posture, so the Apple
-                // copy is decided by the posture as the ceremony's own road
-                // decided it — Standard only (a resumed Castle Replace All
-                // Keys lands no Apple copy).
-                entersCastle: entersCastle, appleCopy: !entersCastle && leaves.posture() == .standard,
+                // VX-99: the vault's word (above) — the marker's
+                // `entersCastle` is false for Replace All Keys in EITHER
+                // posture, so it never decides the Apple copy.
+                entersCastle: roadEntersCastle, appleCopy: !vaultSaysCastle,
                 libraryKey: libraryKey,
                 // The ceremony's words are NOT landed when another device's
                 // rotation is what this resume picked up (M1's rule): the
@@ -1371,7 +1383,7 @@ final class PostureSwitchRunner {
                                        recoveryWords: byAnotherDevice ? nil : typedWords,
                                        recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
-                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice)
+                listPreSwitchPairs: roadEntersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice)
             if byAnotherDevice {
                 outcome.followedAnotherDevicesSwitch = true
                 outcome.otherDeviceName = fetched.format.updatedByDevice

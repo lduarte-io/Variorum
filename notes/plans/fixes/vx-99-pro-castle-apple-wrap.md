@@ -259,17 +259,28 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   with 99 tests in 13 suites passed"**, no skips.
 
 **THE RESUME-RULE DELTA (the orchestrator's ruling, 5ce7175b — LIVE STATUS of the second piece):**
-- Pin (e) written, RED on 449f5618's code: IN-PROGRESS —
+- Pin (e) written, RED on 449f5618's code: DONE (d4c39bbf) —
   `aStandardReplaceAllKeysResumedIntoAnotherDevicesCastleFollowsTheVaultNotAStalePosture` (after pin (d)): A's
   STANDARD Replace All Keys killed at `.beforeVaultWrite`, B (`sharing: a`, "sibling device") enters Castle whole,
   A resumes by the passphrase with its scripted posture STILL `.standard` → expects the follow flag + B's name,
   `outcome.entersCastle`, the new key file `apple == nil && appleKeyID == nil`, custody `.biometric` and the posture
   Castle, the old Standard-era key file GONE from the live folder, the offer listing A's pre-switch pair, the
-  marker cleared. Compiled (build-for-testing SUCCEEDED on the pre-fix code); the red run PENDING the GO.
-- The fix (the ruled scope — the resume's `.vaultWrite`/`.reencrypt` arm only): NOT-STARTED — settled design:
+  marker cleared. **RED on the pre-fix build** (d4c39bbf's tree = 449f5618's code + the pin; slot 2, claimed
+  02:47:22, zero instances): "Test run with 50 tests in 1 suite failed … with 7 issues" — pin (e) at EXACTLY its
+  five ruled expectations: :2445 `outcome.entersCastle`, :2449 `aFile.apple == nil && aFile.appleKeyID == nil`,
+  :2452 custody `.biometric` / posture Castle, :2453 the old key file still in the live folder, :2455 the offer;
+  the other two issues are VX-106's pair (now :2836 / :3068), identical; pins (a)–(d) GREEN on this tree.
+- The fix (the ruled scope — the resume's `.vaultWrite`/`.reencrypt` arm only): DONE (this commit) —
   `let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil`;
   `let roadEntersCastle = byAnotherDevice ? vaultSaysCastle : entersCastle` (feeding `rekeyCustodyAndSnapshot`'s
-  `entersCastle` and `listPreSwitchPairs`); `appleCopy: !vaultSaysCastle` for the WHOLE arm.
+  `entersCastle` and `listPreSwitchPairs`); `appleCopy: !vaultSaysCastle` for the WHOLE arm. The
+  `rekeyCustodyAndSnapshot` doc comment now names the resume's rule. Green PENDING.
+  **Residual recorded (not built — outside the ruled scope):** the arm advances the marker as
+  `marker.advanced(to: .reencrypt)`, which keeps the ORIGINAL `entersCastle` and no follow flag; a SECOND crash
+  inside the walk of an another-device resume resumes at `.reencrypt`, where `byAnotherDevice` cannot fire (it
+  requires `.vaultWrite`) — that resume still lands NO Apple copy (the whole-arm rule reads the vault), but moves
+  custody by the marker's posture and does not retire the old key files. Pre-existing shape, a double-crash corner;
+  for the reviewer / the orchestrator.
 - Behavioral revert (named here BEFORE it runs): **REVERT V99-B** — the arm's two decisions back to 449f5618's:
   `let roadEntersCastle = entersCastle` (the marker's) and `appleCopy: !entersCastle && leaves.posture() ==
   .standard`. Expected: RED on pin (e) alone; (a)–(d), the own-write Standard resume control in (b), and every
