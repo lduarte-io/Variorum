@@ -92,7 +92,15 @@ chapters; no chapter renames; the two guide-pointing cards need no change.
   (no longer seeded; restorable by its new door) onto the seeded starred-notes gathering;
   "the journal & the pool" was restaged off the seeded quicknote (no longer seeded) onto
   a quick note the reader makes; the Jekyll restore sentence stays (restorable, the
-  interpolated name picks up the lowercase title). Chapter 09's change logs carry each.
+  interpolated name picks up the lowercase title). Chapter 10's change logs carry each.
+- **VX-83's "search" lesson (added mid-pass at the coordinator's word):** main merged a
+  NEW lesson "search" into "the library of things", after "comments & tags"
+  (P-VX83-B2's seat, honored). Its triage draft joined `chapter-09-library-of-things.md`
+  from MAIN's seeder (this branch had not merged it yet): pinned practice words kept
+  (marginalia twice, #tutorial alone), the "+ commits" facet sentence kept per
+  R-VX83-10, every door and glyph exact; one R-13s-31 sweep inside it ("where a
+  savepoint landed" → "where a commit landed"). The port follows the orchestrator's
+  next main merge; the porter re-diffs the draft against the then-current seeder.
 - **Prose-matched code hooks the port must move with the words:** the seeder's own
   `hasPrefix("EXIT THREE, middle")` (chapter 06 renames the staged trio to sentence
   case); `theDeletedSpareTakeWaitsInTheBlocksPast` finds a staged take by its prose
