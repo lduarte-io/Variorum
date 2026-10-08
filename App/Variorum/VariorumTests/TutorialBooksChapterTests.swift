@@ -64,32 +64,15 @@ private func withChapterWorld<T>(
         }
         let guideID = try await TutorialSeeder.restore(session: session)
         try await SampleLibraryWelcome.arrange(session: session, guideName: TutorialSeeder.bookName)
-        // 13s-b U1b (R-13s-5/37) — A JUSTIFIED WORLD EDIT, flagged for the
-        // triage LANDING's re-pin: the arrangement no longer mints the
-        // classics gathering or the seeded quicknote, but the SHIPPED
-        // lesson content still teaches both (seed content is the landing's
-        // to reword, never this unit's). This world therefore STAGES them
-        // as the reader's own acts — the gathering through the restore
-        // door's shape (adopt-or-mint on Welcome from the #classics tag),
-        // the quicknote filed under its reserved title — so every truth
-        // arm still executes against the world the lessons describe.
-        try await session.runner.run { _ in
-            let ops = Operations(undoStack: nil)
-            @Dependency(\.database) var database
-            _ = try SampleLibraryWelcome.restoreClassicsGathering(ops: ops)
-            let quicknote = try database.read { db in
-                try String.fetchOne(
-                    db, sql: "SELECT id FROM container WHERE title = ? AND deleted_at IS NULL",
-                    arguments: [SampleLibraryWelcome.quicknoteTitle])
-            }
-            if quicknote == nil {
-                let note = try ops.importPost(
-                    title: SampleLibraryWelcome.quicknoteTitle,
-                    text: "a staged quick note \u{2014} the lesson's live example.",
-                    undoLabel: "Quick Note", segmentation: .oneBlock, wingId: "")
-                _ = ops.fileAsQuicknote(note.container.id)
-            }
-        }
+        // 13s-b triage landing — U1b's JUSTIFIED WORLD EDIT RETIRED, as it
+        // asked ("if the landing forgets, the staged world is the tell"): the
+        // lessons now teach the LAUNCH seed, so this world IS the launch
+        // seed — the guide, the arrangement, and the starred notes gathering
+        // the launch seeds beside them (`StarredGatheringSeeder`'s one call,
+        // the gathering lesson 1 walks). The classics gathering and a quick
+        // note are the READER's acts now, executed by the pins that teach
+        // them (the Help door's brain; the pad's own mint).
+        _ = try await session.runner.run { ops in ops.ensureStarredNotesGathering() }
         return try await body(session, db, guideID)
     }
 }
@@ -180,53 +163,125 @@ struct TutorialBooksLessonTests {
     }
 
     /// **Lesson 1 — the three kinds.** "A gathering shows you every note
-    /// matching its rule — it holds nothing. A book holds its notes as
+    /// matching its rule; it holds nothing. A book holds its notes as
     /// members. An owned book is the only place its notes live."
+    ///
+    /// **13s-b triage landing — A JUSTIFIED EDIT (R-13s-37's launch seed):**
+    /// the lesson's gathering is the seeded, UNSHELVED starred notes gathering
+    /// now (the classics gathering left the fresh seed; it is a Help door),
+    /// and two of the draft's claims were corrected to the shipped build
+    /// (LC-2 — a restored Jekyll is a PLAIN book; LC-3 — the owned mark lives
+    /// OUTSIDE its book). RED ON OLD: the old prose carries "A GATHERING …",
+    /// no starred gathering and neither Help title. Every sentence below is
+    /// executed, kind by kind, and both Help doors run their own brains.
     @Test func lessonOneTheThreeKinds() async throws {
         try await withChapterWorld(library: true) { session, db, guideID in
             let text = try await prose(db, guideID, "the classics walk")
-            #expect(text.contains("A GATHERING shows you every note matching its rule \u{2014} it holds nothing."))
-            #expect(text.contains("A BOOK holds its notes as members."))
-            #expect(text.contains("An OWNED book is the only place its notes live."))
+            #expect(text.contains("A gathering shows you every note matching its rule; it holds nothing."))
+            #expect(text.contains("A book holds its notes as members."))
+            #expect(text.contains("An owned book is the only place its notes live."))
             // The doors and names it points at, from their own homes.
             #expect(text.contains("the \(Operations.welcomeShelfName) shelf"))
-            #expect(text.contains("\u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D}"))
-            // The U7 continuation (F-U7-1 RULED): the gathering is made from the
-            // ONE seed tag both books' notes wear — a JUSTIFIED EDIT (the two
-            // book tags were P-13id-U7-1's superseded stand-in).
+            #expect(text.contains("the \(Operations.starredNotesGatheringName) gathering"),
+                    "the seeded gathering, by its own name")
+            #expect(text.contains("\u{25B8} \(StarCopy.starRow))"), "the star door, by the row's own word")
+            // The U7 continuation (F-U7-1 RULED): the ONE seed tag both books'
+            // shipped notes wear.
             #expect(text.contains("#\(SampleLibrarySeeder.classicsTagPath)"))
             #expect(OwnershipBadgeCopy.ownedBy("x").hasPrefix("owned by"))
             #expect(text.contains("\u{201C}owned by\u{201D}"), "the badge, by its own words")
-            // 17y B-DEDUPE (R-17y-8), the lesson's new claims: the GUIDE is
-            // the plain-book example now, and Jekyll is the example you
-            // choose — one Restore press away, named by its own door.
+            #expect(text.contains("anywhere outside its book"), "LC-3: where the mark lives")
             #expect(text.contains("This guide is the plain kind"))
-            #expect(text.contains("\u{201C}\(SampleLibraryJekyllBook.name)\u{201D}"),
-                    "the Restore sentence names the book the door restores")
+            // The draft's flag (a), answered: both Help doors by their SHIPPED
+            // titles (the registry verbs the Help menu renders).
+            #expect(text.contains(CapabilityRegistry.capability(.restoreJekyllBook).verb),
+                    "the Jekyll door, by its own Help title")
+            #expect(text.contains(CapabilityRegistry.capability(.restoreClassicsGathering).verb),
+                    "the classics gathering's door, by its own Help title")
+            #expect(!text.contains("owned classic"), "LC-2: a restored Jekyll is a PLAIN book")
 
             // THE TRUTH, kind by kind.
             let readings = try await db.read { try Queries.readings($0) }
-            let classics = try #require(readings.first { $0.name == SampleLibraryWelcome.classicsGatheringName })
+            let starred = try #require(readings.first { $0.name == Operations.starredNotesGatheringName })
             let jekyll = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.jekyllAndHyde.name })
             let sherlock = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.sherlock.name })
-            #expect(classics.kind == .gathering)
-            #expect(try await memberIDs(db, classics.id).isEmpty, "a gathering holds nothing…")
-            #expect(!(try await shown(db, classics.id)).isEmpty, "…yet shows every match")
+            let guide = try #require(readings.first { $0.id == guideID })
+            let welcome = try #require(try await db.read { db in
+                try Shelf.fetchOne(db, sql: "SELECT * FROM shelf WHERE role = 'welcome' AND deleted_at IS NULL")
+            })
+            // "Two of the three are waiting on the Welcome shelf: this guide, a
+            // plain book, and the adventures of sherlock holmes, an owned book."
+            #expect(guide.shelfId == welcome.id && sherlock.shelfId == welcome.id)
+            #expect(text.contains(SampleLibrarySeeder.Book.sherlock.name), "Sherlock, by its own name")
+            #expect(sherlock.owned && !guide.owned)
+            #expect(!(try await memberIDs(db, guideID)).isEmpty,
+                    "the guide is a plain book holding members")
+            // "The third kind is with your unshelved books: the starred notes
+            // gathering. … this one's rule is the star."
+            #expect(starred.kind == .gathering)
+            #expect(starred.shelfId == nil, "unshelved")
+            #expect(RuleGrammar.read(starred.querySpec) == .rule(.star))
+            #expect(try await memberIDs(db, starred.id).isEmpty, "a gathering holds nothing…")
+            // "Star any lesson … and open the gathering: the note shows there
+            // without moving anywhere. Unstar it and it leaves on its own."
+            let lesson = try #require(try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT c.id FROM reading_post rp JOIN container c ON c.id = rp.post_id
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND c.title = ?
+                        """,
+                    arguments: [guideID, "the classics walk"])
+            })
+            try session.operations.setStarred(.post(lesson), starred: true)
+            #expect(try await shown(db, starred.id).contains(lesson), "…yet shows the starred note")
+            let starredRows = try await memberIDs(db, starred.id)
+            let guideRows = try await memberIDs(db, guideID)
+            #expect(starredRows.isEmpty && guideRows.contains(lesson), "…which moved nowhere")
+            try session.operations.setStarred(.post(lesson), starred: false)
+            #expect(!(try await shown(db, starred.id)).contains(lesson), "unstarred, it leaves on its own")
+
+            // "A book holds its notes as members" — what it shows IS its rows.
             let jekyllMembers = try await memberIDs(db, jekyll.id)
             let jekyllShown = try await shown(db, jekyll.id)
             #expect(!jekyllMembers.isEmpty && jekyllMembers == jekyllShown,
                     "a book holds its notes as members — what it shows IS its rows")
-            // 17y B-DEDUPE (R-17y-8): the lesson's plain-book example is the
-            // GUIDE itself now — a book whose notes are ordinary members —
-            // and the restored Jekyll's notes join the gathering (the
-            // Restore sentence's truth; this world holds the restored copy).
-            #expect(!(try await memberIDs(db, guideID)).isEmpty,
-                    "the guide is a plain book holding members")
-            let classicsShown = Set(try await shown(db, classics.id))
-            #expect(Set(jekyllMembers).isSubset(of: classicsShown),
-                    "a restored Jekyll's notes join the gathering beside Sherlock's")
-            #expect(sherlock.owned)
-            let story = try #require(try await memberIDs(db, sherlock.id).last)
+            // LC-2: the restored Jekyll (this world holds the restored copy —
+            // the Restore press's shape) is a PLAIN book.
+            #expect(!jekyll.owned, "the arrangement owns Sherlock alone")
+
+            // "Restore the “classics” Gathering adds a gathering made from that
+            // tag, which shows every note wearing it without holding a single
+            // one of them" — the door's own brain, pressed.
+            let classicsID = try await session.runner.run { _ in
+                try SampleLibraryWelcome.restoreClassicsGathering(ops: Operations(undoStack: nil)).id
+            }
+            let classics = try #require(try await db.read { try Queries.reading($0, id: classicsID) })
+            #expect(classics.kind == .gathering)
+            #expect(try await memberIDs(db, classicsID).isEmpty, "it holds nothing…")
+            let classicsShown = Set(try await shown(db, classicsID))
+            let sherlockMembers = try await memberIDs(db, sherlock.id)
+            #expect(Set(sherlockMembers).isSubset(of: classicsShown) && Set(jekyllMembers).isSubset(of: classicsShown),
+                    "…yet shows every note wearing the tag, Sherlock's and the restored Jekyll's")
+
+            // LC-3 — "anywhere outside its book … each of its notes wears a
+            // quiet “owned by” mark": the mark lives OUTSIDE (the badge rule),
+            // and inside its own book the owned note wears none.
+            let story = try #require(sherlockMembers.last)
+            let (outside, inside) = try await db.read { db in
+                (try Queries.ownershipFacts(db, postIDs: [story]),
+                 try Queries.ownershipFacts(db, postIDs: [story], inBook: sherlock.id))
+            }
+            guard case .ownedBy(let owner)? = OwnershipBadgeFace.badge(
+                outside[story], placement: .outside, badgesOn: true) else {
+                Issue.record("a Sherlock note wears the owned mark outside its book")
+                return
+            }
+            #expect(owner.id == sherlock.id)
+            #expect(OwnershipBadgeFace.badge(inside[story], placement: .inBook, badgesOn: true) == nil,
+                    "inside its own book, no owned-by mark — why the lesson says OUTSIDE")
+
+            // "An owned book is the only place its notes live."
             let elsewhere = try session.operations.createReading(name: "elsewhere", kind: .book)
             #expect(throws: (any Error).self, "an owned book is the only place its notes live") {
                 try session.operations.addPostToReading(story, to: elsewhere.id)
@@ -242,7 +297,9 @@ struct TutorialBooksLessonTests {
     @Test func lessonTwoTheEditLaw() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "membership, not ownership")
-            #expect(text.contains("Editing a note that is in a book is always editing every book it appears in \u{2014} owned or not."))
+            // 13s-b triage landing: her edit-law sentence, its dash re-voiced to
+            // a comma (the WHAT ruled, 13s re-voices) — the claim unchanged.
+            #expect(text.contains("Editing a note that is in a book is always editing every book it appears in, owned or not."))
             #expect(text.contains("Adding a note to a book never copies it."))
             #expect(text.contains("A copy only ever happens because you asked for one, and it always remembers where it came from."))
 
@@ -289,7 +346,9 @@ struct TutorialBooksLessonTests {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "gatherings & arrivals")
             #expect(text.contains("A gathering is made from a tag. Remove the tag and the note leaves on its own."))
-            #expect(text.contains("You can't rearrange a gathering \u{2014} bind it into a book to take it in hand, and it keeps collecting after you do."))
+            // 13s-b triage landing: her ruled sentence, its dash re-voiced to a
+            // colon (the WHAT ruled, 13s re-voices) — the claim unchanged.
+            #expect(text.contains("You can't rearrange a gathering: bind it into a book to take it in hand, and it keeps collecting after you do."))
             #expect(text.contains(BindCopy.bindVerb), "the bind door by its own verb")
             #expect(text.contains(RuleEditorCopy.mintTitle), "the gathering mint by its own words")
 
@@ -410,7 +469,9 @@ struct TutorialBooksLessonTests {
     @Test func lessonSixFinishedAndSealed() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "owned, finished, sealed")
-            #expect(text.contains("Finished means the table of contents is done \u{2014} the writing inside can still change. Sealed means the book is done."))
+            // 13s-b triage landing: the dash re-voiced to a semicolon (the WHAT
+            // ruled, 13s re-voices); BookStateCopy.sealLead still says it.
+            #expect(text.contains("Finished means the table of contents is done; the writing inside can still change. Sealed means the book is done."))
             for verb in [BookStateCopy.finishVerb, BookStateCopy.sealVerb,
                          BookStateCopy.reopenVerb, BookStateCopy.unsealVerb, CollectingCopy.openVerb] {
                 #expect(text.contains(verb), "the door \(verb), by its own verb")
@@ -618,17 +679,27 @@ struct TutorialBooksLessonTests {
     @Test func lessonNineTheDailyJournal() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "the journal & the pool")
-            #expect(text.contains("The daily Journal is an ordinary book that is special in one way: it's where \u{2318}J and Today's Entry file."))
+            // 13s-b triage landing — A JUSTIFIED EDIT (R-13s-36/37): the lesson
+            // says "the journal" (the lowercase default) and its on-demand
+            // birth ("made the first time you ask for a day's entry"); the
+            // archive · can't-delete · comes-back sentence keeps every claim,
+            // re-voiced into one sentence. Each is executed below.
+            #expect(text.contains("The journal is an ordinary book that is special in one way: it is where \u{2318}J and Today's Entry file."))
             let todays = CapabilityRegistry.capability(.todaysEntry)
             #expect(text.contains(todays.verb))
             #expect(text.contains(try #require(todays.shortcutLabel)))
             // THE SECOND SENTENCE — taught now that the guard ships (F-U7-2).
-            #expect(text.contains("You can archive it; you can't delete it; it comes back when a day arrives."),
-                    "lesson 9's second sentence lands WITH the guard (13i-e)")
+            #expect(text.contains("It is made the first time you ask for a day's entry, and from then on you can archive it but you can't delete it, and it comes back when a day arrives."),
+                    "lesson 9's second sentence lands WITH the guard (13i-e), its birth said first")
+            #expect(text.contains("the journal itself waits among your unshelved books until you file it"))
             #expect(text.contains(CapabilityRegistry.capability(.archiveBook).verb.lowercased()),
                     "the door it names, by its own verb")
 
             let ops = session.operations
+            // "It is made the first time you ask for a day's entry": none
+            // stands before the first ⌘J on the launch seed.
+            #expect(try await db.read { try Queries.dailyJournalBookID($0) } == nil,
+                    "no journal until a day's entry is asked for")
             let entry = try ops.createPost(title: nil)
             let shelved = ops.shelveInDailyJournalBook(entry.id)
             guard case .shelved(let journal) = shelved else {
@@ -636,6 +707,10 @@ struct TutorialBooksLessonTests {
                 return
             }
             #expect(try await db.read { try Queries.dailyJournalBookID($0) } == journal)
+            #expect(try await db.read { try Queries.reading($0, id: journal) }?.shelfId == nil,
+                    "the journal waits among the unshelved books")
+            #expect(try await db.read { try Queries.reading($0, id: journal) }?.name
+                    == Operations.defaultDailyJournalBookName, "minted as \"journal\" (R-13s-36)")
             #expect(try await memberIDs(db, journal) == [entry.id], "⌘J files into it")
             #expect(try await db.read { try Queries.reading($0, id: journal) }?.kind == .book,
                     "an ordinary book")
@@ -669,25 +744,44 @@ struct TutorialBooksLessonTests {
     }
 
     /// **Lesson 10 — the Pool.** "The Pool is every note with no book. Notes
-    /// that show in gatherings tuck behind the count in its masthead — one
-    /// click shows them." — shown on the seeded quicknote.
+    /// that show in gatherings tuck behind the count in its masthead; one
+    /// click shows them."
+    ///
+    /// **13s-b triage landing — A JUSTIFIED EDIT (R-13s-37):** the seeded
+    /// quicknote left the fresh seed, so the lesson RESTAGES its act — the
+    /// reader presses ⌘⇧N, types a line and closes the pad — and this pin
+    /// runs the pad's OWN mint (`QuickNoteMint.file`, the door's one road):
+    /// the note is tagged "quicknote", the default gathering appears to show
+    /// it, and the note waits in the Pool, tucked. RED ON OLD: the old prose
+    /// names the retired "a first quick note" and no ⌘⇧N act.
     @Test func lessonTenThePool() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "the journal & the pool")
-            #expect(text.contains("The Pool is every note with no book. Notes that show in gatherings tuck behind the count in its masthead \u{2014} one click shows them."))
+            #expect(text.contains("The Pool is every note with no book. Notes that show in gatherings tuck behind the count in its masthead; one click shows them."))
             #expect(text.contains("click \(PoolTuckCopy.toggle(showing: false))"), "the one click, by its own word")
-            #expect(text.contains("\u{201C}\(SampleLibraryWelcome.quicknoteTitle)\u{201D}"))
+            #expect(!text.contains("\u{201C}\(SampleLibraryWelcome.quicknoteTitle)\u{201D}"),
+                    "the retired seeded quicknote is not taught")
+            #expect(text.contains("press \u{2318}\u{21E7}N, type a line, and close the pad"),
+                    "the act the reader performs")
+            #expect(text.contains("\u{201C}\(Operations.quicknoteTagPath)\u{201D}"), "the tag, by its own path")
+            #expect(text.contains("the \(Operations.defaultQuicknoteBookName) gathering appears"))
 
+            // The launch seed has no quicknotes gathering until a capture.
+            #expect(try await db.read { try Queries.quicknotesBookID($0) } == nil)
             let loose = try note(session, "a bookless note")
-            let quicknote = try #require(try await db.read { db in
-                try String.fetchOne(db, sql: "SELECT id FROM container WHERE title = ? AND deleted_at IS NULL",
-                                    arguments: [SampleLibraryWelcome.quicknoteTitle])
-            })
+            let filed = await QuickNoteMint.file("a line for the pad", session: session)
+            let captured = try #require(filed.postID, "the pad files the line as a note")
+            let gathering = try #require(try await db.read { try Queries.quicknotesBookID($0) },
+                                         "the gathering appears at the first capture")
+            let reading = try #require(try await db.read { try Queries.reading($0, id: gathering) })
+            #expect(reading.kind == .gathering && reading.name == Operations.defaultQuicknoteBookName)
+            #expect(try await shown(db, gathering).contains(captured), "…and it shows the note")
+            #expect(try await memberIDs(db, gathering).isEmpty, "…holding nothing: the note is in no book")
             let pool = try await db.read { try Queries.notePoolListing($0, window: 50) }
             #expect(pool.loose.map(\.postID).contains(loose), "every note with no book")
-            #expect(pool.tucked.map(\.postID).contains(quicknote),
-                    "the seeded quicknote shows in Quicknotes, so it tucks behind the count")
-            #expect(!pool.loose.map(\.postID).contains(quicknote))
+            #expect(pool.tucked.map(\.postID).contains(captured),
+                    "the captured note shows in a gathering, so it tucks behind the count")
+            #expect(!pool.loose.map(\.postID).contains(captured))
         }
     }
 
@@ -729,8 +823,17 @@ struct TutorialBooksRitualTests {
     /// the POST-RESTORE shape now — Jekyll is the example the lesson's
     /// Restore press adds, not launch furniture; the walk's mechanics are
     /// identical either way.)
+    ///
+    /// **13s-b triage landing — A JUSTIFIED EDIT (R-13s-37):** the classics
+    /// gathering left the fresh seed and the lesson now names its Help door
+    /// ("Restore the “classics” Gathering adds a gathering made from that
+    /// tag"), so the walk PRESSES that door first — its own brain, which mints
+    /// on Welcome — and then walks her ritual exactly as before.
     @Test func ritualOneTheClassicsWalk() async throws {
-        try await withChapterWorld(library: true) { _, db, _ in
+        try await withChapterWorld(library: true) { session, db, _ in
+            _ = try await session.runner.run { _ in
+                try SampleLibraryWelcome.restoreClassicsGathering(ops: Operations(undoStack: nil))
+            }
             let readings = try await db.read { try Queries.readings($0) }
             let classics = try #require(readings.first { $0.name == SampleLibraryWelcome.classicsGatheringName })
             let sherlock = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.sherlock.name })

@@ -284,8 +284,11 @@ struct TutorialCurrencyTests {
             let count = countWord(labels.count)
             let capitalized = count.prefix(1).uppercased() + String(count.dropFirst())
             #expect(text.contains("\(capitalized) views of a book share the toggle at the top."))
+            // 13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 caps ban):
+            // each view is named in its REAL casing, opening its own sentence;
+            // the arm read the retired caps form (`label.uppercased()`).
             for label in labels {
-                #expect(text.contains(label.uppercased() + " "), "the lesson teaches \(label)")
+                #expect(text.contains(". \(label) "), "the lesson teaches \(label), its own sentence")
             }
         }
     }

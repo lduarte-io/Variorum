@@ -1918,10 +1918,12 @@ struct TutorialLibraryActsTests {
             // 13c 2A/2B/2C: the lesson's vocabulary is the shipped one. The
             // old single "progress bar" claim is replaced by the four the
             // three modes actually make (A6 removed the bar itself).
-            #expect(prose.contains("OUTLINE"), "the lesson teaches the writing surface")
-            #expect(prose.contains("BOOK"), "…the two-up spread")
-            #expect(prose.contains("READ"), "…and the reading pair")
-            #expect(prose.contains("PAGES"), "the lesson teaches the paginated face")
+            // 13s-b triage landing: the views in their real casing, the faces
+            // lowercase as the toggle speaks them (her R-13s-30 caps ban).
+            #expect(prose.contains("Outline is this scroll"), "the lesson teaches the writing surface")
+            #expect(prose.contains("Book is a two-page spread"), "…the two-up spread")
+            #expect(prose.contains("Read is for reading only"), "…and the reading pair")
+            #expect(prose.contains("and pages, real book pages"), "the lesson teaches the paginated face")
             #expect(prose.contains("flowing across"), "…and says what makes it a page")
             #expect(prose.contains("click the word counts"))
             // 13j batch 6 — A JUSTIFIED PIN EDIT (the bounded copy alignment
