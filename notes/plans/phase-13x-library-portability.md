@@ -1648,3 +1648,67 @@ a failed checkpoint degrades to today's honest refusal, never to an unlocked sto
 old — a pool-written store locked via the binding leaves `-wal` empty on new, >0 on old;
 (2) the walk re-run as the behavioral proof. The VX-80-diff cold-review round covers this fix
 too (one review over the phase's whole added diff).**
+
+### VX-80 RECORD (the implementer's record; LIVE STATUS first — the fresh Fable VX-80 session, 2026-10-07)
+
+**LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified):**
+- **PIECE 1 — the NAMED red-on-old pin + this record:** DONE (this commit —
+  `App/Variorum/VariorumTests/VX80CastleFollowRecoveryTests.swift`, the suite "VX-80 — the
+  Castle-follow recovery door", one test: the record's exact simulate shape). Compile check
+  PENDING (build-for-testing into a scratch DerivedData, this session, before the handback).
+  **The RED run is PENDING-BEHIND-THE-STAGE** — exact command, from `App/Variorum/`:
+  `xcodebuild -scheme Variorum -destination 'platform=macOS' test -only-testing:VariorumTests/VX80CastleFollowRecoveryTests`
+  Expected on TODAY'S code: 1 test, FAILING at the `#require(recovery…)` line ("recovery was
+  nil" — the doorless dead end her Air hit). That failure IS the red-on-old confirmation; the
+  brief's order holds (no fix line lands before it is confirmed).
+- **PIECE 2 — the fix:** NOT-STARTED (awaits the confirmed red). The settled design, traced
+  this session against the shipped code:
+  (a) CORE (`Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift`): `StoreOpenError`
+  gains the typed fact **`keyRejected: Bool`** (default false) — true for exactly one refusal
+  class: an ENCRYPTED store whose resolved key (custody-held) failed the open with SQLCipher's
+  NOTADB class (`DatabaseError.resultCode == .SQLITE_NOTADB`, caught around the `onDisk` call
+  in `openStore`, gated on `presence == .encryptedOrUnknown`). R1-M3's own precedent: the
+  failure surface keys on a typed fact, never on matching the reason's prose. No key material
+  rides the reason (the failing statement is a schema read, never the redacted PRAGMA key).
+  (b) APP (`App/Variorum/Shared/AppBootstrap.swift` `failedOutcome`, :407): the one guard
+  widens — `error.keyUnavailable || error.keyRejected` — so the SAME wraps-bearing-sidecar
+  check and the SAME typed-secrets LobbyFacts (demand `.passphrase`, no biometry) serve both
+  classes. ZERO view changes: both failure faces already render a non-nil `recovery` lobby
+  (StoreFailureView / MobileStoreFailureView, R1-M3's machinery). The unreadable-sidecar
+  disposition (P11: doorless, the true cause worded) carries over unchanged.
+  (c) Downstream is the STANDING machinery, untouched: unlock → `beginOpening(unlockedKey:)`
+  → ready → `readyHousekeepingBody` → reconcile (its Apple arm already suppressed by
+  `readSwitchPending`) → the marker's resume doors (ProtectionPane's Finish …, the
+  replace-keys door's redirect) complete the interrupted follow — custody finally moves
+  (`moveCustodyForSwitch`), snapshot, `retireOldKeyFiles` on the resume road (2d.4), marker
+  cleared. The resume at `.rekeyLibrary`/`.custody` needs no passphrase on the follow shape
+  (custody holds M′; `newKeyFromKeyFile` unwraps the new sidecar's master copy).
+- **PIECE 3 — the saveAuto gate check (R1-M3's re-landing under the Castle demanded gate):**
+  NOT-STARTED. Traced mechanism, recorded now: the re-land at `AppBootstrap.finish` is guarded
+  by `!currentEffectiveGate.isDemanded`. On the recovery road under a DEMANDED gate (a
+  gated-custody stranded shape — e.g. a Castle device's Replace-All-Keys crash window: the
+  gated item holds stale A, the route's lobby biometric road releases A, the open fails
+  NOTADB, the recovery lobby's typed word yields B) the gate derives demanded at ready, so
+  saveAuto MUST NOT fire — the state-transition test asserts `backing.auto` stays nil through
+  ready. On the Air's own SILENT shape the effective gate honestly reads `.auto` at that
+  instant (indeterminate posture, custody shape silent), so R1-M3's designed heal REPLACES the
+  stale silent A with the proven B — strictly better custody, and the resume's
+  `moveCustodyForSwitch` then lands the Castle shape (gated/nowhere, silent item deleted).
+  Recorded as designed behavior, not a gap.
+- **PIECE 4 — state-transition tests for the new arm:** NOT-STARTED. Planned: core headless
+  (`Tests/VariorumCoreTests`): wrong-key `openStore` throws `keyRejected == true` +
+  `keyUnavailable == false`; empty-custody keeps `keyUnavailable == true` + `keyRejected ==
+  false`; right-key opens; fresh-store mint unaffected. Mac suite: the demanded-gate recovery
+  road (piece 3's pin); the unreadable-sidecar doorless parity on the new class. The two-client
+  convergence suites untouched (boot routing only).
+- **PIECE 5 — the full headless core suite at close (R2-3's flake watch):** NOT-STARTED.
+
+**Fences held:** zero `Persistence/Migrations.swift` (marker stays 12); ZERO `Sync/` lines —
+none demanded by the traced fix (boot routing + one typed error fact); her real store never;
+the Air's fixture untouched (simulated per the record).
+
+**Tree-sharing note (machinery honesty):** this worktree is ALSO carrying the orchestrator's
+W-1 walk-finding fix (uncommitted `StoreBinding.swift` edit at this record's first commit —
+the walk record's own disposition names the split: the orchestrator owns StoreBinding, this
+session owns AppBootstrap). Every VX-80 commit is pathspec-limited so neither session sweeps
+the other's work.
