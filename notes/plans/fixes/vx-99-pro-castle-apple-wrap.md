@@ -1,5 +1,12 @@
 # VX-99 — Pro library stayed Apple-openable after Castle (the record)
 
+**NOT DONE by round 2b (2026-10-08, the resume-door implementer — ROUND 2b at the bottom):** the busy arm's
+`switchInProgress` sentence (no marker to read; new copy → 13s — its RESIDUAL); no walk/capture (the resume door's
+pending-marker state has no reachable face without crash injection — the pins carry it; the pane captions are pinned as
+code because the pane's `@State` marker never reaches a composition dump); no phone SUITE (the phone build-for-testing
+only); no core re-run (zero `Sources/`); no QUESTIONS entry (no new sentence — both captions reuse round 2's PROVISIONAL
+`resumeReplacingKeysBody`). The cold review (round 3) is the orchestrator's.
+
 **NOT DONE by the round-2 fix pass (2026-10-08, the Opus implementer — ROUND 2 — FIX PASS at the bottom):** finding 5
 (VX-109, out by ruling, untouched); the two things this pass FOUND and left for the orchestrator (the resume door refusing its
 own mid-walk rotation — a likely one-line exemption, a second unit; `resumeBody` under BOTH panes' resume door); the
