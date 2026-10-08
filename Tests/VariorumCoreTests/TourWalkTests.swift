@@ -459,6 +459,76 @@ struct TourWalkTests {
         #expect(w.effects.last == .navigate(.area(.bookcase)))
     }
 
+    /// Round 1 MINOR-1 (the U2 ladder): wandering off the NOTE entirely
+    /// during the tour's middle re-anchors the ring on the toured note's own
+    /// Open-strip row — the road back, the legs' own shape — and the
+    /// road-back sentence is earned. On the note with the step's target
+    /// merely scrolled away, nothing rings and nothing is said (the
+    /// implementer's refinement at the round-1 exchange: A7's contradiction,
+    /// inverted, must not appear).
+    @Test func anAreaWanderDuringTheMiddleStepsRingsTheRoadBackToTheNote() {
+        for step in [Tour.Step.write, .makeTake, .takeIcon, .takesMode, .deeperModes,
+                     .placeFollows] {
+            var w = Self.walk(to: step)
+            w.report(.init(place: .area(.library)))
+            #expect(w.step == step)
+            #expect(w.rings == [[.sidebarOpenRow(Self.scandal)]],
+                    "\(step): the Open row is the road back (\(w.rings))")
+            #expect(w.state.map(Tour.isRoadBack) == true, "\(step): the card says so")
+        }
+        // Step 10 wanders to a non-Bookcase area the same way (the Bookcase
+        // itself advances the step — the home skip, pinned elsewhere).
+        var t = Self.walk(to: .downAndUp)
+        t.report(.init(place: .area(.library)))
+        #expect(t.step == .downAndUp)
+        #expect(t.rings == [[.sidebarOpenRow(Self.scandal)]])
+        #expect(t.state.map(Tour.isRoadBack) == true)
+        // In the note but out of the step's mode, the rail is the road back
+        // (step 7 gains Takes; step 6 keeps Write) — never the Open row.
+        var v = Self.walk(to: .takesMode)
+        v.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(v.rings == [[.sidebarMode(.takes)]])
+        #expect(v.state.map(Tour.isRoadBack) == true)
+        var u = Self.walk(to: .takeIcon)
+        u.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(u.rings == [[.sidebarMode(.write)]])
+        #expect(u.state.map(Tour.isRoadBack) == true)
+        // On the note in the step's own mode, the fallback never fires: the
+        // step's own ring stands (lit or not), and no road back is claimed.
+        var s = Self.walk(to: .takeIcon)
+        s.report(Self.write(Self.middle, ordinal: 40, takes: 2))
+        #expect(s.rings == [[.takeBadge(Self.middle)]])
+        #expect(s.state.map(Tour.isRoadBack) == false)
+    }
+
+    /// Round 1 MINOR-2 (the U2 ladder): leaving Snippets straight INTO the
+    /// field guide is the leg's finish — the tour never navigates away from
+    /// the guide she just opened. Every other exit keeps the designed yank
+    /// home (P-U2-7's choreography).
+    @Test func leavingSnippetsIntoTheFieldGuideFinishesWithoutYankingHerHome() {
+        var w = Self.walk(to: .endCard)
+        w.send(.choose(.keepGoing))
+        w.report(Self.ownNote(starred: true, tags: 1))
+        w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        w.report(.init(place: .area(.snippets)))
+        #expect(w.step == .legSnippets)
+        w.effects = []
+        w.report(.init(place: .book(Self.guide)))
+        #expect(w.state == nil)
+        #expect(w.effects == [.finish(completed: true)],
+                "no navigate off the guide: \(w.effects)")
+        // A non-guide exit still heads home as designed.
+        var v = Self.walk(to: .endCard)
+        v.send(.choose(.keepGoing))
+        v.report(Self.ownNote(starred: true, tags: 1))
+        v.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        v.report(.init(place: .area(.snippets)))
+        v.effects = []
+        v.report(.init(place: .book(Self.sherlock)))
+        #expect(v.step == .legEnd)
+        #expect(v.effects == [.navigate(.area(.bookcase))])
+    }
+
     @Test func nextIsInertOnACardThatWaitsForHerAct() {
         for step in [Tour.Step.seededBook, .write, .makeTake, .downAndUp, .ownNote] {
             var w = Self.walk(to: step)

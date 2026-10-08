@@ -516,7 +516,13 @@ public enum Tour {
         case .legSnippets:
             if place != .area(.snippets) { effects.append(.navigate(.area(.snippets))) }
         case .legEnd:
-            if place != .area(.bookcase) { effects.append(.navigate(.area(.bookcase))) }
+            // Round 1 MINOR-2 (the U2 ladder): landing AT the field guide IS
+            // the leg's finish — `finishAtGuide` accepts this very report —
+            // so never navigate away from the guide she just opened. Every
+            // other arrival heads home as designed (P-U2-7's choreography).
+            if finishAtGuide(state) == nil, place != .area(.bookcase) {
+                effects.append(.navigate(.area(.bookcase)))
+            }
         default:
             break
         }
@@ -655,21 +661,31 @@ public enum Tour {
             }
         case .write:
             // The paragraph is hers to choose — no ring on the live text. In a
-            // note but out of Write, the ring is the road back to it.
-            if case .note = facts.place, facts.noteMode != .write { return [[.sidebarMode(.write)]] }
+            // note but out of Write, the ring is the road back to it; off the
+            // note entirely, the note's own Open-strip row (round 1 MINOR-1).
+            guard case .note = facts.place else { return [roadBackRow(state)] }
+            if facts.noteMode != .write { return [[.sidebarMode(.write)]] }
             return []
         case .makeTake:
-            if case .note = facts.place, facts.noteMode != .write { return [[.sidebarMode(.write)]] }
+            guard case .note = facts.place else { return [roadBackRow(state)] }
+            if facts.noteMode != .write { return [[.sidebarMode(.write)]] }
             return facts.caret?.panelOpen == true ? [[.panelNewTake]] : [[.barTakes]]
         case .takeIcon:
             // ONE ring (A3, the U2 UI assessment — the walk showed two at
             // once, the badge's under the panel): while the panel is up its
             // "Open Takes mode" is the act; with it closed, the ⑂ badge.
+            // Off Write, the road back (round 1 MINOR-1): the rail's Write in
+            // the note, the Open row off it — the badge cannot exist there.
+            guard case .note = facts.place else { return [roadBackRow(state)] }
             if facts.caret?.panelOpen == true { return [[.panelOpenTakesMode]] }
+            if facts.noteMode != .write { return [[.sidebarMode(.write)]] }
             return [state.tourBlockID.map { [.takeBadge($0)] } ?? []]
         case .takesMode:
+            guard case .note = facts.place else { return [roadBackRow(state)] }
+            if facts.noteMode != .takes { return [[.sidebarMode(.takes)]] }
             return [state.tourBlockID.map { [.takesBlock($0)] } ?? []]
         case .deeperModes:
+            guard case .note = facts.place else { return [roadBackRow(state)] }
             return [[.sidebarMode(.lenses)]]
         case .placeFollows:
             switch facts.place {
@@ -679,13 +695,13 @@ public enum Tour {
             case .note:
                 return [[.contextBarBook]]
             default:
-                return []
+                return [roadBackRow(state)]
             }
         case .downAndUp:
             switch facts.place {
             case .book: return [[.noteBoxEditHere]]
             case .note: return [[.contextBarBook]]
-            default: return []
+            default: return [roadBackRow(state)]
             }
         case .home:
             return [[bookcase]]
@@ -710,6 +726,16 @@ public enum Tour {
         }
     }
 
+    /// **The road back to the toured note when she has left it entirely**
+    /// (round 1 MINOR-1, the U2 ladder): its row on the sidebar's Open strip
+    /// — the legs' own shape, visible from every place. Used ONLY off the
+    /// note (the implementer's round-1 refinement): on the note with the
+    /// step's target merely scrolled away, nothing rings and the road-back
+    /// sentence is never said — A7's contradiction must not return inverted.
+    static func roadBackRow(_ state: State) -> [Anchor] {
+        state.tourNoteID.map { [.sidebarOpenRow($0)] } ?? []
+    }
+
     /// **Whether the ring is the ROAD BACK** — the step's own target is not
     /// where she is, so the ring points at the way back to it (she wandered).
     /// The card then adds one muted sentence (A7 of the U2 UI assessment,
@@ -725,12 +751,24 @@ public enum Tour {
         case .insideBook:
             if case .book = place { return false }
             return true
-        case .write, .makeTake:
+        case .write, .makeTake, .takeIcon:
+            // Round 1 MINOR-1: off the note, the Open row is the road back.
             if case .note = place { return state.facts.noteMode != .write }
-            return false
+            return true
+        case .takesMode:
+            if case .note = place { return state.facts.noteMode != .takes }
+            return true
+        case .deeperModes:
+            if case .note = place { return false }
+            return true
+        case .placeFollows:
+            switch place {
+            case .book, .note: return false
+            default: return true
+            }
         case .downAndUp:
-            if case .note = place { return true }
-            return false
+            if case .book = place { return false }
+            return true
         case .legTags:
             guard let own = state.ownNoteID else { return false }
             return place != .note(own)
@@ -738,8 +776,7 @@ public enum Tour {
             return place != .area(.pool)
         case .legSnippets:
             return place != .area(.snippets)
-        case .navigation, .takeIcon, .takesMode, .deeperModes, .placeFollows, .home,
-             .endCard, .legStar:
+        case .navigation, .home, .endCard, .legStar:
             return false
         }
     }
