@@ -94,6 +94,9 @@ struct TourOverlay: View {
             if TourOracle.overlay === engine {
                 TourOracle.overlay = nil
                 TourOracle.cardFrame = nil
+                // Round 1 NIT-2 (the U2 ladder): the door frames leave with
+                // their overlay — a later mount's pin must never read this one's.
+                TourOracle.endDoorFrames = [:]
             }
         }
         #endif
