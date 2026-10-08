@@ -202,9 +202,64 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   != nil`) untouched; (d) `aLocalOnlyCastleLibrarysReplaceAllKeysWritesNoAppleCopyAndAStandardOneStillDoes`
   (the harness reaches the runner's local-only road; the DOOR refuses a non-enrolled library —
   `replaceKeysNotEnrolled` — so (d) pins the runner's road, reached whenever its own enrolled reading fails at
-  the run). Compile PENDING (build-for-testing); the red run PENDING the coordinator's stage slot.
-- The fix: NOT-STARTED
-- Behavioral revert (named here BEFORE it runs): NOT-STARTED
+  the run). **DONE (0dd76c59) — RED ON THE PRE-FIX CODE**, verified under the coordinator's stage slot
+  (claimed 02:01:58, `vx-99-impl`), `test-without-building -only-testing:VariorumTests/PostureSwitchTests`
+  over the pre-fix build: "Test run with 49 tests in 1 suite failed … with 8 issues". Mine, each at its
+  Apple-copy expectation and nowhere else: (a) :2261 `newFile.apple == nil && newFile.appleKeyID == nil` +
+  :2263 "an error was expected but none was thrown" (the iCloud key OPENED the new key file); (b) :2305
+  (seam 1, mid re-encryption), :2324 (seam 2, after the vault write), :2341 (seam 3, `.rekeyLibrary`) — the
+  STANDARD resume control inside (b) passed; (d) :2387 — its Standard control passed. **Two further reds are
+  NOT this diff's** — see "PRE-EXISTING REDS" below.
+- The fix: DONE (this commit) — `PostureSwitch.swift`: ONE decision per road threaded as a required
+  `appleCopy:` into `rekeyCustodyAndSnapshot` → `writeNewKeyFile` (`let apple: AppleKey? = appleCopy ?
+  leaves.appleKeys.read() : nil`). Ceremony, enrolled: `appleCopyInKeyFile = appleHeld != nil` (exactly when
+  the vault write carries an Apple-held copy); ceremony, local-only: `!entersCastle && leaves.posture() ==
+  .standard`; resume: `!entersCastle && leaves.posture() == .standard` (the plan's letter — see "THE RESUME
+  RULE" below); the follow (both calls): `!entersCastle` (the vault's word, behavior unchanged). Entering Castle
+  stays nil on every road. Doc comments on `writeNewKeyFile` / `rekeyCustodyAndSnapshot` / `runFollow` updated.
+  Green run PENDING.
+- Behavioral revert (named here BEFORE it runs): NAMED — **REVERT V99-A**: in `rekeyCustodyAndSnapshot`, the
+  one hand-off line `try await writeNewKeyFile(newKey: newKey, appleCopy: appleCopy, …)` → `appleCopy:
+  !entersCastle` — exactly the pre-fix decision for every road (ceremony, resume, follow). Expected: RED on
+  (a), (b) seams 1–3 and (d)'s Castle arm; their Standard controls, the standing Standard pin (c) and every
+  other test unchanged. Run PENDING.
 - Class sweep table: NOT-STARTED
 - Core headless run: NOT-STARTED
 - Mac suites under a stage slot: NOT-STARTED
+
+## PRE-EXISTING REDS in `PostureSwitchTests` (found by this run; NOT this diff's; NOT fixed here — handed to the orchestrator)
+
+The pre-fix red run (above) also failed two tests that my pins do not touch:
+`regeneratingTheWordsOnOneDeviceRetiresTheOldWordsAtTheVaultForItsSibling` (:2780 `try #require(siblingController.changeNotice)`)
+and `theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord` (:3012 `try #require(controller.changeNotice)`).
+**Traced mechanism (13x's, not VX-99's):** 13x F1 added the `castleKeyFileAppleOpenable` arm to
+`ProtectionController.reconcileFollow` (`ProtectionController.swift:680`): `!reading.hasAppleHeldCopy, keyFile?.apple != nil,
+!switchInProgress ⇒ owe(.castleKeyFileAppleOpenable); return` — it returns BEFORE `changeElsewhere` runs (:696). Both tests
+build the harness's default "Standard" world (`makeWorld()` — the key file carries an `apple` copy) over a vault born by
+`VaultEnrollment.setUp(passphrase:)` with NO Apple-held copy (the harness's own note: "the 2b world's account is
+Castle-shaped", :3873 pre-pins), with the controller's custody shape not yet adopted (`.unknown`), so before 13x the
+mismatch arms fell through to the change notice and now the new arm owes the follow first. The 13x closeout's widened Mac
+run (209 tests in 20 suites, `phase-13x-library-portability.md` §THE PHASE CLOSEOUT item 3) did not include
+`PostureSwitchTests`, which is how it reached `main`. Whether the fix is the tests' world (an Apple-held copy in the vault,
+or a Castle key file) or the arm's order is a 13x-surface call — a second unit; this batch does not "also do" it. The
+green criterion for this batch is therefore: every `PostureSwitchTests` test green EXCEPT exactly these two, which stay
+red identically on both sides of the fix (recorded with each run).
+
+## THE RESUME RULE (the plan's letter built; one corner recorded for the orchestrator — PROPOSAL, not built)
+
+Built per the plan: the resume's key-file decision is `!marker.entersCastle && leaves.posture() == .standard`. The
+resume's ONLY key-file-writing arm is `.vaultWrite`/`.reencrypt` (the `.rekeyLibrary` arm reads the file the ceremony
+already wrote), and that arm always holds the FETCHED vault. **The corner the posture read leaves open:** a STANDARD
+Replace All Keys killed before its own vault write while ANOTHER device ENTERED CASTLE resumes as the follow
+(`byAnotherDevice`) with `marker.entersCastle == false`. In production the posture there is the controller's
+derivation — Castle once the ready's vault read landed; but under an INDETERMINATE reading (the vault unread at ready,
+online by the time of Finish) it is the custody SHAPE (silent ⇒ Standard), so the resumed follow would still wrap L′
+under the iCloud key on a now-Castle account. The same corner also moves custody by the stale posture
+(`moveCustodyForSwitch(entersCastle: false)`), skips `retireOldKeyFiles` (gated `follow && entersCastle`) and lists no
+offer — the old Standard-era key file stays in the live folder (it opens only the OLD library key, so nothing written
+after the re-key; 13x's detector owes the follow at the next ready). **PROPOSAL (for the orchestrator; not built):** in
+the resume's enrolled arm derive the road's posture from the fetched vault exactly as `runFollow` does —
+`let entersCastle = byAnotherDevice ? (fetched.format.masterWrappedByAppleHeld == nil) : marker.entersCastle` and
+`appleCopy: fetched.format.masterWrappedByAppleHeld != nil` — decision 8's "the vault's word, when in hand" (arm 1 of
+`Posture.derive`), which also honors decision 35 (no posture-driven write on an indeterminate reading). It is a
+behavior change on the resume's follow road beyond this unit's letter, so it waits for the orchestrator's word.
