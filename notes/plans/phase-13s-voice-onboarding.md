@@ -418,3 +418,26 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
 - Walk evidence lives in the session scratchpad (gitignored; deleted at the merge per the closeout rule) — this record is the evidence of record. The Opus UI assessors were NOT spent here (small chrome, self-assessed); they are reserved for U2's full-tour walk.
 
 **U1a status: UNIT CLOSED (2026-10-08 ~04:05).** Built, suites green (49/5 + 278/62 at the stage window), walked both rooms, ladder round 1 CLEAN (0B · 0M · 0m · 3 NIT, all agreed record-only — the full exchange and dispositions: `notes/plans/13s-ladders/u1a-round1.md`). The cross-model exchange ran whole: findings verbatim to the implementer, three AGREEs, zero disputes, the ladder closed at round 1. NIT-1's text joins P-U1a-4's QUESTIONS entry at the merge; NIT-2 rides W-U1a-2's for-her note; NIT-3 is a standing hygiene line. U2 spawns next.
+
+## U2 RECORD (the tour engine and the 22 frames — Opus implementer, Pro seat, 2026-10-08)
+
+**What this unit did NOT do (first line, per the contract; rewritten at the stage hand-off):** PENDING — the record opens here and is rewritten at the hand-off.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 0 — the record + the design (this section) | IN-PROGRESS — the design below is settled; the build-verify resolutions are traced |
+| 1 — the pure rule: `Domain/Tour.swift` + headless `TourWalkTests` (P-6) | NOT-STARTED |
+| 2 — the shared spotlight: `Core/Views/TourSpotlight.swift` (the anchor modifier, the ring) | NOT-STARTED |
+| 3 — the engine + the cards: `Features/Onboarding/` (script, engine, overlay) + `RootView` wiring (`startTour()` replaces the U1a stub) | NOT-STARTED |
+| 4 — the anchors at the feature sites | NOT-STARTED |
+| 5 — the Mac pins | NOT-STARTED |
+| 6 — self-assessment + the stage commands | NOT-STARTED |
+
+### THE DESIGN (settled before code; each line is one place to overturn)
+
+- **One pure rule, headless.** `Sources/VariorumCore/Domain/Tour.swift` holds the step order, the step positions ("Step 1 of 11" … "Keep going · 1 of 4" … "The end"), the abstract FACTS the app reports (where the focused pane is, the note's mode, Write's caret block and its take count, whether Write's takes panel is up, whether a book's note box is live, the toured notes' star/tag/book facts), the reducer (facts / next / End tour / the end card's three choices → the next state + EFFECTS: navigate, open the field guide, record completion, finish), and the RING GROUPS per step (ordered candidates; the first one actually on screen lights — this is the "off-target clicks: the tour re-anchors" rule, made data). `TourWalkTests` walk every card headlessly, plus the tolerance cases.
+- **The ring is drawn by the anchor itself, never by a dim** (R-13s-12). `Core/Views/TourSpotlight.swift` is the shared vocabulary (features RENDER a modifier, they never hold the tour's model — CLAUDE.md's cross-feature rule): `.tourAnchor(.bookcaseRow(id))` draws the ring when that anchor is lit, reports its presence and its frame. The spotlight rides the environment from `RootView` (nil when no tour runs ⇒ every anchor is inert). Write's ⑂ badge is AppKit (an `NSButton` the editor's badge overlay owns); the overlay finds it read-only by its identifier and draws its ring itself — nothing in the editor is decorated or edited.
+- **The engine is per WINDOW** (`RootView` `@State`), started by the one entry U1a left (`startTour()` — the offer's "yes" and Help ▸ Take the Tour). A start always begins at step 1 (Q12), on the Bookcase, with the window's first responder released (W-U1a-1). Completing (the end card) records `completed`; End tour before it records `ended` (U1a's `tourEnded(completed:)`); a quit records nothing (Q12 — the offer comes back).
+- **The cards** are SwiftUI in a window overlay (`Features/Onboarding/TourOverlay.swift`): placed beside their lit anchor (trailing · below · leading · above, whichever fits, clamped to the window), a per-step corner when nothing is lit (and for anchors inside Write's takes panel, a sheet). Theme tokens only; the step label, title and buttons are chrome (`chromeLabel`); the body is prose. Copy: `Features/Onboarding/TourScript.swift`, VERBATIM from mockup v5 except the resolutions recorded below.
