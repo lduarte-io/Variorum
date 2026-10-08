@@ -1914,10 +1914,98 @@ Work only in `~/dev/variorum-13x`.
 | piece | status |
 |---|---|
 | 0 — baseline (whole core, headless) | DONE — `swift test` 2338 tests / 269 suites PASSED + StringsWorkbook 40/6 PASSED (146 s); skips = the standing env-gated set only |
-| 1 — R3-1 pins (a)(b)(c), red on today's code | NOT-STARTED |
-| 1 — R3-1 fix (the four constraints) | NOT-STARTED |
-| 2 — R3-2 the gate closures read the marker + pin + revert | NOT-STARTED |
+| 1 — R3-1 pins (a)(b), red on today's code | DONE (this commit) — `Tests/VariorumCoreTests/LibraryHotCopyAdoptionTests.swift`, 2 pins, **RED ON TODAY'S CODE BY DESIGN** (pin-before-fix; the evidence below). (c) NOT written — its shape waits on the ruling (Q1/Q2 below) |
+| — **STOPPED** | **The code contradicts the report's trace** (the brief's STOP condition) — measured facts below; handed back to the orchestrator for the ruling. The core suite on this branch head is red by exactly these 2 pins until the fix lands. |
+| 1 — R3-1 fix (the four constraints) | NOT-STARTED — PROPOSED mechanism below, awaiting the ruling |
+| 2 — R3-2 the gate closures read the marker + pin + revert | NOT-STARTED (no contradiction found; settled design: a Shared composition function wiring both gates to `LibraryRestoreHold.isHeld(besideStore:)`, its Mac pin PENDING-behind-the-stage) |
 | 3 — the full core at close + `build-for-testing` + the PENDING Mac commands | NOT-STARTED |
 
 No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
-claimed or touched by this session (no `xcodebuild test`, no app launch).
+claimed or touched by this session (no `xcodebuild test`, no app launch). The measurement
+probe was a scratch test file, deleted uncommitted; its output is quoted verbatim below.
+
+#### R3-1 — WHAT TODAY'S CODE ACTUALLY DOES (measured headless, real SQLCipher stores, this stack)
+
+The pins' shape (the report's): a keyed library, its schema checkpointed into the main file
+(an ESTABLISHED library), one row written with the pool OPEN — so it lives in the `-wal`
+alone — and the folder copied HOT beside its key file; then the door's real sequence
+(`classify(folder)` → `schemaVerdict(at:key:)` → `LibraryAdoption.plan/execute(holding:)`)
+and the landed library reopened through `AppDatabase.openStore` under the key.
+
+| shape (today's code) | consult verdict | what happened to the PICKED folder | landed library |
+|---|---|---|---|
+| (a) the hot trio, right key | `.current` | the source's **`-shm` REWRITTEN** (32768 bytes, changed) | walled row **ABSENT** (`nil`) — **the report's MAJOR premise CONFIRMED** |
+| (b) shm-less hot copy, right key, writable folder | **`.current`** — NOT `.unreadable` | a **`-shm` CREATED** beside the picked store | walled row **ABSENT** |
+| (b′) shm-less hot copy, right key, NON-writable folder (0555 — a locked volume/DMG/read-only share) | `.unreadable("SQLite error 14: unable to open database file - while executing SELECT * FROM sqlite_master LIMIT 1")` → today's settle: **the FALSE wrong-key sentence** | unchanged | — |
+| torn copy (page 1 intact, tail cut), right key | `.unreadable("SQLite error 11: database disk image is malformed …")` → **the FALSE wrong-key sentence** | unchanged | — |
+| hot trio, **WRONG** key | `.unreadable("SQLite error 26: file is not a database …")` → the wrong-key sentence (TRUE) | **the picked MAIN FILE REWRITTEN** (bytes changed) and its **`-wal` and `-shm` DELETED** — the read-write fallback's close-time checkpoint folded the wal's raw frames in; the walled row survives under the right key | — |
+| closed store, wrong key | `.unreadable(… error 26 …)` → wrong-key (TRUE) | unchanged | — |
+
+The pins' red output on today's code (quoted): (a) `title → nil` vs `"the-walled-row"`;
+`variorum.sqlite-shm was rewritten`. (b) `title → nil`; `after.keys.sorted() →
+[key file, "variorum.sqlite", "variorum.sqlite-shm", "variorum.sqlite-wal"]` vs `before →
+[key file, "variorum.sqlite", "variorum.sqlite-wal"]`. (b)'s own `verdict == .current`
+assertion is GREEN on today's code — the contradiction below.
+
+**The two places the report's trace does not hold on this stack:**
+1. *"GRDB's init runs no reading statement"* — it does: `Database.setUp()` ends with
+   `validateFormat()`, `SELECT * FROM sqlite_master LIMIT 1`
+   (`.build/checkouts/GRDB.swift/GRDB/Core/Database.swift:526`, `:645–651`). So EVERY
+   first-read failure lands inside `schemaVerdict`'s init-scoped `do/catch` and takes the
+   READ-WRITE fallback — which is what rewrote the picked main file in the wrong-key-hot row.
+2. *"a copy WITHOUT its -shm fails at the first read"* — not in a writable folder: SQLite's
+   read-only connection opens the `-shm` `O_RDWR|O_CREAT`, creates it beside the picked
+   store, recovers, and reads `.current`. It fails (CANTOPEN → today's false wrong-key
+   sentence) only where the folder is not writable — (b′). The report's SYMPTOM is real; its
+   SHAPE on this stack is (b′) and the torn copy, not the writable-folder shm-less copy.
+   (Also: "read-only connections never checkpoint" holds, but they DO write the `-shm`.)
+
+**All four constraints remain achievable** — so this stop is the brief's
+contradiction clause, not a can't-be-met one.
+
+#### R3-1 — THE PROPOSED MECHANISM (awaiting the ruling; nothing built)
+
+- **THE STAGED READ.** Every SQLite read of a PICKED file — stage 2's `schemaVerdict`, and
+  (Q4) stage 1's `openForInspection` — runs on a private copy in the per-user temp
+  directory: the main file plus its non-empty `-wal`, NEVER its `-shm`, opened normally
+  (read-write — the copy is ours) so SQLite's own crash recovery folds the wal's committed
+  frames in, exactly as the landing's reopen will. The picked file is never opened in place:
+  no `-shm` created or rewritten, and the read-write fallback (the source-writing road)
+  disappears. `FileManager.copyItem` clones on APFS (same volume ⇒ O(1)); otherwise ∝ the
+  library once, at a deliberate door, off-main (the adoption copies the library twice
+  already). A crash mid-consult leaves the copy in the temp dir until the OS sweeps it
+  (ciphertext for an encrypted source; plaintext only for a plaintext source) — recorded.
+- **THE LANDING (step 5).** Copies the source's main file + its non-empty `-wal`, never its
+  `-shm`; the reopen's recovery folds the frames in. The landed main file stays
+  byte-identical to the source's, so the existing byte-identity pins hold. The consult
+  reads exactly the pair that lands.
+- **THE SPLIT (constraint 3).** `SchemaVerdict` gains `.keyRejected` — VX-80's class letter
+  (`SQLITE_NOTADB` ∧ presence `.encryptedOrUnknown` ∧ a key in hand,
+  `AppDatabase+Dependency.swift`'s `keyRejected`); `.unreadable(reason:)` becomes every
+  other failure (CANTOPEN, CORRUPT, I/O, a failed staging copy). `settle` maps
+  `.keyRejected` → `wrongKeyRefusal` and `.unreadable(reason)` → `unreadableRefusal` with
+  the reason as detail (stage 1's own mapping). The existing
+  `theSchemaVerdictUnderAWrongKeyIsUnreadableNeverAGuess` pin's premise updates to
+  `.keyRejected` (its "never a guess" protection kept).
+- **THE PROPOSED PIN SET:** (a) and (b) as committed (red on old as quoted); **(b′)** the
+  shm-less hot copy in a non-writable folder reads `.current` and lands whole — red on old
+  (`.unreadable` CANTOPEN ⇒ the false wrong-key sentence); **(b″)** a torn copy under its
+  RIGHT key is `.unreadable`, never `.keyRejected` (core), and settles to
+  `unreadableRefusal` (Mac pin — red on old at the sentence level); **(c)** a genuine key
+  mismatch, closed AND hot, is `.keyRejected` (core) and settles to the wrong-key sentence
+  (Mac pin through `LibraryOpenModel`, compiles on both trees — green on both sides,
+  PENDING-behind-the-stage), and over the hot trio the picked folder stays byte-identical
+  (core — red on old: main rewritten, `-wal`/`-shm` deleted).
+
+#### QUESTIONS FOR THE ORCHESTRATOR'S RULING
+
+- **Q1** — accept the re-trace: pin (b) stays as committed (red on old by the wal-tail drop +
+  the materialized `-shm`; its verdict assertion green on both sides), and (b′) + the torn
+  copy carry the report's false-wrong-key symptom on this stack?
+- **Q2** — is the source-WRITING found here (the wrong-key hot consult rewriting the picked
+  main file and deleting its sidecars; the `-shm` rewrite in (a) and creation in (b)) inside
+  R3-1's constraint (1) for F3 to fix? (My reading: yes — constraint 1 is literal, and the
+  staged read removes the fallback entirely.)
+- **Q3** — the staged copy's home: the per-user temp directory (above) acceptable?
+- **Q4** — extend the staged read to stage 1's plaintext `openForInspection` (the same
+  read-only-writes-`-shm` + read-write-fallback construction; NOT measured this session)?
