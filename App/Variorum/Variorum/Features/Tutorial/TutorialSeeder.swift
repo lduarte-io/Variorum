@@ -1002,35 +1002,37 @@ enum TutorialSeeder {
         _ = try lesson(structure, "divide", [
             // 13b 4A: the ruled cut redesign (S4-22) — cuts land between
             // any two words; sentence ends and line breaks pull gently.
-            "Divide cuts a block in two at your cursor — the everyday gesture "
+            "Divide cuts a block in two at your cursor: the everyday gesture "
             + "for \u{201C}this part should stand on its own so I can work on it "
-            + "separately.\u{201D} The cut can land between any two words — it snaps "
-            + "to the nearest word edge, settles a little more readily onto "
+            + "separately.\u{201D} The cut can land between any two words. It "
+            + "snaps to the nearest word edge, settles a little more readily onto "
             + "sentence ends and line breaks, and the app shows you where it "
             + "landed. Only a single word has nothing to divide.",
 
-            "This block holds two thoughts and they deserve two blocks. Put your "
-            + "cursor right before this second sentence and press \u{2318}\u{21E7}D.",
+            "This block holds two thoughts and they deserve two blocks. Put "
+            + "your cursor right before this second sentence and press "
+            + "\u{2318}\u{21E7}D.",
 
             // 13j J4 (her 2026-08-03 ruling): the fanned default. Stated here
             // because THIS is the lesson someone reads before their first
             // divide on a block that already has takes.
-            "If the block has SEVERAL takes, \u{2318}\u{21E7}D still just cuts: the take "
-            + "you're LOOKING at splits across the two new blocks, and every other "
-            + "take stays WHOLE on the first block — the one you divided. Nothing "
-            + "goes missing and there's nothing to hunt for. When you'd rather send "
-            + "them somewhere else, or place a cut in each take by hand, that's "
-            + "Divide choosing takes, \u{2325}\u{2318}\u{21E7}D, and it has the next lesson "
-            + "to itself.",
+            "If the block has several takes, \u{2318}\u{21E7}D still just cuts: "
+            + "the take you're looking at splits across the two new blocks, and "
+            + "every other take stays whole on the first block, the one you "
+            + "divided. Nothing goes missing and there's nothing to hunt for. "
+            + "When you'd rather send them somewhere else, or place a cut in each "
+            + "take by hand, that's Divide choosing takes, "
+            + "\u{2325}\u{2318}\u{21E7}D, and it has the next lesson to itself.",
 
-            "From Takes, divide acts RIGHT THERE — press \u{2318}\u{21E7}D, or Divide "
-            + "in the bottom bar's block \u{25BE} group, and the block you're in is "
-            + "cut without leaving the board. (Extract, Make Block and Merge "
-            + "still travel to Write and act there, visibly — that carry is a "
-            + "feature, not a trick.)",
+            "From Takes, divide acts right there: press \u{2318}\u{21E7}D, or "
+            + "Divide in the bottom bar's block \u{25BE} group, and the block "
+            + "you're in is cut without leaving the board. (Extract, Make Block "
+            + "and Merge still travel to Write and act there, visibly. That carry "
+            + "is a feature, not a trick.)",
 
-            "One \u{2325}\u{2318}Z (structural undo) puts a divided block back together. "
-            + "The undo chapter has the whole story.",
+            "One \u{2325}\u{2318}Z (structural undo) puts a divided block back "
+            + "together. The two undos lesson at this chapter's end has the whole "
+            + "story.",
         ])
 
         let ceremony = try lesson(structure, "divide choosing takes", [
@@ -1038,34 +1040,36 @@ enum TutorialSeeder {
             // ruling flipped ⌘⇧D on a fanned block to the duplicating shape;
             // this lesson teaches the door that still asks take by take.
             "Dividing a fanned block raises a real question: each take is a "
-            + "different text, so where does each one go? \u{2318}\u{21E7}D answers it the "
-            + "quick way — cut the take you're looking at, leave the rest whole on "
-            + "the first block. When the answer matters, ask for the choice "
-            + "instead: \u{2325}\u{2318}\u{21E7}D lays every take out in one sheet and asks "
-            + "where they should go.",
+            + "different text, so where does each one go? \u{2318}\u{21E7}D "
+            + "answers it the quick way: cut the take you're looking at, leave "
+            + "the rest whole on the first block. When the answer matters, ask "
+            + "for the choice instead. \u{2325}\u{2318}\u{21E7}D lays every take "
+            + "out in one sheet and asks where they should go.",
 
             // 13b 4A: the sheet shows every checked take at once, the ✂
             // drags between word edges, keyboard placement, and PARKING.
-            "The block below carries three takes, staged for it. Put your cursor "
-            + "mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet titled \u{201C}Divide choosing "
-            + "takes\u{201D} opens on a row of four: keep the takes on the top block "
-            + "(the everyday answer, already chosen), keep them on the bottom, copy "
-            + "them to both — or \u{201C}Choose per take\u{2026}\u{201D}, which is the one you "
-            + "really have to ask for. Pick that fourth one: every take gets a "
-            + "checkbox and its text laid out with a ✂ you can place anywhere "
-            + "between words — drag it, click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps "
-            + "by sentence, \u{21E5} moves between takes). Leave the third take "
-            + "UNCHECKED before you confirm.",
+            "The block below carries three takes, staged for it. Put your "
+            + "cursor mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet "
+            + "titled \u{201C}Divide choosing takes\u{201D} opens on a row of "
+            + "four: keep the takes on the top block (the everyday answer, "
+            + "already chosen), keep them on the bottom, copy them to both, or "
+            + "\u{201C}Choose per take\u{2026}\u{201D}, the one you really have "
+            + "to ask for. Pick that fourth one: every take gets a checkbox and "
+            + "its text laid out with a \u{2702} you can place anywhere between "
+            + "words. Drag it, click a spot, or use \u{2190}/\u{2192} (\u{2325} "
+            + "jumps by sentence, \u{21E5} moves between takes). Leave the third "
+            + "take unchecked before you confirm.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the storm.",
 
             "Confirm makes two blocks: the first holds every checked take's "
-            + "first half, the second the endings — your openings and endings "
-            + "stay mix-and-matchable. A take doesn't have to split at all: "
-            + "park its \u{2702} at the very end and the whole take rides into the "
+            + "first half, the second the endings, so your openings and endings "
+            + "stay mix-and-matchable. A take doesn't have to split at all: park "
+            + "its \u{2702} at the very end and the whole take rides into the "
             + "first block (at the very start, the second). The unchecked take "
             + "didn't vanish: it stays with the original block, preserved whole "
-            + "off-stage, and \u{2325}\u{2318}Z puts the whole thing back as it was.",
+            + "off-stage, and \u{2325}\u{2318}Z puts the whole thing back as it "
+            + "was.",
         ])
         let ceremonyBlock = ceremony.blocks[2]
         try take(on: ceremonyBlock,
@@ -1079,23 +1083,23 @@ enum TutorialSeeder {
             // ruling 4), so a selection starting anywhere snaps to the
             // nearest word edge and the late-start refusal class is gone.
             // The prose re-widens honestly.
-            "Extract pulls a span at a block's EDGE out into its own block — "
-            + "no fuss at all: the source block keeps its identity and all its "
-            + "takes. Select from anywhere in this paragraph to its end and "
-            + "press \u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
-            + "edge, settling gently onto sentence ends) — and this closing "
-            + "line is begging to stand alone.",
+            "Extract pulls a span at a block's edge out into its own block, no "
+            + "fuss at all: the source block keeps its identity and all its "
+            + "takes. Select from anywhere in this paragraph to its end and press "
+            + "\u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
+            + "edge, settling gently onto sentence ends). This closing line is "
+            + "begging to stand alone.",
 
-            "A MIDDLE span can't extract (the two ends would be left holding "
-            + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it runs two "
-            + "divides as one undoable act. The lonely sentence in the shaping "
-            + "blocks lesson was exactly this gesture.",
+            "A middle span can't extract (the two ends would be left holding "
+            + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it "
+            + "runs two divides as one undoable act. The lonely sentence in the "
+            + "shaping blocks lesson was exactly this gesture.",
 
             "Both work from Takes: make your selection in the take you're "
-            + "reading, press the key, and the app carries the selection to "
-            + "Write and acts. If the block is fanned, the selection carries "
-            + "approximately — the app snaps to boundaries and never cuts "
-            + "silently where it isn't sure.",
+            + "reading, press the key, and the app carries the selection to Write "
+            + "and acts. If the block is fanned, the selection carries "
+            + "approximately. The app snaps to boundaries and never cuts silently "
+            + "where it isn't sure.",
         ])
 
         let merging = try lesson(structure, "merge", [
@@ -1103,88 +1107,90 @@ enum TutorialSeeder {
             // single space at the seam and a sentence cut restored exactly.
             // The ruling made both false, so it says what merge does now —
             // lesson and pin moved together (the standing rule).
-            "Merge is divide's opposite: neighboring blocks become one. The seam "
-            + "between them becomes a line break inside the merged block, so the "
-            + "page reads exactly as it did — divide at a paragraph break and "
-            + "merge it back and you get precisely what you started with.",
+            "Merge is divide's opposite: neighboring blocks become one. The "
+            + "seam between them becomes a line break inside the merged block, so "
+            + "the page reads exactly as it did. Divide at a paragraph break and "
+            + "merge it back, and you get precisely what you started with.",
 
             "These two short blocks are really one thought.",
 
-            "They have been waiting for your \u{2318}\u{21E7}M since the day they were "
-            + "seeded.",
+            "They have been waiting for your \u{2318}\u{21E7}M since the day "
+            + "they were seeded.",
 
-            "In Write, put the cursor at the boundary between them (\u{2318}\u{21E7}B shows "
-            + "seams) and press \u{2318}\u{21E7}M — or select across both and merge the "
-            + "whole run as one undoable act. From Takes, Merge joins the block "
-            + "you're in UPWARD, into the one above.",
+            "In Write, put the cursor at the boundary between them "
+            + "(\u{2318}\u{21E7}B shows seams) and press \u{2318}\u{21E7}M, or "
+            + "select across both and merge the whole run as one undoable act. "
+            + "From Takes, Merge joins the block you're in upward, into the one "
+            + "above.",
 
             // 13b 4B (S4-23) gave merge its ceremony; 13j J4b (her
             // 2026-08-09 ruling) made CARRY-ALL the default and left the
             // ceremony as the summoned door — divide's story, one gesture
             // over.
-            "When either block has other takes, Merge brings them ALL along: "
-            + "the two takes you were looking at join, and every other take "
-            + "rides onto the merged block whole. Nothing is left behind to "
-            + "hunt for, and the extra copies are quick to delete. To choose "
-            + "instead, use Merge choosing takes (\u{2325}\u{2318}\u{21E7}M): it asks first — "
-            + "bring every take (the everyday answer, already chosen), only the two "
-            + "you were looking at, or pair by hand — which opens pre-paired with "
-            + "the two takes you were looking at, so \u{23CE} still gives you "
-            + "exactly the everyday join. "
-            + "Pair takes with \u{FF0B} and the merged block gets one joined take "
-            + "per pairing (divide a two-take block, pair 1+1 and 2+2, and it "
-            + "comes back whole); check \u{201C}carry\u{201D} to ride a take over "
-            + "unjoined; each pairing previews its join — space, new line, or "
-            + "nothing. Takes are never multiplied combinatorially: pairing is "
-            + "choosing by hand.",
+            "When either block has other takes, Merge brings them all along: "
+            + "the two takes you were looking at join, and every other take rides "
+            + "onto the merged block whole. Nothing is left behind to hunt for, "
+            + "and the extra copies are quick to delete. To choose instead, use "
+            + "Merge choosing takes (\u{2325}\u{2318}\u{21E7}M). It asks first: "
+            + "bring every take (the everyday answer, already chosen), only the "
+            + "two you were looking at, or pair by hand, which opens pre-paired "
+            + "with the two takes you were looking at, so \u{23CE} still gives "
+            + "you exactly the everyday join. Pair takes with \u{FF0B} and the "
+            + "merged block gets one joined take per pairing (divide a two-take "
+            + "block, pair 1+1 and 2+2, and it comes back whole); check "
+            + "\u{201C}carry\u{201D} to ride a take over unjoined; each pairing "
+            + "previews its join: space, new line, or nothing. Takes are never "
+            + "multiplied combinatorially. Pairing is choosing by hand.",
 
             "When you pair by hand, whatever you leave unpaired stays with the "
-            + "released blocks in lineage — the app names the road, and "
-            + "\u{2325}\u{2318}Z brings the sources back, takes and all, from either "
-            + "road. Merging THREE or more blocks at once asks the same question "
-            + "with two answers only — every take, or only the shown ones — and "
-            + "never opens the pairing surface. The block below carries a spare "
-            + "take so you can watch both: \u{2318}\u{21E7}M brings the spare along, "
-            + "\u{2325}\u{2318}\u{21E7}M asks where the takes should go.",
+            + "released blocks in lineage. The app names the road, and "
+            + "\u{2325}\u{2318}Z brings the sources back, takes and all, from "
+            + "either road. Merging three or more blocks at once asks the same "
+            + "question with two answers only (every take, or only the shown "
+            + "ones) and never opens the pairing surface. The block below carries "
+            + "a spare take so you can watch both: \u{2318}\u{21E7}M brings the "
+            + "spare along, \u{2325}\u{2318}\u{21E7}M asks where the takes should "
+            + "go.",
 
-            "This block has a second take — merge me upward and my spare comes "
-            + "along whole; with \u{2325}\u{2318}\u{21E7}M you are asked first, my takes "
-            + "laid out for pairing if you want them.",
+            "This block has a second take. Merge me upward and my spare comes "
+            + "along whole; with \u{2325}\u{2318}\u{21E7}M you are asked first, "
+            + "my takes laid out for pairing if you want them.",
         ])
         try take(on: merging.blocks[6],
-            "The spare take: I come along whole on an ordinary merge — or pair me, carry me, or leave me in lineage when you choose by hand. Undo brings me home either way.")
+            "The spare take: I come along whole on an ordinary merge. Or pair me, carry me, or leave me in lineage when you choose by hand. Undo brings me home either way.")
 
         _ = try lesson(structure, "the two undos", [
-            "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z is TEXT "
-            + "undo — your typing, inside the take you're editing, as in any "
-            + "editor.",
+            "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z "
+            + "is text undo: your typing, inside the take you're editing, as in "
+            + "any editor.",
 
             // 13j batch 7 (the J10 content-refresh sweep): structural REDO
             // shipped at 13c (A10 — her *"i desperately need a 'redo'
             // command"*) and this lesson never learned the chord; the J7 sign
             // at the junction is 13j's, and this is where the two stacks are
             // introduced, so both belong here.
-            "\u{2325}\u{2318}Z is STRUCTURAL undo — divides, merges, extracts, moves, "
-            + "deletions of blocks and takes. It never touches your typing; it "
-            + "restores the shape. Every structural act in this book is one "
-            + "\u{2325}\u{2318}Z away from undone, and the report of what was undone lands "
-            + "at the bottom of the window. \u{21E7}\u{2325}\u{2318}Z is its redo: "
-            + "undo an undo, as many times as you like.",
+            "\u{2325}\u{2318}Z is structural undo: divides, merges, extracts, "
+            + "moves, deletions of blocks and takes. It never touches your "
+            + "typing; it restores the shape. Every structural act in this book "
+            + "is one \u{2325}\u{2318}Z away from undone, and the report of what "
+            + "was undone lands at the bottom of the window. "
+            + "\u{21E7}\u{2325}\u{2318}Z is its redo: undo an undo, as many times "
+            + "as you like.",
 
             "The two stacks never mix, and the app helps you at the junction: "
-            + "press \u{2318}Z when there is nothing left to undo in the text "
-            + "and a structural change is what you actually did last, and the "
-            + "status line says so and names \u{2325}\u{2318}Z. The key still does "
-            + "what \u{2318}Z always does — the app only puts up a sign.",
+            + "press \u{2318}Z when there is nothing left to undo in the text and "
+            + "a structural change is what you actually did last, and the status "
+            + "line says so and names \u{2325}\u{2318}Z. The key still does what "
+            + "\u{2318}Z always does; the app only puts up a sign.",
 
-            "If a structural undo would overwrite words you typed AFTER the "
-            + "act, the app ASKS FIRST — that is the one undo that sets "
-            + "writing aside, so it is the one that stops to check. Say yes "
-            + "and a savepoint of your newer text is kept anyway: insurance, "
-            + "so nothing typed is ever more than one restore away. Every "
-            + "other structural undo stays silent. Try it: divide the block "
-            + "above, type a few words into the FIRST half, press "
-            + "\u{2325}\u{2318}Z, answer the question, then look in history.",
+            "If a structural undo would overwrite words you typed after the "
+            + "act, the app asks first. That is the one undo that sets writing "
+            + "aside, so it is the one that stops to check. Say yes and a commit "
+            + "of your newer text is kept anyway: insurance, so nothing typed is "
+            + "ever more than one restore away. Every other structural undo stays "
+            + "silent. Try it: divide the block above, type a few words into the "
+            + "first half, press \u{2325}\u{2318}Z, answer the question, then "
+            + "look in history.",
         ])
 
         // ———————————————————— deleting & getting it back ————————————————————

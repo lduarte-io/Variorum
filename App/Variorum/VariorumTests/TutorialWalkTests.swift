@@ -1436,7 +1436,10 @@ struct TutorialStructureActsTests {
                 $0.text?.contains("begging to stand alone") == true
             })
             let text = host.text ?? ""
-            let start = try utf16Offset(of: "\u{2014} and this closing line", in: text)
+            // 13s-b triage landing: the closing line is its own sentence now
+            // ("…sentence ends). This closing line is begging to stand alone.")
+            // — the span the lesson asks for starts at it, not at a dash.
+            let start = try utf16Offset(of: "This closing line", in: text)
             _ = try await session.runner.run { ops in
                 try ops.extract(host.blockID, span: start..<(text as NSString).length)
             }
@@ -1585,7 +1588,9 @@ struct TutorialStructureActsTests {
             let block = try #require(before.first {
                 $0.text?.contains("two undo stacks") == true
             })
-            let cut = try utf16Offset(of: "\u{2318}Z is TEXT", in: block.text ?? "")
+            // 13s-b triage landing: "⌘Z is TEXT" reads "⌘Z is text undo" (her
+            // R-13s-30 caps ban) — the same cut, between the lesson's two halves.
+            let cut = try utf16Offset(of: "\u{2318}Z is text undo", in: block.text ?? "")
             _ = try await session.runner.run { ops in
                 try ops.divide(block.blockID, cut: cut)
             }
