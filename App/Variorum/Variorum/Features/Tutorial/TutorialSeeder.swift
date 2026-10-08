@@ -748,34 +748,34 @@ enum TutorialSeeder {
         // ————————————————————————————— writing —————————————————————————————
 
         _ = try lesson(writing, "blocks & typing", [
-            "Everything you write is made of BLOCKS — paragraph-sized pieces with "
-            + "permanent identity. You never manage them while drafting: switch to "
-            + "Write (\u{2318}1), click at the very end of this note, and type a few "
-            + "paragraphs. Each paragraph quietly becomes its own block as you "
-            + "type past it. No gesture, nothing to ask for.",
+            "Everything you write is made of blocks: paragraph-sized pieces "
+            + "with permanent identity. You never manage them while drafting. "
+            + "Switch to Write (\u{2318}1), click at the very end of this note, "
+            + "and type a few paragraphs. Each paragraph quietly becomes its own "
+            + "block as you type past it. No gesture, nothing to ask for.",
 
             // 13b 4D (N34 — S4-14): the opt-in one_block face gets a
             // sentence where crystallization is taught.
-            "Return makes a block WHEREVER your cursor is: at the end of a "
+            "Return makes a block wherever your cursor is: at the end of a "
             + "paragraph, a new empty block below it; in the middle of one, a "
             + "divide at the cursor. Shift-Return is the newline that stays "
-            + "INSIDE a block — a blank line in the same paragraph — and a "
-            + "block can hold several paragraphs that way, or by paste or "
-            + "merge. Otherwise boundaries only ever change when you ask "
-            + "(divide, merge, extract — the structure chapter). Prefer to "
-            + "place every boundary yourself? The bottom bar's "
-            + "\u{201C}newlines make blocks\u{201D} switch turns it off for one note "
-            + "— then Return is just a newline again, typing and pasting stay "
-            + "inside the block, and only Divide or New Block Below make new "
-            + "ones.",
+            + "inside a block, a blank line in the same paragraph, and a block "
+            + "can hold several paragraphs that way, or by paste or merge. "
+            + "Otherwise boundaries only ever change when you ask (divide, merge, "
+            + "extract: the structure chapter). Prefer to place every boundary "
+            + "yourself? The bottom bar's \u{201C}newlines make blocks\u{201D} "
+            + "switch turns it off for one note. Then Return is just a newline "
+            + "again, typing and pasting stay inside the block, and only Divide "
+            + "or New Block Below make new ones.",
 
-            "Boundaries are invisible at rest, on purpose: a note reads as calm, "
-            + "seamless prose. When you want to see the seams, press \u{2318}\u{21E7}B — "
-            + "dotted lines appear between blocks, everywhere, until you press it "
-            + "again.",
+            "Boundaries are invisible at rest, on purpose: a note reads as "
+            + "calm, seamless prose. When you want to see the seams, press "
+            + "\u{2318}\u{21E7}B. Dotted lines appear between blocks, everywhere, "
+            + "until you press it again.",
 
-            "The bottom bar keeps quiet count for you: which block your cursor is "
-            + "in, and the word counts — the take you're in, and the whole note.",
+            "The bottom bar keeps quiet count for you: which block your cursor "
+            + "is in, and the word counts, both for the take you're in and for "
+            + "the whole note.",
         ])
 
         let shaping = try lesson(writing, "shaping blocks", [
@@ -785,32 +785,35 @@ enum TutorialSeeder {
             "The first tool needs a middle sentence. This lesson was written as "
             + "calm filler around exactly one restless line. This middle sentence "
             + "wants to be a block of its own. Select that whole sentence, press "
-            + "\u{2318}\u{21E7}K (Make Block from Selection), and watch it become its own "
-            + "block — from Takes, the app carries you to Write and does it there.",
+            + "\u{2318}\u{21E7}K (Make Block from Selection), and watch it become "
+            + "its own block. From Takes, the app carries you to Write and does "
+            + "it there.",
 
             // 13b 4D (N28/S4-13): the insert-below door joins the direct asks.
             // 13g L1: the KEY was stale — 13d batch 4 (A14) superseded ⌥⌘N
             // with ⌘⇧⏎ and this lesson kept teaching the old chord. Same
             // finding class as WT-1 (a discoverability surface that drifted
             // out of the registry); the helper had already been corrected.
-            "New blocks can also be asked for directly: \u{2318}\u{21E7}\u{23CE} (New Block "
-            + "Below) mints an empty block right under the one you're in and "
             // librarywalkpolish VR-122 (F-5): the end-of-note row is on TAKES'
             // block ▾ only (`TakesBottomBar`; Write's has New block below).
-            + "puts your cursor in it — Write and Takes alike; in Takes, the block \u{25BE} "
-            + "menu in the bottom bar also has \u{FF0B} New block at the end of the "
-            + "note. Either way, just keep typing.",
+            "New blocks can also be asked for directly: "
+            + "\u{2318}\u{21E7}\u{23CE} (New Block Below) mints an empty block "
+            + "right under the one you're in and puts your cursor in it, in Write "
+            + "and Takes alike. In Takes, the block \u{25BE} menu in the bottom "
+            + "bar also has \u{FF0B} New block at the end of the note. Either "
+            + "way, just keep typing.",
 
-            "A block can carry a NAME — a handle for finding it, never printed in "
-            + "the prose. This block wears one: open the Blocks tab (\u{2318}6) and "
-            + "you'll see \u{201C}the named block\u{201D} where every other row shows its first "
-            + "sentence. Name\u{2026} on any row sets or clears one.",
+            "A block can carry a name: a handle for finding it, never printed "
+            + "in the prose. This block wears one. Open the Blocks tab "
+            + "(\u{2318}6) and you'll see \u{201C}the named block\u{201D} where "
+            + "every other row shows its first sentence. Name\u{2026} on any row "
+            + "sets or clears one.",
 
-            "This block is a CALLOUT — a colored frame that says \u{201C}this one is "
-            + "different\u{201D}: an aside, a goal, a warning. In Write, put the cursor "
-            + "here and use Block \u{25B8} Callout to change its color, set a leading "
-            + "emoji, or remove the frame. Presentation only — the text itself is "
-            + "untouched, and exports render it as a quote.",
+            "This block is a callout: a colored frame that says this one is "
+            + "different. An aside, a goal, a warning. In Write, put the cursor "
+            + "here and use Block \u{25B8} Callout to change its color, set a "
+            + "leading emoji, or remove the frame. Presentation only; the text "
+            + "itself is untouched, and exports render it as a quote.",
         ])
         try ops.setBlockName(shaping.blocks[3].block.id, name: "the named block")
         try ops.setBlockPresentation(
@@ -822,55 +825,59 @@ enum TutorialSeeder {
         // moment it is seeded — and because storage IS markdown, the prose
         // here is literally the syntax the reader is being shown.
         _ = try lesson(writing, "formatting", [
-            "Formatting in Variorum is **markdown**, and that is not a detail of "
-            + "the implementation \u{2014} it is the whole design. What you see is "
-            + "exactly what is saved: two stars around a word ARE the bold. The "
+            "Formatting in Variorum is **markdown**, and that is not a detail "
+            + "of the implementation: it is the whole design. What you see is "
+            + "exactly what is saved. Two stars around a word are the bold. The "
             + "editor styles the word and dims the stars, so the page reads "
-            + "cleanly while the text stays plain characters you could open in any "
-            + "editor on earth. Nothing about a formatted note is locked in, and an "
-            + "export is already markdown because it was never anything else.",
+            + "cleanly while the text stays plain characters you could open in "
+            + "any editor on earth. Nothing about a formatted note is locked in, "
+            + "and an export is already markdown because it was never anything "
+            + "else.",
 
             "The vocabulary is small on purpose: **bold** (\u{2318}B), *italic* "
-            + "(\u{2318}I), ~~struck out~~, and `inline code`. The last two live in "
-            + "the FORMAT menu, which also carries every act below \u{2014} and "
+            + "(\u{2318}I), ~~struck out~~, and `inline code`. The last two live "
+            + "in the Format menu, which also carries every act below, and "
             + "right-clicking in any writing surface offers the same rows under "
             + "\u{201C}Format\u{201D}. Try it: select these three words and press "
-            + "\u{2318}B. Press it again to take the bold off; the act reads what is "
-            + "already there rather than blindly adding.",
+            + "\u{2318}B. Press it again to take the bold off; the act reads what "
+            + "is already there rather than blindly adding.",
 
             "## Headings are sizes",
 
             // librarywalkpolish VR-122 (F-6): the submenu's rows read
             // "Heading 1/2/3" (`MarkdownActs.headingRows`).
-            "A line that starts with #, ## or ### is a heading \u{2014} those three, "
+            "A line that starts with #, ## or ### is a heading. Those three, "
             + "and nothing else. Put your cursor on this line and use Format "
-            + "\u{25B8} Heading \u{25B8} Heading 2 to see it happen; the line above is "
-            + "already one. Setting a lead REPLACES whatever lead the line had, so "
-            + "a heading becomes a bullet in one press rather than becoming a "
-            + "bullet with a stray # in it.",
+            + "\u{25B8} Heading \u{25B8} Heading 2 to see it happen; the line "
+            + "above is already one. Setting a lead replaces whatever lead the "
+            + "line had, so a heading becomes a bullet in one press rather than "
+            + "becoming a bullet with a stray # in it.",
 
             "- Lists are lines that start with \"- \"",
+
             "- Format \u{25B8} Bullet List makes one from the line you're on",
+
             "- Select several lines and it makes them all into a list",
 
             "- [ ] And a checkbox is a list item with a box: \"- [ ] \"",
-            "- [x] CLICK the box to tick it \u{2014} that is an ordinary edit, so "
+
+            "- [x] Click the box to tick it. That is an ordinary edit, so "
             + "\u{2318}Z takes it back and a sealed note refuses it",
 
-            "Links are written [like this](https://apple.com). Format \u{25B8} Add "
-            + "Link wraps your selection in the brackets and leaves the cursor "
-            + "inside the parentheses, ready for the address. In a writing surface "
-            + "a plain click has to place your cursor, so \u{2318}-CLICK follows a "
-            + "link instead.",
+            "Links are written [like this](https://apple.com). Format \u{25B8} "
+            + "Add Link wraps your selection in the brackets and leaves the "
+            + "cursor inside the parentheses, ready for the address. In a writing "
+            + "surface a plain click has to place your cursor, so \u{2318}-click "
+            + "follows a link instead.",
 
             "Now the one place the app shows you something other than what is "
-            + "stored. Open this book in READ mode (the Outline \u{B7} Index "
+            + "stored. Open this book in Read mode (the Outline \u{B7} Index "
             + "\u{B7} Book \u{B7} Read row above) and look at this lesson again: "
-            + "the markers are gone, "
-            + "the headings are sizes, the list has bullets, the boxes are boxes, "
-            + "and a link is just the words \u{2014} a plain click opens it, because "
-            + "Read has no cursor to place. Read is for reading; everywhere you can "
-            + "write, you see the text exactly as it is saved.",
+            + "the markers are gone, the headings are sizes, the list has "
+            + "bullets, the boxes are boxes, and a link is just the words. A "
+            + "plain click opens it, because Read has no cursor to place. Read is "
+            + "for reading; everywhere you can write, you see the text exactly as "
+            + "it is saved.",
         ])
 
         // ————————————————————————————— takes ———————————————————————————————

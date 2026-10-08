@@ -195,7 +195,9 @@ struct TutorialCurrencyTests {
         try await withGuide { _, db, guideID in
             let row = "\u{FF0B} New block at the end of the note"
             let text = try await prose(db, guideID, "shaping blocks")
-            #expect(text.contains("in Takes, the block \u{25BE} menu in the bottom bar also has \(row)"))
+            // 13s-b triage landing — A JUSTIFIED EDIT: the scoped sentence now
+            // opens its own sentence ("…Write and Takes alike. In Takes, …").
+            #expect(text.contains("In Takes, the block \u{25BE} menu in the bottom bar also has \(row)"))
             #expect(try AppSource.read("Variorum/Features/Takes/TakesBottomBar.swift").contains(row),
                     "the row is Takes' block ▾'s")
             #expect(!(try AppSource.read("Variorum/Features/Editor/CommitBar.swift").contains(row)),

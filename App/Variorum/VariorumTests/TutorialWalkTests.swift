@@ -314,9 +314,11 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: formatting)
             }
+            // 13s-b triage landing: "- [x] CLICK the box" reads "Click" now
+            // (her R-13s-30 caps ban) — the checkbox syntax itself unchanged.
             for syntax in ["**markdown**", "*italic*", "~~struck out~~", "`inline code`",
                            "## Headings are sizes", "- Lists are lines", "- [ ] And a checkbox",
-                           "- [x] CLICK the box", "[like this](https://apple.com)"] {
+                           "- [x] Click the box", "[like this](https://apple.com)"] {
                 #expect(stored.contains(syntax), "the lesson shows \(syntax) by BEING it")
             }
 
@@ -334,7 +336,7 @@ struct TutorialBookShapeTests {
             #expect(rendered.text.contains("Headings are sizes"))
             #expect(rendered.text.contains("\u{2022} Lists are lines"))
             #expect(rendered.text.contains("\u{2610} And a checkbox"))
-            #expect(rendered.text.contains("\u{2611} CLICK the box"))
+            #expect(rendered.text.contains("\u{2611} Click the box"))
             #expect(rendered.links.contains { $0.url == "https://apple.com" })
         }
     }
