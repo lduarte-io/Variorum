@@ -1741,3 +1741,35 @@ implementer's open files); relaunch behavior checked first (a sane relaunch boun
 radius to the adoption's first session); evidence: the walk's full-window captures + a pin on
 the resizability state if it proves state-derived, else walk-verified chrome with the capture
 as the record.
+
+**W-2 FIXED — the mechanism CONFIRMED, and it is the b6dae25 class, not a lobby regime.** The
+hypothesis above was wrong and is corrected here: the relaunch reproduced the tall window
+(1440×2781) while the hold stood, which pointed at the banner itself. `RestoreHoldBar`'s
+ruled ~230-char sentence carried an UNLIMITED `fixedSize(horizontal: false, vertical: true)`
+in the main window's bottom safe-area inset (non-scrolling chrome) — P-8's own named class
+("chrome fixedSize texts always carry a lineLimit"); the window's near-zero-width minimum-size
+probe measured it one character per line and that became the window minimum. FIX: the
+load-bearing `.lineLimit(4)` (LibraryOpenDoor.swift). PIN: `ChromeMinHeightTests.
+restoreHoldBarNearZeroWidthProbeStaysBounded` — RED ON OLD at **2668 pt** (the live window
+read 2734 incl. chrome — the same number), GREEN with the limit; its second half pins the
+sentence still renders whole at a real width.
+
+**Why P-8's enforcement missed it (recorded for the class):** `ChromeLineLimitTests` scans only
+BARE `.fixedSize()`; the explicit-axis form is invisible to it. The app holds **253**
+explicit-axis sites, **158** with no lineLimit in the scan's window. Most sit where the probe
+never reaches (sheets with width floors, scroll-backed forms) — but that is unverdicted, and
+verdicting 158 sites is a sweep of its own, NOT 13x closeout work → ticketed (below).
+
+**THE SWEEP TABLE — 13x's own diff (17 explicit-axis sites added):**
+
+| host | sites | verdict | mechanism |
+|---|---|---|---|
+| `RestoreHoldBar` (main window bottom inset) | 1 | **FIXED** | `.lineLimit(4)` + the named pin |
+| `LibraryOpenSheet` / `LibraryHandOffSheet` (sheets) | 13 | SAFE | `.frame(minWidth: 460)` — the probe never measures narrower than the floor (the R1-6 measured mechanism) |
+| `DataSafetyPane` (Settings) | 3 | SAFE | `Form` + `.formStyle(.grouped)` is scroll-backed; content height never becomes the window minimum |
+
+**A PRE-EXISTING RED, NOT 13x's:** `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy`
+is red on MAIN — two bare `.fixedSize()` sites in `Core/Views/SearchAnswerFaces.swift:182/213`
+(13o's search faces). The VX-83 search follow-up run is editing that file now; routed to that
+session rather than fixed here (a 13x edit would collide with its merge). 13x's closeout Mac
+run will show this one red and it is accounted for here.

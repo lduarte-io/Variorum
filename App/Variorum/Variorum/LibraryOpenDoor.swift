@@ -294,8 +294,13 @@ struct RestoreHoldBar: View {
     var body: some View {
         if model.isHeld {
             HStack(spacing: 10) {
+                // The line limit is load-bearing (the b6dae25 class, W-2):
+                // this bar is non-scrolling window chrome, and without it
+                // the window's near-zero-width minimum-size probe measures
+                // the sentence one character per line.
                 Text(LibraryOpenCopy.holdBanner(asOfDay: model.asOfDay))
                     .font(.caption)
+                    .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 Button(LibraryOpenCopy.resumeSyncDoor) {
