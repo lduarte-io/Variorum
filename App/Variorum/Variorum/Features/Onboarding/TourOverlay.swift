@@ -352,7 +352,12 @@ enum TourBadgeLocator {
         guard let root = probe.window?.contentView,
               let badge = find(blockID: blockID, in: root)
         else { return nil }
-        let visible = badge.visibleRect
+        // `visibleRect` is NOT bounded by the view's own bounds when no
+        // ancestor clips (`clipsToBounds` is false by default on the 14+
+        // SDK) — measured at the U2 stage window: it came back as the whole
+        // window. Over the editor it would be the clip view's whole visible
+        // page. The badge's visible part is that rect AND its own bounds.
+        let visible = badge.visibleRect.intersection(badge.bounds)
         guard !visible.isEmpty else { return nil }
         return probe.convert(visible, from: badge)
     }
