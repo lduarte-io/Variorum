@@ -1097,3 +1097,13 @@ No mobile run is owed (nothing under `VariorumMobile/` or `Shared/` changed).
 | F5 | The whole core suite at the END; counts | DONE (this commit) — whole core `swift test` at `3656d539` (the tree after F1–F4, clean): **"2425 tests in 280 suites passed" + "40 tests in 6 suites passed"**, exit 0 (`u4-fix-core-end.log`, scratchpad; 2425 = U4's 2424 + U1b's round-2 core test). Mac `build-for-testing` GREEN after F1 (F2–F4 touch only the fence's test file and the record; the fence's twin compiled the edited test code itself) |
 
 **FIX ROUND STATUS: DONE — READY FOR U4 ROUND 2.** Headless counts: F1's pin RED 3 → GREEN; F2's control 1 failure → 0 of 17, the tree 0 offenders, the pre-sweep tree 11; core 2425/280 + 40/6. PENDING the stage window, unchanged in kind: every Mac/mobile pin RUN (the stage commands above already name `HelperCurrencyTests` and `DeadVocabularyTests`) and the walk — the ⌘/ `note ▾` row joins the walk's helper capture. P-U4-1 is on her morning list as a three-way taste call; nothing rebuilds before her word.
+
+### U4 FIX ROUND 2 (round-2 arbitration — `notes/plans/13s-ladders/u4-round2.md` § ARBITRATION, 77585eae; the implementer, headless, 2026-10-08)
+
+**What this pass does NOT do:** no rebuild of P-U4-1's wording (the disposition is not reopened), no touch to the two stale doc comments the reviewer found (`CommitBar.swift:756`, `TakesBottomBar.swift:447` — "**note ▾** (R6-2): history, the seal, the entry date": FIX-WHEN-TOUCHED, recorded here, code untouched), no `xcodebuild test`, nothing beyond the three items.
+
+| # | item | status |
+|---|---|---|
+| G1 | P-U4-1 enriched with the round-2 facts: the shared "saved moment" noun predates U4 by DESIGN (~20 per-take sites, the Versions pane using it for both meanings side by side, the ⌘S↔⌘⇧S pairing), so NONE of (a)/(b)/(c) removes the clash; renaming one side is a SEPARATE decision for her | NOT-STARTED |
+| G2 | The dictionary entry cited by NAME, not line | NOT-STARTED |
+| G3 | The ⌘/ helper teaches Block History's real road — one line built from `BlockHistoryPath.name`; the reviewer's pin red on HEAD → green, watched | NOT-STARTED |
