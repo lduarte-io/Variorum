@@ -372,6 +372,11 @@ moment's):**
 - **R-VX83-8 (2026-10-08):** *"yeah no arrow key day navigation in v1 is fine - make a
   linear ticket for that item."* → the §P1 ruling's condition (2) is RATIFIED and its
   deferral is **VX-98** (Backlog, project 13o) — it leaves the ratify bundle, decided.
+- **R-VX83-9 (2026-10-08):** the facet word `+ savepoints` is HER-RATIFIED — she asked
+  "why not + commits?", the verb/noun reading was given (commit is the bar's act, savepoint
+  the stored thing's name everywhere the app names it), and her word: *"accepted."* The
+  chip's word leaves the ratify bundle decided; its help texts and offered-only-with-words
+  rule still ride (P-VX83-C-wording).
 - **R-VX83-7 (2026-10-07 late evening — MERGE ORDER FREED; supersedes this record's
   "merges after 13x" header line, which was also her word, earlier):** *"I told 13x to
   release its hold so you and another session can move through. you should be next in the
