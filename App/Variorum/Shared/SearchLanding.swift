@@ -35,17 +35,21 @@ nonisolated struct EditorFindSeed: Equatable, Hashable, Sendable {
 
 nonisolated enum SearchLanding {
     /// **The find seed a passage lands with** (D6): a TAKE's first matched
-    /// run, as the index marked it in the snippet; it STEPS (is selected)
+    /// SPAN, as the index marked it in the snippet; it STEPS (is selected)
     /// only in the take the note shows (P-13o-U2-4). A name, label or comment
     /// hit lands at its block with no seed — its words are not in the prose.
+    ///
+    /// VX-86 (the 13o follow-up run): the needle is the snippet's first
+    /// CONTIGUOUS matched span — FTS5 marks each term as its own run, and
+    /// taking the first run alone armed "sherlock holmes" as "Sherlock". The
+    /// rule is core's one pure home (`SearchSnippetSegment.firstMatchedSpan`,
+    /// D-3), so the phone lands the same words.
     static func findSeed(
         kind: SearchPassage.Kind, rendered: Bool, snippet: [SearchSnippetSegment]
     ) -> EditorFindSeed? {
-        guard kind == .take,
-              let run = snippet.first(where: \.isMatch)?.text
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-              !run.isEmpty else { return nil }
-        return EditorFindSeed(needle: run, steps: rendered)
+        guard kind == .take, let span = SearchSnippetSegment.firstMatchedSpan(snippet)
+        else { return nil }
+        return EditorFindSeed(needle: span, steps: rendered)
     }
 }
 
