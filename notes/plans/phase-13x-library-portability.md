@@ -42,7 +42,7 @@ the PR merges, hard stop.
 
 ## STATUS
 
-**OPEN — kicked off 2026-10-06 (the Pro).** Orchestrator seated; preflight complete; the KICKOFF
+**CLOSED 2026-10-08 — verified by her hands on real devices (the Pro→Air AirDrop leg); THE PHASE CLOSEOUT is this file's last section. Kicked off 2026-10-06 (the Pro).** Orchestrator seated; preflight complete; the KICKOFF
 SITTING is in progress — the design look and agenda below went to the author the same day. The
 execution plan lands under §EXECUTION PLAN after her rulings. **The 13b constitution P-1…P-9
 binds this phase byte-verbatim** (`.claude/skills/architect-phase/SKILL.md`; the pre-13x §0
@@ -2337,3 +2337,29 @@ identity (§3.3), so the Air meeting the Pro's store id enrolls — in Castle by
 a dropped unlock. The design promises "the passphrase/words once" and the adoption already had it
 in hand ⇒ **VX-100** (carry the typed passphrase one hop into the enrollment). Her future ask:
 **VX-101** — Open Library offers the backups / Previous Libraries locations.
+
+
+## THE PHASE CLOSEOUT (2026-10-08)
+
+**13x is CLOSED.** The AirDrop-your-library promise is true by built doors and was verified by her hands: her
+real Pro library traveled to the Air through File ▸ Send Library to Another Mac… → AirDrop → File ▸ Open Library…,
+landed under the restore hold, caught up at one Resume press, whole (counts confirmed by her).
+
+- **Deliverables (the 13x row):** the hand-off act ✔ · the adoption door ✔ · the same-Mac older-key restore ✔ (the
+  collision rule + decision 11's credential lines + the second look) · the three held FAQ entries ✔ (un-flagged in
+  `notes/stargazing-help-faq-brief-pre13x.md`; hers to hand to the site agent) · VX-64 ✔ · VX-80 ✔ (pulled in).
+- **The ladder:** four rounds (the fourth past the cap at her word, with `phase-13x-review-foci.md`) — reports
+  `13x-ladder-round1…4.md`, every finding dispositioned in this file, every fix red-on-old by behavioural revert.
+- **The walk + her legs:** W-1 · W-2 · W-3 · W-4 found live, all fixed; the phone build break fixed.
+- **Finals:** core **2,346 / 270 + workbook 40 / 6**; the widened Mac run **208 / 209** on the final merged tree (the one
+  red is VX-94's, 13o's P-8 site); Mac + phone build; marker **12**, zero migrations, zero lockstep event.
+- **Canon as ruled:** AppSpec §12 (LIBRARY PORTABILITY) + §14; CLAUDE.md (the bout-start snapshot commit); both phase
+  skills (the atomic in-flight edit); QUESTIONS **#202**; MobileSoul **PL-48**; master plan + archive.
+- **Tickets:** VX-6 · VX-64 · VX-80 Done at the merge; minted VX-95 (P-8 scan blind spot) · VX-99 (the Pro's
+  Castle/Apple-wrap anomaly — HIGH, its investigation running) · VX-100 (one passphrase ask) · VX-101 (Open Library
+  offers the backup locations) · VX-102 (landing residuals); VX-81 open with the Pro's no-crash data point.
+- **MOBILE PARITY:** PL-48 — the doors are Mac-only by design; the phone builds; what it owes is hers to rule.
+- **Her /Applications:** 0.9.2 (5544) from 0787f028 (A1 at `13x-refresh-20261008T061038Z`); the post-merge refresh
+  (the coordinator's, with vx-82andmore's) carries the four post-0787f028 wording fixes.
+- **Next phase:** 13y's plan exists (`phase-13y-per-tenant-seq.md`, OPEN, its ladder closed) — no new plan owed.
+- **The handoff:** `notes/handoffs/phase-13x-handoff.md` (her checklist at the top).
