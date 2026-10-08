@@ -100,3 +100,35 @@ road; hollow by the guard, recorded here rather than raised.
 honest and well-pinned; the one finding is the unclosed `.next` arm of MINOR-2's own corner —
 small, deterministic to pin, one mirrored check to fix — left to the orchestrator's disposition
 (this seat was not authorized to fix in round 2).
+
+## THE IN-ROUND CLOSURE (the cross-model exchange and the fix, same session — 2026-10-08)
+
+**The implementer's response: AGREE, zero dispute, fix-now.** Its independent trace confirmed the
+mechanism exactly (the pre-settle report keeps her at `legSnippets` at the guide; `reduce(.next)`
+never consults `finishAtGuide`; `ringGroups` then points her AWAY from the finish place — "a
+stalled tour at the finish line, the exact contradiction A7 exists to prevent"), confirmed the
+proposed fix as right and minimal, and verified the only other road into `.legEnd`
+(`.choose(.keepGoing)` → `.legStar`) cannot reach it in one press — which matches my own trace
+(`advance(.legSnippets)` requires a fresh report, so `settle` can never cascade through leg 4
+under `.next` or `.choose`).
+
+**Final call (the reviewer's): CONFIRMED — FIXED (5a119f3a).** `reduce(.next)` mirrors the
+`.facts` arm's two-line `finishAtGuide` check after `settle`: a "next" pressed at leg 4 while she
+already sits at the field guide finishes with `[.finish(completed: true)]` alone; the at-Snippets
+press keeps P-U2-7's designed yank home, pinned in the same test's second arm.
+**Pin red-on-old, watched:**
+`TourWalkTests.nextAtLegFourWhileAlreadyAtTheGuideFinishesThereInsteadOfStalling` written FIRST
+and run against the unfixed rule — **RED, 2 issues** (the state survived, no finish; exactly the
+probe's stall), the kept-yank arm green on both sides (it pins the designed behavior, not the
+fix); **GREEN after**. Tour suites 36/3 GREEN; full core suite at the close
+**2423 tests in 280 suites + 40 in 6 GREEN** (the +3 over this round's opening run = this pin +
+U1b's in-worktree core pins, which build beside this ladder; nothing red anywhere). Tree
+discipline: only `Tour.swift` (one hunk) and `TourWalkTests.swift` (one hunk) staged — each file's
+diff checked hunk-by-hunk against U1b's concurrent edits before the add; U1b's unstaged work
+untouched.
+
+**THE U2 LADDER CLOSES: two rounds + this in-round closure, no round 3.** Every finding across
+both rounds carries a written disposition: round 1's two MINORs fixed (33fd6b89), NIT-2 fixed
+(2b71ce6b), NIT-1 record-as-accepted (to the merge's QUESTIONS beside P-U2-9), round 2's one
+MINOR fixed (5a119f3a). The one open residual remains the end card's live re-walk on the fresh
+binary — the next stage window's, tracked in the U2 RECORD.
