@@ -668,3 +668,14 @@ The red-on-old evidence each new pin owes at that window: `TourEndCardTests` rea
 - **Disposition: PRE-EXISTING, not U2's**; the remaining 268 tests of Run 2 are GREEN.
 
 **Reverts starting (red-on-old evidence).** The tree is clean at e7615492 (pushed). Each check is a TEMPORARY manual inverse of one product line, never committed, restored with `git checkout -- <files>`, with `git status` and the tip verified after each.
+
+**RED-ON-OLD, CONFIRMED (each a temporary manual inverse of ONE product line, never committed, then restored).**
+- **F-U2-W-1, the end card (6d38781a).** The doors drawn on the old one-line voiced style (`VoicedButtonStyle`, a plain label; only the pin's DEBUG oracle kept): `TourEndCardTests.theEndCardsDoorsWrapRatherThanTruncate` went **RED, 4 issues: keepGoing and fieldGuide, in both rooms — "drawn 17.0 pt, the words need 34.0 pt — truncated"**. That is exactly the walk's find.
+- **A3, the single ring.** The spotlight's old `lit` (one ring per group): `TourSpotlightTests.theFirstCandidateOnScreenLightsAndDoorsCountTheirCopies` went **RED — `lit` was `[sidebarArea(bookcase), panelOpenTakesMode]`, two rings**. Headless, step 6's old two groups: `TourWalkTests.theMainLegWalksEveryCardInOrder…` went **RED** at its one-ring line.
+- **F-U2-W-2, the Pool's tucked run (f4476b06).** `PoolPostsModel.showTucked` without its guard (the masthead's toggle road): `TourPoolTuckTests.showTuckedOnlyOpensAndLeavingStillTucks` went **RED — the second ask closed the run**. Headless, leg 3's entry without the reveal effect: `TourWalkTests.theKeepGoingLeg…` went **RED** at its effects line.
+
+**After each check:** `git checkout -- <the files>`, `git status` clean, tip fe07c5db. That tip's code is byte-identical to the tested e7615492: `git diff e7615492 -- App Sources Tests` is empty, and only this record moved. The headless walk re-ran **GREEN 22/22** on the restored tree.
+
+**VERIFY WINDOW: CLOSED GREEN for U2** (Run 1 59/59; Run 2 268/270 with the two reds the pre-existing, order-sensitive `TakesArticleScrollTests` class, GREEN alone 40/40; three red-on-old confirmations). No app was launched; the verify walk is the orchestrator's.
+
+**FINAL SELF-ASSESSMENT LINE (the implementer, closing the session):** U2 is BUILT, PINNED and STAGE-VERIFIED. The tour's rule is walked headlessly card by card (22) with its reads (3). The app's pins are 22 across 6 suites (16 at the first window + 6 this round), all GREEN, and the fix round's three are confirmed red-on-old. The walk's fixes and the assessment's A1–A7 are built; A2's card-width flex is not, with the reason in its row. Open, and owned elsewhere: the focus re-grab (VX-112), the order-sensitive Takes suite (pre-existing), and every PROVISIONAL P-U2-1…16 for her eye (P-U2-3's book-carry and P-U2-5's masthead star are product questions, not tour bugs).
