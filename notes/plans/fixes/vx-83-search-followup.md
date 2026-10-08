@@ -505,7 +505,7 @@ uncommitted work. Work ONLY in `~/dev/variorum-vx-83`.
 | 2 | Worktree + branch + in-flight row | DONE 2026-10-07 |
 | 3 | This record + traces + briefs | DONE (this commit) |
 | 4 | The when-door mockup (`notes/plans/mockups/when-door.html`) | DONE (this commit) |
-| 5 | U-A (VX-84 · 85 · 86 · 88) | U-A CLOSED by the implementer 2026-10-07 23:3x (the §U-A RECORD final — every member FIXED with red-on-old; Mac 384/57 + NoteOpenLanding 12/12, core 2,304/263); the orchestrator's check + walk next |
+| 5 | U-A (VX-84 · 85 · 86 · 88 + the VX-84b offer chip) | CLOSED 2026-10-07 23:3x (the §U-A RECORD final — every member FIXED with red-on-old; Mac 384/57 zero-skipped + NoteOpenLanding 12/12 alone, core 2,304/263) · **ORCHESTRATOR CHECK DONE**: tree clean + pushed at a15e6dd9, no live PENDING, suites re-run green on the orchestrator's machine, the red-on-old table read against each §M trace (note for the ladder: the first-cut VX-85 pins were HOLLOW on the bare harness — re-mounted on a real EditorView at the slot, 1d12917c) · the ACCEPTANCE WALK is owed (slot requested; folds with U-B's screenshot drive if the queue is long) |
 | 6 | The sitting (S-1…S-4 + the VX-72 split) → rulings R-VX83-1…6 | DONE 2026-10-07 (the sitting record above; Linear updated: VX-72 re-scoped + membered, VX-93 minted, VX-73's U3-3 rider, VX-89 in) |
 | 7 | U-B (VX-87 direction 1 + screenshots; VX-89) | BRIEFED — runs after U-A |
 | 8 | U-C (VX-72 savepoints) | BRIEFED — runs after U-B |
