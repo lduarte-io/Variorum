@@ -517,3 +517,78 @@ marker carrying the road's facts; the NIT's sweep row rewritten.
   **VX-106's two pre-existing reds:** if the account-consistent fixture turns them green, RECORDED here, never
   claimed as VX-106's fix (the arm-order question stays variorum-da's).
 - **The NIT — DONE.** The class-sweep row 1 rewritten below.
+
+## ROUND 1 — FIX PASS RESULTS (stage runs, 2026-10-08 — slot 3, `vx-99-review`, zero Variorum instances throughout)
+
+All runs `test-without-building` over one scratch DerivedData, each suite in its OWN `-only-testing` invocation
+(combining many `-only-testing` flags via a zsh variable silently selected 0 tests — zsh does not word-split
+unquoted `$var`; single-suite invocations are reliable).
+
+- **FULL GREEN (the committed fix, 155188c5 + the one added opt-out):**
+  - `PostureSwitchTests`: **52 tests passed** — including the two new pins
+    (`aStandardAccountsReplaceAllKeysUnderAStaleCastlePostureKeepsTheAppleCopyByTheVaultsWord`,
+    `aDoubleCrashedAnotherDeviceResumeKeepsTheRoadsCastleFactsNotTheStaleMarker`) and the two formerly-red VX-106
+    tests (now green — see VX-106 below).
+  - **Batch-1, the runner's whole reach (20 suites, 181 tests, all green):** PostureSwitchTests 52 ·
+    PostureSwitchDrillTests 2 · VX80CastleFollowRecoveryTests 4 · AppleRelinkDoorTests 8 · CopyRegisterPinTests 2 ·
+    Phase13pControllerTests 50 · EncryptionFlowTests's nine suites (EncryptionFlowTests 5 · CopyFlowRoundTests 7 ·
+    CrossoverRoundTests 11 · AccountLifecycleDoorTests 2 · AccountDoorWiringTests 4 · TerminologyPinTests 1 ·
+    RetiredNamesPinTests 1 · SyncLockedFaceTests 2 · FreshAccountSetupGeneralityTests 1) · Phase13pProtectionBrainTests's
+    five suites (ProtectionDialsTests 9 · ProtectionCopyTests 10 · ProtectionCadenceTests 4 · StoreKeyGuardBackingTests 3 ·
+    ProtectionDialsPerStoreTests 3).
+  - **The tutorial spine (13 suites, 99 tests, all green):** the eleven TutorialWalkTests suites (BookShape 10 · Door 10 ·
+    WritingActs 7 · TakesActs 5 · StructureActs 10 · LookingActs 6 · LibraryActs 9 · DeletionActs 13 · WherePlacesActs 7 ·
+    PrivacyChapter 2 · FannedMatrix 2) + TutorialBooksLessonTests 13 + TutorialBooksRitualTests 5.
+  - Phone compile re-run on the fix: **BUILD SUCCEEDED** (`VariorumMobile`, generic iOS Simulator). Core not re-run —
+    the diff touches no `Sources/`, so the 13x baseline stands (the Mac build compiles the core package anyway).
+- **V99-C (the MAJOR revert — both guards back to `leaves.posture() == .standard`, named before it ran):** over the
+  rebuilt tree, `PostureSwitchTests` **failed with 3 issues, ALL in the one MAJOR pin** — :2522
+  `checkDoor().appleKeyReadable == true` (the door returned nil under the stale Castle read), :2529
+  `after.format.masterWrappedByAppleHeld != nil …` (the vault dropped the copy — the account silently re-entered
+  Castle), :2510 `Caught error: .appleHeldCopyAbsent` (the unwrap of the dropped copy). Every other test green
+  (the MINOR pin, VX-106's pair, all pre-existing). Restored; the tree is clean vs HEAD for `PostureSwitch.swift`.
+- **V99-D (the MINOR revert — the `.reencrypt` advance back to `marker.advanced(to: .reencrypt)`, named before it ran):**
+  `PostureSwitchTests` **failed with 3 issues, ALL in the one MINOR pin** — :2592 `outcome.entersCastle` ("keys replaced"
+  on a Castle account), :2595 custody `.biometric` / posture `.castle` (went `.auto`), :2596 the old Standard-era key
+  file retired (it stayed). Every other test green (the MAJOR pin, VX-106's pair). Restored; clean vs HEAD.
+
+**VX-106 (recorded, NOT claimed):** the two pre-existing `PostureSwitchTests` reds
+(`regeneratingTheWordsOnOneDeviceRetiresTheOldWordsAtTheVaultForItsSibling`,
+`theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord`) PASS under the account-consistent harness.
+Mechanism: with the Standard world's vault now carrying an Apple-held copy, `reconcileFollow`'s 13x arm
+(`ProtectionController.swift:680`, `!reading.hasAppleHeldCopy`) no longer fires spuriously, so `changeElsewhere` runs
+and the change notice lands — the behavior these tests already assert. This is a FIXTURE correction, not a product fix;
+the ARM-ORDER question (whether :680 should precede `changeElsewhere` for a genuine Castle-key-file-apple case) stays
+variorum-da's — a harness fix can hide a product question, so it is not claimed here.
+
+**ONE added opt-out, surfaced during the green (recorded):** `aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds`
+takes `vaultSaysCastle: true`. On a genuinely-Standard account a near-empty SIBLING (its own, different iCloud key)
+running Replace All Keys correctly refuses `appleKeyUnreachable` (the account's A is not this device's — exactly what
+`replaceAllKeysUnderStandardRefusesWhenTheAppleKeyIsUnreadableOrAnotherAccountsAndNeverMints` pins); that refusal is
+orthogonal to this pin's pull-to-head purpose, so its account is Castle. No assertion changed.
+
+## THE DOUBLE-CRASH RESIDUAL — mechanism + pin shape (NOT built; for the orchestrator's ruling after green)
+
+The MINOR fix carries the road's SECURITY-load-bearing facts in the `.reencrypt` marker (roadEntersCastle → the
+custody move, `retireOldKeyFiles`, the offer; outcome.entersCastle) using the EXISTING `RotationMarker` fields, so
+the fix stays entirely in `App/Variorum/Shared/PostureSwitch.swift` with NO `Sources/VariorumCore/Sync/` touch. Two
+facts still key on the in-memory `byAnotherDevice`, which is SPENT once the resume lands at `.reencrypt` (the corpus
+key id now matches, so the discriminator returns false):
+1. **The Done's other-device sentence** — `outcome.followedAnotherDevicesSwitch` / `otherDeviceName` (set only
+   `if byAnotherDevice`, PostureSwitch.swift ~:1407). A double-crashed another-device resume speaks the ORDINARY
+   "keys replaced"/done copy instead of "you followed [device]'s switch". Cosmetic (the keys and postures are
+   correct); user-visible only on the rare double-crash.
+2. **The words rule** — `recoveryWords: byAnotherDevice ? nil : typedWords` (PostureSwitch.swift ~:1400). If a caller
+   passed the twelve words to the second resume, they would land on the new key file although they are not the
+   account's words. LATENT only — both production resume doors pass `recoveryWords: nil`
+   (`PostureSwitchModel.swift:549`), so it is unreachable in the app; a test that passed words could reach it.
+**Why not carried:** carrying them needs the marker to REMEMBER "another device" across the crash — an additive,
+local-only `RotationMarker.byAnotherDevice: Bool?` field (defaulted nil; `sync_state` only, never synced, no mirror
+column, no merge/wire impact) — which lives in `Sources/VariorumCore/Sync/CorpusRotation.swift`. I did NOT build it:
+this is a custody round, not a sync round, and the standing rule forbids touching `Sources/VariorumCore/Sync/` absent
+an explicit go; a field there is also a (small) protocol-surface change deserving its own nod.
+**Pin shape if ruled in:** extend `aDoubleCrashedAnotherDeviceResumeKeepsTheRoadsCastleFactsNotTheStaleMarker` with a
+caller that passes `recoveryWords:` to the SECOND resume, and assert (red-on-old) that the new key file carries NO W
+copy from those words (`newFile.recovery == nil` for the other-device road) AND `outcome.followedAnotherDevicesSwitch
+&& outcome.otherDeviceName == "sibling device"`. Red on the current fix (byAnotherDevice spent at `.reencrypt`), green
+once the marker carries the bit and the `.reencrypt` arm reads `marker.byAnotherDevice` first in its discriminator.

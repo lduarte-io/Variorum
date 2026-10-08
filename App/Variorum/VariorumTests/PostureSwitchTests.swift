@@ -4326,7 +4326,14 @@ extension PostureSwitchTests {
     /// (the typed gate itself is hers: QUESTIONS #164); it reds the day a
     /// local-as-truth road returns to this door.
     @Test func aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds() async throws {
-        let full = try await makeWorld()
+        // VX-99 round 1 (harness): this pin is about step 1 pulling the whole
+        // server before any key turns — posture-agnostic — and the RAK is run
+        // by the near-empty SIBLING (its own, different iCloud key). On a
+        // genuinely STANDARD account a different-A device's RAK correctly
+        // refuses `appleKeyUnreachable` (pinned by
+        // `replaceAllKeysUnderStandardRefuses…`), which is orthogonal here, so
+        // the account is Castle (`vaultSaysCastle: true`) — no A-copy owed.
+        let full = try await makeWorld(vaultSaysCastle: true)
         defer { full.tearDown() }
         let mirror = try #require(full.mirror)
         // The fuller server: twelve more notes from the full device, pushed.
