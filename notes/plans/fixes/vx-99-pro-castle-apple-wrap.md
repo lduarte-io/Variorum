@@ -102,8 +102,86 @@ so **those 13 snapshots open through her Apple account** for as long as they exi
 "Standard-era backup" situation the Castle ceremony offers to delete. Time Machine copies of that window are
 the same. Deleting them is her call; nothing here touches them.
 
+**CONFIRMED on her phone (2026-10-08, read-only `devicectl device copy from`, field names only):** the
+phone's one live key file `variorum-keys-2f70a42f…` (written Sep 7 02:16, the follow one minute after the
+Pro's Replace All Keys) carries `formatVersion · keyFingerprint · master · passphrase · storeID ·
+vaultCorpusKeyID (a781…) · vaultKDF · vaultRecoveryWrapDigest` — **no `apple`, no `recovery`.** Clean of
+this bug; its words copy lands by the same lobby road. (A separate dev-scope `Variorum-dev` folder sits
+beside it, untouched since Sep 5 — irrelevant here.)
+
+## HER RULINGS (2026-10-08, after the findings — verbatim-faithful)
+
+1. **Sequencing:** *"We'll wait for 13x to merge and free the sync / custody slot … 13x should merge soon,
+   and we'll fix it as soon as it does."* No code before 13x's merge.
+2. **The review ladder:** *"we'll try running a Fable cold review and if it fails (stops responding because
+   it's stuck on that prompt, or worse, switches to opus 4.8), we'll kill it and do an opus 5.5 review.
+   we'll do an opus 5.5 cold review either way at the end too - if the fable one also works great, if not
+   we know we got an opus 5.5 in at least."*
+3. **The backups:** *"i'll handle them soon, after this phase is done."* Hers; never touched here.
+
+## THE FIX PLAN (written 2026-10-08; RE-VERIFY every line number against the merged tree before the spawn)
+
+**Trigger:** 13x (VX-6) merges to `main`. Then, in `~/dev/variorum-vx-99`: `git merge origin/main` (a merge
+commit, never a rebase), re-read `PostureSwitch.swift` (13x's VX-80 fix touched the follow and the resume
+roads — confirm `writeNewKeyFile`, `replaceAllKeys`, `resume` and `appleHeldCopyForStandard` are where this
+record says), take the Sync/-custody slot by editing this effort's in-flight row, then spawn.
+
+**One acceptance unit — "a Castle Replace All Keys never makes an Apple-openable key file."** Evidence:
+red-on-old pins verified by behavioral revert + the class-sweep table + the touched Mac suites green +
+core headless green. No walk on her real store (the pins carry it); her Pro re-checks naturally at its next
+Replace All Keys, and 13x's detector stays as the net.
+
+**Cast:** orchestrator Opus 5.5 (this session); implementer a fresh `opus-implementer` (custody would be
+Fable work by standing rule — her switch to Opus covers it); reviewers per her ruling 2 above.
+
+**The implementer's brief (self-contained):**
+- Read: CLAUDE.md; `notes/SyncSpec.md` whole; `notes/plans/pre-13x-postures-design.md` §1 (decisions 6,
+  28, 30, 35), §3.4, §3.5, §4, §5's Replace All Keys row, §7; this record whole;
+  `notes/SessionResiliencyProtocol.md`'s implementer section (commit per piece, push after each, a LIVE
+  STATUS section in this file from the first commit, foreground waits only).
+- **Pins FIRST, red on today's code** (in `App/Variorum/VariorumTests/PostureSwitchTests.swift`, the
+  `makeWorld` harness; posture set to `.castle`, the vault carrying no Apple-held copy, the iCloud key
+  READABLE):
+  (a) Replace All Keys through the runner → the new key file's `apple == nil` and `appleKeyID == nil`;
+  the vault still has no Apple-held copy; custody target biometric.
+  (b) the same, crashed at `.rekeyLibrary` (or the nearest existing fault point before the key file is
+  written) and finished through `resume` → `apple == nil`.
+  (c) the Standard pin (`newFile.apple != nil` in `replaceAllKeysThroughTheDoorIsFollowedByTheSibling…`)
+  stays green — the guard on the other side.
+  (d) a local-only (no vault) Castle library's Replace All Keys → `apple == nil`, if the harness reaches
+  that road; else record why not.
+- **The fix:** the key file's Apple copy follows the vault's rule — present only when the posture is
+  Standard. Enrolled road: exactly when the vault write carried an Apple-held copy (`appleHeld != nil`);
+  local-only road and resume: `leaves.posture() == .standard`. Prefer threading ONE decision from
+  `runCeremony` into `writeNewKeyFile` over a second posture read. Entering Castle stays `nil`. Fix the doc
+  comment only if it stops matching.
+- **Behavioral revert:** commit the fix, then revert the one decision line, run the pins (red, exact
+  names recorded), restore, run again (green). Name the revert in this file BEFORE starting it.
+- **Class sweep (a table in this file):** every writer that can set a key file's `apple` copy —
+  `PostureSwitch.writeNewKeyFile` (ceremony + resume + follow), `ProtectionController` ~749 and ~1512–1582
+  (the reconcile's Apple arm / landing), `leaveCastle`, enrollment's key-file write, the 13x adoption/
+  hand-off roads — each FIXED-with-pin or SAFE-with-the-mechanism-stated (the posture gate it reads).
+- **Runs:** core `swift test` headless (free). Mac suites `PostureSwitchTests` + every suite the diff
+  touches + the tutorial spine, by suite-level `-only-testing`, **under a stage slot from oct7coordinator**
+  (message it; never run `xcodebuild test` without the held claim). Confirm the "Test run with N tests"
+  line and read the skipped lines.
+- Commit message for the fix states the traced mechanism and the pin names (CLAUDE.md's small-fix rule).
+  No `Co-Authored-By` / `Claude-Session` trailer.
+
+**The ladder (her ruling 2):** round 1 = a fresh `fable-reviewer` running `notes/REVIEW_PROMPT.md`
+VERBATIM over the fix diff (`git diff <merge-of-13x>..HEAD`), zero framing. If it stalls or comes back as
+another model, the orchestrator kills it and records that, then runs a fresh Opus 5.5 reviewer the same
+way. Findings land in this file before any fix session; fixes with traced mechanisms + revert-verified
+pins; round 2 re-reviews. **At the end, an Opus 5.5 cold review runs either way** (her ruling — a guaranteed
+Opus 5.5 read); a new BLOCKER/MAJOR from it is a fix round like any other. Hard cap three rounds counts the
+rounds that produced findings; her end-review is hers on top.
+
+**Close:** the PR `VX-99: …` (merge commit) after 13x's; VX-99 Done rides it; the in-flight row retired;
+QUESTIONS untouched unless a PROVISIONAL arises; MOBILE PARITY: the phone shares `PostureSwitch.swift`
+(Shared/), so the fix reaches it with the next phone install — a MobileSoul row or "nothing
+mobile-visible" (it is invisible in UI); the `/Applications` refresh at the post-merge window with the A1
+rail, via oct7coordinator.
+
 ## Next
 
-1. Her rulings: sequencing of the fix (after 13x's merge, or ask 13x to lend the slot), the reviewer model
-   for the fix, and whether to delete the 13 Apple-openable snapshots.
-2. The fix session: the pins above red first, the fix, the class sweep, a cold review over the diff.
+Wait for 13x's merge, then run THE FIX PLAN above.
