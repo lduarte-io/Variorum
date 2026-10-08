@@ -70,10 +70,12 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
-    /// 13s-b U2 — THE TOUR, while one runs in THIS window (nil otherwise).
-    /// Per window by construction (`RootView` is the window); born at
-    /// `startTour()`, dropped when the tour finishes or ends.
-    @State private var tour: TourEngine?
+    /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
+    /// nil otherwise). Per window by construction (`RootView` is the window);
+    /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
+    /// object rather than a bare `@State` engine so the engine's doors can
+    /// hold it weakly — a window closed mid-tour leaves no cycle behind.
+    @State private var tourSlot = TourSlot()
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -245,7 +247,7 @@ struct RootView: View {
         // 13s-b U2 — the tour's cards over the whole window (never a dim —
         // R-13s-12) and its spotlight in every door's environment (nil, and
         // so inert, whenever no tour runs).
-        .tourLayer(tour, sources: tourSources)
+        .tourLayer(tourSlot.engine, sources: tourSources)
         .environment(theme)
         // 13i-d U6 (k): the shared wings model reaches the note ▾ menus (both
         // bars render the cross-wing doors) without threading it through
@@ -837,30 +839,45 @@ struct RootView: View {
         let session = session
         let place = TourPlaces.place(router.workspace.focusedSelection)
         let doors = tourDoors
+        let slot = tourSlot
         Task {
             let landmarks = await TourEngine.landmarks(session: session)
-            tour = TourEngine(
+            slot.engine = TourEngine(
                 session: session, landmarks: landmarks, facts: Tour.Facts(place: place),
                 doors: doors)
         }
     }
 
     /// What the tour's effects DO in this window — the shell's own roads.
+    /// They hold the window's long-lived objects and the slot WEAKLY, never
+    /// this view (a captured `RootView` would hold the slot that holds the
+    /// engine that holds these closures).
     private var tourDoors: TourEngine.Doors {
-        TourEngine.Doors(
+        let router = router
+        let session = session
+        let offer = tourOffer
+        let slot = tourSlot
+        return TourEngine.Doors(
             navigate: { place in
                 guard let destination = TourPlaces.selection(place),
                       router.workspace.focusedSelection != destination
                 else { return }
-                adopt(destination, in: router.workspace.focusedPane)
+                // The ONE adoption door's own road (`adopt` above) — a tour
+                // destination never names a block, and the same-note refusal
+                // speaks exactly as it does for every other door.
+                if case .focusedExistingPane = router.adopt(
+                    destination, in: router.workspace.focusedPane) {
+                    session.status.refuse(
+                        WorkspaceNaming.sameNoteNote(router.workspace.label(for: destination)))
+                }
             },
             openFieldGuide: {
                 ShellActions(session: session, shell: router).openTutorial()
             },
-            recordCompleted: { tourOffer?.tourEnded(completed: true) },
-            finished: { completed in
-                tourOffer?.tourEnded(completed: completed)
-                tour = nil
+            recordCompleted: { offer?.tourEnded(completed: true) },
+            finished: { [weak slot] completed in
+                offer?.tourEnded(completed: completed)
+                slot?.engine = nil
             })
     }
 

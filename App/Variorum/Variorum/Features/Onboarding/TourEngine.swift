@@ -140,6 +140,17 @@ final class TourEngine {
     }
 }
 
+// MARK: - The composition root's slot
+
+/// **Where a window keeps its running tour** (`RootView`'s `@State`). A class
+/// so the engine's doors can reach it weakly: the engine holds the doors, the
+/// doors must not hold the engine back.
+@MainActor
+@Observable
+final class TourSlot {
+    var engine: TourEngine?
+}
+
 // MARK: - The facts, read from the window
 
 /// **Where the window stands, in the rule's words** — the composition root
