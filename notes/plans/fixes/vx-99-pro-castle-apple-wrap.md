@@ -295,6 +295,22 @@ the resume's enrolled arm derive the road's posture from the fetched vault exact
 `Posture.derive`), which also honors decision 35 (no posture-driven write on an indeterminate reading). It is a
 behavior change on the resume's follow road beyond this unit's letter, so it waits for the orchestrator's word.
 
+**ORCHESTRATOR RULING (2026-10-08, under the architect mandate — a technical call inside ruled canon, not new
+product behavior): BUILD THE PROPOSAL, IN THIS UNIT.** Grounds: the same bug class (an Apple copy written on a Castle
+account from a stale posture read), reached on a road this unit already owns; the vault is fetched in that very arm
+(:1288), so its word is in hand and decision 8 (posture is the ACCOUNT's once a vault exists) + decision 35 (no
+posture-driven write on an indeterminate reading) say to use it; it is exactly `runFollow`'s existing rule, so it adds
+no new behavior, it closes a divergence from the follow. **Scope as ruled:** in the `.vaultWrite`/`.reencrypt` arm
+only — `appleCopy: fetched.format.masterWrappedByAppleHeld != nil` for the WHOLE arm (own-write: the vault carries an
+Apple-held copy exactly when this device's own Standard Replace All Keys wrote one — equal to the built rule there),
+and `entersCastle` from the vault (`masterWrappedByAppleHeld == nil`) when `byAnotherDevice` (so custody moves and
+`retireOldKeyFiles` follow the account, as the follow's do). **Pin owed, red on 449f5618's tree:** a STANDARD Replace
+All Keys killed before its own vault write, another device enters Castle, the resumed road runs with the posture read
+still STANDARD (the indeterminate-reading shape) → the new key file has `apple == nil`, custody target `.biometric`
+(or `.passphrase` per the gate dials), the old Standard-era key file retired from the live folder. Plus the existing
+pins (a)–(d) stay green and the own-write Standard resume control still lands its Apple copy. A second behavioral
+revert (V99-B, named here before it runs) proves the new pin red-on-old. Then the cold review covers the whole diff.
+
 ## THE CLASS SWEEP (every road that can put an `apple` copy into a key file — on the merged tree, 37e26d2e)
 
 Census: `grep setAppleWrappedCopy` + every `StoreKeyEnvelope(…apple:…)` construction + every key-file save/copy in
