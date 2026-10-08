@@ -113,10 +113,13 @@ enum LaunchFurniture {
             // arrangement's arrange-now road only — so Welcome holds it at
             // first open (§19.3) and an existing store never grows one.
             // 13s-b U1b: the example snippet FIRST (the oldest group is the
-            // Snippets rail's first card — R-13s-26), then the guide.
+            // Snippets rail's first card — R-13s-26), then the guide, then
+            // the readme LAST — the newest thing a fresh Library leads
+            // with (R-13s-29/39).
             beforeArranging: {
                 _ = await ExampleSnippetSeeder.seedAtBirth(session: session)
                 _ = await TutorialSeeder.seedAtBirth(session: session)
+                _ = await ReadmeSeeder.seedAtBirth(session: session)
             },
             loadMark: marks.welcome?.load,
             saveMark: marks.welcome?.save)

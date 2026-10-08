@@ -38,6 +38,133 @@ import GRDB
 import OSLog
 import VariorumCore
 
+/// **The readme placeholder** (R-13s-39 — her exact content ruling; the
+/// order R-13s-29 with the letter absent). A standalone BOOKLESS note
+/// titled "readme" (lowercase, her word — R-13s-27), seeded LAST of the
+/// birth furniture so it tops the Library by recency. The content is her
+/// reference's first half VERBATIM — everything from "Welcome to
+/// Variorum!" through the SECOND "--- end alternates ---" ("Ok, enough fun
+/// with takes" is the first excluded sentence) — with the alternates built
+/// as REAL takes on their blocks (displayed text chosen), then her
+/// dictated closer as the final block. NOTHING else; NO letter note
+/// (VX-105 carries her finished text post-merge).
+///
+/// Block boundaries follow the reference's paragraph lines (the recorded
+/// reading): five blocks — the welcome line · the take-icon paragraph
+/// (takes: "You found it! :D" and the Open-Takes line) · the Write/Takes
+/// line · the "This is the point…" paragraph (takes: the shortcuts
+/// alternate and the style alternate) · her closer. Interior bytes are
+/// byte-exact from the reference (curly quotes, the em dash, ":D"); each
+/// paragraph's trailing whitespace is trimmed, which is also exactly what
+/// `SegmentationRules.bulkSegments` does to every imported piece.
+@MainActor
+enum ReadmeSeeder {
+    nonisolated static let title = "readme"
+
+    /// The five blocks, in order (her reference's bytes).
+    nonisolated static let paragraphs: [String] = [
+        "Welcome to Variorum! I'm Lillian, the developer behind this app, and I'm excited "
+        + "that you've downloaded it.",
+
+        "I built Variorum with a simple goal: to be able to create multiple different "
+        + "versions of a block of text. I call these versions takes, borrowing from the "
+        + "film world. The icon to the right of this block is the take icon - click on it.",
+
+        "While Write is meant to behave like a simple and elegant editor, Takes is where "
+        + "complexity thrives. Click on \u{201C}expand all\u{201D} at the top of Takes.",
+
+        "This is the point at which you might be thinking \"cool, but so what?\", unless "
+        + "you're a writer that understands the pain of reworking a particular paragraph "
+        + "to the point of madness. If that isn't you, some of the best use cases I've "
+        + "found for it are in the takes of this paragraph.",
+
+        "This book is a full guide to all the features of variorum and how to use them. "
+        + "Move through the chapters, which are interactive guides, to discover them all.",
+    ]
+
+    /// The alternates, as REAL takes: block index → the take texts, in fan
+    /// order after the displayed (chosen) original.
+    nonisolated static let takes: [Int: [String]] = [
+        1: ["You found it! :D",
+            "Now click on Open Takes mode in the top bar of this modal"],
+        3: ["This is where things get really fun! You can expand or collapse any take "
+            + "block with the button to the right of it, or use the button at the top. "
+            + "Navigation is fully supported by keyboard shortcuts\u{2014}you can also get "
+            + "to Takes with Command 2. Check out all the shortcuts at Command /.",
+            "There are four different ways to see your takes and work with them. Test "
+            + "each of them out now by changing \u{201C}style\u{201D} at the top bar of "
+            + "this note. While each is useful for something different, I\u{2019}m "
+            + "particularly fond of margin grid for quick notes."],
+    ]
+
+    enum BirthSeed: Equatable {
+        case seeded(postID: String)
+        case alreadyPresent
+        case deletedByTheReader
+        case refused(String)
+    }
+
+    private static let log = Logger(
+        subsystem: "io.lduarte.Variorum", category: "birth-furniture")
+
+    @discardableResult
+    static func seedAtBirth(session: AppSession) async -> BirthSeed {
+        let outcome = await perform(session: session)
+        log.notice(
+            "readme at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
+        return outcome
+    }
+
+    private static func perform(session: AppSession) async -> BirthSeed {
+        do {
+            let (liveID, tombstoned) = try await session.database.read { db in
+                (try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT id FROM container
+                        WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
+                        ORDER BY id LIMIT 1
+                        """,
+                    arguments: [title]),
+                 try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (SELECT 1 FROM container
+                                       WHERE kind = 'post' AND title = ?
+                                         AND deleted_at IS NOT NULL)
+                        """,
+                    arguments: [title]) ?? false)
+            }
+            if liveID != nil { return .alreadyPresent }
+            if tombstoned { return .deletedByTheReader }
+            let postID = try await session.runner.run { _ -> String in
+                let ops = Operations(undoStack: nil)
+                @Dependency(\.database) var database
+                let note = try ops.importPost(
+                    title: title, text: paragraphs.joined(separator: "\n"),
+                    undoLabel: "readme", segmentation: .paragraph, wingId: "")
+                for (index, texts) in takes.sorted(by: { $0.key < $1.key }) {
+                    guard note.blockIDs.indices.contains(index) else { continue }
+                    let blockID = note.blockIDs[index]
+                    guard let original = try database.read({ db in
+                        try String.fetchOne(
+                            db, sql: "SELECT default_variant_id FROM block WHERE id = ?",
+                            arguments: [blockID])
+                    }) else { continue }
+                    for text in texts {
+                        let minted = try ops.branchVariant(blockID, from: original)
+                        try ops.autosave(minted.id, text: text, charDelta: text.count)
+                    }
+                }
+                return note.container.id
+            }
+            return .seeded(postID: postID)
+        } catch {
+            return .refused(String(describing: error))
+        }
+    }
+}
+
 /// **The Snippets example scrap** (R-13s-5/26 — Q17's disposition; the
 /// shape is the implementer's call, logged PROVISIONAL in the U1b record).
 @MainActor

@@ -255,6 +255,105 @@ struct LaunchFurnitureTests {
         }
     }
 
+    /// **THE README PLACEHOLDER (13s-b U1b — R-13s-39, her exact content;
+    /// R-13s-27 the lowercase title; R-13s-29's order with the letter
+    /// absent).** A fresh launch leaves ONE bookless Home note titled
+    /// "readme", seeded LAST so it tops the Library by recency: her
+    /// reference's first half as five blocks, the alternates as REAL takes
+    /// on the take-icon block and the "This is the point…" block (displayed
+    /// text chosen), her dictated closer the final block — and NOTHING else
+    /// (no letter note). RED ON OLD by construction: the old tree seeded no
+    /// readme.
+    @Test func aFreshLaunchSeedsTheReadmePlaceholderLastWithItsTakes() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let readme = try await db.read { db -> (id: String, created: String)? in
+                try Row.fetchOne(
+                    db,
+                    sql: """
+                        SELECT id, created_at FROM container
+                        WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [ReadmeSeeder.title]
+                ).map { (id: $0["id"] as String, created: $0["created_at"] as String) }
+            }
+            let (id, created) = try #require(readme, "the readme placeholder seeds")
+            // Bookless, undated, in Home — a standalone note (R-13s-27).
+            let (membered, entryDate, wing, rendered) = try await db.read { db in
+                (try Bool.fetchOne(
+                    db,
+                    sql: "SELECT EXISTS (SELECT 1 FROM reading_post WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? false,
+                 try String.fetchOne(
+                    db, sql: "SELECT entry_date FROM container WHERE id = ?", arguments: [id]),
+                 try String.fetchOne(
+                    db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [id]) ?? "",
+                 try Queries.renderedText(db, containerID: id))
+            }
+            #expect(!membered, "bookless — Pool/Library, no book")
+            #expect(entryDate == nil && wing == "")
+            // The DISPLAYED page is the five paragraphs, byte-exact (the
+            // chosen takes are the originals).
+            #expect(rendered == ReadmeSeeder.paragraphs.joined(separator: "\n"))
+            // The alternates are REAL takes on their ruled blocks, in fan
+            // order after the chosen original, byte-exact.
+            let fans = try await db.read { db -> [Int: [String]] in
+                let blocks = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT block_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL
+                        ORDER BY position, id
+                        """,
+                    arguments: [id])
+                var fans: [Int: [String]] = [:]
+                for (index, blockID) in blocks.enumerated() {
+                    fans[index] = try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT working_text FROM variant
+                            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                            ORDER BY fan_position, id
+                            """,
+                        arguments: [blockID])
+                }
+                return fans
+            }
+            #expect(fans.count == 5, "five blocks — the reference's paragraphs")
+            for (index, texts) in fans {
+                let expected = [ReadmeSeeder.paragraphs[index]] + (ReadmeSeeder.takes[index] ?? [])
+                #expect(texts == expected, "block \(index)'s fan, chosen first, byte-exact")
+            }
+            // Seeded LAST: the newest seeded thing a fresh Library meets —
+            // every other container of the seed was created strictly before.
+            let newest = try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT MAX(created_at) FROM container
+                        WHERE deleted_at IS NULL AND id <> ?
+                        """,
+                    arguments: [id])
+            }
+            #expect(newest.map { $0 < created } == true, "the readme tops the Library by recency")
+            // And no letter note (R-13s-39: "no letter and nothing else").
+            let posts = try await db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT COALESCE(title, '') FROM container
+                        WHERE kind = 'post' AND deleted_at IS NULL
+                          AND created_at >= ?
+                        """,
+                    arguments: [created])
+            }
+            #expect(posts == [ReadmeSeeder.title], "nothing seeds after the readme")
+        }
+    }
+
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing
     /// store that already had its library is declined at launch and grows no
     /// guide; a store born on an earlier build (`done`, no guide) stays as it
