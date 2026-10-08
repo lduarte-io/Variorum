@@ -172,7 +172,15 @@ struct LibraryWhenDoor: View {
                 brain: $brain,
                 month: Binding(
                     get: { month ?? LibraryWhenMonth.opening(range: range, today: today)
-                        ?? LibraryWhenMonth(year: 2026, month: 1) },
+                        // The last-resort floor (ladder R1 NIT-2): structurally
+                        // unreachable — the press seeds `month` before `shown` —
+                        // but if a future road ever reaches it, NOW's month in
+                        // the filter's own calendar, never a dated constant
+                        // (the failable `opening` closes only on a bad key;
+                        // the components form cannot fail).
+                        ?? LibraryWhenMonth(
+                            year: calendar.component(.year, from: now),
+                            month: calendar.component(.month, from: now)) },
                     set: { month = $0 }),
                 onPick: onPick, onClear: onClear)
         }
