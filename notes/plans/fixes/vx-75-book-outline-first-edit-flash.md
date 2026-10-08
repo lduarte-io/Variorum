@@ -62,11 +62,18 @@ Dev store, Debug build (`io.lduarte.Variorum.debug`), under a held `Tools/stage`
 
 ## Findings
 
-*(pending reproduction)*
+**The walk (2026-10-07 ~00:57, dev store, the Sherlock book, Terminal·dark, stage held by 13o's assignment).** A story ▸-unfolded read-cheap, scrolled mid-story, then ONE prose click recorded (`DerivedData/vx75-walk/flash.mov`, 94 frames @ ~15.6 fps, extracted to `frames/`):
+- Frames **f0055–f0063 (~9 frames ≈ 0.6 s)**: the ENTIRE text column is blank — the window's background where the story was. The sidebar (the note box already says "editing" + the title, no bar yet) and the navigator stay drawn. PNG size drops 2.95 MB → 1.83 MB and returns at f0064.
+- **f0065**: the same text back at the SAME position (the "He chuckled…" line at the identical y before and after), the clicked block ringed live, the note box's bar filled in. **No measurable column displacement** — the probe pin agrees (`maxShift=0`, no witness de-realized, the row's height floor never dipped). The "slight shake" is not a geometry move in the frames; its likeliest reading is the blank→return itself plus the note box growing its bar in the same beat — re-walked after the fix.
+- A second recording (a navigator click on a COLLAPSED story, `steady.mov`) shows a different, expected beat: the newly expanded story's body loads below its heading (nothing was on screen there before).
+
+**The pin run (same claim):** the probe `theFirstClickIntoEditingHoldsTheColumnSteady` GREEN (`maxShift=0 heightFloor=16195 of 16195 vanished=[]`) — the column-geometry class is ACQUITTED. The stage claim then lapsed during a session interruption (no harm recorded; 13o's implementer back-filled the idle stage); re-claimed on the author's word.
 
 ## The mechanism
 
-*(pending)*
+**`OutlinePostRow` swaps two VIEWS on focus, and the incoming one is born empty.** Expanded + unfocused renders `ReadPostView` (identity `read-<postID>`); expanded + focused renders `EditorView(inline: true)` (identity `<postID>`) — two separate `if/else` branches. The prose click → `BookViewModel.focus` flips `liveFocusedPostID`, the branch flips, SwiftUI dismantles the read surface IMMEDIATELY, and the inline editor mounts with an EMPTY `EditorTextView` (and a 24-pt frame inside `StableSurface`'s reservation, which is why nothing moves). Its text arrives only when `EditorViewModel.observeSlots`' first `observePost` delivery reaches `applyProjection` → `.initialRender` → `renderFull`. Every displayed frame between those two moments shows a correctly-sized, EMPTY row: the flash. **Once-per-session** because the interval is the editor's COLD first-render cost (first observation, first projection of a ~9.7k-word story, first TK2 layout of that storage — ~0.6 s cold on the walk); warm, the same gap shrinks to a frame or less, below perception — hence "after that… no issues". The class is not cold-only: the gap exists on every read→live swap, it is only invisible when short.
+
+**Red-on-old pin:** `BookOutlineLandingTests.theFirstClickIntoEditingNeverShowsAnEmptyNote` — samples every displayed turn after `focus(_:caret:)` for any in-window `NSTextView` holding the story; RED on the current tree: `emptyTurns=[0] editorFilledAt=1` (in-memory store, warm — one empty turn; the app's cold road is ~9 frames of the same).
 
 ## The pin and the fix
 

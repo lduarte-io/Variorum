@@ -900,3 +900,77 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+extension BookOutlineLandingTests {
+    /// Every text view in the tree that is in a window and holds real prose.
+    @MainActor
+    private func proseSurfaces(in view: NSView) -> [NSTextView] {
+        var found: [NSTextView] = []
+        func walk(_ v: NSView) {
+            if let text = v as? NSTextView, text.window != nil, !text.isHiddenOrHasHiddenAncestor,
+               text.string.count > 1000 {
+                found.append(text)
+            }
+            for sub in v.subviews { walk(sub) }
+        }
+        walk(view)
+        return found
+    }
+
+    /// **VX-75 — THE MECHANISM, as she saw it** (the walk's frames: the
+    /// column blank for ~9 frames, ~0.6 s, then the same text back at the
+    /// same place). A plain click on a read-cheap story swaps the row's read
+    /// surface for the live editor; the read surface is dismantled at once
+    /// while the editor is born EMPTY and fills only when its first projection
+    /// arrives from the store. Every displayed turn between those two moments
+    /// shows no prose where the story was. The contract: from the click until
+    /// the editor holds the story, some surface is always showing it.
+    @Test func theFirstClickIntoEditingNeverShowsAnEmptyNote() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: true) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                !proseSurfaces(in: hosting).isEmpty
+            }, maxTurns: 120)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
+            #expect(!proseSurfaces(in: hosting).isEmpty, "the story reads before the click")
+
+            model.focus(storyID, caret: 120)
+
+            var emptyTurns: [Int] = []
+            var editorFilledAt: Int?
+            for turn in 0..<80 {
+                watchdog.beat()
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                if proseSurfaces(in: hosting).isEmpty { emptyTurns.append(turn) }
+                if (writingEditor(in: hosting)?.string.count ?? 0) > 1000 {
+                    editorFilledAt = editorFilledAt ?? turn
+                    if turn > (editorFilledAt ?? 0) + 3 { break }
+                }
+                pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            print("VX-75 EMPTY: emptyTurns=\(emptyTurns) editorFilledAt=\(String(describing: editorFilledAt))")
+            #expect(editorFilledAt != nil, "the live editor came to hold the story")
+            #expect(emptyTurns.isEmpty,
+                    "no displayed turn shows the story with no prose — empty at turns \(emptyTurns)")
+        }
+    }
+}
