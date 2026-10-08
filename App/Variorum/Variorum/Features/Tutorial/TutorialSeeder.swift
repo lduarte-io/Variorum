@@ -1864,6 +1864,9 @@ enum TutorialSeeder {
         // ⌘K's passages. Every door named here is tied to its own home by
         // `TutorialCurrencyTests`' search pins, and the two practice acts —
         // `#tutorial` alone, and the practice word — are walk-asserted (P-6).
+        // VX-72 (U-B's rider, the same run's U-C): ONE sentence for the
+        // `+ commits` facet (her word, R-VX83-9) — savepoint history joins
+        // the answer, each line marked "savepoint" with its day.
         _ = try lesson(library, searchLessonTitle, [
             "The search field at the top of the Library is the one place to look "
             + "for anything you wrote. Type words and it searches the TEXT itself: "
@@ -1915,7 +1918,10 @@ enum TutorialSeeder {
 
             "Archived notes stay out of the way: search leaves them out until you "
             + "press \u{201C}+ archived\u{201D} in the band, and that chip's "
-            + "\u{2715} leaves them out again. Inside a book, the \u{1F50D} at the "
+            + "\u{2715} leaves them out again. What you saved is searchable the "
+            + "same way: \u{201C}+ commits\u{201D} brings in the words your "
+            + "savepoints kept, each such line marked \u{201C}savepoint\u{201D} "
+            + "with the day it was saved. Inside a book, the \u{1F50D} at the "
             + "right of the book's masthead searches that book alone \u{2014} the "
             + "same kind of answer, scoped to the book. And \u{2318}K finds "
             + "passages too: under the notes and books whose names match, a few "

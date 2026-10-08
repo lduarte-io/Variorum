@@ -341,6 +341,11 @@ struct TutorialCurrencyTests {
             #expect(text.contains(quoted(sentence.plain)), "the popover's own sentence")
 
             #expect(text.contains(quoted(LibrarySearchCopy.archivedOff)))
+            // VX-72 (U-C — U-B's rider): the commits facet's chip, her word
+            // (R-VX83-9), and the word its lines wear.
+            #expect(text.contains(quoted(LibrarySearchCopy.commitsOff)), "the + commits chip")
+            #expect(text.contains(quoted(try #require(SearchAnswerCopy.kindWord(.savepoint)))),
+                    "the savepoint line's word")
             #expect(try AppSource.read("Variorum/Features/BookView/BookSearchViews.swift")
                 .contains("Image(systemName: \"magnifyingglass\")"), "the book masthead's door is a 🔍")
             #expect(text.contains("\u{1F50D} at the right of the book's masthead"))
