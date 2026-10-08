@@ -1290,6 +1290,10 @@ private extension View {
         overlay {
             if let tour {
                 TourOverlay(engine: tour, sources: sources)
+                    // A restarted tour is a NEW overlay: its first facts are
+                    // delivered on appear (`onChange(initial:)`), never left
+                    // waiting for the window to change.
+                    .id(ObjectIdentifier(tour))
             }
         }
         .environment(tour?.spotlight)

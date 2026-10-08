@@ -78,18 +78,27 @@ struct TourOverlay: View {
         .task(id: badgeBlockID) { await followBadge() }
         #if DEBUG
         .onAppear { TourOracle.overlay = engine }
-        .onDisappear { if TourOracle.overlay === engine { TourOracle.overlay = nil } }
+        .onDisappear {
+            if TourOracle.overlay === engine {
+                TourOracle.overlay = nil
+                TourOracle.cardFrame = nil
+            }
+        }
         #endif
     }
 
     @ViewBuilder
     private func card(in container: CGSize) -> some View {
         let step = engine.state.step
+        let spot = placement(for: step, in: container)
         if step == .endCard {
             TourEndCard(tokens: tokens, scheme: scheme) { engine.choose($0) }
                 .fixedSize(horizontal: false, vertical: true)
-                .onGeometryChange(for: CGSize.self) { $0.size } action: { cardSize = $0 }
-                .offset(placement(for: step, in: container))
+                .modifier(MeasuredCard(size: $cardSize))
+                // Placed by layout, not by `offset`, so the card's frame (and
+                // so its click area and the oracle's reading) IS where it draws.
+                .padding(.leading, spot.width)
+                .padding(.top, spot.height)
                 .transition(.opacity)
         } else if let words = TourScript.card(step, takeCount: takeCount) {
             TourCoachCard(
@@ -98,8 +107,9 @@ struct TourOverlay: View {
                 card: words,
                 showsNext: Tour.hasNext(step), showsEnd: Tour.hasEndTour(step),
                 onNext: { engine.next() }, onEnd: { engine.endTour() })
-                .onGeometryChange(for: CGSize.self) { $0.size } action: { cardSize = $0 }
-                .offset(placement(for: step, in: container))
+                .modifier(MeasuredCard(size: $cardSize))
+                .padding(.leading, spot.width)
+                .padding(.top, spot.height)
                 .id(step)
                 .transition(.opacity)
         }
@@ -145,6 +155,22 @@ struct TourOverlay: View {
                 frame: local.map { $0.offsetBy(dx: origin.minX, dy: origin.minY) })
             try? await Task.sleep(for: .milliseconds(250))
         }
+    }
+}
+
+/// The card's measured size (the placement's input) — and, in DEBUG, its
+/// frame for the pins (`TourOracle.cardFrame`).
+private struct MeasuredCard: ViewModifier {
+    @Binding var size: CGSize
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                TourOracle.cardFrame = $0
+            }
+            #endif
     }
 }
 
@@ -330,5 +356,7 @@ enum TourBadgeLocator {
 @MainActor
 enum TourOracle {
     static weak var overlay: TourEngine?
+    /// The card's last frame, `.global`.
+    static var cardFrame: CGRect?
 }
 #endif
