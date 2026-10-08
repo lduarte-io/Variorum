@@ -145,7 +145,8 @@ struct TourWalkTests {
         w.report(Self.write(Self.middle, ordinal: 40, takes: 2, panel: true))
         #expect(w.step == .takeIcon)
         #expect(w.state?.tourBlockID == Self.middle)
-        #expect(w.rings == [[.takeBadge(Self.middle)], [.panelOpenTakesMode]])
+        #expect(w.rings == [[.panelOpenTakesMode]],
+                "ONE ring: while the panel is up, its Open Takes mode is the act (A3)")
         w.report(Self.write(Self.middle, ordinal: 40, takes: 2, panel: false))
         #expect(w.rings == [[.takeBadge(Self.middle)]])
 
@@ -318,6 +319,28 @@ struct TourWalkTests {
         #expect(w.rings == [[.bookcaseRow(Self.sherlock)]])
     }
 
+    /// A7 (PROVISIONAL P-U2-15): the card says "follow the ring back"
+    /// exactly when the ring is a road back — never on a step's own road.
+    @Test func theRoadBackIsSaidOnlyWhenTheRingIsOne() {
+        var w = Self.walk(to: .seededBook)
+        #expect(w.state.map(Tour.isRoadBack) == false, "on the Bookcase the row is the target")
+        w.report(.init(place: .area(.library)))
+        #expect(w.state.map(Tour.isRoadBack) == true)
+        #expect(w.rings == [[.sidebarArea(.bookcase)]])
+
+        var v = Self.walk(to: .write)
+        v.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(v.state.map(Tour.isRoadBack) == true, "out of Write: the rail's Write is the way back")
+        #expect(v.rings == [[.sidebarMode(.write)]])
+
+        let u = Self.walk(to: .placeFollows)
+        #expect(u.state.map(Tour.isRoadBack) == false, "step 9's book icon is its own road")
+        var t = Self.walk(to: .home)
+        #expect(t.state.map(Tour.isRoadBack) == false, "10b's Bookcase IS the step")
+        t.report(.init(place: .area(.library)))
+        #expect(t.state.map(Tour.isRoadBack) == false)
+    }
+
     @Test func anyNoteServesStepThreeAndTheTourFollowsTheNoteSheTook() {
         var w = Self.walk(to: .insideBook)
         w.report(.init(place: .note(Self.league), noteMode: .write))
@@ -486,6 +509,65 @@ struct TourWalkTests {
             #expect(placed.y >= Tour.cardMargin && placed.maxY <= container.height - Tour.cardMargin + 0.5)
             #expect(!placed.intersects(anchor))
         }
+    }
+
+    /// A2 (the U2 UI assessment's placement pattern): a card never covers a
+    /// keep-clear region (the sidebar, a masthead, a bottom bar) or the ring
+    /// it points at — it is PUSHED to the first free gutter along its side,
+    /// and with no side free it takes a clear corner.
+    @Test func aCardAvoidsTheKeepClearRegionsAndTheRingsOwnFrame() {
+        let container = (width: 1100.0, height: 700.0)
+        let card = (width: 300.0, height: 160.0)
+        let sides: [Tour.Side] = [.trailing, .below, .leading, .above]
+        let sidebar = Tour.Rect(x: 0, y: 0, width: 220, height: 700)
+        let masthead = Tour.Rect(x: 220, y: 0, width: 880, height: 80)
+        let bottomBar = Tour.Rect(x: 220, y: 664, width: 880, height: 36)
+        let avoid = [sidebar, masthead, bottomBar]
+        func rect(_ p: (x: Double, y: Double)) -> Tour.Rect {
+            Tour.Rect(x: p.x, y: p.y, width: card.width, height: card.height)
+        }
+        func clear(_ p: (x: Double, y: Double), of anchor: Tour.Rect) -> Bool {
+            let r = rect(p)
+            let ring = Tour.Rect(
+                x: anchor.x - Tour.ringClearance, y: anchor.y - Tour.ringClearance,
+                width: anchor.width + 2 * Tour.ringClearance,
+                height: anchor.height + 2 * Tour.ringClearance)
+            return !avoid.contains { r.intersects($0) } && !r.intersects(ring)
+                && r.x >= Tour.cardMargin && r.maxX <= container.width - Tour.cardMargin + 0.5
+                && r.y >= Tour.cardMargin && r.maxY <= container.height - Tour.cardMargin + 0.5
+        }
+
+        // A sidebar row: the card is pushed past the sidebar into the first
+        // gutter right of it, never over the navigation.
+        let row = Tour.Rect(x: 10, y: 120, width: 170, height: 28)
+        let a = Tour.place(card: card, beside: row, in: container, sides: sides,
+                           corner: .topTrailing, avoid: avoid)
+        #expect(a.x == sidebar.maxX + Tour.cardGap, "the first gutter right of the sidebar")
+        #expect(clear(a, of: row))
+
+        // The masthead's ＃: below it, pushed past the masthead.
+        let tagDoor = Tour.Rect(x: 1000, y: 40, width: 24, height: 24)
+        let b = Tour.place(card: card, beside: tagDoor, in: container, sides: sides,
+                           corner: .topTrailing, avoid: avoid)
+        #expect(b.y >= masthead.maxY + Tour.cardGap, "never on the masthead")
+        #expect(clear(b, of: tagDoor))
+
+        // Write's bar door at the foot: above it, never on the bar.
+        let barDoor = Tour.Rect(x: 400, y: 670, width: 50, height: 22)
+        let c = Tour.place(card: card, beside: barDoor, in: container, sides: sides,
+                           corner: .topTrailing, avoid: avoid)
+        #expect(clear(c, of: barDoor))
+
+        // Nothing to sit beside and the step's corner blocked: a clear corner.
+        let topRightBlock = Tour.Rect(x: 700, y: 0, width: 400, height: 300)
+        let d = Tour.place(card: card, beside: nil, in: container, sides: sides,
+                           corner: .topTrailing, avoid: avoid + [topRightBlock])
+        #expect(!rect(d).intersects(topRightBlock), "the next corner, clear")
+
+        // The pre-A2 placement still holds where nothing is in the way.
+        let free = Tour.place(card: card, beside: row, in: container, sides: sides,
+                              corner: .topTrailing)
+        #expect(free.x == row.maxX + Tour.cardGap)
     }
 
     @Test func thePanelsDoorsTakeTheCornerAndOnlyTheBadgeIsAppKit() {

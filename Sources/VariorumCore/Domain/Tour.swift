@@ -622,11 +622,11 @@ public enum Tour {
         }
     }
 
-    /// **The rings, as ordered candidates.** Each inner list lights ONE ring:
-    /// the first of its anchors that is actually on screen. A step with two
-    /// lists lights two (step 6 points at the badge AND, while the panel is
-    /// up, at its "Open Takes mode"). The first list's lit anchor is the one
-    /// the card sits beside.
+    /// **The ring, as ordered candidates.** The tour lights exactly ONE ring
+    /// (A3, the U2 UI assessment): the first anchor, list by list, that is
+    /// actually on screen. Every step answers one list today; the shape
+    /// stays a list of lists so a step can name a second road without a
+    /// second ring. The lit anchor is the one the card sits beside.
     public static func ringGroups(_ state: State) -> [[Anchor]] {
         let facts = state.facts
         let bookcase = Anchor.sidebarArea(.bookcase)
@@ -654,9 +654,11 @@ public enum Tour {
             if case .note = facts.place, facts.noteMode != .write { return [[.sidebarMode(.write)]] }
             return facts.caret?.panelOpen == true ? [[.panelNewTake]] : [[.barTakes]]
         case .takeIcon:
-            var groups: [[Anchor]] = [state.tourBlockID.map { [.takeBadge($0)] } ?? []]
-            if facts.caret?.panelOpen == true { groups.append([.panelOpenTakesMode]) }
-            return groups
+            // ONE ring (A3, the U2 UI assessment — the walk showed two at
+            // once, the badge's under the panel): while the panel is up its
+            // "Open Takes mode" is the act; with it closed, the ⑂ badge.
+            if facts.caret?.panelOpen == true { return [[.panelOpenTakesMode]] }
+            return [state.tourBlockID.map { [.takeBadge($0)] } ?? []]
         case .takesMode:
             return [state.tourBlockID.map { [.takesBlock($0)] } ?? []]
         case .deeperModes:
@@ -697,6 +699,40 @@ public enum Tour {
         case .legEnd:
             guard facts.place == .area(.bookcase) else { return [[bookcase]] }
             return [state.fieldGuideID.map { [.bookcaseRow($0)] } ?? []]
+        }
+    }
+
+    /// **Whether the ring is the ROAD BACK** — the step's own target is not
+    /// where she is, so the ring points at the way back to it (she wandered).
+    /// The card then adds one muted sentence (A7 of the U2 UI assessment,
+    /// PROVISIONAL P-U2-15) so the ring and the words never contradict. The
+    /// branches mirror `ringGroups`' fallbacks exactly; a step's own road
+    /// (step 9's book icon, step 10b's Bookcase, leg 1's Open row) is never a
+    /// road back.
+    public static func isRoadBack(_ state: State) -> Bool {
+        let place = state.facts.place
+        switch state.step {
+        case .seededBook, .ownNote, .legEnd:
+            return place != .area(.bookcase)
+        case .insideBook:
+            if case .book = place { return false }
+            return true
+        case .write, .makeTake:
+            if case .note = place { return state.facts.noteMode != .write }
+            return false
+        case .downAndUp:
+            if case .note = place { return true }
+            return false
+        case .legTags:
+            guard let own = state.ownNoteID else { return false }
+            return place != .note(own)
+        case .legBook:
+            return place != .area(.pool)
+        case .legSnippets:
+            return place != .area(.snippets)
+        case .navigation, .takeIcon, .takesMode, .deeperModes, .placeFollows, .home,
+             .endCard, .legStar:
+            return false
         }
     }
 
@@ -756,48 +792,104 @@ public enum Tour {
     public static let cardGap: Double = 14
     public static let cardMargin: Double = 16
 
-    /// **Where a card goes.** Beside its anchor on the first preferred side
-    /// where the whole card fits inside the container without covering the
-    /// anchor; on none, its corner. The cross axis is clamped into the
-    /// container.
+    /// How far a card keeps from the ring it points at (the ring's outset
+    /// and its glow — the card never sits on the ring's own frame).
+    public static let ringClearance: Double = 12
+
+    /// **Where a card goes** (A2 of the U2 UI assessment — the placement
+    /// pattern): beside its anchor, on the first preferred side where the
+    /// whole card fits inside the container WITHOUT covering the ring's own
+    /// frame or any KEEP-CLEAR region (the bottom bars, the mastheads, the
+    /// sidebar's navigation — `avoid`). On each side it tries the anchor's
+    /// own alignment first, then centred on it, then its far alignment, then
+    /// the container's two ends; a candidate that lands on a keep-clear
+    /// region is PUSHED along its side past that region (so a card beside a
+    /// sidebar row lands in the first free gutter right of the sidebar, never
+    /// over it). With no side free, the corners in order — the step's own
+    /// first — under the same rules; and only when nothing at all is clear,
+    /// the old rule (beside the anchor, then the corner) as the last resort.
     public static func place(
         card: (width: Double, height: Double), beside anchor: Rect?,
         in container: (width: Double, height: Double),
-        sides: [Side], corner: Corner
+        sides: [Side], corner: Corner, avoid: [Rect] = []
     ) -> (x: Double, y: Double) {
         let m = cardMargin, g = cardGap
+        let w = card.width, h = card.height
         func clamp(_ v: Double, _ lo: Double, _ hi: Double) -> Double { min(max(v, lo), max(lo, hi)) }
-        let maxX = container.width - card.width - m
-        let maxY = container.height - card.height - m
+        let maxX = container.width - w - m
+        let maxY = container.height - h - m
+        let ring = anchor.map {
+            Rect(x: $0.x - ringClearance, y: $0.y - ringClearance,
+                 width: $0.width + 2 * ringClearance, height: $0.height + 2 * ringClearance)
+        }
+        func inside(_ x: Double, _ y: Double) -> Bool {
+            x >= m - 0.5 && y >= m - 0.5 && x <= maxX + 0.5 && y <= maxY + 0.5
+        }
+        func blocker(_ x: Double, _ y: Double) -> Rect? {
+            let r = Rect(x: x, y: y, width: w, height: h)
+            if let ring, r.intersects(ring) { return ring }
+            return avoid.first { r.intersects($0) }
+        }
+        // Beside the anchor, side by side, pushing past keep-clear regions.
+        if let a = anchor {
+            for side in sides {
+                let starts: [(Double, Double)]
+                switch side {
+                case .trailing, .leading:
+                    let x = side == .trailing ? a.maxX + g : a.x - g - w
+                    starts = [a.y - 8, a.y + a.height / 2 - h / 2, a.maxY - h + 8, m, maxY]
+                        .map { (x, clamp($0, m, maxY)) }
+                case .below, .above:
+                    let y = side == .below ? a.maxY + g : a.y - g - h
+                    let first = side == .below ? a.x : a.maxX - w
+                    let far = side == .below ? a.maxX - w : a.x
+                    starts = [first, a.x + a.width / 2 - w / 2, far, m, maxX]
+                        .map { (clamp($0, m, maxX), y) }
+                }
+                for start in starts {
+                    var (x, y) = start
+                    for _ in 0..<4 {
+                        guard inside(x, y) else { break }
+                        guard let block = blocker(x, y) else { return (x, y) }
+                        switch side {
+                        case .trailing: x = block.maxX + g
+                        case .leading: x = block.x - g - w
+                        case .below: y = block.maxY + g
+                        case .above: y = block.y - g - h
+                        }
+                    }
+                }
+            }
+        }
+        // The corners, the step's own first.
+        func point(_ c: Corner) -> (Double, Double) {
+            switch c {
+            case .topTrailing: (max(m, maxX), m)
+            case .bottomLeading: (m, max(m, maxY))
+            case .bottomTrailing: (max(m, maxX), max(m, maxY))
+            case .center: (max(m, (container.width - w) / 2), max(m, container.height * 0.44 - h / 2))
+            }
+        }
+        let corners = [corner] + [Corner.topTrailing, .bottomTrailing, .bottomLeading, .center]
+            .filter { $0 != corner }
+        for c in corners {
+            let (x, y) = point(c)
+            if inside(x, y), blocker(x, y) == nil { return (x, y) }
+        }
+        // Nothing is clear of everything: beside the anchor off the ring
+        // alone (the pre-A2 rule), then the step's corner.
         if let a = anchor {
             for side in sides {
                 let x: Double, y: Double
                 switch side {
-                case .trailing:
-                    x = a.maxX + g
-                    y = clamp(a.y - 8, m, maxY)
-                case .leading:
-                    x = a.x - g - card.width
-                    y = clamp(a.y - 8, m, maxY)
-                case .below:
-                    x = clamp(a.x, m, maxX)
-                    y = a.maxY + g
-                case .above:
-                    x = clamp(a.maxX - card.width, m, maxX)
-                    y = a.y - g - card.height
+                case .trailing: (x, y) = (a.maxX + g, clamp(a.y - 8, m, maxY))
+                case .leading: (x, y) = (a.x - g - w, clamp(a.y - 8, m, maxY))
+                case .below: (x, y) = (clamp(a.x, m, maxX), a.maxY + g)
+                case .above: (x, y) = (clamp(a.maxX - w, m, maxX), a.y - g - h)
                 }
-                let fits = x >= m && y >= m && x <= maxX + 0.5 && y <= maxY + 0.5
-                let covers = Rect(x: x, y: y, width: card.width, height: card.height).intersects(a)
-                if fits && !covers { return (x, y) }
+                if inside(x, y), !Rect(x: x, y: y, width: w, height: h).intersects(a) { return (x, y) }
             }
         }
-        switch corner {
-        case .topTrailing: return (max(m, maxX), m)
-        case .bottomLeading: return (m, max(m, maxY))
-        case .bottomTrailing: return (max(m, maxX), max(m, maxY))
-        case .center:
-            return (max(m, (container.width - card.width) / 2),
-                    max(m, container.height * 0.44 - card.height / 2))
-        }
+        return point(corner)
     }
 }
