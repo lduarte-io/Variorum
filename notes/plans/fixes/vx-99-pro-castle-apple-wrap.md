@@ -182,6 +182,20 @@ QUESTIONS untouched unless a PROVISIONAL arises; MOBILE PARITY: the phone shares
 mobile-visible" (it is invisible in UI); the `/Applications` refresh at the post-merge window with the A1
 rail, via oct7coordinator.
 
-## Next
+## TRIGGER MET (2026-10-08)
 
-Wait for 13x's merge, then run THE FIX PLAN above.
+13x merged (PR #136, `2d88dd49`; the 13x closeout session's message). `origin/main` merged into this
+branch at `b6628b0e` (merge commit). **Re-verified on the merged tree:** `PostureSwitch.swift` UNCHANGED by
+13x — `replaceAllKeys` :419, `writeNewKeyFile` :1049 with the bug line :1065, `appleHeldCopyForStandard`
+:1163 (posture gate :1166), `resume` :1243; the door-time `appleKeyReadable` :373 is posture-gated too (F3).
+**13x DID change `ProtectionController.swift`** (+47/−8 — the `castleKeyFileAppleOpenable` detector arm), so
+the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`). The fix session spawns.
+
+## LIVE STATUS (the implementer flips each line in the same commit as its piece; PENDING = unverified)
+
+- Pins (a)–(d) written, RED on the pre-fix code: NOT-STARTED
+- The fix: NOT-STARTED
+- Behavioral revert (named here BEFORE it runs): NOT-STARTED
+- Class sweep table: NOT-STARTED
+- Core headless run: NOT-STARTED
+- Mac suites under a stage slot: NOT-STARTED
