@@ -1,7 +1,14 @@
 # VX-99 — Pro library stayed Apple-openable after Castle (the record)
 
-**Status: FINDINGS REPORTED, no fix built.** Read-only investigation 2026-10-08. The Sync/-custody slot
-stays 13x's (VX-6); the fix waits for 13x's merge or comes back to her as a sequencing question.
+**NOT DONE by the fix session (2026-10-08):** the resume's another-device corner (THE RESUME RULE's PROPOSAL —
+waits for the orchestrator's word); the two PRE-EXISTING 13x reds in `PostureSwitchTests` (handed off, a second
+unit); no dev-store walk or capture (the plan's evidence clause — a key file's wraps are invisible in UI; the
+pins carry it); no phone run (the phone COMPILE is recorded under LIVE STATUS); the cold review (the
+orchestrator's ladder).
+
+**Status: FIX BUILT, pins red-on-old and revert-verified, Mac + core green (bar two pre-existing 13x reds) —
+awaiting the cold review.** Findings: read-only investigation 2026-10-08. The fix ran after 13x merged, in the
+Sync/-custody slot taken at `f797dbe7`.
 
 ## Cast (changed at her word, 2026-10-08)
 
@@ -226,8 +233,18 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   PostureSwitchTests`): "Test run with 49 tests in 1 suite failed … with 8 issues" — RED exactly on (a) :2261 +
   :2263, (b) :2305 / :2324 / :2341, (d) :2387 (the pre-fix run's six expectations, line for line); the two
   PRE-EXISTING reds identical; nothing else.** Restored with `git checkout --`; `git diff` CLEAN; rebuilt.
-- Class sweep table: IN-PROGRESS — below.
-- Core headless run: NOT-STARTED (the diff touches no `Sources/`; run at the end, headless).
+- Class sweep table: DONE — "THE CLASS SWEEP" below (13 writers: 2 FIXED with pins, 11 SAFE with the gate stated).
+- Core headless run: DONE — `swift test` on the fixed tree (37e26d2e's code; the diff touches no `Sources/`):
+  **"Test run with 2346 tests in 270 suites passed" + "40 tests in 6 suites passed"** (the 13x closeout's own
+  baseline numbers); skips only the standing env-gated set (13o's gated measurement suites, the real-server pass,
+  the fixture minters).
+- The PRE-EXISTING proof: DONE — main's exact code (`origin/main` c71d7f68: its `PostureSwitch.swift` + its
+  `PostureSwitchTests.swift` swapped in, `git diff --stat origin/main -- App Sources` EMPTY, built) under the same
+  slot: **"Test run with 46 tests in 1 suite failed … with 2 issues"** — the same two tests at main's own lines
+  :2607 / :2839 (this branch's :2780 / :3012 minus the 173 lines the pins add). Restored with `git checkout --`;
+  `git diff` CLEAN. (A first swap attempt truncated both files — zsh read `$M:A…` as a path modifier and
+  `git show` failed into the redirect; caught at once, both restored from HEAD by `git checkout --`, sizes
+  re-checked, nothing built or committed from the truncated state.) Stage RELEASED; the coordinator told.
 - Mac suites under a stage slot: DONE (the coordinator's slot, `vx-99-impl`, zero Variorum instances at each
   run's start; over the RESTORED fix, 37e26d2e's code) — **batch 1, the runner's whole reach** (`PostureSwitchTests`
   · `PostureSwitchDrillTests` · `VX80CastleFollowRecoveryTests` · `AppleRelinkDoorTests` · `CopyRegisterPinTests` ·
@@ -274,3 +291,28 @@ the resume's enrolled arm derive the road's posture from the fetched vault exact
 `appleCopy: fetched.format.masterWrappedByAppleHeld != nil` — decision 8's "the vault's word, when in hand" (arm 1 of
 `Posture.derive`), which also honors decision 35 (no posture-driven write on an indeterminate reading). It is a
 behavior change on the resume's follow road beyond this unit's letter, so it waits for the orchestrator's word.
+
+## THE CLASS SWEEP (every road that can put an `apple` copy into a key file — on the merged tree, 37e26d2e)
+
+Census: `grep setAppleWrappedCopy` + every `StoreKeyEnvelope(…apple:…)` construction + every key-file save/copy in
+`App/` and `Sources/` (tests excluded). The class: a key file gains L under the iCloud key A while the account (or,
+local-only, the library) is Castle.
+
+| # | writer (file:line) | verdict | the gate / the mechanism |
+|---|---|---|---|
+| 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d); revert V99-A | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on `posture == .standard` (and refuses an unreadable / another account's A); local-only: `!entersCastle && posture == .standard`; entering Castle: nil |
+| 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (:1364) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) | `!marker.entersCastle && posture == .standard`; the another-device corner is THE RESUME RULE's PROPOSAL (not built) |
+| 3 | the same writer via `runFollow` (:799, :818 — incl. the ceremony's CAS-refused → follow road) | SAFE (behavior unchanged) | `appleCopy: !entersCastle`, `entersCastle = fetched.format.masterWrappedByAppleHeld == nil` — the vault just fetched (decision 8). Pinned: `aCastleFollowerOfReplaceAllKeysFinishesTheWalkAndListsNoOffer` (`apple == nil`), `aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitch…` (`apple == nil`), the Standard sibling in (c) (`apple != nil`) |
+| 4 | `PostureSwitchRunner.followIntoStandard` (:~933) | SAFE | reached only through `followIntoStandardAct` (`VariorumApp.swift:271`, `VariorumMobileApp.swift:129`) from `reconcileFollow`'s arm `reading.hasAppleHeldCopy … !switchInProgress` (`ProtectionController.swift:707`) — the VAULT says Standard (the account left Castle elsewhere, §7). Pinned: `theFollowIntoStandardAddsTheAppleCopy…` |
+| 5 | `PostureSwitchRunner.leaveCastle` (:~1250) | SAFE | IS the Castle → Standard switch (decision 7): `guard leaves.posture() == .castle`, user-initiated through `PostureSwitchModel(.leave)` with the consent sentence + re-auth; adding the copies is the act |
+| 6 | `ProtectionController.reconcileAppleKey` → `landAppleCopyOffMain` (`ProtectionController.swift:1612`) | SAFE | `guard let determined = postureReading.determined` (decision 35 — indeterminate writes nothing) + `guard determined == .standard`; skipped while `switchInProgress || markerPending` (:1437) — so it never lands a copy mid-road of row 1/2 |
+| 7 | the route's Standard-waiting landing, `StoreLaunchGate.effectiveGate` (`StoreLaunchGate.swift:372`) | SAFE | `!enrolled` (no per-store sync custody) AND raw-key custody `.silent` (corner 45: silent ⇒ Standard-waiting; a Castle library's raw key is gated or nowhere — `rawKeyCustody` reads `.gatedOrNone`) AND `apple == nil && passphrase != nil` AND the key belongs |
+| 8 | enrollment / setup / Connect landing, `ProtectionController.landVaultMaterial` (:1669) via `EncryptionSession.adoptEnrolledMaterial` → `onVaultMaterialLanded` | SAFE | writes the master copy, the descriptor + corpus id, the typed P/W copies — never `apple`; a Standard enroll's file copy arrives through row 6 (posture-gated) |
+| 9 | §11 migration's key-file leg (`ProtectionMigration.swift:~258`) | SAFE | master copy + reconciliation only; the file names no `apple` at all |
+| 10 | the deliberate re-link door (`AppleRelinkModel.swift:119` → `healAppleHeldCopy`) | SAFE | refuses unless `controller.posture == .standard`; writes the VAULT's copy, then the file's copy lands only through `controller.reconcile()` → row 6 |
+| 11 | sync setup / the heal's vault writes (`EncryptionSession.swift:444`, `VaultEnrollment.swift:202`, `CorpusRotation.swift:428`) | SAFE (out of the key-file class) | vault-side Apple-held copies — the account's posture by definition; row 1's enrolled decision reads exactly this |
+| 12 | snapshot key files, `StoreBackup.writeSnapshotKeyFile` (`StoreBackup.swift:589`) | SAFE by inheritance | a byte-copy of the LIVE key file written with each snapshot (decision 11, never rewritten) — carries `apple` exactly when the live file does, which rows 1–11 now gate. Her 13 pre-fix Castle-era pairs under `182738de` carry it — hers to handle (ruling 3) |
+| 13 | the 13x roads — adoption (`LibraryAdoption.swift:214/251/271`), hand-off, open-a-copy, the restore hold (`LibraryHandOff` · `LibraryOpenModel` · `RestoreHoldModel` · `BackupRestoreCandidates`) | SAFE (adds none) | none calls `setAppleWrappedCopy` or builds an envelope with `apple:`; adoption byte-copies a pair's OWN key file and the open road reads `apple` only to open (`StoreLobby.openWithAppleKey`) or to list roads. An adopted Standard-era pair under a Castle account is 13x's `castleKeyFileAppleOpenable` detection (the follow re-keys + retires) — detection, as 13x designed it |
+
+MOBILE PARITY: `PostureSwitch.swift` is `Shared/` — the fix reaches the phone with its next install; nothing
+mobile-VISIBLE (a key file's wraps have no face).
