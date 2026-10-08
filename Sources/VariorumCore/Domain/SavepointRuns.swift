@@ -94,11 +94,15 @@ public enum SavepointRuns {
 
     // MARK: - The words
 
-    /// The collapsed line, e.g. *"3 quiet savepoints"*. The verb beside it
+    /// The collapsed line, e.g. *"3 quiet commits"*. The verb beside it
     /// ("show" / "hide") is the face's, because only the face knows which way
     /// the row is currently open.
+    ///
+    /// 13s-b U4 (her R-13s-31, *"I want that changed everywhere"*): the
+    /// user-facing word is COMMIT — this line was "N quiet savepoints". The
+    /// type and its name keep the old word: code names are not the product's.
     public static func runLabel(count: Int) -> String {
-        "\(count) quiet savepoint\(count == 1 ? "" : "s")"
+        "\(count) quiet commit\(count == 1 ? "" : "s")"
     }
 
     public static let showVerb = "show"
@@ -107,7 +111,7 @@ public enum SavepointRuns {
     /// What a quiet savepoint IS, said once — the help both faces hang on the
     /// collapsed row.
     public static let runHelp =
-        "Savepoints Variorum took for you \u{2014} one per changed take each time "
+        "Commits Variorum made for you \u{2014} one per changed take each time "
         + "you left this note, plus the idle backstop. Settings \u{25b8} Writing "
-        + "sets how often. \u{2318}S savepoints are never folded in here."
+        + "sets how often. \u{2318}S commits are never folded in here."
 }

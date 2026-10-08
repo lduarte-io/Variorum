@@ -538,7 +538,10 @@ nonisolated enum QuickNoteCopy {
     /// so its one row says what pressing it does).
     static let summonVerb = "New Quick Note"
     static let header = "quick note"
-    static let placeholder = "jot it down — it lands in Quicknotes"
+    // 13s-b U1b (R-13s-36/38): the lines NAME the default gathering, so
+    // they read its one constant — the fresh default is lowercase now, and
+    // copy must never mix casings with the board it describes.
+    static let placeholder = "jot it down — it lands in \(Operations.defaultQuicknoteBookName)"
     /// **R-13u-4's two keys, in her own order** (13u3 UNIT C — this line
     /// used to read "⏎ new line · ⌘⏎ files it · closing files it too", which
     /// is the model her ruling replaced). The paragraph key comes second
@@ -553,7 +556,7 @@ nonisolated enum QuickNoteCopy {
     /// shelf it can be found on, and NOT the Pool: the Pool lists what no
     /// book holds, and a collected note is held (Stage B's MAJOR 3 — derived
     /// membership counts). One untag puts it back there.
-    static let filedNote = "Filed in Quicknotes — tagged #quicknote."
+    static let filedNote = "Filed in \(Operations.defaultQuicknoteBookName) — tagged #quicknote."
     /// 13i-b U4 (§20 — Quicknotes is ordinary; P-13ib-U4-2): the line for a
     /// filing that tagged the note while NO Quicknotes gathering shows it —
     /// she deleted it, and her deletion stands. `filedNote` would claim a
@@ -572,7 +575,7 @@ nonisolated enum QuickNoteCopy {
     /// `aFilingRefusalNeverClaimsTheQuicknotesLanding` fails on its first
     /// two expectations.
     static func refusedFilingLine(_ reason: String) -> String {
-        "Kept as a note in the Pool — the Quicknotes filing didn't take: \(reason)."
+        "Kept as a note in the Pool — the \(Operations.defaultQuicknoteBookName) filing didn't take: \(reason)."
     }
     static let refusedPrefix = "The quick note wasn't filed:"
 

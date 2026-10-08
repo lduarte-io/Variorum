@@ -19,7 +19,11 @@ import Foundation
 import VariorumCore
 
 nonisolated enum SavepointCadenceCopy {
-    static let title = "Savepoints Variorum takes for you"
+    /// 13s-b U4 (R-13s-31): the pane's word is COMMIT — the strings moved,
+    /// the `savepoint_cadence` key and this enum's name did not. "makes",
+    /// not "takes": a commit is MADE, and "takes" is the app's own noun for
+    /// a block's alternatives (PROVISIONAL P-U4-2).
+    static let title = "Commits Variorum makes for you"
 
     static func label(_ cadence: SavepointCadence) -> String {
         switch cadence {
@@ -31,11 +35,11 @@ nonisolated enum SavepointCadenceCopy {
 
     static let help =
         "Every time I leave a note: closing it, switching away, or quitting "
-        + "leaves one savepoint for each take you changed — and a note you "
+        + "leaves one commit for each take you changed — and a note you "
         + "leave open gets one after about two hours. Only after a note sits "
         + "untouched: just that two-hour backstop. Only when I press ⌘S: "
         + "neither. A take you haven't changed is never saved twice, and "
-        + "these quiet savepoints group into one line in a take's history."
+        + "these quiet commits group into one line in a take's history."
 
     /// The sentence the setting must never leave out (see the header).
     static let insuranceNote =
@@ -54,7 +58,7 @@ nonisolated enum SavepointCadenceCopy {
 /// a pruning setting that read as "your savepoints get thinned" would be
 /// claiming a reach it doesn't have).
 nonisolated enum HistoryPruningCopy {
-    static let title = "Old quiet savepoints"
+    static let title = "Old quiet commits"
 
     static func label(_ pruning: HistoryPruning) -> String {
         switch pruning {
@@ -64,10 +68,10 @@ nonisolated enum HistoryPruningCopy {
     }
 
     static let help =
-        "Tidy: once a take's quiet savepoints are older than "
+        "Tidy: once a take's quiet commits are older than "
         + "\(SavepointPruning.ageDays) days, only the newest "
         + "\(SavepointPruning.keepNewestQuiet) are kept — the rest are "
         + "deleted for good, everywhere, once every synced device has seen "
-        + "them. Keep every one: nothing is ever thinned. Savepoints you "
-        + "took yourself with ⌘S are never touched, in either mode."
+        + "them. Keep every one: nothing is ever thinned. Commits you "
+        + "made yourself with ⌘S are never touched, in either mode."
 }

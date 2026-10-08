@@ -6,13 +6,21 @@ import GRDB
 // bounded by construction.
 extension Queries {
     /// The resolved appearance settings, defaults applied where unseeded.
-    /// Defaults are the sittings' letter: Terminal leads (R1), seams
+    /// Defaults are the sittings' letter: a store with no voice reads STUDY
+    /// (13s-b U1a — her 2026-10-05 ruling, `unsetStoreVoice` below; R1's
+    /// Terminal stays the PLACEHOLDER `voice` holds before a store answers), seams
     /// hidden at rest (§12/R42), editing indicator OFF (R14/R22), margin
     /// comments (R7 — inline is the opt-in), follow-the-scroll off until
     /// asked for (R25 is an OPTION), receipts QUIET (18i — her R-Q5:
     /// *"Quiet should be the default, but toast should still be an
     /// option"*).
     public struct ThemeSettings: Equatable, Sendable {
+        /// **The PLACEHOLDER voice** — what a host draws before any store has
+        /// answered (a `ThemeStore` before its first emission), and what a
+        /// host with no store at all draws (previews, mounted test surfaces —
+        /// `themeStore?.settings ?? ThemeSettings()`): the leading voice, R1's
+        /// Terminal, `VoiceTokens.fallback`'s twin. NOT what a store reads —
+        /// that is `unsetStoreVoice`, applied by `themeSettings(_:)` alone.
         public var voice: ThemeVoice = .terminal
         public var seamsVisible = false
         public var editingIndicator: EditingIndicatorStyle = .off
@@ -56,6 +64,22 @@ extension Queries {
         /// class); anything but "0" reads ON.
         public var ownershipBadges = true
 
+        /// **THE VOICE A STORE READS WHEN IT CARRIES NONE: STUDY** (13s-b
+        /// U1a — her ruling 2026-10-05, verbatim: *"default mode study is an
+        /// explicit ruling"*; the record is the 13s intake's flags section).
+        /// A fresh store wakes in Study; a store that CARRIES a voice keeps it,
+        /// by construction — a stored value always wins the read. A default
+        /// flip at READ time, never a migration: nothing is written, no
+        /// `setting` row is seeded, nothing syncs. The consequence, said
+        /// plainly: an EXISTING store that never chose a voice (no row — it
+        /// read Terminal until this build) reads Study from this build on; the
+        /// U1a RECORD says which stores were checked for that.
+        ///
+        /// Deliberately NOT the memberwise `voice` default above: that one is
+        /// the pre-landing / storeless placeholder, and moving it would
+        /// re-voice every host that has no store to ask.
+        public static let unsetStoreVoice: ThemeVoice = .study
+
         public init() {}
     }
 
@@ -71,6 +95,8 @@ extension Queries {
                               'hide_owned_default', 'ownership_badges')
                 """)
         var settings = ThemeSettings()
+        // 13s-b U1a: the store's own default (no row, or an unreadable one).
+        settings.voice = ThemeSettings.unsetStoreVoice
         for row in rows {
             let value: String = row["value"]
             switch row["key"] as String {

@@ -264,7 +264,18 @@ extension Operations {
     /// The name a freshly created daily journal book takes (13d batch 5:
     /// the constant moves here with the creation it names — the Mac's
     /// `JournalBooks` forwards to it so the two can never drift).
-    public static let defaultDailyJournalBookName = "Journal"
+    /// **Lowercased at 13s-b U1b (R-13s-36/38, her words: "if field notes
+    /// is lower case, and adventures of sherlock holmes is lower case,
+    /// then journal and quicknotes should also default to lowercase" ·
+    /// "that's fine for it only changing the defaults for fresh mints"):**
+    /// FRESH MINTS ONLY by construction — this constant is read at the
+    /// mint (`insertDailyJournalBook`, the phone's starter journal) and as
+    /// a storeless display fallback; no writer renames an existing book,
+    /// the daily designation derives from the `'daily'` MARKER (never the
+    /// name — 13i-a dropped the name leg), and the keeper repair keys the
+    /// same marker, so an installed base's "Journal" converges exactly as
+    /// before.
+    public static let defaultDailyJournalBookName = "journal"
 
     /// The shelving question, asked once: which book is designated, and is
     /// this pair already decided (ANY membership row — live or tombstoned)?

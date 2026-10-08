@@ -119,6 +119,23 @@ struct TakesEntryBandTests {
             EditorTypography.current = typography
             EditorTypography.isAdopted = adopted
         }
+        // 13s-b U1a stage window (A JUSTIFIED EDIT — test isolation): begin
+        // from the PROCESS-FRESH typography, the state this suite always had
+        // when it ran alone. `EditorTypography.current` and its `isAdopted`
+        // latch are process globals, and a suite that ran earlier and landed
+        // a store with no voice — Study since her 2026-10-05 ruling (the
+        // shell-landing suites mount `RootView` over a voiceless store) —
+        // leaves them at STUDY, adopted. This harness builds its landing
+        // model BEFORE the mount, so the model's first aim read the leaked
+        // Study metrics, and the mount's readiness wait (which trusts
+        // `isAdopted`, and whose Terminal arm the placeholder already
+        // satisfies) passed before THIS store adopted: the late Terminal
+        // adoption cost the landing one correction hop. Reproduced red as the
+        // pair ShellLandingDoorTests → TakesEntryBandTests; green alone, and
+        // green as the same pair with the unset voice probed back to Terminal.
+        // The `defer` above still puts the globals back as found.
+        EditorTypography.current = EditorTypography.resolve(voice: .terminal, inlineComments: false)
+        EditorTypography.isAdopted = false
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
         let suiteName = "TakesEntryBand-\(UUID().uuidString)"
@@ -145,7 +162,10 @@ struct TakesEntryBandTests {
                 made.append((minted.block.id, minted.variant.id))
             }
             if !flashOn { try session.operations.setArrivalFlash(false) }
-            if voice != .terminal { try session.operations.setThemeVoice(voice) }
+            // 13s-b U1a (A JUSTIFIED EDIT): a store with no voice reads STUDY
+            // since her 2026-10-05 ruling, so the Terminal arm must say so —
+            // left unset it would silently measure Study twice.
+            try session.operations.setThemeVoice(voice)
             // Her settings, as the app hands them down (the one store every
             // surface reads — a board with no store reads the defaults).
             let theme = ThemeStore(session: session)

@@ -2,11 +2,23 @@
 //  EncryptionBookDoorTests.swift
 //  VariorumTests
 //
-//  pre-13x ladder round 1, F2 (MINOR-8): the tutorial door seeds *Encryption
-//  Explained* when it is absent — Lesson 2's last paragraph points at the
-//  book "on this shelf", and a signed-in-never-synced store seeds neither
-//  book (ledger 70's arrive-by-sync gate). RED ON OLD: the door opened the
-//  tutorial and left the sentence pointing at nothing.
+//  13s-b U1b (R-13s-37, her words: "encryption explained not present and
+//  not restorable") — *Encryption Explained*'s DOORS ARE RETIRED: the
+//  launch no longer seeds it (piece 1, `aFreshLaunchSeedsTheFinalSet`),
+//  the tutorial door no longer silently ensures it, and no Help ▸ Restore
+//  or phone Settings row mints it. This file's pre-13x F2/F3 subjects
+//  split three ways:
+//
+//    · the DOOR subjects (the tutorial door seeds/declines the book, the
+//      purge-outlives-tombstone choreography THROUGH that door) retired
+//      with the ensure — replaced here by the new contract's pin: opening
+//      the tutorial leaves NO encryption book, ever;
+//    · the MECHANISM subjects (the seed latch; the shared restore brain's
+//      words and already-whole voice) survive on the REMAINING vehicles —
+//      JUSTIFIED VEHICLE EDITS, each said at its test;
+//    · the seeder-level tombstone rule ("deleted ⇒ never re-seeded") keeps
+//      its own pins (18o U2's, and the phone's first-write pin, which
+//      13s-b re-vehicled onto Sherlock).
 //
 
 import Dependencies
@@ -17,7 +29,7 @@ import VariorumCore
 @testable import Variorum
 
 @MainActor
-@Suite("pre-13x F2 — the tutorial door seeds the encryption book (MINOR-8)")
+@Suite("13s-b U1b — the encryption book's doors retired; the latch and restore brain live on")
 struct EncryptionBookDoorTests {
     private func withWorld<T>(
         _ body: @MainActor (AppSession, AppDatabase) async throws -> T
@@ -42,10 +54,6 @@ struct EncryptionBookDoorTests {
             // never reads the test host's defaults, a domain the real app
             // shares (her real store's own mark must never decide a pin).
             session.seededBookMarkIsSet = { _ in false }
-            // RUN A batch A2, row 8: the WRITE leaf is injected for the same
-            // reason — a headless run never leaves a mark in the dev store's
-            // own defaults domain. A test that cares about the mark wires its
-            // own pair (see `aPurgedBookIsNotReMintedByTheTutorialDoor`).
             session.markSeededBook = { _ in }
             return try await body(session, db)
         }
@@ -59,24 +67,23 @@ struct EncryptionBookDoorTests {
         }
     }
 
-    private func encryptionBook(_ db: AppDatabase) async throws -> (complete: Bool, books: Int) {
-        let titles = try SampleLibrarySeeder.loadStories(for: .encryptionExplained).map(\.title)
-        let (existing, books) = try await db.read { db in
-            (try SampleLibrarySeeder.discover(db, book: .encryptionExplained),
-             try Queries.readings(db)
-                .filter { $0.name == SampleLibrarySeeder.Book.encryptionExplained.name && $0.deletedAt == nil }.count)
+    private func encryptionBooks(_ db: AppDatabase) async throws -> Int {
+        try await db.read { db in
+            try Queries.readings(db)
+                .filter {
+                    $0.name == SampleLibrarySeeder.Book.encryptionExplained.name
+                        && $0.deletedAt == nil
+                }.count
         }
-        return (existing.isComplete(for: titles), books)
     }
 
-    /// The door on a store with NO seeded books (the gate never opened):
-    /// the tutorial opens AND *Encryption Explained* is minted whole beside
-    /// it — once; a second open re-seeds nothing.
-    @Test func openingTheTutorialSeedsTheEncryptionBookWhenItIsAbsentAndNeverTwice() async throws {
+    /// **THE NEW CONTRACT (R-13s-37) — RED ON OLD: the old tutorial door
+    /// minted the book beside the guide.** Opening the tutorial on a store
+    /// with no seeded books opens the guide and leaves NO *Encryption
+    /// Explained* — not minted, not tombstoned, nothing spoken about it;
+    /// and a second open changes nothing.
+    @Test func openingTheTutorialMintsNoEncryptionBook() async throws {
         try await withWorld { session, db in
-            let before = try await encryptionBook(db)
-            #expect(!before.complete && before.books == 0, "the gate never opened — no book")
-
             let shell = ShellRouter()
             let actions = ShellActions(session: session, shell: shell)
             actions.openTutorial(confirm: { true })
@@ -87,182 +94,67 @@ struct EncryptionBookDoorTests {
                 return
             }
             let tutorialBooks = try await db.read { db in
-                try Queries.readings(db).filter { $0.name == TutorialSeeder.bookName && $0.deletedAt == nil }.map(\.id)
+                try Queries.readings(db)
+                    .filter { $0.name == TutorialSeeder.bookName && $0.deletedAt == nil }
+                    .map(\.id)
             }
             #expect(tutorialBooks == [openedID], "the door opened the tutorial, as before")
-            let after = try await encryptionBook(db)
-            #expect(after.complete && after.books == 1, "the book Lesson 2 names is on the shelf — whole")
-            #expect(session.status.spoken?.text.contains("could not be restored") != true, "silent on success")
+            #expect(try await encryptionBooks(db) == 0, "no Encryption Explained (R-13s-37)")
+            let everExisted = try await db.read { db in
+                try Queries.readingTombstoneExists(
+                    db, name: SampleLibrarySeeder.Book.encryptionExplained.name)
+            }
+            #expect(!everExisted, "never minted at all")
+            #expect(session.status.spoken?.text.contains("could not be restored") != true,
+                    "and nothing is said about it")
 
-            // Again: the existing tutorial opens, the book stays one.
             shell.pendingSelection = nil
             actions.openTutorial(confirm: { true })
             await poll { shell.pendingSelection != nil }
             await poll { !session.tutorialDoorInFlight }
-            let again = try await encryptionBook(db)
-            #expect(again.complete && again.books == 1, "never a second copy")
-        }
-    }
-
-    /// pre-13x ladder round 2, F3 (MINOR-N3) — RED ON OLD: the silent
-    /// ensure re-minted a book the reader DELIBERATELY DELETED, on every
-    /// tutorial open (the seeder's own "deleted ⇒ never re-seeded" rule
-    /// bypassed). The tombstone is the reader's word: the tutorial opens,
-    /// the book stays gone; the EXPLICIT restore door — an ask — still
-    /// brings it back, afresh.
-    @Test func theTutorialDoorDoesNotReMintABookTheReaderDeleted() async throws {
-        try await withWorld { session, db in
-            let first = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
-            guard case .restored(let readingID, _) = first else {
-                Issue.record("a fresh store mints the book: \(first)")
-                return
-            }
-            try session.operations.deleteReading(readingID)
-            #expect(try await encryptionBook(db).books == 0, "the reader deleted the book")
-
-            let shell = ShellRouter()
-            let actions = ShellActions(session: session, shell: shell)
-            actions.openTutorial(confirm: { true })
-            await poll { shell.pendingSelection != nil }
-            await poll { !session.tutorialDoorInFlight }
-            guard case .reading? = shell.pendingSelection else {
-                Issue.record("the tutorial opens")
-                return
-            }
-            let after = try await encryptionBook(db)
-            #expect(after.books == 0, "the reader's deletion STANDS — the silent ensure declines on the tombstone")
-            #expect(session.status.spoken?.text.contains("could not be restored") != true, "a decline is not a failure — nothing spoken")
-
-            // The explicit door is an ask: it mints afresh (a new reading).
-            let again = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
-            guard case .restored(let newID, _) = again else {
-                Issue.record("Help ▸ Restore still mints: \(again)")
-                return
-            }
-            #expect(newID != readingID)
-            #expect(try await encryptionBook(db).books == 1)
-        }
-    }
-
-    /// F3 (MINOR-N3): the OTHER evidence — this device's per-book seeded
-    /// mark (the launch seeder's rule) — read through the ensure's injected
-    /// leaf: marked ⇒ declined, nothing minted; unmarked ⇒ the book.
-    @Test func theSilentEnsureDeclinesOnTheSeededMarkAndMintsWithoutIt() async throws {
-        try await withWorld { session, db in
-            let marked = try await SeededBookRestore.ensure(
-                session: session, book: .encryptionExplained, markIsSet: { true })
-            #expect(marked == .declined(.markedSeeded))
-            #expect(try await encryptionBook(db).books == 0, "nothing minted under the mark")
-            let unmarked = try await SeededBookRestore.ensure(
-                session: session, book: .encryptionExplained, markIsSet: { false })
-            guard case .ensured(.restored(_, let minted)) = unmarked else {
-                Issue.record("unmarked, the ensure mints: \(unmarked)")
-                return
-            }
-            #expect(minted == 8)
-            // The door reads the SESSION's leaf: marked there, the door declines too.
-            session.seededBookMarkIsSet = { _ in true }
-            let shell = ShellRouter()
-            let actions = ShellActions(session: session, shell: shell)
-            // `Existing` is MainActor-isolated: read it whole, ask it on the actor.
-            let existing = try await db.read { db in try SampleLibrarySeeder.discover(db, book: .encryptionExplained) }
-            try session.operations.deleteReading(try #require(existing.bookID))
-            actions.openTutorial(confirm: { true })
-            await poll { shell.pendingSelection != nil }
-            await poll { !session.tutorialDoorInFlight }
-            #expect(try await encryptionBook(db).books == 0, "the mark declines the door's ensure")
+            #expect(try await encryptionBooks(db) == 0, "a second open changes nothing")
         }
     }
 
     /// **"… IS ALREADY WHOLE" IS A REFUSAL** (the 18i ladder round 1, MINOR-3
-    /// — J33). 18i classed both endings of Help ▸ Restore as receipts, but the
-    /// rule it classed by is *"a RECEIPT reports an act that LANDED (the store
-    /// changed…)"* and `.alreadyWhole` changes nothing — the same reading the
-    /// same table applies to *"already one paragraph"*, which paid a whole
-    /// predicate for it. The rule is NOT widened to "or the shell moved":
-    /// that would reclassify the daily-entry note and blur every navigating
-    /// door. So the two endings split, exactly as undo/redo's already do.
-    ///
-    /// **Red on old:** under `.off` the second press said nothing at all.
+    /// — J33): the minting press is a receipt (and `off` drops it); the
+    /// second press changed nothing, so it speaks as a refusal whatever the
+    /// setting. **JUSTIFIED VEHICLE EDIT (13s-b U1b):** the pin rode the
+    /// retired Encryption Explained door and now rides Help ▸ Restore
+    /// Jekyll — the same `restoreSeededBook` road, voice rule unchanged.
     @Test func theAlreadyWholeLineIsARefusalAndAlwaysShows() async throws {
         try await withWorld { session, _ in
             let actions = ShellActions(session: session, shell: ShellRouter())
             session.status.receiptStyle = .off
 
-            actions.restoreEncryptionBook()
+            actions.restoreJekyllBook()
             await poll { session.status.lastDroppedReceipt != nil }
             #expect(session.status.lastDroppedReceipt?.hasPrefix("Restored") == true,
                     "the minting press IS a receipt, and `off` drops it: \(session.status.lastDroppedReceipt ?? "nil")")
 
             session.status.clear()
-            actions.restoreEncryptionBook()
+            actions.restoreJekyllBook()
             await poll { session.status.current != nil }
             #expect(session.status.current?.text
-                    == "\u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
+                    == "\u{201C}\(SampleLibrarySeeder.Book.jekyllAndHyde.name)\u{201D} "
                     + "is already whole — it's on your Bookcase.")  // 13i-d U6 (a): the area's ruled name
             #expect(session.status.current?.kind == .refusal,
                     "nothing was minted — P-2 says she sees it whatever the setting")
         }
     }
 
-    // MARK: - RUN A batch A2, row 8 (17l item 1 / KnownIssues 38)
-
-    /// **THE LATCH — a tutorial open INSIDE the launch seed's window.**
-    /// `seedIfNeeded` and the tutorial door's ensure both DISCOVER and then
-    /// MINT, with awaits in between (the resource parse, the database read,
-    /// one runner turn per chapter), so two roads that each correctly saw
-    /// "no book here" both mint one. Staged deterministically through the
-    /// seeder's own `pacing` leaf: the launch seed is parked at its FIRST
-    /// pacing point — after discovery, before the skeleton turn — while the
-    /// door runs.
-    ///
-    /// **RED ON OLD: two *Encryption Explained* books on the shelf.**
-    @Test func aTutorialOpenInsideTheLaunchSeedsWindowLeavesOneBook() async throws {
-        try await withWorld { session, db in
-            let released = LockIsolated(false)
-            let launch = Task { @MainActor in
-                await SampleLibrarySeeder.seedIfNeeded(
-                    session: session, book: .encryptionExplained,
-                    // The marks are INJECTED: a headless run never reads or
-                    // writes the test host's defaults (the row-42 class).
-                    loadMark: { false }, saveMark: { _ in },
-                    pacing: {
-                        while !released.value {
-                            await Task.yield()
-                            try? await Task.sleep(for: .milliseconds(5))
-                        }
-                    })
-            }
-            let shell = ShellRouter()
-            let actions = ShellActions(session: session, shell: shell)
-            actions.openTutorial(confirm: { true })
-            // The launch seed stays parked until the door has had its whole
-            // turn — which is what makes this deterministic rather than a
-            // race the test hopes to win. Before the fix the door RUNS to
-            // completion here and mints its own copy; after it, the door is
-            // waiting on the latch and this poll simply runs out.
-            await poll({ !session.tutorialDoorInFlight }, turns: 300)
-            released.setValue(true)
-            _ = await launch.value
-            await poll { !session.tutorialDoorInFlight }
-
-            let after = try await encryptionBook(db)
-            #expect(after.books == 1, "one book, not two — the two roads' discover-then-mint is one at a time")
-            #expect(after.complete, "and it is whole")
-        }
-    }
-
-    /// The latch's own contract, without the door's choreography: while one
-    /// road holds a book's discover-then-mint, the other WAITS and then
-    /// re-discovers — so it finds the book the first minted instead of
-    /// minting a twin. (The second road must never be left with a stale
-    /// `Existing`: that is what would mint a second book behind the latch.)
+    /// The latch's contract (RUN A batch A2, row 8): while one road holds a
+    /// book's discover-then-mint, the other WAITS and then re-discovers —
+    /// so it finds the book the first minted instead of minting a twin.
+    /// **JUSTIFIED VEHICLE EDIT (13s-b U1b):** the pin rode Encryption
+    /// Explained (then a launch book) and now rides SHERLOCK, the remaining
+    /// launch book — the same `withSeedLatch`, per book per store.
     @Test func theSeedLatchHoldsOneDiscoverThenMintPerBookPerStore() async throws {
         try await withWorld { session, db in
             let released = LockIsolated(false)
             let launch = Task { @MainActor in
                 await SampleLibrarySeeder.seedIfNeeded(
-                    session: session, book: .encryptionExplained,
+                    session: session, book: .sherlock,
                     loadMark: { false }, saveMark: { _ in },
                     pacing: {
                         while !released.value {
@@ -273,113 +165,41 @@ struct EncryptionBookDoorTests {
             }
             try? await Task.sleep(for: .milliseconds(100))
             let second = Task { @MainActor in
-                try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
+                try await SeededBookRestore.restore(session: session, book: .sherlock)
             }
             try? await Task.sleep(for: .milliseconds(100))
             released.setValue(true)
             let launchOutcome = await launch.value
             let secondOutcome = try await second.value
 
-            #expect(try await encryptionBook(db).books == 1, "\(launchOutcome) then \(secondOutcome)")
+            let books = try await db.read { db in
+                try Queries.readings(db)
+                    .filter {
+                        $0.name == SampleLibrarySeeder.Book.sherlock.name && $0.deletedAt == nil
+                    }.count
+            }
+            #expect(books == 1, "\(launchOutcome) then \(secondOutcome)")
             if case .alreadyWhole = secondOutcome {} else {
                 Issue.record("the waiting road re-discovers and finds the book: \(secondOutcome)")
             }
         }
     }
 
-    /// **A PURGED BOOK STAYS GONE.** F3 (MINOR-N3) made the silent ensure
-    /// decline on a tombstoned reading of the book's name — but a tombstone
-    /// is the reader's word only while the Trash keeps it: Delete Now /
-    /// Empty Trash write a purge intent and the janitor then removes the row
-    /// itself, and 13j's ledger is CONTENT-FREE by design (ids, never
-    /// names), so nothing that survives the purge can be asked "was a book
-    /// called this deleted?". The door therefore RECORDS the reader's
-    /// decision on this device the moment it sees it — the seeded book's own
-    /// per-book mark, the seeder's "deleted ⇒ never re-seeded" rule.
-    ///
-    /// **RED ON OLD: the purge erases the evidence and the next tutorial
-    /// open mints the book again.**
-    @Test func aPurgedBookIsNotReMintedByTheTutorialDoor() async throws {
-        try await withWorld { session, db in
-            // A NON-SEEDING device: the book arrived (by sync, here by the
-            // seeder's own mint with no mark written).
-            let stories = try SampleLibrarySeeder.loadStories(for: .encryptionExplained)
-            let existing = try await db.read { db in
-                try SampleLibrarySeeder.discover(db, book: .encryptionExplained)
-            }
-            let seeded = try await SampleLibrarySeeder.seed(
-                session: session, book: .encryptionExplained, stories: stories, existing: existing)
-            #expect(try await encryptionBook(db).books == 1)
-
-            // This device's mark, as the app keeps it — injected on both
-            // sides so no headless run touches the shared defaults domain.
-            let marks = LockIsolated(Set<String>())
-            session.seededBookMarkIsSet = { marks.value.contains($0.name) }
-            session.markSeededBook = { book in marks.withValue { _ = $0.insert(book.name) } }
-
-            // The reader deletes the book, and the door sees the tombstone.
-            try session.operations.deleteReading(seeded.readingID)
-            let shell = ShellRouter()
-            let actions = ShellActions(session: session, shell: shell)
-            actions.openTutorial(confirm: { true })
-            await poll { shell.pendingSelection != nil }
-            await poll { !session.tutorialDoorInFlight }
-            #expect(try await encryptionBook(db).books == 0, "the tombstone stands (F3's MINOR-N3)")
-
-            // THE PURGE: Delete Now writes the intent; the janitor removes
-            // the row. Both staged here — the intent through the real door,
-            // the removal as the janitor performs it.
-            _ = try session.operations.requestPurge(
-                [SyncPurgeTarget(table: "reading", rowID: seeded.readingID)])
-            let readingID = seeded.readingID
-            try await db.write { db in
-                // The janitor removes the whole expanded family — the book's
-                // memberships and chapters go with the row itself.
-                try db.execute(sql: "DELETE FROM reading_post WHERE reading_id = ?", arguments: [readingID])
-                try db.execute(sql: "DELETE FROM reading_section WHERE reading_id = ?", arguments: [readingID])
-                try db.execute(sql: "DELETE FROM reading WHERE id = ?", arguments: [readingID])
-            }
-            let intentStands = try await db.read { db in
-                try Bool.fetchOne(
-                    db,
-                    sql: "SELECT EXISTS (SELECT 1 FROM purge_intent WHERE table_name = 'reading' AND row_id = ?)",
-                    arguments: [readingID]) ?? false
-            }
-            #expect(intentStands, "the ledger knows the ID — and only the ID")
-            #expect(try await db.read { db in
-                try Queries.readingTombstoneExists(db, name: SampleLibrarySeeder.Book.encryptionExplained.name)
-            } == false, "the tombstone the ensure used to read is GONE")
-
-            // The door again.
-            shell.pendingSelection = nil
-            actions.openTutorial(confirm: { true })
-            await poll { shell.pendingSelection != nil }
-            await poll { !session.tutorialDoorInFlight }
-            #expect(try await encryptionBook(db).books == 0,
-                    "the reader's deletion outlives the tombstone that recorded it")
-
-            // The EXPLICIT door is still an ask — it mints, and marks.
-            let again = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
-            guard case .restored = again else {
-                Issue.record("Help ▸ Restore still mints: \(again)")
-                return
-            }
-            #expect(try await encryptionBook(db).books == 1)
-            #expect(marks.value.contains(SampleLibrarySeeder.Book.encryptionExplained.name))
-        }
-    }
-
-    /// The shared restore brain (the Mac's Help ▸ Restore and the phone's
-    /// row ride it): a partial book is completed, a whole one is reported.
+    /// The shared restore brain (the Mac's Help ▸ Restore doors ride it): a
+    /// missing book is minted whole, a whole one is reported, and every
+    /// failure speaks WORDS, never a raw enum. **JUSTIFIED VEHICLE EDIT
+    /// (13s-b U1b):** the brain pin rode Encryption Explained and now rides
+    /// Jekyll (a surviving door's book — front matter beside two chapters
+    /// and takemania; `minted` counts the plan's three entries).
     @Test func theSharedRestoreMintsWhatIsMissingAndReportsAWholeBook() async throws {
         try await withWorld { session, db in
-            let first = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
+            let first = try await SeededBookRestore.restore(session: session, book: .jekyllAndHyde)
             guard case .restored(let readingID, let minted) = first else {
                 Issue.record("a fresh store mints the book: \(first)")
                 return
             }
-            #expect(minted == 8, "eight chapters")
-            let second = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
+            #expect(minted == 3, "two chapters and takemania — the plan's entries")
+            let second = try await SeededBookRestore.restore(session: session, book: .jekyllAndHyde)
             #expect(second == .alreadyWhole(readingID: readingID))
             // F3 (NIT-N6): the road's failures speak words on every face —
             // never a raw enum description (the Act 10 round's dump class).
@@ -387,8 +207,6 @@ struct EncryptionBookDoorTests {
                 (SampleLibrarySeeder.LoadError.resourceMissing, "resourceMissing"),
                 (CancellationError(), "CancellationError"),
                 (OperationError.readingNotFound(id: "a-book-id"), "readingNotFound"),
-                // 18l-c U6 ladder R2-N1: the book-refuses arms, and F12's stopped
-                // script history — on BOTH faces (the phone renders these lines too).
                 (OperationError.lockedReading(id: "a-book-id"), "lockedReading"),
                 (OperationError.readingAtCapacity(id: "a-book-id"), "readingAtCapacity"),
                 (Takemania.ScriptError.displayedTakeNotInFan(blockID: "a-block-id"), "displayedTakeNotInFan"),
@@ -401,21 +219,8 @@ struct EncryptionBookDoorTests {
                     == BookNameCopy.refusal(existing: "Encryption Explained"), "the one home for her duplicate-name ruling")
             // R2-N1: the approved platform-neutral words, exactly.
             #expect(SeededBookRestore.failureLine(for: OperationError.lockedReading(id: "b"))
-                    // 13i-d U6 (KnownIssues row 106, a JUSTIFIED EDIT): the
-                    // line holds no book, so it names BOTH roads — a sealed
-                    // sample book's is Unseal (Reopen refuses there).
                     == "The book is finished \u{2014} reopen it (or unseal it, if it\u{2019}s sealed), "
                         + "then restore again.")
-            #expect(SeededBookRestore.failureLine(for: OperationError.readingAtCapacity(id: "b"))
-                    == "The book is at its note cap — raise the cap, then restore again.")
-            // Delete one chapter: the restore brings that one back.
-            let chapterID = try await db.read { db in
-                try Queries.assembleReading(db, readingID: readingID).first { $0.title == "Chapter 5 — Backups, and why an old one behaves the way it does" }?.postID
-            }
-            let victim = try #require(chapterID)
-            try session.operations.deleteContainer(victim)
-            let third = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
-            #expect(third == .restored(readingID: readingID, minted: 1), "\(third)")
         }
     }
 }

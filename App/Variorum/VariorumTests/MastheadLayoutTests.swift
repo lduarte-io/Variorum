@@ -485,11 +485,12 @@ struct MastheadLayoutTests {
             // mode's real editor, the markdown palette — standing process-wide,
             // with only a `cancel()` that never joined the store's own task.
             try await withAdoptedTheme(session: session) { store in
-                if voice == .study {
-                    store.setVoice(.study)
-                    await settle(until: { store.settings.voice == .study })
-                    #expect(store.settings.voice == .study, "the Study voice took")
-                }
+                // 13s-b U1a (A JUSTIFIED EDIT): a store with no voice reads
+                // STUDY since her 2026-10-05 ruling, so EVERY arm names its
+                // voice — the Terminal arm left unset would measure Study.
+                store.setVoice(voice)
+                await settle(until: { store.settings.voice == voice })
+                #expect(store.settings.voice == voice, "the \(voice) voice took")
 
                 #if DEBUG
                 // Row 50: this pin's OWN masthead, named by its own session.
@@ -761,11 +762,12 @@ struct MastheadLayoutTests {
             // mode's real editor, the markdown palette — standing process-wide,
             // with only a `cancel()` that never joined the store's own task.
             try await withAdoptedTheme(session: session) { store in
-                if voice == .study {
-                    store.setVoice(.study)
-                    await settle(until: { store.settings.voice == .study })
-                    #expect(store.settings.voice == .study, "the Study voice took")
-                }
+                // 13s-b U1a (A JUSTIFIED EDIT): a store with no voice reads
+                // STUDY since her 2026-10-05 ruling, so EVERY arm names its
+                // voice — the Terminal arm left unset would measure Study.
+                store.setVoice(voice)
+                await settle(until: { store.settings.voice == voice })
+                #expect(store.settings.voice == voice, "the \(voice) voice took")
                 #if DEBUG
                 // Row 50: this mount's OWN masthead, named by its own
                 // session — and a reset that clears its scope alone.

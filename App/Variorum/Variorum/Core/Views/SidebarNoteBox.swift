@@ -27,6 +27,7 @@
 //
 
 import SwiftUI
+import VariorumCore
 
 struct SidebarNoteBox: View {
     /// 13i-c U4: the box's context menu renders the remove/release door
@@ -289,6 +290,9 @@ struct SidebarNoteBox: View {
             }
             .buttonStyle(.plain)
             .help(NoteBoxCopy.editDoorHelp)
+            // 13s-b U2: step 10's first beat points here ("edit here drops
+            // you back into it").
+            .tourAnchor(.noteBoxEditHere, cornerRadius: 6)
 #if DEBUG
             .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] += 1 }
             .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] -= 1 }

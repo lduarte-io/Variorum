@@ -56,43 +56,12 @@ import Foundation
 import VariorumCore
 
 nonisolated enum SeededBookRestore {
-    /// Why the silent ensure declined — the reader's decision, as recorded.
-    enum Declined: Equatable, Sendable {
-        /// This device's launch seeder marked the book seeded (the mark
-        /// survives the reader deleting it — the seeder's own rule).
-        case markedSeeded
-        /// A reading of the book's name is tombstoned (a Delete Now included).
-        case deletedByTheReader
-    }
-
-    enum EnsureOutcome: Equatable, Sendable {
-        case declined(Declined)
-        case ensured(Outcome)
-    }
-
-    /// THE SILENT ENSURE (the tutorial door): decline on the mark or on a
-    /// tombstone; else `restore`. `markIsSet` is the caller's leaf — the
-    /// production door reads `SampleLibrarySeeder.isMarkedSeeded` for the
-    /// session's store variant; a headless pin never reads the test host's
-    /// defaults (the test host's domain IS the Debug app's — the row-36 class).
-    @MainActor
-    static func ensure(
-        session: AppSession, book: SampleLibrarySeeder.Book, markIsSet: @MainActor () -> Bool
-    ) async throws -> EnsureOutcome {
-        if markIsSet() { return .declined(.markedSeeded) }
-        // 18o U2: the rule lives ONCE, read by this ensure and the launch seed
-        // alike (R-18k-5) — `SampleLibrarySeeder.readerDeletedTheBook`.
-        let deleted = try await session.database.read { db in
-            try SampleLibrarySeeder.readerDeletedTheBook(db, book: book)
-        }
-        if deleted {
-            // RUN A batch A2, row 8: RECORD the decision while the evidence
-            // stands — see the file header's note on the purge.
-            session.markSeededBook(book)
-            return .declined(.deletedByTheReader)
-        }
-        return .ensured(try await restore(session: session, book: book))
-    }
+    // (The SILENT ENSURE — pre-13x F2/F3's tutorial-door road — RETIRED at
+    // 13s-b U1b with its one caller, R-13s-37: the tutorial door no longer
+    // ensures *Encryption Explained*, and nothing else was silent. The
+    // explicit doors below keep minting through `restore`; the tombstone
+    // rule they and the launch share lives in
+    // `SampleLibrarySeeder.readerDeletedTheBook`, exactly as before.)
     enum Outcome: Equatable, Sendable {
         /// Every title is present and the book exists — nothing minted.
         case alreadyWhole(readingID: String)

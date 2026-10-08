@@ -268,6 +268,33 @@ struct ContainerOperationsTests {
         }
     }
 
+    /// **13s-b U1b (R-13s-36/38) — the FRESH-MINT default is lowercase,
+    /// and an existing book of hers is never renamed.** RED ON OLD: the
+    /// constant was "Journal". The fresh-only half: a store whose daily
+    /// Journal she renamed (or that was minted title-case on an earlier
+    /// build) files into THAT book with its name untouched — the
+    /// designation derives from the `'daily'` marker, never the name.
+    @Test func theFreshJournalMintIsLowercaseAndAnExistingBookKeepsItsName() throws {
+        try withOperations { ops, db in
+            #expect(Operations.defaultDailyJournalBookName == "journal",
+                    "the ruled default (R-13s-36)")
+            // An earlier build's book: title-case, marker-bearing.
+            let legacy = try ops.createReading(
+                name: "Journal", kind: .book, profile: "daily",
+                sortField: .entryDate, sortDir: .desc)
+            try ops.setDailyJournalBook(legacy.id)
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-08")
+            guard case .shelved(let bookID) = ops.shelveInDailyJournalBook(entry.container.id)
+            else {
+                Issue.record("the entry files")
+                return
+            }
+            #expect(bookID == legacy.id, "her existing book is the home — nothing minted")
+            let name = try db.read { try Queries.reading($0, id: legacy.id)?.name }
+            #expect(name == "Journal", "…and it is NEVER renamed (fresh mints only, R-13s-38)")
+        }
+    }
+
     @Test func shelvingEnsuresOnceNoMatterHowManyDoorsCallIt() throws {
         try withOperations { ops, db in
             for day in ["2026-07-26", "2026-07-27", "2026-07-28"] {

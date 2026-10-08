@@ -291,7 +291,8 @@ struct MobileBlockHistoryTests {
             }
             await model.blockHistory.restore(commit, of: seed.variantID)
             #expect(model.blockHistory.status
-                    == .refusal("This note is locked — unlock it to restore this savepoint."))
+                    == .refusal("This note is locked — unlock it to restore this commit."),
+                    "13s-b U4 (R-13s-31): the refusal names the act in commit's word")
             #expect(model.blockHistory.status?.isRefusal == true)
             #expect(try await storedTakeText(db, variantID: seed.variantID)
                     == "Edited past the savepoint.")
@@ -761,8 +762,10 @@ struct MobileBlockHistoryTests {
     /// platform name anywhere in the family, and the door NAMES THE BLOCK
     /// (her F2 report, one noun over).
     @Test func theHistoryCopyIsPinnedAndPlatformFree() async throws {
+        // 13s-b U4 (R-13s-31): the word is commit; the definition rides
+        // the app's plain gloss (the Mac receipt's twin, P-U4-1).
         #expect(MobileBlockHistoryController.committedStatus
-                == "Committed — a savepoint of this take is kept.")
+                == "Committed — a saved moment of this take is kept.")
         #expect(MobileBlockHistoryController.restoredStatus
                 == BlockHistoryCopy.restoredSavepoint)
         #expect(MobileBlockHistoryController.predatesSplitRowFlag == "predates a split")
@@ -805,12 +808,32 @@ struct MobileBlockHistoryTests {
         }
     }
 
+    /// **13s-b U4 (her R-13s-31) — a commit's row says COMMIT, on the real
+    /// drawn cell**: the empty commit's title and the restore button's
+    /// VoiceOver label (both said "savepoint"; the Mac suite's
+    /// `DeadVocabularyTests` fence walks this file's literals too, but only a
+    /// drawn cell proves what VoiceOver reads).
+    @Test func aCommitRowSaysCommitOnTheDrawnCell() async throws {
+        let commit = CommitPoint(
+            id: "c", variantId: "v", text: "", createdAt: Date(timeIntervalSince1970: 0))
+        let cell = MobileBlockHistoryCell(
+            style: .default, reuseIdentifier: MobileBlockHistoryCell.reuseID)
+        cell.configure(
+            .savepoint(variantID: "v", commit: commit, predatesSplit: false),
+            face: MobileEditorStyle.face) { _ in }
+        #expect(cell.titleLabel.text == MobileEditorStyle.chromeCase("(Empty commit)"))
+        let restore = try #require(cell.contentView.subviews
+            .compactMap { $0 as? UIButton }.first { !$0.isHidden })
+        #expect(restore.accessibilityLabel == "\(BlockHistoryCopy.restoreVerb) this commit")
+        #expect(restore.accessibilityIdentifier == "blockHistory.restore")
+    }
+
     /// **The words are SHARED, not copied** (MobileSoul §3): the phone reads
     /// the same vocabulary the Mac's pane does, so the two faces cannot tell
     /// different stories about one block.
     @Test func theBlockHistoryVocabularyIsShared() async throws {
         #expect(BlockHistoryPath.name == "Block History")
-        #expect(BlockHistoryPath.savepointsSection == "Savepoints")
+        #expect(BlockHistoryPath.savepointsSection == "Commits", "13s-b U4 (R-13s-31)")
         #expect(BlockHistoryPath.archivedSection == "Archived takes")
         #expect(BlockHistoryPath.deletedSection == "Deleted takes")
         #expect(BlockHistoryPath.cameFromSection == "Came from")

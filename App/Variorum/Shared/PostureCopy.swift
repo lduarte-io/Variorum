@@ -770,9 +770,8 @@ nonisolated extension ProtectionCopy {
 // render these; the spine's pins quote them (render, don't re-derive).
 
 nonisolated extension ProtectionCopy {
-    /// The book the chapter's last paragraph points at — copy §7's quoted
-    /// name, which is the seeded book's reserved name.
-    static let encryptionBookName = SampleLibraryEncryptionBook.name
+    // (`encryptionBookName` — copy §7's quoted book name — retired with
+    // the pointer paragraph at 13s-b U1b, R-13s-37.)
 
     /// Lesson 1 — What's true in every mode.
     static let privacyLessonOneTitle = "What's true in every mode"
@@ -805,8 +804,12 @@ nonisolated extension ProtectionCopy {
         + "\(passphraseFloor) characters — it is the one secret a stolen copy of the server could be "
         + "guessed against. A passphrase you already have keeps working whatever its length; the "
         + "change-passphrase door is where a longer one is asked for.",
-        "The whole story — every key, where it lives, what happens when you switch, why an old backup "
-        + "behaves the way it does — is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf.",
+        // (The chapter's fourth paragraph — the door to the seeded book
+        // *Encryption Explained* "on this shelf" — RETIRED at 13s-b U1b,
+        // R-13s-37 + the U3 RECORD's disposition 1: the book is neither
+        // seeded nor restorable, so the sentence is false at ship. It was
+        // OUTSIDE copy §7's two never-soften sentences — the floors below
+        // are byte-untouched. `privacyBookDoorSentence` retired with it.)
     ]
     /// The two floors, as the chapter states them (copy §7's parenthetical
     /// names them; the pins quote these, never a re-typed sentence).
@@ -815,8 +818,6 @@ nonisolated extension ProtectionCopy {
         + "your Apple account is ever gone."
     static let privacyCastleFloorSentence =
         "Lose every enrolled device and both secrets, and your writing is gone — nobody can help."
-    static let privacyBookDoorSentence =
-        "is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf."
 }
 
 // MARK: - pre-13x 5a — THE COPY RECONCILIATION's re-renders (copy §3 · §4 ·

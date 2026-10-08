@@ -376,7 +376,7 @@ enum MobileTutorialSeeder {
             "The bottom bar above the keyboard is the whole toolkit: Aa opens "
             + "the formatting strip, ⑂ opens the takes of the block you're in, "
             + "and ⋯ holds the block's own acts — comments, callout, "
-            + "savepoints, a new block below, divide, merge, delete.",
+            + "commits, a new block below, divide, merge, delete.",
 
             // The ROAD is composed, never re-typed (batch 9's fix wave,
             // cold-review MAJOR 2): `Block History…` LEFT the block ⋯ at
@@ -385,7 +385,11 @@ enum MobileTutorialSeeder {
             // comes from the door itself (`historyTitle`, composed in its
             // turn from the SHARED `BlockHistoryPath.name`), so a re-word
             // lands here for free and a MOVE reds the walk's pin.
-            "Your writing is always autosaved; a SAVEPOINT is the "
+            // 13s-b U4 (her R-13s-31, "I want that changed everywhere"):
+            // the pocket guide's five savepoints became commits; this
+            // defined term is written lowercase, her no-caps-for-emphasis
+            // rule (the guide's other caps are a later pass's, not U4's).
+            "Your writing is always autosaved; a commit is the "
             + "deliberate extra. \(MobileBlockMenuController.commitTitle), in ⋯, "
             + "keeps the exact text of the take you're in, forever — and the "
             + "moments themselves are read back one door along: ⑂ on the "
@@ -393,7 +397,7 @@ enum MobileTutorialSeeder {
             + "carries \(MobileTakesBrowserController.historyTitle), which opens "
             + "everything this block has been: every take's saved "
             + "moments, with restore; the takes it archived or deleted, with "
-            + "a way back; and the block it came out of. A savepoint from "
+            + "a way back; and the block it came out of. A commit from "
             + "before a divide says so, and asks first: restoring it brings "
             + "back the whole pre-split text.",
 
@@ -520,7 +524,7 @@ enum MobileTutorialSeeder {
             "A LOCK is a reversible guard on one take: its text refuses "
             + "edits until you unlock it — one tap in the same ⋯ — or "
             + "branch a fresh copy. Locking a take that has unsaved "
-            + "changes quietly keeps a savepoint first, so the guard "
+            + "changes quietly commits it first, so the guard "
             + "insures exactly what it protects.",
 
             "A LABEL is a short name on a take's card — \u{201C}bolder "
@@ -678,8 +682,8 @@ enum MobileTutorialSeeder {
             + "why.",
 
             "The lock lives on the masthead, up by the title: one tap "
-            + "unlocks, one tap seals again. Sealing quietly keeps a "
-            + "savepoint of any unsaved take first — the guard insures "
+            + "unlocks, one tap seals again. Sealing quietly commits "
+            + "any unsaved take first — the guard insures "
             + "exactly what it protects.",
         ])
         try ops.lockPost(sealed.post.id)

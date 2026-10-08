@@ -314,9 +314,11 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: formatting)
             }
+            // 13s-b triage landing: "- [x] CLICK the box" reads "Click" now
+            // (her R-13s-30 caps ban) — the checkbox syntax itself unchanged.
             for syntax in ["**markdown**", "*italic*", "~~struck out~~", "`inline code`",
                            "## Headings are sizes", "- Lists are lines", "- [ ] And a checkbox",
-                           "- [x] CLICK the box", "[like this](https://apple.com)"] {
+                           "- [x] Click the box", "[like this](https://apple.com)"] {
                 #expect(stored.contains(syntax), "the lesson shows \(syntax) by BEING it")
             }
 
@@ -334,7 +336,7 @@ struct TutorialBookShapeTests {
             #expect(rendered.text.contains("Headings are sizes"))
             #expect(rendered.text.contains("\u{2022} Lists are lines"))
             #expect(rendered.text.contains("\u{2610} And a checkbox"))
-            #expect(rendered.text.contains("\u{2611} CLICK the box"))
+            #expect(rendered.text.contains("\u{2611} Click the box"))
             #expect(rendered.links.contains { $0.url == "https://apple.com" })
         }
     }
@@ -359,8 +361,8 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: workspace)
             }
-            #expect(stored.contains("Quicknotes"),
-                    "the lesson names the smart book that collects the pad's note (R6-4)")
+            #expect(stored.contains(Operations.defaultQuicknoteBookName),
+                    "the lesson names the smart book that collects the pad's note (R6-4; 13s-b U1b — the one name constant)")
             #expect(stored.contains("quicknote"),
                     "…and the tag whose removal is the road back")
             #expect(!stored.contains("kept as a note in the Pool"),
@@ -380,7 +382,9 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: workspace)
             }
-            #expect(stored.contains("\u{23CE} there FILES what you wrote"),
+            // 13s-b triage landing — the claim unchanged, the caps-for-emphasis
+            // gone (her R-13s-30 ban): "FILES" reads "files".
+            #expect(stored.contains("\u{23CE} there files what you wrote"),
                     "⏎ files the capture (R-13u-4)")
             #expect(stored.contains("\u{21E7}\u{23CE} adds another paragraph"),
                     "…and ⇧⏎ is the paragraph key")
@@ -1432,7 +1436,10 @@ struct TutorialStructureActsTests {
                 $0.text?.contains("begging to stand alone") == true
             })
             let text = host.text ?? ""
-            let start = try utf16Offset(of: "\u{2014} and this closing line", in: text)
+            // 13s-b triage landing: the closing line is its own sentence now
+            // ("…sentence ends). This closing line is begging to stand alone.")
+            // — the span the lesson asks for starts at it, not at a dash.
+            let start = try utf16Offset(of: "This closing line", in: text)
             _ = try await session.runner.run { ops in
                 try ops.extract(host.blockID, span: start..<(text as NSString).length)
             }
@@ -1581,7 +1588,9 @@ struct TutorialStructureActsTests {
             let block = try #require(before.first {
                 $0.text?.contains("two undo stacks") == true
             })
-            let cut = try utf16Offset(of: "\u{2318}Z is TEXT", in: block.text ?? "")
+            // 13s-b triage landing: "⌘Z is TEXT" reads "⌘Z is text undo" (her
+            // R-13s-30 caps ban) — the same cut, between the lesson's two halves.
+            let cut = try utf16Offset(of: "\u{2318}Z is text undo", in: block.text ?? "")
             _ = try await session.runner.run { ops in
                 try ops.divide(block.blockID, cut: cut)
             }
@@ -1909,10 +1918,12 @@ struct TutorialLibraryActsTests {
             // 13c 2A/2B/2C: the lesson's vocabulary is the shipped one. The
             // old single "progress bar" claim is replaced by the four the
             // three modes actually make (A6 removed the bar itself).
-            #expect(prose.contains("OUTLINE"), "the lesson teaches the writing surface")
-            #expect(prose.contains("BOOK"), "…the two-up spread")
-            #expect(prose.contains("READ"), "…and the reading pair")
-            #expect(prose.contains("PAGES"), "the lesson teaches the paginated face")
+            // 13s-b triage landing: the views in their real casing, the faces
+            // lowercase as the toggle speaks them (her R-13s-30 caps ban).
+            #expect(prose.contains("Outline is this scroll"), "the lesson teaches the writing surface")
+            #expect(prose.contains("Book is a two-page spread"), "…the two-up spread")
+            #expect(prose.contains("Read is for reading only"), "…and the reading pair")
+            #expect(prose.contains("and pages, real book pages"), "the lesson teaches the paginated face")
             #expect(prose.contains("flowing across"), "…and says what makes it a page")
             #expect(prose.contains("click the word counts"))
             // 13j batch 6 — A JUSTIFIED PIN EDIT (the bounded copy alignment
@@ -2097,7 +2108,9 @@ struct TutorialLibraryActsTests {
             // The POOL keeps its name (R29): the bookless-notes room was
             // never part of the Snippets vocabulary ruling, and a sweep that
             // took it too would have taught her a room that is not there.
-            #expect(prose.contains("POOL (sidebar)"))
+            // 13s-b triage landing: the room in its real casing (her R-13s-30
+            // caps ban) — the name itself, the R29 claim, unchanged.
+            #expect(prose.contains("The Pool (sidebar)"))
         }
     }
 
@@ -2146,9 +2159,11 @@ struct TutorialLibraryActsTests {
         try await withTutorialWorld { _, db, bookID in
             let prose = try await db.read { db in
                 try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, "export \u{2014} it's all yours"))
+                    // 13s-b triage landing: the guide's one em-dash TITLE renamed
+                    // (the U3 RECORD's disposition 2, accepted).
+                    db, containerID: lessonID(db, bookID: bookID, "export: it's all yours"))
             }
-            #expect(prose.contains("BACKUPS happen on their own"))
+            #expect(prose.contains("Backups happen on their own"))  // 13s-b triage landing: sentence case
             #expect(prose.contains("beside the library, on this Mac"),
                     "where the automatic copies live")
             #expect(prose.contains("Settings \u{25B8} \(SettingsPane.dataSafety.title)"),
@@ -2203,7 +2218,9 @@ struct TutorialLibraryActsTests {
 
     @Test func threeWaysLessonCarriesItsPracticeFan() async throws {
         // The A10 absorption: the polish/thread/fork teaching now lives
-        // here, act-ready.
+        // here, act-ready. (13s-b triage landing: the lesson MOVED to close
+        // the welcome chapter — U3 disposition 4 — and found by its title it
+        // walks the same; this suite keeps it where it was written.)
         try await withTutorialWorld { _, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "three ways of working") }
             let lessonProjection = try await projection(db, lesson)
@@ -2213,9 +2230,13 @@ struct TutorialLibraryActsTests {
             #expect(lessonProjection.fans[thread.blockID]?.count == 2,
                     "the thread block has its practice take")
             let texts = lessonProjection.slots.compactMap(\.text).joined()
-            #expect(texts.contains("POLISH IN PLACE"))
-            #expect(texts.contains("THREAD ONE PIECE"))
-            #expect(texts.contains("FORK THE PIECE"))
+            // 13s-b triage landing — the three roads by their sentence-case
+            // lead-ins (her R-13s-30 caps ban; the claim unchanged).
+            #expect(texts.contains("Polish in place:"))
+            #expect(texts.contains("Thread one piece:"))
+            #expect(texts.contains("Fork the piece:"))
+            #expect(TutorialSeeder.plan.first?.lessons.last == "three ways of working",
+                    "the map closes the welcome chapter (U3 disposition 4)")
         }
     }
 }
@@ -2420,7 +2441,9 @@ struct TutorialDeletionActsTests {
             // deliberate, and where the joined blocks went.
             #expect(past.contains("says nothing at the time"),
                     "the declined message's teaching, in the lesson's mouth")
-            #expect(past.contains("BOTH"),
+            // 13s-b triage landing: "BOTH" is plain prose now (her R-13s-30
+            // caps ban) — the claim, ALL of a merge's originals, unchanged.
+            #expect(past.contains("lists both of the blocks it joined"),
                     "…and a merge's originals are ALL of them (her C2 ruling)")
         }
     }
@@ -2431,7 +2454,9 @@ struct TutorialDeletionActsTests {
         try await withTutorialWorld { session, db, bookID in
             let deleting = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let deletingTexts = try await slots(db, deleting).compactMap(\.text)
-            for prefix in ["SCRATCH ONE", "SCRATCH TWO", "SCRATCH THREE"] {
+            // 13s-b triage landing: the staged prefixes read in sentence case
+            // (her R-13s-30 caps ban); each act after its colon is unchanged.
+            for prefix in ["Scratch one", "Scratch two", "Scratch three"] {
                 #expect(deletingTexts.contains { $0.hasPrefix(prefix) },
                         "\(prefix) is staged to be deleted")
             }
@@ -2440,7 +2465,7 @@ struct TutorialDeletionActsTests {
                 try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
             }
             let trioTexts = try await slots(db, trio).compactMap(\.text)
-            for prefix in ["ARCHIVE ME", "DELETE ME", "MOVE ME OUT"] {
+            for prefix in ["Archive me", "Delete me", "Move me out"] {
                 #expect(trioTexts.contains { $0.hasPrefix(prefix) }, "\(prefix) is staged")
             }
 
@@ -2467,7 +2492,7 @@ struct TutorialDeletionActsTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let before = try harness.storeSlots()
-            let scratch = try staged(harness, "SCRATCH ONE")
+            let scratch = try staged(harness, "Scratch one")
 
             let selection = try tripleClickSelection(harness, scratch.blockID)
             let scratchEntry = try entryRange(harness, scratch.blockID)
@@ -2509,8 +2534,8 @@ struct TutorialDeletionActsTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let before = try harness.storeSlots()
-            let two = try staged(harness, "SCRATCH TWO")
-            let three = try staged(harness, "SCRATCH THREE")
+            let two = try staged(harness, "Scratch two")
+            let three = try staged(harness, "Scratch three")
 
             // The ⌘-click door itself (the surface's own entry point).
             #expect(harness.model.pickBlock(
@@ -2555,7 +2580,7 @@ struct TutorialDeletionActsTests {
             window.makeKeyAndOrderFront(nil)
             window.makeFirstResponder(harness.textView)
 
-            let scratch = try staged(harness, "SCRATCH ONE")
+            let scratch = try staged(harness, "Scratch one")
             harness.replace(try tripleClickSelection(harness, scratch.blockID), with: "")
             await harness.flush()
             #expect(session.undoMenuState.topLabel == "Delete Blocks")
@@ -2586,9 +2611,9 @@ struct TutorialDeletionActsTests {
                 try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
-            let keeper = try staged(harness, "ARCHIVE ME")
-            let doomed = try staged(harness, "DELETE ME")
-            let mover = try staged(harness, "MOVE ME OUT")
+            let keeper = try staged(harness, "Archive me")
+            let doomed = try staged(harness, "Delete me")
+            let mover = try staged(harness, "Move me out")
 
             // ARCHIVE — the Block-menu / right-click door.
             harness.textView.setSelectedRange(
@@ -2657,8 +2682,8 @@ struct TutorialDeletionActsTests {
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
             let order = try harness.storeSlots().map(\.blockID)
-            let keeper = try staged(harness, "ARCHIVE ME")
-            let doomed = try staged(harness, "DELETE ME")
+            let keeper = try staged(harness, "Archive me")
+            let doomed = try staged(harness, "Delete me")
 
             harness.textView.setSelectedRange(
                 NSRange(location: try entryRange(harness, keeper.blockID).location, length: 0))
@@ -2914,7 +2939,9 @@ struct TutorialDeletionActsTests {
             }
             let projected = try await projection(db, lesson)
             let host = try #require(projected.slots.first {
-                $0.text?.hasPrefix("Deleted TAKES wait") == true
+                // 13s-b triage landing (the LANDING BRIEF's hook — the spare-take
+                // prose pins move WITH ch 05): "Deleted TAKES" reads "Deleted takes".
+                $0.text?.hasPrefix("Deleted takes wait") == true
             })
             let fan = try #require(projected.fans[host.blockID])
             #expect(fan.count == 2, "the spare take is staged")
@@ -3092,9 +3119,11 @@ struct TutorialWherePlacesActsTests {
             // THREE — what a copy carries (13u3 UNIT E, item 15(b)): her
             // sentence, both halves, in the words the app itself uses.
             let copies = try #require(prose["what a copy carries"])
-            #expect(copies.contains("carries the WORDS, not the past"),
+            // 13s-b triage landing: the copy rule's caps-for-emphasis gone (her
+            // R-13s-30 ban) — "WORDS"/"PLACES" read plainly; the claims unchanged.
+            #expect(copies.contains("carries the words, not the past"),
                     "the rule, in one clause")
-            #expect(copies.contains("only what the note PLACES"),
+            #expect(copies.contains("only what the note places"),
                     "her words: \"you're only saving the placed notes\"")
             #expect(copies.contains(BlockHistoryPath.name)
                 && copies.contains(BlockHistoryPath.doorLabel),
@@ -3110,8 +3139,9 @@ struct TutorialWherePlacesActsTests {
 
             // FOUR — the two exits (row 27), and the rule in her own shape.
             let exits = try #require(prose["the two exits"])
-            #expect(exits.contains("DELETION GOES TO THE TRASH")
-                && exits.contains("TRANSFORMATION GOES TO LINEAGE"),
+            // 13s-b triage landing: her rule, in sentence case (the draft: "The
+            // rule is short." — the old "four words long" miscounted it).
+            #expect(exits.contains("Deletion goes to the Trash; transformation goes to lineage."),
                     "her eleventh-sitting mandate, in the lesson's mouth")
             #expect(exits.contains(TrayPath.menuLabel), "the first exit's near listing")
             #expect(exits.contains(RecoveryCopy.trashSection), "…and its far one")
@@ -3129,21 +3159,21 @@ struct TutorialWherePlacesActsTests {
         try await withTutorialWorld { _, db, bookID in
             let map = try await db.read { try lessonID($0, bookID: bookID, "the five places") }
             #expect(try await slots(db, map).compactMap(\.text)
-                .contains { $0.hasPrefix("PRACTICE ME") },
+                .contains { $0.hasPrefix("Practice me") },  // 13s-b triage landing: sentence case
                     "a block to visit with the history door")
 
             let saving = try await db.read {
                 try lessonID($0, bookID: bookID, "saving a moment")
             }
             #expect(try await slots(db, saving).compactMap(\.text)
-                .contains { $0.hasPrefix("PRACTICE TAKE") },
+                .contains { $0.hasPrefix("Practice take") },
                     "a take to commit")
 
             let copies = try await db.read {
                 try lessonID($0, bookID: bookID, "what a copy carries")
             }
             let copySlots = try await slots(db, copies).compactMap(\.text)
-            #expect(copySlots.contains { $0.hasPrefix("PRACTICE COPY") },
+            #expect(copySlots.contains { $0.hasPrefix("Practice copy") },
                     "a block to save a moment of, then copy the note around")
             #expect(copySlots.count >= 3,
                     """
@@ -3154,12 +3184,12 @@ struct TutorialWherePlacesActsTests {
             let exits = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
             let exitProjection = try await projection(db, exits)
             let texts = exitProjection.slots.compactMap(\.text)
-            #expect(texts.contains { $0.hasPrefix("EXIT ONE") }, "one to delete whole")
+            #expect(texts.contains { $0.hasPrefix("Exit one") }, "one to delete whole")
             let first = try #require(exitProjection.slots.firstIndex {
-                $0.text?.hasPrefix("EXIT TWO, first half") == true
+                $0.text?.hasPrefix("Exit two, first half") == true
             })
             let second = try #require(exitProjection.slots.firstIndex {
-                $0.text?.hasPrefix("EXIT TWO, second half") == true
+                $0.text?.hasPrefix("Exit two, second half") == true
             })
             #expect(second == first + 1, "the pair to join must be ADJACENT")
             for index in [first, second] {
@@ -3246,7 +3276,7 @@ struct TutorialWherePlacesActsTests {
                 try lessonID($0, bookID: bookID, "saving a moment")
             }
             let harness = try tutorialEditor(session, db, postID: lesson)
-            let practice = try staged(harness, "PRACTICE TAKE")
+            let practice = try staged(harness, "Practice take")  // 13s-b triage landing: sentence case
 
             // ⌘S — the take's moment, through the bar's own door.
             harness.textView.setSelectedRange(
@@ -3308,7 +3338,7 @@ struct TutorialWherePlacesActsTests {
                 try lessonID($0, bookID: bookID, "what a copy carries")
             }
             let practice = try #require(try await slots(db, lesson)
-                .first { $0.text?.hasPrefix("PRACTICE COPY") == true })
+                .first { $0.text?.hasPrefix("Practice copy") == true })  // 13s-b triage landing
             let take = try #require(practice.variantID)
 
             // ⌘S — the moment the lesson tells her to save.
@@ -3412,7 +3442,7 @@ struct TutorialWherePlacesActsTests {
             let harness = try tutorialEditor(session, db, postID: lesson)
 
             // ── EXIT ONE: deletion goes to the Trash ──────────────────────
-            let doomed = try staged(harness, "EXIT ONE")
+            let doomed = try staged(harness, "Exit one")  // 13s-b triage landing: sentence case
             harness.replace(try tripleClickSelection(harness, doomed.blockID), with: "")
             await harness.flush()
 
@@ -3428,8 +3458,8 @@ struct TutorialWherePlacesActsTests {
 
             // ── EXIT TWO: transformation goes to lineage ──────────────────
             try harness.reload()
-            let first = try staged(harness, "EXIT TWO, first half")
-            let second = try staged(harness, "EXIT TWO, second half")
+            let first = try staged(harness, "Exit two, first half")
+            let second = try staged(harness, "Exit two, second half")
             let firstRange = try entryRange(harness, first.blockID)
             let secondRange = try entryRange(harness, second.blockID)
             let span = NSRange(
@@ -3449,7 +3479,7 @@ struct TutorialWherePlacesActsTests {
             // — the lesson's own marker survives the cut it asks for.
             let standingSlots = try harness.storeSlots()
             let joined = try #require(standingSlots.first {
-                $0.text?.contains("EXIT TWO") == true
+                $0.text?.contains("Exit two") == true
             }).blockID
             #expect(after.contains(joined))
 
@@ -3524,15 +3554,22 @@ struct TutorialPrivacyChapterTests {
             .ignoresCase().wordBoundaryKind(.simple)
     }
 
+    /// **13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 bound, the U3
+    /// RECORD's disposition 4):** the chapter MOVED LAST — *"it makes more
+    /// sense to have the safety after the workflow and the workflow
+    /// together"* — so its right place is the guide's close, after the books
+    /// chapter (the workflow's capstone), where the map's neighbour seat was.
+    /// RED ON OLD: the old plan seats it seventh, right after the map.
     @Test func theChapterIsTwoLessonsInTheRightPlace() {
         let index = TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter }
         #expect(index != nil)
-        let places = TutorialSeeder.plan.firstIndex { $0.chapter == placesChapter }
-        #expect(places != nil)
-        #expect(index != nil && places != nil)
-        if let index, let places {
-            #expect(index == places + 1,
-                    "the recovery map raises the question this chapter answers")
+        let books = TutorialSeeder.plan.firstIndex { $0.chapter == TutorialSeeder.booksChapter }
+        #expect(books != nil)
+        #expect(index != nil && books != nil)
+        if let index, let books {
+            #expect(index == TutorialSeeder.plan.count - 1,
+                    "safety after the workflow — the guide's closing word")
+            #expect(index == books + 1, "right after the workflow's capstone")
         }
         // pre-13x 5a: copy §7's two lessons, by the copy's own titles.
         #expect(TutorialSeeder.plan.first { $0.chapter == privacyChapter }?.lessons
@@ -3573,8 +3610,13 @@ struct TutorialPrivacyChapterTests {
             #expect(two.contains(ProtectionCopy.privacyStandardFloorSentence))
             #expect(two.contains(ProtectionCopy.privacyCastleFloorSentence))
             #expect(two.contains("your passphrase is what lets a new device in"))
-            #expect(two.contains(ProtectionCopy.privacyBookDoorSentence))
-            #expect(two.contains(SampleLibraryEncryptionBook.name))
+            // 13s-b U1b (R-13s-37, the U3 disposition 1 — a JUSTIFIED
+            // EDIT): the book's-door arm INVERTS — the pointer paragraph
+            // retired with the book's seed and doors, so the chapter must
+            // no longer name a book a fresh store cannot hold. The two
+            // never-soften floor arms above are byte-untouched.
+            #expect(!two.contains(SampleLibraryEncryptionBook.name),
+                    "the retired pointer stays gone")
             // The retired 13p dials lesson is gone: no reset door, no presets.
             #expect(!one.contains("Forgot It? Reset") && !two.contains("Forgot It? Reset"))
             // The two-register rule over the rendered chapter.
@@ -3608,14 +3650,16 @@ struct TutorialFannedMatrixTests {
             let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
 
             // The WHOLE/PART fork — the sentence the matrix rests on.
-            #expect(prose.contains("covered WHOLE") && prose.contains("covered only IN PART"))
+            // 13s-b triage landing: the matrix's caps-for-emphasis gone (her
+            // R-13s-30 ban) — every claim below is the same sentence, plainly.
+            #expect(prose.contains("covered whole") && prose.contains("covered only in part"))
             #expect(prose.contains("with every take on it"),
                     "a fanned block covered whole goes WHOLE — her ruling")
-            #expect(prose.contains("only the take you can SEE loses its piece"),
+            #expect(prose.contains("only the take you can see loses its piece"),
                     "…and a partly covered one touches the shown take only")
             // R-13u-2, in the lesson's mouth, BOTH kinds of break named.
-            #expect(prose.contains("MIDDLE of a paragraph at both ends"))
-            #expect(prose.contains("paragraph BREAK at either end"))
+            #expect(prose.contains("middle of a paragraph at both ends"))
+            #expect(prose.contains("paragraph break at either end"))
             #expect(prose.contains("a line break inside one"),
                     "the INTERNAL newline half of her ruling is named, not implied")
             // #11a's rule at the ends.
@@ -3628,9 +3672,11 @@ struct TutorialFannedMatrixTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
             let harness = try tutorialEditor(session, db, postID: lesson)
 
-            let top = try staged(harness, "EXIT THREE, top")
-            let middle = try staged(harness, "EXIT THREE, middle")
-            let bottom = try staged(harness, "EXIT THREE, bottom")
+            // 13s-b triage landing: the trio in sentence case — the SEEDER's own
+            // hasPrefix moved with the prose in the same commit.
+            let top = try staged(harness, "Exit three, top")
+            let middle = try staged(harness, "Exit three, middle")
+            let bottom = try staged(harness, "Exit three, bottom")
 
             // The middle really carries the fan the card promises.
             let fanBefore = try await db.read { [blockID = middle.blockID] db in
@@ -3665,7 +3711,7 @@ struct TutorialFannedMatrixTests {
 
             // And the two ends are one block whose Came from names both.
             let joined = try #require(try harness.storeSlots().first {
-                $0.text?.contains("EXIT THREE") == true
+                $0.text?.contains("Exit three") == true
             }).blockID
             let history = try await db.read { [now = session.now] db in
                 try Queries.blockHistory(db, blockID: joined, now: now)

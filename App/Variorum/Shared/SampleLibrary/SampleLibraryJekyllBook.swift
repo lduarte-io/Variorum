@@ -29,9 +29,20 @@ import Foundation
 import VariorumCore
 
 nonisolated enum SampleLibraryJekyllBook {
-    /// The book's reserved name — EXACT and case-sensitive for discovery;
-    /// R-18l-11's own words for it.
-    static let name = "The Strange Case of Dr Jekyll and Mr Hyde"
+    /// The book's reserved name — EXACT and case-sensitive for discovery.
+    /// **Lowercased at 13s-b U1b (R-13s-37/38, her words: "dr jekyll and mr
+    /// hyde restorable (also needs consistent casing)" · "one casing, do
+    /// not mix several … that's fine for it only changing the defaults for
+    /// fresh mints"):** the seed's own style ("the adventures of sherlock
+    /// holmes", "the field guide"). FRESH MINTS ONLY by construction — the
+    /// restore door mints with this name; an existing store's title-case
+    /// copy is her data, never renamed, and a Restore press beside one
+    /// mints a lowercase copy rather than finding the old (the recorded
+    /// consequence — nothing lost, either deletable; Jekyll is outside the
+    /// pristine dedupe, QUESTIONS #155). The ATTRIBUTION below keeps the
+    /// published work's title case — a citation is prose, not a label
+    /// (Sherlock's own front matter is the precedent).
+    static let name = "the strange case of dr jekyll and mr hyde"
     /// The reserved tag path — a top-level sibling of `sherlock holmes` and
     /// `encryption explained`, so the whole book is findable and removable
     /// as a set.
@@ -81,7 +92,7 @@ nonisolated enum SampleLibraryJekyllBook {
         Door\u{201D}, and the last, \u{201C}Henry Jekyll\u{2019}s Full Statement of the \
         Case\u{201D}. Between them is takemania \u{2014} the middle of the story, reworked by \
         hand over several weeks. It is a note to practise on, and its history is real: blocks \
-        with several takes beside blocks with none, savepoints spread over the weeks (some of \
+        with several takes beside blocks with none, commits spread over the weeks (some of \
         them named), paragraphs that were divided and merged (their originals wait in the \
         note\u{2019}s tray and behind the lineage doors), and a few blocks already deleted. \
         Divide it, merge it, delete from it, try the takes.

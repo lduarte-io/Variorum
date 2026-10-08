@@ -94,7 +94,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .general: "The voice, the colours, light and dark, and how the app confirms what it did."
         case .editor: "How the writing surface looks and behaves while you are in it."
         case .takes: "How a block's alternative takes open and follow you."
-        case .writing: "What typing does to the note — and the savepoints Variorum keeps for you."
+        case .writing: "What typing does to the note — and the commits Variorum keeps for you."
         case .shortcuts: "Every keyboard shortcut and menu door, grouped. Search above reaches it."
         // 13i-d U6 (a) — found on the walk: the door this names mints a
         // GATHERING (its words are "Make a Gathering…").
@@ -249,13 +249,13 @@ nonisolated enum SettingsCatalog {
                        "segmentation", "split"]),
         SettingsRow(
             id: "cadence", pane: .writing, title: SavepointCadenceCopy.title,
-            blurb: "How often Variorum writes a quiet savepoint for you. The insurance "
+            blurb: "How often Variorum makes a quiet commit for you. The insurance "
                 + "occasions stay on in every mode.",
             keywords: ["savepoint", "commit", "autosave", "history", "backup", "version",
                        "cadence"]),
         SettingsRow(
             id: "pruning", pane: .writing, title: HistoryPruningCopy.title,
-            blurb: "Whether old quiet savepoints are trimmed, and after how long. "
+            blurb: "Whether old quiet commits are trimmed, and after how long. "
                 + "Never means never, on every device.",
             keywords: ["prune", "trim", "clean", "history", "old", "savepoints"]),
 

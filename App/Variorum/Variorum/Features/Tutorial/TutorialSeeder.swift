@@ -74,10 +74,12 @@ enum TutorialSeeder {
     ) -> String {
         let count = PostMode.order(keepingCanvas: keepingCanvas).count
         let word = count == 7 ? "seven" : count == 6 ? "six" : "\(count)"
-        return "A note opens into one of \(word) modes \u{2014} the tabs read "
+        // 13s-b triage landing (R-13s-30): the template re-voiced; the seam's
+        // three calls are untouched.
+        return "A note opens into one of \(word) modes. The tabs read "
             + PostMode.modeList(keepingCanvas: keepingCanvas) + ", and "
             + PostMode.keySpan(keepingCanvas: keepingCanvas)
-            + " switch between them. A note opens in Write the first time \u{2014} the "
+            + " switch between them. The first time, a note opens in Write, the "
             + "plain full page; after that it remembers the mode you left it in. "
             + "The rest of this book visits each mode where it earns its keep."
     }
@@ -90,54 +92,57 @@ enum TutorialSeeder {
     nonisolated static func lookingLessonContent(
         teachesCanvas: Bool = PostMode.buildKeepsCanvas
     ) -> (title: String, paragraphs: [String]) {
+        // 13s-b triage landing (R-13s-30): both flavors re-voiced from the
+        // approved draft; the seam (the title, the intro variant, the canvas
+        // pair) still derives from `teachesCanvas` alone.
         var paragraphs: [String] = [
             teachesCanvas
                 ? "Two more ways of looking, each a different traversal of the same "
-                  + "note \u{2014} nothing is ever copied into a view. (Outlining lives in "
-                  + "Compare now: an outline is just a related note beside its "
-                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)"
-                : "One more way of looking \u{2014} a different traversal of the same "
-                  + "note; nothing is ever copied into a view. (Outlining lives in "
-                  + "Compare now: an outline is just a related note beside its "
-                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)",
+                  + "note: nothing is ever copied into a view. (Outlining lives in "
+                  + "Compare now: an outline is just a related note beside its draft, "
+                  + "the previous lesson's \u{201C}make outline note\u{201D}.)"
+                : "One more way of looking, a different traversal of the same note: "
+                  + "nothing is ever copied into a view. (Outlining lives in Compare "
+                  + "now: an outline is just a related note beside its draft, the "
+                  + "previous lesson's \u{201C}make outline note\u{201D}.)",
 
             // 13b 4D (N39 + N32(a)) + wave 2c (item 16, W8-1 direction C):
             // the workbench, taught where the doors live. (The old
             // table-of-contents half of this lesson lives in Read's edit
             // face now.)
-            "BLOCKS (\u{2318}6) is the workbench \u{2014} the note's blocks as "
-            + "objects. Every row shows what it carries: takes, comments, "
-            + "words, tags, a lock, when it last moved. Click a row and its "
-            + "panel opens on the right \u{2014} edit the text there, see its "
-            + "takes, or jump onward (Write, Takes, its history). \u{2318}-click "
-            + "picks several, and the bar above acts on all of them at once \u{2014} "
-            + "merge, tag, archive, delete, move out to snippets \u{2014} one "
-            + "\u{2325}\u{2318}Z takes the whole act back. Rows reorder with "
-            + "\u{2191} \u{2193}, or the row's \u{22EF} menu moves by position: top, "
-            + "bottom, or the number you type. Move out to snippets does what "
-            + "it says: the block LEAVES this note and becomes a snippet "
-            + "there (a block lives in one place; \u{2325}\u{2318}Z brings it "
-            + "back).",
+            "Blocks (\u{2318}6) is the workbench: the note's blocks as objects. "
+            + "Every row shows what it carries: takes, comments, words, tags, a "
+            + "lock, when it last moved. Click a row and its panel opens on the "
+            + "right. Edit the text there, see its takes, or jump onward (Write, "
+            + "Takes, its history). \u{2318}-click picks several, and the bar "
+            + "above acts on all of them at once: merge, tag, archive, delete, "
+            + "move out to snippets. One \u{2325}\u{2318}Z takes the whole act "
+            + "back. Rows reorder with \u{2191} \u{2193}, or the row's \u{22EF} "
+            + "menu moves by position: top, bottom, or the number you type. Move "
+            + "out to snippets does what it says: the block leaves this note and "
+            + "becomes a snippet there (a block lives in one place; "
+            + "\u{2325}\u{2318}Z brings it back).",
         ]
         if teachesCanvas {
             paragraphs += [
                 // 13b 4E (N30/S4-7): the canvas package, taught whole.
-                "CANVAS (\u{2318}7) scatters the blocks as sticky-note cards. They open "
-                + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
-                + "header \u{2014} arrangement is yours and is remembered, the note's order "
-                + "doesn't move \u{2014} and resize it from the corner grip. Click into a "
-                + "card and type: edits land on the take the card is showing. The "
-                + "little number in a card's corner is the block's place in the "
-                + "note's current order.",
+                "Canvas (\u{2318}7) scatters the blocks as sticky-note cards. They "
+                + "open in a tidy grid until you arrange them; drag a card by its "
+                + "\u{2823} header (arrangement is yours and is remembered; the "
+                + "note's order doesn't move) and resize it from the corner grip. "
+                + "Click into a card and type: edits land on the take the card is "
+                + "showing. The little number in a card's corner is the block's place "
+                + "in the note's current order.",
 
-                "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
-                + "Click cards in the order the note should read \u{2014} each shows its "
-                + "number as you go \u{2014} then Apply once: the numbered cards lead the "
-                + "note and everything else keeps its relative order after them "
-                + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
-                + "card at once \u{2014} bigger boards open a read-only overview; click any "
-                + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
-                + "which take you're viewing (\u{201C}viewing \u{2014} not what the note "
+                "The canvas has one door back into order: \u{201C}order by "
+                + "clicking\u{201D}. Click cards in the order the note should read "
+                + "(each shows its number as you go), then Apply once: the numbered "
+                + "cards lead the note and everything else keeps its relative order "
+                + "after them (\u{2325}\u{2318}Z undoes; Cancel changes nothing). "
+                + "\u{201C}Fit all\u{201D} shows every card at once; bigger boards "
+                + "open a read-only overview, and a click on any card lands back on "
+                + "it. The \u{2039} \u{203A} switcher on a card flips which take "
+                + "you're viewing (\u{201C}viewing \u{2014} not what the note "
                 + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
             ]
         }
@@ -154,15 +159,16 @@ enum TutorialSeeder {
     /// 13i-d U7 (the walk's W-1): the door now composes the Welcome
     /// arrangement too, so the disclosure names it — exactly, the MINOR-D3/D4
     /// rule — before it promises the rest is untouched (PROVISIONAL wording).
+    /// 13s-b U1b: the arrangement no longer makes the classics gathering or
+    /// a quick note (R-13s-5/37), so the disclosure stopped claiming it.
     nonisolated static let replaceDetail =
         "This replaces the tutorial with a fresh copy: every note tagged exactly "
         + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
         + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. It also sets up the "
         + "\(Operations.welcomeShelfName) shelf the books chapter walks: the seeded books that sit "
-        + "unshelved go onto it, the two classic books' shipped notes are tagged "
-        + "#\(SampleLibrarySeeder.classicsTagPath), \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its notes if "
-        + "none of them lives in another book, and a \u{201C}\(SampleLibraryWelcome.classicsGatheringName)"
-        + "\u{201D} gathering and one quick note are made if they are missing. Nothing else is touched."
+        + "unshelved go onto it, the classic books' shipped notes are tagged "
+        + "#\(SampleLibrarySeeder.classicsTagPath), and \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its "
+        + "notes if none of them lives in another book. Nothing else is touched."
 
     // MARK: - The lesson plan (the coverage CONTRACT, walk-asserted)
 
@@ -178,7 +184,11 @@ enum TutorialSeeder {
         // last phase."* It sits second, right after "getting around", where
         // the sidebar has just been introduced and the next honest question
         // is "can I see two of these at once".
-        ("welcome", ["start here", "getting around", "the workspace"]),
+        // 13s-b triage landing (the U3 RECORD's disposition 4): "three ways
+        // of working" moved up from the library chapter's tail to close the
+        // welcome chapter — the map, read before the details.
+        ("welcome", ["start here", "getting around", "the workspace",
+                     "three ways of working"]),
         // 13g L12: "formatting" joins WRITING, after the two lessons that
         // teach what a block IS — the vocabulary is about what a line of
         // text LOOKS like, so it belongs after blocks and before takes.
@@ -221,31 +231,6 @@ enum TutorialSeeder {
         ("where things go",
          ["the five places", "saving a moment", "what a copy carries",
           "the two exits"]),
-        // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
-        // verbatim: *"yes, short chapter, and make the options that are in
-        // settings clear (require lock every time to open, don't, what you
-        // need to reset it, saving it in keychain or not, etc.). It should
-        // also be clear to a user everything they have to lose to lose
-        // their writing AND that there's an option for a plaintext backup
-        // if they want. basically give them their options in a non scary
-        // way, but in a serious way."*
-        //
-        // It sits right after "where things go" because that chapter is
-        // the recovery map, and this one is the same map's other face: the
-        // reader has just learned every place their writing is kept, and
-        // the honest next questions are "who else can read it" and "what
-        // would it take to lose it for good". Two lessons — SHORT, as she
-        // ruled.
-        //
-        // pre-13x 5a (copy §7 — the postures design §1.22): the SHORT
-        // chapter re-seeded as copy §7's two lessons, VERBATIM from the copy
-        // constants both seeders render (`ProtectionCopy.privacyLesson…`);
-        // the walk asserts copy §7's own parenthetical — both modes, both
-        // floors, keystone 3, keystone 4, and the book's door — so the
-        // chapter cannot drift from the copy file's facts. The full story
-        // is the seeded book *Encryption Explained*.
-        ("keeping it private",
-         [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
         // 17y B-DEDUPE (MAJOR-2): the last lesson's title follows the BUILD
         // — Release (no Canvas after (p)) titles it "blocks"; the mint and
         // this plan read the ONE pure function, so the shape pins stay in
@@ -259,21 +244,56 @@ enum TutorialSeeder {
         // right after the lesson that teaches tags — the finder leans on
         // them (`#tag` alone narrows the Library to the notes wearing it).
         ("the library of things", ["comments & tags", searchLessonTitle,
-                                   "pool & scraps", "export — it's all yours",
-                                   "the seal", "three ways of working"]),
+                                   "pool & scraps", "export: it's all yours",
+                                   "the seal"]),
         // 13i-d U7 — **THE BOOKS CHAPTER** (the sitting record §25, written at
         // her instruction as SECONDARY ACCEPTANCE CRITERIA: "every lesson is a
         // sentence the field guide must be able to say TRUTHFULLY of the
         // shipped build"). The eleven lesson sentences and the five rituals,
         // in the guide's card form; `TutorialBooksChapterTests` executes each
-        // sentence's truth and every ritual headless. It sits LAST: it leans
-        // on tags (the library of things) and on everything a note can do.
+        // sentence's truth and every ritual headless. It closes the WORKFLOW
+        // (since 13s-b the privacy chapter closes the guide): it leans on
+        // tags (the library of things) and on everything a note can do.
         // Lesson 9's second sentence (archive · can't delete · comes back) is
         // 13i-e's unbuilt guard and is withheld until it ships (F-U7-2).
         (booksChapter, ["the classics walk", "a book from the inside",
                         "membership, not ownership", "gatherings & arrivals",
                         "owned, finished, sealed", "the bookcase",
                         "the journal & the pool", "wings"]),
+        // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
+        // verbatim: *"yes, short chapter, and make the options that are in
+        // settings clear (require lock every time to open, don't, what you
+        // need to reset it, saving it in keychain or not, etc.). It should
+        // also be clear to a user everything they have to lose to lose
+        // their writing AND that there's an option for a plaintext backup
+        // if they want. basically give them their options in a non scary
+        // way, but in a serious way."*
+        //
+        // (Until 13s-b) it sat right after "where things go" because that chapter is
+        // the recovery map, and this one is the same map's other face: the
+        // reader has just learned every place their writing is kept, and
+        // the honest next questions are "who else can read it" and "what
+        // would it take to lose it for good". Two lessons — SHORT, as she
+        // ruled.
+        //
+        // pre-13x 5a (copy §7 — the postures design §1.22): the SHORT
+        // chapter re-seeded as copy §7's two lessons, VERBATIM from the copy
+        // constants both seeders render (`ProtectionCopy.privacyLesson…`);
+        // the walk asserts copy §7's own parenthetical — both modes, both
+        // floors, keystone 3, keystone 4, and the book's door — so the
+        // chapter cannot drift from the copy file's facts. (The book's door
+        // retired at 13s-b U1b with the book's seed — R-13s-37; the walk
+        // now asserts its ABSENCE.)
+        //
+        // 13s-b triage landing — **MOVED LAST** (R-13s-30's bound, her words:
+        // *"I'll move the safety chapter later in the book, it makes more sense
+        // to have the safety after the workflow and the workflow together"*; the
+        // U3 RECORD's disposition 4): the workflow chapters run unbroken and the
+        // guide closes on the serious chapter. The lost adjacency to the map is
+        // the move's stated tradeoff; both lessons open self-contained, and the
+        // copy §7 text is untouched (the fence).
+        ("keeping it private",
+         [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
     ]
 
     /// The books chapter's name, in one place (the plan, the section and the
@@ -501,13 +521,14 @@ enum TutorialSeeder {
         // The post-13l polish round (row 19): the map, right after the chapter
         // that raises the question.
         let places = try ops.createSection(in: book.id, name: "where things go")
-        // Phase 13p, knot 6: the privacy chapter — the recovery map's
-        // other face, right after it.
-        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
-        // 13i-d U7: the books chapter — last.
+        // 13i-d U7: the books chapter — the workflow's last.
         let books = try ops.createSection(in: book.id, name: booksChapter)
+        // Phase 13p, knot 6: the privacy chapter. 13s-b triage landing
+        // (R-13s-30 / the U3 RECORD's disposition 4): MOVED LAST — safety
+        // after the workflow, the guide's closing word.
+        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
 
         /// One lesson: a `.generic` post inside the book, tagged, blocks in
         /// order. Returns the minted block results for act-ready shaping.
@@ -535,26 +556,40 @@ enum TutorialSeeder {
         // ————————————————————————————— welcome —————————————————————————————
 
         _ = try lesson(welcome, "start here", [
+            // 13s-b triage landing (R-13s-30 — her “I'll add some vision upfront
+            // too”): the guide opens on what the app believes, in the product's own
+            // canon words (choices kept open, nothing destroyed, a family tree not a
+            // court record) — a NEW first block; the four that follow are the old
+            // lesson, re-voiced.
+            "Welcome. Variorum is built on a few beliefs about writing. A "
+            + "paragraph should be able to hold more than one version of itself, "
+            + "side by side, for as long as you want. Nothing you write should "
+            + "ever be destroyed: deleting, dividing and merging are all moves "
+            + "you can take back. And what the app remembers is your choices, "
+            + "never your keystrokes. A family tree, not a court record. "
+            + "Everything this book teaches follows from those beliefs.",
+
             // 13i-d U7 (F-U1-5): the area is the BOOKCASE (§7).
-            "Welcome. This book is Variorum teaching itself with itself: you are "
-            + "reading a note, inside a chapter, inside a book on your Bookcase — the "
-            + "same objects everything you write will live in. Each lesson asks you "
-            + "to actually do the thing it describes, right here in its own text.",
+            "This book is Variorum teaching itself with itself. You are reading "
+            + "a note, inside a chapter, inside a book on your Bookcase, and "
+            + "these are the same objects everything you write will live in. Each "
+            + "lesson asks you to do the thing it describes, right here in its "
+            + "own text.",
 
-            "Everything in this book is safe to play with. Cut it up, rewrite it, "
-            + "delete it — Help \u{25B8} Restore Tutorial\u{2026} replaces the whole book with a "
-            + "pristine copy whenever you want one. Nothing you do here can touch "
-            + "your own writing.",
+            "Everything in this book is safe to play with. Cut it up, rewrite "
+            + "it, delete it. Help \u{25B8} Restore Tutorial\u{2026} replaces the "
+            + "whole book with a pristine copy whenever you want one. Nothing you "
+            + "do here can touch your own writing.",
 
-            "Two companions to know from the start. When the app answers you — a "
-            + "result, a refusal, an undo report — the answer appears briefly at the "
-            + "bottom of the window. And \u{2318}/ opens the Shortcuts & Dictionary "
-            + "helper: every key the app listens for, and every word it uses, in "
-            + "plain language.",
+            "Two companions to know from the start. When the app answers you (a "
+            + "result, a refusal, an undo report), the answer appears briefly at "
+            + "the bottom of the window. And \u{2318}/ opens the Shortcuts & "
+            + "Dictionary helper: every key the app listens for, and every word "
+            + "it uses, in plain language.",
 
-            "The chapters of this book are listed to the left. Read in order, or "
-            + "jump to what itches. When something in a lesson doesn't behave as "
-            + "the words promise, that is a bug in the app, not in you.",
+            "The chapters of this book are listed on the left. Read in order, "
+            + "or jump to what itches. When something in a lesson doesn't behave "
+            + "as the words promise, that is a bug in the app, not in you.",
         ])
 
         _ = try lesson(welcome, "getting around", [
@@ -563,18 +598,19 @@ enum TutorialSeeder {
             // places since the post-13l polish round added ARCHIVED
             // (`SidebarView.areas`), and the Library's views are List · Cards
             // · Timeline (17y (d)'s word). Words functional, 13s re-voices.
-            "The sidebar has five places. BOOKCASE is home: your books, and a dashed "
-            + "box that reads \u{201C}new note — just start typing\u{201D} — type a first line "
-            + "there and \u{23CE} mints a note and opens it. LIBRARY is everything, "
-            + "searchable, with List, Cards and Timeline views. POOL holds notes that "
-            + "belong to no book yet. SNIPPETS holds loose scraps — pieces of text "
-            + "that aren't notes at all. ARCHIVED keeps the notes and books you set "
-            + "aside \u{2014} forever, no clock.",
+            "The sidebar has five places. Bookcase is home: your books, and a "
+            + "dashed box that reads \u{201C}new note \u{2014} just start "
+            + "typing\u{201D}. Type a first line there and \u{23CE} mints a note "
+            + "and opens it. Library is everything, searchable, with List, Cards "
+            + "and Timeline views. Pool holds notes that belong to no book yet. "
+            + "Snippets holds loose scraps, pieces of text that aren't notes at "
+            + "all. Archived keeps the notes and books you set aside: forever, no "
+            + "clock.",
 
-            "\u{2318}K finds anything: notes, books, blocks, and commands — type a few "
-            + "letters and \u{23CE} opens the hit. \u{2318}N makes a new note from anywhere. "
-            + "\u{2318}J opens today's journal entry — the journal is its own daily "
-            + "notebook on the Bookcase.",
+            "\u{2318}K finds anything: notes, books, blocks and commands. Type "
+            + "a few letters and \u{23CE} opens the hit. \u{2318}N makes a new "
+            + "note from anywhere. \u{2318}J opens today's journal entry; the "
+            + "journal is its own daily notebook on the Bookcase.",
 
             // 13b 4D (S4-20): the first-open default is WRITE now; the
             // per-post memory is worth teaching in the same breath.
@@ -584,9 +620,9 @@ enum TutorialSeeder {
             // own precedent). Words functional, 13s re-voices.
             modeRowSentence(),
 
-            "Try it now: press \u{2318}K, type \u{201C}getting\u{201D}, and \u{23CE} back to this very "
-            + "lesson. Then press \u{2318}2 for Takes and \u{2318}1 for Write, and watch the "
-            + "same text wear both faces.",
+            "Try it now: press \u{2318}K, type \u{201C}getting\u{201D}, and "
+            + "\u{23CE} back to this very lesson. Then press \u{2318}2 for Takes "
+            + "and \u{2318}1 for Write, and watch the same text wear both faces.",
         ])
 
         // 13g L1 (WT-1): the workspace lesson — everything Phase 13f built,
@@ -594,32 +630,34 @@ enum TutorialSeeder {
         // registry-declared door; the ⌘/ helper's "Windows & panes" group is
         // the same list in key form.
         _ = try lesson(welcome, "the workspace", [
-            "One window can show TWO notes at once. Right-click any note row \u{25B8} "
-            + "\u{201C}Open Beside\u{201D} and it opens in a second pane next to this one; "
-            + "View \u{25B8} Open Beside does the same with the note you had open most "
-            + "recently. Drag the seam between them to resize, and View \u{25B8} Close "
-            + "Split folds back to one.",
+            "One window can show two notes at once. Right-click any note row "
+            + "\u{25B8} \u{201C}Open Beside\u{201D} and it opens in a second pane "
+            + "next to this one; View \u{25B8} Open Beside does the same with the "
+            + "note you had open most recently. Drag the seam between them to "
+            + "resize, and View \u{25B8} Close Split folds back to one.",
 
-            "Only ONE pane writes at a time. Click into a pane and it becomes the live "
-            + "one \u{2014} its text is the text you type in; the other reads quietly "
-            + "beside it. That is deliberate, and it is what keeps a note with ten "
-            + "thousand words as quick as an empty one. A split never shows the same "
-            + "note twice: to see ONE note two ways, that is what Lenses (\u{2318}4) and "
-            + "Compare (\u{2318}5) are for.",
+            "Only one pane writes at a time. Click into a pane and it becomes "
+            + "the live one: its text is the text you type in, while the other "
+            + "reads quietly beside it. That is deliberate, and it is what keeps "
+            + "a note with ten thousand words as quick as an empty one. A split "
+            + "never shows the same note twice. To see one note two ways, use "
+            + "Lenses (\u{2318}4) or Compare (\u{2318}5).",
 
-            "Whole WINDOWS too: File \u{25B8} New Window opens another full window, with "
-            + "its own sidebar, its own Open list and its own trail. Right-click a note "
-            + "row \u{25B8} \u{201C}Open in New Window\u{201D} opens just that note, sidebar-less, "
-            + "for when one piece deserves its own screen.",
+            "Whole windows too: File \u{25B8} New Window opens another full "
+            + "window, with its own sidebar, its own Open list and its own trail. "
+            + "Right-click a note row \u{25B8} \u{201C}Open in New Window\u{201D} "
+            + "opens just that note, sidebar-less, for when one piece deserves "
+            + "its own screen.",
 
-            "The sidebar keeps an OPEN list of the notes this window has open, in the "
-            + "order you opened them \u{2014} \u{2318}\u{21E7}1 through \u{2318}\u{21E7}9 jump "
-            + "straight to them, drag the rows to rearrange, and \u{2715} closes a ROW "
             // librarywalkpolish VR-122 (F-3): back/forward are ⌥⌘[ / ⌥⌘]
             // since 13u4 UNIT S1 (PROVISIONAL #130 — ⌘[ / ⌘] outdent and
             // indent); both sentences below taught the old pair.
-            + "and nothing else (the note is untouched). \u{2325}\u{2318}[ and \u{2325}\u{2318}] walk back "
-            + "and forward through where this pane has been, like a browser.",
+            "The sidebar keeps an Open list of the notes this window has open, "
+            + "in the order you opened them. \u{2318}\u{21E7}1 through "
+            + "\u{2318}\u{21E7}9 jump straight to them, drag the rows to "
+            + "rearrange, and \u{2715} closes a row and nothing else (the note is "
+            + "untouched). \u{2325}\u{2318}[ and \u{2325}\u{2318}] walk back and "
+            + "forward through where this pane has been, like a browser.",
 
             // 13k round 2 (R2-1, the WT-1 class): this sentence taught the
             // PRE-K11 bar (born folded, a chevron to unfold) — retired by
@@ -637,81 +675,121 @@ enum TutorialSeeder {
             // made the ＃ THE tag door — an inline field with the cursor in
             // it — on the MASTHEAD beside the cards; the bar's own row is
             // three doors (`ContextBarDoors.Door`: back · book · forward).
-            "Above the page sits the CONTEXT BAR \u{2014} always the same three doors: "
-            + "\u{2190} and \u{2192} walk back and forward through where this pane has "
-            + "been (\u{2325}\u{2318}[ and \u{2325}\u{2318}] are the same doors), and the book glyph "
-            + "opens the book this note lives in at this very note. One more thing "
-            + "joins them only when there is something to say: a note that has deleted "
-            + "blocks wears a quiet \u{232B} badge with the count, and it opens "
-            + "that note's tray \u{2014} the deleting chapter has the whole story. "
-            + "The note's TAGS live on the masthead's right edge, under the tray, "
-            + "scraps and references icons: click the \u{FF03} beside the cards and a "
-            + "tag field slides out with the cursor already in it \u{2014} type a "
-            + "name, \u{23CE} applies it (a \u{201C}/\u{201D} nests, like life/goals), "
-            + "\u{238B} puts the field away, and \u{2318}\u{21E7}I opens the same field "
-            + "from anywhere in the note.",
+            "Above the page sits the context bar, always the same three doors: "
+            + "\u{2190} and \u{2192} walk back and forward through where this "
+            + "pane has been (\u{2325}\u{2318}[ and \u{2325}\u{2318}] are the "
+            + "same doors), and the book glyph opens the book this note lives in, "
+            + "at this very note. One more thing joins them only when there is "
+            + "something to say: a note that has deleted blocks wears a quiet "
+            + "\u{232B} badge with the count, and clicking it opens that note's "
+            + "tray. The deleting chapter has the whole story. The note's tags "
+            + "live on the masthead's right edge, under the tray, scraps and "
+            + "references icons. Click the \u{FF03} beside the cards and a tag "
+            + "field slides out with the cursor already in it: type a name, "
+            + "\u{23CE} applies it (a \u{201C}/\u{201D} nests, like life/goals), "
+            + "\u{238B} puts the field away, and \u{2318}\u{21E7}I opens the same "
+            + "field from anywhere in the note.",
 
             // librarywalkpolish VR-122 (F-4): the RIGHT-CLICK row reads Star /
             // Unstar (`StarDoor.title`); "Toggle Star" is the ⌘K act's verb.
             // Written plainly — the pin reads `StarCopy.starRow` (the H pattern).
-            "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
-            + "\u{201C}Star\u{201D} pins it to the sidebar's top \u{2014} up to fifteen, "
-            + "meant for what you are in right now rather than as a filing system. And "
             // 13g cold review R1-2: batch 7 (R6-4) moved the quick note's
             // landing — tagged, into the smart Quicknotes book — and this
             // sentence kept teaching the Pool. The WT-1 class, in the very
             // lesson WT-1 minted.
-            + "\u{2318}\u{21E7}N pops the QUICK NOTE: a small floating pad that stays above "
-            + "your writing, also reachable from the \u{270F}\u{FE0E} in the system menu bar "
             // 13u3 UNIT C (her R-13u-4): this sentence taught the model the
             // ruling replaced — "Return there makes a new line, not a new
             // note". Both capture boxes answer the same two keys now.
-            + "while you are in another app entirely. \u{23CE} there FILES what you wrote "
-            + "and closes the pad; \u{21E7}\u{23CE} adds another paragraph, so a capture "
             // 13i-d U7 (F-U6-3): Quicknotes is a GATHERING (§1/§20) on the
             // BOOKCASE (§7) — it shows the note; it never holds it.
-            + "can be as long as the thought is \u{2014} the same two keys the new-note "
-            + "box on the Bookcase answers. Closing the pad (or \u{2318}\u{23CE}) files it "
-            + "too, and what you wrote is kept as a note, tagged "
-            + "\u{201C}quicknote\u{201D} \u{2014} the Quicknotes gathering on "
-            + "the Bookcase shows it, and taking the tag off sends it back to the Pool.",
+            // 13s-b U1b (R-13s-36/38): the lesson NAMES the default
+            // gathering — the one constant, the lowercase fresh default.
+            "Two more, for keeping and catching. Right-click any note or book "
+            + "\u{25B8} \u{201C}Star\u{201D} pins it to the sidebar's top: up to "
+            + "fifteen, meant for what you are in right now rather than as a "
+            + "filing system. And \u{2318}\u{21E7}N pops the quick note, a small "
+            + "floating pad that stays above your writing, also reachable from "
+            + "the \u{270F}\u{FE0E} in the system menu bar while you are in "
+            + "another app entirely. \u{23CE} there files what you wrote and "
+            + "closes the pad; \u{21E7}\u{23CE} adds another paragraph, so a "
+            + "capture can be as long as the thought is. They are the same two "
+            + "keys the new-note box on the Bookcase answers. Closing the pad (or "
+            + "\u{2318}\u{23CE}) files it too, and what you wrote is kept as a "
+            + "note, tagged \u{201C}quicknote\u{201D}. The "
+            + "\(Operations.defaultQuicknoteBookName) gathering on the Bookcase "
+            + "shows it, and taking the tag off sends it back to the Pool.",
 
-            "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "
-            + "panes\u{201D} group is this whole lesson in key form \u{2014} including the "
-            + "doors that have no key and live in a menu instead.",
+            "\u{2318}/ opens the Shortcuts & Dictionary helper, and its "
+            + "\u{201C}Windows & panes\u{201D} group is this whole lesson in key "
+            + "form, including the doors that have no key and live in a menu "
+            + "instead.",
         ])
+
+        // 13s-b triage landing (R-13s-30; the U3 RECORD's disposition 4 — her
+        // “I'll look at moving it up, that sounds like it might be useful to move
+        // up”): “three ways of working” MOVED from the library chapter's tail
+        // to welcome's close — the map of the whole app, read before the
+        // details (“the chapters ahead teach each road in full”). It still
+        // absorbs the Phase 11 A10 modes tutorial; its practice take travels
+        // with it, so the act works in this seat.
+        let threeWays = try lesson(welcome, "three ways of working", [
+            "Everything in this book comes down to three ways of working with "
+            + "one piece of writing. This lesson is the map; the chapters ahead "
+            + "teach each road in full.",
+
+            "Polish in place: just write. Most text needs no machinery. Type, "
+            + "autosave keeps up, and commit \u{2318}S marks the moments you want "
+            + "to be able to come back to. If your text looks like basic text, it "
+            + "behaves like basic text.",
+
+            "Thread one piece: when one block is the question, fan it. Takes "
+            + "hold the attempts side by side; the \u{2713} picks what the note "
+            + "says; a lens remembers a whole set of picks without touching the "
+            + "note. The block below has a spare take to practice on.",
+
+            "The keeper's logbook recorded weather, oil, and wicks; never once "
+            + "the keeper.",
+
+            "Fork the piece: when the structure should differ (a rearranged "
+            + "argument, a different opening), duplicate the note as a version "
+            + "and let the two grow apart, linked and comparable. A lens is the "
+            + "same structure with different choices; a version is a different "
+            + "structure; promote is the bridge.",
+        ])
+        try take(on: threeWays.blocks[3],
+            "The logbook knew everything about the light and nothing about the keeping of it.")
 
         // ————————————————————————————— writing —————————————————————————————
 
         _ = try lesson(writing, "blocks & typing", [
-            "Everything you write is made of BLOCKS — paragraph-sized pieces with "
-            + "permanent identity. You never manage them while drafting: switch to "
-            + "Write (\u{2318}1), click at the very end of this note, and type a few "
-            + "paragraphs. Each paragraph quietly becomes its own block as you "
-            + "type past it. No gesture, nothing to ask for.",
+            "Everything you write is made of blocks: paragraph-sized pieces "
+            + "with permanent identity. You never manage them while drafting. "
+            + "Switch to Write (\u{2318}1), click at the very end of this note, "
+            + "and type a few paragraphs. Each paragraph quietly becomes its own "
+            + "block as you type past it. No gesture, nothing to ask for.",
 
             // 13b 4D (N34 — S4-14): the opt-in one_block face gets a
             // sentence where crystallization is taught.
-            "Return makes a block WHEREVER your cursor is: at the end of a "
+            "Return makes a block wherever your cursor is: at the end of a "
             + "paragraph, a new empty block below it; in the middle of one, a "
             + "divide at the cursor. Shift-Return is the newline that stays "
-            + "INSIDE a block — a blank line in the same paragraph — and a "
-            + "block can hold several paragraphs that way, or by paste or "
-            + "merge. Otherwise boundaries only ever change when you ask "
-            + "(divide, merge, extract — the structure chapter). Prefer to "
-            + "place every boundary yourself? The bottom bar's "
-            + "\u{201C}newlines make blocks\u{201D} switch turns it off for one note "
-            + "— then Return is just a newline again, typing and pasting stay "
-            + "inside the block, and only Divide or New Block Below make new "
-            + "ones.",
+            + "inside a block, a blank line in the same paragraph, and a block "
+            + "can hold several paragraphs that way, or by paste or merge. "
+            + "Otherwise boundaries only ever change when you ask (divide, merge, "
+            + "extract: the structure chapter). Prefer to place every boundary "
+            + "yourself? The bottom bar's \u{201C}newlines make blocks\u{201D} "
+            + "switch turns it off for one note. Then Return is just a newline "
+            + "again, typing and pasting stay inside the block, and only Divide "
+            + "or New Block Below make new ones.",
 
-            "Boundaries are invisible at rest, on purpose: a note reads as calm, "
-            + "seamless prose. When you want to see the seams, press \u{2318}\u{21E7}B — "
-            + "dotted lines appear between blocks, everywhere, until you press it "
-            + "again.",
+            "Boundaries are invisible at rest, on purpose: a note reads as "
+            + "calm, seamless prose. When you want to see the seams, press "
+            + "\u{2318}\u{21E7}B. Dotted lines appear between blocks, everywhere, "
+            + "until you press it again.",
 
-            "The bottom bar keeps quiet count for you: which block your cursor is "
-            + "in, and the word counts — the take you're in, and the whole note.",
+            "The bottom bar keeps quiet count for you: which block your cursor "
+            + "is in, and the word counts, both for the take you're in and for "
+            + "the whole note.",
         ])
 
         let shaping = try lesson(writing, "shaping blocks", [
@@ -721,32 +799,35 @@ enum TutorialSeeder {
             "The first tool needs a middle sentence. This lesson was written as "
             + "calm filler around exactly one restless line. This middle sentence "
             + "wants to be a block of its own. Select that whole sentence, press "
-            + "\u{2318}\u{21E7}K (Make Block from Selection), and watch it become its own "
-            + "block — from Takes, the app carries you to Write and does it there.",
+            + "\u{2318}\u{21E7}K (Make Block from Selection), and watch it become "
+            + "its own block. From Takes, the app carries you to Write and does "
+            + "it there.",
 
             // 13b 4D (N28/S4-13): the insert-below door joins the direct asks.
             // 13g L1: the KEY was stale — 13d batch 4 (A14) superseded ⌥⌘N
             // with ⌘⇧⏎ and this lesson kept teaching the old chord. Same
             // finding class as WT-1 (a discoverability surface that drifted
             // out of the registry); the helper had already been corrected.
-            "New blocks can also be asked for directly: \u{2318}\u{21E7}\u{23CE} (New Block "
-            + "Below) mints an empty block right under the one you're in and "
             // librarywalkpolish VR-122 (F-5): the end-of-note row is on TAKES'
             // block ▾ only (`TakesBottomBar`; Write's has New block below).
-            + "puts your cursor in it — Write and Takes alike; in Takes, the block \u{25BE} "
-            + "menu in the bottom bar also has \u{FF0B} New block at the end of the "
-            + "note. Either way, just keep typing.",
+            "New blocks can also be asked for directly: "
+            + "\u{2318}\u{21E7}\u{23CE} (New Block Below) mints an empty block "
+            + "right under the one you're in and puts your cursor in it, in Write "
+            + "and Takes alike. In Takes, the block \u{25BE} menu in the bottom "
+            + "bar also has \u{FF0B} New block at the end of the note. Either "
+            + "way, just keep typing.",
 
-            "A block can carry a NAME — a handle for finding it, never printed in "
-            + "the prose. This block wears one: open the Blocks tab (\u{2318}6) and "
-            + "you'll see \u{201C}the named block\u{201D} where every other row shows its first "
-            + "sentence. Name\u{2026} on any row sets or clears one.",
+            "A block can carry a name: a handle for finding it, never printed "
+            + "in the prose. This block wears one. Open the Blocks tab "
+            + "(\u{2318}6) and you'll see \u{201C}the named block\u{201D} where "
+            + "every other row shows its first sentence. Name\u{2026} on any row "
+            + "sets or clears one.",
 
-            "This block is a CALLOUT — a colored frame that says \u{201C}this one is "
-            + "different\u{201D}: an aside, a goal, a warning. In Write, put the cursor "
-            + "here and use Block \u{25B8} Callout to change its color, set a leading "
-            + "emoji, or remove the frame. Presentation only — the text itself is "
-            + "untouched, and exports render it as a quote.",
+            "This block is a callout: a colored frame that says this one is "
+            + "different. An aside, a goal, a warning. In Write, put the cursor "
+            + "here and use Block \u{25B8} Callout to change its color, set a "
+            + "leading emoji, or remove the frame. Presentation only; the text "
+            + "itself is untouched, and exports render it as a quote.",
         ])
         try ops.setBlockName(shaping.blocks[3].block.id, name: "the named block")
         try ops.setBlockPresentation(
@@ -758,64 +839,68 @@ enum TutorialSeeder {
         // moment it is seeded — and because storage IS markdown, the prose
         // here is literally the syntax the reader is being shown.
         _ = try lesson(writing, "formatting", [
-            "Formatting in Variorum is **markdown**, and that is not a detail of "
-            + "the implementation \u{2014} it is the whole design. What you see is "
-            + "exactly what is saved: two stars around a word ARE the bold. The "
+            "Formatting in Variorum is **markdown**, and that is not a detail "
+            + "of the implementation: it is the whole design. What you see is "
+            + "exactly what is saved. Two stars around a word are the bold. The "
             + "editor styles the word and dims the stars, so the page reads "
-            + "cleanly while the text stays plain characters you could open in any "
-            + "editor on earth. Nothing about a formatted note is locked in, and an "
-            + "export is already markdown because it was never anything else.",
+            + "cleanly while the text stays plain characters you could open in "
+            + "any editor on earth. Nothing about a formatted note is locked in, "
+            + "and an export is already markdown because it was never anything "
+            + "else.",
 
             "The vocabulary is small on purpose: **bold** (\u{2318}B), *italic* "
-            + "(\u{2318}I), ~~struck out~~, and `inline code`. The last two live in "
-            + "the FORMAT menu, which also carries every act below \u{2014} and "
+            + "(\u{2318}I), ~~struck out~~, and `inline code`. The last two live "
+            + "in the Format menu, which also carries every act below, and "
             + "right-clicking in any writing surface offers the same rows under "
             + "\u{201C}Format\u{201D}. Try it: select these three words and press "
-            + "\u{2318}B. Press it again to take the bold off; the act reads what is "
-            + "already there rather than blindly adding.",
+            + "\u{2318}B. Press it again to take the bold off; the act reads what "
+            + "is already there rather than blindly adding.",
 
             "## Headings are sizes",
 
             // librarywalkpolish VR-122 (F-6): the submenu's rows read
             // "Heading 1/2/3" (`MarkdownActs.headingRows`).
-            "A line that starts with #, ## or ### is a heading \u{2014} those three, "
+            "A line that starts with #, ## or ### is a heading. Those three, "
             + "and nothing else. Put your cursor on this line and use Format "
-            + "\u{25B8} Heading \u{25B8} Heading 2 to see it happen; the line above is "
-            + "already one. Setting a lead REPLACES whatever lead the line had, so "
-            + "a heading becomes a bullet in one press rather than becoming a "
-            + "bullet with a stray # in it.",
+            + "\u{25B8} Heading \u{25B8} Heading 2 to see it happen; the line "
+            + "above is already one. Setting a lead replaces whatever lead the "
+            + "line had, so a heading becomes a bullet in one press rather than "
+            + "becoming a bullet with a stray # in it.",
 
             "- Lists are lines that start with \"- \"",
+
             "- Format \u{25B8} Bullet List makes one from the line you're on",
+
             "- Select several lines and it makes them all into a list",
 
             "- [ ] And a checkbox is a list item with a box: \"- [ ] \"",
-            "- [x] CLICK the box to tick it \u{2014} that is an ordinary edit, so "
+
+            "- [x] Click the box to tick it. That is an ordinary edit, so "
             + "\u{2318}Z takes it back and a sealed note refuses it",
 
-            "Links are written [like this](https://apple.com). Format \u{25B8} Add "
-            + "Link wraps your selection in the brackets and leaves the cursor "
-            + "inside the parentheses, ready for the address. In a writing surface "
-            + "a plain click has to place your cursor, so \u{2318}-CLICK follows a "
-            + "link instead.",
+            "Links are written [like this](https://apple.com). Format \u{25B8} "
+            + "Add Link wraps your selection in the brackets and leaves the "
+            + "cursor inside the parentheses, ready for the address. In a writing "
+            + "surface a plain click has to place your cursor, so \u{2318}-click "
+            + "follows a link instead.",
 
             "Now the one place the app shows you something other than what is "
-            + "stored. Open this book in READ mode (the Outline \u{B7} Index "
+            + "stored. Open this book in Read mode (the Outline \u{B7} Index "
             + "\u{B7} Book \u{B7} Read row above) and look at this lesson again: "
-            + "the markers are gone, "
-            + "the headings are sizes, the list has bullets, the boxes are boxes, "
-            + "and a link is just the words \u{2014} a plain click opens it, because "
-            + "Read has no cursor to place. Read is for reading; everywhere you can "
-            + "write, you see the text exactly as it is saved.",
+            + "the markers are gone, the headings are sizes, the list has "
+            + "bullets, the boxes are boxes, and a link is just the words. A "
+            + "plain click opens it, because Read has no cursor to place. Read is "
+            + "for reading; everywhere you can write, you see the text exactly as "
+            + "it is saved.",
         ])
 
         // ————————————————————————————— takes ———————————————————————————————
 
         let firstTake = try lesson(takes, "your first take", [
             "The fan is the reason this app exists: a block can hold several "
-            + "parallel TAKES — whole alternative texts — side by side, none of "
-            + "them lost, as long as you like. Most blocks live with one take; "
-            + "the ones you're unsure about can hold ten.",
+            + "parallel takes, whole alternative texts, side by side, none of "
+            + "them lost, for as long as you like. Most blocks live with one "
+            + "take; the ones you're unsure about can hold ten.",
 
             "The next paragraph can't decide what it wants to be. It's yours to "
             + "fan out.",
@@ -826,131 +911,142 @@ enum TutorialSeeder {
             // librarywalkpolish VR-122 (F-7): a note opens in WRITE the first
             // time, and there ⌘T only mints the take behind a receipt and the
             // bar has no "+ take" — the board is where this paragraph happens.
-            "Press \u{2318}2 for Takes, click into that paragraph and press \u{2318}T (or "
-            + "\u{FF0B} take in the bottom "
-            + "bar): a second take appears beside it, born as a copy of what you "
-            + "were reading. Rewrite it freely — bolder, quieter, backwards. The "
-            + "first take is untouched. \u{2325}\u{2318}T makes a BLANK take instead, for a "
+            "Press \u{2318}2 for Takes, click into that paragraph and press "
+            + "\u{2318}T (or \u{FF0B} take in the bottom bar): a second take "
+            + "appears beside it, born as a copy of what you were reading. "
+            + "Rewrite it freely: bolder, quieter, backwards. The first take is "
+            + "untouched. \u{2325}\u{2318}T makes a blank take instead, for a "
             + "genuinely different attempt.",
 
-            "Notice: exactly one pane is ever live for typing — the one with the "
+            "Notice: exactly one pane is ever live for typing, the one with the "
             + "ring. Click any take to make it the live one. Your keystrokes only "
             + "ever land in the ring.",
         ])
         _ = firstTake
 
         let choosing = try lesson(takes, "choosing & the board", [
-            "Takes are for trying; CHOOSING is deciding. The take with the "
-            + "\u{2713} is what the note actually says — \u{201C}visible is what you're "
-            + "looking at; chosen is what the note is.\u{201D} \u{2318}\u{23CE} chooses the take "
-            + "you're in; nothing else changes the note.",
+            "Takes are for trying; choosing is deciding. The take with the "
+            + "\u{2713} is what the note actually says. Visible is what you're "
+            + "looking at; chosen is what the note is. \u{2318}\u{23CE} chooses "
+            + "the take you're in; nothing else changes the note.",
 
             // librarywalkpolish VR-122 (F-8): in Write, ⌘⏎ and ⌃⌘←/→ only open
             // the takes panel (`EditorView.handleRouted`) — stepping, paging
             // and the style: menu are the board's.
             "The block below carries four takes of one sentence, ready for "
-            + "practice. In Takes (\u{2318}2), open its fan (\u{2318}\u{21E7}T), step through them with \u{2303}\u{2318}\u{2190} "
-            + "and \u{2303}\u{2318}\u{2192}, and choose your favorite.",
+            + "practice. In Takes (\u{2318}2), open its fan (\u{2318}\u{21E7}T), "
+            + "step through them with \u{2303}\u{2318}\u{2190} and "
+            + "\u{2303}\u{2318}\u{2192}, and choose your favorite.",
 
             "The rain came in from the sea without an opinion about any of us.",
 
             // 13b 4D (S4-24(1)/N40): the scroll+pager hybrid + the fixed
             // strip — the prose keeps pace with the ruled behavior.
             "When a fan holds more takes than fit, the strip scrolls freely "
-            + "sideways AND pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6} — \u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn "
-            + "the pages from the keyboard, and the counter always agrees with "
-            + "what you scrolled to. Take cards keep one steady height; a long "
-            + "take scrolls inside its card. The style: menu in the board's top "
-            + "line picks how fans open — stack, carousel, margin grid, or slot "
-            + "split — and \u{238B} closes every fan at once.",
+            + "sideways and pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6}. "
+            + "\u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn the "
+            + "pages from the keyboard, and the counter always agrees with what "
+            + "you scrolled to. Take cards keep one steady height; a long take "
+            + "scrolls inside its card. The style: menu in the board's top line "
+            + "picks how fans open (stack, carousel, margin grid, or slot split), "
+            + "and \u{238B} closes every fan at once.",
         ])
         let fanned = choosing.blocks[2]
         try take(on: fanned, "The rain arrived off the sea like a verdict none of us had appealed.")
-        try take(on: fanned, "Sea rain, indifferent rain — it fell on the just and the unjust and the ferry schedule alike.")
+        try take(on: fanned, "Sea rain, indifferent rain: it fell on the just and the unjust and the ferry schedule alike.")
         try take(on: fanned, "The rain came in from the sea, and the sea did not explain itself.")
 
         let keeping = try lesson(takes, "keeping takes safe", [
-            "Everything autosaves, always. A COMMIT is more deliberate: \u{2318}S "
-            + "keeps an immutable savepoint of the take you're in — a version you "
+            // 13s-b triage landing (R-13s-31/32): THE GUIDE'S ONE “savepoint” — the
+            // explanatory common noun defining commit at its first teach, the tour's
+            // step-4 exemplar's twin; every other savepoint in the guide says commit.
+            "Everything autosaves, always. A commit is the deliberate one: "
+            + "\u{2318}S keeps a savepoint of the take you're in, a version you "
             + "can always come back to, no matter what you type over it. Commits "
-            + "append; nothing ever overwrites one.",
+            + "only ever add; nothing overwrites one.",
 
             // 13u3 UNIT D (item 14): the lesson teaches the two keys, because
             // the door asks for a name now. The fast road is still two keys,
             // and saying so here is what keeps ⌘S from feeling slower.
             "Try it here: click into this paragraph, change a few words, press "
-            + "\u{2318}S. A small field appears: type a name for the moment — "
-            + "\u{201C}before the rewrite\u{201D} — or just press \u{23CE} to "
-            + "save it unnamed. Then press history in the bottom bar, right "
-            + "beside commit. Your savepoint is listed under this take, its name "
-            + "first where it has one; Restore loads any savepoint back into the "
-            + "take, Name (or Rename) changes what it is called — the name is "
-            + "always editable, the saved text never is — and committing again "
-            + "just adds another.",
+            + "\u{2318}S. A small field appears: type a name for the moment, "
+            + "\u{201C}before the rewrite\u{201D}, or just press \u{23CE} to save "
+            + "it unnamed. Then press history in the bottom bar, right beside "
+            + "commit. Your commit is listed under this take, its name first "
+            + "where it has one. Restore loads any commit back into the take. "
+            + "Name (or Rename) changes what it is called; the name is always "
+            + "editable, the saved text never is. And committing again just adds "
+            + "another.",
 
-            "The block below has a spare take to practice ARCHIVING on. Click "
-            + "into the second take and press \u{2318}\u{21E7}A — it leaves the board, out "
-            + "of the fan but never gone.",
+            "The block below has a spare take to practice archiving on. Click "
+            + "into the second take and press \u{2318}\u{21E7}A. It leaves the "
+            + "board, out of the fan but never gone.",
 
-            "Never gone means never gone: an \u{201C}archived \u{B7} 1\u{201D} door appears "
-            + "right under that block's takes. Open it and Unarchive puts the "
-            + "take straight back in the fan — no leaving the board. (Write's "
-            + "takes panel keeps the same archived list, if you're over there.)",
+            "Never gone means never gone: an \u{201C}archived \u{B7} 1\u{201D} "
+            + "door appears right under that block's takes. Open it and Unarchive "
+            + "puts the take straight back in the fan, no leaving the board. "
+            + "(Write's takes panel keeps the same archived list, if you're over "
+            + "there.)",
 
             // 13j batch 7 (the J10 content-refresh sweep): J11 gave the app
             // its own savepoint cadence and this lesson still described a
             // history with nothing in it but ⌘S. The words follow
             // `SavepointCadenceCopy` / `SavepointRuns` — the setting's own
             // home — so the lesson and the switch cannot drift apart.
-            "You are not the only one keeping savepoints. LEAVING a note — "
-            + "closing it, switching away, quitting — quietly saves one "
-            + "savepoint for each take you changed while you were in it, and a "
-            + "note you leave open gets one after about two hours. A take you "
-            + "haven't changed is never saved twice. Those quiet ones are muted "
-            + "and fold into a single \u{201C}N quiet savepoints \u{B7} show\u{201D} "
-            + "line, so the ones you took yourself stay the ones you see. "
-            + "Settings (\u{2318},) \u{25B8} Writing has the one switch — every "
-            + "time you leave, only after a note sits untouched, or only when "
-            + "you press \u{2318}S — and whichever you pick, the app still saves "
-            + "a take right before anything could put your words out of reach.",
+            // 13s-b triage landing (LC-1 — U4's watch-out, P-U4-2): “the ones you
+            // made yourself”, the cadence pane's own verb (“Commits you made
+            // yourself with ⌘S”), where the draft said “took”.
+            "You are not the only one committing. Leaving a note (closing it, "
+            + "switching away, quitting) quietly commits each take you changed "
+            + "while you were in it, and a note you leave open gets a commit "
+            + "after about two hours. A take you haven't changed is never saved "
+            + "twice. The quiet ones are muted and fold into a single \u{201C}N "
+            + "quiet commits \u{B7} show\u{201D} line, so the ones you made "
+            + "yourself stay the ones you see. Settings (\u{2318},) \u{25B8} "
+            + "Writing has the one switch: every time you leave, only after a "
+            + "note sits untouched, or only when you press \u{2318}S. Whichever "
+            + "you pick, the app still saves a take right before anything could "
+            + "put your words out of reach.",
         ])
         try take(on: keeping.blocks[2],
-            "This is the spare take — archive me: click into me, then \u{2318}\u{21E7}A.")
+            "This is the spare take. Archive me: click into me, then \u{2318}\u{21E7}A.")
 
         // ———————————————————————————— structure ————————————————————————————
 
         _ = try lesson(structure, "divide", [
             // 13b 4A: the ruled cut redesign (S4-22) — cuts land between
             // any two words; sentence ends and line breaks pull gently.
-            "Divide cuts a block in two at your cursor — the everyday gesture "
+            "Divide cuts a block in two at your cursor: the everyday gesture "
             + "for \u{201C}this part should stand on its own so I can work on it "
-            + "separately.\u{201D} The cut can land between any two words — it snaps "
-            + "to the nearest word edge, settles a little more readily onto "
+            + "separately.\u{201D} The cut can land between any two words. It "
+            + "snaps to the nearest word edge, settles a little more readily onto "
             + "sentence ends and line breaks, and the app shows you where it "
             + "landed. Only a single word has nothing to divide.",
 
-            "This block holds two thoughts and they deserve two blocks. Put your "
-            + "cursor right before this second sentence and press \u{2318}\u{21E7}D.",
+            "This block holds two thoughts and they deserve two blocks. Put "
+            + "your cursor right before this second sentence and press "
+            + "\u{2318}\u{21E7}D.",
 
             // 13j J4 (her 2026-08-03 ruling): the fanned default. Stated here
             // because THIS is the lesson someone reads before their first
             // divide on a block that already has takes.
-            "If the block has SEVERAL takes, \u{2318}\u{21E7}D still just cuts: the take "
-            + "you're LOOKING at splits across the two new blocks, and every other "
-            + "take stays WHOLE on the first block — the one you divided. Nothing "
-            + "goes missing and there's nothing to hunt for. When you'd rather send "
-            + "them somewhere else, or place a cut in each take by hand, that's "
-            + "Divide choosing takes, \u{2325}\u{2318}\u{21E7}D, and it has the next lesson "
-            + "to itself.",
+            "If the block has several takes, \u{2318}\u{21E7}D still just cuts: "
+            + "the take you're looking at splits across the two new blocks, and "
+            + "every other take stays whole on the first block, the one you "
+            + "divided. Nothing goes missing and there's nothing to hunt for. "
+            + "When you'd rather send them somewhere else, or place a cut in each "
+            + "take by hand, that's Divide choosing takes, "
+            + "\u{2325}\u{2318}\u{21E7}D, and it has the next lesson to itself.",
 
-            "From Takes, divide acts RIGHT THERE — press \u{2318}\u{21E7}D, or Divide "
-            + "in the bottom bar's block \u{25BE} group, and the block you're in is "
-            + "cut without leaving the board. (Extract, Make Block and Merge "
-            + "still travel to Write and act there, visibly — that carry is a "
-            + "feature, not a trick.)",
+            "From Takes, divide acts right there: press \u{2318}\u{21E7}D, or "
+            + "Divide in the bottom bar's block \u{25BE} group, and the block "
+            + "you're in is cut without leaving the board. (Extract, Make Block "
+            + "and Merge still travel to Write and act there, visibly. That carry "
+            + "is a feature, not a trick.)",
 
-            "One \u{2325}\u{2318}Z (structural undo) puts a divided block back together. "
-            + "The undo chapter has the whole story.",
+            "One \u{2325}\u{2318}Z (structural undo) puts a divided block back "
+            + "together. The two undos lesson at this chapter's end has the whole "
+            + "story.",
         ])
 
         let ceremony = try lesson(structure, "divide choosing takes", [
@@ -958,34 +1054,36 @@ enum TutorialSeeder {
             // ruling flipped ⌘⇧D on a fanned block to the duplicating shape;
             // this lesson teaches the door that still asks take by take.
             "Dividing a fanned block raises a real question: each take is a "
-            + "different text, so where does each one go? \u{2318}\u{21E7}D answers it the "
-            + "quick way — cut the take you're looking at, leave the rest whole on "
-            + "the first block. When the answer matters, ask for the choice "
-            + "instead: \u{2325}\u{2318}\u{21E7}D lays every take out in one sheet and asks "
-            + "where they should go.",
+            + "different text, so where does each one go? \u{2318}\u{21E7}D "
+            + "answers it the quick way: cut the take you're looking at, leave "
+            + "the rest whole on the first block. When the answer matters, ask "
+            + "for the choice instead. \u{2325}\u{2318}\u{21E7}D lays every take "
+            + "out in one sheet and asks where they should go.",
 
             // 13b 4A: the sheet shows every checked take at once, the ✂
             // drags between word edges, keyboard placement, and PARKING.
-            "The block below carries three takes, staged for it. Put your cursor "
-            + "mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet titled \u{201C}Divide choosing "
-            + "takes\u{201D} opens on a row of four: keep the takes on the top block "
-            + "(the everyday answer, already chosen), keep them on the bottom, copy "
-            + "them to both — or \u{201C}Choose per take\u{2026}\u{201D}, which is the one you "
-            + "really have to ask for. Pick that fourth one: every take gets a "
-            + "checkbox and its text laid out with a ✂ you can place anywhere "
-            + "between words — drag it, click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps "
-            + "by sentence, \u{21E5} moves between takes). Leave the third take "
-            + "UNCHECKED before you confirm.",
+            "The block below carries three takes, staged for it. Put your "
+            + "cursor mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet "
+            + "titled \u{201C}Divide choosing takes\u{201D} opens on a row of "
+            + "four: keep the takes on the top block (the everyday answer, "
+            + "already chosen), keep them on the bottom, copy them to both, or "
+            + "\u{201C}Choose per take\u{2026}\u{201D}, the one you really have "
+            + "to ask for. Pick that fourth one: every take gets a checkbox and "
+            + "its text laid out with a \u{2702} you can place anywhere between "
+            + "words. Drag it, click a spot, or use \u{2190}/\u{2192} (\u{2325} "
+            + "jumps by sentence, \u{21E5} moves between takes). Leave the third "
+            + "take unchecked before you confirm.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the storm.",
 
             "Confirm makes two blocks: the first holds every checked take's "
-            + "first half, the second the endings — your openings and endings "
-            + "stay mix-and-matchable. A take doesn't have to split at all: "
-            + "park its \u{2702} at the very end and the whole take rides into the "
+            + "first half, the second the endings, so your openings and endings "
+            + "stay mix-and-matchable. A take doesn't have to split at all: park "
+            + "its \u{2702} at the very end and the whole take rides into the "
             + "first block (at the very start, the second). The unchecked take "
             + "didn't vanish: it stays with the original block, preserved whole "
-            + "off-stage, and \u{2325}\u{2318}Z puts the whole thing back as it was.",
+            + "off-stage, and \u{2325}\u{2318}Z puts the whole thing back as it "
+            + "was.",
         ])
         let ceremonyBlock = ceremony.blocks[2]
         try take(on: ceremonyBlock,
@@ -999,23 +1097,23 @@ enum TutorialSeeder {
             // ruling 4), so a selection starting anywhere snaps to the
             // nearest word edge and the late-start refusal class is gone.
             // The prose re-widens honestly.
-            "Extract pulls a span at a block's EDGE out into its own block — "
-            + "no fuss at all: the source block keeps its identity and all its "
-            + "takes. Select from anywhere in this paragraph to its end and "
-            + "press \u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
-            + "edge, settling gently onto sentence ends) — and this closing "
-            + "line is begging to stand alone.",
+            "Extract pulls a span at a block's edge out into its own block, no "
+            + "fuss at all: the source block keeps its identity and all its "
+            + "takes. Select from anywhere in this paragraph to its end and press "
+            + "\u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
+            + "edge, settling gently onto sentence ends). This closing line is "
+            + "begging to stand alone.",
 
-            "A MIDDLE span can't extract (the two ends would be left holding "
-            + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it runs two "
-            + "divides as one undoable act. The lonely sentence in the shaping "
-            + "blocks lesson was exactly this gesture.",
+            "A middle span can't extract (the two ends would be left holding "
+            + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it "
+            + "runs two divides as one undoable act. The lonely sentence in the "
+            + "shaping blocks lesson was exactly this gesture.",
 
             "Both work from Takes: make your selection in the take you're "
-            + "reading, press the key, and the app carries the selection to "
-            + "Write and acts. If the block is fanned, the selection carries "
-            + "approximately — the app snaps to boundaries and never cuts "
-            + "silently where it isn't sure.",
+            + "reading, press the key, and the app carries the selection to Write "
+            + "and acts. If the block is fanned, the selection carries "
+            + "approximately. The app snaps to boundaries and never cuts silently "
+            + "where it isn't sure.",
         ])
 
         let merging = try lesson(structure, "merge", [
@@ -1023,88 +1121,90 @@ enum TutorialSeeder {
             // single space at the seam and a sentence cut restored exactly.
             // The ruling made both false, so it says what merge does now —
             // lesson and pin moved together (the standing rule).
-            "Merge is divide's opposite: neighboring blocks become one. The seam "
-            + "between them becomes a line break inside the merged block, so the "
-            + "page reads exactly as it did — divide at a paragraph break and "
-            + "merge it back and you get precisely what you started with.",
+            "Merge is divide's opposite: neighboring blocks become one. The "
+            + "seam between them becomes a line break inside the merged block, so "
+            + "the page reads exactly as it did. Divide at a paragraph break and "
+            + "merge it back, and you get precisely what you started with.",
 
             "These two short blocks are really one thought.",
 
-            "They have been waiting for your \u{2318}\u{21E7}M since the day they were "
-            + "seeded.",
+            "They have been waiting for your \u{2318}\u{21E7}M since the day "
+            + "they were seeded.",
 
-            "In Write, put the cursor at the boundary between them (\u{2318}\u{21E7}B shows "
-            + "seams) and press \u{2318}\u{21E7}M — or select across both and merge the "
-            + "whole run as one undoable act. From Takes, Merge joins the block "
-            + "you're in UPWARD, into the one above.",
+            "In Write, put the cursor at the boundary between them "
+            + "(\u{2318}\u{21E7}B shows seams) and press \u{2318}\u{21E7}M, or "
+            + "select across both and merge the whole run as one undoable act. "
+            + "From Takes, Merge joins the block you're in upward, into the one "
+            + "above.",
 
             // 13b 4B (S4-23) gave merge its ceremony; 13j J4b (her
             // 2026-08-09 ruling) made CARRY-ALL the default and left the
             // ceremony as the summoned door — divide's story, one gesture
             // over.
-            "When either block has other takes, Merge brings them ALL along: "
-            + "the two takes you were looking at join, and every other take "
-            + "rides onto the merged block whole. Nothing is left behind to "
-            + "hunt for, and the extra copies are quick to delete. To choose "
-            + "instead, use Merge choosing takes (\u{2325}\u{2318}\u{21E7}M): it asks first — "
-            + "bring every take (the everyday answer, already chosen), only the two "
-            + "you were looking at, or pair by hand — which opens pre-paired with "
-            + "the two takes you were looking at, so \u{23CE} still gives you "
-            + "exactly the everyday join. "
-            + "Pair takes with \u{FF0B} and the merged block gets one joined take "
-            + "per pairing (divide a two-take block, pair 1+1 and 2+2, and it "
-            + "comes back whole); check \u{201C}carry\u{201D} to ride a take over "
-            + "unjoined; each pairing previews its join — space, new line, or "
-            + "nothing. Takes are never multiplied combinatorially: pairing is "
-            + "choosing by hand.",
+            "When either block has other takes, Merge brings them all along: "
+            + "the two takes you were looking at join, and every other take rides "
+            + "onto the merged block whole. Nothing is left behind to hunt for, "
+            + "and the extra copies are quick to delete. To choose instead, use "
+            + "Merge choosing takes (\u{2325}\u{2318}\u{21E7}M). It asks first: "
+            + "bring every take (the everyday answer, already chosen), only the "
+            + "two you were looking at, or pair by hand, which opens pre-paired "
+            + "with the two takes you were looking at, so \u{23CE} still gives "
+            + "you exactly the everyday join. Pair takes with \u{FF0B} and the "
+            + "merged block gets one joined take per pairing (divide a two-take "
+            + "block, pair 1+1 and 2+2, and it comes back whole); check "
+            + "\u{201C}carry\u{201D} to ride a take over unjoined; each pairing "
+            + "previews its join: space, new line, or nothing. Takes are never "
+            + "multiplied combinatorially. Pairing is choosing by hand.",
 
             "When you pair by hand, whatever you leave unpaired stays with the "
-            + "released blocks in lineage — the app names the road, and "
-            + "\u{2325}\u{2318}Z brings the sources back, takes and all, from either "
-            + "road. Merging THREE or more blocks at once asks the same question "
-            + "with two answers only — every take, or only the shown ones — and "
-            + "never opens the pairing surface. The block below carries a spare "
-            + "take so you can watch both: \u{2318}\u{21E7}M brings the spare along, "
-            + "\u{2325}\u{2318}\u{21E7}M asks where the takes should go.",
+            + "released blocks in lineage. The app names the road, and "
+            + "\u{2325}\u{2318}Z brings the sources back, takes and all, from "
+            + "either road. Merging three or more blocks at once asks the same "
+            + "question with two answers only (every take, or only the shown "
+            + "ones) and never opens the pairing surface. The block below carries "
+            + "a spare take so you can watch both: \u{2318}\u{21E7}M brings the "
+            + "spare along, \u{2325}\u{2318}\u{21E7}M asks where the takes should "
+            + "go.",
 
-            "This block has a second take — merge me upward and my spare comes "
-            + "along whole; with \u{2325}\u{2318}\u{21E7}M you are asked first, my takes "
-            + "laid out for pairing if you want them.",
+            "This block has a second take. Merge me upward and my spare comes "
+            + "along whole; with \u{2325}\u{2318}\u{21E7}M you are asked first, "
+            + "my takes laid out for pairing if you want them.",
         ])
         try take(on: merging.blocks[6],
-            "The spare take: I come along whole on an ordinary merge — or pair me, carry me, or leave me in lineage when you choose by hand. Undo brings me home either way.")
+            "The spare take: I come along whole on an ordinary merge. Or pair me, carry me, or leave me in lineage when you choose by hand. Undo brings me home either way.")
 
         _ = try lesson(structure, "the two undos", [
-            "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z is TEXT "
-            + "undo — your typing, inside the take you're editing, as in any "
-            + "editor.",
+            "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z "
+            + "is text undo: your typing, inside the take you're editing, as in "
+            + "any editor.",
 
             // 13j batch 7 (the J10 content-refresh sweep): structural REDO
             // shipped at 13c (A10 — her *"i desperately need a 'redo'
             // command"*) and this lesson never learned the chord; the J7 sign
             // at the junction is 13j's, and this is where the two stacks are
             // introduced, so both belong here.
-            "\u{2325}\u{2318}Z is STRUCTURAL undo — divides, merges, extracts, moves, "
-            + "deletions of blocks and takes. It never touches your typing; it "
-            + "restores the shape. Every structural act in this book is one "
-            + "\u{2325}\u{2318}Z away from undone, and the report of what was undone lands "
-            + "at the bottom of the window. \u{21E7}\u{2325}\u{2318}Z is its redo: "
-            + "undo an undo, as many times as you like.",
+            "\u{2325}\u{2318}Z is structural undo: divides, merges, extracts, "
+            + "moves, deletions of blocks and takes. It never touches your "
+            + "typing; it restores the shape. Every structural act in this book "
+            + "is one \u{2325}\u{2318}Z away from undone, and the report of what "
+            + "was undone lands at the bottom of the window. "
+            + "\u{21E7}\u{2325}\u{2318}Z is its redo: undo an undo, as many times "
+            + "as you like.",
 
             "The two stacks never mix, and the app helps you at the junction: "
-            + "press \u{2318}Z when there is nothing left to undo in the text "
-            + "and a structural change is what you actually did last, and the "
-            + "status line says so and names \u{2325}\u{2318}Z. The key still does "
-            + "what \u{2318}Z always does — the app only puts up a sign.",
+            + "press \u{2318}Z when there is nothing left to undo in the text and "
+            + "a structural change is what you actually did last, and the status "
+            + "line says so and names \u{2325}\u{2318}Z. The key still does what "
+            + "\u{2318}Z always does; the app only puts up a sign.",
 
-            "If a structural undo would overwrite words you typed AFTER the "
-            + "act, the app ASKS FIRST — that is the one undo that sets "
-            + "writing aside, so it is the one that stops to check. Say yes "
-            + "and a savepoint of your newer text is kept anyway: insurance, "
-            + "so nothing typed is ever more than one restore away. Every "
-            + "other structural undo stays silent. Try it: divide the block "
-            + "above, type a few words into the FIRST half, press "
-            + "\u{2325}\u{2318}Z, answer the question, then look in history.",
+            "If a structural undo would overwrite words you typed after the "
+            + "act, the app asks first. That is the one undo that sets writing "
+            + "aside, so it is the one that stops to check. Say yes and a commit "
+            + "of your newer text is kept anyway: insurance, so nothing typed is "
+            + "ever more than one restore away. Every other structural undo stays "
+            + "silent. Try it: divide the block above, type a few words into the "
+            + "first half, press \u{2325}\u{2318}Z, answer the question, then "
+            + "look in history.",
         ])
 
         // ———————————————————— deleting & getting it back ————————————————————
@@ -1118,98 +1218,96 @@ enum TutorialSeeder {
         let deletingBlocks = try lesson(deleting, "deleting blocks", [
             "Deleting is meant to be easy here, because nothing you delete is "
             + "gone the moment you delete it. A deleted block leaves the note "
-            + "keeping its takes and its savepoints, and it waits — first on "
+            + "keeping its takes and its commits, and it waits: first on "
             + "\u{2325}\u{2318}Z, then in this note's tray, then in the Trash for "
-            + "30 days. This chapter has you delete things on purpose, so you "
-            + "know exactly where each one landed.",
+            + "\(TrashWindow.days) days. This chapter has you delete things on "
+            + "purpose, so you know exactly where each one landed.",
 
             "The everyday way is the way you already know: select a whole "
-            + "paragraph and press \u{232B}. Triple-click the next paragraph — "
-            + "or drag across it and a little past its end — then delete: the "
-            + "block goes, and the note closes over it. (Select only the words "
-            + "INSIDE a paragraph and delete, and you get exactly what you "
-            + "asked for instead: an empty block, still there, ready to type "
-            + "in.)",
+            + "paragraph and press \u{232B}. Triple-click the next paragraph, or "
+            + "drag across it and a little past its end, then delete. The block "
+            + "goes, and the note closes over it. (Select only the words inside a "
+            + "paragraph and delete, and you get exactly what you asked for "
+            + "instead: an empty block, still there, ready to type in.)",
 
-            "SCRATCH ONE: this paragraph exists to be deleted. Triple-click me "
+            "Scratch one: this paragraph exists to be deleted. Triple-click me "
             + "and press \u{232B}.",
 
             "Several at once: hold \u{2318} and click each block you want "
             + "(\u{2318}\u{21E7}-click picks a whole run). A banner appears above "
-            + "the page counting what you picked, with Delete N Blocks on it; "
-            + "the right-click menu carries the same row. They all go under "
-            + "ONE undo — a multi-delete is one mistake to reverse, not five.",
+            + "the page counting what you picked, with Delete N Blocks on it; the "
+            + "right-click menu carries the same row. They all go under one undo. "
+            + "A multi-delete is one mistake to reverse, not five.",
 
-            "SCRATCH TWO: \u{2318}-click me and the paragraph below, then press "
+            "Scratch two: \u{2318}-click me and the paragraph below, then press "
             + "Delete 2 Blocks.",
 
-            "SCRATCH THREE: I'm the other half of that pair.",
+            "Scratch three: I'm the other half of that pair.",
 
-            "\u{2325}\u{2318}Z is the undo for all of it — one press brings back "
-            + "one delete however many blocks it took, and \u{21E7}\u{2325}\u{2318}Z "
-            + "deletes them again. If you reach for \u{2318}Z out of habit and "
-            + "there is nothing left to undo in the text, the app says so at "
-            + "the bottom of the window and names \u{2325}\u{2318}Z for you: two "
-            + "undo stacks, kept separate on purpose, and a sign at the "
-            + "junction.",
+            "\u{2325}\u{2318}Z is the undo for all of it: one press brings back "
+            + "one delete however many blocks it took, and "
+            + "\u{21E7}\u{2325}\u{2318}Z deletes them again. If you reach for "
+            + "\u{2318}Z out of habit and there is nothing left to undo in the "
+            + "text, the app says so at the bottom of the window and names "
+            + "\u{2325}\u{2318}Z for you. Two undo stacks, kept separate on "
+            + "purpose, and a sign at the junction.",
 
             "Everything you just deleted is in This Note's Tray. Open it with "
             + "the tray icon at the top of the note, beside Scraps and "
-            + "References — it opens in the panel on the right, and it is "
-            + "always there. A note that has deleted blocks also wears a quiet "
-            + "\u{232B} badge with the count in the context bar above the page; "
-            + "clicking it opens the same panel. The next two lessons live "
-            + "there.",
+            + "References. It opens in the panel on the right, and it is always "
+            + "there. A note that has deleted blocks also wears a quiet \u{232B} "
+            + "badge with the count in the context bar above the page; clicking "
+            + "it opens the same panel. The next two lessons live there.",
         ])
         _ = deletingBlocks
 
         let trio = try lesson(deleting, "archive \u{B7} delete \u{B7} scraps", [
             "A block you don't want here has three different fates, and the "
-            + "difference between them is the thing to learn once. ARCHIVE "
-            + "keeps it forever — out of the note, in this note's tray, with "
-            + "no countdown. DELETE starts the 30-day clock: it waits in the "
-            + "Trash, and then it really is gone. MOVE OUT TO SNIPPETS cuts "
-            + "the tie to this note altogether and leaves the block as a scrap "
-            + "you can drag into anything.",
+            + "difference between them is the thing to learn once. Archive keeps "
+            + "it forever: out of the note, in this note's tray, with no "
+            + "countdown. Delete starts the \(TrashWindow.days)-day clock: it "
+            + "waits in the Trash, and then it really is gone. Moving a block out "
+            + "to Snippets cuts the tie to this note altogether and leaves it as "
+            + "a scrap you can drag into anything.",
 
-            "ARCHIVE ME: I'm worth keeping and I don't belong in this note "
-            + "today. Put your cursor in me and use Block \u{25B8} Archive "
-            + "Block — the right-click menu has the same row. I leave the page "
-            + "and wait under the tray's \(TrayPath.archivedTab) view wearing "
-            + "\u{201C}kept — no clock\u{201D}, and Put back returns me to this "
-            + "exact spot.",
+            "Archive me: I'm worth keeping and I don't belong in this note "
+            + "today. Put your cursor in me and use Block \u{25B8} Archive Block; "
+            + "the right-click menu has the same row. I leave the page and wait "
+            + "under the tray's \(TrayPath.archivedTab) view wearing \u{201C}kept "
+            + "\u{2014} no clock\u{201D}, and Put back returns me to this exact "
+            + "spot.",
 
-            "DELETE ME: I've had my day. Block \u{25B8} Delete Block, or "
+            "Delete me: I've had my day. Block \u{25B8} Delete Block, or "
             + "triple-click me and press \u{232B}. I go to the same tray's "
-            + "\(TrayPath.leavingTab) view with a countdown on me, and to the Trash in the "
-            + "Library, and in 30 days I'm gone for real.",
+            + "\(TrayPath.leavingTab) view with a countdown on me, and to the "
+            + "Trash in the Library, and in \(TrashWindow.days) days I'm gone for "
+            + "real.",
 
             // 13u3 UNIT H (the ⋯ sweep): this row was renamed by the Snippets
             // vocabulary ruling and the sentence kept the old name, so a
             // reader looked in the menu for a row that is not there. The row
             // is interpolated from its own constant now.
-            "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
+            "Move me out: I'm a decent line in the wrong note. Open Blocks "
             + "(\u{2318}6), find my row, and use its \u{22EF} menu \u{25B8} "
-            + "\(SnippetsCopy.moveOutRow) — it opens onto your groups, pick "
-            + "one. I become a scrap there "
-            + "— material for anywhere — and \u{2325}\u{2318}Z brings me back if "
-            + "that wasn't what you meant.",
+            + "\(SnippetsCopy.moveOutRow). It opens onto your groups; pick one. I "
+            + "become a scrap there, material for anywhere, and \u{2325}\u{2318}Z "
+            + "brings me back if that wasn't what you meant.",
 
             "Which one? Archive when you want it kept and out of the way; "
             + "delete when you mean it; move it out when the words are fine and "
             + "the home is wrong. All three are one \u{2325}\u{2318}Z away for as "
-            + "long as this session is open — and the two that leave something "
+            + "long as this session is open, and the two that leave something "
             + "behind put it somewhere you can find it.",
         ])
         _ = trio
 
         _ = try lesson(deleting, "the tray & the Trash", [
             "Every note keeps its own tray of what it set aside. Open it with "
-            + "the tray icon at the top of the note — This Note's Tray, in the "
-            + "panel on the right — or from the quiet \u{232B} badge in the "
-            + "context bar above the page, which opens the same panel. The badge "
-            + "counts DELETED blocks only and hides when there are none, which "
-            + "is exactly why the icon is always there.",
+            + "the tray icon at the top of the note: This Note's Tray, in the "
+            + "panel on the right. Or use the quiet \u{232B} badge in the context "
+            + "bar above the page, which opens the same panel. The badge counts "
+            + "deleted blocks only and hides when there are none, which is "
+            + "exactly why the icon is always there.",
 
             // 18d batch 2 (her ruling U-9; the round-1 ladder's MAJOR-1):
             // this paragraph taught the control that batch RETIRED — two
@@ -1221,31 +1319,31 @@ enum TutorialSeeder {
             // looking for a disclosure triangle that does not exist is the
             // row-44 class.
             "The tray offers two views at the top, each carrying its count. "
-            + "\(TrayPath.archivedTab) holds what you set aside on purpose: "
-            + "kept, with no clock, forever. \(TrayPath.leavingTab) holds "
-            + "everything of this note's that is counting down — the blocks it "
-            + "deleted, the takes deleted on their own, and any original "
-            + "riding a family's countdown. Under both sits one filter — "
+            + "\(TrayPath.archivedTab) holds what you set aside on purpose: kept, "
+            + "with no clock, forever. \(TrayPath.leavingTab) holds everything of "
+            + "this note's that is counting down: the blocks it deleted, the "
+            + "takes deleted on their own, and any original riding a family's "
+            + "countdown. Under both sits one filter, "
             + "\(RecoveryCopy.trayFilterAll) \u{B7} "
             + "\(RecoveryCopy.trayFilterBlocks) \u{B7} "
-            + "\(RecoveryCopy.trayFilterTakes) — so this note's deleted takes "
-            + "are one click away with their number on the chip, never hidden "
-            + "under the block cards; every card says which kind it is. One "
-            + "verb serves every row: Put back, and a block returns to the "
-            + "place it stood in. (A block kept whole by a divide or a merge "
-            + "is not leaving anything, so it is not here: it waits in the "
-            + "block it became, under \(BlockHistoryPath.cameFromSection) — "
-            + "the next lesson.)",
+            + "\(RecoveryCopy.trayFilterTakes), so this note's deleted takes are "
+            + "one click away with their number on the chip, never hidden under "
+            + "the block cards; every card says which kind it is. One verb serves "
+            + "every row: Put back, and a block returns to the place it stood in. "
+            + "(A block kept whole by a divide or a merge is not leaving "
+            + "anything, so it is not here. It waits in the block it became, "
+            + "under \(BlockHistoryPath.cameFromSection). The next lesson has "
+            + "it.)",
 
             "The Library holds the other half, in two rooms. Archived is its "
-            + "own item in the sidebar: calm and clockless, whole notes you "
-            + "set aside, each with Unarchive. The Trash is behind the trash "
-            + "icon at the top of the Library, and it holds what is LEAVING — "
-            + "notes, books and blocks, each row saying how many days it has "
-            + "left and which note it came from. Filter it by kind, sort "
-            + "oldest first, and Put back works on any row. (A deleted TAKE "
-            + "never rows here: it waits in its own block\u{2019}s History, "
-            + "where its block and its fan are there to make sense of it.)",
+            + "own item in the sidebar: calm and clockless, whole notes you set "
+            + "aside, each with Unarchive. The Trash is behind the trash icon at "
+            + "the top of the Library, and it holds what is leaving: notes, books "
+            + "and blocks, each row saying how many days it has left and which "
+            + "note it came from. Filter it by kind, sort oldest first, and Put "
+            + "back works on any row. (A deleted take never rows here: it waits "
+            + "in its own block\u{2019}s History, where its block and its fan are "
+            + "there to make sense of it.)",
 
             // The post-13l polish round, ledger row 12 (D2): this paragraph
             // taught "no door inside a note ever deletes something for good",
@@ -1256,31 +1354,30 @@ enum TutorialSeeder {
             // in TRASH SURFACES — the Library's Trash and this note's own
             // trash section — and never in the writing flow.
             "Ending something early is deliberate, and it lives in exactly two "
-            + "kinds of place: the Trash, and the \(TrayPath.leavingTab) view "
-            + "of a note's own tray. Delete Now ends one row's remaining days; Empty Trash "
-            + "takes everything the Trash lists at once. Both ask first — "
-            + "Delete Now asks every single time, there is no don't-ask to "
-            + "set — and Empty Trash's question names the full count by kind "
-            + "before it takes anything, and says what it leaves alone. "
-            + "Nowhere you WRITE has such a door: not the page, not the block "
-            + "menu, not a block's history. You have to go to where things are "
-            + "leaving to end anything for good, which is why the Trash is "
-            + "worth visiting once before you need it.",
+            + "kinds of place: the Trash, and the \(TrayPath.leavingTab) view of "
+            + "a note's own tray. Delete Now ends one row's remaining days; Empty "
+            + "Trash takes everything the Trash lists at once. Both ask first. "
+            + "Delete Now asks every single time (there is no don't-ask to set), "
+            + "and Empty Trash's question names the full count by kind before it "
+            + "takes anything, and says what it leaves alone. Nowhere you write "
+            + "has such a door: not the page, not the block menu, not a block's "
+            + "history. You have to go to where things are leaving to end "
+            + "anything for good, which is why the Trash is worth visiting once "
+            + "before you need it.",
 
-            "Practice, and it is safe: go to the Library, right-click this "
-            + "very lesson \u{25B8} Delete, then open the Trash and "
-            + "Put back the row you find there. The lesson comes back "
-            + "into this book, in this chapter, in its place. (And if you ever "
-            + "lose your nerve, Help \u{25B8} Restore Tutorial\u{2026} rebuilds "
-            + "the whole book.)",
+            "Practice, and it is safe: go to the Library, right-click this very "
+            + "lesson \u{25B8} Delete, then open the Trash and Put back the row "
+            + "you find there. The lesson comes back into this book, in this "
+            + "chapter, in its place. (And if you ever lose your nerve, Help "
+            + "\u{25B8} Restore Tutorial\u{2026} rebuilds the whole book.)",
         ])
 
         let past = try lesson(deleting, "what a block leaves behind", [
             "A block remembers more than its text. Put your cursor in one and "
-            + "press history in the bottom bar — the pair to commit, and the "
-            + "same door on both bars. Everything this block has been opens in "
-            + "the panel on the right: every take's saved moments, the takes it "
-            + "archived, the takes it deleted, and where it came from.",
+            + "press history in the bottom bar, the pair to commit, the same door "
+            + "on both bars. Everything this block has been opens in the panel on "
+            + "the right: every take's saved moments, the takes it archived, the "
+            + "takes it deleted, and where it came from.",
 
             // U-2 (18c batch 1): \u{2318}\u{21E7}D keeps the other takes whole on
             // the TOP block. This lesson and its staged take taught 13j's
@@ -1290,30 +1387,28 @@ enum TutorialSeeder {
             "This block has two takes. Put your cursor in the middle of it and "
             + "press \u{2318}\u{21E7}D: the take you are looking at splits across "
             + "two new blocks, and the other take stays whole on the first block. "
-            + "What became of the block you cut? It was kept — whole, off to "
-            + "one side, not deleted.",
+            + "What became of the block you cut? It was kept: whole, off to one "
+            + "side, not deleted.",
 
             "Open history on either new block and its "
             + "\(BlockHistoryPath.cameFromSection) region shows the original "
-            + "itself — \u{201C}From a divide on \u{2039}date\u{203A} — the "
-            + "original is preserved\u{201D} — with Bring back beside it. "
-            + "Right-clicking the block \u{25B8} See original from "
-            + "divide\u{2026} and \u{2318}K land in the same place. They wait "
-            + "there, with no clock, for as long as anything descended from "
-            + "them is alive.",
+            + "itself (\u{201C}From a divide on \u{2039}date\u{203A} \u{2014} the "
+            + "original is preserved\u{201D}) with Bring back beside it. "
+            + "Right-clicking the block \u{25B8} See original from divide\u{2026} "
+            + "and \u{2318}K land in the same place. They wait there, with no "
+            + "clock, for as long as anything descended from them is alive.",
 
             // The post-13l polish round, her A7 ruling: the per-merge message
             // is DECLINED (*"it's annoying to see that message every time"*)
             // and the teaching lands here instead — one sentence, in the
             // chapter about where things go when they leave a page.
-            "MERGING keeps its blocks the same way, and says nothing at the "
-            + "time — deliberately, because a message on every join would be "
-            + "noise. Merge two blocks (or select across them and delete the "
-            + "seam) and the block you get lists BOTH of the blocks it joined "
-            + "in \(BlockHistoryPath.cameFromSection), each with its own "
-            + "Bring back — three of them if you merged three. Nothing was "
-            + "deleted, so nothing is counting down; the next chapter has you "
-            + "do it and find them.",
+            "Merging keeps its blocks the same way, and says nothing at the "
+            + "time. Deliberately: a message on every join would be noise. Merge "
+            + "two blocks (or select across them and delete the seam) and the "
+            + "block you get lists both of the blocks it joined in "
+            + "\(BlockHistoryPath.cameFromSection), each with its own Bring back, "
+            + "three of them if you merged three. Nothing was deleted, so nothing "
+            + "is counting down; the next chapter has you do it and find them.",
 
             // 13u3 UNIT H: the row is named by the ROW's own title and the
             // glyph by the menu's own constant, so a rename moves this
@@ -1321,27 +1416,27 @@ enum TutorialSeeder {
             // It used to send a reader to "the ⋯ menu" without a place, and
             // the surface she is most likely standing on after the takes
             // chapter — the Takes board — had no ⋯ on its cards at all.
-            "Deleted TAKES wait in the same panel, under "
+            "Deleted takes wait in the same panel, under "
             + "\(BlockPastCopy.deletedTakesHeader), each with the days it has "
-            + "left. This paragraph carries a spare take for the experiment: "
-            + "open its takes — \u{2318}\u{21E7}T in Write, or the Takes tab "
-            + "(\u{2318}2), where every take card carries the same menu — and "
-            + "on the spare card use \(TakeCardMenuCopy.menuGlyph) \u{25B8} "
+            + "left. This paragraph carries a spare take for the experiment: open "
+            + "its takes (\u{2318}\u{21E7}T in Write, or the Takes tab, "
+            + "\u{2318}2, where every take card carries the same menu) and on the "
+            + "spare card use \(TakeCardMenuCopy.menuGlyph) \u{25B8} "
             + "\(TakeCardMenuCopy.deleteTake). Then press history: the take is "
-            + "listed with Put back, and it comes back with its label, its "
-            + "place in the fan and its savepoints intact. (A saved lens "
-            + "pointing at a take you archived or deleted says so right in its "
-            + "column, with a Restore button there.)",
+            + "listed with Put back, and it comes back with its label, its place "
+            + "in the fan and its commits intact. (A saved lens pointing at a "
+            + "take you archived or deleted says so right in its column, with a "
+            + "Restore button there.)",
 
             "One honest thing about preserved originals, because it is the kind "
             + "of promise that should never surprise you: an original stays "
             + "permanent only while something descended from it is still alive. "
-            + "Delete the last of its descendants and the original MOVES — "
-            + "visibly, into the note's tray — out of lineage and onto "
-            + "the family's 30-day clock, labelled \u{201C}set aside by a divide "
-            + "or merge \u{2014} kept until its family goes\u{201D}. The delete "
-            + "that does it "
-            + "says so in its own receipt, while you are standing there.",
+            + "Delete the last of its descendants and the original moves, "
+            + "visibly, into the note's tray, out of lineage and onto the "
+            + "family's \(TrashWindow.days)-day clock, labelled \u{201C}set aside "
+            + "by a divide or merge \u{2014} kept until its family goes\u{201D}. "
+            + "The delete that does it says so in its own receipt, while you are "
+            + "standing there.",
         ])
         try take(on: past.blocks[1],
             "The other take of the dividing block: I stay whole on the first block when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
@@ -1351,7 +1446,7 @@ enum TutorialSeeder {
         // count of fanned blocks, and `theDeletedSpareTakeWaitsInTheBlocksPast`
         // finds this one by its prose — both caught the shift.)
         try take(on: past.blocks[4],
-            "the spare take — delete me from my own card's \u{22EF} menu (every take "
+            "the spare take: delete me from my own card's \u{22EF} menu (every take "
             + "card has one, in Takes and in Write's takes panel), then put me back "
             + "from the block's history panel.")
 
@@ -1365,66 +1460,63 @@ enum TutorialSeeder {
 
         _ = try lesson(places, "the five places", [
             "Nothing here goes anywhere you can't find. At any moment, "
-            + "everything you have ever written is in exactly ONE of five "
-            + "places: where you left it \u{B7} in Archive \u{B7} in the Trash "
-            + "\u{B7} in this note's Versions \u{B7} in this block's History. "
-            + "This lesson visits all five, and the two after it teach the "
-            + "ones that are new.",
+            + "everything you have ever written is in exactly one of five places: "
+            + "where you left it \u{B7} in Archive \u{B7} in the Trash \u{B7} in "
+            + "this note's Versions \u{B7} in this block's History. This lesson "
+            + "visits all five, and the two after it teach the ones that are new.",
 
-            "ONE \u{2014} WHERE YOU LEFT IT. The ordinary case, said out loud "
-            + "because it is the one nobody thinks to say: a note you wrote "
-            + "and did nothing else to sits in your Library exactly as you "
-            + "left it, for as long as you keep it. The other four places "
-            + "exist only for things you deliberately set aside, deliberately "
-            + "changed, or deliberately saved.",
+            "One: where you left it. The ordinary case, said out loud because "
+            + "it is the one nobody thinks to say. A note you wrote and did "
+            + "nothing else to sits in your Library exactly as you left it, for "
+            + "as long as you keep it. The other four places exist only for "
+            + "things you deliberately set aside, deliberately changed, or "
+            + "deliberately saved.",
 
-            "TWO \u{2014} ARCHIVE: notes, forever, no clock. Right-click any "
-            + "note \u{25B8} Archive and it leaves the Library for ARCHIVED, "
-            + "its own item in the sidebar, with its own search. Nothing is "
-            + "counting down and nothing needs remembering \u{2014} it is "
-            + "still yours, still editable, still exportable; archiving is "
-            + "about your Library's attention, not about the note. Unarchive "
-            + "puts it back. (Blocks and takes archive too, and each waits "
-            + "where its context is: an archived block in its note's tray, an "
-            + "archived take in its block's History. A thing set aside stays "
-            + "next to what makes sense of it.)",
+            "Two: Archive. Notes, forever, no clock. Right-click any note "
+            + "\u{25B8} Archive and it leaves the Library for Archived, its own "
+            + "item in the sidebar, with its own search. Nothing is counting down "
+            + "and nothing needs remembering. It is still yours, still editable, "
+            + "still exportable; archiving is about your Library's attention, not "
+            + "about the note. Unarchive puts it back. (Blocks and takes archive "
+            + "too, and each waits where its context is: an archived block in its "
+            + "note's tray, an archived take in its block's History. A thing set "
+            + "aside stays next to what makes sense of it.)",
 
-            "THREE \u{2014} THE TRASH: what is leaving, for "
-            + "\(TrashWindow.days) days. Deleting a note, a book or a block "
-            + "starts the clock, and all three wait it out behind the trash "
-            + "icon at the top of the Library \u{2014} every row saying how "
-            + "many days are left and which note it came from, and Put back "
-            + "on any of them. A deleted TAKE is the one thing that never "
-            + "rows there: alone, out of its block, a take is too small to "
+            "Three: the Trash. What is leaving, for \(TrashWindow.days) days. "
+            + "Deleting a note, a book or a block starts the clock, and all three "
+            + "wait it out behind the trash icon at the top of the Library, every "
+            + "row saying how many days are left and which note it came from, and "
+            + "Put back on any of them. A deleted take is the one thing that "
+            + "never rows there: alone, out of its block, a take is too small to "
             + "make sense of, so it waits in that block's History instead.",
 
-            "FOUR \u{2014} THIS NOTE'S VERSIONS: moments of the WHOLE note, "
-            + "saved by hand. \u{2318}\u{21E7}S saves one; note \u{25BE} "
-            + "\u{25B8} \(VersionsPath.menuLabel) lists them, newest first, "
-            + "each with Read, Restore and Promote. A saved version is frozen "
-            + "at birth and stays out of your way \u{2014} never in the "
-            + "Library, never in Archived \u{2014} because it is not another "
-            + "note, it is this note's past. The next lesson is about the key.",
+            "Four: this note's Versions. Moments of the whole note, saved by "
+            + "hand. \u{2318}\u{21E7}S saves one; note \u{25BE} \u{25B8} "
+            + "\(VersionsPath.menuLabel) lists them, newest first, each with "
+            + "Read, Restore and Promote. A saved version is frozen at birth and "
+            + "stays out of your way, never in the Library, never in Archived, "
+            + "because it is not another note. It is this note's past. The next "
+            + "lesson is about the key.",
 
-            "FIVE \u{2014} THIS BLOCK'S HISTORY: everything ONE block has "
-            + "been. The history door sits in the bottom bar right beside "
-            + "commit, and it opens the Block History panel: each live take's "
-            + "saved moments, the takes this block archived, the takes it "
-            + "deleted (with their clocks), and \(BlockHistoryPath.cameFromSection) "
-            + "\u{2014} the blocks it came out of. Two lessons live in there, "
-            + "and they are the two that follow.",
+            "Five: this block's History. Everything one block has been. The "
+            + "history door sits in the bottom bar right beside commit, and it "
+            + "opens the Block History panel: each live take's saved moments, the "
+            + "takes this block archived, the takes it deleted (with their "
+            + "clocks), and \(BlockHistoryPath.cameFromSection), the blocks it "
+            + "came out of. Two lessons live in there, and they are the two that "
+            + "follow.",
 
-            "PRACTICE ME: I'm here to be visited. Put your cursor in me and "
-            + "press history in the bottom bar to read my (empty) past \u{2014} "
-            + "then come back after the next lesson and look again.",
+            "Practice me: I'm here to be visited. Put your cursor in me and "
+            + "press history in the bottom bar to read my (empty) past. Then come "
+            + "back after the next lesson and look again.",
 
-            "A last honest word about the map: it is a map of PLACES, not of "
+            "A last honest word about the map: it is a map of places, not of "
             + "promises about time. Archive keeps forever; the Trash keeps for "
             + "\(TrashWindow.days) days and then really does delete; a note's "
-            + "Versions and a block's History keep for as long as the note or "
-            + "the block does. Wherever something is, the surface it is on "
-            + "tells you which of those it is \u{2014} that is the whole "
-            + "design, and the reason there are five places instead of one.",
+            + "Versions and a block's History keep for as long as the note or the "
+            + "block does. Wherever something is, the surface it is on tells you "
+            + "which of those it is. That is the whole design, and the reason "
+            + "there are five places instead of one.",
         ])
 
         // Row 26 + row 19's savepoint half: the grain pairing IS the lesson,
@@ -1432,27 +1524,27 @@ enum TutorialSeeder {
         // taught (her: *"making it clear where commit / that particular
         // history by the take is, is also important"*).
         let saving = try lesson(places, "saving a moment", [
-            "Two keys save two different SIZES of the same idea, and the pair "
-            + "is worth learning together. \u{2318}S saves a moment of THIS "
-            + "TAKE \u{2014} the block you're in, the take you're looking at. "
-            + "\u{2318}\u{21E7}S saves a moment of THIS NOTE \u{2014} all of "
-            + "it, as it stands. One grain apart, one shift key apart.",
+            "Two keys save two different sizes of the same idea, and the pair "
+            + "is worth learning together. \u{2318}S saves a moment of this take "
+            + "(a commit: the block you're in, the take you're looking at). "
+            + "\u{2318}\u{21E7}S saves a moment of this note (a version: all of "
+            + "it, as it stands). One grain apart, one shift key apart.",
 
             "\u{2318}S's moments live exactly where you'd look for them: press "
-            + "history in the bottom bar, immediately beside commit. That "
-            + "pairing is deliberate \u{2014} commit WRITES a moment, history "
-            + "SHOWS the moments, and the two sit together so the bar reads as "
-            + "the block's own time controls. Every live take of the block has "
-            + "its own run in there, with the take you're in already open.",
+            + "history in the bottom bar, immediately beside commit. That pairing "
+            + "is deliberate. Commit writes a moment, history shows the moments, "
+            + "and the two sit together so the bar reads as the block's own time "
+            + "controls. Every live take of the block has its own run in there, "
+            + "with the take you're in already open.",
 
-            "PRACTICE TAKE: change a few words in me, press \u{2318}S, then "
+            "Practice take: change a few words in me, press \u{2318}S, then "
             + "press history. I'm where your moment will be listed.",
 
             "Restore beside a moment loads it back into the take. It does not "
-            + "overwrite anything: moments only ever append, so restoring an "
-            + "old one and pressing \u{2318}S again just adds another. That is "
-            + "the whole promise of a savepoint here \u{2014} you can always "
-            + "come back, including from the coming back.",
+            + "overwrite anything: moments only ever append, so restoring an old "
+            + "one and pressing \u{2318}S again just adds another. That is the "
+            + "whole promise of a commit here. You can always come back, "
+            + "including from the coming back.",
 
             // 13u3 UNIT E: *"every block, every take"* over-claimed by one
             // word — a version copies the note's PLACED blocks, which is the
@@ -1460,22 +1552,20 @@ enum TutorialSeeder {
             // the confirm's own (corrected there in the same batch: the WORDS
             // come back, the history does not).
             "\u{2318}\u{21E7}S is the same idea one size up. It copies the "
-            + "whole note as it stands \u{2014} every paragraph on the page, "
-            + "every take on them \u{2014} and keeps it under "
-            + "\(VersionsPath.menuLabel) in the note \u{25BE} menu. Restore "
-            + "makes the note say that again, and it saves where the note is "
-            + "NOW first, so none of its words are lost. Promote turns a "
-            + "moment into a note of its own, if you'd rather work with it "
-            + "than go back to it. What a copy carries \u{2014} and what it "
-            + "leaves behind \u{2014} is the next lesson.",
+            + "whole note as it stands, every paragraph on the page, every take "
+            + "on them, and keeps it under \(VersionsPath.menuLabel) in the note "
+            + "\u{25BE} menu. Restore makes the note say that again, and it saves "
+            + "where the note is now first, so none of its words are lost. "
+            + "Promote turns a moment into a note of its own, if you'd rather "
+            + "work with it than go back to it. What a copy carries, and what it "
+            + "leaves behind, is the next lesson.",
 
             "Which one to reach for? \u{2318}S when one paragraph is about to "
             + "change and you might want this wording back. \u{2318}\u{21E7}S "
-            + "before a rewrite \u{2014} anything that will touch several "
-            + "blocks at once. And you are not the only one saving: leaving a "
-            + "note quietly saves a moment for each take you changed while you "
-            + "were in it, so the \u{2318}S you forget is mostly already taken "
-            + "for you.",
+            + "before a rewrite, anything that will touch several blocks at once. "
+            + "And you are not the only one saving: leaving a note quietly "
+            + "commits each take you changed while you were in it, so the "
+            + "\u{2318}S you forget is mostly already taken for you.",
         ])
         _ = saving
 
@@ -1494,51 +1584,48 @@ enum TutorialSeeder {
         // rather than nearly true — and it is the reason RESTORE's confirm
         // counts what it takes (13u3 UNIT E's other half).
         let copies = try lesson(places, "what a copy carries", [
-            "A copy carries the WORDS, not the past. One rule, and it covers "
-            + "every gesture that makes a second thing out of a first: saving "
-            + "a version of this note (\u{2318}\u{21E7}S), duplicating a note, "
-            + "dragging a piece out of Snippets into a draft. What "
-            + "arrives is the text and every take on it \u{2014} and nothing "
-            + "standing behind them.",
+            "A copy carries the words, not the past. One rule, and it covers "
+            + "every gesture that makes a second thing out of a first: saving a "
+            + "version of this note (\u{2318}\u{21E7}S), duplicating a note, "
+            + "dragging a piece out of Snippets into a draft. What arrives is the "
+            + "text and every take on it, and nothing standing behind them.",
 
-            "So the MOMENTS do not travel. Savepoints stay on the take you "
-            + "pressed \u{2318}S on, in that block's \(BlockHistoryPath.name); "
-            + "a copy's takes are born with one fresh moment of the instant "
-            + "they were made and nothing before it. When you want the run of "
-            + "moments, you go back to the block that has them \u{2014} which "
-            + "is what the \(BlockHistoryPath.doorLabel) door is for, and why "
-            + "it is worth knowing where the original is.",
+            "So the moments do not travel. Commits stay on the take you pressed "
+            + "\u{2318}S on, in that block's \(BlockHistoryPath.name); a copy's "
+            + "takes are born with one fresh moment of the instant they were made "
+            + "and nothing before it. When you want the run of moments, you go "
+            + "back to the block that has them, which is what the "
+            + "\(BlockHistoryPath.doorLabel) door is for, and why it is worth "
+            + "knowing where the original is.",
 
-            "And a copy holds only what the note PLACES \u{2014} the "
-            + "paragraphs on the page, in their order. A note keeps things "
-            + "beside its page that are not on it: blocks a divide or a merge "
-            + "set aside whole (\(BlockHistoryPath.cameFromSection)), blocks "
-            + "you archived, blocks on their way out in "
-            + "\(TrayPath.menuLabel). None of those are in a saved version. "
-            + "They belong to the NOTE and they stay with it \u{2014} exactly "
-            + "where the map two lessons ago says they are.",
+            "And a copy holds only what the note places: the paragraphs on the "
+            + "page, in their order. A note keeps things beside its page that are "
+            + "not on it: blocks a divide or a merge set aside whole "
+            + "(\(BlockHistoryPath.cameFromSection)), blocks you archived, blocks "
+            + "on their way out in \(TrayPath.menuLabel). None of those are in a "
+            + "saved version. They belong to the note and they stay with it, "
+            + "exactly where the map two lessons ago says they are.",
 
-            "PRACTICE COPY: put your cursor in me and press \u{2318}S to save "
-            + "a moment of this take. Now press \u{2318}\u{21E7}S to save the "
-            + "whole note. Open note \u{25BE} \u{25B8} \(VersionsPath.menuLabel) "
-            + "and \(VersionsPath.openVerb) the new moment: every word is "
-            + "there, mine included. The moment you just saved is NOT "
-            + "\u{2014} it is still here, in my history, where you left it.",
+            "Practice copy: put your cursor in me and press \u{2318}S to save a "
+            + "moment of this take. Now press \u{2318}\u{21E7}S to save the whole "
+            + "note. Open note \u{25BE} \u{25B8} \(VersionsPath.menuLabel) and "
+            + "\(VersionsPath.openVerb) the new moment: every word is there, mine "
+            + "included. The moment you just saved is not. It is still here, in "
+            + "my history, where you left it.",
 
             "This is why \(VersionsPath.restoreVerb) asks before it acts. It "
-            + "replaces the note's paragraphs with the moment's, and the past "
-            + "of the paragraphs it replaces goes with them: their saved "
-            + "moments, any take you deleted from them, any comment you "
-            + "deleted. The confirm counts them and says so before you press "
-            + "it. \(VersionsPath.promoteVerb) is the road that takes nothing "
-            + "\u{2014} it makes the moment a note of its own and leaves "
-            + "everything where it is.",
+            + "replaces the note's paragraphs with the moment's, and the past of "
+            + "the paragraphs it replaces goes with them: their saved moments, "
+            + "any take you deleted from them, any comment you deleted. The "
+            + "confirm counts them and says so before you press it. "
+            + "\(VersionsPath.promoteVerb) is the road that takes nothing. It "
+            + "makes the moment a note of its own and leaves everything where it "
+            + "is.",
 
-            "None of this contradicts the map; it is the map applied to "
-            + "copies. A copy is a NEW thing in the place you made it, and "
-            + "the past of the thing you copied stays exactly where it "
-            + "already was \u{2014} which is the same reason nothing in this "
-            + "app is ever in two places at once.",
+            "None of this contradicts the map; it is the map applied to copies. "
+            + "A copy is a new thing in the place you made it, and the past of "
+            + "the thing you copied stays exactly where it already was. Which is "
+            + "the same reason nothing in this app is ever in two places at once.",
         ])
         _ = copies
 
@@ -1550,45 +1637,43 @@ enum TutorialSeeder {
         let exits = try lesson(places, "the two exits", [
             "A paragraph can leave a page two different ways, and telling them "
             + "apart answers the question this whole chapter exists for: "
-            + "\u{201C}I deleted a paragraph \u{2014} where is it?\u{201D} The "
-            + "rule is four words long. DELETION GOES TO THE TRASH; "
-            + "TRANSFORMATION GOES TO LINEAGE.",
+            + "\u{201C}I deleted a paragraph, so where is it?\u{201D} The rule is "
+            + "short. Deletion goes to the Trash; transformation goes to lineage.",
 
-            "THE FIRST EXIT \u{2014} you deleted it. Triple-click the "
-            + "paragraph below and press \u{232B}. It leaves the page onto a "
-            + "\(TrashWindow.days)-day clock, and it is now in TWO listings of "
-            + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top "
-            + "of the note, \(TrayPath.leavingTab)) and the Trash in the Library. Put "
-            + "back in either one returns it to the place it stood in. "
-            + "Deleted means LEAVING, and anything that is leaving always says "
+            "The first exit: you deleted it. Triple-click the paragraph below "
+            + "and press \u{232B}. It leaves the page onto a "
+            + "\(TrashWindow.days)-day clock, and it is now in two listings of "
+            + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top of "
+            + "the note, \(TrayPath.leavingTab)) and the Trash in the Library. "
+            + "Put back in either one returns it to the place it stood in. "
+            + "Deleted means leaving, and anything that is leaving always says "
             + "how long it has.",
 
-            "EXIT ONE: triple-click me and press \u{232B}. I'm the deletion "
-            + "\u{2014} look for me under the tray's \(TrayPath.leavingTab) view, and in the "
-            + "Trash, and put me back from either.",
+            "Exit one: triple-click me and press \u{232B}. I'm the deletion. "
+            + "Look for me under the tray's \(TrayPath.leavingTab) view, and in "
+            + "the Trash, and put me back from either.",
 
-            "THE SECOND EXIT \u{2014} it became something else. Select from "
-            + "the middle of the next paragraph to the middle of the one after "
-            + "it and press \u{232B}. The two become ONE, quietly, the way any "
-            + "editor would join them \u{2014} but the two blocks you started "
-            + "with were not deleted. They were kept whole, set aside, and the "
-            + "block they became remembers both.",
+            "The second exit: it became something else. Select from the middle "
+            + "of the next paragraph to the middle of the one after it and press "
+            + "\u{232B}. The two become one, quietly, the way any editor would "
+            + "join them. But the two blocks you started with were not deleted. "
+            + "They were kept whole, set aside, and the block they became "
+            + "remembers both.",
 
-            "EXIT TWO, first half: select from somewhere in me all the way "
-            + "into the paragraph below, and press \u{232B}.",
+            "Exit two, first half: select from somewhere in me all the way into "
+            + "the paragraph below, and press \u{232B}.",
 
-            "EXIT TWO, second half: and what we become will remember us both, "
+            "Exit two, second half: and what we become will remember us both, "
             + "by name.",
 
             "Now look. Put your cursor in the joined paragraph and press "
-            + "history: its \(BlockHistoryPath.cameFromSection) region lists "
-            + "BOTH originals \u{2014} not one of them \u{2014} each with its "
-            + "own text and a \(BlockHistoryPath.bringBackVerb) button that "
-            + "puts it into the note again, beside what it became. Nothing "
-            + "counted down. Nothing was in the Trash. All the app said at "
-            + "the time was one quiet line at the bottom, naming where the "
-            + "two originals went \u{2014} and this panel is where that line "
-            + "points.",
+            + "history: its \(BlockHistoryPath.cameFromSection) region lists both "
+            + "originals, not one of them, each with its own text and a "
+            + "\(BlockHistoryPath.bringBackVerb) button that puts it into the "
+            + "note again, beside what it became. Nothing counted down. Nothing "
+            + "was in the Trash. All the app said at the time was one quiet line "
+            + "at the bottom, naming where the two originals went, and this panel "
+            + "is where that line points.",
 
             // **13u1 UNIT 2 — the FANNED CROSS-BLOCK MATRIX**, which row 27
             // deliberately left to this phase (*"the fanned cross-block
@@ -1596,78 +1681,64 @@ enum TutorialSeeder {
             // item 5 legibility mandate is why it is here at all:
             // *teachability is a design constraint*, and the gesture now has
             // three answers where the lesson taught one.
-            "ONE MORE THING, and it is the whole shape of a big selection. "
+            "One more thing, and it is the whole shape of a big selection. "
             + "Select across several paragraphs, press \u{232B}, and every block "
-            + "you touched gets exactly ONE of two fates \u{2014} decided by how "
-            + "much of it you selected. A block you covered WHOLE leaves the "
-            + "page the FIRST way: to the Trash, with every take on it, "
-            + "together \u{2014} so \(TrayPath.putBackVerb) returns the whole family, not "
-            + "a piece of it. A block you covered only IN PART keeps its name "
-            + "and its place, and only the take you can SEE loses its piece. "
-            + "The takes you are not looking at are never touched.",
+            + "you touched gets exactly one of two fates, decided by how much of "
+            + "it you selected. A block you covered whole leaves the page the "
+            + "first way: to the Trash, with every take on it, together, so "
+            + "\(TrayPath.putBackVerb) returns the whole family, not a piece of "
+            + "it. A block you covered only in part keeps its name and its place, "
+            + "and only the take you can see loses its piece. The takes you are "
+            + "not looking at are never touched.",
 
-            "The two ENDS then join, or they don't, and that is decided by "
-            + "WHERE you cut. Cut in the MIDDLE of a paragraph at both ends "
-            + "and the remainders become one paragraph, the way any editor "
-            + "would join them \u{2014} the SECOND exit, with both originals kept "
-            + "whole under \(BlockHistoryPath.cameFromSection). Cut at a "
-            + "paragraph BREAK at either end \u{2014} the top of a block, the "
-            + "bottom of one, or a line break inside one \u{2014} and the ends keep "
-            + "their own blocks. You meant whole paragraphs, so whole "
-            + "paragraphs is what you get.",
+            "The two ends then join, or they don't, and that is decided by "
+            + "where you cut. Cut in the middle of a paragraph at both ends and "
+            + "the remainders become one paragraph, the way any editor would join "
+            + "them: the second exit, with both originals kept whole under "
+            + "\(BlockHistoryPath.cameFromSection). Cut at a paragraph break at "
+            + "either end (the top of a block, the bottom of one, or a line break "
+            + "inside one) and the ends keep their own blocks. You meant whole "
+            + "paragraphs, so whole paragraphs is what you get.",
 
-            "And there is one more way the ends stay apart: a TAKE hanging "
-            + "on one of them. A keystroke will never fold a fan away \u{2014} the "
-            + "edit lands in the take you can see, the fan stays where it "
-            + "is, and the two blocks stay two. When you do want them joined, "
-            + "merge them deliberately and choose what the takes do.",
+            "And there is one more way the ends stay apart: a take hanging on "
+            + "one of them. A keystroke will never fold a fan away. The edit "
+            + "lands in the take you can see, the fan stays where it is, and the "
+            + "two blocks stay two. When you do want them joined, merge them "
+            + "deliberately and choose what the takes do.",
 
-            "EXIT THREE, top: select from the middle of me\u{2026}",
+            "Exit three, top: select from the middle of me\u{2026}",
 
-            "EXIT THREE, middle: \u{2026}straight through all of me. I have TWO "
-            + "takes, and I go to the Trash whole \u{2014} both of them with me.",
+            "Exit three, middle: \u{2026}straight through all of me. I have two "
+            + "takes, and I go to the Trash whole, both of them with me.",
 
-            "EXIT THREE, bottom: \u{2026}to the middle of me, and press \u{232B}. Then "
-            + "look: the top and I are one paragraph, the middle is in the "
-            + "tray with both its takes, and one \u{2325}\u{2318}Z puts all of it back.",
+            "Exit three, bottom: \u{2026}to the middle of me, and press "
+            + "\u{232B}. Then look: the top and I are one paragraph, the middle "
+            + "is in the tray with both its takes, and one \u{2325}\u{2318}Z puts "
+            + "all of it back.",
 
-            "So, whenever something is missing: if you DELETED it, look where "
-            + "things are leaving \u{2014} the note's tray, then the Trash. If "
-            + "you CHANGED it \u{2014} merged, divided \u{2014} look inside "
-            + "what it became, under \(BlockHistoryPath.cameFromSection). "
-            + "There is one place the two exits meet, and it is honest about "
-            + "itself: a preserved original has no clock only while something "
-            + "descended from it is alive, so deleting the last of those "
-            + "descendants MOVES it, visibly, into the tray and onto the "
-            + "family's clock \u{2014} and the delete that does it says so in "
-            + "its own receipt, while you are standing there.",
+            "So, whenever something is missing: if you deleted it, look where "
+            + "things are leaving, the note's tray, then the Trash. If you "
+            + "changed it (merged, divided), look inside what it became, under "
+            + "\(BlockHistoryPath.cameFromSection). There is one place the two "
+            + "exits meet, and it is honest about itself: a preserved original "
+            + "has no clock only while something descended from it is alive, so "
+            + "deleting the last of those descendants moves it, visibly, into the "
+            + "tray and onto the family's clock. The delete that does it says so "
+            + "in its own receipt, while you are standing there.",
         ])
         // The fan the matrix teaches, staged on the MIDDLE block of the
         // EXIT THREE trio — the cell her item 5 ruling actually CHANGED: a
         // fanned block covered WHOLE goes to the Trash with its family
         // intact, where the older behaviour emptied the take you could see
         // and left a blank block with a fan hanging on it.
+        // 13s-b triage landing: the staged trio reads in sentence case now
+        // (“Exit three, …”), and this prefix moved IN THE SAME COMMIT as
+        // the prose — a stale prefix would silently never mint the take.
         if let middle = exits.blocks.first(where: {
-            $0.variant.workingText.hasPrefix("EXIT THREE, middle")
+            $0.variant.workingText.hasPrefix("Exit three, middle")
         }) {
-            try take(on: middle, "the middle block's second take \u{2014} it rides to the Trash too.")
+            try take(on: middle, "the middle block's second take: it rides to the Trash too.")
         }
-
-        // ————————————————————————— keeping it private —————————————————————
-        //
-        // pre-13x 5a — copy §7's SHORT chapter (the postures design §1.22 /
-        // §8): two lessons, their paragraphs VERBATIM from the copy
-        // constants (`PostureCopy.swift`), the device nouns interpolated.
-        // What's true in every mode; Standard and Castle and what you must
-        // keep in each; the open-app sentence; the door to the seeded book
-        // *Encryption Explained*, which carries the whole story. The 13p
-        // dials lesson and its loss-math composition retired with the
-        // presets, the escrow dial and the reset door they described (§13).
-
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
-                       ProtectionCopy.privacyLessonOneParagraphs)
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
-                       ProtectionCopy.privacyLessonTwoParagraphs)
 
         // ——————————————————————————— ways of looking ———————————————————————
 
@@ -1678,101 +1749,103 @@ enum TutorialSeeder {
         // FUNDAMENTAL ways of looking ("obviously a need, seems more
         // fundamental").
         _ = try lesson(looking, "read", [
-            "READ (\u{2318}3) is the note beside its own index \u{2014} and it opens "
-            + "on EDIT. The column on the left is the index: markdown headings "
+            "Read (\u{2318}3) is the note beside its own index, and it opens on "
+            + "edit. The column on the left is the index: markdown headings "
             + "become sections, every other block files under the one above it, "
             + "and a note with no headings lists plainly. Click a row and the "
             + "text beside it scrolls there; the \u{22EF} menu carries the block "
-            + "acts. In the text, click any block and it goes live right where "
-            + "it is \u{2014} one block at a time. The outline button folds the "
-            + "column away and back. Read opens standing at the block you were "
-            + "just in, whichever mode you came from.",
+            + "acts. In the text, click any block and it goes live right where it "
+            + "is, one block at a time. The outline button folds the column away "
+            + "and back. Read opens standing at the block you were just in, "
+            + "whichever mode you came from.",
 
-            "Switch the face to READ and the same note is a page \u{2014} the "
-            + "paper a book's reading flow uses: markdown rendered, boundaries "
-            + "gone, nothing to edit. Choose continuous, or pages (the book's "
-            + "own leaves, \u{2190} \u{2192} turn them); Aa \u{2212} / Aa \u{FF0B} "
-            + "size the type. Reading is the point \u{2014} and when a sentence "
-            + "needs work, click its paragraph: the page turns to edit with "
-            + "that block live.",
+            "Switch the face to read and the same note is a page: the paper a "
+            + "book's reading flow uses. Markdown rendered, boundaries gone, "
+            + "nothing to edit. Choose continuous, or pages (the book's own "
+            + "leaves; \u{2190} \u{2192} turn them); Aa \u{2212} / Aa \u{FF0B} "
+            + "size the type. Reading is the point. And when a sentence needs "
+            + "work, click its paragraph: the page turns to edit with that block "
+            + "live.",
 
-            "Try it: press \u{2318}3 \u{2014} the column stands at this lesson. "
-            + "Click this very paragraph in the text and it goes live; type a "
-            + "word. Switch to read, click this paragraph again \u{2014} the page "
-            + "turns to edit with it live. Then \u{2318}1 back to Write.",
+            "Try it: press \u{2318}3. The column stands at this lesson. Click "
+            + "this very paragraph in the text and it goes live; type a word. "
+            + "Switch to read, click this paragraph again, and the page turns to "
+            + "edit with it live. Then \u{2318}1 back to Write.",
         ])
 
         let lenses = try lesson(looking, "lenses", [
-            "A LENS is a saved way of LOOKING at a note: for each block, which "
-            + "take to show. It never changes the note — \u{201C}a lens is the same "
-            + "structure with different choices.\u{201D} Lenses mode (\u{2318}4) is their "
+            "A lens is a saved way of looking at a note: for each block, which "
+            + "take to show. It never changes the note. A lens is the same "
+            + "structure with different choices. Lenses mode (\u{2318}4) is their "
             + "home: full-text columns side by side.",
 
             "Both blocks of this lesson carry two takes, and a lens named "
-            + "\u{201C}the other reading\u{201D} is saved beside the chosen text. In Lenses, "
-            + "add its column (\u{FF0B} column \u{25B8} Open \u{201C}the other reading\u{201D}) and read "
-            + "the two versions of this lesson side by side. The \u{2039} \u{203A} arrows "
-            + "on any cell re-pick that block's take; \u{1F4BE} saves your current "
-            + "picks as a new lens.",
+            + "\u{201C}the other reading\u{201D} is saved beside the chosen text. "
+            + "In Lenses, add its column (\u{FF0B} column \u{25B8} Open "
+            + "\u{201C}the other reading\u{201D}) and read the two versions of "
+            + "this lesson side by side. The \u{2039} \u{203A} arrows on any cell "
+            + "re-pick that block's take; \u{1F4BE} saves your current picks as a "
+            + "new lens.",
 
-            "\u{2713} Make this the note ADOPTS a column: the note's chosen takes "
-            + "become what it shows. Adopting swaps, never destroys — the "
+            "\u{2713} Make this the note adopts a column: the note's chosen "
+            + "takes become what it shows. Adopting swaps, never destroys. The "
             + "outgoing chosen is auto-saved as a lens named \u{201C}chosen until "
             + "(today)\u{201D}, so you can always swap back.",
         ])
+        // 13s-b triage landing: the two staged alternates in the drafts' text
+        // (the caps and dashes out; the lens and its two choices unchanged).
         let lensAlt1 = try take(on: lenses.blocks[0],
-            "A LENS is a bookmark on your choices: it remembers, for every block, which "
-            + "take you'd show — without moving the note an inch. Lenses mode (\u{2318}4) lays "
-            + "such readings out as columns.")
+            "A lens is a bookmark on your choices: it remembers, for every "
+            + "block, which take you'd show, without moving the note an inch. "
+            + "Lenses mode (\u{2318}4) lays such readings out as columns.")
         let lensAlt2 = try take(on: lenses.blocks[2],
-            "\u{2713} Make this the note is the one door from looking to being: adopt, and the "
-            + "column's picks become the note's chosen takes. The old chosen is kept as "
-            + "\u{201C}chosen until (today)\u{201D} — swaps, never destroys.")
+            "\u{2713} Make this the note is the one door from looking to being: "
+            + "adopt, and the column's picks become the note's chosen takes. The "
+            + "old chosen is kept as \u{201C}chosen until (today)\u{201D}: swaps, "
+            + "never destroys.")
         let lens = try ops.createLens(post: lenses.post.id, name: "the other reading")
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[0].block.id, variant: lensAlt1.id)
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[2].block.id, variant: lensAlt2.id)
 
         let versions = try lesson(looking, "compare & versions", [
-            "A VERSION is a different NOTE related to this one — \u{201C}a version is "
-            + "a different structure.\u{201D} Two gestures share the word: MARK AS "
-            + "VERSIONS just draws a link between two existing notes; DUPLICATE "
-            + "AS VERSION mints a whole copy (takes and all) and draws the link "
-            + "in one gesture. Mark = connect, duplicate = copy + connect.",
+            "A version is a different note related to this one. A version is a "
+            + "different structure. Two gestures share the word: Mark as Versions "
+            + "just draws a link between two existing notes; Duplicate as Version "
+            + "mints a whole copy (takes and all) and draws the link in one "
+            + "gesture. Mark = connect, duplicate = copy + connect.",
 
-            "This lesson already has a version twin — it was duplicated when "
-            + "the book was seeded. Open Compare (\u{2318}5): the notes sit side "
-            + "by side, related blocks tied by lineage — and every pane is "
-            + "EDITABLE. Click into either column and type: the edit lands in "
-            + "that note, and the one live ring moves wherever you click, "
-            + "across notes. Drag a block's \u{28FF} handle to reorder it — each "
-            + "column reorders its own note only.",
+            "This lesson already has a version twin; it was duplicated when the "
+            + "book was seeded. Open Compare (\u{2318}5): the notes sit side by "
+            + "side, related blocks tied by lineage, and every pane is editable. "
+            + "Click into either column and type: the edit lands in that note, "
+            + "and the one live ring moves wherever you click, across notes. Drag "
+            + "a block's \u{28FF} handle to reorder it; each column reorders its "
+            + "own note only.",
 
             "Compare is honest about relationships. \u{201C}Follow this note's "
-            + "order\u{201D} arranges the other columns beside their related blocks "
-            + "(display only — nothing moves); lineage colors mark the "
-            + "families, and rails appear only where a real relationship "
-            + "exists. Compare against an unrelated note and it says \u{201C}there "
-            + "is no relationship here\u{201D} — the two just sit plainly side by "
-            + "side, no blanks, no colors.",
+            + "order\u{201D} arranges the other columns beside their related "
+            + "blocks (display only; nothing moves); lineage colors mark the "
+            + "families, and rails appear only where a real relationship exists. "
+            + "Compare against an unrelated note and it says \u{201C}there is no "
+            + "relationship here\u{201D}. The two just sit plainly side by side, "
+            + "no blanks, no colors.",
 
-            "Compare OPENS with \u{201C}related blocks only\u{201D} on: it hides every "
-            + "block lineage has nothing to say about, leaving just the "
-            + "material that connects across the columns. Nothing is moved or "
-            + "deleted — it is a way of LOOKING, and one click back: turn the "
-            + "chip off to read the notes whole. Against an unrelated note it "
-            + "tells you there is nothing to show, rather than showing you "
-            + "nothing.",
+            "Compare opens with \u{201C}related blocks only\u{201D} on: it "
+            + "hides every block lineage has nothing to say about, leaving just "
+            + "the material that connects across the columns. Nothing is moved or "
+            + "deleted. It is a way of looking, and one click back: turn the chip "
+            + "off to read the notes whole. Against an unrelated note it tells "
+            + "you there is nothing to show, rather than showing you nothing.",
 
             "Outlines live here too: press \u{201C}make outline note\u{201D} in "
-            + "Compare's header and the app mints a linked condensation — "
-            + "first sentence per block — and opens it beside this note, "
-            + "registered point by point. And the Diff sheet now has "
-            + "Save\u{2026} — the whole diff as a plain-text file, ready to hand "
-            + "to an AI agent.",
+            + "Compare's header and the app mints a linked condensation, first "
+            + "sentence per block, and opens it beside this note, registered "
+            + "point by point. And the Diff sheet has Save\u{2026}: the whole "
+            + "diff as a plain-text file, ready to hand to an AI agent.",
 
-            "Unmark deletes only the connection — both notes stay exactly as "
-            + "they are. The library's right-click menu has Duplicate as "
-            + "Version for any note, any time.",
+            "Unmark deletes only the connection; both notes stay exactly as "
+            + "they are. The library's right-click menu has Duplicate as Version "
+            + "for any note, any time.",
         ])
         let twin = try ops.duplicateAsVersion(versions.post.id)
         // A distinct title (walk finding): the copy inherits the lesson's
@@ -1815,42 +1888,43 @@ enum TutorialSeeder {
             // too crowded"; `BlockDecor` records it), so the promise left
             // with the door. The margin card/badge, ⌘⇧' and both bars'
             // comments button stay.
-            "A COMMENT is a working note on a BLOCK — about the writing, not in "
-            + "it: \u{201C}take 1 is better, but take 2's ending\u{2026}\u{201D}. This block "
-            + "carries one; it renders in the margin with a // prefix. Click it "
-            + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere. "
-            + "The comments button sits in the bottom bar in Write and Takes "
-            + "alike.",
+            "A comment is a working note on a block: about the writing, not in "
+            + "it. \u{201C}Take 1 is better, but take 2's ending\u{2026}\u{201D} "
+            + "This block carries one; it renders in the margin with a // prefix. "
+            + "Click it to open the block's comments panel, or press "
+            + "\u{2318}\u{21E7}' anywhere. The comments button sits in the bottom "
+            + "bar in Write and Takes alike.",
 
             "Comments survive the knife: divide or merge a commented block and "
-            + "the note rides onto the successors. Deleted comments stay "
-            + "visible in the panel and can be brought back — the feature is "
-            + "deliberately never skimpy.",
+            + "the note rides onto the successors. Deleted comments stay visible "
+            + "in the panel and can be brought back. The feature is deliberately "
+            + "never skimpy.",
 
             // 13i-d U7 continuation (F-U7-4 — row 85's twin): this paragraph
             // taught tag cards "on the CONTEXT BAR" and "Fold the bar with
             // ⌘⇧I", a fold the app retired; it now teaches the masthead's ＃
             // field exactly as "the workspace" does. (F-U6-3 earlier: the tag
             // door mints a GATHERING — Settings ▸ Tags' "Make a Gathering…".)
-            "TAGS organize notes (and blocks) without moving them: hierarchical "
+            "Tags organize notes (and blocks) without moving them: hierarchical "
             + "paths like life/goals/2024. A note wears them as little coloured "
-            + "cards on its masthead's right edge \u{2014} click the \u{FF03} beside "
-            + "them and a tag field opens with the cursor in it (type a name; "
-            + "\u{201C}/\u{201D} nests, and a name that doesn't exist yet is made; "
-            + "\u{23CE} applies it), \u{2715} on a card takes one off, and "
+            + "cards on its masthead's right edge. Click the \u{FF03} beside them "
+            + "and a tag field opens with the cursor in it (type a name; "
+            + "\u{201C}/\u{201D} nests, and a name that doesn't exist yet is "
+            + "made; \u{23CE} applies it), \u{2715} on a card takes one off, and "
             + "\u{2318}\u{21E7}I opens the same field from anywhere in the note. "
-            + "Every tag keeps its own colour everywhere. The tag manager lives in "
-            + "Settings (\u{2318},), where Make a Gathering\u{2026} turns a tag into a "
-            + "gathering that shows everything wearing it.",
+            + "Every tag keeps its own colour everywhere. The tag manager lives "
+            + "in Settings (\u{2318},), where Make a Gathering\u{2026} turns a "
+            + "tag into a gathering that shows everything wearing it.",
 
-            "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
-            + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
-            + "replace. Your own notes never wear it unless you put it there; "
-            + "everything else in your library is invisible to the restore.",
+            "Full disclosure: every lesson note wears the "
+            + "\u{201C}tutorial\u{201D} tag. That is exactly how Help \u{25B8} "
+            + "Restore Tutorial\u{2026} finds what to replace. Your own notes "
+            + "never wear it unless you put it there; everything else in your "
+            + "library is invisible to the restore.",
         ])
         _ = try ops.addBlockComment(
             to: commentsTags.blocks[0].block.id,
-            text: "a comment lives in the margin — about the block, never inside its text")
+            text: "a comment lives in the margin: about the block, never inside its text")
 
         // VX-89 — **THE FINDER'S LESSON** (her question at the 13o follow-up
         // report: *"were search details added to the field guide?"* — they
@@ -1868,71 +1942,70 @@ enum TutorialSeeder {
         // `+ commits` facet (her word, R-VX83-9) — savepoint history joins
         // the answer, each line marked "commit" with its day (R-VX83-10).
         _ = try lesson(library, searchLessonTitle, [
-            "The search field at the top of the Library is the one place to look "
-            + "for anything you wrote. Type words and it searches the TEXT itself: "
-            + "the body of every note \u{2014} every take, not only the one showing "
-            + "\u{2014} and titles, snippets, comments, block names and take labels. "
-            + "Capitals and accents don't matter: \u{201C}cafe\u{201D} finds "
-            + "\u{201C}Caf\u{E9}\u{201D}.",
+            "The search field at the top of the Library is the one place to "
+            + "look for anything you wrote. Type words and it searches the text "
+            + "itself: the body of every note (every take, not only the one "
+            + "showing), and titles, snippets, comments, block names and take "
+            + "labels. Capitals and accents don't matter: \u{201C}cafe\u{201D} "
+            + "finds \u{201C}Caf\u{E9}\u{201D}.",
 
-            "Words answer as a sheet. A band under the field counts what was found "
-            + "\u{2014} books, notes, passages \u{2014} and its chips say what is "
+            "Words answer as a sheet. A band under the field counts what was "
+            + "found (books, notes, passages), and its chips say what is "
             + "narrowing the search, starting with the wing you're in "
             + "(\u{201C}in: Home\u{201D}): search looks inside one wing, though "
             + "snippets are found from every wing. Books whose names match come "
             + "first; then each note that matches, best match first, with up to "
-            + "three of its matching lines and the words highlighted. "
-            + "\u{201C}all N \u{203A}\u{201D} on a note opens the rest of its lines.",
+            + "three of its matching lines and the words highlighted. \u{201C}all "
+            + "N \u{203A}\u{201D} on a note opens the rest of its lines.",
 
-            "Click a line and you land IN the note: in Write, at that block, the "
-            + "match selected and the find bar already holding your words. "
+            "Click a line and you land in the note: in Write, at that block, "
+            + "the match selected and the find bar already holding your words. "
             + "\u{2318}G steps to the next match, \u{21E7}\u{2318}G back. A line "
             + "marked \u{201C}in another take\u{201D} matched a take that isn't "
-            + "showing \u{2014} you land at its block with the find bar ready, and "
+            + "showing. You land at its block with the find bar ready, and "
             + "nothing is selected, because those words aren't on the page.",
 
-            "A TAG typed alone narrows the Library to the notes wearing it. Type "
-            + "#tutorial and the Library shows this guide's notes \u{2014} every "
-            + "lesson wears that tag \u{2014} as its own rows, in the order its "
-            + "sort \u{25BE} says, with any books the tag flows into listed on top. "
-            + "A tag covers the tags under it: #life finds a note tagged "
-            + "life/goals too. Put words beside a tag and it narrows the search "
-            + "instead: #tutorial rain looks for rain in these lessons only (the "
-            + "choosing lesson's rain takes answer). "
-            + "And when a word you type is the name of a tag, the band offers it "
-            + "\u{2014} \u{201C}tag: #name \u{203A}\u{201D} \u{2014} and one click "
-            + "searches the tag.",
+            "A tag typed alone narrows the Library to the notes wearing it. "
+            + "Type #tutorial and the Library shows this guide's notes (every "
+            + "lesson wears that tag) as its own rows, in the order its sort "
+            + "\u{25BE} says, with any books the tag flows into listed on top. A "
+            + "tag covers the tags under it: #life finds a note tagged life/goals "
+            + "too. Put words beside a tag and it narrows the search instead: "
+            + "#tutorial rain looks for rain in these lessons only (the choosing "
+            + "lesson's rain takes answer). And when a word you type is the name "
+            + "of a tag, the band offers it (\u{201C}tag: #name "
+            + "\u{203A}\u{201D}), and one click searches the tag.",
 
-            "when \u{25BE}, beside the sort, narrows the Library to a day. It opens "
-            + "a small calendar with two choices above it. \u{201C}on a day\u{201D}: "
-            + "click a day. \u{201C}between days\u{201D}: click the first day, then "
-            + "the last, and the run between them fills in. The sentence under the "
-            + "calendar always says what is showing \u{2014} \u{201C}Showing notes "
-            + "edited on Oct 6.\u{201D} \u{2014} and that sentence is the "
-            + "confirmation: nothing changes until you click a day, and Esc or a "
-            + "click outside keeps exactly what it says. \u{201C}any day\u{201D} "
-            + "clears it, and so does the \u{2715} on the day's chip in the band. "
-            + "One honest limit: a note keeps one edit stamp, so a note edited on "
-            + "two days answers for the later one \u{2014} the earlier day finds it "
-            + "where a savepoint landed.",
+            "when \u{25BE}, beside the sort, narrows the Library to a day. It "
+            + "opens a small calendar with two choices above it. \u{201C}on a "
+            + "day\u{201D}: click a day. \u{201C}between days\u{201D}: click the "
+            + "first day, then the last, and the run between them fills in. The "
+            + "sentence under the calendar always says what is showing "
+            + "(\u{201C}Showing notes edited on Oct 6.\u{201D}) and that sentence "
+            + "is the confirmation: nothing changes until you click a day, and "
+            + "Esc or a click outside keeps exactly what it says. \u{201C}any "
+            + "day\u{201D} clears it, and so does the \u{2715} on the day's chip "
+            + "in the band. One honest limit: a note keeps one edit stamp, so a "
+            + "note edited on two days answers for the later one. The earlier day "
+            + "finds it where a commit landed.",
 
-            "Archived notes stay out of the way: search leaves them out until you "
-            + "press \u{201C}+ archived\u{201D} in the band, and that chip's "
+            "Archived notes stay out of the way: search leaves them out until "
+            + "you press \u{201C}+ archived\u{201D} in the band, and that chip's "
             + "\u{2715} leaves them out again. What you saved is searchable the "
             + "same way: \u{201C}+ commits\u{201D} brings in the words your "
-            + "commits kept, each such line marked \u{201C}commit\u{201D} "
-            + "with the day it was saved. Inside a book, the \u{1F50D} at the "
-            + "right of the book's masthead searches that book alone \u{2014} the "
-            + "same kind of answer, scoped to the book. And \u{2318}K finds "
-            + "passages too: under the notes and books whose names match, a few "
-            + "matching lines, and \u{201C}All matches in the Library "
-            + "\u{203A}\u{201D} to open the whole answer.",
+            + "commits kept, each such line marked \u{201C}commit\u{201D} with "
+            + "the day it was saved. Inside a book, the \u{1F50D} at the right of "
+            + "the book's masthead searches that book alone: the same kind of "
+            + "answer, scoped to the book. And \u{2318}K finds passages too: "
+            + "under the notes and books whose names match, a few matching lines, "
+            + "and \u{201C}All matches in the Library \u{203A}\u{201D} to open "
+            + "the whole answer.",
 
             "Try it: open the Library and type marginalia. This paragraph "
-            + "answers \u{2014} click its line and you land right here, in Write, "
-            + "with the word selected and the find bar holding it. Press \u{2318}G "
-            + "and the selection steps to the next marginalia. Then try "
-            + "#tutorial on its own, and watch the Library become this guide.",
+            + "answers. Click its line and you land right here, in Write, with "
+            + "the word selected and the find bar holding it. Press \u{2318}G and "
+            + "the selection steps to the next marginalia. Then try #tutorial on "
+            + "its own, and watch the Library become this guide.",
         ])
 
         // 13i-d U7: "books & the shelf" MOVED — swept — into the books
@@ -1966,39 +2039,38 @@ enum TutorialSeeder {
         // every already-seeded store's group from Restore Tutorial, which is
         // a behaviour change wearing a copy change's clothes.
         let scraps = try lesson(library, "pool & scraps", [
-            "Not everything starts as a note. The POOL (sidebar) holds notes "
-            + "that belong to no book yet \u{2014} drafts in waiting. SNIPPETS "
-            + "(sidebar) holds exactly that: loose blocks that aren't notes at "
-            + "all \u{2014} overheard lines, stray sentences, one-liners you'll "
-            + "want later.",
+            "Not everything starts as a note. The Pool (sidebar) holds notes "
+            + "that belong to no book yet: drafts in waiting. Snippets (sidebar) "
+            + "holds exactly that: loose blocks that aren't notes at all. "
+            + "Overheard lines, stray sentences, one-liners you'll want later.",
 
-            "A group named \u{201C}tutorial scraps\u{201D} was seeded for you with "
-            + "two snippets \u{2014} the Snippets area's groups column switches "
+            "A group named \u{201C}tutorial scraps\u{201D} was seeded for you "
+            + "with two snippets. The Snippets area's groups column switches "
             + "between groups, and \u{201C}all snippets\u{201D} at its top shows "
-            + "every one at once. To drag a snippet into a note: open any "
-            + "lesson in Write (\u{2318}1) and press the Scraps button in the "
-            + "note's top-right corner (beside References). They sit beside "
-            + "the page \u{2014} drag one in, and it lands as a COPY with lineage "
-            + "back to the snippet, which stays in its group. Hold \u{2325} while "
-            + "dragging and the whole fan rides the copy, takes and all (the "
-            + "second snippet has two, to try exactly that).",
+            + "every one at once. To drag a snippet into a note: open any lesson "
+            + "in Write (\u{2318}1) and press the Scraps button in the note's "
+            + "top-right corner (beside References). They sit beside the page. "
+            + "Drag one in, and it lands as a copy with lineage back to the "
+            + "snippet, which stays in its group. Hold \u{2325} while dragging "
+            + "and the whole fan rides the copy, takes and all (the second "
+            + "snippet has two, to try exactly that).",
 
-            "The Snippets area's own dashed box mints them: start typing in "
-            + "it, press \u{23CE}, and the line is kept as a standalone snippet. "
-            + "Drag pieces out as your drafts want them \u{2014} copy out is the "
-            + "only direction, so the snippets never tangle with your notes.",
+            "The Snippets area's own dashed box mints them: start typing in it, "
+            + "press \u{23CE}, and the line is kept as a standalone snippet. Drag "
+            + "pieces out as your drafts want them. Copy out is the only "
+            + "direction, so the snippets never tangle with your notes.",
 
             // 13b 4D (N32(b)/(c) \u{2014} S4-8/S4-15): snippets are individual
             // items; the groups-vs-tags distinction said plainly.
             // librarywalkpolish VR-122 (F-9): the Snippets area's Canvas face
             // is Debug-only since 17y (p) — "or on a canvas card" left (the
             // guide teaches Canvas only through `lookingLessonContent`).
-            "Each snippet is its own item and can wear TAGS: right-click a "
-            + "snippet row \u{2014} here, or in the side panel "
-            + "\u{2014} and Tags\u{2026} opens its tag sheet. Worth keeping "
-            + "straight: a GROUP is a container (a snippet lives in exactly "
-            + "one; Move to Group moves it), while a TAG is a label (a snippet "
-            + "can wear many, and filtering by tag never moves anything).",
+            "Each snippet is its own item and can wear tags: right-click a "
+            + "snippet row (here, or in the side panel) and Tags\u{2026} opens "
+            + "its tag sheet. Worth keeping straight: a group is a container (a "
+            + "snippet lives in exactly one; Move to Group moves it), while a tag "
+            + "is a label (a snippet can wear many, and filtering by tag never "
+            + "moves anything).",
         ])
         _ = scraps
         let scrapPool = try ops.createPool(title: scrapPoolTitle)
@@ -2013,21 +2085,20 @@ enum TutorialSeeder {
         try take(on: fannedScrap,
             "the second take of the scrap — riding along on an \u{2325}-drag.")
 
-        _ = try lesson(library, "export — it's all yours", [
+        _ = try lesson(library, "export: it's all yours", [
+            // 13i-d U7 (F-U1-5): the book's row on the BOOKCASE carries Export.
             "Your work is always yours to take out. Any note exports as "
             + "Markdown or PDF from the library's right-click Export menu; a "
-            + "block exports alone via File \u{25B8} Export Block as Markdown\u{2026}; a "
-            // 13i-d U7 (F-U1-5): the book's row on the BOOKCASE carries Export.
-            + "book exports as one document — its chapters as headings, this "
-            + "very book included — from its row's right-click on the Bookcase; and "
-            + "File \u{25B8} Export Library\u{2026} writes the whole library as a folder "
-            + "of Markdown in one gesture.",
+            + "block exports alone via File \u{25B8} Export Block as "
+            + "Markdown\u{2026}; a book exports as one document, its chapters as "
+            + "headings, this very book included, from its row's right-click on "
+            + "the Bookcase; and File \u{25B8} Export Library\u{2026} writes the "
+            + "whole library as a folder of Markdown in one gesture.",
 
             "Exports are honest projections: the chosen take in place, and "
             + "Markdown with Takes\u{2026} adds a labeled Alternates section for "
-            + "every fanned block, so nothing you kept open is lost on paper. "
-            + "Try it on the choosing lesson — its four rain takes all reach "
-            + "the page.",
+            + "every fanned block, so nothing you kept open is lost on paper. Try "
+            + "it on the choosing lesson; its four rain takes all reach the page.",
 
             // 13r U3-A — R-13r-14 (her refinement at the U3 kickoff,
             // verbatim: *"if the user guide needs an updated backups session
@@ -2043,65 +2114,39 @@ enum TutorialSeeder {
             // Variorum KEEPS — the same promise, "it's all yours", from the
             // other side; the Mac-only seeder, so the phone (which has no
             // picked-folder road) is never told about a door it lacks.
-            "BACKUPS happen on their own. Once a day while Variorum is open, it "
+            "Backups happen on their own. Once a day while Variorum is open, it "
             + "copies your whole library into a backups folder right beside the "
-            + "library, on this Mac \u{2014} no button, nothing to remember. Those "
-            + "copies survive a mistake; they don\u{2019}t survive losing the Mac.",
+            + "library, on this Mac. No button, nothing to remember. Those copies "
+            + "survive a mistake; they don\u{2019}t survive losing the Mac.",
 
-            "So you can add a second folder of your own choosing \u{2014} iCloud "
-            + "Drive, an external drive, any folder your cloud service syncs \u{2014} "
-            + "and every backup lands there too: Settings \u{25B8} "
-            + "\(SettingsPane.dataSafety.title), under \u{201C}"
-            + "\(DataSafetyCopy.secondFolderSection)\u{201D} \u{2014} its "
-            + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. If you "
-            + "haven\u{2019}t picked one, Variorum offers it a few days into your "
-            + "writing, with a quiet note at the bottom of the window: \u{201C}"
-            + "\(ProtectionCopy.iCloudOfferTitle)\u{201D}",
+            "So you can add a second folder of your own choosing (iCloud Drive, "
+            + "an external drive, any folder your cloud service syncs) and every "
+            + "backup lands there too: Settings \u{25B8} "
+            + "\(SettingsPane.dataSafety.title), under "
+            + "\u{201C}\(DataSafetyCopy.secondFolderSection)\u{201D}, its "
+            + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. "
+            + "If you haven\u{2019}t picked one, Variorum offers it a few days "
+            + "into your writing, with a quiet note at the bottom of the window: "
+            + "\u{201C}\(ProtectionCopy.iCloudOfferTitle)\u{201D}",
         ])
 
         let sealed = try lesson(library, "the seal", [
-            "This note is SEALED — marked complete. Everything under a sealed "
-            + "note refuses to change: typing, new takes, commits, divides, "
-            + "all of it, until you unseal.",
+            "This note is sealed: marked complete. Everything under a sealed "
+            + "note refuses to change. Typing, new takes, commits, divides, all "
+            + "of it, until you unseal.",
 
-            "Try to break it. Press \u{2318}S to commit, or \u{2318}\u{21E7}D to divide — each "
-            + "attempt is answered OUT LOUD at the bottom of the window: the "
-            + "app tells you the note is sealed rather than doing nothing. "
-            + "Typing simply finds the text read-only. A door that can't act "
-            + "tells you why, never nothing.",
+            "Try to break it. Press \u{2318}S to commit, or \u{2318}\u{21E7}D "
+            + "to divide. Each attempt is answered out loud at the bottom of the "
+            + "window: the app tells you the note is sealed rather than doing "
+            + "nothing. Typing simply finds the text read-only. A door that can't "
+            + "act tells you why, never nothing.",
 
             "The seal is reversible and gentle: the unseal door sits in the "
             + "bottom bar's note \u{25BE} group. Unseal this note, change a word, "
-            + "seal it again (same place). Sealing quietly commits any unsaved takes "
-            + "first — the guard insures exactly what it protects.",
+            + "seal it again (same place). Sealing quietly commits any unsaved "
+            + "takes first. The guard insures exactly what it protects.",
         ])
         try ops.lockPost(sealed.post.id)
-
-        let threeWays = try lesson(library, "three ways of working", [
-            "Everything in this book comes down to three ways of working with "
-            + "one piece of writing. This lesson is the map — it absorbs the "
-            + "old modes tutorial.",
-
-            "POLISH IN PLACE: just write. Most text needs no machinery — type, "
-            + "autosave keeps up, \u{2318}S keeps savepoints. If your text looks like "
-            + "basic text, it behaves like basic text.",
-
-            "THREAD ONE PIECE: when one block is the question, fan it. Takes "
-            + "hold the attempts side by side; \u{2713} picks what the note says; a "
-            + "lens remembers a whole set of picks without touching the note. "
-            + "The block below has a spare take to practice on.",
-
-            "The keeper's logbook recorded weather, oil, and wicks — never "
-            + "once the keeper.",
-
-            "FORK THE PIECE: when the STRUCTURE should differ — a rearranged "
-            + "argument, a different opening — duplicate the note as a version "
-            + "and let the two grow apart, linked and comparable. \u{201C}A lens is "
-            + "the same structure with different choices; a version is a "
-            + "different structure; promote is the bridge.\u{201D}",
-        ])
-        try take(on: threeWays.blocks[3],
-            "The logbook knew everything about the light and nothing about the keeping of it.")
 
         // ————————————————————————— books & the bookcase —————————————————————
         //
@@ -2118,45 +2163,60 @@ enum TutorialSeeder {
         // lesson the Welcome arrangement puts on the Welcome shelf).
         _ = try lesson(books, "the classics walk", [
             "Three kinds of thing live on your Bookcase, and this whole chapter "
-            + "rests on telling them apart. A GATHERING shows you every note "
-            + "matching its rule \u{2014} it holds nothing. A BOOK holds its notes "
-            + "as members. An OWNED book is the only place its notes live.",
+            + "rests on telling them apart. A gathering shows you every note "
+            + "matching its rule; it holds nothing. A book holds its notes as "
+            + "members. An owned book is the only place its notes live.",
 
             // 17y B-DEDUPE (R-17y-8): Jekyll left the default seed, so the
             // lesson teaches with what stands — Sherlock (owned), this guide
             // (a plain book), the classics gathering — and carries her
             // intake's own sentence: Jekyll is one Restore press away, an
             // example you choose. Words functional, 13s re-voices.
-            "All three are waiting on the Welcome shelf, where this guide sits "
-            + "too. Open the Bookcase in the sidebar, and on Welcome open the "
-            + "gathering called \u{201C}classics\u{201D}. Every Sherlock note wears "
-            + "the tag #classics, and the gathering is made from that tag \u{2014} "
-            + "so it shows every note wearing it without holding a single one "
-            + "of them.",
+            // 13s-b triage landing (R-13s-37's launch seed): the classics gathering
+            // left the fresh seed, so the gathering act is RESTAGED onto the seeded,
+            // unshelved starred notes gathering (a rule on the star) — the reader still
+            // does the thing with each of the three kinds.
+            "Two of the three are waiting on the Welcome shelf: this guide, a "
+            + "plain book, and the adventures of sherlock holmes, an owned book. "
+            + "The third kind is with your unshelved books: the starred notes "
+            + "gathering. A gathering is made from a rule and holds nothing, and "
+            + "this one's rule is the star. Star any lesson (right-click it "
+            + "\u{25B8} Star) and open the gathering: the note shows there "
+            + "without moving anywhere. Unstar it and it leaves on its own.",
 
-            "Look closer: every Sherlock note wears a quiet \u{201C}owned by\u{201D} "
-            + "mark naming its book. That book OWNS its notes \u{2014} they live there "
+            // 13s-b triage landing — two LANDING CORRECTIONS to the draft, each a
+            // claim the shipped build made false (the LANDING RECORD's LC-2/LC-3):
+            // the mark lives OUTSIDE its book (`OwnershipBadgeFace.badge` — inside,
+            // `.inBook` draws only the shared mark), and a restored Jekyll is a PLAIN
+            // book (the arrangement owns Sherlock alone — `classicBooks`); the two
+            // doors are named by their shipped Help titles.
+            "Look closer at Sherlock: anywhere outside its book (the Library, "
+            + "say), each of its notes wears a quiet \u{201C}owned by\u{201D} "
+            + "mark naming its book. That book owns its notes. They live there "
             + "and nowhere else. This guide is the plain kind: a book whose notes "
-            + "are ordinary members, free to live in other books too. And a second "
-            + "classic is one press away \u{2014} Help \u{25B8} Restore "
-            + "\u{201C}\(SampleLibraryJekyllBook.name)\u{201D} adds it as an example: "
-            + "its notes arrive wearing #classics and join this gathering beside "
-            + "Sherlock's.",
+            + "are ordinary members, free to live in other books too. Sherlock's "
+            + "notes also all wear the tag #classics, and the Help menu has two "
+            + "more classics doors: Restore "
+            + "\u{201C}\(SampleLibraryJekyllBook.name)\u{201D} adds a second "
+            + "classic whose notes arrive wearing the same tag, and Restore the "
+            + "\u{201C}classics\u{201D} Gathering adds a gathering made from that "
+            + "tag, which shows every note wearing it without holding a single "
+            + "one of them.",
 
-            "Click a Sherlock note's mark and you land in its book, at that very "
-            + "note. A gathering is a window onto notes that live somewhere; the "
-            + "mark is the door to where they live.",
+            "Click a Sherlock note's mark and you land in its book, at that "
+            + "very note. A gathering is a window onto notes that live somewhere; "
+            + "the mark is the door to where they live.",
         ])
 
         // The old "books & the shelf" lesson's working paragraphs, swept
         // (the area is the BOOKCASE; finishing and deleting moved to their
         // own lessons below).
         _ = try lesson(books, "a book from the inside", [
-            "You are inside a BOOK right now: an ordered collection of notes "
+            "You are inside a book right now: an ordered collection of notes "
             + "with real chapters. The chapter list on the left is workable: "
             + "\u{FF0B} new chapter, right-click a chapter to rename, move, or "
-            + "delete it, and drag the \u{28FF} dots \u{2014} in the list or on the "
-            + "page's chapter headings \u{2014} to reorder chapters. \u{FF0B} new note "
+            + "delete it, and drag the \u{28FF} dots (in the list or on the "
+            + "page's chapter headings) to reorder chapters. \u{FF0B} new note "
             + "mints a note right inside the book. Notes show as collapsed cards: "
             + "clicking a card opens the note in the full editor; its \u{25B8} "
             + "expands it in place, right here.",
@@ -2165,23 +2225,22 @@ enum TutorialSeeder {
             // Outline · Index · Book · Read (`BookView.bookMasthead`; the book
             // Index since pre-13u Act 10 wave 2c, editable in place since the
             // correction round). Words functional, 13s re-voices.
-            "Four views of a book share the toggle at the top. OUTLINE is "
-            + "this scroll, and it is where a book gets WRITTEN: chapter "
-            + "headings, notes you can collapse, and the same editor you "
-            + "write a note in. INDEX keeps a column of the chapters and notes "
-            + "beside the whole text; click any block in the text and it goes "
-            + "live right where it is. BOOK is a two-page spread \u{2014} each page is one "
-            + "whole note, and the page you are in is editable as Write or "
-            + "as its takes; \u{25C0} \u{25B6} turn the leaf two notes at a "
-            + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
-            + "READ is for reading only, in two faces: SCROLL, the whole "
-            + "book as one calm continuous page, and PAGES, real book pages "
-            + "with the text flowing across them \u{2014} turn the leaf, or scrub. "
-            + "A finished book opens into Read by itself.",
+            "Four views of a book share the toggle at the top. Outline is this "
+            + "scroll, and it is where a book gets written: chapter headings, "
+            + "notes you can collapse, and the same editor you write a note in. "
+            + "Index keeps a column of the chapters and notes beside the whole "
+            + "text; click any block in the text and it goes live right where it "
+            + "is. Book is a two-page spread. Each page is one whole note, and "
+            + "the page you are in is editable as Write or as its takes; \u{25C0} "
+            + "\u{25B6} turn the leaf two notes at a time, and \u{25C1} \u{25B7} "
+            + "nudge by one so you can re-pair. Read is for reading only, in two "
+            + "faces: scroll, the whole book as one calm continuous page, and "
+            + "pages, real book pages with the text flowing across them. Turn the "
+            + "leaf, or scrub. A finished book opens into Read by itself.",
 
             "A book can carry a word target (right-click it on the Bookcase "
-            + "\u{25B8} Length & Extent\u{2026}) \u{2014} this one wears one, so its "
-            + "row on the Bookcase shows progress. A single note can wear its own "
+            + "\u{25B8} Length & Extent\u{2026}). This one wears one, so its row "
+            + "on the Bookcase shows progress. A single note can wear its own "
             + "target too: click the word counts in the editor's bottom bar. "
             + "Targets are a measure, never a wall.",
         ])
@@ -2190,56 +2249,55 @@ enum TutorialSeeder {
         // lesson 8's first sentence, where the ritual meets it.
         _ = try lesson(books, "membership, not ownership", [
             "Editing a note that is in a book is always editing every book it "
-            + "appears in \u{2014} owned or not. Adding a note to a book never copies "
-            + "it. A copy only ever happens because you asked for one, and it "
-            + "always remembers where it came from.",
+            + "appears in, owned or not. Adding a note to a book never copies it. "
+            + "A copy only ever happens because you asked for one, and it always "
+            + "remembers where it came from.",
 
-            "Try it, start to finish. On the Bookcase press \u{FF0B} New Book and "
-            + "make a book called \u{201C}practice\u{201D}; inside it, \u{FF0B} new "
-            + "chapter, then \u{FF0B} new note, and write a line. Make a second book "
-            + "the same way. Now put that same note in the second book too: click "
-            + "the line naming the note's book at the top of its page, and the "
-            + "panel it opens has Add to Book.",
+            "Try it, start to finish. On the Bookcase press \u{FF0B} New Book "
+            + "and make a book called \u{201C}practice\u{201D}; inside it, "
+            + "\u{FF0B} new chapter, then \u{FF0B} new note, and write a line. "
+            + "Make a second book the same way. Now put that same note in the "
+            + "second book too: click the line naming the note's book at the top "
+            + "of its page, and the panel it opens has Add to Book.",
 
             "Edit the note from either book and look at the other: it changed "
-            + "too, because it is ONE note in two books. Then delete one of the "
-            + "books \u{2014} right-click it on the Bookcase \u{25B8} Delete "
-            + "Book\u{2026}. Deleting a plain book never touches a note: yours is "
+            + "too, because it is one note in two books. Then delete one of the "
+            + "books: right-click it on the Bookcase \u{25B8} Delete "
+            + "Book\u{2026}. Deleting a plain book never touches a note. Yours is "
             + "still there, in the other book and in the Library.",
 
             "A deleted book waits \(TrashWindow.days) days in the Trash (the "
-            + "trash icon at the top of the Library) with a Put back door \u{2014} "
-            + "its chapters and memberships come back with it. The only way a "
-            + "note dies is deleting the note.",
+            + "trash icon at the top of the Library) with a Put back door. Its "
+            + "chapters and memberships come back with it. The only way a note "
+            + "dies is deleting the note.",
         ])
 
         // Lesson 3 + ritual R3 + lesson 4 (with item 10's road back).
         _ = try lesson(books, "gatherings & arrivals", [
             "A gathering is made from a tag. Remove the tag and the note leaves "
-            + "on its own. You can't rearrange a gathering \u{2014} bind it into a "
-            + "book to take it in hand, and it keeps collecting after you do.",
+            + "on its own. You can't rearrange a gathering: bind it into a book "
+            + "to take it in hand, and it keeps collecting after you do.",
 
-            "Try it with two of this chapter's own lessons. Give this lesson and "
-            + "the next one a tag of your own \u{2014} say #trial, with the "
-            + "\u{FF03} on the masthead. On the Bookcase, \u{FF0B} New Book "
-            + "\u{25B8} Create Gathering\u{2026}, and gather from #trial: both "
-            + "lessons show. Take the tag off one \u{2014} it leaves the gathering "
-            + "at once.",
+            "Try it with two of this chapter's own lessons. Give this lesson "
+            + "and the next one a tag of your own, say #trial, with the \u{FF03} "
+            + "on the masthead. On the Bookcase, \u{FF0B} New Book \u{25B8} "
+            + "Create Gathering\u{2026}, and gather from #trial: both lessons "
+            + "show. Take the tag off one and it leaves the gathering at once.",
 
             "Now right-click the gathering on the Bookcase \u{25B8} Bind into a "
-            + "Book\u{2026}. It becomes a book holding the lesson it showed "
-            + "\u{2014} and it keeps collecting: tag the other lesson #trial again "
-            + "and the book takes it in. Being a book, it can wear your own "
-            + "order: drag one note above the other. Then take the tag off "
-            + "either one \u{2014} it STAYS. A book's notes are members, and "
-            + "untagging never sends a member away.",
+            + "Book\u{2026}. It becomes a book holding the lesson it showed, and "
+            + "it keeps collecting: tag the other lesson #trial again and the "
+            + "book takes it in. Being a book, it can wear your own order: drag "
+            + "one note above the other. Then take the tag off either one. It "
+            + "stays. A book's notes are members, and untagging never sends a "
+            + "member away.",
 
             // 17y B-DEDUPE (B3's F-B3-1): the door moved to the book
             // masthead's Arrivals icon at 17y B3 (R-17y-1/2) — the lesson
             // names the face that exists. Words functional, 13s re-voices.
             "A collecting book auto-adds freely; anything it can't seat on its "
-            + "own waits at Arrivals \u{2014} the little tray beside the book's "
-            + "settings gear \u{2014} for you to judge: add it, copy it in, or dismiss it. "
+            + "own waits at Arrivals, the little tray beside the book's settings "
+            + "gear, for you to judge: add it, copy it in, or dismiss it. "
             + "Finishing a book dismisses whatever is still waiting. Changed your "
             + "mind? Add it by hand; dismissing only stops the book from adding "
             + "it on its own.",
@@ -2251,18 +2309,17 @@ enum TutorialSeeder {
             + "elsewhere too? You'll get a copy, and you'll know. Remove it and "
             + "it goes back to the Pool, whole.",
 
-            "Try it on your \u{201C}practice\u{201D} book: right-click it on the "
-            + "Bookcase \u{25B8} Own Its Notes\u{2026}. Now add its note to "
-            + "another book \u{2014} the app stops and offers the copy, and says "
-            + "so. Then, inside the book, right-click the note \u{25B8} Release "
-            + "from This Book: it goes to the Pool, whole. (On a book that "
-            + "doesn't own its notes the same door reads Remove from This Book.)",
+            "Try it on your \u{201C}practice\u{201D} book: right-click it on "
+            + "the Bookcase \u{25B8} Own Its Notes\u{2026}. Now add its note to "
+            + "another book: the app stops and offers the copy, and says so. "
+            + "Then, inside the book, right-click the note \u{25B8} Release from "
+            + "This Book: it goes to the Pool, whole. (On a book that doesn't own "
+            + "its notes the same door reads Remove from This Book.)",
 
-            "Finished means the table of contents is done \u{2014} the writing "
-            + "inside can still change. Sealed means the book is done. Both "
-            + "doors are on the book's right-click and in its Book "
-            + "Settings\u{2026}: Finish and Seal\u{2026}, and Reopen and Unseal "
-            + "take them back.",
+            "Finished means the table of contents is done; the writing inside "
+            + "can still change. Sealed means the book is done. Both doors are on "
+            + "the book's right-click and in its Book Settings\u{2026}: Finish "
+            + "and Seal\u{2026}, and Reopen and Unseal take them back.",
 
             "Deleting a plain book never touches a note. Deleting an owned book "
             + "asks: keep the notes (they go to the Pool) or take them too. The "
@@ -2279,21 +2336,22 @@ enum TutorialSeeder {
         // hand-placing sentence back (`noLessonTeachesADoorThisReleaseHides`
         // holds every lesson to the release's doors).
         _ = try lesson(books, "the bookcase", [
-            "Your books live on shelves, alphabetical until you choose otherwise. "
-            + "The shelves run left to right exactly as All stacks them top to "
-            + "bottom. Unshelved books wait at the top until you file them.",
+            "Your books live on shelves, alphabetical until you choose "
+            + "otherwise. The shelves run left to right exactly as All stacks "
+            + "them top to bottom. Unshelved books wait at the top until you file "
+            + "them.",
 
             // librarywalkpolish VR-122 (F-11 — the round-2 ladder's one note
             // for this pass): the strip reads All · starred · the shelves since
             // 17y (s) (R-17y-9's VIRTUAL shelf — no menu, never deleted).
             "The shelves are the strip across the top of the Bookcase: All, "
-            + "then starred, then each shelf by name \u{2014} Welcome is the one this guide "
-            + "came on. Starred isn't a shelf you file into: it shows every starred "
-            + "book, wherever it's shelved, and it can't be renamed or deleted. "
-            + "\u{FF0B} shelf makes another; right-click a shelf to "
-            + "rename it, give it a glyph, make it the default, or delete it "
-            + "(its books just return to Unshelved). The order \u{25BE} beside "
-            + "them reads A\u{2013}Z or last edited.",
+            + "then starred, then each shelf by name. Welcome is the one this "
+            + "guide came on. Starred isn't a shelf you file into: it shows every "
+            + "starred book, wherever it's shelved, and it can't be renamed or "
+            + "deleted. \u{FF0B} shelf makes another; right-click a shelf to "
+            + "rename it, give it a glyph, make it the default, or delete it (its "
+            + "books just return to Unshelved). The order \u{25BE} beside them "
+            + "reads A\u{2013}Z or last edited.",
 
             "Try it: drag a book onto a shelf's name to file it there (or "
             + "right-click the book \u{25B8} Move to Shelf). Switch the order "
@@ -2302,50 +2360,78 @@ enum TutorialSeeder {
             + "books float first, under any order, and starred gathers them all "
             + "in one place.",
 
-            "The Bookcase is a PLACE \u{2014} arranged by you, and it stays "
-            + "where you put it. Finding is the Library's work: search and the "
-            + "day filter live there, never here.",
+            "The Bookcase is a place, arranged by you, and it stays where you "
+            + "put it. Finding is the Library's work: search and the day filter "
+            + "live there, never here.",
         ])
 
         // Lesson 9 WHOLE — its second sentence (archive · can't delete ·
         // comes back) landed WITH 13i-e's guard (F-U7-2's pin flipped at
-        // 13i-e U2) — + lesson 10, shown on the seeded quicknote the Welcome
-        // arrangement left in the Pool.
+        // 13i-e U2) — + lesson 10, shown on a quick note the READER makes
+        // (13s-b triage landing: the seeded quicknote the Welcome arrangement
+        // once left in the Pool is gone from the fresh seed, R-13s-37).
         _ = try lesson(books, "the journal & the pool", [
-            "The daily Journal is an ordinary book that is special in one way: "
-            + "it's where \u{2318}J and Today's Entry file. You can archive it; you "
-            + "can't delete it; it comes back when a day arrives. Today's Entry sits at "
-            + "the top of the Bookcase; the Journal itself waits among your "
-            + "unshelved books until you file it.",
+            "The journal is an ordinary book that is special in one way: it is "
+            + "where \u{2318}J and Today's Entry file. It is made the first time "
+            + "you ask for a day's entry, and from then on you can archive it but "
+            + "you can't delete it, and it comes back when a day arrives. Today's "
+            + "Entry sits at the top of the Bookcase; the journal itself waits "
+            + "among your unshelved books until you file it.",
 
             "The Pool is every note with no book. Notes that show in gatherings "
-            + "tuck behind the count in its masthead \u{2014} one click shows them.",
+            + "tuck behind the count in its masthead; one click shows them.",
 
-            "There is one waiting for you: \u{201C}a first quick note\u{201D} has "
-            + "no book, so it lives in the Pool \u{2014} and Quicknotes shows it, "
-            + "so it tucks behind the count. Open the Pool, click show, and there "
-            + "it is.",
+            // 13s-b triage landing (R-13s-37 — the seeded quicknote left the fresh
+            // seed; Quicknotes mints at the first capture): RESTAGED — the reader
+            // MAKES the quick note (⌘⇧N) and finds it tucked in the Pool.
+            "See it happen: press \u{2318}\u{21E7}N, type a line, and close the "
+            + "pad. What you wrote is kept as a note, tagged "
+            + "\u{201C}quicknote\u{201D}, and the "
+            + "\(Operations.defaultQuicknoteBookName) gathering appears on your "
+            + "Bookcase to show it. The note itself is in no book, so it lives in "
+            + "the Pool, tucked behind the count because a gathering shows it. "
+            + "Open the Pool, click show, and there it is.",
         ])
 
         // Lesson 11 (+ §18.6's small note: the Work is a SHELF; a wing when
         // you want true separation).
         _ = try lesson(books, "wings", [
-            "A wing is a separate library in the same app \u{2014} a different room "
-            + "in the same house. Nothing crosses between wings except what you "
-            + "move or copy yourself.",
+            // 13s-b triage landing (P-LAND-1): this block IS the New Wing prompt's
+            // sentence (`WingWords.lesson`, pinned by lesson 11) — a shipped surface's
+            // words, so its dash stays until the prompt itself is re-voiced.
+            "A wing is a separate library in the same app \u{2014} a different "
+            + "room in the same house. Nothing crosses between wings except what "
+            + "you move or copy yourself.",
 
-            "Most separation wants a SHELF. A wing is for when you want a whole "
+            "Most separation wants a shelf. A wing is for when you want a whole "
             + "separate library: the Bookcase's masthead names the one you're in "
-            + "\u{2014} Home, to begin with \u{2014} and its menu has New "
-            + "Wing\u{2026}. Switch, and everything shows that wing alone: the "
-            + "Bookcase, the Library, the Pool, your tags, search.",
+            + "(Home, to begin with) and its menu has New Wing\u{2026}. Switch, "
+            + "and everything shows that wing alone: the Bookcase, the Library, "
+            + "the Pool, your tags, search.",
 
             "Once a second wing exists, a note's right-click carries Move to "
             + "Wing and Copy to Wing, and a book's carries Move to Wing. Those "
-            + "are the only crossings. Home "
-            + "holds the daily Journal, your quick notes and this guide, and it "
-            + "can't be deleted.",
+            + "are the only crossings. Home holds the journal, your quick notes "
+            + "and this guide, and it can't be deleted.",
         ])
+
+        // ————————————————————————— keeping it private —————————————————————
+        //
+        // pre-13x 5a — copy §7's SHORT chapter (the postures design §1.22 /
+        // §8): two lessons, their paragraphs VERBATIM from the copy
+        // constants (`PostureCopy.swift`), the device nouns interpolated.
+        // What's true in every mode; Standard and Castle and what you must
+        // keep in each; the open-app sentence (the door to the seeded book
+        // *Encryption Explained* retired at 13s-b U1b, R-13s-37). The 13p
+        // dials lesson and its loss-math composition retired with the
+        // presets, the escrow dial and the reset door they described (§13).
+        // 13s-b triage landing: minted LAST (the chapter moved last; a
+        // membership's position is its mint order), the text untouched.
+
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
+                       ProtectionCopy.privacyLessonOneParagraphs)
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
+                       ProtectionCopy.privacyLessonTwoParagraphs)
 
         return book.id
     }

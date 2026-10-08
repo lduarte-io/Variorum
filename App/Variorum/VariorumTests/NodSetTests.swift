@@ -278,7 +278,7 @@ struct NodSetTests {
             #expect(curated == 0)
             // The status line says where it went, in her words' terms.
             // 18i: the filing receipt rides `spoken` (quiet by default).
-            #expect(session.status.spoken?.text.contains("Quicknotes") == true)
+            #expect(session.status.spoken?.text.contains(Operations.defaultQuicknoteBookName) == true)  // 13s-b U1b: the one name constant
         }
     }
 

@@ -89,6 +89,16 @@ final class PoolPostsModel {
         await loadTags()
     }
 
+    /// **Open the tucked run, idempotently** (13s-b U2, F-U2-W-2 — the
+    /// tour's leg 3: her starred note is tucked, and the leg's door is on its
+    /// row). The masthead's "show" is a TOGGLE; this only ever opens, so a
+    /// second ask never closes what the first opened. Leaving the page still
+    /// tucks it away (`tuckAway`), exactly as every visit does.
+    func showTucked() async {
+        guard !showsTucked else { return }
+        await toggleTucked()
+    }
+
     /// Leaving the page tucks the run away again — a fresh visit opens
     /// tucked (P-13ib-U4-4). The model is RootView's and outlives the page,
     /// so without this the click outlived the visit (F-U4-3, walk-found).
@@ -448,6 +458,8 @@ struct PoolPostsView: View {
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                 .help("Into a book — the pool's whole point. Search opens; finished books say so.")
+                // 13s-b U2: the leg's third stop ("Click into add to book").
+                .tourAnchor(.poolAddToBook(item.postID), cornerRadius: 6)
             }
         }
         .contentShape(Rectangle())

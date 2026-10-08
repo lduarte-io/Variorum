@@ -402,6 +402,8 @@ struct PostDetailView: View {
             .padding(.top, 12)
             .padding(.bottom, 8)
             .background(tokens.surface)
+            // 13s-b U2 (A2): the tour's cards never cover the masthead.
+            .tourKeepClear()
             .coordinateSpace(name: Self.mastheadSpace)
             // Row 50: every masthead probe under here — the chip, the tag
             // cards, the open field, the ＃ door, the stamp — reports into

@@ -30,16 +30,19 @@ private final class BookMark {
 @Suite("18o U2 — row 66: the phone's first-write occasion honours a seeded book's tombstone")
 struct MobileFirstWriteTombstoneTests {
 
-    /// RED-ON-OLD — *Encryption Explained* arrived and was deleted; the
-    /// first write's occasion declines it (Sherlock's and the Jekyll book's
-    /// marks read "already seeded", so their parses never run).
+    /// RED-ON-OLD — a seeded book arrived and was deleted; the first
+    /// write's occasion declines it. **JUSTIFIED VEHICLE EDIT (13s-b U1b):**
+    /// the pin rode *Encryption Explained*, which left the phone's default
+    /// seed at R-13s-5/37 — the SUBJECT (the tombstone honoured through the
+    /// one shared brain) is unchanged and now rides SHERLOCK, the remaining
+    /// first-write book, through the same `seedIfNeeded` road.
     @Test func aDeletedSeededBookIsNotReMintedByTheFirstWrite() async throws {
         try await withEditorWorld { session, db in
             // Both session leaves injected — a headless run never writes the
             // test host's defaults (RUN A A2 row 8's rule).
             session.seededBookMarkIsSet = { _ in false }
             session.markSeededBook = { _ in }
-            let book = SampleLibrarySeeder.Book.encryptionExplained
+            let book = SampleLibrarySeeder.Book.sherlock
 
             // The book ARRIVED (the seeder's own mint, no mark written) and
             // the reader then deleted it.
@@ -57,13 +60,14 @@ struct MobileFirstWriteTombstoneTests {
                 session: session, storeVariant: .dev,
                 marks: .init(
                     loadJournal: { true }, saveJournal: { _ in },
-                    loadSample: { true }, saveSample: { _ in },
-                    loadEncryptionBook: { mark.value },
-                    saveEncryptionBook: { mark.value = $0 }))
-            _ = await furniture.run()
+                    loadSample: { mark.value },
+                    saveSample: { mark.value = $0 }))
+            guard case .ran(_, let sample) = await furniture.run() else {
+                Issue.record("expected the occasion to run")
+                return
+            }
 
-            #expect(furniture.encryptionBookOutcome == .deletedByTheReader,
-                    "\(String(describing: furniture.encryptionBookOutcome))")
+            #expect(sample == .deletedByTheReader, "\(String(describing: sample))")
             let name = book.name
             let live = try await db.read { db in
                 try Queries.readings(db).filter { $0.name == name }.count

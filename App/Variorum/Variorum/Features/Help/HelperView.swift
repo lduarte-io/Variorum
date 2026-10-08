@@ -82,7 +82,10 @@ struct HelperView: View {
         ShortcutGroup(title: "Writing", items: [
             // 13u3 UNIT D (item 14): the two-key road, said in the two
             // keys — ⏎ on the empty field is the fast one.
-            ("⌘S", "commit — an immutable savepoint of the take you're in; "
+            // 13s-b U4 (R-13s-31): the definition rides the app's plain
+            // gloss, the saved moment — "commit" defining itself would read
+            // twice (her R-13s-32 note; PROVISIONAL P-U4-1).
+            ("⌘S", "commit — an immutable saved moment of the take you're in; "
                 + "name it or press ⏎ to save it unnamed"),
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
@@ -242,8 +245,24 @@ struct HelperView: View {
                 + "\u{23CE} applies; \u{2715} on a card takes it off"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
-            ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
-                + "note's date"),
+            // 13s-b U4 round 2 (the NIT adopted in-ladder): this group's own
+            // rule — a door that moves gets a line — for the door that left
+            // `note ▾` at the post-13l polish round and lost its line here at
+            // U4's round 1. Block History is the BLOCK's, on both bars, beside
+            // commit; the face's name and the door's word are their constants.
+            ("\(BlockHistoryPath.doorLabel) (bottom bar)", "\(BlockHistoryPath.name), beside "
+                + "commit: everything the block you're in has been \u{2014} each take's "
+                + "commits, the takes it set aside or deleted, and the block it came out of"),
+            // 13s-b U4 round 1 (MINOR-2): the row taught a "history" door
+            // this menu has not carried since the post-13l polish round
+            // (Block History sits beside commit — her F2: "it's unclear that
+            // history is under Note"). It now lists the menu's own doors,
+            // each from its constant, in the menu's order (the wing doors
+            // render only while another wing exists, so they stay unsaid).
+            ("note \u{25BE} (bottom bar)", "\(VersionsPath.saveVerb.lowercased()) · "
+                + "\(VersionsPath.menuLabel.lowercased()) · "
+                + "\(SplitAtNewlinesCopy.noteDoor.lowercased()) · seal / unseal · "
+                + "the note's date · \(RecoveryCopy.deleteNoteTitle.lowercased())"),
         ]),
     ]
 
@@ -362,7 +381,7 @@ struct HelperView: View {
          + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
          + "select in your take, and the app carries the selection to Write and acts."),
         ("commit",
-         "An immutable savepoint of one take (⌘S). It can carry a NAME — ⌘S "
+         "An immutable saved moment of one take (⌘S). It can carry a NAME — ⌘S "
          + "offers a field, ⏎ saves it named or not — and the name is editable "
          + "afterwards from Block History. Commits are append-only: restoring "
          + "one never erases another, and a name never touches the text."),
@@ -398,8 +417,10 @@ struct HelperView: View {
          + "gathering from tags."),
         // 13g batch 7 (R6-4): quick notes now file themselves.
         ("quicknote (the tag)",
+         // 13s-b U1b (R-13s-36/38): the entry NAMES the default gathering,
+         // so it reads the one constant (the fresh default is lowercase).
          "Every quick note is tagged \u{201C}quicknote\u{201D}, and the gathering "
-         + "\u{201C}Quicknotes\u{201D} shows the tag \u{2014} so take the tag off and the "
+         + "\u{201C}\(Operations.defaultQuicknoteBookName)\u{201D} shows the tag \u{2014} so take the tag off and the "
          + "note leaves it, because a gathering is just its rule."),
         ("canvas",
          "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
@@ -473,7 +494,7 @@ struct HelperView: View {
          + "pad; \u{21E7}\u{23CE} adds another paragraph, so a capture can hold as many "
          + "as the thought needs; closing it (or \u{2318}\u{23CE}) files it too. What you "
          + "wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} \u{2014} the "
-         + "Quicknotes gathering shows it, and taking the tag off sends it back to the "
+         + "\(Operations.defaultQuicknoteBookName) gathering shows it, and taking the tag off sends it back to the "
          + "Pool."),
     ]
 

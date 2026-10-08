@@ -36,6 +36,11 @@ final class ShellRouter {
     /// 13r U3-A: Help ▸ What's New — a REQUEST the shell adopts (the sheet
     /// is the window's to present), the `quickNoteRequested` shape exactly.
     var whatsNewRequested = false
+    /// 13s-b U1a, piece 5: Help ▸ Take the Tour — a REQUEST the shell adopts
+    /// (the tour runs over this window), `whatsNewRequested`'s shape exactly.
+    /// The shell answers it with the ONE tour entry the offer line's "yes"
+    /// calls (`RootView.startTour()`).
+    var tourRequested = false
     /// **Whether this window's sidebar is on screen** (the Act 10 correction
     /// round, batch A — row 2). The split view used to hold this for us; with
     /// the flat `ShellSplit` it is per-window state here, toggled by the

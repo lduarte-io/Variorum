@@ -1724,8 +1724,7 @@ final class TakesViewModel {
         await autosave.flushNow()
         await run { ops in _ = try ops.commit(variantID, message: name) }
         if status == nil {
-            setReceipt(name.map(SavepointNameCopy.filed)
-                ?? "Committed — an immutable savepoint of this take.")
+            setReceipt(name.map(SavepointNameCopy.filed) ?? SavepointNameCopy.unnamedReceipt)
         }
     }
 
@@ -2282,7 +2281,7 @@ final class TakesViewModel {
         await run { ops in try ops.restoreCommit(commit.variantId, commitID: commit.id) }
         if status == nil {
             setReceipt(
-                "Restored — the savepoint is back in the take's buffer. Nothing was lost: commits are append-only."
+                "Restored — the commit's text is back in the take's buffer. Nothing was lost: commits are append-only."
             )
         }
     }

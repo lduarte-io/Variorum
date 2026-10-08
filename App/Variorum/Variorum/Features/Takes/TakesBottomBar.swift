@@ -277,6 +277,8 @@ struct TakesBottomBar: View {
             .padding(.vertical, 6)
             .background(tokens.room)
         }
+        // 13s-b U2 (A2): the tour's cards never cover the bar.
+        .tourKeepClear()
         .task(id: model.projection) { await model.refreshSegmentation() }
         // Ledger row 17: the FALLBACK host, Write's bar's twin — the pane's
         // named home is the post detail's inspector, and this bar also rides
@@ -373,7 +375,7 @@ struct TakesBottomBar: View {
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)
-        .help("An immutable savepoint of the take you're in — name it, or "
+        .help("An immutable saved moment of the take you're in — name it, or "
             + "press ⏎ to save it unnamed")
         // Ledger row 17 — the pair, Write's bar's twin. Never disabled: a
         // sealed note's history is still readable (the seal freezes writing,
@@ -510,7 +512,7 @@ struct TakesBottomBar: View {
         .noteMenuWingDoors(
             session: model.session, postID: model.postID, wings: wings,
             context: $wingContext, ask: $wingAsk)
-        .help("The note itself: its seal and its date (a block's savepoints "
+        .help("The note itself: its seal and its date (a block's commits "
             + "are the history door beside commit; its tray is the tray icon "
             + "at the top of the note)")
         .popover(isPresented: $datePickerShown) {

@@ -98,6 +98,14 @@ struct NoteOpenLandingTests {
             EditorTypography.current = typography
             EditorTypography.isAdopted = adopted
         }
+        // 13s closeout — the Study-default harness class (`TerminalMetricsPin`
+        // in EditorTestSupport has the trace): this save/restore predates the
+        // Study no-voice default and assumed the process state WAS Terminal.
+        // Begin process-fresh so the landing geometry measures the voice the
+        // pins were calibrated against; the defer above restores as found.
+        EditorTypography.current = EditorTypography.resolve(
+            voice: .terminal, inlineComments: false)
+        EditorTypography.isAdopted = false
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -105,6 +113,9 @@ struct NoteOpenLandingTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: rng))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            // The store carries the Terminal voice row so any in-test
+            // adoption keeps the calibrated voice.
+            try session.operations.setThemeVoice(.terminal)
             let post = try session.operations.createPost(title: "the note she opens")
             var blocks: [String] = []
             var variants: [String] = []

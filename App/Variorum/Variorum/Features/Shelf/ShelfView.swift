@@ -17,7 +17,8 @@
 //  · the books: a solo'd shelf's rows, or ALL — UNSHELVED at the top under
 //    its own collapsible header (§24's overrule), then every shelf in strip
 //    order under the Library's gray section labels, collapsible;
-//  · the quick-entry box (R3), and at the window's foot the ⌘K hint bar,
+//  · at the window's foot (R3, returned at 13s-b — R-13s-3): the quick-entry
+//    box, then the ⌘K hint bar directly under it,
 //    whose trailing end is now the board's QUIET RECEIPT home (18i) — the
 //    old report overlay drew ON TOP of the hint (KnownIssues rows 103 and
 //    108, closed by the rebuild).
@@ -71,6 +72,13 @@ struct ShelfView: View {
     /// the composition root and handed in). nil in harness mounts: the
     /// masthead then reads "Bookcase" alone, exactly as before.
     var wings: WingsModel? = nil
+    /// 13s-b U1a (R-13s-2/6/13) — **the first-open tour offer's row**, built
+    /// by the composition root and RENDERED here, between the quick-entry box
+    /// and the bottom bar (her R-13s-3: "the tutorial offer can live above
+    /// that bar on the right side"). The Bookcase never holds the onboarding
+    /// feature's model — it draws the view it is handed (the sidebar note
+    /// box's road). nil (harness mounts, a retired offer at launch): no row.
+    var offerLine: AnyView? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -115,12 +123,9 @@ struct ShelfView: View {
     /// hairline), and the section header a book hovers over (re-shelve).
     @State private var rowDropTarget: String?
     @State private var headerDropTarget: String?
-    /// Batch 9 (R102): the list region hugs its content, so the
-    /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
-    /// geometry at every window size. On a board taller than the window the
-    /// region fills the window and the bar stays pinned above the fold,
-    /// exactly as R3 ruled.
-    @State private var listContentHeight: CGFloat = 0
+    // (13s-b U1a, R-13s-3: the `listContentHeight` hug that seated the
+    // quick-entry box right under the rows — batch 9's R102 — is retired;
+    // the box is back at the board's foot. See `body`.)
     #if DEBUG
     /// 17y B2 (F-B2-5): the board's own name in `BookcaseRowOracle` (the C4
     /// rule — its rows' records live exactly as long as this board).
@@ -144,6 +149,9 @@ struct ShelfView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+                // 13s-b U2 (A2): the tour's cards never cover the masthead,
+                // the strip or the bottom bar.
+                .tourKeepClear()
             Divider().overlay(tokens.line)
             BookcaseStrip(
                 model: model, tokens: tokens, menuActions: shelfMenuActions,
@@ -151,6 +159,7 @@ struct ShelfView: View {
                     shelfNameField = ""
                     newShelfPresented = true
                 })
+                .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
@@ -165,16 +174,41 @@ struct ShelfView: View {
                 // little air under the strip (All's headers carry their own).
                 .padding(.top, model.effectiveScope == .all ? 0 : 6)
                 .padding(.bottom, 10)
-                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) {
-                    listContentHeight = $0
-                }
             }
-            .frame(maxHeight: listContentHeight > 0 ? listContentHeight : nil, alignment: .top)
+            // 13s-b U1a — R-13s-3, her words: *"please make the 'new note,
+            // just start typing' default to being at the bottom of the page
+            // again (above the bottom bar, but not right up next to books)."*
+            // THE TRACE: R3 (Phase 13 sitting 1) put the box at the BOTTOM
+            // with the list above it scrollable; batch 9's R102 made the list
+            // HUG its content so the box rode right under the last book; batch
+            // 14 (R109) sent the ⌘K hint to the window's foot and kept the box
+            // high with the list (a Spacer between them). Her ruling returns
+            // R3's geometry: the board takes every point the window has, so
+            // the box sits at the foot directly above the bottom bar — air
+            // between it and the rows on a short board, the rows scrolling
+            // above it on a long one (R3's "max height + scrollable", kept).
+            .frame(maxHeight: .infinity, alignment: .top)
             entryBar
-            // Batch 14: the ⌘k advice bar rides the WINDOW BOTTOM (her
-            // ask); the entry box stays high with the list.
-            Spacer(minLength: 0)
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, owner: oracleOwner)
+                }
+                #endif
+            if let offerLine {
+                offerLine
+                    #if DEBUG
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                        BookcaseRowOracle.recordFrame(BookcaseRowOracle.offerRowKey, $0, owner: oracleOwner)
+                    }
+                    #endif
+            }
             hintBar
+                .tourKeepClear()
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, owner: oracleOwner)
+                }
+                #endif
         }
         .background(tokens.surface)
         // librarywalkpolish VR-115 — THE TWO DROPPERS, ONE IDIOM. № and order
@@ -642,6 +676,9 @@ struct ShelfView: View {
                 }
             }
             .buttonStyle(.plain)
+            // 13s-b U2: step 2 points at the seeded book's row, the leg's end
+            // at the field guide's (and step 3's road back into the book).
+            .tourAnchor(.bookcaseRow(reading.id))
             .overlay(alignment: .top) {
                 // My order's insertion hairline: the dragged book lands HERE.
                 if placing, rowDropTarget == reading.id {
@@ -1119,6 +1156,12 @@ enum BookcaseRowOracle {
     static let censusPanelKey = "\u{2116}panel"
     /// librarywalkpolish VR-115: the order popover's frame.
     static let orderPanelKey = "\u{2116}order"
+    /// 13s-b U1a (R-13s-3): the quick-entry box's frame and the bottom
+    /// bar's, so a pin can read where the box sits (`BookcaseQuickEntryPlacementTests`).
+    static let entryKey = "\u{2116}entry"
+    static let hintBarKey = "\u{2116}hint"
+    /// 13s-b U1a (R-13s-2/6/13): the tour offer's row, when it has one.
+    static let offerRowKey = "\u{2116}offer"
 
     /// A pin's door: start from empty.
     static func forgetAll() {

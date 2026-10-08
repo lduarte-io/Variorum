@@ -1124,7 +1124,7 @@ struct TrayPanel: View {
                     TrayRowVerbs(
                         tokens: tokens, rowID: take.variantID,
                         putBackHelp: "Puts this take back exactly as it was — its label, its "
-                            + "place in the fan and its savepoints come back with it "
+                            + "place in the fan and its commits come back with it "
                             + "(a take that was archived when it was deleted comes "
                             + "back archived)",
                         putBack: { await model.putBackTake(take.variantID) },

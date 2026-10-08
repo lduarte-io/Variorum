@@ -616,6 +616,9 @@ struct TakesBoardView: View {
                 LazyVStack(alignment: .leading, spacing: 6) {
                     ForEach(model.projection.slots, id: \.placementID) { slot in
                         articleRow(slot: slot, commentRoom: commentRoom)
+                            // 13s-b U2: step 7 points at the block she made a
+                            // take of — both takes, side by side.
+                            .tourAnchor(.takesBlock(slot.blockID), cornerRadius: 10)
                             .onAppear { model.rowAppeared(slot.blockID) }
                             .onDisappear {
                                 model.rowDisappeared(slot.blockID)

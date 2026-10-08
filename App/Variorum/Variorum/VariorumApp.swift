@@ -133,6 +133,19 @@ struct VariorumApp: App {
         noteWindows
     }
 
+    /// The launch seed's REAL gate (17y B-SEED's composition, byte-moved —
+    /// 13s-b U1b's diagnosis only NAMED it so the DEBUG walk override above
+    /// has one production body to fall through to): captured strongly,
+    /// deliberately — the closures outlive nothing, and a nil'd weak
+    /// reference would read as "no account", which is the unsafe direction.
+    private func productionSeedGate(_ fresh: AppServices) -> SampleLibrarySeeder.SyncGate {
+        SampleLibrarySeeder.SyncGate(
+            belongsToAnAccount: {
+                fresh.sync.isConfigured || fresh.account.variorum != nil
+            },
+            hasSyncedCleanly: { fresh.sync.status.lastSuccessAt != nil })
+    }
+
     @ViewBuilder
     private var mainWindowContent: some View {
             switch bootstrap.state {
@@ -141,7 +154,9 @@ struct VariorumApp: App {
                     session: session, services: services,
                     protection: bootstrap.protection, windows: windows,
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
-                    calmAsks: appDelegate.calmAsks)
+                    calmAsks: appDelegate.calmAsks,
+                    // 13s-b U1a: the first-open tour offer's one model.
+                    tourOffer: appDelegate.tourOffer)
                     .onAppear {
                         appDelegate.session = session
                         #if DEBUG
@@ -176,13 +191,10 @@ struct VariorumApp: App {
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half
                             // alone — its pocket guide is the parity row).
-                            furnitureFacts: {
-                                let guide = TutorialSeeder.furnitureFactsHalf()
-                                return SampleLibrarySeeder.furnitureDedupeFacts(
-                                    guideBookName: guide.guideBookName,
-                                    guideTagPath: guide.guideTagPath,
-                                    guideContainers: guide.containers)
-                            }(),
+                            // 13s-b U1b: composed in ONE named, pinnable
+                            // place — and it now carries the readme and the
+                            // example snippet (the birth furniture's folds).
+                            furnitureFacts: MacFurnitureFacts.compose(),
                             // The retired-credential sweep — REQUIRED at the
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
@@ -323,21 +335,37 @@ struct VariorumApp: App {
                         // verbatim into `LaunchFurniture.seed` so the pins
                         // drive this exact composition — its header carries
                         // every seed's reasons.
+                        let seedGate: SampleLibrarySeeder.SyncGate
+                        #if DEBUG
+                        // 13s-b U1b DIAGNOSIS (the coordinator's fresh-walk
+                        // block, 2026-10-08 — the U1b record's section): the
+                        // DEV scope carries a persisted device-bound session
+                        // that a store reset never clears, so EVERY fresh
+                        // dev store takes the arrive-by-sync road and — dev
+                        // sync being off by the A4 fence — waits forever,
+                        // seeding nothing and marking nothing (F-BSEED-4's
+                        // recorded corner, QUESTIONS #183). A WALK of the
+                        // fresh seed therefore needs this launch treated as
+                        // unowned: the env key below does exactly that,
+                        // DEBUG-only (the ScaleFixture idiom — walk
+                        // machinery, zero Release bytes, zero store state).
+                        // A REAL fresh install is signed out (the session
+                        // is device-bound), takes Road 1 and seeds — the
+                        // production pin `aFreshLaunchSeedsTheFinalSet`
+                        // drives that composition headlessly.
+                        if ProcessInfo.processInfo
+                            .environment["VARIORUM_SEED_GATE_UNOWNED"] == "1" {
+                            seedGate = .unowned
+                        } else {
+                            seedGate = productionSeedGate(fresh)
+                        }
+                        #else
+                        seedGate = productionSeedGate(fresh)
+                        #endif
                         await LaunchFurniture.seed(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
-                            gate: SampleLibrarySeeder.SyncGate(
-                                // Captured strongly, deliberately: the
-                                // closures outlive nothing, and a nil'd weak
-                                // reference would read as "no account",
-                                // which is the unsafe direction.
-                                belongsToAnAccount: {
-                                    fresh.sync.isConfigured
-                                        || fresh.account.variorum != nil
-                                },
-                                hasSyncedCleanly: {
-                                    fresh.sync.status.lastSuccessAt != nil
-                                }))
+                            gate: seedGate)
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
@@ -471,6 +499,14 @@ struct VariorumApp: App {
             HelperView()
         }
         .defaultSize(width: 680, height: 560)
+        // 13s-b U1a, piece 4 (R-13s-24/25): the About window — the mark, the
+        // lowercase serif wordmark, the version (`AboutView`). A singleton,
+        // sized to its content, like the system panel it replaces.
+        Window(AboutCopy.menuTitle, id: AboutCopy.windowID) {
+            AboutView()
+        }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
         // Phase 13 (B2/R52): the Settings window — Appearance (the voice +
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {

@@ -66,6 +66,16 @@ struct RootView: View {
     /// 13r U3-A: the calm-asks scheduler (the app delegate's one instance);
     /// this window registers the backup-folder ask once its services exist.
     let calmAsks: CalmAskScheduler?
+    /// 13s-b U1a (R-13s-2/6/13): the first-open tour offer — the app
+    /// delegate's ONE model (one per process, every window's Bookcase reads
+    /// it); nil in harness mounts, which then draw no offer.
+    let tourOffer: TourOfferModel?
+    /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
+    /// nil otherwise). Per window by construction (`RootView` is the window);
+    /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
+    /// object rather than a bare `@State` engine so the engine's doors can
+    /// hold it weakly — a window closed mid-tour leaves no cycle behind.
+    @State private var tourSlot = TourSlot()
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -139,7 +149,8 @@ struct RootView: View {
         // system for her chord (it would fight the running app for it).
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
-        calmAsks: CalmAskScheduler? = nil
+        calmAsks: CalmAskScheduler? = nil,
+        tourOffer: TourOfferModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -148,6 +159,7 @@ struct RootView: View {
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
         self.calmAsks = calmAsks
+        self.tourOffer = tourOffer
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -232,6 +244,10 @@ struct RootView: View {
         // band's only content away; `.ignoresSafeArea` above takes the band
         // itself. A TRY, per her word — one modifier to put back.
         .toolbar(removing: .title)
+        // 13s-b U2 — the tour's cards over the whole window (never a dim —
+        // R-13s-12) and its spotlight in every door's environment (nil, and
+        // so inert, whenever no tour runs).
+        .tourLayer(tourSlot.engine, sources: tourSources)
         .environment(theme)
         // 13i-d U6 (k): the shared wings model reaches the note ▾ menus (both
         // bars render the cross-wing doors) without threading it through
@@ -311,6 +327,13 @@ struct RootView: View {
             guard requested else { return }
             whatsNewShown = true
             router.whatsNewRequested = false
+        }
+        // 13s-b U1a, piece 5 — Help ▸ Take the Tour: the same one entry the
+        // offer line's "yes" calls.
+        .onChange(of: router.tourRequested) { _, requested in
+            guard requested else { return }
+            router.tourRequested = false
+            startTour()
         }
         .onChange(of: router.pendingSelection) { _, pending in
             guard let pending else { return }
@@ -791,6 +814,131 @@ struct RootView: View {
             })
     }
 
+    // MARK: - The tour (13s-b U1a — R-13s-2/6/13; U2 builds the engine)
+
+    /// The offer line for the Bookcase's slot: a row exactly when the model
+    /// keeps one this process (`TourOfferModel.holdsRow` — an offer to make,
+    /// or one that retired since launch and keeps its height so nothing moves).
+    private var tourOfferLine: AnyView? {
+        guard let tourOffer, tourOffer.holdsRow else { return nil }
+        return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
+    }
+
+    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
+    /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
+    /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
+    /// resume), on the Bookcase, and the tour's layer releases the window's
+    /// first responder the moment it arrives in the window (`TourOverlay` —
+    /// the U1a walk's W-U1a-1: "yes" left the caret in the quick entry, where
+    /// a keystroke would mint a note). The line steps aside now; the engine
+    /// retires it at the end
+    /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
+    /// ended by End tour before it, nothing at all if the app quits mid-way).
+    private func startTour() {
+        tourOffer?.tourStarted()
+        let session = session
+        let place = TourPlaces.place(router.workspace.focusedSelection)
+        let doors = tourDoors
+        let slot = tourSlot
+        Task {
+            let landmarks = await TourEngine.landmarks(session: session)
+            slot.engine = TourEngine(
+                session: session, landmarks: landmarks, facts: Tour.Facts(place: place),
+                doors: doors)
+        }
+    }
+
+    /// What the tour's effects DO in this window — the shell's own roads.
+    /// They hold the window's long-lived objects and the slot WEAKLY, never
+    /// this view (a captured `RootView` would hold the slot that holds the
+    /// engine that holds these closures).
+    private var tourDoors: TourEngine.Doors {
+        let router = router
+        let session = session
+        let offer = tourOffer
+        let slot = tourSlot
+        let pool = poolPosts
+        return TourEngine.Doors(
+            navigate: { place in
+                guard let destination = TourPlaces.selection(place),
+                      router.workspace.focusedSelection != destination
+                else { return }
+                // The ONE adoption door's own road (`adopt` above) — a tour
+                // destination never names a block, and the same-note refusal
+                // speaks exactly as it does for every other door.
+                if case .focusedExistingPane = router.adopt(
+                    destination, in: router.workspace.focusedPane) {
+                    session.status.refuse(
+                        WorkspaceNaming.sameNoteNote(router.workspace.label(for: destination)))
+                }
+            },
+            openFieldGuide: {
+                ShellActions(session: session, shell: router).openTutorial()
+            },
+            recordCompleted: { offer?.tourEnded(completed: true) },
+            finished: { [weak slot] completed in
+                offer?.tourEnded(completed: completed)
+                slot?.engine = nil
+            },
+            // F-U2-W-2 (option A, ruled): leg 3 opens the Pool's "in
+            // gatherings" run — the masthead's own "show", on this window's
+            // Pool model — so her starred (and so tucked) note is on screen.
+            showPoolTucked: { Task { await pool.showTucked() } })
+    }
+
+    /// The window's facts, as readers the tour's overlay evaluates in ITS
+    /// body (so the caret's observation never lands on this shell's — the
+    /// note box's MAJOR-1 lesson). The caret reading is composed HERE: the
+    /// editor's model is a sibling feature's, and only the composition root
+    /// reads it, handing the tour plain values.
+    private var tourSources: TourFactSources {
+        let router = router
+        let session = session
+        let stars = stars
+        let bookNoteLive = tourBookNoteLive
+        let bookNoteSelected = tourBookNoteSelected
+        return TourFactSources(
+            selection: { router.workspace.focusedSelection },
+            noteDetail: {
+                (session.commandRouter.activePostID, session.commandRouter.activeMode)
+            },
+            caret: {
+                guard let editor = session.editorRouter.editing else { return nil }
+                return TourCaretReading(
+                    postID: editor.postID,
+                    blockID: editor.caretBlockID,
+                    ordinal: editor.caretOrdinal,
+                    takeCounts: Dictionary(
+                        editor.badges.map { ($0.blockID, $0.variantCount) },
+                        uniquingKeysWith: { max($0, $1) }),
+                    panelBlockID: editor.fanPanel?.blockID)
+            },
+            bookNoteLive: { bookNoteLive },
+            bookNoteSelected: { bookNoteSelected },
+            isStarred: { stars.isStarred(.post($0)) })
+    }
+
+    /// Whether the focused pane's BOOK has its note box live — the "edit
+    /// here" door took (the same gate `noteBoxView` draws the box by).
+    private var tourBookNoteLive: Bool {
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane],
+              let report = noteBoxReport, report.readingID == showing
+        else { return false }
+        return report.state.isLive
+    }
+
+    /// Whether that box HOLDS a note at all — selected or live (F-U2-W-3:
+    /// step 10's edit-here ring exists only then; an empty box re-anchors
+    /// the ring on the toured note's Index row).
+    private var tourBookNoteSelected: Bool {
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane],
+              let report = noteBoxReport, report.readingID == showing
+        else { return false }
+        return report.state.postID != nil
+    }
+
     /// The pane seam's family in the shared oracle.
     static let paneSeamFamily = "paneDivider"
 
@@ -854,7 +1002,10 @@ struct RootView: View {
                 session: session, model: shelf, readings: readings,
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
-                starDoor: starDoor, wings: wings)
+                starDoor: starDoor, wings: wings,
+                // 13s-b U1a: the tour offer's row — built HERE (composition)
+                // and rendered by the Bookcase alone ("Bookcase only").
+                offerLine: tourOfferLine)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:
@@ -1148,6 +1299,24 @@ struct RootView: View {
 // adopt this channel in about five lines.
 
 private extension View {
+    /// **13s-b U2 — the tour's layer**: its cards over the whole window and
+    /// its spotlight in every door's environment. Its own function for the
+    /// confirm's reason below (the body's expression is at the type
+    /// checker's budget). With no tour, the spotlight is nil — every
+    /// `.tourAnchor` in the app is inert — and there is no overlay at all.
+    func tourLayer(_ tour: TourEngine?, sources: TourFactSources) -> some View {
+        overlay {
+            if let tour {
+                TourOverlay(engine: tour, sources: sources)
+                    // A restarted tour is a NEW overlay: its first facts are
+                    // delivered on appear (`onChange(initial:)`), never left
+                    // waiting for the window to change.
+                    .id(ObjectIdentifier(tour))
+            }
+        }
+        .environment(tour?.spotlight)
+    }
+
     /// Hosts whatever the shell is asking. Its own function for a mundane
     /// reason worth recording: inlined in `RootView.body` the presenting
     /// `.alert` pushed that already-enormous expression past the type

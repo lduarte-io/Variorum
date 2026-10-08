@@ -817,14 +817,24 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// (`SampleLibrarySeeder`'s resumable seed) — nothing of hers is ever
     /// deleted, so no confirm gates it.
     case restoreSampleLibrary
-    /// pre-13x 5a: *Encryption Explained*'s restore — the same
-    /// mint-what's-missing door as Sherlock's, for the second seeded book.
-    case restoreEncryptionBook
-    /// 18l-c U6 (R-18l-11): *The Strange Case of Dr Jekyll and Mr Hyde*'s
-    /// restore — the same mint-what's-missing door, for the book that holds
-    /// takemania. A deleted takemania note comes back FRESH, history and all
-    /// (the front matter's R-18l-12 promise).
+    // (`restoreEncryptionBook` — pre-13x 5a — RETIRED at 13s-b U1b,
+    // R-13s-37: "encryption explained not present and not restorable".)
+    /// 18l-c U6 (R-18l-11): the Jekyll book's restore — the same
+    /// mint-what's-missing door, for the book that holds takemania (its
+    /// title lowercased at 13s-b U1b, R-13s-38). A deleted takemania note
+    /// comes back FRESH, history and all (the front matter's R-18l-12
+    /// promise).
     case restoreJekyllBook
+    /// 13s-b U1b (R-13s-37, "classics restorable"): the classics
+    /// GATHERING's restore — adopt-or-mint on Welcome from the `#classics`
+    /// tag, the retired arrangement step's shape behind an explicit door.
+    case restoreClassicsGathering
+    /// 13s-b U1a (R-13s-2/6/13): **the tour's ONE entry** — the first-open
+    /// offer line's "yes" (`.surface`) and Help ▸ Take the Tour (`.menuBar`,
+    /// piece 5). App scope; always available as an act — it starts the U2
+    /// tour engine at step 1 (Q12: a mid-tour request starts over; no
+    /// resume state exists).
+    case takeTour
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you
     // are looking at, and their per-gesture conditions (is a folder set? is a

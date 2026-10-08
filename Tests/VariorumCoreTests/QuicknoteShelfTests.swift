@@ -40,6 +40,33 @@ struct QuicknoteShelfTests {
         }
     }
 
+    /// **13s-b U1b (R-13s-36/38) — the FRESH-MINT default is lowercase,
+    /// and an existing gathering of hers is never renamed.** RED ON OLD:
+    /// the constant was "Quicknotes". The fresh-only half: a store whose
+    /// designated gathering carries the old title case keeps it — filing
+    /// finds the book by the DESIGNATION, never the name.
+    @Test func theFreshQuicknotesMintIsLowercaseAndAnExistingGatheringKeepsItsName() throws {
+        try withOperations { ops, db in
+            #expect(Operations.defaultQuicknoteBookName == "quicknotes",
+                    "the ruled default (R-13s-36)")
+            let first = try ops.importPost(title: nil, text: "Jotted.").container
+            guard case .filed(_, let readingID) = ops.fileAsQuicknote(first.id) else {
+                Issue.record("expected .filed")
+                return
+            }
+            // An earlier build's shape: she holds a title-case gathering.
+            try ops.renameReading(readingID, name: "Quicknotes")
+            let second = try ops.importPost(title: nil, text: "Jotted again.").container
+            guard case .filed(_, let again) = ops.fileAsQuicknote(second.id) else {
+                Issue.record("expected .filed")
+                return
+            }
+            #expect(again == readingID, "the designation finds her book — nothing minted")
+            let name = try db.read { try Queries.reading($0, id: readingID)?.name }
+            #expect(name == "Quicknotes", "…and it is NEVER renamed (fresh mints only, R-13s-38)")
+        }
+    }
+
     /// DISCRIMINATING REVERT (verified): mint the book `kind: .book`
     /// instead of `.gathering` in `ensureQuicknotesBook` and this test fails on
     /// its FIRST assembly — a curated book collects nothing, because

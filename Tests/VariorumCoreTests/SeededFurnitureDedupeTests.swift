@@ -401,6 +401,39 @@ struct SeededFurnitureDedupeTests {
             "an edited copy is never retired — content differs, both stand")
     }
 
+    @Test func herStarKeepsBothCopiesOnEveryGrain() async throws {
+        // 13s U1b ladder round 1, MAJOR-1 (#186(a)'s recorded rule —
+        // "starred/un-starred … never merged — both stay, visibly" — and
+        // the R-17y-5 letter's "a star change"): HER STAR is engagement on
+        // every grain. A note's star lives in the synced 'starred' setting
+        // list (the union star's list half); a book's is ALSO its
+        // `reading.starred` column. RED ON OLD: neither the container nor
+        // the book verdict read either store, so a starred copy classified
+        // foldable, could lose the smaller-id toss, and the star folded
+        // away silently.
+        let (a, b, _) = try pairWithFacts()
+        let noteA = try seedQuicknote(a)
+        _ = try seedQuicknote(b)
+        let guideA = try seedGuide(a)
+        _ = try seedGuide(b)
+        try a.with { ops, _ in
+            try ops.setStarred(.post(noteA), starred: true)
+            try ops.setStarred(.reading(guideA.bookID), starred: true)
+        }
+
+        try await converge(a, b)
+
+        #expect(try liveIDs(
+            b, table: "container", where: "title = ?", [Self.quicknoteTitle]).count == 2,
+            "a starred note copy is hers — both stay, visibly (#186(a))")
+        #expect(try liveIDs(
+            b, table: "reading", where: "name = ?", [Self.guideName]).count == 2,
+            "a starred guide copy is hers — both stay")
+        #expect(try liveIDs(
+            a, table: "container", where: "title = ?", [Self.quicknoteTitle]).count == 2,
+            "…and the deciding is deterministic on BOTH devices")
+    }
+
     @Test func theSameCommentOnADifferentBlockKeepsBoth() async throws {
         // The round-2 MINOR's pin: the comment tuple carries the block's
         // REAL placement index, so an identical comment TEXT attached to a

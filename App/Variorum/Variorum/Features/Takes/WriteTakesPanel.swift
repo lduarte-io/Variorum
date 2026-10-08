@@ -110,6 +110,8 @@ struct WriteTakesPanel: View {
                     dismiss()
                 }
                 .help("The full board — every block's takes at once (⌘2)")
+                // 13s-b U2: step 6's second half ("then Open Takes mode").
+                .tourAnchor(.panelOpenTakesMode, cornerRadius: 6)
                 Button("Close") { dismiss() }
             }
             if model.isJournalShaped {
@@ -163,6 +165,10 @@ struct WriteTakesPanel: View {
                     }
                 }
             }
+            // 13s-b U2 (A3): the tour's card, while it runs at steps 5–6 —
+            // drawn HERE, above the sheet's scrim, never under it on the
+            // window. Nothing at all outside a tour.
+            TourPanelSlot()
         }
         .padding(12)
         .frame(minWidth: 560, minHeight: 360)
@@ -274,6 +280,8 @@ struct WriteTakesPanel: View {
             }
             .disabled(slot.variantID == nil)
             .help("A new take that starts as a copy of what's shown (⌘T)")
+            // 13s-b U2: step 5's door, once the panel is up.
+            .tourAnchor(.panelNewTake, cornerRadius: 5)
             Text("·").foregroundStyle(tokens.faint)
             Button("＋ blank take") {
                 Task {

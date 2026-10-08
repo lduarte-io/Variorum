@@ -19,6 +19,21 @@
 //      teaching itself") · ONE seeded quicknote, so the Quicknotes gathering
 //      is a live example.
 //
+//  ── 13s-b U1b — THE SEED RESHAPE (R-13s-5/26/27/37; her launch list,
+//  verbatim: *"I think it's field guide, sherlock holmes, and a starred
+//  notes empty gathering. quicknotes and journal are created at first
+//  mint."*) ──────────────────────────────────────────────────────────────
+//  The arrangement no longer MINTS the classics gathering or the seeded
+//  quicknote — both left the fresh seed (with Encryption Explained and,
+//  since 17y, Jekyll). What survives of #166(b)'s lesson: Sherlock still
+//  OWNS its notes and the classic books' shipped notes still wear
+//  #classics (so the classics GATHERING, now behind its own Help ▸ Restore
+//  door — U1b piece 3 — shows them the moment it is made). The shelving
+//  step keeps every seeded name in its vocabulary, so a RESTORED book or
+//  gathering still lands on Welcome. The reserved quicknote identities
+//  below stay for the installed base: stores born before this build carry
+//  the seeded quicknote, and the furniture fold still folds it.
+//
 //  ── ONE BRAIN, OCCASIONS PER PLATFORM (the seeder's own grammar) ────────
 //  `arrange` is the whole arrangement, idempotent, in ONE runner turn on the
 //  QUIET facade (furniture never lands on her structural-undo stack — the
@@ -64,19 +79,12 @@ nonisolated enum SampleLibraryWelcome {
     /// or this name (E13's sense), the starred gathering's signature.
     static let classicsGatheringName = "classics"
 
-    /// The seeded quicknote's reserved title — how a restore finds it (a quick
-    /// note is untitled by default; a seeded one wears a name so the seeder
-    /// can recognise its own, the seeders' identity convention).
+    /// The seeded quicknote's reserved title. **The MINT is retired (13s-b
+    /// U1b — R-13s-5/37: the seeded quick note left the fresh seed); the
+    /// identity stays** for the installed base: stores born before this
+    /// build carry the note, and the furniture fold's facts still name it
+    /// so two old copies keep folding.
     static let quicknoteTitle = "a first quick note"
-
-    /// The seeded quicknote's text. ONE paragraph, so it mints one block.
-    /// The chord and the gathering's words are tied to their constants by the
-    /// tutorial pins (`TutorialBooksChapterTests`) — written plainly here.
-    static let quicknoteText =
-        "This is a quick note \u{2014} the kind \u{2318}\u{21E7}N catches from anywhere, even "
-        + "from inside another app. Filing one tags it \u{201C}quicknote\u{201D}, and the "
-        + "Quicknotes gathering on your Bookcase shows it. Take the tag off and it leaves "
-        + "Quicknotes for the Pool."
 
     /// The seeded books the Welcome shelf holds (her §19 list), by their
     /// reserved names — the field guide is the caller's (it is Mac-only
@@ -117,24 +125,19 @@ nonisolated enum SampleLibraryWelcome {
         /// The Welcome shelf — adopted or minted.
         var welcome: Operations.WelcomeShelfEnsure
         var sherlock: SherlockOwnership
-        /// The classics gathering's id (nil = not minted: neither classic book
-        /// is in Home), and whether THIS arrangement minted it.
-        var classicsID: String?
-        var mintedClassics: Bool
         /// How many shipped classic notes THIS arrangement tagged `#classics`.
         var taggedClassics: Int
         /// The seeded readings this arrangement put onto Welcome now (they
         /// were unshelved); a book filed elsewhere is never moved.
         var shelved: [String]
-        /// The seeded quicknote's id, and whether THIS arrangement minted it.
-        var quicknoteID: String?
-        var mintedQuicknote: Bool
+        // (The classics-gathering and quicknote mint fields left with their
+        // mints — 13s-b U1b: the arrangement no longer makes either.)
 
         /// Whether anything at all was written — a door that did nothing
         /// speaks a refusal (§12's message kinds), one that did a receipt.
         var didAnything: Bool {
-            welcome.minted || sherlock == .owned || mintedClassics || taggedClassics > 0
-                || !shelved.isEmpty || mintedQuicknote
+            welcome.minted || sherlock == .owned || taggedClassics > 0
+                || !shelved.isEmpty
         }
     }
 
@@ -216,29 +219,11 @@ nonisolated enum SampleLibraryWelcome {
             }
         }
 
-        // (3b) The classics gathering — adopted (a live Home gathering made
-        // from the classics tag, or wearing the reserved name), else minted ON
-        // Welcome once the tag exists.
-        var classicsID: String?
-        var mintedClassics = false
-        let rule = classicsTagID.map { classicsRule(classicsTagID: $0) }
-        if let present = try homeReadings(database, named: nil).first(where: { reading in
-            reading.kind == .gathering
-                && ((rule.map { RuleGrammar.read(reading.querySpec) == .rule($0) } ?? false)
-                    || BookNaming.sameName(reading.name, classicsGatheringName))
-        }) {
-            classicsID = present.id
-        } else if let rule {
-            // Publication order: Jekyll (1886) beside Sherlock (1892) — the
-            // seeds' own clocks make created-at the honest "side by side".
-            let gathering = try ops.createReading(
-                name: classicsGatheringName, kind: .gathering, profile: "collection",
-                sortField: .createdAt, sortDir: .asc,
-                querySpec: try RuleGrammar.encode(rule), wingId: "",
-                shelfId: welcome.shelf.id)
-            classicsID = gathering.id
-            mintedClassics = true
-        }
+        // (3b — RETIRED, 13s-b U1b): the classics GATHERING left the fresh
+        // seed (R-13s-5/37). Its door is Help ▸ Restore (U1b piece 3 —
+        // `ShellActions.restoreClassicsGathering`, which adopts a live one
+        // or mints on Welcome); the tagging above stays, so the gathering
+        // shows the shipped classics the moment it is made.
 
         // (4) Shelving — every live HOME seeded reading that is UNSHELVED
         // (nil or dangling) goes onto Welcome; hers on another shelf stay.
@@ -254,36 +239,14 @@ nonisolated enum SampleLibraryWelcome {
             }
         }
 
-        // (5) The ONE seeded quicknote — the quick note's own road (the pad's
-        // `QuickNoteFiler.file`): an ordinary bookless note in HOME, filed so
-        // it wears `quicknote` and Quicknotes shows it (Quicknotes is minted
-        // here the ordinary way when a store never filed one: unshelved,
-        // starred — §19.3, R-13id-5).
-        var quicknoteID = try database.read { db in
-            try String.fetchOne(
-                db,
-                sql: """
-                    SELECT id FROM container
-                    WHERE kind = 'post' AND deleted_at IS NULL AND title = ?
-                      AND \(Queries.wingScope(column: "wing_id", wingID: "").sql)
-                    ORDER BY id LIMIT 1
-                    """,
-                arguments: [quicknoteTitle])
-        }
-        var mintedQuicknote = false
-        if quicknoteID == nil {
-            let note = try ops.importPost(
-                title: quicknoteTitle, text: quicknoteText, undoLabel: "Quick Note",
-                segmentation: .oneBlock, wingId: "")
-            _ = ops.fileAsQuicknote(note.container.id)
-            quicknoteID = note.container.id
-            mintedQuicknote = true
-        }
+        // (5 — RETIRED, 13s-b U1b): the seeded quicknote left the fresh seed
+        // with the Quicknotes gathering its filing minted (R-13s-5/37, her
+        // word: "quicknotes and journal are created at first mint"). The
+        // reserved title above stays the installed base's fold identity.
 
         return Arrangement(
-            welcome: welcome, sherlock: sherlock, classicsID: classicsID,
-            mintedClassics: mintedClassics, taggedClassics: taggedClassics, shelved: shelved,
-            quicknoteID: quicknoteID, mintedQuicknote: mintedQuicknote)
+            welcome: welcome, sherlock: sherlock,
+            taggedClassics: taggedClassics, shelved: shelved)
     }
 
     /// Live HOME readings (a dangling wing reads as Home — `wingScope`), by
@@ -292,6 +255,38 @@ nonisolated enum SampleLibraryWelcome {
         try database.read { db in
             try Queries.readings(db, wingID: "").filter { name == nil || $0.name == name }
         }
+    }
+
+    // MARK: - The classics gathering's restore brain (13s-b U1b)
+
+    /// **ADOPT-OR-MINT the classics gathering** — the retired arrangement
+    /// step 3b's exact shape, now the Help ▸ Restore door's brain (R-13s-37,
+    /// her word: "classics restorable"; the gathering left the fresh seed at
+    /// R-13s-5). At operations level so the door's runner turn and any
+    /// fixture drive ONE body: ensure Welcome, ensure the `#classics` tag,
+    /// adopt a live Home gathering wearing the rule or the reserved name,
+    /// else mint one ON Welcome. Returns the gathering and whether THIS
+    /// call minted it.
+    static func restoreClassicsGathering(ops: Operations) throws -> (id: String, minted: Bool) {
+        @Dependency(\.database) var database
+        let welcome = try ops.ensureWelcomeShelf(wingID: "")
+        let tags = try database.read { db in try Queries.allTags(db, wingID: "") }
+        let tagID = try tags.first { $0.path == SampleLibrarySeeder.classicsTagPath }?.id
+            ?? ops.createTag(name: SampleLibrarySeeder.classicsTagPath, wingID: "").id
+        let rule = classicsRule(classicsTagID: tagID)
+        if let present = try homeReadings(database, named: nil).first(where: { reading in
+            reading.kind == .gathering
+                && (RuleGrammar.read(reading.querySpec) == .rule(rule)
+                    || BookNaming.sameName(reading.name, classicsGatheringName))
+        }) {
+            return (present.id, false)
+        }
+        let gathering = try ops.createReading(
+            name: classicsGatheringName, kind: .gathering, profile: "collection",
+            sortField: .createdAt, sortDir: .asc,
+            querySpec: try RuleGrammar.encode(rule), wingId: "",
+            shelfId: welcome.shelf.id)
+        return (gathering.id, true)
     }
 
     // MARK: - The launch occasion (fresh stores at birth)

@@ -411,7 +411,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
             accessibilityIdentifier = "blockHistory.savepoint.\(commit.id)"
             titleLabel.numberOfLines = 1
             titleLabel.text = commit.text.isEmpty
-                ? MobileEditorStyle.chromeCase("(Empty savepoint)")
+                ? MobileEditorStyle.chromeCase("(Empty commit)")
                 : String(commit.text.prefix(120))
             titleLabel.textColor = commit.text.isEmpty ? face.muted : face.ink
             metaLabel.text = MobileEditorStyle.chromeCase(
@@ -419,7 +419,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
                     .joined(separator: " \u{00B7} "))
             metaLabel.textColor = predatesSplit ? face.accent : face.muted
             show(BlockHistoryCopy.restoreVerb,
-                 label: "\(BlockHistoryCopy.restoreVerb) this savepoint",
+                 label: "\(BlockHistoryCopy.restoreVerb) this commit",
                  identifier: "blockHistory.restore",
                  tint: face.accent, face: face,
                  act: .restore(variantID: variantID, commit: commit))

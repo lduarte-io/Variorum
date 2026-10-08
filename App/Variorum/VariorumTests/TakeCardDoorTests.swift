@@ -366,7 +366,7 @@ struct TakeCardDoorTests {
             })
             let slots = try await db.read { try Queries.renderPost($0, containerID: lesson) }
             let prose = try #require(slots.first {
-                $0.text?.hasPrefix("Deleted TAKES wait") == true
+                $0.text?.hasPrefix("Deleted takes wait") == true  // 13s-b triage landing: sentence case
             }).text ?? ""
 
             #expect(prose.contains(TakeCardMenuCopy.menuGlyph),
@@ -379,7 +379,7 @@ struct TakeCardDoorTests {
             // The practice take says where its own ⋯ is, because it is read
             // on whichever surface she opened.
             let host = try #require(slots.first {
-                $0.text?.hasPrefix("Deleted TAKES wait") == true
+                $0.text?.hasPrefix("Deleted takes wait") == true  // 13s-b triage landing: sentence case
             })
             let fan = try await db.read { try Queries.blockFan($0, blockID: host.blockID) }
             let spare = try #require(fan.first { $0.workingText.hasPrefix("the spare take") })

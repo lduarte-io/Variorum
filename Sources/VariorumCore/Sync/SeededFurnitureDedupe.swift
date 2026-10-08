@@ -485,6 +485,23 @@ public enum SeededFurnitureClassifier {
         case foldable(signature: String)
     }
 
+    /// **HER STAR is engagement on every grain** (13s U1b ladder round 1,
+    /// MAJOR-1 — #186(a)'s recorded rule: *"starred/un-starred … never
+    /// merged — both stay, visibly"*; the R-17y-5 letter above names "a
+    /// star change"). The union star's two stores (13i-d U2): a NOTE's
+    /// star lives ONLY in the synced `'starred'` setting list; a BOOK's
+    /// also in `reading.starred` — so the book verdict reads BOTH halves
+    /// and the container verdict reads the list. The list read is one
+    /// tiny setting row + decode per verdict (cost ∝ fold candidates, the
+    /// pass's own bound); matching is BY ID across kinds, which errs
+    /// toward keeping on a malformed or ghost entry — engagement's side,
+    /// the standing doctrine. Deterministic per device from SYNCED state;
+    /// a star crossing the fold in flight is #186(g)'s recorded race,
+    /// exactly like every existing axis — no new class.
+    static func starredIDs(_ db: Database) throws -> Set<String> {
+        Set(try Queries.starredTargets(db).map(\.id))
+    }
+
     /// One guide copy's verdict: ENGAGED on any sign of her hands (every
     /// leg errs this way — engagement keeps copies), STRAGGLING when any
     /// row is still in flight, else the copy's content signature —
@@ -503,11 +520,15 @@ public enum SeededFurnitureClassifier {
             sql: """
                 SELECT locked, sealed_at, owned, archived_at, word_target, max_posts,
                        grouping_tag_id, sort_field, sort_dir, shelf_id, hide_owned,
-                       intake_seating, auto_tag_ids, query_spec
+                       intake_seating, auto_tag_ids, query_spec, starred
                 FROM reading WHERE id = ?
                 """,
             arguments: [copyID])
         else { return .straggling }
+        // The star axis (MAJOR-1): the column half of the union star, and
+        // the list half the containers also read.
+        if (book["starred"] as Int? ?? 0) != 0 { return .engaged }
+        if try starredIDs(db).contains(copyID) { return .engaged }
         if (book["locked"] as Int? ?? 0) != 0 { return .engaged }
         if (book["sealed_at"] as String?) != nil { return .engaged }
         if (book["owned"] as Int? ?? 0) != 0 { return .engaged }
@@ -688,6 +709,10 @@ extension SeededFurnitureClassifier {
         if (post["archived_at"] as String?) != nil { return .engaged }
         if (post["entry_date"] as String?) != nil { return .engaged }
         if let notes = post["floating_notes"] as String?, !notes.isEmpty { return .engaged }
+        // The star axis (MAJOR-1 — `starredIDs`' doc carries the rule): a
+        // note's star is the synced list; a pool cannot be starred, so a
+        // list entry naming one is a ghost the id-only match errs-keeps on.
+        if try starredIDs(db).contains(postID) { return .engaged }
 
         if let readingID {
             let elsewhere = try Bool.fetchOne(

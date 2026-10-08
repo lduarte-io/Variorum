@@ -133,9 +133,13 @@ struct TutorialCurrencyTests {
             let areas = SidebarView.areas
             #expect(text.contains("The sidebar has \(countWord(areas.count)) places."),
                     "the count is the area table's own")
+            // 13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 caps ban):
+            // the lesson names each place in its REAL casing now, each opening
+            // its own one-sentence description; the arm read the retired
+            // caps-for-emphasis form (`title.uppercased()`).
             for area in areas {
-                #expect(text.contains(area.title.uppercased()),
-                        "the lesson names the sidebar's \(area.title)")
+                #expect(text.contains(". \(area.title) "),
+                        "the lesson names the sidebar's \(area.title), its own sentence")
             }
             for mode in LibraryCatalogModel.Mode.allCases {
                 #expect(text.contains(mode.label), "the Library's \(mode.label) view, by its own word")
@@ -191,7 +195,9 @@ struct TutorialCurrencyTests {
         try await withGuide { _, db, guideID in
             let row = "\u{FF0B} New block at the end of the note"
             let text = try await prose(db, guideID, "shaping blocks")
-            #expect(text.contains("in Takes, the block \u{25BE} menu in the bottom bar also has \(row)"))
+            // 13s-b triage landing — A JUSTIFIED EDIT: the scoped sentence now
+            // opens its own sentence ("…Write and Takes alike. In Takes, …").
+            #expect(text.contains("In Takes, the block \u{25BE} menu in the bottom bar also has \(row)"))
             #expect(try AppSource.read("Variorum/Features/Takes/TakesBottomBar.swift").contains(row),
                     "the row is Takes' block ▾'s")
             #expect(!(try AppSource.read("Variorum/Features/Editor/CommitBar.swift").contains(row)),
@@ -278,8 +284,11 @@ struct TutorialCurrencyTests {
             let count = countWord(labels.count)
             let capitalized = count.prefix(1).uppercased() + String(count.dropFirst())
             #expect(text.contains("\(capitalized) views of a book share the toggle at the top."))
+            // 13s-b triage landing — A JUSTIFIED EDIT (her R-13s-30 caps ban):
+            // each view is named in its REAL casing, opening its own sentence;
+            // the arm read the retired caps form (`label.uppercased()`).
             for label in labels {
-                #expect(text.contains(label.uppercased() + " "), "the lesson teaches \(label)")
+                #expect(text.contains(". \(label) "), "the lesson teaches \(label), its own sentence")
             }
         }
     }

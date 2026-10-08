@@ -335,7 +335,7 @@ struct LibraryDayFilterTests {
 
         let alone = LibraryDayFace.emptyAnswer(
             day: "2026-09-09", query: "", now: now, calendar: calendar)
-        #expect(alone.headline == "No note's last edit or savepoint falls on Sep 9.")
+        #expect(alone.headline == "No note's last edit or commit falls on Sep 9.")
 
         let narrowed = LibraryDayFace.emptyAnswer(
             day: "2026-09-09", query: "  zzz ", now: now, calendar: calendar)
@@ -608,9 +608,11 @@ struct LibraryDayFilterTests {
             DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
 
         let answer = LibraryDayFace.emptyAnswer(day: "2026-09-09", now: now, calendar: calendar)
-        #expect(answer.headline == "No note's last edit or savepoint falls on Sep 9.")
+        // 13s-b U4 (R-13s-31): the empty answer and its caveat say COMMIT.
+        #expect(answer.headline == "No note's last edit or commit falls on Sep 9.")
         #expect(answer.caveat.contains("one edit stamp"))
-        #expect(answer.caveat.contains("savepoint"))
+        #expect(answer.caveat.contains("where a commit landed"))
+        #expect(answer.caveat.range(of: "savepoint", options: .caseInsensitive) == nil)
         #expect(answer.caveat == LibraryDayFace.caveat,
                 "the door's hover and the empty answer say the same sentence")
 

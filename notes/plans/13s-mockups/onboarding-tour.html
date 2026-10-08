@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13s — the onboarding tour, click-through (v5)</title>
+<style>
+  :root{
+    --room:#ffffff; --side:#f6f4fa; --ink:#2b2933; --muted:#8e8a99; --faint:#b6b2c0;
+    --accent:#5a50c7; --accentink:#4a41b0; --pill:#e7e2f6; --hair:#e8e4f0;
+    --tagbg:#efeafb; --tagink:#6a5fd0; --tagline:#dcd3f2; --cardline:#ddd8e8;
+    --vred:#FC120C;
+  }
+  body{background:#edeaf2;color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system;margin:0;padding:26px 24px 90px;}
+  h1{font-size:21px;font-weight:600;margin:0 0 2px;font-family:'Iowan Old Style',Georgia,serif;}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;max-width:92ch;line-height:1.5;}
+  .topnav{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap;}
+  .topnav button{background:#fff;border:1px solid var(--hair);border-radius:7px;padding:5px 14px;font-size:13px;color:var(--ink);cursor:pointer;}
+  .topnav button:hover{background:var(--side);}
+  .topnav .where{color:var(--muted);font-size:13px;min-width:200px;}
+  .dots{display:flex;gap:5px;flex-wrap:wrap;}
+  .dots span{width:9px;height:9px;border-radius:50%;background:#d4d0dd;cursor:pointer;display:inline-block;}
+  .dots span.on{background:var(--accent);}
+  .dots span.leg{border-radius:2px;}
+  /* ——— the stage ——— */
+  #stage{background:var(--room);border:1px solid var(--hair);border-radius:10px;max-width:1120px;height:660px;position:relative;box-shadow:0 1px 3px rgba(50,45,70,.08);overflow:hidden;display:flex;font-size:13.5px;}
+  .side{width:190px;border-right:1px solid var(--hair);background:var(--side);padding:12px 0 0;flex:none;display:flex;flex-direction:column;font-size:13.5px;}
+  .shead{color:var(--accentink);font-size:12.5px;padding:8px 16px 4px;}
+  .srow{padding:5px 16px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .srow .ic{width:15px;text-align:center;color:#8f89a8;font-size:12px;}
+  .srow.on{background:var(--pill);border-radius:7px;margin:0 8px;padding:5px 8px;font-weight:600;}
+  .srow .star{margin-left:auto;color:var(--accent);font-size:11px;}
+  .sgap{height:10px;}
+  .sfoot{margin-top:auto;border-top:1px solid var(--hair);padding:8px 10px;display:flex;gap:6px;align-items:center;color:var(--muted);font-size:11px;}
+  .sfoot .btn{background:#fff;border:1px solid var(--hair);border-radius:6px;padding:3px 8px;font-size:11.5px;color:var(--ink);}
+  .main{flex:1;display:flex;flex-direction:column;position:relative;min-width:0;}
+  .navarrows{padding:10px 20px 2px;color:#a39eb3;font-size:14px;display:flex;gap:12px;}
+  .navarrows .bookglyph{cursor:pointer;}
+  .vmark{display:inline-block;vertical-align:-4px;margin-right:7px;}
+  /* bookcase */
+  .crumbrow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 22px 6px;}
+  .crumb{font-family:'Iowan Old Style',Georgia,serif;font-size:19px;}
+  .crumb .here{color:var(--accentink);font-weight:600;}
+  .crumb .sub2{color:var(--ink);font-weight:600;}
+  .crumbright{color:var(--accentink);font-size:13px;display:flex;gap:16px;}
+  .striprow{display:flex;align-items:center;gap:6px;padding:4px 22px 10px;font-size:12.5px;border-bottom:1px solid var(--hair);}
+  .s{padding:3px 11px;border-radius:7px;background:#fff;border:1px solid var(--hair);color:var(--ink);}
+  .s.solo{background:var(--accentink);border-color:var(--accentink);color:#fff;font-weight:600;}
+  .s.ghost{border:none;background:none;color:var(--muted);}
+  .striprow .right{margin-left:auto;color:var(--muted);display:flex;gap:12px;}
+  .board{padding:4px 22px 0;overflow:hidden;flex:1;}
+  .shelfhead{color:var(--muted);font-size:12px;margin:10px 0 2px;}
+  .brow{display:flex;align-items:baseline;gap:10px;padding:10px 2px;border-bottom:1px solid var(--hair);}
+  .brow .t{font-family:'Iowan Old Style',Georgia,serif;font-size:17px;font-weight:600;}
+  .brow .meta{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap;}
+  .tag{font-size:11.5px;background:var(--tagbg);border:1px solid var(--tagline);border-radius:5px;padding:1px 7px;color:var(--tagink);}
+  /* bottom band */
+  .bottomband{margin-top:auto;}
+  .quickentry{margin:0 22px 8px;padding:10px 14px;border:1px dashed #cdc8da;border-radius:8px;color:var(--muted);font-size:14px;font-style:italic;background:#fcfbfe;font-family:'Iowan Old Style',Georgia,serif;}
+  .onelinerrow{display:flex;justify-content:flex-end;margin:0 22px 8px;}
+  .oneliner{font-size:13.5px;color:var(--ink);}
+  .oneliner .yes{color:var(--accentink);font-weight:700;cursor:pointer;}
+  .oneliner .no{color:var(--muted);cursor:pointer;}
+  .oneliner.transient{color:var(--muted);font-style:italic;}
+  .bottombar{border-top:1px solid var(--hair);background:#fbfafd;padding:6px 20px;display:flex;gap:14px;color:var(--muted);font-size:12px;align-items:center;}
+  .bottombar .commit{color:var(--accentink);font-weight:600;}
+  .bottombar .right{margin-left:auto;color:var(--accentink);}
+  /* book view */
+  .bookcol{width:230px;border-right:1px solid var(--hair);background:#f6f4fa;padding:12px 14px;flex:none;overflow:hidden;font-size:13px;}
+  .bookcol .btitle{font-family:'Iowan Old Style',Georgia,serif;color:var(--accentink);font-size:15.5px;font-weight:600;margin-bottom:6px;}
+  .bookcol .bmodes{display:flex;gap:10px;margin:2px 0 6px;color:var(--muted);}
+  .bookcol .bmodes b{color:var(--accentink);}
+  .bookcol .order{color:var(--muted);font-size:12px;margin-bottom:10px;}
+  .bookcol .ch{color:var(--accentink);font-weight:600;padding:7px 0 2px;font-size:13px;}
+  .bookcol .newrows{color:var(--accentink);margin-top:12px;font-size:12.5px;line-height:1.8;}
+  .bookmain{flex:1;overflow:hidden;padding:10px 40px;position:relative;}
+  .bookmain h2{font-family:'Iowan Old Style',Georgia,serif;font-size:24px;margin:8px 0 2px;font-weight:600;}
+  .bookmain .bmeta{color:var(--muted);font-size:12.5px;margin-bottom:14px;}
+  .bookmain .chap{font-family:'Iowan Old Style',Georgia,serif;color:var(--accentink);font-size:19px;font-weight:600;margin:16px 0 8px;}
+  .notecard{border:1px solid var(--cardline);border-radius:9px;padding:12px 16px;max-width:760px;background:#fff;}
+  .notecard .nt{display:flex;justify-content:space-between;align-items:baseline;font-family:'Iowan Old Style',Georgia,serif;font-weight:700;font-size:15.5px;margin-bottom:5px;}
+  .notecard .open{color:var(--accentink);font-size:12.5px;font-weight:600;cursor:pointer;background:var(--pill);border-radius:5px;padding:1px 7px;}
+  .notecard .prev{font-family:'Iowan Old Style',Georgia,serif;font-size:14.5px;line-height:1.55;color:#3a3644;}
+  /* note view */
+  .notehead{padding:4px 40px 10px;border-bottom:1px solid var(--hair);position:relative;}
+  .notehead .ntitle{font-family:'Iowan Old Style',Georgia,serif;font-size:25px;font-weight:600;text-align:center;}
+  .notehead .inbook{text-align:center;color:var(--accentink);font-size:12.5px;margin-top:2px;}
+  .notehead .icons{position:absolute;right:28px;top:4px;color:#9a94ab;font-size:13px;display:flex;gap:10px;}
+  .notehead .tags{position:absolute;right:28px;top:28px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .prose{padding:18px 0 10px 110px;max-width:730px;line-height:1.62;font-size:15.5px;overflow:hidden;font-family:'Iowan Old Style',Georgia,serif;flex:1;position:relative;}
+  .prose p{margin:0 0 16px;position:relative;max-width:640px;}
+  .prose p .psi{position:absolute;right:-46px;top:2px;color:#8f89a8;font-size:12px;font-family:ui-sans-serif,system-ui;cursor:pointer;background:#f3f1f8;border-radius:5px;padding:0 5px;}
+  .prose p.dim{color:#aba6b8;}
+  .scrollhint{position:absolute;right:10px;top:150px;width:5px;height:140px;background:var(--hair);border-radius:3px;}
+  .scrollhint i{display:block;width:5px;height:36px;background:#c2bcd2;border-radius:3px;margin-top:52px;}
+  /* takes mode */
+  .takesbar{display:flex;gap:14px;padding:8px 40px;color:var(--muted);font-size:12.5px;border-bottom:1px solid var(--hair);}
+  .takesbar .chip{border:1px solid var(--tagline);border-radius:10px;padding:1px 9px;color:var(--tagink);}
+  .takesbar .right{margin-left:auto;}
+  .tboard{padding:14px 70px;overflow:hidden;flex:1;font-family:'Iowan Old Style',Georgia,serif;font-size:15px;line-height:1.6;}
+  .tblock{position:relative;max-width:700px;margin:0 0 20px;}
+  .tblock .psi2{position:absolute;right:-40px;top:2px;color:#8f89a8;font-size:12px;font-family:ui-sans-serif,system-ui;}
+  .tblock.fanned{background:#f2effa;border:1px solid var(--cardline);border-radius:9px;padding:12px 16px;}
+  .fanstack .takecard{border:1px solid var(--cardline);border-left:3px solid #7bb08a;border-radius:8px;background:#fff;padding:10px 14px;margin:8px 0;}
+  .fanstack .takecard .tl{font-size:11px;color:#5f9a72;font-family:ui-sans-serif,system-ui;margin-bottom:4px;}
+  .fanstack .takecard.alt{border-left-color:#b9b2d6;}
+  .fanstack .takecard.alt .tl{color:var(--muted);}
+  /* the Takes panel (floats on its shadow, nothing dims) */
+  .popover{position:absolute;z-index:5;left:50%;top:46%;transform:translate(-50%,-50%);background:#fff;border:1px solid #d9d4e6;border-radius:13px;box-shadow:0 18px 50px rgba(50,45,70,.28);padding:16px 20px;width:560px;font-size:13.5px;}
+  .popover .phead{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .popover .phead b{font-size:14px;}
+  .popover .pbtn{margin-left:auto;background:#f1eefa;border:1px solid var(--hair);border-radius:7px;padding:3px 10px;color:var(--ink);cursor:pointer;}
+  .popover .pbtn.hot{background:var(--pill);color:var(--accentink);font-weight:700;}
+  .ptake{border:1px solid var(--cardline);border-left:4px solid #7bb08a;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-family:'Iowan Old Style',Georgia,serif;font-size:14.5px;line-height:1.55;}
+  .ptake .pl{font-size:11px;color:#5f9a72;font-family:ui-sans-serif,system-ui;margin-bottom:4px;}
+  .addrow{border:1px dashed #cdc8da;border-radius:8px;padding:7px 12px;color:var(--accentink);font-size:12.5px;text-align:center;}
+  .addrow b{cursor:pointer;}
+  /* library / pool / snippets */
+  .lmast{padding:6px 22px 8px;display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--hair);}
+  .lmast .lt{font-family:'Iowan Old Style',Georgia,serif;font-size:19px;color:var(--accentink);font-weight:600;}
+  .lmast .lsub{color:var(--muted);font-size:12.5px;}
+  .poolcard{border:1px solid var(--cardline);border-radius:9px;padding:10px 14px;margin:8px 0;display:flex;align-items:center;gap:10px;}
+  .poolcard .t2{font-family:'Iowan Old Style',Georgia,serif;font-size:15.5px;font-weight:600;}
+  .poolcard .date{color:var(--muted);font-size:12px;}
+  .poolcard .atb{margin-left:auto;border:1px solid var(--hair);border-radius:7px;padding:3px 10px;font-size:12px;color:var(--ink);cursor:pointer;background:#fff;}
+  .snipcard{border:1px solid var(--cardline);border-radius:9px;padding:10px 14px;margin:8px 0;}
+  .snipcard .t3{font-family:'Iowan Old Style',Georgia,serif;font-size:15px;}
+  .snipcard .meta{color:var(--muted);font-size:11.5px;margin-top:4px;}
+  /* coach machinery: a ring, never a dim */
+  .spot{position:relative;z-index:3;box-shadow:0 0 0 3px var(--accent), 0 0 18px 2px rgba(90,80,199,.45);border-radius:8px;cursor:pointer;}
+  .coach{position:absolute;z-index:6;background:#fff;border:1px solid #d9d4e6;border-radius:12px;box-shadow:0 14px 40px rgba(50,45,70,.25);padding:14px 18px;max-width:300px;font-size:13.6px;line-height:1.5;}
+  .coach .step{font-size:11px;letter-spacing:1.3px;color:var(--muted);margin-bottom:6px;}
+  .coach .tt{font-weight:700;font-size:14.5px;margin-bottom:4px;font-family:'Iowan Old Style',Georgia,serif;}
+  .coach .end{margin-top:10px;color:var(--muted);font-size:12px;cursor:pointer;}
+  .coach .nextbtn{margin-top:10px;display:inline-block;color:var(--accentink);font-weight:700;cursor:pointer;margin-right:14px;}
+  .centercard{position:absolute;z-index:6;left:50%;top:44%;transform:translate(-50%,-50%);background:#fff;border:1px solid #d9d4e6;border-radius:14px;box-shadow:0 18px 50px rgba(50,45,70,.3);padding:26px 30px;max-width:450px;font-size:14.5px;line-height:1.55;}
+  .centercard .tt{font-size:18px;font-weight:700;margin-bottom:8px;font-family:'Iowan Old Style',Georgia,serif;}
+  .centercard .choices{margin-top:16px;display:flex;flex-direction:column;gap:9px;font-size:13.5px;}
+  .centercard .c1{color:var(--accentink);font-weight:700;cursor:pointer;}
+  .centercard .c2{color:#9a4f2e;font-weight:600;cursor:pointer;}
+  .centercard .c3{color:var(--muted);cursor:pointer;}
+  /* notes under the stage */
+  .notes{max-width:1120px;background:#fff;border:1px solid var(--hair);border-radius:10px;margin-top:12px;padding:16px 20px;font-size:13.5px;line-height:1.55;}
+  .notes h3{margin:0 0 6px;font-size:13px;letter-spacing:1.3px;color:var(--accentink);}
+  .notes ul{margin:6px 0 0;padding-left:20px;}
+  .notes li{margin-bottom:5px;}
+  .notes .q{color:#9a4f2e;font-weight:600;}
+  .copylabel{display:inline-block;background:var(--side);border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin-left:8px;vertical-align:1px;}
+  .ideas{padding:26px 34px;overflow:auto;height:100%;box-sizing:border-box;}
+  .ideas h2{font-size:17px;margin:0 0 4px;font-family:'Iowan Old Style',Georgia,serif;}
+  kbd{background:var(--side);border:1px solid var(--hair);border-radius:4px;padding:0 5px;font-size:12px;font-family:ui-monospace,Menlo,monospace;}
+</style>
+</head>
+<body>
+<h1>13s-b — the onboarding tour, v5 <span class="copylabel">2026-10-08 · the assessment folded in · copy FIFTH DRAFT</span></h1>
+<p class="sub"><b>What v5 changes, from the assessment (dispositions in the plan file):</b> the middle is reordered so the word take is defined before Takes mode is ever entered (make the take, meet the icon, then the board, then bounce modes) · the Takes-mode sentence now teaches the true model, working in a take versus choosing it · step 4 gains the safety sentence (autosave, and what commit ⌘S is for) · the ending is restaged: ⏎ opens your new note, and the end card sits over it · the way home is its own beat · leg copy fixes (gathering wording, the snippets gesture) · one muted ⌘J line on the end card. The seed shown is R-13s-5's target seed; U1 lands it with or before the tour.</p>
+<div class="topnav">
+  <button id="prev">⟵ back</button>
+  <button id="next">next ⟶</button>
+  <span class="dots" id="dots"></span>
+  <span class="where" id="where"></span>
+</div>
+<div id="stage"></div>
+<div class="notes" id="notes"></div>
+
+<script>
+/* ———————— the red V, faithful two-tone (approximation of notes/brand/variorum-v-faithful-red.svg — R-13s-25; the real asset ships) ———————— */
+function vmark(size){
+  size=size||18;
+  return `<svg class="vmark" width="${size}" height="${size}" viewBox="0 0 48 48">
+    <rect width="48" height="48" rx="10" fill="#FC120C"/>
+    <path d="M9 8.5 L18.5 8.5 L26.8 41 L20.8 41 Z" fill="#17120e"/>
+    <path d="M29.5 8.5 L39 8.5 L27.2 41 L21.2 41 Z" fill="#17120e"/>
+    <g stroke="#fdfcf8" fill="none">
+      <path d="M13.4 8.5 L22.9 40" stroke-width="1.7"/>
+      <path d="M16.2 8.5 L24.7 37.5" stroke-width="1.3"/>
+      <path d="M34.6 8.5 L25.1 40" stroke-width="1.7"/>
+      <path d="M31.8 8.5 L23.3 37.5" stroke-width="1.3"/>
+    </g>
+  </svg>`;
+}
+/* ———————— chrome templates, drawn from her screenshots ———————— */
+function sidebar(o){
+  o=o||{};
+  const areas=[["Bookcase","📚"],["Library","📄"],["Pool","🗂"],["Snippets","⧉"],["Archived","🗃"]];
+  let h=`<div class="side" id="sidebar">`;
+  if(o.starred&&o.starred.length){h+=`<div class="shead">Starred</div>`+o.starred.map(n=>`<div class="srow">${n}<span class="star">★</span></div>`).join("")+`<div class="sgap"></div>`;}
+  h+=areas.map(a=>`<div class="srow ${a[0]===o.on?'on':''}"${a[0]==="Bookcase"?' id="sb-bookcase"':''}><span class="ic">${a[1]}</span>${a[0]}</div>`).join("");
+  if(o.thisNote){
+    h+=`<div class="sgap"></div><div class="shead">this note</div>`+
+      ["Write","Takes","Read","Lenses","Compare","Blocks"].map(m=>`<div class="srow ${m===o.thisNote?'on':''}" ${m==="Takes"?'id="sn-takes"':''}${m==="Write"?' id="sn-write"':''}${m==="Lenses"?' id="sn-lenses"':''}>${m}</div>`).join("");
+  }
+  if(o.open&&o.open.length){h+=`<div class="sgap"></div><div class="shead">Open</div>`+o.open.map(n=>`<div class="srow" style="font-size:12.5px">${n}<span class="star" style="color:var(--faint)">⌘⇧1 ×</span></div>`).join("");}
+  if(o.noteBox){h+=`<div style="margin:12px 8px 0;background:#fff;border:1px solid var(--hair);border-radius:9px;padding:10px 12px;font-size:12px"><div style="color:var(--accentink);margin-bottom:2px">this note</div><div style="font-family:'Iowan Old Style',Georgia,serif;font-weight:700;font-size:13.5px">A Scandal in Bohemia</div><div style="color:var(--muted);margin:2px 0 8px">2 of 13 in this book · block 2/261</div><div id="nb-edit" style="display:inline-block;background:var(--pill);color:var(--accentink);font-weight:700;border-radius:6px;padding:3px 10px;cursor:pointer">edit here</div></div>`;}
+  h+=`<div class="sfoot">Synced just now <span class="btn">Sync now</span> <span class="btn">Account…</span></div></div>`;
+  return h;
+}
+function bottomband(o){
+  o=o||{};
+  let badge="";
+  if(o.badge==="offer")badge=`<div class="onelinerrow"><span class="oneliner" id="oneliner">${vmark(17)}Welcome to Variorum. Take the tour?&ensp;<span class="yes" id="badgeyes">yes</span> · <span class="no" id="badgeno">not now</span></span></div>`;
+  if(o.badge==="helproad")badge=`<div class="onelinerrow"><span class="oneliner transient">Run it any time from Help ▸ Tutorial.</span></div>`;
+  return `<div class="bottomband">
+    ${o.noQuick?'':'<div class="quickentry" id="quickentry">new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph</div>'}
+    ${badge}
+    <div class="bottombar">${o.bar||'<span>⌘K — find anything: notes, books, commands</span><span class="right">⌘J today · ⌘N new note</span>'}</div>
+  </div>`;
+}
+const NOTEBAR=`<span>block 2/261</span><span>block ▾</span><span id="bar-takes">Takes</span><span class="commit">commit ⌘S</span><span>history</span><span>note ▾</span><span>comments</span><span>Aa</span><span class="right">60w block · 8,412w in note</span>`;
+function bookcase(o){
+  o=o||{};
+  return sidebar({on:"Bookcase",starred:o.starred})+`<div class="main">
+    <div class="navarrows"><span>←</span><span>→</span></div>
+    <div class="crumbrow"><div class="crumb"><span class="here">Bookcase</span> · <span class="sub2">Home ▾</span></div>
+      <div class="crumbright"><span>Today's Entry</span><span>＋ New Book</span></div></div>
+    <div class="striprow"><span class="s solo">All</span><span class="s">starred</span><span class="s">Welcome</span><span class="s ghost">＋ shelf</span>
+      <span class="right"><span>№</span><span>order · A–Z ▾</span><span>details</span></span></div>
+    <div class="board">
+      <div class="shelfhead">▾ Unshelved</div>
+      <div class="brow"><span class="t">starred notes</span><span class="meta">0 notes · gathering</span></div>
+      <div class="shelfhead">▾ Welcome</div>
+      <div class="brow" id="row-guide"><span class="t">the field guide</span><span class="tag">#tutorial</span><span class="meta">41 notes · 10 ch</span></div>
+      <div class="brow" id="row-sherlock"><span class="t">the adventures of sherlock holmes</span><span class="tag">#classics</span><span class="tag">#sherlock holmes</span><span class="meta">13 notes · 13 ch · 105,142w · owned</span></div>
+    </div>
+    ${bottomband(o)}
+  </div>`;
+}
+function bookChrome(mode,mainHTML,noteBox){
+  const ch=["about this text","A Scandal in Bohemia","The Red-Headed League","A Case of Identity","The Boscombe Valley My…","The Five Orange Pips","The Man with the Twiste…"];
+  return sidebar({on:"Bookcase",noteBox:noteBox})+`<div class="bookcol">
+    <div style="color:#a39eb3;margin-bottom:8px">← →</div>
+    <div class="btitle">the adventur…&ensp;<span style="font-weight:400;color:#9a94ab">⎙ ⚙︎</span></div>
+    <div class="bmodes">${["Outline","Index","Book","Read"].map(m=>m===mode?`<b>${m}</b>`:m).join("&ensp;")}</div>
+    <div class="order">order · Manual order ▾</div>
+    ${ch.map(c=>`<div class="ch">⠿ ${c}</div>`).join("")}
+    <div class="newrows">＋ new chapter<br>＋ new note</div>
+  </div><div class="main">${mainHTML}</div>`;
+}
+function bookOutline(){
+  return bookChrome("Outline",`<div class="bookmain">
+    <h2>the adventures of sherlock holmes</h2>
+    <div class="bmeta">book · 13 chapters · 13 notes&emsp;expand all&emsp;collapse all</div>
+    <div class="chap">⠿ A Scandal in Bohemia</div>
+    <div class="notecard" id="card-scandal"><div class="nt">▸ A Scandal in Bohemia <span class="open" id="open-scandal">open ↗</span></div>
+      <div class="prev">To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin…</div></div>
+    <div class="chap">⠿ The Red-Headed League</div>
+    <div class="notecard"><div class="nt">▸ The Red-Headed League <span class="open">open ↗</span></div>
+      <div class="prev">I had called upon my friend, Mr. Sherlock Holmes, one day in the autumn of last year and found him in deep conversation with a very stout, florid-faced, elderly gentleman with fiery red hair…</div></div>
+  </div>${bottomband({noQuick:true,bar:'<span>13 chapters · 13 notes</span>'})}`);
+}
+function bookIndexMid(withBox){
+  return bookChrome("Index",`<div class="bookmain" style="padding-top:16px">
+    <div style="color:var(--muted);font-size:12px;margin-bottom:12px">group · chapters ▾&emsp;filter this book&emsp;fold all</div>
+    <div class="chap" style="margin-top:0">A Scandal in Bohemia</div>
+    <p class="dim" style="font-family:'Iowan Old Style',Georgia,serif;font-size:15px;max-width:640px;color:#aba6b8">…“Quite so. I have trained myself to notice what I see.”</p>
+    <div id="idx-block" style="background:#f2effa;border:1px solid var(--cardline);border-radius:9px;padding:10px 14px;max-width:640px;font-family:'Iowan Old Style',Georgia,serif;font-size:15px;line-height:1.6">${P_MID}</div>
+    <p style="font-family:'Iowan Old Style',Georgia,serif;font-size:15px;max-width:640px;margin-top:14px">“How often?” “Well, some hundreds of times.” “Then how many are there?”</p>
+    <div style="color:var(--muted);font-size:11.5px;margin-top:8px">click a block to write in it right here; one block is live at a time</div>
+  </div>${bottomband({noQuick:true,bar:'<span>13 chapters · 13 notes</span>'})}`,withBox);
+}
+const P_MID=`“You see, but you do not observe. The distinction is clear. For example, you have frequently seen the steps which lead up from the hall to this room.”`;
+const P_MID_B=`“You see, but you do not observe — and that distinction is everything. You have frequently seen the steps which lead up from the hall to this room.”`;
+function noteChrome(mode,inner,extra){
+  return sidebar({on:"Bookcase",thisNote:mode,open:["A Scandal in Bohemia"]})+`<div class="main">
+    <div class="navarrows"><span>←</span><span class="bookglyph" id="ctx-book">📖</span><span>→</span></div>
+    <div class="notehead">
+      <div class="icons">⎘ ⌸ ⧉ 📚</div>
+      <div class="ntitle">A Scandal in Bohemia</div>
+      <div class="inbook">in the adventures of sherlock holmes · 1 gathering</div>
+      <div class="tags"><span><span class="tag">classics ×</span></span><span><span class="tag">sherlock holmes ×</span> <span style="color:#9a94ab">＃</span></span></div>
+    </div>
+    ${inner}
+    ${extra||""}
+  </div>`;
+}
+function noteWriteMid(o){
+  o=o||{};
+  return noteChrome("Write",`<div class="prose" id="prose">
+    <div class="scrollhint"><i></i></div>
+    <p class="dim">…“Quite so. I have trained myself to notice what I see.”</p>
+    <p id="para-mid">${P_MID}${o.took?'<span class="psi" id="psi">ψ2</span>':''}</p>
+    <p>“How often?” “Well, some hundreds of times.” “Then how many are there?” “How many? I don't know.”</p>
+    <p class="dim">“Quite so! You have not observed. And yet you have seen…”</p>
+  </div>${bottomband({noQuick:true,bar:NOTEBAR})}`,o.popover?takesPopover(o.two):"");
+}
+function takesPopover(two){
+  return `<div class="popover"><div class="phead"><b>Takes — block 7E72C84C</b><span class="pbtn hot" id="open-takes-mode">Open Takes mode</span><span class="pbtn">Close</span></div>
+    <div class="ptake"><div class="pl">✓ chosen</div>${P_MID}</div>
+    ${two?`<div class="ptake" style="border-left-color:#b9b2d6"><div class="pl" style="color:var(--muted)">just now</div>${P_MID_B}</div>`:""}
+    <div class="addrow"><b id="newtake">＋ new take (branch)</b> · ＋ blank take · ＋ blank &amp; choose</div></div>`;
+}
+function noteTakesMode(){
+  return noteChrome("Takes",`<div class="takesbar"><span>style: stack ▾</span><span class="chip">wash: on</span><span>expand all</span><span style="color:var(--faint)">close all</span><span class="right">note actions ▾</span></div>
+  <div class="tboard">
+    <div class="tblock" style="color:#aba6b8">…“Quite so. I have trained myself to notice what I see.”<span class="psi2">ψ+</span></div>
+    <div class="tblock fanned" id="fanned"><div class="fanstack">
+      <div class="takecard"><div class="tl">✓ CHOSEN</div>${P_MID}</div>
+      <div class="takecard alt"><div class="tl">JUST NOW</div>${P_MID_B}</div>
+    </div></div>
+    <div class="tblock" style="color:#55506a">“How often?” “Well, some hundreds of times.”…<span class="psi2">ψ+</span></div>
+  </div>${bottomband({noQuick:true,bar:NOTEBAR.replace('<span id="bar-takes">Takes</span>','<span>＋ take</span>')})}`);
+}
+function yourNote(o){
+  o=o||{};
+  return sidebar({on:"Bookcase",thisNote:"Write",starred:o.starredList,open:["What I want this for"]})+`<div class="main">
+    <div class="navarrows"><span>←</span><span>→</span></div>
+    <div class="notehead">
+      <div class="icons"><span id="starbtn" style="font-size:15px">☆</span> ⚙︎</div>
+      <div class="ntitle">What I want this for</div>
+      <div class="inbook" style="color:var(--muted)">in no book — waits in the Pool</div>
+      <div class="tags"><span><span style="color:#9a94ab" id="hashdoor">＃</span></span></div>
+    </div>
+    <div class="prose"><p>Trying this out for my journal, and maybe the half-written essays folder…</p></div>
+    ${bottomband({noQuick:true,bar:'<span>block 1/1</span><span>block ▾</span><span>Takes</span><span class="commit">commit ⌘S</span><span>history</span><span>note ▾</span><span>comments</span><span class="right">11w in note</span>'})}
+  </div>`;
+}
+function poolScreen(){
+  return sidebar({on:"Pool",starred:["What I want this for"]})+`<div class="main">
+    <div class="navarrows"><span>←</span><span>→</span></div>
+    <div class="lmast"><span class="lt">Pool</span><span class="lsub">· 2 notes · 0 in gatherings · show</span></div>
+    <div class="board">
+      <div class="poolcard" id="pool-yours"><span class="t2">What I want this for</span><span class="date">today</span><span class="atb" id="atb">add to book</span></div>
+      <div class="poolcard"><span class="t2">readme</span><span class="date">came with the app</span><span class="atb">add to book</span></div>
+    </div>
+    ${bottomband({})}
+  </div>`;
+}
+function snippetsScreen(){
+  return sidebar({on:"Snippets",starred:["What I want this for"]})+`<div class="main">
+    <div class="navarrows"><span>←</span><span>→</span></div>
+    <div class="lmast"><span class="lt">Snippets</span><span class="lsub">1 snippet in 1 group</span><span style="margin-left:auto;color:var(--muted);font-size:12px">tag: any ▾ · sort: recent ▾&emsp;<span style="border:1px solid var(--hair);border-radius:6px;padding:2px 8px">open as editor</span></span></div>
+    <div class="board">
+      <div class="snipcard" id="snip1"><div class="t3">○ Any resemblance to actual persons, living or dead, is purely coincidental.</div><div class="meta">11 words · came with the app · in Snippets&emsp;⠿</div></div>
+      <div class="quickentry" style="margin:14px 0">drop text or a file here to add it</div>
+      <div style="color:var(--muted);font-size:12.5px">new snippet — start typing · ⏎ keeps it as a standalone snippet</div>
+    </div>
+    ${bottomband({noQuick:true})}
+  </div>`;
+}
+function coach(x,y,step,title,body,showNext){
+  return `<div class="coach" style="left:${x}px;top:${y}px">
+    <div class="step">${step}</div><div class="tt">${title}</div>${body}
+    ${showNext?'<span class="nextbtn" data-adv="1">next ⟶</span>':''}<div class="end">End tour</div></div>`;
+}
+
+/* ———————— the frames ———————— */
+const frames=[
+{label:"cover", where:"cover — v5, the assessment folded in",
+ build:s=>{s.innerHTML=`<div class="ideas">
+   <h2>${vmark(26)}The tour, v5</h2>
+   <p style="max-width:74ch;line-height:1.6">The assessment's accepted findings, built. The middle now runs: Write, make a take, meet the take icon, see Takes mode, then bounce modes with the fan real on screen. The word take is defined before anything is named after it. Step 4 answers the safety question the moment commit ⌘S first glows. The Takes-mode card teaches working in a take versus choosing it, which the old sentence got wrong. The ending is restaged over the note ⏎ just opened, the way home is its own beat, and one muted line gives ⌘J its due.</p>
+   <p style="max-width:74ch;line-height:1.6;color:var(--muted)">The logo build item stands as ruled: the faithful two-tone edition, <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">notes/brand/variorum-v-faithful-red.svg</span>, on the app icon, About, and the welcome line. The board drawn everywhere is R-13s-5's target seed; U1 lands it with or before the tour. Two build-verify flags ride to the implementer: the exact choose door in Takes mode, and the note-side snippets panel's name.</p></div>`;},
+ notes:`<h3>THE ASSESSMENT'S DISPOSITIONS</h3>Accepted and built: the reorder (A1/A2/E1), the visible-versus-chosen fix (C1), the autosave sentence (B1/E2), the restaged ending (A3/C4), the two-beat way home (A4), the gathering wording (C5), the snippets gesture (C6), "Star a note" (D2), the ⌘J line (A6). Recorded, not built: the seed-sequencing constraint (C2), off-target clicks during the tour (B2/B3, U2's), "owned" and the trust question (B4/B5, the guide's and 13s-a's), the fork-only time claim (A5), and Q20 on the welcome note's exact title (C3). The full record is the plan file's ASSESSMENT section.`},
+
+{label:"first open", where:"first open — the quiet offer",
+ build:s=>{s.innerHTML=bookcase({badge:"offer"});},
+ spot:"#badgeyes", notes:`<h3>FIRST OPEN</h3>One quiet line, your words, the small red V beside it. No popup, nothing moves, nothing dims. The board is R-13s-5's target seed; no Starred section exists yet because nothing is starred at birth under it.`},
+
+{label:"not now", where:"after “not now”",
+ build:s=>{s.innerHTML=bookcase({badge:"helproad"});},
+ notes:`<h3>“NOT NOW”</h3>The same line briefly reads "Run it any time from Help ▸ Tutorial.", fades, and the offer never returns.`},
+
+{label:"step 1", where:"step 1 of 11 — navigation",
+ build:s=>{s.innerHTML=bookcase({})+coach(210,180,"STEP 1 OF 11","Navigation",
+  `Everything lives in one of the places on the left. Bookcase holds your books. Library is everything, searchable. Pool holds notes that aren't in a book, and Snippets keeps pieces of text you reuse between notes.`,true);},
+ spot:"#sidebar", spotNoAdv:true,
+ notes:`<h3>STEP 1</h3>Four places, one sentence each. The ring is the only emphasis.`},
+
+{label:"step 2", where:"step 2 of 11 — the seeded book",
+ build:s=>{s.innerHTML=bookcase({})+coach(430,300,"STEP 2 OF 11","Sherlock Holmes, in Variorum",
+  `The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it.`);},
+ spot:"#row-sherlock",
+ notes:`<h3>STEP 2</h3>Title and sentence still yours (<span class="q">Q10</span>). The assessment expects "owned" in this row to draw the question; the guide answers it, and nothing bad happens meanwhile.`},
+
+{label:"step 3", where:"step 3 of 11 — Outline",
+ build:s=>{s.innerHTML=bookOutline()+coach(620,210,"STEP 3 OF 11","Inside a book",
+  `A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into A Scandal in Bohemia.`);},
+ spot:"#card-scandal",
+ notes:`<h3>STEP 3</h3>The real landing, the real left column, your scrapbook line.`},
+
+{label:"step 4", where:"step 4 of 11 — Write, and your writing is safe",
+ build:s=>{s.innerHTML=noteWriteMid({})+coach(650,150,"STEP 4 OF 11","Write",
+  `Notes open in Write. Everything autosaves as you type; commit ⌘S in the bottom bar keeps a savepoint of a moment worth keeping. Scroll to the middle of the note and click into a paragraph there.`);},
+ spot:"#para-mid",
+ notes:`<h3>STEP 4 — THE SAFETY SENTENCE (the assessment's B1/E2)</h3>"commit" is the most clickable unexplained word on screen and the save-anxiety is the worst first-session wobble; two short sentences defuse both at the moment the bar first glows. The mid-note click stands as ruled.`},
+
+{label:"step 5", where:"step 5 of 11 — make a take",
+ build:s=>{s.innerHTML=noteWriteMid({popover:true})+coach(60,420,"STEP 5 OF 11","Make a take",
+  `A block can keep more than one version of itself. These are takes, like takes in film, and they are the heart of Variorum. Click Takes in the bottom bar, then ＋ new take (branch), and change a few words.`);},
+ spot:"#newtake",
+ notes:`<h3>STEP 5 — THE CENTERPIECE, NOW BEFORE ANYTHING IS NAMED AFTER IT (A1)</h3>The word is defined here, with its reason, before Takes mode or the deeper modes are ever mentioned. The road is the app's own panel; nothing dims behind it.`},
+
+{label:"step 6", where:"step 6 of 11 — the take icon",
+ build:s=>{s.innerHTML=noteWriteMid({took:true})+coach(790,210,"STEP 6 OF 11","The take icon",
+  `The ψ2 in the margin marks any block that keeps more than one version. Click into it any time to see them. Click into it now, then Open Takes mode.`);},
+ spot:"#psi",
+ notes:`<h3>STEP 6 (R-13s-17)</h3>Named the moment the user has caused it to appear.`},
+
+{label:"step 7", where:"step 7 of 11 — Takes mode",
+ build:s=>{s.innerHTML=noteTakesMode()+coach(760,300,"STEP 7 OF 11","Both takes, side by side",
+  `This is Takes mode: the whole note, with every version of every block. The ✓ take is what the note says. Click into a take to work in it; its ✓ makes it the one the page shows. The original keeps its own card.`,true);},
+ spot:"#fanned", spotNoAdv:true,
+ notes:`<h3>STEP 7 — THE VISIBLE-VERSUS-CHOSEN FIX (C1, the assessment's most important finding)</h3>The old sentence taught that a click swaps what the note says; the guide's law is that clicking enters a take and CHOOSING is the deliberate act. BUILD-VERIFY: the exact choose door (the card's ✓, ⌘⏎) confirmed in the real app before these words lock.`},
+
+{label:"step 8", where:"step 8 of 11 — the deeper modes",
+ build:s=>{s.innerHTML=noteTakesMode()+coach(220,430,"STEP 8 OF 11","Three more, for later",
+  `Lenses shows different takes of this note side by side. Compare sets other notes beside this one. Blocks is a workbench for many blocks at once. The field guide teaches each of them.`,true);},
+ spot:"#sn-lenses", spotNoAdv:true,
+ notes:`<h3>STEP 8 (R-13s-21)</h3>One line each, no visit. "Different takes side by side" means something now, because the user has two. This card moved before the climb so the whole this-note list is taught while the user is still in the note.`},
+
+{label:"step 9", where:"step 9 of 11 — your place follows (R-13s-26: Index)",
+ build:s=>{s.innerHTML=bookIndexMid(false)+coach(700,200,"STEP 9 OF 11","Your place follows you",
+  `Bounce between Write (⌘1) and Takes (⌘2) as you like. Then click the book icon and pick Index, the book's own view of its notes. Your paragraph is still in focus, one level up. Your place follows you everywhere.`,true);},
+ spot:"#idx-block", spotNoAdv:true,
+ notes:`<h3>STEP 9 — THE FOLLOW MOMENT, WITH THE BOOK'S INDEX (her Q11 answer: "yes, index")</h3>The third hop is the climb: Write, Takes, then the book's Index, the clicked paragraph in focus at every level. The frame is the Index view with the block washed; its own caption says the editing law (one block is live at a time). The fan is real by now (A2), so nothing on screen predates its cause.`},
+
+{label:"step 10a", where:"step 10 of 11 — down and up",
+ build:s=>{s.innerHTML=bookIndexMid(true)+coach(210,330,"STEP 10 OF 11","Down and up",
+  `In a book, the selected note's edit here door drops you back into it, and the book icon brings you up again. The ladder runs both directions. Click into it.`);},
+ spot:"#nb-edit",
+ notes:`<h3>STEP 10, FIRST BEAT (R-13s-9's round trip, through the Index)</h3>The note box in the sidebar carries the selected note's controls; edit here is the way back down. The Book tab stays untaught (Q18 closed with Q11: she meant Index).`},
+
+{label:"step 10b", where:"step 10 of 11 — and home",
+ build:s=>{s.innerHTML=bookIndexMid(false)+coach(210,120,"STEP 10 OF 11 · AND HOME","Head home",
+  `When you're done exploring, Bookcase in the sidebar heads home. Click into it.`);},
+ spot:"#sb-bookcase",
+ notes:`<h3>STEP 10, SECOND BEAT (A4)</h3>The way home is a ringed act of its own.`},
+
+{label:"step 11", where:"step 11 of 11 — one of your own",
+ build:s=>{s.innerHTML=bookcase({})+coach(390,360,"STEP 11 OF 11","One of your own",
+  `The dashed line at the bottom reads new note, just start typing. Type a first line and press ⏎ to open your first note. No book needed; it waits in the Pool until you give it one.`);},
+ spot:"#quickentry",
+ notes:`<h3>STEP 11 (C4)</h3>The copy now says what ⏎ really does: the note opens. The Pool is named here so leg 3 lands on ground already laid.`},
+
+{label:"end card", where:"the end card — over their own note",
+ build:s=>{s.innerHTML=yourNote({})+`<div class="centercard">
+   <div class="tt">That's the tour.</div>
+   Navigation on the left. Books on the Bookcase. Takes on any block. Your place follows you.
+   <div style="margin-top:8px;color:var(--muted);font-size:13px">readme, a short welcome note, is waiting in your Library. And ⌘J opens today's journal entry, whenever you want one.</div>
+   <div class="choices">
+     <span class="c1" data-adv="1">Keep going: two more minutes on stars, tags, books and snippets</span>
+     <span class="c2">Open the field guide, every feature as a lesson</span>
+     <span class="c3">Done, go write</span>
+   </div></div>`;},
+ notes:`<h3>THE FORK, RESTAGED (A3)</h3>The card now sits over the note ⏎ just opened, so "Done, go write" is literally true: close the card and the cursor is already in their note. The ⌘J line is the assessment's A6, one muted sentence. <span class="q">Q20</span>: the end card must name the welcome note's exact seeded title ("Start Here" or "Lillian's Start Here"), your pick at seed time.`},
+
+{label:"leg · star", where:"keep going 1 of 4 — star", leg:true,
+ build:s=>{s.innerHTML=yourNote({})+coach(700,120,"KEEP GOING · 1 OF 4","Star a note",
+  `Click the star. Starred notes rise to the top of the sidebar, and the starred notes gathering on your Bookcase collects them automatically.`);},
+ spot:"#starbtn",
+ notes:`<h3>LEG 1 (D2's flatter title)</h3>Under the target seed nothing is starred at birth, so this star makes the sidebar's Starred section appear for the first time. That premise depends on U1's seed reshape; the plan file records the sequencing constraint (C2).`},
+
+{label:"leg · tags", where:"keep going 2 of 4 — tags", leg:true,
+ build:s=>{s.innerHTML=yourNote({starredList:["What I want this for"]})+coach(680,180,"KEEP GOING · 2 OF 4","Organize with tags",
+  `The ＃ on the masthead adds a tag. Tag a note ideas, and a gathering made from ideas shows it on its own. Make the tag.`);},
+ spot:"#hashdoor",
+ notes:`<h3>LEG 2 (C5)</h3>"A gathering made from ideas" keeps the guide's nouns apart; binding a gathering into a book stays the guide's lesson.`},
+
+{label:"leg · book", where:"keep going 3 of 4 — the Pool", leg:true,
+ build:s=>{s.innerHTML=poolScreen()+coach(640,210,"KEEP GOING · 3 OF 4","Put it in a book",
+  `Your note has been waiting here in the Pool. Click into add to book, or make a new book around it. A note can sit in more than one book.`);},
+ spot:"#atb",
+ notes:`<h3>LEG 3</h3>"Has been waiting" leans on step 11's sentence; the Pool is already known ground.`},
+
+{label:"leg · snippets", where:"keep going 4 of 4 — snippets", leg:true,
+ build:s=>{s.innerHTML=snippetsScreen()+coach(640,240,"KEEP GOING · 4 OF 4","Snippets",
+  `Pieces of text you reuse between notes live here: a phrase, a quote, a line you cut. From inside any note, the snippets panel brings them alongside so you can pull one in. The snippet stays for next time.`);},
+ spot:"#snip1",
+ notes:`<h3>LEG 4 (C6; Q17 closed)</h3>The seeded snippet is IN at her word, and its text is the standard disclaimer line, her pick. BUILD-VERIFY: the note-side panel's exact name (the guide says Scraps) before these words lock.`},
+
+{label:"leg end", where:"the leg's end — the field guide",
+ build:s=>{s.innerHTML=bookcase({starred:["What I want this for"]})+coach(430,255,"THE END","The field guide",
+  `Everything deeper lives in the field guide: takes in depth, divide and merge, books that collect, privacy. Interactive lessons, in order or as needed. That's the tour. Go write.`);},
+ spot:"#row-guide",
+ notes:`<h3>BOTH ROADS END AT THE GUIDE</h3>Their note shows starred in the sidebar; the leg left a visible trace.`},
+
+{label:"questions", where:"open questions",
+ build:s=>{s.innerHTML=`<div class="ideas">
+   <h2>The question ledger (all closed; the tour is APPROVED — R-13s-27)</h2>
+   <ul style="font-size:13.5px;line-height:1.7;max-width:86ch">
+     <li><b>Q20 closed</b>: the welcome note is titled <b>readme</b> (her word); the end card names it. <b>Q16 closed</b>: the letter is a standalone bookless note in Pool/Library, seeded for recency per her call. <b>Both notes' SEEDING DEFERS</b> (R-13s-28, her word: the text isn't done; "it's fine the readme doesnt exist but is in the tour for now").</li>
+     <li><b>Closed at R-13s-26</b>: Q10 the shown title stands · Q11 the follow moment climbs to the book's INDEX (steps 9 and 10) · Q12 restart from step 1 · Q13 the leg stands · Q14 the toured take stays · Q15 the end card's sentence · Q17 the seeded snippet wears the standard disclaimer line · Q18 obsolete · Q19 the logo placements (R-13s-25).</li>
+     <li><b>Build-verify flags for U2</b>: the choose door in Takes mode (the ✓, ⌘⏎) · the note-side snippets panel's name · the Index follow behavior exactly as step 9 claims it.</li>
+   </ul>
+   <div style="font-size:13px;color:var(--muted);margin:16px 0 4px">WHAT HAPPENS NEXT</div>
+   <p style="max-width:80ch;font-size:13.5px;line-height:1.6">Your walk of v5. On per-screen approval, U1 (seed reshape + quick entry + the offer line + Study default + the logo) and U2 (the tour engine and steps, with the two build-verify flags) go to the implementer, and the real tour builds to this file as its spec. The plan file carries the sequencing constraint: U1's seed lands with or before U2's tour. No Swift before approval.</p></div>`;},
+ notes:`<h3>V5's LEDGER</h3>The assessment's nine accepted findings are built; six more are recorded with reasons; nothing was dropped silently. The full dispositions table is the plan file's ASSESSMENT section.`}
+];
+
+/* ———————— driver ———————— */
+let i=0;
+const stage=document.getElementById("stage"),notes=document.getElementById("notes"),
+      dots=document.getElementById("dots"),where=document.getElementById("where");
+frames.forEach((f,n)=>{const d=document.createElement("span");if(f.leg)d.className="leg";d.onclick=()=>go(n);dots.appendChild(d);});
+function go(n){
+  i=Math.max(0,Math.min(frames.length-1,n));
+  const f=frames[i];
+  stage.innerHTML="";f.build(stage);
+  if(f.spot){const el=stage.querySelector(f.spot);if(el){el.classList.add("spot");if(!f.spotNoAdv)el.onclick=()=>go(i+1);}}
+  stage.querySelectorAll("[data-adv]").forEach(el=>el.onclick=()=>go(i+1));
+  notes.innerHTML=f.notes||"";where.textContent=(i+1)+" / "+frames.length+" — "+f.where;
+  [...dots.children].forEach((d,n2)=>d.classList.toggle("on",n2===i));
+}
+document.getElementById("prev").onclick=()=>go(i-1);
+document.getElementById("next").onclick=()=>go(i+1);
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1);});
+go(0);
+</script>
+</body>
+</html>

@@ -259,6 +259,9 @@ struct QuickEntryBar: View {
                     .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
             .contentShape(Rectangle())
             .onTapGesture { focusRequest += 1 }
+            // 13s-b U2: step 11 points at the dashed box itself ("the dashed
+            // line at the bottom"). The tour lights it on the Bookcase only.
+            .tourAnchor(.quickEntry)
             // 13u3 UNIT B — the OFFER (her item 4): the first words, one
             // click to take them as the note's title, ignorable forever.
             if let suggestion = box.suggestedTitle {

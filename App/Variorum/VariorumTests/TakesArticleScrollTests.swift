@@ -118,6 +118,13 @@ struct TakesArticleScrollTests {
             _ mount: @MainActor (TakesViewModel) async -> (NSWindow, NSHostingView<TakesBoardView>)
         ) async throws -> Void
     ) async throws {
+        // 13s closeout — the Study-default harness class (`TerminalMetricsPin`
+        // has the trace): every landing decision here consults the entry
+        // band, whose line height reads `EditorDocument.baseFont` — a
+        // process global a voiceless store's Study adoption leaves behind.
+        // This suite's hand-placed frames are calibrated against Terminal.
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
@@ -138,6 +145,9 @@ struct TakesArticleScrollTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 42))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            // The store carries the Terminal voice row so any in-test
+            // adoption keeps the voice the frames were calibrated against.
+            try session.operations.setThemeVoice(.terminal)
             let post = try session.operations.createPost(title: "article scroll fixture")
             var made: [(block: String, variant: String)] = []
             for i in 1...blocks {
@@ -482,6 +492,12 @@ struct TakesArticleScrollTests {
     /// frame that may be a placeholder. Red on old: the old spend cleared the
     /// request on the first report and never aimed again.
     @Test func theLandingWaitsForRowsAimsByDirectionAndStaysUntilHerHand() {
+        // Pure-board, so no `withSession` — the pin alone holds the Terminal
+        // metrics these frames were measured against (the knife edge: row
+        // bottom 660 sits inside the band at Terminal's line, below it at
+        // Study's).
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
         let board = freshBoard("steps")
         let order = ["a", "b", "c", "far"]
         board.landArticle(on: "far")

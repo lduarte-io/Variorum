@@ -390,18 +390,66 @@ struct ShellActions {
     /// it restores AND opens the book; failures speak.
     func restoreSampleLibrary() { restoreSeededBook(.sherlock) }
 
-    /// pre-13x 5a — **Help ▸ Restore “Encryption Explained”**: the second
-    /// seeded book through the same door (design §8: *"restorable from Help
-    /// like the tutorial"*).
-    func restoreEncryptionBook() { restoreSeededBook(.encryptionExplained) }
+    // (Help ▸ Restore “Encryption Explained” — pre-13x 5a — REMOVED at
+    // 13s-b U1b, R-13s-37, her word: "encryption explained not present and
+    // not restorable". The book's content stays in `Book.all` as the
+    // dedupe facts' vocabulary for the installed base; no door mints it.)
 
-    /// 18l-c U6 (R-18l-11) — **Help ▸ Restore “The Strange Case of Dr Jekyll
-    /// and Mr Hyde”**: the takemania book through the same door. Like the
-    /// others it mints only what is MISSING — so a deleted takemania note
-    /// comes back fresh, its whole scripted history with it (the front
-    /// matter's R-18l-12 promise), while a takemania she is still playing
-    /// with is never touched.
+    /// 18l-c U6 (R-18l-11) — **Help ▸ Restore “the strange case of dr
+    /// jekyll and mr hyde”** (the title lowercased at 13s-b U1b, R-13s-38 —
+    /// one casing, the seed's style): the takemania book through the same
+    /// door. Like the others it mints only what is MISSING — so a deleted
+    /// takemania note comes back fresh, its whole scripted history with it
+    /// (the front matter's R-18l-12 promise), while a takemania she is
+    /// still playing with is never touched.
     func restoreJekyllBook() { restoreSeededBook(.jekyllAndHyde) }
+
+    /// 13s-b U1b (R-13s-37, her word: "classics restorable") — **Help ▸
+    /// Restore the “classics” Gathering** (the menu title is the
+    /// implementer's, PROVISIONAL P-U1b-3): the gathering left the fresh
+    /// seed (R-13s-5), so this door is its one road back. It composes the
+    /// Welcome arrangement first (the classic books' shipped notes tagged
+    /// `#classics`, Welcome adopted or minted), then ADOPTS a live Home
+    /// gathering wearing the rule or the reserved name, else MINTS one on
+    /// Welcome from the `#classics` tag — the retired arrangement step's
+    /// exact shape. Fire-and-DO; an adopted gathering is a refusal (the
+    /// door changed nothing), a minted one a receipt.
+    func restoreClassicsGathering() {
+        Task { @MainActor in
+            do {
+                let arranged = await Self.arrangeWelcome(session: session)
+                let name = SampleLibraryWelcome.classicsGatheringName
+                let (gatheringID, minted) = try await session.runner.run { _ in
+                    try SampleLibraryWelcome.restoreClassicsGathering(
+                        ops: Operations(undoStack: nil))
+                }
+                shell.pendingSelection = .reading(gatheringID)
+                if minted {
+                    status.receipt(
+                        "Restored the \u{201C}\(name)\u{201D} gathering — it shows everything "
+                        + "tagged #\(SampleLibrarySeeder.classicsTagPath)."
+                        + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))
+                } else if let arranged, arranged.didAnything {
+                    // U1b ladder round 1, MINOR-1 — the sibling's ruled
+                    // voice (18i J33 + 13i-d U7): the gathering was only
+                    // ADOPTED, but the arrangement this door composed just
+                    // WROTE (Welcome made, a book shelved, Sherlock owned,
+                    // notes tagged), so the door ACTED and a receipt says
+                    // what — never a "did nothing" refusal over real writes.
+                    status.receipt(WelcomeDoorCopy.alreadyWholeArranged(
+                        book: name, shelf: arranged.welcome.shelf.name))
+                } else {
+                    status.refuse(
+                        "A \u{201C}\(name)\u{201D} gathering is already on your Bookcase.")
+                }
+            } catch {
+                Self.log.error("restore classics gathering failed: \(String(describing: error), privacy: .public)")
+                status.refuse(
+                    "Restoring the \u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D} "
+                    + "gathering failed: " + SeededBookRestore.failureLine(for: error))
+            }
+        }
+    }
 
     /// ONE road for every seeded book (pre-13x 5a generalized Sherlock's):
     /// mint what is missing, open the book, speak the outcome. The noun in
@@ -474,30 +522,10 @@ struct ShellActions {
         }
     }
 
-    /// F2 (MINOR-8): the tutorial door's silent ensure of *Encryption
-    /// Explained* — the restore road, receipt-less on success. F3 (the
-    /// round-2 ladder's MINOR-N3): silent means NOT AN ASK — it declines
-    /// where the reader's decision is on record (this device's seeded
-    /// mark; a tombstoned reading of the name), and the explicit Help ▸
-    /// Restore door keeps minting.
-    private static func ensureEncryptionBook(session: AppSession, status: StatusCenter) async {
-        let book = SampleLibrarySeeder.Book.encryptionExplained
-        do {
-            switch try await SeededBookRestore.ensure(
-                session: session, book: book, markIsSet: { session.seededBookMarkIsSet(book) })
-            {
-            case .declined(let why):
-                Self.log.notice("tutorial door: \(book.name, privacy: .public) not ensured — \(String(describing: why), privacy: .public); Help ▸ Restore still mints it")
-            case .ensured:
-                break
-            }
-        } catch {
-            Self.log.error("tutorial door: ensuring \(book.name, privacy: .public) failed: \(String(describing: error), privacy: .public)")
-            status.refuse(
-                "The tutorial opened, but \u{201C}\(book.name)\u{201D} "
-                + "could not be restored beside it: " + SeededBookRestore.failureLine(for: error))
-        }
-    }
+    // (The tutorial door's silent ensure of *Encryption Explained* —
+    // pre-13x F2/F3 — RETIRED at 13s-b U1b with the book's doors,
+    // R-13s-37: the privacy chapter no longer points at the book, so the
+    // door has no sentence to make true, and "not restorable" is her word.)
 
     /// The open entrance (⌘K row, Library door): an existing book opens;
     /// none ⇒ seed one first — through the restore path (confirm and all)
@@ -524,19 +552,12 @@ struct ShellActions {
                     return
                 }
                 shell.pendingSelection = .reading(found.bookID)
-                // pre-13x ladder round 1, F2 (MINOR-8): Lesson 2's last
-                // paragraph points at *Encryption Explained* "on this shelf"
-                // — a signed-in-never-synced store seeds neither book (ledger
-                // 70's gate, which stays), so the door that opens the
-                // tutorial makes the sentence true by the restore road:
-                // mint what is missing, touch nothing of hers, say nothing
-                // on success; a failure speaks beside the opened tutorial.
-                await Self.ensureEncryptionBook(session: session, status: status)
                 // 13i-d U7: when this door SEEDED the guide it took the
                 // restore road, so the Welcome arrangement rides it (the
-                // guide and *Encryption Explained* onto ONE Welcome shelf —
-                // which is what makes "on this shelf" true). An existing guide
-                // that simply opened arranges nothing.
+                // guide onto the Welcome shelf). An existing guide that
+                // simply opened arranges nothing. (The *Encryption
+                // Explained* ensure that ran here — pre-13x F2 — retired at
+                // 13s-b U1b with the book's doors, R-13s-37.)
                 if found.seeded { await Self.arrangeWelcome(session: session) }
             } catch {
                 status.refuse("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
@@ -681,10 +702,13 @@ struct ShellActions {
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
         // pre-13u Act 10: the sample library's restore, typeable like the
-        // tutorial's.
-        .restoreSampleLibrary, .restoreEncryptionBook,
+        // tutorial's. (The Encryption Explained row left at 13s-b U1b —
+        // R-13s-37: not restorable.)
+        .restoreSampleLibrary,
         // 18l-c U6: the takemania book's restore, typeable like the others.
         .restoreJekyllBook,
+        // 13s-b U1b (R-13s-37): the classics gathering's restore.
+        .restoreClassicsGathering,
         // The Act 10 correction round (row 15): TAG NOTE, typeable — ⌘⇧I's
         // act (the fold it used to toggle retired with the masthead's second
         // door).
@@ -754,8 +778,8 @@ struct ShellActions {
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
-        case .restoreEncryptionBook: return { restoreEncryptionBook() }
         case .restoreJekyllBook: return { restoreJekyllBook() }
+        case .restoreClassicsGathering: return { restoreClassicsGathering() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —

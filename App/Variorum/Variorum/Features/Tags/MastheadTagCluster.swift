@@ -182,6 +182,9 @@ struct MastheadTagCluster: View {
         }
         .buttonStyle(.plain)
         .help(WorkspaceNaming.tagFieldHelp(open: fieldOpen))
+        // 13s-b U2: the leg's second stop ("The ＃ on the masthead adds a
+        // tag").
+        .tourAnchor(.mastheadTagDoor, cornerRadius: 6, outset: 0)
         .mastheadGeometryProbe(.door, in: geometryProbeSpace)
     }
 

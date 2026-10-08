@@ -119,11 +119,16 @@ struct EditorCommands: Commands {
         // 13k K8: the nesting rows (Tab / ⇧Tab's menu twins).
         .formatIndent, .formatOutdent,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
+        // 13s-b U1a, piece 5: Help ▸ Take the Tour.
+        .takeTour,
         // pre-13u Act 10: the sample library's restore, beside the
-        // tutorial's (the tenth-wave ruling).
-        .restoreSampleLibrary, .restoreEncryptionBook,
-        // 18l-c U6: the takemania book's restore, beside the other two.
+        // tutorial's (the tenth-wave ruling). (Encryption Explained's left
+        // at 13s-b U1b — R-13s-37: not restorable.)
+        .restoreSampleLibrary,
+        // 18l-c U6: the takemania book's restore, beside Sherlock's.
         .restoreJekyllBook,
+        // 13s-b U1b (R-13s-37): the classics gathering's restore.
+        .restoreClassicsGathering,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
@@ -273,6 +278,16 @@ struct EditorCommands: Commands {
     }
 
     var body: some Commands {
+        // 13s-b U1a, piece 4 (R-13s-24/25 — the logo's About placement, Q19
+        // closed): the app menu's About item opens OUR window, which carries
+        // the mark and the lowercase serif wordmark the system panel cannot
+        // set (`AboutView`). UNDECLARED in the capability registry, on the
+        // Check for Updates / Lock Library Now / New Window precedent below:
+        // an app-menu standard with no block/take/post/book scope — the same
+        // door the system drew, now ours.
+        CommandGroup(replacing: .appInfo) {
+            Button(AboutCopy.menuTitle) { openWindow(id: AboutCopy.windowID) }
+        }
         // 13r U2 — Variorum ▸ Check for Updates…, under About: the platform's
         // own place for this act. UNDECLARED in the capability registry, on
         // the Lock Library Now / New Window precedent. It is an app-menu
@@ -865,6 +880,15 @@ struct EditorCommands: Commands {
             // applied with the class, flagged so it can be reversed).
             Button("Open the Tutorial") { creationActions()?.openTutorial() }
                 .disabled(!canReachCreationTarget)
+            // 13s-b U1a, piece 5 (R-13s-6/13 — "they can find it under
+            // help"): the tour's standing door, beside the field guide's. Its
+            // name is the registry's verb, which the offer line's help-road
+            // sentence reads too (`TourOfferCopy.menuTitle`): "Tutorial" is
+            // taken by the field guide's door one line up, so the tour's is
+            // "Take the Tour" (PROVISIONAL P-U1a-9). A request the window
+            // adopts, the What's New road (the tour runs over a window).
+            Button(verb(.takeTour)) { windows.creationRouter()?.tourRequested = true }
+                .disabled(!canReachCreationTarget)
             // 13r U3-A: Help ▸ What's New — this version's release notes
             // (the ONE source the appcast also carries), on demand. A
             // request the window adopts, on the creation router (the sheet
@@ -881,14 +905,16 @@ struct EditorCommands: Commands {
                 creationActions()?.restoreSampleLibrary()
             }
             .disabled(!canReachCreationTarget)
-            // pre-13x 5a: the second seeded book's restore, beside Sherlock's.
-            Button(verb(.restoreEncryptionBook)) {
-                creationActions()?.restoreEncryptionBook()
-            }
-            .disabled(!canReachCreationTarget)
-            // 18l-c U6: the takemania book's restore, beside the other two.
+            // (The Encryption Explained restore sat here — pre-13x 5a —
+            // RETIRED at 13s-b U1b, R-13s-37: not restorable.)
+            // 18l-c U6: the takemania book's restore, beside Sherlock's.
             Button(verb(.restoreJekyllBook)) {
                 creationActions()?.restoreJekyllBook()
+            }
+            .disabled(!canReachCreationTarget)
+            // 13s-b U1b (R-13s-37): the classics gathering's restore.
+            Button(verb(.restoreClassicsGathering)) {
+                creationActions()?.restoreClassicsGathering()
             }
             .disabled(!canReachCreationTarget)
             // (The pre-13x batch 0 DEBUG keychain probe door lived here —

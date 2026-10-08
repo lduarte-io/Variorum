@@ -46,18 +46,9 @@ private final class Marks {
               loadSample: { [self] in sample },
               saveSample: { [self] in sample = $0 })
     }
-    /// pre-13x 5a: the encryption book's OWN mark beside Sherlock's, with
-    /// Sherlock's reading "already seeded" (the half-megabyte parse skipped).
-    var encryptionBook = false
-    var encryptionBookOnly: MobileFirstWriteFurniture.Marks {
-        .init(loadJournal: { [self] in journal },
-              saveJournal: { [self] in journal = $0 },
-              loadSample: { true }, saveSample: { _ in },
-              loadEncryptionBook: { [self] in encryptionBook },
-              saveEncryptionBook: { [self] in encryptionBook = $0 })
-    }
     // (The Jekyll marks helper left with the phone's Jekyll seed —
-    // 17y B-DEDUPE, R-17y-8.)
+    // 17y B-DEDUPE, R-17y-8; the encryption book's left with ITS seed —
+    // 13s-b U1b, R-13s-5/37.)
 }
 
 @Suite("The first-write occasion (R-pre13u-1 / R-pre13u-8)")
@@ -359,35 +350,36 @@ struct MobileFirstWriteFurnitureTests {
         }
     }
 
-    // MARK: pre-13x 5a — the second seeded book rides the same occasion
+    // MARK: 13s-b U1b (R-13s-5/37) — Encryption Explained left the default seed
 
-    /// *Encryption Explained* seeds on the phone's first-write occasion
-    /// beside Sherlock, under its OWN mark; an injected Sherlock mark alone
-    /// stands for both (every pin above skips both parses), and the
-    /// encryption book's mark, when injected, is its own.
-    @Test func theOccasionSeedsTheEncryptionBookUnderItsOwnMark() async throws {
+    /// **JUSTIFIED EDIT of pre-13x 5a's seeds-the-encryption-book pin — the
+    /// SUBJECT RETIRED at her R-13s-37 ("encryption explained not present
+    /// and not restorable"), on the R-17y-8 Jekyll precedent (her ruling
+    /// names people's libraries, and a phone-seeded copy re-arrives
+    /// everywhere by sync):** the first-write occasion seeds NO *Encryption
+    /// Explained* — no reading of the name, no tombstone of the name (never
+    /// minted-then-removed). An existing store that already holds it keeps
+    /// it (nothing retrofits — the seed simply never asks). The Mac's
+    /// launch pin (`aFreshLaunchSeedsTheFinalSet`) is the class's
+    /// red-on-old.
+    @Test func theOccasionSeedsNoEncryptionBook() async throws {
         try await withEditorWorld { session, db in
             let marks = Marks()
             let furniture = MobileFirstWriteFurniture(
-                session: session, storeVariant: .dev,
-                marks: marks.encryptionBookOnly)
-            guard case .ran(_, let sample) = await furniture.run() else {
+                session: session, storeVariant: .dev, marks: marks.both)
+            guard case .ran = await furniture.run() else {
                 Issue.record("expected the occasion to run")
                 return
             }
-            #expect(sample == .alreadySeeded, "Sherlock's injected mark stands")
-            guard case .seeded(let bookID, let chapters) = furniture.encryptionBookOutcome else {
-                Issue.record("expected the encryption book to seed, got \(String(describing: furniture.encryptionBookOutcome))")
-                return
+            let (book, tombstoned) = try await db.read { db in
+                (try Queries.readings(db).first {
+                    $0.name == SampleLibraryEncryptionBook.name && $0.deletedAt == nil
+                 },
+                 try Queries.readingTombstoneExists(
+                    db, name: SampleLibraryEncryptionBook.name))
             }
-            #expect(chapters == 8 && marks.encryptionBook)
-            let book = try await db.read { db in try Queries.reading(db, id: bookID) }
-            #expect(book?.name == SampleLibraryEncryptionBook.name)
-            // A second occasion with the mark set seeds nothing more.
-            let again = MobileFirstWriteFurniture(
-                session: session, storeVariant: .dev, marks: marks.encryptionBookOnly)
-            _ = await again.run()
-            #expect(again.encryptionBookOutcome == .alreadySeeded)
+            #expect(book == nil, "no Encryption Explained in a fresh phone library (R-13s-37)")
+            #expect(!tombstoned, "never minted at all")
         }
     }
 

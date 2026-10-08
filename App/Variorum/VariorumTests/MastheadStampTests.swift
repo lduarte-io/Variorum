@@ -351,6 +351,11 @@ struct MastheadStampTests {
             let stampDefaults = UserDefaults(suiteName: suiteName) ?? .standard
             stampDefaults.removePersistentDomain(forName: suiteName)
             defer { stampDefaults.removePersistentDomain(forName: suiteName) }
+            // 13s-b U1a (A JUSTIFIED EDIT): this pin was measured in the
+            // world a voiceless store used to read — Terminal. A store with no
+            // voice reads Study since her 2026-10-05 ruling, so the world is
+            // named, not inherited.
+            try session.operations.setThemeVoice(.terminal)
             try await withAdoptedTheme(session: session) { store in
                 let oracle = MastheadGeometry.reader(session.debugProbeScope)
                 oracle.resetRowTwo()

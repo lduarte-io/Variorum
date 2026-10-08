@@ -2014,22 +2014,40 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
-        // pre-13x 5a: the second seeded book's restore — the same
-        // mint-what's-missing road (`SampleLibrarySeeder`, per book).
-        Capability(
-            id: .restoreEncryptionBook,
-            verb: "Restore \u{201C}\(SampleLibraryEncryptionBook.name)\u{201D}",
-            scope: .app,
-            doors: [.menuBar, .palette],
-            shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "", availability: always),
+        // (The Encryption Explained restore — pre-13x 5a — RETIRED at
+        // 13s-b U1b, R-13s-37: not restorable.)
         // 18l-c U6 (R-18l-11): the takemania book's restore — the same
-        // mint-what's-missing road, the third seeded book.
+        // mint-what's-missing road (its title lowercased at 13s-b U1b,
+        // R-13s-38 — the verb follows the one name constant).
         Capability(
             id: .restoreJekyllBook,
             verb: "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}",
             scope: .app,
             doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
+        // 13s-b U1b (R-13s-37, "classics restorable"): the classics
+        // gathering's restore — adopt-or-mint on Welcome; the verb's
+        // wording is the implementer's (PROVISIONAL P-U1b-3).
+        Capability(
+            id: .restoreClassicsGathering,
+            verb: "Restore the \u{201C}\(SampleLibraryWelcome.classicsGatheringName)\u{201D} Gathering",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
+
+        // 13s-b U1a (R-13s-2/6/13): the tour's one entry. Its verb IS the
+        // Help menu's name for it (`TourOfferCopy.menuTitle` — the help-road
+        // sentence reads the same constant, so the three can never drift).
+        // Doors: the offer line's "yes" (`.surface`) and Help ▸ Take the Tour
+        // (`.menuBar`, piece 5) — both run `RootView.startTour()`, which is
+        // the U2 engine's real entry (step 1, no resume — Q12). No palette
+        // row: the palette's acts are `ShellActions`', and the tour's entry
+        // deliberately stays the shell's two doors.
+        Capability(
+            id: .takeTour, verb: TourOfferCopy.menuTitle, scope: .app,
+            doors: [.surface, .menuBar],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
 

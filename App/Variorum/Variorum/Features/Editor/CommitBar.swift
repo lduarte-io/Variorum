@@ -215,6 +215,8 @@ struct CommitBar: View {
                 horizontalBody
             }
         }
+        // 13s-b U2 (A2): the tour's cards never cover the bar.
+        .tourKeepClear()
 #if DEBUG
         // 18d batch 1's retirement oracle: which arrangements are ON SCREEN.
         // "The book's editing surfaces render no bar of their own" is a claim
@@ -593,13 +595,16 @@ struct CommitBar: View {
     private var takesDoor: some View {
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
+            // 13s-b U2: step 5 points here first ("Click Takes in the bottom
+            // bar"). Chrome, never the text: the ring is the button's.
+            .tourAnchor(.barTakes, cornerRadius: 5)
     }
 
     private var commitDoor: some View {
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
-            .help("An immutable savepoint of the take under the caret — name it, "
+            .help("An immutable saved moment of the take under the caret — name it, "
             + "or press ⏎ to save it unnamed")
     }
 
@@ -759,7 +764,7 @@ struct CommitBar: View {
         }
         .help("The note itself: its versions, its seal, its date, and the "
             + "repair that makes every newline a block (its tray is the tray "
-            + "icon at the top of the note; a block's savepoints are the "
+            + "icon at the top of the note; a block's commits are the "
             + "history door beside commit)")
     }
 
