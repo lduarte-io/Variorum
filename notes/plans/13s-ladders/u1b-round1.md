@@ -222,3 +222,10 @@ files, and every changed test file.
 mechanism gap against a recorded contract that U1b's new fact widens — the
 orchestrator's arbitration routes it (fix-in-ladder under the held slot is my
 recommendation); the MINOR and NIT are the new door's voice.
+
+## ARBITRATION (orchestrator, same-model ladder — CLAUDE.md's rule; 2026-10-08 ~11:25)
+
+- **MAJOR-1 — FIX IN-LADDER, accepted whole.** The mechanism is concrete, the pin is named, and the scope honesty cuts the right way: the gap is pre-existing (0.9.2's B-DEDUPE) but U1b's readme puts the fresh store's most prominent note on the losing side of it, and 13s holds the custody slot NOW — a later fix would have to re-take it. The fix is the reviewer's named shape: one engagement leg per container/book verdict reading the local starred list, with the two-client red-on-old pin (star one copy, fold, both survive). Sync/ change ⇒ FABLE implements: the U1b implementer is resumed for the fix pass AFTER its stage window completes (its suite results stay valid — the fix is core-side; the dedupe suite reruns headless with the pin). #186(a)'s recorded rule and R-17y-5 are the spec it builds to.
+- **MINOR-1 — FIX IN-LADDER:** mirror the sibling's `didAnything` receipt in the classics door's adopted arm (the ruled voice, 18i J33 + 13i-d U7). Same fix pass.
+- **NIT-1 — RECORD-ONLY, accepted:** the standing wording class rides the book doors' family; nothing tonight.
+- **Sequencing:** stage window (running) → my fresh-store walk → release → the fix pass (headless) → round 2 re-reviews the fixes (fresh reviewer). The walk's validity is unaffected by MAJOR-1 (a two-client fold edge, invisible to a single store).
