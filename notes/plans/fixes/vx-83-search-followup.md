@@ -647,11 +647,9 @@ red anyway, STOP and report: `Sync/` is the orchestrator's).
 
 ### U-C RECORD (LIVE STATUS — the implementer maintains this from its first commit)
 
-**LIVE STATUS (2026-10-08): PAUSED at the brief's two PROPOSE-THEN-STOP points — §U-C FORK 1 (the
-variant-reach drop cannot be built within R-13o-4's letter; the brief's own "STOP and report") and
-§U-C PROPOSAL 2 (the facet word, before the chip). NOTHING of the schema half is built; the tree is
-clean; no revert is in flight. Awaiting the orchestrator's rulings — both are below, each ruleable
-on its own.**
+**LIVE STATUS (2026-10-08): BUILDING — the rulings landed (§U-C RULINGS below: FORK 1 = A with five
+binding conditions; PROPOSAL 2 = `+ savepoints`); P1 (the migration) DONE; P2 next. No revert is in
+flight.**
 
 **Seat:** the U-C implementer (Opus, xhigh), seated 2026-10-08 in `~/dev/variorum-vx-83` on
 `vx-83-search-followup` (pulled at `abe4b192`). Required reading done in-context, never delegated:
@@ -676,8 +674,8 @@ physically deleted — pruning and family purges), `renameCommitPoint` (a whole-
 
 | # | Piece | Status |
 |---|---|---|
-| P0 | This record + the two proposals (the first commit) | DONE (this commit) — AWAITING THE RULINGS |
-| P1 | **Migration `v1_23_savepoint_search` ALONE** (per the FORK 1 ruling): `search_doc.variant_id` (the savepoint doc's own-row parent fact), the `search_text` view recreated with the NINTH arm, the `savepoint` capture triggers on `commit_point`, the backfill by the rebuild road; `v1_22` FROZEN on its own eight-kind list (its DDL proved byte-identical before/after); MigrationTests + the capture-set pin's justified edits | NOT-STARTED — gated on FORK 1 |
+| P0 | This record + the two proposals (the first commit) | DONE (`ec9cbc6f`) — RULED at `d9da0027` (§U-C RULINGS) |
+| P1 | **Migration `v1_23_savepoint_search` ALONE** (FORK 1 = A): `search_doc.variant_id` (the savepoint doc's own-row parent fact), the `search_text` view recreated with the NINTH arm, the `savepoint` capture triggers on `commit_point`, the backfill by the rebuild road; `v1_22` FROZEN on its own eight-kind list (its DDL proved byte-identical before/after); MigrationTests + the capture-set pin's justified edits | DONE (this commit) — `Persistence/SearchIndex.swift`: `Source` gains `tombstoned` (default true) with ONE `live(_:)` existence rule and `watchedColumns` (the eight kinds' SQL byte-unchanged); the kind lists split FROZEN — `sourcesV1_22` (the eight, read by `create`/`v1_22` alone) and `sourcesV1_23` (+ `savepoint`: `commit_point.text`, fact `variant_id`, no tombstone — doc ⇔ the physical ROW); `sources` = the current family (the rebuild door, the integrity check); `addSavepoints` (v1_23: `ALTER TABLE search_doc ADD COLUMN variant_id TEXT`, the view dropped + recreated with the ninth arm — FTS5 reads its content by NAME, the virtual table untouched — and the savepoint's three triggers from the ONE generator); `rebuild(_:sources:)`; the integrity check reads each kind's existence rule (condition 3: a dead take's savepoint docs are CORRECT, never drift) and `variant_id` joins the fact-drift columns. `Migrations.swift`: `v1_22` rebuilds over `sourcesV1_22` (frozen), `v1_23_savepoint_search` = `addSavepoints` + `rebuild(sourcesV1_23)`. `SearchDocKind.savepoint` (the stored vocabulary's mirror, its pin `SearchGroupsTests` green). **THE FREEZE, PROVED:** a scratch dump (`sqlite_master`, every object's type/name/table/SQL; the scratch test never committed, dumps in the gitignored `.build/vx83-uc/`) of a store migrated `upTo: v1_22` on the pre-change tree and on this one — **`cmp` IDENTICAL**; at HEAD the diff is EXACTLY the `variant_id` column, the three `search_commit_point_savepoint_*` triggers and the view's ninth arm. The triggers (INSERT · UPDATE OF `text, variant_id` · DELETE) read NEW/OLD and `search_doc` only. **Purge coordination is correct by construction (condition 1):** the janitor's prune/purge physically DELETEs `commit_point` rows, and each row's own DELETE arm retires its doc and its FTS entry in the same statement. Pins: NEW `MigrationTests.theSavepointKindBackfillsAStoreThatAlreadyHoldsSavepoints` (a v1_22 store's savepoints — one under a TOMBSTONED take — all findable after migrating, accents folded, each with its own parent fact only, the eight kinds re-derived, FTS5 integrity-check passes; red on the pre-VX-72 tree by construction); JUSTIFIED EDIT `SearchIndexCaptureTests.theCaptureTriggerSetIsExactlyThreePerSourceField` (24 → 27; the mechanical-only check made SOURCE-AWARE — it refuses every schema table but the trigger's own source and the derived family; its old fixed list named `commit_point`, now a source). **Full core `swift test`: 2,305 tests in 263 suites PASSED** (the standing skips only) + StringsWorkbook 40/6; the completeness walk GREEN with zero `Sync/` lines |
 | P2 | Capture pins across the write layers (operations commit · the variant reach · fake-server remote apply · the janitor's physical delete) red-on-old by revert; rebuild + integrity cover the ninth kind | NOT-STARTED |
 | P3 | The facet in the AST + the ONE composer + `Queries` (the default-answer FENCE; the facet's road through variant → block → placement); core pins incl. the fence (with a sensitivity probe: a leaking default statement turns it red) | NOT-STARTED |
 | P4 | P1 numbers: capture ∝ the commit; queries ∝ matches with savepoint rows in `SearchP1Tests`' corpus; the DEFAULT road's cost with savepoints in the shared index, measured and recorded | NOT-STARTED |
@@ -814,6 +812,8 @@ every savepoint of your takes", armed "Back to the living text — leave savepoi
 > with-words rule are accepted as PROVISIONAL wording for the bundle (one constant each if
 > she re-words at the walk). **C1–C6 are accepted to build as recorded** — C2's 0.9 weight
 > and C4's residual are honestly stated; ride the bundle. — the architect
+
+## LADDER (after U-B, over the run's whole diff)
 
 Fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
 repo-first here; cross-model dispositions per CLAUDE.md; hard cap three rounds.

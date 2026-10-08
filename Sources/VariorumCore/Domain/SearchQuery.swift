@@ -130,8 +130,8 @@ public enum SearchBookState: String, Equatable, Sendable, CaseIterable {
 }
 
 /// **The index's doc KINDS** (F2 — one doc per source text field, a closed
-/// and additive vocabulary; VX-72's savepoint text joins as one more). The
-/// raw values ARE the stored `search_doc.kind` (pinned against
+/// and additive vocabulary; VX-72's savepoint text joined as the ninth at
+/// `v1_23`). The raw values ARE the stored `search_doc.kind` (pinned against
 /// `SearchIndex.sources`).
 public enum SearchDocKind: String, Equatable, Sendable, CaseIterable {
     case take
@@ -142,6 +142,9 @@ public enum SearchDocKind: String, Equatable, Sendable, CaseIterable {
     case noteMeta = "note_meta"
     case book
     case chapter
+    /// A savepoint's immutable text (`commit_point.text`, VX-72) — listed
+    /// only under the savepoints facet.
+    case savepoint
 }
 
 /// The archived facet (R-13o-6).
