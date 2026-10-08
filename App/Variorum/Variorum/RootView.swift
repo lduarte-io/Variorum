@@ -318,6 +318,13 @@ struct RootView: View {
             whatsNewShown = true
             router.whatsNewRequested = false
         }
+        // 13s-b U1a, piece 5 — Help ▸ Take the Tour: the same one entry the
+        // offer line's "yes" calls.
+        .onChange(of: router.tourRequested) { _, requested in
+            guard requested else { return }
+            router.tourRequested = false
+            startTour()
+        }
         .onChange(of: router.pendingSelection) { _, pending in
             guard let pending else { return }
             adopt(pending, in: router.workspace.focusedPane)
@@ -807,8 +814,8 @@ struct RootView: View {
         return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
     }
 
-    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and (piece 5) Help ▸
-    /// Take the Tour. **U1a STUB — U2 replaces the body with the coach-mark
+    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
+    /// Tour (piece 5, through `router.tourRequested`). **U1a STUB — U2 replaces the body with the coach-mark
     /// engine** (mockup v5, step 1; the engine reports its end through
     /// `TourOfferModel.tourEnded(completed:)`, which retires the offer). Until
     /// then the line steps aside for this session (nothing is remembered, so

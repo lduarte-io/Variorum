@@ -2036,9 +2036,13 @@ nonisolated enum CapabilityRegistry {
         // 13s-b U1a (R-13s-2/6/13): the tour's one entry. Its verb IS the
         // Help menu's name for it (`TourOfferCopy.menuTitle` — the help-road
         // sentence reads the same constant, so the three can never drift).
+        // Doors: the offer line's "yes" (`.surface`) and Help ▸ Take the Tour
+        // (`.menuBar`, piece 5). No palette row yet: the palette's acts are
+        // `ShellActions`', and the tour's entry is the shell's — U2's call
+        // once the engine exists.
         Capability(
             id: .takeTour, verb: TourOfferCopy.menuTitle, scope: .app,
-            doors: [.surface],
+            doors: [.surface, .menuBar],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
 

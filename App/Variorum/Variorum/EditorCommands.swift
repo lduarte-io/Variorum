@@ -119,6 +119,8 @@ struct EditorCommands: Commands {
         // 13k K8: the nesting rows (Tab / ⇧Tab's menu twins).
         .formatIndent, .formatOutdent,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
+        // 13s-b U1a, piece 5: Help ▸ Take the Tour.
+        .takeTour,
         // pre-13u Act 10: the sample library's restore, beside the
         // tutorial's (the tenth-wave ruling).
         .restoreSampleLibrary, .restoreEncryptionBook,
@@ -874,6 +876,15 @@ struct EditorCommands: Commands {
             // class one line below (the batch-7 follow-on discipline:
             // applied with the class, flagged so it can be reversed).
             Button("Open the Tutorial") { creationActions()?.openTutorial() }
+                .disabled(!canReachCreationTarget)
+            // 13s-b U1a, piece 5 (R-13s-6/13 — "they can find it under
+            // help"): the tour's standing door, beside the field guide's. Its
+            // name is the registry's verb, which the offer line's help-road
+            // sentence reads too (`TourOfferCopy.menuTitle`): "Tutorial" is
+            // taken by the field guide's door one line up, so the tour's is
+            // "Take the Tour" (PROVISIONAL P-U1a-9). A request the window
+            // adopts, the What's New road (the tour runs over a window).
+            Button(verb(.takeTour)) { windows.creationRouter()?.tourRequested = true }
                 .disabled(!canReachCreationTarget)
             // 13r U3-A: Help ▸ What's New — this version's release notes
             // (the ONE source the appcast also carries), on demand. A

@@ -122,6 +122,34 @@ struct TourOfferLineTests {
         }
     }
 
+    // MARK: - Help ▸ Take the Tour (piece 5)
+
+    /// The standing door the help-road sentence names: in the Help menu,
+    /// declared AND rendered (the registry walk's `menuRendered` set), a
+    /// request the window adopts with the ONE entry the line's "yes" calls.
+    /// The sentence is pinned literally so U2 and the copy pass read the
+    /// exact words a stranger sees (the menu name is PROVISIONAL P-U1a-9).
+    @Test func theHelpMenuCarriesTheTourDoorTheSentenceNames() throws {
+        #expect(TourOfferCopy.menuTitle == "Take the Tour")
+        #expect(TourOfferCopy.helpRoad == "Run it any time from Help \u{25B8} Take the Tour.")
+        let doors = CapabilityRegistry.capability(.takeTour).doors
+        #expect(doors.contains(.menuBar) && doors.contains(.surface))
+        #expect(EditorCommands.menuRendered.contains(.takeTour))
+        #expect(ShellRouter().tourRequested == false, "nothing asks for a tour by itself")
+
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Variorum")
+        let commands = try String(
+            contentsOf: app.appendingPathComponent("EditorCommands.swift"), encoding: .utf8)
+        #expect(commands.contains(
+            "Button(verb(.takeTour)) { windows.creationRouter()?.tourRequested = true }"))
+        let root = try String(
+            contentsOf: app.appendingPathComponent("RootView.swift"), encoding: .utf8)
+        #expect(root.contains(".onChange(of: router.tourRequested)"))
+    }
+
     // MARK: - The line on the Bookcase
 
     /// Where the line sits and that it moves nothing: between the quick-entry

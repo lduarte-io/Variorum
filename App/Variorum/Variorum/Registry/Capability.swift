@@ -826,9 +826,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// (the front matter's R-18l-12 promise).
     case restoreJekyllBook
     /// 13s-b U1a (R-13s-2/6/13): **the tour's ONE entry** — the first-open
-    /// offer line's "yes" (`.surface`) and, from piece 5, the Help menu's
-    /// door. App scope; always available as an act (the U2 engine is what it
-    /// opens — until then a stub that speaks).
+    /// offer line's "yes" (`.surface`) and Help ▸ Take the Tour (`.menuBar`,
+    /// piece 5). App scope; always available as an act (the U2 engine is what
+    /// it opens — until then a stub that speaks).
     case takeTour
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you
