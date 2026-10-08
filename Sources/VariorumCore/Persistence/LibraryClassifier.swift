@@ -14,10 +14,13 @@ import GRDB
 // the verdict is about the PAIR (corner 33: a library arriving WITH its
 // key file opens by the lobby's ordinary roads; without it nothing opens).
 // `schemaVerdict(at:key:)` is the POST-UNLOCK consult: with the key in
-// hand it reads `grdb_migrations` read-only and renders the migrator's
+// hand it reads `grdb_migrations` and renders the migrator's
 // superseded check honestly (the sync trace's item 5 — a copy from a
 // NEWER build refuses, never crashes). Neither stage ever runs the
-// migrator against the picked file.
+// migrator against the picked file — and (13x F3, ladder R3-1) neither
+// ever OPENS the picked file in place: every SQLite read goes through
+// `withStagedRead`, on our own copy, so the picked folder is only ever
+// read (the confirm's "the file you picked is only read").
 //
 // The pair rules this file reads are the SHIPPED ones, restated from their
 // owners rather than re-invented: the live key file's fingerprint name
@@ -220,9 +223,9 @@ public enum LibraryClassifier {
     }
 
     private static func readPlaintext(_ store: URL) throws -> Verdict {
-        let queue = try openForInspection(store)
-        defer { try? queue.close() }
-        return try queue.read { db in
+        // The staged read (13x F3 — Q4): our copy, never the picked file;
+        // the verdicts below still speak the PICKED URL.
+        try withStagedRead(of: store, key: nil) { db in
             guard try db.tableExists("grdb_migrations") else {
                 return .notAVariorumStore(store)
             }
@@ -255,19 +258,63 @@ public enum LibraryClassifier {
         }
     }
 
-    /// Read-only first; a WAL-journaled plaintext file (a Finder-copied
-    /// pre-13p library) can refuse a read-only open outright, so the
-    /// fallback opens read-write — SELECT-only inside, but SQLite may
-    /// materialize `-shm`/`-wal` sidecars. Recorded, not hidden: on a
-    /// read-only volume the fallback fails too and the verdict is
-    /// `.unreadable`, never a guess.
-    private static func openForInspection(_ store: URL) throws -> DatabaseQueue {
-        var readOnly = AppDatabase.configuration()
-        readOnly.readonly = true
-        if let queue = try? DatabaseQueue(path: store.path, configuration: readOnly) {
-            return queue
+    // MARK: - THE STAGED READ (13x F3 — ladder R3-1; the orchestrator's
+    // rulings Q2–Q4, `notes/plans/phase-13x-library-portability.md`)
+
+    /// Every SQLite read of a PICKED file happens here, on OUR copy — never
+    /// on the picked file in place. Measured at F3 (the old tree): a
+    /// read-only open of the picked store REWROTE (or created) the `-shm`
+    /// beside it, and a failed first read (GRDB's `validateFormat` runs
+    /// inside the open, so a wrong key fails there) took a read-write
+    /// fallback whose close-time checkpoint folded the picked `-wal` into
+    /// the picked MAIN FILE and deleted its sidecars — "the file you picked
+    /// was only read" made false by the consult itself.
+    ///
+    /// The copy is the main file plus its non-empty `-wal` — the committed
+    /// frames a hot-copied library carries, the SAME pair the landing
+    /// carries (`LibraryAdoption` step 5) — and NEVER its `-shm`: a
+    /// rebuildable index, never trusted across a copy. It opens read-write
+    /// (it is ours), so SQLite's own recovery rebuilds the index and folds
+    /// the wal in exactly as the landing's reopen will: the consult reads
+    /// what lands, wherever the picked copy sits (a non-writable folder
+    /// included — nothing is ever written beside it).
+    ///
+    /// Home and residue (the Q3 ruling): its own per-consult, owner-only
+    /// subdirectory of the per-user temporary directory, removed on every
+    /// exit path by the `defer`s — only a crash mid-consult leaves one
+    /// (ciphertext for an encrypted source; plaintext only when the picked
+    /// file was already a plaintext file). `copyItem` clones on APFS;
+    /// elsewhere the cost is one copy of the picked library at a deliberate
+    /// door the user started (P1 binds steady state, not this act).
+    static func withStagedRead<T>(
+        of picked: URL, key: StoreKey?, _ body: (Database) throws -> T
+    ) throws -> T {
+        let fm = FileManager.default
+        let stage = fm.temporaryDirectory.appendingPathComponent(
+            "variorum-picked-\(UUID().uuidString)", isDirectory: true)
+        try fm.createDirectory(
+            at: stage, withIntermediateDirectories: false,
+            attributes: [.posixPermissions: 0o700])
+        defer { try? fm.removeItem(at: stage) }
+        let staged = stage.appendingPathComponent("picked.sqlite", isDirectory: false)
+        try fm.copyItem(at: picked, to: staged)
+        var stagedFiles = [staged]
+        let wal = URL(fileURLWithPath: picked.path + "-wal")
+        if let size = try? fm.attributesOfItem(atPath: wal.path)[.size] as? Int, size > 0 {
+            let stagedWal = URL(fileURLWithPath: staged.path + "-wal")
+            try fm.copyItem(at: wal, to: stagedWal)
+            stagedFiles.append(stagedWal)
         }
-        return try DatabaseQueue(path: store.path, configuration: AppDatabase.configuration())
+        // A copy keeps the picked file's mode and flags; ours is owner
+        // read-write (and never Finder-locked, so the cleanup can remove it).
+        for file in stagedFiles {
+            try? fm.setAttributes(
+                [.immutable: false, .posixPermissions: 0o600], ofItemAtPath: file.path)
+        }
+        let queue = try DatabaseQueue(
+            path: staged.path, configuration: AppDatabase.configuration(key: key))
+        defer { try? queue.close() }
+        return try queue.read(body)
     }
 
     // MARK: - Stage 2: the post-unlock schema consult
@@ -275,37 +322,30 @@ public enum LibraryClassifier {
     /// What the OPEN road would meet (advisory, never the migrator's run):
     /// `.current` opens as-is, `.behindThisBuild` opens and migrates up,
     /// `.newer` is the honest refusal the door renders (the sync trace's
-    /// item 5), `.unreadable` covers a wrong key and a torn file alike.
+    /// item 5). The two failure classes are SEPARATE (13x F3, ladder R3-1
+    /// constraint 3 — the old single `.unreadable` wore the wrong-key
+    /// sentence for a torn copy and an unreachable `-shm` alike):
+    /// `.keyRejected` is the ONE place "that key doesn't open this" is
+    /// true; `.unreadable` is every other reason, carried for the detail.
     public enum SchemaVerdict: Equatable, Sendable {
         case current
         case behindThisBuild(unapplied: [String])
         case newer(unknownMigrations: [String])
+        /// The key in hand does not open the file — VX-80's class letter
+        /// (`AppDatabase.openStore`'s `keyRejected`): SQLCipher's first
+        /// page read refused it (`SQLITE_NOTADB`) on an encrypted presence
+        /// with a key in hand. (A ciphertext copy torn AT page 1 is
+        /// indistinguishable from a wrong key by construction — as there.)
+        case keyRejected
+        /// Anything else that stops the read (a torn copy, an I/O failure,
+        /// a staging copy that could not be made, a non-Variorum inside).
         case unreadable(reason: String)
     }
 
     /// `key` nil = a plaintext file (the export's consult).
     public static func schemaVerdict(at url: URL, key: StoreKey?) -> SchemaVerdict {
         do {
-            var configuration = AppDatabase.configuration(key: key)
-            configuration.readonly = true
-            let queue: DatabaseQueue
-            do {
-                queue = try DatabaseQueue(path: url.path, configuration: configuration)
-            } catch {
-                // 13x F1 (ladder R1-N2 — `openForInspection`'s recorded
-                // sentence, owed here too): a WAL-journaled copy can
-                // refuse a read-only open outright, so the fallback opens
-                // read-write — SELECT-only inside, but SQLite may
-                // materialize `-shm`/`-wal` sidecars beside the PICKED
-                // SOURCE. Recorded, not hidden: on a read-only volume the
-                // fallback fails too and the verdict is `.unreadable`,
-                // never a guess (the never-rewritten doctrine's honest
-                // edge, same as stage 1's).
-                queue = try DatabaseQueue(
-                    path: url.path, configuration: AppDatabase.configuration(key: key))
-            }
-            defer { try? queue.close() }
-            return try queue.read { db in
+            return try withStagedRead(of: url, key: key) { db in
                 let applied = try Set(String.fetchAll(
                     db, sql: "SELECT identifier FROM grdb_migrations"))
                 let known = AppDatabase.migrator.migrations
@@ -314,6 +354,10 @@ public enum LibraryClassifier {
                 let unapplied = known.filter { !applied.contains($0) }
                 return unapplied.isEmpty ? .current : .behindThisBuild(unapplied: unapplied)
             }
+        } catch let error as DatabaseError
+            where key != nil && error.resultCode == .SQLITE_NOTADB
+            && StoreFilePresence.classify(at: url) == .encryptedOrUnknown {
+            return .keyRejected
         } catch {
             return .unreadable(reason: String(describing: error))
         }

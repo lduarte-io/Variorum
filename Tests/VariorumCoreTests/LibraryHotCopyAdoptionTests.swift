@@ -308,7 +308,37 @@ struct LibraryHotCopyAdoptionTests {
 
         let verdict = LibraryClassifier.schemaVerdict(at: hot.store, key: wrongKey)
         #expect(verdict != .current, "a wrong key never reads as a library")
+        // (3) the GENUINE mismatch keeps the wrong-key class — hot…
+        #expect(verdict == .keyRejected, "got \(verdict)")
         try expectUntouched(hot.folder, before: sourceBefore)
+
+        // …and closed (the class-separation guard's plain case).
+        let closed = dir.appendingPathComponent("closed/variorum.sqlite")
+        let closedDatabase = try AppDatabase.openStore(
+            at: closed, custody: .inMemory(initial: StoreKey.mint()))
+        _ = closedDatabase.asRebindable().binding.lock()
+        #expect(LibraryClassifier.schemaVerdict(at: closed, key: wrongKey) == .keyRejected)
+    }
+
+    // MARK: - (b″) a torn copy under its RIGHT key is never the wrong-key class
+
+    /// Measured at F3 on the old tree: `.unreadable` ("database disk image
+    /// is malformed") — which the old `settle` dressed in the wrong-key
+    /// sentence, false (the key is right; the copy is torn). The split
+    /// keeps it `.unreadable`, worded as what it is.
+    @Test func aTornCopyUnderItsRightKeyIsUnreadableNeverTheWrongKeyClass() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let torn = try makeTornCopy(in: dir)
+        let sourceBefore = try contents(of: torn.folder)
+        let verdict = LibraryClassifier.schemaVerdict(at: torn.store, key: torn.key)
+        #expect(verdict != .keyRejected, "the key is right — the copy is torn")
+        guard case .unreadable(let reason) = verdict else {
+            Issue.record("a torn copy reads unreadable, got \(verdict)")
+            return
+        }
+        #expect(reason.contains("malformed"), "the reason travels for the detail: \(reason)")
+        try expectUntouched(torn.folder, before: sourceBefore)
     }
 
     // MARK: - Q4 — stage 1's plaintext road takes the same staged read

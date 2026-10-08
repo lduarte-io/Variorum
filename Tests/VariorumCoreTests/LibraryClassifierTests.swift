@@ -287,15 +287,16 @@ struct LibraryClassifierTests {
             == .newer(unknownMigrations: ["v99_from_the_future"]))
     }
 
-    @Test func theSchemaVerdictUnderAWrongKeyIsUnreadableNeverAGuess() throws {
+    /// 13x F3 (ladder R3-1, constraint 3 — the premise updated by the
+    /// RULED split): a wrong key is the `.keyRejected` class, never a
+    /// guess into a readable verdict. (Before the split this pin read
+    /// `.unreadable`, the one class a torn copy shared with it.)
+    @Test func theSchemaVerdictUnderAWrongKeyIsKeyRejectedNeverAGuess() throws {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
         let fixture = try makeEncryptedLibrary(in: dir)
-        guard case .unreadable = LibraryClassifier.schemaVerdict(
-            at: fixture.store, key: StoreKey.mint()) else {
-            Issue.record("a wrong key must read unreadable")
-            return
-        }
+        #expect(LibraryClassifier.schemaVerdict(at: fixture.store, key: StoreKey.mint())
+            == .keyRejected, "a wrong key reads as the wrong-key class")
     }
 
     // MARK: - The name parser (the pair rules' smallest brain)

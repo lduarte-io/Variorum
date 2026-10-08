@@ -248,7 +248,11 @@ final class LibraryOpenModel {
 
     /// The post-unlock consult (the sync trace's item 5): the key in
     /// hand, the copy's schema read honestly — a newer copy refuses, a
-    /// file the key does not open refuses as the wrong key.
+    /// file the key does not open refuses as the wrong key, and a file
+    /// unreadable for any OTHER reason says so with its reason (13x F3,
+    /// ladder R3-1 constraint 3: never one sentence for both — the old
+    /// single arm told a torn copy and a copy on a read-only volume that
+    /// its key file "belongs to another copy").
     private func settle(key: StoreKey, store: URL, keyFile: URL) async {
         let verdict = await Task.detached(priority: .userInitiated) {
             LibraryClassifier.schemaVerdict(at: store, key: key)
@@ -262,8 +266,10 @@ final class LibraryOpenModel {
             phase = .refused(
                 LibraryOpenCopy.newerSchemaRefusal,
                 detail: unknown.isEmpty ? nil : unknown.joined(separator: " · "))
-        case .unreadable:
+        case .keyRejected:
             phase = .refused(LibraryOpenCopy.wrongKeyRefusal, detail: nil)
+        case .unreadable(let reason):
+            phase = .refused(LibraryOpenCopy.unreadableRefusal, detail: reason)
         }
     }
 

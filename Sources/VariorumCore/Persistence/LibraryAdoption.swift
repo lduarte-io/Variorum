@@ -25,8 +25,13 @@ import Foundation
 //      old library's key files are its recovery legs and travel WITH it
 //      (the custody-collision memo's consequence: after adoption the
 //      moved-aside library opens by its own key-file roads);
-//   5. the LANDING: the source store's bytes copied to the store path,
-//      the source key file's bytes landed under its CANONICAL name
+//   5. the LANDING: the source store's bytes copied to the store path
+//      WITH its non-empty `-wal` (13x F3, ladder R3-1: a hot-copied
+//      library's newest committed rows live only there — the confirm's
+//      staged read consulted exactly this pair, so the landing carries
+//      it) and NEVER its `-shm` (a rebuildable index, never trusted
+//      across a copy — the reopen's recovery rebuilds it); the source key
+//      file's bytes landed under its CANONICAL name
 //      (`variorum-keys-<fp>.json` — a snapshot-pair-named key file is
 //      normalized so `StoreKeyEnvelope.locate` finds it beside the
 //      adopted library).
@@ -252,11 +257,20 @@ public enum LibraryAdoption {
             }
         }
 
-        // 5. The landing — the source is COPIED, never moved.
+        // 5. The landing — the source is COPIED, never moved: the main
+        //    file, then its non-empty `-wal` (R3-1 — the committed frames
+        //    a hot copy carries, which the staged consult read), never its
+        //    `-shm`.
         do {
             try fm.createDirectory(
                 at: plan.landedStore.deletingLastPathComponent(), withIntermediateDirectories: true)
             try fm.copyItem(at: plan.sourceStore, to: plan.landedStore)
+            let sourceWal = URL(fileURLWithPath: plan.sourceStore.path + "-wal")
+            if let size = try? fm.attributesOfItem(atPath: sourceWal.path)[.size] as? Int,
+               size > 0 {
+                try fm.copyItem(
+                    at: sourceWal, to: URL(fileURLWithPath: plan.landedStore.path + "-wal"))
+            }
             if let sourceKeyFileBytes, let landedKeyFile = plan.landedKeyFile {
                 try sourceKeyFileBytes.write(to: landedKeyFile, options: .atomic)
             }
