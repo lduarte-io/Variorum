@@ -781,7 +781,9 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   site (:3173 + `.wrongAppleKey`). Restored, `git diff` clean.
   **REVERT V99-I′ (named before it runs — the corrected revert):** in `writeNewKeyFile`, the parameter binding renamed
   `appleKey decided:` and, before the detached task, `let apple: AppleKey? = decided != nil ? leaves.appleKeys.read() : nil`
-  — 8f66bc1f's re-read, at its own place and time. Expected RED: the F7 pin alone.
+  — 8f66bc1f's re-read, at its own place and time. Expected RED: the F7 pin alone. **RESULT (06:30): "Test run with 65
+  tests in 1 suite failed … with 2 issues"** — the F7 pin alone (:3173 the key file's `appleKeyID` the swapped A's; the
+  `.wrongAppleKey` unwrap); nothing else. Restored, `git diff` clean.
 - F6 (NITs): DONE — (1) the `(:524)` cite → the symbol (`runCeremony`'s `vault.fetchVault()` after the drain); (2)
   `DoorFacts.appleKeyReadable`'s doc → "on a Standard ACCOUNT (the vault's word)"; (3) **the rewritten `.reencrypt` marker's
   `newCorpusKeyID` — NOT ADOPTED, disposition:** under finding 3's ruled rule (the stamp decides at every step) the id this
