@@ -280,12 +280,16 @@ struct SavepointRunsTests {
     }
 
     @Test func theWordsCountWhatTheRowStandsFor() {
-        #expect(SavepointRuns.runLabel(count: 3) == "3 quiet savepoints")
-        #expect(SavepointRuns.runLabel(count: 1) == "1 quiet savepoint")
+        // 13s-b U4 (R-13s-31): the word is COMMIT — "N quiet savepoints"
+        // retired on both platforms (this line is the phone's too).
+        #expect(SavepointRuns.runLabel(count: 3) == "3 quiet commits")
+        #expect(SavepointRuns.runLabel(count: 1) == "1 quiet commit")
         // The collapsed row's help must not overclaim: it names the two
         // CADENCE occasions and says ⌘S is never folded in.
-        #expect(SavepointRuns.runHelp.contains("\u{2318}S"))
+        #expect(SavepointRuns.runHelp.contains("\u{2318}S commits are never folded in"))
         #expect(SavepointRuns.runHelp.contains("idle backstop"))
+        #expect(SavepointRuns.runHelp.range(of: "savepoint", options: .caseInsensitive) == nil,
+                "the help the collapsed row hangs speaks commit too")
     }
 }
 
