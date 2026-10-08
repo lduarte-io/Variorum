@@ -110,7 +110,7 @@ struct QuickNoteMintTests {
             #expect(pool.contains(second))
             #expect(tags == [Operations.quicknoteTagPath])
             #expect(session.status.spoken?.text == QuickNoteCopy.filedTaggedOnly)
-            #expect(!QuickNoteCopy.filedTaggedOnly.contains("Quicknotes"))
+            #expect(!QuickNoteCopy.filedTaggedOnly.localizedCaseInsensitiveContains(Operations.defaultQuicknoteBookName))
         }
     }
 
@@ -482,7 +482,7 @@ struct QuickNoteWordTests {
         #expect(line.contains("the quicknotes shelf could not be reached"),
                 "the reason rides along")
         // …and the success line still claims exactly what it always did.
-        #expect(QuickNoteCopy.filedNote.contains("Quicknotes"))
+        #expect(QuickNoteCopy.filedNote.contains(Operations.defaultQuicknoteBookName))  // 13s-b U1b: the one name constant
     }
 
 
@@ -509,8 +509,8 @@ struct QuickNoteWordTests {
         let entry = try #require(
             HelperView.entries.first { $0.term == "quick note" },
             "the dictionary keeps its quick-note entry")
-        #expect(entry.definition.contains("Quicknotes"),
-                "the entry names where the note actually lands (R6-4)")
+        #expect(entry.definition.contains(Operations.defaultQuicknoteBookName),
+                "the entry names where the note actually lands (R6-4; 13s-b U1b — the one name constant)")
         #expect(entry.definition.contains("Pool"),
                 "…and the one-untag road back — the Pool is the consequence, not the landing")
         #expect(!entry.definition.contains("as a new note in the Pool"),

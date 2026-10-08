@@ -674,7 +674,9 @@ enum TutorialSeeder {
             + "can be as long as the thought is \u{2014} the same two keys the new-note "
             + "box on the Bookcase answers. Closing the pad (or \u{2318}\u{23CE}) files it "
             + "too, and what you wrote is kept as a note, tagged "
-            + "\u{201C}quicknote\u{201D} \u{2014} the Quicknotes gathering on "
+            // 13s-b U1b (R-13s-36/38): the lesson NAMES the default
+            // gathering — the one constant, the lowercase fresh default.
+            + "\u{201C}quicknote\u{201D} \u{2014} the \(Operations.defaultQuicknoteBookName) gathering on "
             + "the Bookcase shows it, and taking the tag off sends it back to the Pool.",
 
             "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "
@@ -2323,7 +2325,7 @@ enum TutorialSeeder {
             + "tuck behind the count in its masthead \u{2014} one click shows them.",
 
             "There is one waiting for you: \u{201C}a first quick note\u{201D} has "
-            + "no book, so it lives in the Pool \u{2014} and Quicknotes shows it, "
+            + "no book, so it lives in the Pool \u{2014} and \(Operations.defaultQuicknoteBookName) shows it, "
             + "so it tucks behind the count. Open the Pool, click show, and there "
             + "it is.",
         ])

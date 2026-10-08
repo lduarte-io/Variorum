@@ -21,7 +21,13 @@ extension Operations {
     /// The name a freshly created quicknotes book takes (the
     /// `defaultDailyJournalBookName` shape: the constant lives with the
     /// creation it names).
-    public static let defaultQuicknoteBookName = "Quicknotes"
+    /// **Lowercased at 13s-b U1b (R-13s-36/38 — fresh mints only, the
+    /// daily Journal constant's note):** discovery is the DESIGNATION
+    /// (`quicknote_book`), never the name, and the furniture fold's name
+    /// signature reads `BookNaming.sameName` (case-folded), so an
+    /// installed base's "Quicknotes" still folds with a fresh "quicknotes"
+    /// mint exactly as before.
+    public static let defaultQuicknoteBookName = "quicknotes"
 
     /// The designation setting's ONE key (17y B-DEDUPE NIT-7 — the
     /// `twinTitle` precedent): the writer below and the furniture fold's

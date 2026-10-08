@@ -359,8 +359,8 @@ struct TutorialBookShapeTests {
             let stored = try await db.read {
                 try Queries.renderedText($0, containerID: workspace)
             }
-            #expect(stored.contains("Quicknotes"),
-                    "the lesson names the smart book that collects the pad's note (R6-4)")
+            #expect(stored.contains(Operations.defaultQuicknoteBookName),
+                    "the lesson names the smart book that collects the pad's note (R6-4; 13s-b U1b — the one name constant)")
             #expect(stored.contains("quicknote"),
                     "…and the tag whose removal is the road back")
             #expect(!stored.contains("kept as a note in the Pool"),

@@ -398,8 +398,10 @@ struct HelperView: View {
          + "gathering from tags."),
         // 13g batch 7 (R6-4): quick notes now file themselves.
         ("quicknote (the tag)",
+         // 13s-b U1b (R-13s-36/38): the entry NAMES the default gathering,
+         // so it reads the one constant (the fresh default is lowercase).
          "Every quick note is tagged \u{201C}quicknote\u{201D}, and the gathering "
-         + "\u{201C}Quicknotes\u{201D} shows the tag \u{2014} so take the tag off and the "
+         + "\u{201C}\(Operations.defaultQuicknoteBookName)\u{201D} shows the tag \u{2014} so take the tag off and the "
          + "note leaves it, because a gathering is just its rule."),
         ("canvas",
          "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
@@ -473,7 +475,7 @@ struct HelperView: View {
          + "pad; \u{21E7}\u{23CE} adds another paragraph, so a capture can hold as many "
          + "as the thought needs; closing it (or \u{2318}\u{23CE}) files it too. What you "
          + "wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} \u{2014} the "
-         + "Quicknotes gathering shows it, and taking the tag off sends it back to the "
+         + "\(Operations.defaultQuicknoteBookName) gathering shows it, and taking the tag off sends it back to the "
          + "Pool."),
     ]
 
