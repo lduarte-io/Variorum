@@ -1906,3 +1906,18 @@ Co-Authored-By or any other trailer** (this repo's rule overrides any harness re
 `### F3 RECORD` (LIVE STATUS first) to this file from the first commit; close with "F3 CLOSED" —
 each finding → FIXED(hash), the revert evidence, the final counts, the PENDING Mac commands.
 Work only in `~/dev/variorum-13x`.
+
+### F3 RECORD (the fix session's record — a fresh `opus-implementer`, 2026-10-07 late; LIVE STATUS first — flipped in the same commit as each piece; PENDING = unverified)
+
+#### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 0 — baseline (whole core, headless) | DONE — `swift test` 2338 tests / 269 suites PASSED + StringsWorkbook 40/6 PASSED (146 s); skips = the standing env-gated set only |
+| 1 — R3-1 pins (a)(b)(c), red on today's code | NOT-STARTED |
+| 1 — R3-1 fix (the four constraints) | NOT-STARTED |
+| 2 — R3-2 the gate closures read the marker + pin + revert | NOT-STARTED |
+| 3 — the full core at close + `build-for-testing` + the PENDING Mac commands | NOT-STARTED |
+
+No revert is in flight. No subagents; synchronous foreground waits only; the stage is NEVER
+claimed or touched by this session (no `xcodebuild test`, no app launch).
