@@ -174,6 +174,8 @@ struct SearchTagListingTests {
                 try Queries.catalogNotesPage(db, query: "", sort: .title, direction: .asc, limit: 50, wingID: "")
             }
             #expect(unnarrowed.hits.count == 5, "no question: the whole wing, as shipped")
+            #expect(try notes(db, "#classics hound").hits.isEmpty && (try notes(db, "hound").hits.isEmpty),
+                    "a narrowing the road cannot serve fails CLOSED — never the whole Library")
             #expect(Queries.catalogNotesPageSQL(sort: .lastTouched, direction: .desc, hasCursor: true, wingScope: nil)
                     == Queries.catalogNotesPageSQL(sort: .lastTouched, direction: .desc, hasCursor: true,
                                                    wingScope: nil, narrowing: nil),

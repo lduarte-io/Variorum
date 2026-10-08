@@ -71,8 +71,10 @@ extension Queries {
     /// the seam record's measurement) and keeps its own sort and keyset, so
     /// the sort door orders a tag's notes exactly as it orders the Library.
     /// The composer's conditions carry the archived facet (the shipped
-    /// `archived_at IS NULL` is its living letter). nil — or a question the
-    /// road cannot serve — is the shipped statement, byte for byte.
+    /// `archived_at IS NULL` is its living letter). nil is the shipped
+    /// statement, byte for byte; a narrowing the road cannot serve (words, or
+    /// no typed tag) FAILS CLOSED — an empty page, never the whole Library
+    /// under a question it did not answer.
     public static func catalogNotesPage(
         _ db: Database, query: String,
         sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
@@ -88,6 +90,7 @@ extension Queries {
                 question, kind: .notes, wingID: wingID ?? "",
                 environment: try searchEnvironment(db))
         }
+        if narrowing != nil, narrowed == nil { return CatalogNotesPage(hits: [], next: nil) }
         let sql = catalogNotesPageSQL(
             sort: sort, direction: direction, hasCursor: cursor != nil,
             wingScope: scope?.sql, narrowing: narrowed)
