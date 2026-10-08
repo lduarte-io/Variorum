@@ -1920,7 +1920,8 @@ Work only in `~/dev/variorum-13x`.
 | 1 — R3-1 fix (the four constraints) | DONE (this commit) — `LibraryClassifier.withStagedRead` (stage 1's plaintext read + stage 2's consult; `openForInspection` and the read-write fallback GONE), `LibraryAdoption` step 5 lands main + non-empty `-wal`, never `-shm`; `SchemaVerdict.keyRejected` (VX-80's letter) beside `.unreadable(reason:)`; `settle` maps each to its true sentence. The 8 hot-copy pins + the premise-updated `theSchemaVerdictUnderAWrongKeyIsKeyRejectedNeverAGuess` GREEN; the 8 neighbouring suites 48/8 GREEN headless; zero `variorum-picked-*` residue in the 0700 per-user temp after the run |
 | 1 — R3-1 Mac sentence pins (b″)(c) | DONE (this commit; COMPILED — `build-for-testing` ** TEST BUILD SUCCEEDED **; RUN **PENDING-behind-the-stage**) — `aGenuineKeyMismatchStillSettlesToTheWrongKeySentence` (green on both sides by design — the class-separation guard) and `aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence` (red on old: the single `.unreadable` arm wore the wrong-key sentence), both through `LibraryOpenModel`'s real flow |
 | 1 — R3-1 behavioural reverts A/B/C/C′ | DONE (this commit) — all four run over the committed 64412dba, each red exactly where predicted, each restored by `git checkout --` with `git diff --quiet` EMPTY and both files' sha256 matching the pre-revert capture (quoted in "THE REVERT EVIDENCE" below). **No revert is in flight.** |
-| 3 — the full core at close | IN-PROGRESS |
+| 3 — the full core at close | DONE — `swift test` **2346 tests / 270 suites PASSED** (178 s) + StringsWorkbook **40/6 PASSED**; the 9 skips IDENTICAL to the baseline's (the standing env-gated set); zero `variorum-picked-*` residue after the whole run |
+| — **F3 CLOSED** | see "F3 CLOSED" below |
 | 2 — R3-2 the gate closures read the marker + pin + revert | DONE (this commit; COMPILED, RUN + revert **PENDING-behind-the-stage**) — `RestoreHoldModel.markerGate` (one stat of `LibraryRestoreHold.isHeld(besideStore:)`) + `wireGates(sync:protection:)`, the composition root's ONE wiring (`VariorumApp` calls it; the two `{ hold.isHeld }` closures gone); the projection keeps the banner. Pin `theHoldGatesReadTheMarkerWithNoViewAlive` (marker written after wiring, projection stale ⇒ both gates HELD, zero transport calls; the clear opens both and a round runs) |
 | 3 — `build-for-testing` + the PENDING Mac commands | DONE (64412dba — ** TEST BUILD SUCCEEDED **, private derived data `App/Variorum/DerivedData/13x-f3`, an APFS clone of the walk's; the walk's own products untouched) |
 
@@ -2089,4 +2090,96 @@ the torn-copy sentence pin under REVERT C (expected: `.refused(wrongKeyRefusal)`
 genuine-mismatch sentence pin under REVERT C′ (expected: `.refused(unreadableRefusal, …)` —
 it is green on both sides of the ORIGINAL tree by design), and the R3-2 gate pin under its own
 revert (`markerGate` reading the projection).
+
+### F3 CLOSED — 2026-10-07 late
+
+**NOT DONE BY THIS SESSION (first, as owed):** the Mac pins' RUNS and their three Mac
+behavioural reverts are **PENDING-behind-the-stage** (the stage was never claimed or touched —
+no `xcodebuild test`, no app launch); no walk. A PRE-EXISTING phone-target compile break
+was found and is **NOT fixed** (a different unit — observation 1 below).
+
+**The finding map:**
+
+| finding | disposition | commits |
+|---|---|---|
+| **R3-1** (MAJOR) | **FIXED** — the four constraints, each pinned: (1) the picked folder byte-identical after every consult road (keyed trio · shm-less · non-writable · wrong key · torn · the three plaintext roads); (2) the walled row lands (keyed + plaintext roads); (3) `.keyRejected` vs `.unreadable(reason:)`, each settling to its true sentence; (4) no `-shm` is copied or opened, ever | pins 1604cd95 + 86bc76b0 · fix **df6b9464** · Mac sentence pins 64412dba · reverts 13a87320 |
+| **R3-2** (MINOR) | **FIXED** — both gates read the marker through `RestoreHoldModel.wireGates` (Mac pin compiled; run + revert PENDING) | **64412dba** |
+| **R3-3** (NIT) | the orchestrator's — DONE before F3 (VX-95 homed) | — |
+
+**THE MECHANISM, AND WHY (as ruled at 5cc2973d):** a **STAGED READ** — every SQLite read
+of a picked file, stage 1's plaintext read and stage 2's consult alike, runs on our own copy
+(the main file + its non-empty `-wal`, never its `-shm`), opened read-write in a per-consult
+0700 subdirectory of the per-user temp directory and removed by `defer`. Why this and not
+the report's two options: copying the `-wal`/`-shm` at the landing alone (option 1) leaves
+the CONSULT writing the picked folder (measured: the `-shm` rewritten/created; under a
+wrong key the read-write fallback rewrote the picked MAIN file and deleted its sidecars),
+and the `-shm` is not trustworthy across a copy; refusing a hot source (option 2) would turn
+away a whole, readable library — the ordinary Finder copy of a crashed or force-quit one. The
+staged read never opens the picked file in place, so constraint (1) holds by construction
+on every road (a non-writable folder included, where the in-place read failed outright); it
+reads exactly the pair the landing carries (main + non-empty `-wal`, never `-shm` — step 5),
+so (2) "the confirm read them, the landing carries them" is literal; SQLite's own crash
+recovery rebuilds the index from the wal on both copies, so (4) holds. The split rides VX-80's
+exact class letter (NOTADB ∧ encrypted presence ∧ a key in hand), so the wrong-key sentence
+renders exactly where it is true (3). **Crash residue, stated honestly (Q3):** a crash
+mid-consult leaves one `variorum-picked-<uuid>/` in the owner-only per-user temp directory
+until the OS sweeps it — ciphertext for an encrypted source; plaintext only when the picked
+file was already a plaintext file she holds. **Cost:** one copy of the picked library per
+consult — an APFS clone on the same volume; a real copy elsewhere, at a deliberate,
+user-started door.
+
+**The revert evidence:** "THE REVERT EVIDENCE" above — A (6 reds), B (7), C (1), C′ (2), every
+restore diff-empty with sha256 matched; the old-tree run (7/7 red) in "F3 RESUMED".
+
+**Final counts (headless, at close):** core **2346 / 270 PASSED** (baseline 2338/269 + the 8
+pins of the new suite `LibraryHotCopyAdoptionTests`) · StringsWorkbook **40 / 6 PASSED** ·
+skips identical to the baseline. Mac `build-for-testing` ** TEST BUILD SUCCEEDED **
+(64412dba). Phone target: compiles clean with ONLY the pre-existing N1 line neutralised
+(observation 1; restored, diff-empty). Fences: F3's diff (`4748faaa..HEAD`) carries zero
+`Sources/VariorumCore/Sync/`, zero `Migrations.swift`, zero custody/keychain files; zero
+trailers on every F3 commit.
+
+**THE PENDING MAC COMMANDS** (from `App/Variorum/`, under a HELD stage claim; the bundle is
+pre-built at `DerivedData/13x-f3` from 64412dba — every later F3 commit is record-only):
+
+1. **The green run** (the door suite — its 8 standing pins + F3's 3):
+   `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/13x-f3 test-without-building -only-testing:VariorumTests/LibraryPortabilityDoorTests`
+   — expect 11/11, including `aGenuineKeyMismatchStillSettlesToTheWrongKeySentence`,
+   `aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence`,
+   `theHoldGatesReadTheMarkerWithNoViewAlive`.
+2. **The three Mac reverts** — each: apply the edit, `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/13x-f3 build-for-testing` (no stage), then under the claim
+   `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/13x-f3 test-without-building -only-testing:VariorumTests/LibraryPortabilityDoorTests`,
+   then `git checkout -- <file>` and `git diff --quiet`:
+   - **REVERT C** (`Sources/VariorumCore/Persistence/LibraryClassifier.swift`, `schemaVerdict`'s
+     last `catch` returns `.keyRejected`) ⇒ `aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence`
+     RED (`got That key file doesn't open this library — it belongs to another copy.`).
+   - **REVERT C′** (the same file, the `catch let error as DatabaseError where … NOTADB …` arm
+     deleted) ⇒ `aGenuineKeyMismatchStillSettlesToTheWrongKeySentence` RED
+     (`.refused(unreadableRefusal, "SQLite error 26 …")`). Green on the pre-F3 tree too — the
+     guard is green on both sides of the ORIGINAL change by design.
+   - **REVERT R3-2** (`App/Variorum/Shared/RestoreHoldModel.swift`, `markerGate` returns
+     `{ [weak self] in self?.isHeld ?? false }` — the projection, the old `{ hold.isHeld }`) ⇒
+     `theHoldGatesReadTheMarkerWithNoViewAlive` RED (both gates `→ false`; `dataCalls == 0`
+     false).
+
+**OBSERVATIONS (found, measured where said, NOT fixed — outside F3's surface; the
+orchestrator owns their homing):**
+1. **The phone target does not compile on this branch** — `App/Variorum/Shared/SyncStatusViews.swift:471`
+   (`services.session.status.refuse(...)`, F1's N1 at e8a8fd78): "value of type 'AppSession'
+   has no member 'status'" under `xcodebuild -scheme VariorumMobile -destination
+   'generic/platform=iOS Simulator' build`. The ONLY error; with that one line neutralised
+   (scratch, restored) the phone target builds clean — so F3's Shared changes are iOS-clean.
+   Owed before the merge.
+2. The landing's copies keep the SOURCE's file mode and flags (pre-existing for the main
+   file; the `-wal` copy inherits the same): a Finder-locked or read-only source would land as
+   a locked/read-only library. Unmeasured. (The staged read normalizes its own copies.)
+3. A stray `-wal`/`-shm` at an EMPTY slot (no live store beside them) is not in the departing
+   set (pre-existing): a landing would sit beside a foreign sidecar; with F3 a source `-wal`
+   copy refuses there as `landingFailed`. Unmeasured edge.
+4. R3-2's honest residue: with no main window, the marker-held gates refuse while no banner
+   is on screen to offer Resume (the banner reads the projection; the next main window's
+   `.task` shows it) — the ruled contract holds; the Sync-now refusal sentence names the
+   banner, which renders in the main window.
+5. The R3-2 pin drives `wireGates`; `VariorumApp`'s single call site is not pinnable without a
+   view (a re-inlined `{ hold.isHeld }` there would not redden it) — recorded.
 
