@@ -1204,4 +1204,91 @@ extension BookOutlineLandingTests {
             }
         }
     }
+
+    /// **VX-91 — THE PRE-MOUNT CONSULT's truth table** (the fix's one pure
+    /// brain: `BookViewModel.outlineRowPreMounts`). The width-matched-memory
+    /// guard is load-bearing — an unreserved early mount would collapse a
+    /// tall placeholder mid-scroll — so it is pinned beside the two arms.
+    @Test func thePreMountConsultAsksForTheWayfarerAndAWidthMatchedMemory() async throws {
+        try await withLandingBook(posts: 6, longAt: [1], chapters: false) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[1]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            model.reportOutlineContentWidth(696)
+            #expect(!model.outlineRowPreMounts(storyID), "neither focused nor revealed ⇒ never")
+            model.focus(storyID)
+            #expect(!model.outlineRowPreMounts(storyID), "focused but NO memory ⇒ the shipped road")
+            model.rememberSurfaceSize(storyID, CGSize(width: 500, height: 16000))
+            #expect(!model.outlineRowPreMounts(storyID),
+                    "a memory from ANOTHER width reserves nothing, so it must not pre-mount")
+            model.rememberSurfaceSize(storyID, CGSize(width: 696, height: 16000))
+            #expect(model.outlineRowPreMounts(storyID), "focused + width-matched memory ⇒ pre-mounts")
+            model.focus(nil)
+            #expect(!model.outlineRowPreMounts(storyID), "focus released ⇒ back to the viewport's rule")
+            model.requestReveal(storyID)
+            #expect(model.outlineRowPreMounts(storyID), "the pending reveal's target pre-mounts too")
+        }
+    }
+
+    /// **VX-91 — the integration pin, red-on-old with NO timing race.** Her
+    /// navigator click on a far EXPANDED story used to land on a viewport of
+    /// `Color.clear` placeholders — the clicked title alone, no text (the
+    /// walk's film, `vx92-walk/leave.mov` f0235 / `storm.mov` s0060) —
+    /// because the row's surfaces mounted only after ARRIVAL flipped
+    /// `nearViewport`, and only then began story-sized fills. The structural
+    /// claim, isolated from scroll timing by using a bare `focus` (which
+    /// requests no scroll at all): a far expanded story with a
+    /// width-matched memory mounts its surfaces WHEN SHE SETS OUT — the
+    /// old gate never mounts them at all on this road.
+    @Test func focusingAFarExpandedStoryMountsItsSurfacesWithoutWaitingForTheViewport() async throws {
+        try await withLandingBook(posts: 40, longAt: [30], chapters: false) { session, db, readingID, postIDs, _ in
+            let storyID = postIDs[30]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            model.expand(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.outlineContentWidth > 0
+                    && anchorTop(BookOutlineRows.Row.noteAnchor(storyID)) != nil
+            }, maxTurns: 120)
+            // Her steady state: a persisted record from an earlier
+            // realization, at THIS width (the StableSurface write road).
+            model.rememberSurfaceSize(
+                storyID, CGSize(width: model.outlineContentWidth, height: 16000))
+            // The premise: the story is far below the fold, and nothing of
+            // it is mounted (its text is in no text view in the tree).
+            let top = try #require(anchorTop(BookOutlineRows.Row.noteAnchor(storyID)))
+            #expect(top > landingWindowHeight, "the story starts far below the fold: \(Int(top))")
+            func storyMounted() -> Bool {
+                var found = false
+                func walk(_ v: NSView) {
+                    if let text = v as? NSTextView, text.string.count > 5000 { found = true }
+                    for sub in v.subviews where !found { walk(sub) }
+                }
+                walk(hosting)
+                return found
+            }
+            #expect(!storyMounted(), "nothing holds the story before she sets out")
+
+            // The bare focus — pure state, NO scroll request on this road
+            // (the VX-75 record), so arrival can never mount it for us.
+            model.focus(storyID)
+            await settle(window, hosting, watchdog: watchdog, until: { storyMounted() }, maxTurns: 60)
+            #expect(storyMounted(),
+                    "the focused far story's surfaces mount and fill without waiting for the viewport — on the old gate nothing ever mounts on this road and the title lands alone")
+        }
+    }
 }

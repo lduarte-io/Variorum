@@ -2394,7 +2394,13 @@ private struct OutlinePostRow: View {
                     postHeader
                         .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                    if nearViewport {
+                    // VX-91: `nearViewport` alone left the clicked far
+                    // story's row a placeholder until the scroll ARRIVED —
+                    // the title-alone-over-blank beat. The row she is on
+                    // her way to pre-mounts (`outlineRowPreMounts`: focused
+                    // or the reveal's target, with a width-matched memory
+                    // so the reservation holds the column's geometry).
+                    if nearViewport || model.outlineRowPreMounts(entry.postID) {
                         ZStack(alignment: .topLeading) {
                             if !(isLive && liveShowing) {
                                 StableSurface(
