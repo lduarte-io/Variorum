@@ -17,8 +17,9 @@ feature idea, Backlog) · **VX-93** (search the Trash — the split's other half
 Shape: `/architect-phase` (the RUN form). Pin-before-fix binds PER MEMBER (red-on-old
 verified by revert); ONE cold review over the run's whole diff — **fable-reviewer** (the
 diff reaches `EditorViewModel`'s landing/reveal machinery, editor-adjacent). Merge order:
-**13x merges first; this run rebases onto it** (her word at kickoff). One PR titled
-`VX-83: …`, merge commit.
+**FREED — first-ready merges first, whoever is second rebases** (R-VX83-7, superseding
+the kickoff's "13x merges first", both her word). One PR titled `VX-83: …`, merge commit;
+the closeout includes the `/Applications` refresh and the author handoff notes.
 
 ---
 
@@ -301,6 +302,16 @@ moment's):**
   (U-C below); the Trash half is **VX-93** (Backlog, shaped as search-INSIDE-the-Trash).
 - **R-VX83-6 (VX-73):** stays deferred at her word (*"I'll still defer it for now since it
   sounds like there's a significant UI component"*).
+- **R-VX83-7 (2026-10-07 late evening — MERGE ORDER FREED; supersedes this record's
+  "merges after 13x" header line, which was also her word, earlier):** *"I told 13x to
+  release its hold so you and another session can move through. you should be next in the
+  queue and the current session is close to done. it's fine for you to merge to main
+  before 13x - do your tests when you're granted authorization and move forward freely,
+  culminating in a reinstall / handoff notes."* → first-ready merges first (the standing
+  serialization rule, no special ordering); the run's closeout INCLUDES the
+  `/Applications` refresh (A1 rail, zero-instance window) and the author handoff notes.
+  Consequence for U-C's migration claim: if VX-83 merges first, `v1_23_savepoint_search`
+  stands clean and 13x claims v1_24+ after its rebase (variorum-da notified).
 
 ### U-B — THE DESIGN MEMBERS: VX-87 (direction 1, R-VX83-2) + VX-89 (R-VX83-3); one
 implementer session after U-A closes
@@ -432,4 +443,4 @@ uncommitted work. Work ONLY in `~/dev/variorum-vx-83`.
 | 7 | U-B (VX-87 direction 1 + screenshots; VX-89) | BRIEFED — runs after U-A |
 | 8 | U-C (VX-72 savepoints) | BRIEFED — runs after U-B |
 | 9 | **VX-94** (joined 2026-10-07, relayed by the 13x closeout session's P-8 sweep): ChromeLineLimitTests red on MAIN over this run's in-flight file — `SearchAnswerFaces.swift`'s chip face stack and kind word, two bare `.fixedSize()` with no line policy in the scan's 4-line window (arrived with 13o's merge; 13x deliberately left the file to this run). Fix: `.lineLimit(1)` at each site, orchestrator's own commit (the small-fix class). The PIN is the existing suite — red on main by 13x's run; GREEN proven in the U-A stage slot (the batch adds ChromeLineLimitTests) | FIXED — pending the slot's green |
-| 10 | Ladder → closeout → PR `VX-83: …` (after 13x merges; rebase first) | NOT STARTED |
+| 10 | Ladder → closeout → PR `VX-83: …` (merge order FREED, R-VX83-7 — first-ready merges first; whoever is second rebases) → the `/Applications` refresh (A1 rail, zero-instance window) → the author handoff notes | NOT STARTED |
