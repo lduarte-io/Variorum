@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>13s — the onboarding tour, click-through</title>
+<title>13s — the onboarding tour, click-through (v2)</title>
 <style>
   :root{
     --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
@@ -28,13 +28,20 @@
   .sitem{padding:6px 18px;font-size:14.5px;color:var(--ink);cursor:default;}
   .sitem.on{background:var(--accent-fill);font-weight:700;}
   .sitem.dim{color:var(--muted);}
+  /* the sidebar note box (book views) */
+  .notebox{margin:auto 12px 14px;background:#fff;border:1px solid var(--hair);border-radius:9px;padding:10px 12px;font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  .notebox .nt{font-weight:700;font-size:13px;margin-bottom:2px;font-family:'Iowan Old Style',Georgia,serif;}
+  .notebox .meta{color:var(--muted);margin-bottom:8px;}
+  .notebox .openbtn{display:inline-block;background:var(--accent-fill);border-radius:6px;padding:3px 10px;font-weight:700;color:var(--accent);cursor:pointer;}
   .main{flex:1;display:flex;flex-direction:column;position:relative;min-width:0;}
   .masthead{display:flex;justify-content:space-between;align-items:baseline;padding:14px 22px 8px;}
   .crumb{font-size:16.5px;font-weight:600;}
   .crumb .home{color:var(--ink);}
   .crumb .dot{color:var(--muted);font-weight:400;padding:0 6px;}
   .crumb .here{color:var(--rust);}
-  .mastright{color:var(--muted);font-size:13px;display:flex;gap:14px;font-family:ui-sans-serif,system-ui;}
+  .mastright{color:var(--muted);font-size:13px;display:flex;gap:14px;font-family:ui-sans-serif,system-ui;align-items:center;}
+  .ctxbar{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;font-family:ui-sans-serif,system-ui;}
+  .ctxbar .bookglyph{font-size:14px;cursor:pointer;padding:1px 6px;border-radius:5px;}
   .striprow{display:flex;align-items:center;gap:4px;padding:4px 22px 10px;font-size:13px;border-bottom:1px solid var(--hair);font-family:ui-sans-serif,system-ui;}
   .s{padding:3px 10px;border-radius:6px;background:var(--washlite);border:1px solid var(--hair);color:var(--ink);}
   .s.solo{background:var(--accent-fill);font-weight:700;}
@@ -43,18 +50,18 @@
   .shelfhead{color:var(--muted);font-size:11.5px;letter-spacing:1.6px;margin:10px 0 2px;font-family:ui-sans-serif,system-ui;}
   .brow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 2px;border-bottom:1px solid var(--hair);font-size:15px;}
   .brow .t{font-weight:600;}
-  .brow .t .star{color:var(--star);font-size:13px;margin-right:6px;}
   .brow .t .kind{color:var(--muted);font-weight:400;font-size:12px;margin-left:12px;font-family:ui-sans-serif,system-ui;}
   .brow .meta{color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
   /* bottom band */
   .bottomband{margin-top:auto;}
   .quickentry{margin:0 22px 10px;padding:9px 14px;border:1px dashed var(--hair);border-radius:8px;color:var(--muted);font-size:14px;font-style:italic;background:var(--washlite);}
+  .onelinerrow{display:flex;justify-content:flex-end;margin:0 22px 8px;}
+  .oneliner{font-size:13.5px;font-family:ui-sans-serif,system-ui;color:var(--ink);}
+  .oneliner .go{color:var(--accent);font-weight:700;cursor:pointer;}
+  .oneliner .no{color:var(--muted);cursor:pointer;}
+  .oneliner .x{color:var(--muted);cursor:pointer;margin-left:10px;font-size:12px;}
+  .oneliner.transient{color:var(--muted);font-style:italic;}
   .bottombar{border-top:1px solid var(--hair);background:var(--washlite);padding:5px 22px;display:flex;justify-content:flex-end;color:var(--muted);font-size:11.5px;font-family:ui-sans-serif,system-ui;}
-  .badge{position:absolute;right:20px;bottom:46px;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:0 6px 20px rgba(50,40,30,.12);padding:10px 14px;font-size:13.5px;max-width:240px;font-family:ui-sans-serif,system-ui;}
-  .badge .hi{font-weight:700;}
-  .badge .row{margin-top:7px;display:flex;gap:12px;}
-  .badge .go{color:var(--accent);font-weight:700;cursor:pointer;}
-  .badge .no{color:var(--muted);cursor:pointer;}
   /* book + note views */
   .moderow{display:flex;gap:2px;padding:0 22px 8px;font-size:13px;border-bottom:1px solid var(--hair);font-family:ui-sans-serif,system-ui;}
   .m{padding:3px 11px;border-radius:6px;color:var(--muted);}
@@ -63,9 +70,13 @@
   .irow{display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--hair);font-size:14.5px;}
   .irow .n{color:var(--muted);font-size:12px;margin-right:10px;font-family:ui-monospace,Menlo,monospace;}
   .irow .meta{color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
-  .prose{padding:18px 56px 10px;max-width:640px;line-height:1.62;font-size:16px;overflow:hidden;}
-  .prose p{margin:0 0 14px;position:relative;}
+  .prose{padding:14px 56px 10px;max-width:640px;line-height:1.62;font-size:15.5px;overflow:hidden;position:relative;}
+  .prose p{margin:0 0 13px;position:relative;}
   .prose p .bmenu{position:absolute;left:-30px;top:1px;color:var(--muted);font-size:13px;cursor:pointer;}
+  .prose .fade{color:#b9b1a6;}
+  .scrollhint{position:absolute;right:8px;top:120px;width:5px;height:120px;background:var(--hair);border-radius:3px;}
+  .scrollhint i{display:block;width:5px;height:34px;background:#c2bab0;border-radius:3px;margin-top:46px;}
+  .bookhead{font-size:17px;font-weight:700;margin:14px 0 8px;}
   .menupop{position:absolute;background:#fff;border:1px solid #d8d1c6;border-radius:8px;box-shadow:0 8px 24px rgba(50,40,30,.16);min-width:220px;padding:5px 0;font-size:13.5px;z-index:4;font-family:ui-sans-serif,system-ui;}
   .menupop .mi{padding:5px 14px;}
   .menupop .mi:hover{background:var(--wash);}
@@ -80,7 +91,7 @@
   .take .tl{font-size:11px;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;font-family:ui-sans-serif,system-ui;}
   .take .tl .ck{color:var(--star);font-weight:700;}
   /* read view */
-  .readpage{padding:26px 90px;max-width:620px;line-height:1.75;font-size:16.5px;}
+  .readpage{padding:22px 90px;max-width:620px;line-height:1.75;font-size:16px;}
   .readswitch{position:absolute;top:14px;right:22px;font-size:12.5px;color:var(--muted);font-family:ui-sans-serif,system-ui;}
   .readswitch b{color:var(--ink);}
   /* library rows */
@@ -89,7 +100,7 @@
   .lrow .st.on{color:var(--star);}
   .lrow .meta{margin-left:auto;color:var(--muted);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
   .tagchip{font-size:11.5px;background:var(--wash);border:1px solid var(--hair);border-radius:5px;padding:1px 7px;color:var(--muted);font-family:ui-sans-serif,system-ui;}
-  /* coach machinery */
+  /* coach machinery — the Apple-tip register: a title + at most two short sentences */
   .spot{position:relative;z-index:3;box-shadow:0 0 0 4px rgba(154,79,46,.55), 0 0 0 9999px rgba(46,42,38,.38);border-radius:8px;cursor:pointer;background:var(--paper);}
   .coach{position:absolute;z-index:5;background:#fff;border:1px solid #d8d1c6;border-radius:12px;box-shadow:0 14px 40px rgba(50,40,30,.22);padding:14px 18px;max-width:300px;font-size:13.8px;line-height:1.5;font-family:ui-sans-serif,system-ui;}
   .coach .step{font-size:11px;letter-spacing:1.4px;color:var(--muted);margin-bottom:6px;}
@@ -113,15 +124,12 @@
   /* ideas frame */
   .ideas{padding:26px 34px;overflow:auto;height:100%;box-sizing:border-box;}
   .ideas h2{font-size:17px;margin:0 0 4px;}
-  .ideas .grid{display:flex;gap:18px;margin:14px 0 22px;flex-wrap:wrap;}
-  .vcard{width:250px;background:var(--washlite);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;font-size:13px;font-family:ui-sans-serif,system-ui;position:relative;}
-  .vcard .cap{font-size:11px;letter-spacing:1.2px;color:var(--rust);margin-bottom:8px;font-weight:700;}
   kbd{background:var(--wash);border:1px solid var(--hair);border-radius:4px;padding:0 5px;font-size:12px;font-family:ui-monospace,Menlo,monospace;}
 </style>
 </head>
 <body>
-<h1>13s-b — the onboarding tour <span class="copylabel">click-through mockup · 2026-10-06 · all copy FIRST DRAFT</span></h1>
-<p class="sub">Built to the kickoff sitting's rulings R-13s-1…5 (the plan file carries them verbatim). <b>How to read:</b> ⟵ ⟶ arrow keys or the buttons; clicking the <span style="color:var(--rust);font-weight:700">spotlit</span> element also advances — that is the real tour's grammar (your real click IS the next step). Square dots are the optional keep-going leg. Every frame's margin notes sit under the stage: what the step teaches, and the open questions bundled for your next sitting.</p>
+<h1>13s-b — the onboarding tour, v2 <span class="copylabel">rebuilt 2026-10-07 to R-13s-6…11 · all copy SECOND DRAFT</span></h1>
+<p class="sub"><b>What changed from v1 (your round-1 markup, all of it):</b> the badge is the quiet one-liner with your words and its not-now teaches the way back · the whole spine is NAVIGATION (sidebar → book → note → modes → back up the ladder → your own note) · your two new moments are steps 4–5 (click mid-note, watch your place follow across modes) and 8–9 (book mode ↔ note, both directions) · every card is cut to the Apple-tip register — a title and at most two short sentences · area facts cross-checked against the field guide's "getting around" lesson · the books line is your scrapbook framing · tags are "organize with tags" · the welcome note (your Start Here, first half) joins the seed. ⟵ ⟶ or the buttons; clicking the <span style="color:var(--rust);font-weight:700">spotlit</span> element advances. Square dots = the optional keep-going leg.</p>
 <div class="topnav">
   <button id="prev">⟵ back</button>
   <button id="next">next ⟶</button>
@@ -132,19 +140,25 @@
 <div class="notes" id="notes"></div>
 
 <script>
-/* ———————— shared chrome templates ———————— */
-function sidebar(on){
+/* ———————— shared chrome ———————— */
+function sidebar(on,o){
+  o=o||{};
   const items=["Bookcase","Library","Starred","Pool","Snippets","Archived"];
   return `<div class="side" id="sidebar"><div class="brand">VARIORUM</div>`+
     items.map(i=>`<div class="sitem ${i===on?'on':''} ${["Starred","Archived"].includes(i)?'dim':''}">${i}</div>`).join("")+
+    (o.noteBox?`<div class="notebox" id="notebox"><div class="nt">A Scandal in Bohemia</div><div class="meta">selected · unfiled</div><span class="openbtn" id="opennote">Open note</span></div>`:"")+
     `</div>`;
 }
 function bottomband(o){
   o=o||{};
+  let badge="";
+  if(o.badge==="offer")badge=`<div class="onelinerrow"><span class="oneliner" id="oneliner">Welcome to Variorum. <span class="go" id="badgego">Take the tour?</span>&ensp;<span class="go" id="badgeyes">yes</span> · <span class="no" id="badgeno">not now</span><span class="x">×</span></span></div>`;
+  if(o.badge==="helproad")badge=`<div class="onelinerrow"><span class="oneliner transient">Run it any time from Help ▸ Tutorial.</span></div>`;
   return `<div class="bottomband">
     ${o.noQuick?'':'<div class="quickentry" id="quickentry">new note — just start typing…</div>'}
+    ${badge}
     <div class="bottombar"><span>${o.receipt||""}</span></div>
-  </div>`+(o.badge?`<div class="badge" id="badge"><span class="hi">👋 New here?</span><br>A two-minute tour shows you the house.<div class="row"><span class="go" id="badgego">Take the tour</span><span class="no">Not now</span></div></div>`:"");
+  </div>`;
 }
 function bookcase(o){
   o=o||{};
@@ -167,7 +181,7 @@ function bookIndex(){
   return sidebar("Bookcase")+`<div class="main">
     <div class="masthead"><div class="crumb"><span class="home">Home</span><span class="dot">·</span><span class="here">The Adventures of Sherlock Holmes</span></div>
       <div class="mastright"><span>🛎</span><span>⚙︎</span></div></div>
-    <div class="moderow" id="bookmodes"><span class="m">Outline</span><span class="m on">Index</span><span class="m">Book</span><span class="m">Read</span></div>
+    <div class="moderow" id="bookmodes"><span class="m">Outline</span><span class="m on">Index</span><span class="m" id="mode-book">Book</span><span class="m">Read</span></div>
     <div class="indexlist" id="indexlist">
       ${ch.map((c,i)=>`<div class="irow" ${i===0?'id="irow-scandal"':''}><span><span class="n">▸ ${c[0]}</span>${c[1]}</span><span class="meta">unfiled</span></div>`).join("")}
       <div class="irow"><span class="n" style="border:none">…</span><span class="meta">6 more</span></div>
@@ -175,46 +189,66 @@ function bookIndex(){
     ${bottomband({noQuick:true})}
   </div>`;
 }
-const PARA1=`To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex.`;
-const PARA1B=`To Sherlock Holmes she is always <i>the</i> woman — the only one who ever beat him, and the only one he never names. In his eyes she eclipses the whole of her sex.`;
+function bookMode(o){
+  o=o||{};
+  return sidebar("Bookcase",{noteBox:true})+`<div class="main">
+    <div class="masthead"><div class="crumb"><span class="home">Home</span><span class="dot">·</span><span class="here">The Adventures of Sherlock Holmes</span></div>
+      <div class="mastright"><span>🛎</span><span>⚙︎</span></div></div>
+    <div class="moderow"><span class="m">Outline</span><span class="m">Index</span><span class="m on">Book</span><span class="m">Read</span></div>
+    <div class="prose">
+      <div class="bookhead">A Scandal in Bohemia</div>
+      <p>${PARA_OPEN}</p>
+      <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.</p>
+      <div class="bookhead" style="color:var(--muted)">The Red-Headed League</div>
+      <p class="fade">I had called upon my friend, Mr. Sherlock Holmes, one day in the autumn of last year and found him in deep conversation…</p>
+    </div>
+    ${bottomband({noQuick:true})}
+  </div>`;
+}
+const PARA_OPEN=`To Sherlock Holmes she is always <i>the</i> woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex.`;
+const PARA_MID=`“You see, but you do not observe. The distinction is clear. For example, you have frequently seen the steps which lead up from the hall to this room.”`;
+const PARA_MID_B=`“You see, but you do not observe — and that distinction is everything. You have frequently seen the steps which lead up from the hall to this room.”`;
 function noteChrome(mode,inner,extra){
   const modes=["Write","Takes","Read","Lenses","Compare","Blocks"];
   return sidebar("Bookcase")+`<div class="main">
     <div class="masthead"><div class="crumb"><span class="home">Sherlock Holmes</span><span class="dot">·</span><span class="here">A Scandal in Bohemia</span></div>
-      <div class="mastright"><span>☆</span><span>⚙︎</span></div></div>
+      <div class="ctxbar"><span>←</span><span>→</span><span class="bookglyph" id="ctx-book">📖</span><span>☆</span><span>⚙︎</span></div></div>
     <div class="moderow" id="notemodes">${modes.map(m=>`<span class="m ${m===mode?'on':''}" ${m==="Takes"?'id="mode-takes"':''}>${m}</span>`).join("")}</div>
     ${inner}
     ${bottomband({noQuick:true})}
     ${extra||""}
   </div>`;
 }
-function noteWrite(menuOpen){
+function noteWriteMid(menuOpen){
   return noteChrome("Write",`<div class="prose" id="prose">
-    <p id="para1"><span class="bmenu" id="bmenu">⌄</span>${PARA1}</p>
-    <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.</p>
-    <p>He was, I take it, the most perfect reasoning and observing machine that the world has seen…</p>
+    <div class="scrollhint"><i></i></div>
+    <p class="fade">…quite so. I have trained myself to notice what I see.”</p>
+    <p id="para-mid"><span class="bmenu" id="bmenu">⌄</span>${PARA_MID}</p>
+    <p>“How often?” “Well, some hundreds of times.” “Then how many are there?” “How many? I don't know.”</p>
+    <p class="fade">“Quite so! You have not observed. And yet you have seen…”</p>
   </div>`,
-  menuOpen?`<div class="menupop" style="left:210px;top:170px" id="blockmenu">
+  menuOpen?`<div class="menupop" style="left:210px;top:195px" id="blockmenu">
     <div class="mi hot" id="mi-newtake">New take <span style="color:var(--muted);font-weight:400">(copies this text)</span></div>
     <div class="mi">New blank take</div><div class="sep"></div>
     <div class="mi">Divide…</div><div class="mi">Merge with next</div><div class="sep"></div>
     <div class="mi">Comment…</div><div class="mi">Callout…</div>
   </div>`:"");
 }
-function noteTakes(){
+function noteTakesMid(two){
   return noteChrome("Takes",`<div class="takeswrap">
-    <div class="ghostrow">¶ It was not that he felt any emotion akin to love for Irene Adler…</div>
+    <div class="ghostrow">¶ …quite so. I have trained myself to notice what I see.”</div>
     <div class="fan" id="fan">
-      <div class="take chosen"><div class="tl"><span>TAKE 1 · the original</span><span class="ck">✓ chosen</span></div>${PARA1}</div>
-      <div class="take" id="take2"><div class="tl"><span>TAKE 2 · just now</span><span></span></div>${PARA1B}</div>
+      <div class="take chosen"><div class="tl"><span>TAKE 1 · the original</span><span class="ck">✓ chosen</span></div>${PARA_MID}</div>
+      ${two?`<div class="take" id="take2"><div class="tl"><span>TAKE 2 · just now</span><span></span></div>${PARA_MID_B}</div>`:""}
     </div>
-    <div class="ghostrow">¶ He was, I take it, the most perfect reasoning and observing machine…</div>
+    <div class="ghostrow">¶ “How often?” “Well, some hundreds of times.”…</div>
   </div>`);
 }
-function noteRead(){
+function noteReadMid(){
   return noteChrome("Read",`<div class="readswitch">edit · <b>read</b></div><div class="readpage" id="readpage">
-    <p>${PARA1}</p>
-    <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.</p>
+    <p class="fade" style="color:#b9b1a6">…quite so. I have trained myself to notice what I see.”</p>
+    <p>${PARA_MID}</p>
+    <p>“How often?” “Well, some hundreds of times.” “Then how many are there?”</p>
   </div>`);
 }
 function libraryScreen(o){
@@ -226,8 +260,9 @@ function libraryScreen(o){
       <div class="lrow" id="lrow-yours"><span class="st ${o.starred?'on':''}" id="starbtn">★</span><span style="font-weight:600">What I want this for</span>
         ${o.tagged?'<span class="tagchip">#ideas</span>':''}${o.tagpick?'<span class="tagchip" id="tagpick" style="border-style:dashed">+ tag</span>':''}
         <span class="meta">just now · in no book${o.inbook?' · Essays':''}</span></div>
+      <div class="lrow"><span class="st">★</span>Start Here<span class="meta">came with the app</span></div>
       <div class="lrow"><span class="st">★</span>A Scandal in Bohemia<span class="meta">Sherlock Holmes</span></div>
-      <div class="lrow"><span class="st">★</span>Lesson 1 — the house<span class="meta">The Field Guide</span></div>
+      <div class="lrow"><span class="st">★</span>Lesson 1 — start here<span class="meta">The Field Guide</span></div>
     </div>
     ${bottomband({receipt:o.receipt||""})}
   </div>`+(o.bookmenu?`<div class="menupop" style="right:220px;top:120px"><div class="mi hot" id="mi-addbook">Add to Book…</div><div class="mi">Move to Wing…</div><div class="sep"></div><div class="mi">New book from this note…</div></div>`:"")
@@ -238,13 +273,11 @@ function snippetsScreen(){
     <div class="masthead"><div class="crumb"><span class="home">Snippets</span></div><div class="mastright"><span>+ group</span></div></div>
     <div class="board">
       <div class="shelfhead">LOOSE</div>
-      <div class="brow" id="snip1"><span class="t" style="font-weight:400;font-style:italic">“a sentence you liked but cut — it waits here”</span><span class="meta">came with the app</span></div>
+      <div class="brow" id="snip1"><span class="t" style="font-weight:400;font-style:italic">“a line you'll want again — it waits here”</span><span class="meta">came with the app</span></div>
     </div>
     ${bottomband({noQuick:true})}
   </div>`;
 }
-
-/* ———————— coach helpers ———————— */
 function coach(x,y,step,title,body,showNext){
   return `<div class="coach" style="left:${x}px;top:${y}px">
     <div class="step">${step}</div><div class="tt">${title}</div>${body}
@@ -253,131 +286,139 @@ function coach(x,y,step,title,body,showNext){
 
 /* ———————— the frames ———————— */
 const frames=[
-{label:"cover", where:"cover — how to read this",
+{label:"cover", where:"cover — what v2 is",
  build:s=>{s.innerHTML=`<div class="ideas">
-   <h2>The onboarding tour — every screen, every sentence</h2>
-   <p style="max-width:70ch;line-height:1.6">What you ruled at the kickoff sitting, rendered: <b>one tour + an optional keep-going leg</b> (R-13s-1), a <b>calm first open with a helpful corner badge</b> — no popup (R-13s-2), the <b>quick-entry line back at the bottom</b> with the badge above the bar on the right (R-13s-3), <b>coach-marks on the real app</b> whose centerpiece is <b>making a take in Write, then opening Takes</b>, inside Sherlock (R-13s-4), over the <b>final seed set</b> (R-13s-5: starred notes empty · Sherlock · the Field Guide · maybe one standalone note).</p>
-   <p style="max-width:70ch;line-height:1.6;color:var(--muted)">Frames 1–10 are the core leg (~2 minutes). Square dots are the keep-going leg (~2 more). The last frame is ideas &amp; variations. Arrow keys move; clicking the spotlit thing advances, because in the real tour your click <i>is</i> the step. All words are first drafts in the Study register — plain words, no “commit”, no “variant”.</p></div>`;},
- notes:`<h3>THE SHAPE</h3>Core leg: the rooms → a real book → inside it → Write → make a take → the fan → Read → one note of your own → the end card. Keep-going leg: star · tag · into a book · snippets → the Field Guide. Both roads end pointing at the Field Guide (your funnel).`},
+   <h2>The tour, rebuilt — navigation first</h2>
+   <p style="max-width:70ch;line-height:1.6">Your round-1 markup, applied whole. The spine is the <b>ladder</b>: sidebar → book → note → the note's modes → back up to the book → back down to the note → home to make one of your own. Ten steps, ~2 minutes, every card a title plus at most two short sentences (the Apple-tip register: one idea per card, your real click advances, End tour always present).</p>
+   <p style="max-width:70ch;line-height:1.6;color:var(--muted)">Your two ruled moments are in: <b>steps 4–5</b> (scroll to the middle of a Sherlock note, click a paragraph there, switch modes and watch your place follow) and <b>steps 8–9</b> (book mode → Open note → back to the book: the ladder runs both ways). Making a take stays (steps 6–7). The fork and the keep-going leg stand from R-13s-1. Copy is second-draft, tuned to your Start Here register — plain, direct, no "commit", no "variant", nothing flowery.</p></div>`;},
+ notes:`<h3>THE SHAPE (R-13s-9: "focus the tour on NAVIGATION")</h3>Core: navigation → Sherlock → inside a book → Write mid-note → your place follows → make a take → the fan → up to the book → back down → your own note → the fork. Leg: star · tags · into a book · snippets → the Field Guide. Depth is deliberately the guide's job; the tour only ever points there.`},
 
-{label:"first open", where:"first open — calm, no popup",
- build:s=>{s.innerHTML=bookcase({badge:true});},
- spot:"#badgego", notes:`<h3>FIRST OPEN (R-13s-2 + R-13s-3)</h3>The room at rest: the final seed set, nothing moving, no modal. The quick-entry line sits at the <b>bottom, above the bottom bar, with air between it and the books</b>; the badge above the bar on the right. <ul><li><span class="q">Q1 — badge lifecycle:</span> after “Not now”, does it come back next launch, shrink to a corner dot, or sleep until Help ▸ Take the Tour? Proposed: it returns quieter (one line, no wave) for the next three opens, then only the dot.</li><li><span class="q">Q2:</span> fresh stores wake in Study (ruled) — this mockup is Study light throughout.</li></ul>`},
+{label:"first open", where:"first open — the one-liner (R-13s-6)",
+ build:s=>{s.innerHTML=bookcase({badge:"offer"});},
+ spot:"#badgeyes", notes:`<h3>FIRST OPEN — CALM, ONE QUIET LINE (R-13s-2 + R-13s-3 + R-13s-6)</h3>Variant B's chrome wearing your words: <b>"Welcome to Variorum. Take the tour?&ensp;yes · not now&ensp;×"</b> — a single line above the bottom bar, right side; no card, no emoji, nothing moves. The quick-entry line keeps its ruled bottom seat with air above the bar. The seed set shows R-13s-5's final list; the welcome note (Start Here) lives in the Library — a note, so not a Bookcase row (<span class="q">Q15</span> below asks where a stranger should meet it).<ul><li><span class="q">Q9 — after the transient:</span> proposed — the line returns on later launches until the tour is taken or the × is pressed; × retires it for good; Help ▸ Tutorial is always there. Your call.</li></ul>`},
 
-{label:"step 1", where:"step 1 of 8 — the rooms",
- build:s=>{s.innerHTML=bookcase({})+coach(200,150,"STEP 1 OF 8","The rooms",
-  `Books live on the <b>Bookcase</b>. <b>Library</b> is every note you have, in one list. <b>Pool</b> holds notes that belong to no book, and <b>Snippets</b> keeps scraps too small to be notes.`,true);},
+{label:"not now", where:"first open — after “not now” (R-13s-6)",
+ build:s=>{s.innerHTML=bookcase({badge:"helproad"});},
+ notes:`<h3>“NOT NOW” — THE SAME LINE, BRIEFLY, THEN GONE</h3>Your ruling built: the same line changes text to <b>"Run it any time from Help ▸ Tutorial."</b> for a few seconds, then fades out. Nothing else appears this launch. This is also the "briefly show how to get it back" you asked for — the way back is taught at the moment of declining, not by a lingering chrome.`},
+
+{label:"step 1", where:"step 1 of 10 — navigation",
+ build:s=>{s.innerHTML=bookcase({})+coach(200,150,"STEP 1 OF 10","Navigation",
+  `Everything lives in one of the places on the left. <b>Bookcase</b> — your books. <b>Library</b> — everything, searchable. <b>Pool</b> — notes that aren't in a book. <b>Snippets</b> — pieces of text you reuse between notes.`,true);},
  spot:"#sidebar", spotNoAdv:true,
- notes:`<h3>STEP 1 — ORIENTATION</h3>The only step with nothing to click — the card's <b>next ⟶</b> advances. Spotlight = the whole sidebar. “Archived” and “Starred” deliberately not explained here (the leg and the guide own them).<ul><li><span class="q">Q:</span> is four rooms already too many words for one card? Alternative: name only Bookcase + Library here, let Pool/Snippets wait for the leg.</li></ul>`},
+ notes:`<h3>STEP 1 — "NAVIGATION", NOT "THE ROOMS" (R-13s-7)</h3>Area facts cross-checked against the field guide's "getting around" lesson (R-13s-8): Library is "everything, searchable" — notes, books, blocks — never "every note"; Snippets is your correction verbatim-close ("pieces of text you reuse between different items"); Pool matches the guide's "notes that belong to no book yet". Starred and Archived deliberately unnamed here — the guide teaches the full five places.`},
 
-{label:"step 2", where:"step 2 of 8 — open the book",
- build:s=>{s.innerHTML=bookcase({})+coach(420,205,"STEP 2 OF 8","A real book to poke",
-  `<i>The Adventures of Sherlock Holmes</i> came with the app so you can try everything on a real one. <b>Click it.</b>`);},
+{label:"step 2", where:"step 2 of 10 — Sherlock Holmes, in Variorum",
+ build:s=>{s.innerHTML=bookcase({})+coach(420,205,"STEP 2 OF 10","Sherlock Holmes, in Variorum",
+  `<i>The Adventures of Sherlock Holmes</i> comes with the app, so you can try everything on a real book. <b>Click it.</b>`);},
  spot:"#row-sherlock",
- notes:`<h3>STEP 2 — THE WOW DOOR</h3>Your real click opens the real book — the tour never fakes a screen. Sherlock is the “wow factor” guide (your word at launch).`},
+ notes:`<h3>STEP 2 — THE SEEDED BOOK (R-13s-7: "a real book to poke" is out)</h3>Title and sentence are candidates — your "sherlock holmes in variorum" seeded the title, which you said you don't love either; alternatives for your pick (<span class="q">Q10</span>): <b>(a)</b> as shown · <b>(b)</b> title "A book to learn on", sentence "The Adventures of Sherlock Holmes comes with the app — click it." · <b>(c)</b> title "Open a book", sentence "Sherlock Holmes ships with the app so the tour can use real writing. Click it."</li>`},
 
-{label:"step 3", where:"step 3 of 8 — inside a book",
- build:s=>{s.innerHTML=bookIndex()+coach(560,180,"STEP 3 OF 8","Inside a book",
-  `The <b>Index</b> lists the book's notes — one per adventure here. A book doesn't own its notes; it points at them, so a note can sit in many books at once. <b>Open “A Scandal in Bohemia.”</b>`);},
+{label:"step 3", where:"step 3 of 10 — inside a book",
+ build:s=>{s.innerHTML=bookIndex()+coach(560,180,"STEP 3 OF 10","Inside a book",
+  `The <b>Index</b> lists the notes in this book. A book works like a scrapbook — put a note in and it stays there. <b>Open “A Scandal in Bohemia.”</b>`);},
  spot:"#irow-scandal",
- notes:`<h3>STEP 3 — BOOK → NOTE</h3>Teaches the level between the Bookcase and the page (your intake: “how you move between book → note”). The pointer line (“a note can sit in many books”) is the one conceptual sentence of the whole tour — <span class="q">keep or cut?</span> The book's own mode row (Outline · Index · Book · Read) is visible but not taught; the guide owns it.`},
+ notes:`<h3>STEP 3 — BOOK → NOTE, WITH YOUR SCRAPBOOK LINE (R-13s-8)</h3>v1's pointer sentence ("a book doesn't own its notes…") is replaced by your own Start Here framing — "Think of books as a scrapbook - you put a note in there and it stays there." Membership-with-strength, no mechanism talk; "a note is edited everywhere it is" stays the guide's line, not the tour's. The book's own mode row (Outline · Index · Book · Read) is visible and returns at step 8.`},
 
-{label:"step 4", where:"step 4 of 8 — Write",
- build:s=>{s.innerHTML=noteWrite(false)+coach(640,120,"STEP 4 OF 8","Write — just write",
-  `A note opens in <b>Write</b>: an ordinary page. Type anywhere. Every paragraph is quietly its own <b>block</b> — which is what makes the next trick possible. <span class="nextbtn" data-adv="1">next ⟶</span>`);},
- spot:"#prose", spotNoAdv:true,
- notes:`<h3>STEP 4 — THE CALM PAGE FIRST</h3>“The calm default proves itself before the machinery is ever met” — Write is shown as nothing special on purpose. The word <b>block</b> is introduced in one clause, no diagram.<ul><li><span class="q">Q:</span> should this step wait for a real keystroke (type one word to advance) instead of next ⟶? More alive, slightly bossier.</li></ul>`},
+{label:"step 4", where:"step 4 of 10 — Write, mid-note (R-13s-9)",
+ build:s=>{s.innerHTML=noteWriteMid(false)+coach(640,120,"STEP 4 OF 10","Write",
+  `Notes open in <b>Write</b> — a simple, fast editor. <b>Scroll to the middle of the note and click one of the paragraphs there.</b>`);},
+ spot:"#para-mid",
+ notes:`<h3>STEP 4 — THE MID-NOTE CLICK (your ruling, first half)</h3>The real tour waits for a click that is genuinely past the top of the note (the scrollbar hint shows the position). Clicking the paragraph advances. The word "block" is deliberately NOT introduced yet — it arrives at step 6 where it earns its keep.`},
 
-{label:"step 5", where:"step 5 of 8 — make a take (R-13s-4)",
- build:s=>{s.innerHTML=noteWrite(true)+coach(500,230,"STEP 5 OF 8","Make a take",
-  `A block can keep <b>more than one version of itself</b> — they're called <b>takes</b>. Click <b>New take</b>, then change a few words. The original isn't overwritten; it keeps its own card.`);},
+{label:"step 5", where:"step 5 of 10 — your place follows (R-13s-9)",
+ build:s=>{s.innerHTML=noteTakesMid(false)+coach(700,96,"STEP 5 OF 10","Your place follows you",
+  `This is <b>Takes</b> (⌘2) — and the paragraph you clicked is still the one in focus. Try <b>Read</b> (⌘3), then ⌘1 back to <b>Write</b>: your place rides along.`,true);},
+ spot:"#mode-takes", spotNoAdv:true,
+ notes:`<h3>STEP 5 — CURSOR-FOLLOW ACROSS MODES (your ruling, second half)</h3>Spotlight on the mode row; the user is free to bounce ⌘1/⌘2/⌘3 as long as they like (follow-the-scroll is the shipped behavior — the tour just makes them feel it mid-note, where it's visible). <span class="q">Q11:</span> your list was "write / takes / index" — I read "index" as Read's <i>edit</i> face (the ▸ 01 index column surface). If you meant the BOOK's Index mode, say so and this step gains that hop instead.`},
+
+{label:"step 6", where:"step 6 of 10 — make a take (R-13s-4)",
+ build:s=>{s.innerHTML=noteWriteMid(true)+coach(500,255,"STEP 6 OF 10","Make a take",
+  `Every paragraph is a <b>block</b>, and a block can hold more than one version of itself — <b>takes</b>, like takes in film. Click <b>New take</b>, then change a few words.`);},
  spot:"#mi-newtake",
- notes:`<h3>STEP 5 — THE CENTERPIECE (her ruling: “they should at least make a take in write”)</h3>The ⌄ handle on the paragraph opens the block menu; the tour spotlights <b>New take (copies this text)</b>. After the click the buffer is the second take — the user edits freely; the tour waits for any edit, then offers step 6.<ul><li><span class="q">Q3 — the gesture:</span> the block ⌄ menu (shown) vs a keyboard road vs the tour card carrying its own “make the take for me” button. The menu teaches a reusable door; the button is friendlier. Proposed: the menu, with the card saying exactly where to click.</li><li><span class="q">Q6 — the souvenir:</span> does the toured take stay in Sherlock afterwards (a trace of your first take) or does “Done” offer to tidy it? Sherlock's sign-in fold is unharmed either way (#186's Sherlock rule).</li></ul>`},
+ notes:`<h3>STEP 6 — THE CENTERPIECE, KEPT ("making a take is good")</h3>Same gesture as v1 (the block's ⌄ menu — your Q3 answer stands): the ⌄ opens the menu, New take is spotlit, the tour waits for an edit after the click. The take is made on the SAME mid-note paragraph steps 4–5 focused — one continuous thread, not a new object. "Like takes in film" is your Start Here clause, borrowed.`},
 
-{label:"step 6", where:"step 6 of 8 — the fan",
- build:s=>{s.innerHTML=noteTakes()+coach(700,96,"STEP 6 OF 8","Both takes, side by side",
-  `This is <b>Takes</b> — the same note, machinery summoned. The <b>✓</b> take is what the page shows; click the other to swap. Nothing is lost when you choose; choosing is reversible, forever.`);},
+{label:"step 7", where:"step 7 of 10 — both takes",
+ build:s=>{s.innerHTML=noteTakesMid(true)+coach(700,96,"STEP 7 OF 10","Both takes, side by side",
+  `Back in <b>Takes</b>, the block now shows both. The <b>✓</b> take is what the page shows — click the other to swap. The original keeps its own card.`);},
  spot:"#mode-takes",
- notes:`<h3>STEP 6 — SEE WHAT YOU MADE</h3>Advance road: clicking <b>Takes</b> in the mode row (spotlit) brings this board; the card then anchors the fan. The one-sentence creed (“nothing is lost… reversible, forever”) is the product's heart said once — <span class="q">right words?</span> The other blocks render as muted single-line rows (the real Takes board's grammar).`},
+ notes:`<h3>STEP 7 — SEE WHAT YOU MADE</h3>v1's creed sentence ("nothing is lost… reversible, forever") is cut to the concrete half: <b>"The original keeps its own card."</b> — the fact, in six words, no philosophy. The guide's takes chapter owns the full story.`},
 
-{label:"step 7", where:"step 7 of 8 — Read",
- build:s=>{s.innerHTML=noteRead()+coach(660,210,"STEP 7 OF 8","Read — the calm page",
-  `<b>Read</b> is for rereading without any machinery at all. When something catches your eye, click the sentence — it drops you back into editing right there. <span class="nextbtn" data-adv="1">next ⟶</span>`);},
- spot:"#readpage", spotNoAdv:true,
- notes:`<h3>STEP 7 — CLOSE THE TRIANGLE</h3>Write · Takes · Read are the three modes the tour teaches (your launch message named the main editor views; Index lives on the book level and was taught at step 3). Lenses / Compare / Blocks deliberately untouched — field-guide territory.`},
+{label:"step 8", where:"step 8 of 10 — up to the book (R-13s-9)",
+ build:s=>{s.innerHTML=noteWriteMid(false)+coach(620,60,"STEP 8 OF 10","Up to the book",
+  `The <b>book glyph</b> in the top bar opens the book this note lives in. <b>Click it</b>, then click <b>Book</b> in the book's mode row — the whole book, read straight through.`);},
+ spot:"#ctx-book",
+ notes:`<h3>STEP 8 — THE CONTEXT BAR'S BOOK DOOR</h3>The glyph is the context bar's third constant door (the guide's "the workspace" lesson: "the book glyph opens the book this note lives in at this very note"). The tour then has them pick <b>Book</b> mode so step 9 happens in the continuous view you named. Build note: the glyph lands in the book's last-used mode — the tour's coach-mark simply points at Book in the mode row after the landing.`},
 
-{label:"step 8", where:"step 8 of 8 — one of your own",
- build:s=>{s.innerHTML=bookcase({})+coach(380,330,"STEP 8 OF 8","Now one of yours",
-  `Down here, always: <b>new note — just start typing</b>. A note needs no book — it lands in your Library (and waits in the Pool until you shelve it somewhere, if you ever do).`);},
+{label:"step 9", where:"step 9 of 10 — and back down (R-13s-9)",
+ build:s=>{s.innerHTML=bookMode()+coach(240,330,"STEP 9 OF 10","…and back down",
+  `In a book, the selected note's <b>Open note</b> button sits in the sidebar. <b>Click it</b> to drop back into the note — and the book glyph brings you up again. The ladder runs both ways.`);},
+ spot:"#notebox",
+ notes:`<h3>STEP 9 — THE ROUND TRIP (your ruling: book mode → Open note → note → book glyph → book)</h3>Book mode shown with the sidebar's NOTE BOX (the selected note's controls live there since 18d — the "Open note" door is its live face). Clicking Open note returns to the note; the card says the glyph completes the loop rather than making them do a third hop. The card's last line sends them home: the real tour's next coach-mark points at <b>Bookcase</b> in the sidebar. Build note: exact door names verified against the shipped NOTE BOX at implementation time.`},
+
+{label:"step 10", where:"step 10 of 10 — one of your own",
+ build:s=>{s.innerHTML=bookcase({})+coach(380,330,"STEP 10 OF 10","One of your own",
+  `The dashed line at the bottom — <b>new note, just start typing</b>. Type a first line and press ⏎. It lands in your Library; no book needed.`);},
  spot:"#quickentry",
- notes:`<h3>STEP 8 — THE BOOKLESS NOTE (your intake: “Write *one* note that isn't in a book”)</h3>Back on the Bookcase; the quick-entry line is the spotlight — its bottom placement (R-13s-3) makes it the natural last stop. Typing one line and pressing ⏎ mints the note and advances.<ul><li><span class="q">Q:</span> should the tour have them actually type (the note then EXISTS — their first real object) or just point the line out? Proposed: actually type — ending the tour owning something is the best ending there is.</li></ul>`},
+ notes:`<h3>STEP 10 — THE BOOKLESS NOTE (the intake's "Write *one* note that isn't in a book")</h3>Typing a line and pressing ⏎ mints the note and advances — the tour ends with them owning something. The quick-entry line's bottom seat is R-13s-3's ruling, unchanged from v1.`},
 
 {label:"end card", where:"the end card — the fork (R-13s-1)",
  build:s=>{s.innerHTML=bookcase({})+`<div class="dimall"></div><div class="centercard">
-   <div class="tt">That's the essentials.</div>
-   Rooms on the left · books point at notes · notes keep takes · nothing is ever lost.
+   <div class="tt">That's the tour.</div>
+   Navigation on the left · books on the Bookcase · takes on any paragraph · your place follows you.
    <div class="choices">
-     <span class="c1" data-adv="1">Keep going — two more minutes (stars, tags, books, snippets)</span>
-     <span class="c2">Open the Field Guide — the whole story, lesson by lesson</span>
+     <span class="c1" data-adv="1">Keep going — two more minutes: stars, tags, books, snippets</span>
+     <span class="c2">Open the Field Guide — every feature, lesson by lesson</span>
      <span class="c3">Done — go write</span>
    </div></div>`;},
- notes:`<h3>THE FORK (R-13s-1 — one tour, optional leg)</h3>Three doors, in this order: the leg · the Field Guide · out. Whichever is taken, the Field Guide was named — the funnel you asked for. “Done — go write” leaves the cursor in the note they just made (continuity beats a blank room).<ul><li><span class="q">Q:</span> the fork's middle door opens the guide's Lesson 1 directly vs just revealing the book on the shelf. Proposed: open Lesson 1 — one fewer dead end.</li></ul>`},
+ notes:`<h3>THE FORK, UNCHANGED IN SHAPE (R-13s-1)</h3>Three doors: the leg · the guide · out. "Done — go write" leaves the cursor in the note they just made. The middle door opens the guide at Lesson 1 (v1's proposal, standing unless you say otherwise). The letter from Lillian is deliberately NOT mentioned anywhere in the tour (R-13s-10).`},
 
-{label:"leg · star", where:"keep going 1 of 4 — star it", leg:true,
+{label:"leg · star", where:"keep going 1 of 4 — star", leg:true,
  build:s=>{s.innerHTML=libraryScreen({})+coach(430,170,"KEEP GOING · 1 OF 4","Star what matters",
-  `Click the <b>star</b>. Starred notes float up everywhere, and the <i>starred notes</i> gathering on your Bookcase collects them by itself.`);},
+  `Click the <b>star</b>. Starred notes float to the top of lists, and the <i>starred notes</i> gathering on your Bookcase collects them automatically.`);},
  spot:"#starbtn",
- notes:`<h3>LEG 1 — STAR</h3>Lands in the Library on the note they just wrote (titled by its first words — honest to the real app). The empty seeded “starred notes” gathering gets its first member — the seed set explains itself.`},
+ notes:`<h3>LEG 1 — STAR</h3>Lands in the Library on the note they just wrote. The empty seeded gathering gains its first member — the seed explains itself. Note the Library list now also carries <b>Start Here</b> (the welcome note, R-13s-10) — visible from the leg without being taught.`},
 
-{label:"leg · tag", where:"keep going 2 of 4 — tag it", leg:true,
- build:s=>{s.innerHTML=libraryScreen({starred:true,tagpick:true,tagpop:true})+coach(620,230,"KEEP GOING · 2 OF 4","Tags",
-  `A note can wear <b>tags</b> — little names like <i>ideas</i> or <i>life/journal</i>. Books can collect by tag: tag a note and the right book brings it in on its own. Make the tag <b>ideas</b>.`);},
+{label:"leg · tags", where:"keep going 2 of 4 — tags", leg:true,
+ build:s=>{s.innerHTML=libraryScreen({starred:true,tagpick:true,tagpop:true})+coach(620,230,"KEEP GOING · 2 OF 4","Organize with tags",
+  `Books can collect tagged items automatically — tag a note <i>#ideas</i> and a book gathering from <i>#ideas</i> brings it in on its own. <b>Make the tag.</b>`);},
  spot:"#tagpick",
- notes:`<h3>LEG 2 — TAG</h3>The searchable picker (the 17y one) with “New tag” — the leg teaches the door, not the taxonomy. The gathering sentence plants the smart-book seed without the word “gathering”.<ul><li><span class="q">Q:</span> is the collect-by-tag sentence one idea too many for this card?</li></ul>`},
+ notes:`<h3>LEG 2 — YOUR TAGS LINE, NEAR-VERBATIM (R-13s-7)</h3>"little names" is gone; the card is your sentence — "organize with tags - books can automatically collect tagged items" — with the one concrete act attached. The searchable picker (17y's) with "New tag".`},
 
 {label:"leg · book", where:"keep going 3 of 4 — into a book", leg:true,
  build:s=>{s.innerHTML=libraryScreen({starred:true,tagged:true,bookmenu:true})+coach(440,300,"KEEP GOING · 3 OF 4","Put it in a book",
-  `<b>Add to Book</b> files this note into a book — or makes a new book around it. A note can sit in many books at once; the books just point.`);},
+  `<b>Add to Book</b> files this note into any of your books — or makes a new book around it. A note can sit in more than one book.`);},
  spot:"#mi-addbook",
- notes:`<h3>LEG 3 — THE BOOK DOOR (your intake: “clicking on the book icon”)</h3>Context menu shown; the real surface may prefer the Book Panel or the masthead door — <span class="q">which door should the leg teach?</span> Proposed: whichever door the 0.9.2 app considers primary (Add to Book in the note's menu), so the tour never teaches a side door.`},
+ notes:`<h3>LEG 3 — THE BOOK DOOR</h3>The one many-books clause survives here (not in the core tour) in its simplest form — a fact about filing, not a mechanism. The door taught is the primary one (Add to Book in the note's menu).`},
 
 {label:"leg · snippets", where:"keep going 4 of 4 — snippets", leg:true,
- build:s=>{s.innerHTML=snippetsScreen()+coach(430,200,"KEEP GOING · 4 OF 4","Scraps live here",
-  `<b>Snippets</b> keeps the pieces that aren't notes yet — cut sentences, stray lines. Drag one into any draft when it's time; the scrap stays here too. One example scrap is waiting for you.`);},
+ build:s=>{s.innerHTML=snippetsScreen()+coach(430,200,"KEEP GOING · 4 OF 4","Snippets",
+  `Pieces of text you reuse between notes live here — a phrase, a quote, a line you cut. <b>Drag one into any draft</b>; the snippet stays for next time.`);},
  spot:"#snip1",
- notes:`<h3>LEG 4 — SNIPPETS (your intake: “Example snippet that points you to the snippets page”)</h3>The seeded example scrap gives the room one inhabitant — <span class="q">confirm a seeded scrap joins the final seed set</span> (it wasn't in your stated list; it's small and silent, but it is one more thing at first open).`},
+ notes:`<h3>LEG 4 — SNIPPETS, RE-DESCRIBED (R-13s-8)</h3>Your correction is the card: reuse between items, not "scraps too small to be notes". <span class="q">Q17</span> (was Q8): the one seeded example snippet shown here — confirm it joins the final seed set.`},
 
 {label:"leg end", where:"the leg's end — the Field Guide",
  build:s=>{s.innerHTML=bookcase({})+coach(420,165,"THE END","The Field Guide",
-  `Everything else — takes in depth, divide and merge, books that collect by rule, protection — lives in <b>The Field Guide</b>, as lessons you can play through. It stays on your Bookcase. That's the tour — go write.`);},
+  `Everything deeper — takes in depth, divide and merge, gatherings, privacy — lives in <b>The Field Guide</b>: interactive lessons, in order or as needed. That's the tour — go write.`);},
  spot:"#row-guide",
- notes:`<h3>THE LEG'S END = THE CORE'S END CARD, SAID LONGER</h3>Both roads end on the guide (your funnel). Clicking the guide row opens it; “go write” otherwise returns to their note.`},
+ notes:`<h3>BOTH ROADS END AT THE GUIDE (your funnel, unchanged)</h3>Clicking the guide row opens it; "go write" otherwise returns to their note.`},
 
-{label:"ideas", where:"ideas & variations — for the next sitting",
+{label:"questions", where:"open questions — for your next markup",
  build:s=>{s.innerHTML=`<div class="ideas">
-   <h2>Ideas &amp; variations</h2>
-   <div style="font-size:13px;color:var(--muted);margin-bottom:4px">THE BADGE — three temperatures (R-13s-2's “think clippy showing up in the corner”; the waving-photo idea is recorded as declined in the plan file)</div>
-   <div class="grid">
-     <div class="vcard"><div class="cap">A · THE CARD (shown in frame 1)</div><span style="font-weight:700">👋 New here?</span><br>A two-minute tour shows you the house.<br><span style="color:var(--accent);font-weight:700">Take the tour</span> · <span style="color:var(--muted)">Not now</span></div>
-     <div class="vcard"><div class="cap">B · THE ONE-LINER</div><span style="color:var(--accent);font-weight:600">New here? the two-minute tour →</span><br><span style="color:var(--muted);font-size:12px">a single quiet line above the bar; dismiss ×; no card chrome at all</span></div>
-     <div class="vcard"><div class="cap">C · THE DOT</div><span style="font-size:16px">◉</span> <span style="color:var(--muted);font-size:12px">a small pulsing dot in the corner that expands to A on hover — calmer still, but strangers may never hover</span></div>
-   </div>
-   <div style="font-size:13px;color:var(--muted);margin-bottom:4px">AFTER “NOT NOW” — proposed ladder</div>
-   <p style="max-width:70ch;font-size:13.5px;line-height:1.55">Next three opens: variant B (the one-liner). After that: variant C (the dot) forever, plus Help ▸ <i>Take the Tour</i>. Completing or ending the tour retires badge and dot both. — <span class="q">your call at the next sitting (open Q1).</span></p>
-   <div style="font-size:13px;color:var(--muted);margin:14px 0 4px">THE QUICKSTART NOTE (the intake's “super simple fast read that stands alone”)</div>
-   <p style="max-width:70ch;font-size:13.5px;line-height:1.55">Proposed: it IS the “maybe one standalone note” of your seed list — titled <i>Start here</i>, two short screens of prose saying what the tour says (for people who never click badges), ending at the Field Guide. Lives bookless in the Pool/Library top. The badge's twin door: “read the two-minute version instead.” — <span class="q">open Q2.</span></p>
-   <div style="font-size:13px;color:var(--muted);margin:14px 0 4px">EVERYTHING BUNDLED FOR THE NEXT SITTING</div>
-   <ul style="font-size:13.5px;line-height:1.6;max-width:80ch">
-     <li><b>Q1</b> badge lifecycle (the ladder above?)</li>
-     <li><b>Q2</b> the Quickstart note: in or out, and where it lives</li>
-     <li><b>Q3</b> the make-a-take gesture the tour teaches (block ⌄ menu as shown?)</li>
-     <li><b>Q4</b> tour interruption: quitting mid-tour → badge returns offering to resume?</li>
-     <li><b>Q5</b> the leg's four stops as shown (star · tag · book · snippets)?</li>
-     <li><b>Q6</b> the Sherlock take souvenir: stays or tidied at Done?</li>
-     <li><b>Q7</b> step 1's four rooms vs two; step 3's pointer sentence; step 6's creed sentence — copy temperature checks</li>
-     <li><b>Q8</b> a seeded example scrap in Snippets (leg 4) — joins the seed set?</li>
-   </ul></div>`;},
- notes:`<h3>WHAT HAPPENS NEXT</h3>You walk this file (⟵⟶), mark up anything — wording, order, temperature — and the next iteration lands here same-day. When every screen reads right, U1/U2 briefs go to an implementer and the real tour is built to THIS file as its spec (P-6: a walk test rides every step).`}
+   <h2>Open questions (Q9–Q17; Q1–Q8's dispositions are in the plan file)</h2>
+   <ul style="font-size:13.5px;line-height:1.7;max-width:84ch">
+     <li><b>Q9</b> — the one-liner after "not now" + the transient: proposed, it returns on later launches until toured or ×'d; × retires it for good. Yes?</li>
+     <li><b>Q10</b> — step 2's title + sentence: (a) "Sherlock Holmes, in Variorum" as shown · (b) "A book to learn on" · (c) "Open a book". Or your own words.</li>
+     <li><b>Q11</b> — your "write / takes / index": read as Read's edit face (the ▸ 01 index surface). Did you mean the book's Index mode instead?</li>
+     <li><b>Q12</b> — quitting mid-tour: does the one-liner return offering to RESUME, or does a half-taken tour just restart from Help ▸ Tutorial?</li>
+     <li><b>Q13</b> — the leg's four stops stand (star · tags · book · snippets)?</li>
+     <li><b>Q14</b> — the Sherlock take made at step 6: stays afterwards as a souvenir, or "Done" tidies it? (Sherlock's sign-in fold is safe either way — #186's rule.)</li>
+     <li><b>Q15</b> — WHERE the welcome note (Start Here's first half) lives so a stranger meets it: it's a bookless note, so Library + Pool see it; at birth it's the newest thing in the Library. Enough? Or should the end card's middle region / the one-liner's neighborhood point at it once?</li>
+     <li><b>Q16</b> — where the LETTER (Start Here's emotional half) lives — never mentioned in the tour (your word): a note beside Start Here? the guide's last lesson? Seed-work call, no hurry.</li>
+     <li><b>Q17</b> — the seeded example snippet (leg 4's one inhabitant): joins the final seed set?</li>
+   </ul>
+   <div style="font-size:13px;color:var(--muted);margin:16px 0 4px">WHAT HAPPENS NEXT</div>
+   <p style="max-width:78ch;font-size:13.5px;line-height:1.6">You walk this version and mark it up; iterations land same-day. When every screen reads right, U1/U2 briefs go to the implementer and the real tour builds to THIS file as its spec (P-6: a TourWalk test rides every step). No Swift before your per-screen approval.</p></div>`;},
+ notes:`<h3>V2's LEDGER</h3>Everything from your round-1 markup is either BUILT into a frame (the one-liner + its not-now, Navigation, guide-accurate areas, the scrapbook line, the mid-note click + follow, the book↔note round trip, your tags line, the Start Here welcome note in the seed) or ASKED above with a proposal. Nothing was dropped.`}
 ];
 
 /* ———————— driver ———————— */
