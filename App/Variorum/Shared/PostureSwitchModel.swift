@@ -24,6 +24,47 @@ import Foundation
 import Observation
 import VariorumCore
 
+/// VX-99 round 2 (finding 1 — the cold review's MAJOR): WHICH act a
+/// ceremony face is speaking for. The mode names it for a fresh ceremony;
+/// for a RESUME it is the pending marker's act (`init(resuming:)`) — a
+/// switch into Castle, a Replace All Keys, or a FOLLOW (the marker's
+/// `follow` flag; into Castle or not by the marker's posture). The running
+/// title, the resume's ask, the Done and the restart all read this ONE
+/// value on both platforms (`ProtectionCopy.ceremonyRunningTitle` ·
+/// `ceremonyResumeTitle` · `ceremonyDoneBody`; the model's flow).
+nonisolated enum CeremonyAct: Equatable, Sendable {
+    case enterCastle
+    case replaceKeys
+    case leaveCastle
+    /// A follow's marker (2c / 2d.4): this device was picking up keys
+    /// another device minted — into Castle or not.
+    case follow(entersCastle: Bool)
+
+    /// The act a pending marker records.
+    init(resuming marker: RotationMarker) {
+        if marker.isFollow {
+            self = .follow(entersCastle: marker.entersCastle)
+        } else {
+            self = marker.entersCastle ? .enterCastle : .replaceKeys
+        }
+    }
+
+    /// Whether the act, by itself, enters Castle (the road's outcome may
+    /// still say otherwise — the Done reads the outcome first).
+    var entersCastle: Bool {
+        switch self {
+        case .enterCastle: return true
+        case .replaceKeys, .leaveCastle: return false
+        case .follow(let entersCastle): return entersCastle
+        }
+    }
+
+    var isFollow: Bool {
+        if case .follow = self { return true }
+        return false
+    }
+}
+
 @MainActor
 @Observable
 final class PostureSwitchModel: Identifiable {
@@ -128,6 +169,28 @@ final class PostureSwitchModel: Identifiable {
         if case .resume = mode { return true }
         return false
     }
+
+    /// VX-99 round 2 (finding 1): the act this ceremony speaks for — the
+    /// mode's, or a resume's MARKER's. Every face branch and every flow
+    /// branch that used to ask `mode == .replaceKeys` asks this instead.
+    var act: CeremonyAct {
+        switch mode {
+        case .enter: return .enterCastle
+        case .leave: return .leaveCastle
+        case .replaceKeys: return .replaceKeys
+        // SEAM (behavior-identical to 8f66bc1f): a resume reads as the
+        // Castle ceremony — exactly what every `mode == .replaceKeys`
+        // branch made of it before this property existed.
+        case .resume: return .enterCastle
+        }
+    }
+
+    /// The running screen's title, by the act (both faces render it).
+    var runningTitle: String { ProtectionCopy.ceremonyRunningTitle(act) }
+    /// The resume's passphrase screen title, by the act (both faces).
+    var resumeAskTitle: String { ProtectionCopy.ceremonyResumeTitle(act) }
+    /// The Done's body, by the act and the outcome's road (both faces).
+    var doneBody: String { ProtectionCopy.ceremonyDoneBody(act: act, outcome: outcome) }
     /// pre-13x 3b (Replace All Keys' faces): the Standard addendum renders
     /// under a Standard posture; the checkbox hides when a door handed the
     /// new passphrase in (it IS the new one).
@@ -213,7 +276,7 @@ final class PostureSwitchModel: Identifiable {
 
     func continueFromExplain() {
         guard case .explain = phase else { return }
-        if mode == .replaceKeys {
+        if act == .replaceKeys {
             // The words in hand already (a regeneration handed them in) ⇒
             // straight to the authorization; else the words screens.
             if wordsInHand != nil { advanceAfterWords() } else { advanceToWords() }
@@ -288,7 +351,7 @@ final class PostureSwitchModel: Identifiable {
         case .confirm(let shown): phase = .wordsConfirm(shown)
         case .done:
             wordsInHand = words.wordsInHand
-            if mode == .replaceKeys {
+            if act == .replaceKeys {
                 advanceAfterWords()
             } else {
                 phase = .floor(needsPassphrase: passphraseInHand == nil)
@@ -418,7 +481,7 @@ final class PostureSwitchModel: Identifiable {
     /// the VAULT's copy — a retired word (the key file's recorded descriptor
     /// no longer the vault's) is refused with copy §5's sentence.
     func authorize(passphrase typed: String) async {
-        guard case .authorize = phase, !busy, mode == .replaceKeys else { return }
+        guard case .authorize = phase, !busy, act == .replaceKeys else { return }
         lastError = nil
         guard !typed.isEmpty else {
             lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.emptyPassphrase)
@@ -442,7 +505,7 @@ final class PostureSwitchModel: Identifiable {
 
     /// The checkbox's new passphrase (≥ 12, matched); then the act.
     func commitNewPassphrase(_ new: String, confirmation: String) async {
-        guard case .newPassphrase = phase, !busy, mode == .replaceKeys else { return }
+        guard case .newPassphrase = phase, !busy, act == .replaceKeys else { return }
         lastError = nil
         guard new.count >= ProtectionCopy.passphraseFloor else {
             lastError = ProtectionCopy.passphraseTooShort
@@ -601,6 +664,10 @@ final class PostureSwitchModel: Identifiable {
         return sentence + " " + ProtectionCopy.freshWordsNeverLanded
     }
 
+    /// The switches' one offline sentence (copy row: the runner's transport
+    /// wording) — named once so the refusal and the URL error share it.
+    static let serverUnreachable = "Couldn't reach the server — check your connection and try again."
+
     static func message(for error: any Error) -> String {
         switch error {
         case CorpusRotationError.rotationInProgress:
@@ -649,8 +716,14 @@ final class PostureSwitchModel: Identifiable {
             return "That switch doesn't apply right now."
         case VaultEnrollmentError.wrongPassphrase:
             return ProtectionCopy.passphraseNotTheLibrarys
+        case PostureSwitchError.replaceKeysNeedsSync:
+            // VX-99 round 2 (finding 4 — decision 9): the switches' offline
+            // line (`pre-13x-copy.md`'s row: "Replace All Keys / Use Castle /
+            // Use Standard offline" speaks the transport wording), so the gap
+            // and a dropped connection read alike.
+            return serverUnreachable
         case is URLError:
-            return "Couldn't reach the server — check your connection and try again."
+            return serverUnreachable
         default:
             return EncryptionSession.message(for: error)
         }

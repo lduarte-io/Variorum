@@ -111,6 +111,15 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     /// words — the new keys could not be wrapped under them and the words
     /// would die silently; refused before anything is written.
     case wordsRequired
+    /// VX-99 round 2 (finding 4 — decision 9: every key door is an ONLINE
+    /// act for an ENROLLED library): Replace All Keys reached the runner
+    /// without the enrolled library in hand (a vault, the transport, a
+    /// session, sync custody). The door admits only an enrolled library,
+    /// so this is the check-then-act gap (a session that lapsed during the
+    /// screens; a custody read that failed) — refused before anything is
+    /// written, never run as the local-only road (steps 4–7 alone would
+    /// rotate nothing and the Done would claim otherwise).
+    case replaceKeysNeedsSync
 }
 
 @MainActor

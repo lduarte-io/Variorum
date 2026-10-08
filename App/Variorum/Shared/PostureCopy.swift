@@ -874,4 +874,26 @@ nonisolated extension ProtectionCopy {
         case .written: return enteredCastleDone
         }
     }
+
+    // MARK: VX-99 round 2 (finding 1) — THE ONE SELECTOR over the act and the
+    // outcome's road, for both platforms' ceremony faces.
+
+    /// The running screen's title, by the act.
+    static func ceremonyRunningTitle(_ act: CeremonyAct) -> String {
+        switch act {
+        case .leaveCastle: return leaveCastleTitle
+        case .replaceKeys: return replaceKeysTitle
+        case .enterCastle, .follow: return enterCastleTitle
+        }
+    }
+
+    /// The resume's passphrase screen title, by the act.
+    static func ceremonyResumeTitle(_ act: CeremonyAct) -> String {
+        resumeBody
+    }
+
+    /// The Done's body, by the act and the outcome's road.
+    static func ceremonyDoneBody(act: CeremonyAct, outcome: PostureSwitchRunner.Outcome?) -> String {
+        act == .replaceKeys ? replaceKeysDone : castleDoneBody(outcome)
+    }
 }

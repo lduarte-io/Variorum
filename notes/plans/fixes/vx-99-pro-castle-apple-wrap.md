@@ -678,3 +678,68 @@ A new MAJOR earns round 3 (the cap). **Dispositions:**
 
 Cast for the fix: a FRESH `opus-implementer` (the first one passed ~490k). Round 3 (the cap): a fresh Opus 5.5
 reviewer — the last review is Opus 5.5 per her ruling. Stage: one slot via the coordinator.
+
+## ROUND 2 — FIX PASS (a fresh Opus implementer, 2026-10-08 — LIVE STATUS; PENDING = unverified)
+
+**Scope, exactly as disposed above:** findings 1, 2, 3 (option a — S1 + S2), 4, 6 and 7 in-unit; finding 5 OUT (VX-109),
+untouched. Surfaces: `Shared/PostureSwitch.swift`, `Shared/PostureSwitchModel.swift`, `Shared/PostureCopy.swift`, the Mac
+`ProtectionPane.swift` (the ceremony sheet only), the phone's `MobilePostureSheets.swift`, `PostureSwitchTests.swift`. Zero
+`Sources/`.
+
+**THE SEAM (commit 1 — why the reds run on it, not on bare 8f66bc1f).** Three of finding 1's arms (the running title, the
+resume's ask, the Done) are decided INSIDE the two face files (`model.mode == .replaceKeys ? … : …`), where no test can read
+them. Commit 1 moves those expressions, VERBATIM in effect, into the brain so the pins can: `CeremonyAct` + the model's `act`
+(mapped exactly as every `mode == .replaceKeys` branch read it — a resume of ANY marker reads `.enterCastle`), the model's
+`runningTitle` / `resumeAskTitle` / `doneBody` over `ProtectionCopy.ceremonyRunningTitle` / `ceremonyResumeTitle` /
+`ceremonyDoneBody` (HEAD's expressions: leave/RAK/else-Castle; `resumeBody`; `act == .replaceKeys ? replaceKeysDone :
+castleDoneBody(outcome)`), the faces and the model's four flow branches keyed on `act`, plus the one unthrown error case
+finding 4's pins name (`PostureSwitchError.replaceKeysNeedsSync`, worded by the switches' offline line). Behavior-identical by
+construction; the pins that need no seam (the restart, the follow outcome's phase, the addendum, the S-roads, the gap, the
+Apple pair) are red on 8f66bc1f's code as much as on the seam's.
+
+### LIVE STATUS
+
+- Pins + the seam: DONE (this commit) — `PostureSwitchTests`' MARK "VX-99 round 2" (after round 1's pins) + pin (d)
+  re-pointed in place. TEST BUILD SUCCEEDED (headless). Thirteen tests:
+  - F1 (i)–(iv): `aResumedCeremonysFacesSpeakForTheMarkersActNotAlwaysTheCastleCeremony` (ii + the resume's ask) ·
+    `theCeremonysDoneNeverClaimsCastleUnlessTheOutcomeEnteredIt` (the selector's rule, every act) ·
+    `aResumedReplaceAllKeysSpeaksItsOwnDoneNeverTheCastleClaim` (i, through the model) ·
+    `aReplaceAllKeysWhoseVaultWriteNeverLandedRestartsReplaceAllKeysNeverUseCastle` (iii + the restart's own door) ·
+    `aReplaceAllKeysThatBecameTheFollowIntoAnotherDevicesCastleSaysSoAndOffers` (iv).
+  - F2: `theReplaceAllKeysScreensStandardAddendumReadsTheVaultsWordNotTheDevicesReading` (both directions).
+  - F3: `aResumedUseCastleWhoseAccountLeftCastleElsewhereFollowsTheAccountIntoStandard` (S1, through the model) ·
+    `aResumedReplaceAllKeysWhoseAccountWasRotatedAgainElsewhereIsAnotherDevicesRoad` (S2) ·
+    `aDoubleCrashedAnotherDeviceResumeStaysAnotherDevicesRoadByTheStampItsMarkerCarries` (the rule on the rewritten marker) ·
+    `aResumedFollowWhoseAccountEnteredCastleSinceFollowsTheAccountIntoCastle` (a follow's own marker) ·
+    `aResumedCastleReplaceAllKeysMovesCustodyByTheAccountsPostureNotTheDevicesReading` (custody by the account).
+  - F4: `aReplaceAllKeysWhoseSessionLapsedAfterTheDoorRefusesInsteadOfRotatingNothing` (the production gap) · pin (d)
+    RE-POINTED by name: `aLocalOnlyCastleLibrarysReplaceAllKeysWritesNoAppleCopyAndAStandardOneStillDoes` →
+    `aLocalOnlyLibrarysReplaceAllKeysRefusesAndItsUseCastleRoadStillRuns` (both postures refuse; Use Castle's local-only road
+    kept as the control — the old pin had no Use Castle half, so the control is new).
+  - F7: `theNewKeyFilesAppleCopyIsUnderTheICloudKeyTheBeltVerifiedNotOneReadAfterTheWalk`.
+- Red run (the pins commit, `PostureSwitchTests` alone): PENDING — the stage.
+- F1 fix: NOT-STARTED. F2 fix: NOT-STARTED. F3 fix: NOT-STARTED. F4 fix: NOT-STARTED. F6 (NITs): NOT-STARTED. F7 fix:
+  NOT-STARTED.
+- Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
+- Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
+- Phone compile (`MobilePostureSheets.swift` touched): PENDING.
+
+### NEW — found by this pass, NOT fixed (the orchestrator's call; outside the ruled findings)
+
+- **The resume door refuses its OWN mid-walk rotation.** `PostureSwitchModel.start()` reads `facts.rotationInProgress`
+  (`checkDoor`: the vault carries a previous corpus key) and refuses with the still-finishing sentence BEFORE the mode switch
+  — the `.resume` mode included (its exemptions cover `followPending` and the restore hold only). A ceremony interrupted
+  mid-walk on THIS device (marker `.reencrypt`, the vault's previous key set — a dropped connection during an 18k-row walk)
+  is exactly that state, so "Finish Replacing Keys…" / "Finish Entering Castle…" answers "A key replacement started on
+  [this device] … is still finishing. Any signed-in device that has picked up the new keys can finish it. Try again after."
+  and never runs `runner.resume`; with the marker set the engine refuses every round, so a one-device account stays paused
+  until another device follows. By trace (no test drives `.resume` through the model before this pass; this pass's model-road
+  pins pick states where the vault's previous key is already cleared). The likely fix is one exemption (`!isResume` on that
+  guard — decision 32: "the acting device resumes through its marker and never starts a second"), but it is a second unit's
+  call, so it is left as found.
+- **Same-class residual — the "Entering Castle didn't finish" sentence OUTSIDE the sheet.** `ProtectionCopy.resumeBody` also
+  captions the pane's resume door for EVERY pending marker (`ProtectionPane.swift:323` under "Finish Replacing Keys…"; the
+  phone's twin in `MobileProtectionSheet.swift`, not this pass's surface) and words `PostureSwitchError.switchInProgress`.
+  The sheet's own ask now reads the act (finding 1); the pane captions want the same one call
+  (`ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))`) on both platforms — left for the orchestrator so the
+  two panes move together.

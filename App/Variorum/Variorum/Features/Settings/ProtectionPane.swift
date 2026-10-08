@@ -1100,8 +1100,9 @@ struct PostureSwitchSheet: View {
             switch model.phase {
             case .checking:
                 title("Checking…")
-            case .explain where model.mode == .replaceKeys:
-                // pre-13x 3b — copy §4's Replace All Keys screen.
+            case .explain where model.act == .replaceKeys:
+                // pre-13x 3b — copy §4's Replace All Keys screen (VX-99 round 2,
+                // finding 1: by the ACT — a restarted Replace All Keys marker too).
                 title(ProtectionCopy.replaceKeysTitle)
                 body(ProtectionCopy.replaceKeysBody)
                 if model.accountPostureIsStandard {
@@ -1251,9 +1252,8 @@ struct PostureSwitchSheet: View {
                     .disabled(model.busy || !acknowledged || (needsPassphrase && passphrase.isEmpty))
                 }
             case .running:
-                title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle
-                      : model.mode == .replaceKeys ? ProtectionCopy.replaceKeysTitle
-                      : ProtectionCopy.enterCastleTitle)
+                // VX-99 round 2 (finding 1): the act's title — the one selector.
+                title(model.runningTitle)
                 HStack(spacing: 8) {
                     TravellingDotsIndicator(ink: .secondary)
                     Text(runningLine).font(.callout).foregroundStyle(.secondary)
@@ -1262,9 +1262,9 @@ struct PostureSwitchSheet: View {
                     .font(.caption).foregroundStyle(.secondary)
             case .done(let insuranceOff, _):
                 title("Done")
-                // pre-13x 5a (ledger 61): the conflict-follow's own Done when the
-                // ceremony became the follow (copy §2b), else the ordinary one.
-                body(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.castleDoneBody(model.outcome))
+                // pre-13x 5a (ledger 61) → VX-99 round 2 (finding 1): ONE
+                // selector over the act and the outcome's road (both platforms).
+                body(model.doneBody)
                 if insuranceOff {
                     Text(ProtectionCopy.insuranceTurnedOffNotice)
                         .font(.callout)
@@ -1310,7 +1310,7 @@ struct PostureSwitchSheet: View {
                 body("Your Apple account holds a key again. Nothing else changed.")
                 HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
             case .resumeAsk:
-                title(ProtectionCopy.resumeBody)
+                title(model.resumeAskTitle)
                 body(ProtectionCopy.resumeNeedsPassphrase)
                 PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
