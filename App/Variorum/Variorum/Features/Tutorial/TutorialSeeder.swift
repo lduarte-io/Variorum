@@ -269,7 +269,7 @@ enum TutorialSeeder {
         // right after the lesson that teaches tags — the finder leans on
         // them (`#tag` alone narrows the Library to the notes wearing it).
         ("the library of things", ["comments & tags", searchLessonTitle,
-                                   "pool & scraps", "export — it's all yours",
+                                   "pool & scraps", "export: it's all yours",
                                    "the seal"]),
         // 13i-d U7 — **THE BOOKS CHAPTER** (the sitting record §25, written at
         // her instruction as SECONDARY ACCEPTANCE CRITERIA: "every lesson is a
@@ -1893,42 +1893,43 @@ enum TutorialSeeder {
             // too crowded"; `BlockDecor` records it), so the promise left
             // with the door. The margin card/badge, ⌘⇧' and both bars'
             // comments button stay.
-            "A COMMENT is a working note on a BLOCK — about the writing, not in "
-            + "it: \u{201C}take 1 is better, but take 2's ending\u{2026}\u{201D}. This block "
-            + "carries one; it renders in the margin with a // prefix. Click it "
-            + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere. "
-            + "The comments button sits in the bottom bar in Write and Takes "
-            + "alike.",
+            "A comment is a working note on a block: about the writing, not in "
+            + "it. \u{201C}Take 1 is better, but take 2's ending\u{2026}\u{201D} "
+            + "This block carries one; it renders in the margin with a // prefix. "
+            + "Click it to open the block's comments panel, or press "
+            + "\u{2318}\u{21E7}' anywhere. The comments button sits in the bottom "
+            + "bar in Write and Takes alike.",
 
             "Comments survive the knife: divide or merge a commented block and "
-            + "the note rides onto the successors. Deleted comments stay "
-            + "visible in the panel and can be brought back — the feature is "
-            + "deliberately never skimpy.",
+            + "the note rides onto the successors. Deleted comments stay visible "
+            + "in the panel and can be brought back. The feature is deliberately "
+            + "never skimpy.",
 
             // 13i-d U7 continuation (F-U7-4 — row 85's twin): this paragraph
             // taught tag cards "on the CONTEXT BAR" and "Fold the bar with
             // ⌘⇧I", a fold the app retired; it now teaches the masthead's ＃
             // field exactly as "the workspace" does. (F-U6-3 earlier: the tag
             // door mints a GATHERING — Settings ▸ Tags' "Make a Gathering…".)
-            "TAGS organize notes (and blocks) without moving them: hierarchical "
+            "Tags organize notes (and blocks) without moving them: hierarchical "
             + "paths like life/goals/2024. A note wears them as little coloured "
-            + "cards on its masthead's right edge \u{2014} click the \u{FF03} beside "
-            + "them and a tag field opens with the cursor in it (type a name; "
-            + "\u{201C}/\u{201D} nests, and a name that doesn't exist yet is made; "
-            + "\u{23CE} applies it), \u{2715} on a card takes one off, and "
+            + "cards on its masthead's right edge. Click the \u{FF03} beside them "
+            + "and a tag field opens with the cursor in it (type a name; "
+            + "\u{201C}/\u{201D} nests, and a name that doesn't exist yet is "
+            + "made; \u{23CE} applies it), \u{2715} on a card takes one off, and "
             + "\u{2318}\u{21E7}I opens the same field from anywhere in the note. "
-            + "Every tag keeps its own colour everywhere. The tag manager lives in "
-            + "Settings (\u{2318},), where Make a Gathering\u{2026} turns a tag into a "
-            + "gathering that shows everything wearing it.",
+            + "Every tag keeps its own colour everywhere. The tag manager lives "
+            + "in Settings (\u{2318},), where Make a Gathering\u{2026} turns a "
+            + "tag into a gathering that shows everything wearing it.",
 
-            "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
-            + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
-            + "replace. Your own notes never wear it unless you put it there; "
-            + "everything else in your library is invisible to the restore.",
+            "Full disclosure: every lesson note wears the "
+            + "\u{201C}tutorial\u{201D} tag. That is exactly how Help \u{25B8} "
+            + "Restore Tutorial\u{2026} finds what to replace. Your own notes "
+            + "never wear it unless you put it there; everything else in your "
+            + "library is invisible to the restore.",
         ])
         _ = try ops.addBlockComment(
             to: commentsTags.blocks[0].block.id,
-            text: "a comment lives in the margin — about the block, never inside its text")
+            text: "a comment lives in the margin: about the block, never inside its text")
 
         // VX-89 — **THE FINDER'S LESSON** (her question at the 13o follow-up
         // report: *"were search details added to the field guide?"* — they
@@ -1946,71 +1947,70 @@ enum TutorialSeeder {
         // `+ commits` facet (her word, R-VX83-9) — savepoint history joins
         // the answer, each line marked "commit" with its day (R-VX83-10).
         _ = try lesson(library, searchLessonTitle, [
-            "The search field at the top of the Library is the one place to look "
-            + "for anything you wrote. Type words and it searches the TEXT itself: "
-            + "the body of every note \u{2014} every take, not only the one showing "
-            + "\u{2014} and titles, snippets, comments, block names and take labels. "
-            + "Capitals and accents don't matter: \u{201C}cafe\u{201D} finds "
-            + "\u{201C}Caf\u{E9}\u{201D}.",
+            "The search field at the top of the Library is the one place to "
+            + "look for anything you wrote. Type words and it searches the text "
+            + "itself: the body of every note (every take, not only the one "
+            + "showing), and titles, snippets, comments, block names and take "
+            + "labels. Capitals and accents don't matter: \u{201C}cafe\u{201D} "
+            + "finds \u{201C}Caf\u{E9}\u{201D}.",
 
-            "Words answer as a sheet. A band under the field counts what was found "
-            + "\u{2014} books, notes, passages \u{2014} and its chips say what is "
+            "Words answer as a sheet. A band under the field counts what was "
+            + "found (books, notes, passages), and its chips say what is "
             + "narrowing the search, starting with the wing you're in "
             + "(\u{201C}in: Home\u{201D}): search looks inside one wing, though "
             + "snippets are found from every wing. Books whose names match come "
             + "first; then each note that matches, best match first, with up to "
-            + "three of its matching lines and the words highlighted. "
-            + "\u{201C}all N \u{203A}\u{201D} on a note opens the rest of its lines.",
+            + "three of its matching lines and the words highlighted. \u{201C}all "
+            + "N \u{203A}\u{201D} on a note opens the rest of its lines.",
 
-            "Click a line and you land IN the note: in Write, at that block, the "
-            + "match selected and the find bar already holding your words. "
+            "Click a line and you land in the note: in Write, at that block, "
+            + "the match selected and the find bar already holding your words. "
             + "\u{2318}G steps to the next match, \u{21E7}\u{2318}G back. A line "
             + "marked \u{201C}in another take\u{201D} matched a take that isn't "
-            + "showing \u{2014} you land at its block with the find bar ready, and "
+            + "showing. You land at its block with the find bar ready, and "
             + "nothing is selected, because those words aren't on the page.",
 
-            "A TAG typed alone narrows the Library to the notes wearing it. Type "
-            + "#tutorial and the Library shows this guide's notes \u{2014} every "
-            + "lesson wears that tag \u{2014} as its own rows, in the order its "
-            + "sort \u{25BE} says, with any books the tag flows into listed on top. "
-            + "A tag covers the tags under it: #life finds a note tagged "
-            + "life/goals too. Put words beside a tag and it narrows the search "
-            + "instead: #tutorial rain looks for rain in these lessons only (the "
-            + "choosing lesson's rain takes answer). "
-            + "And when a word you type is the name of a tag, the band offers it "
-            + "\u{2014} \u{201C}tag: #name \u{203A}\u{201D} \u{2014} and one click "
-            + "searches the tag.",
+            "A tag typed alone narrows the Library to the notes wearing it. "
+            + "Type #tutorial and the Library shows this guide's notes (every "
+            + "lesson wears that tag) as its own rows, in the order its sort "
+            + "\u{25BE} says, with any books the tag flows into listed on top. A "
+            + "tag covers the tags under it: #life finds a note tagged life/goals "
+            + "too. Put words beside a tag and it narrows the search instead: "
+            + "#tutorial rain looks for rain in these lessons only (the choosing "
+            + "lesson's rain takes answer). And when a word you type is the name "
+            + "of a tag, the band offers it (\u{201C}tag: #name "
+            + "\u{203A}\u{201D}), and one click searches the tag.",
 
-            "when \u{25BE}, beside the sort, narrows the Library to a day. It opens "
-            + "a small calendar with two choices above it. \u{201C}on a day\u{201D}: "
-            + "click a day. \u{201C}between days\u{201D}: click the first day, then "
-            + "the last, and the run between them fills in. The sentence under the "
-            + "calendar always says what is showing \u{2014} \u{201C}Showing notes "
-            + "edited on Oct 6.\u{201D} \u{2014} and that sentence is the "
-            + "confirmation: nothing changes until you click a day, and Esc or a "
-            + "click outside keeps exactly what it says. \u{201C}any day\u{201D} "
-            + "clears it, and so does the \u{2715} on the day's chip in the band. "
-            + "One honest limit: a note keeps one edit stamp, so a note edited on "
-            + "two days answers for the later one \u{2014} the earlier day finds it "
-            + "where a savepoint landed.",
+            "when \u{25BE}, beside the sort, narrows the Library to a day. It "
+            + "opens a small calendar with two choices above it. \u{201C}on a "
+            + "day\u{201D}: click a day. \u{201C}between days\u{201D}: click the "
+            + "first day, then the last, and the run between them fills in. The "
+            + "sentence under the calendar always says what is showing "
+            + "(\u{201C}Showing notes edited on Oct 6.\u{201D}) and that sentence "
+            + "is the confirmation: nothing changes until you click a day, and "
+            + "Esc or a click outside keeps exactly what it says. \u{201C}any "
+            + "day\u{201D} clears it, and so does the \u{2715} on the day's chip "
+            + "in the band. One honest limit: a note keeps one edit stamp, so a "
+            + "note edited on two days answers for the later one. The earlier day "
+            + "finds it where a commit landed.",
 
-            "Archived notes stay out of the way: search leaves them out until you "
-            + "press \u{201C}+ archived\u{201D} in the band, and that chip's "
+            "Archived notes stay out of the way: search leaves them out until "
+            + "you press \u{201C}+ archived\u{201D} in the band, and that chip's "
             + "\u{2715} leaves them out again. What you saved is searchable the "
             + "same way: \u{201C}+ commits\u{201D} brings in the words your "
-            + "commits kept, each such line marked \u{201C}commit\u{201D} "
-            + "with the day it was saved. Inside a book, the \u{1F50D} at the "
-            + "right of the book's masthead searches that book alone \u{2014} the "
-            + "same kind of answer, scoped to the book. And \u{2318}K finds "
-            + "passages too: under the notes and books whose names match, a few "
-            + "matching lines, and \u{201C}All matches in the Library "
-            + "\u{203A}\u{201D} to open the whole answer.",
+            + "commits kept, each such line marked \u{201C}commit\u{201D} with "
+            + "the day it was saved. Inside a book, the \u{1F50D} at the right of "
+            + "the book's masthead searches that book alone: the same kind of "
+            + "answer, scoped to the book. And \u{2318}K finds passages too: "
+            + "under the notes and books whose names match, a few matching lines, "
+            + "and \u{201C}All matches in the Library \u{203A}\u{201D} to open "
+            + "the whole answer.",
 
             "Try it: open the Library and type marginalia. This paragraph "
-            + "answers \u{2014} click its line and you land right here, in Write, "
-            + "with the word selected and the find bar holding it. Press \u{2318}G "
-            + "and the selection steps to the next marginalia. Then try "
-            + "#tutorial on its own, and watch the Library become this guide.",
+            + "answers. Click its line and you land right here, in Write, with "
+            + "the word selected and the find bar holding it. Press \u{2318}G and "
+            + "the selection steps to the next marginalia. Then try #tutorial on "
+            + "its own, and watch the Library become this guide.",
         ])
 
         // 13i-d U7: "books & the shelf" MOVED — swept — into the books
@@ -2044,39 +2044,38 @@ enum TutorialSeeder {
         // every already-seeded store's group from Restore Tutorial, which is
         // a behaviour change wearing a copy change's clothes.
         let scraps = try lesson(library, "pool & scraps", [
-            "Not everything starts as a note. The POOL (sidebar) holds notes "
-            + "that belong to no book yet \u{2014} drafts in waiting. SNIPPETS "
-            + "(sidebar) holds exactly that: loose blocks that aren't notes at "
-            + "all \u{2014} overheard lines, stray sentences, one-liners you'll "
-            + "want later.",
+            "Not everything starts as a note. The Pool (sidebar) holds notes "
+            + "that belong to no book yet: drafts in waiting. Snippets (sidebar) "
+            + "holds exactly that: loose blocks that aren't notes at all. "
+            + "Overheard lines, stray sentences, one-liners you'll want later.",
 
-            "A group named \u{201C}tutorial scraps\u{201D} was seeded for you with "
-            + "two snippets \u{2014} the Snippets area's groups column switches "
+            "A group named \u{201C}tutorial scraps\u{201D} was seeded for you "
+            + "with two snippets. The Snippets area's groups column switches "
             + "between groups, and \u{201C}all snippets\u{201D} at its top shows "
-            + "every one at once. To drag a snippet into a note: open any "
-            + "lesson in Write (\u{2318}1) and press the Scraps button in the "
-            + "note's top-right corner (beside References). They sit beside "
-            + "the page \u{2014} drag one in, and it lands as a COPY with lineage "
-            + "back to the snippet, which stays in its group. Hold \u{2325} while "
-            + "dragging and the whole fan rides the copy, takes and all (the "
-            + "second snippet has two, to try exactly that).",
+            + "every one at once. To drag a snippet into a note: open any lesson "
+            + "in Write (\u{2318}1) and press the Scraps button in the note's "
+            + "top-right corner (beside References). They sit beside the page. "
+            + "Drag one in, and it lands as a copy with lineage back to the "
+            + "snippet, which stays in its group. Hold \u{2325} while dragging "
+            + "and the whole fan rides the copy, takes and all (the second "
+            + "snippet has two, to try exactly that).",
 
-            "The Snippets area's own dashed box mints them: start typing in "
-            + "it, press \u{23CE}, and the line is kept as a standalone snippet. "
-            + "Drag pieces out as your drafts want them \u{2014} copy out is the "
-            + "only direction, so the snippets never tangle with your notes.",
+            "The Snippets area's own dashed box mints them: start typing in it, "
+            + "press \u{23CE}, and the line is kept as a standalone snippet. Drag "
+            + "pieces out as your drafts want them. Copy out is the only "
+            + "direction, so the snippets never tangle with your notes.",
 
             // 13b 4D (N32(b)/(c) \u{2014} S4-8/S4-15): snippets are individual
             // items; the groups-vs-tags distinction said plainly.
             // librarywalkpolish VR-122 (F-9): the Snippets area's Canvas face
             // is Debug-only since 17y (p) — "or on a canvas card" left (the
             // guide teaches Canvas only through `lookingLessonContent`).
-            "Each snippet is its own item and can wear TAGS: right-click a "
-            + "snippet row \u{2014} here, or in the side panel "
-            + "\u{2014} and Tags\u{2026} opens its tag sheet. Worth keeping "
-            + "straight: a GROUP is a container (a snippet lives in exactly "
-            + "one; Move to Group moves it), while a TAG is a label (a snippet "
-            + "can wear many, and filtering by tag never moves anything).",
+            "Each snippet is its own item and can wear tags: right-click a "
+            + "snippet row (here, or in the side panel) and Tags\u{2026} opens "
+            + "its tag sheet. Worth keeping straight: a group is a container (a "
+            + "snippet lives in exactly one; Move to Group moves it), while a tag "
+            + "is a label (a snippet can wear many, and filtering by tag never "
+            + "moves anything).",
         ])
         _ = scraps
         let scrapPool = try ops.createPool(title: scrapPoolTitle)
@@ -2091,21 +2090,20 @@ enum TutorialSeeder {
         try take(on: fannedScrap,
             "the second take of the scrap — riding along on an \u{2325}-drag.")
 
-        _ = try lesson(library, "export — it's all yours", [
+        _ = try lesson(library, "export: it's all yours", [
+            // 13i-d U7 (F-U1-5): the book's row on the BOOKCASE carries Export.
             "Your work is always yours to take out. Any note exports as "
             + "Markdown or PDF from the library's right-click Export menu; a "
-            + "block exports alone via File \u{25B8} Export Block as Markdown\u{2026}; a "
-            // 13i-d U7 (F-U1-5): the book's row on the BOOKCASE carries Export.
-            + "book exports as one document — its chapters as headings, this "
-            + "very book included — from its row's right-click on the Bookcase; and "
-            + "File \u{25B8} Export Library\u{2026} writes the whole library as a folder "
-            + "of Markdown in one gesture.",
+            + "block exports alone via File \u{25B8} Export Block as "
+            + "Markdown\u{2026}; a book exports as one document, its chapters as "
+            + "headings, this very book included, from its row's right-click on "
+            + "the Bookcase; and File \u{25B8} Export Library\u{2026} writes the "
+            + "whole library as a folder of Markdown in one gesture.",
 
             "Exports are honest projections: the chosen take in place, and "
             + "Markdown with Takes\u{2026} adds a labeled Alternates section for "
-            + "every fanned block, so nothing you kept open is lost on paper. "
-            + "Try it on the choosing lesson — its four rain takes all reach "
-            + "the page.",
+            + "every fanned block, so nothing you kept open is lost on paper. Try "
+            + "it on the choosing lesson; its four rain takes all reach the page.",
 
             // 13r U3-A — R-13r-14 (her refinement at the U3 kickoff,
             // verbatim: *"if the user guide needs an updated backups session
@@ -2121,37 +2119,37 @@ enum TutorialSeeder {
             // Variorum KEEPS — the same promise, "it's all yours", from the
             // other side; the Mac-only seeder, so the phone (which has no
             // picked-folder road) is never told about a door it lacks.
-            "BACKUPS happen on their own. Once a day while Variorum is open, it "
+            "Backups happen on their own. Once a day while Variorum is open, it "
             + "copies your whole library into a backups folder right beside the "
-            + "library, on this Mac \u{2014} no button, nothing to remember. Those "
-            + "copies survive a mistake; they don\u{2019}t survive losing the Mac.",
+            + "library, on this Mac. No button, nothing to remember. Those copies "
+            + "survive a mistake; they don\u{2019}t survive losing the Mac.",
 
-            "So you can add a second folder of your own choosing \u{2014} iCloud "
-            + "Drive, an external drive, any folder your cloud service syncs \u{2014} "
-            + "and every backup lands there too: Settings \u{25B8} "
-            + "\(SettingsPane.dataSafety.title), under \u{201C}"
-            + "\(DataSafetyCopy.secondFolderSection)\u{201D} \u{2014} its "
-            + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. If you "
-            + "haven\u{2019}t picked one, Variorum offers it a few days into your "
-            + "writing, with a quiet note at the bottom of the window: \u{201C}"
-            + "\(ProtectionCopy.iCloudOfferTitle)\u{201D}",
+            "So you can add a second folder of your own choosing (iCloud Drive, "
+            + "an external drive, any folder your cloud service syncs) and every "
+            + "backup lands there too: Settings \u{25B8} "
+            + "\(SettingsPane.dataSafety.title), under "
+            + "\u{201C}\(DataSafetyCopy.secondFolderSection)\u{201D}, its "
+            + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. "
+            + "If you haven\u{2019}t picked one, Variorum offers it a few days "
+            + "into your writing, with a quiet note at the bottom of the window: "
+            + "\u{201C}\(ProtectionCopy.iCloudOfferTitle)\u{201D}",
         ])
 
         let sealed = try lesson(library, "the seal", [
-            "This note is SEALED — marked complete. Everything under a sealed "
-            + "note refuses to change: typing, new takes, commits, divides, "
-            + "all of it, until you unseal.",
+            "This note is sealed: marked complete. Everything under a sealed "
+            + "note refuses to change. Typing, new takes, commits, divides, all "
+            + "of it, until you unseal.",
 
-            "Try to break it. Press \u{2318}S to commit, or \u{2318}\u{21E7}D to divide — each "
-            + "attempt is answered OUT LOUD at the bottom of the window: the "
-            + "app tells you the note is sealed rather than doing nothing. "
-            + "Typing simply finds the text read-only. A door that can't act "
-            + "tells you why, never nothing.",
+            "Try to break it. Press \u{2318}S to commit, or \u{2318}\u{21E7}D "
+            + "to divide. Each attempt is answered out loud at the bottom of the "
+            + "window: the app tells you the note is sealed rather than doing "
+            + "nothing. Typing simply finds the text read-only. A door that can't "
+            + "act tells you why, never nothing.",
 
             "The seal is reversible and gentle: the unseal door sits in the "
             + "bottom bar's note \u{25BE} group. Unseal this note, change a word, "
-            + "seal it again (same place). Sealing quietly commits any unsaved takes "
-            + "first — the guard insures exactly what it protects.",
+            + "seal it again (same place). Sealing quietly commits any unsaved "
+            + "takes first. The guard insures exactly what it protects.",
         ])
         try ops.lockPost(sealed.post.id)
 

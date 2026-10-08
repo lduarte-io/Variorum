@@ -2106,7 +2106,9 @@ struct TutorialLibraryActsTests {
             // The POOL keeps its name (R29): the bookless-notes room was
             // never part of the Snippets vocabulary ruling, and a sweep that
             // took it too would have taught her a room that is not there.
-            #expect(prose.contains("POOL (sidebar)"))
+            // 13s-b triage landing: the room in its real casing (her R-13s-30
+            // caps ban) — the name itself, the R29 claim, unchanged.
+            #expect(prose.contains("The Pool (sidebar)"))
         }
     }
 
@@ -2155,9 +2157,11 @@ struct TutorialLibraryActsTests {
         try await withTutorialWorld { _, db, bookID in
             let prose = try await db.read { db in
                 try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, "export \u{2014} it's all yours"))
+                    // 13s-b triage landing: the guide's one em-dash TITLE renamed
+                    // (the U3 RECORD's disposition 2, accepted).
+                    db, containerID: lessonID(db, bookID: bookID, "export: it's all yours"))
             }
-            #expect(prose.contains("BACKUPS happen on their own"))
+            #expect(prose.contains("Backups happen on their own"))  // 13s-b triage landing: sentence case
             #expect(prose.contains("beside the library, on this Mac"),
                     "where the automatic copies live")
             #expect(prose.contains("Settings \u{25B8} \(SettingsPane.dataSafety.title)"),
