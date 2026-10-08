@@ -233,6 +233,31 @@ struct MobileTutorialBookShapeTests {
         }
     }
 
+    /// 13s-b U4 (her R-13s-31, *"I want that changed everywhere"*): the
+    /// pocket guide speaks COMMIT — every take of every block it seeds, every
+    /// title, every chapter name. Red on the pre-U4 seed by construction:
+    /// five of its sentences said "savepoint" (one of them in caps).
+    @Test func thePocketGuideSaysCommitNeverSavepoint() async throws {
+        try await withPocketGuideWorld { _, db, _ in
+            let texts = try await db.read { db in
+                try String.fetchAll(
+                    db, sql: "SELECT working_text FROM variant WHERE deleted_at IS NULL")
+                    + String.fetchAll(
+                        db, sql: "SELECT COALESCE(title, '') FROM container WHERE deleted_at IS NULL")
+                    + String.fetchAll(
+                        db, sql: "SELECT name FROM reading_section WHERE deleted_at IS NULL")
+            }
+            #expect(texts.count > 20, "the walk read the seeded guide (\(texts.count) texts)")
+            let offenders = texts.filter {
+                $0.range(of: #"\bsavepoints?\b"#, options: [.regularExpression, .caseInsensitive]) != nil
+            }
+            #expect(offenders.isEmpty,
+                    "the pocket guide still says savepoint: \(offenders.map { $0.prefix(80) })")
+            #expect(texts.contains { $0.contains("a commit is the deliberate extra") },
+                    "the term it defines is commit, lowercase")
+        }
+    }
+
     @Test func everyLessonWearsTheTagAndTheGuideSitsPinned() async throws {
         try await withPocketGuideWorld { _, db, bookID in
             let (taggedIDs, lessonIDs, reading, pins) = try await db.read {

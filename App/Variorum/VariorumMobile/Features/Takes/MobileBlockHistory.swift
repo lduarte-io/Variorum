@@ -146,7 +146,10 @@ final class MobileBlockHistoryController {
 
     // MARK: - Copy (pinned statics — promises tests can keep)
 
-    static let committedStatus = "Committed — a savepoint of this take is kept."
+    /// 13s-b U4 (her R-13s-31): the word is COMMIT — and where the sentence
+    /// says what a commit IS, it rides the app's plain gloss, the saved
+    /// moment (the Mac's receipts' twin; PROVISIONAL P-U4-1).
+    static let committedStatus = "Committed — a saved moment of this take is kept."
     static var restoredStatus: String { BlockHistoryCopy.restoredSavepoint }
     /// The row's flag word (the shared history vocabulary's own tag).
     static var predatesSplitRowFlag: String { BlockHistoryCopy.predatesSplitMark }
@@ -483,7 +486,7 @@ final class MobileBlockHistoryController {
             report(.receipt(BlockHistoryCopy.restoredSavepoint))
             await refresh()
         } catch {
-            report(.refusal(Self.refusalMessage(error, act: "restore this savepoint")))
+            report(.refusal(Self.refusalMessage(error, act: "restore this commit")))
         }
     }
 
