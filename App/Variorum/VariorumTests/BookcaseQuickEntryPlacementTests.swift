@@ -50,11 +50,19 @@ struct BookcaseQuickEntryPlacementTests {
         }
     }
 
+    /// The mounted root's own frame, read in the SAME `.global` space the
+    /// board's oracle records in (the stage window's lesson: the first draft
+    /// compared a `.global` frame with the content view's height).
+    @MainActor
+    private final class RootFrame {
+        var frame: CGRect?
+    }
+
     /// Mounts the Bookcase over `bookCount` books in a 900×640 window and
-    /// hands the body the frames it needs.
+    /// hands the body the frames it needs (`root` = the whole mounted board).
     private func onTheBookcase(
         bookCount: Int,
-        _ body: (_ rows: [CGRect], _ entry: CGRect, _ hint: CGRect, _ window: NSWindow) throws -> Void
+        _ body: (_ rows: [CGRect], _ entry: CGRect, _ hint: CGRect, _ root: CGRect) throws -> Void
     ) async throws {
         #if DEBUG
         let db = try AppDatabase.inMemory()
@@ -81,10 +89,14 @@ struct BookcaseQuickEntryPlacementTests {
                 contentRect: NSRect(x: 60, y: 60, width: 900, height: 640),
                 styleMask: [.titled, .resizable], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
+            let root = RootFrame()
             let hosting = NSHostingView(rootView: ShelfView(
                 session: session, model: model,
                 readings: ReadingsViewModel(session: session),
-                onOpen: { _ in }, onTodaysEntry: {}))
+                onOpen: { _ in }, onTodaysEntry: {})
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    root.frame = $0
+                })
             window.contentView = hosting
             window.orderFrontRegardless()
             defer {
@@ -104,7 +116,9 @@ struct BookcaseQuickEntryPlacementTests {
             let rows = ids.compactMap { BookcaseRowOracle.frame($0) }
             let entry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey))
             let hint = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey))
-            try body(rows, entry, hint, window)
+            let board = try #require(root.frame, "the mounted root reported its frame")
+            print("[13s U1a entry placement] books \(bookCount) · root \(board) · entry \(entry) · bar \(hint) · window frame \(window.frame.size) · content \(window.contentView?.bounds.size ?? .zero)")
+            try body(rows, entry, hint, board)
         }
         #endif
     }
@@ -121,12 +135,17 @@ struct BookcaseQuickEntryPlacementTests {
     }
 
     @Test func onABoardTallerThanTheWindowTheBoxStaysOnScreenAboveTheBar() async throws {
-        try await onTheBookcase(bookCount: 40) { _, entry, hint, window in
-            let contentHeight = window.contentView?.bounds.height ?? 0
+        try await onTheBookcase(bookCount: 40) { _, entry, hint, root in
             #expect(abs(entry.maxY - hint.minY) < 1.5,
                     "the box still meets the bar (entry \(entry), bar \(hint))")
-            #expect(hint.maxY <= contentHeight + 1.5,
-                    "the bar and the box above it stay inside the window (bar foot \(hint.maxY), window \(contentHeight))")
+            // Both sides in ONE space: the bar's foot against the mounted
+            // board's own foot (the first draft read a `.global` frame against
+            // the content view's height — the stage window's red, recorded in
+            // the U1a RECORD).
+            #expect(hint.maxY <= root.maxY + 1.5,
+                    "the bar and the box above it stay inside the window (bar foot \(hint.maxY), board foot \(root.maxY))")
+            #expect(root.height <= 640 + 1.5,
+                    "the board itself is no taller than the window's content (\(root.height))")
             #expect(entry.height > 20, "the box drew whole")
         }
     }

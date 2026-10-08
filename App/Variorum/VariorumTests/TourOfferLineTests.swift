@@ -205,7 +205,15 @@ struct TourOfferLineTests {
 
                 #expect(abs(entry.maxY - row.minY) < 1.5, "the row sits right under the box")
                 #expect(abs(row.maxY - hint.minY) < 1.5, "and right above the bottom bar")
-                #expect(words.minX > width / 2,
+                // "On the right side" (R-13s-3) = the line's centre sits in the
+                // right half AND its end meets the board's inset (below). The
+                // first draft asked for the line's START to be right of
+                // centre, which only holds while the line is narrower than
+                // half the board; with piece 4's mark leading it, in this
+                // pin's fallback (Terminal, monospace) face, it is 431 pt in
+                // a 900-pt window and starts at 441 — right-aligned, centred
+                // at 656 (the stage window's red, recorded in the U1a RECORD).
+                #expect(words.midX > width / 2,
                         "the words sit on the RIGHT (words \(words), window width \(width))")
                 #expect(width - words.maxX < 40,
                         "right-aligned at the board's own inset (words end \(words.maxX))")
