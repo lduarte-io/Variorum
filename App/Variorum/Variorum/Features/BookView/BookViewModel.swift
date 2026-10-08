@@ -24,7 +24,22 @@ final class BookViewModel {
     /// P1: a held fetch re-runs at container-write rate, so it must stay
     /// viewport-shaped, not corpus-shaped). Deeper reading = a deliberate
     /// widening, not a default.
-    static let entryWindow = 300
+    nonisolated static let entryWindow = 300
+
+    /// **The window she is reading through** (13o U3 — the book Index's cap
+    /// gets a road, PROVISIONAL P-13o-U3-8): it starts at `entryWindow` and
+    /// grows by one window per "show more ›" — the deliberate widening this
+    /// type's own doc names, never a default (P1: a held fetch costs ∝ the
+    /// window she asked for). A capped listing with no road to the rest was
+    /// her ruled-against class (R-13o-9's own words: "the 40 cap with no
+    /// escape is terrible"). Part of the observation key, so a wider window
+    /// restarts the observation rather than re-reading in place.
+    private(set) var window = BookViewModel.entryWindow
+
+    /// Read one more window of the book (the "show more ›" road).
+    func showMore() {
+        window += Self.entryWindow
+    }
 
     private(set) var entries: [Queries.ReadingEntry] = []
     private(set) var readingName: String?
@@ -60,9 +75,13 @@ final class BookViewModel {
     nonisolated struct ObservationKey: Equatable {
         var order: Queries.ReadingOrder?
         var filter: RuleTerm?
+        /// 13o U3: the window she is reading through.
+        var window = BookViewModel.entryWindow
     }
 
-    var observationKey: ObservationKey { ObservationKey(order: viewOrder, filter: viewFilter) }
+    var observationKey: ObservationKey {
+        ObservationKey(order: viewOrder, filter: viewFilter, window: window)
+    }
     /// True when the window really is hiding later entries (round 2 NIT:
     /// observing window+1 and capping in `adopt` means a reading of
     /// EXACTLY the window size never false-positives the marker).
@@ -83,7 +102,7 @@ final class BookViewModel {
                 try Queries.reading(db, id: readingID)?.name
             }
             for try await value in session.database.observeReading(
-                readingID, limit: Self.entryWindow + 1,  // +1: the truncation probe
+                readingID, limit: window + 1,  // +1: the truncation probe
                 order: viewOrder, filter: viewFilter
             ) {
                 await adopt(value)
@@ -145,8 +164,8 @@ final class BookViewModel {
             }
             return (leftID, false)
         }()
-        truncated = new.count > Self.entryWindow
-        entries = truncated ? Array(new.prefix(Self.entryWindow)) : new
+        truncated = new.count > window
+        entries = truncated ? Array(new.prefix(window)) : new
         if let anchor,
            let newIndex = entries.firstIndex(where: { $0.postID == anchor.postID }) {
             spreadLeftIndex = Self.clampedPage(
@@ -220,7 +239,7 @@ final class BookViewModel {
     /// write (an autosave stamps `last_touched_at`), and a delivery whose
     /// notes are all primed does not open the database at all.
     private func primeCardPreviews(for incoming: [Queries.ReadingEntry]) async {
-        let wanted = incoming.prefix(Self.entryWindow).map(\.postID)
+        let wanted = incoming.prefix(window).map(\.postID)
         let missing = wanted.filter { cardPreviews[$0] == nil }
         if !missing.isEmpty {
             await readCardPreviews(missing)

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13o — Search Mockups</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 80px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px;max-width:78ch;line-height:1.45;}
+  h2{font-size:17px;margin:44px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:76ch;line-height:1.45;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:980px;margin:0 0 10px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;position:relative;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin:10px 0 0 22px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;padding:16px 22px 6px;}
+  .crumb{font-size:17px;color:var(--rust);font-weight:600;}
+  .mastright{color:var(--muted);font-size:13px;}
+  .ctlrow{display:flex;align-items:center;gap:10px;padding:4px 22px 10px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--hair);flex-wrap:wrap;}
+  .field{background:#fff;border:1px solid var(--hair);border-radius:6px;padding:3px 10px;color:var(--ink);min-width:230px;font-size:13.5px;}
+  .field .caret{color:var(--rust);}
+  .seg{display:flex;border:1px solid var(--hair);border-radius:6px;overflow:hidden;font-size:12.5px;}
+  .seg span{padding:3px 10px;background:var(--washlite);color:var(--muted);border-right:1px solid var(--hair);}
+  .seg span:last-child{border-right:none;}
+  .seg span.on{background:var(--accent-fill);color:var(--ink);font-weight:600;}
+  .board{padding:8px 22px 18px;}
+  .sect{color:var(--muted);font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;font-family:ui-sans-serif,system-ui;border-bottom:1px solid var(--hair);padding:14px 0 4px;display:flex;justify-content:space-between;align-items:baseline;}
+  .sect .more{color:var(--rust);text-transform:none;letter-spacing:0;font-size:12px;}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--washlite);font-size:15px;}
+  .row .t{font-weight:600;}
+  .row .t .star{color:var(--star);font-size:13px;margin-right:6px;}
+  .row .t .assoc{color:var(--rust);font-weight:400;font-size:12px;margin-left:12px;font-family:ui-monospace,Menlo,monospace;}
+  .row .meta{color:var(--muted);font-size:12.5px;}
+  .snip{padding:7px 0 9px;border-bottom:1px solid var(--washlite);}
+  .snip .where{font-size:13.5px;font-weight:600;}
+  .snip .where .in{color:var(--muted);font-weight:400;font-size:12.5px;}
+  .snip .line{color:#5a534b;font-size:13.5px;line-height:1.5;padding-left:14px;margin-top:2px;}
+  .snip .line .ell{color:#c0b8ac;}
+  mark{background:var(--accent-fill);color:var(--ink);border-radius:3px;padding:0 2px;}
+  .snip .line .takebadge, .quietbadge{color:var(--muted);font-size:11.5px;border:1px solid var(--hair);border-radius:4px;padding:0 5px;margin-left:8px;font-family:ui-sans-serif,system-ui;}
+  .resultline{color:var(--muted);font-size:12.5px;padding:8px 22px 0;}
+  .resultline b{color:var(--ink);font-weight:600;}
+  .quietword{color:var(--rust);font-size:12.5px;}
+  .foot{color:var(--muted);font-size:12.5px;padding:10px 0 2px;}
+  /* Direction B rail */
+  .split{display:flex;}
+  .rail{width:196px;border-right:1px solid var(--hair);padding:12px 16px 18px;font-size:13px;flex:none;}
+  .rail .rh{color:var(--muted);font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-family:ui-sans-serif,system-ui;margin:12px 0 4px;}
+  .rail .rh:first-child{margin-top:0;}
+  .rail .ri{padding:2.5px 0;color:var(--ink);}
+  .rail .ri.on{font-weight:700;}
+  .rail .ri .n{color:var(--muted);font-size:11.5px;margin-left:6px;}
+  .rail .ri.dim{color:var(--muted);}
+  .rmain{flex:1;padding:8px 22px 18px;min-width:0;}
+  /* Direction C band */
+  .band{display:flex;align-items:baseline;gap:14px;padding:9px 22px;border-bottom:1px solid var(--hair);background:var(--washlite);font-size:13px;flex-wrap:wrap;}
+  .band b{font-weight:600;}
+  .band .chip{border:1px solid var(--hair);border-radius:6px;background:#fff;padding:1.5px 9px;color:var(--ink);font-size:12.5px;}
+  .band .chip.add{color:var(--muted);border-style:dashed;}
+  .band .count{color:var(--muted);}
+  .groupnote{padding:9px 0 3px;border-bottom:1px solid var(--washlite);}
+  .groupnote .nt{font-weight:600;font-size:15px;}
+  .groupnote .nt .nmeta{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:10px;}
+  .future{border:1px dashed var(--hair);border-radius:8px;max-width:980px;margin:6px 0 10px;padding:10px 22px;color:var(--muted);font-size:13px;background:var(--washlite);}
+  .future code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);background:#fff;border:1px solid var(--hair);border-radius:4px;padding:0 5px;}
+  .wordopt{display:flex;gap:10px;align-items:center;padding:8px 22px;border-bottom:1px solid var(--washlite);font-size:13px;}
+  .wordopt .lbl{color:var(--muted);min-width:70px;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-family:ui-sans-serif,system-ui;}
+</style>
+</head>
+<body>
+<h1>13o · The Library in its search state</h1>
+<p class="sub">Study voice approximation (the committed reference's tokens — the build renders every direction in both voices, dark as the black room, palettes under). The story in every mock: you typed <b>dream</b> into the one finder. The engine under all three is identical — FTS5 passages, the tag-association join, facets, the date-parse predicate; the directions differ only in <i>how much furniture the search state earns</i>. Mix and match freely — pieces move between directions.</p>
+
+<h2>Direction A — the listing yields (least furniture)</h2>
+<p class="note">The Library exactly as shipped; typing swaps the board in place. One new section — <b>Passages</b> — joins the familiar labels, and a quiet results line sits under the controls. Filters stay where they always lived (scope · sort · the day door, which grows its range). Archived matches are one quiet word at the bottom, never a panel. Calmest; closest to today.</p>
+<div class="mock">
+  <div class="masthead"><span class="crumb">Library</span><span class="mastright">everything — sortable, searchable</span></div>
+  <div class="ctlrow">
+    <span class="field">dream<span class="caret">|</span></span>
+    <span class="seg"><span class="on">All</span><span>Notes</span><span>Books</span><span>Blocks</span></span>
+    <span class="seg"><span class="on">List</span><span>Cards</span><span>Timeline</span></span>
+    <span>relevance · best first ▾</span>
+    <span>any day ▾</span>
+  </div>
+  <div class="resultline"><b>3 books</b> · <b>29 notes</b> · <b>118 passages</b> · <b>6 scraps</b> for “dream” in Home</div>
+  <div class="board">
+    <div class="sect">Books</div>
+    <div class="row"><span class="t">dream journal<span class="assoc">#dream flows here</span></span><span class="meta">5 notes · gathering</span></div>
+    <div class="row"><span class="t"><span class="star">★</span>Journal</span><span class="meta">10 notes · name matches</span></div>
+    <div class="sect">Notes</div>
+    <div class="row"><span class="t">A Dream Within a Dream</span><span class="meta">edited yesterday</span></div>
+    <div class="row"><span class="t">September 14</span><span class="meta">journal · 12 passages</span></div>
+    <div class="sect">Passages <span class="more">all 118 ›</span></div>
+    <div class="snip"><span class="where">The Night Office <span class="in">· in The Work</span></span>
+      <div class="line"><span class="ell">…</span>woke before the alarm with the <mark>dream</mark> still wet on everything, and wrote it standing up<span class="ell">…</span></div>
+      <div class="line"><span class="ell">…</span>a <mark>dream</mark> is just a draft the night wrote<span class="ell">…</span><span class="takebadge">in another take</span></div></div>
+    <div class="snip"><span class="where">September 14 <span class="in">· journal</span></span>
+      <div class="line"><span class="ell">…</span>didn't <mark>dream</mark> at all, or don't remember, which the notebook says is the same thing<span class="ell">…</span></div></div>
+    <div class="sect">Blocks &amp; Scraps</div>
+    <div class="snip"><span class="where">a loose line <span class="in">· in Snippets</span></span>
+      <div class="line">the <mark>dream</mark> economy runs on unpaid mornings</div></div>
+    <div class="foot">3 archived notes match too — <span class="quietword">show archived</span></div>
+  </div>
+</div>
+
+<h2>Direction B — the search room (most furniture)</h2>
+<p class="note">Typing opens a left rail on the SideColumn idiom (the book navigator's own furniture): scope, kinds, the mode facets as facts, the day range, archived. The board becomes pure results. This is the “pretty substantial UI” reading — and the rail is where the future power grammar naturally lives. Cost: the Library stops looking like itself while a search is active.</p>
+<div class="mock">
+  <div class="masthead"><span class="crumb">Library</span><span class="mastright">everything — sortable, searchable</span></div>
+  <div class="ctlrow">
+    <span class="field">dream<span class="caret">|</span></span>
+    <span class="seg"><span class="on">List</span><span>Cards</span></span>
+    <span>relevance · best first ▾</span>
+  </div>
+  <div class="split">
+    <div class="rail">
+      <div class="rh">Find in</div>
+      <div class="ri on">everything <span class="n">156</span></div>
+      <div class="ri">notes <span class="n">29</span></div>
+      <div class="ri">books <span class="n">3</span></div>
+      <div class="ri">scraps <span class="n">6</span></div>
+      <div class="rh">Books that are</div>
+      <div class="ri dim">gathering · living · owned · finished · sealed</div>
+      <div class="rh">When</div>
+      <div class="ri">any day ▾</div>
+      <div class="ri dim">from — to</div>
+      <div class="rh">Tags</div>
+      <div class="ri">#dream <span class="n">14</span></div>
+      <div class="rh">Kept out</div>
+      <div class="ri dim">archived (3) — show</div>
+    </div>
+    <div class="rmain">
+      <div class="sect">Books</div>
+      <div class="row"><span class="t">dream journal<span class="assoc">#dream flows here</span></span><span class="meta">5 notes · gathering</span></div>
+      <div class="sect">Passages <span class="more">all 118 ›</span></div>
+      <div class="snip"><span class="where">The Night Office <span class="in">· in The Work</span></span>
+        <div class="line"><span class="ell">…</span>woke before the alarm with the <mark>dream</mark> still wet on everything<span class="ell">…</span></div></div>
+      <div class="snip"><span class="where">September 14 <span class="in">· journal</span></span>
+        <div class="line"><span class="ell">…</span>didn't <mark>dream</mark> at all, or don't remember<span class="ell">…</span></div></div>
+    </div>
+  </div>
+</div>
+
+<h2>Direction C — the answer sheet (one new band; passages grouped by note)</h2>
+<p class="note">In place like A, but the search state earns exactly ONE piece of furniture: a results band under the controls — the query's echo, honest counts, and the filters as quiet chips (the capture-microsyntax feel: typed things become chips). Passages group under their note, so two hundred matches read as a dozen notes. Scales furthest without a rail.</p>
+<div class="mock">
+  <div class="masthead"><span class="crumb">Library</span><span class="mastright">everything — sortable, searchable</span></div>
+  <div class="ctlrow">
+    <span class="field">dream<span class="caret">|</span></span>
+    <span class="seg"><span class="on">All</span><span>Notes</span><span>Books</span><span>Blocks</span></span>
+    <span class="seg"><span class="on">List</span><span>Cards</span></span>
+    <span>relevance · best first ▾</span>
+  </div>
+  <div class="band"><b>“dream”</b> <span class="count">— 3 books · 29 notes · 118 passages · 6 scraps</span>
+    <span class="chip">in: Home</span><span class="chip">#dream ✕</span><span class="chip add">+ day range</span><span class="chip add">+ book state</span><span class="chip add">+ archived</span></div>
+  <div class="board">
+    <div class="sect">Books</div>
+    <div class="row"><span class="t">dream journal<span class="assoc">#dream flows here</span></span><span class="meta">5 notes · gathering</span></div>
+    <div class="sect">Notes, with their passages</div>
+    <div class="groupnote"><div class="nt">The Night Office <span class="nmeta">in The Work · 7 passages</span></div>
+      <div class="snip" style="border:none"><div class="line"><span class="ell">…</span>woke before the alarm with the <mark>dream</mark> still wet on everything<span class="ell">…</span></div>
+      <div class="line"><span class="ell">…</span>a <mark>dream</mark> is just a draft the night wrote<span class="ell">…</span><span class="takebadge">in another take</span></div>
+      <div class="line"><span class="quietword">all 7 ›</span></div></div></div>
+    <div class="groupnote"><div class="nt">September 14 <span class="nmeta">journal · 12 passages</span></div>
+      <div class="snip" style="border:none"><div class="line"><span class="ell">…</span>didn't <mark>dream</mark> at all, or don't remember<span class="ell">…</span></div>
+      <div class="line"><span class="quietword">all 12 ›</span></div></div></div>
+    <div class="foot">3 archived notes match too — <span class="quietword">show archived</span></div>
+  </div>
+</div>
+<div class="future">Where the power grammar lands later (VX-73), in this direction's own band — typed, then chipped: <code>dream</code> <code>not in: Journal</code> <code>words &gt; 500</code>. Nothing to build now; the band is simply the surface that can hold it.</div>
+
+<h2>The day door grows its range — three wordings</h2>
+<p class="note">Today's control says “on day…”. Your §21 ruling adds a range; your wording wanted clarity. Each line is the whole control at rest → open. Pick one or write your own over it.</p>
+<div class="mock">
+  <div class="wordopt"><span class="lbl">Wording 1</span><span class="field" style="min-width:0">edited any day ▾</span><span class="mastright">→ opens: <b>on a day…</b> · <b>between days…</b> · any day</span></div>
+  <div class="wordopt"><span class="lbl">Wording 2</span><span class="field" style="min-width:0">when ▾</span><span class="mastright">→ opens: on <b>Sep 14</b> · from <b>Sep 1</b> to <b>Sep 14</b> · clear</span></div>
+  <div class="wordopt"><span class="lbl">Wording 3</span><span class="field" style="min-width:0">edited: Sep 1 – Sep 14 ✕</span><span class="mastright">(armed state shown; rest state reads “edited: any time ▾”)</span></div>
+</div>
+
+<h2>Search within a book — two placements</h2>
+<p class="note">Same engine, scoped to the book. Option 1: a quiet field at the masthead's right, living with the book's own controls. Option 2: no resting furniture — ⌘F inside a book opens a find band over the Index (the Write bar's idiom), with “this book” as its scope word. Both land you at the match in the note.</p>
+<div class="mock"><span class="tag">OPTION 1 — the masthead field</span>
+  <div class="masthead"><span class="crumb">The Work</span><span class="mastright">Outline&nbsp;&nbsp;<b>Index</b>&nbsp;&nbsp;Book&nbsp;&nbsp;Read&nbsp;&nbsp;&nbsp;&nbsp;<span class="field" style="min-width:150px;font-size:12.5px">search this book…</span></span></div>
+  <div style="height:10px"></div>
+</div>
+<div class="mock"><span class="tag">OPTION 2 — ⌘F summons a band, nothing at rest</span>
+  <div class="masthead"><span class="crumb">The Work</span><span class="mastright">Outline&nbsp;&nbsp;<b>Index</b>&nbsp;&nbsp;Book&nbsp;&nbsp;Read</span></div>
+  <div class="band"><span class="field" style="min-width:200px">dream<span class="caret">|</span></span><span class="count">14 passages in this book · ⏎ steps · esc done</span></div>
+  <div style="height:10px"></div>
+</div>
+
+<h2>What every direction shares (not up for picking — already ruled)</h2>
+<p class="note">Clicking a passage opens the note at that block with the match selected and the find bar armed, so ⌘G keeps stepping (your land-at-match). ⌘K gains a few passages under its title hits. Owned-book notes always list here, badged. No capped list anywhere — every “all N ›” is a real road. Everything scopes to the wing. Matching folds case and accents. Books a tag flows into rank first on tag queries.</p>
+
+</body>
+</html>

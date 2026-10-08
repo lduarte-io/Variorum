@@ -87,6 +87,21 @@ nonisolated enum MobileShelfFaces {
         return parts.joined(separator: " · ")
     }
 
+    /// **What a book ROW says aloud** — its name-with-state AND its meta line,
+    /// PLAIN (the standing rule: VoiceOver reads words, not chrome styling, so
+    /// a label is never voice-cased).
+    ///
+    /// It exists because an explicit `accessibilityLabel` on a row REPLACES the
+    /// composed one SwiftUI would have built from the row's children — measured
+    /// at the filter batch: labelling the Library's book rows with the name
+    /// alone dropped the count and tags out of the accessibility tree
+    /// entirely, while the Shelf's own rows (which set no label) still spoke
+    /// both. One rule, so the two listings cannot come to say different things
+    /// about the same book.
+    static func spokenRow(name: String, meta: String) -> String {
+        meta.isEmpty ? name : "\(name), \(meta)"
+    }
+
     /// The pin door's word, state-mirroring (parity C2 — the Mac shelf
     /// menu's own words; voice-cased at render). Pure so the door's
     /// vocabulary is pinned, not promised.
@@ -136,8 +151,10 @@ nonisolated enum MobileShelfFaces {
     static let archiveDailyJournalDoorTitle = "Archive"
     static let archiveDailyJournalDetail = BookArchiveCopy.dailyJournalCaption
 
-    /// The archive landed — the phone has no Archived surface yet, so the
-    /// receipt names the road that IS here.
+    /// The archive landed — the phone has an Archived room for NOTES but no
+    /// archived-BOOKS group in it yet (owed: MobileSoul 13i-e row / VM-6 (4d);
+    /// the VM-5 round-1 review corrected this line), so the receipt names the
+    /// road that IS here.
     static func archivedDailyJournalReceipt(name: String) -> String {
         "Archived \u{201C}\(name)\u{201D} \u{2014} it comes back when a day arrives (Today\u{2019}s Entry)."
     }

@@ -26,8 +26,11 @@ struct SyncSchemaTests {
             }
             #expect(Set(SyncSchema.tables.map(\.name)) == synced,
                     "registry drifted from the set of sync_version-carrying tables")
-            #expect(SyncSchema.localOnlyTables == allTables.subtracting(synced),
-                    "local-only list drifted from the schema")
+            #expect(SyncSchema.localOnlyTables.union(SyncSchema.derivedTables)
+                        == allTables.subtracting(synced),
+                    "local-only + derived lists drifted from the schema")
+            #expect(SyncSchema.localOnlyTables.isDisjoint(with: SyncSchema.derivedTables),
+                    "a table cannot be both export-dropped (local-only) and export-kept (derived)")
         }
     }
 

@@ -2,23 +2,28 @@
 //  MobileTrashModel.swift
 //  VariorumMobile
 //
-//  **THE PHONE'S RECOVERY SURFACE** (round 2, batch 4 — PR2). Until this
-//  batch nothing the phone deleted could ever come back on the phone: a
-//  grep of `VariorumMobile/` for the whole 13j vocabulary — `TrashWindow`,
-//  `Queries.trash`, `restoreBlock`, `restoreVariant`, `requestPurge` —
-//  returned ZERO hits. The brains were all inherited and none of them had
-//  a door.
+//  **THE TRASH ROOM** (round 2, batch 4 — PR2; **narrowed to the Trash
+//  alone at batch 6c**). Until batch 4 nothing the phone deleted could ever
+//  come back on the phone: a grep of `VariorumMobile/` for the whole 13j
+//  vocabulary — `TrashWindow`, `Queries.trash`, `restoreBlock`,
+//  `restoreVariant`, `requestPurge` — returned ZERO hits. The brains were
+//  all inherited and none of them had a door.
 //
-//  **TWO SECTIONS, NEVER ONE LIST** (the inventory's correction, and her
-//  round-3 ruling before it): the **Trash** is deleted things on the
-//  30-day clock; **Archived** is kept-forever with no clock at all.
-//  Conflating them would make archive read as a deletion, which is the one
-//  thing the two states must never do to each other.
+//  **TWO ROOMS, NEVER TWO SECTIONS OF ONE SCREEN** (batch 6c — her
+//  QUESTIONS #84 ruling: *"Two rooms — … Archive becomes a room you browse;
+//  the Trash becomes a utility you visit. Two doors, two destinations,
+//  nothing shared."*). Batch 4 shipped the honest INTERIM — one screen, two
+//  sections, a Divider between them — because conflating a 30-day countdown
+//  with kept-forever would make archive read as a deletion. Her ruling moves
+//  the same two promises one level up: this model now holds the **Trash's**
+//  listing only, and `MobileArchiveModel` holds Archive's. *Nothing shared*
+//  is the IA's letter, and a shared model between two rooms is exactly how
+//  two rooms come to share a state they were separated to keep apart.
 //
 //  Everything here composes existing core reads and ops — `Queries.trash`
-//  (filtered and sorted IN SQL, per-arm limited), `Queries.archivedPosts`,
-//  the five put-back roads, `Operations.requestPurge`, the local sweep.
-//  The words are `RecoveryCopy`'s, shared with the Mac since this batch.
+//  (filtered and sorted IN SQL, per-arm limited), the five put-back roads,
+//  `Operations.requestPurge`, the local sweep. The words are
+//  `RecoveryCopy`'s, shared with the Mac since batch 4.
 //
 //  **The filter and the sort restart the observation** rather than sorting
 //  in memory, because both are applied in SQL: a window applied before a
@@ -46,8 +51,6 @@ final class MobileTrashModel {
 
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
-    private(set) var archived: [Queries.TimelineItem] = []
-    private(set) var archivedTruncated = false
     private(set) var lastError: String?
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
@@ -79,7 +82,7 @@ final class MobileTrashModel {
         restartToken &+= 1
     }
 
-    // MARK: - The two listings
+    // MARK: - The listing
 
     /// The kinds come from `TrashScope` (the post-13l polish round, ledger
     /// row 11 — her D1 revision: takes never row in a global Trash, on either
@@ -93,25 +96,6 @@ final class MobileTrashModel {
                 limit: window + 1
             ) {
                 (trash, trashTruncated) = TrashListing.windowed(value, window: window)
-            }
-        } catch is CancellationError {
-        } catch {
-            lastError = DeletionRefusal.fallback(error)
-        }
-    }
-
-    /// **Through the CORE's own wrapper**, not a rolled `observe { … }` over
-    /// the same query (§49's MINOR). `observeArchivedPosts` exists beside
-    /// `observeLibrary` and `observeTrash`, which this model already uses —
-    /// rolling the third by hand made one of three sibling reads take a
-    /// different road for no reason, and a change to the core observation's
-    /// shape would have reached two of them.
-    func startArchived() async {
-        do {
-            let limit = window + 1
-            for try await value in session.database.observeArchivedPosts(limit: limit) {
-                (archived, archivedTruncated) = TrashListing.windowed(
-                    value, window: window)
             }
         } catch is CancellationError {
         } catch {
@@ -138,28 +122,16 @@ final class MobileTrashModel {
         do {
             receipt = try await TrashPutBack.run(session: session, item: item)
         } catch let error as OperationError {
-            lastError = Self.refusal(error)
+            // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
+            // 6c cold review's n5 retired the one-line forward — the Archive
+            // room grew a byte-identical twin of it at the split, and two
+            // call sites that must change together is the drift shape the
+            // shared home exists to end).
+            lastError = DeletionRefusal.words(error, act: .putBack)
         } catch {
             // Includes `RecoveryRefusal` — nothing was attempted, so it is a
             // refusal and never the `putBackUnplaced` RECEIPT the shipped
             // code put in the red slot (§49's MINOR).
-            lastError = DeletionRefusal.fallback(error)
-        }
-    }
-
-    /// Un-archive a note — the Archived section's one act. Archive has no
-    /// clock, so this is a plain state flip and says so.
-    func unarchive(_ item: Queries.TimelineItem) async {
-        lastError = nil
-        receipt = nil
-        do {
-            try await session.runner.run { ops in
-                try ops.unarchiveContainer(item.postID)
-            }
-            receipt = Self.unarchivedReceipt
-        } catch let error as OperationError {
-            lastError = Self.refusal(error)
-        } catch {
             lastError = DeletionRefusal.fallback(error)
         }
     }
@@ -257,8 +229,6 @@ final class MobileTrashModel {
 
     // MARK: - Words (phone voice over the shared vocabulary)
 
-    static let unarchivedReceipt = "Unarchived — it's back in the library."
-
     /// **Forwards to the shared home** — hoisted at 4.5b so the Mac cannot
     /// keep answering *"where did it go?"* differently. Kept as a forward so
     /// this batch's pins ride unmodified (the 3C parity pattern).
@@ -272,10 +242,4 @@ final class MobileTrashModel {
         RecoveryCopy.putBackReceipt(kind)
     }
 
-    /// **Forwards to the ONE deletion-refusal home** (A1-18): the seal said
-    /// as a diagnosis with the way out (the J8 doctrine), and everything else
-    /// in the shared table rather than a fourth private copy of it.
-    static func refusal(_ error: OperationError) -> String {
-        DeletionRefusal.words(error, act: .putBack)
-    }
 }

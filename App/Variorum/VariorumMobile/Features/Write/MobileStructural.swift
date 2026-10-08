@@ -596,13 +596,70 @@ final class MobileStructuralController {
         }
     }
 
-    /// The delete report. **13j batch 2 — MADE TRUE on the phone's own
-    /// terms**, exactly as its confirm was: this app has no tray face, so
-    /// naming one sends her looking for a door that is not there.
-    /// `MobileBlockMenuController.deleteConfirmDetail` carries the full
-    /// reasoning; the receipt is the plain statement of what happened.
-    /// Pinned static.
-    static let blockDeletedStatus = "Block deleted."
+    /// The delete report. **13j batch 2 made it true on the phone's own
+    /// terms** — this app had no tray face, so naming one would have sent
+    /// her looking for a door that was not there — and **round 2 batch 6b
+    /// built the tray, so the sentence names it.** That is the J8 copy
+    /// doctrine read from its other side: a line that keeps saying "no road"
+    /// after the road opens is the same defect as one promising a road that
+    /// does not exist. `MobileBlockMenuController.deleteConfirmDetail`
+    /// carries the full history. Pinned static.
+    static var blockDeletedStatus: String {
+        "Block deleted \u{2014} \(MobileNoteTrayModel.putBackRoadPhrase)."
+    }
+
+    // MARK: - Archive block (PR6 — the gentler of the two ways a block
+    // leaves the page; 13j's round-7 ruling built the op, batch 6b gives the
+    // phone its door and its way back)
+
+    /// **Set the block aside: `archiveBlock`.** Kept, forever, NO clock —
+    /// which is the whole difference from the row beneath it in the menu,
+    /// and the reason this door carries no confirm: nothing is destroyed and
+    /// the receipt names the road back (blocks ▸ archived, one tap away in
+    /// the same sheet).
+    ///
+    /// It rides the STRUCTURAL contract rather than the menu controller's
+    /// own latch, exactly as Delete Block does, and for the same reason:
+    /// `archiveBlock` RELEASES the placement, so the block leaves the
+    /// surface and the caret needs somewhere to land — which is the shared
+    /// brain's answer (`caretLandingAfterRemoving`), read BEFORE the write
+    /// from the index that still holds the departing block.
+    ///
+    /// **No pre-checks (P-2, fire-and-DO):** the seal and a vanished block
+    /// both refuse through the OPERATION, with nothing archived, and the
+    /// door speaks the ops layer's real answer.
+    func archiveBlock(blockID: String) async {
+        guard let model else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        guard await flushPendingText() else { return }
+        let landing = model.index.caretLandingAfterRemoving([blockID])
+        do {
+            try await session.runner.run { ops in
+                try ops.archiveBlock(blockID)
+            }
+            model.report(Self.blockArchivedStatus, action: .undo)
+            await model.refreshTakesFromStore()
+            landCaret(landing)
+        } catch {
+            model.report(Self.refusalMessage(
+                error, act: "archive the block", nothingWas: "archived"))
+        }
+    }
+
+    /// The archive receipt — what happened, and where it went. Archive's one
+    /// promise is that there is no countdown, so the sentence says it
+    /// (`RecoveryCopy.archivedForever` is the shared words for exactly that
+    /// fact, and the road is composed from the door's own name).
+    static var blockArchivedStatus: String {
+        "Block archived \u{2014} \(RecoveryCopy.archivedForever), in "
+            + "\(MobileNoteTrayModel.archivedRoadPhrase)."
+    }
 
     // MARK: - Whole-block selection + Delete (round 2, batch 1b — R18 ≡ M11)
 
@@ -636,11 +693,20 @@ final class MobileStructuralController {
     /// back — the structural undo/redo door (M20) and the per-note tray
     /// (M21), both of which she asked for. The gate carries the same note
     /// at the routing site.
-    func deleteWholeBlockRun(_ blockIDs: [String]) async {
-        guard let model, !blockIDs.isEmpty else { return }
+    ///
+    /// **It ANSWERS whether it landed** (the batch-7 fix wave, cold review
+    /// MINOR 3). A caller that has to decide what to do next — PR20's sheet
+    /// puts picking mode away on a success and KEEPS her picks on a refusal
+    /// (#59(k)) — was inferring that from a re-read of the listing, which
+    /// made the discrimination ride on a read succeeding. The outcome is
+    /// known right here; returning it is cheaper and cannot be wrong.
+    /// `@discardableResult` because every other caller acts on the receipt.
+    @discardableResult
+    func deleteWholeBlockRun(_ blockIDs: [String]) async -> Bool {
+        guard let model, !blockIDs.isEmpty else { return false }
         guard !structuralInFlight else {
             model.report("Another structural change is still landing.")
-            return
+            return false
         }
         structuralInFlight = true
         defer { structuralInFlight = false }
@@ -649,7 +715,7 @@ final class MobileStructuralController {
         // contract): the op validates against the store, and a tombstone
         // landed past a refused flush would strand the typed bytes outside
         // both the surface and the take they belong to.
-        guard await flushPendingText() else { return }
+        guard await flushPendingText() else { return false }
         // The landing is read AFTER the flush, from the then-current index:
         // the flush SUSPENDS, and a projection delivery landing in that
         // window re-tiles the entries. It names a SURVIVING block by ID —
@@ -675,11 +741,13 @@ final class MobileStructuralController {
                 action: .undo)
             await model.refreshTakesFromStore()
             landCaret(landing)
+            return true
         } catch {
             model.report(Self.refusalMessage(
                 error,
                 act: blockIDs.count == 1 ? "delete the paragraph" : "delete the paragraphs",
                 nothingWas: "deleted"))
+            return false
         }
     }
 

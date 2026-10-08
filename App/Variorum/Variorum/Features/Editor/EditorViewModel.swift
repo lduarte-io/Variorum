@@ -365,6 +365,10 @@ final class EditorViewModel {
     /// live surface).
     @ObservationIgnored var pendingCaretSeed: Int?
     @ObservationIgnored var pendingFanSeed: String?
+    /// **13o U2 — the third one-shot: the FIND seed** (land-at-match, D6): a
+    /// search passage's matched words, applied after the caret seed lands —
+    /// the match selected and the find bar armed (`EditorFindSeed`).
+    @ObservationIgnored var pendingFindSeed: EditorFindSeed?
 
     // Idle-mint (author decision 2026-07-06): the clock is the shared
     // crystallizer's since 18m U2 — these are its forwards (3C), the debounce
@@ -1225,13 +1229,17 @@ final class EditorViewModel {
         // (`MarkdownActs.apply`, `toggleCheckbox`,
         // `insertNewlineContinuingLists`, `deleteWithoutNewline`) is one
         // refactor away from separating an arming from its
-        // `replaceCharacters`; the binding makes that harmless.
+        // `replaceCharacters`; the binding makes that harmless. `binds` adds
+        // the CONTENT check `.openTail` needs to `describes`' geometry (VM-5
+        // stability pass, MAJOR 2 — the shared binding's hole, so both
+        // consumers collect the guard at once).
         let armed = pendingEdit
         pendingEdit = nil
         let bound = armed.flatMap {
-            $0.describes(
+            $0.binds(
                 editedRange: editedRange, delta: delta,
-                documentLength: index.documentLength) ? $0 : nil
+                documentLength: index.documentLength,
+                landedText: { viewText($0) }) ? $0 : nil
         }
         if armed != nil, bound == nil {
             // M13's Mac twin (round-2 ladder round 1, MINOR 5): the paste's
@@ -1965,6 +1973,13 @@ final class EditorViewModel {
             pendingFanSeed = nil
             openFan(blockID: fanBlock)
         }
+        // 13o U2 (D6): a search passage's landing — after the caret seed put
+        // the caret at the block's start, the match is selected there and
+        // the find bar armed, through the find doors' own controller API.
+        if let find = pendingFindSeed {
+            pendingFindSeed = nil
+            applyFindSeed(find)
+        }
         // 13b 1b — the fire-and-DO landing (move-and-execute): a Takes/
         // Lenses door parked a Write intent on the router; the arriving
         // editor consumes it once the index is real — ONLY for its OWN
@@ -2092,6 +2107,41 @@ final class EditorViewModel {
             if !claim() {
                 Task { @MainActor in _ = claim() }
             }
+        }
+    }
+
+    /// **13o U2 — a search passage lands at its match** (D6). The caret seed
+    /// has just put the caret at the landed block's start; from there:
+    ///
+    /// - a match in the text the note SHOWS is SELECTED, made the finder's
+    ///   search string through ⌘E's own road (`performFind(.useSelection)` —
+    ///   which also writes the find pasteboard), and the bar is shown — so
+    ///   ⌘G steps onward from it; the reveal is re-parked at the match (the
+    ///   park waits for the settle hop exactly as the caret's did);
+    /// - a match in an UNRENDERED take (or words the buffer no longer
+    ///   holds) only ARMS the bar: the words go on the find pasteboard and the
+    ///   bar shows them, the caret stays at the block (PROVISIONAL
+    ///   P-13o-U2-4 — nothing on the page to select).
+    ///
+    /// The DETAIL editor only (the one with a find bar — `performFind`'s own
+    /// guard); the text view keeps the keyboard.
+    private func applyFindSeed(_ seed: EditorFindSeed) {
+        guard let textView, scrollView != nil else { return }
+        let from = textView.selectedRange().location
+        if seed.steps,
+           let match = FindSeedLanding.range(of: seed.needle, in: textView.string, from: from) {
+            textView.setSelectedRange(match)
+            performFind(.useSelection)
+            performFind(.show)
+            textView.window?.makeFirstResponder(textView)
+            updateCaretContext()
+            revealLanding(match.location, textView: textView)
+        } else {
+            let board = NSPasteboard(name: .find)
+            board.clearContents()
+            board.setString(seed.needle, forType: .string)
+            performFind(.show)
+            textView.window?.makeFirstResponder(textView)
         }
     }
 
@@ -3265,7 +3315,7 @@ final class EditorViewModel {
             // stop the toasting. The J38 class, other direction.
             showReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            refuse(VersionActs.words(error))
+            refuse(VersionActs.words(error, seal: .mac))
         }
     }
 
@@ -4284,15 +4334,21 @@ final class EditorViewModel {
 /// `auditIdentityProjection()` and `applyPendingIfClean()` are the model's
 /// existing members.
 extension EditorViewModel: TailCrystallizerHost {
-    func transferTailPrefixToLastEntry(_ units: Int) {
+    func transferTailPrefixToLastEntry(_ units: Int) -> Bool {
         index.transferTailPrefixToLastEntry(units)
     }
 
     func crystallizeIndex(
         minted: [(blockID: String, variantID: String, length: Int)],
         remainingTailLength: Int?
-    ) {
+    ) -> Bool {
         index.crystallize(minted: minted, remainingTailLength: remainingTailLength)
+    }
+
+    /// The same road `storageDidEdit` takes when the index's other four
+    /// mutators refuse (VM-5, MINOR 4).
+    func recoverFromRefusedIndexMutation() {
+        desyncRecovery()
     }
 
     func surfaceKnownText(variantID: String) -> String? {

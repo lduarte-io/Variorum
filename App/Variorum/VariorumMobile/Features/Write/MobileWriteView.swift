@@ -31,6 +31,25 @@ struct MobileWriteView: UIViewRepresentable {
     func updateUIView(_ uiView: MobileWriteSurfaceView, context: Context) {}
 }
 
+/// **The Write page's session memory: where each note was left** (VM-10, her
+/// ruled shape (2) — the Mac's `EditorRouter.scrollPlaces` twin, the phone's
+/// own version). Session-only: never persisted, never synced, gone at relaunch
+/// (the Mac's letter — *"not across launches"*). Owned by the shell router,
+/// the one session-lived composition object both tab stacks share, so a note
+/// re-opened on either stack lands where it was last left. Keyed by note.
+@MainActor
+final class MobileWritePlaces {
+    private var places: [String: MobileWritePlace] = [:]
+
+    func place(for postID: String) -> MobileWritePlace? {
+        places[postID]
+    }
+
+    func remember(_ place: MobileWritePlace, for postID: String) {
+        places[postID] = place
+    }
+}
+
 /// The Write screen: the surface under a voiced masthead (batch 3 — the
 /// look canon lands: the voice room, the title in the voice's title type,
 /// status rows in the chrome register). Since S3 batch 1 this is THE
@@ -73,6 +92,11 @@ struct MobileWriteScreen: View {
     /// chip's model and its sheet; a tap jumps the editor there.
     @State private var blockList: MobileBlockListModel
     @State private var blocksPresented = false
+    /// **The per-note TRAY** (round 2 batch 6b — §69.3's ruled shape): this
+    /// note's archived and leaving blocks, reached through the SAME sheet as
+    /// the block list, because all three are one subject in three states
+    /// (the design record's Q8 candidate — see `MobileBlockList.swift`).
+    @State private var tray: MobileNoteTrayModel
     /// Lenses (parity C5 — her top-bar sketch, the ruled saved-peek
     /// shape): the chip's model and its sheet; the active lens is
     /// session-local (evaporates with this screen — M9's lifetime).
@@ -100,7 +124,11 @@ struct MobileWriteScreen: View {
     /// harness/preview use (the pins call the model door directly and
     /// assert the callback fired).
     private let onDeleted: (() -> Void)?
-    /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note…).
+    /// **Note ▸ Versions (batch 6c)** — the shell pushes the note's moments
+    /// onto the OWNING stack; nil in harness/preview use.
+    private let onOpenVersions: (() -> Void)?
+    /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note… +
+    /// batch 6c's two time controls).
     @State private var noteActionsPresented = false
     private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
@@ -118,6 +146,7 @@ struct MobileWriteScreen: View {
         tab: MobileTab = .shelf,
         onOpenNote: ((String) -> Void)? = nil,
         onDeleted: (() -> Void)? = nil,
+        onOpenVersions: (() -> Void)? = nil,
         editor injected: MobileEditorViewModel? = nil
     ) {
         let editor = injected ?? MobileEditorViewModel(session: session, postID: postID)
@@ -126,6 +155,7 @@ struct MobileWriteScreen: View {
         _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
         _references = State(initialValue: MobileReferencesModel(session: session, postID: postID))
         _blockList = State(initialValue: MobileBlockListModel(session: session, postID: postID))
+        _tray = State(initialValue: MobileNoteTrayModel(session: session, postID: postID))
         _lenses = State(initialValue: MobileLensesModel(
             session: session, postID: postID, editor: editor))
         self.session = session
@@ -134,6 +164,7 @@ struct MobileWriteScreen: View {
         self.tab = tab
         self.onOpenNote = onOpenNote
         self.onDeleted = onDeleted
+        self.onOpenVersions = onOpenVersions
         // The live phone voice governs from the first materialization —
         // set BEFORE the surface exists (makeUIView runs later). With a
         // router the value is already authoritative (idempotent).
@@ -167,6 +198,8 @@ struct MobileWriteScreen: View {
                 if let router {
                     await router.editors.register(model, tab: tab)
                 }
+                // VM-10: the session's page memory, before the arrival reads it.
+                model.placeMemory = router?.writePlaces
                 await model.arrive(focus: beginEditing)
                 await model.start()
             }
@@ -319,8 +352,53 @@ struct MobileWriteScreen: View {
         .sheet(isPresented: $referencesPresented) {
             MobileReferencesSheet(model: references, tokens: tokens)
         }
-        .sheet(isPresented: $blocksPresented) {
-            MobileBlockListSheet(model: blockList, tokens: tokens) { blockID in
+        // **THE HOST HEALS THE LENS CHIP'S ⚠** (the 6b cold review's MINOR
+        // 2). The masthead's fallback marker reads `MobileLensesModel.rows`,
+        // and `rows` is written by `refresh()` alone — whose only external
+        // caller is the lens sheet's own `.task`. This batch then shipped
+        // two doors that change a pick's LIVE-ness without touching a lens:
+        // the tray's Put back on a deleted take, and its Delete Now. So a
+        // pick could stop dangling while the chip kept announcing a fallback
+        // that no longer existed — to VoiceOver as well as to the eye —
+        // until she happened to reopen the sheet.
+        //
+        // The refresh rides the sheet's DISMISSAL, and both halves of that
+        // are deliberate:
+        //   · **the HOST does it, not the tray.** A refresh fired from
+        //     `putBackTake` would be a feature-to-feature call; this screen
+        //     composes both features and is the only place allowed to know
+        //     they meet (CLAUDE.md's composition rule).
+        //   · **at dismissal, not at mount.** The chip is BEHIND the sheet
+        //     while it is up (the presented tree is the whole screen), so
+        //     the stale marker becomes visible at exactly this moment — and
+        //     a `.task` on this screen would not fire at all: presenting and
+        //     dismissing a sheet never re-runs the presenter's task, and at
+        //     mount no lens is active yet (`activeLensID` starts nil), so a
+        //     mount-time read could not change the marker either way.
+        // One bounded post-scoped read (`refresh()`'s own cost note), once
+        // per sheet close.
+        .sheet(isPresented: $blocksPresented, onDismiss: {
+            let lenses = lenses
+            Task { await lenses.refresh() }
+        }) {
+            // PR20's act is injected HERE, not called from inside the sheet:
+            // this screen composes the block list and the structural
+            // controller, and it is the only place allowed to know they meet
+            // (CLAUDE.md's composition rule — a call from the list into
+            // `model.structural` would be feature-to-feature). The road
+            // itself is the one that already exists: `deleteWholeBlockRun`
+            // carries the ONE compound undo entry, the flight latch, the
+            // flush-first contract, the caret landing and the receipt.
+            MobileBlockListSheet(
+                model: blockList, tokens: tokens, tray: tray,
+                onDeleteBlocks: { blockIDs in
+                    // The road ANSWERS (the fix wave, MINOR 3): the sheet
+                    // puts picking mode away on a landing and keeps her
+                    // picks on a refusal, and that difference is the act's
+                    // to report, never a re-read's to infer.
+                    await model.structural.deleteWholeBlockRun(blockIDs)
+                }
+            ) { blockID in
                 blocksPresented = false
                 model.jumpToBlock(blockID)
             }
@@ -331,7 +409,8 @@ struct MobileWriteScreen: View {
         .sheet(isPresented: $noteActionsPresented) {
             MobileNoteActionsSheet(
                 door: model.undoDoor, model: model, tokens: tokens,
-                onDeleted: { onDeleted?() })
+                onDeleted: { onDeleted?() },
+                onOpenVersions: { onOpenVersions?() })
                 .presentationDetents([.medium, .large])
         }
         // A12's destructive-undo warning for the RECEIPT's button (the ⋯
@@ -479,14 +558,28 @@ struct MobileWriteScreen: View {
         Button {
             lensesPresented = true
         } label: {
-            Text(tokens.chromeLabel(lenses.chipLabel))
+            // **PR14's marker** (her 13j gate ruling (5) — *"say loudly"*):
+            // while the ACTIVE lens has a pick that fell back to the note's
+            // own take, the chip says so on the page the lens is driving,
+            // in the alarm token, rather than leaving the fact inside a
+            // sheet she would have to think to open. The sheet's own loud
+            // region names WHICH block and offers the way back.
+            Text(tokens.chromeLabel(
+                lenses.chipLabel + (lenses.activeLensHasFallback ? " \u{26A0}" : "")))
                 .font(tokens.small)
-                .foregroundStyle(lenses.activeLensID != nil ? tokens.accent : tokens.faint)
+                .foregroundStyle(
+                    lenses.activeLensHasFallback
+                        ? tokens.alarm
+                        : (lenses.activeLensID != nil ? tokens.accent : tokens.faint))
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Lenses")
+        .accessibilityLabel(lenses.activeLensHasFallback ? Self.lensFallbackChipLabel : "Lenses")
     }
+
+    /// The chip's spoken label while the active lens has a fallback — a
+    /// glyph is not a sentence, and VoiceOver reads words.
+    static let lensFallbackChipLabel = "Lenses — a pick fell back"
 
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a

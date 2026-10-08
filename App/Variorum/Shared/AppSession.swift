@@ -292,8 +292,22 @@ final class AppSession {
     /// This is `savepointOnLeaving`'s existing-only shape, made a named entry
     /// so the two roads cannot drift; that method's own doc has always carried
     /// the argument for it.
-    func flushExistingAutosave(forPost postID: String) async {
-        await postAutosaves[postID]?.coordinator.flushNow()
+    ///
+    /// **It answers whether the post's buffer is CLEAN after the flush** (VM-5
+    /// whole-round pass, MINOR 4) — the editor's `flushPendingText` contract,
+    /// one layer down. `false` means a write was refused and the coordinator
+    /// KEPT the bytes pending (its keep-pending posture — a seal or lock that
+    /// landed remotely mid-typing); `true` when nothing is held for the post,
+    /// which by the rule above means nothing is pending. A caller whose act
+    /// READS or COPIES the store — a version is a copy of the note — must
+    /// consult it, or it acts on a store missing her last words while
+    /// reporting success (`VersionActs`). Discardable, so the callers that
+    /// only want "land whatever can land" read exactly as before.
+    @discardableResult
+    func flushExistingAutosave(forPost postID: String) async -> Bool {
+        guard let coordinator = postAutosaves[postID]?.coordinator else { return true }
+        await coordinator.flushNow()
+        return !coordinator.isDirty
     }
 
     /// How many posts this session is holding a coordinator for — the size

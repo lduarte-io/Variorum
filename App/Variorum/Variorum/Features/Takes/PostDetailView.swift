@@ -25,6 +25,10 @@ struct PostDetailView: View {
     /// Stage C: a caret-precise landing (palette/Library block hits) —
     /// the Write editor opens with its caret seeded at this block.
     var initialBlockID: String? = nil
+    /// 13o U2 (D6 — land-at-match): a search passage's matched words, riding
+    /// the block landing — the arriving Write editor selects the match and
+    /// arms the find bar (`EditorFindSeed`). nil for every other landing.
+    var initialFind: EditorFindSeed? = nil
     /// 13f W20(c): the window's recently-visited books, most recent first —
     /// the membership chip's chooser floats them inside their group (her
     /// round-10 shaping). Defaults empty: curated-before-smart alone orders
@@ -127,6 +131,9 @@ struct PostDetailView: View {
     /// A TOC jump's landing: the Write editor re-seeds at this caret (the
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
+    /// 13o U2 (D6): the landing's find seed, one-shot exactly as the caret
+    /// seed is (set beside it by `jump`, cleared beside it on leaving Write).
+    @State private var pendingFind: EditorFindSeed?
     /// The inspector's occupant (session UI state): the reference panel
     /// (Phase 11b B3 — per-post sources beside the draft), the SCRAPS panel
     /// (13b Stage 3, 3D — N19: the drag-into-draft geometry), or — the
@@ -412,7 +419,9 @@ struct PostDetailView: View {
             Divider().overlay(tokens.line)
             switch mode {
             case .write:
-                EditorView(session: session, postID: postID, caretSeed: pendingCaret)
+                EditorView(
+                    session: session, postID: postID, caretSeed: pendingCaret,
+                    findSeed: pendingFind)
                     .id("\(postID)-caret-\(pendingCaret ?? -1)")
             case .takes:
                 TakesBoardView(session: session, postID: postID)
@@ -535,7 +544,7 @@ struct PostDetailView: View {
         // no detail mounted SPEAKS instead of vanishing).
         .onAppear {
             mode = Self.rememberedMode(postID: postID)
-            if let initialBlockID { jump(to: initialBlockID) }
+            if let initialBlockID { jump(to: initialBlockID, find: initialFind) }
             let binding = $mode
             let panel = $inspectorPanel
             let tagField = $tagFieldOpen
@@ -635,7 +644,10 @@ struct PostDetailView: View {
             // under it; clearing while IN Write (say, where the seed is
             // consumed) would change that `.id` under a mounted editor and
             // remount it mid-visit, re-running the arrival.
-            if new != .write { pendingCaret = nil }
+            if new != .write {
+                pendingCaret = nil
+                pendingFind = nil  // 13o U2: the find seed is the caret's twin
+            }
             // Row 29 (her words: "the block history tab stays open as you
             // move to other modes which looks bad and is confusing"): the
             // pane is SCOPED to the mode that asked — a mode switch CLOSES
@@ -992,7 +1004,9 @@ struct PostDetailView: View {
         mode = new
     }
 
-    private func jump(to blockID: String) {
+    /// `find` (13o U2, D6): a search passage's landing seeds the match too;
+    /// every other road names none, which also clears a seed left standing.
+    private func jump(to blockID: String, find: EditorFindSeed? = nil) {
         Task {
             let offset: Int? = try? await session.database.read { [postID] db in
                 let slots = try Queries.renderPost(db, containerID: postID)
@@ -1001,6 +1015,9 @@ struct PostDetailView: View {
                 }
                 return BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i).location
             }
+            // Set BEFORE the caret: the caret is what re-keys the editor, and
+            // the new editor must be born holding both seeds.
+            pendingFind = find
             pendingCaret = offset ?? 0
             // 13u2b ladder round 1 (MINOR 1's second door): this road names
             // its own block and keeps its standing landing — and it changes

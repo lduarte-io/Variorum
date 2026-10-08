@@ -1926,7 +1926,7 @@ final class TakesViewModel {
         do {
             setReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            setRefusal(VersionActs.words(error))
+            setRefusal(VersionActs.words(error, seal: .mac))
         }
     }
 

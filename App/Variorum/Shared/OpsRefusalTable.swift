@@ -378,6 +378,20 @@ nonisolated enum OpsRefusalCopy {
         return String(describing: error)
     }
 
+    // MARK: - The flush contract's refusal (VM-5 whole-round pass, MINOR 4)
+
+    /// **A door whose act needs the note's pending bytes in the store, when
+    /// the flush could not land them** — a refused autosave (a seal or a take
+    /// lock that arrived by sync mid-typing) leaves the bytes pending, and an
+    /// act that copies or rewrites the note then would act on a store missing
+    /// her last words. Names no door, so it is both platforms' words: the
+    /// phone's `MobileEditorViewModel.unsavedChangesRefusal` forwards here,
+    /// and the shared `VersionActs` speaks it. *(The Mac's structural doors
+    /// still carry this sentence as byte-identical literals — pre-existing,
+    /// each a one-line forward at its next touch.)*
+    static let unsavedChanges =
+        "Unsaved changes couldn't be written — resolve that first, then retry."
+
     // MARK: - The editor GATE's refusals (18m U3, ruling G)
 
     /// **The editor gate's four refusals, ONE brain for both editors.** Each
