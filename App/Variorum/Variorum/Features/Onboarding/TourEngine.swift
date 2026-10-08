@@ -170,6 +170,11 @@ struct TourFactSources {
     /// A book's sidebar note box is live (the composition root derives it
     /// from the box the focused book published).
     var bookNoteLive: () -> Bool
+    /// The box HOLDS a note — selected or live (F-U2-W-3: step 10's
+    /// edit-here ring exists only then; an empty box re-anchors on the
+    /// toured note's Index row). Defaulted so a fixture without a box
+    /// reads "empty", the honest unknown.
+    var bookNoteSelected: () -> Bool = { false }
     /// The star (the window's stars model — store state).
     var isStarred: (String) -> Bool
 }
@@ -228,7 +233,7 @@ enum TourPlaces {
     /// The window's facts, assembled (pure over what the sources read).
     static func facts(
         selection: SidebarSelection?, detail: (postID: String?, mode: PostMode?),
-        caret: TourCaretReading?, bookNoteLive: Bool,
+        caret: TourCaretReading?, bookNoteLive: Bool, bookNoteSelected: Bool = false,
         note: (id: String, facts: Queries.TourNoteFacts)?, isStarred: (String) -> Bool
     ) -> Tour.Facts {
         let place = place(selection)
@@ -245,7 +250,12 @@ enum TourPlaces {
             }
         }
         var bookLive = false
-        if case .book = place { bookLive = bookNoteLive }
+        var bookSelected = false
+        if case .book = place {
+            bookLive = bookNoteLive
+            // F-U2-W-3: live is holding too (the one box state order).
+            bookSelected = bookNoteSelected || bookNoteLive
+        }
         let noteFacts = note.map {
             Tour.NoteFacts(
                 noteID: $0.id, starred: isStarred($0.id),
@@ -253,6 +263,6 @@ enum TourPlaces {
         }
         return Tour.Facts(
             place: place, noteMode: noteMode, caret: tourCaret,
-            bookNoteLive: bookLive, note: noteFacts)
+            bookNoteLive: bookLive, bookNoteSelected: bookSelected, note: noteFacts)
     }
 }

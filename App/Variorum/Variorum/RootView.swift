@@ -896,6 +896,7 @@ struct RootView: View {
         let session = session
         let stars = stars
         let bookNoteLive = tourBookNoteLive
+        let bookNoteSelected = tourBookNoteSelected
         return TourFactSources(
             selection: { router.workspace.focusedSelection },
             noteDetail: {
@@ -913,6 +914,7 @@ struct RootView: View {
                     panelBlockID: editor.fanPanel?.blockID)
             },
             bookNoteLive: { bookNoteLive },
+            bookNoteSelected: { bookNoteSelected },
             isStarred: { stars.isStarred(.post($0)) })
     }
 
@@ -924,6 +926,17 @@ struct RootView: View {
               let report = noteBoxReport, report.readingID == showing
         else { return false }
         return report.state.isLive
+    }
+
+    /// Whether that box HOLDS a note at all — selected or live (F-U2-W-3:
+    /// step 10's edit-here ring exists only then; an empty box re-anchors
+    /// the ring on the toured note's Index row).
+    private var tourBookNoteSelected: Bool {
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane],
+              let report = noteBoxReport, report.readingID == showing
+        else { return false }
+        return report.state.postID != nil
     }
 
     /// The pane seam's family in the shared oracle.

@@ -162,6 +162,10 @@ struct TourWalkTests {
         w.report(.init(place: .book(Self.sherlock)))
         #expect(w.rings == [[.indexNoteRow(Self.scandal), .bookModeTab(.index)]])
         #expect(w.step == .placeFollows, "step 9 teaches; only next moves it")
+        // F-U2-W-3 (justified fixture edit): the box holding the carried
+        // note is now a SAID fact — the edit-here ring stands on it; the
+        // empty-box world has its own pin below.
+        w.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
         w.send(.next)
         #expect(w.step == .downAndUp)
         #expect(w.rings == [[.noteBoxEditHere]])
@@ -559,6 +563,29 @@ struct TourWalkTests {
         v.send(.next)
         #expect(v.step == .legEnd)
         #expect(v.effects == [.navigate(.area(.bookcase))])
+    }
+
+    /// F-U2-W-3 (the fresh-store walk, round 2's fix): at step 10 in a book
+    /// whose note box holds NO note — the walked state: the direct-road
+    /// ascent's Index arrived unselected — the edit-here door does not
+    /// exist, so the ring falls to the toured note's own Index row (her
+    /// verified recovery: clicking it selects, drops into index-edit and
+    /// advances), with the Index tab behind it for the other book modes,
+    /// and the road-back line is earned. With the box holding a note, the
+    /// step's own edit-here ring stands and nothing extra is said.
+    @Test func stepTenInABookWithAnEmptyNoteBoxRingsTheNotesIndexRow() {
+        var w = Self.walk(to: .downAndUp)
+        w.report(.init(place: .book(Self.sherlock)))
+        #expect(w.step == .downAndUp)
+        #expect(w.rings == [[.indexNoteRow(Self.scandal), .bookModeTab(.index)]],
+                "an empty box: the note's row is the way back (\(w.rings))")
+        #expect(w.state.map(Tour.isRoadBack) == true)
+        var v = Self.walk(to: .downAndUp)
+        v.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+        #expect(v.step == .downAndUp)
+        #expect(v.rings == [[.noteBoxEditHere]],
+                "a holding box: the step's own door (\(v.rings))")
+        #expect(v.state.map(Tour.isRoadBack) == false)
     }
 
     @Test func nextIsInertOnACardThatWaitsForHerAct() {

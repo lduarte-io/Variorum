@@ -44,6 +44,7 @@ struct TourOverlay: View {
         TourPlaces.facts(
             selection: sources.selection(), detail: sources.noteDetail(),
             caret: sources.caret(), bookNoteLive: sources.bookNoteLive(),
+            bookNoteSelected: sources.bookNoteSelected(),
             note: engine.noteFacts, isStarred: sources.isStarred)
     }
 

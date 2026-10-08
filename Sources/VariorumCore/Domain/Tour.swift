@@ -174,17 +174,23 @@ public enum Tour {
         public var caret: Caret?
         /// A book's sidebar note box is LIVE — the "edit here" door took.
         public var bookNoteLive: Bool
+        /// A book's sidebar note box HOLDS a note (selected or live) — the
+        /// "edit here" door exists (F-U2-W-3: the fresh-store walk reached
+        /// step 10 in a book whose box was empty, so the beat had no ring).
+        public var bookNoteSelected: Bool
         /// Facts about `noteOfInterest` (nil until the store answered).
         public var note: NoteFacts?
 
         public init(
             place: Place, noteMode: NoteMode? = nil, caret: Caret? = nil,
-            bookNoteLive: Bool = false, note: NoteFacts? = nil
+            bookNoteLive: Bool = false, bookNoteSelected: Bool = false,
+            note: NoteFacts? = nil
         ) {
             self.place = place
             self.noteMode = noteMode
             self.caret = caret
             self.bookNoteLive = bookNoteLive
+            self.bookNoteSelected = bookNoteSelected
             self.note = note
         }
 
@@ -708,7 +714,15 @@ public enum Tour {
             }
         case .downAndUp:
             switch facts.place {
-            case .book: return [[.noteBoxEditHere]]
+            case .book:
+                // F-U2-W-3 (the fresh-store walk): the edit-here door exists
+                // only while the box holds a note. An empty box — the walked
+                // direct-road Index arrived unselected — rings the toured
+                // note's own Index row instead (her verified recovery), the
+                // Index tab behind it: step 9's own group shape.
+                if facts.bookNoteSelected { return [[.noteBoxEditHere]] }
+                return [(state.tourNoteID.map { [Anchor.indexNoteRow($0)] } ?? [])
+                        + [.bookModeTab(.index)]]
             case .note: return [[.contextBarBook]]
             default: return [roadBackRow(state)]
             }
@@ -776,7 +790,10 @@ public enum Tour {
             default: return true
             }
         case .downAndUp:
-            if case .book = place { return false }
+            // F-U2-W-3: in a book, the ring is the step's own edit-here only
+            // while the box holds a note; an empty box's row ring is the
+            // road back, and the line says so.
+            if case .book = place { return !state.facts.bookNoteSelected }
             return true
         case .legTags:
             guard let own = state.ownNoteID else { return false }
