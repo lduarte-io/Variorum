@@ -92,54 +92,57 @@ enum TutorialSeeder {
     nonisolated static func lookingLessonContent(
         teachesCanvas: Bool = PostMode.buildKeepsCanvas
     ) -> (title: String, paragraphs: [String]) {
+        // 13s-b triage landing (R-13s-30): both flavors re-voiced from the
+        // approved draft; the seam (the title, the intro variant, the canvas
+        // pair) still derives from `teachesCanvas` alone.
         var paragraphs: [String] = [
             teachesCanvas
                 ? "Two more ways of looking, each a different traversal of the same "
-                  + "note \u{2014} nothing is ever copied into a view. (Outlining lives in "
-                  + "Compare now: an outline is just a related note beside its "
-                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)"
-                : "One more way of looking \u{2014} a different traversal of the same "
-                  + "note; nothing is ever copied into a view. (Outlining lives in "
-                  + "Compare now: an outline is just a related note beside its "
-                  + "draft \u{2014} the previous lesson's \u{201C}make outline note\u{201D}.)",
+                  + "note: nothing is ever copied into a view. (Outlining lives in "
+                  + "Compare now: an outline is just a related note beside its draft, "
+                  + "the previous lesson's \u{201C}make outline note\u{201D}.)"
+                : "One more way of looking, a different traversal of the same note: "
+                  + "nothing is ever copied into a view. (Outlining lives in Compare "
+                  + "now: an outline is just a related note beside its draft, the "
+                  + "previous lesson's \u{201C}make outline note\u{201D}.)",
 
             // 13b 4D (N39 + N32(a)) + wave 2c (item 16, W8-1 direction C):
             // the workbench, taught where the doors live. (The old
             // table-of-contents half of this lesson lives in Read's edit
             // face now.)
-            "BLOCKS (\u{2318}6) is the workbench \u{2014} the note's blocks as "
-            + "objects. Every row shows what it carries: takes, comments, "
-            + "words, tags, a lock, when it last moved. Click a row and its "
-            + "panel opens on the right \u{2014} edit the text there, see its "
-            + "takes, or jump onward (Write, Takes, its history). \u{2318}-click "
-            + "picks several, and the bar above acts on all of them at once \u{2014} "
-            + "merge, tag, archive, delete, move out to snippets \u{2014} one "
-            + "\u{2325}\u{2318}Z takes the whole act back. Rows reorder with "
-            + "\u{2191} \u{2193}, or the row's \u{22EF} menu moves by position: top, "
-            + "bottom, or the number you type. Move out to snippets does what "
-            + "it says: the block LEAVES this note and becomes a snippet "
-            + "there (a block lives in one place; \u{2325}\u{2318}Z brings it "
-            + "back).",
+            "Blocks (\u{2318}6) is the workbench: the note's blocks as objects. "
+            + "Every row shows what it carries: takes, comments, words, tags, a "
+            + "lock, when it last moved. Click a row and its panel opens on the "
+            + "right. Edit the text there, see its takes, or jump onward (Write, "
+            + "Takes, its history). \u{2318}-click picks several, and the bar "
+            + "above acts on all of them at once: merge, tag, archive, delete, "
+            + "move out to snippets. One \u{2325}\u{2318}Z takes the whole act "
+            + "back. Rows reorder with \u{2191} \u{2193}, or the row's \u{22EF} "
+            + "menu moves by position: top, bottom, or the number you type. Move "
+            + "out to snippets does what it says: the block leaves this note and "
+            + "becomes a snippet there (a block lives in one place; "
+            + "\u{2325}\u{2318}Z brings it back).",
         ]
         if teachesCanvas {
             paragraphs += [
                 // 13b 4E (N30/S4-7): the canvas package, taught whole.
-                "CANVAS (\u{2318}7) scatters the blocks as sticky-note cards. They open "
-                + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
-                + "header \u{2014} arrangement is yours and is remembered, the note's order "
-                + "doesn't move \u{2014} and resize it from the corner grip. Click into a "
-                + "card and type: edits land on the take the card is showing. The "
-                + "little number in a card's corner is the block's place in the "
-                + "note's current order.",
+                "Canvas (\u{2318}7) scatters the blocks as sticky-note cards. They "
+                + "open in a tidy grid until you arrange them; drag a card by its "
+                + "\u{2823} header (arrangement is yours and is remembered; the "
+                + "note's order doesn't move) and resize it from the corner grip. "
+                + "Click into a card and type: edits land on the take the card is "
+                + "showing. The little number in a card's corner is the block's place "
+                + "in the note's current order.",
 
-                "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
-                + "Click cards in the order the note should read \u{2014} each shows its "
-                + "number as you go \u{2014} then Apply once: the numbered cards lead the "
-                + "note and everything else keeps its relative order after them "
-                + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
-                + "card at once \u{2014} bigger boards open a read-only overview; click any "
-                + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
-                + "which take you're viewing (\u{201C}viewing \u{2014} not what the note "
+                "The canvas has one door back into order: \u{201C}order by "
+                + "clicking\u{201D}. Click cards in the order the note should read "
+                + "(each shows its number as you go), then Apply once: the numbered "
+                + "cards lead the note and everything else keeps its relative order "
+                + "after them (\u{2325}\u{2318}Z undoes; Cancel changes nothing). "
+                + "\u{201C}Fit all\u{201D} shows every card at once; bigger boards "
+                + "open a read-only overview, and a click on any card lands back on "
+                + "it. The \u{2039} \u{203A} switcher on a card flips which take "
+                + "you're viewing (\u{201C}viewing \u{2014} not what the note "
                 + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
             ]
         }
@@ -1751,101 +1754,103 @@ enum TutorialSeeder {
         // FUNDAMENTAL ways of looking ("obviously a need, seems more
         // fundamental").
         _ = try lesson(looking, "read", [
-            "READ (\u{2318}3) is the note beside its own index \u{2014} and it opens "
-            + "on EDIT. The column on the left is the index: markdown headings "
+            "Read (\u{2318}3) is the note beside its own index, and it opens on "
+            + "edit. The column on the left is the index: markdown headings "
             + "become sections, every other block files under the one above it, "
             + "and a note with no headings lists plainly. Click a row and the "
             + "text beside it scrolls there; the \u{22EF} menu carries the block "
-            + "acts. In the text, click any block and it goes live right where "
-            + "it is \u{2014} one block at a time. The outline button folds the "
-            + "column away and back. Read opens standing at the block you were "
-            + "just in, whichever mode you came from.",
+            + "acts. In the text, click any block and it goes live right where it "
+            + "is, one block at a time. The outline button folds the column away "
+            + "and back. Read opens standing at the block you were just in, "
+            + "whichever mode you came from.",
 
-            "Switch the face to READ and the same note is a page \u{2014} the "
-            + "paper a book's reading flow uses: markdown rendered, boundaries "
-            + "gone, nothing to edit. Choose continuous, or pages (the book's "
-            + "own leaves, \u{2190} \u{2192} turn them); Aa \u{2212} / Aa \u{FF0B} "
-            + "size the type. Reading is the point \u{2014} and when a sentence "
-            + "needs work, click its paragraph: the page turns to edit with "
-            + "that block live.",
+            "Switch the face to read and the same note is a page: the paper a "
+            + "book's reading flow uses. Markdown rendered, boundaries gone, "
+            + "nothing to edit. Choose continuous, or pages (the book's own "
+            + "leaves; \u{2190} \u{2192} turn them); Aa \u{2212} / Aa \u{FF0B} "
+            + "size the type. Reading is the point. And when a sentence needs "
+            + "work, click its paragraph: the page turns to edit with that block "
+            + "live.",
 
-            "Try it: press \u{2318}3 \u{2014} the column stands at this lesson. "
-            + "Click this very paragraph in the text and it goes live; type a "
-            + "word. Switch to read, click this paragraph again \u{2014} the page "
-            + "turns to edit with it live. Then \u{2318}1 back to Write.",
+            "Try it: press \u{2318}3. The column stands at this lesson. Click "
+            + "this very paragraph in the text and it goes live; type a word. "
+            + "Switch to read, click this paragraph again, and the page turns to "
+            + "edit with it live. Then \u{2318}1 back to Write.",
         ])
 
         let lenses = try lesson(looking, "lenses", [
-            "A LENS is a saved way of LOOKING at a note: for each block, which "
-            + "take to show. It never changes the note — \u{201C}a lens is the same "
-            + "structure with different choices.\u{201D} Lenses mode (\u{2318}4) is their "
+            "A lens is a saved way of looking at a note: for each block, which "
+            + "take to show. It never changes the note. A lens is the same "
+            + "structure with different choices. Lenses mode (\u{2318}4) is their "
             + "home: full-text columns side by side.",
 
             "Both blocks of this lesson carry two takes, and a lens named "
-            + "\u{201C}the other reading\u{201D} is saved beside the chosen text. In Lenses, "
-            + "add its column (\u{FF0B} column \u{25B8} Open \u{201C}the other reading\u{201D}) and read "
-            + "the two versions of this lesson side by side. The \u{2039} \u{203A} arrows "
-            + "on any cell re-pick that block's take; \u{1F4BE} saves your current "
-            + "picks as a new lens.",
+            + "\u{201C}the other reading\u{201D} is saved beside the chosen text. "
+            + "In Lenses, add its column (\u{FF0B} column \u{25B8} Open "
+            + "\u{201C}the other reading\u{201D}) and read the two versions of "
+            + "this lesson side by side. The \u{2039} \u{203A} arrows on any cell "
+            + "re-pick that block's take; \u{1F4BE} saves your current picks as a "
+            + "new lens.",
 
-            "\u{2713} Make this the note ADOPTS a column: the note's chosen takes "
-            + "become what it shows. Adopting swaps, never destroys — the "
+            "\u{2713} Make this the note adopts a column: the note's chosen "
+            + "takes become what it shows. Adopting swaps, never destroys. The "
             + "outgoing chosen is auto-saved as a lens named \u{201C}chosen until "
             + "(today)\u{201D}, so you can always swap back.",
         ])
+        // 13s-b triage landing: the two staged alternates in the drafts' text
+        // (the caps and dashes out; the lens and its two choices unchanged).
         let lensAlt1 = try take(on: lenses.blocks[0],
-            "A LENS is a bookmark on your choices: it remembers, for every block, which "
-            + "take you'd show — without moving the note an inch. Lenses mode (\u{2318}4) lays "
-            + "such readings out as columns.")
+            "A lens is a bookmark on your choices: it remembers, for every "
+            + "block, which take you'd show, without moving the note an inch. "
+            + "Lenses mode (\u{2318}4) lays such readings out as columns.")
         let lensAlt2 = try take(on: lenses.blocks[2],
-            "\u{2713} Make this the note is the one door from looking to being: adopt, and the "
-            + "column's picks become the note's chosen takes. The old chosen is kept as "
-            + "\u{201C}chosen until (today)\u{201D} — swaps, never destroys.")
+            "\u{2713} Make this the note is the one door from looking to being: "
+            + "adopt, and the column's picks become the note's chosen takes. The "
+            + "old chosen is kept as \u{201C}chosen until (today)\u{201D}: swaps, "
+            + "never destroys.")
         let lens = try ops.createLens(post: lenses.post.id, name: "the other reading")
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[0].block.id, variant: lensAlt1.id)
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[2].block.id, variant: lensAlt2.id)
 
         let versions = try lesson(looking, "compare & versions", [
-            "A VERSION is a different NOTE related to this one — \u{201C}a version is "
-            + "a different structure.\u{201D} Two gestures share the word: MARK AS "
-            + "VERSIONS just draws a link between two existing notes; DUPLICATE "
-            + "AS VERSION mints a whole copy (takes and all) and draws the link "
-            + "in one gesture. Mark = connect, duplicate = copy + connect.",
+            "A version is a different note related to this one. A version is a "
+            + "different structure. Two gestures share the word: Mark as Versions "
+            + "just draws a link between two existing notes; Duplicate as Version "
+            + "mints a whole copy (takes and all) and draws the link in one "
+            + "gesture. Mark = connect, duplicate = copy + connect.",
 
-            "This lesson already has a version twin — it was duplicated when "
-            + "the book was seeded. Open Compare (\u{2318}5): the notes sit side "
-            + "by side, related blocks tied by lineage — and every pane is "
-            + "EDITABLE. Click into either column and type: the edit lands in "
-            + "that note, and the one live ring moves wherever you click, "
-            + "across notes. Drag a block's \u{28FF} handle to reorder it — each "
-            + "column reorders its own note only.",
+            "This lesson already has a version twin; it was duplicated when the "
+            + "book was seeded. Open Compare (\u{2318}5): the notes sit side by "
+            + "side, related blocks tied by lineage, and every pane is editable. "
+            + "Click into either column and type: the edit lands in that note, "
+            + "and the one live ring moves wherever you click, across notes. Drag "
+            + "a block's \u{28FF} handle to reorder it; each column reorders its "
+            + "own note only.",
 
             "Compare is honest about relationships. \u{201C}Follow this note's "
-            + "order\u{201D} arranges the other columns beside their related blocks "
-            + "(display only — nothing moves); lineage colors mark the "
-            + "families, and rails appear only where a real relationship "
-            + "exists. Compare against an unrelated note and it says \u{201C}there "
-            + "is no relationship here\u{201D} — the two just sit plainly side by "
-            + "side, no blanks, no colors.",
+            + "order\u{201D} arranges the other columns beside their related "
+            + "blocks (display only; nothing moves); lineage colors mark the "
+            + "families, and rails appear only where a real relationship exists. "
+            + "Compare against an unrelated note and it says \u{201C}there is no "
+            + "relationship here\u{201D}. The two just sit plainly side by side, "
+            + "no blanks, no colors.",
 
-            "Compare OPENS with \u{201C}related blocks only\u{201D} on: it hides every "
-            + "block lineage has nothing to say about, leaving just the "
-            + "material that connects across the columns. Nothing is moved or "
-            + "deleted — it is a way of LOOKING, and one click back: turn the "
-            + "chip off to read the notes whole. Against an unrelated note it "
-            + "tells you there is nothing to show, rather than showing you "
-            + "nothing.",
+            "Compare opens with \u{201C}related blocks only\u{201D} on: it "
+            + "hides every block lineage has nothing to say about, leaving just "
+            + "the material that connects across the columns. Nothing is moved or "
+            + "deleted. It is a way of looking, and one click back: turn the chip "
+            + "off to read the notes whole. Against an unrelated note it tells "
+            + "you there is nothing to show, rather than showing you nothing.",
 
             "Outlines live here too: press \u{201C}make outline note\u{201D} in "
-            + "Compare's header and the app mints a linked condensation — "
-            + "first sentence per block — and opens it beside this note, "
-            + "registered point by point. And the Diff sheet now has "
-            + "Save\u{2026} — the whole diff as a plain-text file, ready to hand "
-            + "to an AI agent.",
+            + "Compare's header and the app mints a linked condensation, first "
+            + "sentence per block, and opens it beside this note, registered "
+            + "point by point. And the Diff sheet has Save\u{2026}: the whole "
+            + "diff as a plain-text file, ready to hand to an AI agent.",
 
-            "Unmark deletes only the connection — both notes stay exactly as "
-            + "they are. The library's right-click menu has Duplicate as "
-            + "Version for any note, any time.",
+            "Unmark deletes only the connection; both notes stay exactly as "
+            + "they are. The library's right-click menu has Duplicate as Version "
+            + "for any note, any time.",
         ])
         let twin = try ops.duplicateAsVersion(versions.post.id)
         // A distinct title (walk finding): the copy inherits the lesson's

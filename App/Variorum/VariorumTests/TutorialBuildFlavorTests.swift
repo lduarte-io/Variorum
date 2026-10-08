@@ -42,15 +42,18 @@ struct TutorialBuildFlavorTests {
         let lesson = TutorialSeeder.lookingLessonContent(teachesCanvas: false)
         #expect(lesson.title == "blocks")
         #expect(lesson.paragraphs.count == 2)
-        #expect(!lesson.paragraphs.contains { $0.contains("CANVAS") })
-        #expect(lesson.paragraphs.contains { $0.contains("BLOCKS (\u{2318}6)") })
+        // 13s-b triage landing — A JUSTIFIED EDIT: the modes read in their
+        // real casing now (her R-13s-30 caps ban), so both arms read the
+        // real-cased names; an all-caps "CANVAS" probe would pass vacuously.
+        #expect(!lesson.paragraphs.contains { $0.localizedCaseInsensitiveContains("canvas") })
+        #expect(lesson.paragraphs.contains { $0.contains("Blocks (\u{2318}6)") })
     }
 
     @Test func theDebugLookingLessonKeepsTheCanvasWhole() {
         let lesson = TutorialSeeder.lookingLessonContent(teachesCanvas: true)
         #expect(lesson.title == "blocks \u{B7} canvas")
         #expect(lesson.paragraphs.count == 4)
-        #expect(lesson.paragraphs.contains { $0.contains("CANVAS (\u{2318}7)") })
+        #expect(lesson.paragraphs.contains { $0.contains("Canvas (\u{2318}7)") })  // 13s-b triage landing
         #expect(lesson.paragraphs.contains { $0.contains("order by clicking") })
     }
 
