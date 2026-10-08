@@ -372,11 +372,14 @@ moment's):**
 - **R-VX83-8 (2026-10-08):** *"yeah no arrow key day navigation in v1 is fine - make a
   linear ticket for that item."* → the §P1 ruling's condition (2) is RATIFIED and its
   deferral is **VX-98** (Backlog, project 13o) — it leaves the ratify bundle, decided.
-- **R-VX83-9 (2026-10-08):** the facet word `+ savepoints` is HER-RATIFIED — she asked
-  "why not + commits?", the verb/noun reading was given (commit is the bar's act, savepoint
-  the stored thing's name everywhere the app names it), and her word: *"accepted."* The
-  chip's word leaves the ratify bundle decided; its help texts and offered-only-with-words
-  rule still ride (P-VX83-C-wording).
+- **R-VX83-9 (2026-10-08) — SUPERSEDED BY HER SAME-NIGHT REVERSAL, below:** the facet word
+  `+ savepoints` was her-ratified ("accepted", after her "why not + commits?" and the
+  verb/noun reading) — then, minutes later, her word: *"hmm. i take it back - do +
+  commits."* → **THE FACET WORD IS `+ commits`** (armed `commits ✕`, the archived chip's
+  grammar unchanged). The verb/noun and 13s-voice considerations are ON the record and
+  were weighed by her; taste is hers and the newest word wins. Help texts re-word to
+  match ("Include your commits — every savepoint…" → the implementer re-drafts around the
+  chip's word, offered-only-with-words rule unchanged, wording rides the bundle).
 - **R-VX83-7 (2026-10-07 late evening — MERGE ORDER FREED; supersedes this record's
   "merges after 13x" header line, which was also her word, earlier):** *"I told 13x to
   release its hold so you and another session can move through. you should be next in the
