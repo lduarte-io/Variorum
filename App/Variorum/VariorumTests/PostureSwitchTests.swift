@@ -3174,6 +3174,186 @@ struct PostureSwitchTests {
         #expect(try newFile.unwrapKey(apple: world.apple.symmetricKey) == newKey)
     }
 
+    // MARK: - VX-99 round 2b (the round-2 fix pass's two finds, ruled in-unit — the resume door)
+
+    /// VX-99 round 2b, item 1 — THE RESUME DOOR FINISHES THIS DEVICE's OWN
+    /// ROTATION. A Use Castle killed MID-WALK on this device leaves the marker
+    /// at `.reencrypt` AND the vault's previous corpus key set — exactly what
+    /// `checkDoor` reports as `rotationInProgress`. Decision 32's still-finishing
+    /// refusal is the door for a rotation a fresh ceremony must not start over;
+    /// the resume is the road that FINISHES this one ("the acting device resumes
+    /// through its marker and never starts a second"), so it runs. Every other
+    /// mode still refuses at the door. RED ON OLD: `start()` refused before the
+    /// `.resume` case — "Finish Entering Castle…" answered "A key replacement
+    /// started on … is still finishing … Try again after." and never reached
+    /// `runner.resume`; with the marker standing every round refuses, so a
+    /// one-device account stayed paused (the VX-80 strand class).
+    @Test func theResumeDoorFinishesThisDevicesOwnMidWalkRotationWhileEveryOtherDoorStillRefuses() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let mirror = try #require(world.mirror)
+        await mirror.setCrashNextReencrypt(true)
+        await #expect(throws: URLError.self) {
+            _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        }
+        let marker = try #require(try await world.marker())
+        #expect(marker.step == .reencrypt && marker.entersCastle, "this device's own Use Castle, killed mid-walk")
+        #expect(try await world.runner.checkDoor().rotationInProgress,
+                "the door reads the vault's previous key — the rotation is THIS device's own, unfinished")
+        let controller = makeController(for: world)
+
+        // Every other mode keeps decision 32's door: the still-finishing sentence, nothing run.
+        let revisionBefore = try await world.vault().revision
+        for mode in [PostureSwitchModel.Mode.enter, .replaceKeys, .leave] {
+            let refused = PostureSwitchModel(mode: mode, runner: world.runner, controller: controller, vaultTie: nil)
+            await refused.start()
+            guard case .failed(let sentence) = refused.phase else {
+                Issue.record("\(mode) refuses at the door while a rotation is finishing: \(refused.phase)")
+                continue
+            }
+            #expect(sentence.contains("is still finishing"), "\(mode): \(sentence)")
+        }
+        #expect(try await world.marker() == marker, "the refused doors left the marker as it was")
+        #expect(try await world.vault().revision == revisionBefore, "…and wrote nothing to the vault")
+
+        // The resume runs — the face's road: the door, the passphrase ask, the finish.
+        let model = PostureSwitchModel(mode: .resume(marker), runner: world.runner, controller: controller, vaultTie: nil)
+        await model.start()
+        guard model.phase == .resumeAsk(needsPassphrase: true) else {
+            Issue.record("the resume door runs the marker's road (the walk, then the passphrase ask), never the still-finishing refusal: \(model.phase)")
+            return
+        }
+        await model.resume(passphrase: "sesame")
+        guard case .done = model.phase else {
+            Issue.record("the resume finishes: \(model.phase) \(model.lastError ?? "")")
+            return
+        }
+        let outcome = try #require(model.outcome)
+        #expect(outcome.entersCastle && !outcome.followedAnotherDevicesSwitch, "this device's own Use Castle, finished: \(outcome)")
+        #expect(model.doneBody == ProtectionCopy.castleDoneBody(outcome), "the Castle Done: \(model.doneBody)")
+        let vault = try await world.vault()
+        #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil,
+                "the rotation is finished — the vault's previous key cleared")
+        #expect(vault.format.classKey(for: .corpus)?.keyID == marker.newCorpusKeyID, "under the keys this device minted")
+        let newKey = try world.keyFile(outcome.newKeyFingerprint).unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey), "the library re-keyed under L′")
+        #expect(world.calls.custodyTargets.last == (world.biometry ? .biometric : .passphrase) && world.posture == .castle)
+        #expect(try await world.marker() == nil, "the marker is gone — sync is back on")
+    }
+
+    /// The two panes' resume door, read as code (the door renders only over a
+    /// pending marker held in the pane's `@State`, which a composition dump of a
+    /// freshly built pane never holds — ProtectionSurfaceRenderTests' recorded
+    /// limit; the phone face has no Mac-side host at all). Comment lines dropped.
+    private static func paneCode(_ path: String) throws -> String {
+        let appRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let text = try String(contentsOf: appRoot.appending(path: path), encoding: .utf8)
+        return text.split(separator: "\n", omittingEmptySubsequences: false)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+            .joined(separator: "\n")
+    }
+
+    /// VX-99 round 2b, item 2 — THE RESUME DOOR's CAPTION SPEAKS FOR THE
+    /// MARKER's ACT, on both panes. Round 2's finding 1 moved the sheet's own
+    /// ask onto the act selector; the PANE's caption under "Finish Replacing
+    /// Keys…" (Mac `ProtectionPane`, phone `MobileProtectionSheet`) still read
+    /// the bare `resumeBody` for every pending marker. The selector over the
+    /// marker's act gives Replace All Keys' body for a Replace All Keys marker
+    /// (and a follow of one) and keeps "Entering Castle didn't finish" for a
+    /// marker that enters Castle — the door label's own rule
+    /// (`pending.entersCastle`), so label and caption cannot disagree. RED ON
+    /// OLD: both panes rendered `ProtectionCopy.resumeBody` under every marker —
+    /// "Entering Castle didn't finish on this Mac" beneath "Finish Replacing
+    /// Keys…".
+    @Test func theResumeDoorsCaptionOnBothPanesSpeaksForTheMarkersActNeverAlwaysEnteringCastle() throws {
+        let stamp = "2026-10-08T00:00:00Z"
+        let replacing = [
+            RotationMarker(step: .reencrypt, entersCastle: false, startedAt: stamp),
+            RotationMarker(step: .rekeyLibrary, entersCastle: false, startedAt: stamp, follow: true),
+        ]
+        let entering = [
+            RotationMarker(step: .reencrypt, entersCastle: true, startedAt: stamp),
+            RotationMarker(step: .custody, entersCastle: true, startedAt: stamp, follow: true),
+        ]
+        for marker in replacing {
+            let caption = ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: marker))
+            #expect(caption == ProtectionCopy.resumeReplacingKeysBody, "a Replace All Keys marker: \(caption)")
+            #expect(CeremonyAct(resuming: marker).entersCastle == marker.entersCastle, "the door label's rule")
+        }
+        for marker in entering {
+            #expect(ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: marker)) == ProtectionCopy.resumeBody,
+                    "a marker that enters Castle keeps its sentence")
+            #expect(CeremonyAct(resuming: marker).entersCastle == marker.entersCastle, "the door label's rule")
+        }
+        for pane in ["Variorum/Features/Settings/ProtectionPane.swift",
+                     "VariorumMobile/Features/Protection/MobileProtectionSheet.swift"] {
+            let code = try Self.paneCode(pane)
+            #expect(!code.contains("ProtectionCopy.resumeBody"),
+                    "\(pane): no bare 'Entering Castle didn't finish' under every marker")
+            #expect(code.components(separatedBy: "ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))").count == 2,
+                    "\(pane): the resume door's caption is the act selector over the pending marker, once")
+        }
+    }
+
+    /// VX-99 round 2b, item 2's sibling — `switchInProgress`'s WORDING. A road
+    /// refused because THIS device's marker is pending (a second start — decision
+    /// 32 on this device; the follow's door) is worded by `message(for:)`, which
+    /// said `resumeBody` for every marker. The refusal now carries the pending
+    /// marker's act and speaks through the same selector. RED ON OLD: "Entering
+    /// Castle didn't finish on this Mac" over a pending Replace All Keys, at the
+    /// ceremony doors and the follow's door alike.
+    @Test func aRoadRefusedByAPendingMarkerSpeaksThatMarkersActNeverAlwaysEnteringCastle() async throws {
+        func killedMidWalk(enteringCastle: Bool) async throws -> (World, RotationMarker) {
+            let world = try await makeWorld()
+            let mirror = try #require(world.mirror)
+            await mirror.setCrashNextReencrypt(true)
+            await #expect(throws: URLError.self) {
+                if enteringCastle {
+                    _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+                } else {
+                    _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+                }
+            }
+            let marker = try #require(try await world.marker())
+            #expect(marker.step == .reencrypt && marker.entersCastle == enteringCastle && !marker.isFollow)
+            return (world, marker)
+        }
+        func refusals(_ world: World) async -> [any Error] {
+            var refused: [any Error] = []
+            do { _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words) } catch { refused.append(error) }
+            do { _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words) } catch { refused.append(error) }
+            do { _ = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil) } catch { refused.append(error) }
+            return refused
+        }
+        // A Replace All Keys killed mid-walk: every refusal speaks Replace All Keys' sentence.
+        do {
+            let (world, _) = try await killedMidWalk(enteringCastle: false)
+            defer { world.tearDown() }
+            let refused = await refusals(world)
+            #expect(refused.count == 3, "the second start, the other ceremony and the follow all refuse")
+            for refusal in refused {
+                guard case PostureSwitchError.switchInProgress = refusal else {
+                    Issue.record("the pending marker refuses the road: \(refusal)"); continue
+                }
+                let sentence = PostureSwitchModel.message(for: refusal)
+                #expect(sentence == ProtectionCopy.resumeReplacingKeysBody, "\(refusal): \(sentence)")
+            }
+        }
+        // A Use Castle killed mid-walk keeps "Entering Castle didn't finish".
+        do {
+            let (world, _) = try await killedMidWalk(enteringCastle: true)
+            defer { world.tearDown() }
+            let refused = await refusals(world)
+            #expect(refused.count == 3)
+            for refusal in refused {
+                guard case PostureSwitchError.switchInProgress = refusal else {
+                    Issue.record("the pending marker refuses the road: \(refusal)"); continue
+                }
+                #expect(PostureSwitchModel.message(for: refusal) == ProtectionCopy.resumeBody, "\(refusal)")
+            }
+        }
+    }
+
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
     /// the front check refuses a STALE recorded corpus id with the
     /// keys-don't-match sentence and runs nothing; then, on the current

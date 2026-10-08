@@ -893,3 +893,60 @@ strand class). Fix: the resume is exempt (it IS the road that finishes the rotat
 resumes through its marker"). (2) `ProtectionCopy.resumeBody` ("Entering Castle didn't finish") still captions the
 resume door on both panes for every marker — it reads from F1's act selector instead. A fresh narrow implementer; one
 more stage slot; then round 3.
+
+## ROUND 2b — THE RESUME DOOR (a fresh narrow Opus implementer, 2026-10-08 — LIVE STATUS; PENDING = unverified)
+
+**Scope, exactly as ruled above:** (1) `PostureSwitchModel.start()`'s `facts.rotationInProgress` refusal exempts
+`.resume` (every other mode keeps it); (2) the resume door's caption on both panes reads F1's act selector
+(`ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))` — no new sentence), and `switchInProgress`'s
+wording is checked for the same flaw. Surfaces: `Shared/PostureSwitchModel.swift`, the Mac `ProtectionPane.swift` (the
+resume door's caption only), the phone's `MobileProtectionSheet.swift` (the same line), `PostureSwitchTests.swift`; for
+the `switchInProgress` sibling, `Shared/PostureSwitch.swift`'s error case + its pending-marker throw sites. Zero
+`Sources/`. Base: fae43998.
+
+**`switchInProgress` — THE SAME FLAW, YES (by trace):** `PostureSwitchModel.message(for: .switchInProgress)` returned
+`resumeBody` for every refusal. The runner throws it at three pending-marker sites (`runCeremony`, `followTyped`,
+`followDerived` — a second start, decision 32 on this device; the follow's door, worded by `PostureFollowModel` through the
+same static `message(for:)`), so over a pending Replace All Keys marker the ceremony doors and the follow's door said
+"Entering Castle didn't finish on this Mac". Fix, the same way: the error carries the pending marker's act
+(`switchInProgress(step, act: CeremonyAct?)`, nil at the busy guards) and the wording reads the same selector. The BUSY
+arm (another road of this runner in flight — no marker exists) keeps `resumeBody`: there is no act to read, and the honest
+sentence there ("a switch is running") would be new copy — RESIDUAL below, not built.
+
+### LIVE STATUS
+
+- Pins: DONE (this commit) — `PostureSwitchTests`' MARK "VX-99 round 2b" (after round 2's F7 pin). Three tests:
+  - (a) `theResumeDoorFinishesThisDevicesOwnMidWalkRotationWhileEveryOtherDoorStillRefuses` — a Use Castle killed
+    mid-walk (the marker at `.reencrypt`, the vault's previous key set, `checkDoor().rotationInProgress`); `.enter`,
+    `.replaceKeys` and `.leave` each refuse with the still-finishing sentence, nothing written; the `.resume` model runs
+    the road (`.resumeAsk`, then the passphrase → `.done`), the vault's previous key cleared, L′, custody to the gate,
+    the marker gone, the Castle Done.
+  - (b) `theResumeDoorsCaptionOnBothPanesSpeaksForTheMarkersActNeverAlwaysEnteringCastle` — the selector over a
+    Replace All Keys marker (and a follow of one) gives `resumeReplacingKeysBody`, over a Castle marker `resumeBody`, the
+    act's `entersCastle` always the door label's rule; both pane files (comment lines dropped) carry no bare
+    `ProtectionCopy.resumeBody` and caption the door with the selector over `pending`, once. Read as CODE because the
+    door renders only over the pane's `@State` pending marker, which a composition dump of a freshly built pane never
+    holds (ProtectionSurfaceRenderTests' recorded limit), and the phone face has no Mac-side host — this suite's own
+    source-read precedent (`theDrainEngineTakesTheLeavesDedupeFacts…`).
+  - (c) `aRoadRefusedByAPendingMarkerSpeaksThatMarkersActNeverAlwaysEnteringCastle` — a Replace All Keys killed
+    mid-walk: the second start, the other ceremony and the follow each refused `switchInProgress`, each worded
+    `resumeReplacingKeysBody`; a Use Castle killed mid-walk: each worded `resumeBody`.
+  Build-for-testing PENDING. Red run PENDING.
+- Fix (1): NOT-STARTED — `if facts.rotationInProgress, !isResume` in `start()`.
+- Fix (2), the captions: NOT-STARTED — both panes `ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))`.
+- Fix (2), `switchInProgress`: NOT-STARTED — `case switchInProgress(RotationMarker.Step, act: CeremonyAct? = nil)`; the
+  three pending-marker sites pass `CeremonyAct(resuming: pending)`; `message(for:)` reads `ceremonyResumeTitle(act)`,
+  the busy arm `resumeBody`. The one existing pin that compares the thrown value (`aCrashAtEachOfTheThreeSeams…`'s
+  second start, `switchInProgress(.reencrypt)`) gains the act it now carries (`.enterCastle`).
+- **REVERT V99-J (named before it runs — item 1):** `if facts.rotationInProgress, !isResume` → `if
+  facts.rotationInProgress`. Expected RED: pin (a)'s resume half alone (the `.resumeAsk` guard); its three refusals green.
+  Result PENDING.
+- **REVERT V99-K (named before it runs — item 2, the captions):** both panes' caption back to `ProtectionCopy.resumeBody`.
+  Expected RED: pin (b)'s four pane lines alone (two per pane); its selector lines green. The pin reads the source at run
+  time, so this revert runs over the tip's bundle with the working tree edited. Result PENDING.
+- **REVERT V99-L (named before it runs — item 2's sibling):** `message(for:)`'s act arm deleted (every `switchInProgress` →
+  `resumeBody`). Expected RED: pin (c)'s three Replace All Keys wordings alone; its Castle half and the seams pin green.
+  Result PENDING.
+- Green PENDING: `PostureSwitchTests`, the batch-1 set (round 2's twenty suites), the tutorial spine (thirteen suites),
+  the two pane face suites (`ProtectionSurfaceRenderTests`, `ProtectionTierFaceTests` — they host `ProtectionPane`); the
+  phone build-for-testing.
