@@ -11,12 +11,44 @@ close; the morning note appended to `notes/handoffs/phase-13x-handoff.md`.
 
 | piece | status |
 |---|---|
-| 0. baseline — core headless + the two reds confirmed on the branch's base | PENDING |
-| 1. the harness fix — the default Standard world's vault carries the Apple-held copy | PENDING |
-| 2. the precedence pin (new) | PENDING |
-| 3. the full `PostureSwitchTests` + every suite exercising the changed sources, Mac, under a stage slot | PENDING |
+| 0. baseline — core headless + the two reds confirmed on the branch's base | DONE (this commit) — core headless on da0e88a9: **2383 tests in 277 suites PASSED** (158.9 s) + StringsWorkbook 40/6 (46.2 s); skips the standing env-gated ones only. The Mac confirmation is PENDING-behind-the-stage — **and the expected answer is NOT red: the pair is already GREEN on the base** (see THE BASE ALREADY CARRIES PIECE 1 below). |
+| 1. the harness fix — the default Standard world's vault carries the Apple-held copy | DONE-ON-THE-BASE by VX-99 (155188c5, refined 096361d7 — merged at 9819bff8, this branch's parent); re-traced here and CONFIRMED minimal, through the real road, zero production change. Nothing for this session to write. |
+| 2. the precedence pin (new) | IN-PROGRESS — the design settled below; the pin next |
+| 3. the full `PostureSwitchTests` + every suite exercising the changed sources, Mac, under a stage slot | PENDING (the orchestrator's; the commands listed below once the pin compiles) |
 | 4. cold review (fresh Fable, `notes/REVIEW_PROMPT.md` verbatim) + dispositions | PENDING |
 | 5. PR `VX-106: …` → merge commit → branch deleted → /Applications refresh (A1 first) → handoff note | PENDING |
+
+### THE BASE ALREADY CARRIES PIECE 1 (the implementer's first finding, 2026-10-08 — read before anything else)
+
+THE MECHANISM above was traced on 13x's tip. Between that trace and this branch, **VX-99 landed exactly the brief's
+harness fix** — the record's own line: *"VX-106's greening is recorded, not claimed"* (`vx-99-ladder-round2.md` :233,
+`-round3.md` :229). The facts, re-traced on this branch's code:
+
+- `PostureSwitchTests.makeWorld` gained `vaultSaysCastle: Bool? = nil` (155188c5; the precondition 096361d7):
+  `accountCastle = vaultSaysCastle ?? !standard`, and when the account is NOT Castle the fresh enrolled world lands
+  the Apple-held copy of M under THIS device's A — `client.updateVault(fetched.format.settingAppleHeldCopy(masterKey:
+  appleKey:appleKeyID:), expectedRevision:, keyProof:)` (:672–679). That is the REAL road, never a hand-forged row:
+  the emulated `key_vault_update` RPC (`VaultRPCEmulation.serveUpdate` — challenge, proof, revision CAS, whole
+  replace), the same write shape as production's `EncryptionSession.relandAppleHeldCopy` (:438) and `leaveCastle`
+  (decision 30/§3.4's Standard vault). `setUp(passphrase:)` stays the 14b passphrase-only mint; the copy lands on
+  the row after it, as the sync-setup road's `setUp(passphrase:recoveryWords:appleHeldCopy:)` would at birth.
+- So every DEFAULT `makeWorld()` reading now derives `hasAppleHeldCopy == true`; the `castleKeyFileAppleOpenable`
+  arm (`!reading.hasAppleHeldCopy`) cannot fire on it; the two tests fall through to `changeElsewhere` as before 13x.
+  `standard: false` (Castle) is unchanged — `accountCastle` true, no copy.
+- The six deliberate mismatches (`vaultSaysCastle: true` — :1867 · :1945 · :1990 · :2025 · :2867 · :5083 · :5176,
+  plus `standard: false, vaultSaysCastle: false` at :2856) keep the Castle-vault-under-a-Standard-file world ON
+  PURPOSE: each is a follow-into-Castle / vault's-word pin whose premise IS the mismatch (VX-99 round 2's review
+  judged each; re-read here — agreed).
+- The evidence that the pair is green: VX-99's tip run on **4adb8801** (an ancestor of this branch's HEAD —
+  verified) — `PostureSwitchTests` **"69 tests in 1 suite passed"** (`vx-99-pro-castle-apple-wrap.md` :1115, :1159),
+  the two VX-106 names inside it (they were the ONLY two issues in every pre-harness-fix run, :298/:315/:319, and
+  no run after 155188c5 lists them).
+
+**Consequence for this unit:** piece 1 has nothing to write — a second harness change would be a change for its own
+sake. Piece 2 (the precedence pin) is the unit's real deliverable: the brief's pin does NOT exist yet on the base (no
+test combines the Castle-by-vault + Apple-wrapped-file world with a PENDING change notice; the 13x pin
+`anAdoptedStandardEraPairUnderACastleVaultOwesTheFollowThatRetiresItsAppleCopy` has no change pending, and the
+two VX-106 tests have no exposure). Zero production change, as the brief expected; no STOP condition met.
 
 ## THE MECHANISM (traced read-only by the orchestrator before any code — the hallucination guard)
 
