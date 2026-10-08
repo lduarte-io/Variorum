@@ -473,6 +473,14 @@ struct VariorumApp: App {
             HelperView()
         }
         .defaultSize(width: 680, height: 560)
+        // 13s-b U1a, piece 4 (R-13s-24/25): the About window — the mark, the
+        // lowercase serif wordmark, the version (`AboutView`). A singleton,
+        // sized to its content, like the system panel it replaces.
+        Window(AboutCopy.menuTitle, id: AboutCopy.windowID) {
+            AboutView()
+        }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
         // Phase 13 (B2/R52): the Settings window — Appearance (the voice +
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {

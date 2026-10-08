@@ -1,0 +1,50 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "srgb:0.98824,0.07059,0.04706,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "srgb:0.00000,0.00000,0.00000,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "glass": false,
+          "image-name-specializations": [
+            {
+              "value": "striped-v.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "striped-v-mono.svg"
+            },
+            {
+              "appearance": "tinted",
+              "value": "striped-v-mono.svg"
+            }
+          ],
+          "name": "striped-v"
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "specular": false,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

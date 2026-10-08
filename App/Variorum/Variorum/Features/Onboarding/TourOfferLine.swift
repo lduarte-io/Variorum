@@ -45,8 +45,8 @@ nonisolated enum TourOfferCopy {
     /// The few seconds after "not now": where the tour lives from now on.
     /// Derived from the menu's name, so the two can never disagree.
     static var helpRoad: String { "Run it any time from Help \u{25B8} \(menuTitle)." }
-    /// The small V's image asset (piece 4 supplies it; until it exists the
-    /// line simply leads with its words).
+    /// The small V's image asset — the ONE mark About draws too (piece 4;
+    /// `notes/brand/tools/appicon.py` writes it; `AppMarkTests` pins it).
     static let markAssetName = "VariorumMark"
     /// **U1a STUB — U2 replaces it.** The tour door's honest answer while the
     /// engine does not exist yet: a door that did nothing says so (18i).
@@ -211,17 +211,14 @@ struct TourOfferLine: View {
         }
     }
 
-    /// The small V (R-13s-24/25 — the faithful two-tone edition), when its
-    /// asset is in the bundle.
-    @ViewBuilder
+    /// The small V (R-13s-24/25 — the faithful two-tone edition on its red
+    /// tile, the Dock icon's own proportions; piece 4's asset).
     private var mark: some View {
-        if let image = NSImage(named: TourOfferCopy.markAssetName) {
-            Image(nsImage: image)
-                .resizable()
-                .interpolation(.high)
-                .frame(width: Self.markSize, height: Self.markSize)
-                .accessibilityHidden(true)
-        }
+        Image(TourOfferCopy.markAssetName)
+            .resizable()
+            .interpolation(.high)
+            .frame(width: Self.markSize, height: Self.markSize)
+            .accessibilityHidden(true)
     }
 }
 

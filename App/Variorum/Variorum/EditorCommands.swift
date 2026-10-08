@@ -273,6 +273,16 @@ struct EditorCommands: Commands {
     }
 
     var body: some Commands {
+        // 13s-b U1a, piece 4 (R-13s-24/25 — the logo's About placement, Q19
+        // closed): the app menu's About item opens OUR window, which carries
+        // the mark and the lowercase serif wordmark the system panel cannot
+        // set (`AboutView`). UNDECLARED in the capability registry, on the
+        // Check for Updates / Lock Library Now / New Window precedent below:
+        // an app-menu standard with no block/take/post/book scope — the same
+        // door the system drew, now ours.
+        CommandGroup(replacing: .appInfo) {
+            Button(AboutCopy.menuTitle) { openWindow(id: AboutCopy.windowID) }
+        }
         // 13r U2 — Variorum ▸ Check for Updates…, under About: the platform's
         // own place for this act. UNDECLARED in the capability registry, on
         // the Lock Library Now / New Window precedent. It is an app-menu
