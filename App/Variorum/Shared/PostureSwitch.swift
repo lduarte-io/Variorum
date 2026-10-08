@@ -1474,8 +1474,14 @@ final class PostureSwitchRunner {
             // the second resume's stamp still differs from the vault's and the
             // road still reads as another device's (the other-device Done, the
             // words rule), round 1's recorded residual closed by the same rule.
+            // And `entersCastle` is the ROAD's only where the road follows the
+            // account (another device's road, a follow's marker); on this
+            // device's OWN road it stays the ACT's — recomputed against the
+            // fresh vault at every resume anyway — so a resume that stops
+            // here to ask the passphrase does not forget it was finishing a
+            // Use Castle (S1's Done; the pane's door label).
             try await writeMarker(RotationMarker(
-                step: .reencrypt, entersCastle: roadEntersCastle,
+                step: .reencrypt, entersCastle: (byAnotherDevice || marker.isFollow) ? roadEntersCastle : entersCastle,
                 oldKeyFingerprint: marker.oldKeyFingerprint, newKeyFingerprint: marker.newKeyFingerprint,
                 newCorpusKeyID: marker.newCorpusKeyID, startedAt: marker.startedAt,
                 follow: (marker.isFollow || byAnotherDevice) ? true : nil))

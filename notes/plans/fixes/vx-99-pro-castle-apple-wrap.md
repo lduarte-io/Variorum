@@ -776,11 +776,12 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   comment and the three redundant re-wraps (`replaceAllKeysUnderStandardRefuses…`, `replaceAllKeysRefusesAnUnreachable…`,
   `twoDevicesSwitchingPostureAtOnce…`) dropped for an `#expect` that the harness landed the copy; (6) `makeWorld(
   vaultSaysCastle:)` gains a `precondition` (only a fresh enrolled world's vault). No behavioral revert — no behavior.
-- F3 correction: IN-PROGRESS — the tip's first green run (05:55) failed ONE line, S1's Done (`set on another device on an
+- F3 correction: DONE (this commit) — the tip's first green run (05:55) failed ONE line, S1's Done (`set on another device on an
   earlier day`): the first `resume(nil)` (before the passphrase ask) rewrites the `.reencrypt` marker with the ROAD's
   `entersCastle` (false on S1), so the second call no longer saw the act (and the pane's door would have said "Finish
   Replacing Keys…" over a Use Castle). Fix: the rewrite keeps the ACT's `entersCastle` on an own road (recomputed from the
-  fresh vault every resume anyway) and the road's on another device's road or a follow's marker.
+  fresh vault every resume anyway) and the road's on another device's road or a follow's marker. Rebuilt; **PostureSwitchTests
+  on the tip: "Test run with 65 tests in 1 suite passed"** (06:01, slot 4). The rest of the green and the reverts PENDING.
 - Reverts (each named in its fix's commit, BEFORE it runs): PENDING.
 - Green (PostureSwitchTests + batch 1's twenty suites + the tutorial spine, each suite its own invocation): PENDING.
 - Phone compile (`MobilePostureSheets.swift` touched): PENDING.
