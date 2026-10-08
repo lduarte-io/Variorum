@@ -592,3 +592,14 @@ caller that passes `recoveryWords:` to the SECOND resume, and assert (red-on-old
 copy from those words (`newFile.recovery == nil` for the other-device road) AND `outcome.followedAnotherDevicesSwitch
 && outcome.otherDeviceName == "sibling device"`. Red on the current fix (byAnotherDevice spent at `.reencrypt`), green
 once the marker carries the bit and the `.reencrypt` arm reads `marker.byAnotherDevice` first in its discriminator.
+
+## ROUND 1 — CLOSED (2026-10-08)
+
+The Fable reviewer's fix pass is ADOPTED (155188c5 + c1daa77c, verified: the diff touches only `PostureSwitch.swift` +
+its tests, zero `Sources/`; V99-C and V99-D each red on their own pin alone; PostureSwitchTests 52/52, batch-1 181/20,
+spine 99/13, phone compile). **The double-crash residual is RULED OUT of this unit → VX-107** (Backlog, Low): one
+cosmetic Done sentence on a double crash + a latent words rule no production door reaches, against a `Sources/…/Sync/`
+marker field, another stage slot and another custody review; every key-protecting fact of that road is already carried
+and pinned. VX-106's pair greened under the account-consistent harness — RECORDED, not claimed (the arm-order question
+stays variorum-da's). Next: one implementer check pass over the whole diff, then round 2 by a fresh Opus 5.5
+reviewer, which doubles as her ruled "Opus 5.5 cold review at the end either way" (Fable already had round 1).
