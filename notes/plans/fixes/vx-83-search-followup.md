@@ -380,6 +380,13 @@ moment's):**
   were weighed by her; taste is hers and the newest word wins. Help texts re-word to
   match ("Include your commits — every savepoint…" → the implementer re-drafts around the
   chip's word, offered-only-with-words rule unchanged, wording rides the bundle).
+- **R-VX83-10 (2026-10-08, resolving C8):** *"yes fix it to being commits. i think it will
+  just make more sense that way. I like commits because I don't want people to think
+  savepoint is for the whole note or something."* → within SEARCH, the lines and counts
+  follow the chip's word: a line reads "commit · Oct 6", the band counts "N commits";
+  the field-guide sentence re-words to match. C8 leaves the bundle decided. (Her
+  rationale is noted for 13s's app-wide voice pass — the Settings pane, receipts and
+  Block History still say "savepoint"; whether THEY move is 13s's sitting, not this run's.)
 - **R-VX83-7 (2026-10-07 late evening — MERGE ORDER FREED; supersedes this record's
   "merges after 13x" header line, which was also her word, earlier):** *"I told 13x to
   release its hold so you and another session can move through. you should be next in the
