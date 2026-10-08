@@ -1083,3 +1083,15 @@ No mobile run is owed (nothing under `VariorumMobile/` or `Shared/` changed).
 4. **The order:** the plan's privacy tuple back to seventh (and its section + mint, or the plan alone) → `theChapterIsTwoLessonsInTheRightPlace` RED (with the plan alone, `theSeededBookMatchesTheLessonPlanExactly` reds too) → restore.
 
 **LANDING STATUS: READY-FOR-STAGE + WALK-PENDING (implementer side closed, 2026-10-08).** The cold review follows — FABLE (seeder-adjacent, the standing rule).
+
+### U4 FIX ROUND (round-1 arbitration — `notes/plans/13s-ladders/u4-round1.md` § ARBITRATION, f0373d10; the implementer, headless, 2026-10-08)
+
+**What this round does NOT do:** no rebuild of P-U4-1's wording (the arbitration: the BUILD STANDS, the choice is hers), no `xcodebuild test` (the Mac pins run at the window), nothing beyond the arbitration's four items. The NIT-2 merge guard is the orchestrator's (done in f0373d10); the triage landing has since ported the guide, so the record's watch-out 1 (the stale fold-line quote) is resolved — `TutorialSeeder.swift` no longer quotes "N quiet savepoints".
+
+| # | item | status |
+|---|---|---|
+| F1 | MINOR-2 — the ⌘/ `note ▾` row drops the dead "history" door and lists the real menu from its constants; the reviewer's red-on-old pin | NOT-STARTED |
+| F2 | MINOR-3 — the fence's sentence ends are "." and "!" only (a "?" title is a header); the control literal red on the old matcher | NOT-STARTED |
+| F3 | P-U4-1 restated to the arbitration's shape (the Versions collision's four sites, the two explanations, seven sites, option (c)) — HER three-way taste call | NOT-STARTED |
+| F4 | NIT-1 — P-U4-5 gains the one honest sentence (literals, never composed strings) | NOT-STARTED |
+| F5 | The whole core suite at the END; counts | NOT-STARTED |
