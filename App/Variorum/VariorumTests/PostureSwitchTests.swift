@@ -2401,6 +2401,62 @@ struct PostureSwitchTests {
         }
     }
 
+    /// VX-99 (e) — THE RESUME's ANOTHER-DEVICE ROAD BY THE VAULT's WORD (the
+    /// orchestrator's ruling, 5ce7175b — the record's THE RESUME RULE). A's
+    /// STANDARD Replace All Keys is killed BEFORE its own vault write; B enters
+    /// Castle whole meanwhile; A resumes with its posture STILL reading Standard
+    /// — the indeterminate reading's custody shape (silent), the ready's vault
+    /// read never having landed. The resume's `.vaultWrite` arm holds the vault
+    /// it just fetched, and that vault says CASTLE (no Apple-held copy): the
+    /// road is the FOLLOW into B's switch (`byAnotherDevice`), so it follows
+    /// the ACCOUNT exactly as `runFollow` does — no Apple copy in the new key
+    /// file, custody to the gate, the Standard-era key file retired from the
+    /// live folder, the offer listed (A was Standard-shaped). RED ON OLD
+    /// (449f5618): the arm took `marker.entersCastle` (false) and the posture
+    /// read (Standard) — the new key file carried `apple`, custody went
+    /// `.auto`, the old Standard-era file stayed, and the outcome said "keys
+    /// replaced" on a Castle account.
+    @Test func aStandardReplaceAllKeysResumedIntoAnotherDevicesCastleFollowsTheVaultNotAStalePosture() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let b = try await makeWorld(sharing: a, deviceName: "sibling device")  // built BEFORE any switch
+        defer { b.tearDown() }
+        let oldPair = try a.addPreSwitchPair()
+        #expect(a.posture == .standard)
+        #expect(try StoreKeyEnvelope.load(at: a.oldKeyFileURL)?.apple != nil, "A's library is Standard-shaped")
+        arm(a, faultAt: .beforeVaultWrite)
+        await #expect(throws: PostureSwitchError.injectedFault(.beforeVaultWrite)) {
+            _ = try await a.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: a.words)
+        }
+        let aMarker = try #require(try await a.marker())
+        #expect(aMarker.step == .vaultWrite && !aMarker.entersCastle, "A's own Replace All Keys marker; its write never landed")
+
+        // B's whole switch lands while A is down: the account is Castle now.
+        let bDone = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
+        let bMaterial = try #require(bDone.material)
+        #expect(try await a.vault().format.masterWrappedByAppleHeld == nil, "the vault carries no Apple-held copy")
+
+        // A resumes — its posture read is STILL Standard (the stale shape).
+        arm(a, faultAt: nil)
+        #expect(a.posture == .standard, "the posture read A's resume starts from")
+        let outcome = try await a.runner.resume(passphrase: "sesame")
+        #expect(outcome.followedAnotherDevicesSwitch && outcome.otherDeviceName == "sibling device",
+                "the road was the FOLLOW into B's switch: \(outcome)")
+        #expect(outcome.entersCastle, "the road follows the ACCOUNT into Castle — the vault's word, never the stale read")
+        let aFile = try a.keyFile(outcome.newKeyFingerprint)
+        let aKey = try aFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(a.storeURL, key: aKey) && !StoreEncryptionMigration.opens(a.storeURL, key: a.oldKey))
+        #expect(aFile.apple == nil && aFile.appleKeyID == nil,
+                "a Castle account's key file carries no Apple copy, whatever the posture read said")
+        #expect(try aFile.unwrapKey(master: bMaterial.masterSymmetricKey) == aKey, "L′ under B's M′")
+        #expect(a.calls.custodyTargets.last == .biometric && a.posture == .castle, "custody to the gate")
+        #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path),
+                "the old Standard-era key file retired from the live folder (the follow's 2d.4 rule)")
+        #expect(outcome.preSwitchSnapshots == [oldPair], "A was Standard-shaped: the follow's offer is listed")
+        #expect(a.appleBacking.key == a.apple, "the iCloud key untouched")
+        #expect(try await a.marker() == nil)
+    }
+
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
     /// the front check refuses a STALE recorded corpus id with the
     /// keys-don't-match sentence and runs nothing; then, on the current

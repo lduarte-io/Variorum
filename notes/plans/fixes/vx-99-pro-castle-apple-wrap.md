@@ -258,6 +258,24 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
   (the eleven `TutorialWalkTests` suites + `TutorialBooksLessonTests` + `TutorialBooksRitualTests`): **"Test run
   with 99 tests in 13 suites passed"**, no skips.
 
+**THE RESUME-RULE DELTA (the orchestrator's ruling, 5ce7175b — LIVE STATUS of the second piece):**
+- Pin (e) written, RED on 449f5618's code: IN-PROGRESS —
+  `aStandardReplaceAllKeysResumedIntoAnotherDevicesCastleFollowsTheVaultNotAStalePosture` (after pin (d)): A's
+  STANDARD Replace All Keys killed at `.beforeVaultWrite`, B (`sharing: a`, "sibling device") enters Castle whole,
+  A resumes by the passphrase with its scripted posture STILL `.standard` → expects the follow flag + B's name,
+  `outcome.entersCastle`, the new key file `apple == nil && appleKeyID == nil`, custody `.biometric` and the posture
+  Castle, the old Standard-era key file GONE from the live folder, the offer listing A's pre-switch pair, the
+  marker cleared. Compiled (build-for-testing SUCCEEDED on the pre-fix code); the red run PENDING the GO.
+- The fix (the ruled scope — the resume's `.vaultWrite`/`.reencrypt` arm only): NOT-STARTED — settled design:
+  `let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil`;
+  `let roadEntersCastle = byAnotherDevice ? vaultSaysCastle : entersCastle` (feeding `rekeyCustodyAndSnapshot`'s
+  `entersCastle` and `listPreSwitchPairs`); `appleCopy: !vaultSaysCastle` for the WHOLE arm.
+- Behavioral revert (named here BEFORE it runs): **REVERT V99-B** — the arm's two decisions back to 449f5618's:
+  `let roadEntersCastle = entersCastle` (the marker's) and `appleCopy: !entersCastle && leaves.posture() ==
+  .standard`. Expected: RED on pin (e) alone; (a)–(d), the own-write Standard resume control in (b), and every
+  other test as before. NOT-STARTED.
+- Green (`PostureSwitchTests` + the runner's reach + the spine, under the same slot): NOT-STARTED.
+
 ## PRE-EXISTING REDS in `PostureSwitchTests` (found by this run; NOT this diff's; NOT fixed here — handed to the orchestrator)
 
 The pre-fix red run (above) also failed two tests that my pins do not touch:
