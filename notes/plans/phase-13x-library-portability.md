@@ -2183,3 +2183,27 @@ orchestrator owns their homing):**
 5. The R3-2 pin drives `wireGates`; `VariorumApp`'s single call site is not pinnable without a
    view (a re-inlined `{ hold.isHeld }` there would not redden it) — recorded.
 
+
+### F3 — THE ORCHESTRATOR'S VERIFICATION + THE CATCH-UP (2026-10-08 early)
+
+- **F3 verified:** commits present and pushed; the core count re-run independently on the
+  merged tree — **2346 tests / 270 suites + workbook 40/6 GREEN** (F3's own figures exactly);
+  fence held (zero `Sync/`, zero `Migrations.swift`, marker 12 at `SyncSchema.swift:146`).
+- **PHONE BUILD BREAK — found by F3, FIXED by the orchestrator (856fcb94):** F1's N1 held-
+  refusal called `AppSession.status` (a Mac-only member, inside `#if os(macOS)`) from Shared
+  `SyncStatusViews.swift:471` — VariorumMobile had not compiled since `e8a8fd78`. The branch is
+  now `#if os(macOS)`, justified by P-F1-2 (the phone's hold gate is nil — never held). Proof:
+  VariorumMobile BUILD SUCCEEDED (iOS Simulator). **Process lesson for the closeout:** no rung
+  of this phase's ladder built the phone target; the closeout's MOBILE PARITY check must
+  include a `VariorumMobile` build, not only a words line.
+- **CATCH-UP MERGE (e6358ec9):** origin/main merged in (VX-75's PR #134 + ledger commits) —
+  clean, no conflicts; core green as above; Mac TEST BUILD SUCCEEDED; phone BUILD SUCCEEDED.
+- **Owed in 13x's stage block (in order):** F3's PENDING Mac commands — the
+  `LibraryPortabilityDoorTests` run (expect 11/11) + REVERT C, C′ and R3-2 (F3 RECORD lists
+  them exactly); any round-4 Mac pins; the /Applications refresh (A1 first); her Air leg; merge.
+- **F3's open observations 2–3** (landing inherits source file flags; a stray sidecar at an
+  empty slot) stand as recorded in the F3 RECORD — round 4 sees them there.
+- **Next: LADDER ROUND 4** (past the cap at her word) — a fresh `fable-reviewer`, REVIEW_PROMPT
+  verbatim, her foci in `notes/plans/phase-13x-review-foci.md`; report →
+  `notes/plans/13x-ladder-round4.md`, committed unedited. The worktree is STILL until its
+  handback.
