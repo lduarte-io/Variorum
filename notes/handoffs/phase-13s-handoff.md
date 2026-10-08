@@ -22,7 +22,7 @@
 
 ## TICKETS BORN OR MOVED TONIGHT
 
-VX-103 (U4, closes at merge) · VX-105 (readme/letter, yours) · VX-111 (the "in 2 books" notice counting gatherings — Pre-launch at your word) · VX-112 (the quick-entry focus re-grab — you'll judge on your walk) · VX-113 (#205's named-change refusal — 13s-a, Pre-launch) · VX-114 (the mobile sweep's 13x LibraryOpenCopy red — the 13x/VM seam's call).
+VX-103 (U4, closes at merge) · VX-105 (readme/letter, yours) · VX-111 (the "in 2 books" notice counting gatherings — Pre-launch at your word) · VX-112 (the quick-entry focus re-grab — you'll judge on your walk) · VX-113 (#205's named-change refusal — 13s-a, Pre-launch) · VX-114 (the mobile sweep's 13x LibraryOpenCopy red — the 13x/VM seam's call) · VX-115 (BookCollectingDoorsTests' pin stale on MAIN since 13o's Search This Book row — found by the closeout whole-target run, red at the merge-base, not ours).
 
 ## THE NIGHT'S MACHINERY NOTES (honesty log)
 
@@ -33,6 +33,7 @@ VX-103 (U4, closes at merge) · VX-105 (readme/letter, yours) · VX-111 (the "in
 - `log show` on this Mac returns zero lines for everything — never read its silence as evidence (recorded).
 - `-only-testing` accepts a FILE-named target silently matching nothing ("Executed 0 tests" under TEST SUCCEEDED) — the skip-trap lesson re-proven; the suites in TutorialBooksChapterTests.swift are LessonTests/RitualTests.
 - The simulator name-resolver's OS:latest quirk refuses a renamed-runtime device; boot + `id=` works (VX-114's log has it).
+- **The whole-target run surfaced one real harness class OURS and one stale pin MAIN'S:** the Study no-voice default makes the first voiceless store a suite opens leave `EditorTypography.current` at Study for every later harness in the process — suites calibrated against Terminal metrics (the entry band's line height reads the base font) sat on knife edges. Closed with ONE named pin (`TerminalMetricsPin`, EditorTestSupport) at the family's harness helpers; bisect-proven (green at the merge-base, red at c41c96e0), red-without/green-with evidence per site. The main-side stale pin is VX-115.
 
 ## OPEN THREADS
 
