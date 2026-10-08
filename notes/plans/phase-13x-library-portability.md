@@ -1773,3 +1773,27 @@ is red on MAIN — two bare `.fixedSize()` sites in `Core/Views/SearchAnswerFace
 (13o's search faces). The VX-83 search follow-up run is editing that file now; routed to that
 session rather than fixed here (a 13x edit would collide with its merge). 13x's closeout Mac
 run will show this one red and it is accounted for here.
+
+### THE WALK — CLOSED (Mac side; 2026-10-07 ~22:15, the orchestrator's hands, now Opus 5.5 — her
+mid-session switch, the Fable safeguards having interrupted the trace; the VX-80 implementer
+stays Fable)
+
+Re-run on the W-1 + W-2 fixed build, every leg green and seen:
+1. File ▸ **Send Library to Another Mac…** → destination panel → the pair produced (store +
+   key file) → done sheet. ✔
+2. File ▸ **Open Library…** → a non-library folder → `notAVariorumStore` refusal. ✔
+3. Open Library… → the produced pair → classify → the ruled confirm (no unlock step on an
+   aligned same-key pair). ✔
+4. **Open This Library** from the RUNNING app (the W-1 road) → adopted: the old library + its
+   key file + sidecars in `Previous Libraries/<stamp>/`, the adopt-safety copy in
+   `Backups/safety-copies/variorum-adopt-safety-<stamp>/`, `variorum-restore-hold.json` beside
+   the store. ✔
+5. The **hold banner** on a bounded 1440×1084 window (the W-2 road) — the ruled sentence +
+   Resume Sync. ✔ Persists across a relaunch while held (by design). ✔
+6. **Resume Sync** on the sync-off dev store → the hold marker CLEARED, the banner gone,
+   nothing else (P-U2-2's account-less arm). ✔
+7. Settings ▸ **Data Safety** → Copies + **Restore from Backup** rows with decision 11's
+   credential lines and Open… doors. ✔
+Walk debris: one stray click collapsed the dev store's "u1 welcome" shelf header (a view
+toggle; the orchestrator's coordinate slip). Findings: W-1 and W-2, both FIXED with red-on-old
+pins above. The real-device AirDrop leg remains hers (the Air brief, `13x-air-leg-prompt.md`).
