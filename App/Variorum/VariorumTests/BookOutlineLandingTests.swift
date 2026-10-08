@@ -1216,14 +1216,22 @@ extension BookOutlineLandingTests {
             await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
-            model.reportOutlineContentWidth(696)
+            // 431, not the harness's real ~696 column: `SurfaceSizeMemory`
+            // PERSISTS (real UserDefaults — the test host is the dev app),
+            // the fixture's `.incrementing` ids repeat across tests, and the
+            // suite's mounted tests persist records for these very ids at
+            // ~696 — a width-matched leak made the "no memory" arm honestly
+            // TRUE on this suite's first full run. At 431 no leaked record
+            // can match, and the arms test the consult, not the leak.
+            model.reportOutlineContentWidth(431)
             #expect(!model.outlineRowPreMounts(storyID), "neither focused nor revealed ⇒ never")
             model.focus(storyID)
-            #expect(!model.outlineRowPreMounts(storyID), "focused but NO memory ⇒ the shipped road")
+            #expect(!model.outlineRowPreMounts(storyID),
+                    "focused but no WIDTH-MATCHED memory ⇒ the shipped road")
             model.rememberSurfaceSize(storyID, CGSize(width: 500, height: 16000))
             #expect(!model.outlineRowPreMounts(storyID),
                     "a memory from ANOTHER width reserves nothing, so it must not pre-mount")
-            model.rememberSurfaceSize(storyID, CGSize(width: 696, height: 16000))
+            model.rememberSurfaceSize(storyID, CGSize(width: 431, height: 16000))
             #expect(model.outlineRowPreMounts(storyID), "focused + width-matched memory ⇒ pre-mounts")
             model.focus(nil)
             #expect(!model.outlineRowPreMounts(storyID), "focus released ⇒ back to the viewport's rule")
