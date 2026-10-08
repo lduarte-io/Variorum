@@ -1000,3 +1000,25 @@ sentence there ("a switch is running") would be new copy — RESIDUAL below, not
   `.disabled(activeSwitch != nil)` does not cover it) still reads `resumeBody`, "Entering Castle didn't finish on this
   [device] … finishing picks up exactly where it stopped" — false there in a different way (nothing failed; a road is
   running). No marker, so no act to read; the honest sentence would be new copy → 13s (QUESTIONS at the merge).
+
+## ROUND 3 — ORCHESTRATOR DISPOSITION (2026-10-08; the CAP — no round 4 without her word)
+
+Round 3 (`notes/plans/fixes/vx-99-ladder-round3.md`, unedited): 1 MAJOR + 1 MINOR introduced by round 2's F3, 2 MINOR
+pre-existing, NITs. **Ruled:**
+- **MAJOR (S2's Done claims her words are not the account's) — FIX NOW, by RESTORING the pre-F3 face on that road:** a
+  road that starts from this device's OWN stamped `.reencrypt` marker (`!isFollow` — its own vault write landed) never
+  speaks ledger 61's words sentence; it speaks an existing sentence with NO words claim (the ordinary follow/keys Done
+  the road showed before F3 — reuse existing copy; a new line only if none is true, PROVISIONAL). The `.vaultWrite`
+  case and the second-crash ambiguity stay with VX-107. Pin: the S2 world with `b.words = a.words` → the Done does
+  not contain "not your account's".
+- **MINOR-1 (silent custody move, no §7 notice) — FIX NOW, option (b), restoring pre-F3 behavior for the into-Standard
+  direction:** the resume keeps custody by the read when the account moved Castle → Standard elsewhere, so the
+  reconcile's follow-into-Standard arm fires at the next ready and speaks `movedToStandardNotice` (§7's one-time
+  notice); the Apple copy stays the vault's word. Pin: the F3 custody world → custody unchanged by the resume, and the
+  next reconcile owes the follow into Standard (the notice set).
+- **MINOR-2 (Use Castle's local-only road for an enrolled-shaped library) — TICKET** (decision 9; the sibling of F4).
+- **MINOR-3 (the CAS-race follow's marker carries no stamp) — appended to VX-107** (its class).
+- **NITs:** the Encryption-tab/sync-row banners → the MINOR-2 ticket; `CeremonyAct`'s home and the stale sweep lines
+  — the fix session may tidy the line numbers; the move is recorded, not made. The SPECULATIVE A re-read → recorded.
+A fresh narrow implementer; one stage slot; the orchestrator verifies the delta itself (no round 4 — her call at the
+morning handoff whether a review of this delta is wanted before anything else builds on it).
