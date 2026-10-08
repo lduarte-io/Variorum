@@ -57,7 +57,7 @@ harness fix** — the record's own line: *"VX-106's greening is recorded, not cl
 - So every DEFAULT `makeWorld()` reading now derives `hasAppleHeldCopy == true`; the `castleKeyFileAppleOpenable`
   arm (`!reading.hasAppleHeldCopy`) cannot fire on it; the two tests fall through to `changeElsewhere` as before 13x.
   `standard: false` (Castle) is unchanged — `accountCastle` true, no copy.
-- The six deliberate mismatches (`vaultSaysCastle: true` — :1867 · :1945 · :1990 · :2025 · :2867 · :5083 · :5176,
+- The seven deliberate mismatches (`vaultSaysCastle: true`, line numbers base-relative — branch :5203/:5296 for the last two after the pin's +120 insertion — :1867 · :1945 · :1990 · :2025 · :2867 · :5083 · :5176,
   plus `standard: false, vaultSaysCastle: false` at :2856) keep the Castle-vault-under-a-Standard-file world ON
   PURPOSE: each is a follow-into-Castle / vault's-word pin whose premise IS the mismatch (VX-99 round 2's review
   judged each; re-read here — agreed).
@@ -134,7 +134,7 @@ sibling). No test is re-worlded by this unit; nothing PROVISIONAL to record for 
 ## THE MECHANISM (traced read-only by the orchestrator before any code — the hallucination guard)
 
 13x's ladder-R1 BLOCKER fix added the `castleKeyFileAppleOpenable` arm to
-`ProtectionController.reconcile` (`App/Variorum/Shared/ProtectionController.swift` ~680): it owes the follow
+`ProtectionController.reconcileFollow` (`App/Variorum/Shared/ProtectionController.swift` ~680; `reconcile` only calls it): it owes the follow
 when the vault holds NO Apple-held copy (`!reading.hasAppleHeldCopy` — a Castle account) AND the live key file
 carries an `apple` wrap, and returns before the change-notice arm. In `PostureSwitchTests.makeWorld(standard:
 true)` — the DEFAULT — the key file IS Apple-wrapped (~653, right for Standard) but the vault is enrolled through
@@ -158,7 +158,7 @@ notice itself. Reordering would let an informational notice delay the fix for a 
 
 Read, in order: `CLAUDE.md` + auto-canon; `notes/SessionResiliencyProtocol.md`; `notes/SyncSpec.md` IN FULL
 (custody work); THIS FILE whole; `notes/plans/phase-13x-library-portability.md` §§ the R1 BLOCKER's
-disposition + F1's BLOCKER fix; then the code: `ProtectionController.reconcile`'s posture arms,
+disposition + F1's BLOCKER fix; then the code: `ProtectionController.reconcileFollow`'s posture arms,
 `PostureSwitchTests.makeWorld` (and VX-99's pins beside it — they share the harness), `VaultEnrollment`, the
 emulated vault (`EmulatedVault`), and how a real Standard vault gains its Apple-held copy
 (`EncryptionSession` / `relandAppleHeldCopy` / decision 30).
@@ -199,3 +199,26 @@ file's LIVE STATUS from your first commit; close with "VX-106 BUILT".
   `PostureSwitchTests.swift:4159` ("Expectation failed: controller.followNotice")**; the other 69 green incl. the
   two VX-106 names; Phase13pControllerTests 50/50 green. Restored by `git checkout --`; `git diff` EMPTY.
 - Stage claimed with the lock FREE (the coordinator acked; next time ask first), released on the result line.
+
+## ROUND 1 — DISPOSITIONS (report `notes/plans/vx-106-ladder-round1.md`, verbatim at f7f6142c: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT)
+
+| finding | disposition |
+|---|---|
+| MINOR — in this pin's world (Castle account, Apple-wrapped key file, passphrase changed elsewhere), the follow's wrong-word refusal says "That isn't your library's passphrase" though the typed old word IS the library's, and the change notice that would say so is suppressed behind the follow | **ACCEPTED as an AUTHOR QUESTION → QUESTIONS #205** (copy, the 13s re-voicing family; no code change — the spec is silent, so no red-on-old pin can exist until she rules the sentence; the same sentence was already pinned in two sibling changed-elsewhere worlds) |
+| NIT — the mechanism section named `reconcile` for the arm's home | **FIXED** — `reconcileFollow` (the record's two sections now agree) |
+| NIT — "six deliberate mismatches" over a list of seven, with base-relative line numbers unsaid | **FIXED** — "seven", base-relative noted |
+
+No round 2: zero BLOCKER/MAJOR and no code changed by the dispositions (the ladder rule).
+
+## VX-106 CLOSEOUT (2026-10-08, the orchestrator — her overnight mandate)
+
+- **Delivered:** the PRECEDENCE PIN `aPendingPassphraseChangeNeverDelaysTheFollowThatRetiresAnAppleOpenableKeyFileUnderCastle`
+  — the decision "a pending change notice never delays the follow that retires an Apple-openable key file under
+  Castle" is now locked by a red-on-old guard (REVERT V106-A red on exactly the pin). The two tests the ticket named
+  were already green on main by VX-99's harness fix (155188c5) — recorded, not claimed.
+- **Evidence:** PostureSwitchTests 70/70 · Phase13pControllerTests 50/50 · V106-A red on exactly :4159, restore
+  diff-empty · core headless 2383/277 + 40/6 (unchanged — zero `Sources/`).
+- **No /Applications refresh** (ruled by the stage coordinator, 2026-10-08): test-only diff; her 5740 (from
+  9819bff8) carries the identical app code; 13s's end-of-run refresh installs main as it stands then.
+- **MOBILE PARITY:** nothing mobile-visible (a Mac test file only).
+- **Canon:** QUESTIONS #205 (the sentence); no AppSpec delta (no behavior changed).

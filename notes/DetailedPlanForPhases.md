@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | 13s — Voice & onboarding | **VX-7** · `vx-7-13s-voice-onboarding` | `~/dev/variorum-13s` · the PRO (seat moved back 2026-10-08 at her word — the Air lacks signing approval; design ran to completion there; the handoff `notes/plans/phase-13s-orchestrator-handoff.md`) | OPEN — at the BUILD stage since 2026-10-08: the tour APPROVED (R-13s-27), mockup v5 is the spec; two tracks at her word — U1a (first-open surface) + the field guide triage (R-13s-30); U1b gated on the Sync/-custody slot (VX-99 holds it); record: `notes/plans/phase-13s-voice-onboarding.md` |
-| VX-106 — PostureSwitchTests harness (13x's last change) | **VX-106** · `vx-106-posture-harness-standard-world` | `~/dev/variorum-vx-106` · the Pro · session `variorum-da` | OPEN — kicked off 2026-10-08 under her overnight mandate; holds the Sync/-custody slot #2 (granted at VX-99's merge 9819bff8); 13s's U1b next. Record: `notes/plans/fixes/vx-106-posture-harness-standard-world.md` |
 
 ### Latest closeout
 
