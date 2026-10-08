@@ -132,6 +132,9 @@ public enum SearchComposer {
     static let kindWeights: [(kind: String, weight: Double)] = [
         ("title", 3.0), ("book", 3.0), ("chapter", 2.5), ("block_name", 2.0),
         ("take_label", 1.5), ("take", 1.0), ("comment", 0.8), ("note_meta", 0.8),
+        // VX-72 (PROVISIONAL P-VX83-C2): a saved state ranks just under the
+        // living take — the living words lead, their savepoints follow.
+        ("savepoint", 0.9),
     ]
     /// The rendered take's boost over the block's other takes.
     static let renderedBoost = 1.25
@@ -218,10 +221,11 @@ public enum SearchComposer {
         if cursor != nil {
             keyset = "WHERE (s.score > ? OR (s.score = ? AND s.doc_id > ?))"
         }
+        let saved = savedAtStage("page", query)
         let sql = """
             WITH hits AS (\(hits.sql)),
             scored AS (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             ),
             page AS (
@@ -230,8 +234,8 @@ public enum SearchComposer {
               ORDER BY s.score, s.doc_id
               LIMIT ?
             )
-            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid
+            SELECT page.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
+            FROM search_fts JOIN page ON page.doc_id = search_fts.rowid\(saved.join)
             WHERE search_fts MATCH ?
             ORDER BY page.score, page.doc_id
             """
@@ -243,12 +247,27 @@ public enum SearchComposer {
     }
 
     /// The score of a hit row `h` — `bm25 × the kind's weight × the
-    /// rendered-take boost` (lower is better; bm25 is negative).
-    static var scoreSQL: String {
+    /// rendered-take boost` (lower is better; bm25 is negative). Under the
+    /// commits facet (VX-72) a savepoint's `rendered` says whether ITS TAKE
+    /// renders (the landing reads it), so the boost is held to takes there —
+    /// a savepoint never wears it (P-VX83-C2). Off the facet no savepoint is
+    /// a hit and the shipped text stands byte for byte.
+    static func scoreSQL(_ query: SearchQuery) -> String {
         let weight = "CASE h.kind "
             + kindWeights.map { "WHEN '\($0.kind)' THEN \($0.weight)" }.joined(separator: " ")
             + " ELSE 1.0 END"
-        return "h.bm * (\(weight)) * (CASE WHEN h.rendered THEN \(renderedBoost) ELSE 1.0 END)"
+        let boosted = query.includesSavepoints ? "h.rendered AND h.kind = 'take'" : "h.rendered"
+        return "h.bm * (\(weight)) * (CASE WHEN \(boosted) THEN \(renderedBoost) ELSE 1.0 END)"
+    }
+
+    /// **A savepoint's DAY, read for the page rows only** (VX-72 — the line
+    /// wears "savepoint · Oct 6", P-VX83-C6): the commit's `created_at` by its
+    /// key, joined at the snippet stage over the ≤ `limit` rows that list
+    /// (∝ the page, never the matches). Nothing off the facet.
+    static func savedAtStage(_ rows: String, _ query: SearchQuery) -> (column: String, join: String) {
+        guard query.includesSavepoints else { return ("", "") }
+        return (", cp.created_at AS saved_at",
+                "\nLEFT JOIN commit_point cp ON cp.id = \(rows).src_id AND \(rows).kind = 'savepoint'")
     }
 
     /// **The HITS** — every matching doc with its home's facts, scoped,
@@ -277,6 +296,17 @@ public enum SearchComposer {
         guard let text = query.text, let match = try ftsMatch(text) else { return nil }
         var arguments: [Value] = [.text(match)]
         var conditions: [String] = ["(c.id IS NOT NULL OR r.id IS NOT NULL)"]
+        // **VX-72 — the SAVEPOINT FENCE** (the §U-C RULINGS' condition 2; her
+        // R-VX83-5 split: "anything you've saved" is a door she opens). Off
+        // the commits facet a savepoint doc NEVER lists: the doc-row kind
+        // fence, evaluated at the doc's own loop before any home is looked up
+        // (pinned: never lists without the facet). Under the facet a
+        // savepoint lists only while its TAKE is live — the take is sought by
+        // key (`sv`, below) and everything past it is the take docs' road:
+        // FORK 1 = A, the liveness resolved here, at query time, never by a
+        // trigger (R-13o-4).
+        let savepoints = query.includesSavepoints
+        conditions.append(savepoints ? "(d.kind <> 'savepoint' OR sv.id IS NOT NULL)" : "d.kind <> 'savepoint'")
 
         // The WING, always (the 13i sitting record §12) — a book's own wing
         // for book/chapter docs, the home container's otherwise. Scraps (a
@@ -314,7 +344,14 @@ public enum SearchComposer {
             }
         }
 
-        let archived = """
+        // A savepoint carries no archived fact of its own: its TAKE's is read
+        // through `sv` (P-VX83-C1 — an archived take's savepoints are archived
+        // history, listed with `+ archived` too).
+        let archived = savepoints ? """
+            (d.archived = 1 OR c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL
+             OR (d.kind = 'chapter' AND r.archived_at IS NOT NULL)
+             OR (d.kind = 'savepoint' AND sv.status = 'archived'))
+            """ : """
             (d.archived = 1 OR c.archived_at IS NOT NULL OR b.archived_at IS NOT NULL
              OR (d.kind = 'chapter' AND r.archived_at IS NOT NULL))
             """
@@ -339,7 +376,12 @@ public enum SearchComposer {
         // live, active, this block's — else the block's default), decided
         // from the doc's OWN facts wherever they suffice; one seek only for a
         // default take whose block points at ANOTHER take.
-        let rendered = """
+        //
+        // VX-72: under the commits facet a SAVEPOINT's `rendered` says whether
+        // ITS TAKE (`sv`) is the one the block renders — the same rule, read
+        // over the take — so its landing steps exactly where a take hit's
+        // would (P-VX83-C4); the score never boosts it (`scoreSQL`).
+        let takeRendered = """
             CASE
               WHEN d.kind <> 'take' THEN 0
               WHEN pl.chosen_variant_id = d.src_id AND d.archived = 0 THEN 1
@@ -350,11 +392,31 @@ public enum SearchComposer {
                                   AND ch.deleted_at IS NULL AND ch.status = 'active')
             END
             """
+        let rendered = savepoints ? """
+            CASE
+              WHEN d.kind = 'savepoint' THEN (CASE
+                WHEN pl.chosen_variant_id = sv.id AND sv.status = 'active' THEN 1
+                WHEN b.default_variant_id IS NOT sv.id THEN 0
+                WHEN pl.chosen_variant_id IS NULL OR pl.chosen_variant_id = sv.id THEN 1
+                ELSE NOT EXISTS (SELECT 1 FROM variant ch
+                                  WHERE ch.id = pl.chosen_variant_id AND ch.block_id = sv.block_id
+                                    AND ch.deleted_at IS NULL AND ch.status = 'active')
+              END)
+              ELSE \(takeRendered)
+            END
+            """ : takeRendered
+        // The facet's road to a savepoint's block: its take, by key (a NULL
+        // `variant_id` — every other kind — joins nothing), then the I2
+        // placement and the block by the take's `block_id`.
+        let blockKey = savepoints ? "COALESCE(d.block_id, sv.block_id)" : "d.block_id"
+        let takeJoin = savepoints
+            ? "\n  LEFT JOIN variant sv ON sv.id = d.variant_id AND sv.deleted_at IS NULL"
+            : ""
         // Leading and trailing newline: the body sits inside `WITH hits AS (…)`
         // exactly where the shipped page statement wrote it.
         let sql = """
 
-              SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, d.block_id AS block_id,
+              SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, \(blockKey) AS block_id,
                      d.reading_id AS reading_id, c.id AS home_id, c.kind AS home_kind,
                      c.title AS home_title, c.entry_date AS home_entry_date,
                      c.created_at AS home_created_at, r.name AS reading_name, r.kind AS reading_kind,
@@ -362,10 +424,10 @@ public enum SearchComposer {
                      \(rendered) AS rendered,
                      bm25(search_fts) AS bm
               FROM search_fts
-              JOIN search_doc d ON d.id = search_fts.rowid
-              LEFT JOIN container_block pl ON pl.block_id = d.block_id AND pl.deleted_at IS NULL
+              JOIN search_doc d ON d.id = search_fts.rowid\(takeJoin)
+              LEFT JOIN container_block pl ON pl.block_id = \(blockKey) AND pl.deleted_at IS NULL
               LEFT JOIN container c ON c.id = COALESCE(d.container_id, pl.container_id) AND c.deleted_at IS NULL
-              LEFT JOIN block b ON b.id = d.block_id AND b.deleted_at IS NULL
+              LEFT JOIN block b ON b.id = \(blockKey) AND b.deleted_at IS NULL
               LEFT JOIN reading r ON r.id = d.reading_id AND r.deleted_at IS NULL
               WHERE search_fts MATCH ?
                 AND \(conditions.joined(separator: "\n    AND "))
@@ -415,10 +477,11 @@ public enum SearchComposer {
         if cursor != nil {
             keyset = "WHERE (g.g_best > ? OR (g.g_best = ? AND g.g_home > ?))"
         }
+        let saved = savedAtStage("top", query)
         let sql = """
             WITH hits AS (\(hits.sql)),
             scored AS MATERIALIZED (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             ),
             grouped AS (
@@ -443,8 +506,8 @@ public enum SearchComposer {
             top AS (
               SELECT * FROM ranked WHERE rn <= ?
             )
-            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet
-            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid
+            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
+            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid\(saved.join)
             WHERE search_fts MATCH ?
             ORDER BY top.g_best, top.home_id, top.rn
             """
@@ -480,7 +543,7 @@ public enum SearchComposer {
         let sql = """
             WITH hits AS MATERIALIZED (\(hits.sql)),
             scored AS (
-              SELECT h.*, \(scoreSQL) AS score
+              SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             )
             SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
@@ -523,6 +586,16 @@ public enum SearchComposer {
         let book = "h.reading_id IS NOT NULL"
         let note = "h.reading_id IS NULL AND h.home_kind = 'post'"
         let pool = "h.reading_id IS NULL AND h.home_kind = 'pool'"
+        // VX-72 (P-VX83-C3): under the commits facet a savepoint hit counts as
+        // its OWN kind — `passages` and `scraps` stay the living text, and the
+        // savepoints are said beside them ("N savepoints"). Off the facet no
+        // savepoint is a hit and the shipped text stands.
+        let line = query.includesSavepoints ? "h.kind NOT IN ('title', 'savepoint')" : "h.kind <> 'title'"
+        let savepointCounts = query.includesSavepoints ? """
+            ,
+              (SELECT COUNT(*) FROM hits h WHERE h.reading_id IS NULL AND h.kind = 'savepoint' AND NOT h.archived) AS savepoints,
+              (SELECT COUNT(*) FROM hits h WHERE h.reading_id IS NULL AND h.kind = 'savepoint') AS all_savepoints
+            """ : ""
         let sql = """
             WITH hits AS MATERIALIZED (\(hits.sql))
             SELECT
@@ -532,20 +605,20 @@ public enum SearchComposer {
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note) AND NOT h.archived
                  UNION ALL SELECT value FROM json_each(?)) n) AS notes,
-              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title' AND NOT h.archived) AS passages,
-              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title' AND NOT h.archived) AS scraps,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND \(line) AND NOT h.archived) AS passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND \(line) AND NOT h.archived) AS scraps,
               (SELECT COUNT(DISTINCT k.id) FROM (
                  SELECT h.reading_id AS id FROM hits h WHERE \(book)
                  UNION ALL SELECT value FROM json_each(?)) k) AS all_books,
               (SELECT COUNT(DISTINCT n.id) FROM (
                  SELECT h.home_id AS id FROM hits h WHERE \(note)
                  UNION ALL SELECT value FROM json_each(?)) n) AS all_notes,
-              (SELECT COUNT(*) FROM hits h WHERE \(note) AND h.kind <> 'title') AS all_passages,
-              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND h.kind <> 'title') AS all_scraps,
+              (SELECT COUNT(*) FROM hits h WHERE \(note) AND \(line)) AS all_passages,
+              (SELECT COUNT(*) FROM hits h WHERE \(pool) AND \(line)) AS all_scraps,
               (SELECT COUNT(DISTINCT p.id) FROM (
                  SELECT COALESCE(h.reading_id, h.home_id) AS id FROM hits h WHERE h.archived
                  UNION ALL SELECT value FROM json_each(?)
-                 UNION ALL SELECT value FROM json_each(?)) p) AS archived_places
+                 UNION ALL SELECT value FROM json_each(?)) p) AS archived_places\(savepointCounts)
             """
         return Statement(
             sql: sql,
