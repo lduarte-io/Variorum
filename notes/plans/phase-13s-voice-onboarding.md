@@ -687,3 +687,21 @@ The red-on-old evidence each new pin owes at that window: `TourEndCardTests` rea
 **ONE STILL-RED — F-U2-W-1 LIVE:** the end card's two door lines STILL truncate in the live app ("…on stars, tag…" / "…as a l…") while `TourEndCardTests` is GREEN — the pin exercises a path the live container clamps (the clamp sits ABOVE the component the pin renders; the B6/P-8 class in its purest form). Back to the implementer: fix the live container, and the pin must render THROUGH the live path (the pin's current green against a live red is the finding). The A4 muted-line sizing could not be judged while the doors truncate — re-verified with the fix.
 
 **Residuals recorded:** a panel opened OUTSIDE steps 5–6 hides the current card under the app's scrim (the A3 slot renders only for 5–6) — nit, the fix round's judgment whether to generalize; walk machinery: two typing misses were MY mis-aimed clicks a few pixels above the quick entry (proven by a slow probe — the entry works, and offered a "name it?" chip worth knowing about), and the tag field's cliclick-return quirk repeated (System Events road works — WalkKit lore, not product).
+
+### THE END-CARD LIVE RED — TRACED (the implementer, 2026-10-08 ~09:45, headless; answering the U2 VERIFY WALK RECORD's one still-red)
+
+**The live red was MY red-on-old inverse binary. It was not a clamp in the live composition, so no product line changes.** The evidence:
+- The verify window's red-on-old check rebuilt the Debug app with three TEMPORARY inverses, the end card's doors back on the one-line `VoicedButtonStyle` among them. Its log (`u2-v-rold.log`, finished 09:33:29) shows `SwiftCompile … TourOverlay.swift`.
+- The app binary `…/DerivedData/Variorum-dytdahycxjuyydbrghicjjtradxl/Build/Products/Debug/Variorum.app/Contents/MacOS/Variorum` was last written at **09:33:04**, inside that run.
+- I restored the source with `git checkout -- <files>` and re-verified headlessly, but did NOT rebuild the app. The walk ran at 09:35–09:42, so it launched the INVERSE build.
+- Everything the walk saw is consistent with that binary. The doors truncated (the inverse's old face). Step 6 still showed ONE ring, because the app-side inverse restored per-group lighting and step 6's rule (not inverted in the app build) answers a single group. Leg 3's run opened, because the unguarded toggle is called once.
+- The SOURCE at every pushed tip is the wrap fix (6d38781a), and the live composition has no clamp: the overlay places the card by padding inside a top-leading ZStack, the card is `.fixedSize(vertical:)`, and each door's Text carries its own `.lineLimit(3)` + vertical `fixedSize`.
+
+**Done:**
+1. The binary is REBUILT from the restored source (`build-for-testing`, 09:46:55). The next walk sees the real code.
+2. The pin is rewritten THROUGH THE LIVE PATH anyway, as asked, because it is the stronger pin. `TourEndCardTests.theEndCardsDoorsWrapThroughTheLiveOverlay` mounts the real `TourOverlay` with a real engine walked to the end card: the overlay's GeometryReader, its ZStack, the layout placement, the card's `.fixedSize` and its measurement. Any clamp anywhere in that composition now reads in the pin. **Its run (and its red-on-old against the one-line face) is PENDING the next window.**
+3. `TourRing`'s metrics are `nonisolated` (an isolation warning `visiblePart` raised).
+
+**The machinery lesson, for the protocol's addenda:** a red-on-old check that rebuilds the APP leaves the reverted binary on disk after the source is restored. **Rebuild after the restore, before the window is handed to a walk.** A source-only restore proves the tree, not the binary the walk will launch.
+
+**What re-walks:** the end card's two doors (expect wrapping in Terminal) and A4's muted line, which could not be judged while the doors truncated. Everything else the walk verified stands: it is either unaffected by the three inverses or consistent with them.
