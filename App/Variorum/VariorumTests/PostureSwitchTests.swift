@@ -2228,6 +2228,179 @@ struct PostureSwitchTests {
         #expect(castleFacts.appleKeyReadable == nil)
     }
 
+    // MARK: - VX-99: a CASTLE Replace All Keys never writes an Apple copy into the new key file
+
+    /// VX-99 (a) — THE CEREMONY ROAD. Her Pro, 2026-09-07: a Replace All Keys
+    /// on a CASTLE account wrote the new key file WITH an `apple` copy, because
+    /// the Mac still held its iCloud key from the Standard era. The mechanism
+    /// (`PostureSwitch.writeNewKeyFile`): `replaceAllKeys` runs the road with
+    /// `entersCastle: false`, and the key file's Apple copy was decided by
+    /// `entersCastle ? nil : leaves.appleKeys.read()` — ANY readable A — while
+    /// the VAULT's side of the same act is posture-gated
+    /// (`appleHeldCopyForStandard`). The Castle row of §3.4: the library key
+    /// wrapped under P, W and M only. A Castle world here: the vault carries no
+    /// Apple-held copy, custody gated, the posture Castle — and the iCloud key
+    /// READABLE (her Pro's state). RED ON OLD: the new key file carries
+    /// `apple` + `appleKeyID` and opens through the iCloud key.
+    @Test func aCastleReplaceAllKeysWritesNoAppleCopyIntoTheNewKeyFileWhileTheICloudKeyIsReadable() async throws {
+        let world = try await makeWorld(standard: false)
+        defer { world.tearDown() }
+        #expect(world.posture == .castle)
+        #expect(world.appleBacking.key == world.apple, "the iCloud key is READABLE on this Mac (the Standard era left it)")
+        let before = try await world.vault()
+        #expect(before.format.masterWrappedByAppleHeld == nil && before.format.appleKeyID == nil, "a Castle account")
+        #expect(try StoreKeyEnvelope.load(at: world.oldKeyFileURL)?.apple == nil, "the Castle key file carries no Apple copy")
+
+        let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+
+        #expect(!outcome.entersCastle)
+        let material = try #require(outcome.material)
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey), "the library is under L′")
+        #expect(newFile.apple == nil && newFile.appleKeyID == nil,
+                "§3.4's Castle row: L′ under P, W and M′ only — no copy the iCloud key opens")
+        #expect(throws: StoreKeyEnvelopeError.noAppleWrappedCopy, "the iCloud key opens nothing in the new key file") {
+            _ = try newFile.unwrapKey(apple: world.apple.symmetricKey)
+        }
+        #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey, "L′ under M′")
+        #expect(try newFile.unwrapKey(recoveryWords: world.words) == newKey, "L′ under the words in hand")
+        let after = try await world.vault()
+        #expect(after.format.masterWrappedByAppleHeld == nil && after.format.appleKeyID == nil,
+                "the vault still carries no Apple-held copy — the account stays Castle")
+        #expect(after.format.classKey(for: .corpus)?.keyID == material.corpusKeyID, "the rotation landed")
+        #expect(world.calls.custodyTargets.last == .biometric && world.posture == .castle, "custody stays behind the gate")
+        #expect(world.appleBacking.key == world.apple, "the iCloud key untouched — never minted, never deleted")
+        #expect(try await world.marker() == nil)
+    }
+
+    /// VX-99 (b) — THE RESUME ROAD. `resume` re-enters the same writer with the
+    /// marker's `entersCastle` (false for Replace All Keys), so a CASTLE
+    /// Replace All Keys that crashed before its key file was written wrote the
+    /// Apple copy on its way back. Three seams: (1) mid re-encryption (the
+    /// marker at `.reencrypt`); (2) after the vault write, before custody (the
+    /// marker at `.vaultWrite` — M′ picked up by the passphrase); (3) the
+    /// brief's literal `.rekeyLibrary` (the export refused — the new key file
+    /// already written by the ceremony's own road, which the resume reads and
+    /// never rewrites). The CONTROL, guarding the other side: a STANDARD
+    /// Replace All Keys resumed from seam (1) still lands the Apple copy under
+    /// the account's own iCloud key (§7 step 5 — "the key file also gets the
+    /// iCloud copy again"). RED ON OLD: seams (1)–(3) end with `apple` set.
+    @Test func aCastleReplaceAllKeysResumedAfterACrashWritesNoAppleCopyAndAStandardOneStillDoes() async throws {
+        // (1) mid re-encryption.
+        do {
+            let world = try await makeWorld(standard: false)
+            defer { world.tearDown() }
+            let mirror = try #require(world.mirror)
+            #expect(world.appleBacking.key == world.apple, "the iCloud key is readable")
+            await mirror.setCrashNextReencrypt(true)
+            await #expect(throws: URLError.self) {
+                _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            }
+            let marker = try #require(try await world.marker())
+            #expect(marker.step == .reencrypt && !marker.entersCastle, "a Replace All Keys marker, mid-walk")
+            let outcome = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
+            #expect(newFile.apple == nil && newFile.appleKeyID == nil, "seam 1: the resumed key file carries no Apple copy")
+            #expect(try await world.vault().format.masterWrappedByAppleHeld == nil, "the account stays Castle")
+            #expect(world.calls.custodyTargets.last == .biometric)
+            #expect(try await world.marker() == nil)
+        }
+        // (2) after the vault write, before custody.
+        do {
+            let world = try await makeWorld(standard: false)
+            defer { world.tearDown() }
+            arm(world, faultAt: .afterVaultWriteBeforeCustody)
+            await #expect(throws: PostureSwitchError.injectedFault(.afterVaultWriteBeforeCustody)) {
+                _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            }
+            let marker = try #require(try await world.marker())
+            #expect(marker.step == .vaultWrite && !marker.entersCastle)
+            arm(world, faultAt: nil)
+            let outcome = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
+            #expect(newFile.apple == nil && newFile.appleKeyID == nil, "seam 2: the resumed key file carries no Apple copy")
+            #expect(try await world.vault().format.masterWrappedByAppleHeld == nil, "the account stays Castle")
+            #expect(try await world.marker() == nil)
+        }
+        // (3) at `.rekeyLibrary` — the export refused after the new key file landed.
+        do {
+            let world = try await makeWorld(standard: false)
+            defer { world.tearDown() }
+            world.calls.rekeyFault = .beforeWork
+            await #expect(throws: URLError.self) {
+                _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            }
+            let marker = try #require(try await world.marker())
+            #expect(marker.step == .rekeyLibrary && !marker.entersCastle)
+            let outcome = try await world.runner.resume(passphrase: nil)
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
+            #expect(newFile.apple == nil && newFile.appleKeyID == nil, "seam 3: the key file the resume finished under carries no Apple copy")
+            #expect(try await world.marker() == nil)
+        }
+        // THE CONTROL — a STANDARD Replace All Keys resumed from seam (1) still lands the Apple copy.
+        do {
+            let world = try await makeWorld()
+            defer { world.tearDown() }
+            let mirror = try #require(world.mirror)
+            #expect(world.posture == .standard)
+            await mirror.setCrashNextReencrypt(true)
+            await #expect(throws: URLError.self) {
+                _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            }
+            #expect(try await world.marker()?.step == .reencrypt)
+            let outcome = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            let newKey = try newFile.unwrapKey(passphrase: "sesame")
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey))
+            #expect(newFile.apple != nil && newFile.appleKeyID == world.apple.id,
+                    "Standard's Replace All Keys: the Apple copy again, under the account's own iCloud key")
+            #expect(try newFile.unwrapKey(apple: world.apple.symmetricKey) == newKey)
+            #expect(try await world.vault().format.masterWrappedByAppleHeld != nil, "decision 30: the vault's copy under the same A")
+            #expect(world.calls.custodyTargets.last == .auto && world.posture == .standard)
+        }
+    }
+
+    /// VX-99 (d) — THE LOCAL-ONLY ROAD (steps 4–7 only). The Replace All Keys
+    /// DOOR refuses a library that is not enrolled (`replaceKeysNotEnrolled`),
+    /// but the RUNNER takes this road whenever its own enrolled reading fails at
+    /// the run (no session, no custody, no vault composed) — the same
+    /// `writeNewKeyFile`. A local-only CASTLE library (its key file under P
+    /// only, custody gated, the posture its key file's — Castle) with the
+    /// iCloud key readable: the new key file carries no Apple copy. The
+    /// CONTROL: a local-only STANDARD library still lands it. RED ON OLD: the
+    /// Castle file carries `apple`.
+    @Test func aLocalOnlyCastleLibrarysReplaceAllKeysWritesNoAppleCopyAndAStandardOneStillDoes() async throws {
+        do {
+            let world = try await makeWorld(enrolled: false, standard: false)
+            defer { world.tearDown() }
+            #expect(world.vaultClient == nil && world.posture == .castle)
+            #expect(world.appleBacking.key == world.apple, "the iCloud key is readable")
+            let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            #expect(outcome.material == nil && outcome.reencrypted == 0, "steps 4–7 only")
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            let newKey = try newFile.unwrapKey(passphrase: "sesame")
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey))
+            #expect(newFile.apple == nil && newFile.appleKeyID == nil,
+                    "a local-only Castle library's new key file: no copy the iCloud key opens")
+            #expect(world.calls.custodyTargets.last == .biometric && world.posture == .castle)
+        }
+        do {
+            let world = try await makeWorld(enrolled: false)
+            defer { world.tearDown() }
+            #expect(world.vaultClient == nil && world.posture == .standard)
+            let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+            let newFile = try world.keyFile(outcome.newKeyFingerprint)
+            let newKey = try newFile.unwrapKey(passphrase: "sesame")
+            #expect(newFile.apple != nil && newFile.appleKeyID == world.apple.id, "the CONTROL: a Standard library keeps its Apple copy")
+            #expect(try newFile.unwrapKey(apple: world.apple.symmetricKey) == newKey)
+            #expect(world.calls.custodyTargets.last == .auto)
+        }
+    }
+
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
     /// the front check refuses a STALE recorded corpus id with the
     /// keys-don't-match sentence and runs nothing; then, on the current

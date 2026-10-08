@@ -193,7 +193,16 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
 
 ## LIVE STATUS (the implementer flips each line in the same commit as its piece; PENDING = unverified)
 
-- Pins (a)–(d) written, RED on the pre-fix code: NOT-STARTED
+- Pins (a)–(d) written, RED on the pre-fix code: IN-PROGRESS — written in `PostureSwitchTests.swift`
+  (the `VX-99` MARK after `replaceAllKeysRefusesAnUnreachableAppleKeyAtTheDoorBeforeAnyScreen`):
+  (a) `aCastleReplaceAllKeysWritesNoAppleCopyIntoTheNewKeyFileWhileTheICloudKeyIsReadable`;
+  (b) `aCastleReplaceAllKeysResumedAfterACrashWritesNoAppleCopyAndAStandardOneStillDoes` (three seams —
+  mid re-encryption, after the vault write before custody, `.rekeyLibrary` — plus a STANDARD resume control);
+  (c) the standing `replaceAllKeysThroughTheDoorIsFollowedByTheSiblingAndAStaleCopyOpensNothing` (`newFile.apple
+  != nil`) untouched; (d) `aLocalOnlyCastleLibrarysReplaceAllKeysWritesNoAppleCopyAndAStandardOneStillDoes`
+  (the harness reaches the runner's local-only road; the DOOR refuses a non-enrolled library —
+  `replaceKeysNotEnrolled` — so (d) pins the runner's road, reached whenever its own enrolled reading fails at
+  the run). Compile PENDING (build-for-testing); the red run PENDING the coordinator's stage slot.
 - The fix: NOT-STARTED
 - Behavioral revert (named here BEFORE it runs): NOT-STARTED
 - Class sweep table: NOT-STARTED
