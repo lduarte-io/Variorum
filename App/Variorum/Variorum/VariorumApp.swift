@@ -192,14 +192,15 @@ struct VariorumApp: App {
                         // one Resume press clears the hold and catches up
                         // (QD: the kept outbox pushes in that round).
                         if let hold = restoreHold {
-                            fresh.sync.roundsHeld = { hold.isHeld }
+                            // 13x F3 (ladder R3-2): BOTH gates — the round
+                            // trigger and the rotation ceremonies' door
+                            // (F1 R1-M1: Replace All Keys / Use Castle
+                            // refuse while held) — read the MARKER, never
+                            // the projection this `.task` refreshes.
+                            hold.wireGates(sync: fresh.sync, protection: bootstrap.protection)
                             hold.onResume = { [weak fresh] in
                                 await fresh?.resumeSync()
                             }
-                            // 13x F1 (R1-M1): the rotation ceremonies'
-                            // door reads the SAME projection — Replace
-                            // All Keys / Use Castle refuse while held.
-                            bootstrap.protection.restoreHoldStands = { hold.isHeld }
                         }
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every

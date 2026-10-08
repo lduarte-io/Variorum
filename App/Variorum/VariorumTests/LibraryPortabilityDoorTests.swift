@@ -115,6 +115,63 @@ struct LibraryPortabilityDoorTests {
         }
     }
 
+    // MARK: F3 R3-2 — the gates read the MARKER, with no view alive
+
+    /// 13x F3 (ladder R3-2): an adoption run from the Settings scene with
+    /// no main window lands the marker on disk while the projection —
+    /// refreshed only by a main window's `.task` — still says "not held".
+    /// The composition root's ONE wiring (`wireGates`, what
+    /// `VariorumApp` calls) points BOTH gates at the marker: consulted
+    /// with no view alive over a standing marker, each answers HELD, and
+    /// the round roads run nothing; Resume's clear opens both. RED ON
+    /// OLD (behavioural revert: `markerGate` reads the projection, the
+    /// old `{ hold.isHeld }`): both gates answer "not held" and a round
+    /// runs.
+    @Test func theHoldGatesReadTheMarkerWithNoViewAlive() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("home/variorum.sqlite")
+        try FileManager.default.createDirectory(
+            at: storeURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let bootstrap = AppBootstrap(
+            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "/x", reason: "unused")) },
+            gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
+            testStoreURL: storeURL)
+        await bootstrap.awaitOpen()
+        let db = try AppDatabase.inMemory()
+        let session = SyncSession(database: db, allowsSync: true)
+        let hold = RestoreHoldModel(storeURL: storeURL)
+        #expect(!hold.isHeld, "premise: no marker yet")
+        hold.wireGates(sync: session, protection: bootstrap.protection)
+
+        // The Settings-scene adoption: the marker lands; nothing refreshes
+        // the projection (no main window, no `.task`).
+        try LibraryRestoreHold.set(besideStore: storeURL, asOf: nil, now: Date())
+        #expect(!hold.isHeld, "premise: the projection is stale")
+        #expect(session.roundsHeld?() == true, "the round gate reads the marker")
+        #expect(bootstrap.protection.restoreHoldStands?() == true,
+                "the rotation ceremonies' gate reads the marker")
+
+        let transport = CountingTransport()
+        await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+        } operation: { @MainActor in
+            await session.configure(transport: transport, keyProvider: DoorTestKeyProvider())
+            session.triggerSync()
+            await session.flush()
+            #expect(await transport.dataCalls == 0, "no round runs over a standing marker")
+            // Resume's clear (the marker gone): both gates open, a round runs.
+            LibraryRestoreHold.clear(besideStore: storeURL)
+            #expect(session.roundsHeld?() == false)
+            #expect(bootstrap.protection.restoreHoldStands?() == false)
+            await session.flush()
+            #expect(await transport.dataCalls > 0)
+            session.stop()
+        }
+    }
+
     // MARK: Row 7 — the hold model (marker → banner state → Resume)
 
     @Test func theHoldModelProjectsTheMarkerAndResumeClearsItOnce() async throws {
@@ -186,6 +243,91 @@ struct LibraryPortabilityDoorTests {
         }
         #expect(message == LibraryOpenCopy.bareStoreRefusal)
         #expect(message.contains("the key file travels with it"))
+    }
+
+    // MARK: F3 R3-1 (constraint 3) — the post-unlock refusal is TRUE per class
+
+    /// 13x F3 (ladder R3-1, constraint 3 — the CLASS-SEPARATION GUARD):
+    /// a key file of ANOTHER key beside the store (two folders mixed) —
+    /// its passphrase opens its key, that key does not open the store —
+    /// settles to the wrong-key sentence, the one place it is true. GREEN
+    /// ON BOTH SIDES by design: the old single `.unreadable` arm said it
+    /// too; this pin guards that the split never moves a genuine mismatch
+    /// off its sentence. (Its twin below is the red-on-old one.)
+    @Test func aGenuineKeyMismatchStillSettlesToTheWrongKeySentence() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let pair = try makePair(in: dir, passphrase: "the travelling word")
+            try FileManager.default.removeItem(at: pair.keyFile)
+            var other = StoreKeyEnvelope()
+            try other.setPassphraseWrap(
+                key: StoreKey.mint(), passphrase: "the other word", kdf: fastKDF())
+            try other.write(at: other.preferredURL(besideStore: pair.store))
+            let model = try await unlockedModel(
+                picked: pair.store, passphrase: "the other word", in: dir)
+            #expect(model.phase == .refused(LibraryOpenCopy.wrongKeyRefusal, detail: nil),
+                    "\(model.phase)")
+        }
+    }
+
+    /// 13x F3 (ladder R3-1, constraint 3): a TORN copy (page 1 intact,
+    /// the rest cut — an interrupted copy, a full disk) beside its RIGHT
+    /// key file settles to the unreadable sentence with its reason —
+    /// never "that key file doesn't open this library — it belongs to
+    /// another copy", which is false on both facts. RED ON OLD: the
+    /// single `.unreadable` arm wore the wrong-key sentence (measured at
+    /// F3: the torn consult reads SQLITE_CORRUPT, "database disk image is
+    /// malformed").
+    @Test func aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let pair = try makePair(in: dir, passphrase: "the travelling word")
+            let whole = try Data(contentsOf: pair.store)
+            #expect(whole.count > 4096 * 2, "premise: the library is longer than the cut")
+            try whole.prefix(4096 * 2).write(to: pair.store)
+            let model = try await unlockedModel(
+                picked: pair.store, passphrase: "the travelling word", in: dir)
+            guard case .refused(let lead, let detail) = model.phase else {
+                Issue.record("a torn copy refuses, got \(model.phase)")
+                return
+            }
+            #expect(lead == LibraryOpenCopy.unreadableRefusal, "got \(lead)")
+            #expect(lead != LibraryOpenCopy.wrongKeyRefusal)
+            #expect(detail?.contains("malformed") == true, "the reason rides the detail: \(detail ?? "nil")")
+        }
+    }
+
+    /// The flow up to the post-unlock settle: classify → the typed road
+    /// (no custody, no Apple copy — the passphrase is the one road) →
+    /// `settle`'s verdict, waited on until the phase leaves `.unlock`.
+    @MainActor
+    private func unlockedModel(
+        picked store: URL, passphrase: String, in dir: URL
+    ) async throws -> LibraryOpenModel {
+        let bootstrap = AppBootstrap(
+            testOpener: { .success(try! AppDatabase.inMemory()) },
+            gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
+            testStoreURL: dir.appendingPathComponent("home/variorum.sqlite"))
+        await bootstrap.awaitOpen()
+        let model = LibraryOpenModel(bootstrap: bootstrap)
+        model.begin(picked: store)
+        try await waitUntil { if case .unlock = model.phase { return true }; return false }
+        await model.unlock(passphrase: passphrase)
+        try await waitUntil {
+            switch model.phase {
+            case .refused, .confirm: return true
+            default: return false
+            }
+        }
+        return model
     }
 
     // MARK: F1 R1-M3 — the failure words are true per arm
