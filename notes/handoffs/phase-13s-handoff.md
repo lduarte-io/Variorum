@@ -1,6 +1,6 @@
 # 13s-b handoff — the overnight build, for Lillian's morning (2026-10-08)
 
-**Status: the phase ran whole overnight per your R-13s-35/40 mandate.** The one running record is `notes/plans/phase-13s-voice-onboarding.md` (rulings R-13s-1…42); the ladder records are `notes/plans/13s-ladders/`; this document is your morning read. PENDING(extra-review) · PENDING(pr-and-merge) · PENDING(refresh-build) are filled at the very end.
+**Status: the phase ran whole overnight per your R-13s-35/40 mandate.** The one running record is `notes/plans/phase-13s-voice-onboarding.md` (rulings R-13s-1…42); the ladder records are `notes/plans/13s-ladders/`; this document is your morning read. The extra review closed 0B/0M/3m/4n (all dispositioned); PENDING(pr-and-merge) · PENDING(refresh-build) are filled at the very end.
 
 ## YOUR CHECKLIST (the things that are yours; nothing tonight blocks on them)
 
@@ -18,7 +18,7 @@
 - **U1b — the seed reshape:** the R-13s-37 launch set · the readme placeholder byte-proven from your reference (fans real, R-13s-39) · Encryption Explained gone AND its restore door removed · the classics restore door added · jekyll's door fully lowercase (R-13s-38) · mint-defaults "journal"/"quicknotes" (fresh mints only) · ZERO Sync/ lines for the seed itself; the ladder's one MAJOR (a pre-existing star-fold gap your readme widened) fixed with a two-client pin — a starred copy can no longer fold away its star. R2 clean bill.
 - **U4 — savepoint→commit:** 46 strings moved on both platforms (Block History "Commits", Settings ▸ Writing, ⌘/, receipts, the phone), 2 ruled survivals, the label-fence with its own verified extractor, the ⌘/ note ▾ row rebuilt honest + a Block History road restored. Two ladder rounds.
 - **U3 — the field guide:** all ten chapters re-voiced per your R-13s-30 bounds + the merged search lesson; the port landed with the accepted order (vision front, three-ways closing welcome, privacy LAST), byte-fidelity machine-proven twice, the acts preserved and executing, the fenced floors byte-identical. Walked live after a Restore Tutorial press.
-- **Evidence:** two stage windows all-green (U1a-era 49/5+278/62; U2 263/56; the final window 166/20 + 200/26 + 191/27 + mobile 66-green-plus-baseline); the landing's four red-on-old recipes; whole core at close 2425/280 + 40/6. PENDING(extra-review).
+- **Evidence:** two stage windows all-green (U1a-era 49/5+278/62; U2 263/56; the final window 166/20 + 200/26 + 191/27 + mobile 66-green-plus-baseline); the landing's four red-on-old recipes; **the closeout WHOLE-TARGET run: 4,164 tests in 682 suites — the ONE red is VX-115's red-on-main (ticketed, not ours), plus 5 known-issue records**; core on the final merged tree 2,426/280 + 40/6 green; the merge-delta suites 26/4 green. **The extra whole-phase Opus pass (your grant): 0B/0M/3m/4n, all closed** — the readme honesty gate built from its MINOR-1 and reviewer-confirmed.
 
 ## TICKETS BORN OR MOVED TONIGHT
 
