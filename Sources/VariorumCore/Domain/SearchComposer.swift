@@ -883,3 +883,47 @@ public struct SearchSnippetSegment: Equatable, Sendable {
     public let text: String
     public let isMatch: Bool
 }
+
+extension SearchSnippetSegment {
+    /// **The words a landing arms the find bar with** (VX-86 — her report:
+    /// *"only the first word of what you searched is filled in"*; the
+    /// provisional call D-3, `notes/plans/fixes/vx-83-search-followup.md`).
+    ///
+    /// FTS5 marks EACH matched term's occurrence as its own run, so
+    /// "sherlock holmes" over "…Sherlock Holmes…" arrives as
+    /// `[Sherlock][ ][Holmes]` — and the landing used to take the first run
+    /// alone. The needle is the snippet's first CONTIGUOUS matched span:
+    /// matched runs separated only by horizontal whitespace coalesce, as
+    /// written ("Sherlock Holmes" — case and spacing preserved, so the find
+    /// bar's literal search meets the text); a gap holding anything else —
+    /// punctuation, another word, a NEWLINE (I4 content; the find bar holds
+    /// one line) — ends the span, so scattered terms keep the first run (the
+    /// bar cannot hold a disjunction). nil when nothing is marked.
+    ///
+    /// One pure home so the phone's search face lands the same words.
+    public static func firstMatchedSpan(_ segments: [SearchSnippetSegment]) -> String? {
+        guard let first = segments.firstIndex(where: \.isMatch) else { return nil }
+        var span = segments[first].text
+        var i = first + 1
+        while i < segments.count {
+            let segment = segments[i]
+            if segment.isMatch {
+                span += segment.text               // two marked runs abutting
+                i += 1
+            } else if i + 1 < segments.count, segments[i + 1].isMatch,
+                      isHorizontalWhitespace(segment.text) {
+                span += segment.text + segments[i + 1].text
+                i += 2
+            } else {
+                break
+            }
+        }
+        let trimmed = span.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// Whitespace that keeps a line one line: no newline of any kind.
+    private static func isHorizontalWhitespace(_ text: String) -> Bool {
+        !text.isEmpty && text.allSatisfy { $0.isWhitespace && !$0.isNewline }
+    }
+}
