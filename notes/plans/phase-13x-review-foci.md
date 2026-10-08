@@ -70,6 +70,26 @@ moved-aside one) can still be opened afterward, by which credential.
     posture allows, what the next launch does, and whether sync's follow/re-key roads fire
     when they should and stay quiet when they should.
 
+12. **(Her addition, 2026-10-07: "what happens if you re-keyed should be clear.") Re-keying —
+    the mechanics AND what the user is told.** Replace All Keys (and any other re-key: the
+    Castle entry, a follow) relative to every copy this phase touches:
+    (a) **a backup from BEFORE the re-key** — which credential opens it now (the day's
+    passphrase · the words unless regenerated · a Standard-era Apple copy — decision 11), which
+    no longer does, and what happens to custody and the live library when it is adopted (the
+    custody-collision rule's `adoptOpeningKey` road), including whether the account's sync keys
+    and the adopted library's key end up disagreeing and what sync then does;
+    (b) **a hand-off pair produced BEFORE a re-key, opened AFTER it** (on either Mac);
+    (c) **a re-key started WHILE a restore hold stands**, and a hold set on a library whose
+    re-key crashed mid-way (the VX-80 window);
+    (d) **the moved-aside previous library after a later re-key** — can it still be opened, by
+    what, and does anything tell the user so;
+    (e) **CLARITY — her word.** Read every sentence the user sees on these roads (the Restore
+    rows' credential lines, the confirm, the refusals, the follow notices, the banner) and
+    judge whether a person who re-keyed last month would understand which password or words
+    open which copy, and what will happen when they open it. A sentence that is technically
+    true but leaves her guessing is a finding (word it as a proposal; the words themselves are
+    13s's to re-voice, the FACTS they state are this phase's).
+
 10. **Anything else that could go wrong — and this one is NOT optional and NOT bounded by the
     list above.** Her explicit instruction (2026-10-07): the reviewer must go BEYOND what her
     prompt and foci 1–9 cover and really *think* — independently and adversarially — about
