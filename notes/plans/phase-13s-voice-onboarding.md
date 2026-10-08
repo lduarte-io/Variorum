@@ -864,4 +864,126 @@ xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,name=<the
 | 2 | Core: `SavepointRuns.runLabel` ("N quiet commits") + `runHelp`; the core pin flipped | DONE (this commit) — the fold line both platforms render is now **"N quiet commit(s)"** (the triage draft's quoted "N quiet commits · show" is now TRUE — the landing's flag answered) and its help **"Commits Variorum made for you — … ⌘S commits are never folded in here."**; `SavepointCadenceTests.theWordsCountWhatTheRowStandsFor` flipped (+ a no-savepoint arm on the help). **Red-on-old RUN HEADLESS:** the old `SavepointRuns.swift` swapped in from `HEAD` → the pin RED with exactly its 4 new issues → restored (`cmp` clean) → GREEN 16/2 |
 | 3 | Mac + Shared surfaces: Block History's header + the put-back help, the Settings cadence/pruning pane (strings move, keys stay), the name field's receipt + help, the three duplicated commit receipts hoisted to one constant, the tooltips, the ⌘/ helper (shortcut row, bar row, dictionary entry), the Blocks workbench count, the day filter's caveat + empty answers, the tray's put-back help, the never-pruned refusal, the Jekyll front matter; Mac pins flipped + `CommitVocabularyTests` | DONE (this commit) — 16 source files (the grep table below lists every string). Block History's region header reads **Commits** (Shared — the phone's header moves with it); Settings ▸ Writing's section **Commits**, its pickers **"Commits Variorum makes for you"** / **"Old quiet commits"** (P-U4-2), every sentence under them, the pane's one-liner and the search hint ("…“seam”, “commit”."); the three Takes/Canvas/Compare unnamed receipts were ONE duplicated literal → hoisted to `SavepointNameCopy.unnamedReceipt`; where a sentence DEFINES commit (the receipts, the two commit-door tooltips, the ⌘/ ⌘S row and the dictionary's "commit" entry) it now rides the app's own plain gloss **"saved moment"** (Block History's word since 13j) — never "commit" defining itself (her R-13s-32 "commit twice would just read as weird"; P-U4-1); labels and plain prose say **commit** outright. Pins: `SavepointOnLeaveTests` (fold line), `LibraryDayFilterTests` ×2 + `LibraryWhenRangeTests` (empty answers + the caveat, with a no-savepoint arm) flipped as JUSTIFIED EDITS (each bound the old word); NEW `CommitVocabularyTests` (6 tests: Block History, the Settings pane incl. every catalog row, the commit doors + the refusal, every ⌘/ helper row + the commit entry's definition, the day filter + Jekyll's front matter, and the KEY half — "savepoint" still FINDS the cadence row through its never-rendered keyword). The twin fence after this piece: **3 offenders, all the phone's** (piece 4's). Mac `build-for-testing` **GREEN** (private DerivedData, 2m21s, `CommitVocabularyTests.o` compiled; the log's 51 "failed with exit code 0 but produced no further output" lines are the toolchain's own noise on an exit-0 build — no error, no new warning in this unit's files). Every Mac pin RUN PENDING the stage window |
 | 4 | The phone's twins: Block History's empty row, restore label + refusal act, the commit receipt; the pocket guide's five sentences; mobile pins flipped + the pocket-guide vocabulary pin | DONE (this commit) — the phone's Block History: the header follows the Shared constant (piece 3), the empty commit row **"(Empty commit)"**, the restore button's VoiceOver label **"Restore this commit"**, the locked-note refusal **"…unlock it to restore this commit."**, the ⋯ Commit Take receipt **"Committed — a saved moment of this take is kept."** (the Mac receipt's twin, P-U4-1); the fold line follows core (piece 2). **The pocket guide** (the phone's twin of the field guide — the U3 triage covers only the Mac's `TutorialSeeder`, so nobody else owns these words; P-U4-3): its five savepoints became commits — the ⋯'s act list ("comments, callout, commits, …"), the defining sentence **"a commit is the deliberate extra"** (lowercase: her no-caps-for-emphasis rule binds a word I write; the guide's OTHER caps — LOCK, LABEL, TERMINAL… — are not this unit's), "A commit from before a divide…", the lock lesson's "quietly commits it first", the seal lesson's "Sealing quietly commits any unsaved take first"; no prefix any walk keys on moved (grep-verified). The accessibility IDENTIFIER `blockHistory.savepoint.<id>` stays (a key, allow-listed in the fence). Pins: `MobileBlockHistoryTests` ×3 flipped as JUSTIFIED EDITS (refusal, receipt, header) + NEW `aCommitRowSaysCommitOnTheDrawnCell` (the real cell: title + VoiceOver label); NEW `MobileTutorialBookShapeTests.thePocketGuideSaysCommitNeverSavepoint` (every seeded take, title and chapter name). The twin fence: **0 offenders**, 0 stale entries, control 16/16. Mobile `build-for-testing` **GREEN** (generic iOS Simulator, private DerivedData, 1m18s; both test objects compiled). Every mobile pin RUN PENDING the stage window |
-| 5 | Evidence: the sweep's grep table, headless core suite GREEN at the END, Mac + mobile `build-for-testing` GREEN, PROVISIONALs, self-assessment, stage-window commands | NOT-STARTED |
+| 5 | Evidence: the sweep's grep table, headless core suite GREEN at the END, Mac + mobile `build-for-testing` GREEN, PROVISIONALs, self-assessment, stage-window commands | DONE (this commit) — the sections below. **Whole core `swift test` GREEN at the END: "2424 tests in 280 suites passed" + "40 tests in 6 suites passed"** (`u4-core-end.log`, scratchpad; exit 0) |
+
+**REVERT STATE: NO REVERT IN FLIGHT.** The one source swap this unit ran (piece 2's red-on-old: the old `SavepointRuns.swift` from `HEAD`, a file copy — never a stash or checkout over the shared tree) was restored and `cmp`-verified before its commit. No app binary was built from a reverted tree (both builds used private DerivedData under the scratchpad; the walk binary in the shared DerivedData is untouched by this unit).
+
+### THE SWEEP'S GREP TABLE (every user-facing candidate; the scan and its classes)
+
+**The scan.** Every STRING LITERAL whose content says "savepoint" (any case, either number — comments skipped, interpolations as «x») in the four shipped roots — `App/Variorum/Variorum`, `App/Variorum/Shared`, `App/Variorum/VariorumMobile`, `Sources/VariorumCore` — read on the pre-sweep tree (`git archive 0f4055fb`): **80 hits.** After the sweep: **34** (= 2 legal survivals + 19 keys + the guide's 13, which are the landing's). **The other ~600 lines that say the word are not words the app shows:** 356 are comment-only lines (history — the existing fence's own principle), and the rest are CODE NAMES (`SavepointCadence`, `SavepointRuns`, `savepointOnLeaving`, `BlockHistoryPath.savepointsSection`, the `.savepoint` row case, test names) — never rendered, and never renamed (the brief: the strings move, the keys stay). Test-target literals are test messages, untouched except where a pin BOUND the old word (flipped, listed per piece above).
+
+| site (pre-sweep line) | what it was | disposition → now |
+|---|---|---|
+| `Core/Views/SavepointNameField.swift:107` | the NAMED commit receipt | MOVED → "Committed “x” — an immutable saved moment of this take." (P-U4-1) |
+| `Core/Views/SavepointNameField.swift:111` | the name field's help | MOVED → "…Block History's rename door beside the commit" |
+| `Features/Settings/SavepointCadenceCopy.swift:22` | cadence picker title — LABEL | MOVED → "Commits Variorum makes for you" (P-U4-2) |
+| `…SavepointCadenceCopy.swift:34, :38` | cadence help | MOVED → "one commit for each take", "these quiet commits" |
+| `…SavepointCadenceCopy.swift:57` | pruning picker title — LABEL | MOVED → "Old quiet commits" |
+| `…SavepointCadenceCopy.swift:67, :71` | pruning help | MOVED → "quiet commits", "Commits you made yourself with ⌘S" |
+| `Features/Settings/AppSettingsView.swift:347` | Settings search's empty hint | MOVED → "…“seam”, “commit”." |
+| `Features/Settings/AppSettingsView.swift:720` | the Writing pane's section — HEADER | MOVED → "Commits" |
+| `Features/Settings/SettingsShape.swift:97, :252, :258` | the pane one-liner + two row blurbs | MOVED → "the commits Variorum keeps", "makes a quiet commit", "old quiet commits" |
+| `Features/Settings/SettingsShape.swift:254, :260` | search KEYWORDS "savepoint"/"savepoints" | KEY-NOT-A-LABEL — matched, never rendered; the old word still finds the pane (P-U4-4; fence-allowed by exact literal) |
+| `Features/TOC/BlocksWorkbenchView.swift:863` ×2 | the context panel's count — LABEL | MOVED → "1 commit" / "N commits" |
+| `Features/Tutorial/TutorialSeeder.swift` ×13 (877, 888, 889, 908, 910, 913, 1106, 1124, 1335, 1457, 1507, 1920, 2089) | the field guide's lessons | NOT THIS UNIT'S — the triage LANDING's (R-13s-34); all prose, so fence-quiet; its drafts already say commit with one R-13s-32 survival |
+| `Features/Takes/CompareBoardView.swift:890`, `Features/Takes/TakesViewModel.swift:1728`, `Features/Canvas/CanvasViewModel.swift:784` | ONE unnamed receipt, three copies | MOVED + HOISTED → `SavepointNameCopy.unnamedReceipt` "Committed — an immutable saved moment of this take." (P-U4-1) |
+| `Features/Takes/TakesViewModel.swift:2285` | the Takes restore receipt | MOVED → "Restored — the commit's text is back in the take's buffer. …" |
+| `Features/Takes/TakesBottomBar.swift:378`, `Features/Editor/CommitBar.swift:607` | the commit doors' tooltips | MOVED → "An immutable saved moment of the take …" (P-U4-1) |
+| `Features/Takes/TakesBottomBar.swift:515`, `Features/Editor/CommitBar.swift:767` | the note menu's tooltips | MOVED → "a block's commits are the history door beside commit" |
+| `Features/Library/LibraryDayFilter.swift:193, :216, :235` | the day filter's caveat + both empty answers | MOVED → "where a commit landed", "No note's last edit or commit falls on/between …" (the triage's search-lesson draft already says the same) |
+| `Features/Library/LibrarySearchCopy.swift:63` | the `+ commits` chip's help | LEGAL SURVIVAL — the search surface (R-VX83-10: "leave it"), and R-13s-32's shape exactly ("your commits — the words every savepoint of your takes kept": the noun explains the label); its wording is P-VX83-C7's PROVISIONAL, hers |
+| `Features/Tray/TrayPanel.swift:1127`, `Shared/BlockHistoryFace.swift:121` | the two put-back helps | MOVED → "its commits come back" / "its commits all come back" |
+| `Features/Onboarding/TourScript.swift:101` | the tour's step-4 sentence | LEGAL SURVIVAL — FROZEN (R-13s-32, her "keep it"); the recorded exemplar |
+| `Features/Help/HelperView.swift:85, :365` | the ⌘/ ⌘S row + the dictionary's "commit" entry | MOVED → "an immutable saved moment of …" (definitions; P-U4-1) |
+| `Features/Help/HelperView.swift:245` | the ⌘/ bar row — LABEL | MOVED → "history (commits) · seal / unseal · …" |
+| `Registry/OpsRefusalCopy.swift:420` | the never-pruned refusal | MOVED → "That's a deliberate ⌘S commit — those are never pruned, in any mode." |
+| `Shared/BlockHistoryFace.swift:42` | Block History's region — HEADER (both platforms) | MOVED → "Commits" |
+| `Shared/SampleLibrary/SampleLibraryJekyllBook.swift:86` (the clause at :95) | the restorable Jekyll book's front matter | MOVED → "commits spread over the weeks (some of them named)" (outside every dedupe signature — P-U1b-5) |
+| `VariorumMobile/…/MobileTutorialSeeder.swift:379, :388, :396, :523, :682` | the pocket guide's five sentences | MOVED → "commits, a new block below…", "a commit is the deliberate extra" (lowercase), "A commit from before a divide…", "quietly commits it first", "Sealing quietly commits any unsaved take first" (P-U4-3; the phone's guide is in no dedupe fact) |
+| `VariorumMobile/…/MobileBlockHistorySheetView.swift:411` | the row's accessibility IDENTIFIER | KEY-NOT-A-LABEL — a UI-test key (fence-allowed by exact literal) |
+| `VariorumMobile/…/MobileBlockHistorySheetView.swift:414, :422` | the empty row's title + the restore VoiceOver label — LABELS | MOVED → "(Empty commit)", "Restore this commit" |
+| `VariorumMobile/…/MobileBlockHistory.swift:149, :486` | the Commit Take receipt + the restore refusal's act | MOVED → "Committed — a saved moment of this take is kept.", "…to restore this commit." |
+| `Sources/VariorumCore/Domain/SavepointRuns.swift:101, :110, :112` | the fold line — LABEL (both platforms) — and its help | MOVED → "N quiet commit(s)", "Commits Variorum made for you … ⌘S commits are never folded in here." |
+| `Sources/VariorumCore/Queries/IdleCommit.swift:33`, `Operations/Operations+Appearance.swift:196` | the `savepoint_cadence` setting key | KEY — never renames (the brief) |
+| `Sources/VariorumCore/Persistence/SearchIndex.swift:124`, `Persistence/Migrations.swift:415, :896` | the derived index's kind key; two migration identifiers | KEY — never renamed (a migration is never rewritten); fence-allowed by folder |
+| `Sources/VariorumCore/Domain/SearchComposer.swift` ×8 (137, 270, 309 ×2, 350, 395, 593, 594), `Queries/SearchQueries.swift:415` ×3 | the index kind `'savepoint'` and column aliases inside SQL | KEY — fence-allowed by file (neither file renders a word) |
+
+**Totals: 46 MOVED · 2 LEGAL SURVIVALS · 19 KEYS · 13 the landing's.** Not the retired word, deliberately untouched: Block History's plain gloss **"saved moment(s)"** (its explainer, "No saved moments yet — ⌘S saves one.", "Saved moment restored…", "Saved moment named “x”.", "Name cleared — the saved moment itself is untouched."), the row details "quiet" / "saved by hand", and the name field ("name this moment") — R-13s-31 retires "savepoint", and "saved moment" is the gloss this sweep's definitions now lean on. **Take-label/name strings: none carried the word** (grep-verified) — nothing to move.
+
+### PROVISIONALs (QUESTIONS-ready at the merge — the shared ledger is touched only at merge moments; each with its alternatives)
+
+- **P-U4-1 — a sentence that DEFINES commit rides "saved moment"**: (a) built — the receipts (the Mac's named + unnamed, the phone's Commit Take), the two commit-door tooltips, the ⌘/ ⌘S row and the dictionary's "commit" entry say "an immutable saved moment of …": Block History's own gloss since 13j, never "commit" defining itself (her R-13s-32 note, "commit twice would just read as weird"), and the retired word nowhere it isn't needed (her R-VX83-10 reason: "I don't want people to think savepoint is for the whole note"). (b) keep "savepoint" in those six definitions as R-13s-32 survivals (the tour's shape; the fence permits it — they are prose). (c) rewrite each definition with no noun at all ("Committed — this take, as it stands, kept for good.").
+- **P-U4-2 — the cadence pane's verb**: (a) built — "Commits Variorum makes for you" (+ "Commits you made yourself with ⌘S", "Commits Variorum made for you" on the fold line's help): a commit is MADE, and "takes" is the app's own noun for a block's alternatives, so "Commits Variorum takes for you" reads two ways once "savepoint" is gone. (b) the one-word swap, "Commits Variorum takes for you". (c) a shorter title, "Quiet commits".
+- **P-U4-3 — the pocket guide moved in THIS unit**: (a) built — it is the phone's twin of the field guide, which the U3 triage does not cover (its drafts are the Mac `TutorialSeeder` only), so "the phone's twins" is the only owner; minimal word swaps, the defined term lowercase per her caps rule (the guide's OTHER caps stay — a phone-guide pass's, not this unit's). (b) leave the pocket guide for a phone-guide triage (it would keep "a SAVEPOINT is the deliberate extra" meanwhile).
+- **P-U4-4 — the Settings search keeps "savepoint"/"savepoints" as never-rendered keywords**: (a) built — the tour and the guide's first teach still use the word as the gloss, so a person who types it finds the pane (the pin `theOldWordStillFindsThePaneItsKeyNamed`). (b) drop them (a "savepoint" search would then find nothing).
+- **P-U4-5 — the fence's mechanical reading of "labels and headers"**: (a) built — a LABEL-SHAPED literal: at most six words and no sentence end; exact keys allow-listed with their decisions; prose surfaces held individually by `CommitVocabularyTests`. (b) a SwiftUI-constructor scope (`Text`/`Button`/`Section`/`.help` arguments) — misses the copy constants, where most labels live. (c) every literal, with an exact-sentence allow-list — stricter than R-13s-32 asks (every explanatory use would need listing).
+
+### SELF-ASSESSMENT (the implementer, at the stage hand-off — 2026-10-08)
+
+**Built (six commits):** 0f4055fb the record · b67e59c8 the fence · 4a18ce00 core (the fold line + its help) · 96ac35ee the Mac + Shared surfaces + `CommitVocabularyTests` · 705e98f2 the phone's twins + the pocket guide · this commit, the evidence.
+
+**Verified at this seat (headless + builds only):** whole core `swift test` GREEN at the END (2424/280 + 40/6); the core pin's red-on-old RUN (4 issues on the old source, restored, green); the fence's red-on-old RUN by its verbatim twin (11 offenders pre-sweep → 3 after piece 3 → **0** after piece 4; the control's 16 checks pass); Mac `build-for-testing` GREEN after piece 3 and mobile `build-for-testing` GREEN after piece 4 (private DerivedData; every new/edited test object compiled).
+
+**PENDING, and why:** (1) every Mac and mobile pin RUN — the stage window (the commands below; no `xcodebuild test` at this seat by the brief); (2) **the use-shaped evidence — the WALK**: no app launch is mine tonight, so the acceptance captures are the orchestrator's under a coordinator GO — Mac, both voices: Block History (header "Commits", a "N quiet commits · show" fold), Settings ▸ Writing (section + both pickers + the help), ⌘/ (the ⌘S row, the bar row, the "commit" entry), one ⌘S receipt (named and unnamed), the Blocks panel's count; phone: the Block History sheet (header, an empty commit row, VoiceOver's restore label) and the pocket guide's writing lesson. This record does NOT close on pins alone: it closes READY-FOR-STAGE + WALK-PENDING.
+
+**Watch-outs for the reviewer and the window:**
+1. **The field guide's "N quiet savepoints · show" quote is stale against the app until the triage LANDING** (TutorialSeeder:913) — the landing's draft already reads "N quiet commits · show", now TRUE; no pin binds the pair, so nothing reds meanwhile.
+2. **Block History reads "Commits" over "No saved moments yet — ⌘S saves one."** — two words on one face (the gloss is not the retired word). The walk's eye should judge it; moving the gloss too is a one-line follow-up, not this ruling's letter.
+3. **The guide draft says "the ones you took yourself"; the pane now says "Commits you made yourself"** — harmless, but the landing may align the verb (P-U4-2).
+4. **The fence's six-word limit is a design line**: a 7+-word label carrying "savepoint" would slip it; the shipped prose surfaces are each held by `CommitVocabularyTests` instead.
+5. **The parallel tour agent's commits interleaved with this unit's** (fc9974db, eea127a7 — disjoint files); every U4 commit was pathspec-limited, and the core END run covered both.
+
+### U4 STAGE-WINDOW COMMANDS (from `<home>/dev/variorum-13s/App/Variorum`, under the held claim, foreground, zsh `pipestatus` checked, the "Test run with N tests" line confirmed)
+
+**Mac run:**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/CommitVocabularyTests \
+  -only-testing:VariorumTests/SavepointOnLeaveTests \
+  -only-testing:VariorumTests/SavepointHistoryFaceTests \
+  -only-testing:VariorumTests/QuietRunRowCaptureTests \
+  -only-testing:VariorumTests/LibraryDayFilterTests \
+  -only-testing:VariorumTests/LibraryWhenRangeTests \
+  -only-testing:VariorumTests/LibraryWhenDoorTests \
+  -only-testing:VariorumTests/SavepointNameCopyTests \
+  -only-testing:VariorumTests/SavepointNameFaceTests \
+  -only-testing:VariorumTests/SavepointNameAskTests \
+  -only-testing:VariorumTests/SavepointCommitDoorTests \
+  -only-testing:VariorumTests/SavepointTakesDoorTests \
+  -only-testing:VariorumTests/SavepointRenameDoorTests \
+  -only-testing:VariorumTests/SavepointSealedDoorTests \
+  -only-testing:VariorumTests/BlockHistoryPaneTests \
+  -only-testing:VariorumTests/BlockHistoryHostTests \
+  -only-testing:VariorumTests/SettingsShapeTests \
+  -only-testing:VariorumTests/HelperCurrencyTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/JekyllTakemaniaSeedTests \
+  -only-testing:VariorumTests/BlocksWorkbenchFaceTests \
+  -only-testing:VariorumTests/CompareViewModelTests \
+  -only-testing:VariorumTests/TrashPurgeDoorsTests \
+  -only-testing:VariorumTests/OpsRefusalTableIntegrityTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests
+```
+**Mobile run (the window's simulator; the claim covers CoreSimulator):**
+```
+xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,name=<the window's device>' test \
+  -only-testing:VariorumMobileTests/MobileBlockHistoryTests \
+  -only-testing:VariorumMobileTests/MobileMenuVocabularyTests \
+  -only-testing:VariorumMobileTests/MobileWalkTests \
+  -only-testing:VariorumMobileTests/MobileTutorialBookShapeTests \
+  -only-testing:VariorumMobileTests/MobileTutorialDoorTests \
+  -only-testing:VariorumMobileTests/MobileTutorialWritingWalkTests \
+  -only-testing:VariorumMobileTests/MobileTutorialTakesWalkTests \
+  -only-testing:VariorumMobileTests/MobileTutorialStructureWalkTests \
+  -only-testing:VariorumMobileTests/MobileTutorialLibraryWalkTests \
+  -only-testing:VariorumMobileTests/MobilePocketGuidePrivacyTests \
+  -only-testing:VariorumMobileTests/MobilePocketGuideDeletionTests \
+  -only-testing:VariorumMobileTests/MobileNoRedirectSweepTests \
+  -only-testing:VariorumMobileTests/MobileCopyRegisterSweepTests
+```
+(`MobileNoRedirectSweepTests` carried ONE red at U1b's window that is 13x's `LibraryOpenCopy.swift`, outside 13s — read it as that baseline, not this unit's.)
+
+**Red-on-old recipes for the window (each a temporary FILE COPY from `HEAD~5` — never a stash or checkout in the shared tree — restored and `cmp`-verified; REBUILD after the restore before any walk):** (1) `Shared/BlockHistoryFace.swift` back → `DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` + `CommitVocabularyTests.blockHistorySaysCommits` + `MobileBlockHistoryTests.theBlockHistoryVocabularyIsShared` RED; (2) `Features/Settings/SavepointCadenceCopy.swift` back → the fence (2 labels) + `theSettingsPaneSaysCommit` RED; (3) `Features/Help/HelperView.swift` back → the fence (the bar row) + `theHelperSaysCommitOnEveryRow` RED; (4) `VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift` back → `thePocketGuideSaysCommitNeverSavepoint` RED (the fence stays quiet — all prose, by design). Recipe (1)'s fence arm and the core pin's are ALREADY run headless (above).
+
+**U4 STATUS: READY-FOR-STAGE + WALK-PENDING (implementer side closed, 2026-10-08).** The cold review follows (opus-reviewer: no editor seam, custody, `Sync/` or default's meaning in this diff).
