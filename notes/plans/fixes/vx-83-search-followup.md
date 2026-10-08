@@ -427,6 +427,41 @@ implementer").
 **Fences:** U-A's verbatim (zero `Sync/`, zero editor-core internals, composer-only query
 reads, environment traps, commit-per-piece + push, no attribution trailers).
 
+### U-B RECORD (LIVE STATUS — the implementer maintains this from its first commit)
+
+**U-B IN PROGRESS — nothing closed yet.** What U-B has NOT done (kept current): no Mac suite run, no
+captures, no stage claim; the grid half of VX-87 is NOT built (see P1 — a proposal awaits the
+orchestrator's ruling); no `notes/QUESTIONS.md` entries and no canon deltas (shared ledgers — the merge
+moment's); zero `Sources/VariorumCore/Sync/` lines; zero lines in
+`EditorTextView`/`BlockRangeIndex`/`PaneSurface`; U-C (VX-72) untouched.
+
+**Seat:** the U-B implementer (Opus, xhigh), seated 2026-10-07 in `~/dev/variorum-vx-83` on
+`vx-83-search-followup` (pulled at `84aa3292`). Required reading done in-context, never delegated:
+this file WHOLE · the mockup `notes/plans/mockups/when-door.html` (direction 1 the ruling) ·
+`notes/plans/phase-13o-search.md` (R-13o-13; the U2 brief + RECORD's D5/P4 and P-13o-U2-9) ·
+`notes/SessionResiliencyProtocol.md` · CLAUDE.md + its canon; the code the pieces touch
+(`Features/Library/LibraryDayFilter.swift` whole, `LibraryCatalogView`'s door + band sites,
+`LibraryCatalogModel`'s range API, `VoicedMenu`, `VoiceTokens`, `MastheadPopover`/`QuietFill`, the
+app's other date popovers) and the tests that drive the door (`LibraryWhenRangeTests`,
+`LibraryDayFilterTests`); for VX-89 `TutorialSeeder` (the plan, the welcome + library-of-things +
+books chapters), `TutorialCurrencyTests` (the VR-122 pattern) and `TutorialWalkTests`' shape pins.
+Machinery: no deaths so far.
+
+**THE PIECE PLAN (each piece its own commit, pushed; flipped here in the same commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record + piece plan (the first commit) | DONE (this commit) |
+| P1 | **VX-87 — the grid FORK, measured:** can the `.graphical` `DatePicker` carry direction 1 (the two-click run washing in; the voice treatment)? Probe + the proposal below; the GRID half is built only on the orchestrator's ruling | IN-PROGRESS — the probe is next |
+| P2 | **VX-87 — the door's brain (grid-agnostic, pure):** the mode row's meaning, the no-silent-arm rule (opening and switching modes arm nothing; only a touched day arms — supersedes P-13o-U2-9 FOR THIS DOOR), the two-click run, the SENTENCE, `any day`; one pure home in `LibraryDayFilter.swift` + new-behavior pins (built, compiled; RUN at the slot) | NOT-STARTED |
+| P3 | **VX-87 — the popover face minus the grid:** the `when ▾` press opens ONE popover (the `VoicedMenu` dies); the mode row, the sentence at the foot, `any day` in the card, Esc/click-out keep the sentence; tokens only, both voices, dark; `LibraryWhenRangeTests` + `LibraryDayFilterTests` JUSTIFIED EDITS where the door's own closures change | NOT-STARTED |
+| P4 | **VX-87 — the month GRID** (per the ruling on P1) | BLOCKED — awaiting the orchestrator's ruling |
+| P5 | **VX-89 — the field guide teaches the finder** (functional words, the VR-122 seed-edit class) + currency pins in `TutorialCurrencyTests` | NOT-STARTED |
+| P6 | **The stage slot** (via `oct7coordinator`): the new pins + `LibraryWhenRangeTests` + `LibraryDayFilterTests` + the touched Library suites + the tutorial spine; then the R-VX83-2 captures (both voices × light/dark × one-day/between-days) into `App/Variorum/DerivedData/vx83-shots/`, checked for spacing/legibility | NOT-STARTED |
+| P7 | Close — record final, self-assessment, report | NOT-STARTED |
+
+PENDING flags: none yet (nothing claimed).
+
 ### U-C — SEARCH WHAT YOU SAVED: VX-72 (R-VX83-5); one implementer session after U-B
 
 ### U-C BRIEF (self-contained)
