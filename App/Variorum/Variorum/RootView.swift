@@ -827,15 +827,15 @@ struct RootView: View {
     /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
     /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
     /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
-    /// resume), on the Bookcase, and it releases the window's first
-    /// responder first (the U1a walk's W-U1a-1: "yes" left the caret in the
-    /// quick entry, where a keystroke would mint a note). The line steps
-    /// aside now; the engine retires it at the end
+    /// resume), on the Bookcase, and the tour's layer releases the window's
+    /// first responder the moment it arrives in the window (`TourOverlay` —
+    /// the U1a walk's W-U1a-1: "yes" left the caret in the quick entry, where
+    /// a keystroke would mint a note). The line steps aside now; the engine
+    /// retires it at the end
     /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
     /// ended by End tour before it, nothing at all if the app quits mid-way).
     private func startTour() {
         tourOffer?.tourStarted()
-        windows.window(for: windowID)?.makeFirstResponder(nil)
         let session = session
         let place = TourPlaces.place(router.workspace.focusedSelection)
         let doors = tourDoors

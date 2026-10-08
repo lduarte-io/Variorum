@@ -103,11 +103,6 @@ final class WindowRegistry {
         entries[id] = entry
     }
 
-    /// The window's own AppKit window, if it has attached one. 13s-b U2: the
-    /// tour's start releases that window's first responder (the walk's
-    /// W-U1a-1 — "yes" must not leave the caret in the Bookcase's quick entry).
-    func window(for id: UUID) -> NSWindow? { entries[id]?.window }
-
     /// A window became key. **The only writer of key-ness** — there is no
     /// resign door, deliberately (see the header).
     func noteKey(_ id: UUID) {

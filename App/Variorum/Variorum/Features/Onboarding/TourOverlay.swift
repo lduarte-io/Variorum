@@ -71,7 +71,13 @@ struct TourOverlay: View {
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
             .animation(.easeOut(duration: 0.2), value: engine.state.step)
         }
-        .background { TourWindowProbe(handle: probe) }
+        .background {
+            // The probe's arrival in the window is the tour's arrival: the
+            // window's first responder is released once (the U1a walk's
+            // W-U1a-1 — "yes" left the caret in the Bookcase's quick entry,
+            // where the next keystroke would have minted a note).
+            TourWindowProbe(handle: probe) { window in window.makeFirstResponder(nil) }
+        }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { origin = $0 }
         .onChange(of: facts, initial: true) { _, now in engine.observe(now) }
         .task(id: engine.noteOfInterest) { await engine.watchNoteFacts() }
@@ -305,14 +311,27 @@ struct TourWindowProbe: NSViewRepresentable {
     }
 
     let handle: Handle
+    /// Called ONCE, when the probe first arrives in a window.
+    var onArrival: ((NSWindow) -> Void)? = nil
 
     final class ProbeView: NSView {
+        var onArrival: ((NSWindow) -> Void)?
+        private var arrived = false
+
         override var isFlipped: Bool { true }
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            guard let window, !arrived else { return }
+            arrived = true
+            onArrival?(window)
+        }
     }
 
     func makeNSView(context: Context) -> NSView {
         let view = ProbeView()
+        view.onArrival = onArrival
         handle.view = view
         return view
     }
