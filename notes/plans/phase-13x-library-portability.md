@@ -2009,3 +2009,40 @@ contradiction clause, not a can't-be-met one.
 - **Q3** — the staged copy's home: the per-user temp directory (above) acceptable?
 - **Q4** — extend the staged read to stage 1's plaintext `openForInspection` (the same
   read-only-writes-`-shm` + read-write-fallback construction; NOT measured this session)?
+
+### F3 — THE ORCHESTRATOR'S RULINGS ON Q1–Q4 (2026-10-07 late; re-trace verified in source:
+GRDB `Database.setUp` ends in `validateFormat()` — `SELECT * FROM sqlite_master LIMIT 1` at
+`.build/checkouts/GRDB.swift/GRDB/Core/Database.swift:645–651` — so every first-read failure,
+a wrong key included, lands in `schemaVerdict`'s read-write fallback, which F1's own N2
+comment already admitted can touch the picked source)
+
+- **Q1 — ACCEPTED.** The re-trace stands: (b) stays as committed; (b′) the non-writable-folder
+  shm-less copy and (b″) the torn copy carry the report's false-wrong-key symptom.
+- **Q2 — YES, IN SCOPE, and it is the most important half of R3-1.** Any write to the picked
+  source — the wrong-key rewrite of its main file, the `-shm` rewrite/creation — breaks the
+  confirm's promise "the file you picked was only read" (constraint 1). F3 fixes it; a pin
+  asserts the picked folder BYTE-IDENTICAL (every file, sidecars included) after each consult
+  road, red on old.
+- **Q3 — ACCEPTED, with two conditions:** (i) the staged copy lives in its own per-consult
+  subdirectory of the per-user temporary directory (owner-only on macOS) and is removed on
+  every exit path (a `defer`), so only a crash can leave one; (ii) the record states the
+  residue honestly — ciphertext for an encrypted source, plaintext only for a source that was
+  already a plaintext file she holds. The copy's cost is ∝ the picked library (an APFS clone
+  where possible) — acceptable for a one-time act the user started (P1 binds steady state,
+  not a deliberate whole-file act).
+- **Q4 — YES:** stage 1's plaintext `openForInspection` takes the same staged read — same
+  construction, same constraint; measured in the session, pinned where it differs.
+- **The mechanism as proposed is RULED:** the staged read (main + non-empty `-wal`, never
+  `-shm`, opened read-write as OUR copy); the landing copies main + non-empty `-wal`, never
+  `-shm`; `SchemaVerdict.keyRejected` on VX-80's exact class definition, `.unreadable(reason:)`
+  for every other failure; `settle` maps each to its TRUE sentence; the existing wrong-key
+  pin's premise updates to `.keyRejected`. Then R3-2 as settled. Continue.
+
+### MERGE ORDER + VX-83's MIGRATION (her ruling and a sibling's fact, held here until F3 paused)
+- **Her ruling (2026-10-07):** VX-83 MAY MERGE BEFORE 13x — first-ready merges first; 13x
+  catches up by a MERGE COMMIT (never a rebase of pushed history), then re-runs core before
+  round 4. Bug-fix PRs (vx-82andmore) may land first likewise.
+- **VX-83 claims `v1_23_savepoint_search`** — searchfollowup's definitive answer: the v1_22 class
+  exactly (local-only derived search index + INSERT-only capture triggers; no mirror; marker
+  stays 12; zero deploy). 13x's install refresh does not wait on it; the orchestrator re-checks
+  the marker after any catch-up merge anyway.
