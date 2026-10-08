@@ -57,6 +57,10 @@ final class RestoreHoldModel {
     /// cleared (trigger a round / connect the chain). nil = nothing to
     /// resume (no account — P-U2-2: the press still clears the hold).
     @ObservationIgnored var onResume: (@MainActor () async -> Void)?
+    /// Whether this Mac belongs to an account — the banner's account
+    /// clause reads it (round 4's NIT). Wired with `onResume`; true until
+    /// wired, the shipped wording's default.
+    var hasAccount = true
 
     init(storeURL: URL?) {
         self.storeURL = storeURL

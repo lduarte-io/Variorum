@@ -2207,3 +2207,26 @@ orchestrator owns their homing):**
   verbatim, her foci in `notes/plans/phase-13x-review-foci.md`; report →
   `notes/plans/13x-ladder-round4.md`, committed unedited. The worktree is STILL until its
   handback.
+
+## THE LADDER — ROUND 4 (past the cap at her word; report `notes/plans/13x-ladder-round4.md`,
+transcribed verbatim at c057438f): 0 BLOCKER · 0 MAJOR · 1 MINOR · 1 NIT; all twelve of her foci
+answered (finding or named clean-bill line), seven beyond-the-foci scenarios (five SAFE).
+
+| finding | disposition |
+|---|---|
+| **R4-1** (MINOR — a fresh-slot adoption failure claimed a current library / dated copy / safety copy that never existed) | **ACCEPTED — FIXED by the orchestrator (the adjudication allowance; app-only, three lines of logic):** `failureWording(for:nothingStood:)` — the call site passes `!willStepAside`; on a fresh slot EVERY arm renders the new `adoptionFailedFreshSlot` ("No library was here before, nothing was moved, and the file you picked was only read"), the detail kept from the arm map. Pins: `onAFreshSlotEveryFailureArmSaysOnlyWhatIsTrue` (pure) and `aFailedAdoptionOntoAFreshSlotNamesNoRecoveryThatDoesNotExist` (the REAL flow — an unwritable empty slot fails at its first write; red on old, and on the call-site revert). Mac pins — run in the stage block. |
+| **R4-2** (NIT — the hold banner names "your account" on an account-less Mac) | **ACCEPTED — FIXED:** `holdBanner(asOfDay:hasAccount:)`; `RestoreHoldModel.hasAccount` wired beside `onResume` from the composition root's own account predicate (`sync.isConfigured \|\| account.variorum != nil`, the launch-furniture gate's). The confirm's "nothing uploads or downloads before that" is literally true account-less and stays. Pin: `theHoldBannerNamesNoAccountWhereNoneExists`. Words 13s's (both banner variants join the 13s table). |
+
+Compiled: Mac TEST BUILD SUCCEEDED · VariorumMobile BUILD SUCCEEDED.
+
+**THE STAGE BLOCK — owed, in order (13x's last):**
+1. `LibraryPortabilityDoorTests` (from `App/Variorum/`, `-derivedDataPath DerivedData/13x-f3
+   test-without-building`) — expect **14/14** (F3's 11 + round 4's 3).
+2. Reverts, each red on exactly its pin, restore diff-empty: F3's **C**, **C′**, **R3-2** (the F3
+   RECORD's exact edits) + round 4's **R4-1a** (call site passes `nothingStood: false` → the flow
+   pin red) and **R4-1b** (the `nothingStood` branch removed → both fresh-slot pins red) and
+   **R4-2** (the `hasAccount` guard removed → the banner pin red).
+3. The widened Mac closeout run (the touched suites + TutorialWalkTests).
+4. A1 safety copy of her real store → `/Applications` refresh from the final SHA → codesign.
+5. Her Air leg (`notes/plans/13x-air-leg-prompt.md`, the final SHA carried over).
+6. Closeout docs → PR `VX-6:` → merge commit → handoff → worktree removed.

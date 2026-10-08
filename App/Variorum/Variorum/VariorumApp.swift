@@ -201,6 +201,8 @@ struct VariorumApp: App {
                             hold.onResume = { [weak fresh] in
                                 await fresh?.resumeSync()
                             }
+                            hold.hasAccount = fresh.sync.isConfigured
+                                || fresh.account.variorum != nil
                         }
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every

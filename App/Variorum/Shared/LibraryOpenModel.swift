@@ -413,7 +413,7 @@ final class LibraryOpenModel {
             // for the arm that threw (the old one lead claimed the
             // dated copy and the safety copy on arms where neither
             // exists).
-            let (lead, detail) = Self.failureWording(for: error)
+            let (lead, detail) = Self.failureWording(for: error, nothingStood: !willStepAside)
             phase = .refused(lead, detail: detail)
         }
     }
@@ -424,8 +424,17 @@ final class LibraryOpenModel {
     /// the unknown class (the old lead — its facts hold exactly there:
     /// by the landing, the dated copy and the safety copy both exist,
     /// and a post-work reopen failure is past the landing by
-    /// construction).
-    nonisolated static func failureWording(for error: any Error) -> (String, String?) {
+    /// construction). Round 4's MINOR: all of that presumes a library
+    /// STOOD at the slot — on a fresh slot (`nothingStood`) there is no
+    /// current library, no dated copy and no safety copy, so every arm
+    /// says only what is true there.
+    nonisolated static func failureWording(
+        for error: any Error, nothingStood: Bool = false
+    ) -> (String, String?) {
+        if nothingStood {
+            let (_, detail) = failureWording(for: error, nothingStood: false)
+            return (LibraryOpenCopy.adoptionFailedFreshSlot, detail)
+        }
         guard let adoption = error as? LibraryAdoption.AdoptionError else {
             return (LibraryOpenCopy.adoptionFailedLead, String(describing: error))
         }

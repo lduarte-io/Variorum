@@ -298,7 +298,8 @@ struct RestoreHoldBar: View {
                 // this bar is non-scrolling window chrome, and without it
                 // the window's near-zero-width minimum-size probe measures
                 // the sentence one character per line.
-                Text(LibraryOpenCopy.holdBanner(asOfDay: model.asOfDay))
+                Text(LibraryOpenCopy.holdBanner(
+                    asOfDay: model.asOfDay, hasAccount: model.hasAccount))
                     .font(.caption)
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)

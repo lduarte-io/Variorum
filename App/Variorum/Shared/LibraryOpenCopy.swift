@@ -69,9 +69,17 @@ nonisolated enum LibraryOpenCopy {
     static let syncNowHeldRefusal =
         "Sync is waiting since the restore — press Resume Sync in the banner below."
 
-    static func holdBanner(asOfDay: String?) -> String {
+    /// `hasAccount` false (round 4's NIT): with no account there is nothing
+    /// to catch up WITH — Resume only clears the hold (P-U2-2), and the
+    /// sentence must not name an account that does not exist.
+    static func holdBanner(asOfDay: String?, hasAccount: Bool = true) -> String {
         let lead = asOfDay.map { "This is your library as of \($0). " }
             ?? "This library was just restored from a copy. "
+        guard hasAccount else {
+            return lead
+                + "Sync is waiting until you press Resume. To keep something from this "
+                + "backup, duplicate it first — duplicates stay."
+        }
         return lead
             + "Sync is waiting — Resume to catch up with your account. Notes you deleted "
             + "since will leave again; edits made since will come back. To keep something "
@@ -161,6 +169,11 @@ nonisolated enum LibraryOpenCopy {
     static let adoptionFailedLead =
         "The library couldn't be opened. Nothing you picked was changed; your current "
         + "library is whole in its dated copy and the safety copy."
+    /// Round 4's MINOR: a failure on a FRESH slot — no library stood here,
+    /// so there is no current library, dated copy or safety copy to name.
+    static let adoptionFailedFreshSlot =
+        "The library couldn't be opened. No library was here before, nothing was "
+        + "moved, and the file you picked was only read."
     /// The pre-move refusals (source missing/unreadable · the hot `-wal` ·
     /// a failed safety copy or hold write): NOTHING moved, and no dated
     /// copy exists to point at.

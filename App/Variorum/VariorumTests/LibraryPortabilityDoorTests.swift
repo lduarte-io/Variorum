@@ -363,6 +363,79 @@ struct LibraryPortabilityDoorTests {
         #expect(unknown == LibraryOpenCopy.adoptionFailedLead)
     }
 
+    /// 13x round 4 (MINOR): on a FRESH slot no library stood — so no arm
+    /// may name a current library, a dated copy or a safety copy.
+    @Test func onAFreshSlotEveryFailureArmSaysOnlyWhatIsTrue() {
+        struct Odd: Error {}
+        let arms: [any Error] = [
+            LibraryAdoption.AdoptionError.sourceMissing("x"),
+            LibraryAdoption.AdoptionError.holdWriteFailed("x"),
+            LibraryAdoption.AdoptionError.landingFailed("x"),
+            Odd(),
+        ]
+        for arm in arms {
+            let (lead, _) = LibraryOpenModel.failureWording(for: arm, nothingStood: true)
+            #expect(lead == LibraryOpenCopy.adoptionFailedFreshSlot, "\(arm)")
+            #expect(!lead.contains("dated copy") && !lead.contains("safety copy")
+                    && !lead.contains("current library"),
+                    "no recovery facts that do not exist: \(arm)")
+        }
+    }
+
+    /// 13x round 4 (MINOR), the CALL SITE: the real flow on an empty slot
+    /// whose folder refuses writes fails at its first write — and must
+    /// render the fresh-slot sentence. RED ON OLD (and on a revert that
+    /// passes `nothingStood: false`): "your current library stands as it
+    /// was", naming a library that never existed.
+    @Test func aFailedAdoptionOntoAFreshSlotNamesNoRecoveryThatDoesNotExist() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_790_000_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let dir = try temporaryDirectory()
+            let slot = dir.appendingPathComponent("home", isDirectory: true)
+            defer {
+                try? FileManager.default.setAttributes(
+                    [.posixPermissions: 0o755], ofItemAtPath: slot.path)
+                try? FileManager.default.removeItem(at: dir)
+            }
+            let pair = try makePair(in: dir, passphrase: "the travelling word")
+            try FileManager.default.createDirectory(at: slot, withIntermediateDirectories: true)
+            let storeURL = slot.appendingPathComponent("variorum.sqlite")
+            let bootstrap = AppBootstrap(
+                testOpener: { .success(try! AppDatabase.inMemory()) },
+                gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
+                testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            let model = LibraryOpenModel(bootstrap: bootstrap)
+            model.begin(picked: pair.store)
+            try await waitUntil { if case .unlock = model.phase { return true }; return false }
+            await model.unlock(passphrase: "the travelling word")
+            try await waitUntil { if case .confirm = model.phase { return true }; return false }
+            #expect(model.willStepAside == false)  // the condition: nothing stands here
+
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o555], ofItemAtPath: slot.path)
+            await model.confirmAdoption()
+            guard case .refused(let lead, _) = model.phase else {
+                Issue.record("an adoption into an unwritable fresh slot must refuse: \(model.phase)")
+                return
+            }
+            #expect(lead == LibraryOpenCopy.adoptionFailedFreshSlot,
+                    "the fresh-slot failure names no library that never existed: \(lead)")
+        }
+    }
+
+    /// 13x round 4 (NIT): on a Mac with no account the banner must not
+    /// promise to "catch up with your account".
+    @Test func theHoldBannerNamesNoAccountWhereNoneExists() {
+        let withAccount = LibraryOpenCopy.holdBanner(asOfDay: "October 7, 2026")
+        #expect(withAccount.contains("your account"))
+        let without = LibraryOpenCopy.holdBanner(asOfDay: "October 7, 2026", hasAccount: false)
+        #expect(!without.contains("account"))
+        #expect(without.contains("Resume"))
+    }
+
     // MARK: F1 R1-MAJOR — the hand-off door's flow (the face over the U1
     // brains; the finding's evidence was the zero-caller grep)
 
