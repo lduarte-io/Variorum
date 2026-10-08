@@ -2283,4 +2283,4 @@ render. (d) **W-3's notice sentence**: the Castle/Apple-wrap follow notice says 
 names no cause. Words are 13s's to re-voice; the facts are this phase's. Her rulings at the close, recorded here as
 their home: **no iCloud-destination warning on the hand-off, for now** ("note it for if the question ever comes up
 later again"); **no unnecessary caps in rendered copy**. Tickets born of the close: VX-95 · VX-99 · VX-100 · VX-101
-and the landing-residuals ticket. **Status: (a)–(d) open for her eye; the rest RATIFIED.**
+and the landing-residuals ticket. **Status: the sixteen RATIFIED; (a)–(d) ACCEPTED FOR NOW at her word (2026-10-08, verbatim: "i'm sure the questions #202 are fine for now") — reopen any at will.**

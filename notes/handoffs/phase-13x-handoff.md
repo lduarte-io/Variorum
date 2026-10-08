@@ -2,7 +2,9 @@
 
 ## Your checklist
 
-1. **Hand the FAQ brief to the site agent** — `notes/stargazing-help-faq-brief-pre13x.md`. The three held entries
+*Status at 2026-10-08 ~02:30, her word: the twelve-words door told (VX-99); the Trash being emptied; /Applications refreshed to 0.9.2 (5589); PL-47 renumbered; #202 "fine for now"; the site brief is hers to carry next.*
+
+1. **Hand the FAQ brief to the site agent** — the CURRENT edition is `notes/stargazing-help-faq-brief-2026-10-04.md` (updated 2026-10-08: its three 13x entries BUILT and verified; publish with the first public release carrying 13x). The product page `notes/brand/site/variorum-product-page.md` carries two fact corrections for your wording before its AirDrop lines publish. (The older pre-13x edition below was updated too, for the record.) The three held entries
    (*Moving to a new Mac* · *Restoring a backup* · *Can my library live in iCloud Drive?*) are un-flagged as built,
    each with a "✔ BUILT in 13x" note and the one new fact the drafts predate: after opening a copy, sync waits until
    **Resume Sync** is pressed. Facts are binding; 13s re-voices the words.
