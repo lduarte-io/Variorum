@@ -134,7 +134,7 @@ chapters; no chapter renames; the two guide-pointing cards need no change.
 | chapter-01-welcome.md | DONE |
 | chapter-02-writing.md | DONE |
 | chapter-03-takes.md | DONE |
-| chapter-04-structure.md | NOT STARTED |
+| chapter-04-structure.md | DONE |
 | chapter-05-deleting.md | NOT STARTED |
 | chapter-06-where-things-go.md | NOT STARTED |
 | chapter-07-keeping-it-private.md | NOT STARTED (fence notes + flags only, as ruled) |
