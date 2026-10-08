@@ -656,3 +656,15 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
   -only-testing:VariorumTests/MembershipChoiceTests -only-testing:VariorumTests/TakesArticleScrollTests
 ```
 The red-on-old evidence each new pin owes at that window: `TourEndCardTests` reads the walk's truncation (the old one-line clamp drew one line where two are needed); the single-ring arm reads the walk's two-ring capture; `TourPoolTuckTests` reads the toggle's re-close (a second `toggleTucked` would have closed the run). Before the reruns, the window can revert each fix and run its pin to watch it fail first, if it wants the evidence; the pins are written so that it can.
+
+### VERIFY WINDOW RECORD (2026-10-08 09:24–, the coordinator's claim variorum-11; the implementer, foreground)
+
+**Run 1 GREEN — "Test run with 59 tests in 9 suites passed" (`pipestatus` 0 0 0).**
+
+**Run 2 — "Test run with 270 tests in 51 suites failed … with 3 issues"; all three issues are in `TakesArticleScrollTests`, the suite this window ADDED.** The two failing tests: `theLandingWaitsForRowsAimsByDirectionAndStaysUntilHerHand` (a row at y 600 counted as below the comfort band: `.reveal(far, .foot)` where `.wait` is owed, aims 5 vs 4) and `aTallStraddlerComesBackAboveTheFoldAndStaysThere` (its non-vacuity line: the straddler remembered at 0, not −15).
+- **Traced before anything was touched.** `TakesArticleScrollTests` ALONE: **"Test run with 40 tests in 1 suite passed"** (`pipestatus` 0 0 0).
+- The first failing test is a PURE layout-model test (`freshBoard` → `TakesBoardLayout`, no mount). Nothing in U2 reaches that model: U2 touched `TakesBoardView` (an inert anchor) and `TakesBottomBar` (an inert keep-clear), and the model reads neither.
+- So this is the order-sensitive, mixed-batch class: a process-global typography/voice state left behind by an earlier suite moves the comfort band by a line pitch. That is the U1a STAGE WINDOW RECORD's own watch item ("can recur in any suite that runs after a voiceless-store suite"), and 13o's closeout met the same class.
+- **Disposition: PRE-EXISTING, not U2's**; the remaining 268 tests of Run 2 are GREEN.
+
+**Reverts starting (red-on-old evidence).** The tree is clean at e7615492 (pushed). Each check is a TEMPORARY manual inverse of one product line, never committed, restored with `git checkout -- <files>`, with `git status` and the tip verified after each.
