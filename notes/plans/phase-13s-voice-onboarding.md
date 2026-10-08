@@ -95,6 +95,24 @@ She resumed on the Air and ruled a **worktree** for this effort — her words: *
 
 **V2 DIRECTION (built same sitting, same file):** the Apple-tip register — one idea per card, a title plus at most two short sentences, visible step count, always escapable, the user's real click advancing; the spine is pure NAVIGATION (sidebar → book → note → modes → back up the ladder → a note of your own); the two ruled moments built in (mid-note click + cursor-follows-you across modes; the book↔note round trip); all copy re-voiced to her Start Here register; area facts from the guide's "getting around"; her tags line nearly verbatim. Old Q disposition: Q1 superseded by R-13s-6 (residue → Q9), Q2 answered by R-13s-10, Q3 answered ("making a take is good" — the block-menu road stands), Q7 superseded by the rewrite; Q4/Q5/Q6/Q8 carry forward as Q12/Q13/Q14/Q17. New: Q9 (badge return cadence after the transient), Q10 (step 2's sentence pick), Q11 (the "index" reading), Q15 (where the welcome note lives so a stranger finds it), Q16 (where the letter from Lillian lives — seed work, never mentioned in the tour).
 
+## SITTING RECORD — THE MOCKUP WALK, ROUND 2 (2026-10-07 late, on the Air; her markup of v2 + 29 screenshots of the REAL app; rulings R-13s-12…19)
+
+**R-13s-12 — NO DIMMING.** *"ok definitely don't dim the screen to make the take tour highlight button pop up - just mentioning that in case you wanted to do that."* v2's spotlight used a full-screen dark overlay and the end card sat on a dim — both OUT. The highlight is a ring/glow on the target alone; the room stays at full light throughout.
+
+**R-13s-13 — THE OFFER NEVER COMES BACK (closes Q9).** *"i think the tour offer just shouldn't come back - they can find it under help."* "Not now" → the transient "Run it any time from Help ▸ Tutorial." → gone for good. No return ladder, no later-launch reappearance, no dot.
+
+**R-13s-14 — WORK FROM THE REAL APP (the fidelity ruling).** *"i would just note that the mockup doesn't exactly look like the real app."* · *"i feel like this walk approach and recreating it in the web first might be causing more harm than good tbh. you just don't know the layout, where the book thing is, what might be intuitive and what's not. there's a bottom bar with menu options. there's other things."* · *"i tried to take these screenshots at least a little in order, though i went back to showing more book details at the end and different things. maybe work freshly from these screenshots to give you a better idea."* · *"you might just need to walk the app for good results - i'll give permission for you to use the air's screen on this ocassion and i've already installed cliclick for your needs."* The 29 screenshots are the new ground truth; the mockup's chrome rebuilds from them (the sidebar's this-note mode list, the bottom bar's block ▾ · Takes · commit ⌘S · history · note ▾ · comments, the ← 📖 → cluster, the real Bookcase masthead and strip, the book's left column). The Air screen grant is THIS OCCASION only.
+
+**R-13s-15 — "Click into it."** *"also, click it sounds too authorative - maybe 'Click into it'."*
+
+**R-13s-16 — Books open to OUTLINE by default.** *"also, books open to outline by default."* (v2's step 3 showed Index as the landing — wrong.)
+
+**R-13s-17 — The take GLYPH in Write is pointed out.** *"also, the glyph that shows takes in write mode should be pointed out - it's an essential feature."* The screenshots name it: the ψN badge in the block's right margin (fanned blocks only), opening the Takes popover ("Takes — block …", the chosen take, + new take (branch) · + blank take · + blank & choose, Open Takes mode). Her own Start Here teaches exactly this road ("The icon to the right of this block is the take icon - click on it").
+
+**R-13s-18 — Lenses/Compare, said right.** *"lenses is for looking at different takes in the same note. compare is for use with other notes."* (The tour doesn't teach them; wherever they're named, these are the words.)
+
+**R-13s-19 — The flow itself re-derived.** *"I just don't know if this tour seems like it's capturing the right flow that a viewer would go through."* v3 rebuilds the step sequence from the screenshots' own order (Bookcase → book Outline → open a note → Write/bottom bar → the take road → Takes mode → back up the ladder → your own note), not from v2's skeleton.
+
 ## RESUME PROMPTS — the mockup-walk sitting (written 2026-10-06 night at her ask; **SUPERSEDED — the walk ran 2026-10-07 on the Air; the round-1 sitting record above is the live state**)
 
 **State at sleep:** mockup delivered and pushed (b4abda9a); rulings R-13s-1…5 recorded above; open questions Q1–Q8 bundled (the EXECUTION PLAN's list + the mockup's ideas frame); 13s out of the stage queue (13o schedules; nothing needed for a mockup sitting); NO Swift before her per-screen approval.
