@@ -244,10 +244,19 @@ struct LibrarySearchLine: View {
 enum LibrarySearchFace {
     /// The snippet's runs as one attributed line — the matched runs on the
     /// wash in the ink, the rest muted (the mockup's `<mark>`).
+    ///
+    /// **VX-88 (the 13o follow-up run — D-5): newline runs fold to one space
+    /// HERE, at the face.** A snippet whose window crosses a newline inside
+    /// its block (I4 — newlines are content; FTS5's snippet copies the raw
+    /// text) drew two tight lines, or a line and a blank one, inside one
+    /// passage row while its neighbours drew one — her *"the spacing between
+    /// the results is weird"* (§M5, confirmed by `SearchPassageLineRhythmTests`).
+    /// The index and the composer stay byte-untouched; only what the row
+    /// draws folds.
     static func snippet(_ segments: [SearchSnippetSegment], tokens: VoiceTokens) -> AttributedString {
         var line = AttributedString()
         for segment in segments {
-            var run = AttributedString(segment.text)
+            var run = AttributedString(foldingNewlines(segment.text))
             if segment.isMatch {
                 run.foregroundColor = tokens.ink
                 run.backgroundColor = tokens.wash
@@ -257,6 +266,33 @@ enum LibrarySearchFace {
             line += run
         }
         return line
+    }
+
+    /// **One visible separator for every newline run** (VX-88, D-5): a run of
+    /// whitespace holding at least one line break — "\n", "\r\n", a blank
+    /// line, U+2028/2029, with any spaces around them — becomes ONE space;
+    /// whitespace without a line break is the text's own and is kept.
+    static func foldingNewlines(_ text: String) -> String {
+        guard text.contains(where: \.isNewline) else { return text }
+        var folded = ""
+        var pending = ""          // a whitespace run not yet written
+        var pendingBreaks = false
+        func flush() {
+            folded += pendingBreaks ? " " : pending
+            pending = ""
+            pendingBreaks = false
+        }
+        for ch in text {
+            if ch.isWhitespace {
+                pending.append(ch)
+                if ch.isNewline { pendingBreaks = true }
+            } else {
+                flush()
+                folded.append(ch)
+            }
+        }
+        flush()
+        return folded
     }
 
     /// A take hit the note does not render (the mockup's badge).

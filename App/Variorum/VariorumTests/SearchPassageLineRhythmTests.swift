@@ -84,4 +84,26 @@ struct SearchPassageLineRhythmTests {
         #expect(abs(height(blank, tokens) - one) < 0.5,
                 "…nor a blank one: \(height(blank, tokens)) vs \(one)")
     }
+
+    // MARK: - The face rule (D-5): newline runs fold to one space, at the face
+
+    @Test func newlineRunsFoldToOneSpaceAndNothingElseMoves() {
+        #expect(LibrarySearchFace.foldingNewlines("along\nthe") == "along the")
+        #expect(LibrarySearchFace.foldingNewlines("along\n\nthe") == "along the", "a blank line too")
+        #expect(LibrarySearchFace.foldingNewlines("along \r\n  the") == "along the",
+                "the spaces around a break fold with it")
+        #expect(LibrarySearchFace.foldingNewlines("along\u{2028}the") == "along the")
+        #expect(LibrarySearchFace.foldingNewlines("two  spaces\tand a tab") == "two  spaces\tand a tab",
+                "whitespace without a line break is the text's own")
+        #expect(LibrarySearchFace.foldingNewlines("") == "")
+
+        let tokens = VoiceTokens.resolve(voice: .study, dark: false)
+        let line = LibrarySearchFace.snippet(
+            SearchComposer.snippetSegments("…we walked along\n\nthe \u{2}harbor\u{3}\nat night…"),
+            tokens: tokens)
+        #expect(String(line.characters) == "…we walked along the harbor at night…")
+        let marked = line.runs.filter { $0.backgroundColor == tokens.wash }
+            .map { String(line[$0.range].characters) }
+        #expect(marked == ["harbor"], "the mark is untouched — only the line breaks fold")
+    }
 }
