@@ -1,13 +1,15 @@
 # VX-99 — Pro library stayed Apple-openable after Castle (the record)
 
-**NOT DONE by the fix session (2026-10-08):** the resume's another-device corner (THE RESUME RULE's PROPOSAL —
-waits for the orchestrator's word); the two PRE-EXISTING 13x reds in `PostureSwitchTests` (handed off, a second
-unit); no dev-store walk or capture (the plan's evidence clause — a key file's wraps are invisible in UI; the
-pins carry it); no phone run (the phone COMPILE is recorded under LIVE STATUS); the cold review (the
+**NOT DONE by the fix session (2026-10-08):** the double-crash residual of the resume's another-device road
+(recorded under THE RESUME-RULE DELTA — outside the ruled scope); the two PRE-EXISTING 13x reds in
+`PostureSwitchTests` (VX-106 now, out of scope); no dev-store walk or capture (the plan's evidence clause — a key
+file's wraps are invisible in UI; the pins carry it); no phone run (the phone COMPILE is recorded); no core re-run
+after the resume-rule delta (it touches no `Sources/`; core stands green at 37e26d2e's code); the cold review (the
 orchestrator's ladder).
 
-**Status: FIX BUILT, pins red-on-old and revert-verified, Mac + core green (bar two pre-existing 13x reds) —
-awaiting the cold review.** Findings: read-only investigation 2026-10-08. The fix ran after 13x merged, in the
+**Status: FIX BUILT (both pieces — the ceremony/resume/local-only decision and the ruled resume rule), pins
+red-on-old and revert-verified (V99-A, V99-B), Mac + core green (bar VX-106's two pre-existing reds) — awaiting the
+cold review.** Findings: read-only investigation 2026-10-08. The fix ran after 13x merged, in the
 Sync/-custody slot taken at `f797dbe7`.
 
 ## Cast (changed at her word, 2026-10-08)
@@ -284,8 +286,17 @@ the class sweep reads it on the merged tree. The slot taken on main (`f797dbe7`)
 - Behavioral revert (named here BEFORE it runs): **REVERT V99-B** — the arm's two decisions back to 449f5618's:
   `let roadEntersCastle = entersCastle` (the marker's) and `appleCopy: !entersCastle && leaves.posture() ==
   .standard`. Expected: RED on pin (e) alone; (a)–(d), the own-write Standard resume control in (b), and every
-  other test as before. NOT-STARTED.
-- Green (`PostureSwitchTests` + the runner's reach + the spine, under the same slot): NOT-STARTED.
+  other test as before. **DONE — over 2a667130 + the two-line edit, built, `-only-testing:VariorumTests/
+  PostureSwitchTests`: "Test run with 50 tests in 1 suite failed … with 7 issues" — RED on pin (e) ALONE, at the
+  same five expectations as the pre-fix run (:2445 · :2449 · :2452 · :2453 · :2455); VX-106's pair identical;
+  (a)–(d) green.** Restored with `git checkout --`; `git diff` CLEAN; rebuilt.
+- Green: DONE (slot 2, zero instances at each start, over the RESTORED 2a667130 code) — **batch 1 (the same
+  twenty suites): "Test run with 179 tests in 20 suites failed … with 2 issues"** — 175 passed, 2 skipped (the
+  drill suite's standing gate), the 2 issues EXACTLY VX-106's pair; passed by name: (a), (b), (d), (e), the Standard
+  pin (c), `aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitchAsTheFollowAndSaysSo`,
+  `aCeremonyWhoseOwnWriteLandedResumesAsItselfAfterAFollowerFinishedAndSpeaksTheOrdinaryDone`. **The spine: "Test run
+  with 99 tests in 13 suites passed"**, no skips. Stage RELEASED; the coordinator told. **Phone compile** re-run on
+  2a667130's code: BUILD SUCCEEDED. Core not re-run (no `Sources/` change since 37e26d2e's green core run).
 
 ## PRE-EXISTING REDS in `PostureSwitchTests` (found by this run; NOT this diff's; NOT fixed here — handed to the orchestrator)
 
@@ -349,7 +360,7 @@ local-only, the library) is Castle.
 | # | writer (file:line) | verdict | the gate / the mechanism |
 |---|---|---|---|
 | 1 | `PostureSwitchRunner.writeNewKeyFile` via `runCeremony` — Replace All Keys / Use Castle (`PostureSwitch.swift` :1092, decided at :560 / :638) | **FIXED** — pins (a), (d); revert V99-A | enrolled: `appleHeld != nil` — the vault write's own Apple-held copy, which `appleHeldCopyForStandard` gates on `posture == .standard` (and refuses an unreadable / another account's A); local-only: `!entersCastle && posture == .standard`; entering Castle: nil |
-| 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (:1364) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) | `!marker.entersCastle && posture == .standard`; the another-device corner is THE RESUME RULE's PROPOSAL (not built) |
+| 2 | the same writer via `resume`'s `.vaultWrite`/`.reencrypt` arm (the call :~1372) | **FIXED** — pin (b) seams 1–2 (seam 3's `.rekeyLibrary` arm writes no key file — it reads the ceremony's) + pin (e) (the another-device road); reverts V99-A, V99-B | the orchestrator's ruling (5ce7175b): `appleCopy: !vaultSaysCastle` — the vault just fetched — for the whole arm; the road's `entersCastle` from the vault when `byAnotherDevice`, the marker's otherwise. (First built as `!marker.entersCastle && posture == .standard` at 37e26d2e; superseded at 2a667130.) Residual: the double-crash corner under THE RESUME-RULE DELTA |
 | 3 | the same writer via `runFollow` (:799, :818 — incl. the ceremony's CAS-refused → follow road) | SAFE (behavior unchanged) | `appleCopy: !entersCastle`, `entersCastle = fetched.format.masterWrappedByAppleHeld == nil` — the vault just fetched (decision 8). Pinned: `aCastleFollowerOfReplaceAllKeysFinishesTheWalkAndListsNoOffer` (`apple == nil`), `aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitch…` (`apple == nil`), the Standard sibling in (c) (`apple != nil`) |
 | 4 | `PostureSwitchRunner.followIntoStandard` (:912, the write :926) | SAFE | reached only through `followIntoStandardAct` (`VariorumApp.swift:271`, `VariorumMobileApp.swift:129`) from `reconcileFollow`'s arm `reading.hasAppleHeldCopy … !switchInProgress` (`ProtectionController.swift:707`) — the VAULT says Standard (the account left Castle elsewhere, §7). Pinned: `theFollowIntoStandardAddsTheAppleCopy…` |
 | 5 | `PostureSwitchRunner.leaveCastle` (:1221, the write :1248) | SAFE | IS the Castle → Standard switch (decision 7): `guard leaves.posture() == .castle`, user-initiated through `PostureSwitchModel(.leave)` with the consent sentence + re-auth; adding the copies is the act |
