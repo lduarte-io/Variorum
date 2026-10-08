@@ -431,4 +431,5 @@ uncommitted work. Work ONLY in `~/dev/variorum-vx-83`.
 | 6 | The sitting (S-1…S-4 + the VX-72 split) → rulings R-VX83-1…6 | DONE 2026-10-07 (the sitting record above; Linear updated: VX-72 re-scoped + membered, VX-93 minted, VX-73's U3-3 rider, VX-89 in) |
 | 7 | U-B (VX-87 direction 1 + screenshots; VX-89) | BRIEFED — runs after U-A |
 | 8 | U-C (VX-72 savepoints) | BRIEFED — runs after U-B |
-| 9 | Ladder → closeout → PR `VX-83: …` (after 13x merges; rebase first) | NOT STARTED |
+| 9 | **VX-94** (joined 2026-10-07, relayed by the 13x closeout session's P-8 sweep): ChromeLineLimitTests red on MAIN over this run's in-flight file — `SearchAnswerFaces.swift`'s chip face stack and kind word, two bare `.fixedSize()` with no line policy in the scan's 4-line window (arrived with 13o's merge; 13x deliberately left the file to this run). Fix: `.lineLimit(1)` at each site, orchestrator's own commit (the small-fix class). The PIN is the existing suite — red on main by 13x's run; GREEN proven in the U-A stage slot (the batch adds ChromeLineLimitTests) | FIXED — pending the slot's green |
+| 10 | Ladder → closeout → PR `VX-83: …` (after 13x merges; rebase first) | NOT STARTED |

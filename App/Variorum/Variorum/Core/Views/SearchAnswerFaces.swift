@@ -179,6 +179,7 @@ struct LibrarySearchChip: View {
                 .strokeBorder(
                     tokens.line,
                     style: StrokeStyle(lineWidth: 1, dash: invitation ? [3, 2] : [])))
+        .lineLimit(1)  // P-8 (R-13u4-5): a chip is one line — the label's own limit sits outside the scan's window
         .fixedSize()
         .help(help ?? "")
         Group {
@@ -210,6 +211,7 @@ struct LibrarySearchLine: View {
                 Text(tokens.chromeLabel(word))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
+                    .lineLimit(1)  // P-8 (R-13u4-5): a kind word is one line
                     .fixedSize()
             }
             Text(LibrarySearchFace.snippet(passage.snippet, tokens: tokens))
