@@ -1613,3 +1613,38 @@ piece; the orchestrator runs or GOes them under the author hold. Commit per piec
 tail "Part of VX-80"; push every commit; no trailers. Append `### VX-80 RECORD` (LIVE STATUS
 first) to this file from the first commit; close with a "VX-80 BUILT" banner mapping record →
 evidence.
+
+## THE CLOSEOUT WALK (2026-10-07 evening, the orchestrator's hands, her attending — the dev
+store found STANDARD-posture at launch, not the digest's Castle; no unlock needed; noted)
+
+**Legs verified before the finding:** both doors render in the File menu (registry → GUI);
+File ▸ Send Library to Another Mac… produced the pair end to end (destination panel Downloads-
+default with the AirDrop-teaching line; `Variorum Library — 2026-10-07/` = ciphertext store
+15.6 MB + key file `variorum-keys-54909c07…json`; done sheet + reveal); the `notAVariorumStore`
+refusal verified live (her accidental worktree-folder pick — an honest refusal, correctly
+worded); the adoption flow's classify→confirm on the produced pair rendered the ruled copy
+exactly (step-aside sentence, picked-file-only-read, sync-waits-for-Resume; NO unlock step on
+an aligned same-key pair — correct).
+
+### WALK FINDING W-1 (BLOCKER-class by the ladder's grammar; found live, post-ladder)
+
+**The READY-road adoption always refuses on its own live store's `-wal`.** Pressing Open This
+Library from the RUNNING app refused: "The library couldn't be opened. Nothing moved…" naming
+`…/Variorum-dev/variorum.sqlite-wal`. TRACE (the orchestrator's own, against source):
+`AppBootstrap.adoptLibrary` tears down via `StoreBinding.lock()` (StoreBinding.swift:89) whose
+close is a plain `outgoing.close()` — NO truncate checkpoint — and a closed pool leaves a
+non-empty `-wal` on disk (the re-key road knew: `StoreEncryptionMigration` runs
+`PRAGMA wal_checkpoint(TRUNCATE)` explicitly at :126/:274 before its swap); then
+`LibraryAdoption` step 2's gate (lines 15–16: "a non-empty -wal refuses — the door closes the
+pool first") reads size>0 ⇒ `moveAsideFailed`. The refusal ARM behaved honestly (nothing
+moved, store reopened, no hold) — but the door can never act in its PRIMARY context, a P-2
+Fire-and-DO break. Why every pin missed it: the door pins stub the bootstrap and the U2b
+drills drove stores whose wal was empty by their construction road; no leg drove the REAL
+ready-road teardown over a hot pool. **DISPOSITION (orchestrator, the architect mandate):
+ACCEPTED — fix now, orchestrator's own (the adjudication-fix allowance), NARROW: checkpoint-
+truncate inside `StoreBinding.lock()` before the close (`try? writeWithoutTransaction` PRAGMA;
+a failed checkpoint degrades to today's honest refusal, never to an unlocked store), ZERO
+`AppBootstrap` edits (the VX-80 session owns that file right now). Pins: (1) headless red-on-
+old — a pool-written store locked via the binding leaves `-wal` empty on new, >0 on old;
+(2) the walk re-run as the behavioral proof. The VX-80-diff cold-review round covers this fix
+too (one review over the phase's whole added diff).**
