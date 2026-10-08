@@ -311,8 +311,7 @@ rest** — the whole store, always, not an optional checkbox.
 - **You own the file.** Your whole collection is one database file. Copy it,
   back it up, AirDrop it to a new Mac and open it there with your passphrase —
   no export-import dance, no server in the loop. And because it's encrypted,
-  the file in transit is noise to anyone without your keys. `[13x-gated —
-  verify the move-your-library flow shipped before publishing]`
+  the file in transit is noise to anyone without your keys. `[13x VERIFIED 2026-10-08 — publish with the first public release that carries 13x; two FACT corrections for the wording first: (1) it travels as a FOLDER — File ▸ Send Library to Another Mac… packs the database file with its key file, and a bare file opens nothing; (2) "with your passphrase" is true in Castle — in Standard the copy opens through your Apple account]`
 - **The exit is always open:** plain-Markdown export of anything, anytime.
   `[open-format guarantee wording — hers; the release strategy wants this
   loud]`
@@ -378,6 +377,7 @@ record keystrokes or reconstruct every change. Coarse, not forensic.
 A single SQLite database (encrypted), local to your Mac — a file you can
 copy, back up, or AirDrop to a new Mac and open with your passphrase.
 Markdown export for everything, anytime. `[open-format guarantee line]`
+`[13x VERIFIED 2026-10-08 — publish with the first public release that carries 13x; two FACT corrections for the wording first: (1) it travels as a FOLDER — File ▸ Send Library to Another Mac… packs the database file with its key file, and a bare file opens nothing; (2) "with your passphrase" is true in Castle — in Standard the copy opens through your Apple account]`
 
 **What does it cost?**
 *[removed for publication]*
