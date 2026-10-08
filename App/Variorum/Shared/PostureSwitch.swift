@@ -1081,10 +1081,12 @@ final class PostureSwitchRunner {
     /// both copies sit under ONE A), its local-only road (Use Castle only)
     /// nil, the follow and the resume's enrolled arm the A read when the
     /// vault's word is Standard (the vault just fetched).
-    /// `accountPosture` (VX-99 round 2, finding 3): the ACCOUNT's posture
-    /// when the caller holds the vault's word for it (the resume's enrolled
-    /// arm) — custody moves to it on a road that does not enter Castle; nil
-    /// = the posture read (`leaves.posture()`), every other road's.
+    /// `accountPosture` (VX-99 round 2, finding 3; round 3, MINOR-1): the
+    /// ACCOUNT's posture when the caller holds the vault's word for it AND it
+    /// tightens (the resume's enrolled arm passes Castle only) — custody
+    /// moves to it on a road that does not enter Castle; nil = the posture
+    /// read (`leaves.posture()`), every other road's and the into-Standard
+    /// direction's (the ready's follow makes that move, with its notice).
     private func rekeyCustodyAndSnapshot(
         entersCastle: Bool, appleKey: AppleKey?, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
@@ -1207,7 +1209,8 @@ final class PostureSwitchRunner {
             target = (leaves.alwaysAsk() || !biometry) ? .passphrase : .biometric
         } else {
             // VX-99 round 2 (finding 3): the account's posture when the
-            // caller holds the vault's word (decision 8), else the read.
+            // caller holds the vault's word (decision 8) — round 3, MINOR-1:
+            // only a tightening one (Castle) — else the read.
             target = StoreAtOpenMode.effective(
                 posture: accountPosture ?? leaves.posture(), dials: ProtectionDials(alwaysAsk: leaves.alwaysAsk()))
         }
@@ -1433,13 +1436,28 @@ final class PostureSwitchRunner {
             // was the switch AND the account is still Castle — A's Use Castle
             // landed, B followed and then used Standard (no rotation, the
             // stamp still A's): the account is Standard, so A's road ends
-            // Standard (custody silent, the Apple copy, no insurance-off, no
-            // offer, a Done that names B's act). A Replace All Keys never
-            // enters Castle by its own act, whatever the account's posture.
+            // Standard (the Apple copy, no insurance-off, no offer, a Done
+            // that names B's act; custody by the read — below). A Replace All
+            // Keys never enters Castle by its own act, whatever the account's
+            // posture.
             let vaultSaysCastle = fetched.format.masterWrappedByAppleHeld == nil
             let roadEntersCastle = (byAnotherDevice || marker.isFollow)
                 ? vaultSaysCastle : (entersCastle && vaultSaysCastle)
-            let accountPosture: Posture = vaultSaysCastle ? .castle : .standard
+            // VX-99 round 3 (MINOR-1 — the orchestrator's ruling, option (b),
+            // restoring the pre-F3 custody rule for the into-STANDARD
+            // direction): the account's posture overrides the posture read
+            // only where it TIGHTENS (Castle). An account that left Castle
+            // elsewhere leaves custody to the read — behind the gate on a
+            // device still reading Castle — so the next ready's follow into
+            // Standard (`ProtectionController.reconcileFollow`) moves it WITH
+            // §7's one-time notice ("Your account is back in Standard — set on
+            // [device] on [day]"). Round 2's F3 moved it silent here, saying
+            // nothing, and the Apple copy the key file then carried (the
+            // vault's word, below — unchanged) kept that arm from ever firing:
+            // the device stopped asking for Touch ID and nothing said why. A
+            // key file and a custody that disagree until that ready is the
+            // announced road, not a gap.
+            let tighteningPosture: Posture? = vaultSaysCastle ? .castle : nil
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase
                 // (or the twelve words — 2c: the follow's own resume).
@@ -1513,13 +1531,30 @@ final class PostureSwitchRunner {
                                        recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
                 listPreSwitchPairs: roadEntersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice,
-                accountPosture: accountPosture)
-            if byAnotherDevice {
+                accountPosture: tighteningPosture)
+            // VX-99 round 3 (the MAJOR — the orchestrator's ruling, restoring
+            // the pre-F3 face): the conflict-follow's flag — ledger 61's "the
+            // twelve words shown here are not your account's" — is true only
+            // where this ceremony's own vault write NEVER landed. This
+            // device's OWN `.reencrypt` marker (`!isFollow`: the ceremony
+            // writes it only after its own write landed and custody took M′,
+            // and this arm's own-road rewrite keeps it so) means its words DID
+            // land; another device's LATER rotation (F3's S2) may have kept
+            // them — typed from the paper, decision 33 — or replaced them, and
+            // the marker cannot tell which. So that road keeps every F3 fact
+            // above (custody, the account's posture, the retirement, the
+            // offer, the words rule) but never the flag: its Done is the
+            // selector's ordinary one, with no words claim — the road it took
+            // before F3. The `.vaultWrite` case and the second-crash
+            // ambiguity stay as they were (VX-107's).
+            let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow
+            if byAnotherDevice, !ownWriteLanded {
                 outcome.followedAnotherDevicesSwitch = true
                 outcome.otherDeviceName = fetched.format.updatedByDevice
             } else if entersCastle, !marker.isFollow, !roadEntersCastle {
                 // S1: this device's own Use Castle, the account Standard now —
-                // the Done names the device that left Castle and its day.
+                // the Done names the device that left Castle and its day (on
+                // the stamped road above too: B left Castle, then rotated).
                 outcome.otherDeviceName = fetched.format.updatedByDevice
                 outcome.otherDeviceDay = fetched.updatedAt
             }

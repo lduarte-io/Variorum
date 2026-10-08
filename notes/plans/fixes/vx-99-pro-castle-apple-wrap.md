@@ -1058,7 +1058,7 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
 
 ### LIVE STATUS
 
-- Pins: IN-PROGRESS (this commit) — `PostureSwitchTests`:
+- Pins: DONE (cf88c841) — `PostureSwitchTests`:
   - MAJOR (new, MARK "VX-99 round 3"): `aResumeFromThisDevicesOwnLandedWriteNeverSaysItsWordsAreNotTheAccountsWhenAnotherDeviceRotatedAgain`
     — S2's world with `b.words = a.words` before B's `enterCastle` (the vault's twelve-words copy of M″ opens with A's words,
     asserted), A resumed through `PostureSwitchModel(mode: .resume(aMarker))` → `start()` → `.resumeAsk` → `resume(passphrase:)`
@@ -1077,12 +1077,16 @@ only) and `PostureSwitchTests.swift`. Zero `Sources/`, zero face files, zero pho
     (`controller(for:material:)`, custody adopted as the bootstrap leaves it after the reopen — a gated custody's resident is
     the key in hand, a silent one's none), `followIntoStandardAct` wired, `reconcile()` → `movedToStandardNotice` of kind
     `.movedToStandard` naming "sibling device", and custody then `.auto` (the announced follow moved it).
-  Build-for-testing of the pins commit: PENDING.
+  Build-for-testing of the pins commit cf88c841: DONE — **TEST BUILD SUCCEEDED** (`vx99-dd`, headless, no stage; no
+  warning in the new lines); its products cloned aside (`r3-red-products`) so the red runs on the pins commit's own bundle.
 - Red run (the pins commit's bundle, `PostureSwitchTests` alone): PENDING — expected: the new MAJOR pin at its flag and its
   three Done lines; the S2 pin at its flag line; the re-pointed MINOR-1 pin at its custody line and its notice line (its
   post-reconcile custody line is green on both sides — `.auto` either way); every other test green (68 + 1 = 69 tests).
-- Fix (MAJOR): NOT-STARTED — the design above.
-- Fix (MINOR-1): NOT-STARTED — the design above.
+- Fix (MAJOR): DONE (this commit) — `let ownWriteLanded = marker.step == .reencrypt && !marker.isFollow`; `if
+  byAnotherDevice, !ownWriteLanded { flag + name } else if entersCastle, !marker.isFollow, !roadEntersCastle { name + day }`.
+  Build + green PENDING.
+- Fix (MINOR-1): DONE (this commit) — `let tighteningPosture: Posture? = vaultSaysCastle ? .castle : nil` passed as the arm's
+  `accountPosture:`; the two doc comments say so. Build + green PENDING.
 - **REVERT V99-M (named before it runs — the MAJOR):** on the tip, the flag's condition `if byAnotherDevice, !ownWriteLanded`
   → `if byAnotherDevice` (F3's: the flag on every another-device road). Expected RED: the new MAJOR pin's flag + three Done
   lines, the S2 pin's flag line; nothing else. PENDING.
