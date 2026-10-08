@@ -46,13 +46,14 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// **The answer sheet's state** (D1): the question has WORDS the index
     /// can be asked about. A `#tag` alone, or a day alone, is a question
     /// without words — the band says it; a `#tag` alone is answered by the
-    /// books it is ASSOCIATED with (13o U3, the tag-association join — the
-    /// sheet still asks for words for its notes, P-13o-U2-6 narrowed), and a
-    /// day alone by the shipped day listing (D5).
+    /// books it is ASSOCIATED with (13o U3, the tag-association join) and,
+    /// since VX-84a (D-1, superseding P-13o-U2-6), by the catalog's own
+    /// listing NARROWED to the notes (and, in the Blocks scope, the blocks)
+    /// it tags; a day alone by the shipped day listing (D5).
     var hasWords: Bool { query.text != nil }
 
-    /// **The sheet can answer** (13o U3): words, or a typed `#tag` whose
-    /// associated books are an answer of their own.
+    /// **The field asks something answerable** (13o U3; VX-84a): words, or a
+    /// typed `#tag` — its associated books and the notes it narrows to.
     var answers: Bool { hasWords || !tagPaths.isEmpty }
 
     /// The field's text as a question — nil when the field holds nothing to
@@ -389,8 +390,8 @@ final class LibrarySearchModel {
             listing.bookReasons = section.reasons
             listing.archivedBooks = section.archived
         }
-        // A typed tag ALONE answers with its books only (13o U3): its notes
-        // need words (P-13o-U2-6, narrowed).
+        // The ranked groups need WORDS; a typed tag alone is the catalog's
+        // own narrowed listing (VX-84a, D-1 — `LibraryCatalogModel.listing`).
         if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(
                 db, query: question.scoped(scope), scope: where_, limit: groupDepth,

@@ -122,7 +122,10 @@ extension Queries {
                 storedTitle: DisplayTitle.isAbsent(row["title"]) ? nil : row["title"],
                 createdAt: row["created_at"],
                 lastTouchedAt: row["touched_at"],
-                profile: row["profile"])
+                profile: row["profile"],
+                // VX-84a: only the narrowed page selects the fact (the shipped
+                // statement lists no archived note at all).
+                isArchived: (row["archived"] as Bool?) ?? false)
         }
         let next: CatalogCursor? = rows.count > limit
             ? CatalogCursor(key: rows[limit - 1]["sort_key"], id: rows[limit - 1]["id"])
@@ -154,6 +157,7 @@ extension Queries {
                     SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
                            c.created_at AS created_at, c.profile AS profile,
                            COALESCE(c.last_touched_at, c.created_at) AS touched_at,
+                           (c.archived_at IS NOT NULL) AS archived,
                            \(key) AS sort_key
                     FROM (\(narrowing.driver)) t
                     CROSS JOIN container c ON c.id = t.tagged_id

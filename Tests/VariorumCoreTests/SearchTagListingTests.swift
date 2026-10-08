@@ -113,9 +113,10 @@ struct SearchTagListingTests {
             _ = try ops.saveNoteVersion(s.study.id)   // a VERSION: a tagged, archived family copy
             #expect(titles(try notes(db, "#classics")) == ["A Study in Scarlet", "The Sign of Four"],
                     "living: the archived note waits behind the facet; the version is archived too")
-            #expect(titles(try notes(db, "#classics", visibility: .includingArchived))
-                    == ["A Study in Scarlet", "The Hound", "The Sign of Four"],
+            let faceted = try notes(db, "#classics", visibility: .includingArchived)
+            #expect(titles(faceted) == ["A Study in Scarlet", "The Hound", "The Sign of Four"],
                     "the facet on: the archived note joins — the version NEVER does")
+            #expect(faceted.hits.map(\.isArchived) == [false, true, false], "…and its row says so (R-13o-6)")
         }
     }
 

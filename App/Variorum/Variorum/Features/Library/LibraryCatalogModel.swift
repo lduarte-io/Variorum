@@ -278,12 +278,22 @@ final class LibraryCatalogModel {
     }
     /// The listing has note rows at all (the section and the empty answer).
     private(set) var hasNoteRows = false
-    /// Everything listed, in the listing's order (books · notes). The block
-    /// arm LEFT at 13o U2 (R-13o-9 — "the 40 cap with no escape is
-    /// terrible"): a block is only ever listed by a typed question, and a
-    /// typed question is the search state, where named blocks and scraps
-    /// join the grouped answer sheet and page like the notes.
-    var hits: [Queries.CatalogHit] { bookHits + noteHits }
+    /// **The blocks a `#tag` typed alone names in the Blocks scope** (VX-84a
+    /// — the 13o follow-up run's D-1: a tag alone narrows the Library, and
+    /// the Blocks scope narrows by BLOCK-level tags), a SET answered whole
+    /// (`Queries.catalogTaggedBlocks`). Empty on every other road.
+    private(set) var blockHits: [Queries.CatalogHit] = []
+    /// Everything listed, in the listing's order (books · notes · blocks).
+    /// The block arm LEFT at 13o U2 (R-13o-9 — "the 40 cap with no escape is
+    /// terrible") and came back at VX-84a for ONE question only: a tag typed
+    /// alone in the Blocks scope (a typed question with words is the search
+    /// state, where named blocks and scraps join the grouped answer sheet).
+    var hits: [Queries.CatalogHit] { bookHits + noteHits + blockHits }
+
+    /// **The text-less question the listed notes are narrowed by** (VX-84a):
+    /// the `#tag` typed alone, so the NEXT page of notes asks the same
+    /// narrowed question its first page did. nil on every other road.
+    @ObservationIgnored private(set) var listedNarrowing: SearchQuery?
 
     // MARK: - The notes' paging state (17y B1 (k) — the extension is the brain)
 
@@ -618,6 +628,8 @@ final class LibraryCatalogModel {
             listedGeneration = generation
             bookHits = listing.books
             noteHits = listing.notes
+            blockHits = listing.blocks
+            listedNarrowing = listing.narrowing
             notesCursor = listing.next
             notesHaveMore = listing.next != nil
             searchState.land(
@@ -659,12 +671,17 @@ final class LibraryCatalogModel {
     }
 
     /// What one read returns (the listing's arms; the search state's answer
-    /// when the field asks with words).
+    /// when the field asks — the sheet with words, the band's numbers and the
+    /// association's books for a tag alone).
     struct Listing {
         var books: [Queries.CatalogHit] = []
         var notes: [Queries.CatalogHit] = []
         var next: Queries.CatalogCursor?
         var search: LibrarySearchListing?
+        /// VX-84a: the Blocks scope's tagged blocks (a tag alone).
+        var blocks: [Queries.CatalogHit] = []
+        /// VX-84a: the text-less question the notes were narrowed by.
+        var narrowing: SearchQuery?
     }
 
     /// **One read, every arm the scope shows** — and only those: a scope
@@ -672,11 +689,20 @@ final class LibraryCatalogModel {
     ///
     /// **13o U2 — the field's question decides the road** (D1): words are
     /// the SEARCH STATE (the answer sheet, `LibrarySearchModel.listing` —
-    /// the books it names, its note groups' heads as the notes); a `#tag`
-    /// typed without words lists the books it is ASSOCIATED with and no
-    /// notes until words join it (13o U3's join; PROVISIONAL P-13o-U2-6,
-    /// narrowed — the band names the tag and asks for the words); no
-    /// question at all is the shipped listing, unnarrowed.
+    /// the books it names, its note groups' heads as the notes); no question
+    /// at all is the shipped listing, unnarrowed.
+    ///
+    /// **VX-84a — a `#tag` typed WITHOUT words NARROWS THE LIBRARY** (her
+    /// report: *"searching a tag is not revealing the notes tagged that at
+    /// all"*; the provisional call D-1, superseding P-13o-U2-6): the
+    /// catalog's OWN listing — the Books section still the tag's ASSOCIATED
+    /// books (13o U3's join, unchanged), the NOTES the tag names (post-level,
+    /// its subtree; paged, in the sort door's order — nothing was ranked, so
+    /// nothing is fabricated), and in the Blocks scope the BLOCKS it names by
+    /// their own (block-level) tags. Every narrowing is the ONE composer's
+    /// text-less road (`SearchComposer.listingNarrowing`), so an armed day,
+    /// a book-state facet and the archived facet compose with the tag
+    /// exactly as they do with words. The band keeps its chips and counts.
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion?, scope: Scope,
         sort: Queries.LibrarySort, direction: SortDirection, day: DayBounds?, wing: String,
@@ -684,13 +710,27 @@ final class LibraryCatalogModel {
     ) throws -> Listing {
         var listing = Listing()
         if let question {
-            // 13o U3: a typed tag alone answers too — its associated books.
             guard question.answers else { return listing }
             let answer = try LibrarySearchModel.listing(
                 db, question: question, scope: scope, wing: wing, groupDepth: groupDepth)
             listing.books = answer.books
-            listing.notes = answer.groups.compactMap(\.note)
             listing.search = answer
+            if question.hasWords {
+                listing.notes = answer.groups.compactMap(\.note)
+                return listing
+            }
+            // VX-84a (D-1): the tag alone narrows the catalog's own listing.
+            listing.narrowing = question.query
+            if scope == .all || scope == .posts {
+                let page = try Queries.catalogNotesPage(
+                    db, query: "", sort: sort, direction: direction,
+                    limit: noteDepth, wingID: wing, narrowing: question.query)
+                listing.notes = page.hits
+                listing.next = page.next
+            }
+            if scope == .blocks {
+                listing.blocks = try Queries.catalogTaggedBlocks(db, narrowing: question.query, wingID: wing)
+            }
             return listing
         }
         // **The day's answer is a SET, so it is not paged** (18h ladder

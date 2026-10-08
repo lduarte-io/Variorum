@@ -150,7 +150,13 @@ struct LibrarySearchStateTests {
         }
     }
 
-    @Test func aTagAloneListsNothingUntilWordsJoinIt() async throws {
+    /// JUSTIFIED EDIT (VX-84a): this pin was `aTagAloneListsNothingUntilWordsJoinIt`
+    /// under P-13o-U2-6 ("nothing listed under a tag alone"). Her report
+    /// superseded it (D-1: a tag alone narrows the Library to the notes it
+    /// TAGS) — the cell it still holds is honest under the new rule: no note
+    /// carries #dream (the note's TITLE says "dream", which a tag never
+    /// reads), so nothing lists. `LibraryTagListingTests` pins the new road.
+    @Test func aTagAloneNamesOnlyTaggedNotesNeverTitleWords() async throws {
         try await withLibrary { session, model in
             let note = try session.operations.createPost(title: "dream note")
             _ = try session.operations.newBlock(in: note.id, text: "words")
@@ -158,7 +164,7 @@ struct LibrarySearchStateTests {
             await model.search()
             #expect(model.searchState.asksAnything, "the band says the question (P-13o-U2-1)")
             #expect(!model.isSearching, "no words, no answer sheet")
-            #expect(model.hits.isEmpty, "PROVISIONAL P-13o-U2-6: nothing listed under a tag alone")
+            #expect(model.hits.isEmpty, "no note is TAGGED #dream — a title's words are not a tag")
             model.removeTypedTag("dream")
             #expect(model.query.isEmpty)
         }

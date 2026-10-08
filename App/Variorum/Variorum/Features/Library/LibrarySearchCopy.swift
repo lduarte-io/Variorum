@@ -34,6 +34,8 @@ nonisolated enum LibrarySearchCopy {
         add(kinds.notes, "note", "notes")
         add(kinds.passages, "passage", "passages")
         add(kinds.scraps, "scrap", "scraps")
+        // VX-84a: a tag typed alone names BLOCKS by their own tags too.
+        add(kinds.blocks, "block", "blocks")
         return parts.isEmpty ? nothingFound : parts.joined(separator: " \u{00B7} ")
     }
 
@@ -101,11 +103,17 @@ nonisolated enum LibrarySearchCopy {
         }
     }
 
-    /// **A tag typed without words** (PROVISIONAL P-13o-U2-6): the band
-    /// names the tag; the sheet asks for the words.
-    static func tagAlone(_ paths: [String]) -> String {
-        "Type a word to search inside " + paths.map(tagChip).joined(separator: " ") + "."
-    }
+    // (VX-84a: `tagAlone` — "Type a word to search inside #tag." — DIED with
+    // P-13o-U2-6. A tag typed alone narrows the Library's own listing now
+    // (D-1), so nothing asks for words.)
+
+    /// The listing's section for a tag's blocks (VX-84a — the Blocks scope
+    /// under a tag typed alone).
+    static let blocksHeader = "Blocks"
+
+    /// A listed block's home, beside its handle (the pre-U2 block row's
+    /// words).
+    static func blockHome(_ home: String) -> String { "in \(home)" }
 
     /// **The sort door, while the answer sheet shows** (PROVISIONAL
     /// P-13o-U2-7): the sheet is ranked by relevance (D2) — the mockup's own
