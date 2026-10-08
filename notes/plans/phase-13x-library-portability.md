@@ -2291,3 +2291,17 @@ A1 copy. **She followed at 00:55 — it completed cleanly:** the new key file
 control data point (the follow on the Pro at 27.0, commented on VX-81). The post-follow file
 carries no local `recovery` wrap — listed in VX-99 to confirm as designed or a gap. Her ruling on
 rendered copy: no unnecessary caps — the hand-off sheet's "WHOLE" lowercased (5451fa19).
+
+**The Air leg's sending side (her hands, 2026-10-08 ~01:05):** the hand-off ran twice — the first
+folder (00:51, `Variorum Library — 2026-10-08`, saved to her iCloud-synced Desktop) was made
+BEFORE her follow and carried the Apple-wrapped `182738de` key file; she DELETED it. The pair she
+AirDropped to the Air is `Variorum Library — 2026-10-08 (2)` (01:05), made AFTER the follow — the
+clean Castle key file. (P-U1-4's " (2)" naming verified live.)
+
+**Ruled — no iCloud-destination warning on Send Library to Another Mac… (her word, 2026-10-08:
+"no on the warning, at least for now. note it for if the question ever comes up later again"):**
+the question was whether the hand-off's destination panel should warn when the picked folder is
+iCloud-synced (Desktop & Documents, iCloud Drive). Context for a future revisit: a CASTLE pair is
+safe in iCloud (its wraps need the passphrase/words/master), but a STANDARD pair carries the
+Apple-wrapped copy into iCloud beside the library — exactly what happened with her pre-follow
+folder tonight. Not built; recorded here as the ruling's home.
