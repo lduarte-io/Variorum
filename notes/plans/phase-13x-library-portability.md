@@ -2230,3 +2230,23 @@ Compiled: Mac TEST BUILD SUCCEEDED · VariorumMobile BUILD SUCCEEDED.
 4. A1 safety copy of her real store → `/Applications` refresh from the final SHA → codesign.
 5. Her Air leg (`notes/plans/13x-air-leg-prompt.md`, the final SHA carried over).
 6. Closeout docs → PR `VX-6:` → merge commit → handoff → worktree removed.
+
+### THE STAGE BLOCK — RESULTS (2026-10-08 ~00:10, claim "variorum-da", 120 min, held across legs per the coordinator's GO)
+
+1. **`LibraryPortabilityDoorTests` — 15 tests in 1 suite PASSED** on f058a83e (the owed list
+   said 14 — F3's count was 12 incl. its three, so 15; recorded, not hidden).
+2. **Six behavioural reverts — each RED on exactly its named pin, each restore `git diff`
+   CLEAN** (one script, edit → build-for-testing → run → `git checkout --` → diff check):
+   C → `aTornCopyUnderItsRightKeySettlesToTheUnreadableSentence` · C′ →
+   `aGenuineKeyMismatchStillSettlesToTheWrongKeySentence` · R3-2 →
+   `theHoldGatesReadTheMarkerWithNoViewAlive` · R4-1a →
+   `aFailedAdoptionOntoAFreshSlotNamesNoRecoveryThatDoesNotExist` · R4-1b → both fresh-slot pins
+   · R4-2 → `theHoldBannerNamesNoAccountWhereNoneExists`.
+3. **The widened closeout Mac run — 209 tests in 20 suites: 208 PASSED, 1 KNOWN RED** — the
+   tutorial spine's eleven suites + every Mac suite the 13x diff touched
+   (CapabilityRegistry · ChromeMinHeight · LibraryHandOff · LibraryPortabilityDoor ·
+   Phase13pController · Phase13pLobby · StoreLaunchRoute · VX80CastleFollowRecovery) +
+   `ChromeLineLimitTests`, whose one red is `everyBareFixedSizeStatesItsLinePolicy` with
+   offenders EXACTLY `Core/Views/SearchAnswerFaces.swift:182` and `:213` — 13o's, owned by
+   VX-83/VX-94 (fix 84617ea6), nothing of 13x's.
+4. Core headless (since the last code change): 2346/270 + 40/6 GREEN; Mac + phone compile.
