@@ -109,3 +109,23 @@ JUDGMENT is searchfollowup's — report, don't conclude.
 - These shots join the same `notes/plans/vx83-screens/` set (numbered on from the U-A ones)
   and the same §WALK EXECUTION log. If you pulled the brief before this appendix existed,
   `git pull --ff-only` again before your slot.
+
+## APPENDIX 2 (the fix-pass verification — a SHORT errand, ~10 min; added after the fix pass went green)
+
+Pull first (`git pull --ff-only`), rebuild per Step 2 (the fix pass changed the app), then:
+- **V1 (the needle, F-W-2):** search `always the woman`, click the Scandal opening passage.
+  EXPECT: the find bar holds `always _the_ woman` (the underscores are the note's own
+  Markdown emphasis — as written) and the whole span is selected. SHOT.
+- **V2 (the needle, the punctuation case):** search `good-night mister sherlock`, click its
+  passage. EXPECT: the bar holds `Good-night, Mister Sherlock`, selected. SHOT.
+- **V3 (the band, F-W-3):** type `#classics` alone. EXPECT: the band reads `1 book · 17
+  notes …` with NO leading dash (the dash returns only when words are typed). SHOT.
+- **V4 (the commits facet, the one unseen face):** search a word you've committed
+  (make one if needed: type a scratch line in a note, commit ⌘S, edit the line away, then
+  search the committed word). EXPECT: without the chip, nothing of the old text lists;
+  press `+ commits` in the band → the saved words list, each line marked `commit · <day>`,
+  the band counting "N commits"; click one → lands at the block with the bar armed (not
+  stepping — the words left the buffer). SHOTS (band + lines; the landing).
+- Evidence exactly as before: shots numbered on from 16 in `notes/plans/vx83-screens/`,
+  a §WALK EXECUTION 2 section appended at the record's END, commit (`Part of VX-83`),
+  push, stage released, hand-back to `searchfollowup`.
