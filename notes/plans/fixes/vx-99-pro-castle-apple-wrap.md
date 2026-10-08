@@ -876,3 +876,20 @@ Apple pair) are red on 8f66bc1f's code as much as on the seam's.
   The sheet's own ask now reads the act (finding 1); the pane captions want the same one call
   (`ProtectionCopy.ceremonyResumeTitle(CeremonyAct(resuming: pending))`) on both platforms — left for the orchestrator so the
   two panes move together.
+
+## ROUND 2 — FIX PASS ADOPTED + ORCHESTRATOR RULING ON ITS TWO FINDS (2026-10-08)
+
+Adopted (tip e7077fff): F1–F4, F6, F7 with thirteen pins red on 43316f21; reverts V99-E/E′/F/G/H/I′ red each on their
+own finding alone (V99-I's mis-sited first attempt recorded honestly); greens PostureSwitchTests 65/65, batch-1
+194/20, spine 99/13, phone build-for-testing; zero `Sources/`. The F6 "carry `held.corpusKeyID`" bullet's
+non-adoption is ACCEPTED (the stamp is what keeps a second crash on another device's road; pinned). The two new
+copy lines stay PROVISIONAL → QUESTIONS at the merge.
+
+**The two finds — RULED IN-UNIT (verified in code):** (1) `PostureSwitchModel.start()` refuses
+`facts.rotationInProgress` (:244) BEFORE the `.resume` case, and `rotationInProgress` is exactly the vault's
+previous-key state that this device's OWN crash mid-walk leaves (`PostureSwitch.swift:423`) — so the resume door can
+never finish its own rotation; on a one-device account nothing else finishes it and sync stays paused (the VX-80
+strand class). Fix: the resume is exempt (it IS the road that finishes the rotation — decision 32's "the acting device
+resumes through its marker"). (2) `ProtectionCopy.resumeBody` ("Entering Castle didn't finish") still captions the
+resume door on both panes for every marker — it reads from F1's act selector instead. A fresh narrow implementer; one
+more stage slot; then round 3.
