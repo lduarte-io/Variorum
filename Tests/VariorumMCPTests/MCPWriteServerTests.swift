@@ -179,7 +179,9 @@ struct MCPWriteServerTests {
             let entry = try h.operations.createPost(title: "an entry", profile: .journal)
             let once = try h.operations.createPost(title: "once")
             for post in [prose, entry] { _ = try h.operations.addPostToReading(post.id, to: book.id) }
-            _ = try h.operations.newBlock(in: prose.id, text: "words", registeringUndo: false)
+            let named = try h.operations.newBlock(in: prose.id, text: "words", registeringUndo: false)
+            try h.operations.setBlockName(named.block.id, name: "the opening")
+            _ = try h.operations.newBlock(in: prose.id, text: "more", registeringUndo: false)
             _ = try h.operations.newBlock(in: once.id, text: "once words", registeringUndo: false)
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", grant(.read, .book, book.id))
@@ -188,6 +190,8 @@ struct MCPWriteServerTests {
             let shaped = try json(try await call(connection, "read_note", ["note_id": .string(prose.id), "with_ids": .bool(true)]))
             let blocks = try #require(shaped["blocks"] as? [[String: Any]])
             #expect(blocks.first?["text"] as? String == "words")
+            #expect(blocks.first?["name"] as? String == "the opening", "R-13nb-8: a block's name rides where set")
+            #expect(blocks.last?["name"] == nil, "and is absent where unset")
             #expect((blocks.first?["takes"] as? [[String: Any]])?.first?["chosen"] as? Bool == true)
 
             let textForm = try await call(connection, "read_note", ["note_id": .string(entry.id)])

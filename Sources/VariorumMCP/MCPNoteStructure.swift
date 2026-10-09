@@ -9,15 +9,21 @@ import VariorumCore
 /// live ACTIVE take (id, label, whether it is the one shown, text — archived
 /// takes are out of the fan, the export's rule) and its live comments. The ids
 /// are the REAL row ids: every later write revalidates them per call against
-/// current facts. Gated by the very same decision as the text form (the
-/// caller's transaction), and ∝ the note — three statements, never the corpus.
+/// current facts — and they are LIVE-WIRE ONLY (R-13nb-9, her doctrine: a
+/// merge or a divide mints new blocks, so an id goes stale under her
+/// structural edits; a stale id refuses honestly and a re-read recovers).
+/// A block's NAME rides where set (R-13nb-8 — "in the xyz block" works
+/// conversationally) as metadata only: ids stay the ONE write address (names
+/// are not unique). Gated by the very same decision as the text form (the
+/// caller's transaction), and ∝ the note — three statements, never the
+/// corpus. Shaped to grow optional fields (R-13nb-7's `with_commits` is U3's).
 enum MCPNoteStructure {
     static func read(_ db: Database, noteID: String, calendar: Calendar) throws -> [String: Any] {
         let title = try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar) ?? ""
         let placements = try Row.fetchAll(
             db,
             sql: """
-                SELECT cb.block_id, cb.chosen_variant_id, b.default_variant_id
+                SELECT cb.block_id, cb.chosen_variant_id, b.default_variant_id, b.name
                 FROM container_block cb JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
                 WHERE cb.container_id = ? AND cb.deleted_at IS NULL
                 ORDER BY cb.position, cb.id
@@ -67,10 +73,12 @@ enum MCPNoteStructure {
                 entries.append(entry)
                 if id == shown { shownText = text }
             }
-            blocks.append([
+            var entry: [String: Any] = [
                 "block_id": blockID, "text": shownText, "takes": entries,
                 "comments": comments[blockID] ?? [],
-            ])
+            ]
+            if let name: String = placement["name"], !name.isEmpty { entry["name"] = name }
+            blocks.append(entry)
         }
         return ["note_id": noteID, "title": title, "blocks": blocks]
     }

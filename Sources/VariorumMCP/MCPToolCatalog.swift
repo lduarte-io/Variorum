@@ -111,9 +111,11 @@ enum MCPToolCatalog {
             ({t:"…"} {#tag/path}), then each block's chosen take as a paragraph, followed — when \
             the block has other takes — by a "--- Alternates for this block ---" section listing \
             them. Blank lines separate blocks. Returns the text. With with_ids: true it returns \
-            JSON instead — the note's blocks in order, each with its block_id, the shown take's \
-            text, every take (take_id, label, chosen, text) and its comments — the ids add_take, \
-            add_comment and save_lens address.
+            JSON instead — the note's blocks in order, each with its block_id, its name if the \
+            author named it, the shown take's text, every take (take_id, label, chosen, text) and \
+            its comments — the ids add_take, add_comment and save_lens address. Ids are live: the \
+            author's own merges and divides make new blocks, so an id can go stale between calls \
+            (a write with a stale id is refused) — read again to get current ids.
             """,
         inputSchema: .object([
             "type": "object",
