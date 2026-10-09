@@ -1224,7 +1224,13 @@ class. Dispositions:
 - Scope: WA-1, WA-2 (fix in-unit), WA-3, WA-4 (trace first: fix only on an
   existing road, else ticket), WA-6 (30-minute time-box). No revert in flight.
 - WA-1 — IN-PROGRESS (trace).
-- WA-2 — NOT-STARTED.
+- WA-2 — **FIXED (PENDING the green run).** `CopyForAI.copiedForAI` is now
+  exactly "Copied for AI." (`Core/Views/CopyForAI.swift` — the constant moved
+  there from `DocumentImportCopy` at ladder F8). Pin: the door test's
+  Copy-for-AI case asserts the spoken receipt's exact words and its RECEIPT
+  kind — RED on the pre-fix tree (pins `7c62471c`, the red run: "Expectation
+  failed: session.status.spoken?.text == \"Copied for AI.\""). PROVISIONAL
+  (the orchestrator's copy ruling; 13s-a re-voices).
 - WA-3 — NOT-STARTED (trace).
 - WA-4 — **TRACED → TICKET (a pre-existing revival-observation class; not
   fixed).** The Library's listing is a deliberate ONE-SHOT read (17y B1 (k),

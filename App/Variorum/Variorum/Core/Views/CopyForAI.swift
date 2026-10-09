@@ -45,8 +45,12 @@ enum CopyForAI {
 
     // MARK: - What it says (sentence case — her standing rule)
 
-    static let copiedForAI =
-        "Copied for AI \u{2014} the note with its takes and tags, ready to paste into any chat."
+    /// The receipt says what happened and nothing more (the 13n-a walk's
+    /// WA-2 — the orchestrator's PROVISIONAL copy ruling; 13s-a re-voices):
+    /// the longer sentence ("… — the note with its takes and tags, ready to
+    /// paste into any chat.") truncated in Terminal's bars, and teaching
+    /// lives elsewhere.
+    static let copiedForAI = "Copied for AI."
     static let copyForAIEmpty =
         "Nothing to copy \u{2014} this note has no text yet."
 }
