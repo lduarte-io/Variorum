@@ -150,10 +150,19 @@ extension Operations {
         }
         let readingID = result.reading.id
         let postIDs = result.postIDs
+        // The redo keys on the stamp the INVERSE wrote (ladder round 1, F1):
+        // the undo hands it over through this box, the P-13ib-6 shape
+        // (`convertSmartReadingToCurated`'s undo-time box). Never the book's
+        // own tombstone — a book she deleted by hand before the undo carries
+        // HER stamp, and reviving it would land in a state that never existed.
+        let undoneOn = LockIsolated<String?>(nil)
         undoStack?.register(
             label: Self.importUndoLabel,
-            inverse: { try $0.revertImportedBook(readingID, posts: postIDs) },
-            redo: { try $0.reapplyImportedBook(readingID, posts: postIDs) })
+            inverse: { ops in
+                let stamp = try ops.revertImportedBook(readingID, posts: postIDs)
+                undoneOn.setValue(stamp)
+            },
+            redo: { try $0.reapplyImportedBook(readingID, posts: postIDs, undoneOn: undoneOn.value) })
         return result
     }
 
@@ -235,7 +244,10 @@ extension Operations {
     /// comes back with it). A book that has since become THE daily Journal
     /// refuses (`dailyJournalCannotBeDeleted` — the delete doors' own guard;
     /// the entry stays on the stack). Already dead ⇒ obsolete, quiet.
-    func revertImportedBook(_ readingID: String, posts postIDs: [String]) throws {
+    ///
+    /// Returns the stamp it wrote (the store's own spelling of it), which the
+    /// entry hands to its redo (ladder round 1, F1).
+    func revertImportedBook(_ readingID: String, posts postIDs: [String]) throws -> String {
         try database.write { db in
             let reading = try Reading.fetchOne(db, key: readingID)
             if let reading, reading.deletedAt == nil, Queries.isDailyJournalMintShape(reading) {
@@ -252,29 +264,42 @@ extension Operations {
                 reading.updatedAt = now
                 try reading.update(db)
             }
+            return DateFormatter.variorumISO8601.string(from: now)
         }
     }
 
-    /// The RE-APPLY: the imported notes that died on the book's stamp come
-    /// back (`restoreContainer`'s exact-stamp body — their blocks, takes,
-    /// tags, and their memberships in other books), then the book
-    /// (`restoreReading`'s body — its chapters and every membership whose
-    /// note is live), in one transaction. The book live again (Put back from
-    /// the Trash meanwhile) ⇒ obsolete, quiet.
-    func reapplyImportedBook(_ readingID: String, posts postIDs: [String]) throws {
+    /// The RE-APPLY, keyed on `undoneOn` — the stamp the undo's inverse
+    /// wrote (ladder round 1, F1): the imported notes that died on THAT stamp
+    /// come back (`restoreContainer`'s exact-stamp body — their blocks,
+    /// takes, tags, and their memberships in other books), then the book —
+    /// ONLY when its own tombstone is that stamp (`restoreReading`'s body —
+    /// its chapters and every membership whose note is live) — in one
+    /// transaction. So undo↔redo returns exactly the rows the undo took
+    /// (AppSpec §9's round trip): a book she deleted by hand BEFORE the undo
+    /// died on her own stamp and stays in the Trash, its notes come back
+    /// bookless, as they were; a note she deleted by hand stays deleted. What
+    /// has come back meanwhile (Put back from the Trash) is live and passes
+    /// over — obsolete, quiet; nil (no inverse ever ran) is obsolete too.
+    func reapplyImportedBook(
+        _ readingID: String, posts postIDs: [String], undoneOn stamp: String?
+    ) throws {
+        guard let stamp else { return }
+        func diedOnTheUndo(_ deletedAt: Date?) -> Bool {
+            deletedAt.map { DateFormatter.variorumISO8601.string(from: $0) } == stamp
+        }
         try database.write { db in
-            guard let reading = try Reading.fetchOne(db, key: readingID),
-                  let stamp = reading.deletedAt
-            else { return }
             var revived: [String] = []
             for postID in postIDs {
                 guard let post = try Container.fetchOne(db, key: postID),
-                      post.deletedAt == stamp
+                      diedOnTheUndo(post.deletedAt)
                 else { continue }
                 try restoreNoteFamily(db, id: postID)
                 revived.append(postID)
             }
-            try restoreReadingRows(db, id: readingID)
+            if let reading = try Reading.fetchOne(db, key: readingID),
+               diedOnTheUndo(reading.deletedAt) {
+                try restoreReadingRows(db, id: readingID)
+            }
             try enforceOwnershipAfterRevival(db, postIDs: revived, now: date.now)
         }
     }

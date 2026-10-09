@@ -673,8 +673,16 @@ Nothing more. No revert is in flight. QUESTIONS lines are PROPOSED in the
 closeout list below, never written to `notes/QUESTIONS.md` (merge-moment
 ledger; her merge).
 
-- STATE: **IN-PROGRESS** — opened; no fix landed yet.
-- F1 (redo keyed on the undo's own stamp) — NOT-STARTED.
+- STATE: **IN-PROGRESS** — F1 landed; the rest in the order listed.
+- F1 (redo keyed on the undo's own stamp) — DONE (this line's commit).
+  The inverse returns the stamp it wrote and hands it to the redo through
+  a `LockIsolated` box (P-13ib-6's undo-time box); the redo revives the
+  imported notes that died on THAT stamp and the book only when its own
+  tombstone is that stamp. Pin
+  `DocumentImportOperationTests.redoAfterTheBookWasDeletedByHandReturnsTheNotesNotTheBook`
+  (the reviewer's probe + one more ping-pong) — red on the old redo
+  (10 issues: 4 notes × 2 cycles left in the Trash, the book's tombstone
+  replaced twice), green after; the two suites over the op 17/17.
 - F4 (a blank/whitespace/header-only stub mints an empty note; option (b)) — NOT-STARTED.
 - F9 (the header line is a header only when it is tokens alone) — NOT-STARTED.
 - F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.

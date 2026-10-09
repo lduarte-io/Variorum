@@ -459,6 +459,43 @@ struct DocumentImportOperationTests {
         }
     }
 
+    @Test func redoAfterTheBookWasDeletedByHandReturnsTheNotesNotTheBook() throws {
+        // Ladder round 1, F1 (MAJOR): the redo keyed its revival on the
+        // BOOK's tombstone. She imports a folder, deletes the book by hand
+        // (book only — the notes go to the Pool; `deleteReading` registers no
+        // entry, so the import stays on top), presses ⌥⌘Z (the import's
+        // inverse takes the notes on a NEW stamp and skips the dead book),
+        // then ⇧⌥⌘Z. The redo must land exactly where the undo started: the
+        // notes live, the book still dead on HER stamp.
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let result = try ops.importBook(try folder())
+            try ops.deleteReading(result.reading.id)
+            let herStamp = try #require(try db.deletedAt("reading", result.reading.id))
+
+            try stack.undo(with: ops)
+            for postID in result.postIDs {
+                #expect(try db.deletedAt("container", postID) != nil, "the undo takes the imported notes")
+            }
+
+            try stack.redo(with: ops)
+            for postID in result.postIDs {
+                #expect(try db.deletedAt("container", postID) == nil, "redo should revive the imported notes")
+            }
+            #expect(try db.deletedAt("reading", result.reading.id) == herStamp,
+                    "redo should not resurrect the book she deleted herself")
+
+            // …and the entry keeps ping-ponging on those same rows.
+            try stack.undo(with: ops)
+            try stack.redo(with: ops)
+            for postID in result.postIDs {
+                #expect(try db.deletedAt("container", postID) == nil)
+            }
+            #expect(try db.deletedAt("reading", result.reading.id) == herStamp)
+        }
+    }
+
     @Test func aFolderNamedLikeALiveBookRefusesAndMintsNothing() throws {
         try withOperations { ops, db in
             try ops.createReading(name: "O Ladrão de Raios", kind: .book)
