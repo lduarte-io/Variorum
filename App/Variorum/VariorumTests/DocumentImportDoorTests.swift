@@ -404,6 +404,85 @@ struct DocumentImportDoorTests {
             // …and what it copied imports back as the same document.
             let parsed = try VariorumDocument.parse(expected)
             #expect(VariorumDocument.serialize(parsed) == expected)
+
+            // WA-2 (the 13n-a walk, W5 — the orchestrator's PROVISIONAL copy
+            // ruling): the receipt says what happened and nothing more, so
+            // it never truncates in a bar (the long sentence did, in
+            // Terminal). Teaching lives elsewhere.
+            #expect(session.status.spoken?.text == "Copied for AI.")
+            #expect(session.status.spoken?.kind == .receipt)
+        }
+    }
+
+    // MARK: - Undo with a note on screen (WA-3)
+
+    /// Bounded async settle (the standing poll rule — never a RunLoop pump).
+    private func settle(_ predicate: () -> Bool) async {
+        for _ in 0..<2000 where !predicate() {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+
+    /// **WA-3 (the 13n-a walk, W3):** ⌥⌘Z on an import while one of its
+    /// notes is open left the pane live on the tombstoned note ("in no book",
+    /// empty, "open tail") and the note in the Open strip. The navigate-away
+    /// road already exists — the Trash door's `.variorumNotesDeleted` signal,
+    /// which every window turns into `WorkspaceModel.notesDeleted` (the pane
+    /// leaves, the strip drops it) and a note-only window turns into a close
+    /// — so the undo door rides it for every note it left dead that a pane,
+    /// a strip, or any window's surface was showing. Red on the pre-fix
+    /// tree: the undo posted nothing.
+    @Test func undoingAnImportGetsEveryPaneAndTheOpenStripOffItsNotes() async throws {
+        try await withDoorSession { session in
+            let url = try folder("o ladrão de raios", [
+                "1 o semideus/01 abertura.md": chapterOne,
+                "posfácio.md": "Depois.",
+            ])
+            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            #expect(await DocumentImporter.importURLs([url], session: session).kind == .receipt)
+            let notes = try await session.database.read { db in
+                try String.fetchAll(db, sql: """
+                    SELECT id FROM container
+                    WHERE kind = 'post' AND deleted_at IS NULL ORDER BY title
+                    """)
+            }
+            try #require(notes.count == 2)
+            // "abertura" open in this window's pane (and so in its Open
+            // strip); "posfácio" held by a surface in ANOTHER window — the
+            // session's holder registry is the only thing that knows it.
+            shell.workspace.select(.post(notes[0]))
+            _ = session.autosave(forPost: notes[1])
+            defer { _ = session.releaseAutosave(forPost: notes[1]) }
+
+            let heard = LockIsolated<[String]>([])
+            let token = NotificationCenter.default.addObserver(
+                forName: .variorumNotesDeleted, object: nil, queue: .main
+            ) { note in
+                heard.withValue { $0 += (note.userInfo?["postIDs"] as? [String]) ?? [] }
+            }
+            defer { NotificationCenter.default.removeObserver(token) }
+
+            actions.structuralUndo()
+            await settle {
+                session.status.spoken?.text.contains("Undid") == true && !heard.value.isEmpty
+            }
+            #expect(session.status.spoken?.text == "Undid: Import")
+            #expect(Set(heard.value) == Set(notes), "every shown note the undo left dead")
+
+            // The window's own listener's act (RootView composes exactly this).
+            _ = shell.workspace.notesDeleted(heard.value)
+            #expect(shell.workspace.selections[.primary] == .library)
+            #expect(shell.workspace.openNotes.ids.isEmpty)
+
+            // A redo that leaves nothing dead says nothing on that road.
+            heard.withValue { $0 = [] }
+            actions.structuralRedo()
+            await settle { session.status.spoken?.text.contains("Redid") == true }
+            #expect(session.status.spoken?.text == "Redid: Import")
+            #expect(heard.value.isEmpty)
         }
     }
 }
