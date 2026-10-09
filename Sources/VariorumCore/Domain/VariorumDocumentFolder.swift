@@ -20,7 +20,9 @@ import Foundation
 ///   (`localizedStandardCompare` — Finder's: "2 …" before "10 …"), for the
 ///   chapters and for the files inside each; the raw string breaks ties.
 /// - **Fail-honest:** every file parses before anything is minted; the first
-///   refusal (in book order) names its file and line.
+///   refusal (in book order) names its file and line. A chapter folder whose
+///   name trims to nothing refuses here too (ladder F6) — every folder-shape
+///   refusal lands before the first mint.
 /// - **Stubs:** a blank, whitespace-only or header-only file is an EMPTY note
 ///   in its place (ladder F4, option (b), PROVISIONAL — `folderNote`).
 public enum VariorumDocumentFolder {
@@ -108,6 +110,15 @@ public enum VariorumDocumentFolder {
         }
         guard !unfiled.isEmpty || chapterFiles.values.contains(where: { !$0.isEmpty }) else {
             throw VariorumDocument.Failure(.noImportableFiles, file: folderName)
+        }
+        // A chapter is named by its folder, and a name that trims to nothing
+        // is no name (ladder F6): refused HERE, before anything is minted,
+        // like every folder-shape refusal — never by the op mid-gesture,
+        // where the gesture's earlier items would roll back into the Trash.
+        if chapterFiles.keys.contains(where: {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }) {
+            throw VariorumDocument.Failure(.blankChapterName)
         }
 
         let chapterNames = chapterFiles.keys.sorted(by: orderedBefore)

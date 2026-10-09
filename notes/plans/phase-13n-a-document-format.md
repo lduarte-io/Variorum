@@ -740,7 +740,21 @@ ledger; her merge).
   mid-gesture refusal; item one's note left in the Trash),
   `aPackageInsideAFolderIsNeitherAChapterNorAFile` (old text "… 1 note in
   1 chapter …" — the `.rtfd` became a chapter). — DONE (this line's commit).
-- F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.
+- F6 (a blank chapter-folder name refuses in the planner's preflight) —
+  DONE (this line's commit). `VariorumDocumentFolder.plan` refuses
+  `blankChapterName` (no file named; the door says "Couldn’t import
+  “spaced book” — one of its folders has a blank name, and a chapter needs
+  one.") before any file parses; the op's own `invalidSectionName` guard
+  stays as defense. Core pin green (the four 13n-a suites 49/49); the door
+  pin `aBlankChapterFolderRefusesBeforeAnythingIsMinted` — green PENDING
+  the Mac green run. **The class, RECORDED as a known limit (the
+  disposition's second half):** any op refusal on item 2+ of a multi-item
+  gesture still rolls the earlier items back through their inverses, and
+  those inverses tombstone — so the earlier items would sit in the Trash
+  beside a refusal saying nothing landed. The preflights (the E13 name
+  check, now the blank chapter name) are the guard that keeps it
+  unreachable from any folder shape; what remains reachable is a fault
+  arriving mid-flight (the wing dying under the gesture).
 - F2 (the Bookcase drop is a context mint) — NOT-STARTED.
 - F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.
 - F7 (a package directory is neither a chapter nor a file) — NOT-STARTED.
