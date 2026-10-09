@@ -413,7 +413,7 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
 
 - **NOT DONE BY THE WALK (first):** the `/Applications` refresh (not this
   session's); no fix of anything seen (anomalies are REPORTED here, never
-  fixed); W3–W7 still to run at this line's commit.
+  fixed); W6–W7 still to run at this line's commit.
 - Stage claimed ("13n-a walk", W1–W7, 60 min); `guard.sh --author` exit 0
   (her app absent, HID idle); the Debug app built from THIS worktree
   (`xcodebuild -scheme Variorum -configuration Debug build`, DerivedData
@@ -466,6 +466,57 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
   `w2-takes-fan-terminal.png`,
   `w2-takes-fan-expanded-unlabeled-take-terminal.png`,
   `w2-takes-fan-expanded-unlabeled-take-study.png`.
+- **W3 — WORKED, one behavioral anomaly.** ⌥⌘Z once (with "abertura"
+  open in Write): the book is gone from the Bookcase, the four notes from
+  the Library; Edit menu items read "Undo Structural Change" (disabled) ·
+  "Redo Import ⌥⇧⌘Z"; the bottom bar said "Undid: Import". **ANOMALY
+  (behavioral): the open note's pane outlives its deletion** — the Write
+  pane stayed on "abertura", now "in no book", empty ("0w in note", the
+  status reading "open tail" — a live-looking editor on a tombstoned
+  note), and "abertura" stayed in the sidebar's Open strip (⌘⇧1) after the
+  undo; nothing was typed into it (not exercised). Captures:
+  `w3-undo-while-note-open-study.png`, `w3-bookcase-book-gone-study.png`,
+  `w3-library-notes-gone-study.png`, `w3-edit-menu-redo-import-study.png`.
+- **W4 — WORKED, one behavioral anomaly.** ⇧⌥⌘Z (from the Library): Edit
+  menu back to "Undo Import"; the receipt "Redid: Import"; the Bookcase
+  row back ("4 notes · 2 ch · 89w"); the book opens whole — chapters "1 o
+  semideus" / "2 a excursão", unfiled "posfácio"; "abertura" reopened from
+  the book shows its three blocks and, in Lenses, the saved **english**
+  lens with all three english takes. **ANOMALY (behavioral): the visible
+  Library did not refresh on the redo** — while the Library was the
+  surface on screen, the book and the four notes stayed absent (captured
+  immediately and again after ~5 s); leaving to the Bookcase and coming
+  back showed them. (The W3 undo's Library was entered AFTER the undo, so
+  whether the undo refreshes a visible Library was not observed.) Not
+  distinguished by this walk: whether the lens rows were ever tombstoned
+  by the undo (they came back either way). Captures:
+  `w4-redo-library-notes-back-study.png` (the stale list, receipt
+  visible), `w4-redo-library-after-wait-study.png`,
+  `w4-redo-bookcase-study.png`, `w4-library-reentered-study.png`,
+  `w4-book-back-whole-chapters-study.png`,
+  `w4-abertura-reopened-study.png`, `w4-lenses-after-redo-study.png`.
+- **W5 — WORKED, one visual anomaly. HER CLIPBOARD:** saved before the
+  row (every item and type, through `NSPasteboard` — it was EMPTY: 0
+  items, changeCount 1414) and restored after (cleared back to empty,
+  verified 0 items / 0 bytes); the row wrote it four times. `note ▾` →
+  "Copy for AI" from BOTH menus (Write's in Study and Terminal, Takes' in
+  Terminal) and ⌘K → "Copy for AI" (Study): each put ONE plain-text item
+  on the board (`public.utf8-plain-text`), and all four copies were
+  byte-identical; `pbpaste` = `{t:"abertura"} {#percy/pt-en}`, a blank
+  line, then the body with its three Alternates sections — `diff` against
+  the fixture `01 abertura.md` differs ONLY by the file's final newline
+  (FP-1's edge). The receipt: "Copied for AI — the note with its takes and
+  tags, ready to paste into any chat." — whole in Study; **ANOMALY
+  (visual): in Terminal the receipt truncates** ("…its takes and tag…" in
+  Write, "…its takes and tags,…" in Takes). Captures:
+  `w5-note-menu-copy-for-ai-write-study.png`,
+  `w5-copy-for-ai-receipt-write-study.png`, `w5-palette-open-study.png`,
+  `w5-palette-copy-for-ai-study.png`,
+  `w5-palette-copy-for-ai-receipt-study.png`,
+  `w5-note-menu-copy-for-ai-takes-terminal.png`,
+  `w5-copy-for-ai-receipt-takes-terminal.png`,
+  `w5-note-menu-copy-for-ai-write-terminal.png`,
+  `w5-copy-for-ai-receipt-write-terminal.png`.
 
 ### Implementer calls (each with its one line of reasoning)
 
