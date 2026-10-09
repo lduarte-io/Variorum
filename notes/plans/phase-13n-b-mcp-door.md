@@ -1375,11 +1375,20 @@ ambiguity; STOP for anything gating.
 
 ## U2 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-**UNIT OPEN — opus-implementer, 2026-10-09, cut from `b6815271`.** Reading
-done in full (this plan top to bottom, the sitting record, the mockups, both
-U1 ladder records, SyncSpec, §9, the dream note, the U1 code). Three forks
-returned to the orchestrator (below) — the halves they gate wait; everything
-else proceeds.
+**UNIT CLOSED by the implementer — NOT DONE: (1) the LIVE acceptance leg
+with a REAL client (her fact-check shape over Claude Code + the ⌥⌘Z walk —
+the orchestrator's, under a held stage claim; my pre-flight drove the REAL
+embedded shim with a scripted client, `u2-walk`, never Claude Code itself);
+(2) the whole VariorumTests target (only the 27 suites in every file the diff
+touches ran); (3) the U3 items AF-8 and R-13nb-7/8/10 assign there (the
+"Allow AI here…" row, `with_commits`, `include_commits`, the set-name tool) —
+the structured serializer and search's argument parsing are left open for
+them; (4) the pre-existing red `BookCollectingDoorsTests
+.theSettingsDoorIsOneActOnBothRoads` (13o U3's `90c081c4` added
+`.searchThisBook` to `BookView.surfaceCapabilities`; the pin was never
+updated; both files untouched by U2 — an orchestrator item / ticket, not
+fixed out of scope).** Session: opus-implementer, 2026-10-09, cut from
+`b6815271`; closed at the commit carrying this record.
 
 ### Pieces
 
@@ -1388,16 +1397,16 @@ else proceeds.
 | Q0 | This record | DONE (`90797596`); forks RULED by the architect (AF-5…AF-8, `d290b090`) |
 | Q1 | The fence's third leg wired (`privateLegForNote`/`ForBook` read v1_25) + pins (NULL not-private; private+granted book fenced; mark fences the next decision; archived private book fences) | DONE (this commit) — `MCPPrivateMarkTests` 6/6; RED-ON-OLD verified: with the legs back at `"0"` the suite fails 4 tests / 10 issues, green after; U1's placeholder assertion retired (justified edit). The end-to-end "next call on a connected client" pin rides Q6 (`MCPServerTests`) |
 | Q2 | The Private mark's ops (`setNotePrivate` / `setBookPrivate`; gatherings and scraps refuse; allowed under a seal — PROVISIONAL) + state-transition tests | DONE (this commit) — no-op-guarded, no touch, synced (outbox), no undo entry |
-| Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | DONE (this commit; Mac run PENDING stage) — `.markNotePrivate` (`.bottomBar`, both bars' note ▾, NOTE contexts, beside Copy full text: the toggle + "Private through “…”" when a Private book holds it + the note's "Shared with AI: …" line) and `.markBookPrivate` (the Book Settings sheet's State row + caption, books only); shared pieces in `Core/Views/PrivateMark.swift`; the ask sheet's Private lead (the journal sentence's twin); the stamp stays OFF the `Reading`/`Container` models (no stale model write can clear it) |
-| Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | DONE (this commit) — `landMCPAfterAdoption(holdStamp:)` keyed on the 13x RESTORE HOLD both adoption doors write (fresh stamp per adoption): an unacknowledged hold writes `server` OFF + records the stamp in ONE transaction; the same hold again changes nothing (her re-enable stands); a new adoption lands OFF again; grants/clients/open book untouched. The door asks it at attach BEFORE its grants observation starts (no stale "on" snapshot can start a server); a failed landing keeps the server down. Zero lines in the 13x road itself, zero `Sync/`, zero custody. Headless `MCPAdoptionLandingTests` 2/2; Mac pin `anAdoptedLibraryLandsOffBeforeItCouldServeAndHerReEnableServes` — run PENDING (stage) |
+| Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | DONE (`b83e7c60`; Mac green — see Q10; walked, captures 10–16, 23) — `.markNotePrivate` (`.bottomBar`, both bars' note ▾, NOTE contexts, beside Copy full text: the toggle + "Private through “…”" when a Private book holds it + the note's "Shared with AI: …" line) and `.markBookPrivate` (the Book Settings sheet's State row + caption, books only); shared pieces in `Core/Views/PrivateMark.swift`; the ask sheet's Private lead (the journal sentence's twin); the stamp stays OFF the `Reading`/`Container` models (no stale model write can clear it) |
+| Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | DONE (this commit) — `landMCPAfterAdoption(holdStamp:)` keyed on the 13x RESTORE HOLD both adoption doors write (fresh stamp per adoption): an unacknowledged hold writes `server` OFF + records the stamp in ONE transaction; the same hold again changes nothing (her re-enable stands); a new adoption lands OFF again; grants/clients/open book untouched. The door asks it at attach BEFORE its grants observation starts (no stale "on" snapshot can start a server); a failed landing keeps the server down. Zero lines in the 13x road itself, zero `Sync/`, zero custody. Headless `MCPAdoptionLandingTests` 2/2; Mac pin `anAdoptedLibraryLandsOffBeforeItCouldServeAndHerReEnableServes` GREEN (its first run tripped AF-1's length guard on the test's own nested socket path — fixed in the test, `20e319ad`) |
 | Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | DONE (this commit) — `Operations+MCPWrites.swift`: each act ONE transaction (the import book: one compound) + ONE entry labeled "<client>'s <act>", exact-row inverse + redo (quiet on divergence, throwing on resolvable refusals); the suggest acts INSERT only (no UPDATE on `variant`/`container_block`). `mintDocument`/`applyDocumentTags` widened private→internal (the one mint road reused). `MCPWriteActsTests` 12/12 |
 | Q6 | The server's write tools over the SESSION runner + the SUGGEST PROOF pin (+ mutation checks) | DONE (`296e9c86` + `0f5f406c` + this commit) — `MCPWriteTools` (8 tools, one serial body per call on the injected executor), `MCPWriteSupport`, the catalog's `scopes` rule, `read_note with_ids` (AF-5), asks on content reads and write refusals (AF-6), AF-7 wired, R2-1 + R2-2 fixed. `MCPWriteServerTests` 9 + U1's 23 = **VariorumMCPTests 32/4**. **THE PROOF MUTATION-CHECKED (4 breaks):** (1) `addTake` also edits her other takes → caught (snapshot); (2) `saveLens` moves the chosen pointer → **NOT caught by the first draft** (it picked only already-chosen takes, so the move was a no-op) → the pin now picks her NON-chosen take → caught; (3) the block acts decided at `.read` instead of their rung → caught (the write-new door accepted under suggest; the once grant not spent); (4) `addTake` makes itself chosen → caught (snapshot + the fact-check shape's rendered text). Every mutation restored from the committed tree (`git checkout --`) |
-| Q7 | The grant sheet's rungs (read · suggest · write new) | DONE (this commit; Mac run PENDING stage) — the radio picker with the mockup §3 sentences, the confirm naming the rung ("Grant suggest in “…” while connected"), "Edit arrives in a later update."; the pane's toggle sentence restored to mockup §1 verbatim (P-13nb-U1-12 retired) |
-| Q8 | The just-in-time ask (sheet + the R2-1 fix) | DONE (this commit; Mac run PENDING stage) — `MCPDoor`'s in-memory queue (deduped per client · target · rung, cap 8 — the oldest WAITING ask forgotten, never the one on screen), `MCPAskSheet` on the main WindowGroup (one at a time; Once · While connected [connected only] · Always [unfenced only] · Don't allow = its cancel action; the answer mints the grant through `grantMCPAccess`), `.mcpAnswerAsk` declared + walked; R2-1 fixed in Q6 |
-| Q9 | Receipts (app voice) + the "shared with AI" chip | DONE (core reads `081792a5`; faces this commit; Mac run PENDING stage) — `MCPReceiptCopy.line` (a run of one client's acts on one target within 120 s coalesces: "claude-code added 2 takes and saved the lens “english readings” in “ch 1” · ⌥⌘Z undoes"), spoken by `MCPDoor.speak` as quiet receipts; the Bookcase row's "shared with AI" chip from `mcpReachableBookIDs` (one-shot with the row aggregates) |
-| Q10 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage), record final | NOT-STARTED |
+| Q7 | The grant sheet's rungs (read · suggest · write new) | DONE (`b83e7c60`; walked, captures 03, 21) — the radio picker with the mockup §3 sentences, the confirm naming the rung ("Grant suggest in “…” while connected"), "Edit arrives in a later update."; the pane's toggle sentence restored to mockup §1 verbatim (P-13nb-U1-12 retired) |
+| Q8 | The just-in-time ask (sheet + the R2-1 fix) | DONE (`b83e7c60` + W-3 `b81868cc`; walked, captures 08/09/11/16/17/22) — `MCPDoor`'s in-memory queue (deduped per client · target · rung, cap 8 — the oldest WAITING ask forgotten, never the one on screen), `MCPAskSheet` on the main WindowGroup (one at a time; Once · While connected [connected only] · Always [unfenced only] · Don't allow = its cancel action; the answer mints the grant through `grantMCPAccess`), `.mcpAnswerAsk` declared + walked; R2-1 fixed in Q6 |
+| Q9 | Receipts (app voice) + the "shared with AI" chip | DONE (core reads `081792a5`; faces `b83e7c60`; W-1/W-2 `508136d4`; walked, captures 01/05a/06/07/09/12/18/19/22) — `MCPReceiptCopy.line` (a run of one client's acts on one target within 120 s coalesces: "claude-code added 2 takes and saved the lens “fact check” · ⌥⌘Z undoes"; past a 72-char budget the run speaks as a count so the undo hint is never truncated — W-2), spoken by `MCPDoor.speak` as quiet receipts; the Bookcase row's "shared with AI" chip from `mcpReachableBookIDs` (one-shot with the row aggregates) |
+| Q10 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage), record final | DONE — headless whole package: core **2,534/291** (baseline 2,511/287 + 23 tests / 4 suites: `MCPPrivateMarkTests` 6, `MCPAdoptionLandingTests` 2, `MCPWriteActsTests` 12, `MCPGrantInContextTests` 2, + the AF-7 rule test in `MCPGrantRuleTests`), **VariorumMCPTests 32/4** (U1's 23 + `MCPWriteServerTests` 9), workbook **40/6**; only the long-standing gated skips. Mac (stage held, `-only-testing`, every suite in every file the diff touches): **179 tests / 27 suites, 0 skipped, ONE red — pre-existing and outside U2** (the BookView pin, banner item 4); `MCPPaneTests` + `MCPAskAndReceiptTests` 19/19 after the walk fixes. The pre-flight walk below (23 captures + the client transcripts) |
 
-### Forks returned to the orchestrator (2026-10-09 — halves wait for the ruling)
+### Forks returned to the orchestrator (2026-10-09) — RULED as AF-5…AF-8 (`d290b090`), built as ruled
 
 - **F-1 — block addressing.** `read_note` speaks the Level 0 format, which
   carries NO ids, so `add_take`/`add_comment`/`save_lens` have no way to name
@@ -1481,9 +1490,12 @@ else proceeds.
   library-open sheet's standing class). Alternative: an offer toast with
   Review… (calmer, missable). And AF-6's other provisional: an ask IS raised
   on an existing-but-unshared note while the wire stays the one answer.
-- **P-13nb-U2-10 — the receipt run**: one client's acts on one target
-  within 120 s speak as one coalesced line; the "in “title”" clause rides
-  only when every act in the run is note-targeted.
+- **P-13nb-U2-10 — the receipt run** (AMENDED by the walk's W-2): one
+  client's acts on one target within 120 s speak as one coalesced line in
+  the mockup §5 shape (no "in “title”" clause — the first build's clause
+  pushed the undo hint off the bar); past a 72-character budget (measured at
+  the walk's 1380-pt window; the bar's width varies, so approximate) the run
+  speaks as a count: "<client> made N changes · ⌥⌘Z undoes".
 - **P-13nb-U2-11 — the "shared with AI" chip is HONEST under every grant
   shape**: a book chips when any approved client can reach it now (a book
   grant, a wing grant on its wing, or the open book — never a journal or a
@@ -1492,6 +1504,18 @@ else proceeds.
 - **P-13nb-U2-12 — the AI take label**: "<client> · suggested", then
   " · <its own label>" when it gives one (P-13n-3's convention, the client's
   name verbatim — "claude-code", never a brand rewrite).
+
+- **P-13nb-U1-2's AMENDED FORM (AF-7, for the merge bundle):** a once
+  grant is spent by the first content-bearing call AT ITS OWN RUNG it
+  authorizes — read: the first content read (U1's letter); suggest / write
+  new: the first WRITE; lower-rung calls under it ride free. Stated edge: a
+  once-suggest grant authorizes ONE write (take-plus-lens wants "while
+  connected"). Walked live: Once allowed exactly one `create_note`, the
+  second refused and asked again (captures 08/09).
+- **P-13nb-U2-13 — the ask sheet uses SYSTEM buttons** (walk W-3): it
+  presents at the WindowGroup level where no session theme reaches (the
+  library-open sheet's precedent); the voice's chrome is the grant sheet's
+  and the pane's, not this sheet's.
 
 ### Decisions within the mandate (recorded as they land)
 
@@ -1502,3 +1526,142 @@ else proceeds.
   the runner is the serialization guard the stack requires. The host gains an
   injected executor (the app's runner; a serial actor in tests); reads stay on
   the reader pool as U1 built them.
+- **R-13nb-8's U2 half + R-13nb-9 built** (`4ee882f7`): `with_ids` carries a
+  block's `name` where set (metadata only — ids stay the one write address);
+  the tool description says ids are live (her merges/divides mint new blocks;
+  a stale id refuses; a re-read recovers).
+- **The stamp stays OFF the models.** `ai_private_at` is read and written by
+  SQL only (`Queries.isNotePrivate`/`isBookPrivate`, the two ops) — GRDB's
+  `update` writes only encoded columns, so no stale `Container`/`Reading`
+  can ever clear a mark, and no copy road silently starts carrying it.
+
+### The U2 pre-flight walk (dev-store Debug build `DerivedData/vx124-u2`, 2026-10-09 ~17:10–18:00, under my own stage claim — the orchestrator's live real-client round is still owed)
+
+Captures (gitignored): `notes/plans/13n-b-screens/u2/01…23-*.png`; the
+scripted client's transcripts + the 60-line client itself:
+`notes/plans/13n-b-screens/u2/client/` (`mcpwalk.py` spawns the REAL embedded
+shim over stdio exactly as Claude Code does; self-named `u2-walk`). Author
+guard + per-click guard (`Tools/WalkKit/click.sh`) throughout; her
+`/Applications` app never running; my instance quit by identity each time.
+
+- **01** Study Bookcase: "shared with AI" on "o ladrão de raios" (the live
+  round's standing `claude-code` read grant). **02** the pane running, the
+  toggle sentence mockup §1 verbatim. `u2-walk` connects → pending, ZERO
+  tools, reads nothing. **03** Approve… → the sheet's three rungs; Suggest →
+  the mockup sentence + "Grant suggest in “o ladrão de raios” always".
+- **Her fact-check shape (headless client, real shim):** `list_books` → the
+  one book; `read_note with_ids` → 3 blocks, live ids; `add_take` ×3
+  (label "fact check"); `save_lens` "fact check". **04** Takes, expand all:
+  "u2-walk · suggested · fact check" at each fan's END, her "✓ chosen"
+  untouched.
+- **05a (W-2 before)** a coalesced receipt truncated, the "⌥⌘Z undoes"
+  clause lost. **06** ONE ⌥⌘Z → "Undid: u2-walk's take" — the client re-read
+  confirms exactly that take gone; **07** two more presses walk back the
+  comment, then "Undid: u2-walk's lens" (the earlier takes stand).
+- **The ask:** `create_note` past the suggest grant answered in 0.32 s —
+  "This client may only read and suggest here. Variorum has asked the author
+  — call again once she answers." — and **08 (W-3 before)** the sheet
+  arrived: "u2-walk asks to write new in “o ladrão de raios”", Once ·
+  Always · Don't allow ("While connected" withheld — disconnected). Once →
+  **09** "Allowed u2-walk: write new in “o ladrão de raios” once."; the retry
+  landed the note at the book's end; the SECOND write refused and asked
+  again (AF-7 live); Don't allow → nothing more landed.
+- **Private:** **10** the note ▾ menu: "Private — never shared with AI"
+  beside Copy full text, under it "Shared with AI: claude-code (read),
+  u2-walk (read and suggest)". Marking it → the client's VERY NEXT
+  `read_note`/`add_take` refused with the Private words, `search` dropped the
+  note's passages; **11** the Private ask (Once only), **12** "Marked Private
+  — no AI client can read this note.", **13** ✓ and the shared line gone;
+  cleared → the client reads again. **14/15** Book Settings' State row + its
+  caption, checked → `list_books` empty, members fenced; **16** the book's
+  chip GONE (honest) and the queued ask presented once the sheet closed;
+  cleared → lists again.
+- **The bulk door:** `import_document` of a whole book into Home → the ONE
+  answer on the wire ("That wing isn't shared…") while **17** her sheet asks
+  "u2-walk asks to write new in the Home wing" (AF-6's provisional,
+  visible); Once → **18** "percy worksheets · 3 notes · 1 ch" + "u2-walk
+  imported the book “percy worksheets” (3 notes) · ⌥⌘Z undoes" (whole);
+  **19** ONE ⌥⌘Z → the book gone, "Undid: u2-walk's book import".
+- **Terminal voice:** **20** the pane (W-1 fixed), **21** the sheet's Write
+  new sentence + "Grant write new in “…” always", **22** the ask with system
+  buttons (W-3 fixed) over the chip in mono, **23** the note menu. Voice
+  restored to Study.
+
+**The walk's three findings — all FIXED and pinned where pinnable:**
+1. **W-1** — the client row said "reads 1 shared place" for a suggest
+   grant → rung-agnostic "1 shared place" (`508136d4`).
+2. **W-2** — the coalesced receipt truncated and lost "⌥⌘Z undoes" → the
+   mockup's shape without the title clause + the count fallback past 72
+   chars (`508136d4`; pinned in `MCPAskAndReceiptTests`).
+3. **W-3** — the ask sheet's buttons in the mono fallback face (no theme at
+   the WindowGroup level) → system buttons (`b81868cc`).
+
+**LEFT in the dev store (deliberate, harmless):** the `u2-walk` client
+(approved; suggest on "o ladrão de raios", always); the three "u2-walk ·
+suggested · fact check" takes on "abertura"; the note "lesson 1 — questions"
+in that book. `claude-code`'s always-read grant untouched (the live round's
+client). Server ON, voice Study.
+
+### Open items for the orchestrator
+
+- **The live acceptance leg** (her fact-check shape with a real Claude Code
+  client + the ⌥⌘Z walk): register the Debug shim (`-s local` in a scratch
+  folder, as U1's round), approve suggest on a book, have the client
+  `read_note with_ids` → `add_take` per block → `save_lens`; press ⌥⌘Z once
+  in the app. The Takes view + the receipt are where to look.
+- **QUESTIONS at merge:** P-13nb-U2-1…13 + P-13nb-U1-2's amended form.
+- **The pre-existing red** (banner item 4) — a one-line pin update, not U2's.
+- **Not built, deliberately:** pane rows for pending asks (AF-6 optional —
+  U3's if wanted); the "Allow AI here…" row (AF-8, U3).
+- **Rulings that landed DURING this unit and were not routed to it**
+  (R-13nb-11…18 + the wire-document memo `67536839`; the orchestrator's
+  last direction to me: "everything else is U3's"). One touches what U2
+  built: **R-13nb-11 G-2** — `create_note` accepts EITHER payload (the text
+  format OR a wire-document subset). U2's `create_note` takes PLAIN PROSE
+  through the bulk rule (`Operations.createNote` →
+  `SegmentationRules.bulkSegments`); the Level 0 text goes through
+  `import_document`, and the wire-document subset awaits the format-schema
+  sitting (R-13nb-13). For U3's brief: the op seam is ready
+  (`Operations.importNote(_:in:undoLabel:)` already mints a parsed
+  `VariorumDocument` into a book or a wing under one entry — an
+  either-payload `create_note` is an argument-parsing change over it).
+  R-13nb-18's `save_version` (write-new rung, staging-timed) and its "the
+  wire has NO undo tool" both agree with what is built (no undo tool exists).
+
+### Self-assessment (the implementer's, before the cold review)
+
+- **The suggest PROOF is real and mutation-checked** — and the check earned
+  its keep: the first draft of the pin could not see a lens that moved the
+  chosen pointer (it only picked takes already chosen). Four deliberate
+  breaks, four catches after the fix.
+- **Where I'd look first, as the reviewer:** (a) `MCPWriteTools`' serial
+  body — decide on a reader snapshot, act through the runner's ops, spend
+  AFTER the act, log; especially `noteIntoBook`'s shared-once-grant spend
+  and `land`'s `try? spend` (P-13nb-U2-8's corner); (b) the undo halves in
+  `Operations+MCPWrites` (`revertAddedMembership`'s arrival restore,
+  `reapplySavedLens`' exact-stamp choice revival, `reapplyAppliedTag`'s twin
+  guard); (c) `MCPDoor`'s adoption landing ordering (the observation starts
+  only after the OFF write) and its ask queue (`enqueue`'s cap never drops
+  index 0); (d) the scope discipline — can any write land outside the grant
+  (a note into an ungranted book, an unreachable note pulled into a granted
+  one, a take on a block of another note)? (e) the ask-on-unshared-existing
+  behaviour (AF-6's provisional) — no wire oracle, but her sheet names a
+  note the client could not list.
+- **What the walk caught that the pins did not:** W-1/W-2/W-3 — all three
+  are rendering facts (copy accuracy, bar width, the theme environment at
+  the WindowGroup level) no headless pin sees.
+- **Scope held:** zero lines in `Sources/VariorumCore/Sync/`, zero custody,
+  zero editor seam, zero lockstep (marker 13 untouched), zero changes to the
+  13x adoption road itself (row 10 lands at the door's attach, keyed on the
+  hold that road already writes), the export pin intact.
+
+### Machinery notes
+
+- The orchestrator committed into this worktree mid-unit (the fork rulings
+  `d290b090`, the sitting records `508d3f6b`/`ae5dd44f`) — pulled, read, kept
+  to my own paths. No session death. The stage was claimed once (120 min)
+  and released at the end; TCC on this host: Accessibility + Screen
+  Recording held (checked before the walk); no prompt raised or answered.
+- One harness lesson: `click.sh`'s author guard refuses a click within 2 s
+  of my own previous synthetic event (HID idle) — a "lost" click mid-walk was
+  the guard, not the app.
