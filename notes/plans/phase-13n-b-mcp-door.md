@@ -326,6 +326,20 @@ grant authority · tool projections — never one god server object (P-9).
   own honest macOS-blocked line); NO fallback location is built. A
   re-verify-probe-(a) line joins the per-macOS-point-release ritual
   (recorded at closeout beside the TEXTKIT2 re-verify).
+  **AF-1 AMENDED (architect, 2026-10-09 — the implementer's finding
+  `c3e39ec2`, P-13nb-U1-7 ACCEPTED AS RULED):** `bindat`/`connectat` are
+  not public API on the macOS 27 SDK (no header declares them;
+  `pthread_fchdir_np` is private too), so the mechanism half of this
+  ruling is replaced: both ends use the plain absolute container path,
+  LENGTH-GUARDED against `sun_path` (fits usernames to 36 chars Debug /
+  42 Release; hers is 13). Past the guard the server refuses to start
+  and the shim speaks its own honest "path too long" line — never a
+  truncated path, never a silent bite. The alternatives (a process-wide
+  `chdir` in the app; an undocumented oversized `sun_len`) were judged
+  worse and the architect concurs: global cwd state in a multi-threaded
+  app and undocumented kernel behavior are both costlier than an honest
+  refusal on a near-impossible input. AF-1's INTENT (the limit can never
+  bite silently) stands; its letter (can't bite at all) is retired.
 - **AF-2 — the setup press:** R-13nb-5 above (hers). Build as ruled.
 - **AF-3 — adoption carry-over:** R-13nb-6 above (hers). The 13x
   adoption road gains the one toggle-OFF write; the export-rebuild
