@@ -1109,4 +1109,73 @@ ambiguity; STOP for anything gating.
 
 ## U2 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty — the U2 implementer writes it)*
+**UNIT OPEN — opus-implementer, 2026-10-09, cut from `b6815271`.** Reading
+done in full (this plan top to bottom, the sitting record, the mockups, both
+U1 ladder records, SyncSpec, §9, the dream note, the U1 code). Three forks
+returned to the orchestrator (below) — the halves they gate wait; everything
+else proceeds.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| Q0 | This record | IN-PROGRESS (this commit) |
+| Q1 | The fence's third leg wired (`privateLegForNote`/`ForBook` read v1_25) + pins (NULL not-private; private+granted book fenced; mark fences the next call; archived private book fences) | NOT-STARTED |
+| Q2 | The Private mark's ops (note + book; gatherings refuse; allowed under a seal — PROVISIONAL) + state-transition tests | NOT-STARTED |
+| Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | NOT-STARTED |
+| Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | NOT-STARTED |
+| Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | NOT-STARTED |
+| Q6 | The server's write tools over the SESSION runner + the SUGGEST PROOF pin (+ mutation checks) | NOT-STARTED — gated by F-1/F-3 |
+| Q7 | The grant sheet's rungs (read · suggest · write new) | NOT-STARTED |
+| Q8 | The just-in-time ask (sheet + the R2-1 fix) | NOT-STARTED — gated by F-2 |
+| Q9 | Receipts (app voice) + the "shared with AI" chip | NOT-STARTED |
+| Q10 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage), record final | NOT-STARTED |
+
+### Forks returned to the orchestrator (2026-10-09 — halves wait for the ruling)
+
+- **F-1 — block addressing.** `read_note` speaks the Level 0 format, which
+  carries NO ids, so `add_take`/`add_comment`/`save_lens` have no way to name
+  a block or a take. PROPOSAL: `read_note` gains an optional `with_ids: true`
+  answering JSON — `{note_id, title, blocks: [{block_id, text (the shown
+  take), takes: [{take_id, label, chosen, text}], comments: [{id, text}]}]}`
+  (the mockup §9 contract already says read_note returns "blocks, takes,
+  comments"); the default answer stays the Level 0 text byte-for-byte.
+  Alternatives: (b) address by block INDEX + `expected_text` (fragile — a
+  multi-paragraph block is not expressible in the format, P-13n-4, and a
+  divide by her mid-session shifts indices); (c) a new `list_blocks` tool (a
+  sixth read tool beyond the ruled lean set).
+- **F-2 — the just-in-time ask's call semantics.** PROPOSAL: the call NEVER
+  blocks — it answers at once, and for an approved client asking past its
+  grant on an EXISTING target the app queues an ask (in memory, deduped per
+  client · target · rung, capped), presented as the mockup §4 sheet on the
+  main window one at a time; her answer mints the grant (once · while
+  connected [connected clients only] · always [never on a fenced target] ·
+  don't allow = nothing). On the wire: `notShared` keeps the one-answer
+  words unchanged (no existence oracle — the client cannot tell an ask was
+  raised); `rungTooLow` and `fenced` (whose existence the client already
+  knows) gain "Variorum has asked the author — call again once she answers."
+  Why not blocking (TCC-literal): a blocked call is a LATENCY existence
+  oracle (missing ids answer instantly, real ones hang), and it holds the
+  client's tool timeout hostage to her attention.
+- **F-3 — "once" on the write rungs.** U1's P-13nb-U1-2 spends a once grant
+  on the first CONTENT READ. Carried literally to writes, a "suggest, once"
+  grant is spent by the read the client needs before it can suggest — a door
+  that cannot act as named. PROPOSAL: a once grant is spent by the first call
+  AT ITS OWN RUNG it authorizes (read: a content read; suggest/write new: the
+  first write); lower-rung calls under it (the reading it needs on the way)
+  ride free. One line in `MCPGrantRule.decide`, pinned. Alternative: spend on
+  any content-bearing call, reads included (literal; makes once-at-suggest
+  nearly useless).
+- **Scope question (not a fork):** the note ⋯ menu's GRANT row ("Allow AI
+  here…", R-13n-11's share-a-note) is not in U2's item list (only the Private
+  row is) — read as U3's unless told otherwise.
+
+### Decisions within the mandate (recorded as they land)
+
+- **MCP writes run on the SESSION's `OperationsRunner` with the session's
+  `UndoStack`** — the one road her gestures use. Not optional: `withCompound`
+  holds ONE collector, so an MCP compound collecting concurrently with one of
+  her gestures would swallow her entry (or trip the no-nesting precondition);
+  the runner is the serialization guard the stack requires. The host gains an
+  injected executor (the app's runner; a serial actor in tests); reads stay on
+  the reader pool as U1 built them.
