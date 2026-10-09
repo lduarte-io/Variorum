@@ -264,7 +264,16 @@ unit should never touch the real store at all.
    `importBook` (one transaction for the whole folder, one undo entry whose
    inverse tombstones exactly the minted notes + the book on one stamp; the
    redo revives them through `restoreReading`'s body). State-transition
-   tests. — NOT-STARTED
+   tests. — DONE (this commit; `DocumentImportOperationTests` 10/10 — exact
+   rows for both ops, import(export(note)) re-exports byte-identical, the
+   one undo entry, undo↔redo on the same rows, her own note filed in the
+   imported book survives the undo, E13 refusal mints nothing, the daily
+   Journal guard on the inverse, intake hearing an imported tag. Enabling
+   refactors, each behaviour-identical: `mintFanBlock` private→internal,
+   `restoreReading`'s body → `restoreReadingRows(db:)` (diff is
+   whitespace-only), `assertBookNameIsFree` → `requireBookNameFree(db:)`,
+   `adopt(tag)` → `adoptPath(path)`. The 35 suites over those paths
+   (+ `ImportOperationTests`): 279/279 green).
 4. **App — the faces.** File ▸ Import… (file or folder; the `.importFiles`
    declaration upgraded), the Bookcase drop (folder = book, file = note;
    outline only where a drop acts), Copy for AI (`.copyForAI`, the two
@@ -277,11 +286,80 @@ unit should never touch the real store at all.
 
 ### Implementer calls (each with its one line of reasoning)
 
-(Filled as they are made.)
+- **IC-1 — the capture grammar MOVED into core; the app delegates.** The
+  plan left "whether the app's capture face later delegates" to me: one
+  rule, one home (`CaptureTokens`, byte-for-byte), so the format's header
+  and her capture boxes can never read a token differently; the app's
+  capture suites are the move's pins. Same for `TypedTagPath.segments` →
+  `TagPath.segments`.
+- **IC-2 — the header is read on the FIRST NON-BLANK line** (the plan says
+  "the body's first line"): forgiving of a leading blank line an LLM or an
+  editor adds; tokens on any other line are her text.
+- **IC-3 — the format names `.paragraph`, never `default_segmentation`**:
+  R-13n-8's "paragraph = block on entry" is the format's own rule, and an
+  Alternates section must attach to one paragraph.
+- **IC-4 — take-marker leniency, canonical spelling first.** `take: "x"` /
+  `take: N` are the canonical forms (what the serializer writes); the parser
+  also reads curly-quoted labels, a bare unquoted label, `take: ""` as
+  unlabeled, and a COMPACT section (no blank lines between marker and text).
+  Lower-case `take:` only, so a prose line opening "Take:" stays prose. A
+  take's text keeps everything but the one blank line the serializer puts on
+  each side of it.
+- **IC-5 — `importBook` is ONE transaction** (the plan's open item): a book
+  lands whole or not at all; a folder of notes is author-scale.
+- **IC-6 — member order: the chapters' notes in chapter order, then the
+  folder's top-level files (unfiled)** — the order the book view and the
+  reading export already present them in.
+- **IC-7 — touch, never churn; baseline = rendered length;
+  `last_major_revision_at` untouched** — the structural convention the plan
+  names, with `copyPost`'s "the copy starts clean" precedent for the
+  baseline.
+- **IC-8 — imported tags go through the ONE application road**
+  (`insertPostTag`), so a living book whose rule hears an imported tag picks
+  the note up — R-13u4-1's doctrine for the same `{#tag}` token.
+- **IC-9 — an empty subfolder still makes its (empty) chapter**: "subfolders
+  = chapters", literally.
+- **IC-10 — the import's undo inverse refuses when the imported book has
+  since become THE daily Journal** (`dailyJournalCannotBeDeleted`, the
+  delete doors' own guard) — the entry stays on the stack.
+- **IC-11 — Copy for AI's `{t:"…"}` is the STORED title only**; a note she
+  never named carries no title token (the importer then names it by its
+  file) — a derived date is not a name she typed (13k K1's letter).
 
 ### PROVISIONALs and forks returned to the orchestrator
 
-(Filled as they are met.)
+- **P-13na-1 — a file nested DEEPER than a first-level subfolder rides into
+  its first-level chapter**, ordered by its path (chapters never nest).
+  Alternatives: refuse the folder naming the nested path; ignore nested
+  files.
+- **P-13na-2 — the folder name hits E13's duplicate-book-name guard:** the
+  import REFUSES ("a book named … is already on your Bookcase"), minting
+  nothing. Alternatives: auto-suffix "(2)" (the versions' naming
+  precedent); allow the twin.
+- **P-13na-3 — tags the import MINTED stay as vocabulary across ⌥⌘Z**
+  (AppSpec §9 excludes tags from structural undo; the applications die and
+  revive with their notes). Alternative: tombstone an import-minted tag
+  that has no other application at undo time, and revive it on redo.
+- **FORK-A (consequence of the plan's "standing bulk rule", returned for the
+  architect, NOT changed): spacing.** The bulk rule stores the blank line
+  between two paragraphs as one trailing newline on the first (the
+  2026-07-12 spacing ruling), so an imported document — an export of hers,
+  or an LLM's Markdown — shows a blank line between every paragraph in
+  Write, exactly as pasting it does today. Text round-trips byte-identical;
+  rows do not (`"A"` exports as `A\n\nB`, re-imports as `"A\n"`). The
+  alternative would be a format-specific reading: a blank line is the
+  separator, k ≥ 3 newlines store k−1 (the exact inverse of
+  `joinRenderedTexts`) — row-identical round trips, but a second
+  segmentation rule beside paste's.
+- **FORK-B (same root): a hard-wrapped paragraph splits into one block per
+  line** under the bulk rule (the mockup §8 sample is hard-wrapped for
+  display; a real export never wraps, and LLMs rarely do). Markdown
+  semantics (single newline = soft wrap) would keep it one block.
+- **FORK-C: an export the import refuses.** A FANNED block whose chosen take
+  is BLANK exports its Alternates section with no paragraph above it (the
+  export's own rule); the plan rules that shape malformed, so re-importing
+  that export refuses, naming the line. Alternative: read a paragraph-less
+  section as a block whose chosen take is empty.
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 

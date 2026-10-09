@@ -229,15 +229,26 @@ extension Operations {
     /// adopts; a missing path mints its missing chain (ancestors first, each
     /// counted as minted).
     func adopt(_ db: Database, _ tag: Tag, _ adoption: inout TagAdoption) throws -> Tag {
-        if let known = adoption.resolved[tag.path] { return known }
-        if let existing = try liveTag(db, path: tag.path, wing: adoption.wing) {
-            adoption.resolved[tag.path] = existing
+        guard let resolved = try adoptPath(db, tag.path, &adoption) else {
+            throw OperationError.tagNotFound(id: tag.id)
+        }
+        return resolved
+    }
+
+    /// `adopt`'s rule over a PATH (13n-a: the document format's `{#a/b}`
+    /// tokens name tags by path, never by id — R-13ia-1's adopt-else-mint,
+    /// the one rule): the live same-path tag in the adoption's wing, else the
+    /// missing chain minted there. Nil only for a path with no segment.
+    func adoptPath(_ db: Database, _ path: String, _ adoption: inout TagAdoption) throws -> Tag? {
+        if let known = adoption.resolved[path] { return known }
+        if let existing = try liveTag(db, path: path, wing: adoption.wing) {
+            adoption.resolved[path] = existing
             adoption.adopted += 1
             return existing
         }
         var parent: Tag?
         var prefix = ""
-        for segment in tag.path.split(separator: "/").map(String.init) {
+        for segment in path.split(separator: "/").map(String.init) {
             prefix = prefix.isEmpty ? segment : prefix + "/" + segment
             if let existing = try liveTag(db, path: prefix, wing: adoption.wing) {
                 parent = existing
@@ -249,8 +260,8 @@ extension Operations {
             adoption.minted += 1
             parent = minted
         }
-        guard let resolved = parent else { throw OperationError.tagNotFound(id: tag.id) }
-        adoption.resolved[tag.path] = resolved
+        guard let resolved = parent else { return nil }
+        adoption.resolved[path] = resolved
         return resolved
     }
 
