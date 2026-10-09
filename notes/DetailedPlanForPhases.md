@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| 13n-b — the MCP door (the server, the grants, the pane) | VX-124 (child of VX-25) · `vx-124-13n-b` | `~/dev/variorum-vx-124` · the Pro | Kicked off 2026-10-09 (`/architect-phase`). Surfaces: a NEW `Grants/`-family local-only table + ops/queries (zero `Sync/`, zero lockstep), the MCP SDK dependency + a `variorum-mcp` helper target, a new Settings ▸ MCP pane, grant faces on book/note menus, registry declarations. No editor seam. |
 
 ### Latest closeout
 
