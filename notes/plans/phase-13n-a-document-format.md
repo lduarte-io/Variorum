@@ -243,7 +243,11 @@ unit should never touch the real store at all.
    (model + markers + `parse` + `serialize`, fail-honest line-numbered
    refusals), `Domain/VariorumDocumentFolder.swift` (a folder → the book
    plan: chapters, digit-aware order, extension filter). Core tests.
-   — NOT-STARTED
+   — DONE (this commit; `VariorumDocumentTests` 17/17 green). The app's two
+   delegations (`CaptureMicrosyntax.parse` → `CaptureTokens.parse`,
+   `TypedTagPath.segments` → `TagPath.segments`) compile-check PENDING with
+   piece 4's app build; their pins are the app's capture suites (run at the
+   end, PENDING).
 2. **Queries — one serializer.** `exportPost(includeVariants:)` re-expressed
    over `VariorumDocument.serializeBody` (the export becomes the
    serializer's client — byte-identity pinned by the existing export

@@ -41,10 +41,12 @@ nonisolated enum TypedTagPath {
     /// yield a segment containing "/" and the filter drops the empties, so
     /// the only refusal this road has is "nothing was typed" (the Stage 3
     /// ladder's NIT-1 deleted the dead guard and its unreachable copy).
+    ///
+    /// 13n-a: the rule lives in core (`VariorumCore.TagPath.segments`) — the
+    /// document format's `{#tag/path}` tokens are typed paths too, and the
+    /// core import door reads them by this same rule. This forwards.
     static func segments(_ raw: String) -> [String] {
-        raw.split(separator: "/")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
+        TagPath.segments(raw)
     }
 
     /// The empty-type hint — ONE sentence for every typing surface in both
