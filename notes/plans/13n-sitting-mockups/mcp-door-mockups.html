@@ -83,25 +83,25 @@
 <h1>The MCP door — sitting mockups</h1>
 <p class="sub">Study voice approximation, 2026-10-09 · VX-116. What 13n would really look like: the grant grammar on screen, the granting moments, AI at work in the fan, the undo story, and the Level 0 document format. Everything here builds on the ruled canon — the 13n note's dream vision, §9's guardrails (ops-shaped door, insure-first, scoped reads, journals gated), and the take/commit vocabulary as shipped. Marked <span class="opt">option</span> where a decision is yours to make at this sitting.</p>
 
-<h2>1 · Settings ▸ AI — at rest</h2>
-<p class="note">A new Settings pane (the tenth). Off is the shipped default; one sentence says what the door is. No popup ever asks you to turn it on.</p>
-<div class="mock"><span class="tag">SETTINGS ▸ AI · off</span>
+<h2>1 · Settings ▸ MCP — at rest</h2>
+<p class="note">A new Settings pane (the tenth), named <b>MCP</b> — ruled 2026-10-09: this room speaks direct and technical, unlike the rest of the app ("it's only for technical people anyway"). Off is the shipped default; no popup ever asks you to turn it on.</p>
+<div class="mock"><span class="tag">SETTINGS ▸ MCP · off</span>
   <div class="pad">
-    <div style="font-size:15px;"><span class="toggle"><i></i></span><b>Allow AI connections</b></div>
-    <p class="sent" style="margin:8px 0 0 39px;">Let an assistant like Claude Code read and write here through Variorum's own doors. Nothing is shared until you grant it, grants are yours to revoke, and your text is never overwritten — an assistant's work lands as takes beside your own.</p>
+    <div style="font-size:15px;"><span class="toggle"><i></i></span><b>Enable the MCP server</b></div>
+    <p class="sent" style="margin:8px 0 0 39px;">Runs a local MCP server while Variorum is open, so clients like Claude Code can read and write here through Variorum's own operations. Nothing is readable until you grant it, every grant is revocable, and no client can overwrite your text — AI work lands as takes beside your own.</p>
   </div>
 </div>
 
-<h2>2 · Settings ▸ AI — on, with a client at the door</h2>
-<p class="note">The pane is the registry: who is connected, who is waiting, what each may do, and a coarse activity line. A new client <b>waits at the door</b> — the Arrivals idiom, no popup; approving opens the grant sheet (section 3). The <b>open book</b> switch is §9's deliberate other end of the spectrum — and journals stay gated even under it.</p>
-<div class="mock"><span class="tag">SETTINGS ▸ AI · on</span>
+<h2>2 · Settings ▸ MCP — on, with a pending connection request</h2>
+<p class="note">The pane is the registry: connected clients, pending requests, grants, and a coarse activity log. A new client is a <b>connection request</b> — plain and technical per the register ruling; Approve… opens the grant sheet (section 3). <b>Ruled constraint (R-13n-10):</b> these lists must stay legible at length — each section caps its rows with an "all N ›" road into a full view; this mock shows the resting shape, the scaled shape is 13n-b design work. The <b>open book</b> switch is §9's deliberate other end of the spectrum — journals stay gated even under it.</p>
+<div class="mock"><span class="tag">SETTINGS ▸ MCP · on</span>
   <div class="pad">
-    <div style="font-size:15px;"><span class="toggle on"><i></i></span><b>Allow AI connections</b> <span class="quiet" style="margin-left:10px;">while Variorum is open</span></div>
+    <div style="font-size:15px;"><span class="toggle on"><i></i></span><b>Enable the MCP server</b> <span class="quiet" style="margin-left:10px;">running · socket in the app container · serves while Variorum is open</span></div>
 
     <div class="door" style="margin-top:14px;">
-      <div class="arrive">Claude Code is at the door.</div>
-      <div class="quiet" style="margin-top:2px;">A client named “claude code” asked to connect a minute ago. It can do nothing until you let it in.</div>
-      <div class="acts"><span>Let it in…</span><span>Dismiss</span></div>
+      <div class="arrive">Connection request — claude code</div>
+      <div class="quiet" style="margin-top:2px;">First seen a minute ago. No access until approved.</div>
+      <div class="acts"><span>Approve…</span><span>Deny</span></div>
     </div>
 
     <div class="sect">CLIENTS</div>
@@ -126,11 +126,11 @@
   </div>
 </div>
 
-<h2>3 · The grant sheet — letting a client in</h2>
-<p class="note">The granting moment, drawn as the membership-choice sheet's twin. Three questions, each a sentence: <b>where</b>, <b>how much</b>, <b>how long</b>. The four rungs are cumulative; the sentences are the contract. <span class="opt">Option:</span> the rung names — “read · suggest · write new · edit” is my proposal; the sentences matter more than the words.</p>
+<h2>3 · The grant sheet — approving a client</h2>
+<p class="note">The granting moment. Three questions, each a sentence: <b>where</b>, <b>how much</b>, <b>how long</b>. The four rungs are cumulative and ruled (R-13n-4): read · suggest · write new · edit — the sentences are the contract.</p>
 <div class="sheet">
-  <h3>Let claude code in</h3>
-  <div class="who">It will see what you share and nothing else. Refusals speak to it exactly as they speak to you.</div>
+  <h3>Grant access — claude code</h3>
+  <div class="who">The client sees what you grant and nothing else. Refusals speak to it exactly as they speak to you.</div>
 
   <div class="sect">WHERE</div>
   <div class="pick">
@@ -150,7 +150,7 @@
   <div class="sect">HOW LONG</div>
   <div class="duration"><span class="btn">Once</span><span class="btn sel">While connected</span><span class="btn">Always</span></div>
 
-  <div class="foot"><span class="btn">Not now</span><span class="btn primary">Let claude code suggest in “the lightning thief”</span></div>
+  <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the lightning thief” while connected</span></div>
 </div>
 
 <h2>4 · The just-in-time ask</h2>
@@ -173,7 +173,7 @@
 </div>
 
 <h2>6 · The paper trail — commits and undo</h2>
-<p class="note">On the edit rung, every AI change to a take is bracketed by named commits — the insurance occasion you already ruled for cross-block edits, extended to a third writer. And every structural act an assistant takes registers <b>structural undo exactly like your own gestures</b>: ⌥⌘Z walks back an AI session one act at a time, and one bulk import is one entry — a whole imported book comes back out in a single press. <span class="opt">Option:</span> whether consecutive AI acts coalesce into one entry per working session, or stay one entry per act (my lean: per act, with the bulk doors compound — honest granularity, and the big undo people dream of lives on the doors that do big things).</p>
+<p class="note">On the edit rung, every AI change to a take is bracketed by named commits — the insurance occasion you already ruled for cross-block edits, extended to a third writer. And every structural act an assistant takes registers <b>structural undo exactly like your own gestures</b>: ⌥⌘Z walks back an AI session one act at a time, and one bulk import is one entry — a whole imported book comes back out in a single press. Ruled (R-13n-6): one entry per act, with the bulk doors compound — honest granularity, and the big undo people dream of lives on the doors that do big things; session coalescing deferred as a ticket. Ruled (R-13n-7): the bracketing commits carry the client's name.</p>
 <div class="mock"><span class="tag">BLOCK HISTORY · commits</span>
   <div class="pad hist">
     <div class="rowline"><span class="t">commit · <b>after claude's edit</b></span><span class="meta">auto · today 14:02</span></div>

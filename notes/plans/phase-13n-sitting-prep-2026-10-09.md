@@ -1,7 +1,10 @@
 # Phase 13n — the MCP door: SITTING PREP (2026-10-09)
 
-**Status: sitting prep — Fable's proposed direction for the promoted 13n design
-sitting, awaiting her rulings.** Ticket VX-116 · branch `vx-116-13n-sitting`.
+**Status: SUPERSEDED BY THE RECORD — the sitting ran the same day; the
+binding rulings are `notes/plans/phase-13n-sitting-record-2026-10-09.md`
+(R-13n-1…11). This file is the prep that framed the questions, kept as
+history.** Originally: Fable's proposed direction for the promoted 13n design
+sitting, awaiting her rulings. Ticket VX-116 · branch `vx-116-13n-sitting`.
 The standing canon this builds on, read in full for this prep:
 `notes/plans/phase-13n-mcp-door-note.md` (her dream vision + use cases,
 verbatim; the chat question; the candidate shape) and
