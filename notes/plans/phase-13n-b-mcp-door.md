@@ -613,10 +613,16 @@ already logged — build to the recorded wording, don't re-open them.
 
 ## U1 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-**NOT DONE (kept current; the first line at close):** everything below
-not marked DONE. Session: opus-implementer, 2026-10-09, cut from
-`2738543d`. Record test: a fresh session with ONLY the repo can finish
-U1 from this section.
+**UNIT CLOSED by the implementer — NOT DONE: (1) the LIVE Claude Code
+round (the acceptance's real-client leg — the orchestrator's, under a held
+stage claim; my pre-flight drove the real embedded shim with a scripted
+client, never Claude Code itself); (2) ledger row 10 (13x adoption lands
+MCP OFF — U2's, ruled); (3) the ACTIVITY face (U3's — the log is written);
+(4) the note scope's face (the note ⋯ menu — U2/U3; the grammar and ops
+carry note grants already); (5) a Developer-ID release export of the shim
+(untested — rides 13r's nested-code re-sign); (6) the whole VariorumTests
+target (only the five touched suites ran).** Session: opus-implementer,
+2026-10-09, cut from `2738543d`; closed at `a3edf260` + this record.
 
 ### Pieces
 
@@ -631,7 +637,7 @@ U1 from this section.
 | P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | DONE (`c3e39ec2` + pins `bab7e30c`) — `MCPServerTests` 10/10 end to end over a real socket with the SDK's own Client; `MCPShimTests` 8/8; mutation-checked (4 server breaks, each caught) |
 | P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | DONE (this commit) — Xcode command-line-tool target `variorum-mcp` (sources `App/Variorum/VariorumMCPShim/main.swift`, links the `VariorumMCPSocket` product), embedded by the app's "Embed MCP Shim" copy phase (Executables = `Contents/MacOS`, CodeSignOnCopy) + a target dependency; hardened runtime, NO sandbox entitlement, team-signed; `codesign --verify --deep --strict` passes; the real embedded Debug shim answers `initialize` with "Variorum must be open" when nothing listens |
 | P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | DONE (`4b3ec357` + the walk's fixes, this commit) — Mac `MCPPaneTests` + the four touched suites 65/65 under the stage (0 skipped); the pre-flight WALK below on the dev-store Debug build, both voices |
-| P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
+| P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | DONE — headless `swift test`, the whole package: core **2,511/287** (baseline 2,478/284 + 33 tests / 3 suites: `MCPGrantSchemaTests` 5, `MCPGrantRuleTests` 13, `MCPGrantOperationsTests` 15), `VariorumMCPTests` **19/3**, workbook **40/6**; the only skips are the long-standing gated ones. Mac (stage held, `-only-testing`): `MCPPaneTests` + `DiagnosticsPaneTests` + `CapabilityRegistryTests` + `SettingsShapeTests` + `AcknowledgmentsCopyTests` **65/65, 0 skipped** (re-run after the self-review fixes `a3edf260`) |
 
 ### External facts (resolved this session)
 
@@ -889,6 +895,67 @@ exactly as Claude Code spawns it), self-named `u1-walk`.
    is connected (`MCPGrantSheet.durations(connected:)`, pinned), with a quiet
    line saying so.
 
+### Open items for the orchestrator (the merge / the ladder)
+
+- **The live round** (the acceptance's real-client leg): a Claude Code
+  session against the dev-store Debug app reads a granted book and is
+  refused past it. Setup: Settings ▸ MCP ▸ Copy setup command registers
+  `variorum-dev` at USER scope in her `~/.claude.json` (P-13nb-U1-10); for
+  a throwaway registration run the copied command with `-s local` in a
+  scratch folder instead (the CLI's local scope is that folder only), and
+  `claude mcp remove variorum-dev` after. The client arrives as a
+  connection request named by Claude Code's own `clientInfo.name`.
+- **QUESTIONS at merge** — the PROVISIONALs above: P-13nb-U1-1 … -12 (the
+  grammar's edges, the caps, the pane's place, the Debug registration
+  name, the U1 sheet's scopes, the U1-true sentence, the AF-1 length
+  guard), plus R-13nb-1's ratification record.
+- **The closeout ritual line** (ledger row 11): re-verify probe (a) — a
+  launchd-vantage process connecting into the app's container — after each
+  macOS point release.
+- **A-4's honest boundary** (ledger row 6) holds as built: any local
+  process that names itself as an approved client inherits its grants.
+- **Not built, deliberately:** a notarized Release shim run; a
+  `Tools/WalkKit` helper for the scripted MCP client (mine lives in the
+  session scratchpad — `mcpclient.py`, 40 lines; the live round uses
+  Claude Code itself).
+
+### Self-assessment (the implementer's, before the cold review)
+
+- **The boundary is one pure function, tested hard.** `MCPGrantRule`
+  decides every call against facts read in the call's own write
+  transaction; its sweep covers 13,824 single-grant worlds against four
+  stated invariants, and four deliberate boundary breaks were each caught
+  (rule and server mutation checks recorded above). The server adds no
+  decision of its own — the catalog's listing rule is a courtesy, every
+  tool re-asks the rule.
+- **Where I'd look first, as the reviewer:** (a) `MCPReadTools.sharedPage`'s
+  multi-source merge (each source keyset-paged by the same cursor, merged
+  and cut — I believe it pages exactly, but it is the subtlest code);
+  (b) `search`'s post-filter (a full page of out-of-scope hits returns few
+  passages with `truncated: true` — honest but thin); (c) a once grant is
+  never shown by search (a deliberate restriction — P-13nb-U1-2's spirit);
+  (d) the transport's 16 MiB line cap and the host's accept loop on stop;
+  (e) `MCPDoor`'s off-main start and its in-flight guard (the one place
+  with concurrency choreography in the app half).
+- **What the walk caught that the pins did not:** four pane defects (the
+  clipped command, the receipt below the fold, a wrong-sounding empty
+  line, "while connected" offered to an unconnected client) — all fixed
+  and pinned where pinnable. The headless and socket-level pins caught
+  nothing the walk later contradicted.
+- **Scope held:** zero lines in `Sources/VariorumCore/Sync/`, zero
+  custody/keychain code, zero editor seam, zero synced-schema change
+  (marker 12), the export never writes a row (it strips a copy), the SDK
+  linked by the Mac app alone.
+
 ### Machinery notes
 
-*(none yet)*
+- The orchestrator committed into this same worktree three times mid-unit
+  (`e3a77016`, `763ee91d`, then `5454fc25`); each was a clean, deliberate
+  plan-file commit (never a twin implementer) — I pulled with
+  `--autostash` and kept my commits to my own paths.
+- No session death. One mis-claim in a commit message (`14763773` named a
+  pin its edit had not landed) was corrected by the next commit
+  (`9afd3456`).
+- TCC on this machine: this session's host holds Accessibility and Screen
+  Recording (checked before the walk); no TCC prompt was raised or
+  answered by any probe or walk step.
