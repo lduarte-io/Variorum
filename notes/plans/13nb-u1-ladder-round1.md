@@ -196,6 +196,55 @@ error) is acceptable; (4) F7's helper — the refused fd's lifecycle (closed exa
   (e.g. `SO_RCVTIMEO` 2 s), so a silent client can't hold the accept loop. A bare close would leave Claude
   Code saying only "failed".
 
+## ROUND 1 — IMPLEMENTER SANITY PASS (opus-implementer, 2026-10-09, on `dca3319b`)
+
+**PASS.** I read the five fix diffs whole (`995d9cc7`, `00a6c943`, `cb6b8c54`, `acadef10`,
+`db7d3571`) plus the four new pins. Ran headless on `dca3319b`: `swift build` green; `VariorumMCPTests`
+**23/23** (3 suites); `MCPGrantRuleTests|MCPGrantOperationsTests|MCPGrantSchemaTests|SyncSchemaTests`
+**45/45** (4 suites). No core source changed in the pass, so the 2,511/287 core count stands. No Mac
+suite needed (no app file touched). Fixed nothing.
+
+The reviewer's look-first list:
+1. **Roads still reading `liveGrants` after F1** — every remaining reader is a LISTING, where once grants
+   belong (`list_books`' candidate books, `sharedPage`'s candidates — P-13nb-U1-2: a listing never spends
+   or excludes a once grant). Every SEARCH road now reads standing reach: `reachedScopes` →
+   `searchGrants`; `note_id` and `book_id` → `isStandingAllow`; per-note passages → `isStandingAllow`.
+   **Observation O1 (NIT, latent, no wrong output today):** `passes` answers a book/chapter NAME hit with
+   `decide(book).isAllowed`, not `isStandingAllow`. I traced every scope shape: wing scopes come only from
+   standing wing grants or the open book, book scopes only from standing book grants, and note scopes
+   carry no book hits. So a book hit always lies under standing reach, and nothing leaks. But the "one
+   standing-reach rule" isn't literally uniform, and a future scope shape could drift. Worth one line in
+   round 2 (route it through `isStandingAllow` too), not a fix this round.
+2. **F2's count under a wing grant listing many books** — per listed book: one member-id read (∝ its
+   members) + one batched `mcpNoteFacts` (∝ its members) + `decide` per member. Total ∝ the reachable
+   books' membership, which IS `list_books`' scope, so P1 holds. The constant is heavier than the old
+   `COUNT(*)` (the journal EXISTS leg per member), and a wing grant on a large library reads facts for
+   every membered note in the wing per call. F3 moved this onto a read snapshot, so it never queues her
+   writes. Acceptable as built. Pagination of `list_books` is the road if a library ever makes it slow.
+   The count matches `bookPage`'s rows exactly (same `kind = 'post'` filter; archived counted since
+   listed; versions have no facts, so neither listed nor counted).
+3. **F3's split** — no consumer assumes the activity line lands atomically with a non-consuming answer.
+   The only activity read in the suites (`aNewClientIsAPendingRequest…`) follows `read_note`, which
+   still logs inside its own transaction; the pane's activity face is U3's, not built. `logAfter` on a
+   store that locks between snapshot and log throws, and `call` turns it into the generic "couldn't
+   complete" error, discarding the computed answer. That's the safe direction, and the server is stopped
+   at lock anyway (`onWillLock` → `detach`), so the window is the race itself. Argument failures still
+   throw before either transaction and stay unlogged, as before. `AppDatabase.read` goes through the
+   writer's `read`, which is the reader pool on the app's `DatabasePool`, so the split really frees the
+   writer.
+4. **F7's refused-fd lifecycle** — closed exactly once, by the helper thread. `serve` returns without
+   touching the fd, the accept loop never closes it, and `stop()` never sees it, since a refused fd is
+   never in `sessions`. `SO_NOSIGPIPE` is set at accept, before `serve`, so the helper's write to a
+   vanished client can't signal. The count-then-insert runs in two lock sections, but only the accept
+   thread inserts, so the cap can't be overshot. **Observation O2 (NIT, residual of the fix):** the
+   refusal HELPERS themselves have no ceiling. Each over-cap connection gets a thread, and `SO_RCVTIMEO`
+   bounds each `read`, not the whole line, so a slow-drip client (one byte every <2 s) can hold a helper
+   up to the 1 MiB line limit. The realistic bug, a client in a reconnect loop, sends its `initialize` at
+   once and frees its helper in milliseconds. A deliberate flood or drip is a hostile local process,
+   which A-4's recorded boundary already concedes has better options. If round 2 wants it closed: cap
+   concurrent refusal helpers (say 4) and close bare past that, or bound the helper by a wall-clock
+   deadline rather than per-read.
+
 ## Clean bill (load-bearing things specifically checked and found solid)
 
 - **The boundary is genuinely one pure rule, and it holds.** `MCPGrantRule` read whole: client gate
