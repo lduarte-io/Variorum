@@ -115,6 +115,13 @@ per call. Nothing can choose a take, hard-delete, or touch keys.
 
 ## Standing constraints
 
+**⚠️ AMENDED 2026-10-09 by R-13nb-4 (hers, the kickoff-day sitting): the
+PRIVATE MARK adds ONE small §12 lockstep event (marker 12→13, two
+additive nullable columns, PLAIN) — see the design addendum. The
+"zero `Sync/` / zero schema SYNC impact" line below is superseded to that
+exact extent (the Sync/ lines are the orchestrator's, AF-4); everything
+else holds, the grants family stays local-only.**
+
 Zero `Sync/`; zero schema SYNC impact (the grants table is local-only —
 registered like the 13o derived family, subtracted from the completeness
 walk, kept out of exports); Claude Code is the must-work first client;
@@ -231,11 +238,103 @@ grant authority · tool projections — never one god server object (P-9).
   almost wonder - should we add a designation or boook setting like
   'Private', so that people can have books that are not shared with AI
   without them having to be journal type? that might be a small sync
-  event but the stage is clear for that."* Architect assessment + her
-  answers land in the follow-on entry when the batch returns.
+  event but the stage is clear for that."* Answered whole at R-13nb-4.
 - **R-13nb-3 (2026-10-09, her next message) — the reviewer cast
   CONFIRMED.** Her words: *"Fable reviewer is good"* — `fable-reviewer`
   on every unit's ladder stands as the default this plan's banner states.
+- **R-13nb-4 (2026-10-09, the question batches) — THE PRIVATE MARK,
+  RULED.** R-13nb-2's question answered whole: **(i)** the mark is a
+  SYNCED column — her lean confirmed ("that might be a small sync event
+  but the stage is clear for that"); **(ii)** the fence is JOURNAL-CLASS
+  (never in a standing grant, never under open-book, excluded from
+  scope listings; per-ask only, the ask never offers "always");
+  **(iii)** scope is **BOTH, ONE EVENT** — a per-NOTE mark (the
+  primitive; her intuition: "it almost makes more sense intuitively to
+  me by note") AND a per-BOOK mark (bulk + future arrivals), two nullable
+  columns riding one marker-12→13 lockstep event; **(iv)** the word is
+  **"Private"** (the row's sub-sentence does the semantic work; 13s-a
+  sweeps the copy). Her answer ratified the stated edges with it:
+  **privacy wins ties** (membership in ANY live private book fences a
+  note everywhere, the journals' precedent); **Private ⊥ Owned** (never
+  coupled — ownership is structure, privacy is disclosure); **gatherings
+  refuse the mark** (fence-by-rule would be unpredictable; their
+  assemblies can never leak a fenced note anyway — the fence is per-note,
+  per-call); **fencing takes effect immediately on connected clients**
+  (the per-call check). Design addendum below.
+- **R-13nb-5 (2026-10-09, same batch) — the SETUP PRESS is "Copy setup
+  command".** The probes showed the sandbox can neither execute the
+  `claude` CLI nor honestly write `~/.claude.json` (whole-file rewrites
+  race a second writer; the file is Claude Code's private state; the
+  exact-path entitlement road declined). The press copies
+  `claude mcp add -s user variorum -- "<shim path>"` with a receipt, the
+  command shown verbatim and selectable beneath; the verb renamed
+  honestly per P-2 (technical register, P-13n-1). This supersedes
+  R-13n-3's "writes the client config itself" LETTER on probed technical
+  grounds — its fallback becomes the primary. The `-s user` correction is
+  load-bearing (the CLI defaults to local scope — folder-only).
+- **R-13nb-6 (2026-10-09, same batch) — ADOPTION LANDS OFF, GRANTS
+  KEPT.** A handed-off/restored library (13x's roads) arrives with the
+  MCP server toggle OFF whatever it was; grant rows survive as data and
+  resume on the deliberate re-enable — the restore-hold shape applied to
+  the door. Plaintext-export rebuilds land empty + OFF by construction
+  (the implementer's A-5 exclusion + adoption recreation, approved).
+
+## THE PRIVATE MARK (R-13nb-4) — design addendum (architect, 2026-10-09)
+
+- **Columns:** `container.ai_private_at TEXT` (nullable stamp) +
+  `reading.ai_private_at TEXT` (nullable stamp) — the `archived_at`
+  class: additive, nullable, constraint-free on the mirror, **PLAIN
+  under E2EE** (a bare timestamp; disclosure is structure-only — that
+  something is marked, never which or what). NULL = not private.
+- **The fence leg (extends R-13nb-1's predicate):** a note is FENCED iff
+  it is a journal (R-13nb-1) OR its own `ai_private_at` is set OR it is
+  a live member of a live reading whose `ai_private_at` is set. One
+  derivation site in Queries; the pure rule consumes the fact. Gatherings
+  refuse the mark (`wrongReadingKind`, the Owned/extents/lock pattern);
+  a pool is not markable in v1 (restraint; revisit on want).
+- **Faces:** the book settings sheet's row and the note ⋯ menu's row,
+  each "Private — never shared with AI" (sentence case; app voice —
+  P-13n-1's boundary; 13s-a sweeps); the per-ask sheet names the reason
+  (the journal sheet's twin, wording sweepable). Registry-declared.
+- **The lockstep event:** marker 12→13, ONE additive event, artifact
+  `Server/supabase/16_phase13nb_private.sql` authored in-branch; the
+  MIRROR DEPLOY runs only at her closeout window (the §12 choreography;
+  both installs refresh in the window — the 13i-e shape). No new §7
+  repair (plain CAS metadata; NULL reads not-private, pinned).
+- **Slotting:** the schema commit (migration `v1_25_private_mark` + the
+  Sync/ column classifications + the mirror artifact) is the ARCHITECT'S
+  OWN COMMIT at the U1/U2 seam — any line inside
+  `Sources/VariorumCore/Sync/` is Fable work (CLAUDE.md), and schema
+  precedes the code that uses it. U1 shapes the fence-fact derivation for
+  the third leg now (the fact reads false until the columns exist); U2
+  builds the faces + wires the leg.
+- **Amendment note:** this phase's "zero schema SYNC impact" standing
+  constraint is AMENDED by this ruling (hers, 2026-10-09) — one small
+  lockstep event, stage clear (the in-flight table carries only this
+  effort). Everything else in Standing constraints holds.
+
+## ARCHITECT RULINGS ON THE U1 PROBE FORKS (Fable, 2026-10-09 — on the implementer's probe facts, recorded before the affected halves build)
+
+- **AF-1 — the socket home: APPROVED AS PROPOSED.** The container socket
+  keeps R-13n-3's letter and the probes prove it clean (a launchd-vantage
+  process with no terminal grants connects 5/5; App-Data TCC gates file
+  opens, not socket connects; the A-10 fallback is the road that FAILS —
+  a sandboxed listener binds only inside its own container).
+  `<container>/Data/mcp.sock`; `bindat`/`connectat` against a dir fd so
+  `sun_path`'s 104-byte limit can't bite; the shim distinguishes
+  ENOENT/ECONNREFUSED ("Variorum must be open") from EPERM/EACCES (its
+  own honest macOS-blocked line); NO fallback location is built. A
+  re-verify-probe-(a) line joins the per-macOS-point-release ritual
+  (recorded at closeout beside the TEXTKIT2 re-verify).
+- **AF-2 — the setup press:** R-13nb-5 above (hers). Build as ruled.
+- **AF-3 — adoption carry-over:** R-13nb-6 above (hers). The 13x
+  adoption road gains the one toggle-OFF write; the export-rebuild
+  recreation as the implementer proposed.
+- **AF-4 — the Sync/ boundary, restated for U1:** any line inside
+  `Sources/VariorumCore/Sync/` — the local-only registration if it lives
+  there, and v1_25's column classifications — is the ORCHESTRATOR'S to
+  land (CLAUDE.md's Fable rider). The implementer messages the exact
+  lines needed; nothing in that directory is edited by an Opus session.
 
 ## ARCHITECT SEAM RULINGS (Fable, 2026-10-09 kickoff — within the mandate, each traced; product-flavored ones marked PROVISIONAL for her)
 
@@ -374,13 +473,17 @@ unit record (TCC state is machine-state the next session inherits).
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | U1 — the spine (SDK, socket server, shim, grants table + pure rule, read rung, pane resting shape, grant sheet read-only form) | U1 implementer | BRIEFED — spawning |
-| 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | U1 implementer → orchestrator | OPEN — first act of U1 |
+| 1 | U1 — the spine (SDK, socket server, shim, grants table + pure rule, read rung, pane resting shape, grant sheet read-only form) | U1 implementer | IN FLIGHT — SDK landed (`14763773`), probes done, building |
+| 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | NOT STARTED |
-| 4 | U2 — suggest + write new | — | NOT STARTED (brief at U1 close) |
+| 4 | U2 — suggest + write new (+ the Private faces per R-13nb-4) | — | NOT STARTED (brief at U1 close) |
 | 5 | U3 — edit + polish + her live round | — | NOT STARTED |
 | 6 | A-4's honest-boundary line → the closeout author checklist | orchestrator | OPEN — standing |
-| 7 | P-13nb-1 (journal predicate, broad) → QUESTIONS at merge | orchestrator | OPEN — standing |
+| 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
+| 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | OPEN — scheduled |
+| 9 | The lockstep DEPLOY window (marker 12→13, mirror → both installs) | her + orchestrator | HELD for the closeout window |
+| 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
+| 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
 
 ---
 
