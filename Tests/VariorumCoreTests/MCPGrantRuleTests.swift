@@ -217,6 +217,40 @@ struct MCPGrantRuleTests {
                             rung: .read, consumes: false) == .refuse(.clientPending))
     }
 
+    // MARK: - AF-7: once spends at its own rung (U2)
+
+    @Test func aOnceWriteGrantLetsTheReadsItNeedRideFreeAndIsSpentByItsFirstWrite() {
+        let onceSuggest = grant("g-s", .suggest, .note, "note-1", .once)
+        func decide(_ g: Rule.Grant, _ rung: Rule.Rung, consumes: Bool = true) -> Rule.Decision {
+            Rule.decide(client: .approved, grants: [g], openBook: false, target: .note(plainNote),
+                        rung: rung, consumes: consumes)
+        }
+        #expect(decide(onceSuggest, .read) == .allow(grantID: "g-s", consumesOnce: false),
+                "the read a suggestion needs rides free")
+        #expect(decide(onceSuggest, .suggest) == .allow(grantID: "g-s", consumesOnce: true),
+                "the first write at its own rung spends it")
+        var spent = onceSuggest
+        spent.consumedAt = "t"
+        #expect(decide(spent, .suggest) == .ask(.notShared, offersAlways: true), "the second write refuses")
+        #expect(decide(spent, .read) == .ask(.notShared, offersAlways: true), "spent is spent for every rung")
+
+        let onceWriteNew = grant("g-w", .writeNew, .note, "note-1", .once)
+        #expect(decide(onceWriteNew, .suggest) == .allow(grantID: "g-w", consumesOnce: false),
+                "a lower-rung write rides free under a once write-new grant")
+        #expect(decide(onceWriteNew, .writeNew) == .allow(grantID: "g-w", consumesOnce: true))
+        let onceRead = grant("g-r", .read, .note, "note-1", .once)
+        #expect(decide(onceRead, .read) == .allow(grantID: "g-r", consumesOnce: true),
+                "a read grant: P-13nb-U1-2's letter, unchanged")
+
+        let onceWing = grant("g-wing", .writeNew, .wing, "", .once)
+        #expect(Rule.decideWing(client: .approved, grants: [onceWing], openBook: false, wingID: "",
+                                rung: .writeNew, consumes: true) == .allow(grantID: "g-wing", consumesOnce: true),
+                "a wing-scoped write spends a once wing grant")
+        #expect(Rule.decideWing(client: .approved, grants: [onceWing], openBook: false, wingID: "",
+                                rung: .read) == .allow(grantID: "g-wing", consumesOnce: false),
+                "a wing listing never spends")
+    }
+
     // MARK: - A wing-level listing
 
     @Test func aWingListingNeedsWingLevelReach() {
@@ -317,8 +351,13 @@ struct MCPGrantRuleTests {
                 #expect(grantID != nil && g.scopeKind == .note && g.scopeID == target.id
                         && g.duration != .always, "invariant 2: a fenced allow is per-ask only")
             }
+            // Invariant 3, AF-7's amended form (U2): a once grant is spent
+            // EXACTLY by a content-bearing call at its own rung.
             if consumesOnce {
-                #expect(consumes && g.duration == .once && g.isLive, "invariant 3")
+                #expect(consumes && g.duration == .once && g.isLive && asked == g.rung, "invariant 3")
+            }
+            if grantID == g.id, g.duration == .once, consumes, asked == g.rung {
+                #expect(consumesOnce, "invariant 3: a content call at the once grant's own rung spends it")
             }
         case .ask(let reason, let offersAlways):
             if target.fence != nil {

@@ -186,9 +186,10 @@ public enum MCPGrantRule {
     // MARK: - The decision
 
     /// **The one decision.** `consumes` says whether this call is
-    /// content-bearing (reading a note's text) — a once grant is spent only
-    /// by such a call, never by a listing; when a standing grant also covers
-    /// the call, the once grant is not spent at all.
+    /// content-bearing (reading a note's text, or a write) — a once grant is
+    /// spent only by such a call AT ITS OWN RUNG (`spends`, AF-7), never by
+    /// a listing; when a standing grant also covers the call, the once grant
+    /// is not spent at all.
     public static func decide(
         client: ClientState?, grants: [Grant], openBook: Bool,
         target: Target, rung: Rung, consumes: Bool
@@ -215,7 +216,7 @@ public enum MCPGrantRule {
         }
         let sufficient = reaching.filter { $0.rung >= rung }
         if let grant = best(sufficient) {
-            return .allow(grantID: grant.id, consumesOnce: grant.duration == .once && consumes)
+            return .allow(grantID: grant.id, consumesOnce: spends(grant, rung: rung, consumes: consumes))
         }
         if let fence {
             return .ask(.fenced(fence), offersAlways: false)
@@ -226,13 +227,29 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    /// **A WING-LEVEL listing** (`list_notes` with a wing): allowed only with
-    /// wing-level reach — the open book on a read, or a live grant on THAT
-    /// wing at the asked rung. Never spends a once grant (a listing reads no
-    /// content). Every note the listing then shows still passes `decide` on
-    /// its own — the fence filters per note, so a wing never lists a journal.
+    /// **ONCE SPENDS AT ITS OWN RUNG** (AF-7, the architect's ruling on the
+    /// U2 fork — amends P-13nb-U1-2 for the write rungs): a once grant is
+    /// consumed by the first CONTENT-BEARING call AT THE GRANT'S OWN RUNG it
+    /// authorizes — a read grant by its first content read (U1's letter,
+    /// unchanged); a suggest or write-new grant by its first WRITE at that
+    /// rung. The lower-rung calls it authorizes on the way (the reading a
+    /// suggestion needs) ride free. So a once-suggest grant authorizes ONE
+    /// suggestion; a take-plus-lens flow wants "while connected".
+    static func spends(_ grant: Grant, rung: Rung, consumes: Bool) -> Bool {
+        grant.duration == .once && consumes && rung == grant.rung
+    }
+
+    /// **A WING-LEVEL decision** — `list_notes` with a wing (a listing:
+    /// never consumes), and since U2 the wing-scoped WRITES (`create_note` /
+    /// `import_document` landing in a wing, `create_book`): allowed only
+    /// with wing-level reach — the open book on a read, or a live grant on
+    /// THAT wing at the asked rung. A wing-scoped write spends a once wing
+    /// grant exactly as `decide` does (AF-7). Every note a wing listing then
+    /// shows still passes `decide` on its own — the fence filters per note,
+    /// so a wing never lists a journal.
     public static func decideWing(
-        client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung
+        client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung,
+        consumes: Bool = false
     ) -> Decision {
         switch client {
         case .approved: break
@@ -241,7 +258,7 @@ public enum MCPGrantRule {
         }
         let reaching = grants.filter { $0.isLive && $0.scopeKind == .wing && $0.scopeID == wingID }
         if let grant = best(reaching.filter { $0.rung >= rung }) {
-            return .allow(grantID: grant.id, consumesOnce: false)
+            return .allow(grantID: grant.id, consumesOnce: spends(grant, rung: rung, consumes: consumes))
         }
         if openBook, rung == .read { return .allow(grantID: nil, consumesOnce: false) }
         if let highest = reaching.map(\.rung).max() {
