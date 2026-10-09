@@ -1226,6 +1226,32 @@ class. Dispositions:
 - WA-1 — IN-PROGRESS (trace).
 - WA-2 — NOT-STARTED.
 - WA-3 — NOT-STARTED (trace).
-- WA-4 — NOT-STARTED (trace).
-- WA-6 — NOT-STARTED (time-boxed trace).
+- WA-4 — **TRACED → TICKET (a pre-existing revival-observation class; not
+  fixed).** The Library's listing is a deliberate ONE-SHOT read (17y B1 (k),
+  `LibraryCatalogModel.search()/refresh()`), re-asked only on: appearing
+  (`.task(id: session.wing.currentID)`), a mode change, its own row acts, the
+  `.variorumNotesDeleted` SIGNAL, and its book-row doors' `onLanded`
+  (`LibraryCatalogView.swift` ~250–335). **Put back posts nothing**
+  (`TrashPutBack.run`, `Shared/RecoveryActs.swift` ~108 — the Trash surface's
+  own `receipt` is its only answer) and **⇧⌥⌘Z posts nothing**
+  (`ShellActions.structuralRedo`): so a Library on screen in another pane or
+  window stays stale after a Put back exactly as after the import's redo —
+  both fail, by the same wiring (and so would any revival a sync apply lands).
+  Nothing on the redo road is import-specific. Proposed ticket: "a live
+  Library misses revivals (Put back, structural redo, sync) — the one-shot
+  listing has no revival signal". Reading-only trace (no probe needed: no
+  re-ask trigger exists on either road).
+- WA-6 — **TRACED → HOLLOW (as designed; her bundle).** A 5-minute core probe
+  (throwaway, not committed): `importBook` → undo → `Queries.trash` lists the
+  book row (`trashBookNoteCount` = 4, so "and 4 notes") AND the four notes'
+  own rows, all on ONE stamp; `deleteReadingWithNotes` → the SAME shape (the
+  book row "and 2 notes" + each note's own row). The note arm of
+  `Queries.trash` (`Queries/Trash.swift` ~185) lists every tombstoned post
+  with no book-stamp exclusion, BY DESIGN — the 13i-c plan §6 (§18.3): "the
+  notes' own Trash rows carry their own Delete Now". So the undone import
+  reads exactly like the shipped book-and-its-notes delete; the premise that
+  that idiom "reads as one row" is not the shipped design. Folding the notes
+  under their book's row would change §18.3's Trash design (per-note Delete
+  Now / Put back), never one honest line — a design question for her bundle:
+  "should a book that went to the Trash with its notes absorb their rows?"
 - Finals — PENDING.
