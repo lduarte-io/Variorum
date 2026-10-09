@@ -227,8 +227,20 @@ unit should never touch the real store at all.
 
 ## UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-- STATE: IN-PROGRESS (implementer session 1, `opus-implementer`, started
-  2026-10-09). No revert is in flight.
+- **NOT DONE BY THIS SESSION (first, per the contract):** (1) the GUI WALK
+  (W1–W7 below) — HELD by `Tools/WalkKit/guard.sh --author` (exit 3: her
+  real-store `/Applications/Variorum.app`, PID 73118, was live all night;
+  her instance is never quit, so no session may drive the GUI until she
+  closes it) — the unit therefore does NOT close on its acceptance gate
+  yet: the headless round (`SampleBookDrillTests`) and the door suites are
+  evidence, not the walk; (2) the `/Applications` refresh (the
+  orchestrator's, and HELD anyway while her instance lives); (3) the
+  review ladder; (4) canon deltas, QUESTIONS entries and the master plan
+  (merge-moment ledgers — the proposals are listed at the end of this
+  record); (5) FORK-A…D below are returned, not decided.
+- STATE: **BUILT — GUI WALK HELD** (implementer session 1, `opus-implementer`,
+  2026-10-09 04:20–05:25 MDT). Every piece committed and pushed; the final
+  suites green at the end (piece 6). No revert is in flight.
 - Per-piece lines land here as `DONE (hash)` / `IN-PROGRESS — exactly what
   remains` / `NOT-STARTED`; unverified claims marked PENDING; revert
   announcements per the resiliency protocol (no revert starts until this
@@ -243,17 +255,19 @@ unit should never touch the real store at all.
    (model + markers + `parse` + `serialize`, fail-honest line-numbered
    refusals), `Domain/VariorumDocumentFolder.swift` (a folder → the book
    plan: chapters, digit-aware order, extension filter). Core tests.
-   — DONE (this commit; `VariorumDocumentTests` 17/17 green). The app's two
+   — DONE (`0f1a22c9`; `VariorumDocumentTests` 17/17 then, 18/18 with
+   piece 4's NFC pin). The app's two
    delegations (`CaptureMicrosyntax.parse` → `CaptureTokens.parse`,
-   `TypedTagPath.segments` → `TagPath.segments`) compile-check PENDING with
-   piece 4's app build; their pins are the app's capture suites (run at the
-   end, PENDING).
+   `TypedTagPath.segments` → `TagPath.segments`) compile on the Mac AND the
+   phone target (`VariorumMobile` generic-simulator build green); their
+   pins — the app's capture suites, the quick note's, the typed-tag
+   pickers' — are green at the end (piece 6), zero test edits.
 2. **Queries — one serializer.** `exportPost(includeVariants:)` re-expressed
    over `VariorumDocument.serializeBody` (the export becomes the
    serializer's client — byte-identity pinned by the existing export
    suites); `Queries.variorumDocument` + `copyForAIText` (header line +
    the export body). Round-trip pins (a) fanless (b) labeled+unlabeled fan
-   (c) internal newlines in a take. — DONE (this commit;
+   (c) internal newlines in a take. — DONE (`2d8d9e66`;
    `DocumentFormatRoundTripTests` 5/5 — (a)(b)(c) + Copy-for-AI = header
    over exactly the fan export + the no-write pin; the export's own suites
    `ExportProjectionTests`, `ChapterAssemblyExportTests`,
@@ -264,7 +278,7 @@ unit should never touch the real store at all.
    `importBook` (one transaction for the whole folder, one undo entry whose
    inverse tombstones exactly the minted notes + the book on one stamp; the
    redo revives them through `restoreReading`'s body). State-transition
-   tests. — DONE (this commit; `DocumentImportOperationTests` 10/10 — exact
+   tests. — DONE (`512ecebf`; `DocumentImportOperationTests` 10/10 — exact
    rows for both ops, import(export(note)) re-exports byte-identical, the
    one undo entry, undo↔redo on the same rows, her own note filed in the
    imported book survives the undo, E13 refusal mints nothing, the daily
@@ -278,7 +292,7 @@ unit should never touch the real store at all.
    declaration upgraded), the Bookcase drop (folder = book, file = note;
    outline only where a drop acts), Copy for AI (`.copyForAI`, the two
    `note ▾` menus + ⌘K), the copy (receipts/refusals). App tests.
-   — DONE (this commit). `Features/Import/DocumentImporter.swift` (read
+   — DONE (`79652a96`). `Features/Import/DocumentImporter.swift` (read
    off-main under the security scope, plan through the pure core rule,
    a NAME PREFLIGHT so a collision refuses before anything is minted, run
    every item in ONE runner turn inside ONE compound undo entry, speak),
@@ -305,7 +319,7 @@ unit should never touch the real store at all.
    real-store `/Applications/Variorum.app` is live — PID 73118, launched
    ~02:45, HID idle 90 min — and `Tools/WalkKit/guard.sh --author` exits 3
    "her app is running — STOP"; her instance is never quit, so no session
-   may drive the GUI until it is closed). DONE headless (this commit): the
+   may drive the GUI until it is closed). DONE headless (`643af3da`): the
    PT/EN fixture `notes/plans/13n-a-sample/o ladrão de raios/` (committed —
    original prose, two chapters, fanned blocks, one take with line breaks;
    her morning test can import it as-is) read from DISK the door's way,
@@ -313,7 +327,28 @@ unit should never touch the real store at all.
    the book + notes + lenses, ONE redo brings them back whole —
    `SampleBookDrillTests` 1/1.
 6. **Close** — the named suites green at the end, every row dispositioned.
-   — NOT-STARTED
+   — DONE (this commit). Finals, all at the END of the unit:
+   - **core, the whole package:** `swift test` → **2,460 tests / 284 suites
+     + 40 / 6, all passed** (the 9 skips are the pre-existing gated
+     measurement/integration tests; baseline at 13s-b 2,426/280 + 40/6 —
+     exactly this unit's +34 tests in +4 suites).
+   - **Mac app, widened to every suite over a changed file or surface**
+     (stage held; no pointer-injecting suite in scope, her app on screen):
+     **297 tests / 40 suites + 6 / 2 (`SearchPickerBrainTests`,
+     `RuleEditorMakeTagTests`), 0 skipped, all passed** — the registry walk,
+     the three capture suites, the quick note's mint/door/word suites, the
+     import faces + CRLF door + confirmations, Versions, the vocabulary
+     sweep, CommitBar layout, the note-deletion family, split-at-newlines,
+     formatting surfaces, the Bookcase's row-freeze/census/quick-entry/
+     masthead-popover/tour-offer suites, masthead tags, chord legibility,
+     undo hint/refusal + destructive-undo warning, the command-routing
+     family, and `DocumentImportDoorTests` (re-run with the registry walk
+     after the last cleanup: 38/38).
+   - **builds:** the Mac app Debug + test target green; the phone
+     (`VariorumMobile`, generic iOS Simulator) green — `Shared/` changed.
+   - Zero `Sources/VariorumCore/Sync/` lines; no schema, no migration,
+     marker untouched; no editor-seam file (`EditorTextView`,
+     `BlockRangeIndex`, `PaneSurface`) touched.
 
 ### THE WALK (HELD — the steps, for whoever holds the stage once her app is closed)
 
@@ -353,9 +388,10 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
   both. (If a Finder file drag turns out to carry plain text too, a book
   row's note-drop would claim it over a row — check; that is the one
   drop interaction the headless pins cannot see.)
-- **W7 — a refusal names its line.** Copy the fixture, delete the
+- **W7 — a refusal names its line.** Copy the fixture, delete the FIRST
   `--- end alternates ---` line in `01 abertura.md`, import the copy: the
-  refusal names the folder, the file and line 5; nothing lands.
+  refusal names the folder, the file, the line where the next section
+  opens, and that the one opened on line 5 never ended; nothing lands.
 
 ### Implementer calls (each with its one line of reasoning)
 
@@ -398,6 +434,32 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
 - **IC-11 — Copy for AI's `{t:"…"}` is the STORED title only**; a note she
   never named carries no title token (the importer then names it by its
   file) — a derived date is not a name she typed (13k K1's letter).
+- **IC-12 — the File-menu placement** (the plan's open item): the shipped
+  "Import Files…" item's own slot, its verb now "Import…" (a folder is the
+  point); the panel takes files AND folders, several at once.
+- **IC-13 — a gesture is all-or-nothing and ONE undo entry:** every picked
+  item parses before anything mints (the first malformed line refuses the
+  whole gesture); a NAME PREFLIGHT refuses a folder named like a live book
+  (or like another folder in the same pick) before item one, so a refused
+  gesture leaves nothing — not even a rolled-back book in the Trash.
+- **IC-14 — where the doors land:** File ▸ Import… OPENS what a lone item
+  made (fire-and-DO, the restore doors' precedent) and says what several
+  made; the Bookcase drop stays on the Bookcase (the new book appears on
+  it; the receipt names what landed, "to the Pool" for a file).
+- **IC-15 — names taken from a PATH are stored precomposed (NFC)**; her
+  text is never touched (the defect the door test found — piece 4).
+- **IC-16 — the drop outline** lights only while a FILE drag is over the
+  board (`BookcaseImportDrop` accepts `.fileURL` alone, so book rows and
+  notes dragged across the board never light it); a dropped file the door
+  does not read refuses by name rather than being pre-filtered (hover
+  cannot read a drag's files without loading them — W6 checks this live).
+
+**Known limits, recorded (not defects of the plan's letter):** a title
+containing `"}` or a tag path containing `}` cannot ride the header line
+(the capture grammar's own limit); a label with a line break cannot ride a
+`take:` line; a take whose own text holds a line reading exactly like a
+`take: …` marker or an end marker splits there (the format has no escape —
+the canonical export never writes one, an LLM essentially never will).
 
 ### PROVISIONALs and forks returned to the orchestrator
 
@@ -439,6 +501,31 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
   export's own rule); the plan rules that shape malformed, so re-importing
   that export refuses, naming the line. Alternative: read a paragraph-less
   section as a block whose chosen take is empty.
+- **P-13na-4 — Copy for AI puts PLAIN TEXT on the clipboard** (the plan's
+  "write `.md` from Copy for AI"): the format is Markdown-compatible, so
+  saved as `.md` it re-imports; no file is written, no second pasteboard
+  type is offered. Alternative: also offer `net.daringfireball.markdown`.
+- **P-13na-5 — the door reads `.variorum`, `.md`, `.markdown`, `.txt`,
+  `.text`** (the plan's "accept all three", plus the two spellings the
+  shipped import already accepted).
+
+### For the closeout (merge-moment ledgers — proposals, not applied)
+
+- **AppSpec §9** gains `importDocument` / `importBook` (the bulk-entry
+  rule, the fan at the end, tags by path through the one application road,
+  touch without churn, ONE undo entry whose inverse tombstones exactly what
+  was minted on one stamp and whose redo revives it through the restore
+  doors' exact-stamp bodies; the E13 guard on the folder name).
+- **AppSpec §12** gains the import door (File ▸ Import… — a file → the
+  Pool, a folder → a book; the Bookcase drop; receipts with ⌥⌘Z, refusals
+  naming file and line) and Copy for AI in both `note ▾` menus + ⌘K; the
+  format's one home is `Domain/VariorumDocument` (the export is its client).
+- **QUESTIONS:** P-13na-1…5 + FORK-A…D (or their rulings).
+- **MOBILE PARITY:** nothing mobile-visible (Mac doors; imported rows sync
+  as ordinary rows; `Shared/`'s capture parse now delegates to core —
+  behaviour-identical on the phone, its target builds).
+- **A follow-up ticket** for FORK-D if the architect agrees (the Library
+  drop's files through `DocumentImporter`).
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 

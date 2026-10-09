@@ -112,7 +112,7 @@ nonisolated enum DocumentImportCopy {
 
     /// An operation refused mid-gesture (nothing landed — the compound
     /// rolled the gesture back).
-    static func refusal(_ error: Error, items: [DocumentImportItem]) -> String {
+    static func refusal(operation error: Error) -> String {
         switch error {
         case OperationError.duplicateBookName(let existing):
             return "Couldn\u{2019}t import \u{201C}\(existing)\u{201D} \u{2014} a book with that name is "

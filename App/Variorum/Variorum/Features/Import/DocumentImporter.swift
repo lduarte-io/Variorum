@@ -99,7 +99,7 @@ enum DocumentImporter {
                 opens: landed.count == 1 ? landed[0].selection : nil)
         } catch {
             return DocumentImportSpeech(
-                kind: .refusal, text: DocumentImportCopy.refusal(error, items: items), opens: nil)
+                kind: .refusal, text: DocumentImportCopy.refusal(operation: error), opens: nil)
         }
     }
 
