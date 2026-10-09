@@ -119,13 +119,57 @@ agree/dispute returns to the reviewer for the final call)*
 
 | # | Severity | Response | Disposition |
 |---|---|---|---|
-| F1 | MINOR | — | — |
-| F2 | MINOR | — | — |
-| F3 | MINOR (arch) | — | — |
-| F4 | NIT | — | — |
-| F5 | NIT | — | — |
-| F6 | NIT | — | — |
-| F7 | MINOR | — | — |
+| F1 | MINOR | AGREE — fix on the catalog side | — |
+| F2 | MINOR | AGREE — count what the client can list | — |
+| F3 | MINOR (arch) | AGREE — prefer taking the split for the three non-consuming tools | — |
+| F4 | NIT | AGREE with the lean — keep as built, record PROVISIONAL | — |
+| F5 | NIT | AGREE — tag the cursor shape | — |
+| F6 | NIT | AGREE — record-only | — |
+| F7 | MINOR | AGREE — cap ~16; suggest an honest refusal past it | — |
+
+## ROUND 1 — IMPLEMENTER RESPONSES (opus-implementer, 2026-10-09 — every finding re-traced against the code at `b9492ced`; no fix made in this pass)
+
+**Seven AGREE, zero disputes.** Nothing here touches undefined product behaviour, so nothing goes to QUESTIONS from this side.
+
+- **F1 — AGREE.** Confirmed: `isListed` (MCPToolCatalog.swift:28-34) tests only rung and scope kind,
+  while `reachedScopes` drops once grants and the `note_id` road requires `isStandingAllow`. Also
+  confirmed via `book_id`: a once BOOK grant passes the book decision, but every passage then fails
+  `passes` → `isStandingAllow`. So a once-only client's `search` can never return a passage. Agree on the
+  catalog side, with ONE rule shared by listing and serving (e.g. a `needsStandingReach` flag, or the
+  handler's own once-exclusion as a static the catalog reads), so the two can't drift again. The
+  once-never-in-search restriction itself should stand.
+- **F2 — AGREE.** Confirmed: the count subquery (MCPReadTools.swift:114-121) has no fence leg, while
+  `list_notes(book_id:)` filters per note. The fix should count EXACTLY what `list_notes(book_id:)` would
+  emit, through the same facts and `decide`, not a parallel SQL fence that could drift from
+  `mcpNoteFacts`. Cost stays ∝ the book (one batched facts read per book). Note: `bookPage` does not
+  exclude archived members, so archived members belong in the count too; only fenced ones (and anything
+  `decide` refuses) come out.
+- **F3 — AGREE; I'd take the fix rather than record it.** The once-stamp atomicity is the only reason
+  `read_note`/`export_note` need the writer, and they should keep it. For `list_books`, `list_notes` and
+  `search`, assemble the whole answer (standing, facts, `decide`, the page, the per-note filter) in ONE
+  `database.read` snapshot, then a short `database.write` for the activity line alone. That keeps every
+  decision internally consistent (one snapshot) and frees the writer for her autosave. Search under the
+  open book is the real offender. Semantics stay honest: a revocation that lands mid-call is honoured on
+  the next call, exactly as the record already states.
+- **F4 — AGREE with the reviewer's lean: keep as built, record it as PROVISIONAL.** One added fact: note
+  text cannot carry another note's id (`MarkdownLink` opens http/https only; there are no internal
+  note-id links). So the only roads to a journal id are a prior per-ask grant on that very note or an id
+  obtained outside Variorum. The distinct words carry the "ask the author" road that U2's just-in-time ask
+  will use.
+- **F5 — AGREE.** A shape-tagged cursor ("b"/"r") refused on mismatch with the existing "not a
+  next_cursor this server returned" words is cheap and honest. Severity is right: every row still passes
+  `decide`, so a garbled page can never leak.
+- **F6 — AGREE, record-only.** The non-racing case is pinned, and both racers would be her own dev
+  builds over the same container and store, so the same grants rule every call either way. An flock'd
+  lock file is the road if it ever bites.
+- **F7 — AGREE.** Confirmed: `serve` (MCPServerHost.swift:144-146) mints a session and a reader thread per
+  accept, with no ceiling. A cap of 16 live sessions is generous. **One refinement for the reviewer's
+  call (P-2):** past the cap, don't just close. Answer the client's first request with one JSON-RPC error
+  ("Variorum is serving its maximum of 16 connections — close another MCP client and reconnect"), then
+  close. `MCPShim.refusalResponse(toFirstLine:message:)` already builds exactly that line and VariorumMCP
+  already links VariorumMCPSocket. Read the first line on a short-lived helper with a receive timeout
+  (e.g. `SO_RCVTIMEO` 2 s), so a silent client can't hold the accept loop. A bare close would leave Claude
+  Code saying only "failed".
 
 ## Clean bill (load-bearing things specifically checked and found solid)
 
