@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The MCP door — sitting mockups</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --take:#f6f1e8; --ai:#eef0f4; --aiink:#3a5a8c;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 100px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px;max-width:78ch;line-height:1.5;}
+  h2{font-size:17px;margin:44px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:76ch;line-height:1.5;}
+  .note b{color:var(--ink);font-weight:600;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:980px;margin:0 0 12px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;position:relative;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin:10px 0 2px 22px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+  .pad{padding:14px 22px 18px;}
+  .rowline{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--hair);font-size:14.5px;gap:14px;}
+  .rowline:last-child{border-bottom:none;}
+  .rowline .t{font-weight:600;}
+  .rowline .meta{color:var(--muted);font-size:12.5px;text-align:right;flex-shrink:0;}
+  .rowline .meta .act{color:var(--rust);margin-left:12px;}
+  .sect{font-size:12px;color:var(--muted);letter-spacing:.4px;margin:16px 0 2px;font-family:ui-sans-serif,system-ui;}
+  .sent{font-size:13.5px;color:var(--muted);line-height:1.5;max-width:70ch;}
+  .toggle{display:inline-block;width:30px;height:17px;border-radius:9px;background:#cfc7bb;position:relative;vertical-align:-3px;margin-right:9px;}
+  .toggle.on{background:var(--rust);}
+  .toggle i{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:7px;background:#fff;}
+  .toggle.on i{left:15px;}
+  .door{background:var(--washlite);border:1px solid var(--hair);border-radius:8px;padding:10px 14px;margin:10px 0 2px;font-size:13.5px;}
+  .door .arrive{font-weight:600;}
+  .door .acts{color:var(--rust);margin-top:4px;}
+  .door .acts span{margin-right:16px;}
+  .btn{display:inline-block;border:1px solid var(--hair);background:#fff;border-radius:7px;padding:3px 12px;font-size:13px;color:var(--ink);}
+  .btn.primary{background:var(--accent-fill);font-weight:600;}
+  .cmd{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#2e2a26;color:#e9e4dc;border-radius:7px;padding:10px 14px;margin:8px 0 2px;overflow-x:auto;white-space:pre;}
+  .cmd .c{color:#9a908a;}
+  .sheet{background:var(--paper);border:1px solid #d8d1c6;border-radius:12px;max-width:560px;margin:0 0 12px;box-shadow:0 14px 40px rgba(50,40,30,.16),0 2px 6px rgba(50,40,30,.08);padding:18px 22px 16px;}
+  .sheet h3{font-size:15.5px;margin:0 0 2px;}
+  .sheet .who{color:var(--muted);font-size:13px;margin:0 0 12px;}
+  .pick{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin:8px 0;}
+  .pick .p{padding:8px 13px;border-bottom:1px solid var(--hair);font-size:13.5px;display:flex;gap:10px;align-items:baseline;}
+  .pick .p:last-child{border-bottom:none;}
+  .pick .p .r{width:13px;color:var(--rust);flex-shrink:0;}
+  .pick .p.sel{background:var(--wash);}
+  .pick .p .nm{font-weight:600;min-width:92px;}
+  .pick .p .d{color:var(--muted);font-size:12.5px;line-height:1.45;}
+  .duration{display:flex;gap:8px;margin:10px 0 4px;}
+  .duration .btn.sel{background:var(--accent-fill);font-weight:600;}
+  .foot{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+  .quiet{color:var(--muted);font-size:12.5px;}
+  .notebar{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--hair);padding:7px 22px;font-size:12.5px;color:var(--muted);background:var(--washlite);}
+  .takecard{border:1px solid var(--hair);border-radius:9px;padding:10px 14px;margin:8px 0;background:var(--take);font-size:14px;line-height:1.5;max-width:620px;}
+  .takecard .lab{font-size:11.5px;color:var(--muted);font-family:ui-sans-serif,system-ui;letter-spacing:.3px;margin-bottom:4px;display:flex;gap:8px;align-items:baseline;}
+  .takecard .lab .chosen{color:var(--rust);font-weight:600;}
+  .takecard.aicard{background:var(--ai);}
+  .takecard.aicard .lab .who{color:var(--aiink);font-weight:600;}
+  .menu{background:#fff;border:1px solid #d8d1c6;border-radius:8px;box-shadow:0 8px 24px rgba(50,40,30,.14);min-width:330px;padding:5px 0;font-size:13px;margin:6px 0 10px;}
+  .menu .mr{display:flex;justify-content:space-between;padding:4.5px 14px;}
+  .menu .mr:hover{background:var(--wash);}
+  .menu .mr .k{color:var(--muted);font-family:ui-sans-serif,system-ui;font-size:12px;}
+  .menu .mr.dim{color:var(--muted);}
+  .menu .sep{border-top:1px solid var(--hair);margin:5px 0;}
+  .hist .rowline .t{font-weight:400;}
+  .hist .rowline .t b{font-weight:600;}
+  .chip{display:inline-block;border:1px solid var(--hair);background:var(--washlite);border-radius:5px;font-size:11px;color:var(--muted);padding:0 6px;margin-left:8px;font-family:ui-sans-serif,system-ui;vertical-align:1px;}
+  .chip.ai{color:var(--aiink);border-color:#ccd4e2;background:#f3f5f9;}
+  .fmt{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:14px 18px;line-height:1.6;white-space:pre-wrap;max-width:720px;}
+  .fmt .dim{color:var(--muted);}
+  .fmt .mk{color:var(--rust);}
+  table{border-collapse:collapse;font-size:13px;max-width:980px;background:var(--paper);border:1px solid var(--hair);border-radius:8px;overflow:hidden;}
+  th,td{border-bottom:1px solid var(--hair);padding:7px 12px;text-align:left;vertical-align:top;}
+  th{font-family:ui-sans-serif,system-ui;font-size:11.5px;letter-spacing:.4px;color:var(--muted);font-weight:600;}
+  td .m{font-family:ui-monospace,Menlo,monospace;font-size:12px;}
+  td.rung{font-weight:600;white-space:nowrap;}
+  .opt{color:var(--rust);font-weight:600;}
+</style>
+</head>
+<body>
+<h1>The MCP door — sitting mockups</h1>
+<p class="sub">Study voice approximation, 2026-10-09 · VX-116. What 13n would really look like: the grant grammar on screen, the granting moments, AI at work in the fan, the undo story, and the Level 0 document format. Everything here builds on the ruled canon — the 13n note's dream vision, §9's guardrails (ops-shaped door, insure-first, scoped reads, journals gated), and the take/commit vocabulary as shipped. Marked <span class="opt">option</span> where a decision is yours to make at this sitting.</p>
+
+<h2>1 · Settings ▸ MCP — at rest</h2>
+<p class="note">A new Settings pane (the tenth), named <b>MCP</b> — ruled 2026-10-09: this room speaks direct and technical, unlike the rest of the app ("it's only for technical people anyway"). Off is the shipped default; no popup ever asks you to turn it on.</p>
+<div class="mock"><span class="tag">SETTINGS ▸ MCP · off</span>
+  <div class="pad">
+    <div style="font-size:15px;"><span class="toggle"><i></i></span><b>Enable the MCP server</b></div>
+    <p class="sent" style="margin:8px 0 0 39px;">Runs a local MCP server while Variorum is open, so clients like Claude Code can read and write here through Variorum's own operations. Nothing is readable until you grant it, every grant is revocable, and no client can overwrite your text — AI work lands as takes beside your own.</p>
+  </div>
+</div>
+
+<h2>2 · Settings ▸ MCP — on, with a pending connection request</h2>
+<p class="note">The pane is the registry: connected clients, pending requests, grants, and a coarse activity log. A new client is a <b>connection request</b> — plain and technical per the register ruling; Approve… opens the grant sheet (section 3). <b>Ruled constraint (R-13n-10):</b> these lists must stay legible at length — each section caps its rows with an "all N ›" road into a full view; this mock shows the resting shape, the scaled shape is 13n-b design work. The <b>open book</b> switch is §9's deliberate other end of the spectrum — journals stay gated even under it.</p>
+<div class="mock"><span class="tag">SETTINGS ▸ MCP · on</span>
+  <div class="pad">
+    <div style="font-size:15px;"><span class="toggle on"><i></i></span><b>Enable the MCP server</b> <span class="quiet" style="margin-left:10px;">running · socket in the app container · serves while Variorum is open</span></div>
+
+    <div class="door" style="margin-top:14px;">
+      <div class="arrive">Connection request — claude code</div>
+      <div class="quiet" style="margin-top:2px;">First seen a minute ago. No access until approved.</div>
+      <div class="acts"><span>Approve…</span><span>Deny</span></div>
+    </div>
+
+    <div class="sect">CLIENTS</div>
+    <div class="rowline"><span class="t">claude code</span><span class="meta">connected now · reads and suggests in “the lightning thief” <span class="act">change…</span><span class="act">revoke</span></span></div>
+    <div class="rowline"><span class="t">local llama</span><span class="meta">last seen tuesday · open book <span class="act">change…</span><span class="act">revoke</span></span></div>
+
+    <div class="sect">SHARED WITH AI</div>
+    <div class="rowline"><span class="t">the lightning thief <span class="chip">book</span></span><span class="meta">claude code · read and suggest · always <span class="act">revoke</span></span></div>
+    <div class="rowline"><span class="t">morning pages — oct 9 <span class="chip">note</span></span><span class="meta">claude code · read · while connected <span class="act">revoke</span></span></div>
+
+    <div class="sect">OPEN BOOK</div>
+    <div class="rowline" style="border-bottom:none;"><span class="t" style="font-weight:400;"><span class="toggle"><i></i></span>Everything is readable, always</span><span class="meta">journals still ask every time</span></div>
+
+    <div class="sect">ACTIVITY</div>
+    <div class="rowline"><span class="t" style="font-weight:400;">claude code added 3 takes to “the lightning thief — ch 7”</span><span class="meta">2m ago</span></div>
+    <div class="rowline"><span class="t" style="font-weight:400;">claude code read “the lightning thief — ch 7”</span><span class="meta">4m ago</span></div>
+
+    <div class="sect">CONNECT A CLIENT</div>
+    <p class="sent">Variorum can set up Claude Code for you — one press writes the connection into Claude Code's own settings.</p>
+    <div style="margin-top:8px;"><span class="btn primary">Set up Claude Code</span> <span class="btn">Copy the command instead</span></div>
+    <div class="cmd">claude mcp add variorum -- "/Applications/Variorum.app/Contents/MacOS/variorum-mcp"</div>
+  </div>
+</div>
+
+<h2>3 · The grant sheet — approving a client</h2>
+<p class="note">The granting moment. Three questions, each a sentence: <b>where</b>, <b>how much</b>, <b>how long</b>. The four rungs are cumulative and ruled (R-13n-4): read · suggest · write new · edit — the sentences are the contract.</p>
+<div class="sheet">
+  <h3>Grant access — claude code</h3>
+  <div class="who">The client sees what you grant and nothing else. Refusals speak to it exactly as they speak to you.</div>
+
+  <div class="sect">WHERE</div>
+  <div class="pick">
+    <div class="p"><span class="r">◦</span><span class="nm">This note</span><span class="d">“the lightning thief — ch 7” only</span></div>
+    <div class="p sel"><span class="r">●</span><span class="nm">A book</span><span class="d">“the lightning thief” — its notes, takes and tags</span></div>
+    <div class="p"><span class="r">◦</span><span class="nm">This wing</span><span class="d">everything in Home except journals, which always ask</span></div>
+  </div>
+
+  <div class="sect">HOW MUCH</div>
+  <div class="pick">
+    <div class="p"><span class="r">◦</span><span class="nm">Read</span><span class="d">it can read and search what you shared</span></div>
+    <div class="p sel"><span class="r">●</span><span class="nm">Suggest</span><span class="d">it can add new takes and comments beside your text, and save a lens of its takes — it cannot touch a word you wrote</span></div>
+    <div class="p"><span class="r">◦</span><span class="nm">Write new</span><span class="d">it can also make new notes, apply tags and build books</span></div>
+    <div class="p"><span class="r">◦</span><span class="nm">Edit</span><span class="d">it can also edit takes — with a commit before and after every change, so you can always compare and come back</span></div>
+  </div>
+
+  <div class="sect">HOW LONG</div>
+  <div class="duration"><span class="btn">Once</span><span class="btn sel">While connected</span><span class="btn">Always</span></div>
+
+  <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Grant suggest in “the lightning thief” while connected</span></div>
+</div>
+
+<h2>4 · The just-in-time ask</h2>
+<p class="note">When a client asks past its grant, the ask arrives as a quiet sheet in the TCC shape — once · while connected · always · don't allow. For a journal the “always” answer simply isn't offered (§9's rule). Prompt fatigue is the failure mode, so the open-book switch exists for the people who want to say yes once — this sheet is for everyone else.</p>
+<div class="sheet" style="max-width:480px;">
+  <h3>claude code asks to read “morning pages — oct 9”</h3>
+  <div class="who">A journal entry. Journals are only ever shared one ask at a time.</div>
+  <div class="duration"><span class="btn sel">Once</span><span class="btn">While connected</span><span class="btn">Don't allow</span></div>
+</div>
+
+<h2>5 · AI at work — the fan</h2>
+<p class="note">An assistant's take is an ordinary take: a card in the fan, labeled with who made it, never chosen by the assistant. Your take keeps the ✓. Choosing stays human. The graded-worksheet shape and the fact-check reviewer both land exactly here — and “save a lens of its takes” gives the review its own column, with machinery that already exists.</p>
+<div class="mock"><span class="tag">TAKES · one block's fan</span>
+  <div class="pad">
+    <div class="takecard"><div class="lab"><span class="chosen">✓ chosen</span><span>yours</span></div>Eu não pedi para herdar o observatório. Ele fica numa ilha sem ponte, e a balsa só passa quando a maré deixa.</div>
+    <div class="takecard aicard"><div class="lab"><span class="who">claude · suggested</span><span>“english”</span></div>Honestly, I never asked for the observatory. It stands on an island with no bridge, and the ferry only runs when the tide allows.</div>
+    <div class="takecard aicard"><div class="lab"><span class="who">claude · suggested</span><span>“more literal”</span></div>I did not ask to inherit the observatory. It is on an island without a bridge, and the ferry passes only when the tide permits.</div>
+  </div>
+  <div class="notebar"><span>claude added 2 takes and saved the lens “english readings” · ⌥⌘Z undoes</span><span>quiet receipt</span></div>
+</div>
+
+<h2>6 · The paper trail — commits and undo</h2>
+<p class="note">On the edit rung, every AI change to a take is bracketed by named commits — the insurance occasion you already ruled for cross-block edits, extended to a third writer. And every structural act an assistant takes registers <b>structural undo exactly like your own gestures</b>: ⌥⌘Z walks back an AI session one act at a time, and one bulk import is one entry — a whole imported book comes back out in a single press. Ruled (R-13n-6): one entry per act, with the bulk doors compound — honest granularity, and the big undo people dream of lives on the doors that do big things; session coalescing deferred as a ticket. Ruled (R-13n-7): the bracketing commits carry the client's name.</p>
+<div class="mock"><span class="tag">BLOCK HISTORY · commits</span>
+  <div class="pad hist">
+    <div class="rowline"><span class="t">commit · <b>after claude's edit</b></span><span class="meta">auto · today 14:02</span></div>
+    <div class="rowline"><span class="t">commit · <b>before claude's edit</b></span><span class="meta">auto · today 14:02</span></div>
+    <div class="rowline"><span class="t">commit · “tightened the opening”</span><span class="meta">yours · today 11:48</span></div>
+  </div>
+</div>
+<div class="menu"><span class="tag" style="margin:6px 0 2px 14px;">EDIT MENU</span>
+  <div class="mr"><span>Undo structural change — claude: merged two blocks</span><span class="k">⌥⌘Z</span></div>
+  <div class="mr"><span>Redo structural change</span><span class="k">⇧⌥⌘Z</span></div>
+  <div class="sep"></div>
+  <div class="mr dim"><span>Undo typing stays ⌘Z, untouched</span><span class="k">⌘Z</span></div>
+</div>
+
+<h2>7 · The grant in context</h2>
+<p class="note">Grants are visible where they live, not only in Settings: a chip on the shared book's row, a row in the book's settings sheet, a door in the note's ⋯ menu. Revoking anywhere revokes everywhere — one grants table, several faces.</p>
+<div class="mock"><span class="tag">BOOKCASE · a shared book's row</span>
+  <div class="pad">
+    <div class="rowline" style="border-bottom:none;"><span class="t">★ the lightning thief<span class="chip ai">shared with AI</span></span><span class="meta">12 notes · 31w · living</span></div>
+  </div>
+</div>
+<div class="menu"><span class="tag" style="margin:6px 0 2px 14px;">NOTE ⋯ MENU</span>
+  <div class="mr"><span>Allow AI here…</span><span class="k"></span></div>
+  <div class="mr"><span>Copy for AI</span><span class="k">the Variorum document format</span></div>
+  <div class="mr dim"><span>Shared with claude code · read and suggest</span><span class="k">revoke</span></div>
+</div>
+<p class="note"><b>Copy for AI</b> is the push gesture — the note in the Level 0 format, onto the clipboard. It works with any chat anywhere, connection or none: paste the note as context, and anything that comes back in the same format imports cleanly. The connected twin: sharing a note to a client grants that one note, read, once.</p>
+
+<h2>8 · Level 0 — the Variorum document format</h2>
+<p class="note">The import format <b>is the export format</b> — the fan export's “Alternates” sections, already shipped, already proven as the app's own voice (your 2026-07-25 intake was one). Round-trip by construction: any LLM that has seen one export can author an import, connection or no connection. The chosen take sits in place; the rest of the fan follows in its section; <span class="mk" style="color:var(--rust);">{t:"…"}</span> and <span class="mk" style="color:var(--rust);">{#tag}</span> are the capture microsyntax you already have. Paragraph = block on entry, the standing bulk rule. One import = one note (or one book from a folder of these) = one undo entry.</p>
+<div class="fmt">{t:"o ladrão de raios — ch 1"} {#percy/pt-en}
+
+<span class="dim">Eu não pedi para herdar o observatório. Se você está lendo isto porque acha
+que pode ser um, meu conselho é: devolva a chave ao barqueiro.</span>
+
+<span class="mk">--- Alternates for this block ---</span>
+
+<span class="mk">take: "english"</span>
+
+<span class="dim">Honestly, I never asked for the observatory. If you're reading this
+because you think you might be one, my advice is: close this book
+right now.</span>
+
+<span class="mk">--- end alternates ---</span>
+
+<span class="dim">Cuidar de um observatório dá trabalho. É assustador. Na maior parte do tempo,
+você perde o barco da maré e espera até amanhã.</span>
+
+<span class="mk">--- Alternates for this block ---</span>
+
+<span class="mk">take: "english"</span>
+
+<span class="dim">Running an observatory is hard work. It's lonely. Most of the time, it
+leaves you stranded waiting on the tide.</span>
+
+<span class="mk">--- end alternates ---</span></div>
+<p class="note" style="margin-top:10px;">The import door: File ▸ Import, or drop the file on the Bookcase. The in-place text becomes each block's chosen take; labeled takes join the fan unlabeled-never-chosen; the title and tags come from the braces. The export pin stands untouched — exports still never write a row; import is its own door, minting fresh rows through ordinary operations, never “reconciling” a file as truth.</p>
+
+<h2>9 · The tool vocabulary — one lean set, four rungs</h2>
+<p class="note">Tools are thin projections of the operations layer; the rung decides which exist for a given grant. Every refusal a door would speak to you is spoken to the client in the same words. Nothing here is raw SQL, nothing can hard-delete, and nothing can choose a take.</p>
+<table>
+  <tr><th>RUNG</th><th>TOOLS</th><th>THE CONTRACT</th></tr>
+  <tr><td class="rung">read</td><td><span class="m">list_books · list_notes · read_note · search · export_note</span></td><td>Reads scope-checked against the grant on every call; <span class="m">read_note</span> returns blocks, takes, comments in the Level 0 format; <span class="m">search</span> is the 13o engine filtered to scope.</td></tr>
+  <tr><td class="rung">suggest</td><td><span class="m">add_take · add_comment · save_lens</span></td><td>New takes land at the fan's end, labeled, never chosen, never locked. Provably cannot modify an existing take — pinned by test like any refusal.</td></tr>
+  <tr><td class="rung">write new</td><td><span class="m">create_note · import_document · apply_tag · create_book · add_note_to_book</span></td><td>Creative acts that still touch no word of yours. <span class="m">import_document</span> is the bulk door — the Level 0 format as payload, one compound undo entry.</td></tr>
+  <tr><td class="rung">edit</td><td><span class="m">edit_take · divide_block · merge_blocks · move_block · delete_block</span></td><td><span class="m">edit_take</span> requires the expected text (stale reads refuse as bufferChangedSinceGesture) and is bracketed by the named before/after commits. <span class="m">delete_block</span> is a tombstone — the tray catches it.</td></tr>
+</table>
+
+<h2>10 · The plumbing, in one breath</h2>
+<p class="note">A tiny <span class="m" style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;">variorum-mcp</span> helper ships inside the app bundle. Claude Code (and Claude Desktop's config file) launch it over stdio; it forwards to the running app over a unix socket in the app's own container — no TCP port, no network service, exactly §9's lean. The app is the only process that ever touches the store; grants live in a local-only table (no sync, no lockstep, marker untouched); the socket dies with the app. On Castle exactly as on Standard: the app is already the unlocked custodian, so the client brings no key and sees no key — a grant is the disclosure, and a local model means nothing leaves the machine at all.</p>
+
+</body>
+</html>
