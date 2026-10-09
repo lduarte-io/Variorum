@@ -718,6 +718,25 @@ the format no longer consults `SegmentationRules` for its body.
 
 ### LADDER FIX ROUND (round 1's dispositions) — LIVE STATUS (fix-round implementer, `opus-implementer`, 2026-10-09)
 
+- **NOT DONE BY THIS ROUND (first, per the contract):** (1) the GUI WALK
+  stays HELD (her real-store `/Applications/Variorum.app`, PID 73118, was
+  live throughout; W6 — the Bookcase drop — now also owes a solo'd-shelf
+  look: drop the fixture while a shelf is solo'd and see the book on it);
+  (2) the whole core package and the widened Mac set were NOT re-run — the
+  brief named the 13n-a + export/paste core suites and the focused Mac
+  suites; (3) the phone target was not rebuilt (this round touched no
+  `Shared/` or mobile file — verified by grep — and core compiles under
+  `swift build`); (4) no `notes/QUESTIONS.md`, canon or master-plan edit
+  (the three proposed lines sit in the closeout list); (5) two things SEEN
+  and returned, not fixed — they are outside the dispositions' letter:
+  (a) the single-note import pair `revertMintedContainer` /
+  `reapplyMintedContainer` (shared with the copy ops since 13c 1B) has
+  F1's shape — import a file, delete that note by hand (`deleteContainer`
+  registers no undo entry), ⌥⌘Z (the inverse finds it dead: a quiet
+  no-op), ⇧⌥⌘Z: the redo sees it dead and `restoreContainer` brings back
+  the note she deleted (traced by reading, not run); (b) a PACKAGE handed
+  to the door itself walks as a folder (F7's line below).
+
 Scope, exactly: the ORCHESTRATOR DISPOSITIONS at the tail of
 `notes/plans/13na-ladder-round1.md` — F1, F2, F3, F4 as option (b), F5's
 wording, F6's preflight refusal, F7, F8's move, F9's tokens-only header.
@@ -725,7 +744,8 @@ Nothing more. No revert is in flight. QUESTIONS lines are PROPOSED in the
 closeout list below, never written to `notes/QUESTIONS.md` (merge-moment
 ledger; her merge).
 
-- STATE: **IN-PROGRESS** — F1 landed; the rest in the order listed.
+- STATE: **CLOSED** — every disposition built (F1–F9), pins red-first
+  where behavior changed, finals green, everything pushed.
 - F1 (redo keyed on the undo's own stamp) — DONE (this line's commit).
   The inverse returns the stamp it wrote and hands it to the redo through
   a `LockIsolated` box (P-13ib-6's undo-time box); the redo revives the
@@ -870,7 +890,26 @@ ledger; her merge).
   written to `notes/QUESTIONS.md`; her merge's ledger). The architect's
   ruling text R-ARCH-13na-1 ("ROWS round-trip") is the orchestrator's and
   is left as written; the closeout proposal now governs any canon line.
-- Finals — PENDING.
+- **Finals — DONE (this line's commit), all at the END, on the tree at
+  `5c891581` (the record commit changes no code):**
+  - **core, the four 13n-a suites** (`VariorumDocumentTests`,
+    `DocumentFormatRoundTripTests`, `DocumentImportOperationTests`,
+    `SampleBookDrillTests`, anchored filter): **50 tests / 4 suites, all
+    passed, 0 skipped** (was 42: +8 — F1 1, F4 4 net (one superseded test
+    renamed), F9 1, F6 1, F2 1).
+  - **core, the export suites + the paste road** (the fix pass's twelve,
+    anchored): **143 tests / 12 suites, all passed, 0 skipped** —
+    unchanged, as the export and the bulk rule are untouched.
+  - **Mac, focused** (stage claimed 05:56, renewed, released 06:09):
+    `DocumentImportDoorTests` + `CapabilityRegistryTests` (the registry
+    walk — `CopyForAI` moved, `ShelfView`'s drop changed) +
+    `BookcaseViewModelTests` (the board the drop sits on): **"Test run
+    with 48 tests in 3 suites passed"** (14 + 29 + 5), no skipped line,
+    `** TEST SUCCEEDED **`. Per-fix door runs between: red 13/9-green at
+    `5693f1ad`; after F2 (F2 + F6 green); after F3 (14, F7 alone red);
+    after F7 14/14; after F8 43/43 with the registry walk.
+  - Zero `Sources/VariorumCore/Sync/` lines; no schema, no migration,
+    marker untouched; no editor-seam file touched.
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 
