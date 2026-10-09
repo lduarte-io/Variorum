@@ -102,8 +102,15 @@ files (R-13nb-9).
   records floating_notes as the one real content omission, hers to pull
   in at a word.
 
-**Tier C — deliberately OUT of the wire (recorded so absence is a
-decision, not an oversight):** lineage edges (coarse-not-forensic; a
+**Tier C — RETIRED AS A FRAME (R-13nb-14, her ruling striking it: "The
+MCP should be as useful as the user at the keyboard … the bar for AI is
+higher" than the file's). The list below stands only as the INVENTORY
+the format-schema sitting now designs carriage for — within grant and
+rung, the wire exposes the full model; an exclusion needs affirmative
+justification. Named IN by R-13nb-14: take ancestry, whole-note
+Versions, lineage, the tray. Named OUT at her own word: block-level
+tags (underbaked — VX-128). Archived reach + the file-side carriage:
+the sitting's option sets. Original list, kept as the inventory:** lineage edges (coarse-not-forensic; a
 view, not wire data) · whole-note Versions (app-only by design,
 version rows are fenced everywhere) · presentations/callout frames
 (rendering vocabulary; 13m's format question) · block-level tags (the
@@ -145,6 +152,11 @@ comments, names, callout frames), the id policy (R-13nb-9: ids live,
 files careful), and what rides file vs wire — producing ONE schema with
 TWO serializations: the 13n-b wire document (built now) and 13m's file
 edition (built at 13m, sharing bones by construction, R-13n-8's own
-promise). 13m keeps sharing/publishing/rendering. Timing: the sitting
-prep lands before U3's brief so U3 builds the wire serialization against
-the ruled schema.
+promise). 13m keeps sharing/publishing/rendering. SCOPE GROWN by
+R-13nb-14 (the keyboard bar): the schema also carries whole-note
+VERSIONS (list/read + the write side's rung), LINEAGE edges, take
+ANCESTRY, THE TRAY (deleted things + Put back's rung), and ARCHIVED
+reach (notes · takes · books — each an option set); the prep carries a
+STAGED delivery proposal (U3-pre-launch vs follow-on effort) for her
+cut. Timing: the sitting prep lands before U3's brief so U3 builds the
+wire serialization against the ruled schema.

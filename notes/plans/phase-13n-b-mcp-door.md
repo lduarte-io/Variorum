@@ -304,6 +304,40 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-14 (2026-10-09, her answer striking Tier C — THE KEYBOARD
+  BAR, verbatim):** *"Why is any of this being excluded? the goal is for
+  an AI to fully empower you with variorum - lot of people will never
+  even understand that take ancestry is a thing, won't know how to use
+  whole note versions (which are super helpful for editions of a design
+  document), etc. … every core variorum use case and concept needs to
+  be built into the mcp. these exclusions are huge. the mcp also needs
+  access to a note's tray of deleted things. The MCP should be as
+  useful as the user at the keyboard - even if we make file format
+  decisions like your trash isn't carried over (which is fair for a
+  file sharing choice maybe, I haven't decided), the bar for AI is
+  higher."* **THE DOCTRINE:** within a grant's scope and rung, the wire
+  exposes the FULL model — the capability bar is the user at the
+  keyboard; an EXCLUSION needs affirmative justification (the fence, or
+  a feature she herself calls underbaked), never the other way around.
+  The memo's Tier C restraint frame is RETIRED. Named IN by this
+  ruling: take ancestry, whole-note VERSIONS (list/read; the write side
+  is the sitting's), lineage, THE TRAY (a note's deleted things —
+  read, and Put back on the fitting rung). Named OUT at her own word:
+  block-level tags ("an underbaked idea that I've never even seen /
+  used") — the verified mechanics recorded for her: block tags ARE
+  exposed today (the Snippets/Pool faces + the search's Blocks scope)
+  and a block tag NEVER pulls a note into a gathering (assembly and
+  intake read post_tag only); her hide-the-faces question is ticket
+  **VX-128** (Needs Lillian). ARCHIVED clarified (the facet = archived
+  NOTES in the Library search): its wire reach is the sitting's option
+  set under this doctrine. The FILE format may stay more conservative
+  (her words — "fair for a file sharing choice maybe, I haven't
+  decided"): wire ⊇ keyboard, file ⊆ — the sitting designs both
+  carriages. **Sizing consequence, said plainly at the record:** this
+  doctrine grows the tool surface well past the ruled lean set; the
+  format-schema sitting's prep carries a STAGED proposal (what ships in
+  13n-b's U3 pre-launch vs what follows as its own effort) — hers to
+  cut at the sitting, never split silently.
 - **R-13nb-11 (2026-10-09, the wire-document memo's batches) — THE MEMO
   EDGES RULED.** G-1 chapters: (a) READ + WRITE — section facts ride the
   wire document and list_notes; `create_section` + a section arg on
