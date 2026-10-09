@@ -278,7 +278,28 @@ unit should never touch the real store at all.
    declaration upgraded), the Bookcase drop (folder = book, file = note;
    outline only where a drop acts), Copy for AI (`.copyForAI`, the two
    `note ▾` menus + ⌘K), the copy (receipts/refusals). App tests.
-   — NOT-STARTED
+   — DONE (this commit). `Features/Import/DocumentImporter.swift` (read
+   off-main under the security scope, plan through the pure core rule,
+   a NAME PREFLIGHT so a collision refuses before anything is minted, run
+   every item in ONE runner turn inside ONE compound undo entry, speak),
+   `DocumentImportCopy.swift` (every sentence, pinned), the
+   `BookcaseImportDrop` delegate (file drags only; the outline draws only
+   while one is over the board), `CopyForAI` (flush the note's pending
+   typing, then the ONE serializer onto the pasteboard; a test seam for a
+   private board). Registry: `.importFiles` verb "Import…", doors
+   menuBar+palette+surface (`ShelfView.surfaceCapabilities` — the walk's
+   union gains its line); `.copyForAI` (post, bottomBar+palette,
+   `noteScoped`) rendered by BOTH `note ▾` menus (Write's only in note
+   contexts — the scraps bar composes it with a pool) and wired in ⌘K. The
+   dead `ImportPanels` left `ImportModel` (the sidebar Library drop and the
+   pool drop keep the plain import — see FORK-D). Debug app build green;
+   `DocumentImportDoorTests` + the capture/registry/import/versions suites
+   100/100 (8 suites, 0 skipped). **A DEFECT the door test found, fixed
+   pin-first:** macOS hands paths back DECOMPOSED, so a folder-named book
+   stored NFD bytes (Swift compared equal, SQLite did not); every name the
+   import derives from a PATH is now stored NFC — her text untouched.
+   Pin `VariorumDocumentTests.namesTakenFromThePathArePrecomposedButTextIsNot`
+   red on the pre-fix planner (3 failed expectations), green after.
 5. **The live round** (stage claim; captures in the gitignored dir named in
    the walk section below). — NOT-STARTED
 6. **Close** — the named suites green at the end, every row dispositioned.
@@ -355,6 +376,12 @@ unit should never touch the real store at all.
   line** under the bulk rule (the mockup §8 sample is hard-wrapped for
   display; a real export never wraps, and LLMs rarely do). Markdown
   semantics (single newline = soft wrap) would keep it one block.
+- **FORK-D: the sidebar's Library drop and a pool's scraps drop stay PLAIN
+  imports** (`ImportModel` → `importPost`/`importBlocks`, the global
+  segmentation, no format reading) — the plan names only File ▸ Import… and
+  the Bookcase drop. So a Variorum document dropped on the Library row lands
+  with its markers as text. Proposal: a follow-up ticket routes the Library
+  drop's FILES through `DocumentImporter` (one file door, one rule).
 - **FORK-C: an export the import refuses.** A FANNED block whose chosen take
   is BLANK exports its Alternates section with no paragraph above it (the
   export's own rule); the plan rules that shape malformed, so re-importing

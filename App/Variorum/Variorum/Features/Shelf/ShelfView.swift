@@ -57,6 +57,10 @@ struct ShelfView: View {
         // not this menu's: an archived book is never on the Bookcase.
         + [.archiveBook]
 
+    /// 13n-a (R-13n-8): the board's FILE DROP is the import door's second
+    /// renderer — a folder dropped here becomes a book, a document a note.
+    static let surfaceCapabilities: [CapabilityID] = [.importFiles]
+
     let session: AppSession
     let model: ShelfViewModel
     let readings: ReadingsViewModel
@@ -123,6 +127,8 @@ struct ShelfView: View {
     /// hairline), and the section header a book hovers over (re-shelve).
     @State private var rowDropTarget: String?
     @State private var headerDropTarget: String?
+    /// 13n-a: a FILE drag is over the board (the import drop's outline).
+    @State private var importDropTargeted = false
     // (13s-b U1a, R-13s-3: the `listContentHeight` hug that seated the
     // quick-entry box right under the rows — batch 9's R102 — is retired;
     // the box is back at the board's foot. See `body`.)
@@ -188,6 +194,32 @@ struct ShelfView: View {
             // between it and the rows on a short board, the rows scrolling
             // above it on a long one (R3's "max height + scrollable", kept).
             .frame(maxHeight: .infinity, alignment: .top)
+            // 13n-a — THE IMPORT DROP (R-13n-8): a folder dropped on the board
+            // becomes a book (its folders its chapters), a document a note in
+            // the Pool; one ⌥⌘Z undoes it. It takes FILE drags only, so a book
+            // row or a note dragged across the board never lights it, and the
+            // outline draws only while a file drag is over it — light only
+            // where a drop acts (§12's false-offer rule). The board stays put:
+            // the new book appears on it, and the receipt names what landed.
+            .onDrop(
+                of: BookcaseImportDrop.types,
+                delegate: BookcaseImportDrop(
+                    session: session, targeted: $importDropTargeted,
+                    speak: { speech in
+                        switch speech.kind {
+                        case .receipt: session.status.receipt(speech.text)
+                        case .refusal: session.status.refuse(speech.text)
+                        }
+                        Task { await model.refreshAggregates() }
+                    }))
+            .overlay {
+                if importDropTargeted {
+                    RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(tokens.accent.opacity(0.6), lineWidth: 1.5)
+                        .padding(6)
+                        .allowsHitTesting(false)
+                }
+            }
             entryBar
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {

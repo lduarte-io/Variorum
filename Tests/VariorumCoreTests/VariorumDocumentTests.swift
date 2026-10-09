@@ -287,6 +287,24 @@ struct VariorumDocumentTests {
         }
     }
 
+    @Test func namesTakenFromThePathArePrecomposedButTextIsNot() throws {
+        // macOS hands paths back DECOMPOSED ("a" + U+0303); a name she would
+        // type is precomposed ("ã"). Swift compares the two equal, SQLite does
+        // not — so every name the IMPORT derives from a path (the book, its
+        // chapters, a note's fallback title) is stored precomposed (NFC),
+        // while a document's own text is hers, byte for byte.
+        let nfd = "ladra\u{0303}o"
+        let nfc = "ladr\u{00E3}o"
+        let book = try VariorumDocumentFolder.plan(
+            folderName: "o \(nfd)",
+            files: [.init(relativePath: "cap \(nfd)/\(nfd).md", contents: "um \(nfd)")])
+        #expect(Array(book.name.unicodeScalars) == Array("o \(nfc)".unicodeScalars))
+        #expect(Array(book.chapters[0].name.unicodeScalars) == Array("cap \(nfc)".unicodeScalars))
+        let note = book.chapters[0].notes[0]
+        #expect(Array(note.fallbackTitle.unicodeScalars) == Array(nfc.unicodeScalars))
+        #expect(Array(note.document.blocks[0].text.unicodeScalars) == Array("um \(nfd)".unicodeScalars))
+    }
+
     @Test func aSingleFileIsNamedByItsFilename() throws {
         let note = try VariorumDocumentFolder.note(named: "03 notes.md", contents: "Hi")
         #expect(note.fallbackTitle == "03 notes")

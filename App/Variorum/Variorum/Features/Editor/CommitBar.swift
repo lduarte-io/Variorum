@@ -150,6 +150,8 @@ struct CommitBar: View {
             // grain pairing with commit/history one line up IS the teaching
             // moment her G4 chapter names.
             .saveNoteVersion, .showNoteVersions,
+            // 13n-a (R-13n-11): Copy for AI — the note ▾ menu's push gesture.
+            .copyForAI,
             // 18c batch 3 (her U-6): the note ▾ row and the block ▾ row.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
             // 13u4 UNIT C2 (her item 9, R-13u4-4): the `block ▾` row,
@@ -798,6 +800,18 @@ struct CommitBar: View {
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
             Divider()
+            // 13n-a (R-13n-11) — COPY FOR AI: the note in the Variorum
+            // document format, onto the clipboard (reads only). NOTE contexts
+            // only — the scraps editor composes this bar with a pool's id,
+            // and a pool is not a note (P-2; the delete door's own gate).
+            if model.header?.kind == .post {
+                Button(CapabilityRegistry.capability(.copyForAI).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await CopyForAI.copy(postID: postID, session: session) }
+                }
+                Divider()
+            }
             // 18c batch 3 — **HER U-6's own button**, in the menu that IS the
             // note: every paragraph in this note becomes its own block, the
             // takes staying with their top paragraph. One ⌥⌘Z undoes it.

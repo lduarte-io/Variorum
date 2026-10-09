@@ -53,7 +53,18 @@ public enum VariorumDocumentFolder {
     /// without the extension.
     public static func fallbackTitle(forFileNamed name: String) -> String {
         let last = name.split(separator: "/").last.map(String.init) ?? name
-        return (last as NSString).deletingPathExtension
+        return precomposed((last as NSString).deletingPathExtension)
+    }
+
+    /// **A NAME TAKEN FROM A PATH IS STORED PRECOMPOSED (NFC).** macOS hands
+    /// paths back decomposed ("a" + U+0303) where a typed name is precomposed
+    /// ("ã"); Swift compares the two equal, SQLite compares bytes — so a book
+    /// named by its folder would never match the name she types into a search
+    /// or the duplicate-name guard's read. Found by the 13n-a door test (the
+    /// receipt matched, the row did not). Only NAMES are normalized: a
+    /// document's text is hers, byte for byte.
+    static func precomposed(_ name: String) -> String {
+        name.precomposedStringWithCanonicalMapping
     }
 
     /// One file read as a note (a single-file import).
@@ -81,7 +92,8 @@ public enum VariorumDocumentFolder {
         var chapterFiles: [String: [File]] = [:]
         for subfolder in subfolders {
             let components = subfolder.split(separator: "/").map(String.init)
-            guard let first = components.first, !first.hasPrefix(".") else { continue }
+            guard let first = components.first.map(precomposed), !first.hasPrefix(".")
+            else { continue }
             if chapterFiles[first] == nil { chapterFiles[first] = [] }
         }
         for file in files where isImportable(file.relativePath) {
@@ -89,7 +101,7 @@ public enum VariorumDocumentFolder {
             if components.count == 1 {
                 unfiled.append(file)
             } else {
-                chapterFiles[components[0], default: []].append(file)
+                chapterFiles[precomposed(components[0]), default: []].append(file)
             }
         }
         guard !unfiled.isEmpty || chapterFiles.values.contains(where: { !$0.isEmpty }) else {
@@ -109,7 +121,8 @@ public enum VariorumDocumentFolder {
         for file in unfiled.sorted(by: { pathOrderedBefore($0.relativePath, $1.relativePath) }) {
             unfiledNotes.append(try note(named: file.relativePath, contents: file.contents))
         }
-        return VariorumDocument.Book(name: folderName, chapters: chapters, unfiled: unfiledNotes)
+        return VariorumDocument.Book(
+            name: precomposed(folderName), chapters: chapters, unfiled: unfiledNotes)
     }
 
     // MARK: - Order (the Bookcase's a–z rule)

@@ -808,7 +808,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // (`BookArchiveDoorSet`): the daily Journal never renders Delete (P-2 —
     // the op refuses it, `dailyJournalCannotBeDeleted`).
     case archiveBook, unarchiveBook
+    // `.importFiles` — 13n-a: File ▸ Import… is the VARIORUM DOCUMENT
+    // FORMAT's door (a file, or a folder that becomes a book — R-13n-8), and
+    // its second renderer is the Bookcase's drop (`.surface`).
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
+    /// 13n-a (R-13n-11 — the push gesture, her rider "be sent some document /
+    /// info as context for a question"): the note in the Variorum document
+    /// format onto the clipboard, for any chat anywhere. Post scope; the two
+    /// `note ▾` menus and ⌘K render it. Reads only.
+    case copyForAI
     case toggleSeams, helper
     case restoreTutorial
     /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,

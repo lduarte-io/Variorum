@@ -71,6 +71,8 @@ struct TakesBottomBar: View {
             // time controls, in `note ▾` — Write's bar's pair, here too
             // (R118's letter: no surface is privileged).
             .saveNoteVersion, .showNoteVersions,
+            // 13n-a (R-13n-11): Copy for AI — Write's bar's twin (R6-2).
+            .copyForAI,
             // 18c batch 3 (her U-6): Write's bar's two rows, here too.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
         ]
@@ -458,6 +460,13 @@ struct TakesBottomBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            Divider()
+            // 13n-a (R-13n-11): Copy for AI — Write's bar's row, here too.
+            Button(CapabilityRegistry.capability(.copyForAI).menuTitle()) {
+                let session = model.session
+                let postID = model.postID
+                Task { await CopyForAI.copy(postID: postID, session: session) }
+            }
             Divider()
             // 18c batch 3 (her U-6): Write's bar's row, in Takes too.
             Button(SplitAtNewlinesCopy.noteDoor) {

@@ -271,19 +271,7 @@ final class ImportModel {
     }
 }
 
-// MARK: - The File-menu door's panel (author-visible moment; thin UI)
-
-@MainActor
-enum ImportPanels {
-    static func chooseFiles() -> [URL] {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = true
-        var types: [UTType] = [.plainText]
-        if let markdown = UTType(filenameExtension: "md") { types.append(markdown) }
-        panel.allowedContentTypes = types
-        panel.prompt = "Import"
-        return panel.runModal() == .OK ? panel.urls : []
-    }
-}
+// (The File-menu door's panel LEFT this file at 13n-a: File ▸ Import… is the
+// Variorum document format's door now — `DocumentImportPanel`, beside
+// `DocumentImporter`. This model keeps the sidebar's Library drop and a
+// pool's scraps drop, which stay plain-text imports.)

@@ -261,24 +261,39 @@ struct ShellActions {
         }
     }
 
+    /// **File ▸ Import…** (13n-a — the Variorum document format's door,
+    /// R-13n-8): a file becomes a note in the Pool, a folder becomes a book.
+    /// The whole gesture is ONE undo entry and lands whole or not at all
+    /// (`DocumentImporter`); a lone item OPENS what it made (fire-and-DO —
+    /// the restore doors' precedent), several just say what landed.
     func importFiles() {
-        let urls = ImportPanels.chooseFiles()
+        let urls = DocumentImportPanel.choose()
         guard !urls.isEmpty else { return }
         Task { @MainActor in
-            let importer = ImportModel(session: session)
-            await importer.importFiles(urls, into: .library)
-            // 18i: a failure is a refusal (always shown); the report of
-            // what arrived is a receipt.
-            if let failure = importer.lastError {
-                status.refuse("Import failed: \(failure)")
-            } else {
-                // J29's second member: a report that names only SKIPS says
-                // nothing arrived, and a refusal always shows.
-                status.say(
-                    importer.lastReport ?? "Import finished.",
-                    refusing: importer.lastReportIsRefusal)
-            }
+            speak(await DocumentImporter.importURLs(urls, session: session))
         }
+    }
+
+    /// The import door's words on the one status seam (18i: a receipt is a
+    /// receipt, a refusal always shows) and its landing.
+    func speak(_ speech: DocumentImportSpeech) {
+        switch speech.kind {
+        case .receipt: status.receipt(speech.text)
+        case .refusal: status.refuse(speech.text)
+        }
+        if let target = speech.opens { shell.pendingSelection = target }
+    }
+
+    /// **⌘K's Copy for AI** (13n-a, R-13n-11): the note the focused pane is
+    /// showing, in the document format, onto the clipboard. With no note in
+    /// reach the registry's honest note speaks (P-2). The `note ▾` menus
+    /// carry their own note and call `CopyForAI` directly.
+    func copyForAI() {
+        guard let postID = router.activePostID else {
+            status.refuse(CapabilityRegistry.capability(.copyForAI).unavailableNote)
+            return
+        }
+        Task { @MainActor in await CopyForAI.copy(postID: postID, session: session) }
     }
 
     func exportLibrary() {
@@ -728,6 +743,8 @@ struct ShellActions {
         // …and the note's own two time controls (ledger rows 16/23): saving a
         // whole moment, and the list of the moments it has.
         .saveNoteVersion, .showNoteVersions,
+        // 13n-a (R-13n-11): Copy for AI, typeable — the note on screen.
+        .copyForAI,
         // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
@@ -776,6 +793,7 @@ struct ShellActions {
         case .showNoteTray: return { dispatch(.showNoteTray) }
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
+        case .copyForAI: return { copyForAI() }
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }

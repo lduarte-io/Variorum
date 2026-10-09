@@ -513,6 +513,10 @@ struct CapabilityRegistryTests {
             // a new line): the Bookcase's first-open TOUR OFFER renders the
             // tour's inline door, its "yes" (`.takeTour`).
             .union(TourOfferLine.surfaceCapabilities)
+            // 13n-a (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the BOOKCASE's file drop renders the import door
+            // (`.importFiles` — a folder becomes a book).
+            .union(ShelfView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
