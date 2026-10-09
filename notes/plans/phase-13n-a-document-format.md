@@ -664,6 +664,27 @@ the format no longer consults `SegmentationRules` for its body.
    it; after a FANLESS paragraph the bytes equal that paragraph's own fan,
    so the takes land on it.
 
+### LADDER FIX ROUND (round 1's dispositions) — LIVE STATUS (fix-round implementer, `opus-implementer`, 2026-10-09)
+
+Scope, exactly: the ORCHESTRATOR DISPOSITIONS at the tail of
+`notes/plans/13na-ladder-round1.md` — F1, F2, F3, F4 as option (b), F5's
+wording, F6's preflight refusal, F7, F8's move, F9's tokens-only header.
+Nothing more. No revert is in flight. QUESTIONS lines are PROPOSED in the
+closeout list below, never written to `notes/QUESTIONS.md` (merge-moment
+ledger; her merge).
+
+- STATE: **IN-PROGRESS** — opened; no fix landed yet.
+- F1 (redo keyed on the undo's own stamp) — NOT-STARTED.
+- F4 (a blank/whitespace/header-only stub mints an empty note; option (b)) — NOT-STARTED.
+- F9 (the header line is a header only when it is tokens alone) — NOT-STARTED.
+- F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.
+- F2 (the Bookcase drop is a context mint) — NOT-STARTED.
+- F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.
+- F7 (a package directory is neither a chapter nor a file) — NOT-STARTED.
+- F8 (`CopyForAI` moves to the shared home) — NOT-STARTED.
+- F5 (the round-trip claims state their exact domain) — NOT-STARTED.
+- Finals — PENDING.
+
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 
 You are the 13n-a implementer — `opus-implementer`, ONE acceptance unit,
