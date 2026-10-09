@@ -531,8 +531,20 @@ the canonical export never writes one, an LLM essentially never will).
 
 ### FIX PASS (rulings) — LIVE STATUS (continuation implementer, `opus-implementer`, 2026-10-09)
 
+- **NOT DONE BY THIS PASS (first, per the contract):** (1) the Mac app
+  suites were NOT re-run — the brief named the core suites; the app
+  changed by zero lines, and `DocumentImportDoorTests` asserts counts,
+  receipts and refusal copy only, never a block's text or shape (read,
+  not run); (2) the GUI walk stays HELD (unchanged — W1–W7 still read
+  right: the reading changes stored spacing, not what the walk checks);
+  (3) no QUESTIONS / canon / master-plan edit (merge-moment ledgers — the
+  two surprises below are for the orchestrator's bundle); (4) no review.
+- STATE: **CLOSED** — both rulings built pin-first, finals green, pushed.
+
 Scope, exactly: R-ARCH-13na-1 and R-ARCH-13na-2 (the section below this
 record). No other refactor; the app is untouched; no revert is in flight.
+IC-3 ("the format names `.paragraph`") is superseded by R-ARCH-13na-1 —
+the format no longer consults `SegmentationRules` for its body.
 
 1. **R-ARCH-13na-1 — the inverse-join body reading.** — DONE (`79ec0f90`). `VariorumDocument.paragraphs(_:beforeSection:)`
    replaces the bulk call: a blank line separates, a single newline is
@@ -587,7 +599,7 @@ record). No other refactor; the app is untouched; no revert is in flight.
    (indent, trailing spaces) — the join never trims, so the inverse cannot;
    the bulk rule's per-piece trim is paste's, not the format's.
 2. **R-ARCH-13na-2 — the paragraph-less Alternates section is legal.** —
-   DONE (this commit; its hash lands with piece 3). The parse reads the
+   DONE (`58a4f6e6`). The parse reads the
    section first, then: paragraphs above ⇒ the last one's fan (as ever);
    NONE above and ≥ 1 non-blank take ⇒ `Block(text: "", alternates:)`;
    none above and no take ⇒ `alternatesWithoutParagraph` at the header
@@ -623,8 +635,34 @@ record). No other refactor; the app is untouched; no revert is in flight.
    ("…needs a paragraph of its own just above it") stays TRUE as a remedy
    and is untouched (the app is out of this pass's scope). The four
    suites: 42/42.
-3. **Finals** — NOT-STARTED: the four 13n-a core suites + the export
-   suites, headless (`swift test --filter`), counts here.
+3. **Finals** — DONE (this commit), headless at the END, on the tree at
+   `58a4f6e6` (the record commit changes no code):
+   - **the four 13n-a core suites** (`VariorumDocumentTests`,
+     `DocumentFormatRoundTripTests`, `DocumentImportOperationTests`,
+     `SampleBookDrillTests`): **42 tests / 4 suites, all passed, 0 skipped**
+     (was 34: +10 new tests, −2 superseded — 21 + 5 + 15 + 1).
+   - **the export suites + the paste road** (`ExportProjectionTests`,
+     `ChapterAssemblyExportTests`, `PostRenderQueryTests`,
+     `BlockPresentationTests`, `BlockTakesProjectionTests`,
+     `Phase13SurfaceQueryTests`, `TakeLabelTests`, `DisplayTitleTests`,
+     `ImportOperationTests`, `SegmentationRulesTests`,
+     `SegmentationLineEndingTests`, `NewlineSplittingTests` — anchored
+     filter): **143 tests / 12 suites, all passed, 0 skipped.**
+   - Zero `Sync/`, zero schema, zero app lines; the serializer and the
+     export are byte-unchanged (only `parse` moved).
+   **The two surprises, for the orchestrator (neither is a choice this
+   pass made — both are properties of the export's bytes):** (a) the
+   ruling's "spaced AND unspaced alike" holds for unspaced blocks and
+   stored spacing ≥ 2, but NOT for a block storing exactly ONE trailing
+   newline — the join writes it like an unspaced block, and that is the
+   shape a two-newline paste (ordinary blank-line Markdown) or typed
+   blank lines store, so such a note re-imports with plain boundaries
+   where it had one-line spacing (bytes identical); only a join change
+   could separate them, and the join is pinned. (b) "any export re-imports
+   whole" holds as never-refuses + every-take-arrives everywhere, and as
+   identical rows wherever the blank-chosen section has no paragraph above
+   it; after a FANLESS paragraph the bytes equal that paragraph's own fan,
+   so the takes land on it.
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 
