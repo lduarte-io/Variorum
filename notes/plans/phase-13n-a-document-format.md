@@ -554,3 +554,35 @@ call (named in "Open items"), decide it, record it in the UNIT RECORD with
 one line of reasoning; where you hit a PRODUCT-flavored fork the plan does
 not answer, STOP that half and return the fork to the orchestrator with
 your proposal (the architect rules; the rest of the unit continues).
+
+## ARCHITECT RULINGS ON THE RETURNED FORKS (Fable, 2026-10-09 overnight — PROVISIONAL under her mandate "rule and build provisionally"; each is hers to keep or reverse in the morning)
+
+- **R-ARCH-13na-1 (FORK-A + FORK-B — one root): the format parses with the
+  INVERSE-JOIN reading, superseding this plan's own "standing bulk rule"
+  LETTER for the FORMAT only.** A blank line separates blocks; a SINGLE
+  newline is content inside its block (I4's spirit: internal newlines are
+  content); k ≥ 3 newlines store k−1 as the first block's trailing spacing
+  (the exact inverse of `joinRenderedTexts`). What this buys, against the
+  as-built bulk reading: ROWS round-trip (an export re-imports to the same
+  store shape, spaced and unspaced alike), hard-wrapped files — Gutenberg
+  novels, old txt, exactly her Percy Jackson case — import as whole
+  paragraphs instead of one block per line, and LLM Markdown (soft-wrap
+  semantics) reads correctly. Paste and every other entry road are
+  UNTOUCHED — the format is a grammar with a defined inverse, not a paste.
+  The plan's letter was written before the implementer surfaced the
+  row-shape consequence; R-13n-8's round-trip spirit outranks it. Evidence
+  owed: row-identical round-trip pins (spaced AND unspaced), a hard-wrap
+  fixture pin (one paragraph, many lines → ONE block), the existing
+  byte-identity pins staying green.
+- **R-ARCH-13na-2 (FORK-C): the paragraph-less Alternates section is LEGAL
+  and mints a block whose chosen take is empty** — the exact store shape
+  that exports it (a fanned block with a blank chosen take; I10 satisfied —
+  live takes exist). The invariant bought and pinned: **any export
+  re-imports whole** (the fail-honest refusals keep covering unterminated
+  and garbled sections; only this export-producible shape stops refusing).
+- **R-ARCH-13na-3 (FORK-D): deferred by ticket — VX-118** (Backlog, project
+  13n): the Library and scraps drops route their FILES through
+  `DocumentImporter`. Deferral with a named owner, not vagueness.
+- **IC-1…16 adopted; P-13na-1…5 adopted as built**, all PROVISIONAL to her
+  morning bundle (the QUESTIONS entry lands at HER merge, per the
+  refresh-not-merge order).
