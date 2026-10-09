@@ -176,6 +176,7 @@ struct ShellActions {
                 // 18i: an act that came back is a RECEIPT; "nothing to
                 // undo" is a refusal and keeps the toast.
                 if let label {
+                    await leaveNotesTheActLeftDead()
                     status.receipt(StructuralUndoCopy.undone(label))
                 } else {
                     status.refuse(StructuralUndoCopy.nothingToUndo)
@@ -211,6 +212,7 @@ struct ShellActions {
                     try undoStack.redo(with: ops)
                 }
                 if let label {
+                    await leaveNotesTheActLeftDead()
                     status.receipt(StructuralUndoCopy.redone(label))
                 } else {
                     status.refuse(StructuralUndoCopy.nothingToRedo)
@@ -220,6 +222,38 @@ struct ShellActions {
                     OpsRefusalCopy.message(for: error)))
             }
         }
+    }
+
+    /// **WA-3 (the 13n-a walk, W3) — an undo or redo that tombstones a note
+    /// on screen gets every pane and window off it.** Undoing an import (or
+    /// a diverge, a copy-in — any structural act whose inverse or re-apply
+    /// tombstones a NOTE) used to leave a pane live on the dead note and the
+    /// note in the Open strip. The navigate-away already exists: it is the
+    /// Trash door's SIGNAL (`.variorumNotesDeleted` — every full window runs
+    /// `WorkspaceModel.notesDeleted` for its own panes and strip, a note-only
+    /// window closes, the Library re-reads), so this door rides it rather
+    /// than growing a second pane lifecycle. What it cannot know is WHICH
+    /// notes an entry's inverse touched (an entry carries a label, never its
+    /// rows), so it asks the one question that matters on screen: of the
+    /// notes this window's panes and strip show, and those any window's
+    /// surfaces hold, which are dead now? ∝ what is open (P1), one read.
+    private func leaveNotesTheActLeftDead() async {
+        let workspace = shell.workspace
+        var shown = workspace.panes.compactMap { workspace.selections[$0]?.noteID }
+        shown += workspace.openNotes.ids
+        shown += session.heldPostIDs
+        let candidates = Array(Set(shown))
+        guard !candidates.isEmpty else { return }
+        // `containerHeader` is nil for a tombstoned (or missing) container —
+        // the same "already gone" reading `NoteDeletion` gives it.
+        let dead = (try? await session.database.read { db in
+            try candidates.filter { id in
+                try Queries.containerHeader(db, containerID: id) == nil
+            }
+        }) ?? []
+        guard !dead.isEmpty else { return }
+        NotificationCenter.default.post(
+            name: .variorumNotesDeleted, object: nil, userInfo: ["postIDs": dead.sorted()])
     }
 
     // MARK: - App-scope acts (⌘N / ⌘J / import / export / seams)
@@ -261,24 +295,39 @@ struct ShellActions {
         }
     }
 
+    /// **File ▸ Import…** (13n-a — the Variorum document format's door,
+    /// R-13n-8): a file becomes a note in the Pool, a folder becomes a book.
+    /// The whole gesture is ONE undo entry and lands whole or not at all
+    /// (`DocumentImporter`); a lone item OPENS what it made (fire-and-DO —
+    /// the restore doors' precedent), several just say what landed.
     func importFiles() {
-        let urls = ImportPanels.chooseFiles()
+        let urls = DocumentImportPanel.choose()
         guard !urls.isEmpty else { return }
         Task { @MainActor in
-            let importer = ImportModel(session: session)
-            await importer.importFiles(urls, into: .library)
-            // 18i: a failure is a refusal (always shown); the report of
-            // what arrived is a receipt.
-            if let failure = importer.lastError {
-                status.refuse("Import failed: \(failure)")
-            } else {
-                // J29's second member: a report that names only SKIPS says
-                // nothing arrived, and a refusal always shows.
-                status.say(
-                    importer.lastReport ?? "Import finished.",
-                    refusing: importer.lastReportIsRefusal)
-            }
+            speak(await DocumentImporter.importURLs(urls, session: session))
         }
+    }
+
+    /// The import door's words on the one status seam (18i: a receipt is a
+    /// receipt, a refusal always shows) and its landing.
+    func speak(_ speech: DocumentImportSpeech) {
+        switch speech.kind {
+        case .receipt: status.receipt(speech.text)
+        case .refusal: status.refuse(speech.text)
+        }
+        if let target = speech.opens { shell.pendingSelection = target }
+    }
+
+    /// **⌘K's Copy for AI** (13n-a, R-13n-11): the note the focused pane is
+    /// showing, in the document format, onto the clipboard. With no note in
+    /// reach the registry's honest note speaks (P-2). The `note ▾` menus
+    /// carry their own note and call `CopyForAI` directly.
+    func copyForAI() {
+        guard let postID = router.activePostID else {
+            status.refuse(CapabilityRegistry.capability(.copyForAI).unavailableNote)
+            return
+        }
+        Task { @MainActor in await CopyForAI.copy(postID: postID, session: session) }
     }
 
     func exportLibrary() {
@@ -728,6 +777,8 @@ struct ShellActions {
         // …and the note's own two time controls (ledger rows 16/23): saving a
         // whole moment, and the list of the moments it has.
         .saveNoteVersion, .showNoteVersions,
+        // 13n-a (R-13n-11): Copy for AI, typeable — the note on screen.
+        .copyForAI,
         // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
@@ -776,6 +827,7 @@ struct ShellActions {
         case .showNoteTray: return { dispatch(.showNoteTray) }
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
+        case .copyForAI: return { copyForAI() }
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }

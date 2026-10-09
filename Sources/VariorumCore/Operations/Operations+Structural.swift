@@ -1367,7 +1367,7 @@ extension Operations {
     /// exists, because the immediate FK refuses a forward reference at
     /// insert time. A self- or out-of-range index reads as parentless
     /// (the outside-the-set rule).
-    private func mintFanBlock(
+    func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
         defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil,
         labels: [String?]? = nil, parentIndices: [Int?]? = nil, now: Date

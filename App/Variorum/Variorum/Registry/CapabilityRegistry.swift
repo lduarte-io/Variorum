@@ -1978,11 +1978,31 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar],
             shortcutLabel: "⌘K", takesAccess: nil,
             unavailableNote: "", availability: always),
+        // 13n-a — THE IMPORT DOOR of the Variorum document format (R-13n-8):
+        // a file becomes a note in the Pool, a FOLDER becomes a book (its
+        // folders its chapters), one press of ⌥⌘Z undoes the lot (R-13n-6).
+        // Its verb lost "Files" because a folder is the point now. Three
+        // renderers of ONE act: File ▸ Import…, ⌘K, and the Bookcase's drop
+        // (`.surface` — `ShelfView.surfaceCapabilities`), which lights only
+        // while a drag carries files (§12's false-offer rule).
         Capability(
-            id: .importFiles, verb: "Import Files…", scope: .app,
-            doors: [.menuBar, .palette],
+            id: .importFiles, verb: "Import\u{2026}", scope: .app,
+            doors: [.menuBar, .palette, .surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // 13n-a — COPY FOR AI (R-13n-11): the note in the document format,
+        // onto the clipboard. Post-scoped and available wherever a note is
+        // (`noteScoped`); with none in reach the palette row speaks the note
+        // below (P-2). Reads only — the export pin.
+        Capability(
+            // Her rename at the 13n-a review (2026-10-09, verbatim: "I'd
+            // rather not have 'for AI' on a button" — other people will
+            // find it useful too); the internal id keeps its minting name.
+            id: .copyForAI, verb: "Copy full text", scope: .post,
+            doors: [.bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Copy full text copies the note you have open \u{2014} open one first.",
+            availability: noteScoped),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,
             doors: [.menuBar, .palette],

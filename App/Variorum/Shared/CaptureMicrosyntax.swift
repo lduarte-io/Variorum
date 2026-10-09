@@ -115,153 +115,19 @@ nonisolated enum CaptureMicrosyntax {
     ///    (`PlainPaste`'s own doctrine, one door over, whose rule 1 reads line
     ///    endings exactly as rule 0 does; and the segmenter the text goes to
     ///    next reads them so anyway).
-    static func parse(_ raw: String) -> Capture {
-        // Rule 0 — every rule below is about LINES, so the lines are read
-        // first, by the segmenter's own rule.
-        let raw = SegmentationRules.normalizedLineEndings(raw)
-        // The fast path AND the promise: no brace, nothing to do.
-        guard raw.contains("{") else {
-            return Capture(text: raw, tagPaths: [], title: nil)
-        }
-        var tagPaths: [String] = []
-        var title: String?
-        var kept: [String] = []
-        for line in raw.split(separator: "\n", omittingEmptySubsequences: false) {
-            let read = readLine(String(line))
-            tagPaths.append(contentsOf: read.tagPaths)
-            // The FIRST title in the whole capture wins.
-            if title == nil { title = read.title }
-            // Rule 5: a line that held only tokens leaves nothing behind.
-            if read.foundToken, read.text.allSatisfy(isHorizontal) { continue }
-            kept.append(read.text)
-        }
-        return Capture(text: kept.joined(separator: "\n"), tagPaths: tagPaths, title: title)
-    }
-
-    // MARK: - Internals
-
-    private struct LineRead {
-        var text: String
-        var tagPaths: [String]
-        var title: String?
-        var foundToken: Bool
-    }
-
-    private enum TokenValue {
-        case tag(String)
-        case title(String)
-    }
-
-    private struct Token {
-        let value: TokenValue
-        /// The index just past the token's closing brace.
-        let end: String.Index
-    }
-
-    private static func readLine(_ line: String) -> LineRead {
-        guard line.contains("{") else {
-            return LineRead(text: line, tagPaths: [], title: nil, foundToken: false)
-        }
-        var out = ""
-        var tagPaths: [String] = []
-        var title: String?
-        var foundToken = false
-        var i = line.startIndex
-        while i < line.endIndex {
-            guard line[i] == "{", let token = token(in: line, at: i) else {
-                // Not a token: the character is hers, byte for byte. A
-                // MALFORMED opener resumes the scan one character on, so a
-                // well-formed token inside it is still found (`{#a{#b}` is
-                // the text "{#a" and the tag "b").
-                out.append(line[i])
-                i = line.index(after: i)
-                continue
-            }
-            foundToken = true
-            switch token.value {
-            case .tag(let path):
-                tagPaths.append(path)
-            case .title(let name):
-                if title == nil { title = name }
-            }
-            var next = token.end
-            if out.allSatisfy(isHorizontal) {
-                // The token opens the line (only her indentation before it),
-                // so the whitespace AFTER it is the seam.
-                while next < line.endIndex, isHorizontal(line[next]) {
-                    next = line.index(after: next)
-                }
-            } else {
-                while let last = out.last, isHorizontal(last) { out.removeLast() }
-            }
-            i = next
-        }
-        return LineRead(text: out, tagPaths: tagPaths, title: title, foundToken: foundToken)
-    }
-
-    /// Reads a token at `start` (which is a `{`), or nil when what stands
-    /// there is ordinary text.
-    private static func token(in line: String, at start: String.Index) -> Token? {
-        let afterBrace = line.index(after: start)
-        guard afterBrace < line.endIndex else { return nil }
-
-        if line[afterBrace] == "#" {
-            let contentStart = line.index(after: afterBrace)
-            guard let close = line[contentStart...].firstIndex(of: "}") else { return nil }
-            let content = String(line[contentStart..<close])
-            // A brace inside means an unclosed token ran into the next one.
-            guard !content.contains("{") else { return nil }
-            let path = content.trimmingCharacters(in: .whitespaces)
-            guard !path.isEmpty else { return nil }
-            return Token(value: .tag(path), end: line.index(after: close))
-        }
-
-        guard line[afterBrace] == "t" || line[afterBrace] == "T" else { return nil }
-        let afterT = line.index(after: afterBrace)
-        guard afterT < line.endIndex, line[afterT] == ":" else { return nil }
-        let afterColon = line.index(after: afterT)
-        guard afterColon < line.endIndex, isQuote(line[afterColon]) else { return nil }
-        let contentStart = line.index(after: afterColon)
-        // Scanning to the first QUOTE FOLLOWED BY `}` rather than to the
-        // first quote is what lets a title carry quotes of its own:
-        // {t:"say "hi""} is `say "hi"`.
-        var cursor = contentStart
-        var close: String.Index?
-        while cursor < line.endIndex {
-            let next = line.index(after: cursor)
-            if isQuote(line[cursor]), next < line.endIndex, line[next] == "}" {
-                close = cursor
-                break
-            }
-            cursor = next
-        }
-        guard let close else { return nil }
-        let name = String(line[contentStart..<close])
-            .trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else { return nil }
-        return Token(value: .title(name), end: line.index(after: line.index(after: close)))
-    }
-
-    /// **THE WALK'S OWN FINDING, 13u4 UNIT C1 (2026-09-20).** The Mac capture
-    /// boxes apply AppKit's automatic quote substitution, so a title token
-    /// typed by hand arrives as `{t:”Ocean dream”}` — U+201D, measured by
-    /// hexdump of the box's own accessibility value, not inferred. Under a
-    /// straight-quote-only rule her title token filed as visible text and
-    /// silently did nothing, while the `{#tag}` beside it worked; the pins
-    /// could never have caught it, because a pin types the characters it
-    /// means. The phone will do the same (iOS substitutes too).
     ///
-    /// So the rule accepts all three: `"` · `“` · `”`, opener and closer
-    /// independently. The alternative — turning substitution OFF in the
-    /// capture boxes — would change what HER PROSE looks like everywhere in
-    /// them to make one token work, which is the tail wagging the dog.
-    private static func isQuote(_ character: Character) -> Bool {
-        character == "\"" || character == "\u{201C}" || character == "\u{201D}"
-    }
-
-    private static func isHorizontal(_ character: Character) -> Bool {
-        character != "\n"
-            && character.unicodeScalars.allSatisfy(CharacterSet.whitespaces.contains)
+    /// **13n-a — THE GRAMMAR LIVES IN CORE NOW** (`VariorumCore.CaptureTokens`,
+    /// moved there byte-for-byte): the Variorum document format reads its
+    /// header line by this exact rule, and core cannot see this target. This
+    /// face delegates — one rule, one home — and every capture suite pinning
+    /// the rules above rides unmodified (the zero-test-edit proof that the
+    /// move changed an address, not a behaviour). The quote rule's history
+    /// (13u4 UNIT C1's measured finding: the capture boxes substitute curly
+    /// quotes as she types, so `"` · `“` · `”` are all accepted, opener and
+    /// closer independently) stays recorded here and on `CaptureTokens`.
+    static func parse(_ raw: String) -> Capture {
+        let parsed = CaptureTokens.parse(raw)
+        return Capture(text: parsed.text, tagPaths: parsed.tagPaths, title: parsed.title)
     }
 }
 

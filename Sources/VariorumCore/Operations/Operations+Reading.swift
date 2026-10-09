@@ -534,113 +534,118 @@ extension Operations {
     /// mode). Uniqueness is safe by construction: no live membership can
     /// exist for a dead reading (every add refuses through liveReading).
     public func restoreReading(_ id: String) throws {
-        try database.write { db in
-            guard var reading = try Reading.fetchOne(db, key: id) else {
-                throw OperationError.readingNotFound(id: id)
-            }
-            guard let deletedAt = reading.deletedAt else {
-                throw OperationError.readingNotDeleted(id: id)
-            }
-            let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
-            let now = date.now
-            let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+        try database.write { db in try restoreReadingRows(db, id: id) }
+    }
 
-            reading.deletedAt = nil
-            reading.updatedAt = now
-            // 13i-d U5 — RE-HOME on Put back (PROVISIONAL P-13id-U5-2): a book
-            // whose wing was deleted while it lay in the Trash comes back to
-            // HOME, unshelved (its shelf died with the wing).
-            if try !Queries.wingIsLive(db, id: reading.wingId) {
-                reading.wingId = ""
-                reading.shelfId = nil
-                reading.shelfPosition = nil
-            }
-            try reading.update(db)
-            // 13j ladder B (B1): a restored row voids any live intent
-            // naming it — a leftover intent must never claim it later.
-            try voidPurgeIntents(db, table: "reading", rowID: id)
-
-            // Chapters: exact-stamp cascade victims revive; independently
-            // deleted chapters (different stamp) stay dead — and now have
-            // a working `restoreSection` door, because the reading is
-            // live again (the boundary reversal's second half).
-            try db.execute(
-                sql: """
-                    UPDATE reading_section SET deleted_at = NULL, updated_at = ?
-                    WHERE reading_id = ? AND deleted_at = ?
-                    """,
-                arguments: [nowStamp, id, stamp])
-
-            // 13i-c U2 — the book RETURNS WHOLE (the sitting record §18.3:
-            // "the delete-book-and-notes road (one stamp) returns WHOLE"):
-            // the notes deleted WITH the book (`deleteReadingWithNotes` — the
-            // book's own member rows and each note on this exact stamp) come
-            // back first, versions and all, through `restoreContainer`'s own
-            // body — so the live-post guard below passes for them. A note
-            // deleted independently carries a different stamp and stays dead
-            // (the standing documented corner); a note put back alone earlier
-            // is live already, and its membership revives below.
-            let notesDeletedWithBook = try String.fetchAll(
-                db,
-                sql: """
-                    SELECT DISTINCT rp.post_id FROM reading_post rp
-                    JOIN container c ON c.id = rp.post_id AND c.deleted_at = ?
-                    WHERE rp.reading_id = ? AND rp.deleted_at = ? AND rp.status = 'member'
-                    ORDER BY rp.post_id
-                    """,
-                arguments: [stamp, id, stamp])
-            for postID in notesDeletedWithBook {
-                try restoreNoteFamily(db, id: postID)
-            }
-
-            // Memberships: exact-stamp victims whose post is still LIVE.
-            // (A post deleted independently stamps its own memberships via
-            // the container cascade — different stamp, doubly safe; a post
-            // that died AFTER this reading did matches the stamp and is
-            // exactly what the live-post guard keeps dead.)
-            // 13i-c U2 (P-13ic-U2-6): a SEALED book takes back only SEALED
-            // members — a note whose seal was lifted by hand while the book
-            // lay in the Trash does not rejoin the edition (P-13ic-6's other
-            // half: "Put back restores a sealed book whose stamps still match").
-            let sealedOnly = reading.sealedAt != nil ? " AND locked = 1" : ""
-            // 13i-d U5b (F-U5b-1, PROVISIONAL P-13id-U5b-5): only notes of the
-            // book's OWN wing, read AFTER the re-home above — a note that
-            // moved to another wing while the book lay in the Trash stays
-            // where it went, and its row stays decided-dead (a book never
-            // spans wings, §9). The one predicate both revival sites read.
-            let sameWing = Queries.revivalWingScope(wingID: reading.wingId)
-            let revivalArguments: [(any DatabaseValueConvertible)?] = [id, stamp] + sameWing.arguments
-            try db.execute(
-                sql: """
-                    UPDATE reading_post SET deleted_at = NULL
-                    WHERE reading_id = ? AND deleted_at = ?
-                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL\(sealedOnly)
-                                        AND \(sameWing.sql))
-                    """,
-                arguments: StatementArguments(revivalArguments))
-
-            // 13i-c U2 — OWNERSHIP holds after the revival (the 13i-c plan §4
-            // row 7): a note added elsewhere while this book (or the note)
-            // lay in the Trash keeps its EARLIEST membership; the later one
-            // bells or goes — R2's shape, applied locally.
-            let revivedMembers = try String.fetchAll(
-                db,
-                sql: """
-                    SELECT post_id FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'
-                    """,
-                arguments: [id])
-            try enforceOwnershipAfterRevival(
-                db, postIDs: revivedMembers + notesDeletedWithBook, now: now)
-
-            // 13i-b U1 — RESUME CATCH-UP (the plan §2.3): a living book back
-            // from the Trash routes the gap's matches through Arrivals. The
-            // exact-stamp revival above came FIRST, so every pair the book
-            // had decided (members, waiting arrivals — both revived — and
-            // its older tombstones) stays decided. A finished book restores
-            // finished, its intake still paused.
-            try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+    /// `restoreReading`'s body at db level (13n-a: an imported book's REDO
+    /// revives its notes and then the book in ONE transaction —
+    /// `reapplyImportedBook`). Byte-identical to the body it was.
+    func restoreReadingRows(_ db: Database, id: String) throws {
+        guard var reading = try Reading.fetchOne(db, key: id) else {
+            throw OperationError.readingNotFound(id: id)
         }
+        guard let deletedAt = reading.deletedAt else {
+            throw OperationError.readingNotDeleted(id: id)
+        }
+        let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
+        let now = date.now
+        let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+
+        reading.deletedAt = nil
+        reading.updatedAt = now
+        // 13i-d U5 — RE-HOME on Put back (PROVISIONAL P-13id-U5-2): a book
+        // whose wing was deleted while it lay in the Trash comes back to
+        // HOME, unshelved (its shelf died with the wing).
+        if try !Queries.wingIsLive(db, id: reading.wingId) {
+            reading.wingId = ""
+            reading.shelfId = nil
+            reading.shelfPosition = nil
+        }
+        try reading.update(db)
+        // 13j ladder B (B1): a restored row voids any live intent
+        // naming it — a leftover intent must never claim it later.
+        try voidPurgeIntents(db, table: "reading", rowID: id)
+
+        // Chapters: exact-stamp cascade victims revive; independently
+        // deleted chapters (different stamp) stay dead — and now have
+        // a working `restoreSection` door, because the reading is
+        // live again (the boundary reversal's second half).
+        try db.execute(
+            sql: """
+                UPDATE reading_section SET deleted_at = NULL, updated_at = ?
+                WHERE reading_id = ? AND deleted_at = ?
+                """,
+            arguments: [nowStamp, id, stamp])
+
+        // 13i-c U2 — the book RETURNS WHOLE (the sitting record §18.3:
+        // "the delete-book-and-notes road (one stamp) returns WHOLE"):
+        // the notes deleted WITH the book (`deleteReadingWithNotes` — the
+        // book's own member rows and each note on this exact stamp) come
+        // back first, versions and all, through `restoreContainer`'s own
+        // body — so the live-post guard below passes for them. A note
+        // deleted independently carries a different stamp and stays dead
+        // (the standing documented corner); a note put back alone earlier
+        // is live already, and its membership revives below.
+        let notesDeletedWithBook = try String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT rp.post_id FROM reading_post rp
+                JOIN container c ON c.id = rp.post_id AND c.deleted_at = ?
+                WHERE rp.reading_id = ? AND rp.deleted_at = ? AND rp.status = 'member'
+                ORDER BY rp.post_id
+                """,
+            arguments: [stamp, id, stamp])
+        for postID in notesDeletedWithBook {
+            try restoreNoteFamily(db, id: postID)
+        }
+
+        // Memberships: exact-stamp victims whose post is still LIVE.
+        // (A post deleted independently stamps its own memberships via
+        // the container cascade — different stamp, doubly safe; a post
+        // that died AFTER this reading did matches the stamp and is
+        // exactly what the live-post guard keeps dead.)
+        // 13i-c U2 (P-13ic-U2-6): a SEALED book takes back only SEALED
+        // members — a note whose seal was lifted by hand while the book
+        // lay in the Trash does not rejoin the edition (P-13ic-6's other
+        // half: "Put back restores a sealed book whose stamps still match").
+        let sealedOnly = reading.sealedAt != nil ? " AND locked = 1" : ""
+        // 13i-d U5b (F-U5b-1, PROVISIONAL P-13id-U5b-5): only notes of the
+        // book's OWN wing, read AFTER the re-home above — a note that
+        // moved to another wing while the book lay in the Trash stays
+        // where it went, and its row stays decided-dead (a book never
+        // spans wings, §9). The one predicate both revival sites read.
+        let sameWing = Queries.revivalWingScope(wingID: reading.wingId)
+        let revivalArguments: [(any DatabaseValueConvertible)?] = [id, stamp] + sameWing.arguments
+        try db.execute(
+            sql: """
+                UPDATE reading_post SET deleted_at = NULL
+                WHERE reading_id = ? AND deleted_at = ?
+                  AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL\(sealedOnly)
+                                    AND \(sameWing.sql))
+                """,
+            arguments: StatementArguments(revivalArguments))
+
+        // 13i-c U2 — OWNERSHIP holds after the revival (the 13i-c plan §4
+        // row 7): a note added elsewhere while this book (or the note)
+        // lay in the Trash keeps its EARLIEST membership; the later one
+        // bells or goes — R2's shape, applied locally.
+        let revivedMembers = try String.fetchAll(
+            db,
+            sql: """
+                SELECT post_id FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL AND status = 'member'
+                """,
+            arguments: [id])
+        try enforceOwnershipAfterRevival(
+            db, postIDs: revivedMembers + notesDeletedWithBook, now: now)
+
+        // 13i-b U1 — RESUME CATCH-UP (the plan §2.3): a living book back
+        // from the Trash routes the gap's matches through Arrivals. The
+        // exact-stamp revival above came FIRST, so every pair the book
+        // had decided (members, waiting arrivals — both revived — and
+        // its older tombstones) stays decided. A finished book restores
+        // finished, its intake still paused.
+        try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
     }
 
     // MARK: - Curated membership
@@ -868,17 +873,26 @@ extension Operations {
     /// silently stopped applying to a non-ASCII name would be worse than no
     /// rule.
     public func assertBookNameIsFree(_ name: String, excluding readingID: String? = nil) throws {
-        let key = BookNaming.key(name)
         try database.read { db in
-            let rows = try Row.fetchAll(
-                db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL")
-            for row in rows {
-                let id: String = row["id"]
-                guard id != readingID else { continue }
-                let existing: String = row["name"]
-                if BookNaming.key(existing) == key {
-                    throw OperationError.duplicateBookName(name: existing)
-                }
+            try requireBookNameFree(db, name, excluding: readingID)
+        }
+    }
+
+    /// The guard's body at db level (13n-a: the folder IMPORT is a door that
+    /// names a book — the folder's name — so `importBook` asks this inside
+    /// its own transaction, before it mints anything). Byte-identical rule.
+    func requireBookNameFree(
+        _ db: Database, _ name: String, excluding readingID: String? = nil
+    ) throws {
+        let key = BookNaming.key(name)
+        let rows = try Row.fetchAll(
+            db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL")
+        for row in rows {
+            let id: String = row["id"]
+            guard id != readingID else { continue }
+            let existing: String = row["name"]
+            if BookNaming.key(existing) == key {
+                throw OperationError.duplicateBookName(name: existing)
             }
         }
     }

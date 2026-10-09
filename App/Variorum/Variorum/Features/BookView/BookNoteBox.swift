@@ -44,6 +44,51 @@ nonisolated enum BookNoteBox {
         return true
     }
 
+    /// **WHERE the book's quiet receipt sits** (the 13n-a walk, WA-1 — the
+    /// orchestrator's ruling: "the quiet receipt belongs on the window's MAIN
+    /// bottom bar's trailing end … never the book navigator's narrow bar").
+    /// The navigator's foot (P-13id-U3-6's home for Outline · Book · Read)
+    /// is ~200 pt wide, so any real receipt truncated there — the import's
+    /// "Imported “o ladrão de raios” — 4 notes in 2 chapters · ⌥⌘Z undoes"
+    /// read "Imported “o ladrão de…", and so did every restore door that
+    /// opens the book it restored. AppSpec §12's letter is "a muted line at
+    /// the bottom bar's trailing end", so the receipt sits at the trailing
+    /// end of the MAIN column's foot: the mode's own bottom bar where it has
+    /// one (Book and Read's pages — their flip bar, before the page line),
+    /// the page's foot where it has none (Outline, Read's flow). Index keeps
+    /// its column footer (13i-d U3 — a different column, with its counts),
+    /// and a LIVE note box still hosts it in the sidebar's bar (one receipt
+    /// never draws twice). The navigator never hosts it. PROVISIONAL (the
+    /// walk-fix pass; the orchestrator re-walks it).
+    enum QuietReceiptHome: Equatable, Sendable {
+        /// The sidebar's live note box — its bar hosts the slot.
+        case liveNoteBox
+        /// Index's column footer (13i-d U3, unchanged).
+        case indexColumnFooter
+        /// The mode's own bottom bar, trailing (Book · Read's pages).
+        case modeBottomBar
+        /// The main column's foot, trailing (Outline · Read's flow).
+        case pageFoot
+    }
+
+    /// `modeBarShown`: whether Book / Read's pages are drawing their flip bar
+    /// (an EMPTY book draws none — then the page's foot hosts instead, so a
+    /// receipt is never left without a home).
+    static func quietReceiptHome(
+        mode: BookStructureModel.ViewMode,
+        pagedRead: Bool,
+        modeBarShown: Bool,
+        box: NoteBoxState?
+    ) -> QuietReceiptHome {
+        guard bookHostsQuietReceipt(box) else { return .liveNoteBox }
+        switch mode {
+        case .index: return .indexColumnFooter
+        case .spread: return modeBarShown ? .modeBottomBar : .pageFoot
+        case .read: return pagedRead && modeBarShown ? .modeBottomBar : .pageFoot
+        case .outline: return .pageFoot
+        }
+    }
+
     /// The box stands in the sidebar while a book is open in an EDITING mode
     /// — Outline, Index, Book — and never in Read (§5.4: Read is a place to
     /// read, and its surfaces are not editable by her A43 ruling).

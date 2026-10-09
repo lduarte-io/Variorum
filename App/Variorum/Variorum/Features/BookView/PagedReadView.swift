@@ -44,6 +44,10 @@ struct PagedReadView: View {
     /// Row 82: a click on a page's paragraph WAKES the editable index at
     /// that (note, block) — the flow's own door (`onWake`), on paper.
     var onWake: ((_ postID: String, _ blockID: String) -> Void)? = nil
+    /// WA-1 (the 13n-a walk): this mode's flip bar is the book's MAIN bottom
+    /// bar, so its trailing end hosts the quiet receipt — when
+    /// `BookNoteBox.quietReceiptHome` says so (one receipt never draws twice).
+    var hostsQuietReceipt: Bool = true
 
     @State private var pages: PagedReadModel
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -51,12 +55,14 @@ struct PagedReadView: View {
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
+        hostsQuietReceipt: Bool = true,
         onWake: ((_ postID: String, _ blockID: String) -> Void)? = nil
     ) {
         self.session = session
         self.model = model
         self.structure = structure
         _pages = State(initialValue: PagedReadModel(session: session))
+        self.hostsQuietReceipt = hostsQuietReceipt
         self.onWake = onWake
     }
 
@@ -189,6 +195,11 @@ struct PagedReadView: View {
                     .disabled(!pages.canTurn(by: 2))
                     .help("Turn the leaf on — two pages (→)")
                 Spacer(minLength: 12)
+                // WA-1: the quiet slot at the bar's trailing end, before the
+                // page line (the Bookcase hint bar's shape — it yields first).
+                QuietReceiptLine(status: session.status, tokens: tokens)
+                    .opacity(hostsQuietReceipt ? 1 : 0)
+                    .accessibilityHidden(!hostsQuietReceipt)
                 Text(tokens.chromeLabel(pages.pageLine))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
