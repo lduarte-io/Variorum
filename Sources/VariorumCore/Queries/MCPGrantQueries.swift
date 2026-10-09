@@ -246,10 +246,8 @@ extension Queries {
     ///    `'journal'` (the trait) or `'daily'` (THE daily Journal) — an
     ///    archived book is still alive, so it still fences;
     /// 3. **the Private mark** — its own `ai_private_at`, or a live member of
-    ///    a live reading carrying one (R-13nb-4, privacy winning ties).
-    ///    **Reads FALSE until v1_25 lands the two columns** (the architect's
-    ///    schema commit at the U1/U2 seam; U2 wires the leg — this site, the
-    ///    `privateLeg` fragments below, is where it goes).
+    ///    a live reading carrying one (R-13nb-4, privacy winning ties; v1_25's
+    ///    columns, wired at U2 — the `privateLeg` fragments below).
     ///
     /// A note is fenced iff any leg holds. Only live non-version POSTS have
     /// facts: a missing, tombstoned, scraps-group or version container reads
@@ -306,7 +304,7 @@ extension Queries {
 
     /// A BOOK's facts — live books only (a gathering is not a grant target in
     /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is a journal (the trait
-    /// or THE daily Journal) or, once v1_25 lands, carries the Private mark.
+    /// or THE daily Journal) or carries the Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
         guard let row = try Row.fetchOne(
             db,
@@ -333,8 +331,8 @@ extension Queries {
     }
 
     /// **The books the grant sheet offers** — every live BOOK the fence does
-    /// not exclude (a journal-trait book, THE daily Journal and, once v1_25
-    /// lands, a Private book are never a grant's scope — the op refuses them,
+    /// not exclude (a journal-trait book, THE daily Journal and a Private
+    /// book are never a grant's scope — the op refuses them,
     /// so the sheet never offers them; P-2), by name. Gatherings are not
     /// grant targets in U1 (P-13nb-U1-4). Author-scale (a library's books).
     public static func mcpGrantableBooks(_ db: Database) throws -> [MCPGrantableBook] {
@@ -351,10 +349,56 @@ extension Queries {
         ).map { MCPGrantableBook(id: $0["id"], name: $0["name"], wingID: $0["wing"]) }
     }
 
-    /// The Private leg for a note (R-13nb-4) — `0` until v1_25 lands
-    /// `container.ai_private_at` + `reading.ai_private_at`; then: its own
-    /// stamp, or a live member of a live reading carrying one.
-    static let privateLegForNote = "0"
-    /// The Private leg for a book — `0` until v1_25 (its own stamp then).
-    static let privateLegForBook = "0"
+    /// **The Private leg for a note** (R-13nb-4, wired at 13n-b U2 over
+    /// v1_25's columns): its OWN stamp (`container.ai_private_at`), or a LIVE
+    /// MEMBER (status 'member' — an arrival is never membership) of a LIVE
+    /// reading carrying one. An ARCHIVED private book still fences (it is
+    /// alive — the journal leg's precedent); a deleted one does not. NULL
+    /// reads not-private. Expects the note aliased `c`.
+    static let privateLegForNote = """
+        (c.ai_private_at IS NOT NULL
+         OR EXISTS (SELECT 1 FROM reading_post prp JOIN reading pr ON pr.id = prp.reading_id
+                    WHERE prp.post_id = c.id AND prp.deleted_at IS NULL AND prp.status = 'member'
+                      AND pr.deleted_at IS NULL AND pr.ai_private_at IS NOT NULL))
+        """
+    /// **The Private leg for a book** — its own stamp. Expects the book
+    /// aliased `r`.
+    static let privateLegForBook = "(r.ai_private_at IS NOT NULL)"
+
+    // MARK: - The Private mark, as the faces read it (R-13nb-4)
+
+    /// A note's OWN mark (not the book road — `mcpNoteFacts` answers whether
+    /// it is fenced at all). False for anything that is not a live post.
+    public static func isNotePrivate(_ db: Database, postID: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT ai_private_at IS NOT NULL FROM container
+                WHERE id = ? AND deleted_at IS NULL AND kind = 'post'
+                """,
+            arguments: [postID]) ?? false
+    }
+
+    /// A book's own mark. False for anything that is not a live reading.
+    public static func isBookPrivate(_ db: Database, readingID: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: "SELECT ai_private_at IS NOT NULL FROM reading WHERE id = ? AND deleted_at IS NULL",
+            arguments: [readingID]) ?? false
+    }
+
+    /// The live PRIVATE books a note is a live member of, by name — the
+    /// note ⋯ menu's "private through “…”" line (the mark it cannot clear
+    /// from the note). ∝ the note's memberships.
+    public static func privateBooksHolding(_ db: Database, postID: String) throws -> [String] {
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT r.name FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
+                WHERE rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                  AND r.deleted_at IS NULL AND r.ai_private_at IS NOT NULL
+                ORDER BY r.name COLLATE NOCASE, r.id
+                """,
+            arguments: [postID])
+    }
 }

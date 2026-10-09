@@ -1179,9 +1179,9 @@ else proceeds.
 
 | # | Piece | Status |
 |---|---|---|
-| Q0 | This record | IN-PROGRESS (this commit) |
-| Q1 | The fence's third leg wired (`privateLegForNote`/`ForBook` read v1_25) + pins (NULL not-private; private+granted book fenced; mark fences the next call; archived private book fences) | NOT-STARTED |
-| Q2 | The Private mark's ops (note + book; gatherings refuse; allowed under a seal — PROVISIONAL) + state-transition tests | NOT-STARTED |
+| Q0 | This record | DONE (`90797596`); forks RULED by the architect (AF-5…AF-8, `d290b090`) |
+| Q1 | The fence's third leg wired (`privateLegForNote`/`ForBook` read v1_25) + pins (NULL not-private; private+granted book fenced; mark fences the next decision; archived private book fences) | DONE (this commit) — `MCPPrivateMarkTests` 6/6; RED-ON-OLD verified: with the legs back at `"0"` the suite fails 4 tests / 10 issues, green after; U1's placeholder assertion retired (justified edit). The end-to-end "next call on a connected client" pin rides Q6 (`MCPServerTests`) |
+| Q2 | The Private mark's ops (`setNotePrivate` / `setBookPrivate`; gatherings and scraps refuse; allowed under a seal — PROVISIONAL) + state-transition tests | DONE (this commit) — no-op-guarded, no touch, synced (outbox), no undo entry |
 | Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | NOT-STARTED |
 | Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | NOT-STARTED |
 | Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | NOT-STARTED |
@@ -1229,6 +1229,23 @@ else proceeds.
 - **Scope question (not a fork):** the note ⋯ menu's GRANT row ("Allow AI
   here…", R-13n-11's share-a-note) is not in U2's item list (only the Private
   row is) — read as U3's unless told otherwise.
+
+### PROVISIONALs (for the merge QUESTIONS bundle)
+
+- **P-13nb-U2-1 — the mark is ALLOWED under a seal, on a finished, sealed
+  or archived book, and on an archived note.** It protects rather than
+  authors (withholding a note from AI writes no word of it). Alternative:
+  refuse under a seal (the comment/label letter).
+- **P-13nb-U2-2 — the mark does NOT ride a copy.** A copy is a new note
+  (the Owned/seal precedent: copies are born open and unowned); the copy
+  doors are several (`copyPost`, the ownership family copy, versions, the
+  wing copy) with no one choke point. A copy filed into a Private book is
+  fenced by membership anyway. Alternative: every copy door carries the
+  stamp (the safe direction for disclosure; four sites).
+- **P-13nb-U2-3 — a grant on a target that becomes Private stays as DATA**
+  (inert while marked — `reaches` never matches a fenced book, and only a
+  per-ask note grant reaches a fenced note); clearing the mark reopens it
+  (pinned). The faces must not call such a grant "shared" while it is inert.
 
 ### Decisions within the mandate (recorded as they land)
 

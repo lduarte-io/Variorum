@@ -279,8 +279,9 @@ struct MCPGrantOperationsTests {
             #expect(facts[deletedJournalMember.id]?.fence == nil, "a deleted book is not alive")
             #expect(try db.read { try Queries.mcpBookFacts($0, readingID: notebook.id) }?.fence == .journal)
             #expect(try db.read { try Queries.mcpBookFacts($0, readingID: daily.id) }?.fence == .journal)
-            #expect(Queries.privateLegForNote == "0" && Queries.privateLegForBook == "0",
-                    "the Private leg reads false until v1_25 lands its columns (R-13nb-4, the architect's seam)")
+            // U2 (justified edit): the Private leg is WIRED over v1_25 — the
+            // U1 placeholder assertion ("reads 0") retired; its pins are
+            // MCPPrivateMarkTests'.
             #expect(MCPGrantRule.fence(journal: true, privateMark: true) == .privateMark, "privacy wins ties")
         }
     }
