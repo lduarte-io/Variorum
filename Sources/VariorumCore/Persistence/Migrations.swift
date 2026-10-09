@@ -912,6 +912,31 @@ extension AppDatabase {
         migrator.registerMigration("v1_24_mcp_grants") { db in
             try db.execute(sql: MCPGrantSchema.v1_24DDL)
         }
+        // **13n-b — THE PRIVATE MARK** (her ruling R-13nb-4, the 13n-b
+        // plan's sitting record + design addendum, 2026-10-09): a per-NOTE
+        // and per-BOOK privacy mark, both the `archived_at` class — an
+        // additive nullable TEXT stamp, NULL = not private. The fence reads
+        // them as its third leg (journal profile · journal/daily membership
+        // · the private mark — a note in ANY live private book is fenced,
+        // privacy wins ties); gatherings refuse the mark operations-side.
+        //
+        // **A SyncSpec §12 LOCKSTEP EVENT** (marker 12 → 13 — the
+        // `SyncSchema.lockstepVersion` bump rides this commit): both
+        // columns are SYNCED (a privacy mark is a fact about the book or
+        // note, not about one Mac's AI setup — it must survive 13x
+        // portability and read the same on every device), PLAIN under E2EE
+        // (bare timestamps; disclosed structure only — that something is
+        // marked, never which or what). The marker moves because a
+        // marker-12 client's CAS whole-row push would silently null
+        // `ai_private_at` out from under a marker-13 writer (13i-e's
+        // reasoning, verbatim). Mirror DDL `16_phase13nb_private.sql` —
+        // the deploy is HER closeout window, never pre-authorized. No
+        // backfill: nothing is private at birth. No new §7 repair (plain
+        // CAS metadata; NULL reads not-private).
+        migrator.registerMigration("v1_25_private_mark") { db in
+            try db.execute(sql: "ALTER TABLE container ADD COLUMN ai_private_at TEXT")
+            try db.execute(sql: "ALTER TABLE reading ADD COLUMN ai_private_at TEXT")
+        }
         return migrator
     }
 }
