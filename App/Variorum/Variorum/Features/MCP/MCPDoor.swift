@@ -22,6 +22,10 @@ import VariorumCore
 import VariorumMCP
 import VariorumMCPSocket
 
+/// U2 (AF-8): the session's runner IS the MCP write executor — the road her
+/// own gestures take (`OperationsRunner.run`'s exact signature).
+extension OperationsRunner: MCPWriteExecutor {}
+
 @MainActor
 @Observable
 final class MCPDoor {
@@ -85,18 +89,36 @@ final class MCPDoor {
     /// Whether this process may run a server at all (never a test process —
     /// the test host IS the dev-store app).
     @ObservationIgnored private let serverAllowed: Bool
-    @ObservationIgnored private let makeHost: @MainActor (AppDatabase) -> MCPServerHost?
+    @ObservationIgnored private let makeHost: @MainActor (AppDatabase, any MCPWriteExecutor) -> MCPServerHost?
+
+    /// U2 — THE JUST-IN-TIME ASKS waiting for her (AF-6): in memory (a
+    /// dropped ask costs the client one re-ask), deduped per client · target
+    /// · rung, capped; the main window's sheet serves the FIRST, one at a time.
+    private(set) var asks: [MCPAsk] = []
+    /// The asks kept waiting at once (PROVISIONAL P-13nb-U2-9, with the
+    /// queue's shape): past it the oldest WAITING one (never the one on
+    /// screen) is forgotten.
+    nonisolated static let askCap = 8
+    var presentedAsk: MCPAsk? { asks.first }
+
+    /// U2 — the receipt RUN: consecutive acts by one client on one target
+    /// within the window speak as one coalesced line (her fact-check's
+    /// "added 2 takes and saved the lens …").
+    @ObservationIgnored private var receiptRun: [MCPWriteReceipt] = []
+    @ObservationIgnored private var receiptRunAt = Date.distantPast
+    nonisolated static let receiptWindow: TimeInterval = 120
 
     init(
         serverAllowed: Bool = !KeychainTestTripwire.armed,
-        makeHost: (@MainActor (AppDatabase) -> MCPServerHost?)? = nil
+        makeHost: (@MainActor (AppDatabase, any MCPWriteExecutor) -> MCPServerHost?)? = nil
     ) {
         self.serverAllowed = serverAllowed
-        self.makeHost = makeHost ?? { database in
+        self.makeHost = makeHost ?? { database, executor in
             guard let directory = MCPDoor.socketDirectory else { return nil }
             return MCPServerHost(
                 database: database, operations: Operations(), directory: directory,
-                version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0")
+                version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0",
+                executor: executor)
         }
     }
 
@@ -187,6 +209,8 @@ final class MCPDoor {
         observation = nil
         stopServer()
         adoptionLandingPending = false
+        asks = []
+        receiptRun = []
         session = nil
         database = nil
         runner = nil
@@ -208,13 +232,21 @@ final class MCPDoor {
             if host.state == .running { serverState = .running }
             return
         }
-        guard let fresh = host ?? makeHost(database) else {
+        // U2 (AF-8): MCP writes run on the SESSION's runner — her own
+        // gestures' road, the serialization the undo stack requires.
+        guard let runner, let fresh = host ?? makeHost(database, runner) else {
             serverState = .failed("the app's container could not be located")
             return
         }
         fresh.onConnectionsChanged = { [weak self] in
             Task { @MainActor in self?.refreshConnected() }
         }
+        fresh.hooks = MCPHostHooks(
+            // "Every refusal speaks to the client exactly as it speaks to
+            // her": the Mac's own table.
+            refusalWords: { OpsRefusalCopy.message(for: $0) },
+            onAsk: { [weak self] ask in Task { @MainActor in self?.enqueue(ask) } },
+            onWrite: { [weak self] receipt in Task { @MainActor in self?.speak(receipt) } })
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -295,6 +327,69 @@ final class MCPDoor {
                 self?.note = Note(text: MCPPaneCopy.refusal(error), place: .top)
             }
         }
+    }
+
+    // MARK: - The just-in-time ask (AF-6)
+
+    /// A client asked past its grant (the call already answered — an ask
+    /// never blocks). Queued once per client · target · rung.
+    func enqueue(_ ask: MCPAsk) {
+        guard session != nil, !asks.contains(where: { $0.id == ask.id }) else { return }
+        asks.append(ask)
+        while asks.count > Self.askCap { asks.remove(at: 1) }
+    }
+
+    enum AskAnswer: Equatable, Sendable {
+        case grant(MCPGrantRule.Duration)
+        case dontAllow
+    }
+
+    /// The durations an ask may offer: "while connected" only to a client
+    /// connected now (U1's rule carried), "always" never on a fenced target
+    /// (R-13n-4; R2-1's fix).
+    func durations(for ask: MCPAsk) -> [MCPGrantRule.Duration] {
+        var offered: [MCPGrantRule.Duration] = [.once]
+        if connected.contains(ask.clientName) { offered.append(.connection) }
+        if ask.offersAlways { offered.append(.always) }
+        return offered
+    }
+
+    /// Her answer: a grant through the ordinary ops (the ask's rung, its
+    /// target as the scope), or nothing. Either way the ask leaves the queue.
+    func answer(_ ask: MCPAsk, _ answer: AskAnswer) {
+        asks.removeAll { $0.id == ask.id }
+        guard case .grant(let duration) = answer, let runner, let database, let session else { return }
+        let spec = Operations.MCPGrantSpec(
+            rung: ask.rung, scopeKind: ask.scopeKind, scopeID: ask.scopeID, duration: duration)
+        Task { @MainActor in
+            do {
+                try await runner.run { ops in
+                    guard let client = try database.read({ try Queries.mcpClient($0, name: ask.clientName) }) else {
+                        throw OperationError.mcpClientNotFound(id: ask.clientName)
+                    }
+                    _ = try ops.grantMCPAccess(client.id, spec)
+                }
+                session.status.receipt(MCPAskCopy.granted(ask, duration: duration))
+            } catch {
+                session.status.refuse(MCPPaneCopy.refusal(error))
+            }
+        }
+    }
+
+    // MARK: - Receipts (the app's voice — P-13n-1)
+
+    /// A write landed: say it on the one status seam, coalesced with the
+    /// client's run on the same target (P-4: the signal carries no decision).
+    func speak(_ receipt: MCPWriteReceipt, now: Date = Date()) {
+        guard let session else { return }
+        if let last = receiptRun.last, last.clientName == receipt.clientName,
+           last.targetID == receipt.targetID, now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
+            receiptRun.append(receipt)
+        } else {
+            receiptRun = [receipt]
+        }
+        receiptRunAt = now
+        session.status.receipt(MCPReceiptCopy.line(receiptRun))
     }
 
     // MARK: - The full lists ("all N ›") and the sheet's choices

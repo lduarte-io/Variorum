@@ -38,6 +38,8 @@ struct TakesBottomBar: View {
     /// note's wing + name, and the move's pending confirm.
     @Environment(WingsModel.self) private var wings: WingsModel?
     @State private var wingContext: NoteMenuWingContext?
+    /// 13n-b U2 (R-13nb-4): the open note's Private row's state.
+    @State private var privacy: NotePrivacyState?
     @State private var wingAsk: WingsModel.MoveAsk?
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -73,6 +75,8 @@ struct TakesBottomBar: View {
             .saveNoteVersion, .showNoteVersions,
             // 13n-a (R-13n-11): Copy for AI — Write's bar's twin (R6-2).
             .copyForAI,
+            // 13n-b U2 (R-13nb-4): the Private row, beside it.
+            .markNotePrivate,
             // 18c batch 3 (her U-6): Write's bar's two rows, here too.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
         ]
@@ -467,6 +471,8 @@ struct TakesBottomBar: View {
                 let postID = model.postID
                 Task { await CopyForAI.copy(postID: postID, session: session) }
             }
+            // 13n-b U2 (R-13nb-4): Write's bar's Private row, here too.
+            NotePrivacyMenuItems(session: model.session, postID: model.postID, state: privacy)
             Divider()
             // 18c batch 3 (her U-6): Write's bar's row, in Takes too.
             Button(SplitAtNewlinesCopy.noteDoor) {
@@ -521,6 +527,8 @@ struct TakesBottomBar: View {
         .noteMenuWingDoors(
             session: model.session, postID: model.postID, wings: wings,
             context: $wingContext, ask: $wingAsk)
+            // 13n-b U2 (R-13nb-4): the Private row's state, loaded per note.
+            .notePrivacyDoor(session: model.session, postID: model.postID, state: $privacy)
         .help("The note itself: its seal and its date (a block's commits "
             + "are the history door beside commit; its tray is the tray icon "
             + "at the top of the note)")

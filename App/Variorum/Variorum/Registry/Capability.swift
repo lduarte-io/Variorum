@@ -899,4 +899,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// the grants are shown, never by a keystroke from elsewhere.
     case mcpApproveClient, mcpDenyClient, mcpChangeClientAccess, mcpRevokeClient
     case mcpRevokeGrant, mcpCopySetupCommand, mcpGrantAccess
+    /// 13n-b U2 — THE JUST-IN-TIME ASK's answer (AF-6; mockup §4), `.surface`
+    /// on the MCP family's precedent: rendered ONLY by the ask sheet, which
+    /// carries the one ask it answers (once · while connected · always ·
+    /// don't allow — the durations the ask may offer).
+    case mcpAnswerAsk
+    /// 13n-b U2 — THE PRIVATE MARK (R-13nb-4): "Private — never shared with
+    /// AI". The note's row lives in the note ▾ menu of both bottom bars
+    /// (`.bottomBar`, beside Copy full text); the book's in the Book Settings
+    /// sheet's State section (`.surface`). Gatherings and scraps never render
+    /// it (the operations refuse them — P-2).
+    case markNotePrivate, markBookPrivate
 }

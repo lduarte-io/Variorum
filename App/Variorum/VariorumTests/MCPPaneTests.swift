@@ -135,8 +135,10 @@ struct MCPPaneTests {
                 .appendingPathComponent("vpane-\(UUID().uuidString.prefix(8))", isDirectory: true)
             defer { try? FileManager.default.removeItem(at: directory) }
             let operations = Operations()
-            let door = MCPDoor(serverAllowed: true) { database in
-                MCPServerHost(database: database, operations: operations, directory: directory, version: "test")
+            let door = MCPDoor(serverAllowed: true) { database, executor in
+                MCPServerHost(
+                    database: database, operations: operations, directory: directory, version: "test",
+                    executor: executor)
             }
             let socket = MCPSocketRoad.socketPath(directory: directory)
             door.attach(session: session)
@@ -188,9 +190,11 @@ struct MCPPaneTests {
             let directory = root.appendingPathComponent("sock", isDirectory: true)
             let socket = MCPSocketRoad.socketPath(directory: directory)
             var started = 0
-            let door = MCPDoor(serverAllowed: true) { database in
+            let door = MCPDoor(serverAllowed: true) { database, executor in
                 started += 1
-                return MCPServerHost(database: database, operations: operations, directory: directory, version: "test")
+                return MCPServerHost(
+                    database: database, operations: operations, directory: directory, version: "test",
+                    executor: executor)
             }
             door.attach(session: session, storeURL: storeURL)
             defer { door.detach() }

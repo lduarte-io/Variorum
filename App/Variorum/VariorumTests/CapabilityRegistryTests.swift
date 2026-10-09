@@ -521,6 +521,10 @@ struct CapabilityRegistryTests {
             // a new line): Settings ▸ MCP renders the door's seven acts and
             // is their ONLY renderer (the grant sheet's confirm included).
             .union(MCPPane.surfaceCapabilities)
+            // 13n-b U2 (A JUSTIFIED EDIT, the same class — a new renderer is
+            // a new line): the just-in-time ASK SHEET renders its answer and
+            // is its only renderer (AF-6).
+            .union(MCPAskSheet.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

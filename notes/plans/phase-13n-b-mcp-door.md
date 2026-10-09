@@ -1238,13 +1238,13 @@ else proceeds.
 | Q0 | This record | DONE (`90797596`); forks RULED by the architect (AF-5…AF-8, `d290b090`) |
 | Q1 | The fence's third leg wired (`privateLegForNote`/`ForBook` read v1_25) + pins (NULL not-private; private+granted book fenced; mark fences the next decision; archived private book fences) | DONE (this commit) — `MCPPrivateMarkTests` 6/6; RED-ON-OLD verified: with the legs back at `"0"` the suite fails 4 tests / 10 issues, green after; U1's placeholder assertion retired (justified edit). The end-to-end "next call on a connected client" pin rides Q6 (`MCPServerTests`) |
 | Q2 | The Private mark's ops (`setNotePrivate` / `setBookPrivate`; gatherings and scraps refuse; allowed under a seal — PROVISIONAL) + state-transition tests | DONE (this commit) — no-op-guarded, no touch, synced (outbox), no undo entry |
-| Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | NOT-STARTED |
+| Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | DONE (this commit; Mac run PENDING stage) — `.markNotePrivate` (`.bottomBar`, both bars' note ▾, NOTE contexts, beside Copy full text: the toggle + "Private through “…”" when a Private book holds it + the note's "Shared with AI: …" line) and `.markBookPrivate` (the Book Settings sheet's State row + caption, books only); shared pieces in `Core/Views/PrivateMark.swift`; the ask sheet's Private lead (the journal sentence's twin); the stamp stays OFF the `Reading`/`Container` models (no stale model write can clear it) |
 | Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | DONE (this commit) — `landMCPAfterAdoption(holdStamp:)` keyed on the 13x RESTORE HOLD both adoption doors write (fresh stamp per adoption): an unacknowledged hold writes `server` OFF + records the stamp in ONE transaction; the same hold again changes nothing (her re-enable stands); a new adoption lands OFF again; grants/clients/open book untouched. The door asks it at attach BEFORE its grants observation starts (no stale "on" snapshot can start a server); a failed landing keeps the server down. Zero lines in the 13x road itself, zero `Sync/`, zero custody. Headless `MCPAdoptionLandingTests` 2/2; Mac pin `anAdoptedLibraryLandsOffBeforeItCouldServeAndHerReEnableServes` — run PENDING (stage) |
 | Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | DONE (this commit) — `Operations+MCPWrites.swift`: each act ONE transaction (the import book: one compound) + ONE entry labeled "<client>'s <act>", exact-row inverse + redo (quiet on divergence, throwing on resolvable refusals); the suggest acts INSERT only (no UPDATE on `variant`/`container_block`). `mintDocument`/`applyDocumentTags` widened private→internal (the one mint road reused). `MCPWriteActsTests` 12/12 |
 | Q6 | The server's write tools over the SESSION runner + the SUGGEST PROOF pin (+ mutation checks) | DONE (`296e9c86` + `0f5f406c` + this commit) — `MCPWriteTools` (8 tools, one serial body per call on the injected executor), `MCPWriteSupport`, the catalog's `scopes` rule, `read_note with_ids` (AF-5), asks on content reads and write refusals (AF-6), AF-7 wired, R2-1 + R2-2 fixed. `MCPWriteServerTests` 9 + U1's 23 = **VariorumMCPTests 32/4**. **THE PROOF MUTATION-CHECKED (4 breaks):** (1) `addTake` also edits her other takes → caught (snapshot); (2) `saveLens` moves the chosen pointer → **NOT caught by the first draft** (it picked only already-chosen takes, so the move was a no-op) → the pin now picks her NON-chosen take → caught; (3) the block acts decided at `.read` instead of their rung → caught (the write-new door accepted under suggest; the once grant not spent); (4) `addTake` makes itself chosen → caught (snapshot + the fact-check shape's rendered text). Every mutation restored from the committed tree (`git checkout --`) |
-| Q7 | The grant sheet's rungs (read · suggest · write new) | NOT-STARTED |
-| Q8 | The just-in-time ask (sheet + the R2-1 fix) | NOT-STARTED — gated by F-2 |
-| Q9 | Receipts (app voice) + the "shared with AI" chip | NOT-STARTED |
+| Q7 | The grant sheet's rungs (read · suggest · write new) | DONE (this commit; Mac run PENDING stage) — the radio picker with the mockup §3 sentences, the confirm naming the rung ("Grant suggest in “…” while connected"), "Edit arrives in a later update."; the pane's toggle sentence restored to mockup §1 verbatim (P-13nb-U1-12 retired) |
+| Q8 | The just-in-time ask (sheet + the R2-1 fix) | DONE (this commit; Mac run PENDING stage) — `MCPDoor`'s in-memory queue (deduped per client · target · rung, cap 8 — the oldest WAITING ask forgotten, never the one on screen), `MCPAskSheet` on the main WindowGroup (one at a time; Once · While connected [connected only] · Always [unfenced only] · Don't allow = its cancel action; the answer mints the grant through `grantMCPAccess`), `.mcpAnswerAsk` declared + walked; R2-1 fixed in Q6 |
+| Q9 | Receipts (app voice) + the "shared with AI" chip | DONE (core reads `081792a5`; faces this commit; Mac run PENDING stage) — `MCPReceiptCopy.line` (a run of one client's acts on one target within 120 s coalesces: "claude-code added 2 takes and saved the lens “english readings” in “ch 1” · ⌥⌘Z undoes"), spoken by `MCPDoor.speak` as quiet receipts; the Bookcase row's "shared with AI" chip from `mcpReachableBookIDs` (one-shot with the row aggregates) |
 | Q10 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage), record final | NOT-STARTED |
 
 ### Forks returned to the orchestrator (2026-10-09 — halves wait for the ruling)
@@ -1318,6 +1318,30 @@ else proceeds.
 - **P-13nb-U2-7 — an AI take is PARENTLESS** (a fresh text, not a branch
   of hers) and fan growth's conventions ride: no touch, no churn — an AI
   session never reshuffles her library's sort.
+
+- **P-13nb-U2-8 — a CRASH between a landed write and its once stamp**
+  leaves the once grant unspent (one more write possible); the content
+  reads keep U1's one-transaction stamp. Inside the serial body nothing
+  else can interleave, and a spend never flips a landed act's answer.
+- **P-13nb-U2-9 — the ask queue's shape** (AF-6 marks it PROVISIONAL):
+  in memory, deduped per client · target · rung, cap 8 (the oldest waiting
+  ask forgotten — never the one on screen); the sheet ARRIVES on the main
+  window (the mockup's "arrives as a quiet sheet in the TCC shape"), one at
+  a time; with several main windows open each presents it (the
+  library-open sheet's standing class). Alternative: an offer toast with
+  Review… (calmer, missable). And AF-6's other provisional: an ask IS raised
+  on an existing-but-unshared note while the wire stays the one answer.
+- **P-13nb-U2-10 — the receipt run**: one client's acts on one target
+  within 120 s speak as one coalesced line; the "in “title”" clause rides
+  only when every act in the run is note-targeted.
+- **P-13nb-U2-11 — the "shared with AI" chip is HONEST under every grant
+  shape**: a book chips when any approved client can reach it now (a book
+  grant, a wing grant on its wing, or the open book — never a journal or a
+  Private book), not only under a grant naming it. The note's face is the
+  note ▾ menu's "Shared with AI: <client> (<reach>)" line.
+- **P-13nb-U2-12 — the AI take label**: "<client> · suggested", then
+  " · <its own label>" when it gives one (P-13n-3's convention, the client's
+  name verbatim — "claude-code", never a brand rewrite).
 
 ### Decisions within the mandate (recorded as they land)
 

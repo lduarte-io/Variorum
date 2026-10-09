@@ -52,6 +52,9 @@ final class ShelfViewModel {
     /// members (one-shot — the read touches `container`, so it never rides
     /// the held snapshot; U1's P1 pin).
     private(set) var archivedCounts: [String: Int] = [:]
+    /// 13n-b U2 (P-13n-3): the books an approved MCP client can reach now —
+    /// the row's "shared with AI" chip (the one-shot half, beside the counts).
+    private(set) var aiShared: Set<String> = []
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -252,10 +255,12 @@ final class ShelfViewModel {
     func refreshAggregates() async {
         let wing = wingID
         do {
-            let (words, tags, rules, aggregates) = try await session.database.read { db in
+            let (words, tags, rules, aggregates, shared) = try await session.database.read { db in
                 (try Queries.bookWordCounts(db), try Queries.shelfBookTags(db),
-                 try Queries.ruleTagPaths(db), try Queries.bookcaseAggregates(db, wingID: wing))
+                 try Queries.ruleTagPaths(db), try Queries.bookcaseAggregates(db, wingID: wing),
+                 try Queries.mcpReachableBookIDs(db))
             }
+            aiShared = shared
             wordCounts = words
             bookTags = tags
             ruleTags = rules

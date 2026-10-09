@@ -83,6 +83,16 @@ struct VariorumApp: App {
                         LibraryHandOffSheet(model: model) { handOff.dismiss() }
                     }
                 }
+                // 13n-b U2 (AF-6): THE JUST-IN-TIME ASK — the door's queue,
+                // one ask at a time. The sheet's own buttons answer (Don't
+                // allow is its cancel action); the setter never answers for
+                // her, so a dismissal can only come from an answer.
+                .sheet(item: Binding(
+                    get: { appDelegate.mcp.presentedAsk },
+                    set: { _ in })
+                ) { ask in
+                    MCPAskSheet(door: appDelegate.mcp, ask: ask)
+                }
         }
         .defaultSize(width: 1240, height: 840)
         // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are

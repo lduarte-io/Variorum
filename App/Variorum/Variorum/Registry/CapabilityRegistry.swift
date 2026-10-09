@@ -2188,6 +2188,31 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Access is granted from Settings \u{25B8} MCP.",
             availability: always),
+        // 13n-b U2 (AF-6): the ask sheet's answer — its one renderer is the
+        // sheet, which carries the ask it answers.
+        Capability(
+            id: .mcpAnswerAsk, verb: "Answer", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's ask is answered on the sheet it arrives on.",
+            availability: always),
+        // 13n-b U2 — THE PRIVATE MARK (R-13nb-4). The note's row: post-scoped
+        // and available wherever a note is (`noteScoped` — Copy full text's
+        // own rule; the bars render it in NOTE contexts only, never on a
+        // scraps group). The book's: the settings sheet's State row (books
+        // only — a gathering refuses `wrongReadingKind`, so it never renders).
+        Capability(
+            id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.noNoteNote,
+            availability: noteScoped),
+        Capability(
+            id: .markBookPrivate, verb: PrivateMarkCopy.rowWords, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.bookSheetNote,
+            availability: always),
     ]
 
     // MARK: - Lookup

@@ -3,10 +3,11 @@
 //  Variorum (MAC ONLY)
 //
 //  13n-b U1 — THE GRANT SHEET, born with the read rung only (A-9; mockup §3).
-//  Three questions, each a sentence: WHERE (a book · a wing), HOW MUCH (read —
-//  the only rung that exists in U1; U2 grows the picker on this same sheet),
-//  HOW LONG (once · while connected · always). Its confirm says the whole
-//  grant in words ("Grant read in “the lightning thief” while connected").
+//  Three questions, each a sentence: WHERE (a book · a wing), HOW MUCH (U2:
+//  read · suggest · write new, each with the mockup's sentence — edit arrives
+//  with U3, and a rung the server can't serve isn't offered, P-2), HOW LONG
+//  (once · while connected · always). Its confirm says the whole grant in
+//  words ("Grant suggest in “the lightning thief” while connected").
 //  Opened by Approve… (a connection request — approve and first grant in one
 //  act) and Change… (an approved client — one more grant).
 //
@@ -32,6 +33,7 @@ struct MCPGrantSheet: View {
     @State private var bookID: String?
     @State private var wingID: String = ""
     @State private var duration: MCPGrantRule.Duration = .always
+    @State private var rung: MCPGrantRule.Rung = .read
     @State private var choices = MCPDoor.Choices()
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -51,9 +53,9 @@ struct MCPGrantSheet: View {
         switch place {
         case .book:
             guard let book = chosenBook else { return nil }
-            return .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: duration)
+            return .init(rung: rung, scopeKind: .book, scopeID: book.id, duration: duration)
         case .wing:
-            return .init(rung: .read, scopeKind: .wing, scopeID: wingID, duration: duration)
+            return .init(rung: rung, scopeKind: .wing, scopeID: wingID, duration: duration)
         }
     }
 
@@ -106,15 +108,14 @@ struct MCPGrantSheet: View {
             }
 
             section(MCPPaneCopy.howMuchSection)
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(MCPPaneCopy.readRung)
-                    .font(.callout.weight(.semibold))
-                    .lineLimit(1)
-                Text(MCPPaneCopy.readRungDetail)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+            Picker(MCPPaneCopy.howMuchSection, selection: $rung) {
+                ForEach(MCPPaneCopy.offeredRungs, id: \.self) { rung in
+                    Text(MCPPaneCopy.rungName(rung)).tag(rung)
+                }
             }
+            .pickerStyle(.radioGroup)
+            .labelsHidden()
+            quiet(MCPPaneCopy.rungDetail(rung))
             quiet(MCPPaneCopy.laterRungsNote)
 
             section(MCPPaneCopy.howLongSection)
@@ -136,7 +137,7 @@ struct MCPGrantSheet: View {
                     .keyboardShortcut(.cancelAction)
                 Button(MCPPaneCopy.confirm(
                     verb: CapabilityRegistry.capability(.mcpGrantAccess).verb,
-                    place: placeName, duration: duration)) {
+                    rung: rung, place: placeName, duration: duration)) {
                     guard let spec else { return }
                     if target.approving {
                         door.approve(target.client.id, granting: spec)
