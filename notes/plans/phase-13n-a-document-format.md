@@ -238,9 +238,23 @@ unit should never touch the real store at all.
   review ladder; (4) canon deltas, QUESTIONS entries and the master plan
   (merge-moment ledgers — the proposals are listed at the end of this
   record); (5) FORK-A…D below are returned, not decided.
-- STATE: **BUILT — GUI WALK HELD** (implementer session 1, `opus-implementer`,
-  2026-10-09 04:20–05:25 MDT). Every piece committed and pushed; the final
-  suites green at the end (piece 6). No revert is in flight.
+- STATE: **BUILT + LADDERED (closed at round 2, 0B/0M) — GUI WALK + REFRESH
+  HELD, PR OPEN AND UNMERGED (her order).** Implementer session 1
+  (`opus-implementer`, 2026-10-09 04:20–05:25 MDT), the rulings fix pass,
+  ladder round 1 (0B/1M/4m/4n, all dispositioned FIX except F5's wording),
+  its fix round (nine pin-first fixes), ladder round 2 (0B/0M/1m/3n —
+  verdicts all implemented-as-worded; R2-1/R2-3 fixed orchestrator-side
+  pin-first, R2-2/R2-4 wording). FINALS on the closed tree: core WHOLE
+  PACKAGE 2,478/284 + 40/6 green (standing gated skips only; +52 over the
+  13s-b baseline); the four 13n-a suites + export + paste 86/14; Mac
+  consuming suites (door + registry) 43/2 under stage after the round-2
+  core fixes. No revert is in flight. Tickets born: VX-118 (FORK-D),
+  VX-119 (the 13c undo-pair class + R2-1's rule), VX-120 (door package
+  semantics; the Pro probe answered). What remains for the unit to CLOSE:
+  the W1–W7 GUI walk (THE WALK below) and the /Applications refresh — both
+  held all night by her live real-store instance, both ready at her
+  zero-instance window; and her review+test, whose merge is the merge
+  moment (ledger proposals in the closeout section).
 - FIX PASS (the architect's rulings R-ARCH-13na-1/2): see "FIX PASS
   (rulings)" at the end of this record — its own live status.
 - Per-piece lines land here as `DONE (hash)` / `IN-PROGRESS — exactly what
