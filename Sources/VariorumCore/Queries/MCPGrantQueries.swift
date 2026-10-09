@@ -415,6 +415,11 @@ public struct MCPNoteSharing: Equatable, Sendable {
     public let clientName: String
     /// The highest rung the client may act at on this note right now.
     public let rung: MCPGrantRule.Rung
+
+    public init(clientName: String, rung: MCPGrantRule.Rung) {
+        self.clientName = clientName
+        self.rung = rung
+    }
 }
 
 extension Queries {
