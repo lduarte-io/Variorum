@@ -304,6 +304,45 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-11 (2026-10-09, the wire-document memo's batches) — THE MEMO
+  EDGES RULED.** G-1 chapters: (a) READ + WRITE — section facts ride the
+  wire document and list_notes; `create_section` + a section arg on
+  `add_note_to_book` at U3 (curated books only, the app's own refusals).
+  G-2 write fidelity: (a) `create_note` accepts EITHER payload — the
+  text format OR a wire-document subset (multi-paragraph blocks, names,
+  labeled takes) through the same ordinary ops; the FILE doors stay
+  text-only, `import_document` included (it IS the file format's door —
+  one format, one meaning, whichever door a file enters by).
+  G-4: the wire OMITS `floating_notes` (a faceless substrate field —
+  no surface renders it; her clarifying question answered with the code
+  fact) — ticket **VX-127** records face-or-retire for her backlog.
+  Tier C's ratification: pending her word (and partly reshaped by
+  R-13nb-13 below — the FILE-side items may move into the pulled-forward
+  format sitting).
+- **R-13nb-12 (2026-10-09, her evening message) — NOTE-LEVEL-AND-UP
+  ACCESS IS DURABLE.** Her words: *"I like note level and up access by
+  the way - way more sane and manageable and not planning to ever
+  change that."* The granularity doctrine (block-level ADDRESSING,
+  note-level-and-up ACCESS; no per-block grant, no per-block fence; the
+  note is the disclosure unit) is ratified as a standing design
+  commitment, not a v1 convenience.
+- **R-13nb-13 (2026-10-09, same message) — DO NOT CONTORT; PULL THE
+  FORMAT DESIGN FORWARD IF NEEDED.** Her words: *"these latest
+  questions make me even more sure that we should NOT be contorting the
+  variorum data to fit this limited markdown import / export model. If
+  we need to pull forward the variorum file format design to do this
+  stage properly, we can do that. even if it's just the design sitting
+  without building it."* The architect's proposed execution shape
+  (hers to pick, the question batch): a NARROW format-SCHEMA sitting
+  pulled forward from 13m — scoped to the DATA SHAPE only (what a
+  full-fidelity note/book serialization carries: blocks with real
+  boundaries, takes, commits, comments, names, callouts; the id policy
+  per R-13nb-9), producing a binding format-design record that the
+  13n-b WIRE DOCUMENT conforms to as its wire serialization — one
+  schema, two serializations, zero rework at 13m; 13m keeps its
+  sharing/publishing/renderer halves. The FILE serialization's BUILD
+  stays 13m's ("even if it's just the design sitting without building
+  it" — her letter).
 - **R-13nb-10 (2026-10-09, minutes after R-13nb-7 — her correction,
   verbatim) — MCP SEARCH REACHES COMMITS BEHIND THE EXPLICIT
   PARAMETER.** Her words: *"why can AI not search commits? seems wrong

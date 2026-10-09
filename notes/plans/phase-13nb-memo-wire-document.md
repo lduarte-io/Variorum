@@ -119,11 +119,32 @@ view, not a sixth tool — AF-5's reasoning stands); the text format's
 byte-pinned round trip; R-13n-8's two-form split (file now, edition at
 13m); the grant grammar; the fence.
 
-## 5. Her rulings wanted (the memo's open edges)
+## 5. Her rulings (landed 2026-10-09 — R-13nb-11/12/13 in the plan's sitting record)
 
-1. G-1 chapters: (a) read+write (recommended) · (b) defer · (c) read-only.
-2. G-2 write fidelity: (a) structured create_note payload at U3
-   (recommended) · (b) text-only v1 with the merge workaround recorded.
-3. G-4 floating_notes/entry_date: carry at U3 · omit-with-ticket
-   (recommended).
-4. Tier C confirmed as deliberate (one word ratifies the list).
+1. G-1 chapters: **(a) READ + WRITE, ruled** — U3.
+2. G-2 write fidelity: **(a) EITHER payload on create_note, ruled** — U3;
+   file doors (import_document included) stay text-only.
+3. G-4: **omit + ticket, ruled** — VX-127 (floating_notes is faceless;
+   face-or-retire is hers).
+4. Tier C: pending her one word — and RESHAPED by R-13nb-13: the
+   FILE-side items (the boundary marker, comments/commits/names/callouts
+   in files) move into the pulled-forward FORMAT-SCHEMA sitting if she
+   picks it; the WIRE-side exclusions (lineage edges, Versions, take
+   ancestry, block tags, archived facet UI-only) stand for ratification
+   as wire decisions.
+
+## 6. The pulled-forward format sitting (R-13nb-13 — her call on shape)
+
+Her words: the data must not be contorted to the limited markdown
+import/export model; the variorum FILE FORMAT design may pull forward
+"even if it's just the design sitting without building it." The
+architect's proposed shape: a NARROW format-SCHEMA sitting (prep doc +
+option sets, the 13n sitting's form) scoped to THE DATA SHAPE ONLY —
+entities and fidelity (blocks with REAL boundaries, takes, commits,
+comments, names, callout frames), the id policy (R-13nb-9: ids live,
+files careful), and what rides file vs wire — producing ONE schema with
+TWO serializations: the 13n-b wire document (built now) and 13m's file
+edition (built at 13m, sharing bones by construction, R-13n-8's own
+promise). 13m keeps sharing/publishing/rendering. Timing: the sitting
+prep lands before U3's brief so U3 builds the wire serialization against
+the ruled schema.
