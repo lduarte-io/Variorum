@@ -158,5 +158,15 @@ VERSIONS (list/read + the write side's rung), LINEAGE edges, take
 ANCESTRY, THE TRAY (deleted things + Put back's rung), and ARCHIVED
 reach (notes · takes · books — each an option set); the prep carries a
 STAGED delivery proposal (U3-pre-launch vs follow-on effort) for her
-cut. Timing: the sitting prep lands before U3's brief so U3 builds the
-wire serialization against the ruled schema.
+cut. SCOPE GROWN AGAIN by R-13nb-15 (carriage settings, her direction):
+the FILE side is parameterized by CARRIAGE PROFILES — the dial set
+(trash · unplaced blocks · commits · comments · names · versions · …),
+opinionated per-format defaults, remembered preferences, optionally
+NAMED audience sets — plus the export TAXONOMY (the Level 0 text · the
+no-lock-in plaintext export · the 13x sealed pair · 13m's edition, one
+job each) and the profile-storage shape (named sets carry user prose;
+the `setting` table's no-prose promise forbids that home — a small
+synced table with encrypted names, or local-only; the sitting rules
+it). The WIRE stays profile-free: rungs and grants are its only dials
+(R-13nb-14). Timing: the sitting prep lands before U3's brief so U3
+builds the wire serialization against the ruled schema.

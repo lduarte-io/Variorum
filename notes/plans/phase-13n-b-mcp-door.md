@@ -304,6 +304,31 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-15 (2026-10-09, her follow-on design direction, verbatim) —
+  THE FILE FORMAT GAINS CARRIAGE SETTINGS.** Her words: *"what this is
+  revealing to me is that the file format is probably going to need to
+  have settings that users can save + are remembered - like: does trash
+  come along? do unplaced blocks come along? and users can choose their
+  default for export. for markdown export, does xyz come along. do we
+  have sqlite export format and a markdown format, etc. but we'll make
+  it more frictionless with opinionated defaults and saved settings /
+  preferences (or even a way to save + name setting sets, for if you
+  send files to different audiences)."* Direction-strength for the
+  format-schema sitting: the file side is parameterized by CARRIAGE
+  PROFILES — a dial set (trash · unplaced blocks · commits · comments ·
+  names · versions · …) with opinionated per-format defaults,
+  remembered preferences, and optionally NAMED profile sets per
+  audience. The sitting designs: the dial set, the defaults per format,
+  the export TAXONOMY (today's roads named so each format has one job —
+  the Level 0 text · the no-lock-in plaintext SQLite export · the 13x
+  sealed transfer pair · 13m's shareable edition), and WHERE profiles
+  live — with one constraint flagged now: NAMED sets carry user prose,
+  and `setting.value` is classified PLAIN under the "enum semantics, no
+  prose" promise (AppSpec §7), so named profiles need their own small
+  synced table (name encrypted) or a local-only home — a §12-relevant
+  shape question the sitting must answer, never improvised. The WIRE
+  stays profile-free (R-13nb-14's keyboard bar: rungs and grants are
+  its only dials).
 - **R-13nb-14 (2026-10-09, her answer striking Tier C — THE KEYBOARD
   BAR, verbatim):** *"Why is any of this being excluded? the goal is for
   an AI to fully empower you with variorum - lot of people will never
