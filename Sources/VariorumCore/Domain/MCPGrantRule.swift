@@ -175,6 +175,14 @@ public enum MCPGrantRule {
         }
     }
 
+    /// The fence from its legs (`Queries.mcpNoteFacts` derives the legs in
+    /// one place) — privacy wins ties (R-13nb-4).
+    public static func fence(journal: Bool, privateMark: Bool) -> Fence? {
+        if privateMark { return .privateMark }
+        if journal { return .journal }
+        return nil
+    }
+
     // MARK: - The decision
 
     /// **The one decision.** `consumes` says whether this call is

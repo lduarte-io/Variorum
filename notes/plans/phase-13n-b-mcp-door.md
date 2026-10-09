@@ -612,8 +612,8 @@ U1 from this section.
 | P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | DONE (`6f5a3d81`) — RULED: AF-1 (container socket as proposed), R-13nb-5 (Copy setup command), R-13nb-6 (adoption lands OFF) |
 | P2 | SDK dependency, own commit (`exact: "0.12.1"`) + `VariorumMCP` / `VariorumMCPTests` targets + license notices | DONE (`14763773` + the pin `9afd3456`); link pin green; the Mac acknowledgements pin's run PENDING (stage) |
 | P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion | DONE (this commit) — the schema suites 74/9 green headless |
-| P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | NOT-STARTED |
-| P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | NOT-STARTED |
+| P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | DONE (`f7927a91`) — 12/12 incl. the 13,824-world sweep; mutation-checked (4 boundary breaks each caught: 324 / 2,243 / 2 / 510 issues) |
+| P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | DONE (this commit) — `MCPGrantOperationsTests` 14/14; the fence's three legs in ONE Queries site (`mcpNoteFacts`/`mcpBookFacts`; the Private leg a `"0"` fragment until v1_25) |
 | P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | NOT-STARTED |
 | P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — AF-1 ruled: `<container>/Data/mcp.sock`, `bindat`/`connectat`, two distinct refusals |
 | P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — R-13nb-5 ruled: "Copy setup command" (`-s user`) |
@@ -715,7 +715,32 @@ mechanism and keeps names truthful"):**
   stripped export lands EMPTY + OFF by construction (no switch row reads
   off) with no change to `LocalMachineryRecreation` or the classifier.
   Pinned: `MCPGrantSchemaTests.thePlaintextExportCarriesTheTablesEmpty`.
-- **Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
+- **P4/P5 — the grammar as built (PROVISIONALs for the record; the
+orchestrator logs them at merge):**
+- **P-13nb-U1-1 — "while connected" = the CLIENT's connection**, not one
+  socket: its while-connected grants are revoked when that client's LAST
+  live connection closes (two Claude Code windows share one name), and
+  every server start sweeps them all (a crash can't leave one standing).
+- **P-13nb-U1-2 — a once grant is spent by the first CONTENT read it
+  authorizes** (`read_note`/`export_note`), never by a listing, and never
+  when a standing grant (or the open book) also covers the call; the stamp
+  lands in the same write transaction as the read.
+- **P-13nb-U1-3 — the open book is read rung, EVERY wing** ("everything is
+  readable"), approved clients only, never a fenced target.
+- **P-13nb-U1-4 — grant targets are BOOKS (kind 'book'), not gatherings**,
+  in U1; a fenced book (journal trait, the daily Journal, later Private)
+  is never a grant scope (the op refuses `mcpGrantScopeFenced`) and never
+  listed; scraps groups (pools) and note versions have no facts — every
+  tool answers them exactly as an unshared note (no existence oracle).
+- **P-13nb-U1-5 — the clients list's "revoke" is a DENY**: every grant
+  revoked at once, the client blocked (its next call refuses "denied");
+  "Approve…" re-admits it.
+- **P-13nb-U1-6 — the caps:** 50 pending requests (the oldest forgotten —
+  a pending client holds nothing), 500 activity lines.
+- **Membership is canon's:** `status='member'` only (an arrival is never
+  membership), live readings only; an ARCHIVED journal book still fences.
+
+**Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
   sealed-pair / backup adoption roads land the WHOLE encrypted file
   (grants and the `server` switch included); the one toggle-OFF write
   belongs on 13x's adoption road (`LibraryAdoption`, which also adopts
