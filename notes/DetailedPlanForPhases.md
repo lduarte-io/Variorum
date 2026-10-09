@@ -72,6 +72,8 @@ fix-phase step opens the sequence:
 > **13o** → **13r** → **13x** → **13y** → **13s** → 🚀 **release**
 >
 > *(Status 2026-10-08: **13o, 13r, 13x and 13y are all CLOSED** — 13y on 2026-09-24, ahead of this listed order; **13s is the one left before release**.)*
+>
+> **⚠️ AMENDED 2026-10-09 (her ruling at the 13n sitting, VX-116 — the record `notes/plans/phase-13n-sitting-record-2026-10-09.md`, R-13n-1/R-13n-9): 13n is PULLED PRE-LAUNCH** — Levels 0 and 2 ship in v1, the chat (Level 3) stays deferred; and 13n runs BEFORE 13s-a (her words: "no reason to do the rewording first. in fact, good reason to do it after since this'll add to the field guide"). **The order before 🚀 is now: 13n-a (the document format) → 13n-b (the door) → 13s-a (re-voicing, sweeping 13n's copy + field-guide chapter) → release.** The 2026-08-25 table's row 10 (13n post-launch, "the launch's follow-on headline") is superseded in its placement by this ruling; the row itself is unchanged as history.
 
 > **⚠️ AMENDED 2026-09-01:** the pre-13u round (done) is followed by **the Act 10 correction round (DONE 2026-09-02)**
 > (`notes/plans/act10-correction-round.md` — her same-morning ruling) → **`pre-13x` — Postures & recovery**
@@ -144,7 +146,7 @@ fix-phase step opens the sequence:
 > stays unplaced at her word. The 13u-internal detail: item 12 — multi-block drag — becomes its
 > own row after 13u1, R-13u-5 confirming R-cor-12.)*
 
-**Open 17 entries NOT placed above — her call (each runs in a session or two whenever she says):** **17b** (doors that lose or mis-copy her text — a data-loss class; the orchestrator's lean: before 🚀), **17d** (purge & sync honesty — `Sync/`; naturally beside 13y), **17e** (correctness & honesty singles). Parked: 17j (may or may not happen), 17k (joined 18a). **Not in the order:** 18a (sync considerations — the dedupe residuals, deletion-aware sync, pause), 18b (restore across devices), Phase 12 (after real use), the mobile catch-up (post-launch), 13n · 13t · 13m · 13h · 13q · 16 · EPUB · grammar · the Apple Notes import.
+**Open 17 entries NOT placed above — her call (each runs in a session or two whenever she says):** **17b** (doors that lose or mis-copy her text — a data-loss class; the orchestrator's lean: before 🚀), **17d** (purge & sync honesty — `Sync/`; naturally beside 13y), **17e** (correctness & honesty singles). Parked: 17j (may or may not happen), 17k (joined 18a). **Not in the order:** 18a (sync considerations — the dedupe residuals, deletion-aware sync, pause), 18b (restore across devices), Phase 12 (after real use), the mobile catch-up (post-launch), 13t · 13m · 13h · 13q · 16 · EPUB · grammar · the Apple Notes import. *(13n left this list 2026-10-09 — pulled pre-launch at the VX-116 sitting; the amendment above.)*
 
 Fix work is `notes/plans/phase-17-standing-fixes.md`'s, not this document's, per the same-day
 standing-fixes ruling — the letters appear here only so the ORDER is legible in one place.
