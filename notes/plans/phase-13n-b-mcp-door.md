@@ -217,6 +217,26 @@ The MCP pane's lists scale by R-13n-10's shapes, not growing piles (P-8's
 restraint). The server module splits by concern — transport · session ·
 grant authority · tool projections — never one god server object (P-9).
 
+## SITTING RECORD (13n-b, running — her rulings during the phase, verbatim-faithful)
+
+- **R-13nb-1 (2026-10-09, same-day as kickoff) — P-13nb-1 RATIFIED.** Her
+  words: *"I agree - profile journal OR member of alive journal/daily book
+  sounds good."* The journal fence's predicate is no longer provisional:
+  a note is a journal iff its container `profile='journal'` OR it is a
+  live member of a live reading with profile `'journal'` or `'daily'`.
+  (The QUESTIONS-at-merge entry for P-13nb-1 becomes a record of this
+  ratification, not an open item.)
+- **R-13nb-2 (2026-10-09, same message) — the PRIVATE book question,
+  raised by her, answers pending the question batch.** Her words: *"I
+  almost wonder - should we add a designation or boook setting like
+  'Private', so that people can have books that are not shared with AI
+  without them having to be journal type? that might be a small sync
+  event but the stage is clear for that."* Architect assessment + her
+  answers land in the follow-on entry when the batch returns.
+- **R-13nb-3 (2026-10-09, her next message) — the reviewer cast
+  CONFIRMED.** Her words: *"Fable reviewer is good"* — `fable-reviewer`
+  on every unit's ladder stands as the default this plan's banner states.
+
 ## ARCHITECT SEAM RULINGS (Fable, 2026-10-09 kickoff — within the mandate, each traced; product-flavored ones marked PROVISIONAL for her)
 
 - **A-1 — Module placement.** The MCP server is a NEW SPM library target
