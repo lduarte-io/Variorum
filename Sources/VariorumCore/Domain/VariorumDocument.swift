@@ -52,7 +52,10 @@ import Foundation
 ///   section's).
 /// - **Parsing is fail-honest:** a malformed Alternates section refuses the
 ///   whole document with the line it found the problem on — never a silent
-///   partial import (`Failure`).
+///   partial import (`Failure`). **Any export re-imports whole**
+///   (R-ARCH-13na-2): a section with no paragraph above it is what the
+///   export writes for a fanned block whose chosen take is blank, and reads
+///   as exactly that block — an empty chosen take with the section's takes.
 ///
 /// What does NOT ride the format, by her ruling: commits, book settings,
 /// block names, comments, callout frames (an export maps a callout to a
@@ -225,7 +228,10 @@ public enum VariorumDocument {
             /// No block in the document (blank, or a header line alone).
             case empty
             /// An Alternates section with no paragraph of its own above it —
-            /// at the document's start, or right after another section.
+            /// at the document's start, or right after another section — AND
+            /// no take in it either: nothing to make a block of. (WITH a take
+            /// it is the export of a blank chosen take and reads as one —
+            /// R-ARCH-13na-2.)
             case alternatesWithoutParagraph
             /// An Alternates section that never reaches its end marker (the
             /// line is the section's header).
@@ -293,12 +299,10 @@ public enum VariorumDocument {
             // A section: the paragraphs above it become blocks first, and the
             // section belongs to the LAST of them. The blank lines between
             // that paragraph and the header are spacing exactly as between
-            // two blocks — the section stands as the join's next piece.
+            // two blocks — the section stands as the join's next piece. With
+            // NO paragraph above it, the section is its own block's (below).
             let headerLine = index + 1
             let above = paragraphs(chunk, beforeSection: true)
-            guard !above.isEmpty else {
-                throw Failure(.alternatesWithoutParagraph, line: headerLine)
-            }
             blocks.append(contentsOf: above.map { Block(text: $0) })
             chunk = []
 
@@ -334,7 +338,22 @@ public enum VariorumDocument {
                 throw Failure(.unterminatedAlternates, line: headerLine)
             }
             // Empty takes skip — the export's own rule, mirrored.
-            blocks[blocks.count - 1].alternates.append(contentsOf: takes.filter { !$0.text.isEmpty })
+            let kept = takes.filter { !$0.text.isEmpty }
+            if above.isEmpty {
+                // NO PARAGRAPH ABOVE (R-ARCH-13na-2, the architect's ruling on
+                // FORK-C): exactly what the export writes for a fanned block
+                // whose CHOSEN take is blank (the blank chosen skips, its
+                // takes are her work) — so it is that block: an empty chosen
+                // take, the section's takes at the fan's end. Any export
+                // re-imports whole. A section with no paragraph AND no take
+                // is nothing the export writes — it still refuses.
+                guard !kept.isEmpty else {
+                    throw Failure(.alternatesWithoutParagraph, line: headerLine)
+                }
+                blocks.append(Block(text: "", alternates: kept))
+            } else {
+                blocks[blocks.count - 1].alternates.append(contentsOf: kept)
+            }
         }
         // The tail's trailing blank lines are an edge run: they drop.
         blocks.append(contentsOf: paragraphs(chunk, beforeSection: false).map { Block(text: $0) })

@@ -236,6 +236,53 @@ struct DocumentImportOperationTests {
         }
     }
 
+    // MARK: - R-ARCH-13na-2: any export re-imports whole
+
+    @Test func anyExportReimportsWholeEvenAFannedBlockWithABlankChosenTake() throws {
+        try withOperations { ops, db in
+            // A fanned block whose CHOSEN take is blank exports its section
+            // with no paragraph above it — at the note's start, and right
+            // after another fanned block. That export re-imports whole: the
+            // same rows, the blank take chosen AND the default again.
+            let post = try ops.createPost(title: "Blank chosen")
+            let opening = try ops.seedBlock(in: post.id, text: "")
+            try take(ops, on: opening, "The opening I have not chosen yet.", label: "draft")
+            try ops.seedBlock(in: post.id, text: "Middle.")
+            let fanned = try ops.seedBlock(in: post.id, text: "Fanned.")
+            try take(ops, on: fanned, "Fanned, again.")
+            let blank = try ops.seedBlock(in: post.id, text: "")
+            try take(ops, on: blank, "One way.")
+            try take(ops, on: blank, "Another\nway.", label: "two")
+            try ops.seedBlock(in: post.id, text: "Last.")
+
+            let export = try db.read { try Queries.exportPost($0, postID: post.id, includeVariants: true) }
+            #expect(export.hasPrefix(VariorumDocument.alternatesHeader))
+            let (original, imported) = try reimport(ops, db, post.id)
+            #expect(original.map { $0.texts[0] } == ["", "Middle.", "Fanned.", "", "Last."])
+            #expect(original[0].chosen == 0 && original[0].defaultTake == 0)
+            #expect(imported == original)
+        }
+    }
+
+    @Test func aBlankChosenFanAfterAFanlessParagraphReimportsOntoThatParagraph() throws {
+        try withOperations { ops, db in
+            // RECORDED — the boundary of R-ARCH-13na-2, a property of the
+            // EXPORT's bytes: after a FANLESS paragraph, a blank-chosen fan's
+            // section reads exactly like that paragraph's own fan (the two
+            // stores export the same text), so the import cannot tell them
+            // apart. Nothing refuses and every take arrives — on the paragraph.
+            let post = try ops.createPost(title: "Ambiguous")
+            try ops.seedBlock(in: post.id, text: "Plain.")
+            let blank = try ops.seedBlock(in: post.id, text: "")
+            try take(ops, on: blank, "Its only take.", label: "x")
+
+            let (original, imported) = try reimport(ops, db, post.id)
+            #expect(original.count == 2)
+            #expect(imported == [SlotShape(
+                texts: ["Plain.", "Its only take."], labels: [nil, "x"], chosen: 0, defaultTake: 0)])
+        }
+    }
+
     @Test func aHardWrappedFileImportsOneBlockPerParagraph() throws {
         try withOperations { ops, db in
             // The old-txt / Gutenberg shape (her Percy Jackson case): every

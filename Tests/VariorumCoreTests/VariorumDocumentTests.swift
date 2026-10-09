@@ -197,15 +197,25 @@ struct VariorumDocumentTests {
     }
 
     @Test func theBodyIsTheExactInverseOfTheJoin() throws {
+        // R-ARCH-13na-2 joins the family: a fanned block whose chosen take is
+        // BLANK, wherever its section has no paragraph above it — the
+        // document's start, or right after another section. (After a FANLESS
+        // paragraph the join writes the very bytes of that paragraph's own
+        // fan — recorded in the operations suite.)
+        let blankChosen = VariorumDocument.Block(text: "", alternates: Self.fans[1])
         let shapes = Self.surfaces.flatMap { text in Self.fans.map { VariorumDocument.Block(text: text, alternates: $0) } }
+            + [blankChosen]
         let domain = Self.sequences(of: shapes).filter { blocks in
             guard let last = blocks.last else { return false }
-            return !last.alternates.isEmpty || !last.text.hasSuffix("\n")
+            let sectionsHaveNoParagraphAbove = blocks.indices.allSatisfy { index in
+                blocks[index] != blankChosen || index == 0 || !blocks[index - 1].alternates.isEmpty
+            }
+            return sectionsHaveNoParagraphAbove && (!last.alternates.isEmpty || !last.text.hasSuffix("\n"))
         }
         var misread: [[VariorumDocument.Block]] = []
         for blocks in domain {
             let body = VariorumDocument.serializeBody(blocks)
-            if try VariorumDocument.parse(body).blocks != blocks { misread.append(blocks) }
+            if (try? VariorumDocument.parse(body))?.blocks != blocks { misread.append(blocks) }
         }
         #expect(misread.isEmpty,
                 "\(misread.count) of \(domain.count) block lists misread; the first: \(String(describing: misread.first))")
@@ -239,6 +249,31 @@ struct VariorumDocumentTests {
             == [.init(text: "Intro."), .init(text: "- one\n- two"), .init(text: "After.")])
     }
 
+    // MARK: - R-ARCH-13na-2: a paragraph-less section is a blank chosen take
+
+    @Test func aParagraphLessSectionIsAFannedBlockWithABlankChosenTake() throws {
+        // The exact shape the export writes for a fanned block whose chosen
+        // take is blank (the blank chosen skips; its takes are her work).
+        // At the document's start — after the header line, too:
+        let opening = try VariorumDocument.parse(
+            "{t:\"T\"}\n\n\(header)\n\ntake: \"en\"\n\nx\n\n\(footer)\n\nNext")
+        #expect(opening.title == "T")
+        #expect(opening.blocks == [
+            .init(text: "", alternates: [.init(label: "en", text: "x")]),
+            .init(text: "Next"),
+        ])
+        // …and right after another section.
+        let following = try VariorumDocument.parse(
+            "A\n\n\(header)\n\ntake: 2\n\nx\n\n\(footer)\n\n\(header)\n\ntake: 3\n\ny\n\n\(footer)")
+        #expect(following.blocks == [
+            .init(text: "A", alternates: [.init(label: nil, text: "x")]),
+            .init(text: "", alternates: [.init(label: nil, text: "y")]),
+        ])
+        // A document that is nothing but such a block is not empty.
+        #expect(try VariorumDocument.parse("\(header)\n\ntake: 1\n\nz\n\n\(footer)").blocks
+            == [.init(text: "", alternates: [.init(label: nil, text: "z")])])
+    }
+
     // MARK: - Parse: fail-honest, with the line
 
     @Test func everyMalformedSectionRefusesNamingItsLine() {
@@ -250,12 +285,17 @@ struct VariorumDocumentTests {
                 return error
             }
         }
-        // A section at the very start has no paragraph of its own.
-        #expect(failure("\(header)\n\ntake: 2\n\nx\n\n\(footer)")
+        // A section with no paragraph above it AND no take of its own — at
+        // the very start — has nothing to make a block of (with a take it is
+        // a blank chosen take's export, R-ARCH-13na-2, pinned above).
+        #expect(failure("\(header)\n\n\(footer)")
             == .init(.alternatesWithoutParagraph, line: 1))
-        // …nor does one right after another section.
-        #expect(failure("A\n\n\(header)\n\ntake: 2\n\nx\n\n\(footer)\n\n\(header)\n\ntake: 3\n\ny\n\n\(footer)")
+        // …nor does one right after another section whose only take is empty.
+        #expect(failure("A\n\n\(header)\n\ntake: 2\n\nx\n\n\(footer)\n\n\(header)\n\ntake: 3\n\n\(footer)")
             == .init(.alternatesWithoutParagraph, line: 11))
+        // Never ends, even with no paragraph above it: named at its header.
+        #expect(failure("\(header)\n\ntake: 2\n\nx")
+            == .init(.unterminatedAlternates, line: 1))
         // Never ends: named at the section's header.
         #expect(failure("A\n\n\(header)\n\ntake: 2\n\nB")
             == .init(.unterminatedAlternates, line: 3))

@@ -534,8 +534,7 @@ the canonical export never writes one, an LLM essentially never will).
 Scope, exactly: R-ARCH-13na-1 and R-ARCH-13na-2 (the section below this
 record). No other refactor; the app is untouched; no revert is in flight.
 
-1. **R-ARCH-13na-1 — the inverse-join body reading.** — DONE (this
-   commit; its hash lands with piece 2). `VariorumDocument.paragraphs(_:beforeSection:)`
+1. **R-ARCH-13na-1 — the inverse-join body reading.** — DONE (`79ec0f90`). `VariorumDocument.paragraphs(_:beforeSection:)`
    replaces the bulk call: a blank line separates, a single newline is
    content (a block's lines joined back with `"\n"`, verbatim), b blank
    lines after a piece store `storedSpacing(blankLines:)` = b when b ≥ 2
@@ -588,10 +587,42 @@ record). No other refactor; the app is untouched; no revert is in flight.
    (indent, trailing spaces) — the join never trims, so the inverse cannot;
    the bulk rule's per-piece trim is paste's, not the format's.
 2. **R-ARCH-13na-2 — the paragraph-less Alternates section is legal.** —
-   NOT-STARTED: the parse mints `Block(text: "", alternates:)` for a
-   paragraph-less section carrying a non-blank take (`importDocument`
-   already mints an empty take 0 as chosen AND default); a paragraph-less
-   section with no take keeps refusing.
+   DONE (this commit; its hash lands with piece 3). The parse reads the
+   section first, then: paragraphs above ⇒ the last one's fan (as ever);
+   NONE above and ≥ 1 non-blank take ⇒ `Block(text: "", alternates:)`;
+   none above and no take ⇒ `alternatesWithoutParagraph` at the header
+   line (not export-producible — the ruling's "only this shape stops
+   refusing"). `importDocument` needed NO change: it already mints take 0
+   (here the empty one) as chosen AND `default_variant_id`, the section's
+   takes after it at the fan's end — pinned on rows. **Pins, red on the
+   old parse first** (4 tests, 4 issues; the extended family misread 273 of
+   1,686 block lists — exactly the blank-chosen ones, which threw), green
+   after: `DocumentImportOperationTests.anyExportReimportsWholeEvenAFannedBlockWithABlankChosenTake`
+   (a note opening with a blank-chosen fan, and another right after a
+   fanned block: export → import → identical rows, the blank take chosen
+   and default); `VariorumDocumentTests.aParagraphLessSectionIsAFannedBlockWithABlankChosenTake`
+   (at the start, after the header line, after another section, alone);
+   `.theBodyIsTheExactInverseOfTheJoin` extended to blank-chosen blocks at
+   every position where their section has no paragraph above;
+   `.everyMalformedSectionRefusesNamingItsLine` — its two
+   `alternatesWithoutParagraph` cases now carry NO take (still refusing,
+   same lines 1 and 11 — green on both sides), plus one new line: an
+   unterminated paragraph-less section now names `unterminatedAlternates`
+   at its header (the section is read before its legality can be judged;
+   the old parse said `alternatesWithoutParagraph` there — still a
+   refusal, same line, the truer reason). Unterminated / garbled refusals
+   all green, unchanged. **RECORDED, green on both sides by design:**
+   `aBlankChosenFanAfterAFanlessParagraphReimportsOntoThatParagraph` — the
+   export writes the SAME bytes for "a fanless paragraph, then a
+   blank-chosen fan" and "that paragraph carrying the fan", so the import
+   reads the latter: nothing refuses, every take arrives, but on the
+   paragraph above (the blank block itself is not re-minted). "Any export
+   re-imports whole" therefore holds as NEVER REFUSES + EVERY TAKE ARRIVES
+   everywhere, and as IDENTICAL ROWS wherever the section has no paragraph
+   above it. The app's refusal copy for `alternatesWithoutParagraph`
+   ("…needs a paragraph of its own just above it") stays TRUE as a remedy
+   and is untouched (the app is out of this pass's scope). The four
+   suites: 42/42.
 3. **Finals** — NOT-STARTED: the four 13n-a core suites + the export
    suites, headless (`swift test --filter`), counts here.
 
