@@ -379,6 +379,39 @@ struct MCPServerTests {
         }
     }
 
+    // MARK: - Round 1 F5: a cursor carries its listing's shape
+
+    @Test func aCursorMintedUnderOneListingOrderIsRefusedByAnother() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "b", kind: .book)
+            for index in 0..<3 {
+                let note = try h.operations.createPost(title: "n\(index)")
+                _ = try h.operations.addPostToReading(note.id, to: shared.id)
+            }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", book(shared.id))
+            try h.operations.setMCPSwitch(.openBook, on: true)
+
+            let first = try json(try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(shared.id), "limit": 1]))
+            let cursor = try #require(first["next_cursor"] as? String)
+            // The same cursor resumes ITS OWN listing…
+            let second = try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(shared.id), "limit": 1, "cursor": .string(cursor)])
+            #expect(second.isError != true)
+            // …and is refused by a listing of another order (book order's key
+            // is a fractional position; the wing listing's is a recency
+            // stamp — comparing one against the other pages garbage).
+            let crossed = try await connection.client.callTool(
+                name: "list_notes", arguments: ["wing_id": "", "cursor": .string(cursor)])
+            #expect(crossed.isError == true)
+            #expect(text(crossed).contains("not a next_cursor this server returned"))
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - Round 1 F2: list_books counts exactly what list_notes(book_id:) would emit
 
     @Test func listBooksCountsOnlyTheNotesTheClientCanList() async throws {

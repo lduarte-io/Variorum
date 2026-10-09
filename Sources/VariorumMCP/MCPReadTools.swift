@@ -29,6 +29,9 @@ struct MCPReadTools: Sendable {
     static let maxPageSize = 200
     static let defaultSearchLimit = 20
     static let maxSearchLimit = 50
+    /// The one refusal for a cursor this server would not have returned —
+    /// undecodable, or minted by a listing of another order (F5).
+    static let staleCursorMessage = "cursor is not a next_cursor this server returned."
 
     /// Route one `tools/call`. Unknown names answer as an error; a KNOWN tool
     /// the client cannot use answers with the rule's own refusal (the list is
@@ -145,12 +148,19 @@ struct MCPReadTools: Sendable {
         let limit = min(max(try optionalInt(args, "limit") ?? Self.defaultPageSize, 1), Self.maxPageSize)
         let cursor = try optionalString(args, "cursor").flatMap(PageCursor.init(encoded:))
         if try optionalString(args, "cursor") != nil, cursor == nil {
-            throw ArgumentFailure(message: "cursor is not a next_cursor this server returned.")
+            throw ArgumentFailure(message: Self.staleCursorMessage)
         }
         let bookID = try optionalString(args, "book_id")
         let wingID = try optionalString(args, "wing_id")
         guard bookID == nil || wingID == nil else {
             throw ArgumentFailure(message: "Pass book_id or wing_id, not both.")
+        }
+        // Round 1 F5: a cursor resumes only the listing ORDER that minted it
+        // — book order's key is a position, the recency listings' a stamp;
+        // crossed, the keyset comparison pages garbage. Same words as an
+        // undecodable cursor.
+        if let cursor, cursor.shape != (bookID != nil ? .book : .recency) {
+            throw ArgumentFailure(message: Self.staleCursorMessage)
         }
         let act = MCPToolCatalog.listNotes.name
         return try database.write { db in
@@ -223,7 +233,7 @@ struct MCPReadTools: Sendable {
             arguments: ["book": bookID, "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit]
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
-                    cursor: PageCursor(key: row["position"], id: row["id"]))
+                    cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]))
         }
     }
 
@@ -266,7 +276,7 @@ struct MCPReadTools: Sendable {
             arguments: StatementArguments(arguments)
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
-                    cursor: PageCursor(key: row["touched"], id: row["id"]))
+                    cursor: PageCursor(shape: .recency, key: row["touched"], id: row["id"]))
         }
     }
 
@@ -502,25 +512,41 @@ struct MCPReadTools: Sendable {
     }
 }
 
-/// A keyset page's resume point — `(sort key, id)`, opaque to the client.
+/// A keyset page's resume point — `(shape, sort key, id)`, opaque to the
+/// client. The SHAPE names the listing order that minted it (round 1 F5):
+/// book order's key is a fractional position, the recency listings' a touched
+/// stamp — replaying one against the other would page garbage (never a leak:
+/// every row still passes the rule), so a mismatched cursor refuses with the
+/// same words as an undecodable one.
 struct PageCursor: Equatable, Sendable {
+    enum Shape: String, Sendable {
+        /// A book's member order — `(position, post id)`.
+        case book = "b"
+        /// Recency — `(touched, id)`, descending.
+        case recency = "r"
+    }
+
+    let shape: Shape
     let key: String
     let id: String
 
-    var encoded: String { Data("\(key)\n\(id)".utf8).base64EncodedString() }
+    var encoded: String { Data("\(shape.rawValue)\n\(key)\n\(id)".utf8).base64EncodedString() }
 
-    init(key: String, id: String) {
+    init(shape: Shape, key: String, id: String) {
+        self.shape = shape
         self.key = key
         self.id = id
     }
 
     init?(encoded: String) {
         guard let data = Data(base64Encoded: encoded),
-              let text = String(data: data, encoding: .utf8),
-              let split = text.firstIndex(of: "\n")
+              let text = String(data: data, encoding: .utf8)
         else { return nil }
-        key = String(text[..<split])
-        id = String(text[text.index(after: split)...])
+        let parts = text.split(separator: "\n", maxSplits: 2, omittingEmptySubsequences: false)
+        guard parts.count == 3, let shape = Shape(rawValue: String(parts[0])) else { return nil }
+        self.shape = shape
+        key = String(parts[1])
+        id = String(parts[2])
         guard !key.isEmpty, !id.isEmpty else { return nil }
     }
 }
