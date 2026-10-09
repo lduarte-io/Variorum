@@ -141,11 +141,18 @@ struct VariorumDocumentTests {
     }
 
     @Test func theHeaderIsReadOnTheFirstNonBlankLineOnly() throws {
-        // Tokens beside prose: the tokens go, the prose is the first block.
+        // The header: the first non-blank line, when it is TOKENS ALONE.
+        let header = try VariorumDocument.parse("\n{t:\"T\"}  {#a}\t\n\nWorld")
+        #expect(header.title == "T")
+        #expect(header.tagPaths == ["a"])
+        #expect(header.blocks.map(\.text) == ["World"])
+
+        // Tokens beside prose (ladder F9 — superseding the as-built "the
+        // tokens go, the prose stays"): that line is BODY, untouched.
         let mixed = try VariorumDocument.parse("\n{t:\"T\"} Hello {#a}\n\nWorld")
-        #expect(mixed.title == "T")
-        #expect(mixed.tagPaths == ["a"])
-        #expect(mixed.blocks.map(\.text) == ["Hello", "World"])
+        #expect(mixed.title == nil)
+        #expect(mixed.tagPaths.isEmpty)
+        #expect(mixed.blocks.map(\.text) == ["{t:\"T\"} Hello {#a}", "World"])
 
         // A token anywhere else is her text.
         let later = try VariorumDocument.parse("Hello\n\n{#x} world")

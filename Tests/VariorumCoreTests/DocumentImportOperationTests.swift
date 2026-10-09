@@ -335,6 +335,35 @@ struct DocumentImportOperationTests {
         }
     }
 
+    // MARK: - Ladder F9: the header line is tokens alone
+
+    @Test func aFirstLineOfProseBesideABraceTokenSurvivesReimportByteIdentical() throws {
+        // A note she never named or tagged copies with NO header line, so its
+        // first paragraph is the document's first line. A note ABOUT the
+        // capture syntax holds literal tokens in that paragraph: they are her
+        // prose and must come back as written — never read as a title or tag.
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: nil)
+            let first = "Type {#dream} in a capture box to tag it, and {t:\"Title\"} to name it."
+            try ops.seedBlock(in: post.id, text: first)
+            try ops.seedBlock(in: post.id, text: "Only braced forms parse.")
+            let copied = try db.read { try Queries.variorumDocumentText($0, postID: post.id) }
+            #expect(copied.hasPrefix(first))
+
+            let imported = try ops.importDocument(try named(copied, file: "capture notes.md"))
+            #expect(imported.post.title == "capture notes")
+            #expect(imported.tagIDs.isEmpty)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM tag") == 0)
+            #expect(try storeShape(db, imported.post.id).map { $0.texts[0] }
+                == [first, "Only braced forms parse."])
+            // The body comes back byte-identical (the copy's own header now
+            // names it by its file, so the comparison is the body's).
+            #expect(try db.read {
+                try Queries.exportPost($0, postID: imported.post.id, includeVariants: true)
+            } == copied)
+        }
+    }
+
     // MARK: - Ladder F4 (option (b), PROVISIONAL): a stub mints an EMPTY note
 
     @Test func aDocumentWithNoBlocksMintsAnEmptyNote() throws {

@@ -705,7 +705,24 @@ ledger; her merge).
   became `aDocumentWithNoBlocksMintsAnEmptyNote`; the header-only line of
   `everyMalformedSectionRefusesNamingItsLine` moved into the new parse
   pin. The four 13n-a suites 47/47.
-- F9 (the header line is a header only when it is tokens alone) — NOT-STARTED.
+- F9 (the header line is a header only when it is tokens alone) — DONE
+  (this line's commit). The first non-blank line is read as the header
+  ONLY when token removal leaves nothing but whitespace; a first line of
+  prose beside a literal brace token is body, untouched (IC-2 refined).
+  Pins, red on the old header rule first (2 tests, 8 issues), green after:
+  `DocumentImportOperationTests.aFirstLineOfProseBesideABraceTokenSurvivesReimportByteIdentical`
+  (an untitled, untagged note whose first paragraph holds `{#dream}` and
+  `{t:"Title"}` as prose: Copy for AI → import → no tag, no tag row, named
+  by its file, the body export byte-identical) and
+  `VariorumDocumentTests.theHeaderIsReadOnTheFirstNonBlankLineOnly` (its
+  mixed-line half was the superseded as-built expectation — "the tokens
+  go, the prose stays" — now pinned as body; a tokens-only line with
+  extra spacing still reads as the header). The four 13n-a suites 48/48.
+  **The residual, stated (narrower than the line F9 retires):** an
+  untitled, untagged note whose FIRST paragraph is nothing but brace
+  tokens (e.g. a paragraph reading exactly `{#dream}`) copies with no
+  header, so that paragraph re-imports as the header — the format has no
+  escape; a titled or tagged note is immune (its header comes first).
 - F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.
 - F2 (the Bookcase drop is a context mint) — NOT-STARTED.
 - F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.

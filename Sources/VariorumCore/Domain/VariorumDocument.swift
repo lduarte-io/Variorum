@@ -31,8 +31,9 @@ import Foundation
 ///   one serializer, so the format and the export cannot drift.
 /// - **The header line** is the capture microsyntax (`CaptureTokens`, the
 ///   app's capture rule moved into core): `{t:"…"}` the title, `{#tag/path}`
-///   each tag. It is read on the document's FIRST NON-BLANK LINE only; tokens
-///   anywhere else are text.
+///   each tag. It is read on the document's FIRST NON-BLANK LINE only, and
+///   only when that line is TOKENS ALONE (ladder F9); tokens anywhere else —
+///   prose beside them on that line included — are text.
 /// - **The body parses as the exact inverse of the join** (R-ARCH-13na-1,
 ///   the architect's ruling on FORK-A/B — superseding the plan's "standing
 ///   bulk rule" letter FOR THE FORMAT ONLY; paste and every other entry road
@@ -270,16 +271,21 @@ public enum VariorumDocument {
         var lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
 
         // THE HEADER LINE — the first non-blank line, read by the capture
-        // grammar. A line that held nothing but tokens goes (rule 5); its
-        // place stays as a blank line so every later line keeps its number.
+        // grammar, and a header ONLY when it is TOKENS ALONE (ladder F9):
+        // token removal must leave nothing but whitespace. A first line
+        // carrying prose beside a literal brace token is BODY, untouched — a
+        // note she never named or tagged copies with no header, so its first
+        // paragraph is this line, and a note about the capture syntax must
+        // come back as written. The header line's place stays as a blank
+        // line so every later line keeps its number.
         var title: String?
         var tagPaths: [String] = []
         if let first = lines.firstIndex(where: { !isBlank($0) }) {
             let read = CaptureTokens.readLine(lines[first])
-            if read.foundToken {
+            if read.foundToken, read.text.allSatisfy(CaptureTokens.isHorizontal) {
                 title = read.title
                 tagPaths = read.tagPaths
-                lines[first] = read.text.allSatisfy(CaptureTokens.isHorizontal) ? "" : read.text
+                lines[first] = ""
             }
         }
 
