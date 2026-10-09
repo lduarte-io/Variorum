@@ -487,4 +487,27 @@ struct VariorumDocumentTests {
         #expect(!VariorumDocumentFolder.isImportable("a/.b.md"))
         #expect(!VariorumDocumentFolder.isImportable("photo.jpg"))
     }
+
+    @Test func aTokenTheHeaderCannotReadBackIsOmittedSoTheRestSurvives() throws {
+        // Ladder round 2, R2-3: a tag path (or a title) carrying the
+        // grammar's own bytes would turn the WHOLE header line into body on
+        // re-import — losing the title and every other tag with it (the F9
+        // tokens-alone rule reads the polluted line as prose). The
+        // serializer writes only tokens that read back; what cannot ride is
+        // the format's recorded limit, and the rest of the header survives.
+        let tagged = VariorumDocument.Document(
+            title: "o ladrão", tagPaths: ["a}b", "percy/pt-en"],
+            blocks: [.init(text: "A.")])
+        let parsed = try VariorumDocument.parse(VariorumDocument.serialize(tagged))
+        #expect(parsed.title == "o ladrão")
+        #expect(parsed.tagPaths == ["percy/pt-en"])
+        #expect(parsed.blocks.map(\.text) == ["A."])
+        let titled = VariorumDocument.Document(
+            title: "x\"}y", tagPaths: ["percy/pt-en"],
+            blocks: [.init(text: "A.")])
+        let parsedTitled = try VariorumDocument.parse(VariorumDocument.serialize(titled))
+        #expect(parsedTitled.title == nil)
+        #expect(parsedTitled.tagPaths == ["percy/pt-en"])
+        #expect(parsedTitled.blocks.map(\.text) == ["A."])
+    }
 }

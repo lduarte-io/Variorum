@@ -62,12 +62,16 @@ import Foundation
 ///   surface block reads as a boundary (P-13n-4); and a blank-chosen fanned
 ///   block right after a FANLESS paragraph exports the very bytes of that
 ///   paragraph's own fan, so its takes re-import onto the paragraph above.
-///   Within that domain rows round-trip (`DocumentImportOperationTests`'s
-///   row pins); the full-fidelity form is 13m's edition.
+///   And BLANK content does not ride (ladder round 2, R2-2): a blank
+///   alternate take and an empty block are neither exported nor re-imported
+///   — a fan [A, ""] comes back [A], an empty block between two others
+///   leaves only its spacing. Within that domain rows round-trip
+///   (`DocumentImportOperationTests`'s row pins); the full-fidelity form is
+///   13m's edition.
 /// - **Parsing is fail-honest:** a malformed Alternates section refuses the
 ///   whole document with the line it found the problem on — never a silent
 ///   partial import (`Failure`). **Any export re-imports** — never refused,
-///   every take arriving (R-ARCH-13na-2): a section with no paragraph above
+///   every NON-BLANK take arriving (R-ARCH-13na-2; R2-2 above): a section with no paragraph above
 ///   it is what the export writes for a fanned block whose chosen take is
 ///   blank, and reads as that block — an empty chosen take with the
 ///   section's takes (except after a fanless paragraph, the corner above);
@@ -202,12 +206,39 @@ public enum VariorumDocument {
     }
 
     /// The header line: `{t:"title"}` then each `{#path}`, space-separated;
-    /// nil when there is nothing to say.
+    /// nil when there is nothing to say. Only tokens the grammar READS BACK
+    /// are written (ladder round 2, R2-3): a title or path carrying the
+    /// grammar's own bytes (a `}`, or `"}` inside a title) would turn the
+    /// whole line into body on re-import — losing every other token with it
+    /// under the F9 tokens-alone rule. Such a value is omitted (the format
+    /// cannot carry it — a recorded limit; the full-fidelity road is 13m's
+    /// edition) and the rest of the header survives.
     public static func headerLine(title: String?, tagPaths: [String]) -> String? {
         var tokens: [String] = []
-        if let title, !title.isEmpty { tokens.append("{t:\"\(title)\"}") }
-        for path in tagPaths where !path.isEmpty { tokens.append("{#\(path)}") }
-        return tokens.isEmpty ? nil : tokens.joined(separator: " ")
+        if let title, !title.isEmpty {
+            let token = "{t:\"\(title)\"}"
+            let read = CaptureTokens.readLine(token)
+            if read.title == title, read.tagPaths.isEmpty,
+                read.text.allSatisfy(CaptureTokens.isHorizontal) {
+                tokens.append(token)
+            }
+        }
+        for path in tagPaths where !path.isEmpty {
+            let token = "{#\(path)}"
+            let read = CaptureTokens.readLine(token)
+            if read.tagPaths == [path], read.title == nil,
+                read.text.allSatisfy(CaptureTokens.isHorizontal) {
+                tokens.append(token)
+            }
+        }
+        guard !tokens.isEmpty else { return nil }
+        // The JOINED line must read back whole too (tokens alone) — a guard
+        // against token interaction; a line that would read as body is no
+        // header at all.
+        let line = tokens.joined(separator: " ")
+        let read = CaptureTokens.readLine(line)
+        guard read.foundToken, read.text.allSatisfy(CaptureTokens.isHorizontal) else { return nil }
+        return line
     }
 
     /// **THE ONE SERIALIZER of a body** — `Queries.exportPost`'s, too. Each

@@ -465,8 +465,12 @@ the canonical export never writes one, an LLM essentially never will).
 *Added by the ladder fix round:* an untitled, untagged note whose FIRST
 paragraph is nothing but brace tokens copies with no header, so that
 paragraph re-imports as the header (F9's residual — prose beside a token is
-body since F9); a PACKAGE inside an imported folder (`.rtfd`,
-`.textbundle`) is passed over, its text never imported (F7); and a
+body since F9); a directory inside an imported folder is passed over as a
+PACKAGE only when THIS Mac's LaunchServices says it is one (R2-4 — on the
+Pro, `.rtfd` reads as a package and is skipped, while `.textbundle` and an
+extension-named plain folder like `percy.v2` read as ordinary directories
+and walk in as chapters; the door-level shapes and the Air's probe are
+VX-120's); and a
 multi-item gesture whose op refuses on item 2+ still rolls the earlier
 items back through tombstoning inverses (they would sit in the Trash beside
 the refusal) — every folder-shape refusal is now a planner preflight (E13's
@@ -551,8 +555,10 @@ arriving mid-flight still could (F6's recorded class).
   unlabeled, and the default), nor locked or archived states; the three
   byte-level corners (one stored trailing newline reads unspaced; a blank
   line inside a surface block is a boundary; a blank-chosen fan after a
-  fanless paragraph lands on that paragraph) stand. Any export re-imports
-  (never refused, every take arriving). The source's wording is
+  fanless paragraph lands on that paragraph) stand; and BLANK content does
+  not ride (R2-2) — a blank alternate take and an empty block are neither
+  exported nor re-imported. Any export re-imports (never refused, every
+  NON-BLANK take arriving). The source's wording is
   `Domain/VariorumDocument.swift`'s type doc comment.
 - **AppSpec §12** gains the import door (File ▸ Import… — a file → the
   Pool, a folder → a book; the Bookcase drop — a context mint onto the
