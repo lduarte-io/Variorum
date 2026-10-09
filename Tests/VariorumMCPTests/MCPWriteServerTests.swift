@@ -139,7 +139,11 @@ struct MCPWriteServerTests {
                 calls.append(("add_take", ["block_id": .string(blockID), "text": .string("ai"), "label": .string("x")]))
                 calls.append(("add_comment", ["block_id": .string(blockID), "text": .string("a note")]))
             }
-            calls.append(("save_lens", ["note_id": .string(note.id), "name": .string("hers"), "take_ids": .array([takeIDs[0], takeIDs[1]])]))
+            // The lens picks her NON-chosen take (mutation check 2 of the unit
+            // record: picking only chosen takes could not see a lens that
+            // moved the chosen pointer — the first draft of this pin did).
+            calls.append(("save_lens", ["note_id": .string(note.id), "name": .string("hers"),
+                                        "take_ids": .array([.string(branch.id), takeIDs[1]])]))
             // Every write-new door, aimed at what is hers — each must refuse
             // at the rung (they are not even listed).
             calls.append(("create_note", ["text": .string("x"), "book_id": .string(book.id)]))
