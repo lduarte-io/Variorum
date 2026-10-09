@@ -506,7 +506,7 @@ U1 from this section.
 | # | Piece | Status |
 |---|---|---|
 | P0 | This record | DONE (this commit) |
-| P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | IN-PROGRESS |
+| P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | DONE — facts + proposal below; RULING PENDING |
 | P2 | SDK dependency, own commit (`exact: "0.12.1"`) + `VariorumMCP` / `VariorumMCPTests` targets + license notices | NOT-STARTED |
 | P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion + adoption recreation | NOT-STARTED |
 | P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | NOT-STARTED |
@@ -531,13 +531,89 @@ U1 from this section.
   a bare `claude mcp add variorum -- …` registers for the CURRENT
   DIRECTORY ONLY; the everywhere form is `-s user`.
 
-### Probe facts (A-10)
+### Probe facts (A-10) — run 2026-10-09 on the Pro, macOS 27 (no Variorum instance running throughout; throwaway C probes in the session scratchpad; every artifact removed after — no probe sockets, containers, launchd jobs or dotfiles remain)
 
-*(PENDING — written as each probe lands)*
+**(a) A process outside the app reaching a socket INSIDE the app's container.**
+A listener bound `~/Library/Containers/io.lduarte.Variorum.debug/Data/probe-a.sock`
+(the REAL Debug app's container, mode 0600). Clients:
+- from this Claude shell (inherits the terminal's grants): CONNECT OK.
+- as a **launchd job** (`launchctl bootstrap gui/$UID`, ppid 1 — its own
+  TCC-responsible process, inheriting NO terminal grants), ad-hoc signed:
+  *[removed for publication]*
+  5× in one job: **5/5 CONNECT OK**.
+- **The control that makes this mean something:** the SAME launchd vantage
+  opening a plain FILE in that container
+  (`Data/Library/Preferences/io.lduarte.Variorum.debug.plist`, `O_RDONLY`)
+  is REFUSED — `errno=1 Operation not permitted`, returned at once (no
+  hang that would suggest a pending dialog; no TCC log line was readable).
+  So App-Data container protection is LIVE on this machine, and it gates
+  file opens but NOT `stat`/`connect` on a socket in the container.
+- No TCC prompt was answered by this session (none was observable; the
+  screen was not watched — the orchestrator may confirm no "would like to
+  access data from other apps" dialog appeared on her screen ~13:47).
+
+**(b) A SANDBOXED process binding an AF_UNIX listener.** Probe = a minimal
+`.app` bundle (Info.plist id), team-signed with hardened runtime + ONLY
+`com.apple.security.app-sandbox` (an ad-hoc, bundle-less sandboxed tool
+SIGTRAPs at sandbox init — exit 133 — so the real helper/app shape was used):
+- bind at its container's Data root: **BIND OK + self-connect OK** (no
+  `network.server`/`network.client` needed for AF_UNIX).
+- bind at `Data/tmp/` (the sandbox's `$TMPDIR` is `<container>/Data/tmp/`): OK.
+- bind beside the store (`Data/Library/Application Support/Variorum-dev/…`):
+  **path too long — 128 bytes vs `sun_path`'s 104** (103 usable). The
+  socket cannot live beside the store under a plain path.
+- `~/.variorum-mcp-probe/` with NO exception: `mkdir` EPERM.
+- WITH the narrow `temporary-exception.files.home-relative-path.read-write`
+  naming that dir: `mkdir` OK, but **`bind()` REFUSED — EPERM**; adding
+  `network.server` + `network.client`: **still EPERM**. A sandboxed
+  listener can bind ONLY inside its container; A-10's named fallback (a
+  home-relative socket dir under a temp exception) does NOT work.
+- Path budget (a plain path): Release `…/io.lduarte.Variorum/Data/` + a
+  17-char name = 82 bytes for this user; Debug `…/Data/tmp/` + name = 92.
+
+**(c) The setup press under sandbox.** From the plain sandboxed probe:
+- read-open `~/.claude.json`: **EPERM**.
+- spawn a child to write in `~` (children inherit the sandbox): **EPERM**.
+- spawn `~/.local/bin/claude --version`: **EPERM — the sandboxed app
+  cannot even EXECUTE the Claude CLI**, so "run `claude mcp add` for her"
+  is impossible from the app as built.
+- with an exact-path `home-relative-path.read-write` exception naming a
+  dotfile (`/.variorum-probe-c.json` as the stand-in): create/open **OK** —
+  so a `/.claude.json` exception WOULD let the app write Claude Code's
+  config file directly.
+- Not probed (screen-touching): an Open-panel (powerbox) pick of
+  `~/.claude.json`; opening Terminal with a written `.command` file
+  (files a sandboxed app writes are quarantined) or via Apple Events
+  (needs the Automation consent prompt + an apple-events exception).
 
 ### Decisions, forks, PROVISIONALs
 
-*(PENDING)*
+**FORK A-10 — returned to the orchestrator 2026-10-09 with this proposal
+(build of P7's path rule and P8's press waits for the ruling):**
+- **Socket home — PROPOSAL: the app's OWN container, R-13n-3's letter kept
+  whole.** `<container>/Data/mcp.sock` (the sandboxed app's
+  `NSHomeDirectory()`; the shim computes the same from its bundle id and
+  the REAL home via `getpwuid`). Both ends use `bindat`/`connectat` with a
+  directory fd + the short relative name, so `sun_path`'s 104-byte limit
+  can never bite a long username. The shim tells the two failures apart:
+  ENOENT/ECONNREFUSED ⇒ "Variorum must be open" (R-13n-3's honest
+  refusal); EPERM/EACCES ⇒ a distinct honest refusal naming macOS
+  blocking the connection (the probed protection boundary, if a future
+  macOS extends App-Data protection to `connect`). No fallback location
+  is built (the named one does not work — (b)). Re-verify (a) after each
+  macOS point release (a TEXTKIT2-§5-style line for the door).
+- **Setup press — PROPOSAL: primary-copy-with-receipt, NO entitlement
+  widening.** The press copies `claude mcp add -s user variorum --
+  "<this app's own shim path>"` and the pane says so in its own line; the
+  command is shown verbatim and selectable beneath. Its verb must not
+  claim a setup it does not perform (P-2) — proposed **"Copy setup
+  command"** (the pane's technical register). Why not the exception road
+  (`/.claude.json` read-write, which works per (c)): Claude Code rewrites
+  that file whole and often — a JSON merge by a second process races it
+  in both directions — and its layout is Claude Code's private state, not
+  a documented interface. `-s user` is a deliberate deviation from the
+  mockup's command (default `local` would register Variorum only for the
+  folder she ran it in — the external fact above).
 
 ### Machinery notes
 
