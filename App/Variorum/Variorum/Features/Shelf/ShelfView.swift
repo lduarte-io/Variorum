@@ -204,7 +204,7 @@ struct ShelfView: View {
             .onDrop(
                 of: BookcaseImportDrop.types,
                 delegate: BookcaseImportDrop(
-                    session: session, targeted: $importDropTargeted,
+                    session: session, shelfID: model.mintShelfID, targeted: $importDropTargeted,
                     speak: { speech in
                         switch speech.kind {
                         case .receipt: session.status.receipt(speech.text)

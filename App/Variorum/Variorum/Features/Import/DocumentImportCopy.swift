@@ -107,6 +107,8 @@ nonisolated enum DocumentImportCopy {
             return "\u{201C}\(footer)\u{201D} closes a section that was never opened"
         case .noImportableFiles:
             return "it holds no .md, .txt or .variorum files"
+        case .blankChapterName:
+            return "one of its folders has a blank name, and a chapter needs one"
         }
     }
 

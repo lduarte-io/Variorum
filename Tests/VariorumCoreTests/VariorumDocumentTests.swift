@@ -441,6 +441,26 @@ struct VariorumDocumentTests {
         }
     }
 
+    @Test func aChapterFolderWithABlankNameRefusesTheFolderBeforeAnythingMints() {
+        // Ladder F6: a chapter is named by its folder, and a name that trims
+        // to nothing is no name — the op refused it MID-gesture, after the
+        // gesture's earlier items had landed (their rollback left them in the
+        // Trash). The plan refuses it first, like every folder-shape refusal.
+        #expect(throws: VariorumDocument.Failure(.blankChapterName)) {
+            try VariorumDocumentFolder.plan(
+                folderName: "Book", files: [file("b.md"), file(" /c.md")])
+        }
+        #expect(throws: VariorumDocument.Failure(.blankChapterName)) {
+            try VariorumDocumentFolder.plan(
+                folderName: "Book", files: [file("b.md")], subfolders: ["Chapter 1", " \t"])
+        }
+        // A deeper folder's name is never a chapter's — it rides as ever.
+        #expect(throws: Never.self) {
+            try VariorumDocumentFolder.plan(
+                folderName: "Book", files: [file("Ch/ /d.md")], subfolders: ["Ch", "Ch/ "])
+        }
+    }
+
     @Test func namesTakenFromThePathArePrecomposedButTextIsNot() throws {
         // macOS hands paths back DECOMPOSED ("a" + U+0303); a name she would
         // type is precomposed ("ã"). Swift compares the two equal, SQLite does

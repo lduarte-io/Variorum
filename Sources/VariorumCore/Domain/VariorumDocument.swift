@@ -247,6 +247,10 @@ public enum VariorumDocument {
             case endWithoutAlternates
             /// A folder with nothing importable in it (folder imports only).
             case noImportableFiles
+            /// A chapter folder (a first-level subfolder) whose name is blank
+            /// once trimmed — a chapter needs a name (folder imports only;
+            /// ladder F6: refused in the plan, before anything is minted).
+            case blankChapterName
         }
 
         public var reason: Reason

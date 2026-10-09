@@ -243,6 +243,9 @@ enum DocumentImportPanel {
 /// the board's own business and never lights this), and fires the one door.
 struct BookcaseImportDrop: DropDelegate {
     let session: AppSession
+    /// The shelf the board is solo'd on (`ShelfViewModel.mintShelfID`), nil
+    /// from All.
+    let shelfID: String?
     @Binding var targeted: Bool
     let speak: @MainActor (DocumentImportSpeech) -> Void
 
@@ -268,21 +271,25 @@ struct BookcaseImportDrop: DropDelegate {
         targeted = false
         let providers = info.itemProviders(for: Self.types)
         guard !providers.isEmpty else { return false }
-        let session = self.session
-        let speak = self.speak
+        let drop = self
         Task { @MainActor in
             var urls: [URL] = []
             for provider in providers {
                 if let url = await Self.loadFileURL(provider) { urls.append(url) }
             }
             guard !urls.isEmpty else {
-                speak(DocumentImportSpeech(
+                drop.speak(DocumentImportSpeech(
                     kind: .refusal, text: DocumentImportCopy.nothingToImport, opens: nil))
                 return
             }
-            speak(await DocumentImporter.importURLs(urls, session: session))
+            drop.speak(await drop.land(urls))
         }
         return true
+    }
+
+    /// What the drop does with the files it carried — the import door.
+    func land(_ urls: [URL]) async -> DocumentImportSpeech {
+        await DocumentImporter.importURLs(urls, session: session)
     }
 
     nonisolated private static func loadFileURL(_ provider: NSItemProvider) async -> URL? {

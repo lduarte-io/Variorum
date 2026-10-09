@@ -16,6 +16,7 @@ import AppKit
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -191,6 +192,124 @@ struct DocumentImportDoorTests {
                 kind: .refusal,
                 text: "Couldn\u{2019}t import \u{201C}photo.jpg\u{201D} \u{2014} only .md, .txt and .variorum files import.",
                 opens: nil))
+        }
+    }
+
+    // MARK: - Ladder round 1 (F2, F3, F6, F7)
+
+    /// F2: the Bookcase drop is a CONTEXT MINT (AppSpec §12 — "a context mint
+    /// lands on the solo'd shelf"; the sitting record §19.1, "you're looking
+    /// at where you're filing"): a folder dropped while a shelf is solo'd
+    /// lands on that shelf, so the book appears on the board it was dropped
+    /// on; dropped from All it lands unshelved (§19). The delegate is built
+    /// exactly as `ShelfView` builds it, from the board's `mintShelfID`.
+    @Test func aFolderDroppedOnASoloedShelfLandsOnThatShelf() async throws {
+        try await withDoorSession { session in
+            let suite = "variorum-13na-door-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let model = ShelfViewModel(session: session, defaults: defaults)
+            let observe = Task { await model.start() }
+            defer { observe.cancel() }
+            let work = try #require(await model.createShelf(named: "Work"))
+            for _ in 0..<200 where model.shelves.count != 1 {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+
+            let filed = try folder("filed here", ["a.md": "A."])
+            let loose = try folder("loose book", ["b.md": "B."])
+            defer {
+                try? FileManager.default.removeItem(at: filed.deletingLastPathComponent())
+                try? FileManager.default.removeItem(at: loose.deletingLastPathComponent())
+            }
+            func shelf(of name: String) async throws -> String? {
+                try await session.database.read {
+                    try String.fetchOne($0, sql: "SELECT shelf_id FROM reading WHERE name = ?", arguments: [name])
+                }
+            }
+
+            model.scope = .shelf(work)
+            let soloDrop = BookcaseImportDrop(
+                session: session, shelfID: model.mintShelfID, targeted: .constant(false), speak: { _ in })
+            #expect(await soloDrop.land([filed]).kind == .receipt)
+            #expect(try await shelf(of: "filed here") == work, "dropped on Work, solo'd — it lands on Work")
+
+            model.scope = .all
+            let allDrop = BookcaseImportDrop(
+                session: session, shelfID: model.mintShelfID, targeted: .constant(false), speak: { _ in })
+            #expect(await allDrop.land([loose]).kind == .receipt)
+            #expect(try await shelf(of: "loose book") == nil, "dropped from All — unshelved")
+        }
+    }
+
+    /// F3: a receipt says "to the Pool" only about a note that IS in the Pool
+    /// (bookless). A living book whose rule hears the imported `{#dream}`
+    /// seats the note (IC-8, the one application road), so the receipt names
+    /// the book that took it.
+    @Test func aNoteCollectedByALivingBookIsNotSaidToLandInThePool() async throws {
+        try await withDoorSession { session in
+            _ = try await session.runner.run { ops in
+                let tag = try ops.createTag(name: "dream")
+                return try ops.createReading(
+                    name: "dream journal", kind: .book,
+                    querySpec: try RuleGrammar.encode(.tag(tag.id))).id
+            }
+            let dir = try folder("loose", [
+                "flying.md": "{#dream}\n\nI was flying.",
+                "grocery list.md": "Eggs.",
+            ])
+            defer { try? FileManager.default.removeItem(at: dir.deletingLastPathComponent()) }
+
+            let one = await DocumentImporter.importURLs(
+                [dir.appendingPathComponent("flying.md")], session: session)
+            #expect(one.kind == .receipt)
+            #expect(one.text
+                == "Imported \u{201C}flying\u{201D} \u{2014} collected by \u{201C}dream journal\u{201D} \u{00B7} \u{2325}\u{2318}Z undoes")
+
+            let two = await DocumentImporter.importURLs(
+                [dir.appendingPathComponent("grocery list.md"), dir.appendingPathComponent("flying.md")],
+                session: session)
+            #expect(two.text == "Imported 1 note to the Pool and 1 note collected by "
+                + "\u{201C}dream journal\u{201D} \u{00B7} \u{2325}\u{2318}Z undoes")
+        }
+    }
+
+    /// F6: a chapter folder whose name trims to nothing refuses in the plan,
+    /// before item one mints — so a refused gesture leaves nothing behind,
+    /// not even the earlier items rolled back into the Trash.
+    @Test func aBlankChapterFolderRefusesBeforeAnythingIsMinted() async throws {
+        try await withDoorSession { session in
+            let loose = try folder("loose", ["a.md": "A."])
+            let book = try folder("spaced book", ["b.md": "B.", " /c.md": "C."])
+            defer {
+                try? FileManager.default.removeItem(at: loose.deletingLastPathComponent())
+                try? FileManager.default.removeItem(at: book.deletingLastPathComponent())
+            }
+            let speech = await DocumentImporter.importURLs(
+                [loose.appendingPathComponent("a.md"), book], session: session)
+            #expect(speech.kind == .refusal)
+            #expect(speech.text == "Couldn\u{2019}t import \u{201C}spaced book\u{201D} \u{2014} "
+                + "one of its folders has a blank name, and a chapter needs one.")
+            #expect(try await count(session, "SELECT COUNT(*) FROM container") == 0, "the Trash stays empty")
+            #expect(try await count(session, "SELECT COUNT(*) FROM reading") == 0)
+            #expect(session.undoStack.depth == 0)
+        }
+    }
+
+    /// F7: a PACKAGE inside a folder (an `.rtfd`, a system-declared package)
+    /// is neither a chapter nor a file — the walk skips its contents, and the
+    /// package itself must not become an empty chapter named after it.
+    @Test func aPackageInsideAFolderIsNeitherAChapterNorAFile() async throws {
+        try await withDoorSession { session in
+            let url = try folder("with a package", [
+                "a.rtfd/TXT.rtf": "{\\rtf1\\ansi x}",
+                "b.md": "B.",
+            ])
+            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+            let speech = await DocumentImporter.importURLs([url], session: session)
+            #expect(speech.text
+                == "Imported \u{201C}with a package\u{201D} \u{2014} 1 note \u{00B7} \u{2325}\u{2318}Z undoes")
+            #expect(try await count(session, "SELECT COUNT(*) FROM reading_section") == 0)
         }
     }
 

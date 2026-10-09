@@ -723,6 +723,23 @@ ledger; her merge).
   tokens (e.g. a paragraph reading exactly `{#dream}`) copies with no
   header, so that paragraph re-imports as the header — the format has no
   escape; a titled or tagged note is immune (its header comes first).
+- **The app-side pins, red first (one WIP commit — the pins + two
+  behavior-neutral scaffolds they need to compile; each fix commit below
+  turns its own pin green):** the scaffolds are F6's `blankChapterName`
+  reason + its copy line (never thrown yet) and F2's drop seam
+  (`BookcaseImportDrop.shelfID` + `land(_:)`, landing exactly as built —
+  no shelf reaches the op). Red runs: core
+  `VariorumDocumentTests.aChapterFolderWithABlankNameRefusesTheFolderBeforeAnythingMints`
+  (2 issues — no throw; its deeper-folder line is a guard, green on both
+  sides); Mac `DocumentImportDoorTests` under a held stage claim — 13
+  tests, 9 green, the 4 new pins red with 7 issues:
+  `aFolderDroppedOnASoloedShelfLandsOnThatShelf` (the book's `shelf_id`
+  nil), `aNoteCollectedByALivingBookIsNotSaidToLandInThePool` (old text
+  "Imported “flying” to the Pool · ⌥⌘Z undoes"),
+  `aBlankChapterFolderRefusesBeforeAnythingIsMinted` (the op's
+  mid-gesture refusal; item one's note left in the Trash),
+  `aPackageInsideAFolderIsNeitherAChapterNorAFile` (old text "… 1 note in
+  1 chapter …" — the `.rtfd` became a chapter). — DONE (this line's commit).
 - F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.
 - F2 (the Bookcase drop is a context mint) — NOT-STARTED.
 - F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.
