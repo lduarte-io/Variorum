@@ -208,3 +208,34 @@ here, except for the R2-1 note for VX-119 and the R2-4 probe answer for VX-120.
 STATUS: ROUND 2 COMPLETE — 0 BLOCKER · 0 MAJOR · 1 MINOR (R2-1, a regression the F1 fix introduced, probe red with a
 verified fix shape) · 3 NIT (R2-2, R2-3, R2-4: record and wording). No new BLOCKER or MAJOR, so per the ladder rule no
 round 3 is earned. R2-1's fix and pin are the orchestrator's to disposition.
+
+---
+
+## ORCHESTRATOR DISPOSITIONS, ROUND 2 (Fable — the ladder closes here: 0B/0M, no round 3 earned)
+
+All nine round-1 dispositions verified implemented-as-worded (the table
+above). The four new findings, each dispositioned and landed:
+
+- **R2-1 MINOR — FIXED (`ead486c4`), orchestrator-written at adjudication.**
+  The reviewer's exact fix shape (verified in its scratch): a retried undo
+  that tombstoned nothing returns nil and never overwrites the stamp box.
+  Pin `aRetriedCompoundUndoStillRedoesEveryBook` red-on-old (2 issues),
+  21/21 after. The rule RIDES VX-119's sweep (its description updated): an
+  inverse that tombstones nothing never overwrites the stamp.
+- **R2-2 NIT — FIXED, wording (`1ae2ebc0`).** The domain statements (source
+  doc comment + the closeout proposals) add the blank-content exclusion;
+  "every take arriving" reads "every NON-BLANK take arriving".
+- **R2-3 NIT — FIXED as option (b) (`1ae2ebc0`), orchestrator-written.**
+  The serializer writes only tokens the grammar reads back; a brace-bearing
+  tag or quote-brace title is omitted (the format's recorded limit) and the
+  REST of the header survives. Pin red-on-old with 5 issues. Option (a)'s
+  known-limits-only road was rejected: losing the title and every OTHER tag
+  to one odd tag name is silent data loss on the Copy-for-AI road.
+- **R2-4 NIT — FIXED, wording (`1ae2ebc0`).** The package line now states
+  the LaunchServices dependence and carries the Pro's probe answer; the
+  door-level shapes and the Air's probe are VX-120's (description updated).
+
+Suites after the round-2 fixes: the four 13n-a + export + paste = 86/14
+green, 0 skipped, headless. The orchestrator's fixes are pin-covered but
+NOT cold-reviewed by a fresh pass (no round 3 is earned — 0B/0M); flagged
+honestly in her morning bundle.
