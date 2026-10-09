@@ -241,6 +241,8 @@ unit should never touch the real store at all.
 - STATE: **BUILT — GUI WALK HELD** (implementer session 1, `opus-implementer`,
   2026-10-09 04:20–05:25 MDT). Every piece committed and pushed; the final
   suites green at the end (piece 6). No revert is in flight.
+- FIX PASS (the architect's rulings R-ARCH-13na-1/2): see "FIX PASS
+  (rulings)" at the end of this record — its own live status.
 - Per-piece lines land here as `DONE (hash)` / `IN-PROGRESS — exactly what
   remains` / `NOT-STARTED`; unverified claims marked PENDING; revert
   announcements per the resiliency protocol (no revert starts until this
@@ -526,6 +528,22 @@ the canonical export never writes one, an LLM essentially never will).
   behaviour-identical on the phone, its target builds).
 - **A follow-up ticket** for FORK-D if the architect agrees (the Library
   drop's files through `DocumentImporter`).
+
+### FIX PASS (rulings) — LIVE STATUS (continuation implementer, `opus-implementer`, 2026-10-09)
+
+Scope, exactly: R-ARCH-13na-1 and R-ARCH-13na-2 (the section below this
+record). No other refactor; the app is untouched; no revert is in flight.
+
+1. **R-ARCH-13na-1 — the inverse-join body reading.** — IN-PROGRESS: pins
+   first (red on the as-built parse), then `VariorumDocument.parse`'s body
+   reading, then the as-built expectations that encoded the bulk reading.
+2. **R-ARCH-13na-2 — the paragraph-less Alternates section is legal.** —
+   NOT-STARTED: the parse mints `Block(text: "", alternates:)` for a
+   paragraph-less section carrying a non-blank take (`importDocument`
+   already mints an empty take 0 as chosen AND default); a paragraph-less
+   section with no take keeps refusing.
+3. **Finals** — NOT-STARTED: the four 13n-a core suites + the export
+   suites, headless (`swift test --filter`), counts here.
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 
