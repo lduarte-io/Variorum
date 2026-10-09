@@ -1,0 +1,400 @@
+import Dependencies
+import Foundation
+import GRDB
+import MCP
+import System
+import Testing
+
+@testable import VariorumCore
+@testable import VariorumMCP
+@testable import VariorumMCPSocket
+
+// 13n-b U1 P6 — THE SERVER END TO END: a real `MCPServerHost` bound on a real
+// socket in a temp directory, driven by the MCP SDK's own `Client` over that
+// socket (the framing the shim forwards verbatim). These are the verification
+// bar's READ half, pinned PER TOOL: reads never exceed the grant; journals
+// never ride a standing grant; a once grant is spent once; while-connected
+// ends with the connection; revocation and denial are immediate; a pending
+// client reads nothing and sees no tools.
+
+/// One live server over an in-memory store, with deterministic ids and clock.
+final class ServerHarness: @unchecked Sendable {
+    let database: AppDatabase
+    let operations: Operations
+    let directory: URL
+    let host: MCPServerHost
+    private var openFDs: [Int32] = []
+
+    init() throws {
+        let database = try AppDatabase.inMemory()
+        self.database = database
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        operations = withDependencies {
+            $0.database = database
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+        } operation: { Operations() }
+        directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("vmcp-\(UUID().uuidString.prefix(8))", isDirectory: true)
+        host = MCPServerHost(database: database, operations: operations, directory: directory, version: "test")
+        try host.start()
+    }
+
+    /// Fixture writes read the position jitter's RNG from the CALLER's
+    /// context (`FractionalIndex`), so a test body runs inside this scope —
+    /// it sets only the RNG; the captured `Operations` keeps its own ids and
+    /// clock.
+    func within<T>(_ body: () async throws -> T) async throws -> T {
+        try await withDependencies {
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+        } operation: {
+            try await body()
+        }
+    }
+
+    func tearDown() {
+        host.stop()
+        for fd in openFDs { close(fd) }
+        try? FileManager.default.removeItem(at: directory)
+    }
+
+    /// A client connected over the socket and initialized as `name`.
+    func connect(as name: String) async throws -> (client: Client, fd: Int32) {
+        guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
+            throw HarnessFailure("could not connect")
+        }
+        openFDs.append(fd)
+        let transport = StdioTransport(
+            input: FileDescriptor(rawValue: fd), output: FileDescriptor(rawValue: fd))
+        let client = Client(name: name, version: "1.0")
+        _ = try await client.connect(transport: transport)
+        return (client, fd)
+    }
+
+    func hangUp(_ connection: (client: Client, fd: Int32)) async {
+        await connection.client.disconnect()
+        shutdown(connection.fd, SHUT_RDWR)
+    }
+
+    func client(_ name: String) throws -> MCPClient {
+        guard let client = try database.read({ try Queries.mcpClient($0, name: name) }) else {
+            throw HarnessFailure("no client row for \(name)")
+        }
+        return client
+    }
+
+    func approve(_ name: String, _ spec: Operations.MCPGrantSpec?) throws -> String? {
+        try operations.approveMCPClient(try client(name).id, granting: spec)
+    }
+
+    /// Wait (bounded) until `condition` holds.
+    func eventually(_ condition: () throws -> Bool) async throws -> Bool {
+        for _ in 0..<200 {
+            if try condition() { return true }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        return try condition()
+    }
+}
+
+struct HarnessFailure: Error, CustomStringConvertible {
+    let description: String
+    init(_ description: String) { self.description = description }
+}
+
+func text(_ result: (content: [Tool.Content], isError: Bool?)) -> String {
+    result.content.compactMap { content -> String? in
+        if case .text(let text, _, _) = content { return text }
+        return nil
+    }.joined()
+}
+
+func json(_ result: (content: [Tool.Content], isError: Bool?)) throws -> [String: Any] {
+    try #require(try JSONSerialization.jsonObject(with: Data(text(result).utf8)) as? [String: Any])
+}
+
+private func book(_ spec: String, _ duration: MCPGrantRule.Duration = .always) -> Operations.MCPGrantSpec {
+    .init(rung: .read, scopeKind: .book, scopeID: spec, duration: duration)
+}
+
+@Suite("13n-b U1 — the MCP server end to end (the read rung)", .serialized)
+struct MCPServerTests {
+    // MARK: - The catalog (P-1 on the wire)
+
+    @Test func everyDeclaredToolIsHandledAndEveryHandledToolDeclared() {
+        let declared = Set(MCPToolCatalog.all.map(\.name))
+        #expect(declared == MCPReadTools.handledToolNames)
+        #expect(declared == ["list_books", "list_notes", "read_note", "search", "export_note"])
+        #expect(MCPToolCatalog.all.allSatisfy { $0.rung == .read }, "U1 ships the read rung only")
+        for declaration in MCPToolCatalog.all {
+            #expect(declaration.inputSchema.objectValue?["type"] == "object")
+        }
+    }
+
+    // MARK: - A new client: a pending request, nothing readable
+
+    @Test func aNewClientIsAPendingRequestThatSeesNoToolsAndReadsNothing() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let note = try h.operations.createPost(title: "ch 7")
+            _ = try h.operations.newBlock(in: note.id, text: "secret words")
+            let connection = try await h.connect(as: "claude-code")
+            #expect(try h.client("claude-code").state == .pending)
+            #expect(try await connection.client.listTools().tools.isEmpty, "no door that can never act (P-2)")
+            let refused = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
+            #expect(refused.isError == true)
+            #expect(text(refused).contains("connection request is waiting"))
+            #expect(!text(refused).contains("secret"))
+            let activity = try await h.database.read { try Queries.mcpActivity($0, limit: 1) }
+            #expect(activity.first?.act == "read_note" && activity.first?.allowed == false)
+            await h.hangUp(connection)
+        }
+    }
+
+    // MARK: - A book grant: reads the book, refused past it
+
+    @Test func aBookGrantReadsTheBookAndIsRefusedPastIt() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "the lightning thief", kind: .book)
+            let other = try h.operations.createReading(name: "private drafts", kind: .book)
+            let inside = try h.operations.createPost(title: "ch 7")
+            _ = try h.operations.newBlock(in: inside.id, text: "Honestly, I never asked for the observatory.")
+            _ = try h.operations.addPostToReading(inside.id, to: shared.id)
+            let outside = try h.operations.createPost(title: "drafts")
+            _ = try h.operations.newBlock(in: outside.id, text: "never for the client")
+            _ = try h.operations.addPostToReading(outside.id, to: other.id)
+            let bookless = try h.operations.createPost(title: "pool note")
+            _ = try h.operations.newBlock(in: bookless.id, text: "also never")
+
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", book(shared.id))
+
+            let names = Set(try await connection.client.listTools().tools.map(\.name))
+            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note"])
+
+            let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
+            #expect(books?.map { $0["id"] as? String } == [shared.id], "only the shared book is listed")
+            #expect(books?.first?["notes"] as? Int == 1)
+
+            let listed = try json(try await connection.client.callTool(name: "list_notes"))["notes"] as? [[String: Any]]
+            #expect(listed?.map { $0["id"] as? String } == [inside.id])
+            let inBook = try json(try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(shared.id)]))["notes"] as? [[String: Any]]
+            #expect(inBook?.map { $0["id"] as? String } == [inside.id])
+
+            let read = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(inside.id)])
+            #expect(read.isError != true)
+            let document = try await h.database.read { try Queries.variorumDocumentText($0, postID: inside.id) }
+            #expect(text(read) == document, "read_note IS the Level 0 format")
+            let exported = try await connection.client.callTool(name: "export_note", arguments: ["note_id": .string(inside.id)])
+            let rendered = try await h.database.read { try Queries.renderedText($0, containerID: inside.id) }
+            #expect(text(exported) == rendered)
+
+            // REFUSED PAST IT — every road, one answer, no words leaked.
+            for noteID in [outside.id, bookless.id, "no-such-note"] {
+                for tool in ["read_note", "export_note"] {
+                    let refused = try await connection.client.callTool(name: tool, arguments: ["note_id": .string(noteID)])
+                    #expect(refused.isError == true, "\(tool) \(noteID)")
+                    #expect(text(refused).hasPrefix("That note isn't shared with this client"))
+                    #expect(!text(refused).contains("never"))
+                }
+            }
+            let refusedBook = try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(other.id)])
+            #expect(refusedBook.isError == true)
+            #expect(text(refusedBook).hasPrefix("That book isn't shared with this client"))
+            let refusedWing = try await connection.client.callTool(name: "list_notes", arguments: ["wing_id": ""])
+            #expect(refusedWing.isError == true, "a book grant never lists the whole wing")
+            await h.hangUp(connection)
+        }
+    }
+
+    // MARK: - Journals never ride a standing grant
+
+    @Test func journalsNeverRideAStandingGrantOrTheOpenBook() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "mixed", kind: .book)
+            let prose = try h.operations.createPost(title: "prose")
+            _ = try h.operations.newBlock(in: prose.id, text: "lighthouse prose")
+            let entry = try h.operations.createPost(title: "morning pages", profile: .journal)
+            _ = try h.operations.newBlock(in: entry.id, text: "lighthouse diary")
+            _ = try h.operations.addPostToReading(prose.id, to: shared.id)
+            _ = try h.operations.addPostToReading(entry.id, to: shared.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", book(shared.id))
+            _ = try h.operations.grantMCPAccess(
+                try h.client("claude-code").id, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
+            try h.operations.setMCPSwitch(.openBook, on: true)
+
+            for args: [String: Value] in [[:], ["book_id": .string(shared.id)], ["wing_id": ""]] {
+                let notes = try json(try await connection.client.callTool(name: "list_notes", arguments: args))["notes"] as? [[String: Any]]
+                #expect(notes?.compactMap { $0["id"] as? String }.contains(entry.id) == false, "\(args)")
+                #expect(notes?.compactMap { $0["id"] as? String }.contains(prose.id) == true, "\(args)")
+            }
+            let refused = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(entry.id)])
+            #expect(refused.isError == true)
+            #expect(text(refused).contains("journal entry"))
+            let found = try json(try await connection.client.callTool(name: "search", arguments: ["query": "lighthouse"]))
+            let noteIDs = (found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } ?? []
+            #expect(noteIDs.contains(prose.id))
+            #expect(!noteIDs.contains(entry.id), "search never surfaces a journal under a standing grant")
+
+            // A per-ask grant naming the entry reaches it (once).
+            _ = try h.operations.grantMCPAccess(
+                try h.client("claude-code").id, .init(rung: .read, scopeKind: .note, scopeID: entry.id, duration: .once))
+            let once = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(entry.id)])
+            #expect(once.isError != true)
+            #expect(text(once).contains("lighthouse diary"))
+            let again = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(entry.id)])
+            #expect(again.isError == true, "the once grant is spent")
+            await h.hangUp(connection)
+        }
+    }
+
+    // MARK: - A note grant, a wing grant, search's scope
+
+    @Test func aNoteGrantListsAndSearchesOnlyThatNote() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let mine = try h.operations.createPost(title: "shared one")
+            _ = try h.operations.newBlock(in: mine.id, text: "the harbour at dawn")
+            let theirs = try h.operations.createPost(title: "not shared")
+            _ = try h.operations.newBlock(in: theirs.id, text: "the harbour at dusk")
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: mine.id, duration: .always))
+            let names = Set(try await connection.client.listTools().tools.map(\.name))
+            #expect(!names.contains("list_books"), "a note grant can never list a book — the tool is not offered")
+            #expect(names.contains("read_note"))
+            let listed = try json(try await connection.client.callTool(name: "list_notes"))["notes"] as? [[String: Any]]
+            #expect(listed?.map { $0["id"] as? String } == [mine.id])
+            let found = try json(try await connection.client.callTool(name: "search", arguments: ["query": "harbour"]))
+            let ids = (found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } ?? []
+            #expect(ids == [mine.id])
+            let narrowed = try await connection.client.callTool(
+                name: "search", arguments: ["query": "harbour", "note_id": .string(theirs.id)])
+            #expect(narrowed.isError == true)
+            await h.hangUp(connection)
+        }
+    }
+
+    @Test func aWingGrantReachesItsWingOnly() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let work = try h.operations.createWing(name: "Work")
+            let homeNote = try h.operations.createPost(title: "home")
+            _ = try h.operations.newBlock(in: homeNote.id, text: "kettle")
+            let workNote = try h.operations.createPost(title: "work", wingId: work.id)
+            _ = try h.operations.newBlock(in: workNote.id, text: "kettle")
+            let workBook = try h.operations.createReading(name: "reports", kind: .book, wingId: work.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .wing, scopeID: work.id, duration: .always))
+            let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
+            #expect(books?.map { $0["id"] as? String } == [workBook.id])
+            let listed = try json(try await connection.client.callTool(
+                name: "list_notes", arguments: ["wing_id": .string(work.id)]))["notes"] as? [[String: Any]]
+            #expect(listed?.map { $0["id"] as? String } == [workNote.id])
+            let home = try await connection.client.callTool(name: "list_notes", arguments: ["wing_id": ""])
+            #expect(home.isError == true)
+            let found = try json(try await connection.client.callTool(name: "search", arguments: ["query": "kettle"]))
+            let ids = (found["passages"] as? [[String: Any]])?.compactMap { $0["note_id"] as? String } ?? []
+            #expect(ids == [workNote.id])
+            let homeRead = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(homeNote.id)])
+            #expect(homeRead.isError == true)
+            await h.hangUp(connection)
+        }
+    }
+
+    // MARK: - Immediacy: revoke, deny, while connected, the tool list
+
+    @Test func revocationAndDenialLandOnTheVeryNextCall() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "b", kind: .book)
+            let note = try h.operations.createPost(title: "n")
+            _ = try h.operations.addPostToReading(note.id, to: shared.id)
+            let connection = try await h.connect(as: "claude-code")
+            let grantID = try #require(try h.approve("claude-code", book(shared.id)))
+            #expect(try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)]).isError != true)
+            try h.operations.revokeMCPGrant(grantID)
+            #expect(try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)]).isError == true)
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, book(shared.id))
+            #expect(try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)]).isError != true)
+            try h.operations.denyMCPClient(try h.client("claude-code").id)
+            let denied = try await connection.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
+            #expect(denied.isError == true)
+            #expect(text(denied).contains("denied"))
+            #expect(try await connection.client.listTools().tools.isEmpty)
+            await h.hangUp(connection)
+        }
+    }
+
+    @Test func whileConnectedEndsWhenTheClientsLastConnectionCloses() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "b", kind: .book)
+            let first = try await h.connect(as: "claude-code")
+            let second = try await h.connect(as: "claude-code")
+            let grantID = try #require(try h.approve("claude-code", book(shared.id, .connection)))
+            func revoked() throws -> Bool {
+                try h.database.read { try Queries.mcpGrant($0, id: grantID) }?.revokedAt != nil
+            }
+            await h.hangUp(first)
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(try revoked() == false, "another connection of the same client is still open")
+            await h.hangUp(second)
+            #expect(try await h.eventually { try revoked() }, "the last connection closed — while connected ends")
+        }
+    }
+
+    @Test func theToolListIsReannouncedWhenTheGrantsChange() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "b", kind: .book)
+            let connection = try await h.connect(as: "claude-code")
+            let heard = LockIsolated(0)
+            _ = await connection.client.onNotification(ToolListChangedNotification.self) { _ in
+                heard.withValue { $0 += 1 }
+            }
+            _ = try h.approve("claude-code", book(shared.id))
+            #expect(try await h.eventually { heard.value > 0 }, "tools/list_changed after the grant")
+            #expect(!(try await connection.client.listTools().tools.isEmpty))
+            await h.hangUp(connection)
+        }
+    }
+
+    // MARK: - The socket's life
+
+    @Test func theSocketIsPrivateWhileServingAndGoneAfterStop() async throws {
+        let h = try ServerHarness()
+        let path = MCPSocketRoad.socketPath(directory: h.directory)
+        let attributes = try FileManager.default.attributesOfItem(atPath: path)
+        #expect((attributes[.posixPermissions] as? NSNumber)?.intValue == 0o600)
+        #expect(throws: MCPSocketRoad.ListenError(kind: .alreadyServed)) {
+            try MCPSocketRoad.listen(directory: h.directory)
+        }
+        h.tearDown()
+        #expect(!FileManager.default.fileExists(atPath: path), "the socket dies with the server")
+        if case .failure(let failure) = MCPSocketRoad.connect(directory: h.directory) {
+            #expect(failure == .notRunning(errno: ENOENT))
+        } else {
+            Issue.record("nothing should answer after stop")
+        }
+    }
+}
