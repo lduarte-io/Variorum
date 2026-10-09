@@ -413,7 +413,8 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
 
 - **NOT DONE BY THE WALK (first):** the `/Applications` refresh (not this
   session's); no fix of anything seen (anomalies are REPORTED here, never
-  fixed); W6–W7 still to run at this line's commit.
+  fixed). W1–W7 all RUN — every row worked; five anomalies and two
+  hesitations recorded at the end of this record.
 - Stage claimed ("13n-a walk", W1–W7, 60 min); `guard.sh --author` exit 0
   (her app absent, HID idle); the Debug app built from THIS worktree
   (`xcodebuild -scheme Variorum -configuration Debug build`, DerivedData
@@ -517,6 +518,73 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
   `w5-copy-for-ai-receipt-takes-terminal.png`,
   `w5-note-menu-copy-for-ai-write-terminal.png`,
   `w5-copy-for-ai-receipt-write-terminal.png`.
+- **W6 — WORKED.** ⌥⌘Z first (the W1 book gone; "Undid: Import"). The
+  fixture folder dragged from a Finder window (`open -R`, closed again at
+  the end) with `cliclick`, in Terminal: (a) with the **welcome shelf
+  solo'd** (the ladder's owed look, P-13na-6) — the board's outline lit
+  over the empty board, went OFF over a book row, came back over the board;
+  the drop landed the book ON welcome (the strip's welcome solo now listed
+  it first) with the full receipt in the Bookcase bar: "Imported “o ladrão
+  de raios” — 4 notes in 2 chapters · ⌥⌘Z undoes" (whole here — the W1
+  truncation is the book navigator's bar only); undone; (b) with **All**
+  — the same outline behaviour; the drop landed the book UNSHELVED, the
+  same receipt. (c) The plan's open question — **a Finder drag dropped ON a
+  book row** ("the field guide"): no outline, no receipt, nothing landed —
+  the field guide still 42 notes, the Edit menu unchanged — so a row's
+  note-drop does NOT claim a Finder drag (it is a silent no-act, which is
+  the false-offer rule's letter). (d) **A BOOK ROW dragged across the
+  board** ("o ladrão de raios"): the title chip rides the cursor, the
+  board outline never lights (over rows or over empty board); the drag
+  cancelled with Esc, the book unmoved. Captures:
+  `w6-undo-before-drop-bookcase-terminal.png`,
+  `w6-file-drag-over-board-soloed-welcome-terminal.png`,
+  `w6-file-drag-over-book-row-soloed-welcome-terminal.png`,
+  `w6-file-drag-back-over-board-soloed-welcome-terminal.png`,
+  `w6-file-drop-landed-soloed-welcome-terminal.png`,
+  `w6-file-drag-over-board-all-terminal.png`,
+  `w6-file-drag-over-book-row-all-terminal.png`,
+  `w6-file-drop-landed-all-receipt-terminal.png`,
+  `w6-file-drag-over-field-guide-row-terminal.png`,
+  `w6-file-dropped-on-book-row-terminal.png`,
+  `w6-book-row-drag-over-board-no-outline-terminal.png`,
+  `w6-book-row-drag-over-empty-board-mid-terminal.png`,
+  `w6-book-row-drag-cancelled-terminal.png`.
+- **W7 — WORKED.** A copy of the fixture in the session scratchpad with
+  the FIRST `--- end alternates ---` (line 11 of `01 abertura.md`)
+  deleted, imported through File ▸ Import… twice: (a) while the W6 book
+  (same folder name) was still LIVE — the PARSE refusal wins over the E13
+  name preflight; (b) after ⌥⌘Z, in Study — the same refusal, a toast:
+  "Couldn’t import “o ladrão de raios” — “1 o semideus/01 abertura.md”,
+  line 14: a new alternates section starts before the one on line 5
+  ends." — the folder, the file (chapter-relative), the line where the
+  next section opens (14 after the deletion), and line 5. Nothing landed:
+  the Bookcase and the Library unchanged, no new Trash row (the Trash's
+  newest rows are the W7-prep undo's own), and the Edit menu kept "Redo
+  Import" (a refused gesture registers nothing). Captures:
+  `w7-broken-copy-while-same-name-book-live-terminal.png`,
+  `w7-before-clean-import-bookcase-study.png`,
+  `w7-refusal-names-file-and-line-study.png`,
+  `w7-library-nothing-landed-study.png`, `w7-trash-after-walk-study.png`.
+- **Close:** the dev instance quit by identity (`pgrep` empty after);
+  the dev store left in Study (as found), appearance untouched; the W6
+  book undone (the Bookcase as found, plus the dev store's Trash holding
+  the walk's undone imports — each undo leaves the book "and 4 notes" row
+  AND the four notes as their own rows); her clipboard empty as found;
+  the stage released. **ANOMALIES, for the orchestrator (reported, not
+  fixed):** (1) W1 — the import receipt truncates in the book navigator's
+  narrow bottom bar after the door opens the book (both voices; the
+  counts and "⌥⌘Z undoes" never show there, and the line is not exposed
+  to Accessibility); (2) W3 — undoing the import with one of its notes
+  open leaves that pane on the dead note ("in no book", empty, "open
+  tail") and the note in the Open strip; (3) W4 — the redo does not
+  refresh a Library that is on screen (re-entering shows the rows); (4) W5
+  — the Copy-for-AI receipt truncates in Terminal (Write and Takes); (5)
+  visual, minor — the refusal toast sits over the Bookcase's quick-entry
+  field (both voices). **Hesitations (not defects):** the soloed-shelf
+  drop puts an imported book on the Welcome shelf, which §12 says "holds
+  the SEEDED content only" — P-13na-6's context mint and that line meet
+  here; the Trash's double listing of an undone import (book "and 4
+  notes" + each note) reads busy.
 
 ### Implementer calls (each with its one line of reasoning)
 
