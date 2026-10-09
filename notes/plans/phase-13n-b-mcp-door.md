@@ -304,6 +304,24 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-10 (2026-10-09, minutes after R-13nb-7 — her correction,
+  verbatim) — MCP SEARCH REACHES COMMITS BEHIND THE EXPLICIT
+  PARAMETER.** Her words: *"why can AI not search commits? seems wrong
+  to me, annoying to have to do a search yourself bc it's searching
+  commits too. the platform should be AI empowered for ppl who want
+  that."* R-13nb-7's "NEVER via MCP search" arm is SUPERSEDED — it was
+  the architect's carry-forward of U1's as-built state, not her ruling.
+  The amended shape: `search` gains `include_commits` (default false) —
+  the `+ commits` facet's WIRE FORM, honoring R-VX83's letter exactly
+  (a savepoint never lists without the facet; the parameter IS the
+  facet, per call, explicit) — scope-checked per note through the same
+  grant road as passages, P1 ∝ matches. Lands at U3 beside
+  `with_commits`; U1's search-never-reaches-savepoints state flips
+  DELIBERATELY there (any pin asserting it is updated as the ritual,
+  not worked around). R-13nb-7's other arms stand: never ambient on
+  reads, never in the Level 0 text. The ARCHIVED facet stays UI-only
+  (unchanged — she named commits; one word from her flips it the same
+  way if wanted).
 - **R-13nb-9 (2026-10-09, her rider, verbatim) — IDS ARE LIVE, THE
   EVENTUAL FORMAT IS CAREFUL.** Her words: *"I definitely think that
   the eventual format should be very careful about block id - even
@@ -589,7 +607,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
 | 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | BRIEFED — spawning (the brief below) |
-| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, the set-name tool R-13nb-8, the Allow-AI-here row AF-8) | — | NOT STARTED |
+| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8) | — | NOT STARTED |
 | 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
 | 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | **DONE** (`304b41d1` — marker 13 client-side; headless whole-package green) |
