@@ -476,4 +476,49 @@ already logged — build to the recorded wording, don't re-open them.
 
 ## U1 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-*(empty — the U1 implementer writes it)*
+**NOT DONE (kept current; the first line at close):** everything below
+not marked DONE. Session: opus-implementer, 2026-10-09, cut from
+`2738543d`. Record test: a fresh session with ONLY the repo can finish
+U1 from this section.
+
+### Pieces
+
+| # | Piece | Status |
+|---|---|---|
+| P0 | This record | DONE (this commit) |
+| P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | IN-PROGRESS |
+| P2 | SDK dependency, own commit (`exact: "0.12.1"`) + `VariorumMCP` / `VariorumMCPTests` targets + license notices | NOT-STARTED |
+| P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion + adoption recreation | NOT-STARTED |
+| P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | NOT-STARTED |
+| P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | NOT-STARTED |
+| P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | NOT-STARTED |
+| P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — socket home awaits the A-10 ruling |
+| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — the setup press awaits the A-10 ruling |
+| P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
+
+### External facts (resolved this session)
+
+- **MCP Swift SDK:** latest tag `0.12.1` (`git ls-remote --tags`,
+  2026-10-09). Its manifest (tools 6.1, macOS 13+): the `MCP` library
+  LINKS `swift-system` (SystemPackage), `swift-log` (Logging) and
+  `mattt/eventsource` (macOS-conditional); the package ALSO declares
+  `swift-nio` (conformance executables only — fetched, never linked
+  into MCP) and `swift-docc-plugin` on `branch: "main"` (fetched,
+  never linked). LICENSE: the MCP project's MIT → Apache-2.0
+  transition text + Apache 2.0; no NOTICE file at the tag.
+- **Claude Code CLI 2.1.296:** `claude mcp add [options] <name> <command>
+  [args...]`; `-s, --scope local|user|project`, **default `local`** —
+  a bare `claude mcp add variorum -- …` registers for the CURRENT
+  DIRECTORY ONLY; the everywhere form is `-s user`.
+
+### Probe facts (A-10)
+
+*(PENDING — written as each probe lands)*
+
+### Decisions, forks, PROVISIONALs
+
+*(PENDING)*
+
+### Machinery notes
+
+*(none yet)*
