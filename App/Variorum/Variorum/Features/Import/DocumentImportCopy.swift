@@ -25,28 +25,57 @@ nonisolated enum DocumentImportCopy {
     static let undoHint = " \u{00B7} \u{2325}\u{2318}Z undoes"
 
     /// What a gesture landed. One item says its name; several say counts.
+    /// A note is said to land "to the Pool" ONLY when it is bookless there
+    /// (ladder F3 — a living book whose rule hears an imported tag seats the
+    /// note, and then the receipt names the book that took it).
     static func receipt(_ landed: [DocumentImportLanded]) -> String {
         if landed.count == 1 {
             switch landed[0] {
-            case .note(_, let title):
+            case .note(_, let title, let books) where books.isEmpty:
                 return "Imported \u{201C}\(title)\u{201D} to the Pool" + undoHint
+            case .note(_, let title, let books):
+                return "Imported \u{201C}\(title)\u{201D} \u{2014} collected by "
+                    + bookNames(books) + undoHint
             case .book(_, let name, let notes, let chapters):
                 return "Imported \u{201C}\(name)\u{201D} \u{2014} "
                     + bookCounts(notes: notes, chapters: chapters) + undoHint
             }
         }
         var books = 0
-        var notes = 0
+        var pooled = 0
+        var collected = 0
+        var collectors: [String] = []
         for item in landed {
             switch item {
-            case .note: notes += 1
-            case .book: books += 1
+            case .note(_, _, let by) where by.isEmpty:
+                pooled += 1
+            case .note(_, _, let by):
+                collected += 1
+                for name in by where !collectors.contains(name) { collectors.append(name) }
+            case .book:
+                books += 1
             }
         }
         var parts: [String] = []
         if books > 0 { parts.append(count(books, "book")) }
-        if notes > 0 { parts.append(count(notes, "note") + " to the Pool") }
-        return "Imported " + parts.joined(separator: " and ") + undoHint
+        if pooled > 0 { parts.append(count(pooled, "note") + " to the Pool") }
+        if collected > 0 {
+            parts.append(count(collected, "note") + " collected by "
+                + (collectors.count == 1 ? "\u{201C}\(collectors[0])\u{201D}" : "your books"))
+        }
+        return "Imported " + listed(parts) + undoHint
+    }
+
+    /// The books that collected one note: “a” · “a” and “b” · “a” and N
+    /// other books (earliest membership first).
+    static func bookNames(_ names: [String]) -> String {
+        let quoted = names.map { "\u{201C}\($0)\u{201D}" }
+        switch quoted.count {
+        case 0: return ""
+        case 1: return quoted[0]
+        case 2: return quoted[0] + " and " + quoted[1]
+        default: return quoted[0] + " and \(names.count - 1) other books"
+        }
     }
 
     /// "12 notes in 3 chapters" · "4 notes" · "1 note in 1 chapter".
@@ -137,5 +166,11 @@ nonisolated enum DocumentImportCopy {
 
     private static func count(_ n: Int, _ noun: String) -> String {
         "\(n) \(noun)\(n == 1 ? "" : "s")"
+    }
+
+    /// "a" · "a and b" · "a, b and c".
+    private static func listed(_ parts: [String]) -> String {
+        guard let last = parts.last, parts.count > 1 else { return parts.first ?? "" }
+        return parts.dropLast().joined(separator: ", ") + " and " + last
     }
 }

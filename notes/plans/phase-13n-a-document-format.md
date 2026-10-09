@@ -767,7 +767,20 @@ ledger; her merge).
   `DocumentImportOperationTests.aFolderImportedOntoAShelfLandsOnItAndADeadOrForeignShelfRefuses`
   (a dead and a foreign-wing shelf refuse, nothing minted). The four 13n-a
   suites 50/50.
-- F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.
+- F3 (the receipt says "to the Pool" only for a still-bookless note) —
+  DONE (this line's commit). Each `.note` landing carries `collectedBy` —
+  the books holding it as a MEMBER after its tags ran, read in the same
+  runner turn through `Queries.noteMemberships` (the membership truth the
+  Pool reads); "to the Pool" only when empty, else "Imported “flying” —
+  collected by “dream journal”". **Fix-round call FR-2 (copy edges, no
+  product behavior):** two books read "“a” and “b”", three or more "“a”
+  and N other books"; a multi-item gesture counts bookless notes "to the
+  Pool" and collected ones "collected by “x”" (one book) or "collected by
+  your books" (several), parts listed "a, b and c". Pin
+  `aNoteCollectedByALivingBookIsNotSaidToLandInThePool` red at 5693f1ad
+  (old text "Imported “flying” to the Pool · ⌥⌘Z undoes"), green at the
+  door run (14 tests — F7's pin alone still red, as designed); the copy
+  test `theReceiptsSayWhereEachNoteWent` added.
 - F7 (a package directory is neither a chapter nor a file) — NOT-STARTED.
 - F8 (`CopyForAI` moves to the shared home) — NOT-STARTED.
 - F5 (the round-trip claims state their exact domain) — NOT-STARTED.

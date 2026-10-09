@@ -323,6 +323,24 @@ struct DocumentImportDoorTests {
             == "Imported \u{201C}o ladrão de raios\u{201D} \u{2014} 12 notes in 3 chapters \u{00B7} \u{2325}\u{2318}Z undoes")
     }
 
+    @Test func theReceiptsSayWhereEachNoteWent() {
+        // Ladder F3's copy: "to the Pool" only for a bookless note; a
+        // collected one names the book(s) that took it.
+        let undo = " \u{00B7} \u{2325}\u{2318}Z undoes"
+        #expect(DocumentImportCopy.receipt([.note(postID: "p", title: "t", collectedBy: [])])
+            == "Imported \u{201C}t\u{201D} to the Pool" + undo)
+        #expect(DocumentImportCopy.receipt([.note(postID: "p", title: "t", collectedBy: ["a", "b"])])
+            == "Imported \u{201C}t\u{201D} \u{2014} collected by \u{201C}a\u{201D} and \u{201C}b\u{201D}" + undo)
+        #expect(DocumentImportCopy.receipt([.note(postID: "p", title: "t", collectedBy: ["a", "b", "c"])])
+            == "Imported \u{201C}t\u{201D} \u{2014} collected by \u{201C}a\u{201D} and 2 other books" + undo)
+        #expect(DocumentImportCopy.receipt([
+            .book(readingID: "r", name: "b", notes: 2, chapters: 0),
+            .note(postID: "p1", title: "x", collectedBy: []),
+            .note(postID: "p2", title: "y", collectedBy: ["a"]),
+            .note(postID: "p3", title: "z", collectedBy: ["c"]),
+        ]) == "Imported 1 book, 1 note to the Pool and 2 notes collected by your books" + undo)
+    }
+
     @Test func everyDocumentRefusalNamesItsLineInSentenceCase() {
         let reasons: [VariorumDocument.Failure.Reason] = [
             .empty, .alternatesWithoutParagraph, .unterminatedAlternates, .textBeforeFirstTake,

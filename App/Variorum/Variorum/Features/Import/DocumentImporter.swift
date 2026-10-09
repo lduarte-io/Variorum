@@ -62,12 +62,16 @@ nonisolated struct DocumentImportSpeech: Equatable, Sendable {
 
 /// What one item of a gesture minted — the receipt's facts and the landing.
 nonisolated enum DocumentImportLanded: Equatable, Sendable {
-    case note(postID: String, title: String)
+    /// `collectedBy`: the books holding the note as a MEMBER once its tags
+    /// were applied (a living book whose rule hears an imported tag seats it
+    /// — IC-8), earliest first; EMPTY means it is bookless, in the Pool
+    /// (ladder F3 — the receipt says "to the Pool" only then).
+    case note(postID: String, title: String, collectedBy: [String])
     case book(readingID: String, name: String, notes: Int, chapters: Int)
 
     var selection: SidebarSelection {
         switch self {
-        case .note(let postID, _): .post(postID)
+        case .note(let postID, _, _): .post(postID)
         case .book(let readingID, _, _, _): .reading(readingID)
         }
     }
@@ -115,6 +119,7 @@ enum DocumentImporter {
     ) async throws -> [DocumentImportLanded] {
         let stack = session.undoStack
         let wing = session.wing.currentID
+        let database = session.database
         return try await session.runner.run { ops in
             // THE NAME PREFLIGHT (E13, before anything is minted): every
             // folder's book name must be free in the store AND distinct
@@ -135,9 +140,18 @@ enum DocumentImporter {
                     switch item {
                     case .note(let named):
                         let result = try ops.importDocument(named, wingId: wing)
+                        // Ladder F3: where the note IS once the tag road has
+                        // run, read in this same runner turn — the membership
+                        // truth the Pool itself reads (a live member row of a
+                        // live BOOK), so the receipt never says "to the Pool"
+                        // about a note a living book has seated.
+                        let books = try database.read { db in
+                            try Queries.noteMemberships(db, postID: result.post.id).map(\.book.name)
+                        }
                         return .note(
                             postID: result.post.id,
-                            title: result.post.title ?? named.fallbackTitle)
+                            title: result.post.title ?? named.fallbackTitle,
+                            collectedBy: books)
                     case .book(let book):
                         let result = try ops.importBook(book, wingId: wing, shelfId: shelfID)
                         return .book(
