@@ -1184,7 +1184,7 @@ else proceeds.
 | Q2 | The Private mark's ops (`setNotePrivate` / `setBookPrivate`; gatherings and scraps refuse; allowed under a seal — PROVISIONAL) + state-transition tests | DONE (this commit) — no-op-guarded, no touch, synced (outbox), no undo entry |
 | Q3 | The Private faces (book settings row, note ⋯ row, registry-declared) + the ask's private wording | NOT-STARTED |
 | Q4 | Ledger row 10 — adoption lands MCP OFF (R-13nb-6) | DONE (this commit) — `landMCPAfterAdoption(holdStamp:)` keyed on the 13x RESTORE HOLD both adoption doors write (fresh stamp per adoption): an unacknowledged hold writes `server` OFF + records the stamp in ONE transaction; the same hold again changes nothing (her re-enable stands); a new adoption lands OFF again; grants/clients/open book untouched. The door asks it at attach BEFORE its grants observation starts (no stale "on" snapshot can start a server); a failed landing keeps the server down. Zero lines in the 13x road itself, zero `Sync/`, zero custody. Headless `MCPAdoptionLandingTests` 2/2; Mac pin `anAdoptedLibraryLandsOffBeforeItCouldServeAndHerReEnableServes` — run PENDING (stage) |
-| Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | NOT-STARTED |
+| Q5 | The core write ops with per-act undo (add take · comment · lens · create note · import · apply tag · create book · add note to book) + tests | DONE (this commit) — `Operations+MCPWrites.swift`: each act ONE transaction (the import book: one compound) + ONE entry labeled "<client>'s <act>", exact-row inverse + redo (quiet on divergence, throwing on resolvable refusals); the suggest acts INSERT only (no UPDATE on `variant`/`container_block`). `mintDocument`/`applyDocumentTags` widened private→internal (the one mint road reused). `MCPWriteActsTests` 12/12 |
 | Q6 | The server's write tools over the SESSION runner + the SUGGEST PROOF pin (+ mutation checks) | NOT-STARTED — gated by F-1/F-3 |
 | Q7 | The grant sheet's rungs (read · suggest · write new) | NOT-STARTED |
 | Q8 | The just-in-time ask (sheet + the R2-1 fix) | NOT-STARTED — gated by F-2 |
@@ -1246,6 +1246,22 @@ else proceeds.
   (inert while marked — `reaches` never matches a fenced book, and only a
   per-ask note grant reaches a fenced note); clearing the mark reopens it
   (pinned). The faces must not call such a grant "shared" while it is inert.
+
+- **P-13nb-U2-4 — EVERY MCP write registers an undo entry, the comment,
+  tag, lens and book acts included** (her own gestures for those stay
+  outside the stack, AppSpec §9) — R-13n-6's "every MCP write" read
+  literally; separate entry points, her doors unchanged.
+- **P-13nb-U2-5 — the undo labels** read "<client>'s take / comment / lens
+  / note / import / book import / tag / book / add to a book" ("Undo
+  claude-code's take", "Undid: claude-code's take") — app voice, 13s-a
+  sweepable (P-13n-1's boundary).
+- **P-13nb-U2-6 — undoing an AI tag removes the APPLICATION only**: a seat
+  the tagging caused in a living book stays (un-tag is a non-event for
+  intake, §19), and a tag the act minted stays as vocabulary (13n-a's
+  precedent).
+- **P-13nb-U2-7 — an AI take is PARENTLESS** (a fresh text, not a branch
+  of hers) and fan growth's conventions ride: no touch, no churn — an AI
+  session never reshuffles her library's sort.
 
 ### Decisions within the mandate (recorded as they land)
 
