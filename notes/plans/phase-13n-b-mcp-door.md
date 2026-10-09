@@ -628,8 +628,8 @@ U1 from this section.
 | P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion | DONE (this commit) — the schema suites 74/9 green headless |
 | P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | DONE (`f7927a91`) — 12/12 incl. the 13,824-world sweep; mutation-checked (4 boundary breaks each caught: 324 / 2,243 / 2 / 510 issues) |
 | P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | DONE (this commit) — `MCPGrantOperationsTests` 14/14; the fence's three legs in ONE Queries site (`mcpNoteFacts`/`mcpBookFacts`; the Private leg a `"0"` fragment until v1_25) |
-| P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | IN-PROGRESS — compiling (this commit): `VariorumMCPSocket` (the socket road + the shim's behaviour), `MCPSocketTransport`, `MCPSession`, `MCPServerHost`, `MCPGrantAuthority` + `MCPRefusalCopy`, `MCPToolCatalog`, `MCPReadTools`; REMAINING: the end-to-end + per-tool scope pins (`VariorumMCPTests`) |
-| P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — AF-1 ruled: `<container>/Data/mcp.sock`, `bindat`/`connectat`, two distinct refusals |
+| P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | DONE (`c3e39ec2` + pins `bab7e30c`) — `MCPServerTests` 10/10 end to end over a real socket with the SDK's own Client; `MCPShimTests` 8/8; mutation-checked (4 server breaks, each caught) |
+| P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | DONE (this commit) — Xcode command-line-tool target `variorum-mcp` (sources `App/Variorum/VariorumMCPShim/main.swift`, links the `VariorumMCPSocket` product), embedded by the app's "Embed MCP Shim" copy phase (Executables = `Contents/MacOS`, CodeSignOnCopy) + a target dependency; hardened runtime, NO sandbox entitlement, team-signed; `codesign --verify --deep --strict` passes; the real embedded Debug shim answers `initialize` with "Variorum must be open" when nothing listens |
 | P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — R-13nb-5 ruled: "Copy setup command" (`-s user`) |
 | P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
 
@@ -764,6 +764,21 @@ up to 36 characters (Debug) / 42 (Release); past that the server refuses to
 start and the shim speaks a distinct honest line (`pathTooLong`) — never a
 truncated path. The ruling's intent (the limit can't silently bite) holds;
 its letter (it can't bite at all) does not. PROVISIONAL P-13nb-U1-7.
+
+**P7 — the shim's build shape (the brief's call, recorded):** an Xcode
+COMMAND-LINE-TOOL target, not an SPM executable + script phase. Xcode
+signs and embeds it natively (a Copy Files phase to Executables with
+CodeSignOnCopy, a target dependency so `xcodebuild -scheme Variorum`
+builds it first), it inherits the two standard configurations (no custom
+configuration — the Debug/Release letter holds), and its behaviour lives
+in the SPM library `VariorumMCPSocket` so it tests headless; the target's
+`main.swift` only launches it. A script phase would have rebuilt the
+package outside Xcode's configuration and signed by hand. Bundle ids
+(the signing identifiers' source): `io.lduarte.Variorum.debug.mcp-shim` /
+`io.lduarte.Variorum.mcp-shim`; `SKIP_INSTALL = YES` (an archive carries
+it inside the app only). Developer ID distribution re-signs nested code at
+export (13r's road) — the shim rides that like any nested binary; noted
+for the release run, untested here.
 
 **Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
   sealed-pair / backup adoption roads land the WHOLE encrypted file
