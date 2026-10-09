@@ -288,3 +288,56 @@ it can write, so this is a design call, not a quick fix.
 - **Honesty of the record.** The unit record states first that the GUI walk (W1–W7) is HELD, so the acceptance unit
   has not closed on use-shaped evidence. The headless `SampleBookDrillTests` is evidence, not the walk. That is
   recorded correctly, not hidden.
+
+---
+
+## ORCHESTRATOR DISPOSITIONS (Fable, same-model flow — arbitrated against the spec; every finding dispositioned)
+
+- **F1 MAJOR — FIX as proposed.** §9's undo↔redo round trip is the contract
+  ("an entry moves between the two stacks and undo↔redo round-trips to the
+  same rows"); a redo keyed on the BOOK's tombstone instead of the stamp the
+  undo wrote resurrects a state that never existed. Key the redo on the
+  undo's own stamp; revive the book only on a stamp match. The reviewer's
+  red probe becomes the pin.
+- **F2 MINOR — FIX.** §12's Bookcase line is explicit: "a context mint lands
+  on the solo'd shelf." A drop onto the board while a shelf is solo'd IS a
+  context mint (the drop code's own comment agrees). `importBook` gains
+  `shelfId:`; the drop passes the solo'd shelf; a drop while All shows lands
+  unshelved. PROVISIONAL flag for her bundle (placement taste is hers).
+- **F3 MINOR — FIX.** Receipts are honest or they are nothing: each `.note`
+  landing records whether it is STILL bookless after the tag road ran, and
+  only then says "to the Pool"; a seated note's receipt names the book that
+  took it.
+- **F4 MINOR — FIX as option (b), PROVISIONAL + a QUESTIONS line at merge.**
+  A blank / whitespace-only / title-only document mints an EMPTY note
+  (title from the header else the filename). This preserves the invariant
+  R-ARCH-13na-2 bought — ANY export re-imports whole — since Copy for AI of
+  a titled empty note is exactly such a file. Empty notes are legal
+  (quick-note precedent).
+- **F5 MINOR — WORDING FIX + a QUESTIONS line.** "Rows round-trip" states
+  its exact domain everywhere it appears (source doc comment, the UNIT
+  RECORD's closeout proposals): block texts, fan membership and labels OF
+  THE ALTERNATES, spacing — the CHOSEN take's label, its fan position, and
+  the chosen-vs-default split do not travel in v1. The QUESTIONS line asks
+  whether the format should carry the chosen take's label (a v2 marker);
+  the full-fidelity answer remains 13m's edition.
+- **F6 NIT — FIX the named leak + RECORD the class.** The folder planner's
+  preflight refuses a chapter folder whose name trims to empty (so every
+  folder-shape refusal happens before minting); the general class — a
+  mid-gesture refusal rolls earlier items back through tombstones into the
+  Trash — is recorded as a known limit of the all-or-nothing gesture (the
+  name preflight is the guard that keeps it unreachable).
+- **F7 NIT — FIX.** A package directory (`.isPackageKey`, e.g. `.rtfd`,
+  `.textbundle`) is neither a chapter nor a file: ignored by `readFolder`,
+  with a known-limits line.
+- **F8 NIT — FIX now.** `CopyForAI` moves to the shared home in this fix
+  pass — this unit IS its minting touch, so "moves at the next touch"
+  costs least today.
+- **F9 NIT — FIX by refinement (retires the known-limits line).** The
+  header line parses as a header ONLY when token removal leaves nothing but
+  whitespace; a first line carrying prose beside a literal brace token is
+  BODY, untouched. Pin: a prose-plus-token first line survives re-import
+  byte-identical.
+
+Round 2 re-reviews the fixes (fresh reviewer) per the ladder; a new
+BLOCKER/MAJOR earns round 3; cap three.
