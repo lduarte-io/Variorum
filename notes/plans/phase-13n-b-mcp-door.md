@@ -1717,3 +1717,9 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   client-named entries for MCP acts) is RATIFIED; the view into recent
   stack entries is **VX-129** (Backlog, Feature) — deliberately not
   this phase's.
+  **FIRMED by her next message, verbatim (2026-10-09):** *"yes, agreed,
+  we don't want a parallel history system. worth a note that the shape
+  of that session bounded simple stack is firm."* — the session-bounded
+  simple interleaved stack is a DURABLE design commitment (the
+  R-13nb-12 class), not a v1 convenience; no parallel history system,
+  ever, by her word.
