@@ -21,6 +21,13 @@ struct MCPGrantAuthority: Sendable {
         /// Live grants only (not revoked, not a spent once grant).
         var liveGrants: [MCPGrantRule.Grant] { grants.filter(\.isLive) }
 
+        /// **THE ONE STANDING-REACH RULE** (round 1 F1): the grants that can
+        /// stand behind SEARCH — a once grant never feeds it (search reads
+        /// words without spending, the recorded restriction beside
+        /// P-13nb-U1-2). The catalog's listing and every serving road read
+        /// THIS set, so the two can never drift again.
+        var searchGrants: [MCPGrantRule.Grant] { liveGrants.filter { $0.duration != .once } }
+
         func grant(id: String?) -> MCPGrantRule.Grant? {
             id.flatMap { id in grants.first { $0.id == id } }
         }

@@ -324,9 +324,13 @@ struct MCPReadTools: Sendable {
             } else if let bookID {
                 let facts = try Queries.mcpBookFacts(db, readingID: bookID)
                 let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .read)
-                guard decision.isAllowed, let facts else {
+                // Round 1 F1: search serves STANDING reach only — a once book
+                // grant would pass the book decision and then fail every
+                // passage, an eternally empty page; refuse it here instead,
+                // the same rule the catalog's listing reads.
+                guard isStandingAllow(decision, standing), let facts else {
                     try log(db, clientName, act, "book", bookID, nil, allowed: false)
-                    return refusal(decision, .book)
+                    return refusal(decision.isAllowed ? .ask(.notShared, offersAlways: true) : decision, .book)
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .book(id: bookID))]
             } else {
@@ -360,7 +364,7 @@ struct MCPReadTools: Sendable {
     /// shared books outside them, then the shared notes outside both (a once
     /// grant never feeds search — search reads words without spending it).
     private func reachedScopes(_ db: Database, _ standing: MCPGrantAuthority.Standing) throws -> [SearchScope] {
-        let live = standing.liveGrants.filter { $0.duration != .once }
+        let live = standing.searchGrants  // F1: the ONE standing-reach rule
         var wings: [String] = live.filter { $0.scopeKind == .wing }.map(\.scopeID)
         if standing.openBook {
             wings = [""] + (try String.fetchAll(db, sql: "SELECT id FROM wing WHERE deleted_at IS NULL ORDER BY position, id"))

@@ -21,14 +21,20 @@ struct MCPToolDeclaration: Sendable {
     let inputSchema: Value
     /// Beyond the rung: the grant shapes this tool can act under at all.
     let needsBookOrWingReach: Bool
+    /// Round 1 F1: the tool serves only STANDING grants (never a once grant)
+    /// — `search`. Its listing reads `Standing.searchGrants`, the SAME set
+    /// the serving roads read, so a tool is never offered to a standing it
+    /// can never act for (P-2 on the wire).
+    var needsStandingReach: Bool = false
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung — of a book or wing when the tool lists
-    /// books.
+    /// books, standing (non-once) when the tool never serves a once grant.
     func isListed(for standing: MCPGrantAuthority.Standing) -> Bool {
         guard standing.state == .approved else { return false }
         if standing.openBook, rung == .read { return true }
-        return standing.liveGrants.contains { grant in
+        let grants = needsStandingReach ? standing.searchGrants : standing.liveGrants
+        return grants.contains { grant in
             grant.rung >= rung && (!needsBookOrWingReach || grant.scopeKind != .note)
         }
     }
@@ -129,7 +135,10 @@ enum MCPToolCatalog {
             "required": .array(["query"]),
             "additionalProperties": false,
         ]),
-        needsBookOrWingReach: false)
+        needsBookOrWingReach: false,
+        // Round 1 F1: search never serves a once grant, so a once-only
+        // standing is never offered it.
+        needsStandingReach: true)
 
     static let exportNote = MCPToolDeclaration(
         name: "export_note", rung: .read, title: "Export a note as plain text",

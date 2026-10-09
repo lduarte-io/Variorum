@@ -379,6 +379,42 @@ struct MCPServerTests {
         }
     }
 
+    // MARK: - Round 1 F1: search needs STANDING reach — listing and serving read one rule
+
+    @Test func searchIsNeitherListedNorServedForAOnceOnlyStanding() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "b", kind: .book)
+            let note = try h.operations.createPost(title: "n")
+            _ = try h.operations.newBlock(in: note.id, text: "the harbour at dawn")
+            _ = try h.operations.addPostToReading(note.id, to: shared.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", book(shared.id, .once))
+
+            // A once-only standing: search can never return a passage (the
+            // recorded once-never-in-search restriction), so it is not listed
+            // (P-2 on the wire) — and called anyway, it refuses rather than
+            // answering an eternally empty page.
+            let names = Set(try await connection.client.listTools().tools.map(\.name))
+            #expect(!names.contains("search"), "a door that can never act is not listed")
+            #expect(names.contains("read_note"), "the once grant's content read IS offered")
+            let served = try await connection.client.callTool(
+                name: "search", arguments: ["query": "harbour", "book_id": .string(shared.id)])
+            #expect(served.isError == true, "serving reads the same rule as listing")
+            #expect(text(served).hasPrefix("That book isn't shared with this client"))
+
+            // A standing grant restores both halves.
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, book(shared.id, .always))
+            let relisted = Set(try await connection.client.listTools().tools.map(\.name))
+            #expect(relisted.contains("search"))
+            let found = try json(try await connection.client.callTool(
+                name: "search", arguments: ["query": "harbour", "book_id": .string(shared.id)]))
+            #expect((found["passages"] as? [[String: Any]])?.isEmpty == false)
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The socket's life
 
     @Test func theSocketIsPrivateWhileServingAndGoneAfterStop() async throws {
