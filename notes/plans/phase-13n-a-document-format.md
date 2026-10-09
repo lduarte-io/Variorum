@@ -366,7 +366,7 @@ unit should never touch the real store at all.
      marker untouched; no editor-seam file (`EditorTextView`,
      `BlockRangeIndex`, `PaneSurface`) touched.
 
-### THE WALK (HELD — the steps, for whoever holds the stage once her app is closed)
+### THE WALK (RUN 2026-10-09 ~10:30 MDT — her app quit by her and the walk sanctioned; the record is "WALK RECORD" right after the steps)
 
 Precondition: `Tools/WalkKit/guard.sh --author` exits 0 (her app closed BY
 HER, idle machine); `Tools/stage claim`; the Debug app from this worktree's
@@ -408,6 +408,64 @@ Appearance, Terminal and Study) for rows W1, W2, W5.
   `--- end alternates ---` line in `01 abertura.md`, import the copy: the
   refusal names the folder, the file, the line where the next section
   opens, and that the one opened on line 5 never ended; nothing lands.
+
+#### WALK RECORD (LIVE STATUS — the walk driver, 2026-10-09)
+
+- **NOT DONE BY THE WALK (first):** the `/Applications` refresh (not this
+  session's); no fix of anything seen (anomalies are REPORTED here, never
+  fixed); W3–W7 still to run at this line's commit.
+- Stage claimed ("13n-a walk", W1–W7, 60 min); `guard.sh --author` exit 0
+  (her app absent, HID idle); the Debug app built from THIS worktree
+  (`xcodebuild -scheme Variorum -configuration Debug build`, DerivedData
+  `Variorum-dpsxczocduggenewfhncdsuvqhsm`, build 5974,
+  `io.lduarte.Variorum.debug`), launched `open -n` on the dev store (PID
+  15366). The dev store's voice on arrival: Study (restored at the end).
+  Captures: `notes/plans/13n-a-screens/` (gitignored — the line was
+  already in `.gitignore`).
+- **W1 — WORKED, one visual anomaly.** File menu reads "Import…" (no
+  chord); the panel's message "Pick a document, or a folder — a folder
+  becomes a book, its folders its chapters."; picking `o ladrão de raios`
+  → Import OPENED the book in Outline: "book · 2 chapters · 4 notes",
+  chapters "1 o semideus" (abertura, a escola), "2 a excursão" (o museu),
+  then unfiled "posfácio"; the Bookcase row "o ladrão de raios
+  #percy/pt-en #viagens · 4 notes · 2 ch · 89w", unshelved; the Library
+  lists the four notes. **ANOMALY (visual): the receipt is TRUNCATED** —
+  because the door opens the book, the quiet receipt lands in the book
+  navigator column's narrow bottom bar and reads only "Imported “o ladrão
+  de raios”…" (Study) / "Imported “o ladrão de…" (Terminal); the counts and
+  "⌥⌘Z undoes" are never visible, and the line is not exposed to
+  Accessibility, so the full sentence could not be read live at all.
+  Both voices: imported in Study, ⌥⌘Z'd (the bottom bar said "Undid:
+  Import", Edit menu "Redo Import" — the first import's book and notes now
+  sit in the dev store's Trash), flipped to Terminal, imported again (the
+  book W3/W4 act on). Captures: `w1-file-menu-import-study.png`,
+  `w1-file-menu-import-terminal.png`,
+  `w1-import-book-opened-receipt-study.png` (+ `-b`),
+  `w1-import-book-opened-receipt-terminal.png`,
+  `w1-bookcase-after-import-study.png`,
+  `w1-bookcase-after-import-terminal.png`,
+  `w1-bookcase-terminal-before-reimport.png`,
+  `w1-undo-first-import-bookcase-study.png`,
+  `w1-library-after-import-terminal.png`.
+- **W2 — WORKED.** "abertura" opened in Write (three single-sentence
+  blocks, ⑂2 ⑂2 ⑂3); Lenses (⌘4): the left column "Chosen (the note)" is
+  Portuguese; the "+ column" menu's item reads "New lens — arrange existing
+  takes" (the script's "pick existing takes" is the plan's wording, not the
+  app's); each block flipped to take 2 = the english take; the lens SAVED
+  as "english" (💾 → "Name this lens") so W4 can look for it — the save
+  registered no structural undo (Edit still "Undo Import"). Takes (⌘2,
+  expand all): each fan reads "✓ chosen" (Portuguese, unlabeled — F5's
+  domain) · "choose english" · and block 3's unlabeled "choose" take with
+  its three lines intact. Captures (both voices):
+  `w2-abertura-open-write-terminal.png`, `w2-abertura-open-write-study.png`,
+  `w2-lenses-initial-terminal.png`, `w2-column-menu-terminal.png`,
+  `w2-lenses-new-lens-terminal.png`,
+  `w2-lenses-pt-en-side-by-side-terminal.png`,
+  `w2-lenses-english-lens-saved-terminal.png`,
+  `w2-lenses-pt-en-side-by-side-study.png`,
+  `w2-takes-fan-terminal.png`,
+  `w2-takes-fan-expanded-unlabeled-take-terminal.png`,
+  `w2-takes-fan-expanded-unlabeled-take-study.png`.
 
 ### Implementer calls (each with its one line of reasoning)
 
