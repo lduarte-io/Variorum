@@ -487,14 +487,14 @@ unit record (TCC state is machine-state the next session inherits).
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | U1 — the spine (SDK, socket server, shim, grants table + pure rule, read rung, pane resting shape, grant sheet read-only form) | U1 implementer | IN FLIGHT — SDK landed (`14763773`), probes done, building |
+| 1 | U1 — the spine (SDK, socket server, shim, grants table + pure rule, read rung, pane resting shape, grant sheet read-only form) | U1 implementer | **CLOSED** — built (`c2a84bd3`), live round MET (`b9492ced`), ladder closed clean |
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
-| 3 | U1 ladder (fable-reviewer) | orchestrator | NOT STARTED |
-| 4 | U2 — suggest + write new (+ the Private faces per R-13nb-4) | — | NOT STARTED (brief at U1 close) |
+| 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
+| 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | BRIEFED — spawning (the brief below) |
 | 5 | U3 — edit + polish + her live round | — | NOT STARTED |
-| 6 | A-4's honest-boundary line → the closeout author checklist | orchestrator | OPEN — standing |
+| 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
-| 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | OPEN — scheduled |
+| 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | **DONE** (`304b41d1` — marker 13 client-side; headless whole-package green) |
 | 9 | The lockstep DEPLOY window (marker 12→13, mirror → both installs) | her + orchestrator | HELD for the closeout window |
 | 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
@@ -1004,3 +1004,109 @@ its always-read grant (useful to the ladder and U2's walks). The
 orchestrator's round report: the scratch folder's `round-report.txt`
 (ephemeral; this section is the record). Next: ladder round 1
 (`fable-reviewer`).
+
+---
+
+## THE U2 IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the U2 implementer for Variorum phase 13n-b, working in
+`~/dev/variorum-vx-124` on branch `vx-124-13n-b` (NEVER the main
+checkout). Commits say `Part of VX-124`, no attribution trailer, push
+after every commit. `notes/SessionResiliencyProtocol.md` binds you: LIVE
+STATUS in the "U2 UNIT RECORD" section below from your first commit,
+foreground waits only, at most ONE read-only Sonnet for external facts
+(you likely need none). Baseline (the v1_25 commit's run, `304b41d1`):
+core 2,511/287 · VariorumMCPTests 23/3 · workbook 40/6, headless.
+
+**Read first (never delegated):** this plan file TOP TO BOTTOM — the
+ruled design, ARCHITECT SEAM RULINGS A-1…A-10, the SITTING RECORD
+R-13nb-1…6, THE PRIVATE MARK design addendum, the environment traps;
+the sitting record file (R-13n-1…11, esp. R-13n-4/6 and P-13n-1/3); the
+mockups (§3 the grant sheet, §4 the just-in-time ask, §5 AI in the fan,
+§7 the grant in context); both ladder records
+(`13nb-u1-ladder-round{1,2}.md` — U1's shapes and the standing NITs).
+Code: `Domain/MCPGrantRule.swift`, `Queries/MCPGrantQueries.swift`
+(`mcpNoteFacts` — the fence's one derivation site, its Private leg a 0
+fragment awaiting your wiring), `Operations/Operations+MCPGrants.swift`,
+`Sources/VariorumMCP/` (the catalog/tools/authority split),
+`Features/MCP/` (the pane + U1 grant sheet), and the structural-undo
+registration road (how her own gestures register — AppSpec §9's
+structural undo block; find the ONE road and use it).
+
+**What U2 builds:**
+
+1. **The fence's third leg, wired + pinned:** `mcpNoteFacts`' Private
+   fragment reads the v1_25 columns (own `ai_private_at`, and any LIVE
+   membership in a LIVE reading with `ai_private_at` set). Pins: NULL
+   reads not-private; a note in a private AND a granted book is fenced
+   (privacy wins ties); marking while a client is connected fences the
+   very next call; archived private books still fence (the journal leg's
+   precedent).
+2. **The mark's operations + faces (R-13nb-4):** set/clear ops for note
+   and book (no-op-guarded identity-level metadata; gatherings refuse
+   `wrongReadingKind`; allowed under a seal — protective, not authoring
+   — PROVISIONAL, log it); the book settings sheet row and the note ⋯
+   menu row, "Private — never shared with AI" (app voice, sentence case,
+   registry-declared); the ask sheet's private wording (the journal
+   sentence's twin, sweepable at 13s-a).
+3. **The SUGGEST rung:** `add_take` (fan's END, labeled per P-13n-3's
+   convention + the client's own label, never chosen, never locked),
+   `add_comment`, `save_lens`. THE PROOF PIN (the verification bar's
+   heart): a suggest grant PROVABLY cannot modify an existing take —
+   pinned like any refusal, plus the mutation-check discipline U1 set.
+4. **The WRITE-NEW rung:** `create_note`, `import_document` (payload =
+   the Level 0 format through `Domain/VariorumDocument` + the 13n-a
+   import ops; ONE compound undo entry — R-13n-6), `apply_tag` (the ONE
+   application road so living books hear it), `create_book`,
+   `add_note_to_book` (through `addPostToReading`'s gates — ownership
+   refusals speak to the client as to her). Scope discipline: creative
+   acts land INSIDE the grant's scope only (a book grant creates in that
+   book; a wing grant in that wing); every refusal is the operations
+   layer's own.
+5. **Undo per act (R-13n-6):** every MCP write registers structural
+   undo exactly as her gestures do — one entry per act, the bulk door
+   compound; ⌥⌘Z in the app walks an AI session back. Her words carried:
+   "undoing AI writing … in a single command."
+6. **The grant sheet grows rungs (A-9's growth):** read · suggest ·
+   write new with the mockup §3 sentences (the EDIT row arrives with U3
+   — a rung the server can't serve isn't offered, P-2); the just-in-time
+   ask sheet (mockup §4: once · while connected · always · don't allow;
+   "while connected" only for a connected client — U1's rule carried;
+   a FENCED target never offers "always" — and fix R2-1 here:
+   `offersAlways: facts?.fence == nil` at MCPReadTools.swift:351).
+7. **Receipts + the shared chip:** quiet receipts in the app's voice for
+   AI acts (P-13n-1's boundary; e.g. the mockup §5 line), the
+   "shared with AI" chip on granted book rows + the note face
+   (P-13n-3's wording, hers to re-voice at 13s-a).
+8. **Ledger row 10 — adoption lands OFF (R-13nb-6):** the one
+   toggle-OFF write on the 13x adoption road (grants kept; the
+   export-rebuild already lands empty+OFF). If ANY line falls inside
+   `Sources/VariorumCore/Sync/`, STOP and message me the exact lines
+   (AF-4) — expected home is the adoption/binding seam outside Sync/.
+9. **R2-2 (optional, rides a touch):** if your rung work touches
+   `search`'s argument parsing, align the paired-ids refusal with
+   `list_notes`; otherwise leave recorded.
+
+**Must NOT touch:** `Sources/VariorumCore/Sync/` (AF-4 — mine),
+custody/keychain, the editor seam, the real store, `/Applications`, the
+mirror artifact (16 is written; the deploy is HERS). The marker is
+already 13 client-side — do not touch `lockstepVersion`. Nothing may
+assume the client is external (R-13n-1). The export pin stands.
+
+**Acceptance (use-shaped, the plan's):** her fact-check shape LIVE on
+the dev store — a real client reads a granted note, lands a take beside
+every block (labeled, never chosen), saves a lens; ONE ⌥⌘Z press in the
+app walks the last act back (and the bulk import undoes in one). Plus
+the suggest PROOF pin and the Private pins above. The live leg runs
+with me under a held stage claim — your walk drives the scripted client
+as U1's did; tests at the unit's END.
+
+**Forks:** anything beyond the recorded rulings returns to me with a
+proposal before building that half; PROVISIONAL-and-log for non-gating
+ambiguity; STOP for anything gating.
+
+---
+
+## U2 UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+*(empty — the U2 implementer writes it)*
