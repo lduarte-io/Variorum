@@ -209,6 +209,11 @@ extension Queries {
         try String.fetchOne(db, sql: "SELECT value FROM mcp_switch WHERE key = ?", arguments: [key.rawValue]) == "1"
     }
 
+    /// The `mcp_switch` row recording the restore hold whose adoption has
+    /// already landed the server OFF (R-13nb-6 — `landMCPAfterAdoption`).
+    /// Not a switch: a stamp, beside the switches it governs.
+    public static let mcpAdoptionAckKey = "adoption_hold_ack"
+
     // MARK: - Activity
 
     public static func mcpActivity(_ db: Database, limit: Int? = nil) throws -> [MCPActivityRow] {

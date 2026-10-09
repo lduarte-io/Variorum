@@ -181,8 +181,10 @@ struct VariorumApp: App {
                         // old writer); idempotent per session, so a window
                         // re-appearing never drops a live connection. It
                         // serves iff its toggle is ON and stops at lock and
-                        // quit.
-                        appDelegate.mcp.attach(session: session)
+                        // quit. 13n-b U2 (R-13nb-6): the store's path rides
+                        // in so an adopted library's restore hold lands the
+                        // server OFF before it could start (ledger row 10).
+                        appDelegate.mcp.attach(session: session, storeURL: bootstrap.liveStoreURL)
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {

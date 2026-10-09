@@ -79,6 +79,9 @@ final class MCPDoor {
     @ObservationIgnored private var observation: Task<Void, Never>?
     /// A start is in flight off the main thread — never start twice.
     @ObservationIgnored private var starting = false
+    /// R-13nb-6: an adopted library's OFF write has not landed yet — the
+    /// server may not start (row 10).
+    @ObservationIgnored private var adoptionLandingPending = false
     /// Whether this process may run a server at all (never a test process —
     /// the test host IS the dev-store app).
     @ObservationIgnored private let serverAllowed: Bool
@@ -127,7 +130,18 @@ final class MCPDoor {
 
     /// The store is open: observe the grants store; start the server when the
     /// toggle says so.
-    func attach(session: AppSession) {
+    ///
+    /// 13n-b U2 (ledger row 10, R-13nb-6 — ADOPTION LANDS OFF): `storeURL` is
+    /// the open library's path. When a 13x RESTORE HOLD stands beside it, the
+    /// grants store's acknowledgement of THAT hold is asked first
+    /// (`landMCPAfterAdoption` — the switch OFF on a hold not yet seen, one
+    /// transaction) and the server may not start until the answer lands: an
+    /// adopted library never serves before its OFF write. The grants
+    /// observation itself starts only AFTER that write commits, so no value
+    /// computed before it (a stale "on") can ever reach `reconcileServer`. A
+    /// failed landing keeps the server down for this session (the
+    /// conservative direction); the pane still renders.
+    func attach(session: AppSession, storeURL: URL? = nil) {
         // Idempotent per session: the same ready re-appearing keeps its
         // server and its connections.
         guard session !== self.session else { return }
@@ -135,7 +149,25 @@ final class MCPDoor {
         self.session = session
         database = session.database
         runner = session.runner
-        let database = session.database
+        guard let storeURL, let hold = LibraryRestoreHold.read(besideStore: storeURL) else {
+            observe(session.database)
+            return
+        }
+        adoptionLandingPending = true
+        let stamp = DateFormatter.variorumISO8601.string(from: hold.heldAt)
+        let runner = session.runner
+        Task { @MainActor [weak self] in
+            let landed = (try? await runner.run { try $0.landMCPAfterAdoption(holdStamp: stamp) }) != nil
+            guard let self, self.session === session else { return }
+            self.adoptionLandingPending = !landed
+            self.observe(session.database)
+        }
+    }
+
+    private func observe(_ database: AppDatabase) {
+        // One observation at a time (a detach + re-attach of the same
+        // session can race two landings to this line).
+        observation?.cancel()
         let observed = database.observe { db in try MCPDoor.read(db) }
         observation = Task { [weak self] in
             do {
@@ -154,6 +186,7 @@ final class MCPDoor {
         observation?.cancel()
         observation = nil
         stopServer()
+        adoptionLandingPending = false
         session = nil
         database = nil
         runner = nil
@@ -167,7 +200,7 @@ final class MCPDoor {
             serverState = .off
             return
         }
-        guard serverAllowed, let database else {
+        guard serverAllowed, let database, !adoptionLandingPending else {
             serverState = .waitingForLibrary
             return
         }

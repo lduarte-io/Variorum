@@ -258,6 +258,44 @@ extension Operations {
             arguments: [Self.mcpActivityCap])
     }
 
+    // MARK: - Adoption lands OFF (R-13nb-6)
+
+    /// **A handed-off or restored library arrives with the server OFF,
+    /// grants kept** (R-13nb-6, hers: "the restore-hold shape applied to the
+    /// door"). Every 13x adoption writes a RESTORE HOLD beside the store with
+    /// a fresh stamp (`LibraryRestoreHold` — both doors, before the move);
+    /// the door calls this at the first ready that finds a hold standing,
+    /// BEFORE any server start. When the hold's stamp is not yet
+    /// acknowledged here, the `server` switch is written OFF and the stamp
+    /// recorded — in ONE transaction, so an adopted library can never serve
+    /// before the write, and a crash before it simply repeats it next ready.
+    /// Once acknowledged, the same hold changes nothing — so her deliberate
+    /// re-enable (the pane's toggle) stands for the rest of the hold's life
+    /// (Resume clears the hold; a NEW adoption's hold carries a new stamp and
+    /// lands OFF again). Grants, clients and the open book are untouched —
+    /// they resume on the re-enable. The acknowledgement lives in the grants
+    /// store (A-6's boundary-state home; local-only). Returns whether the
+    /// switch was turned off by THIS call.
+    @discardableResult
+    public func landMCPAfterAdoption(holdStamp: String) throws -> Bool {
+        try database.write { db in
+            let acknowledged = try String.fetchOne(
+                db, sql: "SELECT value FROM mcp_switch WHERE key = ?",
+                arguments: [Queries.mcpAdoptionAckKey])
+            guard acknowledged != holdStamp else { return false }
+            let now = DateFormatter.variorumISO8601.string(from: date.now)
+            for (key, value) in [(MCPSwitch.server.rawValue, "0"), (Queries.mcpAdoptionAckKey, holdStamp)] {
+                try db.execute(
+                    sql: """
+                        INSERT INTO mcp_switch (key, value, updated_at) VALUES (?, ?, ?)
+                        ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                        """,
+                    arguments: [key, value, now])
+            }
+            return true
+        }
+    }
+
     // MARK: - The switches
 
     /// The server toggle or the open book (A-6). No-op-guarded.

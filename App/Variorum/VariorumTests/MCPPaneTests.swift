@@ -169,6 +169,43 @@ struct MCPPaneTests {
         }
     }
 
+    /// 13n-b U2 — ledger row 10, R-13nb-6: an ADOPTED library (a 13x restore
+    /// hold beside its store) lands with the server OFF before it could ever
+    /// serve, grants kept; her re-enable then serves.
+    @Test func anAdoptedLibraryLandsOffBeforeItCouldServeAndHerReEnableServes() async throws {
+        try await withDoorWorld { (session: AppSession, db: AppDatabase) async throws in
+            let root = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent("vadopt-\(UUID().uuidString.prefix(8))", isDirectory: true)
+            defer { try? FileManager.default.removeItem(at: root) }
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+            let storeURL = root.appendingPathComponent("variorum.sqlite", isDirectory: false)
+            try LibraryRestoreHold.set(besideStore: storeURL, asOf: nil, now: Date())
+            let operations = Operations()
+            let client = try operations.recordMCPContact(name: "claude-code", version: nil)
+            try operations.approveMCPClient(client.id, granting: nil)
+            try operations.setMCPSwitch(.server, on: true)   // the copy arrived ON
+
+            let directory = root.appendingPathComponent("sock", isDirectory: true)
+            let socket = MCPSocketRoad.socketPath(directory: directory)
+            var started = 0
+            let door = MCPDoor(serverAllowed: true) { database in
+                started += 1
+                return MCPServerHost(database: database, operations: operations, directory: directory, version: "test")
+            }
+            door.attach(session: session, storeURL: storeURL)
+            defer { door.detach() }
+            #expect(try await settle { door.serverState == .off && door.snapshot.clientCount == 1 })
+            #expect(started == 0, "the adopted library never started a server before its OFF write")
+            #expect(!FileManager.default.fileExists(atPath: socket))
+            #expect(try await db.read { try Queries.mcpSwitch($0, .server) } == false)
+            #expect(door.snapshot.clients.first?.client.state == .approved, "clients and grants kept as data")
+
+            door.setEnabled(true)   // her deliberate re-enable
+            #expect(try await settle { door.serverState == .running })
+            #expect(FileManager.default.fileExists(atPath: socket))
+        }
+    }
+
     // MARK: - The lists stay legible (R-13n-10)
 
     @Test func theSnapshotCapsEachListAndCountsTheRest() async throws {
