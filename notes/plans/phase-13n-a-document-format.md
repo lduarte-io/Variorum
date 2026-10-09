@@ -534,9 +534,59 @@ the canonical export never writes one, an LLM essentially never will).
 Scope, exactly: R-ARCH-13na-1 and R-ARCH-13na-2 (the section below this
 record). No other refactor; the app is untouched; no revert is in flight.
 
-1. **R-ARCH-13na-1 — the inverse-join body reading.** — IN-PROGRESS: pins
-   first (red on the as-built parse), then `VariorumDocument.parse`'s body
-   reading, then the as-built expectations that encoded the bulk reading.
+1. **R-ARCH-13na-1 — the inverse-join body reading.** — DONE (this
+   commit; its hash lands with piece 2). `VariorumDocument.paragraphs(_:beforeSection:)`
+   replaces the bulk call: a blank line separates, a single newline is
+   content (a block's lines joined back with `"\n"`, verbatim), b blank
+   lines after a piece store `storedSpacing(blankLines:)` = b when b ≥ 2
+   (k = b + 1 ≥ 3 ⇒ k − 1) else 0; the run before an Alternates header is
+   spacing like any other; the document's leading/trailing runs are edges.
+   `bulkSegments` and every other entry road untouched (pinned side by
+   side). **Pins, red on the as-built parse first** (6 tests, 9 issues —
+   the family pin misread 1,350 of 1,413 block lists), green after:
+   `VariorumDocumentTests.theBodyIsTheExactInverseOfTheJoin` (inverse∘join
+   = identity over every 1–3-block sequence of twelve shapes: unspaced,
+   stored spacing 2/3/4, single newlines inside, indent + trailing spaces
+   kept, fanned or not), `.theJoinsOneUndecidableSpacingReadsUnspaced`
+   (RECORDED, see below), `.aSingleNewlineIsContentAndABlankLineIsTheBoundary`;
+   `DocumentImportOperationTests.anUnspacedNoteRoundTripsRowForRow` and
+   `.aSpacedNoteRoundTripsRowForRow` (export → parse → `importDocument` →
+   the stored shape compared: each slot's takes in fan order, labels,
+   chosen, default), `.aHardWrappedFileImportsOneBlockPerParagraph` (a
+   hard-wrapped `.txt` through the door's own file road → one block per
+   paragraph, line breaks inside). As-built expectations that encoded the
+   bulk reading, updated in the same commit: the sitting sample's and
+   the header test's block texts lose the stored `"\n"`;
+   `theBodyIsTheStandingBulkRule` became
+   `theFormatsReadingIsItsOwnAndPasteKeepsTheBulkRule`;
+   `aSurfaceBlocksInternalNewlineImportsAsABlockBoundary` (P-13n-4's old
+   record) is superseded by the single-newline pin;
+   `aDocumentMintsOneBooklessNote…`'s first take and baseline; the drill's
+   Portuguese lens text. **The sample fixture was NOT hard-wrapped — no
+   fixture edit**; `SampleBookDrillTests` now asserts all three Portuguese
+   blocks as single sentences. The byte-identity pins
+   (`DocumentFormatRoundTripTests` 5/5, `serializeThenParseThenSerializeIsByteStable`,
+   `importingAnExportRendersTheSameExportBack`) stayed green untouched.
+   The four suites: 39/39.
+   **THE DOMAIN, stated exactly (what inverse∘join = identity covers):**
+   every block list in which (i) no fanless block is empty (the export
+   skips a blank fanless block — as ever); (ii) no block's text holds a
+   blank line or opens with one (a blank line inside a surface block is a
+   boundary — P-13n-4, narrowed from "every newline" to "a blank line");
+   (iii) **no block stores exactly ONE trailing newline** — the join writes
+   m = 0 and m = 1 as the same `"\n\n"`, so that value is undecidable from
+   the bytes and reads unspaced (a property of `joinRenderedTexts`, not a
+   choice of the parse; it is the shape a two-newline paste stores, so a
+   pasted-Markdown note's blank lines between paragraphs come back as
+   plain block boundaries — the export bytes are identical either way);
+   (iv) a fanless LAST block stores no trailing newline (FP-1 below);
+   (v) the blank-chosen fanned block — piece 2.
+   **Fix-pass calls:** **FP-1 — the document's trailing blank run drops**
+   (the as-built edge doctrine, kept: the ruling reads the run BETWEEN
+   pieces; a file's final newline — every POSIX editor adds one — is not
+   her spacing). **FP-2 — no trim:** a block's lines are kept verbatim
+   (indent, trailing spaces) — the join never trims, so the inverse cannot;
+   the bulk rule's per-piece trim is paste's, not the format's.
 2. **R-ARCH-13na-2 — the paragraph-less Alternates section is legal.** —
    NOT-STARTED: the parse mints `Block(text: "", alternates:)` for a
    paragraph-less section carrying a non-blank take (`importDocument`

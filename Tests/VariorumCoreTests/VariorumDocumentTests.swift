@@ -4,9 +4,9 @@ import Testing
 
 /// 13n-a — THE VARIORUM DOCUMENT FORMAT (Level 0; R-13n-8): the pure half.
 /// The format is the shipped fan export plus the capture microsyntax's
-/// header line; parsing is the standing bulk rule for the body and keeps a
-/// take's own text exactly; every malformed Alternates section refuses with
-/// its line. The store-side round-trip pins (export → parse → serialize) are
+/// header line; the body parses as the exact inverse of the join
+/// (R-ARCH-13na-1) and a take's own text is kept exactly; every malformed
+/// Alternates section refuses with its line. The store-side round-trip pins (export → parse → serialize) are
 /// `DocumentFormatRoundTripTests`; the import operations are
 /// `DocumentImportOperationTests`.
 @Suite("Variorum document format (13n-a)")
@@ -70,12 +70,12 @@ struct VariorumDocumentTests {
         let document = try VariorumDocument.parse(sample)
         #expect(document.title == "o ladrão de raios — ch 1")
         #expect(document.tagPaths == ["percy/pt-en"])
-        // The bulk rule's spacing: the blank line between a paragraph and the
-        // section that follows it is the paragraph's stored k−1.
+        // The inverse of the join (R-ARCH-13na-1): the one blank line between
+        // a paragraph and its section is the separator, never stored text.
         #expect(document.blocks == [
-            .init(text: "Eu não pedi para herdar o observatório.\n",
+            .init(text: "Eu não pedi para herdar o observatório.",
                   alternates: [.init(label: "english", text: "Honestly, I never asked for the observatory.")]),
-            .init(text: "Cuidar de um observatório dá trabalho.\n",
+            .init(text: "Cuidar de um observatório dá trabalho.",
                   alternates: [.init(label: "english", text: "Running an observatory is hard work.")]),
         ])
         #expect(document.alternateCount == 2)
@@ -145,12 +145,12 @@ struct VariorumDocumentTests {
         let mixed = try VariorumDocument.parse("\n{t:\"T\"} Hello {#a}\n\nWorld")
         #expect(mixed.title == "T")
         #expect(mixed.tagPaths == ["a"])
-        #expect(mixed.blocks.map(\.text) == ["Hello\n", "World"])
+        #expect(mixed.blocks.map(\.text) == ["Hello", "World"])
 
         // A token anywhere else is her text.
         let later = try VariorumDocument.parse("Hello\n\n{#x} world")
         #expect(later.tagPaths.isEmpty)
-        #expect(later.blocks.map(\.text) == ["Hello\n", "{#x} world"])
+        #expect(later.blocks.map(\.text) == ["Hello", "{#x} world"])
     }
 
     @Test func foreignLineEndingsAndAByteOrderMarkReadAsTheirLFTwin() throws {
@@ -159,20 +159,84 @@ struct VariorumDocumentTests {
         #expect(try VariorumDocument.parse(crlf) == VariorumDocument.parse(lf))
     }
 
-    @Test func theBodyIsTheStandingBulkRule() throws {
-        // Paragraph = block, spacing stored as k−1 — `bulkSegments` exactly.
+    @Test func theFormatsReadingIsItsOwnAndPasteKeepsTheBulkRule() throws {
+        // R-ARCH-13na-1 supersedes the bulk rule for the FORMAT only: the same
+        // text pasted still segments by `bulkSegments` (a single newline is a
+        // boundary, k newlines store k − 1), untouched by this reading.
         let body = "One.\n\nTwo.\n\n\nThree.\nFour."
-        let document = try VariorumDocument.parse(body)
-        #expect(document.blocks.map(\.text)
-            == SegmentationRules.bulkSegments(body, mode: .paragraph))
+        #expect(try VariorumDocument.parse(body).blocks.map(\.text)
+            == ["One.", "Two.\n\n", "Three.\nFour."])
+        #expect(SegmentationRules.bulkSegments(body, mode: .paragraph)
+            == ["One.\n", "Two.\n\n", "Three.", "Four."])
     }
 
-    @Test func aSurfaceBlocksInternalNewlineImportsAsABlockBoundary() throws {
-        // P-13n-4, RECORDED (not a defect): multi-line SURFACE blocks are not
-        // expressible in v1 — the body is the bulk rule, every line a block.
-        // A take keeps its newlines (pinned above); the surface does not.
-        let document = try VariorumDocument.parse("a line\nanother line")
-        #expect(document.blocks.map(\.text) == ["a line", "another line"])
+    // MARK: - R-ARCH-13na-1: the body is the exact inverse of the join
+
+    /// Every block shape the join writes distinguishably — unspaced, stored
+    /// spacing of 2, 3 and 4 newlines, a single newline inside the text, an
+    /// indent and trailing spaces kept — with and without a fan, in every
+    /// sequence of one to three. The one domain fence: a fanless LAST block
+    /// carries no trailing newline (the document's trailing edge drops — a
+    /// file's final newline is not her spacing).
+    private static let surfaces = [
+        "Plain.", "Spaced.\n\n", "Wider.\n\n\n\n", "Two\nlines.",
+        "Wrapped\nand spaced.\n\n\n", "  an indent kept, and trailing spaces  ",
+    ]
+    private static let fans: [[VariorumDocument.Take]] = [
+        [], [.init(label: "en", text: "Alt."), .init(label: nil, text: "two\n\nlines\n")],
+    ]
+
+    private static func sequences(of shapes: [VariorumDocument.Block]) -> [[VariorumDocument.Block]] {
+        var all: [[VariorumDocument.Block]] = shapes.map { [$0] }
+        var frontier = all
+        for _ in 2...3 {
+            frontier = frontier.flatMap { prefix in shapes.map { prefix + [$0] } }
+            all += frontier
+        }
+        return all
+    }
+
+    @Test func theBodyIsTheExactInverseOfTheJoin() throws {
+        let shapes = Self.surfaces.flatMap { text in Self.fans.map { VariorumDocument.Block(text: text, alternates: $0) } }
+        let domain = Self.sequences(of: shapes).filter { blocks in
+            guard let last = blocks.last else { return false }
+            return !last.alternates.isEmpty || !last.text.hasSuffix("\n")
+        }
+        var misread: [[VariorumDocument.Block]] = []
+        for blocks in domain {
+            let body = VariorumDocument.serializeBody(blocks)
+            if try VariorumDocument.parse(body).blocks != blocks { misread.append(blocks) }
+        }
+        #expect(misread.isEmpty,
+                "\(misread.count) of \(domain.count) block lists misread; the first: \(String(describing: misread.first))")
+    }
+
+    @Test func theJoinsOneUndecidableSpacingReadsUnspaced() throws {
+        // RECORDED — the boundary of R-ARCH-13na-1, a property of the JOIN,
+        // not a choice of the parse: a block storing exactly ONE trailing
+        // newline and an unspaced one export the same bytes ("\n\n" either
+        // way — `joinRenderedTexts`), so no reading can tell them apart; the
+        // inverse reads the unspaced one (one blank line = the separator).
+        let one = [VariorumDocument.Block(text: "A\n"), .init(text: "B")]
+        let none = [VariorumDocument.Block(text: "A"), .init(text: "B")]
+        #expect(VariorumDocument.serializeBody(one) == VariorumDocument.serializeBody(none))
+        #expect(try VariorumDocument.parse(VariorumDocument.serializeBody(one)).blocks == none)
+        // The edges are not spacing: leading and trailing blank runs drop.
+        #expect(try VariorumDocument.parse("\n\nA\n\nB\n\n\n").blocks == none)
+    }
+
+    @Test func aSingleNewlineIsContentAndABlankLineIsTheBoundary() throws {
+        // P-13n-4, narrowed by the ruling: a surface block's single newline
+        // now rides INSIDE it; only a blank line inside a surface block (a
+        // multi-paragraph surface block) still reads as a block boundary.
+        #expect(try VariorumDocument.parse("a line\nanother line").blocks
+            == [.init(text: "a line\nanother line")])
+        #expect(try VariorumDocument.parse("one paragraph\n\nanother").blocks
+            == [.init(text: "one paragraph"), .init(text: "another")])
+        // Markdown's soft-wrap semantics, the way an LLM writes: a list is
+        // one block, its lines content.
+        #expect(try VariorumDocument.parse("Intro.\n\n- one\n- two\n\nAfter.").blocks
+            == [.init(text: "Intro."), .init(text: "- one\n- two"), .init(text: "After.")])
     }
 
     // MARK: - Parse: fail-honest, with the line

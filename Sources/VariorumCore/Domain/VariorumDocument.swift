@@ -33,14 +33,23 @@ import Foundation
 ///   app's capture rule moved into core): `{t:"…"}` the title, `{#tag/path}`
 ///   each tag. It is read on the document's FIRST NON-BLANK LINE only; tokens
 ///   anywhere else are text.
-/// - **Parsing is the standing bulk rule** for the body: paragraph = block on
-///   entry (`SegmentationRules.bulkSegments`, `.paragraph` — the format names
-///   its own segmentation, never the reader's setting), the 2026-07-12
-///   spacing ruling riding it (a run of k newlines between pieces stores k−1
-///   on the preceding block; an Alternates section counts as a piece). A
-///   take's own text is kept EXACTLY, internal newlines and blank lines
-///   included (only the one blank line the serializer puts on each side of a
-///   take's text is the section's).
+/// - **The body parses as the exact inverse of the join** (R-ARCH-13na-1,
+///   the architect's ruling on FORK-A/B — superseding the plan's "standing
+///   bulk rule" letter FOR THE FORMAT ONLY; paste and every other entry road
+///   keep `SegmentationRules.bulkSegments`): a BLANK line separates blocks;
+///   a SINGLE newline is content inside its block (so a hard-wrapped
+///   paragraph is one block, as Markdown reads it); k ≥ 3 newlines between
+///   two pieces store k − 1 on the first as trailing spacing, and k = 2 is
+///   the separator alone (an Alternates section counts as a piece). Rows
+///   therefore round-trip — export, re-import, the same store shape — for
+///   every block the join writes distinguishably; the join's one undecidable
+///   spacing (a block storing exactly ONE trailing newline exports like an
+///   unspaced one) reads unspaced, and a blank line INSIDE a surface block
+///   still reads as a boundary (P-13n-4). The document's leading and
+///   trailing blank runs are edges and drop. A take's own text is kept
+///   EXACTLY, internal newlines and blank lines included (only the one blank
+///   line the serializer puts on each side of a take's text is the
+///   section's).
 /// - **Parsing is fail-honest:** a malformed Alternates section refuses the
 ///   whole document with the line it found the problem on — never a silent
 ///   partial import (`Failure`).
@@ -283,16 +292,14 @@ public enum VariorumDocument {
 
             // A section: the paragraphs above it become blocks first, and the
             // section belongs to the LAST of them. The blank lines between
-            // that paragraph and the header are its stored spacing — the
-            // bulk rule's k−1, with the section standing as the next piece.
+            // that paragraph and the header are spacing exactly as between
+            // two blocks — the section stands as the join's next piece.
             let headerLine = index + 1
-            let above = paragraphs(chunk)
+            let above = paragraphs(chunk, beforeSection: true)
             guard !above.isEmpty else {
                 throw Failure(.alternatesWithoutParagraph, line: headerLine)
             }
             blocks.append(contentsOf: above.map { Block(text: $0) })
-            let spacing = chunk.reversed().prefix(while: isBlank).count
-            blocks[blocks.count - 1].text += String(repeating: "\n", count: spacing)
             chunk = []
 
             var takes: [Take] = []
@@ -330,7 +337,7 @@ public enum VariorumDocument {
             blocks[blocks.count - 1].alternates.append(contentsOf: takes.filter { !$0.text.isEmpty })
         }
         // The tail's trailing blank lines are an edge run: they drop.
-        blocks.append(contentsOf: paragraphs(chunk).map { Block(text: $0) })
+        blocks.append(contentsOf: paragraphs(chunk, beforeSection: false).map { Block(text: $0) })
 
         guard !blocks.isEmpty else { throw Failure(.empty) }
         return Document(title: title, tagPaths: tagPaths, blocks: blocks)
@@ -338,10 +345,49 @@ public enum VariorumDocument {
 
     // MARK: - Internals
 
-    /// The standing bulk rule over a run of body lines — paragraph = block,
-    /// the spacing ruling riding (the format names `.paragraph`).
-    private static func paragraphs(_ lines: [String]) -> [String] {
-        SegmentationRules.bulkSegments(lines.joined(separator: "\n"), mode: .paragraph)
+    /// **THE BODY READING — the exact inverse of the join** (R-ARCH-13na-1)
+    /// over a run of body lines: a BLANK line separates blocks; a single
+    /// newline is CONTENT, so a block's lines join back with `"\n"` exactly
+    /// as written (no trim — the join never trims either); and a run of
+    /// b blank lines between two pieces — k = b + 1 newlines — stores
+    /// `storedSpacing(blankLines:)` on the preceding one. `beforeSection`
+    /// says the run ends at an Alternates header (the join's next piece, so
+    /// the last paragraph's run is spacing too); otherwise it ends the
+    /// document and its trailing run is an edge. Leading runs are edges.
+    private static func paragraphs(_ lines: [String], beforeSection: Bool) -> [String] {
+        var runs: [(text: String, blankLinesAfter: Int)] = []
+        var open: [String] = []
+        for line in lines {
+            if isBlank(line) {
+                if !open.isEmpty {
+                    runs.append((open.joined(separator: "\n"), 0))
+                    open = []
+                }
+                // A blank line counts only after a paragraph (a leading run
+                // has no preceding piece).
+                if !runs.isEmpty { runs[runs.count - 1].blankLinesAfter += 1 }
+                continue
+            }
+            open.append(line)
+        }
+        if !open.isEmpty { runs.append((open.joined(separator: "\n"), 0)) }
+        return runs.enumerated().map { offset, run in
+            let isLast = offset == runs.count - 1
+            guard !isLast || beforeSection else { return run.text }
+            return run.text + String(repeating: "\n", count: storedSpacing(blankLines: run.blankLinesAfter))
+        }
+    }
+
+    /// The trailing newlines a block stores for the b blank lines (k = b + 1
+    /// newlines) that follow it — `Queries.joinRenderedTexts` inverted. The
+    /// join writes `"\n\n"` after a piece with no trailing newline and
+    /// `"\n"` after one that has m ≥ 1, so k = 2 when m ≤ 1 and k = m + 1
+    /// when m ≥ 2. Hence k ≥ 3 ⇒ m = k − 1 = b, and k = 2 ⇒ m = 0 — the
+    /// separator alone. m = 1 is the join's one undecidable value: it writes
+    /// the same bytes as m = 0, and the reading takes the unspaced one
+    /// (recorded, `VariorumDocumentTests.theJoinsOneUndecidableSpacingReadsUnspaced`).
+    private static func storedSpacing(blankLines: Int) -> Int {
+        blankLines >= 2 ? blankLines : 0
     }
 
     /// A take's text: its lines exactly, less the ONE blank line the

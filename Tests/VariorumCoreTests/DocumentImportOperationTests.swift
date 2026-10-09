@@ -69,7 +69,7 @@ struct DocumentImportOperationTests {
             // labeled (a numbered take is unlabeled).
             let first = try fan(db, result.blockIDs[0])
             #expect(first.map(\.workingText) == [
-                "Eu não pedi para herdar o observatório.\n",
+                "Eu não pedi para herdar o observatório.",
                 "Honestly, I never asked for the observatory.",
                 "Je ne voulais pas.",
             ])
@@ -96,7 +96,7 @@ struct DocumentImportOperationTests {
             let row = try db.read { try Container.fetchOne($0, key: result.post.id) }
             #expect(row?.lastTouchedAt != nil)
             #expect(row?.churnAccumulator == 0)
-            #expect(row?.baselineLength == "Eu não pedi para herdar o observatório.\n".count
+            #expect(row?.baselineLength == "Eu não pedi para herdar o observatório.".count
                 + "Cuidar de um observatório dá trabalho.".count)
 
             // ONE undo entry.
@@ -137,6 +137,127 @@ struct DocumentImportOperationTests {
                 try Queries.exportPost($0, postID: imported.post.id, includeVariants: true)
             }
             #expect(again == export)
+        }
+    }
+
+    // MARK: - R-ARCH-13na-1: rows round-trip (export → import → the same store shape)
+
+    /// One placed block as the store holds it: its live takes in fan order
+    /// (text + label), and which of them is chosen and which is the default.
+    private struct SlotShape: Equatable {
+        let texts: [String]
+        let labels: [String?]
+        let chosen: Int?
+        let defaultTake: Int?
+    }
+
+    private func storeShape(_ db: AppDatabase, _ postID: String) throws -> [SlotShape] {
+        try db.read { database in
+            try Row.fetchAll(
+                database, sql: """
+                    SELECT cb.block_id, cb.chosen_variant_id, b.default_variant_id
+                    FROM container_block cb JOIN block b ON b.id = cb.block_id
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                    ORDER BY cb.position, cb.id
+                    """, arguments: [postID]
+            ).map { row in
+                let blockID: String = row["block_id"]
+                let chosen: String? = row["chosen_variant_id"]
+                let defaultID: String? = row["default_variant_id"]
+                let fan = try Variant.fetchAll(
+                    database, sql: """
+                        SELECT * FROM variant WHERE block_id = ? AND deleted_at IS NULL
+                        ORDER BY fan_position, id
+                        """, arguments: [blockID])
+                return SlotShape(
+                    texts: fan.map(\.workingText), labels: fan.map(\.label),
+                    chosen: fan.firstIndex { $0.id == chosen },
+                    defaultTake: fan.firstIndex { $0.id == defaultID })
+            }
+        }
+    }
+
+    /// A take on a seeded block, optionally labeled — never chosen.
+    private func take(
+        _ ops: Operations, on seeded: Operations.NewBlockResult, _ text: String, label: String? = nil
+    ) throws {
+        let take = try ops.branchVariant(seeded.block.id, from: seeded.variant.id)
+        try ops.autosave(take.id, text: text, charDelta: text.count)
+        if let label { try ops.setTakeLabel(take.id, label: label) }
+    }
+
+    /// export → parse → `importDocument`: the original's shape and the copy's.
+    private func reimport(
+        _ ops: Operations, _ db: AppDatabase, _ postID: String
+    ) throws -> (original: [SlotShape], imported: [SlotShape]) {
+        let export = try db.read { try Queries.exportPost($0, postID: postID, includeVariants: true) }
+        let imported = try ops.importDocument(.init(
+            fallbackTitle: "Copy", document: try VariorumDocument.parse(export)))
+        return (try storeShape(db, postID), try storeShape(db, imported.post.id))
+    }
+
+    @Test func anUnspacedNoteRoundTripsRowForRow() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "Unspaced")
+            let first = try ops.seedBlock(in: post.id, text: "Eu não pedi para herdar o observatório.")
+            try take(ops, on: first, "I never asked to inherit the observatory.", label: "english")
+            try take(ops, on: first, "Je ne voulais pas.")
+            try ops.seedBlock(in: post.id, text: "A plain block between.")
+            try ops.seedBlock(in: post.id, text: "A block with\na line break inside it.")
+            let last = try ops.seedBlock(in: post.id, text: "Cuidar de um observatório dá trabalho.")
+            try take(ops, on: last, "Running an observatory is hard work.\nMost nights.", label: "english")
+
+            let (original, imported) = try reimport(ops, db, post.id)
+            #expect(original.count == 4)
+            #expect(imported == original)
+        }
+    }
+
+    @Test func aSpacedNoteRoundTripsRowForRow() throws {
+        try withOperations { ops, db in
+            // Stored spacing of 2, 3 and 4 newlines (a 3-, 4- and 5-newline
+            // paste), beside unspaced neighbours, a fanned block whose spacing
+            // sits between its text and its section, and single newlines
+            // inside a surface block.
+            let post = try ops.createPost(title: "Spaced")
+            try ops.seedBlock(in: post.id, text: "Opening.\n\n")
+            try ops.seedBlock(in: post.id, text: "Tight.")
+            let wide = try ops.seedBlock(in: post.id, text: "A wide gap after me.\n\n\n\n")
+            try take(ops, on: wide, "Um intervalo largo.", label: "pt")
+            try ops.seedBlock(in: post.id, text: "Wrapped\nand spaced.\n\n\n")
+            try ops.seedBlock(in: post.id, text: "Closing.")
+
+            let (original, imported) = try reimport(ops, db, post.id)
+            #expect(original.map { $0.texts[0] } == [
+                "Opening.\n\n", "Tight.", "A wide gap after me.\n\n\n\n",
+                "Wrapped\nand spaced.\n\n\n", "Closing.",
+            ])
+            #expect(imported == original)
+        }
+    }
+
+    @Test func aHardWrappedFileImportsOneBlockPerParagraph() throws {
+        try withOperations { ops, db in
+            // The old-txt / Gutenberg shape (her Percy Jackson case): every
+            // paragraph hard-wrapped near seventy columns, a blank line between
+            // paragraphs, and the file's own final newline.
+            let wrapped = """
+                The house at the end of the lane had been empty for as long as
+                anyone in the village could remember, and the children who dared
+                each other to touch its gate never stayed to see whether it opened.
+
+                Nobody could say who kept the garden. The roses came back every
+                June regardless.
+
+                """
+            let result = try ops.importDocument(try named(wrapped, file: "chapter one.txt"))
+            #expect(try storeShape(db, result.post.id).map(\.texts) == [
+                ["The house at the end of the lane had been empty for as long as\n"
+                    + "anyone in the village could remember, and the children who dared\n"
+                    + "each other to touch its gate never stayed to see whether it opened."],
+                ["Nobody could say who kept the garden. The roses came back every\n"
+                    + "June regardless."],
+            ])
         }
     }
 
