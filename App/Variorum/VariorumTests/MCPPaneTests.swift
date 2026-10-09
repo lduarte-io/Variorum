@@ -150,6 +150,11 @@ struct MCPPaneTests {
             if case .success(let fd) = MCPSocketRoad.connect(directory: directory) { close(fd) } else {
                 Issue.record("the running door answers on its socket")
             }
+            // The same ready re-appearing (a window's `.task` again) is a
+            // no-op: the server keeps serving.
+            door.attach(session: session)
+            #expect(door.serverState == .running)
+            #expect(FileManager.default.fileExists(atPath: socket), "re-attaching the same session keeps the door open")
 
             door.setEnabled(false)
             #expect(try await settle { door.serverState == .off })

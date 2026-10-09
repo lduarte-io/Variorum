@@ -26,7 +26,8 @@ final class MCPSession: @unchecked Sendable {
     static let instructions = """
         Variorum is a writing app; this server is its library's MCP door. A new client is a \
         connection request until the author approves it in Variorum \u{25B8} Settings \u{25B8} MCP, \
-        and tools appear only for what she has shared (they are re-announced when that changes). \
+        and tools appear only for what the author has shared (they are re-announced when that \
+        changes). \
         read_note returns the Variorum document format. Every refusal says why.
         """
 

@@ -174,6 +174,15 @@ struct VariorumApp: App {
                         // ready (this task re-runs after every adoption's
                         // reopen), BEFORE the services guard so a re-ready
                         // always re-reads the marker.
+                        // 13n-b U1 (A-8): the MCP door follows the open
+                        // store — EVERY ready, before the services guard
+                        // (an adoption's reopen re-readies with the services
+                        // standing, and the door must not keep watching the
+                        // old writer); idempotent per session, so a window
+                        // re-appearing never drops a live connection. It
+                        // serves iff its toggle is ON and stops at lock and
+                        // quit.
+                        appDelegate.mcp.attach(session: session)
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {
@@ -199,10 +208,6 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
-                        // 13n-b U1 (A-8): the MCP door follows the open store
-                        // — it serves iff its toggle is ON (the grants
-                        // store's own switch) and stops at lock and quit.
-                        appDelegate.mcp.attach(session: session)
                         // 13x U2 row 7: the restore-hold's gate — wired
                         // BEFORE start() so no first round outruns it; the
                         // one Resume press clears the hold and catches up

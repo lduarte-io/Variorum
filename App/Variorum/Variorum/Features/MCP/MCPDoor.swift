@@ -72,10 +72,13 @@ final class MCPDoor {
     }
     var note: Note?
 
+    @ObservationIgnored private weak var session: AppSession?
     @ObservationIgnored private var database: AppDatabase?
     @ObservationIgnored private var runner: OperationsRunner?
     @ObservationIgnored private var host: MCPServerHost?
     @ObservationIgnored private var observation: Task<Void, Never>?
+    /// A start is in flight off the main thread — never start twice.
+    @ObservationIgnored private var starting = false
     /// Whether this process may run a server at all (never a test process —
     /// the test host IS the dev-store app).
     @ObservationIgnored private let serverAllowed: Bool
@@ -125,7 +128,11 @@ final class MCPDoor {
     /// The store is open: observe the grants store; start the server when the
     /// toggle says so.
     func attach(session: AppSession) {
+        // Idempotent per session: the same ready re-appearing keeps its
+        // server and its connections.
+        guard session !== self.session else { return }
         detach()
+        self.session = session
         database = session.database
         runner = session.runner
         let database = session.database
@@ -147,6 +154,7 @@ final class MCPDoor {
         observation?.cancel()
         observation = nil
         stopServer()
+        session = nil
         database = nil
         runner = nil
         serverState = snapshot.enabled ? .waitingForLibrary : .off
@@ -163,8 +171,8 @@ final class MCPDoor {
             serverState = .waitingForLibrary
             return
         }
-        if let host, host.state == .running {
-            serverState = .running
+        if let host, host.state == .running || starting {
+            if host.state == .running { serverState = .running }
             return
         }
         guard let fresh = host ?? makeHost(database) else {
@@ -175,18 +183,30 @@ final class MCPDoor {
             Task { @MainActor in self?.refreshConnected() }
         }
         host = fresh
-        do {
-            try fresh.start()
-            serverState = .running
-        } catch {
-            serverState = .failed(String(describing: error))
+        starting = true
+        // The start sweeps the while-connected grants (a write) and binds —
+        // OFF the main thread (P2); the state lands back here.
+        Task { @MainActor [weak self] in
+            let outcome: Result<Void, Error> = await Task.detached { Result { try fresh.start() } }.value
+            guard let self else { return }
+            self.starting = false
+            guard self.host === fresh else {
+                // Stopped (toggle OFF, lock, quit) while it was starting.
+                fresh.stop()
+                return
+            }
+            switch outcome {
+            case .success: self.serverState = .running
+            case .failure(let error): self.serverState = .failed(String(describing: error))
+            }
+            self.refreshConnected()
         }
-        refreshConnected()
     }
 
     private func stopServer() {
         host?.stop()
         host = nil
+        starting = false
         connected = []
     }
 
