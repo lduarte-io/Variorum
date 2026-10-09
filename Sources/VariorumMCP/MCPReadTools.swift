@@ -8,9 +8,17 @@ import VariorumCore
 /// itself reads through — `read_note` IS `Queries.variorumDocumentText` (the
 /// Level 0 format), `export_note` IS `Queries.renderedText`, `search` IS the
 /// 13o engine (`Queries.searchPassages`) — each gated PER CALL by the pure
-/// rule over CURRENT facts, inside ONE write transaction that also spends a
-/// once grant and records the coarse activity line, so a once grant can never
-/// be read twice and every refusal is logged.
+/// rule over CURRENT facts.
+///
+/// **Transactions (round 1 F3):** `read_note`/`export_note` run in ONE write
+/// transaction — the once-grant stamp must be atomic with the read it
+/// authorizes, so a once grant can never be read twice. The three
+/// NON-consuming tools (`list_books`, `list_notes`, `search`) assemble their
+/// whole answer in ONE read snapshot and then write the activity line in a
+/// short write of its own — the heavy answer never holds the writer, so her
+/// own autosave is never queued behind a client's search (P2). A revocation
+/// landing mid-call is honoured on the very next call, exactly as before;
+/// every refusal is still logged.
 ///
 /// P1: every call costs ∝ its scope — a book's members, a wing's page by the
 /// recency index, the grants' own candidates, the search engine's matches —
@@ -82,10 +90,11 @@ struct MCPReadTools: Sendable {
     // MARK: - list_books
 
     private func listBooks(clientName: String) throws -> Outcome {
-        try database.write { db in
+        // F3: the whole answer from one read snapshot; the log in its own
+        // short write after.
+        let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             guard standing.state == .approved else {
-                try log(db, clientName, MCPToolCatalog.listBooks.name, nil, nil, nil, allowed: false)
                 return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .book)
             }
             let live = standing.liveGrants
@@ -137,9 +146,10 @@ struct MCPReadTools: Sendable {
                     "notes": readable,
                 ])
             }
-            try log(db, clientName, MCPToolCatalog.listBooks.name, nil, nil, nil, allowed: true)
             return Outcome(text: try encode(["books": books]), isError: false)
         }
+        try logAfter(clientName, MCPToolCatalog.listBooks.name, nil, nil, allowed: !outcome.isError)
+        return outcome
     }
 
     // MARK: - list_notes
@@ -163,27 +173,21 @@ struct MCPReadTools: Sendable {
             throw ArgumentFailure(message: Self.staleCursorMessage)
         }
         let act = MCPToolCatalog.listNotes.name
-        return try database.write { db in
+        // F3: one read snapshot; the log in its own short write after.
+        let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var page: [PageRow]
             if let bookID {
                 let decision = MCPGrantAuthority.decide(
                     standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .read)
-                guard decision.isAllowed else {
-                    try log(db, clientName, act, "book", bookID, nil, allowed: false)
-                    return refusal(decision, .book)
-                }
+                guard decision.isAllowed else { return refusal(decision, .book) }
                 page = try bookPage(db, bookID: bookID, after: cursor, limit: limit)
             } else if let wingID {
                 let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
-                guard decision.isAllowed else {
-                    try log(db, clientName, act, "wing", wingID, nil, allowed: false)
-                    return refusal(decision, .wing)
-                }
+                guard decision.isAllowed else { return refusal(decision, .wing) }
                 page = try recencyPage(db, wingID: wingID, candidates: nil, after: cursor, limit: limit)
             } else {
                 guard standing.state == .approved else {
-                    try log(db, clientName, act, nil, nil, nil, allowed: false)
                     return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
                 }
                 page = try sharedPage(db, standing: standing, after: cursor, limit: limit)
@@ -199,12 +203,13 @@ struct MCPReadTools: Sendable {
                     "book_ids": noteFacts.bookIDs.sorted(), "wing_id": noteFacts.wingID,
                 ])
             }
-            try log(db, clientName, act, bookID != nil ? "book" : (wingID != nil ? "wing" : nil),
-                    bookID ?? wingID, nil, allowed: true)
             var answer: [String: Any] = ["notes": notes]
             if full, let last = page.last { answer["next_cursor"] = last.cursor.encoded }
             return Outcome(text: try encode(answer), isError: false)
         }
+        try logAfter(clientName, act, bookID != nil ? "book" : (wingID != nil ? "wing" : nil),
+                     bookID ?? wingID, allowed: !outcome.isError)
+        return outcome
     }
 
     /// One listed note before the rule's per-note pass.
@@ -333,14 +338,16 @@ struct MCPReadTools: Sendable {
         let query = SearchQueryParser.parse(text, typeAhead: false, calendar: calendar)
         guard !query.isEmpty else { throw ArgumentFailure(message: "Give search some words to look for.") }
         let act = MCPToolCatalog.search.name
-        return try database.write { db in
+        // F3: the whole engine runs on one read snapshot (under the open book
+        // it is the heaviest call the server serves — it must never hold the
+        // writer); the log lands in its own short write after.
+        let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             var scopes: [SearchScope] = []
             if let noteID {
                 let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
                 let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: false)
                 guard isStandingAllow(decision, standing), let facts else {
-                    try log(db, clientName, act, "note", noteID, nil, allowed: false)
                     return refusal(decision.isAllowed ? .ask(.notShared, offersAlways: true) : decision, .note)
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .note(id: noteID))]
@@ -352,13 +359,11 @@ struct MCPReadTools: Sendable {
                 // passage, an eternally empty page; refuse it here instead,
                 // the same rule the catalog's listing reads.
                 guard isStandingAllow(decision, standing), let facts else {
-                    try log(db, clientName, act, "book", bookID, nil, allowed: false)
                     return refusal(decision.isAllowed ? .ask(.notShared, offersAlways: true) : decision, .book)
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .book(id: bookID))]
             } else {
                 guard standing.state == .approved else {
-                    try log(db, clientName, act, nil, nil, nil, allowed: false)
                     return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
                 }
                 scopes = try reachedScopes(db, standing)
@@ -376,10 +381,11 @@ struct MCPReadTools: Sendable {
                     if passages.count == limit { truncated = true; break scopeLoop }
                 }
             }
-            try log(db, clientName, act, bookID != nil ? "book" : (noteID != nil ? "note" : nil),
-                    bookID ?? noteID, nil, allowed: true)
             return Outcome(text: try encode(["passages": passages, "truncated": truncated]), isError: false)
         }
+        try logAfter(clientName, act, noteID != nil ? "note" : (bookID != nil ? "book" : nil),
+                     noteID ?? bookID, allowed: !outcome.isError)
+        return outcome
     }
 
     /// Every scope the client's reach covers, wing-level first: the open
@@ -464,6 +470,17 @@ struct MCPReadTools: Sendable {
         try operations.recordMCPActivity(
             db, clientName: clientName, act: act, targetKind: kind, targetID: id,
             targetTitle: title, allowed: allowed)
+    }
+
+    /// F3: the non-consuming tools' activity line, a short write of its own
+    /// AFTER the read snapshot that built the answer (the consuming tools log
+    /// inside their one write transaction — the once stamp binds them to it).
+    private func logAfter(
+        _ clientName: String, _ act: String, _ kind: String?, _ id: String?, allowed: Bool
+    ) throws {
+        try database.write { db in
+            try log(db, clientName, act, kind, id, nil, allowed: allowed)
+        }
     }
 
     private func displayTitle(_ row: Row) -> String {
