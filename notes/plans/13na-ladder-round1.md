@@ -341,3 +341,26 @@ it can write, so this is a design call, not a quick fix.
 
 Round 2 re-reviews the fixes (fresh reviewer) per the ladder; a new
 BLOCKER/MAJOR earns round 3; cap three.
+
+## FIX-ROUND ADJUNCT DISPOSITIONS (orchestrator, post-fix-round — the two left-undone items)
+
+- **The single-container undo pair (F1's shape in 13c machinery) — TICKETED,
+  VX-119.** Pre-existing: `revertMintedContainer`/`reapplyMintedContainer`
+  predate this unit (the copy ops since 13c); the single-file import door
+  newly rides it. Traced by reading only — pin-before-fix binds, so the
+  ticket's first act is the red probe, then the F1 fix shape, then the
+  CLASS SWEEP (every redo registration keyed on current state vs the undo's
+  stamp, instance × host, FIXED or provably SAFE). Not fixed in-round:
+  shared 13c machinery under an overnight mandate deserves a probe-first
+  daytime session, and the triggering sequence (hand-delete between undo
+  and redo) is narrow. Named in her morning bundle.
+- **The door-level package walk — TICKETED, VX-120, with a probe
+  instruction.** A naive `.isPackageKey` guard at the door may FALSELY
+  refuse a plain folder named like `percy.v2` (and the F7 inside-skip may
+  silently skip such subfolders) — the key's semantics for unregistered
+  extensions must be probed before any guard lands. Known-limits line
+  stands meanwhile: a package handed directly to the door walks as a
+  folder of its importable contents.
+
+ROUND 2 (fresh reviewer) re-reviews the fix round's diff next; findings
+file `notes/plans/13na-ladder-round2.md`.
