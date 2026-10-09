@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| 13n-a — the Variorum document format | VX-117 · `vx-117-13n-a` | `~/dev/variorum-vx-117` · the Pro | OPEN 2026-10-09, overnight under her provisional mandate (plan `notes/plans/phase-13n-a-document-format.md`; the sitting record R-13n-1…11). Surfaces: VariorumCore Domain/Operations/Queries (format + import), Mac File menu + Bookcase drop + note ⋯ menu. NO `Sync/`, NO custody, NO editor seam. **Her standing order: ends with the /Applications refresh, NO merge to main until her review** |
 
 ### Latest closeout
 
