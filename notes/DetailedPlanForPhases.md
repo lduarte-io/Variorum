@@ -12,7 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| 13n-b — the MCP door (the server, the grants, the pane) | VX-124 (child of VX-25) · `vx-124-13n-b` | `~/dev/variorum-vx-124` · the Pro | Kicked off 2026-10-09 (`/architect-phase`). Surfaces: a NEW `Grants/`-family local-only table + ops/queries (zero `Sync/`, zero lockstep), the MCP SDK dependency + a `variorum-mcp` helper target, a new Settings ▸ MCP pane, grant faces on book/note menus, registry declarations. No editor seam. |
+| 13n-b — the MCP door (the server, the grants, the pane) | VX-124 (child of VX-25) · `vx-124-13n-b` | `~/dev/variorum-vx-124` · the Pro | Kicked off 2026-10-09 (`/architect-phase`). Surfaces: a NEW grants-family LOCAL-ONLY table + ops/queries, the MCP SDK dependency + a `variorum-mcp` helper target, a new Settings ▸ MCP pane, grant faces on book/note menus, registry declarations. No editor seam. **AMENDED same day (her R-13nb-4, the plan's sitting record): + THE PRIVATE MARK — one small §12 lockstep event (marker 12→13, two additive nullable PLAIN columns `container.ai_private_at` + `reading.ai_private_at`), Sync/ classification lines Fable-authored; this effort is now THE one Sync-touching effort (stage clear — the table holds only this row); mirror deploy HELD for her closeout window.** |
 
 ### Latest closeout
 
