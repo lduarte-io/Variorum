@@ -117,3 +117,146 @@ re-owned; MOBILE PARITY line (expect "nothing mobile-visible" — the doors
 are Mac faces; imported content syncs as ordinary rows); 13n-b's plan
 written with its kickoff message (the sitting record's R-13n-3…7/10/11
 carry its rulings); the handoff; PR, merge commit, push, hard stop.
+
+---
+
+## THE OVERNIGHT RUN (2026-10-09, kickoff ~04:15 MDT) — her mandate and standing orders
+
+Opened by `/architect-phase` at her word: *"let's get rolling. I'm going to
+sleep, so I want you to rule and build provisionally. I'll be back in the
+morning. you can do that #143 merge + kickoff."* (#143 merged: `062e8534`.)
+Her second order, mid-kickoff, BINDING: *"if you get done before I am back,
+you'll finish with an application refresh but not a merge to main until i
+can review and test it."* So: the unit builds, ladders, and walks tonight;
+the run ends with the /Applications refresh from this branch's tree at a
+zero-instance window (A1 first; HELD instead if her real-store instance is
+alive — never quit it); **PR opened but NOT merged**; the morning bundle
+carries her review+test checklist. Disputed or product-flavored edges land
+PROVISIONAL here and in QUESTIONS, never silently.
+
+Effort: VX-117 (child of VX-25, project 13n) · branch `vx-117-13n-a` ·
+worktree `~/dev/variorum-vx-117` · the Pro. Orchestrator: Fable
+(`/architect-phase`); implementer `opus-implementer` (xhigh); cold reviewer
+`opus-reviewer` (no editor seam / custody / `Sync/` in this diff — the
+sitting record's eligibility call).
+
+## The binding principles (the 13b constitution, copied per the architect-phase skill)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+Constitution applications specific to THIS unit: the two new Mac doors
+(File ▸ Import…, the note ⋯ menu's Copy for AI) are ROUTED vocabulary —
+they are DECLARED in the capability registry (verb, availability, refusal
+copy) and covered by the registry walk (P-1); the Bookcase drop target
+lights only where a drop would act (§12's false-offer rule); import never
+creates a second text surface or touches the liveness authority (P-3 —
+minted notes open through the ordinary doors); receipts/refusals ride the
+one status seam with their KIND decided at the door.
+
+## Environment traps (the standing invariant core — brief-verbatim for the implementer)
+
+Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
+discriminate by PATH; treat real-store instances by STORE, not path —
+NEVER quit/kill one; no Release builds or /Applications refreshes while
+one lives. Mac tests run from `App/Variorum/` with suite-level
+`-only-testing` ONLY, and EVERY `xcodebuild test` run (and any walk,
+Debug-app launch, or dev-store reset) requires a HELD `Tools/stage` claim;
+headless `swift build`/`swift test` on the core package is free. NEVER add
+a custom build configuration (anything not named exactly "Debug" builds
+the packages Release and strips the DEBUG oracles). Swift Testing's
+"passed" count INCLUDES skipped tests — read the `skipped:` lines before
+claiming a gated suite ran. zsh `pipestatus`. Walks: `cliclick` +
+`Tools/WalkKit/` on the DEV-STORE Debug build only
+(`io.lduarte.Variorum.debug`), under the held stage claim; screenshots in
+gitignored dirs. Never `git checkout` over uncommitted work; push after
+every commit; never force-push. Backups of any real store are WAL-safe
+with UTC names into `Backups/safety-copies/` (the A1 rail) — but this
+unit should never touch the real store at all.
+
+## UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
+
+- STATE: NOT-STARTED (the settled design is this plan + the sitting record).
+- Per-piece lines land here as `DONE (hash)` / `IN-PROGRESS — exactly what
+  remains` / `NOT-STARTED`; unverified claims marked PENDING; revert
+  announcements per the resiliency protocol (no revert starts until this
+  record names it and a committed pre-revert state exists).
+
+## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
+
+You are the 13n-a implementer — `opus-implementer`, ONE acceptance unit,
+working tree `~/dev/variorum-vx-117` (branch `vx-117-13n-a`; run
+EVERYTHING from this absolute path, never the main checkout). Read, in
+full, before any code: this plan file top to bottom (it is self-contained);
+`notes/plans/phase-13n-sitting-record-2026-10-09.md` (R-13n-1…11 — the
+rulings you build to); `notes/SessionResiliencyProtocol.md` (binding: the
+checkpoint protocol — commit per coherent piece, push after every commit,
+LIVE STATUS from the first commit, synchronous foreground waits only, no
+subagents); the mockups' §8 for the format sample
+(`notes/plans/13n-sitting-mockups/mcp-door-mockups.html`). The format's
+authoritative existing half is `Sources/VariorumCore/Queries/Export.swift`
+(the Alternates section + the join rules) — your serializer MUST reuse or
+byte-match it, and the round-trip pins prove it. Build the deliverables in
+this plan's "What this phase builds" exactly; honor "What this phase must
+NOT touch"; the acceptance section names your evidence. Commit messages:
+sentence case, stating mechanism and pin where a fix lands, ending
+`Part of VX-117`; NO attribution trailers of any kind. Tests at the END of
+the unit, never a full-suite start. Stage claims for every Mac
+`xcodebuild test` run and for the walk (`Tools/stage claim` — hold it,
+renew it, release it). The live round's captures land in a gitignored dir;
+the record's walk section lists them. Where the plan leaves an implementer
+call (named in "Open items"), decide it, record it in the UNIT RECORD with
+one line of reasoning; where you hit a PRODUCT-flavored fork the plan does
+not answer, STOP that half and return the fork to the orchestrator with
+your proposal (the architect rules; the rest of the unit continues).
