@@ -13,6 +13,7 @@ final class MCPSession: @unchecked Sendable {
     private let server: Server
     private let transport: MCPSocketTransport
     private let tools: MCPReadTools
+    private let writes: MCPWriteTools
     private let database: AppDatabase
     private let operations: Operations
     private let lock = NSLock()
@@ -31,12 +32,20 @@ final class MCPSession: @unchecked Sendable {
         read_note returns the Variorum document format. Every refusal says why.
         """
 
-    init(fd: Int32, database: AppDatabase, operations: Operations, version: String) {
+    init(
+        fd: Int32, database: AppDatabase, operations: Operations, version: String,
+        executor: any MCPWriteExecutor, hooks: MCPHostHooks
+    ) {
         self.fd = fd
         self.database = database
         self.operations = operations
         self.transport = MCPSocketTransport(fd: fd)
-        self.tools = MCPReadTools(database: database, operations: operations)
+        var reads = MCPReadTools(database: database, operations: operations)
+        reads.hooks = hooks
+        self.tools = reads
+        var writes = MCPWriteTools(database: database, grants: operations, executor: executor)
+        writes.hooks = hooks
+        self.writes = writes
         self.server = Server(
             name: VariorumMCP.serverName, version: version, title: "Variorum",
             instructions: Self.instructions,
@@ -55,7 +64,11 @@ final class MCPSession: @unchecked Sendable {
             guard let name = self.clientName else {
                 return .init(content: [.text(text: "Initialize first.", annotations: nil, _meta: nil)], isError: true)
             }
-            let outcome = self.tools.call(params.name, arguments: params.arguments, clientName: name)
+            // U2: the write rungs run on the session's executor (AF-8);
+            // the reads stay where U1 built them.
+            let outcome = MCPWriteTools.handledToolNames.contains(params.name)
+                ? await self.writes.call(params.name, arguments: params.arguments, clientName: name)
+                : self.tools.call(params.name, arguments: params.arguments, clientName: name)
             return .init(
                 content: [.text(text: outcome.text, annotations: nil, _meta: nil)], isError: outcome.isError)
         }

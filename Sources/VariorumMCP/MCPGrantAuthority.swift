@@ -53,19 +53,25 @@ struct MCPGrantAuthority: Sendable {
             target: .note(facts), rung: rung, consumes: consumes)
     }
 
+    /// `consumes` (U2): a WRITE landing in the book (`create_note`,
+    /// `import_document`, `add_note_to_book`) is content-bearing — it spends
+    /// a once book grant at its own rung (AF-7); a listing never does.
     static func decide(
-        _ standing: Standing, book facts: MCPGrantRule.BookFacts?, rung: MCPGrantRule.Rung
+        _ standing: Standing, book facts: MCPGrantRule.BookFacts?, rung: MCPGrantRule.Rung,
+        consumes: Bool = false
     ) -> MCPGrantRule.Decision {
         guard let facts else { return missingTarget(standing) }
         return MCPGrantRule.decide(
             client: standing.state, grants: standing.grants, openBook: standing.openBook,
-            target: .book(facts), rung: rung, consumes: false)
+            target: .book(facts), rung: rung, consumes: consumes)
     }
 
-    static func decideWing(_ standing: Standing, wingID: String, rung: MCPGrantRule.Rung) -> MCPGrantRule.Decision {
+    static func decideWing(
+        _ standing: Standing, wingID: String, rung: MCPGrantRule.Rung, consumes: Bool = false
+    ) -> MCPGrantRule.Decision {
         MCPGrantRule.decideWing(
             client: standing.state, grants: standing.grants, openBook: standing.openBook,
-            wingID: wingID, rung: rung)
+            wingID: wingID, rung: rung, consumes: consumes)
     }
 
     private static func missingTarget(_ standing: Standing) -> MCPGrantRule.Decision {
@@ -79,10 +85,12 @@ struct MCPGrantAuthority: Sendable {
 
 /// **The refusals, as the client reads them** (R-13n-4's "refusals speak to
 /// the client exactly as they speak to you"; technical register inside the
-/// door — P-13n-1). An "ask" decision reads the same in U1: the just-in-time
-/// ask is U2's, so the words say how she would share it.
+/// door — P-13n-1). U2 (AF-6): when a just-in-time ask WAS queued in the app,
+/// a `rungTooLow` or `fenced` refusal — a target the client legitimately
+/// knows exists — gains `askedSentence`; `notShared` keeps its ONE answer
+/// byte-for-byte whether or not an ask was raised (no existence oracle).
 enum MCPRefusalCopy {
-    enum Target: Sendable {
+    enum Target: Sendable, Equatable {
         case note, book, wing
         var noun: String {
             switch self {
@@ -107,11 +115,35 @@ enum MCPRefusalCopy {
         case .rungTooLow(let granted):
             return "This client may only \(rungWords(granted)) here."
         case .fenced(.journal):
+            // U2: a BOOK target names itself — a journal book is never a
+            // grant scope; its entries are asked for one at a time.
+            if target == .book {
+                return "That book is a journal. Its entries are shared one ask at a time, never by a "
+                    + "standing grant."
+            }
             return "That's a journal entry. Journal entries are shared one ask at a time, never by "
                 + "a standing grant; the author hasn't shared this one with this client."
         case .fenced(.privateMark):
+            if target == .book {
+                return "That book is marked Private \u{2014} never shared with AI."
+            }
             return "That \(target.noun) is marked Private \u{2014} never shared with AI unless the "
                 + "author shares it for one ask."
+        }
+    }
+
+    /// AF-6's sentence (copy 13s-a-sweepable): said only where an ask was
+    /// actually queued AND the reason is one the client already knows.
+    static let askedSentence = "Variorum has asked the author \u{2014} call again once she answers."
+
+    /// The words for a refusal, with the asked sentence where it belongs.
+    static func words(_ reason: MCPGrantRule.Reason, _ target: Target, asked: Bool) -> String {
+        let base = words(reason, target)
+        switch reason {
+        case .rungTooLow, .fenced:
+            return asked ? base + " " + askedSentence : base
+        case .notShared, .clientPending, .clientDenied:
+            return base
         }
     }
 
@@ -130,5 +162,31 @@ enum MCPRefusalCopy {
         case .ask(let reason, _): reason
         case .refuse(let reason): reason
         }
+    }
+}
+
+/// **A refusal, with the just-in-time ask raised where one belongs** (AF-6 —
+/// the call NEVER blocks): an `.ask` decision for an APPROVED client on a
+/// target that EXISTS (the caller passes nil for a missing one) queues the
+/// ask in the app — never for a fenced BOOK, which no grant can name — and
+/// the words gain the asked sentence only for a reason the client already
+/// knows (`rungTooLow`, `fenced`); `notShared` stays the one answer.
+struct MCPAsking: Sendable {
+    let onAsk: (@Sendable (MCPAsk) -> Void)?
+
+    func refusal(
+        _ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target,
+        standing: MCPGrantAuthority.Standing, ask: MCPAsk?
+    ) -> MCPReadTools.Outcome {
+        guard let reason = MCPRefusalCopy.reason(of: decision) else {
+            return MCPReadTools.Outcome(text: "Not allowed.", isError: true)
+        }
+        var asked = false
+        if case .ask = decision, standing.state == .approved, let ask, let onAsk,
+           !(ask.scopeKind == .book && ask.fence != nil) {
+            onAsk(ask)
+            asked = true
+        }
+        return MCPReadTools.Outcome(text: MCPRefusalCopy.words(reason, target, asked: asked), isError: true)
     }
 }

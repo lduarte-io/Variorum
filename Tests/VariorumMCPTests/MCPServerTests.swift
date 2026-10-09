@@ -129,10 +129,19 @@ struct MCPServerTests {
     // MARK: - The catalog (P-1 on the wire)
 
     @Test func everyDeclaredToolIsHandledAndEveryHandledToolDeclared() {
+        // U2 (justified edit): the catalog grows the suggest and write-new
+        // rungs; the walk now reads BOTH handlers, and the edit rung is U3's.
         let declared = Set(MCPToolCatalog.all.map(\.name))
-        #expect(declared == MCPReadTools.handledToolNames)
-        #expect(declared == ["list_books", "list_notes", "read_note", "search", "export_note"])
-        #expect(MCPToolCatalog.all.allSatisfy { $0.rung == .read }, "U1 ships the read rung only")
+        #expect(declared == MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames))
+        #expect(MCPReadTools.handledToolNames.isDisjoint(with: MCPWriteTools.handledToolNames))
+        #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
+        #expect(Set(MCPToolCatalog.suggest.map(\.name)) == ["add_take", "add_comment", "save_lens"])
+        #expect(Set(MCPToolCatalog.writeNew.map(\.name))
+                == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book"])
+        #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
+        #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
+        #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
+        #expect(!MCPToolCatalog.all.contains { $0.rung == .edit }, "a rung the server can't serve isn't declared (U3's)")
         for declaration in MCPToolCatalog.all {
             #expect(declaration.inputSchema.objectValue?["type"] == "object")
         }

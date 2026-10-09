@@ -27,6 +27,8 @@ struct MCPReadTools: Sendable {
     let database: AppDatabase
     let operations: Operations
     var calendar: Calendar = JournalDay.storeCalendar
+    /// U2: the app's seams — the just-in-time ask (AF-6) rides here.
+    var hooks = MCPHostHooks()
 
     struct Outcome: Equatable, Sendable {
         let text: String
@@ -68,6 +70,9 @@ struct MCPReadTools: Sendable {
 
     private func readNote(_ args: [String: Value], clientName: String, plain: Bool) throws -> Outcome {
         let noteID = try requiredString(args, "note_id")
+        // U2 (AF-5): the structured form — the SAME decision, the SAME once
+        // stamp, the SAME transaction; only the answer's shape differs.
+        let withIDs = plain ? false : (try optionalBool(args, "with_ids") ?? false)
         let act = plain ? MCPToolCatalog.exportNote.name : MCPToolCatalog.readNote.name
         return try database.write { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
@@ -76,12 +81,21 @@ struct MCPReadTools: Sendable {
             let title = facts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar)
             guard case .allow(let grantID, let consumesOnce) = decision else {
                 try log(db, clientName, act, "note", noteID, title, allowed: false)
-                return refusal(decision, .note)
+                let ask = facts.map { facts in
+                    MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID, title: title ?? "",
+                           rung: .read, fence: facts.fence)
+                }
+                return MCPAsking(onAsk: hooks.onAsk).refusal(decision, .note, standing: standing, ask: ask)
             }
             if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
-            let text = plain
-                ? try Queries.renderedText(db, containerID: noteID)
-                : try Queries.variorumDocumentText(db, postID: noteID)
+            let text: String
+            if plain {
+                text = try Queries.renderedText(db, containerID: noteID)
+            } else if withIDs {
+                text = try encode(try MCPNoteStructure.read(db, noteID: noteID, calendar: calendar))
+            } else {
+                text = try Queries.variorumDocumentText(db, postID: noteID)
+            }
             try log(db, clientName, act, "note", noteID, title, allowed: true)
             return Outcome(text: text, isError: false)
         }
@@ -335,6 +349,11 @@ struct MCPReadTools: Sendable {
         let limit = min(max(try optionalInt(args, "limit") ?? Self.defaultSearchLimit, 1), Self.maxSearchLimit)
         let bookID = try optionalString(args, "book_id")
         let noteID = try optionalString(args, "note_id")
+        // R2-2 (U1 ladder round 2, riding this touch): the pair refuses here
+        // exactly as `list_notes` refuses its pair, never silently note-wins.
+        guard bookID == nil || noteID == nil else {
+            throw ArgumentFailure(message: "Pass book_id or note_id, not both.")
+        }
         let query = SearchQueryParser.parse(text, typeAhead: false, calendar: calendar)
         guard !query.isEmpty else { throw ArgumentFailure(message: "Give search some words to look for.") }
         let act = MCPToolCatalog.search.name
@@ -348,7 +367,10 @@ struct MCPReadTools: Sendable {
                 let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
                 let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: false)
                 guard isStandingAllow(decision, standing), let facts else {
-                    return refusal(decision.isAllowed ? .ask(.notShared, offersAlways: true) : decision, .note)
+                    // R2-1 (U1 ladder round 2): the synthesized ask reads the
+                    // fence — a fenced target's ask never offers "always".
+                    return refusal(
+                        decision.isAllowed ? .ask(.notShared, offersAlways: facts?.fence == nil) : decision, .note)
                 }
                 scopes = [SearchScope(wingID: facts.wingID, within: .note(id: noteID))]
             } else if let bookID {
@@ -519,6 +541,12 @@ struct MCPReadTools: Sendable {
         guard let value = args[key], value != .null else { return nil }
         guard let string = value.stringValue else { throw ArgumentFailure(message: "\(key) must be a string.") }
         return string
+    }
+
+    private func optionalBool(_ args: [String: Value], _ key: String) throws -> Bool? {
+        guard let value = args[key], value != .null else { return nil }
+        guard let bool = value.boolValue else { throw ArgumentFailure(message: "\(key) must be true or false.") }
+        return bool
     }
 
     private func optionalInt(_ args: [String: Value], _ key: String) throws -> Int? {

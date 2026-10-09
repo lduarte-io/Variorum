@@ -28,6 +28,9 @@ public final class MCPServerHost: @unchecked Sendable {
     private let operations: Operations
     private let directory: URL
     private let version: String
+    /// U2 (AF-8): where the write tools run — the session's runner in the
+    /// app, a serial executor over `operations` otherwise.
+    private let executor: any MCPWriteExecutor
     private let lock = NSLock()
     private var listenFD: Int32 = -1
     private var wakePipe: (read: Int32, write: Int32) = (-1, -1)
@@ -40,11 +43,19 @@ public final class MCPServerHost: @unchecked Sendable {
     /// closes — a SIGNAL for the pane to re-read; it carries no decision.
     public var onConnectionsChanged: (@Sendable () -> Void)?
 
-    public init(database: AppDatabase, operations: Operations, directory: URL, version: String) {
+    /// U2: the app's seams — refusal words, the just-in-time ask, the write
+    /// receipt. Set before `start()`; every session reads them as it opens.
+    public var hooks = MCPHostHooks()
+
+    public init(
+        database: AppDatabase, operations: Operations, directory: URL, version: String,
+        executor: (any MCPWriteExecutor)? = nil
+    ) {
         self.database = database
         self.operations = operations
         self.directory = directory
         self.version = version
+        self.executor = executor ?? MCPSerialExecutor(operations: operations)
     }
 
     public var state: State { lock.withLock { _state } }
@@ -160,7 +171,9 @@ public final class MCPServerHost: @unchecked Sendable {
             refuseOverCap(fd)
             return
         }
-        let session = MCPSession(fd: fd, database: database, operations: operations, version: version)
+        let session = MCPSession(
+            fd: fd, database: database, operations: operations, version: version,
+            executor: executor, hooks: hooks)
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
         Task { [weak self] in
