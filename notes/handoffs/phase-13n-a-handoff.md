@@ -2,8 +2,8 @@
 
 ## Your checklist (the things only you can do, in order)
 
-1. **Review and test the build — your refresh-not-merge order is honored: PR
-   PENDING(pr-number) is OPEN and NOT merged.** The branch is `vx-117-13n-a`.
+1. **Review and test the build — your refresh-not-merge order is honored:
+   PR #144 is OPEN and NOT merged.** The branch is `vx-117-13n-a`.
 2. **The GUI walk and the /Applications refresh were HELD all night** — your
    real-store app (PID 73118) ran the whole time and was never touched; the
    walk guard refused correctly. When you're ready: quit the app (or say the
@@ -20,7 +20,23 @@
    the architect rulings R-ARCH-13na-1…3 and the implementer's P-13na-1…5 —
    the honest sheet is below; the full text is the plan file's rulings
    section and UNIT RECORD.
-5. **The ladder's outcome:** PENDING(ladder-summary).
+5. **The ladder's outcome: closed clean at round 2.** Round 1 (fresh
+   opus-reviewer): 0 BLOCKER · 1 MAJOR · 4 MINOR · 4 NIT — the MAJOR was a
+   redo that resurrected a hand-deleted book off the wrong tombstone stamp;
+   all nine findings dispositioned and fixed pin-first in a fresh session.
+   Round 2 (fresh reviewer): all nine verified implemented-as-worded;
+   0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT, no round 3 earned — the MINOR
+   (a retried-undo regression round 1's own fix introduced) and one NIT
+   (a brace-bearing tag silently killing the whole header on re-import)
+   were fixed by ME at adjudication, pin-first, the first to the reviewer's
+   own scratch-verified shape; two were wording. **Honest flag: those two
+   orchestrator-written fixes are pin-covered but not cold-reviewed (no
+   round 3 was earned)** — say the word if you want a fresh pass over
+   `ead486c4` + `1ae2ebc0` before your merge. Two pre-existing/adjacent
+   finds became tickets rather than 5am fixes: VX-119 (the 13c
+   single-container undo pair has the MAJOR's shape — probe-first + a class
+   sweep) and VX-120 (door-level package semantics; the Pro's probe
+   answered, the Air's owed).
 
 ## What landed (one paragraph)
 
@@ -74,7 +90,9 @@ skipped; Mac suites over every changed file green; phone builds. Zero
 
 - Plan + UNIT RECORD + rulings: `notes/plans/phase-13n-a-document-format.md`
 - The sitting record (R-13n-1…11): `notes/plans/phase-13n-sitting-record-2026-10-09.md`
-- Ladder round 1: `notes/plans/13na-ladder-round1.md` — PENDING(ladder-file)
+- Ladder rounds: `notes/plans/13na-ladder-round1.md` (findings +
+  dispositions) · `notes/plans/13na-ladder-round2.md` (verdicts, R2
+  findings, the close)
 - Mockups: `notes/plans/13n-sitting-mockups/mcp-door-mockups.html`
 - QUESTIONS #207 (the sitting's PROVISIONALs; this unit's P/R items land at
   YOUR merge, per your order)
@@ -83,7 +101,7 @@ skipped; Mac suites over every changed file green; phone builds. Zero
 
 ## After your yes
 
-Your merge of PENDING(pr-number) is the merge moment (I can run it at your
+Your merge of PR #144 is the merge moment (I can run it at your
 word: ledgers on latest main — AppSpec §9/§12 contract lines as proposed in
 the UNIT RECORD's closeout section, QUESTIONS, the in-flight row retired,
 the master-plan closeout paragraph, branch deleted, worktree removed); then
