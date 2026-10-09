@@ -1665,3 +1665,55 @@ client). Server ON, voice Study.
 - One harness lesson: `click.sh`'s author guard refuses a click within 2 s
   of my own previous synthetic event (HID idle) — a "lost" click mid-walk was
   the guard, not the app.
+
+## U2 LIVE ROUND (orchestrator, 2026-10-09 — the acceptance's real-client leg; stage held and released)
+
+Fresh branch Debug build (`vx124-u2-liveround`, codesign clean); the real
+Claude Code client via the throwaway `-s local` scratch registration
+(removed after; her user scope untouched). The round, live:
+
+1. **The grant growth:** claude-code's Change… opened the U2 sheet —
+   Read · Suggest · Write new with the mockup sentences and "Edit
+   arrives in a later update." (P-2's honesty); the confirm spoke
+   "Grant suggest in “o ladrão de raios” always."
+2. **HER FACT-CHECK SHAPE, END TO END, with a real client:** the
+   suggest client saw EXACTLY the 8 suggest-reachable tools (the 3
+   suggest + the 5 read — edit/write-new tools NOT EVEN LISTED: P-2 on
+   the wire, stronger than a refusal); `read_note with_ids:true`
+   answered 2 blocks with real ids and the pre-existing takes visible;
+   `add_take` landed a labeled "en" take beside EACH block;
+   `save_lens "english readings — a escola"` collected both; the
+   client's own report: "The author's existing 'english' takes were
+   left untouched."
+3. **The ids-are-the-address doctrine, observed live:** the client
+   first tried `list_notes` by book NAME and was refused with the ONE
+   answer ("That book isn't shared with this client, or doesn't
+   exist."), then self-corrected to the id from `list_books` — names
+   never resolve as addresses (R-13nb-8's letter).
+4. **THE ⌥⌘Z LEG — the R-13n-6 dream, verbatim on screen:** the Edit
+   menu read **"Undo claude-code's lens"**; one press walked the lens
+   back and the menu stepped to **"Undo claude-code's take"** (per-act,
+   newest first) with **"Redo claude-code's lens"** beside it — the
+   redo entries carry the client's name too; the named redo brought
+   the lens back whole. Quit unlinked the socket.
+
+**VERDICT: U2's acceptance bar is MET live** — her fact-check shape
+with a real client, the suggest fence holding by construction, one
+⌥⌘Z walking an AI act back and its named redo returning it. Dev-store
+residue: the claude-code suggest grant, two "en" takes on "a escola",
+the lens "english readings — a escola" (beside the implementer's
+u2-walk residue). **Her two live rulings during the round:** the undo
+STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
+
+## SITTING RECORD ADDENDUM
+
+- **R-13nb-19 (2026-10-09, at the live round, verbatim) — THE UNDO
+  STACK STANDS AS-IS; THE FACE IS A TICKET.** Her words: *"should we
+  make a ticket for some kind of view into recent actions covered by
+  this option command Z? seems really powerful to be just a keyboard
+  shortcut. not in this phase ofc. i'm fine with it being a simple and
+  interleaved session scoped stack though. i think anything else would
+  be a mess."* The mechanism (ONE interleaved, session-scoped stack;
+  client-named entries for MCP acts) is RATIFIED; the view into recent
+  stack entries is **VX-129** (Backlog, Feature) — deliberately not
+  this phase's.
