@@ -407,3 +407,65 @@ extension Queries {
             arguments: [postID])
     }
 }
+
+// MARK: - THE GRANT IN CONTEXT (13n-b U2 — the faces outside Settings ▸ MCP)
+
+/// One approved client's reach on a note, as the note's own face says it.
+public struct MCPNoteSharing: Equatable, Sendable {
+    public let clientName: String
+    /// The highest rung the client may act at on this note right now.
+    public let rung: MCPGrantRule.Rung
+}
+
+extension Queries {
+    /// **Who can reach this note, and how far** — every APPROVED client
+    /// whose standing (its live grants, or the open book) lets the pure rule
+    /// allow at least a read on the note RIGHT NOW, with the highest rung it
+    /// allows. The SAME rule the server consults per call (never a parallel
+    /// SQL fence): a fenced note answers only per-ask note grants; a missing
+    /// or version note answers nobody. ∝ the approved clients (a handful).
+    public static func mcpNoteSharing(_ db: Database, noteID: String) throws -> [MCPNoteSharing] {
+        guard let facts = try mcpNoteFacts(db, noteID: noteID) else { return [] }
+        let openBook = try mcpSwitch(db, .openBook)
+        var sharing: [MCPNoteSharing] = []
+        for client in try mcpClients(db, states: [.approved]) {
+            let grants = try mcpGrants(db, clientID: client.id).map(\.ruleGrant)
+            let reached = MCPGrantRule.Rung.allCases.reversed().first { rung in
+                MCPGrantRule.decide(
+                    client: .approved, grants: grants, openBook: openBook,
+                    target: .note(facts), rung: rung, consumes: false
+                ).isAllowed
+            }
+            if let reached { sharing.append(MCPNoteSharing(clientName: client.name, rung: reached)) }
+        }
+        return sharing.sorted { $0.clientName < $1.clientName }
+    }
+
+    /// **The books an approved client can reach right now** — the Bookcase
+    /// row's "shared with AI" chip (P-13n-3's word). Honest under every
+    /// grant shape: a book grant on it, a wing grant on its wing, or the open
+    /// book — each read through the pure rule on the book's own facts, so a
+    /// journal or Private book (reached by nothing) never chips. ∝ the books
+    /// (a shelf) × the approved clients (a handful).
+    public static func mcpReachableBookIDs(_ db: Database) throws -> Set<String> {
+        let clients = try mcpClients(db, states: [.approved])
+        guard !clients.isEmpty else { return [] }
+        let openBook = try mcpSwitch(db, .openBook)
+        let standings = try clients.map { try mcpGrants(db, clientID: $0.id).map(\.ruleGrant) }
+        guard openBook || standings.contains(where: { $0.contains(where: \.isLive) }) else { return [] }
+        var reachable: Set<String> = []
+        for id in try String.fetchAll(
+            db, sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND kind = 'book'") {
+            guard let facts = try mcpBookFacts(db, readingID: id) else { continue }
+            if standings.contains(where: { grants in
+                MCPGrantRule.decide(
+                    client: .approved, grants: grants, openBook: openBook,
+                    target: .book(facts), rung: .read, consumes: false
+                ).isAllowed
+            }) {
+                reachable.insert(id)
+            }
+        }
+        return reachable
+    }
+}
