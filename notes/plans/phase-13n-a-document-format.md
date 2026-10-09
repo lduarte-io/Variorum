@@ -1219,19 +1219,81 @@ class. Dispositions:
 
 ### WALK-FIX PASS — LIVE STATUS (walk-anomaly implementer, `opus-implementer`, 2026-10-09)
 
-- **NOT DONE BY THIS PASS (first):** no GUI walk (the orchestrator re-walks);
-  WA-5/7/8 are not this pass's (ticketed / her bundle). PENDING items below.
+- **NOT DONE BY THIS PASS (first):** no GUI walk (the orchestrator re-walks
+  WA-1's placement and WA-3's navigate-away — the pins are not the walk);
+  WA-4 and WA-6 NOT fixed (traced: a pre-existing class / hollow — tickets
+  proposed below, none filed); WA-5/7/8 not this pass's (VX-121 / her
+  bundle); no Linear writes, no QUESTIONS entry (merge-moment ledgers — the
+  PROVISIONALs are named here for the closeout).
 - Scope: WA-1, WA-2 (fix in-unit), WA-3, WA-4 (trace first: fix only on an
   existing road, else ticket), WA-6 (30-minute time-box). No revert in flight.
-- WA-1 — IN-PROGRESS (trace).
-- WA-2 — **FIXED (PENDING the green run).** `CopyForAI.copiedForAI` is now
+- WA-1 — **FIXED (design row; PROVISIONAL; re-walk owed), `48c4f436`.**
+  TRACE: the premise "the window's MAIN bottom bar" does not exist on the
+  book surface — Outline (where a freshly opened book stands, so where the
+  import lands) and Read's flow have NO bottom bar; Book and Read's pages
+  have their flip bar. The quiet slot sat at the navigator's foot by
+  13i-d U3's P-13id-U3-6 (`BookView.quietReceiptHost`), ~200 pt wide, so
+  EVERY real receipt truncated there — a PRE-EXISTING class the import only
+  rode (the Help ▸ Restore doors open the book they restore and speak the
+  same long receipts into the same foot). Built (the most §12-defensible
+  reading — "a muted line at the bottom bar's trailing end"): ONE pure rule,
+  `BookNoteBox.quietReceiptHome(mode:pagedRead:modeBarShown:box:)` →
+  `.pageFoot` (Outline, Read's flow — an always-mounted bottom-TRAILING
+  overlay of the main column, backed by the page colour only while
+  speaking, no hits idle, nothing reflows) · `.modeBottomBar` (Book, Read's
+  pages — the flip bar's trailing end, before the page line, the Bookcase
+  hint bar's shape; the page foot instead while an empty book draws no bar)
+  · `.indexColumnFooter` (Index, unchanged) · `.liveNoteBox` (a live note —
+  its bar hosts, one receipt never draws twice). The navigator never hosts;
+  `QuietReceiptLine` keeps P-8's `lineLimit(1)`. Files: `BookNoteBox.swift`,
+  `BookView.swift`, `SpreadBookView.swift`, `PagedReadView.swift`. Pin
+  (design row — the rule every host asks, not red-on-old):
+  `DocumentImportDoorTests.theImportsReceiptLandsAtTheMainColumnsFootNeverTheNavigator`
+  (the import opens the book, the book stands in Outline, the receipt's home
+  is the page foot; the whole table). Residuals, recorded: Index's column
+  footer is its own (narrower) column and can still truncate a long receipt;
+  in the flip bars the receipt yields first (18i's rule), so a narrow window
+  truncates it there. PROVISIONAL P-WA-1 (for the closeout's QUESTIONS
+  bundle): (a) page-foot overlay + flip-bar trailing [BUILT] · (b) a thin
+  always-mounted bottom bar for Outline/Read's flow · (c) the receipt in the
+  book masthead's meta line. The orchestrator's re-walk: File ▸ Import… in
+  both voices — the whole receipt, counts and ⌥⌘Z, at Outline's bottom-right.
+- WA-2 — **FIXED, `6943d2d0`; GREEN.** `CopyForAI.copiedForAI` is now
   exactly "Copied for AI." (`Core/Views/CopyForAI.swift` — the constant moved
   there from `DocumentImportCopy` at ladder F8). Pin: the door test's
   Copy-for-AI case asserts the spoken receipt's exact words and its RECEIPT
   kind — RED on the pre-fix tree (pins `7c62471c`, the red run: "Expectation
   failed: session.status.spoken?.text == \"Copied for AI.\""). PROVISIONAL
   (the orchestrator's copy ruling; 13s-a re-voices).
-- WA-3 — NOT-STARTED (trace).
+- WA-3 — **FIXED (on the EXISTING road), `48c4f436`; pins `7c62471c`.**
+  TRACE: a SYNC apply's tombstone of an open note closes/parks nothing (no
+  poster; stale panes on remote deletions are a pre-existing class). The
+  TRASH door's road does exist: `NoteDeletion.report` (and the scraps
+  group's delete) posts `.variorumNotesDeleted` with the post ids → every
+  full window's `RootView` runs `WorkspaceModel.notesDeleted` (each pane
+  showing one goes to the Library; the Open strip drops it), a note-only
+  window CLOSES, the Library re-reads. The structural undo/redo door posted
+  nothing, and an undo entry carries only a label (never its rows). Built:
+  `ShellActions.leaveNotesTheActLeftDead()` — after an undo or redo LANDS,
+  one read asks which of the notes on screen are dead now (this window's
+  panes + Open strip + `AppSession.heldPostIDs` — the posts any window's
+  surfaces hold, a new read-only accessor over 18k C1's holder registry; ∝
+  what is open, P1) and posts the SAME signal for them before the receipt
+  speaks. No new pane lifecycle: the Trash door's navigate-away, verbatim.
+  It covers every structural act whose inverse/re-apply tombstones a note
+  (import, diverge, copy-in), not the import alone. Pin:
+  `DocumentImportDoorTests.undoingAnImportGetsEveryPaneAndTheOpenStripOffItsNotes`
+  (a note in this window's pane + a note held by another window's surface →
+  both announced; the window's `notesDeleted` then parks the pane on the
+  Library and empties the strip; the redo, which kills nothing, posts
+  nothing) — RED on the pre-fix tree (the red run: `Set(heard.value) ==
+  Set(notes)`, the pane and strip expectations failed), GREEN after.
+  Residuals, recorded: an Open-strip row in ANOTHER window whose note no
+  surface holds is not in the candidate set; the phone's undo door is
+  untouched. TICKET PROPOSED (the class this did not take): "panes stay on
+  notes tombstoned by roads that post no navigate-away — a SYNC apply, and
+  `deleteReadingWithNotes` (an owned book deleted with its notes while one
+  is open, `BookStateDoors` ~741, posts nothing)".
 - WA-4 — **TRACED → TICKET (a pre-existing revival-observation class; not
   fixed).** The Library's listing is a deliberate ONE-SHOT read (17y B1 (k),
   `LibraryCatalogModel.search()/refresh()`), re-asked only on: appearing
@@ -1260,4 +1322,30 @@ class. Dispositions:
   under their book's row would change §18.3's Trash design (per-note Delete
   Now / Put back), never one honest line — a design question for her bundle:
   "should a book that went to the Trash with its notes absorb their rows?"
-- Finals — PENDING.
+- **Finals (at the END, on the tree at `48c4f436` + the record):**
+  - core, headless — the four 13n-a suites + the twelve export/paste suites
+    (anchored filter): **195 tests / 16 suites, all passed, 0 skipped**
+    (zero core lines changed by this pass).
+  - Mac, under a held stage claim (claimed 11:08, released ~11:20; no app
+    instance live): the door + registry + every suite over a touched seam —
+    `DocumentImportDoorTests`, `CapabilityRegistryTests`,
+    `BookOrderConversionTests`, `ShellConfirmTests`,
+    `BlockDeletionAndRedoTests`, `CrossBlockCompoundTests`,
+    `UndoHintAndRefusalTests`, `DestructiveUndoWarningTests`,
+    `ConfirmationsSettingTests`, `BookCollectingDoorsTests`, `BookViewTests`,
+    `AutosaveRegistryLifecycleTests`: **173 tests / 12 suites, 1 issue — the
+    known VX-115 red** (`BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`:
+    the pin predates 13o U3's `.searchThisBook`; identical on `origin/main`,
+    untouched by this pass); then `StatusCenterTests`,
+    `DivideExtractGestureTests`, `PagedReadViewTests`,
+    `NoteDeletionNavigateAwayTests`, `NoteDeletionActTests`: **37 / 5, all
+    passed**; then the tutorial suites that drive the undo door
+    (`TutorialStructureActsTests`, `TutorialDeletionActsTests` — every
+    `structuralUndo/Redo` call in `TutorialWalkTests` lives in these two):
+    **23 / 2, all passed**. No test skipped. The new pins all green: the
+    Copy-for-AI receipt, the receipt's home, the undo's navigate-away.
+- **Tickets proposed (none filed — the orchestrator's):** (1) WA-3's
+  remainder — navigate-away for sync-applied tombstones and for
+  `deleteReadingWithNotes`; (2) WA-4 — a live Library misses revivals (Put
+  back, structural redo, sync); (3) WA-6 — her bundle: should a book that
+  went to the Trash with its notes absorb their rows (§18.3's design).
