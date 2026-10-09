@@ -1,5 +1,18 @@
 # Phase 13n-a — the Variorum document format (Level 0)
 
+**STATUS: CLOSED 2026-10-09 (PR #144, merge commit on main; VX-117 Done).**
+Built overnight under her provisional mandate, laddered clean (two rounds,
+0B/0M at close), walked (W1–W7 + the re-walk, the look verdict GOOD),
+refreshed to /Applications as build 5985 per her refresh-not-merge order,
+reviewed and tested BY HER on her real store ("I did file -> import and
+pulled it in just fine… It looks like it's all working well"), with ONE
+review ruling — **Copy for AI renamed "Copy full text"** (`5b1f0eef`; her
+words: "I'd rather not have 'for AI' on a button"; the installed 5985
+predates the rename by one label). Merged at her "looks good for merge."
+Finals: core 2,478/284 + 40/6; the 13n-a + export + paste suites 195/16;
+Mac door + registry 45/2 after the rename. Tickets born: VX-118–123.
+13n-b (the door) is next — `notes/plans/phase-13n-b-mcp-door.md`.
+
 ## KICKOFF MESSAGE (for a fresh orchestrator session)
 
 You are kicking off 13n-a, the first of the MCP door's two efforts — ruled

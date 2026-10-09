@@ -1,5 +1,14 @@
 # 13n-a — the Variorum document format: HER MORNING HANDOFF (2026-10-09, the overnight run)
 
+**CLOSED 2026-10-09 — she reviewed and tested the same morning (import on
+her real store, the copy output verified by her own paste), ruled the
+rename (Copy for AI → "Copy full text"), and said "looks good for merge";
+PR #144 merged with the full closeout. The checklist below is kept as the
+run's record; the live items moved to QUESTIONS #208 (the ratify bundle)
+and the 13n-b kickoff (`notes/plans/phase-13n-b-mcp-door.md`). The
+installed build 5985 predates the rename by one label — the next refresh
+picks it up.**
+
 ## Your checklist (the things only you can do, in order)
 
 1. **Review and test the build — your refresh-not-merge order is honored:
