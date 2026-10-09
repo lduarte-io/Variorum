@@ -175,8 +175,14 @@ extension Operations {
         undoStack?.register(
             label: Self.importUndoLabel,
             inverse: { ops in
-                let stamp = try ops.revertImportedBook(readingID, posts: postIDs)
-                undoneOn.setValue(stamp)
+                // Ladder round 2, R2-1: a RETRIED undo that tombstoned
+                // nothing returns nil and must not overwrite the stamp the
+                // real deletion wrote — the redo would otherwise look for
+                // rows that died on the fresh stamp and leave the first
+                // undo's books in the Trash.
+                if let stamp = try ops.revertImportedBook(readingID, posts: postIDs) {
+                    undoneOn.setValue(stamp)
+                }
             },
             redo: { try $0.reapplyImportedBook(readingID, posts: postIDs, undoneOn: undoneOn.value) })
         return result
@@ -265,25 +271,31 @@ extension Operations {
     /// the entry stays on the stack). Already dead ⇒ obsolete, quiet.
     ///
     /// Returns the stamp it wrote (the store's own spelling of it), which the
-    /// entry hands to its redo (ladder round 1, F1).
-    func revertImportedBook(_ readingID: String, posts postIDs: [String]) throws -> String {
+    /// entry hands to its redo (ladder round 1, F1) — and NIL when it
+    /// tombstoned nothing (ladder round 2, R2-1: a retried undo whose rows
+    /// are already dead writes no stamp, so the entry keeps the one the real
+    /// deletion wrote and the redo still finds those rows).
+    func revertImportedBook(_ readingID: String, posts postIDs: [String]) throws -> String? {
         try database.write { db in
             let reading = try Reading.fetchOne(db, key: readingID)
             if let reading, reading.deletedAt == nil, Queries.isDailyJournalMintShape(reading) {
                 throw OperationError.dailyJournalCannotBeDeleted(id: readingID)
             }
             let now = date.now
+            var tombstonedAnything = false
             for postID in postIDs {
                 guard let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil
                 else { continue }
                 try tombstoneNoteFamily(db, id: postID, now: now)
+                tombstonedAnything = true
             }
             if var reading, reading.deletedAt == nil {
                 reading.deletedAt = now
                 reading.updatedAt = now
                 try reading.update(db)
+                tombstonedAnything = true
             }
-            return DateFormatter.variorumISO8601.string(from: now)
+            return tombstonedAnything ? DateFormatter.variorumISO8601.string(from: now) : nil
         }
     }
 

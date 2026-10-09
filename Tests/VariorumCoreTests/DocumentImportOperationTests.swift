@@ -640,4 +640,42 @@ struct DocumentImportOperationTests {
             #expect(stack.depth == 1)
         }
     }
+
+    @Test func aRetriedCompoundUndoStillRedoesEveryBook() throws {
+        // Ladder round 2, R2-1: a retried undo that tombstones NOTHING must
+        // not overwrite the stamp the real deletion wrote — else the redo
+        // looks for rows that died on the fresh stamp, finds none, and the
+        // first undo's books stay in the Trash (AppSpec §9's round trip).
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let pair = try stack.withCompound(label: Operations.importUndoLabel, operations: ops) {
+                let alpha = try ops.importBook(VariorumDocument.Book(
+                    name: "alpha", chapters: [],
+                    unfiled: [.init(fallbackTitle: "a", document: .init(blocks: [.init(text: "A")]))]))
+                let beta = try ops.importBook(VariorumDocument.Book(
+                    name: "beta", chapters: [],
+                    unfiled: [.init(fallbackTitle: "b", document: .init(blocks: [.init(text: "B")]))]))
+                return (alpha: alpha, beta: beta)
+            }
+            try ops.setDailyJournalBook(pair.alpha.reading.id)
+            // First press: beta's inverse runs (writing its stamp); alpha's refuses.
+            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: pair.alpha.reading.id)) {
+                try stack.undo(with: ops)
+            }
+            #expect(try db.deletedAt("reading", pair.beta.reading.id) != nil)
+            // She resolves the refusal and presses undo again.
+            let other = try ops.createReading(name: "journal", kind: .book)
+            try ops.setDailyJournalBook(other.id)
+            _ = try stack.undo(with: ops)
+            #expect(try db.deletedAt("reading", pair.alpha.reading.id) != nil)
+            // The redo returns EVERYTHING the gesture made.
+            _ = try stack.redo(with: ops)
+            #expect(try db.deletedAt("reading", pair.alpha.reading.id) == nil)
+            #expect(try db.deletedAt("reading", pair.beta.reading.id) == nil)
+            for post in pair.beta.postIDs {
+                #expect(try db.deletedAt("container", post) == nil)
+            }
+        }
+    }
 }
