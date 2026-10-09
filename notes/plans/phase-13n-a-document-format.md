@@ -462,6 +462,16 @@ containing `"}` or a tag path containing `}` cannot ride the header line
 `take:` line; a take whose own text holds a line reading exactly like a
 `take: …` marker or an end marker splits there (the format has no escape —
 the canonical export never writes one, an LLM essentially never will).
+*Added by the ladder fix round:* an untitled, untagged note whose FIRST
+paragraph is nothing but brace tokens copies with no header, so that
+paragraph re-imports as the header (F9's residual — prose beside a token is
+body since F9); a PACKAGE inside an imported folder (`.rtfd`,
+`.textbundle`) is passed over, its text never imported (F7); and a
+multi-item gesture whose op refuses on item 2+ still rolls the earlier
+items back through tombstoning inverses (they would sit in the Trash beside
+the refusal) — every folder-shape refusal is now a planner preflight (E13's
+name, F6's blank chapter name), so no folder shape reaches it; a fault
+arriving mid-flight still could (F6's recorded class).
 
 ### PROVISIONALs and forks returned to the orchestrator
 
@@ -510,19 +520,61 @@ the canonical export never writes one, an LLM essentially never will).
 - **P-13na-5 — the door reads `.variorum`, `.md`, `.markdown`, `.txt`,
   `.text`** (the plan's "accept all three", plus the two spellings the
   shipped import already accepted).
+- **P-13na-6 (ladder F2, the orchestrator's FIX — placement taste is hers)
+  — a folder dropped on the Bookcase while a shelf is solo'd lands ON that
+  shelf** (the context mint, AppSpec §12; File ▸ Import… still lands
+  unshelved). Alternative: unshelved as first built, with a receipt that
+  names where the book went.
+- **P-13na-7 (ladder F4, option (b)) — a stub is an empty note:** a
+  header-only file (anywhere) and a blank or whitespace-only file INSIDE a
+  folder mint an EMPTY note (zero blocks — ⌘N's shape), named by its
+  header else its file; a blank file picked ALONE still refuses ("nothing
+  in it to import"). Alternatives: (a) refuse the whole folder (as first
+  built); (c) skip stubs and name them in the receipt.
 
 ### For the closeout (merge-moment ledgers — proposals, not applied)
 
-- **AppSpec §9** gains `importDocument` / `importBook` (the bulk-entry
-  rule, the fan at the end, tags by path through the one application road,
-  touch without churn, ONE undo entry whose inverse tombstones exactly what
-  was minted on one stamp and whose redo revives it through the restore
-  doors' exact-stamp bodies; the E13 guard on the folder name).
+- **AppSpec §9** gains `importDocument` / `importBook` (the format's own
+  inverse-join reading — R-ARCH-13na-1 — never the bulk rule; the fan at
+  the end; tags by path through the one application road; touch without
+  churn; a stub mints an empty note (P-13na-7); ONE undo entry whose
+  inverse tombstones exactly what was minted on one stamp and whose redo
+  revives what died on THAT stamp — the book only when its own tombstone
+  is it (ladder F1) — through the restore doors' exact-stamp bodies; the
+  E13 guard on the folder name; `importBook`'s `shelfId` context mint).
+  **The round-trip sentence, if canon carries one, states its exact domain
+  (ladder F5) — never a bare "rows round-trip":** export → re-import
+  preserves block texts (the chosen takes), fan membership, the
+  ALTERNATES' texts in fan order with their labels, and stored spacing;
+  the v1 format does NOT carry the chosen take's label, its fan position,
+  or a chosen ≠ default split (a re-imported chosen take is first,
+  unlabeled, and the default), nor locked or archived states; the three
+  byte-level corners (one stored trailing newline reads unspaced; a blank
+  line inside a surface block is a boundary; a blank-chosen fan after a
+  fanless paragraph lands on that paragraph) stand. Any export re-imports
+  (never refused, every take arriving). The source's wording is
+  `Domain/VariorumDocument.swift`'s type doc comment.
 - **AppSpec §12** gains the import door (File ▸ Import… — a file → the
-  Pool, a folder → a book; the Bookcase drop; receipts with ⌥⌘Z, refusals
-  naming file and line) and Copy for AI in both `note ▾` menus + ⌘K; the
-  format's one home is `Domain/VariorumDocument` (the export is its client).
-- **QUESTIONS:** P-13na-1…5 + FORK-A…D (or their rulings).
+  Pool, a folder → a book; the Bookcase drop — a context mint onto the
+  solo'd shelf (P-13na-6); receipts with ⌥⌘Z that say "to the Pool" only
+  for a bookless note and otherwise name the book that collected it (ladder
+  F3); refusals naming file and line) and Copy for AI in both `note ▾`
+  menus + ⌘K; the format's one home is `Domain/VariorumDocument` (the
+  export is its client).
+- **QUESTIONS:** P-13na-1…7 + FORK-A…D (or their rulings), and the ladder's
+  proposed lines (round 1's dispositions — not written to
+  `notes/QUESTIONS.md` by a build session):
+  - **(F4)** a blank or header-only file inside an imported folder:
+    refuse the book (as first built), mint an empty note (built,
+    PROVISIONAL P-13na-7), or skip it and name it?
+  - **(F5)** should the format carry the CHOSEN take's label (and so its
+    fan position) — a v2 marker? Today Copy for AI → re-import of a
+    picked-language note (her PT/EN notes) drops the chosen take's label
+    and moves it to the front of the fan; the full-fidelity answer
+    remains 13m's edition.
+  - **(F2)** the Bookcase drop's placement: the context mint (built,
+    PROVISIONAL P-13na-6) vs unshelved with a receipt naming where the
+    book went.
 - **MOBILE PARITY:** nothing mobile-visible (Mac doors; imported rows sync
   as ordinary rows; `Shared/`'s capture parse now delegates to core —
   behaviour-identical on the phone, its target builds).
@@ -804,7 +856,20 @@ ledger; her merge).
   strings — the only two reference lines inside the body changed to
   match). Parity: zero test edits; `DocumentImportDoorTests` +
   `CapabilityRegistryTests` (the registry walk) 43/43, 0 failures.
-- F5 (the round-trip claims state their exact domain) — NOT-STARTED.
+- F5 (the round-trip claims state their exact domain) — DONE (this
+  line's commit; wording only, zero behavior). `VariorumDocument`'s type
+  doc comment now states what round-trips exactly — block texts, fan
+  membership, the alternates' texts in fan order with their labels,
+  stored spacing — and what does NOT in v1: the chosen take's label, its
+  fan place, the chosen ≠ default split (a re-imported chosen take is
+  first, unlabeled, the default), locked/archived states, plus the three
+  byte-level corners; "any export re-imports whole" reads "re-imports —
+  never refused, every take arriving". The closeout proposals above carry
+  the same domain for any canon sentence, the new PROVISIONALs
+  P-13na-6/7, and the three PROPOSED QUESTIONS lines (F4, F5, F2 — not
+  written to `notes/QUESTIONS.md`; her merge's ledger). The architect's
+  ruling text R-ARCH-13na-1 ("ROWS round-trip") is the orchestrator's and
+  is left as written; the closeout proposal now governs any canon line.
 - Finals — PENDING.
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)

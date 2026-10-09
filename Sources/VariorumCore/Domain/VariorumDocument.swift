@@ -41,28 +41,44 @@ import Foundation
 ///   a SINGLE newline is content inside its block (so a hard-wrapped
 ///   paragraph is one block, as Markdown reads it); k ≥ 3 newlines between
 ///   two pieces store k − 1 on the first as trailing spacing, and k = 2 is
-///   the separator alone (an Alternates section counts as a piece). Rows
-///   therefore round-trip — export, re-import, the same store shape — for
-///   every block the join writes distinguishably; the join's one undecidable
-///   spacing (a block storing exactly ONE trailing newline exports like an
-///   unspaced one) reads unspaced, and a blank line INSIDE a surface block
-///   still reads as a boundary (P-13n-4). The document's leading and
-///   trailing blank runs are edges and drop. A take's own text is kept
-///   EXACTLY, internal newlines and blank lines included (only the one blank
-///   line the serializer puts on each side of a take's text is the
-///   section's).
+///   the separator alone (an Alternates section counts as a piece). The
+///   document's leading and trailing blank runs are edges and drop. A take's
+///   own text is kept EXACTLY, internal newlines and blank lines included
+///   (only the one blank line the serializer puts on each side of a take's
+///   text is the section's).
+/// - **What round-trips, exactly (ladder round 1, F5 — the claim stated to
+///   its domain):** export → re-import mints the SAME block texts (each
+///   block's chosen take), the same fan MEMBERSHIP, the ALTERNATES' texts in
+///   fan order with their labels, and the same stored spacing. The v1 format
+///   does NOT carry the CHOSEN take's label, its place in the fan, or a
+///   chosen ≠ default split: a re-imported block's chosen take is always
+///   FIRST in its fan, UNLABELED, and its default — so a block whose chosen
+///   take was labeled, or not first, comes back with that label dropped and
+///   the chosen take moved to the front (her picked-language PT/EN notes are
+///   exactly this). Nor do locked or archived states ride (archived takes
+///   are not exported at all). And three byte-level corners: the join's one
+///   undecidable spacing (a block storing exactly ONE trailing newline
+///   exports like an unspaced one) reads unspaced; a blank line INSIDE a
+///   surface block reads as a boundary (P-13n-4); and a blank-chosen fanned
+///   block right after a FANLESS paragraph exports the very bytes of that
+///   paragraph's own fan, so its takes re-import onto the paragraph above.
+///   Within that domain rows round-trip (`DocumentImportOperationTests`'s
+///   row pins); the full-fidelity form is 13m's edition.
 /// - **Parsing is fail-honest:** a malformed Alternates section refuses the
 ///   whole document with the line it found the problem on — never a silent
-///   partial import (`Failure`). **Any export re-imports whole**
-///   (R-ARCH-13na-2): a section with no paragraph above it is what the
-///   export writes for a fanned block whose chosen take is blank, and reads
-///   as exactly that block — an empty chosen take with the section's takes.
+///   partial import (`Failure`). **Any export re-imports** — never refused,
+///   every take arriving (R-ARCH-13na-2): a section with no paragraph above
+///   it is what the export writes for a fanned block whose chosen take is
+///   blank, and reads as that block — an empty chosen take with the
+///   section's takes (except after a fanless paragraph, the corner above);
+///   a header line alone is a stub, an empty note (ladder F4).
 ///
 /// What does NOT ride the format, by her ruling: commits, book settings,
 /// block names, comments, callout frames (an export maps a callout to a
-/// blockquote; a blockquote imports as text), archived takes, and
-/// multi-paragraph SURFACE blocks (P-13n-4 — takes keep their newlines, a
-/// block's surface text does not). The full-fidelity form is 13m's.
+/// blockquote; a blockquote imports as text), archived takes, the chosen
+/// take's label and fan place (above), and multi-paragraph SURFACE blocks
+/// (P-13n-4 — takes keep their newlines, a block's surface text does not).
+/// The full-fidelity form is 13m's.
 public enum VariorumDocument {
     // MARK: - The model
 
@@ -356,9 +372,11 @@ public enum VariorumDocument {
                 // FORK-C): exactly what the export writes for a fanned block
                 // whose CHOSEN take is blank (the blank chosen skips, its
                 // takes are her work) — so it is that block: an empty chosen
-                // take, the section's takes at the fan's end. Any export
-                // re-imports whole. A section with no paragraph AND no take
-                // is nothing the export writes — it still refuses.
+                // take, the section's takes at the fan's end. So any export
+                // re-imports (never refused, every take arriving — the exact
+                // round-trip domain is the type's doc comment, ladder F5). A
+                // section with no paragraph AND no take is nothing the export
+                // writes — it still refuses.
                 guard !kept.isEmpty else {
                     throw Failure(.alternatesWithoutParagraph, line: headerLine)
                 }
