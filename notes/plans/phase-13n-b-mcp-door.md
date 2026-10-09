@@ -304,6 +304,26 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-18 (2026-10-09, her rung walk-through, verbatim) — WRITE-NEW
+  EXPLICITLY INCLUDES THE WHOLE NOTE, THE WHOLE BOOK, AND SAVING A
+  VERSION.** Her words: *"I do think making new notes should be allowed
+  under write new notes + making a new version of the note and such
+  (just making sure explicitly that whole new note and book are
+  included)."* Confirmed: `create_note` and `create_book` are
+  write-new's (the ruled set already carried them — now explicit at her
+  word); NEW by this ruling: **`save_version` (the `saveNoteVersion`
+  family) is a WRITE-NEW-rung act** — minting a whole-note version is a
+  creative act that touches no existing text (the append-only family
+  copy), which is write-new's exact definition; R-13nb-14 had left the
+  versions write side to the sitting, now placed. WHEN it ships rides
+  the R-13nb-16 staging; the RUNG is settled. Her undo question
+  answered at the record: an AI-minted whole note is ONE compound
+  structural-undo entry (R-13n-6's bulk-door rule — the inverse
+  tombstones everything minted on the stamp; ⇧⌥⌘Z revives exact rows);
+  the entry lands on HER app session's one undo stack interleaved with
+  her own gestures; the wire deliberately has NO undo tool — ⌥⌘Z is
+  her veto, never the agent's instrument; after the app session ends
+  the note is an ordinary note and the Trash is the standing net.
 - **R-13nb-16 (2026-10-09, her answer to the sizing flag, verbatim) —
   ALL ON THE PLAN; LAUNCH BUILDS A CHOSEN SUBSET.** Her words: *"that's
   fine on the sizing rule - we can choose what gets built for launch
