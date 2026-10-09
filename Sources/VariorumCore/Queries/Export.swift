@@ -18,18 +18,14 @@ extension Queries {
     /// `take: "<label>"` where a label exists, else `take: N` (unlabeled
     /// ones numbered — N is the take's 1-based ordinal within the block's
     /// alternates enumeration, fan order).
+    ///
+    /// **13n-a: the section's ONE spelling lives in `VariorumDocument`** —
+    /// the Variorum document format's parser reads the same markers this
+    /// writes, so they live beside each other. This forwards (callers pass
+    /// the export's already-filtered, non-blank alternates, so the
+    /// numbering is unchanged).
     static func alternatesSection(_ alternates: [(label: String?, text: String)]) -> String {
-        var lines: [String] = ["--- Alternates for this block ---"]
-        for (index, take) in alternates.enumerated() {
-            if let label = take.label, !label.isEmpty {
-                lines.append("take: \"\(label)\"")
-            } else {
-                lines.append("take: \(index + 1)")
-            }
-            lines.append(take.text)
-        }
-        lines.append("--- end alternates ---")
-        return lines.joined(separator: "\n\n")
+        VariorumDocument.alternatesSection(alternates.map { .init(label: $0.label, text: $0.text) })
     }
 
     /// A block's exportable alternates: live ACTIVE takes in fan order,
@@ -80,6 +76,14 @@ extension Queries {
     /// conditional join so stored spacing stays byte-exact. A fanned
     /// block whose chosen take is blank still contributes its section
     /// (the takes are the author's work; the blank chosen skips as ever).
+    ///
+    /// **13n-a — the export is the Variorum document format's client.** The
+    /// slots become `VariorumDocument.Block`s here (`exportBlocks`) and the
+    /// ONE body serializer (`VariorumDocument.serializeBody`) writes them, so
+    /// the format the import door parses and the text this projection
+    /// produces cannot drift (the round-trip pins,
+    /// `DocumentFormatRoundTripTests`; this projection's own suites pin the
+    /// bytes unchanged).
     public static func exportPost(
         _ db: Database, postID: String, includeVariants: Bool = false
     ) throws -> String {
@@ -87,20 +91,59 @@ extension Queries {
         guard includeVariants || !frames.isEmpty else {
             return try renderedText(db, containerID: postID)
         }
-        var pieces: [String] = []
-        for slot in try renderPost(db, containerID: postID) {
-            if let text = slot.text, !text.isEmpty {
-                pieces.append(exportMapped(text, presentation: frames[slot.blockID]))
+        return VariorumDocument.serializeBody(
+            try exportBlocks(db, postID: postID, includeVariants: includeVariants, frames: frames))
+    }
+
+    /// The post's slots as document blocks, by the export's rules: the
+    /// rendered take in place (callouts mapped to blockquotes — export-only;
+    /// a blank or gap slot carries no text), and, with `includeVariants`, a
+    /// fanned block's live ACTIVE non-blank alternates in fan order.
+    static func exportBlocks(
+        _ db: Database, postID: String, includeVariants: Bool,
+        frames: [String: BlockPresentation]
+    ) throws -> [VariorumDocument.Block] {
+        try renderPost(db, containerID: postID).map { slot in
+            var text = ""
+            if let rendered = slot.text, !rendered.isEmpty {
+                text = exportMapped(rendered, presentation: frames[slot.blockID])
             }
+            var alternates: [VariorumDocument.Take] = []
             if includeVariants, slot.hasFan {
-                let alternates = try exportAlternates(
-                    db, blockID: slot.blockID, renderedVariantID: slot.variantID)
-                if !alternates.isEmpty {
-                    pieces.append(alternatesSection(alternates))
-                }
+                alternates = try exportAlternates(
+                    db, blockID: slot.blockID, renderedVariantID: slot.variantID
+                ).map { .init(label: $0.label, text: $0.text) }
             }
+            return VariorumDocument.Block(text: text, alternates: alternates)
         }
-        return joinRenderedTexts(pieces)
+    }
+
+    // MARK: - The note as a Variorum document (13n-a — Copy for AI)
+
+    /// **A NOTE AS A VARIORUM DOCUMENT** (13n-a; R-13n-11's push gesture,
+    /// "Copy for AI"): the fan export's blocks (`exportBlocks`, variants
+    /// included) under a header naming the note's STORED title — a name she
+    /// typed; a note she never named carries none, and the importer names it
+    /// by its file (PROVISIONAL, the unit record) — and its live tags by
+    /// path. Reads only; writes no row (the export pin). A missing or
+    /// tombstoned note reads as an empty document (tolerant read).
+    public static func variorumDocument(
+        _ db: Database, postID: String
+    ) throws -> VariorumDocument.Document {
+        guard let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil
+        else { return VariorumDocument.Document(blocks: []) }
+        let frames = try blockPresentations(db, containerID: postID)
+        return VariorumDocument.Document(
+            title: DisplayTitle.isAbsent(post.title) ? nil : post.title,
+            tagPaths: try postTags(db, postID: postID).map(\.path),
+            blocks: try exportBlocks(db, postID: postID, includeVariants: true, frames: frames))
+    }
+
+    /// The text Copy for AI puts on the clipboard: the document, through the
+    /// ONE serializer — the header line, then exactly
+    /// `exportPost(…, includeVariants: true)` (pinned).
+    public static func variorumDocumentText(_ db: Database, postID: String) throws -> String {
+        VariorumDocument.serialize(try variorumDocument(db, postID: postID))
     }
 
     // MARK: - Single-block export

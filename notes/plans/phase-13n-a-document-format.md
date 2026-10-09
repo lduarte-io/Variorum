@@ -253,7 +253,12 @@ unit should never touch the real store at all.
    serializer's client — byte-identity pinned by the existing export
    suites); `Queries.variorumDocument` + `copyForAIText` (header line +
    the export body). Round-trip pins (a) fanless (b) labeled+unlabeled fan
-   (c) internal newlines in a take. — NOT-STARTED
+   (c) internal newlines in a take. — DONE (this commit;
+   `DocumentFormatRoundTripTests` 5/5 — (a)(b)(c) + Copy-for-AI = header
+   over exactly the fan export + the no-write pin; the export's own suites
+   `ExportProjectionTests`, `ChapterAssemblyExportTests`,
+   `PostRenderQueryTests`, `BlockPresentationTests` green on the
+   re-expressed export).
 3. **Operations — the import door.** `importDocument` (one note, one
    transaction, one undo entry — `revertMintedContainer`'s pair) and
    `importBook` (one transaction for the whole folder, one undo entry whose
