@@ -1352,3 +1352,21 @@ class. Dispositions:
 - **RE-WALK (2026-10-09, Debug build at `ff3666b4`, dev store, held stage; captures `notes/plans/13n-a-screens/rw*`):**
   - rw1 WA-1 — PASS (Study): File ▸ Import… of the fixture opened the book in Outline; the receipt reads in full at the main column's bottom-right page foot — `Imported “o ladrão de raios” — 4 notes in 2 chapters · ⌥⌘Z undoes` — and the navigator's foot shows only + new chapter / + new note (`rw1-import-receipt-outline-page-foot-study.png`, `rw1-receipt-crop-study.png`).
   - rw2 WA-3 — PASS (Study): ⌥⌘Z (Edit menu read "Undo Import") with abertura open in Write landed the pane on the Library, the Open strip emptied (its section gone), "Undid: Import" spoke at the Library's foot (`rw2-before-undo-abertura-open-study.png` → `rw2-after-undo-pane-left-to-library-strip-dropped-study.png`); ⇧⌥⌘Z then brought the book back whole (4 notes · 2 ch — `rw-final-redo-book-back-study.png`); rw3 — PASS (Terminal): abertura's note ▾ → Copy for AI spoke exactly `Copied for AI.` untruncated before the word count in the bottom bar (`rw3-copy-for-ai-receipt-write-terminal.png`, `rw3-receipt-crop-terminal.png`); voice restored to Study, clipboard restored (it was empty), app quit by bundle id.
+
+## THE RE-WALK + THE REFRESH (orchestrator, 2026-10-09 morning — the run's last acts)
+
+- RE-WALK rw1/rw2/rw3: ALL PASS (the WALK-FIX PASS section's three-line
+  result, commit 62515691; the orchestrator read the receipt crops with its
+  own eyes — full text, muted, trailing, no truncation in either voice).
+  The re-walk confirmed WA-4 in passing (the live Library missed the redo's
+  revivals — VX-122, as ticketed).
+- THE /APPLICATIONS REFRESH: DONE per her standing order. A1 safety copy
+  `Backups/safety-copies/vx117-refresh-20261009T172354Z/` (store trio +
+  key files, app quit throughout); Release build from THIS BRANCH's tree
+  (`ff3666b4`+walk-record commits) = build 5985; installed at a verified
+  zero-instance window; codesign --deep --strict OK; stage claimed and
+  released around both acts. /Applications/Variorum.app now runs the
+  UNMERGED 13n-a build — her review build, exactly as she ordered
+  ("an application refresh but not a merge to main").
+- The unit now waits on exactly one thing: HER review and test; her merge
+  of PR #144 is the merge moment.
