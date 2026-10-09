@@ -414,6 +414,54 @@ struct DocumentImportDoorTests {
         }
     }
 
+    // MARK: - Where the import's receipt lands (WA-1)
+
+    /// **WA-1 (the 13n-a walk, W1):** File ▸ Import… OPENS the book it made
+    /// (fire-and-DO), and a freshly opened book stands in Outline — where the
+    /// quiet receipt sat in the navigator's ~200 pt foot and truncated
+    /// ("Imported “o ladrão de…"; the counts and ⌥⌘Z never showed). The book
+    /// surfaces' ONE placement rule now puts it at the MAIN column's
+    /// trailing foot: the page's foot in Outline and Read's flow, the mode's
+    /// own bottom bar in Book and Read's pages (the page foot again while an
+    /// empty book draws no bar), Index's column footer unchanged, and the
+    /// live note box's bar while a note is live. No case is the navigator.
+    /// A design row — the orchestrator's re-walk is its evidence; this pins
+    /// the rule every host asks.
+    @Test func theImportsReceiptLandsAtTheMainColumnsFootNeverTheNavigator() async throws {
+        try await withDoorSession { session in
+            let url = try folder("o ladrão de raios", ["1 o semideus/01 abertura.md": chapterOne])
+            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+            let speech = await DocumentImporter.importURLs([url], session: session)
+            guard case .reading(let bookID)? = speech.opens else {
+                Issue.record("the door opens the book it made")
+                return
+            }
+            // The book it opens stands in Outline, with no note selected.
+            let structure = BookStructureModel(session: session, readingID: bookID)
+            #expect(structure.mode == .outline)
+            #expect(BookNoteBox.quietReceiptHome(
+                mode: structure.mode, pagedRead: false, modeBarShown: true, box: .empty)
+                == .pageFoot)
+        }
+        typealias Home = BookNoteBox.QuietReceiptHome
+        func home(
+            _ mode: BookStructureModel.ViewMode, paged: Bool = false, bar: Bool = true,
+            _ box: NoteBoxState?
+        ) -> Home {
+            BookNoteBox.quietReceiptHome(mode: mode, pagedRead: paged, modeBarShown: bar, box: box)
+        }
+        #expect(home(.outline, .selected("n")) == .pageFoot)
+        #expect(home(.read, nil) == .pageFoot, "Read's flow: no bar, no box")
+        #expect(home(.read, paged: true, nil) == .modeBottomBar)
+        #expect(home(.read, paged: true, bar: false, nil) == .pageFoot, "an empty book draws no bar")
+        #expect(home(.spread, .empty) == .modeBottomBar)
+        #expect(home(.spread, bar: false, .empty) == .pageFoot)
+        #expect(home(.index, .selected("n")) == .indexColumnFooter)
+        for mode in [BookStructureModel.ViewMode.outline, .spread, .index] {
+            #expect(home(mode, .live("n")) == .liveNoteBox, "one receipt never draws twice")
+        }
+    }
+
     // MARK: - Undo with a note on screen (WA-3)
 
     /// Bounded async settle (the standing poll rule — never a RunLoop pump).
@@ -461,7 +509,8 @@ struct DocumentImportDoorTests {
             let token = NotificationCenter.default.addObserver(
                 forName: .variorumNotesDeleted, object: nil, queue: .main
             ) { note in
-                heard.withValue { $0 += (note.userInfo?["postIDs"] as? [String]) ?? [] }
+                let ids = (note.userInfo?["postIDs"] as? [String]) ?? []
+                heard.withValue { $0 += ids }
             }
             defer { NotificationCenter.default.removeObserver(token) }
 

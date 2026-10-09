@@ -250,7 +250,7 @@ struct BookView: View {
                         masthead: { bookMasthead },
                     ownershipBadge: { ownershipBadge($0) },
                     grouping: grouping,
-                    hostsQuietReceipt: BookNoteBox.bookHostsQuietReceipt(noteBoxReport?.state),
+                    hostsQuietReceipt: quietReceiptHome == .indexColumnFooter,
                     // 13o U3 (F1): in Index the answer covers the PANE — the
                     // column keeps the masthead (and so the field) in view.
                     searchAnswer: bookSearch.isAnswering ? AnyView(searchSheet) : nil,
@@ -272,6 +272,8 @@ struct BookView: View {
                     BookArchivedLine(model: archived, structure: structure)
                     outlineBody
                 }
+                // WA-1: the receipt at the page's foot, trailing.
+                .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                 .overlay { searchAnswerOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
@@ -279,7 +281,11 @@ struct BookView: View {
                 // active one editable in Write or the takes stack (A43/A44).
                 SpreadBookView(
                     session: session, model: model, structure: structure,
-                    archived: archived)
+                    archived: archived,
+                    // WA-1: its flip bar's trailing end hosts the receipt
+                    // (the page foot only while an empty book draws no bar).
+                    hostsQuietReceipt: quietReceiptHome == .modeBottomBar)
+                    .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { searchAnswerOverlay }
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
@@ -306,9 +312,14 @@ struct BookView: View {
                         onRevealLanded: { model.consumeReveal() },
                         sizes: model.flowSurfaceSizes,
                         extentsCache: model.flowExtents)
+                    // WA-1: the receipt at the page's foot, trailing.
+                    .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { searchAnswerOverlay }
                 case .pages:
                     pagedRead
+                        // WA-1: the page foot only while an empty book
+                        // draws no flip bar (the bar hosts otherwise).
+                        .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                         .overlay { searchAnswerOverlay }
                 }
             }
@@ -920,11 +931,10 @@ struct BookView: View {
                         text: BookViewCopy.gatheringFooter,
                         lines: 6)
                 }
-                // 13i-d U3 — KnownIssues row 103's book-surface half: the
-                // quiet slot at the navigator's FOOT (Outline · Book · Read),
-                // the Bookcase hint bar's shape; empty while the sidebar's live
-                // note box hosts it (P-13id-U3-6).
-                quietReceiptHost
+                // (The quiet slot that stood at the navigator's foot here —
+                // 13i-d U3, P-13id-U3-6 — moved to the MAIN column's foot at
+                // the 13n-a walk's WA-1: ~200 pt truncated every real
+                // receipt. `BookNoteBox.quietReceiptHome` says where.)
             }
             .padding(12)
             // 18d batch 3: NO fixed width any more — `SideColumn` gives the
@@ -941,13 +951,36 @@ struct BookView: View {
         }
     }
 
-    /// The navigator's quiet slot (row 103). Always mounted (18i: a slot that
-    /// comes and goes moves doors); faded out while the box is live.
-    private var quietReceiptHost: some View {
-        let hosting = BookNoteBox.bookHostsQuietReceipt(noteBoxReport?.state)
+    /// Where this book's quiet receipt sits right now (WA-1 — one rule,
+    /// `BookNoteBox.quietReceiptHome`; every host below asks it).
+    private var quietReceiptHome: BookNoteBox.QuietReceiptHome {
+        BookNoteBox.quietReceiptHome(
+            mode: structure.mode, pagedRead: structure.readForm == .pages,
+            // Both flip bars draw only over a book with notes.
+            modeBarShown: !model.entries.isEmpty,
+            box: noteBoxReport?.state)
+    }
+
+    /// **The page foot's quiet slot** (WA-1 — Outline and Read's flow have no
+    /// bottom bar, so the receipt sits at the main column's bottom TRAILING
+    /// end, where every bar puts it). An OVERLAY, so nothing in the column
+    /// moves for it (18i's always-mounted rule, kept: idle it is the empty
+    /// line at zero width). While it speaks it backs itself with the page's
+    /// own colour, so prose scrolled under the corner never reads through
+    /// the words; idle it takes no hits.
+    private var pageFootReceipt: some View {
+        let hosting = quietReceiptHome == .pageFoot
+        let speaking = hosting && session.status.quietLine != nil
         return QuietReceiptLine(status: session.status, tokens: tokens)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(tokens.surface.opacity(speaking ? 1 : 0))
+            .animation(.easeInOut(duration: 0.18), value: speaking)
             .opacity(hosting ? 1 : 0)
             .accessibilityHidden(!hosting)
+            .allowsHitTesting(speaking)
+            .padding(.trailing, 18)
+            .padding(.bottom, 8)
     }
 
     // MARK: - The sidebar's note box (18d batch 1 — her U-10)
@@ -1816,6 +1849,8 @@ struct BookView: View {
     private var pagedRead: some View {
         PagedReadView(
             session: session, model: model, structure: structure,
+            // WA-1: its flip bar's trailing end hosts the receipt.
+            hostsQuietReceipt: quietReceiptHome == .modeBottomBar,
             onWake: { postID, blockID in
                 model.requestLanding(LandingTarget(postID: postID, blockID: blockID))
                 structure.mode = .index

@@ -327,6 +327,15 @@ final class AppSession {
         postAutosaves[postID]?.holders ?? 0
     }
 
+    /// The posts some surface is HOLDING right now, in any window (18k C1's
+    /// holders — a pane, a note window, a book's live editor). Read by the
+    /// Mac's structural undo/redo door to ask which notes on screen its act
+    /// left dead (the 13n-a walk, WA-3), so it can ride the navigate-away
+    /// signal for them. Bounded by what is open, never by the corpus (P1).
+    var heldPostIDs: [String] {
+        postAutosaves.compactMap { $0.value.holders > 0 ? $0.key : nil }
+    }
+
     /// True while any open note's coordinator holds typed text that has not
     /// landed (pending in its debounce, or a flush in flight). The phone's
     /// first-write furniture reads this to PACE the sample library's story

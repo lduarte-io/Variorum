@@ -57,6 +57,10 @@ struct SpreadBookView: View {
     /// a pin over the spread alone). 17y B3 (h): the Arrivals line it sat
     /// under moved to the masthead's door.
     var archived: BookArchivedModel? = nil
+    /// WA-1 (the 13n-a walk): this mode's flip bar is the book's MAIN bottom
+    /// bar, so its trailing end hosts the quiet receipt — when
+    /// `BookNoteBox.quietReceiptHome` says so (one receipt never draws twice).
+    var hostsQuietReceipt: Bool = true
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -192,6 +196,11 @@ struct SpreadBookView: View {
                 // the bar's flexible middle — the arrangement Read's Pages
                 // bar already uses, so the two horizontal surfaces read as
                 // one thing (the point of her one-rule-for-both ruling).
+                // WA-1: the quiet slot before it, at the bar's trailing end
+                // (the Bookcase hint bar's shape — it yields first).
+                QuietReceiptLine(status: session.status, tokens: tokens)
+                    .opacity(hostsQuietReceipt ? 1 : 0)
+                    .accessibilityHidden(!hostsQuietReceipt)
                 Text(tokens.chromeLabel(pageLine))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
