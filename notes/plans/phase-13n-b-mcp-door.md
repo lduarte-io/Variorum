@@ -333,7 +333,9 @@ grant authority · tool projections — never one god server object (P-9).
   "read, write takes, write everything" is recorded as spoken; the
   ruled four-rung grammar — read · suggest · write new · edit,
   R-13n-4 — stands untouched, her words speaking its spirit of
-  coarseness, not a re-count.)
+  coarseness, not a re-count. CONFIRMED by her next message, verbatim:
+  *"yes, my phrasing was praising the coarseness, not recounting the
+  rings. … i'm happy with those four though."*)
 - **R-13nb-15 (2026-10-09, her follow-on design direction, verbatim) —
   THE FILE FORMAT GAINS CARRIAGE SETTINGS.** Her words: *"what this is
   revealing to me is that the file format is probably going to need to
