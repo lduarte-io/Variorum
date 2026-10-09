@@ -1216,3 +1216,16 @@ class. Dispositions:
   idiom for unlabeled takes, not this unit's; her bundle carries the line.
 - The W2 script wording ("pick existing takes" vs the real "arrange
   existing takes") was the walk script's error, not the app's.
+
+### WALK-FIX PASS — LIVE STATUS (walk-anomaly implementer, `opus-implementer`, 2026-10-09)
+
+- **NOT DONE BY THIS PASS (first):** no GUI walk (the orchestrator re-walks);
+  WA-5/7/8 are not this pass's (ticketed / her bundle). PENDING items below.
+- Scope: WA-1, WA-2 (fix in-unit), WA-3, WA-4 (trace first: fix only on an
+  existing road, else ticket), WA-6 (30-minute time-box). No revert in flight.
+- WA-1 — IN-PROGRESS (trace).
+- WA-2 — NOT-STARTED.
+- WA-3 — NOT-STARTED (trace).
+- WA-4 — NOT-STARTED (trace).
+- WA-6 — NOT-STARTED (time-boxed trace).
+- Finals — PENDING.
