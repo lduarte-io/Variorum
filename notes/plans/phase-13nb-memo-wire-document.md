@@ -168,5 +168,12 @@ job each) and the profile-storage shape (named sets carry user prose;
 the `setting` table's no-prose promise forbids that home — a small
 synced table with encrypted names, or local-only; the sitting rules
 it). The WIRE stays profile-free: rungs and grants are its only dials
-(R-13nb-14). Timing: the sitting prep lands before U3's brief so U3
-builds the wire serialization against the ruled schema.
+(R-13nb-14), and R-13nb-17 hardens it to doctrine — read reach is
+UNIFORM per rung within a granted scope (no per-client read-carriage
+knobs, ever; "it would be a nightmare to let some ai read deleted
+takes and other ai's not to" — the explicit per-call parameters are
+call shapes, never configuration). R-13nb-16 ratifies the staging: the
+sitting designs the WHOLE inventory on the plan; the launch cut is
+hers; the remainder lands as named follow-on tickets. Timing: the
+sitting prep lands before U3's brief so U3 builds the wire
+serialization against the ruled schema.

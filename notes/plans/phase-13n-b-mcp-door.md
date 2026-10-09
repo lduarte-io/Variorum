@@ -304,6 +304,36 @@ grant authority · tool projections — never one god server object (P-9).
   may label blocks). Access granularity restated with it: block-level
   ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
   per-block fence, the note is the disclosure unit.
+- **R-13nb-16 (2026-10-09, her answer to the sizing flag, verbatim) —
+  ALL ON THE PLAN; LAUNCH BUILDS A CHOSEN SUBSET.** Her words: *"that's
+  fine on the sizing rule - we can choose what gets built for launch
+  and it doesn't necessarily have to be every single thing, but they
+  should be on the *plan*, and I do hope to get as many of them done as
+  possible."* The staged proposal is ratified as the vehicle: the
+  format-schema sitting designs the WHOLE keyboard-bar inventory (every
+  carriage named, nothing left to folklore); the launch cut is hers at
+  the sitting; the un-cut remainder lands as NAMED follow-on tickets on
+  the plan, never vagueness (the S4-16 condition's spirit).
+- **R-13nb-17 (2026-10-09, same message, verbatim) — NARROW WHERE IT
+  COUNTS: THE RUNG IS THE ONLY READ DIAL.** Her words: *"this is also
+  why I like our limited rules - read, write takes, write everything.
+  it means that we aren't allowing users a lot of choice in what's
+  read (aside from private or not, sharing note or not). it would be a
+  nightmare to let some ai read deleted takes and other ai's not to,
+  but that's not even in question. keep that in mind too - the surface
+  is still narrow where it counts in a lot of ways and should be kept
+  that way."* THE DOCTRINE: the grant sheet's dials stay EXACTLY where
+  · how much · how long, plus the Private mark — NO read-carriage
+  knobs, ever. Within a granted scope, read reach is UNIFORM per rung:
+  when versions, the tray, ancestry and commits land on the wire
+  (R-13nb-14), they land identically for every granted reader — the
+  explicit per-call parameters (with_commits, include_commits and kin)
+  are CALL shapes, never per-client configuration. R-13nb-15's
+  carriage profiles are FILE-side only, restated. (Her compression
+  "read, write takes, write everything" is recorded as spoken; the
+  ruled four-rung grammar — read · suggest · write new · edit,
+  R-13n-4 — stands untouched, her words speaking its spirit of
+  coarseness, not a re-count.)
 - **R-13nb-15 (2026-10-09, her follow-on design direction, verbatim) —
   THE FILE FORMAT GAINS CARRIAGE SETTINGS.** Her words: *"what this is
   revealing to me is that the file format is probably going to need to
