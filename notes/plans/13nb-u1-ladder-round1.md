@@ -114,18 +114,43 @@ uses one or two; 16 is generous.
 
 ## Implementer responses / dispositions (round 1)
 
-*(to be filled by the orchestrator's cross-model pass — findings go to the implementer verbatim; its
-agree/dispute returns to the reviewer for the final call)*
+**FINAL DISPOSITIONS (the reviewer's calls on the implementer's responses — fable-reviewer, 2026-10-09,
+the fix pass its own; every bug-class fix carries a red-on-old pin verified before the fix landed, one
+commit per fix, suites green after the pass).**
 
-| # | Severity | Response | Disposition |
+| # | Severity | Response | FINAL disposition |
 |---|---|---|---|
-| F1 | MINOR | AGREE — fix on the catalog side | — |
-| F2 | MINOR | AGREE — count what the client can list | — |
-| F3 | MINOR (arch) | AGREE — prefer taking the split for the three non-consuming tools | — |
-| F4 | NIT | AGREE with the lean — keep as built, record PROVISIONAL | — |
-| F5 | NIT | AGREE — tag the cursor shape | — |
-| F6 | NIT | AGREE — record-only | — |
-| F7 | MINOR | AGREE — cap ~16; suggest an honest refusal past it | — |
+| F1 | MINOR | AGREE — catalog-side, ONE shared rule; the once-BOOK-grant search road closes too | **FIXED (995d9cc7)** — `Standing.searchGrants` is THE shared standing-reach set: the declaration's `needsStandingReach` lists by it, `reachedScopes` builds scopes from it, and the `book_id` road now requires `isStandingAllow` exactly like `note_id` (the implementer's refinement accepted — a once book grant no longer serves an eternally empty allowed page). Pin red-on-old: `searchIsNeitherListedNorServedForAOnceOnlyStanding` (3 expectations failed pre-fix). |
+| F2 | MINOR | AGREE — count through the same facts and `decide`, never a parallel SQL fence | **FIXED (00a6c943)** — the count reads the same member rows as `bookPage`, batches the same `mcpNoteFacts`, counts what `decide` allows; archived members stay counted (the listing shows them — the implementer's note accepted). Pin red-on-old: `listBooksCountsOnlyTheNotesTheClientCanList` (pre-fix counted the journal member). |
+| F3 | MINOR (arch) | AGREE — prefers the FIX over record-as-deliberate | **FIXED (cb6b8c54)** — the reviewer takes the implementer's preference: `read_note`/`export_note` keep the one write transaction (once-stamp atomicity IS the boundary); `list_books`/`list_notes`/`search` assemble the whole answer in ONE read snapshot and log in a short write after (`logAfter`); revocation mid-call honoured next call; every refusal still logged. No pin owed (architectural); the 23 e2e pins hold behavior unchanged. |
+| F4 | NIT | AGREE with the lean — keep as built | **RECORDED — PROVISIONAL P-13nb-U1-13** (below; joins the merge QUESTIONS bundle beside P-13nb-U1-1…12). |
+| F5 | NIT | AGREE — tag the cursor | **FIXED (acadef10)** — `PageCursor` encodes `(shape, key, id)` ('b' book order / 'r' recency); a crossed replay refuses with the existing stale-cursor words (one constant). Pin red-on-old: `aCursorMintedUnderOneListingOrderIsRefusedByAnother`. |
+| F6 | NIT | AGREE — record-only | **RECORDED** — the probe-then-unlink TOCTOU stands as a documented corner: both racers would be her own dev builds over the same container and store, the non-racing case is pinned (`alreadyServed`), and the same grants store rules every call whichever instance serves. The road if it ever bites: an flock'd lock file beside the socket. |
+| F7 | MINOR | AGREE — cap 16; refuse with one honest JSON-RPC error, short-lived helper, ~2 s receive timeout | **FIXED (db7d3571)** — `sessionCap = 16`; past it the first request is answered by `MCPShim.refusalResponse` (id echoed, `readFirstLine` made public for this one reuse) then closed, on a helper thread with `SO_RCVTIMEO` 2 s so a silent client never stalls the accept loop (the implementer's refinement accepted whole — a bare close would leave Claude Code saying only "failed"). A closed connection frees its slot. Pin red-on-old: `connectionsPastTheCapAreRefusedWithOneHonestErrorAndSlotsFree` (pre-fix the 17th initialize was served). |
+
+**PROVISIONAL P-13nb-U1-13 (F4's record — for the merge QUESTIONS bundle):** the FENCED refusal is
+deliberately distinguishable from not-shared ("That's a journal entry… shared one ask at a time" /
+"…marked Private…" vs "…isn't shared…, or doesn't exist"). A client holding a known UUID can therefore
+tell "live fenced note" from "unshared/missing". Kept as built because (1) the words carry the
+ask-the-author road U2's just-in-time ask formalizes, and (2) the exposure is nearly vacuous by
+construction: listings and search never emit fenced ids, and note text cannot carry another note's id
+(`MarkdownLink` opens http/https only — the implementer's added fact), so the only roads to a fenced id
+are a prior per-ask grant on that very note or an id obtained outside Variorum. If she ever wants the
+one-answer doctrine extended to fenced notes, the pin is: read_note on a never-granted journal id answers
+with the not-shared words (red on today's build).
+
+**Fix-pass verification (2026-10-09, headless — no stage needed; zero Mac-app files touched in the
+pass):** whole package `swift test` green — core **2,511/287** (the pre-pass baseline held),
+**VariorumMCPTests 23/3** (19 + the four new pins), workbook **40/6**; the only skips are the
+long-standing gated ones. Commits `995d9cc7 · 00a6c943 · acadef10 · db7d3571 · cb6b8c54`, each pushed.
+
+**For round 2, look first at:** (1) F1's shared rule — `searchGrants` consumers (catalog listing,
+`reachedScopes`, both explicit-scope roads) for any road still reading `liveGrants` where standing reach
+is meant; (2) F2's count — now ∝ members per listed book (one extra batched facts read per book; confirm
+the shape under a wing grant listing many books); (3) F3's split — the three tools' answers now come from
+a READ snapshot: confirm no consumer assumed the activity line landed atomically with the answer, and
+that `logAfter` on a just-locked store failing loud (it throws out of `call`'s catch-all as the generic
+error) is acceptable; (4) F7's helper — the refused fd's lifecycle (closed exactly once, by the helper).
 
 ## ROUND 1 — IMPLEMENTER RESPONSES (opus-implementer, 2026-10-09 — every finding re-traced against the code at `b9492ced`; no fix made in this pass)
 
