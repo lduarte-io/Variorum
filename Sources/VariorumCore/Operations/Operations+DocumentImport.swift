@@ -21,7 +21,8 @@ import GRDB
 //   application road (`insertPostTag` — so a living book whose rule hears a
 //   tag picks the note up, exactly as the capture microsyntax's tags do,
 //   R-13u4-1). The title is the header's `{t:"…"}`, else the filename. A
-//   single file lands BOOKLESS (the Pool — P-13n-2, provisional).
+//   single file lands BOOKLESS (the Pool — P-13n-2, provisional). A
+//   block-less document (a stub — ladder F4) mints an EMPTY note.
 // - **`importBook`** — a FOLDER as a book, in ONE transaction (the
 //   resiliency/size call is the unit record's: one transaction, so a book
 //   either lands whole or not at all): the book unshelved, kind `book`, no
@@ -178,12 +179,15 @@ extension Operations {
         let alternateCount: Int
     }
 
-    /// The note and its blocks, inside the caller's transaction.
+    /// The note and its blocks, inside the caller's transaction. A document
+    /// with NO block — a stub (ladder F4, option (b), PROVISIONAL: a
+    /// header-only file, or a blank file inside a folder) — mints an EMPTY
+    /// note: ⌘N's own shape (`createPost` — a post with no block yet), named
+    /// by its header else its file, its tags applied as ever.
     private func mintDocument(
         _ db: Database, _ named: VariorumDocument.NamedDocument, wingId: String, now: Date
     ) throws -> MintedDocument {
         let document = named.document
-        guard !document.blocks.isEmpty else { throw OperationError.emptyImport }
         let fallback = named.fallbackTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let title = document.title ?? (fallback.isEmpty ? nil : fallback)
         var post = try insertPost(db, title: title, profile: nil, entryDate: nil, wingId: wingId)

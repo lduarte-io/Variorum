@@ -335,13 +335,75 @@ struct DocumentImportOperationTests {
         }
     }
 
-    @Test func anEmptyDocumentRefusesAndMintsNothing() throws {
+    // MARK: - Ladder F4 (option (b), PROVISIONAL): a stub mints an EMPTY note
+
+    @Test func aDocumentWithNoBlocksMintsAnEmptyNote() throws {
+        // (Superseded as-built expectation: this op refused a block-less
+        // document. A blank FILE still refuses at the single-file door's
+        // parse; what reaches the op block-less is a stub — a header-only
+        // file, or a blank one inside a folder.) The empty note is ⌘N's own
+        // shape: a post with no block, named by its header else its file.
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let result = try ops.importDocument(.init(fallbackTitle: "x", document: .init(blocks: [])))
+            #expect(result.post.title == "x")
+            #expect(result.blockIDs.isEmpty)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM container_block WHERE container_id = ?", [result.post.id]) == 0)
+            #expect(try db.read { try Container.fetchOne($0, key: result.post.id) }?.baselineLength == 0)
+            #expect(stack.depth == 1)
+            try stack.undo(with: ops)
+            #expect(try db.deletedAt("container", result.post.id) != nil)
+        }
+    }
+
+    @Test func copyForAIOfATitledEmptyNoteReimportsAsThatEmptyNote() throws {
+        // R-ARCH-13na-2's invariant, extended to the stub: ANY export
+        // re-imports whole. A titled, tagged note with no text yet copies as
+        // its header line alone; that file comes back as the same empty note.
         try withOperations { ops, db in
-            #expect(throws: OperationError.emptyImport) {
-                try ops.importDocument(.init(fallbackTitle: "x", document: .init(blocks: [])))
+            let post = try ops.createPost(title: "Chapter 3")
+            let tag = try ops.createTag(name: "outline")
+            _ = try ops.applyTag(tag.id, toPost: post.id)
+            let copied = try db.read { try Queries.variorumDocumentText($0, postID: post.id) }
+            #expect(copied == "{t:\"Chapter 3\"} {#outline}")
+
+            let imported = try ops.importDocument(try named(copied, file: "untitled.md"))
+            #expect(imported.post.title == "Chapter 3")
+            #expect(imported.blockIDs.isEmpty)
+            #expect(imported.tagIDs == [tag.id])
+            #expect(try db.read { try Queries.variorumDocumentText($0, postID: imported.post.id) } == copied)
+        }
+    }
+
+    @Test func aFolderWithStubsSeatsEachAsAnEmptyNoteInItsPlace() throws {
+        try withOperations { ops, db in
+            let book = try VariorumDocumentFolder.plan(
+                folderName: "scaffold",
+                files: [
+                    .init(relativePath: "1 one/1 opening.md", contents: "It begins."),
+                    .init(relativePath: "1 one/2 later.md", contents: ""),
+                    .init(relativePath: "2 two/1 stub.md", contents: "{t:\"The middle\"}\n"),
+                ])
+            let result = try ops.importBook(book)
+            #expect(result.postIDs.count == 3)
+            let titles = try db.read { database in
+                try result.postIDs.map { try Container.fetchOne(database, key: $0)?.title }
             }
-            let containers = try db.fetchInt("SELECT COUNT(*) FROM container")
-            #expect(containers == 0)
+            #expect(titles == ["1 opening", "2 later", "The middle"])
+            let blockCounts = try result.postIDs.map {
+                try db.fetchInt("SELECT COUNT(*) FROM container_block WHERE container_id = ?", [$0])
+            }
+            #expect(blockCounts == [1, 0, 0])
+            let sections = try db.read {
+                try String?.fetchAll(
+                    $0, sql: """
+                        SELECT section_id FROM reading_post WHERE reading_id = ?
+                        ORDER BY position, id
+                        """, arguments: [result.reading.id])
+            }
+            #expect(sections == [result.sectionIDs[0], result.sectionIDs[0], result.sectionIDs[1]])
         }
     }
 

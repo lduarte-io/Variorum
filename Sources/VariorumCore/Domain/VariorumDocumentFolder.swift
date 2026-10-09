@@ -21,6 +21,8 @@ import Foundation
 ///   chapters and for the files inside each; the raw string breaks ties.
 /// - **Fail-honest:** every file parses before anything is minted; the first
 ///   refusal (in book order) names its file and line.
+/// - **Stubs:** a blank, whitespace-only or header-only file is an EMPTY note
+///   in its place (ladder F4, option (b), PROVISIONAL — `folderNote`).
 public enum VariorumDocumentFolder {
     /// The extensions the import door reads (lower-cased comparison).
     public static let importableExtensions: Set<String> = [
@@ -113,16 +115,36 @@ public enum VariorumDocumentFolder {
         for name in chapterNames {
             var notes: [VariorumDocument.NamedDocument] = []
             for file in (chapterFiles[name] ?? []).sorted(by: { pathOrderedBefore($0.relativePath, $1.relativePath) }) {
-                notes.append(try note(named: file.relativePath, contents: file.contents))
+                notes.append(try folderNote(named: file.relativePath, contents: file.contents))
             }
             chapters.append(.init(name: name, notes: notes))
         }
         var unfiledNotes: [VariorumDocument.NamedDocument] = []
         for file in unfiled.sorted(by: { pathOrderedBefore($0.relativePath, $1.relativePath) }) {
-            unfiledNotes.append(try note(named: file.relativePath, contents: file.contents))
+            unfiledNotes.append(try folderNote(named: file.relativePath, contents: file.contents))
         }
         return VariorumDocument.Book(
             name: precomposed(folderName), chapters: chapters, unfiled: unfiledNotes)
+    }
+
+    /// One file of a FOLDER read as a note — where a BLANK file (empty or
+    /// whitespace only) is a STUB, an empty note named by its file, never a
+    /// refusal of the whole book (ladder F4, option (b), PROVISIONAL: what an
+    /// outline leaves and what an LLM scaffolding a book writes). A
+    /// header-only file is a stub by the parse's own rule; a malformed one
+    /// still refuses, naming its line. (The single-file door keeps refusing a
+    /// blank file — `note(named:contents:)` — there is nothing to import.)
+    static func folderNote(
+        named relativePath: String, contents: String
+    ) throws(VariorumDocument.Failure) -> VariorumDocument.NamedDocument {
+        do throws(VariorumDocument.Failure) {
+            return try note(named: relativePath, contents: contents)
+        } catch {
+            guard error.reason == .empty else { throw error }
+            return VariorumDocument.NamedDocument(
+                fallbackTitle: fallbackTitle(forFileNamed: relativePath),
+                document: VariorumDocument.Document(blocks: []))
+        }
     }
 
     // MARK: - Order (the Bookcase's a–z rule)

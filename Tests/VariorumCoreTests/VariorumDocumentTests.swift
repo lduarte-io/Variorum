@@ -309,10 +309,53 @@ struct VariorumDocumentTests {
         #expect(failure("A\n\n\(footer)") == .init(.endWithoutAlternates, line: 3))
         // Line numbers count a CRLF file's lines as an editor shows them.
         #expect(failure("A\r\n\r\n\(footer)") == .init(.endWithoutAlternates, line: 3))
-        // Nothing to import: blank, or a header line alone.
+        // Nothing to import: a BLANK document (no header, no block). A header
+        // line alone is an empty note now (ladder F4 — pinned below).
         #expect(failure("") == .init(.empty))
         #expect(failure("  \n\n\t\n") == .init(.empty))
-        #expect(failure("{t:\"Only a title\"} {#a}") == .init(.empty))
+    }
+
+    // MARK: - Ladder F4 (option (b)): a stub is an empty note
+
+    @Test func aHeaderOnlyDocumentIsAnEmptyNoteAndABlankOneStillRefuses() throws {
+        // Copy for AI of a titled note with no text yet writes its header
+        // line alone — that file re-imports as the empty note it was.
+        let titled = try VariorumDocument.parse("{t:\"Chapter 3\"}")
+        #expect(titled == .init(title: "Chapter 3", tagPaths: [], blocks: []))
+        let tagged = try VariorumDocument.parse("{t:\"Only a title\"} {#a}\n\n")
+        #expect(tagged == .init(title: "Only a title", tagPaths: ["a"], blocks: []))
+        #expect(try VariorumDocument.parse("\n{#x/y}\n").tagPaths == ["x/y"])
+        // A truly blank document still refuses (the single-file door's
+        // "nothing in it to import").
+        #expect(throws: VariorumDocument.Failure(.empty)) { try VariorumDocument.parse("") }
+        #expect(throws: VariorumDocument.Failure(.empty)) { try VariorumDocument.parse(" \n\t\n") }
+    }
+
+    @Test func aStubInsideAFolderIsAnEmptyNote() throws {
+        // A blank, whitespace-only or header-only file in a folder — what an
+        // outline leaves, what an LLM scaffolding a book writes — is an EMPTY
+        // note in its place, named by its header or else its file; the rest
+        // of the folder imports as ever.
+        let book = try VariorumDocumentFolder.plan(
+            folderName: "Outline",
+            files: [
+                file("ch/1 blank.md", ""),
+                file("ch/2 newline.md", "\n"),
+                file("ch/3 titled.md", "{t:\"Chapter 3\"}"),
+                file("ch/4 written.md", "Real text."),
+                file("afterword.txt", "  \n\t\n"),
+            ])
+        let notes = book.chapters[0].notes
+        #expect(notes.map(\.fallbackTitle) == ["1 blank", "2 newline", "3 titled", "4 written"])
+        #expect(notes.map(\.document.blocks.count) == [0, 0, 0, 1])
+        #expect(notes[2].document.title == "Chapter 3")
+        #expect(book.unfiled.map(\.document) == [.init(blocks: [])])
+        // A malformed file still refuses the whole folder.
+        #expect(throws: VariorumDocument.Failure(.unterminatedAlternates, line: 1, file: "ch/5.md")) {
+            try VariorumDocumentFolder.plan(
+                folderName: "Outline",
+                files: [file("ch/1.md", ""), file("ch/5.md", "\(header)\n\ntake: 1\n\nx")])
+        }
     }
 
     // MARK: - Serialize

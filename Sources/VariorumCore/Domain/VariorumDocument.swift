@@ -225,7 +225,9 @@ public enum VariorumDocument {
     /// (1-based) where one exists, and the file when a folder import read it.
     public struct Failure: Error, Equatable, Sendable {
         public enum Reason: Equatable, Sendable {
-            /// No block in the document (blank, or a header line alone).
+            /// A BLANK document — no header line and no block. (A header line
+            /// alone is a stub, an empty note — ladder F4; and inside a
+            /// folder a blank file is a stub too, `VariorumDocumentFolder`.)
             case empty
             /// An Alternates section with no paragraph of its own above it —
             /// at the document's start, or right after another section — AND
@@ -358,7 +360,11 @@ public enum VariorumDocument {
         // The tail's trailing blank lines are an edge run: they drop.
         blocks.append(contentsOf: paragraphs(chunk, beforeSection: false).map { Block(text: $0) })
 
-        guard !blocks.isEmpty else { throw Failure(.empty) }
+        // A HEADER with no body is a stub — an empty note (ladder F4, option
+        // (b), PROVISIONAL): exactly what Copy for AI writes for a named or
+        // tagged note with no text yet, so it re-imports as that note. Only a
+        // BLANK document — no header, no block — has nothing to import.
+        guard !blocks.isEmpty || title != nil || !tagPaths.isEmpty else { throw Failure(.empty) }
         return Document(title: title, tagPaths: tagPaths, blocks: blocks)
     }
 

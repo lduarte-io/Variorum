@@ -683,7 +683,28 @@ ledger; her merge).
   (the reviewer's probe + one more ping-pong) — red on the old redo
   (10 issues: 4 notes × 2 cycles left in the Trash, the book's tombstone
   replaced twice), green after; the two suites over the op 17/17.
-- F4 (a blank/whitespace/header-only stub mints an empty note; option (b)) — NOT-STARTED.
+- F4 (a blank/whitespace/header-only stub mints an empty note; option (b),
+  PROVISIONAL — P-13na-7 below) — DONE (this line's commit). The parse
+  refuses `.empty` only for a BLANK document (no header, no block); a
+  header-only document is a stub; inside a folder a blank file is a stub
+  too (`VariorumDocumentFolder.folderNote`); the single-file door keeps
+  its "nothing in it to import" for a blank file (option (b)'s letter).
+  The op mints a stub as an EMPTY note. **Fix-round call FR-1 — the empty
+  note is ZERO blocks, ⌘N's own shape** (`createPost` mints no block); the
+  reviewer's option text said "one empty block … the store shape a fresh
+  New Note has", and New Note's real shape is the stated reason, so the
+  shape follows it. Pins, red on the old code first (5 tests, each a
+  refusal: `.empty` ×4, `.emptyImport` ×1), green after:
+  `VariorumDocumentTests.aHeaderOnlyDocumentIsAnEmptyNoteAndABlankOneStillRefuses`,
+  `.aStubInsideAFolderIsAnEmptyNote`;
+  `DocumentImportOperationTests.aDocumentWithNoBlocksMintsAnEmptyNote`,
+  `.copyForAIOfATitledEmptyNoteReimportsAsThatEmptyNote` (the invariant —
+  "any export re-imports whole" — extended to the stub),
+  `.aFolderWithStubsSeatsEachAsAnEmptyNoteInItsPlace`. Superseded as-built
+  expectations, in the same commit: `anEmptyDocumentRefusesAndMintsNothing`
+  became `aDocumentWithNoBlocksMintsAnEmptyNote`; the header-only line of
+  `everyMalformedSectionRefusesNamingItsLine` moved into the new parse
+  pin. The four 13n-a suites 47/47.
 - F9 (the header line is a header only when it is tokens alone) — NOT-STARTED.
 - F6 (a blank chapter-folder name refuses in the planner's preflight) — NOT-STARTED.
 - F2 (the Bookcase drop is a context mint) — NOT-STARTED.
