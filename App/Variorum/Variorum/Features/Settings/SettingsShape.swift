@@ -61,6 +61,11 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
     /// ⌘/ helper shows, because two copies of a list is two lists.
     case shortcuts
     case tags
+    /// 13n-b U1: the MCP door (R-13n-5 named it "MCP"). Beside Tags and
+    /// before Protection — who may reach the library sits next to how it is
+    /// locked; PROVISIONAL P-13nb-U1-9 (13r's ruled Diagnostics placement,
+    /// between Data Safety and Acknowledgments, is untouched).
+    case mcp
     case protection
     case dataSafety
     /// 13r U3-B (the architect's ruling — Option A): crash reports, opt-in,
@@ -80,6 +85,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .writing: "Writing"
         case .shortcuts: "Shortcuts"
         case .tags: "Tags"
+        case .mcp: "MCP"
         case .protection: "Protection"
         case .dataSafety: "Data Safety"
         case .diagnostics: "Diagnostics"
@@ -99,6 +105,8 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         // 13i-d U6 (a) — found on the walk: the door this names mints a
         // GATHERING (its words are "Make a Gathering…").
         case .tags: "The whole tag hierarchy: create, rename, re-parent, and make a gathering from tags."
+        case .mcp: "The local MCP server: which clients may connect, what they can read, and the command "
+            + "that sets up Claude Code."
         case .protection: "The passphrase, how the library locks, and the ways back in."
         case .dataSafety: "Backups, how fresh they are, and what restoring one does."
         case .diagnostics: "Crash reports \u{2014} off unless you turn them on, and never sent without you."
@@ -114,6 +122,7 @@ nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
         case .writing: "pencil.line"
         case .shortcuts: "keyboard"
         case .tags: "tag"
+        case .mcp: "point.3.connected.trianglepath.dotted"
         case .protection: "lock.shield"
         case .dataSafety: "externaldrive.badge.timemachine"
         case .diagnostics: "stethoscope"
@@ -268,6 +277,19 @@ nonisolated enum SettingsCatalog {
             // name finds it); "smart" is retired (§14).
             keywords: ["tag", "tags", "hierarchy", "rename", "promote", "gathering",
                        "label", "folder"]),
+        // 13n-b U1 (R-13n-5 — the pane speaks direct and technical): the
+        // server toggle and the one open-book switch.
+        SettingsRow(
+            id: "mcpServer", pane: .mcp, title: MCPPaneCopy.enableTitle,
+            blurb: "A local server for MCP clients such as Claude Code. Off by default; nothing is "
+                + "readable until you grant it. This Mac only.",
+            keywords: ["mcp", "ai", "claude", "claude code", "agent", "llm", "model context protocol",
+                       "server", "connect", "client", "share", "grant", "socket"]),
+        SettingsRow(
+            id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
+            blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
+                + "journals still ask every time.",
+            keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",
             blurb: "The passphrase, when the library locks, escrow and the recovery key.",

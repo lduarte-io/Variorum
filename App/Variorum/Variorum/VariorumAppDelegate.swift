@@ -52,6 +52,13 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// arrive. Nothing it receives is ever sent automatically.
     let crashReports = CrashReporting.forThisApp()
 
+    /// 13n-b U1 — A-8: **the app's ONE MCP door owner** (the local MCP server
+    /// and the grants pane's state). One per app for the `crashReports`
+    /// reason; attached to the open store at ready, detached at lock and at
+    /// quit (below) — so the socket dies with the app. Never serves inside a
+    /// test process.
+    let mcp = MCPDoor()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
@@ -95,6 +102,12 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         // subscriber's own delivery; an OFF app has nothing to deliver into).
         SyntheticCrashReport.injectIfRequested(into: crashReports)
         #endif
+    }
+
+    /// 13n-b U1 (A-8): the server stops with the app — the socket is
+    /// unlinked and every connection hung up before the process exits.
+    func applicationWillTerminate(_ notification: Notification) {
+        mcp.detach()
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {

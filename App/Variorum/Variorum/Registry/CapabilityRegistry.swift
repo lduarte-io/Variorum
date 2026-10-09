@@ -2139,6 +2139,55 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Crash reports are deleted from Settings \u{25B8} Diagnostics.",
             availability: always),
+
+        // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)
+        // The Diagnostics shape: `.surface`, app scope, always available as
+        // an ACT, each acting on the row it sits on. See the declaration
+        // comment in `Capability.swift` for why none wears a palette or menu
+        // door. The words are the pane's register (direct and technical —
+        // R-13n-5); "Copy setup command" is her R-13nb-5.
+        Capability(
+            id: .mcpApproveClient, verb: "Approve\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Connection requests are approved in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpDenyClient, verb: "Deny", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Connection requests are denied in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpChangeClientAccess, verb: "Change\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's access is changed in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpRevokeClient, verb: "Revoke", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client is revoked in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpRevokeGrant, verb: "Revoke", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Shared places are revoked in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpCopySetupCommand, verb: "Copy setup command", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The setup command is in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpGrantAccess, verb: "Grant", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Access is granted from Settings \u{25B8} MCP.",
+            availability: always),
     ]
 
     // MARK: - Lookup

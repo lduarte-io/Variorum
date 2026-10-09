@@ -889,4 +889,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// never by a keystroke from elsewhere — the verbatim-first promise
     /// would otherwise have a door that skips the reading.
     case sendCrashReport, deleteCrashReport
+    /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
+    /// on the Data Safety / Diagnostics precedent: each acts on the row she
+    /// is looking at (a connection request, a client, a grant) or the pane's
+    /// one command, and the MCP pane is their ONLY renderer. Approve… /
+    /// Change… open the grant sheet, whose confirm is `.mcpGrantAccess`;
+    /// Revoke on a client is a deny (P-13nb-U1-5). Deliberately NOT
+    /// `.palette` or `.menuBar`: who may read the library is decided where
+    /// the grants are shown, never by a keystroke from elsewhere.
+    case mcpApproveClient, mcpDenyClient, mcpChangeClientAccess, mcpRevokeClient
+    case mcpRevokeGrant, mcpCopySetupCommand, mcpGrantAccess
 }

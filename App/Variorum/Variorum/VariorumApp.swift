@@ -199,6 +199,10 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // 13n-b U1 (A-8): the MCP door follows the open store
+                        // — it serves iff its toggle is ON (the grants
+                        // store's own switch) and stops at lock and quit.
+                        appDelegate.mcp.attach(session: session)
                         // 13x U2 row 7: the restore-hold's gate — wired
                         // BEFORE start() so no first round outruns it; the
                         // one Resume press clears the hold and catches up
@@ -229,6 +233,8 @@ struct VariorumApp: App {
                         bootstrap.onWillLock = macWillLock(session: session) {
                             services?.stop()
                             services = nil
+                            // 13n-b U1 (A-8): a locked library serves no one.
+                            appDelegate.mcp.detach()
                         }
                         // pre-13x 2a (decision 18, row 7): the KEYLESS
                         // byte-copy of the closed library at lock time when
@@ -525,6 +531,8 @@ struct VariorumApp: App {
                     // 13r U3-B: Settings ▸ Diagnostics — the ONE crash-
                     // reporting owner (opt-in, default OFF).
                     crashReports: appDelegate.crashReports,
+                    // 13n-b U1: Settings ▸ MCP — the ONE MCP door owner.
+                    mcp: appDelegate.mcp,
                     // 13x U2 row 6: the Restore surface's per-row door —
                     // Settings' OWN presenter (the main scene's sheet and
                     // this one can never both fire).

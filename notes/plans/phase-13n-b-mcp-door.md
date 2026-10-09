@@ -630,7 +630,7 @@ U1 from this section.
 | P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | DONE (this commit) — `MCPGrantOperationsTests` 14/14; the fence's three legs in ONE Queries site (`mcpNoteFacts`/`mcpBookFacts`; the Private leg a `"0"` fragment until v1_25) |
 | P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | DONE (`c3e39ec2` + pins `bab7e30c`) — `MCPServerTests` 10/10 end to end over a real socket with the SDK's own Client; `MCPShimTests` 8/8; mutation-checked (4 server breaks, each caught) |
 | P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | DONE (this commit) — Xcode command-line-tool target `variorum-mcp` (sources `App/Variorum/VariorumMCPShim/main.swift`, links the `VariorumMCPSocket` product), embedded by the app's "Embed MCP Shim" copy phase (Executables = `Contents/MacOS`, CodeSignOnCopy) + a target dependency; hardened runtime, NO sandbox entitlement, team-signed; `codesign --verify --deep --strict` passes; the real embedded Debug shim answers `initialize` with "Variorum must be open" when nothing listens |
-| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — R-13nb-5 ruled: "Copy setup command" (`-s user`) |
+| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | IN-PROGRESS — compiling (this commit; app build + build-for-testing green): `Features/MCP/` (`MCPDoor` — the app delegate's one owner, attached at ready / detached at lock and quit, serving iff the switch is ON and never in a test process; `MCPPane`; `MCPGrantSheet`; `MCPPaneCopy`), seven `.surface` registry acts, the pane roster + two catalog rows, the walk's union line. REMAINING: the pane's Mac pins (run under the stage), then the live round |
 | P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
 
 ### External facts (resolved this session)
@@ -779,6 +779,27 @@ package outside Xcode's configuration and signed by hand. Bundle ids
 it inside the app only). Developer ID distribution re-signs nested code at
 export (13r's road) — the shim rides that like any nested binary; noted
 for the release run, untested here.
+
+**P8 — the pane as built (PROVISIONALs for the record):**
+- **P-13nb-U1-8 — the list caps:** requests 3, clients 5, shared 5, each
+  with its "all N ›" road (a scrollable sheet) — R-13n-10's shape.
+- **P-13nb-U1-9 — the pane's place:** MCP sits between Tags and
+  Protection (the eleventh pane); 13r's ruled Diagnostics placement is
+  untouched (the pane-count pin moved 10 → 11, annotated).
+- **P-13nb-U1-10 — the Debug build registers as `variorum-dev`** in
+  Claude Code (`claude mcp add -s user variorum-dev -- …`), the Release
+  build as `variorum` — so a dev setup never replaces the real one in the
+  client's config (the A4 fence carried to the client's registration).
+- **P-13nb-U1-11 — the sheet's WHERE is "a book · a wing"** in U1:
+  Settings holds no note, so the note scope's face is the note ⋯ menu's
+  (R-13n-4's faces; U2/U3). The grammar and the ops support note grants
+  already (pinned).
+- **P-13nb-U1-12 — the toggle's sentence, U1-true:** the mockup's "can
+  read and write here … AI work lands as takes beside your own" reads
+  "can read here … no client can overwrite your text" until the write
+  rungs land (U2 restores the mockup's words).
+- **The pane does NOT show ACTIVITY** (U3's face per the brief); the log
+  is written from day one.
 
 **Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
   sealed-pair / backup adoption roads land the WHOLE encrypted file

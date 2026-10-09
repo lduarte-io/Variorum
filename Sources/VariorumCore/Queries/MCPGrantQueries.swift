@@ -324,6 +324,33 @@ extension Queries {
             fence: MCPGrantRule.fence(journal: row["journal"] as Bool? ?? false, privateMark: row["private_mark"]))
     }
 
+    /// One book a grant may name.
+    public struct MCPGrantableBook: Equatable, Sendable, Identifiable {
+        public let id: String
+        public let name: String
+        /// Its wing (a dangling pointer read as Home, `''`).
+        public let wingID: String
+    }
+
+    /// **The books the grant sheet offers** — every live BOOK the fence does
+    /// not exclude (a journal-trait book, THE daily Journal and, once v1_25
+    /// lands, a Private book are never a grant's scope — the op refuses them,
+    /// so the sheet never offers them; P-2), by name. Gatherings are not
+    /// grant targets in U1 (P-13nb-U1-4). Author-scale (a library's books).
+    public static func mcpGrantableBooks(_ db: Database) throws -> [MCPGrantableBook] {
+        try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing
+                FROM reading r
+                WHERE r.deleted_at IS NULL AND r.kind = 'book'
+                  AND (r.profile IS NULL OR r.profile NOT IN ('journal', 'daily'))
+                  AND NOT (\(privateLegForBook))
+                ORDER BY r.name COLLATE NOCASE, r.id
+                """
+        ).map { MCPGrantableBook(id: $0["id"], name: $0["name"], wingID: $0["wing"]) }
+    }
+
     /// The Private leg for a note (R-13nb-4) — `0` until v1_25 lands
     /// `container.ai_private_at` + `reading.ai_private_at`; then: its own
     /// stamp, or a live member of a live reading carrying one.

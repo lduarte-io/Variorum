@@ -337,6 +337,26 @@ struct MCPGrantOperationsTests {
         }
     }
 
+    @Test func theGrantSheetOffersExactlyTheBooksAGrantMayName() throws {
+        try withOperations { ops, db in
+            let wing = try ops.createWing(name: "Work")
+            let plain = try ops.createReading(name: "B plain", kind: .book)
+            let inWing = try ops.createReading(name: "a in wing", kind: .book, wingId: wing.id)
+            _ = try ops.createReading(name: "notebook", kind: .book, profile: "journal")
+            _ = try ops.createReading(name: "journal", kind: .book, profile: "daily")
+            let dead = try ops.createReading(name: "dead", kind: .book)
+            try ops.deleteReading(dead.id)
+            let offered = try db.read { try Queries.mcpGrantableBooks($0) }
+            #expect(offered.map(\.id) == [inWing.id, plain.id], "live, unfenced books by name")
+            #expect(offered.first?.wingID == wing.id)
+            // Every offered book is one the op accepts.
+            let client = try approvedClient(ops)
+            for book in offered {
+                _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .book, scopeID: book.id, duration: .always))
+            }
+        }
+    }
+
     @Test func theSharedListNamesEachTargetAndLeavesTheDeadOut() throws {
         try withOperations { ops, db in
             let client = try approvedClient(ops)
