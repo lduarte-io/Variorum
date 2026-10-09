@@ -608,15 +608,15 @@ U1 from this section.
 
 | # | Piece | Status |
 |---|---|---|
-| P0 | This record | DONE (this commit) |
-| P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | DONE — facts + proposal below; RULING PENDING |
-| P2 | SDK dependency, own commit (`exact: "0.12.1"`) + `VariorumMCP` / `VariorumMCPTests` targets + license notices | NOT-STARTED |
-| P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion + adoption recreation | NOT-STARTED |
+| P0 | This record | DONE (`e1e97a74`) |
+| P1 | A-10 probes (a)(b)(c) → facts below → orchestrator | DONE (`6f5a3d81`) — RULED: AF-1 (container socket as proposed), R-13nb-5 (Copy setup command), R-13nb-6 (adoption lands OFF) |
+| P2 | SDK dependency, own commit (`exact: "0.12.1"`) + `VariorumMCP` / `VariorumMCPTests` targets + license notices | DONE (`14763773` + the pin `9afd3456`); link pin green; the Mac acknowledgements pin's run PENDING (stage) |
+| P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion | DONE (this commit) — the schema suites 74/9 green headless |
 | P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | NOT-STARTED |
 | P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | NOT-STARTED |
 | P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | NOT-STARTED |
-| P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — socket home awaits the A-10 ruling |
-| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — the setup press awaits the A-10 ruling |
+| P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — AF-1 ruled: `<container>/Data/mcp.sock`, `bindat`/`connectat`, two distinct refusals |
+| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — R-13nb-5 ruled: "Copy setup command" (`-s user`) |
 | P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
 
 ### External facts (resolved this session)
@@ -690,6 +690,40 @@ SIGTRAPs at sandbox init — exit 133 — so the real helper/app shape was used)
   (needs the Automation consent prompt + an apple-events exception).
 
 ### Decisions, forks, PROVISIONALs
+
+**P3 — the grants store's registration and export (implementer decisions,
+within A-5's mandate "the implementer confirms the walk's exact
+mechanism and keeps names truthful"):**
+- **The completeness walk's mechanism:** `SyncSchemaTests
+  .registryMatchesLiveSchemaExactly` asserts schema − synced ==
+  `SyncSchema.localOnlyTables ∪ SyncSchema.derivedTables` — a TEST, not
+  `Sources/…/Sync/`. The grants family registers as its OWN set,
+  `MCPGrantSchema.tables` (Persistence), and the walk subtracts it by name
+  with disjointness pins against both other families and the synced set.
+  **Zero lines in `Sources/VariorumCore/Sync/`** (AF-4 — nothing to message
+  the orchestrator for). Not added to `localOnlyTables` (that set is SYNC
+  machinery the export DROPS and 13x's adoption RECREATES — the
+  recreation, the classifier's export test and the restore drills all
+  read it) and not to `derivedTables` (rebuildable from truth — grants
+  are not).
+- **The export's exclusion — STRIP, not drop (a change from my probe-time
+  message; same outcome, smaller road):** the plaintext export keeps the
+  four tables and DELETEs their rows (child-first:
+  `MCPGrantSchema.childFirstOrder`, FK order). Dropping them would have
+  left a re-opened export whose `grdb_migrations` says v1_24 ran with the
+  tables absent — a second recreation road in 13x's adoption code. A
+  stripped export lands EMPTY + OFF by construction (no switch row reads
+  off) with no change to `LocalMachineryRecreation` or the classifier.
+  Pinned: `MCPGrantSchemaTests.thePlaintextExportCarriesTheTablesEmpty`.
+- **Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
+  sealed-pair / backup adoption roads land the WHOLE encrypted file
+  (grants and the `server` switch included); the one toggle-OFF write
+  belongs on 13x's adoption road (`LibraryAdoption`, which also adopts
+  custody) — custody-adjacent code this unit's brief keeps out. U1's
+  server reads the switch per launch, so until row 10 lands an adopted
+  library with the switch ON would start the server — OFF is the shipped
+  default and no store has ever had it ON, so nothing is exposed before
+  U2. (Revisit if the orchestrator wants it in U1.)
 
 **FORK A-10 — returned to the orchestrator 2026-10-09 with this proposal
 (build of P7's path rule and P8's press waits for the ruling):**

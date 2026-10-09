@@ -897,6 +897,21 @@ extension AppDatabase {
             try SearchIndex.addSavepoints(db)
             try SearchIndex.rebuild(db, sources: SearchIndex.sourcesV1_23)
         }
+        // **13n-b — THE MCP DOOR's GRANTS STORE** (A-5/A-6; R-13n-4's "a
+        // LOCAL-ONLY table"): `mcp_client` · `mcp_grant` · `mcp_activity` ·
+        // `mcp_switch` (`Persistence/MCPGrantSchema.swift` carries the shape
+        // and why each column is there).
+        //
+        // **NOT a SyncSpec §12 lockstep event**: nothing here carries
+        // `sync_version` or an outbox trigger, nothing is pushed, no mirror
+        // changes — the marker stays 12. Its own registration
+        // (`MCPGrantSchema.tables`) beside the sync registry's local-only and
+        // derived sets; the plaintext export keeps the tables EMPTY. No
+        // backfill: a store meets the door with no clients, no grants, the
+        // server OFF and the open book CLOSED (absent switch rows read off).
+        migrator.registerMigration("v1_24_mcp_grants") { db in
+            try db.execute(sql: MCPGrantSchema.v1_24DDL)
+        }
         return migrator
     }
 }
