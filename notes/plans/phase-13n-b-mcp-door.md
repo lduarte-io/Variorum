@@ -350,6 +350,66 @@ grant authority · tool projections — never one god server object (P-9).
   land (CLAUDE.md's Fable rider). The implementer messages the exact
   lines needed; nothing in that directory is edited by an Opus session.
 
+## ARCHITECT RULINGS ON THE U2 FORKS (Fable, 2026-10-09 — on the U2 implementer's proposals, `90797596`; recorded before the affected halves build)
+
+- **AF-5 — block addressing: proposal (a) APPROVED.** `read_note` gains
+  the optional `with_ids: true`, answering the structured JSON
+  (note_id, title, blocks with block_id / shown-take text / takes with
+  take_id·label·chosen / comments); the DEFAULT answer stays the Level 0
+  text BYTE-FOR-BYTE (the mockup §9 contract's "blocks, takes, comments"
+  reading). (b) index+expected_text rejected (P-13n-4 makes indices
+  unspeakable for multi-paragraph blocks; her mid-session divide shifts
+  them); (c) a sixth tool rejected (the lean set is ruled; ids divorced
+  from the text they address). Riders: the ids are the REAL row UUIDs so
+  every later write revalidates per call against current facts (a block
+  released or re-homed since the read refuses through the ordinary
+  checks); the JSON form passes the same per-note fence/decide filter as
+  the text form (same facts, same rule — pinned); P1 ∝ the note, as the
+  text form.
+- **AF-6 — the just-in-time ask NEVER BLOCKS: proposal APPROVED.** The
+  latency-oracle trace is correct (a blocked call answers instantly for
+  a missing id and hangs for a real one — an existence oracle in time;
+  and it holds the client's tool timeout hostage to her attention). The
+  call answers at once; the app queues the ask (in memory, deduped per
+  client·target·rung, capped), the mockup §4 sheet serves them one at a
+  time; her answer mints the grant through the ordinary ops; `notShared`
+  keeps the ONE answer byte-unchanged on the wire (the client can never
+  tell whether an ask was raised — no oracle); `rungTooLow` and `fenced`
+  (targets the client legitimately knows exist) gain the said sentence
+  ("Variorum has asked the author — call again once she answers." —
+  copy 13s-a-sweepable). "Always" never offered on a fenced target
+  (R2-1's fix rides here); "while connected" only to a connected client
+  (U1's rule carried). In-memory is accepted (a dropped ask costs the
+  client one re-ask next session). OPTIONAL, implementer's call this
+  unit or U3's: pending asks also visible as pane rows on the requests
+  idiom. PROVISIONAL class for the merge bundle: the queue shape and the
+  ask-on-unshared-existing-target behavior (an ask IS queued while the
+  wire stays silent — her sheet names a note the client could not list;
+  informative to her, invisible to the client).
+- **AF-7 — "once" spends AT ITS OWN RUNG: proposal APPROVED.** A once
+  grant is consumed by the first call at the grant's OWN rung that it
+  authorizes — read: the first content read (P-13nb-U1-2's letter,
+  unchanged for read grants); suggest/write new: the FIRST WRITE, with
+  the lower-rung reads it needs on the way riding free. One line in
+  `MCPGrantRule.decide`, pinned both ways (the ride-free read does not
+  consume; the first write does; the second write refuses). This AMENDS
+  P-13nb-U1-2 for the write rungs — the provisional's record gains the
+  amended form for the merge QUESTIONS bundle. Stated edge, honest in
+  the record: a once-suggest grant authorizes ONE write — a take-plus-
+  lens flow wants "while connected", and the ask sheet's durations
+  already offer exactly that.
+- **AF-8 — scope confirmations.** The note ⋯ menu's GRANT row ("Allow
+  AI here…" — R-13n-11's connected share-a-note) is U3's, as the U1
+  not-done list recorded; U2 carries only the Private row there. And the
+  mandate decision noted in `90797596` — MCP writes on the session's
+  OperationsRunner with the session's UndoStack — is CONCURRED with
+  explicitly: it is R-13n-6's letter (MCP writes ARE ordinary
+  operations) and the serialization the one-collector compound machinery
+  requires; reads stay on the reader pool as U1 built them. The U2
+  ladder watches the latency class (a bulk MCP import serializes with
+  her gestures exactly as her own File ▸ Import does — same cost, same
+  class; P1/P2 eyes on anything beyond it).
+
 ## ARCHITECT SEAM RULINGS (Fable, 2026-10-09 kickoff — within the mandate, each traced; product-flavored ones marked PROVISIONAL for her)
 
 - **A-1 — Module placement.** The MCP server is a NEW SPM library target
