@@ -141,7 +141,25 @@ public final class MCPServerHost: @unchecked Sendable {
         }
     }
 
+    /// Round 1 F7 — the session ceiling: each session costs a reader thread,
+    /// so live sessions are capped; without one, a client stuck in a
+    /// reconnect loop grows the app a thread per connection until the APP
+    /// dies. Claude Code uses one or two; sixteen is generous.
+    static let sessionCap = 16
+
+    static let overCapMessage =
+        "Variorum's MCP server is already serving its maximum of \(sessionCap) connections. "
+        + "Close another MCP client, then reconnect."
+
     private func serve(_ fd: Int32) {
+        let overCap: Bool = lock.withLock {
+            guard sessions.count < Self.sessionCap else { return true }
+            return false
+        }
+        guard !overCap else {
+            refuseOverCap(fd)
+            return
+        }
         let session = MCPSession(fd: fd, database: database, operations: operations, version: version)
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
@@ -150,6 +168,25 @@ public final class MCPServerHost: @unchecked Sendable {
             close(fd)
             self?.ended(session)
         }
+    }
+
+    /// Past the cap: answer the connection's FIRST request with one honest
+    /// JSON-RPC error — its id echoed, the shim's refusal shape — then close
+    /// (a bare close would leave the client saying only "failed"; P-2's
+    /// honesty on the wire). A short-lived helper thread with a bounded
+    /// receive timeout reads that first line, so a silent client can never
+    /// stall the accept loop and holds at most one thread for ~2 s.
+    private func refuseOverCap(_ fd: Int32) {
+        let thread = Thread {
+            var timeout = timeval(tv_sec: 2, tv_usec: 0)
+            _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+            let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
+            _ = MCPSocketTransport.writeAll(
+                fd, MCPShim.refusalResponse(toFirstLine: line, message: Self.overCapMessage))
+            close(fd)
+        }
+        thread.name = "variorum.mcp.overcap"
+        thread.start()
     }
 
     /// A connection closed: if it was its client's LAST, the client's

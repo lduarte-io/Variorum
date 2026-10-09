@@ -480,6 +480,53 @@ struct MCPServerTests {
         }
     }
 
+    // MARK: - Round 1 F7: the session ceiling
+
+    @Test func connectionsPastTheCapAreRefusedWithOneHonestErrorAndSlotsFree() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        func rawInitialize(_ name: String) throws -> (fd: Int32, answer: [String: Any]) {
+            guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
+                throw HarnessFailure("could not connect as \(name)")
+            }
+            let line = """
+                {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18",\
+                "capabilities":{},"clientInfo":{"name":"\(name)","version":"1"}}}
+                """
+            _ = MCPShim.writeAll(fd, Data((line + "\n").utf8))
+            let answer = MCPShim.readFirstLine(fd, limit: 1 << 20)
+            guard let object = try JSONSerialization.jsonObject(with: answer) as? [String: Any] else {
+                throw HarnessFailure("\(name) got no JSON answer")
+            }
+            return (fd, object)
+        }
+        var held: [Int32] = []
+        defer { for fd in held { close(fd) } }
+        for index in 0..<16 {
+            let (fd, answer) = try rawInitialize("flood-\(index)")
+            held.append(fd)
+            #expect(answer["result"] != nil, "connection \(index) serves")
+        }
+        #expect(try await h.eventually { h.host.connectedClientNames.count == 16 })
+
+        // The seventeenth is refused with ONE honest JSON-RPC error — its
+        // id echoed — then closed; a bare close would leave the client
+        // saying only "failed".
+        let (overFD, refusal) = try rawInitialize("flood-over")
+        close(overFD)
+        let error = refusal["error"] as? [String: Any]
+        #expect(error?["code"] as? Int == MCPShim.refusalCode, "\(refusal)")
+        #expect((error?["message"] as? String)?.contains("maximum") == true)
+        #expect(refusal["id"] as? Int == 1, "the refusal answers the request by its id")
+
+        // A closed connection frees its slot.
+        close(held.removeFirst())
+        #expect(try await h.eventually { h.host.connectedClientNames.count == 15 })
+        let (freshFD, answer) = try rawInitialize("after-the-drop")
+        held.append(freshFD)
+        #expect(answer["result"] != nil, "the freed slot serves again")
+    }
+
     // MARK: - The socket's life
 
     @Test func theSocketIsPrivateWhileServingAndGoneAfterStop() async throws {

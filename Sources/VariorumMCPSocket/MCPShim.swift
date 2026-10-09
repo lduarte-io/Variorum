@@ -100,7 +100,9 @@ public enum MCPShim {
         writeAll(output, refusalResponse(toFirstLine: line, message: message))
     }
 
-    static func readFirstLine(_ fd: Int32, limit: Int) -> Data {
+    /// Public besides the shim's own use: the app's over-cap refusal (round 1
+    /// F7) reads a refused connection's first request the same bounded way.
+    public static func readFirstLine(_ fd: Int32, limit: Int) -> Data {
         var line = Data()
         var byte: UInt8 = 0
         while line.count < limit {
