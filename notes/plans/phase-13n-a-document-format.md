@@ -301,9 +301,61 @@ unit should never touch the real store at all.
    Pin `VariorumDocumentTests.namesTakenFromThePathArePrecomposedButTextIsNot`
    red on the pre-fix planner (3 failed expectations), green after.
 5. **The live round** (stage claim; captures in the gitignored dir named in
-   the walk section below). — NOT-STARTED
+   the walk section below). — **GUI WALK HELD** (see THE WALK below: her
+   real-store `/Applications/Variorum.app` is live — PID 73118, launched
+   ~02:45, HID idle 90 min — and `Tools/WalkKit/guard.sh --author` exits 3
+   "her app is running — STOP"; her instance is never quit, so no session
+   may drive the GUI until it is closed). DONE headless (this commit): the
+   PT/EN fixture `notes/plans/13n-a-sample/o ladrão de raios/` (committed —
+   original prose, two chapters, fanned blocks, one take with line breaks;
+   her morning test can import it as-is) read from DISK the door's way,
+   imported as one book, read through a lens per language, ONE undo takes
+   the book + notes + lenses, ONE redo brings them back whole —
+   `SampleBookDrillTests` 1/1.
 6. **Close** — the named suites green at the end, every row dispositioned.
    — NOT-STARTED
+
+### THE WALK (HELD — the steps, for whoever holds the stage once her app is closed)
+
+Precondition: `Tools/WalkKit/guard.sh --author` exits 0 (her app closed BY
+HER, idle machine); `Tools/stage claim`; the Debug app from this worktree's
+DerivedData (`xcodebuild -scheme Variorum -configuration Debug build`), dev
+store. Captures → `notes/plans/13n-a-screens/` (gitignored — add the line
+to `.gitignore` in the walk's commit), one per row, BOTH voices (Settings ▸
+Appearance, Terminal and Study) for rows W1, W2, W5.
+
+- **W1 — File ▸ Import… (the folder → a book).** File menu: the item reads
+  "Import…". In the panel: ⌘⇧G → the fixture's parent
+  (`…/notes/plans/13n-a-sample`) → select `o ladrão de raios` → Import.
+  Expect the book to OPEN (fire-and-DO) and the receipt
+  "Imported “o ladrão de raios” — 4 notes in 2 chapters · ⌥⌘Z undoes";
+  the book view lists chapters "1 o semideus", "2 a excursão", then
+  unfiled "posfácio". Capture the book + the receipt.
+- **W2 — Lenses, a lens per language.** Open "abertura" → Lenses (⌘4):
+  the left column is Portuguese; "+ column" → "New lens — pick existing
+  takes" → flip each of the three blocks to its "english" take. Capture:
+  PT | EN side by side; block 3's unlabeled take (line breaks) visible in
+  the fan.
+- **W3 — ⌥⌘Z once.** The whole book is gone from the Bookcase (and the
+  four notes from the Library); the Edit menu's redo item reads "Redo
+  Import". Capture.
+- **W4 — ⇧⌥⌘Z.** The book is back whole — chapters, notes, the english
+  lens. Capture.
+- **W5 — Copy for AI.** In "abertura", `note ▾` → "Copy for AI"; the quiet
+  receipt; `pbpaste` shows `{t:"abertura"} {#percy/pt-en}` then the body
+  with its Alternates sections (note: this writes HER system clipboard —
+  say so in the record). Also ⌘K → "Copy for AI". Capture the menu.
+- **W6 — the Bookcase drop.** Undo the import (⌥⌘Z), then drag the
+  `o ladrão de raios` folder from a Finder window onto the Bookcase board:
+  the outline lights ONLY over the board and only during the file drag;
+  dropping lands the book (the board stays; the receipt speaks). Also
+  drag a BOOK ROW across the board — the outline must NOT light. Capture
+  both. (If a Finder file drag turns out to carry plain text too, a book
+  row's note-drop would claim it over a row — check; that is the one
+  drop interaction the headless pins cannot see.)
+- **W7 — a refusal names its line.** Copy the fixture, delete the
+  `--- end alternates ---` line in `01 abertura.md`, import the copy: the
+  refusal names the folder, the file and line 5; nothing lands.
 
 ### Implementer calls (each with its one line of reasoning)
 
