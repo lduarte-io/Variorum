@@ -59,8 +59,10 @@ nonisolated enum MCPPaneCopy {
     static func lastSeen(_ when: String) -> String { "last seen \(when)" }
     static let deniedState = "denied"
     static let noAccess = "approved \u{00B7} nothing shared"
+    /// U2 walk W-1: rung-agnostic since the write rungs — "reads" was
+    /// false of a suggest or write-new grant.
     static func reads(_ count: Int) -> String {
-        count == 1 ? "reads 1 shared place" : "reads \(count) shared places"
+        count == 1 ? "1 shared place" : "\(count) shared places"
     }
 
     // MARK: - Shared with AI
@@ -269,11 +271,17 @@ nonisolated enum MCPReceiptCopy {
             byAct[receipt.act, default: []].append(receipt)
         }
         let parts = order.map { phrase($0, byAct[$0] ?? []) }
-        let noteTargeted: Set<Operations.MCPWriteAct> = [.take, .comment, .lens, .tag]
-        let suffix = order.allSatisfy(noteTargeted.contains)
-            ? (first.targetTitle.map { " in \u{201C}\($0)\u{201D}" } ?? "") : ""
-        return "\(first.clientName) \(joined(parts))\(suffix) \u{00B7} \(undoes)"
+        // U2 walk W-2: the mockup's line, no "in “title”" clause, and never
+        // so long that the bar's truncation eats the undo — past the budget
+        // the run speaks as a count.
+        let line = "\(first.clientName) \(joined(parts)) \u{00B7} \(undoes)"
+        guard line.count > budget else { return line }
+        return "\(first.clientName) made \(run.count) changes \u{00B7} \(undoes)"
     }
+
+    /// The longest line the bottom bar's quiet slot shows whole at the
+    /// default window width (measured at the U2 walk — W-2).
+    static let budget = 72
 
     private static func phrase(_ act: Operations.MCPWriteAct, _ receipts: [MCPWriteReceipt]) -> String {
         let n = receipts.count

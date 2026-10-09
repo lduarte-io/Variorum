@@ -122,9 +122,16 @@ struct MCPAskAndReceiptTests {
     // MARK: - Receipts (the app's voice — P-13n-1)
 
     @Test func aRunOfActsSpeaksAsTheMockupsOneLine() {
-        #expect(MCPReceiptCopy.line([receipt(.take), receipt(.take), receipt(.lens, detail: "english readings")])
-                == "claude-code added 2 takes and saved the lens “english readings” in “ch 1” · ⌥⌘Z undoes")
-        #expect(MCPReceiptCopy.line([receipt(.take)]) == "claude-code added a take in “ch 1” · ⌥⌘Z undoes")
+        #expect(MCPReceiptCopy.line([receipt(.take), receipt(.take), receipt(.lens, detail: "fact check")])
+                == "claude-code added 2 takes and saved the lens “fact check” · ⌥⌘Z undoes",
+                "the mockup §5 line's shape")
+        #expect(MCPReceiptCopy.line([receipt(.take)]) == "claude-code added a take · ⌥⌘Z undoes")
+        // U2 walk W-2: a run too long for the bar speaks as a count, so the
+        // undo is never truncated away.
+        let long = [receipt(.take), receipt(.take), receipt(.lens, detail: "english readings"),
+                    receipt(.comment), receipt(.take)]
+        #expect(MCPReceiptCopy.line(long) == "claude-code made 5 changes · ⌥⌘Z undoes")
+        #expect(MCPReceiptCopy.line(long).count <= MCPReceiptCopy.budget)
         #expect(MCPReceiptCopy.line([receipt(.importBook, title: "worksheets", count: 3)])
                 == "claude-code imported the book “worksheets” (3 notes) · ⌥⌘Z undoes")
         #expect(MCPReceiptCopy.line([receipt(.bookAdd, title: "lesson 2", detail: "lessons")])
@@ -140,12 +147,15 @@ struct MCPAskAndReceiptTests {
             let now = Date(timeIntervalSince1970: 1_800_000_000)
             door.speak(receipt(.take), now: now)
             door.speak(receipt(.take), now: now.addingTimeInterval(5))
-            #expect(session.status.spoken?.text == "claude-code added 2 takes in “ch 1” · ⌥⌘Z undoes")
+            #expect(session.status.spoken?.text == "claude-code added 2 takes · ⌥⌘Z undoes")
             door.speak(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(6))
-            #expect(session.status.spoken?.text == "claude-code added a take in “ch 2” · ⌥⌘Z undoes")
+            #expect(session.status.spoken?.text == "claude-code added a take · ⌥⌘Z undoes",
+                    "another target starts a fresh run")
+            door.speak(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(7))
+            #expect(session.status.spoken?.text == "claude-code added 2 takes · ⌥⌘Z undoes")
             door.speak(receipt(.take, target: "n2", title: "ch 2"),
-                       now: now.addingTimeInterval(6 + MCPDoor.receiptWindow + 1))
-            #expect(session.status.spoken?.text == "claude-code added a take in “ch 2” · ⌥⌘Z undoes",
+                       now: now.addingTimeInterval(7 + MCPDoor.receiptWindow + 1))
+            #expect(session.status.spoken?.text == "claude-code added a take · ⌥⌘Z undoes",
                     "past the window a run starts afresh")
         }
     }
