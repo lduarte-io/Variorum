@@ -13,6 +13,9 @@ let package = Package(
         // 13n-b (A-1): the MCP door's server — linked ONLY by the Mac app
         // target; the iOS app never carries the SDK.
         .library(name: "VariorumMCP", targets: ["VariorumMCP"]),
+        // The shim's whole behaviour (A-2) — linked by the Xcode
+        // `variorum-mcp` command-line tool embedded at Contents/MacOS.
+        .library(name: "VariorumMCPSocket", targets: ["VariorumMCPSocket"]),
     ],
     dependencies: [
         // Phase 13p (R13p-11, author-approved): the author's GRDB fork with the
@@ -113,17 +116,23 @@ let package = Package(
         .target(
             name: "VariorumMCP",
             dependencies: [
-                "VariorumCore",
+                "VariorumCore", "VariorumMCPSocket",
                 .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "GRDB", package: "GRDB.swift"),
             ]
         ),
+        // 13n-b (A-2, AF-1): the socket road BOTH ends read — the app's
+        // listener and the `variorum-mcp` shim's connect + byte pump.
+        // Foundation and Darwin only: the shim links this and nothing of
+        // Variorum's (zero store access, zero VariorumCore).
+        .target(name: "VariorumMCPSocket"),
         .testTarget(
             name: "VariorumMCPTests",
             dependencies: [
-                "VariorumMCP", "VariorumCore",
+                "VariorumMCP", "VariorumMCPSocket", "VariorumCore",
                 .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "GRDB", package: "GRDB.swift"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
             ]
         ),
         .testTarget(

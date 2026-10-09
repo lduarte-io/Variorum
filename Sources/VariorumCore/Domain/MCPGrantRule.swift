@@ -226,6 +226,30 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
+    /// **A WING-LEVEL listing** (`list_notes` with a wing): allowed only with
+    /// wing-level reach — the open book on a read, or a live grant on THAT
+    /// wing at the asked rung. Never spends a once grant (a listing reads no
+    /// content). Every note the listing then shows still passes `decide` on
+    /// its own — the fence filters per note, so a wing never lists a journal.
+    public static func decideWing(
+        client: ClientState?, grants: [Grant], openBook: Bool, wingID: String, rung: Rung
+    ) -> Decision {
+        switch client {
+        case .approved: break
+        case .denied: return .refuse(.clientDenied)
+        case .pending, nil: return .refuse(.clientPending)
+        }
+        let reaching = grants.filter { $0.isLive && $0.scopeKind == .wing && $0.scopeID == wingID }
+        if let grant = best(reaching.filter { $0.rung >= rung }) {
+            return .allow(grantID: grant.id, consumesOnce: false)
+        }
+        if openBook, rung == .read { return .allow(grantID: nil, consumesOnce: false) }
+        if let highest = reaching.map(\.rung).max() {
+            return .ask(.rungTooLow(granted: highest), offersAlways: true)
+        }
+        return .ask(.notShared, offersAlways: true)
+    }
+
     /// Does this grant's SCOPE reach the target? The fence lives here: a
     /// fenced note is reached only by a per-ask grant naming it (a note
     /// scope, never "always"); a fenced book by nothing.

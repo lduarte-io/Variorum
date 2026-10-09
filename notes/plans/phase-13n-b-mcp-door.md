@@ -614,7 +614,7 @@ U1 from this section.
 | P3 | Schema `v1_24_mcp_grants` (local-only), own commit; registration + export exclusion | DONE (this commit) — the schema suites 74/9 green headless |
 | P4 | The pure grant rule (`Domain/MCPGrantRule`) + exhaustive tests | DONE (`f7927a91`) — 12/12 incl. the 13,824-world sweep; mutation-checked (4 boundary breaks each caught: 324 / 2,243 / 2 / 510 issues) |
 | P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | DONE (this commit) — `MCPGrantOperationsTests` 14/14; the fence's three legs in ONE Queries site (`mcpNoteFacts`/`mcpBookFacts`; the Private leg a `"0"` fragment until v1_25) |
-| P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | NOT-STARTED |
+| P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | IN-PROGRESS — compiling (this commit): `VariorumMCPSocket` (the socket road + the shim's behaviour), `MCPSocketTransport`, `MCPSession`, `MCPServerHost`, `MCPGrantAuthority` + `MCPRefusalCopy`, `MCPToolCatalog`, `MCPReadTools`; REMAINING: the end-to-end + per-tool scope pins (`VariorumMCPTests`) |
 | P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | NOT-STARTED — AF-1 ruled: `<container>/Data/mcp.sock`, `bindat`/`connectat`, two distinct refusals |
 | P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | NOT-STARTED — R-13nb-5 ruled: "Copy setup command" (`-s user`) |
 | P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
@@ -739,6 +739,17 @@ orchestrator logs them at merge):**
   a pending client holds nothing), 500 activity lines.
 - **Membership is canon's:** `status='member'` only (an arrival is never
   membership), live readings only; an ARCHIVED journal book still fences.
+
+**AF-1's MECHANISM — a deviation, reported to the orchestrator
+(non-gating):** `bindat`/`connectat` (and the per-thread
+`pthread_fchdir_np`) are NOT public API on the macOS 27 SDK — no header
+declares them, so a shipping app cannot call them. Both ends therefore use
+the plain ABSOLUTE path, length-guarded: `<home>/Library/Containers/<bundle
+id>/Data/mcp.sock` must fit `sun_path`'s 103 bytes, which leaves a user name
+up to 36 characters (Debug) / 42 (Release); past that the server refuses to
+start and the shim speaks a distinct honest line (`pathTooLong`) — never a
+truncated path. The ruling's intent (the limit can't silently bite) holds;
+its letter (it can't bite at all) does not. PROVISIONAL P-13nb-U1-7.
 
 **Ledger row 10 (13x adoption lands OFF, R-13nb-6) — U2's.** The
   sealed-pair / backup adoption roads land the WHOLE encrypted file

@@ -217,6 +217,30 @@ struct MCPGrantRuleTests {
                             rung: .read, consumes: false) == .refuse(.clientPending))
     }
 
+    // MARK: - A wing-level listing
+
+    @Test func aWingListingNeedsWingLevelReach() {
+        let wingGrant = grant("g-w", .read, .wing, "wing-X", .always)
+        #expect(Rule.decideWing(client: .approved, grants: [wingGrant], openBook: false, wingID: "wing-X", rung: .read)
+                == .allow(grantID: "g-w", consumesOnce: false))
+        #expect(Rule.decideWing(client: .approved, grants: [wingGrant], openBook: false, wingID: "", rung: .read)
+                == .ask(.notShared, offersAlways: true), "another wing's grant reaches nothing here")
+        let bookGrant = grant("g-b", .read, .book, "book-A", .always)
+        let noteGrant = grant("g-n", .read, .note, "note-1", .always)
+        #expect(Rule.decideWing(client: .approved, grants: [bookGrant, noteGrant], openBook: false, wingID: "", rung: .read)
+                == .ask(.notShared, offersAlways: true), "a book or note grant never lists a whole wing")
+        #expect(Rule.decideWing(client: .approved, grants: [], openBook: true, wingID: "wing-X", rung: .read)
+                == .allow(grantID: nil, consumesOnce: false))
+        var revoked = wingGrant
+        revoked.revokedAt = "t"
+        #expect(Rule.decideWing(client: .approved, grants: [revoked], openBook: false, wingID: "wing-X", rung: .read)
+                == .ask(.notShared, offersAlways: true))
+        #expect(Rule.decideWing(client: .pending, grants: [wingGrant], openBook: true, wingID: "wing-X", rung: .read)
+                == .refuse(.clientPending))
+        #expect(Rule.decideWing(client: .denied, grants: [wingGrant], openBook: true, wingID: "wing-X", rung: .read)
+                == .refuse(.clientDenied))
+    }
+
     // MARK: - The exhaustive sweep — the boundary's invariants over every grant shape
 
     /// Every single-grant world (rung × scope kind × matching or not ×
