@@ -746,8 +746,9 @@ ledger; her merge).
   “spaced book” — one of its folders has a blank name, and a chapter needs
   one.") before any file parses; the op's own `invalidSectionName` guard
   stays as defense. Core pin green (the four 13n-a suites 49/49); the door
-  pin `aBlankChapterFolderRefusesBeforeAnythingIsMinted` — green PENDING
-  the Mac green run. **The class, RECORDED as a known limit (the
+  pin `aBlankChapterFolderRefusesBeforeAnythingIsMinted` — green at the
+  next door run (F2's: 13 tests, F2 + F6 pins green, F3 + F7 still red as
+  designed). **The class, RECORDED as a known limit (the
   disposition's second half):** any op refusal on item 2+ of a multi-item
   gesture still rolls the earlier items back through their inverses, and
   those inverses tombstone — so the earlier items would sit in the Trash
@@ -755,7 +756,17 @@ ledger; her merge).
   check, now the blank chapter name) are the guard that keeps it
   unreachable from any folder shape; what remains reachable is a fault
   arriving mid-flight (the wing dying under the gesture).
-- F2 (the Bookcase drop is a context mint) — NOT-STARTED.
+- F2 (the Bookcase drop is a context mint; PROVISIONAL — P-13na-6 below)
+  — DONE (this line's commit). `importBook` gains `shelfId:` (validated
+  as `createReading` does — live, same wing; never placed);
+  `DocumentImporter.importURLs`/`run` thread a `shelfID` (File ▸ Import…
+  passes nil — unshelved, the plan's letter); the drop's `land(_:)` passes
+  the board's `mintShelfID`. Pin `DocumentImportDoorTests.aFolderDroppedOnASoloedShelfLandsOnThatShelf`
+  red at 5693f1ad (`shelf_id` nil), green at the door run (13 tests: F2 +
+  F6 green, F3 + F7 still red as designed); new-API state test
+  `DocumentImportOperationTests.aFolderImportedOntoAShelfLandsOnItAndADeadOrForeignShelfRefuses`
+  (a dead and a foreign-wing shelf refuse, nothing minted). The four 13n-a
+  suites 50/50.
 - F3 (the receipt says "to the Pool" only for a still-bookless note) — NOT-STARTED.
 - F7 (a package directory is neither a chapter nor a file) — NOT-STARTED.
 - F8 (`CopyForAI` moves to the shared home) — NOT-STARTED.

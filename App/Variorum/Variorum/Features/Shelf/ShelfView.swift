@@ -200,7 +200,9 @@ struct ShelfView: View {
             // row or a note dragged across the board never lights it, and the
             // outline draws only while a file drag is over it — light only
             // where a drop acts (§12's false-offer rule). The board stays put:
-            // the new book appears on it, and the receipt names what landed.
+            // the new book appears on it — the drop is a CONTEXT MINT (ladder
+            // F2; §12), landing on the shelf the board is solo'd on, unshelved
+            // from All — and the receipt names what landed.
             .onDrop(
                 of: BookcaseImportDrop.types,
                 delegate: BookcaseImportDrop(

@@ -77,8 +77,13 @@ nonisolated enum DocumentImportLanded: Equatable, Sendable {
 enum DocumentImporter {
     // MARK: - The whole door
 
-    /// Read, plan, run, and say — the act both doors fire.
-    static func importURLs(_ urls: [URL], session: AppSession) async -> DocumentImportSpeech {
+    /// Read, plan, run, and say — the act both doors fire. `shelfID` is the
+    /// Bookcase drop's CONTEXT MINT (ladder F2 — the shelf the board is
+    /// solo'd on, where a dropped folder's book lands); File ▸ Import…
+    /// passes nil and the book lands unshelved.
+    static func importURLs(
+        _ urls: [URL], session: AppSession, shelfID: String? = nil
+    ) async -> DocumentImportSpeech {
         let planned = await Task.detached { plan(urls) }.value
         let items: [DocumentImportItem]
         switch planned {
@@ -93,7 +98,7 @@ enum DocumentImporter {
                 kind: .refusal, text: DocumentImportCopy.nothingToImport, opens: nil)
         }
         do {
-            let landed = try await run(items, session: session)
+            let landed = try await run(items, session: session, shelfID: shelfID)
             return DocumentImportSpeech(
                 kind: .receipt, text: DocumentImportCopy.receipt(landed),
                 opens: landed.count == 1 ? landed[0].selection : nil)
@@ -106,7 +111,7 @@ enum DocumentImporter {
     // MARK: - Run (one gesture, one undo entry)
 
     static func run(
-        _ items: [DocumentImportItem], session: AppSession
+        _ items: [DocumentImportItem], session: AppSession, shelfID: String? = nil
     ) async throws -> [DocumentImportLanded] {
         let stack = session.undoStack
         let wing = session.wing.currentID
@@ -134,7 +139,7 @@ enum DocumentImporter {
                             postID: result.post.id,
                             title: result.post.title ?? named.fallbackTitle)
                     case .book(let book):
-                        let result = try ops.importBook(book, wingId: wing)
+                        let result = try ops.importBook(book, wingId: wing, shelfId: shelfID)
                         return .book(
                             readingID: result.reading.id, name: result.reading.name,
                             notes: result.postIDs.count, chapters: result.sectionIDs.count)
@@ -287,9 +292,11 @@ struct BookcaseImportDrop: DropDelegate {
         return true
     }
 
-    /// What the drop does with the files it carried — the import door.
+    /// What the drop does with the files it carried — the import door, as a
+    /// CONTEXT MINT (ladder F2; AppSpec §12): a folder's book lands on the
+    /// shelf the board is solo'd on, so it appears where she dropped it.
     func land(_ urls: [URL]) async -> DocumentImportSpeech {
-        await DocumentImporter.importURLs(urls, session: session)
+        await DocumentImporter.importURLs(urls, session: session, shelfID: shelfID)
     }
 
     nonisolated private static func loadFileURL(_ provider: NSItemProvider) async -> URL? {

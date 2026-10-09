@@ -25,8 +25,9 @@ import GRDB
 //   block-less document (a stub — ladder F4) mints an EMPTY note.
 // - **`importBook`** — a FOLDER as a book, in ONE transaction (the
 //   resiliency/size call is the unit record's: one transaction, so a book
-//   either lands whole or not at all): the book unshelved, kind `book`, no
-//   rule, in the given wing; a chapter (`reading_section`) per subfolder in
+//   either lands whole or not at all): the book unshelved — or, from the
+//   Bookcase's drop, on the shelf the board is solo'd on (the context mint,
+//   ladder F2) — kind `book`, no rule, in the given wing; a chapter (`reading_section`) per subfolder in
 //   the plan's order; every note minted as above and SEATED — a member of
 //   its chapter, in book order. The folder's name is the book's, and the
 //   duplicate-name door guard (E13) refuses a name a live book already wears.
@@ -92,12 +93,26 @@ extension Operations {
     }
 
     /// A folder → one book in `wingId`, every note seated in its chapter.
+    ///
+    /// `shelfId` — THE CONTEXT MINT (ladder round 1, F2; AppSpec §12 "a
+    /// context mint lands on the solo'd shelf", the sitting record §19.1):
+    /// the Bookcase's drop passes the shelf the board is solo'd on, so the
+    /// book appears where she dropped it; every other door passes nil and the
+    /// book lands UNSHELVED (§19). Validated exactly as `createReading`
+    /// validates it — live, and in this book's wing — and never placed (it
+    /// appends at the end of the shelf's order).
     @discardableResult
     public func importBook(
-        _ book: VariorumDocument.Book, wingId: String = ""
+        _ book: VariorumDocument.Book, wingId: String = "", shelfId: String? = nil
     ) throws -> BookImport {
         let result: BookImport = try database.write { db in
             try requireLiveWing(db, wingId)
+            if let shelfId {
+                let shelf = try liveShelf(db, shelfId)
+                guard shelf.wingId == wingId else {
+                    throw OperationError.shelfNotFound(id: shelfId)
+                }
+            }
             guard book.noteCount > 0 else { throw OperationError.emptyImport }
             let trimmedName = book.name.trimmingCharacters(in: .whitespacesAndNewlines)
             let name = trimmedName.isEmpty ? DisplayTitle.placeholder : trimmedName
@@ -107,7 +122,7 @@ extension Operations {
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,
-                wingId: wingId, createdAt: now, updatedAt: now)
+                wingId: wingId, shelfId: shelfId, createdAt: now, updatedAt: now)
             try reading.insert(db)
 
             var sectionIDs: [String] = []

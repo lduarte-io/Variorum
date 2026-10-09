@@ -587,6 +587,34 @@ struct DocumentImportOperationTests {
         }
     }
 
+    @Test func aFolderImportedOntoAShelfLandsOnItAndADeadOrForeignShelfRefuses() throws {
+        // Ladder F2 — the drop's CONTEXT MINT, validated exactly as
+        // `createReading` validates a shelf: live, and in the book's wing.
+        try withOperations { ops, db in
+            let work = try ops.createShelf(name: "Work")
+            let result = try ops.importBook(try folder(), shelfId: work.id)
+            #expect(result.reading.shelfId == work.id)
+            #expect(try db.read { try Queries.reading($0, id: result.reading.id) }?.shelfId == work.id)
+            #expect(try db.read { try Queries.reading($0, id: result.reading.id) }?.shelfPosition == nil)
+
+            let gone = try ops.createShelf(name: "Gone")
+            try ops.deleteShelf(gone.id)
+            let wing = try ops.createWing(name: "Elsewhere")
+            let foreign = try ops.createShelf(name: "Theirs", wingID: wing.id)
+            for shelfID in [gone.id, foreign.id] {
+                let readings = try db.fetchInt("SELECT COUNT(*) FROM reading")
+                #expect(throws: OperationError.self) {
+                    try ops.importBook(
+                        VariorumDocument.Book(
+                            name: "another \(shelfID)", chapters: [],
+                            unfiled: [.init(fallbackTitle: "a", document: .init(blocks: [.init(text: "A")]))]),
+                        shelfId: shelfID)
+                }
+                #expect(try db.fetchInt("SELECT COUNT(*) FROM reading") == readings, "nothing minted")
+            }
+        }
+    }
+
     @Test func aFolderNamedLikeALiveBookRefusesAndMintsNothing() throws {
         try withOperations { ops, db in
             try ops.createReading(name: "O Ladrão de Raios", kind: .book)
