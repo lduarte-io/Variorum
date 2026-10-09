@@ -1167,3 +1167,52 @@ your proposal (the architect rules; the rest of the unit continues).
 - **IC-1…16 adopted; P-13na-1…5 adopted as built**, all PROVISIONAL to her
   morning bundle (the QUESTIONS entry lands at HER merge, per the
   refresh-not-merge order).
+
+## THE WALK VERDICT + ANOMALY DISPOSITIONS (orchestrator look-pass, 2026-10-09 morning — her ask: "make sure it LOOKS good")
+
+**Verdict: the surfaces are GOOD.** The imported book reads native and calm
+in both voices (W1 captures); Lenses' PT|EN columns are the mockup's
+promise delivered (w2-lenses-pt-en-side-by-side-*); the fan is clean, the
+unlabeled take keeps its line breaks; the drop outline lights only where
+the drop acts; W7's refusal copy is exemplary (folder, file, both lines).
+No surface clutter. Every defect lives in the STATUS seam or a stale-view
+class. Dispositions:
+
+- **WA-1 (W1) — FIX IN-UNIT.** The import receipt lands in the book
+  navigator's NARROW bottom bar and truncates in both voices (counts and
+  ⌥⌘Z never show; not visible to Accessibility). The quiet receipt belongs
+  on the window's MAIN bottom bar's trailing end (the one status seam);
+  P-8's lineLimit law applies either way.
+- **WA-2 (W5) — FIX IN-UNIT, copy ruling (PROVISIONAL, 13s-a re-voices):**
+  the Copy-for-AI receipt shortens to **"Copied for AI."** — the current
+  sentence truncates in Terminal; receipts say what happened, teaching
+  lives elsewhere.
+- **WA-3 (W3) — FIX IN-UNIT IF THE MECHANISM IS THE EXISTING ROAD, else
+  ticket.** Undoing an import leaves an open note's pane live on the dead
+  note (and in the Open strip). A synced tombstone of an open note must
+  already close/park panes somewhere — find THAT road and route the undo's
+  tombstones through it; pin on the import-undo path. If no such road
+  exists (a pre-existing class for every remote deletion), TICKET it with
+  the trace and do not improvise one overnight-style.
+- **WA-4 (W4) — TRACE, THEN FIX OR TICKET.** Redo doesn't refresh an
+  on-screen Library (rows appear only on re-enter). First check whether
+  Put back from the Trash refreshes a live Library — if IT also fails,
+  this is a pre-existing revival-observation class: ticket with the trace.
+  If Put back works, find what the redo road misses and fix with a pin.
+- **WA-5 (W7) — TICKETED, VX-121.** The refusal toast covers the Bookcase
+  quick-entry box — a toast-PLACEMENT class (any toast there collides),
+  pre-existing shape surfaced by the new door.
+- **WA-6 (Trash busy) — TRACE with a TIME-BOX.** An undone import shows a
+  book row ("and 4 notes") AND four separate note rows; the
+  deleteReadingWithNotes idiom reads as one row. Stamps DO match (the
+  inverse writes one stamp), so find what the Trash grouping actually keys
+  on; fix if one honest line, else ticket with the trace.
+- **WA-7 (Welcome shelf) — RECORD + her bundle.** The drop onto a solo'd
+  Welcome lands the book there BY CONSTRUCTION of P-13na-6 (the drop
+  passes the same mintShelfID as + New Book, so it matches the standing
+  context-mint behavior exactly). Whether Welcome should refuse context
+  mints GENERALLY is a standing design question for her, not this unit's.
+- **WA-8 (unlabeled take reads "choose") — RECORD.** The fan's standing
+  idiom for unlabeled takes, not this unit's; her bundle carries the line.
+- The W2 script wording ("pick existing takes" vs the real "arrange
+  existing takes") was the walk script's error, not the app's.
