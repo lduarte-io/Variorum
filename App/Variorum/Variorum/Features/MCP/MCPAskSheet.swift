@@ -22,10 +22,6 @@ struct MCPAskSheet: View {
 
     let door: MCPDoor
     let ask: MCPAsk
-    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
-    @Environment(\.colorScheme) private var scheme
-
-    private var tokens: VoiceTokens { themeStore?.tokens(for: scheme) ?? .fallback(for: scheme) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -38,17 +34,24 @@ struct MCPAskSheet: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+            // U2 walk W-3: SYSTEM buttons — the sheet presents at the
+            // WindowGroup level, where no session theme reaches (the
+            // library-open sheet's own precedent beside it); voiced buttons
+            // there fell back to the mono fallback face.
             HStack(spacing: 8) {
                 ForEach(door.durations(for: ask), id: \.self) { duration in
-                    Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: duration == .once ? .primary : .secondary))
-                        .help(CapabilityRegistry.capability(.mcpAnswerAsk).verb)
+                    if duration == .once {
+                        Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
+                            .keyboardShortcut(.defaultAction)
+                    } else {
+                        Button(MCPAskCopy.button(duration)) { door.answer(ask, .grant(duration)) }
+                    }
                 }
                 Spacer(minLength: 8)
                 Button(MCPAskCopy.dontAllow) { door.answer(ask, .dontAllow) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(.cancelAction)
             }
+            .help(CapabilityRegistry.capability(.mcpAnswerAsk).verb)
             .padding(.top, 4)
         }
         .padding(20)
