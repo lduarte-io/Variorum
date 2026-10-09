@@ -187,7 +187,11 @@ struct MCPPaneTests {
             try operations.approveMCPClient(client.id, granting: nil)
             try operations.setMCPSwitch(.server, on: true)   // the copy arrived ON
 
-            let directory = root.appendingPathComponent("sock", isDirectory: true)
+            // A SHORT socket home of its own (AF-1's length guard refuses a
+            // path past sun_path's 103 bytes — honestly, as built).
+            let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent("va-\(UUID().uuidString.prefix(6))", isDirectory: true)
+            defer { try? FileManager.default.removeItem(at: directory) }
             let socket = MCPSocketRoad.socketPath(directory: directory)
             var started = 0
             let door = MCPDoor(serverAllowed: true) { database, executor in
@@ -205,7 +209,7 @@ struct MCPPaneTests {
             #expect(door.snapshot.clients.first?.client.state == .approved, "clients and grants kept as data")
 
             door.setEnabled(true)   // her deliberate re-enable
-            #expect(try await settle { door.serverState == .running })
+            #expect(try await settle { door.serverState == .running }, "state: \(door.serverState)")
             #expect(FileManager.default.fileExists(atPath: socket))
         }
     }
