@@ -781,7 +781,20 @@ ledger; her merge).
   (old text "Imported “flying” to the Pool · ⌥⌘Z undoes"), green at the
   door run (14 tests — F7's pin alone still red, as designed); the copy
   test `theReceiptsSayWhereEachNoteWent` added.
-- F7 (a package directory is neither a chapter nor a file) — NOT-STARTED.
+- F7 (a package directory is neither a chapter nor a file) — DONE (this
+  line's commit). `readFolder` reads `.isPackageKey` and passes a package
+  over (the walk already skipped its contents; the package itself had
+  become an empty chapter named after it). Pin
+  `aPackageInsideAFolderIsNeitherAChapterNorAFile` red at 5693f1ad (old
+  text "… 1 note in 1 chapter …", one section), green at the door run:
+  `DocumentImportDoorTests` 14/14, 0 failures. **Known limit, recorded:**
+  a package INSIDE a folder is ignored — its text never imports (an
+  `.rtfd` is not a document the door reads; a `.textbundle`'s Markdown
+  would need the package opened). **Seen, NOT fixed (outside F7's
+  letter):** a package handed to the door ITSELF (dropped on the Bookcase;
+  the panel does not offer one) is a directory to `plan(_:)` and walks as a
+  folder — a `.textbundle` would land as a book named "x.textbundle" with
+  its `text.md` as a note. Returned to the orchestrator.
 - F8 (`CopyForAI` moves to the shared home) — NOT-STARTED.
 - F5 (the round-trip claims state their exact domain) — NOT-STARTED.
 - Finals — PENDING.

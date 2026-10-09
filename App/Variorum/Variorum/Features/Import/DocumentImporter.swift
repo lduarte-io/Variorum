@@ -201,14 +201,20 @@ enum DocumentImporter {
         var files: [VariorumDocumentFolder.File] = []
         var subfolders: [String] = []
         let walker = FileManager.default.enumerator(
-            at: url, includingPropertiesForKeys: [.isDirectoryKey],
+            at: url, includingPropertiesForKeys: [.isDirectoryKey, .isPackageKey],
             options: [.skipsHiddenFiles, .skipsPackageDescendants])
         while let item = walker?.nextObject() as? URL {
             let components = item.resolvingSymlinksInPath().standardizedFileURL.pathComponents
             guard components.count > base.count, Array(components.prefix(base.count)) == base
             else { continue }
             let relative = components.dropFirst(base.count).joined(separator: "/")
-            if (try? item.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
+            let values = try? item.resourceValues(forKeys: [.isDirectoryKey, .isPackageKey])
+            // A PACKAGE (an `.rtfd`, a `.textbundle` where an app declares
+            // one) is neither a chapter nor a file (ladder F7): the walk
+            // already skips its contents, and the package itself must not
+            // become an empty chapter named after it — it is passed over.
+            if values?.isPackage == true { continue }
+            if values?.isDirectory == true {
                 subfolders.append(relative)
                 continue
             }
