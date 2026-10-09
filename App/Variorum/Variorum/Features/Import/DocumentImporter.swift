@@ -333,33 +333,5 @@ struct BookcaseImportDrop: DropDelegate {
     }
 }
 
-// MARK: - Copy for AI (R-13n-11 — the push gesture)
-
-/// The note in the Variorum document format, onto the clipboard
-/// (`Queries.variorumDocumentText` — the ONE serializer the round-trip pins
-/// hold). Flushes the note's pending typing first, so what is copied is what
-/// she sees. Reads only; writes no row.
-@MainActor
-enum CopyForAI {
-    /// `pasteboard` is the tests' seam (a private named board) — every door
-    /// passes nothing and writes the general one.
-    static func copy(
-        postID: String, session: AppSession, pasteboard: NSPasteboard = .general
-    ) async {
-        _ = await session.flushExistingAutosave(forPost: postID)
-        do {
-            let text = try await session.database.read { db in
-                try Queries.variorumDocumentText(db, postID: postID)
-            }
-            guard !text.isEmpty else {
-                session.status.refuse(DocumentImportCopy.copyForAIEmpty)
-                return
-            }
-            pasteboard.clearContents()
-            pasteboard.setString(text, forType: .string)
-            session.status.receipt(DocumentImportCopy.copiedForAI)
-        } catch {
-            session.status.refuse(OpsRefusalCopy.message(for: error))
-        }
-    }
-}
+// (Copy for AI — the format's EXPORT side, consumed by three features — lives
+// in the shared home: `Core/Views/CopyForAI.swift`, ladder round 1, F8.)

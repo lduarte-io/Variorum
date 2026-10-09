@@ -2,7 +2,8 @@
 //  DocumentImportCopy.swift
 //  Variorum (Mac)
 //
-//  13n-a — what the import door and Copy for AI SAY. Pure and static, so
+//  13n-a — what the import door SAYS (Copy for AI's own two sentences moved
+//  with it to `Core/Views/CopyForAI.swift` — ladder F8). Pure and static, so
 //  every sentence is pinned without a window (the `WelcomeDoorCopy` shape).
 //  Sentence case everywhere (her standing rule — no emphasis capitals).
 //  Receipts name what landed and that ⌥⌘Z undoes it (the plan's own words:
@@ -154,13 +155,6 @@ nonisolated enum DocumentImportCopy {
             return "Couldn\u{2019}t import \u{2014} " + OpsRefusalCopy.message(for: error)
         }
     }
-
-    // MARK: - Copy for AI
-
-    static let copiedForAI =
-        "Copied for AI \u{2014} the note with its takes and tags, ready to paste into any chat."
-    static let copyForAIEmpty =
-        "Nothing to copy \u{2014} this note has no text yet."
 
     // MARK: - Internals
 

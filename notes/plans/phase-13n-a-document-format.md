@@ -795,7 +795,15 @@ ledger; her merge).
   the panel does not offer one) is a directory to `plan(_:)` and walks as a
   folder — a `.textbundle` would land as a book named "x.textbundle" with
   its `text.md` as a note. Returned to the orchestrator.
-- F8 (`CopyForAI` moves to the shared home) — NOT-STARTED.
+- F8 (`CopyForAI` moves to the shared home) — DONE (this line's commit).
+  `CopyForAI` moved byte for byte from `Features/Import/DocumentImporter.swift`
+  to `Core/Views/CopyForAI.swift` (the Mac shared home, beside
+  `RemoveFromBook` — three features consume it: `CommitBar`,
+  `TakesBottomBar`, `ShellActions`); its two sentences moved with it, from
+  `DocumentImportCopy` to `CopyForAI`'s own statics (same names, same
+  strings — the only two reference lines inside the body changed to
+  match). Parity: zero test edits; `DocumentImportDoorTests` +
+  `CapabilityRegistryTests` (the registry walk) 43/43, 0 failures.
 - F5 (the round-trip claims state their exact domain) — NOT-STARTED.
 - Finals — PENDING.
 
