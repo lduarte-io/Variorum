@@ -630,7 +630,7 @@ U1 from this section.
 | P5 | Grant operations + queries (approve/deny/grant/revoke/activity/prune/switches) + state-transition tests | DONE (this commit) — `MCPGrantOperationsTests` 14/14; the fence's three legs in ONE Queries site (`mcpNoteFacts`/`mcpBookFacts`; the Private leg a `"0"` fragment until v1_25) |
 | P6 | The server (`VariorumMCP`: transport · session · grant authority · tool projections) + read tools + per-tool scope pins | DONE (`c3e39ec2` + pins `bab7e30c`) — `MCPServerTests` 10/10 end to end over a real socket with the SDK's own Client; `MCPShimTests` 8/8; mutation-checked (4 server breaks, each caught) |
 | P7 | The `variorum-mcp` shim (byte pump, bundle-derived socket path) | DONE (this commit) — Xcode command-line-tool target `variorum-mcp` (sources `App/Variorum/VariorumMCPShim/main.swift`, links the `VariorumMCPSocket` product), embedded by the app's "Embed MCP Shim" copy phase (Executables = `Contents/MacOS`, CodeSignOnCopy) + a target dependency; hardened runtime, NO sandbox entitlement, team-signed; `codesign --verify --deep --strict` passes; the real embedded Debug shim answers `initialize` with "Variorum must be open" when nothing listens |
-| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | IN-PROGRESS — compiling (this commit; app build + build-for-testing green): `Features/MCP/` (`MCPDoor` — the app delegate's one owner, attached at ready / detached at lock and quit, serving iff the switch is ON and never in a test process; `MCPPane`; `MCPGrantSheet`; `MCPPaneCopy`), seven `.surface` registry acts, the pane roster + two catalog rows, the walk's union line. REMAINING: the pane's Mac pins (run under the stage), then the live round |
+| P8 | Settings ▸ MCP pane resting shape + the U1 grant sheet (read rung) + registry declarations | DONE (`4b3ec357` + the walk's fixes, this commit) — Mac `MCPPaneTests` + the four touched suites 65/65 under the stage (0 skipped); the pre-flight WALK below on the dev-store Debug build, both voices |
 | P9 | End-of-unit: `swift build`, core suite, `VariorumMCPTests`, Mac focused suites (stage) | PENDING |
 
 ### External facts (resolved this session)
@@ -837,6 +837,57 @@ for the release run, untested here.
   a documented interface. `-s user` is a deliberate deviation from the
   mockup's command (default `local` would register Variorum only for the
   folder she ran it in — the external fact above).
+
+### The U1 pre-flight walk (dev-store Debug build, 2026-10-09 ~14:47–15:00, under my own stage claim — the orchestrator's live Claude Code round is still owed)
+
+Captures (gitignored): `notes/plans/13n-b-screens/u1/01…14-*.png`. The
+client was a scripted MCP session through the REAL embedded shim
+(`…/Debug/Variorum.app/Contents/MacOS/variorum-mcp`, spawned over stdio
+exactly as Claude Code spawns it), self-named `u1-walk`.
+- **01** Study, at rest: OFF, no socket file. **02** toggle ON → the REAL
+  sandboxed app bound `~/Library/Containers/io.lduarte.Variorum.debug/Data/
+  mcp.sock` (`srw-------`), status "running · socket in the app container
+  …". **03** the shim's `initialize` → answered; `tools/list` → `[]`;
+  `read_note` → the pending refusal in its words; the pane shows
+  "Connection request — u1-walk · First seen now. No access until
+  approved." with Approve… / Deny. **04** Approve… → the U1 sheet (where ·
+  read · how long; the confirm "Grant read in “o ladrão de raios”
+  always"). **05** granted: the client row ("reads 1 shared place",
+  Change… / Revoke) and the shared row (book chip, "u1-walk · read ·
+  always"). Through the shim: `list_books` → that ONE book; `list_notes`
+  → its 4 notes; `list_notes(wing_id: "")` → REFUSED ("That wing isn't
+  shared …"); `read_note` → the Level 0 document; `export_note` → the
+  plain prose; `search "semideus"` → the book's passages, matches **marked**.
+- **REFUSED PAST IT with a REAL outside note:** the open book ON (**08**)
+  listed a field-guide note (`140F5B58…`); `export_note` read it; the open
+  book OFF (**09**) → the very next call REFUSED ("That note isn't shared
+  with this client, or doesn't exist."). **10** Revoke on the shared row →
+  `tools/list` `[]` and the book's own note REFUSED on the next call.
+- Quit (⌘Q, my instance) → the socket file GONE (A-8). Relaunch with the
+  toggle still ON → the server bound at store-open by itself.
+- **Terminal voice** (**11** pane, **12** the sheet's wing scope — "everything
+  in Home except journals, which always ask", **13** Home granted, **14**
+  the copy receipt): a Home-wing grant → `list_books` all three books,
+  `list_notes(wing_id: "")` paged with a `next_cursor`, `search
+  "passphrase"` → field-guide passages.
+- Restored: the Home grant revoked, the server OFF (socket gone), the voice
+  back to Study, my instance quit. LEFT in the dev store: the `u1-walk`
+  client row (approved, nothing shared) and its activity lines — a record,
+  harmless; the live round's client arrives under its own name.
+
+**The walk's four findings — all FIXED in this commit:**
+1. The setup command was CLIPPED at three lines on the Debug build's long
+   DerivedData path ("…/Cont…") — not verbatim (R-13nb-5). Now up to ten
+   lines; capture 14 shows it whole. (**06** is the before.)
+2. The copy RECEIPT rendered at the form's foot, below the fold — the press
+   looked silent. `MCPDoor.Note` now carries a place: the receipt renders
+   under its button, a refusal under the server toggle. Pinned.
+3. "No clients yet" read wrong beside a waiting request → "None yet — a
+   client is listed here once you approve or deny its connection request."
+4. "While connected" was offered to a client NOT connected — a door that
+   cannot act as named (P-2). The sheet now offers it only while the client
+   is connected (`MCPGrantSheet.durations(connected:)`, pinned), with a quiet
+   line saying so.
 
 ### Machinery notes
 

@@ -39,6 +39,8 @@ struct MCPPane: View {
         var id: String { client.id }
         let client: MCPClient
         let approving: Bool
+        /// Connected right now — "while connected" is offered only then.
+        var connected = false
     }
 
     enum FullList: String, Identifiable {
@@ -61,6 +63,12 @@ struct MCPPane: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
+                // A refusal from any act lands where she is looking first
+                // (the walk's second finding: a caption at the form's foot
+                // sat below the fold).
+                if let note = door.note, note.place == .top {
+                    caption(note.text)
+                }
             }
             if door.snapshot.pendingCount > 0 {
                 Section(MCPPaneCopy.requestsSection) {
@@ -100,20 +108,17 @@ struct MCPPane: View {
                         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     Spacer(minLength: 0)
                 }
+                if let note = door.note, note.place == .connect {
+                    caption(note.text)
+                }
+                // Shown WHOLE, verbatim and selectable (R-13nb-5) — a Debug
+                // build's DerivedData path runs four lines at this width (the
+                // walk's first finding: three lines clipped it).
                 Text(verbatim: door.setupCommand)
                     .font(.system(size: 11, design: .monospaced))
                     .textSelection(.enabled)
-                    .lineLimit(3)
+                    .lineLimit(10)
                     .fixedSize(horizontal: false, vertical: true)
-            }
-            if let note = door.note {
-                Section {
-                    Text(note)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(4)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
         }
         .formStyle(.grouped)
@@ -138,7 +143,10 @@ struct MCPPane: View {
                 .lineLimit(1)
             quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt)))
             HStack(spacing: 10) {
-                Button(Self.verb(.mcpApproveClient)) { granting = GrantTarget(client: request, approving: true) }
+                Button(Self.verb(.mcpApproveClient)) {
+                    granting = GrantTarget(
+                        client: request, approving: true, connected: door.connected.contains(request.name))
+                }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 Button(Self.verb(.mcpDenyClient)) { door.deny(request.id) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
@@ -150,7 +158,9 @@ struct MCPPane: View {
 
     private func clientRow(_ row: MCPDoor.ClientRow) -> some View {
         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-            granting = GrantTarget(client: row.client, approving: row.client.state != .approved)
+            granting = GrantTarget(
+                client: row.client, approving: row.client.state != .approved,
+                connected: door.connected.contains(row.client.name))
         } revoke: {
             door.deny(row.client.id)
         }
@@ -168,6 +178,13 @@ struct MCPPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption.weight(.semibold))
+            .lineLimit(4)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func quiet(_ text: String) -> some View {
@@ -298,7 +315,9 @@ struct MCPFullListSheet: View {
                             Text(MCPPaneCopy.requestTitle(request.name)).lineLimit(1)
                             Spacer(minLength: 0)
                             Button(CapabilityRegistry.capability(.mcpApproveClient).verb) {
-                                grant(MCPPane.GrantTarget(client: request, approving: true))
+                                grant(MCPPane.GrantTarget(
+                                    client: request, approving: true,
+                                    connected: door.connected.contains(request.name)))
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             Button(CapabilityRegistry.capability(.mcpDenyClient).verb) {
@@ -310,7 +329,9 @@ struct MCPFullListSheet: View {
                 case .clients:
                     ForEach(clients) { row in
                         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-                            grant(MCPPane.GrantTarget(client: row.client, approving: row.client.state != .approved))
+                            grant(MCPPane.GrantTarget(
+                                client: row.client, approving: row.client.state != .approved,
+                                connected: door.connected.contains(row.client.name)))
                         } revoke: {
                             door.deny(row.client.id)
                         }

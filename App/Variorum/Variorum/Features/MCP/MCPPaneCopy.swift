@@ -51,7 +51,9 @@ nonisolated enum MCPPaneCopy {
     // MARK: - Clients
 
     static let clientsSection = "Clients"
-    static let noClients = "No clients yet. A client appears here the first time it connects."
+    /// The walk's third finding: "no clients yet" read wrong beside a
+    /// waiting request — a client is LISTED here once decided.
+    static let noClients = "None yet \u{2014} a client is listed here once you approve or deny its connection request."
     static let connectedNow = "connected now"
     static func lastSeen(_ when: String) -> String { "last seen \(when)" }
     static let deniedState = "denied"
@@ -160,6 +162,7 @@ nonisolated enum MCPPaneCopy {
     /// U2/U3 on this same sheet (A-9).
     static let laterRungsNote = "Suggest, write new and edit arrive in a later update."
     static let cancel = "Cancel"
+    static let whileConnectedNote = "While connected is offered while this client is connected."
 
     static func confirm(verb: String, place: String, duration: MCPGrantRule.Duration) -> String {
         "\(verb) read in \u{201C}\(place)\u{201D} \(durationWord(duration))"

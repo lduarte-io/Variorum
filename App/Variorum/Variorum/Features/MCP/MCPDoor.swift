@@ -63,8 +63,14 @@ final class MCPDoor {
     private(set) var connected: Set<String> = []
     private(set) var serverState: ServerState = .off
     /// The pane's own caption (Settings has no status seam): the last
-    /// refusal or receipt, plainly.
-    var note: String?
+    /// refusal or receipt, plainly — rendered BESIDE the door that spoke
+    /// (the copy receipt under its button; a refusal at the pane's head).
+    nonisolated struct Note: Equatable, Sendable {
+        enum Place: Equatable, Sendable { case top, connect }
+        let text: String
+        let place: Place
+    }
+    var note: Note?
 
     @ObservationIgnored private var database: AppDatabase?
     @ObservationIgnored private var runner: OperationsRunner?
@@ -223,7 +229,7 @@ final class MCPDoor {
     func copySetupCommand(to pasteboard: NSPasteboard = .general) {
         pasteboard.clearContents()
         pasteboard.setString(setupCommand, forType: .string)
-        note = MCPPaneCopy.copiedReceipt
+        note = Note(text: MCPPaneCopy.copiedReceipt, place: .connect)
     }
 
     private func act(_ body: @escaping @Sendable (Operations) throws -> Void) {
@@ -233,7 +239,7 @@ final class MCPDoor {
             do {
                 try await runner.run(body)
             } catch {
-                self?.note = MCPPaneCopy.refusal(error)
+                self?.note = Note(text: MCPPaneCopy.refusal(error), place: .top)
             }
         }
     }

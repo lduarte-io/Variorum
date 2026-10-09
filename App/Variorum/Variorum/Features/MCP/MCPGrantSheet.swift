@@ -119,12 +119,15 @@ struct MCPGrantSheet: View {
 
             section(MCPPaneCopy.howLongSection)
             Picker(MCPPaneCopy.howLongSection, selection: $duration) {
-                ForEach(MCPGrantRule.Duration.allCases, id: \.self) { duration in
+                ForEach(Self.durations(connected: target.connected), id: \.self) { duration in
                     Text(MCPPaneCopy.durationWord(duration).capitalizedFirst).tag(duration)
                 }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+            if !target.connected {
+                quiet(MCPPaneCopy.whileConnectedNote)
+            }
 
             HStack {
                 Spacer()
@@ -153,6 +156,15 @@ struct MCPGrantSheet: View {
             choices = await door.choices()
             if bookID == nil { bookID = choices.books.first?.id }
         }
+    }
+
+    /// **The durations this sheet may offer** (the U1 walk's fourth
+    /// finding — P-2): "while connected" ends when the client's last
+    /// connection closes, so it is offered only while the client IS
+    /// connected; to a client that is not, it would be a door that cannot
+    /// act as named.
+    static func durations(connected: Bool) -> [MCPGrantRule.Duration] {
+        connected ? MCPGrantRule.Duration.allCases : [.once, .always]
     }
 
     private func bookLabel(_ book: Queries.MCPGrantableBook) -> String {
