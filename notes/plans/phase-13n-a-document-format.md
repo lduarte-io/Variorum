@@ -227,11 +227,52 @@ unit should never touch the real store at all.
 
 ## UNIT RECORD (LIVE STATUS — the implementer owns this section from its first commit)
 
-- STATE: NOT-STARTED (the settled design is this plan + the sitting record).
+- STATE: IN-PROGRESS (implementer session 1, `opus-implementer`, started
+  2026-10-09). No revert is in flight.
 - Per-piece lines land here as `DONE (hash)` / `IN-PROGRESS — exactly what
   remains` / `NOT-STARTED`; unverified claims marked PENDING; revert
   announcements per the resiliency protocol (no revert starts until this
   record names it and a committed pre-revert state exists).
+
+### The pieces (in build order)
+
+1. **Domain — the format.** `Domain/CaptureTokens.swift` (the capture brace
+   grammar MOVED into core byte-for-byte; the app's `CaptureMicrosyntax.parse`
+   delegates — one brain), `Domain/TagPath.swift` (the typed-path slash rule;
+   `TypedTagPath.segments` delegates), `Domain/VariorumDocument.swift`
+   (model + markers + `parse` + `serialize`, fail-honest line-numbered
+   refusals), `Domain/VariorumDocumentFolder.swift` (a folder → the book
+   plan: chapters, digit-aware order, extension filter). Core tests.
+   — NOT-STARTED
+2. **Queries — one serializer.** `exportPost(includeVariants:)` re-expressed
+   over `VariorumDocument.serializeBody` (the export becomes the
+   serializer's client — byte-identity pinned by the existing export
+   suites); `Queries.variorumDocument` + `copyForAIText` (header line +
+   the export body). Round-trip pins (a) fanless (b) labeled+unlabeled fan
+   (c) internal newlines in a take. — NOT-STARTED
+3. **Operations — the import door.** `importDocument` (one note, one
+   transaction, one undo entry — `revertMintedContainer`'s pair) and
+   `importBook` (one transaction for the whole folder, one undo entry whose
+   inverse tombstones exactly the minted notes + the book on one stamp; the
+   redo revives them through `restoreReading`'s body). State-transition
+   tests. — NOT-STARTED
+4. **App — the faces.** File ▸ Import… (file or folder; the `.importFiles`
+   declaration upgraded), the Bookcase drop (folder = book, file = note;
+   outline only where a drop acts), Copy for AI (`.copyForAI`, the two
+   `note ▾` menus + ⌘K), the copy (receipts/refusals). App tests.
+   — NOT-STARTED
+5. **The live round** (stage claim; captures in the gitignored dir named in
+   the walk section below). — NOT-STARTED
+6. **Close** — the named suites green at the end, every row dispositioned.
+   — NOT-STARTED
+
+### Implementer calls (each with its one line of reasoning)
+
+(Filled as they are made.)
+
+### PROVISIONALs and forks returned to the orchestrator
+
+(Filled as they are met.)
 
 ## THE IMPLEMENTER BRIEF (self-contained; the spawn names this section)
 
