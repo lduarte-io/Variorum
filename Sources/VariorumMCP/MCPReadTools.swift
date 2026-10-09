@@ -107,18 +107,31 @@ struct MCPReadTools: Sendable {
                     standing, book: try Queries.mcpBookFacts(db, readingID: id), rung: .read)
                 guard decision.isAllowed else { continue }
                 let wing: String = row["wing"]
+                // Round 1 F2: the count IS what list_notes(book_id:) would
+                // emit — the same member rows, the same facts, the same rule
+                // (a fenced member never lists, so it never counts; counting
+                // it would disclose a hidden member's existence ambient and
+                // break honest counts both ways). Never a parallel SQL fence
+                // that could drift from mcpNoteFacts. Cost ∝ the book.
+                let memberIDs = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT c.id FROM reading_post rp JOIN container c ON c.id = rp.post_id
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                          AND c.deleted_at IS NULL AND c.kind = 'post'
+                        """,
+                    arguments: [id])
+                let memberFacts = try Queries.mcpNoteFacts(db, noteIDs: memberIDs)
+                let readable = memberIDs.count { memberID in
+                    MCPGrantAuthority.decide(
+                        standing, note: memberFacts[memberID], rung: .read, consumes: false
+                    ).isAllowed
+                }
                 books.append([
                     "id": id, "name": row["name"] as String, "archived": row["archived"] as Bool,
                     "wing": try Queries.mcpScopeTitle(db, kind: .wing, id: wing) ?? Queries.mcpHomeWingName,
                     "wing_id": wing,
-                    "notes": try Int.fetchOne(
-                        db,
-                        sql: """
-                            SELECT COUNT(*) FROM reading_post rp JOIN container c ON c.id = rp.post_id
-                            WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
-                              AND c.deleted_at IS NULL
-                            """,
-                        arguments: [id]) ?? 0,
+                    "notes": readable,
                 ])
             }
             try log(db, clientName, MCPToolCatalog.listBooks.name, nil, nil, nil, allowed: true)

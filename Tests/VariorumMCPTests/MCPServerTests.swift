@@ -379,6 +379,38 @@ struct MCPServerTests {
         }
     }
 
+    // MARK: - Round 1 F2: list_books counts exactly what list_notes(book_id:) would emit
+
+    @Test func listBooksCountsOnlyTheNotesTheClientCanList() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let shared = try h.operations.createReading(name: "mixed", kind: .book)
+            let prose = try h.operations.createPost(title: "prose")
+            _ = try h.operations.newBlock(in: prose.id, text: "plain words")
+            let entry = try h.operations.createPost(title: "morning pages", profile: .journal)
+            _ = try h.operations.newBlock(in: entry.id, text: "diary words")
+            let archived = try h.operations.createPost(title: "put away")
+            _ = try h.operations.addPostToReading(prose.id, to: shared.id)
+            _ = try h.operations.addPostToReading(entry.id, to: shared.id)
+            _ = try h.operations.addPostToReading(archived.id, to: shared.id)
+            try h.operations.archiveContainer(archived.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", book(shared.id))
+
+            let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
+            // The fenced member never lists, so it never counts; the archived
+            // member lists in book order, so it counts. A count that said 3
+            // would disclose a hidden member's existence ambient (journals
+            // are per-ask, never ambient) and break honest counts both ways.
+            #expect(books?.first?["notes"] as? Int == 2, "the count IS the listing's extent")
+            let listed = try json(try await connection.client.callTool(
+                name: "list_notes", arguments: ["book_id": .string(shared.id)]))["notes"] as? [[String: Any]]
+            #expect(Set(listed?.compactMap { $0["id"] as? String } ?? []) == [prose.id, archived.id])
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - Round 1 F1: search needs STANDING reach — listing and serving read one rule
 
     @Test func searchIsNeitherListedNorServedForAOnceOnlyStanding() async throws {
