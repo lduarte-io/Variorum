@@ -959,3 +959,48 @@ exactly as Claude Code spawns it), self-named `u1-walk`.
 - TCC on this machine: this session's host holds Accessibility and Screen
   Recording (checked before the walk); no TCC prompt was raised or
   answered by any probe or walk step.
+
+## U1 LIVE ROUND (orchestrator, 2026-10-09 — the acceptance's real-client leg; stage held and released)
+
+Run on the dev-store Debug build (fresh branch build `vx124-u1-liveround`,
+codesign clean) with a REAL Claude Code client (`claude -p`, throwaway
+`-s local` registration in a scratch folder, removed after; her
+`~/.claude.json` user scope untouched). Every step live, in order:
+
+1. **The honest refusal, through the real client:** with the server off,
+   `claude mcp list` rendered the shim's refusal VERBATIM — "-32000:
+   Variorum must be open: its MCP server is not running. Open Variorum,
+   turn on Settings ▸ MCP ▸ Enable the MCP server, then reconnect."
+2. **The toggle:** Settings ▸ MCP read the R-13n-5 register at rest;
+   enabling it bound `Data/mcp.sock` (srw------- 0600) in the container.
+3. **Pending reads nothing:** the first Claude Code contact saw ZERO
+   variorum-dev tools; the pane showed "Connection request — claude-code
+   · First seen 5 seconds ago. No access until approved."
+4. **The grant sheet (A-9's U1 form):** Approve… offered where (book —
+   "o ladrão de raios" — / wing), read-only with "Suggest, write new and
+   edit arrive in a later update.", once/always — and "while connected"
+   correctly WITHHELD from a disconnected client (the walk fix, live).
+   Confirm spoke the grant in words: "Grant read in “o ladrão de raios”
+   always."
+5. **Reads within the grant:** a second real session saw the five read
+   tools; `list_books` returned ONLY the granted book; `list_notes` its
+   four notes; `read_note` spoke the Level 0 format (microsyntax header +
+   Alternates sections); `search "semideus"` returned passages from the
+   granted book only (incl. its own chapter heading — in-scope).
+6. **Refused past it:** the open `list_notes` returned the grant's
+   extent and NOTHING outside (no leak); a foreign-id `read_note` got the
+   ONE answer, verbatim: "That note isn't shared with this client, or
+   doesn't exist. The author can share it from Variorum ▸ Settings ▸
+   MCP." — unshared and missing indistinguishable, no existence oracle;
+   no road exists to name an outside note by title.
+7. **Lifecycle:** quit unlinked the socket; the pane's Shared with AI
+   row read "o ladrão de raios · book · claude-code · read · always".
+
+**VERDICT: U1's acceptance bar is MET live** — a real Claude Code session
+on the dev store read a granted book and was refused past it; the refusal
+is pinned in `MCPServerTests` (the implementer's ten end-to-end pins).
+Dev-store residue left deliberately: the approved `claude-code` client +
+its always-read grant (useful to the ladder and U2's walks). The
+orchestrator's round report: the scratch folder's `round-report.txt`
+(ephemeral; this section is the record). Next: ladder round 1
+(`fable-reviewer`).
