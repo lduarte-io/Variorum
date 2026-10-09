@@ -21,8 +21,15 @@ import Testing
 final class ServerHarness: @unchecked Sendable {
     let database: AppDatabase
     let operations: Operations
+    /// U2: the session's undo stack, as the app's runner holds it — the
+    /// write tools register on it through `writeOperations`.
+    let undoStack = UndoStack()
+    let writeOperations: Operations
     let directory: URL
     let host: MCPServerHost
+    /// U2: what the app would have been told (AF-6's asks; the receipts).
+    let asks = LockIsolated<[MCPAsk]>([])
+    let receipts = LockIsolated<[MCPWriteReceipt]>([])
     private var openFDs: [Int32] = []
 
     init() throws {
@@ -30,7 +37,8 @@ final class ServerHarness: @unchecked Sendable {
         self.database = database
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
-        operations = withDependencies {
+        let stack = undoStack
+        (operations, writeOperations) = withDependencies {
             $0.database = database
             $0.uuid = .incrementing
             $0.date = DateGenerator {
@@ -40,10 +48,18 @@ final class ServerHarness: @unchecked Sendable {
                 }
                 return start.addingTimeInterval(Double(seconds))
             }
-        } operation: { Operations() }
+        } operation: { (Operations(), Operations(undoStack: stack)) }
         directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("vmcp-\(UUID().uuidString.prefix(8))", isDirectory: true)
-        host = MCPServerHost(database: database, operations: operations, directory: directory, version: "test")
+        host = MCPServerHost(
+            database: database, operations: operations, directory: directory, version: "test",
+            executor: SeededExecutor(operations: writeOperations))
+        let asks = self.asks
+        let receipts = self.receipts
+        host.hooks = MCPHostHooks(
+            refusalWords: { error in "Refused: \(error)" },
+            onAsk: { ask in asks.withValue { $0.append(ask) } },
+            onWrite: { receipt in receipts.withValue { $0.append(receipt) } })
         try host.start()
     }
 
@@ -101,6 +117,21 @@ final class ServerHarness: @unchecked Sendable {
             try await Task.sleep(for: .milliseconds(10))
         }
         return try condition()
+    }
+}
+
+/// The write executor of the harness: `MCPSerialExecutor`'s shape, with the
+/// position jitter's RNG scoped (a body on an actor inherits no test
+/// dependencies; production reads the live RNG, as every write does).
+actor SeededExecutor: MCPWriteExecutor {
+    private let operations: Operations
+    init(operations: Operations) { self.operations = operations }
+    func run<T: Sendable>(_ body: @Sendable (Operations) throws -> T) throws -> T {
+        try withDependencies {
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+        } operation: {
+            try body(operations)
+        }
     }
 }
 
