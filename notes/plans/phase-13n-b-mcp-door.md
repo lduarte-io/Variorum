@@ -278,6 +278,44 @@ grant authority · tool projections — never one god server object (P-9).
   resume on the deliberate re-enable — the restore-hold shape applied to
   the door. Plaintext-export rebuilds land empty + OFF by construction
   (the implementer's A-5 exclusion + adoption recreation, approved).
+- **R-13nb-7 (2026-10-09, her evening batch) — COMMITS REACHABLE BY
+  EXPLICIT ASK on the connected road.** Her framing that raised it:
+  *"when you say history do you mean commits? like the ability to see
+  what a commit said? because i feel like granting access to a block
+  suggests that."* Ruled: a read grant on a note INCLUDES its commit
+  history, reached by name per call — a `with_commits` parameter on
+  `read_note`'s structured view (13o's `+ commits` facet posture
+  mirrored on the wire). NEVER ambient on every read (P1 on long
+  chains; past-text disclosure stays deliberate), NEVER in the Level 0
+  text (R-13n-8's file ruling stands — history is lived, not authored),
+  NEVER via MCP `search` (the U1 clean-bill line stays deliberate).
+  Lands at U3 beside `edit_take`'s insurance brackets (the agent can
+  read back its own before/after).
+- **R-13nb-8 (2026-10-09, same batch) — BLOCK NAMES: CARRY, AND THE AI
+  MAY NAME (edit rung).** Her ask: *"do you think we should allow for
+  block naming to facilitate working with AI? like 'in xzy block'"* —
+  ruled as CARRY + AI-MAY-NAME: `with_ids` JSON carries `block.name`
+  wherever set (U2, one field — "in the xyz block" works
+  conversationally; the handle exists since v1_6 and search already
+  indexes it); ids stay the ONLY write address (names aren't unique;
+  ambiguity at a write boundary is where wrong-target bugs live); PLUS
+  a set-name tool on the EDIT rung at U3 (`setBlockName` projected —
+  identity-level metadata, no-op-guarded, an agent structuring a book
+  may label blocks). Access granularity restated with it: block-level
+  ADDRESSING, note-level-and-up ACCESS — no per-block grant, no
+  per-block fence, the note is the disclosure unit.
+- **R-13nb-9 (2026-10-09, her rider, verbatim) — IDS ARE LIVE, THE
+  EVENTUAL FORMAT IS CAREFUL.** Her words: *"I definitely think that
+  the eventual format should be very careful about block id - even
+  just a merge changes the id, so it's better live."* The doctrine
+  recorded: block ids are EPHEMERAL under structural ops (a merge
+  mints a fresh block and releases its sources; divide mints
+  successors), so ids belong to the LIVE wire (`with_ids` reads,
+  per-call revalidation — a stale id refuses honestly and a re-read is
+  the recovery), never to the text format — and **13m's full-fidelity
+  variorum edition must weigh this when it designs id carriage** (a
+  file's ids go stale the moment she merges; this line is 13m's
+  pointer, recorded here at her word).
 
 ## THE PRIVATE MARK (R-13nb-4) — design addendum (architect, 2026-10-09)
 
@@ -551,7 +589,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
 | 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | BRIEFED — spawning (the brief below) |
-| 5 | U3 — edit + polish + her live round | — | NOT STARTED |
+| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, the set-name tool R-13nb-8, the Allow-AI-here row AF-8) | — | NOT STARTED |
 | 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
 | 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | **DONE** (`304b41d1` — marker 13 client-side; headless whole-package green) |
