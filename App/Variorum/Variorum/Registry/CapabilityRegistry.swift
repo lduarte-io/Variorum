@@ -1995,10 +1995,13 @@ nonisolated enum CapabilityRegistry {
         // (`noteScoped`); with none in reach the palette row speaks the note
         // below (P-2). Reads only — the export pin.
         Capability(
-            id: .copyForAI, verb: "Copy for AI", scope: .post,
+            // Her rename at the 13n-a review (2026-10-09, verbatim: "I'd
+            // rather not have 'for AI' on a button" — other people will
+            // find it useful too); the internal id keeps its minting name.
+            id: .copyForAI, verb: "Copy full text", scope: .post,
             doors: [.bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Copy for AI copies the note you have open \u{2014} open one first.",
+            unavailableNote: "Copy full text copies the note you have open \u{2014} open one first.",
             availability: noteScoped),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,

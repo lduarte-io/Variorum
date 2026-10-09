@@ -364,7 +364,7 @@ struct DocumentImportDoorTests {
         #expect(ShelfView.surfaceCapabilities.contains(.importFiles))
 
         let copy = CapabilityRegistry.capability(.copyForAI)
-        #expect(copy.verb == "Copy for AI")
+        #expect(copy.verb == "Copy full text")
         #expect(copy.doors == [.bottomBar, .palette])
         #expect(CommitBar.renderedCapabilities.contains(.copyForAI))
         #expect(TakesBottomBar.renderedCapabilities.contains(.copyForAI))
@@ -409,7 +409,7 @@ struct DocumentImportDoorTests {
             // ruling): the receipt says what happened and nothing more, so
             // it never truncates in a bar (the long sentence did, in
             // Terminal). Teaching lives elsewhere.
-            #expect(session.status.spoken?.text == "Copied for AI.")
+            #expect(session.status.spoken?.text == "Copied full text.")
             #expect(session.status.spoken?.kind == .receipt)
         }
     }

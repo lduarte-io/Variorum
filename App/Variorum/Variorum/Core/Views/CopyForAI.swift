@@ -46,11 +46,13 @@ enum CopyForAI {
     // MARK: - What it says (sentence case — her standing rule)
 
     /// The receipt says what happened and nothing more (the 13n-a walk's
-    /// WA-2 — the orchestrator's PROVISIONAL copy ruling; 13s-a re-voices):
-    /// the longer sentence ("… — the note with its takes and tags, ready to
-    /// paste into any chat.") truncated in Terminal's bars, and teaching
-    /// lives elsewhere.
-    static let copiedForAI = "Copied for AI."
+    /// WA-2; the longer sentence truncated in Terminal's bars, and teaching
+    /// lives elsewhere). "Full text", not "for AI" — her rename at the
+    /// 13n-a review (2026-10-09): the button serves anyone, and "Copy in
+    /// format" was set aside so 13m's full-fidelity format keeps the word.
+    /// The internal names keep their minting spelling; her rule binds
+    /// RENDERED text. 13s-a re-voices as ever.
+    static let copiedForAI = "Copied full text."
     static let copyForAIEmpty =
         "Nothing to copy \u{2014} this note has no text yet."
 }
