@@ -629,6 +629,18 @@ grant authority · tool projections — never one god server object (P-9).
   mandate's small-code allowance) so round 2's fresh reviewer covers
   it. N1 (four stale "at its own rung" comments) rewords in the same
   pass.
+  **Round-2 consequences, stated for her ratification (the U2 ladder
+  round 2, R2-F2):** the preference is PER DECISION, so a two-sided act
+  (`add_note_to_book`) holding a once NOTE grant beside a once BOOK or
+  WING grant now deterministically spends BOTH — the note side picks
+  the narrower note grant, the book side the wider one — where the old
+  id coin-flip sometimes picked the wide grant for both sides and the
+  Set dedupe spent ONE. And on a content READ where a once READ grant
+  and a once WRITE grant both reach, the read grant is picked and SPENT
+  though the read could have ridden free under the write grant —
+  lowest-rung-first's letter. Neither direction over-reaches (each
+  spent grant authorized exactly the call made; the burn direction is
+  conservative — less capability left standing afterwards).
 - **AF-8 — scope confirmations.** The note ⋯ menu's GRANT row ("Allow
   AI here…" — R-13n-11's connected share-a-note) is U3's, as the U1
   not-done list recorded; U2 carries only the Private row there. And the
