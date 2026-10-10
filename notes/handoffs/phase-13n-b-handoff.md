@@ -11,11 +11,9 @@ file and #209.**
 ## YOUR CHECKLIST (the morning, ~10 minutes)
 
 1. **Mac:** launch Variorum from `/Applications` (replaced overnight at your
-   authorization — ⟨FILL: build number, marker 13⟩). Your first sync round
+   authorization — build 6138, 0.9.2, marker 13 — the deploy window ran overnight, all legs landed). Your first sync round
    should run clean; the only schema change is the two Private-mark columns.
-2. **Phone:** open Variorum (⟨FILL: installed over wifi overnight / your
-   tomorrow-fallback applies — install via Xcode or ask a session to run the
-   devicectl road in the deploy checklist⟩). Its first round converges; a
+2. **Phone:** open Variorum (installed over wifi overnight — confirmed in the device's app listing). Its first round converges; a
    marker-12 phone visibly refuses to sync until refreshed — that's the §12
    grammar, not a bug.
 3. **The both-directions proof:** edit one note on each device; each lands
@@ -131,8 +129,7 @@ task session). The rung is the ONLY read dial (R-13nb-17).
   `xcodebuild -scheme Variorum -destination 'platform=macOS' test
   -only-testing VariorumTests/MCPNavigationTests` (and friends:
   MCPPaneTests, MCPAskAndReceiptTests, MCPEditFacesTests). The WHOLE
-  VariorumTests target at this closeout: ⟨FILL: final count⟩ — the one
-  standing red is VX-115 (a stale pin on main since 13o, ticketed, not this
+  VariorumTests target at this closeout: 4,212 tests / 687 suites, twice — 9 issues each run: 5 known-issue records + the two standing reds. One is VX-115 (a stale pin on main since 13o, ticketed, not this
   phase's), plus VX-149 (redoNeverAsks fails under the whole target only;
   green in isolation — order-sensitivity recorded).
 - **The dev store vs yours:** everything above runs against YOUR real
@@ -153,10 +150,9 @@ task session). The rung is the ONLY read dial (R-13nb-17).
   ours), VX-149 (ticketed, isolation-green), and two fixed in-branch (the
   status-vocabulary sweep's `.speak(` doors renamed classed — one ours, two
   13n-a residue; the stamp-phase pin's justified update after U1's shim
-  embed). ⟨FILL: re-run final count⟩.
-- **The deploy:** ⟨FILL: window facts — marker 13 verified, grant sweep,
-  /Applications build, phone install or fallback⟩.
-- **Merged:** ⟨FILL: PR number + merge commit⟩. Canon landed: AppSpec §7
+  embed). the re-run matched: 4,212/687, the same two standing reds, nothing else.
+- **The deploy:** RUN overnight at your authorization — the mirror `[]` on the first run, marker 13 and both columns verified, the grant sweep 63 OK · 4 INFO · 0 fail, Mac Release 6138 at /Applications behind the A1 rail (`variorum-backup-a1-13nb-window-2026-10-10T113557Z`), the phone installed over wifi and confirmed. Your first rounds are the checklist above.
+- **Merged:** PR #145, merge commit on main. Canon landed: AppSpec §7
   (Private columns + grants family), §12 (THE MCP DOOR line; the KIND
   line's R-13nb-27 amendment), §14; MobileSoul PL-52; QUESTIONS #209;
   SyncSpec §12's marker-13 entry.
