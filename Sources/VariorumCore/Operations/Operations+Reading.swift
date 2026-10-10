@@ -217,6 +217,15 @@ extension Operations {
     /// finished book's intake is paused — the un-finish catches it up.
     public func setReadingQuerySpec(_ id: String, querySpec: String?) throws {
         try database.write { db in
+            try writeReadingQuerySpec(db, id, querySpec: querySpec)
+        }
+    }
+
+    /// `setReadingQuerySpec`'s row work inside a caller's transaction
+    /// (13n-b U4 — the MCP book-rule act runs her Save's three writes in ONE
+    /// transaction; byte-identical behaviour).
+    func writeReadingQuerySpec(_ db: Database, _ id: String, querySpec: String?) throws {
+        do {
             var reading = try liveReading(db, id)
             let previous = reading.querySpec
             let normalized = try normalizedRuleSpec(db, querySpec, wingID: reading.wingId)

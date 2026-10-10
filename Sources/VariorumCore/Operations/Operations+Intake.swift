@@ -380,6 +380,14 @@ extension Operations {
     /// arrivals already waiting keep waiting for judgment.
     public func setReadingIntakeSeating(_ id: String, _ seating: IntakeSeating?) throws {
         try database.write { db in
+            try writeReadingIntakeSeating(db, id, seating)
+        }
+    }
+
+    /// The row work, inside a caller's transaction (13n-b U4 — the MCP
+    /// book-rule act; byte-identical behaviour).
+    func writeReadingIntakeSeating(_ db: Database, _ id: String, _ seating: IntakeSeating?) throws {
+        do {
             var reading = try liveReading(db, id)
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
@@ -401,6 +409,14 @@ extension Operations {
     /// `tagAllMembers`; clearing it never untags (ruled).
     public func setReadingOutflow(_ id: String, tagIDs: [String]) throws {
         try database.write { db in
+            try writeReadingOutflow(db, id, tagIDs: tagIDs)
+        }
+    }
+
+    /// The row work, inside a caller's transaction (13n-b U4 — the MCP
+    /// book-rule act; byte-identical behaviour).
+    func writeReadingOutflow(_ db: Database, _ id: String, tagIDs: [String]) throws {
+        do {
             var reading = try liveReading(db, id)
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)

@@ -42,6 +42,13 @@ extension Operations {
         case chapter
         case edit, divide, merge, move, delete
         case blockName = "block name"
+        // 13n-b U4 — the carriage's acts (P-13nb-U4: the words extend
+        // P-13nb-U2-5's family, 13s-a sweepable).
+        case putBack = "put back"
+        case version
+        case entryDate = "date"
+        case filing = "chapter filing"
+        case bookRule = "book rule"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
     }

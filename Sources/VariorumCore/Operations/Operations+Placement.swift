@@ -108,9 +108,13 @@ extension Operations {
     ///
     /// A sealed container refuses on BOTH roads (`ensureUnlocked`), exactly
     /// as it did when the only road was `insertPlacement`.
+    ///
+    /// `guardedBy` (13n-b U4 — `put_back`): the caller's in-transaction
+    /// precondition (`WriteGuard`), run first; nil on her doors.
     @discardableResult
-    public func restoreBlock(_ blockID: String) throws -> BlockRestoreLanding {
+    public func restoreBlock(_ blockID: String, guardedBy guardian: WriteGuard? = nil) throws -> BlockRestoreLanding {
         try database.write { db in
+            try guardian?(db)
             guard var block = try Block.fetchOne(db, key: blockID) else {
                 throw OperationError.blockNotFound(id: blockID)
             }

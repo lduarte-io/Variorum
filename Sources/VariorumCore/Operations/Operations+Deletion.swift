@@ -97,9 +97,13 @@ extension Operations {
     /// when it was deleted comes back archived — into the archived listing,
     /// not the fan — and a receipt that assumed "the fan" was lying for that
     /// row. The door reads the op's own answer instead of assuming one.
+    ///
+    /// `guardedBy` (13n-b U4 — `put_back`): the caller's in-transaction
+    /// precondition (`WriteGuard`), run first; nil on her doors.
     @discardableResult
-    public func restoreVariant(_ id: String) throws -> VariantStatus {
+    public func restoreVariant(_ id: String, guardedBy guardian: WriteGuard? = nil) throws -> VariantStatus {
         try database.write { db in
+            try guardian?(db)
             guard var variant = try Variant.fetchOne(db, key: id) else {
                 throw OperationError.variantNotFound(id: id)
             }
@@ -132,8 +136,10 @@ extension Operations {
 
     /// The row work behind `deleteVariant`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
+    /// Internal (was private) since 13n-b U4: `put_back`'s inverse
+    /// re-tombstones a put-back take through this exact row work.
     @discardableResult
-    private func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
+    func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
         try database.write { db in
             let existing = try Variant.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
@@ -239,7 +245,9 @@ extension Operations {
 
     /// The row work behind `deleteBlock`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
-    private func performDeleteBlock(
+    /// Internal (was private) since 13n-b U4: `put_back`'s inverse
+    /// re-tombstones a put-back block through this exact row work.
+    func performDeleteBlock(
         _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition,
         guardedBy guardian: WriteGuard? = nil
     ) throws {

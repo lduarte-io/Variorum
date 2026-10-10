@@ -371,6 +371,19 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? (receipts[0].detail.map { "named a block \(quoted($0))" } ?? "cleared a block's name")
                 : "named \(n) blocks"
+        // 13n-b U4 — the carriage's acts (P-13nb-U4-2's words, 13s-a sweepable).
+        case .putBack: return n == 1 ? "put back \(receipts[0].detail ?? "a block")" : "put back \(n) things"
+        case .version: return n == 1 ? "saved a version" : "saved \(n) versions"
+        case .entryDate:
+            return n == 1
+                ? (receipts[0].detail.map { "dated the note \($0)" } ?? "cleared the note's date")
+                : "changed \(n) dates"
+        case .filing:
+            return n == 1
+                ? (receipts[0].detail.map { "filed a note under \(quoted($0))" } ?? "unfiled a note")
+                : "filed \(n) notes"
+        case .bookRule:
+            return n == 1 ? "changed what \(quoted(receipts[0].targetTitle)) collects" : "changed \(n) books' rules"
         }
     }
 

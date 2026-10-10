@@ -144,6 +144,18 @@ extension Operations {
         _ postID: String, in readingID: String, section sectionID: String?
     ) throws {
         try database.write { db in
+            _ = try assignSectionRow(db, postID: postID, readingID: readingID, sectionID: sectionID)
+        }
+    }
+
+    /// `assignPostToSection`'s row work inside a caller's transaction (13n-b
+    /// U4 — the MCP filing act shares it byte-for-byte). Returns the
+    /// membership's PREVIOUS chapter pointer wrapped when it changed, nil
+    /// for a no-op.
+    func assignSectionRow(
+        _ db: Database, postID: String, readingID: String, sectionID: String?
+    ) throws -> String?? {
+        do {
             let reading = try liveReading(db, readingID)
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
@@ -165,9 +177,11 @@ extension Operations {
                         sectionID: sectionID, readingID: readingID)
                 }
             }
-            guard membership.sectionId != sectionID else { return }
+            guard membership.sectionId != sectionID else { return nil }
+            let previous = membership.sectionId
             membership.sectionId = sectionID
             try membership.update(db)
+            return .some(previous)
         }
     }
 
