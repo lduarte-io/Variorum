@@ -436,8 +436,17 @@ struct MCPWriteTools: Sendable {
     /// before anything lands (adding an unreachable note to a granted book
     /// would pull it into the client's reach). A once grant authorizing BOTH
     /// (a once wing grant) is spent ONCE.
+    ///
+    /// Ladder round 1, F-2: `file_note_in_chapter` rides this same snapshot
+    /// (with `spendsAfter: false` — its guard re-decides and spends inside
+    /// the act's transaction), so BOTH its sides raise the just-in-time ask
+    /// exactly as `add_note_to_book`'s do — the note side's refusal was a
+    /// bare guard throw with no ask and no asked sentence, which mattered
+    /// most for a FENCED member (a journal or Private note is reachable
+    /// per-ask only, and she never heard the ask).
     func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
+        spendsAfter: Bool = true,
         _ act: (_ title: String?, _ bookName: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let (standing, noteFacts, title, bookFacts, bookName) = try database.read { db in
@@ -466,7 +475,7 @@ struct MCPWriteTools: Sendable {
         }
         let spending = Set([spendNote ? noteGrant : nil, spendBook ? bookGrant : nil].compactMap { $0 })
         return try land(job, clientName: clientName, kind: "note", id: noteID, title: title,
-                        spending: spending.sorted()) {
+                        spending: spendsAfter ? spending.sorted() : []) {
             try act(title, bookName)
         }
     }

@@ -471,6 +471,40 @@ struct MCPCarriageServerTests {
         }
     }
 
+    /// Ladder round 1, F-2 (RED-ON-OLD): BOTH of the filing's sides raise the
+    /// just-in-time ask — on the old code the note was decided only inside
+    /// the guard, whose bare refusal queued nothing and never said the asked
+    /// sentence. The arm where it matters most: a FENCED member (a journal or
+    /// Private note is reachable per-ask only — without the ask, she never
+    /// hears it and the road is a dead end).
+    @Test func filingAFencedMemberRaisesTheAskAndSaysSo() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "plain book", kind: .book)
+            let chapter = try h.operations.createSection(in: book.id, name: "1")
+            let entry = try h.operations.createPost(title: "an entry", profile: .journal)
+            _ = try h.operations.addPostToReading(entry.id, to: book.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, book.id))
+
+            let refused = try await call(connection, "file_note_in_chapter", [
+                "note_id": .string(entry.id), "book_id": .string(book.id), "section_id": .string(chapter.id),
+            ])
+            #expect(refused.isError == true && text(refused).hasPrefix("That's a journal entry"))
+            #expect(text(refused).hasSuffix(MCPRefusalCopy.askedSentence),
+                    "the asked sentence — the ask was raised, not just worded")
+            let asks = h.asks.value
+            #expect(asks.map(\.scopeID) == [entry.id] && asks.first?.rung == .writeNew,
+                    "her sheet hears the one ask: the note, at the act's rung")
+            #expect(try await h.database.read { db in
+                try String.fetchOne(db, sql: "SELECT section_id FROM reading_post WHERE post_id = ?",
+                                    arguments: [entry.id])
+            } == nil, "nothing was filed")
+            await h.hangUp(connection)
+        }
+    }
+
     /// Self-review find (red-on-old): `file_note_in_chapter` decides the
     /// book AND the note inside its transaction — with ONE once grant
     /// covering both (a once wing grant), the first decision must not spend

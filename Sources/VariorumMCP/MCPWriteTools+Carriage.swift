@@ -192,20 +192,23 @@ extension MCPWriteTools {
             }
 
         case .fileInChapter(let noteID, let bookID, let sectionID):
-            return try into(.book(bookID), job: job, clientName: clientName, spendsAfter: false) { _ in
+            // Ladder round 1, F-2: the SNAPSHOT decides the note AND the book
+            // (noteIntoBook — add_note_to_book's own shape), so each side's
+            // refusal raises the just-in-time ask; the in-transaction guard
+            // below re-decides and spends, exactly as before.
+            return try noteIntoBook(noteID, bookID, job: job, clientName: clientName, spendsAfter: false) { title, _ in
                 let changed = try ops.fileNoteInChapter(
                     noteID, book: bookID, section: sectionID, undoLabel: label(.filing),
                     guardedBy: guardBookAndNote(clientName, bookID: bookID, noteID: noteID))
-                let names = try database.read { db -> (note: String?, chapter: String?) in
-                    (try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar),
-                     try sectionID.flatMap {
-                         try String.fetchOne(db, sql: "SELECT name FROM reading_section WHERE id = ?", arguments: [$0])
-                     })
+                let chapter = try database.read { db -> String? in
+                    try sectionID.flatMap {
+                        try String.fetchOne(db, sql: "SELECT name FROM reading_section WHERE id = ?", arguments: [$0])
+                    }
                 }
                 return (["note_id": noteID, "book_id": bookID, "section_id": sectionID ?? NSNull(), "changed": changed],
                         changed
                         ? MCPWriteReceipt(clientName: clientName, act: .filing, targetID: noteID,
-                                          targetTitle: names.note, detail: names.chapter,
+                                          targetTitle: title, detail: chapter,
                                           show: .book(bookID: bookID, sectionID: sectionID))
                         : nil)
             }
