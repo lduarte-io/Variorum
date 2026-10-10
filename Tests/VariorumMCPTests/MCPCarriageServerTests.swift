@@ -320,6 +320,31 @@ struct MCPCarriageServerTests {
         }
     }
 
+    /// Ladder round 1, F-5 (RED-ON-OLD): the lens and version lists SAY when
+    /// the cap bites (`lenses_truncated` / `versions_truncated` — the tray's
+    /// own shape); the old code silently dropped everything past the cap.
+    /// Pinned on lenses (cheap rows); `versions` shares the exact shape.
+    @Test func lensAndVersionListsSayWhenTheCapBites() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let note = try h.operations.createPost(title: "many lenses")
+            _ = try h.operations.newBlock(in: note.id, text: "x", registeringUndo: false)
+            for i in 0...MCPNoteStructure.carriageCap {  // cap + 1 lenses
+                _ = try h.operations.createLens(post: note.id, name: "lens \(i)")
+            }
+            let (listed, truncated) = try await h.database.read { db -> (Int, Bool) in
+                let shaped = try MCPNoteStructure.read(
+                    db, noteID: note.id, calendar: JournalDay.storeCalendar,
+                    options: MCPNoteStructure.Options(withLenses: true))
+                return ((shaped["lenses"] as? [[String: Any]])?.count ?? -1,
+                        shaped["lenses_truncated"] as? Bool == true)
+            }
+            #expect(listed == MCPNoteStructure.carriageCap)
+            #expect(truncated, "the cap says so — never a silent drop")
+        }
+    }
+
     // MARK: - set_entry_date and the journal fence's moment
 
     @Test func setEntryDateLandsAndTheFenceGovernsFromTheMomentSheFilesTheNoteInAJournal() async throws {

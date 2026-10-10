@@ -171,8 +171,18 @@ enum MCPNoteStructure {
             answer["books"] = try books(db, noteID: noteID, standing: standing)
         }
         if options.withTray { answer["tray"] = try tray(db, noteID: noteID, now: options.now) }
-        if options.withLenses { answer["lenses"] = try lenses(db, noteID: noteID, blockOrder: blockIDs) }
-        if options.withVersions { answer["versions"] = try versions(db, noteID: noteID) }
+        if options.withLenses {
+            let lenses = try lenses(db, noteID: noteID, blockOrder: blockIDs)
+            answer["lenses"] = lenses.entries
+            // Ladder round 1, F-5: the cap says so (the tray's shape) —
+            // never a silent drop.
+            if lenses.truncated { answer["lenses_truncated"] = true }
+        }
+        if options.withVersions {
+            let versions = try versions(db, noteID: noteID)
+            answer["versions"] = versions.entries
+            if versions.truncated { answer["versions_truncated"] = true }
+        }
         return answer
     }
 
@@ -206,9 +216,14 @@ enum MCPNoteStructure {
     /// (a pick whose take has since been archived or deleted falls through to
     /// the note's own chosen take, `effectiveLensSelection`'s rule — counted
     /// in `dangling_picks`), in the note's block order.
-    static func lenses(_ db: Database, noteID: String, blockOrder: [String]) throws -> [[String: Any]] {
+    /// Capped at `carriageCap` with a truncated flag (ladder round 1, F-5 —
+    /// the tray's own shape; a silent drop said nothing).
+    static func lenses(
+        _ db: Database, noteID: String, blockOrder: [String]
+    ) throws -> (entries: [[String: Any]], truncated: Bool) {
         let rank = Dictionary(blockOrder.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
-        return try Queries.lenses(db, post: noteID).prefix(carriageCap).map { lens -> [String: Any] in
+        let all = try Queries.lenses(db, post: noteID)
+        let entries = try all.prefix(carriageCap).map { lens -> [String: Any] in
             let picks = try Queries.effectiveLensSelection(db, lens: lens.id)
                 .filter { rank[$0.key] != nil }
                 .sorted { (rank[$0.key] ?? 0, $0.key) < (rank[$1.key] ?? 0, $1.key) }
@@ -218,12 +233,15 @@ enum MCPNoteStructure {
                 "dangling_picks": try Queries.danglingLensPicks(db, lens: lens.id).count,
             ]
         }
+        return (entries, all.count > carriageCap)
     }
 
     /// **The note's saved VERSIONS** — Note ▸ Versions' listing (newest
     /// first); `read_note`'s `version_id` reads one.
-    static func versions(_ db: Database, noteID: String) throws -> [[String: Any]] {
-        try Queries.noteVersions(db, of: noteID, limit: carriageCap).map { item -> [String: Any] in
+    /// Capped at `carriageCap` with a truncated flag (ladder round 1, F-5).
+    static func versions(_ db: Database, noteID: String) throws -> (entries: [[String: Any]], truncated: Bool) {
+        let all = try Queries.noteVersions(db, of: noteID, limit: carriageCap + 1)
+        let entries = all.prefix(carriageCap).map { item -> [String: Any] in
             var entry: [String: Any] = [
                 "version_id": item.postID, "saved_at": DateFormatter.variorumISO8601.string(from: item.savedAt),
                 "block_count": item.blockCount,
@@ -231,6 +249,7 @@ enum MCPNoteStructure {
             if let preview = item.preview { entry["preview"] = String(preview.prefix(280)) }
             return entry
         }
+        return (entries, all.count > carriageCap)
     }
 
     /// The ONE uniform stub for a lineage far side beyond the client's grant
