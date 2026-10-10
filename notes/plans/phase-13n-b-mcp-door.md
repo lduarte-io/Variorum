@@ -793,7 +793,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 1 | U1 — the spine (SDK, socket server, shim, grants table + pure rule, read rung, pane resting shape, grant sheet read-only form) | U1 implementer | **CLOSED** — built (`c2a84bd3`), live round MET (`b9492ced`), ladder closed clean |
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
-| 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | BRIEFED — spawning (the brief below) |
+| 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | **CLOSED WHOLE** — built (`5fc30dd9`), live round MET (`aec83fb2`), ladder closed CLEAN at round 2 (R1 0B/1MAJ/1m/3n → 5/5 AGREE → F1+F4 fixed by the reviewer, AF-9 by the architect → sanity PASS → R2 clean bill 0/0/2n disposed in-round; records `13nb-u2-ladder-round{1,2}.md`) |
 | 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8; **edit_take carries an in-transaction fence/scope re-check** — the U2 ladder F2's guard, P-13nb-U2-8's sync-twin record) | — | NOT STARTED |
 | 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
@@ -801,6 +801,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 9 | The lockstep DEPLOY window (marker 12→13, mirror → both installs) | her + orchestrator | HELD for the closeout window |
 | 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
+| 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`, 7 questions incl. navigation §6b) | HER — the phase's one open gate | READY — U3's brief waits on it |
 
 ---
 
