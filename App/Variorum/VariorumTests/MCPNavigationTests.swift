@@ -179,7 +179,7 @@ struct MCPNavigationTests {
             #expect(!session.commandRouter.isEnabled(.showLastAIChange), "grey before any AI change")
 
             let target = MCPShowTarget.takes(noteID: "n1", blockID: "b1")
-            door.speak(MCPWriteReceipt(
+            door.landReceipt(MCPWriteReceipt(
                 clientName: "claude-code", act: .take, targetID: "n1", targetTitle: "ch 1", show: target))
             let line = try #require(session.status.quietLine, "a RECEIPT — her quiet default governs it")
             #expect(line.kind == .receipt && line.action?.label == "Open \u{203A}")
@@ -192,7 +192,7 @@ struct MCPNavigationTests {
             session.status.clear()
             session.status.receiptStyle = .off
             let next = MCPShowTarget.lens(noteID: "n1", lensID: "L1")
-            door.speak(MCPWriteReceipt(
+            door.landReceipt(MCPWriteReceipt(
                 clientName: "claude-code", act: .lens, targetID: "n1", targetTitle: "ch 1", detail: "x", show: next))
             #expect(session.status.spoken == nil)
             #expect(door.lastShow == next && session.commandRouter.isEnabled(.showLastAIChange))

@@ -272,7 +272,7 @@ final class MCPDoor {
             // her": the Mac's own table.
             refusalWords: { OpsRefusalCopy.message(for: $0) },
             onAsk: { [weak self] ask in Task { @MainActor in self?.enqueue(ask) } },
-            onWrite: { [weak self] receipt in Task { @MainActor in self?.speak(receipt) } },
+            onWrite: { [weak self] receipt in Task { @MainActor in self?.landReceipt(receipt) } },
             // U4 (AF-11 F-3): the move dial's delivery — the rule applied on
             // the main actor, in the same hop as any move.
             show: { [weak self] target in
@@ -411,7 +411,7 @@ final class MCPDoor {
 
     /// A write landed: say it on the one status seam, coalesced with the
     /// client's run on the same target (P-4: the signal carries no decision).
-    func speak(_ receipt: MCPWriteReceipt, now: Date = Date()) {
+    func landReceipt(_ receipt: MCPWriteReceipt, now: Date = Date()) {
         guard let session else { return }
         if let last = receiptRun.last, last.clientName == receipt.clientName,
            last.targetID == receipt.targetID, now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {

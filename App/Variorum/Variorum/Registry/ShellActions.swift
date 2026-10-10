@@ -304,13 +304,13 @@ struct ShellActions {
         let urls = DocumentImportPanel.choose()
         guard !urls.isEmpty else { return }
         Task { @MainActor in
-            speak(await DocumentImporter.importURLs(urls, session: session))
+            deliver(await DocumentImporter.importURLs(urls, session: session))
         }
     }
 
     /// The import door's words on the one status seam (18i: a receipt is a
     /// receipt, a refusal always shows) and its landing.
-    func speak(_ speech: DocumentImportSpeech) {
+    func deliver(_ speech: DocumentImportSpeech) {
         switch speech.kind {
         case .receipt: status.receipt(speech.text)
         case .refusal: status.refuse(speech.text)

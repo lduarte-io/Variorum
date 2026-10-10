@@ -145,15 +145,15 @@ struct MCPAskAndReceiptTests {
             defer { door.detach() }
             session.status.receiptStyle = .quiet
             let now = Date(timeIntervalSince1970: 1_800_000_000)
-            door.speak(receipt(.take), now: now)
-            door.speak(receipt(.take), now: now.addingTimeInterval(5))
+            door.landReceipt(receipt(.take), now: now)
+            door.landReceipt(receipt(.take), now: now.addingTimeInterval(5))
             #expect(session.status.spoken?.text == "claude-code added 2 takes · ⌥⌘Z undoes")
-            door.speak(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(6))
+            door.landReceipt(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(6))
             #expect(session.status.spoken?.text == "claude-code added a take · ⌥⌘Z undoes",
                     "another target starts a fresh run")
-            door.speak(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(7))
+            door.landReceipt(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(7))
             #expect(session.status.spoken?.text == "claude-code added 2 takes · ⌥⌘Z undoes")
-            door.speak(receipt(.take, target: "n2", title: "ch 2"),
+            door.landReceipt(receipt(.take, target: "n2", title: "ch 2"),
                        now: now.addingTimeInterval(7 + MCPDoor.receiptWindow + 1))
             #expect(session.status.spoken?.text == "claude-code added a take · ⌥⌘Z undoes",
                     "past the window a run starts afresh")
