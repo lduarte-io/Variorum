@@ -89,7 +89,7 @@ struct BlockHistoryCommitsCaptureTests {
 
     /// A wall-clock moment in the host's own calendar, so the rows read the
     /// way her stamps do.
-    private static func at(_ month: Int, _ day: Int, _ hour: Int, _ minute: Int) -> Date {
+    private nonisolated static func at(_ month: Int, _ day: Int, _ hour: Int, _ minute: Int) -> Date {
         var parts = DateComponents()
         parts.year = 2026
         parts.month = month
