@@ -195,13 +195,7 @@ extension MCPWriteTools {
             return try into(.book(bookID), job: job, clientName: clientName, spendsAfter: false) { _ in
                 let changed = try ops.fileNoteInChapter(
                     noteID, book: bookID, section: sectionID, undoLabel: label(.filing),
-                    guardedBy: { db in
-                        // The book AND the note, each at write new (the
-                        // add_note_to_book double decision — a note the
-                        // client cannot reach is never reorganized).
-                        try guardBook(clientName, bookID)(db)
-                        try guardNotes(clientName, rung: .writeNew) { _ in [noteID] }(db)
-                    })
+                    guardedBy: guardBookAndNote(clientName, bookID: bookID, noteID: noteID))
                 let names = try database.read { db -> (note: String?, chapter: String?) in
                     (try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar),
                      try sectionID.flatMap {
@@ -244,6 +238,26 @@ extension MCPWriteTools {
                                           show: .book(bookID: bookID, sectionID: nil))
                         : nil)
             }
+        }
+    }
+
+    /// `file_note_in_chapter`'s guard: the book AND the note, each decided at
+    /// write new on ONE standing read (the add_note_to_book double decision —
+    /// a note the client cannot reach is never reorganized), and the union of
+    /// the once grants they spend stamped once (a once wing grant covering
+    /// both is ONE write's grant — self-review find, red-on-old pinned: two
+    /// sequential guards spent it in the first and refused the second).
+    private func guardBookAndNote(_ clientName: String, bookID: String, noteID: String) -> Operations.WriteGuard {
+        { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            let onBook = MCPGrantAuthority.decide(
+                standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .writeNew, consumes: true)
+            guard case .allow(let bookGrant, let spendBook) = onBook else { throw Self.refused(onBook, .book) }
+            let onNote = MCPGrantAuthority.decide(
+                standing, note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: .writeNew, consumes: true)
+            guard case .allow(let noteGrant, let spendNote) = onNote else { throw Self.refused(onNote, .note) }
+            let spend = Set([spendBook ? bookGrant : nil, spendNote ? noteGrant : nil].compactMap { $0 })
+            for grantID in spend.sorted() { try grants.consumeMCPOnceGrant(db, grantID) }
         }
     }
 

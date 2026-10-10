@@ -428,6 +428,36 @@ struct MCPCarriageServerTests {
         }
     }
 
+    /// Self-review find (red-on-old): `file_note_in_chapter` decides the
+    /// book AND the note inside its transaction — with ONE once grant
+    /// covering both (a once wing grant), the first decision must not spend
+    /// it out from under the second. One write, one spend.
+    @Test func aOnceWingGrantFilesANoteOnceAndIsSpentOnce() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "lessons", kind: .book)
+            let chapter = try h.operations.createSection(in: book.id, name: "1")
+            let note = try h.operations.createPost(title: "lesson 1")
+            _ = try h.operations.addPostToReading(note.id, to: book.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .wing, "", .once))
+
+            let filed = try await call(connection, "file_note_in_chapter", [
+                "note_id": .string(note.id), "book_id": .string(book.id), "section_id": .string(chapter.id),
+            ])
+            #expect(filed.isError != true, "the one write lands: \(text(filed))")
+            #expect(try await h.database.read { try String.fetchOne(
+                $0, sql: "SELECT section_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                arguments: [note.id]) } == chapter.id)
+            let again = try await call(connection, "file_note_in_chapter", [
+                "note_id": .string(note.id), "book_id": .string(book.id), "section_id": .null,
+            ])
+            #expect(again.isError == true, "the once grant was spent by its one write")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The wire-only refusals speak words, never an enum
 
     @Test func theWireOnlyRefusalsSpeakWordsNotAnEnum() async throws {
