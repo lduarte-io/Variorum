@@ -909,7 +909,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
 | 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`) | HER | **RAN 2026-10-09/10** — all seven ruled (R-13nb-26 a–g) |
 | 13 | U3 — the edit-rung spine (brief below) | U3 implementer | **CLOSED WHOLE** — built (`146cb7ba`), live round MET (`127c7726`), ladder closed CLEAN at round 2 (R1 0B/0M/2m/2n → 4/4 AGREE → F1 record-fixed + F2 FIXED by the reviewer `a87fc8ec` with the three-leg red-on-old pin + F3 RECORDED + F4 copy-fixed `ff1da3f7` → sanity PASS → R2 clean bill 0/0/0/1n record-only; records `13nb-u3-ladder-round{1,2}.md`); VX-132 born (the harness hang, sample-traced) |
-| 14 | U4 — the carriage + book rules + navigation (brief below) | U4 implementer + orchestrator | **BUILT + CLAIMS VERIFIED** — unit closed (`fce833b1`); forks ruled AF-11 (`aeea9dbf`), built as ruled; verified by my own hands 2026-10-10: whole headless rerun clean (core 2,580/295 · MCP 61/8 · workbook 40/6 — counts matching; the FIRST rerun's SPM summary carried a transient core-target failure note, row 15's second sighting → VX-134, the captured identical rerun clean), fences zero over `f4078d61..HEAD` (Sync/ · Server/ · Persistence/ · custody · editor seam · trailers; the one `lockstepVersion` grep hit is this record's own prose), walk evidence on disk and eyeballed (21 captures + 17 transcripts; 02 and 20 faithful to the record); VX-133 born (the receipt run-count overstating — the implementer's observation, ticketed not scope-grabbed); live round (mine, stage) + ladder NEXT |
+| 14 | U4 — the carriage + book rules + navigation (brief below) | U4 implementer + orchestrator | **BUILT + CLAIMS VERIFIED** — unit closed (`fce833b1`); forks ruled AF-11 (`aeea9dbf`), built as ruled; verified by my own hands 2026-10-10: whole headless rerun clean (core 2,580/295 · MCP 61/8 · workbook 40/6 — counts matching; the FIRST rerun's SPM summary carried a transient core-target failure note, row 15's second sighting → VX-134, the captured identical rerun clean), fences zero over `f4078d61..HEAD` (Sync/ · Server/ · Persistence/ · custody · editor seam · trailers; the one `lockstepVersion` grep hit is this record's own prose), walk evidence on disk and eyeballed (21 captures + 17 transcripts; 02 and 20 faithful to the record); VX-133 born (the receipt run-count overstating — the implementer's observation, ticketed not scope-grabbed); **LIVE ROUND MET** (the U4 LIVE ROUND record, 2026-10-10 — all five legs, every write walked back); ladder NEXT |
 | 15 | The transient whole-package core-suite failure (unidentified — TWICE: U3 round 1; the U4 verify's first rerun, summary note only, the name swallowed by a piped tail, the captured identical rerun clean) | orchestrator | **TICKETED VX-134** — watch stays at the closeout whole-target run; any next sighting captures the FULL log to a file |
 
 ---
@@ -3002,3 +3002,56 @@ two U1 list flips and the `recencyPage` version fence under
   `screencapture -R` over the menu's AX frame instead (capture 19). The
   `show_in_app` frontmost leg needs nothing special: a client run from the
   shell does not activate the terminal.
+
+## U4 LIVE ROUND (orchestrator, 2026-10-10 — the acceptance's real-client leg; stage held and released)
+
+Fresh Debug build from HEAD `06386f9e` (`vx124-u4live`, codesign clean,
+`io.lduarte.Variorum.debug`); the real Claude Code client via the throwaway
+`-s local` scratch registration (removed after; her user scope untouched).
+Claims verified before the round (ledger row 14: the clean whole-package
+rerun, the fences, the walk evidence). The round, live:
+
+1. **The tray and put back:** `delete_block` (the middle block of "o museu")
+   → `read_note with_tray` listed it WITH its text (and the U4 walk's
+   residual deleted take, untouched) → `put_back` → `landed:
+   its_old_place`; the note read whole on screen. ONE ⌥⌘Z: **"Undid:
+   claude-code's put back"** — the block back in the tray (⌫1 on the bar);
+   a second: **"Undid: claude-code's delete"** — the note whole again.
+2. **The version:** `save_version` → `with_versions` listed the moment;
+   Note ▸ Versions showed "Oct 10, 2026 at 2:50 AM · 3 blocks" with its
+   preview line; ⌥⌘Z → "Undid: claude-code's version", the pane back to
+   "No saved moments yet".
+3. **The finished book:** finished by HER row menu (the receipt: "Finished
+   “o ladrão de raios” — its table of contents is done; the writing inside
+   can still change."). `create_section` REFUSED verbatim **"This book is
+   finished — reopen it first; if it's sealed, unseal it."** (the J8 fix
+   live through a real client); `list_books` carried the facts (rule null ·
+   outflow [] · new_matches join · finished true); `set_book_rule` LANDED
+   (`changed: true`, the rule stored) with the intake-paused sentence said
+   in the answer (AF-11 F-1's mirror, live). ⌥⌘Z → **"Undid: claude-code's
+   book rule"** — and the book STAYED finished (the undo restores the three
+   fields, never her finish). Reopened by her menu (Finish's slot read
+   Reopen).
+4. **show_in_app, frontmost and refused:** with Variorum frontmost, the
+   note target with `select: "vasos gregos"` → `{"shown": true}` — landed
+   in Write with the words SELECTED and the find bar armed ("2w selected"
+   on the bar), the 13o road verbatim. With Finder frontmost, the SAME call
+   REFUSED: **"The author isn't at Variorum right now, so nothing was moved
+   — showing happens only while Variorum is the app in front. Ask her to
+   switch to it, then call again."** — nothing moved, never queued.
+5. **The keyboard door past the fade:** `add_comment` landed while the app
+   was backgrounded (writes need no frontmost — only showing does); on the
+   Bookcase ~8 s later, the line long faded, **⌥⌘O** opened "o museu" at
+   the block with the comment in the gutter; ⌥⌘Z → "Undid: claude-code's
+   comment".
+6. **Lifecycle:** quit by identity (socket gone); registration removed;
+   stage released.
+
+**VERDICT: U4's acceptance bar is MET live.** Dev-store residue: NONE of
+the round's rows (every write walked back; the book reopened by her door);
+the grants exactly as U3 left them; activity lines for the round's calls.
+Round captures: the scratchpad's `u4-liveround/cap-00…14` + client
+transcripts `out-s1…s5` (ephemeral; this section is the record). One
+capture that caught a strip of the dock was deleted at once (the walk
+lesson held). Next: the U4 ladder round 1 (`fable-reviewer`, the
+cross-model flow verbatim).
