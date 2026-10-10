@@ -225,13 +225,27 @@ struct WriteTakesPanel: View {
     private func handleRouted(_ command: RoutedCommand) -> Bool {
         guard case .takes(let takes) = command else { return false }
         switch takes {
+        // Ladder r1 (the escalated finding): NO take key acts on a block
+        // that has left the note — one rule, one sentence, the mints' guard
+        // on every arm. The ring SURVIVES the block leaving
+        // (`authority.livePane` clears only on blur or a new focus; nothing
+        // clears it when the pane unmounts) and `archiveVariant` needs no
+        // placement (`ensurePlacementUnlocked` passes with none), so before
+        // this guard ⌘⇧A really archived a take of the RELEASED original
+        // while the panel's whole face said the block was gone — and the
+        // ring keys' model refusals said "Click into a take first" over a
+        // face with nothing to click into.
         case .choose:
+            guard slot != nil else { return refuseBlockGone() }
             Task { await model.chooseFocusedTake() }
         case .stepPrev:
+            guard slot != nil else { return refuseBlockGone() }
             Task { await model.stepTakes(by: -1) }
         case .stepNext:
+            guard slot != nil else { return refuseBlockGone() }
             Task { await model.stepTakes(by: 1) }
         case .archive:
+            guard slot != nil else { return refuseBlockGone() }
             Task { await model.archiveFocusedTake() }
         // ⌘T · ⌥⌘T · ⇧⌥⌘T — the growth doors' acts on this block, the ring
         // following onto the new card. A block that has left the note shows
