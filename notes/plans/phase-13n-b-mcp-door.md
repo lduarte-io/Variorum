@@ -728,7 +728,8 @@ grant authority · tool projections — never one god server object (P-9).
   ALIVE after the line fades and under receipt_style off (a chord
   racing a 6-second fade would be a lying keyboard road). ⌥⌘O
   approved SUBJECT TO the collision sweep (record the sweep). The 18i
-  canon nuance rides the closeout delta as a contract line. (b)
+  canon nuance rides the closeout delta as a contract line — **RATIFIED
+  by the author 2026-10-10, R-13nb-27 (the section at the file's end)**. (b)
   REJECTED — always-toasting AI writes would outshout her own acts,
   anti-calm; (c) REJECTED — a mouse-race chord is no road.
 - **F-3 RULED as proposed — show_in_app.** Decided at READ on the
@@ -3055,3 +3056,31 @@ transcripts `out-s1…s5` (ephemeral; this section is the record). One
 capture that caught a strip of the dock was deleted at once (the walk
 lesson held). Next: the U4 ladder round 1 (`fable-reviewer`, the
 cross-model flow verbatim).
+
+## R-13nb-27 — HER RATIFICATION OF THE AF-11 F-2 RECEIPT-DOOR RULING (2026-10-10, mid-U4-ladder)
+
+The author pasted the orchestrator's AF-11 F-2 summary back with the words
+**"I ratify this:"**. The ratified paragraph, verbatim as pasted:
+
+> What "write receipts grow a one-press door" means. It's your own ruling's
+> letter from the format-schema sitting (R-13nb-23 (a)): those AI-write
+> lines gain a press target — "Open ›" — one press and you're looking at
+> the thing the AI just changed. The fork it raised (F-2): 18i's classes
+> say a message carrying a button is an offer, and offers always toast,
+> overriding your quiet default. I ruled the line stays a receipt — your
+> setting keeps governing it, it just carries the door now — because
+> silently reclassifying every AI write into a toast would trade your calm
+> default away. And since a line that fades in six seconds is a mouse race,
+> the door also has a keyboard road: "Show the AI's Last Change" (⌥⌘O),
+> alive after the fade and even with receipts off. The one canon
+> consequence — an AI write line is a receipt that carries a door — is
+> queued as an 18i delta for the closeout, yours to ratify.
+
+**What this settles:** the message-CLASS question is RATIFIED canon — an AI
+write line is a RECEIPT that carries a door; `receipt_style` governs it;
+the session-scoped keyboard road stands. The closeout's 18i delta lands as
+a ratified contract line (no longer pending her word at the bundle).
+**What stays open for the merge QUESTIONS bundle:** the TASTE details only
+— P-13nb-U4-13 (the word "Open ›", per-act targets, middle truncation),
+P-13nb-U4-15 (⌥⌘O's verb wording and helper row), and the chord itself
+remains subject to her veto as any chord is.
