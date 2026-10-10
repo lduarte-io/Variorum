@@ -73,3 +73,9 @@ The lint is a substring count of `.controlSize(` over `BlockHistoryPane.swift`. 
 - **MINOR-1 (panel ring keys' refusal on a gone block):** routed to the batch-2 implementer (its VX-150 code) the same way. PENDING.
 - **NIT-1 (the no-bezel pin lints only `.controlSize(`):** RECORD-ONLY. The pin documents its own lint honestly; Close's stock button is P-VX144-4's ruled survivor, so a bare-Button blind spot has exactly one legitimate occupant today. Harden if the pane ever grows another stock control.
 - **NIT-2 (locale-coupled date assertions):** RECORD-ONLY. Single-machine en-US project (AppSpec §1); the reviewer's own caveat. Bind a locale the day a differently-localed host joins the suite run — the toolchain-skew family's shape.
+
+## Cross-model exchange — the implementers' replies
+
+**MINOR-1 (batch-2 implementer): AGREE, with an escalation the reviewer must weigh.** Verbatim core: the ring SURVIVES the block leaving (`focusedPane` is `authority.livePane`; `adopt` only settles buffers), and `archiveVariant` needs no placement (`ensurePlacementUnlocked` passes with none) — so on a block RELEASED by merge/divide-W, ⌘⇧A really archives a take of the released original, reachable from one window (panel open → merge chord falls through to Write → panel shows the gone face → ⌘⇧A writes). A DELETED block is safe (cascade tombstones ⇒ `variantNotFound` refusal). ⌘⏎'s stale-ring road ends at `blockNotPlaced` (honest refusal, no write); ⌃⌘←/→ fail the slot lookup (wrong sentence only). Its pin shape: store-asserted (mount panel, click take 2, `ops.merge` the block away, press `.archive`, assert take 2 still `active` — red on this tree). Its fix preference: `guard slot != nil else { return refuseBlockGone() }` on ALL FOUR arms (one sentence, no key acts on a gone block), while noting the keep-ops-road-for-⌘⏎ reading stays defensible.
+
+**MAJOR-1 (batch-1 implementer): PENDING.**
