@@ -3157,3 +3157,18 @@ short, for her confirmation in the new issue):**
   event.
 - **(e)** The U4 ladder's cap extends to a FOURTH round at the
   orchestrator's discretion (the 13x precedent, her word).
+
+**R-13nb-28 AMENDMENT (her follow-up, same sitting, verbatim):** "you can
+also go ahead and replace my application when you're done / deploy - I'd
+like to authorize that right now, so you simply use the PAT when it's
+time. my phone should be available over wifi, if that doesn't work I'll
+install the new one tomorrow."
+
+Leg (d)'s conservative iff-clause is SUPERSEDED by her explicit word: the
+deploy bundle is AUTHORIZED NOW for execution when the closeout reaches it
+— the artifact 16 mirror (using the PAT seated for that road), the
+/Applications replace (A1 safety copy first, zero-instance window,
+codesign verify), and the phone's install over wifi, with her named
+fallback (she installs tomorrow) making a phone that cannot be reached
+overnight an ACCEPTED temporary strand — her word, recorded. The §12
+record lands with the marker verified 13 on every side that deployed.
