@@ -356,20 +356,27 @@ struct BookView: View {
         }
         .onChange(of: paneFocused) { _, focused in
             model.paneFocused = focused
-            // VX-143 ladder r1 (MAJOR-1): a pane-focus flip re-speaks this
-            // book's note-box word. A READ book's report is nil on BOTH
-            // sides of the flip, so the `.onChange(of: noteBoxReport)`
-            // below never fires for it — and without this publish a Read
-            // book GAINING focus never says "no box" while focused, which
-            // left RootView's held slot (VX-141) standing a phantom empty
-            // box forever (two finished books in a split, focus returned
-            // to the first). Gaining focus says nil-while-focused — the
-            // declined word; losing focus says the departure nil the
-            // report road already says for editing modes. Published AFTER
-            // `model.paneFocused` so the report is computed against the
-            // settled pass, and `publishNoteBox()` alone — the note-place
-            // channel has its own cadence.
-            publishNoteBox()
+            // VX-143 ladder r1 (MAJOR-1): a pane GAINING focus re-speaks
+            // this book's note-box word. A READ book's report is nil on
+            // BOTH sides of a focus flip, so the `.onChange(of:
+            // noteBoxReport)` below never fires for it — and without this
+            // publish a Read book gaining focus never says "no box" WHILE
+            // focused, which left RootView's held slot (VX-141) standing a
+            // phantom empty box forever (two finished books in a split,
+            // focus returned to the first).
+            //
+            // GAIN ONLY — the sanity pass's catch, confirmed: two panes may
+            // legally show the SAME book (the one-note-per-pane rule is
+            // notes-only) in different modes, and `adoptNoteBox` decides by
+            // book id — a departing Read pane's loss-side nil, landing
+            // after the gaining pane's report, would wipe the box under the
+            // focused pane. The loss side also has nothing to add: editing
+            // modes already speak on loss through the report road (the
+            // report flips nil), and a Read pane's loss was silent before
+            // this run too. Published AFTER `model.paneFocused` so the
+            // report is computed against the settled pass; `publishNoteBox()`
+            // alone — the note-place channel has its own cadence.
+            if focused { publishNoteBox() }
         }
         // 18d batch 1 (her U-10): publish this book's note box. `.onAppear`
         // and `.onChange` together, because the box must be right on the
