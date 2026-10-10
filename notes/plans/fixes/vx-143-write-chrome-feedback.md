@@ -118,3 +118,11 @@ Batch 1 implementer (Opus, 2026-10-10, on the Air) — **BATCH 1 CLOSED by the i
 - THIS RUN RUNS ON THE AIR AT HER GRANT — local `xcodebuild test` is allowed this session. Instance checks before any app-suite run: `pgrep -fl 'Variorum.app/Contents/MacOS'`, discriminate by PATH; a real-store instance is NEVER quit or killed; no Release builds or /Applications refreshes while one lives.
 - zsh `pipestatus` for pipelines; never `git checkout` over uncommitted work; screenshots into gitignored dirs.
 - **Her REAL-STORE Variorum is (or may be) RUNNING on this Air** — the VX-140 screenshot proves a live instance at the sitting. NEVER quit or kill it; app-suite runs and any walk wait for a zero-instance window SHE arranges (ask through the orchestrator). Headless core work proceeds regardless.
+
+## Orchestrator verification of batch 1 (2026-10-10, overnight)
+
+Spot-checked, never trusted: the nine commits exist and are pushed (`7c26a583`…`20b08f1c`); all five pin files present; LIVE STATUS flips rode the right commits; revert evidence two-round and discriminating; the VX-140 tripwire NOT hit (`StoreLockView` + `StoreLaunchGate` only — custody untouched, confirmed by the diff's file list). The 31 whole-target reds are the identical set on the pre-batch tree (implementer's base run) — pre-existing on the Air, not this batch's.
+
+**The implementer's found-not-fixed items, all ticketed:** VX-150 (take-panel sibling keys act on Write's caret block — JOINS THE RUN, batch 2, same class as VX-135) · VX-151 (StatusSeamVocabularyTests red on main at `DocumentImporter.swift:306/310` — 13n-a residue; BookCollectingDoors' red is already VX-115) · VX-152 (AppBootstrap.lock() reentrancy — custody proper, Fable work, NOT this run) · VX-153 (finished book's box flash on open — pre-existing, Backlog).
+
+Batch 2 members: **VX-144** (the commits page cleanup, screenshot-first) + **VX-150**. Then the fable ladder over the whole diff.
