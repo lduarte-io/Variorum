@@ -2051,13 +2051,13 @@ the orchestrator's handoff `03ecb26d`; the code named in the brief.
 | # | Piece | Status |
 |---|---|---|
 | R0 | This record | DONE (this commit) |
-| R1 | THE BOUNDARY-MARKER FORK → orchestrator (glyph + version token + grammar, with rationale) | SENT — awaiting the ruling; R7 waits on it, everything else proceeds |
+| R1 | THE BOUNDARY-MARKER FORK → orchestrator (glyph + version token + grammar, with rationale) | RULED — AF-10 (`1d3f4913`): `--- next block ---` + `{v:2}` + the grammar approved as proposed; all seven build calls concurred, the rider on (b) binding (the CarryAllMerge move keeps every existing pin passing UNMODIFIED — zero test edits is the parity proof) |
 | R2 | Core: the in-transaction GUARD seam on the edit-rung ops + `edit_take`'s op (named insurance brackets, `expectedText`, one undo entry) + set-name / create-section / file-into-chapter acts with client-named undo + state-transition tests | NOT STARTED |
 | R3 | `CarryAllMerge` moved app → core Domain, byte-unchanged (merge_blocks' keyboard default — the `KeepOnTopDivide` 18c precedent) | NOT STARTED |
 | R4 | The EDIT rung on the wire: `edit_take` · `divide_block` · `merge_blocks` · `move_block` · `delete_block` · `set_block_name` (catalog + tools + the guard + receipts) + the PROOF pins (suggest / write new provably cannot reach them) | NOT STARTED |
 | R5 | `with_commits` on read_note's structured view · `include_commits` on search · sections (`create_section`, a `section_id` arg on `add_note_to_book`, section facts in list_notes + the wire document) | NOT STARTED |
 | R6 | `create_note` EITHER payload (the text format or a wire-document subset — multi-paragraph blocks, names, labeled takes, `entry_date`) | NOT STARTED |
-| R7 | THE BOUNDARY MARKER — format v2 in `Domain/VariorumDocument` (marker mode only when needed; byte pins untouched; round-trip pins; the plain export never carries it) | WAITS on R1's ruling |
+| R7 | THE BOUNDARY MARKER — format v2 in `Domain/VariorumDocument` (marker mode only when needed; byte pins untouched; round-trip pins; the plain export never carries it) | NOT STARTED — the design is AF-10's, whole |
 | R8 | App faces: the grant sheet's EDIT rung · "Allow AI here" (the note ▾ menu) · the ACTIVITY face + its "all N ›" road · the all-N pass over U1's lists · receipts for the new acts | NOT STARTED |
 | R9 | End of unit: headless suites, Mac focused suites (stage), the pre-flight walk (stage, both voices) | NOT STARTED |
 

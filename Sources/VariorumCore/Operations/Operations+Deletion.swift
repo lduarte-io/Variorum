@@ -208,10 +208,15 @@ extension Operations {
     /// HOLDS must pass one instead of checking beforehand: a check made
     /// outside this transaction is a check made against a snapshot, and
     /// `BlockDeletionPrecondition`'s doc comment records what that cost.
+    ///
+    /// `guardedBy` (13n-b U3): the caller's in-transaction precondition
+    /// (`WriteGuard`), run first in the forward act only — the redo below
+    /// is her own press and never carries it.
     public func deleteBlock(
-        _ id: String, requiring precondition: BlockDeletionPrecondition = .none
+        _ id: String, requiring precondition: BlockDeletionPrecondition = .none,
+        guardedBy guardian: WriteGuard? = nil
     ) throws {
-        try performDeleteBlock(id, quietWhenGone: false, requiring: precondition)
+        try performDeleteBlock(id, quietWhenGone: false, requiring: precondition, guardedBy: guardian)
         undoStack?.register(
             label: "Delete Block",
             inverse: { try $0.revertDeleteBlock(id) },
@@ -235,9 +240,11 @@ extension Operations {
     /// The row work behind `deleteBlock`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
     private func performDeleteBlock(
-        _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition
+        _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition,
+        guardedBy guardian: WriteGuard? = nil
     ) throws {
         try database.write { db in
+            try guardian?(db)
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
                 if quietWhenGone { return }

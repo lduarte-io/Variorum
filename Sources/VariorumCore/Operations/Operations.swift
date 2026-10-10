@@ -48,6 +48,19 @@ public struct Operations: Sendable {
         case after(String)
         case before(String)
     }
+
+    /// **An injected precondition, run FIRST inside an operation's own write
+    /// transaction** (13n-b U3 — the U2 ladder's F2, closed for the MCP
+    /// door's EDIT rung; AF-10 (a): rung-wide). A caller whose authority to
+    /// act depends on facts that could change between its decision and the
+    /// act (a connected client's grant; a note's Private mark arriving by
+    /// sync) hands that decision to the op as a guard, so it is re-made on
+    /// facts read in the SAME transaction that writes — nothing can land
+    /// between the two. The op decides nothing about who is asking: it runs
+    /// the guard and lets its throw refuse the whole act (the transaction
+    /// rolls back). `nil` on every door of hers; a structural REDO never
+    /// carries one (her ⇧⌥⌘Z is her own act, not the caller's).
+    public typealias WriteGuard = (Database) throws -> Void
 }
 
 // MARK: - Shared fetch-or-throw helpers
