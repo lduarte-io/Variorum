@@ -834,7 +834,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 2 | U1 probes (a)(b)(c) → architect rulings on the socket home + the setup press | orchestrator | CLOSED — AF-1…AF-4 + R-13nb-5/6 (her batch) |
 | 3 | U1 ladder (fable-reviewer) | orchestrator | **CLOSED at round 2** — R1 0B/0M/4m/3n, 7/7 AGREE, 5 FIXED by the reviewer (pins revert-verified twice), 2 RECORDED; sanity pass PASS (O1/O2 record-only); R2 CLEAN BILL (0/0/0/2n record-only). Records: `13nb-u1-ladder-round{1,2}.md` |
 | 4 | U2 — suggest + write new + the grant sheet's rungs + the just-in-time ask + the Private faces (R-13nb-4) | U2 implementer | **CLOSED WHOLE** — built (`5fc30dd9`), live round MET (`aec83fb2`), ladder closed CLEAN at round 2 (R1 0B/1MAJ/1m/3n → 5/5 AGREE → F1+F4 fixed by the reviewer, AF-9 by the architect → sanity PASS → R2 clean bill 0/0/2n disposed in-round; records `13nb-u2-ladder-round{1,2}.md`) |
-| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8; **edit_take carries an in-transaction fence/scope re-check** — the U2 ladder F2's guard, P-13nb-U2-8's sync-twin record) | — | NOT STARTED |
+| 5 | U3 — edit + polish + her live round (+ `with_commits` R-13nb-7, `include_commits` on search R-13nb-10, the set-name tool R-13nb-8, the Allow-AI-here row AF-8; **edit_take carries an in-transaction fence/scope re-check** — the U2 ladder F2's guard, P-13nb-U2-8's sync-twin record) | U3 implementer + orchestrator | **BUILT + LIVE ROUND MET** — unit closed (`146cb7ba`), claims verified (headless rerun by my own hands, fences zero); the real-client round MET (the U3 LIVE ROUND record); ladder NEXT |
 | 6 | A-4's honest-boundary line → the closeout author checklist (now incl. the grants-ride-copies note under R-13nb-6) | orchestrator | OPEN — standing |
 | 7 | P-13nb-1 (journal predicate) — RATIFIED as R-13nb-1; QUESTIONS entry at merge records the ratification | orchestrator | CLOSED as provisional |
 | 8 | THE PRIVATE MARK (R-13nb-4): v1_25 schema commit + Sync/ classifications + mirror artifact 16 — at the U1/U2 seam, Fable's hands | orchestrator | **DONE** (`304b41d1` — marker 13 client-side; headless whole-package green) |
@@ -842,7 +842,7 @@ unit record (TCC state is machine-state the next session inherits).
 | 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
 | 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`) | HER | **RAN 2026-10-09/10** — all seven ruled (R-13nb-26 a–g) |
-| 13 | U3 — the edit-rung spine (brief below) | U3 implementer | BRIEFED — spawning |
+| 13 | U3 — the edit-rung spine (brief below) | U3 implementer | **UNIT CLOSED** (`146cb7ba` — R0–R9, nine mutation checks, two red-on-old self-review fixes, P-13nb-U3-1…17); live round MET; ladder round 1 next |
 | 14 | U4 — the carriage + book rules + navigation (brief at U3's close) | — | SHAPED by R-13nb-26 e/f/g |
 
 ---
@@ -2317,3 +2317,59 @@ stray keystrokes from the walk incident below. `claude-code`'s and
 - **The first `edit_take` on "o museu" deduped its "before"** (the take's
   last commit held its text) — correct behaviour; the walk used a
   never-committed take on the client's own note to show both brackets.
+
+## U3 LIVE ROUND (orchestrator, 2026-10-09 — the acceptance's real-client leg; stage held and released)
+
+Fresh branch Debug build at `146cb7ba` (`vx124-u3-liveround`, codesign
+clean, `io.lduarte.Variorum.debug`); the real Claude Code client via the
+throwaway `-s local` scratch registration (removed after; her user scope
+untouched). Before the round: the implementer's claims verified — the
+whole headless package rerun with my own hands on the final tree (exit 0;
+`swift test list` counts 2,563 core · 45 MCP · 40 workbook, matching the
+record), ZERO lines in `Sync/` and `Server/` across the unit's whole
+range, no migration, no `lockstepVersion` touch, the walk evidence real
+on disk (capture 05's brackets read with my own eyes). The round, live:
+
+1. **The edit fence BEFORE the grant:** at suggest, the client listed
+   EXACTLY the 8 suggest-reachable tools — no edit tool even named
+   (P-2 on the wire, U2's pattern holding at U3).
+2. **The grant growth to EDIT:** claude-code's Change… offered all four
+   rungs; Edit's sheet sentence read the mockup §3 line ("it can also
+   edit takes — with a commit before and after every change, so you can
+   always compare and come back"); the confirm spoke "Grant edit in
+   “o ladrão de raios” always"; the pane stepped to "3 shared places";
+   the Bookcase row wears its "shared with AI" chip. W-1/W-2's amended
+   pane copy read true on screen.
+3. **`edit_take` through the real client:** read_note `with_ids` → the
+   client edited HER "english" take on "a escola" ("far from
+   everything" → "remote from everything"); the answer carried
+   `changed: true` + `after_commit_id`. Block History showed **"after
+   claude-code's edit"** over the prior commit holding the exact
+   pre-edit text — the before-bracket DEDUPED correctly against it (the
+   standing dedupe; the walk's never-committed take had already shown
+   BOTH brackets).
+4. **The stale refusal, verbatim:** a deliberate `edit_take` with the
+   pre-edit `expected_text` was refused in the app's own words — "The
+   text changed while that gesture was landing — nothing was altered;
+   try it again on the current text." — and nothing changed.
+5. **The structural act and HER veto:** `divide_block` with
+   `second_half_starts_with: "longe de tudo"` landed keep-on-top
+   (`kept_on_top: 2`, both English takes riding whole — fresh copies,
+   0 commits, as copies never carry history); Block History's Came
+   from showed the original "kept WHOLE and set aside … the original
+   is preserved". ONE ⌥⌘Z: the bar read **"Undid: claude-code's
+   divide"**, the note byte-restored to two blocks, the original back
+   with its full history (english · 2).
+6. **Lifecycle:** quit by identity unlinked the socket; registration
+   removed; stage released.
+
+**VERDICT: U3's acceptance bar is MET live** — an edit grant's
+`edit_take` landed bracketed and visible in Block History, stale
+`expectedText` refused, the suggest fence held by construction (tools
+not even listed), a structural act walked back by one client-named
+⌥⌘Z. Dev-store residue (deliberate): claude-code's edit-always grant on
+"o ladrão de raios" (useful to the ladder and U4), the english take's
+edit + its "after claude-code's edit" commit; the divide fully undone.
+Round captures: the scratchpad's `u3-liveround/cap-01…13` + client
+transcripts `out-s1…s4` (ephemeral; this section is the record). Next:
+ladder round 1 (`fable-reviewer`, the cross-model flow).
