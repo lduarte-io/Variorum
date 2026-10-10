@@ -897,6 +897,46 @@ extension AppDatabase {
             try SearchIndex.addSavepoints(db)
             try SearchIndex.rebuild(db, sources: SearchIndex.sourcesV1_23)
         }
+        // **13n-b — THE MCP DOOR's GRANTS STORE** (A-5/A-6; R-13n-4's "a
+        // LOCAL-ONLY table"): `mcp_client` · `mcp_grant` · `mcp_activity` ·
+        // `mcp_switch` (`Persistence/MCPGrantSchema.swift` carries the shape
+        // and why each column is there).
+        //
+        // **NOT a SyncSpec §12 lockstep event**: nothing here carries
+        // `sync_version` or an outbox trigger, nothing is pushed, no mirror
+        // changes — the marker stays 12. Its own registration
+        // (`MCPGrantSchema.tables`) beside the sync registry's local-only and
+        // derived sets; the plaintext export keeps the tables EMPTY. No
+        // backfill: a store meets the door with no clients, no grants, the
+        // server OFF and the open book CLOSED (absent switch rows read off).
+        migrator.registerMigration("v1_24_mcp_grants") { db in
+            try db.execute(sql: MCPGrantSchema.v1_24DDL)
+        }
+        // **13n-b — THE PRIVATE MARK** (her ruling R-13nb-4, the 13n-b
+        // plan's sitting record + design addendum, 2026-10-09): a per-NOTE
+        // and per-BOOK privacy mark, both the `archived_at` class — an
+        // additive nullable TEXT stamp, NULL = not private. The fence reads
+        // them as its third leg (journal profile · journal/daily membership
+        // · the private mark — a note in ANY live private book is fenced,
+        // privacy wins ties); gatherings refuse the mark operations-side.
+        //
+        // **A SyncSpec §12 LOCKSTEP EVENT** (marker 12 → 13 — the
+        // `SyncSchema.lockstepVersion` bump rides this commit): both
+        // columns are SYNCED (a privacy mark is a fact about the book or
+        // note, not about one Mac's AI setup — it must survive 13x
+        // portability and read the same on every device), PLAIN under E2EE
+        // (bare timestamps; disclosed structure only — that something is
+        // marked, never which or what). The marker moves because a
+        // marker-12 client's CAS whole-row push would silently null
+        // `ai_private_at` out from under a marker-13 writer (13i-e's
+        // reasoning, verbatim). Mirror DDL `16_phase13nb_private.sql` —
+        // the deploy is HER closeout window, never pre-authorized. No
+        // backfill: nothing is private at birth. No new §7 repair (plain
+        // CAS metadata; NULL reads not-private).
+        migrator.registerMigration("v1_25_private_mark") { db in
+            try db.execute(sql: "ALTER TABLE container ADD COLUMN ai_private_at TEXT")
+            try db.execute(sql: "ALTER TABLE reading ADD COLUMN ai_private_at TEXT")
+        }
         return migrator
     }
 }

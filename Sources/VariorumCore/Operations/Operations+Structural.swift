@@ -189,10 +189,15 @@ extension Operations {
     /// restoreCommit behavior: a commit predating this cut still holds the
     /// full text, and restoring it resurrects both halves into the source's
     /// buffer while C sits next door (AppSpec §9; the editor warns, Phase 7).
+    /// `guardedBy` (13n-b U3): the caller's in-transaction precondition
+    /// (`WriteGuard`), run before any row is read; nil on her doors.
     @discardableResult
-    public func divide(_ blockID: String, cut: Int) throws -> DivideResult {
+    public func divide(_ blockID: String, cut: Int, guardedBy guardian: WriteGuard? = nil) throws -> DivideResult {
         let (result, sourcePreImage): (DivideResult, TextPreImage) =
-            try database.write { db in try divideRows(db, blockID: blockID, cut: cut) }
+            try database.write { db in
+                try guardian?(db)
+                return try divideRows(db, blockID: blockID, cut: cut)
+            }
         undoStack?.register(
             label: "Divide",
             inverse: {
@@ -346,10 +351,12 @@ extension Operations {
     /// among `cuts`, keeps `context.rendered` byte-for-byte.
     @discardableResult
     public func divideW(
-        _ blockID: String, cuts: [String: Int], displayedVariantID: String? = nil
+        _ blockID: String, cuts: [String: Int], displayedVariantID: String? = nil,
+        guardedBy guardian: WriteGuard? = nil
     ) throws -> DivideWResult {
         let result: DivideWResult = try database.write { db in
-            try divideWRows(
+            try guardian?(db)
+            return try divideWRows(
                 db, blockID: blockID, cuts: cuts, displayedVariantID: displayedVariantID)
         }
         // The label is the summoned door's own name (U-4, 2026-09-06; renamed
@@ -897,9 +904,10 @@ extension Operations {
     @discardableResult
     public func merge(
         _ firstBlockID: String, _ secondBlockID: String,
-        joining: MergeJoinRule = .door
+        joining: MergeJoinRule = .door, guardedBy guardian: WriteGuard? = nil
     ) throws -> MergeResult {
         let result: MergeResult = try database.write { db in
+            try guardian?(db)
             let first = try placedContext(db, blockID: firstBlockID)
             let second = try placedContext(db, blockID: secondBlockID)
             let containerID = first.container.id
@@ -1079,9 +1087,10 @@ extension Operations {
     @discardableResult
     public func mergeCeremony(
         _ firstBlockID: String, _ secondBlockID: String,
-        pairings: [MergePairing], carries: [String]
+        pairings: [MergePairing], carries: [String], guardedBy guardian: WriteGuard? = nil
     ) throws -> MergeCeremonyResult {
         let result: MergeCeremonyResult = try database.write { db in
+            try guardian?(db)
             let first = try placedContext(db, blockID: firstBlockID)
             let second = try placedContext(db, blockID: secondBlockID)
             let containerID = first.container.id

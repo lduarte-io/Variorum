@@ -269,6 +269,9 @@ final class BookSettingsModel {
     /// Live paths of every tag the rule and the outflow name.
     private(set) var paths: [String: String] = [:]
     private(set) var hideOwnedDefault = false
+    /// 13n-b U2 (R-13nb-4): the book's Private mark (read with the rest;
+    /// kept off the `Reading` model so no stale model can ever clear it).
+    private(set) var isPrivate = false
     let stateDoors: BookStateDoors
 
     init(session: AppSession, readingID: String) {
@@ -282,11 +285,31 @@ final class BookSettingsModel {
     func load(for reading: Reading) async {
         let ids = Array(RuleGrammar.tagIDs(of: RuleGrammar.decode(reading.querySpec)))
             + reading.autoTagIDs
-        guard let (paths, hides) = try? await session.database.read({ db in
-            (try Queries.tagPaths(db, ids: ids), try Queries.hideOwnedDefault(db))
+        let readingID = readingID
+        guard let (paths, hides, marked) = try? await session.database.read({ db in
+            (try Queries.tagPaths(db, ids: ids), try Queries.hideOwnedDefault(db),
+             try Queries.isBookPrivate(db, readingID: readingID))
         }) else { return }
         self.paths = paths
         hideOwnedDefault = hides
+        isPrivate = marked
+    }
+
+    /// **The Private row** (13n-b U2 — R-13nb-4): `setBookPrivate` through
+    /// the runner; the receipt in the app's voice, or the op's own refusal.
+    /// Allowed on a finished, sealed or archived book (PROVISIONAL
+    /// P-13nb-U2-1 — the mark protects rather than authors).
+    func setPrivate(_ on: Bool, name: String) async {
+        let id = readingID
+        do {
+            let wrote = try await session.runner.run { try $0.setBookPrivate(id, on) }
+            isPrivate = on
+            if wrote {
+                session.status.receipt(on ? PrivateMarkCopy.markedBook(name) : PrivateMarkCopy.clearedBook(name))
+            }
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+        }
     }
 
     /// The "Edit…" door's editor — the rule editor for THIS reading. The
@@ -355,6 +378,8 @@ struct BookSettingsSheet: View {
         // 13i-d U4 (F-U3-5, the adjudication after U3): a GATHERING's
         // hide-owned chips — 13i-c U3's row, undeclared until now.
         + [.setReadingHideOwned]
+        // 13n-b U2 (R-13nb-4): the State section's Private row (books only).
+        + [.markBookPrivate]
 
     let structure: BookStructureModel
     /// The Edit… handoff (W-1): the host presents the editor AFTER this
@@ -623,6 +648,15 @@ struct BookSettingsSheet: View {
             stateRow(
                 caption: own == .unownBook ? CollectingCopy.ownedCaption : CollectingCopy.ownCaption,
                 act: own, readingID: reading.id)
+        }
+        // 13n-b U2 — PRIVATE (R-13nb-4): BOOKS only — a gathering refuses
+        // the mark (`wrongReadingKind`), so it never renders (P-2).
+        if reading.kind == .book {
+            Toggle(tokens.chromeLabel(CapabilityRegistry.capability(.markBookPrivate).verb), isOn: Binding(
+                get: { model.isPrivate },
+                set: { on in Task { await model.setPrivate(on, name: reading.name) } }))
+                .font(tokens.small)
+            ChromeNotice(tokens: tokens, text: PrivateMarkCopy.bookCaption, lines: 3)
         }
         // 13i-e U2 — ARCHIVED (the table's Archive / Unarchive; an owned
         // book's Archive asks — "Archive…").

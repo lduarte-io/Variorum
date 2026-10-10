@@ -153,6 +153,11 @@ struct LensesBoardView: View {
             model.host = .lenses
             // 13b 1b (P-4): registered handler, not a notification.
             commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+            // 13n-b U4: a parked lens landing (show_in_app / "Open ›").
+            model.consumePendingLensLanding()
+        }
+        .onChange(of: session.commandRouter.pendingLensLanding) { _, _ in
+            model.consumePendingLensLanding()
         }
         .onDisappear {
             if let commandToken {

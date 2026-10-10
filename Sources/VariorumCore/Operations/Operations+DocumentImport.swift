@@ -194,7 +194,7 @@ extension Operations {
 
     // MARK: - Internals
 
-    private struct MintedDocument {
+    struct MintedDocument {
         let post: Container
         let blockIDs: [String]
         let alternateCount: Int
@@ -205,7 +205,7 @@ extension Operations {
     /// header-only file, or a blank file inside a folder) — mints an EMPTY
     /// note: ⌘N's own shape (`createPost` — a post with no block yet), named
     /// by its header else its file, its tags applied as ever.
-    private func mintDocument(
+    func mintDocument(
         _ db: Database, _ named: VariorumDocument.NamedDocument, wingId: String, now: Date
     ) throws -> MintedDocument {
         let document = named.document
@@ -245,7 +245,7 @@ extension Operations {
     /// slash noise collapses; a path naming nothing is passed over),
     /// adopted-else-minted in the wing, applied once through the one
     /// application road (intake hears it).
-    private func applyDocumentTags(
+    func applyDocumentTags(
         _ db: Database, _ paths: [String], to postID: String, wingId: String, now: Date
     ) throws -> [String] {
         var adoption = TagAdoption(wing: wingId)

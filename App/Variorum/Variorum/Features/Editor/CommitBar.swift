@@ -50,6 +50,8 @@ struct CommitBar: View {
     /// note's wing + name, and the move's pending confirm.
     @Environment(WingsModel.self) private var wings: WingsModel?
     @State private var wingContext: NoteMenuWingContext?
+    /// 13n-b U2 (R-13nb-4): the open note's Private row's state.
+    @State private var privacy: NotePrivacyState?
     @State private var wingAsk: WingsModel.MoveAsk?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
@@ -152,6 +154,10 @@ struct CommitBar: View {
             .saveNoteVersion, .showNoteVersions,
             // 13n-a (R-13n-11): Copy for AI — the note ▾ menu's push gesture.
             .copyForAI,
+            // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
+            .markNotePrivate,
+            // 13n-b U3: "Allow AI here", the Private row's neighbour.
+            .mcpAllowHere,
             // 18c batch 3 (her U-6): the note ▾ row and the block ▾ row.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
             // 13u4 UNIT C2 (her item 9, R-13u4-4): the `block ▾` row,
@@ -781,6 +787,8 @@ struct CommitBar: View {
             .noteMenuWingDoors(
                 session: model.session, postID: model.postID, wings: wings,
                 context: $wingContext, ask: $wingAsk)
+            // 13n-b U2 (R-13nb-4): the Private row's state, loaded per note.
+            .notePrivacyDoor(session: model.session, postID: model.postID, state: $privacy)
     }
 
     /// The note's items — one list, rendered by `noteMenu` and, in the
@@ -810,6 +818,10 @@ struct CommitBar: View {
                     let postID = model.postID
                     Task { await CopyForAI.copy(postID: postID, session: session) }
                 }
+                // 13n-b U2 (R-13nb-4): "Private — never shared with AI", and
+                // the note's quiet lines (a Private book holding it; the
+                // clients that reach it).
+                NotePrivacyMenuItems(session: model.session, postID: model.postID, state: privacy)
                 Divider()
             }
             // 18c batch 3 — **HER U-6's own button**, in the menu that IS the

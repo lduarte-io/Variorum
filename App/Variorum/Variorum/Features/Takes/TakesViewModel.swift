@@ -923,6 +923,46 @@ final class TakesViewModel {
         saveMemory()
     }
 
+    /// What `showLens` did (13n-b U4 — pinned).
+    enum LensShowing: Equatable {
+        case alreadyShown, added, replacedLast
+    }
+
+    /// **Show THIS saved lens on the board** (13n-b U4 — `show_in_app`'s
+    /// lens target and a receipt's "Open ›"; AF-11 F-3): its column if one
+    /// already shows it; else a new column (her "+ Column → lens" door);
+    /// else, with the board's four columns full, the LAST column swapped for
+    /// it (her R83 replace-in-place door — PROVISIONAL P-13nb-U4-11). Her
+    /// doors' own column ops, so the memory saves as hers do.
+    @discardableResult
+    func showLens(_ lensID: String) -> LensShowing {
+        if columns.contains(where: { $0.kind == .lens(lensID) }) { return .alreadyShown }
+        if columns.count < 4 {
+            addLensColumn(lensID)
+            return .added
+        }
+        guard let last = columns.last else { return .alreadyShown }
+        replaceColumnWithLens(last.id, lensID: lensID)
+        return .replacedLast
+    }
+
+    /// The router's parked lens landing, consumed if it is THIS note's
+    /// (post-stamped — a landing for another note is left alone).
+    func consumePendingLensLanding() {
+        guard let landing = session.commandRouter.pendingLensLanding, landing.postID == postID else { return }
+        session.commandRouter.pendingLensLanding = nil
+        showLens(landing.lensID)
+    }
+
+    /// 13n-b U4: a takes landing parked while THIS board was already
+    /// mounted (an agent's show at a block, a receipt's "Open ›") is
+    /// consumed now against the current projection, rather than waiting for
+    /// the next store write to deliver one.
+    func consumePendingTakesLanding() {
+        guard loaded, session.commandRouter.pendingTakesLanding?.postID == postID else { return }
+        consumeLandings(projection)
+    }
+
     func removeColumn(_ columnID: String) {
         guard columns.count > 1 else { return }
         columns.removeAll { $0.id == columnID }

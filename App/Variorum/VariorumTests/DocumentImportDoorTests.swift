@@ -230,13 +230,13 @@ struct DocumentImportDoorTests {
 
             model.scope = .shelf(work)
             let soloDrop = BookcaseImportDrop(
-                session: session, shelfID: model.mintShelfID, targeted: .constant(false), speak: { _ in })
+                session: session, shelfID: model.mintShelfID, targeted: .constant(false), deliver: { _ in })
             #expect(await soloDrop.land([filed]).kind == .receipt)
             #expect(try await shelf(of: "filed here") == work, "dropped on Work, solo'd — it lands on Work")
 
             model.scope = .all
             let allDrop = BookcaseImportDrop(
-                session: session, shelfID: model.mintShelfID, targeted: .constant(false), speak: { _ in })
+                session: session, shelfID: model.mintShelfID, targeted: .constant(false), deliver: { _ in })
             #expect(await allDrop.land([loose]).kind == .receipt)
             #expect(try await shelf(of: "loose book") == nil, "dropped from All — unshelved")
         }

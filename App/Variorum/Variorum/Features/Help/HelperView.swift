@@ -93,6 +93,8 @@ struct HelperView: View {
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
+            // 13n-b U4 (AF-11 F-2): the offer door's keyboard road.
+            ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
             ("⌃⌘↑ / ⌃⌘↓", "jump to the previous / next block"),
             ("⌘⇧'", "the block's comments"),
             ("⌥⌘C", "callout frame on this block (again to remove it)"),

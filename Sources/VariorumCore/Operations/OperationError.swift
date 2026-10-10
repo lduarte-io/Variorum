@@ -367,4 +367,19 @@ public enum OperationError: Error, Equatable, Sendable {
     /// reason naming the filter, per the author's ruling ("it should give
     /// you a descriptive error message when you can't add something").
     case smartFilterUnsatisfiable(readingID: String, reason: String)
+
+    // THE MCP DOOR's grants store (13n-b U1 — `Operations+MCPGrants.swift`;
+    // these speak in Settings ▸ MCP, the technical register — P-13n-1).
+    /// A client named itself with nothing (blank `clientInfo.name`).
+    case mcpInvalidClientName(name: String)
+    case mcpClientNotFound(id: String)
+    case mcpGrantNotFound(id: String)
+    /// A grant to a client that is pending or denied — approve it first.
+    case mcpClientNotApproved(id: String)
+    /// The grant's target is not a live note / book / wing of its kind.
+    case mcpGrantScopeNotFound(kind: String, id: String)
+    /// A journal's or a Private book is never a grant's scope (its notes are
+    /// shared one ask at a time), and a fenced note never takes "always"
+    /// (R-13n-4; R-13nb-1/4).
+    case mcpGrantScopeFenced(kind: String, id: String)
 }

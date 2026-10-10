@@ -207,7 +207,7 @@ struct ShelfView: View {
                 of: BookcaseImportDrop.types,
                 delegate: BookcaseImportDrop(
                     session: session, shelfID: model.mintShelfID, targeted: $importDropTargeted,
-                    speak: { speech in
+                    deliver: { speech in
                         switch speech.kind {
                         case .receipt: session.status.receipt(speech.text)
                         case .refusal: session.status.refuse(speech.text)
@@ -673,6 +673,18 @@ struct ShelfView: View {
                             .font(tokens.body.weight(.semibold))
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
+                        // 13n-b U2 (P-13n-3; mockup §7): the "shared with AI"
+                        // chip — an approved MCP client can reach this book now.
+                        if model.aiShared.contains(reading.id) {
+                            Text(SharedWithAICopy.chip)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.accent)
+                                .lineLimit(1)
+                                .fixedSize()
+                                .padding(.horizontal, 5)
+                                .overlay(RoundedRectangle(cornerRadius: 4).stroke(tokens.seam, lineWidth: 1))
+                                .help(SharedWithAICopy.chipHelp)
+                        }
                     }
                     .frame(minWidth: 160, alignment: .leading)
                     Text(model.tagsColumn(for: book).map { "#\($0)" }.joined(separator: " "))

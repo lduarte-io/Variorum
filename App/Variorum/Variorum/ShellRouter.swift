@@ -50,6 +50,17 @@ final class ShellRouter {
     /// 13f batch 3: the window's open notes + per-pane back/forward.
     let workspace = WorkspaceModel()
 
+    /// **A book's CHAPTER landing** (13n-b U4 — `show_in_app`'s book target
+    /// and a receipt's "Open ›" on a chapter; AF-11 F-3): the book named
+    /// here, when it mounts (or is already showing), switches to Outline and
+    /// lands that chapter at the top — Outline's own chapter landing
+    /// (`BookViewModel.requestChapterReveal`). One-shot; the book clears it.
+    struct BookChapterLanding: Equatable, Sendable {
+        let bookID: String
+        let sectionID: String
+    }
+    var pendingBookChapter: BookChapterLanding?
+
     // MARK: - The shell's CONFIRM (13u4 UNIT S3 — KnownIssues row 67)
 
     /// **A question the shell is asking, for the window to present.**

@@ -272,7 +272,7 @@ struct BookcaseImportDrop: DropDelegate {
     /// from All.
     let shelfID: String?
     @Binding var targeted: Bool
-    let speak: @MainActor (DocumentImportSpeech) -> Void
+    let deliver: @MainActor (DocumentImportSpeech) -> Void
 
     static let types: [UTType] = [.fileURL]
 
@@ -303,11 +303,11 @@ struct BookcaseImportDrop: DropDelegate {
                 if let url = await Self.loadFileURL(provider) { urls.append(url) }
             }
             guard !urls.isEmpty else {
-                drop.speak(DocumentImportSpeech(
+                drop.deliver(DocumentImportSpeech(
                     kind: .refusal, text: DocumentImportCopy.nothingToImport, opens: nil))
                 return
             }
-            drop.speak(await drop.land(urls))
+            drop.deliver(await drop.land(urls))
         }
         return true
     }

@@ -159,6 +159,26 @@ struct AcknowledgmentsCopyTests {
             #expect(!notice.role.isEmpty)
         }
     }
+
+    /// 13n-b (R-13n-2): the MCP SDK family rides the MAC's notices — the SDK
+    /// with its MIT copyright line and the transition statement, the three
+    /// packages it links, SwiftLog's NOTICE reproduced (Apache 2.0 §4(d)), and
+    /// the Apache 2.0 text itself (§4(a)).
+    @Test func theMCPFamilyRidesTheMacNotices() {
+        let names = AcknowledgmentsCopy.all.map(\.name)
+        for expected in ["MCP Swift SDK", "SwiftLog", "Swift System", "EventSource", "Apache License 2.0"] {
+            #expect(names.contains(expected), "missing \(expected)")
+        }
+        #expect(AcknowledgmentsCopy.mcpSDK.text.contains(
+            "Copyright (c) 2024-2025 Model Context Protocol a Series of LF Projects, LLC."))
+        #expect(AcknowledgmentsCopy.mcpSDK.text.contains("licensing transition from the MIT License"))
+        #expect(AcknowledgmentsCopy.swiftLog.text.contains("Copyright 2018, 2019 The SwiftLog Project"))
+        #expect(AcknowledgmentsCopy.eventSource.text.contains("Copyright 2025 Mattt"))
+        #expect(AcknowledgmentsCopy.apache2.text.contains("END OF TERMS AND CONDITIONS"))
+        #expect(AcknowledgmentsCopy.swiftSystem.text.contains("Runtime Library Exception"))
+        // The shared list (the phone's) never names the Mac-only family.
+        #expect(!AcknowledgmentsCopy.shared.map(\.name).contains("MCP Swift SDK"))
+    }
 }
 
 // MARK: - Batch 2 additions (the owed Batch-1 items)

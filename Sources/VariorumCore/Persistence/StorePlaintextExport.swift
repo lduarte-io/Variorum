@@ -39,6 +39,10 @@ public enum StorePlaintextExport {
     /// The tables that stay behind — the registry's local-only set.
     public static var localOnlyTables: Set<String> { SyncSchema.localOnlyTables }
 
+    /// The tables that travel EMPTY — the MCP door's grants store (13n-b,
+    /// A-5).
+    public static var strippedTables: Set<String> { MCPGrantSchema.tables }
+
     /// Write the decrypted copy at `destination`. Runs on the caller's
     /// thread (a file-sized copy — callers hop off the main actor).
     public static func export(from database: AppDatabase, to destination: URL) throws {
@@ -60,6 +64,15 @@ public enum StorePlaintextExport {
             for table in localOnlyTables.sorted() {
                 let quoted = table.replacingOccurrences(of: "\"", with: "\"\"")
                 try db.execute(sql: "DROP TABLE IF EXISTS plain.\"\(quoted)\"")
+            }
+            // 13n-b (A-5): the MCP door's grants store travels EMPTY — no
+            // client, grant, switch or activity row leaves in the file (a
+            // grants list in an export serves nobody), while the tables stay
+            // so the file's schema is whole and a re-opened export needs no
+            // second recreation road (`MCPGrantSchema`).
+            for table in MCPGrantSchema.childFirstOrder {
+                let quoted = table.replacingOccurrences(of: "\"", with: "\"\"")
+                try db.execute(sql: "DELETE FROM plain.\"\(quoted)\"")
             }
         }
         // The export's own journal sidecars (the attached file's) — swept.

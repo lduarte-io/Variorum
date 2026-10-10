@@ -801,7 +801,8 @@ extension SampleCopyClassifier {
         guard let reading = try Row.fetchOne(
             db,
             sql: """
-                SELECT locked, word_target, max_posts, grouping_tag_id, sort_field, sort_dir
+                SELECT locked, word_target, max_posts, grouping_tag_id, sort_field, sort_dir,
+                       ai_private_at
                 FROM reading WHERE id = ?
                 """,
             arguments: [copyID])
@@ -811,7 +812,11 @@ extension SampleCopyClassifier {
             || (reading["max_posts"] as Int?) != nil
             || (reading["grouping_tag_id"] as String?) != nil
             || (reading["sort_field"] as String?) != SortField.manual.rawValue
-            || (reading["sort_dir"] as String?) != SortDirection.asc.rawValue {
+            || (reading["sort_dir"] as String?) != SortDirection.asc.rawValue
+            // 13n-b U2 ladder F1 (R-13nb-4, v1_25): her Private mark is her
+            // hand on the copy — EDITED, so the marked copy is the keeper
+            // and the fence is never retired to an unmarked twin.
+            || (reading["ai_private_at"] as String?) != nil {
             return .edited
         }
 
@@ -873,7 +878,8 @@ extension SampleCopyClassifier {
             guard let post = try Row.fetchOne(
                 db,
                 sql: """
-                    SELECT title, locked, archived_at, entry_date, floating_notes, deleted_at
+                    SELECT title, locked, archived_at, entry_date, floating_notes, deleted_at,
+                           ai_private_at
                     FROM container WHERE id = ?
                     """,
                 arguments: [postID])
@@ -881,7 +887,10 @@ extension SampleCopyClassifier {
             if (post["deleted_at"] as String?) != nil { return .edited }
             if (post["locked"] as Int? ?? 0) != 0
                 || (post["archived_at"] as String?) != nil
-                || (post["entry_date"] as String?) != nil {
+                || (post["entry_date"] as String?) != nil
+                // 13n-b U2 ladder F1 (R-13nb-4, v1_25): a member note's own
+                // Private mark is her hand on the copy — EDITED.
+                || (post["ai_private_at"] as String?) != nil {
                 return .edited
             }
             if let notes = post["floating_notes"] as String?, !notes.isEmpty { return .edited }

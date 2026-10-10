@@ -108,9 +108,13 @@ extension Operations {
     ///
     /// A sealed container refuses on BOTH roads (`ensureUnlocked`), exactly
     /// as it did when the only road was `insertPlacement`.
+    ///
+    /// `guardedBy` (13n-b U4 — `put_back`): the caller's in-transaction
+    /// precondition (`WriteGuard`), run first; nil on her doors.
     @discardableResult
-    public func restoreBlock(_ blockID: String) throws -> BlockRestoreLanding {
+    public func restoreBlock(_ blockID: String, guardedBy guardian: WriteGuard? = nil) throws -> BlockRestoreLanding {
         try database.write { db in
+            try guardian?(db)
             guard var block = try Block.fetchOne(db, key: blockID) else {
                 throw OperationError.blockNotFound(id: blockID)
             }
@@ -168,8 +172,11 @@ extension Operations {
     /// Move the block's single live placement to another container (or spot).
     /// Both the source and target posts must be unsealed; ownership stays
     /// single because the one pointer row moves (I2).
+    /// `guardedBy` (13n-b U3): the caller's in-transaction precondition
+    /// (`WriteGuard`); nil on her doors, never on the redo.
     public func moveBlock(
-        _ blockID: String, to containerID: String, at insert: InsertPosition = .end
+        _ blockID: String, to containerID: String, at insert: InsertPosition = .end,
+        guardedBy guardian: WriteGuard? = nil
     ) throws {
         // Pre-image captured at do-time: the undo inverse restores the exact
         // prior container and position string, never re-derives them. The
@@ -181,6 +188,7 @@ extension Operations {
             previous: (container: String, position: String),
             landed: (container: String, position: String)
         ) = try database.write { db in
+            try guardian?(db)
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
@@ -210,11 +218,14 @@ extension Operations {
     }
 
     /// Reposition within the current container.
-    public func reorder(_ blockID: String, to insert: InsertPosition) throws {
+    public func reorder(
+        _ blockID: String, to insert: InsertPosition, guardedBy guardian: WriteGuard? = nil
+    ) throws {
         let images: (
             previous: (container: String, position: String),
             landed: (container: String, position: String)
         ) = try database.write { db in
+            try guardian?(db)
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)

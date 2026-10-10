@@ -138,12 +138,20 @@ public enum SyncSchema {
     /// client's CAS whole-row push would silently null the column out
     /// from under a marker-12 writer; mirror DDL 15_phase13ie_archive.sql
     /// — deploy is HER window, the 13i-e deploy checklist, never
-    /// pre-authorized).
+    /// pre-authorized);
+    /// version 13 = the Phase 13n-b PRIVATE MARK event (her ruling
+    /// R-13nb-4, the 13n-b plan's sitting record: TWO additive columns —
+    /// `container.ai_private_at` + `reading.ai_private_at`, the
+    /// `archived_at` class, PLAIN — the AI fence's third leg; no table,
+    /// no RPC change; the marker moves because a marker-12 client's CAS
+    /// whole-row push would silently null the columns out from under a
+    /// marker-13 writer; mirror DDL 16_phase13nb_private.sql — deploy is
+    /// HER closeout window, never pre-authorized).
     /// **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 12
+    public static let lockstepVersion = 13
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -158,7 +166,13 @@ public enum SyncSchema {
                 "locked_at", "segmentation_default", "last_touched_at",
                 "last_major_revision_at", "churn_accumulator",
                 "baseline_length", "word_target", "wing_id", "created_at",
-                "updated_at", "archived_at", "deleted_at",
+                "updated_at", "archived_at",
+                // 13n-b (v1_25, marker 12→13 — R-13nb-4): the per-NOTE
+                // PRIVATE mark, the AI fence's own-row leg. PLAIN — a bare
+                // timestamp, the archived_at class (disclosed structure:
+                // that a note is marked, never which or what it says).
+                "ai_private_at",
+                "deleted_at",
             ],
             encrypted: ["title", "floating_notes"]),
         SyncTable(
@@ -245,6 +259,11 @@ public enum SyncSchema {
                 // class (disclosed structure: that a book is put away, never
                 // which one or what it holds).
                 "archived_at",
+                // 13n-b (v1_25, marker 12→13 — R-13nb-4): the per-BOOK
+                // PRIVATE mark — a live private book fences every live
+                // member (privacy wins ties). PLAIN — a bare timestamp,
+                // the same disclosure class as archived_at.
+                "ai_private_at",
                 "created_at", "updated_at", "deleted_at",
             ],
             encrypted: ["name", "query_spec"]),

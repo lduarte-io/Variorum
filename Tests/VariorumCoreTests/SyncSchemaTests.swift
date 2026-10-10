@@ -26,11 +26,21 @@ struct SyncSchemaTests {
             }
             #expect(Set(SyncSchema.tables.map(\.name)) == synced,
                     "registry drifted from the set of sync_version-carrying tables")
-            #expect(SyncSchema.localOnlyTables.union(SyncSchema.derivedTables)
+            // 13n-b (A-5): the MCP door's grants store is the THIRD unsynced
+            // family — neither sync machinery (export-dropped) nor derived
+            // (export-kept whole): its own registration, exported EMPTY.
+            #expect(SyncSchema.localOnlyTables
+                        .union(SyncSchema.derivedTables)
+                        .union(MCPGrantSchema.tables)
                         == allTables.subtracting(synced),
-                    "local-only + derived lists drifted from the schema")
+                    "local-only + derived + grants-store lists drifted from the schema")
             #expect(SyncSchema.localOnlyTables.isDisjoint(with: SyncSchema.derivedTables),
                     "a table cannot be both export-dropped (local-only) and export-kept (derived)")
+            #expect(MCPGrantSchema.tables.isDisjoint(with: SyncSchema.localOnlyTables)
+                        && MCPGrantSchema.tables.isDisjoint(with: SyncSchema.derivedTables),
+                    "the grants store is its own family, never sync machinery or a derived index")
+            #expect(MCPGrantSchema.tables.isDisjoint(with: synced),
+                    "the grants store is LOCAL-ONLY — no grants table may carry sync_version")
         }
     }
 

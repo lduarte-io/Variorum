@@ -1050,6 +1050,20 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⇧⌥⌘Z", takesAccess: .native,
             unavailableNote: "No structural change to redo.",
             availability: { ctx in ctx.redoAvailable ? .act : .unavailable }),
+        // 13n-b U4 — THE OFFER DOOR's KEYBOARD ROAD (R-13nb-23 (a), her
+        // words: "which opening that needs a keyboard shortcut too"; AF-11
+        // F-2). Every AI write receipt carries "Open ›"; this act opens the
+        // most recent one's target THIS SESSION — alive after the line fades
+        // and under receipt_style off (a chord racing a 6-second fade would
+        // be a lying road). App scope, beside its veto (⌥⌘Z) in the Edit
+        // menu; grey until an AI write has landed this session. ⌥⌘O: THE
+        // COLLISION SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        Capability(
+            id: .showLastAIChange, verb: "Show the AI\u{2019}s Last Change", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "⌥⌘O", takesAccess: nil,
+            unavailableNote: "No AI change to show yet — nothing a connected client wrote has landed this session.",
+            availability: { ctx in ctx.aiLastChangeAvailable ? .act : .unavailable }),
 
         // MARK: Post scope
         Capability(
@@ -2139,6 +2153,88 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Crash reports are deleted from Settings \u{25B8} Diagnostics.",
             availability: always),
+
+        // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)
+        // The Diagnostics shape: `.surface`, app scope, always available as
+        // an ACT, each acting on the row it sits on. See the declaration
+        // comment in `Capability.swift` for why none wears a palette or menu
+        // door. The words are the pane's register (direct and technical —
+        // R-13n-5); "Copy setup command" is her R-13nb-5.
+        Capability(
+            id: .mcpApproveClient, verb: "Approve\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Connection requests are approved in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpDenyClient, verb: "Deny", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Connection requests are denied in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpChangeClientAccess, verb: "Change\u{2026}", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's access is changed in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpRevokeClient, verb: "Revoke", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client is revoked in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpRevokeGrant, verb: "Revoke", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Shared places are revoked in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpCopySetupCommand, verb: "Copy setup command", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The setup command is in Settings \u{25B8} MCP.",
+            availability: always),
+        Capability(
+            id: .mcpGrantAccess, verb: "Grant", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Access is granted from Settings \u{25B8} MCP.",
+            availability: always),
+        // 13n-b U2 (AF-6): the ask sheet's answer — its one renderer is the
+        // sheet, which carries the ask it answers.
+        Capability(
+            id: .mcpAnswerAsk, verb: "Answer", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's ask is answered on the sheet it arrives on.",
+            availability: always),
+        // 13n-b U2 — THE PRIVATE MARK (R-13nb-4). The note's row: post-scoped
+        // and available wherever a note is (`noteScoped` — Copy full text's
+        // own rule; the bars render it in NOTE contexts only, never on a
+        // scraps group). The book's: the settings sheet's State row (books
+        // only — a gathering refuses `wrongReadingKind`, so it never renders).
+        Capability(
+            id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.noNoteNote,
+            availability: noteScoped),
+        Capability(
+            id: .markBookPrivate, verb: PrivateMarkCopy.rowWords, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.bookSheetNote,
+            availability: always),
+        // 13n-b U3 — "Allow AI here" (R-13n-11; AF-8/AF-10 (e)): the Private
+        // row's neighbour, the same post scope and note-only availability.
+        Capability(
+            id: .mcpAllowHere, verb: PrivateMarkCopy.allowHere, scope: .post,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PrivateMarkCopy.allowHereNoNote,
+            availability: noteScoped),
     ]
 
     // MARK: - Lookup

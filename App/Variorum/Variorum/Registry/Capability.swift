@@ -210,6 +210,18 @@ nonisolated enum TakesLanding: Equatable, Sendable {
     }
 }
 
+/// **A Lenses-board landing** (13n-b U4 — `show_in_app`'s lens target and
+/// a receipt's "Open ›" on a saved lens; AF-11 F-3): show THIS saved lens on
+/// the arriving (or mounted) Lenses board — its column if one shows it, else
+/// a new column (her "+ Column → lens" door), else, with the board's four
+/// columns full, the LAST column swapped for it (her R83 replace-in-place
+/// door — PROVISIONAL). Post-stamped and one round, `TakesLanding`'s
+/// discipline.
+nonisolated struct LensLanding: Equatable, Sendable {
+    let postID: String
+    let lensID: String
+}
+
 // MARK: - Availability context
 
 /// The pure context availability rules read. Assembled by `CommandRouter`
@@ -257,6 +269,9 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// `edit` and honestly grey in `read` (the enabled-into-nil class the
     /// registry exists to kill, from both sides).
     var readEditAttached = false
+    /// 13n-b U4 (AF-11 F-2): a connected AI client's write landed this
+    /// session and has somewhere to show — "Show the AI's Last Change" acts.
+    var aiLastChangeAvailable = false
     /// The structural undo stack has an entry.
     var undoAvailable = false
     /// The structural REDO stack has an entry (13c 1B — A10).
@@ -576,6 +591,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case toggleCanvasBank, returnCardToBank
     // Commit + undo/redo (13c 1B — A10 adds the redo half)
     case commitTake, structuralUndo, structuralRedo
+    /// 13n-b U4 (R-13nb-23 (a), AF-11 F-2): the offer door's KEYBOARD road —
+    /// "Show the AI's Last Change" (⌥⌘O), session-scoped.
+    case showLastAIChange
     // Post scope
     case sealPost
     // Write-editor-scoped doors the menu renders
@@ -889,4 +907,31 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// never by a keystroke from elsewhere — the verbatim-first promise
     /// would otherwise have a door that skips the reading.
     case sendCrashReport, deleteCrashReport
+    /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
+    /// on the Data Safety / Diagnostics precedent: each acts on the row she
+    /// is looking at (a connection request, a client, a grant) or the pane's
+    /// one command, and the MCP pane is their ONLY renderer. Approve… /
+    /// Change… open the grant sheet, whose confirm is `.mcpGrantAccess`;
+    /// Revoke on a client is a deny (P-13nb-U1-5). Deliberately NOT
+    /// `.palette` or `.menuBar`: who may read the library is decided where
+    /// the grants are shown, never by a keystroke from elsewhere.
+    case mcpApproveClient, mcpDenyClient, mcpChangeClientAccess, mcpRevokeClient
+    case mcpRevokeGrant, mcpCopySetupCommand, mcpGrantAccess
+    /// 13n-b U2 — THE JUST-IN-TIME ASK's answer (AF-6; mockup §4), `.surface`
+    /// on the MCP family's precedent: rendered ONLY by the ask sheet, which
+    /// carries the one ask it answers (once · while connected · always ·
+    /// don't allow — the durations the ask may offer).
+    case mcpAnswerAsk
+    /// 13n-b U2 — THE PRIVATE MARK (R-13nb-4): "Private — never shared with
+    /// AI". The note's row lives in the note ▾ menu of both bottom bars
+    /// (`.bottomBar`, beside Copy full text); the book's in the Book Settings
+    /// sheet's State section (`.surface`). Gatherings and scraps never render
+    /// it (the operations refuse them — P-2).
+    case markNotePrivate, markBookPrivate
+    /// 13n-b U3 — "ALLOW AI HERE" (R-13n-11's connected push gesture; AF-8,
+    /// AF-10 (e)): the note ▾ menu's submenu of approved clients, each
+    /// sharing THIS note read · once. Rendered beside the Private row in both
+    /// bars (`.bottomBar`), NOTE contexts only, and only when a client is
+    /// there to offer (P-2).
+    case mcpAllowHere
 }

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E1AC00012F0000000000CC01 /* VariorumMCP in Frameworks */ = {isa = PBXBuildFile; productRef = E1AC00022F0000000000CC02 /* VariorumMCP */; };
+		E1AC00032F0000000000CC03 /* VariorumMCPSocket in Frameworks */ = {isa = PBXBuildFile; productRef = E1AC00042F0000000000CC04 /* VariorumMCPSocket */; };
+		E1AC00052F0000000000CC05 /* variorum-mcp in Embed MCP Shim */ = {isa = PBXBuildFile; fileRef = E1AC00062F0000000000CC06 /* variorum-mcp */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1C271B32FFC2FB40084BEA6 /* VariorumCore */; };
 		E1D217912FFCE2C600886CFC /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1D217902FFCE2C600886CFC /* VariorumCore */; };
 		E1B5A0022F0000000000AA02 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E1B5A0032F0000000000AA03 /* Sparkle */; };
@@ -15,6 +18,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E1AC00072F0000000000CC07 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1C271802FFC2F420084BEA6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E1AC00102F0000000000CC10;
+			remoteInfo = "variorum-mcp";
+		};
 		E1C271962FFC2F440084BEA6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E1C271802FFC2F420084BEA6 /* Project object */;
@@ -45,7 +55,22 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E1AC00082F0000000000CC08 /* Embed MCP Shim */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				E1AC00052F0000000000CC05 /* variorum-mcp in Embed MCP Shim */,
+			);
+			name = "Embed MCP Shim";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E1AC00062F0000000000CC06 /* variorum-mcp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "variorum-mcp"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C271882FFC2F420084BEA6 /* Variorum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Variorum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C271952FFC2F440084BEA6 /* VariorumTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VariorumTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C2719F2FFC2F440084BEA6 /* VariorumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VariorumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +81,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		E1AC00092F0000000000CC09 /* VariorumMCPShim */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VariorumMCPShim;
+			sourceTree = "<group>";
+		};
 		E1C2718A2FFC2F420084BEA6 /* Variorum */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Variorum;
@@ -94,12 +124,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E1AC000A2F0000000000CC0A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1AC00032F0000000000CC03 /* VariorumMCPSocket in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1C271852FFC2F420084BEA6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */,
 				E1B5A0022F0000000000AA02 /* Sparkle in Frameworks */,
+				E1AC00012F0000000000CC01 /* VariorumMCP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,6 +192,7 @@
 				E1D2176B2FFCE2C600886CFC /* VariorumMobileTests */,
 				E1D217752FFCE2C600886CFC /* VariorumMobileUITests */,
 				E19B00042F00000000000B04 /* TestSupport */,
+				E1AC00092F0000000000CC09 /* VariorumMCPShim */,
 				E1C271892FFC2F420084BEA6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -166,6 +206,7 @@
 				E1D2175C2FFCE2C500886CFC /* VariorumMobile.app */,
 				E1D217682FFCE2C600886CFC /* VariorumMobileTests.xctest */,
 				E1D217722FFCE2C600886CFC /* VariorumMobileUITests.xctest */,
+				E1AC00062F0000000000CC06 /* variorum-mcp */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -182,6 +223,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E1AC00102F0000000000CC10 /* variorum-mcp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1AC000C2F0000000000CC0C /* Build configuration list for PBXNativeTarget "variorum-mcp" */;
+			buildPhases = (
+				E1AC000B2F0000000000CC0B /* Sources */,
+				E1AC000A2F0000000000CC0A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E1AC00092F0000000000CC09 /* VariorumMCPShim */,
+			);
+			name = "variorum-mcp";
+			packageProductDependencies = (
+				E1AC00042F0000000000CC04 /* VariorumMCPSocket */,
+			);
+			productName = "variorum-mcp";
+			productReference = E1AC00062F0000000000CC06 /* variorum-mcp */;
+			productType = "com.apple.product-type.tool";
+		};
 		E1C271872FFC2F420084BEA6 /* Variorum */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E1C271A92FFC2F440084BEA6 /* Build configuration list for PBXNativeTarget "Variorum" */;
@@ -189,11 +252,13 @@
 				E1C271842FFC2F420084BEA6 /* Sources */,
 				E1C271852FFC2F420084BEA6 /* Frameworks */,
 				E1C271862FFC2F420084BEA6 /* Resources */,
+				E1AC00082F0000000000CC08 /* Embed MCP Shim */,
 				E1B5A0102F0000000000AA10 /* Stamp Build Number */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E1AC000D2F0000000000CC0D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E1C2718A2FFC2F420084BEA6 /* Variorum */,
@@ -203,6 +268,7 @@
 			packageProductDependencies = (
 				E1C271B32FFC2FB40084BEA6 /* VariorumCore */,
 				E1B5A0032F0000000000AA03 /* Sparkle */,
+				E1AC00022F0000000000CC02 /* VariorumMCP */,
 			);
 			productName = Variorum;
 			productReference = E1C271882FFC2F420084BEA6 /* Variorum.app */;
@@ -334,6 +400,9 @@
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					E1AC00102F0000000000CC10 = {
+						CreatedOnToolsVersion = 27.0;
+					};
 					E1C271872FFC2F420084BEA6 = {
 						CreatedOnToolsVersion = 26.3;
 					};
@@ -382,6 +451,7 @@
 				E1D2175B2FFCE2C500886CFC /* VariorumMobile */,
 				E1D217672FFCE2C600886CFC /* VariorumMobileTests */,
 				E1D217712FFCE2C600886CFC /* VariorumMobileUITests */,
+				E1AC00102F0000000000CC10 /* variorum-mcp */,
 			);
 		};
 /* End PBXProject section */
@@ -456,6 +526,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E1AC000B2F0000000000CC0B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1C271842FFC2F420084BEA6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -503,6 +580,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E1AC000D2F0000000000CC0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E1AC00102F0000000000CC10 /* variorum-mcp */;
+			targetProxy = E1AC00072F0000000000CC07 /* PBXContainerItemProxy */;
+		};
 		E1C271972FFC2F440084BEA6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E1C271872FFC2F420084BEA6 /* Variorum */;
@@ -526,6 +608,40 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		E1AC000E2F0000000000CC0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 384925MZJ6;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.lduarte.Variorum.debug.mcp-shim;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E1AC000F2F0000000000CC0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 384925MZJ6;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.lduarte.Variorum.mcp-shim;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 		E1C271A72FFC2F440084BEA6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -965,6 +1081,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E1AC000C2F0000000000CC0C /* Build configuration list for PBXNativeTarget "variorum-mcp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1AC000E2F0000000000CC0E /* Debug */,
+				E1AC000F2F0000000000CC0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E1C271832FFC2F420084BEA6 /* Build configuration list for PBXProject "Variorum" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1049,6 +1174,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E1AC00022F0000000000CC02 /* VariorumMCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VariorumMCP;
+		};
+		E1AC00042F0000000000CC04 /* VariorumMCPSocket */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = VariorumMCPSocket;
+		};
 		E1C271B32FFC2FB40084BEA6 /* VariorumCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = VariorumCore;

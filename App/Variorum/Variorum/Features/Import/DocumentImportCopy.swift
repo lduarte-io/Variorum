@@ -139,6 +139,9 @@ nonisolated enum DocumentImportCopy {
             return "it holds no .md, .txt or .variorum files"
         case .blankChapterName:
             return "one of its folders has a blank name, and a chapter needs one"
+        case .unsupportedVersion(let version):
+            // 13n-b U3: a file from a newer Variorum (format version N).
+            return "it was written by a newer Variorum (format version \(version)) \u{2014} update Variorum to import it"
         }
     }
 
