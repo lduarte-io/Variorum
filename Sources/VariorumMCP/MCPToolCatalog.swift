@@ -14,7 +14,9 @@ import VariorumCore
 /// U1 shipped the READ rung (`list_books`, `list_notes`, `read_note`,
 /// `search`, `export_note`); U2 adds SUGGEST (`add_take`, `add_comment`,
 /// `save_lens`) and WRITE NEW (`create_note`, `import_document`, `apply_tag`,
-/// `create_book`, `add_note_to_book`); U3 edit.
+/// `create_book`, `add_note_to_book`); U3 the EDIT rung (`edit_take`,
+/// `divide_block`, `merge_blocks`, `move_block`, `delete_block`,
+/// `set_block_name`) and write new's `create_section`.
 struct MCPToolDeclaration: Sendable {
     let name: String
     let rung: MCPGrantRule.Rung
@@ -45,7 +47,9 @@ struct MCPToolDeclaration: Sendable {
         Tool(
             name: name, title: title, description: description, inputSchema: inputSchema,
             annotations: .init(
-                title: title, readOnlyHint: rung == .read, destructiveHint: false,
+                // U3: the edit rung changes what is already there (every act
+                // undoable, the delete a tombstone — but honest hints say so).
+                title: title, readOnlyHint: rung == .read, destructiveHint: rung == .edit,
                 idempotentHint: rung == .read, openWorldHint: false))
     }
 
@@ -55,8 +59,13 @@ struct MCPToolDeclaration: Sendable {
 enum MCPToolCatalog {
     static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
     static let suggest: [MCPToolDeclaration] = [addTake, addComment, saveLens]
-    static let writeNew: [MCPToolDeclaration] = [createNote, importDocument, applyTag, createBook, addNoteToBook]
-    static let all: [MCPToolDeclaration] = read + suggest + writeNew
+    static let writeNew: [MCPToolDeclaration] = [
+        createNote, importDocument, applyTag, createBook, addNoteToBook, createSection,
+    ]
+    static let edit: [MCPToolDeclaration] = [
+        editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
+    ]
+    static let all: [MCPToolDeclaration] = read + suggest + writeNew + edit
 
     static func declaration(named name: String) -> MCPToolDeclaration? {
         all.first { $0.name == name }
@@ -323,17 +332,157 @@ enum MCPToolCatalog {
     static let addNoteToBook = MCPToolDeclaration(
         name: "add_note_to_book", rung: .writeNew, title: "Add a note to a book",
         description: """
-            Add a note to a book (at its end). Both must be shared with this client at write new. \
-            Returns JSON.
+            Add a note to a book (at its end), optionally filed under one of the book's chapters \
+            (section_id — from list_notes or create_section). Both must be shared with this client \
+            at write new. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note."]),
                 "book_id": .object(["type": "string", "description": "The book."]),
+                "section_id": .object(["type": "string", "description": "File it under this chapter of the book."]),
             ]),
             "required": .array(["note_id", "book_id"]),
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])
+
+    static let createSection = MCPToolDeclaration(
+        name: "create_section", rung: .writeNew, title: "Add a chapter",
+        description: """
+            Add a chapter (a section) at the end of a shared book's chapter order. Notes are filed \
+            under it with add_note_to_book's section_id. Returns JSON with the section_id.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book."]),
+                "name": .object(["type": "string", "description": "The chapter's name."]),
+            ]),
+            "required": .array(["book_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
+
+    // MARK: - The EDIT rung (U3 — "it can also edit takes — with a commit before and after every change")
+
+    static let editTake = MCPToolDeclaration(
+        name: "edit_take", rung: .edit, title: "Edit a take",
+        description: """
+            Replace one take's text. expected_text must be the take's text EXACTLY as you read it \
+            (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
+            nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
+            and one named "after <your name>'s edit", so the author can always compare and come back, \
+            and the edit is one undo for her. Returns JSON with the commit ids.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "take_id": .object(["type": "string", "description": "The take to edit."]),
+                "text": .object(["type": "string", "description": "The take's whole new text."]),
+                "expected_text": .object(["type": "string", "description": "The take's current text, exactly as read."]),
+            ]),
+            "required": .array(["take_id", "text", "expected_text"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let divideBlock = MCPToolDeclaration(
+        name: "divide_block", rung: .edit, title: "Divide a block",
+        description: """
+            Divide one block in two, at the place in its shown take where second_half_starts_with \
+            begins (those words must appear exactly once in that text). A block with other takes \
+            divides the way the author's own divide does: the shown take splits, and every other \
+            take stays whole on the first block. The halves are new blocks — ids change; read again. \
+            Returns JSON with both block ids.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "block_id": .object(["type": "string", "description": "The block to divide."]),
+                "second_half_starts_with": .object([
+                    "type": "string", "description": "The words the second block begins with.",
+                ]),
+            ]),
+            "required": .array(["block_id", "second_half_starts_with"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let mergeBlocks = MCPToolDeclaration(
+        name: "merge_blocks", rung: .edit, title: "Merge two blocks",
+        description: """
+            Merge two ADJACENT blocks of one note (first_block_id directly before second_block_id) \
+            into one new block, joined by a newline. Where either has other takes, every take comes \
+            along (the two shown takes are joined; the rest ride whole), as the author's own merge \
+            does. The two sources stay in the note's history; the merged block has a NEW id. \
+            Returns JSON with its block_id.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "first_block_id": .object(["type": "string", "description": "The earlier block."]),
+                "second_block_id": .object(["type": "string", "description": "The block right after it."]),
+            ]),
+            "required": .array(["first_block_id", "second_block_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let moveBlock = MCPToolDeclaration(
+        name: "move_block", rung: .edit, title: "Move a block",
+        description: """
+            Move a block: right after another block (after_block_id), right before one \
+            (before_block_id), or to the start or end of a note (note_id, with at: "start" or \
+            "end"; default end). Either note must be shared with this client at edit. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "block_id": .object(["type": "string", "description": "The block to move."]),
+                "after_block_id": .object(["type": "string", "description": "Put it right after this block."]),
+                "before_block_id": .object(["type": "string", "description": "Put it right before this block."]),
+                "note_id": .object(["type": "string", "description": "Put it in this note (with at)."]),
+                "at": .object(["type": "string", "enum": .array(["start", "end"]),
+                               "description": "Where in note_id (default end)."]),
+            ]),
+            "required": .array(["block_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let deleteBlock = MCPToolDeclaration(
+        name: "delete_block", rung: .edit, title: "Delete a block",
+        description: """
+            Delete one block. Nothing is destroyed: it goes to the note's tray of deleted things, \
+            every take with it, where the author can put it back (and it is one undo for her). \
+            Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "block_id": .object(["type": "string", "description": "The block to delete."]),
+            ]),
+            "required": .array(["block_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    static let setBlockName = MCPToolDeclaration(
+        name: "set_block_name", rung: .edit, title: "Name a block",
+        description: """
+            Give a block a name ("the opening") — a handle for talking about it; ids stay the only \
+            address. A blank or null name clears it. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "block_id": .object(["type": "string", "description": "The block."]),
+                "name": .object(["type": ["string", "null"], "description": "The name (blank or null clears)."]),
+            ]),
+            "required": .array(["block_id", "name"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 }

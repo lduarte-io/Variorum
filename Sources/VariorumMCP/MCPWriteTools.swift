@@ -35,7 +35,7 @@ struct MCPWriteTools: Sendable {
     typealias ArgumentFailure = MCPReadTools.ArgumentFailure
 
     static let handledToolNames: Set<String> = Set(
-        (MCPToolCatalog.suggest + MCPToolCatalog.writeNew).map(\.name))
+        (MCPToolCatalog.suggest + MCPToolCatalog.writeNew + MCPToolCatalog.edit).map(\.name))
 
     func call(_ name: String, arguments: [String: Value]?, clientName: String) async -> Outcome {
         let args = arguments ?? [:]
@@ -69,10 +69,13 @@ struct MCPWriteTools: Sendable {
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
         case createBook(name: String, wingID: String)
-        case addNoteToBook(noteID: String, bookID: String)
+        case addNoteToBook(noteID: String, bookID: String, sectionID: String?)
+        /// U3: the edit rung's jobs and `create_section` (`MCPWriteTools+Edit`).
+        case edit(EditJob)
 
         var tool: String {
             switch self {
+            case .edit(let job): job.tool
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -128,8 +131,11 @@ struct MCPWriteTools: Sendable {
             }
             return .createBook(name: try requiredText(args, "name"), wingID: wingID)
         case MCPToolCatalog.addNoteToBook.name:
-            return .addNoteToBook(noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"))
+            return .addNoteToBook(
+                noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"),
+                sectionID: try optionalString(args, "section_id"))
         default:
+            if let job = try parseEdit(name, args) { return .edit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
         }
     }
@@ -265,24 +271,31 @@ struct MCPWriteTools: Sendable {
                 return (["book_id": book.id, "name": book.name],
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name))
             }
-        case .addNoteToBook(let noteID, let bookID):
+        case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
-                _ = try ops.addNoteToBook(noteID, book: bookID, undoLabel: label(.bookAdd))
-                return (["note_id": noteID, "book_id": bookID],
+                _ = try ops.addNoteToBook(noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                var answer: [String: Any] = ["note_id": noteID, "book_id": bookID]
+                if let sectionID { answer["section_id"] = sectionID }
+                return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .bookAdd, targetID: noteID,
                                         targetTitle: title, detail: bookName))
             }
+        case .edit(let editJob):
+            return try performEdit(editJob, job: job, ops: ops, clientName: clientName)
         }
     }
 
-    private typealias Act = (answer: [String: Any], receipt: MCPWriteReceipt)
+    /// An act's answer and its receipt — nil when the act wrote nothing (a
+    /// U3 no-op edit or rename: a receipt may only claim what landed).
+    typealias Act = (answer: [String: Any], receipt: MCPWriteReceipt?)
 
     /// A block's act: the block must be live-placed in a live, non-version
     /// note, and the RULE decides on that note. A block with no such note
     /// (released to lineage, in a scraps group, gone, a stranger's id) answers
     /// exactly as an unshared note — one answer, no existence oracle.
-    private func onBlock(
+    func onBlock(
         _ blockID: String, rung: MCPGrantRule.Rung, job: Job, clientName: String,
+        spendsAfter: Bool = true,
         _ act: (_ noteID: String, _ title: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let noteID = try database.read { db in
@@ -296,17 +309,20 @@ struct MCPWriteTools: Sendable {
                 arguments: [blockID])
         }
         return try onNote(noteID ?? "", rung: rung, job: job, clientName: clientName,
-                          logged: ("block", blockID)) { title in
+                          logged: ("block", blockID), spendsAfter: spendsAfter) { title in
             try act(noteID ?? "", title)
         }
     }
 
     /// A note's act: decided on the note at `rung` (content-bearing — a once
     /// grant spends by its first write of any rung, AF-7 as amended; stamped
-    /// AFTER the act lands).
-    private func onNote(
+    /// AFTER the act lands). U3: `spendsAfter: false` for an act whose GUARD
+    /// re-decides and spends inside the act's own transaction (the edit
+    /// rung, `MCPWriteTools+Edit`) — this snapshot decision then only speaks
+    /// the refusal and raises the ask.
+    func onNote(
         _ noteID: String, rung: MCPGrantRule.Rung, job: Job, clientName: String,
-        logged: (kind: String, id: String)? = nil,
+        logged: (kind: String, id: String)? = nil, spendsAfter: Bool = true,
         _ act: (_ title: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let logKind = logged?.kind ?? "note"
@@ -325,7 +341,7 @@ struct MCPWriteTools: Sendable {
                 .refusal(decision, .note, standing: standing, ask: ask)))
         }
         return try land(job, clientName: clientName, kind: logKind, id: logID, title: title,
-                        spending: consumesOnce ? [grantID].compactMap { $0 } : []) {
+                        spending: consumesOnce && spendsAfter ? [grantID].compactMap { $0 } : []) {
             try act(title)
         }
     }
@@ -334,7 +350,7 @@ struct MCPWriteTools: Sendable {
     /// before anything lands (adding an unreachable note to a granted book
     /// would pull it into the client's reach). A once grant authorizing BOTH
     /// (a once wing grant) is spent ONCE.
-    private func noteIntoBook(
+    func noteIntoBook(
         _ noteID: String, _ bookID: String, job: Job, clientName: String,
         _ act: (_ title: String?, _ bookName: String?) throws -> Act
     ) throws -> Result<Landed, Refused> {
@@ -370,8 +386,8 @@ struct MCPWriteTools: Sendable {
     }
 
     /// A note minted into a book or a wing.
-    private func into(
-        _ place: Place, job: Job, clientName: String,
+    func into(
+        _ place: Place, job: Job, clientName: String, spendsAfter: Bool = true,
         _ act: (Operations.MCPNoteDestination) throws -> Act
     ) throws -> Result<Landed, Refused> {
         switch place {
@@ -390,7 +406,7 @@ struct MCPWriteTools: Sendable {
                     .refusal(decision, .book, standing: standing, ask: ask)))
             }
             return try land(job, clientName: clientName, kind: "book", id: bookID, title: name,
-                            spending: consumesOnce ? [grantID].compactMap { $0 } : []) {
+                            spending: consumesOnce && spendsAfter ? [grantID].compactMap { $0 } : []) {
                 try act(.book(bookID))
             }
         case .wing(let wingID):
@@ -400,7 +416,7 @@ struct MCPWriteTools: Sendable {
 
     /// A wing-scoped act (a note bookless in a wing, a new book, a whole
     /// imported book): wing-level reach at write new.
-    private func inWing(
+    func inWing(
         _ wingID: String, job: Job, clientName: String, _ act: () throws -> Act
     ) throws -> Result<Landed, Refused> {
         let (standing, wingName) = try database.read { db in
@@ -429,14 +445,14 @@ struct MCPWriteTools: Sendable {
     /// recorded corner, P-13nb-U2-8: a CRASH between a landed write and its
     /// stamp leaves the once grant unspent — one more write; the content
     /// reads keep U1's one-transaction stamp.)
-    private func land(
+    func land(
         _ job: Job, clientName: String, kind: String, id: String, title: String?,
         spending: [String] = [], _ act: () throws -> Act
     ) throws -> Result<Landed, Refused> {
         do {
             let landed = try act()
             for grantID in spending { try? spend(grantID) }
-            try log(clientName, job.tool, kind, id, landed.receipt.targetTitle ?? title, allowed: true)
+            try log(clientName, job.tool, kind, id, landed.receipt?.targetTitle ?? title, allowed: true)
             return .success(Landed(answer: try encode(landed.answer), receipt: landed.receipt))
         } catch let refused as Refused {
             try log(clientName, job.tool, kind, id, title, allowed: false)
@@ -453,14 +469,14 @@ struct MCPWriteTools: Sendable {
 
     /// AF-7: the once grant is spent by the write that landed (inside the
     /// same serial body, so no second call can slip between).
-    private func spend(_ grantID: String) throws {
+    func spend(_ grantID: String) throws {
         try database.write { db in try grants.consumeMCPOnceGrant(db, grantID) }
     }
 
     /// The lens's picks from take ids, resolved ONLY among the takes of THIS
     /// note's placed blocks — an id from anywhere else answers one way (no
     /// oracle on take ids), and two takes of one block refuse.
-    private func picks(noteID: String, takeIDs: [String]) throws -> [String: String] {
+    func picks(noteID: String, takeIDs: [String]) throws -> [String: String] {
         let owners: [String: String] = try database.read { db in
             let json = String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)
             var owners: [String: String] = [:]
@@ -490,7 +506,7 @@ struct MCPWriteTools: Sendable {
         return picks
     }
 
-    private func noteAnswer(
+    func noteAnswer(
         _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String
     ) throws -> Act {
         let title = try database.read { db in
@@ -511,7 +527,7 @@ struct MCPWriteTools: Sendable {
 
     // MARK: - Shared pieces
 
-    private func log(
+    func log(
         _ clientName: String, _ act: String, _ kind: String?, _ id: String?, _ title: String?, allowed: Bool
     ) throws {
         try database.write { db in
@@ -521,12 +537,12 @@ struct MCPWriteTools: Sendable {
         }
     }
 
-    private func encode(_ object: [String: Any]) throws -> String {
+    func encode(_ object: [String: Any]) throws -> String {
         String(decoding: try JSONSerialization.data(
             withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
     }
 
-    private func requiredString(_ args: [String: Value], _ key: String) throws -> String {
+    func requiredString(_ args: [String: Value], _ key: String) throws -> String {
         guard let value = try optionalString(args, key), !value.isEmpty else {
             throw ArgumentFailure(message: "\(key) is required.")
         }
@@ -534,7 +550,7 @@ struct MCPWriteTools: Sendable {
     }
 
     /// Required AND not blank.
-    private func requiredText(_ args: [String: Value], _ key: String) throws -> String {
+    func requiredText(_ args: [String: Value], _ key: String) throws -> String {
         let value = try requiredString(args, key)
         guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw ArgumentFailure(message: "\(key) is required.")
@@ -542,13 +558,13 @@ struct MCPWriteTools: Sendable {
         return value
     }
 
-    private func optionalString(_ args: [String: Value], _ key: String) throws -> String? {
+    func optionalString(_ args: [String: Value], _ key: String) throws -> String? {
         guard let value = args[key], value != .null else { return nil }
         guard let string = value.stringValue else { throw ArgumentFailure(message: "\(key) must be a string.") }
         return string
     }
 
-    private func stringArray(_ args: [String: Value], _ key: String) throws -> [String]? {
+    func stringArray(_ args: [String: Value], _ key: String) throws -> [String]? {
         guard let value = args[key], value != .null else { return nil }
         guard let items = value.arrayValue else { throw ArgumentFailure(message: "\(key) must be an array.") }
         return try items.map { item in

@@ -151,12 +151,23 @@ struct MCPWriteServerTests {
             calls.append(("apply_tag", ["note_id": .string(note.id), "tag": .string("x")]))
             calls.append(("create_book", ["name": .string("x"), "wing_id": .string("")]))
             calls.append(("add_note_to_book", ["note_id": .string(note.id), "book_id": .string(book.id)]))
+            // U3 (justified edit — the proof's completeness grows with the
+            // catalog): write new's create_section and EVERY edit door,
+            // aimed at what is hers, each refusing at the rung.
+            calls.append(("create_section", ["book_id": .string(book.id), "name": .string("x")]))
+            calls.append(("edit_take", ["take_id": .string(branch.id), "text": .string("x"),
+                                        "expected_text": .string("her other take")]))
+            calls.append(("divide_block", ["block_id": .string(one.block.id), "second_half_starts_with": .string("first")]))
+            calls.append(("merge_blocks", ["first_block_id": .string(one.block.id), "second_block_id": .string(two.block.id)]))
+            calls.append(("move_block", ["block_id": .string(two.block.id), "before_block_id": .string(one.block.id)]))
+            calls.append(("delete_block", ["block_id": .string(two.block.id)]))
+            calls.append(("set_block_name", ["block_id": .string(one.block.id), "name": .string("x")]))
             // And the read rung, for completeness (reads write no take).
             calls.append(("read_note", ["note_id": .string(note.id), "with_ids": .bool(true)]))
             calls.append(("export_note", ["note_id": .string(note.id)]))
             for (name, arguments) in calls {
                 let result = try await call(connection, name, arguments)
-                if MCPToolCatalog.declaration(named: name)?.rung == .writeNew {
+                if let rung = MCPToolCatalog.declaration(named: name)?.rung, rung >= .writeNew {
                     #expect(result.isError == true, "\(name) refuses under a suggest grant")
                 }
             }
