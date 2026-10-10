@@ -693,6 +693,72 @@ grant authority · tool projections — never one god server object (P-9).
   (g) the brackets as proposed (kind auto, the client's name verbatim,
   the standing dedupe, one undo entry, touch + churn as any text edit).
 
+## ARCHITECT RULING ON THE U4 FORKS (AF-11, Fable, 2026-10-10 — F-1…F-4, `47ed40cd`'s proposals; the full fork text is the U4 UNIT RECORD's)
+
+- **F-1 RULED (a) — the book-rule write MIRRORS her Save; the brief's
+  "refuse as hers do" was MY wrong assumption, corrected to the probe
+  facts.** Her ops and her Book Settings ▸ Edit… door LAND rule edits
+  on a finished book (13i §5's design: intake paused, un-finish
+  catches up), so the wire lands exactly where her Save lands and
+  refuses exactly where it refuses — MIRROR, NEVER INVENT (the sealed
+  case pinned to the app's ACTUAL door behavior, verified not
+  assumed). `set_book_rule` = her rule editor's one Save (optional
+  rule · outflow · new_matches, one runner turn, ONE client-named undo
+  restoring the three fields; existing seats stay — §19's letter);
+  tags named by PATH in the stored grammar keys, a missing path minted
+  in the book's wing (the apply_tag/import adopt-or-mint precedent);
+  legacy terms refuse on write; a malformed stored rule refuses as her
+  editor does; the ANSWER says intake is paused when it is. The walk's
+  app-words refusal leg rides the refusal that EXISTS (`lockedReading`
+  via create_section / file-into-chapter). (b) REJECTED — a wire-only
+  finished/sealed refusal is a new validation path, exactly what the
+  brief bans; (c) REJECTED — R-13nb-26 f ruled write in U4, her word.
+  **The found J8 defect fix APPROVED:** `lockedReading` has no words in
+  OpsRefusalCopy (the wire and every table-routed Mac door speak the
+  raw enum today) — her ReadingsViewModel generic sentence joins the
+  Mac table, red-on-old pin, recorded as a found-defect fix.
+- **F-2 RULED (a) — the lines STAY RECEIPTS and the keyboard road
+  outlives the fade.** Her R-13nb-23 (a) letter ("write receipts GROW
+  a one-press door") is the authority over 18i's buttoned=offer
+  inference: AI write lines remain receipts under `receipt_style`,
+  carrying "Open ›" in the quiet line and the toast alike; the
+  keyboard road is a registry act "Show the AI's last change" —
+  session-scoped (the most recent MCP write's target this session,
+  the R-13nb-19 session-bounded doctrine's twin), grey when none,
+  ALIVE after the line fades and under receipt_style off (a chord
+  racing a 6-second fade would be a lying keyboard road). ⌥⌘O
+  approved SUBJECT TO the collision sweep (record the sweep). The 18i
+  canon nuance rides the closeout delta as a contract line. (b)
+  REJECTED — always-toasting AI writes would outshout her own acts,
+  anti-calm; (c) REJECTED — a mouse-race chord is no road.
+- **F-3 RULED as proposed — show_in_app.** Decided at READ on the
+  TARGET note (a client shows only what it may read); NEVER spends a
+  once grant (a show discloses and changes nothing — AF-7's ride-free
+  reads cover it a fortiori). Targets as proposed: note(+block_id,
+  +select words → the 13o find seed verbatim) · takes(note+block) ·
+  lens(note+lens_id → focus its column, else append, else the R83
+  swap of the LAST when four are full — PROVISIONAL, logged) ·
+  book(+section_id → Outline's chapter landing). Frontmost =
+  `NSApp.isActive` AND the key window is a FULL window — a note-only/
+  quick-note window key REFUSES and never raises another window; not
+  frontmost refuses honestly, NEVER queued (the offer door and F-2's
+  chord are the deliberate roads back). The pure decision lives in
+  VariorumMCP, pinned headless with a fake hook.
+- **F-4 CONCURRED (PROVISIONAL as logged) with ONE RIDER.** The
+  carriage rides read_note's structured view as explicit params
+  (with_tray · with_lineage · include_archived · with_lenses ·
+  with_versions + version_id — the AF-5 precedent); book facts on
+  list_books rows; include_archived on list_books/list_notes/search
+  defaulting archived-OUT (the app's resting facet posture — the two
+  deliberate U1 flips land with pins updated as the ritual; a grant's
+  REACH is untouched: an archived book still answers under its grant
+  when asked). **THE RIDER — lineage beyond the grant is ONE uniform
+  stub:** no id, no title, no kind, nothing that distinguishes a
+  FENCED far side from a merely unshared one — PINNED byte-identical
+  (the U1 one-answer discipline applied to edges; omission would lie
+  about the tree's completeness, a distinguishable stub would open an
+  oracle).
+
 ## ARCHITECT SEAM RULINGS (Fable, 2026-10-09 kickoff — within the mandate, each traced; product-flavored ones marked PROVISIONAL for her)
 
 - **A-1 — Module placement.** The MCP server is a NEW SPM library target
