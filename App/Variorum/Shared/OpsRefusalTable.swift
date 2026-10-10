@@ -109,6 +109,12 @@ nonisolated enum OpsRefusalCopy {
         // SUCCESS story told as a refusal, so it says so.
         case .variantNotDeleted:
             return "That take is already back — it's in the block's fan."
+        // 13n-b U4 — its BLOCK twin (the same J8 class, red-on-old in
+        // `MCPNavigationTests`): a raced `put_back` on the wire, and any door
+        // routed through this table, spoke the raw enum. The recovery doors'
+        // own sentence (`DeletionRefusal`'s "already back" family).
+        case .blockNotDeleted:
+            return "That block is already back."
         // 13j batch 6b (J1): the purge op's refusals, worded — never the raw
         // dump (the J8 bar, in the phase whose bar is copy truth). The first
         // is the honest impossible-door case: only things in the Trash can be

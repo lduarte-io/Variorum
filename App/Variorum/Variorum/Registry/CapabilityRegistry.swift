@@ -1061,7 +1061,7 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .showLastAIChange, verb: "Show the AI\u{2019}s Last Change", scope: .app,
             doors: [.menuBar],
-            shortcutLabel: "⌥⌘O", takesAccess: .native,
+            shortcutLabel: "⌥⌘O", takesAccess: nil,
             unavailableNote: "No AI change to show yet — nothing a connected client wrote has landed this session.",
             availability: { ctx in ctx.aiLastChangeAvailable ? .act : .unavailable }),
 

@@ -75,6 +75,10 @@ struct CapabilityRegistryTests {
         // everywhere the walk looks — the hole every gate above opened before
         // its own context joined.
         contexts.append(CapabilityContext(mode: nil, windowKind: .full))
+        // 13n-b U4 (justified edit, the ritual): the AI-last-change gate — a
+        // session fact (an MCP write landed), not a mode; without it
+        // `.showLastAIChange` would read `.unavailable` everywhere.
+        contexts.append(CapabilityContext(mode: nil, aiLastChangeAvailable: true))
         return contexts
     }
 

@@ -458,6 +458,16 @@ nonisolated extension OpsRefusalCopy {
         case .takePairedTwice:
             return "A take can sit in only one pairing (and a paired take can't also "
                 + "carry) — remove the duplicate first."
+        // 13n-b U4 — A FOUND J8 DEFECT, fixed (AF-11 F-1 approved, red-on-old
+        // in `MCPNavigationTests`): a finished book's refusal had no words in
+        // either table, so the MCP wire (`create_section` /
+        // `file_note_in_chapter` on a finished book) and every Mac door routed
+        // through this table spoke the raw enum with a UUID in it. Her
+        // generic arms' own sentence (`ReadingsViewModel.message`,
+        // `DeletionRefusal`) — no book in hand, so BOTH true roads, a SEALED
+        // book's being Unseal. Mac-local: "unseal" is the Mac's door word.
+        case .lockedReading:
+            return "This book is finished \u{2014} reopen it first; if it\u{2019}s sealed, unseal it."
         default:
             return nil
         }
