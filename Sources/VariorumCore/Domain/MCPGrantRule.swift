@@ -187,9 +187,10 @@ public enum MCPGrantRule {
 
     /// **The one decision.** `consumes` says whether this call is
     /// content-bearing (reading a note's text, or a write) — a once grant is
-    /// spent only by such a call AT ITS OWN RUNG (`spends`, AF-7), never by
-    /// a listing; when a standing grant also covers the call, the once grant
-    /// is not spent at all.
+    /// spent only by such a call (`spends`, AF-7 as amended: a read grant by
+    /// its first content read, a write grant by its first write of any rung),
+    /// never by a listing; when a standing grant also covers the call, the
+    /// once grant is not spent at all.
     public static func decide(
         client: ClientState?, grants: [Grant], openBook: Bool,
         target: Target, rung: Rung, consumes: Bool

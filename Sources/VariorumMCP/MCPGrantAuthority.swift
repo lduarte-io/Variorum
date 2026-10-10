@@ -55,7 +55,8 @@ struct MCPGrantAuthority: Sendable {
 
     /// `consumes` (U2): a WRITE landing in the book (`create_note`,
     /// `import_document`, `add_note_to_book`) is content-bearing — it spends
-    /// a once book grant by its first write of any rung (AF-7 as amended) (AF-7); a listing never does.
+    /// a once book grant by its first write of any rung (AF-7 as amended);
+    /// a listing never does.
     static func decide(
         _ standing: Standing, book facts: MCPGrantRule.BookFacts?, rung: MCPGrantRule.Rung,
         consumes: Bool = false
