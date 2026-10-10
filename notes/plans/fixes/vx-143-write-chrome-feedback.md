@@ -19,6 +19,14 @@ Her feedback, verbatim, dispositioned:
 8. Her version question ANSWERED at the sitting: a note version becomes its own note via **Note ▸ Versions → Promote** (`NoteVersionsPane.swift:319`; the tutorial: "Promote turns a moment into a note of its own"). She confirmed she meant a note version. No ticket.
 9. Her export observation landed as a comment on VX-125 (already filed, 13n project).
 
+## The OVERNIGHT MANDATE (her words, 2026-10-10 evening)
+
+"ok, I want you to run everything provisionally overnight according to my standard discipline. don't merge to main yet - I want you to just get everything done, have it fully ready to merge, and leave me a handoff for me to use in the morning." Plus a SIXTH member, her words: "the commits page is very messy with crowded & cluttered UI - I'm sure if you take a screenshot of it you'll see the issue. i want that UI improved + cleaned up." → **VX-144** (joined the run, In Progress).
+
+Overnight shape: PROVISIONAL-and-continue everything short of an author-only hard stop; taste calls built as the most defensible option, marked PROVISIONAL, bundled into the morning handoff; the PR opens READY but UNMERGED; the handoff lands at `notes/handoffs/vx-143-handoff.md` with her checklist at the top. She closed her real-store app — the zero-instance window is open (suites + walks legal on the Air at her grant).
+
+**VX-144 plan:** screenshot-first — the orchestrator walks the commits page (Block History Commits face / `SavepointHistory` / `CommitBar` — the screenshot decides which surface she means) AFTER batch 1's suites finish (GUI walks and app suites collide on the test host). Then a SECOND implementer batch builds the cleanup to the orchestrator's design direction, PROVISIONAL throughout, before/after screenshots in the handoff for her taste call.
+
 ## Binding principles
 
 The 13b constitution P-1…P-9 binds verbatim (the architect-phase skill carries the text). Highlights for this run: P-1 (any door change renders from the registry, gating is data), P-2 (a rendered door acts or delivers the real refusal — VX-135 is exactly a P-2 defect), P-8 (no literal colour outside tokens; `lineLimit` on fixedSize chrome), red-on-old pins per member verified by behavioural revert.
@@ -42,6 +50,7 @@ Evidence: pins per member + the orchestrator's hands-on walk on the Air (her gra
 - VX-136: NOT-STARTED
 - VX-141: NOT-STARTED
 - VX-142: NOT-STARTED
+- VX-144: NOT-STARTED (batch 2 — screenshot-first, after batch 1)
 
 ## Environment traps (binding for every session in this run)
 
