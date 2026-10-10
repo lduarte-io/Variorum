@@ -352,6 +352,48 @@ struct WriteTakesPanelKeysTests {
         }
     }
 
+    // MARK: - A block that has left the note (ladder r1 — the escalated finding)
+
+    /// **Ladder round 1 (MINOR-1, escalated by the batch-2 implementer and
+    /// confirmed by the reviewer's own trace): on a block that has LEFT the
+    /// note, NO take key writes — the panel's own gone line is the refusal.**
+    ///
+    /// The mechanism that made this a real write and not just a wrong
+    /// sentence: the ring SURVIVES the block leaving (`authority.livePane`
+    /// is cleared only by `blur()` or a new focus — nothing clears it when
+    /// the pane unmounts), and `archiveVariant` needs no placement
+    /// (`ensurePlacementUnlocked` passes when none exists) — so ⌘⇧A on a
+    /// merged-away block really archived a take of the RELEASED original,
+    /// through a panel whose whole face said "This block is no longer in
+    /// the note." RED ON OLD: take 2 of the released block flips to
+    /// 'archived'.
+    @Test func theKeysOnAGoneBlockWriteNothing() async throws {
+        try await withPanel(seed: 155) { fixture, window, hosting, writeSaw in
+            try await clickInto(fixture.takeIDs[1], window, hosting)
+            // The block leaves the note: the caret block merges it away (in
+            // the app the merge chord falls through the panel to Write; the
+            // op is the same act). Both sources are RELEASED to lineage —
+            // preserved whole, takes intact.
+            _ = try fixture.session.operations.merge(
+                fixture.caretBlockID, fixture.panelBlockID)
+            await settle(window, hosting, until: { panelPanes(in: hosting).isEmpty })
+            #expect(panelPanes(in: hosting).isEmpty, "the panel shows the gone face")
+
+            for key in [TakesCommand.archive, .choose, .stepNext, .stepPrev] {
+                press(key, fixture)
+            }
+            // A "nothing happened" assert needs a bounded wait, not a
+            // condition to settle onto.
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let rows = try await takes(fixture.db, blockID: fixture.panelBlockID)
+            #expect(rows.first { $0.id == fixture.takeIDs[1] }?.status == "active",
+                    "no take key writes to a gone block — the ring's take stays active (rows: \(rows.map(\.status)))")
+            #expect(rows.count == 3, "…and the released block's fan neither grew nor shrank (\(rows.count))")
+            #expect(writeSaw.value.isEmpty,
+                    "the panel consumed the keys — the gone line is its refusal, never Write's caret's (saw \(writeSaw.value))")
+        }
+    }
+
     // MARK: - What still belongs to Write (characterization — green on both sides)
 
     @Test func theBloomAndLensKeysStillReachWriteAndEverythingReturnsWhenThePanelCloses()

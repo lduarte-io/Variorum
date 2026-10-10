@@ -86,6 +86,117 @@ struct NoteBoxSlotTests {
         }
     }
 
+    /// Two FINISHED books (the reading row seeds Read — the mode that says
+    /// "no box"), each with a note so they are real.
+    private func withTwoFinishedBooks(
+        _ body: @MainActor (AppSession, _ readingA: String, _ readingB: String) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1412))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            @MainActor func finishedBook(_ name: String) throws -> String {
+                let reading = try session.operations.createReading(name: name, kind: .book)
+                let post = try session.operations.createPost(title: "\(name)'s note")
+                _ = try session.operations.newBlock(in: post.id, text: "Prose for \(name).")
+                try session.operations.addPostToReading(post.id, to: reading.id)
+                try session.operations.lockReading(reading.id)
+                return reading.id
+            }
+            let a = try finishedBook("read book a")
+            let b = try finishedBook("read book b")
+            try await body(session, a, b)
+        }
+    }
+
+    /// **Ladder round 1 (MAJOR-1): focus returning to a Read-mode book in a
+    /// split must not stand a PHANTOM empty box.** A Read book's note-box
+    /// report is nil on BOTH sides of a pane-focus flip, so
+    /// `.onChange(of: noteBoxReport)` never fires for it — the book never
+    /// re-speaks its "no box" word, the one-id `noteBoxDeclinedBy` still
+    /// names the OTHER book, and VX-141's held slot renders the empty box
+    /// face forever. RED ON OLD: after focus returns to book A, the slot
+    /// settles on `.box` and stays there.
+    @Test func focusReturningToAReadBookNeverStandsAPhantomEmptyBox() async throws {
+        try await withTwoFinishedBooks { session, readingA, readingB in
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+#if DEBUG
+            SidebarGeometry.forgetBox(subject: readingA)
+            SidebarGeometry.forgetBox(subject: readingB)
+            let key = SidebarGeometry.bodyKey(for: router.workspace)
+            SidebarGeometry.slotOccupants[key] = nil
+#endif
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+#if DEBUG
+            @MainActor func occupants() -> [SidebarGeometry.SlotOccupant] {
+                SidebarGeometry.slotOccupants[key] ?? []
+            }
+            // Book A in the primary pane. A finished book flashes its
+            // Outline report, then the reading row seeds Read and it speaks
+            // its "no box" word — the slot must END empty (neither rail nor
+            // box). The flash is the fixture's proof the book spoke at all.
+            router.workspace.visit(.reading(readingA))
+            _ = router.workspace.select(.reading(readingA))
+            await settle(window, hosting, until: {
+                occupants().contains(.box) && occupants().last == .empty
+            })
+            try #require(occupants().contains(.box) && occupants().last == .empty,
+                         "fixture: book A spoke (the flash) and settled boxless in Read (occupants: \(occupants().map(\.rawValue)))")
+
+            // Book B beside it — the split opens focused on B, which settles
+            // boxless the same way (its own flash, its own word).
+            let markB = occupants().count
+            _ = router.workspace.openBeside(.reading(readingB))
+            await settle(window, hosting, until: {
+                occupants().dropFirst(markB).contains(.box) && occupants().last == .empty
+            })
+            try #require(occupants().last == .empty,
+                         "fixture: book B settled boxless in Read (tail: \(occupants().dropFirst(markB).map(\.rawValue)))")
+
+            // Focus returns to A's pane. A is mounted (no .onAppear coming)
+            // and in Read (its report is nil → nil across the flip), so only
+            // a focus-change publish can land its "no box" word — without
+            // it, the held slot stands an empty box forever.
+            let markA = occupants().count
+            router.workspace.focus(.primary)
+            await settle(window, hosting, until: {
+                occupants().count > markA && occupants().last == .empty
+            })
+            let tail = Array(occupants().dropFirst(markA))
+            print("[VX-141 r1] occupants after focus returned to A: \(tail.map(\.rawValue))")
+            // (A frames-oracle arm was tried and measured GREEN on the
+            // pre-fix tree — the phantom's probe does not re-record under
+            // the held face reliably — so the occupants arm, red-on-old
+            // verified, is the pin. A hollow arm earns no place.)
+            #expect(occupants().last == .empty,
+                    "focus returning to a Read book stands NO box — the phantom (tail: \(tail.map(\.rawValue)))")
+#endif
+        }
+    }
+
     @Test func goingFromANoteToABookNeverEmptiesTheSlot() async throws {
         try await withBookAndNote { session, readingID, noteID in
             let router = ShellRouter()
