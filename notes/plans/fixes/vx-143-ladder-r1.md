@@ -64,3 +64,12 @@ The lint is a substring count of `.controlSize(` over `BlockHistoryPane.swift`. 
 ---
 
 *Round 1 closes here. MAJOR-1 and MINOR-1 go to the implementer verbatim under the cross-model flow; the reviewer makes the final call on the responses and implements confirmed fixes in this session, each with its pin, suite green after.*
+
+---
+
+## Orchestrator dispositions — round 1 (the architect, against the spec)
+
+- **MAJOR-1 (RootView phantom empty box):** routed to the batch-1 implementer (its VX-141 code) for agree/dispute; the reviewer makes the final call and implements the confirmed fix itself. Disposition PENDING the exchange.
+- **MINOR-1 (panel ring keys' refusal on a gone block):** routed to the batch-2 implementer (its VX-150 code) the same way. PENDING.
+- **NIT-1 (the no-bezel pin lints only `.controlSize(`):** RECORD-ONLY. The pin documents its own lint honestly; Close's stock button is P-VX144-4's ruled survivor, so a bare-Button blind spot has exactly one legitimate occupant today. Harden if the pane ever grows another stock control.
+- **NIT-2 (locale-coupled date assertions):** RECORD-ONLY. Single-machine en-US project (AppSpec §1); the reviewer's own caveat. Bind a locale the day a differently-localed host joins the suite run — the toolchain-skew family's shape.
