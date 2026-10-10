@@ -227,16 +227,17 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    /// **ONCE SPENDS AT ITS OWN RUNG** (AF-7, the architect's ruling on the
-    /// U2 fork — amends P-13nb-U1-2 for the write rungs): a once grant is
-    /// consumed by the first CONTENT-BEARING call AT THE GRANT'S OWN RUNG it
-    /// authorizes — a read grant by its first content read (U1's letter,
-    /// unchanged); a suggest or write-new grant by its first WRITE at that
-    /// rung. The lower-rung calls it authorizes on the way (the reading a
-    /// suggestion needs) ride free. So a once-suggest grant authorizes ONE
-    /// suggestion; a take-plus-lens flow wants "while connected".
+    /// **ONCE: ONE WRITE MEANS ONE WRITE** (AF-7 AS AMENDED at the U2
+    /// ladder's F4 — the ride-free clause covers READS only): a once READ
+    /// grant is spent by its first content read (U1's letter, unchanged);
+    /// a once WRITE grant (suggest or write new) is spent by its first
+    /// CONTENT-BEARING WRITE of ANY rung it authorizes — the content reads
+    /// it needs on the way ride free, writes never do. So a once-suggest
+    /// grant authorizes ONE suggestion, a once-write-new grant ONE write of
+    /// whatever rung; a take-plus-lens flow wants "while connected".
     static func spends(_ grant: Grant, rung: Rung, consumes: Bool) -> Bool {
-        grant.duration == .once && consumes && rung == grant.rung
+        guard grant.duration == .once, consumes else { return false }
+        return grant.rung == .read ? rung == .read : rung >= .suggest
     }
 
     /// **A WING-LEVEL decision** — `list_notes` with a wing (a listing:

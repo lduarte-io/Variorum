@@ -229,6 +229,29 @@ struct MCPWriteServerTests {
         }
     }
 
+    @Test func aOnceWriteNewGrantIsSpentByItsFirstWriteOfAnyRung() async throws {
+        // AF-7 AS AMENDED (the U2 ladder's F4): one write means one write,
+        // whatever its rung — a suggest-rung write under a once write-new
+        // grant IS the one write; it does not "ride free" below the rung.
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "lessons", kind: .book)
+            let note = try h.operations.createPost(title: "lesson 1")
+            _ = try h.operations.addPostToReading(note.id, to: book.id)
+            let block = try h.operations.newBlock(in: note.id, text: "Q1?", registeringUndo: false)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", grant(.writeNew, .book, book.id, .once))
+            #expect(try await call(connection, "read_note", ["note_id": .string(note.id)]).isError != true,
+                    "the content read still rides free")
+            let take = try await call(connection, "add_take", ["block_id": .string(block.block.id), "text": .string("A")])
+            #expect(take.isError != true, "\(text(take))")
+            let second = try await call(connection, "create_note", ["text": .string("x"), "book_id": .string(book.id)])
+            #expect(second.isError == true, "the suggest write spent the once write-new grant")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The Private mark, live (R-13nb-4 — the brief's pin)
 
     @Test func markingPrivateFencesTheVeryNextCallOfAConnectedClient() async throws {

@@ -1515,13 +1515,19 @@ fixed out of scope).** Session: opus-implementer, 2026-10-09, cut from
   " · <its own label>" when it gives one (P-13n-3's convention, the client's
   name verbatim — "claude-code", never a brand rewrite).
 
-- **P-13nb-U1-2's AMENDED FORM (AF-7, for the merge bundle):** a once
-  grant is spent by the first content-bearing call AT ITS OWN RUNG it
-  authorizes — read: the first content read (U1's letter); suggest / write
-  new: the first WRITE; lower-rung calls under it ride free. Stated edge: a
-  once-suggest grant authorizes ONE write (take-plus-lens wants "while
-  connected"). Walked live: Once allowed exactly one `create_note`, the
-  second refused and asked again (captures 08/09).
+- **P-13nb-U1-2's AMENDED FORM (AF-7 + its SECOND AMENDMENT at the U2
+  ladder's F4, for the merge bundle):** a once READ grant is spent by its
+  first content read (U1's letter, unchanged); a once WRITE grant (suggest
+  or write new) is spent by its FIRST WRITE of ANY rung it authorizes —
+  the content reads it needs on the way ride free, writes never do. ONE
+  WRITE MEANS ONE WRITE, whatever its rung (the first spelling's "at its
+  own rung" let a once write-new grant make unlimited suggest-rung writes
+  "riding free" — the ladder's F4 named the consequence and the architect
+  amended the ruling by letter, `d24e77b6`; pinned both ways, fix commit on
+  this branch). Stated edge: a once-suggest grant authorizes ONE write
+  (take-plus-lens wants "while connected"). Walked live: Once allowed
+  exactly one `create_note`, the second refused and asked again (captures
+  08/09 — unchanged under the amendment).
 - **P-13nb-U2-13 — the ask sheet uses SYSTEM buttons** (walk W-3): it
   presents at the WindowGroup level where no session theme reaches (the
   library-open sheet's precedent); the voice's chrome is the grant sheet's

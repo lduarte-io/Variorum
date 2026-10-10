@@ -217,7 +217,9 @@ struct MCPGrantRuleTests {
                             rung: .read, consumes: false) == .refuse(.clientPending))
     }
 
-    // MARK: - AF-7: once spends at its own rung (U2)
+    // MARK: - AF-7 as amended: a once write grant is spent by its FIRST
+    // WRITE of ANY rung it authorizes; ride-free covers READS only (the
+    // amendment at the U2 ladder's F4 — "one write means one write")
 
     @Test func aOnceWriteGrantLetsTheReadsItNeedRideFreeAndIsSpentByItsFirstWrite() {
         let onceSuggest = grant("g-s", .suggest, .note, "note-1", .once)
@@ -228,15 +230,17 @@ struct MCPGrantRuleTests {
         #expect(decide(onceSuggest, .read) == .allow(grantID: "g-s", consumesOnce: false),
                 "the read a suggestion needs rides free")
         #expect(decide(onceSuggest, .suggest) == .allow(grantID: "g-s", consumesOnce: true),
-                "the first write at its own rung spends it")
+                "the first write spends it")
         var spent = onceSuggest
         spent.consumedAt = "t"
         #expect(decide(spent, .suggest) == .ask(.notShared, offersAlways: true), "the second write refuses")
         #expect(decide(spent, .read) == .ask(.notShared, offersAlways: true), "spent is spent for every rung")
 
         let onceWriteNew = grant("g-w", .writeNew, .note, "note-1", .once)
-        #expect(decide(onceWriteNew, .suggest) == .allow(grantID: "g-w", consumesOnce: false),
-                "a lower-rung write rides free under a once write-new grant")
+        #expect(decide(onceWriteNew, .read) == .allow(grantID: "g-w", consumesOnce: false),
+                "a content read under a once write grant still rides free")
+        #expect(decide(onceWriteNew, .suggest) == .allow(grantID: "g-w", consumesOnce: true),
+                "AF-7 AMENDED: a suggest-rung write under a once write-new grant IS its one write")
         #expect(decide(onceWriteNew, .writeNew) == .allow(grantID: "g-w", consumesOnce: true))
         let onceRead = grant("g-r", .read, .note, "note-1", .once)
         #expect(decide(onceRead, .read) == .allow(grantID: "g-r", consumesOnce: true),
@@ -351,13 +355,17 @@ struct MCPGrantRuleTests {
                 #expect(grantID != nil && g.scopeKind == .note && g.scopeID == target.id
                         && g.duration != .always, "invariant 2: a fenced allow is per-ask only")
             }
-            // Invariant 3, AF-7's amended form (U2): a once grant is spent
-            // EXACTLY by a content-bearing call at its own rung.
+            // Invariant 3, AF-7 AS AMENDED (the U2 ladder's F4): a once READ
+            // grant is spent exactly by a content read; a once WRITE grant
+            // (suggest/write new) by a content-bearing WRITE of ANY rung it
+            // authorizes — reads ride free under it, writes never do. The
+            // biconditional, both directions.
+            let spendsHere = g.rung == .read ? asked == .read : asked >= .suggest
             if consumesOnce {
-                #expect(consumes && g.duration == .once && g.isLive && asked == g.rung, "invariant 3")
+                #expect(consumes && g.duration == .once && g.isLive && spendsHere, "invariant 3")
             }
-            if grantID == g.id, g.duration == .once, consumes, asked == g.rung {
-                #expect(consumesOnce, "invariant 3: a content call at the once grant's own rung spends it")
+            if grantID == g.id, g.duration == .once, consumes, spendsHere {
+                #expect(consumesOnce, "invariant 3: one write means one write, whatever its rung")
             }
         case .ask(let reason, let offersAlways):
             if target.fence != nil {
