@@ -246,3 +246,42 @@ boundary itself — the rung fence, the in-transaction re-decision, the atomic o
 insurance brackets, the wing isolation, the format's byte discipline — is solid and pinned from the
 pure rule through the ops to a real socket session, and every load-bearing red-on-old claim I
 tested reproduced under my own hands.
+
+## ROUND 1 — IMPLEMENTER RESPONSES (opus-implementer, 2026-10-10, traced at `7c835cfb`)
+
+**Four AGREE, zero disputes.** The implementer re-traced each finding against the code, confirmed
+F1's record was its own misremembering (the code and pin were always a prefix stop), confirmed
+F2's full direction set line by line (the fan read sites, `measured`'s exact checks, the bystander
+mid-split, the single-take wrong-rendered cut, the merge left-behind), preferred F2's option 2
+(the expectedText precondition class widened to the composition's premises — the composition stays
+pure and outside the op), added the F3 caution that SQLite `length()` counts code points so a
+two-pass fetch must not silently change P-13nb-U3-11's Characters unit, and preferred F4's
+pluralize-the-count shape. No edits were made in its pass. (The verbatim response is the
+coordinator's relay in this session; this paragraph is its faithful record.)
+
+## FINAL DISPOSITIONS (the reviewer's calls — fable-reviewer, 2026-10-10, the fix pass its own; 4/4 AGREE received, zero disputes. Every bug-class fix carries a red-on-old pin verified BEFORE the fix AND by revert after the commit; one commit per piece, pushed; suites green after.)
+
+| # | Severity | Response | FINAL disposition |
+|---|---|---|---|
+| F1 | MINOR (record) | AGREE — correct the record | **FIXED (`6104d4e9`, record)** — P-13nb-U3-11 corrected to the PINNED PREFIX rule with the correction marked honestly in place (the "greedily … a later, smaller one may still ride" clause the code never did and the pin contradicts); the prefix rule kept as the contract (contiguous newest-first, omitted texts by `commit_ids` — the catalog's own sentence; AF-10 (d) ruled only the bound and the fetch). No code change. |
+| F2 | MINOR (arch) | AGREE — option 2 preferred | **FIXED (`a87fc8ec`)** — the implementer's preferred shape, which I concur is right (the composition stays pure and outside the op; every window case becomes ONE honest refusal): `divideBlock`'s `measured` now re-verifies, inside the act's transaction, the fan's ids AND texts (a parked cut is positional) plus the shown take still this block's RENDERED take; `mergeBlocks` gains the equivalent guard (both fans' membership + both shown takes still rendered; texts deliberately unchecked — the ops read them in-transaction) on BOTH roads, the plain path included, so an arrived take refuses instead of being stranded in silence. **Pin `aCompositionStaleAtTheActRefusesInsteadOfMisShaping`** — three legs, each guardian playing the sync apply deterministically inside the act's transaction: RED on old (**6 issues**: the bystander mid-split landed with `keptOnTop: 1`, the wrong-rendered-take cut landed, the plain merge landed with the arrived take left behind), green after; **revert-verified after the commit** (source at `a87fc8ec^` + the committed pin → the same 6 issues; tree restored clean). The plan's mandate-decisions bullet amended (`6104d4e9`). The empty-side pass-through preserved (the chain's rule: the op's own typed refusal speaks there). |
+| F3 | NIT | AGREE (+ the unit caution) | **RECORDED** — record-only, my final call: no wrong output, P1 holds (the fetch ∝ the note's own history), and the honest fix is blocked by the `length` field itself — OMITTED commits carry a Characters-count `length`, which requires the text; a two-pass fetch would have to re-unit `length` (SQLite `length()` counts code points) — a deliberate record change, never a silent one. The constraint is written into P-13nb-U3-11 (`6104d4e9`) so any future fix starts from it. |
+| F4 | NIT (copy) | AGREE — pluralize preferred | **FIXED (`ff1da3f7`)** — a coalesced CREATION run's line speaks the count plainly: "made 2 notes" · "imported N documents" · "made N books" · "added N chapters to “book”" (create_section's title IS the book, so it keeps its place); never one creation's title with a count spanning different creations. Copy only (J8's copy truth), 13s-a-sweepable, said in the code; the coalescing pin extended as a justified edit. Mac focused suites under a HELD stage claim (claimed and released): MCPEditFacesTests + MCPAskAndReceiptTests + MCPPaneTests **23/3, 0 skipped**. |
+
+**Fix-pass verification (2026-10-10):** whole headless package at the end of the pass —
+**core 2,564/294** (the pre-pass 2,563 + the F2 pin) · **VariorumMCPTests 45/6** ·
+**workbook 40/6**, all green, only the long-standing gated skips. Zero lines in
+`Sources/VariorumCore/Sync/`/`Server/`, zero custody, zero editor seam, zero migrations in the
+pass; zero trailers; every commit pushed (`a87fc8ec` F2 · `6104d4e9` F1/F3 records ·
+`ff1da3f7` F4 · this records commit).
+
+**For round 2, look first at:** (1) F2's guards — `divideBlock`'s `measured` (ids + texts +
+rendered-ness; the single-take and fanned paths both route through it) and `mergeBlocks`' guard
+(ids + rendered-ness on BOTH roads; the empty-side pass-through deliberately kept so the op's own
+refusal speaks); whether any window case can still land mis-shaped, and whether the guard's
+`try? renderedVariant` nil-handling is right for a block that died in the window
+(`bufferChangedSinceGesture` speaks instead of `blockNotFound` — judged honest, worth a fresh
+eye); (2) the F2 pin's three legs really isolate the interleave (each guardian is the only
+writer; the rolled-back guardian write is asserted); (3) the record edits — P-13nb-U3-11's
+corrected prefix clause + the F3 note, the mandate-decisions amendment; (4) F4's words beside the
+mockup §2 idiom and the sentence-case rule.
