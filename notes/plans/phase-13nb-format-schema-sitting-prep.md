@@ -146,6 +146,37 @@ carriage) — the phase grows from three ruled units to four at her
 word, one session each, laddered as ever. The alternative keeping
 three units pushes the also-U3 column into the follow-on tickets.
 
+## 6b. NAVIGATION — the MCP moving the app for her (her question, 2026-10-09: "will it move them to the compare tab? and what about opening compare with the new version of the note next to the previous note?")
+
+Today NOTHING navigates: writes land in rows, open panes update through
+observations, the receipt speaks — but the lens does not open itself and
+no tab moves. The design tension and its proposed resolution:
+
+- **The keyboard bar argues FOR it** (the fact-check payoff IS seeing
+  the side-by-side; a keyboard user opens the lens she just made) while
+  **the calm doctrine argues for CONSENT** (an external process yanking
+  panes mid-keystroke is focus theft, the cardinal sin).
+- **Proposed shape, two layers:** (1) **OFFER, the default** — write
+  receipts grow a one-press door ("saved the lens 'english readings' —
+  Open ›"): the agent requests attention, she spends it; no grant
+  change (showing discloses and modifies nothing). (2) **MOVE, her
+  dial** — a `show_in_app(target)` tool that genuinely navigates
+  (mechanically easy: the server lives in the app; the deep-link/
+  LandingTarget machinery is the road; P-4 discipline — composition,
+  never decision-bearing broadcasts), gated by etiquette she rules:
+  only while the app is frontmost, never cross-app activation, maybe
+  only within N seconds of her own last ask.
+- **THE CEILING RULE (proposed as doctrine):** a navigation target must
+  be a state the app's own doors reach — the wire never gets app states
+  the keyboard lacks. Her Compare-with-versions example decomposes
+  exactly here: Compare exists and versions have their pane, but
+  "Compare preloaded with version X beside current" was not found as a
+  one-press app state — if ruled wanted, it is an APP feature first
+  (a good one), and the wire points at it for free afterwards.
+- Targets inventory for the sitting: open note (at block) · open lens ·
+  open Compare (takes) · open Compare (version beside current — needs
+  the app state above) · open book/chapter · open the Versions pane.
+
 ## 7. The sitting's question list (the batches I will run)
 
 1. §3 boundary marker: (a)/(b)/(c), and does Level 0 adopt it or
@@ -158,3 +189,6 @@ three units pushes the also-U3 column into the follow-on tickets.
 5. Versions' write side beyond save_version: restore/promote on the
    wire — edit rung, ask-only, or never-in-v1.
 6. Book rule/outflow on the wire: read-only now, write at follow-on?
+7. NAVIGATION (§6b): offer-only v1, or offer + the move dial? The
+   etiquette gates; the ceiling rule ratified; Compare-with-versions as
+   an app feature (its own ticket) — and which targets ship when.
