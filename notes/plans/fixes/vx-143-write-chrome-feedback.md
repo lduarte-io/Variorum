@@ -47,7 +47,7 @@ Evidence: pins per member + the orchestrator's hands-on walk on the Air (her gra
 
 Batch 1 implementer (Opus, 2026-10-10, on the Air). No behavioural revert is in flight. Every app-suite run re-checks `pgrep` first.
 
-- VX-135: IN-PROGRESS — traced (below); pin + fix next.
+- VX-135: FIX LANDED — pin `WriteTakesPanelChooseTests` RED on the pre-fix tree (run `vx143-red1`: chosen stayed take 1, Write's handler consumed ⌘⏎) and GREEN after (`vx143-green1`); behavioural-revert verification PENDING.
 - VX-140: IN-PROGRESS — traced (below; tripwire NOT hit — presentation layer only); pin + fix next.
 - VX-136: IN-PROGRESS — reading done; the misalignment needs a capture before a fix is designed (capture harness next).
 - VX-141: IN-PROGRESS — traced (below); pin + fix next.

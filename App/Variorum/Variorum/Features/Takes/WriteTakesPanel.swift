@@ -49,6 +49,8 @@ struct WriteTakesPanel: View {
     let blockID: String
     @State private var model: TakesViewModel
     @State private var archived: [Variant] = []
+    /// VX-135: the panel's routed-command registration (see `handleRouted`).
+    @State private var commandToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
@@ -180,6 +182,16 @@ struct WriteTakesPanel: View {
         .onChange(of: model.projection) { _, _ in
             Task { await loadArchived() }
         }
+        // VX-135 (her report: "command enter in a take from write's take
+        // menu doesn't work to select the take as the chosen one"): while the
+        // panel is up it answers ⌘⏎ itself. Write's own handler stands
+        // beneath this sheet, and its `.choose` arm OPENS the caret block's
+        // panel — already open — so the take whose pane is live here was never
+        // chosen. Registered on appear, the panel is the LIFO top; every other
+        // command falls through to Write unchanged.
+        .onAppear {
+            commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+        }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
             set: { model.takeLabelRequest = $0 })
@@ -188,7 +200,24 @@ struct WriteTakesPanel: View {
                 Task { await model.setTakeLabel(request.variantID, label: label) }
             }
         }
-        .onDisappear { model.teardown() }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
+            model.teardown()
+        }
+    }
+
+    /// The panel's routed-command handler (VX-135): ⌘⏎ chooses the take the
+    /// ring is in — `TakesViewModel.chooseFocusedTake`, the Takes board's own
+    /// arm, so the operations layer sets the pointer and, with no take
+    /// clicked into, its real refusal speaks in the panel (P-2). Nothing else
+    /// is claimed: the caret family keeps acting on Write's caret block, as
+    /// before.
+    private func handleRouted(_ command: RoutedCommand) -> Bool {
+        guard case .takes(.choose) = command else { return false }
+        Task { await model.chooseFocusedTake() }
+        return true
     }
 
     // MARK: - Cards (the one grammar)
