@@ -91,8 +91,14 @@ extension Queries {
         guard includeVariants || !frames.isEmpty else {
             return try renderedText(db, containerID: postID)
         }
-        return VariorumDocument.serializeBody(
-            try exportBlocks(db, postID: postID, includeVariants: includeVariants, frames: frames))
+        let blocks = try exportBlocks(db, postID: postID, includeVariants: includeVariants, frames: frames)
+        // 13n-b U3 (R-13nb-26 (a) + her refinement): the TAKES-carrying
+        // export speaks the format — in marker mode when a block holds a
+        // blank line (`{v:2}` + the boundary marker), else v1 byte for byte;
+        // the PLAIN export never carries a marker, a brace or a section.
+        return includeVariants
+            ? VariorumDocument.serializeTakesExport(blocks)
+            : VariorumDocument.serializeBody(blocks)
     }
 
     /// The post's slots as document blocks, by the export's rules: the
@@ -141,7 +147,10 @@ extension Queries {
 
     /// The text Copy for AI puts on the clipboard: the document, through the
     /// ONE serializer — the header line, then exactly
-    /// `exportPost(…, includeVariants: true)` (pinned).
+    /// `exportPost(…, includeVariants: true)` (pinned). In MARKER MODE
+    /// (13n-b U3 — a block holding a blank line) both lead with the `{v:2}`
+    /// token and share the marked body; this one's header adds the title and
+    /// tags after the token.
     public static func variorumDocumentText(_ db: Database, postID: String) throws -> String {
         VariorumDocument.serialize(try variorumDocument(db, postID: postID))
     }

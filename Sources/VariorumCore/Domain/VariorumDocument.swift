@@ -80,9 +80,32 @@ import Foundation
 /// What does NOT ride the format, by her ruling: commits, book settings,
 /// block names, comments, callout frames (an export maps a callout to a
 /// blockquote; a blockquote imports as text), archived takes, the chosen
-/// take's label and fan place (above), and multi-paragraph SURFACE blocks
-/// (P-13n-4 — takes keep their newlines, a block's surface text does not).
-/// The full-fidelity form is 13m's.
+/// take's label and fan place (above). The full-fidelity form is 13m's.
+///
+/// **FORMAT v2 — THE BOUNDARY MARKER** (13n-b U3; her R-13nb-26 (a) —
+/// *"separator line, both forms"* — and its refinement that the PLAIN export
+/// never carries it; the design AF-10's): P-13n-4's limit, closed. A note
+/// holding a MULTI-PARAGRAPH block — a block whose in-place text carries a
+/// blank line with text after it — serializes in MARKER MODE: a `{v:2}`
+/// version token leads the header line, and every block boundary is the
+/// line `--- next block ---` with one blank line on each side, so a blank
+/// line inside a block is CONTENT. Every other note serializes exactly as
+/// v1 did, byte for byte — no token, no marker (`needsBoundaryMarkers`).
+/// Parsing keys on the token: absent (or `{v:1}`) reads v1 exactly as
+/// before; `{v:2}` reads marker mode; any other number refuses, naming its
+/// line. In marker mode a block's text rides VERBATIM (its internal and
+/// leading blank lines, its stored spacing; the document's trailing blank
+/// run is the edge, as in v1), the Alternates section is unchanged, a block
+/// text line that IS the marker gains one backslash on the way out and
+/// loses one on the way in (`\--- next block ---` stacks exactly), and the
+/// reading is lenient for hand-authoring (markers without blank lines
+/// around them, text after a section before the next marker starting a new
+/// block, an empty piece making no block). The marker lives ONLY in the
+/// takes-carrying forms: `serialize` (Copy full text, `read_note`) and
+/// `serializeTakesExport` (the "Markdown with takes" export, led by
+/// `{v:2}` alone so the file re-imports whole); the plain export never
+/// passes through here in marker mode. Recorded, unchanged from v1: a block
+/// text line that IS an Alternates marker is still read as one.
 public enum VariorumDocument {
     // MARK: - The model
 
@@ -179,6 +202,13 @@ public enum VariorumDocument {
 
     public static let alternatesHeader = "--- Alternates for this block ---"
     public static let alternatesFooter = "--- end alternates ---"
+    /// v2's block boundary (AF-10 — the format's own marker idiom; CommonMark
+    /// renders it as a plain line, never a rule or a heading).
+    public static let blockMarker = "--- next block ---"
+    /// The marker-mode format version, and its header token (parser-only —
+    /// never a capture token).
+    public static let markedVersion = 2
+    public static let versionToken = "{v:\(markedVersion)}"
 
     /// A take's marker line: `take: "label"` where a label exists, else
     /// `take: N` — N the take's 1-based ordinal within the section.
@@ -241,7 +271,9 @@ public enum VariorumDocument {
         return line
     }
 
-    /// **THE ONE SERIALIZER of a body** — `Queries.exportPost`'s, too. Each
+    /// **THE ONE v1 SERIALIZER of a body** — `Queries.exportPost`'s, too
+    /// (the plain export's callout road always; the takes export through
+    /// `serializeTakesExport` when no block needs marker mode). Each
     /// block contributes its in-place text when it has any (a blank chosen
     /// take skips, as ever) and then its Alternates section when it carries
     /// a non-blank take; the pieces join through the one join brain.
@@ -259,12 +291,101 @@ public enum VariorumDocument {
     }
 
     /// A whole document: the header line (when it has anything to say), one
-    /// blank line, the body.
+    /// blank line, the body — in MARKER MODE when a block needs it (v2: the
+    /// `{v:2}` token leads the header, the boundary marker joins the
+    /// blocks), else v1 byte for byte.
     public static func serialize(_ document: Document) -> String {
+        if needsBoundaryMarkers(document.blocks) {
+            return markedHeaderLine(title: document.title, tagPaths: document.tagPaths)
+                + "\n\n" + serializeMarkedBody(document.blocks)
+        }
         let body = serializeBody(document.blocks)
         guard let header = headerLine(title: document.title, tagPaths: document.tagPaths)
         else { return body }
         return body.isEmpty ? header : header + "\n\n" + body
+    }
+
+    // MARK: - Format v2: the boundary marker (13n-b U3 — AF-10)
+
+    /// **Does this note need marker mode?** True iff some block's in-place
+    /// text carries a BLANK (whitespace-only) line with non-blank text after
+    /// it — an internal paragraph break, or a leading blank line: every shape
+    /// v1's reading would split or shift. Trailing spacing alone does not
+    /// (v1 carries it); takes' texts never do (the section keeps them).
+    public static func needsBoundaryMarkers(_ blocks: [Block]) -> Bool {
+        blocks.contains { block in
+            var sawBlank = false
+            for line in block.text.split(separator: "\n", omittingEmptySubsequences: false) {
+                if line.allSatisfy(\.isWhitespace) {
+                    sawBlank = true
+                } else if sawBlank {
+                    return true
+                }
+            }
+            return false
+        }
+    }
+
+    /// The marker-mode header: the version token first, then v1's tokens.
+    public static func markedHeaderLine(title: String?, tagPaths: [String]) -> String {
+        ([versionToken] + [headerLine(title: title, tagPaths: tagPaths)].compactMap { $0 })
+            .joined(separator: " ")
+    }
+
+    /// **The marker-mode body.** Each block is one piece — its text verbatim
+    /// (marker lines escaped), then, when it carries a non-blank take, one
+    /// blank line and today's Alternates section (a blank text contributes
+    /// only its section; a blank block with no take contributes nothing, v1's
+    /// skip) — and the pieces join through the boundary marker.
+    public static func serializeMarkedBody(_ blocks: [Block]) -> String {
+        var pieces: [String] = []
+        for block in blocks {
+            let hasTakes = block.alternates.contains { !$0.text.isEmpty }
+            switch (block.text.isEmpty, hasTakes) {
+            case (true, false): continue
+            case (true, true): pieces.append(alternatesSection(block.alternates))
+            case (false, false): pieces.append(escapedBlockText(block.text))
+            case (false, true):
+                pieces.append(escapedBlockText(block.text) + "\n\n" + alternatesSection(block.alternates))
+            }
+        }
+        return pieces.joined(separator: "\n\n" + blockMarker + "\n\n")
+    }
+
+    /// **The takes-carrying export's text** (`Queries.exportPost(…,
+    /// includeVariants: true)` — "Markdown with takes"): v1's body exactly,
+    /// or, in marker mode, the whole v2 form led by `{v:2}` alone (the export
+    /// never carried a title or tags) so the file re-imports whole. The PLAIN
+    /// export never comes here (her R-13nb-26 (a) refinement).
+    public static func serializeTakesExport(_ blocks: [Block]) -> String {
+        guard needsBoundaryMarkers(blocks) else { return serializeBody(blocks) }
+        return serialize(Document(title: nil, tagPaths: [], blocks: blocks))
+    }
+
+    /// A block text line that IS the marker (after any backslashes) gains one
+    /// backslash before its first non-blank character — exact, never a
+    /// refusal: `\\--- next block ---` → `\\\--- next block ---`.
+    static func escapedBlockText(_ text: String) -> String {
+        text.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { stackBackslash(String($0), by: +1) }
+            .joined(separator: "\n")
+    }
+
+    /// One backslash more (+1) or fewer (−1) before a marker line's first
+    /// non-blank character; any other line passes through untouched.
+    static func stackBackslash(_ line: String, by step: Int) -> String {
+        let body = trimmed(line)
+        let slashes = body.prefix { $0 == "\\" }.count
+        guard body.dropFirst(slashes) == blockMarker, step > 0 || slashes > 0,
+              let start = line.firstIndex(where: { !$0.isWhitespace })
+        else { return line }
+        var out = line
+        if step > 0 {
+            out.insert("\\", at: start)
+        } else {
+            out.remove(at: start)
+        }
+        return out
     }
 
     // MARK: - Parse
@@ -298,6 +419,9 @@ public enum VariorumDocument {
             /// once trimmed — a chapter needs a name (folder imports only;
             /// ladder F6: refused in the plan, before anything is minted).
             case blankChapterName
+            /// A `{v:N}` header naming a format version this build cannot
+            /// read (13n-b U3 — written by a newer Variorum).
+            case unsupportedVersion(Int)
         }
 
         public var reason: Reason
@@ -331,12 +455,14 @@ public enum VariorumDocument {
         // line so every later line keeps its number.
         var title: String?
         var tagPaths: [String] = []
-        if let first = lines.firstIndex(where: { !isBlank($0) }) {
-            let read = CaptureTokens.readLine(lines[first])
-            if read.foundToken, read.text.allSatisfy(CaptureTokens.isHorizontal) {
-                title = read.title
-                tagPaths = read.tagPaths
-                lines[first] = ""
+        if let first = lines.firstIndex(where: { !isBlank($0) }),
+           let header = try readHeader(lines[first], lineNumber: first + 1) {
+            title = header.title
+            tagPaths = header.tagPaths
+            lines[first] = ""
+            // v2 (13n-b U3): the version token is the parser's key.
+            if header.version == markedVersion {
+                return try parseMarked(lines, from: first + 1, title: title, tagPaths: tagPaths)
             }
         }
 
@@ -365,39 +491,10 @@ public enum VariorumDocument {
             blocks.append(contentsOf: above.map { Block(text: $0) })
             chunk = []
 
-            var takes: [Take] = []
-            var open: (label: String?, content: [String])?
-            var closed = false
-            index += 1
-            while index < lines.count {
-                let sectionLine = lines[index]
-                let sectionMarker = trimmed(sectionLine)
-                if sectionMarker == alternatesFooter {
-                    if let open { takes.append(Take(label: open.label, text: takeText(open.content))) }
-                    closed = true
-                    index += 1
-                    break
-                }
-                if sectionMarker == alternatesHeader {
-                    throw Failure(.alternatesInsideAlternates(openedAt: headerLine), line: index + 1)
-                }
-                if let label = takeLabel(sectionMarker) {
-                    if let open { takes.append(Take(label: open.label, text: takeText(open.content))) }
-                    open = (label, [])
-                } else if open == nil {
-                    guard isBlank(sectionLine) else {
-                        throw Failure(.textBeforeFirstTake, line: index + 1)
-                    }
-                } else {
-                    open?.content.append(sectionLine)
-                }
-                index += 1
-            }
-            guard closed else {
-                throw Failure(.unterminatedAlternates, line: headerLine)
-            }
+            let section = try readSection(lines, from: index + 1, headerLine: headerLine)
+            index = section.next
             // Empty takes skip — the export's own rule, mirrored.
-            let kept = takes.filter { !$0.text.isEmpty }
+            let kept = section.takes.filter { !$0.text.isEmpty }
             if above.isEmpty {
                 // NO PARAGRAPH ABOVE (R-ARCH-13na-2, the architect's ruling on
                 // FORK-C): exactly what the export writes for a fanned block
@@ -428,6 +525,167 @@ public enum VariorumDocument {
     }
 
     // MARK: - Internals
+
+    /// **The header line, read** — a header ONLY when it is tokens alone
+    /// (ladder F9). v2 (13n-b U3): `{v:N}` tokens are taken out FIRST (the
+    /// version is the parser's own token, never a capture token); what
+    /// remains must be tokens alone, or nothing at all (a version-only
+    /// header). A line with no version token reads exactly as v1 read it. A
+    /// version this build cannot read refuses, naming the line — but only on
+    /// a line that IS a header (prose beside a `{v:…}` is body, untouched).
+    private static func readHeader(
+        _ line: String, lineNumber: Int
+    ) throws(Failure) -> (title: String?, tagPaths: [String], version: Int)? {
+        let (remainder, versions) = takingVersionTokens(line)
+        let read = CaptureTokens.readLine(remainder)
+        guard let version = versions.first else {
+            guard read.foundToken, read.text.allSatisfy(CaptureTokens.isHorizontal) else { return nil }
+            return (read.title, read.tagPaths, 1)
+        }
+        let tokensAlone = read.foundToken
+            ? read.text.allSatisfy(CaptureTokens.isHorizontal)
+            : remainder.allSatisfy(CaptureTokens.isHorizontal)
+        guard tokensAlone else { return nil }
+        guard version == 1 || version == markedVersion else {
+            throw Failure(.unsupportedVersion(version), line: lineNumber)
+        }
+        return (read.title, read.tagPaths, version)
+    }
+
+    /// The `{v:N}` tokens out of a line (each replaced by a space), and
+    /// their numbers in order. Digits only, at most six.
+    private static func takingVersionTokens(_ line: String) -> (String, [Int]) {
+        guard line.contains("{v:") else { return (line, []) }
+        var out = ""
+        var versions: [Int] = []
+        var rest = Substring(line)
+        while let open = rest.range(of: "{v:") {
+            let digits = rest[open.upperBound...].prefix { $0.isASCIIDigit }
+            let afterDigits = rest.index(open.upperBound, offsetBy: digits.count)
+            guard !digits.isEmpty, digits.count <= 6, afterDigits < rest.endIndex,
+                  rest[afterDigits] == "}", let number = Int(digits)
+            else {
+                out += rest[..<open.upperBound]
+                rest = rest[open.upperBound...]
+                continue
+            }
+            out += rest[..<open.lowerBound] + " "
+            versions.append(number)
+            rest = rest[rest.index(after: afterDigits)...]
+        }
+        return (out + rest, versions)
+    }
+
+    /// One Alternates section from the line after its header: its takes and
+    /// the index just past its footer (shared by both readings — v1's loop
+    /// moved here byte-for-byte at 13n-b U3).
+    private static func readSection(
+        _ lines: [String], from start: Int, headerLine: Int
+    ) throws(Failure) -> (takes: [Take], next: Int) {
+        var takes: [Take] = []
+        var open: (label: String?, content: [String])?
+        var index = start
+        while index < lines.count {
+            let sectionLine = lines[index]
+            let sectionMarker = trimmed(sectionLine)
+            if sectionMarker == alternatesFooter {
+                if let open { takes.append(Take(label: open.label, text: takeText(open.content))) }
+                return (takes, index + 1)
+            }
+            if sectionMarker == alternatesHeader {
+                throw Failure(.alternatesInsideAlternates(openedAt: headerLine), line: index + 1)
+            }
+            if let label = takeLabel(sectionMarker) {
+                if let open { takes.append(Take(label: open.label, text: takeText(open.content))) }
+                open = (label, [])
+            } else if open == nil {
+                guard isBlank(sectionLine) else {
+                    throw Failure(.textBeforeFirstTake, line: index + 1)
+                }
+            } else {
+                open?.content.append(sectionLine)
+            }
+            index += 1
+        }
+        throw Failure(.unterminatedAlternates, line: headerLine)
+    }
+
+    /// Where a run of block-text lines starts and ends, for `markedText`.
+    private enum RunStart { case afterBoundary, afterSection }
+    private enum RunEnd { case boundary, section, document }
+
+    /// **THE MARKER-MODE READING** (v2) from the line after the header: a
+    /// marker line (outside a section) ends a block; a section closes the
+    /// block above it (or is a blank-chosen block's, v1's rule); the block
+    /// text between them rides verbatim (`markedText`).
+    private static func parseMarked(
+        _ lines: [String], from start: Int, title: String?, tagPaths: [String]
+    ) throws(Failure) -> Document {
+        var blocks: [Block] = []
+        var chunk: [String] = []
+        var runStart = RunStart.afterBoundary
+        var index = start
+        while index < lines.count {
+            let line = lines[index]
+            let marker = trimmed(line)
+            if marker == alternatesFooter {
+                throw Failure(.endWithoutAlternates, line: index + 1)
+            }
+            if marker == blockMarker {
+                if let text = markedText(chunk, start: runStart, end: .boundary) {
+                    blocks.append(Block(text: text))
+                }
+                chunk = []
+                runStart = .afterBoundary
+                index += 1
+                continue
+            }
+            guard marker == alternatesHeader else {
+                chunk.append(line)
+                index += 1
+                continue
+            }
+            let headerLine = index + 1
+            let text = markedText(chunk, start: runStart, end: .section) ?? ""
+            chunk = []
+            let section = try readSection(lines, from: index + 1, headerLine: headerLine)
+            index = section.next
+            let kept = section.takes.filter { !$0.text.isEmpty }
+            if text.isEmpty, kept.isEmpty {
+                throw Failure(.alternatesWithoutParagraph, line: headerLine)
+            }
+            blocks.append(Block(text: text, alternates: kept))
+            runStart = .afterSection
+        }
+        if let text = markedText(chunk, start: runStart, end: .document) {
+            blocks.append(Block(text: text))
+        }
+        guard !blocks.isEmpty || title != nil || !tagPaths.isEmpty else { throw Failure(.empty) }
+        return Document(title: title, tagPaths: tagPaths, blocks: blocks)
+    }
+
+    /// A marker-mode block text from its run of lines: the ONE blank line the
+    /// serializer writes after a boundary (the header or a marker) and before
+    /// a boundary or a section drops; after a section every blank line before
+    /// the text drops, and at the document's end its trailing blank run is
+    /// the edge (v1's fence). Marker lines unescape. Nil when nothing is left.
+    private static func markedText(_ chunk: [String], start: RunStart, end: RunEnd) -> String? {
+        var lines = chunk[...]
+        switch start {
+        case .afterBoundary:
+            if let first = lines.first, isBlank(first) { lines = lines.dropFirst() }
+        case .afterSection:
+            while let first = lines.first, isBlank(first) { lines = lines.dropFirst() }
+        }
+        switch end {
+        case .boundary, .section:
+            if let last = lines.last, isBlank(last) { lines = lines.dropLast() }
+        case .document:
+            while let last = lines.last, isBlank(last) { lines = lines.dropLast() }
+        }
+        guard !lines.isEmpty else { return nil }
+        return lines.map { stackBackslash($0, by: -1) }.joined(separator: "\n")
+    }
 
     /// **THE BODY READING — the exact inverse of the join** (R-ARCH-13na-1)
     /// over a run of body lines: a BLANK line separates blocks; a single
