@@ -186,6 +186,37 @@ struct MCPEditServerTests {
         }
     }
 
+    /// Wings isolate TOTALLY (AppSpec §7's wing table; the sitting record §9):
+    /// the only crossings are the explicit wing move/copy doors — so a client
+    /// holding edit on a note in EACH of two wings still cannot walk a block
+    /// from one library into the other (its block tags would point at the
+    /// source wing's vocabulary). Decided inside the act's transaction, with
+    /// the grants.
+    @Test func moveBlockNeverCarriesABlockIntoAnotherWing() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let away = try h.operations.createWing(name: "work")
+            let home = try h.operations.createPost(title: "home note")
+            let there = try h.operations.createPost(title: "work note", wingId: away.id)
+            let block = try h.operations.newBlock(in: home.id, text: "Stays home.", registeringUndo: false)
+            _ = try h.operations.newBlock(in: there.id, text: "Work.", registeringUndo: false)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .note, home.id))
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.edit, .note, there.id))
+
+            let crossed = try await call(connection, "move_block", [
+                "block_id": .string(block.block.id), "note_id": .string(there.id),
+            ])
+            #expect(crossed.isError == true, "a block never crosses a wing through move_block: \(text(crossed))")
+            #expect(text(crossed).contains("another wing"))
+            #expect(try await h.database.read { try Queries.renderedText($0, containerID: home.id) } == "Stays home.")
+            #expect(try await h.database.read { try Queries.renderedText($0, containerID: there.id) } == "Work.")
+            #expect(h.undoStack.depth == 0, "nothing landed, nothing to undo")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - THE PROOF, edit half: suggest and write new cannot reach the edit rung
 
     /// **A SUGGEST OR WRITE-NEW GRANT PROVABLY CANNOT REACH `edit_take` OR THE

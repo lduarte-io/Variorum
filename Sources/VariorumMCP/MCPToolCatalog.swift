@@ -477,7 +477,8 @@ enum MCPToolCatalog {
         description: """
             Move a block: right after another block (after_block_id), right before one \
             (before_block_id), or to the start or end of a note (note_id, with at: "start" or \
-            "end"; default end). Either note must be shared with this client at edit. Returns JSON.
+            "end"; default end). Both notes must be shared with this client at edit, and in the same \
+            wing. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",

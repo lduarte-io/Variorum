@@ -180,8 +180,21 @@ extension MCPWriteTools {
                 case .before(let anchor): .before(anchor)
                 case .note(_, let atStart): atStart ? .start : .end
                 }
-                let checks = guardEdit(clientName) { db in
+                let decided = guardEdit(clientName) { db in
                     [try Queries.mcpContainerOf(block: blockID, db), try destinationOf(db)]
+                }
+                // Wings isolate TOTALLY (the sitting record §9): the only
+                // crossings are the explicit wing move/copy doors, never a
+                // block walking between libraries here (its block tags would
+                // name the source wing's vocabulary). PROVISIONAL P-13nb-U3-5.
+                let checks: Operations.WriteGuard = { db in
+                    try decided(db)
+                    let ends = [try Queries.mcpContainerOf(block: blockID, db), try destinationOf(db)]
+                        .compactMap { $0 }
+                    let wings = try Queries.mcpNoteFacts(db, noteIDs: ends)
+                    if Set(ends.map { wings[$0]?.wingID }).count > 1 {
+                        throw Refused(outcome: Outcome(text: Self.otherWingWords, isError: true))
+                    }
                 }
                 try ops.registeringUndo(as: label(.move)) {
                     if destination == noteID {
@@ -268,6 +281,10 @@ extension MCPWriteTools {
             if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
         }
     }
+
+    /// `move_block` toward a note in another wing (P-13nb-U3-5).
+    static let otherWingWords =
+        "That note is in another wing — each wing is a separate library, so a block can't move between them."
 
     static func refused(_ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target) -> Refused {
         let reason = MCPRefusalCopy.reason(of: decision) ?? .notShared
