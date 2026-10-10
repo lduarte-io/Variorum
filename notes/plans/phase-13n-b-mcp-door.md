@@ -1781,3 +1781,50 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   simple interleaved stack is a DURABLE design commitment (the
   R-13nb-12 class), not a v1 convenience; no parallel history system,
   ever, by her word.
+
+- **R-13nb-20 (2026-10-09, her evening batch — ONCE's meaning confirmed,
+  no write counter).** Her question: *"what does one write mean one
+  write mean? like one take only? one bounded session in which writes
+  are allowed? … giving different numbers of writes seems weird (like
+  not giving the option for specifically 5 writes)."* The answer,
+  confirmed as the design: ONCE = one write CALL (one take, one
+  comment, one lens, one note mint — or ONE bulk door: an
+  import_document is one call, one compound act, however many rows);
+  the BOUNDED SESSION she describes IS "while connected" (dies at the
+  client's last disconnect — the task-shaped duration, and the ask
+  sheet's natural steer for multi-step work); no numbered-writes dial
+  exists or will (her instinct ratified — counting writes is the weird
+  middle; the session is the honest unit).
+- **R-13nb-21 (same message) — CARRIAGE PROFILES ARE LOCAL-ONLY IN v1.**
+  Her words: *"agree on the carriage profile being local only in v1."*
+  Zero lockstep; the sitting prep's §4 recommendation ratified.
+- **R-13nb-22 (same message) — FOUR UNITS RATIFIED.** Her words:
+  *"that's fine on the phase growing from three units to four."* The
+  cut's CONTENTS stay the sitting's (prep §6).
+- **R-13nb-23 (same message) — NAVIGATION RULED.** (a) OFFER BY
+  DEFAULT: write receipts grow a one-press door — *"(which opening
+  that needs a keyboard shortcut too)"* — the offer must be reachable
+  from the keyboard, never mouse-only. (b) THE MOVE DIAL IS IN:
+  `show_in_app` switching the pane AND delivering her to the right
+  part of the editor — *"I do think that show_in_app switching the
+  pane and navigating you to the correct part of the editor is good"*
+  — with her etiquette verbatim: *"moving should not be done while you
+  aren't at the app, should not be done automatically. I think the
+  'open where your agent wants you to see deliberately' is fine to
+  stick to."* Delivery mechanics: the EXISTING landing machinery (the
+  13o search-passage landing — block id + selected range + the find
+  bar armed + the comfort band) is the road; no index detour needed.
+  (c) THE CEILING RULE RATIFIED with her one stated exception: *"with
+  the exception of navigating the editing carat and pane to somewhere
+  in the text, which a human can't really do beyond command F for
+  searching but I do think we need"* (mechanically the landing
+  machinery is already a human-reachable state, so the exception is
+  nearly moot — recorded as spoken). (d) Side-pane opening (*"have my
+  agent open this new thing in a side pane"*) is NOT v1 — *"I'd have
+  to seriously think about it"*. (e) Compare-preloaded-with-a-version
+  is an APP feature first: ticket **VX-130**. (f) Her added want for
+  the inventory: navigation to the open takes (a take-board target).
+- **R-13nb-24 (same message) — THE ORCHESTRATOR'S CONTEXT IS KEPT.**
+  Her words: *"Let's keep your context - I think it's valuable."* This
+  session continues as the phase's one orchestrator; no handoff at a
+  seam unless forced.
