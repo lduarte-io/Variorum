@@ -285,3 +285,32 @@ eye); (2) the F2 pin's three legs really isolate the interleave (each guardian i
 writer; the rolled-back guardian write is asserted); (3) the record edits — P-13nb-U3-11's
 corrected prefix clause + the F3 note, the mandate-decisions amendment; (4) F4's words beside the
 mockup §2 idiom and the sentence-case rule.
+
+## The implementer sanity pass (ac-session resumed, 2026-10-10) — PASS
+
+Headless whole package green on `9788f17b` (core 2,564/294 · MCP 45/6 ·
+workbook 40/6; the MCP target 5 further solo runs). Verified from the
+builder's side: guard order and the once spend intact (guardian first,
+a composition refusal rolls the stamp back — P-13nb-U3-3 holds); undo
+untouched (refusals throw before `register`, depth-0 pinned); the parked
+cuts PROTECTED not distorted (the guard's same-ids-same-order-same-texts
+is exactly what KeepOnTopDivide's end-cuts encode); merge guarded on
+both roads with the ONE intended change (an arrived take now refuses
+instead of staying behind silently); the happy path refuses nothing it
+should allow (`mcpShownTake` agrees with `renderedVariant`; her autosave
+rides the same OperationsRunner so her typing cannot land in the
+window); her doors unchanged (only divideBlock/mergeBlocks touched;
+divide/divideW/merge/mergeCeremony byte-untouched, nil guards on every
+app door); the three-leg pin asserts whole rollbacks including the
+guardian's own write. F1/F3/F4 records and copy verified accurate.
+
+**FLAG (record-only, pre-existing — NOT the fix set):** an intermittent
+hang in VariorumMCPTests — one whole-package run never finished the MCP
+bundle (test helper 100% CPU >11 min vs the normal ~1.7 s); `sample`
+showed the SDK's `Client.connect` message loop busy-spinning over
+`StdioTransport.readLoop`'s poll-sleep while `MCPSocketTransport.readLines`
+sat in `read()` — a test awaiting a response that never comes. Hit once
+in seven runs; passed 6/6 after the kill. A race in U1's socket harness
+or the SDK client — separate from round 1's one transient core issue.
+TICKETED (below): give the harness's connect/call a time limit so a
+hang fails loudly with the test's name.
