@@ -1202,7 +1202,11 @@ private struct FlowStoryRow: View {
 /// One post on the page: lazy text, serif paragraphs; each BLOCK's
 /// paragraphs are a click target that wakes editing AT that block (row 38);
 /// the note's empty state wakes the note as a whole.
-private struct FlowPostView: View {
+///
+/// Internal rather than `private` since VX-142 (the VX-143 run), so its
+/// composition pin can build it directly — nothing outside this file
+/// constructs one.
+struct FlowPostView: View {
     let session: AppSession
     let entry: Queries.ReadingEntry
     let page: ReadingPageTokens

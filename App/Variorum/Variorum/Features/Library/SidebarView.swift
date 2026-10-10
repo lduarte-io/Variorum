@@ -271,6 +271,9 @@ struct SidebarView: View {
         // window has its own). Counted INSIDE the evaluation — `.onAppear`
         // or a geometry report would count mounts and layouts, not bodies.
         let _ = SidebarGeometry.noteBodyEvaluation(for: workspace)
+        // VX-141's oracle: what the rail's SLOT holds on this pass.
+        let _ = SidebarGeometry.noteSlotOccupant(
+            railPostID != nil ? .rail : (noteBox != nil ? .box : .empty), for: workspace)
 #endif
         VStack(spacing: 0) {
             // The groups. An outer scroll is the LAST resort for a window
@@ -987,6 +990,27 @@ enum SidebarGeometry {
 
     static func noteBodyEvaluation(for workspace: WorkspaceModel) {
         bodyEvaluations[bodyKey(for: workspace), default: 0] += 1
+    }
+
+    /// **VX-141 (the VX-143 run) — what the rail's SLOT held, pass by pass.**
+    /// Her report is a MOVEMENT (*"the this note section briefly starts to
+    /// minimize and then snaps back"*), and a movement is a sequence: going
+    /// note → book, a pass that holds NEITHER the rail nor the box is the
+    /// collapse she saw begin. Keyed by the workspace like `bodyEvaluations`
+    /// (an owner already), and bounded — the newest passes are the question.
+    enum SlotOccupant: String, Sendable {
+        case rail, box, empty
+    }
+
+    static var slotOccupants: [String: [SlotOccupant]] = [:]
+    static let slotOccupantLimit = 256
+
+    static func noteSlotOccupant(_ occupant: SlotOccupant, for workspace: WorkspaceModel) {
+        let key = bodyKey(for: workspace)
+        var row = slotOccupants[key, default: []]
+        row.append(occupant)
+        if row.count > slotOccupantLimit { row.removeFirst(row.count - slotOccupantLimit) }
+        slotOccupants[key] = row
     }
 
     // **18k UNIT C4 — the rail and the box NAME THEIR OWNER** (the rule and
