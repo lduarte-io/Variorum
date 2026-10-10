@@ -242,8 +242,10 @@ extension Operations {
     /// keep-on-top (U-2: the shown take splits, every other take rides
     /// whole onto the first block — `KeepOnTopDivide` over `divideW`). `cut`
     /// is a UTF-16 offset into `shownTakeID`'s text, which the caller
-    /// measured as `expectedText`: the guard re-checks that text inside the
-    /// act's transaction (a take changed since refuses as
+    /// measured as `expectedText`: the guard re-checks the WHOLE composition
+    /// inside the act's transaction — that text, the take still rendered,
+    /// and the fan's membership and texts the arrangement was built from
+    /// (U3 ladder round 1, F2; anything moved refuses as
     /// `bufferChangedSinceGesture`, never a cut in the wrong place). The
     /// ops' own refusals ride (start/end cuts, a sealed note, a locked take).
     /// ONE undo entry, `undoLabel`.
@@ -254,8 +256,19 @@ extension Operations {
         let fan = try database.read { db in try liveActiveFan(db, blockID: blockID) }
         let measured: WriteGuard = { db in
             try guardian?(db)
-            guard let take = try Variant.fetchOne(db, key: shownTakeID), take.deletedAt == nil,
-                  take.blockId == blockID, take.workingText == expectedText
+            // THE COMPOSITION's premises, re-verified on the act's own rows
+            // (U3 ladder round 1, F2 — the expectedText precondition class,
+            // widened to everything the arrangement was built from): the fan
+            // it composed over, ids AND texts — a parked cut is POSITIONAL,
+            // its take's old length — and the measured take still this
+            // block's RENDERED take. Only a sync apply can land between the
+            // read and this transaction (the serial body); when one did,
+            // ONE honest refusal, never a cut in a place nobody chose.
+            let current = try liveActiveFan(db, blockID: blockID)
+            guard current.map(\.id) == fan.map(\.id),
+                  current.map(\.workingText) == fan.map(\.workingText),
+                  let shown = try? renderedVariant(db, blockID: blockID),
+                  shown.id == shownTakeID, shown.workingText == expectedText
             else { throw OperationError.bufferChangedSinceGesture(variantID: shownTakeID) }
         }
         if fan.count <= 1 {
@@ -293,7 +306,9 @@ extension Operations {
     /// `mergeCeremony` — the two shown takes paired, every other take carried
     /// whole). Adjacency, seals and the rest are the ops' own refusals. A
     /// shown take that vanished from its fan since the read refuses as
-    /// `bufferChangedSinceGesture` (the 13d F-3 class — never a fallback).
+    /// `bufferChangedSinceGesture` (the 13d F-3 class — never a fallback),
+    /// and the guard re-verifies both fans' membership and both shown takes
+    /// inside the act's transaction (U3 ladder round 1, F2).
     /// ONE undo entry, `undoLabel`.
     public func mergeBlocks(
         _ firstBlockID: String, _ secondBlockID: String,
@@ -303,9 +318,28 @@ extension Operations {
             (try liveActiveFan(db, blockID: firstBlockID), try liveActiveFan(db, blockID: secondBlockID),
              try? renderedVariant(db, blockID: firstBlockID).id, try? renderedVariant(db, blockID: secondBlockID).id)
         }
+        let measured: WriteGuard = { db in
+            try guardian?(db)
+            // THE COMPOSITION's premises, re-verified on the act's own rows
+            // (U3 ladder round 1, F2): both fans' MEMBERSHIP (which road —
+            // plain or carry-all — and which takes pair and carry) and both
+            // SHOWN takes still their block's rendered one. Texts need no
+            // check here — the ops read them inside this same transaction.
+            // A sync apply landing in the window refuses honestly instead of
+            // leaving its take behind in silence or pairing takes she was
+            // never looking at. An empty side passes through: the op's own
+            // typed refusal is the honest diagnosis there (the chain's rule).
+            let leadingNow = try liveActiveFan(db, blockID: firstBlockID)
+            let trailingNow = try liveActiveFan(db, blockID: secondBlockID)
+            guard leadingNow.map(\.id) == leadingFan.map(\.id),
+                  trailingNow.map(\.id) == trailingFan.map(\.id),
+                  (try? renderedVariant(db, blockID: firstBlockID))?.id == leadingShown,
+                  (try? renderedVariant(db, blockID: secondBlockID))?.id == trailingShown
+            else { throw OperationError.bufferChangedSinceGesture(variantID: leadingShown ?? firstBlockID) }
+        }
         if leadingFan.count <= 1, trailingFan.count <= 1 {
             let result = try registeringUndo(as: undoLabel) {
-                try merge(firstBlockID, secondBlockID, guardedBy: guardian)
+                try merge(firstBlockID, secondBlockID, guardedBy: measured)
             }
             return MCPMergeResult(blockID: result.block.id, carried: 0)
         }
@@ -316,7 +350,7 @@ extension Operations {
         let result = try registeringUndo(as: undoLabel) {
             try mergeCeremony(
                 firstBlockID, secondBlockID, pairings: [composition.pairing],
-                carries: composition.carries, guardedBy: guardian)
+                carries: composition.carries, guardedBy: measured)
         }
         return MCPMergeResult(blockID: result.block.id, carried: composition.carries.count)
     }

@@ -317,6 +317,95 @@ struct MCPEditActsTests {
         }
     }
 
+    // MARK: - THE COMPOSITION GUARD (U3 ladder round 1, F2)
+
+    /// The divide/merge COMPOSITIONS are arranged from a fan read BEFORE the
+    /// act's transaction; only a sync apply can land between the two (the
+    /// serial body). The guard re-verifies the composition's premises on the
+    /// act's own rows — the fan's membership AND texts for divide (parked
+    /// cuts are positional), the fans' membership and both rendered takes
+    /// for merge — and refuses as the `expectedText` class. Each leg's
+    /// guardian plays the sync apply, deterministically, inside the act's
+    /// own transaction.
+    @Test func aCompositionStaleAtTheActRefusesInsteadOfMisShaping() throws {
+        try withUndo { ops, stack, db in
+            let note = try ops.createPost(title: "ch 1")
+
+            // (1) A BYSTANDER take grows in the window: the stale parked cut
+            // (its old length) would mid-split the take she synced.
+            let fanned = try ops.seedBlock(in: note.id, text: "One. Two.")
+            let bystander = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(bystander.id, text: "short", charDelta: 2)
+            let grows: Operations.WriteGuard = { db in
+                try db.execute(
+                    sql: "UPDATE variant SET working_text = ? WHERE id = ?",
+                    arguments: ["short, but now much longer than the parked cut", bystander.id])
+            }
+            #expect(throws: OperationError.bufferChangedSinceGesture(variantID: fanned.variant.id)) {
+                try ops.divideBlock(
+                    fanned.block.id, cut: "One. ".utf16.count, shownTakeID: fanned.variant.id,
+                    expectedText: "One. Two.", undoLabel: label(.divide), guardedBy: grows)
+            }
+            #expect(try db.deletedAt("block", fanned.block.id) == nil, "nothing divided")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL", [fanned.block.id]) == 2)
+            #expect(try db.fetchString("SELECT working_text FROM variant WHERE id = ?", [bystander.id]) == "short",
+                    "the whole refused act rolled back, the guardian's write included")
+
+            // (2) The SINGLE-take path: the shown take is archived and
+            // replaced in the window — the cut was measured in a take that is
+            // no longer the one divide would cut.
+            let single = try ops.seedBlock(in: note.id, text: "One. Two.")
+            let swap: Operations.WriteGuard = { db in
+                try db.execute(
+                    sql: "UPDATE variant SET status = 'archived' WHERE id = ?", arguments: [single.variant.id])
+                try db.execute(
+                    sql: """
+                        INSERT INTO variant (id, block_id, working_text, status, locked, fan_position,
+                                             created_at, updated_at)
+                        VALUES ('sync-new-take', ?, 'Completely different prose.', 'active', 0, 'zz',
+                                '2026-07-01T00:00:00.000Z', '2026-07-01T00:00:00.000Z')
+                        """,
+                    arguments: [single.block.id])
+                try db.execute(
+                    sql: "UPDATE block SET default_variant_id = 'sync-new-take' WHERE id = ?",
+                    arguments: [single.block.id])
+                try db.execute(
+                    sql: "UPDATE container_block SET chosen_variant_id = NULL WHERE block_id = ?",
+                    arguments: [single.block.id])
+            }
+            #expect(throws: OperationError.bufferChangedSinceGesture(variantID: single.variant.id)) {
+                try ops.divideBlock(
+                    single.block.id, cut: "One. ".utf16.count, shownTakeID: single.variant.id,
+                    expectedText: "One. Two.", undoLabel: label(.divide), guardedBy: swap)
+            }
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE id = 'sync-new-take'") == 0, "rolled back whole")
+
+            // (3) MERGE: a take arrives on the trailing side in the window —
+            // the carry-all would have carried it; the plain road would leave
+            // it behind in silence. It refuses instead.
+            let a = try ops.seedBlock(in: note.id, text: "Alpha.")
+            let b = try ops.seedBlock(in: note.id, text: "Beta.")
+            let arrives: Operations.WriteGuard = { db in
+                try db.execute(
+                    sql: """
+                        INSERT INTO variant (id, block_id, working_text, status, locked, fan_position,
+                                             created_at, updated_at)
+                        VALUES ('sync-arrived-take', ?, 'Beta, another way.', 'active', 0, 'zz',
+                                '2026-07-01T00:00:00.000Z', '2026-07-01T00:00:00.000Z')
+                        """,
+                    arguments: [b.block.id])
+            }
+            #expect(throws: OperationError.bufferChangedSinceGesture(variantID: a.variant.id)) {
+                try ops.mergeBlocks(a.block.id, b.block.id, undoLabel: label(.merge), guardedBy: arrives)
+            }
+            #expect(try db.deletedAt("block", a.block.id) == nil && (try db.deletedAt("block", b.block.id)) == nil,
+                    "nothing merged")
+            #expect(stack.depth == 0, "no refused act registered an entry")
+        }
+    }
+
     // MARK: - create_note's structured payload (R-13nb-11 G-2 + R-13nb-26 (b))
 
     @Test func aStructuredNoteKeepsAMultiParagraphBlockWholeWithNamesTakesAndItsDate() throws {
