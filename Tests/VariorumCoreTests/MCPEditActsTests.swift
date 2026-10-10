@@ -353,6 +353,27 @@ struct MCPEditActsTests {
         }
     }
 
+    @Test func aMalformedEntryDateRefusesAtTheOpAndMintsNothing() throws {
+        // Phase 9b's day-key boundary (`setEntryDate`, `createOrOpenJournalEntry`):
+        // no op is a permissive door to a malformed key — the notebook rule's
+        // open-by-date would never find the entry. The wire validates too; the
+        // op must not rely on it.
+        try withUndo { ops, stack, db in
+            let notes = { try db.fetchInt("SELECT COUNT(*) FROM container WHERE kind = 'post'") }
+            let before = try notes()
+            #expect(throws: OperationError.invalidEntryDate("2019-3-4")) {
+                try ops.createNote(title: "x", text: "One.", entryDate: "2019-3-4", in: .wing(""),
+                                   undoLabel: label(.note))
+            }
+            #expect(throws: OperationError.invalidEntryDate("2019-02-30")) {
+                try ops.createStructuredNote(title: "x", entryDate: "2019-02-30", blocks: [.init(text: "One.")],
+                                             in: .wing(""), undoLabel: label(.note))
+            }
+            #expect(try notes() == before, "the refusal rolls the whole mint back")
+            #expect(stack.depth == 0, "and registers nothing")
+        }
+    }
+
     // MARK: - churn
 
     @Test func anEditsChurnIsWhatChangedBetweenTheCommonEnds() {

@@ -258,7 +258,8 @@ extension Operations {
     ///
     /// `entryDate` (13n-b U3 — R-13nb-26 (b), her words: *"agents should be
     /// able to set the date on a note"*): the minted note's date, `yyyy-MM-dd`
-    /// (the caller validates the shape), set in the same transaction.
+    /// (a malformed key refuses `invalidEntryDate` and mints nothing), set in
+    /// the same transaction.
     @discardableResult
     public func createNote(
         title: String?, text: String, entryDate: String? = nil, in destination: MCPNoteDestination,
@@ -324,8 +325,12 @@ extension Operations {
         }
     }
 
+    /// The day key's boundary is the op's own (Phase 9b — `setEntryDate`,
+    /// `createOrOpenJournalEntry`): canonical `yyyy-MM-dd` or a refusal that
+    /// rolls the whole mint back, never a permissive door.
     private func stampEntryDate(_ db: Database, _ entryDate: String?, on postID: String) throws {
         guard let entryDate else { return }
+        guard JournalDay.isValid(entryDate) else { throw OperationError.invalidEntryDate(entryDate) }
         try db.execute(sql: "UPDATE container SET entry_date = ? WHERE id = ?", arguments: [entryDate, postID])
     }
 
