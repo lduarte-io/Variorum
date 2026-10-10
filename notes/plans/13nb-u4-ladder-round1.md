@@ -139,17 +139,39 @@ ratification honest. Record-only.
 
 ---
 
-## Dispositions (round 1 — pending the cross-model flow)
+## Dispositions (FINAL — the cross-model flow complete, 2026-10-10)
 
-| # | Severity | Disposition |
-|---|---|---|
-| F-1 | MAJOR | pending |
-| F-2 | MINOR | pending |
-| F-3 | MINOR | pending |
-| F-4 | MINOR | pending |
-| F-5 | NIT | pending |
-| F-6 | NIT | pending |
-| F-7 | NIT | pending |
+The implementer's response: **7/7 AGREE**, zero disputes, with three refinements and one
+residual offered for my final call — all four adopted (noted per row). The reviewer (this
+session) made the final calls and implemented the confirmed fixes itself.
+
+| # | Severity | Final call | Landed as |
+|---|---|---|---|
+| F-1 | MAJOR | **CONFIRMED — FIXED (the bell override); PROVISIONAL P-13nb-U4-16 for the merge bundle.** The implementer's preference matched mine; its verification that nothing on the wire exposes arrivals or their counts (so the bell closes the read AND the count oracle) is adopted, and its RESIDUAL (her own later tagging under a join dial seats — her act, stays) is named inside the provisional. | `c707340f` — `sweepOccasion` override on `writeReadingQuerySpec` (her doors untouched); `set_book_rule` passes `.catchUp`; the `matches_wait` answer sentence, unconditional (no match oracle). Pins RED-ON-OLD by revert: server `aRuleWriteNeverExpandsTheClientsOwnReach` (3 issues — the unshared text ANSWERED on old), core `anAgentRuleWritesIntakeBellsAndItsRowsStayThroughUndo` (3 issues — member, not arrival); her Save's backfill pinned untouched in the same test; the old backfill-seat pin updated as the ritual. |
+| F-2 | MINOR | **CONFIRMED — FIXED, the implementer's correction adopted:** my record's example (write-new book grant + read-only member) was WRONG — a book grant reaches a member at writeNew, so that call allows; the arm that actually refuses (where the missing ask mattered most) is a FENCED member, and the pin uses a journal member. Its lesser case (a non-member unshared note's silent ask inviting a doomed grant) is RULED KEPT-UNIFORM with `add_note_to_book`: a membership-conditional ask rule would be a new behavior path with its own edges; the ask is for ACCESS, not for the one act. | `3f1230bc` — the filing snapshot rides `noteIntoBook` (both sides decided with `MCPAsking`; `spendsAfter: false` keeps the guard's atomic spend). Pin `filingAFencedMemberRaisesTheAskAndSaysSo` RED-ON-OLD by revert (2 issues: no asked sentence, no ask queued). |
+| F-3 | MINOR | **CONFIRMED — FIXED.** | `61abd4d6` — the version branch passes the REAL standing + `versionOf`; `farSides` classifies the live note readable, sibling moments as versions (family = the live note), the live note's released originals as family; `books` stays suppressed on a version read (pinned). Pin `aVersionReadsLineageAddressesTheLiveNoteItIsAMomentOf` RED-ON-OLD by revert (2 issues: no `note_id`, the stub). |
+| F-4 | MINOR | **CONFIRMED — FIXED, both refinements adopted:** the words say the note DID open (`partialShowWords`), and the standing is RE-CHECKED after the wait's suspension (she leaves the app mid-delivery ⇒ the tail never fires). | `2096effc` — `MCPNavigator.deliver` answers whether the delivery LANDED (+ `stillStanding`; `mountWait` a var for pins); `MCPDoor.agentShow` maps false → `.refuse(MCPShowRule.partialShowWords)`; her own press keeps always-proceed. Pin `aShowThatCannotFinishRefusesInsteadOfClaimingShown` (two arms: timeout; mid-wait app switch) RED-ON-OLD by revert of MCPDoor alone (3 issues); MCPNavigationTests 8/8 under a held stage claim, released. |
+| F-5 | NIT | **CONFIRMED — FIXED.** | `f6445fa6` — `lenses`/`versions` fetch cap+1 and set `lenses_truncated`/`versions_truncated` (the tray's shape). Pin `lensAndVersionListsSayWhenTheCapBites` (201 lenses) RED-ON-OLD by revert (1 issue: the silent drop). |
+| F-6 | NIT | **RECORD-FIXED — the implementer's argument adopted over my liveness-filter option:** lineage has no dead-edge gap (the delete cascade tombstones edges); omitting dead parents from ancestry would make "no parent fields" distinguishable from the stub — a liveness oracle on unshared notes, against the F-4 rider's spirit; and a dead take's id on a live block is the tray's own `put_back` address. | P-13nb-U4-7 amended in the plan (dated): ancestry answers by the parent's BLOCK — a dead block collapses into the stub; a dead take on a live block keeps its id. No code; record-only by ruling. |
+| F-7 | NIT | **RECORD-FIXED**, the implementer's both-sides clause adopted (her Save differs in face, not law — it greys the rule half; the wire has no face, so the whole-call refusal with her notice is the honest mirror). | P-13nb-U4-8 amended in the plan (dated). The behavior was already pinned (nothing half-lands; dial-only lands); no code. |
+
+## THE FIX PASS (the reviewer's own, per the cross-model flow — commits `c707340f` → `f6445fa6` + this record)
+
+- **Commit per piece, each pushed:** F-1 `c707340f` · F-2 `3f1230bc` · F-3 `61abd4d6` ·
+  F-4 `2096effc` · F-5 `f6445fa6` · the records (this commit). Every bug-class fix carries a
+  red-on-old pin VERIFIED BY REVERT (source stashed, pin red with the traced issue counts
+  above, stash popped, pin green) — no pin was green on both sides.
+- **Plan amendments (same commit as this record):** P-13nb-U4-7 (F-6's ancestry sentence),
+  P-13nb-U4-8 (F-7's both-sides clause), new P-13nb-U4-16 (F-1's bell override + the named
+  residual) — all PROVISIONAL-class, hers at the merge bundle.
+- **Stage:** one claim held for the F-4 Mac runs (`u4-ladder-r1-fixes`), released after.
+- **Suites after the pass (final counts, run whole by this session):** headless whole
+  package — core **2,580/295** (the F-1 core pin REPLACED the old backfill-seat pin, so the
+  count holds; zero regressions), **VariorumMCPTests 65/8** (61 + the four new pins),
+  workbook **40/6**; Mac **MCPNavigationTests 8/8** (stage held, 0 skipped). The
+  long-standing gated skips only.
+- **Scope held:** zero `Sources/VariorumCore/Sync/`, `Server/`, `Persistence/`, custody or
+  editor-seam lines; `lockstepVersion` untouched; no migrations; no trailers.
 
 ---
 

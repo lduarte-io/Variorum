@@ -2773,13 +2773,26 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
   fenced, an unshared and a scrap far side). Take ancestry mirrors it
   (`parent_take_id`, + `parent_version_id` / `parent_note_id`, else
   `parent_beyond_grant: true`). A dead far side is left out (the lineage
-  walks' live-endpoint rule).
+  walks' live-endpoint rule). *Ladder round 1 amendment (F-6, record-fix
+  ruled over a liveness filter — the implementer's analysis adopted): the
+  live-endpoint rule is LINEAGE's (dead blocks never meet a live edge — the
+  delete cascade tombstones edges); ANCESTRY answers by the parent's BLOCK —
+  a dead block collapses into the stub (omission would mint a liveness
+  oracle on unshared notes, against the F-4 rider's spirit), and a dead take
+  on a live block keeps its id (its block is this note's; the id is the
+  tray's own `put_back` address).*
 - **P-13nb-U4-8 — `set_book_rule`'s shape** (AF-11 F-1): one call = her
   Save's three optional fields; the three writes in ONE transaction (her
   Save is three — stricter only in that nothing half-lands); a legacy term
   in the written rule refuses (`legacyTermWords`); an unreadable stored rule
   refuses ANY rule write with her editor's own notice while the dial and the
-  outflow still land (her Save's exact behavior — `RuleEditing.needsWrite`);
+  outflow still land (*ladder round 1 amendment, F-7 — said exactly: a call
+  WITHOUT a rule still lands dial and outflow over the unreadable rule; a
+  call CARRYING a rule refuses WHOLE, dial and outflow included — nothing
+  half-lands, pinned. Her Save differs in face, not law: it greys the rule
+  half and lands dial+outflow because it HAS a face to grey; the wire has
+  none, so the honest mirror is the whole-call refusal with her notice —
+  `RuleEditing.needsWrite`*);
   undo restores the three columns and never evicts. Verified, not assumed:
   her ops and her Edit… door LAND on a finished AND a sealed book
   (`.editRule` is `always`; no op refuses) — both pinned.
@@ -2826,6 +2839,27 @@ door, the landing roads: `ShellRouter.adopt`, `PostDetailView.jump`,
   the moment SHE files the note in a journal book). Watch item, recorded:
   her op never refuses a day another journal entry already holds (the
   notebook rule's converged double-create case) — the wire mirrors it.
+- **P-13nb-U4-16 — AN AGENT-WRITTEN RULE BELLS, NEVER BACKFILL-SEATS (the
+  ladder round 1 MAJOR, the reviewer's fix — hers to ratify or reverse in a
+  word):** `set_book_rule`'s rule write passes `sweepOccasion: .catchUp`
+  through her choke point, so its sweep BELLS whatever the book's rule
+  history. The trace that forced it: a rule set on a rule-less book was
+  BACKFILL and backfill SEATS — matching notes became MEMBERS, a book grant
+  reaches members (`MCPGrantRule.reaches`), so a client with write-new on
+  one book could expand its OWN read reach to every unshared matching note
+  in the wing (two calls past an existing rule: clear, then re-set), and
+  the honest member count doubled as a how-many-notes-wear-this-tag oracle.
+  Backfill's canonical warrant is "birth = intent" — HER authorship, which
+  an agent's call does not carry; the one-note roads (`add_note_to_book`,
+  `file_note_in_chapter`) double-decide to prevent exactly this pull. Her
+  own Save keeps backfill untouched (pinned both ways); the answer says
+  where the matches went (`matches_wait`, unconditional on a landed rule —
+  never per-match, no oracle). **The named RESIDUAL (the implementer's,
+  recorded for the same bundle):** once an agent-written rule stands with
+  the dial at join, HER later applying acts (tagging, starring) seat
+  matching notes, and those members then fall inside the book grant's
+  reach — her own act under the standing book-grant-reaches-members rule;
+  it stays, and the bundle says it.
 
 ### Decisions within the mandate (recorded as they land)
 
