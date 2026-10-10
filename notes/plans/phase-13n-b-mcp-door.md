@@ -653,6 +653,46 @@ grant authority · tool projections — never one god server object (P-9).
   her gestures exactly as her own File ▸ Import does — same cost, same
   class; P1/P2 eyes on anything beyond it).
 
+## ARCHITECT RULING ON THE U3 FORK (AF-10, Fable, 2026-10-10 — the glyph/token/grammar + the seven build calls, `96464a79`'s proposal)
+
+- **THE MARKER: `--- next block ---` APPROVED** — the format's own
+  marker idiom (the Alternates family), hard-wrap-safe, CommonMark-inert
+  (letters inside disqualify thematic break and setext alike, so
+  markdown viewers render a plain line), collision-free in practice
+  with the escape rule below. The invisible `<!-- -->` alternative
+  REJECTED for the implementer's own reason: an invisible structure
+  line misleads anyone editing the rendered view, and it breaks the
+  marker family.
+- **THE TOKEN: `{v:2}` APPROVED** — first on the braced header, legal
+  alone, parser-only (NOT CaptureTokens — capture untouched), absent =
+  v1 byte-exact, `{v:1}` read as v1, unknown numbers refuse fail-honest
+  with the line.
+- **THE GRAMMAR APPROVED as proposed** — marker mode iff some block's
+  in-place text holds a blank line with non-blank after (leading blanks
+  included: every shape v1 misreads); the join
+  `\n\n--- next block ---\n\n`; Alternates unchanged; the
+  backslash-stacking escape (export exact, never refusing); lenient
+  text-after-section parse; exact-inverse pins; the PLAIN export never
+  carries marker/brace/section (pinned — her R-13nb-26(a) refinement);
+  exportBlock stays a block-level clipboard face (recorded).
+- **The seven build calls ALL CONCURRED:** (a) the in-transaction
+  guard RUNG-WIDE — the move_block-out-of-a-fenced-note disclosure
+  trace is exactly right; defaulted `guardedBy:` nil on her doors,
+  redo never carries it; (b) merge_blocks = her ⌘⇧M default with
+  `CarryAllMerge` MOVED to core Domain byte-unchanged — the 3C parity
+  pattern BINDS: the app keeps its name compiling (typealias/forward)
+  so every existing pin passes UNMODIFIED; divide_block = keep-on-top;
+  two blocks per call; (c) the cut addressed by text
+  (`second_half_starts_with`, exactly-once) — LLMs miscount UTF-16,
+  the expectedText precondition class; (d) with_commits newest-first
+  with the 100k-char bound + `commit_ids` fetch (≤20); (e) Allow AI
+  here as the approved-clients submenu, read·once on THAT note, fenced
+  included (per-ask-legal — R-13n-11's letter), unrendered when none
+  (P-2), no ellipsis; (f) book/chapter facts only for readable books
+  (names stay with grants) + section facts on list_notes rows;
+  (g) the brackets as proposed (kind auto, the client's name verbatim,
+  the standing dedupe, one undo entry, touch + churn as any text edit).
+
 ## ARCHITECT SEAM RULINGS (Fable, 2026-10-09 kickoff — within the mandate, each traced; product-flavored ones marked PROVISIONAL for her)
 
 - **A-1 — Module placement.** The MCP server is a NEW SPM library target
