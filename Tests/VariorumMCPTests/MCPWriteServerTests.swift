@@ -13,7 +13,7 @@ import Testing
 // write half: a suggest grant PROVABLY cannot modify an existing take; writes
 // land inside the grant's scope only; every write is one undo entry under the
 // client's name; the just-in-time ask never blocks and never becomes an
-// existence oracle; once spends at its own rung; the Private mark fences the
+// existence oracle; once spends by its first write of any rung (AF-7 as amended); the Private mark fences the
 // very next call of a connected client.
 
 private func grant(

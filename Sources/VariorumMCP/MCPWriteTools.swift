@@ -14,7 +14,7 @@ import VariorumCore
 /// able to interleave — a revocation from the pane, or her own gesture, runs
 /// strictly before or after. Arguments are parsed BEFORE the executor (a
 /// malformed call never queues behind her work). The once grant is stamped
-/// AFTER the act lands (AF-7: spent by its first write at its own rung), so a
+/// AFTER the act lands (AF-7: spent by its first write by its first write of any rung (AF-7 as amended)), so a
 /// refused act never spends it.
 ///
 /// **Scope discipline:** a creative act lands INSIDE the grant's scope — a
@@ -302,7 +302,7 @@ struct MCPWriteTools: Sendable {
     }
 
     /// A note's act: decided on the note at `rung` (content-bearing — AF-7's
-    /// once spends at its own rung, stamped AFTER the act lands).
+    /// once spends by its first write of any rung (AF-7 as amended), stamped AFTER the act lands).
     private func onNote(
         _ noteID: String, rung: MCPGrantRule.Rung, job: Job, clientName: String,
         logged: (kind: String, id: String)? = nil,
