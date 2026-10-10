@@ -801,7 +801,9 @@ unit record (TCC state is machine-state the next session inherits).
 | 9 | The lockstep DEPLOY window (marker 12→13, mirror → both installs) | her + orchestrator | HELD for the closeout window |
 | 10 | 13x adoption lands MCP OFF (R-13nb-6) — the one toggle-OFF write on the adoption road | U2 (or U1 if the road is open) | OPEN |
 | 11 | Re-verify probe (a) per macOS point release — line joins the closeout ritual note | orchestrator | OPEN — standing |
-| 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`, 7 questions incl. navigation §6b) | HER — the phase's one open gate | READY — U3's brief waits on it |
+| 12 | THE FORMAT-SCHEMA SITTING (R-13nb-13; prep `phase-13nb-format-schema-sitting-prep.md`) | HER | **RAN 2026-10-09/10** — all seven ruled (R-13nb-26 a–g) |
+| 13 | U3 — the edit-rung spine (brief below) | U3 implementer | BRIEFED — spawning |
+| 14 | U4 — the carriage + book rules + navigation (brief at U3's close) | — | SHAPED by R-13nb-26 e/f/g |
 
 ---
 
@@ -1838,3 +1840,42 @@ STACK MECHANISM ratified as-is and the FACE ticketed — R-13nb-19 below.
   *"unspent grants being visible rows in shared with AI is good and
   enough for now."* AF-9's determinism confirmed necessary either way
   (her observation: the race exists even with time-limited grants).
+- **R-13nb-26 (2026-10-09/10 — THE FORMAT-SCHEMA SITTING'S RULINGS,
+  run as two question batches; the prep `phase-13nb-format-schema-
+  sitting-prep.md` is the option record):**
+  **(a) THE BOUNDARY MARKER — separator line, BOTH forms, engaged only
+  when needed.** Her condition verbatim: *"people can still export
+  markdown & markdown with takes normally, right? in that case,
+  separator line, both forms"* — honored by construction: a note whose
+  blocks are all single-paragraph exports BYTE-IDENTICAL to today (the
+  Q3-ratified byte-pinned default); only a note holding a
+  multi-paragraph block exports in marker mode, declared by a
+  format-version token in the braced header; the parser keys on the
+  token so old files, pastes and plain markdown import exactly as
+  today. **(b) The eight open inventory rows CARRIED as recommended —
+  PLUS the date is SETTABLE.** Her words: *"agents should be able to
+  set the date on a note - when I bring in old journals, that'll be a
+  necessary part of processing if I want an agent to add years of
+  previous journals to the right date. agree on the rest."* Shape:
+  `entry_date` rides the structured create payload (write-new — the
+  import-processing case whole) AND `set_entry_date` on EXISTING notes
+  joins the EDIT rung; noted for the U4 ladder: a note newly added to
+  a journal book becomes journal-fenced from that moment — creation
+  lands, then the fence governs. **(c) Dials, defaults and the
+  manifest line RATIFIED as proposed** (Q3). **(d) Versions' restore/
+  promote NOT in v1** (Q5) — save + list/read only; a follow-on
+  ticket if use wants it. **(e) THE CUT: ratified with LENSES READ
+  PULLED INTO U4.** U3 = the edit-rung spine as assigned (+ the
+  boundary marker's format work beside either-payload create, +
+  entry_date in the create payload); U4 = the carriage (tray + Put
+  back, versions list/read + save, lineage + ancestry, archived
+  params, lenses list/read, set_entry_date) + (f) + navigation (g).
+  Follow-on tickets at closeout: references read, callout carry,
+  restore-version, deleted comments. **(f) BOOK RULES: READ AND WRITE,
+  U4.** Her pick: *"Write too, in U4"* — book info carries rule/
+  outflow/extents facts AND write-new gains set-rule/set-outflow
+  (validated by the app's own refusals; the tutor's loop complete).
+  **(g) NAVIGATION v1 TARGETS: note-at-block · lens · takes-board ·
+  book/chapter** — her pick "those three + book/chapter"; Compare
+  targets follow VX-130's app state; the offer door + keyboard road
+  and show_in_app with her R-13nb-23 etiquette all ride U4.
